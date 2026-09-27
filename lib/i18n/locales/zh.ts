@@ -695,7 +695,7 @@ const zh = {
       tab_person: '好友',
       tab_transactions: '交易',
       outstanding_label: '待收',
-      search_placeholder: '搜索人员或账单',
+      search_placeholder: '搜索人员或交易',
       search_empty_title: '未找到结果',
       receipt_total_label: '合计',
       people_one: '1 人',

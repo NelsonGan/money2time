@@ -732,7 +732,7 @@ const vi = {
       tab_person: 'Người',
       tab_transactions: 'Giao dịch',
       outstanding_label: 'Còn nợ',
-      search_placeholder: 'Tìm người hoặc hóa đơn',
+      search_placeholder: 'Tìm người hoặc giao dịch',
       search_empty_title: 'Không tìm thấy kết quả',
       receipt_total_label: 'Tổng',
       people_one: '1 người',

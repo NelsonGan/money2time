@@ -14,6 +14,7 @@ import { ActivitySearchRow } from '~/features/transactions/components/ActivitySe
 import { SettleUpDateHeader } from '~/features/transactions/components/SettleUpDateHeader';
 import {
   groupSettleUpPeopleByDate,
+  groupSettleUpSearchResultsByDate,
   groupSettleUpTransactionsByDate,
 } from '~/features/transactions/lib/settleUpDateGroups';
 import {
@@ -28,7 +29,7 @@ import { offscreenPageLimitFor, usePagerTabSync } from '~/hooks/usePagerTabSync'
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { PersonDebt } from '~/types';
+import type { PersonDebt, TransactionDebt } from '~/types';
 import { cn } from '~/utils';
 import { currencySymbolForCode } from '~/utils/currency';
 import { formatCurrency } from '~/utils/formatters';
@@ -103,6 +104,10 @@ export function SettleUpScreen({
     () => groupSettleUpTransactionsByDate(transactions),
     [transactions],
   );
+  const searchGroups = useMemo(
+    () => (isSearchOpen ? groupSettleUpSearchResultsByDate(people, transactions) : []),
+    [isSearchOpen, people, transactions],
+  );
   const locale = settings.locale ?? I18n.locale ?? 'en';
 
   useEffect(() => {
@@ -114,15 +119,6 @@ export function SettleUpScreen({
     const timeout = setTimeout(() => setDebouncedSearchQuery(trimmed), 180);
     return () => clearTimeout(timeout);
   }, [searchQuery]);
-
-  const handleOpenSearch = useCallback(() => {
-    void triggerHaptic('selection');
-    if (isSearchOpen) {
-      searchInputRef.current?.focus();
-      return;
-    }
-    setIsSearchOpen(true);
-  }, [isSearchOpen]);
 
   const handleCloseSearch = useCallback(() => {
     void triggerHaptic('selection');
@@ -139,7 +135,18 @@ export function SettleUpScreen({
     positionRef: pagerPositionRef,
     scrollEnabled: pagerScrollEnabled,
     onPageScrollStateChanged: onPagerScrollStateChanged,
+    settleNow: settlePagerNow,
   } = usePagerTabSync(pagerRef, activeTabIndex);
+
+  const handleOpenSearch = useCallback(() => {
+    void triggerHaptic('selection');
+    if (isSearchOpen) {
+      searchInputRef.current?.focus();
+      return;
+    }
+    settlePagerNow();
+    setIsSearchOpen(true);
+  }, [isSearchOpen, settlePagerNow]);
 
   const handlePagerScrollStateChanged = useCallback(
     (event: PageScrollStateChangedNativeEvent) => {
@@ -194,79 +201,144 @@ export function SettleUpScreen({
     </View>
   );
 
+  const renderPersonCard = (person: PersonDebt) => (
+    <View key={`person:${person.key}`} className="relative">
+      {person.unpaidBillCount > 0 ? (
+        <View
+          pointerEvents="none"
+          className="absolute z-10 -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive border-2 border-background items-center justify-center"
+        >
+          <Text className="text-white text-[10px] font-bold leading-[12px]">
+            {person.unpaidBillCount}
+          </Text>
+        </View>
+      ) : null}
+      <Pressable
+        onPress={() => {
+          Keyboard.dismiss();
+          void triggerHaptic('selection');
+          onOpenPerson(person.key);
+        }}
+        accessibilityRole="button"
+        accessibilityHint={
+          person.unpaidBillCount === 0
+            ? undefined
+            : person.unpaidBillCount === 1
+              ? I18n.t('transactions.settleUp.bills_one')
+              : I18n.t('transactions.settleUp.bills_other', {
+                  count: person.unpaidBillCount,
+                })
+        }
+        className={cn(
+          'flex-row items-center gap-3 rounded-2xl border px-3.5 py-3 active:opacity-80',
+          person.unpaidBillCount === 0
+            ? 'border-border/15 bg-secondary/20'
+            : 'border-border/30 bg-card',
+        )}
+      >
+        <View
+          className="h-11 w-11 items-center justify-center rounded-full"
+          style={{ backgroundColor: avatarColor(person.key) }}
+        >
+          <Text variant="bodyStrong" style={{ color: '#fff' }}>
+            {personInitial(person)}
+          </Text>
+        </View>
+        <View className="flex-1">
+          <Text
+            variant="bodyStrong"
+            tone={person.unpaidBillCount === 0 ? 'muted' : undefined}
+            numberOfLines={1}
+          >
+            {person.name ?? I18n.t('transactions.settleUp.someone')}
+          </Text>
+        </View>
+        <View className="items-end">
+          <Text
+            variant="bodyStrong"
+            className={person.unpaidBillCount === 0 ? 'text-muted-foreground' : 'text-warning'}
+          >
+            {formatReporting(
+              person.unpaidBillCount === 0 ? person.paidReporting : person.totalReporting,
+            )}
+          </Text>
+        </View>
+        <ChevronRight size={18} color={themeColors.textMuted} />
+      </Pressable>
+    </View>
+  );
+
+  const renderTransactionCard = (bill: TransactionDebt) => (
+    <View key={`transaction:${bill.transactionId}`} className="relative">
+      {bill.unpaidSplitCount > 0 ? (
+        <View
+          pointerEvents="none"
+          className="absolute z-10 -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive border-2 border-background items-center justify-center"
+        >
+          <Text className="text-white text-[10px] font-bold leading-[12px]">
+            {bill.unpaidSplitCount}
+          </Text>
+        </View>
+      ) : null}
+      <Pressable
+        onPress={() => {
+          Keyboard.dismiss();
+          void triggerHaptic('selection');
+          onOpenTransaction(bill.transactionId);
+        }}
+        accessibilityRole="button"
+        accessibilityHint={
+          bill.unpaidSplitCount === 0
+            ? undefined
+            : bill.unpaidSplitCount === 1
+              ? I18n.t('transactions.settleUp.people_one')
+              : I18n.t('transactions.settleUp.people_other', {
+                  count: bill.unpaidSplitCount,
+                })
+        }
+        className={cn(
+          'flex-row items-center gap-3 rounded-2xl border px-3.5 py-3 active:opacity-80',
+          bill.unpaidSplitCount === 0
+            ? 'border-border/15 bg-secondary/20'
+            : 'border-border/30 bg-card',
+        )}
+      >
+        <View className="h-11 w-11 items-center justify-center rounded-full bg-secondary/50">
+          <CategoryEmoji icon={bill.categoryIcon} size={22} className="text-[19px]" />
+        </View>
+        <View className="flex-1">
+          <Text
+            variant="bodyStrong"
+            tone={bill.unpaidSplitCount === 0 ? 'muted' : undefined}
+            numberOfLines={1}
+          >
+            {bill.note?.trim() ||
+              bill.categoryName ||
+              I18n.t('transactions.settleUp.untitled_bill')}
+          </Text>
+        </View>
+        <View className="items-end">
+          <Text
+            variant="bodyStrong"
+            className={bill.unpaidSplitCount === 0 ? 'text-muted-foreground' : 'text-warning'}
+          >
+            {formatNative(
+              bill.unpaidSplitCount === 0 ? bill.paidNative : bill.totalNative,
+              bill.currency,
+            )}
+          </Text>
+        </View>
+        <ChevronRight size={18} color={themeColors.textMuted} />
+      </Pressable>
+    </View>
+  );
+
   const renderPeopleList = () => (
     <View className="mt-5 gap-3">
       {peopleGroups.map((group) => (
         <View key={group.dayKey} className="gap-2">
           <SettleUpDateHeader dayKey={group.dayKey} locale={locale} />
-          {group.items.map((person) => (
-            <View key={person.key} className="relative">
-              {person.unpaidBillCount > 0 ? (
-                <View
-                  pointerEvents="none"
-                  className="absolute z-10 -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive border-2 border-background items-center justify-center"
-                >
-                  <Text className="text-white text-[10px] font-bold leading-[12px]">
-                    {person.unpaidBillCount}
-                  </Text>
-                </View>
-              ) : null}
-              <Pressable
-                onPress={() => {
-                  Keyboard.dismiss();
-                  void triggerHaptic('selection');
-                  onOpenPerson(person.key);
-                }}
-                accessibilityRole="button"
-                accessibilityHint={
-                  person.unpaidBillCount === 0
-                    ? undefined
-                    : person.unpaidBillCount === 1
-                      ? I18n.t('transactions.settleUp.bills_one')
-                      : I18n.t('transactions.settleUp.bills_other', {
-                          count: person.unpaidBillCount,
-                        })
-                }
-                className={cn(
-                  'flex-row items-center gap-3 rounded-2xl border px-3.5 py-3 active:opacity-80',
-                  person.unpaidBillCount === 0
-                    ? 'border-border/15 bg-secondary/20'
-                    : 'border-border/30 bg-card',
-                )}
-              >
-                <View
-                  className="h-11 w-11 items-center justify-center rounded-full"
-                  style={{ backgroundColor: avatarColor(person.key) }}
-                >
-                  <Text variant="bodyStrong" style={{ color: '#fff' }}>
-                    {personInitial(person)}
-                  </Text>
-                </View>
-                <View className="flex-1">
-                  <Text
-                    variant="bodyStrong"
-                    tone={person.unpaidBillCount === 0 ? 'muted' : undefined}
-                    numberOfLines={1}
-                  >
-                    {person.name ?? I18n.t('transactions.settleUp.someone')}
-                  </Text>
-                </View>
-                <View className="items-end">
-                  <Text
-                    variant="bodyStrong"
-                    className={
-                      person.unpaidBillCount === 0 ? 'text-muted-foreground' : 'text-warning'
-                    }
-                  >
-                    {formatReporting(
-                      person.unpaidBillCount === 0 ? person.paidReporting : person.totalReporting,
-                    )}
-                  </Text>
-                </View>
-                <ChevronRight size={18} color={themeColors.textMuted} />
-              </Pressable>
-            </View>
-          ))}
+          {group.items.map(renderPersonCard)}
         </View>
       ))}
     </View>
@@ -277,72 +349,22 @@ export function SettleUpScreen({
       {transactionGroups.map((group) => (
         <View key={group.dayKey} className="gap-2">
           <SettleUpDateHeader dayKey={group.dayKey} locale={locale} />
-          {group.items.map((bill) => (
-            <View key={bill.transactionId} className="relative">
-              {bill.unpaidSplitCount > 0 ? (
-                <View
-                  pointerEvents="none"
-                  className="absolute z-10 -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive border-2 border-background items-center justify-center"
-                >
-                  <Text className="text-white text-[10px] font-bold leading-[12px]">
-                    {bill.unpaidSplitCount}
-                  </Text>
-                </View>
-              ) : null}
-              <Pressable
-                onPress={() => {
-                  Keyboard.dismiss();
-                  void triggerHaptic('selection');
-                  onOpenTransaction(bill.transactionId);
-                }}
-                accessibilityRole="button"
-                accessibilityHint={
-                  bill.unpaidSplitCount === 0
-                    ? undefined
-                    : bill.unpaidSplitCount === 1
-                      ? I18n.t('transactions.settleUp.people_one')
-                      : I18n.t('transactions.settleUp.people_other', {
-                          count: bill.unpaidSplitCount,
-                        })
-                }
-                className={cn(
-                  'flex-row items-center gap-3 rounded-2xl border px-3.5 py-3 active:opacity-80',
-                  bill.unpaidSplitCount === 0
-                    ? 'border-border/15 bg-secondary/20'
-                    : 'border-border/30 bg-card',
-                )}
-              >
-                <View className="h-11 w-11 items-center justify-center rounded-full bg-secondary/50">
-                  <CategoryEmoji icon={bill.categoryIcon} size={22} className="text-[19px]" />
-                </View>
-                <View className="flex-1">
-                  <Text
-                    variant="bodyStrong"
-                    tone={bill.unpaidSplitCount === 0 ? 'muted' : undefined}
-                    numberOfLines={1}
-                  >
-                    {bill.note?.trim() ||
-                      bill.categoryName ||
-                      I18n.t('transactions.settleUp.untitled_bill')}
-                  </Text>
-                </View>
-                <View className="items-end">
-                  <Text
-                    variant="bodyStrong"
-                    className={
-                      bill.unpaidSplitCount === 0 ? 'text-muted-foreground' : 'text-warning'
-                    }
-                  >
-                    {formatNative(
-                      bill.unpaidSplitCount === 0 ? bill.paidNative : bill.totalNative,
-                      bill.currency,
-                    )}
-                  </Text>
-                </View>
-                <ChevronRight size={18} color={themeColors.textMuted} />
-              </Pressable>
-            </View>
-          ))}
+          {group.items.map(renderTransactionCard)}
+        </View>
+      ))}
+    </View>
+  );
+
+  const renderSearchResults = () => (
+    <View className="mt-5 gap-3">
+      {searchGroups.map((group) => (
+        <View key={group.dayKey} className="gap-2">
+          <SettleUpDateHeader dayKey={group.dayKey} locale={locale} />
+          {group.items.map((result) =>
+            result.kind === 'person'
+              ? renderPersonCard(result.person)
+              : renderTransactionCard(result.transaction),
+          )}
         </View>
       ))}
     </View>
@@ -426,76 +448,92 @@ export function SettleUpScreen({
 
       {!isSearchOpen ? renderHero() : null}
 
-      {/* Underline tabs: each includes outstanding and paid shares. */}
-      <View className="flex-row border-b border-border/15 px-3">
-        {tabs.map((t) => {
-          const isActive = t.value === tab;
-          return (
-            <Pressable
-              key={t.value}
-              onPress={() => {
-                if (isActive) return;
-                void triggerHaptic('selection');
-                setTab(t.value);
-              }}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: isActive }}
-              className="flex-1 items-center pb-2.5"
-            >
-              <Text
-                variant="bodyStrong"
-                className={cn(isActive ? 'text-foreground' : 'text-muted-foreground')}
+      {!isSearchOpen ? (
+        <View className="flex-row border-b border-border/15 px-3">
+          {tabs.map((t) => {
+            const isActive = t.value === tab;
+            return (
+              <Pressable
+                key={t.value}
+                onPress={() => {
+                  if (isActive) return;
+                  void triggerHaptic('selection');
+                  setTab(t.value);
+                }}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: isActive }}
+                className="flex-1 items-center pb-2.5"
               >
-                {t.label}
-              </Text>
-              <View
-                className="mt-2 h-0.5 rounded-full"
-                style={{ backgroundColor: isActive ? themeColors.primary : 'transparent' }}
-              />
-            </Pressable>
-          );
-        })}
-      </View>
+                <Text
+                  variant="bodyStrong"
+                  className={cn(isActive ? 'text-foreground' : 'text-muted-foreground')}
+                >
+                  {t.label}
+                </Text>
+                <View
+                  className="mt-2 h-0.5 rounded-full"
+                  style={{ backgroundColor: isActive ? themeColors.primary : 'transparent' }}
+                />
+              </Pressable>
+            );
+          })}
+        </View>
+      ) : null}
 
-      <PagerView
-        ref={pagerRef}
-        style={{ flex: 1 }}
-        initialPage={activeTabIndex}
-        offscreenPageLimit={offscreenPageLimitFor(TAB_ORDER.length)}
-        scrollEnabled={pagerScrollEnabled}
-        onPageSelected={handlePageSelected}
-        onPageScrollStateChanged={handlePagerScrollStateChanged}
-      >
-        {TAB_ORDER.map((value) => {
-          const hasResults = value === 'people' ? people.length > 0 : transactions.length > 0;
-          return (
-            <View key={value} style={{ flex: 1 }}>
-              <ScrollView
-                className="flex-1"
-                contentContainerStyle={scrollContentStyle}
-                keyboardDismissMode="on-drag"
-                keyboardShouldPersistTaps="handled"
-              >
-                {hasResults ? (
-                  value === 'people' ? (
-                    renderPeopleList()
-                  ) : (
-                    renderTransactionsList()
-                  )
-                ) : isSearchOpen ? (
-                  <EmptyState
-                    title={I18n.t('transactions.settleUp.search_empty_title')}
-                    message={I18n.t('transactions.empty_search_message')}
-                    mascotMood="curious"
-                  />
-                ) : (
-                  renderOutstandingEmpty()
-                )}
-              </ScrollView>
-            </View>
-          );
-        })}
-      </PagerView>
+      <View className="flex-1">
+        {/* Keep the pager laid out so closing search restores the selected tab. */}
+        <PagerView
+          ref={pagerRef}
+          style={{ flex: 1, opacity: isSearchOpen ? 0 : 1 }}
+          pointerEvents={isSearchOpen ? 'none' : 'auto'}
+          accessibilityElementsHidden={isSearchOpen}
+          importantForAccessibility={isSearchOpen ? 'no-hide-descendants' : 'auto'}
+          initialPage={activeTabIndex}
+          offscreenPageLimit={offscreenPageLimitFor(TAB_ORDER.length)}
+          scrollEnabled={pagerScrollEnabled}
+          onPageSelected={handlePageSelected}
+          onPageScrollStateChanged={handlePagerScrollStateChanged}
+        >
+          {TAB_ORDER.map((value) => {
+            const hasResults = value === 'people' ? people.length > 0 : transactions.length > 0;
+            return (
+              <View key={value} style={{ flex: 1 }}>
+                <ScrollView
+                  className="flex-1"
+                  contentContainerStyle={scrollContentStyle}
+                  keyboardDismissMode="on-drag"
+                  keyboardShouldPersistTaps="handled"
+                >
+                  {hasResults
+                    ? value === 'people'
+                      ? renderPeopleList()
+                      : renderTransactionsList()
+                    : renderOutstandingEmpty()}
+                </ScrollView>
+              </View>
+            );
+          })}
+        </PagerView>
+
+        {isSearchOpen ? (
+          <ScrollView
+            className="absolute inset-0 bg-background"
+            contentContainerStyle={scrollContentStyle}
+            keyboardDismissMode="on-drag"
+            keyboardShouldPersistTaps="handled"
+          >
+            {searchGroups.length > 0 ? (
+              renderSearchResults()
+            ) : (
+              <EmptyState
+                title={I18n.t('transactions.settleUp.search_empty_title')}
+                message={I18n.t('transactions.empty_search_message')}
+                mascotMood="curious"
+              />
+            )}
+          </ScrollView>
+        ) : null}
+      </View>
     </SettingsPageLayout>
   );
 }

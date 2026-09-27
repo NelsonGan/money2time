@@ -1,6 +1,7 @@
 import {
   groupSettleUpItemsByDate,
   groupSettleUpPeopleByDate,
+  groupSettleUpSearchResultsByDate,
   groupSettleUpTransactionsByDate,
 } from '~/features/transactions/lib/settleUpDateGroups';
 import type { PersonDebt, TransactionDebt } from '~/types';
@@ -120,5 +121,28 @@ describe('Who owes you date groups', () => {
     const paidAt = new Date(2026, 5, 10, 23, 30).toISOString();
     const groups = groupSettleUpPeopleByDate([person('paid', [{ date: '2026-01-01', paidAt }], 0)]);
     expect(groups[0].dayKey).toBe('2026-06-10');
+  });
+
+  it('combines matching people and transactions under the same dates, newest first', () => {
+    const groups = groupSettleUpSearchResultsByDate(
+      [
+        person('maya', [{ date: '2026-06-01', paidAt: null }], 1),
+        person('ezra', [{ date: '2026-01-01', paidAt: '2026-06-10' }], 0),
+      ],
+      [
+        transaction('brunch', '2026-06-10', null, 1),
+        transaction('cinema', '2026-01-01', '2026-06-01', 0),
+      ],
+    );
+
+    expect(groups.map((group) => group.dayKey)).toEqual(['2026-06-10', '2026-06-01']);
+    expect(groups.map((group) => group.items.map((item) => item.kind))).toEqual([
+      ['person', 'transaction'],
+      ['person', 'transaction'],
+    ]);
+    expect(groups[0].items).toEqual([
+      { kind: 'person', person: expect.objectContaining({ key: 'ezra' }) },
+      { kind: 'transaction', transaction: expect.objectContaining({ transactionId: 'brunch' }) },
+    ]);
   });
 });

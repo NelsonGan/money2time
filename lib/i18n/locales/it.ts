@@ -738,7 +738,7 @@ const it = {
       tab_person: 'Persona',
       tab_transactions: 'Transazioni',
       outstanding_label: 'In sospeso',
-      search_placeholder: 'Cerca persone o conti',
+      search_placeholder: 'Cerca persone o transazioni',
       search_empty_title: 'Nessun risultato',
       receipt_total_label: 'Totale',
       people_one: '1 persona',

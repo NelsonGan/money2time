@@ -735,7 +735,7 @@ const pt = {
       tab_person: 'Pessoa',
       tab_transactions: 'Transações',
       outstanding_label: 'Pendente',
-      search_placeholder: 'Pesquisar pessoas ou contas',
+      search_placeholder: 'Pesquisar pessoas ou transações',
       search_empty_title: 'Nenhum resultado',
       receipt_total_label: 'Total',
       people_one: '1 pessoa',

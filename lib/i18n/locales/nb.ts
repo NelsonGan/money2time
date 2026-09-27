@@ -734,7 +734,7 @@ const nb = {
       tab_person: 'Person',
       tab_transactions: 'Transaksjoner',
       outstanding_label: 'Utestående',
-      search_placeholder: 'Søk etter personer eller regninger',
+      search_placeholder: 'Søk etter personer eller transaksjoner',
       search_empty_title: 'Ingen treff',
       receipt_total_label: 'Totalt',
       people_one: '1 person',

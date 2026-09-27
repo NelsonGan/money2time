@@ -733,7 +733,7 @@ const sv = {
       tab_person: 'Person',
       tab_transactions: 'Transaktioner',
       outstanding_label: 'Utestående',
-      search_placeholder: 'Sök personer eller räkningar',
+      search_placeholder: 'Sök personer eller transaktioner',
       search_empty_title: 'Inga träffar',
       receipt_total_label: 'Totalt',
       people_one: '1 person',
