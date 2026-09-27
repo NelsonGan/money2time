@@ -4322,7 +4322,7 @@ export function AccountsScreen({
               </View>
             </View>
 
-            {/* Inside a pageSheet modal — no nav bar behind it, so no glass inset. */}
+            {/* Inside a pageSheet modal — no nav bar behind it, so no nav inset. */}
             <ScrollView
               className="flex-1"
               contentContainerStyle={ACCOUNT_BULK_SCROLL_CONTENT_STYLE}

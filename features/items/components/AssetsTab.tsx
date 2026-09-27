@@ -3,6 +3,7 @@ import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
+import { useBottomNavMinimize } from '~/components/navigation/BottomNavMinimize';
 import { AddIconButton } from '~/components/ui/AddIconButton';
 import { Button } from '~/components/ui/button';
 import { ClayIcon } from '~/components/ui/ClayIcon';
@@ -85,11 +86,19 @@ export function AssetsTab({
   const insets = useSafeAreaInsets();
   const [tab, setTab] = useState<AssetsTabName>('accounts');
   const [hideBalances, setHideBalances] = useState(false);
+  const { resetMinimize } = useBottomNavMinimize();
   const toggleBalances = useCallback(() => setHideBalances((previous) => !previous), []);
+  const handleTabChange = useCallback(
+    (nextTab: AssetsTabName) => {
+      resetMinimize();
+      setTab(nextTab);
+    },
+    [resetMinimize],
+  );
 
   useEffect(() => {
-    if (resetToAccountsToken !== undefined) setTab('accounts');
-  }, [resetToAccountsToken]);
+    if (resetToAccountsToken !== undefined) handleTabChange('accounts');
+  }, [handleTabChange, resetToAccountsToken]);
 
   const topInset = Math.max(
     insets.top,
@@ -103,7 +112,7 @@ export function AssetsTab({
         <View className="flex-row items-center justify-between pr-5 pt-2">
           <AssetsTabBar
             active={tab}
-            onChange={setTab}
+            onChange={handleTabChange}
             tabs={[
               { value: 'accounts', label: I18n.t('assets.tab_accounts') },
               { value: 'goals', label: I18n.t('assets.tab_goals') },

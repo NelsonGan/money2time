@@ -16,7 +16,11 @@ import Sortable from 'react-native-sortables';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
-import { useBottomNavContentInset } from '~/components/navigation/BottomNavMinimize';
+import {
+  useBottomNavContentInset,
+  useBottomNavMinimize,
+  useBottomNavScrollReporter,
+} from '~/components/navigation/BottomNavMinimize';
 import { AddIconButton, SelectField, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { useProGate } from '~/hooks/useProGate';
@@ -55,6 +59,8 @@ export function AlbumsScreen({
     Platform.OS === 'android' ? (StatusBar.currentHeight ?? 0) : 0,
   );
   const bottomNavInset = useBottomNavContentInset();
+  const { resetMinimize } = useBottomNavMinimize();
+  const reportBottomNavScroll = useBottomNavScrollReporter();
   const { width: windowWidth } = useWindowDimensions();
   const scrollRef = useAnimatedRef<ElementRef<typeof Animated.ScrollView>>();
 
@@ -88,12 +94,15 @@ export function AlbumsScreen({
   // Tap a tab → animate the pager to that page (swipe is handled by the pager).
   const selectTab = useCallback(
     (value: AlbumsTab) => {
-      if (value !== tab) void triggerHaptic('selection');
+      if (value !== tab) {
+        void triggerHaptic('selection');
+        resetMinimize();
+      }
       if (value === 'map') setMapMounted(true);
       setTab(value);
       pagerRef.current?.scrollTo({ x: value === 'map' ? pageWidth : 0, animated: true });
     },
-    [pageWidth, tab],
+    [pageWidth, resetMinimize, tab],
   );
 
   // Swipe settles on a page → sync the active tab.
@@ -103,9 +112,10 @@ export function AlbumsScreen({
       const value: AlbumsTab = index === 1 ? 'map' : 'albums';
       if (value === tab) return;
       void triggerHaptic('selection');
+      resetMinimize();
       setTab(value);
     },
-    [pageWidth, tab],
+    [pageWidth, resetMinimize, tab],
   );
 
   // Keep the pager aligned to the active tab when the page width changes
@@ -207,6 +217,8 @@ export function AlbumsScreen({
                     <Animated.ScrollView
                       ref={scrollRef}
                       className="flex-1"
+                      onScroll={reportBottomNavScroll}
+                      scrollEventThrottle={32}
                       contentContainerStyle={{
                         paddingHorizontal: SCREEN_PADDING,
                         paddingTop: headerHeight + 6,

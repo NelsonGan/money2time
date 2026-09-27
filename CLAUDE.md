@@ -175,7 +175,7 @@ Features live under `features/` in domain folders. Each has `screens/` and somet
 
 Shared UI primitives in `components/ui/`: `button`, `fat-button`, `card`, `input`, `select`, `settings`, `text`, `textInputStyles`, `theme-modal`, `time-value-inline`, `toggle`, plus the cross-feature sheets `AccountPickerSheet`, `CategoryPickerSheet`, `CurrencyPickerSheet`, `AccountLogoPickerSheet`, and icon/logo helpers `CategoryEmoji`, `ClayIcon`, `SentimentIcons`, `AccountLogo`.
 
-Other shared components: `components/feedback/` (EmptyState, AppErrorBoundary, Mascot, LoadingDots, ImportingOverlay), `components/navigation/` (BottomNav, BottomNavMinimize, AddFab, TodayJumpFab, EdgeSwipeBackContainer, MonthControlsHeader, InOutHeader, FilterIconButton, `liquidGlass`), `components/icons/` (SocialIcons, CloudProviderIcons via Lucide), `components/datePicker/` (DatePickerModal, InlineDatePicker, MonthYearWheelPicker), `components/layout/` (TabletContentContainer), `components/widget-preview/` (home-screen widget previews).
+Other shared components: `components/feedback/` (EmptyState, AppErrorBoundary, Mascot, LoadingDots, ImportingOverlay), `components/navigation/` (BottomNav, BottomNavMinimize, AddFab, TodayJumpFab, EdgeSwipeBackContainer, MonthControlsHeader, InOutHeader, FilterIconButton, `floatingNav`), `components/icons/` (SocialIcons, CloudProviderIcons via Lucide), `components/datePicker/` (DatePickerModal, InlineDatePicker, MonthYearWheelPicker), `components/layout/` (TabletContentContainer), `components/widget-preview/` (home-screen widget previews).
 
 ### Services
 

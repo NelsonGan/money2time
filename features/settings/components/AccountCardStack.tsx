@@ -1018,7 +1018,7 @@ export function AccountCardStack({
   const resolvedTheme = useResolvedTheme();
   const isDark = resolvedTheme === 'dark';
   const themeColors = useThemeColors();
-  // Base spacing.lg, not the full 100px flow-mode clearance — the glass inset
+  // Base spacing.lg, not the full 100px flow-mode clearance — the nav inset
   // already covers the bar, so stacking both over-pads the scroll end.
   const bottomNavInset = useSettingsBottomNavInset(spacing.lg);
   const reportBottomNavScroll = useBottomNavScrollReporter();

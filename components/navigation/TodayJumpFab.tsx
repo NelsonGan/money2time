@@ -3,7 +3,7 @@ import React, { useCallback } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { getBottomNavReservedInset } from '~/components/navigation/BottomNav';
+import { getFloatingNavReservedInset } from '~/components/navigation/floatingNav';
 import { Text } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
@@ -37,7 +37,7 @@ export function TodayJumpFab({ onPress }: TodayJumpFabProps) {
   return (
     <View
       pointerEvents="box-none"
-      style={[styles.anchor, { bottom: getBottomNavReservedInset(safeBottom) + FAB_BOTTOM_GAP }]}
+      style={[styles.anchor, { bottom: getFloatingNavReservedInset(safeBottom) + FAB_BOTTOM_GAP }]}
     >
       <View pointerEvents="box-none" style={[styles.inner, isTablet && styles.innerTablet]}>
         <Pressable

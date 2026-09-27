@@ -4,6 +4,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
+import { useBottomNavScrollReporter } from '~/components/navigation/BottomNavMinimize';
 import {
   SETTINGS_LIST_BOTTOM_PADDING,
   SettingsPageLayout,
@@ -97,6 +98,7 @@ export function GoalsScreen({ hideBalances, onOpenGoal, onOpenGoalEditor }: Goal
   const { checkLimit } = useProGate();
   const themeColors = useThemeColors();
   const listNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
+  const reportBottomNavScroll = useBottomNavScrollReporter();
   const [showArchived, setShowArchived] = useState(false);
 
   // Each goal's saved amount is native to its own currency; convert before
@@ -164,6 +166,8 @@ export function GoalsScreen({ hideBalances, onOpenGoal, onOpenGoalEditor }: Goal
 
       <ScrollView
         className="flex-1"
+        onScroll={reportBottomNavScroll}
+        scrollEventThrottle={32}
         contentContainerStyle={[
           { paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
           listNavInset,

@@ -1,6 +1,10 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { FlatList, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 
+import {
+  useBottomNavContentInset,
+  useBottomNavScrollReporter,
+} from '~/components/navigation/BottomNavMinimize';
 import { Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import type { WeekStartsOn } from '~/types';
@@ -206,6 +210,8 @@ export const CalendarYearView = memo(function CalendarYearView({
   onListRef,
 }: CalendarYearViewProps) {
   const { width: screenWidth } = useWindowDimensions();
+  const bottomNavInset = useBottomNavContentInset();
+  const reportBottomNavScroll = useBottomNavScrollReporter();
 
   const { monthWidth, cellSize, yearItemHeight } = getCalendarYearLayout(screenWidth);
 
@@ -253,6 +259,9 @@ export const CalendarYearView = memo(function CalendarYearView({
   return (
     <FlatList
       ref={onListRef}
+      onScroll={reportBottomNavScroll}
+      scrollEventThrottle={32}
+      contentContainerStyle={{ paddingBottom: bottomNavInset }}
       data={slots}
       keyExtractor={keyExtractor}
       getItemLayout={getItemLayout}
