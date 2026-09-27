@@ -16,9 +16,16 @@ jest.mock('expo-localization', () => ({
 const mockGetLocales = getLocales as jest.MockedFunction<typeof getLocales>;
 
 describe('Chinese locale selection', () => {
+  beforeEach(() => {
+    mockGetLocales.mockReturnValue([
+      { languageTag: 'en-US', languageCode: 'en', regionCode: 'US' } as ReturnType<
+        typeof getLocales
+      >[number],
+    ]);
+  });
+
   afterEach(() => {
     setAppLocale('en');
-    mockGetLocales.mockReset();
   });
 
   it('offers distinct Simplified and Traditional Chinese choices', () => {
@@ -47,12 +54,21 @@ describe('Chinese locale selection', () => {
     },
   );
 
-  it('uses the device region when its Chinese language tag has no variant', () => {
-    mockGetLocales.mockReturnValue([
-      { languageTag: 'zh', languageCode: 'zh', regionCode: 'TW' } as ReturnType<
-        typeof getLocales
-      >[number],
-    ]);
-    expect(getDeviceLocale()).toBe('zh-Hant');
-  });
+  it.each([
+    ['TW', 'zh-Hant'],
+    ['HK', 'zh-Hant'],
+    ['MO', 'zh-Hant'],
+    ['CN', 'zh'],
+    ['SG', 'zh'],
+  ])(
+    'uses the device region %s when its Chinese language tag has no variant',
+    (region, expected) => {
+      mockGetLocales.mockReturnValue([
+        { languageTag: 'zh', languageCode: 'zh', regionCode: region } as ReturnType<
+          typeof getLocales
+        >[number],
+      ]);
+      expect(getDeviceLocale()).toBe(expected);
+    },
+  );
 });
