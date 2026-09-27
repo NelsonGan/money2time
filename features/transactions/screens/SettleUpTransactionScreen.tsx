@@ -20,9 +20,11 @@ import {
   Text,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import { SettleUpDateHeader } from '~/features/transactions/components/SettleUpDateHeader';
 import type { ReceiptContent } from '~/features/transactions/components/SplitReceiptCard';
 import { SplitReceiptShareModal } from '~/features/transactions/components/SplitReceiptShareModal';
 import { personItemNames } from '~/features/transactions/lib/receiptSplitShare';
+import { groupSettleUpItemsByDate } from '~/features/transactions/lib/settleUpDateGroups';
 import { useSettleUpByTransaction } from '~/features/transactions/lib/useSettleUpSummary';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -54,6 +56,7 @@ export function SettleUpTransactionScreen({
 }: SettleUpTransactionScreenProps) {
   const themeColors = useThemeColors();
   const {
+    settings,
     accounts,
     accountGroups,
     getAccountById,
@@ -72,9 +75,13 @@ export function SettleUpTransactionScreen({
     () => summary.transactions.find((t) => t.transactionId === transactionId) ?? null,
     [summary.transactions, transactionId],
   );
+  const dateGroups = useMemo(
+    () => (bill ? groupSettleUpItemsByDate(bill.splits, (split) => split.paidAt ?? bill.date) : []),
+    [bill],
+  );
+  const locale = settings.locale ?? I18n.locale ?? 'en';
 
-  // When the last share is settled the bill drops out of the summary; leave the
-  // page so we never sit on an empty screen.
+  // Paid-only bills remain in the summary; leave only after all shares are removed.
   useEffect(() => {
     if (!bill) onBack();
   }, [bill, onBack]);
@@ -135,7 +142,7 @@ export function SettleUpTransactionScreen({
   );
   const hasItemizedDetail = receiptRecord !== null;
 
-  // Blank while the bill is missing (the last share just settled) so the header
+  // Blank while the bill is missing (the last share was removed) so the header
   // doesn't flash a fallback title for the one frame before the screen pops.
   const title = bill
     ? bill.note?.trim() || bill.categoryName || `${I18n.t('transactions.settleUp.untitled_bill')}`
@@ -149,14 +156,16 @@ export function SettleUpTransactionScreen({
     return {
       title,
       subtitle: formatShortDate(bill.date),
-      lines: bill.splits.map((split) => ({
-        key: split.splitId,
-        initial: personInitial(split.personName),
-        label: split.personName ?? I18n.t('transactions.settleUp.someone'),
-        // Itemized bills list what each person had as bullet points.
-        bullets: receiptRecord ? (personItemNames(receiptRecord, split.personName) ?? []) : [],
-        amount: formatNative(split.amount, split.currency),
-      })),
+      lines: bill.splits
+        .filter((split) => !split.paidAt)
+        .map((split) => ({
+          key: split.splitId,
+          initial: personInitial(split.personName),
+          label: split.personName ?? I18n.t('transactions.settleUp.someone'),
+          // Itemized bills list what each person had as bullet points.
+          bullets: receiptRecord ? (personItemNames(receiptRecord, split.personName) ?? []) : [],
+          amount: formatNative(split.amount, split.currency),
+        })),
     };
   }, [bill, title, formatNative, receiptRecord]);
 
@@ -197,7 +206,10 @@ export function SettleUpTransactionScreen({
                 </Text>
               </View>
               <Text variant="title" className="mt-1 text-center">
-                {formatNative(bill.totalNative, bill.currency)}
+                {formatNative(
+                  bill.unpaidSplitCount === 0 ? bill.paidNative : bill.totalNative,
+                  bill.currency,
+                )}
               </Text>
               <View className="mt-2 h-[3px] w-8 rounded-full bg-primary/30" />
             </View>
@@ -224,87 +236,104 @@ export function SettleUpTransactionScreen({
               </Pressable>
             ) : null}
 
-            <View className="mt-4 gap-2">
-              {bill.splits.map((split) => {
-                const account = split.paybackAccountId
-                  ? getAccountById(split.paybackAccountId)
-                  : null;
-                return (
-                  <View
-                    key={split.splitId}
-                    className="rounded-2xl border border-border/25 bg-card/60 px-4 py-3.5"
-                  >
-                    <View className="flex-row items-center gap-3">
-                      <View className="h-10 w-10 items-center justify-center rounded-full bg-secondary/50">
-                        <Text variant="bodyStrong">{personInitial(split.personName)}</Text>
-                      </View>
-                      <View className="flex-1">
-                        <Text variant="bodyStrong" numberOfLines={1}>
-                          {split.personName ?? I18n.t('transactions.settleUp.someone')}
-                        </Text>
-                      </View>
-                      <Text variant="bodyStrong">{formatNative(split.amount, split.currency)}</Text>
-                    </View>
-
-                    <View className="my-3 h-px bg-border/15" />
-
-                    <View className="flex-row items-center gap-2">
-                      <Pressable
-                        onPress={() => {
-                          void triggerHaptic('selection');
-                          setPickerForSplitId(split.splitId);
-                        }}
-                        className="min-w-0 flex-shrink flex-row items-center gap-1.5 rounded-full bg-secondary/50 py-1.5 pl-2 pr-2.5 active:opacity-70"
+            <View className="mt-4 gap-3">
+              {dateGroups.map((group) => (
+                <View key={group.dayKey} className="gap-2">
+                  <SettleUpDateHeader dayKey={group.dayKey} locale={locale} />
+                  {group.items.map((split) => {
+                    const account = split.paybackAccountId
+                      ? getAccountById(split.paybackAccountId)
+                      : null;
+                    return (
+                      <View
+                        key={split.splitId}
+                        className={
+                          split.paidAt
+                            ? 'rounded-2xl border border-border/15 bg-secondary/20 px-4 py-3.5'
+                            : 'rounded-2xl border border-border/25 bg-card/60 px-4 py-3.5'
+                        }
                       >
-                        {account ? (
-                          <AccountLogo
-                            logoId={account.logoId}
-                            type={account.type}
-                            goalEmoji={account.goalEmoji}
-                            size={16}
-                          />
+                        <View className="flex-row items-center gap-3">
+                          <View className="h-10 w-10 items-center justify-center rounded-full bg-secondary/50">
+                            <Text variant="bodyStrong">{personInitial(split.personName)}</Text>
+                          </View>
+                          <View className="flex-1">
+                            <Text
+                              variant="bodyStrong"
+                              tone={split.paidAt ? 'muted' : undefined}
+                              numberOfLines={1}
+                            >
+                              {split.personName ?? I18n.t('transactions.settleUp.someone')}
+                            </Text>
+                          </View>
+                          <Text variant="bodyStrong" tone={split.paidAt ? 'muted' : undefined}>
+                            {formatNative(split.amount, split.currency)}
+                          </Text>
+                        </View>
+
+                        {!split.paidAt ? (
+                          <View className="mt-2 flex-row items-center gap-2">
+                            <Pressable
+                              onPress={() => {
+                                void triggerHaptic('selection');
+                                setPickerForSplitId(split.splitId);
+                              }}
+                              className="min-w-0 flex-shrink flex-row items-center gap-1.5 rounded-full bg-secondary/50 py-1.5 pl-2 pr-2.5 active:opacity-70"
+                            >
+                              {account ? (
+                                <AccountLogo
+                                  logoId={account.logoId}
+                                  type={account.type}
+                                  goalEmoji={account.goalEmoji}
+                                  size={16}
+                                />
+                              ) : null}
+                              <Text
+                                variant="caption"
+                                tone="muted"
+                                numberOfLines={1}
+                                className="max-w-[150px]"
+                              >
+                                {account?.name ?? I18n.t('common.no_account')}
+                              </Text>
+                              <ChevronDown size={12} color={themeColors.textMuted} />
+                            </Pressable>
+                            <View className="flex-1" />
+                            <Pressable
+                              onPress={() => handleDelete(split.splitId)}
+                              hitSlop={8}
+                              className="h-8 w-8 items-center justify-center rounded-full bg-destructive/10 active:opacity-70"
+                            >
+                              <Trash2 size={15} color={themeColors.error} />
+                            </Pressable>
+                            <Pressable
+                              onPress={() => handleMarkPaid(split.splitId)}
+                              hitSlop={8}
+                              className="flex-row items-center gap-1 rounded-full bg-success/15 px-3.5 py-2 active:opacity-70"
+                            >
+                              <Check size={14} color={themeColors.success} />
+                              <Text variant="caption" className="text-success font-medium">
+                                {I18n.t('transactions.editor.split.mark_paid')}
+                              </Text>
+                            </Pressable>
+                          </View>
                         ) : null}
-                        <Text
-                          variant="caption"
-                          tone="muted"
-                          numberOfLines={1}
-                          className="max-w-[150px]"
-                        >
-                          {account?.name ?? I18n.t('common.no_account')}
-                        </Text>
-                        <ChevronDown size={12} color={themeColors.textMuted} />
-                      </Pressable>
-                      <View className="flex-1" />
-                      <Pressable
-                        onPress={() => handleDelete(split.splitId)}
-                        hitSlop={8}
-                        className="h-8 w-8 items-center justify-center rounded-full bg-destructive/10 active:opacity-70"
-                      >
-                        <Trash2 size={15} color={themeColors.error} />
-                      </Pressable>
-                      <Pressable
-                        onPress={() => handleMarkPaid(split.splitId)}
-                        hitSlop={8}
-                        className="flex-row items-center gap-1 rounded-full bg-success/15 px-3.5 py-2 active:opacity-70"
-                      >
-                        <Check size={14} color={themeColors.success} />
-                        <Text variant="caption" className="text-success font-medium">
-                          {I18n.t('transactions.editor.split.mark_paid')}
-                        </Text>
-                      </Pressable>
-                    </View>
-                  </View>
-                );
-              })}
+                      </View>
+                    );
+                  })}
+                </View>
+              ))}
             </View>
           </ScrollView>
 
-          <View className="px-5 pb-8 pt-2">
-            <Button onPress={handleShare} className="w-full gap-2">
-              <Send size={18} color="#fff" />
-              <Text>{I18n.t('transactions.settleUp.share_receipt')}</Text>
-            </Button>
-          </View>
+          {bill.unpaidSplitCount > 0 ? (
+            <View className="px-5 pb-8 pt-2">
+              <Button onPress={handleShare} className="w-full gap-2">
+                <Send size={18} color="#fff" />
+                <Text>{I18n.t('transactions.settleUp.share_receipt')}</Text>
+              </Button>
+            </View>
+          ) : null}
 
           <AccountPickerSheet
             visible={pickerForSplitId !== null}
@@ -322,7 +351,7 @@ export function SettleUpTransactionScreen({
             visible={shareVisible}
             onClose={() => setShareVisible(false)}
             content={receiptContent}
-            itemCount={bill.splitCount}
+            itemCount={bill.unpaidSplitCount}
             onSetupQr={onOpenSettings}
           />
         </>

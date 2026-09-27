@@ -14,6 +14,7 @@ interface ActivitySearchRowProps {
   value: string;
   onChangeText: (text: string) => void;
   onClose: () => void;
+  placeholder?: string;
   /** Auto-focus the input (opening the keyboard) when the row appears. Defaults
    * to true for the toggled search overlay; pass false for an always-visible bar. */
   autoFocus?: boolean;
@@ -25,6 +26,7 @@ export function ActivitySearchRow({
   value,
   onChangeText,
   onClose,
+  placeholder,
   autoFocus = true,
 }: ActivitySearchRowProps) {
   const themeColors = useThemeColors();
@@ -67,7 +69,7 @@ export function ActivitySearchRow({
           ref={inputRef}
           value={value}
           onChangeText={onChangeText}
-          placeholder={I18n.t('transactions.filters.search_placeholder')}
+          placeholder={placeholder ?? I18n.t('transactions.filters.search_placeholder')}
           placeholderTextColor={themeColors.textMuted}
           returnKeyType="search"
           autoCapitalize="none"
