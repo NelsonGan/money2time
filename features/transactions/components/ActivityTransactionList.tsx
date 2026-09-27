@@ -149,8 +149,8 @@ interface ActivityTransactionListProps {
   locale?: string;
   /**
    * Set when this list is a tab screen's main scrollable behind the floating
-   * liquid-glass nav bar: adds the bar's reserved inset to the bottom padding
-   * and reports scroll so the bar can minimize. No-op in fallback mode.
+   * nav bar: adds the bar's reserved inset to the bottom padding
+   * and reports scroll so the bar can minimize.
    */
   extendUnderBottomNav?: boolean;
   /**

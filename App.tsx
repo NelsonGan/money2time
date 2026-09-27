@@ -978,7 +978,7 @@ function MainShellScreen({
 
   const { resetMinimize } = useBottomNavMinimize();
 
-  // Restore the minimized glass bar when navigating within the settings stack,
+  // Restore the minimized floating bar when navigating within the settings stack,
   // matching the restore on tab change — otherwise a short sub-screen with no
   // scrollable would leave the bar stuck minimized.
   const handleSettingsScreenChange = useCallback(

@@ -14,6 +14,7 @@ import Sortable from 'react-native-sortables';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
+import { useBottomNavScrollReporter } from '~/components/navigation/BottomNavMinimize';
 import {
   AddIconButton,
   ItemIcon,
@@ -302,6 +303,7 @@ export function ItemsScreen({
   const { checkLimit } = useProGate();
   const themeColors = useThemeColors();
   const listNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
+  const reportBottomNavScroll = useBottomNavScrollReporter();
   const listScrollRef = useAnimatedRef<React.ElementRef<typeof Animated.ScrollView>>();
   const { contentWidth } = useDeviceLayout();
   // The list pads `spacing.lg` on each side; cards span the remaining width.
@@ -383,6 +385,8 @@ export function ItemsScreen({
           <Animated.ScrollView
             ref={listScrollRef}
             className="flex-1"
+            onScroll={reportBottomNavScroll}
+            scrollEventThrottle={32}
             contentContainerStyle={[
               { paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
               listNavInset,
