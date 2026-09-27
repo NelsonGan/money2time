@@ -271,10 +271,8 @@ export function SettleUpTransactionScreen({
                           </Text>
                         </View>
 
-                        {!split.paidAt ? <View className="my-3 h-px bg-border/15" /> : null}
-
                         {!split.paidAt ? (
-                          <View className="flex-row items-center gap-2">
+                          <View className="mt-2 flex-row items-center gap-2">
                             <Pressable
                               onPress={() => {
                                 void triggerHaptic('selection');
