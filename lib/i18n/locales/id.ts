@@ -753,6 +753,7 @@ const id = {
       bills_other: '{{count}} tagihan',
       someone: 'Seseorang',
       person_owes_label: 'Berutang padamu',
+      paid_status: 'Dibayar',
       untitled_bill: 'Bagi tagihan',
       remove_bill_title: 'Hapus permintaan ini?',
       remove_bill_message:

@@ -1,5 +1,5 @@
 import { ChevronRight, ReceiptText, Settings2 } from 'lucide-react-native';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import PagerView, {
   type PageScrollStateChangedNativeEvent,
@@ -10,6 +10,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { CategoryEmoji, SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import { SettleUpDateHeader } from '~/features/transactions/components/SettleUpDateHeader';
+import {
+  groupSettleUpPeopleByDate,
+  groupSettleUpTransactionsByDate,
+} from '~/features/transactions/lib/settleUpDateGroups';
 import {
   useSettleUpByTransaction,
   useSettleUpSummary,
@@ -21,7 +26,7 @@ import { triggerHaptic } from '~/services/haptics';
 import type { PersonDebt } from '~/types';
 import { cn } from '~/utils';
 import { currencySymbolForCode } from '~/utils/currency';
-import { formatCurrency, formatRelativeDate, formatShortDate } from '~/utils/formatters';
+import { formatCurrency } from '~/utils/formatters';
 
 type SettleUpTab = 'people' | 'transactions';
 
@@ -72,6 +77,12 @@ export function SettleUpScreen({
   const [tab, setTab] = useState<SettleUpTab>('people');
   const summary = useSettleUpSummary();
   const byTransaction = useSettleUpByTransaction();
+  const peopleGroups = useMemo(() => groupSettleUpPeopleByDate(summary.people), [summary.people]);
+  const transactionGroups = useMemo(
+    () => groupSettleUpTransactionsByDate(byTransaction.transactions),
+    [byTransaction.transactions],
+  );
+  const locale = settings.locale ?? I18n.locale ?? 'en';
 
   // Horizontal pager keeps both tabs swipeable; state and page index stay in sync.
   const pagerRef = useRef<PagerView>(null);
@@ -136,117 +147,127 @@ export function SettleUpScreen({
   );
 
   const renderPeopleList = () => (
-    <View className="mt-5 gap-2">
-      {summary.people.map((person) => (
-        <Pressable
-          key={person.key}
-          onPress={() => {
-            void triggerHaptic('selection');
-            onOpenPerson(person.key);
-          }}
-          className={cn(
-            'flex-row items-center gap-3 rounded-2xl border px-3.5 py-3 active:opacity-80',
-            person.unpaidBillCount === 0
-              ? 'border-border/15 bg-secondary/20'
-              : 'border-border/30 bg-card',
-          )}
-        >
-          <View
-            className="h-11 w-11 items-center justify-center rounded-full"
-            style={{ backgroundColor: avatarColor(person.key) }}
-          >
-            <Text variant="bodyStrong" style={{ color: '#fff' }}>
-              {personInitial(person)}
-            </Text>
-          </View>
-          <View className="flex-1">
-            <Text
-              variant="bodyStrong"
-              tone={person.unpaidBillCount === 0 ? 'muted' : undefined}
-              numberOfLines={1}
-            >
-              {person.name ?? I18n.t('transactions.settleUp.someone')}
-            </Text>
-            <Text variant="caption" tone="muted">
-              {person.unpaidBillCount === 0 && person.bills[0]?.paidAt
-                ? I18n.t('transactions.editor.split.paid_label', {
-                    date: formatShortDate(person.bills[0].paidAt),
-                  })
-                : person.unpaidBillCount === 1
-                  ? I18n.t('transactions.settleUp.bills_one')
-                  : I18n.t('transactions.settleUp.bills_other', { count: person.unpaidBillCount })}
-              {person.unpaidBillCount > 0 ? ` · ${formatRelativeDate(person.oldestDate)}` : null}
-            </Text>
-          </View>
-          <View className="items-end">
-            <Text
-              variant="bodyStrong"
-              className={person.unpaidBillCount === 0 ? 'text-muted-foreground' : 'text-warning'}
-            >
-              {formatReporting(
-                person.unpaidBillCount === 0 ? person.paidReporting : person.totalReporting,
+    <View className="mt-5 gap-3">
+      {peopleGroups.map((group) => (
+        <View key={group.dayKey} className="gap-2">
+          <SettleUpDateHeader dayKey={group.dayKey} locale={locale} />
+          {group.items.map((person) => (
+            <Pressable
+              key={person.key}
+              onPress={() => {
+                void triggerHaptic('selection');
+                onOpenPerson(person.key);
+              }}
+              className={cn(
+                'flex-row items-center gap-3 rounded-2xl border px-3.5 py-3 active:opacity-80',
+                person.unpaidBillCount === 0
+                  ? 'border-border/15 bg-secondary/20'
+                  : 'border-border/30 bg-card',
               )}
-            </Text>
-          </View>
-          <ChevronRight size={18} color={themeColors.textMuted} />
-        </Pressable>
+            >
+              <View
+                className="h-11 w-11 items-center justify-center rounded-full"
+                style={{ backgroundColor: avatarColor(person.key) }}
+              >
+                <Text variant="bodyStrong" style={{ color: '#fff' }}>
+                  {personInitial(person)}
+                </Text>
+              </View>
+              <View className="flex-1">
+                <Text
+                  variant="bodyStrong"
+                  tone={person.unpaidBillCount === 0 ? 'muted' : undefined}
+                  numberOfLines={1}
+                >
+                  {person.name ?? I18n.t('transactions.settleUp.someone')}
+                </Text>
+                <Text variant="caption" tone="muted">
+                  {person.unpaidBillCount === 0
+                    ? I18n.t('transactions.editor.split.section_subtitle_all_paid')
+                    : person.unpaidBillCount === 1
+                      ? I18n.t('transactions.settleUp.bills_one')
+                      : I18n.t('transactions.settleUp.bills_other', {
+                          count: person.unpaidBillCount,
+                        })}
+                </Text>
+              </View>
+              <View className="items-end">
+                <Text
+                  variant="bodyStrong"
+                  className={
+                    person.unpaidBillCount === 0 ? 'text-muted-foreground' : 'text-warning'
+                  }
+                >
+                  {formatReporting(
+                    person.unpaidBillCount === 0 ? person.paidReporting : person.totalReporting,
+                  )}
+                </Text>
+              </View>
+              <ChevronRight size={18} color={themeColors.textMuted} />
+            </Pressable>
+          ))}
+        </View>
       ))}
     </View>
   );
 
   const renderTransactionsList = () => (
-    <View className="mt-5 gap-2">
-      {byTransaction.transactions.map((bill) => (
-        <Pressable
-          key={bill.transactionId}
-          onPress={() => {
-            void triggerHaptic('selection');
-            onOpenTransaction(bill.transactionId);
-          }}
-          className={cn(
-            'flex-row items-center gap-3 rounded-2xl border px-3.5 py-3 active:opacity-80',
-            bill.unpaidSplitCount === 0
-              ? 'border-border/15 bg-secondary/20'
-              : 'border-border/30 bg-card',
-          )}
-        >
-          <View className="h-11 w-11 items-center justify-center rounded-full bg-secondary/50">
-            <CategoryEmoji icon={bill.categoryIcon} size={22} className="text-[19px]" />
-          </View>
-          <View className="flex-1">
-            <Text
-              variant="bodyStrong"
-              tone={bill.unpaidSplitCount === 0 ? 'muted' : undefined}
-              numberOfLines={1}
-            >
-              {bill.note?.trim() ||
-                bill.categoryName ||
-                I18n.t('transactions.settleUp.untitled_bill')}
-            </Text>
-            <Text variant="caption" tone="muted">
-              {bill.unpaidSplitCount === 0
-                ? I18n.t('transactions.editor.split.paid_label', {
-                    date: formatShortDate(bill.latestPaidAt ?? bill.date),
-                  })
-                : bill.unpaidSplitCount === 1
-                  ? I18n.t('transactions.settleUp.people_one')
-                  : I18n.t('transactions.settleUp.people_other', { count: bill.unpaidSplitCount })}
-              {bill.unpaidSplitCount > 0 ? ` · ${formatRelativeDate(bill.date)}` : null}
-            </Text>
-          </View>
-          <View className="items-end">
-            <Text
-              variant="bodyStrong"
-              className={bill.unpaidSplitCount === 0 ? 'text-muted-foreground' : 'text-warning'}
-            >
-              {formatNative(
-                bill.unpaidSplitCount === 0 ? bill.paidNative : bill.totalNative,
-                bill.currency,
+    <View className="mt-5 gap-3">
+      {transactionGroups.map((group) => (
+        <View key={group.dayKey} className="gap-2">
+          <SettleUpDateHeader dayKey={group.dayKey} locale={locale} />
+          {group.items.map((bill) => (
+            <Pressable
+              key={bill.transactionId}
+              onPress={() => {
+                void triggerHaptic('selection');
+                onOpenTransaction(bill.transactionId);
+              }}
+              className={cn(
+                'flex-row items-center gap-3 rounded-2xl border px-3.5 py-3 active:opacity-80',
+                bill.unpaidSplitCount === 0
+                  ? 'border-border/15 bg-secondary/20'
+                  : 'border-border/30 bg-card',
               )}
-            </Text>
-          </View>
-          <ChevronRight size={18} color={themeColors.textMuted} />
-        </Pressable>
+            >
+              <View className="h-11 w-11 items-center justify-center rounded-full bg-secondary/50">
+                <CategoryEmoji icon={bill.categoryIcon} size={22} className="text-[19px]" />
+              </View>
+              <View className="flex-1">
+                <Text
+                  variant="bodyStrong"
+                  tone={bill.unpaidSplitCount === 0 ? 'muted' : undefined}
+                  numberOfLines={1}
+                >
+                  {bill.note?.trim() ||
+                    bill.categoryName ||
+                    I18n.t('transactions.settleUp.untitled_bill')}
+                </Text>
+                <Text variant="caption" tone="muted">
+                  {bill.unpaidSplitCount === 0
+                    ? I18n.t('transactions.editor.split.section_subtitle_all_paid')
+                    : bill.unpaidSplitCount === 1
+                      ? I18n.t('transactions.settleUp.people_one')
+                      : I18n.t('transactions.settleUp.people_other', {
+                          count: bill.unpaidSplitCount,
+                        })}
+                </Text>
+              </View>
+              <View className="items-end">
+                <Text
+                  variant="bodyStrong"
+                  className={bill.unpaidSplitCount === 0 ? 'text-muted-foreground' : 'text-warning'}
+                >
+                  {formatNative(
+                    bill.unpaidSplitCount === 0 ? bill.paidNative : bill.totalNative,
+                    bill.currency,
+                  )}
+                </Text>
+              </View>
+              <ChevronRight size={18} color={themeColors.textMuted} />
+            </Pressable>
+          ))}
+        </View>
       ))}
     </View>
   );

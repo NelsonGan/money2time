@@ -752,6 +752,7 @@ const nl = {
       bills_other: '{{count}} rekeningen',
       someone: 'Iemand',
       person_owes_label: 'Moet jou nog',
+      paid_status: 'Betaald',
       untitled_bill: 'Gesplitste rekening',
       remove_bill_title: 'Dit verzoek verwijderen?',
       remove_bill_message:

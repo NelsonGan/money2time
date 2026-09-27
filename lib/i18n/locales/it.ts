@@ -754,6 +754,7 @@ const it = {
       bills_other: '{{count}} conti',
       someone: 'Qualcuno',
       person_owes_label: 'Ti deve',
+      paid_status: 'Pagato',
       untitled_bill: 'Conto diviso',
       remove_bill_title: 'Rimuovere questa richiesta?',
       remove_bill_message:

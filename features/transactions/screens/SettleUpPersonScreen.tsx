@@ -12,18 +12,20 @@ import {
   Text,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import { SettleUpDateHeader } from '~/features/transactions/components/SettleUpDateHeader';
 import type {
   ReceiptContent,
   ReceiptLine,
 } from '~/features/transactions/components/SplitReceiptCard';
 import { SplitReceiptShareModal } from '~/features/transactions/components/SplitReceiptShareModal';
 import { personItemNames } from '~/features/transactions/lib/receiptSplitShare';
+import { groupSettleUpItemsByDate } from '~/features/transactions/lib/settleUpDateGroups';
 import { useSettleUpSummary } from '~/features/transactions/lib/useSettleUpSummary';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { currencySymbolForCode } from '~/utils/currency';
-import { formatCurrency, formatRelativeDate, formatShortDate } from '~/utils/formatters';
+import { formatCurrency, formatShortDate } from '~/utils/formatters';
 
 interface SettleUpPersonScreenProps {
   personKey: string;
@@ -57,6 +59,12 @@ export function SettleUpPersonScreen({
     () => summary.people.find((p) => p.key === personKey) ?? null,
     [summary.people, personKey],
   );
+  const dateGroups = useMemo(
+    () =>
+      person ? groupSettleUpItemsByDate(person.bills, (bill) => bill.paidAt ?? bill.date) : [],
+    [person],
+  );
+  const locale = settings.locale ?? I18n.locale ?? 'en';
 
   // A paid-only person remains in the summary; leave only after all shares are removed.
   useEffect(() => {
@@ -162,99 +170,106 @@ export function SettleUpPersonScreen({
               <View className="mt-2 h-[3px] w-8 rounded-full bg-primary/30" />
             </View>
 
-            <View className="mt-4 gap-2">
-              {person.bills.map((bill) => {
-                const account = bill.paybackAccountId
-                  ? getAccountById(bill.paybackAccountId)
-                  : null;
-                return (
-                  <View
-                    key={bill.splitId}
-                    className={
-                      bill.paidAt
-                        ? 'rounded-2xl border border-border/15 bg-secondary/20 px-4 py-3.5'
-                        : 'rounded-2xl border border-border/25 bg-card/60 px-4 py-3.5'
-                    }
-                  >
-                    <View className="flex-row items-center gap-3">
-                      <View className="h-10 w-10 items-center justify-center rounded-full bg-secondary/50">
-                        <CategoryEmoji icon={bill.categoryIcon} size={22} className="text-[19px]" />
-                      </View>
-                      <View className="flex-1">
-                        <Text
-                          variant="bodyStrong"
-                          tone={bill.paidAt ? 'muted' : undefined}
-                          numberOfLines={1}
-                        >
-                          {bill.note?.trim() ||
-                            bill.categoryName ||
-                            I18n.t('transactions.settleUp.untitled_bill')}
-                        </Text>
-                        <Text variant="caption" tone="muted">
-                          {bill.paidAt
-                            ? I18n.t('transactions.editor.split.paid_label', {
-                                date: formatShortDate(bill.paidAt),
-                              })
-                            : formatRelativeDate(bill.date)}
-                        </Text>
-                      </View>
-                      <Text variant="bodyStrong" tone={bill.paidAt ? 'muted' : undefined}>
-                        {formatNative(bill.amount, bill.currency)}
-                      </Text>
-                    </View>
-
-                    {!bill.paidAt ? <View className="my-3 h-px bg-border/15" /> : null}
-
-                    {!bill.paidAt ? (
-                      <View className="flex-row items-center gap-2">
-                        <Pressable
-                          onPress={() => {
-                            void triggerHaptic('selection');
-                            setPickerForSplitId(bill.splitId);
-                          }}
-                          className="min-w-0 flex-shrink flex-row items-center gap-1.5 rounded-full bg-secondary/50 py-1.5 pl-2 pr-2.5 active:opacity-70"
-                        >
-                          {account ? (
-                            <AccountLogo
-                              logoId={account.logoId}
-                              type={account.type}
-                              goalEmoji={account.goalEmoji}
-                              size={16}
+            <View className="mt-4 gap-3">
+              {dateGroups.map((group) => (
+                <View key={group.dayKey} className="gap-2">
+                  <SettleUpDateHeader dayKey={group.dayKey} locale={locale} />
+                  {group.items.map((bill) => {
+                    const account = bill.paybackAccountId
+                      ? getAccountById(bill.paybackAccountId)
+                      : null;
+                    return (
+                      <View
+                        key={bill.splitId}
+                        className={
+                          bill.paidAt
+                            ? 'rounded-2xl border border-border/15 bg-secondary/20 px-4 py-3.5'
+                            : 'rounded-2xl border border-border/25 bg-card/60 px-4 py-3.5'
+                        }
+                      >
+                        <View className="flex-row items-center gap-3">
+                          <View className="h-10 w-10 items-center justify-center rounded-full bg-secondary/50">
+                            <CategoryEmoji
+                              icon={bill.categoryIcon}
+                              size={22}
+                              className="text-[19px]"
                             />
-                          ) : null}
-                          <Text
-                            variant="caption"
-                            tone="muted"
-                            numberOfLines={1}
-                            className="max-w-[150px]"
-                          >
-                            {account?.name ?? I18n.t('common.no_account')}
+                          </View>
+                          <View className="flex-1">
+                            <Text
+                              variant="bodyStrong"
+                              tone={bill.paidAt ? 'muted' : undefined}
+                              numberOfLines={1}
+                            >
+                              {bill.note?.trim() ||
+                                bill.categoryName ||
+                                I18n.t('transactions.settleUp.untitled_bill')}
+                            </Text>
+                            <Text variant="caption" tone="muted">
+                              {bill.paidAt
+                                ? I18n.t('transactions.settleUp.paid_status')
+                                : I18n.t('transactions.settleUp.person_owes_label')}
+                            </Text>
+                          </View>
+                          <Text variant="bodyStrong" tone={bill.paidAt ? 'muted' : undefined}>
+                            {formatNative(bill.amount, bill.currency)}
                           </Text>
-                          <ChevronDown size={12} color={themeColors.textMuted} />
-                        </Pressable>
-                        <View className="flex-1" />
-                        <Pressable
-                          onPress={() => handleDelete(bill.splitId)}
-                          hitSlop={8}
-                          className="h-8 w-8 items-center justify-center rounded-full bg-destructive/10 active:opacity-70"
-                        >
-                          <Trash2 size={15} color={themeColors.error} />
-                        </Pressable>
-                        <Pressable
-                          onPress={() => handleMarkPaid(bill.splitId)}
-                          hitSlop={8}
-                          className="flex-row items-center gap-1 rounded-full bg-success/15 px-3.5 py-2 active:opacity-70"
-                        >
-                          <Check size={14} color={themeColors.success} />
-                          <Text variant="caption" className="text-success font-medium">
-                            {I18n.t('transactions.editor.split.mark_paid')}
-                          </Text>
-                        </Pressable>
+                        </View>
+
+                        {!bill.paidAt ? <View className="my-3 h-px bg-border/15" /> : null}
+
+                        {!bill.paidAt ? (
+                          <View className="flex-row items-center gap-2">
+                            <Pressable
+                              onPress={() => {
+                                void triggerHaptic('selection');
+                                setPickerForSplitId(bill.splitId);
+                              }}
+                              className="min-w-0 flex-shrink flex-row items-center gap-1.5 rounded-full bg-secondary/50 py-1.5 pl-2 pr-2.5 active:opacity-70"
+                            >
+                              {account ? (
+                                <AccountLogo
+                                  logoId={account.logoId}
+                                  type={account.type}
+                                  goalEmoji={account.goalEmoji}
+                                  size={16}
+                                />
+                              ) : null}
+                              <Text
+                                variant="caption"
+                                tone="muted"
+                                numberOfLines={1}
+                                className="max-w-[150px]"
+                              >
+                                {account?.name ?? I18n.t('common.no_account')}
+                              </Text>
+                              <ChevronDown size={12} color={themeColors.textMuted} />
+                            </Pressable>
+                            <View className="flex-1" />
+                            <Pressable
+                              onPress={() => handleDelete(bill.splitId)}
+                              hitSlop={8}
+                              className="h-8 w-8 items-center justify-center rounded-full bg-destructive/10 active:opacity-70"
+                            >
+                              <Trash2 size={15} color={themeColors.error} />
+                            </Pressable>
+                            <Pressable
+                              onPress={() => handleMarkPaid(bill.splitId)}
+                              hitSlop={8}
+                              className="flex-row items-center gap-1 rounded-full bg-success/15 px-3.5 py-2 active:opacity-70"
+                            >
+                              <Check size={14} color={themeColors.success} />
+                              <Text variant="caption" className="text-success font-medium">
+                                {I18n.t('transactions.editor.split.mark_paid')}
+                              </Text>
+                            </Pressable>
+                          </View>
+                        ) : null}
                       </View>
-                    ) : null}
-                  </View>
-                );
-              })}
+                    );
+                  })}
+                </View>
+              ))}
             </View>
           </ScrollView>
 

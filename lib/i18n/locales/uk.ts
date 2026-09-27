@@ -750,6 +750,7 @@ const uk = {
       bills_other: '{{count}} рахунків',
       someone: 'Хтось',
       person_owes_label: 'Винен вам',
+      paid_status: 'Оплачено',
       untitled_bill: 'Спільний рахунок',
       remove_bill_title: 'Видалити цей запит?',
       remove_bill_message: 'Це очистить борг за цим рахунком. Сама операція залишиться без змін.',

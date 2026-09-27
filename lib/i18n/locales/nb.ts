@@ -749,6 +749,7 @@ const nb = {
       bills_other: '{{count}} regninger',
       someone: 'Noen',
       person_owes_label: 'Skylder deg',
+      paid_status: 'Betalt',
       untitled_bill: 'Delt regning',
       remove_bill_title: 'Fjerne denne forespørselen?',
       remove_bill_message:

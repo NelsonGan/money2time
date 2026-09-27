@@ -746,6 +746,7 @@ const ko = {
       bills_other: '청구 {{count}}건',
       someone: '이름 없음',
       person_owes_label: '받을 금액',
+      paid_status: '정산됨',
       untitled_bill: '더치페이',
       remove_bill_title: '이 요청을 삭제할까요?',
       remove_bill_message: '이 청구로 받을 금액이 삭제됩니다. 거래 자체는 변경되지 않습니다.',

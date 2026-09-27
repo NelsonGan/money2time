@@ -748,6 +748,7 @@ const ru = {
       bills_other: '{{count}} счетов',
       someone: 'Кто-то',
       person_owes_label: 'Должен вам',
+      paid_status: 'Оплачено',
       untitled_bill: 'Общий счёт',
       remove_bill_title: 'Удалить этот запрос?',
       remove_bill_message:

@@ -748,6 +748,7 @@ const da = {
       bills_other: '{{count}} regninger',
       someone: 'Nogen',
       person_owes_label: 'Skylder dig',
+      paid_status: 'Betalt',
       untitled_bill: 'Delregning',
       remove_bill_title: 'Fjern denne anmodning?',
       remove_bill_message:

@@ -748,6 +748,7 @@ const sv = {
       bills_other: '{{count}} notor',
       someone: 'Någon',
       person_owes_label: 'Skyldig dig',
+      paid_status: 'Betald',
       untitled_bill: 'Delad nota',
       remove_bill_title: 'Ta bort denna begäran?',
       remove_bill_message:

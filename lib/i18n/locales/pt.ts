@@ -750,6 +750,7 @@ const pt = {
       bills_other: '{{count}} contas',
       someone: 'Alguém',
       person_owes_label: 'Te deve',
+      paid_status: 'Pago',
       untitled_bill: 'Conta dividida',
       remove_bill_title: 'Remover esta cobrança?',
       remove_bill_message: 'Isso apaga o que te devem por esta conta. A transação em si não muda.',

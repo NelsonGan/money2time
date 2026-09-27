@@ -750,6 +750,7 @@ const tr = {
       bills_other: '{{count}} hesap',
       someone: 'Birisi',
       person_owes_label: 'Size borcu',
+      paid_status: 'Ödendi',
       untitled_bill: 'Bölünen hesap',
       remove_bill_title: 'Bu talep kaldırılsın mı?',
       remove_bill_message:

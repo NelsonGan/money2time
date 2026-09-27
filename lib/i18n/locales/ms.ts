@@ -754,6 +754,7 @@ const ms = {
       bills_other: '{{count}} bil',
       someone: 'Seseorang',
       person_owes_label: 'Berhutang dengan anda',
+      paid_status: 'Dibayar',
       untitled_bill: 'Bahagi Bil',
       remove_bill_title: 'Buang permintaan ini?',
       remove_bill_message:
