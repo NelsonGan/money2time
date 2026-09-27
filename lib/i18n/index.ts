@@ -24,6 +24,7 @@ import tr from './locales/tr';
 import uk from './locales/uk';
 import vi from './locales/vi';
 import zh from './locales/zh';
+import zhHant from './locales/zh-Hant';
 
 const TRANSLATIONS = {
   da,
@@ -49,6 +50,7 @@ const TRANSLATIONS = {
   uk,
   vi,
   zh,
+  'zh-Hant': zhHant,
 } as const;
 const I18n = new I18nJs(TRANSLATIONS);
 
@@ -79,7 +81,8 @@ const LOCALE_LABELS: Record<string, string> = {
   tr: 'Türkçe',
   uk: 'Українська',
   vi: 'Tiếng Việt',
-  zh: '中文',
+  zh: '简体中文',
+  'zh-Hant': '繁體中文',
 };
 
 // Maps device language codes that differ from our locale keys to the right key.
@@ -91,10 +94,19 @@ const LOCALE_ALIASES: Record<string, string> = {
   in: 'id',
 };
 
-function normalizeLocale(input: string | null | undefined) {
+function normalizeLocale(input: string | null | undefined, regionCode?: string | null) {
   if (!input) return 'en';
-  const lower = input.toLowerCase();
-  const base = lower.split('-')[0] ?? lower;
+  const parts = input.toLowerCase().replace(/_/g, '-').split('-');
+  const base = parts[0];
+  if (base === 'zh') {
+    const hasTraditionalScript = parts.includes('hant');
+    const hasSimplifiedScript = parts.includes('hans');
+    const region = parts.find((part) => ['tw', 'hk', 'mo', 'cn', 'sg'].includes(part));
+    const traditionalRegion = ['tw', 'hk', 'mo'].includes(
+      region ?? regionCode?.toLowerCase() ?? '',
+    );
+    return hasTraditionalScript || (!hasSimplifiedScript && traditionalRegion) ? 'zh-Hant' : 'zh';
+  }
   const resolved = LOCALE_ALIASES[base] ?? base;
   return SUPPORTED_LOCALES.includes(resolved as (typeof SUPPORTED_LOCALES)[number])
     ? resolved
@@ -107,7 +119,7 @@ function getLocaleLabel(locale: string) {
 
 function getDeviceLocale() {
   const locale = getLocales()[0];
-  return normalizeLocale(locale?.languageTag ?? locale?.languageCode ?? 'en');
+  return normalizeLocale(locale?.languageTag ?? locale?.languageCode ?? 'en', locale?.regionCode);
 }
 
 /** Device ISO 3166-1 alpha-2 region code (e.g. "US", "MY"), or null. */

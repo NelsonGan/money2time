@@ -60,6 +60,7 @@ export const SUPPORTED_LOCALES = [
   'uk',
   'vi',
   'zh',
+  'zh-Hant',
 ];
 export const LOCALE_LABELS: Record<string, string> = {
   da: 'Dansk',
@@ -84,7 +85,8 @@ export const LOCALE_LABELS: Record<string, string> = {
   tr: 'Türkçe',
   uk: 'Українська',
   vi: 'Tiếng Việt',
-  zh: '中文',
+  zh: '简体中文',
+  'zh-Hant': '繁體中文',
 };
 export function getDeviceLocale() {
   return 'en';

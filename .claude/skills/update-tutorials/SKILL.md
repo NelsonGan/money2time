@@ -181,7 +181,7 @@ Everything above, plus:
 - Pick a **slug that matches the title**. It is the URL (`money2time.com/tutorials/<slug>`) and
   the deep link (`money2time://tutorial?id=<slug>`). Renaming one after release needs a redirect.
 - Append it to the right `content/<category>.ts`. Category order is `TUTORIAL_CATEGORY_IDS` in
-  `content/types.ts`; a new category needs an i18n key in **all 23 locales** and on the web side.
+  `content/types.ts`; a new category needs an i18n key in **all 24 locales** and on the web side.
 - Give it an icon in `TUTORIAL_ICON` (`features/tutorials/components/TutorialRow.tsx`) **and** in
   the web's `src/lib/tutorials.ts`. Without one it falls back to a generic checklist.
 - Run the test suite: it fails on a duplicate id, a step pointing at a missing image, an image

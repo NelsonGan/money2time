@@ -21,6 +21,7 @@ import tr from '~/lib/i18n/locales/tr';
 import uk from '~/lib/i18n/locales/uk';
 import vi from '~/lib/i18n/locales/vi';
 import zh from '~/lib/i18n/locales/zh';
+import zhHant from '~/lib/i18n/locales/zh-Hant';
 
 type Tree = { [key: string]: string | Tree };
 
@@ -47,6 +48,7 @@ const LOCALES: Record<string, Tree> = {
   uk,
   vi,
   zh,
+  'zh-Hant': zhHant,
 } as unknown as Record<string, Tree>;
 
 function flattenKeys(tree: Tree, prefix = ''): string[] {
