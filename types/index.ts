@@ -1070,6 +1070,8 @@ export interface TransactionDebt {
   totalNative: number;
   /** Already paid shares, in the transaction's currency. */
   paidNative: number;
+  /** Most recent payment date, when at least one share has been paid. */
+  latestPaidAt: string | null;
   splits: TransactionDebtSplit[];
   /** All shares on the transaction, paid and unpaid. */
   splitCount: number;

@@ -226,13 +226,7 @@ export function SettleUpScreen({
             <Text variant="caption" tone="muted">
               {bill.unpaidSplitCount === 0
                 ? I18n.t('transactions.editor.split.paid_label', {
-                    date: formatShortDate(
-                      bill.splits.reduce(
-                        (latest, split) =>
-                          split.paidAt && split.paidAt > latest ? split.paidAt : latest,
-                        '',
-                      ),
-                    ),
+                    date: formatShortDate(bill.latestPaidAt ?? bill.date),
                   })
                 : bill.unpaidSplitCount === 1
                   ? I18n.t('transactions.settleUp.people_one')

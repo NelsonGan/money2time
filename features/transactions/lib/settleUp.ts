@@ -8,7 +8,7 @@ import type {
   TransactionWithRelations,
 } from '~/types';
 
-/** Grouping key for unpaid splits that were never given a person name. */
+/** Grouping key for splits that were never given a person name. */
 export const UNNAMED_PERSON_KEY = '__unnamed__';
 
 export interface AggregateSettleUpOptions {
@@ -254,6 +254,7 @@ export function aggregateSettleUpByTransaction(
     let totalReporting = 0;
     let totalNative = 0;
     let paidNative = 0;
+    let latestPaidAt: string | null = null;
     let unpaidSplitCount = 0;
     for (const split of splits) {
       if (split.isSelf) continue;
@@ -274,6 +275,7 @@ export function aggregateSettleUpByTransaction(
       });
       if (split.paidAt) {
         paidNative = roundCents(paidNative + split.amount);
+        if (latestPaidAt === null || split.paidAt > latestPaidAt) latestPaidAt = split.paidAt;
       } else {
         totalReporting = roundCents(totalReporting + reportingAmount);
         totalNative = roundCents(totalNative + split.amount);
@@ -300,6 +302,7 @@ export function aggregateSettleUpByTransaction(
       totalReporting,
       totalNative,
       paidNative,
+      latestPaidAt,
       splits: owed,
       splitCount: owed.length,
       unpaidSplitCount,
@@ -313,18 +316,8 @@ export function aggregateSettleUpByTransaction(
     if (Boolean(a.unpaidSplitCount) !== Boolean(b.unpaidSplitCount)) {
       return a.unpaidSplitCount ? -1 : 1;
     }
-    const aDate = a.unpaidSplitCount
-      ? a.date
-      : a.splits.reduce(
-          (latest, split) => (split.paidAt && split.paidAt > latest ? split.paidAt : latest),
-          '',
-        );
-    const bDate = b.unpaidSplitCount
-      ? b.date
-      : b.splits.reduce(
-          (latest, split) => (split.paidAt && split.paidAt > latest ? split.paidAt : latest),
-          '',
-        );
+    const aDate = a.unpaidSplitCount ? a.date : (a.latestPaidAt ?? a.date);
+    const bDate = b.unpaidSplitCount ? b.date : (b.latestPaidAt ?? b.date);
     if (aDate !== bDate) return aDate < bDate ? 1 : -1;
     if (b.totalReporting !== a.totalReporting) return b.totalReporting - a.totalReporting;
     return a.transactionId < b.transactionId ? -1 : a.transactionId > b.transactionId ? 1 : 0;
