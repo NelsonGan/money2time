@@ -152,7 +152,7 @@ interface ActivityTransactionListProps {
   locale?: string;
   /**
    * Set when this list is a tab screen's main scrollable behind the floating
-   * floating nav bar: adds the bar's reserved inset to the bottom padding
+   * nav bar: adds the bar's reserved inset to the bottom padding
    * and reports scroll so the bar can minimize.
    */
   extendUnderBottomNav?: boolean;

@@ -38,7 +38,7 @@ export function BottomNavMinimizeProvider({ children }: { children: React.ReactN
   const { bottom: safeBottom } = useSafeAreaInsets();
   const contentInset = getFloatingNavReservedInset(safeBottom);
   const minimizeProgress = useSharedValue(0);
-  const lastOffsetRef = useRef(0);
+  const lastOffsetRef = useRef<number | null>(null);
   const directionalTravelRef = useRef(0);
   const minimizedRef = useRef(false);
 
@@ -56,15 +56,19 @@ export function BottomNavMinimizeProvider({ children }: { children: React.ReactN
 
   const reportScrollOffset = useCallback(
     (offsetY: number) => {
-      const delta = offsetY - lastOffsetRef.current;
+      const previousOffset = lastOffsetRef.current;
       lastOffsetRef.current = offsetY;
-      if (Math.abs(delta) > JUMP_IGNORE_DELTA) {
-        directionalTravelRef.current = 0;
-        return;
-      }
       if (offsetY <= TOP_REVEAL_OFFSET) {
         directionalTravelRef.current = 0;
         setMinimized(false);
+        return;
+      }
+      // A tab can resume at its old scroll position after resetMinimize.
+      // Establish that position before interpreting deltas as user travel.
+      if (previousOffset === null) return;
+      const delta = offsetY - previousOffset;
+      if (Math.abs(delta) > JUMP_IGNORE_DELTA) {
+        directionalTravelRef.current = 0;
         return;
       }
       if (delta === 0) return;
@@ -85,7 +89,7 @@ export function BottomNavMinimizeProvider({ children }: { children: React.ReactN
   );
 
   const resetMinimize = useCallback(() => {
-    lastOffsetRef.current = 0;
+    lastOffsetRef.current = null;
     directionalTravelRef.current = 0;
     setMinimized(false);
   }, [setMinimized]);
