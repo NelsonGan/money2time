@@ -13,6 +13,7 @@ import Animated, {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, CategoryEmoji, SettingsHeader, Text } from '~/components/ui';
+import { AnimatedProgressFill } from '~/components/ui/AnimatedProgressFill';
 import { useApp, useTransactions } from '~/context/AppContext';
 import {
   type DepositSource,
@@ -432,9 +433,10 @@ export function GoalDetailScreen({
             </View>
           </View>
           <View className="mt-3 h-3 overflow-hidden rounded-full bg-secondary/60">
-            <View
-              className="h-3 rounded-full"
-              style={{ width: `${fillRatio * 100}%`, backgroundColor: ringColor }}
+            <AnimatedProgressFill
+              ratio={fillRatio}
+              color={ringColor}
+              style={{ borderRadius: 12 }}
             />
           </View>
           {paceLine ? (
