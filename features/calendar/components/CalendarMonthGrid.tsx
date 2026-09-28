@@ -237,9 +237,10 @@ const styles = StyleSheet.create({
   // The value lines span the cell instead of hugging their text. The month
   // pager lays its pages out ~2400 page widths from the origin
   // (LONG_RANGE_PAGER_CENTER_INDEX), where Yoga's float32 edge rounding only
-  // resolves 1/16 to 1/8pt on a phone (coarser on a tablet), so a box sized
-  // exactly to its text can come out a sliver narrower than the text and get
-  // ellipsized ("300" drew as "3…").
+  // resolves 1/16 to 1/8pt. Unless the pixel grid is a power-of-two fraction of
+  // a point (2x screens), that can leave a box sized exactly to its text a
+  // sliver narrower than the text, and it gets ellipsized ("300" drew as "3…"
+  // on a 3x iPhone).
   cellValues: {
     alignSelf: 'stretch',
     marginTop: 'auto',
