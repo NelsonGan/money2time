@@ -11,6 +11,7 @@ import React, {
 import { Alert, FlatList, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
+import { AnimatedProgressFill } from '~/components/ui/AnimatedProgressFill';
 import {
   CategoryEmoji,
   SETTINGS_LIST_BOTTOM_PADDING,
@@ -63,16 +64,12 @@ function ProgressBar({
   trackColor: string;
   height: number;
 }) {
-  const clamped = Math.max(0, Math.min(ratio, 1));
   return (
     <View
       className="w-full overflow-hidden rounded-full"
       style={{ height, backgroundColor: trackColor }}
     >
-      <View
-        className="rounded-full"
-        style={{ height, width: `${clamped * 100}%`, backgroundColor: color }}
-      />
+      <AnimatedProgressFill ratio={ratio} color={color} style={{ height, borderRadius: height }} />
     </View>
   );
 }
@@ -223,7 +220,6 @@ function BudgetChildRow({
 }) {
   const category = categoriesById.get(line.categoryId);
   const fillColor = line.isOver ? themeColors.error : color;
-  const fillPct = Math.max(0, Math.min(line.usageRatio, 1)) * 100;
 
   return (
     <View className="flex-row items-center gap-2">
@@ -237,17 +233,7 @@ function BudgetChildRow({
         className="relative min-w-0 flex-1 overflow-hidden rounded-xl active:opacity-80"
         style={{ backgroundColor: withColorAlpha(fillColor, 0.08) }}
       >
-        <View
-          pointerEvents="none"
-          style={{
-            position: 'absolute',
-            left: 0,
-            top: 0,
-            bottom: 0,
-            width: `${fillPct}%`,
-            backgroundColor: withColorAlpha(fillColor, 0.18),
-          }}
-        />
+        <AnimatedProgressFill ratio={line.usageRatio} color={withColorAlpha(fillColor, 0.18)} />
         <View className="flex-row items-center gap-2 px-3 py-2">
           {/* Only an explicitly-set emoji renders — no falling back to the
               parent's icon, which just repeated it on every child row. */}

@@ -2,6 +2,7 @@ import { Check, ChevronDown, ChevronLeft, Settings2 } from 'lucide-react-native'
 import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import PagerView, { type PagerViewOnPageSelectedEvent } from 'react-native-pager-view';
+import Animated, { cubicBezier, useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
@@ -48,6 +49,7 @@ const GRID_PAGE_HEIGHT = 280;
 
 /** Listening panel height. Matches the tile grid so the sheet doesn't jump. */
 const VOICE_PANEL_HEIGHT = GRID_PAGE_HEIGHT;
+const PRESS_EASE = cubicBezier(0.23, 1, 0.32, 1);
 
 interface AddActionSheetProps {
   visible: boolean;
@@ -683,45 +685,56 @@ interface GridTileProps {
 function GridTile({ icon, title, subtitle, selected, onPress }: GridTileProps) {
   const themeColors = useThemeColors();
   const isFlat = useIsFlatIcons();
+  const reducedMotion = useReducedMotion();
+  const [pressed, setPressed] = useState(false);
   return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={title}
-      accessibilityState={{ selected: !!selected }}
-      style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-      className={cn(
-        'flex-1 items-center justify-center rounded-3xl border px-3 py-4',
-        selected ? 'border-primary/50 bg-primary/10' : 'border-border/30 bg-secondary/30',
-      )}
+    <Animated.View
+      className="flex-1"
+      style={{
+        transform: [{ scale: pressed && !reducedMotion ? 0.97 : 1 }],
+        transitionProperty: 'transform',
+        transitionDuration: reducedMotion ? '0ms' : '120ms',
+        transitionTimingFunction: PRESS_EASE,
+      }}
     >
-      {selected ? (
-        <View className="absolute right-2.5 top-2.5">
-          <Check size={16} color={themeColors.primary} />
-        </View>
-      ) : null}
-      {/* No tinted disc behind clay: the glyph carries its own colour and depth,
-          and a plate behind it reads as a competing container. The fixed box
-          keeps differently-sized glyphs on one baseline. A flat line glyph gets
-          the disc back, which is what it was drawn against. */}
-      <View
+      <Pressable
+        onPress={onPress}
+        onPressIn={() => setPressed(true)}
+        onPressOut={() => setPressed(false)}
+        pressRetentionOffset={16}
+        accessibilityRole="button"
+        accessibilityLabel={title}
+        accessibilityState={{ selected: !!selected }}
         className={cn(
-          'mb-2 h-14 w-14 items-center justify-center',
-          isFlat ? 'rounded-full bg-primary/10' : null,
+          'flex-1 items-center justify-center rounded-3xl border px-3 py-4',
+          selected ? 'border-primary/50 bg-primary/10' : 'border-border/30 bg-secondary/30',
         )}
       >
-        {icon}
-      </View>
-      <Text variant="bodyStrong" className="text-center" numberOfLines={1}>
-        {title}
-      </Text>
-      <Text
-        tone="muted"
-        className="mt-0.5 text-center text-[11px] leading-[14px]"
-        numberOfLines={1}
-      >
-        {subtitle}
-      </Text>
-    </Pressable>
+        {selected ? (
+          <View className="absolute right-2.5 top-2.5">
+            <Check size={16} color={themeColors.primary} />
+          </View>
+        ) : null}
+        {/* Keep differently sized glyphs on one baseline. */}
+        <View
+          className={cn(
+            'mb-2 h-14 w-14 items-center justify-center',
+            isFlat ? 'rounded-full bg-primary/10' : null,
+          )}
+        >
+          {icon}
+        </View>
+        <Text variant="bodyStrong" className="text-center" numberOfLines={1}>
+          {title}
+        </Text>
+        <Text
+          tone="muted"
+          className="mt-0.5 text-center text-[11px] leading-[14px]"
+          numberOfLines={1}
+        >
+          {subtitle}
+        </Text>
+      </Pressable>
+    </Animated.View>
   );
 }
