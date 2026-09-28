@@ -169,7 +169,6 @@ export const CalendarMonthGrid = memo(function CalendarMonthGrid({
                   {
                     color: cell.income > 0 ? themeColors.success : themeColors.textMuted,
                     opacity: cell.income > 0 ? 1 : 0.55,
-                    maxWidth: dayCellSize - 4,
                   },
                 ]}
               >
@@ -183,7 +182,6 @@ export const CalendarMonthGrid = memo(function CalendarMonthGrid({
                   {
                     color: cell.expense > 0 ? themeColors.error : themeColors.textMuted,
                     opacity: cell.expense > 0 ? 1 : 0.55,
-                    maxWidth: dayCellSize - 4,
                   },
                 ]}
               >
@@ -236,10 +234,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 6,
   },
+  // The value lines span the cell instead of hugging their text. The month
+  // pager lays its pages out ~2400 page widths from the origin
+  // (LONG_RANGE_PAGER_CENTER_INDEX), where Yoga's float32 edge rounding only
+  // resolves 1/16 to 1/8pt. Unless the pixel grid is a power-of-two fraction of
+  // a point (2x screens), that can leave a box sized exactly to its text a
+  // sliver narrower than the text, and it gets ellipsized ("300" drew as "3…"
+  // on a 3x iPhone).
   cellValues: {
+    alignSelf: 'stretch',
     marginTop: 'auto',
     paddingBottom: 4,
-    alignItems: 'center',
     gap: 1,
   },
   cellValueText: {
