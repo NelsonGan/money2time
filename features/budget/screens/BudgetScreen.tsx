@@ -9,9 +9,11 @@ import React, {
   useState,
 } from 'react';
 import { Alert, FlatList, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
+import Animated, { Easing, FadeInDown, ReduceMotion } from 'react-native-reanimated';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { AnimatedProgressFill } from '~/components/ui/AnimatedProgressFill';
+import { ValuePulse } from '~/components/ui/ValuePulse';
 import {
   CategoryEmoji,
   SETTINGS_LIST_BOTTOM_PADDING,
@@ -53,23 +55,33 @@ import {
 } from '~/utils/financialMonth';
 import { asSpendingRow } from '~/utils/spending';
 
+const REVEAL_EASE = Easing.bezier(0.23, 1, 0.32, 1);
+
 function ProgressBar({
   ratio,
   color,
   trackColor,
   height,
+  revealDelayMs = 0,
 }: {
   ratio: number;
   color: string;
   trackColor: string;
   height: number;
+  revealDelayMs?: number;
 }) {
   return (
     <View
       className="w-full overflow-hidden rounded-full"
       style={{ height, backgroundColor: trackColor }}
     >
-      <AnimatedProgressFill ratio={ratio} color={color} style={{ height, borderRadius: height }} />
+      <AnimatedProgressFill
+        ratio={ratio}
+        color={color}
+        style={{ height, borderRadius: height }}
+        revealOnMount
+        revealDelayMs={revealDelayMs}
+      />
     </View>
   );
 }
@@ -105,6 +117,7 @@ function BudgetSummaryCard({
             size={88}
             strokeWidth={9}
             progress={Math.min(summary.usageRatio, 1)}
+            revealDelayMs={220}
             color={ringColor}
             trackColor={withColorAlpha(ringColor, 0.16)}
           >
@@ -119,11 +132,13 @@ function BudgetSummaryCard({
         </View>
 
         <View className="min-w-0 flex-1">
-          <View className="flex-row items-baseline gap-1.5">
-            <Text variant="monoLg" numberOfLines={1} className="shrink">
-              {money(summary.totalSpent, settings)}
-            </Text>
-          </View>
+          <ValuePulse valueKey={summary.totalSpent}>
+            <View className="flex-row items-baseline gap-1.5">
+              <Text variant="monoLg" numberOfLines={1} className="shrink">
+                {money(summary.totalSpent, settings)}
+              </Text>
+            </View>
+          </ValuePulse>
           <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
             / {money(summary.totalBudget, settings)}
           </Text>
@@ -233,7 +248,12 @@ function BudgetChildRow({
         className="relative min-w-0 flex-1 overflow-hidden rounded-xl active:opacity-80"
         style={{ backgroundColor: withColorAlpha(fillColor, 0.08) }}
       >
-        <AnimatedProgressFill ratio={line.usageRatio} color={withColorAlpha(fillColor, 0.18)} />
+        <AnimatedProgressFill
+          ratio={line.usageRatio}
+          color={withColorAlpha(fillColor, 0.18)}
+          revealOnMount
+          revealDelayMs={120}
+        />
         <View className="flex-row items-center gap-2 px-3 py-2">
           {/* Only an explicitly-set emoji renders — no falling back to the
               parent's icon, which just repeated it on every child row. */}
@@ -259,6 +279,7 @@ function BudgetCategoryRow({
   line,
   color,
   first,
+  revealIndex,
   categoriesById,
   settings,
   themeColors,
@@ -269,6 +290,7 @@ function BudgetCategoryRow({
   /** Palette color for this category, shared with the breakdown pie. */
   color: string;
   first: boolean;
+  revealIndex: number;
   categoriesById: Map<string, Category>;
   settings: UserSettings;
   themeColors: ColorPalette;
@@ -321,6 +343,7 @@ function BudgetCategoryRow({
               color={barColor}
               trackColor={withColorAlpha(barColor, 0.14)}
               height={6}
+              revealDelayMs={220 + revealIndex * 55}
             />
             <View className="flex-row items-center gap-2">
               <Text variant="caption" tone="muted" numberOfLines={1} className="flex-1 text-[11px]">
@@ -688,17 +711,25 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
               {orderedCategories.length > 0 ? (
                 <View className="mt-4 overflow-hidden rounded-2xl border border-border/45 bg-card">
                   {orderedCategories.map((line, index) => (
-                    <BudgetCategoryRow
+                    <Animated.View
                       key={line.categoryId}
-                      line={line}
-                      color={colorByCategoryId.get(line.categoryId) ?? themeColors.primary}
-                      first={index === 0}
-                      categoriesById={categoriesById}
-                      settings={settings}
-                      themeColors={themeColors}
-                      onPress={() => openCategoryDrilldown(month, line.categoryId, true)}
-                      onPressChild={(childId) => openCategoryDrilldown(month, childId, false)}
-                    />
+                      entering={FadeInDown.delay(160 + Math.min(index, 5) * 45)
+                        .duration(220)
+                        .easing(REVEAL_EASE)
+                        .reduceMotion(ReduceMotion.System)}
+                    >
+                      <BudgetCategoryRow
+                        line={line}
+                        color={colorByCategoryId.get(line.categoryId) ?? themeColors.primary}
+                        first={index === 0}
+                        revealIndex={index}
+                        categoriesById={categoriesById}
+                        settings={settings}
+                        themeColors={themeColors}
+                        onPress={() => openCategoryDrilldown(month, line.categoryId, true)}
+                        onPressChild={(childId) => openCategoryDrilldown(month, childId, false)}
+                      />
+                    </Animated.View>
                   ))}
                 </View>
               ) : null}

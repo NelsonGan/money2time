@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { ImageStyle, StyleProp, ViewStyle } from 'react-native';
 import { Image, View } from 'react-native';
 
@@ -69,10 +70,11 @@ export function ClayIcon({
   flatColor,
   flatTone,
 }: ClayIconProps) {
+  const [failedName, setFailedName] = useState<ClayIconName | null>(null);
   // Only the icon-style read happens here. Resolving a tone against the palette
   // lives in FlatGlyph so the clay path — which is every icon for most users, on
   // screens that draw dozens of them — subscribes to one context, not two.
-  if (useIconStyle() === 'flat') {
+  if (useIconStyle() === 'flat' || failedName === name) {
     return (
       <FlatGlyph
         name={name}
@@ -93,6 +95,7 @@ export function ClayIcon({
       source={CLAY_ICON_SOURCES[name]}
       style={[{ width: size, height: size }, opacity == null ? null : { opacity }, style]}
       resizeMode="contain"
+      onError={() => setFailedName(name)}
       accessibilityLabel={accessibilityLabel}
       accessible={accessibilityLabel != null}
     />

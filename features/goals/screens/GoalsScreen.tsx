@@ -1,6 +1,7 @@
 import { CircleCheck, PiggyBank, Target } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
+import Animated, { Easing, FadeInDown, ReduceMotion } from 'react-native-reanimated';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
@@ -23,6 +24,7 @@ import { formatAmount } from '~/utils/formatters';
 
 const NOOP = () => {};
 const MASKED_VALUE = '••••';
+const REVEAL_EASE = Easing.bezier(0.23, 1, 0.32, 1);
 
 interface GoalsScreenProps {
   /** Shared with the Accounts pane via the assets shell's eye toggle. */
@@ -175,13 +177,16 @@ export function GoalsScreen({ hideBalances, onOpenGoal, onOpenGoalEditor }: Goal
         showsVerticalScrollIndicator={false}
       >
         <View className="gap-2.5">
-          {active.map((goal) => (
-            <GoalCard
+          {active.map((goal, index) => (
+            <Animated.View
               key={goal.account.id}
-              goal={goal}
-              hideBalances={hideBalances}
-              onPress={onOpenGoal}
-            />
+              entering={FadeInDown.delay(230 + Math.min(index, 5) * 55)
+                .duration(220)
+                .easing(REVEAL_EASE)
+                .reduceMotion(ReduceMotion.System)}
+            >
+              <GoalCard goal={goal} hideBalances={hideBalances} onPress={onOpenGoal} />
+            </Animated.View>
           ))}
         </View>
 

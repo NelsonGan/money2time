@@ -136,6 +136,8 @@ export const GoalCard = React.memo(function GoalCard({
               ratio={progress.ratio}
               color={achieved ? themeColors.success : themeColors.primary}
               style={{ borderRadius: 8 }}
+              revealOnMount
+              revealDelayMs={290}
             />
           </View>
         </View>
