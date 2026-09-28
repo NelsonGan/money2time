@@ -14,6 +14,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Button, CategoryEmoji, SettingsHeader, Text } from '~/components/ui';
 import { AnimatedProgressFill } from '~/components/ui/AnimatedProgressFill';
+import { ValuePulse } from '~/components/ui/ValuePulse';
 import { useApp, useTransactions } from '~/context/AppContext';
 import {
   type DepositSource,
@@ -413,30 +414,34 @@ export function GoalDetailScreen({
           {/* The percentage reads as a badge on the end of the amount rather
               than a second number pushed to the far edge: the two say one
               thing, so they belong on the same line in reading order. */}
-          <View className="flex-row flex-wrap items-center gap-x-2 gap-y-1">
-            <Text variant="headingSm">
-              {I18n.t('goals.saved_of_target', {
-                saved: format(progress.saved),
-                target: format(progress.target),
-              })}
-            </Text>
-            <View
-              className={
-                achieved
-                  ? 'rounded-full bg-success/15 px-2 py-0.5'
-                  : 'rounded-full bg-primary/15 px-2 py-0.5'
-              }
-            >
-              <Text variant="caption" className={achieved ? 'text-success' : 'text-primary'}>
-                {Math.round(progress.ratio * 100)}%
+          <ValuePulse valueKey={progress.saved} delayMs={260}>
+            <View className="flex-row flex-wrap items-center gap-x-2 gap-y-1">
+              <Text variant="headingSm">
+                {I18n.t('goals.saved_of_target', {
+                  saved: format(progress.saved),
+                  target: format(progress.target),
+                })}
               </Text>
+              <View
+                className={
+                  achieved
+                    ? 'rounded-full bg-success/15 px-2 py-0.5'
+                    : 'rounded-full bg-primary/15 px-2 py-0.5'
+                }
+              >
+                <Text variant="caption" className={achieved ? 'text-success' : 'text-primary'}>
+                  {Math.round(progress.ratio * 100)}%
+                </Text>
+              </View>
             </View>
-          </View>
+          </ValuePulse>
           <View className="mt-3 h-3 overflow-hidden rounded-full bg-secondary/60">
             <AnimatedProgressFill
               ratio={fillRatio}
               color={ringColor}
               style={{ borderRadius: 12 }}
+              revealOnMount
+              changeDelayMs={260}
             />
           </View>
           {paceLine ? (

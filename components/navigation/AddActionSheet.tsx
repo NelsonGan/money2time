@@ -2,7 +2,7 @@ import { Check, ChevronDown, ChevronLeft, Settings2 } from 'lucide-react-native'
 import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import PagerView, { type PagerViewOnPageSelectedEvent } from 'react-native-pager-view';
-import Animated, { cubicBezier, useReducedMotion } from 'react-native-reanimated';
+import Animated, { cubicBezier, FadeIn, useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
@@ -402,9 +402,10 @@ export function AddActionSheet({
       <View className="px-4 pt-3" style={{ rowGap: 10 }}>
         {rows.map((pair, ri) => (
           <View key={ri} className="flex-row" style={{ columnGap: 10 }}>
-            {pair.map((action) => (
+            {pair.map((action, ci) => (
               <GridTile
                 key={action.key}
+                revealIndex={ri * 2 + ci}
                 icon={action.icon}
                 title={action.title}
                 subtitle={action.subtitle}
@@ -675,6 +676,7 @@ function CameraUnavailable({ onDismiss }: { onDismiss: () => void }) {
 }
 
 interface GridTileProps {
+  revealIndex: number;
   icon: React.ReactNode;
   title: string;
   subtitle: string;
@@ -682,15 +684,17 @@ interface GridTileProps {
   onPress: () => void;
 }
 
-function GridTile({ icon, title, subtitle, selected, onPress }: GridTileProps) {
+function GridTile({ revealIndex, icon, title, subtitle, selected, onPress }: GridTileProps) {
   const themeColors = useThemeColors();
   const isFlat = useIsFlatIcons();
   const reducedMotion = useReducedMotion();
   const [pressed, setPressed] = useState(false);
   return (
     <Animated.View
-      className="flex-1"
+      entering={reducedMotion ? undefined : FadeIn.delay(60 + revealIndex * 55).duration(220)}
       style={{
+        flex: 1,
+        height: 124,
         transform: [{ scale: pressed && !reducedMotion ? 0.97 : 1 }],
         transitionProperty: 'transform',
         transitionDuration: reducedMotion ? '0ms' : '120ms',

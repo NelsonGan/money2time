@@ -1,16 +1,15 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
-  Easing,
   useAnimatedProps,
   useReducedMotion,
   useSharedValue,
+  withDelay,
   withTiming,
 } from 'react-native-reanimated';
 import Svg, { Circle } from 'react-native-svg';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
-const EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
 
 /**
  * Circular gauge for the savings-rate hero card. Draws a soft track, a
@@ -21,6 +20,7 @@ export function SavingsRateRing({
   size,
   strokeWidth,
   progress,
+  revealDelayMs = 60,
   color,
   trackColor,
   goal,
@@ -31,6 +31,7 @@ export function SavingsRateRing({
   strokeWidth: number;
   /** Arc fill, clamped to 0–1. */
   progress: number;
+  revealDelayMs?: number;
   color: string;
   trackColor: string;
   /** Goal marker position on the ring, 0–1. Omit to hide the marker. */
@@ -44,13 +45,16 @@ export function SavingsRateRing({
   const clamped = Math.max(0, Math.min(1, progress));
   const reducedMotion = useReducedMotion();
   const animatedProgress = useSharedValue(reducedMotion ? clamped : 0);
+  const firstUpdate = useRef(true);
   const goalAngle = goal === undefined ? null : -Math.PI / 2 + goal * 2 * Math.PI;
 
   useEffect(() => {
+    const delay = firstUpdate.current ? revealDelayMs : 0;
+    firstUpdate.current = false;
     animatedProgress.set(
-      reducedMotion ? clamped : withTiming(clamped, { duration: 240, easing: EASE_OUT }),
+      reducedMotion ? clamped : withDelay(delay, withTiming(clamped, { duration: 280 })),
     );
-  }, [animatedProgress, clamped, reducedMotion]);
+  }, [animatedProgress, clamped, reducedMotion, revealDelayMs]);
 
   const arcProps = useAnimatedProps(() => ({
     strokeDashoffset: circumference * (1 - animatedProgress.get()),
