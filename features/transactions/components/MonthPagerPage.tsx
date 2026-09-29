@@ -51,6 +51,9 @@ interface MonthPagerPageProps {
 }
 
 const EMPTY_TRANSACTIONS: TransactionWithRelations[] = [];
+// One shared empty selection. An inline `= []` default made a new array each
+// render, so every page's memoized list re-rendered whenever the pager did.
+const NO_SELECTED_IDS: string[] = [];
 
 export const MonthPagerPage = memo(function MonthPagerPage({
   item,
@@ -67,7 +70,7 @@ export const MonthPagerPage = memo(function MonthPagerPage({
   onTransactionPress,
   onTransactionLongPress,
   onTransactionSplitBadgePress,
-  selectedTransactionIds = [],
+  selectedTransactionIds = NO_SELECTED_IDS,
   selectionMode = false,
   reorderActive = true,
   onToggleDaySelection,

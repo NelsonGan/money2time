@@ -16,7 +16,11 @@ import { normalizeMoneyAmount } from '~/utils/formatters';
 import { newId, nowIso } from '~/utils/id';
 import { sortTransactions } from '~/utils/transactionSorting';
 
-import { toTransaction } from './mappers';
+import {
+  toTransaction,
+  toTransactionWithRelationsFromRaw,
+  TRANSACTION_RAW_COLUMNS_SQL,
+} from './mappers';
 import { transactionSplitsRepository } from './transactionSplitsRepository';
 
 type RelationRow = {
@@ -153,6 +157,48 @@ function attachSplits(transactions: TransactionWithRelations[]): void {
   }
 }
 
+// The relation names every loaded transaction carries, joined in by both the
+// full load and attachRelations' lookup so the two can never disagree.
+const RELATION_JOINS_SQL = `
+    LEFT JOIN accounts a ON a.id = t.account_id AND a.deleted_at IS NULL
+    LEFT JOIN accounts fa ON fa.id = t.from_account_id AND fa.deleted_at IS NULL
+    LEFT JOIN accounts ta ON ta.id = t.to_account_id AND ta.deleted_at IS NULL
+    LEFT JOIN categories c ON c.id = t.category_id
+    LEFT JOIN categories p ON p.id = c.parent_id`;
+
+const CATEGORY_ICON_SQL = `COALESCE(NULLIF(TRIM(c.icon), ''), NULLIF(TRIM(p.icon), ''))`;
+
+/**
+ * Every live transaction with its relation names, read in one query as raw
+ * value arrays and turned into objects in a single pass. This is the launch
+ * load, so it is kept lean: the Drizzle select, `toTransaction` and the second
+ * relations query it replaces built three objects per row and read the table
+ * twice, which on a five-year history took the best part of a second on
+ * Android. Ordered newest first, which leaves `sortTransactions` little or
+ * nothing to do.
+ */
+function loadAllWithRelations(): TransactionWithRelations[] {
+  const statement = getSQLite().prepareSync(`
+    SELECT ${TRANSACTION_RAW_COLUMNS_SQL},
+      a.name, fa.name, ta.name, c.name, ${CATEGORY_ICON_SQL}, c.parent_id, p.name
+    FROM transactions t ${RELATION_JOINS_SQL}
+    WHERE t.deleted_at IS NULL
+    ORDER BY t.date DESC, t.created_at DESC, t.id DESC
+  `);
+  try {
+    const rows = statement
+      .executeForRawResultSync<Record<string, string | number | null>>([])
+      .getAllSync();
+    const transactions = new Array<TransactionWithRelations>(rows.length);
+    for (let index = 0; index < rows.length; index += 1) {
+      transactions[index] = toTransactionWithRelationsFromRaw(rows[index] ?? []);
+    }
+    return transactions;
+  } finally {
+    statement.finalizeSync();
+  }
+}
+
 function attachRelations(transactions: Transaction[]): TransactionWithRelations[] {
   if (transactions.length === 0) return [];
 
@@ -195,15 +241,10 @@ function attachRelations(transactions: Transaction[]): TransactionWithRelations[
       ta.name as toAccountName,
       t.category_id as categoryId,
       c.name as categoryName,
-      COALESCE(NULLIF(TRIM(c.icon), ''), NULLIF(TRIM(p.icon), '')) as categoryIcon,
+      ${CATEGORY_ICON_SQL} as categoryIcon,
       c.parent_id as categoryParentId,
       p.name as parentCategoryName
-    FROM transactions t
-    LEFT JOIN accounts a ON a.id = t.account_id AND a.deleted_at IS NULL
-    LEFT JOIN accounts fa ON fa.id = t.from_account_id AND fa.deleted_at IS NULL
-    LEFT JOIN accounts ta ON ta.id = t.to_account_id AND ta.deleted_at IS NULL
-    LEFT JOIN categories c ON c.id = t.category_id
-    LEFT JOIN categories p ON p.id = c.parent_id
+    FROM transactions t ${RELATION_JOINS_SQL}
     WHERE ${relationFilterSql}
   `,
     scanAllNonDeleted ? [] : txIds,
@@ -306,6 +347,31 @@ function buildSqlPredicates(normalized: TransactionFilters, options?: Transactio
   return predicates;
 }
 
+/** Whether any filter narrows the SQL query itself (see `buildSqlPredicates`). */
+function hasSqlFilters(filters: TransactionFilters): boolean {
+  return (
+    filters.type !== 'all' ||
+    filters.dateRange !== null ||
+    filters.accountId !== null ||
+    filters.minAmount !== null ||
+    filters.maxAmount !== null ||
+    filters.search.trim().length > 0
+  );
+}
+
+/** Whether `list`'s per-row filter pass could drop anything. */
+function hasRowFilters(filters: TransactionFilters): boolean {
+  return (
+    filters.type !== 'all' ||
+    filters.excludedAccountIds.length > 0 ||
+    filters.excludedIncomeCategoryIds.length > 0 ||
+    filters.excludedExpenseCategoryIds.length > 0 ||
+    filters.incomeCategoryId !== null ||
+    filters.expenseCategoryId !== null ||
+    filters.categoryId !== null
+  );
+}
+
 class TransactionsRepository {
   // Plain rows matching the SQL-level filters only — no relation JOINs and no
   // splits lookup. Used by aggregations (cashflow, category breakdowns) which
@@ -326,17 +392,22 @@ class TransactionsRepository {
   }
 
   list(filters: Partial<TransactionFilters> = {}): TransactionWithRelations[] {
-    const db = getDb();
     const normalized = normalizeTransactionFilters(filters);
 
-    const rows = db
-      .select()
-      .from(transactionsTable)
-      .where(and(...buildSqlPredicates(normalized)))
-      .all()
-      .map(toTransaction);
-    const transactions = attachRelations(rows);
+    const transactions = hasSqlFilters(normalized)
+      ? attachRelations(
+          getDb()
+            .select()
+            .from(transactionsTable)
+            .where(and(...buildSqlPredicates(normalized)))
+            .all()
+            .map(toTransaction),
+        )
+      : loadAllWithRelations();
     attachSplits(transactions);
+    if (!hasRowFilters(normalized)) {
+      return sortTransactions(transactions, normalized.sortBy);
+    }
     const excludedAccountIdSet = new Set(normalized.excludedAccountIds);
     const excludedIncomeCategoryIdSet = new Set(normalized.excludedIncomeCategoryIds);
     const excludedExpenseCategoryIdSet = new Set(normalized.excludedExpenseCategoryIds);
@@ -518,9 +589,13 @@ class TransactionsRepository {
     return id;
   }
 
-  createWithId(id: string, input: CreateTransactionInput) {
+  /**
+   * `now` stamps createdAt/updatedAt. A caller that already rendered the row
+   * optimistically passes the stamp it used, so the stored row matches it and
+   * the reconcile after the write has nothing to change.
+   */
+  createWithId(id: string, input: CreateTransactionInput, now: string = nowIso()) {
     const db = getDb();
-    const now = nowIso();
     const normalizedInput = normalizeTransactionInput(input);
 
     db.insert(transactionsTable)

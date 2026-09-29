@@ -6,12 +6,13 @@
  * returns straight away and nothing is recorded or logged. A trace build
  * writes one `[m2t-perf] {json}` line per event to the native log (os_log on
  * iOS, the ReactNativeJS logcat tag on Android), which
- * `scripts/perf/measure.mjs` collects from a simulator or emulator.
+ * `scripts/perf/measure-startup.mjs` collects from a simulator or emulator.
  *
  * Two kinds of event:
  * - `startup`: wall-clock (`Date.now()`) marks from bundle start to the splash
  *   lifting, logged once, followed by a `post_launch` frame report covering the
- *   seconds after the first paint, when the other tabs mount.
+ *   seconds after the first paint, when the other tabs mount, and a
+ *   `post_launch_marks` line saying what ran during them.
  * - `interaction`: a frame report for the couple of seconds after a tap (the +
  *   button, a save). A gap between two animation frames is time the JS thread
  *   could not run anything, so the longest gap and the summed overrun are how
@@ -47,11 +48,19 @@ interface FrameReport {
   longFrames: number;
   frames: number;
   settledAtMs: number;
+  /** Wall-clock start of the window, the clock the marks use. */
+  windowStartedAt: number;
+  /** The longest gaps, as [ms into the window when the gap began, gap ms]. */
+  gaps: [number, number][];
 }
 
+const MAX_REPORTED_GAPS = 12;
+
 function monitorFrames(windowMs: number, onDone: (report: FrameReport) => void) {
+  const windowStartedAt = Date.now();
   const start = performance.now();
   let last = start;
+  const gaps: [number, number][] = [];
   let firstFrameMs = -1;
   let maxGapMs = 0;
   let jankMs = 0;
@@ -69,6 +78,7 @@ function monitorFrames(windowMs: number, onDone: (report: FrameReport) => void) 
     if (gap > LONG_FRAME_MS) {
       longFrames += 1;
       settledAtMs = now - start;
+      gaps.push([Math.round(now - gap - start), Math.round(gap)]);
     }
     if (now - start < windowMs) {
       requestAnimationFrame(tick);
@@ -82,6 +92,8 @@ function monitorFrames(windowMs: number, onDone: (report: FrameReport) => void) 
       longFrames,
       frames,
       settledAtMs: round(settledAtMs),
+      windowStartedAt,
+      gaps: gaps.sort((a, b) => b[1] - a[1]).slice(0, MAX_REPORTED_GAPS),
     });
   };
   requestAnimationFrame(tick);
@@ -105,8 +117,18 @@ export function perfStartupDone(extra: Record<string, unknown> = {}) {
     marks: { ...marks },
     ...extra,
   });
+  const splashHiddenAt = marks.splash_hide ?? Date.now();
   monitorFrames(POST_LAUNCH_WINDOW_MS, (report) => {
     log({ kind: 'post_launch', windowMs: POST_LAUNCH_WINDOW_MS, ...report });
+    // The marks recorded after the splash lifted (tab preloads, the widget
+    // snapshot, the daily backup) say what the jank in that window was. They
+    // get a line of their own, in ms since the splash lifted: iOS truncates a
+    // long log message, which would cut the frame report off too.
+    const later: Record<string, number> = {};
+    for (const [name, at] of Object.entries(marks)) {
+      if (at > splashHiddenAt) later[name] = at - splashHiddenAt;
+    }
+    log({ kind: 'post_launch_marks', marks: later });
   });
 }
 

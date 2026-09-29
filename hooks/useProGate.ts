@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 
 import { PRO_LIMITS } from '~/constants/proLimits';
-import { usePro } from '~/context/ProContext';
+import { useIsPro } from '~/context/ProContext';
 import { I18n } from '~/lib/i18n';
 import { requestOpenPaywall } from '~/services/paywallNavigation';
 
@@ -56,7 +56,7 @@ type ProOnlyFeature =
  * `Pro Paywall Viewed` with the gate as its `source`, which is the same fact.
  */
 export function useProGate() {
-  const { isPro } = usePro();
+  const isPro = useIsPro();
 
   /**
    * Hard Pro gate. Opens the paywall and returns false for a free user, with no

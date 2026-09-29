@@ -18,7 +18,7 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'nativewind';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Appearance,
@@ -52,8 +52,13 @@ import {
   SubscriptionLogoPickerSheet,
 } from '~/components/ui';
 import { PRO_LIMITS } from '~/constants/proLimits';
-import { AppProvider, useApp, useTransactions } from '~/context/AppContext';
-import { ProProvider, usePro } from '~/context/ProContext';
+import {
+  AppProvider,
+  TransactionsWhileVisible,
+  useApp,
+  useTransactions,
+} from '~/context/AppContext';
+import { ProProvider, useIsPro } from '~/context/ProContext';
 import {
   ReceiptScanProvider,
   type ScanOutcome,
@@ -231,6 +236,7 @@ import type { AddButtonAction, CategoryType, TransactionWithRelations, WageConfi
 import { financialMonthKeyForDate, monthCycleOf } from '~/utils/financialMonth';
 import { dayKeyFromIsoLocal, monthKeyFromIsoLocal } from '~/utils/formatters';
 import { perfInteraction, perfMark, perfStartupDone } from '~/utils/perfTrace';
+import { markSplashHidden, whenSplashHidden } from '~/utils/splashState';
 Sentry.init({
   // Read from Expo public env (EXPO_PUBLIC_* is inlined at build time). Left
   // undefined when unset, which disables Sentry rather than crashing.
@@ -249,6 +255,15 @@ Sentry.init({
 });
 
 type MainTab = TabName;
+
+// Hidden tabs mounted ahead of their first visit, in this order, starting a
+// beat after the splash lifts and spaced out after that (see MainShellScreen).
+const TAB_PRELOAD_ORDER: MainTab[] = ['settings', 'insights', 'accounts', 'albums'];
+const TAB_PRELOAD_START_DELAY_MS = 800;
+const TAB_PRELOAD_GAP_MS = 300;
+// The quick-add warm-up goes first, before the tab preloads start (and after
+// the calendar has filled in the months either side of the one on screen).
+const QUICK_ADD_WARMUP_DELAY_MS = 400;
 type ActivityInsightType =
   | 'expense_breakdown'
   | 'income_breakdown'
@@ -310,10 +325,12 @@ const styles = StyleSheet.create({
 });
 
 function MountedTab({
+  name,
   active,
   shouldPreload = false,
   children,
 }: {
+  name: MainTab;
   active: boolean;
   shouldPreload?: boolean;
   children: React.ReactNode;
@@ -328,6 +345,9 @@ function MountedTab({
   const hasBeenActiveRef = useRef(active);
   if (active) hasBeenActiveRef.current = true;
   const shouldMount = hasBeenActiveRef.current || shouldPreload;
+  useEffect(() => {
+    if (shouldMount) perfMark(`tab_${name}_mounted`);
+  }, [name, shouldMount]);
 
   return (
     <View
@@ -335,7 +355,9 @@ function MountedTab({
       style={[styles.tabSlot, active ? styles.tabVisible : styles.tabHidden]}
     >
       {shouldMount ? (
-        <TabVisibilityProvider visible={active}>{children}</TabVisibilityProvider>
+        <TabVisibilityProvider visible={active}>
+          <TransactionsWhileVisible visible={active}>{children}</TransactionsWhileVisible>
+        </TabVisibilityProvider>
       ) : null}
     </View>
   );
@@ -507,58 +529,85 @@ function MainShellScreen({
     return false;
   }, [accounts, isPro, navigation]);
 
+  // The other tabs mount hidden ahead of their first visit so switching to
+  // one is instant. Mounting one is a large render (Insights and Settings walk
+  // every transaction), so none of it starts until the splash has lifted onto
+  // the first screen, the tabs go one at a time with a gap between them, and
+  // each renders as a transition: React works through it in slices and yields
+  // to touches and frames in between, instead of freezing the screen the user
+  // has just been shown.
+  const [tabPreloadStarted, setTabPreloadStarted] = useState(false);
   useEffect(() => {
-    const order: MainTab[] = ['settings', 'insights', 'accounts', 'albums'];
-    let cancelled = false;
-    let pendingTimeout: ReturnType<typeof setTimeout> | null = null;
-    let pendingInteraction: ReturnType<typeof InteractionManager.runAfterInteractions> | null =
-      null;
-
-    const preloadAt = (index: number) => {
-      if (cancelled || index >= order.length) return;
-      pendingInteraction = InteractionManager.runAfterInteractions(() => {
-        if (cancelled) return;
-        const tab = order[index];
-        setPreloadedTabs((prev) => {
-          if (prev.has(tab)) return prev;
-          const next = new Set(prev);
-          next.add(tab);
-          return next;
-        });
-        pendingTimeout = setTimeout(() => preloadAt(index + 1), 120);
-      });
-    };
-
-    pendingTimeout = setTimeout(() => preloadAt(0), 250);
-
+    let startTimer: ReturnType<typeof setTimeout> | null = null;
+    const stopWaiting = whenSplashHidden(() => {
+      startTimer = setTimeout(() => setTabPreloadStarted(true), TAB_PRELOAD_START_DELAY_MS);
+    });
     return () => {
-      cancelled = true;
-      if (pendingTimeout) clearTimeout(pendingTimeout);
-      if (pendingInteraction) pendingInteraction.cancel();
+      stopWaiting();
+      if (startTimer) clearTimeout(startTimer);
     };
   }, []);
 
   useEffect(() => {
-    // Warm up the quick-add sheet off-screen once the app is idle (after the
-    // tabs have pre-loaded). This evaluates its lazy module graph and registers
-    // the cold TextInput/keyboard-controller view classes so the first FAB tap
-    // is as smooth as later ones. Unmount after a beat — the registrations stay
-    // warm for the session.
+    if (!tabPreloadStarted) return undefined;
+    const tab = TAB_PRELOAD_ORDER.find((candidate) => !preloadedTabs.has(candidate));
+    if (!tab) return undefined;
     let cancelled = false;
+    let interaction: ReturnType<typeof InteractionManager.runAfterInteractions> | null = null;
+    // Runs again once the previous tab has committed, so the gap is measured
+    // from the end of one mount to the start of the next.
+    const timer = setTimeout(
+      () => {
+        interaction = InteractionManager.runAfterInteractions(() => {
+          if (cancelled) return;
+          perfMark(`tab_${tab}_preload`);
+          startTransition(() => {
+            setPreloadedTabs((prev) => {
+              if (prev.has(tab)) return prev;
+              const next = new Set(prev);
+              next.add(tab);
+              return next;
+            });
+          });
+        });
+      },
+      preloadedTabs.size === 0 ? 0 : TAB_PRELOAD_GAP_MS,
+    );
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+      interaction?.cancel();
+    };
+  }, [preloadedTabs, tabPreloadStarted]);
+
+  useEffect(() => {
+    // Warm up the quick-add sheet off-screen shortly after the splash lifts,
+    // ahead of the tab preloads: adding an entry is the most likely first thing
+    // anyone does. This evaluates its lazy module graph and registers the cold
+    // TextInput/keyboard-controller view classes so the first FAB tap is as
+    // smooth as later ones. Unmount after a beat — the registrations stay warm
+    // for the session.
+    let cancelled = false;
+    let mountTimer: ReturnType<typeof setTimeout> | null = null;
     let unmountTimer: ReturnType<typeof setTimeout> | null = null;
     let interaction: ReturnType<typeof InteractionManager.runAfterInteractions> | null = null;
 
-    const mountTimer = setTimeout(() => {
-      interaction = InteractionManager.runAfterInteractions(() => {
-        if (cancelled) return;
-        setWarmupQuickAdd(true);
-        unmountTimer = setTimeout(() => setWarmupQuickAdd(false), 3000);
-      });
-    }, 1200);
+    const stopWaiting = whenSplashHidden(() => {
+      mountTimer = setTimeout(() => {
+        interaction = InteractionManager.runAfterInteractions(() => {
+          if (cancelled) return;
+          perfMark('quick_add_warmup');
+          // A transition for the same reason as the tab preloads above.
+          startTransition(() => setWarmupQuickAdd(true));
+          unmountTimer = setTimeout(() => setWarmupQuickAdd(false), 3000);
+        });
+      }, QUICK_ADD_WARMUP_DELAY_MS);
+    });
 
     return () => {
       cancelled = true;
-      clearTimeout(mountTimer);
+      stopWaiting();
+      if (mountTimer) clearTimeout(mountTimer);
       if (unmountTimer) clearTimeout(unmountTimer);
       if (interaction) interaction.cancel();
     };
@@ -1041,7 +1090,11 @@ function MainShellScreen({
   return (
     <View className="flex-1 bg-background">
       <View style={styles.flex}>
-        <MountedTab active={activeTab === 'accounts'} shouldPreload={preloadedTabs.has('accounts')}>
+        <MountedTab
+          name="accounts"
+          active={activeTab === 'accounts'}
+          shouldPreload={preloadedTabs.has('accounts')}
+        >
           <MemoAssetsTab
             resetToAccountsToken={accountsResetToken}
             onAddItem={openItemEditorFromAssets}
@@ -1053,7 +1106,7 @@ function MainShellScreen({
             renderItems={renderAssetsItems}
           />
         </MountedTab>
-        <MountedTab active={activeTab === 'calendar'}>
+        <MountedTab name="calendar" active={activeTab === 'calendar'}>
           <MemoCalendarScreen
             resetToCurrentMonthToken={calendarResetToken}
             goToDayRequest={calendarGoToDayRequest}
@@ -1063,7 +1116,11 @@ function MainShellScreen({
             onShowTodayButtonChange={setShowCalendarTodayButton}
           />
         </MountedTab>
-        <MountedTab active={activeTab === 'insights'} shouldPreload={preloadedTabs.has('insights')}>
+        <MountedTab
+          name="insights"
+          active={activeTab === 'insights'}
+          shouldPreload={preloadedTabs.has('insights')}
+        >
           <MemoInsightsScreen
             resetToCurrentMonthToken={insightsResetToMonthToken}
             onOpenDrilldown={openInsightsDrilldown}
@@ -1076,14 +1133,22 @@ function MainShellScreen({
             activityBreakdownInsightRequest={activityBreakdownInsightRequest}
           />
         </MountedTab>
-        <MountedTab active={activeTab === 'albums'} shouldPreload={preloadedTabs.has('albums')}>
+        <MountedTab
+          name="albums"
+          active={activeTab === 'albums'}
+          shouldPreload={preloadedTabs.has('albums')}
+        >
           <MemoAlbumsScreen
             scrollToTopToken={albumsScrollTopToken}
             onOpenCreateAlbum={openCreateAlbum}
             onOpenAlbumDetail={openAlbumDetail}
           />
         </MountedTab>
-        <MountedTab active={activeTab === 'settings'} shouldPreload={preloadedTabs.has('settings')}>
+        <MountedTab
+          name="settings"
+          active={activeTab === 'settings'}
+          shouldPreload={preloadedTabs.has('settings')}
+        >
           <MemoSettingsStack
             resetToRootToken={settingsResetToken}
             scrollToTopToken={settingsScrollTopToken}
@@ -1222,7 +1287,7 @@ function WidgetSnapshotSync() {
     getTrueHourlyRateForDate,
   } = useApp();
   const { transactions } = useTransactions();
-  const { isPro } = usePro();
+  const isPro = useIsPro();
 
   useEffect(() => {
     // Building the snapshot walks every transaction. During cold-start hydration
@@ -1231,9 +1296,13 @@ function WidgetSnapshotSync() {
     // startup. Defer past interactions and let each dep change cancel the pending
     // run, so the rapid startup churn coalesces into a single build that lands
     // off the render-blocking path — the widget data isn't needed to paint.
+    // It also waits for the launch splash to lift, as the first screen needs
+    // the JS thread more than the home-screen widgets need fresh data.
     let cancelled = false;
-    const handle = InteractionManager.runAfterInteractions(() => {
+    let handle: ReturnType<typeof InteractionManager.runAfterInteractions> | null = null;
+    const buildSnapshot = () => {
       if (cancelled) return;
+      perfMark('widget_snapshot_start');
       const savingsExclusions = parseSavingsExclusions(insightsPreferencesJson);
       const snapshot = buildMoney2TimeWidgetSnapshot({
         transactions,
@@ -1245,11 +1314,16 @@ function WidgetSnapshotSync() {
         excludedSavingsIncomeCategoryIds: savingsExclusions.income,
         excludedSavingsExpenseCategoryIds: savingsExclusions.expense,
       });
+      perfMark('widget_snapshot_built');
       void writeMoney2TimeWidgetSnapshot(snapshot).then(() => reloadMoney2TimeWidgets());
+    };
+    const stopWaiting = whenSplashHidden(() => {
+      handle = InteractionManager.runAfterInteractions(buildSnapshot);
     });
     return () => {
       cancelled = true;
-      handle.cancel();
+      stopWaiting();
+      handle?.cancel();
     };
   }, [
     categories,
@@ -1278,7 +1352,7 @@ function AutoLogSync() {
     createTransaction,
     updateQuickEntryPrefs,
   } = useApp();
-  const { isPro } = usePro();
+  const isPro = useIsPro();
 
   // Read on every render rather than inside the effect so it is a real
   // dependency: switching app language changes the string, which republishes
@@ -2508,6 +2582,7 @@ function AppContent() {
       requestAnimationFrame(() => {
         perfStartupDone({ txCount: getTransactionCount(), platform: Platform.OS });
         void SplashScreen.hideAsync();
+        markSplashHidden();
       });
     });
   }, [getTransactionCount]);

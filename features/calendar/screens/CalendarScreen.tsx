@@ -20,8 +20,8 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { DatePickerModal } from '~/components/datePicker';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
-import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { useBottomNavMinimize } from '~/components/navigation/BottomNavMinimize';
+import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { IN_OUT_VALUE_TEXT_PROPS, InOutHeader } from '~/components/navigation/InOutHeader';
 import {
   AccountPickerSheet,
@@ -80,6 +80,8 @@ import {
   formatMonthYearLabel,
 } from '~/utils/formatters';
 import { countsAsExpenseRow } from '~/utils/spending';
+import { whenSplashHidden } from '~/utils/splashState';
+import { reuseUnchangedGroups } from '~/utils/transactions';
 import { compareTransactionsByDateDesc } from '~/utils/transactionSorting';
 
 import { CalendarMonthGrid } from '../components/CalendarMonthGrid';
@@ -88,7 +90,7 @@ import {
   CENTER_YEAR_INDEX,
   TOTAL_YEAR_SLOTS,
 } from '../components/CalendarYearView';
-import type { CalendarDayAggregate } from '../lib/calendarBuild';
+import type { CalendarDayAggregate, CalendarMonthData } from '../lib/calendarBuild';
 import {
   buildCalendarMonthFromGrouped,
   getCalendarWeekdayLabels,
@@ -123,6 +125,8 @@ const DAY_SCROLL_TARGET_TTL_MS = 4000;
 // its deferred submit at SUBMIT_MAX_DELAY_MS = 400ms, the context write at
 // DEFERRED_WRITE_MAX_DELAY_MS = 300ms) so a normal create is never given up on.
 const CREATED_ROW_WAIT_MS = 1500;
+
+const EMPTY_MONTH_ROWS: TransactionWithRelations[] = [];
 
 const FILTER_MODAL_CONTENT_STYLE = {
   padding: spacing.screenHorizontal,
@@ -256,6 +260,17 @@ export function CalendarScreen({
   useEffect(() => {
     if (viewMode !== 'day') setYearLayerMounted(true);
   }, [viewMode]);
+  // The month pagers render only the month on screen until they are needed,
+  // then fill in a neighbour either side: the list pager once the launch
+  // splash has lifted, and the grid pager, which sits hidden behind the list,
+  // once month view is first shown (the moment the year layer mounts too).
+  // Rendering those pages (a month of rows or a month grid each) in the first
+  // frames held the splash up, and rendering them all at once just after it
+  // froze the screen the user had just seen.
+  const [listNeighboursReady, setListNeighboursReady] = useState(false);
+  useEffect(() => whenSplashHidden(() => setListNeighboursReady(true)), []);
+  const listPagerWindowSize = listNeighboursReady ? MONTH_PAGER_LIST_CONFIG.windowSize : 1;
+  const gridPagerWindowSize = yearLayerMounted ? MONTH_PAGER_LIST_CONFIG.windowSize : 1;
   // The focused day — used by the year view, the grid→list scroll target, and
   // "today". The list view itself is paged by month (see the list month pager).
   const [selectedDayKey, setSelectedDayKey] = useState<string>(todayDayKey);
@@ -639,6 +654,10 @@ export function CalendarScreen({
   // Pre-group transactions by month key (single pass)
   // Built from the (non-search) filtered set so the calendar grids/day pages
   // stay stable while searching — the search overlay covers them anyway.
+  // Months whose rows did not change keep their previous array, so saving one
+  // transaction re-renders its own month page and grid rather than every page
+  // the pagers have mounted.
+  const previousMonthGroupsRef = useRef<Map<string, TransactionWithRelations[]> | null>(null);
   const transactionsByMonthKey = useMemo(() => {
     const map = new Map<string, TransactionWithRelations[]>();
     for (const tx of filteredTransactions) {
@@ -650,12 +669,17 @@ export function CalendarScreen({
       }
       arr.push(tx);
     }
-    return map;
+    const stable = reuseUnchangedGroups(previousMonthGroupsRef.current, map);
+    previousMonthGroupsRef.current = stable;
+    return stable;
   }, [filteredTransactions, monthCycle]);
 
-  // Totals only — the week strip never needs the transaction arrays.
+  // Totals only — the week strip never needs the transaction arrays. Only the
+  // year view reads these, and it mounts on the first zoom out, so skip the
+  // pass over every transaction until then.
   const globalDailyByDayKey = useMemo(() => {
     const map = new Map<string, CalendarDayAggregate>();
+    if (!yearLayerMounted) return map;
     for (const tx of filteredTransactions) {
       const dayKey = dayKeyFromIsoLocal(tx.date);
       let agg = map.get(dayKey);
@@ -686,6 +710,7 @@ export function CalendarScreen({
     });
     return map;
   }, [
+    yearLayerMounted,
     filteredTransactions,
     isTimeMode,
     getDisplayValueForTransaction,
@@ -710,24 +735,21 @@ export function CalendarScreen({
   const displayedMonthLabel = viewMode === 'day' ? activeListMonthLabel : activeMonthLabel;
 
   // Build month data (header summary + month grid). `activeMonthData` is the
-  // grid month; `activeListMonthData` feeds the list-view summary.
-  const buildMonthData = useCallback(
-    (anchor: Date) => {
-      const mk = financialMonthKeyForDate(anchor, monthCycle);
-      return buildCalendarMonthFromGrouped({
-        monthAnchor: anchor,
-        transactions: transactionsByMonthKey.get(mk) ?? [],
-        locale: activeLocale,
-        isTimeMode,
-        getDisplayValueForTransaction,
-        todayDayKey,
-        weekStartsOn: settings.weekStartsOn,
-        monthCycle,
-        reimbursementsCountAsExpense: settings.reimbursementsCountAsExpense,
-      });
-    },
+  // grid month; `activeListMonthData` feeds the list-view summary. Each month's
+  // data is kept while its rows and the inputs below are unchanged, so the grid
+  // pages of months a save did not touch get the same object back and their
+  // memoized grids skip the re-render.
+  const monthDataInputs = useMemo(
+    () => ({
+      locale: activeLocale,
+      isTimeMode,
+      getDisplayValueForTransaction,
+      todayDayKey,
+      weekStartsOn: settings.weekStartsOn,
+      monthCycle,
+      reimbursementsCountAsExpense: settings.reimbursementsCountAsExpense,
+    }),
     [
-      transactionsByMonthKey,
       activeLocale,
       isTimeMode,
       getDisplayValueForTransaction,
@@ -736,6 +758,41 @@ export function CalendarScreen({
       monthCycle,
       settings.reimbursementsCountAsExpense,
     ],
+  );
+  const monthDataCacheRef = useRef(
+    new Map<
+      string,
+      {
+        inputs: typeof monthDataInputs;
+        anchorTime: number;
+        rows: TransactionWithRelations[];
+        data: CalendarMonthData;
+      }
+    >(),
+  );
+  const buildMonthData = useCallback(
+    (anchor: Date) => {
+      const mk = financialMonthKeyForDate(anchor, monthDataInputs.monthCycle);
+      const rows = transactionsByMonthKey.get(mk) ?? EMPTY_MONTH_ROWS;
+      const anchorTime = anchor.getTime();
+      const cached = monthDataCacheRef.current.get(mk);
+      if (
+        cached &&
+        cached.inputs === monthDataInputs &&
+        cached.rows === rows &&
+        cached.anchorTime === anchorTime
+      ) {
+        return cached.data;
+      }
+      const data = buildCalendarMonthFromGrouped({
+        monthAnchor: anchor,
+        transactions: rows,
+        ...monthDataInputs,
+      });
+      monthDataCacheRef.current.set(mk, { inputs: monthDataInputs, anchorTime, rows, data });
+      return data;
+    },
+    [monthDataInputs, transactionsByMonthKey],
   );
 
   const activeMonthData = useMemo(
@@ -1337,7 +1394,6 @@ export function CalendarScreen({
     ({ item }: { item: number }) => {
       const offset = item - MONTH_PAGER_CENTER_INDEX;
       const pageMonth = addFinancialMonths(monthPagerAnchorDate, offset, monthCycle);
-      const mk = financialMonthKeyForDate(pageMonth, monthCycle);
       return (
         <View style={{ width: pageWidth }}>
           <View
@@ -1347,17 +1403,7 @@ export function CalendarScreen({
             ]}
           >
             <CalendarMonthGrid
-              monthData={buildCalendarMonthFromGrouped({
-                monthAnchor: pageMonth,
-                transactions: transactionsByMonthKey.get(mk) ?? [],
-                locale: activeLocale,
-                isTimeMode,
-                getDisplayValueForTransaction,
-                todayDayKey,
-                weekStartsOn: settings.weekStartsOn,
-                monthCycle,
-                reimbursementsCountAsExpense: settings.reimbursementsCountAsExpense,
-              })}
+              monthData={buildMonthData(pageMonth)}
               weekdayLabels={weekdayLabels}
               selectedDayKey={null}
               isTimeMode={isTimeMode}
@@ -1371,17 +1417,13 @@ export function CalendarScreen({
     },
     [
       activeLocale,
-      getDisplayValueForTransaction,
+      buildMonthData,
       gridChartWidth,
       handleSelectDayFromMonth,
       isTimeMode,
       monthPagerAnchorDate,
       pageWidth,
       monthCycle,
-      settings.reimbursementsCountAsExpense,
-      settings.weekStartsOn,
-      todayDayKey,
-      transactionsByMonthKey,
       weekdayLabels,
     ],
   );
@@ -1673,6 +1715,7 @@ export function CalendarScreen({
             data={listMonthPagerSlots}
             keyExtractor={listMonthPagerKeyExtractor}
             {...MONTH_PAGER_LIST_CONFIG}
+            windowSize={listPagerWindowSize}
             renderItem={renderListMonthPage}
             initialScrollIndex={MONTH_PAGER_CENTER_INDEX}
             getItemLayout={getListItemLayout}
@@ -1713,8 +1756,8 @@ export function CalendarScreen({
             onMomentumScrollEnd={handleMonthMomentumEnd}
             onScrollToIndexFailed={handleHorizontalScrollToIndexFailed}
             initialNumToRender={1}
-            maxToRenderPerBatch={2}
-            windowSize={3}
+            maxToRenderPerBatch={1}
+            windowSize={gridPagerWindowSize}
             removeClippedSubviews
             style={styles.flexOne}
           />

@@ -4,7 +4,7 @@ import { Alert, AppState, Linking, Pressable, StyleSheet } from 'react-native';
 
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { useApp, useTransactions } from '~/context/AppContext';
-import { usePro } from '~/context/ProContext';
+import { useIsPro } from '~/context/ProContext';
 import { I18n } from '~/lib/i18n';
 import { type CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import { triggerHaptic } from '~/services/haptics';
@@ -72,7 +72,7 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
     updateQuickEntryPrefs,
   } = useApp();
   const { transactions } = useTransactions();
-  const { isPro } = usePro();
+  const isPro = useIsPro();
 
   const [recording, setRecording] = useState(false);
   const [tapMode, setTapMode] = useState(false);

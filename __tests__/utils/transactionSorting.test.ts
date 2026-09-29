@@ -1,8 +1,10 @@
 import { NO_REIMBURSEMENT } from '~/features/reimbursements/lib/reimbursementMath';
 import type { TransactionWithRelations } from '~/types';
 import {
+  compareText,
   compareTransactionsByDateAsc,
   compareTransactionsByDateDesc,
+  insertTransactionsByDateDesc,
   sortTransactions,
 } from '~/utils/transactionSorting';
 
@@ -219,5 +221,90 @@ describe('sortTransactions', () => {
         'quick',
       ]);
     });
+  });
+});
+
+// A small deterministic generator, so a failure reproduces.
+function seededRandom(seed: number) {
+  let state = seed;
+  return () => {
+    state = (state * 1_103_515_245 + 12_345) % 2_147_483_648;
+    return state / 2_147_483_648;
+  };
+}
+
+function randomIso(random: () => number) {
+  // Spread over a few years, with deliberate collisions on the same instant.
+  const ms = Date.UTC(2022, 0, 1) + Math.floor(random() * 40) * 86_400_000 * 30;
+  const offset = Math.floor(random() * 4) * 3_600_000;
+  return new Date(ms + offset).toISOString();
+}
+
+function randomUuid(random: () => number) {
+  const hex = () => Math.floor(random() * 16).toString(16);
+  const part = (length: number) => Array.from({ length }, hex).join('');
+  return `${part(8)}-${part(4)}-4${part(3)}-a${part(3)}-${part(12)}`;
+}
+
+describe('compareText', () => {
+  it('orders ISO timestamps, day keys and ids the way localeCompare did', () => {
+    const random = seededRandom(7);
+    const samples: string[] = [];
+    for (let index = 0; index < 40; index += 1) {
+      const iso = randomIso(random);
+      samples.push(iso, iso.slice(0, 10), randomUuid(random));
+    }
+    for (const a of samples) {
+      for (const b of samples) {
+        // Only compare like with like, which is all the sort ever does.
+        if (a.length !== b.length) continue;
+        expect(Math.sign(compareText(a, b))).toBe(Math.sign(a.localeCompare(b)));
+      }
+    }
+  });
+
+  it('returns 0 only for identical strings', () => {
+    expect(compareText('2026-05-13', '2026-05-13')).toBe(0);
+    expect(compareText('2026-05-13', '2026-05-14')).toBeLessThan(0);
+    expect(compareText('2026-05-14', '2026-05-13')).toBeGreaterThan(0);
+  });
+});
+
+describe('insertTransactionsByDateDesc', () => {
+  function randomTx(random: () => number, id: string): TransactionWithRelations {
+    const iso = randomIso(random);
+    const roll = random();
+    return makeTx({
+      id,
+      // Some rows are quick-entry day keys, some carry a dragged order key.
+      date: roll < 0.25 ? iso.slice(0, 10) : iso,
+      createdAt: randomIso(random),
+      dayOrder: roll > 0.85 ? Math.floor(random() * 1_000_000) : null,
+    });
+  }
+
+  it('puts each row exactly where a full sort would', () => {
+    const random = seededRandom(42);
+    for (let round = 0; round < 40; round += 1) {
+      const existing = sortTransactions(
+        Array.from({ length: 30 }, (_, index) => randomTx(random, `e${round}-${index}`)),
+        'date_desc',
+      );
+      const added = Array.from({ length: 3 }, (_, index) => randomTx(random, `n${round}-${index}`));
+      const expected = sortTransactions([...existing, ...added], 'date_desc');
+      expect(insertTransactionsByDateDesc(existing, added).map((tx) => tx.id)).toEqual(
+        expected.map((tx) => tx.id),
+      );
+    }
+  });
+
+  it('leaves the list it was given untouched', () => {
+    const existing = [makeTx({ id: 'a', date: '2026-05-13T00:00:00.000Z' })];
+    const snapshot = [...existing];
+    const next = insertTransactionsByDateDesc(existing, [
+      makeTx({ id: 'b', date: '2026-05-14T00:00:00.000Z' }),
+    ]);
+    expect(existing).toEqual(snapshot);
+    expect(next.map((tx) => tx.id)).toEqual(['b', 'a']);
   });
 });

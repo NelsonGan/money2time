@@ -5,6 +5,19 @@ type SortableTransaction = Pick<TransactionWithRelations, 'id' | 'amount' | 'dat
   Partial<Pick<TransactionWithRelations, 'dayOrder'>>;
 
 /**
+ * Orders two strings by UTF-16 code unit. Every key sorted here (day keys, ISO
+ * timestamps, lowercase UUIDs) is fixed-format ASCII, so this is the same order
+ * `localeCompare` gave, at a tiny fraction of the cost: on Android, Hermes
+ * builds a new ICU collator over JNI for every `localeCompare` call (about
+ * 12µs each, against well under 0.1µs here), which made sorting a few thousand
+ * transactions take most of a second on launch and on every save.
+ */
+export function compareText(a: string, b: string): number {
+  if (a === b) return 0;
+  return a < b ? -1 : 1;
+}
+
+/**
  * Where a row sits among rows with the same date: a drag-assigned `dayOrder`,
  * or else when it was created. Both are epoch milliseconds, so a record added
  * after a drag outranks every dragged key and still lands on top. Creation, not
@@ -31,15 +44,15 @@ function compareOrderKeyAsc(a: SortableTransaction, b: SortableTransaction): num
 }
 
 function compareCreatedAtDesc(a: SortableTransaction, b: SortableTransaction): number {
-  const createdDelta = b.createdAt.localeCompare(a.createdAt);
+  const createdDelta = compareText(b.createdAt, a.createdAt);
   if (createdDelta !== 0) return createdDelta;
-  return b.id.localeCompare(a.id);
+  return compareText(b.id, a.id);
 }
 
 function compareCreatedAtAsc(a: SortableTransaction, b: SortableTransaction): number {
-  const createdDelta = a.createdAt.localeCompare(b.createdAt);
+  const createdDelta = compareText(a.createdAt, b.createdAt);
   if (createdDelta !== 0) return createdDelta;
-  return a.id.localeCompare(b.id);
+  return compareText(a.id, b.id);
 }
 
 // Compared as instants, not text: quick entry stores `YYYY-MM-DD` and the
@@ -58,7 +71,7 @@ export function compareTransactionsByDateDesc(
   resolveDayKey: (dateIso: string) => string = dayKeyFromIsoLocal,
   resolveTime: (dateText: string) => number = timeFromDateLocal,
 ): number {
-  const dayDelta = resolveDayKey(b.date).localeCompare(resolveDayKey(a.date));
+  const dayDelta = compareText(resolveDayKey(b.date), resolveDayKey(a.date));
   if (dayDelta !== 0) return dayDelta;
   const timeDiff = timeDelta(b, a, resolveTime);
   if (timeDiff !== 0) return timeDiff;
@@ -71,7 +84,7 @@ export function compareTransactionsByDateAsc(
   resolveDayKey: (dateIso: string) => string = dayKeyFromIsoLocal,
   resolveTime: (dateText: string) => number = timeFromDateLocal,
 ): number {
-  const dayDelta = resolveDayKey(a.date).localeCompare(resolveDayKey(b.date));
+  const dayDelta = compareText(resolveDayKey(a.date), resolveDayKey(b.date));
   if (dayDelta !== 0) return dayDelta;
   const timeDiff = timeDelta(a, b, resolveTime);
   if (timeDiff !== 0) return timeDiff;
@@ -138,4 +151,33 @@ export function sortTransactions<T extends SortableTransaction>(
     default:
       return ensureSorted(compareByDateDesc);
   }
+}
+
+/**
+ * Adds rows to a list already in `date_desc` order, each at the place a full
+ * sort would put it. A binary search per row instead of re-sorting the whole
+ * list: a save used to re-sort every loaded transaction whenever the new row
+ * was not the newest (any future-dated row, such as an upcoming recurring
+ * entry, is enough), which on a years-long history cost hundreds of
+ * milliseconds right as the entry sheet closed.
+ */
+export function insertTransactionsByDateDesc<T extends SortableTransaction>(
+  transactions: readonly T[],
+  rows: readonly T[],
+): T[] {
+  const next = transactions.slice();
+  for (const row of rows) {
+    let low = 0;
+    let high = next.length;
+    while (low < high) {
+      const middle = (low + high) >>> 1;
+      if (compareTransactionsByDateDesc(next[middle] as T, row) <= 0) {
+        low = middle + 1;
+      } else {
+        high = middle;
+      }
+    }
+    next.splice(low, 0, row);
+  }
+  return next;
 }

@@ -78,7 +78,7 @@ import { LONG_RANGE_PAGER_CENTER_INDEX, LONG_RANGE_PAGER_TOTAL_SLOTS } from '~/c
 import { PRO_TREND_TYPES, type ProTrendType } from '~/constants/proLimits';
 import { UTILITY_ICON_SOURCES } from '~/constants/utilityIcons';
 import { useApp, useTransactions } from '~/context/AppContext';
-import { usePro } from '~/context/ProContext';
+import { useIsPro } from '~/context/ProContext';
 import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { BudgetPagerView, type BudgetPagerViewHandle } from '~/features/budget/screens';
@@ -2832,7 +2832,7 @@ export function InsightsScreen({
   // hold the last-seen snapshot so every write doesn't re-run the full insight
   // memo chain in the background; it catches up once when re-activated.
   const rawTransactions = useValueWhileTabVisible(liveTransactions);
-  const { isPro } = usePro();
+  const isPro = useIsPro();
   const proTrendTypeSet = useMemo(() => new Set<string>(PRO_TREND_TYPES), []);
 
   const allTransactions = rawTransactions;

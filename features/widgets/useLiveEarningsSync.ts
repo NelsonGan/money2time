@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { AppState, type AppStateStatus } from 'react-native';
 
 import { useApp } from '~/context/AppContext';
-import { usePro } from '~/context/ProContext';
+import { useIsPro } from '~/context/ProContext';
 import { useThemeColor } from '~/context/ThemeContext';
 import { reportError } from '~/services/errorReporting';
 import { isLiveActivityAvailable } from '~/services/liveActivity';
@@ -25,7 +25,7 @@ import { syncLiveEarningsAutoStart } from './lib/syncLiveEarningsAutoStart';
  */
 export function useLiveEarningsSync() {
   const { settings, notificationPrefs, getTrueHourlyRateForDate } = useApp();
-  const { isPro } = usePro();
+  const isPro = useIsPro();
   const themeColor = useThemeColor();
 
   // Read inside a listener that is registered once, so it must not close over

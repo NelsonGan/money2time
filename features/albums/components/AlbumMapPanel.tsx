@@ -28,6 +28,8 @@ interface AlbumMapPanelProps {
    * mascot sits under the tab bar.
    */
   headerHeight?: number;
+  /** See AlbumCard: changes when the album totals may have, so the pins re-read them. */
+  statsVersion: unknown;
 }
 
 /**
@@ -35,7 +37,12 @@ interface AlbumMapPanelProps {
  * the pins/empty/suspense/error-boundary chrome so both the map itself and its
  * degraded fallbacks live in one place.
  */
-export function AlbumMapPanel({ onOpenAlbumDetail, active, headerHeight = 0 }: AlbumMapPanelProps) {
+export function AlbumMapPanel({
+  onOpenAlbumDetail,
+  active,
+  headerHeight = 0,
+  statsVersion,
+}: AlbumMapPanelProps) {
   const { locatedAlbums, getAlbumStats, settings } = useApp();
   const themeColors = useThemeColors();
 
@@ -70,7 +77,10 @@ export function AlbumMapPanel({ onOpenAlbumDetail, active, headerHeight = 0 }: A
         monthLabel: formatAlbumMonthYear(stats.startDate),
       };
     });
-  }, [shouldRenderMap, locatedAlbums, getAlbumStats, isTimeMode, settings]);
+    // `getAlbumStats` keeps one identity; `statsVersion` is what says the
+    // totals behind it changed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldRenderMap, locatedAlbums, getAlbumStats, isTimeMode, settings, statsVersion]);
 
   useEffect(() => {
     if (!active) return;
