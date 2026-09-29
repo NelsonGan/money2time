@@ -47,6 +47,7 @@ import {
   formatHours,
   normalizeMoneyAmount,
 } from '~/utils/formatters';
+import { perfInteraction } from '~/utils/perfTrace';
 
 import { findFallbackCategory, pickDefaultAccountId } from '../lib/entryDefaults';
 import { matchCategoryByKeywords } from '../utils/categoryKeywords';
@@ -768,6 +769,7 @@ export function QuickAddSheet({
       accountId: effectiveAccountId,
       categoryId: activeCategoryId,
     };
+    perfInteraction('quick_add_save', { txCount: transactions.length });
     // Start the close animation IMMEDIATELY so the user gets instant feedback.
     // Defer the (potentially heavy) onSubmit to the next macrotask so it runs
     // alongside the close animation, not blocking either the animation kickoff
@@ -785,6 +787,7 @@ export function QuickAddSheet({
     parsedLive.note,
     entryCurrency,
     submitDisabled,
+    transactions.length,
     type,
   ]);
 

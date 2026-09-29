@@ -20,10 +20,10 @@ import {
 import {
   DEFAULT_CURRENCY,
   DEFAULT_TRANSACTION_FILTERS,
-  ONBOARDING_MINIMAL_EXPENSE_CATEGORIES,
-  ONBOARDING_MINIMAL_INCOME_CATEGORIES,
   ONBOARDING_DEFAULT_GROUPS,
   ONBOARDING_MINIMAL_ACCOUNTS,
+  ONBOARDING_MINIMAL_EXPENSE_CATEGORIES,
+  ONBOARDING_MINIMAL_INCOME_CATEGORIES,
 } from '~/constants/appDefaults';
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { computeBackPopulateRange, pickAutoCreateTemplate } from '~/features/budget/lib/budgetMath';
@@ -96,13 +96,13 @@ import {
   setSuperProperties,
   trackEvent,
 } from '~/services/analytics';
+import { supportsAppIconSwitching, syncAppIcon } from '~/services/appIcon';
 import {
   registerBackgroundTask,
   runAutoBackupIfDue,
   unregisterBackgroundTask,
 } from '~/services/autoBackup';
 import { clearAllAutoLogQueues } from '~/services/autoLog';
-import { supportsAppIconSwitching, syncAppIcon } from '~/services/appIcon';
 import { reportError, setErrorUser } from '~/services/errorReporting';
 import { refreshRatesNow, runRateRefreshIfDue } from '~/services/exchangeRates';
 import { setHapticsEnabled } from '~/services/haptics';
@@ -186,6 +186,7 @@ import {
 } from '~/utils/formatters';
 import { newId, nowIso } from '~/utils/id';
 import { runAfterInteractionsCapped } from '~/utils/interactions';
+import { perfMark } from '~/utils/perfTrace';
 import { countsAsExpenseRow } from '~/utils/spending';
 import { sortTransactions } from '~/utils/transactionSorting';
 
@@ -1041,6 +1042,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const refreshAll = useCallback(() => {
     try {
       const databaseInit = initializeDatabase();
+      perfMark('db_init');
       if (databaseInit.isDowngrade) {
         // The DB was written by a newer build. Not fatal (we run forward-only
         // and leave the schema alone), but it means this install is running
@@ -1129,6 +1131,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       })();
       accountGroupsRepository.ensureFromActiveAccounts();
       const processedRules = recurringRulesRepository.runDueTransactions();
+      perfMark('recurring_run');
       const trueHourlyRate = effectiveCurrentWage?.trueHourlyRate ?? 0;
 
       // Fire notifications for processed recurring rules
@@ -1149,7 +1152,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const nextRecurringRules = recurringRulesRepository.list();
       const nextAccounts = accountsRepository.list();
       const nextCategories = categoriesRepository.list();
+      perfMark('tx_list_start');
       const nextTransactions = transactionsRepository.list();
+      perfMark('tx_list');
       const nextAlbums = albumsRepository.list();
       const nextItems = itemsRepository.list();
 
@@ -1169,6 +1174,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const nextMonthlyBudgets = monthlyBudgetsRepository.list();
 
       const nextRawAccountBalances = accountsRepository.getBalances();
+      perfMark('balances');
 
       // The review reminders deliberately carry no spend figure. A repeating
       // trigger is scheduled once and fires weeks later, so any total baked in
@@ -1309,11 +1315,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [refreshTransactions]);
 
   useEffect(() => {
+    perfMark('data_load_start');
     setIsLoading(true);
     try {
       refreshAll();
     } finally {
       setIsLoading(false);
+      perfMark('data_load_end');
     }
   }, [refreshAll]);
 

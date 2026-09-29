@@ -103,15 +103,15 @@ import {
   consumePendingAccountLogoPicker,
   setPendingAccountLogoPicker,
 } from '~/features/settings/lib/accountLogoPickerBridge';
-import {
-  consumePendingSubscriptionLogoPicker,
-  setPendingSubscriptionLogoPicker,
-} from '~/features/settings/lib/subscriptionLogoPickerBridge';
 import type { CategoryIconPickerSession } from '~/features/settings/lib/categoryIconPickerBridge';
 import {
   consumePendingCategoryIconPicker,
   setPendingCategoryIconPicker,
 } from '~/features/settings/lib/categoryIconPickerBridge';
+import {
+  consumePendingSubscriptionLogoPicker,
+  setPendingSubscriptionLogoPicker,
+} from '~/features/settings/lib/subscriptionLogoPickerBridge';
 import {
   AccountEditorScreen,
   AccountGroupEditorScreen,
@@ -130,10 +130,6 @@ import {
   ShareAndEarnScreen,
   WageCalculatorFlowScreen,
 } from '~/features/settings/screens';
-import {
-  countAccountsTowardFreeLimit,
-  isNewTransactionBlockedByAccounts,
-} from '~/features/transactions/lib/accountEntryGate';
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import { QuickAddWarmup } from '~/features/transactions/components/QuickAddWarmup';
 import { ReceiptCameraSheet } from '~/features/transactions/components/ReceiptCameraSheet';
@@ -141,6 +137,10 @@ import {
   type VoiceQuickAddHandle,
   VoiceQuickAddOverlay,
 } from '~/features/transactions/components/VoiceQuickAddOverlay';
+import {
+  countAccountsTowardFreeLimit,
+  isNewTransactionBlockedByAccounts,
+} from '~/features/transactions/lib/accountEntryGate';
 import {
   resolveAutoLogEntry,
   selectDrainableAutoLogEntries,
@@ -230,6 +230,7 @@ import {
 import type { AddButtonAction, CategoryType, TransactionWithRelations, WageConfig } from '~/types';
 import { financialMonthKeyForDate, monthCycleOf } from '~/utils/financialMonth';
 import { dayKeyFromIsoLocal, monthKeyFromIsoLocal } from '~/utils/formatters';
+import { perfInteraction, perfMark, perfStartupDone } from '~/utils/perfTrace';
 Sentry.init({
   // Read from Expo public env (EXPO_PUBLIC_* is inlined at build time). Left
   // undefined when unset, which disables Sentry rather than crashing.
@@ -619,6 +620,7 @@ function MainShellScreen({
 
   const openAddTransaction = useCallback(() => {
     if (!checkCanStartNewTransaction()) return;
+    perfInteraction('quick_add_open');
     navigation.navigate('AddTransaction');
   }, [checkCanStartNewTransaction, navigation]);
 
@@ -688,6 +690,7 @@ function MainShellScreen({
   );
 
   const handleFabPress = useCallback(() => {
+    perfInteraction('fab_press');
     if (!checkCanStartNewTransaction()) return;
     if (useAddSheet) {
       setAddSheetVisible(true);
@@ -2500,12 +2503,14 @@ function AppContent() {
     // straight onto populated content.
     if (splashHiddenRef.current) return;
     splashHiddenRef.current = true;
+    perfMark('content_layout');
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
+        perfStartupDone({ txCount: getTransactionCount(), platform: Platform.OS });
         void SplashScreen.hideAsync();
       });
     });
-  }, []);
+  }, [getTransactionCount]);
 
   const handleOnboardingComplete = useCallback(() => {
     checkedFeatureAnnouncementUserRef.current = settings.appUserId;
@@ -2563,6 +2568,7 @@ function AppContent() {
     );
   }
 
+  perfMark('content_render');
   return (
     <View className="flex-1 bg-background" style={themeStyle} onLayout={handleContentLayout}>
       <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
@@ -2756,6 +2762,7 @@ function AppContent() {
 }
 
 export default Sentry.wrap(function App() {
+  perfMark('app_render');
   const shouldLoadCustomFonts = Platform.OS !== 'ios';
   const [fontsLoaded, fontError] = useFonts(
     shouldLoadCustomFonts
@@ -2788,6 +2795,7 @@ export default Sentry.wrap(function App() {
   if (shouldLoadCustomFonts && !fontsLoaded && !fontError) {
     return null;
   }
+  perfMark('fonts_ready');
 
   return (
     <GestureHandlerRootView style={styles.flex}>
