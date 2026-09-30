@@ -804,7 +804,7 @@ const fil = {
       title: 'Mga Filter',
       subtitle: 'I-refine ang listahan ng transaksyon',
       search: 'Maghanap',
-      search_placeholder: 'Maghanap ng note',
+      search_placeholder: 'Maghanap ng note, kategorya o halaga',
       type: 'Uri',
       account: 'Account',
       category: 'Kategorya',

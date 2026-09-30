@@ -798,7 +798,7 @@ const sv = {
       title: 'Filter',
       subtitle: 'Förfina din transaktionslista',
       search: 'Sök',
-      search_placeholder: 'Sök anteckning',
+      search_placeholder: 'Sök anteckning, kategori eller belopp',
       type: 'Typ',
       account: 'Konto',
       category: 'Kategori',

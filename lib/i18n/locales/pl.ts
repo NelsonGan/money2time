@@ -801,7 +801,7 @@ const pl = {
       title: 'Filtry',
       subtitle: 'Zawęź listę transakcji',
       search: 'Szukaj',
-      search_placeholder: 'Szukaj notatki',
+      search_placeholder: 'Szukaj notatki, kategorii lub kwoty',
       type: 'Typ',
       account: 'Konto',
       category: 'Kategoria',

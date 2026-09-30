@@ -805,7 +805,7 @@ const de = {
       title: 'Filter',
       subtitle: 'Transaktionsliste verfeinern',
       search: 'Suchen',
-      search_placeholder: 'Notiz suchen',
+      search_placeholder: 'Notiz, Kategorie oder Betrag suchen',
       type: 'Typ',
       account: 'Konto',
       category: 'Kategorie',

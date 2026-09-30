@@ -775,7 +775,7 @@ const en = {
       title: 'Filters',
       subtitle: 'Refine your transaction list',
       search: 'Search',
-      search_placeholder: 'Search note',
+      search_placeholder: 'Search notes, categories or amounts',
       type: 'Type',
       account: 'Account',
       category: 'Category',

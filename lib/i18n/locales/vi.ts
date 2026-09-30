@@ -797,7 +797,7 @@ const vi = {
       title: 'Bộ lọc',
       subtitle: 'Lọc danh sách giao dịch',
       search: 'Tìm kiếm',
-      search_placeholder: 'Tìm ghi chú',
+      search_placeholder: 'Tìm ghi chú, danh mục hoặc số tiền',
       type: 'Loại',
       account: 'Tài khoản',
       category: 'Danh mục',

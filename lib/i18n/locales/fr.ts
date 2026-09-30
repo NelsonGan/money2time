@@ -801,7 +801,7 @@ const fr = {
       title: 'Filtres',
       subtitle: 'Affinez votre liste de transactions',
       search: 'Rechercher',
-      search_placeholder: 'Rechercher une note',
+      search_placeholder: 'Rechercher une note, une catégorie ou un montant',
       type: 'Type',
       account: 'Compte',
       category: 'Catégorie',

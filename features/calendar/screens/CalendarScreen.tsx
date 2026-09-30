@@ -89,6 +89,11 @@ import {
   CENTER_YEAR_INDEX,
   TOTAL_YEAR_SLOTS,
 } from '../components/CalendarYearView';
+import {
+  amountKeyMatches,
+  parseAmountQuery,
+  transactionAmountSearchKeys,
+} from '../lib/amountSearch';
 import type { CalendarDayAggregate, CalendarMonthData } from '../lib/calendarBuild';
 import {
   buildCalendarMonthFromGrouped,
@@ -608,7 +613,8 @@ export function CalendarScreen({
   // Lowercased haystack per transaction, built lazily once search is open (and
   // rebuilt only when the non-search transaction set changes) — so non-search
   // sessions and unrelated mutations don't pay for it. Typing then costs a
-  // single `includes` per row instead of repeated `toLowerCase` calls.
+  // single `includes` per row instead of repeated `toLowerCase` calls. The
+  // amounts the row shows are keyed alongside, so a numeric query finds them.
   const searchIndex = useMemo(() => {
     if (!isSearchOpen) return [];
     return filteredTransactions.map((tx) => {
@@ -616,7 +622,11 @@ export function CalendarScreen({
       if (tx.note) haystack += tx.note;
       if (tx.categoryName) haystack += `\n${tx.categoryName}`;
       if (tx.categoryParentName) haystack += `\n${tx.categoryParentName}`;
-      return { tx, haystack: haystack.toLowerCase() };
+      return {
+        tx,
+        haystack: haystack.toLowerCase(),
+        amountKeys: transactionAmountSearchKeys(tx),
+      };
     });
   }, [isSearchOpen, filteredTransactions]);
 
@@ -627,8 +637,16 @@ export function CalendarScreen({
   const searchResults = useMemo(() => {
     if (!isSearchOpen) return [];
     const q = debouncedSearchQuery.trim().toLowerCase();
+    const amountQuery = q ? parseAmountQuery(q) : null;
     const matched = q
-      ? searchIndex.filter((entry) => entry.haystack.includes(q)).map((entry) => entry.tx)
+      ? searchIndex
+          .filter(
+            (entry) =>
+              entry.haystack.includes(q) ||
+              (amountQuery !== null &&
+                entry.amountKeys.some((key) => amountKeyMatches(key, amountQuery))),
+          )
+          .map((entry) => entry.tx)
       : [...filteredTransactions];
     matched.sort(compareTransactionsByDateDesc);
     return matched;

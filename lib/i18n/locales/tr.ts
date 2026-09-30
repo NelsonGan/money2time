@@ -800,7 +800,7 @@ const tr = {
       title: 'Filtreler',
       subtitle: 'İşlem listenizi daraltın',
       search: 'Ara',
-      search_placeholder: 'Not ara',
+      search_placeholder: 'Not, kategori veya tutar ara',
       type: 'Tür',
       account: 'Hesap',
       category: 'Kategori',

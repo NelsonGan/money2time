@@ -804,7 +804,7 @@ const ms = {
       title: 'Penapis',
       subtitle: 'Tapis senarai transaksi anda',
       search: 'Cari',
-      search_placeholder: 'Cari nota',
+      search_placeholder: 'Cari nota, kategori atau jumlah',
       type: 'Jenis',
       account: 'Akaun',
       category: 'Kategori',

@@ -798,7 +798,7 @@ const ru = {
       title: 'Фильтры',
       subtitle: 'Уточните список транзакций',
       search: 'Поиск',
-      search_placeholder: 'Поиск по заметке',
+      search_placeholder: 'Поиск по заметке, категории или сумме',
       type: 'Тип',
       account: 'Счёт',
       category: 'Категория',

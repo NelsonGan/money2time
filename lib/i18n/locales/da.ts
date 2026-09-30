@@ -798,7 +798,7 @@ const da = {
       title: 'Filtre',
       subtitle: 'Tilpas din transaktionsliste',
       search: 'Søg',
-      search_placeholder: 'Søg i noter',
+      search_placeholder: 'Søg i noter, kategorier eller beløb',
       type: 'Type',
       account: 'Konto',
       category: 'Kategori',

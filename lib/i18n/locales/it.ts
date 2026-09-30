@@ -804,7 +804,7 @@ const it = {
       title: 'Filtri',
       subtitle: 'Affina la lista delle transazioni',
       search: 'Cerca',
-      search_placeholder: 'Cerca nota',
+      search_placeholder: 'Cerca nota, categoria o importo',
       type: 'Tipo',
       account: 'Conto',
       category: 'Categoria',

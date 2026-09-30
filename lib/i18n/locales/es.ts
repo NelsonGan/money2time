@@ -799,7 +799,7 @@ const es = {
       title: 'Filtros',
       subtitle: 'Refina tu lista de movimientos',
       search: 'Buscar',
-      search_placeholder: 'Buscar nota',
+      search_placeholder: 'Buscar nota, categoría o importe',
       type: 'Tipo',
       account: 'Cuenta',
       category: 'Categoría',
