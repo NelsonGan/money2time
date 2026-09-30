@@ -2318,7 +2318,7 @@ const fil = {
       'Wala pang {{currency}} account. Kailangan ng auto-save ng account na parehong currency.',
     auto_save_rule_name: 'Auto-save: {{name}}',
     auto_save_managed_in_recurring:
-      'May custom na iskedyul ang auto-save ng goal na ito. Baguhin ito sa Settings, sa Recurring.',
+      'May custom na iskedyul ang auto-save ng goal na ito. Baguhin ito sa {{settings}} > {{recurring}}.',
     edit_title: 'I-edit ang goal',
     delete_title: 'Burahin ang goal?',
     delete_message: 'Mabubura ang goal at ang mga transaksyon nito. Hindi na ito maibabalik.',

@@ -215,10 +215,22 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
   const parsedAutoSave = Number.parseFloat(autoSaveAmount);
   const todayKey = dayKeyFromDateLocal(new Date());
   const targetDateValid = !hasTargetDate || targetDate > todayKey;
+  // Inline auto-save keeps v1 simple: only accounts already denominated in the
+  // goal's currency can feed it. Cross-currency rules stay possible through
+  // the full recurring editor.
+  const autoSaveSourceAccounts = useMemo(
+    () => accounts.filter((a) => a.type !== 'goal' && a.currency === currency),
+    [accounts, currency],
+  );
+  const autoSaveSource = autoSaveSourceAccounts.find((a) => a.id === autoSaveSourceId) ?? null;
+
+  // The source must still be one the picker offers: a rule loaded for editing
+  // can point at an account deleted or re-denominated since, and saving that
+  // id back would keep a transfer the engine can never make.
   const autoSaveValid =
     !showAutoSave ||
     !autoSaveEnabled ||
-    (Number.isFinite(parsedAutoSave) && parsedAutoSave > 0 && autoSaveSourceId != null);
+    (Number.isFinite(parsedAutoSave) && parsedAutoSave > 0 && autoSaveSource != null);
   // Strict (Number, not parseFloat) so a typo like "1.2.3" blocks Save instead
   // of silently writing an adjustment to 1.2 — this field moves real money.
   const parsedBalance = Number(balanceInput);
@@ -236,15 +248,6 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
     () => Array.from(new Set([settings.currencyCode, ...fxCurrencies, currency])),
     [settings.currencyCode, fxCurrencies, currency],
   );
-
-  // Inline auto-save keeps v1 simple: only accounts already denominated in the
-  // goal's currency can feed it. Cross-currency rules stay possible through
-  // the full recurring editor.
-  const autoSaveSourceAccounts = useMemo(
-    () => accounts.filter((a) => a.type !== 'goal' && a.currency === currency),
-    [accounts, currency],
-  );
-  const autoSaveSource = autoSaveSourceAccounts.find((a) => a.id === autoSaveSourceId) ?? null;
 
   const handleSave = useCallback(() => {
     if (!canSave) return;
@@ -264,7 +267,7 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
     const wantsAutoSave =
       showAutoSave &&
       autoSaveEnabled &&
-      autoSaveSourceId != null &&
+      autoSaveSource != null &&
       Number.isFinite(parsedAutoSave) &&
       parsedAutoSave > 0;
     if (!isEditing) {
@@ -451,6 +454,7 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
     accounts,
     autoSaveCadence,
     autoSaveEnabled,
+    autoSaveSource,
     autoSaveSourceId,
     canSave,
     checkLimit,
@@ -701,11 +705,12 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
           {showAutoSave ? (
             <>
               <View className="flex-row items-center justify-between gap-3">
-                <View className="flex-1">
+                <View className="flex-1 flex-row items-center gap-1.5">
                   <Text variant="body">{I18n.t('goals.auto_save_toggle')}</Text>
-                  <Text variant="caption" tone="muted" className="mt-0.5">
-                    {I18n.t('goals.auto_save_hint')}
-                  </Text>
+                  <InfoTooltipButton
+                    title={I18n.t('goals.auto_save_toggle')}
+                    infoTooltip={I18n.t('goals.auto_save_hint')}
+                  />
                 </View>
                 <Switch
                   value={autoSaveEnabled}
@@ -791,7 +796,10 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
             <View className="gap-0.5">
               <Text variant="body">{I18n.t('goals.auto_save_toggle')}</Text>
               <Text variant="caption" tone="muted">
-                {I18n.t('goals.auto_save_managed_in_recurring')}
+                {I18n.t('goals.auto_save_managed_in_recurring', {
+                  settings: I18n.t('settings.title'),
+                  recurring: I18n.t('settings.recurring'),
+                })}
               </Text>
             </View>
           ) : null}
@@ -823,9 +831,11 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
             } else {
               convertField(startingAmount, setStartingAmount);
             }
+            // The source must share the goal's currency, so a new currency
+            // needs a new source; re-picking the same one keeps it.
+            setAutoSaveSourceId(null);
           }
           setCurrency(code);
-          setAutoSaveSourceId(null);
           setShowCurrencyPicker(false);
         }}
       />

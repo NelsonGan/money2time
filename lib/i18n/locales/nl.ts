@@ -2312,7 +2312,7 @@ const nl = {
       'Nog geen rekeningen in {{currency}}. Automatisch sparen vereist een rekening in dezelfde valuta.',
     auto_save_rule_name: 'Automatisch sparen: {{name}}',
     auto_save_managed_in_recurring:
-      'Automatisch sparen voor dit doel volgt een eigen schema. Wijzig het in Instellingen, onder Terugkerend.',
+      'Automatisch sparen voor dit doel volgt een eigen schema. Wijzig het in {{settings}} > {{recurring}}.',
     edit_title: 'Doel bewerken',
     delete_title: 'Doel verwijderen?',
     delete_message:

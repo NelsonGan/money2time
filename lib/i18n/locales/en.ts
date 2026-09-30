@@ -2261,7 +2261,7 @@ const en = {
       'No {{currency}} accounts yet. Auto-save needs an account in the same currency.',
     auto_save_rule_name: 'Auto-save: {{name}}',
     auto_save_managed_in_recurring:
-      "This goal's auto-save uses a custom schedule. Change it in Settings, under Recurring.",
+      "This goal's auto-save uses a custom schedule. Change it in {{settings}} > {{recurring}}.",
     edit_title: 'Edit goal',
     delete_title: 'Delete goal?',
     delete_message: 'This deletes the goal and its transactions. This cannot be undone.',

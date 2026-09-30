@@ -2269,7 +2269,7 @@ const vi = {
       'Chưa có tài khoản {{currency}}. Tự động tiết kiệm cần tài khoản cùng loại tiền tệ.',
     auto_save_rule_name: 'Tự động tiết kiệm: {{name}}',
     auto_save_managed_in_recurring:
-      'Tự động tiết kiệm của mục tiêu này dùng lịch tùy chỉnh. Hãy thay đổi trong Cài đặt, mục Định kỳ.',
+      'Tự động tiết kiệm của mục tiêu này dùng lịch tùy chỉnh. Hãy thay đổi trong {{settings}} > {{recurring}}.',
     edit_title: 'Sửa mục tiêu',
     delete_title: 'Xóa mục tiêu?',
     delete_message: 'Thao tác này xóa mục tiêu và các giao dịch của nó. Không thể hoàn tác.',

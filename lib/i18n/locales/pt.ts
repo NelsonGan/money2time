@@ -2295,7 +2295,7 @@ const pt = {
       'Ainda não há contas em {{currency}}. A poupança automática precisa de uma conta na mesma moeda.',
     auto_save_rule_name: 'Poupança automática: {{name}}',
     auto_save_managed_in_recurring:
-      'A poupança automática desta meta usa um agendamento personalizado. Altere-a em Definições, em Recorrentes.',
+      'A poupança automática desta meta usa um agendamento personalizado. Altere-a em {{settings}} > {{recurring}}.',
     edit_title: 'Editar meta',
     delete_title: 'Excluir meta?',
     delete_message: 'Isso exclui a meta e suas transações. Isso não pode ser desfeito.',

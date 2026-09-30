@@ -2287,7 +2287,7 @@ const da = {
       'Ingen {{currency}}-konti endnu. Auto-opsparing kræver en konto i samme valuta.',
     auto_save_rule_name: 'Auto-opsparing: {{name}}',
     auto_save_managed_in_recurring:
-      'Denne opsparings auto-opsparing har en tilpasset plan. Ret den under Indstillinger, Tilbagevendende.',
+      'Denne opsparings auto-opsparing har en tilpasset plan. Ret den i {{settings}} > {{recurring}}.',
     edit_title: 'Rediger mål',
     delete_title: 'Slet mål?',
     delete_message: 'Dette sletter målet og dets transaktioner. Det kan ikke fortrydes.',

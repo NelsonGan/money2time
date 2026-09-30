@@ -2266,7 +2266,7 @@ const ja = {
       '{{currency}} の口座がまだありません。自動貯金には同じ通貨の口座が必要です。',
     auto_save_rule_name: '自動貯金: {{name}}',
     auto_save_managed_in_recurring:
-      'この目標の自動貯金はカスタムのスケジュールです。設定の「定期」から変更してください。',
+      'この目標の自動貯金はカスタムのスケジュールです。{{settings}} > {{recurring}} から変更してください。',
     edit_title: '目標を編集',
     delete_title: '目標を削除しますか？',
     delete_message: '目標とその取引が削除されます。この操作は取り消せません。',

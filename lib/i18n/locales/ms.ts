@@ -2301,7 +2301,7 @@ const ms = {
       'Belum ada akaun {{currency}}. Simpan auto memerlukan akaun dalam mata wang yang sama.',
     auto_save_rule_name: 'Simpan auto: {{name}}',
     auto_save_managed_in_recurring:
-      'Simpan auto matlamat ini menggunakan jadual tersuai. Ubah dalam Tetapan, di bawah Berulang.',
+      'Simpan auto matlamat ini menggunakan jadual tersuai. Ubah dalam {{settings}} > {{recurring}}.',
     edit_title: 'Edit matlamat',
     delete_title: 'Padam matlamat?',
     delete_message: 'Ini memadam matlamat dan transaksinya. Ia tidak boleh dibuat asal.',

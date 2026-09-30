@@ -2314,7 +2314,7 @@ const fr = {
       "Aucun compte en {{currency}} pour l'instant. L'épargne automatique nécessite un compte dans la même devise.",
     auto_save_rule_name: 'Épargne automatique : {{name}}',
     auto_save_managed_in_recurring:
-      "L'épargne automatique de cet objectif suit un calendrier personnalisé. Modifiez-la dans Réglages, Récurrents.",
+      "L'épargne automatique de cet objectif suit un calendrier personnalisé. Modifiez-la dans {{settings}} > {{recurring}}.",
     edit_title: "Modifier l'objectif",
     delete_title: "Supprimer l'objectif ?",
     delete_message: "Cela supprime l'objectif et ses transactions. Cette action est irréversible.",

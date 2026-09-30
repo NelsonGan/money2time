@@ -2298,7 +2298,7 @@ const id = {
       'Belum ada akun {{currency}}. Tabung otomatis butuh akun dengan mata uang yang sama.',
     auto_save_rule_name: 'Tabung otomatis: {{name}}',
     auto_save_managed_in_recurring:
-      'Tabung otomatis tujuan ini memakai jadwal khusus. Ubah di Pengaturan, bagian Berulang.',
+      'Tabung otomatis tujuan ini memakai jadwal khusus. Ubah di {{settings}} > {{recurring}}.',
     edit_title: 'Edit target',
     delete_title: 'Hapus target?',
     delete_message: 'Ini menghapus target beserta transaksinya. Tidak bisa dibatalkan.',
