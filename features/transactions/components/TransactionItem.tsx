@@ -1,4 +1,4 @@
-import { GripVertical, Undo2 } from 'lucide-react-native';
+import { ArrowRight, GripVertical, Undo2 } from 'lucide-react-native';
 import React, { memo, useEffect } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
@@ -11,8 +11,9 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { CategoryEmoji, Text, TimeValueInline } from '~/components/ui';
+import { AccountLogo, CategoryEmoji, Text, TimeValueInline } from '~/components/ui';
 import { motionDurations } from '~/constants/motion';
+import { useApp } from '~/context/AppContext';
 import {
   ReorderGrip,
   useReorderItemLayout,
@@ -22,7 +23,7 @@ import { usePressScale } from '~/hooks/usePressScale';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { TransactionWithRelations, UserSettings } from '~/types';
+import type { Account, TransactionWithRelations, UserSettings } from '~/types';
 import { cn } from '~/utils';
 import { currencySymbolForCode } from '~/utils/currency';
 import {
@@ -138,12 +139,8 @@ function describeTransaction(transaction: TransactionWithRelations): Transaction
       ? `${categoryPrimary} • ${categorySecondary}`
       : categoryPrimary;
   }
-  const transferLabel =
-    isTransfer && !transaction.note
-      ? `${transaction.fromAccountName ?? I18n.t('common.unknown')} → ${transaction.toAccountName ?? I18n.t('common.unknown')}`
-      : null;
   const title = isTransfer
-    ? transaction.note || transferLabel
+    ? transaction.note || I18n.t('transactions.filters.moved')
     : isBalanceAdjustment
       ? transaction.note || I18n.t('transactions.filters.adjustment')
       : transaction.note || (categoryInline ?? I18n.t('common.uncategorized'));
@@ -157,6 +154,46 @@ interface TransactionItemBodyProps {
   showDateInSubtitle: boolean;
   settings: TransactionDisplaySettings;
   getTrueHourlyRateForDate: (dateIso: string) => number;
+}
+
+function TransactionAccountBadge({
+  account,
+  label,
+  compact,
+  className,
+}: {
+  account?: Account;
+  label: string;
+  compact: boolean;
+  className?: string;
+}) {
+  return (
+    <View
+      className={cn(
+        'max-w-full self-start flex-row items-center gap-1.5 rounded-full border border-primary/15 bg-primary/10 px-1 py-px dark:border-primary/20 dark:bg-primary/15',
+        className,
+      )}
+    >
+      <AccountLogo
+        logoId={account?.logoId}
+        type={account?.type}
+        goalEmoji={account?.goalEmoji}
+        size={compact ? 12 : 14}
+      />
+      <Text
+        variant="caption"
+        tone="primary"
+        className={cn(
+          'min-w-0 shrink',
+          compact ? 'text-[10px] leading-[12px]' : 'text-[11px] leading-[14px]',
+        )}
+        numberOfLines={1}
+        ellipsizeMode="tail"
+      >
+        {label}
+      </Text>
+    </View>
+  );
 }
 
 /**
@@ -174,6 +211,7 @@ const TransactionItemBody = memo(
     getTrueHourlyRateForDate,
   }: TransactionItemBodyProps) {
     const themeColors = useThemeColors();
+    const { getAccountById } = useApp();
     const {
       isIncome,
       isTransfer,
@@ -189,14 +227,28 @@ const TransactionItemBody = memo(
     const accountSubtitleLabel = !isTransfer
       ? (transaction.accountName ?? I18n.t('common.no_account'))
       : null;
+    const account = transaction.accountId ? getAccountById(transaction.accountId) : undefined;
+    const fromAccount = transaction.fromAccountId
+      ? getAccountById(transaction.fromAccountId)
+      : undefined;
+    const toAccount = transaction.toAccountId ? getAccountById(transaction.toAccountId) : undefined;
+    const fromAccountLabel = isTransfer
+      ? String(transaction.fromAccountName ?? I18n.t('common.unknown'))
+      : '';
+    const toAccountLabel = isTransfer
+      ? String(transaction.toAccountName ?? I18n.t('common.unknown'))
+      : '';
+    const accountBadgeMarginClassName = compact ? 'mt-[3px]' : 'mt-[5px]';
 
     const joinSubtitleParts = (...parts: (string | null | undefined)[]) =>
       parts.filter((part): part is string => Boolean(part && part.trim().length > 0)).join(' · ');
 
     const subtitlePrimary = isTransfer
-      ? showDateInSubtitle
-        ? joinSubtitleParts(dateLabel, transferSubtitleLabel)
-        : transferSubtitleLabel
+      ? transaction.note
+        ? showDateInSubtitle
+          ? joinSubtitleParts(dateLabel, transferSubtitleLabel)
+          : transferSubtitleLabel
+        : dateLabel
       : isBalanceAdjustment
         ? showDateInSubtitle
           ? joinSubtitleParts(dateLabel, I18n.t('transactions.filters.adjustment'))
@@ -256,7 +308,7 @@ const TransactionItemBody = memo(
               : null;
     const showsPrimaryTime = isTimeMode && rate > 0 && !isTransfer && !isBalanceAdjustment;
     const showsSecondaryTime = !isTimeMode && !isForeign && secondaryValue !== null;
-    const valueColumnClassName = compact ? 'w-[96px]' : 'w-[116px]';
+    const valueColumnClassName = isTransfer ? undefined : compact ? 'w-[96px]' : 'w-[116px]';
     const titleSizeClass = compact ? 'text-[13px] leading-[16px]' : 'text-[15px] leading-[20px]';
     const amountToneColor = isTransfer
       ? themeColors.textMuted
@@ -274,7 +326,7 @@ const TransactionItemBody = memo(
       <>
         <View
           className={cn(
-            'items-center justify-center',
+            'shrink-0 self-center items-center justify-center',
             compact ? 'w-8 h-8' : 'w-10 h-10 rounded-2xl',
             !compact && !isTransfer && !isBalanceAdjustment ? 'bg-secondary/40' : null,
             isTransfer ? 'rounded-full bg-secondary/50' : null,
@@ -352,36 +404,49 @@ const TransactionItemBody = memo(
               </Text>
             )}
           </View>
-          {subtitlePrimary || accountSubtitleLabel ? (
-            accountSubtitleLabel ? (
-              <View className={cn('flex-row items-center', compact ? '' : 'mt-0.5')}>
-                <View className="min-w-0 w-1/2 pr-2">
-                  <Text variant="caption" tone="muted" numberOfLines={1}>
-                    {subtitlePrimary ?? ''}
-                  </Text>
-                </View>
-                <View className="min-w-0 w-1/2 justify-center pl-2">
-                  <View className="max-w-full self-start rounded-full border border-border/30 bg-secondary/55 px-2 py-0.5">
-                    <Text variant="caption" tone="muted" numberOfLines={1}>
-                      {accountSubtitleLabel}
-                    </Text>
-                  </View>
-                </View>
+          {subtitlePrimary ? (
+            <Text
+              variant="caption"
+              tone="muted"
+              className={compact ? '' : 'mt-0.5'}
+              numberOfLines={1}
+            >
+              {subtitlePrimary}
+            </Text>
+          ) : null}
+          {isTransfer ? (
+            <View
+              collapsable={false}
+              accessibilityLabel={`${fromAccountLabel} → ${toAccountLabel}`}
+              className={cn('min-w-0 flex-row items-center gap-1', accountBadgeMarginClassName)}
+            >
+              <TransactionAccountBadge
+                account={fromAccount}
+                label={fromAccountLabel}
+                compact={compact}
+                className={compact ? 'min-w-[40px] shrink' : 'min-w-[44px] shrink'}
+              />
+              <View className="shrink-0">
+                <ArrowRight size={compact ? 10 : 12} color={themeColors.textMuted} />
               </View>
-            ) : (
-              <Text
-                variant="caption"
-                tone="muted"
-                className={compact ? '' : 'mt-0.5'}
-                numberOfLines={1}
-              >
-                {subtitlePrimary ?? ''}
-              </Text>
-            )
+              <TransactionAccountBadge
+                account={toAccount}
+                label={toAccountLabel}
+                compact={compact}
+                className={compact ? 'min-w-[40px] shrink' : 'min-w-[44px] shrink'}
+              />
+            </View>
+          ) : accountSubtitleLabel ? (
+            <TransactionAccountBadge
+              account={account}
+              label={accountSubtitleLabel}
+              compact={compact}
+              className={accountBadgeMarginClassName}
+            />
           ) : null}
         </View>
 
-        <View className={cn('shrink-0 items-end', valueColumnClassName)}>
+        <View className={cn('shrink-0 self-center items-end', valueColumnClassName)}>
           <View className="flex-row items-center justify-end gap-1">
             {showsPrimaryTime ? (
               <TimeValueInline
