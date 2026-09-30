@@ -2161,6 +2161,7 @@ const zhHant = {
     auto_save_source_placeholder: '選擇帳戶',
     auto_save_no_source: '還沒有 {{currency}} 帳戶。自動儲蓄需要一個相同幣種的帳戶。',
     auto_save_rule_name: '自動儲蓄：{{name}}',
+    auto_save_managed_in_recurring: '此目標的自動儲蓄使用自訂週期。請在設定的「定期」中修改。',
     edit_title: '編輯目標',
     delete_title: '刪除目標？',
     delete_message: '這會刪除該目標及其交易。此操作無法撤銷。',

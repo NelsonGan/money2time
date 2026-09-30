@@ -2299,6 +2299,8 @@ const it = {
     auto_save_no_source:
       'Nessun conto in {{currency}} per ora. Il risparmio automatico richiede un conto nella stessa valuta.',
     auto_save_rule_name: 'Risparmio automatico: {{name}}',
+    auto_save_managed_in_recurring:
+      'Il risparmio automatico di questo obiettivo segue una pianificazione personalizzata. Modificalo in Impostazioni, Ricorrenti.',
     edit_title: 'Modifica obiettivo',
     delete_title: "Eliminare l'obiettivo?",
     delete_message: "Questo elimina l'obiettivo e le sue transazioni. Non può essere annullato.",

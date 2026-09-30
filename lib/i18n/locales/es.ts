@@ -2299,6 +2299,8 @@ const es = {
     auto_save_no_source:
       'Aún no hay cuentas en {{currency}}. El ahorro automático necesita una cuenta en la misma moneda.',
     auto_save_rule_name: 'Ahorro automático: {{name}}',
+    auto_save_managed_in_recurring:
+      'El ahorro automático de esta meta usa una programación personalizada. Cámbialo en Ajustes, en Recurrentes.',
     edit_title: 'Editar meta',
     delete_title: '¿Eliminar meta?',
     delete_message: 'Esto elimina la meta y sus transacciones. No se puede deshacer.',

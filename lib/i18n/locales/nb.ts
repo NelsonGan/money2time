@@ -2288,6 +2288,8 @@ const nb = {
     auto_save_no_source:
       'Ingen {{currency}}-kontoer ennå. Autosparing trenger en konto i samme valuta.',
     auto_save_rule_name: 'Autosparing: {{name}}',
+    auto_save_managed_in_recurring:
+      'Autosparingen for dette målet har en egendefinert plan. Endre den under Innstillinger, Gjentakende.',
     edit_title: 'Rediger mål',
     delete_title: 'Slette mål?',
     delete_message: 'Dette sletter målet og transaksjonene dets. Dette kan ikke angres.',
