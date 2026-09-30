@@ -34,6 +34,10 @@ import {
 } from '~/components/ui';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
+import {
+  buildInsightsCategoryPickerData,
+  type InsightsCategoryPickerData,
+} from '~/features/insights/categoryPickerData';
 import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
 import {
   ActivitySearchRow,
@@ -60,9 +64,8 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { subscribeCalendarGoToToday } from '~/services/calendarNavigation';
 import { triggerHaptic } from '~/services/haptics';
-import type { Category, CategoryType, TransactionWithRelations } from '~/types';
+import type { TransactionWithRelations } from '~/types';
 import { cn } from '~/utils';
-import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import {
   addFinancialMonths,
   financialMonthAnchorForToday,
@@ -142,49 +145,6 @@ function toggleStringId(previous: string[], targetId: string): string[] {
   return previous.includes(targetId)
     ? previous.filter((id) => id !== targetId)
     : [...previous, targetId];
-}
-
-interface CategoryPickerData {
-  parents: { id: string; name: string; icon: string }[];
-  childByParent: Map<string, { id: string; name: string; icon: string }[]>;
-}
-
-function buildCategoryPickerData(
-  categories: Category[],
-  categoryType: CategoryType,
-): CategoryPickerData {
-  const parentCategories = categories.filter(
-    (category) => category.type === categoryType && category.parentId === null,
-  );
-  const parentIds = new Set(parentCategories.map((parent) => parent.id));
-  const parentIconById = new Map<string, string>();
-  parentCategories.forEach((category) => {
-    parentIconById.set(category.id, category.icon);
-  });
-  const parents = parentCategories.map((category) => ({
-    id: category.id,
-    name: category.name,
-    icon: resolveCategoryIcon(category.icon),
-  }));
-  const childByParent = new Map<string, { id: string; name: string; icon: string }[]>();
-
-  categories.forEach((category) => {
-    const parentId = category.parentId;
-    if (category.type !== categoryType || !parentId || !parentIds.has(parentId)) return;
-    const child = {
-      id: category.id,
-      name: category.name,
-      icon: resolveCategoryIcon(category.icon, parentIconById.get(parentId) ?? null),
-    };
-    const existing = childByParent.get(parentId);
-    if (existing) {
-      existing.push(child);
-    } else {
-      childByParent.set(parentId, [child]);
-    }
-  });
-
-  return { parents, childByParent };
 }
 
 type FilterPickerKind = 'accounts' | 'incomeCategories' | 'expenseCategories';
@@ -596,11 +556,11 @@ export function CalendarScreen({
     excludedExpenseCategoryIdSet,
   ]);
 
-  const incomeCategoryPickerDataRef = useRef<CategoryPickerData | null>(null);
-  const expenseCategoryPickerDataRef = useRef<CategoryPickerData | null>(null);
+  const incomeCategoryPickerDataRef = useRef<InsightsCategoryPickerData | null>(null);
+  const expenseCategoryPickerDataRef = useRef<InsightsCategoryPickerData | null>(null);
   if (showFilters) {
-    incomeCategoryPickerDataRef.current = buildCategoryPickerData(categories, 'income');
-    expenseCategoryPickerDataRef.current = buildCategoryPickerData(categories, 'expense');
+    incomeCategoryPickerDataRef.current = buildInsightsCategoryPickerData(categories, 'income');
+    expenseCategoryPickerDataRef.current = buildInsightsCategoryPickerData(categories, 'expense');
   }
   const incomeCategoryPickerData = incomeCategoryPickerDataRef.current;
   const expenseCategoryPickerData = expenseCategoryPickerDataRef.current;
@@ -998,20 +958,6 @@ export function CalendarScreen({
     [handleHorizontalMomentumEnd],
   );
 
-  const handlePrevMonth = useCallback(() => {
-    void triggerHaptic('selection');
-    const nextIdx = clampMonthIndex(activeMonthIndex - 1);
-    setActiveMonthIndex(nextIdx);
-    horizontalListRef.current?.scrollToIndex({ index: nextIdx, animated: true });
-  }, [activeMonthIndex, clampMonthIndex, setActiveMonthIndex]);
-
-  const handleNextMonth = useCallback(() => {
-    void triggerHaptic('selection');
-    const nextIdx = clampMonthIndex(activeMonthIndex + 1);
-    setActiveMonthIndex(nextIdx);
-    horizontalListRef.current?.scrollToIndex({ index: nextIdx, animated: true });
-  }, [activeMonthIndex, clampMonthIndex, setActiveMonthIndex]);
-
   const handleListMonthMomentumEnd = useCallback(
     (e: Parameters<typeof handleListMonthMomentumEndRaw>[0]) => {
       if (userDraggingPagerRef.current) void triggerHaptic('selection');
@@ -1021,19 +967,18 @@ export function CalendarScreen({
     [handleListMonthMomentumEndRaw],
   );
 
-  const handleListPrevMonth = useCallback(() => {
+  // The header's prev/next arrows drive whichever pager is showing: the
+  // monthly list in the day view, the month grid otherwise.
+  const stepVisibleMonth = (delta: number) => {
     void triggerHaptic('selection');
-    const nextIdx = clampMonthIndex(activeListMonthIndex - 1);
-    setActiveListMonthIndex(nextIdx);
-    listPagerRef.current?.scrollToIndex({ index: nextIdx, animated: true });
-  }, [activeListMonthIndex, clampMonthIndex, setActiveListMonthIndex]);
-
-  const handleListNextMonth = useCallback(() => {
-    void triggerHaptic('selection');
-    const nextIdx = clampMonthIndex(activeListMonthIndex + 1);
-    setActiveListMonthIndex(nextIdx);
-    listPagerRef.current?.scrollToIndex({ index: nextIdx, animated: true });
-  }, [activeListMonthIndex, clampMonthIndex, setActiveListMonthIndex]);
+    const onList = viewMode === 'day';
+    const nextIdx = clampMonthIndex((onList ? activeListMonthIndex : activeMonthIndex) + delta);
+    (onList ? setActiveListMonthIndex : setActiveMonthIndex)(nextIdx);
+    (onList ? listPagerRef : horizontalListRef).current?.scrollToIndex({
+      index: nextIdx,
+      animated: true,
+    });
+  };
 
   const handleOpenSearch = useCallback(() => {
     void triggerHaptic('light');
@@ -1049,10 +994,6 @@ export function CalendarScreen({
     setSearchQuery('');
     searchInputRef.current?.blur();
     setIsSearchOpen(false);
-  }, []);
-
-  const handleSearchChange = useCallback((text: string) => {
-    setSearchQuery(text);
   }, []);
 
   const handleResetFilters = useCallback(() => {
@@ -1492,12 +1433,8 @@ export function CalendarScreen({
     ],
   );
 
-  const activeYearLabel = useMemo(() => String(activeMonthDate.getFullYear()), [activeMonthDate]);
-
-  const backButtonLabel = useMemo(() => {
-    if (viewMode === 'day') return displayedMonthLabel;
-    return activeYearLabel;
-  }, [viewMode, displayedMonthLabel, activeYearLabel]);
+  const backButtonLabel =
+    viewMode === 'day' ? displayedMonthLabel : String(activeMonthDate.getFullYear());
 
   const BackButton = useMemo(
     () =>
@@ -1643,7 +1580,7 @@ export function CalendarScreen({
               inputRef={searchInputRef}
               visible={isSearchOpen}
               value={searchQuery}
-              onChangeText={handleSearchChange}
+              onChangeText={setSearchQuery}
               onClose={handleCloseSearch}
             />
 
@@ -1658,7 +1595,7 @@ export function CalendarScreen({
                   <View className="rounded-pill bg-secondary/40 px-1.5 py-1.5">
                     <View className="flex-row items-center justify-between">
                       <Pressable
-                        onPress={viewMode === 'day' ? handleListPrevMonth : handlePrevMonth}
+                        onPress={() => stepVisibleMonth(-1)}
                         className="h-9 w-9 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
                       >
                         <ChevronLeft size={16} color={themeColors.textSoft} />
@@ -1671,7 +1608,7 @@ export function CalendarScreen({
                         </View>
                       </View>
                       <Pressable
-                        onPress={viewMode === 'day' ? handleListNextMonth : handleNextMonth}
+                        onPress={() => stepVisibleMonth(1)}
                         className="h-9 w-9 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
                       >
                         <ChevronRight size={16} color={themeColors.textSoft} />
@@ -1960,62 +1897,38 @@ export function CalendarScreen({
           </View>
 
           <ScrollView className="flex-1" contentContainerStyle={FILTER_MODAL_CONTENT_STYLE}>
-            <View className="gap-2.5">
-              <Text variant="caption" tone="muted">
-                {I18n.t('insights.filters.exclude_accounts')}
-              </Text>
-              <Pressable
-                onPress={() => setActiveFilterPicker('accounts')}
-                className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
-              >
-                <Text variant="body" tone={excludedAccountIds.length > 0 ? undefined : 'muted'}>
-                  {excludedAccountIds.length > 0
-                    ? `${excludedAccountIds.length} ${I18n.t('insights.filters.excluded')}`
-                    : I18n.t('common.none')}
+            {(
+              [
+                ['accounts', 'insights.filters.exclude_accounts', excludedAccountIds],
+                [
+                  'incomeCategories',
+                  'insights.filters.exclude_income_categories',
+                  excludedIncomeCategoryIds,
+                ],
+                [
+                  'expenseCategories',
+                  'insights.filters.exclude_expense_categories',
+                  excludedExpenseCategoryIds,
+                ],
+              ] as const
+            ).map(([kind, labelKey, excludedIds]) => (
+              <View key={kind} className="gap-2.5">
+                <Text variant="caption" tone="muted">
+                  {I18n.t(labelKey)}
                 </Text>
-                <ChevronRight size={16} color={themeColors.textMuted} />
-              </Pressable>
-            </View>
-
-            <View className="gap-2.5">
-              <Text variant="caption" tone="muted">
-                {I18n.t('insights.filters.exclude_income_categories')}
-              </Text>
-              <Pressable
-                onPress={() => setActiveFilterPicker('incomeCategories')}
-                className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
-              >
-                <Text
-                  variant="body"
-                  tone={excludedIncomeCategoryIds.length > 0 ? undefined : 'muted'}
+                <Pressable
+                  onPress={() => setActiveFilterPicker(kind)}
+                  className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
                 >
-                  {excludedIncomeCategoryIds.length > 0
-                    ? `${excludedIncomeCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
-                    : I18n.t('common.none')}
-                </Text>
-                <ChevronRight size={16} color={themeColors.textMuted} />
-              </Pressable>
-            </View>
-
-            <View className="gap-2.5">
-              <Text variant="caption" tone="muted">
-                {I18n.t('insights.filters.exclude_expense_categories')}
-              </Text>
-              <Pressable
-                onPress={() => setActiveFilterPicker('expenseCategories')}
-                className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
-              >
-                <Text
-                  variant="body"
-                  tone={excludedExpenseCategoryIds.length > 0 ? undefined : 'muted'}
-                >
-                  {excludedExpenseCategoryIds.length > 0
-                    ? `${excludedExpenseCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
-                    : I18n.t('common.none')}
-                </Text>
-                <ChevronRight size={16} color={themeColors.textMuted} />
-              </Pressable>
-            </View>
+                  <Text variant="body" tone={excludedIds.length > 0 ? undefined : 'muted'}>
+                    {excludedIds.length > 0
+                      ? `${excludedIds.length} ${I18n.t('insights.filters.excluded')}`
+                      : I18n.t('common.none')}
+                  </Text>
+                  <ChevronRight size={16} color={themeColors.textMuted} />
+                </Pressable>
+              </View>
+            ))}
           </ScrollView>
 
           <AccountPickerSheet
