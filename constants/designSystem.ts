@@ -437,8 +437,6 @@ export function getThemeCssVars(themeColor: ThemeColor, resolved: ResolvedTheme)
 }
 
 export const colors: ColorPalette = getThemePalette('rosewood', 'light');
-export const lightCssVars: CssVarMap = getThemeCssVars('rosewood', 'light');
-export const darkCssVars: CssVarMap = getThemeCssVars('rosewood', 'dark');
 
 export const spacing = {
   xxs: 4,
