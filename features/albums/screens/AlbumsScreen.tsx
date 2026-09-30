@@ -23,7 +23,6 @@ import {
 } from '~/components/navigation/BottomNavMinimize';
 import { AddIconButton, SelectField, Text } from '~/components/ui';
 import { useApp, useTransactions } from '~/context/AppContext';
-import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -50,10 +49,9 @@ export function AlbumsScreen({
   onOpenAlbumDetail,
 }: AlbumsScreenProps) {
   const { albums, activeAlbumId, setActiveAlbum, reorderAlbums } = useApp();
-  // Album totals are read through the identity-stable `getAlbumStats`; this is
-  // what tells the cards and pins to re-read them, held still while the tab
-  // is hidden so a save elsewhere doesn't re-render every card behind it.
-  const statsVersion = useValueWhileTabVisible(useTransactions().transactions);
+  // Album totals are read through the identity-stable `getAlbumStats`; the
+  // transaction list is what tells the cards and pins to re-read them.
+  const { transactions: statsVersion } = useTransactions();
   const { checkLimit } = useProGate();
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();

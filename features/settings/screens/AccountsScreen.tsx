@@ -61,7 +61,6 @@ import { getAccountLogoMeta } from '~/constants/accountLogos';
 import { ACCOUNT_TYPE_OPTIONS, DEFAULT_CURRENCY } from '~/constants/appDefaults';
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
-import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
 import { LoanQuoteDisclosure } from '~/features/loans/components';
 import { resolveLoanContractFields } from '~/features/loans/lib/loanContractFields';
 import {
@@ -3098,13 +3097,7 @@ export function AccountsScreen({
     updateTransactionsBulk,
   } = useApp();
   const monthCycle = monthCycleOf(settings);
-  const { accountBalances: liveAccountBalances, transactions: liveTransactions } =
-    useTransactions();
-  // While the accounts tab is hidden (tabs stay mounted), hold the last-seen
-  // snapshots so every transaction write doesn't recompute balances/credit
-  // summaries in the background; they catch up once when re-activated.
-  const accountBalances = useValueWhileTabVisible(liveAccountBalances);
-  const transactions = useValueWhileTabVisible(liveTransactions);
+  const { accountBalances, transactions } = useTransactions();
   const { checkLimit } = useProGate();
 
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(accountId);

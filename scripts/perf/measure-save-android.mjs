@@ -12,77 +12,42 @@
  *   node scripts/perf/measure-save-android.mjs --runs 8 --out save.json \
  *     --fab 949,2016 --quick 282,1794 --save 963,1195 [--text "14.5%slunch"] [--device emulator-5554]
  */
-import { execFileSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 
-const args = process.argv.slice(2);
-const opt = (n, d) => {
-  const i = args.indexOf(`--${n}`);
-  return i >= 0 ? args[i + 1] : d;
-};
-const runs = Number(opt('runs', '8'));
-const out = opt('out');
-const fab = opt('fab').split(',');
-const quick = opt('quick').split(',');
-const save = opt('save').split(',');
-const text = opt('text', '14.5%slunch');
-const device = opt('device', 'emulator-5554');
-const bundle = 'com.nelsongan.money2time';
-const adb = `${process.env.ANDROID_HOME ?? '/opt/homebrew/share/android-commandlinetools'}/platform-tools/adb`;
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const sh = (cmd) => execFileSync(adb, ['-s', device, 'shell', cmd], { encoding: 'utf8' });
-const tryRun = (a) => {
-  try {
-    return execFileSync(adb, ['-s', device, ...a], { encoding: 'utf8' });
-  } catch {
-    return '';
-  }
-};
+import {
+  adb,
+  adbShell,
+  androidLauncherActivity,
+  androidPerfEvents,
+  APP_BUNDLE,
+  median,
+  option,
+  restoreAndroidGolden,
+  sleep,
+  tryRun,
+  waitFor,
+} from './lib.mjs';
 
-function events() {
-  const text = tryRun(['logcat', '-d', '-v', 'raw', '-s', 'ReactNativeJS:*']);
-  const list = [];
-  for (const line of text.split('\n')) {
-    const at = line.indexOf('[m2t-perf] ');
-    if (at < 0) continue;
-    try {
-      list.push(JSON.parse(line.slice(at + 11).trim()));
-    } catch {}
-  }
-  return list;
-}
-async function waitFor(pred, timeout = 30000) {
-  const t = Date.now();
-  while (Date.now() - t < timeout) {
-    const e = events();
-    if (pred(e)) return e;
-    await sleep(250);
-  }
-  return events();
-}
-function activity() {
-  const r = sh(
-    `cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.LAUNCHER ${bundle}`,
-  );
-  return r
-    .split('\n')
-    .find((l) => l.startsWith(`${bundle}/`))
-    .trim();
-}
+const runs = Number(option('runs', '8'));
+const out = option('out');
+const fab = option('fab').split(',');
+const quick = option('quick').split(',');
+const save = option('save').split(',');
+const text = option('text', '14.5%slunch');
+const device = option('device', 'emulator-5554');
+const sh = (cmd) => adbShell(device, cmd);
+const events = () => androidPerfEvents(device);
+const LABELS = ['fab_press', 'quick_add_open', 'quick_add_save'];
 
-const act = activity();
+const act = androidLauncherActivity(device);
 const results = [];
 for (let i = 0; i < runs; i++) {
-  tryRun(['shell', 'am', 'force-stop', bundle]);
-  const files = `/data/data/${bundle}/files`;
-  const owner = sh(`stat -c %U ${files}`).trim();
-  sh(
-    `cd ${files} && rm -rf SQLite user-assets && tar -xf /data/local/tmp/golden.tar && chown -R ${owner}:${owner} SQLite user-assets && restorecon -R SQLite user-assets >/dev/null 2>&1`,
-  );
-  tryRun(['logcat', '-c']);
+  tryRun(adb, ['-s', device, 'shell', 'am', 'force-stop', APP_BUNDLE]);
+  restoreAndroidGolden(device);
+  tryRun(adb, ['-s', device, 'logcat', '-c']);
   await sleep(1500);
   sh(`am start -W -n ${act} -a android.intent.action.MAIN -c android.intent.category.LAUNCHER`);
-  await waitFor((e) => e.some((x) => x.kind === 'post_launch'));
+  await waitFor(events, (e) => e.some((x) => x.kind === 'post_launch'));
   await sleep(1000);
   sh(`input tap ${fab[0]} ${fab[1]}`);
   await sleep(1500);
@@ -91,11 +56,10 @@ for (let i = 0; i < runs; i++) {
   sh(`input text "${text}"`);
   await sleep(1500);
   sh(`input tap ${save[0]} ${save[1]}`);
-  const ev = await waitFor((e) => e.some((x) => x.label === 'quick_add_save'), 8000);
-  const pick = (label) => ev.find((x) => x.label === label) ?? null;
+  const ev = await waitFor(events, (e) => e.some((x) => x.label === 'quick_add_save'), 8000);
   const r = { run: i + 1 };
-  for (const label of ['fab_press', 'quick_add_open', 'quick_add_save']) {
-    const x = pick(label);
+  for (const label of LABELS) {
+    const x = ev.find((item) => item.label === label);
     r[label] = x
       ? {
           maxGapMs: x.maxGapMs,
@@ -112,16 +76,10 @@ for (let i = 0; i < runs; i++) {
   results.push(r);
   await sleep(1000);
 }
-const med = (vals) => {
-  const v = vals.filter((x) => typeof x === 'number').sort((a, b) => a - b);
-  if (!v.length) return null;
-  const m = Math.floor(v.length / 2);
-  return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2;
-};
 const medians = {};
-for (const label of ['fab_press', 'quick_add_open', 'quick_add_save']) {
+for (const label of LABELS) {
   for (const k of ['maxGapMs', 'jankMs', 'longFrames', 'firstFrameMs'])
-    medians[`${label}.${k}`] = med(results.map((r) => r[label]?.[k]));
+    medians[`${label}.${k}`] = median(results.map((r) => r[label]?.[k]));
 }
 console.table(medians);
 if (out) writeFileSync(out, JSON.stringify({ results, medians }, null, 2));

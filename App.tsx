@@ -65,7 +65,6 @@ import {
   useReceiptScans,
 } from '~/context/ReceiptScanContext';
 import { SplitBillSessionProvider } from '~/context/SplitBillSession';
-import { TabVisibilityProvider } from '~/context/TabVisibilityContext';
 import { ThemeProvider, useResolvedTheme } from '~/context/ThemeContext';
 import {
   AddAlbumTransactionsScreen,
@@ -355,9 +354,7 @@ function MountedTab({
       style={[styles.tabSlot, active ? styles.tabVisible : styles.tabHidden]}
     >
       {shouldMount ? (
-        <TabVisibilityProvider visible={active}>
-          <TransactionsWhileVisible visible={active}>{children}</TransactionsWhileVisible>
-        </TabVisibilityProvider>
+        <TransactionsWhileVisible visible={active}>{children}</TransactionsWhileVisible>
       ) : null}
     </View>
   );

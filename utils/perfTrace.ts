@@ -19,7 +19,7 @@
  *   janky the interaction felt.
  */
 
-export const PERF_TRACE_ENABLED = process.env.EXPO_PUBLIC_PERF_TRACE === '1';
+const PERF_TRACE_ENABLED = process.env.EXPO_PUBLIC_PERF_TRACE === '1';
 
 const FRAME_BUDGET_MS = 1000 / 60;
 const LONG_FRAME_MS = 50;
@@ -48,8 +48,6 @@ interface FrameReport {
   longFrames: number;
   frames: number;
   settledAtMs: number;
-  /** Wall-clock start of the window, the clock the marks use. */
-  windowStartedAt: number;
   /** The longest gaps, as [ms into the window when the gap began, gap ms]. */
   gaps: [number, number][];
 }
@@ -57,7 +55,6 @@ interface FrameReport {
 const MAX_REPORTED_GAPS = 12;
 
 function monitorFrames(windowMs: number, onDone: (report: FrameReport) => void) {
-  const windowStartedAt = Date.now();
   const start = performance.now();
   let last = start;
   const gaps: [number, number][] = [];
@@ -92,7 +89,6 @@ function monitorFrames(windowMs: number, onDone: (report: FrameReport) => void) 
       longFrames,
       frames,
       settledAtMs: round(settledAtMs),
-      windowStartedAt,
       gaps: gaps.sort((a, b) => b[1] - a[1]).slice(0, MAX_REPORTED_GAPS),
     });
   };

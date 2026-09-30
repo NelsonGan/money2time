@@ -207,10 +207,10 @@ function attachRelations(transactions: Transaction[]): TransactionWithRelations[
     txIds.push(transaction.id);
   });
   const sqlite = getSQLite();
-  // For large sets (startup full-load), a WHERE t.id IN (…thousands…) clause is
-  // slow to prepare; scan all non-deleted transactions instead. The relation map
-  // is keyed by id, so the per-transaction lookup below still yields the exact
-  // same result whether the query returned a superset or an exact match.
+  // For large sets, a WHERE t.id IN (…thousands…) clause is slow to prepare;
+  // scan all non-deleted transactions instead. The relation map is keyed by
+  // id, so the per-transaction lookup below still yields the exact same result
+  // whether the query returned a superset or an exact match.
   const scanAllNonDeleted = txIds.length > IN_CLAUSE_SCAN_THRESHOLD;
   const relationFilterSql = scanAllNonDeleted
     ? 't.deleted_at IS NULL'
@@ -347,31 +347,6 @@ function buildSqlPredicates(normalized: TransactionFilters, options?: Transactio
   return predicates;
 }
 
-/** Whether any filter narrows the SQL query itself (see `buildSqlPredicates`). */
-function hasSqlFilters(filters: TransactionFilters): boolean {
-  return (
-    filters.type !== 'all' ||
-    filters.dateRange !== null ||
-    filters.accountId !== null ||
-    filters.minAmount !== null ||
-    filters.maxAmount !== null ||
-    filters.search.trim().length > 0
-  );
-}
-
-/** Whether `list`'s per-row filter pass could drop anything. */
-function hasRowFilters(filters: TransactionFilters): boolean {
-  return (
-    filters.type !== 'all' ||
-    filters.excludedAccountIds.length > 0 ||
-    filters.excludedIncomeCategoryIds.length > 0 ||
-    filters.excludedExpenseCategoryIds.length > 0 ||
-    filters.incomeCategoryId !== null ||
-    filters.expenseCategoryId !== null ||
-    filters.categoryId !== null
-  );
-}
-
 class TransactionsRepository {
   // Plain rows matching the SQL-level filters only — no relation JOINs and no
   // splits lookup. Used by aggregations (cashflow, category breakdowns) which
@@ -393,21 +368,22 @@ class TransactionsRepository {
 
   list(filters: Partial<TransactionFilters> = {}): TransactionWithRelations[] {
     const normalized = normalizeTransactionFilters(filters);
+    const predicates = buildSqlPredicates(normalized);
 
-    const transactions = hasSqlFilters(normalized)
-      ? attachRelations(
-          getDb()
-            .select()
-            .from(transactionsTable)
-            .where(and(...buildSqlPredicates(normalized)))
-            .all()
-            .map(toTransaction),
-        )
-      : loadAllWithRelations();
+    // The soft-delete check is always there. With nothing else narrowing the
+    // query every live row is wanted, which the one-query loader reads fastest.
+    const transactions =
+      predicates.filter(Boolean).length > 1
+        ? attachRelations(
+            getDb()
+              .select()
+              .from(transactionsTable)
+              .where(and(...predicates))
+              .all()
+              .map(toTransaction),
+          )
+        : loadAllWithRelations();
     attachSplits(transactions);
-    if (!hasRowFilters(normalized)) {
-      return sortTransactions(transactions, normalized.sortBy);
-    }
     const excludedAccountIdSet = new Set(normalized.excludedAccountIds);
     const excludedIncomeCategoryIdSet = new Set(normalized.excludedIncomeCategoryIds);
     const excludedExpenseCategoryIdSet = new Set(normalized.excludedExpenseCategoryIds);

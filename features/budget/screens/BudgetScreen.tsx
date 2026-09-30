@@ -21,7 +21,6 @@ import { chartCategoryColor } from '~/constants/chartColors';
 import type { ColorPalette } from '~/constants/designSystem';
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
-import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
 import { BudgetTemplatePickerSheet } from '~/features/budget/components/BudgetTemplatePickerSheet';
 import {
   buildBudgetMonthSummary,
@@ -444,12 +443,7 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
       deleteMonthlyBudget,
     } = useApp();
     const monthCycle = monthCycleOf(settings);
-    const { transactions: liveTransactions } = useTransactions();
-    // Tabs stay mounted for the app's lifetime, so when this pager is embedded
-    // in the Insights tab it must freeze its transaction input while hidden —
-    // otherwise every write re-runs the full month aggregation in the
-    // background. Root-stack hosts (the standalone screen) are always visible.
-    const transactions = useValueWhileTabVisible(liveTransactions);
+    const { transactions } = useTransactions();
     const themeColors = useThemeColors();
     const listNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
     const { width: pageWidth } = useWindowDimensions();

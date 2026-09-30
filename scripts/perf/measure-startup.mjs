@@ -23,55 +23,36 @@
  * includes process creation and native init. Android also reports the OS's
  * own `am start -W` TotalTime, which runs until the first frame is drawn.
  */
-import { execFileSync, spawn } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 
-const args = process.argv.slice(2);
-const platform = args[0];
-const option = (name, fallback) => {
-  const index = args.indexOf(`--${name}`);
-  return index >= 0 ? args[index + 1] : fallback;
-};
+import {
+  adb,
+  androidLauncherActivity,
+  APP_BUNDLE,
+  median,
+  option,
+  parsePerfLines,
+  restoreAndroidGolden,
+  run,
+  sleep,
+  tryRun,
+  waitFor,
+} from './lib.mjs';
+
+const platform = process.argv[2];
 const device = option('device');
 const runs = Number(option('runs', '10'));
-const bundle = option('bundle', 'com.nelsongan.money2time');
+const bundle = option('bundle', APP_BUNDLE);
 const out = option('out');
 const settleMs = Number(option('settle', '2000'));
 const golden = option('golden');
-const backupDue = args.includes('--backup-due');
+const backupDue = process.argv.includes('--backup-due');
 const STALE_BACKUP_AT = '2020-01-01T00:00:00.000Z';
 
 if (!['ios', 'android'].includes(platform) || !device) {
   console.error('usage: measure-startup.mjs <ios|android> --device <id> [--runs N] [--out f]');
   process.exit(1);
-}
-
-const adb = `${process.env.ANDROID_HOME ?? '/opt/homebrew/share/android-commandlinetools'}/platform-tools/adb`;
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-const run = (cmd, cmdArgs) => execFileSync(cmd, cmdArgs, { encoding: 'utf8' });
-const tryRun = (cmd, cmdArgs) => {
-  try {
-    return run(cmd, cmdArgs);
-  } catch {
-    return '';
-  }
-};
-
-function parsePerfLines(text) {
-  const events = [];
-  for (const line of text.split('\n')) {
-    const at = line.indexOf('[m2t-perf] ');
-    if (at < 0) continue;
-    const json = line.slice(at + '[m2t-perf] '.length).trim();
-    // os_log can append a trailing quote or escape; take the outermost object.
-    const end = json.lastIndexOf('}');
-    try {
-      events.push(JSON.parse(json.slice(0, end + 1).replace(/\\"/g, '"')));
-    } catch {
-      // Not one of ours, or truncated.
-    }
-  }
-  return events;
 }
 
 // iOS: one `log stream` for the whole session, buffered into a string.
@@ -97,21 +78,12 @@ async function startIosStream() {
   await sleep(1500);
 }
 
-async function waitFor(readText, predicate, timeoutMs = 30000) {
-  const started = Date.now();
-  while (Date.now() - started < timeoutMs) {
-    const events = parsePerfLines(readText());
-    if (predicate(events)) return events;
-    await sleep(250);
-  }
-  return parsePerfLines(readText());
-}
-
 // The frame report, then a moment for the marks line that follows it (builds
 // from before that line existed never send it).
 async function waitForPostLaunch(readText) {
-  await waitFor(readText, (list) => list.some((e) => e.kind === 'post_launch'));
-  return waitFor(readText, (list) => list.some((e) => e.kind === 'post_launch_marks'), 1000);
+  const read = () => parsePerfLines(readText());
+  await waitFor(read, (list) => list.some((e) => e.kind === 'post_launch'));
+  return waitFor(read, (list) => list.some((e) => e.kind === 'post_launch_marks'), 1000);
 }
 
 function restoreIos() {
@@ -129,36 +101,10 @@ function restoreIos() {
 }
 
 function restoreAndroid() {
-  const files = `/data/data/${bundle}/files`;
-  const owner = run(adb, ['-s', device, 'shell', 'stat', '-c', '%U', files]).trim();
   const staleSql = backupDue
-    ? ` && sqlite3 ${files}/SQLite/money2time.db "UPDATE settings SET last_auto_backup_at = '${STALE_BACKUP_AT}';"`
+    ? `sqlite3 SQLite/money2time.db "UPDATE settings SET last_auto_backup_at = '${STALE_BACKUP_AT}';"`
     : '';
-  run(adb, [
-    '-s',
-    device,
-    'shell',
-    `cd ${files} && rm -rf SQLite user-assets && tar -xf /data/local/tmp/golden.tar${staleSql} && chown -R ${owner}:${owner} SQLite user-assets && restorecon -R SQLite user-assets >/dev/null 2>&1`,
-  ]);
-}
-
-function launcherActivity() {
-  const resolved = run(adb, [
-    '-s',
-    device,
-    'shell',
-    'cmd',
-    'package',
-    'resolve-activity',
-    '--brief',
-    '-a',
-    'android.intent.action.MAIN',
-    '-c',
-    'android.intent.category.LAUNCHER',
-    bundle,
-  ]);
-  const line = resolved.split('\n').find((l) => l.startsWith(`${bundle}/`));
-  return line ? line.trim() : `${bundle}/.MainActivity`;
+  restoreAndroidGolden(device, bundle, staleSql);
 }
 
 async function runOnce(index) {
@@ -237,14 +183,7 @@ async function runOnce(index) {
   return { ...result, detail };
 }
 
-function median(values) {
-  const list = values.filter((v) => typeof v === 'number').sort((a, b) => a - b);
-  if (list.length === 0) return null;
-  const mid = Math.floor(list.length / 2);
-  return list.length % 2 ? list[mid] : (list[mid - 1] + list[mid]) / 2;
-}
-
-const activity = platform === 'android' ? launcherActivity() : null;
+const activity = platform === 'android' ? androidLauncherActivity(device, bundle) : null;
 if (platform === 'ios') await startIosStream();
 const results = [];
 for (let index = 0; index < runs; index += 1) {

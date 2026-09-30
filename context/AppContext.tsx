@@ -2175,8 +2175,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           const activeAlbumId = albumsRepository.getActiveId();
           if (activeAlbumId) {
             albumsRepository.addTransactions(activeAlbumId, [id]);
-            // Refresh albums so index-card stats (a memo keyed on the album
-            // reference) recompute for the auto-added transaction.
+            // Reload albums so the album stats re-read the member lists, which
+            // now include the auto-added transaction.
             setAlbums(albumsRepository.list());
           }
           // Voice entries fire a dedicated event so voice adoption can be
@@ -4177,8 +4177,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // re-ran the stats query on every write whether or not an album was showing,
   // and its new identity changed the whole `useApp()` value, which re-rendered
   // every consumer in the app on each transaction save. Callers key their
-  // memos on `useTransactions().transactions` (the albums tab passes its cards
-  // a copy that holds still while the tab is hidden).
+  // memos on `useTransactions().transactions` instead.
   const albumStatsInputs = {
     albums,
     transactions,
@@ -5035,8 +5034,8 @@ export function TransactionsWhileVisible({
   const live = useContext(TransactionsContext);
   const [held, setHeld] = useState(live);
   if (visible && held !== live) {
-    // Render-phase adjustment, as in useValueWhileTabVisible: React re-runs
-    // this render with the fresh value before committing.
+    // Render-phase state adjustment: React re-runs this render with the fresh
+    // value before committing, without an extra commit.
     setHeld(live);
   }
   return (
@@ -5050,7 +5049,8 @@ export function TransactionsWhileVisible({
  * Subscribe to volatile transaction-derived state (transactions,
  * filteredTransactions, accountBalances, filters). Components that do NOT need
  * this data should use `useApp()` instead so they don't re-render on every
- * transaction mutation.
+ * transaction mutation. Inside a hidden tab this is the state from when the tab
+ * was last visible (see `TransactionsWhileVisible`).
  */
 export function useTransactions() {
   const context = useContext(TransactionsContext);
