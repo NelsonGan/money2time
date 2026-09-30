@@ -1,4 +1,3 @@
-import * as ImagePicker from 'expo-image-picker';
 import { Check, ChevronDown, ImagePlus, Search, Trash2, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
@@ -25,6 +24,7 @@ import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { getDeviceRegionCode, I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import { pickLibraryImage } from '~/services/libraryImagePicker';
 import {
   deleteCustomLogo,
   listCustomAccountLogos,
@@ -252,29 +252,14 @@ export function AccountLogoPickerSheet({
     if (!checkLimit('custom_logos', customLogos.length)) {
       return;
     }
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert(
-        I18n.t('accounts.logo.permission_title'),
-        I18n.t('accounts.logo.permission_message'),
-      );
-      return;
-    }
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.9,
-      });
-      if (result.canceled || !result.assets?.[0]) return;
-      // Add to the grid but don't auto-select — the user taps to choose it.
-      saveCustomAccountLogo(result.assets[0].uri);
-      refreshCustomLogos();
-    } catch {
-      // The picker itself can reject, not just the save step below it.
-      Alert.alert(I18n.t('accounts.logo.upload_failed'));
-    }
+    await pickLibraryImage(
+      (uri) => {
+        // Add to the grid but don't auto-select — the user taps to choose it.
+        saveCustomAccountLogo(uri);
+        refreshCustomLogos();
+      },
+      { aspect: [1, 1], failureTitle: I18n.t('accounts.logo.upload_failed') },
+    );
   }, [checkLimit, customLogos.length, refreshCustomLogos]);
 
   const handleDeleteCustom = useCallback(

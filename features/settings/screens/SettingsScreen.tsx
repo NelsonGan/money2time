@@ -1,5 +1,4 @@
 import { Image } from 'expo-image';
-import * as ImagePicker from 'expo-image-picker';
 import {
   CalendarDays,
   Camera,
@@ -53,11 +52,11 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { resetCloudBackupPromptState } from '~/services/cloudBackupPrompt';
 import { triggerHaptic } from '~/services/haptics';
+import { pickLibraryImage } from '~/services/libraryImagePicker';
 import { isLiveActivityAvailable } from '~/services/liveActivity';
 import { openStoreReviewManually } from '~/services/reviewPrompt';
 import { deleteProfileAvatar, getProfileAvatarUri, saveProfileAvatar } from '~/services/userAssets';
 import { cn } from '~/utils';
-import { getErrorMessage } from '~/utils/errorHandling';
 import {
   financialMonthKeyForDate,
   financialMonthKeyForIso,
@@ -203,30 +202,15 @@ export function SettingsScreen({
 
   const handlePickAvatar = useCallback(async () => {
     void triggerHaptic('selection');
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert(
-        I18n.t('accounts.logo.permission_title'),
-        I18n.t('accounts.logo.permission_message'),
-      );
-      return;
-    }
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.9,
-      });
-      if (result.canceled || !result.assets?.[0]) return;
-      const previous = settings.profileAvatarUri;
-      const relativePath = saveProfileAvatar(result.assets[0].uri);
-      updateSettings({ profileAvatarUri: relativePath });
-      if (previous) deleteProfileAvatar(previous);
-    } catch (error) {
-      // The picker itself can reject, not just the save step below it.
-      Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
-    }
+    await pickLibraryImage(
+      (uri) => {
+        const previous = settings.profileAvatarUri;
+        const relativePath = saveProfileAvatar(uri);
+        updateSettings({ profileAvatarUri: relativePath });
+        if (previous) deleteProfileAvatar(previous);
+      },
+      { aspect: [1, 1] },
+    );
   }, [settings.profileAvatarUri, updateSettings]);
 
   useEffect(() => {

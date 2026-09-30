@@ -1,5 +1,4 @@
 import { Image } from 'expo-image';
-import * as ImagePicker from 'expo-image-picker';
 import { ChevronRight, ImageIcon, X } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
@@ -11,6 +10,7 @@ import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import { pickLibraryImage } from '~/services/libraryImagePicker';
 import { deleteAlbumCover, getAlbumCoverUri, saveAlbumCover } from '~/services/userAssets';
 import type { AlbumLocation } from '~/types';
 import { getErrorMessage } from '~/utils/errorHandling';
@@ -50,27 +50,21 @@ export function CreateAlbumScreen({
 
   const pickCover = useCallback(async () => {
     void triggerHaptic('selection');
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert(I18n.t('albums.cover_permission_title'), I18n.t('albums.cover_permission_body'));
-      return;
-    }
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
-        allowsEditing: true,
+    await pickLibraryImage(
+      (uri) => {
+        const previous = coverPath;
+        const relativePath = saveAlbumCover(uri);
+        setCoverPath(relativePath);
+        if (previous) deleteAlbumCover(previous);
+      },
+      {
         aspect: [3, 2],
-        quality: 0.9,
-      });
-      if (result.canceled || !result.assets?.[0]) return;
-      const previous = coverPath;
-      const relativePath = saveAlbumCover(result.assets[0].uri);
-      setCoverPath(relativePath);
-      if (previous) deleteAlbumCover(previous);
-    } catch (error) {
-      // The picker itself can reject, not just the save step below it.
-      Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
-    }
+        permissionAlert: {
+          title: I18n.t('albums.cover_permission_title'),
+          message: I18n.t('albums.cover_permission_body'),
+        },
+      },
+    );
   }, [coverPath]);
 
   const handleSave = useCallback(() => {

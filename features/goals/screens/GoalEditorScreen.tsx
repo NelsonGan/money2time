@@ -1,5 +1,4 @@
 import { Image } from 'expo-image';
-import * as ImagePicker from 'expo-image-picker';
 import { Camera, ChevronRight, ImageIcon, Trash2, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Pressable, View } from 'react-native';
@@ -25,11 +24,11 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
+import { pickLibraryImage } from '~/services/libraryImagePicker';
 import { deleteGoalCover, getGoalCoverUri, saveGoalCover } from '~/services/userAssets';
 import { cn } from '~/utils';
 import { suggestCategoryIcon } from '~/utils/categoryIconMatcher';
 import { convert, currencySymbolForCode } from '~/utils/currency';
-import { getErrorMessage } from '~/utils/errorHandling';
 import {
   dayKeyFromDateLocal,
   formatAmount,
@@ -171,24 +170,18 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
 
   const pickCover = useCallback(async () => {
     void triggerHaptic('selection');
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert(I18n.t('goals.cover_permission_title'), I18n.t('goals.cover_permission_body'));
-      return;
-    }
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
-        allowsEditing: true,
+    await pickLibraryImage(
+      (uri) => {
+        stageCover(saveGoalCover(uri));
+      },
+      {
         aspect: [3, 2],
-        quality: 0.9,
-      });
-      if (result.canceled || !result.assets?.[0]) return;
-      stageCover(saveGoalCover(result.assets[0].uri));
-    } catch (error) {
-      // The picker itself can reject, not just the save step below it.
-      Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
-    }
+        permissionAlert: {
+          title: I18n.t('goals.cover_permission_title'),
+          message: I18n.t('goals.cover_permission_body'),
+        },
+      },
+    );
   }, [stageCover]);
 
   const removeCover = useCallback(() => {
