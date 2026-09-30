@@ -352,7 +352,7 @@ export function CategoryIconPickerSheet({
 
   // `withPack` is only true on the Icons tab: emoji have no pack. The selector
   // lives inside the search pill rather than on its own row, matching the
-  // country filter in AccountLogoPickerSheet.
+  // country filter in LogoPickerSheet.
   const searchBar = (placeholder: string, withPack = false) => (
     <Animated.View
       className="px-5 bg-background"

@@ -188,7 +188,7 @@ export function ItemIconPickerSheet({
   const [query, setQuery] = useState('');
   const [customIcons, setCustomIcons] = useState<{ id: string; uri: string }[]>([]);
 
-  // Lifts the sticky search bar over the keyboard; see AccountLogoPickerSheet for why.
+  // Lifts the sticky search bar over the keyboard; see LogoPickerSheet for why.
   const keyboard = useReanimatedKeyboardAnimation();
   const searchBarAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: keyboard.height.value }],
