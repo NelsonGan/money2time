@@ -5,6 +5,7 @@ import React, { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { Text } from '~/components/ui';
+import { SavingsHistoryWidgetContent } from '~/components/widget-preview/SavingsHistoryWidgetContent';
 import { SavingsRateWidgetContent } from '~/components/widget-preview/SavingsRateWidgetContent';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -396,88 +397,6 @@ function SavingsContent({ snapshot }: { snapshot: ReturnType<typeof buildSampleW
   );
 }
 
-function SavingsHistoryRow({
-  month,
-}: {
-  month: ReturnType<typeof buildSampleWidgetSnapshot>['savingsHistory']['months'][number];
-}) {
-  const themeColors = useThemeColors();
-  const accent = !month.hasIncome
-    ? themeColors.textMuted
-    : month.isPositive
-      ? themeColors.success
-      : themeColors.error;
-  const fillPct = !month.hasIncome
-    ? 0
-    : month.isPositive
-      ? Math.max(4, Math.min(1, month.savingsRate) * 100)
-      : Math.max(8, Math.min(1, Math.abs(month.savingsRate)) * 100);
-  return (
-    <View style={styles.histRow}>
-      <Text variant="caption" style={[styles.histMonth, { color: themeColors.textSoft }]}>
-        {month.monthLabel}
-      </Text>
-      <View style={[styles.histTrack, { backgroundColor: withColorAlpha(themeColors.text, 0.06) }]}>
-        <View
-          style={[
-            styles.histFill,
-            {
-              width: `${fillPct}%`,
-              backgroundColor: month.hasActivity ? accent : withColorAlpha(themeColors.text, 0.08),
-            },
-          ]}
-        />
-      </View>
-      <View style={styles.histValues}>
-        <Text
-          allowFontScaling={false}
-          style={[styles.histRate, { color: month.hasActivity ? accent : themeColors.textMuted }]}
-          numberOfLines={1}
-        >
-          {month.rateLabel}
-        </Text>
-        <Text
-          allowFontScaling={false}
-          style={[styles.histSaved, { color: themeColors.textMuted }]}
-          numberOfLines={1}
-        >
-          {month.savedLabel}
-        </Text>
-      </View>
-    </View>
-  );
-}
-
-function SavingsHistoryContent({
-  snapshot,
-}: {
-  snapshot: ReturnType<typeof buildSampleWidgetSnapshot>;
-}) {
-  const themeColors = useThemeColors();
-  const data = snapshot.savingsHistory;
-  const totalColor = data.totalIsPositive ? themeColors.success : themeColors.error;
-  return (
-    <View style={styles.pad}>
-      <View style={styles.rowBetween}>
-        <Banner />
-        <View style={{ alignItems: 'flex-end' }}>
-          <Text style={[styles.totalAmount, { color: totalColor }]} numberOfLines={1}>
-            {data.totalSavedLabel}
-          </Text>
-          <Text variant="caption" tone="muted" numberOfLines={1}>
-            {data.averageRateLabel}
-          </Text>
-        </View>
-      </View>
-      <View style={styles.histRows}>
-        {data.months.map((month) => (
-          <SavingsHistoryRow key={month.monthKey} month={month} />
-        ))}
-      </View>
-    </View>
-  );
-}
-
 export function WidgetShowcase({
   kind,
   width,
@@ -524,7 +443,7 @@ export function WidgetShowcase({
       ) : kind === 'savings' ? (
         <SavingsContent snapshot={snapshot} />
       ) : kind === 'savingsHistory' ? (
-        <SavingsHistoryContent snapshot={snapshot} />
+        <SavingsHistoryWidgetContent data={snapshot.savingsHistory} bannerWidth={112} />
       ) : (
         <CalendarContent snapshot={snapshot} />
       )}
@@ -578,47 +497,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   // savings history (large)
-  histRows: {
-    flex: 1,
-    justifyContent: 'space-between',
-    paddingTop: 10,
-  },
-  histRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  histMonth: {
-    width: 34,
-    fontFamily: FONT.bold,
-  },
-  histTrack: {
-    flex: 1,
-    height: 12,
-    borderRadius: 999,
-    overflow: 'hidden',
-  },
-  histFill: {
-    height: '100%',
-    borderRadius: 999,
-    minWidth: 4,
-  },
-  histValues: {
-    width: 64,
-    alignItems: 'flex-end',
-  },
-  histRate: {
-    textAlign: 'right',
-    fontFamily: FONT.monoBold,
-    fontSize: 15,
-    lineHeight: 18,
-  },
-  histSaved: {
-    textAlign: 'right',
-    fontFamily: FONT.bold,
-    fontSize: 10,
-    lineHeight: 12,
-  },
   eyebrow: {
     fontSize: 10,
     letterSpacing: 1.4,
