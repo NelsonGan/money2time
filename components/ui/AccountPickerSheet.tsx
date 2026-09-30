@@ -135,6 +135,12 @@ export function AccountPickerSheet(props: AccountPickerSheetProps) {
     return out;
   }, [accounts, accountGroups, selectedIdSet, singleSelectedId]);
 
+  // A hidden overlay renders nothing, so don't build its rows either. Hosts keep
+  // the picker mounted and re-render it with their own state (the quick-add
+  // sheet does as it closes on save), and with a few dozen accounts building
+  // that tree only to discard it was a real slice of the save.
+  if (overlay && !visible) return null;
+
   const sheetContent = (
     <Pressable style={styles.backdrop} onPress={onClose}>
       <Pressable onPress={(e) => e.stopPropagation()} style={styles.sheet}>
@@ -236,7 +242,6 @@ export function AccountPickerSheet(props: AccountPickerSheetProps) {
   );
 
   if (overlay) {
-    if (!visible) return null;
     return <View style={styles.absoluteFill}>{sheetContent}</View>;
   }
 

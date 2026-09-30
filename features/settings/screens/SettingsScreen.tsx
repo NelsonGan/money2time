@@ -45,7 +45,6 @@ import {
 import { ClayIcon } from '~/components/ui/ClayIcon';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
-import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
 import { useIsFlatIcons } from '~/context/ThemeContext';
 import { DisplayModeToggle } from '~/features/transactions/components';
 import { ReimbursementTileBadge } from '~/features/reimbursements/components/ReimbursementTileBadge';
@@ -131,10 +130,7 @@ export function SettingsScreen({
 }: SettingsScreenProps) {
   const { settings, updateSettings } = useApp();
   const monthCycle = monthCycleOf(settings);
-  const { transactions: liveTransactions } = useTransactions();
-  // Profile stats are cosmetic — while the settings tab is hidden, hold the
-  // last-seen snapshot instead of re-scanning all transactions on every write.
-  const transactions = useValueWhileTabVisible(liveTransactions);
+  const { transactions } = useTransactions();
   const { isPro, setDevProOverride } = usePro();
   const themeColors = useThemeColors();
   const isFlatIcons = useIsFlatIcons();

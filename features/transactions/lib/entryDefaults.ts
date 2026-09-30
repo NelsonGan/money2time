@@ -21,13 +21,17 @@ export function findFallbackCategory(
 }
 
 /**
- * The account an entry flow posts to: the preferred/saved account when it
- * still exists, else the first account by sort order.
+ * The account an entry flow posts to: an explicit selection, then the
+ * preferred/saved account when it still exists, else the first by sort order.
  */
 export function pickDefaultAccountId(
   accounts: Account[],
   preferredId?: string | null,
+  initialId?: string | null,
 ): string | null {
+  if (initialId && accounts.some((account) => account.id === initialId)) {
+    return initialId;
+  }
   if (preferredId && accounts.some((account) => account.id === preferredId)) {
     return preferredId;
   }

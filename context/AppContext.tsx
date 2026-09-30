@@ -11,6 +11,7 @@ import React, {
 import {
   AppState as RNAppState,
   type AppStateStatus,
+  InteractionManager,
   Pressable,
   StyleSheet,
   Text,
@@ -20,10 +21,10 @@ import {
 import {
   DEFAULT_CURRENCY,
   DEFAULT_TRANSACTION_FILTERS,
-  ONBOARDING_MINIMAL_EXPENSE_CATEGORIES,
-  ONBOARDING_MINIMAL_INCOME_CATEGORIES,
   ONBOARDING_DEFAULT_GROUPS,
   ONBOARDING_MINIMAL_ACCOUNTS,
+  ONBOARDING_MINIMAL_EXPENSE_CATEGORIES,
+  ONBOARDING_MINIMAL_INCOME_CATEGORIES,
 } from '~/constants/appDefaults';
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { computeBackPopulateRange, pickAutoCreateTemplate } from '~/features/budget/lib/budgetMath';
@@ -34,8 +35,6 @@ import {
   filterSpendingTransactions,
   NO_REIMBURSEMENT,
 } from '~/features/reimbursements/lib/reimbursementMath';
-import { expenseTotalForPeriod } from '~/features/review/lib/reviewMath';
-import { lastCompletedPeriod } from '~/features/review/lib/reviewPeriods';
 import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accountEntryGate';
 import {
   buildPaybackTransferNote,
@@ -96,13 +95,13 @@ import {
   setSuperProperties,
   trackEvent,
 } from '~/services/analytics';
+import { supportsAppIconSwitching, syncAppIcon } from '~/services/appIcon';
 import {
   registerBackgroundTask,
   runAutoBackupIfDue,
   unregisterBackgroundTask,
 } from '~/services/autoBackup';
 import { clearAllAutoLogQueues } from '~/services/autoLog';
-import { supportsAppIconSwitching, syncAppIcon } from '~/services/appIcon';
 import { reportError, setErrorUser } from '~/services/errorReporting';
 import { refreshRatesNow, runRateRefreshIfDue } from '~/services/exchangeRates';
 import { setHapticsEnabled } from '~/services/haptics';
@@ -136,7 +135,6 @@ import {
   type Category,
   type DateRange,
   DEFAULT_QUICK_ENTRY_PREFS,
-  type DisplayMode,
   type ExchangeRate,
   isLocatedAlbum,
   type Item,
@@ -186,8 +184,10 @@ import {
 } from '~/utils/formatters';
 import { newId, nowIso } from '~/utils/id';
 import { runAfterInteractionsCapped } from '~/utils/interactions';
+import { perfMark } from '~/utils/perfTrace';
 import { countsAsExpenseRow } from '~/utils/spending';
-import { sortTransactions } from '~/utils/transactionSorting';
+import { reconcileTransactionRow, reuseUnchangedTransactions } from '~/utils/transactions';
+import { insertTransactionsByDateDesc, sortTransactions } from '~/utils/transactionSorting';
 
 export interface SplitDraftInput {
   id?: string;
@@ -533,6 +533,56 @@ const EMPTY_ALBUM_STATS: AlbumStats = {
   endDate: null,
 };
 
+function computeAlbumStats(
+  {
+    albums,
+    transactions,
+    valueForDisplay,
+    reimbursementsCountAsExpense,
+  }: {
+    albums: Album[];
+    transactions: TransactionWithRelations[];
+    valueForDisplay: (amount: number, dateIso: string) => number;
+    reimbursementsCountAsExpense: boolean;
+  },
+  transactionIdsByAlbum: Map<string, string[]>,
+): Map<string, AlbumStats> {
+  const map = new Map<string, AlbumStats>();
+  if (albums.length === 0) return map;
+  const transactionById = new Map(transactions.map((tx) => [tx.id, tx]));
+
+  albums.forEach((album) => {
+    let totalSpent = 0;
+    let transactionCount = 0;
+    let startDate: string | null = null;
+    let endDate: string | null = null;
+    for (const id of transactionIdsByAlbum.get(album.id) ?? []) {
+      // A deleted transaction is gone from the loaded list, which is exactly
+      // the join on live rows the stats used to be read with.
+      const row = transactionById.get(id);
+      if (!row) continue;
+      transactionCount += 1;
+      // Only the spend is filtered. The transaction count and the trip's
+      // first/last dates describe the album itself, so a reimbursable
+      // expense must not shorten the trip or make the card under-count.
+      if (countsAsExpenseRow(row) && countsTowardSpending(row, reimbursementsCountAsExpense)) {
+        totalSpent += valueForDisplay(row.reportingAmount ?? row.amount, row.date);
+      }
+      if (startDate === null || row.date < startDate) startDate = row.date;
+      if (endDate === null || row.date > endDate) endDate = row.date;
+    }
+    // Manual overrides win over the computed first/last transaction dates.
+    map.set(album.id, {
+      totalSpent,
+      transactionCount,
+      startDate: album.startDate ?? startDate,
+      endDate: album.endDate ?? endDate,
+    });
+  });
+
+  return map;
+}
+
 // Defer a persist/refresh task off the critical render path (so the optimistic
 // UI paint and any in-flight close/navigation animation stay smooth) without
 // letting a busy device starve it — on slower Android phones the modal-dismiss
@@ -544,6 +594,10 @@ const DEFERRED_WRITE_MAX_DELAY_MS = 300;
 function runDeferredWrite(task: () => void) {
   runAfterInteractionsCapped(task, DEFERRED_WRITE_MAX_DELAY_MS);
 }
+
+// How long the foreground auto-backup waits after launch or a return to the
+// foreground before checking whether a backup is due.
+const AUTO_BACKUP_SETTLE_DELAY_MS = 3000;
 
 /**
  * Reclaims an uploaded image after a row stops pointing at it.
@@ -1041,6 +1095,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const refreshAll = useCallback(() => {
     try {
       const databaseInit = initializeDatabase();
+      perfMark('db_init');
       if (databaseInit.isDowngrade) {
         // The DB was written by a newer build. Not fatal (we run forward-only
         // and leave the schema alone), but it means this install is running
@@ -1129,6 +1184,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       })();
       accountGroupsRepository.ensureFromActiveAccounts();
       const processedRules = recurringRulesRepository.runDueTransactions();
+      perfMark('recurring_run');
       const trueHourlyRate = effectiveCurrentWage?.trueHourlyRate ?? 0;
 
       // Fire notifications for processed recurring rules
@@ -1149,7 +1205,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const nextRecurringRules = recurringRulesRepository.list();
       const nextAccounts = accountsRepository.list();
       const nextCategories = categoriesRepository.list();
+      perfMark('tx_list_start');
       const nextTransactions = transactionsRepository.list();
+      perfMark('tx_list');
       const nextAlbums = albumsRepository.list();
       const nextItems = itemsRepository.list();
 
@@ -1169,6 +1227,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const nextMonthlyBudgets = monthlyBudgetsRepository.list();
 
       const nextRawAccountBalances = accountsRepository.getBalances();
+      perfMark('balances');
 
       // The review reminders deliberately carry no spend figure. A repeating
       // trigger is scheduled once and fires weeks later, so any total baked in
@@ -1200,7 +1259,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setRecurringRules(nextRecurringRules);
       setAccounts(nextAccounts);
       setCategories(nextCategories);
-      setTransactions(nextTransactions);
+      setTransactions((prev) => reuseUnchangedTransactions(prev, nextTransactions));
       setAlbums(nextAlbums);
       setItems(nextItems);
       setBudgetTemplates(nextBudgetTemplates);
@@ -1220,7 +1279,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const refreshTransactions = useCallback(() => {
     try {
-      setTransactions(transactionsRepository.list());
+      const next = transactionsRepository.list();
+      setTransactions((prev) => reuseUnchangedTransactions(prev, next));
       setRawAccountBalances(accountsRepository.getBalances());
     } catch (error) {
       reportError(error, { scope: 'refresh_transactions' });
@@ -1309,11 +1369,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [refreshTransactions]);
 
   useEffect(() => {
+    perfMark('data_load_start');
     setIsLoading(true);
     try {
       refreshAll();
     } finally {
       setIsLoading(false);
+      perfMark('data_load_end');
     }
   }, [refreshAll]);
 
@@ -1973,7 +2035,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const categoryRelationInfoById = useMemo(() => {
     const relationInfoById = new Map<
       string,
-      { name: string; icon: string; parentName: string | null }
+      { name: string; icon: string; parentId: string | null; parentName: string | null }
     >();
 
     categories.forEach((category) => {
@@ -1981,6 +2043,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       relationInfoById.set(category.id, {
         name: category.name,
         icon: resolveCategoryIcon(category.icon, parent?.icon ?? null),
+        parentId: category.parentId ?? null,
         parentName: parent?.name ?? null,
       });
     });
@@ -1992,12 +2055,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     (input: Partial<CreateTransactionInput>) => {
       const findAccount = (id?: string | null) => (id ? (accountNameById.get(id) ?? null) : null);
       const findCategory = (id?: string | null) => {
-        if (!id) return { name: null, icon: null, parentName: null };
+        if (!id) return { name: null, icon: null, parentId: null, parentName: null };
         const relationInfo = categoryRelationInfoById.get(id);
-        if (!relationInfo) return { name: null, icon: null, parentName: null };
+        if (!relationInfo) return { name: null, icon: null, parentId: null, parentName: null };
         return {
           name: relationInfo.name,
           icon: relationInfo.icon,
+          parentId: relationInfo.parentId,
           parentName: relationInfo.parentName,
         };
       };
@@ -2008,6 +2072,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         toAccountName: findAccount(input.toAccountId),
         categoryName: catInfo.name,
         categoryIcon: catInfo.icon,
+        categoryParentId: catInfo.parentId,
         categoryParentName: catInfo.parentName,
       };
     },
@@ -2102,16 +2167,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         deletedAt: null,
         ...resolveRelationNames(normalizedInput),
       };
-      setTransactions((prev) => sortTransactions([optimistic, ...prev], 'date_desc'));
+      setTransactions((prev) => insertTransactionsByDateDesc(prev, [optimistic]));
       runDeferredWrite(() => {
         try {
-          transactionsRepository.createWithId(id, normalizedInput);
+          transactionsRepository.createWithId(id, normalizedInput, now);
           // Auto-file into the active album, if one is set.
           const activeAlbumId = albumsRepository.getActiveId();
           if (activeAlbumId) {
             albumsRepository.addTransactions(activeAlbumId, [id]);
-            // Refresh albums so index-card stats (a memo keyed on the album
-            // reference) recompute for the auto-added transaction.
+            // Reload albums so the album stats re-read the member lists, which
+            // now include the auto-added transaction.
             setAlbums(albumsRepository.list());
           }
           // Voice entries fire a dedicated event so voice adoption can be
@@ -2148,11 +2213,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           // their row-level memoization defeated — the main JS-thread stall
           // felt right after Save in bulk create mode.
           const persisted = transactionsRepository.getById(id);
-          setTransactions((prev) =>
-            persisted
-              ? prev.map((tx) => (tx.id === id ? persisted : tx))
-              : prev.filter((tx) => tx.id !== id),
-          );
+          setTransactions((prev) => reconcileTransactionRow(prev, id, persisted));
         } catch {
           // Roll back the optimistic row so a failed insert doesn't leave a
           // phantom transaction in the UI.
@@ -2314,6 +2375,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             if ('categoryId' in input && relations) {
               updated.categoryName = relations.categoryName;
               updated.categoryIcon = relations.categoryIcon;
+              updated.categoryParentId = relations.categoryParentId;
               updated.categoryParentName = relations.categoryParentName;
             }
             return updated;
@@ -2621,22 +2683,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       };
 
       setTransactions((prev) =>
-        sortTransactions(
-          [
-            optimisticRefund,
-            ...prev.map((tx) =>
-              tx.id === id
-                ? {
-                    ...tx,
-                    reimbursedAt: now,
-                    reimbursementAccountId: accountId,
-                    reimbursementTransactionId: refundId,
-                    updatedAt: now,
-                  }
-                : tx,
-            ),
-          ],
-          'date_desc',
+        insertTransactionsByDateDesc(
+          prev.map((tx) =>
+            tx.id === id
+              ? {
+                  ...tx,
+                  reimbursedAt: now,
+                  reimbursementAccountId: accountId,
+                  reimbursementTransactionId: refundId,
+                  updatedAt: now,
+                }
+              : tx,
+          ),
+          [optimisticRefund],
         ),
       );
 
@@ -2838,7 +2897,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         splitsSummary: summarizeSplits(optimisticSplits),
       };
       setTransactions((prev) =>
-        sortTransactions([optimisticParent, ...optimisticTransfers, ...prev], 'date_desc'),
+        insertTransactionsByDateDesc(prev, [optimisticParent, ...optimisticTransfers]),
       );
       runDeferredWrite(() => {
         try {
@@ -3106,9 +3165,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             splitsSummary: summarizeSplits(updatedSplits),
           };
         });
-        return optimisticTransfer
-          ? sortTransactions([optimisticTransfer, ...next], 'date_desc')
-          : next;
+        return optimisticTransfer ? insertTransactionsByDateDesc(next, [optimisticTransfer]) : next;
       });
 
       // Always queue the persistence step. Earlier we tried to populate
@@ -3566,12 +3623,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // so without this guard every such launch fired a second, redundant report
   // for the load failure that `refreshAll` had already reported moments
   // earlier (Sentry MONEY2TIME-2H, always alongside MONEY2TIME-2S/-2G).
+  //
+  // A due backup serializes the whole database (about 16 MB of JSON for five
+  // years of entries), which on the first launch of each day used to run while
+  // the first screen was still rendering: it held the splash up and then
+  // stalled the first seconds of use. So each trigger waits until the app has
+  // settled, then for any running interaction to finish.
   const settingsLoaded = Boolean(settings);
   useEffect(() => {
     if (!autoBackupEnabled || !settingsLoaded) return;
-    const triggerAutoBackup = () => {
+    let settleTimer: ReturnType<typeof setTimeout> | null = null;
+    let interaction: { cancel: () => void } | null = null;
+    const runBackup = () => {
+      perfMark('auto_backup_start');
       void runAutoBackupIfDue()
         .then((result) => {
+          perfMark(result.skipped ? 'auto_backup_skipped' : 'auto_backup_done');
           if (!result.skipped) refreshSettings();
         })
         .catch((error: unknown) => {
@@ -3582,6 +3649,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           reportError(error, { scope: 'auto_backup' });
         });
     };
+    const triggerAutoBackup = () => {
+      if (settleTimer) clearTimeout(settleTimer);
+      interaction?.cancel();
+      settleTimer = setTimeout(() => {
+        settleTimer = null;
+        interaction = InteractionManager.runAfterInteractions(() => {
+          interaction = null;
+          runBackup();
+        });
+      }, AUTO_BACKUP_SETTLE_DELAY_MS);
+    };
     triggerAutoBackup();
     const sub = RNAppState.addEventListener('change', (state: AppStateStatus) => {
       if (state !== 'active') return;
@@ -3589,6 +3667,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
     return () => {
       sub.remove();
+      if (settleTimer) clearTimeout(settleTimer);
+      interaction?.cancel();
     };
   }, [autoBackupEnabled, settingsLoaded, refreshSettings]);
 
@@ -4087,70 +4167,60 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [buildBreakdown],
   );
 
-  // Stats for every album, computed in one batched pass instead of per card.
-  // Previously each `AlbumCard` (and map pin) called `getAlbumStats`, which ran
-  // two synchronous SQLite queries (a stat-rows join + `getById`) during render —
-  // so mounting the 12-album index fired ~24 blocking queries in a burst that
-  // froze the JS thread on tab activation. Here a single `getAllStatRows` query
-  // feeds an in-memory group-by; override dates come from the already-loaded
-  // `albums` array (no `getById`). Keyed on `transactions` so totals stay live
-  // after edits, and on `valueForDisplay` for the money/time-mode conversion.
-  const albumStatsById = useMemo(() => {
-    const map = new Map<string, AlbumStats>();
-    if (albums.length === 0) return map;
+  // Stats for every album: each album's member ids (one query, re-read only
+  // when `albums` reloads, which every membership change does) summed against
+  // the loaded transactions. That keeps them in step with what is on screen,
+  // optimistic rows included, without touching the database on a save.
+  //
+  // Built lazily, on the first `getAlbumStats` call after an input changed, and
+  // `getAlbumStats` keeps one identity. As a memo keyed on `transactions` it
+  // re-ran the stats query on every write whether or not an album was showing,
+  // and its new identity changed the whole `useApp()` value, which re-rendered
+  // every consumer in the app on each transaction save. Callers key their
+  // memos on `useTransactions().transactions` instead.
+  const albumStatsInputs = {
+    albums,
+    transactions,
+    valueForDisplay,
+    reimbursementsCountAsExpense,
+  };
+  const albumStatsInputsRef = useRef(albumStatsInputs);
+  albumStatsInputsRef.current = albumStatsInputs;
+  const albumMembershipRef = useRef<{
+    albums: Album[];
+    transactionIdsByAlbum: Map<string, string[]>;
+  } | null>(null);
+  const albumStatsCacheRef = useRef<{
+    inputs: typeof albumStatsInputs;
+    byId: Map<string, AlbumStats>;
+  } | null>(null);
 
-    const rowsByAlbum = new Map<
-      string,
-      {
-        type: string;
-        date: string;
-        amount: number;
-        reportingAmount: number | null;
-        reimbursable: boolean;
-        reimbursementOfId: string | null;
-        countsAsExpense: boolean;
-      }[]
-    >();
-    albumsRepository.getAllStatRows().forEach((row) => {
-      const list = rowsByAlbum.get(row.albumId);
-      if (list) {
-        list.push(row);
-      } else {
-        rowsByAlbum.set(row.albumId, [row]);
+  const getAlbumStats = useCallback((albumId: string): AlbumStats => {
+    const inputs = albumStatsInputsRef.current;
+    let cache = albumStatsCacheRef.current;
+    if (
+      !cache ||
+      cache.inputs.albums !== inputs.albums ||
+      cache.inputs.transactions !== inputs.transactions ||
+      cache.inputs.valueForDisplay !== inputs.valueForDisplay ||
+      cache.inputs.reimbursementsCountAsExpense !== inputs.reimbursementsCountAsExpense
+    ) {
+      let membership = albumMembershipRef.current;
+      if (!membership || membership.albums !== inputs.albums) {
+        membership = {
+          albums: inputs.albums,
+          transactionIdsByAlbum:
+            inputs.albums.length > 0
+              ? albumsRepository.getAllTransactionIdsByAlbum()
+              : new Map<string, string[]>(),
+        };
+        albumMembershipRef.current = membership;
       }
-    });
-
-    albums.forEach((album) => {
-      const rows = rowsByAlbum.get(album.id) ?? [];
-      let totalSpent = 0;
-      let startDate: string | null = null;
-      let endDate: string | null = null;
-      rows.forEach((row) => {
-        // Only the spend is filtered. The transaction count and the trip's
-        // first/last dates describe the album itself, so a reimbursable
-        // expense must not shorten the trip or make the card under-count.
-        if (countsAsExpenseRow(row) && countsTowardSpending(row, reimbursementsCountAsExpense)) {
-          totalSpent += valueForDisplay(row.reportingAmount ?? row.amount, row.date);
-        }
-        if (startDate === null || row.date < startDate) startDate = row.date;
-        if (endDate === null || row.date > endDate) endDate = row.date;
-      });
-      // Manual overrides win over the computed first/last transaction dates.
-      map.set(album.id, {
-        totalSpent,
-        transactionCount: rows.length,
-        startDate: album.startDate ?? startDate,
-        endDate: album.endDate ?? endDate,
-      });
-    });
-
-    return map;
-  }, [albums, transactions, valueForDisplay, reimbursementsCountAsExpense]);
-
-  const getAlbumStats = useCallback(
-    (albumId: string): AlbumStats => albumStatsById.get(albumId) ?? EMPTY_ALBUM_STATS,
-    [albumStatsById],
-  );
+      cache = { inputs, byId: computeAlbumStats(inputs, membership.transactionIdsByAlbum) };
+      albumStatsCacheRef.current = cache;
+    }
+    return cache.byId.get(albumId) ?? EMPTY_ALBUM_STATS;
+  }, []);
 
   const locatedAlbums = useMemo<LocatedAlbum[]>(() => albums.filter(isLocatedAlbum), [albums]);
 
@@ -4948,10 +5018,39 @@ export function useApp() {
 }
 
 /**
+ * Gives the tree below it the transaction state as it was when `visible` was
+ * last true. The shell wraps each of its always-mounted tabs in this, so a
+ * write (a save, the balance refresh after it) re-renders the tab on screen
+ * and not every tab behind it: a hidden tab keeps an unchanged context value
+ * and React skips it, then catches up in a single render when it is shown.
+ */
+export function TransactionsWhileVisible({
+  visible,
+  children,
+}: {
+  visible: boolean;
+  children: React.ReactNode;
+}) {
+  const live = useContext(TransactionsContext);
+  const [held, setHeld] = useState(live);
+  if (visible && held !== live) {
+    // Render-phase state adjustment: React re-runs this render with the fresh
+    // value before committing, without an extra commit.
+    setHeld(live);
+  }
+  return (
+    <TransactionsContext.Provider value={visible ? live : held}>
+      {children}
+    </TransactionsContext.Provider>
+  );
+}
+
+/**
  * Subscribe to volatile transaction-derived state (transactions,
  * filteredTransactions, accountBalances, filters). Components that do NOT need
  * this data should use `useApp()` instead so they don't re-render on every
- * transaction mutation.
+ * transaction mutation. Inside a hidden tab this is the state from when the tab
+ * was last visible (see `TransactionsWhileVisible`).
  */
 export function useTransactions() {
   const context = useContext(TransactionsContext);

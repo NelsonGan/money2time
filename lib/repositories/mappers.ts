@@ -45,6 +45,7 @@ import type {
   Transaction,
   TransactionSentiment,
   TransactionSplit,
+  TransactionWithRelations,
   UserSettings,
   WeekStartsOn,
 } from '~/types';
@@ -414,6 +415,77 @@ export function toTransaction(row: TransactionRow): Transaction {
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,
+  };
+}
+
+/**
+ * The transaction columns, in the order {@link toTransactionWithRelationsFromRaw}
+ * reads them, for queries that fetch rows as plain value arrays
+ * (`executeForRawResultSync`) rather than keyed objects. Reading every
+ * transaction that way and building each object once is several times faster
+ * than a Drizzle select followed by `toTransaction` and a second pass to add
+ * the relation names, which is what loading a long history used to cost.
+ * Aliased to `t`, followed by the relation columns the caller joins in.
+ */
+export const TRANSACTION_RAW_COLUMNS_SQL = `
+  t.id, t.type, t.amount, t.currency, t.reporting_currency, t.reporting_amount,
+  t.fx_rate, t.to_amount, t.account_amount, t.date, t.account_id,
+  t.from_account_id, t.to_account_id, t.category_id, t.note, t.receipt_uri,
+  t.recurrence_pattern, t.recurrence_interval, t.recurrence_end_date,
+  t.recurrence_parent_id, t.sentiment, t.reimbursable, t.reimbursed_at,
+  t.reimbursement_account_id, t.reimbursement_transaction_id, t.reimbursement_of_id,
+  t.counts_as_expense, t.day_order, t.created_at, t.updated_at, t.deleted_at`;
+
+type RawValue = string | number | null;
+
+/**
+ * Maps one raw row of {@link TRANSACTION_RAW_COLUMNS_SQL} followed by the seven
+ * relation columns (account, from-account and to-account names, category
+ * name, category icon, category parent id, parent name). Mirrors
+ * {@link toTransaction} field for field; the mapper test holds the two together.
+ */
+export function toTransactionWithRelationsFromRaw(
+  values: readonly RawValue[],
+): TransactionWithRelations {
+  return {
+    id: values[0] as string,
+    type: asTransactionType(values[1] as string),
+    amount: values[2] as number,
+    currency: values[3] as string,
+    reportingCurrency: (values[4] as string | null) ?? null,
+    reportingAmount: (values[5] as number | null) ?? null,
+    fxRate: (values[6] as number | null) ?? null,
+    toAmount: (values[7] as number | null) ?? null,
+    accountAmount: (values[8] as number | null) ?? null,
+    date: values[9] as string,
+    accountId: values[10] as string | null,
+    fromAccountId: values[11] as string | null,
+    toAccountId: values[12] as string | null,
+    categoryId: values[13] as string | null,
+    note: values[14] as string | null,
+    receiptUri: (values[15] as string | null) ?? null,
+    recurrencePattern: asRecurrencePattern(values[16] as string),
+    recurrenceInterval: Math.max(1, Math.trunc((values[17] as number | null) ?? 1)),
+    recurrenceEndDate: values[18] as string | null,
+    recurrenceParentId: values[19] as string | null,
+    sentiment: asTransactionSentiment(values[20] as string | null),
+    reimbursable: !!values[21],
+    reimbursedAt: (values[22] as string | null) ?? null,
+    reimbursementAccountId: (values[23] as string | null) ?? null,
+    reimbursementTransactionId: (values[24] as string | null) ?? null,
+    reimbursementOfId: (values[25] as string | null) ?? null,
+    countsAsExpense: !!values[26],
+    dayOrder: (values[27] as number | null) ?? null,
+    createdAt: values[28] as string,
+    updatedAt: values[29] as string,
+    deletedAt: values[30] as string | null,
+    accountName: (values[31] as string | null) ?? null,
+    fromAccountName: (values[32] as string | null) ?? null,
+    toAccountName: (values[33] as string | null) ?? null,
+    categoryName: (values[34] as string | null) ?? null,
+    categoryParentId: (values[36] as string | null) ?? null,
+    categoryParentName: (values[37] as string | null) ?? null,
+    categoryIcon: (values[35] as string | null) ?? null,
   };
 }
 

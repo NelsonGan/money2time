@@ -128,6 +128,7 @@ import {
 } from '~/utils/formatters';
 import { newId } from '~/utils/id';
 import { runAfterInteractionsCapped } from '~/utils/interactions';
+import { perfInteraction } from '~/utils/perfTrace';
 
 type ActiveField =
   | 'amount'
@@ -2156,6 +2157,9 @@ export function TransactionEditorScreen({
       }
 
       void triggerHaptic('success');
+      perfInteraction(
+        mode === 'edit' ? 'editor_update' : bulk ? 'editor_bulk_save' : 'editor_save',
+      );
       // Mark the current receipt as committed so the unmount cleanup keeps it.
       receiptCommittedRef.current = true;
 

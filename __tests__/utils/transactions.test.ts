@@ -3,6 +3,9 @@ import type { TransactionWithRelations } from '~/types';
 import {
   bucketTransactionsByMonth,
   emptyMonthSummary,
+  reconcileTransactionRow,
+  reuseUnchangedGroups,
+  reuseUnchangedTransactions,
   summarizeTransactions,
 } from '~/utils/transactions';
 
@@ -95,5 +98,125 @@ describe('bucketTransactionsByMonth', () => {
     expect(Array.from(transactionsMap.keys()).sort()).toEqual(['2026-04', '2026-05']);
     expect(transactionsMap.get('2026-04')?.[0]?.id).toBe('a');
     expect(transactionsMap.get('2026-05')?.[0]?.id).toBe('b');
+  });
+});
+
+describe('reuseUnchangedGroups', () => {
+  it('hands back the old array for a group holding the same rows', () => {
+    const a = makeTx({ id: 'a' });
+    const b = makeTx({ id: 'b' });
+    const c = makeTx({ id: 'c' });
+    const previous = new Map([
+      ['2026-05', [a, b]],
+      ['2026-04', [c]],
+    ]);
+    const next = new Map([
+      ['2026-05', [a, b]],
+      ['2026-04', [c, makeTx({ id: 'd' })]],
+    ]);
+    const result = reuseUnchangedGroups(previous, next);
+    expect(result.get('2026-05')).toBe(previous.get('2026-05'));
+    expect(result.get('2026-04')).not.toBe(previous.get('2026-04'));
+    expect(result.get('2026-04')?.map((tx) => tx.id)).toEqual(['c', 'd']);
+  });
+
+  it('keeps the new array when a row object changed or the order did', () => {
+    const a = makeTx({ id: 'a' });
+    const b = makeTx({ id: 'b' });
+    const previous = new Map([['2026-05', [a, b]]]);
+    expect(reuseUnchangedGroups(previous, new Map([['2026-05', [b, a]]])).get('2026-05')).not.toBe(
+      previous.get('2026-05'),
+    );
+    const edited = { ...a, amount: 5 };
+    expect(
+      reuseUnchangedGroups(previous, new Map([['2026-05', [edited, b]]])).get('2026-05'),
+    ).not.toBe(previous.get('2026-05'));
+  });
+
+  it('returns the new map untouched without a previous one', () => {
+    const next = new Map([['2026-05', [makeTx({ id: 'a' })]]]);
+    expect(reuseUnchangedGroups(null, next)).toBe(next);
+  });
+});
+
+describe('reuseUnchangedTransactions', () => {
+  it('returns the previous list when a reload changed nothing', () => {
+    const prev = [makeTx({ id: 'a', amount: 1 }), makeTx({ id: 'b', amount: 2 })];
+    const reloaded = prev.map((tx) => ({ ...tx }));
+    expect(reuseUnchangedTransactions(prev, reloaded)).toBe(prev);
+  });
+
+  it('keeps the old object for every unchanged row and takes the changed ones', () => {
+    const prev = [makeTx({ id: 'a', amount: 1 }), makeTx({ id: 'b', amount: 2 })];
+    const reloaded = [{ ...prev[0]!, amount: 10 }, { ...prev[1]! }];
+    const result = reuseUnchangedTransactions(prev, reloaded);
+    expect(result).not.toBe(prev);
+    expect(result[0]).toBe(reloaded[0]);
+    expect(result[1]).toBe(prev[1]);
+  });
+
+  it('treats a reorder, an addition and a removal as changes', () => {
+    const a = makeTx({ id: 'a' });
+    const b = makeTx({ id: 'b' });
+    const reordered = reuseUnchangedTransactions([a, b], [{ ...b }, { ...a }]);
+    expect(reordered.map((tx) => tx.id)).toEqual(['b', 'a']);
+    expect(reordered[0]).toBe(b);
+    expect(reuseUnchangedTransactions([a, b], [{ ...a }]).map((tx) => tx.id)).toEqual(['a']);
+    const c = makeTx({ id: 'c' });
+    expect(reuseUnchangedTransactions([a], [{ ...a }, c])).toEqual([a, c]);
+  });
+
+  it('compares split arrays by content, since a reload always builds new ones', () => {
+    const split = {
+      id: 's1',
+      transactionId: 'a',
+      personName: 'Sam',
+      amount: 5,
+      isSelf: false,
+      paybackAccountId: null,
+      paidAt: null,
+      paidTransactionId: null,
+      sortOrder: 0,
+      createdAt: '2026-05-13T00:00:00.000Z',
+      updatedAt: '2026-05-13T00:00:00.000Z',
+      deletedAt: null,
+    };
+    const prev = [makeTx({ id: 'a', splits: [split] })];
+    expect(reuseUnchangedTransactions(prev, [{ ...prev[0]!, splits: [{ ...split }] }])).toBe(prev);
+    const paid = { ...split, paidAt: '2026-05-14T00:00:00.000Z' };
+    expect(reuseUnchangedTransactions(prev, [{ ...prev[0]!, splits: [paid] }])).not.toBe(prev);
+  });
+
+  it('adopts the new list outright when there was nothing before', () => {
+    const next = [makeTx({ id: 'a' })];
+    expect(reuseUnchangedTransactions([], next)).toBe(next);
+  });
+});
+
+describe('reconcileTransactionRow', () => {
+  const optimistic = makeTx({ id: 'new', amount: 12 });
+  const other = makeTx({ id: 'old', amount: 3 });
+
+  it('keeps the list when the stored row matches the optimistic one', () => {
+    const prev = [optimistic, other];
+    expect(reconcileTransactionRow(prev, 'new', { ...optimistic })).toBe(prev);
+  });
+
+  it('swaps in the stored row when it differs', () => {
+    const prev = [optimistic, other];
+    const stored = { ...optimistic, categoryName: 'Food' };
+    const result = reconcileTransactionRow(prev, 'new', stored);
+    expect(result).not.toBe(prev);
+    expect(result[0]).toBe(stored);
+    expect(result[1]).toBe(other);
+  });
+
+  it('drops the optimistic row when the write did not land', () => {
+    expect(reconcileTransactionRow([optimistic, other], 'new', null)).toEqual([other]);
+  });
+
+  it('ignores an id that is no longer in the list', () => {
+    const prev = [other];
+    expect(reconcileTransactionRow(prev, 'new', optimistic)).toBe(prev);
   });
 });

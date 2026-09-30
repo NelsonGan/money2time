@@ -25,4 +25,18 @@ describe('entry account defaults after mode conversion', () => {
   it('leaves entry unavailable when no account exists', () => {
     expect(pickDefaultAccountId([], 'missing-wallet')).toBeNull();
   });
+
+  it('keeps an explicitly selected account ahead of the saved default', () => {
+    expect(pickDefaultAccountId(accounts, 'cash', 'wallet')).toBe('wallet');
+  });
+
+  it('uses the saved default when the explicitly selected account was deleted', () => {
+    expect(pickDefaultAccountId(accounts, 'wallet', 'deleted-account')).toBe('wallet');
+  });
+
+  it('uses the first account by sort order when neither selection exists', () => {
+    const reversed = [...accounts].reverse();
+    expect(pickDefaultAccountId(reversed, 'deleted-default', 'deleted-account')).toBe('cash');
+    expect(reversed.map((account) => account.id)).toEqual(['wallet', 'cash']);
+  });
 });

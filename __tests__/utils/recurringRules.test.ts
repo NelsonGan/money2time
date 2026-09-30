@@ -233,6 +233,39 @@ describe('projectRecurringOccurrences', () => {
     expect(occurrences.map((o) => o.dayKey)).toEqual(['2026-06-01', '2026-06-08']);
   });
 
+  it('includes the final installment when a loan end date is a bare day key', () => {
+    const rule = makeRule({
+      type: 'transfer',
+      nextRunDate: at('2026-07-30'),
+      endDate: '2026-09-30',
+    });
+    const occurrences = projectRecurringOccurrences([rule], {
+      fromDayKey: '2026-07-30',
+      days: 100,
+    });
+    expect(occurrences.map((o) => o.dayKey)).toEqual(['2026-07-30', '2026-08-30', '2026-09-30']);
+  });
+
+  it('includes an advanced ISO occurrence late on a bare final day', () => {
+    const rule = makeRule({
+      nextRunDate: new Date('2026-09-30T23:59:59').toISOString(),
+      endDate: '2026-09-30',
+    });
+    const occurrences = projectRecurringOccurrences([rule], {
+      fromDayKey: '2026-09-30',
+      days: 40,
+    });
+    expect(occurrences.map((o) => o.dayKey)).toEqual(['2026-09-30']);
+  });
+
+  it('preserves an explicit timestamp cutoff within the final day', () => {
+    const rule = makeRule({
+      nextRunDate: new Date('2026-09-30T13:00:00').toISOString(),
+      endDate: new Date('2026-09-30T12:00:00').toISOString(),
+    });
+    expect(projectRecurringOccurrences([rule], { fromDayKey: '2026-09-30', days: 1 })).toEqual([]);
+  });
+
   it('buckets an overdue run under the first day of the window and flags it', () => {
     const rule = makeRule({ recurrencePattern: 'monthly', nextRunDate: at('2026-05-28') });
     const occurrences = projectRecurringOccurrences([rule], {
