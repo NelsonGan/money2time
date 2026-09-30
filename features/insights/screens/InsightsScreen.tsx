@@ -81,6 +81,18 @@ import { useApp, useTransactions } from '~/context/AppContext';
 import { useIsPro } from '~/context/ProContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { BudgetPagerView, type BudgetPagerViewHandle } from '~/features/budget/screens';
+import {
+  type AssetHistoryAccountOverrides,
+  assetHistoryExcludedAccountIds,
+  type AssetHistoryLedger,
+  assetHistoryTotalForMonth,
+  buildAssetHistoryLedger,
+  includeAllAssetHistoryAccounts,
+  isAssetHistoryAccountExcluded,
+  parseAssetHistoryAccountOverrides,
+  pruneAssetHistoryOverrides,
+  toggleAssetHistoryAccount,
+} from '~/features/insights/assetHistory';
 import { RankedImpactChart, type RankedImpactRow } from '~/features/insights/components';
 import { buildInsightsCategoryPickerData } from '~/features/insights/categoryPickerData';
 import { ProTrendPreviewOverlay } from '~/features/insights/components/ProTrendPreviewOverlay';
@@ -116,7 +128,6 @@ import {
 } from '~/services/insightsNavigation';
 import { getCustomLogoUri } from '~/services/userAssets';
 import type {
-  Account,
   Category,
   CategoryType,
   MonthCycleInput,
@@ -125,8 +136,8 @@ import type {
   WeekStartsOn,
 } from '~/types';
 import { cn } from '~/utils';
-import { getNetAssetContribution } from '~/utils/accountBalances';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
+import { convert } from '~/utils/currency';
 import {
   addFinancialMonths,
   financialMonthAnchorForToday,
@@ -361,7 +372,7 @@ const INSIGHTS_FILTER_MODAL_CONTENT_STYLE = {
   paddingBottom: LIST_BOTTOM_PADDING + spacing.xs,
   gap: spacing.sm,
 } as const;
-const EMPTY_ASSET_HISTORY_MONTHLY_DELTAS = new Map<string, Map<string, number>>();
+const EMPTY_ASSET_HISTORY_LEDGER: AssetHistoryLedger = { accounts: [] };
 const EMPTY_CATEGORY_CHILD_MAP: Map<string, { id: string; name: string; icon: string }[]> =
   new Map();
 const YEAR_MONTH_LABELS_CACHE = new Map<string, string[]>();
@@ -969,7 +980,7 @@ type InsightsPreferencesSnapshot = {
   excludedSavingsExpenseCategoryIds: string[];
   excludedExpenseBreakdownCategoryIds: string[];
   excludedIncomeBreakdownCategoryIds: string[];
-  excludedAssetHistoryAccountIds: string[];
+  assetHistoryAccountOverrides: AssetHistoryAccountOverrides;
   excludedCategoryTrendAccountIds: string[];
   excludedReviewAccountIds: string[];
   excludedReviewExpenseCategoryIds: string[];
@@ -1053,10 +1064,9 @@ function parseInsightsPreferencesPayload(
     next.excludedIncomeBreakdownCategoryIds = toUniqueStringList(
       parsed.excludedIncomeBreakdownCategoryIds,
     );
-    if (Object.prototype.hasOwnProperty.call(parsed, 'excludedAssetHistoryAccountIds')) {
-      next.excludedAssetHistoryAccountIds = toUniqueStringList(
-        parsed.excludedAssetHistoryAccountIds,
-      );
+    const assetHistoryAccountOverrides = parseAssetHistoryAccountOverrides(parsed);
+    if (assetHistoryAccountOverrides) {
+      next.assetHistoryAccountOverrides = assetHistoryAccountOverrides;
     }
     next.excludedCategoryTrendAccountIds = toUniqueStringList(
       parsed.excludedCategoryTrendAccountIds,
@@ -1413,20 +1423,6 @@ function resolveSavingsRateStatus(displayRatePercent: number | null, palette: Co
     return { color: palette.accent, Icon: TrendingUp, labelKey: 'status_building' as const };
   }
   return { color: palette.error, Icon: TrendingDown, labelKey: 'status_overspent' as const };
-}
-
-function isLegacyBalanceAdjustmentTransfer(
-  transaction: Pick<
-    TransactionWithRelations,
-    'type' | 'accountId' | 'fromAccountId' | 'toAccountId'
-  >,
-) {
-  return (
-    transaction.type === 'transfer' &&
-    !!transaction.accountId &&
-    !transaction.fromAccountId &&
-    !transaction.toAccountId
-  );
 }
 
 function resolveBreakdownRootId(
@@ -2825,6 +2821,7 @@ export function InsightsScreen({
     monthlyWages,
     updateTransactionsBulk,
     deleteTransactionsBulk,
+    rateTable,
   } = useApp();
   const { transactions: rawTransactions } = useTransactions();
   const isPro = useIsPro();
@@ -2912,9 +2909,8 @@ export function InsightsScreen({
   const [excludedIncomeBreakdownCategoryIds, setExcludedIncomeBreakdownCategoryIds] = useState<
     string[]
   >([]);
-  const [excludedAssetHistoryAccountIds, setExcludedAssetHistoryAccountIds] = useState<string[]>(
-    () => accounts.filter((account) => !account.includeInTotals).map((account) => account.id),
-  );
+  const [assetHistoryAccountOverrides, setAssetHistoryAccountOverrides] =
+    useState<AssetHistoryAccountOverrides>({});
   const [excludedCategoryTrendAccountIds, setExcludedCategoryTrendAccountIds] = useState<string[]>(
     [],
   );
@@ -3040,7 +3036,6 @@ export function InsightsScreen({
   const activeBreakdownSliceIdRef = useRef<string | null>(null);
   const pageScrollRefs = useRef(new Map<number, { current: ScrollView | null }>());
   const pageDataCacheRef = useRef(new Map<string, InsightPageData>());
-  const hasHydratedAssetHistoryExclusionsRef = useRef(false);
   const getPageScrollRef = useCallback((index: number) => {
     const existing = pageScrollRefs.current.get(index);
     if (existing) return existing;
@@ -3218,9 +3213,8 @@ export function InsightsScreen({
       if (saved.excludedSavingsExpenseCategoryIds) {
         setExcludedSavingsExpenseCategoryIds(saved.excludedSavingsExpenseCategoryIds);
       }
-      if (saved.excludedAssetHistoryAccountIds) {
-        hasHydratedAssetHistoryExclusionsRef.current = true;
-        setExcludedAssetHistoryAccountIds(saved.excludedAssetHistoryAccountIds);
+      if (saved.assetHistoryAccountOverrides) {
+        setAssetHistoryAccountOverrides(saved.assetHistoryAccountOverrides);
       }
       if (saved.excludedExpenseBreakdownCategoryIds) {
         setExcludedExpenseBreakdownCategoryIds(saved.excludedExpenseBreakdownCategoryIds);
@@ -3281,7 +3275,7 @@ export function InsightsScreen({
       excludedSavingsExpenseCategoryIds,
       excludedExpenseBreakdownCategoryIds,
       excludedIncomeBreakdownCategoryIds,
-      excludedAssetHistoryAccountIds,
+      assetHistoryAccountOverrides,
       excludedCategoryTrendAccountIds,
       excludedReviewAccountIds: reviewFilters.excludedAccountIds,
       excludedReviewExpenseCategoryIds: reviewFilters.excludedExpenseCategoryIds,
@@ -3299,7 +3293,7 @@ export function InsightsScreen({
       excludedExpenseTrendExpenseCategoryIds,
       excludedIncomeTrendAccountIds,
       excludedIncomeTrendIncomeCategoryIds,
-      excludedAssetHistoryAccountIds,
+      assetHistoryAccountOverrides,
       excludedCategoryTrendAccountIds,
       excludedSavingsExpenseCategoryIds,
       excludedSavingsIncomeCategoryIds,
@@ -3319,15 +3313,6 @@ export function InsightsScreen({
     applyParsedSnapshot: applyInsightsPreferencesSnapshot,
     writeStoredJson: updateInsightsPreferencesJson,
   });
-  const defaultHiddenAssetHistoryAccountIds = useMemo(
-    () => accounts.filter((account) => !account.includeInTotals).map((account) => account.id),
-    [accounts],
-  );
-  useEffect(() => {
-    if (isLoading || hasHydratedAssetHistoryExclusionsRef.current) return;
-    setExcludedAssetHistoryAccountIds(defaultHiddenAssetHistoryAccountIds);
-    hasHydratedAssetHistoryExclusionsRef.current = true;
-  }, [defaultHiddenAssetHistoryAccountIds, isLoading]);
 
   const categoryById = useMemo(
     () => new Map(categories.map((category) => [category.id, category])),
@@ -3442,9 +3427,9 @@ export function InsightsScreen({
     () => new Set(excludedSavingsExpenseCategoryIds),
     [excludedSavingsExpenseCategoryIds],
   );
-  const excludedAssetHistoryAccountSet = useMemo(
-    () => new Set(excludedAssetHistoryAccountIds),
-    [excludedAssetHistoryAccountIds],
+  const excludedAssetHistoryAccountIds = useMemo(
+    () => assetHistoryExcludedAccountIds(accounts, assetHistoryAccountOverrides),
+    [accounts, assetHistoryAccountOverrides],
   );
   const excludedCategoryTrendAccountSet = useMemo(
     () => new Set(excludedCategoryTrendAccountIds),
@@ -3459,107 +3444,41 @@ export function InsightsScreen({
     [excludedIncomeBreakdownCategoryIds],
   );
   const assetHistoryAccountOptions = accounts;
-  const { includedAssetHistoryAccounts, includedAssetHistoryAccountById } = useMemo(() => {
-    const includedAccounts: Account[] = [];
-    const includedAccountIds: string[] = [];
-    const includedAccountById = new Map<string, Account>();
-
-    assetHistoryAccountOptions.forEach((account) => {
-      if (excludedAssetHistoryAccountSet.has(account.id)) return;
-      includedAccounts.push(account);
-      includedAccountIds.push(account.id);
-      includedAccountById.set(account.id, account);
-    });
-
-    return {
-      includedAssetHistoryAccounts: includedAccounts,
-      includedAssetHistoryAccountIds: includedAccountIds,
-      includedAssetHistoryAccountById: includedAccountById,
-    };
-  }, [assetHistoryAccountOptions, excludedAssetHistoryAccountSet]);
-  const assetHistoryMonthlyDeltas = useMemo(() => {
-    if (selectedInsightType !== 'asset_history') return EMPTY_ASSET_HISTORY_MONTHLY_DELTAS;
-    if (includedAssetHistoryAccountById.size === 0) return new Map<string, Map<string, number>>();
-
-    const monthlyDeltas = new Map<string, Map<string, number>>();
-    const addAccountDelta = (monthKey: string, accountId: string, delta: number) => {
-      if (!delta) return;
-      let monthDelta = monthlyDeltas.get(monthKey);
-      if (!monthDelta) {
-        monthDelta = new Map<string, number>();
-        monthlyDeltas.set(monthKey, monthDelta);
-      }
-      monthDelta.set(accountId, (monthDelta.get(accountId) ?? 0) + delta);
-    };
-
-    allTransactions.forEach((transaction) => {
-      const monthKey =
+  const includedAssetHistoryAccounts = useMemo(
+    () =>
+      assetHistoryAccountOptions.filter(
+        (account) => !isAssetHistoryAccountExcluded(account, assetHistoryAccountOverrides),
+      ),
+    [assetHistoryAccountOptions, assetHistoryAccountOverrides],
+  );
+  // Balances by month in each account's own terms, built the way the Accounts
+  // tab builds today's balance so the chart's latest point lands on its Net
+  // Assets figure. Only rebuilt while the chart is the insight on screen.
+  const assetHistoryLedger = useMemo(() => {
+    if (selectedInsightType !== 'asset_history') return EMPTY_ASSET_HISTORY_LEDGER;
+    return buildAssetHistoryLedger({
+      accounts: includedAssetHistoryAccounts,
+      transactions: allTransactions,
+      monthKeyOf: (transaction) =>
         transactionMonthKeyById.get(transaction.id) ??
-        financialMonthKeyForIso(transaction.date, monthCycle);
-      const isLegacyAdjustmentTransfer = isLegacyBalanceAdjustmentTransfer(transaction);
-
-      if (transaction.type === 'income' && transaction.accountId) {
-        const account = includedAssetHistoryAccountById.get(transaction.accountId);
-        if (account) {
-          addAccountDelta(monthKey, account.id, transaction.amount);
-        }
-      }
-
-      if (transaction.type === 'expense' && transaction.accountId) {
-        const account = includedAssetHistoryAccountById.get(transaction.accountId);
-        if (account) {
-          addAccountDelta(monthKey, account.id, -transaction.amount);
-        }
-      }
-
-      if (
-        transaction.type === 'transfer' &&
-        !isLegacyAdjustmentTransfer &&
-        transaction.toAccountId
-      ) {
-        const account = includedAssetHistoryAccountById.get(transaction.toAccountId);
-        if (account) {
-          addAccountDelta(monthKey, account.id, transaction.amount);
-        }
-      }
-
-      if (
-        transaction.type === 'transfer' &&
-        !isLegacyAdjustmentTransfer &&
-        transaction.fromAccountId
-      ) {
-        const account = includedAssetHistoryAccountById.get(transaction.fromAccountId);
-        if (account) {
-          addAccountDelta(monthKey, account.id, -transaction.amount);
-        }
-      }
-
-      if (
-        (transaction.type === 'balance_adjustment' || isLegacyAdjustmentTransfer) &&
-        transaction.accountId
-      ) {
-        const account = includedAssetHistoryAccountById.get(transaction.accountId);
-        if (account) {
-          addAccountDelta(
-            monthKey,
-            account.id,
-            getNetAssetContribution(account.type, transaction.amount),
-          );
-        }
-      }
+        financialMonthKeyForIso(transaction.date, monthCycle),
     });
-
-    return monthlyDeltas;
   }, [
     allTransactions,
-    includedAssetHistoryAccountById,
+    includedAssetHistoryAccounts,
     selectedInsightType,
     transactionMonthKeyById,
     monthCycle,
   ]);
-  const assetHistorySortedDeltaMonthKeys = useMemo(
-    () => Array.from(assetHistoryMonthlyDeltas.keys()).sort((a, b) => a.localeCompare(b)),
-    [assetHistoryMonthlyDeltas],
+  const reportingCurrency = settings.currencyCode ?? rateTable.base;
+  const toAssetHistoryReportingCurrency = useCallback(
+    (amount: number, currency: string) => {
+      // Same fallback as AppContext's converted balances: without a rate the
+      // native figure is used rather than dropping the account.
+      const { value, rateUsed } = convert(amount, currency, reportingCurrency, rateTable);
+      return rateUsed === null ? amount : value;
+    },
+    [rateTable, reportingCurrency],
   );
   const hasPeriodFilter = activeInsightFilterConfig.fixedPeriodPreset === null;
   const hasAccountFilter = activeInsightFilterConfig.allowAccountFilter;
@@ -4259,27 +4178,18 @@ export function InsightsScreen({
           };
         }
 
-        let runningTotalAssets = includedAccounts.reduce(
-          (sum, account) => sum + getNetAssetContribution(account.type, account.startingBalance),
-          0,
-        );
-        let deltaMonthIndex = 0;
-        const monthRows = monthRowsSeed.map((seedRow) => {
-          while (
-            deltaMonthIndex < assetHistorySortedDeltaMonthKeys.length &&
-            (assetHistorySortedDeltaMonthKeys[deltaMonthIndex] ?? '') <= seedRow.monthKey
-          ) {
-            const deltaMap = assetHistoryMonthlyDeltas.get(
-              assetHistorySortedDeltaMonthKeys[deltaMonthIndex] ?? '',
-            );
-            deltaMap?.forEach((delta) => {
-              runningTotalAssets += delta;
-            });
-            deltaMonthIndex += 1;
-          }
-
-          return { ...seedRow, totalAssets: runningTotalAssets };
-        });
+        const todayDayKey = dayKeyFromDateLocal(new Date());
+        const monthRows = monthRowsSeed.map((seedRow) => ({
+          ...seedRow,
+          totalAssets: assetHistoryTotalForMonth(assetHistoryLedger, {
+            monthKey: seedRow.monthKey,
+            monthEndDayKey: dayKeyFromDateLocal(
+              financialMonthRange(seedRow.monthKey, monthCycle).endInclusive,
+            ),
+            todayDayKey,
+            toReportingCurrency: toAssetHistoryReportingCurrency,
+          }),
+        }));
 
         return {
           kind: 'asset_history',
@@ -4492,8 +4402,7 @@ export function InsightsScreen({
     },
     [
       accountScopedNonTransferEntries,
-      assetHistoryMonthlyDeltas,
-      assetHistorySortedDeltaMonthKeys,
+      assetHistoryLedger,
       canUseTimeDisplayMode,
       categoryById,
       categoryTrendCategoryOptions,
@@ -4510,6 +4419,7 @@ export function InsightsScreen({
       getTrueHourlyRateForDate,
       getDisplayValueForTransaction,
       includedAssetHistoryAccounts,
+      toAssetHistoryReportingCurrency,
       activeLocale,
       settings.displayMode,
       transactionDayKeyById,
@@ -6593,13 +6503,13 @@ export function InsightsScreen({
     });
   }, [categories, excludedIncomeTrendIncomeCategoryIds.length]);
   useEffect(() => {
-    if (excludedAssetHistoryAccountIds.length === 0) return;
-    const validAccountIds = new Set(assetHistoryAccountOptions.map((account) => account.id));
-    setExcludedAssetHistoryAccountIds((previous) => {
-      const next = previous.filter((accountId) => validAccountIds.has(accountId));
-      return next.length === previous.length ? previous : next;
-    });
-  }, [assetHistoryAccountOptions, excludedAssetHistoryAccountIds.length]);
+    // Accounts are empty until the first load; pruning then would wipe every
+    // stored choice before the accounts they name arrive.
+    if (isLoading) return;
+    setAssetHistoryAccountOverrides((previous) =>
+      pruneAssetHistoryOverrides(previous, assetHistoryAccountOptions),
+    );
+  }, [assetHistoryAccountOptions, assetHistoryAccountOverrides, isLoading]);
   const savingsIncomeCategoryPicker = useMemo(
     () => buildInsightsCategoryPickerData(categories, 'income'),
     [categories],
@@ -6654,7 +6564,7 @@ export function InsightsScreen({
       count += excludedCategoryTrendAccountIds.length;
     }
     if (displayHasAssetHistoryAccountExclusionFilter)
-      count += excludedAssetHistoryAccountIds.length;
+      count += Object.keys(assetHistoryAccountOverrides).length;
     if (displayHasSavingsCategoryExclusionFilter) {
       count += excludedSavingsIncomeCategoryIds.length + excludedSavingsExpenseCategoryIds.length;
     }
@@ -6678,7 +6588,7 @@ export function InsightsScreen({
     displayHasIncomeBreakdownExclusionFilter,
     displayPeriodPreset,
     displaySelectedInsightType,
-    excludedAssetHistoryAccountIds.length,
+    assetHistoryAccountOverrides,
     excludedCategoryTrendAccountIds.length,
     excludedExpenseTrendAccountIds.length,
     excludedExpenseTrendExpenseCategoryIds.length,
@@ -6726,7 +6636,7 @@ export function InsightsScreen({
     setExpenseTrendScrubMonthByYear({});
     setIncomeTrendScrubMonthByYear({});
     setCategoryTrendSelectedCategoryId(null);
-    setExcludedAssetHistoryAccountIds([]);
+    setAssetHistoryAccountOverrides({});
     setAssetHistoryScrubMonthByYear({});
   }, [selectedInsightType]);
 
@@ -7548,10 +7458,18 @@ export function InsightsScreen({
             accounts={assetHistoryAccountOptions}
             accountGroups={accountGroups}
             selectedIds={excludedAssetHistoryAccountIds}
-            onToggleSelect={(accountId) =>
-              setExcludedAssetHistoryAccountIds((previous) => toggleStringId(previous, accountId))
+            onToggleSelect={(accountId) => {
+              const account = assetHistoryAccountOptions.find((item) => item.id === accountId);
+              if (!account) return;
+              setAssetHistoryAccountOverrides((previous) =>
+                toggleAssetHistoryAccount(previous, account),
+              );
+            }}
+            onClear={() =>
+              setAssetHistoryAccountOverrides(
+                includeAllAssetHistoryAccounts(assetHistoryAccountOptions),
+              )
             }
-            onClear={() => setExcludedAssetHistoryAccountIds([])}
           />
           <AccountPickerSheet
             overlay
