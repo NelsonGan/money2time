@@ -369,7 +369,7 @@ const TransactionItemBody = memo(
             <View
               className={cn(
                 'max-w-full self-start flex-row items-center gap-1.5 rounded-full border border-primary/15 bg-primary/10 px-1 py-px dark:border-primary/20 dark:bg-primary/15',
-                compact ? 'mt-1' : 'mt-1.5',
+                compact ? 'mt-[3px]' : 'mt-[5px]',
               )}
             >
               <AccountLogo
