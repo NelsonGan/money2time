@@ -60,6 +60,7 @@ describe('parseAmountQuery', () => {
     expect(parseAmountQuery('$')).toBeNull();
     expect(parseAmountQuery('1.2.3')).toBeNull();
     expect(parseAmountQuery('12.3456')).toBeNull();
+    expect(parseAmountQuery('0.123')).toBeNull();
   });
 });
 
@@ -100,18 +101,46 @@ describe('amount matching', () => {
 });
 
 describe('transactionAmountSearchKeys', () => {
-  const tx = (amount: number, reportingAmount: number | null) =>
-    ({ amount, reportingAmount }) as unknown as TransactionWithRelations;
+  const tx = (fields: Partial<TransactionWithRelations>) =>
+    ({
+      type: 'expense',
+      currency: 'MYR',
+      reportingCurrency: 'MYR',
+      reportingAmount: null,
+      ...fields,
+    }) as TransactionWithRelations;
 
   it('keys the entered amount', () => {
-    expect(transactionAmountSearchKeys(tx(12.5, null))).toEqual(['12.50']);
+    expect(transactionAmountSearchKeys(tx({ amount: 12.5 }))).toEqual(['12.50']);
   });
 
   it('adds the reporting amount a foreign-currency row also shows', () => {
-    expect(transactionAmountSearchKeys(tx(1000, 7.25))).toEqual(['1000.00', '7.25']);
+    expect(
+      transactionAmountSearchKeys(
+        tx({ amount: 1000, currency: 'JPY', reportingAmount: 29.25, reportingCurrency: 'MYR' }),
+      ),
+    ).toEqual(['1000.00', '29.25']);
   });
 
   it('does not repeat an identical reporting amount', () => {
-    expect(transactionAmountSearchKeys(tx(12.5, 12.5))).toEqual(['12.50']);
+    expect(
+      transactionAmountSearchKeys(
+        tx({ amount: 12.5, currency: 'SGD', reportingAmount: 12.5, reportingCurrency: 'MYR' }),
+      ),
+    ).toEqual(['12.50']);
+  });
+
+  it('leaves out a reporting amount the row does not show', () => {
+    const transfer = tx({
+      type: 'transfer',
+      amount: 100,
+      currency: 'USD',
+      reportingAmount: 470,
+      reportingCurrency: 'MYR',
+    });
+    expect(transactionAmountSearchKeys(transfer)).toEqual(['100.00']);
+    expect(transactionAmountSearchKeys(tx({ amount: 12.5, reportingAmount: 13 }))).toEqual([
+      '12.50',
+    ]);
   });
 });

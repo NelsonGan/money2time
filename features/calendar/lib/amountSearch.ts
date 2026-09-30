@@ -39,7 +39,7 @@ export function parseAmountQuery(query: string): AmountQuery | null {
   } else if (lastComma > lastDot && lastDot !== -1) {
     // "1.234,50": dots group, the trailing comma is the decimal point.
     normalized = normalized.replace(/\./g, '').replace(',', '.');
-  } else if (lastComma === -1 && /^\d{1,3}(\.\d{3})+$/.test(normalized)) {
+  } else if (lastComma === -1 && /^[1-9]\d{0,2}(\.\d{3})+$/.test(normalized)) {
     // "1.234" / "1.234.567": dot grouping. Three decimals is never an amount.
     normalized = normalized.replace(/\./g, '');
   } else {
@@ -61,13 +61,20 @@ export function amountSearchKey(amount: number): string {
 }
 
 /**
- * The shown amounts of a transaction: its own amount, and its reporting
- * amount when that differs (a foreign-currency row shows both).
+ * The amounts a transaction's row shows: its own amount, plus the
+ * reporting-currency equivalent that `TransactionItem` draws beneath a foreign
+ * expense or income (never beneath a transfer or balance adjustment), so a
+ * search never matches a figure the user cannot see.
  */
 export function transactionAmountSearchKeys(tx: TransactionWithRelations): string[] {
   const keys = [amountSearchKey(tx.amount)];
-  if (tx.reportingAmount != null) {
-    const reportingKey = amountSearchKey(tx.reportingAmount);
+  const showsReportingAmount =
+    (tx.type === 'expense' || tx.type === 'income') &&
+    tx.reportingAmount != null &&
+    tx.reportingCurrency != null &&
+    tx.reportingCurrency !== tx.currency;
+  if (showsReportingAmount) {
+    const reportingKey = amountSearchKey(tx.reportingAmount!);
     if (reportingKey !== keys[0]) keys.push(reportingKey);
   }
   return keys;
