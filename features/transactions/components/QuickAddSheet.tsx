@@ -119,50 +119,6 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     overflow: 'hidden',
   },
-  voiceBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingVertical: 10,
-    paddingLeft: 12,
-    paddingRight: 8,
-    marginBottom: 8,
-    borderRadius: 14,
-    borderWidth: 1,
-  },
-  voiceBannerIcon: {
-    width: 30,
-    height: 30,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  voiceBannerText: {
-    flex: 1,
-    gap: 1,
-  },
-  voiceBannerTitle: {
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  voiceBannerBody: {
-    fontSize: 11,
-    lineHeight: 14,
-  },
-  voiceBannerCta: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 999,
-  },
-  voiceBannerCtaLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 0.1,
-  },
-  voiceBannerClose: {
-    padding: 4,
-    marginLeft: -2,
-  },
   primaryInput: {
     fontSize: 14,
     lineHeight: 20,

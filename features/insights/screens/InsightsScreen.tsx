@@ -408,13 +408,6 @@ const styles = StyleSheet.create({
     height: 2,
     borderRadius: 1,
   },
-  chartReferenceLine: {
-    position: 'absolute',
-    left: GRAPH_HORIZONTAL_PADDING,
-    right: GRAPH_HORIZONTAL_PADDING,
-    borderTopWidth: 1.5,
-    borderStyle: 'dotted',
-  },
   graphYAxisLabelContainer: {
     position: 'absolute',
     right: 0,
@@ -479,17 +472,6 @@ const styles = StyleSheet.create({
   },
   periodPickerGridItem: {
     width: '31.6%',
-  },
-  categoryTrendXAxisOverlay: {
-    position: 'absolute',
-    left: 0,
-    height: CATEGORY_TREND_X_AXIS_HEIGHT,
-  },
-  categoryTrendXAxisLabel: {
-    position: 'absolute',
-    top: 4,
-    textAlign: 'center',
-    fontSize: 9.5,
   },
   insightTypeIconImage: {
     width: 32,
