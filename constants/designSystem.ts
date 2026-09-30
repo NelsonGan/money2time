@@ -437,7 +437,6 @@ export function getThemeCssVars(themeColor: ThemeColor, resolved: ResolvedTheme)
 }
 
 export const colors: ColorPalette = getThemePalette('rosewood', 'light');
-export const darkColors: ColorPalette = getThemePalette('rosewood', 'dark');
 export const lightCssVars: CssVarMap = getThemeCssVars('rosewood', 'light');
 export const darkCssVars: CssVarMap = getThemeCssVars('rosewood', 'dark');
 
@@ -456,20 +455,3 @@ export const spacing = {
 } as const;
 
 export const LIST_BOTTOM_PADDING = spacing.listBottom;
-
-/** Shared radius presets for StyleSheet-based layouts */
-export const radii = {
-  sm: 12,
-  md: 18,
-  lg: 24,
-  xl: 32,
-  pill: 9999,
-} as const;
-
-/** Shared duration presets (ms) */
-export const durations = {
-  fast: 150,
-  normal: 250,
-  slow: 400,
-  entrance: 500,
-} as const;

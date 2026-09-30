@@ -232,12 +232,6 @@ export function addMonthsAtMonthStart(date: Date, offset: number): Date {
   return new Date(date.getFullYear(), date.getMonth() + offset, 1);
 }
 
-export function monthOffsetFromAnchorDate(anchor: Date, target: Date): number {
-  return (
-    (target.getFullYear() - anchor.getFullYear()) * 12 + (target.getMonth() - anchor.getMonth())
-  );
-}
-
 export function parseMonthKey(month: string): Date | null {
   const normalizedMonth = normalizeMonthKey(month);
   const match = normalizedMonth.match(/^(\d{4})-(\d{2})$/);

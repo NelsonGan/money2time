@@ -18,7 +18,6 @@ import {
   monthKeyFromDateIso,
   monthKeyFromDateLocal,
   monthKeyFromIsoLocal,
-  monthOffsetFromAnchorDate,
   normalizeMoneyAmount,
   normalizeMonthKey,
   parseMonthKey,
@@ -173,11 +172,6 @@ describe('month date arithmetic', () => {
     const result = addMonthsAtMonthStart(new Date(2026, 11, 1), 2);
     expect(result.getFullYear()).toBe(2027);
     expect(result.getMonth()).toBe(1);
-  });
-
-  it('computes month offsets between anchor and target', () => {
-    expect(monthOffsetFromAnchorDate(new Date(2026, 0, 1), new Date(2026, 11, 1))).toBe(11);
-    expect(monthOffsetFromAnchorDate(new Date(2026, 5, 1), new Date(2025, 5, 1))).toBe(-12);
   });
 });
 
