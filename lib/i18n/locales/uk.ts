@@ -799,7 +799,7 @@ const uk = {
       title: 'Фільтри',
       subtitle: 'Уточніть список операцій',
       search: 'Пошук',
-      search_placeholder: 'Пошук за нотаткою',
+      search_placeholder: 'Пошук за нотаткою, категорією або сумою',
       type: 'Тип',
       account: 'Рахунок',
       category: 'Категорія',

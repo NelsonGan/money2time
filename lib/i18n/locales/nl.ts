@@ -802,7 +802,7 @@ const nl = {
       title: 'Filters',
       subtitle: 'Verfijn je transactielijst',
       search: 'Zoeken',
-      search_placeholder: 'Notitie zoeken',
+      search_placeholder: 'Notitie, categorie of bedrag zoeken',
       type: 'Type',
       account: 'Rekening',
       category: 'Categorie',

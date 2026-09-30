@@ -796,7 +796,7 @@ const ja = {
       title: 'フィルター',
       subtitle: '取引一覧を絞り込む',
       search: '検索',
-      search_placeholder: 'メモを検索',
+      search_placeholder: 'メモ、カテゴリ、金額で検索',
       type: '種類',
       account: '口座',
       category: 'カテゴリ',

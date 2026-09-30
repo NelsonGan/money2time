@@ -799,7 +799,7 @@ const nb = {
       title: 'Filtre',
       subtitle: 'Avgrens transaksjonslisten',
       search: 'Søk',
-      search_placeholder: 'Søk i notat',
+      search_placeholder: 'Søk i notat, kategori eller beløp',
       type: 'Type',
       account: 'Konto',
       category: 'Kategori',

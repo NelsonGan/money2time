@@ -793,7 +793,7 @@ const th = {
       title: 'ตัวกรอง',
       subtitle: 'กรองรายการ',
       search: 'ค้นหา',
-      search_placeholder: 'ค้นหาหมายเหตุ',
+      search_placeholder: 'ค้นหาหมายเหตุ หมวดหมู่ หรือจำนวนเงิน',
       type: 'ประเภท',
       account: 'บัญชี',
       category: 'หมวดหมู่',

@@ -794,7 +794,7 @@ const ko = {
       title: '필터',
       subtitle: '거래 목록 조건 설정',
       search: '검색',
-      search_placeholder: '메모 검색',
+      search_placeholder: '메모, 카테고리, 금액 검색',
       type: '유형',
       account: '계좌',
       category: '카테고리',
