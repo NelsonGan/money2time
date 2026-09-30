@@ -47,6 +47,9 @@ const LONG_PRESS_DELAY_MS = 300;
 const styles = StyleSheet.create({
   // Over the card's right padding, full height so the whole strip is the grip.
   reorderHandle: { position: 'absolute', top: 0, right: 0, bottom: 0, justifyContent: 'center' },
+  // Runs a few points past its slot (into the gap before the badge) so the
+  // title always has more room than its measured width.
+  titleOverlay: { position: 'absolute', top: 0, left: 0, right: -4 },
 });
 
 interface TransactionItemProps {
@@ -254,6 +257,7 @@ const TransactionItemBody = memo(
     const showsPrimaryTime = isTimeMode && rate > 0 && !isTransfer && !isBalanceAdjustment;
     const showsSecondaryTime = !isTimeMode && !isForeign && secondaryValue !== null;
     const valueColumnClassName = compact ? 'w-[96px]' : 'w-[116px]';
+    const titleSizeClass = compact ? 'text-[13px] leading-[16px]' : 'text-[15px] leading-[20px]';
     const amountToneColor = isTransfer
       ? themeColors.textMuted
       : isBalanceAdjustment
@@ -295,25 +299,58 @@ const TransactionItemBody = memo(
         </View>
 
         <View className="flex-1 min-w-0 pr-1">
+          {/* The title's box is never sized from its own text. These rows sit
+              inside the long-range month pagers, ~1M points from the origin,
+              where Yoga's float32 edges can leave a box that hugs its text a
+              sliver narrower than the text, and it gets ellipsized ("Mcd" drew
+              as "M…" on a 3x iPhone). A plain title fills the row; one followed
+              by the reimbursable badge sizes its slot from a hidden copy and
+              draws the visible title over it with room to spare. */}
           <View className="flex-row items-center gap-1.5">
-            <Text
-              variant="bodyStrong"
-              className={cn(
-                'min-w-0 shrink text-foreground',
-                compact ? 'text-[13px] leading-[16px]' : 'text-[15px] leading-[20px]',
-              )}
-              numberOfLines={1}
-            >
-              {title}
-            </Text>
-            {/* A reimbursable expense can be missing from the spending totals
-                above it, so the row says why rather than looking miscounted. */}
             {transaction.reimbursable ? (
-              <Undo2
-                size={compact ? 11 : 12}
-                color={transaction.reimbursedAt ? themeColors.success : themeColors.primary}
-              />
-            ) : null}
+              <>
+                {/* The row's spoken summary is built from its children's
+                    labels, and would read both copies; labelling the slot
+                    (kept as a real view) reads the title once. */}
+                <View
+                  className="min-w-0 shrink"
+                  collapsable={false}
+                  accessibilityLabel={title ?? undefined}
+                >
+                  <Text
+                    variant="bodyStrong"
+                    className={cn('opacity-0', titleSizeClass)}
+                    numberOfLines={1}
+                    importantForAccessibility="no"
+                  >
+                    {title}
+                  </Text>
+                  <Text
+                    variant="bodyStrong"
+                    className={cn('text-foreground', titleSizeClass)}
+                    style={styles.titleOverlay}
+                    numberOfLines={1}
+                  >
+                    {title}
+                  </Text>
+                </View>
+                {/* A reimbursable expense can be missing from the spending
+                    totals above it, so the row says why rather than looking
+                    miscounted. */}
+                <Undo2
+                  size={compact ? 11 : 12}
+                  color={transaction.reimbursedAt ? themeColors.success : themeColors.primary}
+                />
+              </>
+            ) : (
+              <Text
+                variant="bodyStrong"
+                className={cn('min-w-0 flex-1 text-foreground', titleSizeClass)}
+                numberOfLines={1}
+              >
+                {title}
+              </Text>
+            )}
           </View>
           {subtitlePrimary || accountSubtitleLabel ? (
             accountSubtitleLabel ? (
