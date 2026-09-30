@@ -368,7 +368,7 @@ const TransactionItemBody = memo(
           {accountSubtitleLabel ? (
             <View
               className={cn(
-                'max-w-full self-start flex-row items-center gap-0.5 rounded-full border border-border/30 bg-secondary/55 px-1 py-px',
+                'max-w-full self-start flex-row items-center gap-1.5 rounded-full border border-primary/15 bg-primary/10 px-1 py-px dark:border-primary/20 dark:bg-primary/15',
                 compact ? 'mt-1' : 'mt-1.5',
               )}
             >
@@ -380,7 +380,7 @@ const TransactionItemBody = memo(
               />
               <Text
                 variant="caption"
-                tone="muted"
+                tone="primary"
                 className={cn(
                   'min-w-0 shrink',
                   compact ? 'text-[10px] leading-[12px]' : 'text-[11px] leading-[14px]',
