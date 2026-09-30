@@ -73,6 +73,8 @@ type ActivityRow =
 type DayRow = Extract<ActivityRow, { kind: 'day' }>;
 
 const MAINTAIN_VISIBLE_CONTENT_DISABLED = { disabled: true } as const;
+// Shared so an unselected list keeps one `selectedTransactionIds` identity.
+const NO_SELECTED_IDS: string[] = [];
 // How long the just-created row stays flagged as highlighted, counted from the
 // moment the row actually lands in this list (not from the create request).
 // Comfortably longer than the row's own fade; the fade itself runs on the UI
@@ -296,7 +298,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   onTransactionPress,
   onTransactionLongPress,
   onTransactionSplitBadgePress,
-  selectedTransactionIds = [],
+  selectedTransactionIds = NO_SELECTED_IDS,
   selectionMode = false,
   reorderActive = true,
   onToggleDaySelection,

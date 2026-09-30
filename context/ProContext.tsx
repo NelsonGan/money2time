@@ -31,6 +31,7 @@ import {
   setRevenueCatAppUserId,
   subscribeToRevenueCatCustomerStateUpdates,
 } from '~/services/revenueCat';
+import { perfMark } from '~/utils/perfTrace';
 
 interface ProContextValue {
   isPro: boolean;
@@ -47,6 +48,13 @@ interface ProContextValue {
 }
 
 const ProContext = createContext<ProContextValue | null>(null);
+
+// Just the Pro flag, on its own context. The full value above also changes
+// while RevenueCat refreshes (the loading flag, a fresh customer object),
+// which happens at launch and on every return to the foreground; most screens
+// only ask whether the user is Pro, and re-rendering them for the rest was
+// wasted work at exactly the moments the app is busiest.
+const ProStatusContext = createContext<boolean | null>(null);
 
 export function ProProvider({ children }: { children: React.ReactNode }) {
   const { settings } = useApp();
@@ -111,6 +119,7 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
     // needed to paint the first screen. Use the status-only refresh so we skip
     // the offerings/StoreKit-product fetch (needed only on the paywall).
     const task = InteractionManager.runAfterInteractions(() => {
+      perfMark('pro_status_refresh');
       void refreshStatus();
     });
     return () => task.cancel();
@@ -274,7 +283,20 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
     ],
   );
 
-  return <ProContext.Provider value={value}>{children}</ProContext.Provider>;
+  return (
+    <ProContext.Provider value={value}>
+      <ProStatusContext.Provider value={effectiveIsPro}>{children}</ProStatusContext.Provider>
+    </ProContext.Provider>
+  );
+}
+
+/** Whether the user is Pro, without re-rendering when anything else about Pro changes. */
+export function useIsPro() {
+  const isPro = useContext(ProStatusContext);
+  if (isPro === null) {
+    throw new Error('useIsPro must be used within ProProvider');
+  }
+  return isPro;
 }
 
 export function usePro() {

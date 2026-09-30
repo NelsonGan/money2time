@@ -22,6 +22,12 @@ interface AlbumCardProps {
   width: number;
   isActive: boolean;
   onPress: (albumId: string) => void;
+  /**
+   * Changes whenever the album totals may have (the loaded transactions,
+   * held still while the albums tab is hidden). `getAlbumStats` keeps one
+   * identity, so this is what re-renders the memoized card with fresh totals.
+   */
+  statsVersion: unknown;
 }
 
 export const AlbumCard = memo(function AlbumCard({
@@ -33,9 +39,9 @@ export const AlbumCard = memo(function AlbumCard({
   const { settings, getAlbumStats } = useApp();
   const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.96 });
 
-  // Depend on the album object (a fresh reference after each data reload) so the
-  // total/date range recompute when the album's transactions change.
-  const stats = useMemo(() => getAlbumStats(album.id), [getAlbumStats, album]);
+  // A lookup in a cache `getAlbumStats` rebuilds only after its inputs change;
+  // the memo wrapper re-renders this card when `album` or `statsVersion` does.
+  const stats = getAlbumStats(album.id);
   const coverUri = useMemo(() => getAlbumCoverUri(album.coverPhotoUri), [album.coverPhotoUri]);
   // Skip a uri that failed to load natively; see CategoryEmoji for why.
   const [brokenUri, setBrokenUri] = useState<string | null>(null);

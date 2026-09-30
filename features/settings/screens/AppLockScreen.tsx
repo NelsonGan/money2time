@@ -10,7 +10,7 @@ import {
   useSettingsBottomNavInset,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
-import { usePro } from '~/context/ProContext';
+import { useIsPro } from '~/context/ProContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import {
@@ -92,7 +92,7 @@ export function AppLockScreen({ onBack }: AppLockScreenProps) {
   const themeColors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
   const { settings, updateSettings } = useApp();
-  const { isPro } = usePro();
+  const isPro = useIsPro();
 
   const [biometricLabel, setBiometricLabel] = useState('Biometrics');
   const [busy, setBusy] = useState(false);

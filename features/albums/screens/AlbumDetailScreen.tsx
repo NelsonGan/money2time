@@ -130,12 +130,12 @@ export function AlbumDetailScreen({
   const contentHeight = Math.max(260, windowHeight - insets.top - TOP_BAR_HEIGHT - TAB_BAR_HEIGHT);
 
   const album = albums.find((a) => a.id === albumId);
-  // `albums` is included so membership/stat edits (which trigger a full reload)
-  // recompute these immediately when returning to this screen.
-  const stats = useMemo(
-    () => getAlbumStats(albumId),
-    [getAlbumStats, albumId, albums, transactions],
-  );
+  // Read on every render: `getAlbumStats` keeps one identity and looks the
+  // album up in a cache it rebuilds only when its inputs change (membership,
+  // transactions, the money/time display), so this stays cheap, hands back the
+  // same object while nothing changed, and never goes stale the way a memo keyed
+  // on the function would after a switch to time mode.
+  const stats = getAlbumStats(albumId);
   // `getAlbumTransactions` reads the table, and both it and `albums` are stable
   // across transaction churn, so `transactions` is what tells this memo a row
   // written from here (a duplicate) has landed and can now be read back.

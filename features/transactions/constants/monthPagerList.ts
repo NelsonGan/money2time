@@ -8,9 +8,16 @@ export const MONTH_PAGER_LIST_CONFIG = {
   showsHorizontalScrollIndicator: false,
   overScrollMode: 'never',
   nestedScrollEnabled: true,
-  initialNumToRender: 5,
-  maxToRenderPerBatch: 5,
-  windowSize: 7,
+  // Every page is a month of transaction rows, so each extra mounted page is
+  // a list's worth of views. The pagers open at `initialScrollIndex`, where the
+  // first render covers that index and the ones after it (months in the
+  // future, next to empty), so render only the page on screen first; the
+  // window then fills in the visible page plus one neighbour either side
+  // (windowSize counts viewports: 3 = one each side, 7 would be three), one
+  // page per batch so no single frame has to build two months of rows.
+  initialNumToRender: 1,
+  maxToRenderPerBatch: 1,
+  windowSize: 3,
   // No removeClippedSubviews: each page nests a vertical FlashList inside this
   // horizontal pager, and that shape is where RN's clipping recalculation can
   // hang the main thread walking the whole subtree on every scroll/mount

@@ -130,7 +130,6 @@ money2time/
 │   ├── AppContext.tsx          # Global state — useApp() + useTransactions()
 │   ├── ThemeContext.tsx        # Theme color, icon style, light/dark resolution
 │   ├── ProContext.tsx          # RevenueCat subscription state
-│   ├── TabVisibilityContext.tsx # Lets hidden tabs skip recomputation
 │   ├── ReceiptScanContext.tsx  # Background receipt-OCR jobs
 │   └── SplitBillSession.tsx    # Hands the split draft to the pushed editor
 ├── navigation/                 # rootStack, settingsStack, stackOptions, swipeBackHaptics
@@ -160,13 +159,12 @@ Editors, drilldowns and flows are pushed at the root level; everything under Set
 
 ### State
 
-All app data flows through `context/AppContext.tsx` — accounts, categories, settings, recurring rules, wages, albums, budgets, FX. CRUD operations are methods on the same context (no Redux/Zustand). The volatile transaction-derived state is split into a second context read with `useTransactions()`, so the app's most frequent mutation does not re-render every settings and account consumer. See [CLAUDE.md](CLAUDE.md) for the full API surface.
+All app data flows through `context/AppContext.tsx` — accounts, categories, settings, recurring rules, wages, albums, budgets, FX. CRUD operations are methods on the same context (no Redux/Zustand). The volatile transaction-derived state is split into a second context read with `useTransactions()`, so the app's most frequent mutation does not re-render every settings and account consumer, and the tabs you are not looking at keep the snapshot they last showed until you open them. See [CLAUDE.md](CLAUDE.md) for the full API surface.
 
 Other contexts:
 
 - `context/ThemeContext.tsx` — resolved theme, color palette, icon style
 - `context/ProContext.tsx` — RevenueCat subscription + paywall offering
-- `context/TabVisibilityContext.tsx` — lets hidden tabs skip recomputation
 - `context/ReceiptScanContext.tsx` — background receipt-OCR jobs
 - `context/SplitBillSession.tsx` — hands the split draft to the pushed editor
 

@@ -21,6 +21,7 @@ import {
   type ImportResult,
   parseBackupJson,
   summarizeBackup,
+  yieldToEventLoop,
 } from '~/services/dataManagementService';
 import type { BackupTarget } from '~/types';
 import { getErrorMessage } from '~/utils/errorHandling';
@@ -105,6 +106,8 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
 
     const { json } = await buildBackupJson();
     const name = buildAutoBackupName();
+    // Writing the file is the third long step after reading and serializing.
+    await yieldToEventLoop();
 
     const { targets, fellBackToLocalFrom } = await pickActiveTargets(settings.autoBackupTarget);
     const written: BackupRecord[] = [];

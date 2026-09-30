@@ -85,7 +85,7 @@ Global state lives in `context/AppContext.tsx` via the `useApp()` hook. This is 
 
 **Scoped mutation refreshes.** Non-transaction mutations refresh only the state slice they touch (`refreshAccountsAndGroups`, `refreshCategories`, `refreshAlbums`, `refreshWages`, `refreshSettings` — passed to `runMutation` via `options.refresh`). The full `refreshAll()` is reserved for load/retry, restores/imports/resets, and recurring-rule edits (which rely on its `runDueTransactions` pass). When adding a mutation, pick the narrowest refresh; include `refreshTransactions()` only if the write changes transaction rows or their denormalized relation names (account/category renames, reassignment, redenomination).
 
-**Tab visibility.** The five main tabs stay mounted for the app's lifetime (`MountedTab` in `App.tsx`), so hidden tabs would otherwise recompute on every write. `MountedTab` provides `TabVisibilityContext`; heavy screens hold their transaction-derived inputs with `useValueWhileTabVisible()` (`context/TabVisibilityContext.tsx`) so hidden tabs skip recomputation and catch up once on activation. Root-stack screens (editors, drilldowns) default to visible.
+**Tab visibility.** The five main tabs stay mounted for the app's lifetime (`MountedTab` in `App.tsx`), so hidden tabs would otherwise re-render and recompute on every write. `MountedTab` wraps each tab in `TransactionsWhileVisible` (`context/AppContext.tsx`): inside a hidden tab, `useTransactions()` keeps returning the snapshot from when the tab was last visible, so a write re-renders only the tab on screen and a hidden tab catches up in a single render when shown. Screens therefore read `useTransactions()` directly, with no hold of their own; the flip side is that code running in a hidden tab sees that snapshot, so anything that must act on live transactions belongs outside the tabs (`AppContext`, the shell around them, or a root-stack screen). Root-stack screens (editors, drilldowns) sit outside the tabs and always see live data.
 
 Key properties from `useApp()`:
 
@@ -107,7 +107,7 @@ Key properties from `useApp()`:
 Other contexts:
 
 - `context/ThemeContext.tsx` — theme management: `resolvedTheme`, `themeColor`, `useResolvedTheme()`, `useThemeColor()`
-- `context/ProContext.tsx` — RevenueCat subscription state: `isPro`, `isLoading`, `customerState`, `offering`, `purchasePackage`, `restorePurchases`, `refresh`
+- `context/ProContext.tsx` — RevenueCat subscription state via `usePro()`: `isPro`, `isLoading`, `customerState`, `offering`, `purchasePackage`, `restorePurchases`, `refresh`. `useIsPro()` reads just the flag from its own context, so a caller does not re-render while the subscription status refreshes (at launch and on every return to the app)
 
 ### Database
 
@@ -278,7 +278,7 @@ Traditional Chinese is `zh-Hant`. Device tags for Taiwan, Hong Kong, and Macau s
 - **i18n**: `I18n.t('key')` — strings defined in `lib/i18n/locales/en.ts`.
 - **Analytics**: `trackEvent(AnalyticsEvents.X, props)` from `~/services/analytics`. Every event goes to GA4 (free). Mixpanel bills per event, so it receives every user but only the events in `MIXPANEL_EVENTS` in `services/analytics.shared.ts` (install, activation, product-usage milestones, and the Pro paywall/purchase/restore funnel); everything else, data resets, imports and backups included, sits in `GA4_ONLY_EVENTS`. A new event must go in one of the two groups, and a per-use event for a frequent action belongs in GA4 only: map it to a feature in `FEATURE_BY_EVENT` and its first use reaches Mixpanel as `Feature First Used` (sent only by installs tracked since their first launch; every install adds it to the profile's `features_used`), and its Pro gate already arrives as `Pro Paywall Viewed` with the gate as `source`. Put state (plan, trial, install date, features used) on the profile, not in events (profile updates are not billed). Mixpanel's automatic mobile events stay off; `First App Open` fires from `initializeDatabase().isNewInstall`. Never sample users or events: funnels need every paying user. Every paywall entry point passes its own `source`. `trackEvent` adds `current_screen` and `days_since_install` to every event. GA4 names and parameter limits are normalized centrally in `services/analytics.shared.ts`. The full tracking plan is `docs/analytics-implementation-plan.md`.
 - **Font scaling**: Disabled globally in `App.tsx` for both `Text` and `TextInput`.
-- **Pro gating**: Use `useProGate()` hook or check `isPro` from `useProContext()`. Paywall via `ProPaywall` screen.
+- **Pro gating**: Use the `useProGate()` hook, or `useIsPro()` when only the flag is needed. Paywall via `ProPaywall` screen.
 - **Platform-split services**: `.native.ts` for iOS/Android, `.shared.ts` for web fallback (analytics, notifications, revenueCat).
 - **IDs**: Use `newId()` from `~/utils/id` for generating unique identifiers (UUID-based).
 - **Error handling**: Use `getErrorMessage()` from `~/utils/errorHandling` to safely extract error messages.

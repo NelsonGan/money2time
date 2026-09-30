@@ -15,7 +15,7 @@ import {
 } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
-import { usePro } from '~/context/ProContext';
+import { useIsPro } from '~/context/ProContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import {
   BudgetBreakdownWidgetContent,
@@ -659,7 +659,7 @@ export function WidgetPreviewsScreen({ onBack }: WidgetPreviewsScreenProps) {
     getTrueHourlyRateForDate,
   } = useApp();
   const { transactions } = useTransactions();
-  const { isPro } = usePro();
+  const isPro = useIsPro();
   const bottomNavInset = useSettingsBottomNavInset();
   // Default to the sample snapshot — this is exactly what the OS widget gallery shows.
   const [dataSource, setDataSource] = useState<'sample' | 'real'>('sample');

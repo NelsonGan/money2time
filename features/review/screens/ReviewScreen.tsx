@@ -18,7 +18,6 @@ import { CategoryEmoji, ClayIcon, Text } from '~/components/ui';
 import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
-import { useValueWhileTabVisible } from '~/context/TabVisibilityContext';
 import { useGoals } from '~/features/goals/useGoals';
 import { filterSpendingTransactions } from '~/features/reimbursements/lib/reimbursementMath';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -102,10 +101,7 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
   ) {
     const { settings, categories, monthlyBudgets, getTrueHourlyRateForDate } = useApp();
     const monthCycle = monthCycleOf(settings);
-    const { transactions: liveTransactions } = useTransactions();
-    // The Insights tab stays mounted for the app's lifetime, so hold the last
-    // value while hidden rather than re-aggregating on every write elsewhere.
-    const transactions = useValueWhileTabVisible(liveTransactions);
+    const { transactions } = useTransactions();
 
     // One remembered period per zoom, so switching Week -> Month -> Week comes
     // back to where the user was rather than jumping to the newest.
@@ -228,18 +224,15 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
       spendingTransactions,
     ]);
 
-    // Goals read live balances, so hold them with the tab like the transaction
-    // list: the Insights tab stays mounted and would otherwise recompute on every
-    // write made elsewhere in the app.
-    const heldGoals = useValueWhileTabVisible(useGoals().active);
+    const goals = useGoals().active;
     // A goal is an account, so an excluded account takes its goal off the page
     // too. Without this the Goals card would still report contributions to an
     // account every other card on the report has been told to ignore.
     const activeGoals = useMemo(() => {
-      if (filters.excludedAccountIds.length === 0) return heldGoals;
+      if (filters.excludedAccountIds.length === 0) return goals;
       const excluded = new Set(filters.excludedAccountIds);
-      return heldGoals.filter((goal) => !excluded.has(goal.account.id));
-    }, [filters.excludedAccountIds, heldGoals]);
+      return goals.filter((goal) => !excluded.has(goal.account.id));
+    }, [filters.excludedAccountIds, goals]);
     const goalContributions = useMemo(() => {
       if (!period || activeGoals.length === 0) return new Map<string, number>();
       return goalContributionsForPeriod(

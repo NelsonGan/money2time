@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 
 import { useApp, useTransactions } from '~/context/AppContext';
-import { usePro } from '~/context/ProContext';
+import { useIsPro } from '~/context/ProContext';
 import {
   type ExpandToDetailedValues,
   QuickAddSheet,
@@ -50,7 +50,7 @@ export function QuickAddScreen({
     fxCurrencies,
     rateTable,
   } = useApp();
-  const { isPro } = usePro();
+  const isPro = useIsPro();
   const { transactions } = useTransactions();
 
   // Currencies the user can enter quick-add amounts in: the reporting currency,

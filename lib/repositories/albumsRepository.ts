@@ -165,45 +165,29 @@ class AlbumsRepository {
   }
 
   /**
-   * Stat rows for every album in a single join query, tagged with the owning
-   * album id. Callers group by `albumId` in memory. This replaces the per-card
-   * N+1 (one stat query + one `getById` per album) that blocked the JS thread
-   * whenever the albums index mounted or re-rendered.
+   * Every album's member transaction ids, in one query, instead of a stats
+   * query per album card. The album stats are summed from the loaded
+   * transactions against this, so they always agree with what is on screen,
+   * optimistic rows included, without re-reading the transactions table after
+   * each write.
    */
-  // The two reimbursement columns ride along so album totals can drop a
-  // reimbursable expense (and its refund) when the user has set reimbursements
-  // not to count as spending.
-  getAllStatRows(): {
-    albumId: string;
-    type: string;
-    date: string;
-    amount: number;
-    reportingAmount: number | null;
-    reimbursable: boolean;
-    reimbursementOfId: string | null;
-    countsAsExpense: boolean;
-  }[] {
-    return getSQLite()
-      .getAllSync<{
-        albumId: string;
-        type: string;
-        date: string;
-        amount: number;
-        reportingAmount: number | null;
-        reimbursable: number | null;
-        reimbursementOfId: string | null;
-        countsAsExpense: number | null;
-      }>(
-        `SELECT axn.album_id AS albumId, t.type AS type, t.date AS date, t.amount AS amount, t.reporting_amount AS reportingAmount, t.reimbursable AS reimbursable, t.reimbursement_of_id AS reimbursementOfId, t.counts_as_expense AS countsAsExpense
-       FROM album_transactions axn
-       INNER JOIN transactions t ON t.id = axn.transaction_id
-       WHERE axn.deleted_at IS NULL AND t.deleted_at IS NULL`,
+  getAllTransactionIdsByAlbum(): Map<string, string[]> {
+    const byAlbum = new Map<string, string[]>();
+    getSQLite()
+      .getAllSync<{ albumId: string; transactionId: string }>(
+        `SELECT album_id AS albumId, transaction_id AS transactionId
+       FROM album_transactions
+       WHERE deleted_at IS NULL`,
       )
-      .map((row) => ({
-        ...row,
-        reimbursable: !!row.reimbursable,
-        countsAsExpense: !!row.countsAsExpense,
-      }));
+      .forEach((row) => {
+        const ids = byAlbum.get(row.albumId);
+        if (ids) {
+          ids.push(row.transactionId);
+        } else {
+          byAlbum.set(row.albumId, [row.transactionId]);
+        }
+      });
+    return byAlbum;
   }
 
   addTransactions(albumId: string, transactionIds: string[]) {

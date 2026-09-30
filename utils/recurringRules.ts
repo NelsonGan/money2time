@@ -1,5 +1,5 @@
 import type { RecurrencePattern, RecurringTransactionRule } from '~/types';
-import { dayKeyFromDateLocal, dayKeyFromIsoLocal } from '~/utils/formatters';
+import { dayKeyFromDateLocal, dayKeyFromIsoLocal, timeFromDateLocal } from '~/utils/formatters';
 import { countsAsExpenseRow } from '~/utils/spending';
 
 const AVERAGE_DAYS_PER_YEAR = 365.2425;
@@ -121,6 +121,19 @@ export function nextRunAfter(
   }
 }
 
+/**
+ * Loan rules store a calendar day as their inclusive end date, while the
+ * recurring editor stores an explicit cutoff instant. Use the same boundary
+ * for both the runner and forecast, even after the cursor advances to ISO.
+ */
+export function isAfterRecurringEndDate(dateIso: string, endDate: string | null): boolean {
+  if (!endDate) return false;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(endDate)) {
+    return dayKeyFromIsoLocal(dateIso) > endDate;
+  }
+  return timeFromDateLocal(dateIso) > timeFromDateLocal(endDate);
+}
+
 export interface RecurringOccurrence {
   rule: RecurringTransactionRule;
   /** ISO instant this occurrence is scheduled for. */
@@ -179,7 +192,7 @@ export function projectRecurringOccurrences(
     let cursor: string | null = rule.nextRunDate;
     let overdueEmitted = false;
     for (let step = 0; cursor && step < MAX_STEPS_PER_RULE; step += 1) {
-      if (rule.endDate && cursor > rule.endDate) break;
+      if (isAfterRecurringEndDate(cursor, rule.endDate)) break;
       const dayKey = dayKeyFromIsoLocal(cursor);
       if (dayKey > untilDayKey) break;
       if (dayKey < fromDayKey) {

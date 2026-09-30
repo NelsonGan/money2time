@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 
 import { useApp } from '~/context/AppContext';
-import { usePro } from '~/context/ProContext';
+import { useIsPro } from '~/context/ProContext';
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import { type SplitDraft, splitsHelpers } from '~/features/transactions/components/editor';
 import {
@@ -31,7 +31,7 @@ export function AddTransactionScreen({
   openSplitBillOnMount,
 }: AddTransactionScreenProps) {
   const { accounts, createTransaction, createTransactionWithSplits, markSplitPaid } = useApp();
-  const { isPro } = usePro();
+  const isPro = useIsPro();
 
   // Create the transaction and briefly flash its row so the user can spot the
   // one they just added once the list lands on its day.

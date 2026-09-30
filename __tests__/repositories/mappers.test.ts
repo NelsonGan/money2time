@@ -11,6 +11,8 @@ import {
   toSettings,
   toTransaction,
   toTransactionSplit,
+  toTransactionWithRelationsFromRaw,
+  TRANSACTION_RAW_COLUMNS_SQL,
 } from '~/lib/repositories/mappers';
 
 const STAMPS = {
@@ -782,5 +784,124 @@ describe('toItem', () => {
     expect(result.iconId).toBeNull();
     expect(result.salePrice).toBeNull();
     expect(result.sortOrder).toBe(0);
+  });
+});
+
+describe('toTransactionWithRelationsFromRaw', () => {
+  // The raw loader reads columns by position, so derive the positions from the
+  // SQL itself: a column added to one and not the other shows up here.
+  const columns = TRANSACTION_RAW_COLUMNS_SQL.split(',').map((column) =>
+    column.trim().replace(/^t\./, ''),
+  );
+  const camel = (column: string) =>
+    column.replace(/_([a-z])/g, (_, char: string) => char.toUpperCase());
+  const RELATIONS = {
+    accountName: 'Wallet',
+    fromAccountName: 'Savings',
+    toAccountName: 'Card',
+    categoryName: 'Lunch',
+    categoryIcon: 'meal',
+    categoryParentId: 'c-food',
+    categoryParentName: 'Food',
+  };
+  const relationValues = [
+    RELATIONS.accountName,
+    RELATIONS.fromAccountName,
+    RELATIONS.toAccountName,
+    RELATIONS.categoryName,
+    RELATIONS.categoryIcon,
+    RELATIONS.categoryParentId,
+    RELATIONS.categoryParentName,
+  ];
+
+  function rawFor(row: Record<string, unknown>) {
+    return columns.map((column) => {
+      const key = camel(column);
+      expect(key in row).toBe(true);
+      return row[key] as string | number | null;
+    });
+  }
+
+  it('builds the same transaction as the Drizzle path, plus the relation names', () => {
+    const row: any = {
+      id: 't1',
+      type: 'expense',
+      amount: 12.5,
+      currency: 'MYR',
+      reportingCurrency: 'MYR',
+      reportingAmount: 12.5,
+      fxRate: 1,
+      toAmount: null,
+      accountAmount: null,
+      date: '2026-05-13T04:00:00.000Z',
+      accountId: 'a1',
+      fromAccountId: null,
+      toAccountId: null,
+      categoryId: 'c-lunch',
+      note: 'noodles',
+      receiptUri: 'receipts/1.jpg',
+      recurrencePattern: 'monthly',
+      recurrenceInterval: 2,
+      recurrenceEndDate: '2027-01-01',
+      recurrenceParentId: 'r1',
+      sentiment: 'happy',
+      reimbursable: 1,
+      reimbursedAt: '2026-05-20T00:00:00.000Z',
+      reimbursementAccountId: 'a2',
+      reimbursementTransactionId: 't9',
+      reimbursementOfId: null,
+      countsAsExpense: 1,
+      dayOrder: 1234,
+      ...STAMPS,
+    };
+    expect(toTransactionWithRelationsFromRaw([...rawFor(row), ...relationValues])).toEqual({
+      ...toTransaction(row),
+      ...RELATIONS,
+    });
+  });
+
+  it('normalizes missing and out-of-range values the same way', () => {
+    const row: any = {
+      id: 't2',
+      type: 'not-a-type',
+      amount: 3,
+      currency: 'USD',
+      reportingCurrency: null,
+      reportingAmount: null,
+      fxRate: null,
+      toAmount: null,
+      accountAmount: null,
+      date: '2026-05-13',
+      accountId: null,
+      fromAccountId: 'a1',
+      toAccountId: 'a2',
+      categoryId: null,
+      note: null,
+      receiptUri: null,
+      recurrencePattern: null,
+      recurrenceInterval: 0,
+      recurrenceEndDate: null,
+      recurrenceParentId: null,
+      sentiment: null,
+      reimbursable: 0,
+      reimbursedAt: null,
+      reimbursementAccountId: null,
+      reimbursementTransactionId: null,
+      reimbursementOfId: null,
+      countsAsExpense: 0,
+      dayOrder: null,
+      ...STAMPS,
+    };
+    const nullRelations = relationValues.map(() => null);
+    expect(toTransactionWithRelationsFromRaw([...rawFor(row), ...nullRelations])).toEqual({
+      ...toTransaction(row),
+      accountName: null,
+      fromAccountName: null,
+      toAccountName: null,
+      categoryName: null,
+      categoryIcon: null,
+      categoryParentId: null,
+      categoryParentName: null,
+    });
   });
 });

@@ -148,11 +148,22 @@ export async function buildBackupJson(opts?: {
   pretty?: boolean;
 }): Promise<{ json: string; data: BackupData }> {
   const data = await buildBackupData();
+  // Reading every table and serializing the result each take a noticeable
+  // slice of the JS thread on a large database. Let a frame render between the
+  // two so the auto-backup reads as two short stalls rather than one long one.
+  // (The table reads themselves stay back to back, so the backup is one
+  // consistent snapshot.)
+  await yieldToEventLoop();
   // Auto-backups call with the default (compact) since they're machine-read
   // only — pretty-printing roughly doubles file size and serialization cost.
   // The user-facing export passes { pretty: true } so a curious user can
   // open the file in a text editor.
   return { json: JSON.stringify(data, null, opts?.pretty ? 2 : undefined), data };
+}
+
+/** Resolve on a later macrotask, so pending frames and touches run first. */
+export function yieldToEventLoop(): Promise<void> {
+  return new Promise<void>((resolve) => setTimeout(resolve, 0));
 }
 
 export function summarizeBackup(data: BackupData): BackupSummary {
