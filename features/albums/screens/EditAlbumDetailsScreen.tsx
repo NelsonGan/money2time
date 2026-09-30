@@ -1,18 +1,17 @@
-import { ChevronRight, MapPin, Pencil, X } from 'lucide-react-native';
+import { ChevronRight, Pencil } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { FatButton, Input, SettingsHeader, Text } from '~/components/ui';
-import { CityPickerSheet } from '~/components/ui/CityPickerSheet';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { AlbumLocation } from '~/types';
 
 import { AlbumDateRangeFields } from '../components/AlbumDateRangeFields';
-import { placeLabel } from '../utils';
+import { AlbumLocationField } from '../components/AlbumLocationField';
 
 interface EditAlbumDetailsScreenProps {
   albumId: string;
@@ -45,19 +44,13 @@ export function EditAlbumDetailsScreen({
         }
       : null,
   );
-  const [pickerVisible, setPickerVisible] = useState(false);
   // Location is staged locally and only committed on Save, matching the name /
   // dates fields. The dirty flag keeps Save from re-writing (and re-firing the
   // analytics event) when the location was never touched.
   const [locationDirty, setLocationDirty] = useState(false);
 
-  const handleSelectLocation = useCallback((next: AlbumLocation) => {
+  const handleChangeLocation = useCallback((next: AlbumLocation | null) => {
     setLocation(next);
-    setLocationDirty(true);
-  }, []);
-
-  const handleClearLocation = useCallback(() => {
-    setLocation(null);
     setLocationDirty(true);
   }, []);
 
@@ -113,37 +106,7 @@ export function EditAlbumDetailsScreen({
             onChangeEnd={setEndDate}
           />
 
-          <Text variant="label" tone="muted" className="mb-2 mt-5 px-1">
-            {I18n.t('albums.location.label')}
-          </Text>
-          <Pressable
-            onPress={() => setPickerVisible(true)}
-            style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-            className="flex-row items-center gap-3 rounded-2xl border border-border/30 bg-card px-4 py-3.5"
-          >
-            <MapPin size={18} color={location ? themeColors.primary : themeColors.textMuted} />
-            <Text
-              variant="body"
-              numberOfLines={1}
-              tone={location ? 'default' : 'muted'}
-              className="flex-1"
-            >
-              {location ? placeLabel(location) : I18n.t('albums.location.add')}
-            </Text>
-            {location ? (
-              <Pressable
-                onPress={handleClearLocation}
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('albums.location.clear')}
-                hitSlop={10}
-                className="h-7 w-7 items-center justify-center rounded-full bg-secondary/60 active:opacity-70"
-              >
-                <X size={15} color={themeColors.textMuted} />
-              </Pressable>
-            ) : (
-              <ChevronRight size={18} color={themeColors.textMuted} />
-            )}
-          </Pressable>
+          <AlbumLocationField location={location} onChange={handleChangeLocation} />
 
           <Text variant="label" tone="muted" className="mb-2 mt-5 px-1">
             {I18n.t('albums.tab_transactions')}
@@ -162,12 +125,6 @@ export function EditAlbumDetailsScreen({
             <ChevronRight size={18} color={themeColors.textMuted} />
           </Pressable>
         </ScrollView>
-
-        <CityPickerSheet
-          visible={pickerVisible}
-          onClose={() => setPickerVisible(false)}
-          onSelect={handleSelectLocation}
-        />
 
         <View
           className="border-t border-border/30 bg-background px-5 pt-3"
