@@ -53,7 +53,6 @@ import {
   SettingsHeader,
   SettingsPageLayout,
   Text,
-  ThemeModal,
   TimeValueInline,
   useSettingsBottomNavInset,
 } from '~/components/ui';
@@ -83,6 +82,9 @@ import {
 import type { AccountLogoPickerSession } from '~/features/settings/lib/accountLogoPickerBridge';
 import {
   ActivityTransactionList,
+  buildBulkUpdateInputs,
+  BulkEditTransactionsSheet,
+  type BulkTransactionChanges,
   DuplicateTransactionsDatePicker,
 } from '~/features/transactions/components';
 import {
@@ -110,6 +112,7 @@ import {
   type Account,
   type AccountGroup,
   type AccountType,
+  type CategoryType,
   type LoanInterestModel,
   type LoanRateChange,
   type RateTable,
@@ -129,7 +132,6 @@ import {
 import {
   dayKeyFromDateLocal,
   formatAmount,
-  formatDateInput,
   formatMonthYearLabel,
   formatShortDate,
   normalizeMoneyAmount,
@@ -213,11 +215,8 @@ const ACCOUNT_MANAGEMENT_LIST_CONTENT_STYLE = {
   paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
   paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
 } as const;
-const ACCOUNT_BULK_SCROLL_CONTENT_STYLE = {
-  padding: SETTINGS_HORIZONTAL_PADDING,
-  paddingBottom: SETTINGS_LIST_BOTTOM_PADDING + spacing.xs,
-  gap: spacing.sm,
-} as const;
+// Bulk edit on an account's list changes date and note only.
+const NO_BULK_CATEGORY_TYPES: CategoryType[] = [];
 const FLOATING_ACTION_SIZE = 56;
 const FLOATING_ACTION_GAP = 12;
 const MASKED_BALANCE_VALUE = '••••';
@@ -3119,11 +3118,6 @@ export function AccountsScreen({
   const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
   const [showDuplicatePicker, setShowDuplicatePicker] = useState(false);
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
-  const [bulkDate, setBulkDate] = useState(() => formatDateInput(new Date()));
-  const [bulkDateTouched, setBulkDateTouched] = useState(false);
-  const [bulkDateModalVisible, setBulkDateModalVisible] = useState(false);
-  const [bulkNote, setBulkNote] = useState('');
-  const [bulkNoteTouched, setBulkNoteTouched] = useState(false);
   const accountsOverviewScrollRef = useRef<ScrollView | null>(null);
   const managementScrollRef = useAnimatedRef<React.ElementRef<typeof Animated.ScrollView>>();
   const transactionDisplaySettings = useMemo(
@@ -3310,7 +3304,6 @@ export function AccountsScreen({
       ),
     [normalizedSelectedTransactionTotal, settings.currencySymbol],
   );
-  const hasBulkChanges = bulkDateTouched || bulkNoteTouched;
   const trueHourlyRate = currentMonthWage?.trueHourlyRate ?? 0;
   const balanceToggleLabel = hideAccountBalances
     ? I18n.t('accounts.show_balances')
@@ -3835,41 +3828,23 @@ export function AccountsScreen({
   }, []);
   const handleOpenBulkUpdate = useCallback(() => {
     if (selectedTransactionCount === 0) return;
-    setBulkDate(formatDateInput(new Date()));
-    setBulkDateTouched(false);
-    setBulkNote('');
-    setBulkNoteTouched(false);
     setShowBulkUpdate(true);
   }, [selectedTransactionCount]);
   const handleCloseBulkUpdate = useCallback(() => {
     setShowBulkUpdate(false);
   }, []);
-  const handleApplyBulkUpdate = useCallback(() => {
-    if (selectedTransactionIds.length === 0) return;
-    if (!hasBulkChanges) return;
-
-    const updates: { date?: string; note?: string | null } = {};
-    if (bulkDateTouched) updates.date = bulkDate;
-    if (bulkNoteTouched) {
-      const normalizedNote = bulkNote.trim();
-      updates.note = normalizedNote.length > 0 ? normalizedNote : null;
-    }
-    if (Object.keys(updates).length === 0) return;
-
-    updateTransactionsBulk(
-      selectedTransactionIds.map((transactionId) => ({ id: transactionId, input: updates })),
-    );
-    setShowBulkUpdate(false);
-    setSelectedTransactionIds([]);
-  }, [
-    bulkDate,
-    bulkDateTouched,
-    bulkNote,
-    bulkNoteTouched,
-    hasBulkChanges,
-    selectedTransactionIds,
-    updateTransactionsBulk,
-  ]);
+  const handleApplyBulkUpdate = useCallback(
+    (changes: BulkTransactionChanges) => {
+      if (selectedTransactionIds.length === 0) return;
+      // The sheet only offers date and note here, so no row needs its type.
+      updateTransactionsBulk(
+        buildBulkUpdateInputs(selectedTransactionIds, changes, () => undefined),
+      );
+      setShowBulkUpdate(false);
+      setSelectedTransactionIds([]);
+    },
+    [selectedTransactionIds, updateTransactionsBulk],
+  );
   const handleDeleteSelectedTransactions = useCallback(() => {
     if (selectedTransactionIds.length === 0) return;
     const idsToDelete = [...selectedTransactionIds];
@@ -4268,103 +4243,13 @@ export function AccountsScreen({
           onClose={() => setShowDuplicatePicker(false)}
           onDuplicated={handleDuplicated}
         />
-        <ThemeModal
+        <BulkEditTransactionsSheet
           visible={showBulkUpdate}
-          animationType="slide"
-          presentationStyle="pageSheet"
-          onRequestClose={handleCloseBulkUpdate}
-        >
-          <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-            <View className="px-5 pt-8 pb-4 flex-row items-center justify-between">
-              <View className="flex-1 pr-3">
-                <Text variant="subheading">
-                  {I18n.t('transactions.selection.update_title', {
-                    count: selectedTransactionCount,
-                  })}
-                </Text>
-                <Text variant="friendly" tone="muted">
-                  {I18n.t('transactions.selection.update_subtitle')}
-                </Text>
-              </View>
-              <View className="flex-row items-center gap-2">
-                <Pressable
-                  onPress={handleCloseBulkUpdate}
-                  className="px-3 py-2 rounded-full bg-secondary/70"
-                  accessibilityRole="button"
-                  accessibilityLabel={I18n.t('common.cancel')}
-                >
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('common.cancel')}
-                  </Text>
-                </Pressable>
-                <Pressable
-                  onPress={handleApplyBulkUpdate}
-                  disabled={!hasBulkChanges}
-                  className={cn(
-                    'px-3 py-2 rounded-full',
-                    hasBulkChanges ? 'bg-primary' : 'bg-secondary/70',
-                  )}
-                  accessibilityRole="button"
-                  accessibilityLabel={I18n.t('common.save')}
-                  accessibilityState={{ disabled: !hasBulkChanges }}
-                >
-                  <Text
-                    variant="caption"
-                    className={cn(hasBulkChanges ? 'text-white' : 'text-muted-foreground')}
-                  >
-                    {I18n.t('common.save')}
-                  </Text>
-                </Pressable>
-              </View>
-            </View>
-
-            {/* Inside a pageSheet modal — no nav bar behind it, so no nav inset. */}
-            <ScrollView
-              className="flex-1"
-              contentContainerStyle={ACCOUNT_BULK_SCROLL_CONTENT_STYLE}
-            >
-              <View className="gap-2.5">
-                <Text variant="caption" tone="muted">
-                  {I18n.t('transactions.editor.date')}
-                </Text>
-                <Pressable
-                  onPress={() => {
-                    void triggerHaptic('selection');
-                    setBulkDateModalVisible(true);
-                  }}
-                  accessibilityRole="button"
-                  accessibilityLabel={I18n.t('transactions.editor.date')}
-                  className="rounded-2xl border border-border/30 bg-card px-3.5 py-3.5"
-                >
-                  <Text variant="caption">{bulkDate}</Text>
-                </Pressable>
-              </View>
-
-              <View className="gap-2.5">
-                <Input
-                  label={I18n.t('transaction_detail.note')}
-                  placeholder={I18n.t('transactions.editor.optional')}
-                  value={bulkNote}
-                  onChangeText={(value) => {
-                    setBulkNote(value);
-                    setBulkNoteTouched(true);
-                  }}
-                />
-              </View>
-            </ScrollView>
-            <DatePickerModal
-              visible={bulkDateModalVisible}
-              value={bulkDate}
-              overlay
-              onSelect={(value) => {
-                setBulkDate(value);
-                setBulkDateTouched(true);
-                setBulkDateModalVisible(false);
-              }}
-              onClose={() => setBulkDateModalVisible(false)}
-            />
-          </SafeAreaView>
-        </ThemeModal>
+          selectedCount={selectedTransactionCount}
+          categoryTypes={NO_BULK_CATEGORY_TYPES}
+          onClose={handleCloseBulkUpdate}
+          onApply={handleApplyBulkUpdate}
+        />
       </SettingsPageLayout>,
     );
   }
