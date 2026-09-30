@@ -1,6 +1,6 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import { CATEGORY_ICON_SOURCES, EMOJI_VALUE_PREFIX } from '~/constants/categoryIcons';
+import { CATEGORY_ICON_SOURCES, EMOJI_VALUE_PREFIX, hasNonAscii } from '~/constants/categoryIcons';
 
 /**
  * FROZEN. Emoji glyphs that older builds stored in the icon columns, mapped to
@@ -73,13 +73,6 @@ const ICON_COLUMNS: { table: string; column: string }[] = [
   { table: 'budget_templates', column: 'emoji' },
   { table: 'monthly_budgets', column: 'template_emoji' },
 ];
-
-function hasNonAscii(value: string): boolean {
-  for (let index = 0; index < value.length; index += 1) {
-    if (value.charCodeAt(index) > 127) return true;
-  }
-  return false;
-}
 
 /**
  * Rewrites one stored value into the tagged icon grammar.

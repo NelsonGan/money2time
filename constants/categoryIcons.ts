@@ -67,7 +67,7 @@ export const CUSTOM_ICON_PREFIX = 'custom:';
 /** True when the value contains any non-ASCII character, i.e. it looks like a
  *  glyph rather than a kebab-case id. Written as a scan rather than a regex so
  *  the source carries no control-character escapes. */
-function hasNonAscii(value: string): boolean {
+export function hasNonAscii(value: string): boolean {
   for (let index = 0; index < value.length; index += 1) {
     if (value.charCodeAt(index) > 127) return true;
   }

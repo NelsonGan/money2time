@@ -18,10 +18,7 @@ import { getErrorMessage } from '~/utils/errorHandling';
 
 import { AlbumDateRangeFields } from '../components/AlbumDateRangeFields';
 import { AlbumMonthPicker } from '../components/AlbumMonthPicker';
-
-function placeLabel(location: AlbumLocation): string {
-  return [location.placeName, location.placeAdmin, location.countryCode].filter(Boolean).join(', ');
-}
+import { placeLabel } from '../utils';
 
 interface CreateAlbumScreenProps {
   initialTransactionIds?: string[];

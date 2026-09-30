@@ -80,6 +80,7 @@ import { useApp, useTransactions } from '~/context/AppContext';
 import { useIsPro } from '~/context/ProContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { BudgetPagerView, type BudgetPagerViewHandle } from '~/features/budget/screens';
+import { dayKeyToUtcDate } from '~/features/calendar/lib/calendarBuild';
 import {
   type AssetHistoryAccountOverrides,
   assetHistoryExcludedAccountIds,
@@ -1233,16 +1234,6 @@ function resolveWeekAnchorDateFromRange(range: { start: string; end: string }) {
   const today = startOfDayDate(new Date());
   if (!rangeEndDate) return today;
   return rangeEndDate.getTime() > today.getTime() ? today : rangeEndDate;
-}
-
-function dayKeyToUtcDate(dayKey: string): Date | null {
-  const [yearRaw, monthRaw, dayRaw] = dayKey.split('-');
-  const year = Number(yearRaw);
-  const month = Number(monthRaw);
-  const day = Number(dayRaw);
-  if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) return null;
-  const date = new Date(Date.UTC(year, month - 1, day));
-  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 function monthStartUtcDateFromMonthKey(monthKey: string): Date | null {

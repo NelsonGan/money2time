@@ -5,8 +5,8 @@ import { Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 import { AddActionSheet } from '~/components/navigation/AddActionSheet';
 import {
   AccountPickerSheet,
+  buildCategoryPickerOptions,
   CategoryEmoji,
-  type CategoryPickerOption,
   CategoryPickerSheet,
   CurrencyPickerSheet,
   SettingsHeader,
@@ -119,29 +119,6 @@ const styles = StyleSheet.create({
   },
 });
 
-function buildPickerOptions(categories: Category[]): {
-  parents: CategoryPickerOption[];
-  childByParent: Map<string, CategoryPickerOption[]>;
-} {
-  const parents: CategoryPickerOption[] = [];
-  const childByParent = new Map<string, CategoryPickerOption[]>();
-  const parentIds = new Set<string>();
-  categories.forEach((category) => {
-    if (!category.parentId) {
-      parents.push({ id: category.id, name: category.name, icon: category.icon });
-      parentIds.add(category.id);
-    }
-  });
-  categories.forEach((category) => {
-    if (category.parentId && parentIds.has(category.parentId)) {
-      const list = childByParent.get(category.parentId) ?? [];
-      list.push({ id: category.id, name: category.name, icon: category.icon });
-      childByParent.set(category.parentId, list);
-    }
-  });
-  return { parents, childByParent };
-}
-
 export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenProps) {
   const themeColors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
@@ -169,8 +146,14 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
     [categories],
   );
 
-  const expensePicker = useMemo(() => buildPickerOptions(expenseCategories), [expenseCategories]);
-  const incomePicker = useMemo(() => buildPickerOptions(incomeCategories), [incomeCategories]);
+  const expensePicker = useMemo(
+    () => buildCategoryPickerOptions(expenseCategories),
+    [expenseCategories],
+  );
+  const incomePicker = useMemo(
+    () => buildCategoryPickerOptions(incomeCategories),
+    [incomeCategories],
+  );
 
   const bucketResolution = useMemo(() => {
     // Resolve per bucket against all categories (some buckets are income-flavored)

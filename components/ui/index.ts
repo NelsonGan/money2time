@@ -8,7 +8,7 @@ export { CategoryEmoji } from './CategoryEmoji';
 export { CategoryGrid, type CategoryPickerOption } from './CategoryGrid';
 export { CategoryIconField } from './CategoryIconField';
 export { CategoryIconPickerSheet } from './CategoryIconPickerSheet';
-export { CategoryPickerSheet } from './CategoryPickerSheet';
+export { buildCategoryPickerOptions, CategoryPickerSheet } from './CategoryPickerSheet';
 export { ClayIcon, type ClayIconName } from './ClayIcon';
 export { CurrencyPickerSheet } from './CurrencyPickerSheet';
 export { FatButton } from './fat-button';

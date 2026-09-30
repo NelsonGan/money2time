@@ -12,15 +12,12 @@ import { I18n } from '~/lib/i18n';
 import type { AlbumLocation } from '~/types';
 
 import { AlbumDateRangeFields } from '../components/AlbumDateRangeFields';
+import { placeLabel } from '../utils';
 
 interface EditAlbumDetailsScreenProps {
   albumId: string;
   onClose: () => void;
   onEditTransactions: (albumId: string) => void;
-}
-
-function placeLabel(location: AlbumLocation): string {
-  return [location.placeName, location.placeAdmin, location.countryCode].filter(Boolean).join(', ');
 }
 
 export function EditAlbumDetailsScreen({

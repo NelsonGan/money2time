@@ -14,8 +14,8 @@ import { DatePickerModal } from '~/components/datePicker';
 import {
   AccountLogo,
   AccountPickerSheet,
+  buildCategoryPickerOptions,
   CategoryEmoji,
-  type CategoryPickerOption,
   CategoryPickerSheet,
   CurrencyPickerSheet,
   Text,
@@ -329,29 +329,6 @@ function formatDateChipLabel(value: string): string {
   const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (!match) return value;
   return String(Number(match[3]));
-}
-
-function buildCategoryPickerOptions(categories: Category[]): {
-  parents: CategoryPickerOption[];
-  childByParent: Map<string, CategoryPickerOption[]>;
-} {
-  const parents: CategoryPickerOption[] = [];
-  const childByParent = new Map<string, CategoryPickerOption[]>();
-  const parentIds = new Set<string>();
-  categories.forEach((category) => {
-    if (!category.parentId) {
-      parents.push({ id: category.id, name: category.name, icon: category.icon });
-      parentIds.add(category.id);
-    }
-  });
-  categories.forEach((category) => {
-    if (category.parentId && parentIds.has(category.parentId)) {
-      const list = childByParent.get(category.parentId) ?? [];
-      list.push({ id: category.id, name: category.name, icon: category.icon });
-      childByParent.set(category.parentId, list);
-    }
-  });
-  return { parents, childByParent };
 }
 
 export function QuickAddSheet({

@@ -11,8 +11,8 @@ import { DatePickerModal } from '~/components/datePicker';
 import {
   AccountLogo,
   AccountPickerSheet,
+  buildCategoryPickerOptions,
   CategoryEmoji,
-  type CategoryPickerOption,
   CategoryPickerSheet,
   FatButton,
   Text,
@@ -25,7 +25,6 @@ import type { RootStackParamList } from '~/navigation/rootStack';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import { deleteReceiptImage } from '~/services/userAssets';
-import type { Category } from '~/types';
 import { dayKeyFromDateLocal, formatAmount, formatShortDate } from '~/utils/formatters';
 
 import {
@@ -71,29 +70,6 @@ const STEP_SCROLL_STYLE = { flex: 1 } as const;
 // px-5 pb-6 with the step's row gap (2 → 8px on items, 3 → 12px on summary).
 const ITEMS_CONTENT_STYLE = { paddingHorizontal: 20, paddingBottom: 24, gap: 8 } as const;
 const SUMMARY_CONTENT_STYLE = { paddingHorizontal: 20, paddingBottom: 24, gap: 12 } as const;
-
-function buildCategoryPickerOptions(categories: Category[]): {
-  parents: CategoryPickerOption[];
-  childByParent: Map<string, CategoryPickerOption[]>;
-} {
-  const parents: CategoryPickerOption[] = [];
-  const childByParent = new Map<string, CategoryPickerOption[]>();
-  const parentIds = new Set<string>();
-  categories.forEach((category) => {
-    if (!category.parentId) {
-      parents.push({ id: category.id, name: category.name, icon: category.icon });
-      parentIds.add(category.id);
-    }
-  });
-  categories.forEach((category) => {
-    if (category.parentId && parentIds.has(category.parentId)) {
-      const list = childByParent.get(category.parentId) ?? [];
-      list.push({ id: category.id, name: category.name, icon: category.icon });
-      childByParent.set(category.parentId, list);
-    }
-  });
-  return { parents, childByParent };
-}
 
 /**
  * Split by Item — the itemized receipt split editor. Three steps: review the
