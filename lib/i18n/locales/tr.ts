@@ -2292,6 +2292,8 @@ const tr = {
     auto_save_no_source:
       'Henüz {{currency}} hesabın yok. Otomatik birikim için aynı para biriminde bir hesap gerekir.',
     auto_save_rule_name: 'Otomatik birikim: {{name}}',
+    auto_save_managed_in_recurring:
+      'Bu hedefin otomatik birikimi özel bir plana göre çalışıyor. {{settings}} > {{recurring}} bölümünden değiştirin.',
     edit_title: 'Hedefi düzenle',
     delete_title: 'Hedef silinsin mi?',
     delete_message: 'Bu, hedefi ve işlemlerini siler. Bu işlem geri alınamaz.',

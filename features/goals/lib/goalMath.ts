@@ -78,6 +78,44 @@ export function monthlyEquivalentRate(
   return found ? total : null;
 }
 
+export type GoalAutoSaveCadence = 'monthly' | 'weekly';
+
+export interface GoalAutoSaveRule {
+  rule: RecurringTransactionRule;
+  /**
+   * Whether the goal editor's inline section can represent the rule: a single
+   * same-currency transfer every month or every week. Anything richer (an
+   * interval, a daily or yearly pattern, a cross-currency amount, several
+   * rules) was built in the full recurring editor and is left to it, since
+   * saving it back through the inline form would flatten what it cannot show.
+   */
+  inlineEditable: boolean;
+}
+
+/**
+ * The active auto-save rule behind a goal, for the goal editor. Uses the same
+ * match as `monthlyEquivalentRate` (active transfers into the goal), so the
+ * editor shows exactly the rules the pace line counts.
+ */
+export function findGoalAutoSaveRule(
+  rules: RecurringTransactionRule[],
+  goalAccountId: string,
+  goalCurrency: string,
+): GoalAutoSaveRule | null {
+  const matches = rules.filter(
+    (rule) => rule.isActive && rule.type === 'transfer' && rule.toAccountId === goalAccountId,
+  );
+  const rule = matches[0];
+  if (!rule) return null;
+  const inlineEditable =
+    matches.length === 1 &&
+    (rule.recurrencePattern === 'monthly' || rule.recurrencePattern === 'weekly') &&
+    Math.max(1, rule.recurrenceInterval) === 1 &&
+    rule.toAmount == null &&
+    rule.currency === goalCurrency;
+  return { rule, inlineEditable };
+}
+
 /** Whether the goal counts as achieved: stamped, or balance at/over target. */
 export function isGoalAchieved(input: Pick<GoalMathInput, 'balance' | 'target' | 'achievedAt'>) {
   // A non-positive target (unreachable via the editor, but possible in

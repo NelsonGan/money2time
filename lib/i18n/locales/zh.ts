@@ -2161,6 +2161,8 @@ const zh = {
     auto_save_source_placeholder: '选择账户',
     auto_save_no_source: '还没有 {{currency}} 账户。自动储蓄需要一个相同币种的账户。',
     auto_save_rule_name: '自动储蓄：{{name}}',
+    auto_save_managed_in_recurring:
+      '此目标的自动储蓄使用自定义周期。请在 {{settings}} > {{recurring}} 中修改。',
     edit_title: '编辑目标',
     delete_title: '删除目标？',
     delete_message: '这会删除该目标及其交易。此操作无法撤销。',

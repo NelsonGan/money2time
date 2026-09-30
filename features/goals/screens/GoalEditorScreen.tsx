@@ -18,6 +18,7 @@ import {
 } from '~/components/ui';
 import { CategoryIconField } from '~/components/ui/CategoryIconField';
 import { useApp, useTransactions } from '~/context/AppContext';
+import { findGoalAutoSaveRule, type GoalAutoSaveCadence } from '~/features/goals/lib/goalMath';
 import type { CategoryIconPickerSession } from '~/features/settings/lib/categoryIconPickerBridge';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -44,8 +45,6 @@ interface GoalEditorScreenProps {
 
 const SCROLL_CONTENT = { padding: 20, paddingBottom: 40 } as const;
 
-type AutoSaveCadence = 'monthly' | 'weekly';
-
 /** A friendly default deadline for a brand-new goal: three months out, so
  *  toggling the target date on lands on a valid future date instead of today
  *  (which would immediately fail the "must be in the future" check). */
@@ -54,7 +53,7 @@ function defaultTargetDate(): string {
   return dayKeyFromDateLocal(new Date(now.getFullYear(), now.getMonth() + 3, now.getDate()));
 }
 
-function nextRunDateFor(cadence: AutoSaveCadence): string {
+function nextRunDateFor(cadence: GoalAutoSaveCadence): string {
   const now = new Date();
   if (cadence === 'weekly') {
     return dayKeyFromDateLocal(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7));
@@ -78,7 +77,10 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
     updateAccount,
     changeAccountCurrency,
     deleteAccount,
+    recurringRules,
     createRecurringRule,
+    updateRecurringRule,
+    deleteRecurringRule,
     createTransaction,
     currentMonthWage,
   } = useApp();
@@ -112,10 +114,25 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
     return toBalanceInputValue(balance);
   });
   const [includeInTotals, setIncludeInTotals] = useState(existing?.includeInTotals ?? true);
-  const [autoSaveEnabled, setAutoSaveEnabled] = useState(false);
-  const [autoSaveAmount, setAutoSaveAmount] = useState('');
-  const [autoSaveCadence, setAutoSaveCadence] = useState<AutoSaveCadence>('monthly');
-  const [autoSaveSourceId, setAutoSaveSourceId] = useState<string | null>(null);
+  // Edit mode: the auto-save rule the goal already has, read once so a refresh
+  // mid-edit cannot swap the rule the form was seeded from. A rule the inline
+  // form cannot represent is left alone and pointed at the recurring editor.
+  // An archived goal has had its auto-saves switched off on purpose, so it
+  // gets no inline section to turn one back on from.
+  const [existingAutoSave] = useState(() =>
+    existing ? findGoalAutoSaveRule(recurringRules, existing.id, existing.currency) : null,
+  );
+  const inlineRule = existingAutoSave?.inlineEditable ? existingAutoSave.rule : null;
+  const showAutoSave =
+    !isEditing || (existing?.goalArchivedAt == null && existingAutoSave?.inlineEditable !== false);
+  const [autoSaveEnabled, setAutoSaveEnabled] = useState(inlineRule != null);
+  const [autoSaveAmount, setAutoSaveAmount] = useState(inlineRule ? String(inlineRule.amount) : '');
+  const [autoSaveCadence, setAutoSaveCadence] = useState<GoalAutoSaveCadence>(
+    inlineRule?.recurrencePattern === 'weekly' ? 'weekly' : 'monthly',
+  );
+  const [autoSaveSourceId, setAutoSaveSourceId] = useState<string | null>(
+    inlineRule?.fromAccountId ?? null,
+  );
 
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -198,9 +215,22 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
   const parsedAutoSave = Number.parseFloat(autoSaveAmount);
   const todayKey = dayKeyFromDateLocal(new Date());
   const targetDateValid = !hasTargetDate || targetDate > todayKey;
+  // Inline auto-save keeps v1 simple: only accounts already denominated in the
+  // goal's currency can feed it. Cross-currency rules stay possible through
+  // the full recurring editor.
+  const autoSaveSourceAccounts = useMemo(
+    () => accounts.filter((a) => a.type !== 'goal' && a.currency === currency),
+    [accounts, currency],
+  );
+  const autoSaveSource = autoSaveSourceAccounts.find((a) => a.id === autoSaveSourceId) ?? null;
+
+  // The source must still be one the picker offers: a rule loaded for editing
+  // can point at an account deleted or re-denominated since, and saving that
+  // id back would keep a transfer the engine can never make.
   const autoSaveValid =
+    !showAutoSave ||
     !autoSaveEnabled ||
-    (Number.isFinite(parsedAutoSave) && parsedAutoSave > 0 && autoSaveSourceId != null);
+    (Number.isFinite(parsedAutoSave) && parsedAutoSave > 0 && autoSaveSource != null);
   // Strict (Number, not parseFloat) so a typo like "1.2.3" blocks Save instead
   // of silently writing an adjustment to 1.2 — this field moves real money.
   const parsedBalance = Number(balanceInput);
@@ -219,17 +249,27 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
     [settings.currencyCode, fxCurrencies, currency],
   );
 
-  // Inline auto-save keeps v1 simple: only accounts already denominated in the
-  // goal's currency can feed it. Cross-currency rules stay possible through
-  // the full recurring editor.
-  const autoSaveSourceAccounts = useMemo(
-    () => accounts.filter((a) => a.type !== 'goal' && a.currency === currency),
-    [accounts, currency],
-  );
-  const autoSaveSource = autoSaveSourceAccounts.find((a) => a.id === autoSaveSourceId) ?? null;
-
   const handleSave = useCallback(() => {
     if (!canSave) return;
+    const autoSaveRuleName = (goalName: string) =>
+      I18n.t('goals.auto_save_rule_name', { name: goalName });
+    const autoSaveInput = (goalId: string, goalName: string) => ({
+      name: autoSaveRuleName(goalName),
+      type: 'transfer' as const,
+      amount: parsedAutoSave,
+      currency,
+      fromAccountId: autoSaveSourceId,
+      toAccountId: goalId,
+      recurrencePattern: autoSaveCadence,
+      recurrenceInterval: 1,
+      nextRunDate: nextRunDateFor(autoSaveCadence),
+    });
+    const wantsAutoSave =
+      showAutoSave &&
+      autoSaveEnabled &&
+      autoSaveSource != null &&
+      Number.isFinite(parsedAutoSave) &&
+      parsedAutoSave > 0;
     if (!isEditing) {
       const activeGoalCount = accounts.filter(
         (account) => account.type === 'goal' && account.goalArchivedAt == null,
@@ -266,6 +306,40 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
         ...goalFields,
         ...(clearsAchievement ? { goalAchievedAt: null } : {}),
       };
+      // Bring the goal's auto-save rule in line with the form: create, update
+      // or remove it. The schedule restarts only when the cadence changes, so
+      // editing the amount never moves the next run. The rule's name follows
+      // a goal rename only while it still carries the generated name.
+      const syncAutoSave = () => {
+        if (!showAutoSave) return;
+        if (!wantsAutoSave) {
+          if (inlineRule) deleteRecurringRule(inlineRule.id);
+          return;
+        }
+        const input = autoSaveInput(existing.id, trimmedName);
+        if (!inlineRule) {
+          createRecurringRule(input);
+          return;
+        }
+        const cadenceChanged = inlineRule.recurrencePattern !== autoSaveCadence;
+        const keepsGeneratedName = inlineRule.name === autoSaveRuleName(existing.name);
+        const unchanged =
+          !cadenceChanged &&
+          inlineRule.amount === input.amount &&
+          inlineRule.currency === input.currency &&
+          inlineRule.fromAccountId === input.fromAccountId &&
+          (!keepsGeneratedName || inlineRule.name === input.name);
+        if (unchanged) return;
+        updateRecurringRule(inlineRule.id, {
+          amount: input.amount,
+          currency: input.currency,
+          fromAccountId: input.fromAccountId,
+          recurrencePattern: input.recurrencePattern,
+          ...(keepsGeneratedName ? { name: input.name } : {}),
+          ...(cadenceChanged ? { nextRunDate: input.nextRunDate } : {}),
+        });
+      };
+
       // A currency change re-denominates the goal's whole history, so it warns
       // first and runs as its own operation (the account editor's contract) —
       // the saved-amount field is left for a follow-up edit rather than
@@ -285,6 +359,7 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
               onPress: () => {
                 committedRef.current = true;
                 changeAccountCurrency(existing.id, currency, updates);
+                syncAutoSave();
                 void trackEvent(AnalyticsEvents.GOAL_UPDATED);
                 onClose();
               },
@@ -297,6 +372,7 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
       const applyAccountUpdates = () => {
         committedRef.current = true;
         updateAccount(existing.id, updates);
+        syncAutoSave();
         void trackEvent(AnalyticsEvents.GOAL_UPDATED);
       };
 
@@ -365,19 +441,7 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
         includeInTotals,
         ...goalFields,
       });
-      if (autoSaveEnabled && autoSaveSourceId && Number.isFinite(parsedAutoSave)) {
-        createRecurringRule({
-          name: I18n.t('goals.auto_save_rule_name', { name: trimmedName }),
-          type: 'transfer',
-          amount: parsedAutoSave,
-          currency,
-          fromAccountId: autoSaveSourceId,
-          toAccountId: id,
-          recurrencePattern: autoSaveCadence,
-          recurrenceInterval: 1,
-          nextRunDate: nextRunDateFor(autoSaveCadence),
-        });
-      }
+      if (wantsAutoSave) createRecurringRule(autoSaveInput(id, trimmedName));
       void trackEvent(AnalyticsEvents.GOAL_CREATED, {
         hasTargetDate,
         hasAutoSave: autoSaveEnabled,
@@ -390,6 +454,7 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
     accounts,
     autoSaveCadence,
     autoSaveEnabled,
+    autoSaveSource,
     autoSaveSourceId,
     canSave,
     checkLimit,
@@ -400,6 +465,10 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
     createTransaction,
     currency,
     currentMonthWage?.trueHourlyRate,
+    deleteRecurringRule,
+    inlineRule,
+    showAutoSave,
+    updateRecurringRule,
     parsedBalance,
     settings,
     emoji,
@@ -623,22 +692,25 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
           </View>
 
           {!isEditing ? (
-            <>
-              <Input
-                label={I18n.t('goals.starting_amount_label')}
-                variant="currency"
-                currencySymbol={currencySymbol}
-                value={startingAmount}
-                onChangeText={setStartingAmount}
-                placeholder="0.00"
-              />
+            <Input
+              label={I18n.t('goals.starting_amount_label')}
+              variant="currency"
+              currencySymbol={currencySymbol}
+              value={startingAmount}
+              onChangeText={setStartingAmount}
+              placeholder="0.00"
+            />
+          ) : null}
 
+          {showAutoSave ? (
+            <>
               <View className="flex-row items-center justify-between gap-3">
-                <View className="flex-1">
+                <View className="flex-1 flex-row items-center gap-1.5">
                   <Text variant="body">{I18n.t('goals.auto_save_toggle')}</Text>
-                  <Text variant="caption" tone="muted" className="mt-0.5">
-                    {I18n.t('goals.auto_save_hint')}
-                  </Text>
+                  <InfoTooltipButton
+                    title={I18n.t('goals.auto_save_toggle')}
+                    infoTooltip={I18n.t('goals.auto_save_hint')}
+                  />
                 </View>
                 <Switch
                   value={autoSaveEnabled}
@@ -720,6 +792,16 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
                 </View>
               ) : null}
             </>
+          ) : existingAutoSave && existing?.goalArchivedAt == null ? (
+            <View className="gap-0.5">
+              <Text variant="body">{I18n.t('goals.auto_save_toggle')}</Text>
+              <Text variant="caption" tone="muted">
+                {I18n.t('goals.auto_save_managed_in_recurring', {
+                  settings: I18n.t('settings.title'),
+                  recurring: I18n.t('settings.recurring'),
+                })}
+              </Text>
+            </View>
           ) : null}
         </View>
       </FormScrollView>
@@ -743,15 +825,17 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
               }
             };
             convertField(target, setTarget);
+            convertField(autoSaveAmount, setAutoSaveAmount);
             if (isEditing) {
               convertField(balanceInput, setBalanceInput);
             } else {
               convertField(startingAmount, setStartingAmount);
-              convertField(autoSaveAmount, setAutoSaveAmount);
             }
+            // The source must share the goal's currency, so a new currency
+            // needs a new source; re-picking the same one keeps it.
+            setAutoSaveSourceId(null);
           }
           setCurrency(code);
-          setAutoSaveSourceId(null);
           setShowCurrencyPicker(false);
         }}
       />

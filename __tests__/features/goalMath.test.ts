@@ -1,5 +1,6 @@
 import {
   computeGoalProgress,
+  findGoalAutoSaveRule,
   isGoalAchieved,
   monthlyEquivalentRate,
 } from '~/features/goals/lib/goalMath';
@@ -183,5 +184,37 @@ describe('monthlyEquivalentRate', () => {
     expect(monthlyEquivalentRate([rule({ isActive: false })], 'goal-1')).toBeNull();
     expect(monthlyEquivalentRate([rule({ toAccountId: 'other' })], 'goal-1')).toBeNull();
     expect(monthlyEquivalentRate([rule({ type: 'expense' })], 'goal-1')).toBeNull();
+  });
+});
+
+describe('findGoalAutoSaveRule', () => {
+  it('returns null when no active transfer pays into the goal', () => {
+    expect(findGoalAutoSaveRule([], 'goal-1', 'USD')).toBeNull();
+    expect(findGoalAutoSaveRule([rule({ isActive: false })], 'goal-1', 'USD')).toBeNull();
+    expect(findGoalAutoSaveRule([rule({ toAccountId: 'other' })], 'goal-1', 'USD')).toBeNull();
+  });
+
+  it('treats a single monthly or weekly same-currency rule as inline-editable', () => {
+    for (const recurrencePattern of ['monthly', 'weekly'] as const) {
+      const found = findGoalAutoSaveRule([rule({ recurrencePattern })], 'goal-1', 'USD');
+      expect(found?.rule.id).toBe('r1');
+      expect(found?.inlineEditable).toBe(true);
+    }
+  });
+
+  it('leaves richer rules to the recurring editor', () => {
+    const cases: Partial<RecurringTransactionRule>[] = [
+      { recurrencePattern: 'daily' },
+      { recurrencePattern: 'yearly' },
+      { recurrenceInterval: 2 },
+      { toAmount: 110 },
+      { currency: 'EUR' },
+    ];
+    for (const overrides of cases) {
+      expect(findGoalAutoSaveRule([rule(overrides)], 'goal-1', 'USD')?.inlineEditable).toBe(false);
+    }
+    expect(
+      findGoalAutoSaveRule([rule({ id: 'a' }), rule({ id: 'b' })], 'goal-1', 'USD')?.inlineEditable,
+    ).toBe(false);
   });
 });

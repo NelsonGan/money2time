@@ -2251,6 +2251,8 @@ const ko = {
     auto_save_no_source:
       '아직 {{currency}} 계좌가 없어요. 자동 저축에는 같은 통화의 계좌가 필요합니다.',
     auto_save_rule_name: '자동 저축: {{name}}',
+    auto_save_managed_in_recurring:
+      '이 목표의 자동 저축은 사용자 지정 일정입니다. {{settings}} > {{recurring}}에서 변경하세요.',
     edit_title: '목표 편집',
     delete_title: '목표를 삭제할까요?',
     delete_message: '목표와 관련 거래가 모두 삭제됩니다. 되돌릴 수 없어요.',
