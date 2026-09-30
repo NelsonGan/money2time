@@ -799,7 +799,7 @@ const pt = {
       title: 'Filtros',
       subtitle: 'Refine sua lista de transações',
       search: 'Buscar',
-      search_placeholder: 'Buscar nota',
+      search_placeholder: 'Buscar nota, categoria ou valor',
       type: 'Tipo',
       account: 'Conta',
       category: 'Categoria',

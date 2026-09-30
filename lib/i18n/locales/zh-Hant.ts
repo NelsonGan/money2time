@@ -758,7 +758,7 @@ const zhHant = {
       title: '篩選',
       subtitle: '精確篩選交易列表',
       search: '搜尋',
-      search_placeholder: '搜尋備註',
+      search_placeholder: '搜尋備註、分類或金額',
       type: '型別',
       account: '帳戶',
       category: '分類',

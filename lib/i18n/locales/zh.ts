@@ -758,7 +758,7 @@ const zh = {
       title: '筛选',
       subtitle: '精确筛选交易列表',
       search: '搜索',
-      search_placeholder: '搜索备注',
+      search_placeholder: '搜索备注、分类或金额',
       type: '类型',
       account: '账户',
       category: '分类',

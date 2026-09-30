@@ -798,7 +798,7 @@ const hi = {
       title: 'फ़िल्टर',
       subtitle: 'अपनी लेनदेन सूची को परिष्कृत करें',
       search: 'खोजें',
-      search_placeholder: 'नोट खोजें',
+      search_placeholder: 'नोट, श्रेणी या राशि खोजें',
       type: 'प्रकार',
       account: 'खाता',
       category: 'श्रेणी',

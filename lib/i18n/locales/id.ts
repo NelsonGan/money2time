@@ -803,7 +803,7 @@ const id = {
       title: 'Filter',
       subtitle: 'Saring daftar transaksimu',
       search: 'Cari',
-      search_placeholder: 'Cari catatan',
+      search_placeholder: 'Cari catatan, kategori, atau jumlah',
       type: 'Jenis',
       account: 'Akun',
       category: 'Kategori',
