@@ -72,7 +72,7 @@ import {
   categoryIconToEmoji,
   classifyCategoryIcon,
 } from '~/constants/categoryIcons';
-import { CHART_CATEGORY_COLORS } from '~/constants/chartColors';
+import { chartCategoryColor } from '~/constants/chartColors';
 import { type ColorPalette, LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { LONG_RANGE_PAGER_CENTER_INDEX, LONG_RANGE_PAGER_TOTAL_SLOTS } from '~/constants/pager';
 import { PRO_TREND_TYPES, type ProTrendType } from '~/constants/proLimits';
@@ -93,8 +93,8 @@ import {
   pruneAssetHistoryOverrides,
   toggleAssetHistoryAccount,
 } from '~/features/insights/assetHistory';
-import { RankedImpactChart, type RankedImpactRow } from '~/features/insights/components';
 import { buildInsightsCategoryPickerData } from '~/features/insights/categoryPickerData';
+import { RankedImpactChart, type RankedImpactRow } from '~/features/insights/components';
 import { ProTrendPreviewOverlay } from '~/features/insights/components/ProTrendPreviewOverlay';
 import { SavingsRateRing } from '~/features/insights/components/SavingsRateRing';
 import { SentimentStackedBarChart } from '~/features/insights/components/SentimentStackedBarChart';
@@ -103,8 +103,8 @@ import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursemen
 import {
   EMPTY_REVIEW_FILTERS,
   pruneReviewFilters,
-  type ReviewFilters,
   reviewFilterCount,
+  type ReviewFilters,
 } from '~/features/review/lib/reviewFilters';
 import type { ReviewZoom } from '~/features/review/lib/reviewPeriods';
 import { ReviewPagerView, type ReviewPagerViewHandle } from '~/features/review/screens';
@@ -137,6 +137,7 @@ import type {
 } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
+import { withColorAlpha } from '~/utils/color';
 import { convert } from '~/utils/currency';
 import {
   addFinancialMonths,
@@ -308,8 +309,6 @@ function renderInsightTypeIcon(insightType: InsightType) {
     </View>
   );
 }
-
-const INSIGHTS_CHART_COLORS = CHART_CATEGORY_COLORS;
 
 const INSIGHTS_PAGER_TOTAL_SLOTS = LONG_RANGE_PAGER_TOTAL_SLOTS;
 const INSIGHTS_PAGER_CENTER_INDEX = LONG_RANGE_PAGER_CENTER_INDEX;
@@ -1397,16 +1396,6 @@ function generateDayKeysForRange(startIso: string, endIso: string): string[] {
     cursor.setDate(cursor.getDate() + 1);
   }
   return keys;
-}
-
-function withColorAlpha(hex: string, alpha: number) {
-  const value = hex.replace('#', '');
-  if (!/^[0-9a-fA-F]{6}$/.test(value)) return hex;
-  const r = Number.parseInt(value.slice(0, 2), 16);
-  const g = Number.parseInt(value.slice(2, 4), 16);
-  const b = Number.parseInt(value.slice(4, 6), 16);
-  const normalizedAlpha = Math.max(0, Math.min(1, alpha));
-  return `rgba(${r}, ${g}, ${b}, ${normalizedAlpha})`;
 }
 
 // Tone, icon, and status copy all derive from the same rounded percent the user
@@ -4913,7 +4902,7 @@ export function InsightsScreen({
       value: row.amount,
       emoji: row.emoji || categoryById.get(row.id)?.icon || '•',
       pct: pageTotalAmount > 0 ? (row.amount / pageTotalAmount) * 100 : 0,
-      color: INSIGHTS_CHART_COLORS[i % INSIGHTS_CHART_COLORS.length],
+      color: chartCategoryColor(i),
     })) satisfies BreakdownPieSlice[];
     const activeSlice = activeBreakdownSliceId
       ? (pagePieData.find((item) => item.id === activeBreakdownSliceId) ?? null)

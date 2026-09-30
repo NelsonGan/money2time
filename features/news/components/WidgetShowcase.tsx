@@ -10,6 +10,7 @@ import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { buildSampleWidgetSnapshot } from '~/services/widgetSnapshot.shared';
+import { withColorAlpha } from '~/utils/color';
 import { FONT } from '~/utils/fonts';
 
 export type WidgetShowcaseKind =
@@ -33,15 +34,6 @@ const RATIO: Record<WidgetShowcaseKind, number> = {
 
 const WIDGET_PADDING = 16;
 const GRID_GAP = 4;
-
-function withColorAlpha(hex: string, alpha: number): string {
-  const value = hex.replace('#', '');
-  if (!/^[0-9a-fA-F]{6}$/.test(value)) return hex;
-  const r = Number.parseInt(value.slice(0, 2), 16);
-  const g = Number.parseInt(value.slice(2, 4), 16);
-  const b = Number.parseInt(value.slice(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${Math.max(0, Math.min(1, alpha))})`;
-}
 
 function Banner({ width = 112 }: { width?: number }) {
   return (

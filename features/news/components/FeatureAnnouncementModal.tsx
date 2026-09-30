@@ -17,6 +17,7 @@ import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import { withColorAlpha } from '~/utils/color';
 
 import {
   announcementBadgeLabel,
@@ -36,13 +37,13 @@ import { AppLockShowcase } from './AppLockShowcase';
 import { AutoLogShowcase } from './AutoLogShowcase';
 import { BackupShowcase } from './BackupShowcase';
 import { BudgetShowcase } from './BudgetShowcase';
-import { ExcelExportShowcase } from './ExcelExportShowcase';
 import {
   GoalCoversShowcase,
   HomeCardsShowcase,
   ItemIconsShowcase,
   TransactionReorderShowcase,
 } from './EverydayPersonalizationShowcases';
+import { ExcelExportShowcase } from './ExcelExportShowcase';
 import { FinancialMonthShowcase } from './FinancialMonthShowcase';
 import { GoalsShowcase } from './GoalsShowcase';
 import { IconStyleShowcase } from './IconStyleShowcase';
@@ -55,12 +56,12 @@ import { MascotsShowcase } from './MascotsShowcase';
 import { MonthCycleShowcase } from './MonthCycleShowcase';
 import { MultiCurrencyShowcase } from './MultiCurrencyShowcase';
 import { ReceiptSplitShowcase } from './ReceiptSplitShowcase';
-import { RiceCalShowcase } from './RiceCalShowcase';
-import { AndroidStoreIcon, AppleStoreIcon } from './StorePlatformIcons';
 import { RecurringForecastShowcase } from './RecurringForecastShowcase';
 import { RedesignShowcase } from './RedesignShowcase';
 import { ReviewShowcase } from './ReviewShowcase';
+import { RiceCalShowcase } from './RiceCalShowcase';
 import { ShareEarnShowcase } from './ShareEarnShowcase';
+import { AndroidStoreIcon, AppleStoreIcon } from './StorePlatformIcons';
 import { SubscriptionLogoShowcase } from './SubscriptionLogoShowcase';
 import { TransactionFxShowcase } from './TransactionFxShowcase';
 import { TrialAccountsShowcase } from './TrialAccountsShowcase';
@@ -109,15 +110,6 @@ interface FeatureAnnouncementModalProps {
 
 const MODAL_HORIZONTAL = 16;
 const PANEL_PADDING = 18;
-
-function withColorAlpha(hex: string, alpha: number): string {
-  const value = hex.replace('#', '');
-  if (!/^[0-9a-fA-F]{6}$/.test(value)) return hex;
-  const r = Number.parseInt(value.slice(0, 2), 16);
-  const g = Number.parseInt(value.slice(2, 4), 16);
-  const b = Number.parseInt(value.slice(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${Math.max(0, Math.min(1, alpha))})`;
-}
 
 function resolveAccentColor(
   page: FeatureAnnouncementPage,

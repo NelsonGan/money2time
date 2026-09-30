@@ -13,15 +13,15 @@ import {
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
-import { spacing } from '~/constants/designSystem';
-import { useApp, useTransactions } from '~/context/AppContext';
-import { useIsPro } from '~/context/ProContext';
-import { useThemeColors } from '~/hooks/useThemeColors';
 import {
   BudgetBreakdownWidgetContent,
   BudgetRingWidgetContent,
 } from '~/components/widget-preview/BudgetWidgetContent';
 import { SavingsRateWidgetContent } from '~/components/widget-preview/SavingsRateWidgetContent';
+import { spacing } from '~/constants/designSystem';
+import { useApp, useTransactions } from '~/context/AppContext';
+import { useIsPro } from '~/context/ProContext';
+import { useThemeColors } from '~/hooks/useThemeColors';
 import { WIDGET_DEFINITIONS, WIDGET_IDS, type WidgetSize } from '~/services/widgetRegistry';
 import {
   type BudgetBreakdownSnapshot,
@@ -36,6 +36,7 @@ import {
   type SavingsRateSnapshot,
   type WeeklyExpenseSnapshot,
 } from '~/services/widgetSnapshot.shared';
+import { withColorAlpha } from '~/utils/color';
 import { FONT } from '~/utils/fonts';
 
 interface WidgetPreviewsScreenProps {
@@ -60,16 +61,6 @@ const SIZE_RATIOS: Record<WidgetSize, number> = {
 const WIDGET_RADIUS = 26;
 const WIDGET_PADDING = 16;
 const GRID_GAP = 4;
-
-function withColorAlpha(hex: string, alpha: number): string {
-  const value = hex.replace('#', '');
-  if (!/^[0-9a-fA-F]{6}$/.test(value)) return hex;
-  const r = Number.parseInt(value.slice(0, 2), 16);
-  const g = Number.parseInt(value.slice(2, 4), 16);
-  const b = Number.parseInt(value.slice(4, 6), 16);
-  const a = Math.max(0, Math.min(1, alpha));
-  return `rgba(${r}, ${g}, ${b}, ${a})`;
-}
 
 function PreviewBadge({ label }: { label: string }) {
   const themeColors = useThemeColors();

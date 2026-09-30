@@ -26,12 +26,9 @@ import { EmptyState } from '~/components/feedback/EmptyState';
 import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { Text } from '~/components/ui';
+import { chartCategoryColor } from '~/constants/chartColors';
 import { useApp, useTransactions } from '~/context/AppContext';
-import {
-  type BreakdownChartRow,
-  CategoryBreakdownChart,
-  INSIGHTS_CHART_COLORS,
-} from '~/features/insights/components';
+import { type BreakdownChartRow, CategoryBreakdownChart } from '~/features/insights/components';
 import type { InsightsDrilldownPayload } from '~/features/insights/screens';
 import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
 import {
@@ -205,7 +202,7 @@ export function AlbumDetailScreen({
         categoryRootId: rootCategory?.id,
         categoryRootLabel: rootCategory?.name ?? row.label,
         categoryRootEmoji: rootCategory?.icon ?? row.emoji ?? undefined,
-        categoryRootColor: INSIGHTS_CHART_COLORS[index % INSIGHTS_CHART_COLORS.length],
+        categoryRootColor: chartCategoryColor(index),
         albumId,
       });
     },
