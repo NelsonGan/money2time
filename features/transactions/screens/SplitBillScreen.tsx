@@ -1,10 +1,10 @@
 import { type RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 
 import { useSplitBillSession } from '~/context/SplitBillSession';
-import { SplitBillModal } from '~/features/transactions/components/editor';
+import { SplitBillModal, type SplitDraft } from '~/features/transactions/components/editor';
 import type { RootStackParamList } from '~/navigation/rootStack';
 
 /**
@@ -27,6 +27,28 @@ export function SplitBillScreen() {
   // re-subscribing (and tearing down) on every keystroke.
   const sessionRef = useRef(session);
   sessionRef.current = session;
+
+  // The rows live here too, not only in the editor. A keystroke that had to go
+  // editor state -> publish effect -> session context before reaching the
+  // name TextInput landed a render or two late, and each stale `value` that
+  // arrived mid-burst reset the native text: fast typing or deleting flashed
+  // characters and threw the caret back. Edits now apply here in the same
+  // render as the keystroke and are forwarded to the editor; when they echo
+  // back through the session they are recognised and skipped, while a change
+  // that started in the editor (mark paid / unpaid) is still adopted.
+  const sessionSplits = session?.splits;
+  const [splits, setSplits] = useState<SplitDraft[]>(() => sessionSplits ?? []);
+  const [seenSessionSplits, setSeenSessionSplits] = useState(sessionSplits);
+  const sentSplitsRef = useRef(new WeakSet<SplitDraft[]>());
+  if (sessionSplits !== seenSessionSplits) {
+    setSeenSessionSplits(sessionSplits);
+    if (sessionSplits && !sentSplitsRef.current.has(sessionSplits)) setSplits(sessionSplits);
+  }
+  const handleSplitsChange = useCallback((next: SplitDraft[]) => {
+    sentSplitsRef.current.add(next);
+    setSplits(next);
+    sessionRef.current?.onChange(next);
+  }, []);
 
   // Any removal that wasn't an explicit Done is a cancel — covers the header
   // back button and the edge-swipe-back gesture alike.
@@ -66,8 +88,8 @@ export function SplitBillScreen() {
       total={session.total}
       itemized={session.itemized}
       defaultAccountId={session.defaultAccountId}
-      splits={session.splits}
-      onChange={session.onChange}
+      splits={splits}
+      onChange={handleSplitsChange}
       splitEvenly={session.splitEvenly}
       onSplitEvenlyChange={session.onSplitEvenlyChange}
       accounts={session.accounts}
