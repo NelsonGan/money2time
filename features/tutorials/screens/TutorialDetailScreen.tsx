@@ -1,14 +1,11 @@
-import { Image } from 'expo-image';
-import { ImageIcon } from 'lucide-react-native';
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { Pressable, Share, StyleSheet, View } from 'react-native';
 
-import { Button, ClayIcon, SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
-import { spacing } from '~/constants/designSystem';
-import { useThemeColors } from '~/hooks/useThemeColors';
+import { ClayIcon, SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 
+import { StepPager, useStepPager } from '../components/StepPager';
 import { TUTORIAL_IMAGE_SOURCES } from '../content/images.generated';
 import { getTutorial } from '../content/tutorials';
 import { tutorialWebUrl } from '../links';
@@ -19,37 +16,15 @@ interface TutorialDetailScreenProps {
 }
 
 /**
- * One tutorial, paged one step at a time. Deliberately the same shape as
- * `AutoLogTutorialScreen` (frame, dots, caption, ghost-back + primary-next),
- * because that walkthrough is the one users already know and the two now sit
- * one tap apart.
+ * One tutorial, paged one step at a time on the same `StepPager` as
+ * `AutoLogTutorialScreen`, because that walkthrough is the one users already
+ * know and the two sit one tap apart.
  */
 export function TutorialDetailScreen({ id, onBack }: TutorialDetailScreenProps) {
-  const themeColors = useThemeColors();
   const tutorial = getTutorial(id);
-  const [index, setIndex] = useState(0);
-
   const steps = tutorial?.steps ?? [];
+  const { index, isLast, goNext, goBack } = useStepPager(steps.length, onBack);
   const step = steps[index];
-  const isLast = index === steps.length - 1;
-
-  const goNext = useCallback(() => {
-    void triggerHaptic('medium');
-    if (isLast) {
-      onBack();
-      return;
-    }
-    setIndex((current) => Math.min(current + 1, steps.length - 1));
-  }, [isLast, onBack, steps.length]);
-
-  const goBack = useCallback(() => {
-    void triggerHaptic('selection');
-    if (index === 0) {
-      onBack();
-      return;
-    }
-    setIndex((current) => Math.max(current - 1, 0));
-  }, [index, onBack]);
 
   // Shares the website copy of the same tutorial, which offers to open the app.
   // That link works for someone who does not have Money2Time installed; a bare
@@ -104,31 +79,14 @@ export function TutorialDetailScreen({ id, onBack }: TutorialDetailScreenProps) 
         />
       </View>
 
-      <View style={styles.body}>
-        <View style={[styles.frame, { backgroundColor: `${themeColors.primary}0A` }]}>
-          {source ? (
-            <Image source={source} style={styles.frameImage} contentFit="contain" />
-          ) : (
-            <ImageIcon size={28} color={themeColors.textMuted} />
-          )}
-        </View>
-
-        <View style={styles.dots}>
-          {steps.map((item, dotIndex) => (
-            <View
-              key={`${item.title}-${dotIndex}`}
-              style={[
-                styles.dot,
-                {
-                  width: dotIndex === index ? 18 : 6,
-                  backgroundColor:
-                    dotIndex === index ? themeColors.primary : `${themeColors.primary}33`,
-                },
-              ]}
-            />
-          ))}
-        </View>
-
+      <StepPager
+        image={source}
+        count={steps.length}
+        index={index}
+        isLast={isLast}
+        onNext={goNext}
+        onBack={goBack}
+      >
         <View style={styles.caption}>
           <Text variant="caption" tone="muted">
             {I18n.t('tutorials.step_counter', { current: index + 1, total: steps.length })}
@@ -140,57 +98,15 @@ export function TutorialDetailScreen({ id, onBack }: TutorialDetailScreenProps) 
             {step.body}
           </Text>
         </View>
-
-        <View style={[styles.nav, styles.navBottom]} className="border-t border-border/15">
-          <Button variant="ghost" className="flex-1" haptic="none" onPress={goBack}>
-            <Text>{I18n.t('common.back')}</Text>
-          </Button>
-          <Button className="flex-[2] shadow-glow" haptic="none" onPress={goNext}>
-            <Text>{isLast ? I18n.t('common.done') : I18n.t('common.next')}</Text>
-          </Button>
-        </View>
-      </View>
+      </StepPager>
     </SettingsPageLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  body: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  frame: {
-    flex: 1,
-    borderRadius: 20,
-    overflow: 'hidden',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  frameImage: {
-    width: '100%',
-    height: '100%',
-  },
-  dots: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 14,
-  },
-  dot: {
-    height: 6,
-    borderRadius: 3,
-  },
   caption: {
     minHeight: 96,
     gap: 2,
-  },
-  nav: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    paddingTop: spacing.sm,
-  },
-  navBottom: {
-    paddingBottom: spacing.md,
   },
   missing: {
     flex: 1,
