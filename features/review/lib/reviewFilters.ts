@@ -30,10 +30,6 @@ export function reviewFilterCount(filters: ReviewFilters): number {
   );
 }
 
-export function hasReviewFilters(filters: ReviewFilters): boolean {
-  return reviewFilterCount(filters) > 0;
-}
-
 /**
  * Drops the excluded rows before any of the review's numbers are built, so a
  * single filter reaches the total, the trend, the categories, the mood split,
@@ -52,7 +48,7 @@ export function applyReviewFilters(
   filters: ReviewFilters,
   categories: Pick<Category, 'id' | 'parentId'>[],
 ): TransactionWithRelations[] {
-  if (!hasReviewFilters(filters)) return transactions;
+  if (reviewFilterCount(filters) === 0) return transactions;
 
   const excludedAccounts = new Set(filters.excludedAccountIds);
   const excludedExpenseCategories = new Set(filters.excludedExpenseCategoryIds);
