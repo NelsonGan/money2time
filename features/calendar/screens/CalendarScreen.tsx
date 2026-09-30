@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Copy, Pencil, Trash2 } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { TextInput } from 'react-native';
 import {
@@ -18,7 +18,6 @@ import Reanimated, {
 } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { DatePickerModal } from '~/components/datePicker';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { useBottomNavMinimize } from '~/components/navigation/BottomNavMinimize';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
@@ -27,7 +26,6 @@ import {
   AccountPickerSheet,
   CategoryPickerSheet,
   ClayIcon,
-  Input,
   Text,
   ThemeModal,
   TimeValueInline,
@@ -42,11 +40,15 @@ import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursemen
 import {
   ActivitySearchRow,
   ActivityTransactionList,
+  buildBulkUpdateInputs,
+  BulkEditTransactionsSheet,
+  type BulkTransactionChanges,
   DisplayModeToggle,
   DuplicateTransactionsDatePicker,
   MonthPagerPage,
 } from '~/features/transactions/components';
 import { ScanStatusBanner } from '~/features/transactions/components/ScanStatusBanner';
+import { TransactionSelectionActions } from '~/features/transactions/components/TransactionSelectionToolbar';
 import {
   MONTH_PAGER_CENTER_INDEX,
   MONTH_PAGER_TOTAL_SLOTS,
@@ -64,7 +66,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { subscribeCalendarGoToToday } from '~/services/calendarNavigation';
 import { triggerHaptic } from '~/services/haptics';
-import type { TransactionWithRelations } from '~/types';
+import type { CategoryType, TransactionWithRelations } from '~/types';
 import { cn } from '~/utils';
 import {
   addFinancialMonths,
@@ -78,7 +80,6 @@ import {
   dayKeyFromDateLocal,
   dayKeyFromIsoLocal,
   formatAmount,
-  formatDateInput,
   formatMonthYearLabel,
 } from '~/utils/formatters';
 import { countsAsExpenseRow } from '~/utils/spending';
@@ -134,6 +135,8 @@ const DAY_SCROLL_TARGET_TTL_MS = 4000;
 const CREATED_ROW_WAIT_MS = 1500;
 
 const EMPTY_MONTH_ROWS: TransactionWithRelations[] = [];
+// Bulk edit on the home list changes date and note only.
+const NO_BULK_CATEGORY_TYPES: CategoryType[] = [];
 
 const FILTER_MODAL_CONTENT_STYLE = {
   padding: spacing.screenHorizontal,
@@ -285,16 +288,10 @@ export function CalendarScreen({
   const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
   const [showDuplicatePicker, setShowDuplicatePicker] = useState(false);
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
-  const [bulkDate, setBulkDate] = useState(() => formatDateInput(new Date()));
-  const [bulkDateTouched, setBulkDateTouched] = useState(false);
-  const [bulkDateModalVisible, setBulkDateModalVisible] = useState(false);
-  const [bulkNote, setBulkNote] = useState('');
-  const [bulkNoteTouched, setBulkNoteTouched] = useState(false);
   const isSelectionMode = selectedTransactionIds.length > 0;
   const isSelectionModeRef = useRef(isSelectionMode);
   isSelectionModeRef.current = isSelectionMode;
   const selectedTransactionCount = selectedTransactionIds.length;
-  const hasBulkChanges = bulkDateTouched || bulkNoteTouched;
 
   const closeFilterPicker = useCallback(() => setActiveFilterPicker(null), []);
   useEffect(() => {
@@ -1186,10 +1183,8 @@ export function CalendarScreen({
     [isTimeMode, settings],
   );
 
-  const clearSelection = useCallback(() => {
-    void triggerHaptic('selection');
-    setSelectedTransactionIds([]);
-  }, []);
+  // The selection bar's Cancel plays its own haptic.
+  const clearSelection = useCallback(() => setSelectedTransactionIds([]), []);
 
   const toggleDaySelection = useCallback((transactionIds: string[]) => {
     if (transactionIds.length === 0) return;
@@ -1260,10 +1255,6 @@ export function CalendarScreen({
 
   const handleOpenBulkUpdate = useCallback(() => {
     if (selectedTransactionCount === 0) return;
-    setBulkDate(formatDateInput(new Date()));
-    setBulkDateTouched(false);
-    setBulkNote('');
-    setBulkNoteTouched(false);
     setShowBulkUpdate(true);
   }, [selectedTransactionCount]);
 
@@ -1271,33 +1262,19 @@ export function CalendarScreen({
     setShowBulkUpdate(false);
   }, []);
 
-  const handleApplyBulkUpdate = useCallback(() => {
-    if (selectedTransactionIds.length === 0) return;
-    if (!hasBulkChanges) return;
-
-    const updates: { date?: string; note?: string | null } = {};
-    if (bulkDateTouched) updates.date = bulkDate;
-    if (bulkNoteTouched) {
-      const normalizedNote = bulkNote.trim();
-      updates.note = normalizedNote.length > 0 ? normalizedNote : null;
-    }
-    if (Object.keys(updates).length === 0) return;
-
-    updateTransactionsBulk(
-      selectedTransactionIds.map((transactionId) => ({ id: transactionId, input: updates })),
-    );
-    void triggerHaptic('success');
-    setShowBulkUpdate(false);
-    setSelectedTransactionIds([]);
-  }, [
-    bulkDate,
-    bulkDateTouched,
-    bulkNote,
-    bulkNoteTouched,
-    hasBulkChanges,
-    selectedTransactionIds,
-    updateTransactionsBulk,
-  ]);
+  const handleApplyBulkUpdate = useCallback(
+    (changes: BulkTransactionChanges) => {
+      if (selectedTransactionIds.length === 0) return;
+      // The sheet only offers date and note here, so no row needs its type.
+      updateTransactionsBulk(
+        buildBulkUpdateInputs(selectedTransactionIds, changes, () => undefined),
+      );
+      void triggerHaptic('success');
+      setShowBulkUpdate(false);
+      setSelectedTransactionIds([]);
+    },
+    [selectedTransactionIds, updateTransactionsBulk],
+  );
 
   const handleDeleteSelectedTransactions = useCallback(() => {
     if (selectedTransactionIds.length === 0) return;
@@ -1485,63 +1462,22 @@ export function CalendarScreen({
                 shift when entering/leaving selection mode). */}
             <View className="flex-row items-center justify-between gap-2" style={{ minHeight: 40 }}>
               {isSelectionMode ? (
-                <View className="flex-1 flex-row items-center justify-between gap-2">
-                  <Pressable
-                    onPress={clearSelection}
-                    className="rounded-full bg-secondary/70 px-3 py-1.5 active:opacity-85"
-                    accessibilityRole="button"
-                    accessibilityLabel={I18n.t('common.cancel')}
-                  >
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('common.cancel')}
+                <TransactionSelectionActions
+                  selectedCount={selectedTransactionCount}
+                  totalNode={
+                    <Text variant="label" className="text-foreground">
+                      {selectedTransactionTotalLabel}
                     </Text>
-                  </Pressable>
-                  <View className="flex-1 items-center px-1">
-                    <View className="flex-row flex-wrap items-center justify-center gap-1.5">
-                      <Text variant="caption" className="text-foreground">
-                        {I18n.t('transactions.selection.selected_count', {
-                          count: selectedTransactionCount,
-                        })}
-                      </Text>
-                      <View className="rounded-full border border-border/35 bg-secondary/70 px-2 py-[3px]">
-                        <Text variant="label" className="text-foreground">
-                          {selectedTransactionTotalLabel}
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                  <View className="flex-row items-center gap-1.5">
-                    {duplicableSelectedTransactions.length > 0 ? (
-                      <Pressable
-                        onPress={handleOpenDuplicatePicker}
-                        className="h-9 w-9 rounded-full bg-secondary/70 border border-border/35 items-center justify-center active:opacity-85"
-                        accessibilityRole="button"
-                        accessibilityLabel={I18n.t('transactions.selection.duplicate')}
-                        hitSlop={8}
-                      >
-                        <Copy size={14} color={themeColors.textMuted} />
-                      </Pressable>
-                    ) : null}
-                    <Pressable
-                      onPress={handleOpenBulkUpdate}
-                      className="h-9 w-9 rounded-full bg-primary/12 border border-primary/35 items-center justify-center active:opacity-85"
-                      accessibilityRole="button"
-                      accessibilityLabel={I18n.t('transactions.selection.update')}
-                      hitSlop={8}
-                    >
-                      <Pencil size={14} color={themeColors.primary} />
-                    </Pressable>
-                    <Pressable
-                      onPress={handleDeleteSelectedTransactions}
-                      className="h-9 w-9 rounded-full bg-destructive/10 border border-destructive/35 items-center justify-center active:opacity-85"
-                      accessibilityRole="button"
-                      accessibilityLabel={I18n.t('common.delete')}
-                      hitSlop={8}
-                    >
-                      <Trash2 size={14} color={themeColors.coral} />
-                    </Pressable>
-                  </View>
-                </View>
+                  }
+                  onCancel={clearSelection}
+                  onDuplicate={
+                    duplicableSelectedTransactions.length > 0
+                      ? handleOpenDuplicatePicker
+                      : undefined
+                  }
+                  onEdit={handleOpenBulkUpdate}
+                  onDelete={handleDeleteSelectedTransactions}
+                />
               ) : (
                 <>
                   <View className="flex-row items-center gap-2 flex-1">{BackButton}</View>
@@ -1767,97 +1703,13 @@ export function CalendarScreen({
         ) : null}
       </View>
 
-      <ThemeModal
+      <BulkEditTransactionsSheet
         visible={showBulkUpdate}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={handleCloseBulkUpdate}
-      >
-        <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-          <View style={styles.modalHeaderRow}>
-            <View className="flex-1 pr-3">
-              <Text variant="subheading">
-                {I18n.t('transactions.selection.update_title', { count: selectedTransactionCount })}
-              </Text>
-              <Text variant="friendly" tone="muted">
-                {I18n.t('transactions.selection.update_subtitle')}
-              </Text>
-            </View>
-            <View className="flex-row items-center gap-2">
-              <Pressable
-                onPress={handleCloseBulkUpdate}
-                className="px-3 py-2 rounded-full bg-secondary/70"
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('common.cancel')}
-              >
-                <Text variant="caption" tone="muted">
-                  {I18n.t('common.cancel')}
-                </Text>
-              </Pressable>
-              <Pressable
-                onPress={handleApplyBulkUpdate}
-                disabled={!hasBulkChanges}
-                className={cn(
-                  'px-3 py-2 rounded-full',
-                  hasBulkChanges ? 'bg-primary' : 'bg-secondary/70',
-                )}
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('common.save')}
-                accessibilityState={{ disabled: !hasBulkChanges }}
-              >
-                <Text
-                  variant="caption"
-                  className={cn(hasBulkChanges ? 'text-white' : 'text-muted-foreground')}
-                >
-                  {I18n.t('common.save')}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-
-          <ScrollView className="flex-1" contentContainerStyle={FILTER_MODAL_CONTENT_STYLE}>
-            <View className="gap-2.5">
-              <Text variant="caption" tone="muted">
-                {I18n.t('transactions.editor.date')}
-              </Text>
-              <Pressable
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  setBulkDateModalVisible(true);
-                }}
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('transactions.editor.date')}
-                className="rounded-2xl border border-border/30 bg-card px-3.5 py-3.5"
-              >
-                <Text variant="caption">{bulkDate}</Text>
-              </Pressable>
-            </View>
-
-            <View className="gap-2.5">
-              <Input
-                label={I18n.t('transaction_detail.note')}
-                placeholder={I18n.t('transactions.editor.optional')}
-                value={bulkNote}
-                onChangeText={(value) => {
-                  setBulkNote(value);
-                  setBulkNoteTouched(true);
-                }}
-              />
-            </View>
-          </ScrollView>
-          <DatePickerModal
-            visible={bulkDateModalVisible}
-            value={bulkDate}
-            overlay
-            onSelect={(value) => {
-              setBulkDate(value);
-              setBulkDateTouched(true);
-              setBulkDateModalVisible(false);
-            }}
-            onClose={() => setBulkDateModalVisible(false)}
-          />
-        </SafeAreaView>
-      </ThemeModal>
+        selectedCount={selectedTransactionCount}
+        categoryTypes={NO_BULK_CATEGORY_TYPES}
+        onClose={handleCloseBulkUpdate}
+        onApply={handleApplyBulkUpdate}
+      />
 
       <ThemeModal
         visible={showFilters}
