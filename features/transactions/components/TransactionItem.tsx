@@ -368,7 +368,7 @@ const TransactionItemBody = memo(
           {accountSubtitleLabel ? (
             <View
               className={cn(
-                'max-w-full self-start flex-row items-center gap-1 rounded-full border border-border/30 bg-secondary/55 px-1.5 py-0.5',
+                'max-w-full self-start flex-row items-center gap-0.5 rounded-full border border-border/30 bg-secondary/55 px-1 py-px',
                 compact ? 'mt-1' : 'mt-1.5',
               )}
             >
@@ -376,16 +376,24 @@ const TransactionItemBody = memo(
                 logoId={account?.logoId}
                 type={account?.type}
                 goalEmoji={account?.goalEmoji}
-                size={compact ? 14 : 16}
+                size={compact ? 12 : 14}
               />
-              <Text variant="caption" tone="muted" className="min-w-0 shrink" numberOfLines={1}>
+              <Text
+                variant="caption"
+                tone="muted"
+                className={cn(
+                  'min-w-0 shrink',
+                  compact ? 'text-[10px] leading-[12px]' : 'text-[11px] leading-[14px]',
+                )}
+                numberOfLines={1}
+              >
                 {accountSubtitleLabel}
               </Text>
             </View>
           ) : null}
         </View>
 
-        <View className={cn('shrink-0 self-start items-end', valueColumnClassName)}>
+        <View className={cn('shrink-0 self-center items-end', valueColumnClassName)}>
           <View className="flex-row items-center justify-end gap-1">
             {showsPrimaryTime ? (
               <TimeValueInline
