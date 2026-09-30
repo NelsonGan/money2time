@@ -15,31 +15,18 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 
-import { FeatureAnnouncementModal } from '../components/FeatureAnnouncementModal';
+import {
+  type FeatureAnnouncementCtaHandlers,
+  FeatureAnnouncementModal,
+} from '../components/FeatureAnnouncementModal';
 import {
   announcementTitle,
   type FeatureAnnouncement,
   getFeatureAnnouncementsNewestFirst,
 } from '../featureAnnouncements';
 
-interface NewsScreenProps {
+interface NewsScreenProps extends FeatureAnnouncementCtaHandlers {
   onBack: () => void;
-  onOpenShareEarn?: () => void;
-  onOpenQuickEntrySettings?: () => void;
-  onOpenAutoLog?: () => void;
-  onOpenFirstDayOfMonth?: () => void;
-  onOpenExcelExport?: () => void;
-  onOpenAutoBackup?: () => void;
-  onOpenIconStyle?: () => void;
-  onOpenReview?: () => void;
-  onOpenAccounts?: () => void;
-  onOpenHourlyValueSettings?: () => void;
-  onOpenAddTransaction?: () => void;
-  onOpenRecurring?: () => void;
-  onOpenTutorials?: () => void;
-  onOpenLiveEarnings?: () => void;
-  onOpenAppIcon?: () => void;
-  onOpenProPaywall?: () => void;
 }
 
 function formatAnnouncementDate(dateString: string): string {
@@ -52,25 +39,7 @@ function formatAnnouncementDate(dateString: string): string {
   });
 }
 
-export function NewsScreen({
-  onBack,
-  onOpenShareEarn,
-  onOpenQuickEntrySettings,
-  onOpenAutoLog,
-  onOpenFirstDayOfMonth,
-  onOpenExcelExport,
-  onOpenAutoBackup,
-  onOpenIconStyle,
-  onOpenReview,
-  onOpenAccounts,
-  onOpenHourlyValueSettings,
-  onOpenAddTransaction,
-  onOpenRecurring,
-  onOpenTutorials,
-  onOpenLiveEarnings,
-  onOpenAppIcon,
-  onOpenProPaywall,
-}: NewsScreenProps) {
+export function NewsScreen({ onBack, ...ctaHandlers }: NewsScreenProps) {
   const colors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
   // Voice-gated announcements stay listed everywhere (any device may gain a
@@ -130,22 +99,7 @@ export function NewsScreen({
         announcement={selectedAnnouncement}
         visible={!!selectedAnnouncement}
         onDismiss={() => setSelectedAnnouncement(null)}
-        onOpenShareEarn={onOpenShareEarn}
-        onOpenQuickEntrySettings={onOpenQuickEntrySettings}
-        onOpenAutoLog={onOpenAutoLog}
-        onOpenFirstDayOfMonth={onOpenFirstDayOfMonth}
-        onOpenExcelExport={onOpenExcelExport}
-        onOpenAutoBackup={onOpenAutoBackup}
-        onOpenIconStyle={onOpenIconStyle}
-        onOpenReview={onOpenReview}
-        onOpenAccounts={onOpenAccounts}
-        onOpenHourlyValueSettings={onOpenHourlyValueSettings}
-        onOpenAddTransaction={onOpenAddTransaction}
-        onOpenRecurring={onOpenRecurring}
-        onOpenTutorials={onOpenTutorials}
-        onOpenLiveEarnings={onOpenLiveEarnings}
-        onOpenAppIcon={onOpenAppIcon}
-        onOpenProPaywall={onOpenProPaywall}
+        {...ctaHandlers}
       />
     </SettingsPageLayout>
   );

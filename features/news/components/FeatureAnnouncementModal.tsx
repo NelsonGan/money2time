@@ -70,10 +70,8 @@ import { VoiceShowcase } from './VoiceShowcase';
 import { WidgetShowcase, type WidgetShowcaseKind } from './WidgetShowcase';
 import { WorkingDaysShowcase } from './WorkingDaysShowcase';
 
-interface FeatureAnnouncementModalProps {
-  announcement: FeatureAnnouncement | null;
-  visible: boolean;
-  onDismiss: () => void;
+/** Where each announcement CTA leads; the News screen passes them straight through. */
+export interface FeatureAnnouncementCtaHandlers {
   /** Invoked when a page with the `openShareEarn` CTA is confirmed. */
   onOpenShareEarn?: () => void;
   /** Invoked when a page with the `openQuickEntrySettings` CTA is confirmed. */
@@ -106,6 +104,12 @@ interface FeatureAnnouncementModalProps {
   onOpenAppIcon?: () => void;
   /** Invoked when a page links to the Pro plan selection page. */
   onOpenProPaywall?: () => void;
+}
+
+interface FeatureAnnouncementModalProps extends FeatureAnnouncementCtaHandlers {
+  announcement: FeatureAnnouncement | null;
+  visible: boolean;
+  onDismiss: () => void;
 }
 
 const MODAL_HORIZONTAL = 16;
@@ -568,27 +572,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     marginTop: 18,
-  },
-  toggleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    borderRadius: 18,
-    borderWidth: 1,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    marginTop: 18,
-  },
-  toggleIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  toggleText: {
-    flex: 1,
-    minWidth: 0,
   },
   dot: {
     height: 7,
