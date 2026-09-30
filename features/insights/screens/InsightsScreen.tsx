@@ -128,7 +128,6 @@ import {
 } from '~/services/insightsNavigation';
 import { getCustomLogoUri } from '~/services/userAssets';
 import type {
-  Account,
   Category,
   CategoryType,
   MonthCycleInput,

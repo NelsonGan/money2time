@@ -101,18 +101,16 @@ describe('asset history account visibility', () => {
     expect(pruneAssetHistoryOverrides(clean, accounts)).toBe(clean);
   });
 
-  it('reads the new shape, and turns the retired hidden list into hides', () => {
+  it('reads the new shape and ignores the retired hidden list', () => {
     expect(
       parseAssetHistoryAccountOverrides({
         assetHistoryAccountOverrides: { a: true, b: false, c: 'yes' },
       }),
     ).toEqual({ a: true, b: false });
-    expect(
-      parseAssetHistoryAccountOverrides({ excludedAssetHistoryAccountIds: ['a', 7, ''] }),
-    ).toEqual({ a: false });
-    // An empty retired list carries no choice, so every account follows its
-    // own "Include in totals" setting again.
-    expect(parseAssetHistoryAccountOverrides({ excludedAssetHistoryAccountIds: [] })).toEqual({});
+    // The retired list was a copy of "Include in totals" at first use; reading
+    // it would pin that copy, so every account follows its setting instead.
+    const retired = { excludedAssetHistoryAccountIds: ['a'] };
+    expect(parseAssetHistoryAccountOverrides(retired)).toBeNull();
     expect(parseAssetHistoryAccountOverrides({})).toBeNull();
   });
 });

@@ -88,36 +88,25 @@ export function pruneAssetHistoryOverrides(
 }
 
 /**
- * Reads the stored overrides, falling back to the retired hidden-account list.
+ * Reads the stored overrides.
  *
- * That list cannot say which entries were the user's own and which were just
- * "Include in totals" copied at the time, so every entry becomes a "hide"; the
- * prune then drops those that match the account's current setting. What it
- * cannot recover is an account the user deliberately showed, which the old
- * list recorded only by leaving it out: that account follows its "Include in
- * totals" again, which is the behaviour this change is here to restore.
+ * The retired `excludedAssetHistoryAccountIds` list is deliberately not read.
+ * It was seeded from "Include in totals" at first use, so it cannot tell a
+ * user's own hide from a copy of a setting that has changed since; migrating
+ * its entries would pin exactly that stale copy in place. Dropping it lets
+ * every account follow its "Include in totals" again, and a deliberate hide
+ * is one tap in the filter to redo.
  */
-export function parseAssetHistoryAccountOverrides(parsed: {
-  assetHistoryAccountOverrides?: unknown;
-  excludedAssetHistoryAccountIds?: unknown;
-}): AssetHistoryAccountOverrides | null {
+export function parseAssetHistoryAccountOverrides(
+  parsed: Record<string, unknown>,
+): AssetHistoryAccountOverrides | null {
   const raw = parsed.assetHistoryAccountOverrides;
-  if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
-    const next: AssetHistoryAccountOverrides = {};
-    Object.entries(raw as Record<string, unknown>).forEach(([accountId, included]) => {
-      if (accountId && typeof included === 'boolean') next[accountId] = included;
-    });
-    return next;
-  }
-  const legacy = parsed.excludedAssetHistoryAccountIds;
-  if (Array.isArray(legacy)) {
-    const next: AssetHistoryAccountOverrides = {};
-    legacy.forEach((accountId) => {
-      if (typeof accountId === 'string' && accountId) next[accountId] = false;
-    });
-    return next;
-  }
-  return null;
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const next: AssetHistoryAccountOverrides = {};
+  Object.entries(raw as Record<string, unknown>).forEach(([accountId, included]) => {
+    if (accountId && typeof included === 'boolean') next[accountId] = included;
+  });
+  return next;
 }
 
 type LedgerTransaction = Pick<
