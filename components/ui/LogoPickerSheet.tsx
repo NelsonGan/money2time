@@ -5,6 +5,7 @@ import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { PickerTabs } from '~/components/ui/PickerTabs';
 import { SettingsHeader } from '~/components/ui/settings';
 import { Text } from '~/components/ui/text';
 import { ThemeModal } from '~/components/ui/theme-modal';
@@ -314,40 +315,14 @@ export function LogoPickerSheet({
           onBack={onClose}
         />
 
-        {/* Tabs sit on their own row below the centered title so they don't
-            compete with it for the header's side slots. */}
-        <View className="flex-row px-5 pb-3" style={{ gap: spacing.lg }}>
-          {(
-            [
-              { value: 'library', label: I18n.t('accounts.logo.tab_library') },
-              { value: 'custom', label: I18n.t('accounts.logo.tab_custom') },
-            ] as const
-          ).map((option) => {
-            const active = tab === option.value;
-            return (
-              <Pressable
-                key={option.value}
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  setTab(option.value);
-                }}
-                accessibilityRole="tab"
-                accessibilityState={{ selected: active }}
-              >
-                <Text
-                  variant="bodyStrong"
-                  className={cn(active ? 'text-primary' : 'text-muted-foreground')}
-                >
-                  {option.label}
-                </Text>
-                <View
-                  className="h-0.5 mt-1 rounded-full"
-                  style={{ backgroundColor: active ? themeColors.primary : 'transparent' }}
-                />
-              </Pressable>
-            );
-          })}
-        </View>
+        <PickerTabs
+          options={[
+            { value: 'library', label: I18n.t('accounts.logo.tab_library') },
+            { value: 'custom', label: I18n.t('accounts.logo.tab_custom') },
+          ]}
+          value={tab}
+          onChange={setTab}
+        />
 
         {tab === 'custom' ? (
           <FlatList

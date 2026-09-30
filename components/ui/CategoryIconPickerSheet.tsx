@@ -6,6 +6,7 @@ import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CategoryEmoji } from '~/components/ui/CategoryEmoji';
+import { PickerTabs } from '~/components/ui/PickerTabs';
 import { SettingsHeader } from '~/components/ui/settings';
 import { Text } from '~/components/ui/text';
 import { ThemeModal } from '~/components/ui/theme-modal';
@@ -419,42 +420,18 @@ export function CategoryIconPickerSheet({
           onBack={onClose}
         />
 
-        {/* Tabs sit on their own row below the centered title so they don't
-            compete with it for the header's side slots. */}
-        <View className="flex-row px-5 pb-3" style={{ gap: spacing.lg }}>
-          {(
-            [
-              { value: 'icons', label: I18n.t('category_icon.tab_icons') },
-              { value: 'emoji', label: I18n.t('category_icon.tab_emoji') },
-              { value: 'uploads', label: I18n.t('category_icon.tab_uploads') },
-            ] as const
-          ).map((option) => {
-            const active = tab === option.value;
-            return (
-              <Pressable
-                key={option.value}
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  setTab(option.value);
-                  setQuery('');
-                }}
-                accessibilityRole="tab"
-                accessibilityState={{ selected: active }}
-              >
-                <Text
-                  variant="bodyStrong"
-                  className={cn(active ? 'text-primary' : 'text-muted-foreground')}
-                >
-                  {option.label}
-                </Text>
-                <View
-                  className="h-0.5 mt-1 rounded-full"
-                  style={{ backgroundColor: active ? themeColors.primary : 'transparent' }}
-                />
-              </Pressable>
-            );
-          })}
-        </View>
+        <PickerTabs
+          options={[
+            { value: 'icons', label: I18n.t('category_icon.tab_icons') },
+            { value: 'emoji', label: I18n.t('category_icon.tab_emoji') },
+            { value: 'uploads', label: I18n.t('category_icon.tab_uploads') },
+          ]}
+          value={tab}
+          onChange={(next) => {
+            setTab(next);
+            setQuery('');
+          }}
+        />
 
         {tab === 'uploads' ? (
           <FlatList
