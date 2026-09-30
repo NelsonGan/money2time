@@ -29,6 +29,7 @@ import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import { getGoalCoverUri } from '~/services/userAssets';
 import type { TransactionWithRelations } from '~/types';
+import { withColorAlpha } from '~/utils/color';
 import { formatAmount, formatRelativeDate, formatShortDate } from '~/utils/formatters';
 
 interface GoalDetailScreenProps {
@@ -66,22 +67,6 @@ const HEADER_FADE_DISTANCE = 56;
 // on the solid header rather than on its last frame.
 const HERO_SCROLL_MARGIN = 24;
 const RECENT_LIMIT = 12;
-
-/** `#rrggbb` (or `#rgb`) at a given alpha, for gradient stops. */
-function withAlpha(hex: string, alpha: number): string {
-  const raw = hex.replace('#', '');
-  const full =
-    raw.length === 3
-      ? raw
-          .split('')
-          .map((c) => c + c)
-          .join('')
-      : raw;
-  const value = Number.parseInt(full.slice(0, 6), 16);
-  if (!Number.isFinite(value)) return `rgba(0,0,0,${alpha})`;
-  // eslint-disable-next-line no-bitwise
-  return `rgba(${(value >> 16) & 255}, ${(value >> 8) & 255}, ${value & 255}, ${alpha})`;
-}
 
 /** Signed effect of a transaction on the goal account, in its own currency. */
 function amountForGoal(tx: TransactionWithRelations, goalAccountId: string): number {
@@ -440,7 +425,7 @@ export function GoalDetailScreen({
           {paceLine ? (
             <Text
               variant="caption"
-              tone={achieved ? 'primary' : progress.pace === 'behind' ? 'muted' : 'primary'}
+              tone={progress.pace === 'behind' ? 'muted' : 'primary'}
               className="mt-2.5"
             >
               {paceLine}
@@ -479,7 +464,7 @@ export function GoalDetailScreen({
           {paceLine ? (
             <Text
               variant="caption"
-              tone={achieved ? 'primary' : progress.pace === 'behind' ? 'muted' : 'primary'}
+              tone={progress.pace === 'behind' ? 'muted' : 'primary'}
               className="mt-1.5 text-center"
             >
               {paceLine}
@@ -607,7 +592,10 @@ export function GoalDetailScreen({
               fades to a transparent version of the same colour, not to
               `transparent`, which is rgba(0,0,0,0) and greys the fade out. */}
           <LinearGradient
-            colors={[withAlpha(themeColors.background, 0.92), withAlpha(themeColors.background, 0)]}
+            colors={[
+              withColorAlpha(themeColors.background, 0.92),
+              withColorAlpha(themeColors.background, 0),
+            ]}
             style={{
               position: 'absolute',
               top: 0,

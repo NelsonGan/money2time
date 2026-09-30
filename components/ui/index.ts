@@ -20,6 +20,7 @@ export { ItemIcon } from './ItemIcon';
 export { ItemIconPickerSheet } from './ItemIconPickerSheet';
 export { SelectField } from './select';
 export {
+  FormSwitchRow,
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
   SETTINGS_LIST_BOTTOM_PADDING,
