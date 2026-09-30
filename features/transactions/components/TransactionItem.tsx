@@ -11,8 +11,9 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { CategoryEmoji, Text, TimeValueInline } from '~/components/ui';
+import { AccountLogo, CategoryEmoji, Text, TimeValueInline } from '~/components/ui';
 import { motionDurations } from '~/constants/motion';
+import { useApp } from '~/context/AppContext';
 import {
   ReorderGrip,
   useReorderItemLayout,
@@ -174,6 +175,7 @@ const TransactionItemBody = memo(
     getTrueHourlyRateForDate,
   }: TransactionItemBodyProps) {
     const themeColors = useThemeColors();
+    const { getAccountById } = useApp();
     const {
       isIncome,
       isTransfer,
@@ -189,6 +191,7 @@ const TransactionItemBody = memo(
     const accountSubtitleLabel = !isTransfer
       ? (transaction.accountName ?? I18n.t('common.no_account'))
       : null;
+    const account = transaction.accountId ? getAccountById(transaction.accountId) : undefined;
 
     const joinSubtitleParts = (...parts: (string | null | undefined)[]) =>
       parts.filter((part): part is string => Boolean(part && part.trim().length > 0)).join(' · ');
@@ -274,7 +277,7 @@ const TransactionItemBody = memo(
       <>
         <View
           className={cn(
-            'items-center justify-center',
+            'shrink-0 self-center items-center justify-center',
             compact ? 'w-8 h-8' : 'w-10 h-10 rounded-2xl',
             !compact && !isTransfer && !isBalanceAdjustment ? 'bg-secondary/40' : null,
             isTransfer ? 'rounded-full bg-secondary/50' : null,
@@ -352,36 +355,37 @@ const TransactionItemBody = memo(
               </Text>
             )}
           </View>
-          {subtitlePrimary || accountSubtitleLabel ? (
-            accountSubtitleLabel ? (
-              <View className={cn('flex-row items-center', compact ? '' : 'mt-0.5')}>
-                <View className="min-w-0 w-1/2 pr-2">
-                  <Text variant="caption" tone="muted" numberOfLines={1}>
-                    {subtitlePrimary ?? ''}
-                  </Text>
-                </View>
-                <View className="min-w-0 w-1/2 justify-center pl-2">
-                  <View className="max-w-full self-start rounded-full border border-border/30 bg-secondary/55 px-2 py-0.5">
-                    <Text variant="caption" tone="muted" numberOfLines={1}>
-                      {accountSubtitleLabel}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-            ) : (
-              <Text
-                variant="caption"
-                tone="muted"
-                className={compact ? '' : 'mt-0.5'}
-                numberOfLines={1}
-              >
-                {subtitlePrimary ?? ''}
+          {subtitlePrimary ? (
+            <Text
+              variant="caption"
+              tone="muted"
+              className={compact ? '' : 'mt-0.5'}
+              numberOfLines={1}
+            >
+              {subtitlePrimary}
+            </Text>
+          ) : null}
+          {accountSubtitleLabel ? (
+            <View
+              className={cn(
+                'max-w-full self-start flex-row items-center gap-1 rounded-full border border-border/30 bg-secondary/55 px-1.5 py-0.5',
+                compact ? 'mt-1' : 'mt-1.5',
+              )}
+            >
+              <AccountLogo
+                logoId={account?.logoId}
+                type={account?.type}
+                goalEmoji={account?.goalEmoji}
+                size={compact ? 14 : 16}
+              />
+              <Text variant="caption" tone="muted" className="min-w-0 shrink" numberOfLines={1}>
+                {accountSubtitleLabel}
               </Text>
-            )
+            </View>
           ) : null}
         </View>
 
-        <View className={cn('shrink-0 items-end', valueColumnClassName)}>
+        <View className={cn('shrink-0 self-start items-end', valueColumnClassName)}>
           <View className="flex-row items-center justify-end gap-1">
             {showsPrimaryTime ? (
               <TimeValueInline
