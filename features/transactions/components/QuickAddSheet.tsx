@@ -375,17 +375,6 @@ function formatDateChipLabel(value: string): string {
   return String(Number(match[3]));
 }
 
-function lastUsedAccountId(transactions: Transaction[]): string | null {
-  for (const txn of transactions) {
-    if (txn.type === 'expense' || txn.type === 'income') {
-      if (txn.accountId) return txn.accountId;
-    } else if (txn.type === 'transfer') {
-      if (txn.fromAccountId) return txn.fromAccountId;
-    }
-  }
-  return null;
-}
-
 function buildCategoryPickerOptions(categories: Category[]): {
   parents: CategoryPickerOption[];
   childByParent: Map<string, CategoryPickerOption[]>;
@@ -454,20 +443,10 @@ export function QuickAddSheet({
     Partial<Record<SheetType, string | null>>
   >(() => (initialCategoryId ? { [defaultType]: initialCategoryId } : {}));
 
-  const defaultAccountId = useMemo(() => {
-    // Priority: caller-supplied initial > user's saved default > last-used > first by sort order.
-    if (initialAccountId && accounts.some((a) => a.id === initialAccountId)) {
-      return initialAccountId;
-    }
-    if (
-      quickEntryPrefs.defaultAccountId &&
-      accounts.some((a) => a.id === quickEntryPrefs.defaultAccountId)
-    ) {
-      return quickEntryPrefs.defaultAccountId;
-    }
-    const lastUsed = lastUsedAccountId(transactions);
-    return pickDefaultAccountId(accounts, lastUsed);
-  }, [accounts, initialAccountId, quickEntryPrefs.defaultAccountId, transactions]);
+  const defaultAccountId = useMemo(
+    () => pickDefaultAccountId(accounts, quickEntryPrefs.defaultAccountId, initialAccountId),
+    [accounts, initialAccountId, quickEntryPrefs.defaultAccountId],
+  );
 
   const [accountId, setAccountId] = useState<string | null>(defaultAccountId);
 

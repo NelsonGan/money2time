@@ -7,7 +7,7 @@ import { buildRateTable, convert } from '~/utils/currency';
 import { newId, nowIso } from '~/utils/id';
 // Shared with the screen's forecast so the dates it projects are the dates this
 // runner will actually write.
-import { nextRunAfter } from '~/utils/recurringRules';
+import { isAfterRecurringEndDate, nextRunAfter } from '~/utils/recurringRules';
 
 import { exchangeRatesRepository } from './exchangeRatesRepository';
 import { toRecurringRule } from './mappers';
@@ -176,7 +176,7 @@ class RecurringRulesRepository {
       let cursor = rule.nextRunDate;
       let guard = 0;
       while (cursor <= todayIso && guard < 500) {
-        if (!rule.endDate || cursor <= rule.endDate) {
+        if (!isAfterRecurringEndDate(cursor, rule.endDate)) {
           if (rule.type === 'transfer') {
             if (rule.fromAccountId && rule.toAccountId && rule.fromAccountId !== rule.toAccountId) {
               const toCurrency = accountCurrencyById.get(rule.toAccountId) ?? rule.currency;
@@ -244,7 +244,7 @@ class RecurringRulesRepository {
         guard += 1;
       }
 
-      const shouldDeactivate = !!rule.endDate && cursor > rule.endDate;
+      const shouldDeactivate = isAfterRecurringEndDate(cursor, rule.endDate);
       db.update(recurringRulesTable)
         .set({
           nextRunDate: cursor,
