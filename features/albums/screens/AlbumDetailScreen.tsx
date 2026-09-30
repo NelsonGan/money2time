@@ -138,6 +138,7 @@ export function AlbumDetailScreen({
   // written from here (a duplicate) has landed and can now be read back.
   const albumTransactions = useMemo(
     () => (contentReady ? getAlbumTransactions(albumId) : EMPTY_TRANSACTIONS),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- see above
     [contentReady, getAlbumTransactions, albumId, albums, transactions],
   );
   const coverUri = useMemo(() => getAlbumCoverUri(album?.coverPhotoUri), [album?.coverPhotoUri]);

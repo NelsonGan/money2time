@@ -28,11 +28,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { getLocaleLabel, I18n, orderedLocales, setAppLocale, SUPPORTED_LOCALES } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { IconStyle, ThemeColor, ThemeMode, WeekStartsOn } from '~/types';
-import {
-  monthCycleDefaultDay,
-  monthCycleOf,
-  monthCycleOverrideCount,
-} from '~/utils/financialMonth';
+import { monthCycleDefaultDay, monthCycleOf } from '~/utils/financialMonth';
 
 interface DisplaySettingsScreenProps {
   onBack: () => void;

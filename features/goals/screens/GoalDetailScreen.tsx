@@ -177,6 +177,7 @@ export function GoalDetailScreen({
   // balance-neutral edits (note/category/date) would show stale rows.
   const allActivity = useMemo(
     () => getTransactionsByAccount(accountId),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- see above
     [accountId, getTransactionsByAccount, allTransactions],
   );
   const transactions = useMemo(() => allActivity.slice(0, RECENT_LIMIT), [allActivity]);

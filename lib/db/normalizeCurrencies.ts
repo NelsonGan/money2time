@@ -41,7 +41,7 @@ export function normalizeCurrencyColumns(db: SQLiteDatabase, options: NormalizeO
     options.collapseAll || !validCodes.has(value) ? mainCode : value;
 
   for (const table of ['accounts', 'transactions', 'recurring_rules', 'receipt_splits']) {
-    let rows: Array<{ currency: string | null }>;
+    let rows: { currency: string | null }[];
     try {
       rows = db.getAllSync<{ currency: string | null }>(`SELECT DISTINCT currency FROM ${table}`);
     } catch {

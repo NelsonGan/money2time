@@ -133,7 +133,7 @@ export function normalizeIconValue(value: string | null | undefined): string | n
  */
 export function normalizeIconColumns(db: SQLiteDatabase): void {
   for (const { table, column } of ICON_COLUMNS) {
-    let rows: Array<{ value: string | null }>;
+    let rows: { value: string | null }[];
     try {
       rows = db.getAllSync<{ value: string | null }>(
         `SELECT DISTINCT ${column} AS value FROM ${table} WHERE ${column} IS NOT NULL AND TRIM(${column}) <> ''`,

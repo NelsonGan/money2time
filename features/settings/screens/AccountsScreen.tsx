@@ -90,6 +90,7 @@ import {
   MONTH_PAGER_TOTAL_SLOTS,
 } from '~/features/transactions/constants/monthPager';
 import { MONTH_PAGER_LIST_CONFIG } from '~/features/transactions/constants/monthPagerList';
+import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accountEntryGate';
 import { selectDuplicableTransactions } from '~/features/transactions/lib/duplicateTransaction';
 import { AddTransactionScreen, EditTransactionScreen } from '~/features/transactions/screens';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
@@ -100,7 +101,6 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
-import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accountEntryGate';
 import {
   getLiabilityPaymentDefaults,
   type LiabilityPaymentDefaults,
@@ -997,7 +997,6 @@ function AccountEditorSheet({
     });
   }, [
     account,
-    balanceInput,
     derivedLoanRate,
     effectiveLoanInstalment,
     isEdit,
@@ -2029,8 +2028,12 @@ export function AccountEditorScreen({
         }
         // collectFromAccountId and firstInstalmentDate are form state, not
         // account columns, so they must not reach the insert.
-        const { collectFromAccountId, firstInstalmentDate, finalInstalmentDate, ...accountInput } =
-          input;
+        const {
+          collectFromAccountId,
+          firstInstalmentDate: _firstInstalmentDate,
+          finalInstalmentDate: _finalInstalmentDate,
+          ...accountInput
+        } = input;
         const newAccountId = createAccount({
           ...accountInput,
           currency: input.currency || DEFAULT_CURRENCY,
@@ -3387,7 +3390,7 @@ export function AccountsScreen({
         )}
       </Button>
     ),
-    [balanceToggleLabel, handleToggleAccountBalances, hideAccountBalances, themeColors.textMuted],
+    [balanceToggleLabel, handleToggleAccountBalances, hideAccountBalances],
   );
 
   const handleToggleGroup = useCallback((cardId: string) => {
@@ -3569,14 +3572,14 @@ export function AccountsScreen({
   const pageBalanceMap = useMemo(() => {
     if (loanSummaryByAccountId.size === 0) return balanceMap;
     const next = new Map(balanceMap);
-    loanSummaryByAccountId.forEach((summary, accountId) => {
+    loanSummaryByAccountId.forEach((summary, loanId) => {
       // Only a flat contract. There the statement carries the interest for the
       // rest of the term, because it was all charged at signing. A reducing
       // balance loan's statement is the outstanding principal, which is exactly
       // what its ledger balance already is: substituting the projection would
       // put a figure on this page that the borrower's own statement, and their
       // settlement quote, both contradict.
-      if (grossLoanIds.has(accountId)) next.set(accountId, summary.progress.leftToPay);
+      if (grossLoanIds.has(loanId)) next.set(loanId, summary.progress.leftToPay);
     });
     return next;
   }, [balanceMap, grossLoanIds, loanSummaryByAccountId]);
@@ -3584,15 +3587,15 @@ export function AccountsScreen({
   const pageConvertedBalanceMap = useMemo(() => {
     if (loanSummaryByAccountId.size === 0) return convertedBalanceMap;
     const next = new Map(convertedBalanceMap);
-    loanSummaryByAccountId.forEach((summary, accountId) => {
-      if (!grossLoanIds.has(accountId)) return;
-      const native = balanceMap.get(accountId);
-      const converted = convertedBalanceMap.get(accountId);
+    loanSummaryByAccountId.forEach((summary, loanId) => {
+      if (!grossLoanIds.has(loanId)) return;
+      const native = balanceMap.get(loanId);
+      const converted = convertedBalanceMap.get(loanId);
       // Carried across at whatever rate the balance itself was converted at, so
       // a foreign-currency loan lands in the reporting currency like the rest.
       // A settled loan has nothing to scale and nothing to convert.
       const rate = native != null && native !== 0 && converted != null ? converted / native : 1;
-      next.set(accountId, summary.progress.leftToPay * rate);
+      next.set(loanId, summary.progress.leftToPay * rate);
     });
     return next;
   }, [balanceMap, convertedBalanceMap, grossLoanIds, loanSummaryByAccountId]);

@@ -4,8 +4,8 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
-import { CityPickerSheet } from '~/components/ui/CityPickerSheet';
 import { FatButton, Input, SettingsHeader, Text } from '~/components/ui';
+import { CityPickerSheet } from '~/components/ui/CityPickerSheet';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';

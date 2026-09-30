@@ -26,7 +26,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text as RNText,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -94,7 +93,6 @@ import {
   toggleAssetHistoryAccount,
 } from '~/features/insights/assetHistory';
 import { buildInsightsCategoryPickerData } from '~/features/insights/categoryPickerData';
-import { RankedImpactChart, type RankedImpactRow } from '~/features/insights/components';
 import { ProTrendPreviewOverlay } from '~/features/insights/components/ProTrendPreviewOverlay';
 import { SavingsRateRing } from '~/features/insights/components/SavingsRateRing';
 import { SentimentStackedBarChart } from '~/features/insights/components/SentimentStackedBarChart';
@@ -326,8 +324,6 @@ const CATEGORY_TREND_X_AXIS_HEIGHT = 20;
 const CATEGORY_TREND_LINE_HEIGHT = 206;
 const CATEGORY_TREND_CHART_HEIGHT = CATEGORY_TREND_LINE_HEIGHT + CATEGORY_TREND_X_AXIS_HEIGHT;
 const CATEGORY_TREND_CHART_PADDING_RIGHT = 64;
-const CATEGORY_TREND_X_LABEL_WIDTH = 48;
-const CATEGORY_TREND_TARGET_X_LABELS = 6;
 const SENTIMENT_CHART_HEIGHT = 200;
 const SENTIMENT_CHART_PADDING_RIGHT = 16;
 const SENTIMENT_COLORS = { happy: '#4CAF50', neutral: '#FFB74D', sad: '#E57373' } as const;
@@ -1088,10 +1084,6 @@ function parseInsightsPreferencesPayload(
   } catch {
     return null;
   }
-}
-
-function isBreakdownInsightType(type: InsightType): type is BreakdownInsightType {
-  return type === 'expense_breakdown' || type === 'income_breakdown';
 }
 
 function isAnalyticsInsightType(type: InsightType): type is AnalyticsInsightType {
@@ -2802,12 +2794,10 @@ export function InsightsScreen({
     categories,
     accounts,
     accountGroups,
-    canUseTimeDisplayMode,
     getTrueHourlyRateForDate,
     getDisplayValueForTransaction,
     insightsPreferencesJson,
     updateInsightsPreferencesJson,
-    monthlyWages,
     updateTransactionsBulk,
     deleteTransactionsBulk,
     rateTable,
@@ -4392,7 +4382,6 @@ export function InsightsScreen({
     [
       accountScopedNonTransferEntries,
       assetHistoryLedger,
-      canUseTimeDisplayMode,
       categoryById,
       categoryTrendCategoryOptions,
       effectiveCategoryTrendCategoryId,
@@ -4405,7 +4394,6 @@ export function InsightsScreen({
       excludedExpenseBreakdownCategorySet,
       excludedIncomeBreakdownCategorySet,
       excludedCategoryTrendAccountSet,
-      getTrueHourlyRateForDate,
       getDisplayValueForTransaction,
       includedAssetHistoryAccounts,
       toAssetHistoryReportingCurrency,
@@ -4493,11 +4481,6 @@ export function InsightsScreen({
     headerPreviewPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
     setHeaderPreviewPageIndex(INSIGHTS_PAGER_CENTER_INDEX);
   }, [isTakeoverView, commitPageIndex]);
-  const currentPage = useMemo(
-    () =>
-      getCachedPageData(displayCurrentPeriodState, displaySelectedInsightType, displayPeriodPreset),
-    [displayCurrentPeriodState, displayPeriodPreset, displaySelectedInsightType, getCachedPageData],
-  );
   const headerPreviewOffset = displayHeaderPreviewPageIndex - displayCommittedPageIndex;
   const headerPreviewPeriodState = useMemo(
     () =>
@@ -4637,10 +4620,6 @@ export function InsightsScreen({
         </Text>
       );
     },
-    [settings],
-  );
-  const renderMoneyAmount = useCallback(
-    (amount: number) => formatAmount(amount, settings, { showSign: false, trueHourlyRate: 0 }),
     [settings],
   );
   const formatAxisCurrencyValue = useCallback(

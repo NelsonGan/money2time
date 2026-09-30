@@ -21,7 +21,7 @@ import type {
   RecurringTransactionRule,
   TransactionWithRelations,
 } from '~/types';
-import { buildXlsx, type XlsxCell, type XlsxSheet, xlsxDate } from '~/utils/xlsx';
+import { buildXlsx, type XlsxCell, xlsxDate, type XlsxSheet } from '~/utils/xlsx';
 
 export type { ExcelExportLabels } from '~/services/excelWorkbookSchema';
 

@@ -51,7 +51,6 @@ jest.mock('~/services/notifications', () => ({
   ) => notifications.scheduleLiveEarningsStart(schedule, options),
 }));
 
-// eslint-disable-next-line import/first
 import { syncLiveEarningsAutoStart } from '~/features/widgets/lib/syncLiveEarningsAutoStart';
 
 const SCHEDULE: LiveEarningsSchedule = {

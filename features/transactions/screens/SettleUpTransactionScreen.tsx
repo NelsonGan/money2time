@@ -138,6 +138,7 @@ export function SettleUpTransactionScreen({
   // be converted to Split by Item.
   const receiptRecord = useMemo(
     () => getReceiptSplitForTransaction(transactionId),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- re-read when the splits refresh
     [getReceiptSplitForTransaction, transactionId, bill],
   );
   const hasItemizedDetail = receiptRecord !== null;

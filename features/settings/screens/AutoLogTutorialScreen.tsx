@@ -2,6 +2,7 @@ import { Image, type ImageSource } from 'expo-image';
 import { Download, ImageIcon, Play } from 'lucide-react-native';
 import React, { useCallback, useState } from 'react';
 import { Linking, Pressable, StyleSheet, View } from 'react-native';
+
 import { Button, SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
 import {
   AUTO_LOG_VIDEO_URLS,

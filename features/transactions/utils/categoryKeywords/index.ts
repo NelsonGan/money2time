@@ -1,10 +1,10 @@
 import { I18n } from '~/lib/i18n';
-
 import type { Category } from '~/types';
 
-import en from './en';
 import da from './da';
 import de from './de';
+import type { KeywordCategoryKey } from './en';
+import en from './en';
 import es from './es';
 import fil from './fil';
 import fr from './fr';
@@ -24,8 +24,6 @@ import th from './th';
 import tr from './tr';
 import uk from './uk';
 import vi from './vi';
-
-import type { KeywordCategoryKey } from './en';
 
 export type { KeywordCategoryKey } from './en';
 
@@ -56,7 +54,7 @@ const LOCALE_EXTENSIONS: Partial<Record<string, Partial<Record<KeywordCategoryKe
 };
 
 export const CATEGORY_KEYWORDS: Record<KeywordCategoryKey, string[]> = Object.fromEntries(
-  (Object.entries(CORE_KEYWORDS) as Array<[KeywordCategoryKey, string[]]>).map(([key, list]) => [
+  (Object.entries(CORE_KEYWORDS) as [KeywordCategoryKey, string[]][]).map(([key, list]) => [
     key,
     Array.from(new Set(list)),
   ]),
@@ -136,7 +134,7 @@ function compileBuckets(
   keywords: Record<KeywordCategoryKey, string[]>,
 ): Record<KeywordCategoryKey, CompiledKeyword[]> {
   return Object.fromEntries(
-    (Object.entries(keywords) as Array<[KeywordCategoryKey, string[]]>).map(([bucket, list]) => [
+    (Object.entries(keywords) as [KeywordCategoryKey, string[]][]).map(([bucket, list]) => [
       bucket,
       compileKeywordList(list),
     ]),
@@ -161,7 +159,7 @@ function getCompiledBuckets(locale: string): Record<KeywordCategoryKey, Compiled
   if (localeCompiledCache.has(locale)) return localeCompiledCache.get(locale)!;
 
   const merged = Object.fromEntries(
-    (Object.entries(CATEGORY_KEYWORDS) as Array<[KeywordCategoryKey, string[]]>).map(([k, v]) => [
+    (Object.entries(CATEGORY_KEYWORDS) as [KeywordCategoryKey, string[]][]).map(([k, v]) => [
       k,
       Array.from(new Set([...v, ...(ext[k] ?? [])])),
     ]),
@@ -184,7 +182,7 @@ function compiledKeywordScore(text: string, textLower: string, compiled: Compile
 // called per user-category during every quick-add categorization
 // (via resolveBucketCategoryIds), so allocating ~25 RegExps on each call adds
 // up. With this cache, the per-call cost drops to a few `.test()` invocations.
-const COMPILED_ALIASES: Array<{ pattern: RegExp; keys: KeywordCategoryKey[] }> = Object.entries(
+const COMPILED_ALIASES: { pattern: RegExp; keys: KeywordCategoryKey[] }[] = Object.entries(
   CATEGORY_NAME_TO_KEY,
 )
   .filter(([aliasName]) => aliasName.length >= 3)

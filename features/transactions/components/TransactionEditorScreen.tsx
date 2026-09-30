@@ -1286,6 +1286,7 @@ export function TransactionEditorScreen({
     if (hours < 1)
       return splitHoursHighlightText('transactions.editor.nudge.pause', formattedHours);
     return splitHoursHighlightText('transactions.editor.nudge.large', formattedHours);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- formatHours reads only the workday fields
   }, [
     amount,
     currentMonthWage?.trueHourlyRate,
@@ -1601,9 +1602,9 @@ export function TransactionEditorScreen({
       publishSessionRef.current(nextSplits, nextEvenly, itemized);
       // A one-shot toast to surface a save-time mismatch ON the split page (the
       // editor's own toast would be hidden behind it). Consumed and cleared here.
-      const toast = pendingSplitToastRef.current;
+      const splitToast = pendingSplitToastRef.current;
       pendingSplitToastRef.current = null;
-      navigation.navigate('SplitBill', toast ? { toast } : undefined);
+      navigation.navigate('SplitBill', splitToast ? { toast: splitToast } : undefined);
     },
     [
       amount,

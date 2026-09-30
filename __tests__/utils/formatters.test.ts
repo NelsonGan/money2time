@@ -18,12 +18,12 @@ import {
   monthKeyFromDateIso,
   monthKeyFromDateLocal,
   monthKeyFromIsoLocal,
-  toBalanceInputValue,
   monthOffsetFromAnchorDate,
-  normalizeMonthKey,
   normalizeMoneyAmount,
+  normalizeMonthKey,
   parseMonthKey,
   startOfMonthDate,
+  toBalanceInputValue,
   toRange,
 } from '~/utils/formatters';
 

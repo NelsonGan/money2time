@@ -5,8 +5,8 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import {
   AccountPickerSheet,
   CategoryEmoji,
-  CategoryPickerSheet,
   type CategoryPickerOption,
+  CategoryPickerSheet,
   Text,
 } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';

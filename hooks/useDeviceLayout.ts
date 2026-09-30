@@ -33,4 +33,4 @@ export function useDeviceLayout() {
   }, [width, height]);
 }
 
-export { IS_TABLET, TABLET_CONTENT_MAX_WIDTH, isTabletSize };
+export { IS_TABLET, isTabletSize, TABLET_CONTENT_MAX_WIDTH };

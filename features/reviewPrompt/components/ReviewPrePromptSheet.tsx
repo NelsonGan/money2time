@@ -4,12 +4,12 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Button } from '~/components/ui/button';
 import { Text } from '~/components/ui/text';
 import { ThemeModal } from '~/components/ui/theme-modal';
+import { I18n } from '~/lib/i18n';
 import {
   isAnyPromptVisible,
   markPromptHidden,
   markPromptVisible,
 } from '~/services/globalPromptCoordinator';
-import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import {
   declineFeedback,

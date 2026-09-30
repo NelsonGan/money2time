@@ -6,16 +6,14 @@ const simpleImportSort = require('eslint-plugin-simple-import-sort');
 module.exports = defineConfig([
   expoConfig,
   {
-    ignores: ['dist/*', 'cloudflare/**'],
+    ignores: ['dist/*', 'cloudflare/**', '.agents/**', '.claude/**'],
   },
   {
-    files: ['**/*.{js,jsx,ts,tsx}'],
-    plugins: {
-      'simple-import-sort': simpleImportSort,
-    },
+    // The @typescript-eslint plugin is only registered for TypeScript files, so
+    // these rules have to be scoped to them: applied to a .js file they made
+    // ESLint crash, which `expo lint` swallowed, so nothing was ever linted.
+    files: ['**/*.{ts,tsx}'],
     rules: {
-      'react-hooks/exhaustive-deps': 'error',
-      'no-console': ['error', { allow: ['warn', 'error'] }],
       'no-shadow': 'off',
       '@typescript-eslint/no-shadow': 'error',
       '@typescript-eslint/no-unused-vars': [
@@ -26,6 +24,16 @@ module.exports = defineConfig([
         'error',
         { prefer: 'type-imports', disallowTypeAnnotations: false },
       ],
+    },
+  },
+  {
+    files: ['**/*.{js,jsx,ts,tsx}'],
+    plugins: {
+      'simple-import-sort': simpleImportSort,
+    },
+    rules: {
+      'react-hooks/exhaustive-deps': 'error',
+      'no-console': ['error', { allow: ['warn', 'error'] }],
       'simple-import-sort/imports': 'error',
       'simple-import-sort/exports': 'error',
       'no-restricted-imports': [
@@ -53,6 +61,21 @@ module.exports = defineConfig([
           ],
         },
       ],
+    },
+  },
+  {
+    // Node scripts run outside the app bundle.
+    files: ['scripts/**/*.mjs'],
+    languageOptions: { globals: { Buffer: 'readonly' } },
+  },
+  {
+    // Jest hoists jest.mock above imports, so tests import (or require) the
+    // module under test after declaring its mocks.
+    files: ['__tests__/**/*.{ts,tsx}'],
+    rules: {
+      'import/first': 'off',
+      'import/no-named-as-default': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
     },
   },
 ]);

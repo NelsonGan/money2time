@@ -3,7 +3,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 
 import { AddActionSheet } from '~/components/navigation/AddActionSheet';
-
 import {
   AccountPickerSheet,
   CategoryEmoji,

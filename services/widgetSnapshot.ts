@@ -1,13 +1,14 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NativeModules, Platform } from 'react-native';
 
+import type { Money2TimeWidgetSnapshot } from './widgetSnapshot.shared';
+
 export {
   buildMoney2TimeWidgetSnapshot,
   type Money2TimeWidgetSnapshot,
   type MonthlyExpenseQuickLogSnapshot,
   parseSavingsExclusions,
 } from './widgetSnapshot.shared';
-import type { Money2TimeWidgetSnapshot } from './widgetSnapshot.shared';
 
 export const WIDGET_SNAPSHOT_STORAGE_KEY = '@m2t/widget_snapshot/v1';
 

@@ -314,6 +314,7 @@ export function InsightsDrilldownScreen({
   // recompute this immediately.
   const albumMemberIds = useMemo(
     () => (payload.albumId ? new Set(getAlbumTransactionIds(payload.albumId)) : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- see above
     [payload.albumId, getAlbumTransactionIds, albums],
   );
   const { resolvedTransactions, payloadTransactionById } = useMemo(() => {
