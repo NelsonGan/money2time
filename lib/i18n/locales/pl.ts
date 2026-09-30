@@ -2294,6 +2294,8 @@ const pl = {
     auto_save_no_source:
       'Brak kont w walucie {{currency}}. Automatyczne oszczędzanie wymaga konta w tej samej walucie.',
     auto_save_rule_name: 'Automatyczne oszczędzanie: {{name}}',
+    auto_save_managed_in_recurring:
+      'Automatyczne oszczędzanie tego celu ma własny harmonogram. Zmień je w {{settings}} > {{recurring}}.',
     edit_title: 'Edytuj cel',
     delete_title: 'Usunąć cel?',
     delete_message: 'To usunie cel i jego transakcje. Nie można tego cofnąć.',

@@ -2285,6 +2285,8 @@ const sv = {
     auto_save_no_source:
       'Inga {{currency}}-konton ännu. Autospar behöver ett konto i samma valuta.',
     auto_save_rule_name: 'Autospar: {{name}}',
+    auto_save_managed_in_recurring:
+      'Autosparandet för det här målet har ett eget schema. Ändra det i {{settings}} > {{recurring}}.',
     edit_title: 'Redigera mål',
     delete_title: 'Radera mål?',
     delete_message: 'Detta raderar målet och dess transaktioner. Det kan inte ångras.',

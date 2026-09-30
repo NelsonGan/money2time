@@ -2314,6 +2314,8 @@ const de = {
     auto_save_no_source:
       'Noch keine {{currency}}-Konten. Auto-Sparen braucht ein Konto in derselben Währung.',
     auto_save_rule_name: 'Auto-Sparen: {{name}}',
+    auto_save_managed_in_recurring:
+      'Das Auto-Sparen dieses Ziels hat einen eigenen Zeitplan. Ändere es unter {{settings}} > {{recurring}}.',
     edit_title: 'Ziel bearbeiten',
     delete_title: 'Ziel löschen?',
     delete_message:

@@ -2276,6 +2276,8 @@ const hi = {
     auto_save_no_source:
       'अभी कोई {{currency}} खाता नहीं है। ऑटो-सेव के लिए उसी मुद्रा का खाता चाहिए।',
     auto_save_rule_name: 'ऑटो-सेव: {{name}}',
+    auto_save_managed_in_recurring:
+      'इस लक्ष्य का ऑटो-सेव कस्टम शेड्यूल पर है। इसे {{settings}} > {{recurring}} में बदलें।',
     edit_title: 'लक्ष्य संपादित करें',
     delete_title: 'लक्ष्य हटाएं?',
     delete_message: 'इससे लक्ष्य और उसके लेनदेन हट जाएंगे। इसे वापस नहीं किया जा सकता।',
