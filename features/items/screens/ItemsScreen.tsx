@@ -13,8 +13,8 @@ import type { Edge } from 'react-native-safe-area-context';
 import Sortable from 'react-native-sortables';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
-import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import { useBottomNavScrollReporter } from '~/components/navigation/BottomNavMinimize';
+import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import {
   AddIconButton,
   ItemIcon,
@@ -36,7 +36,12 @@ import type { ItemWithStats, UserSettings } from '~/types';
 import { cn } from '~/utils';
 import { withColorAlpha } from '~/utils/color';
 import { convert } from '~/utils/currency';
-import { formatAmount, formatHours, formatShortMonthYearLabel } from '~/utils/formatters';
+import {
+  dateFromDayKeyLocal,
+  formatAmount,
+  formatHours,
+  formatShortMonthYearLabel,
+} from '~/utils/formatters';
 
 interface ItemsScreenProps {
   /** When provided, renders a standalone header with this back action (settings push). */
@@ -57,12 +62,6 @@ const HANDLE_STRETCH_STYLE = { alignSelf: 'stretch' } as const;
 /** Money in the item's own currency, ignoring the time display mode. */
 function formatMoney(value: number, currency: string, settings: UserSettings): string {
   return formatAmount(value, { ...settings, displayMode: 'money' }, { currencyCode: currency });
-}
-
-/** Local Date from a `YYYY-MM-DD` day key (no UTC drift across the month boundary). */
-function dayKeyToDate(key: string): Date {
-  const [y, m, d] = key.split('-').map(Number);
-  return new Date(y, (m ?? 1) - 1, d ?? 1);
 }
 
 /**
@@ -151,7 +150,10 @@ function ItemCard({
   width: number;
   onPress: () => void;
 }) {
-  const purchaseLabel = formatShortMonthYearLabel(dayKeyToDate(item.purchaseDate), settings.locale);
+  const purchaseLabel = formatShortMonthYearLabel(
+    dateFromDayKeyLocal(item.purchaseDate),
+    settings.locale,
+  );
 
   // Sortable.Flex forces `alignSelf: flex-start` on every child and switches to
   // absolute layout while dragging, so rows never stretch — give the card an

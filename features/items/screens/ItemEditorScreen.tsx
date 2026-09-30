@@ -81,7 +81,7 @@ export function ItemEditorScreen({ itemId, onClose, onOpenIconPicker }: ItemEdit
       note: note.trim() || null,
     };
     void triggerHaptic('success');
-    if (isEditing && existing) {
+    if (existing) {
       updateItem(existing.id, input);
     } else {
       createItem(input);
@@ -95,7 +95,6 @@ export function ItemEditorScreen({ itemId, onClose, onOpenIconPicker }: ItemEdit
     existing,
     hasSalePrice,
     iconId,
-    isEditing,
     isInactive,
     name,
     note,

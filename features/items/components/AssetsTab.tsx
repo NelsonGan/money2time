@@ -106,6 +106,22 @@ export function AssetsTab({
     Platform.OS === 'android' ? (StatusBar.currentHeight ?? 0) : 0,
   );
 
+  // Shared by the Accounts and Goals sub-tabs, which share the visibility state.
+  const balancesToggle = (
+    <Button
+      size="icon"
+      variant="secondary"
+      haptic="selection"
+      className="h-10 w-10 rounded-full"
+      accessibilityLabel={
+        hideBalances ? I18n.t('accounts.show_balances') : I18n.t('accounts.hide_balances')
+      }
+      onPress={toggleBalances}
+    >
+      <ClayIcon name={hideBalances ? 'ui/eye-off' : 'ui/eye'} size={24} flatSize={18} />
+    </Button>
+  );
+
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: topInset }}>
       <TabletContentContainer>
@@ -123,18 +139,7 @@ export function AssetsTab({
             <AddIconButton onPress={onAddItem} accessibilityLabel={I18n.t('items.add')} />
           ) : tab === 'goals' ? (
             <View className="flex-row items-center gap-2">
-              <Button
-                size="icon"
-                variant="secondary"
-                haptic="selection"
-                className="h-10 w-10 rounded-full"
-                accessibilityLabel={
-                  hideBalances ? I18n.t('accounts.show_balances') : I18n.t('accounts.hide_balances')
-                }
-                onPress={toggleBalances}
-              >
-                <ClayIcon name={hideBalances ? 'ui/eye-off' : 'ui/eye'} size={24} flatSize={18} />
-              </Button>
+              {balancesToggle}
               {goalsActions}
             </View>
           ) : (
@@ -149,18 +154,7 @@ export function AssetsTab({
               >
                 <ClayIcon name="ui/settings" size={24} flatSize={18} />
               </Button>
-              <Button
-                size="icon"
-                variant="secondary"
-                haptic="selection"
-                className="h-10 w-10 rounded-full"
-                accessibilityLabel={
-                  hideBalances ? I18n.t('accounts.show_balances') : I18n.t('accounts.hide_balances')
-                }
-                onPress={toggleBalances}
-              >
-                <ClayIcon name={hideBalances ? 'ui/eye-off' : 'ui/eye'} size={24} flatSize={18} />
-              </Button>
+              {balancesToggle}
               <AddIconButton
                 onPress={onAddAccount}
                 accessibilityLabel={I18n.t('accounts.new_account')}

@@ -135,6 +135,12 @@ export function dayKeyFromDateLocal(date: Date): string {
   return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
 }
 
+/** Local midnight of a `YYYY-MM-DD` key (no UTC drift across a day or month boundary). */
+export function dateFromDayKeyLocal(dayKey: string): Date {
+  const [year, month, day] = dayKey.split('-').map(Number);
+  return new Date(year, (month ?? 1) - 1, day ?? 1);
+}
+
 export function dayKeyFromIsoLocal(dateIso: string): string {
   if (isSimpleDayKey(dateIso)) return dateIso;
   const parsed = new Date(dateIso);
