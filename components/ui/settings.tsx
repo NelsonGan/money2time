@@ -320,6 +320,7 @@ export function FormSwitchRow({ label, info, value, onValueChange }: FormSwitchR
         {info ? <InfoTooltipButton title={label} infoTooltip={info} /> : null}
       </View>
       <Switch
+        accessibilityLabel={label}
         value={value}
         onValueChange={(next) => {
           void triggerHaptic('selection');

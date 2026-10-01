@@ -4,6 +4,7 @@ import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { Card, CategoryEmoji, Text, TimeValueInline } from '~/components/ui';
+import { appIconById, DEFAULT_APP_ICON_ID } from '~/constants/appIcons';
 import { getThemeWordmarkPalette, spacing } from '~/constants/designSystem';
 import { useResolvedTheme, useThemeColor } from '~/context/ThemeContext';
 import { OnboardingActionBar } from '~/features/onboarding/components/OnboardingActionBar';
@@ -17,9 +18,8 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { formatCurrency, formatHours } from '~/utils/formatters';
 
-// The brand mark: the whole chick on its rosewood disc, cut from
-// `assets/banner.png` so it matches the logo the widgets and receipts carry.
-const LOGO_SOURCE = require('../../../assets/logo.png');
+/** iOS's squircle is close enough to this fraction of the tile for our purposes. */
+const APP_ICON_RADIUS = 0.2237;
 
 interface OnboardingValuePropStepProps {
   currencySymbol: string;
@@ -33,7 +33,8 @@ export function OnboardingValuePropStep({
   const themeColors = useThemeColors();
   // The wordmark has its own three-colour palette, warm on the name and the
   // theme's own colour on "Time" -- the same split `assets/banner.png` draws.
-  const wordmark = getThemeWordmarkPalette(useThemeColor(), useResolvedTheme());
+  const resolvedTheme = useResolvedTheme();
+  const wordmark = getThemeWordmarkPalette(useThemeColor(), resolvedTheme);
   const { height: windowHeight } = useWindowDimensions();
   const sym = currencySymbol;
   const trueHourlyRate = 15;
@@ -42,7 +43,7 @@ export function OnboardingValuePropStep({
   const isCompact = windowHeight < 700;
   const isMedium = windowHeight >= 700 && windowHeight < 900;
 
-  const logoSize = isCompact ? 96 : isMedium ? 112 : 128;
+  const appIconSize = isCompact ? 84 : isMedium ? 96 : 108;
   const rowVerticalPadding = isCompact ? spacing.xxs + 2 : isMedium ? spacing.sm : spacing.md;
   const cardMarginTop = isCompact ? spacing.md : isMedium ? spacing.lg : spacing.xl;
   // Keep top padding tight — the progress header already provides visual
@@ -99,10 +100,24 @@ export function OnboardingValuePropStep({
       >
         <OnboardingStepHeader compact>
           <View style={styles.brand}>
+            {/* The shipped launcher icon, in the appearance that matches the
+                theme, so the first screen shows the tile the user just tapped.
+                Its backdrop sits close to the page behind it, hence the
+                hairline edge. */}
             <Image
-              source={LOGO_SOURCE}
-              style={{ width: logoSize, height: logoSize }}
-              contentFit="contain"
+              source={
+                resolvedTheme === 'dark'
+                  ? appIconById(DEFAULT_APP_ICON_ID).previewDark
+                  : appIconById(DEFAULT_APP_ICON_ID).previewLight
+              }
+              style={{
+                width: appIconSize,
+                height: appIconSize,
+                borderRadius: appIconSize * APP_ICON_RADIUS,
+                borderWidth: StyleSheet.hairlineWidth,
+                borderColor: themeColors.border,
+              }}
+              contentFit="cover"
               accessible
               accessibilityRole="image"
               accessibilityLabel={I18n.t('app.name')}
