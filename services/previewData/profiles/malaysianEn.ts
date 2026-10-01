@@ -143,13 +143,15 @@ export const malaysianEnProfile: PreviewProfile = {
   budgets: {
     templateName: 'Monthly Budget',
     templateEmoji: '🎯',
-    totalAmount: 5000,
+    // Sized from the seeded month's actual spend so the ring reads ~90% used
+    // with food a little over, not every line in the red.
+    totalAmount: 6600,
     allocations: [
-      { categoryKey: 'home', amount: 2250 },
-      { categoryKey: 'food', amount: 1150 },
-      { categoryKey: 'transport', amount: 520 },
-      { categoryKey: 'lifestyle', amount: 620 },
-      { categoryKey: 'health', amount: 260 },
+      { categoryKey: 'home', amount: 2500 },
+      { categoryKey: 'food', amount: 1900 },
+      { categoryKey: 'transport', amount: 800 },
+      { categoryKey: 'lifestyle', amount: 600 },
+      { categoryKey: 'health', amount: 400 },
     ],
     monthsToSeed: 6,
   },

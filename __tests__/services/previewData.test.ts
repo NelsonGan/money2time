@@ -1,11 +1,29 @@
+import { readdirSync } from 'fs';
+import { join } from 'path';
+
+import { ACCOUNT_LOGO_SOURCES } from '~/constants/accountLogos.generated';
+import { SUBSCRIPTION_LOGO_SOURCES } from '~/constants/subscriptionLogos.generated';
 import {
   CATEGORY_BLUEPRINT,
+  PREVIEW_PROFILE_FOR_LOCALE,
+  PREVIEW_PROFILE_LABELS,
   PREVIEW_PROFILES,
   type PreviewSeedProfile,
   wageConfigForMonthsAgo,
 } from '~/services/previewData';
 
 const PROFILE_KEYS = Object.keys(PREVIEW_PROFILES) as PreviewSeedProfile[];
+
+// Hand-written profiles carry albums and items too. The per-country profiles
+// built by ./profiles/localized cover what the store screenshots show and leave
+// those two out on purpose.
+const FULL_PROFILES = new Set<PreviewSeedProfile>([
+  'american',
+  'chinese',
+  'taiwanese',
+  'malaysian_en',
+  'malaysian_zh',
+]);
 
 const rootExpenseKeys = new Set(
   CATEGORY_BLUEPRINT.filter((item) => item.type === 'expense' && !item.parentKey).map(
@@ -18,10 +36,15 @@ const allCategoryKeys = new Set(CATEGORY_BLUEPRINT.map((item) => item.key));
 const accountKeys = new Set(['checking', 'savings', 'travel', 'card', 'cash', 'brokerage']);
 
 describe('preview profiles', () => {
-  it('covers all five locale profiles', () => {
-    expect(PROFILE_KEYS.sort()).toEqual(
-      ['american', 'chinese', 'taiwanese', 'malaysian_en', 'malaysian_zh'].sort(),
-    );
+  it('gives every app language a profile, and every profile a label', () => {
+    const localeFiles = readdirSync(join(__dirname, '../../lib/i18n/locales'))
+      .filter((file) => file.endsWith('.ts'))
+      .map((file) => file.replace(/\.ts$/, ''));
+    expect(Object.keys(PREVIEW_PROFILE_FOR_LOCALE).sort()).toEqual(localeFiles.sort());
+    Object.values(PREVIEW_PROFILE_FOR_LOCALE).forEach((key) => {
+      expect(PREVIEW_PROFILES[key]).toBeDefined();
+    });
+    expect(Object.keys(PREVIEW_PROFILE_LABELS).sort()).toEqual([...PROFILE_KEYS].sort());
   });
 
   describe.each(PROFILE_KEYS)('%s', (key) => {
@@ -94,6 +117,10 @@ describe('preview profiles', () => {
     });
 
     it('has albums with valid FX metadata', () => {
+      if (!FULL_PROFILES.has(key)) {
+        expect(profile.albums).toEqual([]);
+        return;
+      }
       expect(profile.albums.length).toBeGreaterThan(0);
       // At least one trip abroad, so multi-currency is actually exercised.
       const foreign = profile.albums.filter((a) => a.currencyCode !== profile.currencyCode);
@@ -113,7 +140,7 @@ describe('preview profiles', () => {
     });
 
     it('seeds items with sane pricing', () => {
-      expect(profile.items.length).toBeGreaterThan(0);
+      if (FULL_PROFILES.has(key)) expect(profile.items.length).toBeGreaterThan(0);
       profile.items.forEach((item) => {
         expect(item.purchasePrice).toBeGreaterThan(0);
         if (item.retiredMonthsAgo != null) {
@@ -131,6 +158,22 @@ describe('preview profiles', () => {
         expect(typeof profile.categories[categoryKey as keyof typeof profile.categories]).toBe(
           'string',
         );
+      });
+    });
+
+    it('only references logos that exist in the bundled catalogs', () => {
+      const accountLogos = [
+        ...Object.values(profile.accounts).map((account) => account.logoId),
+        ...profile.extraAccounts.map((account) => account.logoId),
+      ];
+      accountLogos.forEach((logoId) => {
+        expect(ACCOUNT_LOGO_SOURCES[logoId] ? logoId : `missing ${logoId}`).toBe(logoId);
+      });
+      const subscriptionLogos = [profile.recurring.fitness, ...profile.recurring.subscriptions]
+        .map((rule) => rule.logoId)
+        .filter((logoId): logoId is string => Boolean(logoId));
+      subscriptionLogos.forEach((logoId) => {
+        expect(SUBSCRIPTION_LOGO_SOURCES[logoId] ? logoId : `missing ${logoId}`).toBe(logoId);
       });
     });
 

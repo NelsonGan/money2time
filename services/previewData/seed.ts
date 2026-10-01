@@ -1,3 +1,4 @@
+import { suggestSubscriptionLogo } from '~/constants/subscriptionLogos';
 import { getDb, getSQLite } from '~/lib/db/client';
 import {
   accountGroupsTable,
@@ -60,8 +61,12 @@ function createSeededRandom(seed: number): RandomFn {
   };
 }
 
+// Set per seed from the profile, so currencies without minor units (JPY, KRW,
+// IDR, VND) seed whole amounts instead of ¥2,953.46.
+let amountScale = 100;
+
 function roundAmount(value: number) {
-  return Math.round(value * 100) / 100;
+  return Math.round(value * amountScale) / amountScale;
 }
 
 function jitter(base: number, spread: number, random: RandomFn) {
@@ -332,6 +337,7 @@ function seedRecurringRules(
       accountId: accounts.card,
       categoryId: categories.subscriptions,
       note: subscription.note,
+      logoId: subscription.logoId ?? suggestSubscriptionLogo(subscription.name)?.id ?? null,
       recurrencePattern: 'monthly',
       nextRunDate: monthIso(nextMonth, 5 + index * 2, 9),
     });
@@ -1284,6 +1290,7 @@ export function seedProfile(
   receiptRelativePath?: string | null,
 ): PreviewSeedSummary {
   const sqlite = getSQLite();
+  amountScale = 10 ** (profile.amountDecimals ?? 2);
 
   // Reporting currency + the foreign currencies spent abroad, so the FX picker
   // in settings is populated for screenshots.
@@ -1305,6 +1312,11 @@ export function seedProfile(
       fxCurrenciesJson: JSON.stringify(trackedCurrencies),
     });
     settingsRepository.updateInsightsPreferencesJson(null);
+    // Quick-entry and calendar prefs hold account/category ids from the data
+    // being replaced, so stale ones would point the editor at a deleted
+    // account or hide seeded categories behind a leftover filter.
+    settingsRepository.updateQuickEntryPrefsJson(null);
+    settingsRepository.updateCalendarPrefsJson(null);
 
     const accounts = createAccounts(profile);
     const categories = createCategories(profile);
