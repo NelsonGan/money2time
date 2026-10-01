@@ -700,6 +700,13 @@ describe('toSettings', () => {
     expect(settings.hapticsEnabled).toBe(true);
   });
 
+  it('shows the transaction account unless it was switched off', () => {
+    expect(toSettings({ ...baseRow }).showTransactionAccount).toBe(true);
+    expect(toSettings({ ...baseRow, showTransactionAccount: false }).showTransactionAccount).toBe(
+      false,
+    );
+  });
+
   it('maps working-day preferences with migration-safe defaults', () => {
     expect(toSettings({ ...baseRow }).workdayDisplayEnabled).toBe(false);
     expect(toSettings({ ...baseRow }).workingHoursPerDay).toBe(8);

@@ -1190,6 +1190,9 @@ const th = {
     icon_style_flat: 'แบน',
     home_summary_left: 'Left home card',
     home_summary_right: 'Right home card',
+    show_transaction_account: 'แสดงบัญชีในรายการ',
+    show_transaction_account_help:
+      'แสดงบัญชีที่แต่ละรายการจ่ายออกหรือรับเข้า การโอนจะแสดงบัญชีต้นทางและปลายทางเสมอ',
     icon_style_help:
       'เคลย์ใช้ภาพประกอบ 3 มิติแบบนุ่มนวลในแท็บ การตั้งค่า และปุ่มต่างๆ ส่วนแบนจะเปลี่ยนกลับเป็นไอคอนเส้นแบบเรียบง่าย',
     first_day_of_week: 'วันแรกของสัปดาห์',

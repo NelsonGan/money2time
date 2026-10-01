@@ -1203,6 +1203,9 @@ const ja = {
     icon_style_flat: 'フラット',
     home_summary_left: 'Left home card',
     home_summary_right: 'Right home card',
+    show_transaction_account: '取引に口座を表示',
+    show_transaction_account_help:
+      '各取引の支払元または入金先の口座を表示します。振替には常に移動元と移動先の口座が表示されます。',
     icon_style_help:
       'クレイはタブ、設定、ボタン全体でやわらかな3Dイラストを使います。フラットにするとシンプルな線のアイコンに戻ります。',
     first_day_of_week: '週の始まり',

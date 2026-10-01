@@ -6,6 +6,7 @@ import { Alert, Image, Pressable, ScrollView, StyleSheet, View } from 'react-nat
 import {
   Card,
   CardContent,
+  FormSwitchRow,
   InfoTooltipButton,
   SelectField,
   SETTINGS_FORM_BOTTOM_PADDING,
@@ -358,6 +359,12 @@ export function DisplaySettingsScreen({
                   <ChevronRight size={16} color={themeColors.textMuted} />
                 </Pressable>
               </View>
+              <FormSwitchRow
+                label={I18n.t('settings.show_transaction_account')}
+                info={I18n.t('settings.show_transaction_account_help')}
+                value={settings.showTransactionAccount}
+                onValueChange={(value) => updateSettings({ showTransactionAccount: value })}
+              />
             </CardContent>
           </Card>
         </View>

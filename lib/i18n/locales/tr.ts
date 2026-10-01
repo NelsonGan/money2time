@@ -1212,6 +1212,9 @@ const tr = {
     icon_style_flat: 'Düz',
     home_summary_left: 'Left home card',
     home_summary_right: 'Right home card',
+    show_transaction_account: 'İşlemlerde hesabı göster',
+    show_transaction_account_help:
+      'Her işlemin hangi hesaptan ya da hesaba yapıldığını gösterir. Transferler her zaman aradaki hesapları gösterir.',
     icon_style_help:
       'Kil, sekmelerde, ayarlarda ve düğmelerde yumuşak 3B çizimleri kullanır. Düz, bunları basit çizgi simgelerine geri döndürür.',
     first_day_of_week: 'Haftanın ilk günü',

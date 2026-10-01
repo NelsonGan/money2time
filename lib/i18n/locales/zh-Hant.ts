@@ -1152,6 +1152,8 @@ const zhHant = {
     icon_style_help: '黏土在標籤欄、設定和按鈕中使用柔和的立體插畫。扁平會切換回簡潔的線條圖示。',
     home_summary_left: '首頁左側卡片',
     home_summary_right: '首頁右側卡片',
+    show_transaction_account: '在交易中顯示帳戶',
+    show_transaction_account_help: '顯示每筆交易的付款或入帳帳戶。轉帳一律顯示轉出和轉入的帳戶。',
     first_day_of_week: '每週首日',
     first_day_sunday: '星期日',
     first_day_monday: '星期一',

@@ -1211,6 +1211,9 @@ const it = {
     icon_style_flat: 'Piatto',
     home_summary_left: 'Left home card',
     home_summary_right: 'Right home card',
+    show_transaction_account: 'Mostra il conto nelle transazioni',
+    show_transaction_account_help:
+      'Mostra il conto da cui o su cui è avvenuta ogni transazione. I trasferimenti mostrano sempre i conti coinvolti.',
     icon_style_help:
       'Argilla usa le illustrazioni 3D morbide in schede, impostazioni e pulsanti. Piatto torna alle semplici icone lineari.',
     first_day_of_week: 'Primo giorno della settimana',
