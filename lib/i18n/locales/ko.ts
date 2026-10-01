@@ -1188,6 +1188,9 @@ const ko = {
     icon_style_flat: '플랫',
     home_summary_left: 'Left home card',
     home_summary_right: 'Right home card',
+    show_transaction_account: '거래에 계좌 표시',
+    show_transaction_account_help:
+      '각 거래의 출금 또는 입금 계좌를 표시합니다. 이체는 항상 오간 계좌를 표시합니다.',
     icon_style_help:
       '클레이는 탭, 설정, 버튼 전반에 부드러운 3D 일러스트를 사용합니다. 플랫은 단순한 선 아이콘으로 되돌립니다.',
     first_day_of_week: '주 시작 요일',

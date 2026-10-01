@@ -1223,6 +1223,9 @@ const fil = {
     icon_style_flat: 'Flat',
     home_summary_left: 'Left home card',
     home_summary_right: 'Right home card',
+    show_transaction_account: 'Ipakita ang account sa mga transaksyon',
+    show_transaction_account_help:
+      'Ipinapakita ang account kung saan galing o pumasok ang bawat transaksyon. Laging ipinapakita ng mga transfer ang mga account na pinaglipatan.',
     icon_style_help:
       'Ginagamit ng Clay ang malalambot na 3D na ilustrasyon sa mga tab, setting, at button. Ibinabalik ng Flat ang mga simpleng line icon.',
     first_day_of_week: 'Unang araw ng linggo',

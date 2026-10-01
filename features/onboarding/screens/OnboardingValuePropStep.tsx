@@ -17,9 +17,9 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { formatCurrency, formatHours } from '~/utils/formatters';
 
-const APP_ICON_SOURCE = require('../../../assets/app-icon.png');
-/** iOS's squircle is close enough to this fraction of the tile for our purposes. */
-const APP_ICON_RADIUS = 0.2237;
+// The brand mark: the whole chick on its rosewood disc, cut from
+// `assets/banner.png` so it matches the logo the widgets and receipts carry.
+const LOGO_SOURCE = require('../../../assets/logo.png');
 
 interface OnboardingValuePropStepProps {
   currencySymbol: string;
@@ -42,7 +42,7 @@ export function OnboardingValuePropStep({
   const isCompact = windowHeight < 700;
   const isMedium = windowHeight >= 700 && windowHeight < 900;
 
-  const appIconSize = isCompact ? 84 : isMedium ? 96 : 108;
+  const logoSize = isCompact ? 96 : isMedium ? 112 : 128;
   const rowVerticalPadding = isCompact ? spacing.xxs + 2 : isMedium ? spacing.sm : spacing.md;
   const cardMarginTop = isCompact ? spacing.md : isMedium ? spacing.lg : spacing.xl;
   // Keep top padding tight — the progress header already provides visual
@@ -99,19 +99,10 @@ export function OnboardingValuePropStep({
       >
         <OnboardingStepHeader compact>
           <View style={styles.brand}>
-            {/* The launcher icon, so the first screen shows the same tile the
-                user just tapped. It carries its own cream backdrop, which sits
-                close to the page behind it, hence the hairline edge. */}
             <Image
-              source={APP_ICON_SOURCE}
-              style={{
-                width: appIconSize,
-                height: appIconSize,
-                borderRadius: appIconSize * APP_ICON_RADIUS,
-                borderWidth: StyleSheet.hairlineWidth,
-                borderColor: themeColors.border,
-              }}
-              contentFit="cover"
+              source={LOGO_SOURCE}
+              style={{ width: logoSize, height: logoSize }}
+              contentFit="contain"
               accessible
               accessibilityRole="image"
               accessibilityLabel={I18n.t('app.name')}

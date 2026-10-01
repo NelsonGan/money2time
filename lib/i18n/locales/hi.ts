@@ -1202,6 +1202,9 @@ const hi = {
     icon_style_flat: 'फ्लैट',
     home_summary_left: 'Left home card',
     home_summary_right: 'Right home card',
+    show_transaction_account: 'लेन-देन पर खाता दिखाएँ',
+    show_transaction_account_help:
+      'हर लेन-देन किस खाते से या किस खाते में हुआ, यह दिखाता है। ट्रांसफ़र हमेशा दोनों खाते दिखाते हैं।',
     icon_style_help:
       'क्ले टैब, सेटिंग्स और बटन में सॉफ्ट 3D चित्रों का उपयोग करता है। फ्लैट उन्हें सरल लाइन आइकन में वापस बदल देता है।',
     first_day_of_week: 'सप्ताह का पहला दिन',

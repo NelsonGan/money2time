@@ -1205,6 +1205,9 @@ const uk = {
     icon_style_flat: 'Плаский',
     home_summary_left: 'Left home card',
     home_summary_right: 'Right home card',
+    show_transaction_account: 'Показувати рахунок в операціях',
+    show_transaction_account_help:
+      'Показує рахунок, з якого або на який пройшла кожна операція. Перекази завжди показують обидва рахунки.',
     icon_style_help:
       'Глина використовує м’які 3D-ілюстрації у вкладках, налаштуваннях і кнопках. Плаский повертає прості лінійні піктограми.',
     first_day_of_week: 'Перший день тижня',

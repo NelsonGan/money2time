@@ -1207,6 +1207,9 @@ const sv = {
     icon_style_flat: 'Platt',
     home_summary_left: 'Left home card',
     home_summary_right: 'Right home card',
+    show_transaction_account: 'Visa konto på transaktioner',
+    show_transaction_account_help:
+      'Visar kontot varje transaktion betalades från eller in på. Överföringar visar alltid kontona de gick mellan.',
     icon_style_help:
       'Lera använder de mjuka 3D-illustrationerna i flikar, inställningar och knappar. Platt växlar tillbaka till de enkla linjeikonerna.',
     first_day_of_week: 'Veckans första dag',

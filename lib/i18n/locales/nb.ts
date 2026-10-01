@@ -1208,6 +1208,9 @@ const nb = {
     icon_style_flat: 'Flat',
     home_summary_left: 'Left home card',
     home_summary_right: 'Right home card',
+    show_transaction_account: 'Vis konto på transaksjoner',
+    show_transaction_account_help:
+      'Viser kontoen hver transaksjon ble betalt fra eller inn på. Overføringer viser alltid kontoene de gikk mellom.',
     icon_style_help:
       'Leire bruker de myke 3D-illustrasjonene i faner, innstillinger og knapper. Flat bytter tilbake til de enkle strekikonene.',
     first_day_of_week: 'Ukens første dag',

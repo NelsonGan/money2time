@@ -211,7 +211,7 @@ const TransactionItemBody = memo(
     getTrueHourlyRateForDate,
   }: TransactionItemBodyProps) {
     const themeColors = useThemeColors();
-    const { getAccountById } = useApp();
+    const { getAccountById, settings: appSettings } = useApp();
     const {
       isIncome,
       isTransfer,
@@ -224,9 +224,13 @@ const TransactionItemBody = memo(
 
     const dateLabel = showDateInSubtitle ? formatRelativeDate(transaction.date) : null;
     const transferSubtitleLabel = I18n.t('transactions.filters.moved');
-    const accountSubtitleLabel = !isTransfer
-      ? (transaction.accountName ?? I18n.t('common.no_account'))
-      : null;
+    // The account badge can be switched off in Display settings. A transfer
+    // keeps its from → to pair either way: which accounts it moved between is
+    // what the row is about, not a detail of it.
+    const accountSubtitleLabel =
+      !isTransfer && appSettings.showTransactionAccount
+        ? (transaction.accountName ?? I18n.t('common.no_account'))
+        : null;
     const account = transaction.accountId ? getAccountById(transaction.accountId) : undefined;
     const fromAccount = transaction.fromAccountId
       ? getAccountById(transaction.fromAccountId)
@@ -238,7 +242,7 @@ const TransactionItemBody = memo(
     const toAccountLabel = isTransfer
       ? String(transaction.toAccountName ?? I18n.t('common.unknown'))
       : '';
-    const accountBadgeMarginClassName = compact ? 'mt-[3px]' : 'mt-[5px]';
+    const accountBadgeMarginClassName = compact ? 'mt-[2px]' : 'mt-[3px]';
 
     const joinSubtitleParts = (...parts: (string | null | undefined)[]) =>
       parts.filter((part): part is string => Boolean(part && part.trim().length > 0)).join(' · ');

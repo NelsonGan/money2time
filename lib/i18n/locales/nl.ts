@@ -1219,6 +1219,9 @@ const nl = {
     icon_style_flat: 'Vlak',
     home_summary_left: 'Left home card',
     home_summary_right: 'Right home card',
+    show_transaction_account: 'Rekening tonen bij transacties',
+    show_transaction_account_help:
+      'Toont de rekening waarvan of waarnaar elke transactie ging. Overboekingen tonen altijd de betrokken rekeningen.',
     icon_style_help:
       'Klei gebruikt de zachte 3D-illustraties in tabbladen, instellingen en knoppen. Vlak schakelt terug naar de eenvoudige lijnpictogrammen.',
     first_day_of_week: 'Eerste dag van de week',

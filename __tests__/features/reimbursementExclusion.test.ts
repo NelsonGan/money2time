@@ -46,6 +46,7 @@ const baseSettings: UserSettings = {
   paymentQrUri: null,
   defaultPaybackAccountId: null,
   reimbursementsCountAsExpense: true,
+  showTransactionAccount: true,
   createdAt: '2026-06-01T00:00:00.000Z',
   updatedAt: '2026-06-01T00:00:00.000Z',
   deletedAt: null,

@@ -1212,6 +1212,9 @@ const pt = {
     icon_style_flat: 'Plano',
     home_summary_left: 'Left home card',
     home_summary_right: 'Right home card',
+    show_transaction_account: 'Mostrar conta nas transações',
+    show_transaction_account_help:
+      'Mostra a conta de origem ou destino de cada transação. Transferências sempre mostram as contas envolvidas.',
     icon_style_help:
       'Argila usa as ilustrações 3D suaves em abas, ajustes e botões. Plano volta aos ícones de linha simples.',
     first_day_of_week: 'Primeiro dia da semana',

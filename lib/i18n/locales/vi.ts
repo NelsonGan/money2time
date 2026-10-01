@@ -1199,6 +1199,9 @@ const vi = {
     icon_style_flat: 'Phẳng',
     home_summary_left: 'Left home card',
     home_summary_right: 'Right home card',
+    show_transaction_account: 'Hiển thị tài khoản trên giao dịch',
+    show_transaction_account_help:
+      'Hiển thị tài khoản chi hoặc nhận của mỗi giao dịch. Chuyển khoản luôn hiển thị các tài khoản liên quan.',
     icon_style_help:
       'Đất sét dùng các hình minh họa 3D mềm mại trên tab, cài đặt và nút bấm. Phẳng chuyển về các biểu tượng nét đơn giản.',
     first_day_of_week: 'Ngày đầu tuần',
