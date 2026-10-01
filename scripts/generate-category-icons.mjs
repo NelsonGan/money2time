@@ -30,7 +30,10 @@ import { fileURLToPath } from 'node:url';
 import pngjs from 'pngjs';
 import prettier from 'prettier';
 
+import pngOptimizer from './lib/optimizePng.cjs';
+
 const { PNG } = pngjs;
+const { optimizePng } = pngOptimizer;
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..');
@@ -164,10 +167,11 @@ async function main() {
       const atlasFile = `${groupId}.png`;
       await fs.mkdir(atlasDir, { recursive: true });
       quantizeAtlasColors(atlas);
-      await fs.writeFile(
-        path.join(atlasDir, atlasFile),
+      const optimized = await optimizePng(
         PNG.sync.write(atlas, { deflateLevel: 9, deflateStrategy: 3 }),
+        { quantize: true, cellSize: ICON_SIZE, displaySize: 52 },
       );
+      await fs.writeFile(path.join(atlasDir, atlasFile), optimized.buffer);
       atlases.push({
         id: atlasId,
         require: `../assets/icon-atlases/${packName}/${atlasFile}`,
