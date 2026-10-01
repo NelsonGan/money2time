@@ -14,8 +14,8 @@ import { DatePickerModal } from '~/components/datePicker';
 import {
   AccountLogo,
   AccountPickerSheet,
+  buildCategoryPickerOptions,
   CategoryEmoji,
-  type CategoryPickerOption,
   CategoryPickerSheet,
   CurrencyPickerSheet,
   Text,
@@ -118,50 +118,6 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 24,
     overflow: 'hidden',
-  },
-  voiceBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingVertical: 10,
-    paddingLeft: 12,
-    paddingRight: 8,
-    marginBottom: 8,
-    borderRadius: 14,
-    borderWidth: 1,
-  },
-  voiceBannerIcon: {
-    width: 30,
-    height: 30,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  voiceBannerText: {
-    flex: 1,
-    gap: 1,
-  },
-  voiceBannerTitle: {
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  voiceBannerBody: {
-    fontSize: 11,
-    lineHeight: 14,
-  },
-  voiceBannerCta: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 999,
-  },
-  voiceBannerCtaLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 0.1,
-  },
-  voiceBannerClose: {
-    padding: 4,
-    marginLeft: -2,
   },
   primaryInput: {
     fontSize: 14,
@@ -373,29 +329,6 @@ function formatDateChipLabel(value: string): string {
   const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (!match) return value;
   return String(Number(match[3]));
-}
-
-function buildCategoryPickerOptions(categories: Category[]): {
-  parents: CategoryPickerOption[];
-  childByParent: Map<string, CategoryPickerOption[]>;
-} {
-  const parents: CategoryPickerOption[] = [];
-  const childByParent = new Map<string, CategoryPickerOption[]>();
-  const parentIds = new Set<string>();
-  categories.forEach((category) => {
-    if (!category.parentId) {
-      parents.push({ id: category.id, name: category.name, icon: category.icon });
-      parentIds.add(category.id);
-    }
-  });
-  categories.forEach((category) => {
-    if (category.parentId && parentIds.has(category.parentId)) {
-      const list = childByParent.get(category.parentId) ?? [];
-      list.push({ id: category.id, name: category.name, icon: category.icon });
-      childByParent.set(category.parentId, list);
-    }
-  });
-  return { parents, childByParent };
 }
 
 export function QuickAddSheet({

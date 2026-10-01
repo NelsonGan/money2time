@@ -1,5 +1,6 @@
-import type { SQLiteDatabase } from 'expo-sqlite';
 import { DatabaseSync } from 'node:sqlite';
+
+import type { SQLiteDatabase } from 'expo-sqlite';
 
 import { getSQLite } from '~/lib/db/client';
 import migration063RetireSimpleMode from '~/lib/db/migrations/063_retire_simple_mode';

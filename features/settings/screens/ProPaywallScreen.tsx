@@ -29,8 +29,8 @@ import {
 import {
   buildPaywallPlanPresentation,
   getDefaultPaywallPlanId,
-  resolveSelectedPaywallPlan,
   type PaywallPlanKind,
+  resolveSelectedPaywallPlan,
 } from '~/features/settings/lib/paywallPresentation';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -43,6 +43,7 @@ import {
 import { recordProPurchase } from '~/services/reviewPrompt';
 import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
 import { cn } from '~/utils';
+import { withColorAlpha } from '~/utils/color';
 import { FONT } from '~/utils/fonts';
 import { openStoreSubscriptions } from '~/utils/subscriptionSettings';
 
@@ -99,24 +100,6 @@ function usePaywallColors(): PaywallColors {
     }),
     [tc, isDark],
   );
-}
-
-function withAlpha(color: string, alpha: number) {
-  const normalized = color.replace('#', '');
-  const hex =
-    normalized.length === 3
-      ? normalized
-          .split('')
-          .map((char) => `${char}${char}`)
-          .join('')
-      : normalized.slice(0, 6);
-
-  const value = Number.parseInt(hex, 16);
-  const r = (value >> 16) & 255;
-  const g = (value >> 8) & 255;
-  const b = value & 255;
-
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
 // Hero: headline + social proof + testimonial
@@ -289,8 +272,8 @@ function TestimonialCard({
       <View style={s.testimonialQuoteMark} pointerEvents="none">
         <Quote
           size={22}
-          color={withAlpha(colors.primary, 0.22)}
-          fill={withAlpha(colors.primary, 0.22)}
+          color={withColorAlpha(colors.primary, 0.22)}
+          fill={withColorAlpha(colors.primary, 0.22)}
         />
       </View>
       <Text style={[s.testimonialQuote, { color: colors.text }]}>{testimonial.quote}</Text>
@@ -653,7 +636,7 @@ function CompareTable({
             style={[
               s.tableValueCol,
               s.tableProCol,
-              { backgroundColor: withAlpha(colors.primary, colors.isDark ? 0.1 : 0.06) },
+              { backgroundColor: withColorAlpha(colors.primary, colors.isDark ? 0.1 : 0.06) },
             ]}
           >
             <CompareCell value={row.pro} colors={colors} isPro />
@@ -1182,7 +1165,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
             {
               top: insets.top + 56,
               backgroundColor: colors.isDark ? colors.surface : colors.cardBg,
-              borderColor: withAlpha(colors.accent, colors.isDark ? 0.42 : 0.24),
+              borderColor: withColorAlpha(colors.accent, colors.isDark ? 0.42 : 0.24),
             },
           ]}
         >

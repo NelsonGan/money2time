@@ -2,10 +2,9 @@ import { NO_REIMBURSEMENT } from '~/features/reimbursements/lib/reimbursementMat
 import {
   applyReviewFilters,
   EMPTY_REVIEW_FILTERS,
-  hasReviewFilters,
   pruneReviewFilters,
-  type ReviewFilters,
   reviewFilterCount,
+  type ReviewFilters,
 } from '~/features/review/lib/reviewFilters';
 import type { Category, TransactionWithRelations } from '~/types';
 
@@ -69,7 +68,6 @@ function filters(overrides: Partial<ReviewFilters> = {}): ReviewFilters {
 describe('reviewFilterCount', () => {
   it('is zero for the default and sums all three lists', () => {
     expect(reviewFilterCount(EMPTY_REVIEW_FILTERS)).toBe(0);
-    expect(hasReviewFilters(EMPTY_REVIEW_FILTERS)).toBe(false);
     expect(
       reviewFilterCount(
         filters({

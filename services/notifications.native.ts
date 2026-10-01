@@ -14,6 +14,7 @@ import type { LiveEarningsSchedule, NotificationPreferences, WeekStartsOn } from
 
 import {
   DAILY_CHECKIN_ID,
+  isTransientNotificationServiceError,
   LEGACY_WEEKLY_SUMMARY_ID,
   LIVE_EARNINGS_START_IDS,
   liveEarningsStartId,
@@ -22,7 +23,6 @@ import {
   monthlyReminderDay,
   reviewNotificationUrl,
   WEEKLY_REVIEW_ID,
-  isTransientNotificationServiceError,
 } from './notifications.shared';
 
 export * from './notifications.shared';

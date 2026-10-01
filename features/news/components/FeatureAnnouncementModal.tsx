@@ -17,6 +17,7 @@ import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import { withColorAlpha } from '~/utils/color';
 
 import {
   announcementBadgeLabel,
@@ -36,13 +37,13 @@ import { AppLockShowcase } from './AppLockShowcase';
 import { AutoLogShowcase } from './AutoLogShowcase';
 import { BackupShowcase } from './BackupShowcase';
 import { BudgetShowcase } from './BudgetShowcase';
-import { ExcelExportShowcase } from './ExcelExportShowcase';
 import {
   GoalCoversShowcase,
   HomeCardsShowcase,
   ItemIconsShowcase,
   TransactionReorderShowcase,
 } from './EverydayPersonalizationShowcases';
+import { ExcelExportShowcase } from './ExcelExportShowcase';
 import { FinancialMonthShowcase } from './FinancialMonthShowcase';
 import { GoalsShowcase } from './GoalsShowcase';
 import { IconStyleShowcase } from './IconStyleShowcase';
@@ -55,12 +56,12 @@ import { MascotsShowcase } from './MascotsShowcase';
 import { MonthCycleShowcase } from './MonthCycleShowcase';
 import { MultiCurrencyShowcase } from './MultiCurrencyShowcase';
 import { ReceiptSplitShowcase } from './ReceiptSplitShowcase';
-import { RiceCalShowcase } from './RiceCalShowcase';
-import { AndroidStoreIcon, AppleStoreIcon } from './StorePlatformIcons';
 import { RecurringForecastShowcase } from './RecurringForecastShowcase';
 import { RedesignShowcase } from './RedesignShowcase';
 import { ReviewShowcase } from './ReviewShowcase';
+import { RiceCalShowcase } from './RiceCalShowcase';
 import { ShareEarnShowcase } from './ShareEarnShowcase';
+import { AndroidStoreIcon, AppleStoreIcon } from './StorePlatformIcons';
 import { SubscriptionLogoShowcase } from './SubscriptionLogoShowcase';
 import { TransactionFxShowcase } from './TransactionFxShowcase';
 import { TrialAccountsShowcase } from './TrialAccountsShowcase';
@@ -69,10 +70,8 @@ import { VoiceShowcase } from './VoiceShowcase';
 import { WidgetShowcase, type WidgetShowcaseKind } from './WidgetShowcase';
 import { WorkingDaysShowcase } from './WorkingDaysShowcase';
 
-interface FeatureAnnouncementModalProps {
-  announcement: FeatureAnnouncement | null;
-  visible: boolean;
-  onDismiss: () => void;
+/** Where each announcement CTA leads; the News screen passes them straight through. */
+export interface FeatureAnnouncementCtaHandlers {
   /** Invoked when a page with the `openShareEarn` CTA is confirmed. */
   onOpenShareEarn?: () => void;
   /** Invoked when a page with the `openQuickEntrySettings` CTA is confirmed. */
@@ -107,17 +106,14 @@ interface FeatureAnnouncementModalProps {
   onOpenProPaywall?: () => void;
 }
 
+interface FeatureAnnouncementModalProps extends FeatureAnnouncementCtaHandlers {
+  announcement: FeatureAnnouncement | null;
+  visible: boolean;
+  onDismiss: () => void;
+}
+
 const MODAL_HORIZONTAL = 16;
 const PANEL_PADDING = 18;
-
-function withColorAlpha(hex: string, alpha: number): string {
-  const value = hex.replace('#', '');
-  if (!/^[0-9a-fA-F]{6}$/.test(value)) return hex;
-  const r = Number.parseInt(value.slice(0, 2), 16);
-  const g = Number.parseInt(value.slice(2, 4), 16);
-  const b = Number.parseInt(value.slice(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${Math.max(0, Math.min(1, alpha))})`;
-}
 
 function resolveAccentColor(
   page: FeatureAnnouncementPage,
@@ -576,27 +572,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     marginTop: 18,
-  },
-  toggleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    borderRadius: 18,
-    borderWidth: 1,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    marginTop: 18,
-  },
-  toggleIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  toggleText: {
-    flex: 1,
-    minWidth: 0,
   },
   dot: {
     height: 7,

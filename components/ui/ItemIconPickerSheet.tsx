@@ -1,4 +1,3 @@
-import * as ImagePicker from 'expo-image-picker';
 import { ImagePlus, Search, Trash2, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
@@ -7,6 +6,7 @@ import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ItemIcon } from '~/components/ui/ItemIcon';
+import { PickerTabs } from '~/components/ui/PickerTabs';
 import { SettingsHeader } from '~/components/ui/settings';
 import { Text } from '~/components/ui/text';
 import { spacing } from '~/constants/designSystem';
@@ -20,6 +20,7 @@ import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import { pickLibraryImage } from '~/services/libraryImagePicker';
 import { deleteCustomLogo, listCustomItemIcons, saveCustomItemIcon } from '~/services/userAssets';
 import { cn } from '~/utils';
 import { withColorAlpha } from '~/utils/color';
@@ -188,7 +189,7 @@ export function ItemIconPickerSheet({
   const [query, setQuery] = useState('');
   const [customIcons, setCustomIcons] = useState<{ id: string; uri: string }[]>([]);
 
-  // Lifts the sticky search bar over the keyboard; see AccountLogoPickerSheet for why.
+  // Lifts the sticky search bar over the keyboard; see LogoPickerSheet for why.
   const keyboard = useReanimatedKeyboardAnimation();
   const searchBarAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: keyboard.height.value }],
@@ -224,28 +225,13 @@ export function ItemIconPickerSheet({
     if (!checkLimit('custom_item_images', customIcons.length)) {
       return;
     }
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert(
-        I18n.t('accounts.logo.permission_title'),
-        I18n.t('accounts.logo.permission_message'),
-      );
-      return;
-    }
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
-        // No forced square crop — keep the user's full image (shown with `contain`).
-        allowsEditing: false,
-        quality: 0.9,
-      });
-      if (result.canceled || !result.assets?.[0]) return;
-      saveCustomItemIcon(result.assets[0].uri);
-      refreshCustomIcons();
-    } catch {
-      // The picker itself can reject, not just the save step below it.
-      Alert.alert(I18n.t('accounts.logo.upload_failed'));
-    }
+    await pickLibraryImage(
+      (uri) => {
+        saveCustomItemIcon(uri);
+        refreshCustomIcons();
+      },
+      { failureTitle: I18n.t('accounts.logo.upload_failed') },
+    );
   }, [checkLimit, customIcons.length, refreshCustomIcons]);
 
   const handleDeleteCustom = useCallback(
@@ -276,40 +262,14 @@ export function ItemIconPickerSheet({
           onBack={onClose}
         />
 
-        {/* Tabs sit on their own row below the centered title so they don't
-            compete with it for the header's side slots. */}
-        <View className="flex-row px-5 pb-3" style={{ gap: spacing.lg }}>
-          {(
-            [
-              { value: 'library', label: I18n.t('accounts.logo.tab_library') },
-              { value: 'custom', label: I18n.t('accounts.logo.tab_custom') },
-            ] as const
-          ).map((option) => {
-            const active = tab === option.value;
-            return (
-              <Pressable
-                key={option.value}
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  setTab(option.value);
-                }}
-                accessibilityRole="tab"
-                accessibilityState={{ selected: active }}
-              >
-                <Text
-                  variant="bodyStrong"
-                  className={cn(active ? 'text-primary' : 'text-muted-foreground')}
-                >
-                  {option.label}
-                </Text>
-                <View
-                  className="h-0.5 mt-1 rounded-full"
-                  style={{ backgroundColor: active ? themeColors.primary : 'transparent' }}
-                />
-              </Pressable>
-            );
-          })}
-        </View>
+        <PickerTabs
+          options={[
+            { value: 'library', label: I18n.t('accounts.logo.tab_library') },
+            { value: 'custom', label: I18n.t('accounts.logo.tab_custom') },
+          ]}
+          value={tab}
+          onChange={setTab}
+        />
 
         {tab === 'custom' ? (
           <FlatList

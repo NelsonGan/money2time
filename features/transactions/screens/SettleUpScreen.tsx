@@ -1,9 +1,10 @@
 import { ChevronRight, ReceiptText, Search, Settings2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Keyboard, Pressable, ScrollView, TextInput, View } from 'react-native';
+import type { TextInput } from 'react-native';
+import { Keyboard, Pressable, ScrollView, View } from 'react-native';
 import PagerView, {
-  type PageScrollStateChangedNativeEvent,
   type PagerViewOnPageSelectedEvent,
+  type PageScrollStateChangedNativeEvent,
 } from 'react-native-pager-view';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 

@@ -19,7 +19,6 @@ describe('Liquid Glass navigation availability', () => {
     jest.doMock('react-native', () => ({ Platform: { OS: platform } }));
     jest.doMock('expo-glass-effect', moduleFactory);
 
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { getLiquidGlassNavView } =
       require('~/components/navigation/liquidGlass') as typeof import('~/components/navigation/liquidGlass');
     return { getLiquidGlassNavView, moduleFactory, view };

@@ -131,16 +131,12 @@ inside the launcher's own mask, which is the bug adaptive icons exist to avoid.
 `npm run sync:icons` deletes those three filenames out of the prebuilt native
 `res/` for that reason.
 
-The rest of `assets/ios/` is still a leftover of that pipeline and is kept:
-nothing reads it except `AppIcon~ios-marketing.png`, which is the source of
-`classic`, and the other sizes give a revert of this wiring something to go back
-to.
-
-`assets/ios/` keeps the legacy full-size icon set. Only `AppIcon~ios-marketing.png`
-is still read (as the source of `classic`); prebuild renders every other size
-from `ios.icon`, and `npm run sync:icons` no longer copies that folder into the
-native project, because doing so would overwrite the appearance-aware
-`Contents.json` prebuild writes and drop the dark and tinted faces.
+`assets/ios/` now holds only `AppIcon~ios-marketing.png`, the source of
+`classic`. The rest of the legacy icon set was deleted (it is in git history):
+prebuild renders every size from `ios.icon`, and `npm run sync:icons` no longer
+copies that folder into the native project, because doing so would overwrite the
+appearance-aware `Contents.json` prebuild writes and drop the dark and tinted
+faces.
 
 ## Framing
 

@@ -4,7 +4,6 @@ describe('splashState', () => {
   });
 
   function load() {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     return require('~/utils/splashState') as typeof import('~/utils/splashState');
   }
 

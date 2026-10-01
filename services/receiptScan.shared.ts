@@ -225,12 +225,12 @@ function resolveEntryCurrency(ctx: ResolveContext, accountId: string | null): st
  * `ReceiptSplitLaunchSeed` (features/transactions/lib/receiptSplitBridge).
  */
 export interface ResolvedReceiptDetail {
-  items: Array<{
+  items: {
     name: string;
     quantity: number;
     lineTotal: number;
     lowConfidence?: boolean;
-  }>;
+  }[];
   merchant: string | null;
   currency: string | null;
   date: string | null;

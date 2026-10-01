@@ -15,6 +15,7 @@ import { Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { withColorAlpha } from '~/utils/color';
 import { FONT } from '~/utils/fonts';
 import { formatCurrency } from '~/utils/formatters';
 
@@ -22,15 +23,6 @@ import { formatCurrency } from '~/utils/formatters';
 // the resulting transaction card without crowding.
 const RATIO = 338 / 384;
 const EQ_BARS = [0.45, 0.8, 0.35, 1, 0.6, 0.9, 0.5];
-
-function withColorAlpha(hex: string, alpha: number): string {
-  const value = hex.replace('#', '');
-  if (!/^[0-9a-fA-F]{6}$/.test(value)) return hex;
-  const r = Number.parseInt(value.slice(0, 2), 16);
-  const g = Number.parseInt(value.slice(2, 4), 16);
-  const b = Number.parseInt(value.slice(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${Math.max(0, Math.min(1, alpha))})`;
-}
 
 /** A single equalizer bar that gently pulses between a min and full height. */
 function EqualizerBar({ peak, delay, color }: { peak: number; delay: number; color: string }) {

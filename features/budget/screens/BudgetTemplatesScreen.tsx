@@ -1,4 +1,4 @@
-import { Copy, Plus, Trash2 } from 'lucide-react-native';
+import { Copy, Trash2 } from 'lucide-react-native';
 import React, { useCallback } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 

@@ -32,7 +32,12 @@ import {
   financialMonthRange,
   monthCycleOf,
 } from '~/utils/financialMonth';
-import { dayKeyFromDateLocal, dayKeyFromIsoLocal, formatAmount } from '~/utils/formatters';
+import {
+  dateFromDayKeyLocal,
+  dayKeyFromDateLocal,
+  dayKeyFromIsoLocal,
+  formatAmount,
+} from '~/utils/formatters';
 import {
   addDaysToDayKey,
   projectRecurringOccurrences,
@@ -62,13 +67,10 @@ function formatCadence(
   return I18n.t(EVERY_KEY_BY_PATTERN[pattern], { count: interval });
 }
 
-function dayKeyToDate(dayKey: string): Date {
-  const [year, month, day] = dayKey.split('-').map(Number);
-  return new Date(year, (month ?? 1) - 1, day ?? 1);
-}
-
 function daysBetweenDayKeys(from: string, to: string): number {
-  return Math.round((dayKeyToDate(to).getTime() - dayKeyToDate(from).getTime()) / MS_PER_DAY);
+  return Math.round(
+    (dateFromDayKeyLocal(to).getTime() - dateFromDayKeyLocal(from).getTime()) / MS_PER_DAY,
+  );
 }
 
 /** "Today" / "Tomorrow" / the weekday name. */
@@ -76,7 +78,9 @@ function formatDayHeading(dayKey: string, todayKey: string): string {
   const days = daysBetweenDayKeys(todayKey, dayKey);
   if (days <= 0) return I18n.t('common.today');
   if (days === 1) return I18n.t('recurring.due_tomorrow');
-  return new Intl.DateTimeFormat(I18n.locale, { weekday: 'long' }).format(dayKeyToDate(dayKey));
+  return new Intl.DateTimeFormat(I18n.locale, { weekday: 'long' }).format(
+    dateFromDayKeyLocal(dayKey),
+  );
 }
 
 type ListRow =
@@ -191,7 +195,7 @@ export function RecurringScreen({
    */
   const leftThisMonth = useMemo(() => {
     const { endInclusive } = financialMonthRange(
-      financialMonthKeyForDate(dayKeyToDate(todayKey), monthCycle),
+      financialMonthKeyForDate(dateFromDayKeyLocal(todayKey), monthCycle),
       monthCycle,
     );
     const days = Math.max(1, daysBetweenDayKeys(todayKey, dayKeyFromDateLocal(endInclusive)) + 1);
@@ -244,7 +248,7 @@ export function RecurringScreen({
     const weekday = new Intl.DateTimeFormat(I18n.locale, { weekday: 'narrow' });
     return Array.from({ length: WEEK_LENGTH }, (_, index) => {
       const dayKey = addDaysToDayKey(todayKey, index);
-      const date = dayKeyToDate(dayKey);
+      const date = dateFromDayKeyLocal(dayKey);
       return {
         dayKey,
         weekdayLabel: weekday.format(date),
@@ -348,7 +352,7 @@ export function RecurringScreen({
         dateLabel: new Intl.DateTimeFormat(I18n.locale, {
           month: 'short',
           day: 'numeric',
-        }).format(dayKeyToDate(dayKey)),
+        }).format(dateFromDayKeyLocal(dayKey)),
         totalLabel: dayTotal > 0 ? formatValue(dayTotal) : '',
         isToday: dayKey === todayKey,
       });

@@ -4,9 +4,9 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import {
   AccountPickerSheet,
+  buildCategoryPickerOptions,
   CategoryEmoji,
   CategoryPickerSheet,
-  type CategoryPickerOption,
   Text,
 } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -41,29 +41,6 @@ interface VoicePreviewSheetProps {
 
 const HEADER_EXPENSE_COLOR = '#E25A6A';
 const HEADER_INCOME_COLOR = '#16A34A';
-
-function buildCategoryPickerOptions(categories: Category[]): {
-  parents: CategoryPickerOption[];
-  childByParent: Map<string, CategoryPickerOption[]>;
-} {
-  const parents: CategoryPickerOption[] = [];
-  const childByParent = new Map<string, CategoryPickerOption[]>();
-  const parentIds = new Set<string>();
-  categories.forEach((category) => {
-    if (!category.parentId) {
-      parents.push({ id: category.id, name: category.name, icon: category.icon });
-      parentIds.add(category.id);
-    }
-  });
-  categories.forEach((category) => {
-    if (category.parentId && parentIds.has(category.parentId)) {
-      const list = childByParent.get(category.parentId) ?? [];
-      list.push({ id: category.id, name: category.name, icon: category.icon });
-      childByParent.set(category.parentId, list);
-    }
-  });
-  return { parents, childByParent };
-}
 
 export function VoicePreviewSheet({
   visible,

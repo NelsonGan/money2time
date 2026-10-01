@@ -67,7 +67,7 @@ export const CUSTOM_ICON_PREFIX = 'custom:';
 /** True when the value contains any non-ASCII character, i.e. it looks like a
  *  glyph rather than a kebab-case id. Written as a scan rather than a regex so
  *  the source carries no control-character escapes. */
-function hasNonAscii(value: string): boolean {
+export function hasNonAscii(value: string): boolean {
   for (let index = 0; index < value.length; index += 1) {
     if (value.charCodeAt(index) > 127) return true;
   }
@@ -111,18 +111,6 @@ export function classifyCategoryIcon(value?: string | null): ClassifiedCategoryI
   return NONE;
 }
 
-/**
- * Resolves a value to its bundled atlas cell, or null when it is not a bundled
- * icon. Callers that also need the emoji/custom cases should use
- * {@link classifyCategoryIcon} directly.
- */
-export function resolveCategoryIconSource(
-  value?: string | null,
-): GeneratedCategoryIconSource | null {
-  const classified = classifyCategoryIcon(value);
-  return classified.kind === 'bundled' ? classified.source : null;
-}
-
 export interface CategoryIconMeta {
   id: string;
   /** Trailing segment of the id; the key metadata and emoji are stored under. */
@@ -149,12 +137,6 @@ export const CATEGORY_ICONS: CategoryIconMeta[] = GENERATED_CATEGORY_ICONS.map(
     return { id, concept, name, pack, group, keywords };
   },
 );
-
-const ICONS_BY_ID = new Map(CATEGORY_ICONS.map((icon) => [icon.id, icon]));
-
-export function getCategoryIconMeta(id: string): CategoryIconMeta | null {
-  return ICONS_BY_ID.get(id) ?? null;
-}
 
 /**
  * Icons of one pack bucketed into sections, in CATEGORY_ICON_GROUP_ORDER, with

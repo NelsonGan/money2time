@@ -13,15 +13,16 @@ import {
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
-import { spacing } from '~/constants/designSystem';
-import { useApp, useTransactions } from '~/context/AppContext';
-import { useIsPro } from '~/context/ProContext';
-import { useThemeColors } from '~/hooks/useThemeColors';
 import {
   BudgetBreakdownWidgetContent,
   BudgetRingWidgetContent,
 } from '~/components/widget-preview/BudgetWidgetContent';
+import { SavingsHistoryWidgetContent } from '~/components/widget-preview/SavingsHistoryWidgetContent';
 import { SavingsRateWidgetContent } from '~/components/widget-preview/SavingsRateWidgetContent';
+import { spacing } from '~/constants/designSystem';
+import { useApp, useTransactions } from '~/context/AppContext';
+import { useIsPro } from '~/context/ProContext';
+import { useThemeColors } from '~/hooks/useThemeColors';
 import { WIDGET_DEFINITIONS, WIDGET_IDS, type WidgetSize } from '~/services/widgetRegistry';
 import {
   type BudgetBreakdownSnapshot,
@@ -36,6 +37,7 @@ import {
   type SavingsRateSnapshot,
   type WeeklyExpenseSnapshot,
 } from '~/services/widgetSnapshot.shared';
+import { withColorAlpha } from '~/utils/color';
 import { FONT } from '~/utils/fonts';
 
 interface WidgetPreviewsScreenProps {
@@ -60,16 +62,6 @@ const SIZE_RATIOS: Record<WidgetSize, number> = {
 const WIDGET_RADIUS = 26;
 const WIDGET_PADDING = 16;
 const GRID_GAP = 4;
-
-function withColorAlpha(hex: string, alpha: number): string {
-  const value = hex.replace('#', '');
-  if (!/^[0-9a-fA-F]{6}$/.test(value)) return hex;
-  const r = Number.parseInt(value.slice(0, 2), 16);
-  const g = Number.parseInt(value.slice(2, 4), 16);
-  const b = Number.parseInt(value.slice(4, 6), 16);
-  const a = Math.max(0, Math.min(1, alpha));
-  return `rgba(${r}, ${g}, ${b}, ${a})`;
-}
 
 function PreviewBadge({ label }: { label: string }) {
   const themeColors = useThemeColors();
@@ -274,82 +266,10 @@ function QuickAddSmallWidgetPreview({ data }: { data: QuickAddSmallSnapshot }) {
   );
 }
 
-function SavingsHistoryRow({ month }: { month: SavingsHistorySnapshot['months'][number] }) {
-  const themeColors = useThemeColors();
-  const accent = !month.hasIncome
-    ? themeColors.textMuted
-    : month.isPositive
-      ? themeColors.success
-      : themeColors.error;
-  // Positive rate fills proportionally; overspend shows a small coral bar.
-  const fillPct = !month.hasIncome
-    ? 0
-    : month.isPositive
-      ? Math.max(4, Math.min(1, month.savingsRate) * 100)
-      : Math.max(8, Math.min(1, Math.abs(month.savingsRate)) * 100);
-
-  return (
-    <View style={styles.histRow}>
-      <Text variant="caption" style={[styles.histMonth, { color: themeColors.textSoft }]}>
-        {month.monthLabel}
-      </Text>
-      <View style={[styles.histTrack, { backgroundColor: withColorAlpha(themeColors.text, 0.06) }]}>
-        <View
-          style={[
-            styles.histFill,
-            {
-              width: `${fillPct}%`,
-              backgroundColor: month.hasActivity ? accent : withColorAlpha(themeColors.text, 0.08),
-            },
-          ]}
-        />
-      </View>
-      <View style={styles.histValues}>
-        <Text
-          allowFontScaling={false}
-          style={[styles.histRate, { color: month.hasActivity ? accent : themeColors.textMuted }]}
-          numberOfLines={1}
-        >
-          {month.rateLabel}
-        </Text>
-        <Text
-          allowFontScaling={false}
-          style={[styles.histSaved, { color: themeColors.textMuted }]}
-          numberOfLines={1}
-        >
-          {month.savedLabel}
-        </Text>
-      </View>
-    </View>
-  );
-}
-
 function SavingsHistoryWidgetPreview({ data }: { data: SavingsHistorySnapshot }) {
-  const themeColors = useThemeColors();
-  const totalColor = data.totalIsPositive ? themeColors.success : themeColors.error;
-
   return (
     <WidgetFrame size="large" pro>
-      {() => (
-        <View style={styles.pad}>
-          <View style={styles.headerRow}>
-            <WordmarkBanner />
-            <View style={styles.headerRight}>
-              <Text style={[styles.totalAmount, { color: totalColor }]} numberOfLines={1}>
-                {data.totalSavedLabel}
-              </Text>
-              <Text variant="caption" tone="muted" numberOfLines={1}>
-                {data.averageRateLabel}
-              </Text>
-            </View>
-          </View>
-          <View style={styles.histRows}>
-            {data.months.map((month) => (
-              <SavingsHistoryRow key={month.monthKey} month={month} />
-            ))}
-          </View>
-        </View>
-      )}
+      {() => <SavingsHistoryWidgetContent data={data} bannerWidth={116} />}
     </WidgetFrame>
   );
 }
@@ -881,47 +801,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   // Savings history (large)
-  histRows: {
-    flex: 1,
-    justifyContent: 'space-between',
-    paddingTop: 10,
-  },
-  histRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  histMonth: {
-    width: 34,
-    fontFamily: FONT.bold,
-  },
-  histTrack: {
-    flex: 1,
-    height: 12,
-    borderRadius: 999,
-    overflow: 'hidden',
-  },
-  histFill: {
-    height: '100%',
-    borderRadius: 999,
-    minWidth: 4,
-  },
-  histValues: {
-    width: 64,
-    alignItems: 'flex-end',
-  },
-  histRate: {
-    textAlign: 'right',
-    fontFamily: FONT.monoBold,
-    fontSize: 15,
-    lineHeight: 18,
-  },
-  histSaved: {
-    textAlign: 'right',
-    fontFamily: FONT.bold,
-    fontSize: 10,
-    lineHeight: 12,
-  },
   // Weekly expense
   headerRow: {
     flexDirection: 'row',

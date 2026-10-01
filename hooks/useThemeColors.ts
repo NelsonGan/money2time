@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
+import { type ColorPalette, getThemePalette } from '~/constants/designSystem';
 import { useResolvedTheme, useThemeColor } from '~/context/ThemeContext';
-import { getThemePalette, type ColorPalette } from '~/constants/designSystem';
 
 /**
  * Returns the correct color palette based on the resolved theme.

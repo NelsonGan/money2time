@@ -1,26 +1,10 @@
-import {
-  Check,
-  ChevronDown,
-  ChevronRight,
-  Pencil,
-  ReceiptText,
-  Send,
-  Trash2,
-} from 'lucide-react-native';
+import { ChevronRight, Pencil, ReceiptText, Send } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 
-import {
-  AccountLogo,
-  AccountPickerSheet,
-  Button,
-  CategoryEmoji,
-  SettingsHeader,
-  SettingsPageLayout,
-  Text,
-} from '~/components/ui';
+import { Button, CategoryEmoji, SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
-import { SettleUpDateHeader } from '~/features/transactions/components/SettleUpDateHeader';
+import { SettleUpShareList } from '~/features/transactions/components/SettleUpShareList';
 import type { ReceiptContent } from '~/features/transactions/components/SplitReceiptCard';
 import { SplitReceiptShareModal } from '~/features/transactions/components/SplitReceiptShareModal';
 import { personItemNames } from '~/features/transactions/lib/receiptSplitShare';
@@ -55,18 +39,8 @@ export function SettleUpTransactionScreen({
   onOpenReceiptSplit,
 }: SettleUpTransactionScreenProps) {
   const themeColors = useThemeColors();
-  const {
-    settings,
-    accounts,
-    accountGroups,
-    getAccountById,
-    getReceiptSplitForTransaction,
-    markSplitPaid,
-    updateSplitPaybackAccount,
-    deleteSplit,
-  } = useApp();
+  const { settings, getReceiptSplitForTransaction } = useApp();
 
-  const [pickerForSplitId, setPickerForSplitId] = useState<string | null>(null);
   const [shareVisible, setShareVisible] = useState(false);
 
   const summary = useSettleUpByTransaction();
@@ -101,43 +75,12 @@ export function SettleUpTransactionScreen({
     onEdit();
   }, [onEdit]);
 
-  const handleMarkPaid = useCallback(
-    (splitId: string) => {
-      void triggerHaptic('success');
-      markSplitPaid(splitId);
-    },
-    [markSplitPaid],
-  );
-
-  const handleDelete = useCallback(
-    (splitId: string) => {
-      void triggerHaptic('warning');
-      Alert.alert(
-        I18n.t('transactions.settleUp.remove_bill_title'),
-        I18n.t('transactions.settleUp.remove_bill_message'),
-        [
-          { text: I18n.t('common.cancel'), style: 'cancel' },
-          {
-            text: I18n.t('common.remove'),
-            style: 'destructive',
-            onPress: () => deleteSplit(splitId),
-          },
-        ],
-      );
-    },
-    [deleteSplit],
-  );
-
-  const pickerSplit = useMemo(
-    () => bill?.splits.find((s) => s.splitId === pickerForSplitId) ?? null,
-    [bill, pickerForSplitId],
-  );
-
   // Non-reactive read; re-checked whenever the bill's splits refresh. Only an
   // itemized bill offers the "Itemized receipt" row — a plain Split Bill can't
   // be converted to Split by Item.
   const receiptRecord = useMemo(
     () => getReceiptSplitForTransaction(transactionId),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- re-read when the splits refresh
     [getReceiptSplitForTransaction, transactionId, bill],
   );
   const hasItemizedDetail = receiptRecord !== null;
@@ -236,94 +179,14 @@ export function SettleUpTransactionScreen({
               </Pressable>
             ) : null}
 
-            <View className="mt-4 gap-3">
-              {dateGroups.map((group) => (
-                <View key={group.dayKey} className="gap-2">
-                  <SettleUpDateHeader dayKey={group.dayKey} locale={locale} />
-                  {group.items.map((split) => {
-                    const account = split.paybackAccountId
-                      ? getAccountById(split.paybackAccountId)
-                      : null;
-                    return (
-                      <View
-                        key={split.splitId}
-                        className={
-                          split.paidAt
-                            ? 'rounded-2xl border border-border/15 bg-secondary/20 px-4 py-3.5'
-                            : 'rounded-2xl border border-border/25 bg-card/60 px-4 py-3.5'
-                        }
-                      >
-                        <View className="flex-row items-center gap-3">
-                          <View className="h-10 w-10 items-center justify-center rounded-full bg-secondary/50">
-                            <Text variant="bodyStrong">{personInitial(split.personName)}</Text>
-                          </View>
-                          <View className="flex-1">
-                            <Text
-                              variant="bodyStrong"
-                              tone={split.paidAt ? 'muted' : undefined}
-                              numberOfLines={1}
-                            >
-                              {split.personName ?? I18n.t('transactions.settleUp.someone')}
-                            </Text>
-                          </View>
-                          <Text variant="bodyStrong" tone={split.paidAt ? 'muted' : undefined}>
-                            {formatNative(split.amount, split.currency)}
-                          </Text>
-                        </View>
-
-                        {!split.paidAt ? (
-                          <View className="mt-2 flex-row items-center gap-2">
-                            <Pressable
-                              onPress={() => {
-                                void triggerHaptic('selection');
-                                setPickerForSplitId(split.splitId);
-                              }}
-                              className="min-w-0 flex-shrink flex-row items-center gap-1.5 rounded-full bg-secondary/50 py-1.5 pl-2 pr-2.5 active:opacity-70"
-                            >
-                              {account ? (
-                                <AccountLogo
-                                  logoId={account.logoId}
-                                  type={account.type}
-                                  goalEmoji={account.goalEmoji}
-                                  size={16}
-                                />
-                              ) : null}
-                              <Text
-                                variant="caption"
-                                tone="muted"
-                                numberOfLines={1}
-                                className="max-w-[150px]"
-                              >
-                                {account?.name ?? I18n.t('common.no_account')}
-                              </Text>
-                              <ChevronDown size={12} color={themeColors.textMuted} />
-                            </Pressable>
-                            <View className="flex-1" />
-                            <Pressable
-                              onPress={() => handleDelete(split.splitId)}
-                              hitSlop={8}
-                              className="h-8 w-8 items-center justify-center rounded-full bg-destructive/10 active:opacity-70"
-                            >
-                              <Trash2 size={15} color={themeColors.error} />
-                            </Pressable>
-                            <Pressable
-                              onPress={() => handleMarkPaid(split.splitId)}
-                              hitSlop={8}
-                              className="flex-row items-center gap-1 rounded-full bg-success/15 px-3.5 py-2 active:opacity-70"
-                            >
-                              <Check size={14} color={themeColors.success} />
-                              <Text variant="caption" className="text-success font-medium">
-                                {I18n.t('transactions.editor.split.mark_paid')}
-                              </Text>
-                            </Pressable>
-                          </View>
-                        ) : null}
-                      </View>
-                    );
-                  })}
-                </View>
-              ))}
-            </View>
+            <SettleUpShareList
+              groups={dateGroups}
+              locale={locale}
+              renderLeading={(split) => (
+                <Text variant="bodyStrong">{personInitial(split.personName)}</Text>
+              )}
+              label={(split) => split.personName ?? I18n.t('transactions.settleUp.someone')}
+            />
           </ScrollView>
 
           {bill.unpaidSplitCount > 0 ? (
@@ -334,18 +197,6 @@ export function SettleUpTransactionScreen({
               </Button>
             </View>
           ) : null}
-
-          <AccountPickerSheet
-            visible={pickerForSplitId !== null}
-            onClose={() => setPickerForSplitId(null)}
-            accounts={accounts}
-            accountGroups={accountGroups}
-            selectedAccountId={pickerSplit?.paybackAccountId ?? null}
-            onSelect={(accountId) => {
-              if (pickerForSplitId) updateSplitPaybackAccount(pickerForSplitId, accountId);
-              setPickerForSplitId(null);
-            }}
-          />
 
           <SplitReceiptShareModal
             visible={shareVisible}

@@ -25,7 +25,7 @@ interface MinimalEvent {
   message?: string;
   user?: MinimalUser | null;
   request?: unknown;
-  exception?: { values?: Array<{ type?: string; value?: string }> };
+  exception?: { values?: { type?: string; value?: string }[] };
 }
 
 interface MinimalBreadcrumb {

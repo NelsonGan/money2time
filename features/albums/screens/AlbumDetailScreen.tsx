@@ -1,5 +1,4 @@
 import { Image } from 'expo-image';
-import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
   Camera,
@@ -26,12 +25,9 @@ import { EmptyState } from '~/components/feedback/EmptyState';
 import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { Text } from '~/components/ui';
+import { chartCategoryColor } from '~/constants/chartColors';
 import { useApp, useTransactions } from '~/context/AppContext';
-import {
-  type BreakdownChartRow,
-  CategoryBreakdownChart,
-  INSIGHTS_CHART_COLORS,
-} from '~/features/insights/components';
+import { type BreakdownChartRow, CategoryBreakdownChart } from '~/features/insights/components';
 import type { InsightsDrilldownPayload } from '~/features/insights/screens';
 import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
 import {
@@ -46,10 +42,10 @@ import { selectDuplicableTransactions } from '~/features/transactions/lib/duplic
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import { pickLibraryImage } from '~/services/libraryImagePicker';
 import { deleteAlbumCover, getAlbumCoverUri, saveAlbumCover } from '~/services/userAssets';
 import type { CategoryType, TransactionWithRelations } from '~/types';
 import { cn } from '~/utils';
-import { getErrorMessage } from '~/utils/errorHandling';
 import { formatAmount, formatHours } from '~/utils/formatters';
 import { countsAsExpenseRow } from '~/utils/spending';
 
@@ -141,6 +137,7 @@ export function AlbumDetailScreen({
   // written from here (a duplicate) has landed and can now be read back.
   const albumTransactions = useMemo(
     () => (contentReady ? getAlbumTransactions(albumId) : EMPTY_TRANSACTIONS),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- see above
     [contentReady, getAlbumTransactions, albumId, albums, transactions],
   );
   const coverUri = useMemo(() => getAlbumCoverUri(album?.coverPhotoUri), [album?.coverPhotoUri]);
@@ -205,7 +202,7 @@ export function AlbumDetailScreen({
         categoryRootId: rootCategory?.id,
         categoryRootLabel: rootCategory?.name ?? row.label,
         categoryRootEmoji: rootCategory?.icon ?? row.emoji ?? undefined,
-        categoryRootColor: INSIGHTS_CHART_COLORS[index % INSIGHTS_CHART_COLORS.length],
+        categoryRootColor: chartCategoryColor(index),
         albumId,
       });
     },
@@ -239,27 +236,21 @@ export function AlbumDetailScreen({
 
   const changeCover = useCallback(async () => {
     void triggerHaptic('selection');
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert(I18n.t('albums.cover_permission_title'), I18n.t('albums.cover_permission_body'));
-      return;
-    }
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
-        allowsEditing: true,
+    await pickLibraryImage(
+      (uri) => {
+        const previous = album?.coverPhotoUri ?? null;
+        const relativePath = saveAlbumCover(uri);
+        updateAlbum(albumId, { coverPhotoUri: relativePath });
+        if (previous) deleteAlbumCover(previous);
+      },
+      {
         aspect: [3, 2],
-        quality: 0.9,
-      });
-      if (result.canceled || !result.assets?.[0]) return;
-      const previous = album?.coverPhotoUri ?? null;
-      const relativePath = saveAlbumCover(result.assets[0].uri);
-      updateAlbum(albumId, { coverPhotoUri: relativePath });
-      if (previous) deleteAlbumCover(previous);
-    } catch (error) {
-      // The picker itself can reject, not just the save step below it.
-      Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
-    }
+        permissionAlert: {
+          title: I18n.t('albums.cover_permission_title'),
+          message: I18n.t('albums.cover_permission_body'),
+        },
+      },
+    );
   }, [album?.coverPhotoUri, albumId, updateAlbum]);
 
   const isSelectionMode = selectedTransactionIds.length > 0;

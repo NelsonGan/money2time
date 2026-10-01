@@ -43,8 +43,8 @@ jest.mock('@react-native-google-signin/google-signin', () => ({
 import {
   createFolder,
   deleteFile,
-  DriveError,
   downloadFileText,
+  DriveError,
   escapeDriveQueryValue,
   findFolderId,
   findFolderIds,

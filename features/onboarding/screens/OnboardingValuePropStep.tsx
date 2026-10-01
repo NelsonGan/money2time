@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
-import { CategoryEmoji, Card, Text, TimeValueInline } from '~/components/ui';
+import { Card, CategoryEmoji, Text, TimeValueInline } from '~/components/ui';
 import { getThemeWordmarkPalette, spacing } from '~/constants/designSystem';
 import { useResolvedTheme, useThemeColor } from '~/context/ThemeContext';
 import { OnboardingActionBar } from '~/features/onboarding/components/OnboardingActionBar';
@@ -34,7 +34,7 @@ export function OnboardingValuePropStep({
   // The wordmark has its own three-colour palette, warm on the name and the
   // theme's own colour on "Time" -- the same split `assets/banner.png` draws.
   const wordmark = getThemeWordmarkPalette(useThemeColor(), useResolvedTheme());
-  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
+  const { height: windowHeight } = useWindowDimensions();
   const sym = currencySymbol;
   const trueHourlyRate = 15;
 

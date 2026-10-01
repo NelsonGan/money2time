@@ -1,10 +1,10 @@
 import {
-  DEFAULT_LIVE_EARNINGS_SCHEDULE,
   buildScheduleRegistration,
+  DEFAULT_LIVE_EARNINGS_SCHEDULE,
   normalizeLiveEarningsSchedule,
   normalizeScheduleDays,
-  scheduleEndClock,
   scheduledSessionTotal,
+  scheduleEndClock,
   toggleScheduleDay,
   weekdaysFrom,
 } from '~/features/widgets/lib/liveEarningsSchedule';

@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Copy, Pencil, Trash2 } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { TextInput } from 'react-native';
 import {
@@ -18,7 +18,6 @@ import Reanimated, {
 } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { DatePickerModal } from '~/components/datePicker';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { useBottomNavMinimize } from '~/components/navigation/BottomNavMinimize';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
@@ -27,22 +26,29 @@ import {
   AccountPickerSheet,
   CategoryPickerSheet,
   ClayIcon,
-  Input,
   Text,
   ThemeModal,
   TimeValueInline,
 } from '~/components/ui';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
+import {
+  buildInsightsCategoryPickerData,
+  type InsightsCategoryPickerData,
+} from '~/features/insights/categoryPickerData';
 import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
 import {
   ActivitySearchRow,
   ActivityTransactionList,
+  buildBulkUpdateInputs,
+  BulkEditTransactionsSheet,
+  type BulkTransactionChanges,
   DisplayModeToggle,
   DuplicateTransactionsDatePicker,
   MonthPagerPage,
 } from '~/features/transactions/components';
 import { ScanStatusBanner } from '~/features/transactions/components/ScanStatusBanner';
+import { TransactionSelectionActions } from '~/features/transactions/components/TransactionSelectionToolbar';
 import {
   MONTH_PAGER_CENTER_INDEX,
   MONTH_PAGER_TOTAL_SLOTS,
@@ -60,9 +66,8 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { subscribeCalendarGoToToday } from '~/services/calendarNavigation';
 import { triggerHaptic } from '~/services/haptics';
-import type { Category, CategoryType, TransactionWithRelations } from '~/types';
+import type { CategoryType, TransactionWithRelations } from '~/types';
 import { cn } from '~/utils';
-import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import {
   addFinancialMonths,
   financialMonthAnchorForToday,
@@ -75,7 +80,6 @@ import {
   dayKeyFromDateLocal,
   dayKeyFromIsoLocal,
   formatAmount,
-  formatDateInput,
   formatMonthYearLabel,
 } from '~/utils/formatters';
 import { countsAsExpenseRow } from '~/utils/spending';
@@ -131,6 +135,8 @@ const DAY_SCROLL_TARGET_TTL_MS = 4000;
 const CREATED_ROW_WAIT_MS = 1500;
 
 const EMPTY_MONTH_ROWS: TransactionWithRelations[] = [];
+// Bulk edit on the home list changes date and note only.
+const NO_BULK_CATEGORY_TYPES: CategoryType[] = [];
 
 const FILTER_MODAL_CONTENT_STYLE = {
   padding: spacing.screenHorizontal,
@@ -142,49 +148,6 @@ function toggleStringId(previous: string[], targetId: string): string[] {
   return previous.includes(targetId)
     ? previous.filter((id) => id !== targetId)
     : [...previous, targetId];
-}
-
-interface CategoryPickerData {
-  parents: { id: string; name: string; icon: string }[];
-  childByParent: Map<string, { id: string; name: string; icon: string }[]>;
-}
-
-function buildCategoryPickerData(
-  categories: Category[],
-  categoryType: CategoryType,
-): CategoryPickerData {
-  const parentCategories = categories.filter(
-    (category) => category.type === categoryType && category.parentId === null,
-  );
-  const parentIds = new Set(parentCategories.map((parent) => parent.id));
-  const parentIconById = new Map<string, string>();
-  parentCategories.forEach((category) => {
-    parentIconById.set(category.id, category.icon);
-  });
-  const parents = parentCategories.map((category) => ({
-    id: category.id,
-    name: category.name,
-    icon: resolveCategoryIcon(category.icon),
-  }));
-  const childByParent = new Map<string, { id: string; name: string; icon: string }[]>();
-
-  categories.forEach((category) => {
-    const parentId = category.parentId;
-    if (category.type !== categoryType || !parentId || !parentIds.has(parentId)) return;
-    const child = {
-      id: category.id,
-      name: category.name,
-      icon: resolveCategoryIcon(category.icon, parentIconById.get(parentId) ?? null),
-    };
-    const existing = childByParent.get(parentId);
-    if (existing) {
-      existing.push(child);
-    } else {
-      childByParent.set(parentId, [child]);
-    }
-  });
-
-  return { parents, childByParent };
 }
 
 type FilterPickerKind = 'accounts' | 'incomeCategories' | 'expenseCategories';
@@ -325,16 +288,10 @@ export function CalendarScreen({
   const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
   const [showDuplicatePicker, setShowDuplicatePicker] = useState(false);
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
-  const [bulkDate, setBulkDate] = useState(() => formatDateInput(new Date()));
-  const [bulkDateTouched, setBulkDateTouched] = useState(false);
-  const [bulkDateModalVisible, setBulkDateModalVisible] = useState(false);
-  const [bulkNote, setBulkNote] = useState('');
-  const [bulkNoteTouched, setBulkNoteTouched] = useState(false);
   const isSelectionMode = selectedTransactionIds.length > 0;
   const isSelectionModeRef = useRef(isSelectionMode);
   isSelectionModeRef.current = isSelectionMode;
   const selectedTransactionCount = selectedTransactionIds.length;
-  const hasBulkChanges = bulkDateTouched || bulkNoteTouched;
 
   const closeFilterPicker = useCallback(() => setActiveFilterPicker(null), []);
   useEffect(() => {
@@ -596,11 +553,11 @@ export function CalendarScreen({
     excludedExpenseCategoryIdSet,
   ]);
 
-  const incomeCategoryPickerDataRef = useRef<CategoryPickerData | null>(null);
-  const expenseCategoryPickerDataRef = useRef<CategoryPickerData | null>(null);
+  const incomeCategoryPickerDataRef = useRef<InsightsCategoryPickerData | null>(null);
+  const expenseCategoryPickerDataRef = useRef<InsightsCategoryPickerData | null>(null);
   if (showFilters) {
-    incomeCategoryPickerDataRef.current = buildCategoryPickerData(categories, 'income');
-    expenseCategoryPickerDataRef.current = buildCategoryPickerData(categories, 'expense');
+    incomeCategoryPickerDataRef.current = buildInsightsCategoryPickerData(categories, 'income');
+    expenseCategoryPickerDataRef.current = buildInsightsCategoryPickerData(categories, 'expense');
   }
   const incomeCategoryPickerData = incomeCategoryPickerDataRef.current;
   const expenseCategoryPickerData = expenseCategoryPickerDataRef.current;
@@ -998,20 +955,6 @@ export function CalendarScreen({
     [handleHorizontalMomentumEnd],
   );
 
-  const handlePrevMonth = useCallback(() => {
-    void triggerHaptic('selection');
-    const nextIdx = clampMonthIndex(activeMonthIndex - 1);
-    setActiveMonthIndex(nextIdx);
-    horizontalListRef.current?.scrollToIndex({ index: nextIdx, animated: true });
-  }, [activeMonthIndex, clampMonthIndex, setActiveMonthIndex]);
-
-  const handleNextMonth = useCallback(() => {
-    void triggerHaptic('selection');
-    const nextIdx = clampMonthIndex(activeMonthIndex + 1);
-    setActiveMonthIndex(nextIdx);
-    horizontalListRef.current?.scrollToIndex({ index: nextIdx, animated: true });
-  }, [activeMonthIndex, clampMonthIndex, setActiveMonthIndex]);
-
   const handleListMonthMomentumEnd = useCallback(
     (e: Parameters<typeof handleListMonthMomentumEndRaw>[0]) => {
       if (userDraggingPagerRef.current) void triggerHaptic('selection');
@@ -1021,19 +964,18 @@ export function CalendarScreen({
     [handleListMonthMomentumEndRaw],
   );
 
-  const handleListPrevMonth = useCallback(() => {
+  // The header's prev/next arrows drive whichever pager is showing: the
+  // monthly list in the day view, the month grid otherwise.
+  const stepVisibleMonth = (delta: number) => {
     void triggerHaptic('selection');
-    const nextIdx = clampMonthIndex(activeListMonthIndex - 1);
-    setActiveListMonthIndex(nextIdx);
-    listPagerRef.current?.scrollToIndex({ index: nextIdx, animated: true });
-  }, [activeListMonthIndex, clampMonthIndex, setActiveListMonthIndex]);
-
-  const handleListNextMonth = useCallback(() => {
-    void triggerHaptic('selection');
-    const nextIdx = clampMonthIndex(activeListMonthIndex + 1);
-    setActiveListMonthIndex(nextIdx);
-    listPagerRef.current?.scrollToIndex({ index: nextIdx, animated: true });
-  }, [activeListMonthIndex, clampMonthIndex, setActiveListMonthIndex]);
+    const onList = viewMode === 'day';
+    const nextIdx = clampMonthIndex((onList ? activeListMonthIndex : activeMonthIndex) + delta);
+    (onList ? setActiveListMonthIndex : setActiveMonthIndex)(nextIdx);
+    (onList ? listPagerRef : horizontalListRef).current?.scrollToIndex({
+      index: nextIdx,
+      animated: true,
+    });
+  };
 
   const handleOpenSearch = useCallback(() => {
     void triggerHaptic('light');
@@ -1049,10 +991,6 @@ export function CalendarScreen({
     setSearchQuery('');
     searchInputRef.current?.blur();
     setIsSearchOpen(false);
-  }, []);
-
-  const handleSearchChange = useCallback((text: string) => {
-    setSearchQuery(text);
   }, []);
 
   const handleResetFilters = useCallback(() => {
@@ -1245,10 +1183,8 @@ export function CalendarScreen({
     [isTimeMode, settings],
   );
 
-  const clearSelection = useCallback(() => {
-    void triggerHaptic('selection');
-    setSelectedTransactionIds([]);
-  }, []);
+  // The selection bar's Cancel plays its own haptic.
+  const clearSelection = useCallback(() => setSelectedTransactionIds([]), []);
 
   const toggleDaySelection = useCallback((transactionIds: string[]) => {
     if (transactionIds.length === 0) return;
@@ -1319,10 +1255,6 @@ export function CalendarScreen({
 
   const handleOpenBulkUpdate = useCallback(() => {
     if (selectedTransactionCount === 0) return;
-    setBulkDate(formatDateInput(new Date()));
-    setBulkDateTouched(false);
-    setBulkNote('');
-    setBulkNoteTouched(false);
     setShowBulkUpdate(true);
   }, [selectedTransactionCount]);
 
@@ -1330,33 +1262,19 @@ export function CalendarScreen({
     setShowBulkUpdate(false);
   }, []);
 
-  const handleApplyBulkUpdate = useCallback(() => {
-    if (selectedTransactionIds.length === 0) return;
-    if (!hasBulkChanges) return;
-
-    const updates: { date?: string; note?: string | null } = {};
-    if (bulkDateTouched) updates.date = bulkDate;
-    if (bulkNoteTouched) {
-      const normalizedNote = bulkNote.trim();
-      updates.note = normalizedNote.length > 0 ? normalizedNote : null;
-    }
-    if (Object.keys(updates).length === 0) return;
-
-    updateTransactionsBulk(
-      selectedTransactionIds.map((transactionId) => ({ id: transactionId, input: updates })),
-    );
-    void triggerHaptic('success');
-    setShowBulkUpdate(false);
-    setSelectedTransactionIds([]);
-  }, [
-    bulkDate,
-    bulkDateTouched,
-    bulkNote,
-    bulkNoteTouched,
-    hasBulkChanges,
-    selectedTransactionIds,
-    updateTransactionsBulk,
-  ]);
+  const handleApplyBulkUpdate = useCallback(
+    (changes: BulkTransactionChanges) => {
+      if (selectedTransactionIds.length === 0) return;
+      // The sheet only offers date and note here, so no row needs its type.
+      updateTransactionsBulk(
+        buildBulkUpdateInputs(selectedTransactionIds, changes, () => undefined),
+      );
+      void triggerHaptic('success');
+      setShowBulkUpdate(false);
+      setSelectedTransactionIds([]);
+    },
+    [selectedTransactionIds, updateTransactionsBulk],
+  );
 
   const handleDeleteSelectedTransactions = useCallback(() => {
     if (selectedTransactionIds.length === 0) return;
@@ -1492,12 +1410,8 @@ export function CalendarScreen({
     ],
   );
 
-  const activeYearLabel = useMemo(() => String(activeMonthDate.getFullYear()), [activeMonthDate]);
-
-  const backButtonLabel = useMemo(() => {
-    if (viewMode === 'day') return displayedMonthLabel;
-    return activeYearLabel;
-  }, [viewMode, displayedMonthLabel, activeYearLabel]);
+  const backButtonLabel =
+    viewMode === 'day' ? displayedMonthLabel : String(activeMonthDate.getFullYear());
 
   const BackButton = useMemo(
     () =>
@@ -1548,63 +1462,22 @@ export function CalendarScreen({
                 shift when entering/leaving selection mode). */}
             <View className="flex-row items-center justify-between gap-2" style={{ minHeight: 40 }}>
               {isSelectionMode ? (
-                <View className="flex-1 flex-row items-center justify-between gap-2">
-                  <Pressable
-                    onPress={clearSelection}
-                    className="rounded-full bg-secondary/70 px-3 py-1.5 active:opacity-85"
-                    accessibilityRole="button"
-                    accessibilityLabel={I18n.t('common.cancel')}
-                  >
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('common.cancel')}
+                <TransactionSelectionActions
+                  selectedCount={selectedTransactionCount}
+                  totalNode={
+                    <Text variant="label" className="text-foreground">
+                      {selectedTransactionTotalLabel}
                     </Text>
-                  </Pressable>
-                  <View className="flex-1 items-center px-1">
-                    <View className="flex-row flex-wrap items-center justify-center gap-1.5">
-                      <Text variant="caption" className="text-foreground">
-                        {I18n.t('transactions.selection.selected_count', {
-                          count: selectedTransactionCount,
-                        })}
-                      </Text>
-                      <View className="rounded-full border border-border/35 bg-secondary/70 px-2 py-[3px]">
-                        <Text variant="label" className="text-foreground">
-                          {selectedTransactionTotalLabel}
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                  <View className="flex-row items-center gap-1.5">
-                    {duplicableSelectedTransactions.length > 0 ? (
-                      <Pressable
-                        onPress={handleOpenDuplicatePicker}
-                        className="h-9 w-9 rounded-full bg-secondary/70 border border-border/35 items-center justify-center active:opacity-85"
-                        accessibilityRole="button"
-                        accessibilityLabel={I18n.t('transactions.selection.duplicate')}
-                        hitSlop={8}
-                      >
-                        <Copy size={14} color={themeColors.textMuted} />
-                      </Pressable>
-                    ) : null}
-                    <Pressable
-                      onPress={handleOpenBulkUpdate}
-                      className="h-9 w-9 rounded-full bg-primary/12 border border-primary/35 items-center justify-center active:opacity-85"
-                      accessibilityRole="button"
-                      accessibilityLabel={I18n.t('transactions.selection.update')}
-                      hitSlop={8}
-                    >
-                      <Pencil size={14} color={themeColors.primary} />
-                    </Pressable>
-                    <Pressable
-                      onPress={handleDeleteSelectedTransactions}
-                      className="h-9 w-9 rounded-full bg-destructive/10 border border-destructive/35 items-center justify-center active:opacity-85"
-                      accessibilityRole="button"
-                      accessibilityLabel={I18n.t('common.delete')}
-                      hitSlop={8}
-                    >
-                      <Trash2 size={14} color={themeColors.coral} />
-                    </Pressable>
-                  </View>
-                </View>
+                  }
+                  onCancel={clearSelection}
+                  onDuplicate={
+                    duplicableSelectedTransactions.length > 0
+                      ? handleOpenDuplicatePicker
+                      : undefined
+                  }
+                  onEdit={handleOpenBulkUpdate}
+                  onDelete={handleDeleteSelectedTransactions}
+                />
               ) : (
                 <>
                   <View className="flex-row items-center gap-2 flex-1">{BackButton}</View>
@@ -1643,7 +1516,7 @@ export function CalendarScreen({
               inputRef={searchInputRef}
               visible={isSearchOpen}
               value={searchQuery}
-              onChangeText={handleSearchChange}
+              onChangeText={setSearchQuery}
               onClose={handleCloseSearch}
             />
 
@@ -1658,7 +1531,7 @@ export function CalendarScreen({
                   <View className="rounded-pill bg-secondary/40 px-1.5 py-1.5">
                     <View className="flex-row items-center justify-between">
                       <Pressable
-                        onPress={viewMode === 'day' ? handleListPrevMonth : handlePrevMonth}
+                        onPress={() => stepVisibleMonth(-1)}
                         className="h-9 w-9 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
                       >
                         <ChevronLeft size={16} color={themeColors.textSoft} />
@@ -1671,7 +1544,7 @@ export function CalendarScreen({
                         </View>
                       </View>
                       <Pressable
-                        onPress={viewMode === 'day' ? handleListNextMonth : handleNextMonth}
+                        onPress={() => stepVisibleMonth(1)}
                         className="h-9 w-9 rounded-full items-center justify-center bg-card shadow-soft active:scale-95"
                       >
                         <ChevronRight size={16} color={themeColors.textSoft} />
@@ -1830,97 +1703,13 @@ export function CalendarScreen({
         ) : null}
       </View>
 
-      <ThemeModal
+      <BulkEditTransactionsSheet
         visible={showBulkUpdate}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={handleCloseBulkUpdate}
-      >
-        <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-          <View style={styles.modalHeaderRow}>
-            <View className="flex-1 pr-3">
-              <Text variant="subheading">
-                {I18n.t('transactions.selection.update_title', { count: selectedTransactionCount })}
-              </Text>
-              <Text variant="friendly" tone="muted">
-                {I18n.t('transactions.selection.update_subtitle')}
-              </Text>
-            </View>
-            <View className="flex-row items-center gap-2">
-              <Pressable
-                onPress={handleCloseBulkUpdate}
-                className="px-3 py-2 rounded-full bg-secondary/70"
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('common.cancel')}
-              >
-                <Text variant="caption" tone="muted">
-                  {I18n.t('common.cancel')}
-                </Text>
-              </Pressable>
-              <Pressable
-                onPress={handleApplyBulkUpdate}
-                disabled={!hasBulkChanges}
-                className={cn(
-                  'px-3 py-2 rounded-full',
-                  hasBulkChanges ? 'bg-primary' : 'bg-secondary/70',
-                )}
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('common.save')}
-                accessibilityState={{ disabled: !hasBulkChanges }}
-              >
-                <Text
-                  variant="caption"
-                  className={cn(hasBulkChanges ? 'text-white' : 'text-muted-foreground')}
-                >
-                  {I18n.t('common.save')}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-
-          <ScrollView className="flex-1" contentContainerStyle={FILTER_MODAL_CONTENT_STYLE}>
-            <View className="gap-2.5">
-              <Text variant="caption" tone="muted">
-                {I18n.t('transactions.editor.date')}
-              </Text>
-              <Pressable
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  setBulkDateModalVisible(true);
-                }}
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('transactions.editor.date')}
-                className="rounded-2xl border border-border/30 bg-card px-3.5 py-3.5"
-              >
-                <Text variant="caption">{bulkDate}</Text>
-              </Pressable>
-            </View>
-
-            <View className="gap-2.5">
-              <Input
-                label={I18n.t('transaction_detail.note')}
-                placeholder={I18n.t('transactions.editor.optional')}
-                value={bulkNote}
-                onChangeText={(value) => {
-                  setBulkNote(value);
-                  setBulkNoteTouched(true);
-                }}
-              />
-            </View>
-          </ScrollView>
-          <DatePickerModal
-            visible={bulkDateModalVisible}
-            value={bulkDate}
-            overlay
-            onSelect={(value) => {
-              setBulkDate(value);
-              setBulkDateTouched(true);
-              setBulkDateModalVisible(false);
-            }}
-            onClose={() => setBulkDateModalVisible(false)}
-          />
-        </SafeAreaView>
-      </ThemeModal>
+        selectedCount={selectedTransactionCount}
+        categoryTypes={NO_BULK_CATEGORY_TYPES}
+        onClose={handleCloseBulkUpdate}
+        onApply={handleApplyBulkUpdate}
+      />
 
       <ThemeModal
         visible={showFilters}
@@ -1960,62 +1749,38 @@ export function CalendarScreen({
           </View>
 
           <ScrollView className="flex-1" contentContainerStyle={FILTER_MODAL_CONTENT_STYLE}>
-            <View className="gap-2.5">
-              <Text variant="caption" tone="muted">
-                {I18n.t('insights.filters.exclude_accounts')}
-              </Text>
-              <Pressable
-                onPress={() => setActiveFilterPicker('accounts')}
-                className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
-              >
-                <Text variant="body" tone={excludedAccountIds.length > 0 ? undefined : 'muted'}>
-                  {excludedAccountIds.length > 0
-                    ? `${excludedAccountIds.length} ${I18n.t('insights.filters.excluded')}`
-                    : I18n.t('common.none')}
+            {(
+              [
+                ['accounts', 'insights.filters.exclude_accounts', excludedAccountIds],
+                [
+                  'incomeCategories',
+                  'insights.filters.exclude_income_categories',
+                  excludedIncomeCategoryIds,
+                ],
+                [
+                  'expenseCategories',
+                  'insights.filters.exclude_expense_categories',
+                  excludedExpenseCategoryIds,
+                ],
+              ] as const
+            ).map(([kind, labelKey, excludedIds]) => (
+              <View key={kind} className="gap-2.5">
+                <Text variant="caption" tone="muted">
+                  {I18n.t(labelKey)}
                 </Text>
-                <ChevronRight size={16} color={themeColors.textMuted} />
-              </Pressable>
-            </View>
-
-            <View className="gap-2.5">
-              <Text variant="caption" tone="muted">
-                {I18n.t('insights.filters.exclude_income_categories')}
-              </Text>
-              <Pressable
-                onPress={() => setActiveFilterPicker('incomeCategories')}
-                className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
-              >
-                <Text
-                  variant="body"
-                  tone={excludedIncomeCategoryIds.length > 0 ? undefined : 'muted'}
+                <Pressable
+                  onPress={() => setActiveFilterPicker(kind)}
+                  className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
                 >
-                  {excludedIncomeCategoryIds.length > 0
-                    ? `${excludedIncomeCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
-                    : I18n.t('common.none')}
-                </Text>
-                <ChevronRight size={16} color={themeColors.textMuted} />
-              </Pressable>
-            </View>
-
-            <View className="gap-2.5">
-              <Text variant="caption" tone="muted">
-                {I18n.t('insights.filters.exclude_expense_categories')}
-              </Text>
-              <Pressable
-                onPress={() => setActiveFilterPicker('expenseCategories')}
-                className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
-              >
-                <Text
-                  variant="body"
-                  tone={excludedExpenseCategoryIds.length > 0 ? undefined : 'muted'}
-                >
-                  {excludedExpenseCategoryIds.length > 0
-                    ? `${excludedExpenseCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
-                    : I18n.t('common.none')}
-                </Text>
-                <ChevronRight size={16} color={themeColors.textMuted} />
-              </Pressable>
-            </View>
+                  <Text variant="body" tone={excludedIds.length > 0 ? undefined : 'muted'}>
+                    {excludedIds.length > 0
+                      ? `${excludedIds.length} ${I18n.t('insights.filters.excluded')}`
+                      : I18n.t('common.none')}
+                  </Text>
+                  <ChevronRight size={16} color={themeColors.textMuted} />
+                </Pressable>
+              </View>
+            ))}
           </ScrollView>
 
           <AccountPickerSheet

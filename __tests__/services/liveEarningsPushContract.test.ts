@@ -1,10 +1,11 @@
+import { earnedByNow } from '~/features/widgets/lib/liveEarnings';
+import { formatCurrency } from '~/utils/formatters';
+
 import {
   earnedByNow as workerEarnedByNow,
   formatMoney,
 } from '../../cloudflare/workers/live-earnings/src/earnings';
 import { isLiveActivityPushToken } from '../../cloudflare/workers/live-earnings/src/token';
-import { earnedByNow } from '~/features/widgets/lib/liveEarnings';
-import { formatCurrency } from '~/utils/formatters';
 
 /**
  * The Worker pushes the card's amount while the app is suspended, and the app

@@ -13,8 +13,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NativeModules, Platform } from 'react-native';
 
 import {
-  AnalyticsEvents,
   type AnalyticsEventName,
+  AnalyticsEvents,
   type AnalyticsProperties,
   type AnalyticsSuperProperties,
   daysSinceInstall,

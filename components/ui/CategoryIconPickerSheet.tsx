@@ -1,4 +1,3 @@
-import * as ImagePicker from 'expo-image-picker';
 import { Check, ChevronDown, ImagePlus, Lock, Search, Trash2, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
@@ -7,6 +6,7 @@ import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CategoryEmoji } from '~/components/ui/CategoryEmoji';
+import { PickerTabs } from '~/components/ui/PickerTabs';
 import { SettingsHeader } from '~/components/ui/settings';
 import { Text } from '~/components/ui/text';
 import { ThemeModal } from '~/components/ui/theme-modal';
@@ -25,6 +25,7 @@ import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import { pickLibraryImage } from '~/services/libraryImagePicker';
 import {
   deleteCustomLogo,
   listCustomCategoryIcons,
@@ -270,28 +271,13 @@ export function CategoryIconPickerSheet({
     // editor.
     if (!requirePro('custom_category_icons')) return;
 
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert(
-        I18n.t('accounts.logo.permission_title'),
-        I18n.t('accounts.logo.permission_message'),
-      );
-      return;
-    }
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
-        // No forced square crop — keep the user's full image (shown with `contain`).
-        allowsEditing: false,
-        quality: 0.9,
-      });
-      if (result.canceled || !result.assets?.[0]) return;
-      saveCustomCategoryIcon(result.assets[0].uri);
-      refreshCustomIcons();
-    } catch {
-      // The picker itself can reject, not just the save step below it.
-      Alert.alert(I18n.t('accounts.logo.upload_failed'));
-    }
+    await pickLibraryImage(
+      (uri) => {
+        saveCustomCategoryIcon(uri);
+        refreshCustomIcons();
+      },
+      { failureTitle: I18n.t('accounts.logo.upload_failed') },
+    );
   }, [refreshCustomIcons, requirePro]);
 
   const handleDeleteCustom = useCallback(
@@ -367,7 +353,7 @@ export function CategoryIconPickerSheet({
 
   // `withPack` is only true on the Icons tab: emoji have no pack. The selector
   // lives inside the search pill rather than on its own row, matching the
-  // country filter in AccountLogoPickerSheet.
+  // country filter in LogoPickerSheet.
   const searchBar = (placeholder: string, withPack = false) => (
     <Animated.View
       className="px-5 bg-background"
@@ -434,42 +420,18 @@ export function CategoryIconPickerSheet({
           onBack={onClose}
         />
 
-        {/* Tabs sit on their own row below the centered title so they don't
-            compete with it for the header's side slots. */}
-        <View className="flex-row px-5 pb-3" style={{ gap: spacing.lg }}>
-          {(
-            [
-              { value: 'icons', label: I18n.t('category_icon.tab_icons') },
-              { value: 'emoji', label: I18n.t('category_icon.tab_emoji') },
-              { value: 'uploads', label: I18n.t('category_icon.tab_uploads') },
-            ] as const
-          ).map((option) => {
-            const active = tab === option.value;
-            return (
-              <Pressable
-                key={option.value}
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  setTab(option.value);
-                  setQuery('');
-                }}
-                accessibilityRole="tab"
-                accessibilityState={{ selected: active }}
-              >
-                <Text
-                  variant="bodyStrong"
-                  className={cn(active ? 'text-primary' : 'text-muted-foreground')}
-                >
-                  {option.label}
-                </Text>
-                <View
-                  className="h-0.5 mt-1 rounded-full"
-                  style={{ backgroundColor: active ? themeColors.primary : 'transparent' }}
-                />
-              </Pressable>
-            );
-          })}
-        </View>
+        <PickerTabs
+          options={[
+            { value: 'icons', label: I18n.t('category_icon.tab_icons') },
+            { value: 'emoji', label: I18n.t('category_icon.tab_emoji') },
+            { value: 'uploads', label: I18n.t('category_icon.tab_uploads') },
+          ]}
+          value={tab}
+          onChange={(next) => {
+            setTab(next);
+            setQuery('');
+          }}
+        />
 
         {tab === 'uploads' ? (
           <FlatList

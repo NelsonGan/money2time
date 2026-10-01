@@ -33,6 +33,7 @@ type AlternateAppIconsModule = typeof import('expo-alternate-app-icons');
  */
 const alternateAppIcons: AlternateAppIconsModule | null = (() => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports -- see above
     return require('expo-alternate-app-icons') as AlternateAppIconsModule;
   } catch {
     return null;

@@ -1,8 +1,9 @@
-import { Image, type ImageSource } from 'expo-image';
-import { Download, ImageIcon, Play } from 'lucide-react-native';
-import React, { useCallback, useState } from 'react';
+import type { ImageSource } from 'expo-image';
+import { Download, Play } from 'lucide-react-native';
+import React, { useCallback } from 'react';
 import { Linking, Pressable, StyleSheet, View } from 'react-native';
-import { Button, SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
+
+import { SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
 import {
   AUTO_LOG_VIDEO_URLS,
   LOG_CARD_PAYMENT_INTENT_NAME,
@@ -12,6 +13,7 @@ import {
   SCAN_SCREENSHOT_SHORTCUT_URL,
 } from '~/constants/autoLogIntents';
 import { spacing } from '~/constants/designSystem';
+import { StepPager, useStepPager } from '~/features/tutorials/components/StepPager';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { AutoLogTutorialTopic } from '~/navigation/settingsStack';
@@ -98,31 +100,6 @@ const TITLE: Record<AutoLogTutorialTopic, string> = {
 };
 
 const styles = StyleSheet.create({
-  body: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  frame: {
-    flex: 1,
-    borderRadius: 20,
-    overflow: 'hidden',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  frameImage: {
-    width: '100%',
-    height: '100%',
-  },
-  dots: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 14,
-  },
-  dot: {
-    height: 6,
-    borderRadius: 3,
-  },
   caption: {
     minHeight: 72,
   },
@@ -149,48 +126,13 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     paddingHorizontal: 4,
   },
-  nav: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    paddingTop: spacing.sm,
-  },
-  // The page already pads the bottom safe area (SettingsPageLayout edges), so
-  // this is just breathing room above it.
-  navBottom: {
-    paddingBottom: spacing.md,
-  },
 });
 
 export function AutoLogTutorialScreen({ topic, onBack }: AutoLogTutorialScreenProps) {
   const themeColors = useThemeColors();
   const steps = STEPS[topic];
-  const [index, setIndex] = useState(0);
-
+  const { index, isLast, goNext, goBack } = useStepPager(steps.length, onBack);
   const step = steps[index];
-  const isLast = index === steps.length - 1;
-
-  // Haptics are fired here rather than by the Button, matching how the
-  // onboarding steps drive OnboardingActionBar.
-  const goNext = useCallback(() => {
-    void triggerHaptic('medium');
-    if (isLast) {
-      onBack();
-      return;
-    }
-    setIndex((current) => Math.min(current + 1, steps.length - 1));
-  }, [isLast, onBack, steps.length]);
-
-  // Back stays on screen for every step so the 1:2 split never reflows; on the
-  // first step there is nowhere back to go but out, which is what the header's
-  // back does too.
-  const goBack = useCallback(() => {
-    void triggerHaptic('selection');
-    if (index === 0) {
-      onBack();
-      return;
-    }
-    setIndex((current) => Math.max(current - 1, 0));
-  }, [index, onBack]);
 
   const openDownload = useCallback(() => {
     void triggerHaptic('medium');
@@ -232,31 +174,14 @@ export function AutoLogTutorialScreen({ topic, onBack }: AutoLogTutorialScreenPr
         />
       </View>
 
-      <View style={styles.body}>
-        <View style={[styles.frame, { backgroundColor: `${themeColors.primary}0A` }]}>
-          {step.image ? (
-            <Image source={step.image} style={styles.frameImage} contentFit="contain" />
-          ) : (
-            <ImageIcon size={28} color={themeColors.textMuted} />
-          )}
-        </View>
-
-        <View style={styles.dots}>
-          {steps.map((item, dotIndex) => (
-            <View
-              key={item.key}
-              style={[
-                styles.dot,
-                {
-                  width: dotIndex === index ? 18 : 6,
-                  backgroundColor:
-                    dotIndex === index ? themeColors.primary : `${themeColors.primary}33`,
-                },
-              ]}
-            />
-          ))}
-        </View>
-
+      <StepPager
+        image={step.image}
+        count={steps.length}
+        index={index}
+        isLast={isLast}
+        onNext={goNext}
+        onBack={goBack}
+      >
         <View style={styles.caption}>
           <View style={styles.captionMeta}>
             <Text variant="caption" tone="muted">
@@ -283,19 +208,7 @@ export function AutoLogTutorialScreen({ topic, onBack }: AutoLogTutorialScreenPr
             </Pressable>
           ) : null}
         </View>
-
-        {/* Mirrors OnboardingActionBar (ghost back at flex-1, primary at
-            flex-[2]) rather than reusing it. The page pads the bottom safe area
-            (edges above), so the row only adds a little breathing room. */}
-        <View style={[styles.nav, styles.navBottom]} className="border-t border-border/15">
-          <Button variant="ghost" className="flex-1" haptic="none" onPress={goBack}>
-            <Text>{I18n.t('common.back')}</Text>
-          </Button>
-          <Button className="flex-[2] shadow-glow" haptic="none" onPress={goNext}>
-            <Text>{isLast ? I18n.t('common.done') : I18n.t('common.next')}</Text>
-          </Button>
-        </View>
-      </View>
+      </StepPager>
     </SettingsPageLayout>
   );
 }

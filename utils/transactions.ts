@@ -12,7 +12,7 @@ export interface MonthTransactionBuckets {
   summaries: Map<string, MonthSummary>;
 }
 
-export function emptyMonthSummary(): MonthSummary {
+function emptyMonthSummary(): MonthSummary {
   return { count: 0, income: 0, expense: 0 };
 }
 
@@ -26,17 +26,6 @@ function accumulateSummary(
   const value = resolveValue(transaction);
   if (transaction.type === 'income') summary.income += value;
   if (transaction.type === 'expense') summary.expense += value;
-}
-
-export function summarizeTransactions(
-  transactions: TransactionWithRelations[],
-  resolveValue: (transaction: TransactionWithRelations) => number,
-): MonthSummary {
-  const summary = emptyMonthSummary();
-  transactions.forEach((transaction) => {
-    accumulateSummary(summary, transaction, resolveValue);
-  });
-  return summary;
 }
 
 export function bucketTransactionsByMonth(
