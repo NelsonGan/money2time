@@ -1298,7 +1298,6 @@ export function seedProfile(
     purgePreviewData();
     settingsRepository.updateSettings({
       onboardingCompleted: true,
-      userMode: 'power',
       locale: profile.locale,
       currencyCode: profile.currencyCode,
       currencySymbol: profile.currencySymbol,
