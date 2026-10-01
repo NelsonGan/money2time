@@ -1552,12 +1552,22 @@ function ScreenshotScanSync() {
   // request can all fire at once, and two overlapping runs would each see the
   // same queue and scan every screenshot twice.
   const drainingRef = useRef(false);
+  // A drain requested while one is running is not dropped: the running drain
+  // goes round again once its batch settles. Otherwise a second share made
+  // while the first was still scanning would sit in the queue, unlogged,
+  // until the user next left and reopened the app.
+  const rerunRequestedRef = useRef(false);
 
   const drain = useCallback(async () => {
     if (!isScreenshotQueueSupported()) return;
-    if (drainingRef.current) return;
+    if (drainingRef.current) {
+      rerunRequestedRef.current = true;
+      return;
+    }
     drainingRef.current = true;
-    try {
+
+    // One pass over the queue as it stands.
+    const drainOnce = async () => {
       const pending = await readAutoLogPendingScans();
       if (pending.length === 0) return;
 
@@ -1619,6 +1629,13 @@ function ScreenshotScanSync() {
         // its App Group image file). Per-entry so a break above keeps the rest.
         await clearAutoLogPendingScans([entry.id]);
       }
+    };
+
+    try {
+      do {
+        rerunRequestedRef.current = false;
+        await drainOnce();
+      } while (rerunRequestedRef.current);
     } catch (error) {
       // A failed read/clear against an unreachable App Group must not raise an
       // unhandled rejection on every foreground. Whatever wasn't cleared stays

@@ -82,7 +82,7 @@ class ShareScanActivity : Activity() {
     Thread {
       uris.forEach { uri ->
         try {
-          copyIntoQueue(uri)
+          copyIntoQueue(uri, intent?.type)
         } catch (error: Exception) {
           // One unreadable item must not cost the rest of the share.
           Log.w(TAG, "Could not copy shared image", error)
@@ -125,8 +125,14 @@ class ShareScanActivity : Activity() {
       intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)
     }
 
-  private fun copyIntoQueue(uri: Uri) {
-    val mime = contentResolver.getType(uri) ?: ""
+  private fun copyIntoQueue(uri: Uri, intentType: String?) {
+    // Only another app's content URI. A file:// URI, or a content URI from one
+    // of this app's own providers, could otherwise name a private file of ours
+    // (the database, say) and have it copied out and uploaded to the scanner.
+    if (uri.scheme != "content" || isOwnAuthority(uri.authority)) return
+    // Some senders' providers report no type for a perfectly good image; the
+    // share itself still declared one, so fall back to it.
+    val mime = (contentResolver.getType(uri) ?: intentType ?: "").lowercase()
     if (!mime.startsWith("image/")) return
     val dir = File(filesDir, "${SHARED_SCANS_DIR}")
     if (!dir.exists() && !dir.mkdirs()) return
@@ -152,6 +158,13 @@ class ShareScanActivity : Activity() {
     // Only a complete file is renamed into place, so the drain never reads a
     // half-written image.
     if (tooLarge || written == 0L || !part.renameTo(File(dir, name))) part.delete()
+  }
+
+  private fun isOwnAuthority(authority: String?): Boolean {
+    if (authority == null) return true
+    return authority.split(';').any { name ->
+      packageManager.resolveContentProvider(name, 0)?.packageName == packageName
+    }
   }
 
   private fun extensionFor(mime: String): String =
@@ -221,6 +234,10 @@ function withShareScanActivityManifest(config) {
         'android:excludeFromRecents': 'true',
         'android:noHistory': 'true',
         'android:taskAffinity': '',
+        // A rotation, theme or size change would otherwise recreate the
+        // activity mid-copy and run onCreate again, queueing every image twice.
+        'android:configChanges':
+          'orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|navigation|uiMode|density|fontScale|locale|layoutDirection',
       },
       'intent-filter': [
         imageSendFilter('android.intent.action.SEND'),
