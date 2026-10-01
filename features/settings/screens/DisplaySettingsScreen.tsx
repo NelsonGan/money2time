@@ -1,11 +1,12 @@
 import * as Clipboard from 'expo-clipboard';
 import { Check, ChevronRight, Copy } from 'lucide-react-native';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, Image, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import { Alert, Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import {
   Card,
   CardContent,
+  FormSwitchRow,
   InfoTooltipButton,
   SelectField,
   SETTINGS_FORM_BOTTOM_PADDING,
@@ -185,11 +186,6 @@ export function DisplaySettingsScreen({
     );
   };
 
-  const handleShowTransactionAccountChange = (value: boolean) => {
-    void triggerHaptic('selection');
-    updateSettings({ showTransactionAccount: value });
-  };
-
   const weekStartsOnOptions = useMemo(
     () => [
       { value: '1', label: I18n.t('settings.first_day_monday') },
@@ -296,23 +292,6 @@ export function DisplaySettingsScreen({
                 options={homeSummaryOptions}
                 onChange={(value) => handleHomeSummaryChange('right', value)}
               />
-              <View className="min-h-[54px] w-full flex-row items-center gap-3 rounded-3xl border border-border/40 bg-card/95 px-4 py-2">
-                <View className="min-w-0 flex-1 flex-row items-center gap-1.5">
-                  <Text variant="body" numberOfLines={2} className="shrink">
-                    {I18n.t('settings.show_transaction_account')}
-                  </Text>
-                  <InfoTooltipButton
-                    title={I18n.t('settings.show_transaction_account')}
-                    infoTooltip={I18n.t('settings.show_transaction_account_help')}
-                  />
-                </View>
-                <Switch
-                  accessibilityLabel={I18n.t('settings.show_transaction_account')}
-                  value={settings.showTransactionAccount}
-                  onValueChange={handleShowTransactionAccountChange}
-                  trackColor={{ false: themeColors.border, true: themeColors.primary }}
-                />
-              </View>
               {/* Not a SelectField: the options are 74px tiles, so they get a
                   page of their own. It borrows the trigger's metrics anyway so
                   it lines up with the fields above and below it. */}
@@ -380,6 +359,12 @@ export function DisplaySettingsScreen({
                   <ChevronRight size={16} color={themeColors.textMuted} />
                 </Pressable>
               </View>
+              <FormSwitchRow
+                label={I18n.t('settings.show_transaction_account')}
+                info={I18n.t('settings.show_transaction_account_help')}
+                value={settings.showTransactionAccount}
+                onValueChange={(value) => updateSettings({ showTransactionAccount: value })}
+              />
             </CardContent>
           </Card>
         </View>
