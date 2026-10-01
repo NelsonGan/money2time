@@ -1,4 +1,3 @@
-import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowDownRight, ArrowUpRight, Clock, Minus, Plus } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
@@ -19,6 +18,7 @@ import {
 } from '~/components/widget-preview/BudgetWidgetContent';
 import { SavingsHistoryWidgetContent } from '~/components/widget-preview/SavingsHistoryWidgetContent';
 import { SavingsRateWidgetContent } from '~/components/widget-preview/SavingsRateWidgetContent';
+import { WidgetWordmark } from '~/components/widget-preview/WidgetWordmark';
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { useIsPro } from '~/context/ProContext';
@@ -43,8 +43,6 @@ import { FONT } from '~/utils/fonts';
 interface WidgetPreviewsScreenProps {
   onBack: () => void;
 }
-
-const BANNER_SOURCE = require('../../../assets/banner.png');
 
 const SIZE_LABELS: Record<WidgetSize, string> = {
   small: 'Small',
@@ -124,17 +122,6 @@ function WidgetFrame({
   );
 }
 
-function WordmarkBanner({ width = 116 }: { width?: number }) {
-  return (
-    <Image
-      source={BANNER_SOURCE}
-      contentFit="contain"
-      contentPosition="left center"
-      style={{ width, height: width * 0.27 }}
-    />
-  );
-}
-
 function ActionPill({ tone }: { tone: 'income' | 'expense' }) {
   const themeColors = useThemeColors();
   const isIncome = tone === 'income';
@@ -175,7 +162,7 @@ function MonthlySpendWidgetPreview({ data }: { data: MonthlyExpenseQuickLogSnaps
     <WidgetFrame size="medium">
       {() => (
         <View style={styles.pad}>
-          <WordmarkBanner />
+          <WidgetWordmark />
           <View style={styles.monthlyBody}>
             <View style={styles.monthlyColumn}>
               <Text variant="label" tone="muted" style={styles.eyebrow}>
@@ -282,7 +269,7 @@ function WeeklyExpenseWidgetPreview({ data }: { data: WeeklyExpenseSnapshot }) {
       {() => (
         <View style={styles.pad}>
           <View style={styles.headerRow}>
-            <WordmarkBanner />
+            <WidgetWordmark />
             <View style={styles.headerRight}>
               <Text variant="label" tone="muted" style={styles.eyebrow}>
                 Past 7 days
@@ -420,7 +407,7 @@ function CalendarWidgetPreview({ data }: { data: CalendarMonthSnapshot }) {
       {() => (
         <View style={styles.pad}>
           <View style={styles.calHeader}>
-            <WordmarkBanner width={108} />
+            <WidgetWordmark width={108} />
             <View style={styles.calHeaderRight}>
               <Text variant="bodyStrong" style={[styles.monthLabel, { color: themeColors.text }]}>
                 {data.monthLabel}
