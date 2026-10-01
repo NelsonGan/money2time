@@ -10,25 +10,25 @@
     },
     "apk": {
       "bytes": 316666126,
+      "sha256": "a7346257adf3c34bea8f7d900311fc14dce3548207d4dc8c30b8fad59029878f",
       "compressedComponents": {
         "other": 1420812,
         "assets": 14555607,
         "dex": 23491818,
         "native": 189344828,
         "resources": 86134977
-      },
-      "sha256": "a7346257adf3c34bea8f7d900311fc14dce3548207d4dc8c30b8fad59029878f"
+      }
     },
     "aab": {
       "bytes": 231454184,
+      "sha256": "f740e700e5a87d97df1d5943564e09a5e9240d5cac467e8e4dc68b688cfff7f1",
       "compressedComponents": {
         "other": 45719578,
         "assets": 6479302,
         "dex": 23491818,
         "native": 71549722,
         "resources": 83075884
-      },
-      "sha256": "f740e700e5a87d97df1d5943564e09a5e9240d5cac467e8e4dc68b688cfff7f1"
+      }
     }
   },
   "after": {
@@ -41,26 +41,26 @@
       "exportAssets": 839
     },
     "apk": {
-      "bytes": 283347055,
+      "bytes": 283343959,
+      "sha256": "aa762c48036525fffeaec03c3b7ca3d71fe205682597141c6753ac010f6a1efe",
       "compressedComponents": {
         "other": 1422100,
-        "assets": 13356423,
+        "assets": 13353324,
         "dex": 8831407,
         "native": 189344828,
-        "resources": 68697145
-      },
-      "sha256": "d3f2c58f7dc38b7775268e5babd9f8ff72447ecb02c28e4fc48ce42238119e43"
+        "resources": 68697149
+      }
     },
     "aab": {
-      "bytes": 206706198,
+      "bytes": 206696076,
+      "sha256": "2a65f303e9375bc1be5c4b1c52f752fe58669146998e821f22de525597c19941",
       "compressedComponents": {
-        "other": 52954293,
-        "assets": 6243510,
+        "other": 52947270,
+        "assets": 6240411,
         "dex": 8831407,
         "native": 71549722,
         "resources": 66027754
-      },
-      "sha256": "b20fa85ab2a504dc545faf5edf79936211c1c1c9b260042dac8d41dbcfdd766e"
+      }
     }
   },
   "baselineCommit": "8e779f1d",

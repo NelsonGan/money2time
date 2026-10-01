@@ -7,8 +7,8 @@ MB below means 1,000,000 bytes. Exact bytes and artifact hashes are in
 
 | Artifact                                 |    Before |     After |         Reduction |
 | ---------------------------------------- | --------: | --------: | ----------------: |
-| Universal Android release APK            | 316.67 MB | 283.35 MB | 33.32 MB (10.52%) |
-| Android release app bundle (AAB)         | 231.45 MB | 206.71 MB | 24.75 MB (10.69%) |
+| Universal Android release APK            | 316.67 MB | 283.34 MB | 33.32 MB (10.52%) |
+| Android release app bundle (AAB)         | 231.45 MB | 206.70 MB | 24.76 MB (10.70%) |
 | Android exported Hermes bundle           |  13.52 MB |  12.33 MB |   1.19 MB (8.83%) |
 | iOS exported Hermes bundle               |  13.52 MB |  12.32 MB |   1.20 MB (8.87%) |
 | Repository assets, excluding PR evidence | 255.00 MB | 238.15 MB |  16.85 MB (6.61%) |
@@ -50,7 +50,7 @@ artwork are generator inputs and were retained.
 - Remove 74 unused interface illustrations and their generated/flat registry
   entries (2.02 MB). All 1,905 selectable category icons, their stored IDs,
   and all six packs remain intact.
-- Compress PNGs, saving 12.84 MB. Lossless candidates must decode identically.
+- Compress PNGs, saving 12.84 MB. Lossless candidates must preserve exact visible pixels.
   Quantization is restricted to true-color atlases, interface illustrations,
   and automation captures. Already indexed artwork is not quantized again.
 - Quantized candidates preserve fully transparent pixels and must have maximum
@@ -94,10 +94,15 @@ APP_VARIANT=production SENTRY_DISABLE_AUTO_UPLOAD=true ./gradlew :app:assembleRe
 ```
 
 Set `JAVA_HOME` to JDK 17 and the Android SDK variables to the installed SDK.
-When rebuilding after removing/renaming an asset, clear the generated
-`android/app/build/generated/res/createBundleReleaseJsAndAssets` and
-`android/app/build/generated/assets/createBundleReleaseJsAndAssets` directories
-first, so obsolete generated resources cannot affect the comparison.
+When rebuilding after changing an asset, clear these generated directories:
+
+- `android/app/build/generated/res/createBundleReleaseJsAndAssets`
+- `android/app/build/generated/assets/createBundleReleaseJsAndAssets`
+- `android/app/build/generated/assets/createReleaseUpdatesResources`
+
+Do this first, so obsolete resources and embedded update metadata cannot affect the
+comparison. The update-resource task does not track imported image changes
+in its incremental inputs.
 
 Review further image candidates without writing, or apply accepted savings:
 
@@ -119,15 +124,20 @@ byte-identical images and leaves the category registry unchanged.
   alias/type behavior, compression, transparency and indexed PNG preservation.
 - Internal runtime tests cover renamed/changed native-only images, shared
   development/preview compatibility, and unchanged production behavior.
-- Both production exports and both fresh Android release builds succeeded.
+- Both production exports and fresh Android production/release and internal
+  preview builds succeeded. Android asset coverage verification passed against
+  the actual embedded update manifest; the preview runtime matches its
+  packaged configuration and the published CI preview.
 - All 5,771 repository raster images decoded successfully.
 - iPhone 17 simulator: cold startup, persisted transaction, all main tabs,
   charts, album map, tutorials, automation guides, light/dark themes, all six category packs,
   emoji picker, item showcase, subscription-logo selection and the JPEG goal-cover showcase checked.
 - Pixel 7 / Android API 36 emulator: optimized release installed on a clean
   device; onboarding, transaction creation/persistence, account/item icon
-  selection, offline city search, album creation and native map rendering
-  receipt-camera preview, and JPEG goal-cover rendering checked.
+  selection, offline city search, album creation, native map rendering,
+  receipt-camera preview, and JPEG goal-cover rendering checked. The final
+  production APK was also installed over the internal preview without clearing
+  app data; startup and saved onboarding/settings state were preserved.
 - Android onboarding before/after screenshots differ by only two pixels below
   the status bar in the screenshot comparison.
 
