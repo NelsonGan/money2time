@@ -55,7 +55,11 @@ import { resetCloudBackupPromptState } from '~/services/cloudBackupPrompt';
 import { triggerHaptic } from '~/services/haptics';
 import { pickLibraryImage } from '~/services/libraryImagePicker';
 import { isLiveActivityAvailable } from '~/services/liveActivity';
-import type { PreviewSeedProfile } from '~/services/previewData';
+import {
+  PREVIEW_PROFILE_FOR_LOCALE,
+  PREVIEW_PROFILE_LABELS,
+  type PreviewSeedProfile,
+} from '~/services/previewData';
 import { openStoreReviewManually } from '~/services/reviewPrompt';
 import { deleteProfileAvatar, getProfileAvatarUri, saveProfileAvatar } from '~/services/userAssets';
 import { cn } from '~/utils';
@@ -86,11 +90,8 @@ const PREVIEW_SCREEN_COPY = {
     confirmTitle: 'Generate preview data?',
     confirmMessage:
       'Choose a profile. This replaces your local accounts, categories, transactions, budgets, recurring rules, and wage history with screenshot-ready sample data.',
-    americanProfile: 'American',
-    chineseProfile: 'Chinese',
-    taiwaneseProfile: 'Taiwanese',
-    malaysianEnProfile: 'Malaysian (EN)',
-    malaysianZhProfile: 'Malaysian (中文)',
+    matchLanguage: 'Match app language: {{profile}}',
+    chooseProfile: 'Choose a profile…',
     failedMessage: 'Unable to generate preview data. Please try again.',
     doneTitle: 'Preview data ready',
     doneMessage:
@@ -101,11 +102,8 @@ const PREVIEW_SCREEN_COPY = {
     confirmTitle: '生成预览数据？',
     confirmMessage:
       '请选择一个配置。这会用适合截图的样例数据替换你当前的本地账户、分类、交易、预算、循环规则和收入历史。',
-    americanProfile: '美式',
-    chineseProfile: '中文',
-    taiwaneseProfile: '台湾 (繁体)',
-    malaysianEnProfile: '马来西亚 (EN)',
-    malaysianZhProfile: '马来西亚 (中文)',
+    matchLanguage: '匹配应用语言：{{profile}}',
+    chooseProfile: '选择其他配置…',
     failedMessage: '无法生成预览数据，请重试。',
     doneTitle: '预览数据已准备好',
     doneMessage:
@@ -290,21 +288,13 @@ export function SettingsScreen({
   const previewCopy = settings.locale === 'zh' ? PREVIEW_SCREEN_COPY.zh : PREVIEW_SCREEN_COPY.en;
 
   const handleGeneratePreviewData = useCallback(() => {
-    const profileLabels: Record<PreviewSeedProfile, string> = {
-      american: previewCopy.americanProfile,
-      chinese: previewCopy.chineseProfile,
-      taiwanese: previewCopy.taiwaneseProfile,
-      malaysian_en: previewCopy.malaysianEnProfile,
-      malaysian_zh: previewCopy.malaysianZhProfile,
-    };
-
     const runPreviewSeed = async (profile: PreviewSeedProfile) => {
       try {
         const summary = await generatePreviewData(profile);
         Alert.alert(
           previewCopy.doneTitle,
           formatPreviewDoneMessage(previewCopy.doneMessage, {
-            profile: profileLabels[profile],
+            profile: PREVIEW_PROFILE_LABELS[profile],
             accounts: summary.accounts,
             categories: summary.categories,
             recurringRules: summary.recurringRules,
@@ -320,15 +310,30 @@ export function SettingsScreen({
       }
     };
 
+    const chooseProfile = () => {
+      const profiles = Object.keys(PREVIEW_PROFILE_LABELS) as PreviewSeedProfile[];
+      Alert.alert(previewCopy.confirmTitle, undefined, [
+        { text: I18n.t('common.cancel'), style: 'cancel' },
+        ...profiles.map((profile) => ({
+          text: PREVIEW_PROFILE_LABELS[profile],
+          onPress: () => void runPreviewSeed(profile),
+        })),
+      ]);
+    };
+
+    const localeProfile = PREVIEW_PROFILE_FOR_LOCALE[settings.locale] ?? 'malaysian_en';
     Alert.alert(previewCopy.confirmTitle, previewCopy.confirmMessage, [
       { text: I18n.t('common.cancel'), style: 'cancel' },
-      { text: previewCopy.americanProfile, onPress: () => void runPreviewSeed('american') },
-      { text: previewCopy.chineseProfile, onPress: () => void runPreviewSeed('chinese') },
-      { text: previewCopy.taiwaneseProfile, onPress: () => void runPreviewSeed('taiwanese') },
-      { text: previewCopy.malaysianEnProfile, onPress: () => void runPreviewSeed('malaysian_en') },
-      { text: previewCopy.malaysianZhProfile, onPress: () => void runPreviewSeed('malaysian_zh') },
+      {
+        text: previewCopy.matchLanguage.replace(
+          '{{profile}}',
+          PREVIEW_PROFILE_LABELS[localeProfile],
+        ),
+        onPress: () => void runPreviewSeed(localeProfile),
+      },
+      { text: previewCopy.chooseProfile, onPress: chooseProfile },
     ]);
-  }, [generatePreviewData, previewCopy]);
+  }, [generatePreviewData, previewCopy, settings.locale]);
 
   return (
     <SettingsPageLayout>

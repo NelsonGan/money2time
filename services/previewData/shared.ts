@@ -1,5 +1,5 @@
 // Shared types and static blueprints for the localized preview-data seeder.
-// The four locale profiles live in ./profiles/*, the seeding logic in ./seed.ts,
+// The locale profiles live in ./profiles/*, the seeding logic in ./seed.ts,
 // and the public API is re-exported from ./index.ts.
 
 export type PreviewSeedProfile =
@@ -7,7 +7,28 @@ export type PreviewSeedProfile =
   | 'chinese'
   | 'taiwanese'
   | 'malaysian_en'
-  | 'malaysian_zh';
+  | 'malaysian_zh'
+  | 'malaysian_ms'
+  | 'brazilian'
+  | 'danish'
+  | 'dutch'
+  | 'filipino'
+  | 'french'
+  | 'german'
+  | 'indian'
+  | 'indonesian'
+  | 'italian'
+  | 'japanese'
+  | 'korean'
+  | 'norwegian'
+  | 'polish'
+  | 'russian'
+  | 'spanish'
+  | 'swedish'
+  | 'thai'
+  | 'turkish'
+  | 'ukrainian'
+  | 'vietnamese';
 
 export interface PreviewSeedSummary {
   profile: PreviewSeedProfile;
@@ -277,6 +298,8 @@ export interface PreviewRecurringRuleConfig {
   name: string;
   amount: number;
   note: string;
+  /** Subscription brand mark; falls back to `suggestSubscriptionLogo(name)`. */
+  logoId?: string;
 }
 
 // A trip album shown on the Albums map. Each is matched to one of the seeded
@@ -371,6 +394,8 @@ export interface PreviewProfile {
   locale: string;
   currencyCode: string;
   currencySymbol: string;
+  // Fraction digits seeded amounts are rounded to; defaults to 2.
+  amountDecimals?: number;
   // Display name shown on the profile/settings header.
   profileName: string;
   accountGroups: Record<AccountGroupKey, string>;
