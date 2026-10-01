@@ -102,6 +102,7 @@ class SettingsRepository {
         | 'paymentQrUri'
         | 'defaultPaybackAccountId'
         | 'reimbursementsCountAsExpense'
+        | 'showTransactionAccount'
       >
     >,
   ) {
@@ -239,6 +240,7 @@ class SettingsRepository {
         paymentQrUri: null,
         defaultPaybackAccountId: null,
         reimbursementsCountAsExpense: true,
+        showTransactionAccount: true,
         updatedAt: now,
       })
       .where(eq(settingsTable.id, SETTINGS_ID))

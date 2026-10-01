@@ -1219,6 +1219,9 @@ const fr = {
     icon_style_flat: 'Plat',
     home_summary_left: 'Left home card',
     home_summary_right: 'Right home card',
+    show_transaction_account: 'Afficher le compte sur les transactions',
+    show_transaction_account_help:
+      'Affiche le compte débité ou crédité pour chaque transaction. Les virements affichent toujours les comptes concernés.',
     icon_style_help:
       'Argile utilise les illustrations 3D douces dans les onglets, les réglages et les boutons. Plat revient aux icônes de ligne simples.',
     first_day_of_week: 'Premier jour de la semaine',

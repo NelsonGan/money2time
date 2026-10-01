@@ -468,6 +468,7 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
         | 'paymentQrUri'
         | 'defaultPaybackAccountId'
         | 'reimbursementsCountAsExpense'
+        | 'showTransactionAccount'
       >
     >,
   ) => void;
@@ -3397,6 +3398,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           | 'paymentQrUri'
           | 'defaultPaybackAccountId'
           | 'reimbursementsCountAsExpense'
+          | 'showTransactionAccount'
         >
       >,
     ) => {

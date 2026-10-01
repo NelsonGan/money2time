@@ -1152,6 +1152,8 @@ const zh = {
     icon_style_help: '黏土在标签栏、设置和按钮中使用柔和的立体插画。扁平会切换回简洁的线条图标。',
     home_summary_left: 'Left home card',
     home_summary_right: 'Right home card',
+    show_transaction_account: '在交易中显示账户',
+    show_transaction_account_help: '显示每笔交易的付款或入账账户。转账始终显示转出和转入的账户。',
     first_day_of_week: '每周首日',
     first_day_sunday: '星期日',
     first_day_monday: '星期一',

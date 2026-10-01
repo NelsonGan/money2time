@@ -1216,6 +1216,9 @@ const ms = {
     icon_style_flat: 'Rata',
     home_summary_left: 'Left home card',
     home_summary_right: 'Right home card',
+    show_transaction_account: 'Tunjukkan akaun pada transaksi',
+    show_transaction_account_help:
+      'Menunjukkan akaun asal atau tujuan setiap transaksi. Pindahan sentiasa menunjukkan akaun yang terlibat.',
     icon_style_help:
       'Clay menggunakan ilustrasi 3D lembut di seluruh tab, tetapan dan butang. Rata menukarkannya kembali kepada ikon garisan ringkas.',
     first_day_of_week: 'Hari pertama minggu',

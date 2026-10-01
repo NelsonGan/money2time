@@ -230,6 +230,10 @@ export const settingsTable = sqliteTable('settings', {
   reimbursementsCountAsExpense: integer('reimbursements_count_as_expense', { mode: 'boolean' })
     .notNull()
     .default(true),
+  // Whether transaction rows show their account (name and logo). On by default.
+  showTransactionAccount: integer('show_transaction_account', { mode: 'boolean' })
+    .notNull()
+    .default(true),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),

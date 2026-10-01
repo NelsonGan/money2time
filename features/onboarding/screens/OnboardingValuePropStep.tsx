@@ -4,6 +4,7 @@ import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { Card, CategoryEmoji, Text, TimeValueInline } from '~/components/ui';
+import { appIconById, DEFAULT_APP_ICON_ID } from '~/constants/appIcons';
 import { getThemeWordmarkPalette, spacing } from '~/constants/designSystem';
 import { useResolvedTheme, useThemeColor } from '~/context/ThemeContext';
 import { OnboardingActionBar } from '~/features/onboarding/components/OnboardingActionBar';
@@ -17,7 +18,6 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { formatCurrency, formatHours } from '~/utils/formatters';
 
-const APP_ICON_SOURCE = require('../../../assets/app-icon.png');
 /** iOS's squircle is close enough to this fraction of the tile for our purposes. */
 const APP_ICON_RADIUS = 0.2237;
 
@@ -33,7 +33,8 @@ export function OnboardingValuePropStep({
   const themeColors = useThemeColors();
   // The wordmark has its own three-colour palette, warm on the name and the
   // theme's own colour on "Time" -- the same split `assets/banner.png` draws.
-  const wordmark = getThemeWordmarkPalette(useThemeColor(), useResolvedTheme());
+  const resolvedTheme = useResolvedTheme();
+  const wordmark = getThemeWordmarkPalette(useThemeColor(), resolvedTheme);
   const { height: windowHeight } = useWindowDimensions();
   const sym = currencySymbol;
   const trueHourlyRate = 15;
@@ -99,11 +100,16 @@ export function OnboardingValuePropStep({
       >
         <OnboardingStepHeader compact>
           <View style={styles.brand}>
-            {/* The launcher icon, so the first screen shows the same tile the
-                user just tapped. It carries its own cream backdrop, which sits
-                close to the page behind it, hence the hairline edge. */}
+            {/* The shipped launcher icon, in the appearance that matches the
+                theme, so the first screen shows the tile the user just tapped.
+                Its backdrop sits close to the page behind it, hence the
+                hairline edge. */}
             <Image
-              source={APP_ICON_SOURCE}
+              source={
+                resolvedTheme === 'dark'
+                  ? appIconById(DEFAULT_APP_ICON_ID).previewDark
+                  : appIconById(DEFAULT_APP_ICON_ID).previewLight
+              }
               style={{
                 width: appIconSize,
                 height: appIconSize,

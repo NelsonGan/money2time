@@ -1221,6 +1221,9 @@ const de = {
     icon_style_flat: 'Flach',
     home_summary_left: 'Left home card',
     home_summary_right: 'Right home card',
+    show_transaction_account: 'Konto bei Buchungen anzeigen',
+    show_transaction_account_help:
+      'Zeigt das Konto, von dem oder auf das jede Buchung lief. Überweisungen zeigen immer die beteiligten Konten.',
     icon_style_help:
       'Ton verwendet die weichen 3D-Illustrationen in Tabs, Einstellungen und Schaltflächen. Flach wechselt zurück zu den einfachen Strichsymbolen.',
     first_day_of_week: 'Erster Wochentag',

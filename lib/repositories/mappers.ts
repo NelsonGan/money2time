@@ -619,6 +619,7 @@ export function toSettings(row: SettingsRow): UserSettings {
     paymentQrUri: row.paymentQrUri ?? null,
     defaultPaybackAccountId: row.defaultPaybackAccountId ?? null,
     reimbursementsCountAsExpense: row.reimbursementsCountAsExpense ?? true,
+    showTransactionAccount: row.showTransactionAccount ?? true,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,
