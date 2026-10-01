@@ -1187,6 +1187,17 @@ const id = {
         'Saat pertama kali berjalan, ketuk Always Allow agar bisa membaca tangkapan layar Anda.',
       log_screenshot_step_6:
         'Money2Time membaca jumlah dan merchant lalu mencatat transaksinya secara otomatis.',
+      share_screenshot_title: 'Bagikan ke Money2Time',
+      share_screenshot_hint:
+        'Bagikan screenshot pembayaran atau foto struk ke Money2Time dari aplikasi apa pun. Money2Time membaca jumlah, merchant, dan akun lalu mencatat transaksinya secara otomatis.',
+      share_screenshot_step_1:
+        'Ambil screenshot layar pembayaran atau struk, lalu ketuk Bagikan di pratinjau.',
+      share_screenshot_step_2:
+        'Pilih Money2Time di menu berbagi. Tips: tekan lama untuk menyematkannya di depan.',
+      share_screenshot_step_3:
+        'Money2Time terbuka dan membaca screenshot di latar belakang. Foto di galeri juga bisa: buka salah satunya, ketuk Bagikan, lalu pilih Money2Time.',
+      share_screenshot_step_4:
+        'Transaksi tercatat secara otomatis. Bagikan beberapa gambar sekaligus untuk mencatat semuanya.',
       defaults_title: 'Konfigurasi',
       defaults_hint: 'Dipakai saat otomatisasi tidak menetapkan akun atau kategori.',
       default_account: 'Akun bawaan',

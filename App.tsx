@@ -178,6 +178,7 @@ import {
   clearAutoLogPending,
   clearAutoLogPendingScans,
   isAutoLogSupported,
+  isScreenshotQueueSupported,
   readAutoLogPending,
   readAutoLogPendingScans,
   subscribeAutoLogDrain,
@@ -1534,8 +1535,10 @@ function getImageSize(uri: string): Promise<{ width: number; height: number } | 
 }
 
 /**
- * Drains screenshots queued in the App Group by the iOS "Log Screenshot" App
- * Intent (see plugins/withMoney2TimeAutoLog.js) into background receipt scans:
+ * Drains queued screenshots into background receipt scans. On iOS they were
+ * queued in the App Group by the "Log Screenshot" App Intent (see
+ * plugins/withMoney2TimeAutoLog.js); on Android, shared to the app through the
+ * system share sheet (see plugins/withMoney2TimeShareScan.js). Either way:
  * copy each image into the receipt store, hand it to the scan pipeline with the
  * 'screenshot' intent (Worker screenshot mode — arbitrary payment screens,
  * account detection, silent auto-create), and clear the queue entry. Runs on
@@ -1549,12 +1552,22 @@ function ScreenshotScanSync() {
   // request can all fire at once, and two overlapping runs would each see the
   // same queue and scan every screenshot twice.
   const drainingRef = useRef(false);
+  // A drain requested while one is running is not dropped: the running drain
+  // goes round again once its batch settles. Otherwise a second share made
+  // while the first was still scanning would sit in the queue, unlogged,
+  // until the user next left and reopened the app.
+  const rerunRequestedRef = useRef(false);
 
   const drain = useCallback(async () => {
-    if (!isAutoLogSupported()) return;
-    if (drainingRef.current) return;
+    if (!isScreenshotQueueSupported()) return;
+    if (drainingRef.current) {
+      rerunRequestedRef.current = true;
+      return;
+    }
     drainingRef.current = true;
-    try {
+
+    // One pass over the queue as it stands.
+    const drainOnce = async () => {
       const pending = await readAutoLogPendingScans();
       if (pending.length === 0) return;
 
@@ -1588,7 +1601,11 @@ function ScreenshotScanSync() {
           // then copy into the receipt store, which the scan job then owns.
           const downscaled = await downscaleReceiptForStorage(uri, (await getImageSize(uri)) ?? {});
           const rel = saveReceiptImage(downscaled);
-          outcome = await scanReceiptImageAsync(rel, 'shortcut', 'screenshot');
+          outcome = await scanReceiptImageAsync(
+            rel,
+            Platform.OS === 'android' ? 'share' : 'shortcut',
+            'screenshot',
+          );
         } catch (error) {
           // Couldn't even read/store the shot — report for visibility and drop
           // it (image file included). No requeue.
@@ -1612,6 +1629,13 @@ function ScreenshotScanSync() {
         // its App Group image file). Per-entry so a break above keeps the rest.
         await clearAutoLogPendingScans([entry.id]);
       }
+    };
+
+    try {
+      do {
+        rerunRequestedRef.current = false;
+        await drainOnce();
+      } while (rerunRequestedRef.current);
     } catch (error) {
       // A failed read/clear against an unreachable App Group must not raise an
       // unhandled rejection on every foreground. Whatever wasn't cleared stays
@@ -1622,9 +1646,9 @@ function ScreenshotScanSync() {
     }
   }, [scanReceiptImageAsync]);
 
-  // Screenshots only ever arrive via the intent opening the app, so mount +
-  // foreground cover them; no need to listen for explicit drain requests (the
-  // dev test button enqueues taps, never screenshots).
+  // Screenshots only ever arrive via the intent or the share target opening the
+  // app, so mount + foreground cover them; no need to listen for explicit drain
+  // requests (the dev test button enqueues taps, never screenshots).
   useForegroundAutoLogDrain(drain, false);
 
   return null;
@@ -2479,8 +2503,8 @@ function AppContent() {
         const voiceSupported = await isSpeechRecognitionAvailable();
         if (cancelled) return;
         // Platform, not isAutoLogSupported(): iOS builds whose binary predates
-        // the native auto-log module should still see the announcement, like
-        // the Automation tile on the settings home.
+        // the native auto-log module should still see the announcement. It
+        // shows the iOS Shortcuts actions, so Android never gets it.
         const nextAnnouncement = await getLatestUnseenAnnouncementForUser(
           settings.appUserId,
           [

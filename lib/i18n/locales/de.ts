@@ -1194,6 +1194,17 @@ const de = {
         'Wenn er das erste Mal läuft, tippe auf Always Allow, damit er deinen Screenshot lesen darf.',
       log_screenshot_step_6:
         'Money2Time liest Betrag und Händler aus und bucht die Transaktion automatisch.',
+      share_screenshot_title: 'Mit Money2Time teilen',
+      share_screenshot_hint:
+        'Teile einen Zahlungs-Screenshot oder ein Belegfoto aus jeder App mit Money2Time. Betrag, Händler und Konto werden ausgelesen und die Transaktion automatisch gebucht.',
+      share_screenshot_step_1:
+        'Mach einen Screenshot einer Zahlungs- oder Belegansicht und tippe in der Vorschau auf Teilen.',
+      share_screenshot_step_2:
+        'Wähle Money2Time im Teilen-Menü. Tipp: Lange drücken, um es vorne anzuheften.',
+      share_screenshot_step_3:
+        'Money2Time öffnet sich und liest den Screenshot im Hintergrund aus. Fotos aus deiner Galerie gehen auch: Foto öffnen, auf Teilen tippen und Money2Time wählen.',
+      share_screenshot_step_4:
+        'Die Transaktion wird automatisch gebucht. Teile mehrere Bilder auf einmal, um alle zu erfassen.',
       defaults_title: 'Konfiguration',
       defaults_hint:
         'Werden verwendet, wenn eine Automation kein Konto oder keine Kategorie setzt.',

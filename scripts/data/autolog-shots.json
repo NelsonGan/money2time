@@ -1,0 +1,57 @@
+{
+  "ss_1": {
+    "source": "RAW/android-share-1.png",
+    "marks": [{ "type": "circle", "x": 0.048, "y": 0.925, "w": 0.118, "h": 0.053 }]
+  },
+  "ss_2": {
+    "source": "RAW/android-share-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.205,
+        "y": 0.858,
+        "w": 0.185,
+        "h": 0.094,
+        "radius": 0.03,
+        "pad": 0.006
+      }
+    ]
+  },
+  "ss_3": {
+    "source": "RAW/android-share-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.043,
+        "y": 0.252,
+        "w": 0.915,
+        "h": 0.067,
+        "radius": 0.03,
+        "pad": 0.006
+      }
+    ]
+  },
+  "ss_4": {
+    "source": "RAW/android-share-4.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.043,
+        "y": 0.252,
+        "w": 0.915,
+        "h": 0.067,
+        "radius": 0.03,
+        "pad": 0.006
+      },
+      {
+        "type": "rect",
+        "x": 0.049,
+        "y": 0.425,
+        "w": 0.903,
+        "h": 0.075,
+        "radius": 0.03,
+        "pad": 0.006
+      }
+    ]
+  }
+}

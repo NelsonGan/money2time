@@ -1184,6 +1184,17 @@ const pl = {
         'Przy pierwszym uruchomieniu dotknij Always Allow, aby mógł odczytać Twój zrzut ekranu.',
       log_screenshot_step_6:
         'Money2Time odczytuje kwotę i sprzedawcę i automatycznie zapisuje transakcję.',
+      share_screenshot_title: 'Udostępnij do Money2Time',
+      share_screenshot_hint:
+        'Udostępnij do Money2Time zrzut ekranu płatności lub zdjęcie paragonu z dowolnej aplikacji. Aplikacja odczyta kwotę, sprzedawcę i konto i automatycznie zapisze transakcję.',
+      share_screenshot_step_1:
+        'Zrób zrzut ekranu płatności lub paragonu, a potem dotknij Udostępnij w podglądzie.',
+      share_screenshot_step_2:
+        'Wybierz Money2Time w arkuszu udostępniania. Wskazówka: przytrzymaj, aby przypiąć na początku.',
+      share_screenshot_step_3:
+        'Money2Time otworzy się i odczyta zrzut ekranu w tle. Zdjęcia z galerii też działają: otwórz jedno, dotknij Udostępnij i wybierz Money2Time.',
+      share_screenshot_step_4:
+        'Transakcja zapisze się automatycznie. Udostępnij kilka obrazów naraz, aby zapisać wszystkie.',
       defaults_title: 'Konfiguracja',
       defaults_hint: 'Używane, gdy automatyzacja nie ustawia konta ani kategorii.',
       default_account: 'Domyślne konto',
