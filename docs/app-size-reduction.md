@@ -62,8 +62,25 @@ artwork are generator inputs and were retained.
 - Enable Android release code and resource shrinking. Compressed APK Java code
   drops from 23.49 MB to 8.83 MB. The AAB includes shrinker metadata, which is
   why its total reduction differs from the APK reduction.
+- Include a shared native-image revision in internal update runtimes. A renamed
+  or recompressed image excluded from OTA uploads now requires a matching
+  rebuilt development/preview app. Production configuration is unchanged.
 - Pin image tooling as development dependencies and integrate the same quality
   gate into category-atlas generation so regeneration preserves the savings.
+
+## Internal preview rebuild
+
+Internal development and preview builds must be rebuilt once for this change.
+Their runtime includes the app version and a shared content hash of bank logos,
+subscription logos, tutorials, and news images. These directories are excluded
+from OTA uploads, so their filenames and bytes must match the native build.
+Both internal variants use the same revision so a development client can still
+load PR previews. Later changes to those images also invalidate old internal
+builds; images eligible for OTA retain the existing update flow.
+
+Store builds still disable OTA and retain the existing app-version runtime.
+The resolved production configuration was compared with the measured build
+and is exactly unchanged. See [Expo asset selection](https://docs.expo.dev/eas-update/asset-selection/).
 
 ## Reproduce
 
@@ -98,8 +115,10 @@ byte-identical images and leaves the category registry unchanged.
 ## Verification
 
 - `npm run check`: type checking, lint and formatting passed.
-- `npm test -- --runInBand`: 149 suites / 2,150 tests passed, including import
+- `npm test -- --runInBand`: 151 suites / 2,162 tests passed, including import
   alias/type behavior, compression, transparency and indexed PNG preservation.
+- Internal runtime tests cover renamed/changed native-only images, shared
+  development/preview compatibility, and unchanged production behavior.
 - Both production exports and both fresh Android release builds succeeded.
 - All 5,771 repository raster images decoded successfully.
 - iPhone 17 simulator: cold startup, persisted transaction, all main tabs,

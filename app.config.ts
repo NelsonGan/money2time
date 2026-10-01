@@ -1,6 +1,7 @@
 import type { ConfigContext, ExpoConfig } from 'expo/config';
 
 const appJson = require('./app.json') as { expo: ExpoConfig };
+const { getNativeAssetRevision } = require('./scripts/lib/nativeAssetRevision.cjs');
 const baseConfig = appJson.expo;
 
 // The development EAS profile sets APP_VARIANT=development (see eas.json). When it is set we
@@ -96,6 +97,14 @@ function applyDevVariant(cfg: ExpoConfig): ExpoConfig {
 function applyUpdatesPolicy(cfg: ExpoConfig): ExpoConfig {
   return {
     ...cfg,
+    // Logo/tutorial/news assets are omitted from OTA uploads and must exist in
+    // the matching native build. A version-only runtime lets an old dev client
+    // load a bundle whose renamed/recompressed assets it cannot resolve.
+    // Both internal variants share the revision so dev clients can open PR
+    // previews despite their different bundle IDs and widget configuration.
+    runtimeVersion: IS_OTA_VARIANT
+      ? `${cfg.version}-assets-${getNativeAssetRevision(__dirname)}`
+      : cfg.runtimeVersion,
     updates: {
       ...cfg.updates,
       enabled: IS_OTA_VARIANT,
