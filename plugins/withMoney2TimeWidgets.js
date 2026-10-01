@@ -29,9 +29,8 @@ const IOS_WIDGET_BUNDLE_ID = 'com.nelsongan.money2time.Money2TimeWidget';
 // Artwork baked into the native widget targets at prebuild time. These paths
 // are only resolved during `expo prebuild`, so a rename here is invisible to
 // typecheck/lint/tests and only breaks at build time. `__tests__/constants/
-// widgetPluginAssets.test.ts` asserts both files exist so CI fails first.
-const BANNER_ASSET = 'assets/banner.png';
-const MASCOT_ASSET = 'assets/mascots/thumbs-up.png';
+// widgetPluginAssets.test.ts` asserts the shipped headshot exists so CI fails first.
+const APP_LOGO_ASSET = 'assets/app-icons/classic/icon-light.png';
 
 // The ActivityKit attributes for the live-earnings activity. Compiled into
 // both the app target and the widget extension (ActivityKit pairs them by
@@ -679,6 +678,36 @@ function addAndroidWidgetReceiver(config) {
   });
 }
 
+// Keep the Android wordmark dimensions used by the existing widget layouts.
+function androidWordmark(width, height) {
+  const logoSize = Math.round(width * 0.22);
+  return `<LinearLayout
+    android:layout_width="${width}dp"
+    android:layout_height="${height}dp"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:contentDescription="Money2Time">
+    <ImageView
+      android:layout_width="${logoSize}dp"
+      android:layout_height="${logoSize}dp"
+      android:layout_marginEnd="4dp"
+      android:background="@drawable/money2time_widget_logo_clip"
+      android:clipToOutline="true"
+      android:scaleType="fitCenter"
+      android:src="@drawable/widget_logo" />
+    <TextView
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:fontFamily="sans-serif-rounded"
+      android:maxLines="1"
+      android:text="Money2Time"
+      android:textColor="#BF5764"
+      android:textSize="${width * 0.12}sp"
+      android:textStyle="bold" />
+  </LinearLayout>`;
+}
+
 function addAndroidWidgetFiles(config) {
   return withDangerousMod(config, [
     'android',
@@ -689,11 +718,21 @@ function addAndroidWidgetFiles(config) {
       const sourceRoot = path.join(androidRoot, 'app/src/main/java', packagePath);
       const widgetRoot = path.join(sourceRoot, 'widgets');
       const resRoot = path.join(androidRoot, 'app/src/main/res');
-      const bannerAssetPath = path.join(projectRoot, BANNER_ASSET);
-      const mascotAssetPath = path.join(projectRoot, MASCOT_ASSET);
+      const appLogoPath = path.join(projectRoot, APP_LOGO_ASSET);
+      copyFileIfChanged(appLogoPath, path.join(resRoot, 'drawable-nodpi/widget_logo.png'));
+      for (const retired of ['banner.png', 'widget_mascot.png']) {
+        fs.rmSync(path.join(resRoot, 'drawable-nodpi', retired), { force: true });
+      }
 
-      copyFileIfChanged(bannerAssetPath, path.join(resRoot, 'drawable-nodpi/banner.png'));
-      copyFileIfChanged(mascotAssetPath, path.join(resRoot, 'drawable-nodpi/widget_mascot.png'));
+      writeFileIfChanged(
+        path.join(resRoot, 'drawable/money2time_widget_logo_clip.xml'),
+        `<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+  <solid android:color="#FDF0D8" />
+  <corners android:radius="6dp" />
+</shape>
+`,
+      );
 
       // --- Generated repetitive markup / id arrays -------------------------
       // Sample data baked into the static layout so the widget picker (which
@@ -2107,13 +2146,7 @@ public class Money2TimeWidgetPackage implements ReactPackage {
   android:orientation="vertical"
   android:padding="14dp">
 
-  <ImageView
-    android:layout_width="112dp"
-    android:layout_height="28dp"
-    android:adjustViewBounds="true"
-    android:contentDescription="Money2Time"
-    android:scaleType="fitStart"
-    android:src="@drawable/banner" />
+  ${androidWordmark(112, 28)}
 
   <FrameLayout
     android:layout_width="match_parent"
@@ -2255,13 +2288,7 @@ public class Money2TimeWidgetPackage implements ReactPackage {
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:orientation="horizontal">
-      <ImageView
-        android:layout_width="116dp"
-        android:layout_height="32dp"
-        android:adjustViewBounds="true"
-        android:contentDescription="Money2Time"
-        android:scaleType="fitStart"
-        android:src="@drawable/banner" />
+      ${androidWordmark(116, 32)}
       <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -2314,7 +2341,7 @@ ${barColumns}
         android:layout_height="58dp"
         android:adjustViewBounds="true"
         android:contentDescription="Money2Time Pro"
-        android:src="@drawable/widget_mascot" />
+        android:src="@drawable/widget_logo" />
       <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -2405,13 +2432,7 @@ ${barColumns}
       android:layout_height="wrap_content"
       android:orientation="horizontal"
       android:gravity="top">
-      <ImageView
-        android:layout_width="108dp"
-        android:layout_height="30dp"
-        android:adjustViewBounds="true"
-        android:contentDescription="Money2Time"
-        android:scaleType="fitStart"
-        android:src="@drawable/banner" />
+      ${androidWordmark(108, 30)}
       <FrameLayout
         android:layout_width="0dp"
         android:layout_height="1dp"
@@ -2494,7 +2515,7 @@ ${calRows}
       android:layout_height="104dp"
       android:adjustViewBounds="true"
       android:contentDescription="Money2Time Pro"
-      android:src="@drawable/widget_mascot" />
+      android:src="@drawable/widget_logo" />
     <TextView
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
@@ -2579,13 +2600,7 @@ ${calRows}
       android:layout_height="wrap_content"
       android:gravity="center_vertical"
       android:orientation="horizontal">
-      <ImageView
-        android:layout_width="104dp"
-        android:layout_height="28dp"
-        android:adjustViewBounds="true"
-        android:contentDescription="Money2Time"
-        android:scaleType="fitStart"
-        android:src="@drawable/banner" />
+      ${androidWordmark(104, 28)}
       <TextView
         android:id="@+id/savings_month"
         android:layout_width="0dp"
@@ -2716,7 +2731,7 @@ ${calRows}
         android:layout_height="58dp"
         android:adjustViewBounds="true"
         android:contentDescription="Money2Time Pro"
-        android:src="@drawable/widget_mascot" />
+        android:src="@drawable/widget_logo" />
       <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -2896,13 +2911,7 @@ ${calRows}
       android:layout_height="wrap_content"
       android:orientation="horizontal"
       android:gravity="top">
-      <ImageView
-        android:layout_width="116dp"
-        android:layout_height="32dp"
-        android:adjustViewBounds="true"
-        android:contentDescription="Money2Time"
-        android:scaleType="fitStart"
-        android:src="@drawable/banner" />
+      ${androidWordmark(116, 32)}
       <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -2954,7 +2963,7 @@ ${historyRows}
       android:layout_height="104dp"
       android:adjustViewBounds="true"
       android:contentDescription="Money2Time Pro"
-      android:src="@drawable/widget_mascot" />
+      android:src="@drawable/widget_logo" />
     <TextView
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
@@ -3133,7 +3142,7 @@ ${historyRows}
       android:layout_height="44dp"
       android:adjustViewBounds="true"
       android:contentDescription="Money2Time Pro"
-      android:src="@drawable/widget_mascot" />
+      android:src="@drawable/widget_logo" />
     <TextView
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
@@ -3250,13 +3259,7 @@ ${historyRows}
       android:layout_height="wrap_content"
       android:orientation="horizontal"
       android:gravity="top">
-      <ImageView
-        android:layout_width="116dp"
-        android:layout_height="32dp"
-        android:adjustViewBounds="true"
-        android:contentDescription="Money2Time"
-        android:scaleType="fitStart"
-        android:src="@drawable/banner" />
+      ${androidWordmark(116, 32)}
       <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -3389,7 +3392,7 @@ ${budgetRows}
       android:layout_height="104dp"
       android:adjustViewBounds="true"
       android:contentDescription="Money2Time Pro"
-      android:src="@drawable/widget_mascot" />
+      android:src="@drawable/widget_logo" />
     <TextView
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
@@ -3807,11 +3810,11 @@ function addIosWidgetFiles(config) {
       const projectRoot = cfg.modRequest.projectRoot;
       const iosRoot = path.join(projectRoot, 'ios/Money2TimeWidget');
       const appRoot = path.join(projectRoot, 'ios/Money2Time');
-      const bannerAssetPath = path.join(projectRoot, BANNER_ASSET);
-      const mascotAssetPath = path.join(projectRoot, MASCOT_ASSET);
-
-      copyFileIfChanged(bannerAssetPath, path.join(iosRoot, 'banner.png'));
-      copyFileIfChanged(mascotAssetPath, path.join(iosRoot, 'mascot.png'));
+      const appLogoPath = path.join(projectRoot, APP_LOGO_ASSET);
+      copyFileIfChanged(appLogoPath, path.join(iosRoot, 'app-logo.png'));
+      for (const retired of ['banner.png', 'mascot.png']) {
+        fs.rmSync(path.join(iosRoot, retired), { force: true });
+      }
 
       writeFileIfChanged(
         path.join(iosRoot, 'Money2TimeWidget.swift'),
@@ -3852,6 +3855,7 @@ private struct WeeklyExpenseData: Decodable {
 }
 
 private struct CalendarDayData: Decodable {
+  let dayKey: String
   let dayNumber: Int
   let incomeLabel: String
   let expenseLabel: String
@@ -4048,31 +4052,31 @@ private func loadBundleImage(_ name: String) -> Image? {
   return nil
 }
 
-private func bannerImage() -> Image? {
-  loadBundleImage("banner")
-}
-
-private func mascotImage() -> Image? {
-  loadBundleImage("mascot")
+private func appLogoImage() -> Image? {
+  loadBundleImage("app-logo")
 }
 
 private struct Wordmark: View {
   var width: CGFloat = 116
   @Environment(\\.colorScheme) private var scheme
   var body: some View {
-    Group {
-      if let banner = bannerImage() {
-        banner
+    let size = width * 0.22
+    HStack(spacing: width * 0.04) {
+      if let logo = appLogoImage() {
+        logo
           .resizable()
           .scaledToFit()
-          .frame(width: width, height: width * 0.27, alignment: .leading)
-      } else {
-        Text("Money2Time")
-          .font(.system(size: width * 0.15, weight: .heavy, design: .rounded))
-          .foregroundStyle(Palette.current(scheme).primary)
-          .frame(height: width * 0.27, alignment: .leading)
+          .frame(width: size, height: size)
+          .clipShape(RoundedRectangle(cornerRadius: size * 0.24))
       }
+      Text("Money2Time")
+        .font(.system(size: width * 0.12, weight: .heavy, design: .rounded))
+        .foregroundStyle(Palette.current(scheme).primary)
+        .lineLimit(1)
+        .minimumScaleFactor(0.8)
     }
+    .frame(width: width, height: width * 0.27, alignment: .leading)
+    .accessibilityElement(children: .ignore)
     .accessibilityLabel("Money2Time")
   }
 }
@@ -4114,17 +4118,17 @@ private struct ProLockView: View {
   let palette: Palette
   var compact: Bool = false
   // A centered vertical layout tuned for the small (square) widget family, so
-  // the mascot + title + unlock button never clip the way the medium compact
+  // the app logo + title + unlock button never clip the way the medium compact
   // or large full layouts would at 2x2.
   var small: Bool = false
 
   var body: some View {
-    let mascotSize: CGFloat = compact ? 58 : 104
+    let logoSize: CGFloat = compact ? 58 : 104
     Link(destination: URL(string: url) ?? URL(string: "money2time://pro")!) {
       VStack(spacing: 0) {
         Spacer(minLength: 0)
         if small {
-          mascot(size: 44)
+          appLogo(size: 44)
           Text(title)
             .font(.system(size: 15, weight: .heavy, design: .rounded))
             .foregroundStyle(palette.text)
@@ -4139,7 +4143,7 @@ private struct ProLockView: View {
             .padding(.top, 1)
         } else if compact {
           HStack(spacing: 12) {
-            mascot(size: mascotSize)
+            appLogo(size: logoSize)
             VStack(alignment: .leading, spacing: 2) {
               Text(title)
                 .font(.system(size: 16, weight: .heavy, design: .rounded))
@@ -4155,7 +4159,7 @@ private struct ProLockView: View {
             Spacer(minLength: 0)
           }
         } else {
-          mascot(size: mascotSize)
+          appLogo(size: logoSize)
           Text(title)
             .font(.system(size: 21, weight: .heavy, design: .rounded))
             .foregroundStyle(palette.text)
@@ -4177,9 +4181,10 @@ private struct ProLockView: View {
   }
 
   @ViewBuilder
-  private func mascot(size: CGFloat) -> some View {
-    if let image = mascotImage() {
+  private func appLogo(size: CGFloat) -> some View {
+    if let image = appLogoImage() {
       image.resizable().scaledToFit().frame(width: size, height: size)
+        .clipShape(RoundedRectangle(cornerRadius: size * 0.24))
     } else {
       ZStack {
         Circle().fill(palette.accent.opacity(0.18)).frame(width: size, height: size)
@@ -4706,7 +4711,9 @@ private struct CalendarView: View {
           ForEach(0..<data.leadingSpacers, id: \\.self) { _ in
             Color.clear.frame(height: cellHeight)
           }
-          ForEach(Array(data.days.enumerated()), id: \\.offset) { _, day in
+          // LazyVGrid shares IDs across its ForEach children. Date keys keep
+          // days distinct from the blank cells and stable across month changes.
+          ForEach(data.days, id: \\.dayKey) { day in
             CalendarCell(day: day, palette: palette, height: cellHeight)
           }
         }
@@ -6527,8 +6534,9 @@ function ensureIosWidgetXcodeTarget(config) {
     ensureSourceFile(project, 'Money2TimeWidget.swift', widgetTarget.uuid, widgetGroupKey);
     ensureSourceFile(project, 'Money2TimeLiveEarnings.swift', widgetTarget.uuid, widgetGroupKey);
     removeProjectFileByBasename(project, 'money2time_widget_banner.png');
-    ensureResourceFile(project, 'banner.png', widgetTarget.uuid, widgetGroupKey);
-    ensureResourceFile(project, 'mascot.png', widgetTarget.uuid, widgetGroupKey);
+    removeProjectFileByBasename(project, 'banner.png');
+    removeProjectFileByBasename(project, 'mascot.png');
+    ensureResourceFile(project, 'app-logo.png', widgetTarget.uuid, widgetGroupKey);
 
     updateBuildSettingsForTarget(project, widgetTarget.uuid, (buildSettings) => {
       buildSettings.APPLICATION_EXTENSION_API_ONLY = 'YES';

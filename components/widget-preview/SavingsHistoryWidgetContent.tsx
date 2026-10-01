@@ -1,4 +1,3 @@
-import { Image } from 'expo-image';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
@@ -8,7 +7,8 @@ import type { SavingsHistorySnapshot } from '~/services/widgetSnapshot.shared';
 import { withColorAlpha } from '~/utils/color';
 import { FONT } from '~/utils/fonts';
 
-const BANNER_SOURCE = require('../../assets/banner.png');
+import { WidgetWordmark } from './WidgetWordmark';
+
 const WIDGET_PADDING = 16;
 
 function SavingsHistoryRow({ month }: { month: SavingsHistorySnapshot['months'][number] }) {
@@ -75,12 +75,7 @@ export function SavingsHistoryWidgetContent({
   return (
     <View style={styles.pad}>
       <View style={styles.headerRow}>
-        <Image
-          source={BANNER_SOURCE}
-          contentFit="contain"
-          contentPosition="left center"
-          style={{ width: bannerWidth, height: bannerWidth * 0.27 }}
-        />
+        <WidgetWordmark width={bannerWidth} />
         <View style={styles.headerRight}>
           <Text style={[styles.totalAmount, { color: totalColor }]} numberOfLines={1}>
             {data.totalSavedLabel}
