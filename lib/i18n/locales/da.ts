@@ -1184,6 +1184,17 @@ const da = {
         'Første gang den kører, skal du trykke på Always Allow, så den kan læse dit skærmbillede.',
       log_screenshot_step_6:
         'Money2Time aflæser beløbet og forhandleren og bogfører transaktionen automatisk.',
+      share_screenshot_title: 'Del til Money2Time',
+      share_screenshot_hint:
+        'Del et betalingsskærmbillede eller et kvitteringsfoto til Money2Time fra enhver app. Beløb, forhandler og konto aflæses, og transaktionen bogføres automatisk.',
+      share_screenshot_step_1:
+        'Tag et skærmbillede af en betalings- eller kvitteringsskærm, og tryk på Del i forhåndsvisningen.',
+      share_screenshot_step_2:
+        'Vælg Money2Time i delingsmenuen. Tip: tryk længe på den for at fastgøre den forrest.',
+      share_screenshot_step_3:
+        'Money2Time åbner og aflæser skærmbilledet i baggrunden. Billeder, der allerede ligger i dit galleri, virker også: åbn et, tryk på Del, og vælg Money2Time.',
+      share_screenshot_step_4:
+        'Transaktionen bogføres automatisk. Del flere billeder på én gang for at bogføre dem alle.',
       defaults_title: 'Konfiguration',
       defaults_hint: 'Bruges, når en automatisering ikke angiver konto eller kategori.',
       default_account: 'Standardkonto',

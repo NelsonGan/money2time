@@ -1192,6 +1192,17 @@ const fr = {
         "La première fois, touchez Always Allow pour qu'il puisse lire votre capture d'écran.",
       log_screenshot_step_6:
         'Money2Time lit le montant et le commerçant et enregistre la transaction automatiquement.',
+      share_screenshot_title: 'Partager avec Money2Time',
+      share_screenshot_hint:
+        "Partagez une capture de paiement ou une photo de reçu avec Money2Time depuis n'importe quelle app. Il lit le montant, le commerçant et le compte et enregistre la transaction automatiquement.",
+      share_screenshot_step_1:
+        "Faites une capture d'écran d'un paiement ou d'un reçu, puis touchez Partager dans l'aperçu.",
+      share_screenshot_step_2:
+        'Choisissez Money2Time dans le menu de partage. Astuce : appuyez longuement pour l’épingler en tête.',
+      share_screenshot_step_3:
+        'Money2Time s’ouvre et lit la capture en arrière-plan. Les photos de votre galerie fonctionnent aussi : ouvrez-en une, touchez Partager et choisissez Money2Time.',
+      share_screenshot_step_4:
+        'La transaction est enregistrée automatiquement. Partagez plusieurs images à la fois pour toutes les enregistrer.',
       defaults_title: 'Configuration',
       defaults_hint:
         'Utilisées lorsqu’une automatisation ne définit pas de compte ou de catégorie.',

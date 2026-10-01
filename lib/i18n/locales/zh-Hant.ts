@@ -1125,6 +1125,14 @@ const zhHant = {
       log_screenshot_step_4: '在任意付款或收據介面，雙擊 iPhone 背面即可，它會自動為你截圖。',
       log_screenshot_step_5: '首次執行時，點按 Always Allow，讓它可以讀取你的截圖。',
       log_screenshot_step_6: 'Money2Time 會讀取金額和商家，並自動記錄這筆交易。',
+      share_screenshot_title: '分享到 Money2Time',
+      share_screenshot_hint:
+        '從任何 App 把付款截圖或收據照片分享到 Money2Time，它會讀取金額、商家和帳戶，並自動記錄這筆交易。',
+      share_screenshot_step_1: '對付款或收據畫面截圖，然後在預覽中點按「分享」。',
+      share_screenshot_step_2: '在分享選單中選擇 Money2Time。提示：長按可將它釘選在最前面。',
+      share_screenshot_step_3:
+        'Money2Time 會開啟並在背景讀取截圖。相簿裡的照片也可以：打開照片，點按「分享」，再選擇 Money2Time。',
+      share_screenshot_step_4: '交易會自動記錄。一次分享多張圖片，即可全部記錄。',
       defaults_title: '配置',
       defaults_hint: '當自動化沒有指定帳戶或分類時使用。',
       default_account: '預設帳戶',

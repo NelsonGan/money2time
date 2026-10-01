@@ -1192,6 +1192,17 @@ const nl = {
         'De eerste keer dat hij draait, tik op Always Allow zodat hij je schermafbeelding kan lezen.',
       log_screenshot_step_6:
         'Money2Time leest het bedrag en de winkelier en boekt de transactie automatisch.',
+      share_screenshot_title: 'Delen met Money2Time',
+      share_screenshot_hint:
+        'Deel een betalingsscreenshot of een foto van een bon vanuit elke app met Money2Time. Het leest het bedrag, de winkelier en de rekening en boekt de transactie automatisch.',
+      share_screenshot_step_1:
+        'Maak een screenshot van een betaal- of bonscherm en tik in de voorvertoning op Delen.',
+      share_screenshot_step_2:
+        'Kies Money2Time in het deelmenu. Tip: houd het ingedrukt om het vooraan vast te zetten.',
+      share_screenshot_step_3:
+        "Money2Time opent en leest de screenshot op de achtergrond. Foto's uit je galerij werken ook: open er een, tik op Delen en kies Money2Time.",
+      share_screenshot_step_4:
+        'De transactie wordt automatisch geboekt. Deel meerdere afbeeldingen tegelijk om ze allemaal te boeken.',
       defaults_title: 'Configuratie',
       defaults_hint:
         'Worden gebruikt wanneer een automatisering geen rekening of categorie instelt.',

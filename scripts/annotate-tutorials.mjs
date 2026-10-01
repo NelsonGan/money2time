@@ -23,6 +23,13 @@
 //   node scripts/annotate-tutorials.mjs                  # all entries
 //   node scripts/annotate-tutorials.mjs log-an-expense   # only ids with this prefix
 //
+// The same marks serve the Automation walkthroughs under `assets/autolog/`,
+// which have a spec of their own so their frames never count as tutorial
+// images (the tutorials test fails on an image nothing in the catalog uses):
+//
+//   TUTORIAL_SPEC=scripts/data/autolog-shots.json TUTORIAL_OUT_DIR=assets/autolog \
+//     node scripts/annotate-tutorials.mjs
+//
 // Re-run whenever the spec or a raw capture changes.
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
@@ -33,8 +40,11 @@ import Jimp from 'jimp-compact';
 import { encodeIndexedPng } from './lib/pngQuantize.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const SPEC_PATH = path.join(ROOT, 'scripts/data/tutorial-shots.json');
-const OUT_DIR = path.join(ROOT, 'assets/tutorials');
+const SPEC_PATH = path.resolve(
+  ROOT,
+  process.env.TUTORIAL_SPEC ?? 'scripts/data/tutorial-shots.json',
+);
+const OUT_DIR = path.resolve(ROOT, process.env.TUTORIAL_OUT_DIR ?? 'assets/tutorials');
 /** Where `RAW/<file>` sources are looked up. Not committed, see the header. */
 const RAW_DIR = path.resolve(ROOT, process.env.TUTORIAL_RAW_DIR ?? '.tutorial-raw');
 

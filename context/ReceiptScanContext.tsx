@@ -26,6 +26,12 @@ import {
 import { copyReceiptImage, deleteReceiptImage } from '~/services/userAssets';
 import { newId } from '~/utils/id';
 
+/**
+ * Where a scanned image came from, for analytics: the camera, the photo
+ * library, the iOS "Log Screenshot" shortcut, or the Android share sheet.
+ */
+type ScanSource = 'camera' | 'library' | 'shortcut' | 'share';
+
 export type ScanJobStatus = 'scanning' | 'error' | 'ready' | 'created';
 export type ScanJobError = 'empty' | 'capacity' | 'too_large' | 'failed';
 
@@ -80,11 +86,7 @@ interface ReceiptScanContextValue {
    * Called by the camera screen once the user has captured or picked a photo;
    * `rel` is the stored receipt path (e.g. `receipts/9f3c.jpg`).
    */
-  scanReceiptImage: (
-    rel: string,
-    source: 'camera' | 'library' | 'shortcut',
-    intent?: ScanIntent,
-  ) => void;
+  scanReceiptImage: (rel: string, source: ScanSource, intent?: ScanIntent) => void;
   /**
    * Like `scanReceiptImage` but awaitable — resolves with the scan's outcome
    * once the transaction is created (or the scan errors). Used by the auto-log
@@ -92,7 +94,7 @@ interface ReceiptScanContextValue {
    */
   scanReceiptImageAsync: (
     rel: string,
-    source: 'camera' | 'library' | 'shortcut',
+    source: ScanSource,
     intent?: ScanIntent,
   ) => Promise<ScanOutcome>;
   /** Open a 'ready' job in the review editor and remove its banner card. */
@@ -465,11 +467,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
   // can act on the outcome. `scanReceiptImage` below is the fire-and-forget
   // wrapper the camera screen uses.
   const startScanJob = useCallback(
-    (
-      rel: string,
-      source: 'camera' | 'library' | 'shortcut',
-      intent: ScanIntent = 'quick',
-    ): Promise<ScanOutcome> => {
+    (rel: string, source: ScanSource, intent: ScanIntent = 'quick'): Promise<ScanOutcome> => {
       const id = newId();
       setJobsBoth((prev) => [...prev, { id, status: 'scanning', receiptUri: rel, intent }]);
       void triggerHaptic('selection');
@@ -483,7 +481,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
   // (non-blocking). Invoked by the camera screen once it has saved the photo to
   // the receipt store.
   const scanReceiptImage = useCallback(
-    (rel: string, source: 'camera' | 'library' | 'shortcut', intent: ScanIntent = 'quick') => {
+    (rel: string, source: ScanSource, intent: ScanIntent = 'quick') => {
       void startScanJob(rel, source, intent);
     },
     [startScanJob],
@@ -493,7 +491,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
   // is created (or the scan errors). The screenshot drain awaits this so it
   // clears its App Group entry only after the scan has taken ownership.
   const scanReceiptImageAsync = useCallback(
-    (rel: string, source: 'camera' | 'library' | 'shortcut', intent: ScanIntent = 'quick') =>
+    (rel: string, source: ScanSource, intent: ScanIntent = 'quick') =>
       startScanJob(rel, source, intent),
     [startScanJob],
   );

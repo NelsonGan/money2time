@@ -1,6 +1,6 @@
-import { BookOpen, Camera, ChevronRight, Nfc, PlusCircle } from 'lucide-react-native';
+import { BookOpen, Camera, ChevronRight, Nfc, PlusCircle, Share2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import { Alert, Platform, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 
 import { AddActionSheet } from '~/components/navigation/AddActionSheet';
 import {
@@ -128,6 +128,7 @@ export function AutoLogSettingsScreen({
   const themeColors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
   const [actionPickerVisible, setActionPickerVisible] = useState(false);
+  const isAndroid = Platform.OS === 'android';
 
   // Availability is async, so hide the voice tile until it answers rather than
   // offering an action this device cannot run.
@@ -226,153 +227,207 @@ export function AutoLogSettingsScreen({
             title={I18n.t('settings.auto_log.title')}
           />
 
+          {/* Android has no Shortcuts or Back Tap. Its one automation is the
+              system share sheet: sharing a screenshot to the app scans and logs
+              it through the same pipeline as iOS's Log Screenshot, so it shares
+              that action's "save screenshot" setting. */}
+          {isAndroid ? (
+            <View className="mt-2">
+              <AutoLogSectionHeader
+                title={I18n.t('settings.auto_log.share_screenshot_title')}
+                onTutorial={() => onOpenTutorial('shareScreenshot')}
+                tutorialColor={themeColors.primary}
+              />
+              <View style={styles.card} className="bg-card border border-border/30">
+                <View style={styles.row}>
+                  <View
+                    style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}
+                  >
+                    <Share2 size={18} color={themeColors.primary} />
+                  </View>
+                  <View style={styles.rowText}>
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('settings.auto_log.share_screenshot_hint')}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.rowDivider} />
+                <View style={styles.row}>
+                  <View style={styles.rowText}>
+                    <Text variant="body" className="text-foreground">
+                      {I18n.t('settings.auto_log.save_screenshot_label')}
+                    </Text>
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('settings.auto_log.save_screenshot_hint')}
+                    </Text>
+                  </View>
+                  <Switch
+                    value={quickEntryPrefs.autoLogSaveScreenshot}
+                    onValueChange={handleToggleSaveScreenshot}
+                    trackColor={{ false: themeColors.border, true: themeColors.primary }}
+                  />
+                </View>
+              </View>
+            </View>
+          ) : null}
+
           {/* One section per Shortcuts action, headed by the action's own name.
               Grouping by trigger instead ("Back Tap opens") read as a lie: Back
               Tap is only one of the things that can run New Transaction, and the
               rows under it configure the action, not the gesture. The names are
               hardcoded English on purpose — see constants/autoLogIntents.ts. */}
-          <View className="mt-2">
-            <AutoLogSectionHeader
-              title={LOG_CARD_PAYMENT_INTENT_NAME}
-              onTutorial={() => onOpenTutorial('logPayment')}
-              tutorialColor={themeColors.primary}
-            />
-            <View style={styles.card} className="bg-card border border-border/30">
-              <View style={styles.row}>
-                <View style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}>
-                  <Nfc size={18} color={themeColors.primary} />
-                </View>
-                <View style={styles.rowText}>
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('settings.auto_log.log_payment_hint')}
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.rowDivider} />
-              <View style={styles.row}>
-                <View style={styles.rowText}>
-                  <Text variant="body" className="text-foreground">
-                    {I18n.t('settings.auto_log.auto_categorize_label')}
-                  </Text>
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('settings.auto_log.auto_categorize_hint')}
-                  </Text>
-                </View>
-                <Switch
-                  value={quickEntryPrefs.autoLogAutoCategorize}
-                  onValueChange={handleToggleAutoCategorize}
-                  trackColor={{ false: themeColors.border, true: themeColors.primary }}
+          {isAndroid ? null : (
+            <>
+              <View className="mt-2">
+                <AutoLogSectionHeader
+                  title={LOG_CARD_PAYMENT_INTENT_NAME}
+                  onTutorial={() => onOpenTutorial('logPayment')}
+                  tutorialColor={themeColors.primary}
                 />
-              </View>
-              {/* The mapping the auto-categorizer reads lives in Quick Entry, so
-                  link there rather than duplicating it. Only useful while on. */}
-              {quickEntryPrefs.autoLogAutoCategorize ? (
-                <>
+                <View style={styles.card} className="bg-card border border-border/30">
+                  <View style={styles.row}>
+                    <View
+                      style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}
+                    >
+                      <Nfc size={18} color={themeColors.primary} />
+                    </View>
+                    <View style={styles.rowText}>
+                      <Text variant="caption" tone="muted">
+                        {I18n.t('settings.auto_log.log_payment_hint')}
+                      </Text>
+                    </View>
+                  </View>
                   <View style={styles.rowDivider} />
-                  <Pressable style={styles.row} onPress={handleOpenQuickEntry}>
+                  <View style={styles.row}>
                     <View style={styles.rowText}>
                       <Text variant="body" className="text-foreground">
-                        {I18n.t('settings.auto_log.auto_categorize_mapping_link')}
+                        {I18n.t('settings.auto_log.auto_categorize_label')}
+                      </Text>
+                      <Text variant="caption" tone="muted">
+                        {I18n.t('settings.auto_log.auto_categorize_hint')}
+                      </Text>
+                    </View>
+                    <Switch
+                      value={quickEntryPrefs.autoLogAutoCategorize}
+                      onValueChange={handleToggleAutoCategorize}
+                      trackColor={{ false: themeColors.border, true: themeColors.primary }}
+                    />
+                  </View>
+                  {/* The mapping the auto-categorizer reads lives in Quick Entry, so
+                      link there rather than duplicating it. Only useful while on. */}
+                  {quickEntryPrefs.autoLogAutoCategorize ? (
+                    <>
+                      <View style={styles.rowDivider} />
+                      <Pressable style={styles.row} onPress={handleOpenQuickEntry}>
+                        <View style={styles.rowText}>
+                          <Text variant="body" className="text-foreground">
+                            {I18n.t('settings.auto_log.auto_categorize_mapping_link')}
+                          </Text>
+                        </View>
+                        <ChevronRight size={18} color={themeColors.textMuted} />
+                      </Pressable>
+                    </>
+                  ) : null}
+                  <View style={styles.rowDivider} />
+                  <View style={styles.row}>
+                    <View style={styles.rowText}>
+                      <Text variant="body" className="text-foreground">
+                        {I18n.t('settings.auto_log.subcategories_label')}
+                      </Text>
+                      <Text variant="caption" tone="muted">
+                        {I18n.t('settings.auto_log.subcategories_hint')}
+                      </Text>
+                    </View>
+                    <Switch
+                      value={quickEntryPrefs.autoLogIncludeSubcategories}
+                      onValueChange={handleToggleSubcategories}
+                      trackColor={{ false: themeColors.border, true: themeColors.primary }}
+                    />
+                  </View>
+                </View>
+              </View>
+
+              {/* Log Screenshot sits above New Transaction: both install a ready-made
+                  shortcut, and screenshot logging is the more discoverable habit. */}
+              <View className="mt-6">
+                <AutoLogSectionHeader
+                  title={SCAN_SCREENSHOT_INTENT_NAME}
+                  onTutorial={() => onOpenTutorial('logScreenshot')}
+                  tutorialColor={themeColors.primary}
+                />
+                <View style={styles.card} className="bg-card border border-border/30">
+                  <View style={styles.row}>
+                    <View
+                      style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}
+                    >
+                      <Camera size={18} color={themeColors.primary} />
+                    </View>
+                    <View style={styles.rowText}>
+                      <Text variant="caption" tone="muted">
+                        {I18n.t('settings.auto_log.log_screenshot_hint')}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.rowDivider} />
+                  <View style={styles.row}>
+                    <View style={styles.rowText}>
+                      <Text variant="body" className="text-foreground">
+                        {I18n.t('settings.auto_log.save_screenshot_label')}
+                      </Text>
+                      <Text variant="caption" tone="muted">
+                        {I18n.t('settings.auto_log.save_screenshot_hint')}
+                      </Text>
+                    </View>
+                    <Switch
+                      value={quickEntryPrefs.autoLogSaveScreenshot}
+                      onValueChange={handleToggleSaveScreenshot}
+                      trackColor={{ false: themeColors.border, true: themeColors.primary }}
+                    />
+                  </View>
+                </View>
+              </View>
+
+              <View className="mt-6">
+                <AutoLogSectionHeader
+                  title={NEW_TRANSACTION_INTENT_NAME}
+                  onTutorial={() => onOpenTutorial('newTransaction')}
+                  tutorialColor={themeColors.primary}
+                />
+                <View style={styles.card} className="bg-card border border-border/30">
+                  <View style={styles.row}>
+                    <View
+                      style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}
+                    >
+                      <PlusCircle size={18} color={themeColors.primary} />
+                    </View>
+                    <View style={styles.rowText}>
+                      <Text variant="caption" tone="muted">
+                        {I18n.t('settings.auto_log.new_transaction_hint')}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.rowDivider} />
+                  {/* Same sheet Quick Entry uses to map the + button's tap/hold. */}
+                  <Pressable style={styles.row} onPress={() => setActionPickerVisible(true)}>
+                    <View style={styles.rowText}>
+                      <Text variant="body" className="text-foreground">
+                        {I18n.t('settings.auto_log.opens_label')}
+                      </Text>
+                      <Text variant="caption" tone="muted">
+                        {I18n.t(
+                          `settings.quick_entry.add_button.action_${quickEntryPrefs.backTapAction}`,
+                        )}
                       </Text>
                     </View>
                     <ChevronRight size={18} color={themeColors.textMuted} />
                   </Pressable>
-                </>
-              ) : null}
-              <View style={styles.rowDivider} />
-              <View style={styles.row}>
-                <View style={styles.rowText}>
-                  <Text variant="body" className="text-foreground">
-                    {I18n.t('settings.auto_log.subcategories_label')}
-                  </Text>
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('settings.auto_log.subcategories_hint')}
-                  </Text>
                 </View>
-                <Switch
-                  value={quickEntryPrefs.autoLogIncludeSubcategories}
-                  onValueChange={handleToggleSubcategories}
-                  trackColor={{ false: themeColors.border, true: themeColors.primary }}
-                />
               </View>
-            </View>
-          </View>
+            </>
+          )}
 
-          {/* Log Screenshot sits above New Transaction: both install a ready-made
-              shortcut, and screenshot logging is the more discoverable habit. */}
-          <View className="mt-6">
-            <AutoLogSectionHeader
-              title={SCAN_SCREENSHOT_INTENT_NAME}
-              onTutorial={() => onOpenTutorial('logScreenshot')}
-              tutorialColor={themeColors.primary}
-            />
-            <View style={styles.card} className="bg-card border border-border/30">
-              <View style={styles.row}>
-                <View style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}>
-                  <Camera size={18} color={themeColors.primary} />
-                </View>
-                <View style={styles.rowText}>
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('settings.auto_log.log_screenshot_hint')}
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.rowDivider} />
-              <View style={styles.row}>
-                <View style={styles.rowText}>
-                  <Text variant="body" className="text-foreground">
-                    {I18n.t('settings.auto_log.save_screenshot_label')}
-                  </Text>
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('settings.auto_log.save_screenshot_hint')}
-                  </Text>
-                </View>
-                <Switch
-                  value={quickEntryPrefs.autoLogSaveScreenshot}
-                  onValueChange={handleToggleSaveScreenshot}
-                  trackColor={{ false: themeColors.border, true: themeColors.primary }}
-                />
-              </View>
-            </View>
-          </View>
-
-          <View className="mt-6">
-            <AutoLogSectionHeader
-              title={NEW_TRANSACTION_INTENT_NAME}
-              onTutorial={() => onOpenTutorial('newTransaction')}
-              tutorialColor={themeColors.primary}
-            />
-            <View style={styles.card} className="bg-card border border-border/30">
-              <View style={styles.row}>
-                <View style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}>
-                  <PlusCircle size={18} color={themeColors.primary} />
-                </View>
-                <View style={styles.rowText}>
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('settings.auto_log.new_transaction_hint')}
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.rowDivider} />
-              {/* Same sheet Quick Entry uses to map the + button's tap/hold. */}
-              <Pressable style={styles.row} onPress={() => setActionPickerVisible(true)}>
-                <View style={styles.rowText}>
-                  <Text variant="body" className="text-foreground">
-                    {I18n.t('settings.auto_log.opens_label')}
-                  </Text>
-                  <Text variant="caption" tone="muted">
-                    {I18n.t(
-                      `settings.quick_entry.add_button.action_${quickEntryPrefs.backTapAction}`,
-                    )}
-                  </Text>
-                </View>
-                <ChevronRight size={18} color={themeColors.textMuted} />
-              </Pressable>
-            </View>
-          </View>
-
-          {/* Both actions resolve these, so they sit on their own rather than
-              under either one. Account and category are Quick Entry's defaults,
+          {/* Every automation resolves these, so they sit on their own rather than
+              under any one. Account and category are Quick Entry's defaults,
               not a second copy — editing them there is what the drain reads. */}
           <View className="mt-6">
             <Text variant="caption" tone="muted" className="mb-2 px-1">
@@ -410,8 +465,9 @@ export function AutoLogSettingsScreen({
 
           {/* Dev-only, so the copy stays hardcoded English like the Developer
               section on the settings home. A simulator has no NFC and no
-              Shortcuts app, so this is the only way to exercise the real path. */}
-          {__DEV__ ? (
+              Shortcuts app, so this is the only way to exercise the real path.
+              iOS only: Android has no Apple Pay automation to simulate. */}
+          {__DEV__ && !isAndroid ? (
             <View className="mt-6">
               <Text variant="caption" tone="muted" className="mb-2 px-1">
                 Developer

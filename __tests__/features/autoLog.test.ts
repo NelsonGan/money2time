@@ -5,8 +5,10 @@ import {
   parseAutoLogAmount,
   parseAutoLogPendingJson,
   parseAutoLogPendingScansJson,
+  parseSharedScanFileNames,
   resolveAutoLogEntry,
   selectDrainableAutoLogEntries,
+  SHARED_SCANS_DIR,
 } from '~/features/transactions/lib/autoLog';
 import type { Account, Category } from '~/types';
 
@@ -203,6 +205,60 @@ describe('parseAutoLogPendingScansJson', () => {
   it('defaults a missing createdAt rather than dropping the entry', () => {
     const json = JSON.stringify([{ id: 's1', path: '/a.png' }]);
     expect(parseAutoLogPendingScansJson(json)[0].createdAt).toEqual(expect.any(String));
+  });
+});
+
+describe('parseSharedScanFileNames', () => {
+  const DIR = 'file:///data/user/0/com.nelsongan.money2time/files/shared-scans/';
+
+  it('turns completed share files into pending scans, oldest first', () => {
+    const entries = parseSharedScanFileNames(
+      [
+        '1790000000500-bbbb-2222.png',
+        '1790000000100-aaaa-1111.jpg',
+        '1790000000900-cccc-3333.heic',
+      ],
+      DIR,
+    );
+    expect(entries.map((scan) => scan.id)).toEqual([
+      '1790000000100-aaaa-1111.jpg',
+      '1790000000500-bbbb-2222.png',
+      '1790000000900-cccc-3333.heic',
+    ]);
+    expect(entries[0]).toEqual({
+      id: '1790000000100-aaaa-1111.jpg',
+      createdAt: new Date(1790000000100).toISOString(),
+      // Absolute path without the scheme, the same shape the iOS queue hands
+      // the drain (which adds file:// back itself).
+      path: '/data/user/0/com.nelsongan.money2time/files/shared-scans/1790000000100-aaaa-1111.jpg',
+    });
+  });
+
+  it('skips copies still in flight and anything else in the folder', () => {
+    const entries = parseSharedScanFileNames(
+      [
+        '1790000000100-aaaa-1111.jpg.part',
+        'notes.txt',
+        '.DS_Store',
+        'receipt.jpg',
+        '1790000000100-aaaa-1111.pdf',
+        '1790000000200-dddd-4444.JPEG',
+      ],
+      DIR,
+    );
+    expect(entries.map((scan) => scan.id)).toEqual(['1790000000200-dddd-4444.JPEG']);
+  });
+
+  it('accepts a bare directory path', () => {
+    const [scan] = parseSharedScanFileNames(['1790000000100-aaaa.webp'], '/files/shared-scans');
+    expect(scan?.path).toBe('/files/shared-scans/1790000000100-aaaa.webp');
+  });
+
+  it('matches the folder the Android share activity writes into', () => {
+    const plugin = require('../../plugins/withMoney2TimeShareScan.js') as {
+      SHARED_SCANS_DIR: string;
+    };
+    expect(plugin.SHARED_SCANS_DIR).toBe(SHARED_SCANS_DIR);
   });
 });
 
