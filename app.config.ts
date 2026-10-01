@@ -1,7 +1,8 @@
 import type { ConfigContext, ExpoConfig } from 'expo/config';
 
+import { getNativeAssetRevision } from './scripts/lib/nativeAssetRevision.cjs';
+
 const appJson = require('./app.json') as { expo: ExpoConfig };
-const { getNativeAssetRevision } = require('./scripts/lib/nativeAssetRevision.cjs');
 const baseConfig = appJson.expo;
 
 // The development EAS profile sets APP_VARIANT=development (see eas.json). When it is set we
