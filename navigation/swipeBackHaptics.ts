@@ -49,5 +49,3 @@ export function createNativeStackSwipeHapticListeners({
     },
   });
 }
-
-export const SHARED_NATIVE_STACK_SWIPE_HAPTIC_LISTENERS = createNativeStackSwipeHapticListeners();

@@ -3,8 +3,8 @@ import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
-import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import { useBottomNavScrollReporter } from '~/components/navigation/BottomNavMinimize';
+import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import {
   SETTINGS_LIST_BOTTOM_PADDING,
   SettingsPageLayout,

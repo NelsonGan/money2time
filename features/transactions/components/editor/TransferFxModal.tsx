@@ -6,8 +6,8 @@ import { Text, ThemeModal } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import { convert, currencySymbolForCode, resolveRate } from '~/utils/currency';
 import type { RateTable } from '~/types';
+import { convert, currencySymbolForCode, resolveRate } from '~/utils/currency';
 
 interface TransferFxModalProps {
   visible: boolean;

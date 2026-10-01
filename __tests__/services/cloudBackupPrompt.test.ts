@@ -2,10 +2,10 @@ import {
   checkEligibility,
   type CloudBackupPromptState,
   createInitialState,
+  markShown,
   MAX_SHOWS,
   MIN_DAYS_BETWEEN_PROMPTS,
   MIN_TRANSACTIONS_BEFORE_PROMPT,
-  markShown,
   parseStoredState,
 } from '~/services/cloudBackupPrompt.shared';
 

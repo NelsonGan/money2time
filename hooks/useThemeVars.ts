@@ -1,7 +1,8 @@
-import { useMemo } from 'react';
 import { vars } from 'nativewind';
-import { useResolvedTheme, useThemeColor } from '~/context/ThemeContext';
+import { useMemo } from 'react';
+
 import { getThemeCssVars } from '~/constants/designSystem';
+import { useResolvedTheme, useThemeColor } from '~/context/ThemeContext';
 
 /**
  * Returns a NativeWind `vars()` style object that sets all CSS custom properties

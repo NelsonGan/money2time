@@ -213,9 +213,9 @@ function getTableColumnNames(
   sqlite: ReturnType<typeof getSQLite>,
   tableName: string,
 ): ReadonlySet<string> {
-  const columns = sqlite.getAllSync(`PRAGMA table_info(${tableName})`) as Array<{
+  const columns = sqlite.getAllSync(`PRAGMA table_info(${tableName})`) as {
     name?: string | null;
-  }>;
+  }[];
   return new Set(
     columns.map((column) => column.name?.trim()).filter((name): name is string => Boolean(name)),
   );
@@ -247,9 +247,9 @@ export function applyBackupData(backup: BackupData): ImportResult {
   const sqlite = getSQLite();
   const currentAppUserId =
     (
-      sqlite.getAllSync('SELECT app_user_id FROM settings LIMIT 1') as Array<{
+      sqlite.getAllSync('SELECT app_user_id FROM settings LIMIT 1') as {
         app_user_id?: string | null;
-      }>
+      }[]
     )[0]?.app_user_id ?? newAppUserId();
   const settingsRows = withPreservedAppUserId(backup.tables.settings, currentAppUserId);
 

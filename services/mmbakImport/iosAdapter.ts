@@ -161,48 +161,21 @@ export const iosAdapter: MMBackupAdapter = {
         ),
       ]);
 
-    const txRows: MMTxRow[] = txSourceRows.map((row) => ({
-      id: row.id,
-      doType: row.doType,
-      amount: row.amount,
-      dateIso: toIsoFromAppleDate(row.dateRaw),
-      content: row.content,
-      memo: row.memo,
-      assetUid: row.assetUid,
-      assetId: row.assetId,
-      toAssetUid: row.toAssetUid,
-      oppositeAid: row.oppositeAid,
-      categoryUid: row.categoryUid,
-      categoryId: row.categoryId,
-      categoryName: row.categoryName,
-      transferUid: row.transferUid,
-      assetName: row.assetName,
-      toAssetName: row.toAssetName,
+    const txRows: MMTxRow[] = txSourceRows.map(({ dateRaw, ...row }) => ({
+      ...row,
+      dateIso: toIsoFromAppleDate(dateRaw),
     }));
 
-    const recurringRows: MMRecurringRow[] = recurringSourceRows.map((row) => {
-      const nextDateIso = toIsoFromRecurringDate(row.nextDate);
-      const endDateIsoRaw = toIsoFromRecurringDate(row.endDate);
-      const endDateIso = endDateIsoRaw && row.endDate && row.endDate > 0 ? endDateIsoRaw : null;
-      return {
-        id: row.id,
-        uid: row.uid,
-        doType: row.doType,
-        amountSub: row.amountSub,
-        amountSubText: row.amountSubText,
-        assetUid: row.assetUid,
-        accountId: row.accountId,
-        categoryUid: row.categoryUid,
-        categoryId: row.categoryId,
-        categoryIdLegacy: row.categoryIdLegacy,
-        payee: row.payee,
-        memo: row.memo,
-        repeatType: row.repeatType,
-        nextDateIso,
-        endDateIso,
-        isDeleted: row.isDeleted,
-      };
-    });
+    const recurringRows: MMRecurringRow[] = recurringSourceRows.map(
+      ({ nextDate, endDate, ...row }) => {
+        const endDateIso = toIsoFromRecurringDate(endDate);
+        return {
+          ...row,
+          nextDateIso: toIsoFromRecurringDate(nextDate),
+          endDateIso: endDateIso && endDate && endDate > 0 ? endDateIso : null,
+        };
+      },
+    );
 
     return {
       assetRows,

@@ -148,53 +148,24 @@ export const androidAdapter: MMBackupAdapter = {
         ),
       ]);
 
-    const txRows: MMTxRow[] = txSourceRows.map((row) => {
-      const amountNum = row.amountRaw === null ? null : Number(row.amountRaw);
-      const dateMillis = row.dateRaw === null ? null : Number(row.dateRaw);
+    const txRows: MMTxRow[] = txSourceRows.map(({ amountRaw, dateRaw, ...row }) => {
+      const amountNum = amountRaw === null ? null : Number(amountRaw);
       return {
-        id: row.id,
-        doType: row.doType,
+        ...row,
         amount: Number.isFinite(amountNum) ? amountNum : null,
-        dateIso: toIsoFromUnixMillisOrNow(dateMillis),
-        content: row.content,
-        memo: row.memo,
-        assetUid: row.assetUid,
-        assetId: row.assetId,
-        toAssetUid: row.toAssetUid,
-        oppositeAid: row.oppositeAid,
-        categoryUid: row.categoryUid,
-        categoryId: row.categoryId,
-        categoryName: row.categoryName,
-        transferUid: row.transferUid,
-        assetName: row.assetName,
-        toAssetName: row.toAssetName,
+        dateIso: toIsoFromUnixMillisOrNow(dateRaw === null ? null : Number(dateRaw)),
       };
     });
 
-    const recurringRows: MMRecurringRow[] = recurringSourceRows.map((row) => {
-      // `parseUnixMillis` already returns null for raw <= 0, so a zero endDate
-      // (Money Manager's "no end" sentinel) correctly maps to null.
-      const nextDateIso = parseUnixMillis(row.nextDate);
-      const endDateIso = parseUnixMillis(row.endDate);
-      return {
-        id: row.id,
-        uid: row.uid,
-        doType: row.doType,
-        amountSub: row.amountSub,
-        amountSubText: row.amountSubText,
-        assetUid: row.assetUid,
-        accountId: row.accountId,
-        categoryUid: row.categoryUid,
-        categoryId: row.categoryId,
-        categoryIdLegacy: row.categoryIdLegacy,
-        payee: row.payee,
-        memo: row.memo,
-        repeatType: row.repeatType,
-        nextDateIso,
-        endDateIso,
-        isDeleted: row.isDeleted,
-      };
-    });
+    // `parseUnixMillis` already returns null for raw <= 0, so a zero endDate
+    // (Money Manager's "no end" sentinel) correctly maps to null.
+    const recurringRows: MMRecurringRow[] = recurringSourceRows.map(
+      ({ nextDate, endDate, ...row }) => ({
+        ...row,
+        nextDateIso: parseUnixMillis(nextDate),
+        endDateIso: parseUnixMillis(endDate),
+      }),
+    );
 
     return {
       assetRows,

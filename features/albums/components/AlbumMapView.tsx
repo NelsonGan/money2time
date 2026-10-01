@@ -1,5 +1,5 @@
-import { Camera, type CameraRef, Map, Marker } from '@maplibre/maplibre-react-native';
 import type { StyleSpecification } from '@maplibre/maplibre-gl-style-spec';
+import { Camera, type CameraRef, Map, Marker } from '@maplibre/maplibre-react-native';
 import { type ReactNode, useCallback, useMemo, useRef, useState } from 'react';
 import { View } from 'react-native';
 

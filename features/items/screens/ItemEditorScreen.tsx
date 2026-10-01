@@ -1,13 +1,13 @@
 import { ChevronRight, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, Pressable, Switch, View } from 'react-native';
+import { Alert, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { DatePickerModal } from '~/components/datePicker';
 import {
   CurrencyPickerSheet,
   FormScrollView,
-  InfoTooltipButton,
+  FormSwitchRow,
   Input,
   ItemIcon,
   SettingsActionBar,
@@ -81,7 +81,7 @@ export function ItemEditorScreen({ itemId, onClose, onOpenIconPicker }: ItemEdit
       note: note.trim() || null,
     };
     void triggerHaptic('success');
-    if (isEditing && existing) {
+    if (existing) {
       updateItem(existing.id, input);
     } else {
       createItem(input);
@@ -95,7 +95,6 @@ export function ItemEditorScreen({ itemId, onClose, onOpenIconPicker }: ItemEdit
     existing,
     hasSalePrice,
     iconId,
-    isEditing,
     isInactive,
     name,
     note,
@@ -214,23 +213,12 @@ export function ItemEditorScreen({ itemId, onClose, onOpenIconPicker }: ItemEdit
           </View>
 
           {/* Mark as inactive — flat fields, consistent with the rest of the form */}
-          <View className="flex-row items-center justify-between gap-3">
-            <View className="flex-1 flex-row items-center gap-1.5">
-              <Text variant="body">{I18n.t('items.mark_inactive')}</Text>
-              <InfoTooltipButton
-                title={String(I18n.t('items.mark_inactive'))}
-                infoTooltip={String(I18n.t('items.mark_inactive_hint'))}
-              />
-            </View>
-            <Switch
-              value={isInactive}
-              onValueChange={(v) => {
-                void triggerHaptic('selection');
-                setIsInactive(v);
-              }}
-              trackColor={{ true: themeColors.primary }}
-            />
-          </View>
+          <FormSwitchRow
+            label={I18n.t('items.mark_inactive')}
+            info={I18n.t('items.mark_inactive_hint')}
+            value={isInactive}
+            onValueChange={setIsInactive}
+          />
 
           {isInactive ? (
             <>
@@ -247,19 +235,11 @@ export function ItemEditorScreen({ itemId, onClose, onOpenIconPicker }: ItemEdit
                 </Pressable>
               </View>
 
-              <View className="flex-row items-center justify-between gap-3">
-                <Text variant="body" className="flex-1">
-                  {I18n.t('items.sold_toggle')}
-                </Text>
-                <Switch
-                  value={hasSalePrice}
-                  onValueChange={(v) => {
-                    void triggerHaptic('selection');
-                    setHasSalePrice(v);
-                  }}
-                  trackColor={{ true: themeColors.primary }}
-                />
-              </View>
+              <FormSwitchRow
+                label={I18n.t('items.sold_toggle')}
+                value={hasSalePrice}
+                onValueChange={setHasSalePrice}
+              />
 
               {hasSalePrice ? (
                 <Input

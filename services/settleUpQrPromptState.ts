@@ -25,7 +25,3 @@ export async function markQrPromptSeen(appUserId: string): Promise<void> {
     // Best-effort; a failed write just means the prompt may appear once more.
   }
 }
-
-export const settleUpQrPromptStateTestUtils = {
-  storageKey,
-};

@@ -5,6 +5,7 @@ import {
   Platform,
   Pressable,
   StatusBar,
+  Switch,
   View,
   type ViewProps,
 } from 'react-native';
@@ -298,6 +299,35 @@ export function SettingsActionBar({
         </View>
       </View>
     </SafeAreaView>
+  );
+}
+
+interface FormSwitchRowProps {
+  label: string;
+  /** Optional explainer behind an info button next to the label. */
+  info?: string;
+  value: boolean;
+  onValueChange: (value: boolean) => void;
+}
+
+/** A form's label + switch row, with a selection haptic on toggle. */
+export function FormSwitchRow({ label, info, value, onValueChange }: FormSwitchRowProps) {
+  const themeColors = useThemeColors();
+  return (
+    <View className="flex-row items-center justify-between gap-3">
+      <View className="flex-1 flex-row items-center gap-1.5">
+        <Text variant="body">{label}</Text>
+        {info ? <InfoTooltipButton title={label} infoTooltip={info} /> : null}
+      </View>
+      <Switch
+        value={value}
+        onValueChange={(next) => {
+          void triggerHaptic('selection');
+          onValueChange(next);
+        }}
+        trackColor={{ true: themeColors.primary }}
+      />
+    </View>
   );
 }
 

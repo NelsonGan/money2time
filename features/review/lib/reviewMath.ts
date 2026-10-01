@@ -1,5 +1,5 @@
 import type { Category, TransactionSentiment, TransactionWithRelations } from '~/types';
-import { dayKeyFromDateLocal, dayKeyFromIsoLocal } from '~/utils/formatters';
+import { dateFromDayKeyLocal, dayKeyFromDateLocal, dayKeyFromIsoLocal } from '~/utils/formatters';
 
 import { periodContains, type ReviewPeriod } from './reviewPeriods';
 
@@ -115,15 +115,10 @@ function isLive(transaction: TransactionWithRelations): boolean {
   return !transaction.deletedAt;
 }
 
-function parseDayKey(dayKey: string): Date {
-  const [year, month, day] = dayKey.split('-').map(Number);
-  return new Date(year, (month ?? 1) - 1, day ?? 1);
-}
-
 function dayKeysBetween(start: string, end: string): string[] {
   const keys: string[] = [];
-  const cursor = parseDayKey(start);
-  const last = parseDayKey(end);
+  const cursor = dateFromDayKeyLocal(start);
+  const last = dateFromDayKeyLocal(end);
   while (cursor.getTime() <= last.getTime()) {
     keys.push(dayKeyFromDateLocal(cursor));
     cursor.setDate(cursor.getDate() + 1);
@@ -265,7 +260,7 @@ function averagePerBar(period: ReviewPeriod, bars: ReviewBar[], expense: number)
 
 /** Inclusive day span between two day keys. */
 function daysBetween(start: string, end: string): number {
-  const ms = parseDayKey(end).getTime() - parseDayKey(start).getTime();
+  const ms = dateFromDayKeyLocal(end).getTime() - dateFromDayKeyLocal(start).getTime();
   return Math.round(ms / 86_400_000) + 1;
 }
 

@@ -1,5 +1,5 @@
-import { CloudStorage, CloudStorageProvider, CloudStorageScope } from 'react-native-cloud-storage';
 import { Platform } from 'react-native';
+import { CloudStorage, CloudStorageProvider, CloudStorageScope } from 'react-native-cloud-storage';
 
 import {
   AUTO_BACKUP_PREFIX,

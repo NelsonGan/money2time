@@ -8,8 +8,8 @@ import {
   MIN_DAYS_SINCE_VERSION_CHANGE,
   MIN_TRANSACTIONS,
   parseStoredState,
-  recordActivity,
   reconcileVersion,
+  recordActivity,
   REVIEW_PROMPT_SCHEMA_VERSION,
   type ReviewPromptState,
 } from '~/services/reviewPrompt.shared';

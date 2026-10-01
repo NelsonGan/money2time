@@ -164,7 +164,7 @@ const CURRENCY_CODES = new Set(ALL_CURRENCIES.map((entry) => entry.code));
  * silently mislabel every non-US tap. Returning null instead lets the caller
  * use the account's own currency, which is what the card is tied to anyway.
  */
-const UNAMBIGUOUS_SYMBOLS: ReadonlyArray<readonly [string, string]> = [
+const UNAMBIGUOUS_SYMBOLS: readonly (readonly [string, string])[] = [
   ['R$', 'BRL'],
   ['RM', 'MYR'],
   ['Rp', 'IDR'],

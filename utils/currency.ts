@@ -146,7 +146,7 @@ export function isAutoRateSupported(code: string): boolean {
 export function enabledEntryCurrencies(
   reportingCurrency: string,
   fxCurrencies: readonly string[],
-  accounts: ReadonlyArray<{ currency?: string | null }>,
+  accounts: readonly { currency?: string | null }[],
 ): string[] {
   const set = new Set<string>([reportingCurrency, ...fxCurrencies]);
   for (const account of accounts) {

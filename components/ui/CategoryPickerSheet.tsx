@@ -9,8 +9,37 @@ import { ThemeModal } from '~/components/ui/theme-modal';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import type { Category } from '~/types';
 
 export type { CategoryPickerOption } from '~/components/ui/CategoryGrid';
+
+/**
+ * Parents and children in the shape this sheet takes, straight from the
+ * categories: each child keeps its own icon. A child whose parent is not in the
+ * list is left out.
+ */
+export function buildCategoryPickerOptions(categories: Category[]): {
+  parents: CategoryPickerOption[];
+  childByParent: Map<string, CategoryPickerOption[]>;
+} {
+  const parents: CategoryPickerOption[] = [];
+  const childByParent = new Map<string, CategoryPickerOption[]>();
+  const parentIds = new Set<string>();
+  categories.forEach((category) => {
+    if (!category.parentId) {
+      parents.push({ id: category.id, name: category.name, icon: category.icon });
+      parentIds.add(category.id);
+    }
+  });
+  categories.forEach((category) => {
+    if (category.parentId && parentIds.has(category.parentId)) {
+      const list = childByParent.get(category.parentId) ?? [];
+      list.push({ id: category.id, name: category.name, icon: category.icon });
+      childByParent.set(category.parentId, list);
+    }
+  });
+  return { parents, childByParent };
+}
 
 interface CategoryPickerSheetBaseProps {
   visible: boolean;

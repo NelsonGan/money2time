@@ -4,12 +4,12 @@ import Purchases, {
   type CustomerInfo,
   type CustomerInfoUpdateListener,
   INTRO_ELIGIBILITY_STATUS,
-  RECURRENCE_MODE,
   type IntroEligibility,
   PURCHASES_ERROR_CODE,
   type PurchasesError,
   type PurchasesIntroPrice,
   type PurchasesPackage,
+  RECURRENCE_MODE,
   type SubscriptionOption,
 } from 'react-native-purchases';
 

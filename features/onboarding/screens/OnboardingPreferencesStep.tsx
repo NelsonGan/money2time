@@ -89,6 +89,7 @@ export function OnboardingPreferencesStep({
           />
         ),
       })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the labels come from I18n, which follows `locale`
     [locale, resolvedTheme],
   );
   const selectedLocale = SUPPORTED_LOCALES.includes(locale as (typeof SUPPORTED_LOCALES)[number])

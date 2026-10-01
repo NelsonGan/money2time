@@ -17,8 +17,3 @@ export const SHARED_NATIVE_STACK_OPTIONS: NativeStackNavigationOptions = {
   // SDK 54's pinned ~4.16.0 range) verified on a device build.
   animationMatchesGesture: false,
 };
-
-export const DISABLE_BACK_GESTURE_STACK_OPTIONS: NativeStackNavigationOptions = {
-  gestureEnabled: false,
-  fullScreenGestureEnabled: false,
-};

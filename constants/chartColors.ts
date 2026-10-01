@@ -3,7 +3,7 @@
  * and the budget view, so a category reads in the same hue family everywhere.
  * Assigned by display order, wrapping past twelve entries.
  */
-export const CHART_CATEGORY_COLORS = [
+const CHART_CATEGORY_COLORS = [
   '#E53935', // red
   '#FB8C00', // orange
   '#FDD835', // yellow

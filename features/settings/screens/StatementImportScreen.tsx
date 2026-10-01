@@ -29,9 +29,9 @@ import {
 import { useApp } from '~/context/AppContext';
 import {
   detectStatementCurrency,
-  parseImportJson,
   type ParsedStatement,
   type ParsedTransaction,
+  parseImportJson,
 } from '~/features/settings/lib/statementImport';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';

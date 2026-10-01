@@ -125,31 +125,6 @@ export function weekdayColumnIndex(dayKey: string, weekStartsOn: WeekStartsOn): 
   return (sundayFirst - weekStartsOn + 7) % 7;
 }
 
-export function weekStartDayKey(dayKey: string, weekStartsOn: WeekStartsOn): string {
-  const date = dayKeyToUtcDate(dayKey);
-  if (!date) return dayKey;
-  const col = weekdayColumnIndex(dayKey, weekStartsOn);
-  const start = new Date(date);
-  start.setUTCDate(start.getUTCDate() - col);
-  const y = start.getUTCFullYear();
-  const m = String(start.getUTCMonth() + 1).padStart(2, '0');
-  const d = String(start.getUTCDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
-
-export function weekDayKeys(weekStartKey: string): string[] {
-  const date = dayKeyToUtcDate(weekStartKey);
-  if (!date) return [weekStartKey];
-  return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(date);
-    d.setUTCDate(d.getUTCDate() + i);
-    const y = d.getUTCFullYear();
-    const m = String(d.getUTCMonth() + 1).padStart(2, '0');
-    const dd = String(d.getUTCDate()).padStart(2, '0');
-    return `${y}-${m}-${dd}`;
-  });
-}
-
 export function monthLabelFromMonthKey(monthKey: string, locale: string): string {
   const cacheKey = `${locale}|${monthKey}`;
   const cached = MONTH_LABEL_CACHE.get(cacheKey);

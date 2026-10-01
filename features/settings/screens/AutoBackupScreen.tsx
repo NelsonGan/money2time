@@ -38,7 +38,6 @@ import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
-import { getErrorMessage } from '~/utils/errorHandling';
 import {
   type BackupRecord,
   deleteBackup,
@@ -56,6 +55,7 @@ import {
 } from '~/services/autoBackup';
 import { triggerHaptic } from '~/services/haptics';
 import type { BackupTarget } from '~/types';
+import { getErrorMessage } from '~/utils/errorHandling';
 
 interface AutoBackupScreenProps {
   onBack: () => void;

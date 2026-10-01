@@ -16,7 +16,7 @@ interface AddSplitShowcaseProps {
 export function AddSplitShowcase({ width }: AddSplitShowcaseProps) {
   const colors = useThemeColors();
 
-  const tiles: Array<{ key: string; icon: React.ReactNode; title: string }> = [
+  const tiles: { key: string; icon: React.ReactNode; title: string }[] = [
     {
       key: 'quick',
       icon: <Zap size={20} color={colors.primary} />,

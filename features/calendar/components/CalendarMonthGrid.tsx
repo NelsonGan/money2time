@@ -5,6 +5,7 @@ import { Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
+import { withColorAlpha } from '~/utils/color';
 import { formatCompactNumber } from '~/utils/formatters';
 
 import {
@@ -21,16 +22,6 @@ interface CalendarMonthGridProps {
   locale: string;
   onSelectDay: (dayKey: string) => void;
   chartWidth: number;
-}
-
-function withColorAlpha(hex: string, alpha: number): string {
-  const value = hex.replace('#', '');
-  if (!/^[0-9a-fA-F]{6}$/.test(value)) return hex;
-  const r = Number.parseInt(value.slice(0, 2), 16);
-  const g = Number.parseInt(value.slice(2, 4), 16);
-  const b = Number.parseInt(value.slice(4, 6), 16);
-  const normalizedAlpha = Math.max(0, Math.min(1, alpha));
-  return `rgba(${r}, ${g}, ${b}, ${normalizedAlpha})`;
 }
 
 function formatCellCompact(value: number, isTimeMode: boolean): string {

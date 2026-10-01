@@ -20,6 +20,7 @@ import {
 import { triggerHaptic } from '~/services/haptics';
 import { requestPermissions } from '~/services/notifications';
 import { type WageConfig } from '~/types';
+import { withColorAlpha } from '~/utils/color';
 import { getErrorMessage } from '~/utils/errorHandling';
 import { monthKeyFromDateLocal } from '~/utils/formatters';
 
@@ -39,18 +40,6 @@ type OnboardingStepId =
   | 'source'
   | 'notifications'
   | 'features';
-
-function withColorAlpha(hex: string, alpha: number) {
-  const sanitized = hex.replace('#', '');
-
-  if (sanitized.length !== 6) return hex;
-
-  const red = parseInt(sanitized.slice(0, 2), 16);
-  const green = parseInt(sanitized.slice(2, 4), 16);
-  const blue = parseInt(sanitized.slice(4, 6), 16);
-
-  return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
-}
 
 interface OnboardingFlowProps {
   onComplete: () => void;

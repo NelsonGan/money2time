@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { sha256 } from 'js-sha256';
 
 import type { LiveEarningsSession } from '~/features/widgets/lib/liveEarnings';
+import { signingHeaders } from '~/services/requestSigning';
 
 /**
  * Registers a running live-earnings session with the push Worker, so the card's
@@ -87,15 +87,6 @@ function baseUrl(): string | null {
  */
 function apnsEnvironment(): 'sandbox' | 'production' {
   return __DEV__ ? 'sandbox' : 'production';
-}
-
-/** Same shared-secret scheme the receipt-scanner Worker uses. */
-function signingHeaders(appUserId: string): Record<string, string> {
-  const key = process.env.EXPO_PUBLIC_REQUEST_SIGNING_KEY?.trim();
-  if (!key) return {};
-  const timestamp = Date.now().toString();
-  const signature = sha256.hmac(key, `${timestamp}.${appUserId}`);
-  return { 'X-Timestamp': timestamp, 'X-Signature': signature };
 }
 
 async function post(path: string, appUserId: string, body: Record<string, unknown>): Promise<void> {

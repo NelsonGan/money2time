@@ -2,12 +2,12 @@ import {
   computeReceiptSplit,
   friendLetter,
   itemsSubtotal,
-  receiptPersonKey,
-  SELF_PERSON_KEY,
-  splitQuantityLine,
   type ReceiptItemInput,
+  receiptPersonKey,
   type ReceiptShareInput,
   type ReceiptSplitMathInput,
+  SELF_PERSON_KEY,
+  splitQuantityLine,
 } from '~/features/transactions/lib/receiptSplitMath';
 
 const me = (weight = 1): ReceiptShareInput => ({

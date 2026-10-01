@@ -1,17 +1,17 @@
 import { I18n } from '~/lib/i18n';
 import type { UserSettings } from '~/types';
-import { formatAmount, formatMonthYearLabel, parseMonthKey } from '~/utils/formatters';
+import {
+  dateFromDayKeyLocal,
+  formatAmount,
+  formatMonthYearLabel,
+  parseMonthKey,
+} from '~/utils/formatters';
 
 import type { ReviewBar, ReviewPace } from './reviewMath';
 import type { ReviewPeriod, ReviewZoom } from './reviewPeriods';
 
 function resolveLocale(locale?: string) {
   return locale ?? I18n.locale ?? I18n.defaultLocale ?? 'en';
-}
-
-function parseDayKey(dayKey: string): Date {
-  const [year, month, day] = dayKey.split('-').map(Number);
-  return new Date(year, (month ?? 1) - 1, day ?? 1);
 }
 
 const formatterCache = new Map<string, Intl.DateTimeFormat>();
@@ -33,7 +33,7 @@ export function money(value: number, settings: UserSettings): string {
 /** "27 Jul" — the short form used on the period pills and standout rows. */
 export function shortDayLabel(dayKey: string, locale?: string): string {
   return formatter(resolveLocale(locale), { day: 'numeric', month: 'short' }).format(
-    parseDayKey(dayKey),
+    dateFromDayKeyLocal(dayKey),
   );
 }
 
@@ -43,14 +43,16 @@ export function weekdayDayLabel(dayKey: string, locale?: string): string {
     weekday: 'short',
     day: 'numeric',
     month: 'short',
-  }).format(parseDayKey(dayKey));
+  }).format(dateFromDayKeyLocal(dayKey));
 }
 
 /** The label on a period pill: "27 Jul" / "Jul" / "2026". */
 export function periodPillLabel(period: ReviewPeriod, locale?: string): string {
   if (period.zoom === 'week') return shortDayLabel(period.start, locale);
   if (period.zoom === 'month') {
-    return formatter(resolveLocale(locale), { month: 'short' }).format(parseDayKey(period.start));
+    return formatter(resolveLocale(locale), { month: 'short' }).format(
+      dateFromDayKeyLocal(period.start),
+    );
   }
   return period.key.slice('year:'.length);
 }
@@ -78,12 +80,12 @@ export function barLabel(bar: ReviewBar, zoom: ReviewZoom, locale?: string): str
   if (zoom === 'week') {
     // A single letter keeps seven ticks legible on a narrow phone; some locales
     // have no one-letter form, in which case `narrow` returns their shortest.
-    return formatter(resolved, { weekday: 'narrow' }).format(parseDayKey(bar.start));
+    return formatter(resolved, { weekday: 'narrow' }).format(dateFromDayKeyLocal(bar.start));
   }
   if (zoom === 'month') {
     return I18n.t('review.week_tick', { index: bar.key.slice(1) });
   }
-  return formatter(resolved, { month: 'narrow' }).format(parseDayKey(bar.start));
+  return formatter(resolved, { month: 'narrow' }).format(dateFromDayKeyLocal(bar.start));
 }
 
 /** "-12%" / "+4%", or null when there is nothing to compare against. */

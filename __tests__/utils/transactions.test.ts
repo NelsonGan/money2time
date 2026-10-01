@@ -2,11 +2,9 @@ import { NO_REIMBURSEMENT } from '~/features/reimbursements/lib/reimbursementMat
 import type { TransactionWithRelations } from '~/types';
 import {
   bucketTransactionsByMonth,
-  emptyMonthSummary,
   reconcileTransactionRow,
   reuseUnchangedGroups,
   reuseUnchangedTransactions,
-  summarizeTransactions,
 } from '~/utils/transactions';
 
 function makeTx(overrides: Partial<TransactionWithRelations>): TransactionWithRelations {
@@ -41,31 +39,6 @@ function makeTx(overrides: Partial<TransactionWithRelations>): TransactionWithRe
     ...overrides,
   };
 }
-
-describe('summarizeTransactions', () => {
-  it('returns an empty summary for an empty list', () => {
-    expect(summarizeTransactions([], (t) => t.amount)).toEqual(emptyMonthSummary());
-  });
-
-  it('aggregates income and expense amounts, counting every entry', () => {
-    const txs = [
-      makeTx({ type: 'income', amount: 100 }),
-      makeTx({ type: 'expense', amount: 40 }),
-      makeTx({ type: 'expense', amount: 60 }),
-      makeTx({ type: 'transfer', amount: 25, fromAccountId: 'a', toAccountId: 'b' }),
-    ];
-    expect(summarizeTransactions(txs, (t) => t.amount)).toEqual({
-      count: 4,
-      income: 100,
-      expense: 100,
-    });
-  });
-
-  it('uses the provided resolveValue function', () => {
-    const txs = [makeTx({ type: 'income', amount: 10 }), makeTx({ type: 'expense', amount: 10 })];
-    expect(summarizeTransactions(txs, () => 2)).toEqual({ count: 2, income: 2, expense: 2 });
-  });
-});
 
 describe('bucketTransactionsByMonth', () => {
   it('buckets transactions by month key with per-month summaries', () => {

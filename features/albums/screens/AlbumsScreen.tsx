@@ -82,7 +82,7 @@ export function AlbumsScreen({
   useEffect(() => {
     if (scrollToTopToken === undefined) return;
     scrollRef.current?.scrollTo({ y: 0, animated: false });
-  }, [scrollToTopToken]);
+  }, [scrollRef, scrollToTopToken]);
 
   const contentWidth = pageWidth - SCREEN_PADDING * 2;
 

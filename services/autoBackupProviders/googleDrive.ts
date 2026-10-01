@@ -6,19 +6,19 @@ import {
 } from '~/services/autoBackup.shared';
 
 import {
-  ensureGoogleSession,
-  getGoogleAccessToken,
-  isGoogleDriveConfigured,
-} from './googleDriveAuth';
-import {
   createFolder,
   deleteFile,
-  DriveError,
   downloadFileText,
+  DriveError,
   findFolderIds,
   listFolderChildren,
   uploadJsonFile,
 } from './googleDriveApi';
+import {
+  ensureGoogleSession,
+  getGoogleAccessToken,
+  isGoogleDriveConfigured,
+} from './googleDriveAuth';
 
 // The folder id is stable for the life of the install, so resolving it once
 // saves a lookup on every backup, list, and delete. It also stops a burst of

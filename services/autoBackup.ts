@@ -7,9 +7,10 @@
  * the native implementation so callers compile against a single shape.
  */
 
+import type { BackupTarget } from '~/types';
+
 import type { BackupRecord, BackupRunResult } from './autoBackup.shared';
 import type { BackupSummary, ImportResult } from './dataManagementService';
-import type { BackupTarget } from '~/types';
 
 export * from './autoBackup.shared';
 

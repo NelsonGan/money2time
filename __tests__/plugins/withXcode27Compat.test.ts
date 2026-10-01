@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const plugin = require('../../plugins/withXcode27Compat') as {
   addSceneDelegate: (contents: string) => string;
   addSceneManifest: (plist: Record<string, unknown>) => Record<string, unknown>;

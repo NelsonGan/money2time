@@ -63,7 +63,7 @@ export interface ReceiptSplitComputation {
 const toCents = (value: number): number => (Number.isFinite(value) ? Math.round(value * 100) : 0);
 
 /** Cents-rounded sum of line totals. */
-export function itemsSubtotal(items: Array<{ lineTotal: number }>): number {
+export function itemsSubtotal(items: { lineTotal: number }[]): number {
   let cents = 0;
   for (const item of items) {
     cents += toCents(item.lineTotal);
@@ -81,13 +81,13 @@ export function itemsSubtotal(items: Array<{ lineTotal: number }>): number {
 export function splitQuantityLine(item: {
   quantity: number;
   lineTotal: number;
-}): Array<{ quantity: number; lineTotal: number }> | null {
+}): { quantity: number; lineTotal: number }[] | null {
   const count = item.quantity;
   if (!Number.isFinite(count) || !Number.isInteger(count) || count < 2) return null;
   const totalCents = toCents(item.lineTotal);
   if (totalCents < 0) return null;
   const base = Math.floor(totalCents / count);
-  const rows: Array<{ quantity: number; lineTotal: number }> = [];
+  const rows: { quantity: number; lineTotal: number }[] = [];
   for (let i = 0; i < count; i += 1) {
     const isLast = i === count - 1;
     const cents = isLast ? totalCents - base * (count - 1) : base;
@@ -137,7 +137,7 @@ interface PersonAccumulator {
   personKey: string;
   isSelf: boolean;
   itemCents: number;
-  lines: Array<{ itemId: string; cents: number }>;
+  lines: { itemId: string; cents: number }[];
 }
 
 /**

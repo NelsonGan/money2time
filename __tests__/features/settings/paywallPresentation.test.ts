@@ -1,8 +1,8 @@
 import {
   buildPaywallPlanPresentation,
   getDefaultPaywallPlanId,
-  resolveSelectedPaywallPlan,
   type PaywallPresentationPlan,
+  resolveSelectedPaywallPlan,
 } from '~/features/settings/lib/paywallPresentation';
 
 function translate(key: string, params?: Record<string, string | number>) {

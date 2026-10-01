@@ -22,7 +22,7 @@ import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import { currencyNameForCode, currencySymbolForCode } from '~/utils/currency';
+import { currencyNameForCode } from '~/utils/currency';
 
 interface ExchangeRatesScreenProps {
   onBack: () => void;
@@ -66,6 +66,8 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
   // Pending destructive main-currency change, awaiting typed confirmation.
   const [pendingMainCurrency, setPendingMainCurrency] = useState<string | null>(null);
 
+  // `listExchangeRates` reads the table; bumping `rateVersion` after a write re-reads it.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const rateRows = useMemo(() => listExchangeRates(), [listExchangeRates, rateVersion]);
   const rateByQuote = useMemo(() => new Map(rateRows.map((r) => [r.quoteCurrency, r])), [rateRows]);
   const asOfDate = useMemo(() => {

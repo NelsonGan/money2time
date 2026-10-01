@@ -1,8 +1,7 @@
 import { Image } from 'expo-image';
-import * as ImagePicker from 'expo-image-picker';
 import { Camera, ChevronRight, ImageIcon, Trash2, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Pressable, Switch, View } from 'react-native';
+import { Alert, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { DatePickerModal } from '~/components/datePicker';
@@ -10,7 +9,7 @@ import {
   AccountPickerSheet,
   CurrencyPickerSheet,
   FormScrollView,
-  InfoTooltipButton,
+  FormSwitchRow,
   Input,
   SettingsActionBar,
   SettingsHeader,
@@ -25,11 +24,11 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
+import { pickLibraryImage } from '~/services/libraryImagePicker';
 import { deleteGoalCover, getGoalCoverUri, saveGoalCover } from '~/services/userAssets';
 import { cn } from '~/utils';
 import { suggestCategoryIcon } from '~/utils/categoryIconMatcher';
 import { convert, currencySymbolForCode } from '~/utils/currency';
-import { getErrorMessage } from '~/utils/errorHandling';
 import {
   dayKeyFromDateLocal,
   formatAmount,
@@ -171,24 +170,18 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
 
   const pickCover = useCallback(async () => {
     void triggerHaptic('selection');
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert(I18n.t('goals.cover_permission_title'), I18n.t('goals.cover_permission_body'));
-      return;
-    }
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
-        allowsEditing: true,
+    await pickLibraryImage(
+      (uri) => {
+        stageCover(saveGoalCover(uri));
+      },
+      {
         aspect: [3, 2],
-        quality: 0.9,
-      });
-      if (result.canceled || !result.assets?.[0]) return;
-      stageCover(saveGoalCover(result.assets[0].uri));
-    } catch (error) {
-      // The picker itself can reject, not just the save step below it.
-      Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
-    }
+        permissionAlert: {
+          title: I18n.t('goals.cover_permission_title'),
+          message: I18n.t('goals.cover_permission_body'),
+        },
+      },
+    );
   }, [stageCover]);
 
   const removeCover = useCallback(() => {
@@ -264,12 +257,8 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
       recurrenceInterval: 1,
       nextRunDate: nextRunDateFor(autoSaveCadence),
     });
-    const wantsAutoSave =
-      showAutoSave &&
-      autoSaveEnabled &&
-      autoSaveSource != null &&
-      Number.isFinite(parsedAutoSave) &&
-      parsedAutoSave > 0;
+    // canSave has already checked the amount and source of an enabled auto-save.
+    const wantsAutoSave = showAutoSave && autoSaveEnabled;
     if (!isEditing) {
       const activeGoalCount = accounts.filter(
         (account) => account.type === 'goal' && account.goalArchivedAt == null,
@@ -285,7 +274,7 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
       goalCoverUri: coverPath,
     };
 
-    if (isEditing && existing) {
+    if (existing) {
       // The target input always shows (and parses) the currently selected
       // currency: picking a new currency converts the field in place, so the
       // typed value is saved verbatim. On a currency change the balance is
@@ -454,7 +443,6 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
     accounts,
     autoSaveCadence,
     autoSaveEnabled,
-    autoSaveSource,
     autoSaveSourceId,
     canSave,
     checkLimit,
@@ -638,23 +626,12 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
             />
           ) : null}
 
-          <View className="flex-row items-center justify-between gap-3">
-            <View className="flex-1 flex-row items-center gap-1.5">
-              <Text variant="body">{I18n.t('goals.target_date_toggle')}</Text>
-              <InfoTooltipButton
-                title={I18n.t('goals.target_date_toggle')}
-                infoTooltip={I18n.t('goals.target_date_hint')}
-              />
-            </View>
-            <Switch
-              value={hasTargetDate}
-              onValueChange={(v) => {
-                void triggerHaptic('selection');
-                setHasTargetDate(v);
-              }}
-              trackColor={{ true: themeColors.primary }}
-            />
-          </View>
+          <FormSwitchRow
+            label={I18n.t('goals.target_date_toggle')}
+            info={I18n.t('goals.target_date_hint')}
+            value={hasTargetDate}
+            onValueChange={setHasTargetDate}
+          />
 
           {hasTargetDate ? (
             <View className="gap-1.5">
@@ -673,23 +650,12 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
             </View>
           ) : null}
 
-          <View className="flex-row items-center justify-between gap-3">
-            <View className="flex-1 flex-row items-center gap-1.5">
-              <Text variant="body">{I18n.t('accounts.include_in_totals')}</Text>
-              <InfoTooltipButton
-                title={I18n.t('accounts.include_in_totals')}
-                infoTooltip={I18n.t('accounts.include_in_totals_hint')}
-              />
-            </View>
-            <Switch
-              value={includeInTotals}
-              onValueChange={(v) => {
-                void triggerHaptic('selection');
-                setIncludeInTotals(v);
-              }}
-              trackColor={{ true: themeColors.primary }}
-            />
-          </View>
+          <FormSwitchRow
+            label={I18n.t('accounts.include_in_totals')}
+            info={I18n.t('accounts.include_in_totals_hint')}
+            value={includeInTotals}
+            onValueChange={setIncludeInTotals}
+          />
 
           {!isEditing ? (
             <Input
@@ -704,23 +670,12 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
 
           {showAutoSave ? (
             <>
-              <View className="flex-row items-center justify-between gap-3">
-                <View className="flex-1 flex-row items-center gap-1.5">
-                  <Text variant="body">{I18n.t('goals.auto_save_toggle')}</Text>
-                  <InfoTooltipButton
-                    title={I18n.t('goals.auto_save_toggle')}
-                    infoTooltip={I18n.t('goals.auto_save_hint')}
-                  />
-                </View>
-                <Switch
-                  value={autoSaveEnabled}
-                  onValueChange={(v) => {
-                    void triggerHaptic('selection');
-                    setAutoSaveEnabled(v);
-                  }}
-                  trackColor={{ true: themeColors.primary }}
-                />
-              </View>
+              <FormSwitchRow
+                label={I18n.t('goals.auto_save_toggle')}
+                info={I18n.t('goals.auto_save_hint')}
+                value={autoSaveEnabled}
+                onValueChange={setAutoSaveEnabled}
+              />
 
               {autoSaveEnabled ? (
                 <View className="gap-4">

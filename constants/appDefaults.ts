@@ -33,20 +33,6 @@ export const ACCOUNT_TYPE_OPTIONS: { value: AccountType; label: string; icon: st
   { value: 'loan', label: 'Loan', icon: '🧾' },
 ];
 
-export const DEFAULT_ACCOUNT_TEMPLATE: Omit<
-  Account,
-  'id' | 'createdAt' | 'updatedAt' | 'deletedAt'
-> = {
-  name: 'Main Account',
-  type: 'debit',
-  accountGroup: null,
-  creditStatementDay: null,
-  creditDueDay: null,
-  currency: DEFAULT_CURRENCY,
-  startingBalance: 0,
-  includeInTotals: true,
-};
-
 /**
  * Curated common-first order of bundled icon ids, used as the default pick for
  * a new category and as the random fallback when importing data that carries no

@@ -1,4 +1,5 @@
 import { I18n } from '~/lib/i18n';
+import type { AlbumLocation } from '~/types';
 import { dayKeyFromIsoLocal } from '~/utils/formatters';
 
 const rangeFormatterByLocale = new Map<string, Intl.DateTimeFormat>();
@@ -74,4 +75,9 @@ export interface AlbumPin {
   spendLabel: string;
   /** "Jun 2026" badge label (album start month/year), or null when undated. */
   monthLabel: string | null;
+}
+
+/** "Dali, Yunnan, CN": the place line an album's location reads as. */
+export function placeLabel(location: AlbumLocation): string {
+  return [location.placeName, location.placeAdmin, location.countryCode].filter(Boolean).join(', ');
 }

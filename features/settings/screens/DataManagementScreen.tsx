@@ -4,6 +4,7 @@ import { ChevronRight, CloudUpload, Trash2 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
+import { ImportingOverlay } from '~/components/feedback/ImportingOverlay';
 import {
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
@@ -13,8 +14,7 @@ import {
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
-import { ImportingOverlay } from '~/components/feedback/ImportingOverlay';
-import { EXCEL_LOGO, MONEY2TIME_LOGO, MONEY_MANAGER_LOGO } from '~/constants/brandLogos';
+import { EXCEL_LOGO, MONEY_MANAGER_LOGO, MONEY2TIME_LOGO } from '~/constants/brandLogos';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';

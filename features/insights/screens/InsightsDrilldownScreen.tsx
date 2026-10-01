@@ -22,6 +22,7 @@ import {
   TimeValueInline,
 } from '~/components/ui';
 import { categoryIconToEmoji } from '~/constants/categoryIcons';
+import { chartCategoryColor } from '~/constants/chartColors';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
@@ -53,6 +54,7 @@ import { triggerHaptic } from '~/services/haptics';
 import type { Category, CategoryType, TransactionWithRelations } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
+import { withColorAlpha } from '~/utils/color';
 import { FONT } from '~/utils/fonts';
 import { formatAmount, formatHours } from '~/utils/formatters';
 
@@ -61,21 +63,6 @@ type DrilldownTransactionFilter = 'income' | 'expense';
 
 const DRILLDOWN_DIRECT_PARENT_ROW_ID = '__direct-parent__';
 const EMPTY_DRILLDOWN_TRANSACTIONS: TransactionWithRelations[] = [];
-
-const INSIGHTS_CHART_COLORS = [
-  '#E53935',
-  '#FB8C00',
-  '#FDD835',
-  '#43A047',
-  '#00897B',
-  '#00ACC1',
-  '#1E88E5',
-  '#3949AB',
-  '#8E24AA',
-  '#D81B60',
-  '#6D4C41',
-  '#546E7A',
-];
 
 const BREAKDOWN_TINT_EXPENSE = '#D24B36';
 const BREAKDOWN_TINT_INCOME = '#1D9B63';
@@ -140,16 +127,6 @@ interface DrilldownSubcategoryRow {
   sharePct: number;
   count: number;
   transactions: TransactionWithRelations[];
-}
-
-function withColorAlpha(hex: string, alpha: number) {
-  const value = hex.replace('#', '');
-  if (!/^[0-9a-fA-F]{6}$/.test(value)) return hex;
-  const r = Number.parseInt(value.slice(0, 2), 16);
-  const g = Number.parseInt(value.slice(2, 4), 16);
-  const b = Number.parseInt(value.slice(4, 6), 16);
-  const normalizedAlpha = Math.max(0, Math.min(1, alpha));
-  return `rgba(${r}, ${g}, ${b}, ${normalizedAlpha})`;
 }
 
 function FilterPill({
@@ -337,6 +314,7 @@ export function InsightsDrilldownScreen({
   // recompute this immediately.
   const albumMemberIds = useMemo(
     () => (payload.albumId ? new Set(getAlbumTransactionIds(payload.albumId)) : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- see above
     [payload.albumId, getAlbumTransactionIds, albums],
   );
   const { resolvedTransactions, payloadTransactionById } = useMemo(() => {
@@ -858,7 +836,7 @@ export function InsightsDrilldownScreen({
         amount: absAmount,
         emoji: row.emoji,
         pct: row.sharePct,
-        color: INSIGHTS_CHART_COLORS[i % INSIGHTS_CHART_COLORS.length],
+        color: chartCategoryColor(i),
         transactions: row.transactions,
         count: row.count,
         totalValue: row.totalValue,

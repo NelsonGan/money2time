@@ -27,8 +27,8 @@ import { getPermissionStatus, requestPermissions } from '~/services/notification
 import type { Weekday } from '~/types';
 import { formatTimeOfDay } from '~/utils/formatters';
 
-import { LiveEarningsPreview } from '../components/LiveEarningsPreview';
 import { DurationWheelPicker } from '../components/DurationWheelPicker';
+import { LiveEarningsPreview } from '../components/LiveEarningsPreview';
 import { StartSessionSheet } from '../components/StartSessionSheet';
 import {
   clampStartAt,

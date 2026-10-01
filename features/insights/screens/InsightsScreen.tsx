@@ -26,7 +26,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text as RNText,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -72,7 +71,7 @@ import {
   categoryIconToEmoji,
   classifyCategoryIcon,
 } from '~/constants/categoryIcons';
-import { CHART_CATEGORY_COLORS } from '~/constants/chartColors';
+import { chartCategoryColor } from '~/constants/chartColors';
 import { type ColorPalette, LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { LONG_RANGE_PAGER_CENTER_INDEX, LONG_RANGE_PAGER_TOTAL_SLOTS } from '~/constants/pager';
 import { PRO_TREND_TYPES, type ProTrendType } from '~/constants/proLimits';
@@ -81,6 +80,7 @@ import { useApp, useTransactions } from '~/context/AppContext';
 import { useIsPro } from '~/context/ProContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { BudgetPagerView, type BudgetPagerViewHandle } from '~/features/budget/screens';
+import { dayKeyToUtcDate } from '~/features/calendar/lib/calendarBuild';
 import {
   type AssetHistoryAccountOverrides,
   assetHistoryExcludedAccountIds,
@@ -93,7 +93,6 @@ import {
   pruneAssetHistoryOverrides,
   toggleAssetHistoryAccount,
 } from '~/features/insights/assetHistory';
-import { RankedImpactChart, type RankedImpactRow } from '~/features/insights/components';
 import { buildInsightsCategoryPickerData } from '~/features/insights/categoryPickerData';
 import { ProTrendPreviewOverlay } from '~/features/insights/components/ProTrendPreviewOverlay';
 import { SavingsRateRing } from '~/features/insights/components/SavingsRateRing';
@@ -103,8 +102,8 @@ import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursemen
 import {
   EMPTY_REVIEW_FILTERS,
   pruneReviewFilters,
-  type ReviewFilters,
   reviewFilterCount,
+  type ReviewFilters,
 } from '~/features/review/lib/reviewFilters';
 import type { ReviewZoom } from '~/features/review/lib/reviewPeriods';
 import { ReviewPagerView, type ReviewPagerViewHandle } from '~/features/review/screens';
@@ -137,6 +136,7 @@ import type {
 } from '~/types';
 import { cn } from '~/utils';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
+import { withColorAlpha } from '~/utils/color';
 import { convert } from '~/utils/currency';
 import {
   addFinancialMonths,
@@ -309,8 +309,6 @@ function renderInsightTypeIcon(insightType: InsightType) {
   );
 }
 
-const INSIGHTS_CHART_COLORS = CHART_CATEGORY_COLORS;
-
 const INSIGHTS_PAGER_TOTAL_SLOTS = LONG_RANGE_PAGER_TOTAL_SLOTS;
 const INSIGHTS_PAGER_CENTER_INDEX = LONG_RANGE_PAGER_CENTER_INDEX;
 const INSIGHTS_LIST_STYLE = { flex: 1 } as const;
@@ -327,8 +325,6 @@ const CATEGORY_TREND_X_AXIS_HEIGHT = 20;
 const CATEGORY_TREND_LINE_HEIGHT = 206;
 const CATEGORY_TREND_CHART_HEIGHT = CATEGORY_TREND_LINE_HEIGHT + CATEGORY_TREND_X_AXIS_HEIGHT;
 const CATEGORY_TREND_CHART_PADDING_RIGHT = 64;
-const CATEGORY_TREND_X_LABEL_WIDTH = 48;
-const CATEGORY_TREND_TARGET_X_LABELS = 6;
 const SENTIMENT_CHART_HEIGHT = 200;
 const SENTIMENT_CHART_PADDING_RIGHT = 16;
 const SENTIMENT_COLORS = { happy: '#4CAF50', neutral: '#FFB74D', sad: '#E57373' } as const;
@@ -413,13 +409,6 @@ const styles = StyleSheet.create({
     height: 2,
     borderRadius: 1,
   },
-  chartReferenceLine: {
-    position: 'absolute',
-    left: GRAPH_HORIZONTAL_PADDING,
-    right: GRAPH_HORIZONTAL_PADDING,
-    borderTopWidth: 1.5,
-    borderStyle: 'dotted',
-  },
   graphYAxisLabelContainer: {
     position: 'absolute',
     right: 0,
@@ -484,17 +473,6 @@ const styles = StyleSheet.create({
   },
   periodPickerGridItem: {
     width: '31.6%',
-  },
-  categoryTrendXAxisOverlay: {
-    position: 'absolute',
-    left: 0,
-    height: CATEGORY_TREND_X_AXIS_HEIGHT,
-  },
-  categoryTrendXAxisLabel: {
-    position: 'absolute',
-    top: 4,
-    textAlign: 'center',
-    fontSize: 9.5,
   },
   insightTypeIconImage: {
     width: 32,
@@ -1091,10 +1069,6 @@ function parseInsightsPreferencesPayload(
   }
 }
 
-function isBreakdownInsightType(type: InsightType): type is BreakdownInsightType {
-  return type === 'expense_breakdown' || type === 'income_breakdown';
-}
-
 function isAnalyticsInsightType(type: InsightType): type is AnalyticsInsightType {
   return type === 'savings_rate';
 }
@@ -1262,16 +1236,6 @@ function resolveWeekAnchorDateFromRange(range: { start: string; end: string }) {
   return rangeEndDate.getTime() > today.getTime() ? today : rangeEndDate;
 }
 
-function dayKeyToUtcDate(dayKey: string): Date | null {
-  const [yearRaw, monthRaw, dayRaw] = dayKey.split('-');
-  const year = Number(yearRaw);
-  const month = Number(monthRaw);
-  const day = Number(dayRaw);
-  if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) return null;
-  const date = new Date(Date.UTC(year, month - 1, day));
-  return Number.isNaN(date.getTime()) ? null : date;
-}
-
 function monthStartUtcDateFromMonthKey(monthKey: string): Date | null {
   const [yearRaw, monthRaw] = monthKey.split('-');
   const year = Number(yearRaw);
@@ -1397,16 +1361,6 @@ function generateDayKeysForRange(startIso: string, endIso: string): string[] {
     cursor.setDate(cursor.getDate() + 1);
   }
   return keys;
-}
-
-function withColorAlpha(hex: string, alpha: number) {
-  const value = hex.replace('#', '');
-  if (!/^[0-9a-fA-F]{6}$/.test(value)) return hex;
-  const r = Number.parseInt(value.slice(0, 2), 16);
-  const g = Number.parseInt(value.slice(2, 4), 16);
-  const b = Number.parseInt(value.slice(4, 6), 16);
-  const normalizedAlpha = Math.max(0, Math.min(1, alpha));
-  return `rgba(${r}, ${g}, ${b}, ${normalizedAlpha})`;
 }
 
 // Tone, icon, and status copy all derive from the same rounded percent the user
@@ -2813,12 +2767,10 @@ export function InsightsScreen({
     categories,
     accounts,
     accountGroups,
-    canUseTimeDisplayMode,
     getTrueHourlyRateForDate,
     getDisplayValueForTransaction,
     insightsPreferencesJson,
     updateInsightsPreferencesJson,
-    monthlyWages,
     updateTransactionsBulk,
     deleteTransactionsBulk,
     rateTable,
@@ -4403,7 +4355,6 @@ export function InsightsScreen({
     [
       accountScopedNonTransferEntries,
       assetHistoryLedger,
-      canUseTimeDisplayMode,
       categoryById,
       categoryTrendCategoryOptions,
       effectiveCategoryTrendCategoryId,
@@ -4416,7 +4367,6 @@ export function InsightsScreen({
       excludedExpenseBreakdownCategorySet,
       excludedIncomeBreakdownCategorySet,
       excludedCategoryTrendAccountSet,
-      getTrueHourlyRateForDate,
       getDisplayValueForTransaction,
       includedAssetHistoryAccounts,
       toAssetHistoryReportingCurrency,
@@ -4504,11 +4454,6 @@ export function InsightsScreen({
     headerPreviewPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
     setHeaderPreviewPageIndex(INSIGHTS_PAGER_CENTER_INDEX);
   }, [isTakeoverView, commitPageIndex]);
-  const currentPage = useMemo(
-    () =>
-      getCachedPageData(displayCurrentPeriodState, displaySelectedInsightType, displayPeriodPreset),
-    [displayCurrentPeriodState, displayPeriodPreset, displaySelectedInsightType, getCachedPageData],
-  );
   const headerPreviewOffset = displayHeaderPreviewPageIndex - displayCommittedPageIndex;
   const headerPreviewPeriodState = useMemo(
     () =>
@@ -4648,10 +4593,6 @@ export function InsightsScreen({
         </Text>
       );
     },
-    [settings],
-  );
-  const renderMoneyAmount = useCallback(
-    (amount: number) => formatAmount(amount, settings, { showSign: false, trueHourlyRate: 0 }),
     [settings],
   );
   const formatAxisCurrencyValue = useCallback(
@@ -4913,7 +4854,7 @@ export function InsightsScreen({
       value: row.amount,
       emoji: row.emoji || categoryById.get(row.id)?.icon || '•',
       pct: pageTotalAmount > 0 ? (row.amount / pageTotalAmount) * 100 : 0,
-      color: INSIGHTS_CHART_COLORS[i % INSIGHTS_CHART_COLORS.length],
+      color: chartCategoryColor(i),
     })) satisfies BreakdownPieSlice[];
     const activeSlice = activeBreakdownSliceId
       ? (pagePieData.find((item) => item.id === activeBreakdownSliceId) ?? null)

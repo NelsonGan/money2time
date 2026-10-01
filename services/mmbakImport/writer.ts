@@ -1,11 +1,11 @@
+import { DEFAULT_CATEGORY_ICONS } from '~/constants/appDefaults';
+import { I18n } from '~/lib/i18n';
 import { accountGroupsRepository } from '~/lib/repositories/accountGroupsRepository';
 import { accountsRepository } from '~/lib/repositories/accountsRepository';
 import { categoriesRepository } from '~/lib/repositories/categoriesRepository';
 import { recurringRulesRepository } from '~/lib/repositories/recurringRulesRepository';
 import { transactionsRepository } from '~/lib/repositories/transactionsRepository';
-import { DEFAULT_CATEGORY_ICONS } from '~/constants/appDefaults';
 import type { AccountType, CategoryType } from '~/types';
-import { I18n } from '~/lib/i18n';
 import { suggestCategoryIcon } from '~/utils/categoryIconMatcher';
 
 import type { MMBackupData, MMImportSummary, MMTxRow } from './types';

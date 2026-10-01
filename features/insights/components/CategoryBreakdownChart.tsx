@@ -5,9 +5,11 @@ import Svg, { G, Polyline, Text as SvgText } from 'react-native-svg';
 
 import { CategoryEmoji, Text } from '~/components/ui';
 import { categoryIconToEmoji } from '~/constants/categoryIcons';
+import { chartCategoryColor } from '~/constants/chartColors';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { triggerHaptic } from '~/services/haptics';
+import { withColorAlpha } from '~/utils/color';
 import { FONT } from '~/utils/fonts';
 
 import {
@@ -21,21 +23,6 @@ import {
   BREAKDOWN_PIE_MIN_RADIUS,
   layoutBreakdownPieLabels,
 } from '../breakdownPieLayout';
-
-export const INSIGHTS_CHART_COLORS = [
-  '#E53935',
-  '#FB8C00',
-  '#FDD835',
-  '#43A047',
-  '#00897B',
-  '#00ACC1',
-  '#1E88E5',
-  '#3949AB',
-  '#8E24AA',
-  '#D81B60',
-  '#6D4C41',
-  '#546E7A',
-];
 
 export interface BreakdownChartRow {
   id: string;
@@ -62,14 +49,6 @@ function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
 }
 
-function withColorAlpha(hex: string, alpha: number) {
-  const value = hex.replace('#', '');
-  const r = parseInt(value.slice(0, 2), 16);
-  const g = parseInt(value.slice(2, 4), 16);
-  const b = parseInt(value.slice(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
-
 /**
  * Category breakdown pie + legend, matching the insights expense breakdown
  * (gifted-charts pie with a custom collision-avoiding outward-label overlay).
@@ -90,7 +69,7 @@ export function CategoryBreakdownChart({
     () =>
       rows.map((row, index) => ({
         ...row,
-        color: INSIGHTS_CHART_COLORS[index % INSIGHTS_CHART_COLORS.length],
+        color: chartCategoryColor(index),
         pct: total > 0 ? (row.amount / total) * 100 : 0,
       })),
     [rows, total],

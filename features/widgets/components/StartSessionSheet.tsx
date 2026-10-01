@@ -6,7 +6,6 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { formatCurrency, formatTimeOfDay } from '~/utils/formatters';
 
-import { DurationWheelPicker } from './DurationWheelPicker';
 import {
   clampSessionHours,
   clampStartAt,
@@ -16,6 +15,7 @@ import {
   startHourBucketsFor,
   startMinuteOptionsFor,
 } from '../lib/liveEarnings';
+import { DurationWheelPicker } from './DurationWheelPicker';
 
 interface StartSessionSheetProps {
   visible: boolean;

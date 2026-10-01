@@ -2,8 +2,8 @@ import { LIVE_EARNINGS_MIN_HOURS } from '~/features/widgets/lib/liveEarnings';
 import { requestRunAddAction } from '~/services/addActionNavigation';
 import { handleMoney2TimeDeepLink } from '~/services/deepLinks';
 import { requestFocusInsight } from '~/services/insightsNavigation';
-import { requestReviewZoom } from '~/services/reviewNavigation';
 import { consumePendingLiveEarningsStart } from '~/services/liveEarningsNavigation';
+import { requestReviewZoom } from '~/services/reviewNavigation';
 import { requestOpenTab } from '~/services/tabNavigation';
 
 jest.mock('react-native', () => ({

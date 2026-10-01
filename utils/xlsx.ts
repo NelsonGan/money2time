@@ -41,7 +41,7 @@ function isDateCell(value: XlsxCell): value is XlsxDateCell {
 
 // XML 1.0 forbids most control characters outright — they can't even be
 // escaped as entities, so they're dropped rather than encoded.
-// eslint-disable-next-line no-control-regex
+
 const INVALID_XML_CHARS = /[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g;
 
 export function escapeXml(value: string): string {

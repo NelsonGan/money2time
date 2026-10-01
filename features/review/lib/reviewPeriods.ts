@@ -5,7 +5,7 @@ import {
   financialMonthRange,
   financialMonthStartDate,
 } from '~/utils/financialMonth';
-import { dayKeyFromDateLocal } from '~/utils/formatters';
+import { dateFromDayKeyLocal, dayKeyFromDateLocal } from '~/utils/formatters';
 
 /**
  * The three zoom levels a review can be read at. Each one enumerates only
@@ -48,11 +48,6 @@ function addDays(date: Date, days: number): Date {
   const next = new Date(date);
   next.setDate(next.getDate() + days);
   return next;
-}
-
-function parseDayKey(dayKey: string): Date {
-  const [year, month, day] = dayKey.split('-').map(Number);
-  return new Date(year, (month ?? 1) - 1, day ?? 1);
 }
 
 function weekPeriod(start: Date): ReviewPeriod {
@@ -131,7 +126,7 @@ export function shiftPeriod(
   monthCycle: MonthCycleInput,
 ): ReviewPeriod {
   if (period.zoom === 'week') {
-    return weekPeriod(addDays(parseDayKey(period.start), -7 * offset));
+    return weekPeriod(addDays(dateFromDayKeyLocal(period.start), -7 * offset));
   }
   if (period.zoom === 'month') {
     const monthKey = period.key.slice('month:'.length);

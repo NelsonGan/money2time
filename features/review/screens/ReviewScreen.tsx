@@ -31,6 +31,7 @@ import { dayKeyFromIsoLocal, formatAmount } from '~/utils/formatters';
 import { toSpendingRows } from '~/utils/spending';
 
 import { ReviewFilterSheet } from '../components/ReviewFilterSheet';
+import { applyReviewFilters, type ReviewFilters } from '../lib/reviewFilters';
 import {
   barLabel,
   deltaLabel,
@@ -42,7 +43,6 @@ import {
   shortDayLabel,
   weekdayDayLabel,
 } from '../lib/reviewFormat';
-import { applyReviewFilters, type ReviewFilters } from '../lib/reviewFilters';
 import {
   buildReviewSummary,
   expenseTotalForPeriod,
@@ -301,7 +301,7 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
                 <SpentCard summary={summary} />
                 <FlowCard summary={summary} />
                 <TrendCard summary={summary} />
-                {summary.pace ? <PaceCard summary={summary} /> : null}
+                <PaceCard summary={summary} />
                 <CategoriesCard
                   summary={summary}
                   expandedCategoryId={expandedCategoryId}
@@ -448,13 +448,8 @@ function SpentCard({ summary }: { summary: ReviewSummary }) {
   const themeColors = useThemeColors();
   const { delta } = summary;
   const percent = delta ? Math.round(delta.changeRatio * 100) : 0;
-  const deltaTint = !delta
-    ? themeColors.textMuted
-    : percent === 0
-      ? themeColors.textMuted
-      : percent < 0
-        ? themeColors.success
-        : themeColors.error;
+  const deltaTint =
+    percent === 0 ? themeColors.textMuted : percent < 0 ? themeColors.success : themeColors.error;
 
   return (
     // The period lives here rather than on its own line above the cards: it is
@@ -1059,12 +1054,6 @@ const styles = StyleSheet.create({
     paddingTop: spacing.sm,
     gap: spacing.sm,
   },
-  card: {
-    padding: spacing.md,
-  },
-  cardBody: {
-    marginTop: spacing.sm,
-  },
   ring: {
     width: RING_SIZE,
     height: RING_SIZE,
@@ -1119,10 +1108,6 @@ const styles = StyleSheet.create({
   },
   chevronOpen: {
     transform: [{ rotate: '180deg' }],
-  },
-  shareLabel: {
-    width: 34,
-    textAlign: 'right',
   },
   categoryItems: {
     marginTop: spacing.xs,

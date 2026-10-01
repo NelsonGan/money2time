@@ -1,5 +1,10 @@
 import type { RecurrencePattern, RecurringTransactionRule } from '~/types';
-import { dayKeyFromDateLocal, dayKeyFromIsoLocal, timeFromDateLocal } from '~/utils/formatters';
+import {
+  dateFromDayKeyLocal,
+  dayKeyFromDateLocal,
+  dayKeyFromIsoLocal,
+  timeFromDateLocal,
+} from '~/utils/formatters';
 import { countsAsExpenseRow } from '~/utils/spending';
 
 const AVERAGE_DAYS_PER_YEAR = 365.2425;
@@ -214,8 +219,7 @@ export function projectRecurringOccurrences(
 
 /** Shifts a YYYY-MM-DD key by whole days, staying in the local calendar. */
 export function addDaysToDayKey(dayKey: string, days: number): string {
-  const [year, month, day] = dayKey.split('-').map(Number);
-  const date = new Date(year, (month ?? 1) - 1, day ?? 1);
+  const date = dateFromDayKeyLocal(dayKey);
   if (Number.isNaN(date.getTime())) return dayKey;
   date.setDate(date.getDate() + days);
   return dayKeyFromDateLocal(date);

@@ -1,7 +1,6 @@
-import * as ImagePicker from 'expo-image-picker';
 import { ChevronRight, ImagePlus, QrCode, Wallet } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, Image, Pressable, ScrollView, View } from 'react-native';
+import { Image, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -16,8 +15,8 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
+import { pickLibraryImage } from '~/services/libraryImagePicker';
 import { deletePaymentQr, getPaymentQrUri, savePaymentQr } from '~/services/userAssets';
-import { getErrorMessage } from '~/utils/errorHandling';
 
 interface SettleUpSettingsScreenProps {
   onBack: () => void;
@@ -62,31 +61,16 @@ export function SettleUpSettingsScreen({ onBack }: SettleUpSettingsScreenProps) 
 
   const handlePickQr = useCallback(async () => {
     void triggerHaptic('selection');
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert(
-        I18n.t('accounts.logo.permission_title'),
-        I18n.t('accounts.logo.permission_message'),
-      );
-      return;
-    }
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.9,
-      });
-      if (result.canceled || !result.assets?.[0]) return;
-      const previous = settings.paymentQrUri;
-      const relativePath = savePaymentQr(result.assets[0].uri);
-      updateSettings({ paymentQrUri: relativePath });
-      if (previous) deletePaymentQr(previous);
-      trackEvent(AnalyticsEvents.SETTLE_UP_QR_SET);
-    } catch (error) {
-      // The picker itself can reject, not just the save step below it.
-      Alert.alert(I18n.t('errors.generic_operation_failed'), getErrorMessage(error));
-    }
+    await pickLibraryImage(
+      (uri) => {
+        const previous = settings.paymentQrUri;
+        const relativePath = savePaymentQr(uri);
+        updateSettings({ paymentQrUri: relativePath });
+        if (previous) deletePaymentQr(previous);
+        trackEvent(AnalyticsEvents.SETTLE_UP_QR_SET);
+      },
+      { aspect: [1, 1] },
+    );
   }, [settings.paymentQrUri, updateSettings]);
 
   const handleRemoveQr = useCallback(() => {

@@ -1,3 +1,4 @@
+import { PRO_LIMITS } from '~/constants/proLimits';
 import { FEATURE_ANNOUNCEMENTS } from '~/features/news/announcements';
 import {
   announcementBadgeLabel,
@@ -6,7 +7,6 @@ import {
   type FeatureAnnouncementPage,
 } from '~/features/news/featureAnnouncements';
 import { I18n } from '~/lib/i18n';
-import { PRO_LIMITS } from '~/constants/proLimits';
 import en from '~/lib/i18n/locales/en';
 
 type Tree = { [key: string]: string | Tree };
