@@ -137,7 +137,7 @@ export function GoalCoversShowcase({ width }: ShowcaseProps) {
     >
       <View className="relative" style={{ width, aspectRatio: 2 }}>
         <Image
-          source={require('../../../assets/news/goal-cover-japan.png')}
+          source={require('../../../assets/news/goal-cover-japan.jpg')}
           style={{ width: '100%', height: '100%' }}
           contentFit="cover"
         />

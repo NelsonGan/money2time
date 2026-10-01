@@ -3,14 +3,6 @@ import './global.css';
 // OS may invoke it before any React component renders.
 import './services/autoBackupTaskRegistration';
 
-import {
-  WorkSans_400Regular,
-  WorkSans_500Medium,
-  WorkSans_600SemiBold,
-  WorkSans_700Bold,
-  WorkSans_800ExtraBold,
-  WorkSans_900Black,
-} from '@expo-google-fonts/work-sans';
 import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
 import * as Sentry from '@sentry/react-native';
 import { useFonts } from 'expo-font';
@@ -51,6 +43,7 @@ import {
   ItemIconPickerSheet,
   SubscriptionLogoPickerSheet,
 } from '~/components/ui';
+import { CUSTOM_FONTS } from '~/constants/customFonts';
 import { PRO_LIMITS } from '~/constants/proLimits';
 import {
   AppProvider,
@@ -2835,19 +2828,7 @@ function AppContent() {
 
 export default Sentry.wrap(function App() {
   perfMark('app_render');
-  const shouldLoadCustomFonts = Platform.OS !== 'ios';
-  const [fontsLoaded, fontError] = useFonts(
-    shouldLoadCustomFonts
-      ? {
-          WorkSans_400Regular,
-          WorkSans_500Medium,
-          WorkSans_600SemiBold,
-          WorkSans_700Bold,
-          WorkSans_800ExtraBold,
-          WorkSans_900Black,
-        }
-      : {},
-  );
+  const [fontsLoaded, fontError] = useFonts(CUSTOM_FONTS);
 
   // Failsafe: the splash is normally lifted on first content layout, but a
   // bootstrap failure (e.g. a migration or data-load throw) renders the error
@@ -2864,7 +2845,7 @@ export default Sentry.wrap(function App() {
 
   // Splash stays up (prevented from auto-hiding) while fonts resolve, so this
   // null render is never visible. Proceed on error so we can't get stuck.
-  if (shouldLoadCustomFonts && !fontsLoaded && !fontError) {
+  if (Platform.OS !== 'ios' && !fontsLoaded && !fontError) {
     return null;
   }
   perfMark('fonts_ready');

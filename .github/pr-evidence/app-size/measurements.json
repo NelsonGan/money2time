@@ -1,0 +1,78 @@
+{
+  "before": {
+    "android": {
+      "hermesBytes": 13519804,
+      "exportAssets": 925
+    },
+    "ios": {
+      "hermesBytes": 13515164,
+      "exportAssets": 925
+    },
+    "apk": {
+      "bytes": 316666126,
+      "sha256": "a7346257adf3c34bea8f7d900311fc14dce3548207d4dc8c30b8fad59029878f",
+      "compressedComponents": {
+        "other": 1420812,
+        "assets": 14555607,
+        "dex": 23491818,
+        "native": 189344828,
+        "resources": 86134977
+      }
+    },
+    "aab": {
+      "bytes": 231454184,
+      "sha256": "f740e700e5a87d97df1d5943564e09a5e9240d5cac467e8e4dc68b688cfff7f1",
+      "compressedComponents": {
+        "other": 45719578,
+        "assets": 6479302,
+        "dex": 23491818,
+        "native": 71549722,
+        "resources": 83075884
+      }
+    }
+  },
+  "after": {
+    "ios": {
+      "hermesBytes": 12316576,
+      "exportAssets": 833
+    },
+    "android": {
+      "hermesBytes": 12326288,
+      "exportAssets": 839
+    },
+    "apk": {
+      "bytes": 283343959,
+      "sha256": "aa762c48036525fffeaec03c3b7ca3d71fe205682597141c6753ac010f6a1efe",
+      "compressedComponents": {
+        "other": 1422100,
+        "assets": 13353324,
+        "dex": 8831407,
+        "native": 189344828,
+        "resources": 68697149
+      }
+    },
+    "aab": {
+      "bytes": 206696076,
+      "sha256": "2a65f303e9375bc1be5c4b1c52f752fe58669146998e821f22de525597c19941",
+      "compressedComponents": {
+        "other": 52947270,
+        "assets": 6240411,
+        "dex": 8831407,
+        "native": 71549722,
+        "resources": 66027754
+      }
+    }
+  },
+  "baselineCommit": "8e779f1d",
+  "variant": "production",
+  "androidAbis": ["arm64-v8a", "armeabi-v7a", "x86", "x86_64"],
+  "imageOptimization": {
+    "removedUnusedChromeImages": 74,
+    "removedBytes": 2021025,
+    "compressedPngSavingsBytes": 12837097,
+    "photoSavingsBytes": 1992169,
+    "maxAcceptedRmse": 3,
+    "repeatCompressionSavingsBytes": 0,
+    "atlasRegenerationByteIdentical": true
+  }
+}
