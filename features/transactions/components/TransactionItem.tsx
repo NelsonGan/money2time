@@ -51,6 +51,9 @@ const styles = StyleSheet.create({
   // Runs a few points past its slot (into the gap before the badge) so the
   // title always has more room than its measured width.
   titleOverlay: { position: 'absolute', top: 0, left: 0, right: -4 },
+  // Same trick for the account badge's label, run into the badge's own
+  // right padding rather than past its edge.
+  accountLabelOverlay: { position: 'absolute', top: 0, left: 0, right: -3 },
 });
 
 interface TransactionItemProps {
@@ -167,6 +170,7 @@ function TransactionAccountBadge({
   compact: boolean;
   className?: string;
 }) {
+  const labelSizeClass = compact ? 'text-[10px] leading-[12px]' : 'text-[11px] leading-[14px]';
   return (
     <View
       className={cn(
@@ -180,18 +184,31 @@ function TransactionAccountBadge({
         goalEmoji={account?.goalEmoji}
         size={compact ? 12 : 14}
       />
-      <Text
-        variant="caption"
-        tone="primary"
-        className={cn(
-          'min-w-0 shrink',
-          compact ? 'text-[10px] leading-[12px]' : 'text-[11px] leading-[14px]',
-        )}
-        numberOfLines={1}
-        ellipsizeMode="tail"
-      >
-        {label}
-      </Text>
+      {/* Sized from a hidden copy, drawn over it a little wider: inside the
+          long-range month pagers a box that hugs its text can come out a
+          sliver narrower than the text, which ellipsized names that fit
+          ("Cash Wallet" drew as "Cash Wall…" on a 3x iPhone). The label is
+          on the slot so the row's spoken summary reads it once. */}
+      <View className="min-w-0 shrink" collapsable={false} accessibilityLabel={label}>
+        <Text
+          variant="caption"
+          className={cn('opacity-0', labelSizeClass)}
+          numberOfLines={1}
+          importantForAccessibility="no"
+        >
+          {label}
+        </Text>
+        <Text
+          variant="caption"
+          tone="primary"
+          className={labelSizeClass}
+          style={styles.accountLabelOverlay}
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
+          {label}
+        </Text>
+      </View>
     </View>
   );
 }
