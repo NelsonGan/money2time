@@ -1213,6 +1213,9 @@ const id = {
     icon_style_flat: 'Flat',
     home_summary_left: 'Left home card',
     home_summary_right: 'Right home card',
+    show_transaction_account: 'Tampilkan akun di transaksi',
+    show_transaction_account_help:
+      'Menampilkan akun asal atau tujuan setiap transaksi. Transfer selalu menampilkan akun yang terlibat.',
     icon_style_help:
       'Clay menggunakan ilustrasi 3D lembut di seluruh tab, pengaturan, dan tombol. Flat mengembalikannya ke ikon garis sederhana.',
     first_day_of_week: 'Hari pertama minggu',

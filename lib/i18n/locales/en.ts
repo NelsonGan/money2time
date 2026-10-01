@@ -1184,6 +1184,9 @@ const en = {
       'Clay uses the soft 3D illustrations across tabs, settings, and buttons. Flat switches them back to the simple line icons.',
     home_summary_left: 'Left home card',
     home_summary_right: 'Right home card',
+    show_transaction_account: 'Show account on transactions',
+    show_transaction_account_help:
+      'Shows the account each transaction was paid from or into. Transfers always show the accounts they moved between.',
     first_day_of_week: 'First day of week',
     first_day_sunday: 'Sunday',
     first_day_monday: 'Monday',

@@ -1211,6 +1211,9 @@ const ru = {
     icon_style_flat: 'Плоский',
     home_summary_left: 'Left home card',
     home_summary_right: 'Right home card',
+    show_transaction_account: 'Показывать счёт в операциях',
+    show_transaction_account_help:
+      'Показывает счёт, с которого или на который прошла каждая операция. Переводы всегда показывают оба счёта.',
     icon_style_help:
       'Глина использует мягкие 3D-иллюстрации во вкладках, настройках и кнопках. Плоский возвращает простые линейные значки.',
     first_day_of_week: 'Первый день недели',

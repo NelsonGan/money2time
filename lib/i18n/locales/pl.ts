@@ -1210,6 +1210,9 @@ const pl = {
     icon_style_flat: 'Płaskie',
     home_summary_left: 'Left home card',
     home_summary_right: 'Right home card',
+    show_transaction_account: 'Pokazuj konto przy transakcjach',
+    show_transaction_account_help:
+      'Pokazuje konto, z którego lub na które poszła każda transakcja. Przelewy zawsze pokazują konta, między którymi przeszły.',
     icon_style_help:
       'Glina używa miękkich ilustracji 3D w kartach, ustawieniach i przyciskach. Płaskie przywraca proste ikony liniowe.',
     first_day_of_week: 'Pierwszy dzień tygodnia',

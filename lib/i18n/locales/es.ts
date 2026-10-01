@@ -1213,6 +1213,9 @@ const es = {
     icon_style_flat: 'Plano',
     home_summary_left: 'Left home card',
     home_summary_right: 'Right home card',
+    show_transaction_account: 'Mostrar cuenta en transacciones',
+    show_transaction_account_help:
+      'Muestra la cuenta desde o hacia la que se hizo cada transacción. Las transferencias siempre muestran las cuentas entre las que se movió el dinero.',
     icon_style_help:
       'Arcilla usa las ilustraciones 3D suaves en pestañas, ajustes y botones. Plano vuelve a los iconos de línea simples.',
     first_day_of_week: 'Primer día de la semana',

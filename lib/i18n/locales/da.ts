@@ -1210,6 +1210,9 @@ const da = {
     icon_style_flat: 'Flad',
     home_summary_left: 'Left home card',
     home_summary_right: 'Right home card',
+    show_transaction_account: 'Vis konto på transaktioner',
+    show_transaction_account_help:
+      'Viser kontoen, hver transaktion blev betalt fra eller ind på. Overførsler viser altid de konti, de flyttede mellem.',
     icon_style_help:
       'Ler bruger de bløde 3D-illustrationer på tværs af faner, indstillinger og knapper. Flad skifter tilbage til de enkle stregikoner.',
     first_day_of_week: 'Ugens første dag',

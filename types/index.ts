@@ -320,6 +320,8 @@ export interface UserSettings {
   defaultPaybackAccountId: string | null;
   /** Whether a reimbursable expense still counts as spending. */
   reimbursementsCountAsExpense: boolean;
+  /** Whether transaction rows show their account (name and logo). */
+  showTransactionAccount: boolean;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;

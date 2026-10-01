@@ -66,7 +66,7 @@ export function InfoTooltipButton({
             onPress={() => {}}
           >
             <View className="mb-2 flex-row items-center justify-between gap-3">
-              <Text variant="subheading" numberOfLines={1} className="flex-1">
+              <Text variant="subheading" numberOfLines={2} className="flex-1">
                 {title}
               </Text>
               <Pressable
