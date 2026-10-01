@@ -59,6 +59,7 @@ import type { PreviewSeedProfile } from '~/services/previewData';
 import { openStoreReviewManually } from '~/services/reviewPrompt';
 import { deleteProfileAvatar, getProfileAvatarUri, saveProfileAvatar } from '~/services/userAssets';
 import { cn } from '~/utils';
+import { getErrorMessage } from '~/utils/errorHandling';
 import {
   financialMonthKeyForDate,
   financialMonthKeyForIso,
