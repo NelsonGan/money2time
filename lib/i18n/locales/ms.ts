@@ -1190,6 +1190,17 @@ const ms = {
         'Kali pertama ia berjalan, ketik Always Allow supaya ia boleh membaca tangkapan skrin anda.',
       log_screenshot_step_6:
         'Money2Time membaca jumlah dan peniaga lalu merekod transaksi secara automatik.',
+      share_screenshot_title: 'Kongsi ke Money2Time',
+      share_screenshot_hint:
+        'Kongsi tangkapan skrin pembayaran atau foto resit ke Money2Time dari mana-mana aplikasi. Ia membaca jumlah, peniaga dan akaun lalu merekod transaksi secara automatik.',
+      share_screenshot_step_1:
+        'Ambil tangkapan skrin bagi skrin pembayaran atau resit, kemudian ketik Kongsi pada pratonton.',
+      share_screenshot_step_2:
+        'Pilih Money2Time dalam helaian kongsi. Petua: tekan lama untuk menyematkannya di hadapan.',
+      share_screenshot_step_3:
+        'Money2Time dibuka dan membaca tangkapan skrin di latar belakang. Foto dalam galeri anda juga boleh: buka satu, ketik Kongsi dan pilih Money2Time.',
+      share_screenshot_step_4:
+        'Transaksi direkod secara automatik. Kongsi beberapa imej sekali gus untuk merekod semuanya.',
       defaults_title: 'Konfigurasi',
       defaults_hint: 'Digunakan apabila automasi tidak menetapkan akaun atau kategori.',
       default_account: 'Akaun lalai',

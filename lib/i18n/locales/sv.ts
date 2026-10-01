@@ -1181,6 +1181,17 @@ const sv = {
         'Första gången den körs trycker du på Always Allow så att den kan läsa din skärmbild.',
       log_screenshot_step_6:
         'Money2Time läser av beloppet och handlaren och bokför transaktionen automatiskt.',
+      share_screenshot_title: 'Dela till Money2Time',
+      share_screenshot_hint:
+        'Dela en betalningsskärmbild eller ett kvittofoto till Money2Time från valfri app. Belopp, handlare och konto läses av och transaktionen bokförs automatiskt.',
+      share_screenshot_step_1:
+        'Ta en skärmbild av en betalnings- eller kvittoskärm och tryck på Dela i förhandsvisningen.',
+      share_screenshot_step_2:
+        'Välj Money2Time i delningsmenyn. Tips: tryck länge för att fästa den först.',
+      share_screenshot_step_3:
+        'Money2Time öppnas och läser skärmbilden i bakgrunden. Bilder i galleriet fungerar också: öppna en, tryck på Dela och välj Money2Time.',
+      share_screenshot_step_4:
+        'Transaktionen bokförs automatiskt. Dela flera bilder på en gång för att bokföra alla.',
       defaults_title: 'Konfiguration',
       defaults_hint: 'Används när en automation inte anger konto eller kategori.',
       default_account: 'Standardkonto',

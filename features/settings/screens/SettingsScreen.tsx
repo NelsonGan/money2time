@@ -552,15 +552,13 @@ export function SettingsScreen({
                 label={I18n.t('settings.quick_entry.title')}
                 onPress={onOpenQuickEntry}
               />
-              {/* Auto-log rides the iOS Shortcuts "Transaction" automation and
-                  Back Tap; Android has no equivalent trigger. */}
-              {Platform.OS === 'ios' ? (
-                <SettingsGridTile
-                  icon={<ClayIcon name="settings/auto-log" size={34} flatSize={20} />}
-                  label={I18n.t('settings.auto_log.title')}
-                  onPress={onOpenAutoLog}
-                />
-              ) : null}
+              {/* iOS: the Shortcuts actions and Back Tap. Android: sharing a
+                  screenshot to the app from the system share sheet. */}
+              <SettingsGridTile
+                icon={<ClayIcon name="settings/auto-log" size={34} flatSize={20} />}
+                label={I18n.t('settings.auto_log.title')}
+                onPress={onOpenAutoLog}
+              />
               <SettingsGridTile
                 icon={<ClayIcon name="settings/settle-up" size={34} flatSize={20} />}
                 label={I18n.t('transactions.settleUp.title')}

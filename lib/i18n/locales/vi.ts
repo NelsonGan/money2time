@@ -1173,6 +1173,16 @@ const vi = {
       log_screenshot_step_5:
         'Lần đầu chạy, hãy chạm Always Allow để nó có thể đọc ảnh chụp màn hình của bạn.',
       log_screenshot_step_6: 'Money2Time đọc số tiền và người bán rồi tự động ghi lại giao dịch.',
+      share_screenshot_title: 'Chia sẻ tới Money2Time',
+      share_screenshot_hint:
+        'Chia sẻ ảnh chụp màn hình thanh toán hoặc ảnh hóa đơn tới Money2Time từ bất kỳ ứng dụng nào. Ứng dụng đọc số tiền, người bán và tài khoản rồi tự động ghi lại giao dịch.',
+      share_screenshot_step_1:
+        'Chụp màn hình trang thanh toán hoặc hóa đơn, rồi nhấn Chia sẻ trên bản xem trước.',
+      share_screenshot_step_2: 'Chọn Money2Time trong bảng chia sẻ. Mẹo: nhấn giữ để ghim lên đầu.',
+      share_screenshot_step_3:
+        'Money2Time mở ra và đọc ảnh chụp màn hình trong nền. Ảnh có sẵn trong thư viện cũng dùng được: mở ảnh, nhấn Chia sẻ và chọn Money2Time.',
+      share_screenshot_step_4:
+        'Giao dịch được ghi lại tự động. Chia sẻ nhiều ảnh cùng lúc để ghi lại tất cả.',
       defaults_title: 'Cấu hình',
       defaults_hint: 'Được dùng khi một tự động hóa không đặt tài khoản hoặc danh mục.',
       default_account: 'Tài khoản mặc định',

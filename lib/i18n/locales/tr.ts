@@ -1186,6 +1186,17 @@ const tr = {
         "İlk çalıştığında, ekran görüntünüzü okuyabilmesi için Always Allow'a dokunun.",
       log_screenshot_step_6:
         'Money2Time tutarı ve satıcıyı okuyup işlemi otomatik olarak kaydeder.',
+      share_screenshot_title: "Money2Time'a paylaş",
+      share_screenshot_hint:
+        "Herhangi bir uygulamadan ödeme ekran görüntüsünü veya fiş fotoğrafını Money2Time'a paylaşın. Tutarı, satıcıyı ve hesabı okuyup işlemi otomatik olarak kaydeder.",
+      share_screenshot_step_1:
+        'Bir ödeme veya fiş ekranının ekran görüntüsünü alın, ardından önizlemede Paylaş’a dokunun.',
+      share_screenshot_step_2:
+        'Paylaşım menüsünde Money2Time’ı seçin. İpucu: başa sabitlemek için uzun basın.',
+      share_screenshot_step_3:
+        'Money2Time açılır ve ekran görüntüsünü arka planda okur. Galerideki fotoğraflar da olur: birini açın, Paylaş’a dokunun ve Money2Time’ı seçin.',
+      share_screenshot_step_4:
+        'İşlem otomatik olarak kaydedilir. Hepsini kaydetmek için birden çok görseli aynı anda paylaşın.',
       defaults_title: 'Yapılandırma',
       defaults_hint: 'Bir otomasyon hesap veya kategori belirlemediğinde kullanılır.',
       default_account: 'Varsayılan hesap',

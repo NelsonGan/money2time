@@ -43,11 +43,12 @@ export function NewsScreen({ onBack, ...ctaHandlers }: NewsScreenProps) {
   const colors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
   // Voice-gated announcements stay listed everywhere (any device may gain a
-  // voice pack), but the automations announcement is meaningless off iOS: the
-  // Shortcuts actions cannot exist there and its CTA would open a dead
-  // Automation page, so it is dropped from the list entirely. Platform is the
-  // right gate (not isAutoLogSupported) so iOS builds whose binary predates
-  // the native module still see it, matching the Settings tile's visibility.
+  // voice pack), but the automations announcement is meaningless off iOS: it
+  // shows the Shortcuts actions and Back Tap, which Android does not have
+  // (Android's Automation page offers share-to-log instead), so it is dropped
+  // from the list entirely. Platform is the right gate (not
+  // isAutoLogSupported) so iOS builds whose binary predates the native module
+  // still see it, matching the Settings tile's visibility.
   const announcements = useMemo(
     () =>
       getFeatureAnnouncementsNewestFirst().filter(

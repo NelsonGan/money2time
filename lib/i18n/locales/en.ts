@@ -1156,6 +1156,17 @@ const en = {
         'The first time it runs, tap Always Allow so it can read your screenshot.',
       log_screenshot_step_6:
         'Money2Time reads the amount and merchant and logs the transaction automatically.',
+      share_screenshot_title: 'Share to Money2Time',
+      share_screenshot_hint:
+        'Share a payment screenshot or receipt photo to Money2Time from any app. It reads the amount, merchant, and account and logs the transaction automatically.',
+      share_screenshot_step_1:
+        'Take a screenshot of any payment or receipt screen, then tap Share on the preview.',
+      share_screenshot_step_2:
+        'Choose Money2Time in the share sheet. Tip: long-press it to pin it to the front.',
+      share_screenshot_step_3:
+        'Money2Time opens and reads the screenshot in the background. Photos already in your gallery work too: open one, tap Share, and pick Money2Time.',
+      share_screenshot_step_4:
+        'The transaction is logged automatically. Share several images at once to log them all.',
       defaults_title: 'Configurations',
       defaults_hint: 'Used when an automation sets no account or category.',
       default_account: 'Default account',
