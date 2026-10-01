@@ -211,6 +211,70 @@ describe('buildMoney2TimeWidgetSnapshot', () => {
     expect(calendar.totalExpense).toBe(30);
   });
 
+  it.each([
+    ['2026-06-15', 0, 30],
+    ['2026-09-15', 1, 30],
+    ['2026-07-15', 2, 31],
+    ['2026-10-01', 3, 31],
+    ['2027-01-15', 4, 31],
+    ['2026-08-15', 5, 31],
+    ['2026-02-15', 6, 28],
+    ['2028-02-15', 1, 29],
+  ])('keeps every date when %s has %i leading blank cells', (today, leading, count) => {
+    jest.setSystemTime(new Date(`${today}T12:00:00`));
+    const { calendarMonth } = buildMoney2TimeWidgetSnapshot({
+      transactions: [],
+      settings: baseSettings,
+      isPro: true,
+      getTrueHourlyRateForDate: () => 0,
+    });
+
+    expect(calendarMonth.leadingSpacers).toBe(leading);
+    expect(calendarMonth.days.map((day) => day.dayNumber)).toEqual(
+      Array.from({ length: count }, (_, index) => index + 1),
+    );
+    expect(new Set(calendarMonth.days.map((day) => day.dayKey)).size).toBe(count);
+    expect(calendarMonth.days[0].dayKey).toBe(`${today.slice(0, 7)}-01`);
+  });
+
+  it('keeps October 1–3 activity after the September boundary for either week start', () => {
+    jest.setSystemTime(new Date('2026-10-01T12:00:00'));
+    for (const weekStartsOn of [0, 1] as const) {
+      const { calendarMonth } = buildMoney2TimeWidgetSnapshot({
+        transactions: [
+          transaction({ amount: 99, date: '2026-09-30T12:00:00' }),
+          transaction({ amount: 10, date: '2026-10-01T12:00:00' }),
+          transaction({ amount: 20, date: '2026-10-02T12:00:00' }),
+          transaction({ amount: 30, date: '2026-10-03T12:00:00' }),
+        ],
+        settings: { ...baseSettings, weekStartsOn },
+        isPro: true,
+        getTrueHourlyRateForDate: () => 0,
+      });
+
+      expect(calendarMonth.leadingSpacers).toBe(weekStartsOn === 1 ? 3 : 4);
+      expect(calendarMonth.days.slice(0, 3).map((day) => day.expense)).toEqual([10, 20, 30]);
+      expect(calendarMonth.days[0].isToday).toBe(true);
+      expect(calendarMonth.totalExpense).toBe(60);
+    }
+  });
+
+  it('keeps unique full dates when an extended financial month repeats day numbers', () => {
+    jest.setSystemTime(new Date('2026-09-15T12:00:00'));
+    const { calendarMonth } = buildMoney2TimeWidgetSnapshot({
+      transactions: [],
+      settings: { ...baseSettings, firstDayOverridesJson: '{"2026-10":31}' },
+      isPro: true,
+      getTrueHourlyRateForDate: () => 0,
+    });
+
+    expect(calendarMonth.days).toHaveLength(60);
+    expect(
+      calendarMonth.days.filter((day) => day.dayNumber === 1).map((day) => day.dayKey),
+    ).toEqual(['2026-09-01', '2026-10-01']);
+    expect(new Set(calendarMonth.days.map((day) => day.dayKey)).size).toBe(60);
+  });
+
   it('builds the savings-rate snapshot from current-month income and expense', () => {
     const snapshot = buildMoney2TimeWidgetSnapshot({
       transactions: [

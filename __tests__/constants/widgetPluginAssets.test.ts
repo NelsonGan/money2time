@@ -32,12 +32,11 @@ describe('config plugin assets', () => {
     expect(missing).toEqual([]);
   });
 
-  it('copies both widget images the native targets render', () => {
+  it('uses the shipped headshot for native widget branding and locked states', () => {
     const referenced = assetPathsReferencedBy(path.join(PLUGINS_DIR, 'withMoney2TimeWidgets.js'));
 
-    // The Swift/XML layouts load these by their copied names (`banner`,
-    // `widget_mascot`/`mascot`), so the plugin must always ship one of each.
-    expect(referenced).toContain('assets/banner.png');
-    expect(referenced.some((asset) => asset.startsWith('assets/mascots/'))).toBe(true);
+    expect(referenced).toContain('assets/app-icons/classic/icon-light.png');
+    expect(referenced).not.toContain('assets/banner.png');
+    expect(referenced.some((asset) => asset.startsWith('assets/mascots/'))).toBe(false);
   });
 });

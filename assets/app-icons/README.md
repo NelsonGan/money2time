@@ -159,5 +159,8 @@ The splash is the exception, and is not generated here: it keeps the **whole**
 character, centred on its alpha centroid, at 56% of the canvas. It has the room,
 and it is not competing with a 40px launcher tile.
 
-Not covered by these files: `assets/banner.png`, the wordmark used by the native
-widgets. Its badge is the same chick, full body, on the rosewood disc `#D86C72`.
+Native widgets on iOS and Android, their locked states, and the in-app widget
+previews use `classic/icon-light.png` directly. The brand name is rendered as text
+beside the headshot, so there is no separate widget bitmap to drift from the app
+logo. `assets/banner.png` remains the legacy full-body wordmark; widgets do not
+use it.
