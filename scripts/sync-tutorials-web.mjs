@@ -21,6 +21,8 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import ts from 'typescript';
+
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const ASSET_DIR = path.join(ROOT, 'assets/tutorials');
 const CONTENT_DIR = path.join(ROOT, 'features/tutorials/content');
@@ -34,23 +36,28 @@ function resolveWebDir() {
 
 /**
  * Evaluates one content file as JavaScript. The content files are plain data
- * with no imports beyond the shared `type`, so stripping the type import and
- * the `: Tutorial[]` annotation leaves something a dynamic `import()` of a
- * data: URL can run. That keeps this script a dependency-free `node` run, like
- * every other script in `scripts/`.
+ * with shared types and plan limits. Inline the current plan limits and use
+ * the project's TypeScript compiler to remove types before importing the data.
  */
-async function evaluate(source, exportName) {
-  const stripped = source
-    .replace(/^import type .*$/gm, '')
-    .replace(/:\s*Tutorial\[\]\s*=/, ' =')
-    .replace(new RegExp(`^export const ${exportName}\\b`, 'm'), 'export const EXPORTED');
-  const module = await import(
-    `data:text/javascript;base64,${Buffer.from(stripped, 'utf8').toString('base64')}`
+async function evaluate(source, exportName, proLimits) {
+  const bound = source.replace(
+    /^import\s+\{\s*PRO_LIMITS\s*\}\s+from\s+['"]~\/constants\/proLimits['"];?$/gm,
+    () => `const PRO_LIMITS = ${JSON.stringify(proLimits)};`,
   );
-  return module.EXPORTED;
+  const { outputText } = ts.transpileModule(bound, {
+    compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2020 },
+  });
+  const module = await import(
+    `data:text/javascript;base64,${Buffer.from(outputText, 'utf8').toString('base64')}`
+  );
+  return module[exportName];
 }
 
 async function loadCatalog() {
+  const proLimits = await evaluate(
+    await fs.readFile(path.join(ROOT, 'constants/proLimits.ts'), 'utf8'),
+    'PRO_LIMITS',
+  );
   const files = (await fs.readdir(CONTENT_DIR))
     .filter((file) => file.endsWith('.ts'))
     .filter((file) => !['types.ts', 'tutorials.ts', 'images.generated.ts'].includes(file))
@@ -61,7 +68,7 @@ async function loadCatalog() {
     const source = await fs.readFile(path.join(CONTENT_DIR, file), 'utf8');
     const name = source.match(/^export const (\w+)/m)?.[1];
     if (!name) throw new Error(`No exported catalog in ${file}`);
-    tutorials.push(...(await evaluate(source, name)));
+    tutorials.push(...(await evaluate(source, name, proLimits)));
   }
   return tutorials;
 }

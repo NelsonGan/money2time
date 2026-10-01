@@ -101,7 +101,7 @@ export const INSIGHTS_TUTORIALS: Tutorial[] = [
     id: 'widgets',
     category: 'insights',
     title: 'Add a home screen widget',
-    summary: 'Log an expense without opening the app.',
+    summary: 'Log from your home screen and check daily income and spending.',
     platform: 'ios',
     keywords: ['widget', 'home screen', 'lock screen', 'shortcut', 'ios', 'monthly spend'],
     steps: [
@@ -113,12 +113,17 @@ export const INSIGHTS_TUTORIALS: Tutorial[] = [
       {
         image: 'widgets-2',
         title: 'Find Money2Time',
-        body: 'Search for it, then swipe through the sizes. There are widgets for monthly spend, budgets, goals, and more.',
+        body: 'Search for Money2Time and swipe through the choices. Choose Monthly Spend and tap Add Widget to put the Income and Expense buttons on your home screen.',
       },
       {
         image: 'widgets-3',
         title: 'Log straight from it',
         body: 'The Income and Expense buttons open the entry screen. The rest of the widget updates as you log.',
+      },
+      {
+        image: 'widgets-4',
+        title: 'Add the calendar',
+        body: 'Repeat the same steps and choose Calendar to see daily income and spending for the month. Calendar and other widgets with a Pro badge require Pro.',
       },
     ],
   },
