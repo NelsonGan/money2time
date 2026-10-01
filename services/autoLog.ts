@@ -1,3 +1,4 @@
+import { Directory, File, Paths } from 'expo-file-system/next';
 import { NativeModules, Platform } from 'react-native';
 
 import {
@@ -5,6 +6,8 @@ import {
   type AutoLogPendingScan,
   parseAutoLogPendingJson,
   parseAutoLogPendingScansJson,
+  parseSharedScanFileNames,
+  SHARED_SCANS_DIR,
 } from '~/features/transactions/lib/autoLog';
 import type { AutoLogCatalog } from '~/features/transactions/lib/autoLogCatalog';
 
@@ -56,25 +59,80 @@ export async function clearAutoLogPending(ids: string[]): Promise<void> {
 }
 
 /**
- * Screenshots queued by the "Log Screenshot" App Intent, each carrying the
- * absolute path of its image in the App Group container. Empty on a build
- * whose native module predates the intent, so callers degrade to a no-op.
+ * Whether this build has a screenshot queue to drain: the iOS "Log Screenshot"
+ * App Intent's App Group queue, or the Android share target's folder (see
+ * plugins/withMoney2TimeShareScan.js). On an Android binary that predates the
+ * share activity the folder simply never exists, so the drain is a cheap no-op.
+ */
+export function isScreenshotQueueSupported(): boolean {
+  return Platform.OS === 'android' || isAutoLogSupported();
+}
+
+function sharedScansDir(): Directory {
+  return new Directory(Paths.document, SHARED_SCANS_DIR);
+}
+
+/**
+ * A `.part` file is a copy the share activity was still writing. One older than
+ * this was orphaned (the process died mid-copy) and will never be renamed into
+ * place, so the drain deletes it instead of carrying it forever.
+ */
+const STALE_PART_MS = 10 * 60 * 1000;
+
+function readSharedScans(): AutoLogPendingScan[] {
+  const dir = sharedScansDir();
+  if (!dir.exists) return [];
+  const names: string[] = [];
+  for (const item of dir.list()) {
+    if (!(item instanceof File)) continue;
+    if (item.name.endsWith('.part')) {
+      const modified = item.modificationTime;
+      if (modified != null && Date.now() - modified > STALE_PART_MS) item.delete();
+      continue;
+    }
+    names.push(item.name);
+  }
+  return parseSharedScanFileNames(names, dir.uri);
+}
+
+function clearSharedScans(ids: string[]) {
+  const dir = sharedScansDir();
+  if (!dir.exists) return;
+  for (const id of ids) {
+    // Ids are bare file names from the listing; refuse anything path-like so a
+    // clear can never reach outside the queue folder.
+    if (!id || id.includes('/')) continue;
+    const file = new File(dir, id);
+    if (file.exists) file.delete();
+  }
+}
+
+/**
+ * Screenshots waiting to be scanned, each carrying the absolute path of its
+ * image. On iOS these were queued by the "Log Screenshot" App Intent in the App
+ * Group container; on Android, shared to the app through the system share
+ * sheet. Empty on a build that has neither, so callers degrade to a no-op.
  */
 export async function readAutoLogPendingScans(): Promise<AutoLogPendingScan[]> {
+  if (Platform.OS === 'android') return readSharedScans();
   if (!isAutoLogSupported() || !nativeAutoLogModule?.readPendingScans) return [];
   return parseAutoLogPendingScansJson(await nativeAutoLogModule.readPendingScans());
 }
 
-/** Remove drained screenshots — the native side also deletes their image files. */
+/** Remove drained screenshots, image files included. */
 export async function clearAutoLogPendingScans(ids: string[]): Promise<void> {
   if (!ids.length) return;
+  if (Platform.OS === 'android') {
+    clearSharedScans(ids);
+    return;
+  }
   if (!isAutoLogSupported() || !nativeAutoLogModule?.clearPendingScans) return;
   await nativeAutoLogModule.clearPendingScans(ids);
 }
 
 /**
- * Empty both App Group queues — pending taps and pending screenshots (the
- * native side also deletes the screenshots' image files). Used by the full
+ * Empty both queues — pending taps and pending screenshots, image files
+ * included (on Android only the screenshot folder exists). Used by the full
  * data reset: the queues live outside SQLite, so without this a "clean slate"
  * reset would leave pre-reset automations to drain into the wiped database.
  */

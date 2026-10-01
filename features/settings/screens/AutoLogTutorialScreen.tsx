@@ -37,6 +37,9 @@ interface AutoLogTutorialScreenProps {
  * installs from an iCloud link (`download: true`), so their tutorials only cover
  * the trigger, not building the shortcut. Log Card Payment has no link (an
  * automation can't be shared), so it keeps the full hand-built flow.
+ *
+ * Share Screenshot is the Android topic: there is nothing to install or wire up,
+ * so its steps only show the share itself, captured on an Android emulator.
  */
 interface TutorialStep {
   key: string;
@@ -80,6 +83,15 @@ const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
     { key: 'log_screenshot_step_5', image: require('~/assets/autolog/ls_5.png') },
     { key: 'log_screenshot_step_6', image: require('~/assets/autolog/ls_6.png') },
   ],
+  // Android: share a screenshot (or any saved receipt photo) to the app from the
+  // system share sheet. Frames are annotated emulator captures, see
+  // scripts/data/autolog-shots.json.
+  shareScreenshot: [
+    { key: 'share_screenshot_step_1', image: require('~/assets/autolog/ss_1.png') },
+    { key: 'share_screenshot_step_2', image: require('~/assets/autolog/ss_2.png') },
+    { key: 'share_screenshot_step_3', image: require('~/assets/autolog/ss_3.png') },
+    { key: 'share_screenshot_step_4', image: require('~/assets/autolog/ss_4.png') },
+  ],
 };
 
 /** iCloud shortcut links, one per topic that ships a downloadable shortcut. */
@@ -88,16 +100,27 @@ const DOWNLOAD_URL: Partial<Record<AutoLogTutorialTopic, string>> = {
   logScreenshot: SCAN_SCREENSHOT_SHORTCUT_URL,
 };
 
+/** Walkthrough videos exist for the iOS topics only. */
+const VIDEO_URL: Partial<Record<AutoLogTutorialTopic, string>> = AUTO_LOG_VIDEO_URLS;
+
 /**
  * The action's own name, so the header matches both the Settings section that
  * linked here and the action the steps tell the user to find in Shortcuts.
- * Hardcoded English on purpose — see constants/autoLogIntents.ts.
+ * Hardcoded English on purpose — see constants/autoLogIntents.ts. The Android
+ * topic names no Shortcuts action, so it is translated like the rest of the UI.
  */
-const TITLE: Record<AutoLogTutorialTopic, string> = {
-  logPayment: LOG_CARD_PAYMENT_INTENT_NAME,
-  newTransaction: NEW_TRANSACTION_INTENT_NAME,
-  logScreenshot: SCAN_SCREENSHOT_INTENT_NAME,
-};
+function titleFor(topic: AutoLogTutorialTopic): string {
+  switch (topic) {
+    case 'logPayment':
+      return LOG_CARD_PAYMENT_INTENT_NAME;
+    case 'newTransaction':
+      return NEW_TRANSACTION_INTENT_NAME;
+    case 'logScreenshot':
+      return SCAN_SCREENSHOT_INTENT_NAME;
+    case 'shareScreenshot':
+      return I18n.t('settings.auto_log.share_screenshot_title');
+  }
+}
 
 const styles = StyleSheet.create({
   caption: {
@@ -145,10 +168,12 @@ export function AutoLogTutorialScreen({ topic, onBack }: AutoLogTutorialScreenPr
     if (url) void Linking.openURL(url).catch(() => undefined);
   }, [topic]);
 
+  const videoUrl = VIDEO_URL[topic];
   const openVideo = useCallback(() => {
+    if (!videoUrl) return;
     void triggerHaptic('selection');
-    void Linking.openURL(AUTO_LOG_VIDEO_URLS[topic]).catch(() => undefined);
-  }, [topic]);
+    void Linking.openURL(videoUrl).catch(() => undefined);
+  }, [videoUrl]);
 
   return (
     <SettingsPageLayout edges={['top', 'bottom']}>
@@ -156,20 +181,22 @@ export function AutoLogTutorialScreen({ topic, onBack }: AutoLogTutorialScreenPr
         <SettingsHeader
           className="px-0 pt-5 pb-3"
           onBack={onBack}
-          title={TITLE[topic]}
+          title={titleFor(topic)}
           rightAccessory={
-            <Pressable
-              style={styles.videoLink}
-              onPress={openVideo}
-              hitSlop={8}
-              accessibilityRole="link"
-              accessibilityLabel={I18n.t('settings.auto_log.video_tutorial')}
-            >
-              <Play size={13} color={themeColors.primary} fill={themeColors.primary} />
-              <Text variant="caption" style={{ color: themeColors.primary }}>
-                {I18n.t('settings.auto_log.video_tutorial')}
-              </Text>
-            </Pressable>
+            videoUrl ? (
+              <Pressable
+                style={styles.videoLink}
+                onPress={openVideo}
+                hitSlop={8}
+                accessibilityRole="link"
+                accessibilityLabel={I18n.t('settings.auto_log.video_tutorial')}
+              >
+                <Play size={13} color={themeColors.primary} fill={themeColors.primary} />
+                <Text variant="caption" style={{ color: themeColors.primary }}>
+                  {I18n.t('settings.auto_log.video_tutorial')}
+                </Text>
+              </Pressable>
+            ) : undefined
           }
         />
       </View>

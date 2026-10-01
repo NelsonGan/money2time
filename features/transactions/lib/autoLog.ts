@@ -122,6 +122,41 @@ export function parseAutoLogPendingScansJson(raw: string | null | undefined): Au
 }
 
 /**
+ * Folder (under the app's document directory) that Android's share target
+ * copies shared images into. Must match SHARED_SCANS_DIR in
+ * plugins/withMoney2TimeShareScan.js.
+ */
+export const SHARED_SCANS_DIR = 'shared-scans';
+
+const SHARED_SCAN_FILE = /^(\d{10,})-[A-Za-z0-9-]+\.(jpg|jpeg|png|webp|heic)$/i;
+
+/**
+ * Read the Android share queue from a listing of its folder. The share activity
+ * names each image `<epochMillis>-<uuid>.<ext>` and writes it as `<name>.part`
+ * first, renaming only once the copy is complete, so anything that does not
+ * match the final shape (a copy still in flight, a stray file) is skipped
+ * rather than scanned half-written. The file name doubles as the entry id,
+ * which is what `clearAutoLogPendingScans` deletes by. Oldest share first, so
+ * a batch scans in the order it was shared.
+ */
+export function parseSharedScanFileNames(
+  names: readonly string[],
+  dirPath: string,
+): AutoLogPendingScan[] {
+  const base = dirPath.replace(/^file:\/\//, '').replace(/\/+$/, '');
+  return names
+    .map((name) => ({ name, match: SHARED_SCAN_FILE.exec(name) }))
+    .filter((entry): entry is { name: string; match: RegExpExecArray } => entry.match !== null)
+    .map(({ name, match }) => ({ name, millis: Number(match[1]) }))
+    .sort((a, b) => a.millis - b.millis || a.name.localeCompare(b.name))
+    .map(({ name, millis }) => ({
+      id: name,
+      createdAt: new Date(millis).toISOString(),
+      path: `${base}/${name}`,
+    }));
+}
+
+/**
  * The queued entries it is safe to post right now.
  *
  * A provisional row means the category prompt is still outstanding. Posting it

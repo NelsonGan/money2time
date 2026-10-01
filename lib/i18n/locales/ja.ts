@@ -1177,6 +1177,17 @@ const ja = {
       log_screenshot_step_5:
         '初回は Always Allow をタップして、スクリーンショットを読み取れるようにします。',
       log_screenshot_step_6: 'Money2Time が金額と店名を読み取り、取引を自動で記録します。',
+      share_screenshot_title: 'Money2Time に共有',
+      share_screenshot_hint:
+        'どのアプリからでも、支払い画面のスクリーンショットやレシートの写真を Money2Time に共有できます。金額、店名、口座を読み取り、取引を自動で記録します。',
+      share_screenshot_step_1:
+        '支払い画面やレシートのスクリーンショットを撮り、プレビューの「共有」をタップします。',
+      share_screenshot_step_2:
+        '共有シートで Money2Time を選びます。ヒント：長押しで先頭に固定できます。',
+      share_screenshot_step_3:
+        'Money2Time が開き、バックグラウンドでスクリーンショットを読み取ります。ギャラリーの写真も使えます。写真を開いて「共有」をタップし、Money2Time を選んでください。',
+      share_screenshot_step_4:
+        '取引が自動で記録されます。複数の画像をまとめて共有すると、すべて記録されます。',
       defaults_title: '設定',
       defaults_hint: 'オートメーションで口座やカテゴリが未設定の場合に使用。',
       default_account: 'デフォルトの口座',

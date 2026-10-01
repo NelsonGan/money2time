@@ -6,8 +6,15 @@ import {
 
 export type NotificationDetailType = 'dailyCheckin' | 'weeklyReview' | 'monthlyReview';
 
-/** Named after the Shortcuts action each auto-log walkthrough sets up. */
-export type AutoLogTutorialTopic = 'logPayment' | 'newTransaction' | 'logScreenshot';
+/**
+ * Named after the Shortcuts action each iOS auto-log walkthrough sets up;
+ * `shareScreenshot` is the Android one (sharing a screenshot to the app).
+ */
+export type AutoLogTutorialTopic =
+  | 'logPayment'
+  | 'newTransaction'
+  | 'logScreenshot'
+  | 'shareScreenshot';
 
 export type SettingsStackParamList = {
   SettingsHome: undefined;

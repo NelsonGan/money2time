@@ -1162,6 +1162,17 @@ const ko = {
         '결제나 영수증 화면에서 iPhone 뒷면을 두 번 두드리기만 하면 스크린샷이 자동으로 찍힙니다.',
       log_screenshot_step_5: '처음 실행할 때 Always Allow를 눌러 스크린샷을 읽을 수 있게 하세요.',
       log_screenshot_step_6: 'Money2Time이 금액과 가맹점을 읽어 거래를 자동으로 기록합니다.',
+      share_screenshot_title: 'Money2Time으로 공유',
+      share_screenshot_hint:
+        '어떤 앱에서든 결제 스크린샷이나 영수증 사진을 Money2Time으로 공유하세요. 금액, 가맹점, 계좌를 읽어 거래를 자동으로 기록합니다.',
+      share_screenshot_step_1:
+        '결제 또는 영수증 화면을 스크린샷으로 찍은 다음, 미리보기에서 공유를 탭하세요.',
+      share_screenshot_step_2:
+        '공유 시트에서 Money2Time을 선택하세요. 팁: 길게 눌러 맨 앞에 고정할 수 있습니다.',
+      share_screenshot_step_3:
+        'Money2Time이 열리고 백그라운드에서 스크린샷을 읽습니다. 갤러리에 있는 사진도 됩니다. 사진을 열고 공유를 탭한 뒤 Money2Time을 선택하세요.',
+      share_screenshot_step_4:
+        '거래가 자동으로 기록됩니다. 여러 이미지를 한 번에 공유하면 모두 기록됩니다.',
       defaults_title: '구성',
       defaults_hint: '자동화에서 계좌나 카테고리를 설정하지 않았을 때 사용됩니다.',
       default_account: '기본 계좌',

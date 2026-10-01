@@ -1185,6 +1185,17 @@ const it = {
         'La prima volta che viene eseguito, tocca Always Allow così può leggere il tuo screenshot.',
       log_screenshot_step_6:
         "Money2Time legge l'importo e l'esercente e registra la transazione automaticamente.",
+      share_screenshot_title: 'Condividi con Money2Time',
+      share_screenshot_hint:
+        "Condividi con Money2Time uno screenshot di un pagamento o la foto di uno scontrino da qualsiasi app. Legge l'importo, l'esercente e il conto e registra la transazione automaticamente.",
+      share_screenshot_step_1:
+        "Fai uno screenshot di una schermata di pagamento o di uno scontrino, poi tocca Condividi nell'anteprima.",
+      share_screenshot_step_2:
+        'Scegli Money2Time nel menu di condivisione. Suggerimento: tienilo premuto per fissarlo in cima.',
+      share_screenshot_step_3:
+        'Money2Time si apre e legge lo screenshot in background. Funzionano anche le foto della galleria: aprine una, tocca Condividi e scegli Money2Time.',
+      share_screenshot_step_4:
+        'La transazione viene registrata automaticamente. Condividi più immagini insieme per registrarle tutte.',
       defaults_title: 'Configurazione',
       defaults_hint: "Usati quando un'automazione non imposta un conto o una categoria.",
       default_account: 'Conto predefinito',

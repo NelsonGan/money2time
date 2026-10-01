@@ -1197,6 +1197,17 @@ const fil = {
         'Sa unang pagtakbo nito, i-tap ang Always Allow para mabasa nito ang iyong screenshot.',
       log_screenshot_step_6:
         'Binabasa ng Money2Time ang halaga at merchant at awtomatikong itinatala ang transaksyon.',
+      share_screenshot_title: 'I-share sa Money2Time',
+      share_screenshot_hint:
+        'I-share sa Money2Time ang screenshot ng bayad o litrato ng resibo mula sa kahit anong app. Binabasa nito ang halaga, merchant, at account at awtomatikong itinatala ang transaksyon.',
+      share_screenshot_step_1:
+        'Mag-screenshot ng anumang screen ng bayad o resibo, pagkatapos ay i-tap ang Share sa preview.',
+      share_screenshot_step_2:
+        'Piliin ang Money2Time sa share sheet. Tip: i-long-press ito para i-pin sa unahan.',
+      share_screenshot_step_3:
+        'Magbubukas ang Money2Time at babasahin ang screenshot sa background. Gumagana rin ang mga litrato sa gallery mo: buksan ang isa, i-tap ang Share, at piliin ang Money2Time.',
+      share_screenshot_step_4:
+        'Awtomatikong naitatala ang transaksyon. Mag-share ng ilang larawan nang sabay para maitala silang lahat.',
       defaults_title: 'Mga configuration',
       defaults_hint: 'Ginagamit kapag walang itinakdang account o kategorya ang automation.',
       default_account: 'Default na account',
