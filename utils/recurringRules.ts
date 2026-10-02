@@ -160,6 +160,8 @@ export interface RecurringOccurrence {
  */
 const MAX_STEPS_PER_RULE = 5_000;
 
+const MS_PER_DAY = 86_400_000;
+
 interface ProjectOptions {
   /** Local day key the window opens on, normally today. */
   fromDayKey: string;
@@ -214,6 +216,34 @@ export function projectRecurringOccurrences(
 
   return occurrences.sort(
     (a, b) => a.dayKey.localeCompare(b.dayKey) || a.dateIso.localeCompare(b.dateIso),
+  );
+}
+
+/**
+ * What the active spending rules will actually charge from `fromDayKey` through
+ * `untilDayKey` (both inclusive), in the reporting currency: every projected
+ * occurrence summed, not a per-month average. A rule that starts after the
+ * window, or ended before it, contributes nothing, so a commitment due in two
+ * years never inflates this month's or this year's figure. An overdue rule
+ * counts once, on `fromDayKey` (see `projectRecurringOccurrences`).
+ */
+export function recurringExpenseDueBetween(
+  rules: readonly RecurringTransactionRule[],
+  fromDayKey: string,
+  untilDayKey: string,
+  convertToReporting: (amount: number, currency: string) => number,
+): number {
+  if (untilDayKey < fromDayKey) return 0;
+  // Rounded: a window spanning a DST change is not a whole number of 24h days.
+  const days =
+    Math.round(
+      (dateFromDayKeyLocal(untilDayKey).getTime() - dateFromDayKeyLocal(fromDayKey).getTime()) /
+        MS_PER_DAY,
+    ) + 1;
+  return projectRecurringOccurrences(rules, { fromDayKey, days }).reduce(
+    (total, { rule }) =>
+      countsAsExpenseRow(rule) ? total + convertToReporting(rule.amount, rule.currency) : total,
+    0,
   );
 }
 

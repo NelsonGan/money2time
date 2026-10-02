@@ -4,6 +4,7 @@ import {
   nextRunAfter,
   projectRecurringOccurrences,
   recurringAmountPerMonth,
+  recurringExpenseDueBetween,
   recurringMonthlyExpenseTotal,
 } from '~/utils/recurringRules';
 
@@ -304,5 +305,77 @@ describe('projectRecurringOccurrences', () => {
       days: 30,
     });
     expect(occurrences.map((o) => o.rule.id)).toEqual(['sooner', 'later']);
+  });
+});
+
+describe('recurringExpenseDueBetween', () => {
+  const identity = (amount: number) => amount;
+  const at = (dayKey: string) => new Date(`${dayKey}T12:00:00`).toISOString();
+  const rule = (overrides: Partial<RecurringTransactionRule>) =>
+    makeRule({ nextRunDate: at('2026-06-01'), ...overrides });
+
+  // The reported case: three tuition rules that all start in later years.
+  const tuition = [
+    rule({
+      id: 'a',
+      amount: 3840,
+      recurrenceInterval: 24,
+      nextRunDate: at('2027-01-01'),
+      endDate: at('2028-12-01'),
+    }),
+    rule({
+      id: 'b',
+      amount: 7000,
+      recurrenceInterval: 35,
+      nextRunDate: at('2029-01-01'),
+      endDate: at('2031-11-01'),
+    }),
+    rule({
+      id: 'c',
+      amount: 160,
+      nextRunDate: at('2031-12-01'),
+      endDate: at('2031-12-01'),
+    }),
+  ];
+
+  it('counts nothing for rules that only start after the window', () => {
+    expect(recurringExpenseDueBetween(tuition, '2026-09-30', '2026-09-30', identity)).toBe(0);
+    expect(recurringExpenseDueBetween(tuition, '2026-09-30', '2026-12-31', identity)).toBe(0);
+  });
+
+  it('counts a long-interval rule only in the year it actually charges', () => {
+    expect(recurringExpenseDueBetween(tuition, '2027-01-01', '2027-12-31', identity)).toBe(3840);
+    // 2027 is the next run of the 24-month rule; its following run (2029) is past its end.
+    expect(recurringExpenseDueBetween(tuition, '2026-09-30', '2028-12-31', identity)).toBe(3840);
+  });
+
+  it('sums every remaining occurrence of a frequent rule', () => {
+    const weekly = rule({
+      amount: 10,
+      recurrencePattern: 'weekly',
+      nextRunDate: at('2026-06-03'),
+    });
+    // Jun 3, 10, 17, 24.
+    expect(recurringExpenseDueBetween([weekly], '2026-06-01', '2026-06-30', identity)).toBe(40);
+  });
+
+  it('stops at the end date and skips paused and income rules', () => {
+    const rules = [
+      rule({ id: 'ends', endDate: at('2026-08-01') }),
+      rule({ id: 'paused', isActive: false }),
+      rule({ id: 'income', type: 'income' }),
+    ];
+    // Ends: Jun, Jul, Aug only.
+    expect(recurringExpenseDueBetween(rules, '2026-06-01', '2026-12-31', identity)).toBe(300);
+  });
+
+  it('converts each charge to the reporting currency', () => {
+    const ringgit = rule({ currency: 'MYR' });
+    const toSgd = (amount: number, currency: string) => (currency === 'MYR' ? amount / 2 : amount);
+    expect(recurringExpenseDueBetween([ringgit], '2026-06-01', '2026-07-31', toSgd)).toBe(100);
+  });
+
+  it('returns 0 for an inverted window', () => {
+    expect(recurringExpenseDueBetween([rule({})], '2026-07-01', '2026-06-01', identity)).toBe(0);
   });
 });

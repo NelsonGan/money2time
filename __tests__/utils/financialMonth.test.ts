@@ -8,6 +8,7 @@ import {
   financialMonthOffsetForDayKey,
   financialMonthRange,
   financialMonthStartDate,
+  financialYearEndForDate,
   MAX_FIRST_DAY_OF_MONTH,
 } from '~/utils/financialMonth';
 import {
@@ -196,5 +197,47 @@ describe('financialMonthAnchorForToday', () => {
   it('returns the calendar month start at firstDay = 1', () => {
     const anchor = financialMonthAnchorForToday(1);
     expect(dayKeyFromDateLocal(anchor)).toBe(dayKeyFromDateLocal(startOfMonthDate(new Date())));
+  });
+});
+
+describe('financialYearEndForDate', () => {
+  const yearEnd = (y: number, m1: number, d: number, cycle: number) =>
+    dayKeyFromDateLocal(financialYearEndForDate(new Date(y, m1 - 1, d), cycle));
+
+  it('is Dec 31 on the default cycle', () => {
+    expect(yearEnd(2026, 10, 2, 1)).toBe('2026-12-31');
+    expect(yearEnd(2026, 12, 31, 1)).toBe('2026-12-31');
+  });
+
+  it('runs to the end of the December cycle on a payday cycle', () => {
+    expect(yearEnd(2026, 10, 2, 25)).toBe('2027-01-24');
+    // Late December already sits in the December cycle.
+    expect(yearEnd(2026, 12, 28, 25)).toBe('2027-01-24');
+  });
+
+  it('uses the calendar year, not the label of the cycle containing the date', () => {
+    // Jan 10 is in the cycle labelled 2026-12, but "this year" is 2027.
+    expect(yearEnd(2027, 1, 10, 25)).toBe('2028-01-24');
+  });
+
+  it('never ends before the financial month containing the date', () => {
+    for (const cycle of [1, 15, 25, 31]) {
+      for (const [m1, d] of [
+        [1, 1],
+        [1, 20],
+        [6, 15],
+        [12, 1],
+        [12, 31],
+      ]) {
+        const date = new Date(2027, m1 - 1, d);
+        const monthEnd = financialMonthRange(
+          financialMonthKeyForDate(date, cycle),
+          cycle,
+        ).endInclusive;
+        expect(financialYearEndForDate(date, cycle).getTime()).toBeGreaterThanOrEqual(
+          monthEnd.getTime(),
+        );
+      }
+    }
   });
 });
