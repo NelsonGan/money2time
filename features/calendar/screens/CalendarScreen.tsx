@@ -545,6 +545,38 @@ export function CalendarScreen({
     [getPageScrollToDayRef],
   );
 
+  // Forget picks whose account or category has been deleted. A stale id was
+  // harmless when every filter excluded, but an inclusion holding only a
+  // deleted category would hide every row of that type, and the picker can no
+  // longer list it to untick. Keyed on the lists too, so it re-runs right after
+  // the saved preferences hydrate; returning the same array stops it looping.
+  useEffect(() => {
+    const keepLive = (previous: string[], liveIds: Set<string>) => {
+      const next = previous.filter((id) => liveIds.has(id));
+      return next.length === previous.length ? previous : next;
+    };
+    const liveIdsOfType = (type: CategoryType) =>
+      new Set(categories.filter((category) => category.type === type).map((c) => c.id));
+    if (excludedAccountIds.length > 0) {
+      const liveAccountIds = new Set(accounts.map((account) => account.id));
+      setExcludedAccountIds((previous) => keepLive(previous, liveAccountIds));
+    }
+    if (excludedIncomeCategoryIds.length > 0) {
+      const liveIncomeIds = liveIdsOfType('income');
+      setExcludedIncomeCategoryIds((previous) => keepLive(previous, liveIncomeIds));
+    }
+    if (excludedExpenseCategoryIds.length > 0) {
+      const liveExpenseIds = liveIdsOfType('expense');
+      setExcludedExpenseCategoryIds((previous) => keepLive(previous, liveExpenseIds));
+    }
+  }, [
+    accounts,
+    categories,
+    excludedAccountIds,
+    excludedIncomeCategoryIds,
+    excludedExpenseCategoryIds,
+  ]);
+
   const excludedAccountIdSet = useMemo(() => new Set(excludedAccountIds), [excludedAccountIds]);
   const excludedIncomeCategoryIdSet = useMemo(
     () => new Set(excludedIncomeCategoryIds),
