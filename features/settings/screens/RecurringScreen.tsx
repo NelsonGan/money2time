@@ -30,6 +30,7 @@ import { convert } from '~/utils/currency';
 import {
   financialMonthKeyForDate,
   financialMonthRange,
+  financialYearEndForDate,
   monthCycleOf,
 } from '~/utils/financialMonth';
 import {
@@ -40,14 +41,13 @@ import {
 } from '~/utils/formatters';
 import {
   addDaysToDayKey,
-  projectRecurringOccurrences,
   recurringAmountPerMonth,
+  recurringExpenseDueBetween,
   recurringMonthlyExpenseTotal,
 } from '~/utils/recurringRules';
 import { countsAsExpenseRow } from '~/utils/spending';
 
 const MS_PER_DAY = 86_400_000;
-const MONTHS_PER_YEAR = 12;
 /** Days in the pill strip above the timeline. */
 const WEEK_LENGTH = 7;
 
@@ -186,26 +186,20 @@ export function RecurringScreen({
   );
 
   /**
-   * What is still to be charged before this financial month closes: the figure
-   * that answers "how much of the rest of my month is already spoken for".
-   *
-   * This is the one number that needs the full projection rather than each
-   * rule's next run, because a weekly rule can charge four more times before
-   * the month is out.
+   * What is still to be charged from today to the end of this financial month,
+   * and to the end of this year (see `financialYearEndForDate`): the actual
+   * upcoming payments, not each rule's per-month average. A rule that
+   * only starts in a later year adds nothing to either figure.
    */
-  const leftThisMonth = useMemo(() => {
-    const { endInclusive } = financialMonthRange(
-      financialMonthKeyForDate(dateFromDayKeyLocal(todayKey), monthCycle),
-      monthCycle,
-    );
-    const days = Math.max(1, daysBetweenDayKeys(todayKey, dayKeyFromDateLocal(endInclusive)) + 1);
-    return projectRecurringOccurrences(recurringRules, { fromDayKey: todayKey, days }).reduce(
-      (total, occurrence) =>
-        countsAsExpenseRow(occurrence.rule)
-          ? total + toReporting(occurrence.rule.amount, occurrence.rule.currency)
-          : total,
-      0,
-    );
+  const { dueThisMonth, dueThisYear } = useMemo(() => {
+    const today = dateFromDayKeyLocal(todayKey);
+    const monthKey = financialMonthKeyForDate(today, monthCycle);
+    const monthEnd = dayKeyFromDateLocal(financialMonthRange(monthKey, monthCycle).endInclusive);
+    const yearEnd = dayKeyFromDateLocal(financialYearEndForDate(today, monthCycle));
+    return {
+      dueThisMonth: recurringExpenseDueBetween(recurringRules, todayKey, monthEnd, toReporting),
+      dueThisYear: recurringExpenseDueBetween(recurringRules, todayKey, yearEnd, toReporting),
+    };
   }, [recurringRules, monthCycle, todayKey, toReporting]);
 
   /**
@@ -390,8 +384,8 @@ export function RecurringScreen({
       <View className="gap-5 pb-4 pt-1">
         <RecurringSummary
           monthlyLabel={formatValue(monthlyExpense)}
-          leftThisMonthLabel={formatValue(leftThisMonth)}
-          yearlyLabel={formatValue(monthlyExpense * MONTHS_PER_YEAR)}
+          thisMonthLabel={formatValue(dueThisMonth)}
+          thisYearLabel={formatValue(dueThisYear)}
           activeCount={recurringRules.length - pausedRules.length}
         />
         <RecurringWeekStrip
@@ -404,8 +398,9 @@ export function RecurringScreen({
   }, [
     activeDayKey,
     recurringRules.length,
+    dueThisMonth,
+    dueThisYear,
     formatValue,
-    leftThisMonth,
     monthlyExpense,
     pausedRules.length,
     weekDays,
