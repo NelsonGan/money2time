@@ -210,6 +210,8 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
     const signature = `${appUserId}:${profile.signature}`;
     if (signature === proProfileSignatureRef.current) return;
     proProfileSignatureRef.current = signature;
+    let cancelled = false;
+    let completed = false;
 
     void (async () => {
       // People updates are attributed to whoever is identified at the time, and
@@ -217,9 +219,12 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
       // identify (React commits children first). Identifying here is a cheap
       // no-op once it has already happened, and removes that ordering hazard.
       await identifyUser(appUserId);
-      await syncRevenueCatAnalyticsIdentifiers();
-      const profileWritten = await setUserProperties(profile.userProperties);
-      const contextWritten = await setSuperProperties(profile.superProperties);
+      if (cancelled) return;
+      void syncRevenueCatAnalyticsIdentifiers();
+      const profileWritten = await setUserProperties(profile.userProperties, appUserId);
+      if (cancelled) return;
+      const contextWritten = await setSuperProperties(profile.superProperties, appUserId);
+      completed = profileWritten && contextWritten;
       if ((!profileWritten || !contextWritten) && proProfileSignatureRef.current === signature) {
         proProfileSignatureRef.current = null;
       }
@@ -231,6 +236,12 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
       if (proProfileSignatureRef.current === signature) proProfileSignatureRef.current = null;
       reportError(error, { scope: 'analytics_pro_profile' });
     });
+    return () => {
+      cancelled = true;
+      if (!completed && proProfileSignatureRef.current === signature) {
+        proProfileSignatureRef.current = null;
+      }
+    };
   }, [appUserId, customerState, isLoading, isPro]);
 
   const purchasePackage = useCallback(

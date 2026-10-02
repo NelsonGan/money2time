@@ -99,8 +99,8 @@ Mixpanel nothing and warns once in development.
 The checked-in client configuration targets `money2time-expo` and matches all
 three native app identifiers. Earlier setup notes record the dedicated GA4
 property `Money2Time Mobile App` (property ID `553783025`) in Analytics account
-`350740029`, with a data stream for each native app. Live linking, data streams
-and the Developer Traffic filter were not reverified in this review; see the
+`350740029`, with a data stream for each native app. The production data
+streams and Firebase app IDs were checked live for the RevenueCat setup. The Developer Traffic filter was not reverified; see the
 canonical provider table for verification limits.
 
 ## Verification
@@ -137,7 +137,10 @@ Use the [canonical tracking tables](analytics-tracking.md#monitor-mixpanel-usage
 
 RevenueCat's native GA4 and Mixpanel integrations were activated on 2026-10-02.
 The app now syncs its real Firebase installation ID and stable Mixpanel identity
-to RevenueCat, with retries and customer-switch coordination. Production GA4
+to RevenueCat, with retries and customer-switch coordination. The official
+attributes endpoint provides an HTTP acknowledgement using the existing public
+SDK key. Uploads have a five-second limit and run in the background for customer
+status; store offerings are fetched only by paywall operations. Production GA4
 stream rules retain SDK store events as supplemental observations after the
 client confirms that identity sync. The canonical [revenue tables](analytics-tracking.md#revenue-measurement)
 own the exact server names, external settings, duplicate-control rules,

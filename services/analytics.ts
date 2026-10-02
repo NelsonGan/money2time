@@ -34,12 +34,16 @@ export async function recordLoggedTransaction(): Promise<void> {}
 
 export async function setCurrentScreen(_screen: string | null): Promise<void> {}
 
-export async function setSuperProperties(_properties: AnalyticsSuperProperties): Promise<boolean> {
+export async function setSuperProperties(
+  _properties: AnalyticsSuperProperties,
+  _expectedAppUserId?: string,
+): Promise<boolean> {
   return true;
 }
 
 export async function setUserProperties(
   _properties: Record<string, string | number | boolean>,
+  _expectedAppUserId?: string,
 ): Promise<boolean> {
   return true;
 }

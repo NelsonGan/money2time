@@ -95,6 +95,40 @@ export function setRevenueCatAppUserId(appUserId: string | null) {
   desiredRevenueCatAppUserId = normalized;
 }
 
+async function uploadAnalyticsAttributes(
+  appUserId: string,
+  attributes: Record<string, { value: string; updated_at_ms: number }>,
+): Promise<boolean> {
+  const controller = new AbortController();
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      fetch(
+        `https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(appUserId)}/attributes`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${getRevenueCatApiKey()!}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ attributes }),
+          signal: controller.signal,
+        },
+      ).then((response) => response.status === 200),
+      new Promise<boolean>((resolve) => {
+        timeout = setTimeout(() => {
+          resolve(false);
+          controller.abort();
+        }, 5_000);
+      }),
+    ]);
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 async function syncConfiguredAnalyticsIdentifiers(): Promise<void> {
   // Do not let a login change the SDK customer midway through attribute writes.
   while (analyticsIdentityPromise) await analyticsIdentityPromise;
@@ -124,12 +158,31 @@ async function syncConfiguredAnalyticsIdentifiers(): Promise<void> {
         firebaseAttributeSignature = signature;
         analyticsAttributesPendingSync = true;
       }
+      if (
+        signature &&
+        signature === firebaseAttributeSignature &&
+        signature !== firebaseSyncedSignature
+      ) {
+        analyticsAttributesPendingSync = true;
+      }
       if (analyticsAttributesPendingSync) {
-        // Setters update local SDK state. Push it before suppressing SDK revenue;
-        // ordinary attribute delivery otherwise waits for a lifecycle/purchase call.
-        await Purchases.syncAttributesAndOfferingsIfNeeded();
-        analyticsAttributesPendingSync = false;
-        firebaseSyncedSignature = firebaseAttributeSignature;
+        // SDK setters only update local state. The SDK's offerings sync can
+        // skip uploads when rate limited and hides attribute errors. Use the
+        // official attributes endpoint with the public SDK key for an explicit
+        // acknowledgement, without bringing store product loading into startup.
+        const attributes: Record<string, { value: string; updated_at_ms: number }> = {};
+        const updated_at_ms = Date.now();
+        if (mixpanelAttributeUserId === appUserId) {
+          attributes.$mixpanelDistinctId = { value: appUserId, updated_at_ms };
+        }
+        if (instanceId && signature === firebaseAttributeSignature) {
+          attributes.$firebaseAppInstanceId = { value: instanceId, updated_at_ms };
+        }
+        if (await uploadAnalyticsAttributes(appUserId, attributes)) {
+          analyticsAttributesPendingSync = false;
+          firebaseSyncedSignature =
+            instanceId && signature === firebaseAttributeSignature ? signature : null;
+        }
       }
       if (
         signature &&
@@ -224,7 +277,7 @@ function getRevenueCatNotAvailableMessage(environment: RevenueCatEnvironment) {
   }
 }
 
-async function ensureRevenueCatConfigured() {
+async function ensureRevenueCatConfigured(waitForAnalytics = true) {
   const environment = getRevenueCatEnvironment();
 
   if (!environment.isConfigured || !environment.canMakePurchases) {
@@ -266,7 +319,10 @@ async function ensureRevenueCatConfigured() {
     await loginPromise;
   }
 
-  if (!environment.isTestStore) await syncConfiguredAnalyticsIdentifiers();
+  if (!environment.isTestStore) {
+    const sync = syncConfiguredAnalyticsIdentifiers();
+    if (waitForAnalytics) await sync;
+  }
 
   return environment;
 }
@@ -332,7 +388,7 @@ export async function fetchRevenueCatCustomerState(): Promise<RevenueCatCustomer
   }
 
   try {
-    await ensureRevenueCatConfigured();
+    await ensureRevenueCatConfigured(false);
     const customerInfo = await Purchases.getCustomerInfo();
     return toRevenueCatCustomerState(customerInfo);
   } catch {
