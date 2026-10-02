@@ -1257,6 +1257,7 @@ const ru = {
       'Например, 24 часа — это {{days}} рабочих дня при {{hours}}-часовом рабочем дне.',
     working_hours_per_day_error: 'Введите значение от 1 до 24 часов.',
     select_year_month: 'Выбрать месяц',
+    select_year: 'Выбрать год',
     language: 'Язык',
     language_confirm_title: 'Изменить язык?',
     language_confirm_message: 'Переключить язык приложения на {{language}}?',

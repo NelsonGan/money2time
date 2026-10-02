@@ -1251,6 +1251,7 @@ const uk = {
       'Наприклад, 24 години — це {{days}} робочих днів за {{hours}}-годинного робочого дня.',
     working_hours_per_day_error: 'Введіть значення від 1 до 24 годин.',
     select_year_month: 'Вибрати місяць',
+    select_year: 'Вибрати рік',
     language: 'Мова',
     language_confirm_title: 'Змінити мову?',
     language_confirm_message: 'Переключити мову додатку на {{language}}?',

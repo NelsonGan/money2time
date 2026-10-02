@@ -24,6 +24,8 @@ interface UseMonthPagerResult {
   ) => { length: number; offset: number; index: number };
   keyExtractor: (item: number) => string;
   scrollToRelative: (direction: 1 | -1) => void;
+  /** Land on `index` without animating through every page in between. */
+  jumpToIndex: (index: number) => void;
 }
 
 const monthPagerSlotsCache = new Map<number, number[]>();
@@ -133,6 +135,16 @@ export function useMonthPager({
     [clampIndex, listRef],
   );
 
+  const jumpToIndex = useCallback(
+    (index: number) => {
+      const nextIndex = clampIndex(index);
+      activeIndexRef.current = nextIndex;
+      setActiveIndexState(nextIndex);
+      listRef.current?.scrollToIndex({ index: nextIndex, animated: false });
+    },
+    [clampIndex, listRef],
+  );
+
   return {
     activeIndex,
     activeIndexRef,
@@ -145,5 +157,6 @@ export function useMonthPager({
     getItemLayout,
     keyExtractor,
     scrollToRelative,
+    jumpToIndex,
   };
 }

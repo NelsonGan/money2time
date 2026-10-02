@@ -1244,6 +1244,7 @@ const vi = {
       'Ví dụ: 24 giờ tương đương {{days}} ngày làm việc nếu mỗi ngày làm việc có {{hours}} giờ.',
     working_hours_per_day_error: 'Nhập giá trị từ 1 đến 24 giờ.',
     select_year_month: 'Chọn tháng',
+    select_year: 'Chọn năm',
     language: 'Ngôn ngữ',
     language_confirm_title: 'Đổi ngôn ngữ?',
     language_confirm_message: 'Chuyển ngôn ngữ ứng dụng sang {{language}} ngay bây giờ?',

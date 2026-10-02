@@ -1259,6 +1259,7 @@ const id = {
       'Contohnya, 24 jam adalah {{days}} hari kerja dengan {{hours}} jam per hari kerja.',
     working_hours_per_day_error: 'Masukkan nilai dari 1 hingga 24 jam.',
     select_year_month: 'Pilih bulan',
+    select_year: 'Pilih tahun',
     language: 'Bahasa',
     language_confirm_title: 'Ganti bahasa?',
     language_confirm_message: 'Ganti bahasa aplikasi ke {{language}} sekarang?',
