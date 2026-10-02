@@ -27,7 +27,8 @@ import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import { type Edge, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Sortable from 'react-native-sortables';
 
-import { DatePickerModal } from '~/components/datePicker';
+import { DatePickerModal, MonthYearWheelPicker } from '~/components/datePicker';
+import { monthsBetween, shiftYearMonth, yearMonthFromKey } from '~/components/datePicker/monthJump';
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
@@ -3212,6 +3213,7 @@ export function AccountsScreen({
     getItemLayout: getPagerItemLayout,
     keyExtractor: pagerKeyExtractor,
     scrollToRelative: scrollToRelativePage,
+    jumpToIndex: jumpPagerToIndex,
     setActiveIndex: setPagerActiveIndex,
   } = useMonthPager({
     listRef: pagerListRef,
@@ -3255,6 +3257,29 @@ export function AccountsScreen({
     monthCycle,
     usesStatementPeriods,
   ]);
+  // The month the pager's centre slot shows: a statement period is named by
+  // the month it starts in, a financial month by its key.
+  const pagerAnchorMonth = useMemo(
+    () =>
+      usesStatementPeriods
+        ? { year: pagerAnchorDate.getFullYear(), monthIndex: pagerAnchorDate.getMonth() }
+        : yearMonthFromKey(financialMonthKeyForDate(pagerAnchorDate, monthCycle)),
+    [pagerAnchorDate, monthCycle, usesStatementPeriods],
+  );
+  const activePagerMonth = useMemo(
+    () => shiftYearMonth(pagerAnchorMonth, activePagerOffset),
+    [activePagerOffset, pagerAnchorMonth],
+  );
+  const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
+  const handleMonthPicked = useCallback(
+    (year: number, monthIndex: number) => {
+      setIsMonthPickerOpen(false);
+      jumpPagerToIndex(
+        MONTH_PAGER_CENTER_INDEX + monthsBetween(pagerAnchorMonth, { year, monthIndex }),
+      );
+    },
+    [jumpPagerToIndex, pagerAnchorMonth],
+  );
   const activePeriodCreditTotals = useMemo(() => {
     if (!selectedAccount || selectedAccount.type !== 'credit') return null;
     const periodTransactions = accountPeriodTransactionsMap.get(activePagerPeriod.key);
@@ -4177,6 +4202,7 @@ export function AccountsScreen({
               monthLabel={activePagerPeriod.label}
               onPrevMonth={() => scrollToRelativePage(-1)}
               onNextMonth={() => scrollToRelativePage(1)}
+              onMonthPress={() => setIsMonthPickerOpen(true)}
               hideTitleRow
               summary={detailSummaryNode}
             />
@@ -4196,6 +4222,15 @@ export function AccountsScreen({
               onScrollToIndexFailed={handlePagerScrollToIndexFailed}
             />
           </View>
+          <MonthYearWheelPicker
+            visible={isMonthPickerOpen}
+            year={activePagerMonth.year}
+            monthIndex={activePagerMonth.monthIndex}
+            baseYear={pagerAnchorMonth.year}
+            locale={activeLocale}
+            onSelect={handleMonthPicked}
+            onClose={() => setIsMonthPickerOpen(false)}
+          />
           {!isSelectionMode ? (
             <View
               pointerEvents="box-none"

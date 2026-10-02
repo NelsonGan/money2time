@@ -1254,6 +1254,7 @@ const nb = {
       'For eksempel tilsvarer 24 timer {{days}} arbeidsdager med en arbeidsdag på {{hours}} timer.',
     working_hours_per_day_error: 'Skriv inn en verdi fra 1 til 24 timer.',
     select_year_month: 'Velg måned',
+    select_year: 'Velg år',
     language: 'Språk',
     language_confirm_title: 'Bytt språk?',
     language_confirm_message: 'Bytte appspråk til {{language}} nå?',

@@ -1228,6 +1228,7 @@ const en = {
       'For example, 24 hours is {{days}} working days with a {{hours}}-hour workday.',
     working_hours_per_day_error: 'Enter a value from 1 to 24 hours.',
     select_year_month: 'Select month',
+    select_year: 'Select year',
     language: 'Language',
     language_confirm_title: 'Change language?',
     language_confirm_message: 'Switch the app language to {{language}} now?',

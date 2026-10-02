@@ -1269,6 +1269,7 @@ const fil = {
       'Halimbawa, ang 24 na oras ay {{days}} araw ng trabaho kung ang isang araw ng trabaho ay {{hours}} oras.',
     working_hours_per_day_error: 'Maglagay ng halaga mula 1 hanggang 24 na oras.',
     select_year_month: 'Pumili ng buwan',
+    select_year: 'Pumili ng taon',
     language: 'Wika',
     language_confirm_title: 'Baguhin ang wika?',
     language_confirm_message: 'Palitan na ng {{language}} ang wika ng app ngayon?',

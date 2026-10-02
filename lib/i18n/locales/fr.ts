@@ -1265,6 +1265,7 @@ const fr = {
       'Par exemple, 24 heures correspondent à {{days}} jours de travail avec une journée de {{hours}} heures.',
     working_hours_per_day_error: 'Saisissez une valeur comprise entre 1 et 24 heures.',
     select_year_month: 'Sélectionner un mois',
+    select_year: 'Sélectionner une année',
     language: 'Langue',
     language_confirm_title: 'Changer de langue ?',
     language_confirm_message: "Passer la langue de l'application en {{language}} ?",

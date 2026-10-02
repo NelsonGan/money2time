@@ -8,14 +8,26 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 
+import { buildMonthLabels, clampYearMonth, type YearMonth } from './monthJump';
+
 const YEAR_RANGE_HALF = 50;
 
 interface MonthYearWheelPickerProps {
   visible: boolean;
+  /** `month` shows a year wheel and a month wheel; `year` shows the year wheel only. */
+  mode?: 'month' | 'year';
   year: number;
-  monthIndex: number;
-  baseYear: number;
-  monthLabels: string[];
+  /** Ignored in `year` mode. */
+  monthIndex?: number;
+  /** Centre of the default year range (±50). Defaults to `year`. */
+  baseYear?: number;
+  /** Earliest pickable month (or year, in `year` mode). Narrows the year wheel. */
+  min?: YearMonth;
+  /** Latest pickable month (or year, in `year` mode). Narrows the year wheel. */
+  max?: YearMonth;
+  /** Short month names; derived from `locale` when omitted. */
+  monthLabels?: string[];
+  locale?: string;
   onSelect: (year: number, monthIndex: number) => void;
   onClose: () => void;
 }
@@ -39,22 +51,38 @@ const styles = StyleSheet.create({
   },
 });
 
+/**
+ * Jump straight to a month (or a year) instead of paging one step at a time.
+ * Every month/year pager opens this from its label, so the wheels roll the
+ * same way everywhere.
+ */
 export function MonthYearWheelPicker({
   visible,
+  mode = 'month',
   year,
-  monthIndex,
+  monthIndex = 0,
   baseYear,
+  min,
+  max,
   monthLabels,
+  locale,
   onSelect,
   onClose,
 }: MonthYearWheelPickerProps) {
   const themeColors = useThemeColors();
-  const years = useMemo(
-    () => Array.from({ length: YEAR_RANGE_HALF * 2 + 1 }, (_, i) => baseYear - YEAR_RANGE_HALF + i),
-    [baseYear],
+  const centerYear = baseYear ?? year;
+  // Without explicit bounds the range always reaches the current year, so a
+  // pager paged far past ±50 years still opens on the year it shows.
+  const firstYear = min?.year ?? Math.min(year, centerYear - YEAR_RANGE_HALF);
+  const lastYear = Math.max(firstYear, max?.year ?? Math.max(year, centerYear + YEAR_RANGE_HALF));
+  const yearItems = useMemo(
+    () => Array.from({ length: lastYear - firstYear + 1 }, (_, i) => String(firstYear + i)),
+    [firstYear, lastYear],
   );
-  const yearItems = useMemo(() => years.map((y) => String(y)), [years]);
-  const yearStartValue = years[0];
+  const resolvedMonthLabels = useMemo(
+    () => monthLabels ?? buildMonthLabels(locale ?? I18n.locale ?? 'en'),
+    [locale, monthLabels],
+  );
 
   const [tempYear, setTempYear] = useState(year);
   const [tempMonth, setTempMonth] = useState(monthIndex);
@@ -68,13 +96,20 @@ export function MonthYearWheelPicker({
 
   const handleDone = () => {
     void triggerHaptic('medium');
-    onSelect(tempYear, tempMonth);
+    const picked = clampYearMonth(
+      { year: tempYear, monthIndex: mode === 'year' ? monthIndex : tempMonth },
+      min,
+      max,
+    );
+    onSelect(picked.year, picked.monthIndex);
   };
 
   const handleCancel = () => {
     void triggerHaptic('selection');
     onClose();
   };
+
+  const yearIndex = Math.max(0, Math.min(yearItems.length - 1, tempYear - firstYear));
 
   return (
     <Modal
@@ -90,7 +125,9 @@ export function MonthYearWheelPicker({
         </TouchableWithoutFeedback>
         <View style={[styles.card, { backgroundColor: themeColors.card }]}>
           <View className="flex-row items-center justify-between px-4 pt-4 pb-2">
-            <Text variant="subheading">{I18n.t('settings.select_year_month')}</Text>
+            <Text variant="subheading">
+              {I18n.t(mode === 'year' ? 'settings.select_year' : 'settings.select_year_month')}
+            </Text>
             <Pressable
               onPress={handleCancel}
               accessibilityLabel={I18n.t('common.close')}
@@ -105,17 +142,19 @@ export function MonthYearWheelPicker({
               <View className="flex-1">
                 <WheelPicker
                   items={yearItems}
-                  selectedIndex={tempYear - yearStartValue}
-                  onChange={(index) => setTempYear(yearStartValue + index)}
+                  selectedIndex={yearIndex}
+                  onChange={(index) => setTempYear(firstYear + index)}
                 />
               </View>
-              <View className="flex-1">
-                <WheelPicker
-                  items={monthLabels}
-                  selectedIndex={tempMonth}
-                  onChange={setTempMonth}
-                />
-              </View>
+              {mode === 'month' ? (
+                <View className="flex-1">
+                  <WheelPicker
+                    items={resolvedMonthLabels}
+                    selectedIndex={tempMonth}
+                    onChange={setTempMonth}
+                  />
+                </View>
+              ) : null}
             </View>
           </View>
 

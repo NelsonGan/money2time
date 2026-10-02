@@ -1235,6 +1235,7 @@ const th = {
       'ตัวอย่างเช่น 24 ชั่วโมงเท่ากับ {{days}} วันทำงาน เมื่อหนึ่งวันทำงานมี {{hours}} ชั่วโมง',
     working_hours_per_day_error: 'ป้อนค่าระหว่าง 1 ถึง 24 ชั่วโมง',
     select_year_month: 'เลือกเดือน',
+    select_year: 'เลือกปี',
     language: 'ภาษา',
     language_confirm_title: 'เปลี่ยนภาษา?',
     language_confirm_message: 'เปลี่ยนภาษาแอปเป็น {{language}} ตอนนี้?',

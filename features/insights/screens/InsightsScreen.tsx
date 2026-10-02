@@ -6821,7 +6821,11 @@ export function InsightsScreen({
         hideNavigation={isReviewView}
         disableNavArrows={!isTakeoverView && displayPeriodPreset === 'lifetime'}
         onMonthPress={
-          isTakeoverView || displayPeriodPreset === 'lifetime' ? undefined : handleOpenPeriodPicker
+          isBudgetView
+            ? () => budgetPagerRef.current?.openMonthPicker()
+            : isTakeoverView || displayPeriodPreset === 'lifetime'
+              ? undefined
+              : handleOpenPeriodPicker
         }
         monthTriggerRef={periodPickerTriggerRef}
         onMonthTriggerLayout={handlePeriodPickerTriggerLayout}

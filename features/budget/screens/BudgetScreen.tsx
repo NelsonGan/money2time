@@ -10,6 +10,8 @@ import React, {
 } from 'react';
 import { Alert, FlatList, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 
+import { MonthYearWheelPicker } from '~/components/datePicker';
+import { yearMonthFromKey, yearMonthToKey } from '~/components/datePicker/monthJump';
 import { EmptyState } from '~/components/feedback/EmptyState';
 import {
   CategoryEmoji,
@@ -405,6 +407,8 @@ function UnbudgetedRow({
 
 export interface BudgetPagerViewHandle {
   scrollToRelative: (direction: 1 | -1) => void;
+  /** Open the month wheel, for the host header's month label. */
+  openMonthPicker: () => void;
 }
 
 interface BudgetPagerViewProps {
@@ -474,9 +478,15 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
       initialIndex: currentMonthIndex,
     });
 
-    useImperativeHandle(ref, () => ({ scrollToRelative: pager.scrollToRelative }), [
-      pager.scrollToRelative,
-    ]);
+    const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
+    useImperativeHandle(
+      ref,
+      () => ({
+        scrollToRelative: pager.scrollToRelative,
+        openMonthPicker: () => setIsMonthPickerOpen(true),
+      }),
+      [pager.scrollToRelative],
+    );
 
     // The pager tracks a bare slot index, but `months` can gain/lose leading
     // entries while mounted (a backdated expense, an import, a bulk delete).
@@ -607,6 +617,7 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
 
     const activeMonth = months[pager.activeIndex] ?? months[months.length - 1];
     const monthLabel = monthKeyLabel(activeMonth, settings.locale);
+    const activeYearMonth = yearMonthFromKey(activeMonth);
 
     useEffect(() => {
       onActiveMonthLabelChange?.(monthLabel);
@@ -771,6 +782,25 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
           maxToRenderPerBatch={3}
           windowSize={3}
           className="flex-1"
+        />
+
+        <MonthYearWheelPicker
+          visible={isMonthPickerOpen}
+          year={activeYearMonth.year}
+          monthIndex={activeYearMonth.monthIndex}
+          // The pager only holds the months that have a budget or spending, so
+          // the wheel stops at the same ends.
+          min={yearMonthFromKey(months[0])}
+          max={yearMonthFromKey(months[months.length - 1])}
+          locale={settings.locale}
+          onSelect={(year, monthIndex) => {
+            setIsMonthPickerOpen(false);
+            const key = yearMonthToKey({ year, monthIndex });
+            const exact = months.indexOf(key);
+            const next = exact >= 0 ? exact : months.findIndex((month) => month >= key);
+            pager.jumpToIndex(next >= 0 ? next : months.length - 1);
+          }}
+          onClose={() => setIsMonthPickerOpen(false)}
         />
 
         <BudgetTemplatePickerSheet
