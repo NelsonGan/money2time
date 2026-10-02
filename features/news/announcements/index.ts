@@ -17,6 +17,7 @@ import { monthCycleLiveEarningsAnnouncement } from './016_month_cycle_live_earni
 import { riceCalAnnouncement } from './017_ricecal';
 import { proTrialAccountsAnnouncement } from './018_pro_trial_accounts';
 import { everydayPersonalizationAnnouncement } from './019_everyday_personalization';
+import { transactionUpdatesAnnouncement } from './020_transaction_updates';
 
 export const FEATURE_ANNOUNCEMENTS = [
   homeWidgetsAnnouncement,
@@ -38,4 +39,5 @@ export const FEATURE_ANNOUNCEMENTS = [
   riceCalAnnouncement,
   proTrialAccountsAnnouncement,
   everydayPersonalizationAnnouncement,
+  transactionUpdatesAnnouncement,
 ] as const;

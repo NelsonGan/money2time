@@ -64,6 +64,11 @@ import { ShareEarnShowcase } from './ShareEarnShowcase';
 import { AndroidStoreIcon, AppleStoreIcon } from './StorePlatformIcons';
 import { SubscriptionLogoShowcase } from './SubscriptionLogoShowcase';
 import { TransactionFxShowcase } from './TransactionFxShowcase';
+import {
+  AmountSearchShowcase,
+  AndroidScreenshotShowcase,
+  TransactionAccountsShowcase,
+} from './TransactionUpdatesShowcases';
 import { TrialAccountsShowcase } from './TrialAccountsShowcase';
 import { TutorialsShowcase } from './TutorialsShowcase';
 import { VoiceShowcase } from './VoiceShowcase';
@@ -343,7 +348,13 @@ export function FeatureAnnouncementModal({
               </View>
             ) : null}
             <View style={styles.showcaseSlot}>
-              {page.visual === 'monthCycle' ? (
+              {page.visual === 'androidScreenshot' ? (
+                <AndroidScreenshotShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'accountLabels' ? (
+                <TransactionAccountsShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'amountSearch' ? (
+                <AmountSearchShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'monthCycle' ? (
                 <MonthCycleShowcase width={Math.round(showcaseWidth * 0.92)} />
               ) : page.visual === 'transactionReorder' ? (
                 <TransactionReorderShowcase width={Math.round(showcaseWidth * 0.92)} />

@@ -140,6 +140,21 @@ const tr = {
     reset_action: 'Sil ve değiştir',
   },
   news: {
+    transaction_updates: {
+      title: 'İşlemleri takip etmek artık daha kolay',
+      androidScreenshot: {
+        title: 'Android’de ekran görüntüsü paylaşın',
+        body: 'Bir ödeme ekran görüntüsünü veya fiş fotoğrafını Money2Time ile paylaşın. Uygulama ayrıntıları okuyup işlemi otomatik kaydeder. Kılavuzu Ayarlar > Otomasyon bölümünde bulabilirsiniz.',
+      },
+      accountLabels: {
+        title: 'Her işlemin hesabını görün',
+        body: 'Hesap adları artık işlem listesinde görünüyor. Böylece paranın nereden geldiğini veya nereye gittiğini görebilirsiniz. Daha sade bir görünüm mü istiyorsunuz? Ayarlar > Görünüm bölümünde hesap gösterimini kapatın.',
+      },
+      amountSearch: {
+        title: 'İşlemleri tutara göre arayın',
+        body: 'Tutarı hatırlıyor ama mağazayı hatırlamıyor musunuz? Eşleşen kayıtları bulmak için işlem aramasına tutar yazın. Sonuçları daraltmak için ondalık basamakları kullanın.',
+      },
+    },
     everyday_personalization: {
       title: 'More ways to customize',
       reorder: {

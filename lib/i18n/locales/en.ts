@@ -115,6 +115,21 @@ const en = {
     },
   },
   news: {
+    transaction_updates: {
+      title: 'Easier transaction tracking',
+      androidScreenshot: {
+        title: 'Share screenshots on Android',
+        body: 'Share a payment screenshot or receipt photo to Money2Time. It reads the details and logs the transaction automatically. Find the guide in Settings > Automation.',
+      },
+      accountLabels: {
+        title: 'See the account on each transaction',
+        body: 'Account names now appear in your transaction list, so you can see where money came from or went. Prefer a simpler view? Turn off Show account on transactions in Settings > Display.',
+      },
+      amountSearch: {
+        title: 'Search transactions by amount',
+        body: 'Remember the amount but not the merchant? Type an amount in transaction search to find matching entries. Use decimals to narrow the results.',
+      },
+    },
     everyday_personalization: {
       title: 'More ways to customize',
       reorder: {

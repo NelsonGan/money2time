@@ -140,6 +140,21 @@ const fr = {
     reset_action: 'Supprimer et changer',
   },
   news: {
+    transaction_updates: {
+      title: 'Un suivi des transactions plus simple',
+      androidScreenshot: {
+        title: 'Partagez des captures sur Android',
+        body: 'Partagez une capture de paiement ou une photo de reçu avec Money2Time. L’app lit les détails et enregistre automatiquement la transaction. Retrouvez le guide dans Réglages > Automatisation.',
+      },
+      accountLabels: {
+        title: 'Voyez le compte de chaque transaction',
+        body: 'Les noms des comptes apparaissent désormais dans votre liste de transactions pour voir d’où vient ou où va votre argent. Vous préférez une vue plus simple ? Désactivez l’affichage du compte dans Réglages > Affichage.',
+      },
+      amountSearch: {
+        title: 'Recherchez par montant',
+        body: 'Vous vous souvenez du montant, mais pas du commerçant ? Saisissez un montant dans la recherche de transactions pour trouver les entrées correspondantes. Ajoutez des décimales pour affiner les résultats.',
+      },
+    },
     everyday_personalization: {
       title: 'More ways to customize',
       reorder: {

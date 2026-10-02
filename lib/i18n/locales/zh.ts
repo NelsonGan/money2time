@@ -113,6 +113,21 @@ const zh = {
     },
   },
   news: {
+    transaction_updates: {
+      title: '记账更轻松',
+      androidScreenshot: {
+        title: '在 Android 上分享截图',
+        body: '将付款截图或收据照片分享到 Money2Time。应用会读取详情并自动记录交易。在设置 > 自动化中查看指南。',
+      },
+      accountLabels: {
+        title: '查看每笔交易的账户',
+        body: '交易列表现在会显示账户名称，方便你了解钱从哪里来、到哪里去。想要更简洁的界面？在设置 > 显示中关闭交易账户显示。',
+      },
+      amountSearch: {
+        title: '按金额搜索交易',
+        body: '记得金额，却忘了商家？在交易搜索中输入金额，即可找到匹配的记录。输入小数可以缩小搜索范围。',
+      },
+    },
     everyday_personalization: {
       title: 'More ways to customize',
       reorder: {
