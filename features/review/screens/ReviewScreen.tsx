@@ -28,6 +28,7 @@ import type { GoalWithProgress, TransactionSentiment, TransactionWithRelations }
 import { withColorAlpha } from '~/utils/color';
 import { monthCycleOf } from '~/utils/financialMonth';
 import { dayKeyFromIsoLocal, formatAmount } from '~/utils/formatters';
+import { passesSelectionFilter } from '~/utils/selectionFilter';
 import { toSpendingRows } from '~/utils/spending';
 
 import { ReviewFilterSheet } from '../components/ReviewFilterSheet';
@@ -225,14 +226,17 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
     ]);
 
     const goals = useGoals().active;
-    // A goal is an account, so an excluded account takes its goal off the page
-    // too. Without this the Goals card would still report contributions to an
-    // account every other card on the report has been told to ignore.
+    // A goal is an account, so the account filter takes goals off the page
+    // too (an excluded goal, or every goal not picked in include mode). Without
+    // this the Goals card would still report contributions to an account every
+    // other card on the report has been told to ignore.
     const activeGoals = useMemo(() => {
       if (filters.excludedAccountIds.length === 0) return goals;
-      const excluded = new Set(filters.excludedAccountIds);
-      return goals.filter((goal) => !excluded.has(goal.account.id));
-    }, [filters.excludedAccountIds, goals]);
+      const picked = new Set(filters.excludedAccountIds);
+      return goals.filter((goal) =>
+        passesSelectionFilter(filters.accountMode, picked, [goal.account.id]),
+      );
+    }, [filters.accountMode, filters.excludedAccountIds, goals]);
     const goalContributions = useMemo(() => {
       if (!period || activeGoals.length === 0) return new Map<string, number>();
       return goalContributionsForPeriod(

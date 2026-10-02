@@ -66,4 +66,32 @@ describe('calendar preferences', () => {
       ),
     ).toMatchObject({ homeSummaryLeftHidden: true, homeSummaryRightHidden: undefined });
   });
+
+  it('restores each filter mode independently and ignores invalid values', () => {
+    expect(
+      parseCalendarPreferencesSnapshot(
+        JSON.stringify({
+          accountFilterMode: 'include',
+          incomeCategoryFilterMode: 'only',
+          expenseCategoryFilterMode: 'exclude',
+        }),
+      ),
+    ).toMatchObject({
+      accountFilterMode: 'include',
+      incomeCategoryFilterMode: undefined,
+      expenseCategoryFilterMode: 'exclude',
+    });
+  });
+
+  it('keeps the filter modes when the summary cards are changed from Display settings', () => {
+    const current = JSON.stringify({
+      excludedIncomeCategoryIds: ['salary'],
+      incomeCategoryFilterMode: 'include',
+    });
+    expect(JSON.parse(updateHomeSummaryPreference(current, 'right', 'balance'))).toMatchObject({
+      excludedIncomeCategoryIds: ['salary'],
+      incomeCategoryFilterMode: 'include',
+      homeSummaryRight: 'balance',
+    });
+  });
 });
