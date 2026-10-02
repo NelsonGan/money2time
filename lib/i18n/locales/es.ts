@@ -140,6 +140,21 @@ const es = {
     reset_action: 'Eliminar y cambiar',
   },
   news: {
+    transaction_updates: {
+      title: 'Registra transacciones más fácilmente',
+      androidScreenshot: {
+        title: 'Comparte capturas en Android',
+        body: 'Comparte una captura de un pago o una foto de un recibo con Money2Time. La app lee los datos y registra la transacción automáticamente. Encuentra la guía en Ajustes > Automatización.',
+      },
+      accountLabels: {
+        title: 'Ve la cuenta de cada transacción',
+        body: 'Los nombres de las cuentas aparecen ahora en tu lista de transacciones para que veas de dónde vino o adónde fue el dinero. ¿Prefieres una vista más sencilla? Desactiva la visualización de cuentas en Ajustes > Pantalla.',
+      },
+      amountSearch: {
+        title: 'Busca transacciones por importe',
+        body: '¿Recuerdas el importe, pero no el comercio? Escribe un importe en la búsqueda de transacciones para encontrar las entradas que coincidan. Usa decimales para afinar los resultados.',
+      },
+    },
     everyday_personalization: {
       title: 'More ways to customize',
       reorder: {

@@ -140,6 +140,21 @@ const nl = {
     reset_action: 'Verwijderen en wisselen',
   },
   news: {
+    transaction_updates: {
+      title: 'Transacties eenvoudiger bijhouden',
+      androidScreenshot: {
+        title: 'Deel screenshots op Android',
+        body: 'Deel een screenshot van een betaling of een foto van een bon met Money2Time. De app leest de gegevens en registreert de transactie automatisch. Je vindt de uitleg in Instellingen > Automatisering.',
+      },
+      accountLabels: {
+        title: 'Zie de rekening bij elke transactie',
+        body: 'Rekeningnamen staan nu in je transactielijst, zodat je ziet waar geld vandaan kwam of naartoe ging. Liever een eenvoudiger overzicht? Zet de rekeningweergave uit in Instellingen > Weergave.',
+      },
+      amountSearch: {
+        title: 'Zoek transacties op bedrag',
+        body: 'Weet je het bedrag nog, maar niet de winkel? Typ een bedrag in de transactiezoekfunctie om overeenkomende posten te vinden. Gebruik decimalen om de resultaten te verfijnen.',
+      },
+    },
     everyday_personalization: {
       title: 'More ways to customize',
       reorder: {

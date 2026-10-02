@@ -36,17 +36,26 @@ describe('feature announcement state', () => {
     );
   });
 
-  it('surfaces the four new feature pages as the latest announcement', () => {
-    expect(getLatestFeatureAnnouncement()).toMatchObject({
-      id: 'everyday_personalization_2026_09',
-      announcementNumber: 19,
+  it('surfaces the transaction updates with the screenshot page only on Android', () => {
+    const latest = getLatestFeatureAnnouncement()!;
+    expect(latest).toMatchObject({
+      id: 'transaction_updates_2026_10',
+      announcementNumber: 20,
       pages: [
-        { key: 'reorder', visual: 'transactionReorder' },
-        { key: 'homeCards', visual: 'homeCards' },
-        { key: 'itemIcons', visual: 'itemIcons' },
-        { key: 'goalCovers', visual: 'goalCovers' },
+        { key: 'androidScreenshot', visual: 'androidScreenshot', platform: 'android' },
+        { key: 'accountLabels', visual: 'accountLabels' },
+        { key: 'amountSearch', visual: 'amountSearch' },
       ],
     });
+    expect(announcementPagesForPlatform(latest, 'android').map((page) => page.key)).toEqual([
+      'androidScreenshot',
+      'accountLabels',
+      'amountSearch',
+    ]);
+    expect(announcementPagesForPlatform(latest, 'ios').map((page) => page.key)).toEqual([
+      'accountLabels',
+      'amountSearch',
+    ]);
   });
 
   it('drops a platform-only page off that platform, keeping the rest', () => {

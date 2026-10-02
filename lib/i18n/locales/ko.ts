@@ -139,6 +139,21 @@ const ko = {
     reset_action: '삭제 후 전환',
   },
   news: {
+    transaction_updates: {
+      title: '더 쉬워진 거래 기록',
+      androidScreenshot: {
+        title: 'Android에서 스크린샷 공유',
+        body: '결제 스크린샷이나 영수증 사진을 Money2Time으로 공유하세요. 앱이 내용을 읽고 거래를 자동으로 기록합니다. 설정 > 자동화에서 안내를 확인할 수 있어요.',
+      },
+      accountLabels: {
+        title: '각 거래의 계좌 확인',
+        body: '이제 거래 목록에 계좌 이름이 표시되어 돈이 어디서 들어오고 어디로 나갔는지 알 수 있어요. 더 간단한 화면을 원하면 설정 > 화면에서 계좌 표시를 끄세요.',
+      },
+      amountSearch: {
+        title: '금액으로 거래 검색',
+        body: '금액은 기억나지만 가게가 생각나지 않나요? 거래 검색에 금액을 입력해 일치하는 항목을 찾아보세요. 소수점 이하까지 입력하면 결과를 좁힐 수 있어요.',
+      },
+    },
     everyday_personalization: {
       title: 'More ways to customize',
       reorder: {

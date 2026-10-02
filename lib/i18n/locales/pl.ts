@@ -140,6 +140,21 @@ const pl = {
     reset_action: 'Usuń i zmień',
   },
   news: {
+    transaction_updates: {
+      title: 'Łatwiejsze śledzenie transakcji',
+      androidScreenshot: {
+        title: 'Udostępniaj zrzuty ekranu na Androidzie',
+        body: 'Udostępnij zrzut ekranu płatności lub zdjęcie paragonu do Money2Time. Aplikacja odczyta szczegóły i automatycznie zapisze transakcję. Instrukcję znajdziesz w Ustawienia > Automatyzacja.',
+      },
+      accountLabels: {
+        title: 'Zobacz konto przy każdej transakcji',
+        body: 'Nazwy kont pojawiają się teraz na liście transakcji, dzięki czemu wiesz, skąd przyszły lub dokąd poszły pieniądze. Wolisz prostszy widok? Wyłącz wyświetlanie konta w Ustawienia > Wyświetlanie.',
+      },
+      amountSearch: {
+        title: 'Szukaj transakcji według kwoty',
+        body: 'Pamiętasz kwotę, ale nie sklep? Wpisz kwotę w wyszukiwaniu transakcji, aby znaleźć pasujące wpisy. Użyj miejsc po przecinku, aby zawęzić wyniki.',
+      },
+    },
     everyday_personalization: {
       title: 'More ways to customize',
       reorder: {

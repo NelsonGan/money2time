@@ -113,6 +113,21 @@ const zhHant = {
     },
   },
   news: {
+    transaction_updates: {
+      title: '記帳更輕鬆',
+      androidScreenshot: {
+        title: '在 Android 上分享截圖',
+        body: '將付款截圖或收據照片分享到 Money2Time。應用程式會讀取詳情並自動記錄交易。在設定 > 自動化中查看指南。',
+      },
+      accountLabels: {
+        title: '查看每筆交易的帳戶',
+        body: '交易列表現在會顯示帳戶名稱，方便你了解錢從哪裡來、到哪裡去。想要更簡潔的畫面？在設定 > 顯示中關閉交易帳戶顯示。',
+      },
+      amountSearch: {
+        title: '按金額搜尋交易',
+        body: '記得金額，卻忘了商家？在交易搜尋中輸入金額，即可找到相符的記錄。輸入小數可以縮小搜尋範圍。',
+      },
+    },
     everyday_personalization: {
       title: 'More ways to customize',
       reorder: {

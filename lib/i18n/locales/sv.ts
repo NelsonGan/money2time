@@ -140,6 +140,21 @@ const sv = {
     reset_action: 'Radera och byt',
   },
   news: {
+    transaction_updates: {
+      title: 'Enklare att hålla koll på transaktioner',
+      androidScreenshot: {
+        title: 'Dela skärmbilder på Android',
+        body: 'Dela en skärmbild av en betalning eller ett foto av ett kvitto till Money2Time. Appen läser uppgifterna och registrerar transaktionen automatiskt. Du hittar guiden i Inställningar > Automatisering.',
+      },
+      accountLabels: {
+        title: 'Se kontot på varje transaktion',
+        body: 'Kontonamn visas nu i transaktionslistan så att du ser var pengarna kom från eller tog vägen. Vill du ha en enklare vy? Stäng av kontovisningen i Inställningar > Visning.',
+      },
+      amountSearch: {
+        title: 'Sök transaktioner efter belopp',
+        body: 'Minns du beloppet men inte butiken? Skriv ett belopp i transaktionssökningen för att hitta matchande poster. Använd decimaler för att begränsa resultaten.',
+      },
+    },
     everyday_personalization: {
       title: 'More ways to customize',
       reorder: {

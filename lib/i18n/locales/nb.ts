@@ -140,6 +140,21 @@ const nb = {
     reset_action: 'Slett og bytt',
   },
   news: {
+    transaction_updates: {
+      title: 'Enklere registrering av transaksjoner',
+      androidScreenshot: {
+        title: 'Del skjermbilder på Android',
+        body: 'Del et skjermbilde av en betaling eller et bilde av en kvittering med Money2Time. Appen leser detaljene og registrerer transaksjonen automatisk. Finn veiledningen under Innstillinger > Automatisering.',
+      },
+      accountLabels: {
+        title: 'Se kontoen på hver transaksjon',
+        body: 'Kontonavn vises nå i transaksjonslisten, så du kan se hvor pengene kom fra eller gikk. Vil du ha en enklere visning? Slå av kontovisningen under Innstillinger > Visning.',
+      },
+      amountSearch: {
+        title: 'Søk etter transaksjoner etter beløp',
+        body: 'Husker du beløpet, men ikke butikken? Skriv et beløp i transaksjonssøket for å finne treff. Bruk desimaler for å snevre inn resultatene.',
+      },
+    },
     everyday_personalization: {
       title: 'More ways to customize',
       reorder: {

@@ -140,6 +140,21 @@ const fil = {
     reset_action: 'Burahin at palitan',
   },
   news: {
+    transaction_updates: {
+      title: 'Mas madaling pagsubaybay sa transaksyon',
+      androidScreenshot: {
+        title: 'Mag-share ng screenshot sa Android',
+        body: 'I-share ang screenshot ng bayad o larawan ng resibo sa Money2Time. Binabasa nito ang mga detalye at awtomatikong itinatala ang transaksyon. Makikita ang gabay sa Settings > Automation.',
+      },
+      accountLabels: {
+        title: 'Makita ang account ng bawat transaksyon',
+        body: 'Lumalabas na ang pangalan ng account sa listahan ng transaksyon para makita kung saan galing o napunta ang pera. Gusto ng mas simpleng view? I-off ang pagpapakita ng account sa Settings > Display.',
+      },
+      amountSearch: {
+        title: 'Maghanap ng transaksyon ayon sa halaga',
+        body: 'Naaalala ang halaga pero hindi ang tindahan? Mag-type ng halaga sa paghahanap ng transaksyon para makita ang mga tugmang entry. Gumamit ng decimal para mas paliitin ang mga resulta.',
+      },
+    },
     everyday_personalization: {
       title: 'More ways to customize',
       reorder: {

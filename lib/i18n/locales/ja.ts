@@ -140,6 +140,21 @@ const ja = {
     reset_action: '削除して切り替え',
   },
   news: {
+    transaction_updates: {
+      title: '取引の記録がもっと簡単に',
+      androidScreenshot: {
+        title: 'Androidでスクリーンショットを共有',
+        body: '支払いのスクリーンショットやレシートの写真をMoney2Timeに共有すると、内容を読み取り、取引を自動で記録します。設定 > 自動化でガイドを確認できます。',
+      },
+      accountLabels: {
+        title: '取引ごとの口座を表示',
+        body: '取引一覧に口座名が表示され、お金の出入りがわかりやすくなりました。シンプルな表示がお好みなら、設定 > 表示で口座名の表示をオフにできます。',
+      },
+      amountSearch: {
+        title: '金額で取引を検索',
+        body: '金額は覚えていても、お店を忘れてしまったときは、取引検索に金額を入力すると一致する取引が見つかります。小数点以下も入力すると、結果を絞り込めます。',
+      },
+    },
     everyday_personalization: {
       title: 'More ways to customize',
       reorder: {
