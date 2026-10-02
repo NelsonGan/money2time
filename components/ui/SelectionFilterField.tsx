@@ -53,7 +53,7 @@ export function SelectionFilterField({
         : emptyLabel;
 
   return (
-    <View className="gap-2">
+    <View className="gap-1">
       <View className="flex-row items-center justify-between gap-3">
         <Text variant="caption" tone="muted" className="flex-1" numberOfLines={1}>
           {label}
