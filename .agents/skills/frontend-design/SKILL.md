@@ -1,6 +1,6 @@
 ---
 name: frontend-design
-description: "Design and build polished, on-brand UI for the money2time React Native app. Use when adding or restyling screens, sheets, cards, charts, or any visible UI; when the user asks for design work, layout, spacing, typography, theming, dark-mode, or visual polish; or when reviewing a screen for visual quality. Enforces NativeWind + the project design system."
+description: Design and build polished, on-brand UI for the money2time React Native app. Use when adding or restyling screens, sheets, cards, charts, or any visible UI; when the user asks for design work, layout, spacing, typography, theming, dark-mode, or visual polish; or when reviewing a screen for visual quality. Enforces NativeWind + the project design system.
 ---
 
 # Frontend design (money2time)
@@ -8,6 +8,10 @@ description: "Design and build polished, on-brand UI for the money2time React Na
 This app is a local-first React Native (Expo SDK 54, RN 0.81, New Architecture) expense tracker. Its hook is reframing money as **time** at the user's hourly rate. UI must feel calm, premium, and trustworthy — it handles people's money.
 
 Read `CLAUDE.md` first for the architecture map. This skill is the design layer on top of it.
+
+## Analytics impact
+
+When a UI or architecture change alters a tracked action, screen, paywall source, payload, trigger or frequency, follow [maintain-analytics-tracking](../maintain-analytics-tracking/SKILL.md). Update the authoritative `docs/analytics-tracking.md` tables in the same change, even when event names stay the same. Changes without an analytics impact need no table edit.
 
 ## Non-negotiables
 

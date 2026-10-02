@@ -1,6 +1,6 @@
 ---
 name: tdd
-description: "Test-driven development for the money2time codebase using Jest + ts-jest. Use when adding or changing logic in utils, repositories/mappers, services, navigation helpers, or i18n; when the user asks to write tests, do TDD, or improve coverage; or before refactoring pure logic. Write the failing test first, then the code. Knows what is testable here (node env, native deps mocked) and what is not (no RN render tests)."
+description: Test-driven development for the money2time codebase using Jest + ts-jest. Use when adding or changing logic in utils, repositories/mappers, services, navigation helpers, or i18n; when the user asks to write tests, do TDD, or improve coverage; or before refactoring pure logic. Write the failing test first, then the code. Knows what is testable here (node env, native deps mocked) and what is not (no RN render tests).
 ---
 
 # TDD (money2time)
@@ -64,6 +64,10 @@ npm test                        # full suite (CI runs this after `npm run check`
 ```
 
 CI (`.github/workflows/deploy.yml`) gates builds on `npm run check && npm test`, so a red test blocks deploy. Keep the suite green.
+
+## Analytics changes
+
+For changes to tracking or tracked product flows, follow [maintain-analytics-tracking](../maintain-analytics-tracking/SKILL.md). Update the authoritative `docs/analytics-tracking.md` tables in the same change as the implementation, and include `__tests__/services/analyticsTrackingPlan.test.ts` in focused verification. The table check covers names/routing, feature triggers and thresholds; payload/trigger/source prose also needs review.
 
 ## Definition of done
 

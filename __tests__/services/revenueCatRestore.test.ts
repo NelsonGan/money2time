@@ -18,6 +18,9 @@ jest.mock('react-native-purchases', () => ({
     restorePurchases: jest.fn(),
     syncPurchasesForResult: jest.fn(),
     checkTrialOrIntroductoryPriceEligibility: jest.fn(),
+    setFirebaseAppInstanceID: jest.fn(),
+    setMixpanelDistinctID: jest.fn(),
+    syncAttributesAndOfferingsIfNeeded: jest.fn(),
   },
   PURCHASES_ERROR_CODE: {
     PURCHASE_CANCELLED_ERROR: '1',
@@ -37,6 +40,10 @@ jest.mock('react-native-purchases', () => ({
   },
 }));
 jest.mock('~/services/errorReporting', () => ({ reportError: jest.fn() }));
+jest.mock('~/services/analytics', () => ({
+  getFirebaseAppInstanceId: jest.fn(async () => null),
+  markRevenueCatRevenueSource: jest.fn(async () => true),
+}));
 
 function customerInfo(
   options: { active?: boolean; expirationDate?: string | null; periodType?: string } = {},
@@ -78,13 +85,18 @@ function setup(platform = 'android') {
   sdk.restorePurchases.mockResolvedValue(customerInfo());
   sdk.syncPurchasesForResult.mockResolvedValue({ customerInfo: emptyCustomerInfo() });
   sdk.getCustomerInfo.mockResolvedValue(emptyCustomerInfo());
+  sdk.syncAttributesAndOfferingsIfNeeded.mockResolvedValue({ all: {}, current: null });
   service.setRevenueCatAppUserId('m2t_second_device');
   return { sdk, service, reportError };
 }
 
 const originalEnv = { ...process.env };
+const originalFetch = global.fetch;
+const mockAttributeUpload = jest.fn();
 const originalDevDescriptor = Object.getOwnPropertyDescriptor(global, '__DEV__');
 beforeEach(() => {
+  mockAttributeUpload.mockReset().mockResolvedValue({ ok: true, status: 200 });
+  global.fetch = mockAttributeUpload;
   process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY = 'goog_unit_test';
   process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY = 'appl_unit_test';
   process.env.EXPO_PUBLIC_REVENUECAT_ENTITLEMENT_ID = 'pro';
@@ -92,6 +104,7 @@ beforeEach(() => {
   Object.assign(global, { __DEV__: false });
 });
 afterAll(() => {
+  global.fetch = originalFetch;
   process.env = originalEnv;
   if (originalDevDescriptor) {
     Object.defineProperty(global, '__DEV__', originalDevDescriptor);
@@ -101,6 +114,240 @@ afterAll(() => {
 });
 
 describe('native Pro restore', () => {
+  it('links both analytics identities before a restore without logging another purchase', async () => {
+    const { sdk, service } = setup();
+    const analytics = jest.requireMock('~/services/analytics');
+    analytics.getFirebaseAppInstanceId.mockResolvedValue('firebase-real-install');
+    await service.restoreRevenueCatPurchases();
+    expect(sdk.setMixpanelDistinctID).toHaveBeenCalledWith('m2t_second_device');
+    expect(sdk.setFirebaseAppInstanceID).toHaveBeenCalledWith('firebase-real-install');
+    expect(sdk.setFirebaseAppInstanceID.mock.invocationCallOrder[0]).toBeLessThan(
+      sdk.restorePurchases.mock.invocationCallOrder[0],
+    );
+    expect(analytics.markRevenueCatRevenueSource).toHaveBeenCalledWith('m2t_second_device');
+    expect(sdk.setFirebaseAppInstanceID.mock.invocationCallOrder[0]).toBeLessThan(
+      mockAttributeUpload.mock.invocationCallOrder[0],
+    );
+    expect(mockAttributeUpload.mock.invocationCallOrder[0]).toBeLessThan(
+      analytics.markRevenueCatRevenueSource.mock.invocationCallOrder[0],
+    );
+    expect(sdk.purchasePackage).not.toHaveBeenCalled();
+  });
+
+  it('keeps SDK revenue enabled until the pending server attribute sync finishes', async () => {
+    const { sdk, service } = setup();
+    const analytics = jest.requireMock('~/services/analytics');
+    analytics.getFirebaseAppInstanceId.mockResolvedValue('firebase-real-install');
+    let finishSync!: (response: { ok: boolean; status: number }) => void;
+    let startSync!: () => void;
+    const started = new Promise<void>((resolve) => {
+      startSync = resolve;
+    });
+    mockAttributeUpload.mockImplementationOnce(() => {
+      startSync();
+      return new Promise<{ ok: boolean; status: number }>((resolve) => {
+        finishSync = resolve;
+      });
+    });
+    const refresh = service.fetchRevenueCatCustomerState();
+    // Finish even if the assertion fails, so no background work leaks to another test.
+    await started;
+    // Status must resolve while the attributes-only upload is still pending.
+    const statusWhilePending = await Promise.race([
+      refresh.then(() => 'loaded'),
+      new Promise<string>((resolve) => setImmediate(() => resolve('blocked'))),
+    ]);
+    const markedWhilePending = analytics.markRevenueCatRevenueSource.mock.calls.length;
+    finishSync({ ok: true, status: 200 });
+    await refresh;
+    await service.syncRevenueCatAnalyticsIdentifiers();
+    expect(statusWhilePending).toBe('loaded');
+    expect(sdk.getCustomerInfo).toHaveBeenCalledTimes(1);
+    expect(mockAttributeUpload).toHaveBeenCalledTimes(1);
+    expect(sdk.syncAttributesAndOfferingsIfNeeded).not.toHaveBeenCalled();
+    expect(sdk.getOfferings).not.toHaveBeenCalled();
+    expect(markedWhilePending).toBe(0);
+    expect(analytics.markRevenueCatRevenueSource).toHaveBeenCalled();
+  });
+
+  it('retries a failed server attribute sync without denying restored Pro access', async () => {
+    const { sdk, service } = setup();
+    const analytics = jest.requireMock('~/services/analytics');
+    analytics.getFirebaseAppInstanceId.mockResolvedValue('firebase-real-install');
+    mockAttributeUpload.mockRejectedValueOnce(new Error('temporary network failure'));
+    expect((await service.restoreRevenueCatPurchases()).status).toBe('success');
+    expect(analytics.markRevenueCatRevenueSource).not.toHaveBeenCalled();
+    await service.syncRevenueCatAnalyticsIdentifiers();
+    await service.syncRevenueCatAnalyticsIdentifiers();
+    expect(mockAttributeUpload).toHaveBeenCalledTimes(2);
+    expect(sdk.setFirebaseAppInstanceID).toHaveBeenCalledTimes(1);
+    expect(sdk.setMixpanelDistinctID).toHaveBeenCalledTimes(1);
+    expect(analytics.markRevenueCatRevenueSource).toHaveBeenCalledWith('m2t_second_device');
+  });
+
+  it('does not suppress SDK revenue on an HTTP upload failure, even with cached offerings', async () => {
+    const { sdk, service } = setup();
+    const analytics = jest.requireMock('~/services/analytics');
+    analytics.getFirebaseAppInstanceId.mockResolvedValue('firebase-real-install');
+    mockAttributeUpload.mockResolvedValueOnce({ ok: false, status: 429 });
+    expect((await service.restoreRevenueCatPurchases()).status).toBe('success');
+    expect(analytics.markRevenueCatRevenueSource).not.toHaveBeenCalled();
+    expect(sdk.syncAttributesAndOfferingsIfNeeded).not.toHaveBeenCalled();
+    await service.syncRevenueCatAnalyticsIdentifiers();
+    expect(mockAttributeUpload).toHaveBeenCalledTimes(2);
+    expect(analytics.markRevenueCatRevenueSource).toHaveBeenCalled();
+  });
+
+  it('posts both identifiers for the explicit customer using only the platform public SDK key', async () => {
+    const { service } = setup('ios');
+    service.setRevenueCatAppUserId('m2t/customer + id');
+    const analytics = jest.requireMock('~/services/analytics');
+    analytics.getFirebaseAppInstanceId.mockResolvedValue('firebase-real-install');
+    await service.syncRevenueCatAnalyticsIdentifiers();
+    const [url, request] = mockAttributeUpload.mock.calls[0];
+    expect(url).toBe(
+      'https://api.revenuecat.com/v1/subscribers/m2t%2Fcustomer%20%2B%20id/attributes',
+    );
+    expect(request.method).toBe('POST');
+    expect(request.headers.Authorization).toBe('Bearer appl_unit_test');
+    expect(JSON.parse(request.body)).toEqual({
+      attributes: {
+        $mixpanelDistinctId: { value: 'm2t/customer + id', updated_at_ms: expect.any(Number) },
+        $firebaseAppInstanceId: {
+          value: 'firebase-real-install',
+          updated_at_ms: expect.any(Number),
+        },
+      },
+    });
+  });
+
+  it('retries an unacknowledged Firebase attribute after a temporary ID lookup gap', async () => {
+    const { service } = setup();
+    const analytics = jest.requireMock('~/services/analytics');
+    analytics.getFirebaseAppInstanceId.mockResolvedValue('firebase-real-install');
+    mockAttributeUpload.mockResolvedValueOnce({ status: 500 });
+    await service.syncRevenueCatAnalyticsIdentifiers();
+    analytics.getFirebaseAppInstanceId.mockResolvedValueOnce(null);
+    await service.syncRevenueCatAnalyticsIdentifiers();
+    expect(analytics.markRevenueCatRevenueSource).not.toHaveBeenCalled();
+    await service.syncRevenueCatAnalyticsIdentifiers();
+    expect(mockAttributeUpload).toHaveBeenCalledTimes(3);
+    expect(
+      JSON.parse(mockAttributeUpload.mock.calls[2][1].body).attributes.$firebaseAppInstanceId.value,
+    ).toBe('firebase-real-install');
+    expect(analytics.markRevenueCatRevenueSource).toHaveBeenCalledWith('m2t_second_device');
+  });
+
+  it('bounds an unresponsive attributes upload so it cannot deny restored Pro access', async () => {
+    jest.useFakeTimers();
+    try {
+      const { service } = setup();
+      const analytics = jest.requireMock('~/services/analytics');
+      analytics.getFirebaseAppInstanceId.mockResolvedValue('firebase-real-install');
+      mockAttributeUpload.mockImplementationOnce(() => new Promise(() => {}));
+      const restore = service.restoreRevenueCatPurchases();
+      await jest.advanceTimersByTimeAsync(5_000);
+      expect((await restore).status).toBe('success');
+      expect(mockAttributeUpload.mock.calls[0][1].signal.aborted).toBe(true);
+      expect(analytics.markRevenueCatRevenueSource).not.toHaveBeenCalled();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('shares startup attribute writes and retries missing Firebase identity after analytics is ready', async () => {
+    const { sdk, service } = setup();
+    const analytics = jest.requireMock('~/services/analytics');
+    await Promise.all([
+      service.fetchRevenueCatCustomerState(),
+      service.fetchRevenueCatCustomerState(),
+    ]);
+    expect(sdk.setMixpanelDistinctID).toHaveBeenCalledTimes(1);
+    expect(sdk.setFirebaseAppInstanceID).not.toHaveBeenCalled();
+    analytics.getFirebaseAppInstanceId.mockResolvedValue('firebase-late-install');
+    await service.syncRevenueCatAnalyticsIdentifiers();
+    await service.syncRevenueCatAnalyticsIdentifiers();
+    expect(sdk.setFirebaseAppInstanceID).toHaveBeenCalledTimes(1);
+    expect(sdk.setFirebaseAppInstanceID).toHaveBeenCalledWith('firebase-late-install');
+  });
+
+  it('does not block access when an analytics attribute fails and retries on the next refresh', async () => {
+    const { sdk, service } = setup();
+    const analytics = jest.requireMock('~/services/analytics');
+    analytics.getFirebaseAppInstanceId.mockResolvedValue('firebase-real-install');
+    sdk.setMixpanelDistinctID.mockRejectedValueOnce(new Error('temporary native error'));
+    sdk.setFirebaseAppInstanceID.mockRejectedValueOnce(new Error('temporary native error'));
+    expect((await service.restoreRevenueCatPurchases()).status).toBe('success');
+    await service.fetchRevenueCatCustomerState();
+    expect(sdk.setMixpanelDistinctID).toHaveBeenCalledTimes(2);
+    expect(sdk.setFirebaseAppInstanceID).toHaveBeenCalledTimes(2);
+  });
+
+  it('writes attributes again after switching the RevenueCat customer', async () => {
+    const { sdk, service } = setup();
+    const analytics = jest.requireMock('~/services/analytics');
+    analytics.getFirebaseAppInstanceId.mockResolvedValue('firebase-real-install');
+    await service.fetchRevenueCatCustomerState();
+    service.setRevenueCatAppUserId('m2t_new_customer');
+    await service.fetchRevenueCatCustomerState();
+    expect(sdk.setMixpanelDistinctID.mock.calls).toEqual([
+      ['m2t_second_device'],
+      ['m2t_new_customer'],
+    ]);
+    expect(sdk.setFirebaseAppInstanceID).toHaveBeenCalledTimes(2);
+  });
+
+  it('waits for old-customer attribute writes before switching SDK identity', async () => {
+    const { sdk, service } = setup();
+    let finishWrite!: () => void;
+    let startedWrite!: () => void;
+    const started = new Promise<void>((resolve) => {
+      startedWrite = resolve;
+    });
+    sdk.setMixpanelDistinctID.mockImplementationOnce(() => {
+      startedWrite();
+      return new Promise<void>((resolve) => {
+        finishWrite = resolve;
+      });
+    });
+    const initial = service.fetchRevenueCatCustomerState();
+    await started;
+    service.setRevenueCatAppUserId('m2t_new_customer');
+    const changed = service.fetchRevenueCatCustomerState();
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    expect(sdk.logIn).not.toHaveBeenCalled();
+    finishWrite();
+    await Promise.all([initial, changed]);
+    expect(sdk.logIn).toHaveBeenCalledWith('m2t_new_customer');
+    expect(sdk.setMixpanelDistinctID.mock.calls).toEqual([
+      ['m2t_second_device'],
+      ['m2t_new_customer'],
+    ]);
+  });
+
+  it('does not attach anonymous or Test Store customers to production analytics', async () => {
+    const { sdk, service } = setup();
+    service.setRevenueCatAppUserId(null);
+    await service.fetchRevenueCatCustomerState();
+    expect(sdk.setMixpanelDistinctID).not.toHaveBeenCalled();
+    process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY = 'test_unit_test';
+    service.setRevenueCatAppUserId('m2t_test_store');
+    await service.syncRevenueCatAnalyticsIdentifiers();
+    expect(sdk.setMixpanelDistinctID).not.toHaveBeenCalled();
+    expect(sdk.setFirebaseAppInstanceID).not.toHaveBeenCalled();
+  });
+
+  it('retries a failed SDK revenue marker without repeating successful attribute writes', async () => {
+    const { sdk, service } = setup();
+    const analytics = jest.requireMock('~/services/analytics');
+    analytics.getFirebaseAppInstanceId.mockResolvedValue('firebase-real-install');
+    analytics.markRevenueCatRevenueSource.mockResolvedValueOnce(false);
+    await service.syncRevenueCatAnalyticsIdentifiers();
+    await service.syncRevenueCatAnalyticsIdentifiers();
+    expect(sdk.setFirebaseAppInstanceID).toHaveBeenCalledTimes(1);
+    expect(analytics.markRevenueCatRevenueSource).toHaveBeenCalledTimes(2);
+  });
+
   it('retries configuration after a synchronous SDK failure', async () => {
     const { sdk, service } = setup();
     sdk.configure.mockImplementationOnce(() => {

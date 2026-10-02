@@ -173,6 +173,7 @@ import {
   monthCycleDefaultDay,
   monthCycleOf,
 } from '~/utils/financialMonth';
+import { createFirstTransactionSignal } from '~/utils/firstTransactionSignal';
 import { FONT } from '~/utils/fonts';
 import {
   amountToHoursByRate,
@@ -2088,19 +2089,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [categoryRelationInfoById],
   );
 
-  // `First Transaction Created`: the first expense or income an install logs,
-  // its activation moment. Only the first such entry of a session can be one,
-  // so the history is scanned once, before the entry's own optimistic row lands.
-  const firstEntryClaimedRef = useRef(false);
-  const claimFirstEntry = useCallback((type: CreateTransactionInput['type']): boolean => {
-    if (firstEntryClaimedRef.current || !isLoggedEntryType(type)) return false;
-    firstEntryClaimedRef.current = true;
-    return !transactionsRef.current.some((tx) => isLoggedEntryType(tx.type));
+  // Scan history before optimistic inserts, but claim activation only after a
+  // save succeeds. A failed save must leave the next successful entry eligible.
+  const firstEntrySignalRef = useRef<ReturnType<typeof createFirstTransactionSignal> | null>(null);
+  const prepareFirstEntry = useCallback((type: CreateTransactionInput['type']): (() => boolean) => {
+    firstEntrySignalRef.current ??= createFirstTransactionSignal();
+    return firstEntrySignalRef.current.prepare(type, transactionsRef.current);
   }, []);
 
   const createTransaction = useCallback(
     (input: CreateTransactionInput, meta?: CreateTransactionMeta) => {
-      const isFirstEntry = claimFirstEntry(input.type);
+      const claimFirstEntry = prepareFirstEntry(input.type);
       const normalizedAmount = normalizeMoneyAmount(input.amount);
       const snapshot = buildSnapshot(
         input.type,
@@ -2198,7 +2197,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               has_note: !!(normalizedInput.note && normalizedInput.note.trim()),
             });
           }
-          if (isFirstEntry) {
+          if (claimFirstEntry()) {
             void trackEvent(AnalyticsEvents.FIRST_TRANSACTION_CREATED, {
               type: normalizedInput.type,
               source: meta?.source ?? 'manual',
@@ -2224,7 +2223,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       });
       return id;
     },
-    [accounts, buildSnapshot, claimFirstEntry, refreshAccountBalances, resolveRelationNames],
+    [accounts, buildSnapshot, prepareFirstEntry, refreshAccountBalances, resolveRelationNames],
   );
 
   const updateTransactionsBulk = useCallback(
@@ -2774,7 +2773,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       splits: SplitDraftInput[],
       receiptSplit?: ReceiptSplitDraftInput,
     ): string => {
-      const isFirstEntry = claimFirstEntry(input.type);
+      const claimFirstEntry = prepareFirstEntry(input.type);
       const parentSnapshot = buildSnapshot(
         input.type,
         normalizeMoneyAmount(input.amount),
@@ -2942,7 +2941,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           } else {
             trackSplitBillCreated(splits);
           }
-          if (isFirstEntry) {
+          if (claimFirstEntry()) {
             void trackEvent(AnalyticsEvents.FIRST_TRANSACTION_CREATED, {
               type: normalizedInput.type,
               source: receiptSplit ? 'receipt_split' : 'split',
@@ -2957,7 +2956,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       });
       return txId;
     },
-    [buildSnapshot, claimFirstEntry, scheduleRefreshTransactions, resolveRelationNames],
+    [buildSnapshot, prepareFirstEntry, scheduleRefreshTransactions, resolveRelationNames],
   );
 
   const updateTransactionSplits = useCallback(
