@@ -18,6 +18,8 @@ import Reanimated, {
 } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { MonthYearWheelPicker } from '~/components/datePicker';
+import { monthsBetween, shiftYearMonth, yearMonthFromKey } from '~/components/datePicker/monthJump';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { useBottomNavMinimize } from '~/components/navigation/BottomNavMinimize';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
@@ -977,6 +979,29 @@ export function CalendarScreen({
     });
   };
 
+  // Tapping the month label jumps straight to a month instead of paging to it.
+  const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
+  const pagerAnchorMonth = useMemo(
+    () => yearMonthFromKey(financialMonthKeyForDate(monthPagerAnchorDate, monthCycle)),
+    [monthPagerAnchorDate, monthCycle],
+  );
+  const visibleMonth = shiftYearMonth(
+    pagerAnchorMonth,
+    (viewMode === 'day' ? activeListMonthIndex : activeMonthIndex) - MONTH_PAGER_CENTER_INDEX,
+  );
+  const handleMonthPicked = (year: number, monthIndex: number) => {
+    setIsMonthPickerOpen(false);
+    const onList = viewMode === 'day';
+    const nextIdx = clampMonthIndex(
+      MONTH_PAGER_CENTER_INDEX + monthsBetween(pagerAnchorMonth, { year, monthIndex }),
+    );
+    (onList ? setActiveListMonthIndex : setActiveMonthIndex)(nextIdx);
+    (onList ? listPagerRef : horizontalListRef).current?.scrollToIndex({
+      index: nextIdx,
+      animated: false,
+    });
+  };
+
   const handleOpenSearch = useCallback(() => {
     void triggerHaptic('light');
     if (isSearchOpen) {
@@ -1537,11 +1562,20 @@ export function CalendarScreen({
                         <ChevronLeft size={16} color={themeColors.textSoft} />
                       </Pressable>
                       <View className="flex-1 items-center">
-                        <View className="px-2">
+                        <Pressable
+                          onPress={() => {
+                            void triggerHaptic('selection');
+                            setIsMonthPickerOpen(true);
+                          }}
+                          accessibilityRole="button"
+                          accessibilityLabel={displayedMonthLabel}
+                          accessibilityHint={I18n.t('settings.select_year_month')}
+                          className="px-2 active:opacity-80"
+                        >
                           <Text variant="bodyStrong" className="text-foreground tracking-tight">
                             {displayedMonthLabel}
                           </Text>
-                        </View>
+                        </Pressable>
                       </View>
                       <Pressable
                         onPress={() => stepVisibleMonth(1)}
@@ -1702,6 +1736,16 @@ export function CalendarScreen({
           </View>
         ) : null}
       </View>
+
+      <MonthYearWheelPicker
+        visible={isMonthPickerOpen}
+        year={visibleMonth.year}
+        monthIndex={visibleMonth.monthIndex}
+        baseYear={pagerAnchorMonth.year}
+        locale={activeLocale}
+        onSelect={handleMonthPicked}
+        onClose={() => setIsMonthPickerOpen(false)}
+      />
 
       <BulkEditTransactionsSheet
         visible={showBulkUpdate}

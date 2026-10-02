@@ -1,6 +1,8 @@
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { FlatList, useWindowDimensions, View } from 'react-native';
 
+import { MonthYearWheelPicker } from '~/components/datePicker';
+import { monthsBetween, shiftYearMonth, yearMonthFromKey } from '~/components/datePicker/monthJump';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { MonthPagerPage } from '~/features/transactions/components';
@@ -19,6 +21,7 @@ import type { TransactionWithRelations } from '~/types';
 import {
   addFinancialMonths,
   financialMonthAnchorForToday,
+  financialMonthKeyForDate,
   monthCycleOf,
 } from '~/utils/financialMonth';
 import { formatMonthYearLabel } from '~/utils/formatters';
@@ -88,6 +91,7 @@ export function AlbumMonthPicker({ selectedIds, onChange }: AlbumMonthPickerProp
     getItemLayout,
     keyExtractor,
     scrollToRelative,
+    jumpToIndex,
   } = useMonthPager({
     listRef: horizontalListRef,
     pageWidth,
@@ -103,6 +107,20 @@ export function AlbumMonthPicker({ selectedIds, onChange }: AlbumMonthPickerProp
     [activeIndex, monthPagerAnchorDate, monthCycle],
   );
   const activeMonthLabel = formatMonthYearLabel(activeMonthDate, activeLocale);
+
+  const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
+  const pagerAnchorMonth = useMemo(
+    () => yearMonthFromKey(financialMonthKeyForDate(monthPagerAnchorDate, monthCycle)),
+    [monthPagerAnchorDate, monthCycle],
+  );
+  const activeMonth = shiftYearMonth(pagerAnchorMonth, activeIndex - MONTH_PAGER_CENTER_INDEX);
+  const handleMonthPicked = useCallback(
+    (year: number, monthIndex: number) => {
+      setIsMonthPickerOpen(false);
+      jumpToIndex(MONTH_PAGER_CENTER_INDEX + monthsBetween(pagerAnchorMonth, { year, monthIndex }));
+    },
+    [jumpToIndex, pagerAnchorMonth],
+  );
 
   const toggleOne = useCallback(
     (transaction: TransactionWithRelations) => {
@@ -172,6 +190,7 @@ export function AlbumMonthPicker({ selectedIds, onChange }: AlbumMonthPickerProp
         showAccent={false}
         onPrevMonth={() => scrollToRelative(-1)}
         onNextMonth={() => scrollToRelative(1)}
+        onMonthPress={() => setIsMonthPickerOpen(true)}
       />
       <View className="flex-1 overflow-hidden bg-background">
         <FlatList
@@ -188,6 +207,15 @@ export function AlbumMonthPicker({ selectedIds, onChange }: AlbumMonthPickerProp
           onScrollToIndexFailed={handleScrollToIndexFailed}
         />
       </View>
+      <MonthYearWheelPicker
+        visible={isMonthPickerOpen}
+        year={activeMonth.year}
+        monthIndex={activeMonth.monthIndex}
+        baseYear={pagerAnchorMonth.year}
+        locale={activeLocale}
+        onSelect={handleMonthPicked}
+        onClose={() => setIsMonthPickerOpen(false)}
+      />
     </View>
   );
 }

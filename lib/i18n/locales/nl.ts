@@ -1265,6 +1265,7 @@ const nl = {
       'Bijvoorbeeld: 24 uur is {{days}} werkdagen bij een werkdag van {{hours}} uur.',
     working_hours_per_day_error: 'Voer een waarde van 1 tot 24 uur in.',
     select_year_month: 'Maand selecteren',
+    select_year: 'Jaar selecteren',
     language: 'Taal',
     language_confirm_title: 'Taal wijzigen?',
     language_confirm_message: 'De app-taal nu overschakelen naar {{language}}?',

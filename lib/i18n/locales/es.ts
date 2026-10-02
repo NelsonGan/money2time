@@ -1259,6 +1259,7 @@ const es = {
       'Por ejemplo, 24 horas equivalen a {{days}} días laborables con una jornada de {{hours}} horas.',
     working_hours_per_day_error: 'Introduce un valor de 1 a 24 horas.',
     select_year_month: 'Seleccionar mes',
+    select_year: 'Seleccionar año',
     language: 'Idioma',
     language_confirm_title: '¿Cambiar idioma?',
     language_confirm_message: '¿Cambiar el idioma de la app a {{language}} ahora?',

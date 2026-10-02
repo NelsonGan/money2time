@@ -5,6 +5,7 @@ import { Pressable, useWindowDimensions, View } from 'react-native';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
 
@@ -121,6 +122,9 @@ export function MonthControlsHeader({
                       disabled={!onMonthPress}
                       accessibilityRole="button"
                       accessibilityLabel={monthLabel}
+                      accessibilityHint={
+                        onMonthPress ? I18n.t('settings.select_year_month') : undefined
+                      }
                       className={cn(onMonthPress ? 'active:opacity-80' : undefined)}
                     >
                       <View className="px-2">

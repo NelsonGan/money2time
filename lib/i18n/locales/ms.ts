@@ -1262,6 +1262,7 @@ const ms = {
       'Contohnya, 24 jam bersamaan {{days}} hari bekerja dengan {{hours}} jam setiap hari bekerja.',
     working_hours_per_day_error: 'Masukkan nilai antara 1 hingga 24 jam.',
     select_year_month: 'Pilih bulan',
+    select_year: 'Pilih tahun',
     language: 'Bahasa',
     language_confirm_title: 'Tukar bahasa?',
     language_confirm_message: 'Tukar bahasa apl ke {{language}} sekarang?',

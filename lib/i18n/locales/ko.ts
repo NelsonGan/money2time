@@ -1234,6 +1234,7 @@ const ko = {
       '예를 들어 하루 근무 시간이 {{hours}}시간이면 24시간은 {{days}}근무일입니다.',
     working_hours_per_day_error: '1시간에서 24시간 사이의 값을 입력하세요.',
     select_year_month: '월 선택',
+    select_year: '연도 선택',
     language: '언어',
     language_confirm_title: '언어를 변경하시겠어요?',
     language_confirm_message: '앱 언어를 {{language}}(으)로 지금 변경할까요?',

@@ -2,6 +2,7 @@ import { ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 
+import { MonthYearWheelPicker } from '~/components/datePicker';
 import {
   InfoTooltipButton,
   SETTINGS_FORM_BOTTOM_PADDING,
@@ -84,6 +85,7 @@ export function MonthCycleScreen({ onBack }: MonthCycleScreenProps) {
   const today = useMemo(() => new Date(), []);
   const currentYear = today.getFullYear();
   const [year, setYear] = useState(currentYear);
+  const [isYearPickerOpen, setIsYearPickerOpen] = useState(false);
   const [editing, setEditing] = useState<EditTarget | null>(null);
 
   const dayMonthFormatter = useMemo(
@@ -222,9 +224,20 @@ export function MonthCycleScreen({ onBack }: MonthCycleScreenProps) {
             onPress={() => setYear((value) => value - 1)}
             icon={<ChevronLeft size={16} color={themeColors.textMuted} />}
           />
-          <Text variant="friendly" className="flex-1 text-center font-extrabold tracking-tight">
-            {year}
-          </Text>
+          <Pressable
+            onPress={() => {
+              void triggerHaptic('selection');
+              setIsYearPickerOpen(true);
+            }}
+            accessibilityRole="button"
+            accessibilityLabel={String(year)}
+            accessibilityHint={I18n.t('settings.select_year')}
+            className="flex-1 items-center justify-center active:opacity-70"
+          >
+            <Text variant="friendly" className="font-extrabold tracking-tight">
+              {year}
+            </Text>
+          </Pressable>
           <YearStep
             label={String(year + 1)}
             disabled={year >= currentYear + YEAR_REACH}
@@ -329,6 +342,18 @@ export function MonthCycleScreen({ onBack }: MonthCycleScreenProps) {
           setEditing(null);
         }}
         onClose={() => setEditing(null)}
+      />
+      <MonthYearWheelPicker
+        visible={isYearPickerOpen}
+        mode="year"
+        year={year}
+        min={{ year: currentYear - YEAR_REACH, monthIndex: 0 }}
+        max={{ year: currentYear + YEAR_REACH, monthIndex: 0 }}
+        onSelect={(picked) => {
+          setIsYearPickerOpen(false);
+          setYear(picked);
+        }}
+        onClose={() => setIsYearPickerOpen(false)}
       />
     </SettingsPageLayout>
   );

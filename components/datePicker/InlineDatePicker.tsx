@@ -19,6 +19,7 @@ import type { WeekStartsOn } from '~/types';
 import { cn } from '~/utils';
 import { dayKeyFromDateLocal } from '~/utils/formatters';
 
+import { buildMonthLabels } from './monthJump';
 import { MonthYearWheelPicker } from './MonthYearWheelPicker';
 
 interface InlineDatePickerProps {
@@ -143,11 +144,6 @@ function buildWeekdayLabels(locale: string, weekStartsOn: WeekStartsOn) {
     d.setDate(sunday.getDate() + weekStartsOn + i);
     return formatter.format(d);
   });
-}
-
-function buildMonthLabels(locale: string) {
-  const formatter = new Intl.DateTimeFormat(locale, { month: 'short' });
-  return Array.from({ length: 12 }, (_, i) => formatter.format(new Date(2024, i, 1)));
 }
 
 // The picker container's horizontal padding (px-3, both sides). Used to estimate

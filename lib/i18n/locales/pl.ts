@@ -1256,6 +1256,7 @@ const pl = {
       'Na przykład 24 godziny to {{days}} dni roboczych przy {{hours}}-godzinnym dniu pracy.',
     working_hours_per_day_error: 'Wprowadź wartość od 1 do 24 godzin.',
     select_year_month: 'Wybierz miesiąc',
+    select_year: 'Wybierz rok',
     language: 'Język',
     language_confirm_title: 'Zmienić język?',
     language_confirm_message: 'Przełączyć język aplikacji na {{language}}?',

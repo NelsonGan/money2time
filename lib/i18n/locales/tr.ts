@@ -1258,6 +1258,7 @@ const tr = {
       'Örneğin 24 saat, {{hours}} saatlik bir çalışma gününde {{days}} iş gününe eşittir.',
     working_hours_per_day_error: '1 ile 24 saat arasında bir değer girin.',
     select_year_month: 'Ay seçin',
+    select_year: 'Yıl seçin',
     language: 'Dil',
     language_confirm_title: 'Dil değiştirilsin mi?',
     language_confirm_message: 'Uygulama dili şimdi {{language}} olarak değiştirilsin mi?',
