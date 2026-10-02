@@ -175,4 +175,5 @@ export const TUTORIAL_IMAGE_SOURCES: Record<string, ImageSourcePropType> = {
   'widgets-1': require('~/assets/tutorials/widgets-1.png'),
   'widgets-2': require('~/assets/tutorials/widgets-2.png'),
   'widgets-3': require('~/assets/tutorials/widgets-3.png'),
+  'widgets-4': require('~/assets/tutorials/widgets-4.png'),
 };
