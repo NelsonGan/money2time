@@ -86,9 +86,10 @@ import {
   formatMonthYearLabel,
 } from '~/utils/formatters';
 import {
+  applyTransactionSelectionFilters,
   DEFAULT_SELECTION_FILTER_MODE,
-  passesSelectionFilter,
   type SelectionFilterMode,
+  type TransactionSelectionFilters,
 } from '~/utils/selectionFilter';
 import { countsAsExpenseRow } from '~/utils/spending';
 import { whenSplashHidden } from '~/utils/splashState';
@@ -577,57 +578,34 @@ export function CalendarScreen({
     excludedExpenseCategoryIds,
   ]);
 
-  const excludedAccountIdSet = useMemo(() => new Set(excludedAccountIds), [excludedAccountIds]);
-  const excludedIncomeCategoryIdSet = useMemo(
-    () => new Set(excludedIncomeCategoryIds),
-    [excludedIncomeCategoryIds],
+  const selectionFilters = useMemo<TransactionSelectionFilters>(
+    () => ({
+      excludedAccountIds,
+      excludedExpenseCategoryIds,
+      excludedIncomeCategoryIds,
+      accountMode: accountFilterMode,
+      expenseCategoryMode: expenseCategoryFilterMode,
+      incomeCategoryMode: incomeCategoryFilterMode,
+    }),
+    [
+      excludedAccountIds,
+      excludedExpenseCategoryIds,
+      excludedIncomeCategoryIds,
+      accountFilterMode,
+      expenseCategoryFilterMode,
+      incomeCategoryFilterMode,
+    ],
   );
-  const excludedExpenseCategoryIdSet = useMemo(
-    () => new Set(excludedExpenseCategoryIds),
-    [excludedExpenseCategoryIds],
+  const parentIdByCategoryId = useMemo(
+    () => new Map(categories.map((category) => [category.id, category.parentId])),
+    [categories],
   );
-
-  // An account inclusion keeps a transfer when either side of it was picked,
-  // so "only my card" still shows the card being paid off; an exclusion only
-  // ever matched the row's own account, and still does.
-  const filteredTransactions = useMemo(() => {
-    const includeAccounts = accountFilterMode === 'include';
-    return transactions.filter((tx) => {
-      if (
-        !passesSelectionFilter(
-          accountFilterMode,
-          excludedAccountIdSet,
-          includeAccounts ? [tx.accountId, tx.fromAccountId, tx.toAccountId] : [tx.accountId],
-        )
-      ) {
-        return false;
-      }
-      const categoryIds = tx.categoryId ? [tx.categoryId, tx.categoryParentId] : [];
-      if (tx.type === 'income') {
-        return passesSelectionFilter(
-          incomeCategoryFilterMode,
-          excludedIncomeCategoryIdSet,
-          categoryIds,
-        );
-      }
-      if (tx.type === 'expense') {
-        return passesSelectionFilter(
-          expenseCategoryFilterMode,
-          excludedExpenseCategoryIdSet,
-          categoryIds,
-        );
-      }
-      return true;
-    });
-  }, [
-    transactions,
-    accountFilterMode,
-    incomeCategoryFilterMode,
-    expenseCategoryFilterMode,
-    excludedAccountIdSet,
-    excludedIncomeCategoryIdSet,
-    excludedExpenseCategoryIdSet,
-  ]);
+  // Same rules as the review page's filters (one shared implementation), and
+  // the same array back when nothing is picked.
+  const filteredTransactions = useMemo(
+    () => applyTransactionSelectionFilters(transactions, selectionFilters, parentIdByCategoryId),
+    [transactions, selectionFilters, parentIdByCategoryId],
+  );
 
   const incomeCategoryPickerDataRef = useRef<InsightsCategoryPickerData | null>(null);
   const expenseCategoryPickerDataRef = useRef<InsightsCategoryPickerData | null>(null);

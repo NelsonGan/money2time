@@ -2,9 +2,10 @@ import { categoryIconToEmoji } from '~/constants/categoryIcons';
 import { buildBudgetMonthSummary } from '~/features/budget/lib/budgetMath';
 import { weekdayColumnIndex } from '~/features/calendar/lib/calendarBuild';
 import {
-  categoryFilterIds,
+  buildSavingsIncludePredicate,
   filterModeOf,
   parseInsightsFilterModes,
+  type SavingsIncludePredicate,
 } from '~/features/insights/insightsFilterModes';
 import { filterSpendingTransactions } from '~/features/reimbursements/lib/reimbursementMath';
 import { I18n } from '~/lib/i18n';
@@ -34,11 +35,7 @@ import {
   formatHours,
   normalizeMoneyAmount,
 } from '~/utils/formatters';
-import {
-  DEFAULT_SELECTION_FILTER_MODE,
-  passesSelectionFilter,
-  type SelectionFilterMode,
-} from '~/utils/selectionFilter';
+import { DEFAULT_SELECTION_FILTER_MODE, type SelectionFilterMode } from '~/utils/selectionFilter';
 import { toSpendingRows } from '~/utils/spending';
 
 import {
@@ -594,35 +591,7 @@ function buildCalendarMonthSnapshot(
   };
 }
 
-/** Predicate: returns true when a transaction should count toward savings. */
-export type SavingsIncludePredicate = (transaction: TransactionWithRelations) => boolean;
-
-/**
- * Mirrors the Insights "Savings rate" filter. Each list is read through its
- * mode: excluding drops the income/expense rows whose category (or its parent)
- * was picked, including keeps only those. An empty list is off either way, and
- * an uncategorized row, which cannot have been picked, survives an exclusion
- * but not an inclusion, exactly as on the chart.
- */
-export function buildSavingsIncludePredicate(
-  categories: Pick<Category, 'id' | 'parentId'>[],
-  savingsIncomeCategoryIds: string[],
-  savingsExpenseCategoryIds: string[],
-  incomeMode: SelectionFilterMode = DEFAULT_SELECTION_FILTER_MODE,
-  expenseMode: SelectionFilterMode = DEFAULT_SELECTION_FILTER_MODE,
-): SavingsIncludePredicate {
-  const incomeSet = new Set(savingsIncomeCategoryIds);
-  const expenseSet = new Set(savingsExpenseCategoryIds);
-  if (incomeSet.size === 0 && expenseSet.size === 0) return () => true;
-
-  const categoryById = new Map(categories.map((category) => [category.id, category]));
-  return (transaction) => {
-    const ids = categoryFilterIds(transaction.categoryId, categoryById);
-    return transaction.type === 'income'
-      ? passesSelectionFilter(incomeMode, incomeSet, ids)
-      : passesSelectionFilter(expenseMode, expenseSet, ids);
-  };
-}
+export { buildSavingsIncludePredicate, type SavingsIncludePredicate };
 
 /**
  * Reads the two savings category lists, and the mode each is read through, out

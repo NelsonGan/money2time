@@ -101,6 +101,7 @@ import { SavingsRateRing } from '~/features/insights/components/SavingsRateRing'
 import { SentimentStackedBarChart } from '~/features/insights/components/SentimentStackedBarChart';
 import { TrendBarChart } from '~/features/insights/components/TrendBarChart';
 import {
+  buildSavingsIncludePredicate,
   categoryFilterIds,
   filterModeOf,
   type InsightsFilterKey,
@@ -3397,9 +3398,23 @@ export function InsightsScreen({
 
     return scopedEntries;
   }, [allTransactions, effectiveSelectedAccountIdSet, settings.reimbursementsCountAsExpense]);
-  const excludedSavingsIncomeCategorySet = useMemo(
-    () => new Set(excludedSavingsIncomeCategoryIds),
-    [excludedSavingsIncomeCategoryIds],
+  // The home-screen savings widgets build the very same predicate, so the
+  // widget and this chart cannot disagree about what a filter keeps.
+  const includeInSavings = useMemo(
+    () =>
+      buildSavingsIncludePredicate(
+        categories,
+        excludedSavingsIncomeCategoryIds,
+        excludedSavingsExpenseCategoryIds,
+        filterModeOf(insightsFilterModes, 'savingsIncomeCategories'),
+        filterModeOf(insightsFilterModes, 'savingsExpenseCategories'),
+      ),
+    [
+      categories,
+      excludedSavingsIncomeCategoryIds,
+      excludedSavingsExpenseCategoryIds,
+      insightsFilterModes,
+    ],
   );
   const excludedExpenseTrendAccountSet = useMemo(
     () => new Set(excludedExpenseTrendAccountIds),
@@ -3416,10 +3431,6 @@ export function InsightsScreen({
   const excludedIncomeTrendIncomeCategorySet = useMemo(
     () => new Set(excludedIncomeTrendIncomeCategoryIds),
     [excludedIncomeTrendIncomeCategoryIds],
-  );
-  const excludedSavingsExpenseCategorySet = useMemo(
-    () => new Set(excludedSavingsExpenseCategoryIds),
-    [excludedSavingsExpenseCategoryIds],
   );
   const excludedAssetHistoryAccountIds = useMemo(
     () => assetHistoryExcludedAccountIds(accounts, assetHistoryAccountOverrides),
@@ -3640,20 +3651,16 @@ export function InsightsScreen({
         const filteredForRange: TransactionWithRelations[] = [];
         let totalExpense = 0;
 
+        const accountMode = filterModeOf(insightsFilterModes, 'expenseTrendAccounts');
+        const categoryMode = filterModeOf(insightsFilterModes, 'expenseTrendExpenseCategories');
         inRangeTransactions.forEach((tx) => {
           if (tx.type !== 'expense') return;
-          if (
-            !passesSelectionFilter(
-              filterModeOf(insightsFilterModes, 'expenseTrendAccounts'),
-              excludedExpenseTrendAccountSet,
-              [tx.accountId],
-            )
-          ) {
+          if (!passesSelectionFilter(accountMode, excludedExpenseTrendAccountSet, [tx.accountId])) {
             return;
           }
           if (
             !passesSelectionFilter(
-              filterModeOf(insightsFilterModes, 'expenseTrendExpenseCategories'),
+              categoryMode,
               excludedExpenseTrendExpenseCategorySet,
               categoryFilterIds(tx.categoryId, categoryById),
             )
@@ -3834,20 +3841,16 @@ export function InsightsScreen({
         const filteredForRange: TransactionWithRelations[] = [];
         let totalIncome = 0;
 
+        const accountMode = filterModeOf(insightsFilterModes, 'incomeTrendAccounts');
+        const categoryMode = filterModeOf(insightsFilterModes, 'incomeTrendIncomeCategories');
         inRangeTransactions.forEach((tx) => {
           if (tx.type !== 'income') return;
-          if (
-            !passesSelectionFilter(
-              filterModeOf(insightsFilterModes, 'incomeTrendAccounts'),
-              excludedIncomeTrendAccountSet,
-              [tx.accountId],
-            )
-          ) {
+          if (!passesSelectionFilter(accountMode, excludedIncomeTrendAccountSet, [tx.accountId])) {
             return;
           }
           if (
             !passesSelectionFilter(
-              filterModeOf(insightsFilterModes, 'incomeTrendIncomeCategories'),
+              categoryMode,
               excludedIncomeTrendIncomeCategorySet,
               categoryFilterIds(tx.categoryId, categoryById),
             )
@@ -4020,14 +4023,11 @@ export function InsightsScreen({
         const monthRowByKey = new Map(monthRowsSeed.map((row) => [row.monthKey, row]));
         const filteredForRange: TransactionWithRelations[] = [];
 
+        const accountMode = filterModeOf(insightsFilterModes, 'categoryTrendAccounts');
         inRangeTransactions.forEach((tx) => {
           if (tx.type !== 'expense' || !tx.categoryId || !selectedCategoryId) return;
           if (
-            !passesSelectionFilter(
-              filterModeOf(insightsFilterModes, 'categoryTrendAccounts'),
-              excludedCategoryTrendAccountSet,
-              [tx.accountId],
-            )
+            !passesSelectionFilter(accountMode, excludedCategoryTrendAccountSet, [tx.accountId])
           ) {
             return;
           }
@@ -4281,19 +4281,7 @@ export function InsightsScreen({
         inRangeTransactions.forEach((tx) => {
           if (tx.type !== 'income' && tx.type !== 'expense') return;
 
-          const savingsIncome = tx.type === 'income';
-          if (
-            !passesSelectionFilter(
-              filterModeOf(
-                insightsFilterModes,
-                savingsIncome ? 'savingsIncomeCategories' : 'savingsExpenseCategories',
-              ),
-              savingsIncome ? excludedSavingsIncomeCategorySet : excludedSavingsExpenseCategorySet,
-              categoryFilterIds(tx.categoryId, categoryById),
-            )
-          ) {
-            return;
-          }
+          if (!includeInSavings(tx)) return;
 
           transactionsForAnalytics.push(tx);
 
@@ -4441,8 +4429,7 @@ export function InsightsScreen({
       excludedExpenseTrendExpenseCategorySet,
       excludedIncomeTrendAccountSet,
       excludedIncomeTrendIncomeCategorySet,
-      excludedSavingsExpenseCategorySet,
-      excludedSavingsIncomeCategorySet,
+      includeInSavings,
       excludedExpenseBreakdownCategorySet,
       excludedIncomeBreakdownCategorySet,
       excludedCategoryTrendAccountSet,
@@ -6459,25 +6446,27 @@ export function InsightsScreen({
   // excluded; a deleted category left as the only inclusion would hide every
   // row of that type.
   useEffect(() => {
-    if (excludedSavingsIncomeCategoryIds.length === 0) return;
-    const validIncomeCategoryIds = new Set(
-      categories.filter((category) => category.type === 'income').map((category) => category.id),
-    );
-    setExcludedSavingsIncomeCategoryIds((previous) => {
-      const next = previous.filter((categoryId) => validIncomeCategoryIds.has(categoryId));
+    if (
+      excludedSavingsIncomeCategoryIds.length === 0 &&
+      excludedSavingsExpenseCategoryIds.length === 0
+    ) {
+      return;
+    }
+    const liveIds = (type: CategoryType) =>
+      new Set(categories.filter((category) => category.type === type).map((c) => c.id));
+    const keepLive = (previous: string[], live: Set<string>) => {
+      const next = previous.filter((categoryId) => live.has(categoryId));
       return next.length === previous.length ? previous : next;
-    });
-  }, [categories, excludedSavingsIncomeCategoryIds.length]);
-  useEffect(() => {
-    if (excludedSavingsExpenseCategoryIds.length === 0) return;
-    const validExpenseCategoryIds = new Set(
-      categories.filter((category) => category.type === 'expense').map((category) => category.id),
-    );
-    setExcludedSavingsExpenseCategoryIds((previous) => {
-      const next = previous.filter((categoryId) => validExpenseCategoryIds.has(categoryId));
-      return next.length === previous.length ? previous : next;
-    });
-  }, [categories, excludedSavingsExpenseCategoryIds.length]);
+    };
+    const liveIncome = liveIds('income');
+    const liveExpense = liveIds('expense');
+    setExcludedSavingsIncomeCategoryIds((previous) => keepLive(previous, liveIncome));
+    setExcludedSavingsExpenseCategoryIds((previous) => keepLive(previous, liveExpense));
+  }, [
+    categories,
+    excludedSavingsIncomeCategoryIds.length,
+    excludedSavingsExpenseCategoryIds.length,
+  ]);
   // One pass for all three review lists: an id whose account or category has
   // been deleted would otherwise sit in the header badge with nothing behind it.
   useEffect(() => {
@@ -7286,7 +7275,21 @@ export function InsightsScreen({
                 mode={filterModeOf(insightsFilterModes, 'assetHistoryAccounts')}
                 count={assetHistoryPickedAccountIds.length}
                 emptyLabel={I18n.t('common.none')}
-                onModeChange={(mode) => setInsightsFilterMode('assetHistoryAccounts', mode)}
+                onModeChange={(mode) => {
+                  setInsightsFilterMode('assetHistoryAccounts', mode);
+                  // Include counts the shown accounts and reads none as "All",
+                  // so with every account hidden the row would claim "All" over
+                  // an empty chart. Bring them back instead, which is what
+                  // "All" promises.
+                  if (
+                    mode === 'include' &&
+                    excludedAssetHistoryAccountIds.length === assetHistoryAccountOptions.length
+                  ) {
+                    setAssetHistoryAccountOverrides(
+                      includeAllAssetHistoryAccounts(assetHistoryAccountOptions),
+                    );
+                  }
+                }}
                 onPress={() => setActiveInsightsFilterPicker('assetHistoryAccounts')}
               />
             ) : null}
