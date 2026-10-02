@@ -1258,6 +1258,7 @@ const pt = {
       'Por exemplo, 24 horas equivalem a {{days}} dias de trabalho com uma jornada de {{hours}} horas.',
     working_hours_per_day_error: 'Insira um valor entre 1 e 24 horas.',
     select_year_month: 'Selecionar mês',
+    select_year: 'Selecionar ano',
     language: 'Idioma',
     language_confirm_title: 'Mudar idioma?',
     language_confirm_message: 'Mudar o idioma do app para {{language}} agora?',

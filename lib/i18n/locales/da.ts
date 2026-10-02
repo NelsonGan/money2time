@@ -1256,6 +1256,7 @@ const da = {
       'For eksempel svarer 24 timer til {{days}} arbejdsdage med en arbejdsdag på {{hours}} timer.',
     working_hours_per_day_error: 'Indtast en værdi fra 1 til 24 timer.',
     select_year_month: 'Vælg måned',
+    select_year: 'Vælg år',
     language: 'Sprog',
     language_confirm_title: 'Skift sprog?',
     language_confirm_message: 'Skift appens sprog til {{language}} nu?',

@@ -1267,6 +1267,7 @@ const de = {
       'Beispielsweise entsprechen 24 Stunden {{days}} Arbeitstagen bei einem {{hours}}-Stunden-Arbeitstag.',
     working_hours_per_day_error: 'Geben Sie einen Wert zwischen 1 und 24 Stunden ein.',
     select_year_month: 'Monat wählen',
+    select_year: 'Jahr wählen',
     language: 'Sprache',
     language_confirm_title: 'Sprache ändern?',
     language_confirm_message: 'App-Sprache jetzt auf {{language}} umstellen?',

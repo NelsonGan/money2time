@@ -1248,6 +1248,7 @@ const hi = {
       'उदाहरण के लिए, {{hours}} घंटे के कार्यदिवस पर 24 घंटे {{days}} कार्यदिवस होते हैं।',
     working_hours_per_day_error: '1 से 24 घंटे के बीच का मान दर्ज करें।',
     select_year_month: 'महीना चुनें',
+    select_year: 'वर्ष चुनें',
     language: 'भाषा',
     language_confirm_title: 'भाषा बदलें?',
     language_confirm_message: 'ऐप की भाषा अभी {{language}} में बदलें?',

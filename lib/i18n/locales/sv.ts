@@ -1253,6 +1253,7 @@ const sv = {
       'Till exempel motsvarar 24 timmar {{days}} arbetsdagar med en arbetsdag på {{hours}} timmar.',
     working_hours_per_day_error: 'Ange ett värde mellan 1 och 24 timmar.',
     select_year_month: 'Välj månad',
+    select_year: 'Välj år',
     language: 'Språk',
     language_confirm_title: 'Byta språk?',
     language_confirm_message: 'Byta appens språk till {{language}} nu?',

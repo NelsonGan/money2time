@@ -1190,6 +1190,7 @@ const zh = {
       '例如，每个工作日为 {{hours}} 小时时，24 小时等于 {{days}} 个工作日。',
     working_hours_per_day_error: '请输入 1 到 24 小时之间的数值。',
     select_year_month: '选择月份',
+    select_year: '选择年份',
     language: '语言',
     language_confirm_title: '切换语言？',
     language_confirm_message: '现在切换应用语言为 {{language}} 吗？',

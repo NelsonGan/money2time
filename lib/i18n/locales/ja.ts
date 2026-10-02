@@ -1249,6 +1249,7 @@ const ja = {
       'たとえば、1勤務日が{{hours}}時間の場合、24時間は{{days}}勤務日です。',
     working_hours_per_day_error: '1～24時間の値を入力してください。',
     select_year_month: '月を選択',
+    select_year: '年を選択',
     language: '言語',
     language_confirm_title: '言語を変更しますか？',
     language_confirm_message: 'アプリの言語を {{language}} に切り替えますか？',
