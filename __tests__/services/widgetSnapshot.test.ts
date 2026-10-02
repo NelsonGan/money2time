@@ -1,6 +1,10 @@
 import { NO_REIMBURSEMENT } from '~/features/reimbursements/lib/reimbursementMath';
 import { WIDGET_IDS } from '~/services/widgetRegistry';
-import { buildMoney2TimeWidgetSnapshot } from '~/services/widgetSnapshot.shared';
+import {
+  buildMoney2TimeWidgetSnapshot,
+  buildSavingsIncludePredicate,
+  parseSavingsExclusions,
+} from '~/services/widgetSnapshot.shared';
 import type { TransactionWithRelations, UserSettings } from '~/types';
 
 const baseSettings: UserSettings = {
@@ -484,5 +488,51 @@ describe('buildMoney2TimeWidgetSnapshot', () => {
 
     expect(snapshot.monthlyExpenseQuickLog.expenseAmount).toBe(40);
     expect(snapshot.savingsRate).toMatchObject({ income: 500, expense: 40 });
+  });
+});
+
+describe('savings widget filter modes', () => {
+  const categories = [
+    { id: 'salary', parentId: null },
+    { id: 'bonus', parentId: 'salary' },
+    { id: 'gift', parentId: null },
+    { id: 'food', parentId: null },
+  ];
+  const row = (type: 'income' | 'expense', categoryId: string | null) =>
+    ({ type, categoryId }) as TransactionWithRelations;
+
+  it('reads the picks as exclusions by default, as before', () => {
+    const include = buildSavingsIncludePredicate(categories, ['salary'], []);
+    expect(include(row('income', 'bonus'))).toBe(false);
+    expect(include(row('income', 'gift'))).toBe(true);
+    expect(include(row('income', null))).toBe(true);
+    expect(include(row('expense', 'food'))).toBe(true);
+  });
+
+  it('keeps only the picked categories (and their children) in include mode', () => {
+    const include = buildSavingsIncludePredicate(categories, ['salary'], [], 'include', 'exclude');
+    expect(include(row('income', 'bonus'))).toBe(true);
+    expect(include(row('income', 'gift'))).toBe(false);
+    expect(include(row('income', null))).toBe(false);
+    // The expense list is empty, so it filters nothing whatever its mode.
+    expect(include(row('expense', 'food'))).toBe(true);
+  });
+
+  it('parses each savings row mode out of the insights preferences', () => {
+    const json = JSON.stringify({
+      excludedSavingsIncomeCategoryIds: ['salary'],
+      excludedSavingsExpenseCategoryIds: ['food'],
+      insightsFilterModes: { savingsIncomeCategories: 'include' },
+    });
+    expect(parseSavingsExclusions(json)).toEqual({
+      income: ['salary'],
+      expense: ['food'],
+      incomeMode: 'include',
+      expenseMode: 'exclude',
+    });
+    expect(parseSavingsExclusions(null)).toMatchObject({
+      incomeMode: 'exclude',
+      expenseMode: 'exclude',
+    });
   });
 });
