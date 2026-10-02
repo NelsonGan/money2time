@@ -7,9 +7,10 @@ import { I18n } from '~/lib/i18n';
 interface RecurringSummaryProps {
   /** Monthly cost of the active commitments, already formatted. */
   monthlyLabel: string;
-  /** What is still to be charged before this financial month ends. */
-  leftThisMonthLabel: string;
-  yearlyLabel: string;
+  /** Upcoming charges from today to the end of this financial month. */
+  thisMonthLabel: string;
+  /** Upcoming charges from today to the end of this year's December cycle. */
+  thisYearLabel: string;
   activeCount: number;
 }
 
@@ -17,8 +18,8 @@ function StatTile({ label, value }: { label: string; value: string }) {
   return (
     <View className="flex-1 rounded-2xl border border-border/45 bg-card px-2.5 py-2.5">
       {/* Two lines, reserving the height of both: a third of the row does not
-          hold "Left this month" on one line in English, let alone in German,
-          and the three values below still have to share a baseline. */}
+          always hold a label on one line ("W tym miesiącu" in Polish), and the
+          three values below still have to share a baseline. */}
       <View className="min-h-[24px]">
         <Text
           variant="label"
@@ -48,8 +49,8 @@ function StatTile({ label, value }: { label: string; value: string }) {
  */
 export const RecurringSummary = React.memo(function RecurringSummary({
   monthlyLabel,
-  leftThisMonthLabel,
-  yearlyLabel,
+  thisMonthLabel,
+  thisYearLabel,
   activeCount,
 }: RecurringSummaryProps) {
   return (
@@ -64,8 +65,8 @@ export const RecurringSummary = React.memo(function RecurringSummary({
       </View>
 
       <View className="flex-row gap-2">
-        <StatTile label={I18n.t('recurring.left_this_month')} value={leftThisMonthLabel} />
-        <StatTile label={I18n.t('recurring.per_year')} value={yearlyLabel} />
+        <StatTile label={I18n.t('recurring.this_month')} value={thisMonthLabel} />
+        <StatTile label={I18n.t('recurring.this_year')} value={thisYearLabel} />
         <StatTile label={I18n.t('recurring.active_count')} value={String(activeCount)} />
       </View>
     </View>

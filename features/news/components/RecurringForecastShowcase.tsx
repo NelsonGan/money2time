@@ -71,8 +71,8 @@ export function RecurringForecastShowcase({ width }: RecurringForecastShowcasePr
       </View>
 
       <View style={styles.tiles}>
-        <StatTile label={I18n.t('recurring.left_this_month')} value={`${symbol}86`} />
-        <StatTile label={I18n.t('recurring.per_year')} value={`${symbol}2,976`} />
+        <StatTile label={I18n.t('recurring.this_month')} value={`${symbol}86`} />
+        <StatTile label={I18n.t('recurring.this_year')} value={`${symbol}2,976`} />
         <StatTile label={I18n.t('recurring.active_count')} value="7" />
       </View>
 
