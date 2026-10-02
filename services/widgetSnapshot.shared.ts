@@ -1,6 +1,11 @@
 import { categoryIconToEmoji } from '~/constants/categoryIcons';
 import { buildBudgetMonthSummary } from '~/features/budget/lib/budgetMath';
 import { weekdayColumnIndex } from '~/features/calendar/lib/calendarBuild';
+import {
+  categoryFilterIds,
+  filterModeOf,
+  parseInsightsFilterModes,
+} from '~/features/insights/insightsFilterModes';
 import { filterSpendingTransactions } from '~/features/reimbursements/lib/reimbursementMath';
 import { I18n } from '~/lib/i18n';
 import type {
@@ -29,6 +34,11 @@ import {
   formatHours,
   normalizeMoneyAmount,
 } from '~/utils/formatters';
+import {
+  DEFAULT_SELECTION_FILTER_MODE,
+  passesSelectionFilter,
+  type SelectionFilterMode,
+} from '~/utils/selectionFilter';
 import { toSpendingRows } from '~/utils/spending';
 
 import {
@@ -588,49 +598,62 @@ function buildCalendarMonthSnapshot(
 export type SavingsIncludePredicate = (transaction: TransactionWithRelations) => boolean;
 
 /**
- * Mirrors the Insights "Savings rate" filter: income/expense transactions whose
- * category (or its parent/root category) is excluded are dropped from the
- * savings calculation. Other categories and uncategorized transactions count.
+ * Mirrors the Insights "Savings rate" filter. Each list is read through its
+ * mode: excluding drops the income/expense rows whose category (or its parent)
+ * was picked, including keeps only those. An empty list is off either way, and
+ * an uncategorized row, which cannot have been picked, survives an exclusion
+ * but not an inclusion, exactly as on the chart.
  */
 export function buildSavingsIncludePredicate(
   categories: Pick<Category, 'id' | 'parentId'>[],
-  excludedSavingsIncomeCategoryIds: string[],
-  excludedSavingsExpenseCategoryIds: string[],
+  savingsIncomeCategoryIds: string[],
+  savingsExpenseCategoryIds: string[],
+  incomeMode: SelectionFilterMode = DEFAULT_SELECTION_FILTER_MODE,
+  expenseMode: SelectionFilterMode = DEFAULT_SELECTION_FILTER_MODE,
 ): SavingsIncludePredicate {
-  const incomeSet = new Set(excludedSavingsIncomeCategoryIds);
-  const expenseSet = new Set(excludedSavingsExpenseCategoryIds);
+  const incomeSet = new Set(savingsIncomeCategoryIds);
+  const expenseSet = new Set(savingsExpenseCategoryIds);
   if (incomeSet.size === 0 && expenseSet.size === 0) return () => true;
 
-  const rootById = new Map(
-    categories.map((category) => [category.id, category.parentId ?? category.id]),
-  );
+  const categoryById = new Map(categories.map((category) => [category.id, category]));
   return (transaction) => {
-    const categoryId = transaction.categoryId;
-    if (!categoryId) return true;
-    const rootId = rootById.get(categoryId) ?? categoryId;
-    if (transaction.type === 'income') {
-      return !(incomeSet.has(categoryId) || incomeSet.has(rootId));
-    }
-    return !(expenseSet.has(categoryId) || expenseSet.has(rootId));
+    const ids = categoryFilterIds(transaction.categoryId, categoryById);
+    return transaction.type === 'income'
+      ? passesSelectionFilter(incomeMode, incomeSet, ids)
+      : passesSelectionFilter(expenseMode, expenseSet, ids);
   };
 }
 
-/** Reads the two savings-exclusion lists out of `settings.insightsPrefsJson`. */
+/**
+ * Reads the two savings category lists, and the mode each is read through, out
+ * of `settings.insightsPrefsJson`. A list whose row was never flipped excludes.
+ */
 export function parseSavingsExclusions(insightsPrefsJson: string | null | undefined): {
   income: string[];
   expense: string[];
+  incomeMode: SelectionFilterMode;
+  expenseMode: SelectionFilterMode;
 } {
-  if (!insightsPrefsJson) return { income: [], expense: [] };
+  const none = {
+    income: [],
+    expense: [],
+    incomeMode: DEFAULT_SELECTION_FILTER_MODE,
+    expenseMode: DEFAULT_SELECTION_FILTER_MODE,
+  };
+  if (!insightsPrefsJson) return none;
   try {
     const parsed = JSON.parse(insightsPrefsJson) as Record<string, unknown>;
     const toList = (value: unknown) =>
       Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
+    const modes = parseInsightsFilterModes(parsed.insightsFilterModes) ?? {};
     return {
       income: toList(parsed.excludedSavingsIncomeCategoryIds),
       expense: toList(parsed.excludedSavingsExpenseCategoryIds),
+      incomeMode: filterModeOf(modes, 'savingsIncomeCategories'),
+      expenseMode: filterModeOf(modes, 'savingsExpenseCategories'),
     };
   } catch {
-    return { income: [], expense: [] };
+    return none;
   }
 }
 
@@ -835,6 +858,8 @@ export function buildMoney2TimeWidgetSnapshot({
   monthlyBudgets = [],
   excludedSavingsIncomeCategoryIds = [],
   excludedSavingsExpenseCategoryIds = [],
+  savingsIncomeMode = DEFAULT_SELECTION_FILTER_MODE,
+  savingsExpenseMode = DEFAULT_SELECTION_FILTER_MODE,
 }: {
   transactions: TransactionWithRelations[];
   settings: UserSettings;
@@ -845,9 +870,12 @@ export function buildMoney2TimeWidgetSnapshot({
   categories?: Pick<Category, 'id' | 'parentId' | 'name' | 'icon'>[];
   /** Frozen per-month budgets; the budget widgets read the current month's. */
   monthlyBudgets?: MonthlyBudget[];
-  /** Insights "Savings rate" category exclusions; applied to the savings widgets. */
+  /** Insights "Savings rate" category picks; applied to the savings widgets. */
   excludedSavingsIncomeCategoryIds?: string[];
   excludedSavingsExpenseCategoryIds?: string[];
+  /** How each of those lists is read (the Savings rate row's Exclude | Include). */
+  savingsIncomeMode?: SelectionFilterMode;
+  savingsExpenseMode?: SelectionFilterMode;
 }): Money2TimeWidgetSnapshot {
   // Every widget below is a spending readout, so the reimbursement rows come
   // out here once rather than in each builder.
@@ -858,6 +886,8 @@ export function buildMoney2TimeWidgetSnapshot({
     categories,
     excludedSavingsIncomeCategoryIds,
     excludedSavingsExpenseCategoryIds,
+    savingsIncomeMode,
+    savingsExpenseMode,
   );
   const now = new Date();
   const monthCycle = monthCycleOf(settings);

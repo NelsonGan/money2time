@@ -1304,6 +1304,8 @@ function WidgetSnapshotSync() {
         monthlyBudgets,
         excludedSavingsIncomeCategoryIds: savingsExclusions.income,
         excludedSavingsExpenseCategoryIds: savingsExclusions.expense,
+        savingsIncomeMode: savingsExclusions.incomeMode,
+        savingsExpenseMode: savingsExclusions.expenseMode,
       });
       perfMark('widget_snapshot_built');
       void writeMoney2TimeWidgetSnapshot(snapshot).then(() => reloadMoney2TimeWidgets());

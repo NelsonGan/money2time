@@ -82,4 +82,16 @@ describe('calendar preferences', () => {
       expenseCategoryFilterMode: 'exclude',
     });
   });
+
+  it('keeps the filter modes when the summary cards are changed from Display settings', () => {
+    const current = JSON.stringify({
+      excludedIncomeCategoryIds: ['salary'],
+      incomeCategoryFilterMode: 'include',
+    });
+    expect(JSON.parse(updateHomeSummaryPreference(current, 'right', 'balance'))).toMatchObject({
+      excludedIncomeCategoryIds: ['salary'],
+      incomeCategoryFilterMode: 'include',
+      homeSummaryRight: 'balance',
+    });
+  });
 });

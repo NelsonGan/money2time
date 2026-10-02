@@ -583,6 +583,8 @@ export function WidgetPreviewsScreen({ onBack }: WidgetPreviewsScreenProps) {
       monthlyBudgets,
       excludedSavingsIncomeCategoryIds: savingsExclusions.income,
       excludedSavingsExpenseCategoryIds: savingsExclusions.expense,
+      savingsIncomeMode: savingsExclusions.incomeMode,
+      savingsExpenseMode: savingsExclusions.expenseMode,
     });
   }, [
     categories,
