@@ -259,6 +259,23 @@ export function financialMonthRange(
   return { start, endInclusive };
 }
 
+/**
+ * Last local day of `date`'s calendar year, as the month cycle sees it: the end
+ * of the financial month labelled December of that year. At the default cycle
+ * that is Dec 31. On a payday cycle it runs into January, so the December
+ * cycle is counted whole rather than cut off mid-month.
+ *
+ * The year is the **calendar** year of `date`, not the year of the financial
+ * month containing it: on Jan 10 with a cycle starting on the 25th, today sits
+ * in the cycle labelled the previous December, but "this year" is still the
+ * new one. Reading the year off that label instead would end "this year" two
+ * weeks out. Either way the result is never before the end of `date`'s own
+ * financial month.
+ */
+export function financialYearEndForDate(date: Date, cycle: MonthCycleInput = 1): Date {
+  return financialMonthRange(`${date.getFullYear()}-12`, cycle).endInclusive;
+}
+
 /** Start `Date` of the financial month `offset` cycles away from `date`'s cycle. */
 export function addFinancialMonths(date: Date, offset: number, cycle: MonthCycleInput = 1): Date {
   const key = financialMonthKeyForDate(date, cycle);
