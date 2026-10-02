@@ -429,7 +429,7 @@ This file inventories emitted tracking, not a live usage counter or invoice. Rev
 
 The unshipped payment-alert review, binding-learning and Smart categories events were removed when this feature became automatic logging with one selected account per app. Their screens and paywall sources are also removed. Capture links and shared allowance usage commit with the expense; retrying an acknowledged expense does not emit another transaction-created event.
 
-Historical reports can still contain these names; none is an approved current custom event.
+Historical reports can still contain these retired names and behaviors. Current GA4-only product events remain in the active table above.
 
 | Retired name / behavior                                                  | Current replacement                                                                     |
 | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
@@ -446,6 +446,32 @@ Historical reports can still contain these names; none is an approved current cu
 | `Settle Up Opened`, `Reimbursements Opened`, `Insights Drilldown Opened` | GA4 `screen_view`.                                                                      |
 | `Map Pin Tapped`, `Review Prompt Skipped`                                | Removed without a current custom-event replacement.                                     |
 | Per-use product events in Mixpanel                                       | GA4-only rows above; adoption uses `Feature First Used` and `features_used`.            |
+
+### Live Mixpanel catalog cleanup
+
+Verified **2026-10-02** in the mobile Mixpanel project. All 138 existing definitions were compared with the current app and RevenueCat inventories. After cleanup, 101 ordinary names are blocked and hidden, five legacy SDK names are hidden only, and 32 definitions remain visible. Reading the full catalog back confirmed every requested status and that all other definitions retained their original visibility and ingestion settings. The website project was not changed.
+
+| Scope                           | Existing names              | Live action and contract                                                                                                                                                                                                     |
+| ------------------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Current GA4-only app events     | 76                          | Blocked and hidden in Mixpanel. Their active table rows still route to GA4. The other three GA4-only names, `Item Created`, `Split Bill Created` and `Split Marked Unpaid`, had no existing Mixpanel definition to clean up. |
+| Obsolete ordinary events        | 25                          | Blocked and hidden; exact names are listed below. No approved current Mixpanel emitter.                                                                                                                                      |
+| Legacy Mixpanel SDK events      | 5                           | `$ae_crashed`, `$ae_first_open`, `$ae_iap`, `$ae_session` and `$ae_updated` hidden only. Automatic tracking is already disabled in the current app. SDK purchase diagnostics are never settled revenue.                      |
+| Approved app events             | 23 observed of 25 defined   | Preserved. `Pro Purchase Pending` and `Pro Restore Failed` had not appeared; keep their approved routing.                                                                                                                    |
+| RevenueCat server events        | 7 observed of 13 configured | Preserved, including future delivery of configured names absent from the catalog. Financial reporting uses the revenue treatment above.                                                                                      |
+| Mixpanel virtual session events | 2                           | `$session_start` and `$session_end` preserved. These definitions are separate from native `$ae_session` capture.                                                                                                             |
+
+| Retired ordinary group     | Exact blocked and hidden names                                                                                                                                                                                                                             |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bookkeeping and settings   | `Auto Backup Run`, `Mode Switched`, `Settings Updated`, `Transaction Created`, `Transaction Updated`                                                                                                                                                       |
+| Legacy onboarding          | `Onboarding Mode Selected`, `Onboarding Skipped`                                                                                                                                                                                                           |
+| Navigation and map actions | `Insights Drilldown Opened`, `Map Pin Tapped`, `Reimbursements Opened`, `Screen Viewed`, `Settle Up Opened`, `Tab Viewed`                                                                                                                                  |
+| Legacy Pro prompts         | `Pro Cancel Sub Prompt Viewed`, `Pro Exit Offer All Plans Tapped`, `Pro Exit Offer Dismissed`, `Pro Exit Offer Viewed`, `Pro Lifetime Upgrade Completed`, `Pro Lifetime Upgrade Tapped`, `Pro Lifetime Upgrade Viewed`, `Pro Redundant Sub Warning Viewed` |
+| Legacy review prompt       | `Review Prompt Skipped`                                                                                                                                                                                                                                    |
+| Legacy tutorial flow       | `Tutorial Completed`, `Tutorial Skipped`, `Tutorial Started`                                                                                                                                                                                               |
+
+Blocking stops future ingestion after propagation; it does not erase historical records. Hiding removes names from normal report selectors and can change All Events/Flows views, but does not stop ingestion or billing. Historical events remain available through explicit hidden-event selection. Mixpanel does not permit blocking these SDK `$` events, so old app releases can still send them until adoption catches up. Allow a few hours for blocking to propagate. This follows [Mixpanel's cleanup guidance](https://docs.mixpanel.com/docs/data-governance/data-clean-up) and [Lexicon behavior](https://docs.mixpanel.com/docs/data-governance/lexicon).
+
+When reintroducing a retired name, review its current blocked/hidden status and clear it only after approving and documenting the new tracking contract. An approved event with no recent activity is not obsolete. Reconcile usage with billing separately; catalog visibility alone does not measure usage savings.
 
 ## Maintenance contract
 
