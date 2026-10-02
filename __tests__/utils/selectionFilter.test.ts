@@ -1,8 +1,4 @@
-import {
-  isSelectionFilterMode,
-  passesSelectionFilter,
-  toSelectionFilterMode,
-} from '~/utils/selectionFilter';
+import { isSelectionFilterMode, passesSelectionFilter } from '~/utils/selectionFilter';
 
 describe('passesSelectionFilter', () => {
   const picked = new Set(['a', 'b']);
@@ -30,10 +26,10 @@ describe('passesSelectionFilter', () => {
 });
 
 describe('selection filter mode parsing', () => {
-  it('accepts only the two modes and defaults to exclude', () => {
+  it('accepts only the two modes', () => {
     expect(isSelectionFilterMode('include')).toBe(true);
+    expect(isSelectionFilterMode('exclude')).toBe(true);
     expect(isSelectionFilterMode('only')).toBe(false);
-    expect(toSelectionFilterMode('include')).toBe('include');
-    expect(toSelectionFilterMode(undefined)).toBe('exclude');
+    expect(isSelectionFilterMode(undefined)).toBe(false);
   });
 });

@@ -15,10 +15,6 @@ export function isSelectionFilterMode(value: unknown): value is SelectionFilterM
   return value === 'exclude' || value === 'include';
 }
 
-export function toSelectionFilterMode(value: unknown): SelectionFilterMode {
-  return isSelectionFilterMode(value) ? value : DEFAULT_SELECTION_FILTER_MODE;
-}
-
 /**
  * Whether a row passes one filter, given the ids it can be matched on (a
  * category and its parent, or every account a transfer touches).
