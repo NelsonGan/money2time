@@ -1086,6 +1086,11 @@ const ja = {
       exclude_income_categories: '収入カテゴリを除外',
       exclude_expense_categories: '支出カテゴリを除外',
       excluded: '除外済み',
+      included: '件を表示',
+      income_categories: '収入カテゴリ',
+      expense_categories: '支出カテゴリ',
+      mode_exclude: '除外',
+      mode_include: '含める',
       none: '除外なし',
     },
     period: {

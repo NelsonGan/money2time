@@ -19,6 +19,7 @@ export { Input } from './input';
 export { ItemIcon } from './ItemIcon';
 export { ItemIconPickerSheet } from './ItemIconPickerSheet';
 export { SelectField } from './select';
+export { SelectionFilterField } from './SelectionFilterField';
 export {
   FormSwitchRow,
   SETTINGS_FORM_BOTTOM_PADDING,

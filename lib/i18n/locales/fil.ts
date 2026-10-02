@@ -1102,6 +1102,11 @@ const fil = {
       exclude_income_categories: 'Ibukod ang mga income category',
       exclude_expense_categories: 'Ibukod ang mga expense category',
       excluded: 'inalis',
+      included: 'kasama',
+      income_categories: 'Mga kategorya ng kita',
+      expense_categories: 'Mga kategorya ng gastos',
+      mode_exclude: 'Huwag isama',
+      mode_include: 'Isama lang',
       none: 'Walang exclusion',
     },
     period: {

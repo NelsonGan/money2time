@@ -1082,6 +1082,11 @@ const th = {
       exclude_income_categories: 'ยกเว้นหมวดหมู่รายรับ',
       exclude_expense_categories: 'ยกเว้นหมวดหมู่รายจ่าย',
       excluded: 'ยกเว้นแล้ว',
+      included: 'รวมแล้ว',
+      income_categories: 'หมวดหมู่รายรับ',
+      expense_categories: 'หมวดหมู่รายจ่าย',
+      mode_exclude: 'ยกเว้น',
+      mode_include: 'รวม',
       none: 'ไม่มีการยกเว้น',
     },
     period: {

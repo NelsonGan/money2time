@@ -1094,6 +1094,11 @@ const nb = {
       exclude_income_categories: 'Ekskluder inntektskategorier',
       exclude_expense_categories: 'Ekskluder utgiftskategorier',
       excluded: 'ekskludert',
+      included: 'inkludert',
+      income_categories: 'Inntektskategorier',
+      expense_categories: 'Utgiftskategorier',
+      mode_exclude: 'Ekskluder',
+      mode_include: 'Inkluder',
       none: 'Ingen ekskluderinger',
     },
     period: {

@@ -1081,6 +1081,11 @@ const ko = {
       exclude_income_categories: '수입 카테고리 제외',
       exclude_expense_categories: '지출 카테고리 제외',
       excluded: '제외됨',
+      included: '포함됨',
+      income_categories: '수입 카테고리',
+      expense_categories: '지출 카테고리',
+      mode_exclude: '제외',
+      mode_include: '포함',
       none: '제외 항목 없음',
     },
     period: {

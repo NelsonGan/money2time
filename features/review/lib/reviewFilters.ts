@@ -1,27 +1,40 @@
 import type { Category, TransactionWithRelations } from '~/types';
+import {
+  DEFAULT_SELECTION_FILTER_MODE,
+  passesSelectionFilter,
+  type SelectionFilterMode,
+} from '~/utils/selectionFilter';
 
 /**
  * What the review page's filter sheet takes out of the report.
  *
- * All three are *exclusions* rather than inclusions: a review is a recap of
- * everything that happened, and the useful edit is "ignore my joint account" or
- * "ignore the salary that skews the saved ring", not "show me only these".
- * That also means an empty list is the honest default, so a newly added account
- * or category appears in the review without the user going looking for it.
+ * Each list defaults to an *exclusion*: a review is a recap of everything that
+ * happened, and the common edit is "ignore my joint account" or "ignore the
+ * salary that skews the saved ring". Each one can be flipped to an inclusion
+ * ("only my card") through its `*Mode`, in which case the same list names what
+ * to keep. The list keys keep their `excluded*` names because they are what the
+ * insights preferences blob has always persisted. An empty list is off in
+ * either mode, so a newly added account or category still appears by default.
  */
 export interface ReviewFilters {
   excludedAccountIds: string[];
   excludedExpenseCategoryIds: string[];
   excludedIncomeCategoryIds: string[];
+  accountMode: SelectionFilterMode;
+  expenseCategoryMode: SelectionFilterMode;
+  incomeCategoryMode: SelectionFilterMode;
 }
 
 export const EMPTY_REVIEW_FILTERS: ReviewFilters = {
   excludedAccountIds: [],
   excludedExpenseCategoryIds: [],
   excludedIncomeCategoryIds: [],
+  accountMode: DEFAULT_SELECTION_FILTER_MODE,
+  expenseCategoryMode: DEFAULT_SELECTION_FILTER_MODE,
+  incomeCategoryMode: DEFAULT_SELECTION_FILTER_MODE,
 };
 
-/** How many exclusions are in force, for the header button's badge. */
+/** How many picks are in force, for the header button's badge. */
 export function reviewFilterCount(filters: ReviewFilters): number {
   return (
     filters.excludedAccountIds.length +
@@ -31,7 +44,7 @@ export function reviewFilterCount(filters: ReviewFilters): number {
 }
 
 /**
- * Drops the excluded rows before any of the review's numbers are built, so a
+ * Drops the filtered-out rows before any of the review's numbers are built, so a
  * single filter reaches the total, the trend, the categories, the mood split,
  * the standouts *and* the pace comparison against earlier periods at once.
  *
@@ -40,7 +53,11 @@ export function reviewFilterCount(filters: ReviewFilters): number {
  * same rule the insights trends use). It is applied per transaction type, so
  * excluding an expense category never silently removes income.
  *
- * Returns the input array untouched when nothing is excluded — the common case,
+ * An account inclusion keeps a transfer when either side of it was picked, so
+ * "only my card" still shows the card being paid off. An exclusion matches the
+ * row's own account only, as it always has.
+ *
+ * Returns the input array untouched when nothing is picked — the common case,
  * and what keeps the memo downstream from seeing a new array every render.
  */
 export function applyReviewFilters(
@@ -50,26 +67,25 @@ export function applyReviewFilters(
 ): TransactionWithRelations[] {
   if (reviewFilterCount(filters) === 0) return transactions;
 
-  const excludedAccounts = new Set(filters.excludedAccountIds);
-  const excludedExpenseCategories = new Set(filters.excludedExpenseCategoryIds);
-  const excludedIncomeCategories = new Set(filters.excludedIncomeCategoryIds);
+  const accounts = new Set(filters.excludedAccountIds);
+  const expenseCategories = new Set(filters.excludedExpenseCategoryIds);
+  const incomeCategories = new Set(filters.excludedIncomeCategoryIds);
   const parentById = new Map(categories.map((category) => [category.id, category.parentId]));
-
-  const isExcludedCategory = (categoryId: string, excluded: Set<string>) => {
-    if (excluded.size === 0) return false;
-    if (excluded.has(categoryId)) return true;
-    const parentId = parentById.get(categoryId);
-    return parentId ? excluded.has(parentId) : false;
-  };
+  const includeAccounts = filters.accountMode === 'include';
 
   return transactions.filter((transaction) => {
-    if (transaction.accountId && excludedAccounts.has(transaction.accountId)) return false;
-    if (!transaction.categoryId) return true;
+    const accountIds = includeAccounts
+      ? [transaction.accountId, transaction.fromAccountId, transaction.toAccountId]
+      : [transaction.accountId];
+    if (!passesSelectionFilter(filters.accountMode, accounts, accountIds)) return false;
+    const categoryIds = transaction.categoryId
+      ? [transaction.categoryId, parentById.get(transaction.categoryId)]
+      : [];
     if (transaction.type === 'expense') {
-      return !isExcludedCategory(transaction.categoryId, excludedExpenseCategories);
+      return passesSelectionFilter(filters.expenseCategoryMode, expenseCategories, categoryIds);
     }
     if (transaction.type === 'income') {
-      return !isExcludedCategory(transaction.categoryId, excludedIncomeCategories);
+      return passesSelectionFilter(filters.incomeCategoryMode, incomeCategories, categoryIds);
     }
     return true;
   });
@@ -100,5 +116,5 @@ export function pruneReviewFilters(
 
   return unchanged
     ? filters
-    : { excludedAccountIds, excludedExpenseCategoryIds, excludedIncomeCategoryIds };
+    : { ...filters, excludedAccountIds, excludedExpenseCategoryIds, excludedIncomeCategoryIds };
 }

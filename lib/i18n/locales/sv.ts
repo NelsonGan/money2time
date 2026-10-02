@@ -1093,6 +1093,11 @@ const sv = {
       exclude_income_categories: 'Exkludera inkomstkategorier',
       exclude_expense_categories: 'Exkludera utgiftskategorier',
       excluded: 'exkluderade',
+      included: 'inkluderade',
+      income_categories: 'Inkomstkategorier',
+      expense_categories: 'Utgiftskategorier',
+      mode_exclude: 'Exkludera',
+      mode_include: 'Inkludera',
       none: 'Inga undantag',
     },
     period: {

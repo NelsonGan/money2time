@@ -1048,6 +1048,11 @@ const zh = {
       exclude_income_categories: '排除收入分类',
       exclude_expense_categories: '排除支出分类',
       excluded: '项已排除',
+      included: '项已包含',
+      income_categories: '收入类别',
+      expense_categories: '支出类别',
+      mode_exclude: '排除',
+      mode_include: '包含',
       none: '无排除项',
     },
     period: {
