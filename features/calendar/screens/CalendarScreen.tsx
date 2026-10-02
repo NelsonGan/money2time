@@ -28,6 +28,7 @@ import {
   AccountPickerSheet,
   CategoryPickerSheet,
   ClayIcon,
+  SelectionFilterField,
   Text,
   ThemeModal,
   TimeValueInline,
@@ -84,6 +85,12 @@ import {
   formatAmount,
   formatMonthYearLabel,
 } from '~/utils/formatters';
+import {
+  applyTransactionSelectionFilters,
+  DEFAULT_SELECTION_FILTER_MODE,
+  type SelectionFilterMode,
+  type TransactionSelectionFilters,
+} from '~/utils/selectionFilter';
 import { countsAsExpenseRow } from '~/utils/spending';
 import { whenSplashHidden } from '~/utils/splashState';
 import { reuseUnchangedGroups } from '~/utils/transactions';
@@ -256,6 +263,15 @@ export function CalendarScreen({
   const [excludedAccountIds, setExcludedAccountIds] = useState<string[]>([]);
   const [excludedIncomeCategoryIds, setExcludedIncomeCategoryIds] = useState<string[]>([]);
   const [excludedExpenseCategoryIds, setExcludedExpenseCategoryIds] = useState<string[]>([]);
+  const [accountFilterMode, setAccountFilterMode] = useState<SelectionFilterMode>(
+    DEFAULT_SELECTION_FILTER_MODE,
+  );
+  const [incomeCategoryFilterMode, setIncomeCategoryFilterMode] = useState<SelectionFilterMode>(
+    DEFAULT_SELECTION_FILTER_MODE,
+  );
+  const [expenseCategoryFilterMode, setExpenseCategoryFilterMode] = useState<SelectionFilterMode>(
+    DEFAULT_SELECTION_FILTER_MODE,
+  );
   // The calendar mounts only after AppContext finishes loading, so initialize
   // these privacy-sensitive values from the stored snapshot. Hydrating them in
   // an effect would expose a hidden amount for one painted frame on cold start.
@@ -309,6 +325,13 @@ export function CalendarScreen({
       if (saved.excludedExpenseCategoryIds) {
         setExcludedExpenseCategoryIds(saved.excludedExpenseCategoryIds);
       }
+      if (saved.accountFilterMode) setAccountFilterMode(saved.accountFilterMode);
+      if (saved.incomeCategoryFilterMode) {
+        setIncomeCategoryFilterMode(saved.incomeCategoryFilterMode);
+      }
+      if (saved.expenseCategoryFilterMode) {
+        setExpenseCategoryFilterMode(saved.expenseCategoryFilterMode);
+      }
       if (saved.homeSummaryLeftHidden !== undefined) {
         setLeftSummaryHidden(saved.homeSummaryLeftHidden);
       }
@@ -325,6 +348,9 @@ export function CalendarScreen({
       excludedAccountIds,
       excludedIncomeCategoryIds,
       excludedExpenseCategoryIds,
+      accountFilterMode,
+      incomeCategoryFilterMode,
+      expenseCategoryFilterMode,
       homeSummaryLeft: homeSummaryPreferences.left,
       homeSummaryRight: homeSummaryPreferences.right,
       homeSummaryLeftHidden: leftSummaryHidden,
@@ -334,6 +360,9 @@ export function CalendarScreen({
       excludedAccountIds,
       excludedIncomeCategoryIds,
       excludedExpenseCategoryIds,
+      accountFilterMode,
+      incomeCategoryFilterMode,
+      expenseCategoryFilterMode,
       homeSummaryPreferences.left,
       homeSummaryPreferences.right,
       leftSummaryHidden,
@@ -517,43 +546,66 @@ export function CalendarScreen({
     [getPageScrollToDayRef],
   );
 
-  const excludedAccountIdSet = useMemo(() => new Set(excludedAccountIds), [excludedAccountIds]);
-  const excludedIncomeCategoryIdSet = useMemo(
-    () => new Set(excludedIncomeCategoryIds),
-    [excludedIncomeCategoryIds],
-  );
-  const excludedExpenseCategoryIdSet = useMemo(
-    () => new Set(excludedExpenseCategoryIds),
-    [excludedExpenseCategoryIds],
-  );
-
-  const filteredTransactions = useMemo(() => {
-    return transactions.filter((tx) => {
-      if (tx.accountId && excludedAccountIdSet.has(tx.accountId)) return false;
-      if (
-        tx.type === 'income' &&
-        tx.categoryId &&
-        (excludedIncomeCategoryIdSet.has(tx.categoryId) ||
-          (tx.categoryParentId && excludedIncomeCategoryIdSet.has(tx.categoryParentId)))
-      ) {
-        return false;
-      }
-      if (
-        tx.type === 'expense' &&
-        tx.categoryId &&
-        (excludedExpenseCategoryIdSet.has(tx.categoryId) ||
-          (tx.categoryParentId && excludedExpenseCategoryIdSet.has(tx.categoryParentId)))
-      ) {
-        return false;
-      }
-      return true;
-    });
+  // Forget picks whose account or category has been deleted. A stale id was
+  // harmless when every filter excluded, but an inclusion holding only a
+  // deleted category would hide every row of that type, and the picker can no
+  // longer list it to untick. Keyed on the lists too, so it re-runs right after
+  // the saved preferences hydrate; returning the same array stops it looping.
+  useEffect(() => {
+    const keepLive = (previous: string[], liveIds: Set<string>) => {
+      const next = previous.filter((id) => liveIds.has(id));
+      return next.length === previous.length ? previous : next;
+    };
+    const liveIdsOfType = (type: CategoryType) =>
+      new Set(categories.filter((category) => category.type === type).map((c) => c.id));
+    if (excludedAccountIds.length > 0) {
+      const liveAccountIds = new Set(accounts.map((account) => account.id));
+      setExcludedAccountIds((previous) => keepLive(previous, liveAccountIds));
+    }
+    if (excludedIncomeCategoryIds.length > 0) {
+      const liveIncomeIds = liveIdsOfType('income');
+      setExcludedIncomeCategoryIds((previous) => keepLive(previous, liveIncomeIds));
+    }
+    if (excludedExpenseCategoryIds.length > 0) {
+      const liveExpenseIds = liveIdsOfType('expense');
+      setExcludedExpenseCategoryIds((previous) => keepLive(previous, liveExpenseIds));
+    }
   }, [
-    transactions,
-    excludedAccountIdSet,
-    excludedIncomeCategoryIdSet,
-    excludedExpenseCategoryIdSet,
+    accounts,
+    categories,
+    excludedAccountIds,
+    excludedIncomeCategoryIds,
+    excludedExpenseCategoryIds,
   ]);
+
+  const selectionFilters = useMemo<TransactionSelectionFilters>(
+    () => ({
+      excludedAccountIds,
+      excludedExpenseCategoryIds,
+      excludedIncomeCategoryIds,
+      accountMode: accountFilterMode,
+      expenseCategoryMode: expenseCategoryFilterMode,
+      incomeCategoryMode: incomeCategoryFilterMode,
+    }),
+    [
+      excludedAccountIds,
+      excludedExpenseCategoryIds,
+      excludedIncomeCategoryIds,
+      accountFilterMode,
+      expenseCategoryFilterMode,
+      incomeCategoryFilterMode,
+    ],
+  );
+  const parentIdByCategoryId = useMemo(
+    () => new Map(categories.map((category) => [category.id, category.parentId])),
+    [categories],
+  );
+  // Same rules as the review page's filters (one shared implementation), and
+  // the same array back when nothing is picked.
+  const filteredTransactions = useMemo(
+    () => applyTransactionSelectionFilters(transactions, selectionFilters, parentIdByCategoryId),
+    [transactions, selectionFilters, parentIdByCategoryId],
+  );
 
   const incomeCategoryPickerDataRef = useRef<InsightsCategoryPickerData | null>(null);
   const expenseCategoryPickerDataRef = useRef<InsightsCategoryPickerData | null>(null);
@@ -1023,6 +1075,9 @@ export function CalendarScreen({
     setExcludedAccountIds([]);
     setExcludedIncomeCategoryIds([]);
     setExcludedExpenseCategoryIds([]);
+    setAccountFilterMode(DEFAULT_SELECTION_FILTER_MODE);
+    setIncomeCategoryFilterMode(DEFAULT_SELECTION_FILTER_MODE);
+    setExpenseCategoryFilterMode(DEFAULT_SELECTION_FILTER_MODE);
   }, []);
 
   const handleOpenFilters = useCallback(() => {
@@ -1795,35 +1850,38 @@ export function CalendarScreen({
           <ScrollView className="flex-1" contentContainerStyle={FILTER_MODAL_CONTENT_STYLE}>
             {(
               [
-                ['accounts', 'insights.filters.exclude_accounts', excludedAccountIds],
+                [
+                  'accounts',
+                  'insights.filters.accounts',
+                  excludedAccountIds,
+                  accountFilterMode,
+                  setAccountFilterMode,
+                ],
                 [
                   'incomeCategories',
-                  'insights.filters.exclude_income_categories',
+                  'insights.filters.income_categories',
                   excludedIncomeCategoryIds,
+                  incomeCategoryFilterMode,
+                  setIncomeCategoryFilterMode,
                 ],
                 [
                   'expenseCategories',
-                  'insights.filters.exclude_expense_categories',
+                  'insights.filters.expense_categories',
                   excludedExpenseCategoryIds,
+                  expenseCategoryFilterMode,
+                  setExpenseCategoryFilterMode,
                 ],
               ] as const
-            ).map(([kind, labelKey, excludedIds]) => (
-              <View key={kind} className="gap-2.5">
-                <Text variant="caption" tone="muted">
-                  {I18n.t(labelKey)}
-                </Text>
-                <Pressable
-                  onPress={() => setActiveFilterPicker(kind)}
-                  className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
-                >
-                  <Text variant="body" tone={excludedIds.length > 0 ? undefined : 'muted'}>
-                    {excludedIds.length > 0
-                      ? `${excludedIds.length} ${I18n.t('insights.filters.excluded')}`
-                      : I18n.t('common.none')}
-                  </Text>
-                  <ChevronRight size={16} color={themeColors.textMuted} />
-                </Pressable>
-              </View>
+            ).map(([kind, labelKey, pickedIds, mode, setMode]) => (
+              <SelectionFilterField
+                key={kind}
+                label={I18n.t(labelKey)}
+                mode={mode}
+                count={pickedIds.length}
+                emptyLabel={I18n.t('common.none')}
+                onModeChange={setMode}
+                onPress={() => setActiveFilterPicker(kind)}
+              />
             ))}
           </ScrollView>
 

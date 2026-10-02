@@ -164,9 +164,75 @@ describe('pruneReviewFilters', () => {
       excludedIncomeCategoryIds: ['salary'],
     });
     expect(pruneReviewFilters(input, accountIds, expenseCategoryIds, incomeCategoryIds)).toEqual({
+      ...EMPTY_REVIEW_FILTERS,
       excludedAccountIds: ['a1'],
       excludedExpenseCategoryIds: [],
       excludedIncomeCategoryIds: ['salary'],
+    });
+  });
+});
+
+describe('applyReviewFilters in include mode', () => {
+  const rows = [
+    makeTransaction({ id: 'expense-food', categoryId: 'food' }),
+    makeTransaction({ id: 'expense-groceries', categoryId: 'groceries' }),
+    makeTransaction({ id: 'expense-rent', categoryId: 'rent' }),
+    makeTransaction({ id: 'expense-uncategorized', categoryId: null }),
+    makeTransaction({ id: 'income-salary', type: 'income', categoryId: 'salary' }),
+    makeTransaction({ id: 'other-account', accountId: 'a2', categoryId: 'rent' }),
+    makeTransaction({
+      id: 'transfer-into-a2',
+      type: 'transfer',
+      accountId: null,
+      fromAccountId: 'a1',
+      toAccountId: 'a2',
+    }),
+  ];
+
+  const idsAfter = (input: ReviewFilters) =>
+    applyReviewFilters(rows, input, CATEGORIES).map((transaction) => transaction.id);
+
+  it('keeps only rows on the picked accounts, including transfers that touch them', () => {
+    expect(idsAfter(filters({ accountMode: 'include', excludedAccountIds: ['a2'] }))).toEqual([
+      'other-account',
+      'transfer-into-a2',
+    ]);
+  });
+
+  it('including a parent category keeps its children and leaves income alone', () => {
+    expect(
+      idsAfter(filters({ expenseCategoryMode: 'include', excludedExpenseCategoryIds: ['food'] })),
+    ).toEqual(['expense-food', 'expense-groceries', 'income-salary', 'transfer-into-a2']);
+  });
+
+  it('is off while nothing is picked, so flipping the mode alone changes nothing', () => {
+    expect(
+      applyReviewFilters(
+        rows,
+        filters({ accountMode: 'include', expenseCategoryMode: 'include' }),
+        CATEGORIES,
+      ),
+    ).toBe(rows);
+  });
+
+  it('mixes modes per filter', () => {
+    expect(
+      idsAfter(
+        filters({
+          accountMode: 'include',
+          excludedAccountIds: ['a1'],
+          expenseCategoryMode: 'exclude',
+          excludedExpenseCategoryIds: ['food'],
+        }),
+      ),
+    ).toEqual(['expense-rent', 'expense-uncategorized', 'income-salary', 'transfer-into-a2']);
+  });
+
+  it('keeps the modes when pruning stale ids', () => {
+    const input = filters({ accountMode: 'include', excludedAccountIds: ['a1', 'deleted'] });
+    expect(pruneReviewFilters(input, new Set(['a1']), new Set(), new Set())).toEqual({
+      ...input,
+      excludedAccountIds: ['a1'],
     });
   });
 });

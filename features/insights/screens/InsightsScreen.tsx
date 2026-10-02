@@ -60,6 +60,7 @@ import {
   CategoryPickerSheet,
   ClayIcon,
   GradientPercent,
+  SelectionFilterField,
   Text,
   ThemeModal,
   TimeValueInline,
@@ -91,6 +92,7 @@ import {
   isAssetHistoryAccountExcluded,
   parseAssetHistoryAccountOverrides,
   pruneAssetHistoryOverrides,
+  showOnlyAssetHistoryAccount,
   toggleAssetHistoryAccount,
 } from '~/features/insights/assetHistory';
 import { buildInsightsCategoryPickerData } from '~/features/insights/categoryPickerData';
@@ -98,6 +100,14 @@ import { ProTrendPreviewOverlay } from '~/features/insights/components/ProTrendP
 import { SavingsRateRing } from '~/features/insights/components/SavingsRateRing';
 import { SentimentStackedBarChart } from '~/features/insights/components/SentimentStackedBarChart';
 import { TrendBarChart } from '~/features/insights/components/TrendBarChart';
+import {
+  buildSavingsIncludePredicate,
+  categoryFilterIds,
+  filterModeOf,
+  type InsightsFilterKey,
+  type InsightsFilterModes,
+  parseInsightsFilterModes,
+} from '~/features/insights/insightsFilterModes';
 import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
 import {
   EMPTY_REVIEW_FILTERS,
@@ -163,6 +173,12 @@ import {
   startOfMonthDate,
   toRange,
 } from '~/utils/formatters';
+import {
+  DEFAULT_SELECTION_FILTER_MODE,
+  isSelectionFilterMode,
+  passesSelectionFilter,
+  type SelectionFilterMode,
+} from '~/utils/selectionFilter';
 import { asSpendingRow, countsAsExpenseRow } from '~/utils/spending';
 
 import type { InsightsDrilldownPayload } from './InsightsDrilldownScreen';
@@ -963,6 +979,10 @@ type InsightsPreferencesSnapshot = {
   excludedReviewAccountIds: string[];
   excludedReviewExpenseCategoryIds: string[];
   excludedReviewIncomeCategoryIds: string[];
+  reviewAccountMode: SelectionFilterMode;
+  reviewExpenseCategoryMode: SelectionFilterMode;
+  reviewIncomeCategoryMode: SelectionFilterMode;
+  insightsFilterModes: InsightsFilterModes;
   categoryTrendSelectedCategoryId: string | null;
 };
 
@@ -1056,6 +1076,17 @@ function parseInsightsPreferencesPayload(
     next.excludedReviewIncomeCategoryIds = toUniqueStringList(
       parsed.excludedReviewIncomeCategoryIds,
     );
+    if (isSelectionFilterMode(parsed.reviewAccountMode)) {
+      next.reviewAccountMode = parsed.reviewAccountMode;
+    }
+    if (isSelectionFilterMode(parsed.reviewExpenseCategoryMode)) {
+      next.reviewExpenseCategoryMode = parsed.reviewExpenseCategoryMode;
+    }
+    if (isSelectionFilterMode(parsed.reviewIncomeCategoryMode)) {
+      next.reviewIncomeCategoryMode = parsed.reviewIncomeCategoryMode;
+    }
+    const insightsFilterModes = parseInsightsFilterModes(parsed.insightsFilterModes);
+    if (insightsFilterModes) next.insightsFilterModes = insightsFilterModes;
     if (typeof parsed.categoryTrendSelectedCategoryId === 'string') {
       const trimmed = parsed.categoryTrendSelectedCategoryId.trim();
       next.categoryTrendSelectedCategoryId = trimmed.length > 0 ? trimmed : null;
@@ -2884,19 +2915,19 @@ export function InsightsScreen({
     string | null
   >(null);
   const [isCategoryTrendPickerOpen, setIsCategoryTrendPickerOpen] = useState(false);
-  const [activeInsightsFilterPicker, setActiveInsightsFilterPicker] = useState<
-    | 'assetHistoryAccounts'
-    | 'expenseTrendAccounts'
-    | 'expenseTrendExpenseCategories'
-    | 'incomeTrendAccounts'
-    | 'incomeTrendIncomeCategories'
-    | 'categoryTrendAccounts'
-    | 'expenseBreakdownCategories'
-    | 'incomeBreakdownCategories'
-    | 'savingsIncomeCategories'
-    | 'savingsExpenseCategories'
-    | null
-  >(null);
+  const [activeInsightsFilterPicker, setActiveInsightsFilterPicker] =
+    useState<InsightsFilterKey | null>(null);
+  const [insightsFilterModes, setInsightsFilterModes] = useState<InsightsFilterModes>({});
+  const setInsightsFilterMode = useCallback(
+    (key: InsightsFilterKey, mode: SelectionFilterMode) =>
+      setInsightsFilterModes((previous) => {
+        const next = { ...previous };
+        if (mode === DEFAULT_SELECTION_FILTER_MODE) delete next[key];
+        else next[key] = mode;
+        return next;
+      }),
+    [],
+  );
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const closeInsightsFilterPicker = useCallback(() => setActiveInsightsFilterPicker(null), []);
   useEffect(() => {
@@ -3165,6 +3196,7 @@ export function InsightsScreen({
       if (saved.excludedSavingsExpenseCategoryIds) {
         setExcludedSavingsExpenseCategoryIds(saved.excludedSavingsExpenseCategoryIds);
       }
+      if (saved.insightsFilterModes) setInsightsFilterModes(saved.insightsFilterModes);
       if (saved.assetHistoryAccountOverrides) {
         setAssetHistoryAccountOverrides(saved.assetHistoryAccountOverrides);
       }
@@ -3180,12 +3212,18 @@ export function InsightsScreen({
       if (
         saved.excludedReviewAccountIds ||
         saved.excludedReviewExpenseCategoryIds ||
-        saved.excludedReviewIncomeCategoryIds
+        saved.excludedReviewIncomeCategoryIds ||
+        saved.reviewAccountMode ||
+        saved.reviewExpenseCategoryMode ||
+        saved.reviewIncomeCategoryMode
       ) {
         setReviewFilters({
           excludedAccountIds: saved.excludedReviewAccountIds ?? [],
           excludedExpenseCategoryIds: saved.excludedReviewExpenseCategoryIds ?? [],
           excludedIncomeCategoryIds: saved.excludedReviewIncomeCategoryIds ?? [],
+          accountMode: saved.reviewAccountMode ?? DEFAULT_SELECTION_FILTER_MODE,
+          expenseCategoryMode: saved.reviewExpenseCategoryMode ?? DEFAULT_SELECTION_FILTER_MODE,
+          incomeCategoryMode: saved.reviewIncomeCategoryMode ?? DEFAULT_SELECTION_FILTER_MODE,
         });
       }
       if (Object.prototype.hasOwnProperty.call(saved, 'categoryTrendSelectedCategoryId')) {
@@ -3232,10 +3270,15 @@ export function InsightsScreen({
       excludedReviewAccountIds: reviewFilters.excludedAccountIds,
       excludedReviewExpenseCategoryIds: reviewFilters.excludedExpenseCategoryIds,
       excludedReviewIncomeCategoryIds: reviewFilters.excludedIncomeCategoryIds,
+      reviewAccountMode: reviewFilters.accountMode,
+      reviewExpenseCategoryMode: reviewFilters.expenseCategoryMode,
+      reviewIncomeCategoryMode: reviewFilters.incomeCategoryMode,
+      insightsFilterModes,
       categoryTrendSelectedCategoryId,
     }),
     [
       reviewFilters,
+      insightsFilterModes,
       activeCustomDateField,
       anchorDate,
       categoryTrendSelectedCategoryId,
@@ -3355,9 +3398,23 @@ export function InsightsScreen({
 
     return scopedEntries;
   }, [allTransactions, effectiveSelectedAccountIdSet, settings.reimbursementsCountAsExpense]);
-  const excludedSavingsIncomeCategorySet = useMemo(
-    () => new Set(excludedSavingsIncomeCategoryIds),
-    [excludedSavingsIncomeCategoryIds],
+  // The home-screen savings widgets build the very same predicate, so the
+  // widget and this chart cannot disagree about what a filter keeps.
+  const includeInSavings = useMemo(
+    () =>
+      buildSavingsIncludePredicate(
+        categories,
+        excludedSavingsIncomeCategoryIds,
+        excludedSavingsExpenseCategoryIds,
+        filterModeOf(insightsFilterModes, 'savingsIncomeCategories'),
+        filterModeOf(insightsFilterModes, 'savingsExpenseCategories'),
+      ),
+    [
+      categories,
+      excludedSavingsIncomeCategoryIds,
+      excludedSavingsExpenseCategoryIds,
+      insightsFilterModes,
+    ],
   );
   const excludedExpenseTrendAccountSet = useMemo(
     () => new Set(excludedExpenseTrendAccountIds),
@@ -3374,10 +3431,6 @@ export function InsightsScreen({
   const excludedIncomeTrendIncomeCategorySet = useMemo(
     () => new Set(excludedIncomeTrendIncomeCategoryIds),
     [excludedIncomeTrendIncomeCategoryIds],
-  );
-  const excludedSavingsExpenseCategorySet = useMemo(
-    () => new Set(excludedSavingsExpenseCategoryIds),
-    [excludedSavingsExpenseCategoryIds],
   );
   const excludedAssetHistoryAccountIds = useMemo(
     () => assetHistoryExcludedAccountIds(accounts, assetHistoryAccountOverrides),
@@ -3396,6 +3449,20 @@ export function InsightsScreen({
     [excludedIncomeBreakdownCategoryIds],
   );
   const assetHistoryAccountOptions = accounts;
+  // Asset history already stores a show/hide choice for every account, so its
+  // mode only changes which side of that choice the row counts and the picker
+  // ticks: the hidden accounts when excluding, the shown ones when including.
+  // Including everything reads as an empty pick ("All"), like the other rows.
+  const assetHistoryIncludeMode =
+    filterModeOf(insightsFilterModes, 'assetHistoryAccounts') === 'include';
+  const assetHistoryPickedAccountIds = useMemo(() => {
+    if (!assetHistoryIncludeMode) return excludedAssetHistoryAccountIds;
+    if (excludedAssetHistoryAccountIds.length === 0) return [];
+    const hidden = new Set(excludedAssetHistoryAccountIds);
+    return assetHistoryAccountOptions
+      .filter((account) => !hidden.has(account.id))
+      .map((account) => account.id);
+  }, [assetHistoryAccountOptions, assetHistoryIncludeMode, excludedAssetHistoryAccountIds]);
   const includedAssetHistoryAccounts = useMemo(
     () =>
       assetHistoryAccountOptions.filter(
@@ -3584,18 +3651,21 @@ export function InsightsScreen({
         const filteredForRange: TransactionWithRelations[] = [];
         let totalExpense = 0;
 
+        const accountMode = filterModeOf(insightsFilterModes, 'expenseTrendAccounts');
+        const categoryMode = filterModeOf(insightsFilterModes, 'expenseTrendExpenseCategories');
         inRangeTransactions.forEach((tx) => {
           if (tx.type !== 'expense') return;
-          if (tx.accountId && excludedExpenseTrendAccountSet.has(tx.accountId)) return;
-          if (tx.categoryId) {
-            const category = categoryById.get(tx.categoryId);
-            const rootCategoryId = category?.parentId ?? tx.categoryId;
-            if (
-              excludedExpenseTrendExpenseCategorySet.has(tx.categoryId) ||
-              excludedExpenseTrendExpenseCategorySet.has(rootCategoryId)
-            ) {
-              return;
-            }
+          if (!passesSelectionFilter(accountMode, excludedExpenseTrendAccountSet, [tx.accountId])) {
+            return;
+          }
+          if (
+            !passesSelectionFilter(
+              categoryMode,
+              excludedExpenseTrendExpenseCategorySet,
+              categoryFilterIds(tx.categoryId, categoryById),
+            )
+          ) {
+            return;
           }
           const value =
             settings.displayMode === 'time'
@@ -3771,18 +3841,21 @@ export function InsightsScreen({
         const filteredForRange: TransactionWithRelations[] = [];
         let totalIncome = 0;
 
+        const accountMode = filterModeOf(insightsFilterModes, 'incomeTrendAccounts');
+        const categoryMode = filterModeOf(insightsFilterModes, 'incomeTrendIncomeCategories');
         inRangeTransactions.forEach((tx) => {
           if (tx.type !== 'income') return;
-          if (tx.accountId && excludedIncomeTrendAccountSet.has(tx.accountId)) return;
-          if (tx.categoryId) {
-            const category = categoryById.get(tx.categoryId);
-            const rootCategoryId = category?.parentId ?? tx.categoryId;
-            if (
-              excludedIncomeTrendIncomeCategorySet.has(tx.categoryId) ||
-              excludedIncomeTrendIncomeCategorySet.has(rootCategoryId)
-            ) {
-              return;
-            }
+          if (!passesSelectionFilter(accountMode, excludedIncomeTrendAccountSet, [tx.accountId])) {
+            return;
+          }
+          if (
+            !passesSelectionFilter(
+              categoryMode,
+              excludedIncomeTrendIncomeCategorySet,
+              categoryFilterIds(tx.categoryId, categoryById),
+            )
+          ) {
+            return;
           }
           const value =
             settings.displayMode === 'time'
@@ -3950,9 +4023,14 @@ export function InsightsScreen({
         const monthRowByKey = new Map(monthRowsSeed.map((row) => [row.monthKey, row]));
         const filteredForRange: TransactionWithRelations[] = [];
 
+        const accountMode = filterModeOf(insightsFilterModes, 'categoryTrendAccounts');
         inRangeTransactions.forEach((tx) => {
           if (tx.type !== 'expense' || !tx.categoryId || !selectedCategoryId) return;
-          if (tx.accountId && excludedCategoryTrendAccountSet.has(tx.accountId)) return;
+          if (
+            !passesSelectionFilter(accountMode, excludedCategoryTrendAccountSet, [tx.accountId])
+          ) {
+            return;
+          }
           const category = categoryById.get(tx.categoryId);
           const rootCategoryId = category?.parentId ?? tx.categoryId;
           if (rootCategoryId !== selectedCategoryId) return;
@@ -4203,24 +4281,7 @@ export function InsightsScreen({
         inRangeTransactions.forEach((tx) => {
           if (tx.type !== 'income' && tx.type !== 'expense') return;
 
-          const categoryId = tx.categoryId;
-          if (categoryId) {
-            const category = categoryById.get(categoryId);
-            const rootCategoryId = category?.parentId ?? categoryId;
-            if (tx.type === 'income') {
-              if (
-                excludedSavingsIncomeCategorySet.has(categoryId) ||
-                excludedSavingsIncomeCategorySet.has(rootCategoryId)
-              ) {
-                return;
-              }
-            } else if (
-              excludedSavingsExpenseCategorySet.has(categoryId) ||
-              excludedSavingsExpenseCategorySet.has(rootCategoryId)
-            ) {
-              return;
-            }
-          }
+          if (!includeInSavings(tx)) return;
 
           transactionsForAnalytics.push(tx);
 
@@ -4298,6 +4359,10 @@ export function InsightsScreen({
         transactionType === 'expense'
           ? excludedExpenseBreakdownCategorySet
           : excludedIncomeBreakdownCategorySet;
+      const breakdownFilterMode = filterModeOf(
+        insightsFilterModes,
+        transactionType === 'expense' ? 'expenseBreakdownCategories' : 'incomeBreakdownCategories',
+      );
       const filteredForRange: TransactionWithRelations[] = [];
       const breakdownTotals = new Map<
         string,
@@ -4306,12 +4371,14 @@ export function InsightsScreen({
       const breakdownTransactionsById = new Map<string, TransactionWithRelations[]>();
       inRangeTransactions.forEach((tx) => {
         if (tx.type !== transactionType) return;
-        if (breakdownExclusionSet.size > 0 && tx.categoryId) {
-          const category = categoryById.get(tx.categoryId);
-          const rootId = category?.parentId ?? tx.categoryId;
-          if (breakdownExclusionSet.has(tx.categoryId) || breakdownExclusionSet.has(rootId)) {
-            return;
-          }
+        if (
+          !passesSelectionFilter(
+            breakdownFilterMode,
+            breakdownExclusionSet,
+            categoryFilterIds(tx.categoryId, categoryById),
+          )
+        ) {
+          return;
         }
         filteredForRange.push(tx);
 
@@ -4362,11 +4429,11 @@ export function InsightsScreen({
       excludedExpenseTrendExpenseCategorySet,
       excludedIncomeTrendAccountSet,
       excludedIncomeTrendIncomeCategorySet,
-      excludedSavingsExpenseCategorySet,
-      excludedSavingsIncomeCategorySet,
+      includeInSavings,
       excludedExpenseBreakdownCategorySet,
       excludedIncomeBreakdownCategorySet,
       excludedCategoryTrendAccountSet,
+      insightsFilterModes,
       getDisplayValueForTransaction,
       includedAssetHistoryAccounts,
       toAssetHistoryReportingCurrency,
@@ -6375,6 +6442,31 @@ export function InsightsScreen({
       return next.length === previous.length ? previous : next;
     });
   }, [categories, excludedIncomeBreakdownCategoryIds.length]);
+  // The savings lists had no prune, which was harmless while they only
+  // excluded; a deleted category left as the only inclusion would hide every
+  // row of that type.
+  useEffect(() => {
+    if (
+      excludedSavingsIncomeCategoryIds.length === 0 &&
+      excludedSavingsExpenseCategoryIds.length === 0
+    ) {
+      return;
+    }
+    const liveIds = (type: CategoryType) =>
+      new Set(categories.filter((category) => category.type === type).map((c) => c.id));
+    const keepLive = (previous: string[], live: Set<string>) => {
+      const next = previous.filter((categoryId) => live.has(categoryId));
+      return next.length === previous.length ? previous : next;
+    };
+    const liveIncome = liveIds('income');
+    const liveExpense = liveIds('expense');
+    setExcludedSavingsIncomeCategoryIds((previous) => keepLive(previous, liveIncome));
+    setExcludedSavingsExpenseCategoryIds((previous) => keepLive(previous, liveExpense));
+  }, [
+    categories,
+    excludedSavingsIncomeCategoryIds.length,
+    excludedSavingsExpenseCategoryIds.length,
+  ]);
   // One pass for all three review lists: an id whose account or category has
   // been deleted would otherwise sit in the header badge with nothing behind it.
   useEffect(() => {
@@ -6579,6 +6671,7 @@ export function InsightsScreen({
     setCategoryTrendSelectedCategoryId(null);
     setAssetHistoryAccountOverrides({});
     setAssetHistoryScrubMonthByYear({});
+    setInsightsFilterModes({});
   }, [selectedInsightType]);
 
   const handleCustomDateSelect = useCallback(
@@ -7177,222 +7270,127 @@ export function InsightsScreen({
             ) : null}
 
             {hasAssetHistoryAccountExclusionFilter ? (
-              <View className="gap-2.5">
-                <Text variant="caption" tone="muted">
-                  {I18n.t('insights.filters.exclude_accounts')}
-                </Text>
-                <Pressable
-                  onPress={() => setActiveInsightsFilterPicker('assetHistoryAccounts')}
-                  className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
-                >
-                  <Text
-                    variant="body"
-                    tone={excludedAssetHistoryAccountIds.length > 0 ? undefined : 'muted'}
-                  >
-                    {excludedAssetHistoryAccountIds.length > 0
-                      ? `${excludedAssetHistoryAccountIds.length} ${I18n.t('insights.filters.excluded')}`
-                      : I18n.t('common.none')}
-                  </Text>
-                  <ChevronRight size={16} color={themeColors.textMuted} />
-                </Pressable>
-              </View>
+              <SelectionFilterField
+                label={I18n.t('insights.filters.accounts')}
+                mode={filterModeOf(insightsFilterModes, 'assetHistoryAccounts')}
+                count={assetHistoryPickedAccountIds.length}
+                emptyLabel={I18n.t('common.none')}
+                onModeChange={(mode) => {
+                  setInsightsFilterMode('assetHistoryAccounts', mode);
+                  // Include counts the shown accounts and reads none as "All",
+                  // so with every account hidden the row would claim "All" over
+                  // an empty chart. Bring them back instead, which is what
+                  // "All" promises.
+                  if (
+                    mode === 'include' &&
+                    excludedAssetHistoryAccountIds.length === assetHistoryAccountOptions.length
+                  ) {
+                    setAssetHistoryAccountOverrides(
+                      includeAllAssetHistoryAccounts(assetHistoryAccountOptions),
+                    );
+                  }
+                }}
+                onPress={() => setActiveInsightsFilterPicker('assetHistoryAccounts')}
+              />
             ) : null}
 
             {hasExpenseTrendExclusionFilter ? (
               <View className="gap-3">
-                <View className="gap-2">
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('insights.filters.exclude_accounts')}
-                  </Text>
-                  <Pressable
-                    onPress={() => setActiveInsightsFilterPicker('expenseTrendAccounts')}
-                    className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
-                  >
-                    <Text
-                      variant="body"
-                      tone={excludedExpenseTrendAccountIds.length > 0 ? undefined : 'muted'}
-                    >
-                      {excludedExpenseTrendAccountIds.length > 0
-                        ? `${excludedExpenseTrendAccountIds.length} ${I18n.t('insights.filters.excluded')}`
-                        : I18n.t('common.none')}
-                    </Text>
-                    <ChevronRight size={16} color={themeColors.textMuted} />
-                  </Pressable>
-                </View>
-
-                <View className="gap-2">
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('insights.filters.exclude_expense_categories')}
-                  </Text>
-                  <Pressable
-                    onPress={() => setActiveInsightsFilterPicker('expenseTrendExpenseCategories')}
-                    className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
-                  >
-                    <Text
-                      variant="body"
-                      tone={excludedExpenseTrendExpenseCategoryIds.length > 0 ? undefined : 'muted'}
-                    >
-                      {excludedExpenseTrendExpenseCategoryIds.length > 0
-                        ? `${excludedExpenseTrendExpenseCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
-                        : I18n.t('common.none')}
-                    </Text>
-                    <ChevronRight size={16} color={themeColors.textMuted} />
-                  </Pressable>
-                </View>
+                <SelectionFilterField
+                  label={I18n.t('insights.filters.accounts')}
+                  mode={filterModeOf(insightsFilterModes, 'expenseTrendAccounts')}
+                  count={excludedExpenseTrendAccountIds.length}
+                  emptyLabel={I18n.t('common.none')}
+                  onModeChange={(mode) => setInsightsFilterMode('expenseTrendAccounts', mode)}
+                  onPress={() => setActiveInsightsFilterPicker('expenseTrendAccounts')}
+                />
+                <SelectionFilterField
+                  label={I18n.t('insights.filters.expense_categories')}
+                  mode={filterModeOf(insightsFilterModes, 'expenseTrendExpenseCategories')}
+                  count={excludedExpenseTrendExpenseCategoryIds.length}
+                  emptyLabel={I18n.t('common.none')}
+                  onModeChange={(mode) =>
+                    setInsightsFilterMode('expenseTrendExpenseCategories', mode)
+                  }
+                  onPress={() => setActiveInsightsFilterPicker('expenseTrendExpenseCategories')}
+                />
               </View>
             ) : null}
 
             {hasIncomeTrendExclusionFilter ? (
               <View className="gap-3">
-                <View className="gap-2">
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('insights.filters.exclude_accounts')}
-                  </Text>
-                  <Pressable
-                    onPress={() => setActiveInsightsFilterPicker('incomeTrendAccounts')}
-                    className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
-                  >
-                    <Text
-                      variant="body"
-                      tone={excludedIncomeTrendAccountIds.length > 0 ? undefined : 'muted'}
-                    >
-                      {excludedIncomeTrendAccountIds.length > 0
-                        ? `${excludedIncomeTrendAccountIds.length} ${I18n.t('insights.filters.excluded')}`
-                        : I18n.t('common.none')}
-                    </Text>
-                    <ChevronRight size={16} color={themeColors.textMuted} />
-                  </Pressable>
-                </View>
-
-                <View className="gap-2">
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('insights.filters.exclude_income_categories')}
-                  </Text>
-                  <Pressable
-                    onPress={() => setActiveInsightsFilterPicker('incomeTrendIncomeCategories')}
-                    className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
-                  >
-                    <Text
-                      variant="body"
-                      tone={excludedIncomeTrendIncomeCategoryIds.length > 0 ? undefined : 'muted'}
-                    >
-                      {excludedIncomeTrendIncomeCategoryIds.length > 0
-                        ? `${excludedIncomeTrendIncomeCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
-                        : I18n.t('common.none')}
-                    </Text>
-                    <ChevronRight size={16} color={themeColors.textMuted} />
-                  </Pressable>
-                </View>
+                <SelectionFilterField
+                  label={I18n.t('insights.filters.accounts')}
+                  mode={filterModeOf(insightsFilterModes, 'incomeTrendAccounts')}
+                  count={excludedIncomeTrendAccountIds.length}
+                  emptyLabel={I18n.t('common.none')}
+                  onModeChange={(mode) => setInsightsFilterMode('incomeTrendAccounts', mode)}
+                  onPress={() => setActiveInsightsFilterPicker('incomeTrendAccounts')}
+                />
+                <SelectionFilterField
+                  label={I18n.t('insights.filters.income_categories')}
+                  mode={filterModeOf(insightsFilterModes, 'incomeTrendIncomeCategories')}
+                  count={excludedIncomeTrendIncomeCategoryIds.length}
+                  emptyLabel={I18n.t('common.none')}
+                  onModeChange={(mode) =>
+                    setInsightsFilterMode('incomeTrendIncomeCategories', mode)
+                  }
+                  onPress={() => setActiveInsightsFilterPicker('incomeTrendIncomeCategories')}
+                />
               </View>
             ) : null}
 
             {hasCategoryTrendExclusionFilter ? (
-              <View className="gap-2.5">
-                <Text variant="caption" tone="muted">
-                  {I18n.t('insights.filters.exclude_accounts')}
-                </Text>
-                <Pressable
-                  onPress={() => setActiveInsightsFilterPicker('categoryTrendAccounts')}
-                  className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
-                >
-                  <Text
-                    variant="body"
-                    tone={excludedCategoryTrendAccountIds.length > 0 ? undefined : 'muted'}
-                  >
-                    {excludedCategoryTrendAccountIds.length > 0
-                      ? `${excludedCategoryTrendAccountIds.length} ${I18n.t('insights.filters.excluded')}`
-                      : I18n.t('common.none')}
-                  </Text>
-                  <ChevronRight size={16} color={themeColors.textMuted} />
-                </Pressable>
-              </View>
+              <SelectionFilterField
+                label={I18n.t('insights.filters.accounts')}
+                mode={filterModeOf(insightsFilterModes, 'categoryTrendAccounts')}
+                count={excludedCategoryTrendAccountIds.length}
+                emptyLabel={I18n.t('common.none')}
+                onModeChange={(mode) => setInsightsFilterMode('categoryTrendAccounts', mode)}
+                onPress={() => setActiveInsightsFilterPicker('categoryTrendAccounts')}
+              />
             ) : null}
 
             {hasExpenseBreakdownExclusionFilter ? (
-              <View className="gap-2.5">
-                <Text variant="caption" tone="muted">
-                  {I18n.t('insights.filters.exclude_expense_categories')}
-                </Text>
-                <Pressable
-                  onPress={() => setActiveInsightsFilterPicker('expenseBreakdownCategories')}
-                  className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
-                >
-                  <Text
-                    variant="body"
-                    tone={excludedExpenseBreakdownCategoryIds.length > 0 ? undefined : 'muted'}
-                  >
-                    {excludedExpenseBreakdownCategoryIds.length > 0
-                      ? `${excludedExpenseBreakdownCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
-                      : I18n.t('common.none')}
-                  </Text>
-                  <ChevronRight size={16} color={themeColors.textMuted} />
-                </Pressable>
-              </View>
+              <SelectionFilterField
+                label={I18n.t('insights.filters.expense_categories')}
+                mode={filterModeOf(insightsFilterModes, 'expenseBreakdownCategories')}
+                count={excludedExpenseBreakdownCategoryIds.length}
+                emptyLabel={I18n.t('common.none')}
+                onModeChange={(mode) => setInsightsFilterMode('expenseBreakdownCategories', mode)}
+                onPress={() => setActiveInsightsFilterPicker('expenseBreakdownCategories')}
+              />
             ) : null}
 
             {hasIncomeBreakdownExclusionFilter ? (
-              <View className="gap-2.5">
-                <Text variant="caption" tone="muted">
-                  {I18n.t('insights.filters.exclude_income_categories')}
-                </Text>
-                <Pressable
-                  onPress={() => setActiveInsightsFilterPicker('incomeBreakdownCategories')}
-                  className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
-                >
-                  <Text
-                    variant="body"
-                    tone={excludedIncomeBreakdownCategoryIds.length > 0 ? undefined : 'muted'}
-                  >
-                    {excludedIncomeBreakdownCategoryIds.length > 0
-                      ? `${excludedIncomeBreakdownCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
-                      : I18n.t('common.none')}
-                  </Text>
-                  <ChevronRight size={16} color={themeColors.textMuted} />
-                </Pressable>
-              </View>
+              <SelectionFilterField
+                label={I18n.t('insights.filters.income_categories')}
+                mode={filterModeOf(insightsFilterModes, 'incomeBreakdownCategories')}
+                count={excludedIncomeBreakdownCategoryIds.length}
+                emptyLabel={I18n.t('common.none')}
+                onModeChange={(mode) => setInsightsFilterMode('incomeBreakdownCategories', mode)}
+                onPress={() => setActiveInsightsFilterPicker('incomeBreakdownCategories')}
+              />
             ) : null}
 
             {hasSavingsCategoryExclusionFilter ? (
               <View className="gap-3">
-                <View className="gap-2">
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('insights.filters.exclude_income_categories')}
-                  </Text>
-                  <Pressable
-                    onPress={() => setActiveInsightsFilterPicker('savingsIncomeCategories')}
-                    className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
-                  >
-                    <Text
-                      variant="body"
-                      tone={excludedSavingsIncomeCategoryIds.length > 0 ? undefined : 'muted'}
-                    >
-                      {excludedSavingsIncomeCategoryIds.length > 0
-                        ? `${excludedSavingsIncomeCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
-                        : I18n.t('common.none')}
-                    </Text>
-                    <ChevronRight size={16} color={themeColors.textMuted} />
-                  </Pressable>
-                </View>
-
-                <View className="gap-2">
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('insights.filters.exclude_expense_categories')}
-                  </Text>
-                  <Pressable
-                    onPress={() => setActiveInsightsFilterPicker('savingsExpenseCategories')}
-                    className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 flex-row items-center justify-between"
-                  >
-                    <Text
-                      variant="body"
-                      tone={excludedSavingsExpenseCategoryIds.length > 0 ? undefined : 'muted'}
-                    >
-                      {excludedSavingsExpenseCategoryIds.length > 0
-                        ? `${excludedSavingsExpenseCategoryIds.length} ${I18n.t('insights.filters.excluded')}`
-                        : I18n.t('common.none')}
-                    </Text>
-                    <ChevronRight size={16} color={themeColors.textMuted} />
-                  </Pressable>
-                </View>
+                <SelectionFilterField
+                  label={I18n.t('insights.filters.income_categories')}
+                  mode={filterModeOf(insightsFilterModes, 'savingsIncomeCategories')}
+                  count={excludedSavingsIncomeCategoryIds.length}
+                  emptyLabel={I18n.t('common.none')}
+                  onModeChange={(mode) => setInsightsFilterMode('savingsIncomeCategories', mode)}
+                  onPress={() => setActiveInsightsFilterPicker('savingsIncomeCategories')}
+                />
+                <SelectionFilterField
+                  label={I18n.t('insights.filters.expense_categories')}
+                  mode={filterModeOf(insightsFilterModes, 'savingsExpenseCategories')}
+                  count={excludedSavingsExpenseCategoryIds.length}
+                  emptyLabel={I18n.t('common.none')}
+                  onModeChange={(mode) => setInsightsFilterMode('savingsExpenseCategories', mode)}
+                  onPress={() => setActiveInsightsFilterPicker('savingsExpenseCategories')}
+                />
               </View>
             ) : null}
           </ScrollView>
@@ -7402,13 +7400,24 @@ export function InsightsScreen({
             onClose={closeInsightsFilterPicker}
             accounts={assetHistoryAccountOptions}
             accountGroups={accountGroups}
-            selectedIds={excludedAssetHistoryAccountIds}
+            selectedIds={assetHistoryPickedAccountIds}
             onToggleSelect={(accountId) => {
               const account = assetHistoryAccountOptions.find((item) => item.id === accountId);
               if (!account) return;
-              setAssetHistoryAccountOverrides((previous) =>
-                toggleAssetHistoryAccount(previous, account),
-              );
+              setAssetHistoryAccountOverrides((previous) => {
+                if (assetHistoryIncludeMode && assetHistoryPickedAccountIds.length === 0) {
+                  return showOnlyAssetHistoryAccount(assetHistoryAccountOptions, account.id);
+                }
+                const next = toggleAssetHistoryAccount(previous, account);
+                // In include mode an empty pick means "all", so unticking the
+                // last shown account brings every account back rather than
+                // leaving a chart with nothing on it.
+                return assetHistoryIncludeMode &&
+                  assetHistoryExcludedAccountIds(assetHistoryAccountOptions, next).length ===
+                    assetHistoryAccountOptions.length
+                  ? includeAllAssetHistoryAccounts(assetHistoryAccountOptions)
+                  : next;
+              });
             }}
             onClear={() =>
               setAssetHistoryAccountOverrides(

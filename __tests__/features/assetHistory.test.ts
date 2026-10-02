@@ -5,6 +5,7 @@ import {
   includeAllAssetHistoryAccounts,
   parseAssetHistoryAccountOverrides,
   pruneAssetHistoryOverrides,
+  showOnlyAssetHistoryAccount,
   toggleAssetHistoryAccount,
 } from '~/features/insights/assetHistory';
 import { accrueReducingBalance } from '~/features/loans/lib/loanMath';
@@ -87,6 +88,13 @@ describe('asset history account visibility', () => {
     const hidden = toggleAssetHistoryAccount({}, counted);
     expect(hidden).toEqual({ counted: false });
     expect(assetHistoryExcludedAccountIds(accounts, hidden)).toEqual(['counted', 'epf']);
+  });
+
+  it('"show only" keeps one account and hides the rest, storing only departures', () => {
+    const onlyEpf = showOnlyAssetHistoryAccount(accounts, 'epf');
+    expect(onlyEpf).toEqual({ epf: true, counted: false });
+    expect(assetHistoryExcludedAccountIds(accounts, onlyEpf)).toEqual(['counted']);
+    expect(showOnlyAssetHistoryAccount(accounts, 'counted')).toEqual({});
   });
 
   it('"exclude none" shows the accounts left out of the totals too', () => {

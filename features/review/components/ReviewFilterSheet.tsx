@@ -1,4 +1,3 @@
-import { ChevronRight } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,13 +6,13 @@ import {
   AccountPickerSheet,
   CategoryPickerSheet,
   SegmentedToggle,
+  SelectionFilterField,
   Text,
   ThemeModal,
 } from '~/components/ui';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { buildInsightsCategoryPickerData } from '~/features/insights/categoryPickerData';
-import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 
@@ -21,10 +20,11 @@ import { EMPTY_REVIEW_FILTERS, type ReviewFilters } from '../lib/reviewFilters';
 import { REVIEW_ZOOMS, type ReviewZoom } from '../lib/reviewPeriods';
 
 type PickerKind = 'accounts' | 'expenseCategories' | 'incomeCategories';
+type IdListKey = 'excludedAccountIds' | 'excludedExpenseCategoryIds' | 'excludedIncomeCategoryIds';
 
 /**
  * Everything that shapes the review report, behind the header's filter button:
- * how long a stretch it covers, and what to leave out of it.
+ * how long a stretch it covers, and what to leave out of it (or keep only).
  *
  * The zoom lives here rather than in its own header dropdown because it reads
  * as a filter rather than content. *Which* period is showing deliberately does
@@ -48,7 +48,6 @@ export function ReviewFilterSheet({
   onFiltersChange: (filters: ReviewFilters) => void;
 }) {
   const { accounts, accountGroups, categories } = useApp();
-  const themeColors = useThemeColors();
   const [activePicker, setActivePicker] = useState<PickerKind | null>(null);
   const closePicker = useCallback(() => setActivePicker(null), []);
 
@@ -67,7 +66,7 @@ export function ReviewFilterSheet({
   );
 
   const toggleId = useCallback(
-    (key: keyof ReviewFilters, id: string) => {
+    (key: IdListKey, id: string) => {
       const current = filters[key];
       onFiltersChange({
         ...filters,
@@ -78,7 +77,7 @@ export function ReviewFilterSheet({
   );
 
   const clearIds = useCallback(
-    (key: keyof ReviewFilters) => onFiltersChange({ ...filters, [key]: [] }),
+    (key: IdListKey) => onFiltersChange({ ...filters, [key]: [] }),
     [filters, onFiltersChange],
   );
 
@@ -145,22 +144,32 @@ export function ReviewFilterSheet({
             />
           </View>
 
-          <ExclusionRow
-            label={I18n.t('insights.filters.exclude_accounts')}
+          <SelectionFilterField
+            label={I18n.t('insights.filters.accounts')}
+            mode={filters.accountMode}
             count={filters.excludedAccountIds.length}
-            tint={themeColors.textMuted}
+            emptyLabel={I18n.t('insights.filters.none')}
+            onModeChange={(accountMode) => onFiltersChange({ ...filters, accountMode })}
             onPress={() => setActivePicker('accounts')}
           />
-          <ExclusionRow
-            label={I18n.t('insights.filters.exclude_expense_categories')}
+          <SelectionFilterField
+            label={I18n.t('insights.filters.expense_categories')}
+            mode={filters.expenseCategoryMode}
             count={filters.excludedExpenseCategoryIds.length}
-            tint={themeColors.textMuted}
+            emptyLabel={I18n.t('insights.filters.none')}
+            onModeChange={(expenseCategoryMode) =>
+              onFiltersChange({ ...filters, expenseCategoryMode })
+            }
             onPress={() => setActivePicker('expenseCategories')}
           />
-          <ExclusionRow
-            label={I18n.t('insights.filters.exclude_income_categories')}
+          <SelectionFilterField
+            label={I18n.t('insights.filters.income_categories')}
+            mode={filters.incomeCategoryMode}
             count={filters.excludedIncomeCategoryIds.length}
-            tint={themeColors.textMuted}
+            emptyLabel={I18n.t('insights.filters.none')}
+            onModeChange={(incomeCategoryMode) =>
+              onFiltersChange({ ...filters, incomeCategoryMode })
+            }
             onPress={() => setActivePicker('incomeCategories')}
           />
         </ScrollView>
@@ -201,42 +210,6 @@ export function ReviewFilterSheet({
         />
       </SafeAreaView>
     </ThemeModal>
-  );
-}
-
-function ExclusionRow({
-  label,
-  count,
-  tint,
-  onPress,
-}: {
-  label: string;
-  count: number;
-  tint: string;
-  onPress: () => void;
-}) {
-  return (
-    <View className="gap-2">
-      <Text variant="caption" tone="muted">
-        {label}
-      </Text>
-      <Pressable
-        onPress={() => {
-          void triggerHaptic('selection');
-          onPress();
-        }}
-        accessibilityRole="button"
-        accessibilityLabel={label}
-        className="flex-row items-center justify-between rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3"
-      >
-        <Text variant="body" tone={count > 0 ? undefined : 'muted'}>
-          {count > 0
-            ? `${count} ${I18n.t('insights.filters.excluded')}`
-            : I18n.t('insights.filters.none')}
-        </Text>
-        <ChevronRight size={16} color={tint} />
-      </Pressable>
-    </View>
   );
 }
 

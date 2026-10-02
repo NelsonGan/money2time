@@ -65,6 +65,22 @@ export function includeAllAssetHistoryAccounts(
 }
 
 /**
+ * Shows one account on the chart and hides every other: the first pick of an
+ * include filter, where nothing picked meant "all" and one pick means "only this".
+ */
+export function showOnlyAssetHistoryAccount(
+  accounts: readonly AccountVisibility[],
+  accountId: string,
+): AssetHistoryAccountOverrides {
+  const next: AssetHistoryAccountOverrides = {};
+  accounts.forEach((account) => {
+    const included = account.id === accountId;
+    if (included !== account.includeInTotals) next[account.id] = included;
+  });
+  return next;
+}
+
+/**
  * Drops choices for deleted accounts and choices that now match the account's
  * own "Include in totals" (so a later change to that switch reaches the chart).
  * Returns the same object when nothing changed, so it is safe in a state setter.
