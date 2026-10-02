@@ -1,6 +1,9 @@
 /**
  * Shared types and event name constants for product analytics.
  *
+ * Canonical tracking contract: docs/analytics-tracking.md. Update its tables
+ * in the same change as event names, payloads, routing or usage milestones.
+ *
  * Event names follow a consistent `Category Action` naming convention
  * so they sort naturally inside Mixpanel. GA4 receives a namespaced snake-case
  * form produced by `toGa4EventName`.

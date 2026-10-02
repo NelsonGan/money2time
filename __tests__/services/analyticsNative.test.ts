@@ -35,7 +35,8 @@ const mockLogEvent = jest.fn(async () => undefined);
 const mockLogScreenView = jest.fn(async () => undefined);
 const mockResetAnalyticsData = jest.fn(async () => undefined);
 const mockSetConsent = jest.fn(async () => undefined);
-const mockSetDefaultEventParameters = jest.fn(async () => undefined);
+const mockSetDefaultEventParameters = jest.fn(async (): Promise<void> => undefined);
+const mockGetAppInstanceId = jest.fn(async (): Promise<string | null> => 'firebase-install-id');
 
 // Survives `jest.resetModules()`, so a re-import reads what the last one wrote,
 // the way a relaunch reads the device's storage.
@@ -67,6 +68,7 @@ jest.mock('@react-native-firebase/analytics', () => ({
   resetAnalyticsData: mockResetAnalyticsData,
   setConsent: mockSetConsent,
   setDefaultEventParameters: mockSetDefaultEventParameters,
+  getAppInstanceId: mockGetAppInstanceId,
 }));
 
 describe('native analytics provider coordination', () => {
@@ -76,6 +78,81 @@ describe('native analytics provider coordination', () => {
     mockStorage.clear();
     Object.defineProperty(globalThis, '__DEV__', { value: true, configurable: true });
     process.env.EXPO_PUBLIC_MIXPANEL_TOKEN = 'test-token';
+  });
+
+  it('returns the real Firebase installation ID only for the identified production user', async () => {
+    Object.defineProperty(globalThis, '__DEV__', { value: false, configurable: true });
+    const analytics = await import('~/services/analytics.native');
+    expect(await analytics.getFirebaseAppInstanceId('m2t_revenue')).toBeNull();
+    await analytics.identifyUser('m2t_revenue');
+    expect(await analytics.getFirebaseAppInstanceId('m2t_other')).toBeNull();
+    expect(await analytics.getFirebaseAppInstanceId('m2t_revenue')).toBe('firebase-install-id');
+    expect(mockGetAppInstanceId).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps development Firebase IDs out of the production RevenueCat integration', async () => {
+    const analytics = await import('~/services/analytics.native');
+    await analytics.identifyUser('m2t_revenue');
+    expect(await analytics.getFirebaseAppInstanceId('m2t_revenue')).toBeNull();
+    expect(mockGetAppInstanceId).not.toHaveBeenCalled();
+  });
+
+  it('does not mark RevenueCat ready while Firebase startup can still clear its defaults', async () => {
+    Object.defineProperty(globalThis, '__DEV__', { value: false, configurable: true });
+    let finishDefaults!: () => void;
+    let defaultsStarted!: () => void;
+    const started = new Promise<void>((resolve) => {
+      defaultsStarted = resolve;
+    });
+    mockSetDefaultEventParameters.mockImplementationOnce(() => {
+      defaultsStarted();
+      return new Promise<void>((resolve) => {
+        finishDefaults = resolve;
+      });
+    });
+    const analytics = await import('~/services/analytics.native');
+    const identify = analytics.identifyUser('m2t_revenue');
+    await started;
+    const earlyId = await analytics.getFirebaseAppInstanceId('m2t_revenue');
+    const earlyMarker = await analytics.markRevenueCatRevenueSource('m2t_revenue');
+    finishDefaults();
+    await identify;
+    expect(earlyId).toBeNull();
+    expect(earlyMarker).toBe(false);
+    expect(await analytics.getFirebaseAppInstanceId('m2t_revenue')).toBe('firebase-install-id');
+    expect(await analytics.markRevenueCatRevenueSource('m2t_revenue')).toBe(true);
+    expect(mockSetDefaultEventParameters).toHaveBeenLastCalledWith(mockFirebaseInstance, {
+      revenuecat_revenue_enabled: 1,
+    });
+  });
+
+  it('marks SDK revenue as supplemental only after production identity is ready', async () => {
+    Object.defineProperty(globalThis, '__DEV__', { value: false, configurable: true });
+    const analytics = await import('~/services/analytics.native');
+    expect(await analytics.markRevenueCatRevenueSource('m2t_revenue')).toBe(false);
+    await analytics.identifyUser('m2t_revenue');
+    expect(await analytics.markRevenueCatRevenueSource('m2t_revenue')).toBe(true);
+    expect(mockSetDefaultEventParameters).toHaveBeenLastCalledWith(mockFirebaseInstance, {
+      revenuecat_revenue_enabled: 1,
+    });
+    await analytics.markRevenueCatRevenueSource('m2t_revenue');
+    expect(mockSetDefaultEventParameters).toHaveBeenCalledTimes(2);
+    await analytics.identifyUser('m2t_other');
+    await analytics.identifyUser('m2t_revenue');
+    await analytics.markRevenueCatRevenueSource('m2t_revenue');
+    expect(mockSetDefaultEventParameters).toHaveBeenLastCalledWith(mockFirebaseInstance, {
+      revenuecat_revenue_enabled: 1,
+    });
+    expect(mockSetDefaultEventParameters).toHaveBeenCalledTimes(5);
+  });
+
+  it('allows another Firebase ID lookup after a temporary SDK failure', async () => {
+    Object.defineProperty(globalThis, '__DEV__', { value: false, configurable: true });
+    const analytics = await import('~/services/analytics.native');
+    await analytics.identifyUser('m2t_revenue');
+    mockGetAppInstanceId.mockRejectedValueOnce(new Error('temporarily unavailable'));
+    expect(await analytics.getFirebaseAppInstanceId('m2t_revenue')).toBeNull();
+    expect(await analytics.getFirebaseAppInstanceId('m2t_revenue')).toBe('firebase-install-id');
   });
 
   it('queues early calls and sends a funnel event to both providers once identified', async () => {
@@ -106,6 +183,7 @@ describe('native analytics provider coordination', () => {
     });
     expect(mockSetDefaultEventParameters).toHaveBeenCalledWith(mockFirebaseInstance, {
       debug_mode: 1,
+      revenuecat_revenue_enabled: null,
     });
     expect(mockSetUserId).toHaveBeenCalledWith(mockFirebaseInstance, 'm2t_native_test_2');
     expect(mockSetConsent.mock.invocationCallOrder[0]).toBeLessThan(
@@ -142,6 +220,71 @@ describe('native analytics provider coordination', () => {
     expect(mockMixpanelConstructor).toHaveBeenCalledWith('test-token', false, true);
   });
 
+  it('waits for Mixpanel identification before sending queued events or profiles', async () => {
+    let finishIdentify!: () => void;
+    let startedIdentify!: () => void;
+    const started = new Promise<void>((resolve) => {
+      startedIdentify = resolve;
+    });
+    mockMixpanelIdentify.mockImplementationOnce(() => {
+      startedIdentify();
+      return new Promise<void>((resolve) => {
+        finishIdentify = resolve;
+      });
+    });
+    const analytics = await import('~/services/analytics.native');
+    const event = analytics.trackEvent(analytics.AnalyticsEvents.FIRST_APP_OPEN);
+    const identify = analytics.identifyUser('m2t_native_test_2');
+    await started;
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    const sentBeforeIdentification = mockMixpanelTrack.mock.calls.length;
+    const profilesBeforeIdentification = mockMixpanelPeopleSet.mock.calls.length;
+    finishIdentify();
+    await Promise.all([identify, event]);
+
+    expect(sentBeforeIdentification).toBe(0);
+    expect(profilesBeforeIdentification).toBe(0);
+    expect(mockMixpanelTrack).toHaveBeenCalledWith('First App Open', {});
+  });
+
+  it('keeps an identification failure out of Mixpanel and retries for the next event', async () => {
+    const failure = new Error('identity unavailable');
+    const rejected = Promise.reject(failure);
+    void rejected.catch(() => undefined);
+    mockMixpanelIdentify.mockReturnValueOnce(rejected);
+    const analytics = await import('~/services/analytics.native');
+    await expect(analytics.identifyUser('m2t_native_test_2')).resolves.toBeUndefined();
+    expect(mockMixpanelPeopleSet).not.toHaveBeenCalled();
+
+    await analytics.trackEvent(analytics.AnalyticsEvents.PRO_PAYWALL_VIEWED, {
+      source: 'settings_banner',
+    });
+    expect(mockMixpanelIdentify).toHaveBeenCalledTimes(2);
+    expect(mockMixpanelTrack).toHaveBeenCalledTimes(1);
+    expect(mockLogEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it('contains asynchronous Mixpanel tracking failures while GA4 still receives the event', async () => {
+    const failure = new Error('queue unavailable');
+    // Mark it handled independently so the old fire-and-forget implementation
+    // fails the assertion without introducing a global unhandled rejection.
+    const rejected = Promise.reject(failure);
+    void rejected.catch(() => undefined);
+    mockMixpanelTrack.mockReturnValueOnce(rejected);
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    try {
+      const analytics = await import('~/services/analytics.native');
+      await analytics.identifyUser('m2t_native_test_2');
+      await expect(
+        analytics.trackEvent(analytics.AnalyticsEvents.ONBOARDING_STARTED),
+      ).resolves.toBeUndefined();
+      expect(warn).toHaveBeenCalledWith('[Analytics] Mixpanel event tracking failed:', failure);
+      expect(mockLogEvent).toHaveBeenCalledTimes(1);
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
   it('sends Mixpanel every user, with no sampling cohort', async () => {
     const analytics = await import('~/services/analytics.native');
 
@@ -156,6 +299,64 @@ describe('native analytics provider coordination', () => {
     expect(mockSetUserProperties).toHaveBeenLastCalledWith(mockFirebaseInstance, {
       is_pro: 'false',
     });
+  });
+
+  it('sends GA4 events while a Mixpanel queue operation is still pending', async () => {
+    let finishTrack!: () => void;
+    let startedTrack!: () => void;
+    const started = new Promise<void>((resolve) => {
+      startedTrack = resolve;
+    });
+    mockMixpanelTrack.mockImplementationOnce(() => {
+      startedTrack();
+      return new Promise<void>((resolve) => {
+        finishTrack = resolve;
+      });
+    });
+    const analytics = await import('~/services/analytics.native');
+    await analytics.identifyUser('m2t_native_test_2');
+    const tracking = analytics.trackEvent(analytics.AnalyticsEvents.ONBOARDING_STARTED);
+    await started;
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    const ga4CallsWhilePending = mockLogEvent.mock.calls.length;
+    finishTrack();
+    await tracking;
+    expect(ga4CallsWhilePending).toBe(1);
+  });
+
+  it('keeps GA4 working when Mixpanel identification continues to fail', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const failure = new Error('identity unavailable');
+    mockMixpanelIdentify.mockRejectedValueOnce(failure).mockRejectedValueOnce(failure);
+    try {
+      const analytics = await import('~/services/analytics.native');
+      await analytics.identifyUser('m2t_native_test_2');
+      await analytics.trackEvent(analytics.AnalyticsEvents.ONBOARDING_STARTED);
+      expect(mockMixpanelTrack).not.toHaveBeenCalled();
+      expect(mockLogEvent).toHaveBeenCalledWith(mockFirebaseInstance, 'm2t_onboarding_started', {});
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
+  it('reports failed profile writes so the caller can retry unchanged Pro state', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    try {
+      const analytics = await import('~/services/analytics.native');
+      await analytics.identifyUser('m2t_native_test_2');
+      mockMixpanelPeopleSet.mockRejectedValueOnce(new Error('profile unavailable'));
+      expect(await analytics.setUserProperties({ is_pro: true })).toBe(false);
+      expect(mockSetUserProperties).toHaveBeenLastCalledWith(mockFirebaseInstance, {
+        is_pro: 'true',
+      });
+      expect(await analytics.setUserProperties({ is_pro: true })).toBe(true);
+
+      mockMixpanelRegister.mockRejectedValueOnce(new Error('context unavailable'));
+      expect(await analytics.setSuperProperties({ is_pro: true })).toBe(false);
+      expect(await analytics.setSuperProperties({ is_pro: true })).toBe(true);
+    } finally {
+      warn.mockRestore();
+    }
   });
 
   it('keeps GA4-only telemetry out of Mixpanel', async () => {
@@ -253,7 +454,10 @@ describe('native analytics provider coordination', () => {
 
     await analytics.identifyUser('m2t_native_test_0');
 
-    expect(mockSetDefaultEventParameters).toHaveBeenCalledWith(mockFirebaseInstance, undefined);
+    expect(mockSetDefaultEventParameters).toHaveBeenCalledWith(mockFirebaseInstance, {
+      debug_mode: null,
+      revenuecat_revenue_enabled: null,
+    });
   });
 
   it('clears both providers and waits for a new identity after reset', async () => {

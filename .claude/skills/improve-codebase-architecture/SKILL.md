@@ -7,6 +7,10 @@ description: Evaluate and improve the structural health of the money2time codeba
 
 Read `CLAUDE.md` first — it is the canonical architecture map. This skill is about *keeping the codebase true to that map* and improving it incrementally, not redesigning it.
 
+## Analytics impact
+
+When a UI or architecture change alters a tracked action, screen, paywall source, payload, trigger or frequency, follow [maintain-analytics-tracking](../maintain-analytics-tracking/SKILL.md). Update the authoritative `docs/analytics-tracking.md` tables in the same change, even when event names stay the same. Changes without an analytics impact need no table edit.
+
 ## The intended architecture (respect the layers)
 
 Data flows in one direction. Each layer may only depend on the ones below it:

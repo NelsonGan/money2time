@@ -30,6 +30,7 @@ import {
   type RevenueCatPackage,
   setRevenueCatAppUserId,
   subscribeToRevenueCatCustomerStateUpdates,
+  syncRevenueCatAnalyticsIdentifiers,
 } from '~/services/revenueCat';
 import { perfMark } from '~/utils/perfTrace';
 
@@ -216,14 +217,18 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
       // identify (React commits children first). Identifying here is a cheap
       // no-op once it has already happened, and removes that ordering hazard.
       await identifyUser(appUserId);
-      await setUserProperties(profile.userProperties);
-      await setSuperProperties(profile.superProperties);
+      await syncRevenueCatAnalyticsIdentifiers();
+      const profileWritten = await setUserProperties(profile.userProperties);
+      const contextWritten = await setSuperProperties(profile.superProperties);
+      if ((!profileWritten || !contextWritten) && proProfileSignatureRef.current === signature) {
+        proProfileSignatureRef.current = null;
+      }
     })().catch((error: unknown) => {
       // Nothing awaits this, so an SDK throw would surface as a global
       // unhandled rejection rather than a scoped report. Drop the signature
       // too: a failed write must not be remembered as sent, or the profile
       // stays wrong until the user's Pro state happens to change again.
-      proProfileSignatureRef.current = null;
+      if (proProfileSignatureRef.current === signature) proProfileSignatureRef.current = null;
       reportError(error, { scope: 'analytics_pro_profile' });
     });
   }, [appUserId, customerState, isLoading, isPro]);

@@ -1,0 +1,89 @@
+diff --git a/node_modules/mixpanel-react-native/index.js b/node_modules/mixpanel-react-native/index.js
+index 943e248..9f4d008 100644
+--- a/node_modules/mixpanel-react-native/index.js
++++ b/node_modules/mixpanel-react-native/index.js
+@@ -292,7 +292,7 @@ export class Mixpanel {
+     if (!ObjectHelper.isValidOrUndefined(properties)) {
+       ObjectHelper.raiseError(PARAMS.PROPERTIES);
+     }
+-    this.mixpanelImpl.track(this.token, eventName, {
++    return this.mixpanelImpl.track(this.token, eventName, {
+       ...Helper.getMetaData(),
+       ...properties,
+     });
+@@ -442,7 +442,7 @@ export class Mixpanel {
+     if (!ObjectHelper.isValidOrUndefined(properties)) {
+       ObjectHelper.raiseError(PARAMS.PROPERTIES);
+     }
+-    this.mixpanelImpl.registerSuperProperties(this.token, properties || {});
++    return this.mixpanelImpl.registerSuperProperties(this.token, properties || {});
+   }
+ 
+   /**
+@@ -473,7 +473,7 @@ export class Mixpanel {
+     if (!StringHelper.isValid(propertyName)) {
+       StringHelper.raiseError(PARAMS.PROPERTY_NAME);
+     }
+-    this.mixpanelImpl.unregisterSuperProperty(this.token, propertyName);
++    return this.mixpanelImpl.unregisterSuperProperty(this.token, propertyName);
+   }
+ 
+   /**
+@@ -533,7 +533,7 @@ export class Mixpanel {
+       Useful for clearing data when a user logs out.
+      */
+   reset() {
+-    this.mixpanelImpl.reset(this.token);
++    return this.mixpanelImpl.reset(this.token);
+   }
+ 
+   /**
+@@ -582,7 +582,7 @@ export class Mixpanel {
+    * send all remaining messages to the server.
+    */
+   flush() {
+-    this.mixpanelImpl.flush(this.token);
++    return this.mixpanelImpl.flush(this.token);
+   }
+ }
+ 
+@@ -624,7 +624,7 @@ export class People {
+       }
+       properties[prop] = to;
+     }
+-    this.mixpanelImpl.set(this.token, properties);
++    return this.mixpanelImpl.set(this.token, properties);
+   }
+ 
+   /**
+@@ -644,7 +644,7 @@ export class People {
+       }
+       properties[prop] = to;
+     }
+-    this.mixpanelImpl.setOnce(this.token, properties);
++    return this.mixpanelImpl.setOnce(this.token, properties);
+   }
+ 
+   /**
+@@ -723,10 +723,9 @@ export class People {
+     value = Array.isArray(value) ? value : [value];
+ 
+     if (DevicePlatform.iOS === Helper.getDevicePlatform()) {
+-      this.mixpanelImpl.union(this.token, {[name]: value});
+-      this.mixpanelImpl.union(this.token, {[name]: value});
++      return this.mixpanelImpl.union(this.token, {[name]: value});
+     } else {
+-      this.mixpanelImpl.union(this.token, name, value);
++      return this.mixpanelImpl.union(this.token, name, value);
+     }
+   }
+ 
+@@ -760,7 +759,7 @@ export class People {
+     if (!StringHelper.isValid(name)) {
+       StringHelper.raiseError(PARAMS.PROPERTY_NAME);
+     }
+-    this.mixpanelImpl.unset(this.token, name);
++    return this.mixpanelImpl.unset(this.token, name);
+   }
+ 
+   /**

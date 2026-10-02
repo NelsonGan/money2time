@@ -10,6 +10,7 @@ Write for a reviewer who has not seen the conversation. Describe the final chang
 ## Prepare
 
 - Read the repository instructions and any PR template. Inspect the branch, working tree, full diff against the target branch, and existing PR before writing.
+- Assess analytics impact for every change. If tracking or a tracked flow changes, follow [maintain-analytics-tracking](../maintain-analytics-tracking/SKILL.md), update `docs/analytics-tracking.md` in the same change, run the tracking-table check, and explain any Mixpanel volume change in the PR.
 - Review the actual changes and available verification results. Run the checks required by the repository for code changes; when only rewriting a description, reuse verified results for the same code and identify any gaps.
 - When creating a PR, commit only the intended changes, follow the repository's branch and commit conventions, and push the branch. Preserve unrelated work. When rewriting a PR, update that PR instead of opening a duplicate or making unrelated code changes.
 

@@ -13,6 +13,7 @@ import Purchases, {
   type SubscriptionOption,
 } from 'react-native-purchases';
 
+import { getFirebaseAppInstanceId, markRevenueCatRevenueSource } from './analytics';
 import { reportError } from './errorReporting';
 import type {
   RevenueCatActionResult,
@@ -83,10 +84,78 @@ let configured = false;
 let loginPromise: Promise<void> | null = null;
 let desiredRevenueCatAppUserId: string | null = null;
 let activeRevenueCatAppUserId: string | null = null;
+let analyticsIdentityPromise: Promise<void> | null = null;
+let mixpanelAttributeUserId: string | null = null;
+let firebaseAttributeSignature: string | null = null;
+let firebaseSyncedSignature: string | null = null;
+let analyticsAttributesPendingSync = false;
 
 export function setRevenueCatAppUserId(appUserId: string | null) {
   const normalized = normalizeEnvValue(appUserId ?? undefined);
   desiredRevenueCatAppUserId = normalized;
+}
+
+async function syncConfiguredAnalyticsIdentifiers(): Promise<void> {
+  // Do not let a login change the SDK customer midway through attribute writes.
+  while (analyticsIdentityPromise) await analyticsIdentityPromise;
+  const appUserId = activeRevenueCatAppUserId;
+  if (!appUserId || appUserId !== desiredRevenueCatAppUserId) return;
+
+  analyticsIdentityPromise = (async () => {
+    if (mixpanelAttributeUserId !== appUserId) {
+      try {
+        // The app identifies Mixpanel with this same stable pseudonymous ID.
+        await Purchases.setMixpanelDistinctID(appUserId);
+        mixpanelAttributeUserId = appUserId;
+        analyticsAttributesPendingSync = true;
+      } catch {
+        // Retry on the next refresh/purchase. Analytics must not deny Pro access.
+      }
+    }
+    try {
+      const instanceId = await getFirebaseAppInstanceId(appUserId);
+      const signature = instanceId ? `${appUserId}:${instanceId}` : null;
+      if (
+        signature &&
+        signature !== firebaseAttributeSignature &&
+        appUserId === desiredRevenueCatAppUserId
+      ) {
+        await Purchases.setFirebaseAppInstanceID(instanceId);
+        firebaseAttributeSignature = signature;
+        analyticsAttributesPendingSync = true;
+      }
+      if (analyticsAttributesPendingSync) {
+        // Setters update local SDK state. Push it before suppressing SDK revenue;
+        // ordinary attribute delivery otherwise waits for a lifecycle/purchase call.
+        await Purchases.syncAttributesAndOfferingsIfNeeded();
+        analyticsAttributesPendingSync = false;
+        firebaseSyncedSignature = firebaseAttributeSignature;
+      }
+      if (
+        signature &&
+        signature === firebaseSyncedSignature &&
+        appUserId === desiredRevenueCatAppUserId
+      ) {
+        await markRevenueCatRevenueSource(appUserId);
+      }
+    } catch {
+      // A missing or failed ID is never cached as synced; later calls retry it.
+    }
+  })();
+  try {
+    await analyticsIdentityPromise;
+  } finally {
+    analyticsIdentityPromise = null;
+  }
+}
+
+/** Also called after product analytics is ready, covering early startup races. */
+export async function syncRevenueCatAnalyticsIdentifiers(): Promise<void> {
+  try {
+    await ensureRevenueCatConfigured();
+  } catch {
+    // Configuration/login failures must not escape this background sync.
+  }
 }
 
 function toRevenueCatCustomerState(customerInfo: CustomerInfo): RevenueCatCustomerState {
@@ -179,6 +248,13 @@ async function ensureRevenueCatConfigured() {
     (desiredRevenueCatAppUserId && activeRevenueCatAppUserId !== desiredRevenueCatAppUserId)
   ) {
     if (!loginPromise) {
+      await analyticsIdentityPromise;
+      if (
+        loginPromise ||
+        !desiredRevenueCatAppUserId ||
+        activeRevenueCatAppUserId === desiredRevenueCatAppUserId
+      )
+        continue;
       const appUserId = desiredRevenueCatAppUserId!;
       loginPromise = (async () => {
         await Purchases.logIn(appUserId);
@@ -189,6 +265,8 @@ async function ensureRevenueCatConfigured() {
     }
     await loginPromise;
   }
+
+  if (!environment.isTestStore) await syncConfiguredAnalyticsIdentifiers();
 
   return environment;
 }
