@@ -6,7 +6,7 @@ import { CategoryEmoji, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
-import { formatAmount } from '~/utils/formatters';
+import { formatAmount, formatCurrency } from '~/utils/formatters';
 
 interface ShowcaseProps {
   width: number;
@@ -28,7 +28,7 @@ function SampleTransaction({ amount, account }: { amount: number; account?: bool
         {account ? (
           <View className="flex-row items-center gap-1">
             <Wallet size={12} color={colors.textMuted} />
-            <Text variant="caption" tone="muted" numberOfLines={1}>
+            <Text variant="caption" tone="muted" className="min-w-0 flex-1" numberOfLines={1}>
               {I18n.t('accounts.account_name_placeholder')}
             </Text>
           </View>
@@ -99,15 +99,12 @@ export function TransactionAccountsShowcase({ width }: ShowcaseProps) {
 
 export function AmountSearchShowcase({ width }: ShowcaseProps) {
   const colors = useThemeColors();
-  const { settings } = useApp();
 
   return (
     <View className="gap-3" style={{ width }}>
       <View className="flex-row items-center gap-3 rounded-[18px] border border-lavender/30 bg-card px-4 py-3">
         <Search size={19} color={colors.lavender} />
-        <Text variant="mono">
-          {formatAmount(4.5, { ...settings, displayMode: 'money' }, { showSign: false })}
-        </Text>
+        <Text variant="mono">{formatCurrency(4.5, '')}</Text>
       </View>
       <SampleTransaction amount={4.5} account />
     </View>
