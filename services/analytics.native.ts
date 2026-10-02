@@ -109,21 +109,42 @@ function reportProviderFailure(
 
 let mixpanelInstance: MixpanelInstance | null = null;
 let mixpanelInitPromise: Promise<void> | null = null;
+let mixpanelIdentifiedUserId: string | null = null;
+let mixpanelIdentityPromise: Promise<MixpanelInstance | null> | null = null;
 let firebaseAnalytics:
   | { sdk: FirebaseAnalyticsSdk; instance: FirebaseAnalyticsInstance }
   | null
   | undefined;
 let analyticsUserId: string | null = null;
+let firebaseConfiguredUserId: string | null = null;
+let revenueCatRevenueUserId: string | null = null;
 let installDate: string | null = null;
 let currentScreen: string | null = null;
 let lastFirebaseScreen: string | null = null;
 let usageState: UsageState | null = null;
 let usageUpdates: Promise<unknown> = Promise.resolve();
+let providerConfigurationPromise: Promise<void> | null = null;
+let firebaseMutations: Promise<unknown> = Promise.resolve();
+let analyticsReadyResolved = false;
 
 let resolveAnalyticsReady: () => void;
 let analyticsReadyPromise = new Promise<void>((resolve) => {
   resolveAnalyticsReady = resolve;
 });
+
+async function waitForAnalyticsReady(): Promise<void> {
+  let ready: Promise<void>;
+  do {
+    ready = analyticsReadyPromise;
+    await ready;
+  } while (ready !== analyticsReadyPromise);
+}
+
+function mutateFirebase<T>(operation: () => Promise<T>): Promise<T> {
+  const next = firebaseMutations.then(operation, operation);
+  firebaseMutations = next.catch(() => undefined);
+  return next;
+}
 
 function getMixpanelToken(): string | null {
   const token = process.env.EXPO_PUBLIC_MIXPANEL_TOKEN?.trim();
@@ -215,49 +236,80 @@ async function clearRetiredProperties(mp: MixpanelInstance): Promise<void> {
   if (!superProperties) return;
   for (const property of RETIRED_SUPER_PROPERTIES) {
     if (!(property in superProperties)) continue;
-    mp.unregisterSuperProperty(property);
-    if (RETIRED_PROFILE_PROPERTIES.has(property)) mp.getPeople().unset(property);
+    await mp.unregisterSuperProperty(property);
+    if (RETIRED_PROFILE_PROPERTIES.has(property)) await mp.getPeople().unset(property);
+  }
+}
+
+/** Never send anonymous events while identification is pending or has failed. */
+async function ensureMixpanelIdentified(): Promise<MixpanelInstance | null> {
+  const mp = await ensureMixpanelInitialized();
+  if (!mp || !analyticsUserId) return null;
+  if (mixpanelIdentityPromise) {
+    await mixpanelIdentityPromise;
+    return mixpanelIdentifiedUserId === analyticsUserId ? mp : null;
+  }
+  if (mixpanelIdentifiedUserId === analyticsUserId) return mp;
+
+  const userId = analyticsUserId;
+  mixpanelIdentityPromise = (async () => {
+    try {
+      await mp.identify(userId);
+      await mp.getPeople().set({ $name: userId, platform: Platform.OS });
+      await clearRetiredProperties(mp);
+      mixpanelIdentifiedUserId = userId;
+      return mp;
+    } catch (error) {
+      reportProviderFailure('Mixpanel', 'identification', error);
+      return null;
+    }
+  })();
+  try {
+    const identified = await mixpanelIdentityPromise;
+    return analyticsUserId === userId ? identified : null;
+  } finally {
+    mixpanelIdentityPromise = null;
+  }
+}
+
+async function configureFirebase(appUserId: string): Promise<void> {
+  const firebase = getFirebaseAnalytics();
+  if (firebase && firebaseConfiguredUserId !== appUserId) {
+    await mutateFirebase(async () => {
+      if (analyticsUserId !== appUserId || firebaseConfiguredUserId === appUserId) return;
+      firebaseConfiguredUserId = null;
+      revenueCatRevenueUserId = null;
+      try {
+        // Configure identity and consent before collection starts so the first
+        // event is attributed to the stable app user and never enables ad data.
+        await firebase.sdk.setAnalyticsCollectionEnabled(firebase.instance, false);
+        await firebase.sdk.setConsent(firebase.instance, {
+          analytics_storage: true,
+          ad_storage: false,
+          ad_user_data: false,
+          ad_personalization: false,
+        });
+        await firebase.sdk.setDefaultEventParameters(firebase.instance, {
+          debug_mode: IS_DEVELOPMENT ? 1 : null,
+          revenuecat_revenue_enabled: null,
+        });
+        await firebase.sdk.setUserId(firebase.instance, appUserId);
+        await firebase.sdk.setUserProperties(
+          firebase.instance,
+          toGa4UserProperties({ platform: Platform.OS }),
+        );
+        await firebase.sdk.setAnalyticsCollectionEnabled(firebase.instance, true);
+        if (analyticsUserId === appUserId) firebaseConfiguredUserId = appUserId;
+      } catch (error) {
+        reportProviderFailure('Firebase', 'configuration', error);
+      }
+    });
   }
 }
 
 async function configureProviders(appUserId: string): Promise<void> {
-  const firebase = getFirebaseAnalytics();
-  if (firebase) {
-    try {
-      // Configure identity and consent before collection starts so the first
-      // event is attributed to the stable app user and never enables ad data.
-      await firebase.sdk.setAnalyticsCollectionEnabled(firebase.instance, false);
-      await firebase.sdk.setConsent(firebase.instance, {
-        analytics_storage: true,
-        ad_storage: false,
-        ad_user_data: false,
-        ad_personalization: false,
-      });
-      await firebase.sdk.setDefaultEventParameters(
-        firebase.instance,
-        IS_DEVELOPMENT ? { debug_mode: 1 } : undefined,
-      );
-      await firebase.sdk.setUserId(firebase.instance, appUserId);
-      await firebase.sdk.setUserProperties(
-        firebase.instance,
-        toGa4UserProperties({ platform: Platform.OS }),
-      );
-      await firebase.sdk.setAnalyticsCollectionEnabled(firebase.instance, true);
-    } catch (error) {
-      reportProviderFailure('Firebase', 'configuration', error);
-    }
-  }
-
-  const mp = await ensureMixpanelInitialized();
-  if (mp) {
-    try {
-      mp.identify(appUserId);
-      mp.getPeople().set({ $name: appUserId, platform: Platform.OS });
-      await clearRetiredProperties(mp);
-    } catch (error) {
-      reportProviderFailure('Mixpanel', 'identification', error);
-    }
-  }
+  await configureFirebase(appUserId);
+  await ensureMixpanelIdentified();
 
   if (currentScreen) await logFirebaseScreen(currentScreen);
 }
@@ -266,14 +318,76 @@ async function configureProviders(appUserId: string): Promise<void> {
 export async function identifyUser(appUserId: string): Promise<void> {
   const normalizedId = appUserId.trim();
   if (!normalizedId) return;
-  if (normalizedId === analyticsUserId) {
-    await analyticsReadyPromise;
+  if (
+    normalizedId === analyticsUserId &&
+    !providerConfigurationPromise &&
+    (!getFirebaseAnalytics() || firebaseConfiguredUserId === normalizedId) &&
+    (!getMixpanelToken() || mixpanelIdentifiedUserId === normalizedId)
+  ) {
+    await waitForAnalyticsReady();
     return;
   }
 
+  // Reopen readiness for later customers and retries; preserve the initial
+  // promise so calls queued before settings loaded are still released.
+  if (analyticsReadyResolved) {
+    analyticsReadyResolved = false;
+    analyticsReadyPromise = new Promise<void>((resolve) => {
+      resolveAnalyticsReady = resolve;
+    });
+  }
   analyticsUserId = normalizedId;
-  await configureProviders(normalizedId);
-  resolveAnalyticsReady();
+  while (providerConfigurationPromise) await providerConfigurationPromise;
+  if (analyticsUserId !== normalizedId) return;
+  providerConfigurationPromise = configureProviders(normalizedId).finally(() => {
+    providerConfigurationPromise = null;
+  });
+  await providerConfigurationPromise;
+  if (analyticsUserId === normalizedId) {
+    analyticsReadyResolved = true;
+    resolveAnalyticsReady();
+  }
+}
+
+/** RevenueCat needs Firebase's installation ID, not our shared user ID. */
+export async function getFirebaseAppInstanceId(appUserId: string): Promise<string | null> {
+  // RevenueCat's integration targets production streams, never the dev iOS app.
+  if (IS_DEVELOPMENT || analyticsUserId !== appUserId || firebaseConfiguredUserId !== appUserId)
+    return null;
+  const firebase = getFirebaseAnalytics();
+  if (!firebase) return null;
+  try {
+    const instanceId = await firebase.sdk.getAppInstanceId(firebase.instance);
+    return analyticsUserId === appUserId && firebaseConfiguredUserId === appUserId
+      ? instanceId
+      : null;
+  } catch (error) {
+    reportProviderFailure('Firebase', 'installation identity', error);
+    return null;
+  }
+}
+
+/** Enables the stream rules that retain SDK store events as non-revenue observations. */
+export async function markRevenueCatRevenueSource(appUserId: string): Promise<boolean> {
+  if (IS_DEVELOPMENT || analyticsUserId !== appUserId || firebaseConfiguredUserId !== appUserId)
+    return false;
+  if (revenueCatRevenueUserId === appUserId) return true;
+  const firebase = getFirebaseAnalytics();
+  if (!firebase) return false;
+  return mutateFirebase(async () => {
+    if (analyticsUserId !== appUserId || firebaseConfiguredUserId !== appUserId) return false;
+    try {
+      await firebase.sdk.setDefaultEventParameters(firebase.instance, {
+        revenuecat_revenue_enabled: 1,
+      });
+      if (analyticsUserId !== appUserId || firebaseConfiguredUserId !== appUserId) return false;
+      revenueCatRevenueUserId = appUserId;
+      return true;
+    } catch (error) {
+      reportProviderFailure('Firebase', 'revenue source', error);
+      return false;
+    }
+  });
 }
 
 /**
@@ -285,12 +399,12 @@ export async function identifyUser(appUserId: string): Promise<void> {
 export async function setInstallDate(firstAppOpen: string | null): Promise<void> {
   installDate = firstAppOpen;
   if (!firstAppOpen) return;
-  await analyticsReadyPromise;
+  await waitForAnalyticsReady();
 
-  const mp = await ensureMixpanelInitialized();
+  const mp = await ensureMixpanelIdentified();
   if (!mp) return;
   try {
-    mp.getPeople().setOnce({ first_app_open: firstAppOpen });
+    await mp.getPeople().setOnce({ first_app_open: firstAppOpen });
   } catch (error) {
     reportProviderFailure('Mixpanel', 'install date', error);
   }
@@ -354,10 +468,10 @@ async function recordFeatureUse(feature: ProductFeature, screen: string | null):
   );
   if (isFirstUseSinceInstall === null) return;
 
-  const mp = await ensureMixpanelInitialized();
+  const mp = await ensureMixpanelIdentified();
   if (mp) {
     try {
-      mp.getPeople().union('features_used', [feature]);
+      await mp.getPeople().union('features_used', [feature]);
     } catch (error) {
       reportProviderFailure('Mixpanel', 'feature profile', error);
     }
@@ -414,36 +528,44 @@ export async function trackEvent(
   const screen =
     typeof properties?.current_screen === 'string' ? properties.current_screen : currentScreen;
   const trackedAt = Date.now();
-  await analyticsReadyPromise;
+  await waitForAnalyticsReady();
 
   const eventProperties: AnalyticsProperties = { ...properties };
   if (screen) eventProperties.current_screen = screen;
   const installAge = daysSinceInstall(installDate, trackedAt);
   if (installAge != null) eventProperties.days_since_install ??= installAge;
 
-  const [mp, firebase] = await Promise.all([
-    isMixpanelEvent(eventName) ? ensureMixpanelInitialized() : Promise.resolve(null),
-    Promise.resolve(getFirebaseAnalytics()),
+  // Start both independently: a slow or rejected Mixpanel operation must not
+  // hold up GA4. Each provider handles its own failures for void callers.
+  await Promise.all([
+    (async () => {
+      if (!isMixpanelEvent(eventName)) return;
+      const mp = await ensureMixpanelIdentified();
+      if (!mp) return;
+      try {
+        await mp.track(eventName, eventProperties);
+      } catch (error) {
+        reportProviderFailure('Mixpanel', 'event tracking', error);
+      }
+    })(),
+    (async () => {
+      const firebase = getFirebaseAnalytics();
+      if (!firebase) return;
+      const appUserId = analyticsUserId;
+      if (!appUserId) return;
+      await configureFirebase(appUserId);
+      if (analyticsUserId !== appUserId || firebaseConfiguredUserId !== appUserId) return;
+      try {
+        await firebase.sdk.logEvent(
+          firebase.instance,
+          toGa4EventName(eventName),
+          toGa4EventParameters(eventProperties),
+        );
+      } catch (error) {
+        reportProviderFailure('Firebase', 'event tracking', error);
+      }
+    })(),
   ]);
-
-  if (mp) {
-    try {
-      mp.track(eventName, eventProperties);
-    } catch (error) {
-      reportProviderFailure('Mixpanel', 'event tracking', error);
-    }
-  }
-  if (firebase) {
-    try {
-      await firebase.sdk.logEvent(
-        firebase.instance,
-        toGa4EventName(eventName),
-        toGa4EventParameters(eventProperties),
-      );
-    } catch (error) {
-      reportProviderFailure('Firebase', 'event tracking', error);
-    }
-  }
 
   const feature = featureUsedBy(eventName, properties);
   if (feature) await recordFeatureUse(feature, screen);
@@ -457,69 +579,93 @@ export async function setCurrentScreen(screen: string | null): Promise<void> {
   if (screen === currentScreen) return;
   currentScreen = screen;
   if (!screen) return;
-  await analyticsReadyPromise;
+  await waitForAnalyticsReady();
   if (screen !== currentScreen) return;
   await logFirebaseScreen(screen);
 }
 
-/** Register event context in Mixpanel and stable user traits in GA4. */
-export async function setSuperProperties(properties: AnalyticsSuperProperties): Promise<void> {
-  await analyticsReadyPromise;
+/** Register context; false lets profile callers retry an incomplete sync. */
+export async function setSuperProperties(
+  properties: AnalyticsSuperProperties,
+  expectedAppUserId?: string,
+): Promise<boolean> {
+  await waitForAnalyticsReady();
+  const appUserId = expectedAppUserId ?? analyticsUserId;
+  if (appUserId !== analyticsUserId) return false;
 
-  const mp = await ensureMixpanelInitialized();
+  const mp = await ensureMixpanelIdentified();
+  if (appUserId !== analyticsUserId) return false;
+  let succeeded = !getMixpanelToken() || Boolean(mp);
   if (mp) {
     try {
-      mp.registerSuperProperties(properties);
+      await mp.registerSuperProperties(properties);
     } catch (error) {
+      succeeded = false;
       reportProviderFailure('Mixpanel', 'super properties', error);
     }
   }
 
   const firebase = getFirebaseAnalytics();
-  if (firebase) {
+  if (appUserId !== analyticsUserId) return false;
+  if (firebase && firebaseConfiguredUserId !== appUserId) {
+    succeeded = false;
+  } else if (firebase) {
     try {
       await firebase.sdk.setUserProperties(
         firebase.instance,
         toGa4UserProperties({ ...properties }),
       );
     } catch (error) {
+      succeeded = false;
       reportProviderFailure('Firebase', 'user properties', error);
     }
   }
+  return succeeded;
 }
 
-/** Update the user profile in both providers. */
+/** Update the profile; false lets callers retry an incomplete sync. */
 export async function setUserProperties(
   properties: Record<string, string | number | boolean>,
-): Promise<void> {
-  await analyticsReadyPromise;
+  expectedAppUserId?: string,
+): Promise<boolean> {
+  await waitForAnalyticsReady();
+  const appUserId = expectedAppUserId ?? analyticsUserId;
+  if (appUserId !== analyticsUserId) return false;
 
-  const mp = await ensureMixpanelInitialized();
+  const mp = await ensureMixpanelIdentified();
+  if (appUserId !== analyticsUserId) return false;
+  let succeeded = !getMixpanelToken() || Boolean(mp);
   if (mp) {
     try {
-      mp.getPeople().set(properties);
+      await mp.getPeople().set(properties);
     } catch (error) {
+      succeeded = false;
       reportProviderFailure('Mixpanel', 'user properties', error);
     }
   }
 
   const firebase = getFirebaseAnalytics();
-  if (firebase) {
+  if (appUserId !== analyticsUserId) return false;
+  if (firebase && firebaseConfiguredUserId !== appUserId) {
+    succeeded = false;
+  } else if (firebase) {
     try {
       await firebase.sdk.setUserProperties(firebase.instance, toGa4UserProperties(properties));
     } catch (error) {
+      succeeded = false;
       reportProviderFailure('Firebase', 'user properties', error);
     }
   }
+  return succeeded;
 }
 
 /** Firebase manages its own batches; Mixpanel exposes the explicit flush. */
 export async function flushAnalytics(): Promise<void> {
-  await analyticsReadyPromise;
-  const mp = await ensureMixpanelInitialized();
+  await waitForAnalyticsReady();
+  const mp = await ensureMixpanelIdentified();
   if (!mp) return;
   try {
-    mp.flush();
+    await mp.flush();
   } catch (error) {
     reportProviderFailure('Mixpanel', 'flush', error);
   }
@@ -529,7 +675,7 @@ export async function resetAnalytics(): Promise<void> {
   const mp = await ensureMixpanelInitialized();
   if (mp) {
     try {
-      mp.reset();
+      await mp.reset();
     } catch (error) {
       reportProviderFailure('Mixpanel', 'reset', error);
     }
@@ -547,10 +693,14 @@ export async function resetAnalytics(): Promise<void> {
   }
 
   analyticsUserId = null;
+  firebaseConfiguredUserId = null;
+  revenueCatRevenueUserId = null;
+  mixpanelIdentifiedUserId = null;
   installDate = null;
   currentScreen = null;
   lastFirebaseScreen = null;
   analyticsReadyPromise = new Promise<void>((resolve) => {
     resolveAnalyticsReady = resolve;
   });
+  analyticsReadyResolved = false;
 }

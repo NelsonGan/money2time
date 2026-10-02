@@ -44,6 +44,12 @@ npm test
 
 Tests live in `__tests__/` (96 suites covering utils, repositories, services, navigation, db, features, i18n parity). Native deps are mocked in `__tests__/__mocks__/` (i18n, haptics, DB client, drizzle, expo-localization). CI runs `npm run check && npm test` in the `test` job of [.github/workflows/deploy.yml](.github/workflows/deploy.yml) before any build.
 
+## Analytics tracking source of truth
+
+[docs/analytics-tracking.md](docs/analytics-tracking.md) is the **single source of truth** for Mixpanel and Google Analytics tracking. For every product/code change, assess its analytics impact. If events, properties, triggers, frequency, routing, paywall sources, screens, user state, feature adoption, transaction milestones, provider configuration or external producers change, update the affected tables **in the same change**. A change with stale tracking documentation is unfinished; changes without analytics impact need no artificial table edit.
+
+Use the `maintain-analytics-tracking` skill in the matching skills directory. Keep its Claude and Codex copies aligned. Run `npm test -- --runInBand __tests__/services/analyticsTrackingPlan.test.ts` for tracking changes, and review payload/trigger/source details against the diff because the test does not check those automatically. Review expected Mixpanel event volume when adding an event or increasing its frequency.
+
 ## Simulator visibility and PR evidence
 
 **Keep Simulator visible while testing.** Use Argent to boot and control the device.
@@ -276,7 +282,7 @@ Traditional Chinese is `zh-Hant`. Device tags for Taiwan, Hong Kong, and Macau s
 - **Haptics**: `void triggerHaptic('medium' | 'selection' | 'success' | 'warning')`.
 - **Settings updates**: `updateSettings({ field: value })` from `useApp()`.
 - **i18n**: `I18n.t('key')` — strings defined in `lib/i18n/locales/en.ts`.
-- **Analytics**: `trackEvent(AnalyticsEvents.X, props)` from `~/services/analytics`. Every event goes to GA4 (free). Mixpanel bills per event, so it receives every user but only the events in `MIXPANEL_EVENTS` in `services/analytics.shared.ts` (install, activation, product-usage milestones, and the Pro paywall/purchase/restore funnel); everything else, data resets, imports and backups included, sits in `GA4_ONLY_EVENTS`. A new event must go in one of the two groups, and a per-use event for a frequent action belongs in GA4 only: map it to a feature in `FEATURE_BY_EVENT` and its first use reaches Mixpanel as `Feature First Used` (sent only by installs tracked since their first launch; every install adds it to the profile's `features_used`), and its Pro gate already arrives as `Pro Paywall Viewed` with the gate as `source`. Put state (plan, trial, install date, features used) on the profile, not in events (profile updates are not billed). Mixpanel's automatic mobile events stay off; `First App Open` fires from `initializeDatabase().isNewInstall`. Never sample users or events: funnels need every paying user. Every paywall entry point passes its own `source`. `trackEvent` adds `current_screen` and `days_since_install` to every event. GA4 names and parameter limits are normalized centrally in `services/analytics.shared.ts`. The full tracking plan is `docs/analytics-implementation-plan.md`.
+- **Analytics**: Use `trackEvent(AnalyticsEvents.X, props)` from `~/services/analytics`. The authoritative event, property, source and volume tables are in [docs/analytics-tracking.md](docs/analytics-tracking.md); update them alongside every tracking change. GA4 receives every custom event. Mixpanel receives every user but only `MIXPANEL_EVENTS`; frequent per-use actions belong in `GA4_ONLY_EVENTS` and qualifying first uses are recorded through `FEATURE_BY_EVENT`. Keep Mixpanel automatic events off, never sample users/events, and pass an explicit source at every paywall entry point. Profile state, event context and milestone eligibility follow the canonical tables. Setup details live in `docs/analytics-implementation-plan.md`.
 - **Font scaling**: Disabled globally in `App.tsx` for both `Text` and `TextInput`.
 - **Pro gating**: Use the `useProGate()` hook, or `useIsPro()` when only the flag is needed. Paywall via `ProPaywall` screen.
 - **Platform-split services**: `.native.ts` for iOS/Android, `.shared.ts` for web fallback (analytics, notifications, revenueCat).

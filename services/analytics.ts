@@ -15,6 +15,14 @@ export * from './analytics.shared';
 
 export async function identifyUser(_appUserId: string): Promise<void> {}
 
+export async function getFirebaseAppInstanceId(_appUserId: string): Promise<string | null> {
+  return null;
+}
+
+export async function markRevenueCatRevenueSource(_appUserId: string): Promise<boolean> {
+  return false;
+}
+
 export async function setInstallDate(_firstAppOpen: string | null): Promise<void> {}
 
 export async function trackEvent(
@@ -26,11 +34,19 @@ export async function recordLoggedTransaction(): Promise<void> {}
 
 export async function setCurrentScreen(_screen: string | null): Promise<void> {}
 
-export async function setSuperProperties(_properties: AnalyticsSuperProperties): Promise<void> {}
+export async function setSuperProperties(
+  _properties: AnalyticsSuperProperties,
+  _expectedAppUserId?: string,
+): Promise<boolean> {
+  return true;
+}
 
 export async function setUserProperties(
   _properties: Record<string, string | number | boolean>,
-): Promise<void> {}
+  _expectedAppUserId?: string,
+): Promise<boolean> {
+  return true;
+}
 
 export async function flushAnalytics(): Promise<void> {}
 

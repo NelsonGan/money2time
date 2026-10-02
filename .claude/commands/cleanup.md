@@ -31,6 +31,7 @@ For each changed file, read it fully and flag issues in these categories:
 - Direct DB access outside of `lib/repositories/`
 - State mutations outside of `AppContext` / `useApp()`
 - Type imports not using `import type`
+- Tracking or tracked-flow changes without matching updates to the authoritative `docs/analytics-tracking.md` tables (follow `.claude/skills/maintain-analytics-tracking/SKILL.md`; review payloads, triggers, frequency, sources and destinations even if event names did not change)
 
 **Code quality**
 
@@ -50,7 +51,7 @@ Fix every issue you found. Edits must be surgical — change only the lines need
 
 ## Step 4: Run checks
 
-Run `npm run check` (typecheck + lint). Fix any errors it surfaces that are related to your changes.
+Run `npm run check` (typecheck + lint). Fix any errors it surfaces that are related to your changes. If analytics is affected, also run `npm test -- --runInBand __tests__/services/analyticsTrackingPlan.test.ts __tests__/services/analyticsEvents.test.ts __tests__/services/analyticsNative.test.ts` and reconcile the table with the implementation before completing the cleanup.
 
 ## Step 5: Report
 

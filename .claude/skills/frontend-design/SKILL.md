@@ -9,6 +9,10 @@ This app is a local-first React Native (Expo SDK 54, RN 0.81, New Architecture) 
 
 Read `CLAUDE.md` first for the architecture map. This skill is the design layer on top of it.
 
+## Analytics impact
+
+When a UI or architecture change alters a tracked action, screen, paywall source, payload, trigger or frequency, follow [maintain-analytics-tracking](../maintain-analytics-tracking/SKILL.md). Update the authoritative `docs/analytics-tracking.md` tables in the same change, even when event names stay the same. Changes without an analytics impact need no table edit.
+
 ## Non-negotiables
 
 1. **NativeWind only for styling.** Use Tailwind className strings, not inline `StyleSheet` objects, unless a value is genuinely dynamic (animated values, measured layout). Config + theme tokens live in `tailwind.config.js` and `constants/designSystem.ts`.
