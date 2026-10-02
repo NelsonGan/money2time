@@ -140,6 +140,21 @@ const de = {
     reset_action: 'Löschen & wechseln',
   },
   news: {
+    transaction_updates: {
+      title: 'Transaktionen einfacher erfassen',
+      androidScreenshot: {
+        title: 'Screenshots auf Android teilen',
+        body: 'Teile einen Zahlungs-Screenshot oder ein Belegfoto mit Money2Time. Die App liest die Angaben und erfasst die Transaktion automatisch. Die Anleitung findest du unter Einstellungen > Automatisierung.',
+      },
+      accountLabels: {
+        title: 'Das Konto jeder Transaktion sehen',
+        body: 'Kontonamen erscheinen jetzt in deiner Transaktionsliste. So siehst du, woher Geld kam oder wohin es ging. Für eine einfachere Ansicht kannst du die Kontoanzeige unter Einstellungen > Anzeige ausschalten.',
+      },
+      amountSearch: {
+        title: 'Transaktionen nach Betrag suchen',
+        body: 'Du weißt noch den Betrag, aber nicht den Händler? Gib einen Betrag in die Transaktionssuche ein, um passende Einträge zu finden. Mit Nachkommastellen grenzt du die Ergebnisse ein.',
+      },
+    },
     everyday_personalization: {
       title: 'More ways to customize',
       reorder: {

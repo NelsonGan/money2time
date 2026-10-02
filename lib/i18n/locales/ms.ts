@@ -140,6 +140,21 @@ const ms = {
     reset_action: 'Padam & tukar',
   },
   news: {
+    transaction_updates: {
+      title: 'Penjejakan transaksi lebih mudah',
+      androidScreenshot: {
+        title: 'Kongsi tangkap layar di Android',
+        body: 'Kongsi tangkap layar pembayaran atau foto resit ke Money2Time. Aplikasi membaca butiran dan merekodkan transaksi secara automatik. Cari panduan di Tetapan > Automasi.',
+      },
+      accountLabels: {
+        title: 'Lihat akaun pada setiap transaksi',
+        body: 'Nama akaun kini muncul dalam senarai transaksi supaya anda tahu dari mana wang masuk atau ke mana wang pergi. Mahukan paparan lebih ringkas? Matikan paparan akaun di Tetapan > Paparan.',
+      },
+      amountSearch: {
+        title: 'Cari transaksi mengikut amaun',
+        body: 'Ingat amaun tetapi lupa kedai? Taip amaun dalam carian transaksi untuk mencari rekod yang sepadan. Gunakan perpuluhan untuk mengecilkan hasil carian.',
+      },
+    },
     everyday_personalization: {
       title: 'More ways to customize',
       reorder: {

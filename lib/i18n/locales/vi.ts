@@ -140,6 +140,21 @@ const vi = {
     reset_action: 'Xóa và chuyển',
   },
   news: {
+    transaction_updates: {
+      title: 'Theo dõi giao dịch dễ dàng hơn',
+      androidScreenshot: {
+        title: 'Chia sẻ ảnh chụp màn hình trên Android',
+        body: 'Chia sẻ ảnh chụp màn hình thanh toán hoặc ảnh hóa đơn với Money2Time. Ứng dụng đọc thông tin và tự động ghi lại giao dịch. Xem hướng dẫn trong Cài đặt > Tự động hóa.',
+      },
+      accountLabels: {
+        title: 'Xem tài khoản của từng giao dịch',
+        body: 'Tên tài khoản hiện xuất hiện trong danh sách giao dịch để bạn biết tiền đến từ đâu hoặc đi đâu. Muốn giao diện đơn giản hơn? Tắt hiển thị tài khoản trong Cài đặt > Hiển thị.',
+      },
+      amountSearch: {
+        title: 'Tìm giao dịch theo số tiền',
+        body: 'Nhớ số tiền nhưng quên cửa hàng? Nhập số tiền vào tìm kiếm giao dịch để tìm các mục phù hợp. Dùng số thập phân để thu hẹp kết quả.',
+      },
+    },
     everyday_personalization: {
       title: 'More ways to customize',
       reorder: {

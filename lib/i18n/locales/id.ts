@@ -140,6 +140,21 @@ const id = {
     reset_action: 'Hapus & ganti',
   },
   news: {
+    transaction_updates: {
+      title: 'Pencatatan transaksi lebih mudah',
+      androidScreenshot: {
+        title: 'Bagikan tangkapan layar di Android',
+        body: 'Bagikan tangkapan layar pembayaran atau foto struk ke Money2Time. Aplikasi membaca detailnya dan mencatat transaksi secara otomatis. Temukan panduannya di Pengaturan > Otomatisasi.',
+      },
+      accountLabels: {
+        title: 'Lihat akun pada setiap transaksi',
+        body: 'Nama akun kini muncul di daftar transaksi agar kamu tahu dari mana uang masuk atau ke mana uang pergi. Ingin tampilan lebih sederhana? Matikan tampilan akun di Pengaturan > Tampilan.',
+      },
+      amountSearch: {
+        title: 'Cari transaksi berdasarkan jumlah',
+        body: 'Ingat jumlahnya tetapi lupa tokonya? Ketik jumlah di pencarian transaksi untuk menemukan entri yang cocok. Gunakan desimal untuk mempersempit hasil.',
+      },
+    },
     everyday_personalization: {
       title: 'More ways to customize',
       reorder: {
