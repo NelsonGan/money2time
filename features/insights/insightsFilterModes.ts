@@ -1,5 +1,9 @@
-import type { Category } from '~/types';
-import { DEFAULT_SELECTION_FILTER_MODE, type SelectionFilterMode } from '~/utils/selectionFilter';
+import type { Category, TransactionWithRelations } from '~/types';
+import {
+  DEFAULT_SELECTION_FILTER_MODE,
+  passesSelectionFilter,
+  type SelectionFilterMode,
+} from '~/utils/selectionFilter';
 
 /** Every insights filter row whose picks can be read as an exclusion or an inclusion. */
 export const INSIGHTS_FILTER_KEYS = [
@@ -46,4 +50,37 @@ export function parseInsightsFilterModes(value: unknown): InsightsFilterModes | 
     if (record[key] === 'include') next[key] = 'include';
   });
   return next;
+}
+
+/** Predicate: returns true when a transaction should count toward savings. */
+export type SavingsIncludePredicate = (
+  transaction: Pick<TransactionWithRelations, 'type' | 'categoryId'>,
+) => boolean;
+
+/**
+ * The Insights "Savings rate" filter, shared by the chart and the home-screen
+ * savings widgets so the two cannot disagree. Each list is read through its
+ * mode: excluding drops the income/expense rows whose category (or its parent)
+ * was picked, including keeps only those. An empty list is off either way, and
+ * an uncategorized row, which cannot have been picked, survives an exclusion
+ * but not an inclusion.
+ */
+export function buildSavingsIncludePredicate(
+  categories: Pick<Category, 'id' | 'parentId'>[],
+  savingsIncomeCategoryIds: string[],
+  savingsExpenseCategoryIds: string[],
+  incomeMode: SelectionFilterMode = DEFAULT_SELECTION_FILTER_MODE,
+  expenseMode: SelectionFilterMode = DEFAULT_SELECTION_FILTER_MODE,
+): SavingsIncludePredicate {
+  const incomeSet = new Set(savingsIncomeCategoryIds);
+  const expenseSet = new Set(savingsExpenseCategoryIds);
+  if (incomeSet.size === 0 && expenseSet.size === 0) return () => true;
+
+  const categoryById = new Map(categories.map((category) => [category.id, category]));
+  return (transaction) => {
+    const ids = categoryFilterIds(transaction.categoryId, categoryById);
+    return transaction.type === 'income'
+      ? passesSelectionFilter(incomeMode, incomeSet, ids)
+      : passesSelectionFilter(expenseMode, expenseSet, ids);
+  };
 }
