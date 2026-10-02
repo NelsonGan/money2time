@@ -1101,6 +1101,11 @@ const ms = {
       exclude_income_categories: 'Kecualikan kategori pendapatan',
       exclude_expense_categories: 'Kecualikan kategori perbelanjaan',
       excluded: 'dikecualikan',
+      included: 'disertakan',
+      income_categories: 'Kategori pendapatan',
+      expense_categories: 'Kategori perbelanjaan',
+      mode_exclude: 'Kecualikan',
+      mode_include: 'Sertakan',
       none: 'Tiada pengecualian',
     },
     period: {

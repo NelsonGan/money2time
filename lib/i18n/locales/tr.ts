@@ -1096,6 +1096,11 @@ const tr = {
       exclude_income_categories: 'Gelir kategorilerini hariç tut',
       exclude_expense_categories: 'Gider kategorilerini hariç tut',
       excluded: 'hariç tutuldu',
+      included: 'dahil edildi',
+      income_categories: 'Gelir kategorileri',
+      expense_categories: 'Gider kategorileri',
+      mode_exclude: 'Hariç tut',
+      mode_include: 'Dahil et',
       none: 'Hariç tutulan yok',
     },
     period: {

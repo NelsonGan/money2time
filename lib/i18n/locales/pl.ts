@@ -1095,6 +1095,11 @@ const pl = {
       exclude_income_categories: 'Wyklucz kategorie przychodów',
       exclude_expense_categories: 'Wyklucz kategorie wydatków',
       excluded: 'wykluczone',
+      included: 'uwzględnione',
+      income_categories: 'Kategorie przychodów',
+      expense_categories: 'Kategorie wydatków',
+      mode_exclude: 'Wyklucz',
+      mode_include: 'Uwzględnij',
       none: 'Brak wykluczeń',
     },
     period: {

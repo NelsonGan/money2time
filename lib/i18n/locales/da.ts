@@ -1096,6 +1096,11 @@ const da = {
       exclude_income_categories: 'Udeluk indtægtskategorier',
       exclude_expense_categories: 'Udeluk udgiftskategorier',
       excluded: 'udelukket',
+      included: 'inkluderet',
+      income_categories: 'Indtægtskategorier',
+      expense_categories: 'Udgiftskategorier',
+      mode_exclude: 'Udeluk',
+      mode_include: 'Inkluder',
       none: 'Ingen undtagelser',
     },
     period: {

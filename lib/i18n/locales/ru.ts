@@ -1095,6 +1095,11 @@ const ru = {
       exclude_income_categories: 'Исключить категории доходов',
       exclude_expense_categories: 'Исключить категории расходов',
       excluded: 'исключено',
+      included: 'включено',
+      income_categories: 'Категории доходов',
+      expense_categories: 'Категории расходов',
+      mode_exclude: 'Исключить',
+      mode_include: 'Включить',
       none: 'Нет исключений',
     },
     period: {

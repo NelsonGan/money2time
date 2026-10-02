@@ -1089,6 +1089,11 @@ const vi = {
       exclude_income_categories: 'Loại trừ danh mục thu nhập',
       exclude_expense_categories: 'Loại trừ danh mục chi tiêu',
       excluded: 'đã loại trừ',
+      included: 'đã bao gồm',
+      income_categories: 'Danh mục thu nhập',
+      expense_categories: 'Danh mục chi tiêu',
+      mode_exclude: 'Loại trừ',
+      mode_include: 'Bao gồm',
       none: 'Không loại trừ',
     },
     period: {

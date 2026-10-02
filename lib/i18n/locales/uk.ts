@@ -1091,6 +1091,11 @@ const uk = {
       exclude_income_categories: 'Виключити категорії доходів',
       exclude_expense_categories: 'Виключити категорії витрат',
       excluded: 'виключено',
+      included: 'включено',
+      income_categories: 'Категорії доходів',
+      expense_categories: 'Категорії витрат',
+      mode_exclude: 'Виключити',
+      mode_include: 'Включити',
       none: 'Без виключень',
     },
     period: {

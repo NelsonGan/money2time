@@ -1098,6 +1098,11 @@ const es = {
       exclude_income_categories: 'Excluir categorías de ingreso',
       exclude_expense_categories: 'Excluir categorías de gasto',
       excluded: 'excluido',
+      included: 'incluido',
+      income_categories: 'Categorías de ingresos',
+      expense_categories: 'Categorías de gastos',
+      mode_exclude: 'Excluir',
+      mode_include: 'Incluir',
       none: 'Sin exclusiones',
     },
     period: {

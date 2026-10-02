@@ -1100,6 +1100,11 @@ const id = {
       exclude_income_categories: 'Kecualikan kategori pemasukan',
       exclude_expense_categories: 'Kecualikan kategori pengeluaran',
       excluded: 'dikecualikan',
+      included: 'disertakan',
+      income_categories: 'Kategori pemasukan',
+      expense_categories: 'Kategori pengeluaran',
+      mode_exclude: 'Kecualikan',
+      mode_include: 'Sertakan',
       none: 'Tidak ada pengecualian',
     },
     period: {

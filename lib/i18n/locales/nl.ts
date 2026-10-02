@@ -1102,6 +1102,11 @@ const nl = {
       exclude_income_categories: 'Inkomstencategorieën uitsluiten',
       exclude_expense_categories: 'Uitgavecategorieën uitsluiten',
       excluded: 'uitgesloten',
+      included: 'opgenomen',
+      income_categories: 'Inkomstencategorieën',
+      expense_categories: 'Uitgavencategorieën',
+      mode_exclude: 'Uitsluiten',
+      mode_include: 'Opnemen',
       none: 'Geen uitsluitingen',
     },
     period: {

@@ -1,11 +1,21 @@
+import { isSelectionFilterMode, type SelectionFilterMode } from '~/utils/selectionFilter';
+
 export type HomeSummaryMetric = 'income' | 'expense' | 'balance';
 export type HomeSummarySide = 'left' | 'right';
 
 export interface CalendarPreferencesSnapshot {
   version: number;
+  /**
+   * The ids picked in each filter. They keep their `excluded*` names because
+   * that is what has always been persisted; the matching `*FilterMode` says
+   * whether they are dropped (the default) or the only ones kept.
+   */
   excludedAccountIds: string[];
   excludedIncomeCategoryIds: string[];
   excludedExpenseCategoryIds: string[];
+  accountFilterMode: SelectionFilterMode;
+  incomeCategoryFilterMode: SelectionFilterMode;
+  expenseCategoryFilterMode: SelectionFilterMode;
   homeSummaryLeft: HomeSummaryMetric;
   homeSummaryRight: HomeSummaryMetric;
   homeSummaryLeftHidden: boolean;
@@ -50,6 +60,15 @@ export function parseCalendarPreferencesSnapshot(
       excludedAccountIds: toUniqueStringList(record.excludedAccountIds),
       excludedIncomeCategoryIds: toUniqueStringList(record.excludedIncomeCategoryIds),
       excludedExpenseCategoryIds: toUniqueStringList(record.excludedExpenseCategoryIds),
+      accountFilterMode: isSelectionFilterMode(record.accountFilterMode)
+        ? record.accountFilterMode
+        : undefined,
+      incomeCategoryFilterMode: isSelectionFilterMode(record.incomeCategoryFilterMode)
+        ? record.incomeCategoryFilterMode
+        : undefined,
+      expenseCategoryFilterMode: isSelectionFilterMode(record.expenseCategoryFilterMode)
+        ? record.expenseCategoryFilterMode
+        : undefined,
       homeSummaryLeft: isHomeSummaryMetric(record.homeSummaryLeft)
         ? record.homeSummaryLeft
         : undefined,

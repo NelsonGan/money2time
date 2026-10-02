@@ -163,6 +163,11 @@ import {
   startOfMonthDate,
   toRange,
 } from '~/utils/formatters';
+import {
+  DEFAULT_SELECTION_FILTER_MODE,
+  isSelectionFilterMode,
+  type SelectionFilterMode,
+} from '~/utils/selectionFilter';
 import { asSpendingRow, countsAsExpenseRow } from '~/utils/spending';
 
 import type { InsightsDrilldownPayload } from './InsightsDrilldownScreen';
@@ -963,6 +968,9 @@ type InsightsPreferencesSnapshot = {
   excludedReviewAccountIds: string[];
   excludedReviewExpenseCategoryIds: string[];
   excludedReviewIncomeCategoryIds: string[];
+  reviewAccountMode: SelectionFilterMode;
+  reviewExpenseCategoryMode: SelectionFilterMode;
+  reviewIncomeCategoryMode: SelectionFilterMode;
   categoryTrendSelectedCategoryId: string | null;
 };
 
@@ -1056,6 +1064,15 @@ function parseInsightsPreferencesPayload(
     next.excludedReviewIncomeCategoryIds = toUniqueStringList(
       parsed.excludedReviewIncomeCategoryIds,
     );
+    if (isSelectionFilterMode(parsed.reviewAccountMode)) {
+      next.reviewAccountMode = parsed.reviewAccountMode;
+    }
+    if (isSelectionFilterMode(parsed.reviewExpenseCategoryMode)) {
+      next.reviewExpenseCategoryMode = parsed.reviewExpenseCategoryMode;
+    }
+    if (isSelectionFilterMode(parsed.reviewIncomeCategoryMode)) {
+      next.reviewIncomeCategoryMode = parsed.reviewIncomeCategoryMode;
+    }
     if (typeof parsed.categoryTrendSelectedCategoryId === 'string') {
       const trimmed = parsed.categoryTrendSelectedCategoryId.trim();
       next.categoryTrendSelectedCategoryId = trimmed.length > 0 ? trimmed : null;
@@ -3180,12 +3197,18 @@ export function InsightsScreen({
       if (
         saved.excludedReviewAccountIds ||
         saved.excludedReviewExpenseCategoryIds ||
-        saved.excludedReviewIncomeCategoryIds
+        saved.excludedReviewIncomeCategoryIds ||
+        saved.reviewAccountMode ||
+        saved.reviewExpenseCategoryMode ||
+        saved.reviewIncomeCategoryMode
       ) {
         setReviewFilters({
           excludedAccountIds: saved.excludedReviewAccountIds ?? [],
           excludedExpenseCategoryIds: saved.excludedReviewExpenseCategoryIds ?? [],
           excludedIncomeCategoryIds: saved.excludedReviewIncomeCategoryIds ?? [],
+          accountMode: saved.reviewAccountMode ?? DEFAULT_SELECTION_FILTER_MODE,
+          expenseCategoryMode: saved.reviewExpenseCategoryMode ?? DEFAULT_SELECTION_FILTER_MODE,
+          incomeCategoryMode: saved.reviewIncomeCategoryMode ?? DEFAULT_SELECTION_FILTER_MODE,
         });
       }
       if (Object.prototype.hasOwnProperty.call(saved, 'categoryTrendSelectedCategoryId')) {
@@ -3232,6 +3255,9 @@ export function InsightsScreen({
       excludedReviewAccountIds: reviewFilters.excludedAccountIds,
       excludedReviewExpenseCategoryIds: reviewFilters.excludedExpenseCategoryIds,
       excludedReviewIncomeCategoryIds: reviewFilters.excludedIncomeCategoryIds,
+      reviewAccountMode: reviewFilters.accountMode,
+      reviewExpenseCategoryMode: reviewFilters.expenseCategoryMode,
+      reviewIncomeCategoryMode: reviewFilters.incomeCategoryMode,
       categoryTrendSelectedCategoryId,
     }),
     [

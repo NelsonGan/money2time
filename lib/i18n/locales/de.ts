@@ -1106,6 +1106,11 @@ const de = {
       exclude_income_categories: 'Einnahmenkategorien ausschließen',
       exclude_expense_categories: 'Ausgabenkategorien ausschließen',
       excluded: 'ausgeschlossen',
+      included: 'eingeschlossen',
+      income_categories: 'Einnahmekategorien',
+      expense_categories: 'Ausgabekategorien',
+      mode_exclude: 'Ausschließen',
+      mode_include: 'Einschließen',
       none: 'Keine Ausschlüsse',
     },
     period: {

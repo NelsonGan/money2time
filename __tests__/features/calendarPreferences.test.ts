@@ -66,4 +66,20 @@ describe('calendar preferences', () => {
       ),
     ).toMatchObject({ homeSummaryLeftHidden: true, homeSummaryRightHidden: undefined });
   });
+
+  it('restores each filter mode independently and ignores invalid values', () => {
+    expect(
+      parseCalendarPreferencesSnapshot(
+        JSON.stringify({
+          accountFilterMode: 'include',
+          incomeCategoryFilterMode: 'only',
+          expenseCategoryFilterMode: 'exclude',
+        }),
+      ),
+    ).toMatchObject({
+      accountFilterMode: 'include',
+      incomeCategoryFilterMode: undefined,
+      expenseCategoryFilterMode: 'exclude',
+    });
+  });
 });

@@ -1090,6 +1090,11 @@ const hi = {
       exclude_income_categories: 'आय श्रेणियां बाहर करें',
       exclude_expense_categories: 'खर्च श्रेणियां बाहर करें',
       excluded: 'बाहर',
+      included: 'शामिल',
+      income_categories: 'आय श्रेणियाँ',
+      expense_categories: 'व्यय श्रेणियाँ',
+      mode_exclude: 'बाहर रखें',
+      mode_include: 'शामिल करें',
       none: 'कोई बहिष्करण नहीं',
     },
     period: {
