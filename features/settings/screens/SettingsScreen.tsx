@@ -2,7 +2,6 @@ import { Image } from 'expo-image';
 import {
   CalendarDays,
   Camera,
-  ChevronRight,
   Code2,
   Crown,
   Pencil,
@@ -431,7 +430,6 @@ export function SettingsScreen({
                   {I18n.t('pro.upgrade_subtitle')}
                 </Text>
               </View>
-              <ChevronRight size={20} color="#fff" />
             </Pressable>
           ) : null}
 
@@ -448,7 +446,6 @@ export function SettingsScreen({
               >
                 <View className="flex-row items-center justify-between">
                   <ClayIcon name="settings/share-earn" size={36} flatSize={22} />
-                  <ChevronRight size={16} color={themeColors.textMuted} />
                 </View>
                 <Text
                   variant="bodyStrong"
@@ -482,7 +479,6 @@ export function SettingsScreen({
                       {I18n.t('news.badge.ad')}
                     </Text>
                   </View>
-                  <ChevronRight size={16} color={themeColors.textMuted} />
                 </View>
                 <Text
                   variant="bodyStrong"
