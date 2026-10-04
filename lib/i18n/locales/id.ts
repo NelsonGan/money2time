@@ -188,6 +188,7 @@ const id = {
     badge: { ad: 'IKLAN' },
     ricecal: {
       title: 'RiceCal',
+      card_subtitle: 'Lacak kalori',
       intro: {
         title: 'Saya membuat aplikasi lain',
         body: 'Namanya RiceCal. Kalau kamu ingin melacak kalori, saya senang jika kamu mau mencobanya.',
@@ -2125,8 +2126,8 @@ const id = {
     celebration_cta: 'Mantap!',
   },
   shareEarn: {
-    row_label: 'Bagikan & Dapatkan Pro',
-    row_subtitle: 'Posting tentang kami, buka Pro gratis',
+    row_label: 'Bagikan & Dapatkan',
+    row_subtitle: 'Dapat Pro gratis',
     title: 'Bagikan & Dapatkan Pro',
     subtitle: 'Posting tentang Money2Time dan kami buka Pro untukmu, gratis.',
     hero_title: 'Sebarkan, dapatkan Pro 🎁',

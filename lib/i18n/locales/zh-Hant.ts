@@ -161,6 +161,7 @@ const zhHant = {
     badge: { ad: '廣告' },
     ricecal: {
       title: 'RiceCal',
+      card_subtitle: '記錄卡路里',
       intro: {
         title: '我還做了一個應用',
         body: '它叫 RiceCal。如果你想記錄卡路里，我很希望你能試試看。',
@@ -2005,8 +2006,8 @@ const zhHant = {
     celebration_cta: '太棒了！',
   },
   shareEarn: {
-    row_label: '分享賺 Pro',
-    row_subtitle: '發帖介紹我們，免費解鎖 Pro',
+    row_label: '分享賺獎勵',
+    row_subtitle: '免費解鎖 Pro',
     title: '分享賺 Pro',
     subtitle: '發帖介紹 Money2Time，我們就為你免費解鎖 Pro。',
     hero_title: '廣而告之，贏取 Pro 🎁',

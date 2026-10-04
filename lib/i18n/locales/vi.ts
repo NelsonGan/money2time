@@ -188,6 +188,7 @@ const vi = {
     badge: { ad: 'QUẢNG CÁO' },
     ricecal: {
       title: 'RiceCal',
+      card_subtitle: 'Theo dõi calo',
       intro: {
         title: 'Tôi đã làm thêm một ứng dụng',
         body: 'Ứng dụng có tên RiceCal. Nếu bạn muốn theo dõi lượng calo, tôi rất mong bạn dùng thử.',
@@ -2103,8 +2104,8 @@ const vi = {
     celebration_cta: 'Tuyệt!',
   },
   shareEarn: {
-    row_label: 'Chia sẻ & Nhận Pro',
-    row_subtitle: 'Đăng bài về chúng tôi, mở khóa Pro miễn phí',
+    row_label: 'Chia sẻ & Nhận',
+    row_subtitle: 'Nhận Pro miễn phí',
     title: 'Chia sẻ & Nhận Pro',
     subtitle: 'Đăng bài về Money2Time và chúng tôi sẽ mở khóa Pro cho bạn, hoàn toàn miễn phí.',
     hero_title: 'Lan tỏa, nhận Pro 🎁',

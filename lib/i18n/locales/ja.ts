@@ -188,6 +188,7 @@ const ja = {
     badge: { ad: '広告' },
     ricecal: {
       title: 'RiceCal',
+      card_subtitle: 'カロリーを記録',
       intro: {
         title: '別のアプリも作りました',
         body: 'RiceCalというアプリです。カロリーを記録したい方は、ぜひ試してみてください。',
@@ -2104,8 +2105,8 @@ const ja = {
     celebration_cta: 'やったね！',
   },
   shareEarn: {
-    row_label: 'シェアしてProを獲得',
-    row_subtitle: '投稿してProを無料でアンロック',
+    row_label: 'シェアして獲得',
+    row_subtitle: 'Proを無料で獲得',
     title: 'シェアしてProを獲得',
     subtitle: 'Money2Timeについて投稿すると、Proを無料でアンロックします。',
     hero_title: '広めてProをゲット 🎁',

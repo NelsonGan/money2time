@@ -188,6 +188,7 @@ const uk = {
     badge: { ad: 'РЕКЛАМА' },
     ricecal: {
       title: 'RiceCal',
+      card_subtitle: 'Рахуй калорії',
       intro: {
         title: 'Я створив ще один застосунок',
         body: 'Він називається RiceCal. Якщо ви хочете стежити за калоріями, буду радий, якщо ви його спробуєте.',
@@ -2114,8 +2115,8 @@ const uk = {
     celebration_cta: 'Чудово!',
   },
   shareEarn: {
-    row_label: 'Поділись і отримай Pro',
-    row_subtitle: 'Розкажи про нас і відкрий Pro безкоштовно',
+    row_label: 'Поділись і отримай',
+    row_subtitle: 'Отримай Pro безкоштовно',
     title: 'Поділись і отримай Pro',
     subtitle: 'Розкажи про Money2Time, і ми відкриємо тобі Pro, безкоштовно.',
     hero_title: 'Розкажи всім і отримай Pro 🎁',

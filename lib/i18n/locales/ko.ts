@@ -187,6 +187,7 @@ const ko = {
     badge: { ad: '광고' },
     ricecal: {
       title: 'RiceCal',
+      card_subtitle: '칼로리 기록',
       intro: {
         title: '또 다른 앱을 만들었어요',
         body: 'RiceCal이라는 앱이에요. 칼로리를 기록하고 싶다면 한번 사용해 보세요.',
@@ -2090,8 +2091,8 @@ const ko = {
     celebration_cta: '좋아요!',
   },
   shareEarn: {
-    row_label: '공유하고 Pro 받기',
-    row_subtitle: '우리 앱을 게시하고 Pro를 무료로 잠금 해제',
+    row_label: '공유하고 받기',
+    row_subtitle: '무료 Pro 받기',
     title: '공유하고 Pro 받기',
     subtitle: 'Money2Time에 대해 게시하면 Pro를 무료로 잠금 해제해 드려요.',
     hero_title: '널리 알리고 Pro 받기 🎁',

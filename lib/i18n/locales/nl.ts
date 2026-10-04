@@ -188,6 +188,7 @@ const nl = {
     badge: { ad: 'ADVERTENTIE' },
     ricecal: {
       title: 'RiceCal',
+      card_subtitle: 'Houd calorieën bij',
       intro: {
         title: 'Ik heb nog een app gemaakt',
         body: 'Hij heet RiceCal. Als je je calorieën wilt bijhouden, zou ik het leuk vinden als je hem probeert.',
@@ -2139,8 +2140,8 @@ const nl = {
     celebration_cta: 'Lekker!',
   },
   shareEarn: {
-    row_label: 'Deel & verdien Pro',
-    row_subtitle: 'Post over ons, ontgrendel Pro gratis',
+    row_label: 'Deel & verdien',
+    row_subtitle: 'Verdien gratis Pro',
     title: 'Deel & verdien Pro',
     subtitle: 'Post over Money2Time en wij ontgrendelen Pro voor je, gratis.',
     hero_title: 'Verspreid het, verdien Pro 🎁',

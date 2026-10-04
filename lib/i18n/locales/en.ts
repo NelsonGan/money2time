@@ -165,6 +165,7 @@ const en = {
     },
     ricecal: {
       title: 'RiceCal',
+      card_subtitle: 'Track calories',
       intro: {
         title: 'I made another app',
         body: "It's called RiceCal. If you're interested in tracking your calories, I'd love for you to give it a try.",
@@ -2093,8 +2094,8 @@ const en = {
     celebration_cta: 'Nice!',
   },
   shareEarn: {
-    row_label: 'Share & Earn Pro',
-    row_subtitle: 'Post about us, unlock Pro for free',
+    row_label: 'Share & Earn',
+    row_subtitle: 'Earn free Pro',
     title: 'Share & Earn Pro',
     subtitle: 'Post about Money2Time and we’ll unlock Pro for you, on the house.',
     hero_title: 'Spread the word, earn Pro 🎁',

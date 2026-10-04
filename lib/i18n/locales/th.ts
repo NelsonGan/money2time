@@ -187,6 +187,7 @@ const th = {
     badge: { ad: 'โฆษณา' },
     ricecal: {
       title: 'RiceCal',
+      card_subtitle: 'ติดตามแคลอรี',
       intro: {
         title: 'ฉันสร้างแอปใหม่อีกแอป',
         body: 'แอปนี้ชื่อ RiceCal ถ้าคุณสนใจติดตามแคลอรี ฉันยินดีมากหากคุณลองใช้',
@@ -2079,8 +2080,8 @@ const th = {
     celebration_cta: 'เยี่ยม!',
   },
   shareEarn: {
-    row_label: 'แชร์แล้วรับ Pro',
-    row_subtitle: 'โพสต์ถึงเราแล้วปลดล็อก Pro ฟรี',
+    row_label: 'แชร์แล้วรับ',
+    row_subtitle: 'รับ Pro ฟรี',
     title: 'แชร์แล้วรับ Pro',
     subtitle: 'โพสต์เกี่ยวกับ Money2Time แล้วเราจะปลดล็อก Pro ให้คุณฟรี',
     hero_title: 'บอกต่อแล้วรับ Pro 🎁',
