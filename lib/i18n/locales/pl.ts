@@ -188,6 +188,7 @@ const pl = {
     badge: { ad: 'REKLAMA' },
     ricecal: {
       title: 'RiceCal',
+      card_subtitle: 'Licz kalorie',
       intro: {
         title: 'To moja kolejna aplikacja',
         body: 'Nazywa się RiceCal. Jeśli chcesz śledzić kalorie, będzie mi miło, jeśli ją wypróbujesz.',
@@ -2124,8 +2125,8 @@ const pl = {
     celebration_cta: 'Super!',
   },
   shareEarn: {
-    row_label: 'Udostępnij i zdobądź Pro',
-    row_subtitle: 'Napisz o nas, odblokuj Pro za darmo',
+    row_label: 'Udostępnij i zyskaj',
+    row_subtitle: 'Zdobądź Pro za darmo',
     title: 'Udostępnij i zdobądź Pro',
     subtitle: 'Napisz o Money2Time, a my odblokujemy Ci Pro, za darmo.',
     hero_title: 'Rozgłoś to, zdobądź Pro 🎁',

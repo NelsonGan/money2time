@@ -5,7 +5,6 @@ import {
   ChevronRight,
   Code2,
   Crown,
-  Gift,
   Pencil,
   ReceiptText,
   RefreshCcw,
@@ -14,6 +13,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
+  Image as NativeImage,
   Linking,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
@@ -45,6 +45,8 @@ import { ClayIcon } from '~/components/ui/ClayIcon';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
 import { useIsFlatIcons } from '~/context/ThemeContext';
+import { riceCalAnnouncement } from '~/features/news/announcements/017_ricecal';
+import { FeatureAnnouncementModal } from '~/features/news/components/FeatureAnnouncementModal';
 import { ReimbursementTileBadge } from '~/features/reimbursements/components/ReimbursementTileBadge';
 import { DisplayModeToggle } from '~/features/transactions/components';
 import { SettleUpTileBadge } from '~/features/transactions/components/SettleUpTileBadge';
@@ -181,6 +183,7 @@ export function SettingsScreen({
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
   const [contactVisible, setContactVisible] = useState(false);
+  const [riceCalVisible, setRiceCalVisible] = useState(false);
 
   const handleJoinDiscord = useCallback(() => {
     void triggerHaptic('selection');
@@ -433,34 +436,66 @@ export function SettingsScreen({
           ) : null}
 
           {!isPro ? (
-            <Pressable
-              onPress={() => {
-                void triggerHaptic('selection');
-                onOpenShareAndEarn();
-              }}
-              className="mt-2 flex-row items-center gap-3 rounded-3xl px-4 py-4 active:scale-[0.98] active:opacity-95"
-              style={[{ backgroundColor: '#F5A623' }, coloredCtaShadow('#F5A623')]}
-            >
-              {isFlatIcons ? (
-                <View className="h-10 w-10 items-center justify-center rounded-full bg-white/20">
-                  <Gift size={20} color="#fff" />
+            <View className="mt-2 flex-row gap-2">
+              <Pressable
+                accessibilityRole="button"
+                testID="settings-share-earn-card"
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  onOpenShareAndEarn();
+                }}
+                className="min-w-0 flex-1 rounded-3xl border border-accent/25 bg-accent/15 p-3.5 active:scale-[0.98] active:opacity-90"
+              >
+                <View className="flex-row items-center justify-between">
+                  <ClayIcon name="settings/share-earn" size={36} flatSize={22} />
+                  <ChevronRight size={16} color={themeColors.textMuted} />
                 </View>
-              ) : (
-                <ClayIcon name="settings/share-earn" size={44} />
-              )}
-              <View className="flex-1">
                 <Text
-                  className="text-[15px]"
-                  style={{ color: '#fff', fontFamily: FONT.extrabold, fontWeight: '800' }}
+                  variant="bodyStrong"
+                  numberOfLines={2}
+                  className="mt-2 text-sm leading-[18px]"
                 >
                   {I18n.t('shareEarn.row_label')}
                 </Text>
-                <Text className="text-xs" style={{ color: 'rgba(255,255,255,0.9)' }}>
+                <Text variant="caption" tone="muted" numberOfLines={2} className="mt-0.5">
                   {I18n.t('shareEarn.row_subtitle')}
                 </Text>
-              </View>
-              <ChevronRight size={20} color="#fff" />
-            </Pressable>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                testID="settings-ricecal-card"
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  setRiceCalVisible(true);
+                }}
+                className="min-w-0 flex-1 rounded-3xl border border-success/20 bg-success/10 p-3.5 active:scale-[0.98] active:opacity-90"
+              >
+                <View className="flex-row items-center justify-between gap-1">
+                  <NativeImage
+                    accessible={false}
+                    source={require('~/assets/brands/ricecal-app-icon.png')}
+                    className="h-9 w-9 rounded-xl"
+                    resizeMode="cover"
+                  />
+                  <View className="min-w-0 flex-1 items-end">
+                    <Text variant="label" tone="muted" numberOfLines={1}>
+                      {I18n.t('news.badge.ad')}
+                    </Text>
+                  </View>
+                  <ChevronRight size={16} color={themeColors.textMuted} />
+                </View>
+                <Text
+                  variant="bodyStrong"
+                  numberOfLines={2}
+                  className="mt-2 text-sm leading-[18px]"
+                >
+                  {I18n.t('news.ricecal.title')}
+                </Text>
+                <Text variant="caption" tone="muted" numberOfLines={2} className="mt-0.5">
+                  {I18n.t('news.ricecal.card_subtitle')}
+                </Text>
+              </Pressable>
+            </View>
           ) : null}
 
           <SettingsSection
@@ -685,6 +720,12 @@ export function SettingsScreen({
           ) : null}
         </Animated.View>
       </ScrollView>
+
+      <FeatureAnnouncementModal
+        announcement={riceCalVisible ? riceCalAnnouncement : null}
+        visible={!isPro && riceCalVisible}
+        onDismiss={() => setRiceCalVisible(false)}
+      />
 
       <ThemeModal
         visible={contactVisible}

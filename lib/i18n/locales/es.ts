@@ -188,6 +188,7 @@ const es = {
     badge: { ad: 'ANUNCIO' },
     ricecal: {
       title: 'RiceCal',
+      card_subtitle: 'Cuenta calorías',
       intro: {
         title: 'He creado otra app',
         body: 'Se llama RiceCal. Si te interesa llevar un registro de tus calorías, me encantaría que la probaras.',
@@ -2128,8 +2129,8 @@ const es = {
     celebration_cta: '¡Genial!',
   },
   shareEarn: {
-    row_label: 'Comparte y gana Pro',
-    row_subtitle: 'Publica sobre nosotros y desbloquea Pro gratis',
+    row_label: 'Comparte y gana',
+    row_subtitle: 'Gana Pro gratis',
     title: 'Comparte y gana Pro',
     subtitle: 'Publica sobre Money2Time y te desbloqueamos Pro, gratis.',
     hero_title: 'Corre la voz y gana Pro 🎁',
