@@ -188,6 +188,7 @@ const fil = {
     badge: { ad: 'AD' },
     ricecal: {
       title: 'RiceCal',
+      card_subtitle: 'Bilangin ang calories',
       intro: {
         title: 'Gumawa ako ng isa pang app',
         body: 'RiceCal ang pangalan nito. Kung gusto mong subaybayan ang iyong calories, ikatutuwa kong subukan mo ito.',
@@ -2137,8 +2138,8 @@ const fil = {
     celebration_cta: 'Ayos!',
   },
   shareEarn: {
-    row_label: 'Mag-share, kumita ng Pro',
-    row_subtitle: 'Mag-post tungkol sa amin, libre ang Pro',
+    row_label: 'Ibahagi at kumita',
+    row_subtitle: 'Libreng Pro',
     title: 'Mag-share, kumita ng Pro',
     subtitle: 'Mag-post tungkol sa Money2Time at i-unlock namin ang Pro para sa iyo, libre.',
     hero_title: 'Ikalat ito, kumita ng Pro 🎁',

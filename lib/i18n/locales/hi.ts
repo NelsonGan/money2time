@@ -188,6 +188,7 @@ const hi = {
     badge: { ad: 'विज्ञापन' },
     ricecal: {
       title: 'RiceCal',
+      card_subtitle: 'कैलोरी ट्रैक करें',
       intro: {
         title: 'मैंने एक और ऐप बनाया है',
         body: 'इसका नाम RiceCal है। अगर आप अपनी कैलोरी ट्रैक करना चाहते हैं, तो मुझे खुशी होगी अगर आप इसे आज़माएँ।',
@@ -2107,8 +2108,8 @@ const hi = {
     celebration_cta: 'बढ़िया!',
   },
   shareEarn: {
-    row_label: 'शेयर करें और Pro पाएं',
-    row_subtitle: 'हमारे बारे में पोस्ट करें, Pro मुफ़्त पाएं',
+    row_label: 'शेयर करें और पाएं',
+    row_subtitle: 'मुफ़्त Pro पाएं',
     title: 'शेयर करें और Pro पाएं',
     subtitle:
       'Money2Time के बारे में पोस्ट करें और हम आपके लिए Pro अनलॉक कर देंगे, बिल्कुल मुफ़्त।',

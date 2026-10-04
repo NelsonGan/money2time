@@ -188,6 +188,7 @@ const tr = {
     badge: { ad: 'REKLAM' },
     ricecal: {
       title: 'RiceCal',
+      card_subtitle: 'Kalori takibi',
       intro: {
         title: 'Bir uygulama daha yaptım',
         body: 'Adı RiceCal. Kalorilerinizi takip etmek istiyorsanız denemeniz beni mutlu eder.',
@@ -2121,8 +2122,8 @@ const tr = {
     celebration_cta: 'Harika!',
   },
   shareEarn: {
-    row_label: 'Paylaş ve Pro kazan',
-    row_subtitle: 'Bizden bahset, Pro’yu ücretsiz aç',
+    row_label: 'Paylaş ve kazan',
+    row_subtitle: 'Ücretsiz Pro kazan',
     title: 'Paylaş ve Pro kazan',
     subtitle: 'Money2Time hakkında paylaşım yap, Pro’yu senin için açalım, bizden olsun.',
     hero_title: 'Yay, Pro kazan 🎁',

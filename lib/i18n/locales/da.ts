@@ -188,6 +188,7 @@ const da = {
     badge: { ad: 'ANNONCE' },
     ricecal: {
       title: 'RiceCal',
+      card_subtitle: 'Tæl kalorier',
       intro: {
         title: 'Jeg har lavet en ny app',
         body: 'Den hedder RiceCal. Hvis du gerne vil holde styr på dine kalorier, håber jeg, du vil prøve den.',
@@ -2118,8 +2119,8 @@ const da = {
     celebration_cta: 'Fedt!',
   },
   shareEarn: {
-    row_label: 'Del & optjen Pro',
-    row_subtitle: 'Skriv om os, lås Pro op gratis',
+    row_label: 'Del & optjen',
+    row_subtitle: 'Få gratis Pro',
     title: 'Del & optjen Pro',
     subtitle: 'Skriv om Money2Time, så låser vi Pro op for dig, helt gratis.',
     hero_title: 'Spred ordet, optjen Pro 🎁',
