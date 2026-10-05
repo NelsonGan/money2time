@@ -1227,9 +1227,8 @@ const vi = {
       payment_alerts_ios_step_2: 'Tìm Notification rồi chọn.',
       payment_alerts_ios_step_3: 'Tìm Log Payment Alert và thêm vào.',
       payment_alerts_ios_step_4: 'Nhấn Message trong Log Payment Alert rồi Select Variable.',
-      payment_alerts_ios_step_5: 'Chạm From và nhập tên ứng dụng.',
       payment_alerts_ios_step_6:
-        'Chạm mũi tên tác vụ, rồi Account. Chọn tài khoản để ghi lại thanh toán của ứng dụng này.',
+        'Chạm mũi tên tác vụ, rồi Account. Chọn tài khoản để ghi lại thanh toán của ứng dụng này. Để trống Category để tự động phân loại theo từ khóa.',
       payment_alerts_ios_step_7:
         'Chạm quay lại để lưu. Lặp lại cho mỗi ứng dụng ngân hàng hoặc ví điện tử. Thanh toán được ghi khi bạn mở Money2Time lần tới.',
       payment_alerts_android_disclosure:
@@ -1240,8 +1239,6 @@ const vi = {
         'Nhấn mũi tên cạnh ứng dụng. Giữ Automation bật và tắt Notify để ghi lại mà không thông báo.',
       payment_alerts_ios_input: 'Chọn biến Notification bên dưới trình kích hoạt.',
       payment_alerts_ios_body: 'Nhấn biến đã chèn, chọn Body rồi Return.',
-      payment_alerts_ios_fields:
-        'Đặt Title và Subtitle thành thuộc tính Notification tương ứng theo cùng cách. Để trống Category để khớp từ khóa.',
     },
     title: 'Cài đặt',
     display: 'Hiển thị',

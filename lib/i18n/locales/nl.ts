@@ -1248,9 +1248,8 @@ const nl = {
       payment_alerts_ios_step_2: 'Zoek Notification en selecteer dit.',
       payment_alerts_ios_step_3: 'Zoek Log Payment Alert en voeg het toe.',
       payment_alerts_ios_step_4: 'Tik op Message in Log Payment Alert en daarna Select Variable.',
-      payment_alerts_ios_step_5: 'Tik op From en voer de naam van de app in.',
       payment_alerts_ios_step_6:
-        'Tik op de actiepijl en daarna op Account. Kies waar betalingen van deze app worden vastgelegd.',
+        'Tik op de actiepijl en daarna op Account. Kies waar betalingen van deze app worden vastgelegd. Laat Category leeg voor automatische toewijzing op basis van trefwoorden.',
       payment_alerts_ios_step_7:
         'Ga terug om op te slaan. Herhaal dit voor elke bank- of wallet-app. Betalingen worden vastgelegd wanneer je Money2Time opnieuw opent.',
       payment_alerts_android_disclosure:
@@ -1261,8 +1260,6 @@ const nl = {
         'Tik op de pijl naast de app. Laat Automation aan en zet Notify uit om stil te registreren.',
       payment_alerts_ios_input: 'Selecteer de variabele Notification onder de trigger.',
       payment_alerts_ios_body: 'Tik op de ingevoegde variabele, kies Body en daarna Return.',
-      payment_alerts_ios_fields:
-        'Stel Title en Subtitle op dezelfde manier in op de bijbehorende Notification-eigenschappen. Laat Category leeg voor trefwoordmatching.',
     },
     title: 'Instellingen',
     display: 'Weergave',

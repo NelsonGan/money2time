@@ -1237,9 +1237,8 @@ const nb = {
       payment_alerts_ios_step_2: 'Søk etter Notification og velg den.',
       payment_alerts_ios_step_3: 'Søk etter Log Payment Alert og legg den til.',
       payment_alerts_ios_step_4: 'Trykk Message i Log Payment Alert, deretter Select Variable.',
-      payment_alerts_ios_step_5: 'Trykk på From og skriv inn appens navn.',
       payment_alerts_ios_step_6:
-        'Trykk på handlingspilen og deretter Account. Velg hvor betalingene fra denne appen skal registreres.',
+        'Trykk på handlingspilen og deretter Account. Velg hvor betalingene fra denne appen skal registreres. La Category stå tom for automatisk matching av nøkkelord.',
       payment_alerts_ios_step_7:
         'Gå tilbake for å lagre. Gjenta for hver bank- eller lommebok-app. Betalingene registreres neste gang du åpner Money2Time.',
       payment_alerts_android_disclosure:
@@ -1250,8 +1249,6 @@ const nb = {
         'Trykk på pilen ved appen. La Automation være på og slå av Notify for stille registrering.',
       payment_alerts_ios_input: 'Velg Notification-variabelen under utløseren.',
       payment_alerts_ios_body: 'Trykk på variabelen, velg Body og deretter Return.',
-      payment_alerts_ios_fields:
-        'Sett Title og Subtitle til de tilsvarende Notification-egenskapene på samme måte. La Category stå tom for nøkkelordmatching.',
     },
     title: 'Innstillinger',
     display: 'Visning',
