@@ -1230,10 +1230,6 @@ const de = {
       default_category: 'Standardkategorie',
       default_none: 'Nicht festgelegt',
       payment_alerts_title: 'Zahlungsbenachrichtigungen',
-      payment_alerts_hint_android:
-        'Erfasst Zahlungen aus den Benachrichtigungen deiner Banking- und Wallet-Apps. Du wählst die Apps.',
-      payment_alerts_hint_ios:
-        'Erfasst Zahlungen aus Mitteilungen, SMS und E-Mails deiner Bank über eine Automation in Kurzbefehle.',
       payment_alerts_open: 'Zahlungsbenachrichtigungen',
       payment_alerts_status_off: 'Nicht eingerichtet',
       payment_alerts_status_apps_one: 'An für %{count} App',

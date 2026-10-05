@@ -1207,10 +1207,6 @@ const vi = {
       default_category: 'Danh mục mặc định',
       default_none: 'Chưa đặt',
       payment_alerts_title: 'Thông báo thanh toán',
-      payment_alerts_hint_android:
-        'Ghi thanh toán từ thông báo của các ứng dụng ngân hàng và ví điện tử. Bạn tự chọn ứng dụng.',
-      payment_alerts_hint_ios:
-        'Ghi thanh toán từ thông báo, tin nhắn và email của ngân hàng qua một mục tự động hóa trong Phím tắt.',
       payment_alerts_open: 'Thông báo thanh toán',
       payment_alerts_status_off: 'Chưa thiết lập',
       payment_alerts_status_apps_one: 'Bật cho %{count} ứng dụng',

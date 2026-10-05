@@ -1222,10 +1222,6 @@ const id = {
       default_category: 'Kategori bawaan',
       default_none: 'Belum diatur',
       payment_alerts_title: 'Notifikasi pembayaran',
-      payment_alerts_hint_android:
-        'Mencatat pembayaran dari notifikasi aplikasi bank dan dompet digital Anda. Anda yang memilih aplikasinya.',
-      payment_alerts_hint_ios:
-        'Mencatat pembayaran dari notifikasi, SMS, dan email bank Anda lewat otomatisasi Shortcuts.',
       payment_alerts_open: 'Notifikasi pembayaran',
       payment_alerts_status_off: 'Belum diatur',
       payment_alerts_status_apps_one: 'Aktif untuk %{count} aplikasi',

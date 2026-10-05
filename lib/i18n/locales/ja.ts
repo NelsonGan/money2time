@@ -1212,10 +1212,6 @@ const ja = {
       default_category: 'デフォルトのカテゴリ',
       default_none: '未設定',
       payment_alerts_title: '支払い通知',
-      payment_alerts_hint_android:
-        '銀行アプリや電子マネーアプリの通知から支払いを記録します。対象のアプリは自分で選べます。',
-      payment_alerts_hint_ios:
-        'ショートカットのオートメーションで、銀行の通知、SMS、メールから支払いを記録します。',
       payment_alerts_open: '支払い通知',
       payment_alerts_status_off: '未設定',
       payment_alerts_status_apps_one: '%{count} 個のアプリでオン',

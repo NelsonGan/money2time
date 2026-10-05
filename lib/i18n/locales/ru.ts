@@ -1220,10 +1220,6 @@ const ru = {
       default_category: 'Категория по умолчанию',
       default_none: 'Не задано',
       payment_alerts_title: 'Уведомления о платежах',
-      payment_alerts_hint_android:
-        'Записывает платежи из уведомлений банковских приложений и кошельков. Приложения выбираете вы.',
-      payment_alerts_hint_ios:
-        'Записывает платежи из уведомлений, SMS и писем банка с помощью автоматизации в «Быстрых командах».',
       payment_alerts_open: 'Уведомления о платежах',
       payment_alerts_status_off: 'Не настроено',
       payment_alerts_status_apps_one: 'Включено для %{count} приложения',

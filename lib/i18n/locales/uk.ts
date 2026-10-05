@@ -1214,10 +1214,6 @@ const uk = {
       default_category: 'Категорія за замовчуванням',
       default_none: 'Не задано',
       payment_alerts_title: 'Сповіщення про платежі',
-      payment_alerts_hint_android:
-        'Записує платежі зі сповіщень банківських застосунків і гаманців. Застосунки вибираєте ви.',
-      payment_alerts_hint_ios:
-        'Записує платежі зі сповіщень, SMS і листів банку за допомогою автоматизації у «Швидких командах».',
       payment_alerts_open: 'Сповіщення про платежі',
       payment_alerts_status_off: 'Не налаштовано',
       payment_alerts_status_apps_one: 'Увімкнено для %{count} застосунку',

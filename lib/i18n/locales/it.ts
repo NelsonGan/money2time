@@ -1220,10 +1220,6 @@ const it = {
       default_category: 'Categoria predefinita',
       default_none: 'Non impostato',
       payment_alerts_title: 'Notifiche di pagamento',
-      payment_alerts_hint_android:
-        'Registra i pagamenti dalle notifiche delle tue app bancarie e dei wallet. Scegli tu le app.',
-      payment_alerts_hint_ios:
-        "Registra i pagamenti dalle notifiche, dagli SMS e dalle email della tua banca tramite un'automazione di Comandi.",
       payment_alerts_open: 'Avvisi di pagamento',
       payment_alerts_status_off: 'Non configurato',
       payment_alerts_status_apps_one: 'Attivo per %{count} app',

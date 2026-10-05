@@ -4,7 +4,6 @@ import { Alert, Platform, Pressable, ScrollView, StyleSheet, Switch, View } from
 
 import { AddActionSheet } from '~/components/navigation/AddActionSheet';
 import {
-  InfoTooltipButton,
   SettingsHeader,
   SettingsPageLayout,
   Text,
@@ -12,7 +11,6 @@ import {
 } from '~/components/ui';
 import {
   LOG_CARD_PAYMENT_INTENT_NAME,
-  LOG_PAYMENT_ALERT_INTENT_NAME,
   NEW_TRANSACTION_INTENT_NAME,
   SCAN_SCREENSHOT_INTENT_NAME,
 } from '~/constants/autoLogIntents';
@@ -161,11 +159,7 @@ function PaymentAlertsEntry({
   return (
     <View className={className}>
       <AutoLogSectionHeader
-        title={
-          isAndroid
-            ? I18n.t('settings.auto_log.payment_alerts_title')
-            : LOG_PAYMENT_ALERT_INTENT_NAME
-        }
+        title={I18n.t('settings.auto_log.payment_alerts_title')}
         onTutorial={onTutorial}
         tutorialColor={themeColors.primary}
       />
@@ -188,14 +182,6 @@ function PaymentAlertsEntry({
           </View>
           <ChevronRight size={18} color={themeColors.textMuted} />
         </Pressable>
-        <InfoTooltipButton
-          title={I18n.t('settings.auto_log.payment_alerts_title')}
-          infoTooltip={I18n.t(
-            isAndroid
-              ? 'settings.auto_log.payment_alerts_hint_android'
-              : 'settings.auto_log.payment_alerts_hint_ios',
-          )}
-        />
       </View>
     </View>
   );

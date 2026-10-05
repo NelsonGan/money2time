@@ -1228,10 +1228,6 @@ const fr = {
       default_category: 'Catégorie par défaut',
       default_none: 'Non défini',
       payment_alerts_title: 'Notifications de paiement',
-      payment_alerts_hint_android:
-        'Enregistre les paiements à partir des notifications de vos applis bancaires et portefeuilles. Vous choisissez les applis.',
-      payment_alerts_hint_ios:
-        'Enregistre les paiements à partir des notifications, SMS et e-mails de votre banque via une automatisation Raccourcis.',
       payment_alerts_open: 'Alertes de paiement',
       payment_alerts_status_off: 'Non configuré',
       payment_alerts_status_apps_one: 'Activé pour %{count} appli',
