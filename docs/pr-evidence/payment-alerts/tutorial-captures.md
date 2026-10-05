@@ -8,12 +8,12 @@ The 18 indexed PNGs under `assets/autolog/pa_*.png` illustrate 10 iOS steps and
 
 - iPhone 18 Pro, iOS 27.0: manually built a Notification automation in Shortcuts
   using the built-in Wallet app. The simplified guide binds only Notification
-  Body to Message and selects Account. From, Title, Subtitle and Category are
-  empty; categories use the existing keyword matcher. Recaptured the account
-  and completed-action frames after removing the optional fields. The guide
-  shows Automation on and Notify off. The test example was
-  disabled after capture; no shortcut was manually run. The former SMS guide,
-  route, translations and screenshots are removed.
+  Body to Message and selects Account. The action has no From field; Title,
+  Subtitle and Category are empty. Categories use the existing keyword matcher.
+  Recaptured the five action-configuration frames after removing From and moving
+  Account above the optional metadata. The guide shows Automation on and Notify
+  off. The test example was disabled after capture; no shortcut was manually run.
+  The former SMS guide, route, translations and screenshots are removed.
 - Android emulator, API 36: in-app disclosure, system notification access and
   permission confirmation, app selection, account picker and the synthetic
   setup test. Shell is the emulator's test source, mapped to Rewards Card.
@@ -80,6 +80,24 @@ The remaining tutorial topics keep the existing screen tracking.
   through the keyword matcher, with From, Title, Subtitle and Category absent.
   This check saved no transaction. App preferences, locale and theme stayed
   unchanged; the Wallet example automation was saved and left disabled.
-- Rebuilt the iOS development app with the updated action description. The
-  Shortcuts fields remain optional and existing automations remain compatible.
-  Real iPhone notification delivery remains unverified.
+- Rebuilt the iOS development app with From removed from Log Payment Alert.
+  Checked a previously saved Wallet shortcut: its Notification Body binding and
+  E-Wallet account remained selected, and its automation stayed disabled.
+  Legacy source labels in already queued alerts remain readable. Title, Subtitle
+  and Category remain optional. Real iPhone notification delivery remains unverified.
+
+## iOS setup video
+
+- Recorded the real Shortcuts editor on the visible iPhone 18 Pro simulator,
+  iOS 27, using Argent screen recording with touch visualization enabled.
+  Wallet and synthetic Money2Time accounts are the examples. The walkthrough
+  covers creating the Notification trigger, selecting the app, keeping Automation
+  on and Notify off, adding Log Payment Alert, binding Notification Body to Message,
+  choosing Account, and saving. No action requests an app name.
+- The final MP4 adds short instructional captions and animated yellow tap rings
+  from the recorded tap coordinates, and trims waiting time. It is saved locally as
+  `Money2Time-iOS-App-Notifications-Setup.mp4` in Downloads. It does not contain
+  private account data or a real payment, and is not uploaded as a PR attachment.
+  Verified the 1 minute 48 second, 900 × 2120 H.264 MP4 decodes without errors.
+- The recording was stopped and retrieved. The new Wallet demo automation was
+  saved, then disabled after recording. Other automations were not changed.

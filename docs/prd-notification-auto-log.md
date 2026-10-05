@@ -41,10 +41,11 @@ separate Account label. Missing-app help is in the tooltip beside Recently activ
 
 For iOS, set Message to Notification Body and select Account in every Log
 Payment Alert action. Leave Category empty for automatic keyword matching.
-From, Title and Subtitle are optional; the guide omits their setup. From is only
-a source label for duplicate detection. The action does not register in-app
-source settings, and obsolete iOS source settings do not control its logging. An
-unavailable selected account is skipped rather than replaced with another account.
+The action has no From field. Title and Subtitle remain optional; the guide
+omits their setup. Previously queued source labels remain readable. The action
+does not register in-app source settings, and obsolete iOS source settings do not
+control its logging. An unavailable selected account is skipped rather than
+replaced with another account.
 Removed, deleted, goal and loan accounts cannot receive alert expenses.
 
 ## Capture and processing
@@ -134,6 +135,6 @@ was tested. SMS/Message automation instructions and screenshots are removed.
 - Verify the notification trigger fires on a real iPhone. The iOS 27 simulator
   confirmed the editor flow (tap +, Edit, then Automation and Notification),
   the Notification variable's Body property and the action's Account parameter.
-  The guide leaves From, Title, Subtitle and Category empty.
+  The action has no From field. The guide leaves Title, Subtitle and Category empty.
 - Update the privacy policy and Play Console notification-access declaration.
 - Add an in-app announcement when the feature ships.
