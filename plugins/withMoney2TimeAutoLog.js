@@ -42,7 +42,7 @@ const PENDING_KEY = 'autolog_pending';
 const PENDING_SCANS_KEY = 'autolog_pending_scans';
 const SCANS_DIR = 'autolog-scans';
 /**
- * Bank notifications, texts and emails queued by LogPaymentAlertIntent, as a
+ * App notifications queued by LogPaymentAlertIntent, as a
  * JSON array of raw text (parseIosPendingAlertsJson in
  * features/autoLog/lib/captureQueue.ts reads it). The app parses, binds and
  * logs spending to the account the user selected when the app next runs.
@@ -50,7 +50,7 @@ const SCANS_DIR = 'autolog-scans';
 const PENDING_ALERTS_KEY = 'autolog_pending_alerts';
 /** Alerts kept while the app stays closed; the oldest go first beyond this. */
 const MAX_PENDING_ALERTS = 200;
-/** Characters kept per field: an alert is a sentence or two, an email is not. */
+/** Characters kept per field: an app notification is usually a sentence or two. */
 const MAX_ALERT_TEXT = 2000;
 const CATALOG_SCHEMA_VERSION = 1;
 const IOS_APP_TARGET_NAME = 'Money2Time';
@@ -1019,13 +1019,11 @@ const LOG_PAYMENT_ALERT_INTENT_SWIFT = `import AppIntents
 import Foundation
 
 /// The payment-alert action: what a Shortcuts automation runs with the text of
-/// a bank's notification (the Notification trigger, iOS 27), a bank's text
-/// message (Message trigger) or an email (Email trigger). Apple Pay taps have
-/// Log Card Payment; this covers everything else: bank transfers, wallets,
-/// cards not in Apple Pay. docs/prd-notification-auto-log.md §7.5.
+/// a bank or e-wallet app notification (the Notification trigger, iOS 27).
+/// Apple Pay taps have their own Log Card Payment action.
 ///
 /// It only queues the raw text into the App Group and returns, without
-/// opening the app or posting anything: the bank's own notification is the
+/// opening the app or posting anything: the source app's notification is the
 /// receipt. The app reads the amount, merchant and account the next time it
 /// runs, and logs spending automatically to the selected account.
 /// Allowance and parsing checks run when the app drains the queue.
@@ -1041,7 +1039,7 @@ struct LogPaymentAlertIntent: AppIntent {
   static var title: LocalizedStringResource = "Log Payment Alert"
 
   static var description = IntentDescription(
-    "Send a bank notification, text message or email to Money2Time. Choose an account to log spending automatically when the app next opens. Set From to the bank's name so each bank can be set up on its own.",
+    "Send a bank or e-wallet app notification to Money2Time. Choose an account to log payments when the app next opens. Set From to the app's name.",
     categoryName: "Transactions"
   )
 

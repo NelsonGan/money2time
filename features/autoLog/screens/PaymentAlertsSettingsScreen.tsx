@@ -229,11 +229,6 @@ export function PaymentAlertsSettingsScreen({
                 )}
                 onPress={() => onOpenTutorial('paymentAlertsIos')}
               />
-              <TutorialCard
-                title={I18n.t('payment_alerts.ios_sms_title')}
-                description={I18n.t('payment_alerts.ios_sms_hint')}
-                onPress={() => onOpenTutorial('bankSmsIos')}
-              />
             </View>
           )}
           {IS_ANDROID || sources.length > 0 ? (

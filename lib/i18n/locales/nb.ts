@@ -1235,47 +1235,25 @@ const nb = {
       payment_alerts_android_step_7:
         'Betalinger registreres automatisk på den valgte kontoen. Kategorier bruker de samme nøkkelordene som Apple Pay.',
       payment_alerts_ios_step_1:
-        'Åpne Shortcuts, trykk + og deretter Editor. Trykk Automation i redigereren.',
+        'Åpne Shortcuts, trykk + og deretter Edit. Trykk Automation i redigereren.',
       payment_alerts_ios_step_2: 'Søk etter Notification og velg den.',
       payment_alerts_ios_step_3: 'Søk etter Log Payment Alert og legg den til.',
       payment_alerts_ios_step_4: 'Trykk Message i Log Payment Alert, deretter Select Variable.',
-      payment_alerts_ios_step_5: 'Trykk på From og skriv inn navnet på banken.',
-      payment_alerts_ios_step_6: 'Trykk på › og velg under Account kontoen banken betaler fra.',
+      payment_alerts_ios_step_5: 'Trykk på From og skriv inn appens navn.',
+      payment_alerts_ios_step_6:
+        'Trykk på handlingspilen og deretter Account. Velg hvor betalingene fra denne appen skal registreres.',
       payment_alerts_ios_step_7:
-        'Ferdig. Trykk tilbake for å lagre, og gjenta for hver bankapp. Betalinger registreres neste gang du åpner Money2Time.',
+        'Gå tilbake for å lagre. Gjenta for hver bank- eller lommebok-app. Betalingene registreres neste gang du åpner Money2Time.',
       payment_alerts_android_disclosure:
         'Les hvordan varslingstilgangen brukes, og trykk Continue.',
       payment_alerts_ios_app:
-        'Trykk App og velg bankappen. Skjermbildene bruker Messages som eksempel.',
+        'Trykk på App og velg bank- eller lommebok-appen. Disse skjermbildene bruker Wallet som eksempel.',
       payment_alerts_ios_run:
         'Trykk på pilen ved appen. La Automation være på og slå av Notify for stille registrering.',
       payment_alerts_ios_input: 'Velg Notification-variabelen under utløseren.',
       payment_alerts_ios_body: 'Trykk på variabelen, velg Body og deretter Return.',
       payment_alerts_ios_fields:
         'Sett Title og Subtitle til de tilsvarende Notification-egenskapene på samme måte. La Category stå tom for nøkkelordmatching.',
-      bank_sms_ios27_filter_kind:
-        'Trykk Sender til venstre og velg Message for å filtrere etter tekst.',
-      bank_sms_ios27_filter:
-        'Skriv et ord banken alltid bruker, som Maybank. Du kan også velge bankens avsender.',
-      bank_sms_ios27_run:
-        'Trykk på utløserens pil. La Automation være på og slå av Confirm Before Run.',
-      bank_sms_ios27_input: 'Velg Message-variabelen under utløseren.',
-      bank_sms_ios27_done:
-        'Trykk tilbake for å lagre. Bankmeldinger registreres neste gang Money2Time åpnes. La Category stå tom for nøkkelordmatching.',
-      bank_sms_ios_step_1:
-        'Åpne Snarveier, gå til Automation-fanen, trykk på New Automation og velg Message.',
-      bank_sms_ios_step_2:
-        'Velg banken din som avsender, eller skriv et ord som alltid står i SMS-ene under Message Contains. Velg deretter Run Immediately.',
-      bank_sms_ios_step_3:
-        'Trykk på Create New Shortcut, søk etter Money2Time, og legg til Log Payment Alert.',
-      bank_sms_ios_step_4:
-        'Trykk på feltet Message, velg Select Variable, deretter Shortcut Input, og velg Content. Sett From til navnet på banken.',
-      bank_sms_ios_step_5:
-        'Velg Account i Log Payment Alert. Betalinger registreres automatisk på den valgte kontoen. Kategorier bruker de samme nøkkelordene som Apple Pay.',
-      bank_sms_ios27_step_2: 'Søk etter Message og velg den.',
-      bank_sms_ios27_step_4: 'Trykk på variabelen, velg Content og deretter Return.',
-      bank_sms_ios27_step_5:
-        'Trykk på handlingens pil, deretter Account. Velg kontoen for betalingene.',
     },
     title: 'Innstillinger',
     display: 'Visning',
@@ -2609,8 +2587,7 @@ const nb = {
     title: 'Betalingsvarsler',
     intro_android:
       'Money2Time leser betalingsvarslene fra bank- og lommebokappene du velger, og registrerer hver betaling for deg. Varsler leses på denne telefonen og lastes aldri opp.',
-    intro_ios:
-      'Betalinger registreres automatisk på den valgte kontoen. Kategorier bruker de samme nøkkelordene som Apple Pay.',
+    intro_ios: 'Registrer betalinger fra bank- og lommebok-appene dine automatisk.',
     section_status: 'Status',
     master_label: 'Les betalingsvarsler',
     master_hint: 'Registrerer betalinger fra appene du velger.',
@@ -2624,13 +2601,11 @@ const nb = {
     health_reconnect: 'Koble til igjen',
     health_battery_hint:
       'Hvis dette skjer igjen, sett batteribruken for Money2Time til Ubegrenset i Android-innstillingene.',
-    ios_notifications_title: 'Varsler fra banken',
-    ios_notifications_hint: 'Én automatisering per bankapp sender varslene dens til Money2Time.',
+    ios_notifications_title: 'Appvarsler',
+    ios_notifications_hint:
+      'Sett opp én Snarveier-automatisering for hver bank- eller lommebok-app.',
     ios_needs_27:
-      'Automatiseringer for varsler krever iOS 27. SMS-er fra banken, Apple Pay og skjermbilder fungerer allerede nå.',
-    ios_sms_title: 'SMS-er fra banken',
-    ios_sms_hint:
-      'En automatisering sender SMS-er fra banken din til Money2Time. Fungerer fra iOS 17.',
+      'Automatiseringer med appvarsler krever iOS 27. På tidligere versjoner kan du bruke Apple Pay eller dele skjermbilder av betalinger.',
     section_apps: 'Apper',
     section_sources: 'Kilder',
     choose_apps: 'Velg apper',

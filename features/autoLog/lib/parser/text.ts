@@ -1,5 +1,5 @@
 // Text plumbing for the payment-alert parser: normalizing what a notification
-// or an SMS hands over, and matching lexicons against it. Pure.
+// hands over, and matching lexicons against it. Pure.
 
 import type { Lexicon } from './lexicons';
 

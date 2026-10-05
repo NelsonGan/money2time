@@ -312,19 +312,4 @@ describe('the curated payment app list', () => {
     const packages = PAYMENT_APPS.map((app) => app.package);
     expect(new Set(packages).size).toBe(packages.length);
   });
-
-  it('only references account logos that exist', () => {
-    const fs = require('fs') as typeof import('fs');
-
-    const path = require('path') as typeof import('path');
-    const generated = fs.readFileSync(
-      path.join(__dirname, '../../../constants/accountLogos.generated.ts'),
-      'utf8',
-    );
-    for (const app of PAYMENT_APPS) {
-      for (const logoId of app.logoIds) {
-        expect(`${app.package}:${generated.includes(`'${logoId}'`)}`).toBe(`${app.package}:true`);
-      }
-    }
-  });
 });

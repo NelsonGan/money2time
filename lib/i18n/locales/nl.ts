@@ -1246,47 +1246,25 @@ const nl = {
       payment_alerts_android_step_7:
         'Betalingen worden automatisch op de gekozen rekening geboekt. Categorieën gebruiken dezelfde trefwoorden als Apple Pay.',
       payment_alerts_ios_step_1:
-        'Open Shortcuts, tik op + en daarna Editor. Tik in de editor op Automation.',
+        'Open Shortcuts, tik op + en daarna Edit. Tik in de editor op Automation.',
       payment_alerts_ios_step_2: 'Zoek Notification en selecteer dit.',
       payment_alerts_ios_step_3: 'Zoek Log Payment Alert en voeg het toe.',
       payment_alerts_ios_step_4: 'Tik op Message in Log Payment Alert en daarna Select Variable.',
-      payment_alerts_ios_step_5: 'Tik op From en typ de naam van je bank.',
+      payment_alerts_ios_step_5: 'Tik op From en voer de naam van de app in.',
       payment_alerts_ios_step_6:
-        'Tik op › en kies bij Account de rekening waarvan deze bank betaalt.',
+        'Tik op de actiepijl en daarna op Account. Kies waar betalingen van deze app worden vastgelegd.',
       payment_alerts_ios_step_7:
-        'Klaar. Tik op terug om te bewaren en herhaal dit voor elke bank-app. Betalingen worden geregistreerd wanneer je Money2Time weer opent.',
+        'Ga terug om op te slaan. Herhaal dit voor elke bank- of wallet-app. Betalingen worden vastgelegd wanneer je Money2Time opnieuw opent.',
       payment_alerts_android_disclosure:
         'Lees hoe meldingstoegang wordt gebruikt en tik op Continue.',
       payment_alerts_ios_app:
-        'Tik op App en kies je bankapp. De screenshots gebruiken Messages als voorbeeld.',
+        'Tik op App en kies je bank- of wallet-app. Deze screenshots gebruiken Wallet als voorbeeld.',
       payment_alerts_ios_run:
         'Tik op de pijl naast de app. Laat Automation aan en zet Notify uit om stil te registreren.',
       payment_alerts_ios_input: 'Selecteer de variabele Notification onder de trigger.',
       payment_alerts_ios_body: 'Tik op de ingevoegde variabele, kies Body en daarna Return.',
       payment_alerts_ios_fields:
         'Stel Title en Subtitle op dezelfde manier in op de bijbehorende Notification-eigenschappen. Laat Category leeg voor trefwoordmatching.',
-      bank_sms_ios27_filter_kind: 'Tik links op Sender en kies Message om op tekst te filteren.',
-      bank_sms_ios27_filter:
-        'Voer een woord in dat je bank altijd gebruikt, zoals Maybank. Je kunt ook de afzender van de bank kiezen.',
-      bank_sms_ios27_run:
-        'Tik op de triggerpijl. Laat Automation aan en zet Confirm Before Run uit.',
-      bank_sms_ios27_input: 'Selecteer de variabele Message onder de trigger.',
-      bank_sms_ios27_done:
-        'Ga terug om op te slaan. Bankberichten worden geregistreerd wanneer je Money2Time weer opent. Laat Category leeg voor trefwoordmatching.',
-      bank_sms_ios_step_1:
-        'Open Opdrachten, ga naar het tabblad Automation, tik op New Automation en kies Message.',
-      bank_sms_ios_step_2:
-        "Kies je bank als afzender, of typ bij Message Contains een woord dat altijd in de sms'jes staat. Kies dan Run Immediately.",
-      bank_sms_ios_step_3:
-        'Tik op Create New Shortcut, zoek Money2Time en voeg Log Payment Alert toe.',
-      bank_sms_ios_step_4:
-        'Tik op het veld Message, kies Select Variable, daarna Shortcut Input en selecteer Content. Zet bij From de naam van de bank.',
-      bank_sms_ios_step_5:
-        'Kies Account in Log Payment Alert. Betalingen worden automatisch op de gekozen rekening geboekt. Categorieën gebruiken dezelfde trefwoorden als Apple Pay.',
-      bank_sms_ios27_step_2: 'Zoek Message en selecteer dit.',
-      bank_sms_ios27_step_4: 'Tik op de ingevoegde variabele, kies Content en daarna Return.',
-      bank_sms_ios27_step_5:
-        'Tik op de actiepijl en daarna Account. Kies de rekening voor deze betalingen.',
     },
     title: 'Instellingen',
     display: 'Weergave',
@@ -2638,8 +2616,7 @@ const nl = {
     title: 'Betaalmeldingen',
     intro_android:
       'Money2Time leest de betaalmeldingen van de bank- en wallet-apps die je kiest en registreert elke betaling voor je. Meldingen worden op deze telefoon gelezen en nooit geüpload.',
-    intro_ios:
-      'Betalingen worden automatisch op de gekozen rekening geboekt. Categorieën gebruiken dezelfde trefwoorden als Apple Pay.',
+    intro_ios: 'Leg betalingen uit je bank- en wallet-apps automatisch vast.',
     section_status: 'Status',
     master_label: 'Betaalmeldingen lezen',
     master_hint: 'Registreert betalingen uit de apps die je kiest.',
@@ -2653,14 +2630,10 @@ const nl = {
     health_reconnect: 'Opnieuw verbinden',
     health_battery_hint:
       'Gebeurt dit vaker, zet het batterijgebruik van Money2Time dan op Onbeperkt in de Android-instellingen.',
-    ios_notifications_title: 'Meldingen van de bank',
-    ios_notifications_hint:
-      'Eén automatisering per bank-app stuurt de meldingen ervan naar Money2Time.',
+    ios_notifications_title: 'Appmeldingen',
+    ios_notifications_hint: 'Stel voor elke bank- of wallet-app één Opdrachten-automatisering in.',
     ios_needs_27:
-      "Automatiseringen voor meldingen hebben iOS 27 nodig. Sms'jes van de bank, Apple Pay en screenshots werken nu al.",
-    ios_sms_title: "Sms'jes van de bank",
-    ios_sms_hint:
-      "Een automatisering stuurt sms'jes van je bank naar Money2Time. Werkt vanaf iOS 17.",
+      'Automatiseringen voor appmeldingen vereisen iOS 27. Op eerdere versies kun je Apple Pay gebruiken of screenshots van betalingen delen.',
     section_apps: 'Apps',
     section_sources: 'Bronnen',
     choose_apps: 'Apps kiezen',

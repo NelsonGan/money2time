@@ -1238,46 +1238,25 @@ const pl = {
       payment_alerts_android_step_7:
         'Płatności są automatycznie zapisywane na wybranym koncie. Kategorie używają tych samych słów kluczowych co Apple Pay.',
       payment_alerts_ios_step_1:
-        'Otwórz Shortcuts, stuknij +, potem Editor. W edytorze stuknij Automation.',
+        'Otwórz Shortcuts, stuknij +, potem Edit. W edytorze stuknij Automation.',
       payment_alerts_ios_step_2: 'Wyszukaj Notification i wybierz tę opcję.',
       payment_alerts_ios_step_3: 'Wyszukaj Log Payment Alert i dodaj tę akcję.',
       payment_alerts_ios_step_4: 'Stuknij Message w Log Payment Alert, potem Select Variable.',
-      payment_alerts_ios_step_5: 'Dotknij From i wpisz nazwę banku.',
-      payment_alerts_ios_step_6: 'Dotknij › i wybierz w Account konto, z którego płaci ten bank.',
+      payment_alerts_ios_step_5: 'Stuknij From i wpisz nazwę aplikacji.',
+      payment_alerts_ios_step_6:
+        'Stuknij strzałkę czynności, a następnie Account. Wybierz konto do zapisywania płatności tej aplikacji.',
       payment_alerts_ios_step_7:
-        'Gotowe. Wróć, aby zapisać, i powtórz dla każdej aplikacji bankowej. Płatności zostaną zapisane przy następnym otwarciu Money2Time.',
+        'Wróć, aby zapisać. Powtórz dla każdej aplikacji bankowej lub portfela elektronicznego. Płatności zostaną zapisane przy następnym otwarciu Money2Time.',
       payment_alerts_android_disclosure:
         'Przeczytaj, jak używany jest dostęp do powiadomień, i stuknij Continue.',
       payment_alerts_ios_app:
-        'Stuknij App i wybierz aplikację banku. Na zrzutach Messages służy jako przykład.',
+        'Stuknij App i wybierz aplikację bankową lub portfel elektroniczny. Te zrzuty pokazują Wallet jako przykład.',
       payment_alerts_ios_run:
         'Stuknij strzałkę obok aplikacji. Pozostaw Automation włączone i wyłącz Notify, aby zapisywać bez powiadomień.',
       payment_alerts_ios_input: 'Wybierz zmienną Notification pod wyzwalaczem.',
       payment_alerts_ios_body: 'Stuknij wstawioną zmienną, wybierz Body, potem Return.',
       payment_alerts_ios_fields:
         'Przypisz Title i Subtitle do odpowiednich właściwości Notification w ten sam sposób. Pozostaw Category puste, aby dopasowywać słowa kluczowe.',
-      bank_sms_ios27_filter_kind: 'Stuknij Sender po lewej i wybierz Message, aby filtrować tekst.',
-      bank_sms_ios27_filter:
-        'Wpisz słowo zawsze używane przez bank, np. Maybank. Możesz też wybrać nadawcę banku.',
-      bank_sms_ios27_run:
-        'Stuknij strzałkę wyzwalacza. Pozostaw Automation włączone i wyłącz Confirm Before Run.',
-      bank_sms_ios27_input: 'Wybierz zmienną Message pod wyzwalaczem.',
-      bank_sms_ios27_done:
-        'Wróć, aby zapisać. SMS-y banku zostaną zapisane przy następnym otwarciu Money2Time. Pozostaw Category puste, aby dopasowywać słowa kluczowe.',
-      bank_sms_ios_step_1:
-        'Otwórz Skróty, przejdź do karty Automation, dotknij New Automation i wybierz Message.',
-      bank_sms_ios_step_2:
-        'Wybierz bank jako nadawcę albo w Message Contains wpisz słowo, które zawsze występuje w jego SMS-ach. Potem wybierz Run Immediately.',
-      bank_sms_ios_step_3:
-        'Dotknij Create New Shortcut, wyszukaj Money2Time i dodaj Log Payment Alert.',
-      bank_sms_ios_step_4:
-        'Dotknij pola Message, wybierz Select Variable, potem Shortcut Input i wybierz Content. Wpisz nazwę banku w From.',
-      bank_sms_ios_step_5:
-        'Wybierz Account w Log Payment Alert. Płatności są automatycznie zapisywane na wybranym koncie. Kategorie używają tych samych słów kluczowych co Apple Pay.',
-      bank_sms_ios27_step_2: 'Wyszukaj Message i wybierz tę opcję.',
-      bank_sms_ios27_step_4: 'Stuknij wstawioną zmienną, wybierz Content, potem Return.',
-      bank_sms_ios27_step_5:
-        'Stuknij strzałkę akcji, potem Account. Wybierz konto dla tych płatności.',
     },
     title: 'Ustawienia',
     display: 'Wyświetlanie',
@@ -2618,8 +2597,7 @@ const pl = {
     title: 'Powiadomienia o płatnościach',
     intro_android:
       'Money2Time odczytuje powiadomienia o płatnościach z wybranych aplikacji bankowych i portfeli, a potem zapisuje za Ciebie każdą płatność. Powiadomienia są odczytywane na tym telefonie i nigdy nie są wysyłane.',
-    intro_ios:
-      'Płatności są automatycznie zapisywane na wybranym koncie. Kategorie używają tych samych słów kluczowych co Apple Pay.',
+    intro_ios: 'Automatycznie zapisuj płatności z aplikacji bankowych i portfeli elektronicznych.',
     section_status: 'Stan',
     master_label: 'Odczytuj powiadomienia o płatnościach',
     master_hint: 'Zapisuje płatności z wybranych aplikacji.',
@@ -2633,13 +2611,11 @@ const pl = {
     health_reconnect: 'Połącz ponownie',
     health_battery_hint:
       'Jeśli to się powtarza, ustaw zużycie baterii przez Money2Time na Bez ograniczeń w ustawieniach Androida.',
-    ios_notifications_title: 'Powiadomienia z banku',
+    ios_notifications_title: 'Powiadomienia aplikacji',
     ios_notifications_hint:
-      'Jedna automatyzacja na każdą aplikację bankową wysyła jej powiadomienia do Money2Time.',
+      'Utwórz jedną automatyzację Skrótów dla każdej aplikacji bankowej lub portfela elektronicznego.',
     ios_needs_27:
-      'Automatyzacje powiadomień wymagają iOS 27. SMS-y z banku, Apple Pay i zrzuty ekranu działają już teraz.',
-    ios_sms_title: 'SMS-y z banku',
-    ios_sms_hint: 'Automatyzacja wysyła SMS-y z Twojego banku do Money2Time. Działa od iOS 17.',
+      'Automatyzacje powiadomień aplikacji wymagają iOS 27. We wcześniejszych wersjach możesz używać Apple Pay lub udostępniać zrzuty płatności.',
     section_apps: 'Aplikacje',
     section_sources: 'Źródła',
     choose_apps: 'Wybierz aplikacje',

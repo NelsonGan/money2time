@@ -1,7 +1,7 @@
 import type { ImageSource } from 'expo-image';
 import { Download, Play } from 'lucide-react-native';
 import React, { useCallback } from 'react';
-import { Linking, Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Linking, Pressable, StyleSheet, View } from 'react-native';
 
 import { SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
 import {
@@ -47,10 +47,6 @@ interface TutorialStep {
   /** Renders the "Get Shortcut" CTA under the caption, opening the topic's link. */
   download?: boolean;
 }
-
-/** iOS 27 moved automations out of their own tab and into the shortcut editor. */
-const IOS_27_OR_LATER =
-  Platform.OS === 'ios' && Number.parseInt(String(Platform.Version), 10) >= 27;
 
 const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
   // Built from scratch (no shareable link): create a Wallet automation, add the
@@ -157,37 +153,6 @@ const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
     { key: 'payment_alerts_ios_fields', image: require('~/assets/autolog/pa_ios_metadata.png') },
     { key: 'payment_alerts_ios_step_7', image: require('~/assets/autolog/pa_ios_done.png') },
   ],
-  // iOS 17+: a "Message" automation for bank text messages, same action. On
-  // iOS 27 it is built in the shortcut editor like the notification one, so
-  // its opening and search steps are shared with that topic.
-  bankSmsIos: IOS_27_OR_LATER
-    ? [
-        { key: 'payment_alerts_ios_step_1', image: require('~/assets/autolog/pa_ios_editor.png') },
-        { key: 'bank_sms_ios27_step_2', image: require('~/assets/autolog/pa_sms_message.png') },
-        {
-          key: 'bank_sms_ios27_filter_kind',
-          image: require('~/assets/autolog/pa_sms_filter_kind.png'),
-        },
-        { key: 'bank_sms_ios27_filter', image: require('~/assets/autolog/pa_sms_filter.png') },
-        { key: 'bank_sms_ios27_run', image: require('~/assets/autolog/pa_sms_auto.png') },
-        { key: 'payment_alerts_ios_step_3', image: require('~/assets/autolog/pa_sms_action.png') },
-        {
-          key: 'payment_alerts_ios_step_4',
-          image: require('~/assets/autolog/pa_sms_variable.png'),
-        },
-        { key: 'bank_sms_ios27_input', image: require('~/assets/autolog/pa_sms_input.png') },
-        { key: 'bank_sms_ios27_step_4', image: require('~/assets/autolog/pa_sms_content.png') },
-        { key: 'payment_alerts_ios_step_5', image: require('~/assets/autolog/pa_sms_from.png') },
-        { key: 'bank_sms_ios27_step_5', image: require('~/assets/autolog/pa_sms_account.png') },
-        { key: 'bank_sms_ios27_done', image: require('~/assets/autolog/pa_sms_done.png') },
-      ]
-    : [
-        { key: 'bank_sms_ios_step_1', image: null },
-        { key: 'bank_sms_ios_step_2', image: null },
-        { key: 'bank_sms_ios_step_3', image: null },
-        { key: 'bank_sms_ios_step_4', image: null },
-        { key: 'bank_sms_ios_step_5', image: null },
-      ],
 };
 
 /** iCloud shortcut links, one per topic that ships a downloadable shortcut. */
@@ -219,8 +184,6 @@ function titleFor(topic: AutoLogTutorialTopic): string {
       return I18n.t('payment_alerts.title');
     case 'paymentAlertsIos':
       return I18n.t('payment_alerts.ios_notifications_title');
-    case 'bankSmsIos':
-      return I18n.t('payment_alerts.ios_sms_title');
   }
 }
 

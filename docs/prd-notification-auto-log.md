@@ -21,8 +21,10 @@ transaction-history learning, AI requests, or categorization server is involved.
   and its status. Its top-right Tutorial link opens the platform's guide.
 - Android Payment alerts contains the capture switch, chosen apps with their
   account names and Choose apps. There is no duplicate tutorial button inside.
-- iOS Payment alerts contains the two Shortcuts tutorial links and configured
-  automation sources with their selected accounts.
+- iOS Payment alerts contains one App notifications guide and configured
+  automation sources with their selected accounts. Bank and e-wallet apps use
+  the Notification trigger on iOS 27. There is no SMS or Message automation guide;
+  earlier iOS versions can use Apple Pay or share payment screenshots.
 - A source screen contains its switch, one account picker, and Remove. Android
   places Remove in a top-right trash icon with the same confirmation dialog.
 - Explanations appear above controls and tutorial links. Navigation rows have
@@ -109,19 +111,18 @@ retention acknowledgements and automatic retries. Locale parity covers all 24
 catalogues. Native notification delivery and the real iPhone Shortcuts trigger
 still need device verification before release.
 
-The three new guides now include 31 annotated simulator captures across 32
+The two payment-alert guides include 20 annotated simulator captures across 20
 steps: Android notification access, app/account selection and the test alert;
-iOS 27 Notification and Message triggers, variables and Log Payment Alert
-configuration. Messages is the installed example app; Maybank is an example
-source name and SMS filter. No Maybank app or real bank alert was tested.
-Older iOS SMS instructions remain available, but their screens have not been
-recaptured because only the iOS 27 simulator runtime is installed.
+iOS 27 Notification triggers, variables and Log Payment Alert configuration.
+The iOS example uses the built-in Wallet app. Android uses the emulator's Shell
+test source because no bank app is installed. No Maybank app or real bank alert
+was tested. SMS/Message automation instructions and screenshots are removed.
 
 ## Release work
 
 - Verify the notification trigger fires on a real iPhone. The iOS 27 simulator
-  confirmed the editor flow (tap +, Editor, then Automation and Notification or
-  Message), the Notification variable's Body, Title and Subtitle properties,
-  the Message variable's Content, and the action's From and Account parameters.
+  confirmed the editor flow (tap +, Edit, then Automation and Notification),
+  the Notification variable's Body, Title and Subtitle properties, and the
+  action's From and Account parameters.
 - Update the privacy policy and Play Console notification-access declaration.
 - Add an in-app announcement when the feature ships.

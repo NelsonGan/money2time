@@ -1208,46 +1208,24 @@ const en = {
       payment_alerts_android_step_6: 'Send a test alert to check that everything works.',
       payment_alerts_android_step_7:
         'Payments log automatically to your selected account. Categories use the same keywords as Apple Pay.',
-      payment_alerts_ios_step_1:
-        'Open Shortcuts, tap +, then Editor. Tap Automation in the editor.',
+      payment_alerts_ios_step_1: 'Open Shortcuts, tap +, then Edit. Tap Automation in the editor.',
       payment_alerts_ios_step_2: 'Search for Notification and select it.',
       payment_alerts_ios_step_3: 'Search for Log Payment Alert and add it.',
       payment_alerts_ios_step_4: 'Tap Message in Log Payment Alert, then Select Variable.',
-      payment_alerts_ios_step_5: "Tap From and type your bank's name.",
-      payment_alerts_ios_step_6: 'Tap › and choose the Account this bank pays from.',
+      payment_alerts_ios_step_5: 'Tap From and type the app’s name.',
+      payment_alerts_ios_step_6:
+        'Tap the action arrow, then Account. Choose where this app’s payments should be logged.',
       payment_alerts_ios_step_7:
-        'Done. Tap back to save, then repeat for each banking app. Payments are logged the next time you open Money2Time.',
+        'Tap back to save. Repeat for each bank or e-wallet app. Payments log when you next open Money2Time.',
       payment_alerts_android_disclosure: 'Read how notification access is used, then tap Continue.',
       payment_alerts_ios_app:
-        'Tap App and choose your banking app. These screenshots use Messages as an example.',
+        'Tap App and choose your bank or e-wallet app. These screenshots use Wallet as an example.',
       payment_alerts_ios_run:
         'Tap the arrow beside the app and keep Automation on. Turn Notify off for silent logging.',
       payment_alerts_ios_input: 'Select the Notification variable below the trigger.',
       payment_alerts_ios_body: 'Tap the inserted variable and choose Body, then Return.',
       payment_alerts_ios_fields:
         'Set Title and Subtitle to the matching Notification properties using the same variable steps. Leave Category unset to use keyword matching.',
-      bank_sms_ios27_filter_kind: 'Tap Sender on the left and choose Message to filter by text.',
-      bank_sms_ios27_filter:
-        'Enter a word your bank always includes, such as Maybank. You can use a bank sender instead.',
-      bank_sms_ios27_run:
-        'Tap the trigger arrow. Keep Automation on and turn Confirm Before Run off.',
-      bank_sms_ios27_input: 'Select the Message variable below the trigger.',
-      bank_sms_ios27_done:
-        'Tap back to save. Bank texts are logged the next time you open Money2Time. Leave Category unset to use keyword matching.',
-      bank_sms_ios_step_1:
-        'Open Shortcuts, go to the Automation tab, tap New Automation, and choose Message.',
-      bank_sms_ios_step_2:
-        'Choose your bank as the sender, or under Message Contains type a word its texts always use. Then choose Run Immediately.',
-      bank_sms_ios_step_3:
-        'Tap Create New Shortcut, search for Money2Time, and add Log Payment Alert.',
-      bank_sms_ios_step_4:
-        "Tap the Message field, choose Select Variable, then Shortcut Input, and pick Content. Set From to the bank's name.",
-      bank_sms_ios_step_5:
-        'Choose Account in Log Payment Alert. Payments log automatically to your selected account. Categories use the same keywords as Apple Pay.',
-      bank_sms_ios27_step_2: 'Search for Message and select it.',
-      bank_sms_ios27_step_4: 'Tap the inserted variable and choose Content, then Return.',
-      bank_sms_ios27_step_5:
-        'Tap the action arrow, then Account. Choose where these payments should be logged.',
     },
     title: 'Settings',
     display: 'Display',
@@ -2608,8 +2586,7 @@ const en = {
     title: 'Payment alerts',
     intro_android:
       'Money2Time reads the payment notifications from the banking and wallet apps you choose and logs each payment for you. Alerts are read on this phone and never uploaded.',
-    intro_ios:
-      'Payments log automatically to your selected account. Categories use the same keywords as Apple Pay.',
+    intro_ios: 'Automatically log payments from your bank and e-wallet apps.',
     section_status: 'Status',
     master_label: 'Read payment notifications',
     master_hint: 'Logs payments from the apps you choose.',
@@ -2623,13 +2600,10 @@ const en = {
     health_reconnect: 'Reconnect',
     health_battery_hint:
       'If this keeps happening, set the battery usage for Money2Time to Unrestricted in Android settings.',
-    ios_notifications_title: 'Bank notifications',
-    ios_notifications_hint: 'One automation per banking app sends its notifications to Money2Time.',
+    ios_notifications_title: 'App notifications',
+    ios_notifications_hint: 'Set up one Shortcuts automation for each bank or e-wallet app.',
     ios_needs_27:
-      'Notification automations need iOS 27. Bank text messages, Apple Pay and screenshots work now.',
-    ios_sms_title: 'Bank text messages',
-    ios_sms_hint:
-      'An automation sends texts from your bank to Money2Time. Works on iOS 17 and later.',
+      'App notification automations need iOS 27. You can use Apple Pay or share payment screenshots on earlier versions.',
     section_apps: 'Apps',
     section_sources: 'Sources',
     choose_apps: 'Choose apps',

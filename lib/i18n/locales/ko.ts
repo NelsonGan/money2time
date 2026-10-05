@@ -1215,45 +1215,24 @@ const ko = {
       payment_alerts_android_step_7:
         '결제는 선택한 계좌에 자동으로 기록됩니다. 카테고리는 Apple Pay와 같은 키워드를 사용합니다.',
       payment_alerts_ios_step_1:
-        'Shortcuts를 열고 +, Editor를 누르세요. 편집기에서 Automation을 누르세요.',
+        'Shortcuts를 열고 +, Edit를 누르세요. 편집기에서 Automation을 누르세요.',
       payment_alerts_ios_step_2: 'Notification을 검색해 선택하세요.',
       payment_alerts_ios_step_3: 'Log Payment Alert를 검색해 추가하세요.',
       payment_alerts_ios_step_4: 'Log Payment Alert에서 Message, Select Variable을 누르세요.',
-      payment_alerts_ios_step_5: 'From을 누르고 은행 이름을 입력하세요.',
-      payment_alerts_ios_step_6: '›를 누르고 Account에서 이 은행이 결제하는 계좌를 선택하세요.',
+      payment_alerts_ios_step_5: 'From을 탭하고 앱 이름을 입력하세요.',
+      payment_alerts_ios_step_6:
+        '동작 화살표를 탭한 다음 Account를 탭하세요. 이 앱의 결제를 기록할 계좌를 선택하세요.',
       payment_alerts_ios_step_7:
-        '완료입니다. 뒤로 가서 저장하고, 은행 앱마다 반복하세요. 결제는 다음에 Money2Time을 열 때 기록됩니다.',
+        '뒤로 가기를 탭해 저장하세요. 은행 또는 전자 지갑 앱마다 반복하세요. 다음에 Money2Time을 열면 결제가 기록됩니다.',
       payment_alerts_android_disclosure: '알림 접근 권한의 사용 방법을 읽고 Continue를 누르세요.',
       payment_alerts_ios_app:
-        'App을 눌러 은행 앱을 선택하세요. 스크린샷은 Messages를 예로 사용합니다.',
+        'App을 탭하고 은행 또는 전자 지갑 앱을 선택하세요. 이 스크린샷은 Wallet을 예로 사용합니다.',
       payment_alerts_ios_run:
         '앱 옆 화살표를 누르세요. Automation을 켜 두고 조용히 기록하려면 Notify를 끄세요.',
       payment_alerts_ios_input: '트리거 아래의 Notification 변수를 선택하세요.',
       payment_alerts_ios_body: '삽입된 변수를 눌러 Body, Return을 선택하세요.',
       payment_alerts_ios_fields:
         '같은 방법으로 Title과 Subtitle에 해당 Notification 속성을 지정하세요. 키워드 매칭을 쓰려면 Category를 비워 두세요.',
-      bank_sms_ios27_filter_kind:
-        '왼쪽 Sender를 눌러 Message를 선택하면 문자 내용으로 필터링할 수 있습니다.',
-      bank_sms_ios27_filter:
-        'Maybank처럼 은행 문자에 항상 포함되는 단어를 입력하세요. 은행 발신자를 선택해도 됩니다.',
-      bank_sms_ios27_run:
-        '트리거 화살표를 누르세요. Automation을 켜 두고 Confirm Before Run을 끄세요.',
-      bank_sms_ios27_input: '트리거 아래의 Message 변수를 선택하세요.',
-      bank_sms_ios27_done:
-        '뒤로 가서 저장하세요. 다음에 Money2Time을 열면 은행 문자가 기록됩니다. 키워드 매칭을 쓰려면 Category를 비워 두세요.',
-      bank_sms_ios_step_1:
-        '단축어를 열고 자동화 탭에서 New Automation을 누른 다음 Message를 선택하세요.',
-      bank_sms_ios_step_2:
-        '보낸 사람으로 은행을 고르거나, Message Contains에 문자에 항상 들어가는 단어를 입력하세요. 그런 다음 Run Immediately를 선택하세요.',
-      bank_sms_ios_step_3:
-        'Create New Shortcut을 누르고 Money2Time을 검색해 Log Payment Alert를 추가하세요.',
-      bank_sms_ios_step_4:
-        'Message 필드를 누르고 Select Variable를 선택한 다음 Shortcut Input을 누르고 Content를 선택하세요. From에 은행 이름을 입력하세요.',
-      bank_sms_ios_step_5:
-        'Log Payment Alert에서 Account를 선택하세요. 결제는 선택한 계좌에 자동으로 기록됩니다. 카테고리는 Apple Pay와 같은 키워드를 사용합니다.',
-      bank_sms_ios27_step_2: 'Message를 검색해 선택하세요.',
-      bank_sms_ios27_step_4: '삽입된 변수를 눌러 Content, Return을 선택하세요.',
-      bank_sms_ios27_step_5: '동작 화살표, Account를 누르고 결제를 기록할 계좌를 선택하세요.',
     },
     title: '설정',
     display: '화면',
@@ -2574,8 +2553,7 @@ const ko = {
     title: '결제 알림',
     intro_android:
       'Money2Time이 선택한 은행 앱과 간편결제 앱의 결제 알림을 읽고 결제를 하나하나 기록합니다. 알림은 이 기기에서만 읽으며 업로드되지 않습니다.',
-    intro_ios:
-      '결제는 선택한 계좌에 자동으로 기록됩니다. 카테고리는 Apple Pay와 같은 키워드를 사용합니다.',
+    intro_ios: '은행 및 전자 지갑 앱의 결제를 자동으로 기록합니다.',
     section_status: '상태',
     master_label: '결제 알림 읽기',
     master_hint: '선택한 앱의 결제를 기록합니다.',
@@ -2589,13 +2567,10 @@ const ko = {
     health_reconnect: '다시 연결',
     health_battery_hint:
       "이런 일이 반복되면 Android 설정에서 Money2Time의 배터리 사용을 '제한 없음'으로 설정하세요.",
-    ios_notifications_title: '은행 알림',
-    ios_notifications_hint: '은행 앱마다 자동화를 하나씩 만들어 알림을 Money2Time으로 보냅니다.',
+    ios_notifications_title: '앱 알림',
+    ios_notifications_hint: '은행 또는 전자 지갑 앱마다 단축어 자동화를 하나씩 설정하세요.',
     ios_needs_27:
-      '알림 자동화에는 iOS 27이 필요합니다. 은행 문자, Apple Pay, 스크린샷은 지금 바로 사용할 수 있습니다.',
-    ios_sms_title: '은행 문자 메시지',
-    ios_sms_hint:
-      '자동화가 은행에서 온 문자를 Money2Time으로 보냅니다. iOS 17 이상에서 작동합니다.',
+      '앱 알림 자동화에는 iOS 27이 필요합니다. 이전 버전에서는 Apple Pay를 사용하거나 결제 스크린샷을 공유할 수 있습니다.',
     section_apps: '앱',
     section_sources: '출처',
     choose_apps: '앱 선택',
