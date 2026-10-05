@@ -39,10 +39,13 @@ pipeline using a selected source, without saving a transaction.
 The app picker aligns each selected account control with its app row, without a
 separate Account label. Missing-app help is in the tooltip beside Recently active.
 
-For iOS, select Account in every Log Payment Alert action. From identifies the
-source for duplicate detection. The action does not register in-app source
-settings, and obsolete iOS source settings do not control its logging. An
-unavailable selected account is skipped rather than replaced with another account.
+For iOS, set Message to Notification Body and select Account in every Log
+Payment Alert action. Leave Category empty for automatic keyword matching.
+The action has no From field. Title and Subtitle remain optional; the guide
+omits their setup. Previously queued source labels remain readable. The action
+does not register in-app source settings, and obsolete iOS source settings do not
+control its logging. An unavailable selected account is skipped rather than
+replaced with another account.
 Removed, deleted, goal and loan accounts cannot receive alert expenses.
 
 ## Capture and processing
@@ -119,9 +122,10 @@ alert is recognized in all 24 catalogues, with additional decline, refund and
 promotion checks. Locale parity covers all 24 catalogues. Native notification delivery and the real iPhone Shortcuts trigger
 still need device verification before release.
 
-The two payment-alert guides include 20 annotated simulator captures across 20
-steps: Android notification access, app/account selection and the test alert;
-iOS 27 Notification triggers, variables and Log Payment Alert configuration.
+The two payment-alert guides include 18 annotated simulator captures across 18
+steps (10 iOS and 8 Android): Android notification access, app/account selection
+and the test alert; iOS 27 Notification triggers, variables and Log Payment
+Alert configuration.
 The iOS example uses the built-in Wallet app. Android uses the emulator's Shell
 test source because no bank app is installed. No Maybank app or real bank alert
 was tested. SMS/Message automation instructions and screenshots are removed.
@@ -130,7 +134,7 @@ was tested. SMS/Message automation instructions and screenshots are removed.
 
 - Verify the notification trigger fires on a real iPhone. The iOS 27 simulator
   confirmed the editor flow (tap +, Edit, then Automation and Notification),
-  the Notification variable's Body, Title and Subtitle properties, and the
-  action's From and Account parameters.
+  the Notification variable's Body property and the action's Account parameter.
+  The action has no From field. The guide leaves Title, Subtitle and Category empty.
 - Update the privacy policy and Play Console notification-access declaration.
 - Add an in-app announcement when the feature ships.

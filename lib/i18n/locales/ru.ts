@@ -1242,9 +1242,8 @@ const ru = {
       payment_alerts_ios_step_2: 'Найдите Notification и выберите его.',
       payment_alerts_ios_step_3: 'Найдите Log Payment Alert и добавьте его.',
       payment_alerts_ios_step_4: 'Нажмите Message в Log Payment Alert, затем Select Variable.',
-      payment_alerts_ios_step_5: 'Нажмите From и введите название приложения.',
       payment_alerts_ios_step_6:
-        'Нажмите стрелку действия, затем Account. Выберите счёт для записи платежей этого приложения.',
+        'Нажмите стрелку действия, затем Account. Выберите счёт для записи платежей этого приложения. Оставьте Category пустым для автоматического подбора по ключевым словам.',
       payment_alerts_ios_step_7:
         'Вернитесь назад для сохранения. Повторите для каждого приложения банка или кошелька. Платежи запишутся при следующем открытии Money2Time.',
       payment_alerts_android_disclosure:
@@ -1255,8 +1254,6 @@ const ru = {
         'Нажмите стрелку рядом с приложением. Оставьте Automation включённым и отключите Notify для записи без уведомлений.',
       payment_alerts_ios_input: 'Выберите переменную Notification под триггером.',
       payment_alerts_ios_body: 'Нажмите вставленную переменную, выберите Body, затем Return.',
-      payment_alerts_ios_fields:
-        'Так же задайте Title и Subtitle соответствующие свойства Notification. Оставьте Category пустым для подбора по ключевым словам.',
     },
     title: 'Настройки',
     display: 'Отображение',

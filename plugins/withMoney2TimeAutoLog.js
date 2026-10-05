@@ -271,8 +271,7 @@ enum AutoLogStore {
   struct PendingAlert: Codable {
     var id: String
     var createdAt: String
-    /// The automation's "From" (the bank or app name the user typed), which
-    /// becomes the alert's source in the app.
+    /// Optional source label retained for alerts queued by earlier actions.
     var source: String?
     var title: String?
     var subtitle: String?
@@ -1039,7 +1038,7 @@ struct LogPaymentAlertIntent: AppIntent {
   static var title: LocalizedStringResource = "Log Payment Alert"
 
   static var description = IntentDescription(
-    "Send a bank or e-wallet app notification to Money2Time. Choose an account to log payments when the app next opens. Set From to the app's name.",
+    "Send a bank or e-wallet app notification to Money2Time. Use Notification Body as Message and choose an account. Payments log when the app next opens, with categories matched automatically.",
     categoryName: "Transactions"
   )
 
@@ -1048,8 +1047,8 @@ struct LogPaymentAlertIntent: AppIntent {
   @Parameter(title: "Message")
   var message: String
 
-  @Parameter(title: "From")
-  var source: String?
+  @Parameter(title: "Account")
+  var account: AutoLogAccountEntity?
 
   @Parameter(title: "Title")
   var alertTitle: String?
@@ -1057,17 +1056,14 @@ struct LogPaymentAlertIntent: AppIntent {
   @Parameter(title: "Subtitle")
   var subtitle: String?
 
-  @Parameter(title: "Account")
-  var account: AutoLogAccountEntity?
-
   @Parameter(title: "Category")
   var category: AutoLogCategoryEntity?
 
   static var parameterSummary: some ParameterSummary {
-    Summary("Log payment alert \\(\\.$message) from \\(\\.$source)") {
+    Summary("Log payment alert \\(\\.$message)") {
+      \\.$account
       \\.$alertTitle
       \\.$subtitle
-      \\.$account
       \\.$category
     }
   }
@@ -1082,7 +1078,7 @@ struct LogPaymentAlertIntent: AppIntent {
     // nothing rather than fail the user's automation.
     try AutoLogStore.enqueueAlert(
       message: message,
-      source: source,
+      source: nil,
       title: alertTitle,
       subtitle: subtitle,
       accountId: account?.id,

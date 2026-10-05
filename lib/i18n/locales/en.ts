@@ -1210,9 +1210,8 @@ const en = {
       payment_alerts_ios_step_2: 'Search for Notification and select it.',
       payment_alerts_ios_step_3: 'Search for Log Payment Alert and add it.',
       payment_alerts_ios_step_4: 'Tap Message in Log Payment Alert, then Select Variable.',
-      payment_alerts_ios_step_5: 'Tap From and type the app’s name.',
       payment_alerts_ios_step_6:
-        'Tap the action arrow, then Account. Choose where this app’s payments should be logged.',
+        'Tap the action arrow, then Account. Choose where this app’s payments should be logged. Leave Category empty for automatic keyword matching.',
       payment_alerts_ios_step_7:
         'Tap back to save. Repeat for each bank or e-wallet app. Payments log when you next open Money2Time.',
       payment_alerts_android_disclosure: 'Read how notification access is used, then tap Continue.',
@@ -1222,8 +1221,6 @@ const en = {
         'Tap the arrow beside the app and keep Automation on. Turn Notify off for silent logging.',
       payment_alerts_ios_input: 'Select the Notification variable below the trigger.',
       payment_alerts_ios_body: 'Tap the inserted variable and choose Body, then Return.',
-      payment_alerts_ios_fields:
-        'Set Title and Subtitle to the matching Notification properties using the same variable steps. Leave Category unset to use keyword matching.',
     },
     title: 'Settings',
     display: 'Display',
