@@ -3,6 +3,7 @@ import type {
   AccountGroupRow,
   AccountRow,
   AlbumRow,
+  AutoLogCaptureRow,
   BudgetTemplateCategoryRow,
   BudgetTemplateRow,
   CategoryRow,
@@ -36,6 +37,11 @@ import type {
   MonthlyBudget,
   MonthlyBudgetLine,
   MonthlyWageSettings,
+  PaymentAlertCapture,
+  PaymentAlertChannel,
+  PaymentAlertReason,
+  PaymentAlertResolution,
+  PaymentAlertStatus,
   ReceiptSplit,
   ReceiptSplitItem,
   ReceiptSplitItemShare,
@@ -656,5 +662,76 @@ export function toMonthlyWageSettings(row: MonthlyWageSettingsRow): MonthlyWageS
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,
+  };
+}
+
+const ALERT_CHANNELS: readonly PaymentAlertChannel[] = [
+  'android_notification',
+  'ios_alert',
+  'paste',
+  'share_text',
+  'apple_pay',
+];
+const ALERT_STATUSES: readonly PaymentAlertStatus[] = [
+  'pending',
+  'logged',
+  'dismissed',
+  'ignored',
+  'duplicate',
+  'failed',
+];
+
+/**
+ * Read the saved resolution, ignoring missing or unreadable JSON. Older records
+ * may not include the resolved currency.
+ */
+function parseAlertResolution(json: string | null): PaymentAlertResolution | null {
+  if (!json) return null;
+  try {
+    const raw = JSON.parse(json) as unknown;
+    if (!raw || typeof raw !== 'object') return null;
+    const row = raw as Partial<PaymentAlertResolution>;
+    if (!row.parse || typeof row.parse !== 'object') return null;
+    return {
+      parse: row.parse,
+      currency: typeof row.currency === 'string' ? row.currency : (row.parse.currency ?? null),
+      accountId: typeof row.accountId === 'string' ? row.accountId : null,
+      certainty: row.certainty ?? 'none',
+      bindingReason: row.bindingReason ?? 'none',
+      identifier: typeof row.identifier === 'string' ? row.identifier : null,
+      candidateAccountIds: Array.isArray(row.candidateAccountIds) ? row.candidateAccountIds : [],
+      categoryId: typeof row.categoryId === 'string' ? row.categoryId : null,
+      categoryOrigin: row.categoryOrigin ?? null,
+      draftType: row.draftType ?? null,
+      transferFromAccountId:
+        typeof row.transferFromAccountId === 'string' ? row.transferFromAccountId : null,
+      transferToAccountId:
+        typeof row.transferToAccountId === 'string' ? row.transferToAccountId : null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function toPaymentAlertCapture(row: AutoLogCaptureRow): PaymentAlertCapture {
+  return {
+    id: row.id,
+    channel: ALERT_CHANNELS.find((channel) => channel === row.channel) ?? 'paste',
+    sourceKey: row.sourceKey,
+    sourceLabel: row.sourceLabel ?? null,
+    capturedAt: row.capturedAt,
+    nativeKey: row.nativeKey ?? null,
+    title: row.title ?? null,
+    body: row.body ?? null,
+    status: ALERT_STATUSES.find((status) => status === row.status) ?? 'pending',
+    reason: (row.reason as PaymentAlertReason | null) ?? null,
+    resolution: parseAlertResolution(row.resolutionJson ?? null),
+    parserVersion: row.parserVersion ?? 0,
+    transactionId: row.transactionId ?? null,
+    duplicateOf: row.duplicateOf ?? null,
+    dedupeKey: row.dedupeKey ?? null,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt ?? null,
   };
 }

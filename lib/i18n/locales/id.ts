@@ -1221,6 +1221,42 @@ const id = {
       default_account: 'Akun bawaan',
       default_category: 'Kategori bawaan',
       default_none: 'Belum diatur',
+      payment_alerts_title: 'Notifikasi pembayaran',
+      payment_alerts_open: 'Notifikasi pembayaran',
+      payment_alerts_status_off: 'Belum diatur',
+      payment_alerts_status_apps_one: 'Aktif untuk %{count} aplikasi',
+      payment_alerts_status_apps_other: 'Aktif untuk %{count} aplikasi',
+      payment_alerts_android_step_1: 'Buka Payment alerts dan aktifkan Read payment notifications.',
+      payment_alerts_android_step_2:
+        'Android membuka layar akses notifikasi. Cari Money2Time dan aktifkan.',
+      payment_alerts_android_step_3:
+        'Konfirmasi dengan Izinkan. Android memperingatkan bahwa aplikasi bisa membaca semua notifikasi, tetapi Money2Time hanya menyimpan aplikasi yang Anda pilih.',
+      payment_alerts_android_step_4:
+        'Kembali ke Money2Time, pilih aplikasi bank dan dompet digital yang mengirim notifikasi pembayaran Anda.',
+      payment_alerts_android_step_5: 'Pilih akun untuk setiap aplikasi.',
+      payment_alerts_android_step_6:
+        'Kirim notifikasi uji coba untuk memastikan semuanya berfungsi.',
+      payment_alerts_android_step_7:
+        'Pembayaran otomatis dicatat ke akun yang dipilih. Kategori memakai kata kunci yang sama dengan Apple Pay.',
+      payment_alerts_ios_step_1: 'Buka Shortcuts, ketuk +, lalu Edit. Ketuk Automation di editor.',
+      payment_alerts_ios_step_2: 'Cari Notification dan pilih.',
+      payment_alerts_ios_step_3: 'Cari Log Payment Alert lalu tambahkan.',
+      payment_alerts_ios_step_4: 'Ketuk Message di Log Payment Alert, lalu Select Variable.',
+      payment_alerts_ios_step_5: 'Ketuk From dan ketik nama aplikasi.',
+      payment_alerts_ios_step_6:
+        'Ketuk panah tindakan, lalu Account. Pilih akun untuk mencatat pembayaran aplikasi ini.',
+      payment_alerts_ios_step_7:
+        'Ketuk kembali untuk menyimpan. Ulangi untuk setiap aplikasi bank atau dompet digital. Pembayaran dicatat saat Anda membuka Money2Time lagi.',
+      payment_alerts_android_disclosure:
+        'Baca cara akses notifikasi digunakan, lalu ketuk Continue.',
+      payment_alerts_ios_app:
+        'Ketuk App dan pilih aplikasi bank atau dompet digital. Tangkapan layar ini menggunakan Wallet sebagai contoh.',
+      payment_alerts_ios_run:
+        'Ketuk panah di samping aplikasi. Biarkan Automation aktif dan matikan Notify untuk pencatatan tanpa pemberitahuan.',
+      payment_alerts_ios_input: 'Pilih variabel Notification di bawah pemicu.',
+      payment_alerts_ios_body: 'Ketuk variabel yang dimasukkan, pilih Body, lalu Return.',
+      payment_alerts_ios_fields:
+        'Atur Title dan Subtitle ke properti Notification yang sesuai dengan cara yang sama. Kosongkan Category untuk pencocokan kata kunci.',
     },
     title: 'Pengaturan',
     display: 'Tampilan',
@@ -2555,6 +2591,72 @@ const id = {
       insights: 'Memahami',
       data: 'Data Anda',
     },
+  },
+  payment_alerts: {
+    account_hint:
+      'Pembayaran otomatis dicatat ke akun yang dipilih. Kategori memakai kata kunci yang sama dengan Apple Pay.',
+    title: 'Notifikasi pembayaran',
+    intro_android:
+      'Money2Time membaca notifikasi pembayaran dari aplikasi bank dan dompet digital yang Anda pilih, lalu mencatat setiap pembayaran untuk Anda. Notifikasi dibaca di ponsel ini dan tidak pernah diunggah.',
+    intro_ios: 'Catat pembayaran dari aplikasi bank dan dompet digital secara otomatis.',
+    section_status: 'Status',
+    master_label: 'Baca notifikasi pembayaran',
+    master_hint: 'Mencatat pembayaran dari aplikasi yang Anda pilih.',
+    access_open_settings: 'Buka pengaturan',
+    health_unsupported:
+      'Versi Money2Time ini tidak bisa membaca notifikasi. Perbarui aplikasi untuk memakai notifikasi pembayaran.',
+    health_access_off:
+      'Akses notifikasi nonaktif, jadi tidak ada pembayaran yang dibaca. Aktifkan lagi di pengaturan Android.',
+    health_not_receiving:
+      'Money2Time sudah lama tidak menerima notifikasi. Ponsel Anda mungkin menjedanya untuk menghemat baterai.',
+    health_reconnect: 'Sambungkan ulang',
+    health_battery_hint:
+      'Jika ini terus terjadi, atur penggunaan baterai Money2Time ke Tidak dibatasi di pengaturan Android.',
+    ios_notifications_title: 'Notifikasi aplikasi',
+    ios_notifications_hint:
+      'Siapkan satu otomatisasi Shortcuts untuk setiap aplikasi bank atau dompet digital.',
+    ios_needs_27:
+      'Otomatisasi notifikasi aplikasi memerlukan iOS 27. Pada versi sebelumnya, gunakan Apple Pay atau bagikan tangkapan layar pembayaran.',
+    section_apps: 'Aplikasi',
+    choose_apps: 'Pilih aplikasi',
+    source_off: 'Nonaktif',
+    disclosure_title: 'Catat pembayaran dari notifikasi Anda',
+    disclosure_body: 'Money2Time memerlukan akses notifikasi untuk ini. Begini cara memakainya:',
+    disclosure_point_selected:
+      'Hanya membaca notifikasi dari aplikasi bank dan dompet digital yang Anda pilih. Selebihnya diabaikan.',
+    disclosure_point_device: 'Notifikasi dibaca di ponsel ini. Teksnya tidak pernah diunggah.',
+    disclosure_android_warning:
+      'Android akan memperingatkan bahwa aplikasi dengan akses notifikasi bisa membaca semua notifikasi Anda. Money2Time hanya menyimpan aplikasi yang Anda pilih.',
+    access_title: 'Aktifkan akses notifikasi',
+    access_body: 'Cari Money2Time di daftar dan aktifkan akses notifikasi, lalu kembali ke sini.',
+    access_greyed_title: 'Tombolnya tidak bisa diketuk?',
+    access_greyed_body:
+      'Android memblokir ini untuk aplikasi yang dipasang di luar Google Play. Buka Setelan, Aplikasi, Money2Time, ketuk menu di atas, pilih Izinkan setelan terbatas, lalu coba lagi.',
+    apps_title: 'Aplikasi mana yang mengirim notifikasi pembayaran Anda?',
+    apps_suggested: 'Di ponsel ini',
+    apps_recent: 'Baru-baru ini aktif',
+    apps_missing_hint:
+      'Aplikasinya tidak ada? Aplikasi akan muncul di sini setelah mengirim notifikasi berikutnya.',
+    apps_other: 'Aplikasi lain',
+    test_title: 'Kirim notifikasi uji coba',
+    test_body:
+      'Money2Time mengirim notifikasi pembayaran pura-pura untuk memastikan semuanya berfungsi. Tidak ada yang dicatat.',
+    test_alert_title: 'Uji coba Money2Time',
+    test_alert_body: 'Anda berbelanja %{amount} di Test Cafe dengan kartu berakhiran 0000.',
+    test_channel_name: 'Uji coba notifikasi pembayaran',
+    test_send: 'Kirim notifikasi uji coba',
+    test_waiting: 'Menunggu notifikasi…',
+    test_success: 'Berhasil. Money2Time bisa membaca notifikasi pembayaran Anda.',
+    test_would_log: 'Akan dicatat %{amount} ke %{account} sebagai %{category}.',
+    test_would_log_no_category: 'Akan dicatat %{amount} ke %{account}.',
+    test_timeout_title: 'Tidak ada notifikasi masuk',
+    test_timeout_body:
+      'Pastikan akses notifikasi aktif, lalu coba lagi. Beberapa ponsel juga perlu penggunaan baterai Money2Time diatur ke Tidak dibatasi.',
+    source_enabled_hint: 'Jika nonaktif, notifikasinya diabaikan.',
+    source_missing: 'Sumber ini sudah dihapus.',
+    source_remove_title: 'Hapus %{app}?',
+    source_remove_body_android:
+      'Money2Time berhenti membaca notifikasinya. Pembayaran yang sudah dicatat tetap ada.',
   },
 };
 

@@ -27,6 +27,8 @@ import {
   ONBOARDING_MINIMAL_INCOME_CATEGORIES,
 } from '~/constants/appDefaults';
 import { PRO_LIMITS } from '~/constants/proLimits';
+import { parsePaymentAlertPrefs, serializePaymentAlertPrefs } from '~/features/autoLog/lib/prefs';
+import { persistAutoLogTransaction } from '~/features/autoLog/persistTransaction';
 import { computeBackPopulateRange, pickAutoCreateTemplate } from '~/features/budget/lib/budgetMath';
 import { computeItemStats } from '~/features/items/utils';
 import {
@@ -48,6 +50,7 @@ import { normalizeIconColumns } from '~/lib/db/normalizeIcons';
 import {
   accountGroupsTable,
   accountsTable,
+  autoLogCapturesTable,
   budgetTemplateCategoriesTable,
   budgetTemplatesTable,
   categoriesTable,
@@ -71,6 +74,7 @@ import { exchangeRatesRepository } from '~/lib/repositories/exchangeRatesReposit
 import { itemsRepository } from '~/lib/repositories/itemsRepository';
 import { monthlyBudgetsRepository } from '~/lib/repositories/monthlyBudgetsRepository';
 import { monthlyWageRepository } from '~/lib/repositories/monthlyWageRepository';
+import { paymentAlertCapturesRepository } from '~/lib/repositories/paymentAlertCapturesRepository';
 import {
   type ReceiptSplitDraftInput,
   receiptSplitsRepository,
@@ -117,6 +121,7 @@ import {
   normalizeNotificationPrefs,
   syncScheduledNotifications,
 } from '~/services/notifications';
+import { clearAndroidCaptureQueue } from '~/services/paymentCapture';
 import { initReviewPrompt, recordTransactionLogged } from '~/services/reviewPrompt';
 import { runUserAssetGc, runUserAssetGcBackfillOnce } from '~/services/userAssetGc';
 import { deleteAlbumCover, deleteGoalCover, isCustomLogoId } from '~/services/userAssets';
@@ -144,6 +149,8 @@ import {
   type MonthlyBudget,
   type MonthlyWageSettings,
   type NotificationPreferences,
+  type PaymentAlertChannel,
+  type PaymentAlertPrefs,
   type QuickEntryPrefs,
   type RateRefreshResult,
   type RateTable,
@@ -210,6 +217,14 @@ export type TransactionSource = 'manual' | 'voice' | 'receipt' | 'autolog' | 'st
 
 export interface CreateTransactionMeta {
   source?: TransactionSource;
+  /** For `autolog`: how the payment reached the app. Absent means the Apple Pay automation. */
+  channel?: PaymentAlertChannel;
+  /** Automatic logging never prompts for review. */
+  decision?: 'auto';
+  /** Both native queues share the allowance checked at the durable write. */
+  autoLogIsPro?: boolean;
+  /** Capture bookkeeping committed atomically with an auto-logged expense. */
+  onAutoLogPersisted?: (transactionId: string) => void;
 }
 
 export interface CreateItemInput {
@@ -516,6 +531,10 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   updateCalendarPreferencesJson: (value: string | null) => void;
   notificationPrefs: NotificationPreferences;
   updateNotificationPrefs: (updates: Partial<NotificationPreferences>) => void;
+  paymentAlertPrefs: PaymentAlertPrefs;
+  updatePaymentAlertPrefs: (
+    next: PaymentAlertPrefs | ((previous: PaymentAlertPrefs) => PaymentAlertPrefs),
+  ) => void;
   quickEntryPrefs: QuickEntryPrefs;
   updateQuickEntryPrefs: (updates: Partial<QuickEntryPrefs>) => void;
 
@@ -812,6 +831,9 @@ function purgeAllData() {
   db.delete(budgetTemplatesTable).run();
   db.delete(monthlyBudgetCategoriesTable).run();
   db.delete(monthlyBudgetsTable).run();
+  // Payment alerts point at transactions, accounts and categories that are gone.
+  db.delete(autoLogCapturesTable).run();
+  getSQLite().execSync('DELETE FROM merchant_categories');
   // Reset settings to defaults but preserve appUserId so the device identity
   // remains stable across in-app data resets. The ID only rotates on
   // uninstall/reinstall (when SQLite itself is wiped).
@@ -831,11 +853,17 @@ function purgeDataForImport() {
   db.delete(budgetTemplatesTable).run();
   db.delete(monthlyBudgetCategoriesTable).run();
   db.delete(monthlyBudgetsTable).run();
+  // Same for payment alerts: their transaction, account and category ids are
+  // all replaced by the import.
+  db.delete(autoLogCapturesTable).run();
+  getSQLite().execSync('DELETE FROM merchant_categories');
 }
 
 function purgeTransactionsOnly() {
   const db = getDb();
   db.delete(transactionsTable).run();
+  // Capture links cannot survive deletion of the entire ledger.
+  db.delete(autoLogCapturesTable).run();
 }
 
 function applyTransactionFilters(
@@ -1041,6 +1069,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
   const [quickEntryPrefs, setQuickEntryPrefs] =
     useState<QuickEntryPrefs>(DEFAULT_QUICK_ENTRY_PREFS);
+  const quickEntryPrefsRef = useRef(quickEntryPrefs);
+  const [paymentAlertPrefs, setPaymentAlertPrefs] = useState<PaymentAlertPrefs>(() =>
+    parsePaymentAlertPrefs(null),
+  );
+  const paymentAlertPrefsRef = useRef(paymentAlertPrefs);
+  const updatePaymentAlertPrefs = useCallback(
+    (next: PaymentAlertPrefs | ((previous: PaymentAlertPrefs) => PaymentAlertPrefs)) => {
+      const resolved = typeof next === 'function' ? next(paymentAlertPrefsRef.current) : next;
+      try {
+        settingsRepository.updateAutoLogPrefsJson(serializePaymentAlertPrefs(resolved));
+        paymentAlertPrefsRef.current = resolved;
+        setPaymentAlertPrefs(resolved);
+      } catch (error) {
+        reportError(error, { scope: 'payment_alerts_prefs' });
+        throw error;
+      }
+    },
+    [],
+  );
   const [loadError, setLoadError] = useState<string | null>(null);
   const [rateTable, setRateTable] = useState<RateTable>(() => emptyRateTable());
 
@@ -1256,6 +1303,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setInsightsPreferencesJson(nextInsightsPreferencesJson);
       setCalendarPreferencesJson(nextCalendarPreferencesJson);
       setNotificationPrefs(nextNotificationPrefs);
+      const nextPaymentAlertPrefs = parsePaymentAlertPrefs(
+        settingsRepository.getAutoLogPrefsJson(),
+      );
+      paymentAlertPrefsRef.current = nextPaymentAlertPrefs;
+      setPaymentAlertPrefs(nextPaymentAlertPrefs);
+      quickEntryPrefsRef.current = nextQuickEntryPrefs;
       setQuickEntryPrefs(nextQuickEntryPrefs);
       setAccountGroups(nextAccountGroups);
       setRecurringRules(nextRecurringRules);
@@ -2167,10 +2220,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         deletedAt: null,
         ...resolveRelationNames(normalizedInput),
       };
+      if (meta?.source === 'autolog') {
+        const nextPrefs = persistAutoLogTransaction(
+          { isPro: meta.autoLogIsPro ?? false, accounts, prefs: quickEntryPrefsRef.current },
+          {
+            transaction: (write) => getSQLite().withTransactionSync(write),
+            create: () => transactionsRepository.createWithId(id, normalizedInput, now),
+            record: () => meta.onAutoLogPersisted?.(id),
+            savePrefs: (next) => settingsRepository.updateQuickEntryPrefsJson(JSON.stringify(next)),
+          },
+        );
+        quickEntryPrefsRef.current = nextPrefs;
+        setQuickEntryPrefs(nextPrefs);
+      }
       setTransactions((prev) => insertTransactionsByDateDesc(prev, [optimistic]));
       runDeferredWrite(() => {
         try {
-          transactionsRepository.createWithId(id, normalizedInput, now);
+          if (meta?.source !== 'autolog')
+            transactionsRepository.createWithId(id, normalizedInput, now);
           // Auto-file into the active album, if one is set.
           const activeAlbumId = albumsRepository.getActiveId();
           if (activeAlbumId) {
@@ -2195,6 +2262,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             void trackEvent(AnalyticsEvents.AUTOLOG_TRANSACTION_CREATED, {
               has_category: !!normalizedInput.categoryId,
               has_note: !!(normalizedInput.note && normalizedInput.note.trim()),
+              channel: meta.channel ?? 'apple_pay',
+              decision: meta.decision ?? 'auto',
             });
           }
           if (claimFirstEntry()) {
@@ -2214,10 +2283,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           // felt right after Save in bulk create mode.
           const persisted = transactionsRepository.getById(id);
           setTransactions((prev) => reconcileTransactionRow(prev, id, persisted));
-        } catch {
-          // Roll back the optimistic row so a failed insert doesn't leave a
-          // phantom transaction in the UI.
-          setTransactions((prev) => prev.filter((tx) => tx.id !== id));
+        } catch (error) {
+          if (meta?.source === 'autolog') {
+            // The expense is already committed; a failed album or UI refresh
+            // must not erase it or make the native drain retry the payment.
+            reportError(error, { scope: 'autolog_after_save' });
+          } else {
+            setTransactions((prev) => prev.filter((tx) => tx.id !== id));
+          }
         }
         refreshAccountBalances();
       });
@@ -2537,6 +2610,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           }
           // Cascade any itemized receipt-split detail (no-op when none exists).
           receiptSplitsRepository.softDeleteByTransactionIds(uniqueIds);
+          // Keep internal duplicate records consistent when a transaction is deleted.
+          try {
+            paymentAlertCapturesRepository.markTransactionsDeleted(uniqueIds);
+          } catch (error) {
+            reportError(error, { scope: 'payment_alerts_delete' });
+          }
           // Restore parent amounts in one update per parent (re-read from DB so
           // multiple restored splits per parent accumulate correctly).
           restoreByParentId.forEach((restore, parentId) => {
@@ -3832,80 +3911,76 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const updateQuickEntryPrefs = useCallback((updates: Partial<QuickEntryPrefs>) => {
-    setQuickEntryPrefs((previous) => {
-      const merged: QuickEntryPrefs = {
-        categoryMap: updates.categoryMap !== undefined ? updates.categoryMap : previous.categoryMap,
-        defaultExpenseCategoryId:
-          updates.defaultExpenseCategoryId !== undefined
-            ? updates.defaultExpenseCategoryId
-            : previous.defaultExpenseCategoryId,
-        defaultIncomeCategoryId:
-          updates.defaultIncomeCategoryId !== undefined
-            ? updates.defaultIncomeCategoryId
-            : previous.defaultIncomeCategoryId,
-        defaultAccountId:
-          updates.defaultAccountId !== undefined
-            ? updates.defaultAccountId
-            : previous.defaultAccountId,
-        defaultCurrency:
-          updates.defaultCurrency !== undefined
-            ? updates.defaultCurrency
-            : previous.defaultCurrency,
-        voiceSkipConfirmation:
-          updates.voiceSkipConfirmation !== undefined
-            ? updates.voiceSkipConfirmation
-            : previous.voiceSkipConfirmation,
-        voiceUsageCount:
-          updates.voiceUsageCount !== undefined
-            ? updates.voiceUsageCount
-            : previous.voiceUsageCount,
-        autoLogUsageCount:
-          updates.autoLogUsageCount !== undefined
-            ? updates.autoLogUsageCount
-            : previous.autoLogUsageCount,
-        bulkCreateEnabled:
-          updates.bulkCreateEnabled !== undefined
-            ? updates.bulkCreateEnabled
-            : previous.bulkCreateEnabled,
-        backTapAction:
-          updates.backTapAction !== undefined ? updates.backTapAction : previous.backTapAction,
-        autoLogIncludeSubcategories:
-          updates.autoLogIncludeSubcategories !== undefined
-            ? updates.autoLogIncludeSubcategories
-            : previous.autoLogIncludeSubcategories,
-        saveScannedReceipts:
-          updates.saveScannedReceipts !== undefined
-            ? updates.saveScannedReceipts
-            : previous.saveScannedReceipts,
-        autoLogSaveScreenshot:
-          updates.autoLogSaveScreenshot !== undefined
-            ? updates.autoLogSaveScreenshot
-            : previous.autoLogSaveScreenshot,
-        autoLogAutoCategorize:
-          updates.autoLogAutoCategorize !== undefined
-            ? updates.autoLogAutoCategorize
-            : previous.autoLogAutoCategorize,
-        addUseActionSheet:
-          updates.addUseActionSheet !== undefined
-            ? updates.addUseActionSheet
-            : previous.addUseActionSheet,
-        addPrimaryAction:
-          updates.addPrimaryAction !== undefined
-            ? updates.addPrimaryAction
-            : previous.addPrimaryAction,
-        addSecondaryAction:
-          updates.addSecondaryAction !== undefined
-            ? updates.addSecondaryAction
-            : previous.addSecondaryAction,
-      };
-      try {
-        settingsRepository.updateQuickEntryPrefsJson(JSON.stringify(merged));
-      } catch (error) {
-        reportError(error, { scope: 'quick_entry_preferences' });
-        return previous;
-      }
-      return merged;
-    });
+    const previous = quickEntryPrefsRef.current;
+    const merged: QuickEntryPrefs = {
+      categoryMap: updates.categoryMap !== undefined ? updates.categoryMap : previous.categoryMap,
+      defaultExpenseCategoryId:
+        updates.defaultExpenseCategoryId !== undefined
+          ? updates.defaultExpenseCategoryId
+          : previous.defaultExpenseCategoryId,
+      defaultIncomeCategoryId:
+        updates.defaultIncomeCategoryId !== undefined
+          ? updates.defaultIncomeCategoryId
+          : previous.defaultIncomeCategoryId,
+      defaultAccountId:
+        updates.defaultAccountId !== undefined
+          ? updates.defaultAccountId
+          : previous.defaultAccountId,
+      defaultCurrency:
+        updates.defaultCurrency !== undefined ? updates.defaultCurrency : previous.defaultCurrency,
+      voiceSkipConfirmation:
+        updates.voiceSkipConfirmation !== undefined
+          ? updates.voiceSkipConfirmation
+          : previous.voiceSkipConfirmation,
+      voiceUsageCount:
+        updates.voiceUsageCount !== undefined ? updates.voiceUsageCount : previous.voiceUsageCount,
+      autoLogUsageCount:
+        updates.autoLogUsageCount !== undefined
+          ? updates.autoLogUsageCount
+          : previous.autoLogUsageCount,
+      bulkCreateEnabled:
+        updates.bulkCreateEnabled !== undefined
+          ? updates.bulkCreateEnabled
+          : previous.bulkCreateEnabled,
+      backTapAction:
+        updates.backTapAction !== undefined ? updates.backTapAction : previous.backTapAction,
+      autoLogIncludeSubcategories:
+        updates.autoLogIncludeSubcategories !== undefined
+          ? updates.autoLogIncludeSubcategories
+          : previous.autoLogIncludeSubcategories,
+      saveScannedReceipts:
+        updates.saveScannedReceipts !== undefined
+          ? updates.saveScannedReceipts
+          : previous.saveScannedReceipts,
+      autoLogSaveScreenshot:
+        updates.autoLogSaveScreenshot !== undefined
+          ? updates.autoLogSaveScreenshot
+          : previous.autoLogSaveScreenshot,
+      autoLogAutoCategorize:
+        updates.autoLogAutoCategorize !== undefined
+          ? updates.autoLogAutoCategorize
+          : previous.autoLogAutoCategorize,
+      addUseActionSheet:
+        updates.addUseActionSheet !== undefined
+          ? updates.addUseActionSheet
+          : previous.addUseActionSheet,
+      addPrimaryAction:
+        updates.addPrimaryAction !== undefined
+          ? updates.addPrimaryAction
+          : previous.addPrimaryAction,
+      addSecondaryAction:
+        updates.addSecondaryAction !== undefined
+          ? updates.addSecondaryAction
+          : previous.addSecondaryAction,
+    };
+    try {
+      settingsRepository.updateQuickEntryPrefsJson(JSON.stringify(merged));
+    } catch (error) {
+      reportError(error, { scope: 'quick_entry_preferences' });
+      return;
+    }
+    quickEntryPrefsRef.current = merged;
+    setQuickEntryPrefs(merged);
   }, []);
 
   // Initialize notification handler and sync on mount
@@ -4485,6 +4560,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     // SQLite — drop them too, or pre-reset automations would drain into the
     // freshly-wiped database. Failure is non-fatal (App Group unreachable).
     clearAllAutoLogQueues().catch(() => undefined);
+    // Android's notification listener queues payment alerts in a folder.
+    clearAndroidCaptureQueue();
     void cancelAllNotifications();
     void trackEvent(AnalyticsEvents.DATA_RESET, { scope: 'all' });
     void flushAnalytics();
@@ -4495,6 +4572,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       purgeTransactionsOnly();
       resetTransactionFilters();
     });
+    void clearAllAutoLogQueues().catch((error) =>
+      reportError(error, { scope: 'reset_autolog_queues' }),
+    );
+    clearAndroidCaptureQueue();
     // Deleting every transaction orphans their receipt images; reclaim them.
     runDeferredWrite(() => {
       runUserAssetGc();
@@ -4825,6 +4906,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             updateCalendarPreferencesJson,
             notificationPrefs,
             updateNotificationPrefs,
+            paymentAlertPrefs,
+            updatePaymentAlertPrefs,
             quickEntryPrefs,
             updateQuickEntryPrefs,
             completeOnboarding,
@@ -4949,6 +5032,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updateCalendarPreferencesJson,
       notificationPrefs,
       updateNotificationPrefs,
+      paymentAlertPrefs,
+      updatePaymentAlertPrefs,
       quickEntryPrefs,
       updateQuickEntryPrefs,
       completeOnboarding,

@@ -1227,6 +1227,42 @@ const nl = {
       default_account: 'Standaardrekening',
       default_category: 'Standaardcategorie',
       default_none: 'Niet ingesteld',
+      payment_alerts_title: 'Betaalmeldingen',
+      payment_alerts_open: 'Betaalmeldingen',
+      payment_alerts_status_off: 'Niet ingesteld',
+      payment_alerts_status_apps_one: 'Aan voor %{count} app',
+      payment_alerts_status_apps_other: 'Aan voor %{count} apps',
+      payment_alerts_android_step_1: 'Open Payment alerts en zet Read payment notifications aan.',
+      payment_alerts_android_step_2:
+        'Android opent het scherm voor meldingstoegang. Zoek Money2Time en zet het aan.',
+      payment_alerts_android_step_3:
+        'Bevestig met Toestaan. Android waarschuwt dat de app alle meldingen kan lezen, maar Money2Time bewaart alleen de apps die je kiest.',
+      payment_alerts_android_step_4:
+        'Kies terug in Money2Time de bank- en wallet-apps die je betaalmeldingen sturen.',
+      payment_alerts_android_step_5: 'Kies de rekening voor elke app.',
+      payment_alerts_android_step_6: 'Stuur een testmelding om te controleren of alles werkt.',
+      payment_alerts_android_step_7:
+        'Betalingen worden automatisch op de gekozen rekening geboekt. Categorieën gebruiken dezelfde trefwoorden als Apple Pay.',
+      payment_alerts_ios_step_1:
+        'Open Shortcuts, tik op + en daarna Edit. Tik in de editor op Automation.',
+      payment_alerts_ios_step_2: 'Zoek Notification en selecteer dit.',
+      payment_alerts_ios_step_3: 'Zoek Log Payment Alert en voeg het toe.',
+      payment_alerts_ios_step_4: 'Tik op Message in Log Payment Alert en daarna Select Variable.',
+      payment_alerts_ios_step_5: 'Tik op From en voer de naam van de app in.',
+      payment_alerts_ios_step_6:
+        'Tik op de actiepijl en daarna op Account. Kies waar betalingen van deze app worden vastgelegd.',
+      payment_alerts_ios_step_7:
+        'Ga terug om op te slaan. Herhaal dit voor elke bank- of wallet-app. Betalingen worden vastgelegd wanneer je Money2Time opnieuw opent.',
+      payment_alerts_android_disclosure:
+        'Lees hoe meldingstoegang wordt gebruikt en tik op Continue.',
+      payment_alerts_ios_app:
+        'Tik op App en kies je bank- of wallet-app. Deze screenshots gebruiken Wallet als voorbeeld.',
+      payment_alerts_ios_run:
+        'Tik op de pijl naast de app. Laat Automation aan en zet Notify uit om stil te registreren.',
+      payment_alerts_ios_input: 'Selecteer de variabele Notification onder de trigger.',
+      payment_alerts_ios_body: 'Tik op de ingevoegde variabele, kies Body en daarna Return.',
+      payment_alerts_ios_fields:
+        'Stel Title en Subtitle op dezelfde manier in op de bijbehorende Notification-eigenschappen. Laat Category leeg voor trefwoordmatching.',
     },
     title: 'Instellingen',
     display: 'Weergave',
@@ -2571,6 +2607,71 @@ const nl = {
       insights: 'Begrijpen',
       data: 'Jouw gegevens',
     },
+  },
+  payment_alerts: {
+    account_hint:
+      'Betalingen worden automatisch op de gekozen rekening geboekt. Categorieën gebruiken dezelfde trefwoorden als Apple Pay.',
+    title: 'Betaalmeldingen',
+    intro_android:
+      'Money2Time leest de betaalmeldingen van de bank- en wallet-apps die je kiest en registreert elke betaling voor je. Meldingen worden op deze telefoon gelezen en nooit geüpload.',
+    intro_ios: 'Leg betalingen uit je bank- en wallet-apps automatisch vast.',
+    section_status: 'Status',
+    master_label: 'Betaalmeldingen lezen',
+    master_hint: 'Registreert betalingen uit de apps die je kiest.',
+    access_open_settings: 'Instellingen openen',
+    health_unsupported:
+      'Deze versie van Money2Time kan geen meldingen lezen. Werk de app bij om betaalmeldingen te gebruiken.',
+    health_access_off:
+      'Meldingstoegang staat uit, dus er worden geen betalingen gelezen. Zet hem weer aan in de Android-instellingen.',
+    health_not_receiving:
+      'Money2Time heeft al een tijdje geen meldingen ontvangen. Misschien heeft je telefoon de app gepauzeerd om batterij te sparen.',
+    health_reconnect: 'Opnieuw verbinden',
+    health_battery_hint:
+      'Gebeurt dit vaker, zet het batterijgebruik van Money2Time dan op Onbeperkt in de Android-instellingen.',
+    ios_notifications_title: 'Appmeldingen',
+    ios_notifications_hint: 'Stel voor elke bank- of wallet-app één Opdrachten-automatisering in.',
+    ios_needs_27:
+      'Automatiseringen voor appmeldingen vereisen iOS 27. Op eerdere versies kun je Apple Pay gebruiken of screenshots van betalingen delen.',
+    section_apps: 'Apps',
+    choose_apps: 'Apps kiezen',
+    source_off: 'Uit',
+    disclosure_title: 'Betalingen registreren uit je meldingen',
+    disclosure_body: 'Money2Time heeft hiervoor meldingstoegang nodig. Zo wordt die gebruikt:',
+    disclosure_point_selected:
+      'Alleen meldingen van de bank- en wallet-apps die je kiest worden gelezen. Al het andere wordt genegeerd.',
+    disclosure_point_device:
+      'Meldingen worden op deze telefoon gelezen. De tekst wordt nooit geüpload.',
+    disclosure_android_warning:
+      'Android waarschuwt dat een app met meldingstoegang al je meldingen kan lezen. Money2Time bewaart alleen de apps die je kiest.',
+    access_title: 'Meldingstoegang aanzetten',
+    access_body: 'Zoek Money2Time in de lijst, zet meldingstoegang aan en kom dan hier terug.',
+    access_greyed_title: 'Is de schakelaar grijs?',
+    access_greyed_body:
+      'Android blokkeert dit voor apps die buiten Google Play zijn geïnstalleerd. Open Instellingen, Apps, Money2Time, tik bovenaan op het menu, kies Beperkte instellingen toestaan en probeer het opnieuw.',
+    apps_title: 'Welke apps sturen je betaalmeldingen?',
+    apps_suggested: 'Op deze telefoon',
+    apps_recent: 'Onlangs actief',
+    apps_missing_hint: 'Staat de app er niet bij? Hij verschijnt hier na zijn volgende melding.',
+    apps_other: 'Andere apps',
+    test_title: 'Testmelding sturen',
+    test_body:
+      'Money2Time stuurt een nep-betaalmelding om te controleren of alles werkt. Er wordt niets geregistreerd.',
+    test_alert_title: 'Money2Time-test',
+    test_alert_body: 'Je hebt %{amount} betaald bij Test Cafe met de kaart eindigend op 0000.',
+    test_channel_name: 'Test van betaalmeldingen',
+    test_send: 'Testmelding sturen',
+    test_waiting: 'Wachten op de melding…',
+    test_success: 'Het werkt. Money2Time kan je betaalmeldingen lezen.',
+    test_would_log: 'Dit zou %{amount} op %{account} registreren als %{category}.',
+    test_would_log_no_category: 'Dit zou %{amount} op %{account} registreren.',
+    test_timeout_title: 'Geen melding ontvangen',
+    test_timeout_body:
+      'Controleer of meldingstoegang aanstaat en probeer het opnieuw. Op sommige telefoons moet het batterijgebruik van Money2Time ook op Onbeperkt staan.',
+    source_enabled_hint: 'Staat dit uit, dan worden de meldingen genegeerd.',
+    source_missing: 'Deze bron is verwijderd.',
+    source_remove_title: '%{app} verwijderen?',
+    source_remove_body_android:
+      'Money2Time leest de meldingen ervan niet meer. Al geregistreerde betalingen blijven staan.',
   },
 };
 

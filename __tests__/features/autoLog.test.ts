@@ -104,6 +104,13 @@ describe('parseAutoLogAmount', () => {
     expect(parseAutoLogAmount('12.34 USD')).toEqual({ amount: 12.34, currency: 'USD' });
   });
 
+  it.each(['KWD 1.250', 'BHD 1,250', '1.250 OMR'])(
+    'preserves the three-decimal amount in %s',
+    (raw) => {
+      expect(parseAutoLogAmount(raw)?.amount).toBe(1.25);
+    },
+  );
+
   it('ignores three-letter tokens that are not real currencies', () => {
     expect(parseAutoLogAmount('XYZ 12.34')).toEqual({ amount: 12.34, currency: null });
   });
@@ -304,9 +311,14 @@ describe('resolveAutoLogEntry', () => {
     expect(result).toMatchObject({ type: 'expense', amount: 12.34, note: 'Starbucks' });
   });
 
-  it('dates the transaction from the tap, as a local day key', () => {
+  it('dates the transaction at the tap itself, so it sorts by time and dedupes', () => {
     const result = resolveAutoLogEntry(entry({ createdAt: '2026-07-15T10:30:00.000Z' }), ctx());
-    expect(result?.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(result?.date).toBe('2026-07-15T10:30:00.000Z');
+  });
+
+  it('falls back to the day when the tap stamp does not parse', () => {
+    const result = resolveAutoLogEntry(entry({ createdAt: '2026-07-15 garbage' }), ctx());
+    expect(result?.date).toBe('2026-07-15');
   });
 
   it('drops an entry whose amount cannot be parsed', () => {
