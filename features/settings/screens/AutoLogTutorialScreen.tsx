@@ -232,8 +232,6 @@ export function AutoLogTutorialScreen({ topic, onBack }: AutoLogTutorialScreenPr
   }, [topic]);
 
   const videoUrl = VIDEO_URL[topic];
-  // The translated app-notification title needs more room than the action names.
-  const compactVideoLink = topic === 'paymentAlertsIos';
   const openVideo = useCallback(() => {
     if (!videoUrl) return;
     void triggerHaptic('selection');
@@ -247,30 +245,20 @@ export function AutoLogTutorialScreen({ topic, onBack }: AutoLogTutorialScreenPr
           className="px-0 pt-5 pb-3"
           onBack={onBack}
           title={titleFor(topic)}
+          fitActions={Boolean(videoUrl)}
           rightAccessory={
             videoUrl ? (
               <Pressable
-                className={
-                  compactVideoLink
-                    ? 'h-10 w-10 items-center justify-center rounded-full border border-border/30 bg-card shadow-soft'
-                    : undefined
-                }
-                style={compactVideoLink ? undefined : styles.videoLink}
+                style={styles.videoLink}
                 onPress={openVideo}
                 hitSlop={8}
                 accessibilityRole="link"
                 accessibilityLabel={I18n.t('settings.auto_log.video_tutorial')}
               >
-                <Play
-                  size={compactVideoLink ? 18 : 13}
-                  color={themeColors.primary}
-                  fill={themeColors.primary}
-                />
-                {compactVideoLink ? null : (
-                  <Text variant="caption" style={{ color: themeColors.primary }}>
-                    {I18n.t('settings.auto_log.video_tutorial')}
-                  </Text>
-                )}
+                <Play size={13} color={themeColors.primary} fill={themeColors.primary} />
+                <Text variant="caption" style={{ color: themeColors.primary }}>
+                  {I18n.t('settings.auto_log.video_tutorial')}
+                </Text>
               </Pressable>
             ) : undefined
           }

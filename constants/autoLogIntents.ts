@@ -43,5 +43,5 @@ export const AUTO_LOG_VIDEO_URLS = {
   newTransaction: 'https://youtube.com/shorts/_ywgy40eVxo',
   logScreenshot: 'https://youtube.com/shorts/MEK2AyOQh6w',
   paymentAlertsIos:
-    'https://media.money2time.com/tutorials/ios/app-notifications/setup-2026-10-05.mp4',
+    'https://media.money2time.com/tutorials/ios/app-notifications/setup-2026-10-05-2x.mp4',
 } as const;

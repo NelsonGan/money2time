@@ -132,6 +132,8 @@ interface SettingsHeaderProps {
   onClose?: () => void;
   closeRowAccessory?: React.ReactNode;
   rightAccessory?: React.ReactNode;
+  /** Reserve each action's natural width; shorten a long title before the actions. */
+  fitActions?: boolean;
   className?: string;
 }
 
@@ -142,17 +144,19 @@ export function SettingsHeader({
   onClose,
   closeRowAccessory,
   rightAccessory,
+  fitActions = false,
   className,
 }: SettingsHeaderProps) {
   const themeColors = useThemeColors();
 
   return (
     <View className={cn('px-5 pt-3 pb-2', className)}>
-      {/* Back button (left), centered title, and actions (right) all share one
-          row. The left/right slots are equal-width (flex-1) so the title stays
-          visually centered regardless of what each side holds. */}
+      {/* Equal slots center the title by default. Text actions can opt into
+          natural-width slots so the title gives them room on smaller screens. */}
       <View className="flex-row items-center gap-2" style={{ minHeight: 40 }}>
-        <View className="flex-1 flex-row items-center justify-start">
+        <View
+          className={cn('flex-row items-center justify-start', fitActions ? 'min-w-10' : 'flex-1')}
+        >
           {onBack ? (
             <HeaderIconButton
               onPress={onBack}
@@ -162,14 +166,29 @@ export function SettingsHeader({
           ) : null}
         </View>
 
-        <View className="flex-row items-center justify-center gap-1.5" style={{ flexShrink: 1 }}>
-          <Text variant="subheading" numberOfLines={1} className="tracking-tight text-center">
+        <View
+          className={cn(
+            'flex-row items-center justify-center gap-1.5',
+            fitActions && 'min-w-0 flex-1',
+          )}
+          style={{ flexShrink: 1 }}
+        >
+          <Text
+            variant="subheading"
+            numberOfLines={1}
+            className={cn('tracking-tight text-center', fitActions && 'min-w-0 shrink')}
+          >
             {title}
           </Text>
           {infoTooltip ? <InfoTooltipButton title={title} infoTooltip={infoTooltip} /> : null}
         </View>
 
-        <View className="flex-1 flex-row items-center justify-end gap-2">
+        <View
+          className={cn(
+            'flex-row items-center justify-end gap-2',
+            fitActions ? 'min-w-10 shrink-0' : 'flex-1',
+          )}
+        >
           {rightAccessory}
           {closeRowAccessory}
           {onClose ? (

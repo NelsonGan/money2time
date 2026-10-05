@@ -8,19 +8,23 @@ minimum TLS 1.2; the development `r2.dev` URL stays disabled.
 This bucket contains public app assets. User data and backups belong elsewhere.
 The app opens videos through the top-right video link in each automation
 tutorial, using the URLs in `constants/autoLogIntents.ts`. App notifications uses
-a compact play button with a translated **Watch video** accessibility label.
+the same **Watch video** button as the other automation tutorials.
 
 ## Published video
 
-- Object: `tutorials/ios/app-notifications/setup-2026-10-05.mp4`
-- URL: <https://media.money2time.com/tutorials/ios/app-notifications/setup-2026-10-05.mp4>
+- Object: `tutorials/ios/app-notifications/setup-2026-10-05-2x.mp4`
+- URL: <https://media.money2time.com/tutorials/ios/app-notifications/setup-2026-10-05-2x.mp4>
 - Recording: iPhone 18 Pro simulator, iOS 27, real Shortcuts editor with Wallet
   and synthetic Money2Time accounts. Includes instructional captions and visible
   tap animations. The Log Payment Alert action binds Message to Notification
   Body and selects Account, without a From field.
-- Encoding: H.264 MP4, 900 × 2120, approximately 1 minute 48 seconds.
-- Size: 4,615,757 bytes.
-- SHA-256: `7697c8b548cde8c894ebc1f55c13982db0b1cc3dc6e6cd00c0f40df8da24411d`.
+- Encoding: H.264 MP4, 900 × 2120, approximately 54 seconds at 2× speed.
+- Size: 3,517,300 bytes.
+- SHA-256: `0464f8f82320675407ca28974274e527288deca8d6099321b0116ccb2ee55fa4`.
+- Local file: `Money2Time-iOS-App-Notifications-Setup-2x.mp4` in Downloads.
+
+The original 1× recording remains at `setup-2026-10-05.mp4`. The app uses the new
+2× object so previously cached downloads cannot serve the slower recording.
 
 ## Upload a new version
 
@@ -33,9 +37,9 @@ From the repository root, using the existing Wrangler installation and login:
 
 ```bash
 cloudflare/workers/receipt-scanner/node_modules/.bin/wrangler r2 object put \
-  money2time-assets/tutorials/ios/app-notifications/setup-2026-10-05.mp4 \
+  money2time-assets/tutorials/ios/app-notifications/setup-2026-10-05-2x.mp4 \
   --remote \
-  --file "$HOME/Downloads/Money2Time-iOS-App-Notifications-Setup.mp4" \
+  --file "$HOME/Downloads/Money2Time-iOS-App-Notifications-Setup-2x.mp4" \
   --content-type video/mp4 \
   --content-disposition inline \
   --cache-control 'public, max-age=31536000, immutable'
