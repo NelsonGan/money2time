@@ -271,7 +271,7 @@ export const SPEND_STRONG: Lexicon = {
     'authorised',
     'authorized',
     'dibelanjakan',
-    'berbelanja',
+    'telah berbelanja',
     'dibayar',
     'dibayarkan',
     'didebitkan',
@@ -302,7 +302,6 @@ export const SPEND_STRONG: Lexicon = {
   ],
   substrings: [
     '消费',
-    '消費',
     '已支付',
     '付款成功',
     '扣款',
@@ -327,6 +326,7 @@ export const SPEND_WEAK: Lexicon = {
     'payment for',
     'purchase',
     'покупка',
+    'berbelanja',
     'transaksi',
     'pembayaran',
     'pembelian',
@@ -352,7 +352,7 @@ export const SPEND_WEAK: Lexicon = {
     'płatność',
     'zakup',
   ],
-  substrings: ['支付', '付款', '支出', '支払', 'จ่าย', 'ใช้จ่าย'],
+  substrings: ['消費', '支付', '付款', '支出', '支払', 'จ่าย', 'ใช้จ่าย'],
 };
 
 /** Words that say a payment went through; turn a weak spend into a strong one. */
@@ -424,12 +424,16 @@ export const PROMO: Lexicon = {
     'khuyến mãi',
     'ưu đãi',
     'скидкой',
+    'скидка',
     'знижкою',
+    'знижка',
   ],
   substrings: [
     '优惠',
+    '優惠',
     '折扣',
     '返现',
+    '返現',
     'キャンペーン',
     '割引',
     '할인',

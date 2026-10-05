@@ -28,6 +28,10 @@ describe('the localized Android setup test alert', () => {
     'Повернення: покупка MYR 1.00.',
     'Покупка MYR 1.00 со скидкой.',
     'Покупка MYR 1.00 зі знижкою.',
+    'Berbelanja MYR 50.00 dan dapatkan cashback.',
+    '消費滿 MYR 50.00 可享優惠。',
+    'Покупка MYR 1.00: скидка 20%.',
+    'Покупка MYR 1.00: знижка 20%.',
   ])(
     'does not turn a localized failed, refunded or promotional payment into an expense: %s',
     (body) => {
