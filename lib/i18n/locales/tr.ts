@@ -1220,6 +1220,53 @@ const tr = {
       default_account: 'Varsayılan hesap',
       default_category: 'Varsayılan kategori',
       default_none: 'Ayarlanmadı',
+      payment_alerts_title: 'Ödeme bildirimleri',
+      payment_alerts_hint_android:
+        'Banka ve cüzdan uygulamalarınızın bildirimlerinden ödemeleri kaydeder. Uygulamaları siz seçersiniz.',
+      payment_alerts_hint_ios:
+        "Kestirmeler'deki bir otomasyonla bankanızın bildirimlerinden, SMS'lerinden ve e-postalarından ödemeleri kaydeder.",
+      payment_alerts_open: 'Ödeme bildirimleri',
+      payment_alerts_status_off: 'Kurulmadı',
+      payment_alerts_status_apps_one: '%{count} uygulama için açık',
+      payment_alerts_status_apps_other: '%{count} uygulama için açık',
+      payment_alerts_status_sources_one: '%{count} kaynak',
+      payment_alerts_status_sources_other: '%{count} kaynak',
+      payment_alerts_android_step_1:
+        "Ödeme bildirimleri'ni açın ve Ödeme bildirimlerini oku'yu etkinleştirin. Money2Time'ın bildirim erişimini nasıl kullandığını okuyun, sonra Devam'a dokunun.",
+      payment_alerts_android_step_2:
+        "Android bildirim erişimi ekranını açar. Money2Time'ı bulun ve açın.",
+      payment_alerts_android_step_3:
+        'İzin ver ile onaylayın. Android, uygulamanın tüm bildirimleri okuyabileceği konusunda uyarır, ancak Money2Time yalnızca seçtiğiniz uygulamaları tutar.',
+      payment_alerts_android_step_4:
+        "Money2Time'a dönüp ödeme bildirimlerinizi gönderen banka ve cüzdan uygulamalarını seçin.",
+      payment_alerts_android_step_5: 'Her uygulama için hesabı seçin.',
+      payment_alerts_android_step_6:
+        'Her şeyin çalıştığını kontrol etmek için bir test bildirimi gönderin.',
+      payment_alerts_android_step_7:
+        'Ödemeler seçtiğiniz hesaba otomatik kaydedilir. Kategoriler Apple Pay ile aynı anahtar kelimeleri kullanır.',
+      payment_alerts_ios_step_1:
+        'Kestirmeler’i açın, Automation sekmesine gidin ve New Automation’a dokunun.',
+      payment_alerts_ios_step_2:
+        'Notification’ı seçin, banka uygulamanızı seçin, ardından Run Immediately’yi seçin.',
+      payment_alerts_ios_step_3:
+        'Create New Shortcut’a dokunun, Money2Time’ı arayın ve Log Payment Alert’i ekleyin.',
+      payment_alerts_ios_step_4:
+        'Message alanına dokunun, Select Variable’ı seçin, ardından Shortcut Input’u seçip Body’yi seçin.',
+      payment_alerts_ios_step_5:
+        'From alanına bankanın adını yazın; böylece her bankanın Money2Time’da kendi ayarları olur.',
+      payment_alerts_ios_step_6: 'Log Payment Alert içinde Account seçin.',
+      payment_alerts_ios_step_7:
+        'Bitti. Her banka uygulaması için tekrarlayın. Ödemeler, Money2Time’ı bir sonraki açışınızda kaydedilir.',
+      bank_sms_ios_step_1:
+        'Kestirmeler’i açın, Automation sekmesine gidin, New Automation’a dokunun ve Message’ı seçin.',
+      bank_sms_ios_step_2:
+        'Gönderen olarak bankanızı seçin ya da Message Contains alanına SMS’lerinde her zaman geçen bir kelime yazın. Sonra Run Immediately’yi seçin.',
+      bank_sms_ios_step_3:
+        'Create New Shortcut’a dokunun, Money2Time’ı arayın ve Log Payment Alert’i ekleyin.',
+      bank_sms_ios_step_4:
+        'Message alanına dokunun, Select Variable’ı seçin, ardından Shortcut Input’u seçip Content’i seçin. From alanına bankanın adını yazın.',
+      bank_sms_ios_step_5:
+        'Log Payment Alert içinde Account seçin. Ödemeler seçtiğiniz hesaba otomatik kaydedilir. Kategoriler Apple Pay ile aynı anahtar kelimeleri kullanır.',
     },
     title: 'Ayarlar',
     display: 'Görünüm',
@@ -2550,6 +2597,81 @@ const tr = {
       insights: 'Anlama',
       data: 'Verileriniz',
     },
+  },
+  payment_alerts: {
+    account_hint:
+      'Ödemeler seçtiğiniz hesaba otomatik kaydedilir. Kategoriler Apple Pay ile aynı anahtar kelimeleri kullanır.',
+    title: 'Ödeme bildirimleri',
+    intro_android:
+      'Money2Time, seçtiğiniz banka ve cüzdan uygulamalarının ödeme bildirimlerini okur ve her ödemeyi sizin için kaydeder. Bildirimler bu telefonda okunur ve asla yüklenmez.',
+    intro_ios:
+      'Ödemeler seçtiğiniz hesaba otomatik kaydedilir. Kategoriler Apple Pay ile aynı anahtar kelimeleri kullanır.',
+    section_status: 'Durum',
+    master_label: 'Ödeme bildirimlerini oku',
+    master_hint: 'Seçtiğiniz uygulamalardaki ödemeleri kaydeder.',
+    access_open_settings: 'Ayarları aç',
+    health_unsupported:
+      "Money2Time'ın bu sürümü bildirimleri okuyamıyor. Ödeme bildirimlerini kullanmak için uygulamayı güncelleyin.",
+    health_access_off:
+      'Bildirim erişimi kapalı, bu yüzden hiçbir ödeme okunmuyor. Android ayarlarından yeniden açın.',
+    health_not_receiving:
+      'Money2Time bir süredir hiç bildirim almadı. Telefonunuz pil tasarrufu için uygulamayı duraklatmış olabilir.',
+    health_reconnect: 'Yeniden bağlan',
+    health_battery_hint:
+      "Bu tekrarlanırsa, Android ayarlarından Money2Time'ın pil kullanımını Kısıtlanmamış olarak ayarlayın.",
+    ios_notifications_title: 'Banka bildirimleri',
+    ios_notifications_hint:
+      "Her banka uygulaması için bir otomasyon, o uygulamanın bildirimlerini Money2Time'a gönderir.",
+    ios_needs_27:
+      "Bildirim otomasyonları için iOS 27 gerekir. Banka SMS'leri, Apple Pay ve ekran görüntüleri şimdiden çalışıyor.",
+    ios_sms_title: "Banka SMS'leri",
+    ios_sms_hint:
+      "Bir otomasyon, bankanızdan gelen SMS'leri Money2Time'a gönderir. iOS 17 ve sonrasında çalışır.",
+    section_apps: 'Uygulamalar',
+    section_sources: 'Kaynaklar',
+    choose_apps: 'Uygulama seç',
+    source_off: 'Kapalı',
+    disclosure_title: 'Bildirimlerinizden ödeme kaydedin',
+    disclosure_body:
+      "Bunun için Money2Time'ın bildirim erişimine ihtiyacı var. Erişimi şöyle kullanır:",
+    disclosure_point_selected:
+      'Yalnızca seçtiğiniz banka ve cüzdan uygulamalarının bildirimlerini okur. Diğer her şey yok sayılır.',
+    disclosure_point_device: 'Bildirimler bu telefonda okunur. Metinleri asla yüklenmez.',
+    disclosure_android_warning:
+      'Android, bildirim erişimi olan bir uygulamanın tüm bildirimlerinizi okuyabileceği konusunda uyaracak. Money2Time yalnızca seçtiğiniz uygulamaları tutar.',
+    access_title: 'Bildirim erişimini açın',
+    access_body: "Listede Money2Time'ı bulun, bildirim erişimini açın ve buraya geri dönün.",
+    access_greyed_title: 'Anahtar gri mi görünüyor?',
+    access_greyed_body:
+      "Android, Google Play dışından yüklenen uygulamalar için bunu engeller. Ayarlar, Uygulamalar, Money2Time'ı açın, üstteki menüye dokunun, Kısıtlanmış ayarlara izin ver'i seçin ve yeniden deneyin.",
+    apps_title: 'Ödeme bildirimlerinizi hangi uygulamalar gönderiyor?',
+    apps_body:
+      'Banka ve cüzdan uygulamalarınızı, bankanız SMS gönderiyorsa mesajlar uygulamasını da seçin.',
+    apps_suggested: 'Bu telefonda',
+    apps_recent: 'Son zamanlarda etkin',
+    apps_missing_hint: 'Uygulama listede yok mu? Bir sonraki bildiriminden sonra burada görünür.',
+    apps_other: 'Diğer uygulamalar',
+    test_title: 'Test bildirimi gönderin',
+    test_body:
+      'Money2Time, her şeyin çalıştığını kontrol etmek için sahte bir ödeme bildirimi gönderir. Hiçbir şey kaydedilmez.',
+    test_alert_title: 'Money2Time testi',
+    test_alert_body: "Test Cafe'de sonu 0000 olan kartınızla %{amount} harcadınız.",
+    test_channel_name: 'Ödeme bildirimi testi',
+    test_send: 'Test bildirimi gönder',
+    test_waiting: 'Bildirim bekleniyor…',
+    test_success: 'Çalışıyor. Money2Time ödeme bildirimlerinizi okuyabiliyor.',
+    test_would_log: '%{amount}, %{account} hesabına %{category} olarak kaydedilir.',
+    test_would_log_no_category: '%{amount}, %{account} hesabına kaydedilir.',
+    test_timeout_title: 'Bildirim gelmedi',
+    test_timeout_body:
+      "Bildirim erişiminin açık olduğunu kontrol edip yeniden deneyin. Bazı telefonlarda Money2Time'ın pil kullanımının Kısıtlanmamış olması da gerekir.",
+    source_enabled_hint: 'Kapalıyken bildirimleri yok sayılır.',
+    source_missing: 'Bu kaynak kaldırıldı.',
+    source_remove_title: '%{app} kaldırılsın mı?',
+    source_remove_body_android:
+      'Money2Time bu uygulamanın bildirimlerini okumayı bırakır. Kaydedilmiş ödemeler kalır.',
+    source_remove_body_ios:
+      "Ayarları kaldırılır. Bildirimlerinin gelmesini durdurmak için Kestirmeler'deki otomasyonu da silin.",
   },
 };
 

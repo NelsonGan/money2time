@@ -1213,6 +1213,52 @@ const uk = {
       default_account: 'Рахунок за замовчуванням',
       default_category: 'Категорія за замовчуванням',
       default_none: 'Не задано',
+      payment_alerts_title: 'Сповіщення про платежі',
+      payment_alerts_hint_android:
+        'Записує платежі зі сповіщень банківських застосунків і гаманців. Застосунки вибираєте ви.',
+      payment_alerts_hint_ios:
+        'Записує платежі зі сповіщень, SMS і листів банку за допомогою автоматизації у «Швидких командах».',
+      payment_alerts_open: 'Сповіщення про платежі',
+      payment_alerts_status_off: 'Не налаштовано',
+      payment_alerts_status_apps_one: 'Увімкнено для %{count} застосунку',
+      payment_alerts_status_apps_other: 'Увімкнено, застосунків: %{count}',
+      payment_alerts_status_sources_one: '%{count} джерело',
+      payment_alerts_status_sources_other: 'Джерел: %{count}',
+      payment_alerts_android_step_1:
+        'Відкрийте «Сповіщення про платежі» й увімкніть «Читати сповіщення про платежі». Прочитайте, як Money2Time використовує доступ до сповіщень, і торкніться «Продовжити».',
+      payment_alerts_android_step_2:
+        'Android відкриє екран доступу до сповіщень. Знайдіть Money2Time і увімкніть його.',
+      payment_alerts_android_step_3:
+        'Підтвердьте кнопкою «Дозволити». Android попередить, що застосунок може читати всі сповіщення, але Money2Time зберігає лише вибрані вами застосунки.',
+      payment_alerts_android_step_4:
+        'Повернувшись у Money2Time, виберіть банківські застосунки й гаманці, які надсилають сповіщення про платежі.',
+      payment_alerts_android_step_5: 'Виберіть рахунок для кожного застосунку.',
+      payment_alerts_android_step_6: 'Надішліть тестове сповіщення, щоб перевірити, що все працює.',
+      payment_alerts_android_step_7:
+        'Платежі автоматично записуються на вибраний рахунок. Категорії використовують ті самі ключові слова, що й Apple Pay.',
+      payment_alerts_ios_step_1:
+        'Відкрийте «Швидкі команди», перейдіть на вкладку Automation і натисніть New Automation.',
+      payment_alerts_ios_step_2:
+        'Виберіть Notification, виберіть застосунок банку, потім Run Immediately.',
+      payment_alerts_ios_step_3:
+        'Натисніть Create New Shortcut, знайдіть Money2Time і додайте Log Payment Alert.',
+      payment_alerts_ios_step_4:
+        'Натисніть поле Message, виберіть Select Variable, потім Shortcut Input і виберіть Body.',
+      payment_alerts_ios_step_5:
+        'Укажіть у From назву банку, щоб кожен банк мав свої налаштування в Money2Time.',
+      payment_alerts_ios_step_6: 'Виберіть Account у Log Payment Alert.',
+      payment_alerts_ios_step_7:
+        'Готово. Повторіть для кожного банківського застосунку. Платежі запишуться під час наступного відкриття Money2Time.',
+      bank_sms_ios_step_1:
+        'Відкрийте «Швидкі команди», перейдіть на вкладку Automation, натисніть New Automation і виберіть Message.',
+      bank_sms_ios_step_2:
+        'Виберіть банк відправником або введіть у Message Contains слово, яке завжди є в його SMS. Потім виберіть Run Immediately.',
+      bank_sms_ios_step_3:
+        'Натисніть Create New Shortcut, знайдіть Money2Time і додайте Log Payment Alert.',
+      bank_sms_ios_step_4:
+        'Натисніть поле Message, виберіть Select Variable, потім Shortcut Input і виберіть Content. Укажіть у From назву банку.',
+      bank_sms_ios_step_5:
+        'Виберіть Account у Log Payment Alert. Платежі автоматично записуються на вибраний рахунок. Категорії використовують ті самі ключові слова, що й Apple Pay.',
     },
     title: 'Налаштування',
     display: 'Відображення',
@@ -2540,6 +2586,82 @@ const uk = {
       insights: 'Розібратися',
       data: 'Ваші дані',
     },
+  },
+  payment_alerts: {
+    account_hint:
+      'Платежі автоматично записуються на вибраний рахунок. Категорії використовують ті самі ключові слова, що й Apple Pay.',
+    title: 'Сповіщення про платежі',
+    intro_android:
+      'Money2Time читає сповіщення про платежі з вибраних вами банківських застосунків і гаманців та записує кожен платіж за вас. Сповіщення читаються на цьому телефоні й ніколи не завантажуються.',
+    intro_ios:
+      'Платежі автоматично записуються на вибраний рахунок. Категорії використовують ті самі ключові слова, що й Apple Pay.',
+    section_status: 'Стан',
+    master_label: 'Читати сповіщення про платежі',
+    master_hint: 'Записує платежі з вибраних застосунків.',
+    access_open_settings: 'Відкрити налаштування',
+    health_unsupported:
+      'Ця версія Money2Time не вміє читати сповіщення. Оновіть застосунок, щоб користуватися сповіщеннями про платежі.',
+    health_access_off:
+      'Доступ до сповіщень вимкнено, тому платежі не читаються. Увімкніть його знову в налаштуваннях Android.',
+    health_not_receiving:
+      'Money2Time давно не отримував сповіщень. Можливо, телефон призупинив застосунок, щоб заощадити заряд.',
+    health_reconnect: 'Перепідключити',
+    health_battery_hint:
+      'Якщо це повторюється, встановіть для Money2Time використання батареї «Без обмежень» у налаштуваннях Android.',
+    ios_notifications_title: 'Сповіщення банку',
+    ios_notifications_hint:
+      'Одна автоматизація на кожен банківський застосунок надсилає його сповіщення до Money2Time.',
+    ios_needs_27:
+      'Автоматизаціям сповіщень потрібна iOS 27. SMS банку, Apple Pay і знімки екрана працюють уже зараз.',
+    ios_sms_title: 'SMS банку',
+    ios_sms_hint: 'Автоматизація надсилає SMS вашого банку до Money2Time. Працює з iOS 17.',
+    section_apps: 'Застосунки',
+    section_sources: 'Джерела',
+    choose_apps: 'Вибрати застосунки',
+    source_off: 'Вимкнено',
+    disclosure_title: 'Записуйте платежі зі сповіщень',
+    disclosure_body:
+      'Для цього Money2Time потрібен доступ до сповіщень. Ось як він використовується:',
+    disclosure_point_selected:
+      'Читаються лише сповіщення вибраних вами банківських застосунків і гаманців. Усе інше ігнорується.',
+    disclosure_point_device:
+      'Сповіщення читаються на цьому телефоні. Їхній текст ніколи не завантажується.',
+    disclosure_android_warning:
+      'Android попередить, що застосунок із доступом до сповіщень може читати їх усі. Money2Time зберігає лише вибрані вами застосунки.',
+    access_title: 'Увімкніть доступ до сповіщень',
+    access_body: 'Знайдіть Money2Time у списку, увімкніть доступ до сповіщень і поверніться сюди.',
+    access_greyed_title: 'Перемикач сірий?',
+    access_greyed_body:
+      'Android блокує це для застосунків, встановлених не з Google Play. Відкрийте Налаштування, Застосунки, Money2Time, торкніться меню вгорі, виберіть «Дозволити обмежені налаштування» і спробуйте ще раз.',
+    apps_title: 'Які застосунки надсилають сповіщення про платежі?',
+    apps_body:
+      'Виберіть банківські застосунки й гаманці, а також застосунок повідомлень, якщо банк надсилає SMS.',
+    apps_suggested: 'На цьому телефоні',
+    apps_recent: 'Нещодавно активні',
+    apps_missing_hint:
+      'Немає потрібного застосунку? Він з’явиться тут після наступного сповіщення.',
+    apps_other: 'Інші застосунки',
+    test_title: 'Надішліть тестове сповіщення',
+    test_body:
+      'Money2Time надішле несправжнє сповіщення про платіж, щоб перевірити, що все працює. Нічого не записується.',
+    test_alert_title: 'Тест Money2Time',
+    test_alert_body: 'Покупка %{amount} у Test Cafe карткою з останніми цифрами 0000.',
+    test_channel_name: 'Тест сповіщень про платежі',
+    test_send: 'Надіслати тестове сповіщення',
+    test_waiting: 'Чекаємо на сповіщення…',
+    test_success: 'Працює. Money2Time може читати ваші сповіщення про платежі.',
+    test_would_log: 'Буде записано %{amount} на %{account} у категорію %{category}.',
+    test_would_log_no_category: 'Буде записано %{amount} на %{account}.',
+    test_timeout_title: 'Сповіщення не надійшло',
+    test_timeout_body:
+      'Перевірте, що доступ до сповіщень увімкнено, і спробуйте ще раз. На деяких телефонах також потрібно встановити для Money2Time використання батареї «Без обмежень».',
+    source_enabled_hint: 'Якщо вимкнено, його сповіщення ігноруються.',
+    source_missing: 'Це джерело видалено.',
+    source_remove_title: 'Прибрати %{app}?',
+    source_remove_body_android:
+      'Money2Time перестане читати його сповіщення. Уже записані платежі залишаться.',
+    source_remove_body_ios:
+      'Його налаштування буде видалено. Щоб сповіщення перестали надходити, видаліть і автоматизацію у «Швидких командах».',
   },
 };
 

@@ -6,10 +6,10 @@
 // time, so the only genuinely fiddly logic here stays under Jest rather than
 // living in untestable Swift.
 
-import { ALL_CURRENCIES } from '~/constants/appDefaults';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import type { Account, Category } from '~/types';
 import { dayKeyFromIsoLocal } from '~/utils/formatters';
+import { detectCurrency, parseNumber } from '~/utils/moneyText';
 
 import { findFallbackCategory, pickDefaultAccountId } from './entryDefaults';
 
@@ -188,84 +188,6 @@ export interface ParsedAutoLogAmount {
   currency: string | null;
 }
 
-const CURRENCY_CODES = new Set(ALL_CURRENCIES.map((entry) => entry.code));
-
-/**
- * Symbols that map to exactly one currency.
- *
- * `$`, `¥` and `kr` are deliberately absent: `$` spans USD/CAD/AUD/SGD/NZD/HKD,
- * `¥` spans JPY/CNY, and `kr` spans SEK/NOK/DKK/ISK. The trigger formats the
- * amount in the *device locale*, so guessing from an ambiguous symbol would
- * silently mislabel every non-US tap. Returning null instead lets the caller
- * use the account's own currency, which is what the card is tied to anyway.
- */
-const UNAMBIGUOUS_SYMBOLS: readonly (readonly [string, string])[] = [
-  ['R$', 'BRL'],
-  ['RM', 'MYR'],
-  ['Rp', 'IDR'],
-  ['zł', 'PLN'],
-  ['€', 'EUR'],
-  ['£', 'GBP'],
-  ['₹', 'INR'],
-  ['₩', 'KRW'],
-  ['₫', 'VND'],
-  ['₺', 'TRY'],
-  ['฿', 'THB'],
-  ['₱', 'PHP'],
-  ['₪', 'ILS'],
-  ['₦', 'NGN'],
-  ['₴', 'UAH'],
-];
-
-/** An explicit ISO code in the string beats a symbol; both beat nothing. */
-function detectCurrency(raw: string): string | null {
-  for (const match of raw.toUpperCase().matchAll(/[A-Z]{3}/g)) {
-    if (CURRENCY_CODES.has(match[0])) return match[0];
-  }
-  for (const [symbol, code] of UNAMBIGUOUS_SYMBOLS) {
-    if (raw.includes(symbol)) return code;
-  }
-  return null;
-}
-
-/**
- * Read the numeric value out of a locale-formatted amount, handling both
- * `1,234.56` and `1.234,56`.
- */
-function parseNumber(raw: string): number | null {
-  const cleaned = raw.replace(/[^\d.,-]/g, '');
-  if (!/\d/.test(cleaned)) return null;
-
-  const digits = cleaned.replace(/-/g, '');
-  const lastDot = digits.lastIndexOf('.');
-  const lastComma = digits.lastIndexOf(',');
-
-  let decimalSep: string | null = null;
-  if (lastDot >= 0 && lastComma >= 0) {
-    // Both present, so the rightmost is the decimal mark and the other groups.
-    decimalSep = lastDot > lastComma ? '.' : ',';
-  } else if (lastDot >= 0 || lastComma >= 0) {
-    const sep = lastDot >= 0 ? '.' : ',';
-    const occurrences = digits.split(sep).length - 1;
-    const tail = digits.slice(digits.lastIndexOf(sep) + 1);
-    // A lone separator trailed by exactly three digits is a thousands mark
-    // ("1,234" and "1.234" both mean 1234) — currency amounts carry at most
-    // two decimals. Known gap: the three-decimal currencies (KWD, BHD, TND)
-    // parse 100x low here, which is part of why an ambiguous currency falls
-    // back to the account's rather than being guessed.
-    decimalSep = occurrences === 1 && tail.length !== 3 ? sep : null;
-  }
-
-  const normalized = decimalSep
-    ? `${digits.slice(0, digits.lastIndexOf(decimalSep)).replace(/[.,]/g, '')}.${digits
-        .slice(digits.lastIndexOf(decimalSep) + 1)
-        .replace(/[.,]/g, '')}`
-    : digits.replace(/[.,]/g, '');
-
-  const value = Number(normalized);
-  return Number.isFinite(value) ? value : null;
-}
-
 /**
  * Parse the trigger's Amount text. Returns null when there is no usable number,
  * which tells the drain to drop the entry rather than post a bogus row.
@@ -279,6 +201,17 @@ export function parseAutoLogAmount(raw: string): ParsedAutoLogAmount | null {
   if (amount <= 0) return null;
 
   return { amount, currency: detectCurrency(raw) };
+}
+
+/**
+ * The tap's own instant, as the full UTC ISO string the editor also stores, so
+ * the row sorts by time within its day and a bank alert for the same purchase
+ * can be matched to it (features/autoLog/lib/dedupe.ts). A stamp that does not
+ * parse falls back to its day.
+ */
+function tapDate(createdAt: string): string {
+  const parsed = new Date(createdAt);
+  return Number.isNaN(parsed.getTime()) ? dayKeyFromIsoLocal(createdAt) : parsed.toISOString();
 }
 
 export interface AutoLogResolveContext {
@@ -355,7 +288,7 @@ export function resolveAutoLogEntry(
     type: 'expense',
     amount: parsed.amount,
     currency,
-    date: dayKeyFromIsoLocal(entry.createdAt),
+    date: tapDate(entry.createdAt),
     accountId,
     categoryId,
     note,

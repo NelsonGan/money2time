@@ -1227,6 +1227,51 @@ const nl = {
       default_account: 'Standaardrekening',
       default_category: 'Standaardcategorie',
       default_none: 'Niet ingesteld',
+      payment_alerts_title: 'Betaalmeldingen',
+      payment_alerts_hint_android:
+        'Registreert betalingen uit de meldingen van je bank- en wallet-apps. Jij kiest de apps.',
+      payment_alerts_hint_ios:
+        "Registreert betalingen uit de meldingen, sms'jes en e-mails van je bank via een automatisering in Opdrachten.",
+      payment_alerts_open: 'Betaalmeldingen',
+      payment_alerts_status_off: 'Niet ingesteld',
+      payment_alerts_status_apps_one: 'Aan voor %{count} app',
+      payment_alerts_status_apps_other: 'Aan voor %{count} apps',
+      payment_alerts_status_sources_one: '%{count} bron',
+      payment_alerts_status_sources_other: '%{count} bronnen',
+      payment_alerts_android_step_1:
+        'Open Betaalmeldingen en zet Betaalmeldingen lezen aan. Lees hoe Money2Time meldingstoegang gebruikt en tik op Doorgaan.',
+      payment_alerts_android_step_2:
+        'Android opent het scherm voor meldingstoegang. Zoek Money2Time en zet het aan.',
+      payment_alerts_android_step_3:
+        'Bevestig met Toestaan. Android waarschuwt dat de app alle meldingen kan lezen, maar Money2Time bewaart alleen de apps die je kiest.',
+      payment_alerts_android_step_4:
+        'Kies terug in Money2Time de bank- en wallet-apps die je betaalmeldingen sturen.',
+      payment_alerts_android_step_5: 'Kies de rekening voor elke app.',
+      payment_alerts_android_step_6: 'Stuur een testmelding om te controleren of alles werkt.',
+      payment_alerts_android_step_7:
+        'Betalingen worden automatisch op de gekozen rekening geboekt. Categorieën gebruiken dezelfde trefwoorden als Apple Pay.',
+      payment_alerts_ios_step_1:
+        'Open Opdrachten, ga naar het tabblad Automation en tik op New Automation.',
+      payment_alerts_ios_step_2: 'Kies Notification, kies je bank-app en kies dan Run Immediately.',
+      payment_alerts_ios_step_3:
+        'Tik op Create New Shortcut, zoek Money2Time en voeg Log Payment Alert toe.',
+      payment_alerts_ios_step_4:
+        'Tik op het veld Message, kies Select Variable, daarna Shortcut Input en selecteer Body.',
+      payment_alerts_ios_step_5:
+        'Zet bij From de naam van de bank, zodat elke bank eigen instellingen krijgt in Money2Time.',
+      payment_alerts_ios_step_6: 'Kies Account in Log Payment Alert.',
+      payment_alerts_ios_step_7:
+        'Klaar. Herhaal dit voor elke bank-app. Betalingen worden geregistreerd wanneer je Money2Time weer opent.',
+      bank_sms_ios_step_1:
+        'Open Opdrachten, ga naar het tabblad Automation, tik op New Automation en kies Message.',
+      bank_sms_ios_step_2:
+        "Kies je bank als afzender, of typ bij Message Contains een woord dat altijd in de sms'jes staat. Kies dan Run Immediately.",
+      bank_sms_ios_step_3:
+        'Tik op Create New Shortcut, zoek Money2Time en voeg Log Payment Alert toe.',
+      bank_sms_ios_step_4:
+        'Tik op het veld Message, kies Select Variable, daarna Shortcut Input en selecteer Content. Zet bij From de naam van de bank.',
+      bank_sms_ios_step_5:
+        'Kies Account in Log Payment Alert. Betalingen worden automatisch op de gekozen rekening geboekt. Categorieën gebruiken dezelfde trefwoorden als Apple Pay.',
     },
     title: 'Instellingen',
     display: 'Weergave',
@@ -2571,6 +2616,80 @@ const nl = {
       insights: 'Begrijpen',
       data: 'Jouw gegevens',
     },
+  },
+  payment_alerts: {
+    account_hint:
+      'Betalingen worden automatisch op de gekozen rekening geboekt. Categorieën gebruiken dezelfde trefwoorden als Apple Pay.',
+    title: 'Betaalmeldingen',
+    intro_android:
+      'Money2Time leest de betaalmeldingen van de bank- en wallet-apps die je kiest en registreert elke betaling voor je. Meldingen worden op deze telefoon gelezen en nooit geüpload.',
+    intro_ios:
+      'Betalingen worden automatisch op de gekozen rekening geboekt. Categorieën gebruiken dezelfde trefwoorden als Apple Pay.',
+    section_status: 'Status',
+    master_label: 'Betaalmeldingen lezen',
+    master_hint: 'Registreert betalingen uit de apps die je kiest.',
+    access_open_settings: 'Instellingen openen',
+    health_unsupported:
+      'Deze versie van Money2Time kan geen meldingen lezen. Werk de app bij om betaalmeldingen te gebruiken.',
+    health_access_off:
+      'Meldingstoegang staat uit, dus er worden geen betalingen gelezen. Zet hem weer aan in de Android-instellingen.',
+    health_not_receiving:
+      'Money2Time heeft al een tijdje geen meldingen ontvangen. Misschien heeft je telefoon de app gepauzeerd om batterij te sparen.',
+    health_reconnect: 'Opnieuw verbinden',
+    health_battery_hint:
+      'Gebeurt dit vaker, zet het batterijgebruik van Money2Time dan op Onbeperkt in de Android-instellingen.',
+    ios_notifications_title: 'Meldingen van de bank',
+    ios_notifications_hint:
+      'Eén automatisering per bank-app stuurt de meldingen ervan naar Money2Time.',
+    ios_needs_27:
+      "Automatiseringen voor meldingen hebben iOS 27 nodig. Sms'jes van de bank, Apple Pay en screenshots werken nu al.",
+    ios_sms_title: "Sms'jes van de bank",
+    ios_sms_hint:
+      "Een automatisering stuurt sms'jes van je bank naar Money2Time. Werkt vanaf iOS 17.",
+    section_apps: 'Apps',
+    section_sources: 'Bronnen',
+    choose_apps: 'Apps kiezen',
+    source_off: 'Uit',
+    disclosure_title: 'Betalingen registreren uit je meldingen',
+    disclosure_body: 'Money2Time heeft hiervoor meldingstoegang nodig. Zo wordt die gebruikt:',
+    disclosure_point_selected:
+      'Alleen meldingen van de bank- en wallet-apps die je kiest worden gelezen. Al het andere wordt genegeerd.',
+    disclosure_point_device:
+      'Meldingen worden op deze telefoon gelezen. De tekst wordt nooit geüpload.',
+    disclosure_android_warning:
+      'Android waarschuwt dat een app met meldingstoegang al je meldingen kan lezen. Money2Time bewaart alleen de apps die je kiest.',
+    access_title: 'Meldingstoegang aanzetten',
+    access_body: 'Zoek Money2Time in de lijst, zet meldingstoegang aan en kom dan hier terug.',
+    access_greyed_title: 'Is de schakelaar grijs?',
+    access_greyed_body:
+      'Android blokkeert dit voor apps die buiten Google Play zijn geïnstalleerd. Open Instellingen, Apps, Money2Time, tik bovenaan op het menu, kies Beperkte instellingen toestaan en probeer het opnieuw.',
+    apps_title: 'Welke apps sturen je betaalmeldingen?',
+    apps_body: "Kies je bank- en wallet-apps, en je berichten-app als je bank sms'jes stuurt.",
+    apps_suggested: 'Op deze telefoon',
+    apps_recent: 'Onlangs actief',
+    apps_missing_hint: 'Staat de app er niet bij? Hij verschijnt hier na zijn volgende melding.',
+    apps_other: 'Andere apps',
+    test_title: 'Testmelding sturen',
+    test_body:
+      'Money2Time stuurt een nep-betaalmelding om te controleren of alles werkt. Er wordt niets geregistreerd.',
+    test_alert_title: 'Money2Time-test',
+    test_alert_body: 'Je hebt %{amount} betaald bij Test Cafe met de kaart eindigend op 0000.',
+    test_channel_name: 'Test van betaalmeldingen',
+    test_send: 'Testmelding sturen',
+    test_waiting: 'Wachten op de melding…',
+    test_success: 'Het werkt. Money2Time kan je betaalmeldingen lezen.',
+    test_would_log: 'Dit zou %{amount} op %{account} registreren als %{category}.',
+    test_would_log_no_category: 'Dit zou %{amount} op %{account} registreren.',
+    test_timeout_title: 'Geen melding ontvangen',
+    test_timeout_body:
+      'Controleer of meldingstoegang aanstaat en probeer het opnieuw. Op sommige telefoons moet het batterijgebruik van Money2Time ook op Onbeperkt staan.',
+    source_enabled_hint: 'Staat dit uit, dan worden de meldingen genegeerd.',
+    source_missing: 'Deze bron is verwijderd.',
+    source_remove_title: '%{app} verwijderen?',
+    source_remove_body_android:
+      'Money2Time leest de meldingen ervan niet meer. Al geregistreerde betalingen blijven staan.',
+    source_remove_body_ios:
+      'De instellingen worden verwijderd. Verwijder ook de automatisering in Opdrachten om geen meldingen meer te ontvangen.',
   },
 };
 

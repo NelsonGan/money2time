@@ -121,6 +121,7 @@ money2time/
 │   ├── loans/                  # Loan accounts — payoff progress, instalments, interest
 │   ├── reimbursements/         # Expenses someone else pays back
 │   ├── widgets/                # Widgets hub + the live-earnings Live Activity
+│   ├── autoLog/                # Payment alerts: notifications and SMS into automatic transactions
 │   ├── settings/               # All settings screens + nested stack
 │   ├── onboarding/             # First-run flow (welcome, basics, wage, backup, source, notifications, features)
 │   ├── tutorials/              # Searchable how-to guides, mirrored to money2time.com
@@ -142,7 +143,7 @@ money2time/
 ├── constants/                  # appDefaults, designSystem, motion, pager, proLimits, icons, accountLogos
 ├── utils/                      # Pure helpers (formatters, IDs, date keys, currency, error utils)
 ├── types/                      # Shared domain types
-├── plugins/                    # Expo config plugins (widgets, auto-log, alternate icons)
+├── plugins/                    # Expo config plugins (widgets, auto-log, payment capture, alternate icons)
 ├── cloudflare/                 # Receipt-scan + live-earnings Workers and their D1 schemas
 ├── scripts/                    # Icon/logo/tutorial generation pipelines
 ├── __tests__/                  # Jest tests (96 suites: utils, repositories, services, navigation, db, features, i18n)
@@ -166,6 +167,7 @@ Other contexts:
 - `context/ThemeContext.tsx` — resolved theme, color palette, icon style
 - `context/ProContext.tsx` — RevenueCat subscription + paywall offering
 - `context/ReceiptScanContext.tsx` — background receipt-OCR jobs
+- `useApp().paymentAlertPrefs` — payment-alert sources and their selected accounts
 - `context/SplitBillSession.tsx` — hands the split draft to the pushed editor
 
 ### Database
@@ -188,6 +190,7 @@ SQLite (`money2time.db`) opened via `expo-sqlite`, queried with Drizzle. Schema 
 | `monthlyBudgets*` (2 tables)             | The frozen budget copied into a given month, and its lines                                     |
 | `monthlyWageSettingsTable`               | Per-month wage config (hourly/monthly/yearly + commute)                                        |
 | `settingsTable`                          | Singleton row for app preferences (locale, currency, theme, mode, App Lock, FX, prefs JSON)    |
+| `autoLogCapturesTable`                   | Payment alerts as captured, with internal results for duplicate detection and retention        |
 
 Repositories live in `lib/repositories/`; mapping between rows and domain types is in [lib/repositories/mappers.ts](lib/repositories/mappers.ts).
 
@@ -211,6 +214,7 @@ Most services are platform-split (`.native.ts` for iOS/Android, `.shared.ts` for
 | `reviewPrompt.*`                                                                                    | In-app store review request (expo-store-review)                                         |
 | `widgetSnapshot.*` + `widgetRegistry.ts`                                                            | Home-screen widget data snapshots                                                       |
 | `liveActivity.ts`, `liveEarningsPush.ts`, `liveEarningsWidget.ts`                                   | The live-earnings Live Activity: ActivityKit bridge, push registration, widget timeline |
+| `paymentCapture.ts`                                                                                 | Payment-alert capture queues and notification access; automatic on-device logging       |
 | `receiptScan.*`, `receiptImage.*`, `receiptPicker.ts`                                               | Receipt OCR against the Worker, plus the photo pick and downscale                       |
 | `appIcon.*`                                                                                         | Alternate home-screen app icons                                                         |
 | `errorReporting.*`                                                                                  | Sentry crash/error reporting                                                            |

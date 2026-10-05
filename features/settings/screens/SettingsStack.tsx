@@ -1,6 +1,8 @@
 import { CommonActions, StackActions } from '@react-navigation/native';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
+import { PaymentAlertSourceScreen } from '~/features/autoLog/screens/PaymentAlertSourceScreen';
+import { PaymentAlertsSettingsScreen } from '~/features/autoLog/screens/PaymentAlertsSettingsScreen';
 import { ItemsScreen } from '~/features/items/screens';
 import { NewsScreen } from '~/features/news/screens/NewsScreen';
 import { ReimbursementSettingsScreen } from '~/features/reimbursements/screens/ReimbursementSettingsScreen';
@@ -17,6 +19,7 @@ import {
 import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
 import { requestFocusInsight } from '~/services/insightsNavigation';
+import { requestOpenPaymentAlerts } from '~/services/paymentAlertsNavigation';
 import { subscribeOpenSettingsScreenRequest } from '~/services/settingsNavigation';
 import { requestOpenTab } from '~/services/tabNavigation';
 import type { CategoryType, TransactionWithRelations, WageConfig } from '~/types';
@@ -457,6 +460,39 @@ export function SettingsStack({
               onBack={() => props.navigation.goBack()}
               onOpenTutorial={(topic) => props.navigation.navigate('AutoLogTutorial', { topic })}
               onOpenQuickEntry={() => props.navigation.navigate('QuickEntrySettings')}
+              onOpenPaymentAlerts={() => props.navigation.navigate('PaymentAlerts')}
+            />
+          );
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="PaymentAlerts">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return (
+            <PaymentAlertsSettingsScreen
+              onBack={() => props.navigation.goBack()}
+              onOpenSource={(source) =>
+                props.navigation.navigate('PaymentAlertSource', {
+                  channel: source.channel,
+                  sourceKey: source.sourceKey,
+                })
+              }
+              onOpenTutorial={(topic) => props.navigation.navigate('AutoLogTutorial', { topic })}
+              onOpenSetup={(step) =>
+                requestOpenPaymentAlerts({ screen: 'PaymentAlertsSetup', step })
+              }
+            />
+          );
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="PaymentAlertSource">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return (
+            <PaymentAlertSourceScreen
+              channel={props.route.params.channel}
+              sourceKey={props.route.params.sourceKey}
+              onBack={() => props.navigation.goBack()}
             />
           );
         }}

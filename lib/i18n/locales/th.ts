@@ -1197,6 +1197,50 @@ const th = {
       default_account: 'บัญชีเริ่มต้น',
       default_category: 'หมวดหมู่เริ่มต้น',
       default_none: 'ยังไม่ได้ตั้ง',
+      payment_alerts_title: 'การแจ้งเตือนการชำระเงิน',
+      payment_alerts_hint_android:
+        'บันทึกการชำระเงินจากการแจ้งเตือนของแอปธนาคารและแอปวอลเล็ต คุณเลือกแอปเองได้',
+      payment_alerts_hint_ios:
+        'บันทึกการชำระเงินจากการแจ้งเตือน SMS และอีเมลของธนาคารผ่านระบบอัตโนมัติใน Shortcuts',
+      payment_alerts_open: 'การแจ้งเตือนการชำระเงิน',
+      payment_alerts_status_off: 'ยังไม่ได้ตั้งค่า',
+      payment_alerts_status_apps_one: 'เปิดสำหรับ %{count} แอป',
+      payment_alerts_status_apps_other: 'เปิดสำหรับ %{count} แอป',
+      payment_alerts_status_sources_one: '%{count} แหล่งที่มา',
+      payment_alerts_status_sources_other: '%{count} แหล่งที่มา',
+      payment_alerts_android_step_1:
+        'เปิดการแจ้งเตือนการชำระเงิน แล้วเปิดอ่านการแจ้งเตือนการชำระเงิน อ่านวิธีที่ Money2Time ใช้สิทธิ์เข้าถึงการแจ้งเตือน แล้วแตะต่อไป',
+      payment_alerts_android_step_2:
+        'Android จะเปิดหน้าสิทธิ์เข้าถึงการแจ้งเตือน หา Money2Time แล้วเปิด',
+      payment_alerts_android_step_3:
+        'ยืนยันด้วยอนุญาต Android จะเตือนว่าแอปอ่านการแจ้งเตือนทั้งหมดได้ แต่ Money2Time เก็บไว้เฉพาะแอปที่คุณเลือก',
+      payment_alerts_android_step_4:
+        'กลับมาที่ Money2Time แล้วเลือกแอปธนาคารและแอปวอลเล็ตที่ส่งการแจ้งเตือนการชำระเงินให้คุณ',
+      payment_alerts_android_step_5: 'เลือกบัญชีสำหรับแต่ละแอป',
+      payment_alerts_android_step_6: 'ส่งการแจ้งเตือนทดสอบเพื่อตรวจว่าทุกอย่างทำงาน',
+      payment_alerts_android_step_7:
+        'บันทึกการชำระเงินลงบัญชีที่เลือกโดยอัตโนมัติ หมวดหมู่ใช้คำสำคัญเดียวกับ Apple Pay',
+      payment_alerts_ios_step_1: 'เปิด Shortcuts ไปที่แท็บ Automation แล้วแตะ New Automation',
+      payment_alerts_ios_step_2:
+        'เลือก Notification เลือกแอปธนาคารของคุณ แล้วเลือก Run Immediately',
+      payment_alerts_ios_step_3:
+        'แตะ Create New Shortcut ค้นหา Money2Time แล้วเพิ่ม Log Payment Alert',
+      payment_alerts_ios_step_4:
+        'แตะช่อง Message เลือก Select Variable แล้วเลือก Shortcut Input จากนั้นเลือก Body',
+      payment_alerts_ios_step_5:
+        'ตั้งค่า From เป็นชื่อธนาคาร เพื่อให้แต่ละธนาคารมีการตั้งค่าของตัวเองใน Money2Time',
+      payment_alerts_ios_step_6: 'เลือก Account ใน Log Payment Alert',
+      payment_alerts_ios_step_7:
+        'เสร็จแล้ว ทำซ้ำกับทุกแอปธนาคาร การชำระเงินจะถูกบันทึกเมื่อคุณเปิด Money2Time ครั้งถัดไป',
+      bank_sms_ios_step_1:
+        'เปิด Shortcuts ไปที่แท็บ Automation แตะ New Automation แล้วเลือก Message',
+      bank_sms_ios_step_2:
+        'เลือกธนาคารเป็นผู้ส่ง หรือพิมพ์คำที่อยู่ใน SMS ของธนาคารเสมอในช่อง Message Contains แล้วเลือก Run Immediately',
+      bank_sms_ios_step_3: 'แตะ Create New Shortcut ค้นหา Money2Time แล้วเพิ่ม Log Payment Alert',
+      bank_sms_ios_step_4:
+        'แตะช่อง Message เลือก Select Variable แล้วเลือก Shortcut Input จากนั้นเลือก Content ตั้งค่า From เป็นชื่อธนาคาร',
+      bank_sms_ios_step_5:
+        'เลือก Account ใน Log Payment Alert บันทึกการชำระเงินลงบัญชีที่เลือกโดยอัตโนมัติ หมวดหมู่ใช้คำสำคัญเดียวกับ Apple Pay',
     },
     title: 'ตั้งค่า',
     display: 'การแสดงผล',
@@ -2499,6 +2543,78 @@ const th = {
       insights: 'ทำความเข้าใจ',
       data: 'ข้อมูลของคุณ',
     },
+  },
+  payment_alerts: {
+    account_hint:
+      'บันทึกการชำระเงินลงบัญชีที่เลือกโดยอัตโนมัติ หมวดหมู่ใช้คำสำคัญเดียวกับ Apple Pay',
+    title: 'การแจ้งเตือนการชำระเงิน',
+    intro_android:
+      'Money2Time อ่านการแจ้งเตือนการชำระเงินจากแอปธนาคารและแอปวอลเล็ตที่คุณเลือก แล้วบันทึกการชำระเงินแต่ละรายการให้คุณ การแจ้งเตือนจะถูกอ่านบนโทรศัพท์เครื่องนี้และไม่ถูกอัปโหลด',
+    intro_ios: 'บันทึกการชำระเงินลงบัญชีที่เลือกโดยอัตโนมัติ หมวดหมู่ใช้คำสำคัญเดียวกับ Apple Pay',
+    section_status: 'สถานะ',
+    master_label: 'อ่านการแจ้งเตือนการชำระเงิน',
+    master_hint: 'บันทึกการชำระเงินจากแอปที่คุณเลือก',
+    access_open_settings: 'เปิดการตั้งค่า',
+    health_unsupported:
+      'Money2Time เวอร์ชันนี้อ่านการแจ้งเตือนไม่ได้ อัปเดตแอปเพื่อใช้การแจ้งเตือนการชำระเงิน',
+    health_access_off:
+      'สิทธิ์เข้าถึงการแจ้งเตือนปิดอยู่ จึงไม่มีการอ่านการชำระเงิน เปิดอีกครั้งในการตั้งค่า Android',
+    health_not_receiving:
+      'Money2Time ไม่ได้รับการแจ้งเตือนใดๆ มาสักพักแล้ว โทรศัพท์อาจหยุดการทำงานไว้เพื่อประหยัดแบตเตอรี่',
+    health_reconnect: 'เชื่อมต่ออีกครั้ง',
+    health_battery_hint:
+      'หากเกิดขึ้นบ่อย ให้ตั้งค่าการใช้แบตเตอรี่ของ Money2Time เป็นไม่จำกัดในการตั้งค่า Android',
+    ios_notifications_title: 'การแจ้งเตือนจากธนาคาร',
+    ios_notifications_hint:
+      'ระบบอัตโนมัติหนึ่งรายการต่อแอปธนาคาร ส่งการแจ้งเตือนของแอปนั้นมาที่ Money2Time',
+    ios_needs_27:
+      'ระบบอัตโนมัติสำหรับการแจ้งเตือนต้องใช้ iOS 27 ส่วน SMS ธนาคาร Apple Pay และภาพหน้าจอใช้งานได้แล้วตอนนี้',
+    ios_sms_title: 'SMS จากธนาคาร',
+    ios_sms_hint: 'ระบบอัตโนมัติจะส่ง SMS จากธนาคารมาที่ Money2Time ใช้ได้บน iOS 17 ขึ้นไป',
+    section_apps: 'แอป',
+    section_sources: 'แหล่งที่มา',
+    choose_apps: 'เลือกแอป',
+    source_off: 'ปิด',
+    disclosure_title: 'บันทึกการชำระเงินจากการแจ้งเตือน',
+    disclosure_body:
+      'Money2Time ต้องได้รับสิทธิ์เข้าถึงการแจ้งเตือนสำหรับฟีเจอร์นี้ โดยใช้งานดังนี้',
+    disclosure_point_selected:
+      'อ่านเฉพาะการแจ้งเตือนจากแอปธนาคารและแอปวอลเล็ตที่คุณเลือก นอกนั้นจะถูกละเว้น',
+    disclosure_point_device: 'การแจ้งเตือนจะถูกอ่านบนโทรศัพท์เครื่องนี้ ข้อความจะไม่ถูกอัปโหลด',
+    disclosure_android_warning:
+      'Android จะเตือนว่าแอปที่มีสิทธิ์เข้าถึงการแจ้งเตือนอ่านการแจ้งเตือนทั้งหมดได้ Money2Time เก็บไว้เฉพาะแอปที่คุณเลือก',
+    access_title: 'เปิดสิทธิ์เข้าถึงการแจ้งเตือน',
+    access_body: 'หา Money2Time ในรายการแล้วเปิดสิทธิ์เข้าถึงการแจ้งเตือน จากนั้นกลับมาที่นี่',
+    access_greyed_title: 'สวิตช์เป็นสีเทาใช่ไหม',
+    access_greyed_body:
+      'Android จำกัดสิทธิ์นี้สำหรับแอปที่ติดตั้งนอก Google Play เปิดการตั้งค่า > แอป > Money2Time แตะเมนูด้านบน เลือกอนุญาตการตั้งค่าที่จำกัด แล้วลองอีกครั้ง',
+    apps_title: 'แอปไหนส่งการแจ้งเตือนการชำระเงินให้คุณ',
+    apps_body: 'เลือกแอปธนาคารและแอปวอลเล็ต รวมถึงแอปข้อความหากธนาคารส่ง SMS',
+    apps_suggested: 'แอปในโทรศัพท์นี้',
+    apps_recent: 'ใช้งานล่าสุด',
+    apps_missing_hint: 'ไม่พบแอป? แอปจะปรากฏที่นี่หลังจากส่งการแจ้งเตือนครั้งถัดไป',
+    apps_other: 'แอปอื่น',
+    test_title: 'ส่งการแจ้งเตือนทดสอบ',
+    test_body:
+      'Money2Time จะส่งการแจ้งเตือนการชำระเงินจำลองเพื่อตรวจว่าทุกอย่างทำงาน ไม่มีการบันทึกใดๆ',
+    test_alert_title: 'ทดสอบ Money2Time',
+    test_alert_body: 'คุณใช้จ่าย %{amount} ที่ Test Cafe ด้วยบัตรลงท้าย 0000',
+    test_channel_name: 'ทดสอบการแจ้งเตือนการชำระเงิน',
+    test_send: 'ส่งการแจ้งเตือนทดสอบ',
+    test_waiting: 'กำลังรอการแจ้งเตือน…',
+    test_success: 'สำเร็จ Money2Time อ่านการแจ้งเตือนการชำระเงินของคุณได้',
+    test_would_log: 'จะบันทึก %{amount} ลงใน %{account} เป็น %{category}',
+    test_would_log_no_category: 'จะบันทึก %{amount} ลงใน %{account}',
+    test_timeout_title: 'ไม่มีการแจ้งเตือนเข้ามา',
+    test_timeout_body:
+      'ตรวจว่าสิทธิ์เข้าถึงการแจ้งเตือนเปิดอยู่ แล้วลองอีกครั้ง โทรศัพท์บางรุ่นต้องตั้งค่าการใช้แบตเตอรี่ของ Money2Time เป็นไม่จำกัดด้วย',
+    source_enabled_hint: 'เมื่อปิด การแจ้งเตือนของแหล่งนี้จะถูกละเว้น',
+    source_missing: 'แหล่งที่มานี้ถูกลบแล้ว',
+    source_remove_title: 'นำ %{app} ออกไหม',
+    source_remove_body_android:
+      'Money2Time จะหยุดอ่านการแจ้งเตือนของแอปนี้ การชำระเงินที่บันทึกไว้แล้วจะยังอยู่',
+    source_remove_body_ios:
+      'การตั้งค่าจะถูกลบ หากต้องการหยุดรับการแจ้งเตือน ให้ลบระบบอัตโนมัติใน Shortcuts ด้วย',
   },
 };
 

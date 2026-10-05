@@ -1210,6 +1210,52 @@ const hi = {
       default_account: 'डिफ़ॉल्ट खाता',
       default_category: 'डिफ़ॉल्ट श्रेणी',
       default_none: 'सेट नहीं है',
+      payment_alerts_title: 'भुगतान सूचनाएं',
+      payment_alerts_hint_android:
+        'आपके बैंकिंग और वॉलेट ऐप्स की सूचनाओं से भुगतान दर्ज करता है। ऐप्स आप चुनते हैं।',
+      payment_alerts_hint_ios:
+        'Shortcuts ऑटोमेशन के ज़रिए आपके बैंक की सूचनाओं, SMS और ईमेल से भुगतान दर्ज करता है।',
+      payment_alerts_open: 'भुगतान अलर्ट',
+      payment_alerts_status_off: 'सेट अप नहीं',
+      payment_alerts_status_apps_one: '%{count} ऐप के लिए चालू',
+      payment_alerts_status_apps_other: '%{count} ऐप्स के लिए चालू',
+      payment_alerts_status_sources_one: '%{count} स्रोत',
+      payment_alerts_status_sources_other: '%{count} स्रोत',
+      payment_alerts_android_step_1:
+        'भुगतान अलर्ट खोलें और भुगतान सूचनाएं पढ़ें चालू करें। पढ़ें कि Money2Time सूचना पहुंच का कैसे इस्तेमाल करता है, फिर जारी रखें पर टैप करें।',
+      payment_alerts_android_step_2:
+        'Android सूचना पहुंच की स्क्रीन खोलता है। Money2Time ढूंढें और उसे चालू करें।',
+      payment_alerts_android_step_3:
+        'अनुमति दें से पुष्टि करें। Android चेतावनी देता है कि ऐप सभी सूचनाएं पढ़ सकता है, लेकिन Money2Time सिर्फ़ आपके चुने हुए ऐप्स रखता है।',
+      payment_alerts_android_step_4:
+        'Money2Time में लौटकर वे बैंकिंग और वॉलेट ऐप्स चुनें जो आपके भुगतान अलर्ट भेजते हैं।',
+      payment_alerts_android_step_5: 'हर ऐप के लिए खाता चुनें।',
+      payment_alerts_android_step_6: 'सब कुछ ठीक चल रहा है यह जांचने के लिए टेस्ट अलर्ट भेजें।',
+      payment_alerts_android_step_7:
+        'भुगतान चुने गए खाते में अपने आप दर्ज होते हैं। श्रेणियां Apple Pay जैसे ही कीवर्ड इस्तेमाल करती हैं।',
+      payment_alerts_ios_step_1:
+        'Shortcuts खोलें, Automation टैब पर जाएं, और New Automation दबाएं।',
+      payment_alerts_ios_step_2:
+        'Notification चुनें, अपना बैंकिंग ऐप चुनें, फिर Run Immediately चुनें।',
+      payment_alerts_ios_step_3:
+        'Create New Shortcut दबाएं, Money2Time खोजें, और Log Payment Alert जोड़ें।',
+      payment_alerts_ios_step_4:
+        'Message फ़ील्ड दबाएं, Select Variable चुनें, फिर Shortcut Input, और Body चुनें।',
+      payment_alerts_ios_step_5:
+        'From में बैंक का नाम डालें, ताकि Money2Time में हर बैंक की अपनी सेटिंग्स हों।',
+      payment_alerts_ios_step_6: 'Log Payment Alert में Account चुनें।',
+      payment_alerts_ios_step_7:
+        'हो गया। हर बैंकिंग ऐप के लिए दोहराएं। अगली बार Money2Time खोलने पर भुगतान दर्ज होंगे।',
+      bank_sms_ios_step_1:
+        'Shortcuts खोलें, Automation टैब पर जाएं, New Automation दबाएं, और Message चुनें।',
+      bank_sms_ios_step_2:
+        'भेजने वाले के रूप में अपना बैंक चुनें, या Message Contains में वह शब्द लिखें जो उसके SMS में हमेशा होता है। फिर Run Immediately चुनें।',
+      bank_sms_ios_step_3:
+        'Create New Shortcut दबाएं, Money2Time खोजें, और Log Payment Alert जोड़ें।',
+      bank_sms_ios_step_4:
+        'Message फ़ील्ड दबाएं, Select Variable चुनें, फिर Shortcut Input, और Content चुनें। From में बैंक का नाम डालें।',
+      bank_sms_ios_step_5:
+        'Log Payment Alert में Account चुनें। भुगतान चुने गए खाते में अपने आप दर्ज होते हैं। श्रेणियां Apple Pay जैसे ही कीवर्ड इस्तेमाल करती हैं।',
     },
     title: 'सेटिंग्स',
     display: 'डिस्प्ले',
@@ -2533,6 +2579,78 @@ const hi = {
       insights: 'समझें',
       data: 'आपका डेटा',
     },
+  },
+  payment_alerts: {
+    account_hint:
+      'भुगतान चुने गए खाते में अपने आप दर्ज होते हैं। श्रेणियां Apple Pay जैसे ही कीवर्ड इस्तेमाल करती हैं।',
+    title: 'भुगतान अलर्ट',
+    intro_android:
+      'Money2Time आपके चुने हुए बैंकिंग और वॉलेट ऐप्स की भुगतान सूचनाएं पढ़ता है और हर भुगतान आपके लिए दर्ज करता है। अलर्ट इसी फ़ोन पर पढ़े जाते हैं और कभी अपलोड नहीं होते।',
+    intro_ios:
+      'भुगतान चुने गए खाते में अपने आप दर्ज होते हैं। श्रेणियां Apple Pay जैसे ही कीवर्ड इस्तेमाल करती हैं।',
+    section_status: 'स्थिति',
+    master_label: 'भुगतान सूचनाएं पढ़ें',
+    master_hint: 'आपके चुने हुए ऐप्स के भुगतान दर्ज करता है।',
+    access_open_settings: 'सेटिंग्स खोलें',
+    health_unsupported:
+      'Money2Time का यह संस्करण सूचनाएं नहीं पढ़ सकता। भुगतान अलर्ट इस्तेमाल करने के लिए ऐप अपडेट करें।',
+    health_access_off:
+      'सूचना पहुंच बंद है, इसलिए कोई भुगतान नहीं पढ़ा जा रहा। Android सेटिंग्स में इसे फिर से चालू करें।',
+    health_not_receiving:
+      'Money2Time को काफ़ी समय से कोई सूचना नहीं मिली है। हो सकता है आपके फ़ोन ने बैटरी बचाने के लिए इसे रोक दिया हो।',
+    health_reconnect: 'फिर से कनेक्ट करें',
+    health_battery_hint:
+      'अगर ऐसा बार-बार हो, तो Android सेटिंग्स में Money2Time का बैटरी उपयोग अप्रतिबंधित पर सेट करें।',
+    ios_notifications_title: 'बैंक सूचनाएं',
+    ios_notifications_hint: 'हर बैंकिंग ऐप के लिए एक ऑटोमेशन उसकी सूचनाएं Money2Time को भेजता है।',
+    ios_needs_27:
+      'सूचना ऑटोमेशन के लिए iOS 27 चाहिए। बैंक SMS, Apple Pay और स्क्रीनशॉट अभी काम करते हैं।',
+    ios_sms_title: 'बैंक SMS',
+    ios_sms_hint:
+      'एक ऑटोमेशन आपके बैंक के SMS Money2Time को भेजता है। iOS 17 और उसके बाद के संस्करणों पर काम करता है।',
+    section_apps: 'ऐप्स',
+    section_sources: 'स्रोत',
+    choose_apps: 'ऐप्स चुनें',
+    source_off: 'बंद',
+    disclosure_title: 'अपनी सूचनाओं से भुगतान दर्ज करें',
+    disclosure_body: 'इसके लिए Money2Time को सूचना पहुंच चाहिए। यह इसका ऐसे इस्तेमाल करता है:',
+    disclosure_point_selected:
+      'यह सिर्फ़ आपके चुने हुए बैंकिंग और वॉलेट ऐप्स की सूचनाएं पढ़ता है। बाकी सब अनदेखा किया जाता है।',
+    disclosure_point_device: 'अलर्ट इसी फ़ोन पर पढ़े जाते हैं। उनका पाठ कभी अपलोड नहीं होता।',
+    disclosure_android_warning:
+      'Android चेतावनी देगा कि सूचना पहुंच वाला ऐप आपकी सभी सूचनाएं पढ़ सकता है। Money2Time सिर्फ़ आपके चुने हुए ऐप्स की सूचनाएं रखता है।',
+    access_title: 'सूचना पहुंच चालू करें',
+    access_body: 'सूची में Money2Time ढूंढें और सूचना पहुंच चालू करें, फिर यहां लौट आएं।',
+    access_greyed_title: 'क्या स्विच धुंधला है?',
+    access_greyed_body:
+      'Android, Google Play के बाहर से इंस्टॉल किए गए ऐप्स के लिए इसे रोकता है। सेटिंग्स, ऐप्स, Money2Time खोलें, ऊपर का मेनू टैप करें, प्रतिबंधित सेटिंग्स की अनुमति दें चुनें, फिर दोबारा कोशिश करें।',
+    apps_title: 'कौन से ऐप्स आपके भुगतान अलर्ट भेजते हैं?',
+    apps_body: 'अपने बैंकिंग और वॉलेट ऐप्स चुनें, और अगर बैंक SMS भेजता है तो मैसेज ऐप भी।',
+    apps_suggested: 'इस फ़ोन पर',
+    apps_recent: 'हाल ही में सक्रिय',
+    apps_missing_hint: 'ऐप सूची में नहीं है? अगली सूचना भेजने के बाद यह यहां दिखेगा।',
+    apps_other: 'अन्य ऐप्स',
+    test_title: 'टेस्ट अलर्ट भेजें',
+    test_body:
+      'Money2Time सब कुछ ठीक चल रहा है यह जांचने के लिए एक नकली भुगतान सूचना भेजता है। कुछ भी दर्ज नहीं होता।',
+    test_alert_title: 'Money2Time टेस्ट',
+    test_alert_body: 'You spent %{amount} at Test Cafe with card ending 0000.',
+    test_channel_name: 'भुगतान अलर्ट टेस्ट',
+    test_send: 'टेस्ट अलर्ट भेजें',
+    test_waiting: 'अलर्ट का इंतज़ार…',
+    test_success: 'यह काम कर रहा है। Money2Time आपके भुगतान अलर्ट पढ़ सकता है।',
+    test_would_log: 'यह %{amount} को %{account} में %{category} के रूप में दर्ज करेगा।',
+    test_would_log_no_category: 'यह %{amount} को %{account} में दर्ज करेगा।',
+    test_timeout_title: 'कोई अलर्ट नहीं आया',
+    test_timeout_body:
+      'जांचें कि सूचना पहुंच चालू है, फिर दोबारा कोशिश करें। कुछ फ़ोन पर Money2Time का बैटरी उपयोग अप्रतिबंधित पर भी सेट करना होता है।',
+    source_enabled_hint: 'बंद होने पर इसके अलर्ट अनदेखे किए जाते हैं।',
+    source_missing: 'यह स्रोत हटा दिया गया है।',
+    source_remove_title: '%{app} हटाएं?',
+    source_remove_body_android:
+      'Money2Time इसकी सूचनाएं पढ़ना बंद कर देगा। पहले से दर्ज भुगतान बने रहेंगे।',
+    source_remove_body_ios:
+      'इसकी सेटिंग्स हटा दी जाती हैं। इसके अलर्ट आना बंद करने के लिए Shortcuts में ऑटोमेशन भी मिटाएं।',
   },
 };
 
