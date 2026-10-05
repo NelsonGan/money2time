@@ -24,6 +24,13 @@ describe('Log Payment Alert (withMoney2TimeAutoLog)', () => {
     expect(swift).not.toContain('UNUserNotificationCenter');
   });
 
+  it('does not request an app name when logging a notification', () => {
+    expect(swift).not.toContain('@Parameter(title: "From")');
+    expect(swift).not.toContain('\\.$source');
+    expect(swift).toContain('source: nil');
+    expect(swift).toContain('\\.$account');
+  });
+
   it('queues what the app reads', () => {
     // The Swift PendingAlert encodes these property names as JSON keys.
     const queued = JSON.stringify([

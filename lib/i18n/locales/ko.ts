@@ -1217,9 +1217,8 @@ const ko = {
       payment_alerts_ios_step_2: 'Notification을 검색해 선택하세요.',
       payment_alerts_ios_step_3: 'Log Payment Alert를 검색해 추가하세요.',
       payment_alerts_ios_step_4: 'Log Payment Alert에서 Message, Select Variable을 누르세요.',
-      payment_alerts_ios_step_5: 'From을 탭하고 앱 이름을 입력하세요.',
       payment_alerts_ios_step_6:
-        '동작 화살표를 탭한 다음 Account를 탭하세요. 이 앱의 결제를 기록할 계좌를 선택하세요.',
+        '동작 화살표를 탭한 다음 Account를 탭하세요. 이 앱의 결제를 기록할 계좌를 선택하세요. Category를 비워 두면 키워드로 자동 분류됩니다.',
       payment_alerts_ios_step_7:
         '뒤로 가기를 탭해 저장하세요. 은행 또는 전자 지갑 앱마다 반복하세요. 다음에 Money2Time을 열면 결제가 기록됩니다.',
       payment_alerts_android_disclosure: '알림 접근 권한의 사용 방법을 읽고 Continue를 누르세요.',
@@ -1229,8 +1228,6 @@ const ko = {
         '앱 옆 화살표를 누르세요. Automation을 켜 두고 조용히 기록하려면 Notify를 끄세요.',
       payment_alerts_ios_input: '트리거 아래의 Notification 변수를 선택하세요.',
       payment_alerts_ios_body: '삽입된 변수를 눌러 Body, Return을 선택하세요.',
-      payment_alerts_ios_fields:
-        '같은 방법으로 Title과 Subtitle에 해당 Notification 속성을 지정하세요. 키워드 매칭을 쓰려면 Category를 비워 두세요.',
     },
     title: '설정',
     display: '화면',

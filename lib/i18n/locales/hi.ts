@@ -1233,9 +1233,8 @@ const hi = {
       payment_alerts_ios_step_3: 'Log Payment Alert खोजें और जोड़ें।',
       payment_alerts_ios_step_4:
         'Log Payment Alert में Message और फिर Select Variable पर टैप करें।',
-      payment_alerts_ios_step_5: 'From पर टैप करके ऐप का नाम लिखें।',
       payment_alerts_ios_step_6:
-        'एक्शन के तीर पर, फिर Account पर टैप करें। चुनें कि इस ऐप के भुगतान किस खाते में दर्ज हों।',
+        'एक्शन के तीर पर, फिर Account पर टैप करें। चुनें कि इस ऐप के भुगतान किस खाते में दर्ज हों। कीवर्ड से अपने आप श्रेणी चुनने के लिए Category खाली छोड़ें।',
       payment_alerts_ios_step_7:
         'सहेजने के लिए वापस जाएँ। हर बैंक या ई-वॉलेट ऐप के लिए दोहराएँ। अगली बार Money2Time खोलने पर भुगतान दर्ज होंगे।',
       payment_alerts_android_disclosure:
@@ -1246,8 +1245,6 @@ const hi = {
         'ऐप के पास तीर पर टैप करें। Automation चालू रखें और बिना सूचना के लॉग करने के लिए Notify बंद करें।',
       payment_alerts_ios_input: 'ट्रिगर के नीचे Notification वेरिएबल चुनें।',
       payment_alerts_ios_body: 'जोड़े गए वेरिएबल पर टैप करें, Body चुनें और फिर Return।',
-      payment_alerts_ios_fields:
-        'इसी तरह Title और Subtitle में संबंधित Notification गुण चुनें। कीवर्ड मिलान के लिए Category खाली छोड़ें।',
     },
     title: 'सेटिंग्स',
     display: 'डिस्प्ले',

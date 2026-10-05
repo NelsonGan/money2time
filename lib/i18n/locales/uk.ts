@@ -1235,9 +1235,8 @@ const uk = {
       payment_alerts_ios_step_2: 'Знайдіть Notification та виберіть його.',
       payment_alerts_ios_step_3: 'Знайдіть Log Payment Alert і додайте його.',
       payment_alerts_ios_step_4: 'Натисніть Message у Log Payment Alert, потім Select Variable.',
-      payment_alerts_ios_step_5: 'Торкніться From і введіть назву застосунку.',
       payment_alerts_ios_step_6:
-        'Торкніться стрілки дії, потім Account. Виберіть рахунок для запису платежів цього застосунку.',
+        'Торкніться стрілки дії, потім Account. Виберіть рахунок для запису платежів цього застосунку. Залиште Category порожнім для автоматичного зіставлення за ключовими словами.',
       payment_alerts_ios_step_7:
         'Поверніться назад для збереження. Повторіть для кожного застосунку банку або гаманця. Платежі запишуться під час наступного відкриття Money2Time.',
       payment_alerts_android_disclosure:
@@ -1248,8 +1247,6 @@ const uk = {
         'Натисніть стрілку біля застосунку. Залиште Automation увімкненим і вимкніть Notify для тихого запису.',
       payment_alerts_ios_input: 'Виберіть змінну Notification під тригером.',
       payment_alerts_ios_body: 'Натисніть вставлену змінну, виберіть Body, потім Return.',
-      payment_alerts_ios_fields:
-        'Так само задайте Title і Subtitle відповідні властивості Notification. Залиште Category порожнім для зіставлення за ключовими словами.',
     },
     title: 'Налаштування',
     display: 'Відображення',

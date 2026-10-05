@@ -1244,9 +1244,8 @@ const tr = {
       payment_alerts_ios_step_3: 'Log Payment Alert’i arayın ve ekleyin.',
       payment_alerts_ios_step_4:
         'Log Payment Alert içinde Message, ardından Select Variable seçeneğine dokunun.',
-      payment_alerts_ios_step_5: 'From’a dokunup uygulamanın adını yazın.',
       payment_alerts_ios_step_6:
-        'Eylem okuna, ardından Account’a dokunun. Bu uygulamanın ödemelerinin kaydedileceği hesabı seçin.',
+        'Eylem okuna, ardından Account’a dokunun. Bu uygulamanın ödemelerinin kaydedileceği hesabı seçin. Otomatik anahtar kelime eşleştirmesi için Category alanını boş bırakın.',
       payment_alerts_ios_step_7:
         'Kaydetmek için geri dönün. Her banka veya e-cüzdan uygulaması için tekrarlayın. Ödemeler Money2Time’ı bir sonraki açışınızda kaydedilir.',
       payment_alerts_android_disclosure:
@@ -1257,8 +1256,6 @@ const tr = {
         'Uygulamanın yanındaki oka dokunun. Automation açık kalsın; sessiz kayıt için Notify seçeneğini kapatın.',
       payment_alerts_ios_input: 'Tetikleyicinin altındaki Notification değişkenini seçin.',
       payment_alerts_ios_body: 'Eklenen değişkene dokunup Body, ardından Return seçeneğini seçin.',
-      payment_alerts_ios_fields:
-        'Aynı yöntemle Title ve Subtitle alanlarını ilgili Notification özelliklerine ayarlayın. Anahtar sözcük eşleştirmesi için Category boş kalsın.',
     },
     title: 'Ayarlar',
     display: 'Görünüm',
