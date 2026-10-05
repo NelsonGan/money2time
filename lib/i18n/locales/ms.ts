@@ -1231,8 +1231,7 @@ const ms = {
       payment_alerts_status_apps_other: 'Hidup untuk %{count} aplikasi',
       payment_alerts_status_sources_one: '%{count} sumber',
       payment_alerts_status_sources_other: '%{count} sumber',
-      payment_alerts_android_step_1:
-        'Buka Makluman pembayaran dan hidupkan Baca pemberitahuan pembayaran. Baca cara Money2Time menggunakan akses pemberitahuan, kemudian ketik Teruskan.',
+      payment_alerts_android_step_1: 'Buka Payment alerts dan hidupkan Read payment notifications.',
       payment_alerts_android_step_2:
         'Android membuka skrin akses pemberitahuan. Cari Money2Time dan hidupkannya.',
       payment_alerts_android_step_3:
@@ -1244,18 +1243,34 @@ const ms = {
       payment_alerts_android_step_7:
         'Pembayaran direkodkan secara automatik ke akaun pilihan anda. Kategori menggunakan kata kunci yang sama seperti Apple Pay.',
       payment_alerts_ios_step_1:
-        'Buka Shortcuts, pergi ke tab Automation, dan ketik New Automation.',
-      payment_alerts_ios_step_2:
-        'Pilih Notification, pilih aplikasi bank anda, kemudian pilih Run Immediately.',
-      payment_alerts_ios_step_3:
-        'Ketik Create New Shortcut, cari Money2Time, dan tambah Log Payment Alert.',
-      payment_alerts_ios_step_4:
-        'Ketik medan Message, pilih Select Variable, kemudian Shortcut Input, dan pilih Body.',
-      payment_alerts_ios_step_5:
-        'Tetapkan From kepada nama bank, supaya setiap bank mendapat tetapannya sendiri dalam Money2Time.',
-      payment_alerts_ios_step_6: 'Pilih Account dalam Log Payment Alert.',
+        'Buka Shortcuts, ketik +, kemudian Editor. Ketik Automation dalam editor.',
+      payment_alerts_ios_step_2: 'Cari Notification dan pilihnya.',
+      payment_alerts_ios_step_3: 'Cari Log Payment Alert dan tambahkannya.',
+      payment_alerts_ios_step_4: 'Ketik Message dalam Log Payment Alert, kemudian Select Variable.',
+      payment_alerts_ios_step_5: 'Ketik From dan taip nama bank anda.',
+      payment_alerts_ios_step_6:
+        'Ketik › dan pilih dalam Account akaun yang digunakan oleh bank ini untuk membayar.',
       payment_alerts_ios_step_7:
-        'Selesai. Ulang untuk setiap aplikasi bank. Pembayaran direkod apabila anda membuka Money2Time seterusnya.',
+        'Selesai. Ketik kembali untuk menyimpan, kemudian ulang untuk setiap aplikasi bank. Pembayaran direkod apabila anda membuka Money2Time seterusnya.',
+      payment_alerts_android_disclosure:
+        'Baca cara akses pemberitahuan digunakan, kemudian ketik Continue.',
+      payment_alerts_ios_app:
+        'Ketik App dan pilih aplikasi bank anda. Tangkapan skrin ini menggunakan Messages sebagai contoh.',
+      payment_alerts_ios_run:
+        'Ketik anak panah di sebelah aplikasi. Biarkan Automation hidup dan matikan Notify untuk merekod tanpa pemberitahuan.',
+      payment_alerts_ios_input: 'Pilih pemboleh ubah Notification di bawah pencetus.',
+      payment_alerts_ios_body: 'Ketik pemboleh ubah yang dimasukkan, pilih Body, kemudian Return.',
+      payment_alerts_ios_fields:
+        'Tetapkan Title dan Subtitle kepada sifat Notification yang sepadan dengan langkah yang sama. Biarkan Category kosong untuk padanan kata kunci.',
+      bank_sms_ios27_filter_kind:
+        'Ketik Sender di kiri dan pilih Message untuk menapis mengikut teks.',
+      bank_sms_ios27_filter:
+        'Masukkan perkataan yang sentiasa digunakan bank, seperti Maybank. Anda juga boleh memilih pengirim bank.',
+      bank_sms_ios27_run:
+        'Ketik anak panah pencetus. Biarkan Automation hidup dan matikan Confirm Before Run.',
+      bank_sms_ios27_input: 'Pilih pemboleh ubah Message di bawah pencetus.',
+      bank_sms_ios27_done:
+        'Ketik kembali untuk menyimpan. SMS bank direkod apabila Money2Time dibuka semula. Biarkan Category kosong untuk padanan kata kunci.',
       bank_sms_ios_step_1:
         'Buka Shortcuts, pergi ke tab Automation, ketik New Automation, dan pilih Message.',
       bank_sms_ios_step_2:
@@ -1266,6 +1281,10 @@ const ms = {
         'Ketik medan Message, pilih Select Variable, kemudian Shortcut Input, dan pilih Content. Tetapkan From kepada nama bank.',
       bank_sms_ios_step_5:
         'Pilih Account dalam Log Payment Alert. Pembayaran direkodkan secara automatik ke akaun pilihan anda. Kategori menggunakan kata kunci yang sama seperti Apple Pay.',
+      bank_sms_ios27_step_2: 'Cari Message dan pilihnya.',
+      bank_sms_ios27_step_4: 'Ketik pemboleh ubah yang dimasukkan, pilih Content, kemudian Return.',
+      bank_sms_ios27_step_5:
+        'Ketik anak panah tindakan, kemudian Account. Pilih akaun untuk merekod pembayaran ini.',
     },
     title: 'Tetapan',
     display: 'Paparan',

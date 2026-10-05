@@ -109,9 +109,19 @@ retention acknowledgements and automatic retries. Locale parity covers all 24
 catalogues. Native notification delivery and the real iPhone Shortcuts trigger
 still need device verification before release.
 
+The three new guides now include 31 annotated simulator captures across 32
+steps: Android notification access, app/account selection and the test alert;
+iOS 27 Notification and Message triggers, variables and Log Payment Alert
+configuration. Messages is the installed example app; Maybank is an example
+source name and SMS filter. No Maybank app or real bank alert was tested.
+Older iOS SMS instructions remain available, but their screens have not been
+recaptured because only the iOS 27 simulator runtime is installed.
+
 ## Release work
 
-- Capture the three new Automation tutorial topics on devices.
-- Verify the notification trigger and variables on a real iPhone.
+- Verify the notification trigger fires on a real iPhone. The iOS 27 simulator
+  confirmed the editor flow (tap +, Editor, then Automation and Notification or
+  Message), the Notification variable's Body, Title and Subtitle properties,
+  the Message variable's Content, and the action's From and Account parameters.
 - Update the privacy policy and Play Console notification-access declaration.
 - Add an in-app announcement when the feature ships.

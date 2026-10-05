@@ -1204,8 +1204,7 @@ const th = {
       payment_alerts_status_apps_other: 'เปิดสำหรับ %{count} แอป',
       payment_alerts_status_sources_one: '%{count} แหล่งที่มา',
       payment_alerts_status_sources_other: '%{count} แหล่งที่มา',
-      payment_alerts_android_step_1:
-        'เปิดการแจ้งเตือนการชำระเงิน แล้วเปิดอ่านการแจ้งเตือนการชำระเงิน อ่านวิธีที่ Money2Time ใช้สิทธิ์เข้าถึงการแจ้งเตือน แล้วแตะต่อไป',
+      payment_alerts_android_step_1: 'เปิด Payment alerts แล้วเปิด Read payment notifications',
       payment_alerts_android_step_2:
         'Android จะเปิดหน้าสิทธิ์เข้าถึงการแจ้งเตือน หา Money2Time แล้วเปิด',
       payment_alerts_android_step_3:
@@ -1216,18 +1215,28 @@ const th = {
       payment_alerts_android_step_6: 'ส่งการแจ้งเตือนทดสอบเพื่อตรวจว่าทุกอย่างทำงาน',
       payment_alerts_android_step_7:
         'บันทึกการชำระเงินลงบัญชีที่เลือกโดยอัตโนมัติ หมวดหมู่ใช้คำสำคัญเดียวกับ Apple Pay',
-      payment_alerts_ios_step_1: 'เปิด Shortcuts ไปที่แท็บ Automation แล้วแตะ New Automation',
-      payment_alerts_ios_step_2:
-        'เลือก Notification เลือกแอปธนาคารของคุณ แล้วเลือก Run Immediately',
-      payment_alerts_ios_step_3:
-        'แตะ Create New Shortcut ค้นหา Money2Time แล้วเพิ่ม Log Payment Alert',
-      payment_alerts_ios_step_4:
-        'แตะช่อง Message เลือก Select Variable แล้วเลือก Shortcut Input จากนั้นเลือก Body',
-      payment_alerts_ios_step_5:
-        'ตั้งค่า From เป็นชื่อธนาคาร เพื่อให้แต่ละธนาคารมีการตั้งค่าของตัวเองใน Money2Time',
-      payment_alerts_ios_step_6: 'เลือก Account ใน Log Payment Alert',
+      payment_alerts_ios_step_1: 'เปิด Shortcuts แตะ + แล้วเลือก Editor แตะ Automation ในตัวแก้ไข',
+      payment_alerts_ios_step_2: 'ค้นหา Notification แล้วเลือก',
+      payment_alerts_ios_step_3: 'ค้นหา Log Payment Alert แล้วเพิ่ม',
+      payment_alerts_ios_step_4: 'แตะ Message ใน Log Payment Alert แล้วเลือก Select Variable',
+      payment_alerts_ios_step_5: 'แตะ From แล้วพิมพ์ชื่อธนาคารของคุณ',
+      payment_alerts_ios_step_6: 'แตะ › แล้วเลือกบัญชีที่ธนาคารนี้ใช้จ่ายใน Account',
       payment_alerts_ios_step_7:
-        'เสร็จแล้ว ทำซ้ำกับทุกแอปธนาคาร การชำระเงินจะถูกบันทึกเมื่อคุณเปิด Money2Time ครั้งถัดไป',
+        'เสร็จแล้ว แตะย้อนกลับเพื่อบันทึก แล้วทำซ้ำกับทุกแอปธนาคาร การชำระเงินจะถูกบันทึกเมื่อคุณเปิด Money2Time ครั้งถัดไป',
+      payment_alerts_android_disclosure: 'อ่านวิธีใช้สิทธิ์เข้าถึงการแจ้งเตือน แล้วแตะ Continue',
+      payment_alerts_ios_app: 'แตะ App แล้วเลือกแอปธนาคาร ภาพหน้าจอใช้ Messages เป็นตัวอย่าง',
+      payment_alerts_ios_run:
+        'แตะลูกศรข้างแอป เปิด Automation ไว้ และปิด Notify เพื่อบันทึกโดยไม่แจ้งเตือน',
+      payment_alerts_ios_input: 'เลือกตัวแปร Notification ใต้ตัวกระตุ้น',
+      payment_alerts_ios_body: 'แตะตัวแปรที่ใส่ เลือก Body แล้วเลือก Return',
+      payment_alerts_ios_fields:
+        'ตั้ง Title และ Subtitle เป็นคุณสมบัติ Notification ที่ตรงกันด้วยวิธีเดียวกัน เว้น Category ว่างเพื่อจับคู่คำสำคัญ',
+      bank_sms_ios27_filter_kind: 'แตะ Sender ทางซ้าย แล้วเลือก Message เพื่อกรองตามข้อความ',
+      bank_sms_ios27_filter: 'ใส่คำที่ธนาคารใช้เสมอ เช่น Maybank หรือเลือกผู้ส่งของธนาคาร',
+      bank_sms_ios27_run: 'แตะลูกศรของตัวกระตุ้น เปิด Automation ไว้และปิด Confirm Before Run',
+      bank_sms_ios27_input: 'เลือกตัวแปร Message ใต้ตัวกระตุ้น',
+      bank_sms_ios27_done:
+        'ย้อนกลับเพื่อบันทึก SMS ธนาคารจะถูกบันทึกเมื่อเปิด Money2Time ครั้งถัดไป เว้น Category ว่างเพื่อจับคู่คำสำคัญ',
       bank_sms_ios_step_1:
         'เปิด Shortcuts ไปที่แท็บ Automation แตะ New Automation แล้วเลือก Message',
       bank_sms_ios_step_2:
@@ -1237,6 +1246,10 @@ const th = {
         'แตะช่อง Message เลือก Select Variable แล้วเลือก Shortcut Input จากนั้นเลือก Content ตั้งค่า From เป็นชื่อธนาคาร',
       bank_sms_ios_step_5:
         'เลือก Account ใน Log Payment Alert บันทึกการชำระเงินลงบัญชีที่เลือกโดยอัตโนมัติ หมวดหมู่ใช้คำสำคัญเดียวกับ Apple Pay',
+      bank_sms_ios27_step_2: 'ค้นหา Message แล้วเลือก',
+      bank_sms_ios27_step_4: 'แตะตัวแปรที่ใส่ เลือก Content แล้วเลือก Return',
+      bank_sms_ios27_step_5:
+        'แตะลูกศรของการทำงาน แล้วเลือก Account เลือกบัญชีสำหรับบันทึกการชำระเงิน',
     },
     title: 'ตั้งค่า',
     display: 'การแสดงผล',

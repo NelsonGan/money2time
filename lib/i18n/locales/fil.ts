@@ -1239,7 +1239,7 @@ const fil = {
       payment_alerts_status_sources_one: '%{count} pinagmulan',
       payment_alerts_status_sources_other: '%{count} na pinagmulan',
       payment_alerts_android_step_1:
-        'Buksan ang Mga alerto sa bayad at i-on ang Basahin ang mga notification ng bayad. Basahin kung paano ginagamit ng Money2Time ang notification access, saka i-tap ang Ituloy.',
+        'Buksan ang Payment alerts at i-on ang Read payment notifications.',
       payment_alerts_android_step_2:
         'Bubuksan ng Android ang screen ng notification access. Hanapin ang Money2Time at i-on ito.',
       payment_alerts_android_step_3:
@@ -1252,18 +1252,34 @@ const fil = {
       payment_alerts_android_step_7:
         'Awtomatikong itinatala ang mga bayad sa napiling account. Pareho sa Apple Pay ang mga keyword para sa kategorya.',
       payment_alerts_ios_step_1:
-        'Buksan ang Shortcuts, pumunta sa Automation tab, at i-tap ang New Automation.',
-      payment_alerts_ios_step_2:
-        'Piliin ang Notification, piliin ang banking app mo, saka piliin ang Run Immediately.',
-      payment_alerts_ios_step_3:
-        'I-tap ang Create New Shortcut, hanapin ang Money2Time, at idagdag ang Log Payment Alert.',
-      payment_alerts_ios_step_4:
-        'I-tap ang field na Message, piliin ang Select Variable, tapos Shortcut Input, at piliin ang Body.',
-      payment_alerts_ios_step_5:
-        'Itakda ang From sa pangalan ng bangko, para may sariling settings ang bawat bangko sa Money2Time.',
-      payment_alerts_ios_step_6: 'Piliin ang Account sa Log Payment Alert.',
+        'Buksan ang Shortcuts, i-tap ang +, saka Editor. I-tap ang Automation sa editor.',
+      payment_alerts_ios_step_2: 'Hanapin at piliin ang Notification.',
+      payment_alerts_ios_step_3: 'Hanapin ang Log Payment Alert at idagdag ito.',
+      payment_alerts_ios_step_4: 'I-tap ang Message sa Log Payment Alert, saka Select Variable.',
+      payment_alerts_ios_step_5: 'I-tap ang From at i-type ang pangalan ng bangko mo.',
+      payment_alerts_ios_step_6:
+        'I-tap ang › at piliin sa Account ang account na pinagbabayaran ng bangkong ito.',
       payment_alerts_ios_step_7:
-        'Tapos na. Ulitin para sa bawat banking app. Maitatala ang mga bayad sa susunod mong pagbukas ng Money2Time.',
+        'Tapos na. I-tap ang back para i-save, saka ulitin para sa bawat banking app. Maitatala ang mga bayad sa susunod mong pagbukas ng Money2Time.',
+      payment_alerts_android_disclosure:
+        'Basahin kung paano ginagamit ang notification access, saka i-tap ang Continue.',
+      payment_alerts_ios_app:
+        'I-tap ang App at piliin ang banking app. Messages ang halimbawa sa mga screenshot.',
+      payment_alerts_ios_run:
+        'I-tap ang arrow sa tabi ng app. Panatilihing naka-on ang Automation at i-off ang Notify para tahimik ang pag-log.',
+      payment_alerts_ios_input: 'Piliin ang Notification variable sa ilalim ng trigger.',
+      payment_alerts_ios_body: 'I-tap ang inilagay na variable, piliin ang Body, saka Return.',
+      payment_alerts_ios_fields:
+        'Itakda ang Title at Subtitle sa katumbas na Notification properties gamit ang parehong paraan. Iwanang walang laman ang Category para sa keyword matching.',
+      bank_sms_ios27_filter_kind:
+        'I-tap ang Sender sa kaliwa at piliin ang Message para mag-filter ayon sa teksto.',
+      bank_sms_ios27_filter:
+        'Maglagay ng salitang laging ginagamit ng bangko, tulad ng Maybank. Maaari ring piliin ang sender ng bangko.',
+      bank_sms_ios27_run:
+        'I-tap ang arrow ng trigger. Panatilihing naka-on ang Automation at i-off ang Confirm Before Run.',
+      bank_sms_ios27_input: 'Piliin ang Message variable sa ilalim ng trigger.',
+      bank_sms_ios27_done:
+        'Bumalik para i-save. Malo-log ang mga mensahe ng bangko sa susunod na pagbukas ng Money2Time. Iwanang walang laman ang Category para sa keyword matching.',
       bank_sms_ios_step_1:
         'Buksan ang Shortcuts, pumunta sa Automation tab, i-tap ang New Automation, at piliin ang Message.',
       bank_sms_ios_step_2:
@@ -1274,6 +1290,10 @@ const fil = {
         'I-tap ang field na Message, piliin ang Select Variable, tapos Shortcut Input, at piliin ang Content. Itakda ang From sa pangalan ng bangko.',
       bank_sms_ios_step_5:
         'Piliin ang Account sa Log Payment Alert. Awtomatikong itinatala ang mga bayad sa napiling account. Pareho sa Apple Pay ang mga keyword para sa kategorya.',
+      bank_sms_ios27_step_2: 'Hanapin at piliin ang Message.',
+      bank_sms_ios27_step_4: 'I-tap ang inilagay na variable, piliin ang Content, saka Return.',
+      bank_sms_ios27_step_5:
+        'I-tap ang arrow ng action, saka Account. Piliin kung saan ilalagay ang mga bayad.',
     },
     title: 'Settings',
     display: 'Display',

@@ -1163,8 +1163,7 @@ const zhHant = {
       payment_alerts_status_apps_other: '已為 %{count} 個 App 開啟',
       payment_alerts_status_sources_one: '%{count} 個來源',
       payment_alerts_status_sources_other: '%{count} 個來源',
-      payment_alerts_android_step_1:
-        '開啟「付款通知」並打開「讀取付款通知」。了解 Money2Time 如何使用通知存取權，然後點按「繼續」。',
+      payment_alerts_android_step_1: '開啟付款提醒，開啟讀取付款通知。',
       payment_alerts_android_step_2: 'Android 會開啟通知存取權頁面。找到 Money2Time 並開啟。',
       payment_alerts_android_step_3:
         '點按「允許」確認。Android 會提示 App 可以讀取所有通知，但 Money2Time 只保留你所選的 App。',
@@ -1173,16 +1172,27 @@ const zhHant = {
       payment_alerts_android_step_6: '傳送一則測試通知，確認一切正常。',
       payment_alerts_android_step_7:
         '付款會自動記錄到所選帳戶。分類使用與 Apple Pay 相同的關鍵字。',
-      payment_alerts_ios_step_1: '開啟快捷指令，進入自動化標籤，點按 New Automation。',
-      payment_alerts_ios_step_2: '選擇 Notification，選好你的銀行 App，再選擇 Run Immediately。',
-      payment_alerts_ios_step_3:
-        '點按 Create New Shortcut，搜尋 Money2Time，新增 Log Payment Alert。',
-      payment_alerts_ios_step_4:
-        '點按 Message 欄位，選擇 Select Variable，再選 Shortcut Input，然後選 Body。',
-      payment_alerts_ios_step_5: '把 From 設為銀行名稱，讓每家銀行在 Money2Time 裡都有自己的設定。',
-      payment_alerts_ios_step_6: '在 Log Payment Alert 中選擇 Account。',
+      payment_alerts_ios_step_1: '開啟 Shortcuts，點 +，再點 Editor。在編輯器中點 Automation。',
+      payment_alerts_ios_step_2: '搜尋並選擇 Notification。',
+      payment_alerts_ios_step_3: '搜尋 Log Payment Alert 並新增。',
+      payment_alerts_ios_step_4: '點 Log Payment Alert 中的 Message，再點 Select Variable。',
+      payment_alerts_ios_step_5: '點按 From，輸入你的銀行名稱。',
+      payment_alerts_ios_step_6: '點按 ›，在 Account 中選擇這家銀行扣款的帳戶。',
       payment_alerts_ios_step_7:
-        '完成。為每個銀行 App 重複以上步驟。下次開啟 Money2Time 時就會記下付款。',
+        '完成。返回即可儲存，再為每個銀行 App 重複以上步驟。下次開啟 Money2Time 時就會記下付款。',
+      payment_alerts_android_disclosure: '閱讀通知權限的使用說明，然後點 Continue。',
+      payment_alerts_ios_app: '點 App，選擇銀行應用程式。截圖以 Messages 為範例。',
+      payment_alerts_ios_run: '點應用程式旁的箭頭，保持 Automation 開啟。關閉 Notify 可靜默記帳。',
+      payment_alerts_ios_input: '選擇觸發條件下方的 Notification 變數。',
+      payment_alerts_ios_body: '點已插入的變數，選擇 Body，再點 Return。',
+      payment_alerts_ios_fields:
+        '用相同步驟，將 Title 和 Subtitle 設為對應的 Notification 屬性。留空 Category 即可按關鍵字分類。',
+      bank_sms_ios27_filter_kind: '點左側 Sender，選擇 Message，以簡訊內容篩選。',
+      bank_sms_ios27_filter: '輸入銀行簡訊總會包含的詞，例如 Maybank。也可以選擇銀行的寄件人。',
+      bank_sms_ios27_run: '點觸發條件的箭頭，保持 Automation 開啟，關閉 Confirm Before Run。',
+      bank_sms_ios27_input: '選擇觸發條件下方的 Message 變數。',
+      bank_sms_ios27_done:
+        '返回以儲存。下次開啟 Money2Time 時會記錄銀行簡訊。留空 Category 即可按關鍵字分類。',
       bank_sms_ios_step_1: '開啟快捷指令，進入自動化標籤，點按 New Automation，然後選擇 Message。',
       bank_sms_ios_step_2:
         '把銀行選為寄件者，或在 Message Contains 中輸入它的簡訊一定會出現的字詞。然後選擇 Run Immediately。',
@@ -1190,7 +1200,10 @@ const zhHant = {
       bank_sms_ios_step_4:
         '點按 Message 欄位，選擇 Select Variable，再選 Shortcut Input，然後選 Content。把 From 設為銀行名稱。',
       bank_sms_ios_step_5:
-        '在 Log Payment Alert 中選擇 Account。 付款會自動記錄到所選帳戶。分類使用與 Apple Pay 相同的關鍵字。',
+        '在 Log Payment Alert 中選擇 Account。付款會自動記錄到所選帳戶。分類使用與 Apple Pay 相同的關鍵字。',
+      bank_sms_ios27_step_2: '搜尋並選擇 Message。',
+      bank_sms_ios27_step_4: '點已插入的變數，選擇 Content，再點 Return。',
+      bank_sms_ios27_step_5: '點操作的箭頭，再點 Account，選擇記錄這些付款的帳戶。',
     },
     title: '設定',
     display: '顯示',

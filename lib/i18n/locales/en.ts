@@ -1197,8 +1197,7 @@ const en = {
       payment_alerts_status_apps_other: 'On for %{count} apps',
       payment_alerts_status_sources_one: '%{count} source',
       payment_alerts_status_sources_other: '%{count} sources',
-      payment_alerts_android_step_1:
-        'Open Payment alerts and turn on Read payment notifications. Read how Money2Time uses notification access, then tap Continue.',
+      payment_alerts_android_step_1: 'Open Payment alerts and turn on Read payment notifications.',
       payment_alerts_android_step_2:
         'Android opens the notification access screen. Find Money2Time and turn it on.',
       payment_alerts_android_step_3:
@@ -1210,18 +1209,31 @@ const en = {
       payment_alerts_android_step_7:
         'Payments log automatically to your selected account. Categories use the same keywords as Apple Pay.',
       payment_alerts_ios_step_1:
-        'Open Shortcuts, go to the Automation tab, and tap New Automation.',
-      payment_alerts_ios_step_2:
-        'Choose Notification, pick your banking app, then choose Run Immediately.',
-      payment_alerts_ios_step_3:
-        'Tap Create New Shortcut, search for Money2Time, and add Log Payment Alert.',
-      payment_alerts_ios_step_4:
-        'Tap the Message field, choose Select Variable, then Shortcut Input, and pick Body.',
-      payment_alerts_ios_step_5:
-        "Set From to the bank's name, so each bank gets its own settings in Money2Time.",
-      payment_alerts_ios_step_6: 'Choose Account in Log Payment Alert.',
+        'Open Shortcuts, tap +, then Editor. Tap Automation in the editor.',
+      payment_alerts_ios_step_2: 'Search for Notification and select it.',
+      payment_alerts_ios_step_3: 'Search for Log Payment Alert and add it.',
+      payment_alerts_ios_step_4: 'Tap Message in Log Payment Alert, then Select Variable.',
+      payment_alerts_ios_step_5: "Tap From and type your bank's name.",
+      payment_alerts_ios_step_6: 'Tap › and choose the Account this bank pays from.',
       payment_alerts_ios_step_7:
-        'Done. Repeat for each banking app. Payments are logged the next time you open Money2Time.',
+        'Done. Tap back to save, then repeat for each banking app. Payments are logged the next time you open Money2Time.',
+      payment_alerts_android_disclosure: 'Read how notification access is used, then tap Continue.',
+      payment_alerts_ios_app:
+        'Tap App and choose your banking app. These screenshots use Messages as an example.',
+      payment_alerts_ios_run:
+        'Tap the arrow beside the app and keep Automation on. Turn Notify off for silent logging.',
+      payment_alerts_ios_input: 'Select the Notification variable below the trigger.',
+      payment_alerts_ios_body: 'Tap the inserted variable and choose Body, then Return.',
+      payment_alerts_ios_fields:
+        'Set Title and Subtitle to the matching Notification properties using the same variable steps. Leave Category unset to use keyword matching.',
+      bank_sms_ios27_filter_kind: 'Tap Sender on the left and choose Message to filter by text.',
+      bank_sms_ios27_filter:
+        'Enter a word your bank always includes, such as Maybank. You can use a bank sender instead.',
+      bank_sms_ios27_run:
+        'Tap the trigger arrow. Keep Automation on and turn Confirm Before Run off.',
+      bank_sms_ios27_input: 'Select the Message variable below the trigger.',
+      bank_sms_ios27_done:
+        'Tap back to save. Bank texts are logged the next time you open Money2Time. Leave Category unset to use keyword matching.',
       bank_sms_ios_step_1:
         'Open Shortcuts, go to the Automation tab, tap New Automation, and choose Message.',
       bank_sms_ios_step_2:
@@ -1232,6 +1244,10 @@ const en = {
         "Tap the Message field, choose Select Variable, then Shortcut Input, and pick Content. Set From to the bank's name.",
       bank_sms_ios_step_5:
         'Choose Account in Log Payment Alert. Payments log automatically to your selected account. Categories use the same keywords as Apple Pay.',
+      bank_sms_ios27_step_2: 'Search for Message and select it.',
+      bank_sms_ios27_step_4: 'Tap the inserted variable and choose Content, then Return.',
+      bank_sms_ios27_step_5:
+        'Tap the action arrow, then Account. Choose where these payments should be logged.',
     },
     title: 'Settings',
     display: 'Display',

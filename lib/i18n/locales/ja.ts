@@ -1219,7 +1219,7 @@ const ja = {
       payment_alerts_status_sources_one: '送信元 %{count} 件',
       payment_alerts_status_sources_other: '送信元 %{count} 件',
       payment_alerts_android_step_1:
-        '「支払い通知」を開き、「支払い通知を読み取る」をオンにします。通知へのアクセスの使い方を読んで、「続ける」をタップします。',
+        'Payment alertsを開き、Read payment notificationsをオンにします。',
       payment_alerts_android_step_2:
         'Android の通知へのアクセス画面が開きます。Money2Time を探してオンにします。',
       payment_alerts_android_step_3:
@@ -1231,17 +1231,31 @@ const ja = {
       payment_alerts_android_step_7:
         '支払いは選択した口座に自動で記録されます。カテゴリは Apple Pay と同じキーワードで選ばれます。',
       payment_alerts_ios_step_1:
-        'ショートカットを開き、「オートメーション」タブで New Automation をタップします。',
-      payment_alerts_ios_step_2:
-        'Notification を選び、銀行アプリを選んでから Run Immediately を選びます。',
-      payment_alerts_ios_step_3:
-        'Create New Shortcut をタップし、Money2Time を検索して Log Payment Alert を追加します。',
-      payment_alerts_ios_step_4:
-        'Message のフィールドをタップし、Select Variable を選び、次に Shortcut Input を選んで Body を選択します。',
-      payment_alerts_ios_step_5: 'From に銀行名を入れると、Money2Time で銀行ごとに設定できます。',
-      payment_alerts_ios_step_6: 'Log Payment Alert で Account を選びます。',
+        'Shortcutsを開き、+、Editorの順にタップします。エディタでAutomationをタップします。',
+      payment_alerts_ios_step_2: 'Notificationを検索して選択します。',
+      payment_alerts_ios_step_3: 'Log Payment Alert を検索して追加します。',
+      payment_alerts_ios_step_4: 'Log Payment AlertのMessage、Select Variableの順にタップします。',
+      payment_alerts_ios_step_5: 'From をタップして銀行名を入力します。',
+      payment_alerts_ios_step_6: '› をタップし、Account でこの銀行が支払う口座を選びます。',
       payment_alerts_ios_step_7:
-        '完了です。銀行アプリごとに繰り返します。支払いは次に Money2Time を開いたときに記録されます。',
+        '完了です。戻って保存し、銀行アプリごとに繰り返します。支払いは次に Money2Time を開いたときに記録されます。',
+      payment_alerts_android_disclosure: '通知へのアクセスの使い方を読み、Continueをタップします。',
+      payment_alerts_ios_app:
+        'Appをタップして銀行アプリを選びます。画像ではMessagesを例にしています。',
+      payment_alerts_ios_run:
+        'アプリの横の矢印をタップします。Automationをオンのままにし、Notifyをオフにすると通知せず記録できます。',
+      payment_alerts_ios_input: 'トリガーの下のNotification変数を選びます。',
+      payment_alerts_ios_body: '挿入した変数をタップし、Body、Returnの順に選びます。',
+      payment_alerts_ios_fields:
+        '同じ手順でTitleとSubtitleに対応するNotificationのプロパティを設定します。キーワード照合を使う場合はCategoryを未設定にします。',
+      bank_sms_ios27_filter_kind: '左のSenderをタップしてMessageを選び、本文で絞り込みます。',
+      bank_sms_ios27_filter:
+        'Maybankなど、銀行が毎回使う語を入力します。銀行の送信者を指定することもできます。',
+      bank_sms_ios27_run:
+        'トリガーの矢印をタップします。Automationをオンのままにし、Confirm Before Runをオフにします。',
+      bank_sms_ios27_input: 'トリガーの下のMessage変数を選びます。',
+      bank_sms_ios27_done:
+        '戻って保存します。次回Money2Timeを開くと銀行のSMSが記録されます。キーワード照合を使う場合はCategoryを未設定にします。',
       bank_sms_ios_step_1:
         'ショートカットを開き、「オートメーション」タブで New Automation をタップし、Message を選びます。',
       bank_sms_ios_step_2:
@@ -1251,7 +1265,11 @@ const ja = {
       bank_sms_ios_step_4:
         'Message のフィールドをタップし、Select Variable を選び、次に Shortcut Input を選んで Content を選択します。From に銀行名を入れます。',
       bank_sms_ios_step_5:
-        'Log Payment Alert で Account を選びます。 支払いは選択した口座に自動で記録されます。カテゴリは Apple Pay と同じキーワードで選ばれます。',
+        'Log Payment Alert で Account を選びます。支払いは選択した口座に自動で記録されます。カテゴリは Apple Pay と同じキーワードで選ばれます。',
+      bank_sms_ios27_step_2: 'Messageを検索して選択します。',
+      bank_sms_ios27_step_4: '挿入した変数をタップし、Content、Returnの順に選びます。',
+      bank_sms_ios27_step_5:
+        'アクションの矢印、Accountの順にタップし、支払いを記録する口座を選びます。',
     },
     title: '設定',
     display: '表示',

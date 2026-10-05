@@ -1225,8 +1225,7 @@ const da = {
       payment_alerts_status_apps_other: 'Til for %{count} apps',
       payment_alerts_status_sources_one: '%{count} kilde',
       payment_alerts_status_sources_other: '%{count} kilder',
-      payment_alerts_android_step_1:
-        'Åbn Betalingsnotifikationer, og slå Læs betalingsnotifikationer til. Læs, hvordan Money2Time bruger notifikationsadgang, og tryk på Fortsæt.',
+      payment_alerts_android_step_1: 'Åbn Payment alerts, og slå Read payment notifications til.',
       payment_alerts_android_step_2:
         'Android åbner skærmen for notifikationsadgang. Find Money2Time, og slå det til.',
       payment_alerts_android_step_3:
@@ -1237,18 +1236,33 @@ const da = {
       payment_alerts_android_step_6: 'Send en testnotifikation for at tjekke, at alt virker.',
       payment_alerts_android_step_7:
         'Betalinger registreres automatisk på din valgte konto. Kategorier bruger de samme nøgleord som Apple Pay.',
-      payment_alerts_ios_step_1: 'Åbn Genveje, gå til fanen Automation, og tryk på New Automation.',
-      payment_alerts_ios_step_2:
-        'Vælg Notification, vælg din bankapp, og vælg derefter Run Immediately.',
-      payment_alerts_ios_step_3:
-        'Tryk på Create New Shortcut, søg efter Money2Time, og tilføj Log Payment Alert.',
-      payment_alerts_ios_step_4:
-        'Tryk på feltet Message, vælg Select Variable, derefter Shortcut Input, og vælg Body.',
-      payment_alerts_ios_step_5:
-        'Sæt From til bankens navn, så hver bank får sine egne indstillinger i Money2Time.',
-      payment_alerts_ios_step_6: 'Vælg Account i Log Payment Alert.',
+      payment_alerts_ios_step_1:
+        'Åbn Shortcuts, tryk + og derefter Editor. Tryk Automation i editoren.',
+      payment_alerts_ios_step_2: 'Søg efter Notification, og vælg den.',
+      payment_alerts_ios_step_3: 'Søg efter Log Payment Alert, og tilføj den.',
+      payment_alerts_ios_step_4: 'Tryk Message i Log Payment Alert og derefter Select Variable.',
+      payment_alerts_ios_step_5: 'Tryk på From, og skriv bankens navn.',
+      payment_alerts_ios_step_6: 'Tryk på ›, og vælg under Account den konto, banken betaler fra.',
       payment_alerts_ios_step_7:
-        'Færdig. Gentag for hver bankapp. Betalinger registreres, næste gang du åbner Money2Time.',
+        'Færdig. Tryk tilbage for at gemme, og gentag for hver bankapp. Betalinger registreres, næste gang du åbner Money2Time.',
+      payment_alerts_android_disclosure: 'Læs om brugen af notifikationsadgang, og tryk Continue.',
+      payment_alerts_ios_app:
+        'Tryk App, og vælg din bankapp. Skærmbillederne bruger Messages som eksempel.',
+      payment_alerts_ios_run:
+        'Tryk på pilen ved appen. Behold Automation slået til, og slå Notify fra for lydløs registrering.',
+      payment_alerts_ios_input: 'Vælg variablen Notification under udløseren.',
+      payment_alerts_ios_body: 'Tryk på den indsatte variabel, vælg Body og derefter Return.',
+      payment_alerts_ios_fields:
+        'Indstil Title og Subtitle til de tilsvarende Notification-egenskaber på samme måde. Lad Category være tom for nøgleordsmatchning.',
+      bank_sms_ios27_filter_kind:
+        'Tryk Sender til venstre, og vælg Message for at filtrere efter tekst.',
+      bank_sms_ios27_filter:
+        'Indtast et ord, banken altid bruger, fx Maybank. Du kan også vælge bankens afsender.',
+      bank_sms_ios27_run:
+        'Tryk på udløserens pil. Behold Automation slået til, og slå Confirm Before Run fra.',
+      bank_sms_ios27_input: 'Vælg variablen Message under udløseren.',
+      bank_sms_ios27_done:
+        'Tryk tilbage for at gemme. Bankens beskeder registreres, næste gang Money2Time åbnes. Lad Category være tom for nøgleordsmatchning.',
       bank_sms_ios_step_1:
         'Åbn Genveje, gå til fanen Automation, tryk på New Automation, og vælg Message.',
       bank_sms_ios_step_2:
@@ -1259,6 +1273,10 @@ const da = {
         'Tryk på feltet Message, vælg Select Variable, derefter Shortcut Input, og vælg Content. Sæt From til bankens navn.',
       bank_sms_ios_step_5:
         'Vælg Account i Log Payment Alert. Betalinger registreres automatisk på din valgte konto. Kategorier bruger de samme nøgleord som Apple Pay.',
+      bank_sms_ios27_step_2: 'Søg efter Message, og vælg den.',
+      bank_sms_ios27_step_4: 'Tryk på den indsatte variabel, vælg Content og derefter Return.',
+      bank_sms_ios27_step_5:
+        'Tryk på handlingens pil og derefter Account. Vælg kontoen til betalingerne.',
     },
     title: 'Indstillinger',
     display: 'Visning',

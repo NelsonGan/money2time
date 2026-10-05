@@ -1228,7 +1228,7 @@ const tr = {
       payment_alerts_status_sources_one: '%{count} kaynak',
       payment_alerts_status_sources_other: '%{count} kaynak',
       payment_alerts_android_step_1:
-        "Ödeme bildirimleri'ni açın ve Ödeme bildirimlerini oku'yu etkinleştirin. Money2Time'ın bildirim erişimini nasıl kullandığını okuyun, sonra Devam'a dokunun.",
+        'Payment alerts bölümünü açıp Read payment notifications seçeneğini etkinleştirin.',
       payment_alerts_android_step_2:
         "Android bildirim erişimi ekranını açar. Money2Time'ı bulun ve açın.",
       payment_alerts_android_step_3:
@@ -1241,18 +1241,35 @@ const tr = {
       payment_alerts_android_step_7:
         'Ödemeler seçtiğiniz hesaba otomatik kaydedilir. Kategoriler Apple Pay ile aynı anahtar kelimeleri kullanır.',
       payment_alerts_ios_step_1:
-        'Kestirmeler’i açın, Automation sekmesine gidin ve New Automation’a dokunun.',
-      payment_alerts_ios_step_2:
-        'Notification’ı seçin, banka uygulamanızı seçin, ardından Run Immediately’yi seçin.',
-      payment_alerts_ios_step_3:
-        'Create New Shortcut’a dokunun, Money2Time’ı arayın ve Log Payment Alert’i ekleyin.',
+        'Shortcuts uygulamasında +, ardından Editor seçeneğine dokunun. Düzenleyicide Automation seçeneğine dokunun.',
+      payment_alerts_ios_step_2: 'Notification arayıp seçin.',
+      payment_alerts_ios_step_3: 'Log Payment Alert’i arayın ve ekleyin.',
       payment_alerts_ios_step_4:
-        'Message alanına dokunun, Select Variable’ı seçin, ardından Shortcut Input’u seçip Body’yi seçin.',
-      payment_alerts_ios_step_5:
-        'From alanına bankanın adını yazın; böylece her bankanın Money2Time’da kendi ayarları olur.',
-      payment_alerts_ios_step_6: 'Log Payment Alert içinde Account seçin.',
+        'Log Payment Alert içinde Message, ardından Select Variable seçeneğine dokunun.',
+      payment_alerts_ios_step_5: 'From’a dokunun ve bankanızın adını yazın.',
+      payment_alerts_ios_step_6:
+        '›’ye dokunun ve Account içinde bu bankanın ödeme yaptığı hesabı seçin.',
       payment_alerts_ios_step_7:
-        'Bitti. Her banka uygulaması için tekrarlayın. Ödemeler, Money2Time’ı bir sonraki açışınızda kaydedilir.',
+        'Bitti. Kaydetmek için geri dönün ve her banka uygulaması için tekrarlayın. Ödemeler, Money2Time’ı bir sonraki açışınızda kaydedilir.',
+      payment_alerts_android_disclosure:
+        'Bildirim erişiminin nasıl kullanıldığını okuyup Continue seçeneğine dokunun.',
+      payment_alerts_ios_app:
+        'App seçeneğine dokunup banka uygulamanızı seçin. Ekran görüntülerinde Messages örnek olarak kullanılıyor.',
+      payment_alerts_ios_run:
+        'Uygulamanın yanındaki oka dokunun. Automation açık kalsın; sessiz kayıt için Notify seçeneğini kapatın.',
+      payment_alerts_ios_input: 'Tetikleyicinin altındaki Notification değişkenini seçin.',
+      payment_alerts_ios_body: 'Eklenen değişkene dokunup Body, ardından Return seçeneğini seçin.',
+      payment_alerts_ios_fields:
+        'Aynı yöntemle Title ve Subtitle alanlarını ilgili Notification özelliklerine ayarlayın. Anahtar sözcük eşleştirmesi için Category boş kalsın.',
+      bank_sms_ios27_filter_kind:
+        'Soldaki Sender seçeneğine dokunup metin filtresi için Message seçin.',
+      bank_sms_ios27_filter:
+        'Bankanızın her zaman kullandığı Maybank gibi bir sözcük girin. Banka gönderenini de seçebilirsiniz.',
+      bank_sms_ios27_run:
+        'Tetikleyicinin okuna dokunun. Automation açık kalsın ve Confirm Before Run seçeneğini kapatın.',
+      bank_sms_ios27_input: 'Tetikleyicinin altındaki Message değişkenini seçin.',
+      bank_sms_ios27_done:
+        'Kaydetmek için geri dönün. Banka mesajları Money2Time bir sonraki açıldığında kaydedilir. Anahtar sözcük eşleştirmesi için Category boş kalsın.',
       bank_sms_ios_step_1:
         'Kestirmeler’i açın, Automation sekmesine gidin, New Automation’a dokunun ve Message’ı seçin.',
       bank_sms_ios_step_2:
@@ -1263,6 +1280,10 @@ const tr = {
         'Message alanına dokunun, Select Variable’ı seçin, ardından Shortcut Input’u seçip Content’i seçin. From alanına bankanın adını yazın.',
       bank_sms_ios_step_5:
         'Log Payment Alert içinde Account seçin. Ödemeler seçtiğiniz hesaba otomatik kaydedilir. Kategoriler Apple Pay ile aynı anahtar kelimeleri kullanır.',
+      bank_sms_ios27_step_2: 'Message arayıp seçin.',
+      bank_sms_ios27_step_4: 'Eklenen değişkene dokunup Content, ardından Return seçeneğini seçin.',
+      bank_sms_ios27_step_5:
+        'Eylemin okuna, ardından Account seçeneğine dokunun. Ödemelerin kaydedileceği hesabı seçin.',
     },
     title: 'Ayarlar',
     display: 'Görünüm',

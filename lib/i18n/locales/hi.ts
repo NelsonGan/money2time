@@ -1218,7 +1218,7 @@ const hi = {
       payment_alerts_status_sources_one: '%{count} स्रोत',
       payment_alerts_status_sources_other: '%{count} स्रोत',
       payment_alerts_android_step_1:
-        'भुगतान अलर्ट खोलें और भुगतान सूचनाएं पढ़ें चालू करें। पढ़ें कि Money2Time सूचना पहुंच का कैसे इस्तेमाल करता है, फिर जारी रखें पर टैप करें।',
+        'Payment alerts खोलें और Read payment notifications चालू करें।',
       payment_alerts_android_step_2:
         'Android सूचना पहुंच की स्क्रीन खोलता है। Money2Time ढूंढें और उसे चालू करें।',
       payment_alerts_android_step_3:
@@ -1230,18 +1230,35 @@ const hi = {
       payment_alerts_android_step_7:
         'भुगतान चुने गए खाते में अपने आप दर्ज होते हैं। श्रेणियां Apple Pay जैसे ही कीवर्ड इस्तेमाल करती हैं।',
       payment_alerts_ios_step_1:
-        'Shortcuts खोलें, Automation टैब पर जाएं, और New Automation दबाएं।',
-      payment_alerts_ios_step_2:
-        'Notification चुनें, अपना बैंकिंग ऐप चुनें, फिर Run Immediately चुनें।',
-      payment_alerts_ios_step_3:
-        'Create New Shortcut दबाएं, Money2Time खोजें, और Log Payment Alert जोड़ें।',
+        'Shortcuts खोलें, + और फिर Editor पर टैप करें। एडिटर में Automation पर टैप करें।',
+      payment_alerts_ios_step_2: 'Notification खोजें और चुनें।',
+      payment_alerts_ios_step_3: 'Log Payment Alert खोजें और जोड़ें।',
       payment_alerts_ios_step_4:
-        'Message फ़ील्ड दबाएं, Select Variable चुनें, फिर Shortcut Input, और Body चुनें।',
-      payment_alerts_ios_step_5:
-        'From में बैंक का नाम डालें, ताकि Money2Time में हर बैंक की अपनी सेटिंग्स हों।',
-      payment_alerts_ios_step_6: 'Log Payment Alert में Account चुनें।',
+        'Log Payment Alert में Message और फिर Select Variable पर टैप करें।',
+      payment_alerts_ios_step_5: 'From दबाएं और अपने बैंक का नाम लिखें।',
+      payment_alerts_ios_step_6:
+        '› दबाएं और Account में वह खाता चुनें जिससे यह बैंक भुगतान करता है।',
       payment_alerts_ios_step_7:
-        'हो गया। हर बैंकिंग ऐप के लिए दोहराएं। अगली बार Money2Time खोलने पर भुगतान दर्ज होंगे।',
+        'हो गया। सेव करने के लिए वापस जाएं, और हर बैंकिंग ऐप के लिए दोहराएं। अगली बार Money2Time खोलने पर भुगतान दर्ज होंगे।',
+      payment_alerts_android_disclosure:
+        'सूचनाओं की पहुँच कैसे इस्तेमाल होती है, पढ़ें और Continue पर टैप करें।',
+      payment_alerts_ios_app:
+        'App पर टैप करके अपना बैंकिंग ऐप चुनें। स्क्रीनशॉट में Messages उदाहरण के तौर पर है।',
+      payment_alerts_ios_run:
+        'ऐप के पास तीर पर टैप करें। Automation चालू रखें और बिना सूचना के लॉग करने के लिए Notify बंद करें।',
+      payment_alerts_ios_input: 'ट्रिगर के नीचे Notification वेरिएबल चुनें।',
+      payment_alerts_ios_body: 'जोड़े गए वेरिएबल पर टैप करें, Body चुनें और फिर Return।',
+      payment_alerts_ios_fields:
+        'इसी तरह Title और Subtitle में संबंधित Notification गुण चुनें। कीवर्ड मिलान के लिए Category खाली छोड़ें।',
+      bank_sms_ios27_filter_kind:
+        'बाईं ओर Sender पर टैप करके Message चुनें, ताकि टेक्स्ट के आधार पर फ़िल्टर हो।',
+      bank_sms_ios27_filter:
+        'बैंक के संदेशों में हमेशा आने वाला शब्द लिखें, जैसे Maybank। बैंक का प्रेषक भी चुन सकते हैं।',
+      bank_sms_ios27_run:
+        'ट्रिगर के तीर पर टैप करें। Automation चालू रखें और Confirm Before Run बंद करें।',
+      bank_sms_ios27_input: 'ट्रिगर के नीचे Message वेरिएबल चुनें।',
+      bank_sms_ios27_done:
+        'सहेजने के लिए वापस जाएँ। बैंक के संदेश अगली बार Money2Time खोलने पर लॉग होंगे। कीवर्ड मिलान के लिए Category खाली छोड़ें।',
       bank_sms_ios_step_1:
         'Shortcuts खोलें, Automation टैब पर जाएं, New Automation दबाएं, और Message चुनें।',
       bank_sms_ios_step_2:
@@ -1252,6 +1269,10 @@ const hi = {
         'Message फ़ील्ड दबाएं, Select Variable चुनें, फिर Shortcut Input, और Content चुनें। From में बैंक का नाम डालें।',
       bank_sms_ios_step_5:
         'Log Payment Alert में Account चुनें। भुगतान चुने गए खाते में अपने आप दर्ज होते हैं। श्रेणियां Apple Pay जैसे ही कीवर्ड इस्तेमाल करती हैं।',
+      bank_sms_ios27_step_2: 'Message खोजें और चुनें।',
+      bank_sms_ios27_step_4: 'जोड़े गए वेरिएबल पर टैप करें, Content चुनें और फिर Return।',
+      bank_sms_ios27_step_5:
+        'ऐक्शन के तीर और फिर Account पर टैप करें। इन भुगतानों के लिए खाता चुनें।',
     },
     title: 'सेटिंग्स',
     display: 'डिस्प्ले',
