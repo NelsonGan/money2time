@@ -1227,8 +1227,7 @@ const pt = {
       payment_alerts_status_apps_other: 'Ativado para %{count} apps',
       payment_alerts_status_sources_one: '%{count} fonte',
       payment_alerts_status_sources_other: '%{count} fontes',
-      payment_alerts_android_step_1:
-        'Abra Alertas de pagamento e ative Ler notificações de pagamento. Leia como o Money2Time usa o acesso a notificações e toque em Continuar.',
+      payment_alerts_android_step_1: 'Abra Payment alerts e ative Read payment notifications.',
       payment_alerts_android_step_2:
         'O Android abre a tela de acesso a notificações. Encontre o Money2Time e ative.',
       payment_alerts_android_step_3:
@@ -1240,18 +1239,35 @@ const pt = {
       payment_alerts_android_step_7:
         'Os pagamentos são registrados automaticamente na conta escolhida. As categorias usam as mesmas palavras-chave do Apple Pay.',
       payment_alerts_ios_step_1:
-        'Abra o Atalhos, vá para a aba Automation e toque em New Automation.',
-      payment_alerts_ios_step_2:
-        'Escolha Notification, selecione o app do seu banco e depois escolha Run Immediately.',
-      payment_alerts_ios_step_3:
-        'Toque em Create New Shortcut, busque Money2Time e adicione Log Payment Alert.',
+        'Abra Shortcuts, toque em + e depois em Editor. Toque em Automation no editor.',
+      payment_alerts_ios_step_2: 'Procure Notification e selecione.',
+      payment_alerts_ios_step_3: 'Busque Log Payment Alert e adicione.',
       payment_alerts_ios_step_4:
-        'Toque no campo Message, escolha Select Variable, depois Shortcut Input e selecione Body.',
-      payment_alerts_ios_step_5:
-        'Coloque o nome do banco em From, para que cada banco tenha suas próprias configurações no Money2Time.',
-      payment_alerts_ios_step_6: 'Escolha Account em Log Payment Alert.',
+        'Toque em Message em Log Payment Alert e depois em Select Variable.',
+      payment_alerts_ios_step_5: 'Toque em From e digite o nome do seu banco.',
+      payment_alerts_ios_step_6:
+        'Toque em › e escolha em Account a conta que esse banco usa para pagar.',
       payment_alerts_ios_step_7:
-        'Pronto. Repita para cada app de banco. Os pagamentos são registrados na próxima vez que você abrir o Money2Time.',
+        'Pronto. Toque em voltar para salvar e repita para cada app de banco. Os pagamentos são registrados na próxima vez que você abrir o Money2Time.',
+      payment_alerts_android_disclosure:
+        'Leia como o acesso às notificações é usado e toque em Continue.',
+      payment_alerts_ios_app:
+        'Toque em App e escolha o aplicativo do banco. As capturas usam Messages como exemplo.',
+      payment_alerts_ios_run:
+        'Toque na seta ao lado do aplicativo. Mantenha Automation ativo e desative Notify para registrar silenciosamente.',
+      payment_alerts_ios_input: 'Selecione a variável Notification abaixo do gatilho.',
+      payment_alerts_ios_body: 'Toque na variável inserida, escolha Body e depois Return.',
+      payment_alerts_ios_fields:
+        'Defina Title e Subtitle com as propriedades correspondentes de Notification da mesma forma. Deixe Category vazio para usar palavras-chave.',
+      bank_sms_ios27_filter_kind:
+        'Toque em Sender à esquerda e escolha Message para filtrar o texto.',
+      bank_sms_ios27_filter:
+        'Digite uma palavra que seu banco sempre usa, como Maybank. Você também pode escolher o remetente do banco.',
+      bank_sms_ios27_run:
+        'Toque na seta do gatilho. Mantenha Automation ativo e desative Confirm Before Run.',
+      bank_sms_ios27_input: 'Selecione a variável Message abaixo do gatilho.',
+      bank_sms_ios27_done:
+        'Volte para salvar. Os SMS do banco serão registrados ao abrir Money2Time novamente. Deixe Category vazio para usar palavras-chave.',
       bank_sms_ios_step_1:
         'Abra o Atalhos, vá para a aba Automation, toque em New Automation e escolha Message.',
       bank_sms_ios_step_2:
@@ -1262,6 +1278,10 @@ const pt = {
         'Toque no campo Message, escolha Select Variable, depois Shortcut Input e selecione Content. Coloque o nome do banco em From.',
       bank_sms_ios_step_5:
         'Escolha Account em Log Payment Alert. Os pagamentos são registrados automaticamente na conta escolhida. As categorias usam as mesmas palavras-chave do Apple Pay.',
+      bank_sms_ios27_step_2: 'Procure Message e selecione.',
+      bank_sms_ios27_step_4: 'Toque na variável inserida, escolha Content e depois Return.',
+      bank_sms_ios27_step_5:
+        'Toque na seta da ação e depois em Account. Escolha a conta para esses pagamentos.',
     },
     title: 'Configurações',
     display: 'Exibição',

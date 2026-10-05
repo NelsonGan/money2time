@@ -1213,8 +1213,7 @@ const vi = {
       payment_alerts_status_apps_other: 'Bật cho %{count} ứng dụng',
       payment_alerts_status_sources_one: '%{count} nguồn',
       payment_alerts_status_sources_other: '%{count} nguồn',
-      payment_alerts_android_step_1:
-        'Mở Thông báo thanh toán và bật Đọc thông báo thanh toán. Đọc cách Money2Time dùng quyền truy cập thông báo, rồi chạm Tiếp tục.',
+      payment_alerts_android_step_1: 'Mở Payment alerts và bật Read payment notifications.',
       payment_alerts_android_step_2:
         'Android mở màn hình quyền truy cập thông báo. Tìm Money2Time và bật lên.',
       payment_alerts_android_step_3:
@@ -1225,18 +1224,34 @@ const vi = {
       payment_alerts_android_step_6: 'Gửi một thông báo thử để kiểm tra mọi thứ hoạt động.',
       payment_alerts_android_step_7:
         'Thanh toán được ghi tự động vào tài khoản đã chọn. Danh mục dùng cùng từ khóa như Apple Pay.',
-      payment_alerts_ios_step_1: 'Mở Phím tắt, vào tab Automation và chạm New Automation.',
-      payment_alerts_ios_step_2:
-        'Chọn Notification, chọn ứng dụng ngân hàng của bạn, rồi chọn Run Immediately.',
-      payment_alerts_ios_step_3:
-        'Chạm Create New Shortcut, tìm Money2Time và thêm Log Payment Alert.',
-      payment_alerts_ios_step_4:
-        'Chạm trường Message, chọn Select Variable, rồi Shortcut Input, và chọn Body.',
-      payment_alerts_ios_step_5:
-        'Đặt From là tên ngân hàng, để mỗi ngân hàng có cài đặt riêng trong Money2Time.',
-      payment_alerts_ios_step_6: 'Chọn Account trong Log Payment Alert.',
+      payment_alerts_ios_step_1:
+        'Mở Shortcuts, nhấn + rồi Editor. Nhấn Automation trong trình chỉnh sửa.',
+      payment_alerts_ios_step_2: 'Tìm Notification rồi chọn.',
+      payment_alerts_ios_step_3: 'Tìm Log Payment Alert và thêm vào.',
+      payment_alerts_ios_step_4: 'Nhấn Message trong Log Payment Alert rồi Select Variable.',
+      payment_alerts_ios_step_5: 'Chạm From và nhập tên ngân hàng của bạn.',
+      payment_alerts_ios_step_6:
+        'Chạm › và chọn trong Account tài khoản mà ngân hàng này dùng để thanh toán.',
       payment_alerts_ios_step_7:
-        'Xong. Lặp lại cho từng ứng dụng ngân hàng. Thanh toán sẽ được ghi vào lần tới bạn mở Money2Time.',
+        'Xong. Chạm quay lại để lưu, rồi lặp lại cho từng ứng dụng ngân hàng. Thanh toán sẽ được ghi vào lần tới bạn mở Money2Time.',
+      payment_alerts_android_disclosure:
+        'Đọc cách sử dụng quyền truy cập thông báo rồi nhấn Continue.',
+      payment_alerts_ios_app:
+        'Nhấn App và chọn ứng dụng ngân hàng. Ảnh chụp dùng Messages làm ví dụ.',
+      payment_alerts_ios_run:
+        'Nhấn mũi tên cạnh ứng dụng. Giữ Automation bật và tắt Notify để ghi lại mà không thông báo.',
+      payment_alerts_ios_input: 'Chọn biến Notification bên dưới trình kích hoạt.',
+      payment_alerts_ios_body: 'Nhấn biến đã chèn, chọn Body rồi Return.',
+      payment_alerts_ios_fields:
+        'Đặt Title và Subtitle thành thuộc tính Notification tương ứng theo cùng cách. Để trống Category để khớp từ khóa.',
+      bank_sms_ios27_filter_kind: 'Nhấn Sender bên trái rồi chọn Message để lọc theo nội dung.',
+      bank_sms_ios27_filter:
+        'Nhập từ ngân hàng luôn dùng, chẳng hạn Maybank. Bạn cũng có thể chọn người gửi của ngân hàng.',
+      bank_sms_ios27_run:
+        'Nhấn mũi tên trình kích hoạt. Giữ Automation bật và tắt Confirm Before Run.',
+      bank_sms_ios27_input: 'Chọn biến Message bên dưới trình kích hoạt.',
+      bank_sms_ios27_done:
+        'Quay lại để lưu. SMS ngân hàng được ghi khi bạn mở Money2Time lần tiếp theo. Để trống Category để khớp từ khóa.',
       bank_sms_ios_step_1: 'Mở Phím tắt, vào tab Automation, chạm New Automation và chọn Message.',
       bank_sms_ios_step_2:
         'Chọn ngân hàng làm người gửi, hoặc trong Message Contains nhập một từ luôn có trong tin nhắn của ngân hàng. Sau đó chọn Run Immediately.',
@@ -1245,6 +1260,10 @@ const vi = {
         'Chạm trường Message, chọn Select Variable, rồi Shortcut Input, và chọn Content. Đặt From là tên ngân hàng.',
       bank_sms_ios_step_5:
         'Chọn Account trong Log Payment Alert. Thanh toán được ghi tự động vào tài khoản đã chọn. Danh mục dùng cùng từ khóa như Apple Pay.',
+      bank_sms_ios27_step_2: 'Tìm Message rồi chọn.',
+      bank_sms_ios27_step_4: 'Nhấn biến đã chèn, chọn Content rồi Return.',
+      bank_sms_ios27_step_5:
+        'Nhấn mũi tên hành động rồi Account. Chọn tài khoản để ghi các khoản thanh toán.',
     },
     title: 'Cài đặt',
     display: 'Hiển thị',

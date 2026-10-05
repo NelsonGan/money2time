@@ -1,7 +1,7 @@
 import type { ImageSource } from 'expo-image';
 import { Download, Play } from 'lucide-react-native';
 import React, { useCallback } from 'react';
-import { Linking, Pressable, StyleSheet, View } from 'react-native';
+import { Linking, Platform, Pressable, StyleSheet, View } from 'react-native';
 
 import { SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
 import {
@@ -25,7 +25,7 @@ interface AutoLogTutorialScreenProps {
 }
 
 /**
- * Steps carry a real screenshot captured on a physical iPhone (Shortcuts,
+ * Steps carry real device or simulator captures (Shortcuts, Android settings,
  * Wallet, and Accessibility → Back Tap), annotated to circle the exact control to
  * tap. Metro needs a literal path, so each require is spelled out rather than
  * built from the step key. A step with `image: null` renders a blank frame (the
@@ -47,6 +47,10 @@ interface TutorialStep {
   /** Renders the "Get Shortcut" CTA under the caption, opening the topic's link. */
   download?: boolean;
 }
+
+/** iOS 27 moved automations out of their own tab and into the shortcut editor. */
+const IOS_27_OR_LATER =
+  Platform.OS === 'ios' && Number.parseInt(String(Platform.Version), 10) >= 27;
 
 const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
   // Built from scratch (no shareable link): create a Wallet automation, add the
@@ -95,34 +99,95 @@ const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
   // Android: turn on notification access, pick the banking and wallet apps,
   // say which account each pays from, and send a test alert.
   paymentAlertsAndroid: [
-    { key: 'payment_alerts_android_step_1', image: null },
-    { key: 'payment_alerts_android_step_2', image: null },
-    { key: 'payment_alerts_android_step_3', image: null },
-    { key: 'payment_alerts_android_step_4', image: null },
-    { key: 'payment_alerts_android_step_5', image: null },
-    { key: 'payment_alerts_android_step_6', image: null },
-    { key: 'payment_alerts_android_step_7', image: null },
+    {
+      key: 'payment_alerts_android_step_1',
+      image: require('~/assets/autolog/pa_android_toggle.png'),
+    },
+    {
+      key: 'payment_alerts_android_disclosure',
+      image: require('~/assets/autolog/pa_android_disclosure.png'),
+    },
+    {
+      key: 'payment_alerts_android_step_2',
+      image: require('~/assets/autolog/pa_android_access.png'),
+    },
+    {
+      key: 'payment_alerts_android_step_3',
+      image: require('~/assets/autolog/pa_android_allow.png'),
+    },
+    {
+      key: 'payment_alerts_android_step_4',
+      image: require('~/assets/autolog/pa_android_apps.png'),
+    },
+    {
+      key: 'payment_alerts_android_step_5',
+      image: require('~/assets/autolog/pa_android_account.png'),
+    },
+    {
+      key: 'payment_alerts_android_step_6',
+      image: require('~/assets/autolog/pa_android_test.png'),
+    },
+    {
+      key: 'payment_alerts_android_step_7',
+      image: require('~/assets/autolog/pa_android_success.png'),
+    },
   ],
-  // iOS 27+: a Shortcuts "Notification" automation per bank app, running Log
-  // Payment Alert with the notification's Title, Subtitle and Body. Automations
-  // cannot be shared, so this one is built by hand like Log Card Payment.
+  // iOS 27+ (the Notification trigger is new in 27): one shortcut per banking
+  // app, started by its notifications, running Log Payment Alert with the
+  // notification's Body and the account chosen in the action. iOS 27 has no
+  // Automation tab, so the trigger is added from the editor's Automation list.
+  // Checked against the iOS 27 simulator.
   paymentAlertsIos: [
-    { key: 'payment_alerts_ios_step_1', image: null },
-    { key: 'payment_alerts_ios_step_2', image: null },
-    { key: 'payment_alerts_ios_step_3', image: null },
-    { key: 'payment_alerts_ios_step_4', image: null },
-    { key: 'payment_alerts_ios_step_5', image: null },
-    { key: 'payment_alerts_ios_step_6', image: null },
-    { key: 'payment_alerts_ios_step_7', image: null },
+    { key: 'payment_alerts_ios_step_1', image: require('~/assets/autolog/pa_ios_editor.png') },
+    {
+      key: 'payment_alerts_ios_step_2',
+      image: require('~/assets/autolog/pa_ios_notification.png'),
+    },
+    { key: 'payment_alerts_ios_app', image: require('~/assets/autolog/pa_ios_trigger.png') },
+    { key: 'payment_alerts_ios_run', image: require('~/assets/autolog/pa_ios_auto.png') },
+    { key: 'payment_alerts_ios_step_3', image: require('~/assets/autolog/pa_ios_action.png') },
+    { key: 'payment_alerts_ios_step_4', image: require('~/assets/autolog/pa_ios_variable.png') },
+    { key: 'payment_alerts_ios_input', image: require('~/assets/autolog/pa_ios_input.png') },
+    { key: 'payment_alerts_ios_body', image: require('~/assets/autolog/pa_ios_body.png') },
+    { key: 'payment_alerts_ios_step_5', image: require('~/assets/autolog/pa_ios_from.png') },
+    {
+      key: 'payment_alerts_ios_step_6',
+      image: require('~/assets/autolog/pa_ios_pick_account.png'),
+    },
+    { key: 'payment_alerts_ios_fields', image: require('~/assets/autolog/pa_ios_metadata.png') },
+    { key: 'payment_alerts_ios_step_7', image: require('~/assets/autolog/pa_ios_done.png') },
   ],
-  // iOS 17+: a "Message" automation for bank text messages, same action.
-  bankSmsIos: [
-    { key: 'bank_sms_ios_step_1', image: null },
-    { key: 'bank_sms_ios_step_2', image: null },
-    { key: 'bank_sms_ios_step_3', image: null },
-    { key: 'bank_sms_ios_step_4', image: null },
-    { key: 'bank_sms_ios_step_5', image: null },
-  ],
+  // iOS 17+: a "Message" automation for bank text messages, same action. On
+  // iOS 27 it is built in the shortcut editor like the notification one, so
+  // its opening and search steps are shared with that topic.
+  bankSmsIos: IOS_27_OR_LATER
+    ? [
+        { key: 'payment_alerts_ios_step_1', image: require('~/assets/autolog/pa_ios_editor.png') },
+        { key: 'bank_sms_ios27_step_2', image: require('~/assets/autolog/pa_sms_message.png') },
+        {
+          key: 'bank_sms_ios27_filter_kind',
+          image: require('~/assets/autolog/pa_sms_filter_kind.png'),
+        },
+        { key: 'bank_sms_ios27_filter', image: require('~/assets/autolog/pa_sms_filter.png') },
+        { key: 'bank_sms_ios27_run', image: require('~/assets/autolog/pa_sms_auto.png') },
+        { key: 'payment_alerts_ios_step_3', image: require('~/assets/autolog/pa_sms_action.png') },
+        {
+          key: 'payment_alerts_ios_step_4',
+          image: require('~/assets/autolog/pa_sms_variable.png'),
+        },
+        { key: 'bank_sms_ios27_input', image: require('~/assets/autolog/pa_sms_input.png') },
+        { key: 'bank_sms_ios27_step_4', image: require('~/assets/autolog/pa_sms_content.png') },
+        { key: 'payment_alerts_ios_step_5', image: require('~/assets/autolog/pa_sms_from.png') },
+        { key: 'bank_sms_ios27_step_5', image: require('~/assets/autolog/pa_sms_account.png') },
+        { key: 'bank_sms_ios27_done', image: require('~/assets/autolog/pa_sms_done.png') },
+      ]
+    : [
+        { key: 'bank_sms_ios_step_1', image: null },
+        { key: 'bank_sms_ios_step_2', image: null },
+        { key: 'bank_sms_ios_step_3', image: null },
+        { key: 'bank_sms_ios_step_4', image: null },
+        { key: 'bank_sms_ios_step_5', image: null },
+      ],
 };
 
 /** iCloud shortcut links, one per topic that ships a downloadable shortcut. */
