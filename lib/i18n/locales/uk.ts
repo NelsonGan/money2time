@@ -1218,8 +1218,6 @@ const uk = {
       payment_alerts_status_off: 'Не налаштовано',
       payment_alerts_status_apps_one: 'Увімкнено для %{count} застосунку',
       payment_alerts_status_apps_other: 'Увімкнено, застосунків: %{count}',
-      payment_alerts_status_sources_one: '%{count} джерело',
-      payment_alerts_status_sources_other: 'Джерел: %{count}',
       payment_alerts_android_step_1:
         'Відкрийте Payment alerts та увімкніть Read payment notifications.',
       payment_alerts_android_step_2:
@@ -2606,7 +2604,6 @@ const uk = {
     ios_needs_27:
       'Автоматизації сповіщень застосунків потребують iOS 27. На попередніх версіях використовуйте Apple Pay або діліться знімками платежів.',
     section_apps: 'Застосунки',
-    section_sources: 'Джерела',
     choose_apps: 'Вибрати застосунки',
     source_off: 'Вимкнено',
     disclosure_title: 'Записуйте платежі зі сповіщень',

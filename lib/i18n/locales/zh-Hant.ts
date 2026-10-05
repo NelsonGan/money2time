@@ -1161,8 +1161,6 @@ const zhHant = {
       payment_alerts_status_off: '尚未設定',
       payment_alerts_status_apps_one: '已為 %{count} 個 App 開啟',
       payment_alerts_status_apps_other: '已為 %{count} 個 App 開啟',
-      payment_alerts_status_sources_one: '%{count} 個來源',
-      payment_alerts_status_sources_other: '%{count} 個來源',
       payment_alerts_android_step_1: '開啟付款提醒，開啟讀取付款通知。',
       payment_alerts_android_step_2: 'Android 會開啟通知存取權頁面。找到 Money2Time 並開啟。',
       payment_alerts_android_step_3:
@@ -2494,7 +2492,6 @@ const zhHant = {
     ios_notifications_hint: '為每個銀行或電子錢包 App 設定一個捷徑自動化。',
     ios_needs_27: 'App 通知自動化需要 iOS 27。較早版本可使用 Apple Pay 或分享付款截圖。',
     section_apps: 'App',
-    section_sources: '來源',
     choose_apps: '選擇 App',
     source_off: '已關閉',
     disclosure_title: '從通知中記錄付款',

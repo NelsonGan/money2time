@@ -1216,8 +1216,6 @@ const ja = {
       payment_alerts_status_off: '未設定',
       payment_alerts_status_apps_one: '%{count} 個のアプリでオン',
       payment_alerts_status_apps_other: '%{count} 個のアプリでオン',
-      payment_alerts_status_sources_one: '送信元 %{count} 件',
-      payment_alerts_status_sources_other: '送信元 %{count} 件',
       payment_alerts_android_step_1:
         'Payment alertsを開き、Read payment notificationsをオンにします。',
       payment_alerts_android_step_2:
@@ -2593,7 +2591,6 @@ const ja = {
     ios_needs_27:
       'アプリ通知のオートメーションには iOS 27 が必要です。それ以前のバージョンでは Apple Pay や支払いのスクリーンショット共有を使えます。',
     section_apps: 'アプリ',
-    section_sources: '送信元',
     choose_apps: 'アプリを選ぶ',
     source_off: 'オフ',
     disclosure_title: '通知から支払いを記録',

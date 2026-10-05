@@ -17,16 +17,18 @@ transaction-history learning, AI requests, or categorization server is involved.
 
 ## Interface
 
-- Automation has a Payment notifications section with a Payment alerts entry
-  and its status. Its top-right Tutorial link opens the platform's guide.
+- Android Automation has a Payment notifications section with a Payment alerts
+  entry and its status. Its top-right Tutorial link opens the Android guide.
 - Android Payment alerts contains the capture switch, chosen apps with their
   account names and Choose apps. There is no duplicate tutorial button inside.
-- iOS Payment alerts contains one App notifications guide and configured
-  automation sources with their selected accounts. Bank and e-wallet apps use
-  the Notification trigger on iOS 27. There is no SMS or Message automation guide;
-  earlier iOS versions can use Apple Pay or share payment screenshots.
-- A source screen contains its switch, one account picker, and Remove. Android
-  places Remove in a top-right trash icon with the same confirmation dialog.
+- iOS Automation shows App notifications directly as a bell icon and explanation,
+  matching the other automation cards. The card has no arrow or settings page;
+  its top-right Tutorial link opens the single App notifications guide. Account
+  selection happens in Shortcuts. Bank and e-wallet apps use the Notification
+  trigger on iOS 27. There is no SMS or Message automation guide; earlier iOS
+  versions see the version requirement and can use Apple Pay or share screenshots.
+- Android's source screen contains its switch, one account picker, and a top-right
+  trash icon with a confirmation dialog.
 - Explanations appear above controls and tutorial links. Navigation rows have
   one arrow. Notification-access details are visible before opening system settings.
 
@@ -39,7 +41,7 @@ separate Account label. Missing-app help is in the tooltip beside Recently activ
 
 For iOS, select Account in the Log Payment Alert action. From identifies the
 source; its first queued alert registers the source and selected account in
-settings. An explicit action Account takes precedence over the saved source
+saved preferences. An explicit action Account takes precedence over the saved source
 account. Removed, deleted, goal and loan accounts cannot receive alert expenses.
 
 ## Capture and processing

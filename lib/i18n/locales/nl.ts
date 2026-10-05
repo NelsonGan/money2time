@@ -1232,8 +1232,6 @@ const nl = {
       payment_alerts_status_off: 'Niet ingesteld',
       payment_alerts_status_apps_one: 'Aan voor %{count} app',
       payment_alerts_status_apps_other: 'Aan voor %{count} apps',
-      payment_alerts_status_sources_one: '%{count} bron',
-      payment_alerts_status_sources_other: '%{count} bronnen',
       payment_alerts_android_step_1: 'Open Payment alerts en zet Read payment notifications aan.',
       payment_alerts_android_step_2:
         'Android opent het scherm voor meldingstoegang. Zoek Money2Time en zet het aan.',
@@ -2635,7 +2633,6 @@ const nl = {
     ios_needs_27:
       'Automatiseringen voor appmeldingen vereisen iOS 27. Op eerdere versies kun je Apple Pay gebruiken of screenshots van betalingen delen.',
     section_apps: 'Apps',
-    section_sources: 'Bronnen',
     choose_apps: 'Apps kiezen',
     source_off: 'Uit',
     disclosure_title: 'Betalingen registreren uit je meldingen',

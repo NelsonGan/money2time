@@ -1225,8 +1225,6 @@ const tr = {
       payment_alerts_status_off: 'Kurulmadı',
       payment_alerts_status_apps_one: '%{count} uygulama için açık',
       payment_alerts_status_apps_other: '%{count} uygulama için açık',
-      payment_alerts_status_sources_one: '%{count} kaynak',
-      payment_alerts_status_sources_other: '%{count} kaynak',
       payment_alerts_android_step_1:
         'Payment alerts bölümünü açıp Read payment notifications seçeneğini etkinleştirin.',
       payment_alerts_android_step_2:
@@ -2618,7 +2616,6 @@ const tr = {
     ios_needs_27:
       'Uygulama bildirimi otomasyonları iOS 27 gerektirir. Önceki sürümlerde Apple Pay kullanabilir veya ödeme ekran görüntülerini paylaşabilirsiniz.',
     section_apps: 'Uygulamalar',
-    section_sources: 'Kaynaklar',
     choose_apps: 'Uygulama seç',
     source_off: 'Kapalı',
     disclosure_title: 'Bildirimlerinizden ödeme kaydedin',

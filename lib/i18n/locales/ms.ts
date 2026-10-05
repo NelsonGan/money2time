@@ -1229,8 +1229,6 @@ const ms = {
       payment_alerts_status_off: 'Belum disediakan',
       payment_alerts_status_apps_one: 'Hidup untuk %{count} aplikasi',
       payment_alerts_status_apps_other: 'Hidup untuk %{count} aplikasi',
-      payment_alerts_status_sources_one: '%{count} sumber',
-      payment_alerts_status_sources_other: '%{count} sumber',
       payment_alerts_android_step_1: 'Buka Payment alerts dan hidupkan Read payment notifications.',
       payment_alerts_android_step_2:
         'Android membuka skrin akses pemberitahuan. Cari Money2Time dan hidupkannya.',
@@ -2627,7 +2625,6 @@ const ms = {
     ios_needs_27:
       'Automasi notifikasi aplikasi memerlukan iOS 27. Pada versi terdahulu, anda boleh menggunakan Apple Pay atau berkongsi tangkapan skrin pembayaran.',
     section_apps: 'Aplikasi',
-    section_sources: 'Sumber',
     choose_apps: 'Pilih aplikasi',
     source_off: 'Mati',
     disclosure_title: 'Rekod pembayaran daripada pemberitahuan anda',

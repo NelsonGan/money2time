@@ -1220,8 +1220,6 @@ const sv = {
       payment_alerts_status_off: 'Inte konfigurerat',
       payment_alerts_status_apps_one: 'På för %{count} app',
       payment_alerts_status_apps_other: 'På för %{count} appar',
-      payment_alerts_status_sources_one: '%{count} källa',
-      payment_alerts_status_sources_other: '%{count} källor',
       payment_alerts_android_step_1: 'Öppna Payment alerts och slå på Read payment notifications.',
       payment_alerts_android_step_2:
         'Android öppnar skärmen för aviseringsåtkomst. Hitta Money2Time och slå på det.',
@@ -2607,7 +2605,6 @@ const sv = {
     ios_needs_27:
       'Automatiseringar med appnotiser kräver iOS 27. På tidigare versioner kan du använda Apple Pay eller dela skärmbilder av betalningar.',
     section_apps: 'Appar',
-    section_sources: 'Källor',
     choose_apps: 'Välj appar',
     source_off: 'Av',
     disclosure_title: 'Registrera betalningar från dina aviseringar',

@@ -1211,8 +1211,6 @@ const vi = {
       payment_alerts_status_off: 'Chưa thiết lập',
       payment_alerts_status_apps_one: 'Bật cho %{count} ứng dụng',
       payment_alerts_status_apps_other: 'Bật cho %{count} ứng dụng',
-      payment_alerts_status_sources_one: '%{count} nguồn',
-      payment_alerts_status_sources_other: '%{count} nguồn',
       payment_alerts_android_step_1: 'Mở Payment alerts và bật Read payment notifications.',
       payment_alerts_android_step_2:
         'Android mở màn hình quyền truy cập thông báo. Tìm Money2Time và bật lên.',
@@ -2590,7 +2588,6 @@ const vi = {
     ios_needs_27:
       'Tự động hóa thông báo ứng dụng cần iOS 27. Với phiên bản cũ hơn, bạn có thể dùng Apple Pay hoặc chia sẻ ảnh chụp thanh toán.',
     section_apps: 'Ứng dụng',
-    section_sources: 'Nguồn',
     choose_apps: 'Chọn ứng dụng',
     source_off: 'Tắt',
     disclosure_title: 'Ghi thanh toán từ thông báo',
