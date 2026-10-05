@@ -1,4 +1,4 @@
-// Payment-alert parser: one bank, wallet or SMS alert in, what it says about
+// Payment-alert parser: one bank or wallet app alert in, what it says about
 // money out. Pure and synchronous; covered by
 // __tests__/features/autoLog/parser.test.ts against the fixture corpus in
 // __tests__/fixtures/payment-alerts.

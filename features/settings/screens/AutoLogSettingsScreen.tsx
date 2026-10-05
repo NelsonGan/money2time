@@ -425,7 +425,7 @@ export function AutoLogSettingsScreen({
                 </View>
               </View>
 
-              {/* Bank notifications, SMS and emails: the payment automation for
+              {/* Bank and e-wallet app notifications: the payment automation for
                   everything Apple Pay does not cover, so it sits next to it. */}
               <PaymentAlertsEntry
                 isAndroid={false}

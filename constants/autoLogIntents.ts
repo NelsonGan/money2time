@@ -20,9 +20,9 @@ export const NEW_TRANSACTION_INTENT_NAME = 'New Transaction';
 export const SCAN_SCREENSHOT_INTENT_NAME = 'Log Screenshot';
 
 /**
- * Takes the text of a bank notification, SMS or email (from a Notification,
- * Message or Email automation) and queues it without opening the app.
- * Spending is logged automatically when the app next runs. docs/prd-notification-auto-log.md §7.5.
+ * Takes a bank or e-wallet app notification from a Notification automation
+ * and queues it without opening the app. Spending is logged automatically
+ * when the app next runs.
  */
 export const LOG_PAYMENT_ALERT_INTENT_NAME = 'Log Payment Alert';
 

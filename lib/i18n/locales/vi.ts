@@ -1225,45 +1225,25 @@ const vi = {
       payment_alerts_android_step_7:
         'Thanh toán được ghi tự động vào tài khoản đã chọn. Danh mục dùng cùng từ khóa như Apple Pay.',
       payment_alerts_ios_step_1:
-        'Mở Shortcuts, nhấn + rồi Editor. Nhấn Automation trong trình chỉnh sửa.',
+        'Mở Shortcuts, nhấn + rồi Edit. Nhấn Automation trong trình chỉnh sửa.',
       payment_alerts_ios_step_2: 'Tìm Notification rồi chọn.',
       payment_alerts_ios_step_3: 'Tìm Log Payment Alert và thêm vào.',
       payment_alerts_ios_step_4: 'Nhấn Message trong Log Payment Alert rồi Select Variable.',
-      payment_alerts_ios_step_5: 'Chạm From và nhập tên ngân hàng của bạn.',
+      payment_alerts_ios_step_5: 'Chạm From và nhập tên ứng dụng.',
       payment_alerts_ios_step_6:
-        'Chạm › và chọn trong Account tài khoản mà ngân hàng này dùng để thanh toán.',
+        'Chạm mũi tên tác vụ, rồi Account. Chọn tài khoản để ghi lại thanh toán của ứng dụng này.',
       payment_alerts_ios_step_7:
-        'Xong. Chạm quay lại để lưu, rồi lặp lại cho từng ứng dụng ngân hàng. Thanh toán sẽ được ghi vào lần tới bạn mở Money2Time.',
+        'Chạm quay lại để lưu. Lặp lại cho mỗi ứng dụng ngân hàng hoặc ví điện tử. Thanh toán được ghi khi bạn mở Money2Time lần tới.',
       payment_alerts_android_disclosure:
         'Đọc cách sử dụng quyền truy cập thông báo rồi nhấn Continue.',
       payment_alerts_ios_app:
-        'Nhấn App và chọn ứng dụng ngân hàng. Ảnh chụp dùng Messages làm ví dụ.',
+        'Chạm App và chọn ứng dụng ngân hàng hoặc ví điện tử. Các ảnh này dùng Wallet làm ví dụ.',
       payment_alerts_ios_run:
         'Nhấn mũi tên cạnh ứng dụng. Giữ Automation bật và tắt Notify để ghi lại mà không thông báo.',
       payment_alerts_ios_input: 'Chọn biến Notification bên dưới trình kích hoạt.',
       payment_alerts_ios_body: 'Nhấn biến đã chèn, chọn Body rồi Return.',
       payment_alerts_ios_fields:
         'Đặt Title và Subtitle thành thuộc tính Notification tương ứng theo cùng cách. Để trống Category để khớp từ khóa.',
-      bank_sms_ios27_filter_kind: 'Nhấn Sender bên trái rồi chọn Message để lọc theo nội dung.',
-      bank_sms_ios27_filter:
-        'Nhập từ ngân hàng luôn dùng, chẳng hạn Maybank. Bạn cũng có thể chọn người gửi của ngân hàng.',
-      bank_sms_ios27_run:
-        'Nhấn mũi tên trình kích hoạt. Giữ Automation bật và tắt Confirm Before Run.',
-      bank_sms_ios27_input: 'Chọn biến Message bên dưới trình kích hoạt.',
-      bank_sms_ios27_done:
-        'Quay lại để lưu. SMS ngân hàng được ghi khi bạn mở Money2Time lần tiếp theo. Để trống Category để khớp từ khóa.',
-      bank_sms_ios_step_1: 'Mở Phím tắt, vào tab Automation, chạm New Automation và chọn Message.',
-      bank_sms_ios_step_2:
-        'Chọn ngân hàng làm người gửi, hoặc trong Message Contains nhập một từ luôn có trong tin nhắn của ngân hàng. Sau đó chọn Run Immediately.',
-      bank_sms_ios_step_3: 'Chạm Create New Shortcut, tìm Money2Time và thêm Log Payment Alert.',
-      bank_sms_ios_step_4:
-        'Chạm trường Message, chọn Select Variable, rồi Shortcut Input, và chọn Content. Đặt From là tên ngân hàng.',
-      bank_sms_ios_step_5:
-        'Chọn Account trong Log Payment Alert. Thanh toán được ghi tự động vào tài khoản đã chọn. Danh mục dùng cùng từ khóa như Apple Pay.',
-      bank_sms_ios27_step_2: 'Tìm Message rồi chọn.',
-      bank_sms_ios27_step_4: 'Nhấn biến đã chèn, chọn Content rồi Return.',
-      bank_sms_ios27_step_5:
-        'Nhấn mũi tên hành động rồi Account. Chọn tài khoản để ghi các khoản thanh toán.',
     },
     title: 'Cài đặt',
     display: 'Hiển thị',
@@ -2590,8 +2570,7 @@ const vi = {
     title: 'Thông báo thanh toán',
     intro_android:
       'Money2Time đọc thông báo thanh toán từ các ứng dụng ngân hàng và ví điện tử bạn chọn, rồi ghi lại từng khoản thanh toán cho bạn. Thông báo được đọc trên điện thoại này và không bao giờ được tải lên.',
-    intro_ios:
-      'Thanh toán được ghi tự động vào tài khoản đã chọn. Danh mục dùng cùng từ khóa như Apple Pay.',
+    intro_ios: 'Tự động ghi lại thanh toán từ các ứng dụng ngân hàng và ví điện tử.',
     section_status: 'Trạng thái',
     master_label: 'Đọc thông báo thanh toán',
     master_hint: 'Ghi lại thanh toán từ các ứng dụng bạn chọn.',
@@ -2605,14 +2584,11 @@ const vi = {
     health_reconnect: 'Kết nối lại',
     health_battery_hint:
       'Nếu việc này lặp lại, hãy đặt mức sử dụng pin của Money2Time thành Không hạn chế trong cài đặt Android.',
-    ios_notifications_title: 'Thông báo ngân hàng',
+    ios_notifications_title: 'Thông báo ứng dụng',
     ios_notifications_hint:
-      'Mỗi ứng dụng ngân hàng có một mục tự động hóa gửi thông báo của nó tới Money2Time.',
+      'Thiết lập một tự động hóa Phím tắt cho mỗi ứng dụng ngân hàng hoặc ví điện tử.',
     ios_needs_27:
-      'Tự động hóa thông báo cần iOS 27. Tin nhắn ngân hàng, Apple Pay và ảnh chụp màn hình dùng được ngay bây giờ.',
-    ios_sms_title: 'Tin nhắn ngân hàng',
-    ios_sms_hint:
-      'Một mục tự động hóa gửi tin nhắn từ ngân hàng của bạn tới Money2Time. Dùng được trên iOS 17 trở lên.',
+      'Tự động hóa thông báo ứng dụng cần iOS 27. Với phiên bản cũ hơn, bạn có thể dùng Apple Pay hoặc chia sẻ ảnh chụp thanh toán.',
     section_apps: 'Ứng dụng',
     section_sources: 'Nguồn',
     choose_apps: 'Chọn ứng dụng',

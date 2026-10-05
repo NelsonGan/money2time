@@ -1230,49 +1230,26 @@ const hi = {
       payment_alerts_android_step_7:
         'भुगतान चुने गए खाते में अपने आप दर्ज होते हैं। श्रेणियां Apple Pay जैसे ही कीवर्ड इस्तेमाल करती हैं।',
       payment_alerts_ios_step_1:
-        'Shortcuts खोलें, + और फिर Editor पर टैप करें। एडिटर में Automation पर टैप करें।',
+        'Shortcuts खोलें, + और फिर Edit पर टैप करें। एडिटर में Automation पर टैप करें।',
       payment_alerts_ios_step_2: 'Notification खोजें और चुनें।',
       payment_alerts_ios_step_3: 'Log Payment Alert खोजें और जोड़ें।',
       payment_alerts_ios_step_4:
         'Log Payment Alert में Message और फिर Select Variable पर टैप करें।',
-      payment_alerts_ios_step_5: 'From दबाएं और अपने बैंक का नाम लिखें।',
+      payment_alerts_ios_step_5: 'From पर टैप करके ऐप का नाम लिखें।',
       payment_alerts_ios_step_6:
-        '› दबाएं और Account में वह खाता चुनें जिससे यह बैंक भुगतान करता है।',
+        'एक्शन के तीर पर, फिर Account पर टैप करें। चुनें कि इस ऐप के भुगतान किस खाते में दर्ज हों।',
       payment_alerts_ios_step_7:
-        'हो गया। सेव करने के लिए वापस जाएं, और हर बैंकिंग ऐप के लिए दोहराएं। अगली बार Money2Time खोलने पर भुगतान दर्ज होंगे।',
+        'सहेजने के लिए वापस जाएँ। हर बैंक या ई-वॉलेट ऐप के लिए दोहराएँ। अगली बार Money2Time खोलने पर भुगतान दर्ज होंगे।',
       payment_alerts_android_disclosure:
         'सूचनाओं की पहुँच कैसे इस्तेमाल होती है, पढ़ें और Continue पर टैप करें।',
       payment_alerts_ios_app:
-        'App पर टैप करके अपना बैंकिंग ऐप चुनें। स्क्रीनशॉट में Messages उदाहरण के तौर पर है।',
+        'App पर टैप करके अपना बैंक या ई-वॉलेट ऐप चुनें। इन स्क्रीनशॉट में Wallet उदाहरण है।',
       payment_alerts_ios_run:
         'ऐप के पास तीर पर टैप करें। Automation चालू रखें और बिना सूचना के लॉग करने के लिए Notify बंद करें।',
       payment_alerts_ios_input: 'ट्रिगर के नीचे Notification वेरिएबल चुनें।',
       payment_alerts_ios_body: 'जोड़े गए वेरिएबल पर टैप करें, Body चुनें और फिर Return।',
       payment_alerts_ios_fields:
         'इसी तरह Title और Subtitle में संबंधित Notification गुण चुनें। कीवर्ड मिलान के लिए Category खाली छोड़ें।',
-      bank_sms_ios27_filter_kind:
-        'बाईं ओर Sender पर टैप करके Message चुनें, ताकि टेक्स्ट के आधार पर फ़िल्टर हो।',
-      bank_sms_ios27_filter:
-        'बैंक के संदेशों में हमेशा आने वाला शब्द लिखें, जैसे Maybank। बैंक का प्रेषक भी चुन सकते हैं।',
-      bank_sms_ios27_run:
-        'ट्रिगर के तीर पर टैप करें। Automation चालू रखें और Confirm Before Run बंद करें।',
-      bank_sms_ios27_input: 'ट्रिगर के नीचे Message वेरिएबल चुनें।',
-      bank_sms_ios27_done:
-        'सहेजने के लिए वापस जाएँ। बैंक के संदेश अगली बार Money2Time खोलने पर लॉग होंगे। कीवर्ड मिलान के लिए Category खाली छोड़ें।',
-      bank_sms_ios_step_1:
-        'Shortcuts खोलें, Automation टैब पर जाएं, New Automation दबाएं, और Message चुनें।',
-      bank_sms_ios_step_2:
-        'भेजने वाले के रूप में अपना बैंक चुनें, या Message Contains में वह शब्द लिखें जो उसके SMS में हमेशा होता है। फिर Run Immediately चुनें।',
-      bank_sms_ios_step_3:
-        'Create New Shortcut दबाएं, Money2Time खोजें, और Log Payment Alert जोड़ें।',
-      bank_sms_ios_step_4:
-        'Message फ़ील्ड दबाएं, Select Variable चुनें, फिर Shortcut Input, और Content चुनें। From में बैंक का नाम डालें।',
-      bank_sms_ios_step_5:
-        'Log Payment Alert में Account चुनें। भुगतान चुने गए खाते में अपने आप दर्ज होते हैं। श्रेणियां Apple Pay जैसे ही कीवर्ड इस्तेमाल करती हैं।',
-      bank_sms_ios27_step_2: 'Message खोजें और चुनें।',
-      bank_sms_ios27_step_4: 'जोड़े गए वेरिएबल पर टैप करें, Content चुनें और फिर Return।',
-      bank_sms_ios27_step_5:
-        'ऐक्शन के तीर और फिर Account पर टैप करें। इन भुगतानों के लिए खाता चुनें।',
     },
     title: 'सेटिंग्स',
     display: 'डिस्प्ले',
@@ -2603,8 +2580,7 @@ const hi = {
     title: 'भुगतान अलर्ट',
     intro_android:
       'Money2Time आपके चुने हुए बैंकिंग और वॉलेट ऐप्स की भुगतान सूचनाएं पढ़ता है और हर भुगतान आपके लिए दर्ज करता है। अलर्ट इसी फ़ोन पर पढ़े जाते हैं और कभी अपलोड नहीं होते।',
-    intro_ios:
-      'भुगतान चुने गए खाते में अपने आप दर्ज होते हैं। श्रेणियां Apple Pay जैसे ही कीवर्ड इस्तेमाल करती हैं।',
+    intro_ios: 'अपने बैंक और ई-वॉलेट ऐप के भुगतान अपने आप दर्ज करें।',
     section_status: 'स्थिति',
     master_label: 'भुगतान सूचनाएं पढ़ें',
     master_hint: 'आपके चुने हुए ऐप्स के भुगतान दर्ज करता है।',
@@ -2618,13 +2594,10 @@ const hi = {
     health_reconnect: 'फिर से कनेक्ट करें',
     health_battery_hint:
       'अगर ऐसा बार-बार हो, तो Android सेटिंग्स में Money2Time का बैटरी उपयोग अप्रतिबंधित पर सेट करें।',
-    ios_notifications_title: 'बैंक सूचनाएं',
-    ios_notifications_hint: 'हर बैंकिंग ऐप के लिए एक ऑटोमेशन उसकी सूचनाएं Money2Time को भेजता है।',
+    ios_notifications_title: 'ऐप सूचनाएँ',
+    ios_notifications_hint: 'हर बैंक या ई-वॉलेट ऐप के लिए एक Shortcuts ऑटोमेशन सेट करें।',
     ios_needs_27:
-      'सूचना ऑटोमेशन के लिए iOS 27 चाहिए। बैंक SMS, Apple Pay और स्क्रीनशॉट अभी काम करते हैं।',
-    ios_sms_title: 'बैंक SMS',
-    ios_sms_hint:
-      'एक ऑटोमेशन आपके बैंक के SMS Money2Time को भेजता है। iOS 17 और उसके बाद के संस्करणों पर काम करता है।',
+      'ऐप सूचना ऑटोमेशन के लिए iOS 27 चाहिए। पुराने संस्करणों पर Apple Pay इस्तेमाल करें या भुगतान के स्क्रीनशॉट साझा करें।',
     section_apps: 'ऐप्स',
     section_sources: 'स्रोत',
     choose_apps: 'ऐप्स चुनें',

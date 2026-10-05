@@ -96,7 +96,7 @@
       {
         "type": "rect",
         "x": 0.04,
-        "y": 0.212,
+        "y": 0.164,
         "w": 0.92,
         "h": 0.075,
         "radius": 0.022,
@@ -194,7 +194,7 @@
       {
         "type": "rect",
         "x": 0.299,
-        "y": 0.154,
+        "y": 0.223,
         "w": 0.622,
         "h": 0.069,
         "radius": 0.022,
@@ -218,160 +218,6 @@
   },
   "pa_ios_done": {
     "source": "RAW/pa_ios_done.png",
-    "marks": [
-      {
-        "type": "rect",
-        "x": 0.04,
-        "y": 0.071,
-        "w": 0.109,
-        "h": 0.05,
-        "radius": 0.022,
-        "pad": 0.006
-      }
-    ]
-  },
-  "pa_sms_message": {
-    "source": "RAW/pa_sms_message.png",
-    "marks": [
-      {
-        "type": "rect",
-        "x": 0.179,
-        "y": 0.304,
-        "w": 0.648,
-        "h": 0.023,
-        "radius": 0.022,
-        "pad": 0.006
-      }
-    ]
-  },
-  "pa_sms_filter_kind": {
-    "source": "RAW/pa_sms_filter_kind.png",
-    "marks": [
-      {
-        "type": "rect",
-        "x": 0.02,
-        "y": 0.408,
-        "w": 0.622,
-        "h": 0.048,
-        "radius": 0.022,
-        "pad": 0.006
-      }
-    ]
-  },
-  "pa_sms_filter": {
-    "source": "RAW/pa_sms_filter.png",
-    "marks": [
-      {
-        "type": "rect",
-        "x": 0.06,
-        "y": 0.26,
-        "w": 0.861,
-        "h": 0.038,
-        "radius": 0.022,
-        "pad": 0.006
-      }
-    ]
-  },
-  "pa_sms_auto": {
-    "source": "RAW/pa_sms_auto.png",
-    "marks": [
-      {
-        "type": "rect",
-        "x": 0.04,
-        "y": 0.406,
-        "w": 0.92,
-        "h": 0.05,
-        "radius": 0.022,
-        "pad": 0.006
-      }
-    ]
-  },
-  "pa_sms_action": {
-    "source": "RAW/pa_sms_action.png",
-    "marks": [
-      {
-        "type": "rect",
-        "x": 0.179,
-        "y": 0.241,
-        "w": 0.648,
-        "h": 0.023,
-        "radius": 0.022,
-        "pad": 0.006
-      }
-    ]
-  },
-  "pa_sms_variable": {
-    "source": "RAW/pa_sms_variable.png",
-    "marks": [
-      {
-        "type": "rect",
-        "x": 0.082,
-        "y": 0.568,
-        "w": 0.29,
-        "h": 0.023,
-        "radius": 0.022,
-        "pad": 0.006
-      }
-    ]
-  },
-  "pa_sms_input": {
-    "source": "RAW/pa_sms_input.png",
-    "marks": [
-      {
-        "type": "rect",
-        "x": 0.44,
-        "y": 0.421,
-        "w": 0.178,
-        "h": 0.023,
-        "radius": 0.022,
-        "pad": 0.006
-      }
-    ]
-  },
-  "pa_sms_content": {
-    "source": "RAW/pa_sms_content.png",
-    "marks": [
-      {
-        "type": "rect",
-        "x": 0.058,
-        "y": 0.767,
-        "w": 0.884,
-        "h": 0.057,
-        "radius": 0.022,
-        "pad": 0.006
-      }
-    ]
-  },
-  "pa_sms_from": {
-    "source": "RAW/pa_sms_from.png",
-    "marks": [
-      {
-        "type": "rect",
-        "x": 0.04,
-        "y": 0.393,
-        "w": 0.92,
-        "h": 0.075,
-        "radius": 0.022,
-        "pad": 0.006
-      }
-    ]
-  },
-  "pa_sms_account": {
-    "source": "RAW/pa_sms_account.png",
-    "marks": [
-      {
-        "type": "rect",
-        "x": 0.299,
-        "y": 0.172,
-        "w": 0.622,
-        "h": 0.069,
-        "radius": 0.022,
-        "pad": 0.006
-      }
-    ]
-  },
-  "pa_sms_done": {
-    "source": "RAW/pa_sms_done.png",
     "marks": [
       {
         "type": "rect",
@@ -446,7 +292,7 @@
       {
         "type": "rect",
         "x": 0.8083,
-        "y": 0.2571,
+        "y": 0.3154,
         "w": 0.113,
         "h": 0.0296,
         "radius": 0.022,
@@ -460,7 +306,7 @@
       {
         "type": "rect",
         "x": 0.0343,
-        "y": 0.3504,
+        "y": 0.7967,
         "w": 0.4574,
         "h": 0.0558,
         "radius": 0.022,

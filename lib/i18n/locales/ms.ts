@@ -1243,48 +1243,25 @@ const ms = {
       payment_alerts_android_step_7:
         'Pembayaran direkodkan secara automatik ke akaun pilihan anda. Kategori menggunakan kata kunci yang sama seperti Apple Pay.',
       payment_alerts_ios_step_1:
-        'Buka Shortcuts, ketik +, kemudian Editor. Ketik Automation dalam editor.',
+        'Buka Shortcuts, ketik +, kemudian Edit. Ketik Automation dalam editor.',
       payment_alerts_ios_step_2: 'Cari Notification dan pilihnya.',
       payment_alerts_ios_step_3: 'Cari Log Payment Alert dan tambahkannya.',
       payment_alerts_ios_step_4: 'Ketik Message dalam Log Payment Alert, kemudian Select Variable.',
-      payment_alerts_ios_step_5: 'Ketik From dan taip nama bank anda.',
+      payment_alerts_ios_step_5: 'Ketik From dan taip nama aplikasi.',
       payment_alerts_ios_step_6:
-        'Ketik › dan pilih dalam Account akaun yang digunakan oleh bank ini untuk membayar.',
+        'Ketik anak panah tindakan, kemudian Account. Pilih akaun untuk merekod pembayaran aplikasi ini.',
       payment_alerts_ios_step_7:
-        'Selesai. Ketik kembali untuk menyimpan, kemudian ulang untuk setiap aplikasi bank. Pembayaran direkod apabila anda membuka Money2Time seterusnya.',
+        'Ketik kembali untuk menyimpan. Ulangi untuk setiap aplikasi bank atau e-dompet. Pembayaran direkod apabila anda membuka Money2Time semula.',
       payment_alerts_android_disclosure:
         'Baca cara akses pemberitahuan digunakan, kemudian ketik Continue.',
       payment_alerts_ios_app:
-        'Ketik App dan pilih aplikasi bank anda. Tangkapan skrin ini menggunakan Messages sebagai contoh.',
+        'Ketik App dan pilih aplikasi bank atau e-dompet anda. Tangkapan skrin ini menggunakan Wallet sebagai contoh.',
       payment_alerts_ios_run:
         'Ketik anak panah di sebelah aplikasi. Biarkan Automation hidup dan matikan Notify untuk merekod tanpa pemberitahuan.',
       payment_alerts_ios_input: 'Pilih pemboleh ubah Notification di bawah pencetus.',
       payment_alerts_ios_body: 'Ketik pemboleh ubah yang dimasukkan, pilih Body, kemudian Return.',
       payment_alerts_ios_fields:
         'Tetapkan Title dan Subtitle kepada sifat Notification yang sepadan dengan langkah yang sama. Biarkan Category kosong untuk padanan kata kunci.',
-      bank_sms_ios27_filter_kind:
-        'Ketik Sender di kiri dan pilih Message untuk menapis mengikut teks.',
-      bank_sms_ios27_filter:
-        'Masukkan perkataan yang sentiasa digunakan bank, seperti Maybank. Anda juga boleh memilih pengirim bank.',
-      bank_sms_ios27_run:
-        'Ketik anak panah pencetus. Biarkan Automation hidup dan matikan Confirm Before Run.',
-      bank_sms_ios27_input: 'Pilih pemboleh ubah Message di bawah pencetus.',
-      bank_sms_ios27_done:
-        'Ketik kembali untuk menyimpan. SMS bank direkod apabila Money2Time dibuka semula. Biarkan Category kosong untuk padanan kata kunci.',
-      bank_sms_ios_step_1:
-        'Buka Shortcuts, pergi ke tab Automation, ketik New Automation, dan pilih Message.',
-      bank_sms_ios_step_2:
-        'Pilih bank anda sebagai pengirim, atau di bawah Message Contains taip perkataan yang sentiasa digunakan dalam SMSnya. Kemudian pilih Run Immediately.',
-      bank_sms_ios_step_3:
-        'Ketik Create New Shortcut, cari Money2Time, dan tambah Log Payment Alert.',
-      bank_sms_ios_step_4:
-        'Ketik medan Message, pilih Select Variable, kemudian Shortcut Input, dan pilih Content. Tetapkan From kepada nama bank.',
-      bank_sms_ios_step_5:
-        'Pilih Account dalam Log Payment Alert. Pembayaran direkodkan secara automatik ke akaun pilihan anda. Kategori menggunakan kata kunci yang sama seperti Apple Pay.',
-      bank_sms_ios27_step_2: 'Cari Message dan pilihnya.',
-      bank_sms_ios27_step_4: 'Ketik pemboleh ubah yang dimasukkan, pilih Content, kemudian Return.',
-      bank_sms_ios27_step_5:
-        'Ketik anak panah tindakan, kemudian Account. Pilih akaun untuk merekod pembayaran ini.',
     },
     title: 'Tetapan',
     display: 'Paparan',
@@ -2630,8 +2607,7 @@ const ms = {
     title: 'Makluman pembayaran',
     intro_android:
       'Money2Time membaca pemberitahuan pembayaran daripada aplikasi bank dan e-dompet yang anda pilih, lalu merekod setiap pembayaran untuk anda. Makluman dibaca pada telefon ini dan tidak pernah dimuat naik.',
-    intro_ios:
-      'Pembayaran direkodkan secara automatik ke akaun pilihan anda. Kategori menggunakan kata kunci yang sama seperti Apple Pay.',
+    intro_ios: 'Rekod pembayaran secara automatik daripada aplikasi bank dan e-dompet anda.',
     section_status: 'Status',
     master_label: 'Baca pemberitahuan pembayaran',
     master_hint: 'Merekod pembayaran daripada aplikasi yang anda pilih.',
@@ -2645,14 +2621,11 @@ const ms = {
     health_reconnect: 'Sambung semula',
     health_battery_hint:
       'Jika ini terus berlaku, tetapkan penggunaan bateri Money2Time kepada Tanpa had dalam tetapan Android.',
-    ios_notifications_title: 'Pemberitahuan bank',
+    ios_notifications_title: 'Notifikasi aplikasi',
     ios_notifications_hint:
-      'Satu automasi bagi setiap aplikasi bank menghantar pemberitahuannya kepada Money2Time.',
+      'Sediakan satu automasi Shortcuts untuk setiap aplikasi bank atau e-dompet.',
     ios_needs_27:
-      'Automasi pemberitahuan memerlukan iOS 27. Mesej teks bank, Apple Pay dan tangkapan skrin sudah boleh digunakan sekarang.',
-    ios_sms_title: 'Mesej teks bank',
-    ios_sms_hint:
-      'Satu automasi menghantar mesej teks daripada bank anda kepada Money2Time. Berfungsi pada iOS 17 dan ke atas.',
+      'Automasi notifikasi aplikasi memerlukan iOS 27. Pada versi terdahulu, anda boleh menggunakan Apple Pay atau berkongsi tangkapan skrin pembayaran.',
     section_apps: 'Aplikasi',
     section_sources: 'Sumber',
     choose_apps: 'Pilih aplikasi',

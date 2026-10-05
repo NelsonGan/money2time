@@ -1247,48 +1247,25 @@ const fr = {
       payment_alerts_android_step_7:
         'Les paiements sont enregistrés automatiquement sur le compte choisi. Les catégories utilisent les mêmes mots-clés qu’Apple Pay.',
       payment_alerts_ios_step_1:
-        'Ouvrez Shortcuts, touchez +, puis Editor. Touchez Automation dans l’éditeur.',
+        'Ouvrez Shortcuts, touchez +, puis Edit. Touchez Automation dans l’éditeur.',
       payment_alerts_ios_step_2: 'Recherchez Notification et sélectionnez-le.',
       payment_alerts_ios_step_3: 'Recherchez Log Payment Alert et ajoutez-le.',
       payment_alerts_ios_step_4: 'Touchez Message dans Log Payment Alert, puis Select Variable.',
-      payment_alerts_ios_step_5: 'Touchez From et saisissez le nom de votre banque.',
+      payment_alerts_ios_step_5: 'Touchez From et saisissez le nom de l’app.',
       payment_alerts_ios_step_6:
-        'Touchez › et choisissez dans Account le compte utilisé par cette banque.',
+        'Touchez la flèche de l’action, puis Account. Choisissez où enregistrer les paiements de cette app.',
       payment_alerts_ios_step_7:
-        'C’est fait. Touchez retour pour enregistrer, puis répétez pour chaque appli bancaire. Les paiements sont enregistrés à la prochaine ouverture de Money2Time.',
+        'Revenez en arrière pour enregistrer. Répétez pour chaque app bancaire ou portefeuille électronique. Les paiements seront enregistrés à la prochaine ouverture de Money2Time.',
       payment_alerts_android_disclosure:
         'Lisez comment l’accès aux notifications est utilisé, puis touchez Continue.',
       payment_alerts_ios_app:
-        'Touchez App et choisissez votre application bancaire. Les captures utilisent Messages comme exemple.',
+        'Touchez App et choisissez votre app bancaire ou portefeuille électronique. Ces captures utilisent Wallet comme exemple.',
       payment_alerts_ios_run:
         'Touchez la flèche près de l’application. Gardez Automation activé et désactivez Notify pour enregistrer silencieusement.',
       payment_alerts_ios_input: 'Sélectionnez la variable Notification sous le déclencheur.',
       payment_alerts_ios_body: 'Touchez la variable insérée, choisissez Body, puis Return.',
       payment_alerts_ios_fields:
         'Associez Title et Subtitle aux propriétés Notification correspondantes de la même manière. Laissez Category vide pour utiliser les mots-clés.',
-      bank_sms_ios27_filter_kind:
-        'Touchez Sender à gauche et choisissez Message pour filtrer le texte.',
-      bank_sms_ios27_filter:
-        'Saisissez un mot que votre banque utilise toujours, comme Maybank. Vous pouvez aussi choisir son expéditeur.',
-      bank_sms_ios27_run:
-        'Touchez la flèche du déclencheur. Gardez Automation activé et désactivez Confirm Before Run.',
-      bank_sms_ios27_input: 'Sélectionnez la variable Message sous le déclencheur.',
-      bank_sms_ios27_done:
-        'Revenez en arrière pour enregistrer. Les messages bancaires seront enregistrés à la prochaine ouverture de Money2Time. Laissez Category vide pour utiliser les mots-clés.',
-      bank_sms_ios_step_1:
-        'Ouvrez Raccourcis, allez dans l’onglet Automation, touchez New Automation et choisissez Message.',
-      bank_sms_ios_step_2:
-        'Choisissez votre banque comme expéditeur, ou dans Message Contains saisissez un mot que ses SMS contiennent toujours. Choisissez ensuite Run Immediately.',
-      bank_sms_ios_step_3:
-        'Touchez Create New Shortcut, recherchez Money2Time et ajoutez Log Payment Alert.',
-      bank_sms_ios_step_4:
-        'Touchez le champ Message, choisissez Select Variable, puis Shortcut Input, et sélectionnez Content. Indiquez le nom de la banque dans From.',
-      bank_sms_ios_step_5:
-        'Choisissez Account dans Log Payment Alert. Les paiements sont enregistrés automatiquement sur le compte choisi. Les catégories utilisent les mêmes mots-clés qu’Apple Pay.',
-      bank_sms_ios27_step_2: 'Recherchez Message et sélectionnez-le.',
-      bank_sms_ios27_step_4: 'Touchez la variable insérée, choisissez Content, puis Return.',
-      bank_sms_ios27_step_5:
-        'Touchez la flèche de l’action, puis Account. Choisissez le compte pour ces paiements.',
     },
     title: 'Réglages',
     display: 'Affichage',
@@ -2643,7 +2620,7 @@ const fr = {
     intro_android:
       'Money2Time lit les notifications de paiement des applis bancaires et portefeuilles que vous choisissez, et enregistre chaque paiement pour vous. Les alertes sont lues sur ce téléphone et ne sont jamais envoyées en ligne.',
     intro_ios:
-      'Les paiements sont enregistrés automatiquement sur le compte choisi. Les catégories utilisent les mêmes mots-clés qu’Apple Pay.',
+      'Enregistrez automatiquement les paiements de vos apps bancaires et portefeuilles électroniques.',
     section_status: 'État',
     master_label: 'Lire les notifications de paiement',
     master_hint: 'Enregistre les paiements des applis que vous choisissez.',
@@ -2657,14 +2634,11 @@ const fr = {
     health_reconnect: 'Reconnecter',
     health_battery_hint:
       'Si cela se reproduit, réglez l’utilisation de la batterie de Money2Time sur Non restreinte dans les réglages Android.',
-    ios_notifications_title: 'Notifications bancaires',
+    ios_notifications_title: 'Notifications des apps',
     ios_notifications_hint:
-      'Une automatisation par appli bancaire envoie ses notifications à Money2Time.',
+      'Créez une automatisation Raccourcis pour chaque app bancaire ou portefeuille électronique.',
     ios_needs_27:
-      'Les automatisations de notifications nécessitent iOS 27. Les SMS bancaires, Apple Pay et les captures d’écran fonctionnent dès maintenant.',
-    ios_sms_title: 'SMS bancaires',
-    ios_sms_hint:
-      'Une automatisation envoie les SMS de votre banque à Money2Time. Fonctionne à partir d’iOS 17.',
+      'Les automatisations de notifications nécessitent iOS 27. Sur les versions antérieures, utilisez Apple Pay ou partagez des captures de paiement.',
     section_apps: 'Applis',
     section_sources: 'Sources',
     choose_apps: 'Choisir les applis',

@@ -1231,45 +1231,24 @@ const ja = {
       payment_alerts_android_step_7:
         '支払いは選択した口座に自動で記録されます。カテゴリは Apple Pay と同じキーワードで選ばれます。',
       payment_alerts_ios_step_1:
-        'Shortcutsを開き、+、Editorの順にタップします。エディタでAutomationをタップします。',
+        'Shortcutsを開き、+、Editの順にタップします。エディタでAutomationをタップします。',
       payment_alerts_ios_step_2: 'Notificationを検索して選択します。',
       payment_alerts_ios_step_3: 'Log Payment Alert を検索して追加します。',
       payment_alerts_ios_step_4: 'Log Payment AlertのMessage、Select Variableの順にタップします。',
-      payment_alerts_ios_step_5: 'From をタップして銀行名を入力します。',
-      payment_alerts_ios_step_6: '› をタップし、Account でこの銀行が支払う口座を選びます。',
+      payment_alerts_ios_step_5: 'From をタップしてアプリ名を入力します。',
+      payment_alerts_ios_step_6:
+        'アクションの矢印、Account の順にタップし、このアプリの支払いを記録する口座を選びます。',
       payment_alerts_ios_step_7:
-        '完了です。戻って保存し、銀行アプリごとに繰り返します。支払いは次に Money2Time を開いたときに記録されます。',
+        '戻るをタップして保存します。銀行や電子ウォレットのアプリごとに繰り返してください。次に Money2Time を開いたときに支払いが記録されます。',
       payment_alerts_android_disclosure: '通知へのアクセスの使い方を読み、Continueをタップします。',
       payment_alerts_ios_app:
-        'Appをタップして銀行アプリを選びます。画像ではMessagesを例にしています。',
+        'App をタップして銀行または電子ウォレットのアプリを選びます。この画像では Wallet を例にしています。',
       payment_alerts_ios_run:
         'アプリの横の矢印をタップします。Automationをオンのままにし、Notifyをオフにすると通知せず記録できます。',
       payment_alerts_ios_input: 'トリガーの下のNotification変数を選びます。',
       payment_alerts_ios_body: '挿入した変数をタップし、Body、Returnの順に選びます。',
       payment_alerts_ios_fields:
         '同じ手順でTitleとSubtitleに対応するNotificationのプロパティを設定します。キーワード照合を使う場合はCategoryを未設定にします。',
-      bank_sms_ios27_filter_kind: '左のSenderをタップしてMessageを選び、本文で絞り込みます。',
-      bank_sms_ios27_filter:
-        'Maybankなど、銀行が毎回使う語を入力します。銀行の送信者を指定することもできます。',
-      bank_sms_ios27_run:
-        'トリガーの矢印をタップします。Automationをオンのままにし、Confirm Before Runをオフにします。',
-      bank_sms_ios27_input: 'トリガーの下のMessage変数を選びます。',
-      bank_sms_ios27_done:
-        '戻って保存します。次回Money2Timeを開くと銀行のSMSが記録されます。キーワード照合を使う場合はCategoryを未設定にします。',
-      bank_sms_ios_step_1:
-        'ショートカットを開き、「オートメーション」タブで New Automation をタップし、Message を選びます。',
-      bank_sms_ios_step_2:
-        '送信者に銀行を選ぶか、Message Contains にその SMS に必ず含まれる言葉を入力します。次に Run Immediately を選びます。',
-      bank_sms_ios_step_3:
-        'Create New Shortcut をタップし、Money2Time を検索して Log Payment Alert を追加します。',
-      bank_sms_ios_step_4:
-        'Message のフィールドをタップし、Select Variable を選び、次に Shortcut Input を選んで Content を選択します。From に銀行名を入れます。',
-      bank_sms_ios_step_5:
-        'Log Payment Alert で Account を選びます。支払いは選択した口座に自動で記録されます。カテゴリは Apple Pay と同じキーワードで選ばれます。',
-      bank_sms_ios27_step_2: 'Messageを検索して選択します。',
-      bank_sms_ios27_step_4: '挿入した変数をタップし、Content、Returnの順に選びます。',
-      bank_sms_ios27_step_5:
-        'アクションの矢印、Accountの順にタップし、支払いを記録する口座を選びます。',
     },
     title: '設定',
     display: '表示',
@@ -2594,8 +2573,7 @@ const ja = {
     title: '支払い通知',
     intro_android:
       'Money2Time は、選んだ銀行アプリや電子マネーアプリの支払い通知を読み取り、支払いを1件ずつ記録します。通知はこの端末上で読み取られ、アップロードされることはありません。',
-    intro_ios:
-      '支払いは選択した口座に自動で記録されます。カテゴリは Apple Pay と同じキーワードで選ばれます。',
+    intro_ios: '銀行や電子ウォレットのアプリから支払いを自動記録します。',
     section_status: 'ステータス',
     master_label: '支払い通知を読み取る',
     master_hint: '選んだアプリの支払いを記録します。',
@@ -2609,14 +2587,11 @@ const ja = {
     health_reconnect: '再接続',
     health_battery_hint:
       '何度も起きる場合は、Android の設定で Money2Time の電池使用量を「制限なし」にしてください。',
-    ios_notifications_title: '銀行の通知',
+    ios_notifications_title: 'アプリの通知',
     ios_notifications_hint:
-      '銀行アプリごとにオートメーションを作り、その通知を Money2Time に送ります。',
+      '銀行や電子ウォレットのアプリごとにショートカットのオートメーションを設定します。',
     ios_needs_27:
-      '通知のオートメーションには iOS 27 が必要です。銀行の SMS、Apple Pay、スクリーンショットは今すぐ使えます。',
-    ios_sms_title: '銀行の SMS',
-    ios_sms_hint:
-      'オートメーションで銀行からの SMS を Money2Time に送ります。iOS 17 以降で使えます。',
+      'アプリ通知のオートメーションには iOS 27 が必要です。それ以前のバージョンでは Apple Pay や支払いのスクリーンショット共有を使えます。',
     section_apps: 'アプリ',
     section_sources: '送信元',
     choose_apps: 'アプリを選ぶ',

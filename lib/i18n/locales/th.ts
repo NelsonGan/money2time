@@ -1215,41 +1215,24 @@ const th = {
       payment_alerts_android_step_6: 'ส่งการแจ้งเตือนทดสอบเพื่อตรวจว่าทุกอย่างทำงาน',
       payment_alerts_android_step_7:
         'บันทึกการชำระเงินลงบัญชีที่เลือกโดยอัตโนมัติ หมวดหมู่ใช้คำสำคัญเดียวกับ Apple Pay',
-      payment_alerts_ios_step_1: 'เปิด Shortcuts แตะ + แล้วเลือก Editor แตะ Automation ในตัวแก้ไข',
+      payment_alerts_ios_step_1: 'เปิด Shortcuts แตะ + แล้วเลือก Edit แตะ Automation ในตัวแก้ไข',
       payment_alerts_ios_step_2: 'ค้นหา Notification แล้วเลือก',
       payment_alerts_ios_step_3: 'ค้นหา Log Payment Alert แล้วเพิ่ม',
       payment_alerts_ios_step_4: 'แตะ Message ใน Log Payment Alert แล้วเลือก Select Variable',
-      payment_alerts_ios_step_5: 'แตะ From แล้วพิมพ์ชื่อธนาคารของคุณ',
-      payment_alerts_ios_step_6: 'แตะ › แล้วเลือกบัญชีที่ธนาคารนี้ใช้จ่ายใน Account',
+      payment_alerts_ios_step_5: 'แตะ From แล้วพิมพ์ชื่อแอป',
+      payment_alerts_ios_step_6:
+        'แตะลูกศรของการทำงาน แล้วแตะ Account เลือกบัญชีที่จะบันทึกการชำระเงินของแอปนี้',
       payment_alerts_ios_step_7:
-        'เสร็จแล้ว แตะย้อนกลับเพื่อบันทึก แล้วทำซ้ำกับทุกแอปธนาคาร การชำระเงินจะถูกบันทึกเมื่อคุณเปิด Money2Time ครั้งถัดไป',
+        'แตะกลับเพื่อบันทึก ทำซ้ำสำหรับแต่ละแอปธนาคารหรือกระเป๋าเงินอิเล็กทรอนิกส์ การชำระเงินจะถูกบันทึกเมื่อเปิด Money2Time ครั้งถัดไป',
       payment_alerts_android_disclosure: 'อ่านวิธีใช้สิทธิ์เข้าถึงการแจ้งเตือน แล้วแตะ Continue',
-      payment_alerts_ios_app: 'แตะ App แล้วเลือกแอปธนาคาร ภาพหน้าจอใช้ Messages เป็นตัวอย่าง',
+      payment_alerts_ios_app:
+        'แตะ App แล้วเลือกแอปธนาคารหรือกระเป๋าเงินอิเล็กทรอนิกส์ ภาพหน้าจอนี้ใช้ Wallet เป็นตัวอย่าง',
       payment_alerts_ios_run:
         'แตะลูกศรข้างแอป เปิด Automation ไว้ และปิด Notify เพื่อบันทึกโดยไม่แจ้งเตือน',
       payment_alerts_ios_input: 'เลือกตัวแปร Notification ใต้ตัวกระตุ้น',
       payment_alerts_ios_body: 'แตะตัวแปรที่ใส่ เลือก Body แล้วเลือก Return',
       payment_alerts_ios_fields:
         'ตั้ง Title และ Subtitle เป็นคุณสมบัติ Notification ที่ตรงกันด้วยวิธีเดียวกัน เว้น Category ว่างเพื่อจับคู่คำสำคัญ',
-      bank_sms_ios27_filter_kind: 'แตะ Sender ทางซ้าย แล้วเลือก Message เพื่อกรองตามข้อความ',
-      bank_sms_ios27_filter: 'ใส่คำที่ธนาคารใช้เสมอ เช่น Maybank หรือเลือกผู้ส่งของธนาคาร',
-      bank_sms_ios27_run: 'แตะลูกศรของตัวกระตุ้น เปิด Automation ไว้และปิด Confirm Before Run',
-      bank_sms_ios27_input: 'เลือกตัวแปร Message ใต้ตัวกระตุ้น',
-      bank_sms_ios27_done:
-        'ย้อนกลับเพื่อบันทึก SMS ธนาคารจะถูกบันทึกเมื่อเปิด Money2Time ครั้งถัดไป เว้น Category ว่างเพื่อจับคู่คำสำคัญ',
-      bank_sms_ios_step_1:
-        'เปิด Shortcuts ไปที่แท็บ Automation แตะ New Automation แล้วเลือก Message',
-      bank_sms_ios_step_2:
-        'เลือกธนาคารเป็นผู้ส่ง หรือพิมพ์คำที่อยู่ใน SMS ของธนาคารเสมอในช่อง Message Contains แล้วเลือก Run Immediately',
-      bank_sms_ios_step_3: 'แตะ Create New Shortcut ค้นหา Money2Time แล้วเพิ่ม Log Payment Alert',
-      bank_sms_ios_step_4:
-        'แตะช่อง Message เลือก Select Variable แล้วเลือก Shortcut Input จากนั้นเลือก Content ตั้งค่า From เป็นชื่อธนาคาร',
-      bank_sms_ios_step_5:
-        'เลือก Account ใน Log Payment Alert บันทึกการชำระเงินลงบัญชีที่เลือกโดยอัตโนมัติ หมวดหมู่ใช้คำสำคัญเดียวกับ Apple Pay',
-      bank_sms_ios27_step_2: 'ค้นหา Message แล้วเลือก',
-      bank_sms_ios27_step_4: 'แตะตัวแปรที่ใส่ เลือก Content แล้วเลือก Return',
-      bank_sms_ios27_step_5:
-        'แตะลูกศรของการทำงาน แล้วเลือก Account เลือกบัญชีสำหรับบันทึกการชำระเงิน',
     },
     title: 'ตั้งค่า',
     display: 'การแสดงผล',
@@ -2559,7 +2542,7 @@ const th = {
     title: 'การแจ้งเตือนการชำระเงิน',
     intro_android:
       'Money2Time อ่านการแจ้งเตือนการชำระเงินจากแอปธนาคารและแอปวอลเล็ตที่คุณเลือก แล้วบันทึกการชำระเงินแต่ละรายการให้คุณ การแจ้งเตือนจะถูกอ่านบนโทรศัพท์เครื่องนี้และไม่ถูกอัปโหลด',
-    intro_ios: 'บันทึกการชำระเงินลงบัญชีที่เลือกโดยอัตโนมัติ หมวดหมู่ใช้คำสำคัญเดียวกับ Apple Pay',
+    intro_ios: 'บันทึกการชำระเงินจากแอปธนาคารและกระเป๋าเงินอิเล็กทรอนิกส์โดยอัตโนมัติ',
     section_status: 'สถานะ',
     master_label: 'อ่านการแจ้งเตือนการชำระเงิน',
     master_hint: 'บันทึกการชำระเงินจากแอปที่คุณเลือก',
@@ -2573,13 +2556,11 @@ const th = {
     health_reconnect: 'เชื่อมต่ออีกครั้ง',
     health_battery_hint:
       'หากเกิดขึ้นบ่อย ให้ตั้งค่าการใช้แบตเตอรี่ของ Money2Time เป็นไม่จำกัดในการตั้งค่า Android',
-    ios_notifications_title: 'การแจ้งเตือนจากธนาคาร',
+    ios_notifications_title: 'การแจ้งเตือนแอป',
     ios_notifications_hint:
-      'ระบบอัตโนมัติหนึ่งรายการต่อแอปธนาคาร ส่งการแจ้งเตือนของแอปนั้นมาที่ Money2Time',
+      'ตั้งค่าการทำงานอัตโนมัติในคำสั่งลัดหนึ่งรายการต่อแอปธนาคารหรือกระเป๋าเงินอิเล็กทรอนิกส์',
     ios_needs_27:
-      'ระบบอัตโนมัติสำหรับการแจ้งเตือนต้องใช้ iOS 27 ส่วน SMS ธนาคาร Apple Pay และภาพหน้าจอใช้งานได้แล้วตอนนี้',
-    ios_sms_title: 'SMS จากธนาคาร',
-    ios_sms_hint: 'ระบบอัตโนมัติจะส่ง SMS จากธนาคารมาที่ Money2Time ใช้ได้บน iOS 17 ขึ้นไป',
+      'การทำงานอัตโนมัติจากการแจ้งเตือนแอปต้องใช้ iOS 27 สำหรับเวอร์ชันก่อนหน้า สามารถใช้ Apple Pay หรือแชร์ภาพหน้าจอการชำระเงินได้',
     section_apps: 'แอป',
     section_sources: 'แหล่งที่มา',
     choose_apps: 'เลือกแอป',

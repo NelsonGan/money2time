@@ -11,8 +11,8 @@ export type NotificationDetailType = 'dailyCheckin' | 'weeklyReview' | 'monthlyR
 /**
  * Named after the Shortcuts action each iOS auto-log walkthrough sets up;
  * `shareScreenshot` and `paymentAlertsAndroid` are the Android ones (sharing a
- * screenshot, and turning on notification access). `paymentAlertsIos` and
- * `bankSmsIos` set up the Log Payment Alert action.
+ * screenshot, and turning on notification access). `paymentAlertsIos` sets up
+ * the Log Payment Alert action for bank and e-wallet app notifications.
  */
 export type AutoLogTutorialTopic =
   | 'logPayment'
@@ -20,8 +20,7 @@ export type AutoLogTutorialTopic =
   | 'logScreenshot'
   | 'shareScreenshot'
   | 'paymentAlertsAndroid'
-  | 'paymentAlertsIos'
-  | 'bankSmsIos';
+  | 'paymentAlertsIos';
 
 export type SettingsStackParamList = {
   SettingsHome: undefined;
