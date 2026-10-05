@@ -1254,9 +1254,8 @@ const fil = {
       payment_alerts_ios_step_2: 'Hanapin at piliin ang Notification.',
       payment_alerts_ios_step_3: 'Hanapin ang Log Payment Alert at idagdag ito.',
       payment_alerts_ios_step_4: 'I-tap ang Message sa Log Payment Alert, saka Select Variable.',
-      payment_alerts_ios_step_5: 'I-tap ang From at ilagay ang pangalan ng app.',
       payment_alerts_ios_step_6:
-        'I-tap ang arrow ng action, pagkatapos ang Account. Piliin kung saan itatala ang mga bayad mula sa app na ito.',
+        'I-tap ang arrow ng action, pagkatapos ang Account. Piliin kung saan itatala ang mga bayad mula sa app na ito. Iwanang walang laman ang Category para sa awtomatikong pagtutugma ng keyword.',
       payment_alerts_ios_step_7:
         'Bumalik para i-save. Ulitin para sa bawat bank o e-wallet app. Itatala ang mga bayad sa susunod mong pagbukas ng Money2Time.',
       payment_alerts_android_disclosure:
@@ -1267,8 +1266,6 @@ const fil = {
         'I-tap ang arrow sa tabi ng app. Panatilihing naka-on ang Automation at i-off ang Notify para tahimik ang pag-log.',
       payment_alerts_ios_input: 'Piliin ang Notification variable sa ilalim ng trigger.',
       payment_alerts_ios_body: 'I-tap ang inilagay na variable, piliin ang Body, saka Return.',
-      payment_alerts_ios_fields:
-        'Itakda ang Title at Subtitle sa katumbas na Notification properties gamit ang parehong paraan. Iwanang walang laman ang Category para sa keyword matching.',
     },
     title: 'Settings',
     display: 'Display',

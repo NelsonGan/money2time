@@ -1039,7 +1039,7 @@ struct LogPaymentAlertIntent: AppIntent {
   static var title: LocalizedStringResource = "Log Payment Alert"
 
   static var description = IntentDescription(
-    "Send a bank or e-wallet app notification to Money2Time. Choose an account to log payments when the app next opens. Set From to the app's name.",
+    "Send a bank or e-wallet app notification to Money2Time. Use Notification Body as Message and choose an account. Payments log when the app next opens, with categories matched automatically.",
     categoryName: "Transactions"
   )
 

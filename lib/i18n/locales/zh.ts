@@ -1174,8 +1174,8 @@ const zh = {
       payment_alerts_ios_step_2: '搜索并选择 Notification。',
       payment_alerts_ios_step_3: '搜索 Log Payment Alert 并添加。',
       payment_alerts_ios_step_4: '点 Log Payment Alert 中的 Message，再点 Select Variable。',
-      payment_alerts_ios_step_5: '轻点 From 并输入 App 名称。',
-      payment_alerts_ios_step_6: '轻点操作箭头，再轻点 Account，选择用于记录此 App 付款的账户。',
+      payment_alerts_ios_step_6:
+        '轻点操作箭头，再轻点 Account，选择用于记录此 App 付款的账户。 将 Category 留空，以便自动按关键词分类。',
       payment_alerts_ios_step_7:
         '轻点返回保存。为每个银行或电子钱包 App 重复设置。下次打开 Money2Time 时会记录付款。',
       payment_alerts_android_disclosure: '阅读通知权限的使用说明，然后点 Continue。',
@@ -1183,8 +1183,6 @@ const zh = {
       payment_alerts_ios_run: '点应用旁的箭头，保持 Automation 开启。关闭 Notify 可静默记账。',
       payment_alerts_ios_input: '选择触发条件下方的 Notification 变量。',
       payment_alerts_ios_body: '点已插入的变量，选择 Body，再点 Return。',
-      payment_alerts_ios_fields:
-        '用相同步骤，将 Title 和 Subtitle 设为对应的 Notification 属性。留空 Category 即可按关键词分类。',
     },
     title: '设置',
     display: '显示',

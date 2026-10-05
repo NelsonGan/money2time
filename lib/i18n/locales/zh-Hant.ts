@@ -1174,8 +1174,8 @@ const zhHant = {
       payment_alerts_ios_step_2: '搜尋並選擇 Notification。',
       payment_alerts_ios_step_3: '搜尋 Log Payment Alert 並新增。',
       payment_alerts_ios_step_4: '點 Log Payment Alert 中的 Message，再點 Select Variable。',
-      payment_alerts_ios_step_5: '點一下 From 並輸入 App 名稱。',
-      payment_alerts_ios_step_6: '點一下動作箭頭，再點 Account，選擇用來記錄此 App 付款的帳戶。',
+      payment_alerts_ios_step_6:
+        '點一下動作箭頭，再點 Account，選擇用來記錄此 App 付款的帳戶。 將 Category 留空，以便自動依關鍵字分類。',
       payment_alerts_ios_step_7:
         '點一下返回儲存。為每個銀行或電子錢包 App 重複設定。下次開啟 Money2Time 時會記錄付款。',
       payment_alerts_android_disclosure: '閱讀通知權限的使用說明，然後點 Continue。',
@@ -1183,8 +1183,6 @@ const zhHant = {
       payment_alerts_ios_run: '點應用程式旁的箭頭，保持 Automation 開啟。關閉 Notify 可靜默記帳。',
       payment_alerts_ios_input: '選擇觸發條件下方的 Notification 變數。',
       payment_alerts_ios_body: '點已插入的變數，選擇 Body，再點 Return。',
-      payment_alerts_ios_fields:
-        '用相同步驟，將 Title 和 Subtitle 設為對應的 Notification 屬性。留空 Category 即可按關鍵字分類。',
     },
     title: '設定',
     display: '顯示',

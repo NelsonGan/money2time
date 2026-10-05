@@ -1233,9 +1233,8 @@ const ja = {
       payment_alerts_ios_step_2: 'Notificationを検索して選択します。',
       payment_alerts_ios_step_3: 'Log Payment Alert を検索して追加します。',
       payment_alerts_ios_step_4: 'Log Payment AlertのMessage、Select Variableの順にタップします。',
-      payment_alerts_ios_step_5: 'From をタップしてアプリ名を入力します。',
       payment_alerts_ios_step_6:
-        'アクションの矢印、Account の順にタップし、このアプリの支払いを記録する口座を選びます。',
+        'アクションの矢印、Account の順にタップし、このアプリの支払いを記録する口座を選びます。 Category は空欄のままにすると、キーワードから自動で分類されます。',
       payment_alerts_ios_step_7:
         '戻るをタップして保存します。銀行や電子ウォレットのアプリごとに繰り返してください。次に Money2Time を開いたときに支払いが記録されます。',
       payment_alerts_android_disclosure: '通知へのアクセスの使い方を読み、Continueをタップします。',
@@ -1245,8 +1244,6 @@ const ja = {
         'アプリの横の矢印をタップします。Automationをオンのままにし、Notifyをオフにすると通知せず記録できます。',
       payment_alerts_ios_input: 'トリガーの下のNotification変数を選びます。',
       payment_alerts_ios_body: '挿入した変数をタップし、Body、Returnの順に選びます。',
-      payment_alerts_ios_fields:
-        '同じ手順でTitleとSubtitleに対応するNotificationのプロパティを設定します。キーワード照合を使う場合はCategoryを未設定にします。',
     },
     title: '設定',
     display: '表示',

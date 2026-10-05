@@ -1217,9 +1217,8 @@ const th = {
       payment_alerts_ios_step_2: 'ค้นหา Notification แล้วเลือก',
       payment_alerts_ios_step_3: 'ค้นหา Log Payment Alert แล้วเพิ่ม',
       payment_alerts_ios_step_4: 'แตะ Message ใน Log Payment Alert แล้วเลือก Select Variable',
-      payment_alerts_ios_step_5: 'แตะ From แล้วพิมพ์ชื่อแอป',
       payment_alerts_ios_step_6:
-        'แตะลูกศรของการทำงาน แล้วแตะ Account เลือกบัญชีที่จะบันทึกการชำระเงินของแอปนี้',
+        'แตะลูกศรของการทำงาน แล้วแตะ Account เลือกบัญชีที่จะบันทึกการชำระเงินของแอปนี้ เว้น Category ว่างไว้เพื่อจับคู่หมวดหมู่จากคำสำคัญโดยอัตโนมัติ',
       payment_alerts_ios_step_7:
         'แตะกลับเพื่อบันทึก ทำซ้ำสำหรับแต่ละแอปธนาคารหรือกระเป๋าเงินอิเล็กทรอนิกส์ การชำระเงินจะถูกบันทึกเมื่อเปิด Money2Time ครั้งถัดไป',
       payment_alerts_android_disclosure: 'อ่านวิธีใช้สิทธิ์เข้าถึงการแจ้งเตือน แล้วแตะ Continue',
@@ -1229,8 +1228,6 @@ const th = {
         'แตะลูกศรข้างแอป เปิด Automation ไว้ และปิด Notify เพื่อบันทึกโดยไม่แจ้งเตือน',
       payment_alerts_ios_input: 'เลือกตัวแปร Notification ใต้ตัวกระตุ้น',
       payment_alerts_ios_body: 'แตะตัวแปรที่ใส่ เลือก Body แล้วเลือก Return',
-      payment_alerts_ios_fields:
-        'ตั้ง Title และ Subtitle เป็นคุณสมบัติ Notification ที่ตรงกันด้วยวิธีเดียวกัน เว้น Category ว่างเพื่อจับคู่คำสำคัญ',
     },
     title: 'ตั้งค่า',
     display: 'การแสดงผล',
