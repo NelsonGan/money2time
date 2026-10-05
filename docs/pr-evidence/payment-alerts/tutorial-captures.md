@@ -97,7 +97,29 @@ The remaining tutorial topics keep the existing screen tracking.
 - The final MP4 adds short instructional captions and animated yellow tap rings
   from the recorded tap coordinates, and trims waiting time. It is saved locally as
   `Money2Time-iOS-App-Notifications-Setup.mp4` in Downloads. It does not contain
-  private account data or a real payment, and is not uploaded as a PR attachment.
+  private account data or a real payment. The recording is also published in
+  the `money2time-assets` R2 bucket at
+  <https://media.money2time.com/tutorials/ios/app-notifications/setup-2026-10-05.mp4>
+  and linked by the top-right play button in the App notifications tutorial.
   Verified the 1 minute 48 second, 900 × 2120 H.264 MP4 decodes without errors.
 - The recording was stopped and retrieved. The new Wallet demo automation was
   saved, then disabled after recording. Other automations were not changed.
+
+## Hosted video verification
+
+- Created the public `money2time-assets` R2 bucket and connected
+  `media.money2time.com` with active domain ownership and TLS. The `r2.dev`
+  development URL remains disabled. Uploaded the versioned MP4 with `video/mp4`,
+  inline disposition and a one-year immutable cache header. The public download
+  matches the original SHA-256 and size; a byte-range request returns HTTP 206.
+  Upload details and the checksum are in `cloudflare/r2/README.md`.
+- Checked the top-right play button on iPhone 18 Pro and iPad mini (A17 Pro),
+  iOS 27, through local Metro. Captured the final iPhone light/dark and iPad
+  layouts. Checked Malay and Russian translations; the compact button avoids
+  overlap with longer titles and retains the translated Watch video accessibility
+  label. Restored the iPhone's original English locale and System theme.
+- Opened the public video from the iPhone tutorial and verified Safari playback
+  with the captions visible and the playback time advancing. Captured a playback
+  frame. This verification does not test bank notification delivery. Existing
+  Android and other automation video destinations remain unchanged. No analytics
+  event, property, trigger or screen route changed, so event volume is unchanged.

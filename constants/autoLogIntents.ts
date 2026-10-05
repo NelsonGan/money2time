@@ -36,10 +36,12 @@ export const NEW_TRANSACTION_SHORTCUT_URL =
 export const SCAN_SCREENSHOT_SHORTCUT_URL =
   'https://www.icloud.com/shortcuts/50f20a5f88084dda95718f5b6e56e927';
 
-// YouTube Shorts walkthroughs, one per automation type, linked from the top-right
-// of each tutorial.
+// Video walkthroughs, one per automation type, linked from the top-right of each
+// tutorial. Keep R2 object paths versioned so cached videos never change in place.
 export const AUTO_LOG_VIDEO_URLS = {
   logPayment: 'https://youtube.com/shorts/RPDvP40KdFE',
   newTransaction: 'https://youtube.com/shorts/_ywgy40eVxo',
   logScreenshot: 'https://youtube.com/shorts/MEK2AyOQh6w',
+  paymentAlertsIos:
+    'https://media.money2time.com/tutorials/ios/app-notifications/setup-2026-10-05.mp4',
 } as const;

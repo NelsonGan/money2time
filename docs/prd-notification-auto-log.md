@@ -27,6 +27,9 @@ transaction-history learning, AI requests, or categorization server is involved.
   selection happens in Shortcuts. Bank and e-wallet apps use the Notification
   trigger on iOS 27. There is no SMS or Message automation guide; earlier iOS
   versions see the version requirement and can use Apple Pay or share screenshots.
+- The iOS App notifications guide has a top-right play button to the captioned
+  setup recording with visible taps, hosted at `media.money2time.com` in R2.
+  It opens the MP4 in the browser, matching the other automation video links.
 - Android's source screen contains its switch, one account picker, and a top-right
   trash icon with a confirmation dialog.
 - Explanations appear above controls and tutorial links. Navigation rows have
