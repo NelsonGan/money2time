@@ -2653,8 +2653,6 @@ const ms = {
     access_greyed_body:
       'Android menyekat ini bagi aplikasi yang dipasang di luar Google Play. Buka Tetapan, Aplikasi, Money2Time, ketik menu di bahagian atas, pilih Benarkan tetapan terhad, kemudian cuba lagi.',
     apps_title: 'Aplikasi mana yang menghantar makluman pembayaran anda?',
-    apps_body:
-      'Pilih aplikasi bank dan e-dompet anda, serta aplikasi mesej jika bank anda menghantar SMS.',
     apps_suggested: 'Di telefon ini',
     apps_recent: 'Aktif baru-baru ini',
     apps_missing_hint:

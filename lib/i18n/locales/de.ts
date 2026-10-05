@@ -2668,8 +2668,6 @@ const de = {
     access_greyed_body:
       'Android sperrt das für Apps, die nicht aus Google Play installiert wurden. Öffne Einstellungen, Apps, Money2Time, tippe oben auf das Menü, wähle Eingeschränkte Einstellungen zulassen und versuche es dann erneut.',
     apps_title: 'Welche Apps schicken deine Zahlungsbenachrichtigungen?',
-    apps_body:
-      'Wähle deine Banking- und Wallet-Apps und die Nachrichten-App, falls deine Bank SMS schickt.',
     apps_suggested: 'Auf diesem Handy',
     apps_recent: 'Zuletzt aktiv',
     apps_missing_hint:

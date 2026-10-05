@@ -2614,8 +2614,6 @@ const vi = {
     access_greyed_body:
       'Android chặn quyền này với ứng dụng cài ngoài Google Play. Mở Cài đặt, Ứng dụng, Money2Time, chạm vào menu ở trên cùng, chọn Cho phép cài đặt bị hạn chế, rồi thử lại.',
     apps_title: 'Ứng dụng nào gửi thông báo thanh toán cho bạn?',
-    apps_body:
-      'Chọn ứng dụng ngân hàng và ví điện tử, cùng ứng dụng tin nhắn nếu ngân hàng gửi SMS.',
     apps_suggested: 'Trên điện thoại này',
     apps_recent: 'Hoạt động gần đây',
     apps_missing_hint:

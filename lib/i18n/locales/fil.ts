@@ -2667,8 +2667,6 @@ const fil = {
     access_greyed_body:
       'Hinaharangan ito ng Android para sa mga app na na-install sa labas ng Google Play. Buksan ang Settings, Apps, Money2Time, i-tap ang menu sa itaas, piliin ang Allow restricted settings, saka subukan ulit.',
     apps_title: 'Aling mga app ang nagpapadala ng mga alerto sa bayad mo?',
-    apps_body:
-      'Piliin ang mga banking at wallet app mo, pati ang messages app kung nagte-text ang bangko mo.',
     apps_suggested: 'Nasa phone na ito',
     apps_recent: 'Kamakailang aktibo',
     apps_missing_hint:

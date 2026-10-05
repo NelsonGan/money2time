@@ -1,5 +1,6 @@
+import { Trash2 } from 'lucide-react-native';
 import React, { useCallback } from 'react';
-import { Alert, ScrollView, View } from 'react-native';
+import { Alert, Pressable, ScrollView, View } from 'react-native';
 
 import {
   Button,
@@ -10,7 +11,9 @@ import {
   useSettingsBottomNavInset,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { triggerHaptic } from '~/services/haptics';
 import type { PaymentAlertChannel, PaymentAlertSource } from '~/types';
 
 import { PaysFromControl } from '../components/PaysFromControl';
@@ -29,6 +32,7 @@ export function PaymentAlertSourceScreen({
 }: PaymentAlertSourceScreenProps) {
   const { paymentAlertPrefs: prefs, updatePaymentAlertPrefs: updatePrefs } = useApp();
   const bottomInset = useSettingsBottomNavInset();
+  const colors = useThemeColors();
   const source = findAlertSource(prefs, channel, sourceKey);
   const update = useCallback(
     (patch: Partial<PaymentAlertSource>) => {
@@ -69,6 +73,22 @@ export function PaymentAlertSourceScreen({
             className="px-0 pt-5 pb-0"
             onBack={onBack}
             title={source?.label ?? I18n.t('payment_alerts.title')}
+            rightAccessory={
+              source && channel === 'android_notification' ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('common.remove')}
+                  hitSlop={8}
+                  className="h-10 w-10 items-center justify-center rounded-full bg-destructive/10"
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    remove();
+                  }}
+                >
+                  <Trash2 size={18} color={colors.error} />
+                </Pressable>
+              ) : undefined
+            }
           />
           {source ? (
             <>
@@ -92,9 +112,11 @@ export function PaymentAlertSourceScreen({
                   onChange={(accountId) => update({ accountId })}
                 />
               </View>
-              <Button variant="ghost" onPress={remove}>
-                <Text className="text-destructive">{I18n.t('common.remove')}</Text>
-              </Button>
+              {channel !== 'android_notification' ? (
+                <Button variant="ghost" onPress={remove}>
+                  <Text className="text-destructive">{I18n.t('common.remove')}</Text>
+                </Button>
+              ) : null}
             </>
           ) : (
             <Text tone="muted">{I18n.t('payment_alerts.source_missing')}</Text>

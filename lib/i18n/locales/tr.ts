@@ -2641,8 +2641,6 @@ const tr = {
     access_greyed_body:
       "Android, Google Play dışından yüklenen uygulamalar için bunu engeller. Ayarlar, Uygulamalar, Money2Time'ı açın, üstteki menüye dokunun, Kısıtlanmış ayarlara izin ver'i seçin ve yeniden deneyin.",
     apps_title: 'Ödeme bildirimlerinizi hangi uygulamalar gönderiyor?',
-    apps_body:
-      'Banka ve cüzdan uygulamalarınızı, bankanız SMS gönderiyorsa mesajlar uygulamasını da seçin.',
     apps_suggested: 'Bu telefonda',
     apps_recent: 'Son zamanlarda etkin',
     apps_missing_hint: 'Uygulama listede yok mu? Bir sonraki bildiriminden sonra burada görünür.',

@@ -2596,7 +2596,6 @@ const ko = {
     access_greyed_body:
       "Android는 Google Play 외부에서 설치한 앱을 제한합니다. 설정 > 애플리케이션 > Money2Time을 열고 상단 메뉴에서 '제한된 설정 허용'을 선택한 뒤 다시 시도하세요.",
     apps_title: '결제 알림을 보내는 앱은 무엇인가요?',
-    apps_body: '은행 앱과 간편결제 앱을 고르세요. 은행이 문자를 보낸다면 메시지 앱도 고르세요.',
     apps_suggested: '이 휴대폰의 앱',
     apps_recent: '최근 활동한 앱',
     apps_missing_hint: '앱이 목록에 없나요? 다음 알림을 보낸 뒤 여기에 나타납니다.',

@@ -2648,8 +2648,6 @@ const it = {
     access_greyed_body:
       'Android lo blocca per le app installate al di fuori di Google Play. Apri Impostazioni, App, Money2Time, tocca il menu in alto, scegli Consenti impostazioni con restrizioni e riprova.',
     apps_title: 'Quali app inviano i tuoi avvisi di pagamento?',
-    apps_body:
-      "Scegli le tue app bancarie e i wallet, più l'app dei messaggi se la banca ti manda SMS.",
     apps_suggested: 'Su questo telefono',
     apps_recent: 'Attive di recente',
     apps_missing_hint: "L'app non c'è? Comparirà qui dopo la sua prossima notifica.",

@@ -18,12 +18,13 @@ transaction-history learning, AI requests, or categorization server is involved.
 ## Interface
 
 - Automation has a Payment notifications section with a Payment alerts entry
-  and its status.
+  and its status. Its top-right Tutorial link opens the platform's guide.
 - Android Payment alerts contains the capture switch, chosen apps with their
-  account names, Choose apps, and the tutorial link.
+  account names and Choose apps. There is no duplicate tutorial button inside.
 - iOS Payment alerts contains the two Shortcuts tutorial links and configured
   automation sources with their selected accounts.
-- A source screen contains its switch, one account picker, and Remove.
+- A source screen contains its switch, one account picker, and Remove. Android
+  places Remove in a top-right trash icon with the same confirmation dialog.
 - Explanations appear above controls and tutorial links. Navigation rows have
   one arrow. Notification-access details are visible before opening system settings.
 
@@ -31,6 +32,8 @@ Android setup consists of disclosure, notification access, apps/accounts, and a
 test alert. Every selected app needs an active debit or credit account before
 setup can continue. New apps have no guessed account. The test runs the local
 pipeline using a selected source, without saving a transaction.
+The app picker aligns each selected account control with its app row, without a
+separate Account label. Missing-app help is in the tooltip beside Recently active.
 
 For iOS, select Account in the Log Payment Alert action. From identifies the
 source; its first queued alert registers the source and selected account in

@@ -2630,7 +2630,6 @@ const nb = {
     access_greyed_body:
       'Android blokkerer dette for apper installert utenfor Google Play. Åpne Innstillinger, Apper, Money2Time, trykk på menyen øverst, velg Tillat begrensede innstillinger, og prøv igjen.',
     apps_title: 'Hvilke apper sender betalingsvarslene dine?',
-    apps_body: 'Velg bank- og lommebokappene dine, og meldingsappen hvis banken din sender SMS.',
     apps_suggested: 'På denne telefonen',
     apps_recent: 'Nylig aktive',
     apps_missing_hint: 'Mangler appen? Den dukker opp her etter neste varsel fra den.',

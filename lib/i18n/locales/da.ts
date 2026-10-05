@@ -2632,7 +2632,6 @@ const da = {
     access_greyed_body:
       'Android blokerer det for apps installeret uden for Google Play. Åbn Indstillinger, Apps, Money2Time, tryk på menuen øverst, vælg Tillad begrænsede indstillinger, og prøv igen.',
     apps_title: 'Hvilke apps sender dine betalingsnotifikationer?',
-    apps_body: "Vælg dine bank- og wallet-apps, og din besked-app, hvis din bank sender sms'er.",
     apps_suggested: 'På denne telefon',
     apps_recent: 'Aktive for nylig',
     apps_missing_hint: 'Mangler appen? Den dukker op her efter sin næste notifikation.',

@@ -285,9 +285,6 @@ export function PaymentAlertsSetupScreen({ initialStep, onClose }: PaymentAlerts
             <Text variant="heading" className="text-foreground">
               {I18n.t('payment_alerts.apps_title')}
             </Text>
-            <Text variant="caption" tone="muted">
-              {I18n.t('payment_alerts.apps_body')}
-            </Text>
             <AppPickerList
               selected={selected}
               onToggle={toggleApp}
@@ -295,15 +292,10 @@ export function PaymentAlertsSetupScreen({ initialStep, onClose }: PaymentAlerts
                 const source = findAlertSource(prefs, 'android_notification', app.package);
                 if (!source) return null;
                 return (
-                  <View className="gap-2 pl-12">
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('transactions.editor.account')}
-                    </Text>
-                    <PaysFromControl
-                      accountId={source.accountId}
-                      onChange={(accountId) => setBinding(source, accountId)}
-                    />
-                  </View>
+                  <PaysFromControl
+                    accountId={source.accountId}
+                    onChange={(accountId) => setBinding(source, accountId)}
+                  />
                 );
               }}
             />

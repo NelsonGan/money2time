@@ -1,4 +1,4 @@
-import { BookOpen, ChevronRight } from 'lucide-react-native';
+import { ChevronRight } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { AppState, Platform, Pressable, ScrollView, View } from 'react-native';
 
@@ -117,7 +117,6 @@ export function PaymentAlertsSettingsScreen({
 }: PaymentAlertsSettingsScreenProps) {
   const { accounts } = useApp();
   const { paymentAlertPrefs: prefs, updatePaymentAlertPrefs: updatePrefs } = useApp();
-  const colors = useThemeColors();
   const bottomInset = useSettingsBottomNavInset();
   const [listener, setListener] = useState<NotificationListenerState | null>(null);
   const [status, setStatus] = useState(() => readListenerStatus());
@@ -273,18 +272,6 @@ export function PaymentAlertsSettingsScreen({
                 ) : null}
               </Card>
             </View>
-          ) : null}
-          {IS_ANDROID ? (
-            <Pressable
-              className="flex-row items-center justify-center gap-2 py-2"
-              accessibilityRole="button"
-              onPress={() => onOpenTutorial('paymentAlertsAndroid')}
-            >
-              <BookOpen size={16} color={colors.primary} />
-              <Text variant="caption" tone="primary">
-                {I18n.t('settings.auto_log.tutorial_button')}
-              </Text>
-            </Pressable>
           ) : null}
         </View>
       </ScrollView>

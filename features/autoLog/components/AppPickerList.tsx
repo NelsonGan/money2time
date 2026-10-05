@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { AppState, Image, Switch, View } from 'react-native';
 
-import { ClayIcon, Text } from '~/components/ui';
+import { ClayIcon, InfoTooltipButton, Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -149,15 +149,11 @@ export function AppPickerList({ selected, onToggle, renderSelectedDetail }: AppP
   const section = (title: string, apps: PickableApp[], hint?: string) =>
     apps.length > 0 || hint ? (
       <View className="gap-2">
-        <View className="gap-1 px-1">
+        <View className="flex-row items-center gap-1.5 px-1">
           <Text variant="caption" tone="muted">
             {title}
           </Text>
-          {hint ? (
-            <Text variant="caption" tone="muted">
-              {hint}
-            </Text>
-          ) : null}
+          {hint ? <InfoTooltipButton title={title} infoTooltip={hint} /> : null}
         </View>
         {apps.length > 0 ? (
           <View className="overflow-hidden rounded-2xl border border-border/30 bg-card">
