@@ -49,7 +49,10 @@ export function analyzeCapture(capture: CaptureInput, ctx: PipelineContext): Cap
   };
   const parse = parsePaymentAlert(parts);
   const lowerText = normalizedAlertLower(parts);
-  const source = findAlertSource(ctx.prefs, capture.channel, capture.sourceKey);
+  const source =
+    capture.channel === 'android_notification'
+      ? findAlertSource(ctx.prefs, capture.channel, capture.sourceKey)
+      : null;
   const binding = bindAccount({
     presetAccountId: capture.presetAccountId,
     source,
@@ -109,9 +112,10 @@ export function finalizeCapture(
     parse: analysis.parse,
     certainty: analysis.binding.certainty,
     duplicate: options.duplicate,
+    captureEnabled: analysis.capture.channel !== 'android_notification' || ctx.prefs.alertsEnabled,
     source:
       analysis.source ??
-      (analysis.binding.certainty === 'certain'
+      (analysis.capture.channel === 'ios_alert' && analysis.binding.certainty === 'certain'
         ? {
             channel: analysis.capture.channel,
             sourceKey: analysis.capture.sourceKey,

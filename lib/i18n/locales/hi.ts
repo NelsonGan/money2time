@@ -2635,8 +2635,6 @@ const hi = {
     source_remove_title: '%{app} हटाएं?',
     source_remove_body_android:
       'Money2Time इसकी सूचनाएं पढ़ना बंद कर देगा। पहले से दर्ज भुगतान बने रहेंगे।',
-    source_remove_body_ios:
-      'इसकी सेटिंग्स हटा दी जाती हैं। इसके अलर्ट आना बंद करने के लिए Shortcuts में ऑटोमेशन भी मिटाएं।',
   },
 };
 

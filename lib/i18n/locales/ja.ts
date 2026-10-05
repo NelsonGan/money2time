@@ -2630,8 +2630,6 @@ const ja = {
     source_remove_title: '%{app} を外しますか？',
     source_remove_body_android:
       'Money2Time はこのアプリの通知を読み取らなくなります。記録済みの支払いは残ります。',
-    source_remove_body_ios:
-      '設定が削除されます。通知が届かないようにするには、ショートカットのオートメーションも削除してください。',
   },
 };
 

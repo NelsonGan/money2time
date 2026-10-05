@@ -44,4 +44,21 @@ describe('explicit payment-alert accounts', () => {
       ).toBeNull();
     },
   );
+  it.each(['goal', 'loan', 'deleted', 'missing'])(
+    'does not replace an explicitly selected unavailable %s account with the source account',
+    (kind) => {
+      const unavailable = account({
+        id: 'unavailable',
+        ...(kind === 'goal' || kind === 'loan' ? { type: kind } : {}),
+        deletedAt: kind === 'deleted' ? '2026-10-01' : null,
+      });
+      expect(
+        bindAccount({
+          accounts: [...accounts, ...(kind === 'missing' ? [] : [unavailable])],
+          source: source({ accountId: 'app' }),
+          presetAccountId: 'unavailable',
+        }),
+      ).toMatchObject({ accountId: null, certainty: 'none' });
+    },
+  );
 });

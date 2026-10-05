@@ -2681,8 +2681,6 @@ const fil = {
     source_remove_title: 'Alisin ang %{app}?',
     source_remove_body_android:
       'Titigil ang Money2Time sa pagbasa ng mga notification nito. Mananatili ang mga bayad na naitala na.',
-    source_remove_body_ios:
-      'Aalisin ang settings nito. Para tumigil ang pagdating ng mga alerto nito, burahin din ang automation sa Shortcuts.',
   },
 };
 

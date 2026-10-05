@@ -2630,8 +2630,6 @@ const vi = {
     source_remove_title: 'Gỡ %{app}?',
     source_remove_body_android:
       'Money2Time ngừng đọc thông báo của ứng dụng này. Các khoản đã ghi vẫn giữ nguyên.',
-    source_remove_body_ios:
-      'Cài đặt của nguồn này sẽ bị xóa. Để ngừng nhận thông báo, hãy xóa cả mục tự động hóa trong Phím tắt.',
   },
 };
 

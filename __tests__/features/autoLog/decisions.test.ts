@@ -14,6 +14,7 @@ function decision(overrides: Partial<DecisionInput> = {}) {
     certainty: 'certain',
     duplicate: { kind: 'none', supersedesCaptureId: null },
     source: source(),
+    captureEnabled: true,
     ignoredByPhrase: false,
     autoLogsRemaining: null,
     ...overrides,
@@ -240,6 +241,23 @@ describe('findDuplicate', () => {
     expect(findDuplicate(base, [captureRef({ counterparty: 'SHELL' })], [], new Set()).kind).toBe(
       'none',
     );
+  });
+
+  it('keeps distinct amounts separate, including three-decimal currencies', () => {
+    const incoming = { ...base, currency: 'KWD', amount: 1.25 };
+    expect(
+      findDuplicate(incoming, [captureRef({ currency: 'KWD', amount: 1.255 })], [], new Set()).kind,
+    ).toBe('none');
+    expect(
+      findDuplicate({ ...base, amount: 25.01 }, [captureRef({ amount: 25 })], [], new Set()).kind,
+    ).toBe('none');
+  });
+
+  it('still matches the same money despite floating-point rounding', () => {
+    expect(
+      findDuplicate({ ...base, amount: 0.1 + 0.2 }, [captureRef({ amount: 0.3 })], [], new Set())
+        .kind,
+    ).toBe('certain');
   });
 
   it('does not drop an identical purchase later that day or one following a failed save', () => {

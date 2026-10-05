@@ -2660,8 +2660,6 @@ const it = {
     source_remove_title: 'Rimuovere %{app}?',
     source_remove_body_android:
       'Money2Time smette di leggere le sue notifiche. I pagamenti già registrati restano.',
-    source_remove_body_ios:
-      "Le sue impostazioni vengono rimosse. Per non ricevere più i suoi avvisi, elimina anche l'automazione in Comandi.",
   },
 };
 

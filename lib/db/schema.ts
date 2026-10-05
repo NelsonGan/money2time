@@ -57,8 +57,6 @@ export const accountsTable = sqliteTable('accounts', {
   // The category a counted repayment is filed under, so it lands in the
   // breakdown and depletes a budget line like any other expense.
   loanPaymentCategoryId: text('loan_payment_category_id'),
-  // JSON `{ last4: string[], names: string[] }`: what payment alerts print for
-  // this account. Null when none are set. See features/autoLog/lib/binding.ts.
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),
@@ -236,8 +234,8 @@ export const settingsTable = sqliteTable('settings', {
   showTransactionAccount: integer('show_transaction_account', { mode: 'boolean' })
     .notNull()
     .default(true),
-  // Payment alerts: watched sources, their modes and the Smart categories
-  // opt-in, as JSON. Null means defaults. Parse with parsePaymentAlertPrefs.
+  // Payment alerts: Android apps, selected accounts and capture preferences.
+  // Null means defaults. Parse with parsePaymentAlertPrefs.
   autoLogPrefsJson: text('auto_log_prefs_json'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),

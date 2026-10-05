@@ -39,10 +39,11 @@ pipeline using a selected source, without saving a transaction.
 The app picker aligns each selected account control with its app row, without a
 separate Account label. Missing-app help is in the tooltip beside Recently active.
 
-For iOS, select Account in the Log Payment Alert action. From identifies the
-source; its first queued alert registers the source and selected account in
-saved preferences. An explicit action Account takes precedence over the saved source
-account. Removed, deleted, goal and loan accounts cannot receive alert expenses.
+For iOS, select Account in every Log Payment Alert action. From identifies the
+source for duplicate detection. The action does not register in-app source
+settings, and obsolete iOS source settings do not control its logging. An
+unavailable selected account is skipped rather than replaced with another account.
+Removed, deleted, goal and loan accounts cannot receive alert expenses.
 
 ## Capture and processing
 
@@ -62,14 +63,18 @@ expense through `AppContext.createTransaction`.
 
 Recognized spending alerts with a positive amount log automatically, including
 medium-confidence spend messages. Verification codes, promotions, declined
-payments, balance messages, unrecognized text, money coming in, refunds and
+payments, explicit pre-authorization holds, balance messages, unrecognized text, money coming in, refunds and
 transfers are ignored. Sources that are off or have no usable selected account
-are ignored. These cases never create a review item or ask a question.
+are ignored. Turning Android capture off also ignores already queued Android
+alerts. iOS actions are enabled individually in Shortcuts. These cases never
+create a review item or ask a question.
 
 Duplicate detection covers repeated captures, notification updates, overlapping
 bank/wallet alerts, Apple Pay taps, manually entered expenses and recurring
 expenses. Matches require the same selected account and currency. Cross-source and
-manual/recurring matches also require merchant evidence. Text repeats have a
+manual/recurring matches also require merchant evidence. Different amounts stay
+separate, including three-decimal currencies; only floating-point rounding is
+tolerated. Text repeats have a
 two-minute window rather than suppressing identical purchases all day. Failed
 saves never count as a successful duplicate. Qualified duplicates are skipped
 without a prompt.
@@ -83,7 +88,7 @@ Automatic expense creation, the capture link and shared usage count commit in
 one SQLite transaction before acknowledging an alert. The same synchronous
 save path protects Apple Pay taps. Only durably handled captures are removed
 from the native queue. Database
-lookup/storage failures and failed transaction creation remain queued for a
+lookup/storage failures, transient queue file read failures and failed transaction creation remain queued for a
 later automatic retry. Already logged captures are acknowledged without a
 second transaction. An individual failure does not stop other alerts.
 
@@ -109,8 +114,9 @@ milestones. Review, binding-learning and Smart categories events are removed.
 The synthetic alert corpus covers currency/locale parsing and non-payment
 messages. Tests cover explicit account binding, automatic decisions, keyword
 fallbacks, duplicate handling, native queue contracts, migration compatibility,
-retention acknowledgements and automatic retries. Locale parity covers all 24
-catalogues. Native notification delivery and the real iPhone Shortcuts trigger
+retention acknowledgements and automatic retries. Every localized setup test
+alert is recognized in all 24 catalogues, with additional decline, refund and
+promotion checks. Locale parity covers all 24 catalogues. Native notification delivery and the real iPhone Shortcuts trigger
 still need device verification before release.
 
 The two payment-alert guides include 20 annotated simulator captures across 20

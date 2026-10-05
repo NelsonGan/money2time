@@ -2608,8 +2608,6 @@ const ko = {
     source_remove_title: '%{app}을(를) 제거할까요?',
     source_remove_body_android:
       'Money2Time이 이 앱의 알림을 더 이상 읽지 않습니다. 이미 기록된 결제는 유지됩니다.',
-    source_remove_body_ios:
-      '설정이 삭제됩니다. 알림이 오지 않게 하려면 단축어에서 자동화도 삭제하세요.',
   },
 };
 

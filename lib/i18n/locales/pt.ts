@@ -2660,8 +2660,6 @@ const pt = {
     source_remove_title: 'Remover %{app}?',
     source_remove_body_android:
       'O Money2Time para de ler as notificações dele. Os pagamentos já registrados continuam.',
-    source_remove_body_ios:
-      'As configurações dela são removidas. Para parar de receber os alertas, apague também a automação no Atalhos.',
   },
 };
 

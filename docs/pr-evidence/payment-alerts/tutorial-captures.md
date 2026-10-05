@@ -48,3 +48,20 @@ The remaining tutorial topics keep the existing screen tracking.
   Payment-alert preferences stayed unchanged on all three devices, and original
   iOS themes were restored. These presentation changes do not test new payment
   delivery.
+
+## Code review regression verification
+
+- Android API 36: reran Choose apps and the native setup test with Malay selected.
+  The localized alert previews RM1.00 / Rewards Card / Food. The native test
+  capture was drained and no expense was created: 7,099 transactions before
+  and after. Restored the original English locale, System theme and exact
+  payment-alert preferences, then checked the Shell account screen's trash icon.
+- iOS 27 iPad mini and Android API 36: evaluated the revised pipeline in the
+  running app with synthetic inputs. Checked explicit iOS accounts against
+  obsolete disabled source settings, unavailable accounts, Android's off switch,
+  pre-authorization holds and KWD 1.250 parsing. These runtime checks did not
+  save transactions or exercise a real notification-triggered iOS automation.
+- Refreshed the iPad Automation and Android source screenshots and added the
+  Malay test-result capture. The iPad preferences and Light theme stayed unchanged.
+  Both device windows remained visible during testing and were left on the
+  checked Automation/source screens.

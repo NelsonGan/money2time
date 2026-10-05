@@ -26,12 +26,12 @@ export function isPayableAccount(account: Account): boolean {
 /** Only an account explicitly selected for this app or automation may be used. */
 export function bindAccount(input: BindingInput): AccountBinding {
   const payable = input.accounts.filter(isPayableAccount);
-  const preset = payable.find((account) => account.id === input.presetAccountId);
-  const selected = preset ?? payable.find((account) => account.id === input.source?.accountId);
+  const selectedId = input.presetAccountId ?? input.source?.accountId;
+  const selected = payable.find((account) => account.id === selectedId);
   return {
     accountId: selected?.id ?? null,
     certainty: selected ? 'certain' : 'none',
-    reason: preset ? 'preset' : selected ? 'source_single' : 'none',
+    reason: selected ? (input.presetAccountId ? 'preset' : 'source_single') : 'none',
     identifier: null,
     candidateAccountIds: selected ? [selected.id] : [],
   };

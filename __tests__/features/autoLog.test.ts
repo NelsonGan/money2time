@@ -104,6 +104,13 @@ describe('parseAutoLogAmount', () => {
     expect(parseAutoLogAmount('12.34 USD')).toEqual({ amount: 12.34, currency: 'USD' });
   });
 
+  it.each(['KWD 1.250', 'BHD 1,250', '1.250 OMR'])(
+    'preserves the three-decimal amount in %s',
+    (raw) => {
+      expect(parseAutoLogAmount(raw)?.amount).toBe(1.25);
+    },
+  );
+
   it('ignores three-letter tokens that are not real currencies', () => {
     expect(parseAutoLogAmount('XYZ 12.34')).toEqual({ amount: 12.34, currency: null });
   });

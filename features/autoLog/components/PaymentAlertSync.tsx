@@ -20,12 +20,7 @@ import {
 
 import type { CaptureInput } from '../lib/captureQueue';
 import { analyzeCapture, finalizeCapture } from '../lib/pipeline';
-import {
-  androidCapturePackages,
-  findAlertSource,
-  newAlertSource,
-  withAlertSource,
-} from '../lib/prefs';
+import { androidCapturePackages } from '../lib/prefs';
 import { buildPipelineContext, processAlertCaptures } from '../processAlerts';
 
 /**
@@ -42,7 +37,7 @@ export function PaymentAlertSync() {
   const { accounts, categories, settings, quickEntryPrefs, createTransaction } = useApp();
   const { transactions } = useTransactions();
   const isPro = useIsPro();
-  const { paymentAlertPrefs: prefs, updatePaymentAlertPrefs: updatePrefs } = useApp();
+  const { paymentAlertPrefs: prefs } = useApp();
 
   const stateRef = useRef({
     accounts,
@@ -52,7 +47,6 @@ export function PaymentAlertSync() {
     createTransaction,
     isPro,
     prefs,
-    updatePrefs,
     transactions,
   });
   stateRef.current = {
@@ -63,7 +57,6 @@ export function PaymentAlertSync() {
     createTransaction,
     isPro,
     prefs,
-    updatePrefs,
     transactions,
   };
   const drainingRef = useRef(false);
@@ -108,13 +101,8 @@ export function PaymentAlertSync() {
         }
         const captures = queued.filter((capture) => !capture.isTest);
         if (captures.length === 0) continue;
-        // An iOS automation is its own opt-in: the first alert it sends
-        // registers its "From" as a source, so the user can manage it here.
-        const effectivePrefs = registerIosSources(current.prefs, captures);
-        if (effectivePrefs !== current.prefs) current.updatePrefs(effectivePrefs);
         const summary = await processAlertCaptures(captures, {
           ...current,
-          prefs: effectivePrefs,
           reportingCurrency: current.settings.currencyCode,
         });
         // Only remove alerts durably handled by the pipeline.
@@ -175,30 +163,6 @@ async function repairListener(alertsEnabled: boolean) {
   if (!alertsEnabled || !isNotificationCaptureSupported()) return;
   const state = await getNotificationListenerState();
   if (state.granted && !state.connected) await rebindNotificationListener();
-}
-
-function registerIosSources(
-  prefs: Parameters<typeof withAlertSource>[0],
-  captures: readonly CaptureInput[],
-) {
-  let next = prefs;
-  for (const capture of captures) {
-    if (capture.channel !== 'ios_alert') continue;
-    if (findAlertSource(next, capture.channel, capture.sourceKey)) continue;
-    next = withAlertSource(
-      next,
-      newAlertSource(
-        {
-          channel: 'ios_alert',
-          sourceKey: capture.sourceKey,
-          label: capture.sourceLabel ?? capture.sourceKey,
-          accountId: capture.presetAccountId,
-        },
-        new Date().toISOString(),
-      ),
-    );
-  }
-  return next;
 }
 
 /** Run the setup screen's test alert through the pipeline without storing it. */

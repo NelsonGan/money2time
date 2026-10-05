@@ -2643,8 +2643,6 @@ const sv = {
     source_remove_title: 'Ta bort %{app}?',
     source_remove_body_android:
       'Money2Time slutar läsa dess aviseringar. Redan registrerade betalningar finns kvar.',
-    source_remove_body_ios:
-      'Dess inställningar tas bort. Radera också automationen i Genvägar för att stoppa aviseringarna.',
   },
 };
 

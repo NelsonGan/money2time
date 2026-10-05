@@ -1,3 +1,4 @@
+import type { CaptureInput } from '~/features/autoLog/lib/captureQueue';
 import {
   analyzeCapture,
   finalizeCapture,
@@ -20,7 +21,7 @@ const context = (): PipelineContext => ({
   autoCategorizeByMerchant: true,
   lookups: { keyword: () => 'food' },
 });
-const capture = (body: string) => ({
+const capture = (body: string): CaptureInput => ({
   id: 'alert',
   channel: 'android_notification' as const,
   sourceKey: 'com.example.bank',
@@ -96,5 +97,52 @@ describe('simple automatic payment logging', () => {
     expect(value).not.toHaveProperty('defaultMode');
     expect(Object.values(value.sources)[0]).not.toHaveProperty('mode');
     expect(Object.values(value.sources)[0]).not.toHaveProperty('accountMode');
+  });
+  it('does not log queued Android alerts after the master switch is turned off', () => {
+    const ctx = context();
+    ctx.prefs.alertsEnabled = false;
+    expect(outcome('You spent RM25.00 at SHELL.', ctx).decision).toEqual({
+      action: 'ignore',
+      reason: 'source_disabled',
+    });
+  });
+
+  it('uses the iOS action account even when obsolete source settings are disabled', () => {
+    const ctx = context();
+    ctx.prefs = withAlertSource(
+      prefs({ alertsEnabled: false }),
+      source({ channel: 'ios_alert', sourceKey: 'bank', enabled: false, accountId: 'other' }),
+    );
+    const input = {
+      ...capture('You spent RM25.00 at SHELL.'),
+      channel: 'ios_alert' as const,
+      sourceKey: 'bank',
+      presetAccountId: 'selected',
+    };
+    const result = finalizeCapture(analyzeCapture(input, ctx), ctx, {
+      duplicate: { kind: 'none', supersedesCaptureId: null },
+      autoLogsRemaining: null,
+    });
+    expect(result.decision).toEqual({ action: 'log', reason: 'auto' });
+    expect(result.draft?.accountId).toBe('selected');
+  });
+
+  it('does not use an obsolete iOS source account when the action has no selected account', () => {
+    const ctx = context();
+    ctx.prefs = withAlertSource(
+      prefs(),
+      source({ channel: 'ios_alert', sourceKey: 'bank', accountId: 'selected' }),
+    );
+    const input = {
+      ...capture('You spent RM25.00 at SHELL.'),
+      channel: 'ios_alert' as const,
+      sourceKey: 'bank',
+    };
+    const result = finalizeCapture(analyzeCapture(input, ctx), ctx, {
+      duplicate: { kind: 'none', supersedesCaptureId: null },
+      autoLogsRemaining: null,
+    });
+    expect(result.decision.action).toBe('ignore');
+    expect(result.resolution.accountId).toBeNull();
   });
 });

@@ -115,4 +115,27 @@ describe('automatic alert persistence', () => {
     expect((await processAlertCaptures([capture], input)).captureIds).toEqual(['capture']);
     expect(input.createTransaction).not.toHaveBeenCalled();
   });
+  it('logs only the completed charge following a pre-authorization hold', async () => {
+    const input = deps();
+    const result = await processAlertCaptures(
+      [
+        {
+          ...capture,
+          id: 'hold',
+          body: 'A pre-authorization of RM300.00 was authorised at HILTON KL on card ending 1234.',
+        },
+        { ...capture, id: 'charge', body: 'You spent RM250.00 at HILTON KL.' },
+      ],
+      input,
+    );
+    expect(input.createTransaction).toHaveBeenCalledTimes(1);
+    expect(input.createTransaction).toHaveBeenCalledWith(
+      expect.objectContaining({ amount: 250 }),
+      expect.any(Object),
+    );
+    expect(result).toMatchObject({ logged: 1, ignored: 1, captureIds: ['hold', 'charge'] });
+    expect(paymentAlertCapturesRepository.insert).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'hold', status: 'ignored', reason: 'authorization_hold' }),
+    );
+  });
 });

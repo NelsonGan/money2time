@@ -2661,8 +2661,6 @@ const es = {
     source_remove_title: '¿Quitar %{app}?',
     source_remove_body_android:
       'Money2Time deja de leer sus notificaciones. Los pagos ya registrados se mantienen.',
-    source_remove_body_ios:
-      'Se eliminan sus ajustes. Para dejar de recibir sus alertas, borra también la automatización en Atajos.',
   },
 };
 

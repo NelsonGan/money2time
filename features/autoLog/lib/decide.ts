@@ -27,6 +27,8 @@ export interface DecisionInput {
   duplicate: DuplicateVerdict;
   /** The configured source; null for an unconfigured one, which is ignored. */
   source: PaymentAlertSource | null;
+  /** Android's master switch; iOS actions are individually enabled in Shortcuts. */
+  captureEnabled: boolean;
   /** An ignore phrase (global or the source's) matched the alert. */
   ignoredByPhrase: boolean;
   /** Automatic logs left on the free tier; null when unlimited (Pro). */
@@ -45,11 +47,14 @@ const IGNORED_KINDS: Partial<Record<PaymentAlertParse['kind'], PaymentAlertReaso
 export function decideCapture(input: DecisionInput): CaptureDecision {
   const { parse } = input;
 
-  if (input.source && !input.source.enabled) return { action: 'ignore', reason: 'source_disabled' };
+  if (!input.captureEnabled || (input.source && !input.source.enabled))
+    return { action: 'ignore', reason: 'source_disabled' };
   if (input.ignoredByPhrase) return { action: 'ignore', reason: 'ignore_phrase' };
   const ignoredAs = IGNORED_KINDS[parse.kind];
   if (ignoredAs) return { action: 'ignore', reason: ignoredAs };
   if (parse.amount === null) return { action: 'ignore', reason: 'no_amount' };
+  if (parse.signals.includes('auth_hold'))
+    return { action: 'ignore', reason: 'authorization_hold' };
 
   if (input.duplicate.kind === 'certain') return { action: 'duplicate', reason: 'duplicate' };
   if (input.duplicate.kind === 'possible') return { action: 'duplicate', reason: 'duplicate' };

@@ -331,7 +331,7 @@ export function PaymentAlertsSetupScreen({ initialStep, onClose }: PaymentAlerts
                 <Text variant="bodyStrong" className="text-foreground">
                   {I18n.t('payment_alerts.test_success')}
                 </Text>
-                {testResult.amount !== null ? (
+                {testResult.wouldLog && testResult.amount !== null ? (
                   <Text variant="body" className="text-foreground">
                     {I18n.t(
                       testCategory

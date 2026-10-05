@@ -2666,8 +2666,6 @@ const ms = {
     source_remove_title: 'Buang %{app}?',
     source_remove_body_android:
       'Money2Time berhenti membaca pemberitahuannya. Pembayaran yang sudah direkod kekal.',
-    source_remove_body_ios:
-      'Tetapannya dibuang. Untuk menghentikan maklumannya, padam juga automasi dalam Shortcuts.',
   },
 };
 

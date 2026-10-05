@@ -5,8 +5,8 @@
 // `apple_pay` capture after: that row is what the alert drain's cross-source
 // rule (dedupe rule 3) matches a later alert against.
 //
-// Everything here is bookkeeping around a drain that already works on its own,
-// so a failure degrades to logging the tap exactly as before.
+// A logged tap and its capture record commit in the same transaction. A failed
+// save stays queued for retry.
 
 import type { AutoLogPendingEntry } from '~/features/transactions/lib/autoLog';
 import { paymentAlertCapturesRepository } from '~/lib/repositories/paymentAlertCapturesRepository';

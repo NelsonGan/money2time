@@ -193,14 +193,15 @@ export interface ParsedAutoLogAmount {
  * which tells the drain to drop the entry rather than post a bogus row.
  */
 export function parseAutoLogAmount(raw: string): ParsedAutoLogAmount | null {
-  const value = parseNumber(raw);
+  const currency = detectCurrency(raw);
+  const value = parseNumber(raw, { currency });
   if (value === null) return null;
 
   // A refund arrives negative; we still log magnitude as an expense.
   const amount = Math.abs(value);
   if (amount <= 0) return null;
 
-  return { amount, currency: detectCurrency(raw) };
+  return { amount, currency };
 }
 
 /**
