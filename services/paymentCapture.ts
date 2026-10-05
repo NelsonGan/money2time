@@ -93,12 +93,18 @@ function readAndroidCaptures(): CaptureInput[] {
   }
   const captures: CaptureInput[] = [];
   for (const name of sortCaptureFileNames(names)) {
-    const json = readText(name);
+    let json: string;
+    try {
+      json = new File(dir, name).textSync();
+    } catch {
+      // An I/O failure must retain the alert for the next drain.
+      continue;
+    }
     const capture = json ? parseAndroidCaptureJson(name, json) : null;
     if (capture) {
       captures.push(capture);
     } else {
-      // Unreadable: drop it so it cannot wedge every later drain.
+      // A completed malformed capture cannot become valid on a later drain.
       try {
         new File(capturesDir(), name).delete();
       } catch {

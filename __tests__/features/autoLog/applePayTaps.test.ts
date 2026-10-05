@@ -17,7 +17,6 @@ jest.mock('~/lib/repositories/paymentAlertCapturesRepository', () => ({
 jest.mock('~/services/errorReporting', () => ({
   reportError: (error: unknown, context: unknown) => reportError(error, context),
 }));
-jest.mock('~/services/paymentAlertsBridge', () => ({ emitPaymentAlertsChanged: jest.fn() }));
 
 import { checkApplePayTap, recordApplePayTap } from '~/features/autoLog/applePayTaps';
 

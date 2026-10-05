@@ -1271,6 +1271,7 @@ export type PaymentAlertReason =
   | 'promo'
   | 'declined'
   | 'balance'
+  | 'authorization_hold'
   | 'no_amount'
   | 'ignore_phrase'
   | 'duplicate'

@@ -2684,8 +2684,6 @@ const de = {
     source_remove_title: '%{app} entfernen?',
     source_remove_body_android:
       'Money2Time liest ihre Benachrichtigungen nicht mehr. Bereits erfasste Zahlungen bleiben erhalten.',
-    source_remove_body_ios:
-      'Ihre Einstellungen werden entfernt. Damit keine Benachrichtigungen mehr ankommen, lösche auch die Automation in Kurzbefehle.',
   },
 };
 

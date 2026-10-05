@@ -2643,8 +2643,6 @@ const nb = {
     source_remove_title: 'Fjerne %{app}?',
     source_remove_body_android:
       'Money2Time slutter å lese varslene dens. Betalinger som allerede er registrert, blir værende.',
-    source_remove_body_ios:
-      'Innstillingene fjernes. Slett også automatiseringen i Snarveier for å stoppe varslene.',
   },
 };
 

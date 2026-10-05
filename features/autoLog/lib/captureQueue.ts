@@ -1,7 +1,8 @@
 // Reading what the native capture layers queued: Android's notification
 // listener (one JSON file per alert in filesDir/payment-captures, see
 // plugins/withMoney2TimePaymentCapture.js) and iOS's Log Payment Alert intent
-// (a JSON array in the App Group, see plugins/withMoney2TimeAutoLog.js).
+// (one atomic file per alert in the App Group, exposed as a JSON array by
+// plugins/withMoney2TimeAutoLog.js).
 // Everything here crosses the native boundary, so malformed input degrades to
 // "nothing queued" rather than throwing. Pure; covered by
 // __tests__/features/autoLog/pipeline.test.ts.

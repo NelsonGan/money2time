@@ -121,7 +121,7 @@ money2time/
 │   ├── loans/                  # Loan accounts — payoff progress, instalments, interest
 │   ├── reimbursements/         # Expenses someone else pays back
 │   ├── widgets/                # Widgets hub + the live-earnings Live Activity
-│   ├── autoLog/                # Payment alerts: notifications and SMS into automatic transactions
+│   ├── autoLog/                # Bank and wallet app notifications into automatic transactions
 │   ├── settings/               # All settings screens + nested stack
 │   ├── onboarding/             # First-run flow (welcome, basics, wage, backup, source, notifications, features)
 │   ├── tutorials/              # Searchable how-to guides, mirrored to money2time.com

@@ -1,8 +1,8 @@
 // Recognizing the same payment twice: a notification re-posted or updated,
 // the bank app and the wallet both announcing one purchase, an Apple Pay tap
 // that the bank also alerts, or a payment the user already typed in. Pure;
-// covered by __tests__/features/autoLog/decisions.test.ts. Rules are
-// docs/prd-notification-auto-log.md §9.5.
+// covered by __tests__/features/autoLog/decisions.test.ts. Rules are in
+// docs/prd-notification-auto-log.md.
 
 import type {
   PaymentAlertCapture,
@@ -114,7 +114,8 @@ function sameMoney(
   b: { amount: number | null; currency: string | null },
 ): boolean {
   if (a.amount === null || b.amount === null) return false;
-  if (Math.abs(a.amount - b.amount) > 0.01) return false;
+  const roundingTolerance = Number.EPSILON * Math.max(1, a.amount, b.amount) * 4;
+  if (Math.abs(a.amount - b.amount) > roundingTolerance) return false;
   return !!a.currency && a.currency === b.currency;
 }
 

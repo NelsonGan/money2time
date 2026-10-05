@@ -2655,8 +2655,6 @@ const tr = {
     source_remove_title: '%{app} kaldırılsın mı?',
     source_remove_body_android:
       'Money2Time bu uygulamanın bildirimlerini okumayı bırakır. Kaydedilmiş ödemeler kalır.',
-    source_remove_body_ios:
-      "Ayarları kaldırılır. Bildirimlerinin gelmesini durdurmak için Kestirmeler'deki otomasyonu da silin.",
   },
 };
 

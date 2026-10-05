@@ -27,7 +27,7 @@ interface NativeAutoLogModule {
   clearPending?: (ids: string[]) => Promise<void>;
   readPendingScans?: () => Promise<string | null>;
   clearPendingScans?: (ids: string[]) => Promise<void>;
-  /** Log Payment Alert queue (bank notifications, SMS and emails via Shortcuts). */
+  /** Log Payment Alert queue (bank and wallet app notifications via Shortcuts). */
   readPendingAlerts?: () => Promise<string | null>;
   clearPendingAlerts?: (ids: string[]) => Promise<void>;
   /** Debug builds only. See `enqueueTestAutoLogTap`. */
@@ -173,8 +173,8 @@ export async function clearAutoLogPendingAlerts(ids: string[]): Promise<void> {
 
 /**
  * Debug builds only: queue an alert as if a Shortcuts automation had run Log
- * Payment Alert. The simulator has no Shortcuts automations, so this is the
- * only way to exercise the real queue there.
+ * Payment Alert. Exercises the real App Group queue without waiting for a
+ * notification-triggered automation.
  */
 export async function enqueueTestAutoLogAlert(
   source: string,
@@ -208,7 +208,7 @@ export function subscribeAutoLogDrain(listener: () => void) {
 /**
  * Debug builds only: queue a tap as if the Shortcuts automation had fired.
  *
- * A simulator has no NFC and no Shortcuts app, so this is the only way to
+ * A simulator has no NFC, so this is the only way to
  * exercise the real path there. It goes through the same App Group queue the
  * intent writes, so the drain, the amount parsing and the defaults all run for
  * real rather than being stubbed.

@@ -2644,8 +2644,6 @@ const da = {
     source_remove_title: 'Fjern %{app}?',
     source_remove_body_android:
       'Money2Time stopper med at læse dens notifikationer. Allerede registrerede betalinger bliver.',
-    source_remove_body_ios:
-      'Dens indstillinger fjernes. Slet også automatiseringen i Genveje for at stoppe dens notifikationer.',
   },
 };
 

@@ -2680,8 +2680,6 @@ const fr = {
     source_remove_title: 'Retirer %{app} ?',
     source_remove_body_android:
       'Money2Time cesse de lire ses notifications. Les paiements déjà enregistrés restent.',
-    source_remove_body_ios:
-      'Ses réglages sont supprimés. Pour ne plus recevoir ses alertes, supprimez aussi l’automatisation dans Raccourcis.',
   },
 };
 

@@ -2672,8 +2672,6 @@ const nl = {
     source_remove_title: '%{app} verwijderen?',
     source_remove_body_android:
       'Money2Time leest de meldingen ervan niet meer. Al geregistreerde betalingen blijven staan.',
-    source_remove_body_ios:
-      'De instellingen worden verwijderd. Verwijder ook de automatisering in Opdrachten om geen meldingen meer te ontvangen.',
   },
 };
 

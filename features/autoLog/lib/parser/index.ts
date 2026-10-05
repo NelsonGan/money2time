@@ -36,8 +36,8 @@ import {
   type NormalizedAlert,
 } from './text';
 
-/** Bump when the parser's output for the same text changes; pending alerts re-parse. */
-export const ALERT_PARSER_VERSION = 2;
+/** Bump when the parser's output for the same text changes. Retries use the latest version. */
+export const ALERT_PARSER_VERSION = 3;
 
 const LEX = {
   otp: compileLexicon(OTP),

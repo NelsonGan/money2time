@@ -2527,8 +2527,6 @@ const zhHant = {
     source_missing: '此來源已被移除。',
     source_remove_title: '移除 %{app}？',
     source_remove_body_android: 'Money2Time 將不再讀取它的通知。已記下的付款會保留。',
-    source_remove_body_ios:
-      '它的設定會被移除。如要停止接收它的通知，請一併在快捷指令中刪除該自動化。',
   },
 };
 

@@ -2657,8 +2657,6 @@ const id = {
     source_remove_title: 'Hapus %{app}?',
     source_remove_body_android:
       'Money2Time berhenti membaca notifikasinya. Pembayaran yang sudah dicatat tetap ada.',
-    source_remove_body_ios:
-      'Pengaturannya dihapus. Agar notifikasinya berhenti masuk, hapus juga otomatisasinya di Shortcuts.',
   },
 };
 

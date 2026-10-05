@@ -4,7 +4,7 @@
 import type { Lexicon } from './lexicons';
 
 /** Characters that make up a word in the scripts lexicon words are written in. */
-export const WORD_CHAR_CLASS = 'A-Za-z0-9\\u00C0-\\u024F\\u1E00-\\u1EFF';
+export const WORD_CHAR_CLASS = 'A-Za-z0-9\\u00C0-\\u024F\\u0400-\\u052F\\u1E00-\\u1EFF';
 const WORD_CHAR = new RegExp(`[${WORD_CHAR_CLASS}]`);
 
 /** Longest text the parser looks at; real alerts are a few hundred characters. */
@@ -29,7 +29,7 @@ export function isWordChar(char: string | undefined): boolean {
   return !!char && WORD_CHAR.test(char);
 }
 
-/** Email bodies arrive as HTML through the iOS Email automation. */
+/** Normalize markup when it is included in shared alert text. */
 function stripHtml(value: string): string {
   if (!/<\/?[a-z][^>]*>/i.test(value)) return value;
   return value

@@ -3,7 +3,6 @@ import React, { useCallback } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 
 import {
-  Button,
   FormSwitchRow,
   SettingsHeader,
   SettingsPageLayout,
@@ -47,11 +46,7 @@ export function PaymentAlertSourceScreen({
     if (!source) return;
     Alert.alert(
       I18n.t('payment_alerts.source_remove_title', { app: source.label }),
-      I18n.t(
-        channel === 'android_notification'
-          ? 'payment_alerts.source_remove_body_android'
-          : 'payment_alerts.source_remove_body_ios',
-      ),
+      I18n.t('payment_alerts.source_remove_body_android'),
       [
         { text: I18n.t('common.cancel'), style: 'cancel' },
         {
@@ -74,7 +69,7 @@ export function PaymentAlertSourceScreen({
             onBack={onBack}
             title={source?.label ?? I18n.t('payment_alerts.title')}
             rightAccessory={
-              source && channel === 'android_notification' ? (
+              source ? (
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel={I18n.t('common.remove')}
@@ -112,11 +107,6 @@ export function PaymentAlertSourceScreen({
                   onChange={(accountId) => update({ accountId })}
                 />
               </View>
-              {channel !== 'android_notification' ? (
-                <Button variant="ghost" onPress={remove}>
-                  <Text className="text-destructive">{I18n.t('common.remove')}</Text>
-                </Button>
-              ) : null}
             </>
           ) : (
             <Text tone="muted">{I18n.t('payment_alerts.source_missing')}</Text>

@@ -2642,8 +2642,6 @@ const en = {
     source_remove_title: 'Remove %{app}?',
     source_remove_body_android:
       'Money2Time stops reading its notifications. Payments already logged stay.',
-    source_remove_body_ios:
-      'Its settings are removed. To stop its alerts arriving, delete the automation in Shortcuts too.',
   },
 };
 

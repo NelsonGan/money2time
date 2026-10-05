@@ -2654,8 +2654,6 @@ const pl = {
     source_remove_title: 'Usunąć %{app}?',
     source_remove_body_android:
       'Money2Time przestanie odczytywać jego powiadomienia. Zapisane już płatności pozostaną.',
-    source_remove_body_ios:
-      'Jego ustawienia zostaną usunięte. Aby przestać otrzymywać powiadomienia, usuń też automatyzację w Skrótach.',
   },
 };
 

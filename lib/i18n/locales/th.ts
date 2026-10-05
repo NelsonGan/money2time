@@ -2599,8 +2599,6 @@ const th = {
     source_remove_title: 'นำ %{app} ออกไหม',
     source_remove_body_android:
       'Money2Time จะหยุดอ่านการแจ้งเตือนของแอปนี้ การชำระเงินที่บันทึกไว้แล้วจะยังอยู่',
-    source_remove_body_ios:
-      'การตั้งค่าจะถูกลบ หากต้องการหยุดรับการแจ้งเตือน ให้ลบระบบอัตโนมัติใน Shortcuts ด้วย',
   },
 };
 
