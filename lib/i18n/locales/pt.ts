@@ -1221,10 +1221,6 @@ const pt = {
       default_category: 'Categoria padrão',
       default_none: 'Não definido',
       payment_alerts_title: 'Notificações de pagamento',
-      payment_alerts_hint_android:
-        'Registra pagamentos a partir das notificações dos seus apps de banco e carteiras. Você escolhe os apps.',
-      payment_alerts_hint_ios:
-        'Registra pagamentos a partir das notificações, SMS e e-mails do seu banco com uma automação do Atalhos.',
       payment_alerts_open: 'Alertas de pagamento',
       payment_alerts_status_off: 'Não configurado',
       payment_alerts_status_apps_one: 'Ativado para %{count} app',

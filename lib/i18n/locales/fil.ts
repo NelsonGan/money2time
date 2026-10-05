@@ -1232,10 +1232,6 @@ const fil = {
       default_category: 'Default na kategorya',
       default_none: 'Hindi nakatakda',
       payment_alerts_title: 'Mga notification ng bayad',
-      payment_alerts_hint_android:
-        'Itinatala ang mga bayad mula sa mga notification ng mga banking at wallet app mo. Ikaw ang pipili ng mga app.',
-      payment_alerts_hint_ios:
-        'Itinatala ang mga bayad mula sa mga notification, text message at email ng bangko mo sa pamamagitan ng Shortcuts automation.',
       payment_alerts_open: 'Mga alerto sa bayad',
       payment_alerts_status_off: 'Hindi pa naka-set up',
       payment_alerts_status_apps_one: 'Naka-on para sa %{count} app',

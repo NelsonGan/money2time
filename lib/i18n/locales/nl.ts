@@ -1228,10 +1228,6 @@ const nl = {
       default_category: 'Standaardcategorie',
       default_none: 'Niet ingesteld',
       payment_alerts_title: 'Betaalmeldingen',
-      payment_alerts_hint_android:
-        'Registreert betalingen uit de meldingen van je bank- en wallet-apps. Jij kiest de apps.',
-      payment_alerts_hint_ios:
-        "Registreert betalingen uit de meldingen, sms'jes en e-mails van je bank via een automatisering in Opdrachten.",
       payment_alerts_open: 'Betaalmeldingen',
       payment_alerts_status_off: 'Niet ingesteld',
       payment_alerts_status_apps_one: 'Aan voor %{count} app',

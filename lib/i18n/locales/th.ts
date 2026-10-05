@@ -1198,10 +1198,6 @@ const th = {
       default_category: 'หมวดหมู่เริ่มต้น',
       default_none: 'ยังไม่ได้ตั้ง',
       payment_alerts_title: 'การแจ้งเตือนการชำระเงิน',
-      payment_alerts_hint_android:
-        'บันทึกการชำระเงินจากการแจ้งเตือนของแอปธนาคารและแอปวอลเล็ต คุณเลือกแอปเองได้',
-      payment_alerts_hint_ios:
-        'บันทึกการชำระเงินจากการแจ้งเตือน SMS และอีเมลของธนาคารผ่านระบบอัตโนมัติใน Shortcuts',
       payment_alerts_open: 'การแจ้งเตือนการชำระเงิน',
       payment_alerts_status_off: 'ยังไม่ได้ตั้งค่า',
       payment_alerts_status_apps_one: 'เปิดสำหรับ %{count} แอป',

@@ -1216,10 +1216,6 @@ const sv = {
       default_category: 'Standardkategori',
       default_none: 'Inte angivet',
       payment_alerts_title: 'Betalningsaviseringar',
-      payment_alerts_hint_android:
-        'Registrerar betalningar från aviseringarna i dina bank- och plånboksappar. Du väljer apparna.',
-      payment_alerts_hint_ios:
-        'Registrerar betalningar från bankens aviseringar, sms och mejl via en automation i Genvägar.',
       payment_alerts_open: 'Betalningsaviseringar',
       payment_alerts_status_off: 'Inte konfigurerat',
       payment_alerts_status_apps_one: 'På för %{count} app',

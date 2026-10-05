@@ -1221,10 +1221,6 @@ const tr = {
       default_category: 'Varsayılan kategori',
       default_none: 'Ayarlanmadı',
       payment_alerts_title: 'Ödeme bildirimleri',
-      payment_alerts_hint_android:
-        'Banka ve cüzdan uygulamalarınızın bildirimlerinden ödemeleri kaydeder. Uygulamaları siz seçersiniz.',
-      payment_alerts_hint_ios:
-        "Kestirmeler'deki bir otomasyonla bankanızın bildirimlerinden, SMS'lerinden ve e-postalarından ödemeleri kaydeder.",
       payment_alerts_open: 'Ödeme bildirimleri',
       payment_alerts_status_off: 'Kurulmadı',
       payment_alerts_status_apps_one: '%{count} uygulama için açık',

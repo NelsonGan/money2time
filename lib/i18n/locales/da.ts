@@ -1219,10 +1219,6 @@ const da = {
       default_category: 'Standardkategori',
       default_none: 'Ikke angivet',
       payment_alerts_title: 'Betalingsnotifikationer',
-      payment_alerts_hint_android:
-        'Registrerer betalinger fra notifikationerne i dine bank- og wallet-apps. Du vælger apps.',
-      payment_alerts_hint_ios:
-        "Registrerer betalinger fra din banks notifikationer, sms'er og e-mails via en automatisering i Genveje.",
       payment_alerts_open: 'Betalingsnotifikationer',
       payment_alerts_status_off: 'Ikke sat op',
       payment_alerts_status_apps_one: 'Til for %{count} app',

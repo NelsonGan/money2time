@@ -1191,10 +1191,6 @@ const en = {
       default_category: 'Default category',
       default_none: 'Not set',
       payment_alerts_title: 'Payment notifications',
-      payment_alerts_hint_android:
-        'Logs payments from the notifications of your banking and wallet apps. You choose which apps.',
-      payment_alerts_hint_ios:
-        "Logs payments from your bank's notifications, text messages and emails through a Shortcuts automation.",
       payment_alerts_open: 'Payment alerts',
       payment_alerts_status_off: 'Not set up',
       payment_alerts_status_apps_one: 'On for %{count} app',

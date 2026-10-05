@@ -1219,10 +1219,6 @@ const pl = {
       default_category: 'Domyślna kategoria',
       default_none: 'Nie ustawiono',
       payment_alerts_title: 'Powiadomienia o płatnościach',
-      payment_alerts_hint_android:
-        'Zapisuje płatności z powiadomień aplikacji bankowych i portfeli. Ty wybierasz aplikacje.',
-      payment_alerts_hint_ios:
-        'Zapisuje płatności z powiadomień, SMS-ów i e-maili z banku dzięki automatyzacji w Skrótach.',
       payment_alerts_open: 'Powiadomienia o płatnościach',
       payment_alerts_status_off: 'Nieskonfigurowane',
       payment_alerts_status_apps_one: 'Włączone dla %{count} aplikacji',

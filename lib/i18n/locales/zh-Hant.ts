@@ -1157,8 +1157,6 @@ const zhHant = {
       default_category: '預設分類',
       default_none: '未設定',
       payment_alerts_title: '付款通知',
-      payment_alerts_hint_android: '從銀行與電子錢包 App 的通知中記錄付款。由你選擇哪些 App。',
-      payment_alerts_hint_ios: '透過快捷指令自動化，從銀行的通知、簡訊和電子郵件中記錄付款。',
       payment_alerts_open: '付款通知',
       payment_alerts_status_off: '尚未設定',
       payment_alerts_status_apps_one: '已為 %{count} 個 App 開啟',

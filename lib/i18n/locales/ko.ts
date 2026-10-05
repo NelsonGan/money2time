@@ -1197,10 +1197,6 @@ const ko = {
       default_category: '기본 카테고리',
       default_none: '설정 안 됨',
       payment_alerts_title: '결제 알림',
-      payment_alerts_hint_android:
-        '은행 앱과 간편결제 앱의 알림에서 결제를 기록합니다. 어떤 앱을 쓸지 직접 고릅니다.',
-      payment_alerts_hint_ios:
-        '단축어 자동화로 은행의 알림, 문자 메시지, 이메일에서 결제를 기록합니다.',
       payment_alerts_open: '결제 알림',
       payment_alerts_status_off: '설정 안 됨',
       payment_alerts_status_apps_one: '앱 %{count}개에서 켜짐',

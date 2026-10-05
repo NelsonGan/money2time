@@ -1222,10 +1222,6 @@ const es = {
       default_category: 'Categoría predeterminada',
       default_none: 'Sin definir',
       payment_alerts_title: 'Notificaciones de pago',
-      payment_alerts_hint_android:
-        'Registra pagos a partir de las notificaciones de tus apps bancarias y billeteras. Tú eliges las apps.',
-      payment_alerts_hint_ios:
-        'Registra pagos a partir de las notificaciones, SMS y correos de tu banco mediante una automatización de Atajos.',
       payment_alerts_open: 'Alertas de pago',
       payment_alerts_status_off: 'Sin configurar',
       payment_alerts_status_apps_one: 'Activado para %{count} app',

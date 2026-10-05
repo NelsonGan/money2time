@@ -1211,10 +1211,6 @@ const hi = {
       default_category: 'डिफ़ॉल्ट श्रेणी',
       default_none: 'सेट नहीं है',
       payment_alerts_title: 'भुगतान सूचनाएं',
-      payment_alerts_hint_android:
-        'आपके बैंकिंग और वॉलेट ऐप्स की सूचनाओं से भुगतान दर्ज करता है। ऐप्स आप चुनते हैं।',
-      payment_alerts_hint_ios:
-        'Shortcuts ऑटोमेशन के ज़रिए आपके बैंक की सूचनाओं, SMS और ईमेल से भुगतान दर्ज करता है।',
       payment_alerts_open: 'भुगतान अलर्ट',
       payment_alerts_status_off: 'सेट अप नहीं',
       payment_alerts_status_apps_one: '%{count} ऐप के लिए चालू',

@@ -1217,10 +1217,6 @@ const nb = {
       default_category: 'Standardkategori',
       default_none: 'Ikke angitt',
       payment_alerts_title: 'Betalingsvarsler',
-      payment_alerts_hint_android:
-        'Registrerer betalinger fra varslene i bank- og lommebokappene dine. Du velger appene.',
-      payment_alerts_hint_ios:
-        'Registrerer betalinger fra bankens varsler, SMS-er og e-poster via en automatisering i Snarveier.',
       payment_alerts_open: 'Betalingsvarsler',
       payment_alerts_status_off: 'Ikke satt opp',
       payment_alerts_status_apps_one: 'På for %{count} app',

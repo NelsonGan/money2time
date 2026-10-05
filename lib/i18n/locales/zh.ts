@@ -1157,8 +1157,6 @@ const zh = {
       default_category: '默认分类',
       default_none: '未设置',
       payment_alerts_title: '付款通知',
-      payment_alerts_hint_android: '从银行和电子钱包应用的通知中记录付款。由你选择哪些应用。',
-      payment_alerts_hint_ios: '通过快捷指令自动化，从银行的通知、短信和邮件中记录付款。',
       payment_alerts_open: '付款通知',
       payment_alerts_status_off: '尚未设置',
       payment_alerts_status_apps_one: '已为 %{count} 个应用开启',

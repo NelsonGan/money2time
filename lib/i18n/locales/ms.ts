@@ -1225,10 +1225,6 @@ const ms = {
       default_category: 'Kategori lalai',
       default_none: 'Tidak ditetapkan',
       payment_alerts_title: 'Pemberitahuan pembayaran',
-      payment_alerts_hint_android:
-        'Merekod pembayaran daripada pemberitahuan aplikasi bank dan e-dompet anda. Anda yang memilih aplikasinya.',
-      payment_alerts_hint_ios:
-        'Merekod pembayaran daripada pemberitahuan, mesej teks dan e-mel bank anda melalui automasi Shortcuts.',
       payment_alerts_open: 'Makluman pembayaran',
       payment_alerts_status_off: 'Belum disediakan',
       payment_alerts_status_apps_one: 'Hidup untuk %{count} aplikasi',
