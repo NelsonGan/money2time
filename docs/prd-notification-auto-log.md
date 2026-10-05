@@ -17,14 +17,15 @@ transaction-history learning, AI requests, or categorization server is involved.
 
 ## Interface
 
-- Automation contains one compact Payment alerts entry and its status.
+- Automation has a Payment notifications section with a Payment alerts entry
+  and its status.
 - Android Payment alerts contains the capture switch, chosen apps with their
   account names, Choose apps, and the tutorial link.
 - iOS Payment alerts contains the two Shortcuts tutorial links and configured
   automation sources with their selected accounts.
 - A source screen contains its switch, one account picker, and Remove.
-- Longer explanations live behind the existing info tooltip buttons. The
-  initial notification-access disclosure stays visible before system access.
+- Explanations appear above controls and tutorial links. Navigation rows have
+  one arrow. Notification-access details are visible before opening system settings.
 
 Android setup consists of disclosure, notification access, apps/accounts, and a
 test alert. Every selected app needs an active debit or credit account before

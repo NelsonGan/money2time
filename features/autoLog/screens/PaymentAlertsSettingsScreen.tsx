@@ -4,7 +4,6 @@ import { AppState, Platform, Pressable, ScrollView, View } from 'react-native';
 
 import {
   FormSwitchRow,
-  InfoTooltipButton,
   SettingsHeader,
   SettingsPageLayout,
   Text,
@@ -49,36 +48,63 @@ function Card({ children }: { children: React.ReactNode }) {
 function LinkRow({
   label,
   detail,
-  help,
+  accessibilityLabel,
   onPress,
 }: {
   label: string;
   detail?: string;
-  help?: string;
+  accessibilityLabel?: string;
   onPress: () => void;
 }) {
   const colors = useThemeColors();
   return (
-    <View className="flex-row items-center gap-3 px-4 py-3">
-      <Pressable
-        className="flex-1 flex-row items-center gap-3"
-        accessibilityRole="button"
-        onPress={() => {
-          void triggerHaptic('selection');
-          onPress();
-        }}
-      >
-        <View className="flex-1 gap-1">
-          <Text>{label}</Text>
-          {detail ? (
-            <Text variant="caption" tone="muted" numberOfLines={1}>
-              {detail}
-            </Text>
-          ) : null}
-        </View>
-        <ChevronRight size={18} color={colors.textMuted} />
-      </Pressable>
-      {help ? <InfoTooltipButton title={label} infoTooltip={help} /> : null}
+    <Pressable
+      className="flex-row items-center gap-3 px-4 py-3"
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel ?? label}
+      onPress={() => {
+        void triggerHaptic('selection');
+        onPress();
+      }}
+    >
+      <View className="flex-1 gap-1">
+        <Text>{label}</Text>
+        {detail ? (
+          <Text variant="caption" tone="muted" numberOfLines={1}>
+            {detail}
+          </Text>
+        ) : null}
+      </View>
+      <ChevronRight size={18} color={colors.textMuted} />
+    </Pressable>
+  );
+}
+
+function TutorialCard({
+  title,
+  description,
+  onPress,
+}: {
+  title: string;
+  description: string;
+  onPress: () => void;
+}) {
+  return (
+    <View className="gap-2">
+      <Text variant="caption" tone="muted" className="px-1">
+        {title}
+      </Text>
+      <Card>
+        <Text variant="caption" tone="muted" className="px-4 py-3">
+          {description}
+        </Text>
+        <Divider />
+        <LinkRow
+          label={I18n.t('settings.auto_log.tutorial_button')}
+          accessibilityLabel={title}
+          onPress={onPress}
+        />
+      </Card>
     </View>
   );
 }
@@ -142,16 +168,18 @@ export function PaymentAlertsSettingsScreen({
             className="px-0 pt-5 pb-0"
             onBack={onBack}
             title={I18n.t('payment_alerts.title')}
-            infoTooltip={I18n.t(
-              IS_ANDROID ? 'payment_alerts.intro_android' : 'payment_alerts.intro_ios',
-            )}
           />
+          <Text variant="caption" tone="muted">
+            {I18n.t(IS_ANDROID ? 'payment_alerts.intro_android' : 'payment_alerts.intro_ios')}
+          </Text>
           {IS_ANDROID ? (
             <Card>
-              <View className="p-4">
+              <View className="gap-3 p-4">
+                <Text variant="caption" tone="muted">
+                  {I18n.t('payment_alerts.master_hint')}
+                </Text>
                 <FormSwitchRow
                   label={I18n.t('payment_alerts.master_label')}
-                  info={I18n.t('payment_alerts.master_hint')}
                   value={prefs.alertsEnabled}
                   onValueChange={toggleAlerts}
                 />
@@ -160,15 +188,15 @@ export function PaymentAlertsSettingsScreen({
                 <>
                   <Divider />
                   <View className="gap-3 p-4">
-                    <View className="flex-row items-center gap-2">
-                      <Text variant="caption" tone="warning" className="flex-1">
-                        {health}
-                      </Text>
-                      <InfoTooltipButton
-                        title={I18n.t('payment_alerts.section_status')}
-                        infoTooltip={I18n.t('payment_alerts.health_battery_hint')}
-                      />
-                    </View>
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('payment_alerts.section_status')}
+                    </Text>
+                    <Text variant="caption" tone="warning">
+                      {health}
+                    </Text>
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('payment_alerts.health_battery_hint')}
+                    </Text>
                     <View className="flex-row gap-4">
                       <Pressable
                         accessibilityRole="button"
@@ -192,23 +220,22 @@ export function PaymentAlertsSettingsScreen({
               ) : null}
             </Card>
           ) : (
-            <Card>
-              <LinkRow
-                label={I18n.t('payment_alerts.ios_notifications_title')}
-                help={I18n.t(
+            <View className="gap-4">
+              <TutorialCard
+                title={I18n.t('payment_alerts.ios_notifications_title')}
+                description={I18n.t(
                   IOS_HAS_NOTIFICATION_TRIGGER
                     ? 'payment_alerts.ios_notifications_hint'
                     : 'payment_alerts.ios_needs_27',
                 )}
                 onPress={() => onOpenTutorial('paymentAlertsIos')}
               />
-              <Divider />
-              <LinkRow
-                label={I18n.t('payment_alerts.ios_sms_title')}
-                help={I18n.t('payment_alerts.ios_sms_hint')}
+              <TutorialCard
+                title={I18n.t('payment_alerts.ios_sms_title')}
+                description={I18n.t('payment_alerts.ios_sms_hint')}
                 onPress={() => onOpenTutorial('bankSmsIos')}
               />
-            </Card>
+            </View>
           )}
           {IS_ANDROID || sources.length > 0 ? (
             <View className="gap-2">
