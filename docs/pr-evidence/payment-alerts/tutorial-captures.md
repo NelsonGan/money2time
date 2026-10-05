@@ -13,8 +13,9 @@ The 31 indexed PNGs under `assets/autolog/pa_*.png` illustrate 32 steps.
   examples were disabled after capture. No shortcut was manually run.
 - Android emulator, API 36: in-app disclosure, system notification access and
   permission confirmation, installed-app selection, account picker and the
-  actual test notification. Its successful preview showed RM1.00, Everyday
-  Account and Food. The database held 7,099 transactions before and after the
+  setup's synthetic test alert. Money2Time's own notification permission was
+  denied, so this run used the native test-queue fallback. Its successful
+  preview showed RM1.00, Everyday Account and Food. The database held 7,099 transactions before and after the
   test, confirming that the preview created no expense. Original app
   preferences, theme and notification access were restored after capture.
 - The simulator and emulator windows remained open during testing. The final
