@@ -145,12 +145,10 @@ const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
     { key: 'payment_alerts_ios_step_4', image: require('~/assets/autolog/pa_ios_variable.png') },
     { key: 'payment_alerts_ios_input', image: require('~/assets/autolog/pa_ios_input.png') },
     { key: 'payment_alerts_ios_body', image: require('~/assets/autolog/pa_ios_body.png') },
-    { key: 'payment_alerts_ios_step_5', image: require('~/assets/autolog/pa_ios_from.png') },
     {
       key: 'payment_alerts_ios_step_6',
       image: require('~/assets/autolog/pa_ios_pick_account.png'),
     },
-    { key: 'payment_alerts_ios_fields', image: require('~/assets/autolog/pa_ios_metadata.png') },
     { key: 'payment_alerts_ios_step_7', image: require('~/assets/autolog/pa_ios_done.png') },
   ],
 };

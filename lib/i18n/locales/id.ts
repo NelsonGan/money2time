@@ -1242,9 +1242,8 @@ const id = {
       payment_alerts_ios_step_2: 'Cari Notification dan pilih.',
       payment_alerts_ios_step_3: 'Cari Log Payment Alert lalu tambahkan.',
       payment_alerts_ios_step_4: 'Ketuk Message di Log Payment Alert, lalu Select Variable.',
-      payment_alerts_ios_step_5: 'Ketuk From dan ketik nama aplikasi.',
       payment_alerts_ios_step_6:
-        'Ketuk panah tindakan, lalu Account. Pilih akun untuk mencatat pembayaran aplikasi ini.',
+        'Ketuk panah tindakan, lalu Account. Pilih akun untuk mencatat pembayaran aplikasi ini. Biarkan Category kosong untuk pencocokan kata kunci otomatis.',
       payment_alerts_ios_step_7:
         'Ketuk kembali untuk menyimpan. Ulangi untuk setiap aplikasi bank atau dompet digital. Pembayaran dicatat saat Anda membuka Money2Time lagi.',
       payment_alerts_android_disclosure:
@@ -1255,8 +1254,6 @@ const id = {
         'Ketuk panah di samping aplikasi. Biarkan Automation aktif dan matikan Notify untuk pencatatan tanpa pemberitahuan.',
       payment_alerts_ios_input: 'Pilih variabel Notification di bawah pemicu.',
       payment_alerts_ios_body: 'Ketuk variabel yang dimasukkan, pilih Body, lalu Return.',
-      payment_alerts_ios_fields:
-        'Atur Title dan Subtitle ke properti Notification yang sesuai dengan cara yang sama. Kosongkan Category untuk pencocokan kata kunci.',
     },
     title: 'Pengaturan',
     display: 'Tampilan',

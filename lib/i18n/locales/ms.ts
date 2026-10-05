@@ -1245,9 +1245,8 @@ const ms = {
       payment_alerts_ios_step_2: 'Cari Notification dan pilihnya.',
       payment_alerts_ios_step_3: 'Cari Log Payment Alert dan tambahkannya.',
       payment_alerts_ios_step_4: 'Ketik Message dalam Log Payment Alert, kemudian Select Variable.',
-      payment_alerts_ios_step_5: 'Ketik From dan taip nama aplikasi.',
       payment_alerts_ios_step_6:
-        'Ketik anak panah tindakan, kemudian Account. Pilih akaun untuk merekod pembayaran aplikasi ini.',
+        'Ketik anak panah tindakan, kemudian Account. Pilih akaun untuk merekod pembayaran aplikasi ini. Biarkan Category kosong untuk padanan kata kunci automatik.',
       payment_alerts_ios_step_7:
         'Ketik kembali untuk menyimpan. Ulangi untuk setiap aplikasi bank atau e-dompet. Pembayaran direkod apabila anda membuka Money2Time semula.',
       payment_alerts_android_disclosure:
@@ -1258,8 +1257,6 @@ const ms = {
         'Ketik anak panah di sebelah aplikasi. Biarkan Automation hidup dan matikan Notify untuk merekod tanpa pemberitahuan.',
       payment_alerts_ios_input: 'Pilih pemboleh ubah Notification di bawah pencetus.',
       payment_alerts_ios_body: 'Ketik pemboleh ubah yang dimasukkan, pilih Body, kemudian Return.',
-      payment_alerts_ios_fields:
-        'Tetapkan Title dan Subtitle kepada sifat Notification yang sepadan dengan langkah yang sama. Biarkan Category kosong untuk padanan kata kunci.',
     },
     title: 'Tetapan',
     display: 'Paparan',

@@ -3,12 +3,15 @@
 Captured on 5 October 2026 from the running apps, using Argent screenshots at
 full device resolution. Red tap markers come from accessibility frames;
 `scripts/data/autolog-shots.json` stores the reproducible annotation spec.
-The 20 indexed PNGs under `assets/autolog/pa_*.png` illustrate 20 steps.
+The 18 indexed PNGs under `assets/autolog/pa_*.png` illustrate 10 iOS steps and
+8 Android steps.
 
 - iPhone 18 Pro, iOS 27.0: manually built a Notification automation in Shortcuts
-  using the built-in Wallet app. Bound Notification Body, Title and Subtitle to
-  Money2Time's Log Payment Alert action, with From set to Wallet and a selected
-  account. The guide shows Automation on and Notify off. The test example was
+  using the built-in Wallet app. The simplified guide binds only Notification
+  Body to Message and selects Account. From, Title, Subtitle and Category are
+  empty; categories use the existing keyword matcher. Recaptured the account
+  and completed-action frames after removing the optional fields. The guide
+  shows Automation on and Notify off. The test example was
   disabled after capture; no shortcut was manually run. The former SMS guide,
   route, translations and screenshots are removed.
 - Android emulator, API 36: in-app disclosure, system notification access and
@@ -65,3 +68,18 @@ The remaining tutorial topics keep the existing screen tracking.
   Malay test-result capture. The iPad preferences and Light theme stayed unchanged.
   Both device windows remained visible during testing and were left on the
   checked Automation/source screens.
+
+## Simplified iOS setup verification
+
+- Walked all 10 App notifications guide pages on iPhone 18 Pro, iOS 27, through
+  local Metro. Checked captions, images, tap markers and the final Done button.
+  Refreshed the Body-selection PR screenshot and added account-selection and
+  completed-setup screenshots. The visible simulator stayed on page 10.
+- The running app accepted a synthetic queued alert containing only Message
+  and Account. It produced an expense draft for MYR25.00 and selected Fuel
+  through the keyword matcher, with From, Title, Subtitle and Category absent.
+  This check saved no transaction. App preferences, locale and theme stayed
+  unchanged; the Wallet example automation was saved and left disabled.
+- Rebuilt the iOS development app with the updated action description. The
+  Shortcuts fields remain optional and existing automations remain compatible.
+  Real iPhone notification delivery remains unverified.

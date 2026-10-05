@@ -1249,9 +1249,8 @@ const fr = {
       payment_alerts_ios_step_2: 'Recherchez Notification et sélectionnez-le.',
       payment_alerts_ios_step_3: 'Recherchez Log Payment Alert et ajoutez-le.',
       payment_alerts_ios_step_4: 'Touchez Message dans Log Payment Alert, puis Select Variable.',
-      payment_alerts_ios_step_5: 'Touchez From et saisissez le nom de l’app.',
       payment_alerts_ios_step_6:
-        'Touchez la flèche de l’action, puis Account. Choisissez où enregistrer les paiements de cette app.',
+        'Touchez la flèche de l’action, puis Account. Choisissez où enregistrer les paiements de cette app. Laissez Category vide pour une attribution automatique par mots-clés.',
       payment_alerts_ios_step_7:
         'Revenez en arrière pour enregistrer. Répétez pour chaque app bancaire ou portefeuille électronique. Les paiements seront enregistrés à la prochaine ouverture de Money2Time.',
       payment_alerts_android_disclosure:
@@ -1262,8 +1261,6 @@ const fr = {
         'Touchez la flèche près de l’application. Gardez Automation activé et désactivez Notify pour enregistrer silencieusement.',
       payment_alerts_ios_input: 'Sélectionnez la variable Notification sous le déclencheur.',
       payment_alerts_ios_body: 'Touchez la variable insérée, choisissez Body, puis Return.',
-      payment_alerts_ios_fields:
-        'Associez Title et Subtitle aux propriétés Notification correspondantes de la même manière. Laissez Category vide pour utiliser les mots-clés.',
     },
     title: 'Réglages',
     display: 'Affichage',
