@@ -181,6 +181,24 @@ class SettingsRepository {
       .run();
   }
 
+  getAutoLogPrefsJson(): string | null {
+    const db = getDb();
+    const row = db
+      .select({ autoLogPrefsJson: settingsTable.autoLogPrefsJson })
+      .from(settingsTable)
+      .where(and(eq(settingsTable.id, SETTINGS_ID), isNull(settingsTable.deletedAt)))
+      .get();
+    return row?.autoLogPrefsJson ?? null;
+  }
+
+  updateAutoLogPrefsJson(value: string | null) {
+    const db = getDb();
+    db.update(settingsTable)
+      .set({ autoLogPrefsJson: value, updatedAt: nowIso() })
+      .where(and(eq(settingsTable.id, SETTINGS_ID), isNull(settingsTable.deletedAt)))
+      .run();
+  }
+
   getCalendarPrefsJson(): string | null {
     const db = getDb();
     const row = db
@@ -223,6 +241,7 @@ class SettingsRepository {
         notificationPrefsJson: null,
         quickEntryPrefsJson: null,
         calendarPrefsJson: null,
+        autoLogPrefsJson: null,
         onboardingCompleted: false,
         userMode: 'power',
         weekStartsOn: 1,

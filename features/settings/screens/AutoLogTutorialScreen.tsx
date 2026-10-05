@@ -92,6 +92,37 @@ const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
     { key: 'share_screenshot_step_3', image: require('~/assets/autolog/ss_3.png') },
     { key: 'share_screenshot_step_4', image: require('~/assets/autolog/ss_4.png') },
   ],
+  // Android: turn on notification access, pick the banking and wallet apps,
+  // say which account each pays from, and send a test alert.
+  paymentAlertsAndroid: [
+    { key: 'payment_alerts_android_step_1', image: null },
+    { key: 'payment_alerts_android_step_2', image: null },
+    { key: 'payment_alerts_android_step_3', image: null },
+    { key: 'payment_alerts_android_step_4', image: null },
+    { key: 'payment_alerts_android_step_5', image: null },
+    { key: 'payment_alerts_android_step_6', image: null },
+    { key: 'payment_alerts_android_step_7', image: null },
+  ],
+  // iOS 27+: a Shortcuts "Notification" automation per bank app, running Log
+  // Payment Alert with the notification's Title, Subtitle and Body. Automations
+  // cannot be shared, so this one is built by hand like Log Card Payment.
+  paymentAlertsIos: [
+    { key: 'payment_alerts_ios_step_1', image: null },
+    { key: 'payment_alerts_ios_step_2', image: null },
+    { key: 'payment_alerts_ios_step_3', image: null },
+    { key: 'payment_alerts_ios_step_4', image: null },
+    { key: 'payment_alerts_ios_step_5', image: null },
+    { key: 'payment_alerts_ios_step_6', image: null },
+    { key: 'payment_alerts_ios_step_7', image: null },
+  ],
+  // iOS 17+: a "Message" automation for bank text messages, same action.
+  bankSmsIos: [
+    { key: 'bank_sms_ios_step_1', image: null },
+    { key: 'bank_sms_ios_step_2', image: null },
+    { key: 'bank_sms_ios_step_3', image: null },
+    { key: 'bank_sms_ios_step_4', image: null },
+    { key: 'bank_sms_ios_step_5', image: null },
+  ],
 };
 
 /** iCloud shortcut links, one per topic that ships a downloadable shortcut. */
@@ -119,6 +150,12 @@ function titleFor(topic: AutoLogTutorialTopic): string {
       return SCAN_SCREENSHOT_INTENT_NAME;
     case 'shareScreenshot':
       return I18n.t('settings.auto_log.share_screenshot_title');
+    case 'paymentAlertsAndroid':
+      return I18n.t('payment_alerts.title');
+    case 'paymentAlertsIos':
+      return I18n.t('payment_alerts.ios_notifications_title');
+    case 'bankSmsIos':
+      return I18n.t('payment_alerts.ios_sms_title');
   }
 }
 

@@ -1211,6 +1211,51 @@ const ja = {
       default_account: 'デフォルトの口座',
       default_category: 'デフォルトのカテゴリ',
       default_none: '未設定',
+      payment_alerts_title: '支払い通知',
+      payment_alerts_hint_android:
+        '銀行アプリや電子マネーアプリの通知から支払いを記録します。対象のアプリは自分で選べます。',
+      payment_alerts_hint_ios:
+        'ショートカットのオートメーションで、銀行の通知、SMS、メールから支払いを記録します。',
+      payment_alerts_open: '支払い通知',
+      payment_alerts_status_off: '未設定',
+      payment_alerts_status_apps_one: '%{count} 個のアプリでオン',
+      payment_alerts_status_apps_other: '%{count} 個のアプリでオン',
+      payment_alerts_status_sources_one: '送信元 %{count} 件',
+      payment_alerts_status_sources_other: '送信元 %{count} 件',
+      payment_alerts_android_step_1:
+        '「支払い通知」を開き、「支払い通知を読み取る」をオンにします。通知へのアクセスの使い方を読んで、「続ける」をタップします。',
+      payment_alerts_android_step_2:
+        'Android の通知へのアクセス画面が開きます。Money2Time を探してオンにします。',
+      payment_alerts_android_step_3:
+        '「許可」で確定します。Android はすべての通知を読めると警告しますが、Money2Time が保存するのは選んだアプリの通知だけです。',
+      payment_alerts_android_step_4:
+        'Money2Time に戻り、支払い通知を送ってくる銀行アプリや電子マネーアプリを選びます。',
+      payment_alerts_android_step_5: '各アプリの口座を選びます。',
+      payment_alerts_android_step_6: 'テスト通知を送って、正しく動くか確認します。',
+      payment_alerts_android_step_7:
+        '支払いは選択した口座に自動で記録されます。カテゴリは Apple Pay と同じキーワードで選ばれます。',
+      payment_alerts_ios_step_1:
+        'ショートカットを開き、「オートメーション」タブで New Automation をタップします。',
+      payment_alerts_ios_step_2:
+        'Notification を選び、銀行アプリを選んでから Run Immediately を選びます。',
+      payment_alerts_ios_step_3:
+        'Create New Shortcut をタップし、Money2Time を検索して Log Payment Alert を追加します。',
+      payment_alerts_ios_step_4:
+        'Message のフィールドをタップし、Select Variable を選び、次に Shortcut Input を選んで Body を選択します。',
+      payment_alerts_ios_step_5: 'From に銀行名を入れると、Money2Time で銀行ごとに設定できます。',
+      payment_alerts_ios_step_6: 'Log Payment Alert で Account を選びます。',
+      payment_alerts_ios_step_7:
+        '完了です。銀行アプリごとに繰り返します。支払いは次に Money2Time を開いたときに記録されます。',
+      bank_sms_ios_step_1:
+        'ショートカットを開き、「オートメーション」タブで New Automation をタップし、Message を選びます。',
+      bank_sms_ios_step_2:
+        '送信者に銀行を選ぶか、Message Contains にその SMS に必ず含まれる言葉を入力します。次に Run Immediately を選びます。',
+      bank_sms_ios_step_3:
+        'Create New Shortcut をタップし、Money2Time を検索して Log Payment Alert を追加します。',
+      bank_sms_ios_step_4:
+        'Message のフィールドをタップし、Select Variable を選び、次に Shortcut Input を選んで Content を選択します。From に銀行名を入れます。',
+      bank_sms_ios_step_5:
+        'Log Payment Alert で Account を選びます。 支払いは選択した口座に自動で記録されます。カテゴリは Apple Pay と同じキーワードで選ばれます。',
     },
     title: '設定',
     display: '表示',
@@ -2528,6 +2573,81 @@ const ja = {
       insights: '分析する',
       data: 'データ',
     },
+  },
+  payment_alerts: {
+    account_hint:
+      '支払いは選択した口座に自動で記録されます。カテゴリは Apple Pay と同じキーワードで選ばれます。',
+    title: '支払い通知',
+    intro_android:
+      'Money2Time は、選んだ銀行アプリや電子マネーアプリの支払い通知を読み取り、支払いを1件ずつ記録します。通知はこの端末上で読み取られ、アップロードされることはありません。',
+    intro_ios:
+      '支払いは選択した口座に自動で記録されます。カテゴリは Apple Pay と同じキーワードで選ばれます。',
+    section_status: 'ステータス',
+    master_label: '支払い通知を読み取る',
+    master_hint: '選んだアプリの支払いを記録します。',
+    access_open_settings: '設定を開く',
+    health_unsupported:
+      'このバージョンの Money2Time は通知を読み取れません。支払い通知を使うにはアプリを更新してください。',
+    health_access_off:
+      '通知へのアクセスがオフのため、支払いを読み取れていません。Android の設定でオンに戻してください。',
+    health_not_receiving:
+      'Money2Time はしばらく通知を受け取っていません。省電力のために端末が停止させた可能性があります。',
+    health_reconnect: '再接続',
+    health_battery_hint:
+      '何度も起きる場合は、Android の設定で Money2Time の電池使用量を「制限なし」にしてください。',
+    ios_notifications_title: '銀行の通知',
+    ios_notifications_hint:
+      '銀行アプリごとにオートメーションを作り、その通知を Money2Time に送ります。',
+    ios_needs_27:
+      '通知のオートメーションには iOS 27 が必要です。銀行の SMS、Apple Pay、スクリーンショットは今すぐ使えます。',
+    ios_sms_title: '銀行の SMS',
+    ios_sms_hint:
+      'オートメーションで銀行からの SMS を Money2Time に送ります。iOS 17 以降で使えます。',
+    section_apps: 'アプリ',
+    section_sources: '送信元',
+    choose_apps: 'アプリを選ぶ',
+    source_off: 'オフ',
+    disclosure_title: '通知から支払いを記録',
+    disclosure_body:
+      'そのために Money2Time には通知へのアクセスが必要です。使い方は次のとおりです。',
+    disclosure_point_selected:
+      '読み取るのは、選んだ銀行アプリや電子マネーアプリの通知だけです。それ以外は無視します。',
+    disclosure_point_device:
+      '通知はこの端末上で読み取られます。本文がアップロードされることはありません。',
+    disclosure_android_warning:
+      'Android は、通知へのアクセスを持つアプリはすべての通知を読めると警告します。Money2Time が保存するのは選んだアプリの通知だけです。',
+    access_title: '通知へのアクセスをオンにする',
+    access_body: '一覧から Money2Time を探して通知へのアクセスをオンにし、ここに戻ってください。',
+    access_greyed_title: 'スイッチがグレーになっていますか？',
+    access_greyed_body:
+      'Android は Google Play 以外からインストールしたアプリを制限します。「設定」>「アプリ」> Money2Time を開き、上部のメニューから「制限付き設定を許可」を選んで、もう一度お試しください。',
+    apps_title: '支払い通知を送ってくるアプリは？',
+    apps_body:
+      '銀行アプリと電子マネーアプリを選びます。銀行から SMS が届く場合はメッセージアプリも選んでください。',
+    apps_suggested: 'この端末のアプリ',
+    apps_recent: '最近の通知',
+    apps_missing_hint: 'アプリが見つからない場合は、次の通知が届いた後にここに表示されます。',
+    apps_other: 'その他のアプリ',
+    test_title: 'テスト通知を送る',
+    test_body: 'Money2Time が支払いの模擬通知を送り、正しく動くか確認します。何も記録されません。',
+    test_alert_title: 'Money2Time テスト',
+    test_alert_body: 'Test Cafe で %{amount} のご利用がありました。カード末尾 0000。',
+    test_channel_name: '支払い通知テスト',
+    test_send: 'テスト通知を送る',
+    test_waiting: '通知を待っています…',
+    test_success: '成功しました。Money2Time は支払い通知を読み取れます。',
+    test_would_log: '%{amount} を %{account} に %{category} として記録します。',
+    test_would_log_no_category: '%{amount} を %{account} に記録します。',
+    test_timeout_title: '通知が届きませんでした',
+    test_timeout_body:
+      '通知へのアクセスがオンか確認して、もう一度お試しください。端末によっては Money2Time の電池使用量を「制限なし」にする必要もあります。',
+    source_enabled_hint: 'オフにすると、その通知は無視されます。',
+    source_missing: 'この送信元は削除されました。',
+    source_remove_title: '%{app} を外しますか？',
+    source_remove_body_android:
+      'Money2Time はこのアプリの通知を読み取らなくなります。記録済みの支払いは残ります。',
+    source_remove_body_ios:
+      '設定が削除されます。通知が届かないようにするには、ショートカットのオートメーションも削除してください。',
   },
 };
 

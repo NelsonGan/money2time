@@ -309,6 +309,14 @@ export function applyBackupData(backup: BackupData): ImportResult {
         // Older databases without the table — ignore.
       }
     }
+    // Captures refer to replaced transactions. Also clear unused legacy category memory.
+    for (const alertTable of ['auto_log_captures', 'merchant_categories']) {
+      try {
+        sqlite.execSync(`DELETE FROM ${alertTable}`);
+      } catch {
+        // Older databases without the table — ignore.
+      }
+    }
     sqlite.execSync('DELETE FROM recurring_rules');
     sqlite.execSync('DELETE FROM transactions');
     sqlite.execSync('DELETE FROM accounts');

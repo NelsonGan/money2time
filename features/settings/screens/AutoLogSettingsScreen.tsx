@@ -4,6 +4,7 @@ import { Alert, Platform, Pressable, ScrollView, StyleSheet, Switch, View } from
 
 import { AddActionSheet } from '~/components/navigation/AddActionSheet';
 import {
+  InfoTooltipButton,
   SettingsHeader,
   SettingsPageLayout,
   Text,
@@ -11,10 +12,12 @@ import {
 } from '~/components/ui';
 import {
   LOG_CARD_PAYMENT_INTENT_NAME,
+  LOG_PAYMENT_ALERT_INTENT_NAME,
   NEW_TRANSACTION_INTENT_NAME,
   SCAN_SCREENSHOT_INTENT_NAME,
 } from '~/constants/autoLogIntents';
 import { useApp } from '~/context/AppContext';
+import { countKey } from '~/features/autoLog/lib/presentation';
 import {
   findFallbackCategory,
   pickDefaultAccountId,
@@ -32,6 +35,7 @@ interface AutoLogSettingsScreenProps {
   onBack: () => void;
   onOpenTutorial: (topic: AutoLogTutorialTopic) => void;
   onOpenQuickEntry: () => void;
+  onOpenPaymentAlerts: () => void;
 }
 
 const styles = StyleSheet.create({
@@ -119,10 +123,89 @@ function AutoLogSectionHeader({
   );
 }
 
+/**
+ * Payment alerts (bank and wallet notifications) have their own page; this is
+ * the doorway to it, with a one-line status so the Automation page still shows
+ * at a glance whether alerts are being read.
+ */
+function PaymentAlertsEntry({
+  isAndroid,
+  className,
+  onOpen,
+  onTutorial,
+}: {
+  isAndroid: boolean;
+  className: string;
+  onOpen: () => void;
+  onTutorial: () => void;
+}) {
+  const themeColors = useThemeColors();
+  const { paymentAlertPrefs: prefs } = useApp();
+  const channel = isAndroid ? 'android_notification' : 'ios_alert';
+  const sourceCount = Object.values(prefs.sources).filter(
+    (source) => source.channel === channel && source.enabled,
+  ).length;
+  const on = isAndroid ? prefs.alertsEnabled && sourceCount > 0 : sourceCount > 0;
+  const status = on
+    ? I18n.t(
+        countKey(
+          isAndroid
+            ? 'settings.auto_log.payment_alerts_status_apps'
+            : 'settings.auto_log.payment_alerts_status_sources',
+          sourceCount,
+        ),
+        { count: sourceCount },
+      )
+    : I18n.t('settings.auto_log.payment_alerts_status_off');
+
+  return (
+    <View className={className}>
+      <AutoLogSectionHeader
+        title={
+          isAndroid
+            ? I18n.t('settings.auto_log.payment_alerts_title')
+            : LOG_PAYMENT_ALERT_INTENT_NAME
+        }
+        onTutorial={onTutorial}
+        tutorialColor={themeColors.primary}
+      />
+      <View className="flex-row items-center gap-3 rounded-2xl border border-border/30 bg-card px-4 py-3">
+        <Pressable
+          className="flex-1 flex-row items-center gap-3"
+          onPress={() => {
+            void triggerHaptic('selection');
+            onOpen();
+          }}
+          accessibilityRole="button"
+        >
+          <View className="flex-1">
+            <Text variant="body" className="text-foreground">
+              {I18n.t('settings.auto_log.payment_alerts_open')}
+            </Text>
+            <Text variant="caption" tone="muted">
+              {status}
+            </Text>
+          </View>
+          <ChevronRight size={18} color={themeColors.textMuted} />
+        </Pressable>
+        <InfoTooltipButton
+          title={I18n.t('settings.auto_log.payment_alerts_title')}
+          infoTooltip={I18n.t(
+            isAndroid
+              ? 'settings.auto_log.payment_alerts_hint_android'
+              : 'settings.auto_log.payment_alerts_hint_ios',
+          )}
+        />
+      </View>
+    </View>
+  );
+}
+
 export function AutoLogSettingsScreen({
   onBack,
   onOpenTutorial,
   onOpenQuickEntry,
+  onOpenPaymentAlerts,
 }: AutoLogSettingsScreenProps) {
   const { accounts, categories, quickEntryPrefs, updateQuickEntryPrefs } = useApp();
   const themeColors = useThemeColors();
@@ -232,7 +315,16 @@ export function AutoLogSettingsScreen({
               it through the same pipeline as iOS's Log Screenshot, so it shares
               that action's "save screenshot" setting. */}
           {isAndroid ? (
-            <View className="mt-2">
+            <PaymentAlertsEntry
+              isAndroid
+              className="mt-2"
+              onOpen={onOpenPaymentAlerts}
+              onTutorial={() => onOpenTutorial('paymentAlertsAndroid')}
+            />
+          ) : null}
+
+          {isAndroid ? (
+            <View className="mt-6">
               <AutoLogSectionHeader
                 title={I18n.t('settings.auto_log.share_screenshot_title')}
                 onTutorial={() => onOpenTutorial('shareScreenshot')}
@@ -346,6 +438,15 @@ export function AutoLogSettingsScreen({
                   </View>
                 </View>
               </View>
+
+              {/* Bank notifications, SMS and emails: the payment automation for
+                  everything Apple Pay does not cover, so it sits next to it. */}
+              <PaymentAlertsEntry
+                isAndroid={false}
+                className="mt-6"
+                onOpen={onOpenPaymentAlerts}
+                onTutorial={() => onOpenTutorial('paymentAlertsIos')}
+              />
 
               {/* Log Screenshot sits above New Transaction: both install a ready-made
                   shortcut, and screenshot logging is the more discoverable habit. */}

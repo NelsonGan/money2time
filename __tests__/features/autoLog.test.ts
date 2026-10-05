@@ -304,9 +304,14 @@ describe('resolveAutoLogEntry', () => {
     expect(result).toMatchObject({ type: 'expense', amount: 12.34, note: 'Starbucks' });
   });
 
-  it('dates the transaction from the tap, as a local day key', () => {
+  it('dates the transaction at the tap itself, so it sorts by time and dedupes', () => {
     const result = resolveAutoLogEntry(entry({ createdAt: '2026-07-15T10:30:00.000Z' }), ctx());
-    expect(result?.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(result?.date).toBe('2026-07-15T10:30:00.000Z');
+  });
+
+  it('falls back to the day when the tap stamp does not parse', () => {
+    const result = resolveAutoLogEntry(entry({ createdAt: '2026-07-15 garbage' }), ctx());
+    expect(result?.date).toBe('2026-07-15');
   });
 
   it('drops an entry whose amount cannot be parsed', () => {

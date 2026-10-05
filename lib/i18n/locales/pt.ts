@@ -1220,6 +1220,52 @@ const pt = {
       default_account: 'Conta padrão',
       default_category: 'Categoria padrão',
       default_none: 'Não definido',
+      payment_alerts_title: 'Notificações de pagamento',
+      payment_alerts_hint_android:
+        'Registra pagamentos a partir das notificações dos seus apps de banco e carteiras. Você escolhe os apps.',
+      payment_alerts_hint_ios:
+        'Registra pagamentos a partir das notificações, SMS e e-mails do seu banco com uma automação do Atalhos.',
+      payment_alerts_open: 'Alertas de pagamento',
+      payment_alerts_status_off: 'Não configurado',
+      payment_alerts_status_apps_one: 'Ativado para %{count} app',
+      payment_alerts_status_apps_other: 'Ativado para %{count} apps',
+      payment_alerts_status_sources_one: '%{count} fonte',
+      payment_alerts_status_sources_other: '%{count} fontes',
+      payment_alerts_android_step_1:
+        'Abra Alertas de pagamento e ative Ler notificações de pagamento. Leia como o Money2Time usa o acesso a notificações e toque em Continuar.',
+      payment_alerts_android_step_2:
+        'O Android abre a tela de acesso a notificações. Encontre o Money2Time e ative.',
+      payment_alerts_android_step_3:
+        'Confirme com Permitir. O Android avisa que o app pode ler todas as notificações, mas o Money2Time só guarda os apps que você escolher.',
+      payment_alerts_android_step_4:
+        'De volta ao Money2Time, escolha os apps de banco e carteiras que enviam seus alertas de pagamento.',
+      payment_alerts_android_step_5: 'Escolha a conta para cada app.',
+      payment_alerts_android_step_6: 'Envie um alerta de teste para conferir se tudo funciona.',
+      payment_alerts_android_step_7:
+        'Os pagamentos são registrados automaticamente na conta escolhida. As categorias usam as mesmas palavras-chave do Apple Pay.',
+      payment_alerts_ios_step_1:
+        'Abra o Atalhos, vá para a aba Automation e toque em New Automation.',
+      payment_alerts_ios_step_2:
+        'Escolha Notification, selecione o app do seu banco e depois escolha Run Immediately.',
+      payment_alerts_ios_step_3:
+        'Toque em Create New Shortcut, busque Money2Time e adicione Log Payment Alert.',
+      payment_alerts_ios_step_4:
+        'Toque no campo Message, escolha Select Variable, depois Shortcut Input e selecione Body.',
+      payment_alerts_ios_step_5:
+        'Coloque o nome do banco em From, para que cada banco tenha suas próprias configurações no Money2Time.',
+      payment_alerts_ios_step_6: 'Escolha Account em Log Payment Alert.',
+      payment_alerts_ios_step_7:
+        'Pronto. Repita para cada app de banco. Os pagamentos são registrados na próxima vez que você abrir o Money2Time.',
+      bank_sms_ios_step_1:
+        'Abra o Atalhos, vá para a aba Automation, toque em New Automation e escolha Message.',
+      bank_sms_ios_step_2:
+        'Escolha seu banco como remetente, ou em Message Contains digite uma palavra que os SMS dele sempre têm. Depois escolha Run Immediately.',
+      bank_sms_ios_step_3:
+        'Toque em Create New Shortcut, busque Money2Time e adicione Log Payment Alert.',
+      bank_sms_ios_step_4:
+        'Toque no campo Message, escolha Select Variable, depois Shortcut Input e selecione Content. Coloque o nome do banco em From.',
+      bank_sms_ios_step_5:
+        'Escolha Account em Log Payment Alert. Os pagamentos são registrados automaticamente na conta escolhida. As categorias usam as mesmas palavras-chave do Apple Pay.',
     },
     title: 'Configurações',
     display: 'Exibição',
@@ -2555,6 +2601,83 @@ const pt = {
       insights: 'Entender',
       data: 'Seus dados',
     },
+  },
+  payment_alerts: {
+    account_hint:
+      'Os pagamentos são registrados automaticamente na conta escolhida. As categorias usam as mesmas palavras-chave do Apple Pay.',
+    title: 'Alertas de pagamento',
+    intro_android:
+      'O Money2Time lê as notificações de pagamento dos apps de banco e carteiras que você escolher e registra cada pagamento para você. Os alertas são lidos neste celular e nunca são enviados.',
+    intro_ios:
+      'Os pagamentos são registrados automaticamente na conta escolhida. As categorias usam as mesmas palavras-chave do Apple Pay.',
+    section_status: 'Status',
+    master_label: 'Ler notificações de pagamento',
+    master_hint: 'Registra os pagamentos dos apps que você escolher.',
+    access_open_settings: 'Abrir configurações',
+    health_unsupported:
+      'Esta versão do Money2Time não consegue ler notificações. Atualize o app para usar os alertas de pagamento.',
+    health_access_off:
+      'O acesso a notificações está desativado, então nenhum pagamento está sendo lido. Ative de novo nas configurações do Android.',
+    health_not_receiving:
+      'O Money2Time não recebe notificações há algum tempo. Talvez o celular tenha pausado o app para economizar bateria.',
+    health_reconnect: 'Reconectar',
+    health_battery_hint:
+      'Se isso continuar, defina o uso de bateria do Money2Time como Sem restrições nas configurações do Android.',
+    ios_notifications_title: 'Notificações do banco',
+    ios_notifications_hint:
+      'Uma automação por app de banco envia as notificações dele para o Money2Time.',
+    ios_needs_27:
+      'Automações de notificação exigem o iOS 27. SMS do banco, Apple Pay e capturas de tela já funcionam agora.',
+    ios_sms_title: 'SMS do banco',
+    ios_sms_hint:
+      'Uma automação envia os SMS do seu banco para o Money2Time. Funciona no iOS 17 ou posterior.',
+    section_apps: 'Apps',
+    section_sources: 'Fontes',
+    choose_apps: 'Escolher apps',
+    source_off: 'Desativado',
+    disclosure_title: 'Registre pagamentos a partir das suas notificações',
+    disclosure_body:
+      'Para isso, o Money2Time precisa de acesso às notificações. Veja como ele usa:',
+    disclosure_point_selected:
+      'Ele só lê notificações dos apps de banco e carteiras que você escolher. Todo o resto é ignorado.',
+    disclosure_point_device: 'Os alertas são lidos neste celular. O texto nunca é enviado.',
+    disclosure_android_warning:
+      'O Android vai avisar que um app com acesso a notificações pode ler todas elas. O Money2Time só guarda os apps que você escolher.',
+    access_title: 'Ative o acesso a notificações',
+    access_body:
+      'Encontre o Money2Time na lista, ative o acesso a notificações e depois volte aqui.',
+    access_greyed_title: 'O botão está cinza?',
+    access_greyed_body:
+      'O Android bloqueia isso para apps instalados fora do Google Play. Abra Configurações, Apps, Money2Time, toque no menu no topo, escolha Permitir configurações restritas e tente de novo.',
+    apps_title: 'Quais apps enviam seus alertas de pagamento?',
+    apps_body:
+      'Escolha seus apps de banco e carteiras, e o app de mensagens se o seu banco manda SMS.',
+    apps_suggested: 'Neste celular',
+    apps_recent: 'Ativos recentemente',
+    apps_missing_hint:
+      'O app não aparece? Ele vai aparecer aqui depois da próxima notificação dele.',
+    apps_other: 'Outros apps',
+    test_title: 'Envie um alerta de teste',
+    test_body:
+      'O Money2Time envia uma notificação de pagamento fictícia para conferir se tudo funciona. Nada é registrado.',
+    test_alert_title: 'Teste do Money2Time',
+    test_alert_body: 'Você gastou %{amount} em Test Cafe com o cartão final 0000.',
+    test_channel_name: 'Teste de alertas de pagamento',
+    test_send: 'Enviar alerta de teste',
+    test_waiting: 'Aguardando o alerta…',
+    test_success: 'Funcionou. O Money2Time consegue ler seus alertas de pagamento.',
+    test_would_log: 'Registraria %{amount} em %{account} como %{category}.',
+    test_would_log_no_category: 'Registraria %{amount} em %{account}.',
+    test_timeout_title: 'Nenhum alerta chegou',
+    test_timeout_body:
+      'Confira se o acesso a notificações está ativado e tente de novo. Alguns celulares também exigem o uso de bateria do Money2Time como Sem restrições.',
+    source_enabled_hint: 'Desativado, os alertas dele são ignorados.',
+    source_missing: 'Esta fonte foi removida.',
+    source_remove_title: 'Remover %{app}?',
+    source_remove_body_android:
+      'O Money2Time para de ler as notificações dele. Os pagamentos já registrados continuam.',
+    source_remove_body_ios:
+      'As configurações dela são removidas. Para parar de receber os alertas, apague também a automação no Atalhos.',
   },
 };
 

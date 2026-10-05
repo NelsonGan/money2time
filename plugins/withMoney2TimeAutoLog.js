@@ -41,6 +41,17 @@ const PENDING_KEY = 'autolog_pending';
  */
 const PENDING_SCANS_KEY = 'autolog_pending_scans';
 const SCANS_DIR = 'autolog-scans';
+/**
+ * Bank notifications, texts and emails queued by LogPaymentAlertIntent, as a
+ * JSON array of raw text (parseIosPendingAlertsJson in
+ * features/autoLog/lib/captureQueue.ts reads it). The app parses, binds and
+ * logs spending to the account the user selected when the app next runs.
+ */
+const PENDING_ALERTS_KEY = 'autolog_pending_alerts';
+/** Alerts kept while the app stays closed; the oldest go first beyond this. */
+const MAX_PENDING_ALERTS = 200;
+/** Characters kept per field: an alert is a sentence or two, an email is not. */
+const MAX_ALERT_TEXT = 2000;
 const CATALOG_SCHEMA_VERSION = 1;
 const IOS_APP_TARGET_NAME = 'Money2Time';
 /**
@@ -62,6 +73,7 @@ const SWIFT_SOURCES = [
   'Money2TimeLogCardPaymentIntent.swift',
   'Money2TimeNewTransactionIntent.swift',
   'Money2TimeScanScreenshotIntent.swift',
+  'Money2TimeLogPaymentAlertIntent.swift',
   'Money2TimeAppShortcuts.swift',
   'Money2TimeAutoLogModule.swift',
 ];
@@ -161,6 +173,9 @@ enum AutoLogStore {
   static let catalogKey = "${CATALOG_KEY}"
   static let pendingKey = "${PENDING_KEY}"
   static let pendingScansKey = "${PENDING_SCANS_KEY}"
+  static let pendingAlertsKey = "${PENDING_ALERTS_KEY}"
+  static let maxPendingAlerts = ${MAX_PENDING_ALERTS}
+  static let maxAlertText = ${MAX_ALERT_TEXT}
   static let scansDirName = "${SCANS_DIR}"
   static let schemaVersion = ${CATALOG_SCHEMA_VERSION}
   static let upsertWindow: TimeInterval = ${UPSERT_WINDOW_SECONDS}
@@ -249,6 +264,22 @@ enum AutoLogStore {
     var id: String
     var createdAt: String
     var filename: String
+  }
+
+  /// One alert queued by LogPaymentAlertIntent: raw text only. Parsing lives in
+  /// the app (features/autoLog), where it is tested against real alerts.
+  struct PendingAlert: Codable {
+    var id: String
+    var createdAt: String
+    /// The automation's "From" (the bank or app name the user typed), which
+    /// becomes the alert's source in the app.
+    var source: String?
+    var title: String?
+    var subtitle: String?
+    var message: String
+    /// Preset in the automation: every alert it sends pays from this account.
+    var accountId: String?
+    var categoryId: String?
   }
 
   static var defaults: UserDefaults? {
@@ -353,6 +384,98 @@ enum AutoLogStore {
     )
     savePendingScans(entries)
     return id
+  }
+
+  /// One immutable file per alert: app clears cannot overwrite an intent that
+  /// queues another alert concurrently. Keep reading the earlier defaults queue
+  /// so alerts captured by development builds survive this change.
+  static func alertsDirectory() throws -> URL {
+    guard let container = FileManager.default.containerURL(
+      forSecurityApplicationGroupIdentifier: appGroup
+    ) else { throw AutoLogError.notReady }
+    let dir = container.appendingPathComponent("payment-alerts", isDirectory: true)
+    try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+    return dir
+  }
+
+  static func legacyPendingAlerts() -> [PendingAlert] {
+    guard let json = defaults?.string(forKey: pendingAlertsKey),
+      let data = json.data(using: .utf8),
+      let entries = try? JSONDecoder().decode([PendingAlert].self, from: data)
+    else { return [] }
+    return entries
+  }
+
+  static func loadPendingAlerts() throws -> [PendingAlert] {
+    let dir = try alertsDirectory()
+    let files = try FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil)
+    var entries = legacyPendingAlerts()
+    for file in files where file.pathExtension == "json" {
+      guard let data = try? Data(contentsOf: file),
+        let entry = try? JSONDecoder().decode(PendingAlert.self, from: data)
+      else { continue }
+      entries.append(entry)
+    }
+    return entries.sorted { $0.createdAt < $1.createdAt }
+  }
+
+  private static func trimmed(_ value: String?) -> String? {
+    guard let value = value?.trimmingCharacters(in: .whitespacesAndNewlines), !value.isEmpty else {
+      return nil
+    }
+    return String(value.prefix(maxAlertText))
+  }
+
+  /// Queue an alert's text for the app. Returns nil when there is no text.
+  @discardableResult
+  static func enqueueAlert(
+    message: String,
+    source: String?,
+    title: String?,
+    subtitle: String?,
+    accountId: String?,
+    categoryId: String?
+  ) throws -> String? {
+    guard let message = trimmed(message) else { return nil }
+    let dir = try alertsDirectory()
+    let entry = PendingAlert(
+      id: UUID().uuidString,
+      createdAt: isoFormatter.string(from: Date()),
+      source: trimmed(source),
+      title: trimmed(title),
+      subtitle: trimmed(subtitle),
+      message: message,
+      accountId: accountId,
+      categoryId: categoryId
+    )
+    let data = try JSONEncoder().encode(entry)
+    try data.write(to: dir.appendingPathComponent(entry.id + ".json"), options: .atomic)
+    // Bound disk use while the app stays closed; never remove another writer's
+    // temporary file or rewrite a shared queue.
+    let entries = try loadPendingAlerts()
+    if entries.count > maxPendingAlerts {
+      try clearPendingAlerts(ids: Array(entries.prefix(entries.count - maxPendingAlerts)).map { $0.id })
+    }
+    return entry.id
+  }
+
+  static func clearPendingAlerts(ids: [String]) throws {
+    let dir = try alertsDirectory()
+    for id in ids where UUID(uuidString: id) != nil {
+      let file = dir.appendingPathComponent(id + ".json")
+      if FileManager.default.fileExists(atPath: file.path) {
+        try FileManager.default.removeItem(at: file)
+      }
+    }
+    // New intents only write files, so clearing the legacy array cannot race
+    // with a producer. Leave everything whose id the drain did not acknowledge.
+    let removing = Set(ids)
+    let legacy = legacyPendingAlerts()
+    if !legacy.isEmpty {
+      let data = try JSONEncoder().encode(legacy.filter { !removing.contains($0.id) })
+      defaults?.set(String(data: data, encoding: .utf8), forKey: pendingAlertsKey)
+      defaults?.synchronize()
+    }
   }
 
   /// Remove drained screenshots — both the queue entries and their image files.
@@ -892,6 +1015,86 @@ struct ScanScreenshotIntent: AppIntent {
 }
 `;
 
+const LOG_PAYMENT_ALERT_INTENT_SWIFT = `import AppIntents
+import Foundation
+
+/// The payment-alert action: what a Shortcuts automation runs with the text of
+/// a bank's notification (the Notification trigger, iOS 27), a bank's text
+/// message (Message trigger) or an email (Email trigger). Apple Pay taps have
+/// Log Card Payment; this covers everything else: bank transfers, wallets,
+/// cards not in Apple Pay. docs/prd-notification-auto-log.md §7.5.
+///
+/// It only queues the raw text into the App Group and returns, without
+/// opening the app or posting anything: the bank's own notification is the
+/// receipt. The app reads the amount, merchant and account the next time it
+/// runs, and logs spending automatically to the selected account.
+/// Allowance and parsing checks run when the app drains the queue.
+///
+/// The struct name is this intent's identity to iOS — renaming it orphans the
+/// action in every shortcut already built on it. \`title\` is safe to reword.
+/// It has no string catalog behind it, so Shortcuts shows this English literal
+/// in every locale; \`LOG_PAYMENT_ALERT_INTENT_NAME\` in constants/autoLogIntents.ts
+/// mirrors it so Settings names the same action the user has to go find.
+///
+/// Generated by plugins/withMoney2TimeAutoLog.js — edit the plugin, not this file.
+struct LogPaymentAlertIntent: AppIntent {
+  static var title: LocalizedStringResource = "Log Payment Alert"
+
+  static var description = IntentDescription(
+    "Send a bank notification, text message or email to Money2Time. Choose an account to log spending automatically when the app next opens. Set From to the bank's name so each bank can be set up on its own.",
+    categoryName: "Transactions"
+  )
+
+  static var openAppWhenRun: Bool = false
+
+  @Parameter(title: "Message")
+  var message: String
+
+  @Parameter(title: "From")
+  var source: String?
+
+  @Parameter(title: "Title")
+  var alertTitle: String?
+
+  @Parameter(title: "Subtitle")
+  var subtitle: String?
+
+  @Parameter(title: "Account")
+  var account: AutoLogAccountEntity?
+
+  @Parameter(title: "Category")
+  var category: AutoLogCategoryEntity?
+
+  static var parameterSummary: some ParameterSummary {
+    Summary("Log payment alert \\(\\.$message) from \\(\\.$source)") {
+      \\.$alertTitle
+      \\.$subtitle
+      \\.$account
+      \\.$category
+    }
+  }
+
+  func perform() async throws -> some IntentResult {
+    // Same guard as the other actions: an app never opened has no accounts or
+    // categories to log into.
+    guard AutoLogStore.loadCatalog() != nil else {
+      throw AutoLogError.notReady
+    }
+    // An empty message (a notification with no body) is nothing to log; say
+    // nothing rather than fail the user's automation.
+    try AutoLogStore.enqueueAlert(
+      message: message,
+      source: source,
+      title: alertTitle,
+      subtitle: subtitle,
+      accountId: account?.id,
+      categoryId: category?.id
+    )
+    return .result()
+  }
+}
+`;
+
 const APP_SHORTCUTS_SWIFT = `import AppIntents
 
 /// Surfaces the intents in the Shortcuts app and Siri without any setup.
@@ -1019,7 +1222,61 @@ class Money2TimeAutoLog: NSObject {
     resolve(nil)
   }
 
+  /// Alerts queued by LogPaymentAlertIntent, as the JSON array it stored.
+  @objc(readPendingAlerts:rejecter:)
+  func readPendingAlerts(
+    _ resolve: RCTPromiseResolveBlock,
+    rejecter reject: RCTPromiseRejectBlock
+  ) {
+    do {
+      let data = try JSONEncoder().encode(AutoLogStore.loadPendingAlerts())
+      resolve(String(data: data, encoding: .utf8))
+    } catch {
+      reject("autolog_alert_read_failed", "Could not read payment alerts.", error)
+    }
+  }
+
+  @objc(clearPendingAlerts:resolver:rejecter:)
+  func clearPendingAlerts(
+    _ ids: [String],
+    resolver resolve: RCTPromiseResolveBlock,
+    rejecter reject: RCTPromiseRejectBlock
+  ) {
+    do {
+      try AutoLogStore.clearPendingAlerts(ids: ids)
+      resolve(nil)
+    } catch {
+      reject("autolog_alert_clear_failed", "Could not clear payment alerts.", error)
+    }
+  }
+
   #if DEBUG
+  /// Queue an alert exactly as LogPaymentAlertIntent would, for the dev-only
+  /// button in Payment alerts settings: a simulator has no Shortcuts
+  /// automations, so this is the only way to run the real queue there.
+  @objc(enqueueTestAlert:title:message:resolver:rejecter:)
+  func enqueueTestAlert(
+    _ source: String,
+    title: String,
+    message: String,
+    resolver resolve: RCTPromiseResolveBlock,
+    rejecter reject: RCTPromiseRejectBlock
+  ) {
+    do {
+      let id = try AutoLogStore.enqueueAlert(
+      message: message,
+      source: source,
+      title: title,
+      subtitle: nil,
+      accountId: nil,
+      categoryId: nil
+    )
+      resolve(id)
+    } catch {
+      reject("autolog_alert_enqueue_failed", "Could not queue payment alert.", error)
+    }
+  }
+
   /// Queue a tap exactly as LogCardPaymentIntent would, for the dev-only test
   /// button. A simulator has neither NFC nor the Shortcuts app, so this is the
   /// only way to exercise the real queue-and-drain path there.
@@ -1072,7 +1329,20 @@ RCT_EXTERN_METHOD(clearPendingScans:(NSArray *)ids
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(readPendingAlerts:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(clearPendingAlerts:(NSArray *)ids
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
 #if DEBUG
+RCT_EXTERN_METHOD(enqueueTestAlert:(NSString *)source
+                  title:(NSString *)title
+                  message:(NSString *)message
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
 RCT_EXTERN_METHOD(enqueueTestTap:(NSString *)amountRaw
                   merchant:(NSString *)merchant
                   card:(NSString *)card
@@ -1112,6 +1382,10 @@ function addIosAutoLogFiles(config) {
       writeFileIfChanged(
         path.join(appRoot, 'Money2TimeScanScreenshotIntent.swift'),
         SCAN_SCREENSHOT_INTENT_SWIFT,
+      );
+      writeFileIfChanged(
+        path.join(appRoot, 'Money2TimeLogPaymentAlertIntent.swift'),
+        LOG_PAYMENT_ALERT_INTENT_SWIFT,
       );
       writeFileIfChanged(path.join(appRoot, 'Money2TimeAppShortcuts.swift'), APP_SHORTCUTS_SWIFT);
       writeFileIfChanged(
@@ -1179,3 +1453,7 @@ module.exports = function withMoney2TimeAutoLog(config) {
   config = ensureIosAutoLogSources(config);
   return config;
 };
+
+module.exports.PENDING_ALERTS_KEY = PENDING_ALERTS_KEY;
+module.exports.LOG_PAYMENT_ALERT_INTENT_SWIFT = LOG_PAYMENT_ALERT_INTENT_SWIFT;
+module.exports.AUTO_LOG_STORE_SWIFT = AUTO_LOG_STORE_SWIFT;

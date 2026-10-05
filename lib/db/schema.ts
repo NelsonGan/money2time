@@ -57,6 +57,8 @@ export const accountsTable = sqliteTable('accounts', {
   // The category a counted repayment is filed under, so it lands in the
   // breakdown and depletes a budget line like any other expense.
   loanPaymentCategoryId: text('loan_payment_category_id'),
+  // JSON `{ last4: string[], names: string[] }`: what payment alerts print for
+  // this account. Null when none are set. See features/autoLog/lib/binding.ts.
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),
@@ -234,6 +236,9 @@ export const settingsTable = sqliteTable('settings', {
   showTransactionAccount: integer('show_transaction_account', { mode: 'boolean' })
     .notNull()
     .default(true),
+  // Payment alerts: watched sources, their modes and the Smart categories
+  // opt-in, as JSON. Null means defaults. Parse with parsePaymentAlertPrefs.
+  autoLogPrefsJson: text('auto_log_prefs_json'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),
@@ -424,6 +429,31 @@ export const monthlyWageSettingsTable = sqliteTable('monthly_wage_settings', {
   deletedAt: text('deleted_at'),
 });
 
+// Every payment alert the pipeline saw. See lib/db/migrations/067_payment_alerts.ts.
+export const autoLogCapturesTable = sqliteTable('auto_log_captures', {
+  id: text('id').primaryKey(),
+  channel: text('channel').notNull(),
+  sourceKey: text('source_key').notNull(),
+  sourceLabel: text('source_label'),
+  capturedAt: text('captured_at').notNull(),
+  // Android StatusBarNotification.key, which tracks updates to one notification.
+  nativeKey: text('native_key'),
+  // Raw alert text; nulled by the retention sweep.
+  title: text('title'),
+  body: text('body'),
+  status: text('status').notNull().default('pending'),
+  reason: text('reason'),
+  // JSON PaymentAlertResolution: what the parser read and what was decided.
+  resolutionJson: text('resolution_json'),
+  parserVersion: integer('parser_version').notNull().default(0),
+  transactionId: text('transaction_id'),
+  duplicateOf: text('duplicate_of'),
+  dedupeKey: text('dedupe_key'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+  deletedAt: text('deleted_at'),
+});
+
 export type AccountRow = typeof accountsTable.$inferSelect;
 export type AccountGroupRow = typeof accountGroupsTable.$inferSelect;
 export type CategoryRow = typeof categoriesTable.$inferSelect;
@@ -443,3 +473,4 @@ export type MonthlyBudgetCategoryRow = typeof monthlyBudgetCategoriesTable.$infe
 export type ReceiptSplitRow = typeof receiptSplitsTable.$inferSelect;
 export type ReceiptSplitItemRow = typeof receiptSplitItemsTable.$inferSelect;
 export type ReceiptSplitItemShareRow = typeof receiptSplitItemSharesTable.$inferSelect;
+export type AutoLogCaptureRow = typeof autoLogCapturesTable.$inferSelect;

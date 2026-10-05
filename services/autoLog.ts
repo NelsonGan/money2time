@@ -1,6 +1,7 @@
 import { Directory, File, Paths } from 'expo-file-system/next';
 import { NativeModules, Platform } from 'react-native';
 
+import { type CaptureInput, parseIosPendingAlertsJson } from '~/features/autoLog/lib/captureQueue';
 import {
   type AutoLogPendingEntry,
   type AutoLogPendingScan,
@@ -26,8 +27,13 @@ interface NativeAutoLogModule {
   clearPending?: (ids: string[]) => Promise<void>;
   readPendingScans?: () => Promise<string | null>;
   clearPendingScans?: (ids: string[]) => Promise<void>;
+  /** Log Payment Alert queue (bank notifications, SMS and emails via Shortcuts). */
+  readPendingAlerts?: () => Promise<string | null>;
+  clearPendingAlerts?: (ids: string[]) => Promise<void>;
   /** Debug builds only. See `enqueueTestAutoLogTap`. */
   enqueueTestTap?: (amountRaw: string, merchant: string, card: string) => Promise<string>;
+  /** Debug builds only. See `enqueueTestAutoLogAlert`. */
+  enqueueTestAlert?: (source: string, title: string, message: string) => Promise<string>;
 }
 
 const nativeAutoLogModule = NativeModules.Money2TimeAutoLog as NativeAutoLogModule | undefined;
@@ -131,17 +137,54 @@ export async function clearAutoLogPendingScans(ids: string[]): Promise<void> {
 }
 
 /**
- * Empty both queues — pending taps and pending screenshots, image files
- * included (on Android only the screenshot folder exists). Used by the full
- * data reset: the queues live outside SQLite, so without this a "clean slate"
+ * Empty pending taps, screenshots and payment alerts, image files included.
+ * Android notification captures are cleared separately. Used by data resets: the queues live outside SQLite, so without this a "clean slate"
  * reset would leave pre-reset automations to drain into the wiped database.
  */
 export async function clearAllAutoLogQueues(): Promise<void> {
-  const [taps, scans] = await Promise.all([readAutoLogPending(), readAutoLogPendingScans()]);
+  const [taps, scans, alerts] = await Promise.all([
+    readAutoLogPending(),
+    readAutoLogPendingScans(),
+    readAutoLogPendingAlerts(),
+  ]);
   await Promise.all([
     clearAutoLogPending(taps.map((entry) => entry.id)),
     clearAutoLogPendingScans(scans.map((entry) => entry.id)),
+    clearAutoLogPendingAlerts(alerts.map((entry) => entry.id)),
   ]);
+}
+
+/** Whether this iOS build has the Log Payment Alert action and its queue. */
+export function isPaymentAlertIntentSupported(): boolean {
+  return Platform.OS === 'ios' && !!nativeAutoLogModule?.readPendingAlerts;
+}
+
+/** Alerts the Log Payment Alert action queued, oldest first. */
+export async function readAutoLogPendingAlerts(): Promise<CaptureInput[]> {
+  if (!isPaymentAlertIntentSupported() || !nativeAutoLogModule?.readPendingAlerts) return [];
+  return parseIosPendingAlertsJson(await nativeAutoLogModule.readPendingAlerts());
+}
+
+export async function clearAutoLogPendingAlerts(ids: string[]): Promise<void> {
+  if (!ids.length) return;
+  if (!isPaymentAlertIntentSupported() || !nativeAutoLogModule?.clearPendingAlerts) return;
+  await nativeAutoLogModule.clearPendingAlerts(ids);
+}
+
+/**
+ * Debug builds only: queue an alert as if a Shortcuts automation had run Log
+ * Payment Alert. The simulator has no Shortcuts automations, so this is the
+ * only way to exercise the real queue there.
+ */
+export async function enqueueTestAutoLogAlert(
+  source: string,
+  title: string,
+  message: string,
+): Promise<boolean> {
+  if (!__DEV__) return false;
+  if (!isPaymentAlertIntentSupported() || !nativeAutoLogModule?.enqueueTestAlert) return false;
+  await nativeAutoLogModule.enqueueTestAlert(source, title, message);
+  return true;
 }
 
 const drainListeners = new Set<() => void>();

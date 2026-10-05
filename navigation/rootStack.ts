@@ -112,6 +112,8 @@ export type RootStackParamList = {
   // `money2time://tutorial?id=` can reset straight onto them.
   Tutorials: undefined;
   TutorialDetail: { id: string };
+  // Android notification capture setup.
+  PaymentAlertsSetup: { step?: 'apps' } | undefined;
 };
 
 export type RootMainNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;
