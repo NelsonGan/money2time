@@ -2515,7 +2515,6 @@ const zh = {
     access_greyed_body:
       'Android 会对 Google Play 以外安装的应用进行限制。打开「设置」>「应用」> Money2Time，点按顶部的菜单，选择「允许受限设置」，然后再试一次。',
     apps_title: '哪些应用会发送你的付款通知？',
-    apps_body: '选择你的银行和电子钱包应用；如果银行会发短信，也选上短信应用。',
     apps_suggested: '此手机上的应用',
     apps_recent: '最近活跃',
     apps_missing_hint: '没找到应用？它发出下一条通知后就会出现在这里。',

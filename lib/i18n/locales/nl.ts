@@ -2660,7 +2660,6 @@ const nl = {
     access_greyed_body:
       'Android blokkeert dit voor apps die buiten Google Play zijn geïnstalleerd. Open Instellingen, Apps, Money2Time, tik bovenaan op het menu, kies Beperkte instellingen toestaan en probeer het opnieuw.',
     apps_title: 'Welke apps sturen je betaalmeldingen?',
-    apps_body: "Kies je bank- en wallet-apps, en je berichten-app als je bank sms'jes stuurt.",
     apps_suggested: 'Op deze telefoon',
     apps_recent: 'Onlangs actief',
     apps_missing_hint: 'Staat de app er niet bij? Hij verschijnt hier na zijn volgende melding.',

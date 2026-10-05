@@ -2618,8 +2618,6 @@ const ja = {
     access_greyed_body:
       'Android は Google Play 以外からインストールしたアプリを制限します。「設定」>「アプリ」> Money2Time を開き、上部のメニューから「制限付き設定を許可」を選んで、もう一度お試しください。',
     apps_title: '支払い通知を送ってくるアプリは？',
-    apps_body:
-      '銀行アプリと電子マネーアプリを選びます。銀行から SMS が届く場合はメッセージアプリも選んでください。',
     apps_suggested: 'この端末のアプリ',
     apps_recent: '最近の通知',
     apps_missing_hint: 'アプリが見つからない場合は、次の通知が届いた後にここに表示されます。',

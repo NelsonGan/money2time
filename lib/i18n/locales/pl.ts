@@ -2641,8 +2641,6 @@ const pl = {
     access_greyed_body:
       'Android blokuje to dla aplikacji zainstalowanych spoza Google Play. Otwórz Ustawienia, Aplikacje, Money2Time, dotknij menu u góry, wybierz Zezwól na ustawienia z ograniczeniami i spróbuj ponownie.',
     apps_title: 'Które aplikacje wysyłają powiadomienia o płatnościach?',
-    apps_body:
-      'Wybierz aplikacje bankowe i portfele, a także aplikację do wiadomości, jeśli bank wysyła SMS-y.',
     apps_suggested: 'Na tym telefonie',
     apps_recent: 'Ostatnio aktywne',
     apps_missing_hint: 'Brakuje aplikacji? Pojawi się tutaj po jej następnym powiadomieniu.',

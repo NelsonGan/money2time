@@ -2631,7 +2631,6 @@ const sv = {
     access_greyed_body:
       'Android blockerar detta för appar som installerats utanför Google Play. Öppna Inställningar, Appar, Money2Time, tryck på menyn högst upp, välj Tillåt begränsade inställningar och försök igen.',
     apps_title: 'Vilka appar skickar dina betalningsaviseringar?',
-    apps_body: 'Välj dina bank- och plånboksappar, och meddelandeappen om banken skickar sms.',
     apps_suggested: 'På den här telefonen',
     apps_recent: 'Nyligen aktiva',
     apps_missing_hint: 'Saknas appen? Den dyker upp här efter sin nästa avisering.',

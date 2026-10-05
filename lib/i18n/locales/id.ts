@@ -2644,8 +2644,6 @@ const id = {
     access_greyed_body:
       'Android memblokir ini untuk aplikasi yang dipasang di luar Google Play. Buka Setelan, Aplikasi, Money2Time, ketuk menu di atas, pilih Izinkan setelan terbatas, lalu coba lagi.',
     apps_title: 'Aplikasi mana yang mengirim notifikasi pembayaran Anda?',
-    apps_body:
-      'Pilih aplikasi bank dan dompet digital Anda, serta aplikasi pesan jika bank Anda mengirim SMS.',
     apps_suggested: 'Di ponsel ini',
     apps_recent: 'Baru-baru ini aktif',
     apps_missing_hint:

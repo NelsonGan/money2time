@@ -2515,7 +2515,6 @@ const zhHant = {
     access_greyed_body:
       'Android 會限制從 Google Play 以外安裝的 App。開啟「設定」>「應用程式」> Money2Time，點按頂端的選單，選擇「允許受限制的設定」，然後再試一次。',
     apps_title: '哪些 App 會傳送你的付款通知？',
-    apps_body: '選擇你的銀行與電子錢包 App；如果銀行會傳簡訊，也選上訊息 App。',
     apps_suggested: '這支手機上的 App',
     apps_recent: '最近活躍',
     apps_missing_hint: '沒找到 App？它傳出下一則通知後就會出現在這裡。',

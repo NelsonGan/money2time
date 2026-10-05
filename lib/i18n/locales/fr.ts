@@ -2666,8 +2666,6 @@ const fr = {
     access_greyed_body:
       'Android bloque cet accès pour les applis installées hors de Google Play. Ouvrez Paramètres, Applications, Money2Time, touchez le menu en haut, choisissez Autoriser les paramètres restreints, puis réessayez.',
     apps_title: 'Quelles applis envoient vos alertes de paiement ?',
-    apps_body:
-      'Choisissez vos applis bancaires et portefeuilles, ainsi que votre appli de messages si votre banque envoie des SMS.',
     apps_suggested: 'Sur ce téléphone',
     apps_recent: 'Actives récemment',
     apps_missing_hint: 'Appli absente ? Elle apparaîtra ici après sa prochaine notification.',

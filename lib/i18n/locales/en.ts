@@ -2632,8 +2632,6 @@ const en = {
     access_greyed_body:
       'Android blocks this for apps installed outside Google Play. Open Settings, Apps, Money2Time, tap the menu at the top, choose Allow restricted settings, then try again.',
     apps_title: 'Which apps send your payment alerts?',
-    apps_body:
-      'Pick your banking and wallet apps, plus your messages app if your bank sends texts.',
     apps_suggested: 'On this phone',
     apps_recent: 'Recently active',
     apps_missing_hint: 'App not listed? It appears here after it sends its next notification.',
