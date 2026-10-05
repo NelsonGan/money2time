@@ -4,7 +4,6 @@ import { Alert, ScrollView, View } from 'react-native';
 import {
   Button,
   FormSwitchRow,
-  InfoTooltipButton,
   SettingsHeader,
   SettingsPageLayout,
   Text,
@@ -73,22 +72,21 @@ export function PaymentAlertSourceScreen({
           />
           {source ? (
             <>
-              <View className="rounded-2xl border border-border/30 bg-card p-4">
+              <View className="gap-3 rounded-2xl border border-border/30 bg-card p-4">
+                <Text variant="caption" tone="muted">
+                  {I18n.t('payment_alerts.source_enabled_hint')}
+                </Text>
                 <FormSwitchRow
                   label={I18n.t('payment_alerts.master_label')}
-                  info={I18n.t('payment_alerts.source_enabled_hint')}
                   value={source.enabled}
                   onValueChange={(enabled) => update({ enabled })}
                 />
               </View>
               <View className="gap-3 rounded-2xl border border-border/30 bg-card p-4">
-                <View className="flex-row items-center gap-2">
-                  <Text variant="bodyStrong">{I18n.t('transactions.editor.account')}</Text>
-                  <InfoTooltipButton
-                    title={I18n.t('transactions.editor.account')}
-                    infoTooltip={I18n.t('payment_alerts.account_hint')}
-                  />
-                </View>
+                <Text variant="bodyStrong">{I18n.t('transactions.editor.account')}</Text>
+                <Text variant="caption" tone="muted">
+                  {I18n.t('payment_alerts.account_hint')}
+                </Text>
                 <PaysFromControl
                   accountId={source.accountId}
                   onChange={(accountId) => update({ accountId })}

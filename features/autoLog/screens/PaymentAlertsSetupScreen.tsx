@@ -2,13 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AppState, ScrollView, View } from 'react-native';
 
 import { Mascot } from '~/components/feedback/Mascot';
-import {
-  Button,
-  InfoTooltipButton,
-  SettingsHeader,
-  SettingsPageLayout,
-  Text,
-} from '~/components/ui';
+import { Button, SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
@@ -254,12 +248,9 @@ export function PaymentAlertsSetupScreen({ initialStep, onClose }: PaymentAlerts
                 </View>
               ))}
             </View>
-            <View className="flex-row justify-end">
-              <InfoTooltipButton
-                title={I18n.t('payment_alerts.access_title')}
-                infoTooltip={I18n.t('payment_alerts.disclosure_android_warning')}
-              />
-            </View>
+            <Text variant="caption" tone="muted">
+              {I18n.t('payment_alerts.disclosure_android_warning')}
+            </Text>
             <Button onPress={() => void continueFromIntro()}>
               <Text>{I18n.t('common.continue')}</Text>
             </Button>
@@ -277,29 +268,26 @@ export function PaymentAlertsSetupScreen({ initialStep, onClose }: PaymentAlerts
             <Text variant="body" className="text-foreground">
               {I18n.t('payment_alerts.access_body')}
             </Text>
+            <View className="gap-1">
+              <Text variant="bodyStrong">{I18n.t('payment_alerts.access_greyed_title')}</Text>
+              <Text variant="caption" tone="muted">
+                {I18n.t('payment_alerts.access_greyed_body')}
+              </Text>
+            </View>
             <Button onPress={openSettings}>
               <Text>{I18n.t('payment_alerts.access_open_settings')}</Text>
             </Button>
-            <View className="flex-row justify-end">
-              <InfoTooltipButton
-                title={I18n.t('payment_alerts.access_greyed_title')}
-                infoTooltip={I18n.t('payment_alerts.access_greyed_body')}
-              />
-            </View>
           </>
         ) : null}
 
         {step === 'apps' ? (
           <>
-            <View className="flex-row items-center gap-3">
-              <Text variant="heading" className="flex-1 text-foreground">
-                {I18n.t('payment_alerts.apps_title')}
-              </Text>
-              <InfoTooltipButton
-                title={I18n.t('payment_alerts.apps_title')}
-                infoTooltip={I18n.t('payment_alerts.apps_body')}
-              />
-            </View>
+            <Text variant="heading" className="text-foreground">
+              {I18n.t('payment_alerts.apps_title')}
+            </Text>
+            <Text variant="caption" tone="muted">
+              {I18n.t('payment_alerts.apps_body')}
+            </Text>
             <AppPickerList
               selected={selected}
               onToggle={toggleApp}
@@ -340,15 +328,12 @@ export function PaymentAlertsSetupScreen({ initialStep, onClose }: PaymentAlerts
 
         {step === 'test' ? (
           <>
-            <View className="flex-row items-center gap-3">
-              <Text variant="heading" className="flex-1 text-foreground">
-                {I18n.t('payment_alerts.test_title')}
-              </Text>
-              <InfoTooltipButton
-                title={I18n.t('payment_alerts.test_title')}
-                infoTooltip={I18n.t('payment_alerts.test_body')}
-              />
-            </View>
+            <Text variant="heading" className="text-foreground">
+              {I18n.t('payment_alerts.test_title')}
+            </Text>
+            <Text variant="caption" tone="muted">
+              {I18n.t('payment_alerts.test_body')}
+            </Text>
             {testState === 'done' && testResult ? (
               <View className="gap-1 rounded-2xl border border-success/40 bg-success/10 p-4">
                 <Text variant="bodyStrong" className="text-foreground">
