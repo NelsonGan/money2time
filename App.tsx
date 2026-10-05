@@ -67,6 +67,9 @@ import {
   EditAlbumDetailsScreen,
   EditAlbumTransactionsScreen,
 } from '~/features/albums/screens';
+import { checkApplePayTap, recordApplePayTap } from '~/features/autoLog/applePayTaps';
+import { PaymentAlertSync } from '~/features/autoLog/components/PaymentAlertSync';
+import { PaymentAlertsSetupScreen } from '~/features/autoLog/screens/PaymentAlertsSetupScreen';
 import {
   consumePendingCategoryAllocation,
   setPendingCategoryAllocation,
@@ -205,6 +208,7 @@ import {
 import { subscribeOpenHourlyValueRequest } from '~/services/hourlyValueNavigation';
 import { requestFocusInsight } from '~/services/insightsNavigation';
 import { subscribeNotificationResponses } from '~/services/notifications';
+import { subscribeOpenPaymentAlerts } from '~/services/paymentAlertsNavigation';
 import { subscribeOpenPaywallRequest } from '~/services/paywallNavigation';
 import { downscaleReceiptForStorage } from '~/services/receiptImage';
 import { subscribeOpenReceiptSplit } from '~/services/receiptSplitNavigation';
@@ -613,6 +617,12 @@ function MainShellScreen({
   useEffect(() => {
     return subscribeOpenPaywallRequest(({ source, flashMessage }) => {
       navigation.navigate('ProPaywall', { source, flashMessage });
+    });
+  }, [navigation]);
+
+  useEffect(() => {
+    return subscribeOpenPaymentAlerts((request) => {
+      navigation.navigate('PaymentAlertsSetup', { step: request.step });
     });
   }, [navigation]);
 
@@ -1269,6 +1279,18 @@ function AddTransactionDetailedRouteScreen({
   );
 }
 
+function PaymentAlertsSetupRouteScreen({
+  route,
+  navigation,
+}: RootStackRouteProps<'PaymentAlertsSetup'>) {
+  return (
+    <PaymentAlertsSetupScreen
+      initialStep={route.params?.step}
+      onClose={() => navigation.goBack()}
+    />
+  );
+}
+
 function WidgetSnapshotSync() {
   const {
     settings,
@@ -1337,14 +1359,7 @@ function WidgetSnapshotSync() {
  * transactions. See plugins/withMoney2TimeAutoLog.js for the Swift side.
  */
 function AutoLogSync() {
-  const {
-    accounts,
-    categories,
-    settings,
-    quickEntryPrefs,
-    createTransaction,
-    updateQuickEntryPrefs,
-  } = useApp();
+  const { accounts, categories, settings, quickEntryPrefs, createTransaction } = useApp();
   const isPro = useIsPro();
 
   // Read on every render rather than inside the effect so it is a real
@@ -1355,9 +1370,16 @@ function AutoLogSync() {
   const failureNotificationBody = I18n.t('notifications.content.autolog_failure_body');
 
   // Guards against overlapping drains; see `drain` below.
+  const stateRef = useRef({
+    accounts,
+    categories,
+    settings,
+    quickEntryPrefs,
+    createTransaction,
+    isPro,
+  });
+  stateRef.current = { accounts, categories, settings, quickEntryPrefs, createTransaction, isPro };
   const drainingRef = useRef(false);
-  const usageCountRef = useRef(quickEntryPrefs.autoLogUsageCount);
-  usageCountRef.current = quickEntryPrefs.autoLogUsageCount;
 
   useEffect(() => {
     if (!isAutoLogSupported()) return undefined;
@@ -1419,39 +1441,62 @@ function AutoLogSync() {
     try {
       const drainable = selectDrainableAutoLogEntries(await readAutoLogPending());
       if (drainable.length === 0) return;
+      const current = stateRef.current;
 
       const consumed: string[] = [];
-      let created = 0;
 
       for (const entry of drainable) {
         const input = resolveAutoLogEntry(entry, {
-          accounts,
-          categories,
-          defaultAccountId: quickEntryPrefs.defaultAccountId,
-          defaultExpenseCategoryId: quickEntryPrefs.defaultExpenseCategoryId,
-          reportingCurrency: settings.currencyCode,
-          autoCategorizeByMerchant: quickEntryPrefs.autoLogAutoCategorize,
+          accounts: current.accounts,
+          categories: current.categories,
+          defaultAccountId: current.quickEntryPrefs.defaultAccountId,
+          defaultExpenseCategoryId: current.quickEntryPrefs.defaultExpenseCategoryId,
+          reportingCurrency: current.settings.currencyCode,
+          autoCategorizeByMerchant: current.quickEntryPrefs.autoLogAutoCategorize,
           // Same keyword → category mapping quick entry uses, keyed on the
           // merchant name the automation captured.
           matchMerchantCategoryId: (merchant, expenseCategories) =>
-            matchCategoryByKeywords(merchant, expenseCategories, quickEntryPrefs.categoryMap)
-              ?.categoryId ?? null,
+            matchCategoryByKeywords(
+              merchant,
+              expenseCategories,
+              current.quickEntryPrefs.categoryMap,
+            )?.categoryId ?? null,
         });
 
         if (!input) {
           // Nothing postable in it. Consume anyway so one bad row can't wedge
           // the queue on every foreground forever.
           reportError(new Error('Auto-log entry could not be resolved'), {
-            amountRaw: entry.amountRaw,
+            autoLogEntryId: entry.id,
+          });
+          consumed.push(entry.id);
+          continue;
+        }
+
+        // A bank alert for the same purchase may have been logged already.
+        const tapCheck = checkApplePayTap(entry, input);
+        if (tapCheck.action === 'skip') {
+          recordApplePayTap(entry, input, {
+            status: 'duplicate',
+            transactionId: tapCheck.transactionId,
+            duplicateOf: tapCheck.twinCaptureId,
           });
           consumed.push(entry.id);
           continue;
         }
 
         try {
-          createTransaction(input, { source: 'autolog' });
+          current.createTransaction(input, {
+            source: 'autolog',
+            autoLogIsPro: current.isPro,
+            onAutoLogPersisted: (transactionId) =>
+              recordApplePayTap(entry, input, {
+                status: 'logged',
+                transactionId,
+                supersedesCaptureId: tapCheck.supersedesCaptureId,
+              }),
+          });
           consumed.push(entry.id);
-          created += 1;
         } catch (error) {
           // Leave it queued so the next foreground retries it.
           reportError(error, { autoLogEntryId: entry.id });
@@ -1461,12 +1506,6 @@ function AutoLogSync() {
       // Clear only what we actually consumed, so a create that threw is retried
       // rather than silently lost.
       if (consumed.length > 0) await clearAutoLogPending(consumed);
-      // Read the count through a ref: the closure's copy can be stale by now if
-      // prefs changed while we were awaiting, and undercounting hands out free
-      // auto-logs past the cap.
-      if (created > 0) {
-        updateQuickEntryPrefs({ autoLogUsageCount: usageCountRef.current + created });
-      }
     } catch (error) {
       // The native side rejects when the App Group is unreachable (e.g. a build
       // whose entitlement is missing). Swallow it here so a foreground does not
@@ -1475,18 +1514,7 @@ function AutoLogSync() {
     } finally {
       drainingRef.current = false;
     }
-  }, [
-    accounts,
-    categories,
-    createTransaction,
-    quickEntryPrefs.autoLogAutoCategorize,
-    quickEntryPrefs.categoryMap,
-    quickEntryPrefs.defaultAccountId,
-    quickEntryPrefs.defaultExpenseCategoryId,
-    settings.currencyCode,
-    updateQuickEntryPrefs,
-  ]);
-
+  }, []);
   // Also drain on an explicit request (the dev test button) since that enqueues
   // a tap this component owns.
   useForegroundAutoLogDrain(drain, true);
@@ -2665,6 +2693,7 @@ function AppContent() {
       <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
       <WidgetSnapshotSync />
       <AutoLogSync />
+      <PaymentAlertSync />
       <ScreenshotScanSync />
       <NavigationContainer
         key={`locale:${navigationLocaleKey}`}
@@ -2773,6 +2802,7 @@ function AppContent() {
             />
             <RootStack.Screen name="Tutorials" component={TutorialsRouteScreen} />
             <RootStack.Screen name="TutorialDetail" component={TutorialDetailRouteScreen} />
+            <RootStack.Screen name="PaymentAlertsSetup" component={PaymentAlertsSetupRouteScreen} />
             <RootStack.Screen name="CreateAlbum" component={CreateAlbumRouteScreen} />
             <RootStack.Screen name="AlbumDetail" component={AlbumDetailRouteScreen} />
             <RootStack.Screen

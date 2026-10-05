@@ -19,6 +19,13 @@ export const NEW_TRANSACTION_INTENT_NAME = 'New Transaction';
  */
 export const SCAN_SCREENSHOT_INTENT_NAME = 'Log Screenshot';
 
+/**
+ * Takes a bank or e-wallet app notification from a Notification automation
+ * and queues it without opening the app. Spending is logged automatically
+ * when the app next runs.
+ */
+export const LOG_PAYMENT_ALERT_INTENT_NAME = 'Log Payment Alert';
+
 // Ready-made iCloud share links for the two shortcuts a user can install as-is,
 // so the tutorial only has to cover the trigger (Back Tap / automation) rather
 // than walking them through building the shortcut by hand. Log Card Payment has

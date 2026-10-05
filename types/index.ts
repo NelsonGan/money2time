@@ -1182,3 +1182,168 @@ export interface AppState {
   transactions: TransactionWithRelations[];
   activeAccountFilter: string | null;
 }
+
+// Payment alerts: bank and wallet notifications (Android), and the Log Payment
+// Alert Shortcuts action (iOS), turned into transactions. The pipeline lives in
+// features/autoLog/; docs/prd-notification-auto-log.md has the design.
+
+/**
+ * How an alert reached the app. `apple_pay` rows are written by the Log Card
+ * Payment drain so an alert for the same tap can be recognized as a duplicate.
+ */
+export type PaymentAlertChannel =
+  | 'android_notification'
+  | 'ios_alert'
+  | 'paste'
+  | 'share_text'
+  | 'apple_pay';
+
+export type PaymentAlertKind =
+  | 'spend'
+  | 'income'
+  | 'refund'
+  | 'transfer'
+  | 'otp'
+  | 'promo'
+  | 'declined'
+  | 'balance'
+  | 'unknown';
+
+export type PaymentAlertConfidence = 'high' | 'medium' | 'low';
+
+/** What the parser read out of one alert. */
+export interface PaymentAlertParse {
+  kind: PaymentAlertKind;
+  amount: number | null;
+  /** ISO code, only when the text names the currency beyond doubt. */
+  currency: string | null;
+  /** The symbol or code next to the amount as written (`$`, `RM`, `USD`). */
+  currencyToken: string | null;
+  /** A second amount in another currency, e.g. the billed amount of a foreign spend. */
+  secondary: { amount: number; currency: string } | null;
+  /** Merchant, payee or payer. */
+  counterparty: string | null;
+  /** The word that introduced the counterparty (`at`, `to`, `from`, …). */
+  counterpartyLeadIn: string | null;
+  confidence: PaymentAlertConfidence;
+  /** Short machine-readable parsing signals. */
+  signals: string[];
+  parserVersion: number;
+}
+
+/** How sure the binding is about the account; only `certain` may auto-log. */
+export type AccountBindingCertainty = 'certain' | 'likely' | 'guess' | 'none';
+
+export type AccountBindingReason =
+  | 'preset'
+  | 'identifier'
+  | 'identifier_source'
+  | 'source_single'
+  | 'source_history'
+  | 'logo'
+  | 'name'
+  | 'default'
+  | 'ambiguous'
+  | 'none';
+
+export type PaymentAlertCategoryOrigin = 'preset' | 'keyword' | 'default' | 'fallback';
+
+export type PaymentAlertStatus =
+  | 'pending'
+  | 'logged'
+  | 'dismissed'
+  | 'ignored'
+  | 'duplicate'
+  | 'failed';
+
+/** Processing reason; legacy values remain readable for previously stored captures. */
+export type PaymentAlertReason =
+  | 'auto'
+  | 'mode_review'
+  | 'low_confidence'
+  | 'account_uncertain'
+  | 'possible_duplicate'
+  | 'limit_reached'
+  | 'income'
+  | 'refund'
+  | 'transfer'
+  | 'otp'
+  | 'promo'
+  | 'declined'
+  | 'balance'
+  | 'authorization_hold'
+  | 'no_amount'
+  | 'ignore_phrase'
+  | 'duplicate'
+  | 'source_disabled'
+  | 'user'
+  | 'superseded';
+
+/** Everything the pipeline worked out for one alert, stored with the capture. */
+export interface PaymentAlertResolution {
+  parse: PaymentAlertParse;
+  /** Currency used by the expense, including account fallback for ambiguous symbols. */
+  currency?: string | null;
+  accountId: string | null;
+  certainty: AccountBindingCertainty;
+  bindingReason: AccountBindingReason;
+  /** The identifier that bound the account (`1234`, `Visa Platinum`). */
+  identifier: string | null;
+  /** Legacy binding details, retained for stored-capture compatibility. */
+  candidateAccountIds: string[];
+  categoryId: string | null;
+  categoryOrigin: PaymentAlertCategoryOrigin | null;
+  draftType: TransactionType | null;
+  /** The two sides of a top-up or withdrawal draft, when known. */
+  transferFromAccountId: string | null;
+  transferToAccountId: string | null;
+}
+
+/** One alert as stored in `auto_log_captures`. */
+export interface PaymentAlertCapture {
+  id: string;
+  channel: PaymentAlertChannel;
+  /** Android package or iOS "From" value; old captures may use a legacy channel key. */
+  sourceKey: string;
+  sourceLabel: string | null;
+  /** When the alert was posted (UTC ISO); the transaction is dated here. */
+  capturedAt: string;
+  /** Android `StatusBarNotification.key`, which tracks updates to one notification. */
+  nativeKey: string | null;
+  /** Raw text; nulled by the retention sweep. */
+  title: string | null;
+  body: string | null;
+  status: PaymentAlertStatus;
+  reason: PaymentAlertReason | null;
+  resolution: PaymentAlertResolution | null;
+  parserVersion: number;
+  transactionId: string | null;
+  duplicateOf: string | null;
+  dedupeKey: string | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
+/** A configured alert source: an Android app, or an iOS automation's "From". */
+export interface PaymentAlertSource {
+  channel: PaymentAlertChannel;
+  sourceKey: string;
+  label: string;
+  enabled: boolean;
+  /** Account explicitly selected for this app or automation. */
+  accountId: string | null;
+  ignorePhrases: string[];
+  addedAt: string;
+}
+
+/** `settings.auto_log_prefs_json`. Parse with `parsePaymentAlertPrefs`. */
+export interface PaymentAlertPrefs {
+  version: 1;
+  /** Master switch for alert capture on this device. */
+  alertsEnabled: boolean;
+  /** Keyed by `paymentAlertSourceKey(channel, sourceKey)`. */
+  sources: Record<string, PaymentAlertSource>;
+  /** Phrases that make any alert ignored. */
+  ignorePhrases: string[];
+}

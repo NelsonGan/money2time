@@ -1216,6 +1216,42 @@ const nb = {
       default_account: 'Standardkonto',
       default_category: 'Standardkategori',
       default_none: 'Ikke angitt',
+      payment_alerts_title: 'Betalingsvarsler',
+      payment_alerts_open: 'Betalingsvarsler',
+      payment_alerts_status_off: 'Ikke satt opp',
+      payment_alerts_status_apps_one: 'På for %{count} app',
+      payment_alerts_status_apps_other: 'På for %{count} apper',
+      payment_alerts_android_step_1: 'Åpne Payment alerts og slå på Read payment notifications.',
+      payment_alerts_android_step_2:
+        'Android åpner skjermen for varseltilgang. Finn Money2Time og slå det på.',
+      payment_alerts_android_step_3:
+        'Bekreft med Tillat. Android advarer om at appen kan lese alle varsler, men Money2Time beholder bare appene du velger.',
+      payment_alerts_android_step_4:
+        'Tilbake i Money2Time velger du bank- og lommebokappene som sender betalingsvarslene dine.',
+      payment_alerts_android_step_5: 'Velg kontoen for hver app.',
+      payment_alerts_android_step_6: 'Send et testvarsel for å sjekke at alt fungerer.',
+      payment_alerts_android_step_7:
+        'Betalinger registreres automatisk på den valgte kontoen. Kategorier bruker de samme nøkkelordene som Apple Pay.',
+      payment_alerts_ios_step_1:
+        'Åpne Shortcuts, trykk + og deretter Edit. Trykk Automation i redigereren.',
+      payment_alerts_ios_step_2: 'Søk etter Notification og velg den.',
+      payment_alerts_ios_step_3: 'Søk etter Log Payment Alert og legg den til.',
+      payment_alerts_ios_step_4: 'Trykk Message i Log Payment Alert, deretter Select Variable.',
+      payment_alerts_ios_step_5: 'Trykk på From og skriv inn appens navn.',
+      payment_alerts_ios_step_6:
+        'Trykk på handlingspilen og deretter Account. Velg hvor betalingene fra denne appen skal registreres.',
+      payment_alerts_ios_step_7:
+        'Gå tilbake for å lagre. Gjenta for hver bank- eller lommebok-app. Betalingene registreres neste gang du åpner Money2Time.',
+      payment_alerts_android_disclosure:
+        'Les hvordan varslingstilgangen brukes, og trykk Continue.',
+      payment_alerts_ios_app:
+        'Trykk på App og velg bank- eller lommebok-appen. Disse skjermbildene bruker Wallet som eksempel.',
+      payment_alerts_ios_run:
+        'Trykk på pilen ved appen. La Automation være på og slå av Notify for stille registrering.',
+      payment_alerts_ios_input: 'Velg Notification-variabelen under utløseren.',
+      payment_alerts_ios_body: 'Trykk på variabelen, velg Body og deretter Return.',
+      payment_alerts_ios_fields:
+        'Sett Title og Subtitle til de tilsvarende Notification-egenskapene på samme måte. La Category stå tom for nøkkelordmatching.',
     },
     title: 'Innstillinger',
     display: 'Visning',
@@ -2542,6 +2578,71 @@ const nb = {
       insights: 'Forstå det',
       data: 'Dine data',
     },
+  },
+  payment_alerts: {
+    account_hint:
+      'Betalinger registreres automatisk på den valgte kontoen. Kategorier bruker de samme nøkkelordene som Apple Pay.',
+    title: 'Betalingsvarsler',
+    intro_android:
+      'Money2Time leser betalingsvarslene fra bank- og lommebokappene du velger, og registrerer hver betaling for deg. Varsler leses på denne telefonen og lastes aldri opp.',
+    intro_ios: 'Registrer betalinger fra bank- og lommebok-appene dine automatisk.',
+    section_status: 'Status',
+    master_label: 'Les betalingsvarsler',
+    master_hint: 'Registrerer betalinger fra appene du velger.',
+    access_open_settings: 'Åpne innstillinger',
+    health_unsupported:
+      'Denne versjonen av Money2Time kan ikke lese varsler. Oppdater appen for å bruke betalingsvarsler.',
+    health_access_off:
+      'Varseltilgang er slått av, så ingen betalinger blir lest. Slå den på igjen i Android-innstillingene.',
+    health_not_receiving:
+      'Money2Time har ikke mottatt varsler på en stund. Telefonen kan ha satt appen på pause for å spare batteri.',
+    health_reconnect: 'Koble til igjen',
+    health_battery_hint:
+      'Hvis dette skjer igjen, sett batteribruken for Money2Time til Ubegrenset i Android-innstillingene.',
+    ios_notifications_title: 'Appvarsler',
+    ios_notifications_hint:
+      'Sett opp én Snarveier-automatisering for hver bank- eller lommebok-app.',
+    ios_needs_27:
+      'Automatiseringer med appvarsler krever iOS 27. På tidligere versjoner kan du bruke Apple Pay eller dele skjermbilder av betalinger.',
+    section_apps: 'Apper',
+    choose_apps: 'Velg apper',
+    source_off: 'Av',
+    disclosure_title: 'Registrer betalinger fra varslene dine',
+    disclosure_body: 'Money2Time trenger varseltilgang for dette. Slik brukes den:',
+    disclosure_point_selected:
+      'Den leser bare varsler fra bank- og lommebokappene du velger. Alt annet ignoreres.',
+    disclosure_point_device: 'Varsler leses på denne telefonen. Teksten lastes aldri opp.',
+    disclosure_android_warning:
+      'Android advarer om at en app med varseltilgang kan lese alle varslene dine. Money2Time beholder bare appene du velger.',
+    access_title: 'Slå på varseltilgang',
+    access_body: 'Finn Money2Time i listen, slå på varseltilgang, og kom så tilbake hit.',
+    access_greyed_title: 'Er bryteren grå?',
+    access_greyed_body:
+      'Android blokkerer dette for apper installert utenfor Google Play. Åpne Innstillinger, Apper, Money2Time, trykk på menyen øverst, velg Tillat begrensede innstillinger, og prøv igjen.',
+    apps_title: 'Hvilke apper sender betalingsvarslene dine?',
+    apps_suggested: 'På denne telefonen',
+    apps_recent: 'Nylig aktive',
+    apps_missing_hint: 'Mangler appen? Den dukker opp her etter neste varsel fra den.',
+    apps_other: 'Andre apper',
+    test_title: 'Send et testvarsel',
+    test_body:
+      'Money2Time sender et falskt betalingsvarsel for å sjekke at alt fungerer. Ingenting registreres.',
+    test_alert_title: 'Money2Time-test',
+    test_alert_body: 'Du har betalt %{amount} hos Test Cafe med kortet som slutter på 0000.',
+    test_channel_name: 'Test av betalingsvarsler',
+    test_send: 'Send testvarsel',
+    test_waiting: 'Venter på varselet…',
+    test_success: 'Det fungerer. Money2Time kan lese betalingsvarslene dine.',
+    test_would_log: 'Den ville registrert %{amount} på %{account} som %{category}.',
+    test_would_log_no_category: 'Den ville registrert %{amount} på %{account}.',
+    test_timeout_title: 'Ingen varsler kom',
+    test_timeout_body:
+      'Sjekk at varseltilgang er slått på, og prøv igjen. Noen telefoner krever også at batteribruken for Money2Time står på Ubegrenset.',
+    source_enabled_hint: 'Når den er av, ignoreres varslene dens.',
+    source_missing: 'Denne kilden er fjernet.',
+    source_remove_title: 'Fjerne %{app}?',
+    source_remove_body_android:
+      'Money2Time slutter å lese varslene dens. Betalinger som allerede er registrert, blir værende.',
   },
 };
 

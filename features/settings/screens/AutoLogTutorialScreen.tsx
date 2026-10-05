@@ -25,7 +25,7 @@ interface AutoLogTutorialScreenProps {
 }
 
 /**
- * Steps carry a real screenshot captured on a physical iPhone (Shortcuts,
+ * Steps carry real device or simulator captures (Shortcuts, Android settings,
  * Wallet, and Accessibility → Back Tap), annotated to circle the exact control to
  * tap. Metro needs a literal path, so each require is spelled out rather than
  * built from the step key. A step with `image: null` renders a blank frame (the
@@ -92,6 +92,67 @@ const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
     { key: 'share_screenshot_step_3', image: require('~/assets/autolog/ss_3.png') },
     { key: 'share_screenshot_step_4', image: require('~/assets/autolog/ss_4.png') },
   ],
+  // Android: turn on notification access, pick the banking and wallet apps,
+  // say which account each pays from, and send a test alert.
+  paymentAlertsAndroid: [
+    {
+      key: 'payment_alerts_android_step_1',
+      image: require('~/assets/autolog/pa_android_toggle.png'),
+    },
+    {
+      key: 'payment_alerts_android_disclosure',
+      image: require('~/assets/autolog/pa_android_disclosure.png'),
+    },
+    {
+      key: 'payment_alerts_android_step_2',
+      image: require('~/assets/autolog/pa_android_access.png'),
+    },
+    {
+      key: 'payment_alerts_android_step_3',
+      image: require('~/assets/autolog/pa_android_allow.png'),
+    },
+    {
+      key: 'payment_alerts_android_step_4',
+      image: require('~/assets/autolog/pa_android_apps.png'),
+    },
+    {
+      key: 'payment_alerts_android_step_5',
+      image: require('~/assets/autolog/pa_android_account.png'),
+    },
+    {
+      key: 'payment_alerts_android_step_6',
+      image: require('~/assets/autolog/pa_android_test.png'),
+    },
+    {
+      key: 'payment_alerts_android_step_7',
+      image: require('~/assets/autolog/pa_android_success.png'),
+    },
+  ],
+  // iOS 27+ (the Notification trigger is new in 27): one shortcut per banking
+  // app, started by its notifications, running Log Payment Alert with the
+  // notification's Body and the account chosen in the action. iOS 27 has no
+  // Automation tab, so the trigger is added from the editor's Automation list.
+  // Checked against the iOS 27 simulator.
+  paymentAlertsIos: [
+    { key: 'payment_alerts_ios_step_1', image: require('~/assets/autolog/pa_ios_editor.png') },
+    {
+      key: 'payment_alerts_ios_step_2',
+      image: require('~/assets/autolog/pa_ios_notification.png'),
+    },
+    { key: 'payment_alerts_ios_app', image: require('~/assets/autolog/pa_ios_trigger.png') },
+    { key: 'payment_alerts_ios_run', image: require('~/assets/autolog/pa_ios_auto.png') },
+    { key: 'payment_alerts_ios_step_3', image: require('~/assets/autolog/pa_ios_action.png') },
+    { key: 'payment_alerts_ios_step_4', image: require('~/assets/autolog/pa_ios_variable.png') },
+    { key: 'payment_alerts_ios_input', image: require('~/assets/autolog/pa_ios_input.png') },
+    { key: 'payment_alerts_ios_body', image: require('~/assets/autolog/pa_ios_body.png') },
+    { key: 'payment_alerts_ios_step_5', image: require('~/assets/autolog/pa_ios_from.png') },
+    {
+      key: 'payment_alerts_ios_step_6',
+      image: require('~/assets/autolog/pa_ios_pick_account.png'),
+    },
+    { key: 'payment_alerts_ios_fields', image: require('~/assets/autolog/pa_ios_metadata.png') },
+    { key: 'payment_alerts_ios_step_7', image: require('~/assets/autolog/pa_ios_done.png') },
+  ],
 };
 
 /** iCloud shortcut links, one per topic that ships a downloadable shortcut. */
@@ -119,6 +180,10 @@ function titleFor(topic: AutoLogTutorialTopic): string {
       return SCAN_SCREENSHOT_INTENT_NAME;
     case 'shareScreenshot':
       return I18n.t('settings.auto_log.share_screenshot_title');
+    case 'paymentAlertsAndroid':
+      return I18n.t('payment_alerts.title');
+    case 'paymentAlertsIos':
+      return I18n.t('payment_alerts.ios_notifications_title');
   }
 }
 

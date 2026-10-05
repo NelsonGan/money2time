@@ -1218,6 +1218,41 @@ const da = {
       default_account: 'Standardkonto',
       default_category: 'Standardkategori',
       default_none: 'Ikke angivet',
+      payment_alerts_title: 'Betalingsnotifikationer',
+      payment_alerts_open: 'Betalingsnotifikationer',
+      payment_alerts_status_off: 'Ikke sat op',
+      payment_alerts_status_apps_one: 'Til for %{count} app',
+      payment_alerts_status_apps_other: 'Til for %{count} apps',
+      payment_alerts_android_step_1: 'Åbn Payment alerts, og slå Read payment notifications til.',
+      payment_alerts_android_step_2:
+        'Android åbner skærmen for notifikationsadgang. Find Money2Time, og slå det til.',
+      payment_alerts_android_step_3:
+        'Bekræft med Tillad. Android advarer om, at appen kan læse alle notifikationer, men Money2Time beholder kun de apps, du vælger.',
+      payment_alerts_android_step_4:
+        'Tilbage i Money2Time vælger du de bank- og wallet-apps, der sender dine betalingsnotifikationer.',
+      payment_alerts_android_step_5: 'Vælg kontoen for hver app.',
+      payment_alerts_android_step_6: 'Send en testnotifikation for at tjekke, at alt virker.',
+      payment_alerts_android_step_7:
+        'Betalinger registreres automatisk på din valgte konto. Kategorier bruger de samme nøgleord som Apple Pay.',
+      payment_alerts_ios_step_1:
+        'Åbn Shortcuts, tryk + og derefter Edit. Tryk Automation i editoren.',
+      payment_alerts_ios_step_2: 'Søg efter Notification, og vælg den.',
+      payment_alerts_ios_step_3: 'Søg efter Log Payment Alert, og tilføj den.',
+      payment_alerts_ios_step_4: 'Tryk Message i Log Payment Alert og derefter Select Variable.',
+      payment_alerts_ios_step_5: 'Tryk på From, og skriv appens navn.',
+      payment_alerts_ios_step_6:
+        'Tryk på handlingens pil og derefter Account. Vælg, hvor denne apps betalinger skal registreres.',
+      payment_alerts_ios_step_7:
+        'Gå tilbage for at gemme. Gentag for hver bank- eller wallet-app. Betalingerne registreres, næste gang du åbner Money2Time.',
+      payment_alerts_android_disclosure: 'Læs om brugen af notifikationsadgang, og tryk Continue.',
+      payment_alerts_ios_app:
+        'Tryk på App, og vælg din bank- eller wallet-app. Disse skærmbilleder bruger Wallet som eksempel.',
+      payment_alerts_ios_run:
+        'Tryk på pilen ved appen. Behold Automation slået til, og slå Notify fra for lydløs registrering.',
+      payment_alerts_ios_input: 'Vælg variablen Notification under udløseren.',
+      payment_alerts_ios_body: 'Tryk på den indsatte variabel, vælg Body og derefter Return.',
+      payment_alerts_ios_fields:
+        'Indstil Title og Subtitle til de tilsvarende Notification-egenskaber på samme måde. Lad Category være tom for nøgleordsmatchning.',
     },
     title: 'Indstillinger',
     display: 'Visning',
@@ -2544,6 +2579,71 @@ const da = {
       insights: 'Forstå det',
       data: 'Dine data',
     },
+  },
+  payment_alerts: {
+    account_hint:
+      'Betalinger registreres automatisk på din valgte konto. Kategorier bruger de samme nøgleord som Apple Pay.',
+    title: 'Betalingsnotifikationer',
+    intro_android:
+      'Money2Time læser betalingsnotifikationerne fra de bank- og wallet-apps, du vælger, og registrerer hver betaling for dig. Notifikationer læses på denne telefon og uploades aldrig.',
+    intro_ios: 'Registrer automatisk betalinger fra dine bank- og wallet-apps.',
+    section_status: 'Status',
+    master_label: 'Læs betalingsnotifikationer',
+    master_hint: 'Registrerer betalinger fra de apps, du vælger.',
+    access_open_settings: 'Åbn indstillinger',
+    health_unsupported:
+      'Denne version af Money2Time kan ikke læse notifikationer. Opdater appen for at bruge betalingsnotifikationer.',
+    health_access_off:
+      'Notifikationsadgang er slået fra, så ingen betalinger bliver læst. Slå den til igen i Android-indstillingerne.',
+    health_not_receiving:
+      'Money2Time har ikke modtaget nogen notifikationer i et stykke tid. Din telefon har måske sat appen på pause for at spare strøm.',
+    health_reconnect: 'Forbind igen',
+    health_battery_hint:
+      'Hvis det sker igen, så sæt batteriforbruget for Money2Time til Ubegrænset i Android-indstillingerne.',
+    ios_notifications_title: 'Appnotifikationer',
+    ios_notifications_hint: 'Opret én Genveje-automatisering for hver bank- eller wallet-app.',
+    ios_needs_27:
+      'Automatiseringer med appnotifikationer kræver iOS 27. På tidligere versioner kan du bruge Apple Pay eller dele skærmbilleder af betalinger.',
+    section_apps: 'Apps',
+    choose_apps: 'Vælg apps',
+    source_off: 'Fra',
+    disclosure_title: 'Registrer betalinger fra dine notifikationer',
+    disclosure_body: 'Money2Time skal bruge notifikationsadgang til dette. Sådan bruges den:',
+    disclosure_point_selected:
+      'Den læser kun notifikationer fra de bank- og wallet-apps, du vælger. Alt andet ignoreres.',
+    disclosure_point_device: 'Notifikationer læses på denne telefon. Teksten uploades aldrig.',
+    disclosure_android_warning:
+      'Android advarer om, at en app med notifikationsadgang kan læse alle dine notifikationer. Money2Time beholder kun de apps, du vælger.',
+    access_title: 'Slå notifikationsadgang til',
+    access_body:
+      'Find Money2Time på listen, slå notifikationsadgang til, og vend så tilbage hertil.',
+    access_greyed_title: 'Er kontakten grå?',
+    access_greyed_body:
+      'Android blokerer det for apps installeret uden for Google Play. Åbn Indstillinger, Apps, Money2Time, tryk på menuen øverst, vælg Tillad begrænsede indstillinger, og prøv igen.',
+    apps_title: 'Hvilke apps sender dine betalingsnotifikationer?',
+    apps_suggested: 'På denne telefon',
+    apps_recent: 'Aktive for nylig',
+    apps_missing_hint: 'Mangler appen? Den dukker op her efter sin næste notifikation.',
+    apps_other: 'Andre apps',
+    test_title: 'Send en testnotifikation',
+    test_body:
+      'Money2Time sender en falsk betalingsnotifikation for at tjekke, at alt virker. Intet registreres.',
+    test_alert_title: 'Money2Time-test',
+    test_alert_body: 'Du har betalt %{amount} hos Test Cafe med kortet, der slutter på 0000.',
+    test_channel_name: 'Test af betalingsnotifikationer',
+    test_send: 'Send testnotifikation',
+    test_waiting: 'Venter på notifikationen…',
+    test_success: 'Det virker. Money2Time kan læse dine betalingsnotifikationer.',
+    test_would_log: 'Den ville registrere %{amount} på %{account} som %{category}.',
+    test_would_log_no_category: 'Den ville registrere %{amount} på %{account}.',
+    test_timeout_title: 'Ingen notifikation modtaget',
+    test_timeout_body:
+      'Tjek, at notifikationsadgang er slået til, og prøv igen. Nogle telefoner kræver også, at batteriforbruget for Money2Time står på Ubegrænset.',
+    source_enabled_hint: 'Når den er slået fra, ignoreres dens notifikationer.',
+    source_missing: 'Denne kilde er fjernet.',
+    source_remove_title: 'Fjern %{app}?',
+    source_remove_body_android:
+      'Money2Time stopper med at læse dens notifikationer. Allerede registrerede betalinger bliver.',
   },
 };
 

@@ -4,17 +4,23 @@ import {
   type NativeStackScreenProps,
 } from '@react-navigation/native-stack';
 
+import type { PaymentAlertChannel } from '~/types';
+
 export type NotificationDetailType = 'dailyCheckin' | 'weeklyReview' | 'monthlyReview';
 
 /**
  * Named after the Shortcuts action each iOS auto-log walkthrough sets up;
- * `shareScreenshot` is the Android one (sharing a screenshot to the app).
+ * `shareScreenshot` and `paymentAlertsAndroid` are the Android ones (sharing a
+ * screenshot, and turning on notification access). `paymentAlertsIos` sets up
+ * the Log Payment Alert action for bank and e-wallet app notifications.
  */
 export type AutoLogTutorialTopic =
   | 'logPayment'
   | 'newTransaction'
   | 'logScreenshot'
-  | 'shareScreenshot';
+  | 'shareScreenshot'
+  | 'paymentAlertsAndroid'
+  | 'paymentAlertsIos';
 
 export type SettingsStackParamList = {
   SettingsHome: undefined;
@@ -64,6 +70,8 @@ export type SettingsStackParamList = {
   Widgets: undefined;
   LiveEarnings: undefined;
   WidgetPreviews: undefined;
+  PaymentAlerts: undefined;
+  PaymentAlertSource: { channel: PaymentAlertChannel; sourceKey: string };
 };
 
 export type SettingsStackNavigationProp = NativeStackNavigationProp<SettingsStackParamList>;
