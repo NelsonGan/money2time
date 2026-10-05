@@ -1215,8 +1215,6 @@ const hi = {
       payment_alerts_status_off: 'सेट अप नहीं',
       payment_alerts_status_apps_one: '%{count} ऐप के लिए चालू',
       payment_alerts_status_apps_other: '%{count} ऐप्स के लिए चालू',
-      payment_alerts_status_sources_one: '%{count} स्रोत',
-      payment_alerts_status_sources_other: '%{count} स्रोत',
       payment_alerts_android_step_1:
         'Payment alerts खोलें और Read payment notifications चालू करें।',
       payment_alerts_android_step_2:
@@ -2599,7 +2597,6 @@ const hi = {
     ios_needs_27:
       'ऐप सूचना ऑटोमेशन के लिए iOS 27 चाहिए। पुराने संस्करणों पर Apple Pay इस्तेमाल करें या भुगतान के स्क्रीनशॉट साझा करें।',
     section_apps: 'ऐप्स',
-    section_sources: 'स्रोत',
     choose_apps: 'ऐप्स चुनें',
     source_off: 'बंद',
     disclosure_title: 'अपनी सूचनाओं से भुगतान दर्ज करें',

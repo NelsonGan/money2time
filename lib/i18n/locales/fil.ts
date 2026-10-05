@@ -1236,8 +1236,6 @@ const fil = {
       payment_alerts_status_off: 'Hindi pa naka-set up',
       payment_alerts_status_apps_one: 'Naka-on para sa %{count} app',
       payment_alerts_status_apps_other: 'Naka-on para sa %{count} na app',
-      payment_alerts_status_sources_one: '%{count} pinagmulan',
-      payment_alerts_status_sources_other: '%{count} na pinagmulan',
       payment_alerts_android_step_1:
         'Buksan ang Payment alerts at i-on ang Read payment notifications.',
       payment_alerts_android_step_2:
@@ -2641,7 +2639,6 @@ const fil = {
     ios_needs_27:
       'Kailangan ng iOS 27 para sa mga app notification automation. Sa mas lumang bersyon, puwedeng gamitin ang Apple Pay o mag-share ng screenshot ng bayad.',
     section_apps: 'Mga app',
-    section_sources: 'Mga pinagmulan',
     choose_apps: 'Pumili ng mga app',
     source_off: 'Naka-off',
     disclosure_title: 'Itala ang mga bayad mula sa iyong mga notification',

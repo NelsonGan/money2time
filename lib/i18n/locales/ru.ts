@@ -1224,8 +1224,6 @@ const ru = {
       payment_alerts_status_off: 'Не настроено',
       payment_alerts_status_apps_one: 'Включено для %{count} приложения',
       payment_alerts_status_apps_other: 'Включено, приложений: %{count}',
-      payment_alerts_status_sources_one: '%{count} источник',
-      payment_alerts_status_sources_other: 'Источников: %{count}',
       payment_alerts_android_step_1:
         'Откройте Payment alerts и включите Read payment notifications.',
       payment_alerts_android_step_2:
@@ -2613,7 +2611,6 @@ const ru = {
     ios_needs_27:
       'Автоматизации уведомлений приложений требуют iOS 27. На более ранних версиях используйте Apple Pay или делитесь скриншотами платежей.',
     section_apps: 'Приложения',
-    section_sources: 'Источники',
     choose_apps: 'Выбрать приложения',
     source_off: 'Выключено',
     disclosure_title: 'Записывайте платежи из уведомлений',

@@ -1223,8 +1223,6 @@ const da = {
       payment_alerts_status_off: 'Ikke sat op',
       payment_alerts_status_apps_one: 'Til for %{count} app',
       payment_alerts_status_apps_other: 'Til for %{count} apps',
-      payment_alerts_status_sources_one: '%{count} kilde',
-      payment_alerts_status_sources_other: '%{count} kilder',
       payment_alerts_android_step_1: 'Åbn Payment alerts, og slå Read payment notifications til.',
       payment_alerts_android_step_2:
         'Android åbner skærmen for notifikationsadgang. Find Money2Time, og slå det til.',
@@ -2607,7 +2605,6 @@ const da = {
     ios_needs_27:
       'Automatiseringer med appnotifikationer kræver iOS 27. På tidligere versioner kan du bruge Apple Pay eller dele skærmbilleder af betalinger.',
     section_apps: 'Apps',
-    section_sources: 'Kilder',
     choose_apps: 'Vælg apps',
     source_off: 'Fra',
     disclosure_title: 'Registrer betalinger fra dine notifikationer',

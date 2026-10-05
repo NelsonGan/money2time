@@ -1226,8 +1226,6 @@ const id = {
       payment_alerts_status_off: 'Belum diatur',
       payment_alerts_status_apps_one: 'Aktif untuk %{count} aplikasi',
       payment_alerts_status_apps_other: 'Aktif untuk %{count} aplikasi',
-      payment_alerts_status_sources_one: '%{count} sumber',
-      payment_alerts_status_sources_other: '%{count} sumber',
       payment_alerts_android_step_1: 'Buka Payment alerts dan aktifkan Read payment notifications.',
       payment_alerts_android_step_2:
         'Android membuka layar akses notifikasi. Cari Money2Time dan aktifkan.',
@@ -2620,7 +2618,6 @@ const id = {
     ios_needs_27:
       'Otomatisasi notifikasi aplikasi memerlukan iOS 27. Pada versi sebelumnya, gunakan Apple Pay atau bagikan tangkapan layar pembayaran.',
     section_apps: 'Aplikasi',
-    section_sources: 'Sumber',
     choose_apps: 'Pilih aplikasi',
     source_off: 'Nonaktif',
     disclosure_title: 'Catat pembayaran dari notifikasi Anda',

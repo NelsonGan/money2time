@@ -34,3 +34,17 @@ existing Apple Pay or screenshot-sharing flows; there is no SMS fallback guide.
 
 Tutorial images and captions add no analytics events, properties or triggers.
 The remaining tutorial topics keep the existing screen tracking.
+
+## Automation page verification
+
+- iPhone 18 Pro and iPad mini (A17 Pro), iOS 27: checked the App notifications
+  bell icon and explanation in light and dark themes. The card stays on
+  Automation when tapped; the top-right Tutorial link opens page 1 of the
+  App notifications guide directly. There is no iOS source-settings entry.
+- Android API 36: confirmed Payment alerts still opens the capture switch,
+  selected apps and Choose apps, with no tutorial button on the inner page.
+- The screenshot comparison on iPhone showed changes in the notification
+  section and the sections below it; the Apple Pay section above stayed the same.
+  Payment-alert preferences stayed unchanged on all three devices, and original
+  iOS themes were restored. These presentation changes do not test new payment
+  delivery.

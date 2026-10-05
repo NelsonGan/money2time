@@ -1195,8 +1195,6 @@ const en = {
       payment_alerts_status_off: 'Not set up',
       payment_alerts_status_apps_one: 'On for %{count} app',
       payment_alerts_status_apps_other: 'On for %{count} apps',
-      payment_alerts_status_sources_one: '%{count} source',
-      payment_alerts_status_sources_other: '%{count} sources',
       payment_alerts_android_step_1: 'Open Payment alerts and turn on Read payment notifications.',
       payment_alerts_android_step_2:
         'Android opens the notification access screen. Find Money2Time and turn it on.',
@@ -2605,7 +2603,6 @@ const en = {
     ios_needs_27:
       'App notification automations need iOS 27. You can use Apple Pay or share payment screenshots on earlier versions.',
     section_apps: 'Apps',
-    section_sources: 'Sources',
     choose_apps: 'Choose apps',
     source_off: 'Off',
     disclosure_title: 'Log payments from your notifications',

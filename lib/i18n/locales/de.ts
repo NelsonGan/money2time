@@ -1234,8 +1234,6 @@ const de = {
       payment_alerts_status_off: 'Nicht eingerichtet',
       payment_alerts_status_apps_one: 'An für %{count} App',
       payment_alerts_status_apps_other: 'An für %{count} Apps',
-      payment_alerts_status_sources_one: '%{count} Quelle',
-      payment_alerts_status_sources_other: '%{count} Quellen',
       payment_alerts_android_step_1:
         'Öffne Payment alerts und aktiviere Read payment notifications.',
       payment_alerts_android_step_2:
@@ -2645,7 +2643,6 @@ const de = {
     ios_needs_27:
       'Automationen für App-Mitteilungen benötigen iOS 27. Auf älteren Versionen kannst du Apple Pay verwenden oder Zahlungs-Screenshots teilen.',
     section_apps: 'Apps',
-    section_sources: 'Quellen',
     choose_apps: 'Apps auswählen',
     source_off: 'Aus',
     disclosure_title: 'Zahlungen aus deinen Benachrichtigungen erfassen',

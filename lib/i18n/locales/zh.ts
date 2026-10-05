@@ -1161,8 +1161,6 @@ const zh = {
       payment_alerts_status_off: '尚未设置',
       payment_alerts_status_apps_one: '已为 %{count} 个应用开启',
       payment_alerts_status_apps_other: '已为 %{count} 个应用开启',
-      payment_alerts_status_sources_one: '%{count} 个来源',
-      payment_alerts_status_sources_other: '%{count} 个来源',
       payment_alerts_android_step_1: '打开付款提醒，开启读取付款通知。',
       payment_alerts_android_step_2: 'Android 会打开通知使用权页面。找到 Money2Time 并开启。',
       payment_alerts_android_step_3:
@@ -2494,7 +2492,6 @@ const zh = {
     ios_notifications_hint: '为每个银行或电子钱包 App 设置一个快捷指令自动化。',
     ios_needs_27: 'App 通知自动化需要 iOS 27。较早版本可使用 Apple Pay 或分享付款截图。',
     section_apps: '应用',
-    section_sources: '来源',
     choose_apps: '选择应用',
     source_off: '已关闭',
     disclosure_title: '从通知中记录付款',

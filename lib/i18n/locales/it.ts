@@ -1224,8 +1224,6 @@ const it = {
       payment_alerts_status_off: 'Non configurato',
       payment_alerts_status_apps_one: 'Attivo per %{count} app',
       payment_alerts_status_apps_other: 'Attivo per %{count} app',
-      payment_alerts_status_sources_one: '%{count} fonte',
-      payment_alerts_status_sources_other: '%{count} fonti',
       payment_alerts_android_step_1: 'Apri Payment alerts e attiva Read payment notifications.',
       payment_alerts_android_step_2:
         'Android apre la schermata di accesso alle notifiche. Trova Money2Time e attivalo.',
@@ -2622,7 +2620,6 @@ const it = {
     ios_needs_27:
       'Le automazioni delle notifiche richiedono iOS 27. Nelle versioni precedenti puoi usare Apple Pay o condividere screenshot dei pagamenti.',
     section_apps: 'App',
-    section_sources: 'Fonti',
     choose_apps: 'Scegli le app',
     source_off: 'Disattivata',
     disclosure_title: 'Registra i pagamenti dalle tue notifiche',

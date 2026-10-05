@@ -1201,8 +1201,6 @@ const ko = {
       payment_alerts_status_off: '설정 안 됨',
       payment_alerts_status_apps_one: '앱 %{count}개에서 켜짐',
       payment_alerts_status_apps_other: '앱 %{count}개에서 켜짐',
-      payment_alerts_status_sources_one: '출처 %{count}개',
-      payment_alerts_status_sources_other: '출처 %{count}개',
       payment_alerts_android_step_1: 'Payment alerts를 열고 Read payment notifications를 켜세요.',
       payment_alerts_android_step_2:
         'Android의 알림 접근 화면이 열립니다. Money2Time을 찾아 켜세요.',
@@ -2572,7 +2570,6 @@ const ko = {
     ios_needs_27:
       '앱 알림 자동화에는 iOS 27이 필요합니다. 이전 버전에서는 Apple Pay를 사용하거나 결제 스크린샷을 공유할 수 있습니다.',
     section_apps: '앱',
-    section_sources: '출처',
     choose_apps: '앱 선택',
     source_off: '꺼짐',
     disclosure_title: '알림으로 결제 기록하기',

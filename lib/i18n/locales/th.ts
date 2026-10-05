@@ -1202,8 +1202,6 @@ const th = {
       payment_alerts_status_off: 'ยังไม่ได้ตั้งค่า',
       payment_alerts_status_apps_one: 'เปิดสำหรับ %{count} แอป',
       payment_alerts_status_apps_other: 'เปิดสำหรับ %{count} แอป',
-      payment_alerts_status_sources_one: '%{count} แหล่งที่มา',
-      payment_alerts_status_sources_other: '%{count} แหล่งที่มา',
       payment_alerts_android_step_1: 'เปิด Payment alerts แล้วเปิด Read payment notifications',
       payment_alerts_android_step_2:
         'Android จะเปิดหน้าสิทธิ์เข้าถึงการแจ้งเตือน หา Money2Time แล้วเปิด',
@@ -2562,7 +2560,6 @@ const th = {
     ios_needs_27:
       'การทำงานอัตโนมัติจากการแจ้งเตือนแอปต้องใช้ iOS 27 สำหรับเวอร์ชันก่อนหน้า สามารถใช้ Apple Pay หรือแชร์ภาพหน้าจอการชำระเงินได้',
     section_apps: 'แอป',
-    section_sources: 'แหล่งที่มา',
     choose_apps: 'เลือกแอป',
     source_off: 'ปิด',
     disclosure_title: 'บันทึกการชำระเงินจากการแจ้งเตือน',

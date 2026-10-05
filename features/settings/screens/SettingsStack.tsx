@@ -477,7 +477,6 @@ export function SettingsStack({
                   sourceKey: source.sourceKey,
                 })
               }
-              onOpenTutorial={(topic) => props.navigation.navigate('AutoLogTutorial', { topic })}
               onOpenSetup={(step) =>
                 requestOpenPaymentAlerts({ screen: 'PaymentAlertsSetup', step })
               }

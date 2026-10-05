@@ -1,6 +1,6 @@
 import { ChevronRight } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { AppState, Platform, Pressable, ScrollView, View } from 'react-native';
+import { AppState, Pressable, ScrollView, View } from 'react-native';
 
 import {
   FormSwitchRow,
@@ -12,7 +12,6 @@ import {
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
-import type { AutoLogTutorialTopic } from '~/navigation/settingsStack';
 import { triggerHaptic } from '~/services/haptics';
 import {
   getNotificationListenerState,
@@ -30,12 +29,8 @@ import { isPayableAccount } from '../lib/binding';
 interface PaymentAlertsSettingsScreenProps {
   onBack: () => void;
   onOpenSource: (source: PaymentAlertSource) => void;
-  onOpenTutorial: (topic: AutoLogTutorialTopic) => void;
   onOpenSetup: (step?: 'apps') => void;
 }
-const IS_ANDROID = Platform.OS === 'android';
-const IOS_HAS_NOTIFICATION_TRIGGER =
-  Platform.OS === 'ios' && Number.parseInt(String(Platform.Version), 10) >= 27;
 const QUIET_WARNING_MS = 2 * 24 * 60 * 60 * 1000;
 function Divider() {
   return <View className="ml-4 h-px bg-border/40" />;
@@ -80,39 +75,9 @@ function LinkRow({
   );
 }
 
-function TutorialCard({
-  title,
-  description,
-  onPress,
-}: {
-  title: string;
-  description: string;
-  onPress: () => void;
-}) {
-  return (
-    <View className="gap-2">
-      <Text variant="caption" tone="muted" className="px-1">
-        {title}
-      </Text>
-      <Card>
-        <Text variant="caption" tone="muted" className="px-4 py-3">
-          {description}
-        </Text>
-        <Divider />
-        <LinkRow
-          label={I18n.t('settings.auto_log.tutorial_button')}
-          accessibilityLabel={title}
-          onPress={onPress}
-        />
-      </Card>
-    </View>
-  );
-}
-
 export function PaymentAlertsSettingsScreen({
   onBack,
   onOpenSource,
-  onOpenTutorial,
   onOpenSetup,
 }: PaymentAlertsSettingsScreenProps) {
   const { accounts } = useApp();
@@ -135,7 +100,7 @@ export function PaymentAlertsSettingsScreen({
   const sources = useMemo(
     () =>
       Object.values(prefs.sources)
-        .filter((source) => source.channel === (IS_ANDROID ? 'android_notification' : 'ios_alert'))
+        .filter((source) => source.channel === 'android_notification')
         .sort((a, b) => a.label.localeCompare(b.label)),
     [prefs.sources],
   );
@@ -169,105 +134,83 @@ export function PaymentAlertsSettingsScreen({
             title={I18n.t('payment_alerts.title')}
           />
           <Text variant="caption" tone="muted">
-            {I18n.t(IS_ANDROID ? 'payment_alerts.intro_android' : 'payment_alerts.intro_ios')}
+            {I18n.t('payment_alerts.intro_android')}
           </Text>
-          {IS_ANDROID ? (
-            <Card>
-              <View className="gap-3 p-4">
-                <Text variant="caption" tone="muted">
-                  {I18n.t('payment_alerts.master_hint')}
-                </Text>
-                <FormSwitchRow
-                  label={I18n.t('payment_alerts.master_label')}
-                  value={prefs.alertsEnabled}
-                  onValueChange={toggleAlerts}
-                />
-              </View>
-              {health ? (
-                <>
-                  <Divider />
-                  <View className="gap-3 p-4">
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('payment_alerts.section_status')}
-                    </Text>
-                    <Text variant="caption" tone="warning">
-                      {health}
-                    </Text>
-                    <Text variant="caption" tone="muted">
-                      {I18n.t('payment_alerts.health_battery_hint')}
-                    </Text>
-                    <View className="flex-row gap-4">
-                      <Pressable
-                        accessibilityRole="button"
-                        onPress={() => void openNotificationAccessSettings()}
-                      >
-                        <Text variant="caption" tone="primary">
-                          {I18n.t('payment_alerts.access_open_settings')}
-                        </Text>
-                      </Pressable>
-                      <Pressable
-                        accessibilityRole="button"
-                        onPress={() => void rebindNotificationListener().then(refreshHealth)}
-                      >
-                        <Text variant="caption" tone="primary">
-                          {I18n.t('payment_alerts.health_reconnect')}
-                        </Text>
-                      </Pressable>
-                    </View>
-                  </View>
-                </>
-              ) : null}
-            </Card>
-          ) : (
-            <View className="gap-4">
-              <TutorialCard
-                title={I18n.t('payment_alerts.ios_notifications_title')}
-                description={I18n.t(
-                  IOS_HAS_NOTIFICATION_TRIGGER
-                    ? 'payment_alerts.ios_notifications_hint'
-                    : 'payment_alerts.ios_needs_27',
-                )}
-                onPress={() => onOpenTutorial('paymentAlertsIos')}
+          <Card>
+            <View className="gap-3 p-4">
+              <Text variant="caption" tone="muted">
+                {I18n.t('payment_alerts.master_hint')}
+              </Text>
+              <FormSwitchRow
+                label={I18n.t('payment_alerts.master_label')}
+                value={prefs.alertsEnabled}
+                onValueChange={toggleAlerts}
               />
             </View>
-          )}
-          {IS_ANDROID || sources.length > 0 ? (
-            <View className="gap-2">
-              <Text variant="caption" tone="muted" className="px-1">
-                {I18n.t(
-                  IS_ANDROID ? 'payment_alerts.section_apps' : 'payment_alerts.section_sources',
-                )}
-              </Text>
-              <Card>
-                {sources.map((source, index) => (
-                  <View key={`${source.channel}:${source.sourceKey}`}>
-                    {index > 0 ? <Divider /> : null}
-                    <LinkRow
-                      label={source.label}
-                      detail={
-                        source.enabled
-                          ? (accounts.find(
-                              (account) =>
-                                account.id === source.accountId && isPayableAccount(account),
-                            )?.name ?? I18n.t('transactions.editor.choose_account'))
-                          : I18n.t('payment_alerts.source_off')
-                      }
-                      onPress={() => onOpenSource(source)}
-                    />
+            {health ? (
+              <>
+                <Divider />
+                <View className="gap-3 p-4">
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('payment_alerts.section_status')}
+                  </Text>
+                  <Text variant="caption" tone="warning">
+                    {health}
+                  </Text>
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('payment_alerts.health_battery_hint')}
+                  </Text>
+                  <View className="flex-row gap-4">
+                    <Pressable
+                      accessibilityRole="button"
+                      onPress={() => void openNotificationAccessSettings()}
+                    >
+                      <Text variant="caption" tone="primary">
+                        {I18n.t('payment_alerts.access_open_settings')}
+                      </Text>
+                    </Pressable>
+                    <Pressable
+                      accessibilityRole="button"
+                      onPress={() => void rebindNotificationListener().then(refreshHealth)}
+                    >
+                      <Text variant="caption" tone="primary">
+                        {I18n.t('payment_alerts.health_reconnect')}
+                      </Text>
+                    </Pressable>
                   </View>
-                ))}
-                {IS_ANDROID ? (
-                  <>
-                    {sources.length > 0 ? <Divider /> : null}
-                    <LinkRow
-                      label={I18n.t('payment_alerts.choose_apps')}
-                      onPress={() => onOpenSetup(listener?.granted ? 'apps' : undefined)}
-                    />
-                  </>
-                ) : null}
-              </Card>
-            </View>
-          ) : null}
+                </View>
+              </>
+            ) : null}
+          </Card>
+          <View className="gap-2">
+            <Text variant="caption" tone="muted" className="px-1">
+              {I18n.t('payment_alerts.section_apps')}
+            </Text>
+            <Card>
+              {sources.map((source, index) => (
+                <View key={`${source.channel}:${source.sourceKey}`}>
+                  {index > 0 ? <Divider /> : null}
+                  <LinkRow
+                    label={source.label}
+                    detail={
+                      source.enabled
+                        ? (accounts.find(
+                            (account) =>
+                              account.id === source.accountId && isPayableAccount(account),
+                          )?.name ?? I18n.t('transactions.editor.choose_account'))
+                        : I18n.t('payment_alerts.source_off')
+                    }
+                    onPress={() => onOpenSource(source)}
+                  />
+                </View>
+              ))}
+              {sources.length > 0 ? <Divider /> : null}
+              <LinkRow
+                label={I18n.t('payment_alerts.choose_apps')}
+                onPress={() => onOpenSetup(listener?.granted ? 'apps' : undefined)}
+              />
+            </Card>
+          </View>
         </View>
       </ScrollView>
     </SettingsPageLayout>

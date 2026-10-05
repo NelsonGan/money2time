@@ -1,4 +1,4 @@
-import { BookOpen, Camera, ChevronRight, Nfc, PlusCircle, Share2 } from 'lucide-react-native';
+import { Bell, BookOpen, Camera, ChevronRight, Nfc, PlusCircle, Share2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Platform, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 
@@ -121,39 +121,26 @@ function AutoLogSectionHeader({
   );
 }
 
-/**
- * Payment alerts (bank and wallet notifications) have their own page; this is
- * the doorway to it, with a one-line status so the Automation page still shows
- * at a glance whether alerts are being read.
- */
-function PaymentAlertsEntry({
-  isAndroid,
+/** Android's notification listener is configured inside Payment alerts. */
+function AndroidPaymentAlertsEntry({
   className,
   onOpen,
   onTutorial,
 }: {
-  isAndroid: boolean;
   className: string;
   onOpen: () => void;
   onTutorial: () => void;
 }) {
   const themeColors = useThemeColors();
   const { paymentAlertPrefs: prefs } = useApp();
-  const channel = isAndroid ? 'android_notification' : 'ios_alert';
   const sourceCount = Object.values(prefs.sources).filter(
-    (source) => source.channel === channel && source.enabled,
+    (source) => source.channel === 'android_notification' && source.enabled,
   ).length;
-  const on = isAndroid ? prefs.alertsEnabled && sourceCount > 0 : sourceCount > 0;
+  const on = prefs.alertsEnabled && sourceCount > 0;
   const status = on
-    ? I18n.t(
-        countKey(
-          isAndroid
-            ? 'settings.auto_log.payment_alerts_status_apps'
-            : 'settings.auto_log.payment_alerts_status_sources',
-          sourceCount,
-        ),
-        { count: sourceCount },
-      )
+    ? I18n.t(countKey('settings.auto_log.payment_alerts_status_apps', sourceCount), {
+        count: sourceCount,
+      })
     : I18n.t('settings.auto_log.payment_alerts_status_off');
 
   return (
@@ -296,13 +283,10 @@ export function AutoLogSettingsScreen({
             title={I18n.t('settings.auto_log.title')}
           />
 
-          {/* Android has no Shortcuts or Back Tap. Its one automation is the
-              system share sheet: sharing a screenshot to the app scans and logs
-              it through the same pipeline as iOS's Log Screenshot, so it shares
-              that action's "save screenshot" setting. */}
+          {/* Android configures notification capture in-app and also supports
+              screenshot sharing through the system share sheet. */}
           {isAndroid ? (
-            <PaymentAlertsEntry
-              isAndroid
+            <AndroidPaymentAlertsEntry
               className="mt-2"
               onOpen={onOpenPaymentAlerts}
               onTutorial={() => onOpenTutorial('paymentAlertsAndroid')}
@@ -427,12 +411,33 @@ export function AutoLogSettingsScreen({
 
               {/* Bank and e-wallet app notifications: the payment automation for
                   everything Apple Pay does not cover, so it sits next to it. */}
-              <PaymentAlertsEntry
-                isAndroid={false}
-                className="mt-6"
-                onOpen={onOpenPaymentAlerts}
-                onTutorial={() => onOpenTutorial('paymentAlertsIos')}
-              />
+              <View className="mt-6">
+                <AutoLogSectionHeader
+                  title={I18n.t('payment_alerts.ios_notifications_title')}
+                  onTutorial={() => onOpenTutorial('paymentAlertsIos')}
+                  tutorialColor={themeColors.primary}
+                />
+                <View className="overflow-hidden rounded-[16px] border border-border/30 bg-card">
+                  <View className="flex-row items-center gap-[12px] px-[16px] py-[12px]">
+                    <View
+                      className="h-[36px] w-[36px] items-center justify-center rounded-[12px]"
+                      style={{ backgroundColor: `${themeColors.primary}14` }}
+                    >
+                      <Bell size={18} color={themeColors.primary} />
+                    </View>
+                    <View className="flex-1 gap-0.5">
+                      <Text variant="caption" tone="muted">
+                        {I18n.t('payment_alerts.intro_ios')}{' '}
+                        {I18n.t(
+                          Number.parseInt(String(Platform.Version), 10) >= 27
+                            ? 'payment_alerts.ios_notifications_hint'
+                            : 'payment_alerts.ios_needs_27',
+                        )}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
 
               {/* Log Screenshot sits above New Transaction: both install a ready-made
                   shortcut, and screenshot logging is the more discoverable habit. */}
