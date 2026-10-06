@@ -1239,14 +1239,14 @@ const ms = {
       payment_alerts_android_step_5: 'Pilih akaun untuk setiap aplikasi.',
       payment_alerts_android_step_6: 'Hantar makluman ujian untuk memastikan semuanya berfungsi.',
       payment_alerts_android_step_7:
-        'Pembayaran direkodkan secara automatik ke akaun pilihan anda. Kategori menggunakan kata kunci yang sama seperti Apple Pay.',
+        'Perbelanjaan dan pendapatan direkodkan ke akaun pilihan anda. AI memilih kategori dan melangkau promosi.',
       payment_alerts_ios_step_1:
         'Buka Shortcuts, ketik +, kemudian Edit. Ketik Automation dalam editor.',
       payment_alerts_ios_step_2: 'Cari Notification dan pilihnya.',
       payment_alerts_ios_step_3: 'Cari Log Payment Alert dan tambahkannya.',
       payment_alerts_ios_step_4: 'Ketik Message dalam Log Payment Alert, kemudian Select Variable.',
       payment_alerts_ios_step_6:
-        'Ketik anak panah tindakan, kemudian Account. Pilih akaun untuk merekod pembayaran aplikasi ini. Biarkan Category kosong untuk padanan kata kunci automatik.',
+        'Kembangkan tindakan dan pilih Akaun. Biarkan Kategori kosong untuk pengkategorian automatik.',
       payment_alerts_ios_step_7:
         'Ketik kembali untuk menyimpan. Ulangi untuk setiap aplikasi bank atau e-dompet. Pembayaran direkod apabila anda membuka Money2Time semula.',
       payment_alerts_android_disclosure:
@@ -2598,14 +2598,16 @@ const ms = {
   },
   payment_alerts: {
     account_hint:
-      'Pembayaran direkodkan secara automatik ke akaun pilihan anda. Kategori menggunakan kata kunci yang sama seperti Apple Pay.',
+      'Perbelanjaan dan pendapatan direkodkan ke akaun pilihan anda. AI memilih kategori dan melangkau promosi.',
     title: 'Makluman pembayaran',
     intro_android:
-      'Money2Time membaca pemberitahuan pembayaran daripada aplikasi bank dan e-dompet yang anda pilih, lalu merekod setiap pembayaran untuk anda. Makluman dibaca pada telefon ini dan tidak pernah dimuat naik.',
-    intro_ios: 'Rekod pembayaran secara automatik daripada aplikasi bank dan e-dompet anda.',
+      'Perbelanjaan dan pendapatan direkodkan ke akaun pilihan anda. AI memilih kategori dan melangkau promosi. Teks pemberitahuan dihantar dengan selamat ke perkhidmatan imbasan dan penyedia AI kami untuk mengenal pasti transaksi. Sambungan internet diperlukan.',
+    intro_ios:
+      'Perbelanjaan dan pendapatan direkodkan ke akaun pilihan anda. AI memilih kategori dan melangkau promosi. Teks pemberitahuan dihantar dengan selamat ke perkhidmatan imbasan dan penyedia AI kami untuk mengenal pasti transaksi. Sambungan internet diperlukan.',
     section_status: 'Status',
     master_label: 'Baca pemberitahuan pembayaran',
-    master_hint: 'Merekod pembayaran daripada aplikasi yang anda pilih.',
+    master_hint:
+      'Perbelanjaan dan pendapatan direkodkan ke akaun pilihan anda. AI memilih kategori dan melangkau promosi.',
     access_open_settings: 'Buka tetapan',
     health_unsupported:
       'Versi Money2Time ini tidak boleh membaca pemberitahuan. Kemas kini aplikasi untuk menggunakan makluman pembayaran.',
@@ -2629,7 +2631,8 @@ const ms = {
       'Money2Time memerlukan akses pemberitahuan untuk ini. Begini cara ia digunakan:',
     disclosure_point_selected:
       'Ia hanya membaca pemberitahuan daripada aplikasi bank dan e-dompet yang anda pilih. Yang lain diabaikan.',
-    disclosure_point_device: 'Makluman dibaca pada telefon ini. Teksnya tidak pernah dimuat naik.',
+    disclosure_point_device:
+      'Teks pemberitahuan dihantar dengan selamat ke perkhidmatan imbasan dan penyedia AI kami untuk mengenal pasti transaksi. Sambungan internet diperlukan.',
     disclosure_android_warning:
       'Android akan memberi amaran bahawa aplikasi dengan akses pemberitahuan boleh membaca semua pemberitahuan anda. Money2Time hanya menyimpan aplikasi yang anda pilih.',
     access_title: 'Hidupkan akses pemberitahuan',
@@ -2655,9 +2658,8 @@ const ms = {
     test_success: 'Berjaya. Money2Time boleh membaca makluman pembayaran anda.',
     test_would_log: 'Ia akan merekod %{amount} ke %{account} sebagai %{category}.',
     test_would_log_no_category: 'Ia akan merekod %{amount} ke %{account}.',
-    test_timeout_title: 'Tiada makluman diterima',
-    test_timeout_body:
-      'Pastikan akses pemberitahuan dihidupkan, kemudian cuba lagi. Sesetengah telefon juga memerlukan penggunaan bateri Money2Time ditetapkan kepada Tanpa had.',
+    test_timeout_title: 'Ujian tidak dapat diselesaikan',
+    test_timeout_body: 'Semak akses pemberitahuan dan sambungan internet anda, kemudian cuba lagi.',
     source_enabled_hint: 'Apabila dimatikan, maklumannya diabaikan.',
     source_missing: 'Sumber ini telah dibuang.',
     source_remove_title: 'Buang %{app}?',

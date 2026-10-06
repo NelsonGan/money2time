@@ -1,17 +1,13 @@
 import { findFallbackCategory } from '~/features/transactions/lib/entryDefaults';
 import type { Category, PaymentAlertCategoryOrigin, PaymentAlertKind } from '~/types';
 
-export interface CategoryLookups {
-  keyword: (text: string, candidates: readonly Category[]) => string | null;
-}
-
 export interface CategoryInput {
   kind: PaymentAlertKind;
-  counterparty: string | null;
+  scannedCategory: string | null;
   presetCategoryId: string | null;
   categories: readonly Category[];
   defaultExpenseCategoryId: string | null;
-  autoCategorizeByMerchant: boolean;
+  defaultIncomeCategoryId: string | null;
 }
 
 export interface CategoryResolution {
@@ -19,26 +15,26 @@ export interface CategoryResolution {
   origin: PaymentAlertCategoryOrigin | null;
 }
 
-/** Same preset, keyword, default and fallback order as Apple Pay. */
-export function resolveAlertCategory(
-  input: CategoryInput,
-  lookups: CategoryLookups,
-): CategoryResolution {
-  if (input.kind !== 'spend') return { categoryId: null, origin: null };
+/** Explicit automation category, worker category, default, then same-type fallback. */
+export function resolveAlertCategory(input: CategoryInput): CategoryResolution {
+  if (input.kind !== 'spend' && input.kind !== 'income') return { categoryId: null, origin: null };
+  const type = input.kind === 'income' ? 'income' : 'expense';
   const candidates = input.categories.filter(
-    (category) => category.type === 'expense' && !category.deletedAt,
+    (category) => category.type === type && !category.deletedAt,
   );
   const valid = (id: string | null) =>
     id && candidates.some((category) => category.id === id) ? id : null;
   const preset = valid(input.presetCategoryId);
   if (preset) return { categoryId: preset, origin: 'preset' };
-  const keyword =
-    input.autoCategorizeByMerchant && input.counterparty
-      ? valid(lookups.keyword(input.counterparty, candidates))
-      : null;
-  if (keyword) return { categoryId: keyword, origin: 'keyword' };
-  const defaultId = valid(input.defaultExpenseCategoryId);
+  const wanted = input.scannedCategory?.trim().toLowerCase();
+  const matched = wanted
+    ? candidates.find((category) => category.name.trim().toLowerCase() === wanted)
+    : null;
+  if (matched) return { categoryId: matched.id, origin: 'ai' };
+  const defaultId = valid(
+    type === 'income' ? input.defaultIncomeCategoryId : input.defaultExpenseCategoryId,
+  );
   if (defaultId) return { categoryId: defaultId, origin: 'default' };
-  const fallback = findFallbackCategory(candidates, 'expense');
+  const fallback = findFallbackCategory(candidates, type);
   return { categoryId: fallback?.id ?? null, origin: fallback ? 'fallback' : null };
 }

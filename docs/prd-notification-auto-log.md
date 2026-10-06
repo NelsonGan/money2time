@@ -1,19 +1,28 @@
 # Payment alerts
 
-Current design for `feature/payment-alerts`, simplified on 2026-10-05.
+Current design for `feature/payment-alerts`, updated on 2026-10-06.
 
 ## Product behavior
 
-Payment notifications become expenses automatically. The user selects an
-account for each app or Shortcuts automation. There is no paste flow, detected
-payments page, history page, review queue, Ask first mode, card matching, or
-Smart categories option.
+Completed bank and wallet notifications become expenses or income automatically.
+The user selects an account for each app or Shortcuts automation. There is no
+paste flow, history page, review queue, Ask first mode or card matching.
 
-Categories use the same on-device keyword matcher and Quick Entry category map
-as Apple Pay. The precedence is an explicit automation category, a keyword
-match when Apple Pay merchant categorization is enabled, the default expense
-category, then the existing expense-category fallback. No merchant memory,
-transaction-history learning, AI requests, or categorization server is involved.
+Notification text is sent to the same signed receipt-scanner Worker at `/scan`,
+with `mode: notification` and no image. It uses the same OpenRouter model and
+backup model to identify completed money movement, amount, currency, counterparty
+and category in any language. Categories resolve in this order: an explicit
+same-type automation category, the model’s exact same-type category name, the
+Quick Entry default for expense/income, then the existing same-type fallback.
+Apple Pay keeps its existing local keyword categorization.
+
+Promotions, hypothetical spending, verification codes, balance/statement summaries,
+payment requests, upcoming payments, failed/declined payments and pending holds
+return an empty transaction list and are skipped. Completed receipts of money,
+including salary, deposits and refunds, become income. Outgoing payments become
+expenses. A notification describing a completed transfer records only the
+incoming/outgoing movement in the selected account; it never guesses a second
+account or creates a transfer between accounts.
 
 ## Interface
 
@@ -38,19 +47,19 @@ transaction-history learning, AI requests, or categorization server is involved.
 
 Android setup consists of disclosure, notification access, apps/accounts, and a
 test alert. Every selected app needs an active debit or credit account before
-setup can continue. New apps have no guessed account. The test runs the local
+setup can continue. New apps have no guessed account. The test runs the same Worker parsing
 pipeline using a selected source, without saving a transaction.
 The app picker aligns each selected account control with its app row, without a
 separate Account label. Missing-app help is in the tooltip beside Recently active.
 
 For iOS, set Message to Notification Body and select Account in every Log
-Payment Alert action. Leave Category empty for automatic keyword matching.
+Payment Alert action. Leave Category empty for automatic AI categorization.
 The action has no From field. Title and Subtitle remain optional; the guide
 omits their setup. Previously queued source labels remain readable. The action
 does not register in-app source settings, and obsolete iOS source settings do not
 control its logging. An unavailable selected account is skipped rather than
 replaced with another account.
-Removed, deleted, goal and loan accounts cannot receive alert expenses.
+Removed, deleted, goal and loan accounts cannot receive alert transactions.
 
 ## Capture and processing
 
@@ -64,21 +73,23 @@ ids, so an alert arriving during cleanup remains queued. Native changes require
 a development-client rebuild.
 
 `PaymentAlertSync` runs outside the mounted tabs, on launch, foreground and live
-Android listener events. Its pure TypeScript pipeline parses an alert, binds the
-explicit account, matches category keywords, checks duplicates and creates an
-expense through `AppContext.createTransaction`.
+Android listener events. Its TypeScript pipeline checks capture opt-in, the selected account and the
+local automatic-log allowance before upload, parses notification details through
+the Worker, checks duplicates and creates an expense/income through
+`AppContext.createTransaction`. Account/source settings and live transactions
+are checked again after inference; deleting an account or turning capture off
+while waiting prevents a save. Changing the selected account leaves the alert
+queued for a fresh parse against that account’s currency.
 
-Recognized spending alerts with a positive amount log automatically, including
-medium-confidence spend messages. Verification codes, promotions, declined
-payments, explicit pre-authorization holds, balance messages, unrecognized text, money coming in, refunds and
-transfers are ignored. Sources that are off or have no usable selected account
-are ignored. Turning Android capture off also ignores already queued Android
-alerts. iOS actions are enabled individually in Shortcuts. These cases never
-create a review item or ask a question.
+Sources that are off or have no usable selected account are ignored. Turning
+Android capture off also ignores already queued Android alerts. iOS actions are
+enabled individually in Shortcuts. These cases never create a review item or ask
+a question. Invalid/malformed model results fail safely and remain queued; an
+explicit empty result is a successful skip and is not retried by the Worker.
 
 Duplicate detection covers repeated captures, notification updates, overlapping
-bank/wallet alerts, Apple Pay taps, manually entered expenses and recurring
-expenses. Matches require the same selected account and currency. Cross-source and
+bank/wallet alerts, Apple Pay taps, manually entered expenses/income and recurring
+transactions. Matches require the same selected account, currency and transaction direction. Cross-source and
 manual/recurring matches also require merchant evidence. Different amounts stay
 separate, including three-decimal currencies; only floating-point rounding is
 tolerated. Text repeats have a
@@ -91,13 +102,13 @@ logs on the free tier, unlimited for Pro. Free installs over the account limit
 and installs that exhaust their automatic-log allowance do not create new
 transactions from alerts. The existing Automation page shows the usage limit.
 
-Automatic expense creation, the capture link and shared usage count commit in
+Automatic transaction creation, the capture link and shared usage count commit in
 one SQLite transaction before acknowledging an alert. The same synchronous
 save path protects Apple Pay taps. Only durably handled captures are removed
-from the native queue. Database
+from the native queue. Worker/network/quota failures, malformed responses, database
 lookup/storage failures, transient queue file read failures and failed transaction creation remain queued for a
 later automatic retry. Already logged captures are acknowledged without a
-second transaction. An individual failure does not stop other alerts.
+second transaction. A failed save reuses its stored Worker parse instead of spending inference quota again. An individual failure does not stop other alerts. Both transaction and capture references are refreshed after inference, including Apple Pay saves made while awaiting the Worker. Account currency changes trigger one fresh parse; subscription and local usage changes are rechecked before saving. Cached parses include their inference currency and are validated before reuse.
 
 ## Persistence and compatibility
 
@@ -109,22 +120,43 @@ reading settings; only source accounts, enabled flags and capture preferences
 are used.
 
 Captured text is not included in backups or analytics. Existing retention and
-reset/restore cleanup apply. No alert text is sent to a server.
+reset/restore cleanup apply. Data reset, import and restore invalidate notification
+inference already in flight so it cannot recreate cleared transactions. The notification title, subtitle, body, extra text, source label and capture time
+are sent over HTTPS to the receipt-scanner Worker and OpenRouter for parsing.
+User category names and selected account currency are sent; account IDs, account
+lists and images are not. Notification text and provider error bodies are never
+written to Worker logs or D1; D1 stores only entitlement and usage counters.
+The setup disclosure and all localized guidance describe this upload and the
+internet requirement. No provider-retention guarantees are implied.
+
+Notification parses use a separate D1 counter (`<appUserId>:notifications`):
+1,000 completed classifications per month for free, 3,000 per month as the Pro service
+ceiling, configurable with `NOTIFICATION_FREE_LIMIT` / `NOTIFICATION_PRO_LIMIT`.
+Completed classifications consume one unit, including deliberate empty skips,
+duplicates and setup previews; malformed responses and failed inference do not.
+This monthly service limit bounds provider usage without prematurely consuming
+the app’s 100 successful free automatic logs. These counters never consume receipt-scan allowance.
+The existing local 100 free automatic logs, shared with Apple Pay, still count
+only persisted transactions. Quota failures stay queued for later retry.
 
 ## Analytics and verification
 
 The canonical tables are in `docs/analytics-tracking.md`. Payment alerts emit two
-GA4-only events: setup steps and drain counts. Automatic expenses use the
+GA4-only events: setup steps and drain counts. Automatic expenses/income use the
 existing Autolog Transaction Created event, autolog adoption and transaction
 milestones. Review, binding-learning and Smart categories events are removed.
 
-The synthetic alert corpus covers currency/locale parsing and non-payment
-messages. Tests cover explicit account binding, automatic decisions, keyword
-fallbacks, duplicate handling, native queue contracts, migration compatibility,
-retention acknowledgements and automatic retries. Every localized setup test
-alert is recognized in all 24 catalogues, with additional decline, refund and
-promotion checks. Locale parity covers all 24 catalogues. Native notification delivery and the real iPhone Shortcuts trigger
-still need device verification before release.
+Tests cover signed text-only requests, expense/income category resolution,
+promotion skips, strict model-result validation, provider failover, no retry for
+empty notification results, separate Worker counters, explicit account binding,
+income duplicate detection, durable acknowledgements, failed-save parse reuse
+and opt-in/account changes during inference. Receipt-image behavior has regression
+coverage. Worker inference is mocked in unit tests; real model classification,
+native delivery and the real iPhone Shortcuts trigger still need device verification
+before release. The unused local keyword parser and its obsolete tests have been
+removed. Synthetic notification samples remain in `scripts/data/payment-alerts.json`
+for manual verification with `scripts/post-test-alerts.mjs`. Locale parity covers all 24
+catalogues; tutorial captions and disclosure explain expense/income parsing, text uploads and internet access. Setup previews expire after 100 seconds and failed previews are cleared; stale results cannot complete a newer setup test. Android capture accepts title-only notifications. Rich notification payloads are bounded to the Worker’s 16,000-character JSON limit before upload, removing ancillary extras first.
 
 The two payment-alert guides include 18 annotated simulator captures across 18
 steps (10 iOS and 8 Android): Android notification access, app/account selection

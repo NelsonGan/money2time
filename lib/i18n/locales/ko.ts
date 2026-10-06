@@ -1211,14 +1211,14 @@ const ko = {
       payment_alerts_android_step_5: '각 앱의 계좌를 선택하세요.',
       payment_alerts_android_step_6: '테스트 알림을 보내 모든 것이 작동하는지 확인하세요.',
       payment_alerts_android_step_7:
-        '결제는 선택한 계좌에 자동으로 기록됩니다. 카테고리는 Apple Pay와 같은 키워드를 사용합니다.',
+        '지출과 수입은 선택한 계좌에 기록됩니다. AI가 카테고리를 선택하고 홍보 알림은 건너뜁니다.',
       payment_alerts_ios_step_1:
         'Shortcuts를 열고 +, Edit를 누르세요. 편집기에서 Automation을 누르세요.',
       payment_alerts_ios_step_2: 'Notification을 검색해 선택하세요.',
       payment_alerts_ios_step_3: 'Log Payment Alert를 검색해 추가하세요.',
       payment_alerts_ios_step_4: 'Log Payment Alert에서 Message, Select Variable을 누르세요.',
       payment_alerts_ios_step_6:
-        '동작 화살표를 탭한 다음 Account를 탭하세요. 이 앱의 결제를 기록할 계좌를 선택하세요. Category를 비워 두면 키워드로 자동 분류됩니다.',
+        '동작을 펼치고 계좌를 선택하세요. 자동 분류하려면 카테고리를 비워 두세요.',
       payment_alerts_ios_step_7:
         '뒤로 가기를 탭해 저장하세요. 은행 또는 전자 지갑 앱마다 반복하세요. 다음에 Money2Time을 열면 결제가 기록됩니다.',
       payment_alerts_android_disclosure: '알림 접근 권한의 사용 방법을 읽고 Continue를 누르세요.',
@@ -2544,14 +2544,16 @@ const ko = {
   },
   payment_alerts: {
     account_hint:
-      '결제는 선택한 계좌에 자동으로 기록됩니다. 카테고리는 Apple Pay와 같은 키워드를 사용합니다.',
+      '지출과 수입은 선택한 계좌에 기록됩니다. AI가 카테고리를 선택하고 홍보 알림은 건너뜁니다.',
     title: '결제 알림',
     intro_android:
-      'Money2Time이 선택한 은행 앱과 간편결제 앱의 결제 알림을 읽고 결제를 하나하나 기록합니다. 알림은 이 기기에서만 읽으며 업로드되지 않습니다.',
-    intro_ios: '은행 및 전자 지갑 앱의 결제를 자동으로 기록합니다.',
+      '지출과 수입은 선택한 계좌에 기록됩니다. AI가 카테고리를 선택하고 홍보 알림은 건너뜁니다. 거래를 식별하기 위해 알림 텍스트가 스캔 서비스와 AI 제공업체로 안전하게 전송됩니다. 인터넷 연결이 필요합니다.',
+    intro_ios:
+      '지출과 수입은 선택한 계좌에 기록됩니다. AI가 카테고리를 선택하고 홍보 알림은 건너뜁니다. 거래를 식별하기 위해 알림 텍스트가 스캔 서비스와 AI 제공업체로 안전하게 전송됩니다. 인터넷 연결이 필요합니다.',
     section_status: '상태',
     master_label: '결제 알림 읽기',
-    master_hint: '선택한 앱의 결제를 기록합니다.',
+    master_hint:
+      '지출과 수입은 선택한 계좌에 기록됩니다. AI가 카테고리를 선택하고 홍보 알림은 건너뜁니다.',
     access_open_settings: '설정 열기',
     health_unsupported:
       '이 버전의 Money2Time은 알림을 읽을 수 없습니다. 결제 알림을 사용하려면 앱을 업데이트하세요.',
@@ -2573,7 +2575,8 @@ const ko = {
     disclosure_body: '이를 위해 Money2Time에 알림 접근 권한이 필요합니다. 이렇게 사용합니다.',
     disclosure_point_selected:
       '선택한 은행 앱과 간편결제 앱의 알림만 읽고, 나머지는 모두 무시합니다.',
-    disclosure_point_device: '알림은 이 기기에서 읽으며, 내용은 업로드되지 않습니다.',
+    disclosure_point_device:
+      '거래를 식별하기 위해 알림 텍스트가 스캔 서비스와 AI 제공업체로 안전하게 전송됩니다. 인터넷 연결이 필요합니다.',
     disclosure_android_warning:
       'Android는 알림 접근 권한이 있는 앱이 모든 알림을 읽을 수 있다고 경고합니다. Money2Time은 선택한 앱의 알림만 보관합니다.',
     access_title: '알림 접근 켜기',
@@ -2597,9 +2600,8 @@ const ko = {
     test_success: '성공했습니다. Money2Time이 결제 알림을 읽을 수 있습니다.',
     test_would_log: '%{amount}을(를) %{account}에 %{category}(으)로 기록합니다.',
     test_would_log_no_category: '%{amount}을(를) %{account}에 기록합니다.',
-    test_timeout_title: '알림이 도착하지 않았습니다',
-    test_timeout_body:
-      "알림 접근이 켜져 있는지 확인하고 다시 시도하세요. 일부 휴대폰은 Money2Time의 배터리 사용을 '제한 없음'으로 설정해야 합니다.",
+    test_timeout_title: '테스트를 완료하지 못했어요',
+    test_timeout_body: '알림 접근 권한과 인터넷 연결을 확인한 뒤 다시 시도하세요.',
     source_enabled_hint: '끄면 이 알림은 무시됩니다.',
     source_missing: '이 출처는 삭제되었습니다.',
     source_remove_title: '%{app}을(를) 제거할까요?',

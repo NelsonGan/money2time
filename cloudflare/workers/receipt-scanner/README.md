@@ -1,6 +1,6 @@
 # money2time Receipt-Scanner Worker
 
-Cloudflare Worker that proxies receipt-scan requests to **OpenRouter**. It keeps
+Cloudflare Worker that proxies receipt-image and notification-text requests to **OpenRouter**. It keeps
 the OpenRouter API key server-side, verifies the
 caller's **RevenueCat** entitlement, and meters usage so OpenRouter spend
 can't be abused from the no-login app.
@@ -16,8 +16,9 @@ the Cloudflare resources by product: one folder per Worker under
 `cloudflare/workers/`, one folder per D1 database schema under `cloudflare/d1/`.
 Each Worker folder is isolated from the Expo app: it has its own `package.json`
 / `tsconfig.json`, and the whole `cloudflare/` tree is excluded from the root
-`tsconfig`, ESLint, Jest, Prettier, Metro bundling, and EAS so `npm run check` /
-`npm test` at the repo root ignore it.
+`tsconfig`, ESLint, Prettier and EAS. Worker endpoint tests live in the root
+`__tests__/services/notificationScannerWorker.test.ts` and run with `npm test`;
+Worker type checking still runs separately in this folder.
 
 ## Endpoint
 
@@ -26,13 +27,13 @@ Each Worker folder is isolated from the Expo app: it has its own `package.json`
 ```jsonc
 // request
 {
-  "appUserId": "m2t_…",         // settings.appUserId from the app
-  "image": "<base64>",          // no data: prefix
+  "appUserId": "m2t_…", // settings.appUserId from the app
+  "image": "<base64>", // no data: prefix
   "mime": "image/jpeg",
-  "currency": "USD",            // user's reporting currency
-  "categories": ["Food", "…"],  // user's expense category names
-  "mode": "quick",              // "quick" (default) | "itemized" | "screenshot"
-  "accounts": ["Visa", "…"]     // screenshot mode only, matched against the payment source
+  "currency": "USD", // user's reporting currency
+  "categories": ["Food", "…"], // user's expense category names
+  "mode": "quick", // "quick" (default) | "itemized" | "screenshot"
+  "accounts": ["Visa", "…"], // screenshot mode only, matched against the payment source
 }
 ```
 
@@ -40,9 +41,44 @@ Each Worker folder is isolated from the Expo app: it has its own `package.json`
 the total only, `itemized` adds a line-item breakdown for Split by Item, and
 `screenshot` also matches the payment source against `accounts`.
 
+For text-only notification parsing, omit `image` and `mime`:
+
+```json
+{
+  "appUserId": "m2t_example",
+  "mode": "notification",
+  "currency": "MYR",
+  "categories": ["Food", "Other"],
+  "incomeCategories": ["Salary", "Other"],
+  "notification": {
+    "source": "Bank",
+    "title": "Money received",
+    "subtitle": null,
+    "body": "MYR 3000 credited from Employer",
+    "extra": [],
+    "capturedAt": "2026-10-06T04:00:00.000Z"
+  }
+}
+```
+
+Notification mode returns zero or one expense/income. Promotions, security
+codes, statements, future/failed payments and pending holds return an empty
+array, without an empty-result retry. Malformed model responses try the backup
+model and otherwise return 502. The selected account currency is the fallback
+for ambiguous/missing currencies; no account list or account ID is sent. Dates
+are assigned locally from the notification capture time. An optional `secondary`
+amount/currency preserves explicitly stated foreign-payment billing.
+Notification text is untrusted user content, separated from system instructions,
+and is never logged or stored in D1. OpenRouter receives it for inference.
+
 ```jsonc
 // 200
-{ "transactions": [ /* ScannedTransaction[] */ ], "quota": { "used": 3, "limit": 10, "isPro": false, "interval": "month" } }
+{
+  "transactions": [
+    /* ScannedTransaction[] */
+  ],
+  "quota": { "used": 3, "limit": 10, "isPro": false, "interval": "month" },
+}
 // 402 { "error": "limit_reached", "isPro": false, "limit": 10, "used": 10, "interval": "month" }
 // 429 { "error": "capacity" }                       // upstream saturated (retryable)
 // 400 { "error": "missing_image" | "invalid_mime" | … }
@@ -57,12 +93,21 @@ allowance.
 
 `wrangler.toml` `[vars]`: `MODEL`, `ENTITLEMENT_ID`, and the per-tier quota:
 
-| Var             | Default   | Meaning                                                             |
-| --------------- | --------- | ------------------------------------------------------------------- |
-| `FREE_LIMIT`    | `20`      | Free scans allowed per window                                       |
-| `FREE_INTERVAL` | `100year` | Free metering cadence (a 100-year window ≈ lifetime)                |
-| `PRO_LIMIT`     | `500`     | Pro scans allowed per window (fair-use; paywall says unlimited)     |
-| `PRO_INTERVAL`  | `month`   | Pro metering cadence                                                |
+| Var                       | Default   | Meaning                                                           |
+| ------------------------- | --------- | ----------------------------------------------------------------- |
+| `FREE_LIMIT`              | `20`      | Free scans allowed per window                                     |
+| `FREE_INTERVAL`           | `100year` | Free metering cadence (a 100-year window ≈ lifetime)              |
+| `PRO_LIMIT`               | `500`     | Pro scans allowed per window (fair-use; paywall says unlimited)   |
+| `PRO_INTERVAL`            | `month`   | Pro metering cadence                                              |
+| `NOTIFICATION_FREE_LIMIT` | `1000`    | Completed notification classifications per monthly window         |
+| `NOTIFICATION_PRO_LIMIT`  | `3000`    | Completed notification classifications per monthly service window |
+
+Notifications use the same tables with a separate `<appUserId>:notifications`
+counter. They never consume receipt-scan quota. Every completed classification costs one unit, including an empty skip,
+duplicate or setup preview. Malformed output and provider failures are free. The app’s
+existing automatic-log allowance separately counts persisted transactions.
+Deploy this Worker mode before shipping the app that calls it; old image clients
+continue to use the same `/scan` contract. No database migration is needed.
 
 The rate limiter is interval-agnostic (`src/interval.ts`): a `*_INTERVAL` is a
 unit (`day`/`week`/`month`/`year`) with an optional count prefix, so changing a
@@ -91,10 +136,10 @@ Worker automatically retries the request once with `BACKUP_MODEL`
 Two time-bounded concerns, both in the `money2time-d1-receipt-scanner` D1
 database (schema in `cloudflare/d1/receipt-scanner/schema.sql`):
 
-| Concern           | Table               | Key                                              | Expiry                                    |
-| ----------------- | ------------------- | ------------------------------------------------ | ----------------------------------------- |
-| Usage counter     | `scan_usage`        | `(app_user_id, interval_unit, window_start)`     | window end in `expires_at`; cron-pruned   |
-| Entitlement cache | `entitlement_cache` | `app_user_id`                                    | `expires_at` checked on read; cron-pruned |
+| Concern           | Table               | Key                                          | Expiry                                    |
+| ----------------- | ------------------- | -------------------------------------------- | ----------------------------------------- |
+| Usage counter     | `scan_usage`        | `(app_user_id, interval_unit, window_start)` | window end in `expires_at`; cron-pruned   |
+| Entitlement cache | `entitlement_cache` | `app_user_id`                                | `expires_at` checked on read; cron-pruned |
 
 D1 has no native TTL, so every row carries an `expires_at` (epoch-ms) and the
 daily cron (`scheduled()`) prunes stale rows. `scan_usage` is one row per

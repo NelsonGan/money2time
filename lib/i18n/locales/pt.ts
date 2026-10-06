@@ -1235,7 +1235,7 @@ const pt = {
       payment_alerts_android_step_5: 'Escolha a conta para cada app.',
       payment_alerts_android_step_6: 'Envie um alerta de teste para conferir se tudo funciona.',
       payment_alerts_android_step_7:
-        'Os pagamentos são registrados automaticamente na conta escolhida. As categorias usam as mesmas palavras-chave do Apple Pay.',
+        'Despesas e receitas são registradas na conta escolhida. A IA escolhe categorias e ignora promoções.',
       payment_alerts_ios_step_1:
         'Abra Shortcuts, toque em + e depois em Edit. Toque em Automation no editor.',
       payment_alerts_ios_step_2: 'Procure Notification e selecione.',
@@ -1243,7 +1243,7 @@ const pt = {
       payment_alerts_ios_step_4:
         'Toque em Message em Log Payment Alert e depois em Select Variable.',
       payment_alerts_ios_step_6:
-        'Toque na seta da ação e depois em Account. Escolha onde registrar os pagamentos deste app. Deixe Category vazio para a correspondência automática de palavras-chave.',
+        'Expanda a ação e escolha Conta. Deixe Categoria vazia para a categorização automática.',
       payment_alerts_ios_step_7:
         'Volte para salvar. Repita para cada app de banco ou carteira digital. Os pagamentos serão registrados quando você abrir Money2Time novamente.',
       payment_alerts_android_disclosure:
@@ -2592,14 +2592,16 @@ const pt = {
   },
   payment_alerts: {
     account_hint:
-      'Os pagamentos são registrados automaticamente na conta escolhida. As categorias usam as mesmas palavras-chave do Apple Pay.',
+      'Despesas e receitas são registradas na conta escolhida. A IA escolhe categorias e ignora promoções.',
     title: 'Alertas de pagamento',
     intro_android:
-      'O Money2Time lê as notificações de pagamento dos apps de banco e carteiras que você escolher e registra cada pagamento para você. Os alertas são lidos neste celular e nunca são enviados.',
-    intro_ios: 'Registre automaticamente pagamentos dos seus apps de banco e carteiras digitais.',
+      'Despesas e receitas são registradas na conta escolhida. A IA escolhe categorias e ignora promoções. O texto das notificações é enviado com segurança ao nosso serviço de digitalização e provedor de IA para identificar transações. É necessário internet.',
+    intro_ios:
+      'Despesas e receitas são registradas na conta escolhida. A IA escolhe categorias e ignora promoções. O texto das notificações é enviado com segurança ao nosso serviço de digitalização e provedor de IA para identificar transações. É necessário internet.',
     section_status: 'Status',
     master_label: 'Ler notificações de pagamento',
-    master_hint: 'Registra os pagamentos dos apps que você escolher.',
+    master_hint:
+      'Despesas e receitas são registradas na conta escolhida. A IA escolhe categorias e ignora promoções.',
     access_open_settings: 'Abrir configurações',
     health_unsupported:
       'Esta versão do Money2Time não consegue ler notificações. Atualize o app para usar os alertas de pagamento.',
@@ -2623,7 +2625,8 @@ const pt = {
       'Para isso, o Money2Time precisa de acesso às notificações. Veja como ele usa:',
     disclosure_point_selected:
       'Ele só lê notificações dos apps de banco e carteiras que você escolher. Todo o resto é ignorado.',
-    disclosure_point_device: 'Os alertas são lidos neste celular. O texto nunca é enviado.',
+    disclosure_point_device:
+      'O texto das notificações é enviado com segurança ao nosso serviço de digitalização e provedor de IA para identificar transações. É necessário internet.',
     disclosure_android_warning:
       'O Android vai avisar que um app com acesso a notificações pode ler todas elas. O Money2Time só guarda os apps que você escolher.',
     access_title: 'Ative o acesso a notificações',
@@ -2649,9 +2652,9 @@ const pt = {
     test_success: 'Funcionou. O Money2Time consegue ler seus alertas de pagamento.',
     test_would_log: 'Registraria %{amount} em %{account} como %{category}.',
     test_would_log_no_category: 'Registraria %{amount} em %{account}.',
-    test_timeout_title: 'Nenhum alerta chegou',
+    test_timeout_title: 'Não foi possível concluir o teste',
     test_timeout_body:
-      'Confira se o acesso a notificações está ativado e tente de novo. Alguns celulares também exigem o uso de bateria do Money2Time como Sem restrições.',
+      'Verifique o acesso às notificações e sua conexão com a internet e tente novamente.',
     source_enabled_hint: 'Desativado, os alertas dele são ignorados.',
     source_missing: 'Esta fonte foi removida.',
     source_remove_title: 'Remover %{app}?',

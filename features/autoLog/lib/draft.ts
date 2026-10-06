@@ -17,7 +17,7 @@ export interface DraftInput {
 export function buildAlertDraft(input: DraftInput): CreateTransactionInput | null {
   const { parse } = input;
   if (
-    parse.kind !== 'spend' ||
+    (parse.kind !== 'spend' && parse.kind !== 'income') ||
     parse.amount === null ||
     !Number.isFinite(parse.amount) ||
     !(parse.amount > 0)
@@ -52,7 +52,7 @@ export function buildAlertDraft(input: DraftInput): CreateTransactionInput | nul
   const note = parse.counterparty?.trim() || null;
 
   return {
-    type: 'expense',
+    type: parse.kind === 'income' ? 'income' : 'expense',
     amount: parse.amount,
     currency,
     ...(accountAmount !== undefined ? { accountAmount } : {}),

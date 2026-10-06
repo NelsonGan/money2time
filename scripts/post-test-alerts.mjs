@@ -14,8 +14,8 @@
  *   node scripts/post-test-alerts.mjs --list
  *
  * Options: --serial <adb serial>, --delay <ms between posts, default 1500>.
- * Fixtures come from __tests__/fixtures/payment-alerts/alerts.json, the same
- * corpus the parser tests run against.
+ * Synthetic notification samples come from scripts/data/payment-alerts.json.
+ * Inspect the resulting transactions and skipped alerts to verify model behavior.
  */
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
@@ -23,7 +23,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const FIXTURES = path.join(ROOT, '__tests__/fixtures/payment-alerts/alerts.json');
+const FIXTURES = path.join(ROOT, 'scripts/data/payment-alerts.json');
 
 function adbPath() {
   const androidSdkRoot = process.env.ANDROID_HOME || process.env.ANDROID_SDK_ROOT;
