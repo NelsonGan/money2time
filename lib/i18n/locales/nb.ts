@@ -1231,14 +1231,14 @@ const nb = {
       payment_alerts_android_step_5: 'Velg kontoen for hver app.',
       payment_alerts_android_step_6: 'Send et testvarsel for å sjekke at alt fungerer.',
       payment_alerts_android_step_7:
-        'Betalinger registreres automatisk på den valgte kontoen. Kategorier bruker de samme nøkkelordene som Apple Pay.',
+        'Utgifter og inntekter registreres på den valgte kontoen. KI velger kategorier og hopper over reklame.',
       payment_alerts_ios_step_1:
         'Åpne Shortcuts, trykk + og deretter Edit. Trykk Automation i redigereren.',
       payment_alerts_ios_step_2: 'Søk etter Notification og velg den.',
       payment_alerts_ios_step_3: 'Søk etter Log Payment Alert og legg den til.',
       payment_alerts_ios_step_4: 'Trykk Message i Log Payment Alert, deretter Select Variable.',
       payment_alerts_ios_step_6:
-        'Trykk på handlingspilen og deretter Account. Velg hvor betalingene fra denne appen skal registreres. La Category stå tom for automatisk matching av nøkkelord.',
+        'Utvid handlingen og velg Konto. La Kategori være tom for automatisk kategorisering.',
       payment_alerts_ios_step_7:
         'Gå tilbake for å lagre. Gjenta for hver bank- eller lommebok-app. Betalingene registreres neste gang du åpner Money2Time.',
       payment_alerts_android_disclosure:
@@ -2578,14 +2578,16 @@ const nb = {
   },
   payment_alerts: {
     account_hint:
-      'Betalinger registreres automatisk på den valgte kontoen. Kategorier bruker de samme nøkkelordene som Apple Pay.',
+      'Utgifter og inntekter registreres på den valgte kontoen. KI velger kategorier og hopper over reklame.',
     title: 'Betalingsvarsler',
     intro_android:
-      'Money2Time leser betalingsvarslene fra bank- og lommebokappene du velger, og registrerer hver betaling for deg. Varsler leses på denne telefonen og lastes aldri opp.',
-    intro_ios: 'Registrer betalinger fra bank- og lommebok-appene dine automatisk.',
+      'Utgifter og inntekter registreres på den valgte kontoen. KI velger kategorier og hopper over reklame. Varseltekst sendes sikkert til skannetjenesten og KI-leverandøren vår for å finne transaksjoner. Internettilgang kreves.',
+    intro_ios:
+      'Utgifter og inntekter registreres på den valgte kontoen. KI velger kategorier og hopper over reklame. Varseltekst sendes sikkert til skannetjenesten og KI-leverandøren vår for å finne transaksjoner. Internettilgang kreves.',
     section_status: 'Status',
     master_label: 'Les betalingsvarsler',
-    master_hint: 'Registrerer betalinger fra appene du velger.',
+    master_hint:
+      'Utgifter og inntekter registreres på den valgte kontoen. KI velger kategorier og hopper over reklame.',
     access_open_settings: 'Åpne innstillinger',
     health_unsupported:
       'Denne versjonen av Money2Time kan ikke lese varsler. Oppdater appen for å bruke betalingsvarsler.',
@@ -2608,7 +2610,8 @@ const nb = {
     disclosure_body: 'Money2Time trenger varseltilgang for dette. Slik brukes den:',
     disclosure_point_selected:
       'Den leser bare varsler fra bank- og lommebokappene du velger. Alt annet ignoreres.',
-    disclosure_point_device: 'Varsler leses på denne telefonen. Teksten lastes aldri opp.',
+    disclosure_point_device:
+      'Varseltekst sendes sikkert til skannetjenesten og KI-leverandøren vår for å finne transaksjoner. Internettilgang kreves.',
     disclosure_android_warning:
       'Android advarer om at en app med varseltilgang kan lese alle varslene dine. Money2Time beholder bare appene du velger.',
     access_title: 'Slå på varseltilgang',
@@ -2632,9 +2635,8 @@ const nb = {
     test_success: 'Det fungerer. Money2Time kan lese betalingsvarslene dine.',
     test_would_log: 'Den ville registrert %{amount} på %{account} som %{category}.',
     test_would_log_no_category: 'Den ville registrert %{amount} på %{account}.',
-    test_timeout_title: 'Ingen varsler kom',
-    test_timeout_body:
-      'Sjekk at varseltilgang er slått på, og prøv igjen. Noen telefoner krever også at batteribruken for Money2Time står på Ubegrenset.',
+    test_timeout_title: 'Testen kunne ikke fullføres',
+    test_timeout_body: 'Kontroller varslingstilgangen og internettforbindelsen, og prøv igjen.',
     source_enabled_hint: 'Når den er av, ignoreres varslene dens.',
     source_missing: 'Denne kilden er fjernet.',
     source_remove_title: 'Fjerne %{app}?',

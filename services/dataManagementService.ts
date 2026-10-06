@@ -6,6 +6,10 @@ import { getSQLite } from '~/lib/db/client';
 import { normalizeCurrencyColumns } from '~/lib/db/normalizeCurrencies';
 import { normalizeIconColumns } from '~/lib/db/normalizeIcons';
 import { retireSimpleMode } from '~/lib/db/retireSimpleMode';
+import { clearAllAutoLogQueues } from '~/services/autoLog';
+import { reportError } from '~/services/errorReporting';
+import { invalidatePaymentAlertProcessing } from '~/services/paymentAlertsBridge';
+import { clearAndroidCaptureQueue } from '~/services/paymentCapture';
 import { runUserAssetGc } from '~/services/userAssetGc';
 import {
   collectUserAssetsForBackup,
@@ -244,6 +248,7 @@ function insertRows(
 }
 
 export function applyBackupData(backup: BackupData): ImportResult {
+  invalidatePaymentAlertProcessing();
   const sqlite = getSQLite();
   const currentAppUserId =
     (
@@ -357,6 +362,11 @@ export function applyBackupData(backup: BackupData): ImportResult {
     // run. Convert within this transaction so a failure rolls back the restore.
     retireSimpleMode(sqlite);
     sqlite.execSync('COMMIT');
+    // Native queues are outside the restored database and reference its old ids.
+    clearAndroidCaptureQueue();
+    void clearAllAutoLogQueues().catch((error) =>
+      reportError(error, { scope: 'restore_autolog_queues' }),
+    );
 
     // Older backups stored currency symbols (e.g. "RM") instead of ISO codes —
     // normalize so multi-currency doesn't treat them as bogus sub-currencies.

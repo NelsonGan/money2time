@@ -28,7 +28,7 @@ function normalizeCurrencyCode(currency: string): string {
     : 'USD';
 }
 
-export type ScanMode = 'quick' | 'itemized' | 'screenshot';
+export type ScanMode = 'quick' | 'itemized' | 'screenshot' | 'notification';
 
 /** De-dupe, trim, and keep a clean comma list for the model. */
 function toAllowedLine(list: string[]): string {

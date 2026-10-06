@@ -18,8 +18,7 @@ const context = (): PipelineContext => ({
   prefs: withAlertSource(prefs(), source({ accountId: selected.id })),
   reportingCurrency: 'MYR',
   defaultExpenseCategoryId: 'default',
-  autoCategorizeByMerchant: true,
-  lookups: { keyword: () => 'food' },
+  defaultIncomeCategoryId: null,
 });
 const capture = (body: string): CaptureInput => ({
   id: 'alert',
@@ -35,9 +34,20 @@ const capture = (body: string): CaptureInput => ({
   presetAccountId: null,
   presetCategoryId: null,
 });
-function outcome(body: string, ctx = context()) {
-  return finalizeCapture(analyzeCapture(capture(body), ctx), ctx, {
-    duplicate: { kind: 'none', supersedesCaptureId: null },
+function scan() {
+  return {
+    type: 'expense' as const,
+    amount: 25,
+    currency: 'MYR',
+    category: 'Food',
+    note: 'SHELL',
+    sentiment: 'neutral' as const,
+    date: null,
+  };
+}
+function outcome(body: string, ctx = context(), scanned = scan()) {
+  return finalizeCapture(analyzeCapture(capture(body), ctx, scanned), ctx, {
+    duplicate: { kind: 'none' },
     autoLogsRemaining: null,
   });
 }
@@ -49,7 +59,7 @@ describe('simple automatic payment logging', () => {
     expect(result.draft?.accountId).toBe('selected');
   });
 
-  it('automatically logs a medium-confidence spend without a review prompt', () => {
+  it('automatically logs a completed worker-parsed payment without a review prompt', () => {
     expect(outcome('You have sent MYR 25.00 to JAMIE.').decision).toEqual({
       action: 'log',
       reason: 'auto',
@@ -65,20 +75,15 @@ describe('simple automatic payment logging', () => {
     });
   });
 
-  it('uses the same merchant keyword lookup and default fallback as Apple Pay', () => {
+  it('uses the worker category, then the configured default', () => {
     const ctx = context();
-    const lookup = jest.fn(() => 'food');
-    ctx.lookups.keyword = lookup;
     expect(outcome('You spent RM25.00 at SHELL.', ctx).resolution).toMatchObject({
       categoryId: 'food',
-      categoryOrigin: 'keyword',
+      categoryOrigin: 'ai',
     });
-    expect(lookup).toHaveBeenCalledWith('SHELL', ctx.categories);
-    ctx.autoCategorizeByMerchant = false;
-    expect(outcome('You spent RM25.00 at SHELL.', ctx).resolution).toMatchObject({
-      categoryId: 'default',
-      categoryOrigin: 'default',
-    });
+    expect(
+      outcome('You spent RM25.00 at SHELL.', ctx, { ...scan(), category: '' }).resolution,
+    ).toMatchObject({ categoryId: 'default', categoryOrigin: 'default' });
   });
 
   it('drops removed modes and AI settings when reading older preferences', () => {
@@ -119,8 +124,8 @@ describe('simple automatic payment logging', () => {
       sourceKey: 'bank',
       presetAccountId: 'selected',
     };
-    const result = finalizeCapture(analyzeCapture(input, ctx), ctx, {
-      duplicate: { kind: 'none', supersedesCaptureId: null },
+    const result = finalizeCapture(analyzeCapture(input, ctx, scan()), ctx, {
+      duplicate: { kind: 'none' },
       autoLogsRemaining: null,
     });
     expect(result.decision).toEqual({ action: 'log', reason: 'auto' });
@@ -138,8 +143,8 @@ describe('simple automatic payment logging', () => {
       channel: 'ios_alert' as const,
       sourceKey: 'bank',
     };
-    const result = finalizeCapture(analyzeCapture(input, ctx), ctx, {
-      duplicate: { kind: 'none', supersedesCaptureId: null },
+    const result = finalizeCapture(analyzeCapture(input, ctx, scan()), ctx, {
+      duplicate: { kind: 'none' },
       autoLogsRemaining: null,
     });
     expect(result.decision.action).toBe('ignore');

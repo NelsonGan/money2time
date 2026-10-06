@@ -8,6 +8,7 @@ import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import {
+  isCurrentTestAlert,
   requestPaymentAlertDrain,
   subscribeTestAlertResult,
   type TestAlertResult,
@@ -25,6 +26,7 @@ import { formatAmount } from '~/utils/formatters';
 import { AppPickerList, type PickableApp } from '../components/AppPickerList';
 import { PaysFromControl } from '../components/PaysFromControl';
 import { isPayableAccount } from '../lib/binding';
+import { TEST_ALERT_TIMEOUT_MS } from '../lib/constants';
 import {
   androidCapturePackages,
   findAlertSource,
@@ -41,9 +43,6 @@ interface PaymentAlertsSetupScreenProps {
   onClose: () => void;
 }
 
-/** How long the test waits for its own notification to come back. */
-const TEST_TIMEOUT_MS = 10000;
-
 /**
  * Android setup for payment notifications: the prominent disclosure Google
  * Play requires before the system toggle, notification access, the apps to
@@ -55,6 +54,7 @@ export function PaymentAlertsSetupScreen({ initialStep, onClose }: PaymentAlerts
   const [step, setStep] = useState<Step>(initialStep ?? 'intro');
   const [testState, setTestState] = useState<'idle' | 'waiting' | 'done' | 'timeout'>('idle');
   const [testResult, setTestResult] = useState<TestAlertResult | null>(null);
+  const testStartedAt = useRef<number | null>(null);
   const testTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -90,8 +90,14 @@ export function PaymentAlertsSetupScreen({ initialStep, onClose }: PaymentAlerts
 
   useEffect(() => {
     return subscribeTestAlertResult((result) => {
+      if (!isCurrentTestAlert(result, testStartedAt.current)) return;
+      testStartedAt.current = null;
       if (testTimer.current) clearTimeout(testTimer.current);
       setTestResult(result);
+      if (!result.wouldLog) {
+        setTestState('timeout');
+        return;
+      }
       setTestState('done');
       void triggerHaptic('success');
       void trackEvent(AnalyticsEvents.AUTOLOG_ALERTS_SETUP, {
@@ -103,6 +109,7 @@ export function PaymentAlertsSetupScreen({ initialStep, onClose }: PaymentAlerts
 
   useEffect(
     () => () => {
+      testStartedAt.current = null;
       if (testTimer.current) clearTimeout(testTimer.current);
     },
     [],
@@ -196,7 +203,11 @@ export function PaymentAlertsSetupScreen({ initialStep, onClose }: PaymentAlerts
     setTestState('waiting');
     setTestResult(null);
     if (testTimer.current) clearTimeout(testTimer.current);
-    testTimer.current = setTimeout(() => setTestState('timeout'), TEST_TIMEOUT_MS);
+    testStartedAt.current = Date.now();
+    testTimer.current = setTimeout(() => {
+      testStartedAt.current = null;
+      setTestState('timeout');
+    }, TEST_ALERT_TIMEOUT_MS);
     const amount = `${settings.currencyCode} 1.00`;
     const sent = await postNotificationTestAlert(
       I18n.t('payment_alerts.test_alert_title'),
@@ -204,6 +215,7 @@ export function PaymentAlertsSetupScreen({ initialStep, onClose }: PaymentAlerts
       I18n.t('payment_alerts.test_channel_name'),
     );
     if (!sent) {
+      testStartedAt.current = null;
       if (testTimer.current) clearTimeout(testTimer.current);
       setTestState('timeout');
       return;

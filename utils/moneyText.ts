@@ -1,8 +1,6 @@
-// Reading money out of free text: the Apple Pay auto-log drain parses the
-// Shortcuts trigger's Amount string with this, and the payment-alert parser
-// (features/autoLog/lib/parser) reads bank and wallet notifications with it.
-// Pure, no React Native imports; covered by the payment-alert parser tests
-// and, through parseAutoLogAmount, by __tests__/features/autoLog.test.ts.
+// Read the Apple Pay Shortcut's structured Amount string, and validate currency
+// codes returned by notification inference. Pure; Apple Pay parsing is covered
+// by __tests__/features/autoLog.test.ts.
 
 import { ALL_CURRENCIES } from '~/constants/appDefaults';
 

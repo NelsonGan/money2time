@@ -476,7 +476,7 @@ internal object PaymentCaptureStore {
       ?.takeLast(MAX_LINES)
       ?: emptyList()
     val messages = messagesOf(extras)
-    if (body == null && bigText == null && lines.isEmpty() && messages.isEmpty()) return null
+    if (title == null && body == null && bigText == null && lines.isEmpty() && messages.isEmpty()) return null
 
     val json = JSONObject()
       .put("v", 1)

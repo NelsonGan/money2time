@@ -1231,14 +1231,14 @@ const sv = {
       payment_alerts_android_step_6:
         'Skicka en testavisering för att kontrollera att allt fungerar.',
       payment_alerts_android_step_7:
-        'Betalningar registreras automatiskt på det valda kontot. Kategorier använder samma nyckelord som Apple Pay.',
+        'Utgifter och inkomster registreras på det valda kontot. AI väljer kategorier och hoppar över reklam.',
       payment_alerts_ios_step_1:
         'Öppna Shortcuts, tryck + och sedan Edit. Tryck Automation i redigeraren.',
       payment_alerts_ios_step_2: 'Sök efter Notification och välj den.',
       payment_alerts_ios_step_3: 'Sök efter Log Payment Alert och lägg till den.',
       payment_alerts_ios_step_4: 'Tryck Message i Log Payment Alert och sedan Select Variable.',
       payment_alerts_ios_step_6:
-        'Tryck på åtgärdspilen och sedan Account. Välj var appens betalningar ska registreras. Lämna Category tomt för automatisk matchning av nyckelord.',
+        'Utöka åtgärden och välj Konto. Lämna Kategori tom för automatisk kategorisering.',
       payment_alerts_ios_step_7:
         'Gå tillbaka för att spara. Upprepa för varje bank- eller plånboksapp. Betalningar registreras nästa gång du öppnar Money2Time.',
       payment_alerts_android_disclosure: 'Läs hur aviseringsåtkomsten används och tryck Continue.',
@@ -2579,14 +2579,16 @@ const sv = {
   },
   payment_alerts: {
     account_hint:
-      'Betalningar registreras automatiskt på det valda kontot. Kategorier använder samma nyckelord som Apple Pay.',
+      'Utgifter och inkomster registreras på det valda kontot. AI väljer kategorier och hoppar över reklam.',
     title: 'Betalningsaviseringar',
     intro_android:
-      'Money2Time läser betalningsaviseringarna från de bank- och plånboksappar du väljer och registrerar varje betalning åt dig. Aviseringar läses på den här telefonen och laddas aldrig upp.',
-    intro_ios: 'Registrera betalningar från dina bank- och plånboksappar automatiskt.',
+      'Utgifter och inkomster registreras på det valda kontot. AI väljer kategorier och hoppar över reklam. Aviseringstext skickas säkert till vår skanningstjänst och AI-leverantör för att identifiera transaktioner. Internetanslutning krävs.',
+    intro_ios:
+      'Utgifter och inkomster registreras på det valda kontot. AI väljer kategorier och hoppar över reklam. Aviseringstext skickas säkert till vår skanningstjänst och AI-leverantör för att identifiera transaktioner. Internetanslutning krävs.',
     section_status: 'Status',
     master_label: 'Läs betalningsaviseringar',
-    master_hint: 'Registrerar betalningar från de appar du väljer.',
+    master_hint:
+      'Utgifter och inkomster registreras på det valda kontot. AI väljer kategorier och hoppar över reklam.',
     access_open_settings: 'Öppna inställningar',
     health_unsupported:
       'Den här versionen av Money2Time kan inte läsa aviseringar. Uppdatera appen för att använda betalningsaviseringar.',
@@ -2608,7 +2610,8 @@ const sv = {
     disclosure_body: 'Money2Time behöver aviseringsåtkomst för det här. Så här används den:',
     disclosure_point_selected:
       'Den läser bara aviseringar från de bank- och plånboksappar du väljer. Allt annat ignoreras.',
-    disclosure_point_device: 'Aviseringar läses på den här telefonen. Texten laddas aldrig upp.',
+    disclosure_point_device:
+      'Aviseringstext skickas säkert till vår skanningstjänst och AI-leverantör för att identifiera transaktioner. Internetanslutning krävs.',
     disclosure_android_warning:
       'Android varnar för att en app med aviseringsåtkomst kan läsa alla dina aviseringar. Money2Time behåller bara de appar du väljer.',
     access_title: 'Slå på aviseringsåtkomst',
@@ -2632,9 +2635,8 @@ const sv = {
     test_success: 'Det fungerar. Money2Time kan läsa dina betalningsaviseringar.',
     test_would_log: 'Den skulle registrera %{amount} på %{account} som %{category}.',
     test_would_log_no_category: 'Den skulle registrera %{amount} på %{account}.',
-    test_timeout_title: 'Ingen avisering kom',
-    test_timeout_body:
-      'Kontrollera att aviseringsåtkomst är på och försök igen. Vissa telefoner kräver också att batterianvändningen för Money2Time är Obegränsad.',
+    test_timeout_title: 'Testet kunde inte slutföras',
+    test_timeout_body: 'Kontrollera aviseringsåtkomst och internetanslutning och försök igen.',
     source_enabled_hint: 'När den är av ignoreras dess aviseringar.',
     source_missing: 'Den här källan har tagits bort.',
     source_remove_title: 'Ta bort %{app}?',

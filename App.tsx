@@ -1475,6 +1475,7 @@ function AutoLogSync() {
 
         // A bank alert for the same purchase may have been logged already.
         const tapCheck = checkApplePayTap(entry, input);
+        if (tapCheck.action === 'retry') continue;
         if (tapCheck.action === 'skip') {
           recordApplePayTap(entry, input, {
             status: 'duplicate',
@@ -1493,7 +1494,6 @@ function AutoLogSync() {
               recordApplePayTap(entry, input, {
                 status: 'logged',
                 transactionId,
-                supersedesCaptureId: tapCheck.supersedesCaptureId,
               }),
           });
           consumed.push(entry.id);

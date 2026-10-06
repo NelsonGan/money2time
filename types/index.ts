@@ -1211,23 +1211,23 @@ export type PaymentAlertKind =
 
 export type PaymentAlertConfidence = 'high' | 'medium' | 'low';
 
-/** What the parser read out of one alert. */
+/** Validated transaction details; legacy parsing diagnostics remain readable. */
 export interface PaymentAlertParse {
   kind: PaymentAlertKind;
   amount: number | null;
-  /** ISO code, only when the text names the currency beyond doubt. */
+  /** ISO code, resolved by inference using the selected account currency when ambiguous. */
   currency: string | null;
   /** The symbol or code next to the amount as written (`$`, `RM`, `USD`). */
-  currencyToken: string | null;
+  currencyToken?: string | null;
   /** A second amount in another currency, e.g. the billed amount of a foreign spend. */
   secondary: { amount: number; currency: string } | null;
   /** Merchant, payee or payer. */
   counterparty: string | null;
   /** The word that introduced the counterparty (`at`, `to`, `from`, …). */
-  counterpartyLeadIn: string | null;
-  confidence: PaymentAlertConfidence;
-  /** Short machine-readable parsing signals. */
-  signals: string[];
+  counterpartyLeadIn?: string | null;
+  confidence?: PaymentAlertConfidence;
+  /** Legacy local parser diagnostics. */
+  signals?: string[];
   parserVersion: number;
 }
 
@@ -1246,7 +1246,7 @@ export type AccountBindingReason =
   | 'ambiguous'
   | 'none';
 
-export type PaymentAlertCategoryOrigin = 'preset' | 'keyword' | 'default' | 'fallback';
+export type PaymentAlertCategoryOrigin = 'preset' | 'ai' | 'keyword' | 'default' | 'fallback';
 
 export type PaymentAlertStatus =
   | 'pending'
@@ -1282,21 +1282,22 @@ export type PaymentAlertReason =
 /** Everything the pipeline worked out for one alert, stored with the capture. */
 export interface PaymentAlertResolution {
   parse: PaymentAlertParse;
-  /** Currency used by the expense, including account fallback for ambiguous symbols. */
+  /** Account currency used for notification inference, including ambiguous symbols. */
+  scanCurrency?: string;
+  /** Currency used by the transaction. */
   currency?: string | null;
   accountId: string | null;
   certainty: AccountBindingCertainty;
   bindingReason: AccountBindingReason;
-  /** The identifier that bound the account (`1234`, `Visa Platinum`). */
-  identifier: string | null;
   /** Legacy binding details, retained for stored-capture compatibility. */
-  candidateAccountIds: string[];
+  identifier?: string | null;
+  candidateAccountIds?: string[];
   categoryId: string | null;
   categoryOrigin: PaymentAlertCategoryOrigin | null;
   draftType: TransactionType | null;
-  /** The two sides of a top-up or withdrawal draft, when known. */
-  transferFromAccountId: string | null;
-  transferToAccountId: string | null;
+  /** Legacy transfer drafts; current notifications log one expense or income. */
+  transferFromAccountId?: string | null;
+  transferToAccountId?: string | null;
 }
 
 /** One alert as stored in `auto_log_captures`. */

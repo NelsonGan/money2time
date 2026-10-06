@@ -1205,13 +1205,13 @@ const en = {
       payment_alerts_android_step_5: 'Choose the account for each app.',
       payment_alerts_android_step_6: 'Send a test alert to check that everything works.',
       payment_alerts_android_step_7:
-        'Payments log automatically to your selected account. Categories use the same keywords as Apple Pay.',
+        'Expenses and income log to your selected account. AI picks categories and skips promotions.',
       payment_alerts_ios_step_1: 'Open Shortcuts, tap +, then Edit. Tap Automation in the editor.',
       payment_alerts_ios_step_2: 'Search for Notification and select it.',
       payment_alerts_ios_step_3: 'Search for Log Payment Alert and add it.',
       payment_alerts_ios_step_4: 'Tap Message in Log Payment Alert, then Select Variable.',
       payment_alerts_ios_step_6:
-        'Tap the action arrow, then Account. Choose where this app’s payments should be logged. Leave Category empty for automatic keyword matching.',
+        'Expand the action and choose Account. Leave Category empty for automatic categorization.',
       payment_alerts_ios_step_7:
         'Tap back to save. Repeat for each bank or e-wallet app. Payments log when you next open Money2Time.',
       payment_alerts_android_disclosure: 'Read how notification access is used, then tap Continue.',
@@ -2577,14 +2577,16 @@ const en = {
   },
   payment_alerts: {
     account_hint:
-      'Payments log automatically to your selected account. Categories use the same keywords as Apple Pay.',
+      'Expenses and income log to your selected account. AI picks categories and skips promotions.',
     title: 'Payment alerts',
     intro_android:
-      'Money2Time reads the payment notifications from the banking and wallet apps you choose and logs each payment for you. Alerts are read on this phone and never uploaded.',
-    intro_ios: 'Automatically log payments from your bank and e-wallet apps.',
+      'Expenses and income log to your selected account. AI picks categories and skips promotions. Notification text is sent securely to our scanning service and AI provider to identify transactions. Internet access is required.',
+    intro_ios:
+      'Expenses and income log to your selected account. AI picks categories and skips promotions. Notification text is sent securely to our scanning service and AI provider to identify transactions. Internet access is required.',
     section_status: 'Status',
     master_label: 'Read payment notifications',
-    master_hint: 'Logs payments from the apps you choose.',
+    master_hint:
+      'Expenses and income log to your selected account. AI picks categories and skips promotions.',
     access_open_settings: 'Open settings',
     health_unsupported:
       'This version of Money2Time cannot read notifications. Update the app to use payment alerts.',
@@ -2606,7 +2608,8 @@ const en = {
     disclosure_body: 'Money2Time needs notification access for this. Here is how it uses it:',
     disclosure_point_selected:
       'It reads notifications only from the banking and wallet apps you choose. Everything else is ignored.',
-    disclosure_point_device: 'Alerts are read on this phone. Their text is never uploaded.',
+    disclosure_point_device:
+      'Notification text is sent securely to our scanning service and AI provider to identify transactions. Internet access is required.',
     disclosure_android_warning:
       'Android will warn that an app with notification access can read all your notifications. Money2Time keeps only the apps you pick.',
     access_title: 'Turn on notification access',
@@ -2631,9 +2634,8 @@ const en = {
     test_success: 'It works. Money2Time can read your payment alerts.',
     test_would_log: 'It would log %{amount} to %{account} as %{category}.',
     test_would_log_no_category: 'It would log %{amount} to %{account}.',
-    test_timeout_title: 'No alert arrived',
-    test_timeout_body:
-      'Check that notification access is on, then try again. Some phones also need the battery usage for Money2Time set to Unrestricted.',
+    test_timeout_title: 'Couldn’t finish the test',
+    test_timeout_body: 'Check notification access and your internet connection, then try again.',
     source_enabled_hint: 'When off, its alerts are ignored.',
     source_missing: 'This source was removed.',
     source_remove_title: 'Remove %{app}?',
