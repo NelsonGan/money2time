@@ -1,9 +1,16 @@
-import type { Account, PaymentAlertSource } from '~/types';
+import type {
+  Account,
+  AccountBindingCertainty,
+  AccountBindingReason,
+  PaymentAlertSource,
+} from '~/types';
 
 export interface AccountBinding {
   accountId: string | null;
-  certainty: 'certain' | 'none';
-  reason: 'preset' | 'source_single' | 'none';
+  certainty: AccountBindingCertainty;
+  reason: AccountBindingReason;
+  identifier: string | null;
+  candidateAccountIds: string[];
 }
 
 export interface BindingInput {
@@ -25,5 +32,7 @@ export function bindAccount(input: BindingInput): AccountBinding {
     accountId: selected?.id ?? null,
     certainty: selected ? 'certain' : 'none',
     reason: selected ? (input.presetAccountId ? 'preset' : 'source_single') : 'none',
+    identifier: null,
+    candidateAccountIds: selected ? [selected.id] : [],
   };
 }

@@ -76,9 +76,10 @@ export interface IncomingCapture {
 }
 
 export type DuplicateVerdict =
-  | { kind: 'none' }
+  | { kind: 'none'; supersedesCaptureId: string | null }
   | { kind: 'certain'; ofCaptureId: string | null; ofTransactionId: string | null }
-  | { kind: 'possible'; ofCaptureId: string | null; ofTransactionId: string | null };
+  | { kind: 'possible'; ofCaptureId: string | null; ofTransactionId: string | null }
+  | { kind: 'reversal'; ofCaptureId: string; ofTransactionId: string | null };
 
 const MINUTE = 60 * 1000;
 const EXACT_REPEAT_WINDOW = 2 * MINUTE;
@@ -118,6 +119,8 @@ function sameMoney(
   return !!a.currency && a.currency === b.currency;
 }
 
+const LIVE_STATUSES: ReadonlySet<PaymentAlertStatus> = new Set(['pending', 'logged']);
+
 function normalizedName(text: string | null): string {
   return (text ?? '')
     .normalize('NFKC')
@@ -155,12 +158,11 @@ export function findDuplicate(
   // 1. The very same alert again (a re-post, or the queue read twice).
   const repeat = others.find(
     (capture) =>
-      capture.status === 'logged' &&
+      LIVE_STATUSES.has(capture.status) &&
       capture.channel === incoming.channel &&
       capture.sourceKey === incoming.sourceKey &&
       sameAccount(capture, incoming) &&
       sameMoney(capture, incoming) &&
-      (!capture.kind || capture.kind === incoming.kind) &&
       capture.dedupeKey === incoming.dedupeKey &&
       (!capture.nativeKey || !incoming.nativeKey || capture.nativeKey === incoming.nativeKey) &&
       Math.abs(timeOf(capture.capturedAt) - at) <= EXACT_REPEAT_WINDOW,
@@ -173,28 +175,45 @@ export function findDuplicate(
     const earlier = others
       .filter(
         (capture) =>
-          capture.status === 'logged' &&
           capture.nativeKey === incoming.nativeKey &&
           capture.channel === incoming.channel &&
           capture.sourceKey === incoming.sourceKey &&
           sameAccount(capture, incoming) &&
-          sameMoney(capture, incoming) &&
-          (!capture.kind || capture.kind === incoming.kind) &&
-          (!capture.counterparty ||
-            !incoming.counterparty ||
-            similarNames(capture.counterparty, incoming.counterparty)) &&
           Math.abs(timeOf(capture.capturedAt) - at) <= UPDATE_WINDOW,
       )
       .sort((a, b) => timeOf(b.capturedAt) - timeOf(a.capturedAt))[0];
-    if (earlier)
-      return { kind: 'certain', ofCaptureId: earlier.id, ofTransactionId: earlier.transactionId };
+    if (earlier) {
+      if (earlier.status === 'logged') {
+        if (incoming.kind === 'declined' || incoming.kind === 'refund') {
+          return {
+            kind: 'reversal',
+            ofCaptureId: earlier.id,
+            ofTransactionId: earlier.transactionId,
+          };
+        }
+        if (
+          sameMoney(earlier, incoming) &&
+          (!earlier.counterparty ||
+            !incoming.counterparty ||
+            similarNames(earlier.counterparty, incoming.counterparty))
+        ) {
+          return {
+            kind: 'certain',
+            ofCaptureId: earlier.id,
+            ofTransactionId: earlier.transactionId,
+          };
+        }
+      } else if (earlier.status === 'pending') {
+        return { kind: 'none', supersedesCaptureId: earlier.id };
+      }
+    }
   }
 
   // 3. The same payment announced by another source (bank app and wallet,
   //    or the Apple Pay automation and the bank).
-  if (incoming.kind === 'spend' || incoming.kind === 'income') {
+  if (incoming.kind === 'spend' || incoming.kind === 'income' || incoming.kind === 'refund') {
     const twin = others.find((capture) => {
-      if (capture.status !== 'logged') return false;
+      if (!LIVE_STATUSES.has(capture.status)) return false;
       if (
         !sameAccount(capture, incoming) ||
         !similarNames(capture.counterparty, incoming.counterparty)
@@ -214,9 +233,9 @@ export function findDuplicate(
   }
 
   // 4. The user already entered it, or a recurring rule did.
-  if ((incoming.kind === 'spend' || incoming.kind === 'income') && incoming.amount !== null) {
+  if (incoming.kind === 'spend' && incoming.amount !== null) {
     for (const transaction of recentTransactions) {
-      if (transaction.type !== (incoming.kind === 'income' ? 'income' : 'expense')) continue;
+      if (transaction.type !== 'expense') continue;
       if (
         !sameAccount(transaction, incoming) ||
         !similarNames(transaction.note, incoming.counterparty)
@@ -253,5 +272,5 @@ export function findDuplicate(
     }
   }
 
-  return { kind: 'none' };
+  return { kind: 'none', supersedesCaptureId: null };
 }

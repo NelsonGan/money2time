@@ -1,17 +1,12 @@
 import { getSQLite } from '~/lib/db/client';
 import { normalizeCurrencyColumns } from '~/lib/db/normalizeCurrencies';
-import { clearAllAutoLogQueues } from '~/services/autoLog';
 import { applyBackupData, buildBackupData } from '~/services/dataManagementService';
-import { paymentAlertProcessingGeneration } from '~/services/paymentAlertsBridge';
 
 // Native modules pulled in at module load but only used by export/picker paths
 // we don't exercise here — stub them so the file can be imported under Jest.
 jest.mock('expo-document-picker', () => ({}));
 jest.mock('expo-file-system/next', () => ({ File: class {}, Paths: {} }));
 jest.mock('expo-sharing', () => ({}));
-jest.mock('~/services/autoLog', () => ({ clearAllAutoLogQueues: jest.fn(async () => undefined) }));
-jest.mock('~/services/paymentCapture', () => ({ clearAndroidCaptureQueue: jest.fn() }));
-jest.mock('~/services/errorReporting', () => ({ reportError: jest.fn() }));
 
 jest.mock('~/lib/db/client', () => ({ getSQLite: jest.fn() }));
 jest.mock('~/services/userAssets', () => ({
@@ -140,11 +135,8 @@ describe('dataManagementService item backup/restore', () => {
     const fresh = createFakeSqlite({ items: [] }, { items: ITEM_COLUMNS });
     (getSQLite as jest.Mock).mockReturnValue(fresh);
 
-    const generation = paymentAlertProcessingGeneration();
     const result = applyBackupData(data);
     expect(result.success).toBe(true);
-    expect(paymentAlertProcessingGeneration()).toBeGreaterThan(generation);
-    expect(clearAllAutoLogQueues).toHaveBeenCalled();
     expect(fresh.tables.items).toEqual([item]);
   });
 

@@ -1,0 +1,500 @@
+{
+  "_about": "Synthetic payment alerts written in the shapes banks, wallets and card networks use. Names, card digits, references and balances are invented. Add real alerts from the Phase 0 corpus here only after anonymizing them (see docs/prd-notification-auto-log.md, section 8.7).",
+  "alerts": [
+    {
+      "id": "my-card-spent",
+      "lang": "en",
+      "app": "com.example.bank.my",
+      "title": "Card transaction",
+      "body": "You've spent RM25.00 at STARBUCKS KLCC with card ending 1234.",
+      "expected": {
+        "kind": "spend",
+        "amount": 25,
+        "currency": "MYR",
+        "counterparty": "STARBUCKS KLCC",
+        "confidence": "high"
+      }
+    },
+    {
+      "id": "my-payment-to-balance",
+      "lang": "en",
+      "app": "com.example.wallet.my",
+      "title": "Payment successful",
+      "body": "Payment of RM12.50 to GRAB RIDES successful. Balance: RM230.10",
+      "expected": {
+        "kind": "spend",
+        "amount": 12.5,
+        "currency": "MYR",
+        "counterparty": "GRAB RIDES",
+        "confidence": "high"
+      }
+    },
+    {
+      "id": "my-otp",
+      "lang": "en",
+      "app": "com.example.bank.my",
+      "title": "Secure verification",
+      "body": "Your OTP for RM25.00 at STARBUCKS is 123456. Do not share it with anyone.",
+      "expected": {
+        "kind": "otp"
+      }
+    },
+    {
+      "id": "my-tac",
+      "lang": "en",
+      "app": "com.example.bank.my",
+      "title": null,
+      "body": "RM0.00 TAC 482913 for DuitNow transfer to ALI. Never share your TAC.",
+      "expected": {
+        "kind": "otp"
+      }
+    },
+    {
+      "id": "promo-cashback",
+      "lang": "en",
+      "app": "com.example.wallet.my",
+      "title": "Weekend treat",
+      "body": "Get 10% cashback when you spend RM50 at participating merchants! T&C apply.",
+      "expected": {
+        "kind": "promo"
+      }
+    },
+    {
+      "id": "promo-next-purchase",
+      "lang": "en",
+      "app": "com.example.shop",
+      "title": "Just for you",
+      "body": "Enjoy RM10 off your next purchase of RM50 and above.",
+      "expected": {
+        "kind": "promo"
+      }
+    },
+    {
+      "id": "fx-two-amounts",
+      "lang": "en",
+      "app": "com.example.bank.my",
+      "title": "Card transaction",
+      "body": "USD 12.00 (RM 56.30) at AMAZON.COM was approved on your card ending 9876.",
+      "expected": {
+        "kind": "spend",
+        "amount": 12,
+        "currency": "USD",
+        "secondary": {
+          "amount": 56.3,
+          "currency": "MYR"
+        },
+        "counterparty": "AMAZON.COM"
+      }
+    },
+    {
+      "id": "wallet-reload",
+      "lang": "en",
+      "app": "com.example.wallet.my",
+      "title": "Reload",
+      "body": "Reload of RM100.00 successful.",
+      "expected": {
+        "kind": "transfer",
+        "amount": 100,
+        "currency": "MYR"
+      }
+    },
+    {
+      "id": "income-received",
+      "lang": "en",
+      "app": "com.example.bank.my",
+      "title": "Money in",
+      "body": "You have received RM50.00 from AHMAD BIN ALI.",
+      "expected": {
+        "kind": "income",
+        "amount": 50,
+        "currency": "MYR",
+        "counterparty": "AHMAD BIN ALI"
+      }
+    },
+    {
+      "id": "refund",
+      "lang": "en",
+      "app": "com.example.bank.my",
+      "title": "Refund",
+      "body": "Refund of RM25.00 from SHOPEE has been credited to your card ending 1234.",
+      "expected": {
+        "kind": "refund",
+        "amount": 25,
+        "currency": "MYR"
+      }
+    },
+    {
+      "id": "declined",
+      "lang": "en",
+      "app": "com.example.bank.my",
+      "title": "Transaction declined",
+      "body": "Your card ending 1234 was declined at SHELL for RM80.00.",
+      "expected": {
+        "kind": "declined"
+      }
+    },
+    {
+      "id": "future-debit",
+      "lang": "en",
+      "app": "com.example.bank.my",
+      "title": "Reminder",
+      "body": "RM54.90 will be debited from your account on 15 Oct for NETFLIX.",
+      "expected": {
+        "kind": "balance"
+      }
+    },
+    {
+      "id": "statement",
+      "lang": "en",
+      "app": "com.example.bank.my",
+      "title": "Statement ready",
+      "body": "Your card statement is ready. Outstanding balance RM1,234.56.",
+      "expected": {
+        "kind": "balance"
+      }
+    },
+    {
+      "id": "bill-due",
+      "lang": "en",
+      "app": "com.example.bank.my",
+      "title": "Payment due",
+      "body": "Your minimum payment of RM120.00 is due on 20 Oct.",
+      "expected": {
+        "kind": "balance"
+      }
+    },
+    {
+      "id": "my-ms-dibelanjakan",
+      "lang": "ms",
+      "app": "com.example.bank.my",
+      "title": "Transaksi kad",
+      "body": "RM25.00 telah dibelanjakan di STARBUCKS KLCC menggunakan kad berakhir 1234.",
+      "expected": {
+        "kind": "spend",
+        "amount": 25,
+        "currency": "MYR",
+        "counterparty": "STARBUCKS KLCC",
+        "confidence": "high"
+      }
+    },
+    {
+      "id": "my-ms-pembayaran-berjaya",
+      "lang": "ms",
+      "app": "com.example.wallet.my",
+      "title": "Pembayaran berjaya",
+      "body": "Pembayaran RM12.50 kepada GRAB berjaya.",
+      "expected": {
+        "kind": "spend",
+        "amount": 12.5,
+        "currency": "MYR",
+        "counterparty": "GRAB"
+      }
+    },
+    {
+      "id": "id-dibayarkan",
+      "lang": "id",
+      "app": "com.example.wallet.id",
+      "title": "Pembayaran",
+      "body": "Rp 50.000 telah dibayarkan ke Indomaret.",
+      "expected": {
+        "kind": "spend",
+        "amount": 50000,
+        "currency": "IDR",
+        "counterparty": "Indomaret",
+        "confidence": "high"
+      }
+    },
+    {
+      "id": "id-grouped-decimal",
+      "lang": "id",
+      "app": "com.example.bank.id",
+      "title": "Transaksi",
+      "body": "Transaksi sebesar Rp1.250.000,00 di TOKOPEDIA berhasil.",
+      "expected": {
+        "kind": "spend",
+        "amount": 1250000,
+        "currency": "IDR",
+        "counterparty": "TOKOPEDIA"
+      }
+    },
+    {
+      "id": "zh-cn-xiaofei",
+      "lang": "zh",
+      "app": "com.example.bank.cn",
+      "title": "交易提醒",
+      "body": "您尾号1234的信用卡在星巴克消费人民币25.00元。",
+      "expected": {
+        "kind": "spend",
+        "amount": 25,
+        "currency": "CNY",
+        "counterparty": "星巴克"
+      }
+    },
+    {
+      "id": "in-upi-debited",
+      "lang": "en",
+      "app": "com.example.bank.in",
+      "title": null,
+      "body": "₹500.00 debited from A/c XX1234 on 03-10-26 to VPA abc@okbank (UPI Ref 627384910211).",
+      "expected": {
+        "kind": "spend",
+        "amount": 500,
+        "currency": "INR",
+        "counterparty": "abc@okbank"
+      }
+    },
+    {
+      "id": "in-rs-debited",
+      "lang": "en",
+      "app": "com.example.bank.in",
+      "title": null,
+      "body": "Rs.1,250.00 debited from your A/c XX5678 at SWIGGY on 03-Oct-26. Avl Bal Rs.12,000.00",
+      "expected": {
+        "kind": "spend",
+        "amount": 1250,
+        "currency": null,
+        "counterparty": "SWIGGY"
+      }
+    },
+    {
+      "id": "ph-gcash-sent",
+      "lang": "en",
+      "app": "com.example.wallet.ph",
+      "title": "Express Send",
+      "body": "You have sent PHP 500.00 to JUAN DELA CRUZ.",
+      "expected": {
+        "kind": "spend",
+        "amount": 500,
+        "currency": "PHP",
+        "counterparty": "JUAN DELA CRUZ",
+        "confidence": "medium"
+      }
+    },
+    {
+      "id": "us-card-purchase",
+      "lang": "en",
+      "app": "com.example.bank.us",
+      "title": "Purchase alert",
+      "body": "A $42.17 purchase at TARGET T-1234 was made on your card ending in 4242.",
+      "expected": {
+        "kind": "spend",
+        "amount": 42.17,
+        "currency": null
+      }
+    },
+    {
+      "id": "us-charged",
+      "lang": "en",
+      "app": "com.example.bank.us",
+      "title": null,
+      "body": "Your card was charged $8.99 by SPOTIFY.",
+      "expected": {
+        "kind": "spend",
+        "amount": 8.99,
+        "currency": null
+      }
+    },
+    {
+      "id": "uk-paid",
+      "lang": "en",
+      "app": "com.example.bank.uk",
+      "title": "Pret A Manger",
+      "body": "You paid £4.50 at Pret A Manger",
+      "expected": {
+        "kind": "spend",
+        "amount": 4.5,
+        "currency": "GBP",
+        "counterparty": "Pret A Manger",
+        "confidence": "high"
+      }
+    },
+    {
+      "id": "eu-comma-decimal",
+      "lang": "de",
+      "app": "com.example.bank.de",
+      "title": "Kartenzahlung",
+      "body": "Kartenzahlung über 12,34 € bei REWE wurde belastet.",
+      "expected": {
+        "kind": "spend",
+        "amount": 12.34,
+        "currency": "EUR"
+      }
+    },
+    {
+      "id": "eu-grouped",
+      "lang": "fr",
+      "app": "com.example.bank.fr",
+      "title": "Paiement",
+      "body": "Paiement de 1 234,56 € chez FNAC débité.",
+      "expected": {
+        "kind": "spend",
+        "amount": 1234.56,
+        "currency": "EUR"
+      }
+    },
+    {
+      "id": "jp-yen",
+      "lang": "ja",
+      "app": "com.example.card.jp",
+      "title": "ご利用のお知らせ",
+      "body": "1,200円のご利用がありました。ご利用先：ローソン",
+      "expected": {
+        "kind": "spend",
+        "amount": 1200,
+        "currency": "JPY",
+        "counterparty": "ローソン"
+      }
+    },
+    {
+      "id": "sg-paylah",
+      "lang": "en",
+      "app": "com.example.wallet.sg",
+      "title": null,
+      "body": "You have paid S$6.80 to KOPITIAM PTE LTD.",
+      "expected": {
+        "kind": "spend",
+        "amount": 6.8,
+        "currency": "SGD",
+        "counterparty": "KOPITIAM PTE LTD",
+        "confidence": "high"
+      }
+    },
+    {
+      "id": "th-baht",
+      "lang": "th",
+      "app": "com.example.bank.th",
+      "title": "แจ้งเตือน",
+      "body": "ชำระเงิน 120.00 บาท ที่ 7-ELEVEN",
+      "expected": {
+        "kind": "spend",
+        "amount": 120,
+        "currency": "THB"
+      }
+    },
+    {
+      "id": "vn-dong",
+      "lang": "vi",
+      "app": "com.example.bank.vn",
+      "title": null,
+      "body": "Thanh toán thành công 50.000 VND tại HIGHLANDS COFFEE",
+      "expected": {
+        "kind": "spend",
+        "amount": 50000,
+        "currency": "VND"
+      }
+    },
+    {
+      "id": "br-pix-enviado",
+      "lang": "pt",
+      "app": "com.example.bank.br",
+      "title": "Pix enviado",
+      "body": "Pix enviado de R$ 35,90 para MARIA SILVA",
+      "expected": {
+        "kind": "spend",
+        "amount": 35.9,
+        "currency": "BRL",
+        "confidence": "medium"
+      }
+    },
+    {
+      "id": "kwd-three-decimals",
+      "lang": "en",
+      "app": "com.example.bank.kw",
+      "title": null,
+      "body": "KWD 1.250 debited at TALABAT using card ending 3344.",
+      "expected": {
+        "kind": "spend",
+        "amount": 1.25,
+        "currency": "KWD"
+      }
+    },
+    {
+      "id": "ewallet-linked-card",
+      "lang": "en",
+      "app": "com.example.wallet.my",
+      "title": "Payment successful",
+      "body": "You paid RM18.90 at GRABFOOD with Mastercard ••5566.",
+      "expected": {
+        "kind": "spend",
+        "amount": 18.9,
+        "currency": "MYR",
+        "counterparty": "GRABFOOD",
+        "confidence": "high"
+      }
+    },
+    {
+      "id": "auth-hold",
+      "lang": "en",
+      "app": "com.example.bank.my",
+      "title": null,
+      "body": "A pre-authorization of RM300.00 was authorised at HILTON KL on card ending 1234.",
+      "expected": {
+        "kind": "spend",
+        "amount": 300,
+        "currency": "MYR",
+        "confidence": "medium"
+      }
+    },
+    {
+      "id": "html-email",
+      "lang": "en",
+      "app": "email",
+      "title": "Card alert",
+      "body": "<html><body><p>Dear customer,</p><p>You spent <b>RM 88.00</b> at <b>IKEA CHERAS</b> on 03 Oct 2026.</p></body></html>",
+      "expected": {
+        "kind": "spend",
+        "amount": 88,
+        "currency": "MYR",
+        "counterparty": "IKEA CHERAS"
+      }
+    },
+    {
+      "id": "no-money",
+      "lang": "en",
+      "app": "com.example.bank.my",
+      "title": "Welcome back",
+      "body": "Your new device has been registered.",
+      "expected": {
+        "kind": "unknown"
+      }
+    },
+    {
+      "id": "atm-withdrawal",
+      "lang": "en",
+      "app": "com.example.bank.my",
+      "title": null,
+      "body": "Cash withdrawal of RM200.00 at ATM MAYBANK SS2 from account ending 7788.",
+      "expected": {
+        "kind": "transfer",
+        "amount": 200,
+        "currency": "MYR"
+      }
+    },
+    {
+      "id": "sent-you-income",
+      "lang": "en",
+      "app": "com.example.wallet.us",
+      "title": null,
+      "body": "Jamie sent you $25.00 for dinner",
+      "expected": {
+        "kind": "income",
+        "amount": 25,
+        "currency": null
+      }
+    },
+    {
+      "id": "lowercase-rm",
+      "lang": "en",
+      "app": "com.example.wallet.my",
+      "title": null,
+      "body": "you spent rm 7.50 at zus coffee",
+      "expected": {
+        "kind": "spend",
+        "amount": 7.5,
+        "currency": "MYR",
+        "counterparty": "zus coffee",
+        "confidence": "high"
+      }
+    }
+  ]
+}

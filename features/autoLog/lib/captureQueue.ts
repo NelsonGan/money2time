@@ -79,7 +79,6 @@ export function parseAndroidCaptureJson(fileName: string, json: string): Capture
   const packageName = str(row.package);
   if (!packageName) return null;
 
-  const title = str(row.title);
   const text = str(row.text);
   const bigText = str(row.bigText);
   const lines = Array.isArray(row.lines)
@@ -87,7 +86,7 @@ export function parseAndroidCaptureJson(fileName: string, json: string): Capture
     : [];
   const message = messagesText(row.messages);
   const body = message ?? bigText ?? text ?? (lines.length > 0 ? lines.join('\n') : null);
-  if (!body && !title) return null;
+  if (!body) return null;
 
   const postedAt = typeof row.postedAt === 'number' && row.postedAt > 0 ? row.postedAt : null;
   const fromName = CAPTURE_FILE.exec(fileName);
@@ -106,9 +105,9 @@ export function parseAndroidCaptureJson(fileName: string, json: string): Capture
     sourceKey: packageName,
     sourceLabel: str(row.appLabel),
     capturedAt: date.toISOString(),
-    title,
+    title: str(row.title),
     subtitle: null,
-    body: body ?? '',
+    body,
     extra,
     nativeKey: str(row.key),
     presetAccountId: null,

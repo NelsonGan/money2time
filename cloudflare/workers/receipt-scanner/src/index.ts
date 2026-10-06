@@ -6,7 +6,6 @@
 
 import { checkQuota, consumeQuota } from './ratelimit';
 import { getEntitlement } from './revenuecat';
-import { buildNotificationPrompt, parseNotificationTransactions } from './scanModes/notification';
 import {
   buildReceiptPrompt,
   maxTokensForMode,
@@ -37,8 +36,6 @@ export interface Env {
   // Optional OpenAI-style image_url.detail hint ("low" | "high" | "auto").
   // "low" downsamples to cut input tokens at some OCR-accuracy risk; unset omits it.
   IMAGE_DETAIL?: string;
-  NOTIFICATION_FREE_LIMIT?: string;
-  NOTIFICATION_PRO_LIMIT?: string;
 }
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
@@ -50,7 +47,7 @@ const INFERENCE_TIMEOUT_MS = 45000;
 // than at the first inference call on purpose: the entitlement lookup (8s of
 // its own, and a cache miss every 60s) and the quota round trip run first, and
 // a budget that ignored them would let the response land after the app's own
-// fetch timeout (timeout in services/receiptScannerRequest.ts) — turning
+// fetch timeout (FETCH_TIMEOUT_MS in services/receiptScan.native.ts) — turning
 // a scan the Worker was about to answer 200 into "network request failed".
 const SCAN_BUDGET_MS = 70000;
 // Vision models are flaky in one specific way: they occasionally return an
@@ -81,8 +78,8 @@ const SIGNATURE_MAX_SKEW_MS = 5 * 60 * 1000;
 
 interface ScanRequest {
   appUserId: string;
-  image?: string;
-  mime?: string;
+  image: string;
+  mime: string;
   currency: string;
   categories: string[];
   // 'itemized' adds a line-item breakdown; 'screenshot' detects the account.
@@ -90,15 +87,6 @@ interface ScanRequest {
   mode?: ScanMode;
   // User's account names — screenshot mode only, matched against the payment source.
   accounts?: string[];
-  incomeCategories?: string[];
-  notification?: {
-    title?: string | null;
-    subtitle?: string | null;
-    body?: string | null;
-    extra?: string[];
-    source?: string;
-    capturedAt?: string;
-  };
 }
 
 interface ScannedTransaction {
@@ -106,13 +94,12 @@ interface ScannedTransaction {
   amount: number;
   currency: string;
   /** YYYY-MM-DD — the receipt's own date when within 30 days back / 2 days ahead, else today (UTC). */
-  date: string | null;
+  date: string;
   category: string;
   note: string;
   sentiment: 'happy' | 'neutral' | 'sad';
   /** Screenshot mode: the matched account name from the list sent, or "". */
   account: string;
-  secondary?: { amount: number; currency: string } | null;
 }
 
 // One JSON line per event (keyed by reqId) for Workers Logs.
@@ -156,16 +143,14 @@ export default {
     }
 
     const mode: ScanMode =
-      body.mode === 'itemized' || body.mode === 'screenshot' || body.mode === 'notification'
-        ? body.mode
-        : 'quick';
+      body.mode === 'itemized' || body.mode === 'screenshot' ? body.mode : 'quick';
     log('scan_request', {
       reqId,
       appUserId: body.appUserId,
       currency: body.currency,
       mime: body.mime,
       mode,
-      imageBytes: body.image?.length ?? 0,
+      imageBytes: body.image.length,
       categoryCount: Array.isArray(body.categories) ? body.categories.length : 0,
       accountCount: Array.isArray(body.accounts) ? body.accounts.length : 0,
     });
@@ -174,21 +159,8 @@ export default {
 
     const { isPro } = await getEntitlement(body.appUserId, env);
 
-    // Check quota without consuming; meter completed inference below.
-    // Notification parsing has its own counter so it cannot exhaust receipt scans.
-    const quotaUserId =
-      mode === 'notification' ? `${body.appUserId}:notifications` : body.appUserId;
-    const quotaEnv =
-      mode === 'notification'
-        ? {
-            ...env,
-            FREE_LIMIT: env.NOTIFICATION_FREE_LIMIT ?? '1000',
-            FREE_INTERVAL: 'month',
-            PRO_LIMIT: env.NOTIFICATION_PRO_LIMIT ?? '3000',
-            PRO_INTERVAL: 'month',
-          }
-        : env;
-    const quota = await checkQuota(quotaUserId, isPro, quotaEnv, now);
+    // Check quota without consuming; consume only on a successful parse.
+    const quota = await checkQuota(body.appUserId, isPro, env, now);
     log('entitlement', {
       reqId,
       appUserId: body.appUserId,
@@ -206,13 +178,7 @@ export default {
         isPro,
       });
       return json(
-        {
-          error: 'limit_reached',
-          isPro,
-          limit: quota.limit,
-          used: quota.used,
-          interval: quota.interval,
-        },
+        { error: 'limit_reached', isPro, limit: quota.limit, used: quota.used, interval: quota.interval },
         402,
       );
     }
@@ -243,14 +209,14 @@ export default {
       );
     }
 
-    // Every classified notification costs inference, including promotions.
-    // Empty receipts remain free. Written via waitUntil so the
+    // Consume quota only when the parse yielded something — an unreadable
+    // receipt returns 200 but must not burn a scan. Written via waitUntil so the
     // response isn't held on a D1 round trip; `used` is the optimistic total.
     const count = transactions.length;
     let used = quota.used;
-    if (count > 0 || mode === 'notification') {
+    if (count > 0) {
       used = quota.used + 1;
-      ctx.waitUntil(consumeQuota(quotaUserId, isPro, quotaEnv, now));
+      ctx.waitUntil(consumeQuota(body.appUserId, isPro, env, now));
     }
 
     log('scan_success', {
@@ -267,12 +233,7 @@ export default {
     const quotaOut = { used, limit: quota.limit, isPro, interval: quota.interval };
     // schemaVersion 2 = receiptDetail may be present; old clients ignore it.
     return json(
-      {
-        transactions,
-        receiptDetail: receiptDetail ?? undefined,
-        quota: quotaOut,
-        schemaVersion: 2,
-      },
+      { transactions, receiptDetail: receiptDetail ?? undefined, quota: quotaOut, schemaVersion: 2 },
       200,
     );
   },
@@ -300,41 +261,15 @@ async function pruneExpired(env: Env): Promise<void> {
 function validate(body: ScanRequest): string | null {
   if (!body || typeof body !== 'object') return 'invalid_body';
   if (!body.appUserId || typeof body.appUserId !== 'string') return 'missing_app_user_id';
-  if (body.mode === 'notification') {
-    const notification = body.notification;
-    if (!notification || typeof notification !== 'object' || Array.isArray(notification))
-      return 'missing_notification';
-    const parts = [
-      notification.title,
-      notification.subtitle,
-      notification.body,
-      ...(Array.isArray(notification.extra) ? notification.extra : []),
-    ];
-    if (parts.some((part) => part !== undefined && part !== null && typeof part !== 'string'))
-      return 'invalid_notification';
-    if (notification.extra !== undefined && !Array.isArray(notification.extra))
-      return 'invalid_notification';
-    if (!parts.some((part) => part?.trim())) return 'empty_notification';
-    if (JSON.stringify(notification).length > 16000) return 'notification_too_large';
-    if (
-      !Array.isArray(body.categories) ||
-      body.categories.some((name) => typeof name !== 'string') ||
-      !Array.isArray(body.incomeCategories) ||
-      body.incomeCategories.some((name) => typeof name !== 'string')
-    )
-      return 'invalid_categories';
-  } else {
-    if (!body.image || typeof body.image !== 'string') return 'missing_image';
-    if (body.image.length > MAX_IMAGE_BYTES) return 'image_too_large';
-    if (!body.mime || !/^image\/(jpe?g|png|webp|heic)$/i.test(body.mime)) return 'invalid_mime';
-  }
+  if (!body.image || typeof body.image !== 'string') return 'missing_image';
+  if (body.image.length > MAX_IMAGE_BYTES) return 'image_too_large';
+  if (!body.mime || !/^image\/(jpe?g|png|webp|heic)$/i.test(body.mime)) return 'invalid_mime';
   if (!body.currency || typeof body.currency !== 'string') return 'missing_currency';
   if (
     body.mode !== undefined &&
     body.mode !== 'quick' &&
     body.mode !== 'itemized' &&
-    body.mode !== 'screenshot' &&
-    body.mode !== 'notification'
+    body.mode !== 'screenshot'
   ) {
     return 'invalid_mode';
   }
@@ -398,8 +333,8 @@ interface AttemptOptions {
   deadline: number;
 }
 
-// Sends an image or notification text through the same provider/failover chain.
-async function completeWithInput(
+// Sends the receipt image + prompt to OpenRouter and returns the raw output.
+async function completeWithImage(
   body: ScanRequest,
   env: Env,
   reqId: string,
@@ -442,21 +377,15 @@ async function completeWithInput(
         // otherwise be billed as output tokens and add latency for no accuracy
         // gain. OpenRouter normalizes this across model families.
         reasoning: { enabled: false },
-        messages:
-          body.mode === 'notification'
-            ? [
-                { role: 'system', content: opts.prompt },
-                { role: 'user', content: JSON.stringify(body.notification) },
-              ]
-            : [
-                {
-                  role: 'user',
-                  content: [
-                    { type: 'text', text: opts.prompt },
-                    { type: 'image_url', image_url: imageUrl },
-                  ],
-                },
-              ],
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: opts.prompt },
+              { type: 'image_url', image_url: imageUrl },
+            ],
+          },
+        ],
       }),
     });
 
@@ -470,29 +399,13 @@ async function completeWithInput(
 
     if (!res.ok) {
       const text = await res.text().catch(() => '');
-      // Providers can echo notification content in errors; never put that in logs.
-      throw new Error(
-        `openrouter ${res.status}: ${body.mode === 'notification' ? 'notification_inference_failed' : text.slice(0, 200)}`,
-      );
+      throw new Error(`openrouter ${res.status}: ${text.slice(0, 200)}`);
     }
 
     const completion = (await res.json()) as {
       choices?: { message?: { content?: string } }[];
     };
     return completion?.choices?.[0]?.message?.content ?? '';
-  } catch (error) {
-    if (body.mode !== 'notification') throw error;
-    // JSON/network exceptions can also include provider response text.
-    if (
-      error instanceof Error &&
-      /^openrouter \d+: notification_inference_failed$/.test(error.message)
-    )
-      throw error;
-    throw new Error(
-      error instanceof Error && error.name === 'AbortError'
-        ? 'notification_inference_timeout'
-        : 'notification_provider_failed',
-    );
   } finally {
     clearTimeout(timer);
   }
@@ -510,9 +423,7 @@ async function completeWithFailover(
   for (let i = 0; i < models.length; i += 1) {
     const model = models[i];
     try {
-      const content = await completeWithInput(body, env, reqId, opts, model);
-      if (body.mode === 'notification') parseNotificationTransactions(extractParsedObject(content));
-      return content;
+      return await completeWithImage(body, env, reqId, opts, model);
     } catch (err) {
       lastError = err;
       // Read the clock after the attempt, not before it: the attempt is what
@@ -540,10 +451,7 @@ async function runInference(
   now: Date,
   deadline: number,
 ): Promise<{ transactions: ScannedTransaction[]; receiptDetail: ScannedReceiptDetail | null }> {
-  const prompt =
-    mode === 'notification'
-      ? buildNotificationPrompt(body.categories, body.incomeCategories ?? [], body.currency)
-      : buildReceiptPrompt(body.categories, body.currency, mode, body.accounts ?? []);
+  const prompt = buildReceiptPrompt(body.categories, body.currency, mode, body.accounts ?? []);
   const maxTokens = maxTokensForMode(mode);
 
   // An empty transactions array is not an error — the failover above never sees
@@ -578,10 +486,7 @@ async function runInference(
       break;
     }
     const parsed = extractParsedObject(content);
-    const transactions =
-      mode === 'notification'
-        ? parseNotificationTransactions(parsed)
-        : parseTransactions(parsed, now);
+    const transactions = parseTransactions(parsed, now);
     const receiptDetail = mode === 'itemized' ? normalizeReceiptDetail(parsed) : null;
     if (receiptDetail) receiptDetail.date = clampReceiptDate(receiptDetail.date, now);
     log('parsed', {
@@ -593,7 +498,7 @@ async function runInference(
       accountDetected: transactions.some((t) => t.account !== ''),
     });
     last = { transactions, receiptDetail };
-    if (transactions.length > 0 || mode === 'notification') break;
+    if (transactions.length > 0) break;
 
     // This attempt's duration is the best estimate of the next one's, so
     // require at least that much left rather than a flat floor — otherwise a
@@ -679,7 +584,9 @@ function normalizeRow(input: unknown, now: Date): ScannedTransaction | null {
 
   const type = row.type === 'income' ? 'income' : 'expense';
   const sentiment =
-    row.sentiment === 'happy' || row.sentiment === 'sad' ? row.sentiment : 'neutral';
+    row.sentiment === 'happy' || row.sentiment === 'sad'
+      ? row.sentiment
+      : 'neutral';
   const date = clampReceiptDate(typeof row.date === 'string' ? row.date : null, now);
 
   return {

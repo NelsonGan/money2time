@@ -1227,14 +1227,14 @@ const ja = {
       payment_alerts_android_step_5: '各アプリの口座を選びます。',
       payment_alerts_android_step_6: 'テスト通知を送って、正しく動くか確認します。',
       payment_alerts_android_step_7:
-        '支出と収入は選択した口座に記録されます。AIがカテゴリを選び、広告通知はスキップします。',
+        '支払いは選択した口座に自動で記録されます。カテゴリは Apple Pay と同じキーワードで選ばれます。',
       payment_alerts_ios_step_1:
         'Shortcutsを開き、+、Editの順にタップします。エディタでAutomationをタップします。',
       payment_alerts_ios_step_2: 'Notificationを検索して選択します。',
       payment_alerts_ios_step_3: 'Log Payment Alert を検索して追加します。',
       payment_alerts_ios_step_4: 'Log Payment AlertのMessage、Select Variableの順にタップします。',
       payment_alerts_ios_step_6:
-        'アクションを展開して口座を選択してください。自動分類する場合はカテゴリを空欄にします。',
+        'アクションの矢印、Account の順にタップし、このアプリの支払いを記録する口座を選びます。 Category は空欄のままにすると、キーワードから自動で分類されます。',
       payment_alerts_ios_step_7:
         '戻るをタップして保存します。銀行や電子ウォレットのアプリごとに繰り返してください。次に Money2Time を開いたときに支払いが記録されます。',
       payment_alerts_android_disclosure: '通知へのアクセスの使い方を読み、Continueをタップします。',
@@ -2564,16 +2564,14 @@ const ja = {
   },
   payment_alerts: {
     account_hint:
-      '支出と収入は選択した口座に記録されます。AIがカテゴリを選び、広告通知はスキップします。',
+      '支払いは選択した口座に自動で記録されます。カテゴリは Apple Pay と同じキーワードで選ばれます。',
     title: '支払い通知',
     intro_android:
-      '支出と収入は選択した口座に記録されます。AIがカテゴリを選び、広告通知はスキップします。 取引を識別するため、通知のテキストは当社のスキャンサービスとAI提供元に安全に送信されます。インターネット接続が必要です。',
-    intro_ios:
-      '支出と収入は選択した口座に記録されます。AIがカテゴリを選び、広告通知はスキップします。 取引を識別するため、通知のテキストは当社のスキャンサービスとAI提供元に安全に送信されます。インターネット接続が必要です。',
+      'Money2Time は、選んだ銀行アプリや電子マネーアプリの支払い通知を読み取り、支払いを1件ずつ記録します。通知はこの端末上で読み取られ、アップロードされることはありません。',
+    intro_ios: '銀行や電子ウォレットのアプリから支払いを自動記録します。',
     section_status: 'ステータス',
     master_label: '支払い通知を読み取る',
-    master_hint:
-      '支出と収入は選択した口座に記録されます。AIがカテゴリを選び、広告通知はスキップします。',
+    master_hint: '選んだアプリの支払いを記録します。',
     access_open_settings: '設定を開く',
     health_unsupported:
       'このバージョンの Money2Time は通知を読み取れません。支払い通知を使うにはアプリを更新してください。',
@@ -2598,7 +2596,7 @@ const ja = {
     disclosure_point_selected:
       '読み取るのは、選んだ銀行アプリや電子マネーアプリの通知だけです。それ以外は無視します。',
     disclosure_point_device:
-      '取引を識別するため、通知のテキストは当社のスキャンサービスとAI提供元に安全に送信されます。インターネット接続が必要です。',
+      '通知はこの端末上で読み取られます。本文がアップロードされることはありません。',
     disclosure_android_warning:
       'Android は、通知へのアクセスを持つアプリはすべての通知を読めると警告します。Money2Time が保存するのは選んだアプリの通知だけです。',
     access_title: '通知へのアクセスをオンにする',
@@ -2621,8 +2619,9 @@ const ja = {
     test_success: '成功しました。Money2Time は支払い通知を読み取れます。',
     test_would_log: '%{amount} を %{account} に %{category} として記録します。',
     test_would_log_no_category: '%{amount} を %{account} に記録します。',
-    test_timeout_title: 'テストを完了できませんでした',
-    test_timeout_body: '通知へのアクセスとインターネット接続を確認して、もう一度お試しください。',
+    test_timeout_title: '通知が届きませんでした',
+    test_timeout_body:
+      '通知へのアクセスがオンか確認して、もう一度お試しください。端末によっては Money2Time の電池使用量を「制限なし」にする必要もあります。',
     source_enabled_hint: 'オフにすると、その通知は無視されます。',
     source_missing: 'この送信元は削除されました。',
     source_remove_title: '%{app} を外しますか？',
