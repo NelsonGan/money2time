@@ -107,7 +107,7 @@ beforeEach(() => {
 describe('checkApplePayTap', () => {
   it('logs a tap no alert has seen', () => {
     listSince.mockReturnValue([]);
-    expect(checkApplePayTap(tap(), draft())).toEqual({ action: 'log' });
+    expect(checkApplePayTap(tap(), draft())).toEqual({ action: 'log', supersedesCaptureId: null });
   });
 
   it('skips a tap the bank alert already logged', () => {
@@ -130,10 +130,11 @@ describe('checkApplePayTap', () => {
     expect(checkApplePayTap(tap(), draft()).action).toBe('skip');
   });
 
-  it('logs a payment when a legacy review record has no saved transaction', () => {
+  it('logs over a bank alert still waiting in review, and hands back its id', () => {
     listSince.mockReturnValue([capture({ status: 'pending', transactionId: null })]);
     expect(checkApplePayTap(tap(), draft())).toEqual({
       action: 'log',
+      supersedesCaptureId: 'alert-1',
     });
   });
 
@@ -166,14 +167,14 @@ describe('checkApplePayTap', () => {
     listSince.mockReturnValue([
       capture({ id: 'apple_pay-tap-0', channel: 'apple_pay', sourceKey: 'apple_pay' }),
     ]);
-    expect(checkApplePayTap(tap(), draft())).toEqual({ action: 'log' });
+    expect(checkApplePayTap(tap(), draft())).toEqual({ action: 'log', supersedesCaptureId: null });
   });
 
-  it('keeps the tap queued when the alert store cannot be read', () => {
+  it('falls back to logging when the alert store cannot be read', () => {
     listSince.mockImplementation(() => {
       throw new Error('db closed');
     });
-    expect(checkApplePayTap(tap(), draft())).toEqual({ action: 'retry' });
+    expect(checkApplePayTap(tap(), draft())).toEqual({ action: 'log', supersedesCaptureId: null });
     expect(reportError).toHaveBeenCalled();
   });
 });
@@ -183,6 +184,7 @@ describe('recordApplePayTap', () => {
     recordApplePayTap(tap(), draft(), {
       status: 'logged',
       transactionId: 'tx-tap',
+      supersedesCaptureId: null,
     });
     expect(insert).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -197,6 +199,19 @@ describe('recordApplePayTap', () => {
     const stored = insert.mock.calls[0][0] as { resolution: { parse: { amount: number } } };
     expect(stored.resolution.parse.amount).toBe(12.3);
     expect(update).not.toHaveBeenCalled();
+  });
+
+  it('marks the alert it replaced as a duplicate of the tap', () => {
+    recordApplePayTap(tap(), draft(), {
+      status: 'logged',
+      transactionId: 'tx-tap',
+      supersedesCaptureId: 'alert-1',
+    });
+    expect(update).toHaveBeenCalledWith('alert-1', {
+      status: 'duplicate',
+      reason: 'duplicate',
+      duplicateOf: 'apple_pay-tap-1',
+    });
   });
 
   it('records a skipped tap as a duplicate pointing at the alert', () => {

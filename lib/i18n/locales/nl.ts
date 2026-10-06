@@ -1242,14 +1242,14 @@ const nl = {
       payment_alerts_android_step_5: 'Kies de rekening voor elke app.',
       payment_alerts_android_step_6: 'Stuur een testmelding om te controleren of alles werkt.',
       payment_alerts_android_step_7:
-        'Uitgaven en inkomsten worden op de gekozen rekening geboekt. AI kiest categorieën en slaat promoties over.',
+        'Betalingen worden automatisch op de gekozen rekening geboekt. Categorieën gebruiken dezelfde trefwoorden als Apple Pay.',
       payment_alerts_ios_step_1:
         'Open Shortcuts, tik op + en daarna Edit. Tik in de editor op Automation.',
       payment_alerts_ios_step_2: 'Zoek Notification en selecteer dit.',
       payment_alerts_ios_step_3: 'Zoek Log Payment Alert en voeg het toe.',
       payment_alerts_ios_step_4: 'Tik op Message in Log Payment Alert en daarna Select Variable.',
       payment_alerts_ios_step_6:
-        'Vouw de actie uit en kies Rekening. Laat Categorie leeg voor automatische indeling.',
+        'Tik op de actiepijl en daarna op Account. Kies waar betalingen van deze app worden vastgelegd. Laat Category leeg voor automatische toewijzing op basis van trefwoorden.',
       payment_alerts_ios_step_7:
         'Ga terug om op te slaan. Herhaal dit voor elke bank- of wallet-app. Betalingen worden vastgelegd wanneer je Money2Time opnieuw opent.',
       payment_alerts_android_disclosure:
@@ -2607,16 +2607,14 @@ const nl = {
   },
   payment_alerts: {
     account_hint:
-      'Uitgaven en inkomsten worden op de gekozen rekening geboekt. AI kiest categorieën en slaat promoties over.',
+      'Betalingen worden automatisch op de gekozen rekening geboekt. Categorieën gebruiken dezelfde trefwoorden als Apple Pay.',
     title: 'Betaalmeldingen',
     intro_android:
-      'Uitgaven en inkomsten worden op de gekozen rekening geboekt. AI kiest categorieën en slaat promoties over. Meldingstekst wordt veilig naar onze scandienst en AI-provider gestuurd om transacties te herkennen. Internet is vereist.',
-    intro_ios:
-      'Uitgaven en inkomsten worden op de gekozen rekening geboekt. AI kiest categorieën en slaat promoties over. Meldingstekst wordt veilig naar onze scandienst en AI-provider gestuurd om transacties te herkennen. Internet is vereist.',
+      'Money2Time leest de betaalmeldingen van de bank- en wallet-apps die je kiest en registreert elke betaling voor je. Meldingen worden op deze telefoon gelezen en nooit geüpload.',
+    intro_ios: 'Leg betalingen uit je bank- en wallet-apps automatisch vast.',
     section_status: 'Status',
     master_label: 'Betaalmeldingen lezen',
-    master_hint:
-      'Uitgaven en inkomsten worden op de gekozen rekening geboekt. AI kiest categorieën en slaat promoties over.',
+    master_hint: 'Registreert betalingen uit de apps die je kiest.',
     access_open_settings: 'Instellingen openen',
     health_unsupported:
       'Deze versie van Money2Time kan geen meldingen lezen. Werk de app bij om betaalmeldingen te gebruiken.',
@@ -2639,7 +2637,7 @@ const nl = {
     disclosure_point_selected:
       'Alleen meldingen van de bank- en wallet-apps die je kiest worden gelezen. Al het andere wordt genegeerd.',
     disclosure_point_device:
-      'Meldingstekst wordt veilig naar onze scandienst en AI-provider gestuurd om transacties te herkennen. Internet is vereist.',
+      'Meldingen worden op deze telefoon gelezen. De tekst wordt nooit geüpload.',
     disclosure_android_warning:
       'Android waarschuwt dat een app met meldingstoegang al je meldingen kan lezen. Money2Time bewaart alleen de apps die je kiest.',
     access_title: 'Meldingstoegang aanzetten',
@@ -2663,9 +2661,9 @@ const nl = {
     test_success: 'Het werkt. Money2Time kan je betaalmeldingen lezen.',
     test_would_log: 'Dit zou %{amount} op %{account} registreren als %{category}.',
     test_would_log_no_category: 'Dit zou %{amount} op %{account} registreren.',
-    test_timeout_title: 'De test kon niet worden voltooid',
+    test_timeout_title: 'Geen melding ontvangen',
     test_timeout_body:
-      'Controleer de meldingstoegang en internetverbinding en probeer het opnieuw.',
+      'Controleer of meldingstoegang aanstaat en probeer het opnieuw. Op sommige telefoons moet het batterijgebruik van Money2Time ook op Onbeperkt staan.',
     source_enabled_hint: 'Staat dit uit, dan worden de meldingen genegeerd.',
     source_missing: 'Deze bron is verwijderd.',
     source_remove_title: '%{app} verwijderen?',

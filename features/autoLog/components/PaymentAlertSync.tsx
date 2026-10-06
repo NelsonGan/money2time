@@ -6,7 +6,7 @@ import { useIsPro } from '~/context/ProContext';
 import { paymentAlertCapturesRepository } from '~/lib/repositories/paymentAlertCapturesRepository';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { reportError } from '~/services/errorReporting';
-import { subscribePaymentAlertDrain } from '~/services/paymentAlertsBridge';
+import { emitTestAlertResult, subscribePaymentAlertDrain } from '~/services/paymentAlertsBridge';
 import {
   clearQueuedCaptures,
   getNotificationListenerState,
@@ -18,9 +18,10 @@ import {
   writeListenerConfig,
 } from '~/services/paymentCapture';
 
+import type { CaptureInput } from '../lib/captureQueue';
+import { analyzeCapture, finalizeCapture } from '../lib/pipeline';
 import { androidCapturePackages } from '../lib/prefs';
-import { previewTestAlerts } from '../previewAlerts';
-import { processAlertCaptures } from '../processAlerts';
+import { buildPipelineContext, processAlertCaptures } from '../processAlerts';
 
 /**
  * Turns queued payment alerts into transactions. Mounted once,
@@ -92,24 +93,17 @@ export function PaymentAlertSync() {
         const current = stateRef.current;
         const tests = queued.filter((capture) => capture.isTest);
         if (tests.length > 0) {
-          const tested = await previewTestAlerts(tests, () => ({
-            ...stateRef.current,
-            reportingCurrency: stateRef.current.settings.currencyCode,
-            appUserId: stateRef.current.settings.appUserId,
-          }));
-          await clearQueuedCaptures(tested);
+          previewTestAlerts(tests, {
+            ...current,
+            reportingCurrency: current.settings.currencyCode,
+          });
+          await clearQueuedCaptures(tests);
         }
         const captures = queued.filter((capture) => !capture.isTest);
         if (captures.length === 0) continue;
         const summary = await processAlertCaptures(captures, {
           ...current,
           reportingCurrency: current.settings.currencyCode,
-          appUserId: current.settings.appUserId,
-          getCurrent: () => ({
-            ...stateRef.current,
-            reportingCurrency: stateRef.current.settings.currencyCode,
-            appUserId: stateRef.current.settings.appUserId,
-          }),
         });
         // Only remove alerts durably handled by the pipeline.
         await clearQueuedCaptures(
@@ -169,4 +163,33 @@ async function repairListener(alertsEnabled: boolean) {
   if (!alertsEnabled || !isNotificationCaptureSupported()) return;
   const state = await getNotificationListenerState();
   if (state.granted && !state.connected) await rebindNotificationListener();
+}
+
+/** Run the setup screen's test alert through the pipeline without storing it. */
+function previewTestAlerts(
+  tests: readonly CaptureInput[],
+  deps: Parameters<typeof buildPipelineContext>[0],
+) {
+  const ctx = buildPipelineContext(deps);
+  for (const capture of tests) {
+    const testSource = Object.values(ctx.prefs.sources).find(
+      (source) => source.channel === 'android_notification' && source.enabled && source.accountId,
+    );
+    const analysis = analyzeCapture(
+      { ...capture, sourceKey: testSource?.sourceKey ?? capture.sourceKey },
+      ctx,
+    );
+    const outcome = finalizeCapture(analysis, ctx, {
+      duplicate: { kind: 'none', supersedesCaptureId: null },
+      autoLogsRemaining: null,
+    });
+    emitTestAlertResult({
+      amount: analysis.parse.amount,
+      currency: analysis.parse.currency,
+      counterparty: analysis.parse.counterparty,
+      accountId: outcome.resolution.accountId,
+      categoryId: outcome.resolution.categoryId,
+      wouldLog: outcome.decision.action === 'log',
+    });
+  }
 }

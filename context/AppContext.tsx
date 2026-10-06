@@ -121,7 +121,6 @@ import {
   normalizeNotificationPrefs,
   syncScheduledNotifications,
 } from '~/services/notifications';
-import { invalidatePaymentAlertProcessing } from '~/services/paymentAlertsBridge';
 import { clearAndroidCaptureQueue } from '~/services/paymentCapture';
 import { initReviewPrompt, recordTransactionLogged } from '~/services/reviewPrompt';
 import { runUserAssetGc, runUserAssetGcBackfillOnce } from '~/services/userAssetGc';
@@ -818,7 +817,6 @@ function trackSplitBillCreated(splits: readonly { isSelf: boolean }[]): void {
 }
 
 function purgeAllData() {
-  invalidatePaymentAlertProcessing();
   const db = getDb();
   db.delete(transactionsTable).run();
   db.delete(categoriesTable).run();
@@ -843,7 +841,6 @@ function purgeAllData() {
 }
 
 function purgeDataForImport() {
-  invalidatePaymentAlertProcessing();
   const db = getDb();
   db.delete(transactionsTable).run();
   db.delete(categoriesTable).run();
@@ -863,7 +860,6 @@ function purgeDataForImport() {
 }
 
 function purgeTransactionsOnly() {
-  invalidatePaymentAlertProcessing();
   const db = getDb();
   db.delete(transactionsTable).run();
   // Capture links cannot survive deletion of the entire ledger.
@@ -3615,10 +3611,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         seedDefaultAccountsIfMissing(code);
       });
       reportingCurrencyRef.current = code;
-      clearAndroidCaptureQueue();
-      void clearAllAutoLogQueues().catch((error) =>
-        reportError(error, { scope: 'reset_autolog_queues' }),
-      );
       void runRateRefreshIfDue({ force: true }).then((result) => {
         if (result.ok) reloadRateTable(code);
       });
@@ -4601,10 +4593,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       try {
         // Preserve app-level settings and hourly wage settings on manual imports.
         purgeDataForImport();
-        clearAndroidCaptureQueue();
-        await clearAllAutoLogQueues().catch((error) =>
-          reportError(error, { scope: 'import_autolog_queues' }),
-        );
 
         const symbol = settings?.currencySymbol ?? '$';
         const summary = await importMoneyManagerBackupFromUri(uri, symbol);

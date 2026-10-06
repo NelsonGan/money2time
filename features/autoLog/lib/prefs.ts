@@ -5,7 +5,7 @@
 
 import type { PaymentAlertChannel, PaymentAlertPrefs, PaymentAlertSource } from '~/types';
 
-import { containsWords } from './text';
+import { containsWords } from './parser/text';
 
 export const DEFAULT_PAYMENT_ALERT_PREFS: PaymentAlertPrefs = {
   version: 1,

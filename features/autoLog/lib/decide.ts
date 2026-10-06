@@ -35,19 +35,33 @@ export interface DecisionInput {
   autoLogsRemaining: number | null;
 }
 
+/** Kinds that are never a transaction, and the reason they are ignored under. */
+const IGNORED_KINDS: Partial<Record<PaymentAlertParse['kind'], PaymentAlertReason>> = {
+  otp: 'otp',
+  promo: 'promo',
+  declined: 'declined',
+  balance: 'balance',
+  unknown: 'no_amount',
+};
+
 export function decideCapture(input: DecisionInput): CaptureDecision {
   const { parse } = input;
 
   if (!input.captureEnabled || (input.source && !input.source.enabled))
     return { action: 'ignore', reason: 'source_disabled' };
   if (input.ignoredByPhrase) return { action: 'ignore', reason: 'ignore_phrase' };
-  if (parse.kind !== 'spend' && parse.kind !== 'income')
-    return { action: 'ignore', reason: 'no_amount' };
-  if (parse.amount === null || !Number.isFinite(parse.amount) || parse.amount <= 0)
-    return { action: 'ignore', reason: 'no_amount' };
+  const ignoredAs = IGNORED_KINDS[parse.kind];
+  if (ignoredAs) return { action: 'ignore', reason: ignoredAs };
+  if (parse.amount === null) return { action: 'ignore', reason: 'no_amount' };
+  if (parse.signals.includes('auth_hold'))
+    return { action: 'ignore', reason: 'authorization_hold' };
 
   if (input.duplicate.kind === 'certain') return { action: 'duplicate', reason: 'duplicate' };
   if (input.duplicate.kind === 'possible') return { action: 'duplicate', reason: 'duplicate' };
+  if (input.duplicate.kind === 'reversal') return { action: 'ignore', reason: 'refund' };
+  if (parse.kind === 'income' || parse.kind === 'refund' || parse.kind === 'transfer')
+    return { action: 'ignore', reason: parse.kind };
+  if (parse.kind !== 'spend') return { action: 'ignore', reason: 'no_amount' };
   if (!input.source) return { action: 'ignore', reason: 'source_disabled' };
   if (input.certainty !== 'certain') return { action: 'ignore', reason: 'account_uncertain' };
   if (input.autoLogsRemaining !== null && input.autoLogsRemaining <= 0) {

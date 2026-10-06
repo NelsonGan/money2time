@@ -1233,14 +1233,14 @@ const da = {
       payment_alerts_android_step_5: 'Vælg kontoen for hver app.',
       payment_alerts_android_step_6: 'Send en testnotifikation for at tjekke, at alt virker.',
       payment_alerts_android_step_7:
-        'Udgifter og indtægter registreres på din valgte konto. AI vælger kategorier og springer reklamer over.',
+        'Betalinger registreres automatisk på din valgte konto. Kategorier bruger de samme nøgleord som Apple Pay.',
       payment_alerts_ios_step_1:
         'Åbn Shortcuts, tryk + og derefter Edit. Tryk Automation i editoren.',
       payment_alerts_ios_step_2: 'Søg efter Notification, og vælg den.',
       payment_alerts_ios_step_3: 'Søg efter Log Payment Alert, og tilføj den.',
       payment_alerts_ios_step_4: 'Tryk Message i Log Payment Alert og derefter Select Variable.',
       payment_alerts_ios_step_6:
-        'Udvid handlingen og vælg Konto. Lad Kategori være tom for automatisk kategorisering.',
+        'Tryk på handlingens pil og derefter Account. Vælg, hvor denne apps betalinger skal registreres. Lad Category være tom for automatisk søgeordsmatchning.',
       payment_alerts_ios_step_7:
         'Gå tilbage for at gemme. Gentag for hver bank- eller wallet-app. Betalingerne registreres, næste gang du åbner Money2Time.',
       payment_alerts_android_disclosure: 'Læs om brugen af notifikationsadgang, og tryk Continue.',
@@ -2579,16 +2579,14 @@ const da = {
   },
   payment_alerts: {
     account_hint:
-      'Udgifter og indtægter registreres på din valgte konto. AI vælger kategorier og springer reklamer over.',
+      'Betalinger registreres automatisk på din valgte konto. Kategorier bruger de samme nøgleord som Apple Pay.',
     title: 'Betalingsnotifikationer',
     intro_android:
-      'Udgifter og indtægter registreres på din valgte konto. AI vælger kategorier og springer reklamer over. Notifikationstekst sendes sikkert til vores scanningstjeneste og AI-udbyder for at finde transaktioner. Internetadgang kræves.',
-    intro_ios:
-      'Udgifter og indtægter registreres på din valgte konto. AI vælger kategorier og springer reklamer over. Notifikationstekst sendes sikkert til vores scanningstjeneste og AI-udbyder for at finde transaktioner. Internetadgang kræves.',
+      'Money2Time læser betalingsnotifikationerne fra de bank- og wallet-apps, du vælger, og registrerer hver betaling for dig. Notifikationer læses på denne telefon og uploades aldrig.',
+    intro_ios: 'Registrer automatisk betalinger fra dine bank- og wallet-apps.',
     section_status: 'Status',
     master_label: 'Læs betalingsnotifikationer',
-    master_hint:
-      'Udgifter og indtægter registreres på din valgte konto. AI vælger kategorier og springer reklamer over.',
+    master_hint: 'Registrerer betalinger fra de apps, du vælger.',
     access_open_settings: 'Åbn indstillinger',
     health_unsupported:
       'Denne version af Money2Time kan ikke læse notifikationer. Opdater appen for at bruge betalingsnotifikationer.',
@@ -2610,8 +2608,7 @@ const da = {
     disclosure_body: 'Money2Time skal bruge notifikationsadgang til dette. Sådan bruges den:',
     disclosure_point_selected:
       'Den læser kun notifikationer fra de bank- og wallet-apps, du vælger. Alt andet ignoreres.',
-    disclosure_point_device:
-      'Notifikationstekst sendes sikkert til vores scanningstjeneste og AI-udbyder for at finde transaktioner. Internetadgang kræves.',
+    disclosure_point_device: 'Notifikationer læses på denne telefon. Teksten uploades aldrig.',
     disclosure_android_warning:
       'Android advarer om, at en app med notifikationsadgang kan læse alle dine notifikationer. Money2Time beholder kun de apps, du vælger.',
     access_title: 'Slå notifikationsadgang til',
@@ -2636,8 +2633,9 @@ const da = {
     test_success: 'Det virker. Money2Time kan læse dine betalingsnotifikationer.',
     test_would_log: 'Den ville registrere %{amount} på %{account} som %{category}.',
     test_would_log_no_category: 'Den ville registrere %{amount} på %{account}.',
-    test_timeout_title: 'Testen kunne ikke gennemføres',
-    test_timeout_body: 'Kontrollér notifikationsadgang og din internetforbindelse, og prøv igen.',
+    test_timeout_title: 'Ingen notifikation modtaget',
+    test_timeout_body:
+      'Tjek, at notifikationsadgang er slået til, og prøv igen. Nogle telefoner kræver også, at batteriforbruget for Money2Time står på Ubegrænset.',
     source_enabled_hint: 'Når den er slået fra, ignoreres dens notifikationer.',
     source_missing: 'Denne kilde er fjernet.',
     source_remove_title: 'Fjern %{app}?',
