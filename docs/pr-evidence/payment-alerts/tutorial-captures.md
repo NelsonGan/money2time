@@ -94,10 +94,38 @@ The remaining tutorial topics keep the existing screen tracking.
   covers creating the Notification trigger, selecting the app, keeping Automation
   on and Notify off, adding Log Payment Alert, binding Notification Body to Message,
   choosing Account, and saving. No action requests an app name.
-- The final MP4 adds short instructional captions and animated yellow tap rings
+- The original 1× MP4 adds short instructional captions and animated yellow tap rings
   from the recorded tap coordinates, and trims waiting time. It is saved locally as
   `Money2Time-iOS-App-Notifications-Setup.mp4` in Downloads. It does not contain
-  private account data or a real payment, and is not uploaded as a PR attachment.
+  private account data or a real payment. The recording is also published in
+  the `money2time-assets` R2 bucket. The app now links the 2× version at
+  <https://media.money2time.com/tutorials/ios/app-notifications/setup-2026-10-05-2x.mp4>
+  through the same top-right Watch video button as the other automation tutorials.
   Verified the 1 minute 48 second, 900 × 2120 H.264 MP4 decodes without errors.
+- The 2× version is approximately 54 seconds, retaining the captions and visible
+  tap animations. It is saved as `Money2Time-iOS-App-Notifications-Setup-2x.mp4`
+  in Downloads. Verified the complete faster MP4 decodes without errors.
 - The recording was stopped and retrieved. The new Wallet demo automation was
   saved, then disabled after recording. Other automations were not changed.
+
+## Hosted video verification
+
+- Created the public `money2time-assets` R2 bucket and connected
+  `media.money2time.com` with active domain ownership and TLS. The `r2.dev`
+  development URL remains disabled. Uploaded the versioned 2× MP4 with `video/mp4`,
+  inline disposition and a one-year immutable cache header. The public download
+  matches the local 2× recording's SHA-256 and size; a byte-range request returns HTTP 206.
+  Upload details and the checksum are in `cloudflare/r2/README.md`.
+- Checked the top-right Watch video button on iPhone 18 Pro and iPad mini (A17 Pro),
+  iOS 27, through local Metro. Captured the final iPhone light/dark and iPad
+  layouts. Checked the longer Russian translation. Tutorial headers reserve
+  the text action's natural width and shorten long titles before the Watch video
+  label. Other settings headers retain their existing layout. Restored the
+  iPhone's original English locale and System theme.
+- Checked the Apple Pay tutorial header with the shared Watch video button.
+- Opened the public video from the iPhone tutorial and verified Safari playback
+  at 2× speed, with the captions visible and the playback time advancing over
+  the 54-second duration. Captured a playback frame with a caption and tap ring.
+  This verification does not test bank notification delivery. Existing
+  Android and other automation video destinations remain unchanged. No analytics
+  event, property, trigger or screen route changed, so event volume is unchanged.
