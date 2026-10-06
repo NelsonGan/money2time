@@ -1237,7 +1237,7 @@ const tr = {
       payment_alerts_android_step_6:
         'Her şeyin çalıştığını kontrol etmek için bir test bildirimi gönderin.',
       payment_alerts_android_step_7:
-        'Ödemeler seçtiğiniz hesaba otomatik kaydedilir. Kategoriler Apple Pay ile aynı anahtar kelimeleri kullanır.',
+        'Giderler ve gelirler seçtiğiniz hesaba kaydedilir. Yapay zekâ kategorileri seçer ve promosyonları atlar.',
       payment_alerts_ios_step_1:
         'Shortcuts uygulamasında +, ardından Edit seçeneğine dokunun. Düzenleyicide Automation seçeneğine dokunun.',
       payment_alerts_ios_step_2: 'Notification arayıp seçin.',
@@ -1245,7 +1245,7 @@ const tr = {
       payment_alerts_ios_step_4:
         'Log Payment Alert içinde Message, ardından Select Variable seçeneğine dokunun.',
       payment_alerts_ios_step_6:
-        'Eylem okuna, ardından Account’a dokunun. Bu uygulamanın ödemelerinin kaydedileceği hesabı seçin. Otomatik anahtar kelime eşleştirmesi için Category alanını boş bırakın.',
+        'Eylemi genişletin ve Hesap seçin. Otomatik sınıflandırma için Kategoriyi boş bırakın.',
       payment_alerts_ios_step_7:
         'Kaydetmek için geri dönün. Her banka veya e-cüzdan uygulaması için tekrarlayın. Ödemeler Money2Time’ı bir sonraki açışınızda kaydedilir.',
       payment_alerts_android_disclosure:
@@ -2589,14 +2589,16 @@ const tr = {
   },
   payment_alerts: {
     account_hint:
-      'Ödemeler seçtiğiniz hesaba otomatik kaydedilir. Kategoriler Apple Pay ile aynı anahtar kelimeleri kullanır.',
+      'Giderler ve gelirler seçtiğiniz hesaba kaydedilir. Yapay zekâ kategorileri seçer ve promosyonları atlar.',
     title: 'Ödeme bildirimleri',
     intro_android:
-      'Money2Time, seçtiğiniz banka ve cüzdan uygulamalarının ödeme bildirimlerini okur ve her ödemeyi sizin için kaydeder. Bildirimler bu telefonda okunur ve asla yüklenmez.',
-    intro_ios: 'Banka ve e-cüzdan uygulamalarınızdaki ödemeleri otomatik kaydedin.',
+      'Giderler ve gelirler seçtiğiniz hesaba kaydedilir. Yapay zekâ kategorileri seçer ve promosyonları atlar. Bildirim metni, işlemleri belirlemek için tarama hizmetimize ve yapay zekâ sağlayıcımıza güvenli şekilde gönderilir. İnternet erişimi gerekir.',
+    intro_ios:
+      'Giderler ve gelirler seçtiğiniz hesaba kaydedilir. Yapay zekâ kategorileri seçer ve promosyonları atlar. Bildirim metni, işlemleri belirlemek için tarama hizmetimize ve yapay zekâ sağlayıcımıza güvenli şekilde gönderilir. İnternet erişimi gerekir.',
     section_status: 'Durum',
     master_label: 'Ödeme bildirimlerini oku',
-    master_hint: 'Seçtiğiniz uygulamalardaki ödemeleri kaydeder.',
+    master_hint:
+      'Giderler ve gelirler seçtiğiniz hesaba kaydedilir. Yapay zekâ kategorileri seçer ve promosyonları atlar.',
     access_open_settings: 'Ayarları aç',
     health_unsupported:
       "Money2Time'ın bu sürümü bildirimleri okuyamıyor. Ödeme bildirimlerini kullanmak için uygulamayı güncelleyin.",
@@ -2620,7 +2622,8 @@ const tr = {
       "Bunun için Money2Time'ın bildirim erişimine ihtiyacı var. Erişimi şöyle kullanır:",
     disclosure_point_selected:
       'Yalnızca seçtiğiniz banka ve cüzdan uygulamalarının bildirimlerini okur. Diğer her şey yok sayılır.',
-    disclosure_point_device: 'Bildirimler bu telefonda okunur. Metinleri asla yüklenmez.',
+    disclosure_point_device:
+      'Bildirim metni, işlemleri belirlemek için tarama hizmetimize ve yapay zekâ sağlayıcımıza güvenli şekilde gönderilir. İnternet erişimi gerekir.',
     disclosure_android_warning:
       'Android, bildirim erişimi olan bir uygulamanın tüm bildirimlerinizi okuyabileceği konusunda uyaracak. Money2Time yalnızca seçtiğiniz uygulamaları tutar.',
     access_title: 'Bildirim erişimini açın',
@@ -2644,9 +2647,8 @@ const tr = {
     test_success: 'Çalışıyor. Money2Time ödeme bildirimlerinizi okuyabiliyor.',
     test_would_log: '%{amount}, %{account} hesabına %{category} olarak kaydedilir.',
     test_would_log_no_category: '%{amount}, %{account} hesabına kaydedilir.',
-    test_timeout_title: 'Bildirim gelmedi',
-    test_timeout_body:
-      "Bildirim erişiminin açık olduğunu kontrol edip yeniden deneyin. Bazı telefonlarda Money2Time'ın pil kullanımının Kısıtlanmamış olması da gerekir.",
+    test_timeout_title: 'Test tamamlanamadı',
+    test_timeout_body: 'Bildirim erişimini ve internet bağlantınızı kontrol edip tekrar deneyin.',
     source_enabled_hint: 'Kapalıyken bildirimleri yok sayılır.',
     source_missing: 'Bu kaynak kaldırıldı.',
     source_remove_title: '%{app} kaldırılsın mı?',

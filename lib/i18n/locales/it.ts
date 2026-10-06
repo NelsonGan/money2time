@@ -1234,13 +1234,13 @@ const it = {
       payment_alerts_android_step_5: 'Scegli il conto per ogni app.',
       payment_alerts_android_step_6: 'Invia un avviso di prova per verificare che tutto funzioni.',
       payment_alerts_android_step_7:
-        'I pagamenti vengono registrati automaticamente sul conto scelto. Le categorie usano le stesse parole chiave di Apple Pay.',
+        'Spese e entrate vengono registrate sul conto scelto. L’IA sceglie le categorie e ignora le promozioni.',
       payment_alerts_ios_step_1: 'Apri Shortcuts, tocca +, poi Edit. Tocca Automation nell’editor.',
       payment_alerts_ios_step_2: 'Cerca Notification e selezionalo.',
       payment_alerts_ios_step_3: 'Cerca Log Payment Alert e aggiungilo.',
       payment_alerts_ios_step_4: 'Tocca Message in Log Payment Alert, poi Select Variable.',
       payment_alerts_ios_step_6:
-        'Tocca la freccia dell’azione, poi Account. Scegli dove registrare i pagamenti di questa app. Lascia Category vuoto per la corrispondenza automatica delle parole chiave.',
+        'Espandi l’azione e scegli Conto. Lascia Categoria vuota per la categorizzazione automatica.',
       payment_alerts_ios_step_7:
         'Torna indietro per salvare. Ripeti per ogni app bancaria o portafoglio digitale. I pagamenti vengono registrati alla prossima apertura di Money2Time.',
       payment_alerts_android_disclosure:
@@ -2593,14 +2593,16 @@ const it = {
   },
   payment_alerts: {
     account_hint:
-      'I pagamenti vengono registrati automaticamente sul conto scelto. Le categorie usano le stesse parole chiave di Apple Pay.',
+      'Spese e entrate vengono registrate sul conto scelto. L’IA sceglie le categorie e ignora le promozioni.',
     title: 'Avvisi di pagamento',
     intro_android:
-      'Money2Time legge le notifiche di pagamento delle app bancarie e dei wallet che scegli e registra ogni pagamento per te. Gli avvisi vengono letti su questo telefono e non vengono mai caricati.',
-    intro_ios: 'Registra automaticamente i pagamenti dalle app bancarie e dai portafogli digitali.',
+      'Spese e entrate vengono registrate sul conto scelto. L’IA sceglie le categorie e ignora le promozioni. Il testo delle notifiche viene inviato in modo sicuro al nostro servizio di scansione e fornitore di IA per identificare le transazioni. Serve internet.',
+    intro_ios:
+      'Spese e entrate vengono registrate sul conto scelto. L’IA sceglie le categorie e ignora le promozioni. Il testo delle notifiche viene inviato in modo sicuro al nostro servizio di scansione e fornitore di IA per identificare le transazioni. Serve internet.',
     section_status: 'Stato',
     master_label: 'Leggi le notifiche di pagamento',
-    master_hint: 'Registra i pagamenti delle app che scegli.',
+    master_hint:
+      'Spese e entrate vengono registrate sul conto scelto. L’IA sceglie le categorie e ignora le promozioni.',
     access_open_settings: 'Apri impostazioni',
     health_unsupported:
       "Questa versione di Money2Time non può leggere le notifiche. Aggiorna l'app per usare gli avvisi di pagamento.",
@@ -2625,7 +2627,7 @@ const it = {
     disclosure_point_selected:
       'Legge solo le notifiche delle app bancarie e dei wallet che scegli. Tutto il resto viene ignorato.',
     disclosure_point_device:
-      'Gli avvisi vengono letti su questo telefono. Il testo non viene mai caricato.',
+      'Il testo delle notifiche viene inviato in modo sicuro al nostro servizio di scansione e fornitore di IA per identificare le transazioni. Serve internet.',
     disclosure_android_warning:
       "Android ti avviserà che un'app con accesso alle notifiche può leggerle tutte. Money2Time tiene solo le app che scegli.",
     access_title: "Attiva l'accesso alle notifiche",
@@ -2649,9 +2651,8 @@ const it = {
     test_success: 'Funziona. Money2Time può leggere i tuoi avvisi di pagamento.',
     test_would_log: 'Registrerebbe %{amount} su %{account} come %{category}.',
     test_would_log_no_category: 'Registrerebbe %{amount} su %{account}.',
-    test_timeout_title: 'Nessun avviso arrivato',
-    test_timeout_body:
-      "Controlla che l'accesso alle notifiche sia attivo e riprova. Su alcuni telefoni serve anche impostare la batteria di Money2Time su Senza restrizioni.",
+    test_timeout_title: 'Impossibile completare il test',
+    test_timeout_body: 'Controlla l’accesso alle notifiche e la connessione internet, poi riprova.',
     source_enabled_hint: 'Se disattivata, i suoi avvisi vengono ignorati.',
     source_missing: 'Questa fonte è stata rimossa.',
     source_remove_title: 'Rimuovere %{app}?',

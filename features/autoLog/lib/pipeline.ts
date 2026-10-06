@@ -1,23 +1,27 @@
-// On-device pipeline: parse, select the configured account, match keywords and log.
+// Resolve a worker-parsed notification against the selected account and categories.
 
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
+import type { ScanPaymentAlertArgs } from '~/services/paymentAlertScan';
+import type { ScannedTransaction } from '~/services/receiptScan.shared';
 import type {
   Account,
   Category,
   PaymentAlertParse,
   PaymentAlertPrefs,
+  PaymentAlertReason,
   PaymentAlertResolution,
   PaymentAlertSource,
 } from '~/types';
 
 import { type AccountBinding, bindAccount } from './binding';
 import type { CaptureInput } from './captureQueue';
-import { type CategoryLookups, type CategoryResolution, resolveAlertCategory } from './categorize';
+import { type CategoryResolution, resolveAlertCategory } from './categorize';
+import { NOTIFICATION_PARSER_VERSION } from './constants';
 import { type CaptureDecision, decideCapture } from './decide';
 import { alertDedupeKey, type DuplicateVerdict } from './dedupe';
 import { buildAlertDraft } from './draft';
-import { normalizedAlertLower, parsePaymentAlert } from './parser';
 import { findAlertSource, matchesIgnorePhrase } from './prefs';
+import { normalizeAlertText } from './text';
 
 export interface PipelineContext {
   accounts: readonly Account[];
@@ -25,8 +29,7 @@ export interface PipelineContext {
   prefs: PaymentAlertPrefs;
   reportingCurrency: string;
   defaultExpenseCategoryId: string | null;
-  autoCategorizeByMerchant: boolean;
-  lookups: CategoryLookups;
+  defaultIncomeCategoryId: string | null;
 }
 
 export interface CaptureAnalysis {
@@ -40,15 +43,25 @@ export interface CaptureAnalysis {
   ignoredByPhrase: boolean;
 }
 
-export function analyzeCapture(capture: CaptureInput, ctx: PipelineContext): CaptureAnalysis {
-  const parts = {
-    title: capture.title,
-    subtitle: capture.subtitle,
-    body: capture.body,
-    extra: capture.extra,
+export function analyzeCapture(
+  capture: CaptureInput,
+  ctx: PipelineContext,
+  scanned: ScannedTransaction | null,
+): CaptureAnalysis {
+  const parse: PaymentAlertParse = {
+    kind: scanned ? (scanned.type === 'income' ? 'income' : 'spend') : 'unknown',
+    amount: scanned?.amount ?? null,
+    currency: scanned?.currency ?? null,
+    secondary: scanned?.secondary ?? null,
+    counterparty: scanned?.note.trim() || null,
+    parserVersion: NOTIFICATION_PARSER_VERSION,
   };
-  const parse = parsePaymentAlert(parts);
-  const lowerText = normalizedAlertLower(parts);
+  const lowerText = normalizeAlertText([
+    capture.title,
+    capture.subtitle,
+    capture.body,
+    ...capture.extra,
+  ]).lower;
   const source =
     capture.channel === 'android_notification'
       ? findAlertSource(ctx.prefs, capture.channel, capture.sourceKey)
@@ -58,17 +71,14 @@ export function analyzeCapture(capture: CaptureInput, ctx: PipelineContext): Cap
     source,
     accounts: ctx.accounts,
   });
-  const category = resolveAlertCategory(
-    {
-      kind: parse.kind,
-      counterparty: parse.counterparty,
-      presetCategoryId: capture.presetCategoryId,
-      categories: ctx.categories,
-      defaultExpenseCategoryId: ctx.defaultExpenseCategoryId,
-      autoCategorizeByMerchant: ctx.autoCategorizeByMerchant,
-    },
-    ctx.lookups,
-  );
+  const category = resolveAlertCategory({
+    kind: parse.kind,
+    scannedCategory: scanned?.category ?? null,
+    presetCategoryId: capture.presetCategoryId,
+    categories: ctx.categories,
+    defaultExpenseCategoryId: ctx.defaultExpenseCategoryId,
+    defaultIncomeCategoryId: ctx.defaultIncomeCategoryId,
+  });
 
   return {
     capture,
@@ -86,6 +96,52 @@ export interface CaptureOutcome {
   resolution: PaymentAlertResolution;
   decision: CaptureDecision;
   draft: CreateTransactionInput | null;
+}
+
+/** Local gates run before upload and again after a potentially slow response. */
+export function captureSkipReason(
+  analysis: CaptureAnalysis,
+  ctx: PipelineContext,
+  remaining: number | null,
+): PaymentAlertReason | null {
+  const { capture } = analysis;
+  if (
+    (capture.channel === 'android_notification' &&
+      (!ctx.prefs.alertsEnabled || !analysis.source?.enabled)) ||
+    (capture.channel !== 'android_notification' && capture.channel !== 'ios_alert')
+  )
+    return 'source_disabled';
+  if (analysis.ignoredByPhrase) return 'ignore_phrase';
+  if (analysis.binding.certainty !== 'certain') return 'account_uncertain';
+  if (remaining !== null && remaining <= 0) return 'limit_reached';
+  return null;
+}
+
+export function buildNotificationScanArgs(
+  capture: CaptureInput,
+  ctx: PipelineContext,
+  appUserId: string,
+  accountId: string | null,
+): ScanPaymentAlertArgs {
+  return {
+    appUserId,
+    currency:
+      ctx.accounts.find((account) => account.id === accountId)?.currency ?? ctx.reportingCurrency,
+    categories: ctx.categories
+      .filter((category) => category.type === 'expense' && !category.deletedAt)
+      .map((category) => category.name),
+    incomeCategories: ctx.categories
+      .filter((category) => category.type === 'income' && !category.deletedAt)
+      .map((category) => category.name),
+    notification: {
+      title: capture.title,
+      subtitle: capture.subtitle,
+      body: capture.body,
+      extra: capture.extra,
+      source: capture.sourceLabel ?? capture.sourceKey,
+      capturedAt: capture.capturedAt,
+    },
+  };
 }
 
 export function finalizeCapture(
@@ -133,17 +189,16 @@ export function finalizeCapture(
   return {
     resolution: {
       parse: analysis.parse,
+      scanCurrency:
+        ctx.accounts.find((account) => account.id === analysis.binding.accountId)?.currency ??
+        ctx.reportingCurrency,
       currency: draft?.currency ?? analysis.parse.currency,
       accountId: analysis.binding.accountId,
       certainty: analysis.binding.certainty,
       bindingReason: analysis.binding.reason,
-      identifier: analysis.binding.identifier,
-      candidateAccountIds: analysis.binding.candidateAccountIds,
       categoryId: category.categoryId,
       categoryOrigin: category.origin,
       draftType: draft?.type ?? null,
-      transferFromAccountId: draft?.type === 'transfer' ? (draft.fromAccountId ?? null) : null,
-      transferToAccountId: draft?.type === 'transfer' ? (draft.toAccountId ?? null) : null,
     },
     // A draft that cannot be built (no amount) can only be ignored.
     decision:

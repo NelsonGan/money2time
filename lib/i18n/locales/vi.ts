@@ -1221,14 +1221,14 @@ const vi = {
       payment_alerts_android_step_5: 'Chọn tài khoản cho mỗi ứng dụng.',
       payment_alerts_android_step_6: 'Gửi một thông báo thử để kiểm tra mọi thứ hoạt động.',
       payment_alerts_android_step_7:
-        'Thanh toán được ghi tự động vào tài khoản đã chọn. Danh mục dùng cùng từ khóa như Apple Pay.',
+        'Chi tiêu và thu nhập được ghi vào tài khoản đã chọn. AI chọn danh mục và bỏ qua quảng cáo.',
       payment_alerts_ios_step_1:
         'Mở Shortcuts, nhấn + rồi Edit. Nhấn Automation trong trình chỉnh sửa.',
       payment_alerts_ios_step_2: 'Tìm Notification rồi chọn.',
       payment_alerts_ios_step_3: 'Tìm Log Payment Alert và thêm vào.',
       payment_alerts_ios_step_4: 'Nhấn Message trong Log Payment Alert rồi Select Variable.',
       payment_alerts_ios_step_6:
-        'Chạm mũi tên tác vụ, rồi Account. Chọn tài khoản để ghi lại thanh toán của ứng dụng này. Để trống Category để tự động phân loại theo từ khóa.',
+        'Mở rộng tác vụ và chọn Tài khoản. Để trống Danh mục để phân loại tự động.',
       payment_alerts_ios_step_7:
         'Chạm quay lại để lưu. Lặp lại cho mỗi ứng dụng ngân hàng hoặc ví điện tử. Thanh toán được ghi khi bạn mở Money2Time lần tới.',
       payment_alerts_android_disclosure:
@@ -2561,14 +2561,16 @@ const vi = {
   },
   payment_alerts: {
     account_hint:
-      'Thanh toán được ghi tự động vào tài khoản đã chọn. Danh mục dùng cùng từ khóa như Apple Pay.',
+      'Chi tiêu và thu nhập được ghi vào tài khoản đã chọn. AI chọn danh mục và bỏ qua quảng cáo.',
     title: 'Thông báo thanh toán',
     intro_android:
-      'Money2Time đọc thông báo thanh toán từ các ứng dụng ngân hàng và ví điện tử bạn chọn, rồi ghi lại từng khoản thanh toán cho bạn. Thông báo được đọc trên điện thoại này và không bao giờ được tải lên.',
-    intro_ios: 'Tự động ghi lại thanh toán từ các ứng dụng ngân hàng và ví điện tử.',
+      'Chi tiêu và thu nhập được ghi vào tài khoản đã chọn. AI chọn danh mục và bỏ qua quảng cáo. Nội dung thông báo được gửi an toàn đến dịch vụ quét và nhà cung cấp AI của chúng tôi để nhận diện giao dịch. Cần kết nối internet.',
+    intro_ios:
+      'Chi tiêu và thu nhập được ghi vào tài khoản đã chọn. AI chọn danh mục và bỏ qua quảng cáo. Nội dung thông báo được gửi an toàn đến dịch vụ quét và nhà cung cấp AI của chúng tôi để nhận diện giao dịch. Cần kết nối internet.',
     section_status: 'Trạng thái',
     master_label: 'Đọc thông báo thanh toán',
-    master_hint: 'Ghi lại thanh toán từ các ứng dụng bạn chọn.',
+    master_hint:
+      'Chi tiêu và thu nhập được ghi vào tài khoản đã chọn. AI chọn danh mục và bỏ qua quảng cáo.',
     access_open_settings: 'Mở cài đặt',
     health_unsupported:
       'Phiên bản Money2Time này không đọc được thông báo. Hãy cập nhật ứng dụng để dùng thông báo thanh toán.',
@@ -2593,7 +2595,7 @@ const vi = {
     disclosure_point_selected:
       'Chỉ đọc thông báo từ các ứng dụng ngân hàng và ví điện tử bạn chọn. Mọi thứ khác đều bị bỏ qua.',
     disclosure_point_device:
-      'Thông báo được đọc trên điện thoại này. Nội dung không bao giờ được tải lên.',
+      'Nội dung thông báo được gửi an toàn đến dịch vụ quét và nhà cung cấp AI của chúng tôi để nhận diện giao dịch. Cần kết nối internet.',
     disclosure_android_warning:
       'Android sẽ cảnh báo rằng ứng dụng có quyền truy cập thông báo có thể đọc mọi thông báo. Money2Time chỉ giữ lại các ứng dụng bạn chọn.',
     access_title: 'Bật quyền truy cập thông báo',
@@ -2619,9 +2621,8 @@ const vi = {
     test_success: 'Thành công. Money2Time đọc được thông báo thanh toán của bạn.',
     test_would_log: 'Sẽ ghi %{amount} vào %{account} với danh mục %{category}.',
     test_would_log_no_category: 'Sẽ ghi %{amount} vào %{account}.',
-    test_timeout_title: 'Không có thông báo nào',
-    test_timeout_body:
-      'Hãy kiểm tra quyền truy cập thông báo đã bật, rồi thử lại. Một số điện thoại cũng cần đặt mức sử dụng pin của Money2Time thành Không hạn chế.',
+    test_timeout_title: 'Không thể hoàn tất kiểm tra',
+    test_timeout_body: 'Kiểm tra quyền truy cập thông báo và kết nối internet rồi thử lại.',
     source_enabled_hint: 'Khi tắt, thông báo của nó sẽ bị bỏ qua.',
     source_missing: 'Nguồn này đã bị xóa.',
     source_remove_title: 'Gỡ %{app}?',

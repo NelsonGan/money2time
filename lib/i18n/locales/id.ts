@@ -1237,13 +1237,13 @@ const id = {
       payment_alerts_android_step_6:
         'Kirim notifikasi uji coba untuk memastikan semuanya berfungsi.',
       payment_alerts_android_step_7:
-        'Pembayaran otomatis dicatat ke akun yang dipilih. Kategori memakai kata kunci yang sama dengan Apple Pay.',
+        'Pengeluaran dan pemasukan dicatat ke akun pilihan Anda. AI memilih kategori dan melewati promosi.',
       payment_alerts_ios_step_1: 'Buka Shortcuts, ketuk +, lalu Edit. Ketuk Automation di editor.',
       payment_alerts_ios_step_2: 'Cari Notification dan pilih.',
       payment_alerts_ios_step_3: 'Cari Log Payment Alert lalu tambahkan.',
       payment_alerts_ios_step_4: 'Ketuk Message di Log Payment Alert, lalu Select Variable.',
       payment_alerts_ios_step_6:
-        'Ketuk panah tindakan, lalu Account. Pilih akun untuk mencatat pembayaran aplikasi ini. Biarkan Category kosong untuk pencocokan kata kunci otomatis.',
+        'Perluas tindakan dan pilih Akun. Kosongkan Kategori untuk kategorisasi otomatis.',
       payment_alerts_ios_step_7:
         'Ketuk kembali untuk menyimpan. Ulangi untuk setiap aplikasi bank atau dompet digital. Pembayaran dicatat saat Anda membuka Money2Time lagi.',
       payment_alerts_android_disclosure:
@@ -2591,14 +2591,16 @@ const id = {
   },
   payment_alerts: {
     account_hint:
-      'Pembayaran otomatis dicatat ke akun yang dipilih. Kategori memakai kata kunci yang sama dengan Apple Pay.',
+      'Pengeluaran dan pemasukan dicatat ke akun pilihan Anda. AI memilih kategori dan melewati promosi.',
     title: 'Notifikasi pembayaran',
     intro_android:
-      'Money2Time membaca notifikasi pembayaran dari aplikasi bank dan dompet digital yang Anda pilih, lalu mencatat setiap pembayaran untuk Anda. Notifikasi dibaca di ponsel ini dan tidak pernah diunggah.',
-    intro_ios: 'Catat pembayaran dari aplikasi bank dan dompet digital secara otomatis.',
+      'Pengeluaran dan pemasukan dicatat ke akun pilihan Anda. AI memilih kategori dan melewati promosi. Teks notifikasi dikirim dengan aman ke layanan pemindaian dan penyedia AI kami untuk mengenali transaksi. Koneksi internet diperlukan.',
+    intro_ios:
+      'Pengeluaran dan pemasukan dicatat ke akun pilihan Anda. AI memilih kategori dan melewati promosi. Teks notifikasi dikirim dengan aman ke layanan pemindaian dan penyedia AI kami untuk mengenali transaksi. Koneksi internet diperlukan.',
     section_status: 'Status',
     master_label: 'Baca notifikasi pembayaran',
-    master_hint: 'Mencatat pembayaran dari aplikasi yang Anda pilih.',
+    master_hint:
+      'Pengeluaran dan pemasukan dicatat ke akun pilihan Anda. AI memilih kategori dan melewati promosi.',
     access_open_settings: 'Buka pengaturan',
     health_unsupported:
       'Versi Money2Time ini tidak bisa membaca notifikasi. Perbarui aplikasi untuk memakai notifikasi pembayaran.',
@@ -2621,7 +2623,8 @@ const id = {
     disclosure_body: 'Money2Time memerlukan akses notifikasi untuk ini. Begini cara memakainya:',
     disclosure_point_selected:
       'Hanya membaca notifikasi dari aplikasi bank dan dompet digital yang Anda pilih. Selebihnya diabaikan.',
-    disclosure_point_device: 'Notifikasi dibaca di ponsel ini. Teksnya tidak pernah diunggah.',
+    disclosure_point_device:
+      'Teks notifikasi dikirim dengan aman ke layanan pemindaian dan penyedia AI kami untuk mengenali transaksi. Koneksi internet diperlukan.',
     disclosure_android_warning:
       'Android akan memperingatkan bahwa aplikasi dengan akses notifikasi bisa membaca semua notifikasi Anda. Money2Time hanya menyimpan aplikasi yang Anda pilih.',
     access_title: 'Aktifkan akses notifikasi',
@@ -2646,9 +2649,8 @@ const id = {
     test_success: 'Berhasil. Money2Time bisa membaca notifikasi pembayaran Anda.',
     test_would_log: 'Akan dicatat %{amount} ke %{account} sebagai %{category}.',
     test_would_log_no_category: 'Akan dicatat %{amount} ke %{account}.',
-    test_timeout_title: 'Tidak ada notifikasi masuk',
-    test_timeout_body:
-      'Pastikan akses notifikasi aktif, lalu coba lagi. Beberapa ponsel juga perlu penggunaan baterai Money2Time diatur ke Tidak dibatasi.',
+    test_timeout_title: 'Pengujian tidak dapat diselesaikan',
+    test_timeout_body: 'Periksa akses notifikasi dan koneksi internet Anda, lalu coba lagi.',
     source_enabled_hint: 'Jika nonaktif, notifikasinya diabaikan.',
     source_missing: 'Sumber ini sudah dihapus.',
     source_remove_title: 'Hapus %{app}?',

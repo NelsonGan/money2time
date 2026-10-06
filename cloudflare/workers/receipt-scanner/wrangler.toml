@@ -51,6 +51,10 @@ FREE_LIMIT = "20"
 FREE_INTERVAL = "100year"
 PRO_LIMIT = "500"
 PRO_INTERVAL = "month"
+# Monthly service caps include skipped notifications and previews. The app separately
+# meters its free lifetime allowance on successful transaction saves.
+NOTIFICATION_FREE_LIMIT = "1000"
+NOTIFICATION_PRO_LIMIT = "3000"
 # Optional image-resolution hint sent to the provider (OpenAI-style
 # image_url.detail): "low" | "high" | "auto". "low" downsamples the image to
 # cut input tokens, at some OCR-accuracy risk — flip it on here to A/B the

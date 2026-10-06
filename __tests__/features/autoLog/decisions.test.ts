@@ -2,17 +2,16 @@ import { PRO_LIMITS } from '~/constants/proLimits';
 import { resolveAlertCategory } from '~/features/autoLog/lib/categorize';
 import { autoLogAllowance, decideCapture, type DecisionInput } from '~/features/autoLog/lib/decide';
 import { alertDedupeKey, type CaptureRef, findDuplicate } from '~/features/autoLog/lib/dedupe';
-import { parsePaymentAlert } from '~/features/autoLog/lib/parser';
 
-import { account, category, source } from './helpers';
+import { account, category, parsedAlert, source } from './helpers';
 
-const spend = parsePaymentAlert({ body: "You've spent RM25.00 at STARBUCKS KLCC." });
+const spend = parsedAlert();
 
 function decision(overrides: Partial<DecisionInput> = {}) {
   return decideCapture({
     parse: spend,
     certainty: 'certain',
-    duplicate: { kind: 'none', supersedesCaptureId: null },
+    duplicate: { kind: 'none' },
     source: source(),
     captureEnabled: true,
     ignoredByPhrase: false,
@@ -22,6 +21,13 @@ function decision(overrides: Partial<DecisionInput> = {}) {
 }
 
 describe('decideCapture', () => {
+  it('logs a completed income with a selected account', () => {
+    expect(decision({ parse: { ...spend, kind: 'income' } })).toEqual({
+      action: 'log',
+      reason: 'auto',
+    });
+  });
+
   it('logs a confident spend from an auto source with a certain account', () => {
     expect(decision()).toEqual({ action: 'log', reason: 'auto' });
   });
@@ -82,26 +88,11 @@ describe('decideCapture', () => {
     ).toBe(PRO_LIMITS.FREE_MAX_AUTO_LOGS);
   });
 
-  it('ignores codes, promotions, declines, balances and alerts without money', () => {
-    for (const body of [
-      'Your OTP is 123456. Do not share.',
-      'Get 10% cashback when you spend RM50!',
-      'Your card was declined at SHELL for RM80.00.',
-      'Your statement is ready. Outstanding balance RM1,234.56.',
-      'Your new device has been registered.',
-    ]) {
-      expect(decision({ parse: parsePaymentAlert({ body }) }).action).toBe('ignore');
-    }
-  });
-
-  it('never auto-logs money in, refunds or top-ups', () => {
-    for (const body of [
-      'You have received RM50.00 from AHMAD.',
-      'Refund of RM25.00 from SHOPEE has been credited.',
-      'Reload of RM100.00 successful.',
-    ]) {
-      expect(decision({ parse: parsePaymentAlert({ body }) }).action).toBe('ignore');
-    }
+  it('ignores a notification for which the worker returned no completed transaction', () => {
+    expect(decision({ parse: parsedAlert({ kind: 'unknown', amount: null }) })).toEqual({
+      action: 'ignore',
+      reason: 'no_amount',
+    });
   });
 
   it('skips both certain and possible duplicates', () => {
@@ -150,6 +141,16 @@ describe('findDuplicate', () => {
     ...overrides,
   });
 
+  it('keeps incoming and outgoing amounts separate even when the notification key is reused', () => {
+    const old = captureRef({
+      sourceKey: base.sourceKey,
+      nativeKey: base.nativeKey,
+      dedupeKey: base.dedupeKey,
+      kind: 'spend',
+    });
+    expect(findDuplicate({ ...base, kind: 'income' }, [old], [], new Set()).kind).toBe('none');
+  });
+
   it('treats the same text from the same source as one alert', () => {
     const verdict = findDuplicate(
       base,
@@ -186,23 +187,30 @@ describe('findDuplicate', () => {
     expect(findDuplicate(base, [late], [], new Set()).kind).toBe('none');
   });
 
-  it('lets an updated notification supersede its pending earlier version', () => {
+  it('does not let legacy pending records suppress a completed payment', () => {
     const earlier = captureRef({
       sourceKey: base.sourceKey,
       nativeKey: 'key-1',
       status: 'pending',
+      transactionId: null,
     });
-    expect(findDuplicate(base, [earlier], [], new Set())).toEqual({
-      kind: 'none',
-      supersedesCaptureId: 'old',
-    });
+    expect(findDuplicate(base, [earlier], [], new Set()).kind).toBe('none');
   });
 
-  it('flags a decline arriving for a payment already logged', () => {
-    const earlier = captureRef({ sourceKey: base.sourceKey, nativeKey: 'key-1' });
-    expect(findDuplicate({ ...base, kind: 'declined' }, [earlier], [], new Set()).kind).toBe(
-      'reversal',
-    );
+  it('finds a logged notification update even after a newer ignored update reused its key', () => {
+    const earlier = captureRef({ sourceKey: base.sourceKey, nativeKey: base.nativeKey });
+    const ignored = captureRef({
+      id: 'ignored',
+      sourceKey: base.sourceKey,
+      nativeKey: base.nativeKey,
+      status: 'ignored',
+      capturedAt: '2026-10-03T12:04:00.000Z',
+    });
+    expect(findDuplicate(base, [earlier, ignored], [], new Set())).toEqual({
+      kind: 'certain',
+      ofCaptureId: earlier.id,
+      ofTransactionId: earlier.transactionId,
+    });
   });
 
   it('recognizes a possible duplicate payment the user already typed in', () => {
@@ -324,37 +332,48 @@ describe('resolveAlertCategory', () => {
   const categories = [
     category({ id: 'food' }),
     category({ id: 'other', name: 'Other' }),
-    category({ id: 'income', name: 'Salary', type: 'income' }),
+    category({ id: 'salary', name: 'Salary', type: 'income' }),
   ];
   const input = {
     kind: 'spend' as const,
-    counterparty: 'SHELL',
     presetCategoryId: null,
     categories,
     defaultExpenseCategoryId: null,
-    autoCategorizeByMerchant: true,
+    defaultIncomeCategoryId: 'salary',
+    scannedCategory: 'Food',
   };
-  it('honors an explicit category before a keyword match', () => {
-    expect(
-      resolveAlertCategory({ ...input, presetCategoryId: 'other' }, { keyword: () => 'food' }),
-    ).toEqual({ categoryId: 'other', origin: 'preset' });
+  it('honors an explicit category before the worker category', () => {
+    expect(resolveAlertCategory({ ...input, presetCategoryId: 'other' })).toEqual({
+      categoryId: 'other',
+      origin: 'preset',
+    });
   });
-  it('falls back to an expense category when keywords do not match', () => {
-    expect(resolveAlertCategory(input, { keyword: () => null })).toEqual({
+  it('uses the worker category without a keyword lookup', () => {
+    expect(resolveAlertCategory(input)).toEqual({ categoryId: 'food', origin: 'ai' });
+  });
+  it('falls back when the worker names an unavailable category', () => {
+    expect(resolveAlertCategory({ ...input, scannedCategory: 'Unknown' })).toEqual({
       categoryId: 'other',
       origin: 'fallback',
     });
   });
-  it('rejects income and deleted category matches for spending', () => {
-    expect(resolveAlertCategory(input, { keyword: () => 'income' }).categoryId).toBe('other');
+  it('only resolves categories of the parsed transaction type', () => {
     expect(
-      resolveAlertCategory(
-        {
-          ...input,
-          categories: [category({ id: 'deleted', deletedAt: '2026-01-01' }), categories[1]!],
-        },
-        { keyword: () => 'deleted' },
-      ).categoryId,
+      resolveAlertCategory({
+        ...input,
+        kind: 'income',
+        scannedCategory: 'Salary',
+        presetCategoryId: 'food',
+      }),
+    ).toEqual({ categoryId: 'salary', origin: 'ai' });
+    expect(resolveAlertCategory({ ...input, scannedCategory: 'Salary' }).categoryId).toBe('other');
+  });
+  it('ignores deleted categories', () => {
+    expect(
+      resolveAlertCategory({
+        ...input,
+        categories: [category({ deletedAt: '2026-01-01' }), categories[1]!],
+      }).categoryId,
     ).toBe('other');
   });
 });

@@ -694,6 +694,7 @@ function parseAlertResolution(json: string | null): PaymentAlertResolution | nul
     if (!row.parse || typeof row.parse !== 'object') return null;
     return {
       parse: row.parse,
+      ...(typeof row.scanCurrency === 'string' ? { scanCurrency: row.scanCurrency } : {}),
       currency: typeof row.currency === 'string' ? row.currency : (row.parse.currency ?? null),
       accountId: typeof row.accountId === 'string' ? row.accountId : null,
       certainty: row.certainty ?? 'none',

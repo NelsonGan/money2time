@@ -1,4 +1,14 @@
 const drainListeners = new Set<() => void>();
+let processingGeneration = 0;
+
+/** A data reset or restore invalidates notification work already awaiting inference. */
+export function invalidatePaymentAlertProcessing(): void {
+  processingGeneration += 1;
+}
+
+export function paymentAlertProcessingGeneration(): number {
+  return processingGeneration;
+}
 
 /** Ask the mounted drain to run now (a setup test alert). */
 export function requestPaymentAlertDrain() {
@@ -14,6 +24,8 @@ export function subscribePaymentAlertDrain(listener: () => void): () => void {
 
 /** What the pipeline made of the setup screen's test alert. */
 export interface TestAlertResult {
+  captureId: string;
+  capturedAt: string;
   amount: number | null;
   currency: string | null;
   counterparty: string | null;
@@ -33,4 +45,10 @@ export function subscribeTestAlertResult(listener: (result: TestAlertResult) => 
   return () => {
     testListeners.delete(listener);
   };
+}
+
+/** Ignore previews from earlier setup attempts or after the screen timed out. */
+export function isCurrentTestAlert(result: TestAlertResult, startedAt: number | null): boolean {
+  const capturedAt = new Date(result.capturedAt).getTime();
+  return startedAt !== null && Number.isFinite(capturedAt) && capturedAt >= startedAt;
 }
