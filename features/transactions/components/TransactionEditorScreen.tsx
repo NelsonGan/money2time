@@ -1480,9 +1480,14 @@ export function TransactionEditorScreen({
   }, [amount, splitMode, splitEvenly, splitRouteOpen, splitItemized]);
 
   // When type leaves expense, force-disable splitMode so a saved transfer/income doesn't carry splits.
+  // Coming back to expense restores it while friend rows are still held, so a
+  // stray swipe across the type pager doesn't read as "every friend removed"
+  // and clear the persisted splits on save (resolveSplitSaveRoute).
   useEffect(() => {
-    if (type !== 'expense' && splitMode) {
-      setSplitMode(false);
+    if (type !== 'expense') {
+      if (splitMode) setSplitMode(false);
+    } else if (!splitMode && splits.some((s) => !s.isSelf)) {
+      setSplitMode(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type]);

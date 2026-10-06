@@ -46,5 +46,8 @@ describe('resolveSplitSaveRoute', () => {
     expect(resolveSplitSaveRoute({ ...base, splitMode: false, rows: [] })).toBe('plain');
     expect(resolveSplitSaveRoute({ ...base, rows: [me] })).toBe('plain');
     expect(resolveSplitSaveRoute({ ...base, isRecurring: true })).toBe('plain');
+    expect(resolveSplitSaveRoute({ ...base, isRecurring: true, hadPersistedSplits: true })).toBe(
+      'plain',
+    );
   });
 });

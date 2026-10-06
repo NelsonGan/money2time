@@ -33,5 +33,6 @@ export function resolveSplitSaveRoute({
   // Removing every friend (or leaving expense) folds split mode off and empties
   // the rows, but the persisted rows are still on the transaction. A plain
   // update never touches them, so the bill would come back on the next open.
-  return hadPersistedSplits ? 'clear' : 'plain';
+  // A recurring rule never carries splits, so it always saves plainly.
+  return hadPersistedSplits && !isRecurring ? 'clear' : 'plain';
 }
