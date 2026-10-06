@@ -1246,7 +1246,7 @@ const de = {
       payment_alerts_android_step_6:
         'Sende eine Testbenachrichtigung, um zu prüfen, ob alles funktioniert.',
       payment_alerts_android_step_7:
-        'Ausgaben und Einnahmen werden auf dem gewählten Konto erfasst. KI wählt Kategorien und überspringt Werbung.',
+        'Zahlungen werden automatisch auf dem gewählten Konto erfasst. Kategorien nutzen dieselben Schlüsselwörter wie Apple Pay.',
       payment_alerts_ios_step_1:
         'Öffne Shortcuts, tippe auf +, dann Edit. Tippe im Edit auf Automation.',
       payment_alerts_ios_step_2: 'Suche nach Notification und wähle sie aus.',
@@ -1254,7 +1254,7 @@ const de = {
       payment_alerts_ios_step_4:
         'Tippe in Log Payment Alert auf Message, dann auf Select Variable.',
       payment_alerts_ios_step_6:
-        'Erweitere die Aktion und wähle Konto. Lass Kategorie für die automatische Zuordnung leer.',
+        'Tippe auf den Aktionspfeil und dann auf Account. Wähle, wo die Zahlungen dieser App erfasst werden. Lass Category leer, damit Schlüsselwörter automatisch zugeordnet werden.',
       payment_alerts_ios_step_7:
         'Gehe zum Speichern zurück. Wiederhole dies für jede Banking- oder Wallet-App. Zahlungen werden beim nächsten Öffnen von Money2Time erfasst.',
       payment_alerts_android_disclosure:
@@ -2616,16 +2616,14 @@ const de = {
   },
   payment_alerts: {
     account_hint:
-      'Ausgaben und Einnahmen werden auf dem gewählten Konto erfasst. KI wählt Kategorien und überspringt Werbung.',
+      'Zahlungen werden automatisch auf dem gewählten Konto erfasst. Kategorien nutzen dieselben Schlüsselwörter wie Apple Pay.',
     title: 'Zahlungsbenachrichtigungen',
     intro_android:
-      'Ausgaben und Einnahmen werden auf dem gewählten Konto erfasst. KI wählt Kategorien und überspringt Werbung. Benachrichtigungstext wird sicher an unseren Scan-Dienst und KI-Anbieter gesendet, um Transaktionen zu erkennen. Internetzugang ist erforderlich.',
-    intro_ios:
-      'Ausgaben und Einnahmen werden auf dem gewählten Konto erfasst. KI wählt Kategorien und überspringt Werbung. Benachrichtigungstext wird sicher an unseren Scan-Dienst und KI-Anbieter gesendet, um Transaktionen zu erkennen. Internetzugang ist erforderlich.',
+      'Money2Time liest die Zahlungsbenachrichtigungen der Banking- und Wallet-Apps, die du auswählst, und erfasst jede Zahlung für dich. Benachrichtigungen werden auf diesem Handy gelesen und nie hochgeladen.',
+    intro_ios: 'Erfasse Zahlungen aus deinen Banking- und Wallet-Apps automatisch.',
     section_status: 'Status',
     master_label: 'Zahlungsbenachrichtigungen lesen',
-    master_hint:
-      'Ausgaben und Einnahmen werden auf dem gewählten Konto erfasst. KI wählt Kategorien und überspringt Werbung.',
+    master_hint: 'Erfasst Zahlungen aus den Apps, die du auswählst.',
     access_open_settings: 'Einstellungen öffnen',
     health_unsupported:
       'Diese Version von Money2Time kann keine Benachrichtigungen lesen. Aktualisiere die App, um Zahlungsbenachrichtigungen zu nutzen.',
@@ -2649,7 +2647,7 @@ const de = {
     disclosure_point_selected:
       'Gelesen werden nur Benachrichtigungen der Banking- und Wallet-Apps, die du auswählst. Alles andere wird ignoriert.',
     disclosure_point_device:
-      'Benachrichtigungstext wird sicher an unseren Scan-Dienst und KI-Anbieter gesendet, um Transaktionen zu erkennen. Internetzugang ist erforderlich.',
+      'Benachrichtigungen werden auf diesem Handy gelesen. Ihr Text wird nie hochgeladen.',
     disclosure_android_warning:
       'Android warnt, dass eine App mit Benachrichtigungszugriff alle deine Benachrichtigungen lesen kann. Money2Time behält nur die Apps, die du auswählst.',
     access_title: 'Benachrichtigungszugriff einschalten',
@@ -2675,9 +2673,9 @@ const de = {
     test_success: 'Es funktioniert. Money2Time kann deine Zahlungsbenachrichtigungen lesen.',
     test_would_log: 'Es würde %{amount} auf %{account} als %{category} erfassen.',
     test_would_log_no_category: 'Es würde %{amount} auf %{account} erfassen.',
-    test_timeout_title: 'Test konnte nicht abgeschlossen werden',
+    test_timeout_title: 'Keine Benachrichtigung angekommen',
     test_timeout_body:
-      'Prüfe den Benachrichtigungszugriff und deine Internetverbindung und versuche es erneut.',
+      'Prüfe, ob der Benachrichtigungszugriff an ist, und versuche es erneut. Manche Handys brauchen zusätzlich die Akkunutzung von Money2Time auf Nicht eingeschränkt.',
     source_enabled_hint: 'Wenn aus, werden ihre Benachrichtigungen ignoriert.',
     source_missing: 'Diese Quelle wurde entfernt.',
     source_remove_title: '%{app} entfernen?',

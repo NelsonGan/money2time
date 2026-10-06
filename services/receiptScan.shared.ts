@@ -27,8 +27,6 @@ export interface ScannedTransaction {
    * clear match. Absent from quick/itemized responses and older workers.
    */
   account?: string;
-  /** Notification mode: billed amount in another currency, when explicitly stated. */
-  secondary?: { amount: number; currency: string } | null;
 }
 
 export interface ReceiptScanQuota {

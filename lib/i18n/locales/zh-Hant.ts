@@ -1168,12 +1168,14 @@ const zhHant = {
       payment_alerts_android_step_4: '回到 Money2Time，選擇會傳送付款通知的銀行與電子錢包 App。',
       payment_alerts_android_step_5: '為每個 App 選擇帳戶。',
       payment_alerts_android_step_6: '傳送一則測試通知，確認一切正常。',
-      payment_alerts_android_step_7: '支出和收入會記錄到所選帳戶。AI 自動選擇分類並略過促銷通知。',
+      payment_alerts_android_step_7:
+        '付款會自動記錄到所選帳戶。分類使用與 Apple Pay 相同的關鍵字。',
       payment_alerts_ios_step_1: '開啟 Shortcuts，點 +，再點 Edit。在編輯器中點 Automation。',
       payment_alerts_ios_step_2: '搜尋並選擇 Notification。',
       payment_alerts_ios_step_3: '搜尋 Log Payment Alert 並新增。',
       payment_alerts_ios_step_4: '點 Log Payment Alert 中的 Message，再點 Select Variable。',
-      payment_alerts_ios_step_6: '展開操作並選擇帳戶。將分類留空以自動分類。',
+      payment_alerts_ios_step_6:
+        '點一下動作箭頭，再點 Account，選擇用來記錄此 App 付款的帳戶。 將 Category 留空，以便自動依關鍵字分類。',
       payment_alerts_ios_step_7:
         '點一下返回儲存。為每個銀行或電子錢包 App 重複設定。下次開啟 Money2Time 時會記錄付款。',
       payment_alerts_android_disclosure: '閱讀通知權限的使用說明，然後點 Continue。',
@@ -2468,15 +2470,14 @@ const zhHant = {
     },
   },
   payment_alerts: {
-    account_hint: '支出和收入會記錄到所選帳戶。AI 自動選擇分類並略過促銷通知。',
+    account_hint: '付款會自動記錄到所選帳戶。分類使用與 Apple Pay 相同的關鍵字。',
     title: '付款通知',
     intro_android:
-      '支出和收入會記錄到所選帳戶。AI 自動選擇分類並略過促銷通知。 通知文字會安全傳送到我們的掃描服務和 AI 供應商，以識別交易。需要連網。',
-    intro_ios:
-      '支出和收入會記錄到所選帳戶。AI 自動選擇分類並略過促銷通知。 通知文字會安全傳送到我們的掃描服務和 AI 供應商，以識別交易。需要連網。',
+      'Money2Time 會讀取你所選銀行與電子錢包 App 的付款通知，並為你記下每一筆付款。通知只在這支手機上讀取，絕不上傳。',
+    intro_ios: '自動記錄銀行和電子錢包 App 的付款。',
     section_status: '狀態',
     master_label: '讀取付款通知',
-    master_hint: '支出和收入會記錄到所選帳戶。AI 自動選擇分類並略過促銷通知。',
+    master_hint: '記錄你所選 App 裡的付款。',
     access_open_settings: '開啟設定',
     health_unsupported: '此版本的 Money2Time 無法讀取通知。請更新 App 以使用付款通知。',
     health_access_off: '通知存取權已關閉，因此沒有讀取任何付款。請在 Android 設定中重新開啟。',
@@ -2494,8 +2495,7 @@ const zhHant = {
     disclosure_title: '從通知中記錄付款',
     disclosure_body: '這需要 Money2Time 取得通知存取權。它是這樣使用的：',
     disclosure_point_selected: '只讀取你所選銀行與電子錢包 App 的通知，其餘一律忽略。',
-    disclosure_point_device:
-      '通知文字會安全傳送到我們的掃描服務和 AI 供應商，以識別交易。需要連網。',
+    disclosure_point_device: '通知只在這支手機上讀取，內容絕不上傳。',
     disclosure_android_warning:
       'Android 會提示，擁有通知存取權的 App 可以讀取你的所有通知。Money2Time 只保留你所選的 App。',
     access_title: '開啟通知存取權',
@@ -2518,8 +2518,9 @@ const zhHant = {
     test_success: '成功了。Money2Time 可以讀取你的付款通知。',
     test_would_log: '將把 %{amount} 記到 %{account}，分類為 %{category}。',
     test_would_log_no_category: '將把 %{amount} 記到 %{account}。',
-    test_timeout_title: '未能完成測試',
-    test_timeout_body: '請檢查通知存取權限和網路連線，然後重試。',
+    test_timeout_title: '沒有收到通知',
+    test_timeout_body:
+      '請確認通知存取權已開啟，然後再試一次。有些手機還需要把 Money2Time 的電池用量設為「不受限制」。',
     source_enabled_hint: '關閉後，它的通知會被忽略。',
     source_missing: '此來源已被移除。',
     source_remove_title: '移除 %{app}？',

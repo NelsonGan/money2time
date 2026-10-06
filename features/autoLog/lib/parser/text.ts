@@ -1,11 +1,14 @@
-// Normalize notification text for duplicate fingerprints and user-defined ignore phrases.
+// Text plumbing for the payment-alert parser: normalizing what a notification
+// hands over, and matching lexicons against it. Pure.
 
-/** Characters that make up a word in the scripts user-defined phrases are written in. */
-const WORD_CHAR_CLASS = 'A-Za-z0-9\\u00C0-\\u024F\\u0400-\\u052F\\u1E00-\\u1EFF';
+import type { Lexicon } from './lexicons';
+
+/** Characters that make up a word in the scripts lexicon words are written in. */
+export const WORD_CHAR_CLASS = 'A-Za-z0-9\\u00C0-\\u024F\\u0400-\\u052F\\u1E00-\\u1EFF';
 const WORD_CHAR = new RegExp(`[${WORD_CHAR_CLASS}]`);
 
-/** Bound normalization to the worker notification payload limit. */
-export const MAX_ALERT_TEXT_LENGTH = 16000;
+/** Longest text the parser looks at; real alerts are a few hundred characters. */
+export const MAX_ALERT_TEXT_LENGTH = 2000;
 
 const HTML_TAG = /<\/?[a-z][^>]*>/gi;
 const HTML_ENTITIES: Record<string, string> = {
@@ -18,7 +21,11 @@ const HTML_ENTITIES: Record<string, string> = {
   '&apos;': "'",
 };
 
-function isWordChar(char: string | undefined): boolean {
+export function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+export function isWordChar(char: string | undefined): boolean {
   return !!char && WORD_CHAR.test(char);
 }
 
@@ -99,9 +106,63 @@ export function normalizeAlertText(parts: readonly (string | null | undefined)[]
   return { text, lower };
 }
 
+export interface CompiledLexicon {
+  pattern: RegExp | null;
+  substrings: readonly string[];
+}
+
+export interface LexiconHit {
+  /** Index in the lowercased text where the matched word starts. */
+  index: number;
+  word: string;
+}
+
+/**
+ * Lexicon entries go through the same compatibility normalization as alert
+ * text, or a word whose characters NFKC rewrites (Thai SARA AM, for one) would
+ * never match the normalized alert.
+ */
+export function compileLexicon(lexicon: Lexicon): CompiledLexicon {
+  const words = [...new Set(lexicon.words.map((word) => toCompatibilityForm(word).toLowerCase()))]
+    .sort((a, b) => b.length - a.length)
+    .map(escapeRegex);
+  return {
+    pattern: words.length
+      ? new RegExp(
+          `(?:^|[^${WORD_CHAR_CLASS}])(${words.join('|')})(?=$|[^${WORD_CHAR_CLASS}])`,
+          'g',
+        )
+      : null,
+    substrings: lexicon.substrings.map((value) => toCompatibilityForm(value).toLowerCase()),
+  };
+}
+
+/** Every place a lexicon matches in the lowercased text, in order. */
+export function findLexiconHits(lower: string, lexicon: CompiledLexicon): LexiconHit[] {
+  const hits: LexiconHit[] = [];
+  if (lexicon.pattern) {
+    lexicon.pattern.lastIndex = 0;
+    let match: RegExpExecArray | null;
+    while ((match = lexicon.pattern.exec(lower)) !== null) {
+      const word = match[1] ?? '';
+      hits.push({ index: match.index + match[0].length - word.length, word });
+    }
+  }
+  for (const substring of lexicon.substrings) {
+    let from = 0;
+    while (from <= lower.length) {
+      const index = lower.indexOf(substring, from);
+      if (index < 0) break;
+      hits.push({ index, word: substring });
+      from = index + substring.length;
+    }
+  }
+  return hits.sort((a, b) => a.index - b.index);
+}
+
 /** Whole-word, case-insensitive containment, for user-entered names. */
 export function containsWords(lower: string, phrase: string): boolean {
-  const needle = toCompatibilityForm(phrase).trim().toLowerCase();
+  const needle = phrase.trim().toLowerCase();
   if (!needle) return false;
   let from = 0;
   while (from <= lower.length) {

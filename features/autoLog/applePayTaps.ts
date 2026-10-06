@@ -14,16 +14,15 @@ import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepo
 import { reportError } from '~/services/errorReporting';
 import type { PaymentAlertParse, PaymentAlertResolution } from '~/types';
 
-import { APPLE_PAY_PARSER_VERSION } from './lib/constants';
 import { alertDedupeKey, captureRefOf, findDuplicate } from './lib/dedupe';
+import { ALERT_PARSER_VERSION } from './lib/parser';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const APPLE_PAY_SOURCE = 'apple_pay';
 
 export type ApplePayTapCheck =
-  /** Log it after checking the durable duplicate store. */
-  | { action: 'log' }
-  | { action: 'retry' }
+  /** Log it. `supersedesCaptureId` is an alert for it not yet logged. */
+  | { action: 'log'; supersedesCaptureId: string | null }
   /** A bank alert already logged this payment. */
   | { action: 'skip'; twinCaptureId: string; transactionId: string | null };
 
@@ -41,9 +40,13 @@ function parseOf(entry: AutoLogPendingEntry, input: CreateTransactionInput): Pay
     kind: 'spend',
     amount: input.amount,
     currency: input.currency ?? null,
+    currencyToken: null,
     secondary: null,
     counterparty: entry.merchant?.trim() || null,
-    parserVersion: APPLE_PAY_PARSER_VERSION,
+    counterpartyLeadIn: null,
+    confidence: 'high',
+    signals: ['apple_pay'],
+    parserVersion: ALERT_PARSER_VERSION,
   };
 }
 
@@ -60,7 +63,7 @@ export function checkApplePayTap(
     if (stored?.status === 'logged' || stored?.status === 'duplicate') {
       return { action: 'skip', twinCaptureId: stored.id, transactionId: stored.transactionId };
     }
-    if (recent.length === 0) return { action: 'log' };
+    if (recent.length === 0) return { action: 'log', supersedesCaptureId: null };
     const parse = parseOf(entry, input);
     const verdict = findDuplicate(
       {
@@ -82,16 +85,18 @@ export function checkApplePayTap(
       new Set(),
     );
     if (verdict.kind !== 'certain' || !verdict.ofCaptureId) {
-      return { action: 'log' };
+      return { action: 'log', supersedesCaptureId: null };
     }
     const twin = recent.find((capture) => capture.id === verdict.ofCaptureId);
     if (twin?.status === 'logged') {
       return { action: 'skip', twinCaptureId: twin.id, transactionId: twin.transactionId };
     }
-    return { action: 'log' };
+    // An earlier alert has no transaction yet: prefer the tap
+    // whose account was selected in the automation.
+    return { action: 'log', supersedesCaptureId: twin?.id ?? null };
   } catch (error) {
     reportError(error, { scope: 'apple_pay_dedupe' });
-    return { action: 'retry' };
+    return { action: 'log', supersedesCaptureId: null };
   }
 }
 
@@ -100,7 +105,7 @@ export function recordApplePayTap(
   entry: AutoLogPendingEntry,
   input: CreateTransactionInput,
   outcome:
-    | { status: 'logged'; transactionId: string }
+    | { status: 'logged'; transactionId: string; supersedesCaptureId: string | null }
     | { status: 'duplicate'; transactionId: string | null; duplicateOf: string },
 ): void {
   const id = applePayCaptureId(entry.id);
@@ -111,9 +116,13 @@ export function recordApplePayTap(
     accountId: input.accountId ?? null,
     certainty: entry.accountId ? 'certain' : 'guess',
     bindingReason: entry.accountId ? 'preset' : 'default',
+    identifier: null,
+    candidateAccountIds: [],
     categoryId: input.categoryId ?? null,
     categoryOrigin: entry.categoryId ? 'preset' : null,
     draftType: 'expense',
+    transferFromAccountId: null,
+    transferToAccountId: null,
   };
   paymentAlertCapturesRepository.insert({
     id,
@@ -127,9 +136,16 @@ export function recordApplePayTap(
     status: outcome.status,
     reason: outcome.status === 'logged' ? 'auto' : 'duplicate',
     resolution,
-    parserVersion: APPLE_PAY_PARSER_VERSION,
+    parserVersion: ALERT_PARSER_VERSION,
     transactionId: outcome.transactionId,
     duplicateOf: outcome.status === 'duplicate' ? outcome.duplicateOf : null,
     dedupeKey: alertDedupeKey('apple_pay', APPLE_PAY_SOURCE, entry.id),
   });
+  if (outcome.status === 'logged' && outcome.supersedesCaptureId) {
+    paymentAlertCapturesRepository.update(outcome.supersedesCaptureId, {
+      status: 'duplicate',
+      reason: 'duplicate',
+      duplicateOf: id,
+    });
+  }
 }

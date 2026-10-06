@@ -1168,12 +1168,14 @@ const zh = {
       payment_alerts_android_step_4: '回到 Money2Time，选择会发送付款通知的银行和电子钱包应用。',
       payment_alerts_android_step_5: '为每个应用选择账户。',
       payment_alerts_android_step_6: '发送一条测试通知，确认一切正常。',
-      payment_alerts_android_step_7: '支出和收入会记录到所选账户。AI 自动选择分类并跳过促销通知。',
+      payment_alerts_android_step_7:
+        '付款会自动记录到所选账户。分类使用与 Apple Pay 相同的关键词。',
       payment_alerts_ios_step_1: '打开 Shortcuts，点 +，再点 Edit。在编辑器中点 Automation。',
       payment_alerts_ios_step_2: '搜索并选择 Notification。',
       payment_alerts_ios_step_3: '搜索 Log Payment Alert 并添加。',
       payment_alerts_ios_step_4: '点 Log Payment Alert 中的 Message，再点 Select Variable。',
-      payment_alerts_ios_step_6: '展开操作并选择账户。将分类留空以自动分类。',
+      payment_alerts_ios_step_6:
+        '轻点操作箭头，再轻点 Account，选择用于记录此 App 付款的账户。 将 Category 留空，以便自动按关键词分类。',
       payment_alerts_ios_step_7:
         '轻点返回保存。为每个银行或电子钱包 App 重复设置。下次打开 Money2Time 时会记录付款。',
       payment_alerts_android_disclosure: '阅读通知权限的使用说明，然后点 Continue。',
@@ -2468,15 +2470,14 @@ const zh = {
     },
   },
   payment_alerts: {
-    account_hint: '支出和收入会记录到所选账户。AI 自动选择分类并跳过促销通知。',
+    account_hint: '付款会自动记录到所选账户。分类使用与 Apple Pay 相同的关键词。',
     title: '付款通知',
     intro_android:
-      '支出和收入会记录到所选账户。AI 自动选择分类并跳过促销通知。 通知文本会安全发送到我们的扫描服务和 AI 提供商，以识别交易。需要联网。',
-    intro_ios:
-      '支出和收入会记录到所选账户。AI 自动选择分类并跳过促销通知。 通知文本会安全发送到我们的扫描服务和 AI 提供商，以识别交易。需要联网。',
+      'Money2Time 会读取你所选银行和电子钱包应用的付款通知，并为你记下每一笔付款。通知只在这部手机上读取，绝不上传。',
+    intro_ios: '自动记录银行和电子钱包 App 的付款。',
     section_status: '状态',
     master_label: '读取付款通知',
-    master_hint: '支出和收入会记录到所选账户。AI 自动选择分类并跳过促销通知。',
+    master_hint: '记录你所选应用里的付款。',
     access_open_settings: '打开设置',
     health_unsupported: '此版本的 Money2Time 无法读取通知。请更新应用以使用付款通知。',
     health_access_off: '通知使用权已关闭，因此没有读取任何付款。请在 Android 设置中重新开启。',
@@ -2494,8 +2495,7 @@ const zh = {
     disclosure_title: '从通知中记录付款',
     disclosure_body: '这需要 Money2Time 获得通知使用权。它是这样使用的：',
     disclosure_point_selected: '只读取你所选银行和电子钱包应用的通知，其余一律忽略。',
-    disclosure_point_device:
-      '通知文本会安全发送到我们的扫描服务和 AI 提供商，以识别交易。需要联网。',
+    disclosure_point_device: '通知只在这部手机上读取，内容绝不上传。',
     disclosure_android_warning:
       'Android 会提示，拥有通知使用权的应用可以读取你的所有通知。Money2Time 只保留你所选的应用。',
     access_title: '开启通知使用权',
@@ -2518,8 +2518,9 @@ const zh = {
     test_success: '成功了。Money2Time 可以读取你的付款通知。',
     test_would_log: '将把 %{amount} 记到 %{account}，分类为 %{category}。',
     test_would_log_no_category: '将把 %{amount} 记到 %{account}。',
-    test_timeout_title: '未能完成测试',
-    test_timeout_body: '请检查通知访问权限和网络连接，然后重试。',
+    test_timeout_title: '没有收到通知',
+    test_timeout_body:
+      '请确认通知使用权已开启，然后再试一次。有些手机还需要把 Money2Time 的电池用量设为「无限制」。',
     source_enabled_hint: '关闭后，它的通知会被忽略。',
     source_missing: '此来源已被移除。',
     source_remove_title: '移除 %{app}？',

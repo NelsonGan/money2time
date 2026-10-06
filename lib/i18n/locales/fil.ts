@@ -1248,14 +1248,14 @@ const fil = {
       payment_alerts_android_step_6:
         'Magpadala ng test na alerto para masuring gumagana ang lahat.',
       payment_alerts_android_step_7:
-        'Naitatala ang gastos at kita sa napili mong account. AI ang pumipili ng kategorya at lumalaktaw sa mga promo.',
+        'Awtomatikong itinatala ang mga bayad sa napiling account. Pareho sa Apple Pay ang mga keyword para sa kategorya.',
       payment_alerts_ios_step_1:
         'Buksan ang Shortcuts, i-tap ang +, saka Edit. I-tap ang Automation sa editor.',
       payment_alerts_ios_step_2: 'Hanapin at piliin ang Notification.',
       payment_alerts_ios_step_3: 'Hanapin ang Log Payment Alert at idagdag ito.',
       payment_alerts_ios_step_4: 'I-tap ang Message sa Log Payment Alert, saka Select Variable.',
       payment_alerts_ios_step_6:
-        'Palawakin ang action at piliin ang Account. Iwang blangko ang Category para sa awtomatikong pagpili.',
+        'I-tap ang arrow ng action, pagkatapos ang Account. Piliin kung saan itatala ang mga bayad mula sa app na ito. Iwanang walang laman ang Category para sa awtomatikong pagtutugma ng keyword.',
       payment_alerts_ios_step_7:
         'Bumalik para i-save. Ulitin para sa bawat bank o e-wallet app. Itatala ang mga bayad sa susunod mong pagbukas ng Money2Time.',
       payment_alerts_android_disclosure:
@@ -2612,16 +2612,14 @@ const fil = {
   },
   payment_alerts: {
     account_hint:
-      'Naitatala ang gastos at kita sa napili mong account. AI ang pumipili ng kategorya at lumalaktaw sa mga promo.',
+      'Awtomatikong itinatala ang mga bayad sa napiling account. Pareho sa Apple Pay ang mga keyword para sa kategorya.',
     title: 'Mga alerto sa bayad',
     intro_android:
-      'Naitatala ang gastos at kita sa napili mong account. AI ang pumipili ng kategorya at lumalaktaw sa mga promo. Ligtas na ipinapadala ang teksto ng notification sa aming scanning service at AI provider para matukoy ang mga transaksyon. Kailangan ng internet.',
-    intro_ios:
-      'Naitatala ang gastos at kita sa napili mong account. AI ang pumipili ng kategorya at lumalaktaw sa mga promo. Ligtas na ipinapadala ang teksto ng notification sa aming scanning service at AI provider para matukoy ang mga transaksyon. Kailangan ng internet.',
+      'Binabasa ng Money2Time ang mga notification ng bayad mula sa mga banking at wallet app na pinili mo, at itinatala nito ang bawat bayad para sa iyo. Sa phone na ito binabasa ang mga alerto at hindi kailanman ina-upload.',
+    intro_ios: 'Awtomatikong itala ang mga bayad mula sa iyong bank at e-wallet apps.',
     section_status: 'Status',
     master_label: 'Basahin ang mga notification ng bayad',
-    master_hint:
-      'Naitatala ang gastos at kita sa napili mong account. AI ang pumipili ng kategorya at lumalaktaw sa mga promo.',
+    master_hint: 'Itinatala ang mga bayad mula sa mga app na pinili mo.',
     access_open_settings: 'Buksan ang settings',
     health_unsupported:
       'Hindi kayang magbasa ng notification ng bersyong ito ng Money2Time. I-update ang app para magamit ang mga alerto sa bayad.',
@@ -2646,7 +2644,7 @@ const fil = {
     disclosure_point_selected:
       'Binabasa lang nito ang mga notification mula sa mga banking at wallet app na pinili mo. Hindi pinapansin ang iba.',
     disclosure_point_device:
-      'Ligtas na ipinapadala ang teksto ng notification sa aming scanning service at AI provider para matukoy ang mga transaksyon. Kailangan ng internet.',
+      'Sa phone na ito binabasa ang mga alerto. Hindi kailanman ina-upload ang text nito.',
     disclosure_android_warning:
       'Magbababala ang Android na kayang basahin ng app na may notification access ang lahat ng notification mo. Ang mga app lang na pinili mo ang itinatabi ng Money2Time.',
     access_title: 'I-on ang notification access',
@@ -2672,9 +2670,9 @@ const fil = {
     test_success: 'Gumagana. Nababasa ng Money2Time ang mga alerto sa bayad mo.',
     test_would_log: 'Itatala nito ang %{amount} sa %{account} bilang %{category}.',
     test_would_log_no_category: 'Itatala nito ang %{amount} sa %{account}.',
-    test_timeout_title: 'Hindi natapos ang pagsubok',
+    test_timeout_title: 'Walang dumating na alerto',
     test_timeout_body:
-      'Tingnan ang access sa notification at koneksyon sa internet, at subukan muli.',
+      'Tiyaking naka-on ang notification access, saka subukan ulit. May mga phone din na kailangang itakda sa Unrestricted ang paggamit ng baterya ng Money2Time.',
     source_enabled_hint: 'Kapag naka-off, hindi pinapansin ang mga alerto nito.',
     source_missing: 'Inalis na ang pinagmulang ito.',
     source_remove_title: 'Alisin ang %{app}?',
