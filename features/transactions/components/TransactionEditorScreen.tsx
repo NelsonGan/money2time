@@ -94,6 +94,7 @@ import {
   formatMoney,
 } from '~/features/transactions/components/editor/calculatorEngine';
 import { resolveNoteChange } from '~/features/transactions/lib/noteSuggestionPick';
+import { resolveSplitSaveRoute } from '~/features/transactions/lib/splitSaveRoute';
 import { offscreenPageLimitFor, usePagerTabSync } from '~/hooks/usePagerTabSync';
 import { usePressScale } from '~/hooks/usePressScale';
 import { useProGate } from '~/hooks/useProGate';
@@ -2127,11 +2128,14 @@ export function TransactionEditorScreen({
         onSubmitReady?.(preparedSubmitPayload);
       }
 
-      const useSplitsPath =
-        splitMode &&
-        type === 'expense' &&
-        !recurringOptions &&
-        splits.filter((s) => !s.isSelf).length > 0;
+      const splitSaveRoute = resolveSplitSaveRoute({
+        splitMode,
+        type,
+        isRecurring: !!recurringOptions,
+        rows: splits,
+        hadPersistedSplits: hasInitialSplits,
+      });
+      const useSplitsPath = splitSaveRoute === 'splits';
 
       if (useSplitsPath && submitPayload) {
         // Sum only UNPAID splits (Me + outstanding friends). Paid splits are
@@ -2165,9 +2169,9 @@ export function TransactionEditorScreen({
       receiptCommittedRef.current = true;
 
       let deferredSubmit: (() => void) | null = null;
-      if (useSplitsPath && submitPayload && onSubmitWithSplits) {
+      if (splitSaveRoute !== 'plain' && submitPayload && onSubmitWithSplits) {
         const capturedPayload = submitPayload;
-        const capturedSplits = splits;
+        const capturedSplits = useSplitsPath ? splits : [];
         deferredSubmit = () => onSubmitWithSplits(capturedPayload, capturedSplits);
       } else if (submitPayload) {
         const capturedPayload = submitPayload;
