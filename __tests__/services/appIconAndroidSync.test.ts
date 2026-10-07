@@ -1,5 +1,5 @@
 const store = new Map<string, string>();
-const setAlternateAppIcon = jest.fn(async () => undefined);
+const setAlternateAppIcon = jest.fn(async (_name: string | null) => undefined);
 let currentName: string | null = null;
 
 jest.mock('@react-native-async-storage/async-storage', () => ({
@@ -13,7 +13,7 @@ jest.mock('react-native', () => ({ Platform: { OS: 'android' } }));
 jest.mock('expo-alternate-app-icons', () => ({
   supportsAlternateIcons: true,
   getAppIconName: () => currentName,
-  setAlternateAppIcon: (name: string | null) => setAlternateAppIcon(name as never),
+  setAlternateAppIcon: (name: string | null) => setAlternateAppIcon(name),
 }));
 
 import { syncAppIcon } from '~/services/appIcon.native';
