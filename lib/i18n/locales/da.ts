@@ -2584,7 +2584,7 @@ const da = {
     title: 'Notifikationer',
     intro_android:
       'Money2Time læser betalingsnotifikationerne fra de bank- og wallet-apps, du vælger, og registrerer hver betaling for dig. Notifikationer læses på denne telefon og uploades aldrig.',
-    intro_ios:
+    card_intro:
       'Registrer automatisk betalinger fra de notifikationer, dine bank- og wallet-apps sender.',
     section_status: 'Status',
     master_label: 'Læs notifikationer',

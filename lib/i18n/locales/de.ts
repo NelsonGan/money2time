@@ -2619,7 +2619,7 @@ const de = {
     title: 'Benachrichtigungen',
     intro_android:
       'Money2Time liest die Zahlungsbenachrichtigungen der Banking- und Wallet-Apps, die du auswählst, und erfasst jede Zahlung für dich. Benachrichtigungen werden auf diesem Handy gelesen und nie hochgeladen.',
-    intro_ios:
+    card_intro:
       'Erfasse Zahlungen automatisch aus den Benachrichtigungen deiner Banking- und Wallet-Apps.',
     section_status: 'Status',
     master_label: 'Benachrichtigungen lesen',

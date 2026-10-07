@@ -2604,7 +2604,7 @@ const ms = {
     title: 'Pemberitahuan',
     intro_android:
       'Money2Time membaca pemberitahuan pembayaran daripada aplikasi bank dan e-dompet yang anda pilih, lalu merekod setiap pembayaran untuk anda. Pemberitahuan dibaca pada telefon ini dan tidak pernah dimuat naik.',
-    intro_ios:
+    card_intro:
       'Rekod pembayaran secara automatik daripada pemberitahuan aplikasi bank dan e-dompet anda.',
     section_status: 'Status',
     master_label: 'Baca pemberitahuan',

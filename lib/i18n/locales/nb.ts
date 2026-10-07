@@ -2582,7 +2582,8 @@ const nb = {
     title: 'Varsler',
     intro_android:
       'Money2Time leser betalingsvarslene fra bank- og lommebokappene du velger, og registrerer hver betaling for deg. Varsler leses på denne telefonen og lastes aldri opp.',
-    intro_ios: 'Registrer betalinger automatisk fra varslene bank- og lommebok-appene dine sender.',
+    card_intro:
+      'Registrer betalinger automatisk fra varslene bank- og lommebok-appene dine sender.',
     section_status: 'Status',
     master_label: 'Les varsler',
     master_hint: 'Registrerer betalinger fra appene du velger.',

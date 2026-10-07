@@ -2582,7 +2582,7 @@ const en = {
     title: 'Notifications',
     intro_android:
       'Money2Time reads the payment notifications from the banking and wallet apps you choose and logs each payment for you. Notifications are read on this phone and never uploaded.',
-    intro_ios:
+    card_intro:
       'Automatically log payments from the notifications your bank and e-wallet apps send.',
     section_status: 'Status',
     master_label: 'Read notifications',

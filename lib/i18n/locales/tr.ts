@@ -2593,7 +2593,8 @@ const tr = {
     title: 'Bildirimler',
     intro_android:
       'Money2Time, seçtiğiniz banka ve cüzdan uygulamalarının ödeme bildirimlerini okur ve her ödemeyi sizin için kaydeder. Bildirimler bu telefonda okunur ve asla yüklenmez.',
-    intro_ios: 'Banka ve e-cüzdan uygulamalarınızın bildirimlerindeki ödemeleri otomatik kaydedin.',
+    card_intro:
+      'Banka ve e-cüzdan uygulamalarınızın bildirimlerindeki ödemeleri otomatik kaydedin.',
     section_status: 'Durum',
     master_label: 'Bildirimleri oku',
     master_hint: 'Seçtiğiniz uygulamalardaki ödemeleri kaydeder.',

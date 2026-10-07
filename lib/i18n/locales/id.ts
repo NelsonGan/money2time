@@ -2596,7 +2596,8 @@ const id = {
     title: 'Notifikasi',
     intro_android:
       'Money2Time membaca notifikasi pembayaran dari aplikasi bank dan dompet digital yang Anda pilih, lalu mencatat setiap pembayaran untuk Anda. Notifikasi dibaca di ponsel ini dan tidak pernah diunggah.',
-    intro_ios: 'Catat pembayaran secara otomatis dari notifikasi aplikasi bank dan dompet digital.',
+    card_intro:
+      'Catat pembayaran secara otomatis dari notifikasi aplikasi bank dan dompet digital.',
     section_status: 'Status',
     master_label: 'Baca notifikasi',
     master_hint: 'Mencatat pembayaran dari aplikasi yang Anda pilih.',

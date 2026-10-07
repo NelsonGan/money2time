@@ -2593,7 +2593,7 @@ const pl = {
     title: 'Powiadomienia',
     intro_android:
       'Money2Time odczytuje powiadomienia o płatnościach z wybranych aplikacji bankowych i portfeli, a potem zapisuje za Ciebie każdą płatność. Powiadomienia są odczytywane na tym telefonie i nigdy nie są wysyłane.',
-    intro_ios:
+    card_intro:
       'Automatycznie zapisuj płatności z powiadomień aplikacji bankowych i portfeli elektronicznych.',
     section_status: 'Stan',
     master_label: 'Odczytuj powiadomienia',

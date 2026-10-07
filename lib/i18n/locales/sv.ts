@@ -2584,7 +2584,7 @@ const sv = {
     title: 'Aviseringar',
     intro_android:
       'Money2Time läser betalningsaviseringarna från de bank- och plånboksappar du väljer och registrerar varje betalning åt dig. Aviseringar läses på den här telefonen och laddas aldrig upp.',
-    intro_ios:
+    card_intro:
       'Registrera betalningar automatiskt från aviseringarna dina bank- och plånboksappar skickar.',
     section_status: 'Status',
     master_label: 'Läs aviseringar',

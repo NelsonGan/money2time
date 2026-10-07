@@ -2615,7 +2615,7 @@ const fr = {
     title: 'Notifications',
     intro_android:
       'Money2Time lit les notifications de paiement des applis bancaires et portefeuilles que vous choisissez, et enregistre chaque paiement pour vous. Les notifications sont lues sur ce téléphone et ne sont jamais envoyées en ligne.',
-    intro_ios:
+    card_intro:
       'Enregistrez automatiquement les paiements à partir des notifications de vos apps bancaires et portefeuilles électroniques.',
     section_status: 'État',
     master_label: 'Lire les notifications',

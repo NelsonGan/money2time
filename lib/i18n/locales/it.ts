@@ -2599,7 +2599,7 @@ const it = {
     title: 'Notifiche',
     intro_android:
       'Money2Time legge le notifiche di pagamento delle app bancarie e dei wallet che scegli e registra ogni pagamento per te. Le notifiche vengono lette su questo telefono e non vengono mai caricate.',
-    intro_ios:
+    card_intro:
       'Registra automaticamente i pagamenti dalle notifiche delle app bancarie e dei portafogli digitali.',
     section_status: 'Stato',
     master_label: 'Leggi le notifiche',

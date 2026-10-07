@@ -150,16 +150,29 @@ function AndroidPaymentAlertsEntry({
         onTutorial={onTutorial}
         tutorialColor={themeColors.primary}
       />
-      <View className="flex-row items-center gap-3 rounded-2xl border border-border/30 bg-card px-4 py-3">
+      {/* Same bell card as iOS, with the in-app setup row underneath. */}
+      <View style={styles.card} className="bg-card border border-border/30">
+        <View style={styles.row}>
+          <View style={[styles.iconBubble, { backgroundColor: `${themeColors.primary}14` }]}>
+            <Bell size={18} color={themeColors.primary} />
+          </View>
+          <View style={styles.rowText}>
+            <Text variant="caption" tone="muted">
+              {I18n.t('payment_alerts.card_intro')}{' '}
+              {I18n.t('payment_alerts.disclosure_point_device')}
+            </Text>
+          </View>
+        </View>
+        <View style={styles.rowDivider} />
         <Pressable
-          className="flex-1 flex-row items-center gap-3"
+          style={styles.row}
           onPress={() => {
             void triggerHaptic('selection');
             onOpen();
           }}
           accessibilityRole="button"
         >
-          <View className="flex-1">
+          <View style={styles.rowText}>
             <Text variant="body" className="text-foreground">
               {I18n.t('settings.auto_log.payment_alerts_open')}
             </Text>
@@ -427,7 +440,7 @@ export function AutoLogSettingsScreen({
                     </View>
                     <View className="flex-1 gap-0.5">
                       <Text variant="caption" tone="muted">
-                        {I18n.t('payment_alerts.intro_ios')}{' '}
+                        {I18n.t('payment_alerts.card_intro')}{' '}
                         {I18n.t(
                           Number.parseInt(String(Platform.Version), 10) >= 27
                             ? 'payment_alerts.ios_notifications_hint'

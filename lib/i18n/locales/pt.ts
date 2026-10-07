@@ -2598,7 +2598,7 @@ const pt = {
     title: 'Notificações',
     intro_android:
       'O Money2Time lê as notificações de pagamento dos apps de banco e carteiras que você escolher e registra cada pagamento para você. As notificações são lidas neste celular e nunca são enviadas.',
-    intro_ios:
+    card_intro:
       'Registre automaticamente pagamentos das notificações dos seus apps de banco e carteiras digitais.',
     section_status: 'Status',
     master_label: 'Ler notificações',

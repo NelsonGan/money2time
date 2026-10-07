@@ -2601,7 +2601,7 @@ const es = {
     title: 'Notificaciones',
     intro_android:
       'Money2Time lee las notificaciones de pago de las apps bancarias y billeteras que elijas, y registra cada pago por ti. Las notificaciones se leen en este teléfono y nunca se suben.',
-    intro_ios:
+    card_intro:
       'Registra automáticamente los pagos de las notificaciones de tus apps bancarias y monederos digitales.',
     section_status: 'Estado',
     master_label: 'Leer notificaciones',

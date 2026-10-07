@@ -2565,7 +2565,7 @@ const vi = {
     title: 'Thông báo',
     intro_android:
       'Money2Time đọc thông báo thanh toán từ các ứng dụng ngân hàng và ví điện tử bạn chọn, rồi ghi lại từng khoản thanh toán cho bạn. Thông báo được đọc trên điện thoại này và không bao giờ được tải lên.',
-    intro_ios: 'Tự động ghi lại thanh toán từ thông báo của các ứng dụng ngân hàng và ví điện tử.',
+    card_intro: 'Tự động ghi lại thanh toán từ thông báo của các ứng dụng ngân hàng và ví điện tử.',
     section_status: 'Trạng thái',
     master_label: 'Đọc thông báo',
     master_hint: 'Ghi lại thanh toán từ các ứng dụng bạn chọn.',

@@ -2612,7 +2612,7 @@ const nl = {
     title: 'Meldingen',
     intro_android:
       'Money2Time leest de betaalmeldingen van de bank- en wallet-apps die je kiest en registreert elke betaling voor je. Meldingen worden op deze telefoon gelezen en nooit geüpload.',
-    intro_ios: 'Leg betalingen automatisch vast uit de meldingen van je bank- en wallet-apps.',
+    card_intro: 'Leg betalingen automatisch vast uit de meldingen van je bank- en wallet-apps.',
     section_status: 'Status',
     master_label: 'Meldingen lezen',
     master_hint: 'Registreert betalingen uit de apps die je kiest.',

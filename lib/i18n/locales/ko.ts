@@ -2548,7 +2548,7 @@ const ko = {
     title: '알림',
     intro_android:
       'Money2Time이 선택한 은행 앱과 간편결제 앱의 결제 알림을 읽고 결제를 하나하나 기록합니다. 알림은 이 기기에서만 읽으며 업로드되지 않습니다.',
-    intro_ios: '은행 및 전자 지갑 앱의 알림으로 결제를 자동으로 기록합니다.',
+    card_intro: '은행 및 전자 지갑 앱의 알림으로 결제를 자동으로 기록합니다.',
     section_status: '상태',
     master_label: '알림 읽기',
     master_hint: '선택한 앱의 결제를 기록합니다.',

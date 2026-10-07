@@ -2616,7 +2616,7 @@ const fil = {
     title: 'Mga notification',
     intro_android:
       'Binabasa ng Money2Time ang mga notification ng bayad mula sa mga banking at wallet app na pinili mo, at itinatala nito ang bawat bayad para sa iyo. Sa phone na ito binabasa ang mga notification at hindi kailanman ina-upload.',
-    intro_ios:
+    card_intro:
       'Awtomatikong itala ang mga bayad mula sa mga notification ng iyong bank at e-wallet apps.',
     section_status: 'Status',
     master_label: 'Basahin ang mga notification',
