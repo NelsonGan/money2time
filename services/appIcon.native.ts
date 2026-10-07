@@ -12,6 +12,7 @@
  * Android has no light/dark launcher icons at all; its equivalent is the themed
  * (monochrome) layer, which every variant also ships.
  */
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
 import {
@@ -51,6 +52,34 @@ export const getActiveAppIcon = (): AppIconId => {
   }
 };
 
+/**
+ * Android only: the icon this install last switched the launcher to. The OS is
+ * the source of truth, but on Android it can only be read off the activity the
+ * app was launched through, and a deep link or widget tap lands on
+ * `MainActivity` even while an alias is enabled. Without this marker that
+ * reads as "launcher is on the default, stored choice differs", and the load
+ * sync disables the activity that is running, tearing it down under any open
+ * `<Modal>` (Sentry MONEY2TIME-3Y: `DecorView ... not attached to window
+ * manager`, repeated recreations of `MainActivityDetective`).
+ */
+const ANDROID_APPLIED_ICON_KEY = 'appIcon.androidApplied';
+
+const readAndroidAppliedIcon = async (): Promise<string | null> => {
+  try {
+    return await AsyncStorage.getItem(ANDROID_APPLIED_ICON_KEY);
+  } catch {
+    return null;
+  }
+};
+
+const writeAndroidAppliedIcon = async (id: AppIconId): Promise<void> => {
+  try {
+    await AsyncStorage.setItem(ANDROID_APPLIED_ICON_KEY, id);
+  } catch {
+    // Best effort: without the marker the next load just re-checks the OS.
+  }
+};
+
 export const applyAppIcon = async (id: AppIconId): Promise<AppIconId> => {
   if (!alternateAppIcons || !supportsAppIconSwitching) return getActiveAppIcon();
 
@@ -58,9 +87,13 @@ export const applyAppIcon = async (id: AppIconId): Promise<AppIconId> => {
   // iOS raises its "You have changed the icon" alert on every *successful*
   // call, so a redundant one is not free. Android would restart the launcher
   // entry for nothing.
-  if (alternateAppIcons.getAppIconName() === target) return id;
+  if (alternateAppIcons.getAppIconName() === target) {
+    if (Platform.OS === 'android') await writeAndroidAppliedIcon(id);
+    return id;
+  }
 
   await alternateAppIcons.setAlternateAppIcon(target);
+  if (Platform.OS === 'android') await writeAndroidAppliedIcon(id);
   return id;
 };
 
@@ -80,6 +113,15 @@ export const applyAppIcon = async (id: AppIconId): Promise<AppIconId> => {
 export const syncAppIcon = async (id: AppIconId): Promise<void> => {
   if (!alternateAppIcons || !supportsAppIconSwitching) return;
   if (Platform.OS !== 'android' && isRetiredAlternateName(alternateAppIcons.getAppIconName())) {
+    return;
+  }
+  if (
+    Platform.OS === 'android' &&
+    !isRetiredAlternateName(alternateAppIcons.getAppIconName()) &&
+    (await readAndroidAppliedIcon()) === id
+  ) {
+    // Already switched to this icon on this install; a differing read here is
+    // just a launch through MainActivity, not a launcher that needs repair.
     return;
   }
   await applyAppIcon(id);
