@@ -1232,7 +1232,8 @@ const nl = {
       payment_alerts_status_off: 'Niet ingesteld',
       payment_alerts_status_apps_one: 'Aan voor %{count} app',
       payment_alerts_status_apps_other: 'Aan voor %{count} apps',
-      payment_alerts_android_step_1: 'Open Vastleggen uit meldingen en zet Meldingen lezen aan.',
+      payment_alerts_android_step_1:
+        'Tik op “Vastleggen uit meldingen” en zet “Meldingen lezen” aan.',
       payment_alerts_android_step_2:
         'Android opent het scherm voor meldingstoegang. Zoek Money2Time en zet het aan.',
       payment_alerts_android_step_3:
@@ -2611,7 +2612,7 @@ const nl = {
     title: 'Meldingen',
     intro_android:
       'Money2Time leest de betaalmeldingen van de bank- en wallet-apps die je kiest en registreert elke betaling voor je. Meldingen worden op deze telefoon gelezen en nooit geüpload.',
-    intro_ios: 'Leg betalingen uit je bank- en wallet-apps automatisch vast.',
+    intro_ios: 'Leg betalingen automatisch vast uit de meldingen van je bank- en wallet-apps.',
     section_status: 'Status',
     master_label: 'Meldingen lezen',
     master_hint: 'Registreert betalingen uit de apps die je kiest.',

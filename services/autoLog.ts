@@ -173,7 +173,7 @@ export async function clearAutoLogPendingAlerts(ids: string[]): Promise<void> {
 
 /**
  * Debug builds only: queue an alert as if a Shortcuts automation had run Log
- * Payment Alert. Exercises the real App Group queue without waiting for a
+ * Notification. Exercises the real App Group queue without waiting for a
  * notification-triggered automation.
  */
 export async function enqueueTestAutoLogAlert(

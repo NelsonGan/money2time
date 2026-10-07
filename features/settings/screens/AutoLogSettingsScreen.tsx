@@ -121,7 +121,7 @@ function AutoLogSectionHeader({
   );
 }
 
-/** Android's notification listener is configured inside Payment alerts. */
+/** Android's notification listener is configured inside the Notifications screen. */
 function AndroidPaymentAlertsEntry({
   className,
   onOpen,

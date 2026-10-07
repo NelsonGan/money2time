@@ -1237,7 +1237,7 @@ const fil = {
       payment_alerts_status_apps_one: 'Naka-on para sa %{count} app',
       payment_alerts_status_apps_other: 'Naka-on para sa %{count} na app',
       payment_alerts_android_step_1:
-        'Buksan ang Itala mula sa mga notification at i-on ang Basahin ang mga notification.',
+        'I-tap ang “Itala mula sa mga notification” at i-on ang “Basahin ang mga notification”.',
       payment_alerts_android_step_2:
         'Bubuksan ng Android ang screen ng notification access. Hanapin ang Money2Time at i-on ito.',
       payment_alerts_android_step_3:
@@ -2616,7 +2616,8 @@ const fil = {
     title: 'Mga notification',
     intro_android:
       'Binabasa ng Money2Time ang mga notification ng bayad mula sa mga banking at wallet app na pinili mo, at itinatala nito ang bawat bayad para sa iyo. Sa phone na ito binabasa ang mga notification at hindi kailanman ina-upload.',
-    intro_ios: 'Awtomatikong itala ang mga bayad mula sa iyong bank at e-wallet apps.',
+    intro_ios:
+      'Awtomatikong itala ang mga bayad mula sa mga notification ng iyong bank at e-wallet apps.',
     section_status: 'Status',
     master_label: 'Basahin ang mga notification',
     master_hint: 'Itinatala ang mga bayad mula sa mga app na pinili mo.',

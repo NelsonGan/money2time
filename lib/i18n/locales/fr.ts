@@ -1233,7 +1233,7 @@ const fr = {
       payment_alerts_status_apps_one: 'Activé pour %{count} appli',
       payment_alerts_status_apps_other: 'Activé pour %{count} applis',
       payment_alerts_android_step_1:
-        'Ouvrez Enregistrer depuis les notifications et activez Lire les notifications.',
+        'Touchez « Enregistrer depuis les notifications » et activez « Lire les notifications ».',
       payment_alerts_android_step_2:
         'Android ouvre l’écran d’accès aux notifications. Trouvez Money2Time et activez-le.',
       payment_alerts_android_step_3:
@@ -2616,7 +2616,7 @@ const fr = {
     intro_android:
       'Money2Time lit les notifications de paiement des applis bancaires et portefeuilles que vous choisissez, et enregistre chaque paiement pour vous. Les notifications sont lues sur ce téléphone et ne sont jamais envoyées en ligne.',
     intro_ios:
-      'Enregistrez automatiquement les paiements de vos apps bancaires et portefeuilles électroniques.',
+      'Enregistrez automatiquement les paiements à partir des notifications de vos apps bancaires et portefeuilles électroniques.',
     section_status: 'État',
     master_label: 'Lire les notifications',
     master_hint: 'Enregistre les paiements des applis que vous choisissez.',

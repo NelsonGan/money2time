@@ -1221,7 +1221,7 @@ const sv = {
       payment_alerts_status_apps_one: 'På för %{count} app',
       payment_alerts_status_apps_other: 'På för %{count} appar',
       payment_alerts_android_step_1:
-        'Öppna Registrera från aviseringar och slå på Läs aviseringar.',
+        'Tryck på ”Registrera från aviseringar” och slå på ”Läs aviseringar”.',
       payment_alerts_android_step_2:
         'Android öppnar skärmen för aviseringsåtkomst. Hitta Money2Time och slå på det.',
       payment_alerts_android_step_3:
@@ -2584,7 +2584,8 @@ const sv = {
     title: 'Aviseringar',
     intro_android:
       'Money2Time läser betalningsaviseringarna från de bank- och plånboksappar du väljer och registrerar varje betalning åt dig. Aviseringar läses på den här telefonen och laddas aldrig upp.',
-    intro_ios: 'Registrera betalningar från dina bank- och plånboksappar automatiskt.',
+    intro_ios:
+      'Registrera betalningar automatiskt från aviseringarna dina bank- och plånboksappar skickar.',
     section_status: 'Status',
     master_label: 'Läs aviseringar',
     master_hint: 'Registrerar betalningar från de appar du väljer.',

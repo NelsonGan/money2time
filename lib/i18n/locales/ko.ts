@@ -1201,7 +1201,7 @@ const ko = {
       payment_alerts_status_off: '설정 안 됨',
       payment_alerts_status_apps_one: '앱 %{count}개에서 켜짐',
       payment_alerts_status_apps_other: '앱 %{count}개에서 켜짐',
-      payment_alerts_android_step_1: '알림으로 기록을 열고 알림 읽기를 켜세요.',
+      payment_alerts_android_step_1: '“알림으로 기록”을 누르고 “알림 읽기”를 켜세요.',
       payment_alerts_android_step_2:
         'Android의 알림 접근 화면이 열립니다. Money2Time을 찾아 켜세요.',
       payment_alerts_android_step_3:
@@ -1215,7 +1215,7 @@ const ko = {
       payment_alerts_ios_step_1:
         'Shortcuts를 열고 +, Edit를 누르세요. 편집기에서 Automation을 누르세요.',
       payment_alerts_ios_step_2: 'Notification을 검색해 선택하세요.',
-      payment_alerts_ios_step_3: 'Log Notification를 검색해 추가하세요.',
+      payment_alerts_ios_step_3: 'Log Notification을 검색해 추가하세요.',
       payment_alerts_ios_step_4: 'Log Notification에서 Message, Select Variable을 누르세요.',
       payment_alerts_ios_step_6:
         '동작 화살표를 탭한 다음 Account를 탭하세요. 이 앱의 결제를 기록할 계좌를 선택하세요. Category를 비워 두면 키워드로 자동 분류됩니다.',
@@ -2548,7 +2548,7 @@ const ko = {
     title: '알림',
     intro_android:
       'Money2Time이 선택한 은행 앱과 간편결제 앱의 결제 알림을 읽고 결제를 하나하나 기록합니다. 알림은 이 기기에서만 읽으며 업로드되지 않습니다.',
-    intro_ios: '은행 및 전자 지갑 앱의 결제를 자동으로 기록합니다.',
+    intro_ios: '은행 및 전자 지갑 앱의 알림으로 결제를 자동으로 기록합니다.',
     section_status: '상태',
     master_label: '알림 읽기',
     master_hint: '선택한 앱의 결제를 기록합니다.',

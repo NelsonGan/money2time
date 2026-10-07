@@ -2474,7 +2474,7 @@ const zh = {
     title: '通知',
     intro_android:
       'Money2Time 会读取你所选银行和电子钱包应用的付款通知，并为你记下每一笔付款。通知只在这部手机上读取，绝不上传。',
-    intro_ios: '自动记录银行和电子钱包 App 的付款。',
+    intro_ios: '从银行和电子钱包 App 的通知自动记录付款。',
     section_status: '状态',
     master_label: '读取通知',
     master_hint: '记录你所选应用里的付款。',

@@ -1221,7 +1221,7 @@ const nb = {
       payment_alerts_status_off: 'Ikke satt opp',
       payment_alerts_status_apps_one: 'På for %{count} app',
       payment_alerts_status_apps_other: 'På for %{count} apper',
-      payment_alerts_android_step_1: 'Åpne Registrer fra varsler og slå på Les varsler.',
+      payment_alerts_android_step_1: 'Trykk på «Registrer fra varsler» og slå på «Les varsler».',
       payment_alerts_android_step_2:
         'Android åpner skjermen for varseltilgang. Finn Money2Time og slå det på.',
       payment_alerts_android_step_3:
@@ -2582,7 +2582,7 @@ const nb = {
     title: 'Varsler',
     intro_android:
       'Money2Time leser betalingsvarslene fra bank- og lommebokappene du velger, og registrerer hver betaling for deg. Varsler leses på denne telefonen og lastes aldri opp.',
-    intro_ios: 'Registrer betalinger fra bank- og lommebok-appene dine automatisk.',
+    intro_ios: 'Registrer betalinger automatisk fra varslene bank- og lommebok-appene dine sender.',
     section_status: 'Status',
     master_label: 'Les varsler',
     master_hint: 'Registrerer betalinger fra appene du velger.',

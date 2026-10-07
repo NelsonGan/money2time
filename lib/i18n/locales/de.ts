@@ -1235,7 +1235,7 @@ const de = {
       payment_alerts_status_apps_one: 'An für %{count} App',
       payment_alerts_status_apps_other: 'An für %{count} Apps',
       payment_alerts_android_step_1:
-        'Öffne Aus Benachrichtigungen erfassen und aktiviere Benachrichtigungen lesen.',
+        'Tippe auf „Aus Benachrichtigungen erfassen“ und aktiviere „Benachrichtigungen lesen“.',
       payment_alerts_android_step_2:
         'Android öffnet den Bildschirm für Benachrichtigungszugriff. Suche Money2Time und schalte es ein.',
       payment_alerts_android_step_3:
@@ -2619,7 +2619,8 @@ const de = {
     title: 'Benachrichtigungen',
     intro_android:
       'Money2Time liest die Zahlungsbenachrichtigungen der Banking- und Wallet-Apps, die du auswählst, und erfasst jede Zahlung für dich. Benachrichtigungen werden auf diesem Handy gelesen und nie hochgeladen.',
-    intro_ios: 'Erfasse Zahlungen aus deinen Banking- und Wallet-Apps automatisch.',
+    intro_ios:
+      'Erfasse Zahlungen automatisch aus den Benachrichtigungen deiner Banking- und Wallet-Apps.',
     section_status: 'Status',
     master_label: 'Benachrichtigungen lesen',
     master_hint: 'Erfasst Zahlungen aus den Apps, die du auswählst.',

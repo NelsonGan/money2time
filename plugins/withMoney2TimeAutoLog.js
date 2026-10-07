@@ -1248,7 +1248,7 @@ class Money2TimeAutoLog: NSObject {
 
   #if DEBUG
   /// Queue an alert exactly as LogPaymentAlertIntent would, for the dev-only
-  /// button in Payment alerts settings: a simulator has no Shortcuts
+  /// button in Notifications settings: a simulator has no Shortcuts
   /// automations, so this is the only way to run the real queue there.
   @objc(enqueueTestAlert:title:message:resolver:rejecter:)
   func enqueueTestAlert(

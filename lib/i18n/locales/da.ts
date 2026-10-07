@@ -1224,7 +1224,7 @@ const da = {
       payment_alerts_status_apps_one: 'Til for %{count} app',
       payment_alerts_status_apps_other: 'Til for %{count} apps',
       payment_alerts_android_step_1:
-        'Åbn Registrér fra notifikationer, og slå Læs notifikationer til.',
+        'Tryk på “Registrér fra notifikationer”, og slå “Læs notifikationer” til.',
       payment_alerts_android_step_2:
         'Android åbner skærmen for notifikationsadgang. Find Money2Time, og slå det til.',
       payment_alerts_android_step_3:
@@ -2584,7 +2584,8 @@ const da = {
     title: 'Notifikationer',
     intro_android:
       'Money2Time læser betalingsnotifikationerne fra de bank- og wallet-apps, du vælger, og registrerer hver betaling for dig. Notifikationer læses på denne telefon og uploades aldrig.',
-    intro_ios: 'Registrer automatisk betalinger fra dine bank- og wallet-apps.',
+    intro_ios:
+      'Registrer automatisk betalinger fra de notifikationer, dine bank- og wallet-apps sender.',
     section_status: 'Status',
     master_label: 'Læs notifikationer',
     master_hint: 'Registrerer betalinger fra de apps, du vælger.',

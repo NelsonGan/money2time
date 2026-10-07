@@ -1223,7 +1223,8 @@ const pl = {
       payment_alerts_status_off: 'Nieskonfigurowane',
       payment_alerts_status_apps_one: 'Włączone dla %{count} aplikacji',
       payment_alerts_status_apps_other: 'Włączone, aplikacje: %{count}',
-      payment_alerts_android_step_1: 'Otwórz Zapisuj z powiadomień i włącz Odczytuj powiadomienia.',
+      payment_alerts_android_step_1:
+        'Stuknij „Zapisuj z powiadomień” i włącz „Odczytuj powiadomienia”.',
       payment_alerts_android_step_2:
         'Android otworzy ekran dostępu do powiadomień. Znajdź Money2Time i włącz go.',
       payment_alerts_android_step_3:
@@ -2592,7 +2593,8 @@ const pl = {
     title: 'Powiadomienia',
     intro_android:
       'Money2Time odczytuje powiadomienia o płatnościach z wybranych aplikacji bankowych i portfeli, a potem zapisuje za Ciebie każdą płatność. Powiadomienia są odczytywane na tym telefonie i nigdy nie są wysyłane.',
-    intro_ios: 'Automatycznie zapisuj płatności z aplikacji bankowych i portfeli elektronicznych.',
+    intro_ios:
+      'Automatycznie zapisuj płatności z powiadomień aplikacji bankowych i portfeli elektronicznych.',
     section_status: 'Stan',
     master_label: 'Odczytuj powiadomienia',
     master_hint: 'Zapisuje płatności z wybranych aplikacji.',

@@ -1226,7 +1226,7 @@ const tr = {
       payment_alerts_status_apps_one: '%{count} uygulama için açık',
       payment_alerts_status_apps_other: '%{count} uygulama için açık',
       payment_alerts_android_step_1:
-        'Bildirimlerden kaydet bölümünü açıp Bildirimleri oku seçeneğini etkinleştirin.',
+        '“Bildirimlerden kaydet” bölümüne dokunup “Bildirimleri oku” seçeneğini etkinleştirin.',
       payment_alerts_android_step_2:
         "Android bildirim erişimi ekranını açar. Money2Time'ı bulun ve açın.",
       payment_alerts_android_step_3:
@@ -1241,7 +1241,7 @@ const tr = {
       payment_alerts_ios_step_1:
         'Shortcuts uygulamasında +, ardından Edit seçeneğine dokunun. Düzenleyicide Automation seçeneğine dokunun.',
       payment_alerts_ios_step_2: 'Notification arayıp seçin.',
-      payment_alerts_ios_step_3: 'Log Notification’i arayın ve ekleyin.',
+      payment_alerts_ios_step_3: 'Log Notification eylemini arayıp ekleyin.',
       payment_alerts_ios_step_4:
         'Log Notification içinde Message, ardından Select Variable seçeneğine dokunun.',
       payment_alerts_ios_step_6:
@@ -2593,7 +2593,7 @@ const tr = {
     title: 'Bildirimler',
     intro_android:
       'Money2Time, seçtiğiniz banka ve cüzdan uygulamalarının ödeme bildirimlerini okur ve her ödemeyi sizin için kaydeder. Bildirimler bu telefonda okunur ve asla yüklenmez.',
-    intro_ios: 'Banka ve e-cüzdan uygulamalarınızdaki ödemeleri otomatik kaydedin.',
+    intro_ios: 'Banka ve e-cüzdan uygulamalarınızın bildirimlerindeki ödemeleri otomatik kaydedin.',
     section_status: 'Durum',
     master_label: 'Bildirimleri oku',
     master_hint: 'Seçtiğiniz uygulamalardaki ödemeleri kaydeder.',

@@ -1224,7 +1224,8 @@ const it = {
       payment_alerts_status_off: 'Non configurato',
       payment_alerts_status_apps_one: 'Attivo per %{count} app',
       payment_alerts_status_apps_other: 'Attivo per %{count} app',
-      payment_alerts_android_step_1: 'Apri Registra dalle notifiche e attiva Leggi le notifiche.',
+      payment_alerts_android_step_1:
+        'Tocca “Registra dalle notifiche” e attiva “Leggi le notifiche”.',
       payment_alerts_android_step_2:
         'Android apre la schermata di accesso alle notifiche. Trova Money2Time e attivalo.',
       payment_alerts_android_step_3:
@@ -2598,7 +2599,8 @@ const it = {
     title: 'Notifiche',
     intro_android:
       'Money2Time legge le notifiche di pagamento delle app bancarie e dei wallet che scegli e registra ogni pagamento per te. Le notifiche vengono lette su questo telefono e non vengono mai caricate.',
-    intro_ios: 'Registra automaticamente i pagamenti dalle app bancarie e dai portafogli digitali.',
+    intro_ios:
+      'Registra automaticamente i pagamenti dalle notifiche delle app bancarie e dei portafogli digitali.',
     section_status: 'Stato',
     master_label: 'Leggi le notifiche',
     master_hint: 'Registra i pagamenti delle app che scegli.',

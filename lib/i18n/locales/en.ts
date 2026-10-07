@@ -1195,7 +1195,8 @@ const en = {
       payment_alerts_status_off: 'Not set up',
       payment_alerts_status_apps_one: 'On for %{count} app',
       payment_alerts_status_apps_other: 'On for %{count} apps',
-      payment_alerts_android_step_1: 'Open Log from notifications and turn on Read notifications.',
+      payment_alerts_android_step_1:
+        'Tap “Log from notifications” and turn on the “Read notifications” switch.',
       payment_alerts_android_step_2:
         'Android opens the notification access screen. Find Money2Time and turn it on.',
       payment_alerts_android_step_3:
@@ -2581,7 +2582,8 @@ const en = {
     title: 'Notifications',
     intro_android:
       'Money2Time reads the payment notifications from the banking and wallet apps you choose and logs each payment for you. Notifications are read on this phone and never uploaded.',
-    intro_ios: 'Automatically log payments from your bank and e-wallet apps.',
+    intro_ios:
+      'Automatically log payments from the notifications your bank and e-wallet apps send.',
     section_status: 'Status',
     master_label: 'Read notifications',
     master_hint: 'Logs payments from the apps you choose.',

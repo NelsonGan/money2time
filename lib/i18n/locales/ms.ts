@@ -1230,7 +1230,7 @@ const ms = {
       payment_alerts_status_apps_one: 'Hidup untuk %{count} aplikasi',
       payment_alerts_status_apps_other: 'Hidup untuk %{count} aplikasi',
       payment_alerts_android_step_1:
-        'Buka Rekod daripada pemberitahuan dan hidupkan Baca pemberitahuan.',
+        'Ketik “Rekod daripada pemberitahuan” dan hidupkan “Baca pemberitahuan”.',
       payment_alerts_android_step_2:
         'Android membuka skrin akses pemberitahuan. Cari Money2Time dan hidupkannya.',
       payment_alerts_android_step_3:
@@ -2604,7 +2604,8 @@ const ms = {
     title: 'Pemberitahuan',
     intro_android:
       'Money2Time membaca pemberitahuan pembayaran daripada aplikasi bank dan e-dompet yang anda pilih, lalu merekod setiap pembayaran untuk anda. Pemberitahuan dibaca pada telefon ini dan tidak pernah dimuat naik.',
-    intro_ios: 'Rekod pembayaran secara automatik daripada aplikasi bank dan e-dompet anda.',
+    intro_ios:
+      'Rekod pembayaran secara automatik daripada pemberitahuan aplikasi bank dan e-dompet anda.',
     section_status: 'Status',
     master_label: 'Baca pemberitahuan',
     master_hint: 'Merekod pembayaran daripada aplikasi yang anda pilih.',

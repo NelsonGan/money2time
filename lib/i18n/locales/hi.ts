@@ -1215,7 +1215,8 @@ const hi = {
       payment_alerts_status_off: 'सेट अप नहीं',
       payment_alerts_status_apps_one: '%{count} ऐप के लिए चालू',
       payment_alerts_status_apps_other: '%{count} ऐप्स के लिए चालू',
-      payment_alerts_android_step_1: 'सूचनाओं से दर्ज करें खोलें और सूचनाएं पढ़ें चालू करें।',
+      payment_alerts_android_step_1:
+        '“सूचनाओं से दर्ज करें” पर टैप करें और “सूचनाएं पढ़ें” चालू करें।',
       payment_alerts_android_step_2:
         'Android सूचना पहुंच की स्क्रीन खोलता है। Money2Time ढूंढें और उसे चालू करें।',
       payment_alerts_android_step_3:
@@ -2573,7 +2574,7 @@ const hi = {
     title: 'सूचनाएं',
     intro_android:
       'Money2Time आपके चुने हुए बैंकिंग और वॉलेट ऐप्स की भुगतान सूचनाएं पढ़ता है और हर भुगतान आपके लिए दर्ज करता है। सूचनाएं इसी फ़ोन पर पढ़ी जाती हैं और कभी अपलोड नहीं होतीं।',
-    intro_ios: 'अपने बैंक और ई-वॉलेट ऐप के भुगतान अपने आप दर्ज करें।',
+    intro_ios: 'अपने बैंक और ई-वॉलेट ऐप की सूचनाओं से भुगतान अपने आप दर्ज करें।',
     section_status: 'स्थिति',
     master_label: 'सूचनाएं पढ़ें',
     master_hint: 'आपके चुने हुए ऐप्स के भुगतान दर्ज करता है।',
