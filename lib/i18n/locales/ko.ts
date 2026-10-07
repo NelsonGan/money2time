@@ -1196,12 +1196,12 @@ const ko = {
       default_account: '기본 계좌',
       default_category: '기본 카테고리',
       default_none: '설정 안 됨',
-      payment_alerts_title: '결제 알림',
-      payment_alerts_open: '결제 알림',
+      payment_alerts_title: '알림',
+      payment_alerts_open: '알림으로 기록',
       payment_alerts_status_off: '설정 안 됨',
       payment_alerts_status_apps_one: '앱 %{count}개에서 켜짐',
       payment_alerts_status_apps_other: '앱 %{count}개에서 켜짐',
-      payment_alerts_android_step_1: 'Payment alerts를 열고 Read payment notifications를 켜세요.',
+      payment_alerts_android_step_1: '“알림으로 기록”을 누르고 “알림 읽기”를 켜세요.',
       payment_alerts_android_step_2:
         'Android의 알림 접근 화면이 열립니다. Money2Time을 찾아 켜세요.',
       payment_alerts_android_step_3:
@@ -1215,8 +1215,8 @@ const ko = {
       payment_alerts_ios_step_1:
         'Shortcuts를 열고 +, Edit를 누르세요. 편집기에서 Automation을 누르세요.',
       payment_alerts_ios_step_2: 'Notification을 검색해 선택하세요.',
-      payment_alerts_ios_step_3: 'Log Payment Alert를 검색해 추가하세요.',
-      payment_alerts_ios_step_4: 'Log Payment Alert에서 Message, Select Variable을 누르세요.',
+      payment_alerts_ios_step_3: 'Log Notification을 검색해 추가하세요.',
+      payment_alerts_ios_step_4: 'Log Notification에서 Message, Select Variable을 누르세요.',
       payment_alerts_ios_step_6:
         '동작 화살표를 탭한 다음 Account를 탭하세요. 이 앱의 결제를 기록할 계좌를 선택하세요. Category를 비워 두면 키워드로 자동 분류됩니다.',
       payment_alerts_ios_step_7:
@@ -2545,12 +2545,12 @@ const ko = {
   payment_alerts: {
     account_hint:
       '결제는 선택한 계좌에 자동으로 기록됩니다. 카테고리는 Apple Pay와 같은 키워드를 사용합니다.',
-    title: '결제 알림',
+    title: '알림',
     intro_android:
       'Money2Time이 선택한 은행 앱과 간편결제 앱의 결제 알림을 읽고 결제를 하나하나 기록합니다. 알림은 이 기기에서만 읽으며 업로드되지 않습니다.',
-    intro_ios: '은행 및 전자 지갑 앱의 결제를 자동으로 기록합니다.',
+    card_intro: '은행 및 전자 지갑 앱의 알림으로 결제를 자동으로 기록합니다.',
     section_status: '상태',
-    master_label: '결제 알림 읽기',
+    master_label: '알림 읽기',
     master_hint: '선택한 앱의 결제를 기록합니다.',
     access_open_settings: '설정 열기',
     health_unsupported:
@@ -2562,7 +2562,7 @@ const ko = {
     health_reconnect: '다시 연결',
     health_battery_hint:
       "이런 일이 반복되면 Android 설정에서 Money2Time의 배터리 사용을 '제한 없음'으로 설정하세요.",
-    ios_notifications_title: '앱 알림',
+    ios_notifications_title: '알림',
     ios_notifications_hint: '은행 또는 전자 지갑 앱마다 단축어 자동화를 하나씩 설정하세요.',
     ios_needs_27:
       '앱 알림 자동화에는 iOS 27이 필요합니다. 이전 버전에서는 Apple Pay를 사용하거나 결제 스크린샷을 공유할 수 있습니다.',
@@ -2591,7 +2591,7 @@ const ko = {
       'Money2Time이 가짜 결제 알림을 보내 모든 것이 작동하는지 확인합니다. 아무것도 기록되지 않습니다.',
     test_alert_title: 'Money2Time 테스트',
     test_alert_body: 'Test Cafe에서 %{amount} 결제되었습니다. 카드 끝자리 0000.',
-    test_channel_name: '결제 알림 테스트',
+    test_channel_name: '알림 테스트',
     test_send: '테스트 알림 보내기',
     test_waiting: '알림을 기다리는 중…',
     test_success: '성공했습니다. Money2Time이 결제 알림을 읽을 수 있습니다.',

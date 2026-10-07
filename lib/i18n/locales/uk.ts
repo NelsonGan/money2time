@@ -1213,13 +1213,13 @@ const uk = {
       default_account: 'Рахунок за замовчуванням',
       default_category: 'Категорія за замовчуванням',
       default_none: 'Не задано',
-      payment_alerts_title: 'Сповіщення про платежі',
-      payment_alerts_open: 'Сповіщення про платежі',
+      payment_alerts_title: 'Сповіщення',
+      payment_alerts_open: 'Облік зі сповіщень',
       payment_alerts_status_off: 'Не налаштовано',
       payment_alerts_status_apps_one: 'Увімкнено для %{count} застосунку',
       payment_alerts_status_apps_other: 'Увімкнено, застосунків: %{count}',
       payment_alerts_android_step_1:
-        'Відкрийте Payment alerts та увімкніть Read payment notifications.',
+        'Відкрийте «Облік зі сповіщень» та увімкніть «Читати сповіщення».',
       payment_alerts_android_step_2:
         'Android відкриє екран доступу до сповіщень. Знайдіть Money2Time і увімкніть його.',
       payment_alerts_android_step_3:
@@ -1233,8 +1233,8 @@ const uk = {
       payment_alerts_ios_step_1:
         'Відкрийте Shortcuts, натисніть +, потім Edit. У редакторі натисніть Automation.',
       payment_alerts_ios_step_2: 'Знайдіть Notification та виберіть його.',
-      payment_alerts_ios_step_3: 'Знайдіть Log Payment Alert і додайте його.',
-      payment_alerts_ios_step_4: 'Натисніть Message у Log Payment Alert, потім Select Variable.',
+      payment_alerts_ios_step_3: 'Знайдіть Log Notification і додайте його.',
+      payment_alerts_ios_step_4: 'Натисніть Message у Log Notification, потім Select Variable.',
       payment_alerts_ios_step_6:
         'Торкніться стрілки дії, потім Account. Виберіть рахунок для запису платежів цього застосунку. Залиште Category порожнім для автоматичного зіставлення за ключовими словами.',
       payment_alerts_ios_step_7:
@@ -2578,12 +2578,13 @@ const uk = {
   payment_alerts: {
     account_hint:
       'Платежі автоматично записуються на вибраний рахунок. Категорії використовують ті самі ключові слова, що й Apple Pay.',
-    title: 'Сповіщення про платежі',
+    title: 'Сповіщення',
     intro_android:
       'Money2Time читає сповіщення про платежі з вибраних вами банківських застосунків і гаманців та записує кожен платіж за вас. Сповіщення читаються на цьому телефоні й ніколи не завантажуються.',
-    intro_ios: 'Автоматично записуйте платежі із застосунків банків та електронних гаманців.',
+    card_intro:
+      'Автоматично записуйте платежі зі сповіщень застосунків банків та електронних гаманців.',
     section_status: 'Стан',
-    master_label: 'Читати сповіщення про платежі',
+    master_label: 'Читати сповіщення',
     master_hint: 'Записує платежі з вибраних застосунків.',
     access_open_settings: 'Відкрити налаштування',
     health_unsupported:
@@ -2595,7 +2596,7 @@ const uk = {
     health_reconnect: 'Перепідключити',
     health_battery_hint:
       'Якщо це повторюється, встановіть для Money2Time використання батареї «Без обмежень» у налаштуваннях Android.',
-    ios_notifications_title: 'Сповіщення застосунків',
+    ios_notifications_title: 'Сповіщення',
     ios_notifications_hint:
       'Налаштуйте одну автоматизацію Команд для кожного застосунку банку або електронного гаманця.',
     ios_needs_27:
@@ -2628,7 +2629,7 @@ const uk = {
       'Money2Time надішле несправжнє сповіщення про платіж, щоб перевірити, що все працює. Нічого не записується.',
     test_alert_title: 'Тест Money2Time',
     test_alert_body: 'Покупка %{amount} у Test Cafe карткою з останніми цифрами 0000.',
-    test_channel_name: 'Тест сповіщень про платежі',
+    test_channel_name: 'Тест сповіщень',
     test_send: 'Надіслати тестове сповіщення',
     test_waiting: 'Чекаємо на сповіщення…',
     test_success: 'Працює. Money2Time може читати ваші сповіщення про платежі.',

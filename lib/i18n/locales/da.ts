@@ -1218,12 +1218,13 @@ const da = {
       default_account: 'Standardkonto',
       default_category: 'Standardkategori',
       default_none: 'Ikke angivet',
-      payment_alerts_title: 'Betalingsnotifikationer',
-      payment_alerts_open: 'Betalingsnotifikationer',
+      payment_alerts_title: 'Notifikationer',
+      payment_alerts_open: 'Registrér fra notifikationer',
       payment_alerts_status_off: 'Ikke sat op',
       payment_alerts_status_apps_one: 'Til for %{count} app',
       payment_alerts_status_apps_other: 'Til for %{count} apps',
-      payment_alerts_android_step_1: 'Åbn Payment alerts, og slå Read payment notifications til.',
+      payment_alerts_android_step_1:
+        'Tryk på “Registrér fra notifikationer”, og slå “Læs notifikationer” til.',
       payment_alerts_android_step_2:
         'Android åbner skærmen for notifikationsadgang. Find Money2Time, og slå det til.',
       payment_alerts_android_step_3:
@@ -1237,8 +1238,8 @@ const da = {
       payment_alerts_ios_step_1:
         'Åbn Shortcuts, tryk + og derefter Edit. Tryk Automation i editoren.',
       payment_alerts_ios_step_2: 'Søg efter Notification, og vælg den.',
-      payment_alerts_ios_step_3: 'Søg efter Log Payment Alert, og tilføj den.',
-      payment_alerts_ios_step_4: 'Tryk Message i Log Payment Alert og derefter Select Variable.',
+      payment_alerts_ios_step_3: 'Søg efter Log Notification, og tilføj den.',
+      payment_alerts_ios_step_4: 'Tryk Message i Log Notification og derefter Select Variable.',
       payment_alerts_ios_step_6:
         'Tryk på handlingens pil og derefter Account. Vælg, hvor denne apps betalinger skal registreres. Lad Category være tom for automatisk søgeordsmatchning.',
       payment_alerts_ios_step_7:
@@ -2580,12 +2581,13 @@ const da = {
   payment_alerts: {
     account_hint:
       'Betalinger registreres automatisk på din valgte konto. Kategorier bruger de samme nøgleord som Apple Pay.',
-    title: 'Betalingsnotifikationer',
+    title: 'Notifikationer',
     intro_android:
       'Money2Time læser betalingsnotifikationerne fra de bank- og wallet-apps, du vælger, og registrerer hver betaling for dig. Notifikationer læses på denne telefon og uploades aldrig.',
-    intro_ios: 'Registrer automatisk betalinger fra dine bank- og wallet-apps.',
+    card_intro:
+      'Registrer automatisk betalinger fra de notifikationer, dine bank- og wallet-apps sender.',
     section_status: 'Status',
-    master_label: 'Læs betalingsnotifikationer',
+    master_label: 'Læs notifikationer',
     master_hint: 'Registrerer betalinger fra de apps, du vælger.',
     access_open_settings: 'Åbn indstillinger',
     health_unsupported:
@@ -2597,7 +2599,7 @@ const da = {
     health_reconnect: 'Forbind igen',
     health_battery_hint:
       'Hvis det sker igen, så sæt batteriforbruget for Money2Time til Ubegrænset i Android-indstillingerne.',
-    ios_notifications_title: 'Appnotifikationer',
+    ios_notifications_title: 'Notifikationer',
     ios_notifications_hint: 'Opret én Genveje-automatisering for hver bank- eller wallet-app.',
     ios_needs_27:
       'Automatiseringer med appnotifikationer kræver iOS 27. På tidligere versioner kan du bruge Apple Pay eller dele skærmbilleder af betalinger.',
@@ -2627,7 +2629,7 @@ const da = {
       'Money2Time sender en falsk betalingsnotifikation for at tjekke, at alt virker. Intet registreres.',
     test_alert_title: 'Money2Time-test',
     test_alert_body: 'Du har betalt %{amount} hos Test Cafe med kortet, der slutter på 0000.',
-    test_channel_name: 'Test af betalingsnotifikationer',
+    test_channel_name: 'Notifikationstest',
     test_send: 'Send testnotifikation',
     test_waiting: 'Venter på notifikationen…',
     test_success: 'Det virker. Money2Time kan læse dine betalingsnotifikationer.',
