@@ -24,7 +24,7 @@ import {
 /**
  * Bridge to the platforms' payment-alert capture: Android's notification
  * listener (plugins/withMoney2TimePaymentCapture.js), which writes one JSON
- * file per alert, and iOS's Log Payment Alert Shortcuts action
+ * file per alert, and iOS's Log Notification Shortcuts action
  * (plugins/withMoney2TimeAutoLog.js), which queues into the App Group. Both
  * capture raw text only; features/autoLog parses it.
  */

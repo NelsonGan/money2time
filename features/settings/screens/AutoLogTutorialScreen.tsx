@@ -129,7 +129,7 @@ const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
     },
   ],
   // iOS 27+ (the Notification trigger is new in 27): one shortcut per banking
-  // app, started by its notifications, running Log Payment Alert with the
+  // app, started by its notifications, running Log Notification with the
   // notification's Body and the account chosen in the action. iOS 27 has no
   // Automation tab, so the trigger is added from the editor's Automation list.
   // Checked against the iOS 27 simulator.

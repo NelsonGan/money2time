@@ -1229,13 +1229,13 @@ const de = {
       default_account: 'Standardkonto',
       default_category: 'Standardkategorie',
       default_none: 'Nicht festgelegt',
-      payment_alerts_title: 'Zahlungsbenachrichtigungen',
-      payment_alerts_open: 'Zahlungsbenachrichtigungen',
+      payment_alerts_title: 'Benachrichtigungen',
+      payment_alerts_open: 'Aus Benachrichtigungen erfassen',
       payment_alerts_status_off: 'Nicht eingerichtet',
       payment_alerts_status_apps_one: 'An für %{count} App',
       payment_alerts_status_apps_other: 'An für %{count} Apps',
       payment_alerts_android_step_1:
-        'Öffne Payment alerts und aktiviere Read payment notifications.',
+        'Tippe auf „Aus Benachrichtigungen erfassen“ und aktiviere „Benachrichtigungen lesen“.',
       payment_alerts_android_step_2:
         'Android öffnet den Bildschirm für Benachrichtigungszugriff. Suche Money2Time und schalte es ein.',
       payment_alerts_android_step_3:
@@ -1250,9 +1250,8 @@ const de = {
       payment_alerts_ios_step_1:
         'Öffne Shortcuts, tippe auf +, dann Edit. Tippe im Edit auf Automation.',
       payment_alerts_ios_step_2: 'Suche nach Notification und wähle sie aus.',
-      payment_alerts_ios_step_3: 'Suche nach Log Payment Alert und füge es hinzu.',
-      payment_alerts_ios_step_4:
-        'Tippe in Log Payment Alert auf Message, dann auf Select Variable.',
+      payment_alerts_ios_step_3: 'Suche nach Log Notification und füge es hinzu.',
+      payment_alerts_ios_step_4: 'Tippe in Log Notification auf Message, dann auf Select Variable.',
       payment_alerts_ios_step_6:
         'Tippe auf den Aktionspfeil und dann auf Account. Wähle, wo die Zahlungen dieser App erfasst werden. Lass Category leer, damit Schlüsselwörter automatisch zugeordnet werden.',
       payment_alerts_ios_step_7:
@@ -2617,12 +2616,13 @@ const de = {
   payment_alerts: {
     account_hint:
       'Zahlungen werden automatisch auf dem gewählten Konto erfasst. Kategorien nutzen dieselben Schlüsselwörter wie Apple Pay.',
-    title: 'Zahlungsbenachrichtigungen',
+    title: 'Benachrichtigungen',
     intro_android:
       'Money2Time liest die Zahlungsbenachrichtigungen der Banking- und Wallet-Apps, die du auswählst, und erfasst jede Zahlung für dich. Benachrichtigungen werden auf diesem Handy gelesen und nie hochgeladen.',
-    intro_ios: 'Erfasse Zahlungen aus deinen Banking- und Wallet-Apps automatisch.',
+    card_intro:
+      'Erfasse Zahlungen automatisch aus den Benachrichtigungen deiner Banking- und Wallet-Apps.',
     section_status: 'Status',
-    master_label: 'Zahlungsbenachrichtigungen lesen',
+    master_label: 'Benachrichtigungen lesen',
     master_hint: 'Erfasst Zahlungen aus den Apps, die du auswählst.',
     access_open_settings: 'Einstellungen öffnen',
     health_unsupported:
@@ -2634,7 +2634,7 @@ const de = {
     health_reconnect: 'Neu verbinden',
     health_battery_hint:
       'Wenn das öfter passiert, stelle die Akkunutzung von Money2Time in den Android-Einstellungen auf Nicht eingeschränkt.',
-    ios_notifications_title: 'App-Mitteilungen',
+    ios_notifications_title: 'Benachrichtigungen',
     ios_notifications_hint:
       'Richte für jede Banking- oder Wallet-App eine Kurzbefehle-Automation ein.',
     ios_needs_27:
@@ -2667,7 +2667,7 @@ const de = {
       'Money2Time schickt eine erfundene Zahlungsbenachrichtigung, um zu prüfen, ob alles funktioniert. Es wird nichts erfasst.',
     test_alert_title: 'Money2Time-Test',
     test_alert_body: 'Du hast %{amount} bei Test Cafe mit der Karte mit Endziffern 0000 bezahlt.',
-    test_channel_name: 'Test für Zahlungsbenachrichtigungen',
+    test_channel_name: 'Benachrichtigungstest',
     test_send: 'Testbenachrichtigung senden',
     test_waiting: 'Warte auf die Benachrichtigung…',
     test_success: 'Es funktioniert. Money2Time kann deine Zahlungsbenachrichtigungen lesen.',

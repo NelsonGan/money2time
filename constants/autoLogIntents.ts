@@ -24,7 +24,7 @@ export const SCAN_SCREENSHOT_INTENT_NAME = 'Log Screenshot';
  * and queues it without opening the app. Spending is logged automatically
  * when the app next runs.
  */
-export const LOG_PAYMENT_ALERT_INTENT_NAME = 'Log Payment Alert';
+export const LOG_NOTIFICATION_INTENT_NAME = 'Log Notification';
 
 // Ready-made iCloud share links for the two shortcuts a user can install as-is,
 // so the tutorial only has to cover the trigger (Back Tap / automation) rather
@@ -42,6 +42,5 @@ export const AUTO_LOG_VIDEO_URLS = {
   logPayment: 'https://youtube.com/shorts/RPDvP40KdFE',
   newTransaction: 'https://youtube.com/shorts/_ywgy40eVxo',
   logScreenshot: 'https://youtube.com/shorts/MEK2AyOQh6w',
-  paymentAlertsIos:
-    'https://media.money2time.com/tutorials/ios/app-notifications/setup-2026-10-05-2x.mp4',
+  paymentAlertsIos: 'https://media.money2time.com/tutorials/ios/notifications/setup-2026-10-07.mp4',
 } as const;

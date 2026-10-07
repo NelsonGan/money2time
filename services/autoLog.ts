@@ -27,7 +27,7 @@ interface NativeAutoLogModule {
   clearPending?: (ids: string[]) => Promise<void>;
   readPendingScans?: () => Promise<string | null>;
   clearPendingScans?: (ids: string[]) => Promise<void>;
-  /** Log Payment Alert queue (bank and wallet app notifications via Shortcuts). */
+  /** Log Notification queue (bank and wallet app notifications via Shortcuts). */
   readPendingAlerts?: () => Promise<string | null>;
   clearPendingAlerts?: (ids: string[]) => Promise<void>;
   /** Debug builds only. See `enqueueTestAutoLogTap`. */
@@ -154,12 +154,12 @@ export async function clearAllAutoLogQueues(): Promise<void> {
   ]);
 }
 
-/** Whether this iOS build has the Log Payment Alert action and its queue. */
+/** Whether this iOS build has the Log Notification action and its queue. */
 export function isPaymentAlertIntentSupported(): boolean {
   return Platform.OS === 'ios' && !!nativeAutoLogModule?.readPendingAlerts;
 }
 
-/** Alerts the Log Payment Alert action queued, oldest first. */
+/** Alerts the Log Notification action queued, oldest first. */
 export async function readAutoLogPendingAlerts(): Promise<CaptureInput[]> {
   if (!isPaymentAlertIntentSupported() || !nativeAutoLogModule?.readPendingAlerts) return [];
   return parseIosPendingAlertsJson(await nativeAutoLogModule.readPendingAlerts());
@@ -173,7 +173,7 @@ export async function clearAutoLogPendingAlerts(ids: string[]): Promise<void> {
 
 /**
  * Debug builds only: queue an alert as if a Shortcuts automation had run Log
- * Payment Alert. Exercises the real App Group queue without waiting for a
+ * Notification. Exercises the real App Group queue without waiting for a
  * notification-triggered automation.
  */
 export async function enqueueTestAutoLogAlert(

@@ -1183,8 +1183,8 @@ export interface AppState {
   activeAccountFilter: string | null;
 }
 
-// Payment alerts: bank and wallet notifications (Android), and the Log Payment
-// Alert Shortcuts action (iOS), turned into transactions. The pipeline lives in
+// Payment alerts (shown to users as Notifications): bank and wallet notifications
+// (Android), and the Log Notification Shortcuts action (iOS), turned into transactions. The pipeline lives in
 // features/autoLog/; docs/prd-notification-auto-log.md has the design.
 
 /**

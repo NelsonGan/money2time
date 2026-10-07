@@ -1,6 +1,6 @@
 // Reading what the native capture layers queued: Android's notification
 // listener (one JSON file per alert in filesDir/payment-captures, see
-// plugins/withMoney2TimePaymentCapture.js) and iOS's Log Payment Alert intent
+// plugins/withMoney2TimePaymentCapture.js) and iOS's Log Notification intent
 // (one atomic file per alert in the App Group, exposed as a JSON array by
 // plugins/withMoney2TimeAutoLog.js).
 // Everything here crosses the native boundary, so malformed input degrades to
@@ -116,7 +116,7 @@ export function parseAndroidCaptureJson(fileName: string, json: string): Capture
   };
 }
 
-/** The iOS App Group queue of alerts the Log Payment Alert intent received. */
+/** The iOS App Group queue of alerts the Log Notification intent received. */
 export function parseIosPendingAlertsJson(raw: string | null | undefined): CaptureInput[] {
   if (!raw) return [];
   let parsed: unknown;

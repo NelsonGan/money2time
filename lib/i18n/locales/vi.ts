@@ -1206,12 +1206,12 @@ const vi = {
       default_account: 'Tài khoản mặc định',
       default_category: 'Danh mục mặc định',
       default_none: 'Chưa đặt',
-      payment_alerts_title: 'Thông báo thanh toán',
-      payment_alerts_open: 'Thông báo thanh toán',
+      payment_alerts_title: 'Thông báo',
+      payment_alerts_open: 'Ghi từ thông báo',
       payment_alerts_status_off: 'Chưa thiết lập',
       payment_alerts_status_apps_one: 'Bật cho %{count} ứng dụng',
       payment_alerts_status_apps_other: 'Bật cho %{count} ứng dụng',
-      payment_alerts_android_step_1: 'Mở Payment alerts và bật Read payment notifications.',
+      payment_alerts_android_step_1: 'Nhấn “Ghi từ thông báo” rồi bật “Đọc thông báo”.',
       payment_alerts_android_step_2:
         'Android mở màn hình quyền truy cập thông báo. Tìm Money2Time và bật lên.',
       payment_alerts_android_step_3:
@@ -1225,8 +1225,8 @@ const vi = {
       payment_alerts_ios_step_1:
         'Mở Shortcuts, nhấn + rồi Edit. Nhấn Automation trong trình chỉnh sửa.',
       payment_alerts_ios_step_2: 'Tìm Notification rồi chọn.',
-      payment_alerts_ios_step_3: 'Tìm Log Payment Alert và thêm vào.',
-      payment_alerts_ios_step_4: 'Nhấn Message trong Log Payment Alert rồi Select Variable.',
+      payment_alerts_ios_step_3: 'Tìm Log Notification và thêm vào.',
+      payment_alerts_ios_step_4: 'Nhấn Message trong Log Notification rồi Select Variable.',
       payment_alerts_ios_step_6:
         'Chạm mũi tên tác vụ, rồi Account. Chọn tài khoản để ghi lại thanh toán của ứng dụng này. Để trống Category để tự động phân loại theo từ khóa.',
       payment_alerts_ios_step_7:
@@ -2562,12 +2562,12 @@ const vi = {
   payment_alerts: {
     account_hint:
       'Thanh toán được ghi tự động vào tài khoản đã chọn. Danh mục dùng cùng từ khóa như Apple Pay.',
-    title: 'Thông báo thanh toán',
+    title: 'Thông báo',
     intro_android:
       'Money2Time đọc thông báo thanh toán từ các ứng dụng ngân hàng và ví điện tử bạn chọn, rồi ghi lại từng khoản thanh toán cho bạn. Thông báo được đọc trên điện thoại này và không bao giờ được tải lên.',
-    intro_ios: 'Tự động ghi lại thanh toán từ các ứng dụng ngân hàng và ví điện tử.',
+    card_intro: 'Tự động ghi lại thanh toán từ thông báo của các ứng dụng ngân hàng và ví điện tử.',
     section_status: 'Trạng thái',
-    master_label: 'Đọc thông báo thanh toán',
+    master_label: 'Đọc thông báo',
     master_hint: 'Ghi lại thanh toán từ các ứng dụng bạn chọn.',
     access_open_settings: 'Mở cài đặt',
     health_unsupported:
@@ -2579,7 +2579,7 @@ const vi = {
     health_reconnect: 'Kết nối lại',
     health_battery_hint:
       'Nếu việc này lặp lại, hãy đặt mức sử dụng pin của Money2Time thành Không hạn chế trong cài đặt Android.',
-    ios_notifications_title: 'Thông báo ứng dụng',
+    ios_notifications_title: 'Thông báo',
     ios_notifications_hint:
       'Thiết lập một tự động hóa Phím tắt cho mỗi ứng dụng ngân hàng hoặc ví điện tử.',
     ios_needs_27:
@@ -2613,7 +2613,7 @@ const vi = {
       'Money2Time gửi một thông báo thanh toán giả để kiểm tra mọi thứ hoạt động. Không có gì được ghi lại.',
     test_alert_title: 'Thử nghiệm Money2Time',
     test_alert_body: 'Bạn đã chi %{amount} tại Test Cafe bằng thẻ có số cuối 0000.',
-    test_channel_name: 'Thử thông báo thanh toán',
+    test_channel_name: 'Thử thông báo',
     test_send: 'Gửi thông báo thử',
     test_waiting: 'Đang chờ thông báo…',
     test_success: 'Thành công. Money2Time đọc được thông báo thanh toán của bạn.',
