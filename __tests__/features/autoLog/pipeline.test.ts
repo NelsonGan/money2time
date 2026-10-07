@@ -138,7 +138,7 @@ describe('the Android capture queue', () => {
 });
 
 describe('the iOS alert queue', () => {
-  it('reads what the Log Payment Alert intent queued', () => {
+  it('reads what the Log Notification intent queued', () => {
     const [capture] = parseIosPendingAlertsJson(
       JSON.stringify([
         {

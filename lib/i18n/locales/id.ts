@@ -1221,12 +1221,12 @@ const id = {
       default_account: 'Akun bawaan',
       default_category: 'Kategori bawaan',
       default_none: 'Belum diatur',
-      payment_alerts_title: 'Notifikasi pembayaran',
-      payment_alerts_open: 'Notifikasi pembayaran',
+      payment_alerts_title: 'Notifikasi',
+      payment_alerts_open: 'Catat dari notifikasi',
       payment_alerts_status_off: 'Belum diatur',
       payment_alerts_status_apps_one: 'Aktif untuk %{count} aplikasi',
       payment_alerts_status_apps_other: 'Aktif untuk %{count} aplikasi',
-      payment_alerts_android_step_1: 'Buka Payment alerts dan aktifkan Read payment notifications.',
+      payment_alerts_android_step_1: 'Buka Catat dari notifikasi dan aktifkan Baca notifikasi.',
       payment_alerts_android_step_2:
         'Android membuka layar akses notifikasi. Cari Money2Time dan aktifkan.',
       payment_alerts_android_step_3:
@@ -1240,8 +1240,8 @@ const id = {
         'Pembayaran otomatis dicatat ke akun yang dipilih. Kategori memakai kata kunci yang sama dengan Apple Pay.',
       payment_alerts_ios_step_1: 'Buka Shortcuts, ketuk +, lalu Edit. Ketuk Automation di editor.',
       payment_alerts_ios_step_2: 'Cari Notification dan pilih.',
-      payment_alerts_ios_step_3: 'Cari Log Payment Alert lalu tambahkan.',
-      payment_alerts_ios_step_4: 'Ketuk Message di Log Payment Alert, lalu Select Variable.',
+      payment_alerts_ios_step_3: 'Cari Log Notification lalu tambahkan.',
+      payment_alerts_ios_step_4: 'Ketuk Message di Log Notification, lalu Select Variable.',
       payment_alerts_ios_step_6:
         'Ketuk panah tindakan, lalu Account. Pilih akun untuk mencatat pembayaran aplikasi ini. Biarkan Category kosong untuk pencocokan kata kunci otomatis.',
       payment_alerts_ios_step_7:
@@ -2592,12 +2592,12 @@ const id = {
   payment_alerts: {
     account_hint:
       'Pembayaran otomatis dicatat ke akun yang dipilih. Kategori memakai kata kunci yang sama dengan Apple Pay.',
-    title: 'Notifikasi pembayaran',
+    title: 'Notifikasi',
     intro_android:
       'Money2Time membaca notifikasi pembayaran dari aplikasi bank dan dompet digital yang Anda pilih, lalu mencatat setiap pembayaran untuk Anda. Notifikasi dibaca di ponsel ini dan tidak pernah diunggah.',
     intro_ios: 'Catat pembayaran dari aplikasi bank dan dompet digital secara otomatis.',
     section_status: 'Status',
-    master_label: 'Baca notifikasi pembayaran',
+    master_label: 'Baca notifikasi',
     master_hint: 'Mencatat pembayaran dari aplikasi yang Anda pilih.',
     access_open_settings: 'Buka pengaturan',
     health_unsupported:
@@ -2609,7 +2609,7 @@ const id = {
     health_reconnect: 'Sambungkan ulang',
     health_battery_hint:
       'Jika ini terus terjadi, atur penggunaan baterai Money2Time ke Tidak dibatasi di pengaturan Android.',
-    ios_notifications_title: 'Notifikasi aplikasi',
+    ios_notifications_title: 'Notifikasi',
     ios_notifications_hint:
       'Siapkan satu otomatisasi Shortcuts untuk setiap aplikasi bank atau dompet digital.',
     ios_needs_27:
@@ -2640,7 +2640,7 @@ const id = {
       'Money2Time mengirim notifikasi pembayaran pura-pura untuk memastikan semuanya berfungsi. Tidak ada yang dicatat.',
     test_alert_title: 'Uji coba Money2Time',
     test_alert_body: 'Anda berbelanja %{amount} di Test Cafe dengan kartu berakhiran 0000.',
-    test_channel_name: 'Uji coba notifikasi pembayaran',
+    test_channel_name: 'Uji coba notifikasi',
     test_send: 'Kirim notifikasi uji coba',
     test_waiting: 'Menunggu notifikasi…',
     test_success: 'Berhasil. Money2Time bisa membaca notifikasi pembayaran Anda.',

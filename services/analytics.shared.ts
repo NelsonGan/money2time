@@ -89,7 +89,7 @@ export const GA4_ONLY_EVENTS = {
   AUTOLOG_TRANSACTION_CREATED: 'Autolog Transaction Created',
   BACK_TAP_TRIGGERED: 'Back Tap Triggered',
 
-  // Automatic payment alerts (bank and wallet notifications, Log Payment Alert)
+  // Automatic payment alerts (bank and wallet notifications, Log Notification)
   AUTOLOG_ALERTS_SETUP: 'Autolog Alerts Setup',
   AUTOLOG_ALERTS_DRAINED: 'Autolog Alerts Drained',
   TRANSACTION_DELETED: 'Transaction Deleted',

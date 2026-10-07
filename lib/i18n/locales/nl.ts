@@ -1227,12 +1227,12 @@ const nl = {
       default_account: 'Standaardrekening',
       default_category: 'Standaardcategorie',
       default_none: 'Niet ingesteld',
-      payment_alerts_title: 'Betaalmeldingen',
-      payment_alerts_open: 'Betaalmeldingen',
+      payment_alerts_title: 'Meldingen',
+      payment_alerts_open: 'Vastleggen uit meldingen',
       payment_alerts_status_off: 'Niet ingesteld',
       payment_alerts_status_apps_one: 'Aan voor %{count} app',
       payment_alerts_status_apps_other: 'Aan voor %{count} apps',
-      payment_alerts_android_step_1: 'Open Payment alerts en zet Read payment notifications aan.',
+      payment_alerts_android_step_1: 'Open Vastleggen uit meldingen en zet Meldingen lezen aan.',
       payment_alerts_android_step_2:
         'Android opent het scherm voor meldingstoegang. Zoek Money2Time en zet het aan.',
       payment_alerts_android_step_3:
@@ -1246,8 +1246,8 @@ const nl = {
       payment_alerts_ios_step_1:
         'Open Shortcuts, tik op + en daarna Edit. Tik in de editor op Automation.',
       payment_alerts_ios_step_2: 'Zoek Notification en selecteer dit.',
-      payment_alerts_ios_step_3: 'Zoek Log Payment Alert en voeg het toe.',
-      payment_alerts_ios_step_4: 'Tik op Message in Log Payment Alert en daarna Select Variable.',
+      payment_alerts_ios_step_3: 'Zoek Log Notification en voeg het toe.',
+      payment_alerts_ios_step_4: 'Tik op Message in Log Notification en daarna Select Variable.',
       payment_alerts_ios_step_6:
         'Tik op de actiepijl en daarna op Account. Kies waar betalingen van deze app worden vastgelegd. Laat Category leeg voor automatische toewijzing op basis van trefwoorden.',
       payment_alerts_ios_step_7:
@@ -2608,12 +2608,12 @@ const nl = {
   payment_alerts: {
     account_hint:
       'Betalingen worden automatisch op de gekozen rekening geboekt. Categorieën gebruiken dezelfde trefwoorden als Apple Pay.',
-    title: 'Betaalmeldingen',
+    title: 'Meldingen',
     intro_android:
       'Money2Time leest de betaalmeldingen van de bank- en wallet-apps die je kiest en registreert elke betaling voor je. Meldingen worden op deze telefoon gelezen en nooit geüpload.',
     intro_ios: 'Leg betalingen uit je bank- en wallet-apps automatisch vast.',
     section_status: 'Status',
-    master_label: 'Betaalmeldingen lezen',
+    master_label: 'Meldingen lezen',
     master_hint: 'Registreert betalingen uit de apps die je kiest.',
     access_open_settings: 'Instellingen openen',
     health_unsupported:
@@ -2625,7 +2625,7 @@ const nl = {
     health_reconnect: 'Opnieuw verbinden',
     health_battery_hint:
       'Gebeurt dit vaker, zet het batterijgebruik van Money2Time dan op Onbeperkt in de Android-instellingen.',
-    ios_notifications_title: 'Appmeldingen',
+    ios_notifications_title: 'Meldingen',
     ios_notifications_hint: 'Stel voor elke bank- of wallet-app één Opdrachten-automatisering in.',
     ios_needs_27:
       'Automatiseringen voor appmeldingen vereisen iOS 27. Op eerdere versies kun je Apple Pay gebruiken of screenshots van betalingen delen.',
@@ -2655,7 +2655,7 @@ const nl = {
       'Money2Time stuurt een nep-betaalmelding om te controleren of alles werkt. Er wordt niets geregistreerd.',
     test_alert_title: 'Money2Time-test',
     test_alert_body: 'Je hebt %{amount} betaald bij Test Cafe met de kaart eindigend op 0000.',
-    test_channel_name: 'Test van betaalmeldingen',
+    test_channel_name: 'Meldingstest',
     test_send: 'Testmelding sturen',
     test_waiting: 'Wachten op de melding…',
     test_success: 'Het werkt. Money2Time kan je betaalmeldingen lezen.',

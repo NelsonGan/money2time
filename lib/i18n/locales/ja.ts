@@ -1211,13 +1211,12 @@ const ja = {
       default_account: 'デフォルトの口座',
       default_category: 'デフォルトのカテゴリ',
       default_none: '未設定',
-      payment_alerts_title: '支払い通知',
-      payment_alerts_open: '支払い通知',
+      payment_alerts_title: '通知',
+      payment_alerts_open: '通知から記録',
       payment_alerts_status_off: '未設定',
       payment_alerts_status_apps_one: '%{count} 個のアプリでオン',
       payment_alerts_status_apps_other: '%{count} 個のアプリでオン',
-      payment_alerts_android_step_1:
-        'Payment alertsを開き、Read payment notificationsをオンにします。',
+      payment_alerts_android_step_1: '「通知から記録」を開き、「通知を読み取る」をオンにします。',
       payment_alerts_android_step_2:
         'Android の通知へのアクセス画面が開きます。Money2Time を探してオンにします。',
       payment_alerts_android_step_3:
@@ -1231,8 +1230,8 @@ const ja = {
       payment_alerts_ios_step_1:
         'Shortcutsを開き、+、Editの順にタップします。エディタでAutomationをタップします。',
       payment_alerts_ios_step_2: 'Notificationを検索して選択します。',
-      payment_alerts_ios_step_3: 'Log Payment Alert を検索して追加します。',
-      payment_alerts_ios_step_4: 'Log Payment AlertのMessage、Select Variableの順にタップします。',
+      payment_alerts_ios_step_3: 'Log Notification を検索して追加します。',
+      payment_alerts_ios_step_4: 'Log NotificationのMessage、Select Variableの順にタップします。',
       payment_alerts_ios_step_6:
         'アクションの矢印、Account の順にタップし、このアプリの支払いを記録する口座を選びます。 Category は空欄のままにすると、キーワードから自動で分類されます。',
       payment_alerts_ios_step_7:
@@ -2565,12 +2564,12 @@ const ja = {
   payment_alerts: {
     account_hint:
       '支払いは選択した口座に自動で記録されます。カテゴリは Apple Pay と同じキーワードで選ばれます。',
-    title: '支払い通知',
+    title: '通知',
     intro_android:
       'Money2Time は、選んだ銀行アプリや電子マネーアプリの支払い通知を読み取り、支払いを1件ずつ記録します。通知はこの端末上で読み取られ、アップロードされることはありません。',
     intro_ios: '銀行や電子ウォレットのアプリから支払いを自動記録します。',
     section_status: 'ステータス',
-    master_label: '支払い通知を読み取る',
+    master_label: '通知を読み取る',
     master_hint: '選んだアプリの支払いを記録します。',
     access_open_settings: '設定を開く',
     health_unsupported:
@@ -2582,7 +2581,7 @@ const ja = {
     health_reconnect: '再接続',
     health_battery_hint:
       '何度も起きる場合は、Android の設定で Money2Time の電池使用量を「制限なし」にしてください。',
-    ios_notifications_title: 'アプリの通知',
+    ios_notifications_title: '通知',
     ios_notifications_hint:
       '銀行や電子ウォレットのアプリごとにショートカットのオートメーションを設定します。',
     ios_needs_27:
@@ -2613,7 +2612,7 @@ const ja = {
     test_body: 'Money2Time が支払いの模擬通知を送り、正しく動くか確認します。何も記録されません。',
     test_alert_title: 'Money2Time テスト',
     test_alert_body: 'Test Cafe で %{amount} のご利用がありました。カード末尾 0000。',
-    test_channel_name: '支払い通知テスト',
+    test_channel_name: '通知テスト',
     test_send: 'テスト通知を送る',
     test_waiting: '通知を待っています…',
     test_success: '成功しました。Money2Time は支払い通知を読み取れます。',
