@@ -1,0 +1,296 @@
+{
+  "date": "2026-10-08",
+  "passed": 8,
+  "total": 8,
+  "results": [
+    {
+      "provider": "primary",
+      "id": "quick-total",
+      "status": 200,
+      "pass": true,
+      "ms": 2682,
+      "response": {
+        "transactions": [
+          {
+            "type": "expense",
+            "amount": 16,
+            "currency": "MYR",
+            "date": "2026-10-08",
+            "category": "Food",
+            "note": "QA CAFE",
+            "sentiment": "neutral",
+            "account": ""
+          }
+        ],
+        "quota": {
+          "used": 1,
+          "limit": 20,
+          "isPro": false,
+          "interval": "100year"
+        },
+        "schemaVersion": 2
+      }
+    },
+    {
+      "provider": "backup",
+      "id": "quick-total",
+      "status": 200,
+      "pass": true,
+      "ms": 4460,
+      "response": {
+        "transactions": [
+          {
+            "type": "expense",
+            "amount": 16,
+            "currency": "MYR",
+            "date": "2026-10-08",
+            "category": "Food",
+            "note": "QA CAFE",
+            "sentiment": "neutral",
+            "account": ""
+          }
+        ],
+        "quota": {
+          "used": 1,
+          "limit": 20,
+          "isPro": false,
+          "interval": "100year"
+        },
+        "schemaVersion": 2
+      }
+    },
+    {
+      "provider": "primary",
+      "id": "itemized",
+      "status": 200,
+      "pass": true,
+      "ms": 3061,
+      "response": {
+        "transactions": [
+          {
+            "type": "expense",
+            "amount": 16,
+            "currency": "USD",
+            "date": "2026-10-08",
+            "category": "Food",
+            "note": "",
+            "sentiment": "neutral",
+            "account": ""
+          }
+        ],
+        "receiptDetail": {
+          "merchant": "QA CAFE - TEST RECEIPT",
+          "date": "2026-10-08",
+          "currency": "MYR",
+          "items": [
+            {
+              "name": "Coffee",
+              "quantity": 2,
+              "lineTotal": 12,
+              "confidence": "high"
+            },
+            {
+              "name": "Tea",
+              "quantity": 1,
+              "lineTotal": 3,
+              "confidence": "high"
+            }
+          ],
+          "itemsConfidence": "high"
+        },
+        "quota": {
+          "used": 2,
+          "limit": 20,
+          "isPro": false,
+          "interval": "100year"
+        },
+        "schemaVersion": 2
+      }
+    },
+    {
+      "provider": "primary",
+      "id": "screenshot-account",
+      "status": 200,
+      "pass": true,
+      "ms": 2680,
+      "response": {
+        "transactions": [
+          {
+            "type": "expense",
+            "amount": 16,
+            "currency": "MYR",
+            "date": "2026-10-08",
+            "category": "Food",
+            "note": "QA CAFE",
+            "sentiment": "neutral",
+            "account": "Everyday Account"
+          }
+        ],
+        "quota": {
+          "used": 3,
+          "limit": 20,
+          "isPro": false,
+          "interval": "100year"
+        },
+        "schemaVersion": 2
+      }
+    },
+    {
+      "provider": "backup",
+      "id": "itemized",
+      "status": 200,
+      "pass": true,
+      "ms": 4198,
+      "response": {
+        "transactions": [
+          {
+            "type": "expense",
+            "amount": 16,
+            "currency": "USD",
+            "date": "2026-10-08",
+            "category": "Food",
+            "note": "QA CAFE - TEST RECEIPT",
+            "sentiment": "neutral",
+            "account": ""
+          }
+        ],
+        "receiptDetail": {
+          "merchant": "QA CAFE - TEST RECEIPT",
+          "date": "2026-10-08",
+          "currency": "MYR",
+          "items": [
+            {
+              "name": "Coffee",
+              "quantity": 2,
+              "lineTotal": 12,
+              "confidence": "high"
+            },
+            {
+              "name": "Tea",
+              "quantity": 1,
+              "lineTotal": 3,
+              "confidence": "high"
+            }
+          ],
+          "itemsConfidence": "high"
+        },
+        "quota": {
+          "used": 2,
+          "limit": 20,
+          "isPro": false,
+          "interval": "100year"
+        },
+        "schemaVersion": 2
+      }
+    },
+    {
+      "provider": "primary",
+      "id": "multiple-receipts",
+      "status": 200,
+      "pass": true,
+      "ms": 4398,
+      "response": {
+        "transactions": [
+          {
+            "type": "expense",
+            "amount": 16,
+            "currency": "MYR",
+            "date": "2026-10-08",
+            "category": "Food",
+            "note": "QA CAFE - TEST RECEIPT",
+            "sentiment": "neutral",
+            "account": ""
+          },
+          {
+            "type": "expense",
+            "amount": 7.5,
+            "currency": "MYR",
+            "date": "2026-10-08",
+            "category": "Food",
+            "note": "QA BAKERY - TEST RECEIPT",
+            "sentiment": "neutral",
+            "account": ""
+          }
+        ],
+        "quota": {
+          "used": 4,
+          "limit": 20,
+          "isPro": false,
+          "interval": "100year"
+        },
+        "schemaVersion": 2
+      }
+    },
+    {
+      "provider": "backup",
+      "id": "screenshot-account",
+      "status": 200,
+      "pass": true,
+      "ms": 6709,
+      "response": {
+        "transactions": [
+          {
+            "type": "expense",
+            "amount": 16,
+            "currency": "MYR",
+            "date": "2026-10-08",
+            "category": "Food",
+            "note": "QA CAFE",
+            "sentiment": "neutral",
+            "account": "Everyday Account"
+          }
+        ],
+        "quota": {
+          "used": 3,
+          "limit": 20,
+          "isPro": false,
+          "interval": "100year"
+        },
+        "schemaVersion": 2
+      }
+    },
+    {
+      "provider": "backup",
+      "id": "multiple-receipts",
+      "status": 200,
+      "pass": true,
+      "ms": 6428,
+      "response": {
+        "transactions": [
+          {
+            "type": "expense",
+            "amount": 16,
+            "currency": "MYR",
+            "date": "2026-10-08",
+            "category": "Food",
+            "note": "QA CAFE - TEST RECEIPT",
+            "sentiment": "neutral",
+            "account": ""
+          },
+          {
+            "type": "expense",
+            "amount": 7.5,
+            "currency": "MYR",
+            "date": "2026-10-08",
+            "category": "Food",
+            "note": "QA BAKERY - TEST RECEIPT",
+            "sentiment": "neutral",
+            "account": ""
+          }
+        ],
+        "quota": {
+          "used": 4,
+          "limit": 20,
+          "isPro": false,
+          "interval": "100year"
+        },
+        "schemaVersion": 2
+      }
+    }
+  ],
+  "previewVersion": "c64c94a1-c02f-48ca-85c3-948b5ca1915e",
+  "sourceCommit": "7f25a5446e867dfc4b1054a8656a11a564caaae5",
+  "primaryModel": "qwen/qwen3.7-flash",
+  "backupModel": "google/gemini-2.5-flash-lite",
+  "backupForcedByUnavailablePrimary": true
+}

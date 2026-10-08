@@ -6,7 +6,7 @@ inference were synthetic. Production Worker traffic was not changed.
 ## Automated checks
 
 - `npm run check`: app type checking, lint and formatting.
-- `npm test -- --runInBand`: 178 suites, 2488 tests.
+- `npm test -- --runInBand`: 180 suites, 2536 tests after the receipt compatibility review.
 - Receipt scanner Worker: `npm run typecheck` and explicit formatting check.
 - Worker contract tests exercise signed requests, entitlement/allowance isolation,
   text-only provider payloads, malformed output, intentional ignores, primary and
@@ -116,6 +116,48 @@ unchanged. Android and iPhone light/dark layouts, Android setup and the centered
 iPad layout were checked again. Three tutorial images and their moved markers
 were refreshed; website sync produced no catalogue changes. All 178 suites and
 2488 tests passed again, along with app type checking, lint and formatting.
+
+## Existing receipt operations review
+
+No receipt regression was found. The shared image request path was compared with
+`main`, including signing, local image reads, payload limits, timeouts, error
+mapping and compatibility with older responses. Quick, itemized and screenshot
+prompts, normalization, receipt draft resolution and the camera/picker, share and
+Back Tap job paths retain their existing behavior. The receipt context still
+forces expense direction, selects the posting account, opens itemized scans for
+review, and keeps or deletes images according to the existing preferences.
+Notification validation and counters are isolated from image scans.
+
+Added 48 automated regression checks in the native receipt client and image Worker
+endpoint. They cover omitted mode from older clients; all three explicit image
+modes; signed image payloads and resolution hints on primary/backup attempts;
+free/Pro receipt quota and exhausted notification counters; unreadable-image
+retries and failures; multi-receipt results billed once per image; split-item data,
+screenshot accounts and dates; malformed replies and inputs; image size limits;
+and the existing 70-second Worker / 90-second client timeouts. All 180 suites and
+2536 tests passed, along with app type checking, lint/formatting and Worker type
+checking. This review adds tests and evidence without changing app behavior or
+analytics.
+
+Live current-code preview `c64c94a1-c02f-48ca-85c3-948b5ca1915e` passed **8/8**
+synthetic image checks: four on `qwen/qwen3.7-flash` and four with the primary
+intentionally unavailable, forcing `google/gemini-2.5-flash-lite`:
+
+- Quick: final MYR16 total after tax/discount, ignoring MYR20 tendered and MYR4 change.
+- Itemized: Coffee quantity 2 / line total 12 and Tea quantity 1 / line total 3;
+  detected receipt currency MYR while transaction currency stayed at the requested USD.
+- Screenshot: MYR16 payment, ignoring MYR999 balance, matched to Everyday Account.
+- Multi-receipt: separate MYR16 and MYR7.50 expenses, using one receipt allowance unit.
+
+See [live responses](pr-evidence/notification-text-scanning/receipt-regression-results.json)
+and [synthetic fixtures](../__tests__/fixtures/receipts/scanner-regression/README.md).
+The preview's temporary authentication was limited to two synthetic QA user IDs;
+it also fixed their entitlement to free, so it made no RevenueCat requests. Real
+signatures and free/Pro handling are covered by the automated endpoint tests.
+Production deployment IDs were identical before and after the preview upload.
+No private images were uploaded. The real camera/picker and Shortcuts triggers
+were reviewed in code, not repeated on devices during this follow-up. Model
+accuracy on photographed, blurry or unusually long receipts remains variable.
 
 ## Release order and remaining checks
 
