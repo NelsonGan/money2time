@@ -24,12 +24,10 @@ import {
 } from '~/services/paymentCapture';
 import type { PaymentAlertSource } from '~/types';
 
-import { NotificationHistoryButton } from '../components/NotificationHistoryButton';
 import { isPayableAccount } from '../lib/binding';
 
 interface PaymentAlertsSettingsScreenProps {
   onBack: () => void;
-  onOpenHistory: () => void;
   onOpenSource: (source: PaymentAlertSource) => void;
   onOpenSetup: (step?: 'apps') => void;
 }
@@ -79,7 +77,6 @@ function LinkRow({
 
 export function PaymentAlertsSettingsScreen({
   onBack,
-  onOpenHistory,
   onOpenSource,
   onOpenSetup,
 }: PaymentAlertsSettingsScreenProps) {
@@ -135,8 +132,6 @@ export function PaymentAlertsSettingsScreen({
             className="px-0 pt-5 pb-0"
             onBack={onBack}
             title={I18n.t('payment_alerts.title')}
-            fitActions
-            rightAccessory={<NotificationHistoryButton onPress={onOpenHistory} />}
           />
           <Text variant="caption" tone="muted">
             {I18n.t('payment_alerts.card_intro')}

@@ -273,3 +273,103 @@ it('repairs the saved amount and account after a history failure instead of show
     0,
   );
 });
+it('uses the shared keyword categories before defaults, with explicit presets winning', async () => {
+  const deps = setup();
+  const live = deps.getCurrent();
+  live.categories.push(category({ id: 'other', name: 'Others' }));
+  live.quickEntryPrefs.defaultExpenseCategoryId = 'other';
+  jest
+    .mocked(readNotificationScanHistory)
+    .mockResolvedValue([{ ...rows[0], text: 'Paid RM0.20 at Starbucks coffee' }]);
+  await resolveNotificationReviews(['one'], 'expense', { ...deps, getCurrent: () => live });
+  expect(create).toHaveBeenLastCalledWith(
+    expect.objectContaining({ categoryId: 'c1' }),
+    expect.anything(),
+  );
+  jest
+    .mocked(readNotificationScanHistory)
+    .mockResolvedValue([{ ...rows[0], text: 'Starbucks coffee', categoryId: 'other' }]);
+  await resolveNotificationReviews(['one'], 'expense', { ...deps, getCurrent: () => live });
+  expect(create).toHaveBeenLastCalledWith(
+    expect.objectContaining({ categoryId: 'other' }),
+    expect.anything(),
+  );
+});
+it('preserves full editor fields while committing the same capture link', async () => {
+  await resolveNotificationReviews(['one'], 'income', setup(), {
+    one: {
+      amount: { amount: 1.25, currency: 'MYR' },
+      accountId: 'a1',
+      editedInput: {
+        type: 'income',
+        amount: 1.25,
+        currency: 'MYR',
+        accountId: 'a1',
+        categoryId: 'income',
+        date: '2026-10-07T00:00:00.000Z',
+        note: 'Corrected payer',
+        sentiment: 'happy',
+        receiptUri: 'receipts/qa.jpg',
+      },
+    },
+  });
+  expect(create).toHaveBeenCalledWith(
+    expect.objectContaining({
+      type: 'income',
+      amount: 1.25,
+      categoryId: 'income',
+      date: '2026-10-07T00:00:00.000Z',
+      note: 'Corrected payer',
+      sentiment: 'happy',
+      receiptUri: 'receipts/qa.jpg',
+    }),
+    expect.objectContaining({ source: 'notification_review' }),
+  );
+});
+it('rejects an edited type or deleted category instead of saving a different transaction', async () => {
+  const editedInput = {
+    type: 'income' as const,
+    amount: 1,
+    currency: 'MYR',
+    accountId: 'a1',
+    categoryId: 'income',
+    date: rows[0].capturedAt,
+  };
+  expect(
+    await resolveNotificationReviews(['one'], 'expense', setup(), {
+      one: {
+        amount: { amount: 1, currency: 'MYR' },
+        accountId: 'a1',
+        editedInput,
+      },
+    }),
+  ).toEqual({ completed: 0, unfinished: ['one'] });
+  expect(
+    await resolveNotificationReviews(['one'], 'income', setup(), {
+      one: {
+        amount: { amount: 1, currency: 'MYR' },
+        accountId: 'a1',
+        editedInput: { ...editedInput, categoryId: 'deleted' },
+      },
+    }),
+  ).toEqual({ completed: 0, unfinished: ['one'] });
+  expect(create).not.toHaveBeenCalled();
+});
+it('suggests an income category without choosing an expense category with matching keywords', async () => {
+  const deps = setup();
+  const live = deps.getCurrent();
+  live.categories = live.categories.map((item) =>
+    item.type === 'income' ? { ...item, name: 'Others' } : item,
+  );
+  live.categories.push(category({ id: 'salary', name: 'Salary', type: 'income' }));
+  jest
+    .mocked(readNotificationScanHistory)
+    .mockResolvedValue([
+      { ...rows[0], text: 'Your salary RM0.20 has been credited. Coffee promotion inside.' },
+    ]);
+  await resolveNotificationReviews(['one'], 'income', { ...deps, getCurrent: () => live });
+  expect(create).toHaveBeenCalledWith(
+    expect.objectContaining({ type: 'income', categoryId: 'salary' }),
+    expect.anything(),
+  );
+});

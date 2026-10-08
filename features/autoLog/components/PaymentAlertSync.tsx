@@ -30,7 +30,7 @@ import {
 
 /**
  * Queues notifications for explicit review with local amount candidates. Mounted once,
- * outside the tabs (it needs live transactions for de-duplication), next to
+ * outside the tabs so capture runs regardless of the visible screen, next to
  * AutoLogSync. Runs on mount, on every foreground, whenever Android's listener
  * writes a capture while the app is open, and on an explicit request (a
  * setup screen's test alert).

@@ -7,6 +7,9 @@ import migration063RetireSimpleMode from '~/lib/db/migrations/063_retire_simple_
 import { applyMigrations } from '~/lib/db/migrations/runner';
 import { applyBackupData, type BackupData } from '~/services/dataManagementService';
 
+jest.mock('~/services/resetAutomationCaptureData', () => ({
+  resetAutomationCaptureData: jest.fn(),
+}));
 jest.mock('~/lib/db/client', () => ({ getSQLite: jest.fn() }));
 jest.mock('expo-document-picker', () => ({}));
 jest.mock('expo-file-system/next', () => ({}));

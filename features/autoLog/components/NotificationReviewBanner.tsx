@@ -15,11 +15,16 @@ import {
 import { requestOpenPaymentAlerts } from '~/services/paymentAlertsNavigation';
 
 /** Floating review action on the shell; dismissal never ignores unfinished items. */
-export function NotificationReviewBanner() {
+export function NotificationReviewBanner({
+  onHeightChange,
+}: {
+  onHeightChange: (height: number) => void;
+}) {
   const { settings } = useApp();
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
   const [ids, setIds] = useState<string[]>([]);
+  const [height, setHeight] = useState(0);
   const [dismissed, setDismissed] = useState<string | null>(null);
   useEffect(() => {
     let active = true;
@@ -47,12 +52,18 @@ export function NotificationReviewBanner() {
     };
   }, [settings.appUserId]);
   const signature = ids.join('|');
-  if (!ids.length || signature === dismissed) return null;
+  const visible = ids.length > 0 && signature !== dismissed;
+  useEffect(() => {
+    onHeightChange(visible && height > 0 ? height + 16 : 0);
+  }, [visible, height, onHeightChange]);
+  useEffect(() => () => onHeightChange(0), [onHeightChange]);
+  if (!visible) return null;
   return (
     <View
       pointerEvents="box-none"
       className="absolute right-5 left-5 items-center"
-      style={{ bottom: insets.bottom + 148, zIndex: 20 }}
+      style={{ top: insets.top + 8, zIndex: 20 }}
+      onLayout={(event) => setHeight(event.nativeEvent.layout.height)}
     >
       <Pressable
         accessibilityRole="button"
@@ -61,7 +72,7 @@ export function NotificationReviewBanner() {
           void triggerHaptic('selection');
           requestOpenPaymentAlerts({ screen: 'NotificationHistory' });
         }}
-        className="w-full max-w-[640px] flex-row items-center gap-3 rounded-2xl border border-border/50 bg-card p-4 shadow-float"
+        className="w-full max-w-[640px] flex-row items-center gap-3 rounded-2xl border border-border/50 bg-card p-3 shadow-float"
       >
         <View className="h-10 w-10 items-center justify-center rounded-xl bg-primary/15">
           <Bell size={20} color={colors.primary} />
@@ -84,11 +95,12 @@ export function NotificationReviewBanner() {
           accessibilityRole="button"
           accessibilityLabel={I18n.t('common.close')}
           hitSlop={8}
-          onPress={() => {
+          onPress={(event) => {
+            event.stopPropagation();
             void triggerHaptic('selection');
             setDismissed(signature);
           }}
-          className="h-8 w-8 items-center justify-center rounded-full bg-secondary"
+          className="h-11 w-11 items-center justify-center rounded-full bg-secondary"
         >
           <X size={16} color={colors.textMuted} />
         </Pressable>

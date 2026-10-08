@@ -6,13 +6,13 @@ Reviewed on 2026-10-08 for PR 570. This replaces the earlier AI notification wor
 
 Notifications are captured locally, with currency-labelled monetary candidates.
 Capture never writes money or calls an AI provider. The user chooses Income,
-Expense or Ignore. Several amounts require a selection; missing amounts and
-accounts can be corrected. Bulk actions process the selected pending snapshot.
+Expense or Ignore. Several amounts require a selection; missing amounts can be entered in the full transaction editor. Compact cards use the detected currency and configured account without extra controls. The pencil opens the ordinary full editor, while its save uses the durable notification review guard. Categories reuse the Apple Pay keyword mapping after a valid same-type preset and before defaults. Bulk actions process the selected pending snapshot.
 Apple Pay automatic logging and receipt photo/itemized/screenshot scanning keep
 their existing behavior.
 
 History keeps all pending items and the newest 10 completed items. Pending drafts
-do not expire. A floating action returns on launch/foreground and new captures.
+do not expire. A floating action at the top returns on launch/foreground and new captures,
+reserving space so it does not cover the screen header.
 The root review page intercepts Back, hardware Back and swipe-back; Cancel stays,
 and confirmation durably ignores the unfinished snapshot before navigating.
 New notifications arriving while the warning is open remain pending.
@@ -21,6 +21,11 @@ The review fixed malformed numeric grouping, currency-change validation,
 three-decimal amount rounding, interrupted queue writes, replay after a partial history failure, recovery
 of corrected amounts/accounts, reset and identity cancellation, list jumps after
 reviewing an item, floating-action touch ordering, and bottom safe-area spacing.
+Older notifications retain their capture links for 180 days after the last
+review update, so a newly reviewed old notification remains recoverable. Raw-text
+redaction does not extend that retention window. Successful backup restores,
+Money Manager imports and all reset paths clear local history and native queues;
+failed backup restores keep reviews intact.
 A committed capture link prevents duplicate saves; transaction and capture writes
 share a SQLite transaction. Explicit review uses no scanner credits or automatic
 log allowance, while preserving the existing free account-count gate. Ignore is
@@ -34,7 +39,7 @@ Settings ad click tracking remains included in this PR.
 ## Automated verification
 
 - Root type checking, lint and formatting: `npm run check`.
-- Full Jest regression suite: 181 suites, 2,494 tests, including receipt client,
+- Full Jest regression suite: 183 suites, 2,506 tests, including receipt client,
   Worker image modes, native queue contracts, Apple Pay, localization parity,
   notification extraction, capture/history and review/recovery scenarios.
 - Six analytics suites: 115 tests passed. Trigger/payload/source prose was also
@@ -53,7 +58,7 @@ reviews and zero logged transactions. Choosing Expense saved RM0.20; choosing
 Income saved RM12.50; choosing Ignore dismissed the promotion. The ledger grew
 by exactly two entries and the automatic-log preferences stayed unchanged.
 
-Verified the floating action opens History, light/dark layouts, amount/account editing controls,
+Verified the floating action opens History, light/dark layouts, full transaction editing,
 multiple amount candidates, disabled save buttons for missing amounts, bulk
 handling of unfinished items, and the existing free account-limit warning.
 Back showed the unfinished-items warning; Cancel kept the page open. While a
@@ -64,7 +69,11 @@ preserved history and the completed list was capped at 10.
 
 Final UI evidence is in `docs/pr-evidence/notification-review/`. Screenshots show
 only synthetic text and demo accounts. Changed Android walkthrough frames are
-refreshed to show the local review flow. No before screenshots are claimed.
+refreshed to show the local review flow. Actual before screenshots and the generated design guide are included.
+The redesigned page separates To review from Recent, uses compact cards and flat
+action rows, and has no currency/account controls. Selected amounts survive
+switching tabs; the exit warning still covers pending items while viewing Recent.
+The refreshed top action was checked after a full bundle reload; dismissing it preserved all three pending items. To review shows a spaced red count only when items are pending and the original rounded toggle highlights the active tab; Recent has no count. History uses an icon-only action beside the Notifications section title on both platforms’ Automation page; the Notifications settings header is centered. An edited RM0.20 draft saved as RM5.00 with Food selected, completed its capture and increased the ledger from 7,109 to 7,110 exactly once. Demo account fixtures used to exercise the allowed editor path were restored afterward.
 
 ## Limits and rollout
 

@@ -71,6 +71,7 @@ import { checkApplePayTap, recordApplePayTap } from '~/features/autoLog/applePay
 import { NotificationReviewBanner } from '~/features/autoLog/components/NotificationReviewBanner';
 import { PaymentAlertSync } from '~/features/autoLog/components/PaymentAlertSync';
 import { NotificationHistoryScreen } from '~/features/autoLog/screens/NotificationHistoryScreen';
+import { NotificationReviewEditorScreen } from '~/features/autoLog/screens/NotificationReviewEditorScreen';
 import { PaymentAlertsSetupScreen } from '~/features/autoLog/screens/PaymentAlertsSetupScreen';
 import {
   consumePendingCategoryAllocation,
@@ -408,6 +409,7 @@ function MainShellScreen({
   const { checkLimit, isPro } = useProGate();
   const { startScan } = useReceiptScans();
   const [addSheetVisible, setAddSheetVisible] = useState(false);
+  const [notificationBannerHeight, setNotificationBannerHeight] = useState(0);
   const voiceHandleRef = useRef<VoiceQuickAddHandle | null>(null);
   const [voiceSupported, setVoiceSupported] = useState(false);
   // A voice start requested before the capture overlay had mounted (the support
@@ -1093,7 +1095,7 @@ function MainShellScreen({
 
   return (
     <View className="flex-1 bg-background">
-      <View style={styles.flex}>
+      <View style={[styles.flex, { marginTop: notificationBannerHeight }]}>
         <MountedTab
           name="accounts"
           active={activeTab === 'accounts'}
@@ -1193,7 +1195,7 @@ function MainShellScreen({
         </>
       ) : null}
 
-      <NotificationReviewBanner />
+      <NotificationReviewBanner onHeightChange={setNotificationBannerHeight} />
       <AddActionSheet
         visible={addSheetVisible}
         canStartTransaction={checkCanStartNewTransaction}
@@ -1287,6 +1289,14 @@ function NotificationHistoryRouteScreen({
   navigation,
 }: RootStackRouteProps<'NotificationHistory'>) {
   return <NotificationHistoryScreen onBack={() => navigation.goBack()} />;
+}
+
+function NotificationReviewEditorRouteScreen({
+  route,
+  navigation,
+}: RootStackRouteProps<'NotificationReviewEditor'>) {
+  const close = useCallback(() => navigation.goBack(), [navigation]);
+  return <NotificationReviewEditorScreen launch={route.params} onClose={close} />;
 }
 
 function PaymentAlertsSetupRouteScreen({
@@ -2815,6 +2825,10 @@ function AppContent() {
             <RootStack.Screen
               name="NotificationHistory"
               component={NotificationHistoryRouteScreen}
+            />
+            <RootStack.Screen
+              name="NotificationReviewEditor"
+              component={NotificationReviewEditorRouteScreen}
             />
             <RootStack.Screen name="PaymentAlertsSetup" component={PaymentAlertsSetupRouteScreen} />
             <RootStack.Screen name="CreateAlbum" component={CreateAlbumRouteScreen} />

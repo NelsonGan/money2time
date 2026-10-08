@@ -103,11 +103,13 @@ function AutoLogSectionHeader({
 }) {
   return (
     <View style={styles.sectionHeader}>
-      <Text variant="caption" tone="muted">
-        {title}
-      </Text>
+      <View className="min-w-0 flex-1 flex-row items-center gap-1">
+        <Text variant="caption" tone="muted" className="shrink">
+          {title}
+        </Text>
+        {onHistory ? <NotificationHistoryButton onPress={onHistory} /> : null}
+      </View>
       <View className="flex-row items-center gap-3">
-        {onHistory ? <NotificationHistoryButton compact onPress={onHistory} /> : null}
         <Pressable
           style={styles.tutorialLink}
           onPress={() => {
@@ -133,10 +135,12 @@ function AndroidPaymentAlertsEntry({
   className,
   onOpen,
   onTutorial,
+  onHistory,
 }: {
   className: string;
   onOpen: () => void;
   onTutorial: () => void;
+  onHistory: () => void;
 }) {
   const themeColors = useThemeColors();
   const { paymentAlertPrefs: prefs } = useApp();
@@ -155,6 +159,7 @@ function AndroidPaymentAlertsEntry({
       <AutoLogSectionHeader
         title={I18n.t('settings.auto_log.payment_alerts_title')}
         onTutorial={onTutorial}
+        onHistory={onHistory}
         tutorialColor={themeColors.primary}
       />
       {/* Same bell card as iOS, with the in-app setup row underneath. */}
@@ -309,6 +314,7 @@ export function AutoLogSettingsScreen({
             <AndroidPaymentAlertsEntry
               className="mt-2"
               onOpen={onOpenPaymentAlerts}
+              onHistory={onOpenNotificationHistory}
               onTutorial={() => onOpenTutorial('paymentAlertsAndroid')}
             />
           ) : null}

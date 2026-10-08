@@ -105,7 +105,6 @@ import {
   runAutoBackupIfDue,
   unregisterBackgroundTask,
 } from '~/services/autoBackup';
-import { clearAllAutoLogQueues } from '~/services/autoLog';
 import { reportError, setErrorUser } from '~/services/errorReporting';
 import { refreshRatesNow, runRateRefreshIfDue } from '~/services/exchangeRates';
 import { setHapticsEnabled } from '~/services/haptics';
@@ -121,8 +120,7 @@ import {
   normalizeNotificationPrefs,
   syncScheduledNotifications,
 } from '~/services/notifications';
-import { clearNotificationScanHistory } from '~/services/notificationScanHistory';
-import { clearAndroidCaptureQueue } from '~/services/paymentCapture';
+import { resetAutomationCaptureData } from '~/services/resetAutomationCaptureData';
 import { initReviewPrompt, recordTransactionLogged } from '~/services/reviewPrompt';
 import { runUserAssetGc, runUserAssetGcBackfillOnce } from '~/services/userAssetGc';
 import { deleteAlbumCover, deleteGoalCover, isCustomLogoId } from '~/services/userAssets';
@@ -3630,10 +3628,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         seedDefaultAccountsIfMissing(code);
       });
       reportingCurrencyRef.current = code;
-      if (historyUserId)
-        void clearNotificationScanHistory(historyUserId).catch((error) =>
-          reportError(error, { scope: 'notification_scan_history_reset' }),
-        );
+      resetAutomationCaptureData(historyUserId);
       void runRateRefreshIfDue({ force: true }).then((result) => {
         if (result.ok) reloadRateTable(code);
       });
@@ -4580,16 +4575,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     runDeferredWrite(() => {
       runUserAssetGc();
     });
-    // The iOS App Group queues (auto-log taps, screenshot scans) live outside
-    // SQLite — drop them too, or pre-reset automations would drain into the
-    // freshly-wiped database. Failure is non-fatal (App Group unreachable).
-    clearAllAutoLogQueues().catch(() => undefined);
-    // Android's notification listener queues payment alerts in a folder.
-    clearAndroidCaptureQueue();
-    if (historyUserId)
-      void clearNotificationScanHistory(historyUserId).catch((error) =>
-        reportError(error, { scope: 'notification_scan_history_reset' }),
-      );
+    resetAutomationCaptureData(historyUserId);
     void cancelAllNotifications();
     void trackEvent(AnalyticsEvents.DATA_RESET, { scope: 'all' });
     void flushAnalytics();
@@ -4601,14 +4587,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       purgeTransactionsOnly();
       resetTransactionFilters();
     });
-    void clearAllAutoLogQueues().catch((error) =>
-      reportError(error, { scope: 'reset_autolog_queues' }),
-    );
-    clearAndroidCaptureQueue();
-    if (historyUserId)
-      void clearNotificationScanHistory(historyUserId).catch((error) =>
-        reportError(error, { scope: 'notification_scan_history_reset' }),
-      );
+    resetAutomationCaptureData(historyUserId);
     // Deleting every transaction orphans their receipt images; reclaim them.
     runDeferredWrite(() => {
       runUserAssetGc();
@@ -4626,6 +4605,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       try {
         // Preserve app-level settings and hourly wage settings on manual imports.
         purgeDataForImport();
+        resetAutomationCaptureData(settings?.appUserId);
 
         const symbol = settings?.currencySymbol ?? '$';
         const summary = await importMoneyManagerBackupFromUri(uri, symbol);
@@ -4650,7 +4630,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         throw toError(error, I18n.t('errors.import_failed_generic'));
       }
     },
-    [refreshAll, settings?.currencySymbol],
+    [refreshAll, settings?.currencySymbol, settings?.appUserId],
   );
 
   const completeOnboarding = useCallback((options?: { seedDefaultAccounts?: boolean }) => {

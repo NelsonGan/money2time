@@ -1,4 +1,4 @@
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, usePreventRemove } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   ArrowLeftRight,
@@ -345,6 +345,8 @@ interface TransactionEditorScreenProps {
   mode: 'create' | 'edit';
   onClose: () => void;
   onSubmit: (input: CreateTransactionInput) => void;
+  /** Capture-linked review waits for persistence before closing; ordinary editors keep deferred saves. */
+  onSubmitConfirmed?: (input: CreateTransactionInput) => Promise<void>;
   onSubmitWithSplits?: (input: CreateTransactionInput, splits: SplitDraft[]) => void;
   onSubmitReady?: (input: CreateTransactionInput) => void;
   onDelete?: () => void;
@@ -587,6 +589,7 @@ export function TransactionEditorScreen({
   mode,
   onClose,
   onSubmit,
+  onSubmitConfirmed,
   onSubmitWithSplits,
   onSubmitReady,
   onDelete,
@@ -620,7 +623,17 @@ export function TransactionEditorScreen({
   // Bulk create mode: when on, Save keeps the editor open in create mode so the
   // user can add several transactions back-to-back. Persisted in quickEntryPrefs.
   // Only meaningful in create mode (not edit / recurring).
-  const showBulkToggle = mode === 'create' && !recurringOptions;
+  const confirmedSubmitRef = useRef(false);
+  const editorMountedRef = useRef(true);
+  const [confirmedSaving, setConfirmedSaving] = useState(false);
+  useEffect(() => {
+    editorMountedRef.current = true;
+    return () => {
+      editorMountedRef.current = false;
+    };
+  }, []);
+  usePreventRemove(confirmedSaving, () => undefined);
+  const showBulkToggle = !onSubmitConfirmed && mode === 'create' && !recurringOptions;
   // Sticky-numpad mode: the amount pad lives in an always-present, pull-down
   // drawer instead of the shared bottom tool zone. Only the normal editor uses
   // it; the recurring editor keeps the tool zone (it also hosts repeat/ends).
@@ -1955,12 +1968,13 @@ export function TransactionEditorScreen({
     return 'default' as const;
   }, [amount, isBalanceAdjustmentType, type]);
 
-  const handleSubmit = (bulkOverride?: boolean) => {
+  const handleSubmit = async (bulkOverride?: boolean) => {
+    if (confirmedSubmitRef.current) return;
     // Two explicit save actions drive this: "Add" (bulk = false, closes) and
     // "Add" + bulk icon (bulk = true, stays open). Falls back to the persisted
     // pref for the recurring editor's single Save button.
     const bulk = bulkOverride ?? bulkCreateEnabled;
-    const numericAmount = normalizeMoneyAmount(Number(amount));
+    const numericAmount = onSubmitConfirmed ? Number(amount) : normalizeMoneyAmount(Number(amount));
     const amountDraft = amount.trim();
     const normalizedNote = note.trim();
     const fallbackDefaultNote =
@@ -2189,6 +2203,23 @@ export function TransactionEditorScreen({
       );
       // Mark the current receipt as committed so the unmount cleanup keeps it.
       receiptCommittedRef.current = true;
+
+      if (onSubmitConfirmed && submitPayload) {
+        confirmedSubmitRef.current = true;
+        setConfirmedSaving(true);
+        try {
+          await onSubmitConfirmed(submitPayload);
+          settlePagerNow();
+          // Let the remove guard update before dispatching the close action.
+          requestAnimationFrame(() => {
+            if (editorMountedRef.current) onClose();
+          });
+        } finally {
+          confirmedSubmitRef.current = false;
+          if (editorMountedRef.current) setConfirmedSaving(false);
+        }
+        return;
+      }
 
       let deferredSubmit: (() => void) | null = null;
       if (splitSaveRoute !== 'plain' && submitPayload && onSubmitWithSplits) {
@@ -3929,7 +3960,13 @@ export function TransactionEditorScreen({
                 </Pressable>
               ) : null}
               {!useStickyNumpad ? (
-                <Button size="sm" haptic="none" onPress={() => handleSubmit()}>
+                <Button
+                  size="sm"
+                  haptic="none"
+                  onPress={() => {
+                    void handleSubmit();
+                  }}
+                >
                   <Text>{submitLabel}</Text>
                 </Button>
               ) : null}
@@ -4482,7 +4519,9 @@ export function TransactionEditorScreen({
                 >
                   {showBulkToggle ? (
                     <Pressable
-                      onPress={() => handleSubmit(true)}
+                      onPress={() => {
+                        void handleSubmit(true);
+                      }}
                       accessibilityRole="button"
                       accessibilityLabel={`${saveLabel} · ${I18n.t('transactions.editor.bulk_mode')}`}
                       className="h-12 flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl border border-primary/50 bg-primary/12 active:opacity-80"
@@ -4494,7 +4533,10 @@ export function TransactionEditorScreen({
                     </Pressable>
                   ) : null}
                   <Pressable
-                    onPress={() => handleSubmit(false)}
+                    disabled={confirmedSaving}
+                    onPress={() => {
+                      void handleSubmit(false);
+                    }}
                     accessibilityRole="button"
                     className="h-12 flex-1 flex-row items-center justify-center gap-1.5 rounded-2xl bg-primary active:opacity-90"
                   >

@@ -473,7 +473,6 @@ export function SettingsStack({
           stackNavigationRef.current = props.navigation;
           return (
             <PaymentAlertsSettingsScreen
-              onOpenHistory={() => requestOpenPaymentAlerts({ screen: 'NotificationHistory' })}
               onBack={() => props.navigation.goBack()}
               onOpenSource={(source) =>
                 props.navigation.navigate('PaymentAlertSource', {

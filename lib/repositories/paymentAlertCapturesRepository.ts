@@ -38,7 +38,7 @@ const IGNORED_TEXT_DAYS = 7;
 const SETTLED_TEXT_DAYS = 30;
 /** Legacy pending records expire after this; current review records do not expire. */
 const PENDING_DAYS = 30;
-/** Rows are deleted after this. */
+/** Settled rows are deleted this long after their last update. */
 const ROW_DAYS = 180;
 
 class PaymentAlertCapturesRepository {
@@ -196,7 +196,7 @@ class PaymentAlertCapturesRepository {
       )
       .run();
     db.update(autoLogCapturesTable)
-      .set({ title: null, body: null, updatedAt: stamp })
+      .set({ title: null, body: null })
       .where(
         and(
           eq(autoLogCapturesTable.status, 'ignored'),
@@ -206,7 +206,7 @@ class PaymentAlertCapturesRepository {
       )
       .run();
     db.update(autoLogCapturesTable)
-      .set({ title: null, body: null, updatedAt: stamp })
+      .set({ title: null, body: null })
       .where(
         and(
           inArray(autoLogCapturesTable.status, ['logged', 'dismissed', 'duplicate', 'failed']),
@@ -218,7 +218,7 @@ class PaymentAlertCapturesRepository {
     db.delete(autoLogCapturesTable)
       .where(
         and(
-          lt(autoLogCapturesTable.capturedAt, before(ROW_DAYS)),
+          lt(autoLogCapturesTable.updatedAt, before(ROW_DAYS)),
           inArray(autoLogCapturesTable.status, [
             'logged',
             'dismissed',

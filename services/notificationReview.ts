@@ -5,6 +5,7 @@ import {
   countAccountsTowardFreeLimit,
   isNewTransactionBlockedByAccounts,
 } from '~/features/transactions/lib/accountEntryGate';
+import { matchCategoryByKeywords } from '~/features/transactions/utils/categoryKeywords';
 import { paymentAlertCapturesRepository } from '~/lib/repositories/paymentAlertCapturesRepository';
 import {
   type CreateTransactionInput,
@@ -16,6 +17,7 @@ import { isValidNotificationAmount } from '~/utils/notificationAmounts';
 
 import {
   getNotificationScanHistoryGeneration,
+  type NotificationScanHistoryEntry,
   readNotificationScanHistory,
   recordNotificationScan,
 } from './notificationScanHistory';
@@ -23,6 +25,7 @@ import {
 export interface NotificationReviewSelection {
   amount: NotificationAmount | null;
   accountId: string | null;
+  editedInput?: CreateTransactionInput;
 }
 export interface NotificationReviewDeps {
   appUserId: string;
@@ -125,24 +128,32 @@ export function resolveNotificationReviews(
       ) {
         throw new NotificationReviewAccountLimitError();
       }
-      const category = resolveAlertCategory({
-        kind: action === 'income' ? 'income' : 'spend',
-        scannedCategory: null,
-        presetCategoryId: entry.categoryId ?? null,
-        categories: live.categories,
-        defaultExpenseCategoryId: live.quickEntryPrefs.defaultExpenseCategoryId,
-        defaultIncomeCategoryId: live.quickEntryPrefs.defaultIncomeCategoryId,
-      });
+      const edited = selected?.editedInput;
+      if (
+        edited &&
+        (edited.type !== action ||
+          (edited.categoryId != null &&
+            !live.categories.some(
+              (item) => item.id === edited.categoryId && item.type === action && !item.deletedAt,
+            )))
+      ) {
+        result.unfinished.push(id);
+        continue;
+      }
+      const categoryId = edited
+        ? edited.categoryId
+        : suggestNotificationCategory(entry, action, live.categories, live.quickEntryPrefs);
       const transactionId = live.createTransaction(
         {
+          ...(edited ?? {}),
           type: action,
           amount: amount.amount,
           currency: amount.currency,
-          date: entry.capturedAt,
+          date: edited?.date ?? entry.capturedAt,
           accountId: account.id,
-          categoryId: category.categoryId,
-          note: entry.sourceLabel,
-          sentiment: 'neutral',
+          categoryId,
+          note: edited ? edited.note : entry.sourceLabel,
+          sentiment: edited?.sentiment ?? 'neutral',
         },
         {
           source: 'notification_review',
@@ -169,4 +180,25 @@ export function resolveNotificationReviews(
   });
   decisions = work.catch(() => undefined);
   return work;
+}
+
+/** Same keyword mapping as Apple Pay; only category suggestions, never money/direction inference. */
+export function suggestNotificationCategory(
+  entry: NotificationScanHistoryEntry,
+  type: 'income' | 'expense',
+  categories: readonly Category[],
+  prefs: QuickEntryPrefs,
+): string | null {
+  const candidates = categories.filter((item) => item.type === type && !item.deletedAt);
+  const explicit = candidates.find((item) => item.id === entry.categoryId);
+  if (explicit) return explicit.id;
+  const keyword = matchCategoryByKeywords(entry.text, candidates, prefs.categoryMap ?? {});
+  return resolveAlertCategory({
+    kind: type === 'income' ? 'income' : 'spend',
+    scannedCategory: null,
+    presetCategoryId: keyword?.categoryId ?? null,
+    categories: candidates,
+    defaultExpenseCategoryId: prefs.defaultExpenseCategoryId,
+    defaultIncomeCategoryId: prefs.defaultIncomeCategoryId,
+  }).categoryId;
 }
