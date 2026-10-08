@@ -108,6 +108,7 @@ import {
   type InsightsFilterModes,
   parseInsightsFilterModes,
 } from '~/features/insights/insightsFilterModes';
+import { getPeriodPagerCommitSteps } from '~/features/insights/lib/periodPager';
 import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
 import {
   EMPTY_REVIEW_FILTERS,
@@ -2732,8 +2733,11 @@ const InsightsWindowPage = React.memo(
       },
       [reportBottomNavScroll, onScrollNearEnd, pageData],
     );
+    // A horizontal list cell sizes itself from this width. flex-1 gives the
+    // page a zero flex basis, which can collapse a newly mounted Android
+    // cell and shift every following month away from getItemLayout.
     return (
-      <View style={pageStyle} className="flex-1 bg-background">
+      <View style={pageStyle} className="h-full shrink-0 bg-background">
         <ScrollView
           ref={(ref) => {
             getPageScrollRef(item).current = ref;
@@ -4709,8 +4713,12 @@ export function InsightsScreen({
     (nextIndex: number) => {
       const clampedIndex = clampInsightsPageIndex(nextIndex);
       const currentIndex = committedPageIndexRef.current;
-      const steps = clampedIndex - currentIndex;
-      if (steps === 0) {
+      const steps = getPeriodPagerCommitSteps({
+        renderedIndex: committedPageIndex,
+        committedIndex: currentIndex,
+        targetIndex: clampedIndex,
+      });
+      if (steps === null) {
         headerPreviewPageIndexRef.current = currentIndex;
         setHeaderPreviewPageIndex(currentIndex);
         return;
@@ -4726,6 +4734,7 @@ export function InsightsScreen({
     [
       clampInsightsPageIndex,
       commitPageIndex,
+      committedPageIndex,
       currentPeriodState,
       effectivePeriodPreset,
       shiftPeriodStateBySteps,
@@ -6979,14 +6988,10 @@ export function InsightsScreen({
             showsHorizontalScrollIndicator={false}
             overScrollMode="never"
             nestedScrollEnabled
-            // NO `removeClippedSubviews` here. Android detaches a clipped cell's
-            // whole native subtree, and for these pages — each one a vertical
-            // ScrollView nested in the horizontal pager — it does not always
-            // reattach: swiping to the previous month landed on a page that
-            // stayed completely empty (no total, no pie, no category rows) while
-            // the header showed the right month, until an unrelated re-render
-            // rebuilt it. `windowSize={3}` already caps the pager at the visible
-            // page plus one neighbour each side, so clipping saved nothing.
+            // FlatList defaults clipping to true on Android. Nested scrollable
+            // pages can stay detached after a swipe, leaving the chart blank.
+            // Disable it explicitly; windowSize still limits mounted pages.
+            removeClippedSubviews={false}
             initialNumToRender={3}
             maxToRenderPerBatch={3}
             windowSize={3}

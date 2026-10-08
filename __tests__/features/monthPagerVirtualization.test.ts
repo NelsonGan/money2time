@@ -14,8 +14,8 @@ const REPO_ROOT = path.resolve(__dirname, '../..');
  *
  * Both pagers cap themselves with `windowSize`, so clipping was never buying
  * anything worth that risk. These live in two places (the shared config and
- * the insights screen's inline props) and the prop is an easy "optimization"
- * to reach for again, so pin the invariant here rather than in a comment.
+ * the insights screen's inline props). FlatList defaults clipping to true on
+ * Android, so omitting the prop does not disable it. Require an explicit false.
  */
 const PAGER_SOURCES = [
   'features/transactions/constants/monthPagerList.ts',
@@ -33,7 +33,14 @@ function readPagerSource(relativePath: string): string {
 
 describe('month pager virtualization', () => {
   it.each(PAGER_SOURCES)('%s does not clip pager subviews', (relativePath) => {
-    expect(readPagerSource(relativePath)).not.toContain('removeClippedSubviews');
+    const clippingValues = [
+      ...readPagerSource(relativePath).matchAll(/removeClippedSubviews\s*[:=]\s*\{?(\w+)/g),
+    ].map((match) => match[1]);
+
+    const clippingProps = readPagerSource(relativePath).match(/\bremoveClippedSubviews\b/g) ?? [];
+    expect(clippingProps.length).toBeGreaterThan(0);
+    expect(clippingValues).toHaveLength(clippingProps.length);
+    clippingValues.forEach((value) => expect(value).toBe('false'));
   });
 
   it.each(PAGER_SOURCES)('%s keeps a neighbour page mounted either side', (relativePath) => {
