@@ -10,12 +10,9 @@ import { readReceiptBase64 } from '~/services/userAssets';
 import { getErrorMessage } from '~/utils/errorHandling';
 
 import {
-  type NotificationScanResponse,
   ReceiptScanError,
   type ReceiptScanResponse,
-  type ScanNotificationArgs,
   type ScanReceiptArgs,
-  validateNotificationScanResponse,
 } from './receiptScan.shared';
 
 export * from './receiptScan.shared';
@@ -59,14 +56,7 @@ export async function scanReceipt(args: ScanReceiptArgs): Promise<ReceiptScanRes
   return response;
 }
 
-/** Scan captured text through the same signed service as receipt images. */
-export async function scanNotification(
-  args: ScanNotificationArgs,
-): Promise<NotificationScanResponse> {
-  return validateNotificationScanResponse(await postScan({ ...args, mode: 'notification' }));
-}
-
-/** Shared signed request, timeout and error mapping for images and text. */
+/** Shared signed request, timeout and error mapping for receipt images. */
 async function postScan(body: Record<string, unknown>): Promise<unknown> {
   const base = apiBaseUrl();
   if (!base) throw new ReceiptScanError('not_available', 'Receipt scanning is not configured.');

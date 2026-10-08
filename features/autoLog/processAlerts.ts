@@ -1,8 +1,4 @@
-// Runs queued payment alerts through the pipeline and writes the results:
-// transactions for completed payment alerts and internal records for de-duplication. This is the
-// I/O half of features/autoLog; the decisions themselves are the pure modules
-// in ./lib. Called by PaymentAlertSync.
-
+// Capture notifications locally for explicit user review. No inference or transaction write happens here.
 import type { CreateTransactionMeta } from '~/context/AppContext';
 import { paymentAlertCapturesRepository } from '~/lib/repositories/paymentAlertCapturesRepository';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
@@ -11,33 +7,23 @@ import {
   getNotificationScanHistoryGeneration,
   recordNotificationScan,
 } from '~/services/notificationScanHistory';
-import { ReceiptScanError, scanNotification } from '~/services/receiptScan';
 import type {
   Account,
   Category,
-  PaymentAlertParse,
   PaymentAlertPrefs,
   QuickEntryPrefs,
   TransactionWithRelations,
 } from '~/types';
-import { timeFromDateLocal } from '~/utils/formatters';
+import { extractNotificationAmounts } from '~/utils/notificationAmounts';
 
 import type { CaptureInput } from './lib/captureQueue';
-import { autoLogAllowance } from './lib/decide';
-import { type CaptureRef, captureRefOf, findDuplicate, type TransactionRef } from './lib/dedupe';
 import { NOTIFICATION_PARSER_VERSION, notificationParse } from './lib/notification';
-import {
-  analyzeCapture,
-  type CaptureAnalysis,
-  captureSkipReason,
-  finalizeCapture,
-  type PipelineContext,
-} from './lib/pipeline';
-import { hasNativeAlertTruncation, MAX_ALERT_TEXT_LENGTH, normalizeAlertText } from './lib/text';
+import { analyzeCapture, type CaptureAnalysis, type PipelineContext } from './lib/pipeline';
+import { MAX_ALERT_TEXT_LENGTH, normalizeAlertText } from './lib/text';
 
 export interface AlertProcessingDeps {
   appUserId: string;
-  /** Re-read live preferences/accounts after a slow network request. */
+  /** Re-read live preferences/accounts during local storage work. */
   getCurrent?: () => AlertProcessingDeps;
   /** Reset generation when reading the native queue began. */
   scanGeneration?: number;
@@ -54,6 +40,7 @@ export interface AlertProcessingDeps {
 
 export interface AlertProcessingSummary {
   captured: number;
+  pending: number;
   logged: number;
   ignored: number;
   duplicates: number;
@@ -63,11 +50,45 @@ export interface AlertProcessingSummary {
   captureIds: string[];
 }
 
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-function emptySummary(): AlertProcessingSummary {
+export function buildPipelineContext(deps: AlertProcessingDeps): PipelineContext {
   return {
+    accounts: deps.accounts,
+    categories: deps.categories,
+    prefs: deps.prefs,
+    reportingCurrency: deps.reportingCurrency,
+    defaultExpenseCategoryId: deps.quickEntryPrefs.defaultExpenseCategoryId,
+    defaultIncomeCategoryId: deps.quickEntryPrefs.defaultIncomeCategoryId,
+  };
+}
+
+/** Setup preview only: read money locally, with no income/expense classification. */
+export async function analyzeNotificationCapture(
+  capture: CaptureInput,
+  deps: AlertProcessingDeps,
+): Promise<CaptureAnalysis> {
+  const current = deps.getCurrent?.() ?? deps;
+  const ctx = buildPipelineContext(current);
+  const initial = analyzeCapture(capture, ctx);
+  const currency =
+    current.accounts.find((account) => account.id === initial.binding.accountId)?.currency ??
+    current.reportingCurrency;
+  const text = normalizeAlertText([
+    capture.isTest ? null : capture.title,
+    capture.subtitle,
+    capture.body,
+    ...capture.extra,
+  ]).text;
+  return analyzeCapture(capture, ctx, notificationParse(text, currency));
+}
+
+/** Acknowledge only notifications persisted for review or disabled sources. */
+export async function processAlertCaptures(
+  captures: readonly CaptureInput[],
+  deps: AlertProcessingDeps,
+): Promise<AlertProcessingSummary> {
+  const summary: AlertProcessingSummary = {
     captured: 0,
+    pending: 0,
     logged: 0,
     ignored: 0,
     duplicates: 0,
@@ -75,278 +96,60 @@ function emptySummary(): AlertProcessingSummary {
     loggedTransactionIds: [],
     captureIds: [],
   };
-}
-
-export function buildPipelineContext(
-  deps: Pick<
-    AlertProcessingDeps,
-    'accounts' | 'categories' | 'transactions' | 'prefs' | 'reportingCurrency' | 'quickEntryPrefs'
-  >,
-): PipelineContext {
-  const { quickEntryPrefs } = deps;
-  return {
-    accounts: deps.accounts,
-    categories: deps.categories,
-    prefs: deps.prefs,
-    reportingCurrency: deps.reportingCurrency,
-    defaultExpenseCategoryId: quickEntryPrefs.defaultExpenseCategoryId,
-    defaultIncomeCategoryId: quickEntryPrefs.defaultIncomeCategoryId,
-  };
-}
-
-/** Shared by real drains and setup previews; no keyword fallback on failure. */
-export async function analyzeNotificationCapture(
-  capture: CaptureInput,
-  deps: AlertProcessingDeps,
-  saved?: PaymentAlertParse,
-): Promise<CaptureAnalysis> {
-  const current = deps.getCurrent?.() ?? deps;
   const appUserId = deps.appUserId;
   const generation = deps.scanGeneration ?? getNotificationScanHistoryGeneration(appUserId);
   const isCurrent = () =>
     (deps.getCurrent?.() ?? deps).appUserId === appUserId &&
     getNotificationScanHistoryGeneration(appUserId) === generation;
-  if (!isCurrent())
-    throw new ReceiptScanError('not_available', 'Notification scan cancelled by data change.');
-  const ctx = buildPipelineContext(current);
-  const initial = analyzeCapture(capture, ctx);
-  if (
-    captureSkipReason(initial, ctx) ||
-    autoLogAllowance({
-      isPro: current.isPro,
-      accounts: current.accounts,
-      usedAutoLogs: current.quickEntryPrefs.autoLogUsageCount,
-    }) === 0
-  )
-    return initial;
-  if (
-    capture.possiblyTruncated ??
-    hasNativeAlertTruncation([capture.title, capture.subtitle, capture.body, ...capture.extra])
-  )
-    return initial;
-  const account = current.accounts.find((item) => item.id === initial.binding.accountId);
-  const scanCurrency = account?.currency ?? current.reportingCurrency;
-  // A resolved currency may have come from the selected account, rather than
-  // the text. Cached results are safe only with the same fallback context.
-  let parse = saved?.scanCurrency === scanCurrency ? saved : undefined;
-  if (!parse) {
-    const text = normalizeAlertText([
-      // Native setup tests are preview-only. Their visible "test" label would
-      // correctly make the classifier reject an otherwise realistic sample.
-      capture.isTest ? null : capture.title,
-      capture.subtitle,
-      capture.body,
-      ...capture.extra,
-    ]).text;
-    // Do not truncate: a late "failed" or promotional condition changes meaning.
-    if (!text || text.length > MAX_ALERT_TEXT_LENGTH) return initial;
-    const recordHistory = async (result: 'expense' | 'income' | 'none' | 'failed') => {
-      if (capture.isTest || !isCurrent()) return;
-      await recordNotificationScan(
-        appUserId,
-        {
-          id: capture.id,
-          capturedAt: capture.capturedAt,
-          sourceLabel: capture.sourceLabel,
-          text,
-          result,
-        },
-        generation,
-      ).catch((error) => reportError(error, { scope: 'notification_scan_history' }));
-    };
+  for (const capture of captures) {
+    if (!isCurrent()) break;
+    if (capture.isTest) continue;
     try {
-      const result = await scanNotification({
-        appUserId,
-        text,
-        capturedAt: capture.capturedAt,
-        currency: scanCurrency,
-        categories: current.categories
-          .filter((item) => item.type === 'expense' && !item.deletedAt)
-          .map((item) => item.name),
-        incomeCategories: current.categories
-          .filter((item) => item.type === 'income' && !item.deletedAt)
-          .map((item) => item.name),
-      });
-      parse = notificationParse(result, scanCurrency);
-      await recordHistory(
-        parse.kind === 'spend' ? 'expense' : parse.kind === 'income' ? 'income' : 'none',
-      );
-    } catch (error) {
-      await recordHistory('failed');
-      throw error;
-    }
-  }
-  if (!isCurrent())
-    throw new ReceiptScanError('not_available', 'Notification scan cancelled by data change.');
-  const latest = deps.getCurrent?.() ?? deps;
-  const latestContext = buildPipelineContext(latest);
-  const analysis = analyzeCapture(capture, latestContext, parse);
-  const latestAccount = latest.accounts.find((item) => item.id === analysis.binding.accountId);
-  if (
-    !captureSkipReason(analysis, latestContext) &&
-    scanCurrency !== (latestAccount?.currency ?? latest.reportingCurrency)
-  )
-    throw new ReceiptScanError(
-      'not_available',
-      'Notification scan currency changed. Retry needed.',
-    );
-  return analysis;
-}
-
-/** Process alerts without a prompt. Only acknowledged captures may leave the native queue. */
-export async function processAlertCaptures(
-  captures: readonly CaptureInput[],
-  deps: AlertProcessingDeps,
-): Promise<AlertProcessingSummary> {
-  const summary = emptySummary();
-  const appUserId = deps.appUserId;
-  const generation = deps.scanGeneration ?? getNotificationScanHistoryGeneration(appUserId);
-  const isCurrent = () =>
-    (deps.getCurrent?.() ?? deps).appUserId === appUserId &&
-    getNotificationScanHistoryGeneration(appUserId) === generation;
-  if (!isCurrent()) return summary;
-  const savedParses = new Map<string, PaymentAlertParse>();
-  const fresh = captures.filter((capture) => {
-    try {
+      const current = deps.getCurrent?.() ?? deps;
+      const initial = analyzeCapture(capture, buildPipelineContext(current));
       const stored = paymentAlertCapturesRepository.getById(capture.id);
-      if (!stored || stored.status === 'failed') {
-        const parse = stored?.resolution?.parse;
-        if (
-          parse?.parserVersion === NOTIFICATION_PARSER_VERSION &&
-          parse.signals.includes('notification_scanner')
-        )
-          savedParses.set(capture.id, parse);
-        return true;
+      if (stored && stored.status !== 'failed') {
+        summary.captureIds.push(capture.id);
+        continue;
       }
-      summary.captureIds.push(capture.id);
-    } catch (error) {
-      reportError(error, { scope: 'payment_alerts_store' });
-    }
-    return false;
-  });
-  if (fresh.length === 0) return summary;
-
-  // Dedupe context: captures and transactions around the batch's time span.
-  const times = fresh.map((capture) => new Date(capture.capturedAt).getTime());
-  const earliest = Math.min(...times);
-  const latest = Math.max(...times);
-  const since = new Date(earliest - 4 * DAY_MS).toISOString();
-  const recentCaptures: CaptureRef[] = [];
-  const transactionIdsFromCaptures = new Set(
-    paymentAlertCapturesRepository.listLoggedTransactionIds(since),
-  );
-
-  let remaining = autoLogAllowance({
-    isPro: deps.isPro,
-    accounts: deps.accounts,
-    usedAutoLogs: deps.quickEntryPrefs.autoLogUsageCount,
-  });
-
-  for (const capture of fresh) {
-    if (!isCurrent()) break;
-    let current = deps.getCurrent?.() ?? deps;
-    remaining = autoLogAllowance({
-      isPro: current.isPro,
-      accounts: current.accounts,
-      usedAutoLogs: Math.max(
-        current.quickEntryPrefs.autoLogUsageCount,
-        deps.quickEntryPrefs.autoLogUsageCount + summary.logged,
-      ),
-    });
-    let analysis: CaptureAnalysis;
-    try {
-      analysis =
-        remaining === 0
-          ? analyzeCapture(capture, buildPipelineContext(current))
-          : await analyzeNotificationCapture(capture, deps, savedParses.get(capture.id));
-    } catch (error) {
-      if (!isCurrent()) break;
-      reportError(error, { scope: 'payment_alerts_scan' });
-      // A service failure is not a classification. Preserve the native copy.
-      // These failures apply to the whole batch; retry on the next drain.
-      if (
-        error instanceof ReceiptScanError &&
-        ['network', 'capacity', 'limit_reached', 'not_available'].includes(error.code)
-      )
-        break;
-      continue;
-    }
-    if (!isCurrent()) break;
-    current = deps.getCurrent?.() ?? deps;
-    const ctx = buildPipelineContext(current);
-    analysis = analyzeCapture(capture, ctx, analysis.parse);
-    remaining = autoLogAllowance({
-      isPro: current.isPro,
-      accounts: current.accounts,
-      usedAutoLogs: Math.max(
-        current.quickEntryPrefs.autoLogUsageCount,
-        deps.quickEntryPrefs.autoLogUsageCount + summary.logged,
-      ),
-    });
-    // A manual entry or Apple Pay capture may arrive while inference is pending.
-    // Refresh both sources before deciding whether to write another transaction.
-    const recentTransactions: TransactionRef[] = current.transactions
-      .filter((transaction) => {
-        const when = timeFromDateLocal(transaction.date);
-        return when >= earliest - 4 * DAY_MS && when <= latest + DAY_MS;
-      })
-      .map((transaction) => ({
-        id: transaction.id,
-        type: transaction.type,
-        amount: transaction.amount,
-        currency: transaction.currency,
-        date: transaction.date,
-        note: transaction.note ?? null,
-        recurrenceParentId: transaction.recurrenceParentId ?? null,
-        accountId: transaction.accountId ?? null,
-      }));
-    const currentCaptures = new Map(
-      paymentAlertCapturesRepository.listSince(since).map((item) => [item.id, captureRefOf(item)]),
-    );
-    for (const item of recentCaptures)
-      if (!currentCaptures.has(item.id)) currentCaptures.set(item.id, item);
-    for (const id of paymentAlertCapturesRepository.listLoggedTransactionIds(since))
-      transactionIdsFromCaptures.add(id);
-    const duplicate = findDuplicate(
-      {
-        id: capture.id,
-        channel: capture.channel,
-        sourceKey: capture.sourceKey,
-        capturedAt: capture.capturedAt,
-        nativeKey: capture.nativeKey,
-        dedupeKey: analysis.dedupeKey,
-        kind: analysis.parse.kind,
-        amount: analysis.parse.amount,
-        currency:
-          analysis.parse.currency ??
-          current.accounts.find((account) => account.id === analysis.binding.accountId)?.currency ??
-          current.reportingCurrency,
-        accountId: analysis.binding.accountId,
-        counterparty: analysis.parse.counterparty,
-      },
-      [...currentCaptures.values()],
-      recentTransactions,
-      transactionIdsFromCaptures,
-    );
-    const outcome = finalizeCapture(analysis, ctx, {
-      duplicate,
-      autoLogsRemaining: remaining,
-    });
-    const { decision, resolution, draft } = outcome;
-
-    const status =
-      decision.action === 'ignore'
-        ? 'ignored'
-        : decision.action === 'duplicate'
-          ? 'duplicate'
-          : 'failed';
-    const duplicateOf =
-      duplicate.kind === 'certain' || duplicate.kind === 'possible' || duplicate.kind === 'reversal'
-        ? (duplicate.ofCaptureId ?? duplicate.ofTransactionId ?? null)
-        : null;
-
-    try {
-      const inserted = paymentAlertCapturesRepository.insert({
+      const disabled =
+        capture.channel === 'android_notification' &&
+        (!current.prefs.alertsEnabled || !initial.source?.enabled);
+      if (!disabled) {
+        const text = normalizeAlertText([
+          capture.title,
+          capture.subtitle,
+          capture.body,
+          ...capture.extra,
+        ]).text;
+        const currency =
+          current.accounts.find((account) => account.id === initial.binding.accountId)?.currency ??
+          current.reportingCurrency;
+        // Truncated notifications remain reviewable; they are never automatically classified.
+        const amounts = extractNotificationAmounts(text.slice(0, MAX_ALERT_TEXT_LENGTH), currency);
+        await recordNotificationScan(
+          appUserId,
+          {
+            id: capture.id,
+            capturedAt: capture.capturedAt,
+            sourceLabel: capture.sourceLabel,
+            text,
+            result: 'pending',
+            accountId: initial.binding.accountId,
+            categoryId: capture.presetCategoryId,
+            channel: capture.channel,
+            amounts,
+            selectedAmount: amounts.length === 1 ? amounts[0] : null,
+          },
+          generation,
+        );
+        if (!isCurrent()) break;
+        // Android sources can be switched off during storage I/O. The already
+        // captured item remains reviewable; future captures honor the switch.
+      }
+      const status = disabled ? 'ignored' : 'pending';
+      const reason = disabled ? 'source_disabled' : 'mode_review';
+      const row = {
         id: capture.id,
         channel: capture.channel,
         sourceKey: capture.sourceKey,
@@ -356,88 +159,30 @@ export async function processAlertCaptures(
         title: null,
         body: null,
         status,
-        reason: decision.reason,
-        resolution,
-        parserVersion: analysis.parse.parserVersion,
+        reason,
+        resolution: null,
+        parserVersion: NOTIFICATION_PARSER_VERSION,
         transactionId: null,
-        duplicateOf,
-        dedupeKey: analysis.dedupeKey,
-      });
-      if (!inserted)
+        duplicateOf: null,
+        dedupeKey: initial.dedupeKey,
+      } as const;
+      if (!paymentAlertCapturesRepository.insert(row))
         paymentAlertCapturesRepository.update(capture.id, {
           status,
-          title: null,
-          body: null,
-          reason: decision.reason,
-          resolution,
-          duplicateOf,
-          parserVersion: analysis.parse.parserVersion,
+          reason,
+          resolution: null,
+          parserVersion: NOTIFICATION_PARSER_VERSION,
         });
+      summary.captured++;
+      if (disabled) summary.ignored++;
+      else summary.pending++;
+      if (initial.binding.accountId) summary.accountCertain++;
+      summary.captureIds.push(capture.id);
     } catch (error) {
-      reportError(error, { scope: 'payment_alerts_store' });
-      continue;
+      if (!isCurrent()) break;
+      reportError(error, { scope: 'notification_review_capture' });
+      // A failed local write keeps the original native capture for retry.
     }
-    summary.captured += 1;
-    if (resolution.certainty === 'certain') summary.accountCertain += 1;
-
-    if (duplicate.kind === 'none' && duplicate.supersedesCaptureId) {
-      paymentAlertCapturesRepository.update(duplicate.supersedesCaptureId, {
-        status: 'duplicate',
-        reason: 'superseded',
-        duplicateOf: capture.id,
-      });
-    }
-
-    const ref: CaptureRef = {
-      id: capture.id,
-      channel: capture.channel,
-      sourceKey: capture.sourceKey,
-      capturedAt: capture.capturedAt,
-      nativeKey: capture.nativeKey,
-      dedupeKey: analysis.dedupeKey,
-      status,
-      kind: analysis.parse.kind,
-      amount: analysis.parse.amount,
-      currency: draft?.currency ?? analysis.parse.currency,
-      accountId: resolution.accountId,
-      counterparty: analysis.parse.counterparty,
-      transactionId: null,
-    };
-
-    if (decision.action === 'log' && draft) {
-      try {
-        const transactionId = current.createTransaction(draft, {
-          source: 'autolog',
-          channel: capture.channel,
-          decision: 'auto',
-          autoLogIsPro: current.isPro,
-          onAutoLogPersisted: (persistedId) =>
-            paymentAlertCapturesRepository.update(capture.id, {
-              status: 'logged',
-              reason: 'auto',
-              transactionId: persistedId,
-            }),
-        });
-        ref.status = 'logged';
-        ref.transactionId = transactionId;
-        transactionIdsFromCaptures.add(transactionId);
-        summary.logged += 1;
-        summary.loggedTransactionIds.push(transactionId);
-        if (remaining !== null) remaining -= 1;
-      } catch (error) {
-        // Keep the native copy so a later foreground can retry automatically.
-        reportError(error, { scope: 'payment_alerts_log' });
-        recentCaptures.push(ref);
-        continue;
-      }
-    } else if (status === 'ignored') {
-      summary.ignored += 1;
-    } else {
-      summary.duplicates += 1;
-    }
-    summary.captureIds.push(capture.id);
-    recentCaptures.push(ref);
   }
-
   return summary;
 }

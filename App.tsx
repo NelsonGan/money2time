@@ -68,7 +68,9 @@ import {
   EditAlbumTransactionsScreen,
 } from '~/features/albums/screens';
 import { checkApplePayTap, recordApplePayTap } from '~/features/autoLog/applePayTaps';
+import { NotificationReviewBanner } from '~/features/autoLog/components/NotificationReviewBanner';
 import { PaymentAlertSync } from '~/features/autoLog/components/PaymentAlertSync';
+import { NotificationHistoryScreen } from '~/features/autoLog/screens/NotificationHistoryScreen';
 import { PaymentAlertsSetupScreen } from '~/features/autoLog/screens/PaymentAlertsSetupScreen';
 import {
   consumePendingCategoryAllocation,
@@ -622,7 +624,8 @@ function MainShellScreen({
 
   useEffect(() => {
     return subscribeOpenPaymentAlerts((request) => {
-      navigation.navigate('PaymentAlertsSetup', { step: request.step });
+      if (request.screen === 'NotificationHistory') navigation.navigate('NotificationHistory');
+      else navigation.navigate('PaymentAlertsSetup', { step: request.step });
     });
   }, [navigation]);
 
@@ -1190,6 +1193,7 @@ function MainShellScreen({
         </>
       ) : null}
 
+      <NotificationReviewBanner />
       <AddActionSheet
         visible={addSheetVisible}
         canStartTransaction={checkCanStartNewTransaction}
@@ -1277,6 +1281,12 @@ function AddTransactionDetailedRouteScreen({
       openSplitBillOnMount={route.params?.openSplitBill}
     />
   );
+}
+
+function NotificationHistoryRouteScreen({
+  navigation,
+}: RootStackRouteProps<'NotificationHistory'>) {
+  return <NotificationHistoryScreen onBack={() => navigation.goBack()} />;
 }
 
 function PaymentAlertsSetupRouteScreen({
@@ -2802,6 +2812,10 @@ function AppContent() {
             />
             <RootStack.Screen name="Tutorials" component={TutorialsRouteScreen} />
             <RootStack.Screen name="TutorialDetail" component={TutorialDetailRouteScreen} />
+            <RootStack.Screen
+              name="NotificationHistory"
+              component={NotificationHistoryRouteScreen}
+            />
             <RootStack.Screen name="PaymentAlertsSetup" component={PaymentAlertsSetupRouteScreen} />
             <RootStack.Screen name="CreateAlbum" component={CreateAlbumRouteScreen} />
             <RootStack.Screen name="AlbumDetail" component={AlbumDetailRouteScreen} />

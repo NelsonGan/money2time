@@ -71,7 +71,6 @@ export type SettingsStackParamList = {
   LiveEarnings: undefined;
   WidgetPreviews: undefined;
   PaymentAlerts: undefined;
-  NotificationHistory: undefined;
   PaymentAlertSource: { channel: PaymentAlertChannel; sourceKey: string };
 };
 

@@ -1,14 +1,22 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { MAX_ALERT_TEXT_LENGTH } from '~/features/autoLog/lib/text';
+import type { PaymentAlertChannel } from '~/types';
+import { isValidNotificationAmount, type NotificationAmount } from '~/utils/notificationAmounts';
 
-export type NotificationScanResult = 'expense' | 'income' | 'none' | 'failed';
+export type NotificationScanResult = 'pending' | 'expense' | 'income' | 'none' | 'failed';
 export interface NotificationScanHistoryEntry {
   id: string;
   capturedAt: string;
   sourceLabel: string | null;
   text: string;
   result: NotificationScanResult;
+  accountId?: string | null;
+  categoryId?: string | null;
+  channel?: PaymentAlertChannel;
+  amounts?: NotificationAmount[];
+  selectedAmount?: NotificationAmount | null;
+  transactionId?: string | null;
 }
 const LIMIT = 10;
 const keyFor = (appUserId: string) => `notification-scan-history:${appUserId}`;
@@ -38,19 +46,38 @@ function parse(raw: string | null): NotificationScanHistoryEntry[] {
         Number.isFinite(Date.parse(row.capturedAt)) &&
         (row.sourceLabel === null || typeof row.sourceLabel === 'string') &&
         typeof row.text === 'string' &&
-        ['expense', 'income', 'none', 'failed'].includes(row.result),
+        ['pending', 'expense', 'income', 'none', 'failed'].includes(row.result),
     );
+    let completed = 0;
     return [...new Map(valid.map((row) => [row.id, row])).values()]
       .sort(
         (a, b) => Date.parse(b.capturedAt) - Date.parse(a.capturedAt) || b.id.localeCompare(a.id),
       )
-      .slice(0, LIMIT)
+      .filter((row) => row.result === 'pending' || completed++ < LIMIT)
       .map((row) => ({
         id: row.id,
         capturedAt: row.capturedAt,
         sourceLabel: row.sourceLabel,
         text: row.text.slice(0, MAX_ALERT_TEXT_LENGTH),
         result: row.result,
+        ...(row.accountId === null || typeof row.accountId === 'string'
+          ? { accountId: row.accountId }
+          : {}),
+        ...(row.categoryId === null || typeof row.categoryId === 'string'
+          ? { categoryId: row.categoryId }
+          : {}),
+        ...(row.channel === 'ios_alert' || row.channel === 'android_notification'
+          ? { channel: row.channel }
+          : {}),
+        ...(Array.isArray(row.amounts)
+          ? { amounts: row.amounts.filter(isValidNotificationAmount).slice(0, 30) }
+          : {}),
+        ...(row.selectedAmount === null || isValidNotificationAmount(row.selectedAmount)
+          ? { selectedAmount: row.selectedAmount }
+          : {}),
+        ...(row.transactionId === null || typeof row.transactionId === 'string'
+          ? { transactionId: row.transactionId }
+          : {}),
       }));
   } catch {
     return [];
@@ -70,6 +97,12 @@ export function recordNotificationScan(
     if (generation !== getNotificationScanHistoryGeneration(appUserId)) return;
     const previous = parse(await AsyncStorage.getItem(keyFor(appUserId)));
     if (generation !== getNotificationScanHistoryGeneration(appUserId)) return;
+    // A queue retry must never reopen a review that the user already finished.
+    if (
+      entry.result === 'pending' &&
+      previous.some((row) => row.id === entry.id && row.result !== 'pending')
+    )
+      return;
     const next = parse(JSON.stringify([...previous.filter((row) => row.id !== entry.id), entry]));
     await AsyncStorage.setItem(keyFor(appUserId), JSON.stringify(next));
     if (generation !== getNotificationScanHistoryGeneration(appUserId)) return;

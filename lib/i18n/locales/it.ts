@@ -1236,15 +1236,15 @@ const it = {
       payment_alerts_android_step_6:
         'Invia una notifica di prova per verificare che tutto funzioni.',
       payment_alerts_android_step_7:
-        'Completed income and expenses log to your selected account. The scanner selects categories and discards offers and unrelated notifications.',
+        'Open History to review each notification. Choose Income, Expense or Ignore, or use the All buttons.',
       payment_alerts_ios_step_1: 'Apri Shortcuts, tocca +, poi Edit. Tocca Automation nell’editor.',
       payment_alerts_ios_step_2: 'Cerca Notification e selezionalo.',
       payment_alerts_ios_step_3: 'Cerca Log Notification e aggiungilo.',
       payment_alerts_ios_step_4: 'Tocca Message in Log Notification, poi Select Variable.',
       payment_alerts_ios_step_6:
-        'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
+        'Tap the action arrow, then Account. Choose where reviewed transactions should be logged. Category is optional.',
       payment_alerts_ios_step_7:
-        'Tap back to save. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
+        'Tap back to save. Repeat for each bank or wallet app. Open Money2Time to review new notifications, even offline.',
       payment_alerts_android_disclosure:
         'Leggi come viene usato l’accesso alle notifiche, poi tocca Continue.',
       payment_alerts_ios_app:
@@ -2594,25 +2594,42 @@ const it = {
     },
   },
   payment_alerts: {
+    review_pending: 'To review',
+    review_recent: 'Recent',
+    review_ignore: 'Ignore',
+    review_income_all: 'Income All',
+    review_expense_all: 'Expense All',
+    review_ignore_all: 'Ignore All',
+    review_banner: '%{count} notifications to review',
+    review_banner_single: '1 notification to review',
+    review_banner_hint: 'Choose Income, Expense or Ignore',
+    review_amount_hint: 'Choose or enter the amount',
+    review_missing: 'Some items still need an amount or account.',
+    review_save_error: 'Could not save. Your unfinished items are still here.',
+    review_leave_title: 'Ignore unfinished notifications?',
+    review_leave_body: 'Leaving will ignore all %{count} unfinished notifications.',
+    review_leave_body_single: 'Leaving will ignore the unfinished notification.',
+    review_leave_confirm: 'Ignore and leave',
+    review_show_more: 'Show full notification',
+    review_show_less: 'Show less',
     history: 'History',
     history_title: 'Notification history',
-    history_empty: 'No notifications scanned yet',
-    history_hint: 'Your last 10 notifications',
-    history_none: 'No transaction',
-    history_failed: 'Scan failed',
+    history_empty: 'No notifications yet',
+    history_hint:
+      'Choose Income, Expense or Ignore. Your last 10 completed notifications stay here.',
+    history_none: 'Ignored',
+    history_failed: 'Not logged',
     history_error: 'Could not load notification history.',
     test_scan_failed_title: 'Impossibile registrare la notifica di prova',
     test_scan_failed:
-      'The notification arrived, but could not be turned into a transaction. Check your internet connection and automatic logging allowance, then try again.',
-
+      'The notification arrived, but no amount or account could be read. Check your selected account and try again.',
     account_hint:
-      'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
+      'Notifications go to review. Choose Income, Expense or Ignore for your selected account.',
     title: 'Notifiche',
-    card_intro:
-      'Automatically log completed income and expenses from bank and wallet notifications.',
+    card_intro: 'Review bank and wallet notifications before logging income or expenses.',
     section_status: 'Stato',
     master_label: 'Leggi le notifiche',
-    master_hint: 'Captures notifications from the apps you choose and logs completed transactions.',
+    master_hint: 'Keeps notifications from the apps you choose for you to review.',
     access_open_settings: 'Apri impostazioni',
     health_unsupported:
       "Questa versione di Money2Time non può leggere le notifiche. Aggiorna l'app per registrare i pagamenti dalle notifiche.",
@@ -2657,8 +2674,8 @@ const it = {
     test_send: 'Invia notifica di prova',
     test_waiting: 'In attesa della notifica…',
     test_success: 'Funziona. Money2Time può leggere le tue notifiche di pagamento.',
-    test_would_log: 'Registrerebbe %{amount} su %{account} come %{category}.',
-    test_would_log_no_category: 'Registrerebbe %{amount} su %{account}.',
+    test_would_log: 'It would offer %{amount} for review in %{account}.',
+    test_would_log_no_category: 'It would offer %{amount} for review in %{account}.',
     test_timeout_title: 'Nessuna notifica arrivata',
     test_timeout_body:
       "Controlla che l'accesso alle notifiche sia attivo e riprova. Su alcuni telefoni serve anche impostare la batteria di Money2Time su Senza restrizioni.",

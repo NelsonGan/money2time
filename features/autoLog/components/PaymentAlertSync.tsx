@@ -20,8 +20,6 @@ import {
 } from '~/services/paymentCapture';
 
 import type { CaptureInput } from '../lib/captureQueue';
-import { autoLogAllowance } from '../lib/decide';
-import { finalizeCapture } from '../lib/pipeline';
 import { androidCapturePackages } from '../lib/prefs';
 import {
   type AlertProcessingDeps,
@@ -31,7 +29,7 @@ import {
 } from '../processAlerts';
 
 /**
- * Turns queued payment alerts into transactions. Mounted once,
+ * Queues notifications for explicit review with local amount candidates. Mounted once,
  * outside the tabs (it needs live transactions for de-duplication), next to
  * AutoLogSync. Runs on mount, on every foreground, whenever Android's listener
  * writes a capture while the app is open, and on an explicit request (a
@@ -142,6 +140,7 @@ export function PaymentAlertSync() {
           void trackEvent(AnalyticsEvents.AUTOLOG_ALERTS_DRAINED, {
             captured: summary.captured,
             logged: summary.logged,
+            pending: summary.pending,
             ignored: summary.ignored,
             duplicates: summary.duplicates,
             account_certain: summary.accountCertain,
@@ -211,27 +210,17 @@ async function previewTestAlerts(tests: readonly CaptureInput[], deps: AlertProc
         { ...capture, sourceKey: testSource?.sourceKey ?? capture.sourceKey },
         deps,
       );
-      const current = deps.getCurrent?.() ?? deps;
-      const currentCtx = buildPipelineContext(current);
-      const outcome = finalizeCapture(analysis, currentCtx, {
-        duplicate: { kind: 'none', supersedesCaptureId: null },
-        autoLogsRemaining: autoLogAllowance({
-          isPro: current.isPro,
-          accounts: current.accounts,
-          usedAutoLogs: current.quickEntryPrefs.autoLogUsageCount,
-        }),
-      });
       emitTestAlertResult({
         capturedAt: capture.capturedAt,
         amount: analysis.parse.amount,
         currency: analysis.parse.currency,
         counterparty: analysis.parse.counterparty,
-        accountId: outcome.resolution.accountId,
-        categoryId: outcome.resolution.categoryId,
-        wouldLog: outcome.decision.action === 'log',
+        accountId: analysis.binding.accountId,
+        categoryId: null,
+        wouldLog: analysis.parse.amount !== null && analysis.binding.accountId !== null,
       });
     } catch (error) {
-      reportError(error, { scope: 'payment_alerts_test_scan' });
+      reportError(error, { scope: 'payment_alerts_test_amount' });
       emitTestAlertResult({
         capturedAt: capture.capturedAt,
         amount: null,

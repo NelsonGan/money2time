@@ -7,7 +7,7 @@ const { AndroidConfig, withAndroidManifest, withDangerousMod } = require('@expo/
  * Android payment alerts: a NotificationListenerService that copies the text of
  * payment notifications from the banking and wallet apps the user picked into
  * the app's files directory, where the JS drain (PaymentAlertSync) parses and
- * logs them. Design: docs/prd-notification-auto-log.md §7.
+ * queues them for user review. Design: docs/prd-notification-auto-log.md.
  *
  * What the listener does, and deliberately does not do:
  *

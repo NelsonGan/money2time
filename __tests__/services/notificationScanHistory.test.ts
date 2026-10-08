@@ -36,6 +36,25 @@ it('persists only the 10 newest notifications, including no-transaction results'
   expect(history.map((x) => x.id)).toEqual(['11', '10', '9', '8', '7', '6', '5', '4', '3', '2']);
   expect(JSON.parse([...storage.values()][0])).toHaveLength(10);
 });
+it('retains all unfinished reviews alongside the last 10 completed notifications', async () => {
+  for (let i = 0; i < 12; i++)
+    await recordNotificationScan('review', {
+      ...entry(i),
+      result: 'pending',
+      accountId: 'a1',
+      categoryId: null,
+      channel: 'ios_alert',
+      amounts: [{ amount: 0.2, currency: 'MYR' }],
+    });
+  for (let i = 20; i < 32; i++) await recordNotificationScan('review', entry(i));
+  const rows = await readNotificationScanHistory('review');
+  expect(rows.filter((row) => row.result === 'pending')).toHaveLength(12);
+  expect(rows.filter((row) => row.result !== 'pending')).toHaveLength(10);
+  expect(rows.find((row) => row.id === '0')).toMatchObject({
+    accountId: 'a1',
+    amounts: [{ amount: 0.2, currency: 'MYR' }],
+  });
+});
 it('updates a failed retry without adding another entry or displacing newer notifications', async () => {
   await recordNotificationScan('a', entry(0, 'failed'));
   await recordNotificationScan('a', entry(1));

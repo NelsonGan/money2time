@@ -1,7 +1,6 @@
 import { CommonActions, StackActions } from '@react-navigation/native';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { NotificationHistoryScreen } from '~/features/autoLog/screens/NotificationHistoryScreen';
 import { PaymentAlertSourceScreen } from '~/features/autoLog/screens/PaymentAlertSourceScreen';
 import { PaymentAlertsSettingsScreen } from '~/features/autoLog/screens/PaymentAlertsSettingsScreen';
 import { ItemsScreen } from '~/features/items/screens';
@@ -462,7 +461,9 @@ export function SettingsStack({
               onOpenTutorial={(topic) => props.navigation.navigate('AutoLogTutorial', { topic })}
               onOpenQuickEntry={() => props.navigation.navigate('QuickEntrySettings')}
               onOpenPaymentAlerts={() => props.navigation.navigate('PaymentAlerts')}
-              onOpenNotificationHistory={() => props.navigation.navigate('NotificationHistory')}
+              onOpenNotificationHistory={() =>
+                requestOpenPaymentAlerts({ screen: 'NotificationHistory' })
+              }
             />
           );
         }}
@@ -472,7 +473,7 @@ export function SettingsStack({
           stackNavigationRef.current = props.navigation;
           return (
             <PaymentAlertsSettingsScreen
-              onOpenHistory={() => props.navigation.navigate('NotificationHistory')}
+              onOpenHistory={() => requestOpenPaymentAlerts({ screen: 'NotificationHistory' })}
               onBack={() => props.navigation.goBack()}
               onOpenSource={(source) =>
                 props.navigation.navigate('PaymentAlertSource', {
@@ -485,12 +486,6 @@ export function SettingsStack({
               }
             />
           );
-        }}
-      </SettingsStackNavigator.Screen>
-      <SettingsStackNavigator.Screen name="NotificationHistory">
-        {(props) => {
-          stackNavigationRef.current = props.navigation;
-          return <NotificationHistoryScreen onBack={() => props.navigation.goBack()} />;
         }}
       </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="PaymentAlertSource">

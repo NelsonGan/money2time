@@ -214,18 +214,26 @@ export interface SplitDraftInput {
 /** How a transaction was entered. Drives which analytics event fires on
  *  create — voice entries are tracked separately from manual adds, and a
  *  statement import's rows are not entries the user logged one by one. */
-export type TransactionSource = 'manual' | 'voice' | 'receipt' | 'autolog' | 'statement_import';
+export type TransactionSource =
+  | 'manual'
+  | 'voice'
+  | 'receipt'
+  | 'autolog'
+  | 'notification_review'
+  | 'statement_import';
 
 export interface CreateTransactionMeta {
   source?: TransactionSource;
   /** For `autolog`: how the payment reached the app. Absent means the Apple Pay automation. */
   channel?: PaymentAlertChannel;
-  /** Automatic logging never prompts for review. */
-  decision?: 'auto';
-  /** Both native queues share the allowance checked at the durable write. */
+  /** Notification review is confirmed explicitly; Apple Pay remains automatic. */
+  decision?: 'auto' | 'confirm';
+  /** Apple Pay allowance checked at the durable automatic write. */
   autoLogIsPro?: boolean;
   /** Capture bookkeeping committed atomically with an auto-logged expense. */
   onAutoLogPersisted?: (transactionId: string) => void;
+  /** Capture link committed atomically with a manually reviewed notification. */
+  onNotificationReviewPersisted?: (transactionId: string) => void;
 }
 
 export interface CreateItemInput {
@@ -2154,7 +2162,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const createTransaction = useCallback(
     (input: CreateTransactionInput, meta?: CreateTransactionMeta) => {
       const claimFirstEntry = prepareFirstEntry(input.type);
-      const normalizedAmount = normalizeMoneyAmount(input.amount);
+      // Local review validates currency precision before this synchronous save.
+      const normalizedAmount =
+        meta?.source === 'notification_review' ? input.amount : normalizeMoneyAmount(input.amount);
       const snapshot = buildSnapshot(
         input.type,
         normalizedAmount,
@@ -2234,10 +2244,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         quickEntryPrefsRef.current = nextPrefs;
         setQuickEntryPrefs(nextPrefs);
       }
+      if (meta?.source === 'notification_review') {
+        // Explicit review is a manual save: no scanner or auto-log allowance.
+        getSQLite().withTransactionSync(() => {
+          transactionsRepository.createWithId(id, normalizedInput, now);
+          meta.onNotificationReviewPersisted?.(id);
+        });
+      }
       setTransactions((prev) => insertTransactionsByDateDesc(prev, [optimistic]));
       runDeferredWrite(() => {
         try {
-          if (meta?.source !== 'autolog')
+          if (meta?.source !== 'autolog' && meta?.source !== 'notification_review')
             transactionsRepository.createWithId(id, normalizedInput, now);
           // Auto-file into the active album, if one is set.
           const activeAlbumId = albumsRepository.getActiveId();
@@ -2259,7 +2276,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           }
           // `has_category` here measures whether the user answered the intent's
           // category prompt or let it fall through to their default.
-          if (meta?.source === 'autolog') {
+          if (meta?.source === 'autolog' || meta?.source === 'notification_review') {
             void trackEvent(AnalyticsEvents.AUTOLOG_TRANSACTION_CREATED, {
               has_category: !!normalizedInput.categoryId,
               has_note: !!(normalizedInput.note && normalizedInput.note.trim()),
@@ -2285,7 +2302,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           const persisted = transactionsRepository.getById(id);
           setTransactions((prev) => reconcileTransactionRow(prev, id, persisted));
         } catch (error) {
-          if (meta?.source === 'autolog') {
+          if (meta?.source === 'autolog' || meta?.source === 'notification_review') {
             // The expense is already committed; a failed album or UI refresh
             // must not erase it or make the native drain retry the payment.
             reportError(error, { scope: 'autolog_after_save' });
