@@ -29,7 +29,7 @@ import {
   finalizeCapture,
   type PipelineContext,
 } from './lib/pipeline';
-import { MAX_ALERT_TEXT_LENGTH, normalizeAlertText } from './lib/text';
+import { hasNativeAlertTruncation, MAX_ALERT_TEXT_LENGTH, normalizeAlertText } from './lib/text';
 
 export interface AlertProcessingDeps {
   appUserId: string;
@@ -108,6 +108,11 @@ export async function analyzeNotificationCapture(
     return initial;
   if (!current.prefs.notificationScanningEnabled)
     throw new ReceiptScanError('not_available', 'Notification scanning is disabled.');
+  if (
+    capture.possiblyTruncated ||
+    hasNativeAlertTruncation([capture.title, capture.subtitle, capture.body, ...capture.extra])
+  )
+    return initial;
   let parse = saved;
   if (!parse) {
     const text = normalizeAlertText([

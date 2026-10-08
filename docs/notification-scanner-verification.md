@@ -6,7 +6,7 @@ inference were synthetic. Production Worker traffic was not changed.
 ## Automated checks
 
 - `npm run check`: app type checking, lint and formatting.
-- `npm test -- --runInBand`: 176 suites, 2469 tests.
+- `npm test -- --runInBand`: 176 suites, 2473 tests.
 - Receipt scanner Worker: `npm run typecheck` and explicit formatting check.
 - Worker contract tests exercise signed requests, entitlement/allowance isolation,
   text-only provider payloads, malformed output, intentional ignores, primary and
@@ -15,6 +15,10 @@ inference were synthetic. Production Worker traffic was not changed.
   atomic persistence, retrying saved classifications, explicit upload consent,
   live preference changes, manual entries during inference, offline batch stopping
   and preservation of a late failure condition in long text.
+- Android and iOS native fields at their existing 2000-character truncation
+  boundary are discarded without uploading or creating a transaction, since the
+  cut-off suffix might change a payment's meaning. Truncation evidence is retained
+  before whitespace trimming.
 - The setup preview scans the sample payment without its synthetic test title and
   never creates a transaction. Locale keys/interpolations retain parity across
   all 24 catalogues; the analytics tracking-plan check passes.

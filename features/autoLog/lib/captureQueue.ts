@@ -10,6 +10,7 @@
 import type { PaymentAlertChannel } from '~/types';
 
 import { iosSourceKey } from './prefs';
+import { hasNativeAlertTruncation } from './text';
 
 /** Folder under the app's document directory. MUST match the Android plugin. */
 export const PAYMENT_CAPTURES_DIR = 'payment-captures';
@@ -38,6 +39,8 @@ export interface CaptureInput {
   presetCategoryId: string | null;
   /** The setup screen's own test alert: previewed, never stored or logged. */
   isTest?: boolean;
+  /** Preserve native boundary evidence before whitespace normalization. */
+  possiblyTruncated?: boolean;
 }
 
 const CAPTURE_FILE = /^(\d{10,})-[A-Za-z0-9-]+\.json$/;
@@ -113,6 +116,20 @@ export function parseAndroidCaptureJson(fileName: string, json: string): Capture
     presetAccountId: null,
     presetCategoryId: null,
     isTest: row.test === true,
+    ...(hasNativeAlertTruncation([
+      row.title,
+      row.text,
+      row.bigText,
+      row.subText,
+      row.summaryText,
+      row.infoText,
+      ...lines,
+      ...(Array.isArray(row.messages)
+        ? row.messages.map((item) => (item && typeof item === 'object' ? item.text : null))
+        : []),
+    ])
+      ? { possiblyTruncated: true }
+      : {}),
   };
 }
 
@@ -152,6 +169,9 @@ export function parseIosPendingAlertsJson(raw: string | null | undefined): Captu
       nativeKey: null,
       presetAccountId: str(row.accountId),
       presetCategoryId: str(row.categoryId),
+      ...(hasNativeAlertTruncation([row.title, row.subtitle, row.message])
+        ? { possiblyTruncated: true }
+        : {}),
     });
   }
   return entries;

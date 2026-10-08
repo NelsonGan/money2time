@@ -6,6 +6,14 @@ const WORD_CHAR = new RegExp(`[${WORD_CHAR_CLASS}]`);
 
 /** Longest text accepted by the scanner; real alerts are a few hundred characters. */
 export const MAX_ALERT_TEXT_LENGTH = 12000;
+/** Both existing native capture plugins truncate each field at this boundary.
+ * Without a truncation flag, discard boundary-length fields rather than trust
+ * a prefix that may have lost a later failure or promotional condition. */
+export const NATIVE_ALERT_FIELD_LIMIT = 2000;
+
+export function hasNativeAlertTruncation(parts: readonly unknown[]): boolean {
+  return parts.some((part) => typeof part === 'string' && part.length >= NATIVE_ALERT_FIELD_LIMIT);
+}
 
 const HTML_TAG = /<\/?[a-z][^>]*>/gi;
 const HTML_ENTITIES: Record<string, string> = {

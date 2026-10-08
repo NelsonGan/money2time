@@ -26,6 +26,9 @@ future/pending/failed payments, holds, own-account transfers, top-ups and
 withdrawals are discarded. Multiple distinct movements and uncertain direction
 are also discarded. A malformed model reply is a service failure, not an ignore.
 An intentional ignore is final and is never retried into a transaction.
+Existing native capture plugins truncate individual fields at 2000 characters.
+The app discards fields at that boundary before upload: a truncated prefix may
+have lost a later failure or promotional condition. No native rebuild is needed.
 
 ## Disclosure and interface
 

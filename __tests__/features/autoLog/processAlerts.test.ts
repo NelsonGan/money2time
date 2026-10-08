@@ -1,4 +1,8 @@
-import type { CaptureInput } from '~/features/autoLog/lib/captureQueue';
+import {
+  type CaptureInput,
+  parseAndroidCaptureJson,
+  parseIosPendingAlertsJson,
+} from '~/features/autoLog/lib/captureQueue';
 import { withAlertSource } from '~/features/autoLog/lib/prefs';
 import {
   type AlertProcessingDeps,
@@ -356,4 +360,39 @@ describe('network boundary and retry safety', () => {
     expect(scanNotification).not.toHaveBeenCalled();
     expect(input.createTransaction).not.toHaveBeenCalled();
   });
+  it.each(['android_notification', 'ios_alert'] as const)(
+    'discards a %s field at the native truncation boundary without uploading',
+    async (channel) => {
+      const input = deps();
+      const summary = await processAlertCaptures(
+        [{ ...capture, channel, presetAccountId: 'a1', body: capture.body.padEnd(2000, 'x') }],
+        input,
+      );
+      expect(scanNotification).not.toHaveBeenCalled();
+      expect(input.createTransaction).not.toHaveBeenCalled();
+      expect(summary.ignored).toBe(1);
+      expect(summary.captureIds).toEqual(['capture']);
+    },
+  );
+  it.each(['android_notification', 'ios_alert'] as const)(
+    'retains %s truncation evidence before trimming whitespace',
+    async (channel) => {
+      const input = deps();
+      const body = capture.body.padEnd(2000, ' ');
+      const parsed =
+        channel === 'android_notification'
+          ? parseAndroidCaptureJson(
+              'capture.json',
+              JSON.stringify({ package: 'com.example.bank', text: body }),
+            )!
+          : parseIosPendingAlertsJson(
+              JSON.stringify([{ id: 'capture', message: body, accountId: 'a1' }]),
+            )[0]!;
+      expect(parsed.body.length).toBeLessThan(2000);
+      const summary = await processAlertCaptures([parsed], input);
+      expect(scanNotification).not.toHaveBeenCalled();
+      expect(input.createTransaction).not.toHaveBeenCalled();
+      expect(summary.ignored).toBe(1);
+    },
+  );
 });
