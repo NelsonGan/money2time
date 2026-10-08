@@ -1179,7 +1179,7 @@ const nb = {
       bt27_touch: 'Åpne Innstillinger → Tilgjengelighet → Berøring.',
       bt27_backtap: 'Rull ned, og trykk på Bakpanel-trykk.',
       bt27_double: 'Trykk på Dobbelttrykk (eller Trippeltrykk).',
-      bt27_shortcuts: 'Rull ned, og trykk på Snarveier.',
+      bt27_shortcuts: 'Trykk på Snarveier.',
       step_counter: '%{current} av %{total}',
       log_payment_step_1: 'Åpne Snarveier, gå til Automation-fanen og trykk på New Automation.',
       log_payment_step_2: 'Velg Wallet: “Når jeg trykker på et Wallet-kort eller -pass.”',

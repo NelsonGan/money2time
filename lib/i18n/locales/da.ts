@@ -1181,7 +1181,7 @@ const da = {
       bt27_touch: 'Åbn Indstillinger → Tilgængelighed → Berøring.',
       bt27_backtap: 'Rul ned, og tryk på Tryk på bagsiden.',
       bt27_double: 'Tryk på Dobbelttryk (eller Tredobbelt tryk).',
-      bt27_shortcuts: 'Rul ned, og tryk på Genveje.',
+      bt27_shortcuts: 'Tryk på Genveje.',
       step_counter: '%{current} af %{total}',
       log_payment_step_1: 'Åbn Genveje, gå til fanen Automation, og tryk på New Automation.',
       log_payment_step_2: 'Vælg Wallet: “Når jeg trykker på et Wallet-kort eller -pas.”',

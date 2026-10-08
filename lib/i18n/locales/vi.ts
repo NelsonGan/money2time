@@ -1172,7 +1172,7 @@ const vi = {
       bt27_touch: 'Mở Cài đặt → Trợ năng → Cảm ứng.',
       bt27_backtap: 'Cuộn xuống và chạm Chạm vào mặt sau.',
       bt27_double: 'Chạm Chạm hai lần (hoặc Chạm ba lần).',
-      bt27_shortcuts: 'Cuộn xuống và chạm Phím tắt.',
+      bt27_shortcuts: 'Chạm Phím tắt.',
       step_counter: '%{current} trên %{total}',
       log_payment_step_1: 'Mở Phím tắt, vào tab Automation và chạm New Automation.',
       log_payment_step_2: 'Chọn Wallet: “Khi tôi chạm vào thẻ hoặc pass trong Wallet.”',

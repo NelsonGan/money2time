@@ -1184,7 +1184,7 @@ const pt = {
       bt27_touch: 'Abra Ajustes → Acessibilidade → Toque.',
       bt27_backtap: 'Role para baixo e toque em Toque Traseiro.',
       bt27_double: 'Toque em Toque Duplo (ou Toque Triplo).',
-      bt27_shortcuts: 'Role para baixo e toque em Atalhos.',
+      bt27_shortcuts: 'Toque em Atalhos.',
       step_counter: '%{current} de %{total}',
       log_payment_step_1: 'Abra o Atalhos, vá para a aba Automation e toque em New Automation.',
       log_payment_step_2: 'Escolha Wallet: “Quando eu toco em um cartão ou passe da Wallet.”',

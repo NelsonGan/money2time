@@ -1183,7 +1183,7 @@ const es = {
       bt27_touch: 'Abre Ajustes → Accesibilidad → Tocar.',
       bt27_backtap: 'Desplázate hacia abajo y toca Toque posterior.',
       bt27_double: 'Toca Doble toque (o Triple toque).',
-      bt27_shortcuts: 'Desplázate hacia abajo y toca Atajos.',
+      bt27_shortcuts: 'Toca Atajos.',
       step_counter: '%{current} de %{total}',
       log_payment_step_1: 'Abre Atajos, ve a la pestaña Automation y toca New Automation.',
       log_payment_step_2: 'Elige Wallet: “Cuando toco una tarjeta o pase de Wallet.”',

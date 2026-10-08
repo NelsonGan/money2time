@@ -15,11 +15,16 @@ export function iosMajorVersion(os: string, version: string | number): number | 
   return Number.isFinite(major) ? major : null;
 }
 
+/** True on iOS `min` or later. Always false off iOS. */
+export function isIosAtLeast(os: string, version: string | number, min: number): boolean {
+  const major = iosMajorVersion(os, version);
+  return major !== null && major >= min;
+}
+
 /**
  * True when the automation tutorials can hand out a ready-made automation
  * (trigger included) instead of walking through building one.
  */
 export function supportsSharedAutomations(os: string, version: string | number): boolean {
-  const major = iosMajorVersion(os, version);
-  return major !== null && major >= SHARED_AUTOMATIONS_MIN_IOS;
+  return isIosAtLeast(os, version, SHARED_AUTOMATIONS_MIN_IOS);
 }

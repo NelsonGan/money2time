@@ -1185,7 +1185,7 @@ const id = {
       bt27_touch: 'Buka Pengaturan → Aksesibilitas → Sentuh.',
       bt27_backtap: 'Gulir ke bawah dan ketuk Ketuk Belakang.',
       bt27_double: 'Ketuk Ketuk Dua Kali (atau Ketuk Tiga Kali).',
-      bt27_shortcuts: 'Gulir ke bawah dan ketuk Pintasan.',
+      bt27_shortcuts: 'Ketuk Pintasan.',
       step_counter: '%{current} dari %{total}',
       log_payment_step_1: 'Buka Shortcuts, buka tab Automation, lalu ketuk New Automation.',
       log_payment_step_2: 'Pilih Wallet: “When I tap a Wallet Card or Pass.”',

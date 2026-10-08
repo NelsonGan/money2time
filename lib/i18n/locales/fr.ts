@@ -1186,7 +1186,7 @@ const fr = {
       bt27_touch: 'Ouvrez Réglages → Accessibilité → Toucher.',
       bt27_backtap: 'Faites défiler et touchez Toucher l’arrière.',
       bt27_double: 'Touchez Toucher deux fois (ou Toucher trois fois).',
-      bt27_shortcuts: 'Faites défiler et touchez Raccourcis.',
+      bt27_shortcuts: 'Touchez Raccourcis.',
       step_counter: '%{current} sur %{total}',
       log_payment_step_1:
         'Ouvrez Raccourcis, allez dans l’onglet Automation et touchez New Automation.',

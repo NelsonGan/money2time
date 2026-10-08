@@ -1178,7 +1178,7 @@ const sv = {
       bt27_touch: 'Öppna Inställningar → Hjälpmedel → Tryck.',
       bt27_backtap: 'Rulla ned och tryck på Tryck på baksidan.',
       bt27_double: 'Tryck på Dubbeltryck (eller Trippeltryck).',
-      bt27_shortcuts: 'Rulla ned och tryck på Genvägar.',
+      bt27_shortcuts: 'Tryck på Genvägar.',
       step_counter: '%{current} av %{total}',
       log_payment_step_1: 'Öppna Genvägar, gå till fliken Automation och tryck på New Automation.',
       log_payment_step_2: 'Välj Wallet: “När jag trycker på ett Wallet-kort eller -pass.”',

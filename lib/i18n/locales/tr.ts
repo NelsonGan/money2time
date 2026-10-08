@@ -1182,7 +1182,7 @@ const tr = {
       bt27_touch: 'Ayarlar → Erişilebilirlik → Dokunma’yı açın.',
       bt27_backtap: 'Aşağı kaydırın ve Arkaya Dokunma’ya dokunun.',
       bt27_double: 'Çift Dokunma’ya (veya Üçlü Dokunma’ya) dokunun.',
-      bt27_shortcuts: 'Aşağı kaydırın ve Kestirmeler’e dokunun.',
+      bt27_shortcuts: 'Kestirmeler’e dokunun.',
       step_counter: '%{current} / %{total}',
       log_payment_step_1:
         'Kısayollar’ı açın, Automation sekmesine gidin ve New Automation’a dokunun.',

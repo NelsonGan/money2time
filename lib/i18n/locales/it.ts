@@ -1182,7 +1182,7 @@ const it = {
       bt27_touch: 'Apri Impostazioni → Accessibilità → Tocco.',
       bt27_backtap: 'Scorri in basso e tocca Tocco posteriore.',
       bt27_double: 'Tocca Tocco doppio (o Tocco triplo).',
-      bt27_shortcuts: 'Scorri in basso e tocca Comandi rapidi.',
+      bt27_shortcuts: 'Tocca Comandi rapidi.',
       step_counter: '%{current} di %{total}',
       log_payment_step_1: 'Apri Comandi, vai alla scheda Automation e tocca New Automation.',
       log_payment_step_2: 'Scegli Wallet: “Quando tocco una carta o un pass Wallet.”',

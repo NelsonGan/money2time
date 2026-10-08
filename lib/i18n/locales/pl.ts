@@ -1180,7 +1180,7 @@ const pl = {
       bt27_touch: 'Otwórz Ustawienia → Dostępność → Dotyk.',
       bt27_backtap: 'Przewiń w dół i stuknij Stuknięcie w tył.',
       bt27_double: 'Stuknij Stuknij dwukrotnie (lub trzykrotnie).',
-      bt27_shortcuts: 'Przewiń w dół i stuknij Skróty.',
+      bt27_shortcuts: 'Stuknij Skróty.',
       step_counter: '%{current} z %{total}',
       log_payment_step_1: 'Otwórz Skróty, przejdź do karty Automation i dotknij New Automation.',
       log_payment_step_2: 'Wybierz Wallet: „Gdy dotknę karty lub przepustki Wallet”.',

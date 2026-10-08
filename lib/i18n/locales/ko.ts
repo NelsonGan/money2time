@@ -1164,7 +1164,7 @@ const ko = {
       bt27_touch: '설정 → 손쉬운 사용 → 터치를 여세요.',
       bt27_backtap: '아래로 스크롤해 뒷면 탭을 탭하세요.',
       bt27_double: '이중 탭(또는 삼중 탭)을 탭하세요.',
-      bt27_shortcuts: '아래로 스크롤해 단축어를 탭하세요.',
+      bt27_shortcuts: '단축어를 탭하세요.',
       step_counter: '%{total}단계 중 %{current}단계',
       log_payment_step_1: '단축어를 열고 자동화 탭에서 New Automation을 누르세요.',
       log_payment_step_2: 'Wallet을 선택하세요: “When I tap a Wallet Card or Pass.”',

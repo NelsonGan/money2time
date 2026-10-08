@@ -1188,7 +1188,7 @@ const nl = {
       bt27_touch: 'Open Instellingen → Toegankelijkheid → Aanraken.',
       bt27_backtap: 'Scrol omlaag en tik op Tik op achterkant.',
       bt27_double: 'Tik op Dubbeltik (of Drievoudige tik).',
-      bt27_shortcuts: 'Scrol omlaag en tik op Opdrachten.',
+      bt27_shortcuts: 'Tik op Opdrachten.',
       step_counter: '%{current} van %{total}',
       log_payment_step_1:
         'Open Opdrachten, ga naar het tabblad Automation en tik op New Automation.',

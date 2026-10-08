@@ -1153,7 +1153,7 @@ const en = {
       bt27_touch: 'Open Settings → Accessibility → Touch.',
       bt27_backtap: 'Scroll down and tap Back Tap.',
       bt27_double: 'Tap Double Tap (or Triple Tap).',
-      bt27_shortcuts: 'Scroll down and tap Shortcuts.',
+      bt27_shortcuts: 'Tap Shortcuts.',
       step_counter: '%{current} of %{total}',
       log_payment_step_1: 'Open Shortcuts, go to the Automation tab, and tap New Automation.',
       log_payment_step_2: 'Choose Wallet: “When I tap a Wallet Card or Pass.”',

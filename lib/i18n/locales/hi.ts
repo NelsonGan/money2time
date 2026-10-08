@@ -1174,7 +1174,7 @@ const hi = {
       bt27_touch: 'सेटिंग्स → एक्सेसिबिलिटी → टच खोलें।',
       bt27_backtap: 'नीचे स्क्रॉल करें और Back Tap पर टैप करें।',
       bt27_double: 'Double Tap (या Triple Tap) पर टैप करें।',
-      bt27_shortcuts: 'नीचे स्क्रॉल करें और Shortcuts पर टैप करें।',
+      bt27_shortcuts: 'Shortcuts पर टैप करें।',
       step_counter: '%{total} में से %{current}',
       log_payment_step_1: 'Shortcuts खोलें, Automation टैब पर जाएं, और New Automation दबाएं।',
       log_payment_step_2: 'Wallet चुनें: “When I tap a Wallet Card or Pass.”',

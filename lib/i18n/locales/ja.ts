@@ -1171,7 +1171,7 @@ const ja = {
       bt27_touch: '設定 → アクセシビリティ → タッチ を開きます。',
       bt27_backtap: '下にスクロールして 背面タップ をタップします。',
       bt27_double: 'ダブルタップ（またはトリプルタップ）をタップします。',
-      bt27_shortcuts: '下にスクロールして ショートカット をタップします。',
+      bt27_shortcuts: 'ショートカット をタップします。',
       step_counter: '%{current} / %{total}',
       log_payment_step_1:
         'ショートカットを開き、「オートメーション」タブで New Automation をタップします。',

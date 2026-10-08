@@ -1192,7 +1192,7 @@ const fil = {
       bt27_touch: 'Buksan ang Settings → Accessibility → Touch.',
       bt27_backtap: 'Mag-scroll pababa at i-tap ang Back Tap.',
       bt27_double: 'I-tap ang Double Tap (o Triple Tap).',
-      bt27_shortcuts: 'Mag-scroll pababa at i-tap ang Shortcuts.',
+      bt27_shortcuts: 'I-tap ang Shortcuts.',
       step_counter: '%{current} sa %{total}',
       log_payment_step_1:
         'Buksan ang Shortcuts, pumunta sa Automation tab, at i-tap ang New Automation.',

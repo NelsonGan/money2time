@@ -1129,7 +1129,7 @@ const zh = {
       bt27_touch: '打开「设置」→「辅助功能」→「触控」。',
       bt27_backtap: '向下滚动并轻点「轻点背面」。',
       bt27_double: '轻点「轻点两下」（或「轻点三下」）。',
-      bt27_shortcuts: '向下滚动并轻点「快捷指令」。',
+      bt27_shortcuts: '轻点「快捷指令」。',
       step_counter: '第 %{current} 步，共 %{total} 步',
       log_payment_step_1: '打开快捷指令，进入自动化标签，点按 New Automation。',
       log_payment_step_2: '选择 Wallet: “当我轻点钱包卡或通行证时”。',

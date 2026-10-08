@@ -1191,7 +1191,7 @@ const de = {
       bt27_touch: 'Öffne Einstellungen → Bedienungshilfen → Tippen.',
       bt27_backtap: 'Scrolle nach unten und tippe auf Auf Rückseite tippen.',
       bt27_double: 'Tippe auf Doppeltippen (oder Dreifachtippen).',
-      bt27_shortcuts: 'Scrolle nach unten und tippe auf Kurzbefehle.',
+      bt27_shortcuts: 'Tippe auf Kurzbefehle.',
       step_counter: '%{current} von %{total}',
       log_payment_step_1: 'Öffne Kurzbefehle, geh zum Tab Automation und tippe auf New Automation.',
       log_payment_step_2: 'Wähl Wallet: „Wenn ich auf eine Wallet-Karte oder einen Pass tippe.“',

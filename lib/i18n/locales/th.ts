@@ -1165,7 +1165,7 @@ const th = {
       bt27_touch: 'เปิด การตั้งค่า → การช่วยการเข้าถึง → สัมผัส',
       bt27_backtap: 'เลื่อนลงแล้วแตะ แตะด้านหลัง',
       bt27_double: 'แตะ แตะสองครั้ง (หรือ แตะสามครั้ง)',
-      bt27_shortcuts: 'เลื่อนลงแล้วแตะ คำสั่งลัด',
+      bt27_shortcuts: 'แตะ คำสั่งลัด',
       step_counter: '%{current} จาก %{total}',
       log_payment_step_1: 'เปิด Shortcuts ไปที่แท็บ Automation แล้วแตะ New Automation',
       log_payment_step_2: 'เลือก Wallet: “When I tap a Wallet Card or Pass.”',

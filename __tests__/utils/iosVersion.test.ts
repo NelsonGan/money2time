@@ -1,4 +1,4 @@
-import { iosMajorVersion, supportsSharedAutomations } from '~/utils/iosVersion';
+import { iosMajorVersion, isIosAtLeast, supportsSharedAutomations } from '~/utils/iosVersion';
 
 describe('iosMajorVersion', () => {
   it('reads the major version from an iOS version string', () => {
@@ -25,5 +25,16 @@ describe('supportsSharedAutomations', () => {
 
   it('never applies to Android, whatever its API level', () => {
     expect(supportsSharedAutomations('android', 36)).toBe(false);
+  });
+});
+
+describe('isIosAtLeast', () => {
+  it('compares the major version against the minimum', () => {
+    expect(isIosAtLeast('ios', '26.4', 27)).toBe(false);
+    expect(isIosAtLeast('ios', '27.0.1', 27)).toBe(true);
+  });
+
+  it('is false off iOS', () => {
+    expect(isIosAtLeast('android', 36, 27)).toBe(false);
   });
 });

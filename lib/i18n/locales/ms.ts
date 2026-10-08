@@ -1188,7 +1188,7 @@ const ms = {
       bt27_touch: 'Buka Tetapan → Kebolehcapaian → Sentuh.',
       bt27_backtap: 'Skrol ke bawah dan ketik Ketik Belakang.',
       bt27_double: 'Ketik Ketik Dua Kali (atau Ketik Tiga Kali).',
-      bt27_shortcuts: 'Skrol ke bawah dan ketik Pintasan.',
+      bt27_shortcuts: 'Ketik Pintasan.',
       step_counter: '%{current} daripada %{total}',
       log_payment_step_1: 'Buka Shortcuts, pergi ke tab Automation, dan ketik New Automation.',
       log_payment_step_2: 'Pilih Wallet: “When I tap a Wallet Card or Pass.”',
