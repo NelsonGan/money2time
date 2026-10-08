@@ -5,6 +5,16 @@ Reviewed on 2026-10-08 for PR 570. This replaces the earlier AI notification wor
 ## Behavior and review fixes
 
 Notifications are captured locally, with monetary candidates extracted even when no currency symbol is present. Unlabelled numbers use the configured account currency; explicit currencies retain priority.
+The final review added failing regressions for adjacent currency labels, masked
+card digits, account/security identifiers and Unicode minus signs, then fixed
+their extraction. Attached currencies take priority over neighbouring numbers;
+a suffix currency cannot also label the next amount. PINs,
+CVVs, passcodes and masked card suffixes do not become money candidates; Unicode
+negative amounts are rejected. Capture no longer subscribes to transaction or
+subscription state or receives an unused transaction creation function.
+Queued notifications that failed under the retired AI workflow become pending
+local reviews on retry. Replayed income, expense and ignored decisions stay
+completed, so retries cannot reopen a finished review.
 Capture never writes money or calls an AI provider. The user chooses Income,
 Expense or Ignore. Several amounts require a selection; missing amounts can be entered in the full transaction editor. Compact cards use the detected currency and configured account without extra controls. The pencil opens the ordinary full editor, while its save uses the durable notification review guard. Categories reuse the Apple Pay keyword mapping after a valid same-type preset and before defaults. Bulk actions process the selected pending snapshot.
 Apple Pay automatic logging and receipt photo/itemized/screenshot scanning keep
@@ -38,7 +48,7 @@ Settings ad click tracking remains included in this PR.
 ## Automated verification
 
 - Root type checking, lint and formatting: `npm run check`.
-- Full Jest regression suite: 183 suites, 2,517 tests, including receipt client,
+- Full Jest regression suite: 183 suites, 2,528 tests, including receipt client,
   Worker image modes, native queue contracts, Apple Pay, localization parity,
   notification extraction, capture/history and review/recovery scenarios.
 - Six analytics suites: 115 tests passed. Trigger/payload/source prose was also

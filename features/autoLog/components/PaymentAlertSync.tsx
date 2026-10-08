@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { AppState, InteractionManager } from 'react-native';
 
-import { useApp, useTransactions } from '~/context/AppContext';
-import { useIsPro } from '~/context/ProContext';
+import { useApp } from '~/context/AppContext';
 import { paymentAlertCapturesRepository } from '~/lib/repositories/paymentAlertCapturesRepository';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { reportError } from '~/services/errorReporting';
@@ -39,9 +38,7 @@ import {
  * and asks Android to rebind the listener when it was dropped.
  */
 export function PaymentAlertSync() {
-  const { accounts, categories, settings, quickEntryPrefs, createTransaction } = useApp();
-  const { transactions } = useTransactions();
-  const isPro = useIsPro();
+  const { accounts, categories, settings, quickEntryPrefs } = useApp();
   const { paymentAlertPrefs: prefs } = useApp();
 
   const stateRef = useRef({
@@ -49,20 +46,14 @@ export function PaymentAlertSync() {
     categories,
     settings,
     quickEntryPrefs,
-    createTransaction,
-    isPro,
     prefs,
-    transactions,
   });
   stateRef.current = {
     accounts,
     categories,
     settings,
     quickEntryPrefs,
-    createTransaction,
-    isPro,
     prefs,
-    transactions,
   };
   const drainingRef = useRef(false);
   const rerunRef = useRef(false);

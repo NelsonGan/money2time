@@ -101,3 +101,34 @@ it('accepts common colon and credit-plus formatting while excluding labelled pho
     { amount: 14.5, currency: 'MYR' },
   ]);
 });
+
+it('keeps adjacent currency prefixes attached to their own numbers', () => {
+  expect(extractNotificationAmounts('RM5.00 USD10.00', 'MYR')).toEqual([
+    { amount: 5, currency: 'MYR' },
+    { amount: 10, currency: 'USD' },
+  ]);
+  expect(extractNotificationAmounts('5.00 MYR 10.00 USD', 'MYR')).toEqual([
+    { amount: 5, currency: 'MYR' },
+    { amount: 10, currency: 'USD' },
+  ]);
+});
+
+it('prefers an attached currency label over a neighbouring unlabelled balance', () => {
+  expect(extractNotificationAmounts('Balance 900.00 USD25.00', 'MYR')).toEqual([
+    { amount: 900, currency: 'MYR' },
+    { amount: 25, currency: 'USD' },
+  ]);
+});
+
+it.each([
+  'Paid 12.50 using ****1234.',
+  'Paid 12.50 using ••••1234.',
+  'Paid 12.50. A/C 12345678.',
+  'Paid 12.50. PIN is 1234. CVV: 123. Passcode 456789.',
+])('excludes account and security identifiers from number-only candidates: %s', (text) => {
+  expect(extractNotificationAmounts(text, 'MYR')).toEqual([{ amount: 12.5, currency: 'MYR' }]);
+});
+
+it('does not turn Unicode negative amounts into positive candidates', () => {
+  expect(extractNotificationAmounts('Payment −5.00, RM−10.00, − 15.00.', 'MYR')).toEqual([]);
+});

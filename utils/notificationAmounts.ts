@@ -44,22 +44,36 @@ export function extractNotificationAmounts(
     })
     .replace(/\u066b/g, '.')
     .replace(/\u066c/g, ',')
+    .replace(/\u2212/g, '-')
     .replace(/\u202f/g, '\u00a0');
   const found: { index: number; value: NotificationAmount }[] = [];
   const labelledRanges: { start: number; end: number }[] = [];
+  const labelled: { start: number; end: number; spacing: number; token: string; raw: string }[] =
+    [];
   for (const [regex, isPrefix] of [
     [prefix, true],
     [suffix, false],
   ] as const) {
     regex.lastIndex = 0;
     for (const match of normalized.matchAll(regex)) {
-      labelledRanges.push({ start: match.index, end: match.index + match[0].length });
-      const token = (isPrefix ? match[2] : match[3]).toUpperCase();
-      const raw = (isPrefix ? match[3] : match[2]).trim();
-      const currency = CURRENCY_CODES.has(token) ? token : (symbols.get(token) ?? fallbackCurrency);
-      const value = readAmount(raw, currency);
-      if (value) found.push({ index: match.index, value });
+      labelled.push({
+        start: match.index + match[1].length,
+        end: match.index + match[0].length,
+        spacing: match[0].length - match[1].length - match[2].length - match[3].length,
+        token: (isPrefix ? match[2] : match[3]).toUpperCase(),
+        raw: (isPrefix ? match[3] : match[2]).trim(),
+      });
     }
+  }
+  // Attached labels win; otherwise a currency belongs to its first amount only.
+  for (const { start, end, token, raw } of labelled.sort(
+    (a, b) => a.spacing - b.spacing || a.start - b.start,
+  )) {
+    if (labelledRanges.some((range) => start < range.end && end > range.start)) continue;
+    labelledRanges.push({ start, end });
+    const currency = CURRENCY_CODES.has(token) ? token : (symbols.get(token) ?? fallbackCurrency);
+    const value = readAmount(raw, currency);
+    if (value) found.push({ index: start, value });
   }
   unlabelled.lastIndex = 0;
   for (const match of normalized.matchAll(unlabelled)) {
@@ -78,7 +92,8 @@ export function extractNotificationAmounts(
       /[A-Za-z]{2,}$|[a-z]$|[0-9][A-Za-z]$/.test(before) ||
       /^[A-Za-z0-9]/.test(after) ||
       /^\s*(?:%|points?\b|pts\b)/i.test(after) ||
-      /\b(?:otp|code|ref(?:erence)?|card|account|acct|id|invoice|phone|tel)(?:\s+(?:number|no\.?|is|ending|ends|in|with))*[\s:#*.\-+]*$/i.test(
+      /[*•●xX]{2,}\s*$/.test(before) ||
+      /\b(?:otp|pin|cvv|cvc|passcode|password|code|ref(?:erence)?|card|account|acct|a\/c|id|invoice|phone|tel)(?:\s+(?:number|no\.?|is|ending|ends|in|with))*[\s:#*.\-+]*$/i.test(
         before,
       )
     )

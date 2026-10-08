@@ -1,19 +1,11 @@
 // Capture notifications locally for explicit user review. No inference or transaction write happens here.
-import type { CreateTransactionMeta } from '~/context/AppContext';
 import { paymentAlertCapturesRepository } from '~/lib/repositories/paymentAlertCapturesRepository';
-import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import { reportError } from '~/services/errorReporting';
 import {
   getNotificationScanHistoryGeneration,
   recordNotificationScan,
 } from '~/services/notificationScanHistory';
-import type {
-  Account,
-  Category,
-  PaymentAlertPrefs,
-  QuickEntryPrefs,
-  TransactionWithRelations,
-} from '~/types';
+import type { Account, Category, PaymentAlertPrefs, QuickEntryPrefs } from '~/types';
 import { extractNotificationAmounts } from '~/utils/notificationAmounts';
 
 import type { CaptureInput } from './lib/captureQueue';
@@ -29,13 +21,9 @@ export interface AlertProcessingDeps {
   scanGeneration?: number;
   accounts: readonly Account[];
   categories: readonly Category[];
-  /** Live transactions, newest first. */
-  transactions: readonly TransactionWithRelations[];
   prefs: PaymentAlertPrefs;
   reportingCurrency: string;
   quickEntryPrefs: QuickEntryPrefs;
-  isPro: boolean;
-  createTransaction: (input: CreateTransactionInput, meta?: CreateTransactionMeta) => string;
 }
 
 export interface AlertProcessingSummary {
@@ -45,7 +33,6 @@ export interface AlertProcessingSummary {
   ignored: number;
   duplicates: number;
   accountCertain: number;
-  loggedTransactionIds: string[];
   /** Ids of the captures written, in order. */
   captureIds: string[];
 }
@@ -93,7 +80,6 @@ export async function processAlertCaptures(
     ignored: 0,
     duplicates: 0,
     accountCertain: 0,
-    loggedTransactionIds: [],
     captureIds: [],
   };
   const appUserId = deps.appUserId;

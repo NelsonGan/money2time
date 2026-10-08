@@ -64,6 +64,23 @@ it('updates a failed retry without adding another entry or displacing newer noti
     ['0', 'income'],
   ]);
 });
+it('moves a failed legacy scan into the local review queue on retry', async () => {
+  await recordNotificationScan('a', entry(0, 'failed'));
+  await recordNotificationScan('a', { ...entry(0), result: 'pending' });
+  expect(await readNotificationScanHistory('a')).toEqual([
+    expect.objectContaining({ id: '0', result: 'pending' }),
+  ]);
+});
+it.each(['expense', 'income', 'none'] as const)(
+  'never reopens a completed %s notification on queue replay',
+  async (result) => {
+    await recordNotificationScan('a', entry(0, result));
+    await recordNotificationScan('a', { ...entry(0), result: 'pending' });
+    expect(await readNotificationScanHistory('a')).toEqual([
+      expect.objectContaining({ id: '0', result }),
+    ]);
+  },
+);
 it('serializes concurrent writes without losing captures', async () => {
   await Promise.all(Array.from({ length: 10 }, (_, i) => recordNotificationScan('a', entry(i))));
   expect(await readNotificationScanHistory('a')).toHaveLength(10);

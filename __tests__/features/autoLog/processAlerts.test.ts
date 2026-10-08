@@ -23,7 +23,7 @@ jest.mock('~/services/notificationScanHistory', () => ({
   getNotificationScanHistoryGeneration: jest.fn(() => 0),
 }));
 jest.mock('~/services/receiptScan', () => ({
-  scanNotification: jest.fn(() => {
+  scanReceipt: jest.fn(() => {
     throw new Error('AI must never run');
   }),
 }));
@@ -45,12 +45,9 @@ const deps = (): AlertProcessingDeps => ({
   appUserId: 'test-user',
   accounts: [account()],
   categories: [category()],
-  transactions: [],
   prefs: withAlertSource(prefs(), source({ accountId: 'a1' })),
   reportingCurrency: 'MYR',
   quickEntryPrefs: { autoLogUsageCount: 9999, defaultExpenseCategoryId: 'c1' } as QuickEntryPrefs,
-  isPro: false,
-  createTransaction: jest.fn(),
 });
 beforeEach(() => {
   jest.clearAllMocks();
@@ -69,7 +66,6 @@ it('queues a local amount for review without creating a transaction or using AI/
     }),
     0,
   );
-  expect(current.createTransaction).not.toHaveBeenCalled();
   expect(summary).toMatchObject({ logged: 0, pending: 1, captureIds: ['capture'] });
   expect(paymentAlertCapturesRepository.insert).toHaveBeenCalledWith(
     expect.objectContaining({ status: 'pending', body: null }),

@@ -100,7 +100,9 @@ export function recordNotificationScan(
     // A queue retry must never reopen a review that the user already finished.
     if (
       entry.result === 'pending' &&
-      previous.some((row) => row.id === entry.id && row.result !== 'pending')
+      previous.some(
+        (row) => row.id === entry.id && ['income', 'expense', 'none'].includes(row.result),
+      )
     )
       return;
     const next = parse(JSON.stringify([...previous.filter((row) => row.id !== entry.id), entry]));
