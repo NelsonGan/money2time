@@ -1221,7 +1221,7 @@ const th = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
       payment_alerts_ios_step_7:
-        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text” after reading the disclosure. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
+        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text”. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
       payment_alerts_android_disclosure: 'อ่านวิธีใช้สิทธิ์เข้าถึงการแจ้งเตือน แล้วแตะ Continue',
       payment_alerts_ios_app:
         'แตะ App แล้วเลือกแอปธนาคารหรือกระเป๋าเงินอิเล็กทรอนิกส์ ภาพหน้าจอนี้ใช้ Wallet เป็นตัวอย่าง',
@@ -2534,8 +2534,6 @@ const th = {
   },
   payment_alerts: {
     scan_enabled: 'สแกนข้อความการแจ้งเตือน',
-    scan_disclosure:
-      'ส่งข้อความการแจ้งเตือนจากแอปที่เลือกไปยังเครื่องสแกนของ Money2Time และผู้ให้บริการ AI อย่าง OpenRouter เพื่อระบุรายรับและรายจ่ายที่เสร็จสมบูรณ์ ข้อเสนอและข้อความที่ไม่เกี่ยวข้องจะถูกทิ้ง ต้องใช้อินเทอร์เน็ต และโควตาสแกนใบเสร็จแยกกัน',
     test_scan_failed_title: 'ไม่สามารถบันทึกการแจ้งเตือนทดสอบได้',
     test_scan_failed:
       'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
@@ -2543,8 +2541,6 @@ const th = {
     account_hint:
       'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
     title: 'การแจ้งเตือน',
-    intro_android:
-      'Money2Time scans notification text from the bank and wallet apps you choose to identify completed income and expenses. It sends this text to its scanner and AI provider, OpenRouter. Offers and unrelated messages are discarded.',
     card_intro:
       'Automatically log completed income and expenses from bank and wallet notifications.',
     section_status: 'สถานะ',
@@ -2574,8 +2570,6 @@ const th = {
       'Money2Time ต้องได้รับสิทธิ์เข้าถึงการแจ้งเตือนสำหรับฟีเจอร์นี้ โดยใช้งานดังนี้',
     disclosure_point_selected:
       'อ่านเฉพาะการแจ้งเตือนจากแอปธนาคารและแอปวอลเล็ตที่คุณเลือก นอกนั้นจะถูกละเว้น',
-    disclosure_point_device:
-      'ส่งข้อความการแจ้งเตือนจากแอปที่เลือกไปยังเครื่องสแกนของ Money2Time และผู้ให้บริการ AI อย่าง OpenRouter เพื่อระบุรายรับและรายจ่ายที่เสร็จสมบูรณ์ ข้อเสนอและข้อความที่ไม่เกี่ยวข้องจะถูกทิ้ง ต้องใช้อินเทอร์เน็ต และโควตาสแกนใบเสร็จแยกกัน',
     disclosure_android_warning:
       'Android จะเตือนว่าแอปที่มีสิทธิ์เข้าถึงการแจ้งเตือนอ่านการแจ้งเตือนทั้งหมดได้ Money2Time เก็บไว้เฉพาะแอปที่คุณเลือก',
     access_title: 'เปิดสิทธิ์เข้าถึงการแจ้งเตือน',

@@ -249,16 +249,14 @@ export function PaymentAlertsSetupScreen({ initialStep, onClose }: PaymentAlerts
               {I18n.t('payment_alerts.disclosure_body')}
             </Text>
             <View className="gap-3 rounded-2xl border border-border/30 bg-card p-4">
-              {['disclosure_point_selected', 'disclosure_point_device'].map((key) => (
-                <View key={key} className="flex-row gap-3">
-                  <Text variant="body" tone="primary">
-                    •
-                  </Text>
-                  <Text variant="body" className="flex-1 text-foreground">
-                    {I18n.t(`payment_alerts.${key}`)}
-                  </Text>
-                </View>
-              ))}
+              <View className="flex-row gap-3">
+                <Text variant="body" tone="primary">
+                  •
+                </Text>
+                <Text variant="body" className="flex-1 text-foreground">
+                  {I18n.t('payment_alerts.disclosure_point_selected')}
+                </Text>
+              </View>
             </View>
             <Text variant="caption" tone="muted">
               {I18n.t('payment_alerts.disclosure_android_warning')}

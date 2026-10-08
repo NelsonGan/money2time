@@ -12,7 +12,7 @@ inference were synthetic. Production Worker traffic was not changed.
   text-only provider payloads, malformed output, intentional ignores, primary and
   backup failure, unchanged image requests and daily attempt throttling.
 - App tests exercise income categories, currency/billed amounts, duplicates,
-  atomic persistence, retrying saved classifications, explicit upload consent,
+  atomic persistence, retrying saved classifications, notification scanning opt-in,
   live preference changes, manual entries during inference, offline batch stopping
   and preservation of a late failure condition in long text.
 - Android and iOS native fields at their existing 2000-character truncation
@@ -69,7 +69,7 @@ subset. Do not use private notification text or publish credentials.
 Android API36 emulator testing used the real native notification listener and
 the native scanner client, with requests routed to the isolated live preview:
 
-- Explicit disclosure and scan switch rendered correctly in light and dark themes.
+- The original disclosure and scan switch rendered correctly in light and dark themes.
   Returning from the background with notification access already granted did not
   bypass the disclosure.
 - A completed MYR21.23 purchase, MYR121.23 salary and equal-value MYR21.23 refund
@@ -84,7 +84,7 @@ the native scanner client, with requests routed to the isolated live preview:
   unclassified error, rather than claiming no notification arrived.
 
 iPhone18Pro/iOS27 testing verified the native text scanner client against the live
-preview and the Automation disclosure layout in light/dark themes. iPad mini A17
+preview and the original Automation disclosure layout in light/dark themes. iPad mini A17
 Pro/iOS27 verified the centered tablet layout. Real iOS financial data was not
 sent or included in evidence. The real iPhone Shortcuts notification trigger was
 not exercised; its existing native queue/action format is unchanged.
@@ -106,6 +106,16 @@ The original scanning preference and development Pro override were restored.
 Three affected in-app automation tutorial frames were recaptured and annotated.
 Tutorial registry generation and website sync completed; the website catalogue
 had no changes because these automation guides are maintained separately.
+
+## UI copy follow-up
+
+Removed the added scanner/provider explanation entirely from the scan control and
+Android setup, including its unused locale entries in all 24 catalogues. The scan
+switch and processing behavior are unchanged. Analytics triggers and payloads are
+unchanged. Android and iPhone light/dark layouts, Android setup and the centered
+iPad layout were checked again. Three tutorial images and their moved markers
+were refreshed; website sync produced no catalogue changes. All 178 suites and
+2488 tests passed again, along with app type checking, lint and formatting.
 
 ## Release order and remaining checks
 

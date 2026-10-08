@@ -1241,7 +1241,7 @@ const sv = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
       payment_alerts_ios_step_7:
-        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text” after reading the disclosure. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
+        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text”. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
       payment_alerts_android_disclosure: 'Läs hur aviseringsåtkomsten används och tryck Continue.',
       payment_alerts_ios_app:
         'Tryck på App och välj din bank- eller plånboksapp. Dessa skärmbilder använder Wallet som exempel.',
@@ -2580,8 +2580,6 @@ const sv = {
   },
   payment_alerts: {
     scan_enabled: 'Skanna aviseringstext',
-    scan_disclosure:
-      'Skicka aviseringstext från valda appar till Money2Times skanner och AI-leverantören OpenRouter för att identifiera genomförda inkomster och utgifter. Erbjudanden och ovidkommande meddelanden kasseras. Kräver internet; kvittoskanning har en separat kvot.',
     test_scan_failed_title: 'Testnotisen kunde inte registreras',
     test_scan_failed:
       'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
@@ -2589,8 +2587,6 @@ const sv = {
     account_hint:
       'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
     title: 'Aviseringar',
-    intro_android:
-      'Money2Time scans notification text from the bank and wallet apps you choose to identify completed income and expenses. It sends this text to its scanner and AI provider, OpenRouter. Offers and unrelated messages are discarded.',
     card_intro:
       'Automatically log completed income and expenses from bank and wallet notifications.',
     section_status: 'Status',
@@ -2618,8 +2614,6 @@ const sv = {
     disclosure_body: 'Money2Time behöver aviseringsåtkomst för det här. Så här används den:',
     disclosure_point_selected:
       'Den läser bara aviseringar från de bank- och plånboksappar du väljer. Allt annat ignoreras.',
-    disclosure_point_device:
-      'Skicka aviseringstext från valda appar till Money2Times skanner och AI-leverantören OpenRouter för att identifiera genomförda inkomster och utgifter. Erbjudanden och ovidkommande meddelanden kasseras. Kräver internet; kvittoskanning har en separat kvot.',
     disclosure_android_warning:
       'Android varnar för att en app med aviseringsåtkomst kan läsa alla dina aviseringar. Money2Time behåller bara de appar du väljer.',
     access_title: 'Slå på aviseringsåtkomst',

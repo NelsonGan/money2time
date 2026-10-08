@@ -1252,7 +1252,7 @@ const nl = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
       payment_alerts_ios_step_7:
-        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text” after reading the disclosure. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
+        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text”. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
       payment_alerts_android_disclosure:
         'Lees hoe meldingstoegang wordt gebruikt en tik op Continue.',
       payment_alerts_ios_app:
@@ -2608,8 +2608,6 @@ const nl = {
   },
   payment_alerts: {
     scan_enabled: 'Meldingstekst scannen',
-    scan_disclosure:
-      'Stuur meldingstekst van de gekozen apps naar de scanner van Money2Time en de AI-aanbieder OpenRouter om voltooide inkomsten en uitgaven te herkennen. Aanbiedingen en niet-relevante berichten worden weggegooid. Internet vereist; bonnen scannen heeft een apart tegoed.',
     test_scan_failed_title: 'Testmelding kon niet worden vastgelegd',
     test_scan_failed:
       'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
@@ -2617,8 +2615,6 @@ const nl = {
     account_hint:
       'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
     title: 'Meldingen',
-    intro_android:
-      'Money2Time scans notification text from the bank and wallet apps you choose to identify completed income and expenses. It sends this text to its scanner and AI provider, OpenRouter. Offers and unrelated messages are discarded.',
     card_intro:
       'Automatically log completed income and expenses from bank and wallet notifications.',
     section_status: 'Status',
@@ -2646,8 +2642,6 @@ const nl = {
     disclosure_body: 'Money2Time heeft hiervoor meldingstoegang nodig. Zo wordt die gebruikt:',
     disclosure_point_selected:
       'Alleen meldingen van de bank- en wallet-apps die je kiest worden gelezen. Al het andere wordt genegeerd.',
-    disclosure_point_device:
-      'Stuur meldingstekst van de gekozen apps naar de scanner van Money2Time en de AI-aanbieder OpenRouter om voltooide inkomsten en uitgaven te herkennen. Aanbiedingen en niet-relevante berichten worden weggegooid. Internet vereist; bonnen scannen heeft een apart tegoed.',
     disclosure_android_warning:
       'Android waarschuwt dat een app met meldingstoegang al je meldingen kan lezen. Money2Time bewaart alleen de apps die je kiest.',
     access_title: 'Meldingstoegang aanzetten',

@@ -1247,7 +1247,7 @@ const tr = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
       payment_alerts_ios_step_7:
-        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text” after reading the disclosure. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
+        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text”. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
       payment_alerts_android_disclosure:
         'Bildirim erişiminin nasıl kullanıldığını okuyup Continue seçeneğine dokunun.',
       payment_alerts_ios_app:
@@ -2589,8 +2589,6 @@ const tr = {
   },
   payment_alerts: {
     scan_enabled: 'Bildirim metnini tara',
-    scan_disclosure:
-      'Tamamlanan gelir ve giderleri belirlemek için seçtiğiniz uygulamaların bildirim metnini Money2Time tarayıcısına ve yapay zekâ sağlayıcısı OpenRouter’a gönderin. Teklifler ve ilgisiz mesajlar atılır. İnternet gerekir; makbuz tarama kotası ayrıdır.',
     test_scan_failed_title: 'Test bildirimi kaydedilemedi',
     test_scan_failed:
       'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
@@ -2598,8 +2596,6 @@ const tr = {
     account_hint:
       'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
     title: 'Bildirimler',
-    intro_android:
-      'Money2Time scans notification text from the bank and wallet apps you choose to identify completed income and expenses. It sends this text to its scanner and AI provider, OpenRouter. Offers and unrelated messages are discarded.',
     card_intro:
       'Automatically log completed income and expenses from bank and wallet notifications.',
     section_status: 'Durum',
@@ -2629,8 +2625,6 @@ const tr = {
       "Bunun için Money2Time'ın bildirim erişimine ihtiyacı var. Erişimi şöyle kullanır:",
     disclosure_point_selected:
       'Yalnızca seçtiğiniz banka ve cüzdan uygulamalarının bildirimlerini okur. Diğer her şey yok sayılır.',
-    disclosure_point_device:
-      'Tamamlanan gelir ve giderleri belirlemek için seçtiğiniz uygulamaların bildirim metnini Money2Time tarayıcısına ve yapay zekâ sağlayıcısı OpenRouter’a gönderin. Teklifler ve ilgisiz mesajlar atılır. İnternet gerekir; makbuz tarama kotası ayrıdır.',
     disclosure_android_warning:
       'Android, bildirim erişimi olan bir uygulamanın tüm bildirimlerinizi okuyabileceği konusunda uyaracak. Money2Time yalnızca seçtiğiniz uygulamaları tutar.',
     access_title: 'Bildirim erişimini açın',

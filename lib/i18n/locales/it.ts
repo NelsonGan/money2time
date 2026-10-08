@@ -1244,7 +1244,7 @@ const it = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
       payment_alerts_ios_step_7:
-        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text” after reading the disclosure. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
+        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text”. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
       payment_alerts_android_disclosure:
         'Leggi come viene usato l’accesso alle notifiche, poi tocca Continue.',
       payment_alerts_ios_app:
@@ -2595,8 +2595,6 @@ const it = {
   },
   payment_alerts: {
     scan_enabled: 'Analizza il testo delle notifiche',
-    scan_disclosure:
-      'Invia il testo delle notifiche delle app scelte allo scanner di Money2Time e al suo fornitore IA, OpenRouter, per identificare entrate e spese completate. Offerte e messaggi non pertinenti vengono scartati. Richiede internet; le scansioni delle ricevute hanno una quota separata.',
     test_scan_failed_title: 'Impossibile registrare la notifica di prova',
     test_scan_failed:
       'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
@@ -2604,8 +2602,6 @@ const it = {
     account_hint:
       'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
     title: 'Notifiche',
-    intro_android:
-      'Money2Time scans notification text from the bank and wallet apps you choose to identify completed income and expenses. It sends this text to its scanner and AI provider, OpenRouter. Offers and unrelated messages are discarded.',
     card_intro:
       'Automatically log completed income and expenses from bank and wallet notifications.',
     section_status: 'Stato',
@@ -2635,8 +2631,6 @@ const it = {
       "Per farlo, Money2Time ha bisogno dell'accesso alle notifiche. Ecco come lo usa:",
     disclosure_point_selected:
       'Legge solo le notifiche delle app bancarie e dei wallet che scegli. Tutto il resto viene ignorato.',
-    disclosure_point_device:
-      'Invia il testo delle notifiche delle app scelte allo scanner di Money2Time e al suo fornitore IA, OpenRouter, per identificare entrate e spese completate. Offerte e messaggi non pertinenti vengono scartati. Richiede internet; le scansioni delle ricevute hanno una quota separata.',
     disclosure_android_warning:
       "Android ti avviserà che un'app con accesso alle notifiche può leggerle tutte. Money2Time tiene solo le app che scegli.",
     access_title: "Attiva l'accesso alle notifiche",

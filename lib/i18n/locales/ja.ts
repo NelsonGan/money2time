@@ -1236,7 +1236,7 @@ const ja = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
       payment_alerts_ios_step_7:
-        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text” after reading the disclosure. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
+        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text”. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
       payment_alerts_android_disclosure: '通知へのアクセスの使い方を読み、Continueをタップします。',
       payment_alerts_ios_app:
         'App をタップして銀行または電子ウォレットのアプリを選びます。この画像では Wallet を例にしています。',
@@ -2564,8 +2564,6 @@ const ja = {
   },
   payment_alerts: {
     scan_enabled: '通知テキストをスキャン',
-    scan_disclosure:
-      '選択したアプリの通知テキストをMoney2TimeのスキャナーとAIプロバイダーのOpenRouterに送信し、完了した収入と支出を判別します。広告や無関係なメッセージは破棄されます。インターネット接続が必要です。レシートのスキャン枠は別です。',
     test_scan_failed_title: 'テスト通知を記録できませんでした',
     test_scan_failed:
       'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
@@ -2573,8 +2571,6 @@ const ja = {
     account_hint:
       'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
     title: '通知',
-    intro_android:
-      'Money2Time scans notification text from the bank and wallet apps you choose to identify completed income and expenses. It sends this text to its scanner and AI provider, OpenRouter. Offers and unrelated messages are discarded.',
     card_intro:
       'Automatically log completed income and expenses from bank and wallet notifications.',
     section_status: 'ステータス',
@@ -2604,8 +2600,6 @@ const ja = {
       'そのために Money2Time には通知へのアクセスが必要です。使い方は次のとおりです。',
     disclosure_point_selected:
       '読み取るのは、選んだ銀行アプリや電子マネーアプリの通知だけです。それ以外は無視します。',
-    disclosure_point_device:
-      '選択したアプリの通知テキストをMoney2TimeのスキャナーとAIプロバイダーのOpenRouterに送信し、完了した収入と支出を判別します。広告や無関係なメッセージは破棄されます。インターネット接続が必要です。レシートのスキャン枠は別です。',
     disclosure_android_warning:
       'Android は、通知へのアクセスを持つアプリはすべての通知を読めると警告します。Money2Time が保存するのは選んだアプリの通知だけです。',
     access_title: '通知へのアクセスをオンにする',

@@ -1178,7 +1178,7 @@ const zh = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
       payment_alerts_ios_step_7:
-        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text” after reading the disclosure. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
+        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text”. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
       payment_alerts_android_disclosure: '阅读通知权限的使用说明，然后点 Continue。',
       payment_alerts_ios_app: '轻点 App 并选择银行或电子钱包 App。截图以 Wallet 为例。',
       payment_alerts_ios_run: '点应用旁的箭头，保持 Automation 开启。关闭 Notify 可静默记账。',
@@ -2472,8 +2472,6 @@ const zh = {
   },
   payment_alerts: {
     scan_enabled: '扫描通知文本',
-    scan_disclosure:
-      '将所选应用的通知文本发送至 Money2Time 扫描服务及其 AI 提供商 OpenRouter，以识别已完成的收入和支出。优惠和无关消息会被丢弃。需要联网；收据扫描额度单独计算。',
     test_scan_failed_title: '无法记录测试通知',
     test_scan_failed:
       'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
@@ -2481,8 +2479,6 @@ const zh = {
     account_hint:
       'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
     title: '通知',
-    intro_android:
-      'Money2Time scans notification text from the bank and wallet apps you choose to identify completed income and expenses. It sends this text to its scanner and AI provider, OpenRouter. Offers and unrelated messages are discarded.',
     card_intro:
       'Automatically log completed income and expenses from bank and wallet notifications.',
     section_status: '状态',
@@ -2506,8 +2502,6 @@ const zh = {
     disclosure_title: 'Log transactions from your notifications',
     disclosure_body: '这需要 Money2Time 获得通知使用权。它是这样使用的：',
     disclosure_point_selected: '只读取你所选银行和电子钱包应用的通知，其余一律忽略。',
-    disclosure_point_device:
-      '将所选应用的通知文本发送至 Money2Time 扫描服务及其 AI 提供商 OpenRouter，以识别已完成的收入和支出。优惠和无关消息会被丢弃。需要联网；收据扫描额度单独计算。',
     disclosure_android_warning:
       'Android 会提示，拥有通知使用权的应用可以读取你的所有通知。Money2Time 只保留你所选的应用。',
     access_title: '开启通知使用权',

@@ -1245,7 +1245,7 @@ const ru = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
       payment_alerts_ios_step_7:
-        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text” after reading the disclosure. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
+        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text”. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
       payment_alerts_android_disclosure:
         'Прочитайте, как используется доступ к уведомлениям, и нажмите Continue.',
       payment_alerts_ios_app:
@@ -2584,8 +2584,6 @@ const ru = {
   },
   payment_alerts: {
     scan_enabled: 'Сканировать текст уведомлений',
-    scan_disclosure:
-      'Отправляйте текст уведомлений выбранных приложений сканеру Money2Time и поставщику ИИ OpenRouter для распознавания завершённых доходов и расходов. Реклама и посторонние сообщения отбрасываются. Нужен интернет; лимит сканирования чеков отдельный.',
     test_scan_failed_title: 'Не удалось записать тестовое уведомление',
     test_scan_failed:
       'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
@@ -2593,8 +2591,6 @@ const ru = {
     account_hint:
       'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
     title: 'Уведомления',
-    intro_android:
-      'Money2Time scans notification text from the bank and wallet apps you choose to identify completed income and expenses. It sends this text to its scanner and AI provider, OpenRouter. Offers and unrelated messages are discarded.',
     card_intro:
       'Automatically log completed income and expenses from bank and wallet notifications.',
     section_status: 'Состояние',
@@ -2623,8 +2619,6 @@ const ru = {
     disclosure_body: 'Для этого Money2Time нужен доступ к уведомлениям. Вот как он используется:',
     disclosure_point_selected:
       'Читаются только уведомления выбранных вами банковских приложений и кошельков. Всё остальное игнорируется.',
-    disclosure_point_device:
-      'Отправляйте текст уведомлений выбранных приложений сканеру Money2Time и поставщику ИИ OpenRouter для распознавания завершённых доходов и расходов. Реклама и посторонние сообщения отбрасываются. Нужен интернет; лимит сканирования чеков отдельный.',
     disclosure_android_warning:
       'Android предупредит, что приложение с доступом к уведомлениям может читать их все. Money2Time сохраняет только выбранные вами приложения.',
     access_title: 'Включите доступ к уведомлениям',

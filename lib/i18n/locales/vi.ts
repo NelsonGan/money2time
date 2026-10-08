@@ -1231,7 +1231,7 @@ const vi = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
       payment_alerts_ios_step_7:
-        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text” after reading the disclosure. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
+        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text”. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
       payment_alerts_android_disclosure:
         'Đọc cách sử dụng quyền truy cập thông báo rồi nhấn Continue.',
       payment_alerts_ios_app:
@@ -2562,8 +2562,6 @@ const vi = {
   },
   payment_alerts: {
     scan_enabled: 'Quét văn bản thông báo',
-    scan_disclosure:
-      'Gửi văn bản thông báo từ các ứng dụng đã chọn đến trình quét của Money2Time và nhà cung cấp AI OpenRouter để nhận diện thu nhập và chi tiêu đã hoàn tất. Ưu đãi và tin nhắn không liên quan bị loại bỏ. Cần internet; hạn mức quét biên lai được tính riêng.',
     test_scan_failed_title: 'Không thể ghi lại thông báo thử nghiệm',
     test_scan_failed:
       'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
@@ -2571,8 +2569,6 @@ const vi = {
     account_hint:
       'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
     title: 'Thông báo',
-    intro_android:
-      'Money2Time scans notification text from the bank and wallet apps you choose to identify completed income and expenses. It sends this text to its scanner and AI provider, OpenRouter. Offers and unrelated messages are discarded.',
     card_intro:
       'Automatically log completed income and expenses from bank and wallet notifications.',
     section_status: 'Trạng thái',
@@ -2602,8 +2598,6 @@ const vi = {
       'Money2Time cần quyền truy cập thông báo cho việc này. Cách ứng dụng sử dụng quyền đó:',
     disclosure_point_selected:
       'Chỉ đọc thông báo từ các ứng dụng ngân hàng và ví điện tử bạn chọn. Mọi thứ khác đều bị bỏ qua.',
-    disclosure_point_device:
-      'Gửi văn bản thông báo từ các ứng dụng đã chọn đến trình quét của Money2Time và nhà cung cấp AI OpenRouter để nhận diện thu nhập và chi tiêu đã hoàn tất. Ưu đãi và tin nhắn không liên quan bị loại bỏ. Cần internet; hạn mức quét biên lai được tính riêng.',
     disclosure_android_warning:
       'Android sẽ cảnh báo rằng ứng dụng có quyền truy cập thông báo có thể đọc mọi thông báo. Money2Time chỉ giữ lại các ứng dụng bạn chọn.',
     access_title: 'Bật quyền truy cập thông báo',

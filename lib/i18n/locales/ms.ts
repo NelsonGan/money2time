@@ -1250,7 +1250,7 @@ const ms = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
       payment_alerts_ios_step_7:
-        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text” after reading the disclosure. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
+        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text”. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
       payment_alerts_android_disclosure:
         'Baca cara akses pemberitahuan digunakan, kemudian ketik Continue.',
       payment_alerts_ios_app:
@@ -2600,8 +2600,6 @@ const ms = {
   },
   payment_alerts: {
     scan_enabled: 'Imbas teks pemberitahuan',
-    scan_disclosure:
-      'Hantar teks pemberitahuan daripada aplikasi pilihan anda ke pengimbas Money2Time dan penyedia AInya, OpenRouter, untuk mengenal pasti pendapatan dan perbelanjaan yang telah selesai. Tawaran dan mesej tidak berkaitan dibuang. Memerlukan internet; kuota imbasan resit berasingan.',
     test_scan_failed_title: 'Notifikasi ujian tidak dapat direkodkan',
     test_scan_failed:
       'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
@@ -2609,8 +2607,6 @@ const ms = {
     account_hint:
       'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
     title: 'Pemberitahuan',
-    intro_android:
-      'Money2Time scans notification text from the bank and wallet apps you choose to identify completed income and expenses. It sends this text to its scanner and AI provider, OpenRouter. Offers and unrelated messages are discarded.',
     card_intro:
       'Automatically log completed income and expenses from bank and wallet notifications.',
     section_status: 'Status',
@@ -2640,8 +2636,6 @@ const ms = {
       'Money2Time memerlukan akses pemberitahuan untuk ini. Begini cara ia digunakan:',
     disclosure_point_selected:
       'Ia hanya membaca pemberitahuan daripada aplikasi bank dan e-dompet yang anda pilih. Yang lain diabaikan.',
-    disclosure_point_device:
-      'Hantar teks pemberitahuan daripada aplikasi pilihan anda ke pengimbas Money2Time dan penyedia AInya, OpenRouter, untuk mengenal pasti pendapatan dan perbelanjaan yang telah selesai. Tawaran dan mesej tidak berkaitan dibuang. Memerlukan internet; kuota imbasan resit berasingan.',
     disclosure_android_warning:
       'Android akan memberi amaran bahawa aplikasi dengan akses pemberitahuan boleh membaca semua pemberitahuan anda. Money2Time hanya menyimpan aplikasi yang anda pilih.',
     access_title: 'Hidupkan akses pemberitahuan',
