@@ -115,6 +115,7 @@ export function SettleUpTransactionScreen({
   return (
     <SettingsPageLayout>
       <SettingsHeader
+        fitActions
         className="px-5 pt-5 pb-3"
         onBack={onBack}
         title={title}

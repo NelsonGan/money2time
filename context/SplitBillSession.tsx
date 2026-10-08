@@ -21,7 +21,8 @@ export interface SplitBillSession {
   itemized: boolean;
   defaultAccountId: string | null;
   splits: SplitDraft[];
-  onChange: (splits: SplitDraft[]) => void;
+  /** A percentage adjustment also replaces the parent total in fixed-total mode. */
+  onChange: (splits: SplitDraft[], adjustedTotal?: number) => void;
   splitEvenly: boolean;
   onSplitEvenlyChange: (value: boolean) => void;
   accounts: Account[];
