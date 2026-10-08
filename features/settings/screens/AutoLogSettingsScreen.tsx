@@ -15,7 +15,7 @@ import {
   SCAN_SCREENSHOT_INTENT_NAME,
 } from '~/constants/autoLogIntents';
 import { useApp } from '~/context/AppContext';
-import { NotificationScanControl } from '~/features/autoLog/components/NotificationScanControl';
+import { NotificationHistoryButton } from '~/features/autoLog/components/NotificationHistoryButton';
 import { countKey } from '~/features/autoLog/lib/presentation';
 import {
   findFallbackCategory,
@@ -35,6 +35,7 @@ interface AutoLogSettingsScreenProps {
   onOpenTutorial: (topic: AutoLogTutorialTopic) => void;
   onOpenQuickEntry: () => void;
   onOpenPaymentAlerts: () => void;
+  onOpenNotificationHistory: () => void;
 }
 
 const styles = StyleSheet.create({
@@ -85,7 +86,7 @@ const styles = StyleSheet.create({
 });
 
 /**
- * Section title with a compact "Tutorial" link on the right. Replaces the old
+ * Section title with compact action links on the right. Replaces the old
  * full-width button that sat under each card — the link keeps the walkthrough one
  * tap away without dominating the section.
  */
@@ -93,31 +94,38 @@ function AutoLogSectionHeader({
   title,
   onTutorial,
   tutorialColor,
+  onHistory,
 }: {
   title: string;
   onTutorial: () => void;
   tutorialColor: string;
+  onHistory?: () => void;
 }) {
   return (
     <View style={styles.sectionHeader}>
-      <Text variant="caption" tone="muted">
-        {title}
-      </Text>
-      <Pressable
-        style={styles.tutorialLink}
-        onPress={() => {
-          void triggerHaptic('selection');
-          onTutorial();
-        }}
-        hitSlop={8}
-        accessibilityRole="button"
-        accessibilityLabel={I18n.t('settings.auto_log.tutorial_button')}
-      >
-        <BookOpen size={13} color={tutorialColor} />
-        <Text variant="caption" style={{ color: tutorialColor }}>
-          {I18n.t('settings.auto_log.tutorial_button')}
+      <View className="min-w-0 flex-1 flex-row items-center gap-1">
+        <Text variant="caption" tone="muted" className="shrink">
+          {title}
         </Text>
-      </Pressable>
+        {onHistory ? <NotificationHistoryButton onPress={onHistory} /> : null}
+      </View>
+      <View className="flex-row items-center gap-3">
+        <Pressable
+          style={styles.tutorialLink}
+          onPress={() => {
+            void triggerHaptic('selection');
+            onTutorial();
+          }}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={I18n.t('settings.auto_log.tutorial_button')}
+        >
+          <BookOpen size={13} color={tutorialColor} />
+          <Text variant="caption" style={{ color: tutorialColor }}>
+            {I18n.t('settings.auto_log.tutorial_button')}
+          </Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -127,10 +135,12 @@ function AndroidPaymentAlertsEntry({
   className,
   onOpen,
   onTutorial,
+  onHistory,
 }: {
   className: string;
   onOpen: () => void;
   onTutorial: () => void;
+  onHistory: () => void;
 }) {
   const themeColors = useThemeColors();
   const { paymentAlertPrefs: prefs } = useApp();
@@ -149,6 +159,7 @@ function AndroidPaymentAlertsEntry({
       <AutoLogSectionHeader
         title={I18n.t('settings.auto_log.payment_alerts_title')}
         onTutorial={onTutorial}
+        onHistory={onHistory}
         tutorialColor={themeColors.primary}
       />
       {/* Same bell card as iOS, with the in-app setup row underneath. */}
@@ -192,6 +203,7 @@ export function AutoLogSettingsScreen({
   onOpenTutorial,
   onOpenQuickEntry,
   onOpenPaymentAlerts,
+  onOpenNotificationHistory,
 }: AutoLogSettingsScreenProps) {
   const { accounts, categories, quickEntryPrefs, updateQuickEntryPrefs } = useApp();
   const themeColors = useThemeColors();
@@ -302,6 +314,7 @@ export function AutoLogSettingsScreen({
             <AndroidPaymentAlertsEntry
               className="mt-2"
               onOpen={onOpenPaymentAlerts}
+              onHistory={onOpenNotificationHistory}
               onTutorial={() => onOpenTutorial('paymentAlertsAndroid')}
             />
           ) : null}
@@ -427,6 +440,7 @@ export function AutoLogSettingsScreen({
               <View className="mt-6">
                 <AutoLogSectionHeader
                   title={I18n.t('payment_alerts.ios_notifications_title')}
+                  onHistory={onOpenNotificationHistory}
                   onTutorial={() => onOpenTutorial('paymentAlertsIos')}
                   tutorialColor={themeColors.primary}
                 />
@@ -449,7 +463,6 @@ export function AutoLogSettingsScreen({
                       </Text>
                     </View>
                   </View>
-                  <NotificationScanControl />
                 </View>
               </View>
 

@@ -105,7 +105,6 @@ import {
   runAutoBackupIfDue,
   unregisterBackgroundTask,
 } from '~/services/autoBackup';
-import { clearAllAutoLogQueues } from '~/services/autoLog';
 import { reportError, setErrorUser } from '~/services/errorReporting';
 import { refreshRatesNow, runRateRefreshIfDue } from '~/services/exchangeRates';
 import { setHapticsEnabled } from '~/services/haptics';
@@ -121,7 +120,7 @@ import {
   normalizeNotificationPrefs,
   syncScheduledNotifications,
 } from '~/services/notifications';
-import { clearAndroidCaptureQueue } from '~/services/paymentCapture';
+import { resetAutomationCaptureData } from '~/services/resetAutomationCaptureData';
 import { initReviewPrompt, recordTransactionLogged } from '~/services/reviewPrompt';
 import { runUserAssetGc, runUserAssetGcBackfillOnce } from '~/services/userAssetGc';
 import { deleteAlbumCover, deleteGoalCover, isCustomLogoId } from '~/services/userAssets';
@@ -213,18 +212,26 @@ export interface SplitDraftInput {
 /** How a transaction was entered. Drives which analytics event fires on
  *  create — voice entries are tracked separately from manual adds, and a
  *  statement import's rows are not entries the user logged one by one. */
-export type TransactionSource = 'manual' | 'voice' | 'receipt' | 'autolog' | 'statement_import';
+export type TransactionSource =
+  | 'manual'
+  | 'voice'
+  | 'receipt'
+  | 'autolog'
+  | 'notification_review'
+  | 'statement_import';
 
 export interface CreateTransactionMeta {
   source?: TransactionSource;
   /** For `autolog`: how the payment reached the app. Absent means the Apple Pay automation. */
   channel?: PaymentAlertChannel;
-  /** Automatic logging never prompts for review. */
-  decision?: 'auto';
-  /** Both native queues share the allowance checked at the durable write. */
+  /** Notification review is confirmed explicitly; Apple Pay remains automatic. */
+  decision?: 'auto' | 'confirm';
+  /** Apple Pay allowance checked at the durable automatic write. */
   autoLogIsPro?: boolean;
   /** Capture bookkeeping committed atomically with an auto-logged expense. */
   onAutoLogPersisted?: (transactionId: string) => void;
+  /** Capture link committed atomically with a manually reviewed notification. */
+  onNotificationReviewPersisted?: (transactionId: string) => void;
 }
 
 export interface CreateItemInput {
@@ -2153,7 +2160,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const createTransaction = useCallback(
     (input: CreateTransactionInput, meta?: CreateTransactionMeta) => {
       const claimFirstEntry = prepareFirstEntry(input.type);
-      const normalizedAmount = normalizeMoneyAmount(input.amount);
+      // Local review validates currency precision before this synchronous save.
+      const normalizedAmount =
+        meta?.source === 'notification_review' ? input.amount : normalizeMoneyAmount(input.amount);
       const snapshot = buildSnapshot(
         input.type,
         normalizedAmount,
@@ -2233,10 +2242,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         quickEntryPrefsRef.current = nextPrefs;
         setQuickEntryPrefs(nextPrefs);
       }
+      if (meta?.source === 'notification_review') {
+        // Explicit review is a manual save: no scanner or auto-log allowance.
+        getSQLite().withTransactionSync(() => {
+          transactionsRepository.createWithId(id, normalizedInput, now);
+          meta.onNotificationReviewPersisted?.(id);
+        });
+      }
       setTransactions((prev) => insertTransactionsByDateDesc(prev, [optimistic]));
       runDeferredWrite(() => {
         try {
-          if (meta?.source !== 'autolog')
+          if (meta?.source !== 'autolog' && meta?.source !== 'notification_review')
             transactionsRepository.createWithId(id, normalizedInput, now);
           // Auto-file into the active album, if one is set.
           const activeAlbumId = albumsRepository.getActiveId();
@@ -2258,7 +2274,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           }
           // `has_category` here measures whether the user answered the intent's
           // category prompt or let it fall through to their default.
-          if (meta?.source === 'autolog') {
+          if (meta?.source === 'autolog' || meta?.source === 'notification_review') {
             void trackEvent(AnalyticsEvents.AUTOLOG_TRANSACTION_CREATED, {
               has_category: !!normalizedInput.categoryId,
               has_note: !!(normalizedInput.note && normalizedInput.note.trim()),
@@ -2284,7 +2300,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           const persisted = transactionsRepository.getById(id);
           setTransactions((prev) => reconcileTransactionRow(prev, id, persisted));
         } catch (error) {
-          if (meta?.source === 'autolog') {
+          if (meta?.source === 'autolog' || meta?.source === 'notification_review') {
             // The expense is already committed; a failed album or UI refresh
             // must not erase it or make the native drain retry the payment.
             reportError(error, { scope: 'autolog_after_save' });
@@ -3597,6 +3613,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // typed confirmation in the UI.
   const resetAndChangeMainCurrency = useCallback(
     (code: string) => {
+      const historyUserId = settings?.appUserId;
       runMutation(() => {
         purgeAllData();
         settingsRepository.updateSettings({
@@ -3611,6 +3628,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         seedDefaultAccountsIfMissing(code);
       });
       reportingCurrencyRef.current = code;
+      resetAutomationCaptureData(historyUserId);
       void runRateRefreshIfDue({ force: true }).then((result) => {
         if (result.ok) reloadRateTable(code);
       });
@@ -3618,7 +3636,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // re-seeds and skips onboarding, which is what the scope tells apart.
       void trackEvent(AnalyticsEvents.DATA_RESET, { scope: 'currency_change' });
     },
-    [reloadRateTable, runMutation],
+    [reloadRateTable, runMutation, settings?.appUserId],
   );
 
   // Refresh FX rates once on load (and when the reporting currency changes),
@@ -4548,6 +4566,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   const resetAllData = useCallback(() => {
+    const historyUserId = settings?.appUserId;
     runMutation(() => {
       purgeAllData();
     });
@@ -4556,32 +4575,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     runDeferredWrite(() => {
       runUserAssetGc();
     });
-    // The iOS App Group queues (auto-log taps, screenshot scans) live outside
-    // SQLite — drop them too, or pre-reset automations would drain into the
-    // freshly-wiped database. Failure is non-fatal (App Group unreachable).
-    clearAllAutoLogQueues().catch(() => undefined);
-    // Android's notification listener queues payment alerts in a folder.
-    clearAndroidCaptureQueue();
+    resetAutomationCaptureData(historyUserId);
     void cancelAllNotifications();
     void trackEvent(AnalyticsEvents.DATA_RESET, { scope: 'all' });
     void flushAnalytics();
-  }, [runMutation]);
+  }, [runMutation, settings?.appUserId]);
 
   const resetTransactionsOnly = useCallback(() => {
+    const historyUserId = settings?.appUserId;
     runMutation(() => {
       purgeTransactionsOnly();
       resetTransactionFilters();
     });
-    void clearAllAutoLogQueues().catch((error) =>
-      reportError(error, { scope: 'reset_autolog_queues' }),
-    );
-    clearAndroidCaptureQueue();
+    resetAutomationCaptureData(historyUserId);
     // Deleting every transaction orphans their receipt images; reclaim them.
     runDeferredWrite(() => {
       runUserAssetGc();
     });
     void trackEvent(AnalyticsEvents.DATA_RESET, { scope: 'transactions_only' });
-  }, [resetTransactionFilters, runMutation]);
+  }, [resetTransactionFilters, runMutation, settings?.appUserId]);
 
   const importMoneyManagerBackup = useCallback(
     async (uri: string, fileName?: string) => {
@@ -4593,6 +4605,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       try {
         // Preserve app-level settings and hourly wage settings on manual imports.
         purgeDataForImport();
+        resetAutomationCaptureData(settings?.appUserId);
 
         const symbol = settings?.currencySymbol ?? '$';
         const summary = await importMoneyManagerBackupFromUri(uri, symbol);
@@ -4617,7 +4630,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         throw toError(error, I18n.t('errors.import_failed_generic'));
       }
     },
-    [refreshAll, settings?.currencySymbol],
+    [refreshAll, settings?.currencySymbol, settings?.appUserId],
   );
 
   const completeOnboarding = useCallback((options?: { seedDefaultAccounts?: boolean }) => {

@@ -461,6 +461,9 @@ export function SettingsStack({
               onOpenTutorial={(topic) => props.navigation.navigate('AutoLogTutorial', { topic })}
               onOpenQuickEntry={() => props.navigation.navigate('QuickEntrySettings')}
               onOpenPaymentAlerts={() => props.navigation.navigate('PaymentAlerts')}
+              onOpenNotificationHistory={() =>
+                requestOpenPaymentAlerts({ screen: 'NotificationHistory' })
+              }
             />
           );
         }}

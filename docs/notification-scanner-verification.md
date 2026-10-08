@@ -1,4 +1,10 @@
-# Notification scanner verification
+# Historical notification scanner verification
+
+This is evidence for the retired AI workflow in merged PR 569. It is superseded
+by [notification-history-verification.md](notification-history-verification.md).
+The evaluation script and notification AI endpoint described below have been
+removed. These historical results and release instructions do not apply to the
+current local review workflow.
 
 Verified on 2026-10-08. All notification examples and receipt images used for
 inference were synthetic. Production Worker traffic was not changed.

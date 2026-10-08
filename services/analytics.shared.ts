@@ -11,7 +11,8 @@
  * Every event goes to GA4, which is free and unsampled. Mixpanel bills per
  * event, so it only receives the events in `MIXPANEL_EVENTS`: installs,
  * activation, product-usage milestones, and every step of the path to a Pro
- * purchase. Everything else is per-use telemetry that GA4 answers on its own. A
+ * purchase, plus explicitly approved promotional clicks. Everything else is
+ * per-use telemetry that GA4 answers on its own. A
  * new event has to be placed in one of the two groups below, and that placement
  * is the decision about whether it is worth paying for.
  */
@@ -27,9 +28,13 @@ import type { RevenueCatPeriodType } from './revenueCat.shared';
  * event for a frequent action does not belong here even if the feature matters:
  * its first use arrives as `Feature First Used`, every use is in GA4, and the Pro
  * gate it eventually hits already arrives as `Pro Paywall Viewed` with the gate
- * as its `source`.
+ * as its `source`. RiceCal ad clicks are an explicitly approved per-tap
+ * exception for measuring promotional engagement.
  */
 export const MIXPANEL_EVENTS = {
+  // Approved promotional engagement: one event per explicit Settings ad tap.
+  RICECAL_AD_CLICKED: 'RiceCal Ad Clicked',
+
   // Install and activation. One-off per user.
   /** A fresh install's first launch. Replaces Mixpanel's automatic `$ae_first_open`. */
   FIRST_APP_OPEN: 'First App Open',

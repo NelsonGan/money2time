@@ -4,10 +4,8 @@
  * the shared types + pure resolver.
  */
 import {
-  type NotificationScanResponse,
   ReceiptScanError,
   type ReceiptScanResponse,
-  type ScanNotificationArgs,
   type ScanReceiptArgs,
 } from './receiptScan.shared';
 
@@ -18,14 +16,5 @@ export async function scanReceipt(_args: ScanReceiptArgs): Promise<ReceiptScanRe
   throw new ReceiptScanError(
     'not_available',
     'Receipt scanning is not available on this platform.',
-  );
-}
-
-export async function scanNotification(
-  _args: ScanNotificationArgs,
-): Promise<NotificationScanResponse> {
-  throw new ReceiptScanError(
-    'not_available',
-    'Notification scanning is not available on this platform.',
   );
 }

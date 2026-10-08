@@ -36,9 +36,9 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const IGNORED_TEXT_DAYS = 7;
 /** Other alerts retain raw text briefly for diagnostics. */
 const SETTLED_TEXT_DAYS = 30;
-/** Legacy pending records expire after this; new alerts never enter a review queue. */
+/** Legacy pending records expire after this; current review records do not expire. */
 const PENDING_DAYS = 30;
-/** Rows are deleted after this. */
+/** Settled rows are deleted this long after their last update. */
 const ROW_DAYS = 180;
 
 class PaymentAlertCapturesRepository {
@@ -127,6 +127,8 @@ class PaymentAlertCapturesRepository {
     id: string,
     input: Partial<{
       status: PaymentAlertStatus;
+      title: null;
+      body: null;
       reason: PaymentAlertReason | null;
       transactionId: string | null;
       duplicateOf: string | null;
@@ -187,13 +189,14 @@ class PaymentAlertCapturesRepository {
       .where(
         and(
           eq(autoLogCapturesTable.status, 'pending'),
+          lt(autoLogCapturesTable.parserVersion, 5),
           lt(autoLogCapturesTable.capturedAt, before(PENDING_DAYS)),
           isNull(autoLogCapturesTable.deletedAt),
         ),
       )
       .run();
     db.update(autoLogCapturesTable)
-      .set({ title: null, body: null, updatedAt: stamp })
+      .set({ title: null, body: null })
       .where(
         and(
           eq(autoLogCapturesTable.status, 'ignored'),
@@ -203,7 +206,7 @@ class PaymentAlertCapturesRepository {
       )
       .run();
     db.update(autoLogCapturesTable)
-      .set({ title: null, body: null, updatedAt: stamp })
+      .set({ title: null, body: null })
       .where(
         and(
           inArray(autoLogCapturesTable.status, ['logged', 'dismissed', 'duplicate', 'failed']),
@@ -213,7 +216,18 @@ class PaymentAlertCapturesRepository {
       )
       .run();
     db.delete(autoLogCapturesTable)
-      .where(lt(autoLogCapturesTable.capturedAt, before(ROW_DAYS)))
+      .where(
+        and(
+          lt(autoLogCapturesTable.updatedAt, before(ROW_DAYS)),
+          inArray(autoLogCapturesTable.status, [
+            'logged',
+            'dismissed',
+            'ignored',
+            'duplicate',
+            'failed',
+          ]),
+        ),
+      )
       .run();
   }
 }
