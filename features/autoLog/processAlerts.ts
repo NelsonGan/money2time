@@ -7,7 +7,10 @@ import type { CreateTransactionMeta } from '~/context/AppContext';
 import { paymentAlertCapturesRepository } from '~/lib/repositories/paymentAlertCapturesRepository';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import { reportError } from '~/services/errorReporting';
-import { recordNotificationScan } from '~/services/notificationScanHistory';
+import {
+  getNotificationScanHistoryGeneration,
+  recordNotificationScan,
+} from '~/services/notificationScanHistory';
 import { ReceiptScanError, scanNotification } from '~/services/receiptScan';
 import type {
   Account,
@@ -36,6 +39,8 @@ export interface AlertProcessingDeps {
   appUserId: string;
   /** Re-read live preferences/accounts after a slow network request. */
   getCurrent?: () => AlertProcessingDeps;
+  /** Reset generation when reading the native queue began. */
+  scanGeneration?: number;
   accounts: readonly Account[];
   categories: readonly Category[];
   /** Live transactions, newest first. */
@@ -96,6 +101,13 @@ export async function analyzeNotificationCapture(
   saved?: PaymentAlertParse,
 ): Promise<CaptureAnalysis> {
   const current = deps.getCurrent?.() ?? deps;
+  const appUserId = deps.appUserId;
+  const generation = deps.scanGeneration ?? getNotificationScanHistoryGeneration(appUserId);
+  const isCurrent = () =>
+    (deps.getCurrent?.() ?? deps).appUserId === appUserId &&
+    getNotificationScanHistoryGeneration(appUserId) === generation;
+  if (!isCurrent())
+    throw new ReceiptScanError('not_available', 'Notification scan cancelled by data change.');
   const ctx = buildPipelineContext(current);
   const initial = analyzeCapture(capture, ctx);
   if (
@@ -129,18 +141,22 @@ export async function analyzeNotificationCapture(
     // Do not truncate: a late "failed" or promotional condition changes meaning.
     if (!text || text.length > MAX_ALERT_TEXT_LENGTH) return initial;
     const recordHistory = async (result: 'expense' | 'income' | 'none' | 'failed') => {
-      if (capture.isTest || (deps.getCurrent?.() ?? deps).appUserId !== current.appUserId) return;
-      await recordNotificationScan(current.appUserId, {
-        id: capture.id,
-        capturedAt: capture.capturedAt,
-        sourceLabel: capture.sourceLabel,
-        text,
-        result,
-      }).catch((error) => reportError(error, { scope: 'notification_scan_history' }));
+      if (capture.isTest || !isCurrent()) return;
+      await recordNotificationScan(
+        appUserId,
+        {
+          id: capture.id,
+          capturedAt: capture.capturedAt,
+          sourceLabel: capture.sourceLabel,
+          text,
+          result,
+        },
+        generation,
+      ).catch((error) => reportError(error, { scope: 'notification_scan_history' }));
     };
     try {
       const result = await scanNotification({
-        appUserId: current.appUserId,
+        appUserId,
         text,
         capturedAt: capture.capturedAt,
         currency: scanCurrency,
@@ -160,6 +176,8 @@ export async function analyzeNotificationCapture(
       throw error;
     }
   }
+  if (!isCurrent())
+    throw new ReceiptScanError('not_available', 'Notification scan cancelled by data change.');
   const latest = deps.getCurrent?.() ?? deps;
   const latestContext = buildPipelineContext(latest);
   const analysis = analyzeCapture(capture, latestContext, parse);
@@ -181,6 +199,12 @@ export async function processAlertCaptures(
   deps: AlertProcessingDeps,
 ): Promise<AlertProcessingSummary> {
   const summary = emptySummary();
+  const appUserId = deps.appUserId;
+  const generation = deps.scanGeneration ?? getNotificationScanHistoryGeneration(appUserId);
+  const isCurrent = () =>
+    (deps.getCurrent?.() ?? deps).appUserId === appUserId &&
+    getNotificationScanHistoryGeneration(appUserId) === generation;
+  if (!isCurrent()) return summary;
   const savedParses = new Map<string, PaymentAlertParse>();
   const fresh = captures.filter((capture) => {
     try {
@@ -219,6 +243,7 @@ export async function processAlertCaptures(
   });
 
   for (const capture of fresh) {
+    if (!isCurrent()) break;
     let current = deps.getCurrent?.() ?? deps;
     remaining = autoLogAllowance({
       isPro: current.isPro,
@@ -235,6 +260,7 @@ export async function processAlertCaptures(
           ? analyzeCapture(capture, buildPipelineContext(current))
           : await analyzeNotificationCapture(capture, deps, savedParses.get(capture.id));
     } catch (error) {
+      if (!isCurrent()) break;
       reportError(error, { scope: 'payment_alerts_scan' });
       // A service failure is not a classification. Preserve the native copy.
       // These failures apply to the whole batch; retry on the next drain.
@@ -245,6 +271,7 @@ export async function processAlertCaptures(
         break;
       continue;
     }
+    if (!isCurrent()) break;
     current = deps.getCurrent?.() ?? deps;
     const ctx = buildPipelineContext(current);
     analysis = analyzeCapture(capture, ctx, analysis.parse);

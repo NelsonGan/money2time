@@ -3598,6 +3598,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // typed confirmation in the UI.
   const resetAndChangeMainCurrency = useCallback(
     (code: string) => {
+      const historyUserId = settings?.appUserId;
       runMutation(() => {
         purgeAllData();
         settingsRepository.updateSettings({
@@ -3612,6 +3613,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         seedDefaultAccountsIfMissing(code);
       });
       reportingCurrencyRef.current = code;
+      if (historyUserId)
+        void clearNotificationScanHistory(historyUserId).catch((error) =>
+          reportError(error, { scope: 'notification_scan_history_reset' }),
+        );
       void runRateRefreshIfDue({ force: true }).then((result) => {
         if (result.ok) reloadRateTable(code);
       });
@@ -3619,7 +3624,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // re-seeds and skips onboarding, which is what the scope tells apart.
       void trackEvent(AnalyticsEvents.DATA_RESET, { scope: 'currency_change' });
     },
-    [reloadRateTable, runMutation],
+    [reloadRateTable, runMutation, settings?.appUserId],
   );
 
   // Refresh FX rates once on load (and when the reporting currency changes),

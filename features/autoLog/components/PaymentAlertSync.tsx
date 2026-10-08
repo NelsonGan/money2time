@@ -6,6 +6,7 @@ import { useIsPro } from '~/context/ProContext';
 import { paymentAlertCapturesRepository } from '~/lib/repositories/paymentAlertCapturesRepository';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { reportError } from '~/services/errorReporting';
+import { getNotificationScanHistoryGeneration } from '~/services/notificationScanHistory';
 import { emitTestAlertResult, subscribePaymentAlertDrain } from '~/services/paymentAlertsBridge';
 import {
   clearQueuedCaptures,
@@ -94,29 +95,39 @@ export function PaymentAlertSync() {
     try {
       do {
         rerunRef.current = false;
+        const appUserId = stateRef.current.settings.appUserId;
+        const scanGeneration = getNotificationScanHistoryGeneration(appUserId);
+        const isCurrent = () =>
+          stateRef.current.settings.appUserId === appUserId &&
+          getNotificationScanHistoryGeneration(appUserId) === scanGeneration;
         const queued = await readQueuedCaptures();
+        if (!isCurrent()) break;
         if (queued.length === 0) break;
         const current = stateRef.current;
         const tests = queued.filter((capture) => capture.isTest);
         if (tests.length > 0) {
           await previewTestAlerts(tests, {
             ...current,
+            scanGeneration,
             reportingCurrency: current.settings.currencyCode,
-            appUserId: current.settings.appUserId,
+            appUserId,
             getCurrent: () => ({
               ...stateRef.current,
               reportingCurrency: stateRef.current.settings.currencyCode,
               appUserId: stateRef.current.settings.appUserId,
             }),
           });
+          if (!isCurrent()) break;
           await clearQueuedCaptures(tests);
         }
+        if (!isCurrent()) break;
         const captures = queued.filter((capture) => !capture.isTest);
         if (captures.length === 0) continue;
         const summary = await processAlertCaptures(captures, {
           ...current,
+          scanGeneration,
           reportingCurrency: current.settings.currencyCode,
-          appUserId: current.settings.appUserId,
+          appUserId,
           getCurrent: () => ({
             ...stateRef.current,
             reportingCurrency: stateRef.current.settings.currencyCode,

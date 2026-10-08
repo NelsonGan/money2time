@@ -10,7 +10,10 @@ import {
   processAlertCaptures,
 } from '~/features/autoLog/processAlerts';
 import { paymentAlertCapturesRepository } from '~/lib/repositories/paymentAlertCapturesRepository';
-import { recordNotificationScan } from '~/services/notificationScanHistory';
+import {
+  getNotificationScanHistoryGeneration,
+  recordNotificationScan,
+} from '~/services/notificationScanHistory';
 import { ReceiptScanError, scanNotification } from '~/services/receiptScan';
 import type { QuickEntryPrefs, TransactionWithRelations } from '~/types';
 
@@ -28,6 +31,7 @@ jest.mock('~/lib/repositories/paymentAlertCapturesRepository', () => ({
 jest.mock('~/services/errorReporting', () => ({ reportError: jest.fn() }));
 jest.mock('~/services/notificationScanHistory', () => ({
   recordNotificationScan: jest.fn(async () => undefined),
+  getNotificationScanHistoryGeneration: jest.fn(() => 0),
 }));
 jest.mock('~/services/receiptScan', () => ({
   ...jest.requireActual('~/services/receiptScan'),
@@ -301,6 +305,7 @@ describe('network boundary and retry safety', () => {
       expect(recordNotificationScan).toHaveBeenCalledWith(
         'test-user',
         expect.objectContaining({ id: capture.id, text: capture.body, result: type }),
+        0,
       );
     },
   );
@@ -314,6 +319,7 @@ describe('network boundary and retry safety', () => {
     expect(recordNotificationScan).toHaveBeenCalledWith(
       'test-user',
       expect.objectContaining({ result: 'none' }),
+      0,
     );
   });
   it('records a scan error without acknowledging the queued notification', async () => {
@@ -324,6 +330,7 @@ describe('network boundary and retry safety', () => {
     expect(recordNotificationScan).toHaveBeenCalledWith(
       'test-user',
       expect.objectContaining({ result: 'failed' }),
+      0,
     );
     expect(summary.captureIds).toEqual([]);
   });
@@ -337,6 +344,71 @@ describe('network boundary and retry safety', () => {
   it('does not put setup test alerts into real notification history', async () => {
     await analyzeNotificationCapture({ ...capture, isTest: true }, deps());
     expect(recordNotificationScan).not.toHaveBeenCalled();
+  });
+  it('cancels the old batch when data is reset during inference', async () => {
+    let generation = 0;
+    jest.mocked(getNotificationScanHistoryGeneration).mockImplementation(() => generation);
+    jest.mocked(scanNotification).mockImplementationOnce(async () => {
+      generation += 1;
+      return scanned();
+    });
+    const input = deps();
+    try {
+      const summary = await processAlertCaptures([capture, { ...capture, id: 'second' }], input);
+      expect(recordNotificationScan).not.toHaveBeenCalled();
+      expect(input.createTransaction).not.toHaveBeenCalled();
+      expect(paymentAlertCapturesRepository.insert).not.toHaveBeenCalled();
+      expect(scanNotification).toHaveBeenCalledTimes(1);
+      expect(summary.captureIds).toEqual([]);
+    } finally {
+      jest.mocked(getNotificationScanHistoryGeneration).mockReturnValue(0);
+    }
+  });
+  it('does not process a native queue read that began before reset', async () => {
+    const input = { ...deps(), scanGeneration: -1 };
+    const summary = await processAlertCaptures([capture], input);
+    expect(scanNotification).not.toHaveBeenCalled();
+    expect(paymentAlertCapturesRepository.getById).not.toHaveBeenCalled();
+    expect(input.createTransaction).not.toHaveBeenCalled();
+    expect(summary.captureIds).toEqual([]);
+  });
+  it('does not start scanning when the queue belongs to a previous user identity', async () => {
+    const input = deps();
+    input.getCurrent = () => ({ ...input, appUserId: 'restored-user' });
+    const summary = await processAlertCaptures([capture], input);
+    expect(scanNotification).not.toHaveBeenCalled();
+    expect(paymentAlertCapturesRepository.getById).not.toHaveBeenCalled();
+    expect(input.createTransaction).not.toHaveBeenCalled();
+    expect(summary.captureIds).toEqual([]);
+  });
+  it('cancels persistence when data is reset while history is being saved', async () => {
+    let generation = 0;
+    jest.mocked(getNotificationScanHistoryGeneration).mockImplementation(() => generation);
+    jest.mocked(recordNotificationScan).mockImplementationOnce(async () => {
+      generation += 1;
+    });
+    const input = deps();
+    try {
+      const summary = await processAlertCaptures([capture], input);
+      expect(input.createTransaction).not.toHaveBeenCalled();
+      expect(paymentAlertCapturesRepository.insert).not.toHaveBeenCalled();
+      expect(summary.captureIds).toEqual([]);
+    } finally {
+      jest.mocked(getNotificationScanHistoryGeneration).mockReturnValue(0);
+    }
+  });
+  it('does not persist an old scan under a restored user identity', async () => {
+    const input = deps();
+    input.getCurrent = () => input;
+    jest.mocked(scanNotification).mockImplementationOnce(async () => {
+      input.appUserId = 'restored-user';
+      return scanned();
+    });
+    const summary = await processAlertCaptures([capture], input);
+    expect(recordNotificationScan).not.toHaveBeenCalled();
+    expect(input.createTransaction).not.toHaveBeenCalled();
+    expect(paymentAlertCapturesRepository.insert).not.toHaveBeenCalled();
+    expect(summary.captureIds).toEqual([]);
   });
   it('scans configured notifications without a separate legacy opt-in', async () => {
     const input = deps();

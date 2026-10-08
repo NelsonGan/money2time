@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
   clearNotificationScanHistory,
+  getNotificationScanHistoryGeneration,
   readNotificationScanHistory,
   recordNotificationScan,
   subscribeNotificationScanHistory,
@@ -54,6 +55,24 @@ it('isolates users and clears stored history on reset', async () => {
   await clearNotificationScanHistory('a');
   expect(await readNotificationScanHistory('a')).toEqual([]);
   expect(await readNotificationScanHistory('b')).toHaveLength(1);
+});
+it('rejects a scan started before the most recent reset', async () => {
+  const generation = getNotificationScanHistoryGeneration('stale-user');
+  await clearNotificationScanHistory('stale-user');
+  await recordNotificationScan('stale-user', entry(0), generation);
+  expect(await readNotificationScanHistory('stale-user')).toEqual([]);
+  await recordNotificationScan('stale-user', entry(1));
+  expect((await readNotificationScanHistory('stale-user')).map((row) => row.id)).toEqual(['1']);
+});
+it('does not publish a pending write after reset has been requested', async () => {
+  const listener = jest.fn();
+  const stop = subscribeNotificationScanHistory('pending-user', listener);
+  const write = recordNotificationScan('pending-user', entry(0));
+  const clear = clearNotificationScanHistory('pending-user');
+  await Promise.all([write, clear]);
+  expect(await readNotificationScanHistory('pending-user')).toEqual([]);
+  expect(listener).toHaveBeenCalledTimes(1);
+  stop();
 });
 it('recovers from malformed storage and a failed write', async () => {
   await recordNotificationScan('a', entry(0));

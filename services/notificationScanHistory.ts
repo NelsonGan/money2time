@@ -13,7 +13,12 @@ export interface NotificationScanHistoryEntry {
 const LIMIT = 10;
 const keyFor = (appUserId: string) => `notification-scan-history:${appUserId}`;
 const listeners = new Map<string, Set<() => void>>();
+const generations = new Map<string, number>();
 let updates: Promise<unknown> = Promise.resolve();
+
+export function getNotificationScanHistoryGeneration(appUserId: string): number {
+  return generations.get(appUserId) ?? 0;
+}
 
 function serialize<T>(work: () => Promise<T>): Promise<T> {
   const next = updates.then(work);
@@ -59,15 +64,21 @@ export function readNotificationScanHistory(
 export function recordNotificationScan(
   appUserId: string,
   entry: NotificationScanHistoryEntry,
+  generation = getNotificationScanHistoryGeneration(appUserId),
 ): Promise<void> {
   return serialize(async () => {
+    if (generation !== getNotificationScanHistoryGeneration(appUserId)) return;
     const previous = parse(await AsyncStorage.getItem(keyFor(appUserId)));
+    if (generation !== getNotificationScanHistoryGeneration(appUserId)) return;
     const next = parse(JSON.stringify([...previous.filter((row) => row.id !== entry.id), entry]));
     await AsyncStorage.setItem(keyFor(appUserId), JSON.stringify(next));
+    if (generation !== getNotificationScanHistoryGeneration(appUserId)) return;
     listeners.get(appUserId)?.forEach((listener) => listener());
   });
 }
 export function clearNotificationScanHistory(appUserId: string): Promise<void> {
+  // Cancel in-flight scans immediately, before the queued storage deletion.
+  generations.set(appUserId, getNotificationScanHistoryGeneration(appUserId) + 1);
   return serialize(async () => {
     await AsyncStorage.removeItem(keyFor(appUserId));
     listeners.get(appUserId)?.forEach((listener) => listener());
