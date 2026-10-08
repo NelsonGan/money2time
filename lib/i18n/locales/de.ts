@@ -1177,6 +1177,21 @@ const de = {
       tutorial_button: 'Tutorial',
       video_tutorial: 'Video ansehen',
       download_shortcut_button: 'Kurzbefehl holen',
+      download_automation_button: 'Automation holen',
+      lp27_get: 'Am schnellsten: Tippe auf die Schaltfläche unten und dann auf Set Up Shortcut.',
+      lp27_card:
+        'Tippe auf Any Card, wähle die Karte, die du erfassen willst, und tippe dann auf Add Shortcut.',
+      lp27_finish:
+        'Sie wird ausgeschaltet hinzugefügt. Öffne sie, tippe auf Edit, wähle bei Log Card Payment das Account und schalte Automation ein. Hat sie keine Aktionen, lösche sie und baue sie mit den nächsten Schritten selbst.',
+      lp27_m_options: 'Tippe beim Auslöser auf ›. Lass Automation an und schalte Notify aus.',
+      lp27_m_select_variable: 'Tippe auf Amount und dann auf Select Variable.',
+      lp27_m_transaction: 'Wähle die Variable Transaction unter dem Auslöser.',
+      lp27_m_amount: 'Tippe auf die eingefügte Transaction und wähle Amount.',
+      lp27_m_merchant: 'Mach dasselbe für Merchant: Select Variable, Transaction, dann Merchant.',
+      bt27_touch: 'Öffne Einstellungen → Bedienungshilfen → Tippen.',
+      bt27_backtap: 'Scrolle nach unten und tippe auf Auf Rückseite tippen.',
+      bt27_double: 'Tippe auf Doppeltippen (oder Dreifachtippen).',
+      bt27_shortcuts: 'Tippe auf Kurzbefehle.',
       step_counter: '%{current} von %{total}',
       log_payment_step_1: 'Öffne Kurzbefehle, geh zum Tab Automation und tippe auf New Automation.',
       log_payment_step_2: 'Wähl Wallet: „Wenn ich auf eine Wallet-Karte oder einen Pass tippe.“',
@@ -1255,7 +1270,7 @@ const de = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where reviewed transactions should be logged. Category is optional.',
       payment_alerts_ios_step_7:
-        'Tap back to save. Repeat for each bank or wallet app. Open Money2Time to review new notifications, even offline.',
+        'Tippe auf Zurück, um zu speichern. Wiederhole das für jede Bank- oder Wallet-App. Um neue Benachrichtigungen zu prüfen, auch offline, tippe in Money2Time auf das Verlaufssymbol neben Benachrichtigungen.',
       payment_alerts_android_disclosure:
         'Lies, wie der Benachrichtigungszugriff verwendet wird, und tippe auf Continue.',
       payment_alerts_ios_app:

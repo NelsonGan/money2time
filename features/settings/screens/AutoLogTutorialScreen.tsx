@@ -1,11 +1,13 @@
 import type { ImageSource } from 'expo-image';
 import { Download, Play } from 'lucide-react-native';
 import React, { useCallback } from 'react';
-import { Linking, Pressable, StyleSheet, View } from 'react-native';
+import { Linking, Platform, Pressable, StyleSheet, View } from 'react-native';
 
 import { SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
 import {
   AUTO_LOG_VIDEO_URLS,
+  AUTO_LOG_VIDEO_URLS_IOS27,
+  LOG_CARD_PAYMENT_AUTOMATION_URL,
   LOG_CARD_PAYMENT_INTENT_NAME,
   NEW_TRANSACTION_INTENT_NAME,
   NEW_TRANSACTION_SHORTCUT_URL,
@@ -18,6 +20,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { AutoLogTutorialTopic } from '~/navigation/settingsStack';
 import { triggerHaptic } from '~/services/haptics';
+import { supportsSharedAutomations } from '~/utils/iosVersion';
 
 interface AutoLogTutorialScreenProps {
   topic: AutoLogTutorialTopic;
@@ -34,9 +37,15 @@ interface AutoLogTutorialScreenProps {
  * `assets/autolog/` and swap the null for a `require(...)`.
  *
  * New Transaction and Log Screenshot both ship a ready-made shortcut the user
- * installs from an iCloud link (`download: true`), so their tutorials only cover
- * the trigger, not building the shortcut. Log Card Payment has no link (an
- * automation can't be shared), so it keeps the full hand-built flow.
+ * installs from an iCloud link (`download: 'shortcut'`), so their tutorials only
+ * cover the trigger, not building the shortcut. Before iOS 27 an automation
+ * can't be shared, so Log Card Payment keeps the full hand-built flow there.
+ *
+ * iOS 27 redesigned Shortcuts and Settings, so those three topics have a second
+ * set of steps (STEPS_IOS27) captured on an iOS 27 iPhone. Its Log Card Payment
+ * guide offers the shareable automation first (`download: 'automation'`) and
+ * then the hand-built steps, because a link install can come up empty.
+ * Notifications only exists on iOS 27, so it has one set.
  *
  * Share Screenshot is the Android topic: there is nothing to install or wire up,
  * so its steps only show the share itself, captured on an Android emulator.
@@ -44,8 +53,8 @@ interface AutoLogTutorialScreenProps {
 interface TutorialStep {
   key: string;
   image: ImageSource | null;
-  /** Renders the "Get Shortcut" CTA under the caption, opening the topic's link. */
-  download?: boolean;
+  /** Renders the Get Shortcut / Get Automation CTA under the caption, opening the topic's link. */
+  download?: 'shortcut' | 'automation';
 }
 
 const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
@@ -67,7 +76,11 @@ const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
   // Step 1 installs the ready-made shortcut from iCloud, then a Back Tap is wired
   // to run it. Frames are annotated captures from the walkthrough video.
   newTransaction: [
-    { key: 'new_transaction_step_1', image: require('~/assets/autolog/nt_1.png'), download: true },
+    {
+      key: 'new_transaction_step_1',
+      image: require('~/assets/autolog/nt_1.png'),
+      download: 'shortcut',
+    },
     { key: 'new_transaction_step_2', image: require('~/assets/autolog/nt_2.png') },
     { key: 'new_transaction_step_3', image: require('~/assets/autolog/nt_3.png') },
     { key: 'new_transaction_step_4', image: require('~/assets/autolog/nt_4.png') },
@@ -76,7 +89,11 @@ const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
   // to run it, then show the screenshot → Always Allow → auto-log flow. Frames
   // are annotated captures from the walkthrough video.
   logScreenshot: [
-    { key: 'log_screenshot_step_1', image: require('~/assets/autolog/ls_1.png'), download: true },
+    {
+      key: 'log_screenshot_step_1',
+      image: require('~/assets/autolog/ls_1.png'),
+      download: 'shortcut',
+    },
     { key: 'log_screenshot_step_2', image: require('~/assets/autolog/ls_2.png') },
     { key: 'log_screenshot_step_3', image: require('~/assets/autolog/ls_3.png') },
     { key: 'log_screenshot_step_4', image: require('~/assets/autolog/ls_4.png') },
@@ -153,14 +170,102 @@ const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
   ],
 };
 
-/** iCloud shortcut links, one per topic that ships a downloadable shortcut. */
+/** Settings → Accessibility → Touch → Back Tap → Double Tap → Shortcuts, on iOS 27. */
+const BACK_TAP_IOS27: TutorialStep[] = [
+  { key: 'bt27_touch', image: require('~/assets/autolog/bt27_01_touch.png') },
+  { key: 'bt27_backtap', image: require('~/assets/autolog/bt27_02_backtap.png') },
+  { key: 'bt27_double', image: require('~/assets/autolog/bt27_03_double.png') },
+  { key: 'bt27_shortcuts', image: require('~/assets/autolog/bt27_04_shortcuts.png') },
+];
+
+/**
+ * iOS 27 versions of the topics whose screens changed. Captured on an iPhone
+ * running iOS 27.0.1. The Back Tap list frames have the owner's own shortcut
+ * names painted out (a `redact` mark in scripts/data/autolog-shots.json).
+ */
+const STEPS_IOS27: Partial<Record<AutoLogTutorialTopic, TutorialStep[]>> = {
+  // The link installs the automation, switched off and without an account, so
+  // step 3 finishes it. Everything after that builds it by hand, for when the
+  // link install comes up empty.
+  logPayment: [
+    {
+      key: 'lp27_get',
+      image: require('~/assets/autolog/lp27q_01_setup.png'),
+      download: 'automation',
+    },
+    { key: 'lp27_card', image: require('~/assets/autolog/lp27q_02_card.png') },
+    { key: 'lp27_finish', image: require('~/assets/autolog/lp27m_12_account.png') },
+    {
+      key: 'payment_alerts_ios_step_1',
+      image: require('~/assets/autolog/lp27m_02_automation.png'),
+    },
+    { key: 'log_payment_step_2', image: require('~/assets/autolog/lp27m_03_wallet.png') },
+    { key: 'log_payment_step_3', image: require('~/assets/autolog/lp27m_04_card.png') },
+    { key: 'lp27_m_options', image: require('~/assets/autolog/lp27m_05_options.png') },
+    { key: 'log_payment_step_5', image: require('~/assets/autolog/lp27m_06_action.png') },
+    {
+      key: 'lp27_m_select_variable',
+      image: require('~/assets/autolog/lp27m_08_select_variable.png'),
+    },
+    { key: 'lp27_m_transaction', image: require('~/assets/autolog/lp27m_09_transaction.png') },
+    { key: 'lp27_m_amount', image: require('~/assets/autolog/lp27m_10_pick_amount.png') },
+    { key: 'lp27_m_merchant', image: require('~/assets/autolog/lp27m_11_pick_merchant.png') },
+    { key: 'log_payment_step_7', image: require('~/assets/autolog/lp27m_12_account.png') },
+    { key: 'log_payment_step_8', image: require('~/assets/autolog/lp27m_13_done.png') },
+  ],
+  newTransaction: [
+    {
+      key: 'new_transaction_step_1',
+      image: require('~/assets/autolog/nt27_01_add.png'),
+      download: 'shortcut',
+    },
+    ...BACK_TAP_IOS27,
+    { key: 'new_transaction_step_3', image: require('~/assets/autolog/bt27_05_list_nt.png') },
+    { key: 'new_transaction_step_4', image: require('~/assets/autolog/nt_4.png') },
+  ],
+  logScreenshot: [
+    {
+      key: 'log_screenshot_step_1',
+      image: require('~/assets/autolog/ls27_01_add.png'),
+      download: 'shortcut',
+    },
+    ...BACK_TAP_IOS27,
+    { key: 'log_screenshot_step_3', image: require('~/assets/autolog/bt27_05_list_ls.png') },
+    { key: 'log_screenshot_step_4', image: require('~/assets/autolog/ls_4.png') },
+    { key: 'log_screenshot_step_5', image: require('~/assets/autolog/ls_5.png') },
+    { key: 'log_screenshot_step_6', image: require('~/assets/autolog/ls_6.png') },
+  ],
+};
+
+/** iCloud links, one per topic that ships a downloadable shortcut or automation. */
 const DOWNLOAD_URL: Partial<Record<AutoLogTutorialTopic, string>> = {
   newTransaction: NEW_TRANSACTION_SHORTCUT_URL,
   logScreenshot: SCAN_SCREENSHOT_SHORTCUT_URL,
 };
 
+const DOWNLOAD_URL_IOS27: Partial<Record<AutoLogTutorialTopic, string>> = {
+  logPayment: LOG_CARD_PAYMENT_AUTOMATION_URL,
+};
+
 /** Walkthrough videos exist for the iOS topics only. */
 const VIDEO_URL: Partial<Record<AutoLogTutorialTopic, string>> = AUTO_LOG_VIDEO_URLS;
+const VIDEO_URL_IOS27: Partial<Record<AutoLogTutorialTopic, string>> = AUTO_LOG_VIDEO_URLS_IOS27;
+
+const SHARED_AUTOMATIONS = supportsSharedAutomations(Platform.OS, Platform.Version);
+
+/** The iOS 27 entry where one exists and the device runs iOS 27, else the original. */
+function pick<T>(
+  ios27: Partial<Record<AutoLogTutorialTopic, T>>,
+  base: Partial<Record<AutoLogTutorialTopic, T>>,
+  topic: AutoLogTutorialTopic,
+): T | undefined {
+  return (SHARED_AUTOMATIONS ? ios27[topic] : undefined) ?? base[topic];
+}
+
+const DOWNLOAD_LABEL: Record<NonNullable<TutorialStep['download']>, string> = {
+  shortcut: 'settings.auto_log.download_shortcut_button',
+  automation: 'settings.auto_log.download_automation_button',
+};
 
 /**
  * The action's own name, so the header matches both the Settings section that
@@ -216,13 +321,13 @@ const styles = StyleSheet.create({
 
 export function AutoLogTutorialScreen({ topic, onBack }: AutoLogTutorialScreenProps) {
   const themeColors = useThemeColors();
-  const steps = STEPS[topic];
+  const steps = pick(STEPS_IOS27, STEPS, topic) ?? STEPS[topic];
   const { index, isLast, goNext, goBack } = useStepPager(steps.length, onBack);
   const step = steps[index];
 
   const openDownload = useCallback(() => {
     void triggerHaptic('medium');
-    const url = DOWNLOAD_URL[topic];
+    const url = pick(DOWNLOAD_URL_IOS27, DOWNLOAD_URL, topic);
     // Linking.openURL rejects (rather than resolving false, like canOpenURL)
     // when nothing can handle the link — e.g. the Shortcuts app association is
     // broken. Swallow it, matching the Discord-link precedent elsewhere in
@@ -231,7 +336,7 @@ export function AutoLogTutorialScreen({ topic, onBack }: AutoLogTutorialScreenPr
     if (url) void Linking.openURL(url).catch(() => undefined);
   }, [topic]);
 
-  const videoUrl = VIDEO_URL[topic];
+  const videoUrl = pick(VIDEO_URL_IOS27, VIDEO_URL, topic);
   const openVideo = useCallback(() => {
     if (!videoUrl) return;
     void triggerHaptic('selection');
@@ -290,11 +395,11 @@ export function AutoLogTutorialScreen({ topic, onBack }: AutoLogTutorialScreenPr
               style={[styles.download, { backgroundColor: themeColors.primary }]}
               onPress={openDownload}
               accessibilityRole="button"
-              accessibilityLabel={I18n.t('settings.auto_log.download_shortcut_button')}
+              accessibilityLabel={I18n.t(DOWNLOAD_LABEL[step.download])}
             >
               <Download size={16} color="#fff" />
               <Text variant="caption" style={{ color: '#fff', fontWeight: '600' }}>
-                {I18n.t('settings.auto_log.download_shortcut_button')}
+                {I18n.t(DOWNLOAD_LABEL[step.download])}
               </Text>
             </Pressable>
           ) : null}

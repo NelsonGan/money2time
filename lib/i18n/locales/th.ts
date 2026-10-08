@@ -1152,6 +1152,20 @@ const th = {
       tutorial_button: 'บทเรียน',
       video_tutorial: 'ดูวิดีโอ',
       download_shortcut_button: 'รับคำสั่งลัด',
+      download_automation_button: 'รับระบบอัตโนมัติ',
+      lp27_get: 'วิธีที่เร็วที่สุด: แตะปุ่มด้านล่าง แล้วแตะ Set Up Shortcut',
+      lp27_card: 'แตะ Any Card เลือกบัตรที่ต้องการติดตาม แล้วแตะ Add Shortcut',
+      lp27_finish:
+        'ระบบจะเพิ่มแบบปิดไว้ เปิดขึ้นมา แตะ Edit เลือก Account ใน Log Card Payment แล้วเปิด Automation หากไม่มีการทำงานใด ให้ลบทิ้งและสร้างเองตามขั้นตอนถัดไป',
+      lp27_m_options: 'แตะ › ที่ทริกเกอร์ เปิด Automation ไว้และปิด Notify',
+      lp27_m_select_variable: 'แตะ Amount แล้วแตะ Select Variable',
+      lp27_m_transaction: 'เลือกตัวแปร Transaction ใต้ทริกเกอร์',
+      lp27_m_amount: 'แตะ Transaction ที่แทรกไว้ แล้วเลือก Amount',
+      lp27_m_merchant: 'ทำแบบเดียวกันกับ Merchant: Select Variable, Transaction แล้ว Merchant',
+      bt27_touch: 'เปิด การตั้งค่า → การช่วยการเข้าถึง → สัมผัส',
+      bt27_backtap: 'เลื่อนลงแล้วแตะ แตะด้านหลัง',
+      bt27_double: 'แตะ แตะสองครั้ง (หรือ แตะสามครั้ง)',
+      bt27_shortcuts: 'แตะ คำสั่งลัด',
       step_counter: '%{current} จาก %{total}',
       log_payment_step_1: 'เปิด Shortcuts ไปที่แท็บ Automation แล้วแตะ New Automation',
       log_payment_step_2: 'เลือก Wallet: “When I tap a Wallet Card or Pass.”',
@@ -1221,7 +1235,7 @@ const th = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where reviewed transactions should be logged. Category is optional.',
       payment_alerts_ios_step_7:
-        'Tap back to save. Repeat for each bank or wallet app. Open Money2Time to review new notifications, even offline.',
+        'แตะย้อนกลับเพื่อบันทึก ทำซ้ำสำหรับแอปธนาคารหรือวอลเล็ตแต่ละแอป หากต้องการตรวจสอบการแจ้งเตือนใหม่ แม้ออฟไลน์ ให้แตะไอคอนประวัติข้างการแจ้งเตือนใน Money2Time',
       payment_alerts_android_disclosure: 'อ่านวิธีใช้สิทธิ์เข้าถึงการแจ้งเตือน แล้วแตะ Continue',
       payment_alerts_ios_app:
         'แตะ App แล้วเลือกแอปธนาคารหรือกระเป๋าเงินอิเล็กทรอนิกส์ ภาพหน้าจอนี้ใช้ Wallet เป็นตัวอย่าง',

@@ -1159,6 +1159,20 @@ const vi = {
       tutorial_button: 'Hướng dẫn',
       video_tutorial: 'Xem video',
       download_shortcut_button: 'Tải phím tắt',
+      download_automation_button: 'Nhận tự động hóa',
+      lp27_get: 'Nhanh nhất: chạm vào nút bên dưới, sau đó chạm Set Up Shortcut.',
+      lp27_card: 'Chạm Any Card, chọn thẻ cần theo dõi, sau đó chạm Add Shortcut.',
+      lp27_finish:
+        'Tự động hóa được thêm ở trạng thái tắt. Mở ra, chạm Edit, chọn Account ở Log Card Payment và bật Automation. Nếu không có tác vụ nào, hãy xóa và tự tạo theo các bước tiếp theo.',
+      lp27_m_options: 'Chạm › ở bộ kích hoạt. Giữ Automation bật và tắt Notify.',
+      lp27_m_select_variable: 'Chạm Amount, sau đó Select Variable.',
+      lp27_m_transaction: 'Chọn biến Transaction bên dưới bộ kích hoạt.',
+      lp27_m_amount: 'Chạm Transaction vừa chèn và chọn Amount.',
+      lp27_m_merchant: 'Làm tương tự với Merchant: Select Variable, Transaction, sau đó Merchant.',
+      bt27_touch: 'Mở Cài đặt → Trợ năng → Cảm ứng.',
+      bt27_backtap: 'Cuộn xuống và chạm Chạm vào mặt sau.',
+      bt27_double: 'Chạm Chạm hai lần (hoặc Chạm ba lần).',
+      bt27_shortcuts: 'Chạm Phím tắt.',
       step_counter: '%{current} trên %{total}',
       log_payment_step_1: 'Mở Phím tắt, vào tab Automation và chạm New Automation.',
       log_payment_step_2: 'Chọn Wallet: “Khi tôi chạm vào thẻ hoặc pass trong Wallet.”',
@@ -1231,7 +1245,7 @@ const vi = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where reviewed transactions should be logged. Category is optional.',
       payment_alerts_ios_step_7:
-        'Tap back to save. Repeat for each bank or wallet app. Open Money2Time to review new notifications, even offline.',
+        'Chạm quay lại để lưu. Lặp lại cho từng ứng dụng ngân hàng hoặc ví. Để xem lại thông báo mới, kể cả khi ngoại tuyến, chạm biểu tượng lịch sử cạnh Thông báo trong Money2Time.',
       payment_alerts_android_disclosure:
         'Đọc cách sử dụng quyền truy cập thông báo rồi nhấn Continue.',
       payment_alerts_ios_app:

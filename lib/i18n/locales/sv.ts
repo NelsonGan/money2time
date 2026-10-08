@@ -1164,6 +1164,21 @@ const sv = {
       tutorial_button: 'Handledning',
       video_tutorial: 'Titta på video',
       download_shortcut_button: 'Hämta genväg',
+      download_automation_button: 'Hämta automatisering',
+      lp27_get: 'Snabbast: tryck på knappen nedan och sedan på Set Up Shortcut.',
+      lp27_card: 'Tryck på Any Card, välj kortet du vill följa och tryck sedan på Add Shortcut.',
+      lp27_finish:
+        'Den läggs till avstängd. Öppna den, tryck på Edit, välj Account i Log Card Payment och slå på Automation. Om den saknar åtgärder, radera den och bygg den själv med nästa steg.',
+      lp27_m_options: 'Tryck på › vid utlösaren. Låt Automation vara på och stäng av Notify.',
+      lp27_m_select_variable: 'Tryck på Amount och sedan på Select Variable.',
+      lp27_m_transaction: 'Välj variabeln Transaction under utlösaren.',
+      lp27_m_amount: 'Tryck på den infogade Transaction och välj Amount.',
+      lp27_m_merchant:
+        'Gör samma sak för Merchant: Select Variable, Transaction och sedan Merchant.',
+      bt27_touch: 'Öppna Inställningar → Hjälpmedel → Tryck.',
+      bt27_backtap: 'Rulla ned och tryck på Tryck på baksidan.',
+      bt27_double: 'Tryck på Dubbeltryck (eller Trippeltryck).',
+      bt27_shortcuts: 'Tryck på Genvägar.',
       step_counter: '%{current} av %{total}',
       log_payment_step_1: 'Öppna Genvägar, gå till fliken Automation och tryck på New Automation.',
       log_payment_step_2: 'Välj Wallet: “När jag trycker på ett Wallet-kort eller -pass.”',
@@ -1241,7 +1256,7 @@ const sv = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where reviewed transactions should be logged. Category is optional.',
       payment_alerts_ios_step_7:
-        'Tap back to save. Repeat for each bank or wallet app. Open Money2Time to review new notifications, even offline.',
+        'Tryck på tillbaka för att spara. Upprepa för varje bank- eller plånboksapp. Tryck på historikikonen bredvid Aviseringar i Money2Time för att granska nya aviseringar, även offline.',
       payment_alerts_android_disclosure: 'Läs hur aviseringsåtkomsten används och tryck Continue.',
       payment_alerts_ios_app:
         'Tryck på App och välj din bank- eller plånboksapp. Dessa skärmbilder använder Wallet som exempel.',

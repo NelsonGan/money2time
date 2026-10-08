@@ -1168,6 +1168,20 @@ const ru = {
       tutorial_button: 'Обучение',
       video_tutorial: 'Смотреть видео',
       download_shortcut_button: 'Получить команду',
+      download_automation_button: 'Получить автоматизацию',
+      lp27_get: 'Быстрее всего: нажмите кнопку ниже, затем Set Up Shortcut.',
+      lp27_card: 'Нажмите Any Card, выберите карту для отслеживания, затем нажмите Add Shortcut.',
+      lp27_finish:
+        'Она добавляется выключенной. Откройте её, нажмите Edit, выберите Account в Log Card Payment и включите Automation. Если в ней нет действий, удалите её и создайте сами по следующим шагам.',
+      lp27_m_options: 'Нажмите › у триггера. Оставьте Automation включённым и выключите Notify.',
+      lp27_m_select_variable: 'Нажмите Amount, затем Select Variable.',
+      lp27_m_transaction: 'Выберите переменную Transaction под триггером.',
+      lp27_m_amount: 'Нажмите на вставленную Transaction и выберите Amount.',
+      lp27_m_merchant: 'То же для Merchant: Select Variable, Transaction, затем Merchant.',
+      bt27_touch: 'Откройте Настройки → Универсальный доступ → Касание.',
+      bt27_backtap: 'Прокрутите вниз и нажмите Касание задней панели.',
+      bt27_double: 'Нажмите Двойное касание (или Тройное касание).',
+      bt27_shortcuts: 'Нажмите Команды.',
       step_counter: '%{current} из %{total}',
       log_payment_step_1:
         'Откройте «Быстрые команды», перейдите на вкладку Automation и нажмите New Automation.',
@@ -1245,7 +1259,7 @@ const ru = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where reviewed transactions should be logged. Category is optional.',
       payment_alerts_ios_step_7:
-        'Tap back to save. Repeat for each bank or wallet app. Open Money2Time to review new notifications, even offline.',
+        'Нажмите «Назад», чтобы сохранить. Повторите для каждого приложения банка или кошелька. Чтобы просмотреть новые уведомления, даже офлайн, нажмите значок истории рядом с «Уведомлениями» в Money2Time.',
       payment_alerts_android_disclosure:
         'Прочитайте, как используется доступ к уведомлениям, и нажмите Continue.',
       payment_alerts_ios_app:

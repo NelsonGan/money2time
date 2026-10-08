@@ -1174,6 +1174,21 @@ const ms = {
       tutorial_button: 'Tutorial',
       video_tutorial: 'Tonton video',
       download_shortcut_button: 'Dapatkan Pintasan',
+      download_automation_button: 'Dapatkan Automasi',
+      lp27_get: 'Cara terpantas: ketik butang di bawah, kemudian ketik Set Up Shortcut.',
+      lp27_card: 'Ketik Any Card, pilih kad yang ingin dijejak, kemudian ketik Add Shortcut.',
+      lp27_finish:
+        'Ia ditambah dalam keadaan dimatikan. Bukanya, ketik Edit, pilih Account pada Log Card Payment, dan hidupkan Automation. Jika tiada tindakan, padamkannya dan bina sendiri dengan langkah seterusnya.',
+      lp27_m_options: 'Ketik › pada pencetus. Biarkan Automation hidup dan matikan Notify.',
+      lp27_m_select_variable: 'Ketik Amount, kemudian Select Variable.',
+      lp27_m_transaction: 'Pilih pemboleh ubah Transaction di bawah pencetus.',
+      lp27_m_amount: 'Ketik Transaction yang dimasukkan dan pilih Amount.',
+      lp27_m_merchant:
+        'Lakukan yang sama untuk Merchant: Select Variable, Transaction, kemudian Merchant.',
+      bt27_touch: 'Buka Tetapan → Kebolehcapaian → Sentuh.',
+      bt27_backtap: 'Skrol ke bawah dan ketik Ketik Belakang.',
+      bt27_double: 'Ketik Ketik Dua Kali (atau Ketik Tiga Kali).',
+      bt27_shortcuts: 'Ketik Pintasan.',
       step_counter: '%{current} daripada %{total}',
       log_payment_step_1: 'Buka Shortcuts, pergi ke tab Automation, dan ketik New Automation.',
       log_payment_step_2: 'Pilih Wallet: “When I tap a Wallet Card or Pass.”',
@@ -1250,7 +1265,7 @@ const ms = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where reviewed transactions should be logged. Category is optional.',
       payment_alerts_ios_step_7:
-        'Tap back to save. Repeat for each bank or wallet app. Open Money2Time to review new notifications, even offline.',
+        'Ketik kembali untuk menyimpan. Ulang untuk setiap aplikasi bank atau dompet. Untuk menyemak pemberitahuan baharu, walaupun di luar talian, ketik ikon sejarah di sebelah Pemberitahuan dalam Money2Time.',
       payment_alerts_android_disclosure:
         'Baca cara akses pemberitahuan digunakan, kemudian ketik Continue.',
       payment_alerts_ios_app:

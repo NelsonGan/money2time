@@ -177,7 +177,18 @@ async function annotate(id, entry) {
     // its label.
     const pad = mark.pad === undefined ? stroke * 1.6 : mark.pad * width;
 
-    if (mark.type === 'circle') {
+    if (mark.type === 'redact') {
+      // Paints the box with the colour just left of it, so private text in a
+      // capture taken on a real phone (a bank's name in a list row) disappears
+      // into its row instead of leaving a visible block.
+      const fill = image.getPixelColor(
+        Math.max(0, Math.round(x - stroke * 2)),
+        Math.round(y + h / 2),
+      );
+      for (let py = Math.floor(y); py <= Math.ceil(y + h); py += 1) {
+        for (let px = Math.floor(x); px <= Math.ceil(x + w); px += 1) plot(image, px, py, fill);
+      }
+    } else if (mark.type === 'circle') {
       strokeEllipse(image, x - pad, y - pad, w + pad * 2, h + pad * 2, stroke, RED);
     } else if (mark.type === 'arrow') {
       strokeArrow(image, x, y, (mark.x2 ?? 0) * width, (mark.y2 ?? 0) * height, stroke, RED);

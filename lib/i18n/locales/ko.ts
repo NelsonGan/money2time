@@ -1150,6 +1150,21 @@ const ko = {
       tutorial_button: '튜토리얼',
       video_tutorial: '동영상 보기',
       download_shortcut_button: '단축어 받기',
+      download_automation_button: '자동화 받기',
+      lp27_get: '가장 빠른 방법: 아래 버튼을 탭한 다음 Set Up Shortcut을 탭하세요.',
+      lp27_card: 'Any Card를 탭해 추적할 카드를 고른 다음 Add Shortcut을 탭하세요.',
+      lp27_finish:
+        '꺼진 상태로 추가됩니다. 열어서 Edit을 탭하고, Log Card Payment에서 Account를 고른 뒤 Automation을 켜세요. 동작이 없다면 삭제하고 다음 단계에 따라 직접 만드세요.',
+      lp27_m_options: '트리거의 ›를 탭하세요. Automation은 켜 두고 Notify는 끄세요.',
+      lp27_m_select_variable: 'Amount를 탭한 다음 Select Variable을 탭하세요.',
+      lp27_m_transaction: '트리거 아래의 Transaction 변수를 선택하세요.',
+      lp27_m_amount: '삽입된 Transaction을 탭하고 Amount를 고르세요.',
+      lp27_m_merchant:
+        'Merchant도 같은 방법으로: Select Variable, Transaction, Merchant 순서로 고르세요.',
+      bt27_touch: '설정 → 손쉬운 사용 → 터치를 여세요.',
+      bt27_backtap: '아래로 스크롤해 뒷면 탭을 탭하세요.',
+      bt27_double: '이중 탭(또는 삼중 탭)을 탭하세요.',
+      bt27_shortcuts: '단축어를 탭하세요.',
       step_counter: '%{total}단계 중 %{current}단계',
       log_payment_step_1: '단축어를 열고 자동화 탭에서 New Automation을 누르세요.',
       log_payment_step_2: 'Wallet을 선택하세요: “When I tap a Wallet Card or Pass.”',
@@ -1221,7 +1236,7 @@ const ko = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where reviewed transactions should be logged. Category is optional.',
       payment_alerts_ios_step_7:
-        'Tap back to save. Repeat for each bank or wallet app. Open Money2Time to review new notifications, even offline.',
+        '뒤로를 탭해 저장하세요. 은행이나 지갑 앱마다 반복하세요. 새 알림을 검토하려면 오프라인에서도 Money2Time에서 알림 옆의 기록 아이콘을 탭하세요.',
       payment_alerts_android_disclosure: '알림 접근 권한의 사용 방법을 읽고 Continue를 누르세요.',
       payment_alerts_ios_app:
         'App을 탭하고 은행 또는 전자 지갑 앱을 선택하세요. 이 스크린샷은 Wallet을 예로 사용합니다.',

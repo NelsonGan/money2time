@@ -1163,6 +1163,21 @@ const uk = {
       tutorial_button: 'Навчання',
       video_tutorial: 'Дивитися відео',
       download_shortcut_button: 'Отримати команду',
+      download_automation_button: 'Отримати автоматизацію',
+      lp27_get: 'Найшвидше: торкніться кнопки нижче, а потім Set Up Shortcut.',
+      lp27_card:
+        'Торкніться Any Card, виберіть картку для відстеження, а потім торкніться Add Shortcut.',
+      lp27_finish:
+        'Вона додається вимкненою. Відкрийте її, торкніться Edit, виберіть Account у Log Card Payment і ввімкніть Automation. Якщо в ній немає дій, видаліть її та створіть самостійно за наступними кроками.',
+      lp27_m_options: 'Торкніться › біля тригера. Залиште Automation увімкненим і вимкніть Notify.',
+      lp27_m_select_variable: 'Торкніться Amount, а потім Select Variable.',
+      lp27_m_transaction: 'Виберіть змінну Transaction під тригером.',
+      lp27_m_amount: 'Торкніться вставленої Transaction і виберіть Amount.',
+      lp27_m_merchant: 'Те саме для Merchant: Select Variable, Transaction, а потім Merchant.',
+      bt27_touch: 'Відкрийте Параметри → Доступність → Дотик.',
+      bt27_backtap: 'Прокрутіть униз і торкніться Дотик ззаду.',
+      bt27_double: 'Торкніться Подвійний дотик (або Потрійний дотик).',
+      bt27_shortcuts: 'Торкніться Швидкі команди.',
       step_counter: '%{current} з %{total}',
       log_payment_step_1:
         'Відкрийте «Швидкі команди», перейдіть на вкладку Automation і натисніть New Automation.',
@@ -1238,7 +1253,7 @@ const uk = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where reviewed transactions should be logged. Category is optional.',
       payment_alerts_ios_step_7:
-        'Tap back to save. Repeat for each bank or wallet app. Open Money2Time to review new notifications, even offline.',
+        'Торкніться «Назад», щоб зберегти. Повторіть для кожного застосунку банку чи гаманця. Щоб переглянути нові сповіщення, навіть офлайн, торкніться значка історії поруч зі «Сповіщеннями» в Money2Time.',
       payment_alerts_android_disclosure:
         'Прочитайте, як використовується доступ до сповіщень, і натисніть Continue.',
       payment_alerts_ios_app:
