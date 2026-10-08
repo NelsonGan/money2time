@@ -283,6 +283,7 @@
             "extraPods": [
               {
                 "name": "GoogleUtilities",
+                "version": "~> 8.1.4",
                 "modular_headers": true
               },
               {
