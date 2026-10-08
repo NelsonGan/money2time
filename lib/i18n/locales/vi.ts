@@ -1245,7 +1245,7 @@ const vi = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where reviewed transactions should be logged. Category is optional.',
       payment_alerts_ios_step_7:
-        'Tap back to save. Repeat for each bank or wallet app. Open Money2Time to review new notifications, even offline.',
+        'Chạm quay lại để lưu. Lặp lại cho từng ứng dụng ngân hàng hoặc ví. Để xem lại thông báo mới, kể cả khi ngoại tuyến, chạm biểu tượng lịch sử cạnh Thông báo trong Money2Time.',
       payment_alerts_android_disclosure:
         'Đọc cách sử dụng quyền truy cập thông báo rồi nhấn Continue.',
       payment_alerts_ios_app:

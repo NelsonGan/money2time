@@ -1235,7 +1235,7 @@ const th = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where reviewed transactions should be logged. Category is optional.',
       payment_alerts_ios_step_7:
-        'Tap back to save. Repeat for each bank or wallet app. Open Money2Time to review new notifications, even offline.',
+        'แตะย้อนกลับเพื่อบันทึก ทำซ้ำสำหรับแอปธนาคารหรือวอลเล็ตแต่ละแอป หากต้องการตรวจสอบการแจ้งเตือนใหม่ แม้ออฟไลน์ ให้แตะไอคอนประวัติข้างการแจ้งเตือนใน Money2Time',
       payment_alerts_android_disclosure: 'อ่านวิธีใช้สิทธิ์เข้าถึงการแจ้งเตือน แล้วแตะ Continue',
       payment_alerts_ios_app:
         'แตะ App แล้วเลือกแอปธนาคารหรือกระเป๋าเงินอิเล็กทรอนิกส์ ภาพหน้าจอนี้ใช้ Wallet เป็นตัวอย่าง',

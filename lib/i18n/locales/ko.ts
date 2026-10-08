@@ -1236,7 +1236,7 @@ const ko = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where reviewed transactions should be logged. Category is optional.',
       payment_alerts_ios_step_7:
-        'Tap back to save. Repeat for each bank or wallet app. Open Money2Time to review new notifications, even offline.',
+        '뒤로를 탭해 저장하세요. 은행이나 지갑 앱마다 반복하세요. 새 알림을 검토하려면 오프라인에서도 Money2Time에서 알림 옆의 기록 아이콘을 탭하세요.',
       payment_alerts_android_disclosure: '알림 접근 권한의 사용 방법을 읽고 Continue를 누르세요.',
       payment_alerts_ios_app:
         'App을 탭하고 은행 또는 전자 지갑 앱을 선택하세요. 이 스크린샷은 Wallet을 예로 사용합니다.',

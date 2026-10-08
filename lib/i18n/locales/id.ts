@@ -1261,7 +1261,7 @@ const id = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where reviewed transactions should be logged. Category is optional.',
       payment_alerts_ios_step_7:
-        'Tap back to save. Repeat for each bank or wallet app. Open Money2Time to review new notifications, even offline.',
+        'Ketuk kembali untuk menyimpan. Ulangi untuk setiap aplikasi bank atau dompet. Untuk meninjau notifikasi baru, bahkan saat offline, ketuk ikon riwayat di samping Notifikasi di Money2Time.',
       payment_alerts_android_disclosure:
         'Baca cara akses notifikasi digunakan, lalu ketuk Continue.',
       payment_alerts_ios_app:

@@ -1263,7 +1263,7 @@ const tr = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where reviewed transactions should be logged. Category is optional.',
       payment_alerts_ios_step_7:
-        'Tap back to save. Repeat for each bank or wallet app. Open Money2Time to review new notifications, even offline.',
+        'Kaydetmek için geri’ye dokunun. Her banka veya cüzdan uygulaması için tekrarlayın. Yeni bildirimleri çevrimdışıyken bile incelemek için Money2Time’da Bildirimler’in yanındaki geçmiş simgesine dokunun.',
       payment_alerts_android_disclosure:
         'Bildirim erişiminin nasıl kullanıldığını okuyup Continue seçeneğine dokunun.',
       payment_alerts_ios_app:

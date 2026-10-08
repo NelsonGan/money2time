@@ -1249,7 +1249,7 @@ const hi = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where reviewed transactions should be logged. Category is optional.',
       payment_alerts_ios_step_7:
-        'Tap back to save. Repeat for each bank or wallet app. Open Money2Time to review new notifications, even offline.',
+        'सेव करने के लिए back पर टैप करें। हर बैंक या वॉलेट ऐप के लिए दोहराएं। नई सूचनाएं देखने के लिए, ऑफ़लाइन भी, Money2Time में सूचनाएं के पास इतिहास आइकन पर टैप करें।',
       payment_alerts_android_disclosure:
         'सूचनाओं की पहुँच कैसे इस्तेमाल होती है, पढ़ें और Continue पर टैप करें।',
       payment_alerts_ios_app:

@@ -1192,7 +1192,7 @@ const zhHant = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where reviewed transactions should be logged. Category is optional.',
       payment_alerts_ios_step_7:
-        'Tap back to save. Repeat for each bank or wallet app. Open Money2Time to review new notifications, even offline.',
+        '點一下返回以儲存。為每個銀行或錢包 App 重複一次。若要檢視新通知（離線也可以），請在 Money2Time 中點一下「通知」旁的記錄圖示。',
       payment_alerts_android_disclosure: '閱讀通知權限的使用說明，然後點 Continue。',
       payment_alerts_ios_app: '點一下 App 並選擇銀行或電子錢包 App。截圖以 Wallet 為例。',
       payment_alerts_ios_run: '點應用程式旁的箭頭，保持 Automation 開啟。關閉 Notify 可靜默記帳。',

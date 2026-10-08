@@ -1256,7 +1256,7 @@ const nb = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where reviewed transactions should be logged. Category is optional.',
       payment_alerts_ios_step_7:
-        'Tap back to save. Repeat for each bank or wallet app. Open Money2Time to review new notifications, even offline.',
+        'Trykk tilbake for å lagre. Gjenta for hver bank- eller lommebokapp. For å gå gjennom nye varsler, også uten nett, trykker du på historikkikonet ved siden av Varsler i Money2Time.',
       payment_alerts_android_disclosure:
         'Les hvordan varslingstilgangen brukes, og trykk Continue.',
       payment_alerts_ios_app:

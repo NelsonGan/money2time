@@ -1256,7 +1256,7 @@ const sv = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where reviewed transactions should be logged. Category is optional.',
       payment_alerts_ios_step_7:
-        'Tap back to save. Repeat for each bank or wallet app. Open Money2Time to review new notifications, even offline.',
+        'Tryck på tillbaka för att spara. Upprepa för varje bank- eller plånboksapp. Tryck på historikikonen bredvid Aviseringar i Money2Time för att granska nya aviseringar, även offline.',
       payment_alerts_android_disclosure: 'Läs hur aviseringsåtkomsten används och tryck Continue.',
       payment_alerts_ios_app:
         'Tryck på App och välj din bank- eller plånboksapp. Dessa skärmbilder använder Wallet som exempel.',

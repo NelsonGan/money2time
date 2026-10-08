@@ -1267,7 +1267,7 @@ const nl = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where reviewed transactions should be logged. Category is optional.',
       payment_alerts_ios_step_7:
-        'Tap back to save. Repeat for each bank or wallet app. Open Money2Time to review new notifications, even offline.',
+        'Tik op terug om te bewaren. Herhaal dit voor elke bank- of wallet-app. Tik in Money2Time op het geschiedenis-icoon naast Meldingen om nieuwe meldingen te bekijken, ook offline.',
       payment_alerts_android_disclosure:
         'Lees hoe meldingstoegang wordt gebruikt en tik op Continue.',
       payment_alerts_ios_app:

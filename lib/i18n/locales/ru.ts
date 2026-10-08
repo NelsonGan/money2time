@@ -1259,7 +1259,7 @@ const ru = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where reviewed transactions should be logged. Category is optional.',
       payment_alerts_ios_step_7:
-        'Tap back to save. Repeat for each bank or wallet app. Open Money2Time to review new notifications, even offline.',
+        'Нажмите «Назад», чтобы сохранить. Повторите для каждого приложения банка или кошелька. Чтобы просмотреть новые уведомления, даже офлайн, нажмите значок истории рядом с «Уведомлениями» в Money2Time.',
       payment_alerts_android_disclosure:
         'Прочитайте, как используется доступ к уведомлениям, и нажмите Continue.',
       payment_alerts_ios_app:

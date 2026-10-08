@@ -1253,7 +1253,7 @@ const uk = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where reviewed transactions should be logged. Category is optional.',
       payment_alerts_ios_step_7:
-        'Tap back to save. Repeat for each bank or wallet app. Open Money2Time to review new notifications, even offline.',
+        'Торкніться «Назад», щоб зберегти. Повторіть для кожного застосунку банку чи гаманця. Щоб переглянути нові сповіщення, навіть офлайн, торкніться значка історії поруч зі «Сповіщеннями» в Money2Time.',
       payment_alerts_android_disclosure:
         'Прочитайте, як використовується доступ до сповіщень, і натисніть Continue.',
       payment_alerts_ios_app:

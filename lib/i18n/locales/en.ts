@@ -1228,7 +1228,7 @@ const en = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where reviewed transactions should be logged. Category is optional.',
       payment_alerts_ios_step_7:
-        'Tap back to save. Repeat for each bank or wallet app. Open Money2Time to review new notifications, even offline.',
+        'Tap back to save. Repeat for each bank or wallet app. To review new notifications, even offline, tap the History icon next to Notifications in Money2Time.',
       payment_alerts_android_disclosure: 'Read how notification access is used, then tap Continue.',
       payment_alerts_ios_app:
         'Tap App and choose your bank or e-wallet app. These screenshots use Wallet as an example.',
