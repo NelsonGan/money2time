@@ -29,6 +29,7 @@ import { triggerHaptic } from '~/services/haptics';
 import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
 import type { AddButtonAction } from '~/types';
 import { getErrorMessage } from '~/utils/errorHandling';
+import { supportsSharedAutomations } from '~/utils/iosVersion';
 
 interface AutoLogSettingsScreenProps {
   onBack: () => void;
@@ -456,7 +457,7 @@ export function AutoLogSettingsScreen({
                       <Text variant="caption" tone="muted">
                         {I18n.t('payment_alerts.card_intro')}{' '}
                         {I18n.t(
-                          Number.parseInt(String(Platform.Version), 10) >= 27
+                          supportsSharedAutomations(Platform.OS, Platform.Version)
                             ? 'payment_alerts.ios_notifications_hint'
                             : 'payment_alerts.ios_needs_27',
                         )}

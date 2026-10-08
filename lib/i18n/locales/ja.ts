@@ -1157,6 +1157,21 @@ const ja = {
       tutorial_button: 'チュートリアル',
       video_tutorial: '動画を見る',
       download_shortcut_button: 'ショートカットを入手',
+      download_automation_button: 'オートメーションを入手',
+      lp27_get: '最も手軽な方法：下のボタンをタップし、Set Up Shortcut をタップします。',
+      lp27_card: 'Any Card をタップして記録するカードを選び、Add Shortcut をタップします。',
+      lp27_finish:
+        'オフの状態で追加されます。開いて Edit をタップし、Log Card Payment の Account を選んで Automation をオンにします。アクションが表示されない場合は削除し、次の手順で自分で作成してください。',
+      lp27_m_options:
+        'トリガーの › をタップします。Automation はオンのまま、Notify をオフにします。',
+      lp27_m_select_variable: 'Amount をタップし、Select Variable をタップします。',
+      lp27_m_transaction: 'トリガーの下にある Transaction 変数を選びます。',
+      lp27_m_amount: '挿入された Transaction をタップし、Amount を選びます。',
+      lp27_m_merchant: 'Merchant も同様に：Select Variable、Transaction、Merchant の順に選びます。',
+      bt27_touch: '設定 → アクセシビリティ → タッチ を開きます。',
+      bt27_backtap: '下にスクロールして 背面タップ をタップします。',
+      bt27_double: 'ダブルタップ（またはトリプルタップ）をタップします。',
+      bt27_shortcuts: '下にスクロールして ショートカット をタップします。',
       step_counter: '%{current} / %{total}',
       log_payment_step_1:
         'ショートカットを開き、「オートメーション」タブで New Automation をタップします。',

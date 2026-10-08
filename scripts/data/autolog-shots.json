@@ -313,5 +313,355 @@
         "pad": 0.006
       }
     ]
+  },
+  "lp27q_01_setup": {
+    "source": "RAW/ios27/lp27q_01_setup.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.056,
+        "y": 0.91,
+        "w": 0.888,
+        "h": 0.054,
+        "radius": 0.022,
+        "pad": 0.006
+      }
+    ]
+  },
+  "lp27q_02_card": {
+    "source": "RAW/ios27/lp27q_02_card.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.77,
+        "y": 0.262,
+        "w": 0.185,
+        "h": 0.036,
+        "radius": 0.022,
+        "pad": 0.006
+      }
+    ]
+  },
+  "lp27m_02_automation": {
+    "source": "RAW/ios27/lp27m_02_automation.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.06,
+        "y": 0.603,
+        "w": 0.31,
+        "h": 0.044,
+        "radius": 0.022,
+        "pad": 0.006
+      }
+    ]
+  },
+  "lp27m_03_wallet": {
+    "source": "RAW/ios27/lp27m_03_wallet.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.047,
+        "y": 0.192,
+        "w": 0.907,
+        "h": 0.063,
+        "radius": 0.022,
+        "pad": 0.006
+      }
+    ]
+  },
+  "lp27m_04_card": {
+    "source": "RAW/ios27/lp27m_04_card.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.292,
+        "y": 0.153,
+        "w": 0.223,
+        "h": 0.029,
+        "radius": 0.022,
+        "pad": 0.006
+      }
+    ]
+  },
+  "lp27m_05_options": {
+    "source": "RAW/ios27/lp27m_05_options.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.037,
+        "y": 0.295,
+        "w": 0.926,
+        "h": 0.095,
+        "radius": 0.022,
+        "pad": 0.006
+      }
+    ]
+  },
+  "lp27m_06_action": {
+    "source": "RAW/ios27/lp27m_06_action.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.047,
+        "y": 0.207,
+        "w": 0.907,
+        "h": 0.06,
+        "radius": 0.022,
+        "pad": 0.006
+      }
+    ]
+  },
+  "lp27m_08_select_variable": {
+    "source": "RAW/ios27/lp27m_08_select_variable.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.05,
+        "y": 0.563,
+        "w": 0.32,
+        "h": 0.043,
+        "radius": 0.022,
+        "pad": 0.006
+      }
+    ]
+  },
+  "lp27m_09_transaction": {
+    "source": "RAW/ios27/lp27m_09_transaction.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.355,
+        "y": 0.252,
+        "w": 0.295,
+        "h": 0.034,
+        "radius": 0.022,
+        "pad": 0.006
+      }
+    ]
+  },
+  "lp27m_10_pick_amount": {
+    "source": "RAW/ios27/lp27m_10_pick_amount.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.063,
+        "y": 0.857,
+        "w": 0.873,
+        "h": 0.054,
+        "radius": 0.022,
+        "pad": 0.006
+      }
+    ]
+  },
+  "lp27m_11_pick_merchant": {
+    "source": "RAW/ios27/lp27m_11_pick_merchant.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.063,
+        "y": 0.804,
+        "w": 0.873,
+        "h": 0.054,
+        "radius": 0.022,
+        "pad": 0.006
+      }
+    ]
+  },
+  "lp27m_12_account": {
+    "source": "RAW/ios27/lp27m_12_account.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.037,
+        "y": 0.363,
+        "w": 0.926,
+        "h": 0.047,
+        "radius": 0.022,
+        "pad": 0.006
+      }
+    ]
+  },
+  "lp27m_13_done": {
+    "source": "RAW/ios27/lp27m_13_done.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.047,
+        "y": 0.063,
+        "w": 0.102,
+        "h": 0.047,
+        "radius": 0.022,
+        "pad": 0.006
+      }
+    ]
+  },
+  "bt27_01_touch": {
+    "source": "RAW/ios27/bt27_01_touch.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.047,
+        "y": 0.487,
+        "w": 0.907,
+        "h": 0.057,
+        "radius": 0.022,
+        "pad": 0.006
+      }
+    ]
+  },
+  "bt27_02_backtap": {
+    "source": "RAW/ios27/bt27_02_backtap.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.047,
+        "y": 0.711,
+        "w": 0.907,
+        "h": 0.057,
+        "radius": 0.022,
+        "pad": 0.006
+      }
+    ]
+  },
+  "bt27_03_double": {
+    "source": "RAW/ios27/bt27_03_double.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.047,
+        "y": 0.159,
+        "w": 0.907,
+        "h": 0.056,
+        "radius": 0.022,
+        "pad": 0.006
+      }
+    ]
+  },
+  "bt27_04_shortcuts": {
+    "source": "RAW/ios27/bt27_04_shortcuts.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.047,
+        "y": 0.515,
+        "w": 0.907,
+        "h": 0.056,
+        "radius": 0.022,
+        "pad": 0.006
+      }
+    ]
+  },
+  "nt27_01_add": {
+    "source": "RAW/ios27/nt27_01_add.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.056,
+        "y": 0.91,
+        "w": 0.888,
+        "h": 0.054,
+        "radius": 0.022,
+        "pad": 0.006
+      }
+    ]
+  },
+  "ls27_01_add": {
+    "source": "RAW/ios27/ls27_01_add.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.056,
+        "y": 0.91,
+        "w": 0.888,
+        "h": 0.054,
+        "radius": 0.022,
+        "pad": 0.006
+      }
+    ]
+  },
+  "bt27_05_list_nt": {
+    "source": "RAW/ios27/bt27_05_list.png",
+    "marks": [
+      {
+        "type": "redact",
+        "x": 0.093,
+        "y": 0.233,
+        "w": 0.6,
+        "h": 0.024
+      },
+      {
+        "type": "redact",
+        "x": 0.093,
+        "y": 0.289,
+        "w": 0.6,
+        "h": 0.024
+      },
+      {
+        "type": "redact",
+        "x": 0.093,
+        "y": 0.344,
+        "w": 0.6,
+        "h": 0.024
+      },
+      {
+        "type": "redact",
+        "x": 0.093,
+        "y": 0.4,
+        "w": 0.6,
+        "h": 0.024
+      },
+      {
+        "type": "rect",
+        "x": 0.047,
+        "y": 0.775,
+        "w": 0.907,
+        "h": 0.056,
+        "radius": 0.022,
+        "pad": 0.006
+      }
+    ]
+  },
+  "bt27_05_list_ls": {
+    "source": "RAW/ios27/bt27_05_list.png",
+    "marks": [
+      {
+        "type": "redact",
+        "x": 0.093,
+        "y": 0.233,
+        "w": 0.6,
+        "h": 0.024
+      },
+      {
+        "type": "redact",
+        "x": 0.093,
+        "y": 0.289,
+        "w": 0.6,
+        "h": 0.024
+      },
+      {
+        "type": "redact",
+        "x": 0.093,
+        "y": 0.344,
+        "w": 0.6,
+        "h": 0.024
+      },
+      {
+        "type": "redact",
+        "x": 0.093,
+        "y": 0.4,
+        "w": 0.6,
+        "h": 0.024
+      },
+      {
+        "type": "rect",
+        "x": 0.047,
+        "y": 0.607,
+        "w": 0.907,
+        "h": 0.056,
+        "radius": 0.022,
+        "pad": 0.006
+      }
+    ]
   }
 }

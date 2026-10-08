@@ -1167,6 +1167,22 @@ const tr = {
       tutorial_button: 'Öğretici',
       video_tutorial: 'Videoyu izle',
       download_shortcut_button: 'Kısayolu al',
+      download_automation_button: 'Otomasyonu al',
+      lp27_get: 'En hızlısı: aşağıdaki düğmeye, ardından Set Up Shortcut’a dokunun.',
+      lp27_card: 'Any Card’a dokunun, izlenecek kartı seçin, ardından Add Shortcut’a dokunun.',
+      lp27_finish:
+        'Kapalı olarak eklenir. Açın, Edit’e dokunun, Log Card Payment’ta Account’u seçin ve Automation’ı açın. Hiç eylemi yoksa silin ve sonraki adımlarla kendiniz oluşturun.',
+      lp27_m_options:
+        'Tetikleyicideki ›’ye dokunun. Automation’ı açık bırakın ve Notify’ı kapatın.',
+      lp27_m_select_variable: 'Amount’a, ardından Select Variable’a dokunun.',
+      lp27_m_transaction: 'Tetikleyicinin altındaki Transaction değişkenini seçin.',
+      lp27_m_amount: 'Eklenen Transaction’a dokunun ve Amount’u seçin.',
+      lp27_m_merchant:
+        'Merchant için de aynısını yapın: Select Variable, Transaction, ardından Merchant.',
+      bt27_touch: 'Ayarlar → Erişilebilirlik → Dokunma’yı açın.',
+      bt27_backtap: 'Aşağı kaydırın ve Arkaya Dokunma’ya dokunun.',
+      bt27_double: 'Çift Dokunma’ya (veya Üçlü Dokunma’ya) dokunun.',
+      bt27_shortcuts: 'Aşağı kaydırın ve Kestirmeler’e dokunun.',
       step_counter: '%{current} / %{total}',
       log_payment_step_1:
         'Kısayollar’ı açın, Automation sekmesine gidin ve New Automation’a dokunun.',

@@ -28,13 +28,23 @@ export const LOG_NOTIFICATION_INTENT_NAME = 'Log Notification';
 
 // Ready-made iCloud share links for the two shortcuts a user can install as-is,
 // so the tutorial only has to cover the trigger (Back Tap / automation) rather
-// than walking them through building the shortcut by hand. Log Card Payment has
-// no link on purpose: a Transaction *automation* can't be packaged into a
-// shareable shortcut, so that flow stays fully manual.
+// than walking them through building the shortcut by hand. Before iOS 27 a
+// Transaction *automation* can't be packaged into a shareable shortcut, so Log
+// Card Payment stays fully manual there.
 export const NEW_TRANSACTION_SHORTCUT_URL =
   'https://www.icloud.com/shortcuts/90b01863119d42929db64150bff172b8';
 export const SCAN_SCREENSHOT_SHORTCUT_URL =
   'https://www.icloud.com/shortcuts/50f20a5f88084dda95718f5b6e56e927';
+
+// iOS 27 shares a shortcut together with its automation trigger, so this one
+// installs the whole Wallet automation. Its only Import Question is the card:
+// asking for the Money2Time Account there leaves Shortcuts' Add Shortcut button
+// dead on iOS 27, so the guide has the user set the account afterwards. On iOS
+// 27.0.1 a link install can also arrive with its Money2Time action missing (the
+// long-standing New Transaction link does the same), which is why the guide
+// keeps the step-by-step build right after the link.
+export const LOG_CARD_PAYMENT_AUTOMATION_URL =
+  'https://www.icloud.com/shortcuts/9e3d3157b1d94fa9a01e4c0295073f33';
 
 // Video walkthroughs, one per automation type, linked from the top-right of each
 // tutorial. Keep R2 object paths versioned so cached videos never change in place.
@@ -44,3 +54,14 @@ export const AUTO_LOG_VIDEO_URLS = {
   logScreenshot: 'https://youtube.com/shorts/MEK2AyOQh6w',
   paymentAlertsIos: 'https://media.money2time.com/tutorials/ios/notifications/setup-2026-10-07.mp4',
 } as const;
+
+/** iOS 27 walkthroughs, replacing the ones above where the iOS 27 screens differ. */
+export const AUTO_LOG_VIDEO_URLS_IOS27: Partial<Record<keyof typeof AUTO_LOG_VIDEO_URLS, string>> =
+  {
+    logPayment:
+      'https://media.money2time.com/tutorials/ios27/log-card-payment/setup-2026-10-09.mp4',
+    newTransaction:
+      'https://media.money2time.com/tutorials/ios27/new-transaction/setup-2026-10-09.mp4',
+    logScreenshot:
+      'https://media.money2time.com/tutorials/ios27/log-screenshot/setup-2026-10-09.mp4',
+  };

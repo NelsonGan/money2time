@@ -1175,6 +1175,24 @@ const fil = {
       tutorial_button: 'Tutorial',
       video_tutorial: 'Manood ng video',
       download_shortcut_button: 'Kunin ang Shortcut',
+      download_automation_button: 'Kunin ang Automation',
+      lp27_get:
+        'Pinakamabilis: i-tap ang button sa ibaba, pagkatapos ay i-tap ang Set Up Shortcut.',
+      lp27_card:
+        'I-tap ang Any Card, piliin ang card na ita-track, pagkatapos ay i-tap ang Add Shortcut.',
+      lp27_finish:
+        'Naka-off ito pagdating. Buksan ito, i-tap ang Edit, itakda ang Account sa Log Card Payment, at i-on ang Automation. Kung walang action, burahin ito at sundin ang mga susunod na hakbang para gawin ito mismo.',
+      lp27_m_options:
+        'I-tap ang › sa trigger. Panatilihing naka-on ang Automation at i-off ang Notify.',
+      lp27_m_select_variable: 'I-tap ang Amount, pagkatapos ay Select Variable.',
+      lp27_m_transaction: 'Piliin ang Transaction variable sa ilalim ng trigger.',
+      lp27_m_amount: 'I-tap ang idinagdag na Transaction at piliin ang Amount.',
+      lp27_m_merchant:
+        'Gawin din sa Merchant: Select Variable, Transaction, pagkatapos ay Merchant.',
+      bt27_touch: 'Buksan ang Settings → Accessibility → Touch.',
+      bt27_backtap: 'Mag-scroll pababa at i-tap ang Back Tap.',
+      bt27_double: 'I-tap ang Double Tap (o Triple Tap).',
+      bt27_shortcuts: 'Mag-scroll pababa at i-tap ang Shortcuts.',
       step_counter: '%{current} sa %{total}',
       log_payment_step_1:
         'Buksan ang Shortcuts, pumunta sa Automation tab, at i-tap ang New Automation.',

@@ -1174,6 +1174,21 @@ const nl = {
       tutorial_button: 'Tutorial',
       video_tutorial: 'Video bekijken',
       download_shortcut_button: 'Opdracht ophalen',
+      download_automation_button: 'Automatisering ophalen',
+      lp27_get: 'Snelst: tik op de knop hieronder en daarna op Set Up Shortcut.',
+      lp27_card: 'Tik op Any Card, kies de kaart die je wilt volgen en tik daarna op Add Shortcut.',
+      lp27_finish:
+        'Hij wordt uitgeschakeld toegevoegd. Open hem, tik op Edit, kies het Account bij Log Card Payment en zet Automation aan. Heeft hij geen acties, verwijder hem dan en maak hem zelf met de volgende stappen.',
+      lp27_m_options: 'Tik op › bij de trigger. Laat Automation aan en zet Notify uit.',
+      lp27_m_select_variable: 'Tik op Amount en daarna op Select Variable.',
+      lp27_m_transaction: 'Selecteer de variabele Transaction onder de trigger.',
+      lp27_m_amount: 'Tik op de ingevoegde Transaction en kies Amount.',
+      lp27_m_merchant:
+        'Doe hetzelfde voor Merchant: Select Variable, Transaction en daarna Merchant.',
+      bt27_touch: 'Open Instellingen → Toegankelijkheid → Aanraken.',
+      bt27_backtap: 'Scrol omlaag en tik op Tik op achterkant.',
+      bt27_double: 'Tik op Dubbeltik (of Drievoudige tik).',
+      bt27_shortcuts: 'Scrol omlaag en tik op Opdrachten.',
       step_counter: '%{current} van %{total}',
       log_payment_step_1:
         'Open Opdrachten, ga naar het tabblad Automation en tik op New Automation.',
