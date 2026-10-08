@@ -44,10 +44,10 @@ export function SplitBillScreen() {
     setSeenSessionSplits(sessionSplits);
     if (sessionSplits && !sentSplitsRef.current.has(sessionSplits)) setSplits(sessionSplits);
   }
-  const handleSplitsChange = useCallback((next: SplitDraft[]) => {
+  const handleSplitsChange = useCallback((next: SplitDraft[], adjustedTotal?: number) => {
     sentSplitsRef.current.add(next);
     setSplits(next);
-    sessionRef.current?.onChange(next);
+    sessionRef.current?.onChange(next, adjustedTotal);
   }, []);
 
   // Any removal that wasn't an explicit Done is a cancel — covers the header

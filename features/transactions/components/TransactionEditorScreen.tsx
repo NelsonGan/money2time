@@ -864,6 +864,14 @@ export function TransactionEditorScreen({
     [],
   );
   const [amountExpression, setAmountExpression] = useState('');
+  // Split edits replace the amount outside the keypad. Remount it with the new
+  // seed so its private expression cannot overwrite an adjustment or a cancel.
+  const [splitAmountRevision, setSplitAmountRevision] = useState(0);
+  const replaceAmountFromSplit = useCallback((next: string) => {
+    setAmount(next);
+    setAmountExpression('');
+    setSplitAmountRevision((revision) => revision + 1);
+  }, []);
   // Height of the software keyboard while the note field is focused. When > 0 we
   // lift the pinned bottom panel just enough for the note to clear the keyboard.
   // Restored to 0 on blur.
@@ -1638,7 +1646,7 @@ export function TransactionEditorScreen({
         Math.round(
           splits.reduce((acc, s) => (s.paid ? acc : acc + (Number(s.amount) || 0)), 0) * 100,
         ) / 100;
-      setAmount(sum > 0 ? sum.toFixed(2) : '');
+      replaceAmountFromSplit(sum > 0 ? sum.toFixed(2) : '');
       setSplitEvenly(false);
       setSplitItemized(false);
     }
@@ -1647,7 +1655,7 @@ export function TransactionEditorScreen({
       setSplitMode(false);
       setSplits([]);
     }
-  }, [splitItemized, splits]);
+  }, [replaceAmountFromSplit, splitItemized, splits]);
 
   const handleCancelSplitBill = useCallback(() => {
     setSplitRouteOpen(false);
@@ -1656,10 +1664,10 @@ export function TransactionEditorScreen({
     splitBillSnapshotRef.current = null;
     if (!snapshot) return;
     setSplits(snapshot.splits);
-    setAmount(snapshot.amount);
+    replaceAmountFromSplit(snapshot.amount);
     setSplitEvenly(snapshot.splitEvenly);
     setSplitMode(snapshot.splitMode);
-  }, []);
+  }, [replaceAmountFromSplit]);
 
   // Read the latest opener from a ref so the auto-open effect below can fire it
   // without listing it as a dep (which would let a mid-frame identity change
@@ -1761,6 +1769,14 @@ export function TransactionEditorScreen({
     [effectiveEntryCurrency],
   );
 
+  const handleSplitChange = useCallback(
+    (rows: SplitDraft[], adjustedTotal?: number) => {
+      setSplits(rows);
+      if (adjustedTotal !== undefined) replaceAmountFromSplit(adjustedTotal.toFixed(2));
+    },
+    [replaceAmountFromSplit],
+  );
+
   // Publish the editor's live split draft + callbacks for the pushed Split Bill
   // route to consume. The editor only ever writes the session (never reads it),
   // so republishing on every edit can't re-render this screen into a loop.
@@ -1771,7 +1787,7 @@ export function TransactionEditorScreen({
         itemized,
         defaultAccountId: defaultPaybackAccountId,
         splits: rows,
-        onChange: setSplits,
+        onChange: handleSplitChange,
         splitEvenly: evenly,
         onSplitEvenlyChange: setSplitEvenly,
         accounts,
@@ -1798,6 +1814,7 @@ export function TransactionEditorScreen({
       handleDoneSplitBill,
       handleSplitMarkPaidLocal,
       handleSplitMarkUnpaidLocal,
+      handleSplitChange,
       mode,
       newlyPaidIds,
       setSplitSession,
@@ -2849,6 +2866,7 @@ export function TransactionEditorScreen({
             <View className="flex-1">
               <NumpadPanel
                 resetNonce={bulkEntryNonce}
+                key={splitAmountRevision}
                 initialExpression={amount}
                 onBackgroundPress={clearActiveField}
                 onValueChange={handleAmountValueChange}
@@ -4449,6 +4467,7 @@ export function TransactionEditorScreen({
                     <NumpadPanel
                       compact
                       resetNonce={bulkEntryNonce}
+                      key={splitAmountRevision}
                       initialExpression={amount}
                       onValueChange={handleAmountValueChange}
                       onConfirm={handleAmountConfirm}
