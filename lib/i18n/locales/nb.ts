@@ -1165,6 +1165,21 @@ const nb = {
       tutorial_button: 'Veiledning',
       video_tutorial: 'Se video',
       download_shortcut_button: 'Hent snarvei',
+      download_automation_button: 'Hent automatisering',
+      lp27_get: 'Raskest: trykk på knappen nedenfor, og trykk deretter på Set Up Shortcut.',
+      lp27_card: 'Trykk på Any Card, velg kortet du vil følge, og trykk deretter på Add Shortcut.',
+      lp27_finish:
+        'Den legges til avslått. Åpne den, trykk på Edit, velg Account i Log Card Payment, og slå på Automation. Hvis den ikke har handlinger, slett den og lag den selv med de neste trinnene.',
+      lp27_m_options: 'Trykk på › ved utløseren. La Automation være på, og slå av Notify.',
+      lp27_m_select_variable: 'Trykk på Amount og deretter Select Variable.',
+      lp27_m_transaction: 'Velg variabelen Transaction under utløseren.',
+      lp27_m_amount: 'Trykk på den innsatte Transaction, og velg Amount.',
+      lp27_m_merchant:
+        'Gjør det samme for Merchant: Select Variable, Transaction og deretter Merchant.',
+      bt27_touch: 'Åpne Innstillinger → Tilgjengelighet → Berøring.',
+      bt27_backtap: 'Rull ned, og trykk på Bakpanel-trykk.',
+      bt27_double: 'Trykk på Dobbelttrykk (eller Trippeltrykk).',
+      bt27_shortcuts: 'Trykk på Snarveier.',
       step_counter: '%{current} av %{total}',
       log_payment_step_1: 'Åpne Snarveier, gå til Automation-fanen og trykk på New Automation.',
       log_payment_step_2: 'Velg Wallet: “Når jeg trykker på et Wallet-kort eller -pass.”',
@@ -1241,7 +1256,7 @@ const nb = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where reviewed transactions should be logged. Category is optional.',
       payment_alerts_ios_step_7:
-        'Tap back to save. Repeat for each bank or wallet app. Open Money2Time to review new notifications, even offline.',
+        'Trykk tilbake for å lagre. Gjenta for hver bank- eller lommebokapp. For å gå gjennom nye varsler, også uten nett, trykker du på historikkikonet ved siden av Varsler i Money2Time.',
       payment_alerts_android_disclosure:
         'Les hvordan varslingstilgangen brukes, og trykk Continue.',
       payment_alerts_ios_app:

@@ -1170,6 +1170,21 @@ const pt = {
       tutorial_button: 'Tutorial',
       video_tutorial: 'Ver vídeo',
       download_shortcut_button: 'Obter atalho',
+      download_automation_button: 'Obter automação',
+      lp27_get: 'O jeito mais rápido: toque no botão abaixo e depois em Set Up Shortcut.',
+      lp27_card: 'Toque em Any Card, escolha o cartão a acompanhar e depois toque em Add Shortcut.',
+      lp27_finish:
+        'Ela é adicionada desativada. Abra-a, toque em Edit, escolha a Account em Log Card Payment e ative Automation. Se não tiver ações, apague-a e crie você mesmo com os próximos passos.',
+      lp27_m_options: 'Toque em › no gatilho. Mantenha Automation ativado e desative Notify.',
+      lp27_m_select_variable: 'Toque em Amount e depois em Select Variable.',
+      lp27_m_transaction: 'Selecione a variável Transaction abaixo do gatilho.',
+      lp27_m_amount: 'Toque na Transaction inserida e escolha Amount.',
+      lp27_m_merchant:
+        'Faça o mesmo para Merchant: Select Variable, Transaction e depois Merchant.',
+      bt27_touch: 'Abra Ajustes → Acessibilidade → Toque.',
+      bt27_backtap: 'Role para baixo e toque em Toque Traseiro.',
+      bt27_double: 'Toque em Toque Duplo (ou Toque Triplo).',
+      bt27_shortcuts: 'Toque em Atalhos.',
       step_counter: '%{current} de %{total}',
       log_payment_step_1: 'Abra o Atalhos, vá para a aba Automation e toque em New Automation.',
       log_payment_step_2: 'Escolha Wallet: “Quando eu toco em um cartão ou passe da Wallet.”',
@@ -1247,7 +1262,7 @@ const pt = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where reviewed transactions should be logged. Category is optional.',
       payment_alerts_ios_step_7:
-        'Tap back to save. Repeat for each bank or wallet app. Open Money2Time to review new notifications, even offline.',
+        'Toque em voltar para salvar. Repita para cada app de banco ou carteira. Para revisar novas notificações, mesmo offline, toque no ícone de histórico ao lado de Notificações no Money2Time.',
       payment_alerts_android_disclosure:
         'Leia como o acesso às notificações é usado e toque em Continue.',
       payment_alerts_ios_app:

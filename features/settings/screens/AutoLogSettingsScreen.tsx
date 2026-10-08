@@ -29,6 +29,10 @@ import { triggerHaptic } from '~/services/haptics';
 import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
 import type { AddButtonAction } from '~/types';
 import { getErrorMessage } from '~/utils/errorHandling';
+import { isIosAtLeast } from '~/utils/iosVersion';
+
+/** Shortcuts gained the Notification automation trigger in iOS 27. */
+const IOS_NOTIFICATION_TRIGGER_MIN = 27;
 
 interface AutoLogSettingsScreenProps {
   onBack: () => void;
@@ -456,7 +460,7 @@ export function AutoLogSettingsScreen({
                       <Text variant="caption" tone="muted">
                         {I18n.t('payment_alerts.card_intro')}{' '}
                         {I18n.t(
-                          Number.parseInt(String(Platform.Version), 10) >= 27
+                          isIosAtLeast(Platform.OS, Platform.Version, IOS_NOTIFICATION_TRIGGER_MIN)
                             ? 'payment_alerts.ios_notifications_hint'
                             : 'payment_alerts.ios_needs_27',
                         )}

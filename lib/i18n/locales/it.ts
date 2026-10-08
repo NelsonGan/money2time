@@ -1169,6 +1169,20 @@ const it = {
       tutorial_button: 'Tutorial',
       video_tutorial: 'Guarda il video',
       download_shortcut_button: 'Ottieni comando',
+      download_automation_button: 'Ottieni automazione',
+      lp27_get: 'Più veloce: tocca il pulsante qui sotto, poi Set Up Shortcut.',
+      lp27_card: 'Tocca Any Card, scegli la carta da monitorare, poi tocca Add Shortcut.',
+      lp27_finish:
+        'Viene aggiunta disattivata. Aprila, tocca Edit, scegli l’Account in Log Card Payment e attiva Automation. Se non ha azioni, eliminala e creala tu con i passaggi successivi.',
+      lp27_m_options: 'Tocca › sull’attivatore. Lascia Automation attivo e disattiva Notify.',
+      lp27_m_select_variable: 'Tocca Amount, poi Select Variable.',
+      lp27_m_transaction: 'Seleziona la variabile Transaction sotto l’attivatore.',
+      lp27_m_amount: 'Tocca la Transaction inserita e scegli Amount.',
+      lp27_m_merchant: 'Fai lo stesso per Merchant: Select Variable, Transaction, poi Merchant.',
+      bt27_touch: 'Apri Impostazioni → Accessibilità → Tocco.',
+      bt27_backtap: 'Scorri in basso e tocca Tocco posteriore.',
+      bt27_double: 'Tocca Tocco doppio (o Tocco triplo).',
+      bt27_shortcuts: 'Tocca Comandi rapidi.',
       step_counter: '%{current} di %{total}',
       log_payment_step_1: 'Apri Comandi, vai alla scheda Automation e tocca New Automation.',
       log_payment_step_2: 'Scegli Wallet: “Quando tocco una carta o un pass Wallet.”',
@@ -1244,7 +1258,7 @@ const it = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where reviewed transactions should be logged. Category is optional.',
       payment_alerts_ios_step_7:
-        'Tap back to save. Repeat for each bank or wallet app. Open Money2Time to review new notifications, even offline.',
+        'Tocca indietro per salvare. Ripeti per ogni app bancaria o di portafoglio. Per controllare le nuove notifiche, anche offline, tocca l’icona della cronologia accanto a Notifiche in Money2Time.',
       payment_alerts_android_disclosure:
         'Leggi come viene usato l’accesso alle notifiche, poi tocca Continue.',
       payment_alerts_ios_app:

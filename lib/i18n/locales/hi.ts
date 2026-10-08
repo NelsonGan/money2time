@@ -1161,6 +1161,20 @@ const hi = {
       tutorial_button: 'ट्यूटोरियल',
       video_tutorial: 'वीडियो देखें',
       download_shortcut_button: 'शॉर्टकट पाएं',
+      download_automation_button: 'ऑटोमेशन पाएं',
+      lp27_get: 'सबसे तेज़ तरीका: नीचे दिए बटन पर टैप करें, फिर Set Up Shortcut पर टैप करें।',
+      lp27_card: 'Any Card पर टैप करें, ट्रैक करने वाला कार्ड चुनें, फिर Add Shortcut पर टैप करें।',
+      lp27_finish:
+        'यह बंद स्थिति में जुड़ता है। इसे खोलें, Edit पर टैप करें, Log Card Payment में Account चुनें और Automation चालू करें। अगर इसमें कोई एक्शन न हो, तो इसे हटाकर अगले स्टेप से खुद बनाएं।',
+      lp27_m_options: 'ट्रिगर पर › टैप करें। Automation चालू रखें और Notify बंद करें।',
+      lp27_m_select_variable: 'Amount पर टैप करें, फिर Select Variable।',
+      lp27_m_transaction: 'ट्रिगर के नीचे Transaction वेरिएबल चुनें।',
+      lp27_m_amount: 'जोड़े गए Transaction पर टैप करें और Amount चुनें।',
+      lp27_m_merchant: 'Merchant के लिए भी यही करें: Select Variable, Transaction, फिर Merchant।',
+      bt27_touch: 'सेटिंग्स → एक्सेसिबिलिटी → टच खोलें।',
+      bt27_backtap: 'नीचे स्क्रॉल करें और Back Tap पर टैप करें।',
+      bt27_double: 'Double Tap (या Triple Tap) पर टैप करें।',
+      bt27_shortcuts: 'Shortcuts पर टैप करें।',
       step_counter: '%{total} में से %{current}',
       log_payment_step_1: 'Shortcuts खोलें, Automation टैब पर जाएं, और New Automation दबाएं।',
       log_payment_step_2: 'Wallet चुनें: “When I tap a Wallet Card or Pass.”',
@@ -1235,7 +1249,7 @@ const hi = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where reviewed transactions should be logged. Category is optional.',
       payment_alerts_ios_step_7:
-        'Tap back to save. Repeat for each bank or wallet app. Open Money2Time to review new notifications, even offline.',
+        'सेव करने के लिए back पर टैप करें। हर बैंक या वॉलेट ऐप के लिए दोहराएं। नई सूचनाएं देखने के लिए, ऑफ़लाइन भी, Money2Time में सूचनाएं के पास इतिहास आइकन पर टैप करें।',
       payment_alerts_android_disclosure:
         'सूचनाओं की पहुँच कैसे इस्तेमाल होती है, पढ़ें और Continue पर टैप करें।',
       payment_alerts_ios_app:

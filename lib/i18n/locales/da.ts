@@ -1167,6 +1167,21 @@ const da = {
       tutorial_button: 'Vejledning',
       video_tutorial: 'Se video',
       download_shortcut_button: 'Hent genvej',
+      download_automation_button: 'Hent automatisering',
+      lp27_get: 'Hurtigst: tryk på knappen nedenfor, og tryk derefter på Set Up Shortcut.',
+      lp27_card: 'Tryk på Any Card, vælg kortet, du vil følge, og tryk derefter på Add Shortcut.',
+      lp27_finish:
+        'Den tilføjes slået fra. Åbn den, tryk på Edit, vælg Account i Log Card Payment, og slå Automation til. Hvis den ikke har nogen handlinger, så slet den og byg den selv med de næste trin.',
+      lp27_m_options: 'Tryk på › ved udløseren. Lad Automation være slået til, og slå Notify fra.',
+      lp27_m_select_variable: 'Tryk på Amount og derefter Select Variable.',
+      lp27_m_transaction: 'Vælg variablen Transaction under udløseren.',
+      lp27_m_amount: 'Tryk på den indsatte Transaction, og vælg Amount.',
+      lp27_m_merchant:
+        'Gør det samme for Merchant: Select Variable, Transaction og derefter Merchant.',
+      bt27_touch: 'Åbn Indstillinger → Tilgængelighed → Berøring.',
+      bt27_backtap: 'Rul ned, og tryk på Tryk på bagsiden.',
+      bt27_double: 'Tryk på Dobbelttryk (eller Tredobbelt tryk).',
+      bt27_shortcuts: 'Tryk på Genveje.',
       step_counter: '%{current} af %{total}',
       log_payment_step_1: 'Åbn Genveje, gå til fanen Automation, og tryk på New Automation.',
       log_payment_step_2: 'Vælg Wallet: “Når jeg trykker på et Wallet-kort eller -pas.”',
@@ -1243,7 +1258,7 @@ const da = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where reviewed transactions should be logged. Category is optional.',
       payment_alerts_ios_step_7:
-        'Tap back to save. Repeat for each bank or wallet app. Open Money2Time to review new notifications, even offline.',
+        'Tryk tilbage for at gemme. Gentag for hver bank- eller wallet-app. Tryk på historikikonet ved siden af Notifikationer i Money2Time for at gennemgå nye notifikationer, også offline.',
       payment_alerts_android_disclosure: 'Læs om brugen af notifikationsadgang, og tryk Continue.',
       payment_alerts_ios_app:
         'Tryk på App, og vælg din bank- eller wallet-app. Disse skærmbilleder bruger Wallet som eksempel.',
