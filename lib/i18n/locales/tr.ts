@@ -1226,7 +1226,7 @@ const tr = {
       payment_alerts_status_apps_one: '%{count} uygulama için açık',
       payment_alerts_status_apps_other: '%{count} uygulama için açık',
       payment_alerts_android_step_1:
-        '“Bildirimlerden kaydet” bölümüne dokunup “Bildirimleri oku” seçeneğini etkinleştirin.',
+        'Tap “Log from notifications”, read the scanning disclosure and enable “Scan notification text” and “Read notifications”.',
       payment_alerts_android_step_2:
         "Android bildirim erişimi ekranını açar. Money2Time'ı bulun ve açın.",
       payment_alerts_android_step_3:
@@ -1237,7 +1237,7 @@ const tr = {
       payment_alerts_android_step_6:
         'Her şeyin çalıştığını kontrol etmek için bir test bildirimi gönderin.',
       payment_alerts_android_step_7:
-        'Ödemeler seçtiğiniz hesaba otomatik kaydedilir. Kategoriler Apple Pay ile aynı anahtar kelimeleri kullanır.',
+        'Completed income and expenses log to your selected account. The scanner selects categories and discards offers and unrelated notifications.',
       payment_alerts_ios_step_1:
         'Shortcuts uygulamasında +, ardından Edit seçeneğine dokunun. Düzenleyicide Automation seçeneğine dokunun.',
       payment_alerts_ios_step_2: 'Notification arayıp seçin.',
@@ -1245,9 +1245,9 @@ const tr = {
       payment_alerts_ios_step_4:
         'Log Notification içinde Message, ardından Select Variable seçeneğine dokunun.',
       payment_alerts_ios_step_6:
-        'Eylem okuna, ardından Account’a dokunun. Bu uygulamanın ödemelerinin kaydedileceği hesabı seçin. Otomatik anahtar kelime eşleştirmesi için Category alanını boş bırakın.',
+        'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
       payment_alerts_ios_step_7:
-        'Kaydetmek için geri dönün. Her banka veya e-cüzdan uygulaması için tekrarlayın. Ödemeler Money2Time’ı bir sonraki açışınızda kaydedilir.',
+        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text”. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
       payment_alerts_android_disclosure:
         'Bildirim erişiminin nasıl kullanıldığını okuyup Continue seçeneğine dokunun.',
       payment_alerts_ios_app:
@@ -2588,16 +2588,20 @@ const tr = {
     },
   },
   payment_alerts: {
+    scan_enabled: 'Bildirim metnini tara',
+    test_scan_failed_title: 'Test bildirimi kaydedilemedi',
+    test_scan_failed:
+      'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
+
     account_hint:
-      'Ödemeler seçtiğiniz hesaba otomatik kaydedilir. Kategoriler Apple Pay ile aynı anahtar kelimeleri kullanır.',
+      'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
     title: 'Bildirimler',
-    intro_android:
-      'Money2Time, seçtiğiniz banka ve cüzdan uygulamalarının ödeme bildirimlerini okur ve her ödemeyi sizin için kaydeder. Bildirimler bu telefonda okunur ve asla yüklenmez.',
     card_intro:
-      'Banka ve e-cüzdan uygulamalarınızın bildirimlerindeki ödemeleri otomatik kaydedin.',
+      'Automatically log completed income and expenses from bank and wallet notifications.',
     section_status: 'Durum',
     master_label: 'Bildirimleri oku',
-    master_hint: 'Seçtiğiniz uygulamalardaki ödemeleri kaydeder.',
+    master_hint:
+      'Captures notifications from the apps you choose. Enable text scanning to log completed transactions.',
     access_open_settings: 'Ayarları aç',
     health_unsupported:
       "Money2Time'ın bu sürümü bildirimleri okuyamıyor. Ödeme bildirimlerini kullanmak için uygulamayı güncelleyin.",
@@ -2616,12 +2620,11 @@ const tr = {
     section_apps: 'Uygulamalar',
     choose_apps: 'Uygulama seç',
     source_off: 'Kapalı',
-    disclosure_title: 'Bildirimlerinizden ödeme kaydedin',
+    disclosure_title: 'Log transactions from your notifications',
     disclosure_body:
       "Bunun için Money2Time'ın bildirim erişimine ihtiyacı var. Erişimi şöyle kullanır:",
     disclosure_point_selected:
       'Yalnızca seçtiğiniz banka ve cüzdan uygulamalarının bildirimlerini okur. Diğer her şey yok sayılır.',
-    disclosure_point_device: 'Bildirimler bu telefonda okunur. Metinleri asla yüklenmez.',
     disclosure_android_warning:
       'Android, bildirim erişimi olan bir uygulamanın tüm bildirimlerinizi okuyabileceği konusunda uyaracak. Money2Time yalnızca seçtiğiniz uygulamaları tutar.',
     access_title: 'Bildirim erişimini açın',

@@ -192,6 +192,7 @@ export function findDuplicate(
           };
         }
         if (
+          earlier.kind === incoming.kind &&
           sameMoney(earlier, incoming) &&
           (!earlier.counterparty ||
             !incoming.counterparty ||
@@ -233,9 +234,9 @@ export function findDuplicate(
   }
 
   // 4. The user already entered it, or a recurring rule did.
-  if (incoming.kind === 'spend' && incoming.amount !== null) {
+  if ((incoming.kind === 'spend' || incoming.kind === 'income') && incoming.amount !== null) {
     for (const transaction of recentTransactions) {
-      if (transaction.type !== 'expense') continue;
+      if (transaction.type !== (incoming.kind === 'income' ? 'income' : 'expense')) continue;
       if (
         !sameAccount(transaction, incoming) ||
         !similarNames(transaction.note, incoming.counterparty)

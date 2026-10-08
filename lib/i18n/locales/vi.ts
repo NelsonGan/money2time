@@ -1211,7 +1211,8 @@ const vi = {
       payment_alerts_status_off: 'Chưa thiết lập',
       payment_alerts_status_apps_one: 'Bật cho %{count} ứng dụng',
       payment_alerts_status_apps_other: 'Bật cho %{count} ứng dụng',
-      payment_alerts_android_step_1: 'Nhấn “Ghi từ thông báo” rồi bật “Đọc thông báo”.',
+      payment_alerts_android_step_1:
+        'Tap “Log from notifications”, read the scanning disclosure and enable “Scan notification text” and “Read notifications”.',
       payment_alerts_android_step_2:
         'Android mở màn hình quyền truy cập thông báo. Tìm Money2Time và bật lên.',
       payment_alerts_android_step_3:
@@ -1221,16 +1222,16 @@ const vi = {
       payment_alerts_android_step_5: 'Chọn tài khoản cho mỗi ứng dụng.',
       payment_alerts_android_step_6: 'Gửi một thông báo thử để kiểm tra mọi thứ hoạt động.',
       payment_alerts_android_step_7:
-        'Thanh toán được ghi tự động vào tài khoản đã chọn. Danh mục dùng cùng từ khóa như Apple Pay.',
+        'Completed income and expenses log to your selected account. The scanner selects categories and discards offers and unrelated notifications.',
       payment_alerts_ios_step_1:
         'Mở Shortcuts, nhấn + rồi Edit. Nhấn Automation trong trình chỉnh sửa.',
       payment_alerts_ios_step_2: 'Tìm Notification rồi chọn.',
       payment_alerts_ios_step_3: 'Tìm Log Notification và thêm vào.',
       payment_alerts_ios_step_4: 'Nhấn Message trong Log Notification rồi Select Variable.',
       payment_alerts_ios_step_6:
-        'Chạm mũi tên tác vụ, rồi Account. Chọn tài khoản để ghi lại thanh toán của ứng dụng này. Để trống Category để tự động phân loại theo từ khóa.',
+        'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
       payment_alerts_ios_step_7:
-        'Chạm quay lại để lưu. Lặp lại cho mỗi ứng dụng ngân hàng hoặc ví điện tử. Thanh toán được ghi khi bạn mở Money2Time lần tới.',
+        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text”. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
       payment_alerts_android_disclosure:
         'Đọc cách sử dụng quyền truy cập thông báo rồi nhấn Continue.',
       payment_alerts_ios_app:
@@ -2560,15 +2561,20 @@ const vi = {
     },
   },
   payment_alerts: {
+    scan_enabled: 'Quét văn bản thông báo',
+    test_scan_failed_title: 'Không thể ghi lại thông báo thử nghiệm',
+    test_scan_failed:
+      'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
+
     account_hint:
-      'Thanh toán được ghi tự động vào tài khoản đã chọn. Danh mục dùng cùng từ khóa như Apple Pay.',
+      'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
     title: 'Thông báo',
-    intro_android:
-      'Money2Time đọc thông báo thanh toán từ các ứng dụng ngân hàng và ví điện tử bạn chọn, rồi ghi lại từng khoản thanh toán cho bạn. Thông báo được đọc trên điện thoại này và không bao giờ được tải lên.',
-    card_intro: 'Tự động ghi lại thanh toán từ thông báo của các ứng dụng ngân hàng và ví điện tử.',
+    card_intro:
+      'Automatically log completed income and expenses from bank and wallet notifications.',
     section_status: 'Trạng thái',
     master_label: 'Đọc thông báo',
-    master_hint: 'Ghi lại thanh toán từ các ứng dụng bạn chọn.',
+    master_hint:
+      'Captures notifications from the apps you choose. Enable text scanning to log completed transactions.',
     access_open_settings: 'Mở cài đặt',
     health_unsupported:
       'Phiên bản Money2Time này không đọc được thông báo. Hãy cập nhật ứng dụng để dùng thông báo thanh toán.',
@@ -2587,13 +2593,11 @@ const vi = {
     section_apps: 'Ứng dụng',
     choose_apps: 'Chọn ứng dụng',
     source_off: 'Tắt',
-    disclosure_title: 'Ghi thanh toán từ thông báo',
+    disclosure_title: 'Log transactions from your notifications',
     disclosure_body:
       'Money2Time cần quyền truy cập thông báo cho việc này. Cách ứng dụng sử dụng quyền đó:',
     disclosure_point_selected:
       'Chỉ đọc thông báo từ các ứng dụng ngân hàng và ví điện tử bạn chọn. Mọi thứ khác đều bị bỏ qua.',
-    disclosure_point_device:
-      'Thông báo được đọc trên điện thoại này. Nội dung không bao giờ được tải lên.',
     disclosure_android_warning:
       'Android sẽ cảnh báo rằng ứng dụng có quyền truy cập thông báo có thể đọc mọi thông báo. Money2Time chỉ giữ lại các ứng dụng bạn chọn.',
     access_title: 'Bật quyền truy cập thông báo',

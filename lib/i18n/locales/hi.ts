@@ -1216,7 +1216,7 @@ const hi = {
       payment_alerts_status_apps_one: '%{count} ऐप के लिए चालू',
       payment_alerts_status_apps_other: '%{count} ऐप्स के लिए चालू',
       payment_alerts_android_step_1:
-        '“सूचनाओं से दर्ज करें” पर टैप करें और “सूचनाएं पढ़ें” चालू करें।',
+        'Tap “Log from notifications”, read the scanning disclosure and enable “Scan notification text” and “Read notifications”.',
       payment_alerts_android_step_2:
         'Android सूचना पहुंच की स्क्रीन खोलता है। Money2Time ढूंढें और उसे चालू करें।',
       payment_alerts_android_step_3:
@@ -1226,16 +1226,16 @@ const hi = {
       payment_alerts_android_step_5: 'हर ऐप के लिए खाता चुनें।',
       payment_alerts_android_step_6: 'सब कुछ ठीक चल रहा है यह जांचने के लिए टेस्ट सूचना भेजें।',
       payment_alerts_android_step_7:
-        'भुगतान चुने गए खाते में अपने आप दर्ज होते हैं। श्रेणियां Apple Pay जैसे ही कीवर्ड इस्तेमाल करती हैं।',
+        'Completed income and expenses log to your selected account. The scanner selects categories and discards offers and unrelated notifications.',
       payment_alerts_ios_step_1:
         'Shortcuts खोलें, + और फिर Edit पर टैप करें। एडिटर में Automation पर टैप करें।',
       payment_alerts_ios_step_2: 'Notification खोजें और चुनें।',
       payment_alerts_ios_step_3: 'Log Notification खोजें और जोड़ें।',
       payment_alerts_ios_step_4: 'Log Notification में Message और फिर Select Variable पर टैप करें।',
       payment_alerts_ios_step_6:
-        'एक्शन के तीर पर, फिर Account पर टैप करें। चुनें कि इस ऐप के भुगतान किस खाते में दर्ज हों। कीवर्ड से अपने आप श्रेणी चुनने के लिए Category खाली छोड़ें।',
+        'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
       payment_alerts_ios_step_7:
-        'सहेजने के लिए वापस जाएँ। हर बैंक या ई-वॉलेट ऐप के लिए दोहराएँ। अगली बार Money2Time खोलने पर भुगतान दर्ज होंगे।',
+        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text”. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
       payment_alerts_android_disclosure:
         'सूचनाओं की पहुँच कैसे इस्तेमाल होती है, पढ़ें और Continue पर टैप करें।',
       payment_alerts_ios_app:
@@ -2569,15 +2569,20 @@ const hi = {
     },
   },
   payment_alerts: {
+    scan_enabled: 'सूचना का टेक्स्ट स्कैन करें',
+    test_scan_failed_title: 'परीक्षण सूचना दर्ज नहीं हो सकी',
+    test_scan_failed:
+      'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
+
     account_hint:
-      'भुगतान चुने गए खाते में अपने आप दर्ज होते हैं। श्रेणियां Apple Pay जैसे ही कीवर्ड इस्तेमाल करती हैं।',
+      'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
     title: 'सूचनाएं',
-    intro_android:
-      'Money2Time आपके चुने हुए बैंकिंग और वॉलेट ऐप्स की भुगतान सूचनाएं पढ़ता है और हर भुगतान आपके लिए दर्ज करता है। सूचनाएं इसी फ़ोन पर पढ़ी जाती हैं और कभी अपलोड नहीं होतीं।',
-    card_intro: 'अपने बैंक और ई-वॉलेट ऐप की सूचनाओं से भुगतान अपने आप दर्ज करें।',
+    card_intro:
+      'Automatically log completed income and expenses from bank and wallet notifications.',
     section_status: 'स्थिति',
     master_label: 'सूचनाएं पढ़ें',
-    master_hint: 'आपके चुने हुए ऐप्स के भुगतान दर्ज करता है।',
+    master_hint:
+      'Captures notifications from the apps you choose. Enable text scanning to log completed transactions.',
     access_open_settings: 'सेटिंग्स खोलें',
     health_unsupported:
       'Money2Time का यह संस्करण सूचनाएं नहीं पढ़ सकता। सूचनाओं से भुगतान दर्ज करने के लिए ऐप अपडेट करें।',
@@ -2595,11 +2600,10 @@ const hi = {
     section_apps: 'ऐप्स',
     choose_apps: 'ऐप्स चुनें',
     source_off: 'बंद',
-    disclosure_title: 'अपनी सूचनाओं से भुगतान दर्ज करें',
+    disclosure_title: 'Log transactions from your notifications',
     disclosure_body: 'इसके लिए Money2Time को सूचना पहुंच चाहिए। यह इसका ऐसे इस्तेमाल करता है:',
     disclosure_point_selected:
       'यह सिर्फ़ आपके चुने हुए बैंकिंग और वॉलेट ऐप्स की सूचनाएं पढ़ता है। बाकी सब अनदेखा किया जाता है।',
-    disclosure_point_device: 'सूचनाएं इसी फ़ोन पर पढ़ी जाती हैं। उनका पाठ कभी अपलोड नहीं होता।',
     disclosure_android_warning:
       'Android चेतावनी देगा कि सूचना पहुंच वाला ऐप आपकी सभी सूचनाएं पढ़ सकता है। Money2Time सिर्फ़ आपके चुने हुए ऐप्स की सूचनाएं रखता है।',
     access_title: 'सूचना पहुंच चालू करें',

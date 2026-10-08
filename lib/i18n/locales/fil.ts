@@ -1237,7 +1237,7 @@ const fil = {
       payment_alerts_status_apps_one: 'Naka-on para sa %{count} app',
       payment_alerts_status_apps_other: 'Naka-on para sa %{count} na app',
       payment_alerts_android_step_1:
-        'I-tap ang “Itala mula sa mga notification” at i-on ang “Basahin ang mga notification”.',
+        'Tap “Log from notifications”, read the scanning disclosure and enable “Scan notification text” and “Read notifications”.',
       payment_alerts_android_step_2:
         'Bubuksan ng Android ang screen ng notification access. Hanapin ang Money2Time at i-on ito.',
       payment_alerts_android_step_3:
@@ -1248,16 +1248,16 @@ const fil = {
       payment_alerts_android_step_6:
         'Magpadala ng test na notification para masuring gumagana ang lahat.',
       payment_alerts_android_step_7:
-        'Awtomatikong itinatala ang mga bayad sa napiling account. Pareho sa Apple Pay ang mga keyword para sa kategorya.',
+        'Completed income and expenses log to your selected account. The scanner selects categories and discards offers and unrelated notifications.',
       payment_alerts_ios_step_1:
         'Buksan ang Shortcuts, i-tap ang +, saka Edit. I-tap ang Automation sa editor.',
       payment_alerts_ios_step_2: 'Hanapin at piliin ang Notification.',
       payment_alerts_ios_step_3: 'Hanapin ang Log Notification at idagdag ito.',
       payment_alerts_ios_step_4: 'I-tap ang Message sa Log Notification, saka Select Variable.',
       payment_alerts_ios_step_6:
-        'I-tap ang arrow ng action, pagkatapos ang Account. Piliin kung saan itatala ang mga bayad mula sa app na ito. Iwanang walang laman ang Category para sa awtomatikong pagtutugma ng keyword.',
+        'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
       payment_alerts_ios_step_7:
-        'Bumalik para i-save. Ulitin para sa bawat bank o e-wallet app. Itatala ang mga bayad sa susunod mong pagbukas ng Money2Time.',
+        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text”. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
       payment_alerts_android_disclosure:
         'Basahin kung paano ginagamit ang notification access, saka i-tap ang Continue.',
       payment_alerts_ios_app:
@@ -2611,16 +2611,20 @@ const fil = {
     },
   },
   payment_alerts: {
+    scan_enabled: 'I-scan ang teksto ng notification',
+    test_scan_failed_title: 'Hindi maitala ang test notification',
+    test_scan_failed:
+      'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
+
     account_hint:
-      'Awtomatikong itinatala ang mga bayad sa napiling account. Pareho sa Apple Pay ang mga keyword para sa kategorya.',
+      'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
     title: 'Mga notification',
-    intro_android:
-      'Binabasa ng Money2Time ang mga notification ng bayad mula sa mga banking at wallet app na pinili mo, at itinatala nito ang bawat bayad para sa iyo. Sa phone na ito binabasa ang mga notification at hindi kailanman ina-upload.',
     card_intro:
-      'Awtomatikong itala ang mga bayad mula sa mga notification ng iyong bank at e-wallet apps.',
+      'Automatically log completed income and expenses from bank and wallet notifications.',
     section_status: 'Status',
     master_label: 'Basahin ang mga notification',
-    master_hint: 'Itinatala ang mga bayad mula sa mga app na pinili mo.',
+    master_hint:
+      'Captures notifications from the apps you choose. Enable text scanning to log completed transactions.',
     access_open_settings: 'Buksan ang settings',
     health_unsupported:
       'Hindi kayang magbasa ng notification ng bersyong ito ng Money2Time. I-update ang app para makapagtala ng bayad mula sa mga notification.',
@@ -2639,13 +2643,11 @@ const fil = {
     section_apps: 'Mga app',
     choose_apps: 'Pumili ng mga app',
     source_off: 'Naka-off',
-    disclosure_title: 'Itala ang mga bayad mula sa iyong mga notification',
+    disclosure_title: 'Log transactions from your notifications',
     disclosure_body:
       'Kailangan ng Money2Time ng notification access para rito. Ganito nito ito ginagamit:',
     disclosure_point_selected:
       'Binabasa lang nito ang mga notification mula sa mga banking at wallet app na pinili mo. Hindi pinapansin ang iba.',
-    disclosure_point_device:
-      'Sa phone na ito binabasa ang mga notification. Hindi kailanman ina-upload ang text nito.',
     disclosure_android_warning:
       'Magbababala ang Android na kayang basahin ng app na may notification access ang lahat ng notification mo. Ang mga app lang na pinili mo ang itinatabi ng Money2Time.',
     access_title: 'I-on ang notification access',

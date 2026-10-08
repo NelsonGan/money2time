@@ -17,7 +17,7 @@ the Cloudflare resources by product: one folder per Worker under
 Each Worker folder is isolated from the Expo app: it has its own `package.json`
 / `tsconfig.json`, and the whole `cloudflare/` tree is excluded from the root
 `tsconfig`, ESLint, Jest, Prettier, Metro bundling, and EAS so `npm run check` /
-`npm test` at the repo root ignore it.
+`npm test` at the repo root ignore it, except the explicit Worker contract tests under `__tests__/cloudflare/`.
 
 ## Endpoint
 
@@ -26,13 +26,13 @@ Each Worker folder is isolated from the Expo app: it has its own `package.json`
 ```jsonc
 // request
 {
-  "appUserId": "m2t_…",         // settings.appUserId from the app
-  "image": "<base64>",          // no data: prefix
+  "appUserId": "m2t_…", // settings.appUserId from the app
+  "image": "<base64>", // no data: prefix
   "mime": "image/jpeg",
-  "currency": "USD",            // user's reporting currency
-  "categories": ["Food", "…"],  // user's expense category names
-  "mode": "quick",              // "quick" (default) | "itemized" | "screenshot"
-  "accounts": ["Visa", "…"]     // screenshot mode only, matched against the payment source
+  "currency": "USD", // user's reporting currency
+  "categories": ["Food", "…"], // user's expense category names
+  "mode": "quick", // "quick" (default) | "itemized" | "screenshot"
+  "accounts": ["Visa", "…"], // screenshot mode only, matched against the payment source
 }
 ```
 
@@ -42,7 +42,12 @@ the total only, `itemized` adds a line-item breakdown for Split by Item, and
 
 ```jsonc
 // 200
-{ "transactions": [ /* ScannedTransaction[] */ ], "quota": { "used": 3, "limit": 10, "isPro": false, "interval": "month" } }
+{
+  "transactions": [
+    /* ScannedTransaction[] */
+  ],
+  "quota": { "used": 3, "limit": 10, "isPro": false, "interval": "month" },
+}
 // 402 { "error": "limit_reached", "isPro": false, "limit": 10, "used": 10, "interval": "month" }
 // 429 { "error": "capacity" }                       // upstream saturated (retryable)
 // 400 { "error": "missing_image" | "invalid_mime" | … }
@@ -57,12 +62,12 @@ allowance.
 
 `wrangler.toml` `[vars]`: `MODEL`, `ENTITLEMENT_ID`, and the per-tier quota:
 
-| Var             | Default   | Meaning                                                             |
-| --------------- | --------- | ------------------------------------------------------------------- |
-| `FREE_LIMIT`    | `20`      | Free scans allowed per window                                       |
-| `FREE_INTERVAL` | `100year` | Free metering cadence (a 100-year window ≈ lifetime)                |
-| `PRO_LIMIT`     | `500`     | Pro scans allowed per window (fair-use; paywall says unlimited)     |
-| `PRO_INTERVAL`  | `month`   | Pro metering cadence                                                |
+| Var             | Default   | Meaning                                                         |
+| --------------- | --------- | --------------------------------------------------------------- |
+| `FREE_LIMIT`    | `20`      | Free scans allowed per window                                   |
+| `FREE_INTERVAL` | `100year` | Free metering cadence (a 100-year window ≈ lifetime)            |
+| `PRO_LIMIT`     | `500`     | Pro scans allowed per window (fair-use; paywall says unlimited) |
+| `PRO_INTERVAL`  | `month`   | Pro metering cadence                                            |
 
 The rate limiter is interval-agnostic (`src/interval.ts`): a `*_INTERVAL` is a
 unit (`day`/`week`/`month`/`year`) with an optional count prefix, so changing a
@@ -91,10 +96,10 @@ Worker automatically retries the request once with `BACKUP_MODEL`
 Two time-bounded concerns, both in the `money2time-d1-receipt-scanner` D1
 database (schema in `cloudflare/d1/receipt-scanner/schema.sql`):
 
-| Concern           | Table               | Key                                              | Expiry                                    |
-| ----------------- | ------------------- | ------------------------------------------------ | ----------------------------------------- |
-| Usage counter     | `scan_usage`        | `(app_user_id, interval_unit, window_start)`     | window end in `expires_at`; cron-pruned   |
-| Entitlement cache | `entitlement_cache` | `app_user_id`                                    | `expires_at` checked on read; cron-pruned |
+| Concern           | Table               | Key                                          | Expiry                                    |
+| ----------------- | ------------------- | -------------------------------------------- | ----------------------------------------- |
+| Usage counter     | `scan_usage`        | `(app_user_id, interval_unit, window_start)` | window end in `expires_at`; cron-pruned   |
+| Entitlement cache | `entitlement_cache` | `app_user_id`                                | `expires_at` checked on read; cron-pruned |
 
 D1 has no native TTL, so every row carries an `expires_at` (epoch-ms) and the
 daily cron (`scheduled()`) prunes stale rows. `scan_usage` is one row per
@@ -149,3 +154,51 @@ curl -X POST http://localhost:8787/scan \
   -H 'Content-Type: application/json' \
   -d "{\"appUserId\":\"m2t_test\",\"image\":\"$(base64 -w0 sample-receipt.jpg)\",\"mime\":\"image/jpeg\",\"currency\":\"USD\",\"categories\":[\"Food\",\"Groceries\",\"Other\"]}"
 ```
+
+## Text-only notification mode
+
+`POST /scan` also accepts a text-only request (no image or MIME):
+
+```json
+{
+  "appUserId": "m2t_example",
+  "mode": "notification",
+  "text": "Salary MYR 3500 from ACME has been credited.",
+  "capturedAt": "2026-10-08T01:00:00Z",
+  "currency": "MYR",
+  "categories": ["Food", "Other"],
+  "incomeCategories": ["Salary", "Other"]
+}
+```
+
+`currency` is the explicitly selected account's currency for ambiguous symbols.
+The system prompt classifies completed expense/income, including completed refund
+credits, and rejects promotions, reminders, codes, failed/pending payments, holds,
+own-account transfers and unrelated text. Notification text is untrusted user
+content, separate from the system instructions. One high-confidence completed
+movement is required. The reply adds `notificationDecision: "transaction"` or
+`"ignore"`; ignores have an empty transactions array and are not retried.
+Malformed model output returns a retryable 502 rather than pretending it is an ignore.
+Amounts/types/currencies and category type are validated before responding.
+The response may include `secondary` for an explicitly billed foreign amount.
+Text is capped at 12000 characters and is never logged by this Worker.
+
+The existing signed request/entitlement flow applies. Notification counters use
+`notification:<appUserId>` so receipt quota is untouched. `FREE_NOTIFICATION_LIMIT`
+is 100 lifetime, `PRO_NOTIFICATION_LIMIT` is 2000/month, and
+`NOTIFICATION_DAILY_ATTEMPTS` is 500 per UTC day, including ignores/failures.
+Intentional ignores do not consume the valid-scan quota. Temporary 429/402 responses
+leave captures queued on the client. The D1 schema needs no migration.
+
+Run app contract tests with `npm test -- --runInBand __tests__/cloudflare` from the
+repository root and run `npm run typecheck` here. Roll out this Worker before the
+app. Existing image modes are unchanged; older Workers cannot accidentally classify
+or discard new text requests.
+
+For live semantic evaluation, run `node scripts/evaluate-notification-scanner.mjs`
+from the repository root against a configured preview. It uses the synthetic
+notification corpus and checks decision, amount and currency. Set
+`SCANNER_EVALUATION_URL`, `SCANNER_EVALUATION_USER` and the preview's signing key;
+optional fixture IDs select a subset. See
+[`docs/notification-scanner-verification.md`](../../../docs/notification-scanner-verification.md)
+for actual model/device evidence and remaining release checks.

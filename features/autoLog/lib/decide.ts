@@ -52,16 +52,19 @@ export function decideCapture(input: DecisionInput): CaptureDecision {
   if (input.ignoredByPhrase) return { action: 'ignore', reason: 'ignore_phrase' };
   const ignoredAs = IGNORED_KINDS[parse.kind];
   if (ignoredAs) return { action: 'ignore', reason: ignoredAs };
-  if (parse.amount === null) return { action: 'ignore', reason: 'no_amount' };
+  if (parse.amount === null || !Number.isFinite(parse.amount) || parse.amount <= 0)
+    return { action: 'ignore', reason: 'no_amount' };
+  if (parse.confidence !== 'high') return { action: 'ignore', reason: 'low_confidence' };
   if (parse.signals.includes('auth_hold'))
     return { action: 'ignore', reason: 'authorization_hold' };
 
   if (input.duplicate.kind === 'certain') return { action: 'duplicate', reason: 'duplicate' };
   if (input.duplicate.kind === 'possible') return { action: 'duplicate', reason: 'duplicate' };
   if (input.duplicate.kind === 'reversal') return { action: 'ignore', reason: 'refund' };
-  if (parse.kind === 'income' || parse.kind === 'refund' || parse.kind === 'transfer')
+  if (parse.kind === 'refund' || parse.kind === 'transfer')
     return { action: 'ignore', reason: parse.kind };
-  if (parse.kind !== 'spend') return { action: 'ignore', reason: 'no_amount' };
+  if (parse.kind !== 'spend' && parse.kind !== 'income')
+    return { action: 'ignore', reason: 'no_amount' };
   if (!input.source) return { action: 'ignore', reason: 'source_disabled' };
   if (input.certainty !== 'certain') return { action: 'ignore', reason: 'account_uncertain' };
   if (input.autoLogsRemaining !== null && input.autoLogsRemaining <= 0) {

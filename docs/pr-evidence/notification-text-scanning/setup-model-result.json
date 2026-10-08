@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-08T08:49:40.900Z",
+  "passed": 1,
+  "total": 1,
+  "results": [
+    {
+      "id": "setup-sample-body",
+      "pass": true,
+      "status": 200,
+      "expected": {
+        "decision": "expense",
+        "amount": 1,
+        "currency": "MYR"
+      },
+      "actual": {
+        "decision": "expense",
+        "amount": 1,
+        "currency": "MYR"
+      }
+    }
+  ]
+}

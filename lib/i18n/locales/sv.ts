@@ -1221,7 +1221,7 @@ const sv = {
       payment_alerts_status_apps_one: 'På för %{count} app',
       payment_alerts_status_apps_other: 'På för %{count} appar',
       payment_alerts_android_step_1:
-        'Tryck på ”Registrera från aviseringar” och slå på ”Läs aviseringar”.',
+        'Tap “Log from notifications”, read the scanning disclosure and enable “Scan notification text” and “Read notifications”.',
       payment_alerts_android_step_2:
         'Android öppnar skärmen för aviseringsåtkomst. Hitta Money2Time och slå på det.',
       payment_alerts_android_step_3:
@@ -1232,16 +1232,16 @@ const sv = {
       payment_alerts_android_step_6:
         'Skicka en testavisering för att kontrollera att allt fungerar.',
       payment_alerts_android_step_7:
-        'Betalningar registreras automatiskt på det valda kontot. Kategorier använder samma nyckelord som Apple Pay.',
+        'Completed income and expenses log to your selected account. The scanner selects categories and discards offers and unrelated notifications.',
       payment_alerts_ios_step_1:
         'Öppna Shortcuts, tryck + och sedan Edit. Tryck Automation i redigeraren.',
       payment_alerts_ios_step_2: 'Sök efter Notification och välj den.',
       payment_alerts_ios_step_3: 'Sök efter Log Notification och lägg till den.',
       payment_alerts_ios_step_4: 'Tryck Message i Log Notification och sedan Select Variable.',
       payment_alerts_ios_step_6:
-        'Tryck på åtgärdspilen och sedan Account. Välj var appens betalningar ska registreras. Lämna Category tomt för automatisk matchning av nyckelord.',
+        'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
       payment_alerts_ios_step_7:
-        'Gå tillbaka för att spara. Upprepa för varje bank- eller plånboksapp. Betalningar registreras nästa gång du öppnar Money2Time.',
+        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text”. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
       payment_alerts_android_disclosure: 'Läs hur aviseringsåtkomsten används och tryck Continue.',
       payment_alerts_ios_app:
         'Tryck på App och välj din bank- eller plånboksapp. Dessa skärmbilder använder Wallet som exempel.',
@@ -2579,16 +2579,20 @@ const sv = {
     },
   },
   payment_alerts: {
+    scan_enabled: 'Skanna aviseringstext',
+    test_scan_failed_title: 'Testnotisen kunde inte registreras',
+    test_scan_failed:
+      'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
+
     account_hint:
-      'Betalningar registreras automatiskt på det valda kontot. Kategorier använder samma nyckelord som Apple Pay.',
+      'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
     title: 'Aviseringar',
-    intro_android:
-      'Money2Time läser betalningsaviseringarna från de bank- och plånboksappar du väljer och registrerar varje betalning åt dig. Aviseringar läses på den här telefonen och laddas aldrig upp.',
     card_intro:
-      'Registrera betalningar automatiskt från aviseringarna dina bank- och plånboksappar skickar.',
+      'Automatically log completed income and expenses from bank and wallet notifications.',
     section_status: 'Status',
     master_label: 'Läs aviseringar',
-    master_hint: 'Registrerar betalningar från de appar du väljer.',
+    master_hint:
+      'Captures notifications from the apps you choose. Enable text scanning to log completed transactions.',
     access_open_settings: 'Öppna inställningar',
     health_unsupported:
       'Den här versionen av Money2Time kan inte läsa aviseringar. Uppdatera appen för att använda betalningsaviseringar.',
@@ -2606,11 +2610,10 @@ const sv = {
     section_apps: 'Appar',
     choose_apps: 'Välj appar',
     source_off: 'Av',
-    disclosure_title: 'Registrera betalningar från dina aviseringar',
+    disclosure_title: 'Log transactions from your notifications',
     disclosure_body: 'Money2Time behöver aviseringsåtkomst för det här. Så här används den:',
     disclosure_point_selected:
       'Den läser bara aviseringar från de bank- och plånboksappar du väljer. Allt annat ignoreras.',
-    disclosure_point_device: 'Aviseringar läses på den här telefonen. Texten laddas aldrig upp.',
     disclosure_android_warning:
       'Android varnar för att en app med aviseringsåtkomst kan läsa alla dina aviseringar. Money2Time behåller bara de appar du väljer.',
     access_title: 'Slå på aviseringsåtkomst',

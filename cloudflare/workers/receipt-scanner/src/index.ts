@@ -5,6 +5,11 @@
 // Worker's secrets — never in the app.
 
 import { checkQuota, consumeQuota } from './ratelimit';
+import {
+  buildNotificationPrompt,
+  normalizeNotificationResult,
+  NOTIFICATION_MAX_TOKENS,
+} from './scanModes/notification';
 import { getEntitlement } from './revenuecat';
 import {
   buildReceiptPrompt,
@@ -36,6 +41,9 @@ export interface Env {
   // Optional OpenAI-style image_url.detail hint ("low" | "high" | "auto").
   // "low" downsamples to cut input tokens at some OCR-accuracy risk; unset omits it.
   IMAGE_DETAIL?: string;
+  FREE_NOTIFICATION_LIMIT?: string;
+  PRO_NOTIFICATION_LIMIT?: string;
+  NOTIFICATION_DAILY_ATTEMPTS?: string;
 }
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
@@ -78,8 +86,11 @@ const SIGNATURE_MAX_SKEW_MS = 5 * 60 * 1000;
 
 interface ScanRequest {
   appUserId: string;
-  image: string;
-  mime: string;
+  image?: string;
+  mime?: string;
+  text?: string;
+  capturedAt?: string;
+  incomeCategories?: string[];
   currency: string;
   categories: string[];
   // 'itemized' adds a line-item breakdown; 'screenshot' detects the account.
@@ -143,14 +154,17 @@ export default {
     }
 
     const mode: ScanMode =
-      body.mode === 'itemized' || body.mode === 'screenshot' ? body.mode : 'quick';
+      body.mode === 'itemized' || body.mode === 'screenshot' || body.mode === 'notification'
+        ? body.mode
+        : 'quick';
     log('scan_request', {
       reqId,
       appUserId: body.appUserId,
       currency: body.currency,
       mime: body.mime,
       mode,
-      imageBytes: body.image.length,
+      imageBytes: body.image?.length ?? 0,
+      textChars: body.text?.length ?? 0,
       categoryCount: Array.isArray(body.categories) ? body.categories.length : 0,
       accountCount: Array.isArray(body.accounts) ? body.accounts.length : 0,
     });
@@ -160,7 +174,19 @@ export default {
     const { isPro } = await getEntitlement(body.appUserId, env);
 
     // Check quota without consuming; consume only on a successful parse.
-    const quota = await checkQuota(body.appUserId, isPro, env, now);
+    // Notifications have their own allowance; they never consume receipt scans.
+    const quotaUser = mode === 'notification' ? `notification:${body.appUserId}` : body.appUserId;
+    const quotaEnv =
+      mode === 'notification'
+        ? {
+            ...env,
+            FREE_LIMIT: env.FREE_NOTIFICATION_LIMIT ?? '100',
+            FREE_INTERVAL: '100year',
+            PRO_LIMIT: env.PRO_NOTIFICATION_LIMIT ?? '2000',
+            PRO_INTERVAL: 'month',
+          }
+        : env;
+    const quota = await checkQuota(quotaUser, isPro, quotaEnv, now);
     log('entitlement', {
       reqId,
       appUserId: body.appUserId,
@@ -178,15 +204,38 @@ export default {
         isPro,
       });
       return json(
-        { error: 'limit_reached', isPro, limit: quota.limit, used: quota.used, interval: quota.interval },
+        {
+          error: 'limit_reached',
+          isPro,
+          limit: quota.limit,
+          used: quota.used,
+          interval: quota.interval,
+        },
         402,
       );
     }
 
+    if (mode === 'notification') {
+      // Even discarded text costs inference. Bound every attempt separately;
+      // temporary throttling leaves the native capture queued for another day.
+      const attemptUser = `notification-attempt:${body.appUserId}`;
+      const attemptEnv = {
+        ...env,
+        FREE_LIMIT: env.NOTIFICATION_DAILY_ATTEMPTS ?? '500',
+        FREE_INTERVAL: 'day',
+        PRO_LIMIT: env.NOTIFICATION_DAILY_ATTEMPTS ?? '500',
+        PRO_INTERVAL: 'day',
+      };
+      const attempts = await checkQuota(attemptUser, isPro, attemptEnv, now);
+      if (!attempts.allowed) return json({ error: 'capacity' }, 429);
+      await consumeQuota(attemptUser, isPro, attemptEnv, now);
+    }
+
     let transactions: ScannedTransaction[] = [];
+    let notificationDecision: 'ignore' | 'transaction' | undefined;
     let receiptDetail: ScannedReceiptDetail | null = null;
     try {
-      ({ transactions, receiptDetail } = await runInference(
+      ({ transactions, receiptDetail, notificationDecision } = await runInference(
         body,
         env,
         reqId,
@@ -216,7 +265,7 @@ export default {
     let used = quota.used;
     if (count > 0) {
       used = quota.used + 1;
-      ctx.waitUntil(consumeQuota(body.appUserId, isPro, env, now));
+      ctx.waitUntil(consumeQuota(quotaUser, isPro, quotaEnv, now));
     }
 
     log('scan_success', {
@@ -233,7 +282,13 @@ export default {
     const quotaOut = { used, limit: quota.limit, isPro, interval: quota.interval };
     // schemaVersion 2 = receiptDetail may be present; old clients ignore it.
     return json(
-      { transactions, receiptDetail: receiptDetail ?? undefined, quota: quotaOut, schemaVersion: 2 },
+      {
+        transactions,
+        receiptDetail: receiptDetail ?? undefined,
+        notificationDecision,
+        quota: quotaOut,
+        schemaVersion: 2,
+      },
       200,
     );
   },
@@ -261,15 +316,30 @@ async function pruneExpired(env: Env): Promise<void> {
 function validate(body: ScanRequest): string | null {
   if (!body || typeof body !== 'object') return 'invalid_body';
   if (!body.appUserId || typeof body.appUserId !== 'string') return 'missing_app_user_id';
-  if (!body.image || typeof body.image !== 'string') return 'missing_image';
-  if (body.image.length > MAX_IMAGE_BYTES) return 'image_too_large';
-  if (!body.mime || !/^image\/(jpe?g|png|webp|heic)$/i.test(body.mime)) return 'invalid_mime';
+  if (body.mode === 'notification') {
+    if (typeof body.text !== 'string' || !body.text.trim()) return 'missing_text';
+    if (body.text.length > 12000) return 'text_too_large';
+    if (typeof body.capturedAt !== 'string' || !Number.isFinite(Date.parse(body.capturedAt)))
+      return 'invalid_captured_at';
+    if (!/^[A-Za-z]{3}$/.test(body.currency)) return 'invalid_currency';
+    const validList = (value: unknown) =>
+      Array.isArray(value) &&
+      value.length <= 500 &&
+      value.every((name) => typeof name === 'string' && name.length <= 200);
+    if (!validList(body.categories) || !validList(body.incomeCategories))
+      return 'invalid_categories';
+  } else {
+    if (!body.image || typeof body.image !== 'string') return 'missing_image';
+    if (body.image.length > MAX_IMAGE_BYTES) return 'image_too_large';
+    if (!body.mime || !/^image\/(jpe?g|png|webp|heic)$/i.test(body.mime)) return 'invalid_mime';
+  }
   if (!body.currency || typeof body.currency !== 'string') return 'missing_currency';
   if (
     body.mode !== undefined &&
     body.mode !== 'quick' &&
     body.mode !== 'itemized' &&
-    body.mode !== 'screenshot'
+    body.mode !== 'screenshot' &&
+    body.mode !== 'notification'
   ) {
     return 'invalid_mode';
   }
@@ -334,7 +404,7 @@ interface AttemptOptions {
 }
 
 // Sends the receipt image + prompt to OpenRouter and returns the raw output.
-async function completeWithImage(
+async function completeScan(
   body: ScanRequest,
   env: Env,
   reqId: string,
@@ -377,15 +447,24 @@ async function completeWithImage(
         // otherwise be billed as output tokens and add latency for no accuracy
         // gain. OpenRouter normalizes this across model families.
         reasoning: { enabled: false },
-        messages: [
-          {
-            role: 'user',
-            content: [
-              { type: 'text', text: opts.prompt },
-              { type: 'image_url', image_url: imageUrl },
-            ],
-          },
-        ],
+        messages:
+          body.mode === 'notification'
+            ? [
+                { role: 'system', content: opts.prompt },
+                {
+                  role: 'user',
+                  content: JSON.stringify({ notification: body.text, capturedAt: body.capturedAt }),
+                },
+              ]
+            : [
+                {
+                  role: 'user',
+                  content: [
+                    { type: 'text', text: opts.prompt },
+                    { type: 'image_url', image_url: imageUrl },
+                  ],
+                },
+              ],
       }),
     });
 
@@ -417,15 +496,22 @@ async function completeWithFailover(
   env: Env,
   reqId: string,
   opts: AttemptOptions,
+  validateContent?: (content: string) => void,
 ): Promise<string> {
   const models = resolveModels(env);
   let lastError: unknown;
   for (let i = 0; i < models.length; i += 1) {
     const model = models[i];
     try {
-      return await completeWithImage(body, env, reqId, opts, model);
+      const content = await completeScan(body, env, reqId, opts, model);
+      validateContent?.(content);
+      return content;
     } catch (err) {
-      lastError = err;
+      // Providers and JSON parsers can echo the submitted text in failures.
+      // Keep notification errors to controlled diagnostics before logging or
+      // returning them to the client. Receipt diagnostics remain unchanged.
+      const failure = body.mode === 'notification' ? notificationInferenceError(err) : err;
+      lastError = failure;
       // Read the clock after the attempt, not before it: the attempt is what
       // spends the budget, so a check made at loop entry can wave through a
       // model that then throws inference_budget_exhausted, burying this error.
@@ -435,12 +521,24 @@ async function completeWithFailover(
         model,
         isBackup: i > 0,
         willRetry,
-        error: err instanceof Error ? err.message : String(err),
+        error: failure instanceof Error ? failure.message : String(failure),
       });
       if (!willRetry) break;
     }
   }
   throw lastError;
+}
+
+function notificationInferenceError(error: unknown): Error {
+  const message = error instanceof Error ? error.message : '';
+  const status = /^openrouter (\d{3}):/.exec(message)?.[1];
+  const capacity = /429|overloaded|capacity|concurren/i.test(message);
+  if (status) return new Error(`openrouter ${status}${capacity ? ' capacity' : ''}`);
+  if (capacity) return new Error('inference_capacity');
+  if (message === 'invalid_notification_result' || message === 'inference_budget_exhausted')
+    return new Error(message);
+  if (error instanceof Error && error.name === 'AbortError') return new Error('inference_timeout');
+  return new Error('inference_failed');
 }
 
 async function runInference(
@@ -450,7 +548,42 @@ async function runInference(
   mode: ScanMode,
   now: Date,
   deadline: number,
-): Promise<{ transactions: ScannedTransaction[]; receiptDetail: ScannedReceiptDetail | null }> {
+): Promise<{
+  transactions: ScannedTransaction[];
+  receiptDetail: ScannedReceiptDetail | null;
+  notificationDecision?: 'ignore' | 'transaction';
+}> {
+  if (mode === 'notification') {
+    const normalize = (content: string) =>
+      normalizeNotificationResult(
+        extractParsedObject(content),
+        body.currency,
+        body.capturedAt!,
+        body.categories,
+        body.incomeCategories ?? [],
+      );
+    const content = await completeWithFailover(
+      body,
+      env,
+      reqId,
+      {
+        prompt: buildNotificationPrompt(
+          body.categories,
+          body.incomeCategories ?? [],
+          body.currency,
+        ),
+        maxTokens: NOTIFICATION_MAX_TOKENS,
+        deadline,
+        temperature: 0,
+      },
+      (output) => {
+        normalize(output);
+      },
+    );
+    // Explicit ignores are final; malformed output can try the backup model.
+    const result = normalize(content);
+    return { ...result, receiptDetail: null };
+  }
   const prompt = buildReceiptPrompt(body.categories, body.currency, mode, body.accounts ?? []);
   const maxTokens = maxTokensForMode(mode);
 
@@ -584,9 +717,7 @@ function normalizeRow(input: unknown, now: Date): ScannedTransaction | null {
 
   const type = row.type === 'income' ? 'income' : 'expense';
   const sentiment =
-    row.sentiment === 'happy' || row.sentiment === 'sad'
-      ? row.sentiment
-      : 'neutral';
+    row.sentiment === 'happy' || row.sentiment === 'sad' ? row.sentiment : 'neutral';
   const date = clampReceiptDate(typeof row.date === 'string' ? row.date : null, now);
 
   return {

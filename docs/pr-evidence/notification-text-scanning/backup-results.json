@@ -1,0 +1,57 @@
+{
+  "version": "d95eafa2-bf17-45df-9a6c-1649ec8a1372",
+  "results": [
+    {
+      "id": "salary-credit",
+      "status": 200,
+      "pass": true,
+      "decision": "income",
+      "amount": 3500
+    },
+    {
+      "id": "explicit-refund-credit",
+      "status": 200,
+      "pass": true,
+      "decision": "income",
+      "amount": 25
+    },
+    {
+      "id": "adversarial-promo-past-tense",
+      "status": 200,
+      "pass": true,
+      "decision": "ignore"
+    },
+    {
+      "id": "my-otp",
+      "status": 200,
+      "pass": true,
+      "decision": "ignore"
+    },
+    {
+      "id": "receipt-image",
+      "status": 200,
+      "pass": true,
+      "response": {
+        "transactions": [
+          {
+            "type": "expense",
+            "amount": 15,
+            "currency": "MYR",
+            "date": "2026-10-08",
+            "category": "Food",
+            "note": "QA CAFE",
+            "sentiment": "neutral",
+            "account": ""
+          }
+        ],
+        "quota": {
+          "used": 1,
+          "limit": 20,
+          "isPro": false,
+          "interval": "100year"
+        },
+        "schemaVersion": 2
+      }
+    }
+  ]
+}

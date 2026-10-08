@@ -41,7 +41,7 @@ MODEL = "qwen/qwen3.7-flash"
 # Backup model tried automatically if the primary MODEL errors or times out
 # (provider down/overloaded). Any multimodal OpenRouter model works; set it to
 # the same value as MODEL to disable failover.
-BACKUP_MODEL = "nex-agi/nex-n2-mini"
+BACKUP_MODEL = "google/gemini-2.5-flash-lite"
 ENTITLEMENT_ID = "pro"
 # Per-tier scan cap + metering cadence. INTERVAL is day | week | month | year
 # with an optional count prefix ("100year" ≈ lifetime); change it to re-meter a
@@ -51,6 +51,11 @@ FREE_LIMIT = "20"
 FREE_INTERVAL = "100year"
 PRO_LIMIT = "500"
 PRO_INTERVAL = "month"
+# Separate text-notification allowance; ignored text does not consume it.
+FREE_NOTIFICATION_LIMIT = "100"
+PRO_NOTIFICATION_LIMIT = "2000"
+# All notification attempts, including ignores/failures, per user per UTC day.
+NOTIFICATION_DAILY_ATTEMPTS = "500"
 # Optional image-resolution hint sent to the provider (OpenAI-style
 # image_url.detail): "low" | "high" | "auto". "low" downsamples the image to
 # cut input tokens, at some OCR-accuracy risk — flip it on here to A/B the
