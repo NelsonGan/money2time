@@ -486,6 +486,278 @@
         "amount": 1,
         "currency": "MYR"
       }
+    },
+    {
+      "id": "my-successful-person-transfer",
+      "text": "You have successfully transferred RM 0.20 to ALEX TAN.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "expense",
+        "amount": 0.2,
+        "currency": "MYR"
+      }
+    },
+    {
+      "id": "my-small-duitnow-transfer",
+      "text": "DuitNow transfer of RM0.01 to QA FRIEND successful.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "expense",
+        "amount": 0.01,
+        "currency": "MYR"
+      }
+    },
+    {
+      "id": "my-business-transfer",
+      "text": "You have successfully transferred RM 20.00 to QA SERVICES SDN BHD.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "expense",
+        "amount": 20,
+        "currency": "MYR"
+      }
+    },
+    {
+      "id": "my-received-person-transfer",
+      "text": "You have received RM 0.20 from ALEX TAN.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "income",
+        "amount": 0.2,
+        "currency": "MYR"
+      }
+    },
+    {
+      "id": "my-ms-person-transfer",
+      "text": "Anda telah berjaya memindahkan RM 0.20 kepada ALEX TAN.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "expense",
+        "amount": 0.2,
+        "currency": "MYR"
+      }
+    },
+    {
+      "id": "my-transfer-balance-promo",
+      "text": "You have successfully transferred RM 0.20 to ALEX TAN. Available balance RM100.00. Earn RM5 on your next payment.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "expense",
+        "amount": 0.2,
+        "currency": "MYR"
+      }
+    },
+    {
+      "id": "my-own-account-transfer",
+      "text": "You have successfully transferred RM 0.20 between your own savings and current accounts.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "ignore"
+      }
+    },
+    {
+      "id": "my-own-named-account-transfer",
+      "text": "You have successfully transferred RM 0.20 to your own account held under ALEX TAN.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "ignore"
+      }
+    },
+    {
+      "id": "my-own-account-received",
+      "text": "RM 0.20 received from your own savings account.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "ignore"
+      }
+    },
+    {
+      "id": "my-successful-wallet-topup",
+      "text": "You have successfully transferred RM 0.20 to top up your own QA Wallet.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "ignore"
+      }
+    },
+    {
+      "id": "my-successful-withdrawal",
+      "text": "You have successfully withdrawn RM 20.00 from the ATM.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "ignore"
+      }
+    },
+    {
+      "id": "my-pending-transfer",
+      "text": "Your transfer of RM 0.20 to ALEX TAN is pending.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "ignore"
+      }
+    },
+    {
+      "id": "my-failed-transfer",
+      "text": "Your transfer of RM 0.20 to ALEX TAN was unsuccessful. No money was sent.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "ignore"
+      }
+    },
+    {
+      "id": "my-late-cancelled-transfer",
+      "text": "Transfer of RM 0.20 to ALEX TAN: processing started successfully, but the transfer was cancelled before any debit.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "ignore"
+      }
+    },
+    {
+      "id": "my-scheduled-transfer",
+      "text": "Your transfer of RM 0.20 to ALEX TAN has been successfully scheduled for tomorrow.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "ignore"
+      }
+    },
+    {
+      "id": "my-transfer-request",
+      "text": "ALEX TAN requested a transfer of RM 0.20. Tap here to send.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "ignore"
+      }
+    },
+    {
+      "id": "my-transfer-otp",
+      "text": "Your OTP to successfully transfer RM 0.20 to ALEX TAN is 123456.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "ignore"
+      }
+    },
+    {
+      "id": "my-transfer-promo-question",
+      "text": "You have successfully transferred RM 0.20 to ALEX TAN? Transfer again to earn RM5 cashback this weekend.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "ignore"
+      }
+    },
+    {
+      "id": "my-transfer-promo-example",
+      "text": "Example notification: \"You have successfully transferred RM 0.20 to ALEX TAN.\" Try our new transfer feature today. No transfer has taken place.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "ignore"
+      }
+    },
+    {
+      "id": "my-transfer-multiple",
+      "text": "You have successfully transferred RM 0.20 to ALEX TAN and RM 0.30 to QA FRIEND.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "ignore"
+      }
+    },
+    {
+      "id": "my-transfer-unclear-direction",
+      "text": "Transfer successful: RM 0.20.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "ignore"
+      }
+    },
+    {
+      "id": "my-transfer-zero",
+      "text": "You have successfully transferred RM 0.00 to ALEX TAN.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "ignore"
+      }
+    },
+    {
+      "id": "my-sms-charge-prefix",
+      "text": "RM0.00 QA BANK: You have successfully transferred RM 0.20 to ALEX TAN.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "expense",
+        "amount": 0.2,
+        "currency": "MYR"
+      }
+    },
+    {
+      "id": "my-card-security-footer",
+      "text": "RM0.00 QA BANK: A purchase of MYR25.00 was made on your card ending 0000 at QA CAFE. Contact the bank if you did not perform this transaction.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "expense",
+        "amount": 25,
+        "currency": "MYR"
+      }
+    },
+    {
+      "id": "my-fpx-prefix-otp",
+      "text": "RM0.00 QA BANK: ID is #000. Your FPX purchase OTP for MYR25.00 is 123456.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "ignore"
+      }
+    },
+    {
+      "id": "my-payment-approval-request",
+      "text": "Approve payment of MYR25.00 to QA CAFE in your banking app.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "ignore"
+      }
+    },
+    {
+      "id": "my-transfer-submitted-processing",
+      "text": "Your transfer of RM 0.20 to ALEX TAN was successfully submitted for processing. Status: pending.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "ignore"
+      }
+    },
+    {
+      "id": "my-debit-without-merchant",
+      "text": "MYR 0.20 has been debited from your account ending 0000.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "expense",
+        "amount": 0.2,
+        "currency": "MYR"
+      }
+    },
+    {
+      "id": "my-transfer-masked-payee",
+      "text": "You have successfully transferred RM 0.20 to account ending 0000.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "expense",
+        "amount": 0.2,
+        "currency": "MYR"
+      }
+    },
+    {
+      "id": "my-transfer-two-ledger-legs",
+      "text": "Transfer completed: your account was debited MYR25.00 and ALEX TAN was credited MYR25.00 for the same transfer.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "expense",
+        "amount": 25,
+        "currency": "MYR"
+      }
+    },
+    {
+      "id": "my-merchant-incoming-qr",
+      "text": "Payment received: MYR25.00 from ALEX TAN via DuitNow QR has been credited to your merchant account.",
+      "currency": "MYR",
+      "expected": {
+        "decision": "income",
+        "amount": 25,
+        "currency": "MYR"
+      }
     }
   ]
 }

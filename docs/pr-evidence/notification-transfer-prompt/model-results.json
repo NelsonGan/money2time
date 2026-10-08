@@ -1,0 +1,3674 @@
+{
+  "date": "2026-10-08",
+  "previewVersion": "755acb30-f726-4124-b5f6-a31b6ce4b4f6",
+  "sourceSha256": "554f2d7d644d8fe000e8d27e23347d748ff135338326d94c5ca4ec311174cd15",
+  "models": {
+    "primary": "qwen/qwen3.7-flash",
+    "backup": "google/gemini-2.5-flash-lite"
+  },
+  "method": "Synthetic fixtures over HTTP through an isolated authenticated Worker preview. Normal route keeps existing failover; backup route forces primary unavailable. Each final full run is one request per fixture. Responses are normalized by the unchanged production validator. No production deployment or mobile UI testing.",
+  "expenseCategories": [
+    "Accomodation",
+    "House Ownership",
+    "Rental",
+    "Vehicle Ownership",
+    "Cost",
+    "Petrol",
+    "Parking",
+    "Insurance",
+    "Road Tax",
+    "Maintenance",
+    "Car Wash",
+    "Others",
+    "Transportation",
+    "Petrol",
+    "Parking",
+    "Public Transport",
+    "E-Hailing",
+    "Toll",
+    "Car Rental",
+    "Others",
+    "Food",
+    "Lifestyle",
+    "Karaoke",
+    "Cinema",
+    "Sports",
+    "Theme Parks",
+    "Games",
+    "Coworking Space",
+    "Gamble",
+    "Clubbing",
+    "Others",
+    "Grocery",
+    "Health & Grooming",
+    "Haircare",
+    "Skincare",
+    "Optical",
+    "Dental",
+    "Insurance",
+    "Others",
+    "Purchases",
+    "Clothing",
+    "Fashion Accessories",
+    "Electronics",
+    "Accessories",
+    "Digital Goods",
+    "Furniture",
+    "Others",
+    "Subscription & Services",
+    "General",
+    "Entertainment",
+    "Education",
+    "Work",
+    "Others",
+    "Contribution & Gifts",
+    "Gifts",
+    "Contributions",
+    "Others"
+  ],
+  "incomeCategories": [
+    "Salary",
+    "QA Employer",
+    "Miscellaneous",
+    "Business",
+    "Retirement",
+    "EPF",
+    "Others",
+    "Ang Pow",
+    "Gamble",
+    "General",
+    "Loan",
+    "Allowance",
+    "Investment",
+    "Cashback",
+    "Other",
+    "App"
+  ],
+  "baseline": {
+    "finishedAt": "2026-10-08T11:35:57.188Z",
+    "passed": 3,
+    "total": 5,
+    "results": [
+      {
+        "id": "my-successful-person-transfer",
+        "pass": false,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 0.2,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-small-duitnow-transfer",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 0.01,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 0.01,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Others",
+              "note": "QA FRIEND",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-received-person-transfer",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "income",
+          "amount": 0.2,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "income",
+              "amount": 0.2,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Miscellaneous",
+              "note": "ALEX TAN",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-own-account-transfer",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-transfer-promo-question",
+        "pass": false,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 0.2,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Others",
+              "note": "ALEX TAN",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      }
+    ]
+  },
+  "finalNormalRoute": {
+    "finishedAt": "2026-10-08T11:57:40.028Z",
+    "passed": 84,
+    "total": 84,
+    "results": [
+      {
+        "id": "my-debit-without-merchant",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 0.2,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 0.2,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-successful-person-transfer",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 0.2,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 0.2,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "ALEX TAN",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-transfer-promo-question",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-transfer-balance-promo",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 0.2,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 0.2,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "ALEX TAN",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-transfer-request",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-transfer-otp",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-transfer-promo-example",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-transfer-multiple",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-transfer-unclear-direction",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-transfer-zero",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-transfer-submitted-processing",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-transfer-masked-payee",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 0.2,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 0.2,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-transfer-two-ledger-legs",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 25,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 25,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "ALEX TAN",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-card-spent",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 25,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 25,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Food",
+              "note": "STARBUCKS KLCC",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-payment-to-balance",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 12.5,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 12.5,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Transportation",
+              "note": "GRAB RIDES",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-otp",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-tac",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "promo-cashback",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "promo-next-purchase",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "fx-two-amounts",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 12,
+          "currency": "USD"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 12,
+              "currency": "USD",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "AMAZON.COM",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": {
+                "amount": 56.3,
+                "currency": "MYR"
+              }
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "wallet-reload",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "income-received",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "income",
+          "amount": 50,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "income",
+              "amount": 50,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "AHMAD BIN ALI",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "refund",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "income",
+          "amount": 25,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "income",
+              "amount": 25,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Others",
+              "note": "SHOPEE",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "declined",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "future-debit",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "statement",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "bill-due",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-ms-dibelanjakan",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 25,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 25,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Food",
+              "note": "STARBUCKS KLCC",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-ms-pembayaran-berjaya",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 12.5,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 12.5,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Transportation",
+              "note": "GRAB",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "id-dibayarkan",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 50000,
+          "currency": "IDR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 50000,
+              "currency": "IDR",
+              "date": "2026-10-08",
+              "category": "Grocery",
+              "note": "Indomaret",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "id-grouped-decimal",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 1250000,
+          "currency": "IDR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 1250000,
+              "currency": "IDR",
+              "date": "2026-10-08",
+              "category": "Others",
+              "note": "TOKOPEDIA",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "zh-cn-xiaofei",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 25,
+          "currency": "CNY"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 25,
+              "currency": "CNY",
+              "date": "2026-10-08",
+              "category": "Food",
+              "note": "STARBUCKS",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "in-upi-debited",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 500,
+          "currency": "INR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 500,
+              "currency": "INR",
+              "date": "2026-10-08",
+              "category": "Others",
+              "note": "VPA abc@okbank",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "in-rs-debited",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 1250
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 1250,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Food",
+              "note": "SWIGGY",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "ph-gcash-sent",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 500,
+          "currency": "PHP"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 500,
+              "currency": "PHP",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "JUAN DELA CRUZ",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "us-card-purchase",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 42.17
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 42.17,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Grocery",
+              "note": "TARGET T-1234",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "us-charged",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 8.99
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 8.99,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Subscription & Services",
+              "note": "SPOTIFY",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "uk-paid",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 4.5,
+          "currency": "GBP"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 4.5,
+              "currency": "GBP",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "Pret A Manger",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "eu-comma-decimal",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 12.34,
+          "currency": "EUR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 12.34,
+              "currency": "EUR",
+              "date": "2026-10-08",
+              "category": "Grocery",
+              "note": "REWE",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "eu-grouped",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 1234.56,
+          "currency": "EUR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 1234.56,
+              "currency": "EUR",
+              "date": "2026-10-08",
+              "category": "Purchases",
+              "note": "FNAC",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "jp-yen",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 1200,
+          "currency": "JPY"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 1200,
+              "currency": "JPY",
+              "date": "2026-10-08",
+              "category": "Grocery",
+              "note": "\u30ed\u30fc\u30bd\u30f3",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "sg-paylah",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 6.8,
+          "currency": "SGD"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 6.8,
+              "currency": "SGD",
+              "date": "2026-10-08",
+              "category": "Food",
+              "note": "KOPITIAM PTE LTD",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "th-baht",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 120,
+          "currency": "THB"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 120,
+              "currency": "THB",
+              "date": "2026-10-08",
+              "category": "Grocery",
+              "note": "7-ELEVEN",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "vn-dong",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 50000,
+          "currency": "VND"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 50000,
+              "currency": "VND",
+              "date": "2026-10-08",
+              "category": "Food",
+              "note": "HIGHLANDS COFFEE",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "br-pix-enviado",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 35.9,
+          "currency": "BRL"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 35.9,
+              "currency": "BRL",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "MARIA SILVA",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "kwd-three-decimals",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 1.257,
+          "currency": "KWD"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 1.257,
+              "currency": "KWD",
+              "date": "2026-10-08",
+              "category": "Food",
+              "note": "TALABAT",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "ewallet-linked-card",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 18.9,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 18.9,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Food",
+              "note": "GRABFOOD",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "auth-hold",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "html-email",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 88,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 88,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Others",
+              "note": "IKEA CHERAS",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "no-money",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "atm-withdrawal",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "sent-you-income",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "income",
+          "amount": 25
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "income",
+              "amount": 25,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Miscellaneous",
+              "note": "Jamie",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "lowercase-rm",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 7.5,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 7.5,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Food",
+              "note": "ZUS COFFEE",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "adversarial-promo-past-tense",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "hypothetical-salary",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "real-payment-plus-offer",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 25,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 25,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Food",
+              "note": "QA CAFE",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "real-cashback-credit",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "income",
+          "amount": 5,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "income",
+              "amount": 5,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Cashback",
+              "note": "",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "pending-payment",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "late-declined",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "request-for-money",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "multiple-payments",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "prompt-injection",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "no-movement-balance",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "explicit-refund-credit",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "income",
+          "amount": 25,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "income",
+              "amount": 25,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Others",
+              "note": "QA CAFE",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "salary-credit",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "income",
+          "amount": 3500,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "income",
+              "amount": 3500,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Salary",
+              "note": "QA EMPLOYER",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "setup-sample-body",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 1,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 1,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Food",
+              "note": "Test Cafe",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-small-duitnow-transfer",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 0.01,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 0.01,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Others",
+              "note": "QA FRIEND",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-business-transfer",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 20,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 20,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "QA SERVICES SDN BHD",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-received-person-transfer",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "income",
+          "amount": 0.2,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "income",
+              "amount": 0.2,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "ALEX TAN",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-ms-person-transfer",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 0.2,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 0.2,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "ALEX TAN",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-own-account-transfer",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-own-named-account-transfer",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-own-account-received",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-successful-wallet-topup",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-successful-withdrawal",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-pending-transfer",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-failed-transfer",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-late-cancelled-transfer",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-scheduled-transfer",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-sms-charge-prefix",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 0.2,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 0.2,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "ALEX TAN",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-card-security-footer",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 25,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 25,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Food",
+              "note": "QA CAFE",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-fpx-prefix-otp",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-payment-approval-request",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-merchant-incoming-qr",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "income",
+          "amount": 25,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "income",
+              "amount": 25,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Business",
+              "note": "ALEX TAN",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      }
+    ]
+  },
+  "finalForcedBackup": {
+    "finishedAt": "2026-10-08T11:58:06.208Z",
+    "passed": 84,
+    "total": 84,
+    "results": [
+      {
+        "id": "my-debit-without-merchant",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 0.2,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 0.2,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-successful-person-transfer",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 0.2,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 0.2,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "ALEX TAN",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-transfer-promo-question",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-transfer-balance-promo",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 0.2,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 0.2,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "ALEX TAN",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-transfer-request",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-transfer-otp",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-transfer-promo-example",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-transfer-multiple",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-transfer-unclear-direction",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-transfer-zero",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-transfer-submitted-processing",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-transfer-masked-payee",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 0.2,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 0.2,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "account ending 0000",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-transfer-two-ledger-legs",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 25,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 25,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "ALEX TAN",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-card-spent",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 25,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 25,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Food",
+              "note": "STARBUCKS KLCC",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-payment-to-balance",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 12.5,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 12.5,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "GRAB RIDES",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-otp",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-tac",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "promo-cashback",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "promo-next-purchase",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "fx-two-amounts",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 12,
+          "currency": "USD"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 12,
+              "currency": "USD",
+              "date": "2026-10-08",
+              "category": "Purchases",
+              "note": "AMAZON.COM",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": {
+                "amount": 56.3,
+                "currency": "MYR"
+              }
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "wallet-reload",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "income-received",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "income",
+          "amount": 50,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "income",
+              "amount": 50,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "AHMAD BIN ALI",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "refund",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "income",
+          "amount": 25,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "income",
+              "amount": 25,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Other",
+              "note": "SHOPEE",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "declined",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "future-debit",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "statement",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "bill-due",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-ms-dibelanjakan",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 25,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 25,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Food",
+              "note": "STARBUCKS KLCC",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-ms-pembayaran-berjaya",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 12.5,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 12.5,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Transportation",
+              "note": "GRAB",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "id-dibayarkan",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 50000,
+          "currency": "IDR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 50000,
+              "currency": "IDR",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "Indomaret",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "id-grouped-decimal",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 1250000,
+          "currency": "IDR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 1250000,
+              "currency": "IDR",
+              "date": "2026-10-08",
+              "category": "Purchases",
+              "note": "TOKOPEDIA",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "zh-cn-xiaofei",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 25,
+          "currency": "CNY"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 25,
+              "currency": "CNY",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "\u661f\u5df4\u514b",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "in-upi-debited",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 500,
+          "currency": "INR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 500,
+              "currency": "INR",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "abc@okbank",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "in-rs-debited",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 1250
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 1250,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Food",
+              "note": "SWIGGY",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "ph-gcash-sent",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 500,
+          "currency": "PHP"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 500,
+              "currency": "PHP",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "JUAN DELA CRUZ",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "us-card-purchase",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 42.17
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 42.17,
+              "currency": "USD",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "TARGET T-1234",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "us-charged",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 8.99
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 8.99,
+              "currency": "USD",
+              "date": "2026-10-08",
+              "category": "Subscription & Services",
+              "note": "SPOTIFY",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "uk-paid",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 4.5,
+          "currency": "GBP"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 4.5,
+              "currency": "GBP",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "Pret A Manger",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "eu-comma-decimal",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 12.34,
+          "currency": "EUR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 12.34,
+              "currency": "EUR",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "REWE",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "eu-grouped",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 1234.56,
+          "currency": "EUR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 1234.56,
+              "currency": "EUR",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "FNAC",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "jp-yen",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 1200,
+          "currency": "JPY"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 1200,
+              "currency": "JPY",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "\u30ed\u30fc\u30bd\u30f3",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "sg-paylah",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 6.8,
+          "currency": "SGD"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 6.8,
+              "currency": "SGD",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "KOPITIAM PTE LTD",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "th-baht",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 120,
+          "currency": "THB"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 120,
+              "currency": "THB",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "7-ELEVEN",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "vn-dong",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 50000,
+          "currency": "VND"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 50000,
+              "currency": "VND",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "HIGHLANDS COFFEE",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "br-pix-enviado",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 35.9,
+          "currency": "BRL"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 35.9,
+              "currency": "BRL",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "MARIA SILVA",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "kwd-three-decimals",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 1.257,
+          "currency": "KWD"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 1.257,
+              "currency": "KWD",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "TALABAT",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "ewallet-linked-card",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 18.9,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 18.9,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "GRABFOOD",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "auth-hold",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "html-email",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 88,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 88,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Purchases",
+              "note": "IKEA CHERAS",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "no-money",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "atm-withdrawal",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "sent-you-income",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "income",
+          "amount": 25
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "income",
+              "amount": 25,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "General",
+              "note": "Jamie",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "lowercase-rm",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 7.5,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 7.5,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Food",
+              "note": "zus coffee",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "adversarial-promo-past-tense",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "hypothetical-salary",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "real-payment-plus-offer",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 25,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 25,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Food",
+              "note": "QA CAFE",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "real-cashback-credit",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "income",
+          "amount": 5,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "income",
+              "amount": 5,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Cashback",
+              "note": "",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "pending-payment",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "late-declined",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "request-for-money",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "multiple-payments",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "prompt-injection",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "no-movement-balance",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "explicit-refund-credit",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "income",
+          "amount": 25,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "income",
+              "amount": 25,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Other",
+              "note": "QA CAFE",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "salary-credit",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "income",
+          "amount": 3500,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "income",
+              "amount": 3500,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Salary",
+              "note": "QA EMPLOYER",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "setup-sample-body",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 1,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 1,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "Test Cafe",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-small-duitnow-transfer",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 0.01,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 0.01,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "QA FRIEND",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-business-transfer",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 20,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 20,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "Others",
+              "note": "QA SERVICES SDN BHD",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-received-person-transfer",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "income",
+          "amount": 0.2,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "income",
+              "amount": 0.2,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "ALEX TAN",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-ms-person-transfer",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 0.2,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 0.2,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "ALEX TAN",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-own-account-transfer",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-own-named-account-transfer",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-own-account-received",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-successful-wallet-topup",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-successful-withdrawal",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-pending-transfer",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-failed-transfer",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-late-cancelled-transfer",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-scheduled-transfer",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-sms-charge-prefix",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 0.2,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 0.2,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "ALEX TAN",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-card-security-footer",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "expense",
+          "amount": 25,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "expense",
+              "amount": 25,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "QA CAFE",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      },
+      {
+        "id": "my-fpx-prefix-otp",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-payment-approval-request",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "ignore"
+        },
+        "actual": {
+          "decision": "ignore",
+          "transactions": [],
+          "error": null
+        }
+      },
+      {
+        "id": "my-merchant-incoming-qr",
+        "pass": true,
+        "status": 200,
+        "expected": {
+          "decision": "income",
+          "amount": 25,
+          "currency": "MYR"
+        },
+        "actual": {
+          "decision": "transaction",
+          "transactions": [
+            {
+              "type": "income",
+              "amount": 25,
+              "currency": "MYR",
+              "date": "2026-10-08",
+              "category": "",
+              "note": "ALEX TAN",
+              "sentiment": "neutral",
+              "account": "",
+              "secondary": null
+            }
+          ],
+          "error": null
+        }
+      }
+    ]
+  },
+  "intermediateFindings": [
+    "Promotional question accepted as expense",
+    "Unspecified transfer direction guessed",
+    "Merchant-free debit and masked-payee transfer discarded",
+    "Sender-perspective income discarded",
+    "Original and billed foreign-currency amounts reversed",
+    "Isolated malformed replies; repeated backup currency string \"null\" diagnosed and clarified to literal JSON null"
+  ],
+  "automated": {
+    "suites": 180,
+    "tests": 2540,
+    "result": "passed",
+    "rootCheck": "passed",
+    "workerTypecheck": "passed",
+    "explicitFormatting": "passed"
+  },
+  "productionDeploymentUnchanged": true
+}
