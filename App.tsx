@@ -68,7 +68,6 @@ import {
   EditAlbumTransactionsScreen,
 } from '~/features/albums/screens';
 import { checkApplePayTap, recordApplePayTap } from '~/features/autoLog/applePayTaps';
-import { NotificationReviewBanner } from '~/features/autoLog/components/NotificationReviewBanner';
 import { PaymentAlertSync } from '~/features/autoLog/components/PaymentAlertSync';
 import { NotificationHistoryScreen } from '~/features/autoLog/screens/NotificationHistoryScreen';
 import { NotificationReviewEditorScreen } from '~/features/autoLog/screens/NotificationReviewEditorScreen';
@@ -409,7 +408,6 @@ function MainShellScreen({
   const { checkLimit, isPro } = useProGate();
   const { startScan } = useReceiptScans();
   const [addSheetVisible, setAddSheetVisible] = useState(false);
-  const [notificationBannerHeight, setNotificationBannerHeight] = useState(0);
   const voiceHandleRef = useRef<VoiceQuickAddHandle | null>(null);
   const [voiceSupported, setVoiceSupported] = useState(false);
   // A voice start requested before the capture overlay had mounted (the support
@@ -1095,7 +1093,7 @@ function MainShellScreen({
 
   return (
     <View className="flex-1 bg-background">
-      <View style={[styles.flex, { marginTop: notificationBannerHeight }]}>
+      <View style={styles.flex}>
         <MountedTab
           name="accounts"
           active={activeTab === 'accounts'}
@@ -1195,7 +1193,6 @@ function MainShellScreen({
         </>
       ) : null}
 
-      <NotificationReviewBanner onHeightChange={setNotificationBannerHeight} />
       <AddActionSheet
         visible={addSheetVisible}
         canStartTransaction={checkCanStartNewTransaction}

@@ -1,7 +1,6 @@
 import { Bell, ChevronRight, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { AppState, Pressable, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
@@ -14,17 +13,11 @@ import {
 } from '~/services/notificationScanHistory';
 import { requestOpenPaymentAlerts } from '~/services/paymentAlertsNavigation';
 
-/** Floating review action on the shell; dismissal never ignores unfinished items. */
-export function NotificationReviewBanner({
-  onHeightChange,
-}: {
-  onHeightChange: (height: number) => void;
-}) {
+/** Inline home review action alongside receipt scans; dismissal never ignores unfinished items. */
+export function NotificationReviewBanner() {
   const { settings } = useApp();
   const colors = useThemeColors();
-  const insets = useSafeAreaInsets();
   const [ids, setIds] = useState<string[]>([]);
-  const [height, setHeight] = useState(0);
   const [dismissed, setDismissed] = useState<string | null>(null);
   useEffect(() => {
     let active = true;
@@ -53,18 +46,9 @@ export function NotificationReviewBanner({
   }, [settings.appUserId]);
   const signature = ids.join('|');
   const visible = ids.length > 0 && signature !== dismissed;
-  useEffect(() => {
-    onHeightChange(visible && height > 0 ? height + 16 : 0);
-  }, [visible, height, onHeightChange]);
-  useEffect(() => () => onHeightChange(0), [onHeightChange]);
   if (!visible) return null;
   return (
-    <View
-      pointerEvents="box-none"
-      className="absolute right-5 left-5 items-center"
-      style={{ top: insets.top + 8, zIndex: 20 }}
-      onLayout={(event) => setHeight(event.nativeEvent.layout.height)}
-    >
+    <View className="items-center">
       <Pressable
         accessibilityRole="button"
         testID="notification-review-banner"

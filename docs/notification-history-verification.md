@@ -4,15 +4,14 @@ Reviewed on 2026-10-08 for PR 570. This replaces the earlier AI notification wor
 
 ## Behavior and review fixes
 
-Notifications are captured locally, with currency-labelled monetary candidates.
+Notifications are captured locally, with monetary candidates extracted even when no currency symbol is present. Unlabelled numbers use the configured account currency; explicit currencies retain priority.
 Capture never writes money or calls an AI provider. The user chooses Income,
 Expense or Ignore. Several amounts require a selection; missing amounts can be entered in the full transaction editor. Compact cards use the detected currency and configured account without extra controls. The pencil opens the ordinary full editor, while its save uses the durable notification review guard. Categories reuse the Apple Pay keyword mapping after a valid same-type preset and before defaults. Bulk actions process the selected pending snapshot.
 Apple Pay automatic logging and receipt photo/itemized/screenshot scanning keep
 their existing behavior.
 
 History keeps all pending items and the newest 10 completed items. Pending drafts
-do not expire. A floating action at the top returns on launch/foreground and new captures,
-reserving space so it does not cover the screen header.
+do not expire. An inline home action below the income/expense summary, alongside receipt-scan status, returns on launch/foreground and new captures. It appears in the calendar day view outside search.
 The root review page intercepts Back, hardware Back and swipe-back; Cancel stays,
 and confirmation durably ignores the unfinished snapshot before navigating.
 New notifications arriving while the warning is open remain pending.
@@ -39,7 +38,7 @@ Settings ad click tracking remains included in this PR.
 ## Automated verification
 
 - Root type checking, lint and formatting: `npm run check`.
-- Full Jest regression suite: 183 suites, 2,506 tests, including receipt client,
+- Full Jest regression suite: 183 suites, 2,517 tests, including receipt client,
   Worker image modes, native queue contracts, Apple Pay, localization parity,
   notification extraction, capture/history and review/recovery scenarios.
 - Six analytics suites: 115 tests passed. Trigger/payload/source prose was also
@@ -70,10 +69,10 @@ preserved history and the completed list was capped at 10.
 Final UI evidence is in `docs/pr-evidence/notification-review/`. Screenshots show
 only synthetic text and demo accounts. Changed Android walkthrough frames are
 refreshed to show the local review flow. Actual before screenshots and the generated design guide are included.
-The redesigned page separates To review from Recent, uses compact cards and flat
+A symbol-free synthetic transfer of 0.20 went through production capture, produced one pending item and zero transactions, and displayed RM0.20 using the configured account currency. The redesigned page separates To review from Recent, uses compact cards and flat
 action rows, and has no currency/account controls. Selected amounts survive
 switching tabs; the exit warning still covers pending items while viewing Recent.
-The refreshed top action was checked after a full bundle reload; dismissing it preserved all three pending items. To review shows a spaced red count only when items are pending and the original rounded toggle highlights the active tab; Recent has no count. History uses an icon-only action beside the Notifications section title on both platforms’ Automation page; the Notifications settings header is centered. An edited RM0.20 draft saved as RM5.00 with Food selected, completed its capture and increased the ledger from 7,109 to 7,110 exactly once. Demo account fixtures used to exercise the allowed editor path were restored afterward.
+The review action was checked after a full bundle reload in its final position below the calendar summary; dismissing it preserved all three pending items. To review shows a spaced red count only when items are pending and the original rounded toggle highlights the active tab; Recent has no count. History uses an icon-only action beside the Notifications section title on both platforms’ Automation page; the Notifications settings header is centered. An edited RM0.20 draft saved as RM5.00 with Food selected, completed its capture and increased the ledger from 7,109 to 7,110 exactly once. Demo account fixtures used to exercise the allowed editor path were restored afterward.
 
 ## Limits and rollout
 

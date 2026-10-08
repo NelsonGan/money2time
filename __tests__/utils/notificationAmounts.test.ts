@@ -56,3 +56,48 @@ it('validates editable amounts without interpreting extra decimals as thousands'
 it('rejects malformed mixed grouping instead of guessing the amount', () => {
   expect(extractNotificationAmounts('RM 1,234.567.89 RM 1,234,56', 'MYR')).toEqual([]);
 });
+
+it.each([
+  ['Transferred 0.20 to ALEX TAN.', 'MYR', 0.2],
+  ['500 debited from your wallet.', 'INR', 500],
+  ['Payment 1.234,56 completed.', 'EUR', 1234.56],
+  ['Payment 1\u202f234,56 completed.', 'EUR', 1234.56],
+  ['Payment 0.001 completed.', 'KWD', 0.001],
+  ['Payment د.إ 25.50 completed.', 'AED', 25.5],
+  ['تم الدفع ١٢٫٥٠', 'AED', 12.5],
+])('reads amounts without requiring a known currency token: %s', (text, currency, amount) => {
+  expect(extractNotificationAmounts(text, currency)).toEqual([{ amount, currency }]);
+});
+it('keeps unlabelled payment and balance candidates without including IDs or times', () => {
+  expect(
+    extractNotificationAmounts(
+      'Card ending in 1234: Payment 25.00. Balance 900.00. Ref: 99999 at 10:57 on 2026-10-08.',
+      'MYR',
+    ),
+  ).toEqual([
+    { amount: 25, currency: 'MYR' },
+    { amount: 900, currency: 'MYR' },
+  ]);
+});
+it('does not add fallback-currency duplicates of explicit amounts or split invalid numbers', () => {
+  expect(extractNotificationAmounts('USD5.00, payment 7.50', 'MYR')).toEqual([
+    { amount: 5, currency: 'USD' },
+    { amount: 7.5, currency: 'MYR' },
+  ]);
+  expect(extractNotificationAmounts('Payment 1,234,56. Ref ABC1234, 10% offer.', 'MYR')).toEqual(
+    [],
+  );
+});
+it('rejects negative numbers and scientific notation without plucking a numeric tail', () => {
+  expect(
+    extractNotificationAmounts('Payment - 5.00, -10.00, 0.00, 1e3, 1E+3 or 1E-3.', 'MYR'),
+  ).toEqual([]);
+});
+it('accepts common colon and credit-plus formatting while excluding labelled phone numbers', () => {
+  expect(
+    extractNotificationAmounts('Amount: 25.00. Credited +14.50. Phone +60123456789.', 'MYR'),
+  ).toEqual([
+    { amount: 25, currency: 'MYR' },
+    { amount: 14.5, currency: 'MYR' },
+  ]);
+});

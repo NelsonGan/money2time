@@ -35,6 +35,7 @@ import {
 } from '~/components/ui';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
+import { NotificationReviewBanner } from '~/features/autoLog/components/NotificationReviewBanner';
 import {
   buildInsightsCategoryPickerData,
   type InsightsCategoryPickerData,
@@ -1668,7 +1669,12 @@ export function CalendarScreen({
 
             {/* Background receipt-scan status — sits below the income/expense
                 summary and above the transaction list on the home view. */}
-            {viewMode === 'day' && !isSearchOpen ? <ScanStatusBanner /> : null}
+            {viewMode === 'day' && !isSearchOpen ? (
+              <View className="gap-2">
+                <ScanStatusBanner />
+                <NotificationReviewBanner />
+              </View>
+            ) : null}
           </View>
         </View>
       </TabletContentContainer>
