@@ -13,6 +13,13 @@ import {
 } from '~/services/analytics.shared';
 
 describe('analytics event routing', () => {
+  it('routes each RiceCal ad click to both providers without marking feature adoption', () => {
+    const event = AnalyticsEvents.RICECAL_AD_CLICKED;
+    expect(isMixpanelEvent(event)).toBe(true);
+    expect(toGa4EventName(event)).toBe('m2t_rice_cal_ad_clicked');
+    expect(featureUsedBy(event, { source: 'settings' })).toBeNull();
+  });
+
   it('places every event in exactly one destination group', () => {
     const mixpanelKeys = Object.keys(MIXPANEL_EVENTS);
     const ga4OnlyKeys = new Set(Object.keys(GA4_ONLY_EVENTS));
@@ -168,7 +175,12 @@ describe('GA4 analytics mapping', () => {
   it('never truncates an event name to fit the GA4 limit', () => {
     // Truncation is silent, so a long name would reach GA4 cut mid-word.
     Object.values(AnalyticsEvents).forEach((name) =>
-      expect(toGa4EventName(name)).toBe(`m2t_${name.toLowerCase().replace(/ /g, '_')}`),
+      expect(toGa4EventName(name)).toBe(
+        `m2t_${name
+          .replace(/([a-z0-9])([A-Z])/g, '$1_$2')
+          .toLowerCase()
+          .replace(/ /g, '_')}`,
+      ),
     );
   });
 
