@@ -1219,7 +1219,7 @@ const uk = {
       payment_alerts_status_apps_one: 'Увімкнено для %{count} застосунку',
       payment_alerts_status_apps_other: 'Увімкнено, застосунків: %{count}',
       payment_alerts_android_step_1:
-        'Відкрийте «Облік зі сповіщень» та увімкніть «Читати сповіщення».',
+        'Tap “Log from notifications”, read the scanning disclosure and enable “Scan notification text” and “Read notifications”.',
       payment_alerts_android_step_2:
         'Android відкриє екран доступу до сповіщень. Знайдіть Money2Time і увімкніть його.',
       payment_alerts_android_step_3:
@@ -1229,16 +1229,16 @@ const uk = {
       payment_alerts_android_step_5: 'Виберіть рахунок для кожного застосунку.',
       payment_alerts_android_step_6: 'Надішліть тестове сповіщення, щоб перевірити, що все працює.',
       payment_alerts_android_step_7:
-        'Платежі автоматично записуються на вибраний рахунок. Категорії використовують ті самі ключові слова, що й Apple Pay.',
+        'Completed income and expenses log to your selected account. The scanner selects categories and discards offers and unrelated notifications.',
       payment_alerts_ios_step_1:
         'Відкрийте Shortcuts, натисніть +, потім Edit. У редакторі натисніть Automation.',
       payment_alerts_ios_step_2: 'Знайдіть Notification та виберіть його.',
       payment_alerts_ios_step_3: 'Знайдіть Log Notification і додайте його.',
       payment_alerts_ios_step_4: 'Натисніть Message у Log Notification, потім Select Variable.',
       payment_alerts_ios_step_6:
-        'Торкніться стрілки дії, потім Account. Виберіть рахунок для запису платежів цього застосунку. Залиште Category порожнім для автоматичного зіставлення за ключовими словами.',
+        'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
       payment_alerts_ios_step_7:
-        'Поверніться назад для збереження. Повторіть для кожного застосунку банку або гаманця. Платежі запишуться під час наступного відкриття Money2Time.',
+        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text” after reading the disclosure. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
       payment_alerts_android_disclosure:
         'Прочитайте, як використовується доступ до сповіщень, і натисніть Continue.',
       payment_alerts_ios_app:
@@ -2576,16 +2576,24 @@ const uk = {
     },
   },
   payment_alerts: {
+    scan_enabled: 'Сканувати текст сповіщень',
+    scan_disclosure:
+      'Надсилайте текст сповіщень вибраних застосунків сканеру Money2Time та постачальнику ШІ OpenRouter, щоб визначити завершені доходи й витрати. Пропозиції та сторонні повідомлення відкидаються. Потрібен інтернет; ліміт сканування чеків окремий.',
+    test_scan_failed_title: 'Не вдалося записати тестове сповіщення',
+    test_scan_failed:
+      'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
+
     account_hint:
-      'Платежі автоматично записуються на вибраний рахунок. Категорії використовують ті самі ключові слова, що й Apple Pay.',
+      'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
     title: 'Сповіщення',
     intro_android:
-      'Money2Time читає сповіщення про платежі з вибраних вами банківських застосунків і гаманців та записує кожен платіж за вас. Сповіщення читаються на цьому телефоні й ніколи не завантажуються.',
+      'Money2Time scans notification text from the bank and wallet apps you choose to identify completed income and expenses. It sends this text to its scanner and AI provider, OpenRouter. Offers and unrelated messages are discarded.',
     card_intro:
-      'Автоматично записуйте платежі зі сповіщень застосунків банків та електронних гаманців.',
+      'Automatically log completed income and expenses from bank and wallet notifications.',
     section_status: 'Стан',
     master_label: 'Читати сповіщення',
-    master_hint: 'Записує платежі з вибраних застосунків.',
+    master_hint:
+      'Captures notifications from the apps you choose. Enable text scanning to log completed transactions.',
     access_open_settings: 'Відкрити налаштування',
     health_unsupported:
       'Ця версія Money2Time не вміє читати сповіщення. Оновіть застосунок, щоб користуватися сповіщеннями про платежі.',
@@ -2604,13 +2612,13 @@ const uk = {
     section_apps: 'Застосунки',
     choose_apps: 'Вибрати застосунки',
     source_off: 'Вимкнено',
-    disclosure_title: 'Записуйте платежі зі сповіщень',
+    disclosure_title: 'Log transactions from your notifications',
     disclosure_body:
       'Для цього Money2Time потрібен доступ до сповіщень. Ось як він використовується:',
     disclosure_point_selected:
       'Читаються лише сповіщення вибраних вами банківських застосунків і гаманців. Усе інше ігнорується.',
     disclosure_point_device:
-      'Сповіщення читаються на цьому телефоні. Їхній текст ніколи не завантажується.',
+      'Надсилайте текст сповіщень вибраних застосунків сканеру Money2Time та постачальнику ШІ OpenRouter, щоб визначити завершені доходи й витрати. Пропозиції та сторонні повідомлення відкидаються. Потрібен інтернет; ліміт сканування чеків окремий.',
     disclosure_android_warning:
       'Android попередить, що застосунок із доступом до сповіщень може читати їх усі. Money2Time зберігає лише вибрані вами застосунки.',
     access_title: 'Увімкніть доступ до сповіщень',

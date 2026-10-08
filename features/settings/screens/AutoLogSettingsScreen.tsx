@@ -15,6 +15,7 @@ import {
   SCAN_SCREENSHOT_INTENT_NAME,
 } from '~/constants/autoLogIntents';
 import { useApp } from '~/context/AppContext';
+import { NotificationScanControl } from '~/features/autoLog/components/NotificationScanControl';
 import { countKey } from '~/features/autoLog/lib/presentation';
 import {
   findFallbackCategory,
@@ -158,8 +159,7 @@ function AndroidPaymentAlertsEntry({
           </View>
           <View style={styles.rowText}>
             <Text variant="caption" tone="muted">
-              {I18n.t('payment_alerts.card_intro')}{' '}
-              {I18n.t('payment_alerts.disclosure_point_device')}
+              {I18n.t('payment_alerts.card_intro')}
             </Text>
           </View>
         </View>
@@ -449,6 +449,7 @@ export function AutoLogSettingsScreen({
                       </Text>
                     </View>
                   </View>
+                  <NotificationScanControl />
                 </View>
               </View>
 

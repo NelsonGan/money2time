@@ -1224,7 +1224,7 @@ const da = {
       payment_alerts_status_apps_one: 'Til for %{count} app',
       payment_alerts_status_apps_other: 'Til for %{count} apps',
       payment_alerts_android_step_1:
-        'Tryk på “Registrér fra notifikationer”, og slå “Læs notifikationer” til.',
+        'Tap “Log from notifications”, read the scanning disclosure and enable “Scan notification text” and “Read notifications”.',
       payment_alerts_android_step_2:
         'Android åbner skærmen for notifikationsadgang. Find Money2Time, og slå det til.',
       payment_alerts_android_step_3:
@@ -1234,16 +1234,16 @@ const da = {
       payment_alerts_android_step_5: 'Vælg kontoen for hver app.',
       payment_alerts_android_step_6: 'Send en testnotifikation for at tjekke, at alt virker.',
       payment_alerts_android_step_7:
-        'Betalinger registreres automatisk på din valgte konto. Kategorier bruger de samme nøgleord som Apple Pay.',
+        'Completed income and expenses log to your selected account. The scanner selects categories and discards offers and unrelated notifications.',
       payment_alerts_ios_step_1:
         'Åbn Shortcuts, tryk + og derefter Edit. Tryk Automation i editoren.',
       payment_alerts_ios_step_2: 'Søg efter Notification, og vælg den.',
       payment_alerts_ios_step_3: 'Søg efter Log Notification, og tilføj den.',
       payment_alerts_ios_step_4: 'Tryk Message i Log Notification og derefter Select Variable.',
       payment_alerts_ios_step_6:
-        'Tryk på handlingens pil og derefter Account. Vælg, hvor denne apps betalinger skal registreres. Lad Category være tom for automatisk søgeordsmatchning.',
+        'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
       payment_alerts_ios_step_7:
-        'Gå tilbage for at gemme. Gentag for hver bank- eller wallet-app. Betalingerne registreres, næste gang du åbner Money2Time.',
+        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text” after reading the disclosure. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
       payment_alerts_android_disclosure: 'Læs om brugen af notifikationsadgang, og tryk Continue.',
       payment_alerts_ios_app:
         'Tryk på App, og vælg din bank- eller wallet-app. Disse skærmbilleder bruger Wallet som eksempel.',
@@ -2579,16 +2579,24 @@ const da = {
     },
   },
   payment_alerts: {
+    scan_enabled: 'Scan notifikationstekst',
+    scan_disclosure:
+      'Send teksten fra dine valgte apps til Money2Times scanner og AI-udbyderen OpenRouter for at finde gennemførte indtægter og udgifter. Tilbud og uvedkommende beskeder kasseres. Kræver internet; kvitteringsscanning har en separat kvote.',
+    test_scan_failed_title: 'Testnotifikationen kunne ikke logges',
+    test_scan_failed:
+      'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
+
     account_hint:
-      'Betalinger registreres automatisk på din valgte konto. Kategorier bruger de samme nøgleord som Apple Pay.',
+      'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
     title: 'Notifikationer',
     intro_android:
-      'Money2Time læser betalingsnotifikationerne fra de bank- og wallet-apps, du vælger, og registrerer hver betaling for dig. Notifikationer læses på denne telefon og uploades aldrig.',
+      'Money2Time scans notification text from the bank and wallet apps you choose to identify completed income and expenses. It sends this text to its scanner and AI provider, OpenRouter. Offers and unrelated messages are discarded.',
     card_intro:
-      'Registrer automatisk betalinger fra de notifikationer, dine bank- og wallet-apps sender.',
+      'Automatically log completed income and expenses from bank and wallet notifications.',
     section_status: 'Status',
     master_label: 'Læs notifikationer',
-    master_hint: 'Registrerer betalinger fra de apps, du vælger.',
+    master_hint:
+      'Captures notifications from the apps you choose. Enable text scanning to log completed transactions.',
     access_open_settings: 'Åbn indstillinger',
     health_unsupported:
       'Denne version af Money2Time kan ikke læse notifikationer. Opdater appen for at bruge betalingsnotifikationer.',
@@ -2606,11 +2614,12 @@ const da = {
     section_apps: 'Apps',
     choose_apps: 'Vælg apps',
     source_off: 'Fra',
-    disclosure_title: 'Registrer betalinger fra dine notifikationer',
+    disclosure_title: 'Log transactions from your notifications',
     disclosure_body: 'Money2Time skal bruge notifikationsadgang til dette. Sådan bruges den:',
     disclosure_point_selected:
       'Den læser kun notifikationer fra de bank- og wallet-apps, du vælger. Alt andet ignoreres.',
-    disclosure_point_device: 'Notifikationer læses på denne telefon. Teksten uploades aldrig.',
+    disclosure_point_device:
+      'Send teksten fra dine valgte apps til Money2Times scanner og AI-udbyderen OpenRouter for at finde gennemførte indtægter og udgifter. Tilbud og uvedkommende beskeder kasseres. Kræver internet; kvitteringsscanning har en separat kvote.',
     disclosure_android_warning:
       'Android advarer om, at en app med notifikationsadgang kan læse alle dine notifikationer. Money2Time beholder kun de apps, du vælger.',
     access_title: 'Slå notifikationsadgang til',

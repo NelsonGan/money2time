@@ -20,6 +20,7 @@ export interface TestAlertResult {
   accountId: string | null;
   categoryId: string | null;
   wouldLog: boolean;
+  scanFailed?: boolean;
 }
 
 const testListeners = new Set<(result: TestAlertResult) => void>();

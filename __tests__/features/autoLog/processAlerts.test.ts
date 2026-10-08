@@ -1,10 +1,15 @@
 import type { CaptureInput } from '~/features/autoLog/lib/captureQueue';
 import { withAlertSource } from '~/features/autoLog/lib/prefs';
-import { type AlertProcessingDeps, processAlertCaptures } from '~/features/autoLog/processAlerts';
+import {
+  type AlertProcessingDeps,
+  analyzeNotificationCapture,
+  processAlertCaptures,
+} from '~/features/autoLog/processAlerts';
 import { paymentAlertCapturesRepository } from '~/lib/repositories/paymentAlertCapturesRepository';
-import type { QuickEntryPrefs } from '~/types';
+import { ReceiptScanError, scanNotification } from '~/services/receiptScan';
+import type { QuickEntryPrefs, TransactionWithRelations } from '~/types';
 
-import { account, category, prefs, source } from './helpers';
+import { account, alertParse, category, prefs, source } from './helpers';
 
 jest.mock('~/lib/repositories/paymentAlertCapturesRepository', () => ({
   paymentAlertCapturesRepository: {
@@ -16,6 +21,31 @@ jest.mock('~/lib/repositories/paymentAlertCapturesRepository', () => ({
   },
 }));
 jest.mock('~/services/errorReporting', () => ({ reportError: jest.fn() }));
+jest.mock('~/services/receiptScan', () => ({
+  ...jest.requireActual('~/services/receiptScan'),
+  scanNotification: jest.fn(),
+}));
+const scanned = (
+  type: 'income' | 'expense' = 'expense',
+  amount = 25,
+  note = 'SHELL',
+  categoryName = 'Food',
+) => ({
+  notificationDecision: 'transaction' as const,
+  transactions: [
+    {
+      type,
+      amount,
+      currency: 'MYR',
+      date: null,
+      category: categoryName,
+      note,
+      sentiment: 'neutral' as const,
+      secondary: null,
+    },
+  ],
+  quota: { used: 1, limit: 50, isPro: false },
+});
 
 const capture: CaptureInput = {
   id: 'capture',
@@ -32,6 +62,7 @@ const capture: CaptureInput = {
   presetCategoryId: null,
 };
 const deps = (): AlertProcessingDeps => ({
+  appUserId: 'test-user',
   accounts: [account()],
   categories: [category()],
   transactions: [],
@@ -50,7 +81,10 @@ const deps = (): AlertProcessingDeps => ({
 });
 
 describe('automatic alert persistence', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.mocked(scanNotification).mockResolvedValue(scanned());
+  });
 
   it('creates an expense and acknowledges its capture only after saving the transaction link', async () => {
     const input = deps();
@@ -117,6 +151,14 @@ describe('automatic alert persistence', () => {
   });
   it('logs only the completed charge following a pre-authorization hold', async () => {
     const input = deps();
+    jest
+      .mocked(scanNotification)
+      .mockResolvedValueOnce({
+        notificationDecision: 'ignore',
+        transactions: [],
+        quota: { used: 0, limit: 50, isPro: false },
+      })
+      .mockResolvedValueOnce(scanned('expense', 250, 'HILTON KL'));
     const result = await processAlertCaptures(
       [
         {
@@ -135,7 +177,183 @@ describe('automatic alert persistence', () => {
     );
     expect(result).toMatchObject({ logged: 1, ignored: 1, captureIds: ['hold', 'charge'] });
     expect(paymentAlertCapturesRepository.insert).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'hold', status: 'ignored', reason: 'authorization_hold' }),
+      expect.objectContaining({ id: 'hold', status: 'ignored', reason: 'no_amount' }),
     );
+  });
+});
+
+describe('scanner notification transformation', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.mocked(scanNotification).mockResolvedValue(scanned());
+  });
+  it('scans the setup sample body without its synthetic test label', async () => {
+    const input = deps();
+    await analyzeNotificationCapture({ ...capture, isTest: true, title: 'Money2Time test' }, input);
+    expect(scanNotification).toHaveBeenCalledWith(expect.objectContaining({ text: capture.body }));
+    expect(input.createTransaction).not.toHaveBeenCalled();
+  });
+  it('logs income and uses an income category instead of expense defaults', async () => {
+    const input = deps();
+    input.categories = [category(), category({ id: 'salary', type: 'income', name: 'Salary' })];
+    jest.mocked(scanNotification).mockResolvedValue(scanned('income', 3500, 'ACME', 'Salary'));
+    const summary = await processAlertCaptures([{ ...capture, body: 'Salary credited.' }], input);
+    expect(input.createTransaction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'income',
+        amount: 3500,
+        categoryId: 'salary',
+        accountId: 'a1',
+      }),
+      expect.any(Object),
+    );
+    expect(summary.logged).toBe(1);
+    expect(scanNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        appUserId: 'test-user',
+        categories: ['Food'],
+        incomeCategories: ['Salary'],
+      }),
+    );
+  });
+  it('discards unrelated text even when it contains payment keywords and money', async () => {
+    const input = deps();
+    jest.mocked(scanNotification).mockResolvedValue({
+      notificationDecision: 'ignore',
+      transactions: [],
+      quota: { used: 0, limit: 50, isPro: false },
+    });
+    const summary = await processAlertCaptures(
+      [{ ...capture, body: 'You spent RM25! Get RM5 cashback on your next purchase.' }],
+      input,
+    );
+    expect(input.createTransaction).not.toHaveBeenCalled();
+    expect(summary).toMatchObject({ ignored: 1, captureIds: [capture.id] });
+  });
+  it.each(['network', 'capacity', 'server', 'limit_reached'] as const)(
+    'retains the queue on a %s scanner failure',
+    async (code) => {
+      const input = deps();
+      jest.mocked(scanNotification).mockRejectedValue(new ReceiptScanError(code, 'unavailable'));
+      const summary = await processAlertCaptures([capture], input);
+      expect(summary.captureIds).toEqual([]);
+      expect(input.createTransaction).not.toHaveBeenCalled();
+      expect(paymentAlertCapturesRepository.insert).not.toHaveBeenCalled();
+    },
+  );
+  it.each(['disabled', 'account_missing', 'allowance_exhausted'])(
+    'does not upload notifications when %s',
+    async (condition) => {
+      const input = deps();
+      if (condition === 'disabled') input.prefs.alertsEnabled = false;
+      if (condition === 'account_missing') input.accounts = [];
+      if (condition === 'allowance_exhausted') {
+        input.isPro = false;
+        input.quickEntryPrefs.autoLogUsageCount = 999;
+      }
+      const summary = await processAlertCaptures([capture], input);
+      expect(scanNotification).not.toHaveBeenCalled();
+      expect(input.createTransaction).not.toHaveBeenCalled();
+      expect(summary.captureIds).toEqual([capture.id]);
+    },
+  );
+  it('stops an offline batch after the first failure and retains all unprocessed alerts', async () => {
+    const input = deps();
+    jest.mocked(scanNotification).mockRejectedValue(new ReceiptScanError('network', 'offline'));
+    const summary = await processAlertCaptures([capture, { ...capture, id: 'second' }], input);
+    expect(scanNotification).toHaveBeenCalledTimes(1);
+    expect(summary.captureIds).toEqual([]);
+  });
+  it('does not turn a failed scanner into a keyword expense', async () => {
+    const input = deps();
+    jest.mocked(scanNotification).mockRejectedValue(new Error('offline'));
+    await processAlertCaptures([capture], input);
+    expect(input.createTransaction).not.toHaveBeenCalled();
+  });
+  it('does not scan an already acknowledged capture again', async () => {
+    const input = deps();
+    jest
+      .mocked(paymentAlertCapturesRepository.getById)
+      .mockReturnValueOnce({ status: 'logged' } as never);
+    await processAlertCaptures([capture], input);
+    expect(scanNotification).not.toHaveBeenCalled();
+  });
+});
+
+describe('network boundary and retry safety', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.mocked(scanNotification).mockResolvedValue(scanned());
+  });
+  it('keeps legacy opted-in notifications queued until the new scanning disclosure is accepted', async () => {
+    const input = deps();
+    input.prefs.notificationScanningEnabled = false;
+    const summary = await processAlertCaptures([capture], input);
+    expect(scanNotification).not.toHaveBeenCalled();
+    expect(input.createTransaction).not.toHaveBeenCalled();
+    expect(summary.captureIds).toEqual([]);
+  });
+  it('rechecks the master switch after a slow classification', async () => {
+    const input = deps();
+    input.getCurrent = () => input;
+    jest.mocked(scanNotification).mockImplementationOnce(async () => {
+      input.prefs = { ...input.prefs, alertsEnabled: false };
+      return scanned();
+    });
+    const summary = await processAlertCaptures([capture], input);
+    expect(input.createTransaction).not.toHaveBeenCalled();
+    expect(summary.captureIds).toEqual([capture.id]);
+  });
+  it('does not duplicate a manual entry made while the scanner is running', async () => {
+    const input = deps();
+    input.getCurrent = () => input;
+    jest.mocked(scanNotification).mockImplementationOnce(async () => {
+      input.transactions = [
+        {
+          id: 'manual',
+          type: 'expense',
+          amount: 25,
+          currency: 'MYR',
+          accountId: 'a1',
+          date: '2026-10-05T12:00:00.000Z',
+          note: 'SHELL',
+          recurrenceParentId: null,
+        } as TransactionWithRelations,
+      ];
+      return scanned();
+    });
+    const summary = await processAlertCaptures([capture], input);
+    expect(input.createTransaction).not.toHaveBeenCalled();
+    expect(summary.duplicates).toBe(1);
+  });
+  it('retains a capture when upload consent is revoked during inference', async () => {
+    const input = deps();
+    input.getCurrent = () => input;
+    jest.mocked(scanNotification).mockImplementationOnce(async () => {
+      input.prefs = { ...input.prefs, notificationScanningEnabled: false };
+      return scanned();
+    });
+    const summary = await processAlertCaptures([capture], input);
+    expect(input.createTransaction).not.toHaveBeenCalled();
+    expect(summary.captureIds).toEqual([]);
+  });
+  it('reuses a validated saved classification after a transaction write failure', async () => {
+    const input = deps();
+    jest
+      .mocked(paymentAlertCapturesRepository.getById)
+      .mockReturnValueOnce({ status: 'failed', resolution: { parse: alertParse() } } as never);
+    jest.mocked(paymentAlertCapturesRepository.insert).mockReturnValueOnce(false);
+    const summary = await processAlertCaptures([capture], input);
+    expect(scanNotification).not.toHaveBeenCalled();
+    expect(summary.logged).toBe(1);
+  });
+  it('does not truncate an oversized notification into a completed payment', async () => {
+    const input = deps();
+    await processAlertCaptures(
+      [{ ...capture, body: capture.body + 'x'.repeat(12001) + 'This payment was declined.' }],
+      input,
+    );
+    expect(scanNotification).not.toHaveBeenCalled();
+    expect(input.createTransaction).not.toHaveBeenCalled();
   });
 });

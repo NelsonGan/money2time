@@ -1,144 +1,108 @@
-# Payment alerts
+# Notification transactions
 
-Current design for `feature/payment-alerts`, simplified on 2026-10-05.
+Current design, updated 2026-10-08.
 
 ## Product behavior
 
-Payment notifications become expenses automatically. The user selects an
-account for each app or Shortcuts automation. There is no paste flow, detected
-payments page, history page, review queue, Ask first mode, card matching, or
-Smart categories option.
+Notifications from selected bank and wallet apps become completed expenses or
+income, including refunds actually credited back. Account selection remains
+explicit: Android uses the app's selected debit/credit account; iOS uses Account
+in the existing Log Notification action. Deleted, goal and loan accounts never
+receive transactions. The app does not guess an account or create a review inbox.
 
-Categories use the same on-device keyword matcher and Quick Entry category map
-as Apple Pay. The precedence is an explicit automation category, a keyword
-match when Apple Pay merchant categorization is enabled, the default expense
-category, then the existing expense-category fallback. No merchant memory,
-transaction-history learning, AI requests, or categorization server is involved.
+Notification text uses the receipt scanner's new text-only `notification` mode.
+There is no notification keyword classifier, amount extraction lexicon or
+merchant keyword category matcher. Apple Pay and manual Quick Entry retain their
+existing behavior. Category precedence is explicit automation category, scanner
+category of the correct type, Quick Entry's default for that type, then fallback.
+Amounts keep the notification's explicit currency, falling back to the selected
+account currency only when ambiguous. An explicit foreign billed amount supplies
+the account amount and reporting snapshot. Transactions use the capture timestamp.
 
-## Interface
+The scanner reads the complete notification in any language and returns either
+one high-confidence completed income/expense or an explicit ignore. Offers,
+hypothetical spending, OTPs, security messages, balances, statements, reminders,
+future/pending/failed payments, holds, own-account transfers, top-ups and
+withdrawals are discarded. Multiple distinct movements and uncertain direction
+are also discarded. A malformed model reply is a service failure, not an ignore.
+An intentional ignore is final and is never retried into a transaction.
 
-- Android Automation has a Payment notifications section with a Payment alerts
-  entry and its status. Its top-right Tutorial link opens the Android guide.
-- Android Payment alerts contains the capture switch, chosen apps with their
-  account names and Choose apps. There is no duplicate tutorial button inside.
-- iOS Automation shows App notifications directly as a bell icon and explanation,
-  matching the other automation cards. The card has no arrow or settings page;
-  its top-right Tutorial link opens the single App notifications guide. Account
-  selection happens in Shortcuts. Bank and e-wallet apps use the Notification
-  trigger on iOS 27. There is no SMS or Message automation guide; earlier iOS
-  versions see the version requirement and can use Apple Pay or share screenshots.
-- The iOS App notifications guide has the same top-right Watch video button as
-  the other automation tutorials. It opens the 54-second setup recording at 2×
-  speed, with captions and visible taps, hosted at `media.money2time.com` in R2.
-  It opens the MP4 in the browser, matching the other automation video links.
-- Android's source screen contains its switch, one account picker, and a top-right
-  trash icon with a confirmation dialog.
-- Explanations appear above controls and tutorial links. Navigation rows have
-  one arrow. Notification-access details are visible before opening system settings.
+## Disclosure and interface
 
-Android setup consists of disclosure, notification access, apps/accounts, and a
-test alert. Every selected app needs an active debit or credit account before
-setup can continue. New apps have no guessed account. The test runs the local
-pipeline using a selected source, without saving a transaction.
-The app picker aligns each selected account control with its app row, without a
-separate Account label. Missing-app help is in the tooltip beside Recently active.
+Notification scanning needs internet and sends selected notification text and
+category names through Money2Time's Cloudflare scanner to OpenRouter and the
+configured model provider. Account names are not sent or inferred. Notifications
+outside the selected Android packages never reach the scanner.
 
-For iOS, set Message to Notification Body and select Account in every Log
-Payment Alert action. Leave Category empty for automatic keyword matching.
-The action has no From field. Title and Subtitle remain optional; the guide
-omits their setup. Previously queued source labels remain readable. The action
-does not register in-app source settings, and obsolete iOS source settings do not
-control its logging. An unavailable selected account is skipped rather than
-replaced with another account.
-Removed, deleted, goal and loan accounts cannot receive alert expenses.
+`notificationScanningEnabled` defaults false when reading old preferences.
+Existing local-only capture permission never silently enables uploads. Users
+read the new disclosure and enable Scan notification text in Android Notifications
+or the iOS Automation Notifications card. Android setup's Continue also accepts
+the prominent disclosure. Pending captures remain queued while scanning is off.
+Turning Android's Read notifications switch off still ignores queued captures.
+Explicit user ignore phrases are filters only; they never transform a notification.
 
-## Capture and processing
+Android setup retains disclosure, system access, app/account selection and a test
+notification. Its preview calls the same scanner without saving a transaction,
+waits up to 105 seconds, and explains scan failure. The setup success event
+requires a successful transaction classification.
+The preview omits the native test notification's synthetic title while scanning
+its sample payment body; real notifications always include their complete text.
+Every selected Android app
+needs a payable account. iOS still uses the Log Notification action with Message
+bound to Notification Body and an explicit Account; Category may be left empty.
+The action identity, queue format and native listener stay compatible.
 
-Native code only captures raw text. Android uses the opt-in notification
-listener generated by `plugins/withMoney2TimePaymentCapture.js`, with an atomic
-file queue and a selected-package allowlist. iOS uses the Log Notification
-App Intent in `plugins/withMoney2TimeAutoLog.js`, queuing text in the App Group.
-The iOS queue uses one atomic file per alert, retaining read compatibility
-with the earlier App Group defaults queue. A drain clears only acknowledged
-ids, so an alert arriving during cleanup remains queued. Native changes require
-a development-client rebuild.
+## Capture, retries and duplicates
 
-`PaymentAlertSync` runs outside the mounted tabs, on launch, foreground and live
-Android listener events. Its pure TypeScript pipeline parses an alert, binds the
-explicit account, matches category keywords, checks duplicates and creates an
-expense through `AppContext.createTransaction`.
+The native Android listener and iOS App Intent keep their atomic queues.
+`PaymentAlertSync` runs outside tabs on launch, foreground, listener events and
+explicit drain requests. It checks source settings, account validity, explicit
+filters and the shared automatic-log allowance before uploading. After inference,
+it rechecks live settings/accounts/categories and allowance before saving.
 
-Recognized spending alerts with a positive amount log automatically, including
-medium-confidence spend messages. Verification codes, promotions, declined
-payments, explicit pre-authorization holds, balance messages, unrecognized text, money coming in, refunds and
-transfers are ignored. Sources that are off or have no usable selected account
-are ignored. Turning Android capture off also ignores already queued Android
-alerts. iOS actions are enabled individually in Shortcuts. These cases never
-create a review item or ask a question.
+Only durable handling acknowledges a native capture. Network, capacity, quota,
+malformed reply and database failures remain queued. A failed-save capture reuses
+its successful scanner classification instead of spending another inference.
+Transaction creation, capture link and the shared automatic-log counter commit
+in one SQLite transaction. Already logged captures are acknowledged without a
+second save. No keyword fallback runs during outages or against older Workers.
 
-Duplicate detection covers repeated captures, notification updates, overlapping
-bank/wallet alerts, Apple Pay taps, manually entered expenses and recurring
-expenses. Matches require the same selected account and currency. Cross-source and
-manual/recurring matches also require merchant evidence. Different amounts stay
-separate, including three-decimal currencies; only floating-point rounding is
-tolerated. Text repeats have a
-two-minute window rather than suppressing identical purchases all day. Failed
-saves never count as a successful duplicate. Qualified duplicates are skipped
-without a prompt.
+Duplicate checks cover repeat/update captures, cross-source bank/wallet messages,
+Apple Pay taps and manually entered/recurring transactions. Account, direction,
+currency and amount must match; cross-source/manual matches also need merchant
+or payer evidence. A refund credit is not suppressed by its original equal-value
+expense. The existing time windows and three-decimal currency precision remain.
 
-The existing automatic-log allowance is shared with Apple Pay: 100 lifetime
-logs on the free tier, unlimited for Pro. Free installs over the account limit
-and installs that exhaust their automatic-log allowance do not create new
-transactions from alerts. The existing Automation page shows the usage limit.
+## Allowances and storage
 
-Automatic expense creation, the capture link and shared usage count commit in
-one SQLite transaction before acknowledging an alert. The same synchronous
-save path protects Apple Pay taps. Only durably handled captures are removed
-from the native queue. Database
-lookup/storage failures, transient queue file read failures and failed transaction creation remain queued for a
-later automatic retry. Already logged captures are acknowledged without a
-second transaction. An individual failure does not stop other alerts.
+Notification scans never spend the receipt-image allowance. The Worker keeps
+notification counters under `notification:<appUserId>` using the existing D1
+schema: 100 valid scans in a lifetime for free, 2000/month fair use for Pro.
+Intentional ignores do not consume this allowance. A separate attempt counter
+bounds all notification calls, including ignores and failures, to 500 per UTC day.
+These caps are configurable. Server throttling leaves captures queued.
+The shared Apple Pay/notification auto-log allowance remains 100 lifetime free
+logs and unlimited for Pro; the free account gate still applies.
 
-## Persistence and compatibility
+Migration 067 remains unchanged. Internal capture rows serve duplicate and retry
+bookkeeping, not an inbox. Ignored captures store no raw title/body. Other capture
+retention, backup exclusions and reset/restore cleanup remain. Raw text, amounts
+and merchant/payer names are excluded from analytics and new Worker logs.
 
-Migration 067 is retained unchanged so databases that already ran it remain
-compatible. `auto_log_captures` is internal duplicate/retention bookkeeping, not
-a user-facing inbox. The old merchant-memory table and identifier column are
-unused by the feature. Legacy review/card/AI preference fields are ignored when
-reading settings; only source accounts, enabled flags and capture preferences
-are used.
+## Verification and release
 
-Captured text is not included in backups or analytics. Existing retention and
-reset/restore cleanup apply. No alert text is sent to a server.
+App and Worker contract tests cover text-only signed requests, strict classification
+results, no retry on ignores, failover, quotas, account/category resolution,
+income/refunds, duplicate protection, durable acknowledgement, opt-in and settings
+changes during a scan. Localized catalogues retain key/interpolation parity.
+The synthetic notification corpus supports real-model evaluation; mocked inference
+checks must be reported separately from real-model accuracy.
 
-## Analytics and verification
-
-The canonical tables are in `docs/analytics-tracking.md`. Payment alerts emit two
-GA4-only events: setup steps and drain counts. Automatic expenses use the
-existing Autolog Transaction Created event, autolog adoption and transaction
-milestones. Review, binding-learning and Smart categories events are removed.
-
-The synthetic alert corpus covers currency/locale parsing and non-payment
-messages. Tests cover explicit account binding, automatic decisions, keyword
-fallbacks, duplicate handling, native queue contracts, migration compatibility,
-retention acknowledgements and automatic retries. Every localized setup test
-alert is recognized in all 24 catalogues, with additional decline, refund and
-promotion checks. Locale parity covers all 24 catalogues. Native notification delivery and the real iPhone Shortcuts trigger
-still need device verification before release.
-
-The two payment-alert guides include 18 annotated simulator captures across 18
-steps (10 iOS and 8 Android): Android notification access, app/account selection
-and the test alert; iOS 27 Notification triggers, variables and Log Payment
-Alert configuration.
-The iOS example uses the built-in Wallet app. Android uses the emulator's Shell
-test source because no bank app is installed. No Maybank app or real bank alert
-was tested. SMS/Message automation instructions and screenshots are removed.
-
-## Release work
-
-- Verify the notification trigger fires on a real iPhone. The iOS 27 simulator
-  confirmed the editor flow (tap +, Edit, then Automation and Notification),
-  the Notification variable's Body property and the action's Account parameter.
-  The action has no From field. The guide leaves Title, Subtitle and Category empty.
-- Update the privacy policy and Play Console notification-access declaration.
-- Add an in-app announcement when the feature ships.
+Deploy the receipt-scanner Worker before publishing the app update. Old clients
+retain image scanning; a new client against an older Worker keeps text captures
+queued. No native rebuild is required for this change. Existing guides still use
+the same native action and account setup; the in-app copy now explains text scanning.
+Real bank notifications and the real iPhone Shortcuts trigger need verification
+before release. Update the public privacy policy and Play Console disclosure for
+notification text processing when releasing.

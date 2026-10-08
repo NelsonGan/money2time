@@ -2,11 +2,10 @@ import { PRO_LIMITS } from '~/constants/proLimits';
 import { resolveAlertCategory } from '~/features/autoLog/lib/categorize';
 import { autoLogAllowance, decideCapture, type DecisionInput } from '~/features/autoLog/lib/decide';
 import { alertDedupeKey, type CaptureRef, findDuplicate } from '~/features/autoLog/lib/dedupe';
-import { parsePaymentAlert } from '~/features/autoLog/lib/parser';
 
-import { account, category, source } from './helpers';
+import { account, alertParse, category, source } from './helpers';
 
-const spend = parsePaymentAlert({ body: "You've spent RM25.00 at STARBUCKS KLCC." });
+const spend = alertParse({ counterparty: 'STARBUCKS KLCC' });
 
 function decision(overrides: Partial<DecisionInput> = {}) {
   return decideCapture({
@@ -82,26 +81,22 @@ describe('decideCapture', () => {
     ).toBe(PRO_LIMITS.FREE_MAX_AUTO_LOGS);
   });
 
-  it('ignores codes, promotions, declines, balances and alerts without money', () => {
-    for (const body of [
-      'Your OTP is 123456. Do not share.',
-      'Get 10% cashback when you spend RM50!',
-      'Your card was declined at SHELL for RM80.00.',
-      'Your statement is ready. Outstanding balance RM1,234.56.',
-      'Your new device has been registered.',
-    ]) {
-      expect(decision({ parse: parsePaymentAlert({ body }) }).action).toBe('ignore');
+  it('ignores scanner discards and legacy non-transaction kinds', () => {
+    for (const kind of [
+      'otp',
+      'promo',
+      'declined',
+      'balance',
+      'unknown',
+      'transfer',
+      'refund',
+    ] as const) {
+      expect(decision({ parse: alertParse({ kind }) }).action).toBe('ignore');
     }
   });
-
-  it('never auto-logs money in, refunds or top-ups', () => {
-    for (const body of [
-      'You have received RM50.00 from AHMAD.',
-      'Refund of RM25.00 from SHOPEE has been credited.',
-      'Reload of RM100.00 successful.',
-    ]) {
-      expect(decision({ parse: parsePaymentAlert({ body }) }).action).toBe('ignore');
-    }
+  it('logs a confident income and refuses uncertain classification', () => {
+    expect(decision({ parse: alertParse({ kind: 'income' }) }).action).toBe('log');
+    expect(decision({ parse: alertParse({ confidence: 'medium' }) }).reason).toBe('low_confidence');
   });
 
   it('skips both certain and possible duplicates', () => {
@@ -328,33 +323,38 @@ describe('resolveAlertCategory', () => {
   ];
   const input = {
     kind: 'spend' as const,
-    counterparty: 'SHELL',
+    scannedCategory: 'Food',
     presetCategoryId: null,
     categories,
     defaultExpenseCategoryId: null,
-    autoCategorizeByMerchant: true,
+    defaultIncomeCategoryId: null,
   };
-  it('honors an explicit category before a keyword match', () => {
-    expect(
-      resolveAlertCategory({ ...input, presetCategoryId: 'other' }, { keyword: () => 'food' }),
-    ).toEqual({ categoryId: 'other', origin: 'preset' });
+  it('honors an explicit category before the scanner', () => {
+    expect(resolveAlertCategory({ ...input, presetCategoryId: 'other' })).toEqual({
+      categoryId: 'other',
+      origin: 'preset',
+    });
   });
-  it('falls back to an expense category when keywords do not match', () => {
-    expect(resolveAlertCategory(input, { keyword: () => null })).toEqual({
+  it('uses the scanner category name without a keyword lookup', () => {
+    expect(resolveAlertCategory(input)).toEqual({ categoryId: 'food', origin: 'scanner' });
+  });
+  it('falls back to a category of the correct type', () => {
+    expect(resolveAlertCategory({ ...input, scannedCategory: null })).toEqual({
       categoryId: 'other',
       origin: 'fallback',
     });
+    expect(resolveAlertCategory({ ...input, kind: 'income', scannedCategory: 'Salary' })).toEqual({
+      categoryId: 'income',
+      origin: 'scanner',
+    });
   });
-  it('rejects income and deleted category matches for spending', () => {
-    expect(resolveAlertCategory(input, { keyword: () => 'income' }).categoryId).toBe('other');
+  it('rejects deleted and opposite-type categories', () => {
+    expect(resolveAlertCategory({ ...input, scannedCategory: 'Salary' }).categoryId).toBe('other');
     expect(
-      resolveAlertCategory(
-        {
-          ...input,
-          categories: [category({ id: 'deleted', deletedAt: '2026-01-01' }), categories[1]!],
-        },
-        { keyword: () => 'deleted' },
-      ).categoryId,
+      resolveAlertCategory({
+        ...input,
+        categories: [category({ id: 'deleted', deletedAt: '2026-01-01' }), categories[1]!],
+      }).categoryId,
     ).toBe('other');
   });
 });

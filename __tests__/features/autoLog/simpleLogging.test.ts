@@ -6,7 +6,7 @@ import {
 } from '~/features/autoLog/lib/pipeline';
 import { parsePaymentAlertPrefs, withAlertSource } from '~/features/autoLog/lib/prefs';
 
-import { account, category, prefs, source } from './helpers';
+import { account, alertParse, category, prefs, source } from './helpers';
 
 const selected = account({ id: 'selected' });
 const other = Object.assign(account({ id: 'other' }), {
@@ -18,8 +18,7 @@ const context = (): PipelineContext => ({
   prefs: withAlertSource(prefs(), source({ accountId: selected.id })),
   reportingCurrency: 'MYR',
   defaultExpenseCategoryId: 'default',
-  autoCategorizeByMerchant: true,
-  lookups: { keyword: () => 'food' },
+  defaultIncomeCategoryId: null,
 });
 const capture = (body: string): CaptureInput => ({
   id: 'alert',
@@ -36,7 +35,7 @@ const capture = (body: string): CaptureInput => ({
   presetCategoryId: null,
 });
 function outcome(body: string, ctx = context()) {
-  return finalizeCapture(analyzeCapture(capture(body), ctx), ctx, {
+  return finalizeCapture(analyzeCapture(capture(body), ctx, alertParse()), ctx, {
     duplicate: { kind: 'none', supersedesCaptureId: null },
     autoLogsRemaining: null,
   });
@@ -49,11 +48,15 @@ describe('simple automatic payment logging', () => {
     expect(result.draft?.accountId).toBe('selected');
   });
 
-  it('automatically logs a medium-confidence spend without a review prompt', () => {
-    expect(outcome('You have sent MYR 25.00 to JAMIE.').decision).toEqual({
-      action: 'log',
-      reason: 'auto',
-    });
+  it('ignores a medium-confidence classification', () => {
+    const ctx = context();
+    expect(
+      finalizeCapture(
+        analyzeCapture(capture('Paid MYR25'), ctx, alertParse({ confidence: 'medium' })),
+        ctx,
+        { duplicate: { kind: 'none', supersedesCaptureId: null }, autoLogsRemaining: null },
+      ).decision.reason,
+    ).toBe('low_confidence');
   });
 
   it('does not guess an account when the app has no selected account', () => {
@@ -65,20 +68,19 @@ describe('simple automatic payment logging', () => {
     });
   });
 
-  it('uses the same merchant keyword lookup and default fallback as Apple Pay', () => {
+  it('uses the scanner category, and a type-specific default when it finds none', () => {
     const ctx = context();
-    const lookup = jest.fn(() => 'food');
-    ctx.lookups.keyword = lookup;
-    expect(outcome('You spent RM25.00 at SHELL.', ctx).resolution).toMatchObject({
+    expect(outcome('Paid MYR25', ctx).resolution).toMatchObject({
       categoryId: 'food',
-      categoryOrigin: 'keyword',
+      categoryOrigin: 'scanner',
     });
-    expect(lookup).toHaveBeenCalledWith('SHELL', ctx.categories);
-    ctx.autoCategorizeByMerchant = false;
-    expect(outcome('You spent RM25.00 at SHELL.', ctx).resolution).toMatchObject({
-      categoryId: 'default',
-      categoryOrigin: 'default',
-    });
+    const analysis = analyzeCapture(capture('Paid MYR25'), ctx, alertParse({ category: null }));
+    expect(
+      finalizeCapture(analysis, ctx, {
+        duplicate: { kind: 'none', supersedesCaptureId: null },
+        autoLogsRemaining: null,
+      }).resolution.categoryId,
+    ).toBe('default');
   });
 
   it('drops removed modes and AI settings when reading older preferences', () => {
@@ -119,7 +121,7 @@ describe('simple automatic payment logging', () => {
       sourceKey: 'bank',
       presetAccountId: 'selected',
     };
-    const result = finalizeCapture(analyzeCapture(input, ctx), ctx, {
+    const result = finalizeCapture(analyzeCapture(input, ctx, alertParse()), ctx, {
       duplicate: { kind: 'none', supersedesCaptureId: null },
       autoLogsRemaining: null,
     });
@@ -138,7 +140,7 @@ describe('simple automatic payment logging', () => {
       channel: 'ios_alert' as const,
       sourceKey: 'bank',
     };
-    const result = finalizeCapture(analyzeCapture(input, ctx), ctx, {
+    const result = finalizeCapture(analyzeCapture(input, ctx, alertParse()), ctx, {
       duplicate: { kind: 'none', supersedesCaptureId: null },
       autoLogsRemaining: null,
     });

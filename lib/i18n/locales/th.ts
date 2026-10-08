@@ -1202,7 +1202,8 @@ const th = {
       payment_alerts_status_off: 'ยังไม่ได้ตั้งค่า',
       payment_alerts_status_apps_one: 'เปิดสำหรับ %{count} แอป',
       payment_alerts_status_apps_other: 'เปิดสำหรับ %{count} แอป',
-      payment_alerts_android_step_1: 'แตะ “บันทึกจากการแจ้งเตือน” แล้วเปิด “อ่านการแจ้งเตือน”',
+      payment_alerts_android_step_1:
+        'Tap “Log from notifications”, read the scanning disclosure and enable “Scan notification text” and “Read notifications”.',
       payment_alerts_android_step_2:
         'Android จะเปิดหน้าสิทธิ์เข้าถึงการแจ้งเตือน หา Money2Time แล้วเปิด',
       payment_alerts_android_step_3:
@@ -1212,15 +1213,15 @@ const th = {
       payment_alerts_android_step_5: 'เลือกบัญชีสำหรับแต่ละแอป',
       payment_alerts_android_step_6: 'ส่งการแจ้งเตือนทดสอบเพื่อตรวจว่าทุกอย่างทำงาน',
       payment_alerts_android_step_7:
-        'บันทึกการชำระเงินลงบัญชีที่เลือกโดยอัตโนมัติ หมวดหมู่ใช้คำสำคัญเดียวกับ Apple Pay',
+        'Completed income and expenses log to your selected account. The scanner selects categories and discards offers and unrelated notifications.',
       payment_alerts_ios_step_1: 'เปิด Shortcuts แตะ + แล้วเลือก Edit แตะ Automation ในตัวแก้ไข',
       payment_alerts_ios_step_2: 'ค้นหา Notification แล้วเลือก',
       payment_alerts_ios_step_3: 'ค้นหา Log Notification แล้วเพิ่ม',
       payment_alerts_ios_step_4: 'แตะ Message ใน Log Notification แล้วเลือก Select Variable',
       payment_alerts_ios_step_6:
-        'แตะลูกศรของการทำงาน แล้วแตะ Account เลือกบัญชีที่จะบันทึกการชำระเงินของแอปนี้ เว้น Category ว่างไว้เพื่อจับคู่หมวดหมู่จากคำสำคัญโดยอัตโนมัติ',
+        'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
       payment_alerts_ios_step_7:
-        'แตะกลับเพื่อบันทึก ทำซ้ำสำหรับแต่ละแอปธนาคารหรือกระเป๋าเงินอิเล็กทรอนิกส์ การชำระเงินจะถูกบันทึกเมื่อเปิด Money2Time ครั้งถัดไป',
+        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text” after reading the disclosure. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
       payment_alerts_android_disclosure: 'อ่านวิธีใช้สิทธิ์เข้าถึงการแจ้งเตือน แล้วแตะ Continue',
       payment_alerts_ios_app:
         'แตะ App แล้วเลือกแอปธนาคารหรือกระเป๋าเงินอิเล็กทรอนิกส์ ภาพหน้าจอนี้ใช้ Wallet เป็นตัวอย่าง',
@@ -2532,16 +2533,24 @@ const th = {
     },
   },
   payment_alerts: {
+    scan_enabled: 'สแกนข้อความการแจ้งเตือน',
+    scan_disclosure:
+      'ส่งข้อความการแจ้งเตือนจากแอปที่เลือกไปยังเครื่องสแกนของ Money2Time และผู้ให้บริการ AI อย่าง OpenRouter เพื่อระบุรายรับและรายจ่ายที่เสร็จสมบูรณ์ ข้อเสนอและข้อความที่ไม่เกี่ยวข้องจะถูกทิ้ง ต้องใช้อินเทอร์เน็ต และโควตาสแกนใบเสร็จแยกกัน',
+    test_scan_failed_title: 'ไม่สามารถบันทึกการแจ้งเตือนทดสอบได้',
+    test_scan_failed:
+      'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
+
     account_hint:
-      'บันทึกการชำระเงินลงบัญชีที่เลือกโดยอัตโนมัติ หมวดหมู่ใช้คำสำคัญเดียวกับ Apple Pay',
+      'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
     title: 'การแจ้งเตือน',
     intro_android:
-      'Money2Time อ่านการแจ้งเตือนการชำระเงินจากแอปธนาคารและแอปวอลเล็ตที่คุณเลือก แล้วบันทึกการชำระเงินแต่ละรายการให้คุณ การแจ้งเตือนจะถูกอ่านบนโทรศัพท์เครื่องนี้และไม่ถูกอัปโหลด',
+      'Money2Time scans notification text from the bank and wallet apps you choose to identify completed income and expenses. It sends this text to its scanner and AI provider, OpenRouter. Offers and unrelated messages are discarded.',
     card_intro:
-      'บันทึกการชำระเงินจากการแจ้งเตือนของแอปธนาคารและกระเป๋าเงินอิเล็กทรอนิกส์โดยอัตโนมัติ',
+      'Automatically log completed income and expenses from bank and wallet notifications.',
     section_status: 'สถานะ',
     master_label: 'อ่านการแจ้งเตือน',
-    master_hint: 'บันทึกการชำระเงินจากแอปที่คุณเลือก',
+    master_hint:
+      'Captures notifications from the apps you choose. Enable text scanning to log completed transactions.',
     access_open_settings: 'เปิดการตั้งค่า',
     health_unsupported:
       'Money2Time เวอร์ชันนี้อ่านการแจ้งเตือนไม่ได้ อัปเดตแอปเพื่อใช้การแจ้งเตือนการชำระเงิน',
@@ -2560,12 +2569,13 @@ const th = {
     section_apps: 'แอป',
     choose_apps: 'เลือกแอป',
     source_off: 'ปิด',
-    disclosure_title: 'บันทึกการชำระเงินจากการแจ้งเตือน',
+    disclosure_title: 'Log transactions from your notifications',
     disclosure_body:
       'Money2Time ต้องได้รับสิทธิ์เข้าถึงการแจ้งเตือนสำหรับฟีเจอร์นี้ โดยใช้งานดังนี้',
     disclosure_point_selected:
       'อ่านเฉพาะการแจ้งเตือนจากแอปธนาคารและแอปวอลเล็ตที่คุณเลือก นอกนั้นจะถูกละเว้น',
-    disclosure_point_device: 'การแจ้งเตือนจะถูกอ่านบนโทรศัพท์เครื่องนี้ ข้อความจะไม่ถูกอัปโหลด',
+    disclosure_point_device:
+      'ส่งข้อความการแจ้งเตือนจากแอปที่เลือกไปยังเครื่องสแกนของ Money2Time และผู้ให้บริการ AI อย่าง OpenRouter เพื่อระบุรายรับและรายจ่ายที่เสร็จสมบูรณ์ ข้อเสนอและข้อความที่ไม่เกี่ยวข้องจะถูกทิ้ง ต้องใช้อินเทอร์เน็ต และโควตาสแกนใบเสร็จแยกกัน',
     disclosure_android_warning:
       'Android จะเตือนว่าแอปที่มีสิทธิ์เข้าถึงการแจ้งเตือนอ่านการแจ้งเตือนทั้งหมดได้ Money2Time เก็บไว้เฉพาะแอปที่คุณเลือก',
     access_title: 'เปิดสิทธิ์เข้าถึงการแจ้งเตือน',

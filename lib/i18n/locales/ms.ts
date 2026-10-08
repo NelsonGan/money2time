@@ -1230,7 +1230,7 @@ const ms = {
       payment_alerts_status_apps_one: 'Hidup untuk %{count} aplikasi',
       payment_alerts_status_apps_other: 'Hidup untuk %{count} aplikasi',
       payment_alerts_android_step_1:
-        'Ketik “Rekod daripada pemberitahuan” dan hidupkan “Baca pemberitahuan”.',
+        'Tap “Log from notifications”, read the scanning disclosure and enable “Scan notification text” and “Read notifications”.',
       payment_alerts_android_step_2:
         'Android membuka skrin akses pemberitahuan. Cari Money2Time dan hidupkannya.',
       payment_alerts_android_step_3:
@@ -1241,16 +1241,16 @@ const ms = {
       payment_alerts_android_step_6:
         'Hantar pemberitahuan ujian untuk memastikan semuanya berfungsi.',
       payment_alerts_android_step_7:
-        'Pembayaran direkodkan secara automatik ke akaun pilihan anda. Kategori menggunakan kata kunci yang sama seperti Apple Pay.',
+        'Completed income and expenses log to your selected account. The scanner selects categories and discards offers and unrelated notifications.',
       payment_alerts_ios_step_1:
         'Buka Shortcuts, ketik +, kemudian Edit. Ketik Automation dalam editor.',
       payment_alerts_ios_step_2: 'Cari Notification dan pilihnya.',
       payment_alerts_ios_step_3: 'Cari Log Notification dan tambahkannya.',
       payment_alerts_ios_step_4: 'Ketik Message dalam Log Notification, kemudian Select Variable.',
       payment_alerts_ios_step_6:
-        'Ketik anak panah tindakan, kemudian Account. Pilih akaun untuk merekod pembayaran aplikasi ini. Biarkan Category kosong untuk padanan kata kunci automatik.',
+        'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
       payment_alerts_ios_step_7:
-        'Ketik kembali untuk menyimpan. Ulangi untuk setiap aplikasi bank atau e-dompet. Pembayaran direkod apabila anda membuka Money2Time semula.',
+        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text” after reading the disclosure. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
       payment_alerts_android_disclosure:
         'Baca cara akses pemberitahuan digunakan, kemudian ketik Continue.',
       payment_alerts_ios_app:
@@ -2599,16 +2599,24 @@ const ms = {
     },
   },
   payment_alerts: {
+    scan_enabled: 'Imbas teks pemberitahuan',
+    scan_disclosure:
+      'Hantar teks pemberitahuan daripada aplikasi pilihan anda ke pengimbas Money2Time dan penyedia AInya, OpenRouter, untuk mengenal pasti pendapatan dan perbelanjaan yang telah selesai. Tawaran dan mesej tidak berkaitan dibuang. Memerlukan internet; kuota imbasan resit berasingan.',
+    test_scan_failed_title: 'Notifikasi ujian tidak dapat direkodkan',
+    test_scan_failed:
+      'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
+
     account_hint:
-      'Pembayaran direkodkan secara automatik ke akaun pilihan anda. Kategori menggunakan kata kunci yang sama seperti Apple Pay.',
+      'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
     title: 'Pemberitahuan',
     intro_android:
-      'Money2Time membaca pemberitahuan pembayaran daripada aplikasi bank dan e-dompet yang anda pilih, lalu merekod setiap pembayaran untuk anda. Pemberitahuan dibaca pada telefon ini dan tidak pernah dimuat naik.',
+      'Money2Time scans notification text from the bank and wallet apps you choose to identify completed income and expenses. It sends this text to its scanner and AI provider, OpenRouter. Offers and unrelated messages are discarded.',
     card_intro:
-      'Rekod pembayaran secara automatik daripada pemberitahuan aplikasi bank dan e-dompet anda.',
+      'Automatically log completed income and expenses from bank and wallet notifications.',
     section_status: 'Status',
     master_label: 'Baca pemberitahuan',
-    master_hint: 'Merekod pembayaran daripada aplikasi yang anda pilih.',
+    master_hint:
+      'Captures notifications from the apps you choose. Enable text scanning to log completed transactions.',
     access_open_settings: 'Buka tetapan',
     health_unsupported:
       'Versi Money2Time ini tidak boleh membaca pemberitahuan. Kemas kini aplikasi untuk merekod pembayaran daripada pemberitahuan.',
@@ -2627,13 +2635,13 @@ const ms = {
     section_apps: 'Aplikasi',
     choose_apps: 'Pilih aplikasi',
     source_off: 'Mati',
-    disclosure_title: 'Rekod pembayaran daripada pemberitahuan anda',
+    disclosure_title: 'Log transactions from your notifications',
     disclosure_body:
       'Money2Time memerlukan akses pemberitahuan untuk ini. Begini cara ia digunakan:',
     disclosure_point_selected:
       'Ia hanya membaca pemberitahuan daripada aplikasi bank dan e-dompet yang anda pilih. Yang lain diabaikan.',
     disclosure_point_device:
-      'Pemberitahuan dibaca pada telefon ini. Teksnya tidak pernah dimuat naik.',
+      'Hantar teks pemberitahuan daripada aplikasi pilihan anda ke pengimbas Money2Time dan penyedia AInya, OpenRouter, untuk mengenal pasti pendapatan dan perbelanjaan yang telah selesai. Tawaran dan mesej tidak berkaitan dibuang. Memerlukan internet; kuota imbasan resit berasingan.',
     disclosure_android_warning:
       'Android akan memberi amaran bahawa aplikasi dengan akses pemberitahuan boleh membaca semua pemberitahuan anda. Money2Time hanya menyimpan aplikasi yang anda pilih.',
     access_title: 'Hidupkan akses pemberitahuan',

@@ -1225,6 +1225,8 @@ export interface PaymentAlertParse {
   counterparty: string | null;
   /** The word that introduced the counterparty (`at`, `to`, `from`, …). */
   counterpartyLeadIn: string | null;
+  /** Category name returned by the notification scanner; absent on legacy captures. */
+  category?: string | null;
   confidence: PaymentAlertConfidence;
   /** Short machine-readable parsing signals. */
   signals: string[];
@@ -1246,7 +1248,7 @@ export type AccountBindingReason =
   | 'ambiguous'
   | 'none';
 
-export type PaymentAlertCategoryOrigin = 'preset' | 'keyword' | 'default' | 'fallback';
+export type PaymentAlertCategoryOrigin = 'preset' | 'keyword' | 'scanner' | 'default' | 'fallback';
 
 export type PaymentAlertStatus =
   | 'pending'
@@ -1342,6 +1344,8 @@ export interface PaymentAlertPrefs {
   version: 1;
   /** Master switch for alert capture on this device. */
   alertsEnabled: boolean;
+  /** Explicit opt-in to sending selected notification text to the scanner. */
+  notificationScanningEnabled: boolean;
   /** Keyed by `paymentAlertSourceKey(channel, sourceKey)`. */
   sources: Record<string, PaymentAlertSource>;
   /** Phrases that make any alert ignored. */

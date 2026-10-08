@@ -1221,7 +1221,8 @@ const nb = {
       payment_alerts_status_off: 'Ikke satt opp',
       payment_alerts_status_apps_one: 'På for %{count} app',
       payment_alerts_status_apps_other: 'På for %{count} apper',
-      payment_alerts_android_step_1: 'Trykk på «Registrer fra varsler» og slå på «Les varsler».',
+      payment_alerts_android_step_1:
+        'Tap “Log from notifications”, read the scanning disclosure and enable “Scan notification text” and “Read notifications”.',
       payment_alerts_android_step_2:
         'Android åpner skjermen for varseltilgang. Finn Money2Time og slå det på.',
       payment_alerts_android_step_3:
@@ -1231,16 +1232,16 @@ const nb = {
       payment_alerts_android_step_5: 'Velg kontoen for hver app.',
       payment_alerts_android_step_6: 'Send et testvarsel for å sjekke at alt fungerer.',
       payment_alerts_android_step_7:
-        'Betalinger registreres automatisk på den valgte kontoen. Kategorier bruker de samme nøkkelordene som Apple Pay.',
+        'Completed income and expenses log to your selected account. The scanner selects categories and discards offers and unrelated notifications.',
       payment_alerts_ios_step_1:
         'Åpne Shortcuts, trykk + og deretter Edit. Trykk Automation i redigereren.',
       payment_alerts_ios_step_2: 'Søk etter Notification og velg den.',
       payment_alerts_ios_step_3: 'Søk etter Log Notification og legg den til.',
       payment_alerts_ios_step_4: 'Trykk Message i Log Notification, deretter Select Variable.',
       payment_alerts_ios_step_6:
-        'Trykk på handlingspilen og deretter Account. Velg hvor betalingene fra denne appen skal registreres. La Category stå tom for automatisk matching av nøkkelord.',
+        'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
       payment_alerts_ios_step_7:
-        'Gå tilbake for å lagre. Gjenta for hver bank- eller lommebok-app. Betalingene registreres neste gang du åpner Money2Time.',
+        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text” after reading the disclosure. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
       payment_alerts_android_disclosure:
         'Les hvordan varslingstilgangen brukes, og trykk Continue.',
       payment_alerts_ios_app:
@@ -2577,16 +2578,24 @@ const nb = {
     },
   },
   payment_alerts: {
+    scan_enabled: 'Skann varslingstekst',
+    scan_disclosure:
+      'Send varslingstekst fra valgte apper til Money2Times skanner og AI-leverandøren OpenRouter for å finne gjennomførte inntekter og utgifter. Tilbud og irrelevante meldinger forkastes. Krever internett; kvitteringsskanning har en egen kvote.',
+    test_scan_failed_title: 'Kunne ikke registrere testvarselet',
+    test_scan_failed:
+      'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
+
     account_hint:
-      'Betalinger registreres automatisk på den valgte kontoen. Kategorier bruker de samme nøkkelordene som Apple Pay.',
+      'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
     title: 'Varsler',
     intro_android:
-      'Money2Time leser betalingsvarslene fra bank- og lommebokappene du velger, og registrerer hver betaling for deg. Varsler leses på denne telefonen og lastes aldri opp.',
+      'Money2Time scans notification text from the bank and wallet apps you choose to identify completed income and expenses. It sends this text to its scanner and AI provider, OpenRouter. Offers and unrelated messages are discarded.',
     card_intro:
-      'Registrer betalinger automatisk fra varslene bank- og lommebok-appene dine sender.',
+      'Automatically log completed income and expenses from bank and wallet notifications.',
     section_status: 'Status',
     master_label: 'Les varsler',
-    master_hint: 'Registrerer betalinger fra appene du velger.',
+    master_hint:
+      'Captures notifications from the apps you choose. Enable text scanning to log completed transactions.',
     access_open_settings: 'Åpne innstillinger',
     health_unsupported:
       'Denne versjonen av Money2Time kan ikke lese varsler. Oppdater appen for å bruke betalingsvarsler.',
@@ -2605,11 +2614,12 @@ const nb = {
     section_apps: 'Apper',
     choose_apps: 'Velg apper',
     source_off: 'Av',
-    disclosure_title: 'Registrer betalinger fra varslene dine',
+    disclosure_title: 'Log transactions from your notifications',
     disclosure_body: 'Money2Time trenger varseltilgang for dette. Slik brukes den:',
     disclosure_point_selected:
       'Den leser bare varsler fra bank- og lommebokappene du velger. Alt annet ignoreres.',
-    disclosure_point_device: 'Varsler leses på denne telefonen. Teksten lastes aldri opp.',
+    disclosure_point_device:
+      'Send varslingstekst fra valgte apper til Money2Times skanner og AI-leverandøren OpenRouter for å finne gjennomførte inntekter og utgifter. Tilbud og irrelevante meldinger forkastes. Krever internett; kvitteringsskanning har en egen kvote.',
     disclosure_android_warning:
       'Android advarer om at en app med varseltilgang kan lese alle varslene dine. Money2Time beholder bare appene du velger.',
     access_title: 'Slå på varseltilgang',

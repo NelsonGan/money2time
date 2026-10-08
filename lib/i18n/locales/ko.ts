@@ -1201,7 +1201,8 @@ const ko = {
       payment_alerts_status_off: '설정 안 됨',
       payment_alerts_status_apps_one: '앱 %{count}개에서 켜짐',
       payment_alerts_status_apps_other: '앱 %{count}개에서 켜짐',
-      payment_alerts_android_step_1: '“알림으로 기록”을 누르고 “알림 읽기”를 켜세요.',
+      payment_alerts_android_step_1:
+        'Tap “Log from notifications”, read the scanning disclosure and enable “Scan notification text” and “Read notifications”.',
       payment_alerts_android_step_2:
         'Android의 알림 접근 화면이 열립니다. Money2Time을 찾아 켜세요.',
       payment_alerts_android_step_3:
@@ -1211,16 +1212,16 @@ const ko = {
       payment_alerts_android_step_5: '각 앱의 계좌를 선택하세요.',
       payment_alerts_android_step_6: '테스트 알림을 보내 모든 것이 작동하는지 확인하세요.',
       payment_alerts_android_step_7:
-        '결제는 선택한 계좌에 자동으로 기록됩니다. 카테고리는 Apple Pay와 같은 키워드를 사용합니다.',
+        'Completed income and expenses log to your selected account. The scanner selects categories and discards offers and unrelated notifications.',
       payment_alerts_ios_step_1:
         'Shortcuts를 열고 +, Edit를 누르세요. 편집기에서 Automation을 누르세요.',
       payment_alerts_ios_step_2: 'Notification을 검색해 선택하세요.',
       payment_alerts_ios_step_3: 'Log Notification을 검색해 추가하세요.',
       payment_alerts_ios_step_4: 'Log Notification에서 Message, Select Variable을 누르세요.',
       payment_alerts_ios_step_6:
-        '동작 화살표를 탭한 다음 Account를 탭하세요. 이 앱의 결제를 기록할 계좌를 선택하세요. Category를 비워 두면 키워드로 자동 분류됩니다.',
+        'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
       payment_alerts_ios_step_7:
-        '뒤로 가기를 탭해 저장하세요. 은행 또는 전자 지갑 앱마다 반복하세요. 다음에 Money2Time을 열면 결제가 기록됩니다.',
+        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text” after reading the disclosure. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
       payment_alerts_android_disclosure: '알림 접근 권한의 사용 방법을 읽고 Continue를 누르세요.',
       payment_alerts_ios_app:
         'App을 탭하고 은행 또는 전자 지갑 앱을 선택하세요. 이 스크린샷은 Wallet을 예로 사용합니다.',
@@ -2543,15 +2544,24 @@ const ko = {
     },
   },
   payment_alerts: {
+    scan_enabled: '알림 텍스트 스캔',
+    scan_disclosure:
+      '선택한 앱의 알림 텍스트를 Money2Time 스캐너와 AI 제공업체 OpenRouter로 보내 완료된 수입과 지출을 식별합니다. 광고와 관련 없는 메시지는 삭제됩니다. 인터넷 연결이 필요하며 영수증 스캔 한도는 별도입니다.',
+    test_scan_failed_title: '테스트 알림을 기록할 수 없습니다',
+    test_scan_failed:
+      'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
+
     account_hint:
-      '결제는 선택한 계좌에 자동으로 기록됩니다. 카테고리는 Apple Pay와 같은 키워드를 사용합니다.',
+      'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
     title: '알림',
     intro_android:
-      'Money2Time이 선택한 은행 앱과 간편결제 앱의 결제 알림을 읽고 결제를 하나하나 기록합니다. 알림은 이 기기에서만 읽으며 업로드되지 않습니다.',
-    card_intro: '은행 및 전자 지갑 앱의 알림으로 결제를 자동으로 기록합니다.',
+      'Money2Time scans notification text from the bank and wallet apps you choose to identify completed income and expenses. It sends this text to its scanner and AI provider, OpenRouter. Offers and unrelated messages are discarded.',
+    card_intro:
+      'Automatically log completed income and expenses from bank and wallet notifications.',
     section_status: '상태',
     master_label: '알림 읽기',
-    master_hint: '선택한 앱의 결제를 기록합니다.',
+    master_hint:
+      'Captures notifications from the apps you choose. Enable text scanning to log completed transactions.',
     access_open_settings: '설정 열기',
     health_unsupported:
       '이 버전의 Money2Time은 알림을 읽을 수 없습니다. 결제 알림을 사용하려면 앱을 업데이트하세요.',
@@ -2569,11 +2579,12 @@ const ko = {
     section_apps: '앱',
     choose_apps: '앱 선택',
     source_off: '꺼짐',
-    disclosure_title: '알림으로 결제 기록하기',
+    disclosure_title: 'Log transactions from your notifications',
     disclosure_body: '이를 위해 Money2Time에 알림 접근 권한이 필요합니다. 이렇게 사용합니다.',
     disclosure_point_selected:
       '선택한 은행 앱과 간편결제 앱의 알림만 읽고, 나머지는 모두 무시합니다.',
-    disclosure_point_device: '알림은 이 기기에서 읽으며, 내용은 업로드되지 않습니다.',
+    disclosure_point_device:
+      '선택한 앱의 알림 텍스트를 Money2Time 스캐너와 AI 제공업체 OpenRouter로 보내 완료된 수입과 지출을 식별합니다. 광고와 관련 없는 메시지는 삭제됩니다. 인터넷 연결이 필요하며 영수증 스캔 한도는 별도입니다.',
     disclosure_android_warning:
       'Android는 알림 접근 권한이 있는 앱이 모든 알림을 읽을 수 있다고 경고합니다. Money2Time은 선택한 앱의 알림만 보관합니다.',
     access_title: '알림 접근 켜기',

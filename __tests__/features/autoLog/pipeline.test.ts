@@ -8,7 +8,6 @@ import {
   sortCaptureFileNames,
 } from '~/features/autoLog/lib/captureQueue';
 import { buildAlertDraft } from '~/features/autoLog/lib/draft';
-import { parsePaymentAlert } from '~/features/autoLog/lib/parser';
 import { PAYMENT_APPS } from '~/features/autoLog/lib/paymentApps';
 import {
   androidCapturePackages,
@@ -21,7 +20,7 @@ import {
   withAlertSource,
 } from '~/features/autoLog/lib/prefs';
 
-import { account, prefs, source } from './helpers';
+import { account, alertParse, prefs, source } from './helpers';
 
 // The plugin's Kotlin writes the queue the JS side reads; the folder name is
 // the contract between them.
@@ -236,7 +235,7 @@ describe('buildAlertDraft', () => {
 
   it('dates the transaction at the alert and notes the merchant', () => {
     const draft = buildAlertDraft({
-      parse: parsePaymentAlert({ body: 'You spent RM25.00 at SHELL' }),
+      parse: alertParse(),
       capturedAt: '2026-10-03T12:00:00.000Z',
       accountId: 'myr',
       categoryId: 'fuel',
@@ -256,7 +255,12 @@ describe('buildAlertDraft', () => {
 
   it('keeps the billed amount of a foreign spend as the account amount', () => {
     const draft = buildAlertDraft({
-      parse: parsePaymentAlert({ body: 'USD 12.00 (RM 56.30) at AMAZON.COM was approved' }),
+      parse: alertParse({
+        amount: 12,
+        currency: 'USD',
+        secondary: { amount: 56.3, currency: 'MYR' },
+        counterparty: 'AMAZON.COM',
+      }),
       capturedAt: '2026-10-03T12:00:00.000Z',
       accountId: 'myr',
       categoryId: null,
@@ -267,7 +271,12 @@ describe('buildAlertDraft', () => {
   });
 
   it('values a foreign spend at what the bank charged, not the market rate', () => {
-    const parse = parsePaymentAlert({ body: 'USD 12.00 (RM 56.30) at AMAZON.COM was approved' });
+    const parse = alertParse({
+      amount: 12,
+      currency: 'USD',
+      secondary: { amount: 56.3, currency: 'MYR' },
+      counterparty: 'AMAZON.COM',
+    });
     const draft = buildAlertDraft({
       parse,
       capturedAt: '2026-10-03T12:00:00.000Z',
@@ -296,7 +305,7 @@ describe('buildAlertDraft', () => {
 
   it('does not create a transaction for a wallet reload', () => {
     const draft = buildAlertDraft({
-      parse: parsePaymentAlert({ body: 'Reload of RM100.00 successful.' }),
+      parse: alertParse({ kind: 'unknown', amount: null }),
       capturedAt: '2026-10-03T12:00:00.000Z',
       accountId: 'wallet',
       categoryId: null,

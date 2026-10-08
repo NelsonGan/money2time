@@ -89,6 +89,65 @@ export interface ScanReceiptArgs {
   accounts?: string[];
 }
 
+/** Text-only notification scan; account selection stays on-device. */
+export interface ScanNotificationArgs {
+  appUserId: string;
+  text: string;
+  capturedAt: string;
+  /** Selected account currency, used only when the notification is ambiguous. */
+  currency: string;
+  categories: string[];
+  incomeCategories: string[];
+}
+
+export interface ScannedNotificationTransaction extends ScannedTransaction {
+  secondary?: { amount: number; currency: string } | null;
+}
+export interface NotificationScanResponse {
+  transactions: ScannedNotificationTransaction[];
+  notificationDecision: 'ignore' | 'transaction';
+  quota: ReceiptScanQuota;
+}
+
+/** An old worker's empty receipt reply must never discard a queued alert. */
+export function validateNotificationScanResponse(value: unknown): NotificationScanResponse {
+  const fail = () => {
+    throw new ReceiptScanError('server', 'Unexpected notification scan response.');
+  };
+  if (!value || typeof value !== 'object') return fail();
+  const response = value as NotificationScanResponse;
+  if (!Array.isArray(response.transactions)) return fail();
+  if (response.notificationDecision === 'ignore') {
+    if (response.transactions.length !== 0) return fail();
+    return response;
+  }
+  if (response.notificationDecision !== 'transaction' || response.transactions.length !== 1)
+    return fail();
+  const row = response.transactions[0];
+  if (
+    !row ||
+    (row.type !== 'income' && row.type !== 'expense') ||
+    typeof row.amount !== 'number' ||
+    !Number.isFinite(row.amount) ||
+    row.amount <= 0 ||
+    typeof row.currency !== 'string' ||
+    !/^[A-Z]{3}$/.test(row.currency) ||
+    typeof row.category !== 'string' ||
+    typeof row.note !== 'string'
+  )
+    return fail();
+  if (
+    row.secondary != null &&
+    (typeof row.secondary.amount !== 'number' ||
+      !Number.isFinite(row.secondary.amount) ||
+      row.secondary.amount <= 0 ||
+      typeof row.secondary.currency !== 'string' ||
+      !/^[A-Z]{3}$/.test(row.secondary.currency))
+  )
+    return fail();
+  return response;
+}
+
 /** Error codes surfaced to the client so the UI can branch (paywall vs retry). */
 export type ReceiptScanErrorCode =
   | 'limit_reached' // scan quota exhausted (free: lifetime, Pro: monthly) → paywall or alert
