@@ -8,7 +8,8 @@ Reviewed on 2026-10-08 alongside the notification transfer prompt change in PR 5
   notification-text scanning toggle and its legacy stored preference no longer
   block scans. Android retains system notification access, the master switch and
   selected-app/account checks.
-- Both platforms link to Notification History. It stores the 10 newest scanned
+- Both platforms link to Notification History. On iOS, History sits immediately
+  to the left of Tutorial in the Notifications section header. It stores the 10 newest scanned
   notifications locally, showing the notification, source, capture time and
   expense/income/no-transaction result. A scan error is shown separately as
   **Scan failed** rather than implying that no transaction was detected.

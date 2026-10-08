@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
 });
 
 /**
- * Section title with a compact "Tutorial" link on the right. Replaces the old
+ * Section title with compact action links on the right. Replaces the old
  * full-width button that sat under each card — the link keeps the walkthrough one
  * tap away without dominating the section.
  */
@@ -94,31 +94,36 @@ function AutoLogSectionHeader({
   title,
   onTutorial,
   tutorialColor,
+  onHistory,
 }: {
   title: string;
   onTutorial: () => void;
   tutorialColor: string;
+  onHistory?: () => void;
 }) {
   return (
     <View style={styles.sectionHeader}>
       <Text variant="caption" tone="muted">
         {title}
       </Text>
-      <Pressable
-        style={styles.tutorialLink}
-        onPress={() => {
-          void triggerHaptic('selection');
-          onTutorial();
-        }}
-        hitSlop={8}
-        accessibilityRole="button"
-        accessibilityLabel={I18n.t('settings.auto_log.tutorial_button')}
-      >
-        <BookOpen size={13} color={tutorialColor} />
-        <Text variant="caption" style={{ color: tutorialColor }}>
-          {I18n.t('settings.auto_log.tutorial_button')}
-        </Text>
-      </Pressable>
+      <View className="flex-row items-center gap-3">
+        {onHistory ? <NotificationHistoryButton compact onPress={onHistory} /> : null}
+        <Pressable
+          style={styles.tutorialLink}
+          onPress={() => {
+            void triggerHaptic('selection');
+            onTutorial();
+          }}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={I18n.t('settings.auto_log.tutorial_button')}
+        >
+          <BookOpen size={13} color={tutorialColor} />
+          <Text variant="caption" style={{ color: tutorialColor }}>
+            {I18n.t('settings.auto_log.tutorial_button')}
+          </Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -429,6 +434,7 @@ export function AutoLogSettingsScreen({
               <View className="mt-6">
                 <AutoLogSectionHeader
                   title={I18n.t('payment_alerts.ios_notifications_title')}
+                  onHistory={onOpenNotificationHistory}
                   onTutorial={() => onOpenTutorial('paymentAlertsIos')}
                   tutorialColor={themeColors.primary}
                 />
@@ -451,7 +457,6 @@ export function AutoLogSettingsScreen({
                       </Text>
                     </View>
                   </View>
-                  <NotificationHistoryButton onPress={onOpenNotificationHistory} />
                 </View>
               </View>
 
