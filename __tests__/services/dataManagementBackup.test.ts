@@ -1,6 +1,11 @@
 import { getSQLite } from '~/lib/db/client';
 import { normalizeCurrencyColumns } from '~/lib/db/normalizeCurrencies';
 import { applyBackupData, buildBackupData } from '~/services/dataManagementService';
+import { resetAutomationCaptureData } from '~/services/resetAutomationCaptureData';
+
+jest.mock('~/services/resetAutomationCaptureData', () => ({
+  resetAutomationCaptureData: jest.fn(),
+}));
 
 // Native modules pulled in at module load but only used by export/picker paths
 // we don't exercise here — stub them so the file can be imported under Jest.
@@ -609,5 +614,34 @@ describe('dataManagementService savings-goal cover backup/restore', () => {
     expect(result.success).toBe(true);
     expect(fresh.tables.accounts).toHaveLength(1);
     expect(fresh.tables.accounts[0].goal_cover_uri).toBeUndefined();
+  });
+});
+
+describe('notification review data on backup restore', () => {
+  beforeEach(() => jest.mocked(resetAutomationCaptureData).mockClear());
+  const backup = {
+    tables: {
+      accounts: [],
+      account_groups: [],
+      categories: [],
+      transactions: [],
+      recurring_rules: [],
+      settings: [],
+      monthly_wage_settings: [],
+    },
+  };
+  it('clears local history and queues after a successful replacement using the preserved identity', () => {
+    jest.mocked(getSQLite).mockReturnValue(createFakeSqlite({}, {}) as never);
+    expect(applyBackupData(backup as never).success).toBe(true);
+    expect(resetAutomationCaptureData).toHaveBeenCalledWith('user-1');
+  });
+  it('preserves reviews when the database replacement rolls back', () => {
+    const sqlite = createFakeSqlite({}, {});
+    sqlite.execSync = (sql) => {
+      if (sql === 'COMMIT') throw new Error('commit failed');
+    };
+    jest.mocked(getSQLite).mockReturnValue(sqlite as never);
+    expect(applyBackupData(backup as never).success).toBe(false);
+    expect(resetAutomationCaptureData).not.toHaveBeenCalled();
   });
 });

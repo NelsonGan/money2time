@@ -1216,7 +1216,7 @@ const hi = {
       payment_alerts_status_apps_one: '%{count} ऐप के लिए चालू',
       payment_alerts_status_apps_other: '%{count} ऐप्स के लिए चालू',
       payment_alerts_android_step_1:
-        'Tap “Log from notifications”, read the scanning disclosure and enable “Scan notification text” and “Read notifications”.',
+        'Tap “Log from notifications” and enable “Read notifications”.',
       payment_alerts_android_step_2:
         'Android सूचना पहुंच की स्क्रीन खोलता है। Money2Time ढूंढें और उसे चालू करें।',
       payment_alerts_android_step_3:
@@ -1226,16 +1226,16 @@ const hi = {
       payment_alerts_android_step_5: 'हर ऐप के लिए खाता चुनें।',
       payment_alerts_android_step_6: 'सब कुछ ठीक चल रहा है यह जांचने के लिए टेस्ट सूचना भेजें।',
       payment_alerts_android_step_7:
-        'Completed income and expenses log to your selected account. The scanner selects categories and discards offers and unrelated notifications.',
+        'Open History to review each notification. Choose Income, Expense or Ignore, or use the All buttons.',
       payment_alerts_ios_step_1:
         'Shortcuts खोलें, + और फिर Edit पर टैप करें। एडिटर में Automation पर टैप करें।',
       payment_alerts_ios_step_2: 'Notification खोजें और चुनें।',
       payment_alerts_ios_step_3: 'Log Notification खोजें और जोड़ें।',
       payment_alerts_ios_step_4: 'Log Notification में Message और फिर Select Variable पर टैप करें।',
       payment_alerts_ios_step_6:
-        'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
+        'Tap the action arrow, then Account. Choose where reviewed transactions should be logged. Category is optional.',
       payment_alerts_ios_step_7:
-        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text”. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
+        'Tap back to save. Repeat for each bank or wallet app. Open Money2Time to review new notifications, even offline.',
       payment_alerts_android_disclosure:
         'सूचनाओं की पहुँच कैसे इस्तेमाल होती है, पढ़ें और Continue पर टैप करें।',
       payment_alerts_ios_app:
@@ -2569,20 +2569,42 @@ const hi = {
     },
   },
   payment_alerts: {
-    scan_enabled: 'सूचना का टेक्स्ट स्कैन करें',
+    review_pending: 'To review',
+    review_recent: 'Recent',
+    review_ignore: 'Ignore',
+    review_income_all: 'Income All',
+    review_expense_all: 'Expense All',
+    review_ignore_all: 'Ignore All',
+    review_banner: '%{count} notifications to review',
+    review_banner_single: '1 notification to review',
+    review_banner_hint: 'Choose Income, Expense or Ignore',
+    review_amount_hint: 'Choose or enter the amount',
+    review_missing: 'Some items still need an amount or account.',
+    review_save_error: 'Could not save. Your unfinished items are still here.',
+    review_leave_title: 'Ignore unfinished notifications?',
+    review_leave_body: 'Leaving will ignore all %{count} unfinished notifications.',
+    review_leave_body_single: 'Leaving will ignore the unfinished notification.',
+    review_leave_confirm: 'Ignore and leave',
+    review_show_more: 'Show full notification',
+    review_show_less: 'Show less',
+    history: 'History',
+    history_title: 'Notification history',
+    history_empty: 'No notifications yet',
+    history_hint:
+      'Choose Income, Expense or Ignore. Your last 10 completed notifications stay here.',
+    history_none: 'Ignored',
+    history_failed: 'Not logged',
+    history_error: 'Could not load notification history.',
     test_scan_failed_title: 'परीक्षण सूचना दर्ज नहीं हो सकी',
     test_scan_failed:
-      'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
-
+      'The notification arrived, but no amount or account could be read. Check your selected account and try again.',
     account_hint:
-      'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
+      'Notifications go to review. Choose Income, Expense or Ignore for your selected account.',
     title: 'सूचनाएं',
-    card_intro:
-      'Automatically log completed income and expenses from bank and wallet notifications.',
+    card_intro: 'Review bank and wallet notifications before logging income or expenses.',
     section_status: 'स्थिति',
     master_label: 'सूचनाएं पढ़ें',
-    master_hint:
-      'Captures notifications from the apps you choose. Enable text scanning to log completed transactions.',
+    master_hint: 'Keeps notifications from the apps you choose for you to review.',
     access_open_settings: 'सेटिंग्स खोलें',
     health_unsupported:
       'Money2Time का यह संस्करण सूचनाएं नहीं पढ़ सकता। सूचनाओं से भुगतान दर्ज करने के लिए ऐप अपडेट करें।',
@@ -2625,8 +2647,8 @@ const hi = {
     test_send: 'टेस्ट सूचना भेजें',
     test_waiting: 'सूचना का इंतज़ार…',
     test_success: 'यह काम कर रहा है। Money2Time आपकी भुगतान सूचनाएं पढ़ सकता है।',
-    test_would_log: 'यह %{amount} को %{account} में %{category} के रूप में दर्ज करेगा।',
-    test_would_log_no_category: 'यह %{amount} को %{account} में दर्ज करेगा।',
+    test_would_log: 'It would offer %{amount} for review in %{account}.',
+    test_would_log_no_category: 'It would offer %{amount} for review in %{account}.',
     test_timeout_title: 'कोई सूचना नहीं आई',
     test_timeout_body:
       'जांचें कि सूचना पहुंच चालू है, फिर दोबारा कोशिश करें। कुछ फ़ोन पर Money2Time का बैटरी उपयोग अप्रतिबंधित पर भी सेट करना होता है।',

@@ -24,7 +24,6 @@ import {
 } from '~/services/paymentCapture';
 import type { PaymentAlertSource } from '~/types';
 
-import { NotificationScanControl } from '../components/NotificationScanControl';
 import { isPayableAccount } from '../lib/binding';
 
 interface PaymentAlertsSettingsScreenProps {
@@ -138,8 +137,6 @@ export function PaymentAlertsSettingsScreen({
             {I18n.t('payment_alerts.card_intro')}
           </Text>
           <Card>
-            <NotificationScanControl />
-            <Divider />
             <View className="gap-3 p-4">
               <Text variant="caption" tone="muted">
                 {I18n.t('payment_alerts.master_hint')}

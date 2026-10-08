@@ -114,6 +114,13 @@ export type RootStackParamList = {
   TutorialDetail: { id: string };
   // Android notification capture setup.
   PaymentAlertsSetup: { step?: 'apps' } | undefined;
+  NotificationHistory: undefined;
+  NotificationReviewEditor: {
+    captureId: string;
+    appUserId: string;
+    generation: number;
+    initialValues: AddTransactionInitialValues;
+  };
 };
 
 export type RootMainNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;

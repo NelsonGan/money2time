@@ -1,5 +1,7 @@
 /** Open Android payment-alert setup from the settings stack. */
-export type PaymentAlertsScreenRequest = { screen: 'PaymentAlertsSetup'; step?: 'apps' };
+export type PaymentAlertsScreenRequest =
+  | { screen: 'PaymentAlertsSetup'; step?: 'apps' }
+  | { screen: 'NotificationHistory' };
 
 type Listener = (request: PaymentAlertsScreenRequest) => void;
 

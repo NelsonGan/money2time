@@ -6,6 +6,7 @@ import { getSQLite } from '~/lib/db/client';
 import { normalizeCurrencyColumns } from '~/lib/db/normalizeCurrencies';
 import { normalizeIconColumns } from '~/lib/db/normalizeIcons';
 import { retireSimpleMode } from '~/lib/db/retireSimpleMode';
+import { resetAutomationCaptureData } from '~/services/resetAutomationCaptureData';
 import { runUserAssetGc } from '~/services/userAssetGc';
 import {
   collectUserAssetsForBackup,
@@ -357,6 +358,7 @@ export function applyBackupData(backup: BackupData): ImportResult {
     // run. Convert within this transaction so a failure rolls back the restore.
     retireSimpleMode(sqlite);
     sqlite.execSync('COMMIT');
+    resetAutomationCaptureData(currentAppUserId);
 
     // Older backups stored currency symbols (e.g. "RM") instead of ISO codes —
     // normalize so multi-currency doesn't treat them as bogus sub-currencies.

@@ -1217,7 +1217,7 @@ const ja = {
       payment_alerts_status_apps_one: '%{count} 個のアプリでオン',
       payment_alerts_status_apps_other: '%{count} 個のアプリでオン',
       payment_alerts_android_step_1:
-        'Tap “Log from notifications”, read the scanning disclosure and enable “Scan notification text” and “Read notifications”.',
+        'Tap “Log from notifications” and enable “Read notifications”.',
       payment_alerts_android_step_2:
         'Android の通知へのアクセス画面が開きます。Money2Time を探してオンにします。',
       payment_alerts_android_step_3:
@@ -1227,16 +1227,16 @@ const ja = {
       payment_alerts_android_step_5: '各アプリの口座を選びます。',
       payment_alerts_android_step_6: 'テスト通知を送って、正しく動くか確認します。',
       payment_alerts_android_step_7:
-        'Completed income and expenses log to your selected account. The scanner selects categories and discards offers and unrelated notifications.',
+        'Open History to review each notification. Choose Income, Expense or Ignore, or use the All buttons.',
       payment_alerts_ios_step_1:
         'Shortcutsを開き、+、Editの順にタップします。エディタでAutomationをタップします。',
       payment_alerts_ios_step_2: 'Notificationを検索して選択します。',
       payment_alerts_ios_step_3: 'Log Notification を検索して追加します。',
       payment_alerts_ios_step_4: 'Log NotificationのMessage、Select Variableの順にタップします。',
       payment_alerts_ios_step_6:
-        'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
+        'Tap the action arrow, then Account. Choose where reviewed transactions should be logged. Category is optional.',
       payment_alerts_ios_step_7:
-        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text”. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
+        'Tap back to save. Repeat for each bank or wallet app. Open Money2Time to review new notifications, even offline.',
       payment_alerts_android_disclosure: '通知へのアクセスの使い方を読み、Continueをタップします。',
       payment_alerts_ios_app:
         'App をタップして銀行または電子ウォレットのアプリを選びます。この画像では Wallet を例にしています。',
@@ -2563,20 +2563,42 @@ const ja = {
     },
   },
   payment_alerts: {
-    scan_enabled: '通知テキストをスキャン',
+    review_pending: 'To review',
+    review_recent: 'Recent',
+    review_ignore: 'Ignore',
+    review_income_all: 'Income All',
+    review_expense_all: 'Expense All',
+    review_ignore_all: 'Ignore All',
+    review_banner: '%{count} notifications to review',
+    review_banner_single: '1 notification to review',
+    review_banner_hint: 'Choose Income, Expense or Ignore',
+    review_amount_hint: 'Choose or enter the amount',
+    review_missing: 'Some items still need an amount or account.',
+    review_save_error: 'Could not save. Your unfinished items are still here.',
+    review_leave_title: 'Ignore unfinished notifications?',
+    review_leave_body: 'Leaving will ignore all %{count} unfinished notifications.',
+    review_leave_body_single: 'Leaving will ignore the unfinished notification.',
+    review_leave_confirm: 'Ignore and leave',
+    review_show_more: 'Show full notification',
+    review_show_less: 'Show less',
+    history: 'History',
+    history_title: 'Notification history',
+    history_empty: 'No notifications yet',
+    history_hint:
+      'Choose Income, Expense or Ignore. Your last 10 completed notifications stay here.',
+    history_none: 'Ignored',
+    history_failed: 'Not logged',
+    history_error: 'Could not load notification history.',
     test_scan_failed_title: 'テスト通知を記録できませんでした',
     test_scan_failed:
-      'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
-
+      'The notification arrived, but no amount or account could be read. Check your selected account and try again.',
     account_hint:
-      'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
+      'Notifications go to review. Choose Income, Expense or Ignore for your selected account.',
     title: '通知',
-    card_intro:
-      'Automatically log completed income and expenses from bank and wallet notifications.',
+    card_intro: 'Review bank and wallet notifications before logging income or expenses.',
     section_status: 'ステータス',
     master_label: '通知を読み取る',
-    master_hint:
-      'Captures notifications from the apps you choose. Enable text scanning to log completed transactions.',
+    master_hint: 'Keeps notifications from the apps you choose for you to review.',
     access_open_settings: '設定を開く',
     health_unsupported:
       'このバージョンの Money2Time は通知を読み取れません。支払い通知を使うにはアプリを更新してください。',
@@ -2620,8 +2642,8 @@ const ja = {
     test_send: 'テスト通知を送る',
     test_waiting: '通知を待っています…',
     test_success: '成功しました。Money2Time は支払い通知を読み取れます。',
-    test_would_log: '%{amount} を %{account} に %{category} として記録します。',
-    test_would_log_no_category: '%{amount} を %{account} に記録します。',
+    test_would_log: 'It would offer %{amount} for review in %{account}.',
+    test_would_log_no_category: 'It would offer %{amount} for review in %{account}.',
     test_timeout_title: '通知が届きませんでした',
     test_timeout_body:
       '通知へのアクセスがオンか確認して、もう一度お試しください。端末によっては Money2Time の電池使用量を「制限なし」にする必要もあります。',

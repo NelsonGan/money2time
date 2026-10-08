@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { AppState, InteractionManager } from 'react-native';
 
-import { useApp, useTransactions } from '~/context/AppContext';
-import { useIsPro } from '~/context/ProContext';
+import { useApp } from '~/context/AppContext';
 import { paymentAlertCapturesRepository } from '~/lib/repositories/paymentAlertCapturesRepository';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { reportError } from '~/services/errorReporting';
+import { getNotificationScanHistoryGeneration } from '~/services/notificationScanHistory';
 import { emitTestAlertResult, subscribePaymentAlertDrain } from '~/services/paymentAlertsBridge';
 import {
   clearQueuedCaptures,
@@ -19,8 +19,6 @@ import {
 } from '~/services/paymentCapture';
 
 import type { CaptureInput } from '../lib/captureQueue';
-import { autoLogAllowance } from '../lib/decide';
-import { finalizeCapture } from '../lib/pipeline';
 import { androidCapturePackages } from '../lib/prefs';
 import {
   type AlertProcessingDeps,
@@ -30,8 +28,8 @@ import {
 } from '../processAlerts';
 
 /**
- * Turns queued payment alerts into transactions. Mounted once,
- * outside the tabs (it needs live transactions for de-duplication), next to
+ * Queues notifications for explicit review with local amount candidates. Mounted once,
+ * outside the tabs so capture runs regardless of the visible screen, next to
  * AutoLogSync. Runs on mount, on every foreground, whenever Android's listener
  * writes a capture while the app is open, and on an explicit request (a
  * setup screen's test alert).
@@ -40,9 +38,7 @@ import {
  * and asks Android to rebind the listener when it was dropped.
  */
 export function PaymentAlertSync() {
-  const { accounts, categories, settings, quickEntryPrefs, createTransaction } = useApp();
-  const { transactions } = useTransactions();
-  const isPro = useIsPro();
+  const { accounts, categories, settings, quickEntryPrefs } = useApp();
   const { paymentAlertPrefs: prefs } = useApp();
 
   const stateRef = useRef({
@@ -50,20 +46,14 @@ export function PaymentAlertSync() {
     categories,
     settings,
     quickEntryPrefs,
-    createTransaction,
-    isPro,
     prefs,
-    transactions,
   });
   stateRef.current = {
     accounts,
     categories,
     settings,
     quickEntryPrefs,
-    createTransaction,
-    isPro,
     prefs,
-    transactions,
   };
   const drainingRef = useRef(false);
   const rerunRef = useRef(false);
@@ -94,29 +84,39 @@ export function PaymentAlertSync() {
     try {
       do {
         rerunRef.current = false;
+        const appUserId = stateRef.current.settings.appUserId;
+        const scanGeneration = getNotificationScanHistoryGeneration(appUserId);
+        const isCurrent = () =>
+          stateRef.current.settings.appUserId === appUserId &&
+          getNotificationScanHistoryGeneration(appUserId) === scanGeneration;
         const queued = await readQueuedCaptures();
+        if (!isCurrent()) break;
         if (queued.length === 0) break;
         const current = stateRef.current;
         const tests = queued.filter((capture) => capture.isTest);
         if (tests.length > 0) {
           await previewTestAlerts(tests, {
             ...current,
+            scanGeneration,
             reportingCurrency: current.settings.currencyCode,
-            appUserId: current.settings.appUserId,
+            appUserId,
             getCurrent: () => ({
               ...stateRef.current,
               reportingCurrency: stateRef.current.settings.currencyCode,
               appUserId: stateRef.current.settings.appUserId,
             }),
           });
+          if (!isCurrent()) break;
           await clearQueuedCaptures(tests);
         }
+        if (!isCurrent()) break;
         const captures = queued.filter((capture) => !capture.isTest);
         if (captures.length === 0) continue;
         const summary = await processAlertCaptures(captures, {
           ...current,
+          scanGeneration,
           reportingCurrency: current.settings.currencyCode,
-          appUserId: current.settings.appUserId,
+          appUserId,
           getCurrent: () => ({
             ...stateRef.current,
             reportingCurrency: stateRef.current.settings.currencyCode,
@@ -131,6 +131,7 @@ export function PaymentAlertSync() {
           void trackEvent(AnalyticsEvents.AUTOLOG_ALERTS_DRAINED, {
             captured: summary.captured,
             logged: summary.logged,
+            pending: summary.pending,
             ignored: summary.ignored,
             duplicates: summary.duplicates,
             account_certain: summary.accountCertain,
@@ -146,10 +147,10 @@ export function PaymentAlertSync() {
       drainingRef.current = false;
     }
   }, []);
-  // Drain only after the consent update has rendered into the live state ref.
+  // Source/account changes can make previously queued captures processable.
   useEffect(() => {
-    if (prefs.notificationScanningEnabled) void drain();
-  }, [drain, prefs.notificationScanningEnabled]);
+    void drain();
+  }, [drain, prefs]);
 
   const drainRef = useRef(drain);
   drainRef.current = drain;
@@ -200,27 +201,17 @@ async function previewTestAlerts(tests: readonly CaptureInput[], deps: AlertProc
         { ...capture, sourceKey: testSource?.sourceKey ?? capture.sourceKey },
         deps,
       );
-      const current = deps.getCurrent?.() ?? deps;
-      const currentCtx = buildPipelineContext(current);
-      const outcome = finalizeCapture(analysis, currentCtx, {
-        duplicate: { kind: 'none', supersedesCaptureId: null },
-        autoLogsRemaining: autoLogAllowance({
-          isPro: current.isPro,
-          accounts: current.accounts,
-          usedAutoLogs: current.quickEntryPrefs.autoLogUsageCount,
-        }),
-      });
       emitTestAlertResult({
         capturedAt: capture.capturedAt,
         amount: analysis.parse.amount,
         currency: analysis.parse.currency,
         counterparty: analysis.parse.counterparty,
-        accountId: outcome.resolution.accountId,
-        categoryId: outcome.resolution.categoryId,
-        wouldLog: outcome.decision.action === 'log',
+        accountId: analysis.binding.accountId,
+        categoryId: null,
+        wouldLog: analysis.parse.amount !== null && analysis.binding.accountId !== null,
       });
     } catch (error) {
-      reportError(error, { scope: 'payment_alerts_test_scan' });
+      reportError(error, { scope: 'payment_alerts_test_amount' });
       emitTestAlertResult({
         capturedAt: capture.capturedAt,
         amount: null,

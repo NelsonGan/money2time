@@ -1025,9 +1025,9 @@ import Foundation
 ///
 /// It only queues the raw text into the App Group and returns, without
 /// opening the app or posting anything: the source app's notification is the
-/// receipt. The app reads the amount, merchant and account the next time it
-/// runs, and logs spending automatically to the selected account.
-/// Allowance and parsing checks run when the app drains the queue.
+/// draft. The app extracts monetary amounts locally the next time it runs.
+/// The user reviews each notification as Income, Expense or Ignore before
+/// any transaction is saved. Notification review uses no automatic-log allowance.
 ///
 /// The struct name is this intent's identity to iOS — renaming it orphans the
 /// action in every shortcut already built on it. \`title\` is safe to reword.
@@ -1040,7 +1040,7 @@ struct LogPaymentAlertIntent: AppIntent {
   static var title: LocalizedStringResource = "Log Notification"
 
   static var description = IntentDescription(
-    "Send a bank or e-wallet app notification to Money2Time. Use Notification Body as Message and choose an account. Payments log when the app next opens, with categories matched automatically.",
+    "Send a bank or e-wallet app notification to Money2Time. Use Notification Body as Message and choose an account. When the app next opens, review the notification as Income, Expense or Ignore before saving.",
     categoryName: "Transactions"
   )
 

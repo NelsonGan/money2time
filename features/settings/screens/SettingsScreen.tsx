@@ -51,6 +51,7 @@ import { DisplayModeToggle } from '~/features/transactions/components';
 import { SettleUpTileBadge } from '~/features/transactions/components/SettleUpTileBadge';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { resetCloudBackupPromptState } from '~/services/cloudBackupPrompt';
 import { triggerHaptic } from '~/services/haptics';
 import { pickLibraryImage } from '~/services/libraryImagePicker';
@@ -463,6 +464,7 @@ export function SettingsScreen({
                 testID="settings-ricecal-card"
                 onPress={() => {
                   void triggerHaptic('selection');
+                  void trackEvent(AnalyticsEvents.RICECAL_AD_CLICKED, { source: 'settings' });
                   setRiceCalVisible(true);
                 }}
                 className="min-w-0 flex-1 rounded-3xl border border-success/20 bg-success/10 p-3.5 active:scale-[0.98] active:opacity-90"

@@ -51,11 +51,6 @@ FREE_LIMIT = "20"
 FREE_INTERVAL = "100year"
 PRO_LIMIT = "500"
 PRO_INTERVAL = "month"
-# Separate text-notification allowance; ignored text does not consume it.
-FREE_NOTIFICATION_LIMIT = "100"
-PRO_NOTIFICATION_LIMIT = "2000"
-# All notification attempts, including ignores/failures, per user per UTC day.
-NOTIFICATION_DAILY_ATTEMPTS = "500"
 # Optional image-resolution hint sent to the provider (OpenAI-style
 # image_url.detail): "low" | "high" | "auto". "low" downsamples the image to
 # cut input tokens, at some OCR-accuracy risk — flip it on here to A/B the

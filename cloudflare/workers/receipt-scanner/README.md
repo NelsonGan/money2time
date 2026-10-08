@@ -155,50 +155,16 @@ curl -X POST http://localhost:8787/scan \
   -d "{\"appUserId\":\"m2t_test\",\"image\":\"$(base64 -w0 sample-receipt.jpg)\",\"mime\":\"image/jpeg\",\"currency\":\"USD\",\"categories\":[\"Food\",\"Groceries\",\"Other\"]}"
 ```
 
-## Text-only notification mode
+## Notification review
 
-`POST /scan` also accepts a text-only request (no image or MIME):
+Notifications are handled entirely on-device. They do not call this Worker,
+OpenRouter, RevenueCat entitlement verification or receipt-scan quotas.
+The retired `mode: "notification"` endpoint returns HTTP 400 with
+`notification_scanning_removed` before any entitlement, quota or inference call.
+Receipt photo, itemized and payment screenshot modes retain their prompts,
+transport, model failover and quotas.
 
-```json
-{
-  "appUserId": "m2t_example",
-  "mode": "notification",
-  "text": "Salary MYR 3500 from ACME has been credited.",
-  "capturedAt": "2026-10-08T01:00:00Z",
-  "currency": "MYR",
-  "categories": ["Food", "Other"],
-  "incomeCategories": ["Salary", "Other"]
-}
-```
-
-`currency` is the explicitly selected account's currency for ambiguous symbols.
-The system prompt classifies completed expense/income, including completed refund
-credits, and rejects promotions, reminders, codes, failed/pending payments, holds,
-own-account transfers and unrelated text. Notification text is untrusted user
-content, separate from the system instructions. One high-confidence completed
-movement is required. The reply adds `notificationDecision: "transaction"` or
-`"ignore"`; ignores have an empty transactions array and are not retried.
-Malformed model output returns a retryable 502 rather than pretending it is an ignore.
-Amounts/types/currencies and category type are validated before responding.
-The response may include `secondary` for an explicitly billed foreign amount.
-Text is capped at 12000 characters and is never logged by this Worker.
-
-The existing signed request/entitlement flow applies. Notification counters use
-`notification:<appUserId>` so receipt quota is untouched. `FREE_NOTIFICATION_LIMIT`
-is 100 lifetime, `PRO_NOTIFICATION_LIMIT` is 2000/month, and
-`NOTIFICATION_DAILY_ATTEMPTS` is 500 per UTC day, including ignores/failures.
-Intentional ignores do not consume the valid-scan quota. Temporary 429/402 responses
-leave captures queued on the client. The D1 schema needs no migration.
-
-Run app contract tests with `npm test -- --runInBand __tests__/cloudflare` from the
-repository root and run `npm run typecheck` here. Roll out this Worker before the
-app. Existing image modes are unchanged; older Workers cannot accidentally classify
-or discard new text requests.
-
-For live semantic evaluation, run `node scripts/evaluate-notification-scanner.mjs`
-from the repository root against a configured preview. It uses the synthetic
-notification corpus and checks decision, amount and currency. Set
-`SCANNER_EVALUATION_URL`, `SCANNER_EVALUATION_USER` and the preview's signing key;
-optional fixture IDs select a subset. See
-[`docs/notification-scanner-verification.md`](../../../docs/notification-scanner-verification.md)
-for actual model/device evidence and remaining release checks.
+Run the root receipt client/image regression suites and this Worker's typecheck
+when modifying this endpoint. CI deploys Worker changes on merge: coordinate
+the app rollout with endpoint retirement. Older clients cannot process
+notifications against the retired endpoint until they update.

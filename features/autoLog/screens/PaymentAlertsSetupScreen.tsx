@@ -53,9 +53,7 @@ const TEST_TIMEOUT_MS = 105000;
 export function PaymentAlertsSetupScreen({ initialStep, onClose }: PaymentAlertsSetupScreenProps) {
   const { accounts, categories, settings } = useApp();
   const { paymentAlertPrefs: prefs, updatePaymentAlertPrefs: updatePrefs } = useApp();
-  const [step, setStep] = useState<Step>(
-    prefs.notificationScanningEnabled ? (initialStep ?? 'intro') : 'intro',
-  );
+  const [step, setStep] = useState<Step>(initialStep ?? 'intro');
   const [testState, setTestState] = useState<'idle' | 'waiting' | 'done' | 'timeout'>('idle');
   const [testResult, setTestResult] = useState<TestAlertResult | null>(null);
   const testTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -63,13 +61,13 @@ export function PaymentAlertsSetupScreen({ initialStep, onClose }: PaymentAlerts
   const disclosureTracked = useRef(false);
 
   useEffect(() => {
-    if (disclosureTracked.current || (initialStep && prefs.notificationScanningEnabled)) return;
+    if (disclosureTracked.current || initialStep) return;
     disclosureTracked.current = true;
     void trackEvent(AnalyticsEvents.AUTOLOG_ALERTS_SETUP, {
       step: 'disclosure_viewed',
       platform: 'android',
     });
-  }, [initialStep, prefs.notificationScanningEnabled]);
+  }, [initialStep]);
 
   // Back from Android settings: move on as soon as access is on.
   useEffect(() => {
@@ -142,14 +140,13 @@ export function PaymentAlertsSetupScreen({ initialStep, onClose }: PaymentAlerts
   // Access survives turning the feature off in the app, so a returning user
   // who still has it goes straight to the apps instead of the system screen.
   const continueFromIntro = useCallback(async () => {
-    updatePrefs((previous) => ({ ...previous, notificationScanningEnabled: true }));
     if (await getNotificationAccessGranted()) {
       void triggerHaptic('medium');
       setStep('apps');
       return;
     }
     openSettings();
-  }, [openSettings, updatePrefs]);
+  }, [openSettings]);
 
   const toggleApp = useCallback(
     (app: PickableApp, on: boolean) => {

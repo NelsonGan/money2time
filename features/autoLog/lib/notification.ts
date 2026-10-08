@@ -1,29 +1,23 @@
-import {
-  type NotificationScanResponse,
-  validateNotificationScanResponse,
-} from '~/services/receiptScan.shared';
 import type { PaymentAlertParse } from '~/types';
+import { extractNotificationAmounts } from '~/utils/notificationAmounts';
 
-// Version 4 replaces local keyword parsing with the scanner's strict contract.
-export const NOTIFICATION_PARSER_VERSION = 4;
+export const NOTIFICATION_PARSER_VERSION = 5;
 
-export function notificationParse(
-  response?: NotificationScanResponse,
-  scanCurrency?: string,
-): PaymentAlertParse {
-  const row = response ? validateNotificationScanResponse(response).transactions[0] : undefined;
+/** Extract amount candidates locally; never infer transaction direction or relevance. */
+export function notificationParse(text = '', currency = 'MYR'): PaymentAlertParse {
+  const amounts = extractNotificationAmounts(text, currency);
+  const single = amounts.length === 1 ? amounts[0] : undefined;
   return {
-    kind: row ? (row.type === 'income' ? 'income' : 'spend') : 'unknown',
-    amount: row?.amount ?? null,
-    currency: row?.currency ?? null,
+    kind: 'unknown',
+    amount: single?.amount ?? null,
+    currency: single?.currency ?? null,
     currencyToken: null,
-    secondary: row?.secondary ?? null,
-    counterparty: row?.note?.trim() || null,
+    secondary: null,
+    counterparty: null,
     counterpartyLeadIn: null,
-    category: row?.category ?? null,
-    ...(scanCurrency ? { scanCurrency } : {}),
-    confidence: row ? 'high' : 'low',
-    signals: ['notification_scanner'],
+    category: null,
+    confidence: 'low',
+    signals: ['notification_local_amount'],
     parserVersion: NOTIFICATION_PARSER_VERSION,
   };
 }

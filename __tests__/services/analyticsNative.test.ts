@@ -549,6 +549,32 @@ describe('native analytics provider coordination', () => {
     });
   });
 
+  it('tracks repeated RiceCal ad taps once each in Mixpanel and GA4', async () => {
+    const analytics = await import('~/services/analytics.native');
+    const event = analytics.AnalyticsEvents.RICECAL_AD_CLICKED;
+    await analytics.identifyUser('m2t_native_test_2');
+    await analytics.setCurrentScreen('Settings');
+
+    await analytics.trackEvent(event, { source: 'settings' });
+    await analytics.trackEvent(event, { source: 'settings' });
+
+    expect(mockMixpanelTrack).toHaveBeenCalledTimes(2);
+    expect(mockMixpanelTrack).toHaveBeenNthCalledWith(1, 'RiceCal Ad Clicked', {
+      source: 'settings',
+      current_screen: 'Settings',
+    });
+    expect(mockMixpanelTrack).toHaveBeenNthCalledWith(2, 'RiceCal Ad Clicked', {
+      source: 'settings',
+      current_screen: 'Settings',
+    });
+    expect(mockLogEvent).toHaveBeenCalledTimes(2);
+    expect(mockLogEvent).toHaveBeenCalledWith(mockFirebaseInstance, 'm2t_rice_cal_ad_clicked', {
+      source: 'settings',
+      current_screen: 'Settings',
+    });
+    expect(mockMixpanelPeopleUnion).not.toHaveBeenCalled();
+  });
+
   it('leaves an install without the marker alone', async () => {
     const analytics = await import('~/services/analytics.native');
 

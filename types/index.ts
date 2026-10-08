@@ -1346,8 +1346,6 @@ export interface PaymentAlertPrefs {
   version: 1;
   /** Master switch for alert capture on this device. */
   alertsEnabled: boolean;
-  /** Explicit opt-in to sending selected notification text to the scanner. */
-  notificationScanningEnabled: boolean;
   /** Keyed by `paymentAlertSourceKey(channel, sourceKey)`. */
   sources: Record<string, PaymentAlertSource>;
   /** Phrases that make any alert ignored. */
