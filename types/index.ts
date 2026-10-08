@@ -1215,7 +1215,7 @@ export type PaymentAlertConfidence = 'high' | 'medium' | 'low';
 export interface PaymentAlertParse {
   kind: PaymentAlertKind;
   amount: number | null;
-  /** ISO code, only when the text names the currency beyond doubt. */
+  /** ISO code from text or scanner account fallback; null on ambiguous legacy parses. */
   currency: string | null;
   /** The symbol or code next to the amount as written (`$`, `RM`, `USD`). */
   currencyToken: string | null;
@@ -1227,6 +1227,8 @@ export interface PaymentAlertParse {
   counterpartyLeadIn: string | null;
   /** Category name returned by the notification scanner; absent on legacy captures. */
   category?: string | null;
+  /** Account currency supplied to the scanner; cached results require the same fallback. */
+  scanCurrency?: string;
   confidence: PaymentAlertConfidence;
   /** Short machine-readable parsing signals. */
   signals: string[];

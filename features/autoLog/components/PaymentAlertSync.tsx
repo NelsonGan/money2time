@@ -211,6 +211,7 @@ async function previewTestAlerts(tests: readonly CaptureInput[], deps: AlertProc
         }),
       });
       emitTestAlertResult({
+        capturedAt: capture.capturedAt,
         amount: analysis.parse.amount,
         currency: analysis.parse.currency,
         counterparty: analysis.parse.counterparty,
@@ -221,6 +222,7 @@ async function previewTestAlerts(tests: readonly CaptureInput[], deps: AlertProc
     } catch (error) {
       reportError(error, { scope: 'payment_alerts_test_scan' });
       emitTestAlertResult({
+        capturedAt: capture.capturedAt,
         amount: null,
         currency: null,
         counterparty: null,

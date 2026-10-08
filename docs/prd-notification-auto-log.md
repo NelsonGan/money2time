@@ -48,7 +48,8 @@ Explicit user ignore phrases are filters only; they never transform a notificati
 Android setup retains disclosure, system access, app/account selection and a test
 notification. Its preview calls the same scanner without saving a transaction,
 waits up to 105 seconds, and explains scan failure. The setup success event
-requires a successful transaction classification.
+requires a successful transaction classification from the current requested test.
+Delayed results from previous attempts or an earlier setup screen are ignored.
 The preview omits the native test notification's synthetic title while scanning
 its sample payment body; real notifications always include their complete text.
 Every selected Android app
@@ -66,7 +67,9 @@ it rechecks live settings/accounts/categories and allowance before saving.
 
 Only durable handling acknowledges a native capture. Network, capacity, quota,
 malformed reply and database failures remain queued. A failed-save capture reuses
-its successful scanner classification instead of spending another inference.
+its successful scanner classification when the selected account currency is
+unchanged. Currency changes during a scan retain the alert for retry; saved
+classifications without a matching currency context are rescanned.
 Transaction creation, capture link and the shared automatic-log counter commit
 in one SQLite transaction. Already logged captures are acknowledged without a
 second save. No keyword fallback runs during outages or against older Workers.
@@ -89,7 +92,9 @@ The shared Apple Pay/notification auto-log allowance remains 100 lifetime free
 logs and unlimited for Pro; the free account gate still applies.
 
 Migration 067 remains unchanged. Internal capture rows serve duplicate and retry
-bookkeeping, not an inbox. Ignored captures store no raw title/body. Other capture
+bookkeeping, not an inbox. Ignored captures store no raw title/body, including
+failed captures discarded on retry. Provider failures are sanitized before
+notification diagnostics are logged or returned. Other capture
 retention, backup exclusions and reset/restore cleanup remain. Raw text, amounts
 and merchant/payer names are excluded from analytics and new Worker logs.
 

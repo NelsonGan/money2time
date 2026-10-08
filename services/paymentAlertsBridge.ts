@@ -14,6 +14,7 @@ export function subscribePaymentAlertDrain(listener: () => void): () => void {
 
 /** What the pipeline made of the setup screen's test alert. */
 export interface TestAlertResult {
+  capturedAt: string;
   amount: number | null;
   currency: string | null;
   counterparty: string | null;
@@ -21,6 +22,11 @@ export interface TestAlertResult {
   categoryId: string | null;
   wouldLog: boolean;
   scanFailed?: boolean;
+}
+
+/** A slow or queued test must not complete a later setup attempt. */
+export function isCurrentTestAlertResult(result: TestAlertResult, startedAt: number | null) {
+  return startedAt !== null && Date.parse(result.capturedAt) >= startedAt;
 }
 
 const testListeners = new Set<(result: TestAlertResult) => void>();

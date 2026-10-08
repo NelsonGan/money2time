@@ -109,11 +109,15 @@ export async function analyzeNotificationCapture(
   if (!current.prefs.notificationScanningEnabled)
     throw new ReceiptScanError('not_available', 'Notification scanning is disabled.');
   if (
-    capture.possiblyTruncated ||
+    capture.possiblyTruncated ??
     hasNativeAlertTruncation([capture.title, capture.subtitle, capture.body, ...capture.extra])
   )
     return initial;
-  let parse = saved;
+  const account = current.accounts.find((item) => item.id === initial.binding.accountId);
+  const scanCurrency = account?.currency ?? current.reportingCurrency;
+  // A resolved currency may have come from the selected account, rather than
+  // the text. Cached results are safe only with the same fallback context.
+  let parse = saved?.scanCurrency === scanCurrency ? saved : undefined;
   if (!parse) {
     const text = normalizeAlertText([
       // Native setup tests are preview-only. Their visible "test" label would
@@ -125,12 +129,11 @@ export async function analyzeNotificationCapture(
     ]).text;
     // Do not truncate: a late "failed" or promotional condition changes meaning.
     if (!text || text.length > MAX_ALERT_TEXT_LENGTH) return initial;
-    const account = current.accounts.find((item) => item.id === initial.binding.accountId);
     const result = await scanNotification({
       appUserId: current.appUserId,
       text,
       capturedAt: capture.capturedAt,
-      currency: account?.currency ?? current.reportingCurrency,
+      currency: scanCurrency,
       categories: current.categories
         .filter((item) => item.type === 'expense' && !item.deletedAt)
         .map((item) => item.name),
@@ -138,13 +141,22 @@ export async function analyzeNotificationCapture(
         .filter((item) => item.type === 'income' && !item.deletedAt)
         .map((item) => item.name),
     });
-    parse = notificationParse(result);
+    parse = notificationParse(result, scanCurrency);
   }
   const latest = deps.getCurrent?.() ?? deps;
   const latestContext = buildPipelineContext(latest);
   const analysis = analyzeCapture(capture, latestContext, parse);
   if (!latest.prefs.notificationScanningEnabled && !captureSkipReason(analysis, latestContext))
     throw new ReceiptScanError('not_available', 'Notification scanning was disabled.');
+  const latestAccount = latest.accounts.find((item) => item.id === analysis.binding.accountId);
+  if (
+    !captureSkipReason(analysis, latestContext) &&
+    scanCurrency !== (latestAccount?.currency ?? latest.reportingCurrency)
+  )
+    throw new ReceiptScanError(
+      'not_available',
+      'Notification scan currency changed. Retry needed.',
+    );
   return analysis;
 }
 
@@ -180,9 +192,7 @@ export async function processAlertCaptures(
   const earliest = Math.min(...times);
   const latest = Math.max(...times);
   const since = new Date(earliest - 4 * DAY_MS).toISOString();
-  const recentCaptures: CaptureRef[] = paymentAlertCapturesRepository
-    .listSince(since)
-    .map(captureRefOf);
+  const recentCaptures: CaptureRef[] = [];
   const transactionIdsFromCaptures = new Set(
     paymentAlertCapturesRepository.listLoggedTransactionIds(since),
   );
@@ -252,7 +262,8 @@ export async function processAlertCaptures(
     const currentCaptures = new Map(
       paymentAlertCapturesRepository.listSince(since).map((item) => [item.id, captureRefOf(item)]),
     );
-    for (const item of recentCaptures) currentCaptures.set(item.id, item);
+    for (const item of recentCaptures)
+      if (!currentCaptures.has(item.id)) currentCaptures.set(item.id, item);
     for (const id of paymentAlertCapturesRepository.listLoggedTransactionIds(since))
       transactionIdsFromCaptures.add(id);
     const duplicate = findDuplicate(

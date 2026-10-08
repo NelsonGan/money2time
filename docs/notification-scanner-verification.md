@@ -6,7 +6,7 @@ inference were synthetic. Production Worker traffic was not changed.
 ## Automated checks
 
 - `npm run check`: app type checking, lint and formatting.
-- `npm test -- --runInBand`: 176 suites, 2473 tests.
+- `npm test -- --runInBand`: 178 suites, 2488 tests.
 - Receipt scanner Worker: `npm run typecheck` and explicit formatting check.
 - Worker contract tests exercise signed requests, entitlement/allowance isolation,
   text-only provider payloads, malformed output, intentional ignores, primary and
@@ -19,6 +19,14 @@ inference were synthetic. Production Worker traffic was not changed.
   boundary are discarded without uploading or creating a transaction, since the
   cut-off suffix might change a payment's meaning. Truncation evidence is retained
   before whitespace trimming.
+- Review regressions cover account currency changes during inference and saved
+  retries, fresh duplicate records after transaction deletion, immediate raw-text
+  removal when a failed capture is discarded, complete multiline native bodies,
+  sanitized provider errors (with capacity behavior preserved), and setup results
+  belonging only to the current requested test.
+- The evaluation runner rejects missing or contradictory explicit decisions;
+  four local HTTP contract cases passed. These checks test the reporting script,
+  not model accuracy.
 - The setup preview scans the sample payment without its synthetic test title and
   never creates a transaction. Locale keys/interpolations retain parity across
   all 24 catalogues; the analytics tracking-plan check passes.
@@ -86,6 +94,14 @@ Simulator application; iOS devices were controllable through Argent but a visibl
 Simulator window could not be opened. iOS visual checks used device captures.
 Final screenshots are in [PR evidence](pr-evidence/notification-text-scanning/).
 Only final images were captured; there is no before/after comparison.
+
+The review follow-up used the same Android emulator with a held local scanner
+response. Unsolicited and stale setup results did not change the screen; releasing
+the current native test returned the expected MYR1 preview; a duplicate completion
+was ignored. This timing test made one locally intercepted notification request,
+sent no notification text to a provider and saved no transaction. Its final image
+is [current-test preview](pr-evidence/notification-text-scanning/android-setup-current-test.png).
+The original scanning preference and development Pro override were restored.
 
 Three affected in-app automation tutorial frames were recaptured and annotated.
 Tutorial registry generation and website sync completed; the website catalogue

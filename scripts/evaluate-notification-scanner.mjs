@@ -50,8 +50,14 @@ for (const entry of selected) {
     const body = await response.json();
     const transaction = body.transactions?.[0];
     const decision = body.notificationDecision === 'ignore' ? 'ignore' : transaction?.type;
+    const validDecision =
+      Array.isArray(body.transactions) &&
+      (body.notificationDecision === 'ignore'
+        ? body.transactions.length === 0
+        : body.notificationDecision === 'transaction' && body.transactions.length === 1);
     const pass =
       response.status === 200 &&
+      validDecision &&
       decision === entry.expected.decision &&
       (decision === 'ignore' ||
         (transaction?.amount === entry.expected.amount &&

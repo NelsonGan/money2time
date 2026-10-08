@@ -8,6 +8,7 @@ import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import {
+  isCurrentTestAlertResult,
   requestPaymentAlertDrain,
   subscribeTestAlertResult,
   type TestAlertResult,
@@ -58,6 +59,7 @@ export function PaymentAlertsSetupScreen({ initialStep, onClose }: PaymentAlerts
   const [testState, setTestState] = useState<'idle' | 'waiting' | 'done' | 'timeout'>('idle');
   const [testResult, setTestResult] = useState<TestAlertResult | null>(null);
   const testTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const testStartedAt = useRef<number | null>(null);
   const disclosureTracked = useRef(false);
 
   useEffect(() => {
@@ -94,6 +96,8 @@ export function PaymentAlertsSetupScreen({ initialStep, onClose }: PaymentAlerts
 
   useEffect(() => {
     return subscribeTestAlertResult((result) => {
+      if (!isCurrentTestAlertResult(result, testStartedAt.current)) return;
+      testStartedAt.current = null;
       if (testTimer.current) clearTimeout(testTimer.current);
       const scanFailed = result.scanFailed || !result.wouldLog;
       setTestResult({ ...result, scanFailed });
@@ -200,6 +204,7 @@ export function PaymentAlertsSetupScreen({ initialStep, onClose }: PaymentAlerts
   }, [prefs, updatePrefs]);
 
   const sendTest = useCallback(async () => {
+    testStartedAt.current = Date.now();
     setTestState('waiting');
     setTestResult(null);
     if (testTimer.current) clearTimeout(testTimer.current);

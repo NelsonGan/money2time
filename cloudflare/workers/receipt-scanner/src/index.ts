@@ -507,7 +507,11 @@ async function completeWithFailover(
       validateContent?.(content);
       return content;
     } catch (err) {
-      lastError = err;
+      // Providers and JSON parsers can echo the submitted text in failures.
+      // Keep notification errors to controlled diagnostics before logging or
+      // returning them to the client. Receipt diagnostics remain unchanged.
+      const failure = body.mode === 'notification' ? notificationInferenceError(err) : err;
+      lastError = failure;
       // Read the clock after the attempt, not before it: the attempt is what
       // spends the budget, so a check made at loop entry can wave through a
       // model that then throws inference_budget_exhausted, burying this error.
@@ -517,12 +521,24 @@ async function completeWithFailover(
         model,
         isBackup: i > 0,
         willRetry,
-        error: err instanceof Error ? err.message : String(err),
+        error: failure instanceof Error ? failure.message : String(failure),
       });
       if (!willRetry) break;
     }
   }
   throw lastError;
+}
+
+function notificationInferenceError(error: unknown): Error {
+  const message = error instanceof Error ? error.message : '';
+  const status = /^openrouter (\d{3}):/.exec(message)?.[1];
+  const capacity = /429|overloaded|capacity|concurren/i.test(message);
+  if (status) return new Error(`openrouter ${status}${capacity ? ' capacity' : ''}`);
+  if (capacity) return new Error('inference_capacity');
+  if (message === 'invalid_notification_result' || message === 'inference_budget_exhausted')
+    return new Error(message);
+  if (error instanceof Error && error.name === 'AbortError') return new Error('inference_timeout');
+  return new Error('inference_failed');
 }
 
 async function runInference(

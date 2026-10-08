@@ -16,13 +16,14 @@ const request = (body = args, headers = {}) => new Request('https://scanner.test
 const completion = (value: unknown) => new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify(value) } }] }), { status: 200 });
 
 describe('text-only notification endpoint', () => {
+  let logSpy: jest.SpyInstance;
   const originalFetch = global.fetch;
   beforeAll(() => { Object.defineProperty(global, 'crypto', { value: webcrypto, configurable: true }); });
   beforeEach(() => {
     jest.clearAllMocks(); global.fetch = fetchMock;
     fetchMock.mockReset().mockResolvedValue(completion(inference));
     checkQuota.mockResolvedValue({ allowed: true, used: 0, limit: 50, interval: '100year' });
-    jest.spyOn(console, 'log').mockImplementation(() => {});
+    logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     jest.spyOn(console, 'error').mockImplementation(() => {});
   });
   afterEach(() => jest.restoreAllMocks());
@@ -56,6 +57,23 @@ describe('text-only notification endpoint', () => {
     fetchMock.mockResolvedValueOnce(new Response('', { status: 503 }));
     expect((await worker.fetch(request(), env, ctx)).status).toBe(200);
     expect(JSON.parse(fetchMock.mock.calls[1][1].body).model).toBe('backup');
+  });
+  it.each(['http', 'invalid_json', 'network'])('never includes notification text in %s failure logs or responses', async (failure) => {
+    const privateText = 'PRIVATE NOTIFICATION ACCOUNT 1234';
+    if (failure === 'http') fetchMock.mockImplementation(async () => new Response(privateText, { status: 503 }));
+    if (failure === 'invalid_json') fetchMock.mockImplementation(async () => new Response(privateText, { status: 200 }));
+    if (failure === 'network') fetchMock.mockRejectedValue(new Error(privateText));
+    const response = await worker.fetch(request({ ...args, text: privateText }), env, ctx);
+    expect(response.status).toBe(502);
+    expect(await response.text()).not.toContain(privateText);
+    expect(JSON.stringify(jest.mocked(console.error).mock.calls)).not.toContain(privateText);
+    expect(JSON.stringify(logSpy.mock.calls)).not.toContain(privateText);
+  });
+  it('preserves capacity error handling while removing echoed provider text', async () => {
+    fetchMock.mockImplementation(async () => new Response('Provider overloaded: PRIVATE NOTIFICATION', { status: 503 }));
+    const response = await worker.fetch(request(), env, ctx);
+    expect(response.status).toBe(429);
+    expect(await response.text()).not.toContain('PRIVATE NOTIFICATION');
   });
   it.each([
     { text: '' }, { text: 'a'.repeat(12001) }, { text: 25 }, { capturedAt: 'bad' },

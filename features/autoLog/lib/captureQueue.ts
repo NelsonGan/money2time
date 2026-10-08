@@ -116,7 +116,7 @@ export function parseAndroidCaptureJson(fileName: string, json: string): Capture
     presetAccountId: null,
     presetCategoryId: null,
     isTest: row.test === true,
-    ...(hasNativeAlertTruncation([
+    possiblyTruncated: hasNativeAlertTruncation([
       row.title,
       row.text,
       row.bigText,
@@ -127,9 +127,7 @@ export function parseAndroidCaptureJson(fileName: string, json: string): Capture
       ...(Array.isArray(row.messages)
         ? row.messages.map((item) => (item && typeof item === 'object' ? item.text : null))
         : []),
-    ])
-      ? { possiblyTruncated: true }
-      : {}),
+    ]),
   };
 }
 
@@ -169,9 +167,7 @@ export function parseIosPendingAlertsJson(raw: string | null | undefined): Captu
       nativeKey: null,
       presetAccountId: str(row.accountId),
       presetCategoryId: str(row.categoryId),
-      ...(hasNativeAlertTruncation([row.title, row.subtitle, row.message])
-        ? { possiblyTruncated: true }
-        : {}),
+      possiblyTruncated: hasNativeAlertTruncation([row.title, row.subtitle, row.message]),
     });
   }
   return entries;
