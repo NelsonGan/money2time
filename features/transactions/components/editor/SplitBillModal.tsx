@@ -36,7 +36,11 @@ import {
 } from '~/features/transactions/components/editor/calculatorEngine';
 import { MiniNumpad } from '~/features/transactions/components/editor/MiniNumpad';
 import { recentSplitPersonNames } from '~/features/transactions/lib/settleUp';
-import { applyPercent, nextEditableAmountIndex } from '~/features/transactions/lib/splitMath';
+import {
+  applyPercent,
+  nextEditableAmountIndex,
+  sumUnpaidRows,
+} from '~/features/transactions/lib/splitMath';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -80,7 +84,8 @@ interface SplitBillModalProps {
   total: number;
   defaultAccountId: string | null;
   splits: SplitDraft[];
-  onChange: (splits: SplitDraft[]) => void;
+  /** Percentage adjustments supply the matching parent total in fixed-total mode. */
+  onChange: (splits: SplitDraft[], adjustedTotal?: number) => void;
   splitEvenly: boolean;
   onSplitEvenlyChange: (v: boolean) => void;
   accounts: Account[];
@@ -100,7 +105,7 @@ const styles = StyleSheet.create({
   },
 });
 
-// Tax & service percentage stepper bounds (itemized mode). Negative values are
+// Tax & service percentage stepper bounds. Negative values are
 // a discount; applyPercent supports anything > -100.
 const DEFAULT_ADJUST_PERCENT = 10;
 const MIN_ADJUST_PERCENT = -99;
@@ -432,7 +437,7 @@ export function SplitBillModal({
 
   const diff = useMemo(() => Math.round((total - unpaidSum) * 100) / 100, [total, unpaidSum]);
 
-  // Itemized-mode tax & service adjustment: a single percentage stepper.
+  // Tax & service adjustment: a single percentage stepper.
   // Applying is a one-shot transform of the row amounts; applying twice
   // stacks intentionally (service charge, then GST).
   const [percent, setPercent] = useState(DEFAULT_ADJUST_PERCENT);
@@ -488,7 +493,7 @@ export function SplitBillModal({
     const next = applyPercent(splits, percent);
     if (!next) return;
     void triggerHaptic('success');
-    onChange(next);
+    onChange(next, itemized ? undefined : sumUnpaidRows(next));
     Keyboard.dismiss();
     // Close the mini numpad. Without this the focused row keeps showing its live
     // expression (not the freshly scaled amount) and confirming the pad would
@@ -496,7 +501,7 @@ export function SplitBillModal({
     // the highlighted field.
     setFocusedAmountIndex(null);
     setFocusedExpression('');
-  }, [onChange, percent, splits]);
+  }, [itemized, onChange, percent, splits]);
 
   const formatMoney = useCallback(
     (n: number) => {
@@ -945,66 +950,64 @@ export function SplitBillModal({
             </View>
           ) : null}
 
-          {/* Tax & service (itemized only): a percentage stepper applied
+          {/* Tax & service: a percentage stepper applied
               proportionally on top of the entered amounts. */}
-          {itemized ? (
-            <View className="mx-4 mt-3 rounded-[20px] bg-card/60 border border-border/25 overflow-hidden">
-              <View className="px-4 pt-3 pb-1">
-                <Text variant="caption" tone="muted">
-                  {percent < 0
-                    ? I18n.t('transactions.editor.split.discount_title')
-                    : I18n.t('transactions.editor.split.adjustments_title')}
-                </Text>
-              </View>
-              <View className="px-4 pb-3 pt-1 flex-row items-center gap-3">
-                <Pressable
-                  onPressIn={() => startHold(-1)}
-                  onPressOut={stopHold}
-                  disabled={percent <= MIN_ADJUST_PERCENT}
-                  hitSlop={6}
-                  className="h-8 w-8 rounded-full bg-secondary/60 items-center justify-center"
-                  style={{ opacity: percent <= MIN_ADJUST_PERCENT ? 0.4 : 1 }}
-                >
-                  <Minus size={14} color={themeColors.text} />
-                </Pressable>
-                <Text variant="bodyStrong" className="min-w-[60px] text-center">
-                  {I18n.t('transactions.editor.split.percent_chip', { percent })}
-                </Text>
-                <Pressable
-                  onPressIn={() => startHold(1)}
-                  onPressOut={stopHold}
-                  disabled={percent >= MAX_ADJUST_PERCENT}
-                  hitSlop={6}
-                  className="h-8 w-8 rounded-full bg-secondary/60 items-center justify-center"
-                  style={{ opacity: percent >= MAX_ADJUST_PERCENT ? 0.4 : 1 }}
-                >
-                  <Plus size={14} color={themeColors.text} />
-                </Pressable>
-
-                <View className="flex-1" />
-
-                <Pressable
-                  onPress={handleApplyPercent}
-                  disabled={!canApplyPercent}
-                  className={cn(
-                    'px-3.5 py-1.5 rounded-full active:opacity-80',
-                    canApplyPercent ? 'bg-primary' : 'bg-secondary/60',
-                  )}
-                  style={{ opacity: canApplyPercent ? 1 : 0.4 }}
-                >
-                  <Text
-                    variant="caption"
-                    className={cn(
-                      'font-medium',
-                      canApplyPercent ? 'text-primary-foreground' : 'text-muted-foreground',
-                    )}
-                  >
-                    {I18n.t('transactions.editor.split.apply')}
-                  </Text>
-                </Pressable>
-              </View>
+          <View className="mx-4 mt-3 rounded-[20px] bg-card/60 border border-border/25 overflow-hidden">
+            <View className="px-4 pt-3 pb-1">
+              <Text variant="caption" tone="muted">
+                {percent < 0
+                  ? I18n.t('transactions.editor.split.discount_title')
+                  : I18n.t('transactions.editor.split.adjustments_title')}
+              </Text>
             </View>
-          ) : null}
+            <View className="px-4 pb-3 pt-1 flex-row items-center gap-3">
+              <Pressable
+                onPressIn={() => startHold(-1)}
+                onPressOut={stopHold}
+                disabled={percent <= MIN_ADJUST_PERCENT}
+                hitSlop={6}
+                className="h-8 w-8 rounded-full bg-secondary/60 items-center justify-center"
+                style={{ opacity: percent <= MIN_ADJUST_PERCENT ? 0.4 : 1 }}
+              >
+                <Minus size={14} color={themeColors.text} />
+              </Pressable>
+              <Text variant="bodyStrong" className="min-w-[60px] text-center">
+                {I18n.t('transactions.editor.split.percent_chip', { percent })}
+              </Text>
+              <Pressable
+                onPressIn={() => startHold(1)}
+                onPressOut={stopHold}
+                disabled={percent >= MAX_ADJUST_PERCENT}
+                hitSlop={6}
+                className="h-8 w-8 rounded-full bg-secondary/60 items-center justify-center"
+                style={{ opacity: percent >= MAX_ADJUST_PERCENT ? 0.4 : 1 }}
+              >
+                <Plus size={14} color={themeColors.text} />
+              </Pressable>
+
+              <View className="flex-1" />
+
+              <Pressable
+                onPress={handleApplyPercent}
+                disabled={!canApplyPercent}
+                className={cn(
+                  'px-3.5 py-1.5 rounded-full active:opacity-80',
+                  canApplyPercent ? 'bg-primary' : 'bg-secondary/60',
+                )}
+                style={{ opacity: canApplyPercent ? 1 : 0.4 }}
+              >
+                <Text
+                  variant="caption"
+                  className={cn(
+                    'font-medium',
+                    canApplyPercent ? 'text-primary-foreground' : 'text-muted-foreground',
+                  )}
+                >
+                  {I18n.t('transactions.editor.split.apply')}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
         </ScrollView>
 
         {/* Name suggestions: drop-up above the sum bar / keyboard while typing a name */}

@@ -155,7 +155,10 @@ export function SettingsHeader({
           natural-width slots so the title gives them room on smaller screens. */}
       <View className="flex-row items-center gap-2" style={{ minHeight: 40 }}>
         <View
-          className={cn('flex-row items-center justify-start', fitActions ? 'min-w-10' : 'flex-1')}
+          className={cn(
+            'min-w-10 shrink-0 flex-row items-center justify-start',
+            !fitActions && 'flex-1',
+          )}
         >
           {onBack ? (
             <HeaderIconButton
@@ -168,15 +171,15 @@ export function SettingsHeader({
 
         <View
           className={cn(
-            'flex-row items-center justify-center gap-1.5',
-            fitActions && 'min-w-0 flex-1',
+            'min-w-0 flex-row items-center justify-center gap-1.5',
+            fitActions && 'flex-1',
           )}
           style={{ flexShrink: 1 }}
         >
           <Text
             variant="subheading"
             numberOfLines={1}
-            className={cn('tracking-tight text-center', fitActions && 'min-w-0 shrink')}
+            className="min-w-0 shrink tracking-tight text-center"
           >
             {title}
           </Text>
@@ -185,8 +188,8 @@ export function SettingsHeader({
 
         <View
           className={cn(
-            'flex-row items-center justify-end gap-2',
-            fitActions ? 'min-w-10 shrink-0' : 'flex-1',
+            'min-w-10 shrink-0 flex-row items-center justify-end gap-2',
+            !fitActions && 'flex-1',
           )}
         >
           {rightAccessory}
