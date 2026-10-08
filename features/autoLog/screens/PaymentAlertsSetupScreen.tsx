@@ -8,6 +8,7 @@ import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import {
+  isCurrentTestAlertResult,
   requestPaymentAlertDrain,
   subscribeTestAlertResult,
   type TestAlertResult,
@@ -42,7 +43,7 @@ interface PaymentAlertsSetupScreenProps {
 }
 
 /** How long the test waits for its own notification to come back. */
-const TEST_TIMEOUT_MS = 10000;
+const TEST_TIMEOUT_MS = 105000;
 
 /**
  * Android setup for payment notifications: the prominent disclosure Google
@@ -52,25 +53,30 @@ const TEST_TIMEOUT_MS = 10000;
 export function PaymentAlertsSetupScreen({ initialStep, onClose }: PaymentAlertsSetupScreenProps) {
   const { accounts, categories, settings } = useApp();
   const { paymentAlertPrefs: prefs, updatePaymentAlertPrefs: updatePrefs } = useApp();
-  const [step, setStep] = useState<Step>(initialStep ?? 'intro');
+  const [step, setStep] = useState<Step>(
+    prefs.notificationScanningEnabled ? (initialStep ?? 'intro') : 'intro',
+  );
   const [testState, setTestState] = useState<'idle' | 'waiting' | 'done' | 'timeout'>('idle');
   const [testResult, setTestResult] = useState<TestAlertResult | null>(null);
   const testTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const testStartedAt = useRef<number | null>(null);
+  const disclosureTracked = useRef(false);
 
   useEffect(() => {
-    if (initialStep) return;
+    if (disclosureTracked.current || (initialStep && prefs.notificationScanningEnabled)) return;
+    disclosureTracked.current = true;
     void trackEvent(AnalyticsEvents.AUTOLOG_ALERTS_SETUP, {
       step: 'disclosure_viewed',
       platform: 'android',
     });
-  }, [initialStep]);
+  }, [initialStep, prefs.notificationScanningEnabled]);
 
   // Back from Android settings: move on as soon as access is on.
   useEffect(() => {
     const check = async () => {
       if (await getNotificationAccessGranted()) {
         setStep((current) => {
-          if (current === 'access' || current === 'intro') {
+          if (current === 'access') {
             void trackEvent(AnalyticsEvents.AUTOLOG_ALERTS_SETUP, {
               step: 'access_granted',
               platform: 'android',
@@ -90,9 +96,13 @@ export function PaymentAlertsSetupScreen({ initialStep, onClose }: PaymentAlerts
 
   useEffect(() => {
     return subscribeTestAlertResult((result) => {
+      if (!isCurrentTestAlertResult(result, testStartedAt.current)) return;
+      testStartedAt.current = null;
       if (testTimer.current) clearTimeout(testTimer.current);
-      setTestResult(result);
-      setTestState('done');
+      const scanFailed = result.scanFailed || !result.wouldLog;
+      setTestResult({ ...result, scanFailed });
+      setTestState(scanFailed ? 'timeout' : 'done');
+      if (scanFailed) return;
       void triggerHaptic('success');
       void trackEvent(AnalyticsEvents.AUTOLOG_ALERTS_SETUP, {
         step: 'test_passed',
@@ -132,13 +142,14 @@ export function PaymentAlertsSetupScreen({ initialStep, onClose }: PaymentAlerts
   // Access survives turning the feature off in the app, so a returning user
   // who still has it goes straight to the apps instead of the system screen.
   const continueFromIntro = useCallback(async () => {
+    updatePrefs((previous) => ({ ...previous, notificationScanningEnabled: true }));
     if (await getNotificationAccessGranted()) {
       void triggerHaptic('medium');
       setStep('apps');
       return;
     }
     openSettings();
-  }, [openSettings]);
+  }, [openSettings, updatePrefs]);
 
   const toggleApp = useCallback(
     (app: PickableApp, on: boolean) => {
@@ -193,6 +204,7 @@ export function PaymentAlertsSetupScreen({ initialStep, onClose }: PaymentAlerts
   }, [prefs, updatePrefs]);
 
   const sendTest = useCallback(async () => {
+    testStartedAt.current = Date.now();
     setTestState('waiting');
     setTestResult(null);
     if (testTimer.current) clearTimeout(testTimer.current);
@@ -237,16 +249,14 @@ export function PaymentAlertsSetupScreen({ initialStep, onClose }: PaymentAlerts
               {I18n.t('payment_alerts.disclosure_body')}
             </Text>
             <View className="gap-3 rounded-2xl border border-border/30 bg-card p-4">
-              {['disclosure_point_selected', 'disclosure_point_device'].map((key) => (
-                <View key={key} className="flex-row gap-3">
-                  <Text variant="body" tone="primary">
-                    •
-                  </Text>
-                  <Text variant="body" className="flex-1 text-foreground">
-                    {I18n.t(`payment_alerts.${key}`)}
-                  </Text>
-                </View>
-              ))}
+              <View className="flex-row gap-3">
+                <Text variant="body" tone="primary">
+                  •
+                </Text>
+                <Text variant="body" className="flex-1 text-foreground">
+                  {I18n.t('payment_alerts.disclosure_point_selected')}
+                </Text>
+              </View>
             </View>
             <Text variant="caption" tone="muted">
               {I18n.t('payment_alerts.disclosure_android_warning')}
@@ -356,10 +366,18 @@ export function PaymentAlertsSetupScreen({ initialStep, onClose }: PaymentAlerts
             {testState === 'timeout' ? (
               <View className="gap-1 rounded-2xl border border-warning/40 bg-warning/10 p-4">
                 <Text variant="bodyStrong" className="text-foreground">
-                  {I18n.t('payment_alerts.test_timeout_title')}
+                  {I18n.t(
+                    testResult?.scanFailed
+                      ? 'payment_alerts.test_scan_failed_title'
+                      : 'payment_alerts.test_timeout_title',
+                  )}
                 </Text>
                 <Text variant="caption" tone="muted">
-                  {I18n.t('payment_alerts.test_timeout_body')}
+                  {I18n.t(
+                    testResult?.scanFailed
+                      ? 'payment_alerts.test_scan_failed'
+                      : 'payment_alerts.test_timeout_body',
+                  )}
                 </Text>
               </View>
             ) : null}

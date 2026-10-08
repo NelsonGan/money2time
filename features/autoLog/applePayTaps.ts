@@ -15,7 +15,7 @@ import { reportError } from '~/services/errorReporting';
 import type { PaymentAlertParse, PaymentAlertResolution } from '~/types';
 
 import { alertDedupeKey, captureRefOf, findDuplicate } from './lib/dedupe';
-import { ALERT_PARSER_VERSION } from './lib/parser';
+import { NOTIFICATION_PARSER_VERSION } from './lib/notification';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const APPLE_PAY_SOURCE = 'apple_pay';
@@ -46,7 +46,7 @@ function parseOf(entry: AutoLogPendingEntry, input: CreateTransactionInput): Pay
     counterpartyLeadIn: null,
     confidence: 'high',
     signals: ['apple_pay'],
-    parserVersion: ALERT_PARSER_VERSION,
+    parserVersion: NOTIFICATION_PARSER_VERSION,
   };
 }
 
@@ -136,7 +136,7 @@ export function recordApplePayTap(
     status: outcome.status,
     reason: outcome.status === 'logged' ? 'auto' : 'duplicate',
     resolution,
-    parserVersion: ALERT_PARSER_VERSION,
+    parserVersion: NOTIFICATION_PARSER_VERSION,
     transactionId: outcome.transactionId,
     duplicateOf: outcome.status === 'duplicate' ? outcome.duplicateOf : null,
     dedupeKey: alertDedupeKey('apple_pay', APPLE_PAY_SOURCE, entry.id),

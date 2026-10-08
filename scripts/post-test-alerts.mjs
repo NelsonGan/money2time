@@ -15,7 +15,7 @@
  *
  * Options: --serial <adb serial>, --delay <ms between posts, default 1500>.
  * Fixtures come from __tests__/fixtures/payment-alerts/alerts.json, the same
- * corpus the parser tests run against.
+ * synthetic corpus used by notification scanner evaluations.
  */
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';

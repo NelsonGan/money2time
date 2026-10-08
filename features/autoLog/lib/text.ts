@@ -1,14 +1,19 @@
-// Text plumbing for the payment-alert parser: normalizing what a notification
-// hands over, and matching lexicons against it. Pure.
+// Notification text normalization for duplicate checks and explicit user filters.
 
-import type { Lexicon } from './lexicons';
-
-/** Characters that make up a word in the scripts lexicon words are written in. */
+/** Characters that make up a word for whole-word explicit ignore filters. */
 export const WORD_CHAR_CLASS = 'A-Za-z0-9\\u00C0-\\u024F\\u0400-\\u052F\\u1E00-\\u1EFF';
 const WORD_CHAR = new RegExp(`[${WORD_CHAR_CLASS}]`);
 
-/** Longest text the parser looks at; real alerts are a few hundred characters. */
-export const MAX_ALERT_TEXT_LENGTH = 2000;
+/** Longest text accepted by the scanner; real alerts are a few hundred characters. */
+export const MAX_ALERT_TEXT_LENGTH = 12000;
+/** Both existing native capture plugins truncate each field at this boundary.
+ * Without a truncation flag, discard boundary-length fields rather than trust
+ * a prefix that may have lost a later failure or promotional condition. */
+export const NATIVE_ALERT_FIELD_LIMIT = 2000;
+
+export function hasNativeAlertTruncation(parts: readonly unknown[]): boolean {
+  return parts.some((part) => typeof part === 'string' && part.length >= NATIVE_ALERT_FIELD_LIMIT);
+}
 
 const HTML_TAG = /<\/?[a-z][^>]*>/gi;
 const HTML_ENTITIES: Record<string, string> = {
@@ -20,10 +25,6 @@ const HTML_ENTITIES: Record<string, string> = {
   '&#39;': "'",
   '&apos;': "'",
 };
-
-export function escapeRegex(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
 
 export function isWordChar(char: string | undefined): boolean {
   return !!char && WORD_CHAR.test(char);
@@ -82,15 +83,12 @@ export function normalizeAlertText(parts: readonly (string | null | undefined)[]
   const text = toCompatibilityForm(stripHtml(joined))
     .replace(/\r\n?/g, '\n')
     // Every horizontal space, including no-break and thin spaces used as digit
-    // grouping, becomes a plain space; the amount pattern accepts that as a
-    // thousands separator.
+    // grouping, becomes a plain space for consistent duplicate checks.
     .replace(/[^\S\n]+/g, ' ')
     .split('\n')
     .map((line) => line.trim())
     .filter((line) => line.length > 0)
-    .join('\n')
-    .slice(0, MAX_ALERT_TEXT_LENGTH);
-
+    .join('\n');
   // toLowerCase can change length for a handful of characters (e.g. the
   // dotted capital I); fall back to a per-character lowercase so indices stay
   // aligned with `text`.
@@ -104,60 +102,6 @@ export function normalizeAlertText(parts: readonly (string | null | undefined)[]
         }).join('');
 
   return { text, lower };
-}
-
-export interface CompiledLexicon {
-  pattern: RegExp | null;
-  substrings: readonly string[];
-}
-
-export interface LexiconHit {
-  /** Index in the lowercased text where the matched word starts. */
-  index: number;
-  word: string;
-}
-
-/**
- * Lexicon entries go through the same compatibility normalization as alert
- * text, or a word whose characters NFKC rewrites (Thai SARA AM, for one) would
- * never match the normalized alert.
- */
-export function compileLexicon(lexicon: Lexicon): CompiledLexicon {
-  const words = [...new Set(lexicon.words.map((word) => toCompatibilityForm(word).toLowerCase()))]
-    .sort((a, b) => b.length - a.length)
-    .map(escapeRegex);
-  return {
-    pattern: words.length
-      ? new RegExp(
-          `(?:^|[^${WORD_CHAR_CLASS}])(${words.join('|')})(?=$|[^${WORD_CHAR_CLASS}])`,
-          'g',
-        )
-      : null,
-    substrings: lexicon.substrings.map((value) => toCompatibilityForm(value).toLowerCase()),
-  };
-}
-
-/** Every place a lexicon matches in the lowercased text, in order. */
-export function findLexiconHits(lower: string, lexicon: CompiledLexicon): LexiconHit[] {
-  const hits: LexiconHit[] = [];
-  if (lexicon.pattern) {
-    lexicon.pattern.lastIndex = 0;
-    let match: RegExpExecArray | null;
-    while ((match = lexicon.pattern.exec(lower)) !== null) {
-      const word = match[1] ?? '';
-      hits.push({ index: match.index + match[0].length - word.length, word });
-    }
-  }
-  for (const substring of lexicon.substrings) {
-    let from = 0;
-    while (from <= lower.length) {
-      const index = lower.indexOf(substring, from);
-      if (index < 0) break;
-      hits.push({ index, word: substring });
-      from = index + substring.length;
-    }
-  }
-  return hits.sort((a, b) => a.index - b.index);
 }
 
 /** Whole-word, case-insensitive containment, for user-entered names. */

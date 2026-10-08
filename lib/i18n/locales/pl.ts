@@ -1224,7 +1224,7 @@ const pl = {
       payment_alerts_status_apps_one: 'Włączone dla %{count} aplikacji',
       payment_alerts_status_apps_other: 'Włączone, aplikacje: %{count}',
       payment_alerts_android_step_1:
-        'Stuknij „Zapisuj z powiadomień” i włącz „Odczytuj powiadomienia”.',
+        'Tap “Log from notifications”, read the scanning disclosure and enable “Scan notification text” and “Read notifications”.',
       payment_alerts_android_step_2:
         'Android otworzy ekran dostępu do powiadomień. Znajdź Money2Time i włącz go.',
       payment_alerts_android_step_3:
@@ -1235,16 +1235,16 @@ const pl = {
       payment_alerts_android_step_6:
         'Wyślij testowe powiadomienie, aby sprawdzić, czy wszystko działa.',
       payment_alerts_android_step_7:
-        'Płatności są automatycznie zapisywane na wybranym koncie. Kategorie używają tych samych słów kluczowych co Apple Pay.',
+        'Completed income and expenses log to your selected account. The scanner selects categories and discards offers and unrelated notifications.',
       payment_alerts_ios_step_1:
         'Otwórz Shortcuts, stuknij +, potem Edit. W edytorze stuknij Automation.',
       payment_alerts_ios_step_2: 'Wyszukaj Notification i wybierz tę opcję.',
       payment_alerts_ios_step_3: 'Wyszukaj Log Notification i dodaj tę akcję.',
       payment_alerts_ios_step_4: 'Stuknij Message w Log Notification, potem Select Variable.',
       payment_alerts_ios_step_6:
-        'Stuknij strzałkę czynności, a następnie Account. Wybierz konto do zapisywania płatności tej aplikacji. Pozostaw Category puste, aby automatycznie dopasować słowa kluczowe.',
+        'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
       payment_alerts_ios_step_7:
-        'Wróć, aby zapisać. Powtórz dla każdej aplikacji bankowej lub portfela elektronicznego. Płatności zostaną zapisane przy następnym otwarciu Money2Time.',
+        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text”. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
       payment_alerts_android_disclosure:
         'Przeczytaj, jak używany jest dostęp do powiadomień, i stuknij Continue.',
       payment_alerts_ios_app:
@@ -2588,16 +2588,20 @@ const pl = {
     },
   },
   payment_alerts: {
+    scan_enabled: 'Skanuj tekst powiadomień',
+    test_scan_failed_title: 'Nie udało się zapisać powiadomienia testowego',
+    test_scan_failed:
+      'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
+
     account_hint:
-      'Płatności są automatycznie zapisywane na wybranym koncie. Kategorie używają tych samych słów kluczowych co Apple Pay.',
+      'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
     title: 'Powiadomienia',
-    intro_android:
-      'Money2Time odczytuje powiadomienia o płatnościach z wybranych aplikacji bankowych i portfeli, a potem zapisuje za Ciebie każdą płatność. Powiadomienia są odczytywane na tym telefonie i nigdy nie są wysyłane.',
     card_intro:
-      'Automatycznie zapisuj płatności z powiadomień aplikacji bankowych i portfeli elektronicznych.',
+      'Automatically log completed income and expenses from bank and wallet notifications.',
     section_status: 'Stan',
     master_label: 'Odczytuj powiadomienia',
-    master_hint: 'Zapisuje płatności z wybranych aplikacji.',
+    master_hint:
+      'Captures notifications from the apps you choose. Enable text scanning to log completed transactions.',
     access_open_settings: 'Otwórz ustawienia',
     health_unsupported:
       'Ta wersja Money2Time nie potrafi odczytywać powiadomień. Zaktualizuj aplikację, aby korzystać z powiadomień o płatnościach.',
@@ -2616,12 +2620,10 @@ const pl = {
     section_apps: 'Aplikacje',
     choose_apps: 'Wybierz aplikacje',
     source_off: 'Wyłączone',
-    disclosure_title: 'Zapisuj płatności z powiadomień',
+    disclosure_title: 'Log transactions from your notifications',
     disclosure_body: 'Do tego Money2Time potrzebuje dostępu do powiadomień. Tak z niego korzysta:',
     disclosure_point_selected:
       'Odczytuje tylko powiadomienia z wybranych przez Ciebie aplikacji bankowych i portfeli. Wszystko inne jest ignorowane.',
-    disclosure_point_device:
-      'Powiadomienia są odczytywane na tym telefonie. Ich treść nigdy nie jest wysyłana.',
     disclosure_android_warning:
       'Android ostrzeże, że aplikacja z dostępem do powiadomień może czytać wszystkie powiadomienia. Money2Time zachowuje tylko wybrane aplikacje.',
     access_title: 'Włącz dostęp do powiadomień',

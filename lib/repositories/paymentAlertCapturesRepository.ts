@@ -139,6 +139,9 @@ class PaymentAlertCapturesRepository {
     db.update(autoLogCapturesTable)
       .set({
         ...columns,
+        // A retry can become irrelevant after a settings change. Discard its
+        // original text just as we do when inserting a newly ignored alert.
+        ...(input.status === 'ignored' ? { title: null, body: null } : {}),
         ...(resolution !== undefined
           ? { resolutionJson: resolution ? JSON.stringify(resolution) : null }
           : {}),

@@ -10,9 +10,12 @@ import { readReceiptBase64 } from '~/services/userAssets';
 import { getErrorMessage } from '~/utils/errorHandling';
 
 import {
+  type NotificationScanResponse,
   ReceiptScanError,
   type ReceiptScanResponse,
+  type ScanNotificationArgs,
   type ScanReceiptArgs,
+  validateNotificationScanResponse,
 } from './receiptScan.shared';
 
 export * from './receiptScan.shared';
@@ -34,7 +37,15 @@ function apiBaseUrl(): string | null {
 }
 
 export async function scanReceipt(args: ScanReceiptArgs): Promise<ReceiptScanResponse> {
-  const body = await postScan(args.receiptRelPath, {
+  if (!apiBaseUrl())
+    throw new ReceiptScanError('not_available', 'Receipt scanning is not configured.');
+  const image = await readReceiptBase64(args.receiptRelPath);
+  if (!image) throw new ReceiptScanError('server', 'Could not read the captured receipt.');
+  if (image.base64.length > MAX_IMAGE_BASE64_BYTES)
+    throw new ReceiptScanError('too_large', 'The receipt photo is too large to scan.');
+  const body = await postScan({
+    image: image.base64,
+    mime: image.mime,
     appUserId: args.appUserId,
     currency: args.currency,
     categories: args.categories,
@@ -48,24 +59,17 @@ export async function scanReceipt(args: ScanReceiptArgs): Promise<ReceiptScanRes
   return response;
 }
 
-/** Shared request pipeline for the scan: read the stored image, POST it with a
- *  timeout, and map failures onto ReceiptScanError codes. */
-async function postScan(
-  receiptRelPath: string,
-  extraBody: Record<string, unknown>,
-): Promise<unknown> {
-  const base = apiBaseUrl();
-  if (!base) {
-    throw new ReceiptScanError('not_available', 'Receipt scanning is not configured.');
-  }
+/** Scan captured text through the same signed service as receipt images. */
+export async function scanNotification(
+  args: ScanNotificationArgs,
+): Promise<NotificationScanResponse> {
+  return validateNotificationScanResponse(await postScan({ ...args, mode: 'notification' }));
+}
 
-  const image = await readReceiptBase64(receiptRelPath);
-  if (!image) {
-    throw new ReceiptScanError('server', 'Could not read the captured receipt.');
-  }
-  if (image.base64.length > MAX_IMAGE_BASE64_BYTES) {
-    throw new ReceiptScanError('too_large', 'The receipt photo is too large to scan.');
-  }
+/** Shared signed request, timeout and error mapping for images and text. */
+async function postScan(body: Record<string, unknown>): Promise<unknown> {
+  const base = apiBaseUrl();
+  if (!base) throw new ReceiptScanError('not_available', 'Receipt scanning is not configured.');
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
@@ -74,10 +78,10 @@ async function postScan(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...signingHeaders(String(extraBody.appUserId ?? '')),
+        ...signingHeaders(String(body.appUserId ?? '')),
       },
       signal: controller.signal,
-      body: JSON.stringify({ image: image.base64, mime: image.mime, ...extraBody }),
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {

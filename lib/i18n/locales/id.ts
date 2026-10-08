@@ -1227,7 +1227,7 @@ const id = {
       payment_alerts_status_apps_one: 'Aktif untuk %{count} aplikasi',
       payment_alerts_status_apps_other: 'Aktif untuk %{count} aplikasi',
       payment_alerts_android_step_1:
-        'Ketuk “Catat dari notifikasi” lalu aktifkan “Baca notifikasi”.',
+        'Tap “Log from notifications”, read the scanning disclosure and enable “Scan notification text” and “Read notifications”.',
       payment_alerts_android_step_2:
         'Android membuka layar akses notifikasi. Cari Money2Time dan aktifkan.',
       payment_alerts_android_step_3:
@@ -1238,15 +1238,15 @@ const id = {
       payment_alerts_android_step_6:
         'Kirim notifikasi uji coba untuk memastikan semuanya berfungsi.',
       payment_alerts_android_step_7:
-        'Pembayaran otomatis dicatat ke akun yang dipilih. Kategori memakai kata kunci yang sama dengan Apple Pay.',
+        'Completed income and expenses log to your selected account. The scanner selects categories and discards offers and unrelated notifications.',
       payment_alerts_ios_step_1: 'Buka Shortcuts, ketuk +, lalu Edit. Ketuk Automation di editor.',
       payment_alerts_ios_step_2: 'Cari Notification dan pilih.',
       payment_alerts_ios_step_3: 'Cari Log Notification lalu tambahkan.',
       payment_alerts_ios_step_4: 'Ketuk Message di Log Notification, lalu Select Variable.',
       payment_alerts_ios_step_6:
-        'Ketuk panah tindakan, lalu Account. Pilih akun untuk mencatat pembayaran aplikasi ini. Biarkan Category kosong untuk pencocokan kata kunci otomatis.',
+        'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
       payment_alerts_ios_step_7:
-        'Ketuk kembali untuk menyimpan. Ulangi untuk setiap aplikasi bank atau dompet digital. Pembayaran dicatat saat Anda membuka Money2Time lagi.',
+        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text”. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
       payment_alerts_android_disclosure:
         'Baca cara akses notifikasi digunakan, lalu ketuk Continue.',
       payment_alerts_ios_app:
@@ -2591,16 +2591,20 @@ const id = {
     },
   },
   payment_alerts: {
+    scan_enabled: 'Pindai teks notifikasi',
+    test_scan_failed_title: 'Notifikasi uji tidak dapat dicatat',
+    test_scan_failed:
+      'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
+
     account_hint:
-      'Pembayaran otomatis dicatat ke akun yang dipilih. Kategori memakai kata kunci yang sama dengan Apple Pay.',
+      'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
     title: 'Notifikasi',
-    intro_android:
-      'Money2Time membaca notifikasi pembayaran dari aplikasi bank dan dompet digital yang Anda pilih, lalu mencatat setiap pembayaran untuk Anda. Notifikasi dibaca di ponsel ini dan tidak pernah diunggah.',
     card_intro:
-      'Catat pembayaran secara otomatis dari notifikasi aplikasi bank dan dompet digital.',
+      'Automatically log completed income and expenses from bank and wallet notifications.',
     section_status: 'Status',
     master_label: 'Baca notifikasi',
-    master_hint: 'Mencatat pembayaran dari aplikasi yang Anda pilih.',
+    master_hint:
+      'Captures notifications from the apps you choose. Enable text scanning to log completed transactions.',
     access_open_settings: 'Buka pengaturan',
     health_unsupported:
       'Versi Money2Time ini tidak bisa membaca notifikasi. Perbarui aplikasi untuk memakai notifikasi pembayaran.',
@@ -2619,11 +2623,10 @@ const id = {
     section_apps: 'Aplikasi',
     choose_apps: 'Pilih aplikasi',
     source_off: 'Nonaktif',
-    disclosure_title: 'Catat pembayaran dari notifikasi Anda',
+    disclosure_title: 'Log transactions from your notifications',
     disclosure_body: 'Money2Time memerlukan akses notifikasi untuk ini. Begini cara memakainya:',
     disclosure_point_selected:
       'Hanya membaca notifikasi dari aplikasi bank dan dompet digital yang Anda pilih. Selebihnya diabaikan.',
-    disclosure_point_device: 'Notifikasi dibaca di ponsel ini. Teksnya tidak pernah diunggah.',
     disclosure_android_warning:
       'Android akan memperingatkan bahwa aplikasi dengan akses notifikasi bisa membaca semua notifikasi Anda. Money2Time hanya menyimpan aplikasi yang Anda pilih.',
     access_title: 'Aktifkan akses notifikasi',

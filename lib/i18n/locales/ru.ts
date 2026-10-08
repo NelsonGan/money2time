@@ -1225,7 +1225,7 @@ const ru = {
       payment_alerts_status_apps_one: 'Включено для %{count} приложения',
       payment_alerts_status_apps_other: 'Включено, приложений: %{count}',
       payment_alerts_android_step_1:
-        'Откройте «Учёт из уведомлений» и включите «Читать уведомления».',
+        'Tap “Log from notifications”, read the scanning disclosure and enable “Scan notification text” and “Read notifications”.',
       payment_alerts_android_step_2:
         'Android откроет экран доступа к уведомлениям. Найдите Money2Time и включите его.',
       payment_alerts_android_step_3:
@@ -1236,16 +1236,16 @@ const ru = {
       payment_alerts_android_step_6:
         'Отправьте тестовое уведомление, чтобы проверить, что всё работает.',
       payment_alerts_android_step_7:
-        'Платежи автоматически записываются на выбранный счёт. Категории используют те же ключевые слова, что и Apple Pay.',
+        'Completed income and expenses log to your selected account. The scanner selects categories and discards offers and unrelated notifications.',
       payment_alerts_ios_step_1:
         'Откройте Shortcuts, нажмите +, затем Edit. В редакторе нажмите Automation.',
       payment_alerts_ios_step_2: 'Найдите Notification и выберите его.',
       payment_alerts_ios_step_3: 'Найдите Log Notification и добавьте его.',
       payment_alerts_ios_step_4: 'Нажмите Message в Log Notification, затем Select Variable.',
       payment_alerts_ios_step_6:
-        'Нажмите стрелку действия, затем Account. Выберите счёт для записи платежей этого приложения. Оставьте Category пустым для автоматического подбора по ключевым словам.',
+        'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
       payment_alerts_ios_step_7:
-        'Вернитесь назад для сохранения. Повторите для каждого приложения банка или кошелька. Платежи запишутся при следующем открытии Money2Time.',
+        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text”. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
       payment_alerts_android_disclosure:
         'Прочитайте, как используется доступ к уведомлениям, и нажмите Continue.',
       payment_alerts_ios_app:
@@ -2583,16 +2583,20 @@ const ru = {
     },
   },
   payment_alerts: {
+    scan_enabled: 'Сканировать текст уведомлений',
+    test_scan_failed_title: 'Не удалось записать тестовое уведомление',
+    test_scan_failed:
+      'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
+
     account_hint:
-      'Платежи автоматически записываются на выбранный счёт. Категории используют те же ключевые слова, что и Apple Pay.',
+      'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
     title: 'Уведомления',
-    intro_android:
-      'Money2Time читает уведомления о платежах из выбранных вами банковских приложений и кошельков и записывает каждый платёж за вас. Уведомления читаются на этом телефоне и никогда не загружаются.',
     card_intro:
-      'Автоматически записывайте платежи из уведомлений приложений банков и электронных кошельков.',
+      'Automatically log completed income and expenses from bank and wallet notifications.',
     section_status: 'Состояние',
     master_label: 'Читать уведомления',
-    master_hint: 'Записывает платежи из выбранных приложений.',
+    master_hint:
+      'Captures notifications from the apps you choose. Enable text scanning to log completed transactions.',
     access_open_settings: 'Открыть настройки',
     health_unsupported:
       'Эта версия Money2Time не умеет читать уведомления. Обновите приложение, чтобы пользоваться уведомлениями о платежах.',
@@ -2611,12 +2615,10 @@ const ru = {
     section_apps: 'Приложения',
     choose_apps: 'Выбрать приложения',
     source_off: 'Выключено',
-    disclosure_title: 'Записывайте платежи из уведомлений',
+    disclosure_title: 'Log transactions from your notifications',
     disclosure_body: 'Для этого Money2Time нужен доступ к уведомлениям. Вот как он используется:',
     disclosure_point_selected:
       'Читаются только уведомления выбранных вами банковских приложений и кошельков. Всё остальное игнорируется.',
-    disclosure_point_device:
-      'Уведомления читаются на этом телефоне. Их текст никогда не загружается.',
     disclosure_android_warning:
       'Android предупредит, что приложение с доступом к уведомлениям может читать их все. Money2Time сохраняет только выбранные вами приложения.',
     access_title: 'Включите доступ к уведомлениям',

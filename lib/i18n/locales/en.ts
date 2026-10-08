@@ -1196,7 +1196,7 @@ const en = {
       payment_alerts_status_apps_one: 'On for %{count} app',
       payment_alerts_status_apps_other: 'On for %{count} apps',
       payment_alerts_android_step_1:
-        'Tap “Log from notifications” and turn on the “Read notifications” switch.',
+        'Tap “Log from notifications”, read the scanning disclosure and enable “Scan notification text” and “Read notifications”.',
       payment_alerts_android_step_2:
         'Android opens the notification access screen. Find Money2Time and turn it on.',
       payment_alerts_android_step_3:
@@ -1206,15 +1206,15 @@ const en = {
       payment_alerts_android_step_5: 'Choose the account for each app.',
       payment_alerts_android_step_6: 'Send a test notification to check that everything works.',
       payment_alerts_android_step_7:
-        'Payments log automatically to your selected account. Categories use the same keywords as Apple Pay.',
+        'Completed income and expenses log to your selected account. The scanner selects categories and discards offers and unrelated notifications.',
       payment_alerts_ios_step_1: 'Open Shortcuts, tap +, then Edit. Tap Automation in the editor.',
       payment_alerts_ios_step_2: 'Search for Notification and select it.',
       payment_alerts_ios_step_3: 'Search for Log Notification and add it.',
       payment_alerts_ios_step_4: 'Tap Message in Log Notification, then Select Variable.',
       payment_alerts_ios_step_6:
-        'Tap the action arrow, then Account. Choose where this app’s payments should be logged. Leave Category empty for automatic keyword matching.',
+        'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
       payment_alerts_ios_step_7:
-        'Tap back to save. Repeat for each bank or e-wallet app. Payments log when you next open Money2Time.',
+        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text”. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
       payment_alerts_android_disclosure: 'Read how notification access is used, then tap Continue.',
       payment_alerts_ios_app:
         'Tap App and choose your bank or e-wallet app. These screenshots use Wallet as an example.',
@@ -2577,16 +2577,19 @@ const en = {
     },
   },
   payment_alerts: {
+    scan_enabled: 'Scan notification text',
+    test_scan_failed_title: 'Could not log the test notification',
+    test_scan_failed:
+      'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
     account_hint:
-      'Payments log automatically to your selected account. Categories use the same keywords as Apple Pay.',
+      'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
     title: 'Notifications',
-    intro_android:
-      'Money2Time reads the payment notifications from the banking and wallet apps you choose and logs each payment for you. Notifications are read on this phone and never uploaded.',
     card_intro:
-      'Automatically log payments from the notifications your bank and e-wallet apps send.',
+      'Automatically log completed income and expenses from bank and wallet notifications.',
     section_status: 'Status',
     master_label: 'Read notifications',
-    master_hint: 'Logs payments from the apps you choose.',
+    master_hint:
+      'Captures notifications from the apps you choose. Enable text scanning to log completed transactions.',
     access_open_settings: 'Open settings',
     health_unsupported:
       'This version of Money2Time cannot read notifications. Update the app to log payments from notifications.',
@@ -2604,11 +2607,10 @@ const en = {
     section_apps: 'Apps',
     choose_apps: 'Choose apps',
     source_off: 'Off',
-    disclosure_title: 'Log payments from your notifications',
+    disclosure_title: 'Log transactions from your notifications',
     disclosure_body: 'Money2Time needs notification access for this. Here is how it uses it:',
     disclosure_point_selected:
       'It reads notifications only from the banking and wallet apps you choose. Everything else is ignored.',
-    disclosure_point_device: 'Notifications are read on this phone. Their text is never uploaded.',
     disclosure_android_warning:
       'Android will warn that an app with notification access can read all your notifications. Money2Time keeps only the apps you pick.',
     access_title: 'Turn on notification access',

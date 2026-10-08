@@ -1,7 +1,13 @@
 // Shared builders for the payment-alert tests. Not a test file itself (no
 // `.test.ts`), so Jest only runs it through the imports below it.
 
-import type { Account, Category, PaymentAlertPrefs, PaymentAlertSource } from '~/types';
+import type {
+  Account,
+  Category,
+  PaymentAlertParse,
+  PaymentAlertPrefs,
+  PaymentAlertSource,
+} from '~/types';
 
 export function account(overrides: Partial<Account> = {}): Account {
   return {
@@ -56,8 +62,26 @@ export function prefs(overrides: Partial<PaymentAlertPrefs> = {}): PaymentAlertP
   return {
     version: 1,
     alertsEnabled: true,
+    notificationScanningEnabled: true,
     sources: {},
     ignorePhrases: [],
+    ...overrides,
+  };
+}
+
+export function alertParse(overrides: Partial<PaymentAlertParse> = {}): PaymentAlertParse {
+  return {
+    kind: 'spend',
+    amount: 25,
+    currency: 'MYR',
+    currencyToken: null,
+    secondary: null,
+    counterparty: 'SHELL',
+    counterpartyLeadIn: null,
+    confidence: 'high',
+    signals: ['notification_scanner'],
+    parserVersion: 4,
+    category: 'Food',
     ...overrides,
   };
 }

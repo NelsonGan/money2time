@@ -19,9 +19,15 @@ import {
 } from '~/services/paymentCapture';
 
 import type { CaptureInput } from '../lib/captureQueue';
-import { analyzeCapture, finalizeCapture } from '../lib/pipeline';
+import { autoLogAllowance } from '../lib/decide';
+import { finalizeCapture } from '../lib/pipeline';
 import { androidCapturePackages } from '../lib/prefs';
-import { buildPipelineContext, processAlertCaptures } from '../processAlerts';
+import {
+  type AlertProcessingDeps,
+  analyzeNotificationCapture,
+  buildPipelineContext,
+  processAlertCaptures,
+} from '../processAlerts';
 
 /**
  * Turns queued payment alerts into transactions. Mounted once,
@@ -93,9 +99,15 @@ export function PaymentAlertSync() {
         const current = stateRef.current;
         const tests = queued.filter((capture) => capture.isTest);
         if (tests.length > 0) {
-          previewTestAlerts(tests, {
+          await previewTestAlerts(tests, {
             ...current,
             reportingCurrency: current.settings.currencyCode,
+            appUserId: current.settings.appUserId,
+            getCurrent: () => ({
+              ...stateRef.current,
+              reportingCurrency: stateRef.current.settings.currencyCode,
+              appUserId: stateRef.current.settings.appUserId,
+            }),
           });
           await clearQueuedCaptures(tests);
         }
@@ -104,6 +116,12 @@ export function PaymentAlertSync() {
         const summary = await processAlertCaptures(captures, {
           ...current,
           reportingCurrency: current.settings.currencyCode,
+          appUserId: current.settings.appUserId,
+          getCurrent: () => ({
+            ...stateRef.current,
+            reportingCurrency: stateRef.current.settings.currencyCode,
+            appUserId: stateRef.current.settings.appUserId,
+          }),
         });
         // Only remove alerts durably handled by the pipeline.
         await clearQueuedCaptures(
@@ -128,6 +146,11 @@ export function PaymentAlertSync() {
       drainingRef.current = false;
     }
   }, []);
+  // Drain only after the consent update has rendered into the live state ref.
+  useEffect(() => {
+    if (prefs.notificationScanningEnabled) void drain();
+  }, [drain, prefs.notificationScanningEnabled]);
+
   const drainRef = useRef(drain);
   drainRef.current = drain;
   const alertsEnabledRef = useRef(prefs.alertsEnabled);
@@ -166,30 +189,48 @@ async function repairListener(alertsEnabled: boolean) {
 }
 
 /** Run the setup screen's test alert through the pipeline without storing it. */
-function previewTestAlerts(
-  tests: readonly CaptureInput[],
-  deps: Parameters<typeof buildPipelineContext>[0],
-) {
-  const ctx = buildPipelineContext(deps);
+async function previewTestAlerts(tests: readonly CaptureInput[], deps: AlertProcessingDeps) {
   for (const capture of tests) {
+    const ctx = buildPipelineContext(deps.getCurrent?.() ?? deps);
     const testSource = Object.values(ctx.prefs.sources).find(
       (source) => source.channel === 'android_notification' && source.enabled && source.accountId,
     );
-    const analysis = analyzeCapture(
-      { ...capture, sourceKey: testSource?.sourceKey ?? capture.sourceKey },
-      ctx,
-    );
-    const outcome = finalizeCapture(analysis, ctx, {
-      duplicate: { kind: 'none', supersedesCaptureId: null },
-      autoLogsRemaining: null,
-    });
-    emitTestAlertResult({
-      amount: analysis.parse.amount,
-      currency: analysis.parse.currency,
-      counterparty: analysis.parse.counterparty,
-      accountId: outcome.resolution.accountId,
-      categoryId: outcome.resolution.categoryId,
-      wouldLog: outcome.decision.action === 'log',
-    });
+    try {
+      const analysis = await analyzeNotificationCapture(
+        { ...capture, sourceKey: testSource?.sourceKey ?? capture.sourceKey },
+        deps,
+      );
+      const current = deps.getCurrent?.() ?? deps;
+      const currentCtx = buildPipelineContext(current);
+      const outcome = finalizeCapture(analysis, currentCtx, {
+        duplicate: { kind: 'none', supersedesCaptureId: null },
+        autoLogsRemaining: autoLogAllowance({
+          isPro: current.isPro,
+          accounts: current.accounts,
+          usedAutoLogs: current.quickEntryPrefs.autoLogUsageCount,
+        }),
+      });
+      emitTestAlertResult({
+        capturedAt: capture.capturedAt,
+        amount: analysis.parse.amount,
+        currency: analysis.parse.currency,
+        counterparty: analysis.parse.counterparty,
+        accountId: outcome.resolution.accountId,
+        categoryId: outcome.resolution.categoryId,
+        wouldLog: outcome.decision.action === 'log',
+      });
+    } catch (error) {
+      reportError(error, { scope: 'payment_alerts_test_scan' });
+      emitTestAlertResult({
+        capturedAt: capture.capturedAt,
+        amount: null,
+        currency: null,
+        counterparty: null,
+        accountId: null,
+        categoryId: null,
+        wouldLog: false,
+        scanFailed: true,
+      });
+    }
   }
 }
