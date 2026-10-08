@@ -1219,7 +1219,7 @@ const uk = {
       payment_alerts_status_apps_one: 'Увімкнено для %{count} застосунку',
       payment_alerts_status_apps_other: 'Увімкнено, застосунків: %{count}',
       payment_alerts_android_step_1:
-        'Tap “Log from notifications”, read the scanning disclosure and enable “Scan notification text” and “Read notifications”.',
+        'Tap “Log from notifications” and enable “Read notifications”.',
       payment_alerts_android_step_2:
         'Android відкриє екран доступу до сповіщень. Знайдіть Money2Time і увімкніть його.',
       payment_alerts_android_step_3:
@@ -1238,7 +1238,7 @@ const uk = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
       payment_alerts_ios_step_7:
-        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text”. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
+        'Tap back to save. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
       payment_alerts_android_disclosure:
         'Прочитайте, як використовується доступ до сповіщень, і натисніть Continue.',
       payment_alerts_ios_app:
@@ -2576,10 +2576,16 @@ const uk = {
     },
   },
   payment_alerts: {
-    scan_enabled: 'Сканувати текст сповіщень',
+    history: 'History',
+    history_title: 'Notification history',
+    history_empty: 'No notifications scanned yet',
+    history_hint: 'Your last 10 notifications',
+    history_none: 'No transaction',
+    history_failed: 'Scan failed',
+    history_error: 'Could not load notification history.',
     test_scan_failed_title: 'Не вдалося записати тестове сповіщення',
     test_scan_failed:
-      'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
+      'The notification arrived, but could not be turned into a transaction. Check your internet connection and automatic logging allowance, then try again.',
 
     account_hint:
       'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
@@ -2588,8 +2594,7 @@ const uk = {
       'Automatically log completed income and expenses from bank and wallet notifications.',
     section_status: 'Стан',
     master_label: 'Читати сповіщення',
-    master_hint:
-      'Captures notifications from the apps you choose. Enable text scanning to log completed transactions.',
+    master_hint: 'Captures notifications from the apps you choose and logs completed transactions.',
     access_open_settings: 'Відкрити налаштування',
     health_unsupported:
       'Ця версія Money2Time не вміє читати сповіщення. Оновіть застосунок, щоб користуватися сповіщеннями про платежі.',

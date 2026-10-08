@@ -1216,7 +1216,7 @@ const hi = {
       payment_alerts_status_apps_one: '%{count} ऐप के लिए चालू',
       payment_alerts_status_apps_other: '%{count} ऐप्स के लिए चालू',
       payment_alerts_android_step_1:
-        'Tap “Log from notifications”, read the scanning disclosure and enable “Scan notification text” and “Read notifications”.',
+        'Tap “Log from notifications” and enable “Read notifications”.',
       payment_alerts_android_step_2:
         'Android सूचना पहुंच की स्क्रीन खोलता है। Money2Time ढूंढें और उसे चालू करें।',
       payment_alerts_android_step_3:
@@ -1235,7 +1235,7 @@ const hi = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
       payment_alerts_ios_step_7:
-        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text”. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
+        'Tap back to save. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
       payment_alerts_android_disclosure:
         'सूचनाओं की पहुँच कैसे इस्तेमाल होती है, पढ़ें और Continue पर टैप करें।',
       payment_alerts_ios_app:
@@ -2569,10 +2569,16 @@ const hi = {
     },
   },
   payment_alerts: {
-    scan_enabled: 'सूचना का टेक्स्ट स्कैन करें',
+    history: 'History',
+    history_title: 'Notification history',
+    history_empty: 'No notifications scanned yet',
+    history_hint: 'Your last 10 notifications',
+    history_none: 'No transaction',
+    history_failed: 'Scan failed',
+    history_error: 'Could not load notification history.',
     test_scan_failed_title: 'परीक्षण सूचना दर्ज नहीं हो सकी',
     test_scan_failed:
-      'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
+      'The notification arrived, but could not be turned into a transaction. Check your internet connection and automatic logging allowance, then try again.',
 
     account_hint:
       'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
@@ -2581,8 +2587,7 @@ const hi = {
       'Automatically log completed income and expenses from bank and wallet notifications.',
     section_status: 'स्थिति',
     master_label: 'सूचनाएं पढ़ें',
-    master_hint:
-      'Captures notifications from the apps you choose. Enable text scanning to log completed transactions.',
+    master_hint: 'Captures notifications from the apps you choose and logs completed transactions.',
     access_open_settings: 'सेटिंग्स खोलें',
     health_unsupported:
       'Money2Time का यह संस्करण सूचनाएं नहीं पढ़ सकता। सूचनाओं से भुगतान दर्ज करने के लिए ऐप अपडेट करें।',

@@ -146,10 +146,10 @@ export function PaymentAlertSync() {
       drainingRef.current = false;
     }
   }, []);
-  // Drain only after the consent update has rendered into the live state ref.
+  // Source/account changes can make previously queued captures processable.
   useEffect(() => {
-    if (prefs.notificationScanningEnabled) void drain();
-  }, [drain, prefs.notificationScanningEnabled]);
+    void drain();
+  }, [drain, prefs]);
 
   const drainRef = useRef(drain);
   drainRef.current = drain;

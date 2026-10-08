@@ -62,7 +62,6 @@ export function prefs(overrides: Partial<PaymentAlertPrefs> = {}): PaymentAlertP
   return {
     version: 1,
     alertsEnabled: true,
-    notificationScanningEnabled: true,
     sources: {},
     ignorePhrases: [],
     ...overrides,

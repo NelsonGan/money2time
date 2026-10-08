@@ -1233,7 +1233,7 @@ const nl = {
       payment_alerts_status_apps_one: 'Aan voor %{count} app',
       payment_alerts_status_apps_other: 'Aan voor %{count} apps',
       payment_alerts_android_step_1:
-        'Tap “Log from notifications”, read the scanning disclosure and enable “Scan notification text” and “Read notifications”.',
+        'Tap “Log from notifications” and enable “Read notifications”.',
       payment_alerts_android_step_2:
         'Android opent het scherm voor meldingstoegang. Zoek Money2Time en zet het aan.',
       payment_alerts_android_step_3:
@@ -1252,7 +1252,7 @@ const nl = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
       payment_alerts_ios_step_7:
-        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text”. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
+        'Tap back to save. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
       payment_alerts_android_disclosure:
         'Lees hoe meldingstoegang wordt gebruikt en tik op Continue.',
       payment_alerts_ios_app:
@@ -2607,10 +2607,16 @@ const nl = {
     },
   },
   payment_alerts: {
-    scan_enabled: 'Meldingstekst scannen',
+    history: 'History',
+    history_title: 'Notification history',
+    history_empty: 'No notifications scanned yet',
+    history_hint: 'Your last 10 notifications',
+    history_none: 'No transaction',
+    history_failed: 'Scan failed',
+    history_error: 'Could not load notification history.',
     test_scan_failed_title: 'Testmelding kon niet worden vastgelegd',
     test_scan_failed:
-      'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
+      'The notification arrived, but could not be turned into a transaction. Check your internet connection and automatic logging allowance, then try again.',
 
     account_hint:
       'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
@@ -2619,8 +2625,7 @@ const nl = {
       'Automatically log completed income and expenses from bank and wallet notifications.',
     section_status: 'Status',
     master_label: 'Meldingen lezen',
-    master_hint:
-      'Captures notifications from the apps you choose. Enable text scanning to log completed transactions.',
+    master_hint: 'Captures notifications from the apps you choose and logs completed transactions.',
     access_open_settings: 'Instellingen openen',
     health_unsupported:
       'Deze versie van Money2Time kan geen meldingen lezen. Werk de app bij om betaalmeldingen te gebruiken.',

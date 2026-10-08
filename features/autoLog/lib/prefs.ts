@@ -10,7 +10,6 @@ import { containsWords } from './text';
 export const DEFAULT_PAYMENT_ALERT_PREFS: PaymentAlertPrefs = {
   version: 1,
   alertsEnabled: false,
-  notificationScanningEnabled: false,
   sources: {},
   ignorePhrases: [],
 };
@@ -77,7 +76,6 @@ export function parsePaymentAlertPrefs(json: string | null | undefined): Payment
   return {
     version: 1,
     alertsEnabled: row.alertsEnabled === true,
-    notificationScanningEnabled: row.notificationScanningEnabled === true,
     sources,
     ignorePhrases: asStringList(row.ignorePhrases),
   };

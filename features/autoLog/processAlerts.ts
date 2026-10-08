@@ -7,6 +7,7 @@ import type { CreateTransactionMeta } from '~/context/AppContext';
 import { paymentAlertCapturesRepository } from '~/lib/repositories/paymentAlertCapturesRepository';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import { reportError } from '~/services/errorReporting';
+import { recordNotificationScan } from '~/services/notificationScanHistory';
 import { ReceiptScanError, scanNotification } from '~/services/receiptScan';
 import type {
   Account,
@@ -106,8 +107,6 @@ export async function analyzeNotificationCapture(
     }) === 0
   )
     return initial;
-  if (!current.prefs.notificationScanningEnabled)
-    throw new ReceiptScanError('not_available', 'Notification scanning is disabled.');
   if (
     capture.possiblyTruncated ??
     hasNativeAlertTruncation([capture.title, capture.subtitle, capture.body, ...capture.extra])
@@ -129,25 +128,41 @@ export async function analyzeNotificationCapture(
     ]).text;
     // Do not truncate: a late "failed" or promotional condition changes meaning.
     if (!text || text.length > MAX_ALERT_TEXT_LENGTH) return initial;
-    const result = await scanNotification({
-      appUserId: current.appUserId,
-      text,
-      capturedAt: capture.capturedAt,
-      currency: scanCurrency,
-      categories: current.categories
-        .filter((item) => item.type === 'expense' && !item.deletedAt)
-        .map((item) => item.name),
-      incomeCategories: current.categories
-        .filter((item) => item.type === 'income' && !item.deletedAt)
-        .map((item) => item.name),
-    });
-    parse = notificationParse(result, scanCurrency);
+    const recordHistory = async (result: 'expense' | 'income' | 'none' | 'failed') => {
+      if (capture.isTest || (deps.getCurrent?.() ?? deps).appUserId !== current.appUserId) return;
+      await recordNotificationScan(current.appUserId, {
+        id: capture.id,
+        capturedAt: capture.capturedAt,
+        sourceLabel: capture.sourceLabel,
+        text,
+        result,
+      }).catch((error) => reportError(error, { scope: 'notification_scan_history' }));
+    };
+    try {
+      const result = await scanNotification({
+        appUserId: current.appUserId,
+        text,
+        capturedAt: capture.capturedAt,
+        currency: scanCurrency,
+        categories: current.categories
+          .filter((item) => item.type === 'expense' && !item.deletedAt)
+          .map((item) => item.name),
+        incomeCategories: current.categories
+          .filter((item) => item.type === 'income' && !item.deletedAt)
+          .map((item) => item.name),
+      });
+      parse = notificationParse(result, scanCurrency);
+      await recordHistory(
+        parse.kind === 'spend' ? 'expense' : parse.kind === 'income' ? 'income' : 'none',
+      );
+    } catch (error) {
+      await recordHistory('failed');
+      throw error;
+    }
   }
   const latest = deps.getCurrent?.() ?? deps;
   const latestContext = buildPipelineContext(latest);
   const analysis = analyzeCapture(capture, latestContext, parse);
-  if (!latest.prefs.notificationScanningEnabled && !captureSkipReason(analysis, latestContext))
-    throw new ReceiptScanError('not_available', 'Notification scanning was disabled.');
   const latestAccount = latest.accounts.find((item) => item.id === analysis.binding.accountId);
   if (
     !captureSkipReason(analysis, latestContext) &&
@@ -232,7 +247,6 @@ export async function processAlertCaptures(
     }
     current = deps.getCurrent?.() ?? deps;
     const ctx = buildPipelineContext(current);
-    if (!current.prefs.notificationScanningEnabled && !captureSkipReason(analysis, ctx)) continue;
     analysis = analyzeCapture(capture, ctx, analysis.parse);
     remaining = autoLogAllowance({
       isPro: current.isPro,
@@ -312,11 +326,8 @@ export async function processAlertCaptures(
         sourceLabel: capture.sourceLabel,
         capturedAt: capture.capturedAt,
         nativeKey: capture.nativeKey,
-        title: status === 'ignored' ? null : capture.title,
-        body:
-          status === 'ignored'
-            ? null
-            : [capture.subtitle, capture.body, ...capture.extra].filter(Boolean).join('\n'),
+        title: null,
+        body: null,
         status,
         reason: decision.reason,
         resolution,
@@ -328,6 +339,8 @@ export async function processAlertCaptures(
       if (!inserted)
         paymentAlertCapturesRepository.update(capture.id, {
           status,
+          title: null,
+          body: null,
           reason: decision.reason,
           resolution,
           duplicateOf,

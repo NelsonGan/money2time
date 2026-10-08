@@ -10,6 +10,7 @@ import {
   processAlertCaptures,
 } from '~/features/autoLog/processAlerts';
 import { paymentAlertCapturesRepository } from '~/lib/repositories/paymentAlertCapturesRepository';
+import { recordNotificationScan } from '~/services/notificationScanHistory';
 import { ReceiptScanError, scanNotification } from '~/services/receiptScan';
 import type { QuickEntryPrefs, TransactionWithRelations } from '~/types';
 
@@ -25,6 +26,9 @@ jest.mock('~/lib/repositories/paymentAlertCapturesRepository', () => ({
   },
 }));
 jest.mock('~/services/errorReporting', () => ({ reportError: jest.fn() }));
+jest.mock('~/services/notificationScanHistory', () => ({
+  recordNotificationScan: jest.fn(async () => undefined),
+}));
 jest.mock('~/services/receiptScan', () => ({
   ...jest.requireActual('~/services/receiptScan'),
   scanNotification: jest.fn(),
@@ -289,13 +293,60 @@ describe('network boundary and retry safety', () => {
     jest.clearAllMocks();
     jest.mocked(scanNotification).mockReset().mockResolvedValue(scanned());
   });
-  it('keeps legacy opted-in notifications queued until the new scanning disclosure is accepted', async () => {
-    const input = deps();
-    input.prefs.notificationScanningEnabled = false;
-    const summary = await processAlertCaptures([capture], input);
-    expect(scanNotification).not.toHaveBeenCalled();
-    expect(input.createTransaction).not.toHaveBeenCalled();
+  it.each(['expense', 'income'] as const)(
+    'records the detected %s with notification text',
+    async (type) => {
+      jest.mocked(scanNotification).mockResolvedValueOnce(scanned(type));
+      await processAlertCaptures([capture], deps());
+      expect(recordNotificationScan).toHaveBeenCalledWith(
+        'test-user',
+        expect.objectContaining({ id: capture.id, text: capture.body, result: type }),
+      );
+    },
+  );
+  it('records no transaction for a scanner discard', async () => {
+    jest.mocked(scanNotification).mockResolvedValueOnce({
+      notificationDecision: 'ignore',
+      transactions: [],
+      quota: { used: 0, limit: 50, isPro: false },
+    });
+    await processAlertCaptures([capture], deps());
+    expect(recordNotificationScan).toHaveBeenCalledWith(
+      'test-user',
+      expect.objectContaining({ result: 'none' }),
+    );
+  });
+  it('records a scan error without acknowledging the queued notification', async () => {
+    jest
+      .mocked(scanNotification)
+      .mockRejectedValueOnce(new ReceiptScanError('network', 'Network unavailable'));
+    const summary = await processAlertCaptures([capture], deps());
+    expect(recordNotificationScan).toHaveBeenCalledWith(
+      'test-user',
+      expect.objectContaining({ result: 'failed' }),
+    );
     expect(summary.captureIds).toEqual([]);
+  });
+  it('still saves the transaction when history storage fails', async () => {
+    jest.mocked(recordNotificationScan).mockRejectedValueOnce(new Error('disk unavailable'));
+    const input = deps();
+    const summary = await processAlertCaptures([capture], input);
+    expect(input.createTransaction).toHaveBeenCalledTimes(1);
+    expect(summary.captureIds).toEqual(['capture']);
+  });
+  it('does not put setup test alerts into real notification history', async () => {
+    await analyzeNotificationCapture({ ...capture, isTest: true }, deps());
+    expect(recordNotificationScan).not.toHaveBeenCalled();
+  });
+  it('scans configured notifications without a separate legacy opt-in', async () => {
+    const input = deps();
+    input.prefs = JSON.parse(
+      JSON.stringify({ ...input.prefs, notificationScanningEnabled: false }),
+    );
+    const summary = await processAlertCaptures([capture], input);
+    expect(scanNotification).toHaveBeenCalledTimes(1);
+    expect(input.createTransaction).toHaveBeenCalledTimes(1);
+    expect(summary.captureIds).toEqual(['capture']);
   });
   it('rechecks the master switch after a slow classification', async () => {
     const input = deps();
@@ -330,16 +381,21 @@ describe('network boundary and retry safety', () => {
     expect(input.createTransaction).not.toHaveBeenCalled();
     expect(summary.duplicates).toBe(1);
   });
-  it('retains a capture when upload consent is revoked during inference', async () => {
+  it('does not use a legacy scan toggle to block an iOS shortcut during inference', async () => {
     const input = deps();
     input.getCurrent = () => input;
     jest.mocked(scanNotification).mockImplementationOnce(async () => {
-      input.prefs = { ...input.prefs, notificationScanningEnabled: false };
+      input.prefs = JSON.parse(
+        JSON.stringify({ ...input.prefs, notificationScanningEnabled: false }),
+      );
       return scanned();
     });
-    const summary = await processAlertCaptures([capture], input);
-    expect(input.createTransaction).not.toHaveBeenCalled();
-    expect(summary.captureIds).toEqual([]);
+    const summary = await processAlertCaptures(
+      [{ ...capture, channel: 'ios_alert', presetAccountId: input.accounts[0].id }],
+      input,
+    );
+    expect(input.createTransaction).toHaveBeenCalledTimes(1);
+    expect(summary.captureIds).toEqual(['capture']);
   });
   it('reuses a validated saved classification after a transaction write failure', async () => {
     const input = deps();

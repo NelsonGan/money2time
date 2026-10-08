@@ -24,7 +24,7 @@ examples of those documented situations, not claimed verbatim bank templates.
 | [MessageBird Malaysian SMS guidelines](https://messagebird.com/support-center/omnichannel-and-connectivity/policies-and-guidelines/malaysia)                                                                       | Malaysian messages may require an RM0.00 prefix.                                                                                                   | That prefix is not a zero-value transaction or an additional movement.                                          |
 | [HSBC FPX guide](https://sp.hsbc.com.my/notices/conventional/hbmy_fpx_notice.pdf)                                                                                                                                  | The historical guide gives an RM0.00-prefixed purchase OTP example before payment is completed.                                                    | OTP/approval text must still be discarded even if it contains payment details.                                  |
 
-## Change and review
+## Initial prompt change and review
 
 The prompt now applies an ordered confirmation/context/direction/exclusion check,
 anchors direction to the notification addressee, treats completed
@@ -42,7 +42,9 @@ as do OTPs, failures, holds, top-ups, withdrawals and multiple distinct payments
 Two ledger legs describing the same transfer are one movement. No application
 keyword parsing or unconditional transaction fallback was added.
 
-The only runtime change is the notification prompt. Receipt image prompts,
+The initial runtime change was the notification prompt. Subsequent app changes
+remove the separate scan opt-in and add a bounded notification history; the
+model results below cover the unchanged prompt. Receipt image prompts,
 parsers, retries, timeouts, quota and model configuration are unchanged. The
 analytics table records qualifying transfer cases; event names, payloads,
 routing, milestone thresholds and maximum Mixpanel volume are unchanged.
@@ -108,6 +110,6 @@ No UI or physical-phone verification is included in this server-prompt change.
 A prompt improves classification but cannot guarantee every provider response.
 The classifier has no account-ownership database: a real self-transfer that
 omits any ownership indication can look identical to payment to another person.
-The new rule uses explicit direction without inventing ownership. It still
-requires scanning opt-in; already acknowledged ignores are not automatically
-rescanned after the Worker update.
+The new rule uses explicit direction without inventing ownership. Already acknowledged ignores are not automatically rescanned after the Worker
+update. Configured Shortcuts now work without a separate text-scanning opt-in;
+Android still uses its system notification access and selected-app controls.

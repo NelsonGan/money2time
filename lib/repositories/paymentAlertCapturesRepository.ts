@@ -127,6 +127,8 @@ class PaymentAlertCapturesRepository {
     id: string,
     input: Partial<{
       status: PaymentAlertStatus;
+      title: null;
+      body: null;
       reason: PaymentAlertReason | null;
       transactionId: string | null;
       duplicateOf: string | null;

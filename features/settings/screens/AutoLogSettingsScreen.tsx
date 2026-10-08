@@ -15,7 +15,7 @@ import {
   SCAN_SCREENSHOT_INTENT_NAME,
 } from '~/constants/autoLogIntents';
 import { useApp } from '~/context/AppContext';
-import { NotificationScanControl } from '~/features/autoLog/components/NotificationScanControl';
+import { NotificationHistoryButton } from '~/features/autoLog/components/NotificationHistoryButton';
 import { countKey } from '~/features/autoLog/lib/presentation';
 import {
   findFallbackCategory,
@@ -35,6 +35,7 @@ interface AutoLogSettingsScreenProps {
   onOpenTutorial: (topic: AutoLogTutorialTopic) => void;
   onOpenQuickEntry: () => void;
   onOpenPaymentAlerts: () => void;
+  onOpenNotificationHistory: () => void;
 }
 
 const styles = StyleSheet.create({
@@ -192,6 +193,7 @@ export function AutoLogSettingsScreen({
   onOpenTutorial,
   onOpenQuickEntry,
   onOpenPaymentAlerts,
+  onOpenNotificationHistory,
 }: AutoLogSettingsScreenProps) {
   const { accounts, categories, quickEntryPrefs, updateQuickEntryPrefs } = useApp();
   const themeColors = useThemeColors();
@@ -449,7 +451,7 @@ export function AutoLogSettingsScreen({
                       </Text>
                     </View>
                   </View>
-                  <NotificationScanControl />
+                  <NotificationHistoryButton onPress={onOpenNotificationHistory} />
                 </View>
               </View>
 

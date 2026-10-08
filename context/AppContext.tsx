@@ -121,6 +121,7 @@ import {
   normalizeNotificationPrefs,
   syncScheduledNotifications,
 } from '~/services/notifications';
+import { clearNotificationScanHistory } from '~/services/notificationScanHistory';
 import { clearAndroidCaptureQueue } from '~/services/paymentCapture';
 import { initReviewPrompt, recordTransactionLogged } from '~/services/reviewPrompt';
 import { runUserAssetGc, runUserAssetGcBackfillOnce } from '~/services/userAssetGc';
@@ -4548,6 +4549,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   const resetAllData = useCallback(() => {
+    const historyUserId = settings?.appUserId;
     runMutation(() => {
       purgeAllData();
     });
@@ -4562,12 +4564,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     clearAllAutoLogQueues().catch(() => undefined);
     // Android's notification listener queues payment alerts in a folder.
     clearAndroidCaptureQueue();
+    if (historyUserId)
+      void clearNotificationScanHistory(historyUserId).catch((error) =>
+        reportError(error, { scope: 'notification_scan_history_reset' }),
+      );
     void cancelAllNotifications();
     void trackEvent(AnalyticsEvents.DATA_RESET, { scope: 'all' });
     void flushAnalytics();
-  }, [runMutation]);
+  }, [runMutation, settings?.appUserId]);
 
   const resetTransactionsOnly = useCallback(() => {
+    const historyUserId = settings?.appUserId;
     runMutation(() => {
       purgeTransactionsOnly();
       resetTransactionFilters();
@@ -4576,12 +4583,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       reportError(error, { scope: 'reset_autolog_queues' }),
     );
     clearAndroidCaptureQueue();
+    if (historyUserId)
+      void clearNotificationScanHistory(historyUserId).catch((error) =>
+        reportError(error, { scope: 'notification_scan_history_reset' }),
+      );
     // Deleting every transaction orphans their receipt images; reclaim them.
     runDeferredWrite(() => {
       runUserAssetGc();
     });
     void trackEvent(AnalyticsEvents.DATA_RESET, { scope: 'transactions_only' });
-  }, [resetTransactionFilters, runMutation]);
+  }, [resetTransactionFilters, runMutation, settings?.appUserId]);
 
   const importMoneyManagerBackup = useCallback(
     async (uri: string, fileName?: string) => {

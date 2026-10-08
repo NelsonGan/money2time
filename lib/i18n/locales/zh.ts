@@ -1162,7 +1162,7 @@ const zh = {
       payment_alerts_status_apps_one: '已为 %{count} 个应用开启',
       payment_alerts_status_apps_other: '已为 %{count} 个应用开启',
       payment_alerts_android_step_1:
-        'Tap “Log from notifications”, read the scanning disclosure and enable “Scan notification text” and “Read notifications”.',
+        'Tap “Log from notifications” and enable “Read notifications”.',
       payment_alerts_android_step_2: 'Android 会打开通知使用权页面。找到 Money2Time 并开启。',
       payment_alerts_android_step_3:
         '点按「允许」确认。Android 会提示应用可以读取所有通知，但 Money2Time 只保留你所选的应用。',
@@ -1178,7 +1178,7 @@ const zh = {
       payment_alerts_ios_step_6:
         'Tap the action arrow, then Account. Choose where transactions should be logged. Leave Category empty for the scanner to select it.',
       payment_alerts_ios_step_7:
-        'Tap back to save. In Money2Time’s Automation settings, enable “Scan notification text”. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
+        'Tap back to save. Repeat for each bank or wallet app. Transactions log when you next open Money2Time with internet access.',
       payment_alerts_android_disclosure: '阅读通知权限的使用说明，然后点 Continue。',
       payment_alerts_ios_app: '轻点 App 并选择银行或电子钱包 App。截图以 Wallet 为例。',
       payment_alerts_ios_run: '点应用旁的箭头，保持 Automation 开启。关闭 Notify 可静默记账。',
@@ -2471,10 +2471,16 @@ const zh = {
     },
   },
   payment_alerts: {
-    scan_enabled: '扫描通知文本',
+    history: 'History',
+    history_title: 'Notification history',
+    history_empty: 'No notifications scanned yet',
+    history_hint: 'Your last 10 notifications',
+    history_none: 'No transaction',
+    history_failed: 'Scan failed',
+    history_error: 'Could not load notification history.',
     test_scan_failed_title: '无法记录测试通知',
     test_scan_failed:
-      'The notification arrived, but could not be turned into a transaction. Check your scanning settings, internet connection and automatic logging allowance, then try again.',
+      'The notification arrived, but could not be turned into a transaction. Check your internet connection and automatic logging allowance, then try again.',
 
     account_hint:
       'Completed income and expenses log to your selected account. Categories are selected by the scanner.',
@@ -2483,8 +2489,7 @@ const zh = {
       'Automatically log completed income and expenses from bank and wallet notifications.',
     section_status: '状态',
     master_label: '读取通知',
-    master_hint:
-      'Captures notifications from the apps you choose. Enable text scanning to log completed transactions.',
+    master_hint: 'Captures notifications from the apps you choose and logs completed transactions.',
     access_open_settings: '打开设置',
     health_unsupported: '此版本的 Money2Time 无法读取通知。请更新应用以使用付款通知。',
     health_access_off: '通知使用权已关闭，因此没有读取任何付款。请在 Android 设置中重新开启。',
