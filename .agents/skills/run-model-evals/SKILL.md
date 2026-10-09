@@ -6,13 +6,13 @@ description: Run the receipt-scanner model eval for a named model (an OpenRouter
 # Run the receipt-scanner model eval
 
 The app's only LLM call is the receipt-scanner Worker (`apps/cloudflare/workers/receipt-scanner`, three
-modes: `quick`, `itemized`, `screenshot`). The eval in `apps/cloudflare/evals/receipt-scanner/` runs a
+modes: `quick`, `itemized`, `screenshot`). The eval in `apps/evals/receipt-scanner/` runs a
 model over ~140 answer-keyed images exactly as production does, grades every answer with Opus via
 `claude -p` on a rubric, and scores it. Full design and rubric: "Receipt-scanner model eval" in the
 repository [README](../../../README.md#receipt-scanner-model-eval); every flag: `npm run eval -- --help`.
 Read the README section once if you have not this session.
 
-Run every command below from `apps/cloudflare/evals/receipt-scanner`, its own npm project (Node 24+);
+Run every command below from `apps/evals/receipt-scanner`, its own npm project (Node 24+);
 run `npm install` there first if `node_modules/` is missing. Paths below are relative to it.
 
 ## 1. Resolve the model id

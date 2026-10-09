@@ -3,7 +3,7 @@
 // lib/checks.mjs or lib/scoring.mjs, so an existing run's report reflects the
 // fix instead of paying for the whole suite again.
 //
-//   node rescore.mjs results/<run> [--no-commit]   (from apps/cloudflare/evals/receipt-scanner)
+//   node rescore.mjs results/<run> [--no-commit]   (from apps/evals/receipt-scanner)
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';

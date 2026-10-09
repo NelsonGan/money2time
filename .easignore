@@ -73,6 +73,10 @@ skills-lock.json
 # README.md) and are never part of the iOS/Android app bundle.
 /apps/cloudflare/
 
+# The local model evals (apps/evals): OpenRouter + Opus judge tooling with a
+# rendered dataset, never part of the app.
+/apps/evals/
+
 # Repository-level material no build reads: CI workflows and the PR screenshots
 # and evidence under .github/pr-assets (100+ MB), and the agent config.
 /.github/
