@@ -170,7 +170,9 @@ export function renderRunReport(run) {
     );
   }
   lines.push('');
-  lines.push(`Raw outputs, checks and judge reasons for every case: \`run.json\` in this folder.`);
+  lines.push(
+    `Raw outputs, checks and judge reasons for every case: \`evals/receipt-scanner/results/${run.runId}/run.json\` (local, gitignored).`,
+  );
   return `${lines.join('\n')}\n`;
 }
 
