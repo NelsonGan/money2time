@@ -32,6 +32,6 @@ describe('review period labels', () => {
 
   it('says when the running period ends', () => {
     const running = currentPeriod({ zoom: 'month', today: TODAY, weekStartsOn: 1, monthCycle: 31 });
-    expect(inProgressLabel(running, 'en-US')).toBe('In progress · ends Oct 30');
+    expect(inProgressLabel(running, 'en-US')).toBe('In progress, ends Oct 30');
   });
 });

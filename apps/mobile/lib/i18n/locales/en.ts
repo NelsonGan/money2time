@@ -2426,7 +2426,7 @@ const en = {
     week_range: '{{start}} to {{end}}',
     week_tick: 'W{{index}}',
     range_short: '{{start}} – {{end}}',
-    in_progress: 'In progress · ends {{date}}',
+    in_progress: 'In progress, ends {{date}}',
     empty_title: 'Nothing to review yet',
     nothing_logged_title: 'A quiet stretch',
     nothing_logged_description: 'Nothing was logged in this period.',

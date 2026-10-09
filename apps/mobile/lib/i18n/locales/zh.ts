@@ -2324,7 +2324,7 @@ const zh = {
     week_range: '{{start}} 至 {{end}}',
     week_tick: '第{{index}}周',
     range_short: '{{start}} – {{end}}',
-    in_progress: '进行中・{{date}}结束',
+    in_progress: '进行中，{{date}}结束',
     empty_title: '还没有可回顾的内容',
     nothing_logged_title: '安静的一段时间',
     nothing_logged_description: '这段时间没有记录任何内容。',

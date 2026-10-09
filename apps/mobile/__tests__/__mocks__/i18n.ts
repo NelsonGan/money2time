@@ -22,7 +22,7 @@ const translations: Translations = {
   'notifications.review.day_of_month_short': 'Day {day}',
   'review.week_range': '{start} to {end}',
   'review.range_short': '{start} – {end}',
-  'review.in_progress': 'In progress · ends {date}',
+  'review.in_progress': 'In progress, ends {date}',
 };
 
 export const I18n = {

@@ -1,4 +1,11 @@
-import { CalendarDays, ChevronDown, ListChecks, Moon, TrendingDown } from 'lucide-react-native';
+import {
+  CalendarDays,
+  ChevronDown,
+  Hourglass,
+  ListChecks,
+  Moon,
+  TrendingDown,
+} from 'lucide-react-native';
 import React, {
   forwardRef,
   useCallback,
@@ -351,6 +358,7 @@ function PeriodRail({
   locale: string;
   onSelect: (period: ReviewPeriod) => void;
 }) {
+  const themeColors = useThemeColors();
   const scrollRef = useRef<ScrollView>(null);
   const offsetsRef = useRef<number[]>([]);
   const widthRef = useRef(0);
@@ -423,15 +431,18 @@ function PeriodRail({
           </Pressable>
         );
       })}
-      {/* Not selectable: its numbers are partial until it ends, which is the
-          whole reason the rail stops before it. */}
+      {/* The running period, labelled like its neighbours and marked with an
+          hourglass. Not selectable: its numbers are partial until it ends,
+          which is the whole reason the rail stops before it. */}
       <View
         accessible
         accessibilityRole="text"
-        className="h-9 items-center justify-center rounded-full border border-dashed border-border px-4"
+        accessibilityLabel={inProgressLabel(runningPeriod, locale)}
+        className="h-9 flex-row items-center justify-center gap-1.5 rounded-full bg-muted px-4"
       >
+        <Hourglass size={12} color={themeColors.textMuted} strokeWidth={2.25} />
         <Text variant="caption" tone="muted">
-          {inProgressLabel(runningPeriod, locale)}
+          {periodPillLabel(runningPeriod, locale)}
         </Text>
       </View>
     </ScrollView>

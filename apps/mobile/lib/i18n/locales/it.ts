@@ -2443,7 +2443,7 @@ const it = {
     week_range: 'Dal {{start}} al {{end}}',
     week_tick: 'S{{index}}',
     range_short: '{{start}} – {{end}}',
-    in_progress: 'In corso · termina il {{date}}',
+    in_progress: 'In corso, termina il {{date}}',
     empty_title: 'Ancora niente da rivedere',
     nothing_logged_title: 'Un periodo tranquillo',
     nothing_logged_description: 'In questo periodo non è stato registrato nulla.',

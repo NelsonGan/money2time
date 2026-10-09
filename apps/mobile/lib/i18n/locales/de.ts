@@ -2462,7 +2462,7 @@ const de = {
     week_range: '{{start}} bis {{end}}',
     week_tick: 'KW{{index}}',
     range_short: '{{start}} – {{end}}',
-    in_progress: 'Läuft · endet am {{date}}',
+    in_progress: 'Läuft, endet am {{date}}',
     empty_title: 'Noch nichts zum Zurückblicken',
     nothing_logged_title: 'Eine ruhige Phase',
     nothing_logged_description: 'In diesem Zeitraum wurde nichts erfasst.',

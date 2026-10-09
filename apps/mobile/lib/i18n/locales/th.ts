@@ -2385,7 +2385,7 @@ const th = {
     week_range: '{{start}} ถึง {{end}}',
     week_tick: 'สัปดาห์ {{index}}',
     range_short: '{{start}} – {{end}}',
-    in_progress: 'กำลังดำเนินอยู่ · สิ้นสุด {{date}}',
+    in_progress: 'กำลังดำเนินอยู่, สิ้นสุด {{date}}',
     empty_title: 'ยังไม่มีอะไรให้ทบทวน',
     nothing_logged_title: 'ช่วงที่เงียบสงบ',
     nothing_logged_description: 'ไม่มีการบันทึกรายการในช่วงนี้',

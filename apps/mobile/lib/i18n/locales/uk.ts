@@ -2427,7 +2427,7 @@ const uk = {
     week_range: 'з {{start}} до {{end}}',
     week_tick: 'Т{{index}}',
     range_short: '{{start}} – {{end}}',
-    in_progress: 'Триває · до {{date}}',
+    in_progress: 'Триває, до {{date}}',
     empty_title: 'Ще немає що переглядати',
     nothing_logged_title: 'Тихий період',
     nothing_logged_description: 'У цьому періоді нічого не записано.',

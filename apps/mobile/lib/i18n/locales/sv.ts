@@ -2429,7 +2429,7 @@ const sv = {
     week_range: '{{start}} till {{end}}',
     week_tick: 'v{{index}}',
     range_short: '{{start}} – {{end}}',
-    in_progress: 'Pågår · slutar {{date}}',
+    in_progress: 'Pågår, slutar {{date}}',
     empty_title: 'Inget att gå igenom än',
     nothing_logged_title: 'En lugn period',
     nothing_logged_description: 'Inget registrerades under den här perioden.',

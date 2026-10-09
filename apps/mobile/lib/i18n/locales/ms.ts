@@ -2448,7 +2448,7 @@ const ms = {
     week_range: '{{start}} hingga {{end}}',
     week_tick: 'M{{index}}',
     range_short: '{{start}} – {{end}}',
-    in_progress: 'Sedang berjalan · tamat {{date}}',
+    in_progress: 'Sedang berjalan, tamat {{date}}',
     empty_title: 'Belum ada apa-apa untuk disemak',
     nothing_logged_title: 'Tempoh yang sunyi',
     nothing_logged_description: 'Tiada apa-apa direkodkan dalam tempoh ini.',

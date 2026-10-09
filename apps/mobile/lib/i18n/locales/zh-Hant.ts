@@ -2324,7 +2324,7 @@ const zhHant = {
     week_range: '{{start}} 至 {{end}}',
     week_tick: '第 {{index}} 週',
     range_short: '{{start}} – {{end}}',
-    in_progress: '進行中・{{date}}結束',
+    in_progress: '進行中，{{date}}結束',
     empty_title: '還沒有可回顧的內容',
     nothing_logged_title: '安靜的一段時間',
     nothing_logged_description: '這段時間沒有記錄任何內容。',

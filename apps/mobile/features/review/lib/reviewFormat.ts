@@ -87,7 +87,7 @@ export function periodTitle(period: ReviewPeriod, locale?: string): string {
   return period.key.slice('year:'.length);
 }
 
-/** "In progress · ends 30 Oct" — the rail's closing pill for the running period. */
+/** "In progress, ends 30 Oct" — what a screen reader says for the running period. */
 export function inProgressLabel(period: ReviewPeriod, locale?: string): string {
   return I18n.t('review.in_progress', { date: shortDayLabel(period.end, locale) });
 }

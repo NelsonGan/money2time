@@ -2433,7 +2433,7 @@ const ru = {
     week_range: '{{start}} по {{end}}',
     week_tick: 'Н{{index}}',
     range_short: '{{start}} – {{end}}',
-    in_progress: 'Идёт · до {{date}}',
+    in_progress: 'Идёт, до {{date}}',
     empty_title: 'Пока нечего смотреть',
     nothing_logged_title: 'Тихий период',
     nothing_logged_description: 'В этот период ничего не записано.',
