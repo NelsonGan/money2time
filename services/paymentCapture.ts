@@ -86,7 +86,13 @@ function readAndroidCaptures(): CaptureInput[] {
     if (!(item instanceof File)) continue;
     if (item.name.endsWith('.part')) {
       const modified = item.modificationTime;
-      if (modified != null && Date.now() - modified > STALE_PART_MS) item.delete();
+      if (modified != null && Date.now() - modified > STALE_PART_MS) {
+        try {
+          item.delete();
+        } catch {
+          // The listener may have renamed or removed it since the listing; the next drain retries.
+        }
+      }
       continue;
     }
     names.push(item.name);
