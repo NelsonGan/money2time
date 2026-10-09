@@ -2456,6 +2456,8 @@ const nl = {
     },
     week_range: '{{start}} tot {{end}}',
     week_tick: 'W{{index}}',
+    range_short: '{{start}} – {{end}}',
+    in_progress: 'Loopt · eindigt {{date}}',
     empty_title: 'Nog niets om terug te kijken',
     nothing_logged_title: 'Een rustige periode',
     nothing_logged_description: 'In deze periode is niets vastgelegd.',

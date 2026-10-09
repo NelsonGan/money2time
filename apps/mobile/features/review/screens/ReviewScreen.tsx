@@ -36,6 +36,7 @@ import { applyReviewFilters, type ReviewFilters } from '../lib/reviewFilters';
 import {
   barLabel,
   deltaLabel,
+  inProgressLabel,
   money,
   paceBadgeLabel,
   pacePercentLabel,
@@ -54,6 +55,7 @@ import {
   UNCATEGORIZED_ID,
 } from '../lib/reviewMath';
 import {
+  currentPeriod,
   listCompletedPeriods,
   monthKeyOfPeriod,
   type ReviewPeriod,
@@ -148,6 +150,14 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
           earliestTransactionDate,
         }),
       [earliestTransactionDate, monthCycle, settings.weekStartsOn, zoom],
+    );
+
+    // The period still running, shown after the completed ones so a user whose
+    // month cycle starts late can see when the next review lands.
+    const runningPeriod = useMemo(
+      () =>
+        currentPeriod({ zoom, today: new Date(), weekStartsOn: settings.weekStartsOn, monthCycle }),
+      [monthCycle, settings.weekStartsOn, zoom],
     );
 
     const selectedIndex = useMemo(
@@ -287,6 +297,7 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
           <TabletContentContainer>
             <PeriodRail
               periods={periods}
+              runningPeriod={runningPeriod}
               selectedIndex={selectedIndex}
               locale={settings.locale}
               onSelect={selectPeriod}
@@ -329,11 +340,13 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
 
 function PeriodRail({
   periods,
+  runningPeriod,
   selectedIndex,
   locale,
   onSelect,
 }: {
   periods: ReviewPeriod[];
+  runningPeriod: ReviewPeriod;
   selectedIndex: number;
   locale: string;
   onSelect: (period: ReviewPeriod) => void;
@@ -355,8 +368,14 @@ function PeriodRail({
   const centerSelected = useCallback(() => {
     const offset = offsetsRef.current[selectedIndex];
     if (offset === undefined || widthRef.current === 0) return;
+    // The newest pill sits beside the in-progress one, which centring would
+    // cut off; pinning the rail to its end shows both.
+    if (selectedIndex === periods.length - 1) {
+      scrollRef.current?.scrollToEnd({ animated: true });
+      return;
+    }
     scrollRef.current?.scrollTo({ x: Math.max(0, offset - widthRef.current / 2), animated: true });
-  }, [selectedIndex]);
+  }, [periods.length, selectedIndex]);
 
   useEffect(centerSelected, [centerSelected]);
 
@@ -404,6 +423,17 @@ function PeriodRail({
           </Pressable>
         );
       })}
+      {/* Not selectable: its numbers are partial until it ends, which is the
+          whole reason the rail stops before it. */}
+      <View
+        accessible
+        accessibilityRole="text"
+        className="h-9 items-center justify-center rounded-full border border-dashed border-border px-4"
+      >
+        <Text variant="caption" tone="muted">
+          {inProgressLabel(runningPeriod, locale)}
+        </Text>
+      </View>
     </ScrollView>
   );
 }

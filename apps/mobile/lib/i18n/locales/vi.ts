@@ -2411,6 +2411,8 @@ const vi = {
     },
     week_range: '{{start}} đến {{end}}',
     week_tick: 'T{{index}}',
+    range_short: '{{start}} – {{end}}',
+    in_progress: 'Đang diễn ra · kết thúc {{date}}',
     empty_title: 'Chưa có gì để tổng kết',
     nothing_logged_title: 'Một quãng yên ắng',
     nothing_logged_description: 'Không có gì được ghi lại trong giai đoạn này.',

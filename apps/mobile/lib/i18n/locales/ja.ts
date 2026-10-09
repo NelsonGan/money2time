@@ -2415,6 +2415,8 @@ const ja = {
     },
     week_range: '{{start}} から {{end}}',
     week_tick: '第{{index}}週',
+    range_short: '{{start}} – {{end}}',
+    in_progress: '進行中・{{date}}まで',
     empty_title: 'まだ振り返るものがありません',
     nothing_logged_title: '静かな期間',
     nothing_logged_description: 'この期間には何も記録されていません。',

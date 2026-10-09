@@ -8,7 +8,7 @@ import {
 } from '~/utils/formatters';
 
 import type { ReviewBar, ReviewPace } from './reviewMath';
-import type { ReviewPeriod, ReviewZoom } from './reviewPeriods';
+import { isCalendarMonthPeriod, type ReviewPeriod, type ReviewZoom } from './reviewPeriods';
 
 function resolveLocale(locale?: string) {
   return locale ?? I18n.locale ?? I18n.defaultLocale ?? 'en';
@@ -46,10 +46,19 @@ export function weekdayDayLabel(dayKey: string, locale?: string): string {
   }).format(dateFromDayKeyLocal(dayKey));
 }
 
-/** The label on a period pill: "27 Jul" / "Jul" / "2026". */
+/**
+ * The label on a period pill: "27 Jul" / "Jul" / "2026", or "31 Aug – 29 Sep"
+ * for a month cycle that does not line up with the calendar month.
+ */
 export function periodPillLabel(period: ReviewPeriod, locale?: string): string {
   if (period.zoom === 'week') return shortDayLabel(period.start, locale);
   if (period.zoom === 'month') {
+    if (!isCalendarMonthPeriod(period)) {
+      return I18n.t('review.range_short', {
+        start: shortDayLabel(period.start, locale),
+        end: shortDayLabel(period.end, locale),
+      });
+    }
     return formatter(resolveLocale(locale), { month: 'short' }).format(
       dateFromDayKeyLocal(period.start),
     );
@@ -57,9 +66,13 @@ export function periodPillLabel(period: ReviewPeriod, locale?: string): string {
   return period.key.slice('year:'.length);
 }
 
-/** The header label for the selected period: a range, a month, or a year. */
+/**
+ * The header label for the selected period: a range, a month, or a year. A
+ * month cycle off the calendar reads as its range, like a week does.
+ */
 export function periodTitle(period: ReviewPeriod, locale?: string): string {
-  if (period.zoom === 'week') {
+  const isOffCalendarMonth = period.zoom === 'month' && !isCalendarMonthPeriod(period);
+  if (period.zoom === 'week' || isOffCalendarMonth) {
     return I18n.t('review.week_range', {
       start: shortDayLabel(period.start, locale),
       end: shortDayLabel(period.end, locale),
@@ -72,6 +85,11 @@ export function periodTitle(period: ReviewPeriod, locale?: string): string {
     );
   }
   return period.key.slice('year:'.length);
+}
+
+/** "In progress · ends 30 Oct" — the rail's closing pill for the running period. */
+export function inProgressLabel(period: ReviewPeriod, locale?: string): string {
+  return I18n.t('review.in_progress', { date: shortDayLabel(period.end, locale) });
 }
 
 /** A trend bar's tick label: weekday initial, week number, or month initial. */

@@ -2418,6 +2418,8 @@ const hi = {
     },
     week_range: '{{start}} से {{end}}',
     week_tick: 'स{{index}}',
+    range_short: '{{start}} – {{end}}',
+    in_progress: 'जारी है · {{date}} को समाप्त',
     empty_title: 'अभी समीक्षा के लिए कुछ नहीं',
     nothing_logged_title: 'एक शांत दौर',
     nothing_logged_description: 'इस अवधि में कुछ भी दर्ज नहीं हुआ।',

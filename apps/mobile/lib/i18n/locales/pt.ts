@@ -2443,6 +2443,8 @@ const pt = {
     },
     week_range: '{{start}} a {{end}}',
     week_tick: 'S{{index}}',
+    range_short: '{{start}} – {{end}}',
+    in_progress: 'Em andamento · termina em {{date}}',
     empty_title: 'Ainda não há nada para revisar',
     nothing_logged_title: 'Um período tranquilo',
     nothing_logged_description: 'Nada foi registrado neste período.',

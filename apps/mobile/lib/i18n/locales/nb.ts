@@ -2428,6 +2428,8 @@ const nb = {
     },
     week_range: '{{start}} til {{end}}',
     week_tick: 'U{{index}}',
+    range_short: '{{start}} – {{end}}',
+    in_progress: 'Pågår · slutter {{date}}',
     empty_title: 'Ingenting å se tilbake på ennå',
     nothing_logged_title: 'En rolig periode',
     nothing_logged_description: 'Ingenting ble registrert i denne perioden.',

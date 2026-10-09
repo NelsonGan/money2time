@@ -2438,6 +2438,8 @@ const tr = {
     },
     week_range: '{{start}} ile {{end}} arası',
     week_tick: 'H{{index}}',
+    range_short: '{{start}} – {{end}}',
+    in_progress: 'Devam ediyor · {{date}} bitiyor',
     empty_title: 'Henüz incelenecek bir şey yok',
     nothing_logged_title: 'Sakin bir dönem',
     nothing_logged_description: 'Bu dönemde hiçbir şey kaydedilmedi.',

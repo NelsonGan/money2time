@@ -2396,6 +2396,8 @@ const ko = {
     },
     week_range: '{{start}} ~ {{end}}',
     week_tick: '{{index}}주차',
+    range_short: '{{start}} – {{end}}',
+    in_progress: '진행 중 · {{date}} 종료',
     empty_title: '아직 돌아볼 내용이 없어요',
     nothing_logged_title: '조용했던 기간',
     nothing_logged_description: '이 기간에는 기록된 내용이 없어요.',

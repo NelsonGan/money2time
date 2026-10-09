@@ -2429,6 +2429,8 @@ const da = {
     },
     week_range: '{{start}} til {{end}}',
     week_tick: 'U{{index}}',
+    range_short: '{{start}} – {{end}}',
+    in_progress: 'I gang · slutter {{date}}',
     empty_title: 'Ingenting at gennemgå endnu',
     nothing_logged_title: 'En stille periode',
     nothing_logged_description: 'Der blev ikke registreret noget i denne periode.',

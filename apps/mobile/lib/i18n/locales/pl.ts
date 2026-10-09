@@ -2437,6 +2437,8 @@ const pl = {
     },
     week_range: '{{start}} do {{end}}',
     week_tick: 'T{{index}}',
+    range_short: '{{start}} – {{end}}',
+    in_progress: 'W toku · kończy się {{date}}',
     empty_title: 'Nie ma jeszcze czego podsumować',
     nothing_logged_title: 'Spokojny okres',
     nothing_logged_description: 'W tym okresie nic nie zapisano.',

@@ -2460,6 +2460,8 @@ const fr = {
     },
     week_range: '{{start}} au {{end}}',
     week_tick: 'S{{index}}',
+    range_short: '{{start}} – {{end}}',
+    in_progress: 'En cours · se termine le {{date}}',
     empty_title: 'Rien à passer en revue pour le moment',
     nothing_logged_title: 'Une période calme',
     nothing_logged_description: "Rien n'a été enregistré sur cette période.",

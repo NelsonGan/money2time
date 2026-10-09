@@ -5,6 +5,8 @@ import {
   UNCATEGORIZED_ID,
 } from '~/features/review/lib/reviewMath';
 import {
+  currentPeriod,
+  isCalendarMonthPeriod,
   lastCompletedPeriod,
   listCompletedPeriods,
   MAX_REVIEW_PERIODS,
@@ -127,6 +129,69 @@ describe('reviewPeriods — only completed periods', () => {
     });
     expect(shiftPeriod(july, 1, 1)).toMatchObject({ key: 'month:2026-06' });
     expect(shiftPeriod(july, 7, 1)).toMatchObject({ key: 'month:2025-12' });
+  });
+});
+
+describe('a month cycle starting on the 31st', () => {
+  // Friday 9 Oct 2026, with every month starting on its last day when short.
+  const clock = { zoom: 'month' as const, today: new Date(2026, 9, 9), weekStartsOn: 1 as const };
+
+  it('is still inside the cycle that started on 30 Sep', () => {
+    expect(currentPeriod({ ...clock, monthCycle: 31 })).toMatchObject({
+      key: 'month:2026-09',
+      start: '2026-09-30',
+      end: '2026-10-30',
+    });
+  });
+
+  it('has the cycle covering September as its last completed one', () => {
+    const latest = lastCompletedPeriod({ ...clock, monthCycle: 31 });
+    // Labelled August by the cycle convention, though 29 of its 30 days are
+    // September, which is why the review shows these dates rather than a name.
+    expect(latest).toMatchObject({ key: 'month:2026-08', start: '2026-08-31', end: '2026-09-29' });
+    expect(isCalendarMonthPeriod(latest)).toBe(false);
+  });
+});
+
+describe('currentPeriod', () => {
+  const base = { today: TODAY, weekStartsOn: 1 as WeekStartsOn, monthCycle: 1 };
+
+  it('is the period lastCompletedPeriod steps back from', () => {
+    for (const zoom of ['week', 'month', 'year'] as const) {
+      const running = currentPeriod({ ...base, zoom });
+      expect(periodContains(running, '2026-08-06')).toBe(true);
+      expect(shiftPeriod(running, 1, 1)).toEqual(lastCompletedPeriod({ ...base, zoom }));
+    }
+  });
+});
+
+describe('isCalendarMonthPeriod', () => {
+  const at = (monthCycle: number) =>
+    lastCompletedPeriod({ zoom: 'month', today: TODAY, weekStartsOn: 1, monthCycle });
+
+  it('is true only for a whole calendar month', () => {
+    expect(isCalendarMonthPeriod(at(1))).toBe(true);
+    expect(isCalendarMonthPeriod(at(15))).toBe(false);
+    expect(isCalendarMonthPeriod(at(31))).toBe(false);
+  });
+
+  it('is false when a pinned neighbour borrows days from a month starting on the 1st', () => {
+    // July starts on the 1st but August is pinned to the 10th, so July runs to 9 Aug.
+    const july = lastCompletedPeriod({
+      zoom: 'month',
+      today: new Date(2026, 7, 20),
+      weekStartsOn: 1,
+      monthCycle: { defaultDay: 1, overrides: { '2026-08': 10 } },
+    });
+    expect(july).toMatchObject({ start: '2026-07-01', end: '2026-08-09' });
+    expect(isCalendarMonthPeriod(july)).toBe(false);
+  });
+
+  it('is false for weeks and years', () => {
+    for (const zoom of ['week', 'year'] as const) {
+      const period = currentPeriod({ zoom, today: TODAY, weekStartsOn: 1, monthCycle: 1 });
+      expect(isCalendarMonthPeriod(period)).toBe(false);
+    }
   });
 });
 

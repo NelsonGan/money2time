@@ -2460,6 +2460,8 @@ const fil = {
     },
     week_range: '{{start}} hanggang {{end}}',
     week_tick: 'L{{index}}',
+    range_short: '{{start}} – {{end}}',
+    in_progress: 'Kasalukuyan · matatapos sa {{date}}',
     empty_title: 'Wala pang mare-review',
     nothing_logged_title: 'Isang tahimik na yugto',
     nothing_logged_description: 'Walang naitala sa panahong ito.',

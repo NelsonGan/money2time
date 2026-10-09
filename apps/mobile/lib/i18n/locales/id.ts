@@ -2439,6 +2439,8 @@ const id = {
     },
     week_range: '{{start}} sampai {{end}}',
     week_tick: 'M{{index}}',
+    range_short: '{{start}} – {{end}}',
+    in_progress: 'Berjalan · berakhir {{date}}',
     empty_title: 'Belum ada yang bisa ditinjau',
     nothing_logged_title: 'Periode yang sepi',
     nothing_logged_description: 'Tidak ada yang dicatat pada periode ini.',
