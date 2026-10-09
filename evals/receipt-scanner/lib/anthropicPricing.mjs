@@ -5,7 +5,7 @@
 // at their own rates, so pricing every prompt token as plain input is wrong in both
 // directions (writes cost more, reads far less). The CLI's own `total_cost_usd`
 // is no substitute: for models it does not list yet it reports `costBasis:
-// "unknown"` and was ~66x off for Haiku 5.5.
+// "unknown"` and came out ~40x above the cache-inclusive list price for Haiku 5.5.
 //
 // Source: the Claude API model table and prompt-caching economics, checked
 // 2026-10-09. USD per million tokens, prompts up to 100K tokens. Cache writes are
