@@ -5,7 +5,7 @@ description: Keep the canonical Money2Time Mixpanel and Google Analytics trackin
 
 # Maintain analytics tracking
 
-[docs/analytics-tracking.md](../../../docs/analytics-tracking.md) is the **single source of truth** for tracking. Read its relevant tables before changing analytics or a tracked product flow. The integration notes explain setup; they must not become a second event inventory.
+The [Analytics](../../../README.md#analytics) section of `README.md` is the **single source of truth** for tracking. Read its relevant tables before changing analytics or a tracked product flow. The integration notes explain setup; they must not become a second event inventory.
 
 For every product/code change, assess its analytics impact. If it changes an event name, payload, trigger, frequency, destination, paywall source, visible screen, profile/super property, feature-use rule, transaction milestone, provider configuration or external producer, update the affected tracking tables **in the same change**. No analytics impact means no artificial table edit. A change with stale tracking documentation is unfinished.
 
@@ -27,7 +27,7 @@ For every product/code change, assess its analytics impact. If it changes an eve
 Run:
 
 ```bash
-npm test -- --runInBand __tests__/services/analyticsTrackingPlan.test.ts __tests__/services/analyticsEvents.test.ts __tests__/services/analyticsNative.test.ts __tests__/services/revenueCatRestore.test.ts __tests__/patches/mixpanelAsyncOperations.test.ts __tests__/utils/firstTransactionSignal.test.ts
+cd apps/mobile && npm test -- --runInBand __tests__/services/analyticsTrackingPlan.test.ts __tests__/services/analyticsEvents.test.ts __tests__/services/analyticsNative.test.ts __tests__/services/revenueCatRestore.test.ts __tests__/patches/mixpanelAsyncOperations.test.ts __tests__/utils/firstTransactionSignal.test.ts
 ```
 
 The table check enforces event completeness, exact names/destinations, summary counts, feature triggers/exclusions and transaction thresholds. The native, installed-SDK and activation tests cover provider ordering, async failures, profile retries, RevenueCat identity/marker coordination and successful-save claims. Reconcile the Mixpanel SDK patch and run the installed-SDK tests on dependency upgrades. Review trigger prose, payload keys, source/screen tables and provider configuration against the diff as well; the table test does not validate those automatically. Follow the repository's broader checks for code changes. When opening a PR or reporting completion, identify tracking-table updates and explain any Mixpanel volume change.

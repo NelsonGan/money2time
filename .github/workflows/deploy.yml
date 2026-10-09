@@ -48,11 +48,12 @@ jobs:
   # Classifies the diff into the three things this repo can ship:
   #   app     — anything that can reach the mobile binary (gates the EAS
   #             preview + the production store build)
-  #   worker  — cloudflare/** (gates the per-PR Worker preview upload)
-  #   checks  — anything the root `npm run check` / `npm test` can even see,
-  #             i.e. everything outside cloudflare/ (prettier, eslint and
-  #             tsconfig all exclude that directory, and jest only reads
-  #             __tests__/), so a Worker-only change skips the app test job.
+  #   worker  — apps/cloudflare/** (gates the per-PR Worker preview upload)
+  #   checks  — anything the app's `npm run check` / `npm test` can even see,
+  #             i.e. everything outside apps/cloudflare/ (eslint and tsconfig
+  #             only see apps/mobile, prettier sees it plus the root docs and
+  #             .github/, and jest only reads its __tests__/), so a Worker-only
+  #             change skips the app test job.
   # Fail open: when the diff can't be resolved, every flag is true.
   changes:
     name: Detect changes
@@ -122,15 +123,15 @@ jobs:
           # `if`, so a genuine app change classifies as `app=false` and the push
           # never cuts a store build. It is size-dependent, so it passed on every
           # normal diff and first bit on a 2,265-file one. Keep these unpiped.
-          # Markdown under cloudflare/ is documentation only, and cloudflare.yml
-          # ignores it too, so it never earns a Worker preview upload.
-          grep -E '^cloudflare/' changed.txt > worker_paths.txt || true
+          # Markdown under apps/cloudflare/ is documentation only, and
+          # cloudflare.yml ignores it too, so it never earns a Worker preview upload.
+          grep -E '^apps/cloudflare/' changed.txt > worker_paths.txt || true
           grep -vE '\.md$' worker_paths.txt > worker_code.txt || true
           [ -s worker_code.txt ] && worker=true
-          grep -qvE '^cloudflare/' changed.txt && checks=true
+          grep -qvE '^apps/cloudflare/' changed.txt && checks=true
           # Paths that cannot change the shipped binary. Anything else counts as
           # an app change, so an unrecognised path always builds the app.
-          grep -vE '^(cloudflare/|docs/|\.github/|\.claude/|\.vscode/)|(^|/)[^/]*\.md$|^LICENSE$' changed.txt > app_paths.txt || true
+          grep -vE '^(apps/cloudflare/|\.github/|\.claude/|\.agents/|\.codex/|\.vscode/)|(^|/)[^/]*\.md$|^LICENSE$' changed.txt > app_paths.txt || true
           [ -s app_paths.txt ] && app=true
 
           echo "app=$app | worker=$worker | checks=$checks"
@@ -139,14 +140,18 @@ jobs:
   test:
     name: Test
     needs: changes
-    # `npm run check` / `npm test` are blind to cloudflare/ (prettier and eslint
-    # ignore it, tsconfig excludes it, jest only reads __tests__/), so a
-    # Worker-only change has nothing to run here.
+    # `npm run check` / `npm test` run inside apps/mobile and are blind to
+    # apps/cloudflare/ (eslint and tsconfig only see the app, prettier the app plus
+    # the root docs and .github/, jest only __tests__/), so a Worker-only change
+    # has nothing to run here.
     if: needs.changes.outputs.checks == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
       contents: read
+    defaults:
+      run:
+        working-directory: apps/mobile
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -156,6 +161,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: apps/mobile/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -243,7 +249,7 @@ jobs:
 
       - name: Deploy branch Worker (preview)
         id: worker
-        working-directory: cloudflare/workers/receipt-scanner
+        working-directory: apps/cloudflare/workers/receipt-scanner
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -291,6 +297,9 @@ jobs:
       # App-only PRs skip the Worker preview upload and fall back to production,
       # so their preview still scans against a live backend.
       WORKER_URL: ${{ needs.worker-preview.outputs.url || 'https://workers-receipt-scanner.money2time.com' }}
+    defaults:
+      run:
+        working-directory: apps/mobile
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -300,6 +309,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: apps/mobile/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -338,6 +348,7 @@ jobs:
           APP_VARIANT: preview
         with:
           command: eas update --branch pr-${{ github.event.number }} --message "${{ steps.message.outputs.text }}"
+          working-directory: apps/mobile
           comment: false
 
       - name: Comment QR code and link
@@ -393,7 +404,7 @@ jobs:
             }
 
   # Production Worker deploys live in the dedicated cloudflare.yml workflow (runs on
-  # push to main when cloudflare/** changes), so there is no worker-deploy job here —
+  # push to main when apps/cloudflare/** changes), so there is no worker-deploy job here —
   # that would double-deploy the Worker on every push to main.
 
   plan:
@@ -459,6 +470,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: apps/mobile/package-lock.json
 
       - name: Set up Java
         if: matrix.platform == 'android'
@@ -477,15 +489,15 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.eas-build-local
-          key: ${{ runner.os }}-eas-build-local-${{ hashFiles('**/package-lock.json', 'patches/**') }}
+          key: ${{ runner.os }}-eas-build-local-${{ hashFiles('apps/mobile/package-lock.json', 'apps/mobile/patches/**') }}
           restore-keys: ${{ runner.os }}-eas-build-local-
 
       - name: Cache CocoaPods
         if: matrix.platform == 'ios'
         uses: actions/cache@v4
         with:
-          path: ios/Pods
-          key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock', 'patches/**') }}
+          path: apps/mobile/ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('apps/mobile/ios/Podfile.lock', 'apps/mobile/patches/**') }}
           restore-keys: ${{ runner.os }}-pods-
 
       - name: Cache Gradle
@@ -495,10 +507,11 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', 'patches/**') }}
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', 'apps/mobile/patches/**') }}
           restore-keys: ${{ runner.os }}-gradle-
 
       - name: Install dependencies
+        working-directory: apps/mobile
         run: npm ci
 
       - name: Resolve output path
@@ -515,6 +528,7 @@ jobs:
           echo "file=./build/money2time-${{ matrix.platform }}-${{ matrix.profile }}.$ext" >> "$GITHUB_OUTPUT"
 
       - name: Build app
+        working-directory: apps/mobile
         run: |
           mkdir -p build
           eas build \
@@ -525,6 +539,7 @@ jobs:
             --output=${{ steps.output.outputs.file }}
 
       - name: Submit build
+        working-directory: apps/mobile
         run: |
           eas submit \
             --platform ${{ matrix.platform }} \
@@ -540,6 +555,9 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: read
+    defaults:
+      run:
+        working-directory: apps/mobile
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -549,6 +567,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: apps/mobile/package-lock.json
 
       - name: Install dependencies
         run: npm ci

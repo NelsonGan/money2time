@@ -10,7 +10,7 @@ Write for a reviewer who has not seen the conversation. Describe the final chang
 ## Prepare
 
 - Read the repository instructions and any PR template. Inspect the branch, working tree, full diff against the target branch, and existing PR before writing.
-- Assess analytics impact for every change. If tracking or a tracked flow changes, follow [maintain-analytics-tracking](../maintain-analytics-tracking/SKILL.md), update `docs/analytics-tracking.md` in the same change, run the tracking-table check, and explain any Mixpanel volume change in the PR.
+- Assess analytics impact for every change. If tracking or a tracked flow changes, follow [maintain-analytics-tracking](../maintain-analytics-tracking/SKILL.md), update the [Analytics](../../../README.md#analytics) tables in `README.md` in the same change, run the tracking-table check, and explain any Mixpanel volume change in the PR.
 - Review the actual changes and available verification results. Run the checks required by the repository for code changes; when only rewriting a description, reuse verified results for the same code and identify any gaps.
 - When creating a PR, commit only the intended changes, follow the repository's branch and commit conventions, and push the branch. Preserve unrelated work. When rewriting a PR, update that PR instead of opening a duplicate or making unrelated code changes.
 
@@ -27,7 +27,8 @@ Start with one sentence explaining what the PR achieves. No Summary heading is n
 
 - State what was actually tested, where, and the result. For mobile apps, name the platform/device or simulator and whether the backend was local, staging, or production when relevant.
 - After UI testing, always embed screenshots of the final UI in the PR description. Recordings and a description of the flows checked can supplement the screenshots. Include before/after images only if both were captured.
-- Use image URLs a PR reviewer can access and verify that they load. Local filesystem paths and a text-only report are not enough. Do not invent attachments, expose private account data, or claim unrun checks passed.
+- Save every screenshot, recording and evidence file for the PR in `.github/pr-assets/<topic>/`, one kebab-case folder per PR (for example `.github/pr-assets/split-bill-name-typing/after.png`), and commit them on the PR branch. That is the only place PR assets go: never a `docs/` folder, a `pr-evidence` folder or the app's `assets/`.
+- Embed them with URLs pinned to the commit that added them, `https://raw.githubusercontent.com/NelsonGan/money2time/<commit-sha>/.github/pr-assets/<topic>/<file>`, not `main` or the branch name, so the images keep loading after a merge, a rebase or a later move. Verify that they load. Local filesystem paths and a text-only report are not enough. Do not invent attachments, expose private account data, or claim unrun checks passed.
 - Keep the simulator or emulator window visible while testing, following the repository's simulator visibility instructions, and leave it open on the tested screen.
 - For instructions-only changes without UI testing, state that no app behavior changed and report documentation checks; screenshots of unchanged app screens are not required.
 - Call out relevant untested platforms or paths. Distinguish automated checks from manual verification and pending CI.

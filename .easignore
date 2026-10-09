@@ -1,3 +1,7 @@
+# EAS reads this file from the root of the git repository, not from the app
+# (apps/mobile), and archives the whole repository; the build then runs in
+# apps/mobile. So paths here are relative to the repository root.
+#
 # A .easignore REPLACES .gitignore for the EAS build archive, it does not add to
 # it. So this file has to repeat every .gitignore rule that matters for a build:
 # without them the locally prebuilt /ios and /android folders ride along, which
@@ -43,8 +47,8 @@ yarn-error.*
 *.tsbuildinfo
 
 # generated native folders (EAS runs prebuild itself)
-/ios
-/android
+/apps/mobile/ios
+/apps/mobile/android
 /.idea
 
 # local app data / backups
@@ -54,16 +58,23 @@ yarn-error.*
 *.db-wal
 *.sqlite
 *.sqlite-*
-# bundled read-only reference DB (built by scripts/build-cities-db.mjs)
-!assets/db/cities.db
+# bundled read-only reference DB (built by apps/mobile/scripts/build-cities-db.mjs)
+!/apps/mobile/assets/db/cities.db
 *.mmbak
 skills-lock.json
 /.agents
 
 # training data
 /training
+/apps/mobile/training
 
 # Keep the Cloudflare resources (Workers, D1 schemas) out of the EAS build
-# context entirely — they are separate server-side deploys (see
-# cloudflare/workers/*/README.md) and are never part of the iOS/Android app bundle.
-cloudflare/
+# context entirely — they are separate server-side deploys (see "Cloudflare" in
+# README.md) and are never part of the iOS/Android app bundle.
+/apps/cloudflare/
+
+# Repository-level material no build reads: CI workflows and the PR screenshots
+# and evidence under .github/pr-assets (100+ MB), and the agent config.
+/.github/
+/.claude/
+/.codex/
