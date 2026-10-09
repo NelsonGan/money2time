@@ -126,7 +126,7 @@ price (`lib/anthropicPricing.mjs`): plain input, cache writes at 1.25x (5-minute
 input, cache reads at 0.1x (0.05x on Opus 5.5), and output. `claude -p` writes each prompt to a
 1-hour cache, so a `claude-code:` row also shows the cost with no caching, which is closer to a
 one-off production call. The CLI's own `total_cost_usd` is kept only for reference: it has no price
-for models it does not list yet and was about 66x off for Haiku 5.5.
+for models it does not list yet and came out about 40x above the cache-inclusive list price for Haiku 5.5.
 
 OpenRouter calls are cheap (the production models cost cents per thousand scans). The judge
 dominates: about **$0.03-0.05 per judgement**, so roughly **$4-6 per model** for the full suite, and
