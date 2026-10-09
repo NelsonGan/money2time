@@ -2424,7 +2424,7 @@ const uk = {
       month: 'Місяць',
       year: 'Рік',
     },
-    week_range: 'з {{start}} до {{end}}',
+    range: 'з {{start}} до {{end}}',
     week_tick: 'Т{{index}}',
     range_short: '{{start}} – {{end}}',
     in_progress: 'Триває, до {{date}}',

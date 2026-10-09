@@ -20,7 +20,7 @@ const translations: Translations = {
   'widgets.of_work_behind': '≈ {hours} of work behind',
   'notifications.review.every_month_on': 'Day {day} of every month',
   'notifications.review.day_of_month_short': 'Day {day}',
-  'review.week_range': '{start} to {end}',
+  'review.range': '{start} to {end}',
   'review.range_short': '{start} – {end}',
   'review.in_progress': 'In progress, ends {date}',
 };

@@ -73,7 +73,7 @@ export function periodPillLabel(period: ReviewPeriod, locale?: string): string {
 export function periodTitle(period: ReviewPeriod, locale?: string): string {
   const isOffCalendarMonth = period.zoom === 'month' && !isCalendarMonthPeriod(period);
   if (period.zoom === 'week' || isOffCalendarMonth) {
-    return I18n.t('review.week_range', {
+    return I18n.t('review.range', {
       start: shortDayLabel(period.start, locale),
       end: shortDayLabel(period.end, locale),
     });

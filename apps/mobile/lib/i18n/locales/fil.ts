@@ -2458,7 +2458,7 @@ const fil = {
       month: 'Buwan',
       year: 'Taon',
     },
-    week_range: '{{start}} hanggang {{end}}',
+    range: '{{start}} hanggang {{end}}',
     week_tick: 'L{{index}}',
     range_short: '{{start}} – {{end}}',
     in_progress: 'Kasalukuyan, matatapos sa {{date}}',

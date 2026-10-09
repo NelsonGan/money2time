@@ -2409,7 +2409,7 @@ const vi = {
       month: 'Tháng',
       year: 'Năm',
     },
-    week_range: '{{start}} đến {{end}}',
+    range: '{{start}} đến {{end}}',
     week_tick: 'T{{index}}',
     range_short: '{{start}} – {{end}}',
     in_progress: 'Đang diễn ra, kết thúc {{date}}',

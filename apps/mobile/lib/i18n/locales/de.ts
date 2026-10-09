@@ -2459,7 +2459,7 @@ const de = {
       month: 'Monat',
       year: 'Jahr',
     },
-    week_range: '{{start}} bis {{end}}',
+    range: '{{start}} bis {{end}}',
     week_tick: 'KW{{index}}',
     range_short: '{{start}} – {{end}}',
     in_progress: 'Läuft, endet am {{date}}',

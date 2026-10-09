@@ -2458,7 +2458,7 @@ const fr = {
       month: 'Mois',
       year: 'Année',
     },
-    week_range: '{{start}} au {{end}}',
+    range: '{{start}} au {{end}}',
     week_tick: 'S{{index}}',
     range_short: '{{start}} – {{end}}',
     in_progress: 'En cours, se termine le {{date}}',

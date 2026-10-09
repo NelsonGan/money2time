@@ -2427,7 +2427,7 @@ const da = {
       month: 'Måned',
       year: 'År',
     },
-    week_range: '{{start}} til {{end}}',
+    range: '{{start}} til {{end}}',
     week_tick: 'U{{index}}',
     range_short: '{{start}} – {{end}}',
     in_progress: 'I gang, slutter {{date}}',

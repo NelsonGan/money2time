@@ -2445,7 +2445,7 @@ const ms = {
       month: 'Bulan',
       year: 'Tahun',
     },
-    week_range: '{{start}} hingga {{end}}',
+    range: '{{start}} hingga {{end}}',
     week_tick: 'M{{index}}',
     range_short: '{{start}} – {{end}}',
     in_progress: 'Sedang berjalan, tamat {{date}}',

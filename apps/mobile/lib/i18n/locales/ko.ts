@@ -2394,7 +2394,7 @@ const ko = {
       month: '월',
       year: '년',
     },
-    week_range: '{{start}} ~ {{end}}',
+    range: '{{start}} ~ {{end}}',
     week_tick: '{{index}}주차',
     range_short: '{{start}} – {{end}}',
     in_progress: '진행 중, {{date}} 종료',

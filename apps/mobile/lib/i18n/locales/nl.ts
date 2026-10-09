@@ -2454,7 +2454,7 @@ const nl = {
       month: 'Maand',
       year: 'Jaar',
     },
-    week_range: '{{start}} tot {{end}}',
+    range: '{{start}} tot {{end}}',
     week_tick: 'W{{index}}',
     range_short: '{{start}} – {{end}}',
     in_progress: 'Loopt, eindigt {{date}}',

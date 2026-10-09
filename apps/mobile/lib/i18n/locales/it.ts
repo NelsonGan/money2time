@@ -2440,7 +2440,7 @@ const it = {
       month: 'Mese',
       year: 'Anno',
     },
-    week_range: 'Dal {{start}} al {{end}}',
+    range: 'Dal {{start}} al {{end}}',
     week_tick: 'S{{index}}',
     range_short: '{{start}} – {{end}}',
     in_progress: 'In corso, termina il {{date}}',

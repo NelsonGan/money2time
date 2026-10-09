@@ -2436,7 +2436,7 @@ const tr = {
       month: 'Ay',
       year: 'Yıl',
     },
-    week_range: '{{start}} ile {{end}} arası',
+    range: '{{start}} ile {{end}} arası',
     week_tick: 'H{{index}}',
     range_short: '{{start}} – {{end}}',
     in_progress: 'Devam ediyor, {{date}} bitiyor',

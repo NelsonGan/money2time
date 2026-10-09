@@ -2437,7 +2437,7 @@ const id = {
       month: 'Bulan',
       year: 'Tahun',
     },
-    week_range: '{{start}} sampai {{end}}',
+    range: '{{start}} sampai {{end}}',
     week_tick: 'M{{index}}',
     range_short: '{{start}} – {{end}}',
     in_progress: 'Berjalan, berakhir {{date}}',

@@ -2423,7 +2423,7 @@ const en = {
       month: 'Month',
       year: 'Year',
     },
-    week_range: '{{start}} to {{end}}',
+    range: '{{start}} to {{end}}',
     week_tick: 'W{{index}}',
     range_short: '{{start}} – {{end}}',
     in_progress: 'In progress, ends {{date}}',

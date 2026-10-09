@@ -2382,7 +2382,7 @@ const th = {
       month: 'เดือน',
       year: 'ปี',
     },
-    week_range: '{{start}} ถึง {{end}}',
+    range: '{{start}} ถึง {{end}}',
     week_tick: 'สัปดาห์ {{index}}',
     range_short: '{{start}} – {{end}}',
     in_progress: 'กำลังดำเนินอยู่, สิ้นสุด {{date}}',

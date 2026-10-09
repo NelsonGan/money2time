@@ -2435,7 +2435,7 @@ const pl = {
       month: 'Miesiąc',
       year: 'Rok',
     },
-    week_range: '{{start}} do {{end}}',
+    range: '{{start}} do {{end}}',
     week_tick: 'T{{index}}',
     range_short: '{{start}} – {{end}}',
     in_progress: 'W toku, kończy się {{date}}',

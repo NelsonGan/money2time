@@ -2441,7 +2441,7 @@ const pt = {
       month: 'Mês',
       year: 'Ano',
     },
-    week_range: '{{start}} a {{end}}',
+    range: '{{start}} a {{end}}',
     week_tick: 'S{{index}}',
     range_short: '{{start}} – {{end}}',
     in_progress: 'Em andamento, termina em {{date}}',

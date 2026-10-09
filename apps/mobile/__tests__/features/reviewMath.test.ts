@@ -150,6 +150,7 @@ describe('a month cycle starting on the 31st', () => {
     // September, which is why the review shows these dates rather than a name.
     expect(latest).toMatchObject({ key: 'month:2026-08', start: '2026-08-31', end: '2026-09-29' });
     expect(isCalendarMonthPeriod(latest)).toBe(false);
+    expect(shiftPeriod(latest, -1, 31)).toEqual(currentPeriod({ ...clock, monthCycle: 31 }));
   });
 });
 
@@ -161,6 +162,8 @@ describe('currentPeriod', () => {
       const running = currentPeriod({ ...base, zoom });
       expect(periodContains(running, '2026-08-06')).toBe(true);
       expect(shiftPeriod(running, 1, 1)).toEqual(lastCompletedPeriod({ ...base, zoom }));
+      // The screen steps forward from the newest completed period to find it.
+      expect(shiftPeriod(lastCompletedPeriod({ ...base, zoom }), -1, 1)).toEqual(running);
     }
   });
 });

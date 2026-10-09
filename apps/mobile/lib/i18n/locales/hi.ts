@@ -2416,7 +2416,7 @@ const hi = {
       month: 'महीना',
       year: 'साल',
     },
-    week_range: '{{start}} से {{end}}',
+    range: '{{start}} से {{end}}',
     week_tick: 'स{{index}}',
     range_short: '{{start}} – {{end}}',
     in_progress: 'जारी है, {{date}} को समाप्त',

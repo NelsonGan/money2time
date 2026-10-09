@@ -1,6 +1,7 @@
 import type { MonthCycleInput, WeekStartsOn } from '~/types';
 import {
   addFinancialMonths,
+  daysInMonth,
   financialMonthKeyForDate,
   financialMonthRange,
   financialMonthStartDate,
@@ -128,9 +129,8 @@ export function lastCompletedPeriod(clock: PeriodClock): ReviewPeriod {
  */
 export function isCalendarMonthPeriod(period: ReviewPeriod): boolean {
   if (period.zoom !== 'month' || !period.start.endsWith('-01')) return false;
-  const start = dateFromDayKeyLocal(period.start);
-  const lastDay = new Date(start.getFullYear(), start.getMonth() + 1, 0);
-  return period.end === dayKeyFromDateLocal(lastDay);
+  const lastDay = daysInMonth(Number(period.start.slice(0, 4)), Number(period.start.slice(5, 7)));
+  return period.end === `${period.start.slice(0, 8)}${String(lastDay).padStart(2, '0')}`;
 }
 
 /** The period `offset` steps before `period` (positive `offset` goes back in time). */

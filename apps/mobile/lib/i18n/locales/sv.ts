@@ -2426,7 +2426,7 @@ const sv = {
       month: 'Månad',
       year: 'År',
     },
-    week_range: '{{start}} till {{end}}',
+    range: '{{start}} till {{end}}',
     week_tick: 'v{{index}}',
     range_short: '{{start}} – {{end}}',
     in_progress: 'Pågår, slutar {{date}}',

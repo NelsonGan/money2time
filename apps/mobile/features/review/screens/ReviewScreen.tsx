@@ -62,7 +62,6 @@ import {
   UNCATEGORIZED_ID,
 } from '../lib/reviewMath';
 import {
-  currentPeriod,
   listCompletedPeriods,
   monthKeyOfPeriod,
   type ReviewPeriod,
@@ -160,11 +159,12 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
     );
 
     // The period still running, shown after the completed ones so a user whose
-    // month cycle starts late can see when the next review lands.
+    // month cycle starts late can see when the next review lands. Stepped on
+    // from the newest completed period rather than read off its own clock, so
+    // the two can never disagree about which period is today's.
     const runningPeriod = useMemo(
-      () =>
-        currentPeriod({ zoom, today: new Date(), weekStartsOn: settings.weekStartsOn, monthCycle }),
-      [monthCycle, settings.weekStartsOn, zoom],
+      () => shiftPeriod(periods[periods.length - 1], -1, monthCycle),
+      [monthCycle, periods],
     );
 
     const selectedIndex = useMemo(

@@ -2430,7 +2430,7 @@ const ru = {
       month: 'Месяц',
       year: 'Год',
     },
-    week_range: '{{start}} по {{end}}',
+    range: '{{start}} по {{end}}',
     week_tick: 'Н{{index}}',
     range_short: '{{start}} – {{end}}',
     in_progress: 'Идёт, до {{date}}',

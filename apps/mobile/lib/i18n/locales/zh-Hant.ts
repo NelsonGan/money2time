@@ -2321,7 +2321,7 @@ const zhHant = {
       month: '月',
       year: '年',
     },
-    week_range: '{{start}} 至 {{end}}',
+    range: '{{start}} 至 {{end}}',
     week_tick: '第 {{index}} 週',
     range_short: '{{start}} – {{end}}',
     in_progress: '進行中，{{date}}結束',
