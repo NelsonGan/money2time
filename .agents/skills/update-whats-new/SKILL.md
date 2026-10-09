@@ -60,8 +60,10 @@ so the app in fact grew by 20 MiB. Compare the release tag or version-bump commi
 
 ```bash
 cd ~/Projects/money2time
+# The app moved to apps/mobile; a commit from before the move keeps it at the root.
 for r in <last version-bump commit> main; do printf "%s  " $r
-  git ls-tree -r -l $r -- assets | awk '{s+=$4} END{printf "%.1f MiB\n", s/1048576}'; done
+  d=apps/mobile/assets; git cat-file -e "$r:$d" 2>/dev/null || d=assets
+  git ls-tree -r -l $r -- "$d" | awk '{s+=$4} END{printf "%.1f MiB\n", s/1048576}'; done
 ```
 
 Narrow the path to what actually ships. Assets under `assets/` are only bundled when some

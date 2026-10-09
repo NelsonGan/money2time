@@ -5,7 +5,7 @@ A React Native expense tracker that lets you view spending as **money or as time
 ## Tech stack
 
 - **Expo SDK 54** + React Native 0.81.5 + React 19 (New Architecture enabled)
-- **TypeScript** strict mode, path alias `~/*` → repo root
+- **TypeScript** strict mode, path alias `~/*` → the app root (`apps/mobile`)
 - **SQLite** via `expo-sqlite` + **Drizzle ORM** (64 migrations)
 - **NativeWind 4** (Tailwind for React Native) — class-based dark mode, 8 theme colors
 - **React Navigation** native stack (root + nested settings stack)
@@ -22,7 +22,12 @@ A React Native expense tracker that lets you view spending as **money or as time
 
 ## Setup
 
+The app lives in `apps/mobile` and the Cloudflare Workers in `apps/cloudflare`
+(see [Architecture](#architecture)). Each is its own npm project; app commands
+run from `apps/mobile`.
+
 ```bash
+cd apps/mobile
 npm install
 cp .env.example .env  # fill in RevenueCat/Mixpanel keys (optional in dev)
 
@@ -50,26 +55,28 @@ BRANDFETCH_API_KEY=
 ```
 
 The two Worker URLs point at the receipt-scan
-([`cloudflare/workers/receipt-scanner/`](cloudflare/workers/receipt-scanner/README.md)) and live-earnings-push
-([`cloudflare/workers/live-earnings/`](cloudflare/workers/live-earnings/README.md)) Cloudflare Workers. Their
+([`apps/cloudflare/workers/receipt-scanner/`](apps/cloudflare/workers/receipt-scanner/README.md)) and live-earnings-push
+([`apps/cloudflare/workers/live-earnings/`](apps/cloudflare/workers/live-earnings/README.md)) Cloudflare Workers. Their
 provider secrets (OpenRouter, APNs) live only in the Workers — never in the app.
 In CI, PR builds override the receipt-scan URL with the branch's Worker
 **preview URL** so each branch talks to its own Worker.
 
-Native GA4 uses the Firebase client configs committed at the repository root:
+Native GA4 uses the Firebase client configs committed at the app root (`apps/mobile`):
 `google-services.json`, `GoogleService-Info.plist`, and
 `GoogleService-Info.dev.plist`. They contain Firebase project identifiers, not
 service-account credentials. GA4 is enabled for the complete population without
 an in-app prompt and receives every event. Mixpanel also receives every user,
 but only the install, activation and Pro purchase funnel events, plus product
 usage as milestones (each feature's first use, transaction counts); see
-[`docs/analytics-implementation-plan.md`](docs/analytics-implementation-plan.md)
+[`docs/analytics-implementation-plan.md`](apps/mobile/docs/analytics-implementation-plan.md)
 for the tracking plan and event routing.
 
 For Pro purchase identity, Google Play restore behavior, and cross-device QA,
-see [Pro purchase restoration](docs/pro-restoration.md).
+see [Pro purchase restoration](apps/mobile/docs/pro-restoration.md).
 
 ## Scripts
+
+Run from `apps/mobile`:
 
 | Script                 | What it does                                       |
 | ---------------------- | -------------------------------------------------- |
@@ -95,6 +102,11 @@ annotate → registry → website sync (see [CLAUDE.md](CLAUDE.md) for each).
 
 ```text
 money2time/
+├── apps/cloudflare/            # Receipt-scan + live-earnings Workers (workers/) and their D1 schemas (d1/)
+├── .github/workflows/          # CI: deploy.yml (app), cloudflare.yml (Workers)
+└── apps/mobile/                # The Expo app (everything below)
+
+apps/mobile/
 ├── App.tsx                     # Root navigator + MainShellScreen (tab orchestrator)
 ├── index.ts                    # Expo entrypoint
 ├── app.json / app.config.ts    # Expo config
@@ -144,10 +156,9 @@ money2time/
 ├── utils/                      # Pure helpers (formatters, IDs, date keys, currency, error utils)
 ├── types/                      # Shared domain types
 ├── plugins/                    # Expo config plugins (widgets, auto-log, payment capture, alternate icons)
-├── cloudflare/                 # Receipt-scan + live-earnings Workers and their D1 schemas
 ├── scripts/                    # Icon/logo/tutorial generation pipelines
-├── __tests__/                  # Jest tests (96 suites: utils, repositories, services, navigation, db, features, i18n)
-└── .github/workflows/          # CI: deploy.yml (app), cloudflare.yml (Workers)
+├── docs/                       # PRDs, the analytics tracking plan, PR evidence
+└── __tests__/                  # Jest tests (96 suites: utils, repositories, services, navigation, db, features, i18n)
 ```
 
 ### Navigation
@@ -156,7 +167,7 @@ money2time/
 
 The `calendar` tab is the home view (`CalendarScreen`, with three-level year/month/day zoom and a day pager). All five tabs are available to every user. The `settings` tab hosts its own nested stack.
 
-Editors, drilldowns and flows are pushed at the root level; everything under Settings lives in the nested stack. The two route lists are enumerated in [CLAUDE.md](CLAUDE.md) and defined in [navigation/rootStack.ts](navigation/rootStack.ts) and [navigation/settingsStack.ts](navigation/settingsStack.ts).
+Editors, drilldowns and flows are pushed at the root level; everything under Settings lives in the nested stack. The two route lists are enumerated in [CLAUDE.md](CLAUDE.md) and defined in [navigation/rootStack.ts](apps/mobile/navigation/rootStack.ts) and [navigation/settingsStack.ts](apps/mobile/navigation/settingsStack.ts).
 
 ### State
 
@@ -172,7 +183,7 @@ Other contexts:
 
 ### Database
 
-SQLite (`money2time.db`) opened via `expo-sqlite`, queried with Drizzle. Schema in [lib/db/schema.ts](lib/db/schema.ts), migrations in [lib/db/migrations/](lib/db/migrations/). All tables use soft-deletes (`deletedAt`).
+SQLite (`money2time.db`) opened via `expo-sqlite`, queried with Drizzle. Schema in [lib/db/schema.ts](apps/mobile/lib/db/schema.ts), migrations in [lib/db/migrations/](apps/mobile/lib/db/migrations/). All tables use soft-deletes (`deletedAt`).
 
 | Table                                    | Purpose                                                                                        |
 | ---------------------------------------- | ---------------------------------------------------------------------------------------------- |
@@ -192,7 +203,7 @@ SQLite (`money2time.db`) opened via `expo-sqlite`, queried with Drizzle. Schema 
 | `settingsTable`                          | Singleton row for app preferences (locale, currency, theme, mode, App Lock, FX, prefs JSON)    |
 | `autoLogCapturesTable`                   | Payment alerts as captured, with internal results for duplicate detection and retention        |
 
-Repositories live in `lib/repositories/`; mapping between rows and domain types is in [lib/repositories/mappers.ts](lib/repositories/mappers.ts).
+Repositories live in `lib/repositories/`; mapping between rows and domain types is in [lib/repositories/mappers.ts](apps/mobile/lib/repositories/mappers.ts).
 
 ### Services
 
@@ -225,9 +236,9 @@ Most services are platform-split (`.native.ts` for iOS/Android, `.shared.ts` for
 
 ### Theming & i18n
 
-NativeWind drives styles; theme colors live in [constants/designSystem.ts](constants/designSystem.ts) with palettes for **sage, ocean, terracotta, slate, amber, indigo, emerald, rosewood**. Dark mode is class-based.
+NativeWind drives styles; theme colors live in [constants/designSystem.ts](apps/mobile/constants/designSystem.ts) with palettes for **sage, ocean, terracotta, slate, amber, indigo, emerald, rosewood**. Dark mode is class-based.
 
-i18n via `i18n-js` ([lib/i18n/index.ts](lib/i18n/index.ts)). **24 locales** shipped (da, de, en, es, fil, fr, hi, id, it, ja, ko, ms, nb, nl, pl, pt, ru, sv, th, tr, uk, vi, zh, zh-Hant); device locale auto-detected with English fallback. `en.ts` is the source of truth and a parity test keeps every locale's key set in sync.
+i18n via `i18n-js` ([lib/i18n/index.ts](apps/mobile/lib/i18n/index.ts)). **24 locales** shipped (da, de, en, es, fil, fr, hi, id, it, ja, ko, ms, nb, nl, pl, pt, ru, sv, th, tr, uk, vi, zh, zh-Hant); device locale auto-detected with English fallback. `en.ts` is the source of truth and a parity test keeps every locale's key set in sync.
 
 Traditional Chinese uses `zh-Hant`; device tags for Taiwan, Hong Kong, and Macau select it automatically. Generic `zh`, Simplified Chinese tags, and mainland China or Singapore tags continue to use `zh`.
 
@@ -258,6 +269,7 @@ Over-the-air updates are **internal-only** — `updates.enabled` is on for the d
 ## Tests
 
 ```bash
+cd apps/mobile
 npm test
 ```
 

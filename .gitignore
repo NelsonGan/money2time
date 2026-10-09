@@ -26,6 +26,7 @@ npm-debug.*
 yarn-debug.*
 yarn-error.*
 /.argent/
+/apps/mobile/.argent/
 
 # macOS
 .DS_Store
@@ -38,9 +39,11 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
-# generated native folders
-/ios
-/android
+# generated native folders (Continuous Native Generation: `expo prebuild` output).
+# Anchored to the app dir so a source directory that happens to be named `ios`
+# or `android` is not swallowed.
+/apps/mobile/ios
+/apps/mobile/android
 /.idea
 
 # local app data / backups
@@ -50,8 +53,8 @@ yarn-error.*
 *.db-wal
 *.sqlite
 *.sqlite-*
-# bundled read-only reference DB (built by scripts/build-cities-db.mjs)
-!assets/db/cities.db
+# bundled read-only reference DB (built by apps/mobile/scripts/build-cities-db.mjs)
+!/apps/mobile/assets/db/cities.db
 *.mmbak
 skills-lock.json
 # Shared agent workflows are versioned; local agent state stays private.
@@ -61,6 +64,8 @@ skills-lock.json
 
 # training data
 /training
+/apps/mobile/training
 
-# Raw simulator captures behind assets/tutorials (see scripts/annotate-tutorials.mjs)
+# Raw simulator captures behind apps/mobile/assets/tutorials (see
+# apps/mobile/scripts/annotate-tutorials.mjs)
 .tutorial-raw/

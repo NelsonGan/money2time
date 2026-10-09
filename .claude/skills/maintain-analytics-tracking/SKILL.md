@@ -5,7 +5,7 @@ description: Keep the canonical Money2Time Mixpanel and Google Analytics trackin
 
 # Maintain analytics tracking
 
-[docs/analytics-tracking.md](../../../docs/analytics-tracking.md) is the **single source of truth** for tracking. Read its relevant tables before changing analytics or a tracked product flow. The integration notes explain setup; they must not become a second event inventory.
+[docs/analytics-tracking.md](../../../apps/mobile/docs/analytics-tracking.md) is the **single source of truth** for tracking. Read its relevant tables before changing analytics or a tracked product flow. The integration notes explain setup; they must not become a second event inventory.
 
 For every product/code change, assess its analytics impact. If it changes an event name, payload, trigger, frequency, destination, paywall source, visible screen, profile/super property, feature-use rule, transaction milestone, provider configuration or external producer, update the affected tracking tables **in the same change**. No analytics impact means no artificial table edit. A change with stale tracking documentation is unfinished.
 
