@@ -60,7 +60,7 @@ export function autoCriteria(kase, checks) {
                 ? 4
                 : r.accountError === 'missed'
                   ? 2
-                  : r.accountError === 'invented'
+                  : r.accountError === 'invented' || r.accountError === 'guessed'
                     ? 1
                     : 0),
           0,
@@ -162,7 +162,11 @@ export function summarize(results, weights) {
       categoryAcceptable: frac(realRows, (x) => x.categoryAcceptable),
       merchantAccuracy: frac(realRows, (x) => x.noteOk),
       accountAccuracy: frac(shotRows, (x) => x.accountOk),
-      wrongAccountRate: frac(shotRows, (x) => x.accountError === 'wrong'),
+      // Posted to an account the screen does not support: a different one, or a guess between candidates.
+      wrongAccountRate: frac(
+        shotRows,
+        (x) => x.accountError === 'wrong' || x.accountError === 'guessed',
+      ),
       hallucinationRate: frac(
         noReceipt,
         (r) => r.checks.transactions.hallucinated || Boolean(r.checks.detail?.present),
