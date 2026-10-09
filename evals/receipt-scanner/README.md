@@ -99,13 +99,38 @@ cost and speed, and per model its weakest tags and worst cases with the judge's
 explanation) and `run.json` (every raw output, attempt, check and judge reason).
 `results/LEADERBOARD.md` keeps the latest full-suite result per model on the
 current dataset; filtered or limited runs are listed separately as partial.
+`results/` is gitignored scratch.
+
+## Run history (committed)
+
+Every run is also logged to `history/` and **committed automatically**, so `git log`
+shows how each model scored over time:
+
+- `history/HISTORY.md`: one table of every run, newest first (time, model, score per mode,
+  strict pass, wrong/guessed accounts, invented payments, cost per 1,000 scans, latency,
+  dataset version, and the code commit measured, `+` when the eval or Worker had uncommitted edits).
+- `history/runs/<timestamp>.md`: that run's full report.
+- `history/runs.jsonl`: the same, one JSON line per model per run.
+
+The commit contains only those files (`git commit -- <paths>`), so anything else you have
+staged is left alone. It is not pushed. Smoke tests and filtered runs are logged too, marked
+partial. `--no-commit` writes the history without committing; `rescore.mjs` updates that run's
+lines (and commits) instead of adding new ones.
 
 ## Cost
 
-OpenRouter calls are cheap (the production models cost cents per thousand scans).
-The judge dominates: about **$0.03-0.08 per judgement**, so roughly **$6 per model**
-for the full suite, and nothing for answers already in the cache. `--dry-run`
-prints the plan and a rough OpenRouter estimate first.
+Costs include prompt caching. OpenRouter's billed `cost` already discounts cached reads and
+includes any cache-write premium; the report also shows the mean cached and cache-written prompt
+tokens. For `claude-code:` models and the judge, cost is computed per token type at Anthropic list
+price (`lib/anthropicPricing.mjs`): plain input, cache writes at 1.25x (5-minute) or 2x (1-hour)
+input, cache reads at 0.1x (0.05x on Opus 5.5), and output. `claude -p` writes each prompt to a
+1-hour cache, so a `claude-code:` row also shows the cost with no caching, which is closer to a
+one-off production call. The CLI's own `total_cost_usd` is kept only for reference: it has no price
+for models it does not list yet and was about 66x off for Haiku 5.5.
+
+OpenRouter calls are cheap (the production models cost cents per thousand scans). The judge
+dominates: about **$0.03-0.05 per judgement**, so roughly **$4-6 per model** for the full suite, and
+nothing for answers already in the cache. `--dry-run` prints the plan and a rough estimate first.
 
 ## Setup
 
@@ -132,6 +157,7 @@ prints the plan and a rough OpenRouter estimate first.
 --weights <k=v,...>     mode weights for the overall score, e.g. screenshot=2
 --out <dir>             results directory (default evals/receipt-scanner/results)
 --dry-run               validate models and print the plan; no API calls
+--no-commit             write the run to history/ but do not commit it
 --force                 run a model even if OpenRouter says it takes no images
 ```
 

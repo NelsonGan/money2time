@@ -12,6 +12,7 @@ import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
+import { costOfClaudeResult } from './anthropicPricing.mjs';
 import { judgeSchema, RUBRIC_VERSION, RUBRICS, SCALE, weightedScore } from './rubric.mjs';
 import { sha } from './util.mjs';
 
@@ -190,7 +191,9 @@ export async function judgeCase({
         critical_errors: verdict.critical_errors,
         user_would_accept: verdict.user_would_accept,
         summary: verdict.summary,
-        cost: out.total_cost_usd ?? null,
+        // Cache-aware list price from the token counts; the CLI's figure only as a fallback.
+        cost: costOfClaudeResult(out).cost ?? out.total_cost_usd ?? null,
+        cliReportedCost: out.total_cost_usd ?? null,
         model: Object.keys(out.modelUsage ?? {})[0] ?? judgeModel,
         rubricVersion: RUBRIC_VERSION,
       };

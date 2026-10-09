@@ -17,25 +17,19 @@
 // The CLI cannot set temperature or max_tokens. Current Anthropic models reject
 // non-default sampling anyway, and receipt answers are far below any cap.
 //
-// Cost: the CLI writes the prompt to a one-hour cache and prices it from its own
-// table, which lags new models (it reports `costBasis: "unknown"` for Haiku 5.5
-// and guesses high). A direct API call like the Worker's pays list price for
-// every prompt token, so cost is recomputed from the token counts below.
+// Cost: priced per token type at Anthropic list rates by ./anthropicPricing.mjs,
+// including the CLI's prompt-cache writes (2x input for its 1-hour TTL) and reads
+// (0.1x), because that is what this run actually bills. `costUncached` is the
+// same tokens with no caching, the closer match to a one-off Worker call. The
+// CLI's own figure is kept as `cliReportedCost` for reference only (wrong for
+// models it does not list yet).
 
 import { spawn } from 'node:child_process';
 import { tmpdir } from 'node:os';
 
-export const CLAUDE_CODE_PREFIX = 'claude-code:';
+import { ANTHROPIC_PRICES, costOfClaudeResult, uncachedCost } from './anthropicPricing.mjs';
 
-// Anthropic first-party list prices in USD per million tokens, for prompts up to
-// 100K tokens (receipt prompts are ~2K). Source: Claude API model table, checked 2026-10-09.
-const PRICES = {
-  'claude-haiku-5-5': { input: 0.1, output: 0.5 },
-  'claude-sonnet-5-5': { input: 2, output: 10 },
-  'claude-opus-5-5': { input: 4, output: 20 },
-  'claude-haiku-4-5': { input: 1, output: 5 },
-  'claude-sonnet-4-6': { input: 3, output: 15 },
-};
+export const CLAUDE_CODE_PREFIX = 'claude-code:';
 
 const ATTEMPT_TIMEOUT_MS = 120000;
 const SYSTEM_PROMPT = "Follow the user's instructions exactly.";
@@ -46,7 +40,7 @@ export const claudeModelId = (id) => id.slice(CLAUDE_CODE_PREFIX.length);
 /** Same shape as fetchModelInfo() so the run plan treats both providers alike. */
 export function claudeModelInfo(id) {
   const model = claudeModelId(id);
-  const price = PRICES[model];
+  const price = ANTHROPIC_PRICES[model];
   return {
     found: true,
     id,
@@ -130,23 +124,21 @@ function runOnce({ model, prompt, mime, imageBase64 }) {
         return reject(
           new Error(`claude error: ${String(result.result ?? result.subtype).slice(0, 300)}`),
         );
-      const usage = Object.values(result.modelUsage ?? {})[0] ?? {};
-      const promptTokens =
-        (usage.inputTokens ?? 0) +
-        (usage.cacheCreationInputTokens ?? 0) +
-        (usage.cacheReadInputTokens ?? 0);
-      const completionTokens = usage.outputTokens ?? 0;
-      const price = PRICES[model];
+      const { cost, tokens } = costOfClaudeResult(result);
       resolve({
         content: result.result ?? '',
         finishReason: result.stop_reason ?? null,
         provider: 'claude-code',
         model,
         usage: {
-          promptTokens,
-          completionTokens,
-          reasoningTokens: usage.thinkingTokens ?? null,
-          cost: price ? (promptTokens * price.input + completionTokens * price.output) / 1e6 : null,
+          // Every prompt token, however it was billed (plain, cache write or cache read).
+          promptTokens: tokens.input + tokens.cacheWrite + tokens.cacheRead,
+          cacheWriteTokens: tokens.cacheWrite,
+          cacheReadTokens: tokens.cacheRead,
+          completionTokens: tokens.output,
+          reasoningTokens: tokens.thinking,
+          cost,
+          costUncached: uncachedCost(model, tokens),
           cliReportedCost: result.total_cost_usd ?? null,
         },
         latencyMs: result.duration_ms ?? Date.now() - startedAt,
