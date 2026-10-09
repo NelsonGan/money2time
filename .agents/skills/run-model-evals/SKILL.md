@@ -78,9 +78,11 @@ user, in this order:
 1. **Score** (judge, 0-100) overall and per mode, with strict pass rate, next to production's.
 2. **What would reach users**: amount accuracy, wrong-account rate (screenshot auto-log posts with no
    review, so this is the costliest error), hallucinations on non-receipts, item recall/precision.
-3. **Cost per 1,000 scans and p50/p95 latency** against production. For `claude-code:` models, cost is
-   computed from token counts at Anthropic list price (the CLI's own figure is not used: it bills a
-   cache write and lacks prices for new models). Say so.
+3. **Cost per 1,000 scans and p50/p95 latency** against production. Costs include prompt caching:
+   OpenRouter's billed cost already does; `claude-code:` models are priced per token type at
+   Anthropic list price, cache writes and reads included (the CLI's own figure is not used: it lacks
+   prices for new models). For `claude-code:` rows also give the no-caching cost from the report,
+   since `claude -p` writes every prompt to a 1-hour cache that a production call would not.
 4. **Failure patterns**: group the worst cases by cause (e.g. "misreads DD-MM-YY years", "returns
    'Visa' instead of empty when ambiguous"), quoting the judge's critical errors.
 5. A recommendation only if the evidence supports one, with its caveat: synthetic receipts, single run,
@@ -92,7 +94,11 @@ Keep private details out of anything you post outside the terminal.
 
 - Never change `MODEL` / `BACKUP_MODEL` in `wrangler.toml` unless the user asks. Changing it deploys the
   Worker on merge to `main`, so it goes through a PR like any Worker change.
-- Results under `evals/receipt-scanner/results/` are local and gitignored. Do not commit them.
+- Every run logs itself to `evals/receipt-scanner/history/` and commits only those files, so the run
+  history is in git. Commit any code changes to the eval **before** running, or the history marks the
+  run's code as uncommitted (`+`). Push the history commit with the branch; never pass `--no-commit`
+  unless the user asks.
+- Results under `evals/receipt-scanner/results/` are local and gitignored scratch. Do not commit them.
 - If a judge call fails, the case shows `judge failed` and is excluded from the judge score. Re-run the
   same command: successful judgements are cached, so only the failures cost anything.
 - A scan error rate above a few percent means a provider problem (429 / capacity), not a bad model.

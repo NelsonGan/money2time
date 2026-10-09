@@ -3,7 +3,7 @@
 // lib/checks.mjs or lib/scoring.mjs, so an existing run's report reflects the
 // fix instead of paying for the whole suite again.
 //
-//   node evals/receipt-scanner/rescore.mjs evals/receipt-scanner/results/<run>
+//   node evals/receipt-scanner/rescore.mjs evals/receipt-scanner/results/<run> [--no-commit]
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -11,6 +11,7 @@ import path from 'node:path';
 import { buildDataset } from './build-dataset.mjs';
 import { nowFor } from './dataset/reference.mjs';
 import { runChecks } from './lib/checks.mjs';
+import { recordRun } from './lib/history.mjs';
 import { renderRunReport, updateLeaderboard } from './lib/report.mjs';
 import { scoreCase, summarize } from './lib/scoring.mjs';
 import { parseLikeWorker } from './lib/worker.mjs';
@@ -57,9 +58,14 @@ for (const m of run.models) {
 }
 run.rescoredAt = new Date().toISOString();
 writeFileSync(path.join(runDir, 'run.json'), `${JSON.stringify(run, null, 2)}\n`);
-writeFileSync(path.join(runDir, 'report.md'), renderRunReport(run));
+const report = renderRunReport(run);
+writeFileSync(path.join(runDir, 'report.md'), report);
 // The leaderboard lives in the results folder that holds the run.
 updateLeaderboard(path.dirname(path.resolve(runDir)), run);
+recordRun(run, report, {
+  commit: !process.argv.includes('--no-commit'),
+  log: (line) => process.stdout.write(`${line}\n`),
+});
 process.stdout.write(
   `Rescored ${runDir}: ${changed} case(s) changed. Report and leaderboard updated.\n`,
 );

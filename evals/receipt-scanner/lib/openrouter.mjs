@@ -91,6 +91,9 @@ async function complete({ apiKey, body, retries }) {
             model: json.model ?? body.model,
             usage: {
               promptTokens: json.usage?.prompt_tokens ?? null,
+              // Billed `cost` already reflects these: cached reads are discounted, writes may carry a premium.
+              cacheReadTokens: json.usage?.prompt_tokens_details?.cached_tokens ?? null,
+              cacheWriteTokens: json.usage?.prompt_tokens_details?.cache_write_tokens ?? null,
               completionTokens: json.usage?.completion_tokens ?? null,
               reasoningTokens: json.usage?.completion_tokens_details?.reasoning_tokens ?? null,
               cost: json.usage?.cost ?? null,

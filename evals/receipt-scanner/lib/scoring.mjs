@@ -194,6 +194,17 @@ export function summarize(results, weights) {
       promptTokens: mean(attempts.map((a) => a.usage.promptTokens)),
       completionTokens: mean(attempts.map((a) => a.usage.completionTokens)),
       reasoningTokens: mean(attempts.map((a) => a.usage.reasoningTokens)),
+      cacheReadTokens: mean(attempts.map((a) => a.usage.cacheReadTokens)),
+      cacheWriteTokens: mean(attempts.map((a) => a.usage.cacheWriteTokens)),
+      // claude -p only: the same tokens with no prompt caching (null for OpenRouter).
+      perScanUncached: mean(
+        results
+          .filter((r) => r.scan.ok)
+          .map((r) => {
+            const known = r.scan.attempts.filter((a) => Number.isFinite(a.usage?.costUncached));
+            return known.length ? known.reduce((s, a) => s + a.usage.costUncached, 0) : null;
+          }),
+      ),
     },
     judgeCost: results.reduce(
       (s, r) => s + (r.judge && !r.judge.cached ? (r.judge.cost ?? 0) : 0),

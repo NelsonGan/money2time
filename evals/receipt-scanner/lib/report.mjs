@@ -96,16 +96,38 @@ export function renderRunReport(run) {
     table(
       ['Cost & speed', ...sorted.map((m) => `\`${m.model}\``)],
       [
-        ['Mean cost / scan', ...sorted.map((m) => fmtUsd(m.summary.cost.perScan, 6))],
+        [
+          'Mean cost / scan (prompt cache included)',
+          ...sorted.map((m) => fmtUsd(m.summary.cost.perScan, 6)),
+        ],
+        [
+          'Cost / scan with no caching (claude -p only)',
+          ...sorted.map((m) =>
+            m.summary.cost.perScanUncached == null
+              ? 'n/a'
+              : fmtUsd(m.summary.cost.perScanUncached, 6),
+          ),
+        ],
         ['Mean prompt tokens', ...sorted.map((m) => num(m.summary.cost.promptTokens, 0))],
         ['Mean completion tokens', ...sorted.map((m) => num(m.summary.cost.completionTokens, 0))],
         [
           'Mean thinking tokens (in completion)',
           ...sorted.map((m) => num(m.summary.cost.reasoningTokens, 0)),
         ],
+        [
+          'Mean cache-read prompt tokens',
+          ...sorted.map((m) => num(m.summary.cost.cacheReadTokens, 0)),
+        ],
+        [
+          'Mean cache-write prompt tokens',
+          ...sorted.map((m) => num(m.summary.cost.cacheWriteTokens, 0)),
+        ],
         ['Mean latency', ...sorted.map((m) => ms(m.summary.latency.mean))],
         ['Model-call spend (this run)', ...sorted.map((m) => fmtUsd(m.summary.cost.total, 4))],
-        ['Judge spend (this run, uncached)', ...sorted.map((m) => fmtUsd(m.summary.judgeCost, 2))],
+        [
+          'Judge spend (this run, new judgements)',
+          ...sorted.map((m) => fmtUsd(m.summary.judgeCost, 2)),
+        ],
       ],
     ),
   );

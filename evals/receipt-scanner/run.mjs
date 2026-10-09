@@ -18,6 +18,7 @@ import { parseArgs } from 'node:util';
 import { buildDataset, GENERATED_DIR } from './build-dataset.mjs';
 import { nowFor } from './dataset/reference.mjs';
 import { runChecks } from './lib/checks.mjs';
+import { codeVersion, recordRun } from './lib/history.mjs';
 import { judgeCase } from './lib/judge.mjs';
 import { claudeModelInfo, isClaudeCodeModel } from './lib/claudeCode.mjs';
 import { fetchModelInfo, scanCase } from './lib/openrouter.mjs';
@@ -50,6 +51,7 @@ const { values: args } = parseArgs({
     out: { type: 'string', default: path.join(HERE, 'results') },
     'dry-run': { type: 'boolean', default: false },
     force: { type: 'boolean', default: false },
+    'no-commit': { type: 'boolean', default: false },
     help: { type: 'boolean', short: 'h', default: false },
   },
   allowPositionals: false,
@@ -209,6 +211,7 @@ if (!apiKey && models.some((m) => !isClaudeCodeModel(m.id))) {
 
 // --- run -----------------------------------------------------------------------------
 const startedAt = new Date();
+const code = codeVersion();
 const runId = startedAt.toISOString().replace(/[:.]/g, '-').slice(0, 23);
 const runDir = path.join(args.out, runId);
 mkdirSync(runDir, { recursive: true });
@@ -291,6 +294,8 @@ const run = {
   startedAt: startedAt.toISOString(),
   finishedAt: new Date().toISOString(),
   rubricVersion: RUBRIC_VERSION,
+  // Read at the start of the run, so the history records the code that was actually measured.
+  code,
   dataset: {
     sourceHash: manifest.sourceHash,
     referenceDate: manifest.referenceDate,
@@ -335,6 +340,8 @@ writeFileSync(path.join(runDir, 'run.json'), `${JSON.stringify(run, null, 2)}\n`
 const report = renderRunReport(run);
 writeFileSync(path.join(runDir, 'report.md'), report);
 updateLeaderboard(args.out, run);
+// Committed record of every run (history/); --no-commit writes it without committing.
+recordRun(run, report, { commit: !args['no-commit'], log: out });
 
 out('\nResults');
 for (const m of [...run.models].sort(
