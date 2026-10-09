@@ -67,7 +67,7 @@ CI (`.github/workflows/deploy.yml`) gates builds on `npm run check && npm test`,
 
 ## Analytics changes
 
-For changes to tracking or tracked product flows, follow [maintain-analytics-tracking](../maintain-analytics-tracking/SKILL.md). Update the authoritative `docs/analytics-tracking.md` tables in the same change as the implementation, and include `__tests__/services/analyticsTrackingPlan.test.ts` in focused verification. The table check covers names/routing, feature triggers and thresholds; payload/trigger/source prose also needs review.
+For changes to tracking or tracked product flows, follow [maintain-analytics-tracking](../maintain-analytics-tracking/SKILL.md). Update the authoritative Analytics tables in `README.md` in the same change as the implementation, and include `__tests__/services/analyticsTrackingPlan.test.ts` in focused verification. The table check covers names/routing, feature triggers and thresholds; payload/trigger/source prose also needs review.
 
 ## Definition of done
 

@@ -31,7 +31,7 @@ For each changed file, read it fully and flag issues in these categories:
 - Direct DB access outside of `lib/repositories/`
 - State mutations outside of `AppContext` / `useApp()`
 - Type imports not using `import type`
-- Tracking or tracked-flow changes without matching updates to the authoritative `docs/analytics-tracking.md` tables (follow `.claude/skills/maintain-analytics-tracking/SKILL.md`; review payloads, triggers, frequency, sources and destinations even if event names did not change)
+- Tracking or tracked-flow changes without matching updates to the authoritative Analytics tables in `README.md` (follow `.claude/skills/maintain-analytics-tracking/SKILL.md`; review payloads, triggers, frequency, sources and destinations even if event names did not change)
 
 **Code quality**
 
