@@ -4,6 +4,15 @@
 // returns the parsed transactions. The OpenRouter key lives only in this
 // Worker's secrets — never in the app.
 
+import {
+  buildCompletionBody,
+  clampReceiptDate,
+  EMPTY_RESULT_RETRIES,
+  extractParsedObject,
+  parseTransactions,
+  RETRY_TEMPERATURE,
+  type ScannedTransaction,
+} from './completion';
 import { checkQuota, consumeQuota } from './ratelimit';
 import { getEntitlement } from './revenuecat';
 import {
@@ -50,20 +59,12 @@ const INFERENCE_TIMEOUT_MS = 45000;
 // fetch timeout (FETCH_TIMEOUT_MS in services/receiptScan.native.ts) — turning
 // a scan the Worker was about to answer 200 into "network request failed".
 const SCAN_BUDGET_MS = 70000;
-// Vision models are flaky in one specific way: they occasionally return an
-// empty transactions array for a receipt they read perfectly well on a second
-// pass. One empty result therefore buys exactly one more attempt.
-const EMPTY_RESULT_RETRIES = 1;
 // Floor on what is left before a retry may start: an attempt cut off partway is
 // a billed call thrown away and pushes the response past the client's timeout,
 // which is worse than the empty answer already in hand. The real gate is the
 // first attempt's own duration (the best estimate of the second's); this is
 // just the floor for when that attempt was very fast.
 const MIN_RETRY_BUDGET_MS = 15000;
-// The first attempt runs at 0 for a stable, reproducible read. A retry at 0
-// would largely resample the same path and reproduce the same empty answer, so
-// the retry nudges the sampler just far enough to land somewhere else.
-const RETRY_TEMPERATURE = 0.2;
 // Cap on the base64 payload; the app enforces the same limit before uploading.
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 
@@ -87,19 +88,6 @@ interface ScanRequest {
   mode?: ScanMode | 'notification';
   // User's account names — screenshot mode only, matched against the payment source.
   accounts?: string[];
-}
-
-interface ScannedTransaction {
-  type: 'expense' | 'income';
-  amount: number;
-  currency: string;
-  /** YYYY-MM-DD — the receipt's own date when within 30 days back / 2 days ahead, else today (UTC). */
-  date: string;
-  category: string;
-  note: string;
-  sentiment: 'happy' | 'neutral' | 'sad';
-  /** Screenshot mode: the matched account name from the list sent, or "". */
-  account: string;
 }
 
 // One JSON line per event (keyed by reqId) for Workers Logs.
@@ -357,11 +345,6 @@ async function completeScan(
   model: string,
 ): Promise<string> {
   const dataUrl = `data:${body.mime};base64,${body.image}`;
-  // Resolution hint attached only when set (see Env.IMAGE_DETAIL).
-  const detail = env.IMAGE_DETAIL?.trim();
-  const imageUrl: { url: string; detail?: string } = detail
-    ? { url: dataUrl, detail }
-    : { url: dataUrl };
 
   // Never outlive the shared budget: a late attempt gets whatever is left of it.
   const remaining = opts.deadline - Date.now();
@@ -381,22 +364,17 @@ async function completeScan(
         'X-Title': 'money2time receipt scanner',
       },
       signal: controller.signal,
-      body: JSON.stringify({
-        // No response_format/structured outputs: not every provider accepts it.
-        // The prompt pins JSON-only output and the parsers tolerate fences/prose.
-        model,
-        temperature: opts.temperature,
-        max_tokens: opts.maxTokens,
-        // Receipt parsing is a mechanical OCR/extraction task, so disable
-        // reasoning: on reasoning-capable models the chain-of-thought would
-        // otherwise be billed as output tokens and add latency for no accuracy
-        // gain. OpenRouter normalizes this across model families.
-        reasoning: { enabled: false },
-        messages: [{ role: 'user', content: [
-          { type: 'text', text: opts.prompt },
-          { type: 'image_url', image_url: imageUrl },
-        ] }],
-      }),
+      body: JSON.stringify(
+        buildCompletionBody({
+          model,
+          prompt: opts.prompt,
+          dataUrl,
+          // Resolution hint attached only when set (see Env.IMAGE_DETAIL).
+          detail: env.IMAGE_DETAIL?.trim() || undefined,
+          maxTokens: opts.maxTokens,
+          temperature: opts.temperature,
+        }),
+      ),
     });
 
     log('openrouter_response', {
@@ -528,93 +506,6 @@ async function runInference(
     if (!willRetry) break;
   }
   return last;
-}
-
-/** A line amount as a positive finite number, or null when unusable. */
-function coerceAmount(value: unknown): number | null {
-  const amount = Number(value);
-  return Number.isFinite(amount) && amount > 0 ? amount : null;
-}
-
-// Tolerant parse: extract the first {...} block (models add fences/prose).
-function extractParsedObject(content: string): unknown {
-  const raw = extractJsonObject(content);
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
-}
-
-function parseTransactions(parsed: unknown, now: Date): ScannedTransaction[] {
-  const list = (parsed as { transactions?: unknown })?.transactions;
-  if (!Array.isArray(list)) return [];
-
-  return list
-    .map((row) => normalizeRow(row, now))
-    .filter((row): row is ScannedTransaction => row !== null);
-}
-
-function extractJsonObject(content: string): string | null {
-  const fenced = content.replace(/```(?:json)?/gi, '').trim();
-  const start = fenced.indexOf('{');
-  const end = fenced.lastIndexOf('}');
-  if (start === -1 || end === -1 || end <= start) return null;
-  return fenced.slice(start, end + 1);
-}
-
-// How far back a receipt's printed date is trusted; anything older posts today.
-const RECEIPT_DATE_MAX_AGE_DAYS = 30;
-// "Today" here is UTC but the user's device may be up to a day ahead (and a
-// just-printed receipt already carries that local date), so allow a small
-// forward window instead of clamping every seemingly future date.
-const RECEIPT_DATE_MAX_FUTURE_DAYS = 2;
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-/** `date` as a YYYY-MM-DD day key (UTC). */
-function dayKeyUtc(date: Date): string {
-  return date.toISOString().slice(0, 10);
-}
-
-// The date a scanned transaction should post on. The model is only asked to
-// read a date off the receipt (null when absent); validation happens here, not
-// in the app: keep the receipt's date when it falls between 30 days ago and 2
-// days ahead (timezone slack), otherwise (absent, unparsable, further in the
-// future, or older) use today.
-function clampReceiptDate(raw: string | null, now: Date): string {
-  const today = dayKeyUtc(now);
-  if (!raw || !/^\d{4}-\d{2}-\d{2}$/.test(raw)) return today;
-  // Date.parse rejects non-calendar days (e.g. 2026-02-30) in strict ISO form.
-  if (!Number.isFinite(Date.parse(`${raw}T00:00:00Z`))) return today;
-  const oldest = dayKeyUtc(new Date(now.getTime() - RECEIPT_DATE_MAX_AGE_DAYS * DAY_MS));
-  const newest = dayKeyUtc(new Date(now.getTime() + RECEIPT_DATE_MAX_FUTURE_DAYS * DAY_MS));
-  // Day-key strings compare chronologically.
-  return raw > newest || raw < oldest ? today : raw;
-}
-
-function normalizeRow(input: unknown, now: Date): ScannedTransaction | null {
-  if (!input || typeof input !== 'object') return null;
-  const row = input as Record<string, unknown>;
-  const amount = coerceAmount(row.amount);
-  if (amount === null) return null;
-
-  const type = row.type === 'income' ? 'income' : 'expense';
-  const sentiment =
-    row.sentiment === 'happy' || row.sentiment === 'sad' ? row.sentiment : 'neutral';
-  const date = clampReceiptDate(typeof row.date === 'string' ? row.date : null, now);
-
-  return {
-    type,
-    amount,
-    currency: typeof row.currency === 'string' ? row.currency.toUpperCase() : 'USD',
-    date,
-    category: typeof row.category === 'string' ? row.category : 'Other',
-    note: typeof row.note === 'string' ? row.note : '',
-    sentiment,
-    // Screenshot mode only; other prompts never emit it.
-    account: typeof row.account === 'string' ? row.account : '',
-  };
 }
 
 function json(data: unknown, status: number): Response {

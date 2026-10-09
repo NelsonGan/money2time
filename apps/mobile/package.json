@@ -16,6 +16,7 @@
     "format": "prettier --write . \"../../*.md\" ../../.github",
     "format:check": "prettier --check . \"../../*.md\" ../../.github",
     "test": "jest",
+    "eval:receipts": "node evals/receipt-scanner/run.mjs",
     "postinstall": "patch-package"
   },
   "dependencies": {
