@@ -5,11 +5,15 @@ description: Run the receipt-scanner model eval for a named model (an OpenRouter
 
 # Run the receipt-scanner model eval
 
-The app's only LLM call is the receipt-scanner Worker (`cloudflare/workers/receipt-scanner`, three
-modes: `quick`, `itemized`, `screenshot`). `evals/receipt-scanner/` runs a model over ~140 answer-keyed
-images exactly as production does, grades every answer with Opus via `claude -p` on a rubric, and
-scores it. Full design, flags and rubric: [evals/receipt-scanner/README.md](../../../evals/receipt-scanner/README.md).
-Read it once if you have not this session.
+The app's only LLM call is the receipt-scanner Worker (`apps/cloudflare/workers/receipt-scanner`, three
+modes: `quick`, `itemized`, `screenshot`). The eval in `apps/cloudflare/evals/receipt-scanner/` runs a
+model over ~140 answer-keyed images exactly as production does, grades every answer with Opus via
+`claude -p` on a rubric, and scores it. Full design and rubric: "Receipt-scanner model eval" in the
+repository [README](../../../README.md#receipt-scanner-model-eval); every flag: `npm run eval -- --help`.
+Read the README section once if you have not this session.
+
+Run every command below from `apps/cloudflare/evals/receipt-scanner`, its own npm project (Node 24+);
+run `npm install` there first if `node_modules/` is missing. Paths below are relative to it.
 
 ## 1. Resolve the model id
 
@@ -26,7 +30,7 @@ The user names the model; the eval needs an exact id.
 ## 2. Pre-flight (cheap, no model calls)
 
 ```bash
-npm run eval:receipts -- --model <id> --dry-run
+npm run eval -- --model <id> --dry-run
 ```
 
 This validates the id against OpenRouter's catalogue (and refuses models without image input),
@@ -34,10 +38,10 @@ builds the dataset if stale, and prints the case count and a rough cost. For Ope
 check the key is configured without printing it:
 
 ```bash
-grep -q '^OPENROUTER_API_KEY=.' evals/receipt-scanner/.env && echo "key present"
+grep -q '^OPENROUTER_API_KEY=.' .env && echo "key present"
 ```
 
-If the key is missing, ask the user to add it to `evals/receipt-scanner/.env` (gitignored). Never
+If the key is missing, ask the user to add it to `.env` (gitignored). Never
 echo, log or commit the key.
 
 **Cost.** Model calls are usually cents. The judge dominates: about $0.05 per case, so about $7 per
@@ -46,7 +50,7 @@ for one or two models. Above roughly $20 of new judging, confirm with the user f
 
 ## 3. Compare against production
 
-A score means little alone. Check `evals/receipt-scanner/results/LEADERBOARD.md`: if production's
+A score means little alone. Check `results/LEADERBOARD.md`: if production's
 models already have a **full-suite** row on the current dataset, compare against that. If not, add
 `--production` to the run (or ask whether they want it, if cost is a concern).
 
@@ -55,14 +59,14 @@ models already have a **full-suite** row on the current dataset, compare against
 Smoke test first when the model or provider is new to this session (3 cases per mode):
 
 ```bash
-npm run eval:receipts -- --model <id> --limit 3
+npm run eval -- --model <id> --limit 3
 ```
 
 Then the full suite. It takes several minutes, so run it in the background and wait for it to
 finish instead of polling:
 
 ```bash
-npm run eval:receipts -- --model <id> [--model <id2>] [--production]
+npm run eval -- --model <id> [--model <id2>] [--production]
 ```
 
 Useful variants: `--modes screenshot` (one flow), `--tags trap:tip,account:ambiguous` (specific
@@ -72,7 +76,7 @@ main leaderboard.
 
 ## 5. Report
 
-Read `evals/receipt-scanner/results/<run>/report.md` (and `run.json` for any case worth quoting). Tell the
+Read `results/<run>/report.md` (and `run.json` for any case worth quoting). Tell the
 user, in this order:
 
 1. **Score** (judge, 0-100) overall and per mode, with strict pass rate, next to production's.
@@ -94,11 +98,11 @@ Keep private details out of anything you post outside the terminal.
 
 - Never change `MODEL` / `BACKUP_MODEL` in `wrangler.toml` unless the user asks. Changing it deploys the
   Worker on merge to `main`, so it goes through a PR like any Worker change.
-- Every run logs itself to `evals/receipt-scanner/history/` and commits only those files, so the run
+- Every run logs itself to `history/` and commits only those files, so the run
   history is in git. Commit any code changes to the eval **before** running, or the history marks the
   run's code as uncommitted (`+`). Push the history commit with the branch; never pass `--no-commit`
   unless the user asks.
-- Results under `evals/receipt-scanner/results/` are local and gitignored scratch. Do not commit them.
+- Results under `results/` are local and gitignored scratch. Do not commit them.
 - If a judge call fails, the case shows `judge failed` and is excluded from the judge score. Re-run the
   same command: successful judgements are cached, so only the failures cost anything.
 - A scan error rate above a few percent means a provider problem (429 / capacity), not a bad model.

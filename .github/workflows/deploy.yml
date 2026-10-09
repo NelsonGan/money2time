@@ -125,7 +125,9 @@ jobs:
           # normal diff and first bit on a 2,265-file one. Keep these unpiped.
           # Markdown under apps/cloudflare/ is documentation only, and
           # cloudflare.yml ignores it too, so it never earns a Worker preview upload.
-          grep -E '^apps/cloudflare/' changed.txt > worker_paths.txt || true
+          # The model eval under apps/cloudflare/evals/ is local tooling, not a Worker.
+          grep -E '^apps/cloudflare/' changed.txt > cloudflare_paths.txt || true
+          grep -vE '^apps/cloudflare/evals/' cloudflare_paths.txt > worker_paths.txt || true
           grep -vE '\.md$' worker_paths.txt > worker_code.txt || true
           [ -s worker_code.txt ] && worker=true
           grep -qvE '^apps/cloudflare/' changed.txt && checks=true

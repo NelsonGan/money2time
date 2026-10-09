@@ -37,11 +37,11 @@ export function codeVersion() {
         'status',
         '--porcelain',
         '--',
-        'evals/receipt-scanner',
-        'cloudflare/workers/receipt-scanner',
+        'apps/cloudflare/evals/receipt-scanner',
+        'apps/cloudflare/workers/receipt-scanner',
       )
         .split('\n')
-        .filter((line) => line && !line.includes('evals/receipt-scanner/history/')).length > 0;
+        .filter((line) => line && !line.includes('apps/cloudflare/evals/receipt-scanner/history/')).length > 0;
     return { commit, dirty };
   } catch {
     return { commit: null, dirty: null };
@@ -133,7 +133,7 @@ function renderIndex(entries) {
     });
   return `# Receipt-scanner eval history
 
-Every eval run, newest first, written and committed by \`evals/receipt-scanner/run.mjs\`.
+Every eval run, newest first, written and committed by \`apps/cloudflare/evals/receipt-scanner/run.mjs\`.
 Scores are the Opus judge's (0-100; the check-based auto score when a run had no judge).
 Compare rows only on the same dataset and rubric. Cost per 1,000 scans includes prompt
 caching; time is UTC; Code is the commit measured (\`+\` = with uncommitted eval or Worker edits).

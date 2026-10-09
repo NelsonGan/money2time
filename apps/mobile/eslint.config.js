@@ -65,7 +65,7 @@ module.exports = defineConfig([
   },
   {
     // Node scripts run outside the app bundle.
-    files: ['scripts/**/*.mjs', 'evals/**/*.mjs'],
+    files: ['scripts/**/*.mjs'],
     languageOptions: { globals: { Buffer: 'readonly' } },
   },
   {
