@@ -9,8 +9,8 @@ import { registerHooks } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-export const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
-export const WORKER_DIR = path.join(REPO_ROOT, 'cloudflare/workers/receipt-scanner');
+export const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../..');
+export const WORKER_DIR = path.join(REPO_ROOT, 'apps/cloudflare/workers/receipt-scanner');
 
 registerHooks({
   resolve(specifier, context, nextResolve) {

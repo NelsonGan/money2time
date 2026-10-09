@@ -1,9 +1,9 @@
 // Renders every eval case to the image the app would upload and writes
 // dataset/generated/manifest.json (cases + answer keys + image hashes).
 //
-//   node evals/receipt-scanner/build-dataset.mjs          # build if stale
-//   node evals/receipt-scanner/build-dataset.mjs --force  # always rebuild
-//   node evals/receipt-scanner/build-dataset.mjs --list   # print the case table
+//   node build-dataset.mjs          # build if stale
+//   node build-dataset.mjs --force  # always rebuild
+//   node build-dataset.mjs --list   # print the case table
 //
 // The run script calls this itself, so running it by hand is only needed to
 // look at the images (dataset/generated/*.jpg) or the case list. Generated

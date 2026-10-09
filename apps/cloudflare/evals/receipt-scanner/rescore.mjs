@@ -3,7 +3,7 @@
 // lib/checks.mjs or lib/scoring.mjs, so an existing run's report reflects the
 // fix instead of paying for the whole suite again.
 //
-//   node evals/receipt-scanner/rescore.mjs evals/receipt-scanner/results/<run> [--no-commit]
+//   node rescore.mjs results/<run> [--no-commit]   (from apps/cloudflare/evals/receipt-scanner)
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -18,7 +18,7 @@ import { parseLikeWorker } from './lib/worker.mjs';
 
 const runDir = process.argv[2];
 if (!runDir) {
-  process.stdout.write('Usage: node evals/receipt-scanner/rescore.mjs <results/run-dir>\n');
+  process.stdout.write('Usage: node rescore.mjs <results/run-dir>\n');
   process.exit(1);
 }
 

@@ -2,13 +2,16 @@
 // the production Worker would, grade every answer with Opus (`claude -p`) on
 // the rubric, and score each model.
 //
-//   npm run eval:receipts -- --model google/gemini-2.5-flash-lite
-//   npm run eval:receipts -- --model a/x --model b/y --production   # compare with prod MODEL/BACKUP_MODEL
-//   npm run eval:receipts -- --model a/x --limit 3                  # smoke test: 3 cases per mode
-//   npm run eval:receipts -- --model a/x --dry-run                  # plan + cost estimate, no calls
+// From apps/cloudflare/evals/receipt-scanner:
 //
-// See README.md for every flag. Reads OPENROUTER_API_KEY from the environment
-// or evals/receipt-scanner/.env(.local).
+//   npm run eval -- --model google/gemini-2.5-flash-lite
+//   npm run eval -- --model a/x --model b/y --production   # compare with prod MODEL/BACKUP_MODEL
+//   npm run eval -- --model a/x --limit 3                  # smoke test: 3 cases per mode
+//   npm run eval -- --model a/x --dry-run                  # plan + cost estimate, no calls
+//
+// `--help` lists every flag; "Receipt-scanner model eval" in the repository
+// README explains the rest. Reads OPENROUTER_API_KEY from the environment or
+// this directory's .env(.local).
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -28,6 +31,28 @@ import { scoreCase, summarize } from './lib/scoring.mjs';
 import { fmtUsd, loadEnvFile, pool, rel, slug } from './lib/util.mjs';
 import { productionModels } from './lib/worker.mjs';
 
+
+const HELP = `Usage: npm run eval -- --model <id> [flags]   (from apps/cloudflare/evals/receipt-scanner)
+
+--model, -m <id>        OpenRouter model id; repeat or comma-separate for several
+--production            also run the Worker's MODEL and BACKUP_MODEL from wrangler.toml
+--modes <list>          quick,itemized,screenshot (default: all)
+--cases <list>          only case ids equal to / containing these strings
+--tags <list>           only cases carrying any of these tags (e.g. trap:tip,account:ambiguous)
+--limit <n>             first n cases per mode (hand-written traps come first)
+--concurrency <n>       parallel OpenRouter calls (default 6)
+--judge-concurrency <n> parallel judge sessions (default 4)
+--judge-model <alias>   judge model for claude -p (default opus)
+--no-judge              skip the judge; auto scores only
+--no-empty-retry        disable the Worker's retry-on-empty (first-pass behaviour)
+--retries <n>           transport retries on 429/5xx/timeouts (default 2)
+--image-detail <v>      send image_url.detail low|high|auto (the Worker's IMAGE_DETAIL A/B)
+--weights <k=v,...>     mode weights for the overall score, e.g. screenshot=2
+--out <dir>             results directory (default ./results)
+--dry-run               validate models and print the plan; no API calls
+--no-commit             write the run to history/ but do not commit it
+--force                 run a model even if OpenRouter says it takes no images
+`;
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const out = (s = '') => process.stdout.write(`${s}\n`);
 
@@ -58,10 +83,7 @@ const { values: args } = parseArgs({
 });
 
 if (args.help) {
-  out(
-    readFileSync(path.join(HERE, 'README.md'), 'utf8').split('## Flags')[1]?.split('\n## ')[0] ??
-      'See README.md',
-  );
+  out(HELP);
   process.exit(0);
 }
 
@@ -90,7 +112,7 @@ for (const m of models) {
 if (models.length === 0) {
   out('Name at least one model: --model <openrouter-id> (repeatable), and/or --production.');
   out(
-    `Production today: MODEL=${prod.primary}, BACKUP_MODEL=${prod.backup} (cloudflare/workers/receipt-scanner/wrangler.toml).`,
+    `Production today: MODEL=${prod.primary}, BACKUP_MODEL=${prod.backup} (apps/cloudflare/workers/receipt-scanner/wrangler.toml).`,
   );
   process.exit(1);
 }
@@ -204,7 +226,7 @@ if (args['dry-run']) process.exit(0);
 const apiKey = process.env.OPENROUTER_API_KEY;
 if (!apiKey && models.some((m) => !isClaudeCodeModel(m.id))) {
   out(
-    'OPENROUTER_API_KEY is not set. Put it in evals/receipt-scanner/.env (gitignored) or export it.',
+    'OPENROUTER_API_KEY is not set. Put it in apps/cloudflare/evals/receipt-scanner/.env (gitignored) or export it.',
   );
   process.exit(1);
 }
