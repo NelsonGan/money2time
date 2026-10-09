@@ -1,7 +1,7 @@
 /**
  * Shared types and event name constants for product analytics.
  *
- * Canonical tracking contract: docs/analytics-tracking.md. Update its tables
+ * Canonical tracking contract: the "Analytics" section of the repository README. Update its tables
  * in the same change as event names, payloads, routing or usage milestones.
  *
  * Event names follow a consistent `Category Action` naming convention

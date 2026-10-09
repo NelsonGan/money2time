@@ -1185,7 +1185,7 @@ export interface AppState {
 
 // Payment alerts (shown to users as Notifications): bank and wallet notifications
 // (Android), and the Log Notification Shortcuts action (iOS), turned into transactions. The pipeline lives in
-// features/autoLog/; docs/prd-notification-auto-log.md has the design.
+// features/autoLog/; "Notification review" in the repository README has the design.
 
 /**
  * How an alert reached the app. `apple_pay` rows are written by the Log Card

@@ -2,7 +2,7 @@
 // the bank app and the wallet both announcing one purchase, an Apple Pay tap
 // that the bank also alerts, or a payment the user already typed in. Pure;
 // covered by __tests__/features/autoLog/decisions.test.ts. Rules are in
-// docs/prd-notification-auto-log.md.
+// "Notification review" in the repository README.
 
 import type {
   PaymentAlertCapture,

@@ -702,7 +702,7 @@ export async function restoreRevenueCatPurchases(): Promise<RevenueCatActionResu
     // Explicit restore posts Play purchases with isRestore=true. Background
     // sync uses the SDK's account-sharing policy instead, and must not precede
     // or short-circuit this user-requested restore. Neither API can recover a
-    // consumed lifetime purchase on Billing Client 8; see docs/pro-restoration.md.
+    // consumed lifetime purchase on Billing Client 8; see "Purchase identity and restore" in the repository README.
     const customerInfo = await Purchases.restorePurchases();
     const customerState = toRevenueCatCustomerState(customerInfo);
     return {

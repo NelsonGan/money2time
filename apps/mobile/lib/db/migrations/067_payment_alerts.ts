@@ -3,7 +3,7 @@ import type { DbMigration } from './types';
 
 /**
  * Payment alerts: bank and wallet notifications turned into transactions (see
- * docs/prd-notification-auto-log.md).
+ * "Notification review" in the repository README).
  *
  * - `auto_log_captures` holds every alert the pipeline saw: the inbox of ones
  *   waiting for review, the history of ones logged or skipped, and the

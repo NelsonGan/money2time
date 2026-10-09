@@ -69,6 +69,12 @@ skills-lock.json
 /apps/mobile/training
 
 # Keep the Cloudflare resources (Workers, D1 schemas) out of the EAS build
-# context entirely — they are separate server-side deploys (see
-# apps/cloudflare/workers/*/README.md) and are never part of the iOS/Android app bundle.
+# context entirely — they are separate server-side deploys (see "Cloudflare" in
+# README.md) and are never part of the iOS/Android app bundle.
 /apps/cloudflare/
+
+# Repository-level material no build reads: CI workflows and the PR screenshots
+# and evidence under .github/pr-assets (100+ MB), and the agent config.
+/.github/
+/.claude/
+/.codex/

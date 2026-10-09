@@ -11,7 +11,7 @@ Read `CLAUDE.md` first for the architecture map. This skill is the design layer 
 
 ## Analytics impact
 
-When a UI or architecture change alters a tracked action, screen, paywall source, payload, trigger or frequency, follow [maintain-analytics-tracking](../maintain-analytics-tracking/SKILL.md). Update the authoritative `docs/analytics-tracking.md` tables in the same change, even when event names stay the same. Changes without an analytics impact need no table edit.
+When a UI or architecture change alters a tracked action, screen, paywall source, payload, trigger or frequency, follow [maintain-analytics-tracking](../maintain-analytics-tracking/SKILL.md). Update the authoritative Analytics tables in `README.md` in the same change, even when event names stay the same. Changes without an analytics impact need no table edit.
 
 ## Non-negotiables
 

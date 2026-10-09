@@ -22,15 +22,20 @@ function tableRows(markdown: string): string[][] {
     );
 }
 
+// The body under `heading` (a full heading line), up to the next heading of the
+// same or a higher level.
 function section(markdown: string, heading: string): string {
-  const contents = markdown.split(`## ${heading}\n`)[1];
+  const level = heading.indexOf(' ');
+  const contents = markdown.split(`\n${heading}\n`)[1];
   if (contents == null) throw new Error(`Missing tracking table section: ${heading}`);
-  return contents.split('\n## ')[0];
+  return contents.split(new RegExp(`\n#{1,${level}} `))[0];
 }
 
 describe('canonical analytics tracking table', () => {
+  // The tables live in the Analytics section of the repository README; reading
+  // only that section keeps other tables there from counting as events.
   const readPlan = () =>
-    readFileSync(resolve(__dirname, '../../docs/analytics-tracking.md'), 'utf8');
+    section(readFileSync(resolve(__dirname, '../../../../README.md'), 'utf8'), '## Analytics');
 
   it('documents every custom event exactly once with its provider names and routing', () => {
     const rows = tableRows(readPlan()).filter((cells) => /^[A-Z][A-Z_]+$/.test(cells[0]));
@@ -50,7 +55,7 @@ describe('canonical analytics tracking table', () => {
   });
 
   it('keeps the volume summary consistent with the event destinations', () => {
-    const rows = tableRows(section(readPlan(), 'Provider coverage'));
+    const rows = tableRows(section(readPlan(), '### Provider coverage'));
     const counts = Object.fromEntries(rows.map(([label, count]) => [label, Number(count)]));
     const events = Object.values(AnalyticsEvents);
     expect(counts['All custom events']).toBe(events.length);
@@ -71,7 +76,7 @@ describe('canonical analytics tracking table', () => {
   });
 
   it('documents every feature adoption trigger and its excluded uses', () => {
-    const rows = tableRows(section(readPlan(), 'Feature adoption')).filter((cells) =>
+    const rows = tableRows(section(readPlan(), '### Feature adoption')).filter((cells) =>
       /^[a-z]+(?:_[a-z]+)*$/.test(cells[0]),
     );
     const documented = Object.fromEntries(rows.map(([feature, key]) => [key, feature]));
@@ -94,7 +99,7 @@ describe('canonical analytics tracking table', () => {
   });
 
   it('keeps the documented transaction milestones consistent with the volume budget', () => {
-    const rows = tableRows(section(readPlan(), 'Transaction milestones')).filter((cells) =>
+    const rows = tableRows(section(readPlan(), '### Transaction milestones')).filter((cells) =>
       /^\d+$/.test(cells[0]),
     );
     expect(rows.map(([count]) => Number(count))).toEqual(TRANSACTION_MILESTONES);

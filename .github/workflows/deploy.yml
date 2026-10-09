@@ -131,7 +131,7 @@ jobs:
           grep -qvE '^apps/cloudflare/' changed.txt && checks=true
           # Paths that cannot change the shipped binary. Anything else counts as
           # an app change, so an unrecognised path always builds the app.
-          grep -vE '^(apps/cloudflare/|apps/mobile/docs/|\.github/|\.claude/|\.vscode/)|(^|/)[^/]*\.md$|^LICENSE$' changed.txt > app_paths.txt || true
+          grep -vE '^(apps/cloudflare/|\.github/|\.claude/|\.agents/|\.codex/|\.vscode/)|(^|/)[^/]*\.md$|^LICENSE$' changed.txt > app_paths.txt || true
           [ -s app_paths.txt ] && app=true
 
           echo "app=$app | worker=$worker | checks=$checks"
@@ -489,7 +489,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.eas-build-local
-          key: ${{ runner.os }}-eas-build-local-${{ hashFiles('**/package-lock.json', 'apps/mobile/patches/**') }}
+          key: ${{ runner.os }}-eas-build-local-${{ hashFiles('apps/mobile/package-lock.json', 'apps/mobile/patches/**') }}
           restore-keys: ${{ runner.os }}-eas-build-local-
 
       - name: Cache CocoaPods
