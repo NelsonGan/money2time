@@ -1,6 +1,7 @@
 import type { MonthCycleInput, WeekStartsOn } from '~/types';
 import {
   addFinancialMonths,
+  daysInMonth,
   financialMonthKeyForDate,
   financialMonthRange,
   financialMonthStartDate,
@@ -89,34 +90,47 @@ export function startOfWeekFor(date: Date, weekStartsOn: WeekStartsOn): Date {
   return addDays(day, -diff);
 }
 
-/**
- * The most recent period of `zoom` that has fully elapsed as of `today` — i.e.
- * the one immediately before the period currently running.
- */
-export function lastCompletedPeriod({
-  zoom,
-  today,
-  weekStartsOn,
-  monthCycle,
-}: {
+interface PeriodClock {
   zoom: ReviewZoom;
   today: Date;
   weekStartsOn: WeekStartsOn;
   monthCycle: MonthCycleInput;
-}): ReviewPeriod {
-  if (zoom === 'week') {
-    return weekPeriod(addDays(startOfWeekFor(today, weekStartsOn), -7));
-  }
-  if (zoom === 'month') {
-    const currentKey = financialMonthKeyForDate(today, monthCycle);
-    const previousStart = addFinancialMonths(
-      financialMonthStartDate(currentKey, monthCycle),
-      -1,
-      monthCycle,
-    );
-    return monthPeriod(financialMonthKeyForDate(previousStart, monthCycle), monthCycle);
-  }
-  return yearPeriod(today.getFullYear() - 1);
+}
+
+/**
+ * The period of `zoom` that `today` falls in, still running. It is never
+ * reviewed, but the rail shows when it ends so the user can see why it is not
+ * there yet — on a cycle starting the 31st, "September" runs to 30 Oct.
+ */
+export function currentPeriod({
+  zoom,
+  today,
+  weekStartsOn,
+  monthCycle,
+}: PeriodClock): ReviewPeriod {
+  if (zoom === 'week') return weekPeriod(startOfWeekFor(today, weekStartsOn));
+  if (zoom === 'month') return monthPeriod(financialMonthKeyForDate(today, monthCycle), monthCycle);
+  return yearPeriod(today.getFullYear());
+}
+
+/**
+ * The most recent period of `zoom` that has fully elapsed as of `today` — i.e.
+ * the one immediately before the period currently running.
+ */
+export function lastCompletedPeriod(clock: PeriodClock): ReviewPeriod {
+  return shiftPeriod(currentPeriod(clock), 1, clock.monthCycle);
+}
+
+/**
+ * True when a `month` period is exactly one calendar month (the 1st to its last
+ * day). Only then can it go by a month's name alone: a payday cycle such as
+ * 31 Aug to 29 Sep is labelled "August" by the cycle's convention, yet nearly
+ * all of it is September, so the review shows its dates instead.
+ */
+export function isCalendarMonthPeriod(period: ReviewPeriod): boolean {
+  if (period.zoom !== 'month' || !period.start.endsWith('-01')) return false;
+  const lastDay = daysInMonth(Number(period.start.slice(0, 4)), Number(period.start.slice(5, 7)));
+  return period.end === `${period.start.slice(0, 8)}${String(lastDay).padStart(2, '0')}`;
 }
 
 /** The period `offset` steps before `period` (positive `offset` goes back in time). */

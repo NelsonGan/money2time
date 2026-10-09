@@ -1,4 +1,11 @@
-import { CalendarDays, ChevronDown, ListChecks, Moon, TrendingDown } from 'lucide-react-native';
+import {
+  CalendarDays,
+  ChevronDown,
+  Hourglass,
+  ListChecks,
+  Moon,
+  TrendingDown,
+} from 'lucide-react-native';
 import React, {
   forwardRef,
   useCallback,
@@ -36,6 +43,7 @@ import { applyReviewFilters, type ReviewFilters } from '../lib/reviewFilters';
 import {
   barLabel,
   deltaLabel,
+  inProgressLabel,
   money,
   paceBadgeLabel,
   pacePercentLabel,
@@ -148,6 +156,15 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
           earliestTransactionDate,
         }),
       [earliestTransactionDate, monthCycle, settings.weekStartsOn, zoom],
+    );
+
+    // The period still running, shown after the completed ones so a user whose
+    // month cycle starts late can see when the next review lands. Stepped on
+    // from the newest completed period rather than read off its own clock, so
+    // the two can never disagree about which period is today's.
+    const runningPeriod = useMemo(
+      () => shiftPeriod(periods[periods.length - 1], -1, monthCycle),
+      [monthCycle, periods],
     );
 
     const selectedIndex = useMemo(
@@ -287,6 +304,7 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
           <TabletContentContainer>
             <PeriodRail
               periods={periods}
+              runningPeriod={runningPeriod}
               selectedIndex={selectedIndex}
               locale={settings.locale}
               onSelect={selectPeriod}
@@ -329,15 +347,18 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
 
 function PeriodRail({
   periods,
+  runningPeriod,
   selectedIndex,
   locale,
   onSelect,
 }: {
   periods: ReviewPeriod[];
+  runningPeriod: ReviewPeriod;
   selectedIndex: number;
   locale: string;
   onSelect: (period: ReviewPeriod) => void;
 }) {
+  const themeColors = useThemeColors();
   const scrollRef = useRef<ScrollView>(null);
   const offsetsRef = useRef<number[]>([]);
   const widthRef = useRef(0);
@@ -355,8 +376,14 @@ function PeriodRail({
   const centerSelected = useCallback(() => {
     const offset = offsetsRef.current[selectedIndex];
     if (offset === undefined || widthRef.current === 0) return;
+    // The newest pill sits beside the in-progress one, which centring would
+    // cut off; pinning the rail to its end shows both.
+    if (selectedIndex === periods.length - 1) {
+      scrollRef.current?.scrollToEnd({ animated: true });
+      return;
+    }
     scrollRef.current?.scrollTo({ x: Math.max(0, offset - widthRef.current / 2), animated: true });
-  }, [selectedIndex]);
+  }, [periods.length, selectedIndex]);
 
   useEffect(centerSelected, [centerSelected]);
 
@@ -404,6 +431,20 @@ function PeriodRail({
           </Pressable>
         );
       })}
+      {/* The running period, labelled like its neighbours and marked with an
+          hourglass. Not selectable: its numbers are partial until it ends,
+          which is the whole reason the rail stops before it. */}
+      <View
+        accessible
+        accessibilityRole="text"
+        accessibilityLabel={inProgressLabel(runningPeriod, locale)}
+        className="h-9 flex-row items-center justify-center gap-1.5 rounded-full bg-muted px-4"
+      >
+        <Hourglass size={12} color={themeColors.textMuted} strokeWidth={2.25} />
+        <Text variant="caption" tone="muted">
+          {periodPillLabel(runningPeriod, locale)}
+        </Text>
+      </View>
     </ScrollView>
   );
 }
