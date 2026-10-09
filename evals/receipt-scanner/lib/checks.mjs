@@ -157,9 +157,21 @@ function checkTransactions(kase, final, now) {
       row.expectedAccount = want;
       row.account = got;
       row.accountOk = got === want;
-      // wrong = posted to a different real account (the costly error); invented = named one when none applied.
+      // wrong   = posted to a different real account than the right one;
+      // guessed = picked one of the user's real accounts when the answer was "" (ambiguous or
+      //           no source shown), so the entry lands on an account the screen never named;
+      // invented = a name that is not one of the user's accounts; missed = "" when one matched.
+      const isRealAccount = (kase.input.accounts ?? []).includes(got);
       row.accountError =
-        got === want ? null : want === '' ? 'invented' : got === '' ? 'missed' : 'wrong';
+        got === want
+          ? null
+          : want === ''
+            ? isRealAccount
+              ? 'guessed'
+              : 'invented'
+            : got === ''
+              ? 'missed'
+              : 'wrong';
     }
     out.rows.push(row);
   }
