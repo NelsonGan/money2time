@@ -1,6 +1,6 @@
 // The I/O-free half of a scan: the OpenRouter request body index.ts sends, and
 // the parse that turns the model's reply into the transactions the app gets.
-// Kept apart from index.ts so the local model eval (apps/cloudflare/evals)
+// Kept apart from index.ts so the local model eval (apps/evals/receipt-scanner)
 // imports exactly what production runs instead of a copy that could drift.
 
 // Vision models are flaky in one specific way: they occasionally return an

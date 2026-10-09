@@ -70,9 +70,9 @@ skills-lock.json
 # apps/mobile/scripts/annotate-tutorials.mjs)
 .tutorial-raw/
 
-# Receipt-scanner model eval (apps/cloudflare/evals/receipt-scanner): rendered
+# Receipt-scanner model eval (apps/evals/receipt-scanner): rendered
 # images, run results and private real-photo cases stay local; the generators
 # are the dataset.
-/apps/cloudflare/evals/receipt-scanner/dataset/generated/
-/apps/cloudflare/evals/receipt-scanner/results/
-/apps/cloudflare/evals/receipt-scanner/dataset/real/
+/apps/evals/receipt-scanner/dataset/generated/
+/apps/evals/receipt-scanner/results/
+/apps/evals/receipt-scanner/dataset/real/

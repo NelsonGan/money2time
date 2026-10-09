@@ -171,7 +171,7 @@ export function renderRunReport(run) {
   }
   lines.push('');
   lines.push(
-    `Raw outputs, checks and judge reasons for every case: \`apps/cloudflare/evals/receipt-scanner/results/${run.runId}/run.json\` (local, gitignored).`,
+    `Raw outputs, checks and judge reasons for every case: \`apps/evals/receipt-scanner/results/${run.runId}/run.json\` (local, gitignored).`,
   );
   return `${lines.join('\n')}\n`;
 }

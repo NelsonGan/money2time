@@ -50,10 +50,10 @@ jobs:
   #             preview + the production store build)
   #   worker  — apps/cloudflare/** (gates the per-PR Worker preview upload)
   #   checks  — anything the app's `npm run check` / `npm test` can even see,
-  #             i.e. everything outside apps/cloudflare/ (eslint and tsconfig
-  #             only see apps/mobile, prettier sees it plus the root docs and
-  #             .github/, and jest only reads its __tests__/), so a Worker-only
-  #             change skips the app test job.
+  #             i.e. everything outside apps/cloudflare/ and apps/evals/ (eslint
+  #             and tsconfig only see apps/mobile, prettier sees it plus the
+  #             root docs and .github/, and jest only reads its __tests__/), so
+  #             a Worker-only or eval-only change skips the app test job.
   # Fail open: when the diff can't be resolved, every flag is true.
   changes:
     name: Detect changes
@@ -125,15 +125,14 @@ jobs:
           # normal diff and first bit on a 2,265-file one. Keep these unpiped.
           # Markdown under apps/cloudflare/ is documentation only, and
           # cloudflare.yml ignores it too, so it never earns a Worker preview upload.
-          # The model eval under apps/cloudflare/evals/ is local tooling, not a Worker.
-          grep -E '^apps/cloudflare/' changed.txt > cloudflare_paths.txt || true
-          grep -vE '^apps/cloudflare/evals/' cloudflare_paths.txt > worker_paths.txt || true
+          grep -E '^apps/cloudflare/' changed.txt > worker_paths.txt || true
           grep -vE '\.md$' worker_paths.txt > worker_code.txt || true
           [ -s worker_code.txt ] && worker=true
-          grep -qvE '^apps/cloudflare/' changed.txt && checks=true
+          # The model eval in apps/evals/ is local tooling the app's checks never read.
+          grep -qvE '^apps/(cloudflare|evals)/' changed.txt && checks=true
           # Paths that cannot change the shipped binary. Anything else counts as
           # an app change, so an unrecognised path always builds the app.
-          grep -vE '^(apps/cloudflare/|\.github/|\.claude/|\.agents/|\.codex/|\.vscode/)|(^|/)[^/]*\.md$|^LICENSE$' changed.txt > app_paths.txt || true
+          grep -vE '^(apps/cloudflare/|apps/evals/|\.github/|\.claude/|\.agents/|\.codex/|\.vscode/)|(^|/)[^/]*\.md$|^LICENSE$' changed.txt > app_paths.txt || true
           [ -s app_paths.txt ] && app=true
 
           echo "app=$app | worker=$worker | checks=$checks"

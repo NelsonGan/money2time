@@ -22,6 +22,7 @@ Paths in `code` are relative to the app, `apps/mobile`, unless they start with
 - [App icons](#app-icons)
 - [App size and native-only assets](#app-size-and-native-only-assets)
 - [Cloudflare](#cloudflare)
+- [Model evals](#model-evals)
 - [CI and deploy](#ci-and-deploy)
 - [Testing](#testing)
 - [Conventions](#conventions)
@@ -33,8 +34,9 @@ Paths in `code` are relative to the app, `apps/mobile`, unless they start with
 ```
 apps/mobile      Expo / React Native app: its own npm project (package.json,
                  package-lock.json, patches/, eas.json)
-apps/cloudflare  workers/, d1/ and evals/: one npm project per Worker, one
-                 schema directory per D1 database, and the local model eval
+apps/cloudflare  workers/ and d1/: one npm project per Worker, one schema
+                 directory per D1 database, and the R2 tutorial-media notes
+apps/evals       local model evals, one npm project each (never deployed)
 .github          CI workflows, and the screenshots and evidence PRs embed
                  (.github/pr-assets/)
 ```
@@ -1921,222 +1923,6 @@ when modifying this endpoint. CI deploys Worker changes on merge: coordinate
 the app rollout with endpoint retirement. Older clients cannot process
 notifications against the retired endpoint until they update.
 
-### Receipt-scanner model eval
-
-Local pipeline for choosing the vision model behind the app's only LLM feature,
-the receipt-scanner Worker. It lives in `apps/cloudflare/evals/receipt-scanner`,
-its own npm project (Node 24+, for `sharp`), and paths in this section are
-relative to it. It sends each
-test image to an OpenRouter model **exactly as production does**, grades every
-answer with **Opus as the judge** (Claude Code's programmatic `claude -p`) on a
-rubric, and gives each model a score next to its strict accuracy, reliability,
-latency and cost per 1,000 scans.
-
-It is local only and never deployed: nothing here is imported by the app or a
-Worker. Under `apps/cloudflare/` it is outside the app's Metro project and the
-EAS archive, and `cloudflare.yml` and `deploy.yml`'s change classifier skip
-`apps/cloudflare/evals/`, so an eval run never redeploys a Worker or cuts a
-store build.
-
-It imports the Worker's own prompt, request body and response parse
-(`src/scanModes/`, `src/completion.ts` in the Worker), so **keep those modules
-I/O-free and importable by plain Node**: no Worker globals.
-
-```bash
-cd apps/cloudflare/evals/receipt-scanner
-npm install
-npm run eval -- --model google/gemini-2.5-flash-lite      # one model, full suite
-npm run eval -- --model x/a --model y/b --production      # compare against prod MODEL + BACKUP_MODEL
-npm run eval -- --model x/a --limit 3                     # smoke test, 3 cases per mode
-npm run eval -- --model x/a --dry-run                     # validate the id, plan, rough cost; no calls
-npm run eval -- --help                                    # every flag
-```
-
-The `run-model-evals` skill (`/run-model-evals <model>`) wraps this end to end.
-
-#### What is tested
-
-The Worker has three modes, each a real flow in the app, and the dataset covers
-all three (107 cases):
-
-| Mode         | App flow                                             | Cases | What the cases stress                                                                                                                                                                                                               |
-| ------------ | ---------------------------------------------------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `quick`      | Snap a receipt, pre-fill an expense                  | 46    | cash tendered/change, handwritten tips, service + SST + rounding, discounts, tax-inclusive yen, `1.234,56` and `Rp 125.000` formats, currency pinning, 2-3 receipts per photo, faded/blurred/sideways/dim photos, date clamp, menus |
-| `itemized`   | Split by Item (line items to assign to people)       | 32    | quantity layouts (`2 x`, `3 @`, own line, by weight), per-line vs receipt-level discounts, tax/service/tip/rounding exclusion, modifiers, POS abbreviations, long receipts, multi-receipt (no detail), currency detection           |
-| `screenshot` | Auto-log a payment screenshot (posts with no review) | 29    | account matching by last 4 / wallet name, ambiguous sources (must be `""`), decoy digits, lock-screen noise and promos, balances, transfers, transaction lists, order totals, FX billed amount, emailed receipts, paper receipts    |
-
-Cases are a mix of hand-written traps (`dataset/cases.mjs`, each with a `notes`
-line naming the trap) and seeded procedural variety across nine locales
-(`dataset/procedural.mjs`: MYR, USD, SGD, GBP, JPY, IDR, EUR, PHP, AUD, each
-with that locale's date order, tax regime, rounding, payment methods and the
-category list a user there would have, localized names included).
-
-**Answer keys are exact.** Receipts are rendered from a spec (`dataset/receipt.mjs`)
-and every figure is computed in integer minor units from the same numbers that
-get printed, so the expected total can never disagree with the image. Photos are
-composited on table backgrounds with tilt, blur, fade, noise and side light
-(`dataset/scene.mjs`), then downscaled exactly like the app does before upload
-(long edge 1600px, JPEG). Dates are written against a fixed reference "today"
-(`REFERENCE_DATE`), and the Worker's 30-day date clamp is applied against it, so
-the dataset rebuilds byte-identically and never goes stale.
-
-**Real photos.** Drop private receipts into `dataset/real/` (gitignored), see
-[Real receipt photos](#real-receipt-photos). They join the suite, downscaled the
-same way; without an answer key the judge grades them from the image.
-
-#### How a case is scored
-
-1. **Scan** — the Worker's own TypeScript is imported (`lib/worker.mjs`), so the
-   prompt (`buildReceiptPrompt`), request body (`buildCompletionBody`: temperature 0,
-   reasoning off, per-mode `max_tokens`) and response parse (`parseTransactions`,
-   `normalizeReceiptDetail`, the date clamp) are production's, not copies. The
-   Worker's single retry on an empty result (at temperature 0.2) is replicated;
-   `--no-empty-retry` turns it off to measure first-pass behaviour.
-2. **Checks** (`lib/checks.mjs`) — deterministic facts against the answer key:
-   amount exact, count, raw and app-facing date, category valid/best/acceptable,
-   merchant, account (`wrong` / `invented` / `missed`), item recall/precision,
-   quantities, item sum, JSON purity, currency pinned. A case **strict-passes** when
-   the app would get every amount (and account / item list) exactly right.
-3. **Judge** (`lib/judge.mjs`) — one headless `claude -p --model opus` session per
-   case: Read-only tools scoped to the dataset folder (it can open the image), no
-   CLAUDE.md/settings/skills/MCP, answer forced into the rubric's JSON schema with
-   `--json-schema`. It sees the request, answer key, raw and Worker-normalized
-   output and the checks, and is **blind to the model name**. Each rubric
-   criterion gets 0-4 with a reason, plus critical errors, `user_would_accept`
-   and a summary.
-4. **Score** (`lib/scoring.mjs`) — criteria weighted per mode (`lib/rubric.mjs`) into
-   0-100. A failed scan scores 0. An **auto score** fills the same criteria from
-   the checks alone, so `--no-judge` runs are still comparable and a large
-   judge/auto gap marks a case worth reading. A model's score is the mean per
-   mode, then the mean across modes (equal weights unless `--weights`).
-
-Rubric weights (sum to 100 per mode):
-
-| quick              | itemized                | screenshot        |
-| ------------------ | ----------------------- | ----------------- |
-| amount 40          | amount 15               | amount 30         |
-| receipt count 15   | count + detail 10       | account 25        |
-| category 15        | item completeness 20    | count 15          |
-| date 10            | item accuracy 20        | merchant/payee 10 |
-| merchant 10        | non-items excluded 10   | category 10       |
-| output contract 10 | detail metadata 10      | date 5            |
-|                    | category 5, contract 10 | output contract 5 |
-
-Judgements are cached in `results/.judge-cache/`, keyed by the judge prompt,
-rubric version, judge model, case, image and the exact model output, so re-runs
-only pay for answers that changed.
-
-#### Output
-
-Each run writes `results/<timestamp>/report.md` (leaderboard, app-facing metrics,
-cost and speed, and per model its weakest tags and worst cases with the judge's
-explanation) and `run.json` (every raw output, attempt, check and judge reason).
-`results/LEADERBOARD.md` keeps the latest full-suite result per model on the
-current dataset; filtered or limited runs are listed separately as partial.
-`results/` is gitignored scratch.
-
-#### Run history (committed)
-
-Every run is also logged to `history/` and **committed automatically**, so `git log`
-shows how each model scored over time:
-
-- `history/HISTORY.md`: one table of every run, newest first (time, model, score per mode,
-  strict pass, wrong/guessed accounts, invented payments, cost per 1,000 scans, latency,
-  dataset version, and the code commit measured, `+` when the eval or Worker had uncommitted edits).
-- `history/runs/<timestamp>.md`: that run's full report.
-- `history/runs.jsonl`: the same, one JSON line per model per run.
-
-The commit contains only those files (`git commit -- <paths>`), so anything else you have
-staged is left alone. It is not pushed. Because each run records the code commit it measured,
-**commit eval or Worker changes before running**; a dirty tree is marked `+`. Smoke tests and filtered runs are logged too, marked
-partial. `--no-commit` writes the history without committing; `rescore.mjs` updates that run's
-lines (and commits) instead of adding new ones.
-
-#### Cost
-
-Costs include prompt caching. OpenRouter's billed `cost` already discounts cached reads and
-includes any cache-write premium; the report also shows the mean cached and cache-written prompt
-tokens. For `claude-code:` models and the judge, cost is computed per token type at Anthropic list
-price (`lib/anthropicPricing.mjs`): plain input, cache writes at 1.25x (5-minute) or 2x (1-hour)
-input, cache reads at 0.1x (0.05x on Opus 5.5), and output. `claude -p` writes each prompt to a
-1-hour cache, so a `claude-code:` row also shows the cost with no caching, which is closer to a
-one-off production call. The CLI's own `total_cost_usd` is kept only for reference: it has no price
-for models it does not list yet and came out about 40x above the cache-inclusive list price for Haiku 5.5.
-
-OpenRouter calls are cheap (the production models cost cents per thousand scans). The judge
-dominates: about **$0.03-0.05 per judgement**, so roughly **$4-6 per model** for the full suite, and
-nothing for answers already in the cache. `--dry-run` prints the plan and a rough estimate first.
-
-#### Setup
-
-- Node 24+ (the Worker's TypeScript is loaded with Node's built-in type stripping), and `npm install` in this directory for `sharp`.
-- `claude` CLI on PATH, signed in (the judge runs on your Claude Code account).
-- `OPENROUTER_API_KEY` in `.env` here (gitignored), `.env.local`, or the environment.
-
-#### Flags and maintenance
-
-`npm run eval -- --help` prints every flag (the list lives in `run.mjs`).
-
-After changing `lib/checks.mjs` or `lib/scoring.mjs`, re-score a saved run without calling any
-model or the judge (judge verdicts are kept):
-
-```bash
-node rescore.mjs results/<run>
-```
-
-Rebuild or inspect the dataset on its own:
-
-```bash
-node build-dataset.mjs --list     # case table
-node build-dataset.mjs --force    # re-render into dataset/generated/
-```
-
-#### Changing things
-
-- **Prompts or parsing** live in the Worker and are picked up automatically; re-run the models you care about.
-- **New case**: add it to `dataset/cases.mjs` (receipt spec, screen template data, or paper SVG) with a `notes` line naming the trap. `build-dataset` validates that expected categories and accounts are in the case's own lists.
-- **Rubric**: edit `lib/rubric.mjs` and bump `RUBRIC_VERSION`.
-- **Procedural set**: bump `PROCEDURAL_VERSION` in `dataset/procedural.mjs` to reshuffle it deliberately.
-
-#### Real receipt photos
-
-`dataset/real/` is gitignored, so real receipts never get committed. Each case is an image plus a JSON file sharing its name:
-
-```
-dataset/real/
-  lunch-0927.jpg
-  lunch-0927.json
-```
-
-The JSON is a case without `image` (the builder downscales the photo like the
-app does). `expect` is optional: leave it out and the Opus judge grades the
-answer from the image alone (no strict metrics for that case).
-
-```json
-{
-  "id": "real-lunch-0927",
-  "mode": "quick",
-  "notes": "Crumpled kopitiam receipt, total RM 18.40 at the bottom.",
-  "tags": ["MYR", "crumpled"],
-  "input": { "currency": "MYR", "categories": ["Food", "Groceries", "Transport", "Other"] },
-  "expect": {
-    "transactions": [
-      { "amount": 18.4, "date": "2026-09-27", "category": ["Food"], "note": ["Kedai Kopi Ah Seng"] }
-    ]
-  }
-}
-```
-
-For `screenshot` mode add `input.accounts` and an `account` on each expected
-transaction (`""` when none should match). For `itemized` mode add
-`expect.receiptDetail` with `merchant`, `date`, `currency` (acceptable codes,
-`null` allowed), `itemsSubtotal` and `items: [{ name, aliases, quantity, lineTotal }]`.
-
-Dates are checked after the Worker's 30-day clamp, measured from the case's own
-`referenceDate` ("today" for that receipt). It defaults to the first expected
-transaction's date, so a recent receipt keeps its printed date; set it explicitly
-(e.g. `"referenceDate": "2026-10-05"`) to test the clamp on an old receipt.
-
 ### Live-earnings Worker
 
 Raises the app's live-earnings Live Activity at the start of a scheduled shift,
@@ -2445,11 +2231,234 @@ byte-range request returns `206 Partial Content`, and that the tutorial's Video
 link opens and plays it on iOS. Record the new object's size and hash in the
 table above. No Worker deployment or app native rebuild is required.
 
+## Model evals
+
+Local tooling for choosing models, in `apps/evals/`: one directory per eval,
+each its own npm project. They are scored, not shipped, and each run is
+committed to that eval's `history/` so `git log` shows how models compared over
+time.
+
+### Receipt-scanner model eval
+
+Local pipeline for choosing the vision model behind the app's only LLM feature,
+the receipt-scanner Worker. It lives in `apps/evals/receipt-scanner`,
+its own npm project (Node 24+, for `sharp`), and paths in this section are
+relative to it. It sends each
+test image to an OpenRouter model **exactly as production does**, grades every
+answer with **Opus as the judge** (Claude Code's programmatic `claude -p`) on a
+rubric, and gives each model a score next to its strict accuracy, reliability,
+latency and cost per 1,000 scans.
+
+It is local only and never deployed: nothing here is imported by the app or a
+Worker. `apps/evals/` sits outside the app's Metro project, `.easignore` keeps
+it out of the EAS archive, `cloudflare.yml` never sees it, and `deploy.yml`'s
+change classifier counts it as neither an app nor a test change, so a committed
+eval run never redeploys a Worker, runs the app's checks or cuts a store build.
+
+It imports the Worker's own prompt, request body and response parse
+(`src/scanModes/`, `src/completion.ts` in the Worker), so **keep those modules
+I/O-free and importable by plain Node**: no Worker globals.
+
+```bash
+cd apps/evals/receipt-scanner
+npm install
+npm run eval -- --model google/gemini-2.5-flash-lite      # one model, full suite
+npm run eval -- --model x/a --model y/b --production      # compare against prod MODEL + BACKUP_MODEL
+npm run eval -- --model x/a --limit 3                     # smoke test, 3 cases per mode
+npm run eval -- --model x/a --dry-run                     # validate the id, plan, rough cost; no calls
+npm run eval -- --help                                    # every flag
+```
+
+The `run-model-evals` skill (`/run-model-evals <model>`) wraps this end to end.
+
+#### What is tested
+
+The Worker has three modes, each a real flow in the app, and the dataset covers
+all three (107 cases):
+
+| Mode         | App flow                                             | Cases | What the cases stress                                                                                                                                                                                                               |
+| ------------ | ---------------------------------------------------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `quick`      | Snap a receipt, pre-fill an expense                  | 46    | cash tendered/change, handwritten tips, service + SST + rounding, discounts, tax-inclusive yen, `1.234,56` and `Rp 125.000` formats, currency pinning, 2-3 receipts per photo, faded/blurred/sideways/dim photos, date clamp, menus |
+| `itemized`   | Split by Item (line items to assign to people)       | 32    | quantity layouts (`2 x`, `3 @`, own line, by weight), per-line vs receipt-level discounts, tax/service/tip/rounding exclusion, modifiers, POS abbreviations, long receipts, multi-receipt (no detail), currency detection           |
+| `screenshot` | Auto-log a payment screenshot (posts with no review) | 29    | account matching by last 4 / wallet name, ambiguous sources (must be `""`), decoy digits, lock-screen noise and promos, balances, transfers, transaction lists, order totals, FX billed amount, emailed receipts, paper receipts    |
+
+Cases are a mix of hand-written traps (`dataset/cases.mjs`, each with a `notes`
+line naming the trap) and seeded procedural variety across nine locales
+(`dataset/procedural.mjs`: MYR, USD, SGD, GBP, JPY, IDR, EUR, PHP, AUD, each
+with that locale's date order, tax regime, rounding, payment methods and the
+category list a user there would have, localized names included).
+
+**Answer keys are exact.** Receipts are rendered from a spec (`dataset/receipt.mjs`)
+and every figure is computed in integer minor units from the same numbers that
+get printed, so the expected total can never disagree with the image. Photos are
+composited on table backgrounds with tilt, blur, fade, noise and side light
+(`dataset/scene.mjs`), then downscaled exactly like the app does before upload
+(long edge 1600px, JPEG). Dates are written against a fixed reference "today"
+(`REFERENCE_DATE`), and the Worker's 30-day date clamp is applied against it, so
+the dataset rebuilds byte-identically and never goes stale.
+
+**Real photos.** Drop private receipts into `dataset/real/` (gitignored), see
+[Real receipt photos](#real-receipt-photos). They join the suite, downscaled the
+same way; without an answer key the judge grades them from the image.
+
+#### How a case is scored
+
+1. **Scan** — the Worker's own TypeScript is imported (`lib/worker.mjs`), so the
+   prompt (`buildReceiptPrompt`), request body (`buildCompletionBody`: temperature 0,
+   reasoning off, per-mode `max_tokens`) and response parse (`parseTransactions`,
+   `normalizeReceiptDetail`, the date clamp) are production's, not copies. The
+   Worker's single retry on an empty result (at temperature 0.2) is replicated;
+   `--no-empty-retry` turns it off to measure first-pass behaviour.
+2. **Checks** (`lib/checks.mjs`) — deterministic facts against the answer key:
+   amount exact, count, raw and app-facing date, category valid/best/acceptable,
+   merchant, account (`wrong` / `invented` / `missed`), item recall/precision,
+   quantities, item sum, JSON purity, currency pinned. A case **strict-passes** when
+   the app would get every amount (and account / item list) exactly right.
+3. **Judge** (`lib/judge.mjs`) — one headless `claude -p --model opus` session per
+   case: Read-only tools scoped to the dataset folder (it can open the image), no
+   CLAUDE.md/settings/skills/MCP, answer forced into the rubric's JSON schema with
+   `--json-schema`. It sees the request, answer key, raw and Worker-normalized
+   output and the checks, and is **blind to the model name**. Each rubric
+   criterion gets 0-4 with a reason, plus critical errors, `user_would_accept`
+   and a summary.
+4. **Score** (`lib/scoring.mjs`) — criteria weighted per mode (`lib/rubric.mjs`) into
+   0-100. A failed scan scores 0. An **auto score** fills the same criteria from
+   the checks alone, so `--no-judge` runs are still comparable and a large
+   judge/auto gap marks a case worth reading. A model's score is the mean per
+   mode, then the mean across modes (equal weights unless `--weights`).
+
+Rubric weights (sum to 100 per mode):
+
+| quick              | itemized                | screenshot        |
+| ------------------ | ----------------------- | ----------------- |
+| amount 40          | amount 15               | amount 30         |
+| receipt count 15   | count + detail 10       | account 25        |
+| category 15        | item completeness 20    | count 15          |
+| date 10            | item accuracy 20        | merchant/payee 10 |
+| merchant 10        | non-items excluded 10   | category 10       |
+| output contract 10 | detail metadata 10      | date 5            |
+|                    | category 5, contract 10 | output contract 5 |
+
+Judgements are cached in `results/.judge-cache/`, keyed by the judge prompt,
+rubric version, judge model, case, image and the exact model output, so re-runs
+only pay for answers that changed.
+
+#### Output
+
+Each run writes `results/<timestamp>/report.md` (leaderboard, app-facing metrics,
+cost and speed, and per model its weakest tags and worst cases with the judge's
+explanation) and `run.json` (every raw output, attempt, check and judge reason).
+`results/LEADERBOARD.md` keeps the latest full-suite result per model on the
+current dataset; filtered or limited runs are listed separately as partial.
+`results/` is gitignored scratch.
+
+#### Run history (committed)
+
+Every run is also logged to `history/` and **committed automatically**, so `git log`
+shows how each model scored over time:
+
+- `history/HISTORY.md`: one table of every run, newest first (time, model, score per mode,
+  strict pass, wrong/guessed accounts, invented payments, cost per 1,000 scans, latency,
+  dataset version, and the code commit measured, `+` when the eval or Worker had uncommitted edits).
+- `history/runs/<timestamp>.md`: that run's full report.
+- `history/runs.jsonl`: the same, one JSON line per model per run.
+
+The commit contains only those files (`git commit -- <paths>`), so anything else you have
+staged is left alone. It is not pushed. Because each run records the code commit it measured,
+**commit eval or Worker changes before running**; a dirty tree is marked `+`. Smoke tests and filtered runs are logged too, marked
+partial. `--no-commit` writes the history without committing; `rescore.mjs` updates that run's
+lines (and commits) instead of adding new ones.
+
+#### Cost
+
+Costs include prompt caching. OpenRouter's billed `cost` already discounts cached reads and
+includes any cache-write premium; the report also shows the mean cached and cache-written prompt
+tokens. For `claude-code:` models and the judge, cost is computed per token type at Anthropic list
+price (`lib/anthropicPricing.mjs`): plain input, cache writes at 1.25x (5-minute) or 2x (1-hour)
+input, cache reads at 0.1x (0.05x on Opus 5.5), and output. `claude -p` writes each prompt to a
+1-hour cache, so a `claude-code:` row also shows the cost with no caching, which is closer to a
+one-off production call. The CLI's own `total_cost_usd` is kept only for reference: it has no price
+for models it does not list yet and came out about 40x above the cache-inclusive list price for Haiku 5.5.
+
+OpenRouter calls are cheap (the production models cost cents per thousand scans). The judge
+dominates: about **$0.03-0.05 per judgement**, so roughly **$4-6 per model** for the full suite, and
+nothing for answers already in the cache. `--dry-run` prints the plan and a rough estimate first.
+
+#### Setup
+
+- Node 24+ (the Worker's TypeScript is loaded with Node's built-in type stripping), and `npm install` in this directory for `sharp`.
+- `claude` CLI on PATH, signed in (the judge runs on your Claude Code account).
+- `OPENROUTER_API_KEY` in `.env` here (gitignored), `.env.local`, or the environment.
+
+#### Flags and maintenance
+
+`npm run eval -- --help` prints every flag (the list lives in `run.mjs`).
+
+After changing `lib/checks.mjs` or `lib/scoring.mjs`, re-score a saved run without calling any
+model or the judge (judge verdicts are kept):
+
+```bash
+node rescore.mjs results/<run>
+```
+
+Rebuild or inspect the dataset on its own:
+
+```bash
+node build-dataset.mjs --list     # case table
+node build-dataset.mjs --force    # re-render into dataset/generated/
+```
+
+#### Changing things
+
+- **Prompts or parsing** live in the Worker and are picked up automatically; re-run the models you care about.
+- **New case**: add it to `dataset/cases.mjs` (receipt spec, screen template data, or paper SVG) with a `notes` line naming the trap. `build-dataset` validates that expected categories and accounts are in the case's own lists.
+- **Rubric**: edit `lib/rubric.mjs` and bump `RUBRIC_VERSION`.
+- **Procedural set**: bump `PROCEDURAL_VERSION` in `dataset/procedural.mjs` to reshuffle it deliberately.
+
+#### Real receipt photos
+
+`dataset/real/` is gitignored, so real receipts never get committed. Each case is an image plus a JSON file sharing its name:
+
+```
+dataset/real/
+  lunch-0927.jpg
+  lunch-0927.json
+```
+
+The JSON is a case without `image` (the builder downscales the photo like the
+app does). `expect` is optional: leave it out and the Opus judge grades the
+answer from the image alone (no strict metrics for that case).
+
+```json
+{
+  "id": "real-lunch-0927",
+  "mode": "quick",
+  "notes": "Crumpled kopitiam receipt, total RM 18.40 at the bottom.",
+  "tags": ["MYR", "crumpled"],
+  "input": { "currency": "MYR", "categories": ["Food", "Groceries", "Transport", "Other"] },
+  "expect": {
+    "transactions": [
+      { "amount": 18.4, "date": "2026-09-27", "category": ["Food"], "note": ["Kedai Kopi Ah Seng"] }
+    ]
+  }
+}
+```
+
+For `screenshot` mode add `input.accounts` and an `account` on each expected
+transaction (`""` when none should match). For `itemized` mode add
+`expect.receiptDetail` with `merchant`, `date`, `currency` (acceptable codes,
+`null` allowed), `itemsSubtotal` and `items: [{ name, aliases, quantity, lineTotal }]`.
+
+Dates are checked after the Worker's 30-day clamp, measured from the case's own
+`referenceDate` ("today" for that receipt). It defaults to the first expected
+transaction's date, so a recent receipt keeps its printed date; set it explicitly
+(e.g. `"referenceDate": "2026-10-05"`) to test the clamp on an old receipt.
+
 ## CI and deploy
 
 App CI/CD is [.github/workflows/deploy.yml](.github/workflows/deploy.yml), gated `changes → test → plan → deploy`:
 
-- **Changes** — runs first on every event and classifies the diff (`git diff` of the PR merge commit's base parent, or the push's `before..after`) into three flags every other job keys off: `app` (anything that can reach the mobile binary, i.e. everything except `apps/cloudflare/**`, `.github/**`, `.claude/**`, `.agents/**`, `.codex/**`, `.vscode/**`, any `*.md`, `LICENSE`), `worker` (non-markdown `apps/cloudflare/**`), and `checks` (anything outside `apps/cloudflare/**`). **Fail open:** an unresolvable diff or an unrecognized path sets every flag true, so a new directory builds the app rather than silently skipping the release.
+- **Changes** — runs first on every event and classifies the diff (`git diff` of the PR merge commit's base parent, or the push's `before..after`) into three flags every other job keys off: `app` (anything that can reach the mobile binary, i.e. everything except `apps/cloudflare/**`, `apps/evals/**`, `.github/**`, `.claude/**`, `.agents/**`, `.codex/**`, `.vscode/**`, any `*.md`, `LICENSE`), `worker` (non-markdown `apps/cloudflare/**`), and `checks` (anything outside `apps/cloudflare/**` and `apps/evals/**`). **Fail open:** an unresolvable diff or an unrecognized path sets every flag true, so a new directory builds the app rather than silently skipping the release.
 - **Test** — `npm ci`, `npm run check` (typecheck + lint + format), `npm test`. Runs in `apps/mobile`. Skipped when `checks` is false, because eslint and tsconfig only see the app, prettier sees the app plus the root `*.md` and `.github/`, and jest only reads `__tests__/` — there is literally nothing for it to check on a Worker-only change. A failure blocks everything downstream.
 - **PR preview** (`preview-pending` → `worker-preview` → `pr-update`) — pull requests only, and only when `app` or `worker` is set (docs-only PRs publish nothing). `worker-preview` uploads a per-PR aliased Worker version **only** when `worker` is set; when it is skipped, `pr-update` points the EAS update at the production Worker URL instead.
 - **Plan** — manual dispatch, or push-to-main **when `app` is set**. A Worker-only or docs-only merge to `main` therefore never cuts a store build. Resolves the build matrix (push = both iOS+Android production; dispatch = the chosen single platform/profile).

@@ -18,15 +18,11 @@ on:
       # it is excluded (later patterns win) and never triggers a deploy.
       - 'apps/cloudflare/**'
       - '!apps/cloudflare/**/*.md'
-      # The model eval is local tooling; its run history is committed but it
-      # never ships, so it must not redeploy a Worker.
-      - '!apps/cloudflare/evals/**'
       - '.github/workflows/cloudflare.yml'
   pull_request:
     paths:
       - 'apps/cloudflare/**'
       - '!apps/cloudflare/**/*.md'
-      - '!apps/cloudflare/evals/**'
       - '.github/workflows/cloudflare.yml'
   workflow_dispatch:
 

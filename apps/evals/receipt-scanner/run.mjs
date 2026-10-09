@@ -2,7 +2,7 @@
 // the production Worker would, grade every answer with Opus (`claude -p`) on
 // the rubric, and score each model.
 //
-// From apps/cloudflare/evals/receipt-scanner:
+// From apps/evals/receipt-scanner:
 //
 //   npm run eval -- --model google/gemini-2.5-flash-lite
 //   npm run eval -- --model a/x --model b/y --production   # compare with prod MODEL/BACKUP_MODEL
@@ -32,7 +32,7 @@ import { fmtUsd, loadEnvFile, pool, rel, slug } from './lib/util.mjs';
 import { productionModels } from './lib/worker.mjs';
 
 
-const HELP = `Usage: npm run eval -- --model <id> [flags]   (from apps/cloudflare/evals/receipt-scanner)
+const HELP = `Usage: npm run eval -- --model <id> [flags]   (from apps/evals/receipt-scanner)
 
 --model, -m <id>        OpenRouter model id; repeat or comma-separate for several
 --production            also run the Worker's MODEL and BACKUP_MODEL from wrangler.toml
@@ -226,7 +226,7 @@ if (args['dry-run']) process.exit(0);
 const apiKey = process.env.OPENROUTER_API_KEY;
 if (!apiKey && models.some((m) => !isClaudeCodeModel(m.id))) {
   out(
-    'OPENROUTER_API_KEY is not set. Put it in apps/cloudflare/evals/receipt-scanner/.env (gitignored) or export it.',
+    'OPENROUTER_API_KEY is not set. Put it in apps/evals/receipt-scanner/.env (gitignored) or export it.',
   );
   process.exit(1);
 }

@@ -13,6 +13,7 @@ anything reading `AGENTS.md` by convention gets the same thing.
 ```
 apps/mobile      Expo / React Native app, its own npm project
 apps/cloudflare  workers/ and d1/, one directory per Worker and per database
+apps/evals       local model evals, one npm project each, never deployed
 .github          CI workflows, and pr-assets/ for PR screenshots and evidence
 ```
 
