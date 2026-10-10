@@ -1,0 +1,18 @@
+{
+  "name": "money2time-evals-receipt-scanner",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local model eval for the receipt-scanner Worker (OpenRouter, judged by Opus via claude -p). Never deployed.",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "eval": "node run.mjs",
+    "rescore": "node rescore.mjs",
+    "dataset": "node build-dataset.mjs"
+  },
+  "devDependencies": {
+    "sharp": "0.34.5"
+  }
+}
