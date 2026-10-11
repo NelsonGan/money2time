@@ -179,6 +179,7 @@ import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
 import { subscribeRunAddAction } from '~/services/addActionNavigation';
 import { AnalyticsEvents, setCurrentScreen, trackEvent } from '~/services/analytics';
+import { canApplyNativeColorScheme } from '~/services/appIcon';
 import {
   clearAutoLogPending,
   clearAutoLogPendingScans,
@@ -377,7 +378,12 @@ function ThemeGate({ children }: { children: React.ReactNode }) {
     return () => sub.remove();
   }, []);
 
+  // Only native chrome (system dialogs and pickers) reads this; the app's own
+  // colours come from `resolved` below. On Android behind an alternate-icon
+  // alias it would recreate the activity and crash any open Modal, so there the
+  // native chrome follows the system theme instead (see canApplyNativeColorScheme).
   useEffect(() => {
+    if (!canApplyNativeColorScheme()) return;
     setColorScheme(themeMode === 'system' ? 'system' : themeMode);
   }, [themeMode, setColorScheme]);
 

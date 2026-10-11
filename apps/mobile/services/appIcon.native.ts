@@ -65,6 +65,36 @@ export const applyAppIcon = async (id: AppIconId): Promise<AppIconId> => {
 };
 
 /**
+ * Whether the app may push its own light/dark choice into Android's AppCompat
+ * night mode (`Appearance.setColorScheme`) without that recreating the activity.
+ * Always true on iOS.
+ *
+ * AppCompat decides between "tell the activity" and "recreate it" by reading
+ * the activity's `configChanges` from the manifest entry named after its class,
+ * `.MainActivity`, and it looks that entry up without MATCH_DISABLED_COMPONENTS.
+ * An alternate icon disables `.MainActivity` (see withAndroidAlternateIcons), so
+ * in an activity launched through an icon alias the lookup throws, AppCompat
+ * concludes the activity cannot handle a uiMode change, and recreates it. React
+ * Native then tears down any open Modal against a window that no longer exists,
+ * which crashes (Sentry MONEY2TIME-3Y / MONEY2TIME-62). The lock screen and the
+ * feature announcement are Modals up at launch, so a user with an alternate icon
+ * and a forced theme crashed on every launch.
+ *
+ * Read off the running activity: an alias in front means `.MainActivity` was
+ * already disabled when it was created, which is when AppCompat cached the
+ * flags. An activity created through `.MainActivity` keeps correct flags even
+ * after the user then picks an alternate icon.
+ */
+export const canApplyNativeColorScheme = (): boolean => {
+  if (Platform.OS !== 'android' || !alternateAppIcons) return true;
+  try {
+    return alternateAppIcons.getAppIconName() == null;
+  } catch {
+    return true;
+  }
+};
+
+/**
  * Reconciles the launcher with the user's stored choice at load, as opposed to
  * `applyAppIcon`, which carries out a choice they just made.
  *
