@@ -20,5 +20,8 @@ export const getActiveAppIcon = (): AppIconId => DEFAULT_APP_ICON_ID;
  */
 export const applyAppIcon = async (_id: AppIconId): Promise<AppIconId> => DEFAULT_APP_ICON_ID;
 
+/** Whether the app's theme may be pushed into native night mode. See the native one. */
+export const canApplyNativeColorScheme = (): boolean => true;
+
 /** Reconciles the launcher with the stored choice at load. See the native one. */
 export const syncAppIcon = async (_id: AppIconId): Promise<void> => {};

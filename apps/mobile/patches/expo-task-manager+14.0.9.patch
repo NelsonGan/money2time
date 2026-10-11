@@ -1,0 +1,21 @@
+diff --git a/node_modules/expo-task-manager/ios/EXTaskManager/EXTaskManager.m b/node_modules/expo-task-manager/ios/EXTaskManager/EXTaskManager.m
+index b7cc8e8..3721e94 100644
+--- a/node_modules/expo-task-manager/ios/EXTaskManager/EXTaskManager.m
++++ b/node_modules/expo-task-manager/ios/EXTaskManager/EXTaskManager.m
+@@ -86,6 +86,16 @@ EX_EXPORT_MODULE(ExpoTaskManager);
+ 
+ - (void)stopObserving {}
+ 
++// money2time patch: every exported method reaches EXTaskService, which keeps its
++// tasks and requests in plain NSMutable collections and is also driven from the
++// main thread at launch. Running these on the module's own serial queue raced
++// it and crashed in -[EXTaskExecutionRequest _maybeExecuteCallback]
++// (Sentry MONEY2TIME-23).
++- (dispatch_queue_t)methodQueue
++{
++  return dispatch_get_main_queue();
++}
++
+ # pragma mark - Exported methods
+ 
+ EX_EXPORT_METHOD_AS(isAvailableAsync,

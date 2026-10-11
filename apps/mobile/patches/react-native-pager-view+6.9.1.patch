@@ -1,0 +1,108 @@
+diff --git a/node_modules/react-native-pager-view/ios/Fabric/RNCPagerViewComponentView.mm b/node_modules/react-native-pager-view/ios/Fabric/RNCPagerViewComponentView.mm
+index 067f92e..d016a99 100644
+--- a/node_modules/react-native-pager-view/ios/Fabric/RNCPagerViewComponentView.mm
++++ b/node_modules/react-native-pager-view/ios/Fabric/RNCPagerViewComponentView.mm
+@@ -23,6 +23,10 @@ using namespace facebook::react;
+     LayoutMetrics _oldLayoutMetrics;
+     UIScrollView *scrollView;
+     BOOL transitioning;
++    // money2time patch: unmounted page controllers, held until UIPageViewController
++    // can no longer be showing them. See unmountChildComponentView.
++    NSMutableArray<UIViewController *> *_releasedChildViewControllers;
++    BOOL _needsPageResyncAfterScroll;
+ }
+ 
+ // Needed because of this: https://github.com/facebook/react-native/pull/37274
+@@ -67,6 +71,7 @@ using namespace facebook::react;
+         static const auto defaultProps = std::make_shared<const RNCViewPagerProps>();
+         _props = defaultProps;
+         _nativeChildrenViewControllers = [[NSMutableArray alloc] init];
++        _releasedChildViewControllers = [[NSMutableArray alloc] init];
+         _currentIndex = -1;
+         _destinationIndex = -1;
+         _layoutDirection = @"ltr";
+@@ -95,13 +100,30 @@ using namespace facebook::react;
+ 
+ - (void)unmountChildComponentView:(UIView<RCTComponentViewProtocol> *)childComponentView index:(NSInteger)index {
+     [childComponentView removeFromSuperview];
++    UIViewController *removed = [_nativeChildrenViewControllers objectAtIndex:index];
+     [_nativeChildrenViewControllers removeObjectAtIndex:index];
+ 
++    // money2time patch: this array is the only owner of a page controller the
++    // user is swiping towards. Releasing it mid-swipe (the pager closing under
++    // a finger, e.g. a sheet or screen dismissed by a tap) frees the controller
++    // while UIPageViewController still shows its view, and when the swipe
++    // settles UIKit throws "No view controller managing visible view" (Sentry
++    // MONEY2TIME-S). The setViewControllers: that goTo: below makes ends a
++    // swipe early and throws the same way at once (Sentry MONEY2TIME-2F). So
++    // every removed controller outlives this call, and mid-swipe the re-sync
++    // waits for the swipe to settle.
++    [_releasedChildViewControllers addObject:removed];
++    if (scrollView.isDragging || scrollView.isDecelerating) {
++        _needsPageResyncAfterScroll = YES;
++        return;
++    }
++ 
+     NSInteger maxPage = _nativeChildrenViewControllers.count - 1;
+     
+     if (self.currentIndex >= maxPage) {
+         [self goTo:maxPage animated:NO];
+     }
++    [self releaseUnmountedPages];
+ }
+ 
+ 
+@@ -297,7 +319,42 @@ using namespace facebook::react;
+    
+ }
+ 
++// money2time patch: see unmountChildComponentView. Released controllers are let
++// go on the next main-queue turn, after UIPageViewController has finished its
++// own bookkeeping for the scroll or page change that led here.
++- (void)releaseUnmountedPages {
++    NSArray<UIViewController *> *released = [_releasedChildViewControllers copy];
++    [_releasedChildViewControllers removeAllObjects];
++    BOOL resync = _needsPageResyncAfterScroll;
++    _needsPageResyncAfterScroll = NO;
++    if (released.count == 0 && !resync) {
++        return;
++    }
++    __weak RNCPagerViewComponentView *weakSelf = self;
++    dispatch_async(dispatch_get_main_queue(), ^{
++        (void)released;
++        __strong RNCPagerViewComponentView *strongSelf = weakSelf;
++        if (!resync || strongSelf == nil) {
++            return;
++        }
++        NSInteger maxPage = strongSelf->_nativeChildrenViewControllers.count - 1;
++        if (maxPage >= 0) {
++            [strongSelf goTo:MIN(MAX(strongSelf->_currentIndex, 0), maxPage) animated:NO];
++        }
++    });
++}
++
++- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
++    if (!decelerate) {
++        [self releaseUnmountedPages];
++    }
++}
++
+ - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
++    [self releaseUnmountedPages];
++    if (_eventEmitter == nullptr) {
++        return;
++    }
+     const auto strongEventEmitter = *std::dynamic_pointer_cast<const RNCViewPagerEventEmitter>(_eventEmitter);
+     strongEventEmitter.onPageScrollStateChanged(RNCViewPagerEventEmitter::OnPageScrollStateChanged{.pageScrollState =  RNCViewPagerEventEmitter::OnPageScrollStateChangedPageScrollState::Idle });
+ }
+@@ -383,6 +440,10 @@ using namespace facebook::react;
+     if (completed) {
+         UIViewController* currentVC = [self currentlyDisplayed];
+         NSUInteger currentIndex = [_nativeChildrenViewControllers indexOfObject:currentVC];
++        // money2time patch: the page landed on was unmounted mid-swipe.
++        if (currentIndex == NSNotFound) {
++            return;
++        }
+         _currentIndex = currentIndex;
+         int position = (int) currentIndex;
+         const auto strongEventEmitter = *std::dynamic_pointer_cast<const RNCViewPagerEventEmitter>(_eventEmitter);
