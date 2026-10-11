@@ -1692,6 +1692,18 @@ artwork are generator inputs and were retained.
 - Enable Android release code and resource shrinking. Compressed APK Java code
   drops from 23.49 MB to 8.83 MB. The AAB includes shrinker metadata, which is
   why its total reduction differs from the APK reduction.
+- **Shrinking only honours keep rules a native module hands to the app.** A
+  module's `proguard-rules.pro` reaches R8 only through `consumerProguardFiles`
+  in its Gradle build, and expo-notifications and expo-task-manager ship theirs
+  without it. R8 then stripped the private `writeObject` that
+  expo-notifications' `NotificationContent` uses to save its `data` as a string,
+  so every reminder carrying `data` (the weekly and monthly reviews) failed to
+  schedule on Android 1.5.12 with "Failed to schedule the notification.
+  org.json.JSONObject" (Sentry MONEY2TIME-R, ~3,700 events in five days, which
+  used up the Sentry error quota). Both modules' rules are copied into
+  `extraProguardRules` in `app.json`, and `__tests__/build/androidKeepRules.test.ts`
+  fails if any installed module ships rules that are neither consumed nor
+  copied. Check that test after adding a native dependency.
 - Include a shared native-image revision in internal update runtimes. A renamed
   or recompressed image excluded from OTA uploads now requires a matching
   rebuilt development/preview app. Production configuration is unchanged.

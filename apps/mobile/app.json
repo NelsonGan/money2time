@@ -275,7 +275,8 @@
         {
           "android": {
             "enableMinifyInReleaseBuilds": true,
-            "enableShrinkResourcesInReleaseBuilds": true
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "extraProguardRules": "-keep class expo.modules.notifications.** { *; }\n-keep class expo.modules.taskManager.** { *; }"
           },
           "ios": {
             "deploymentTarget": "16.4",
