@@ -1,13 +1,7 @@
 import React, { useRef } from 'react';
 
 import { useApp } from '~/context/AppContext';
-import { useIsPro } from '~/context/ProContext';
 import { TransactionEditorScreen } from '~/features/transactions/components';
-import {
-  countAccountsTowardFreeLimit,
-  isNewTransactionBlockedByAccounts,
-} from '~/features/transactions/lib/accountEntryGate';
-import { TransactionEntryBlockedScreen } from '~/features/transactions/screens/TransactionEntryBlockedScreen';
 import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import type { RootStackParamList } from '~/navigation/rootStack';
@@ -22,13 +16,8 @@ export function NotificationReviewEditorScreen({
   onClose: () => void;
 }) {
   const app = useApp();
-  const isPro = useIsPro();
-  const live = useRef({ app, isPro });
-  live.current = { app, isPro };
-  const count = countAccountsTowardFreeLimit(app.accounts);
-  if (isNewTransactionBlockedByAccounts(isPro, count)) {
-    return <TransactionEntryBlockedScreen activeAccountCount={count} onClose={onClose} />;
-  }
+  const live = useRef(app);
+  live.current = app;
   const save = async (input: CreateTransactionInput) => {
     if (input.type !== 'income' && input.type !== 'expense')
       throw new Error(I18n.t('payment_alerts.review_save_error'));
@@ -39,16 +28,15 @@ export function NotificationReviewEditorScreen({
         appUserId: launch.appUserId,
         generation: launch.generation,
         getCurrent: () => ({
-          ...live.current.app,
-          isPro: live.current.isPro,
-          appUserId: live.current.app.settings.appUserId,
+          ...live.current,
+          appUserId: live.current.settings.appUserId,
         }),
       },
       {
         [launch.captureId]: {
           amount: {
             amount: input.amount,
-            currency: input.currency ?? live.current.app.settings.currencyCode,
+            currency: input.currency ?? live.current.settings.currencyCode,
           },
           accountId: input.accountId ?? null,
           editedInput: input,

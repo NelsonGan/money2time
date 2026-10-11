@@ -8,15 +8,11 @@ import { Alert, Pressable, View } from 'react-native';
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { Button, SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
-import { PRO_LIMITS } from '~/constants/proLimits';
 import { useApp } from '~/context/AppContext';
-import { useIsPro } from '~/context/ProContext';
-import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accountEntryGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { RootStackParamList } from '~/navigation/rootStack';
 import {
-  NotificationReviewAccountLimitError,
   type NotificationReviewSelection,
   resolveNotificationReviews,
   suggestNotificationCategory,
@@ -39,9 +35,6 @@ import { isPayableAccount } from '../lib/binding';
 
 export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
   const app = useApp();
-  const isPro = useIsPro();
-  const livePro = useRef(isPro);
-  livePro.current = isPro;
   const { settings } = app;
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const live = useRef(app);
@@ -107,7 +100,6 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
           generation: snapshot.generation,
           getCurrent: () => ({
             ...live.current,
-            isPro: livePro.current,
             appUserId: live.current.settings.appUserId,
           }),
         },
@@ -121,17 +113,7 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
         return false;
       }
       return true;
-    } catch (error) {
-      if (error instanceof NotificationReviewAccountLimitError) {
-        Alert.alert(
-          I18n.t('pro.limit_reached_title'),
-          I18n.t('add_action.over_account_limit_message', {
-            active: countAccountsTowardFreeLimit(live.current.accounts),
-            count: PRO_LIMITS.FREE_MAX_ACCOUNTS,
-          }),
-        );
-        return false;
-      }
+    } catch {
       Alert.alert(
         I18n.t('payment_alerts.history_title'),
         I18n.t('payment_alerts.review_save_error'),
