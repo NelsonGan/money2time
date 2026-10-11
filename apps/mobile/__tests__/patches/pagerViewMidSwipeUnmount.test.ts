@@ -9,10 +9,13 @@ import path from 'node:path';
  * the controller of the page being revealed, and when the swipe settled
  * UIPageViewController threw "No view controller managing visible view"
  * (Sentry MONEY2TIME-S). The orphan in every report is a page controller's
- * root view: `autoresize = W+H`, sized to the page.
+ * root view: `autoresize = W+H`, sized to the page. The page re-sync that
+ * unmounting triggers threw the same way at once when it ended a swipe early
+ * (Sentry MONEY2TIME-2F: unmountChildComponentView -> setViewControllers).
  *
- * patches/react-native-pager-view+6.9.1.patch holds those controllers until
- * the scroll view settles. This reads the installed module so an upgrade that
+ * patches/react-native-pager-view+6.9.1.patch keeps every unmounted controller
+ * until the next main-queue turn, or until the swipe settles, and holds the
+ * re-sync for the same moment. This reads the installed module so an upgrade that
  * drops the patch fails here instead of quietly bringing the crash back.
  */
 
@@ -31,20 +34,32 @@ const methodBody = (source: string, signature: string) => {
 describe('pager-view iOS unmount during a swipe', () => {
   const source = readFileSync(SOURCE, 'utf8');
 
-  it('keeps a page controller alive when it is unmounted mid-swipe', () => {
+  it('keeps every unmounted page controller alive past the unmount', () => {
     const unmount = methodBody(source, '- (void)unmountChildComponentView:');
-    expect(unmount).toMatch(/scrollView\.isDragging \|\| scrollView\.isDecelerating/);
-    expect(unmount).toContain('[_releasedChildViewControllers addObject:removed]');
+    const park = unmount.indexOf('[_releasedChildViewControllers addObject:removed]');
+    expect(park).toBeGreaterThanOrEqual(0);
+    // Parked before the mid-swipe early return, so both paths keep it.
+    expect(park).toBeLessThan(unmount.indexOf('return;'));
+  });
+
+  it('holds the page re-sync until a swipe in flight settles', () => {
+    const unmount = methodBody(source, '- (void)unmountChildComponentView:');
+    expect(unmount).toMatch(
+      /if \(scrollView\.isDragging \|\| scrollView\.isDecelerating\) \{\s*_needsPageResyncAfterScroll = YES;\s*return;/,
+    );
   });
 
   it('lets them go only once the swipe has settled', () => {
+    expect(methodBody(source, '- (void)unmountChildComponentView:')).toContain(
+      '[self releaseUnmountedPages]',
+    );
     expect(methodBody(source, '- (void)scrollViewDidEndDecelerating:')).toContain(
-      '[self userScrollDidSettle]',
+      '[self releaseUnmountedPages]',
     );
     expect(methodBody(source, '- (void)scrollViewDidEndDragging:')).toContain(
-      '[self userScrollDidSettle]',
+      '[self releaseUnmountedPages]',
     );
-    expect(methodBody(source, '- (void)userScrollDidSettle')).toContain(
+    expect(methodBody(source, '- (void)releaseUnmountedPages')).toContain(
       'dispatch_async(dispatch_get_main_queue()',
     );
   });
