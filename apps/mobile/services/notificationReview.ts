@@ -1,10 +1,6 @@
 import type { CreateTransactionMeta } from '~/context/AppContext';
 import { isPayableAccount } from '~/features/autoLog/lib/binding';
 import { resolveAlertCategory } from '~/features/autoLog/lib/categorize';
-import {
-  countAccountsTowardFreeLimit,
-  isNewTransactionBlockedByAccounts,
-} from '~/features/transactions/lib/accountEntryGate';
 import { matchCategoryByKeywords } from '~/features/transactions/utils/categoryKeywords';
 import { paymentAlertCapturesRepository } from '~/lib/repositories/paymentAlertCapturesRepository';
 import {
@@ -32,17 +28,11 @@ export interface NotificationReviewDeps {
   generation: number;
   getCurrent: () => {
     appUserId: string;
-    isPro: boolean;
     accounts: readonly Account[];
     categories: readonly Category[];
     quickEntryPrefs: QuickEntryPrefs;
     createTransaction: (input: CreateTransactionInput, meta?: CreateTransactionMeta) => string;
   };
-}
-export class NotificationReviewAccountLimitError extends Error {
-  constructor() {
-    super('notification_review_account_limit');
-  }
 }
 let decisions: Promise<unknown> = Promise.resolve();
 
@@ -122,11 +112,6 @@ export function resolveNotificationReviews(
       if (!isValidNotificationAmount(amount) || !account) {
         result.unfinished.push(id);
         continue;
-      }
-      if (
-        isNewTransactionBlockedByAccounts(live.isPro, countAccountsTowardFreeLimit(live.accounts))
-      ) {
-        throw new NotificationReviewAccountLimitError();
       }
       const edited = selected?.editedInput;
       if (

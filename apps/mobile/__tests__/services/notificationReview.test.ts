@@ -40,7 +40,6 @@ const setup = () => ({
   generation: 0,
   getCurrent: () => ({
     appUserId: 'user',
-    isPro: false,
     accounts: [account()],
     categories: [category(), category({ id: 'income', type: 'income' })],
     quickEntryPrefs: {
@@ -218,21 +217,23 @@ it('does not write after the user changes while history is loading', async () =>
   expect(recordNotificationScan).not.toHaveBeenCalled();
   expect(paymentAlertCapturesRepository.update).not.toHaveBeenCalled();
 });
-it('keeps the existing free account limit while still allowing Ignore', async () => {
+it('saves for a free user over the account limit, without any free-tier gate', async () => {
   const deps = setup();
   deps.getCurrent = () => ({
     ...setup().getCurrent(),
     accounts: Array.from({ length: PRO_LIMITS.FREE_MAX_ACCOUNTS + 1 }, (_, i) =>
       account({ id: i === 0 ? 'a1' : `a${i + 1}` }),
     ),
+    quickEntryPrefs: {
+      ...setup().getCurrent().quickEntryPrefs,
+      autoLogUsageCount: PRO_LIMITS.FREE_MAX_AUTO_LOGS,
+    },
   });
-  await expect(resolveNotificationReviews(['one'], 'expense', deps)).rejects.toThrow(
-    'notification_review_account_limit',
-  );
-  expect(create).not.toHaveBeenCalled();
-  await expect(resolveNotificationReviews(['one'], 'none', deps)).resolves.toMatchObject({
+  await expect(resolveNotificationReviews(['one'], 'expense', deps)).resolves.toEqual({
     completed: 1,
+    unfinished: [],
   });
+  expect(create).toHaveBeenCalledTimes(1);
 });
 
 it('bulk income and expense save every valid item but leave invalid entries pending', async () => {
