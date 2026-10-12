@@ -51,6 +51,23 @@ type CaptureEvent = Parameters<
   Extract<PostHogOptions['before_send'], (...args: never[]) => unknown>
 >[0];
 
+/**
+ * Hosts that receive PostHog's tracing headers (`X-POSTHOG-SESSION-ID`,
+ * `X-POSTHOG-DISTINCT-ID`): only the receipt-scanner Worker, which copies the
+ * session onto its `$ai_generation` events so an AI trace links to the replay
+ * and events of the session that sent it. Read from the same env var the scan
+ * client uses, so a PR build pointing at its preview Worker links too.
+ */
+function tracingHeaderHosts(): string[] {
+  const url = process.env.EXPO_PUBLIC_MONEY2TIME_WORKERS_RECEIPT_SCANNER?.trim();
+  if (!url) return [];
+  try {
+    return [new URL(url).hostname];
+  } catch {
+    return [];
+  }
+}
+
 let client: PostHog | null | undefined;
 
 /**
@@ -112,6 +129,7 @@ export function initPostHog(): PostHog | null {
         (event: CaptureEvent | null) =>
           event && event.event === '$exception' ? beforeSendException(event) : event,
       ],
+      addTracingHeaders: tracingHeaderHosts(),
       disableSurveys: true,
       capturePushNotificationSubscriptions: false,
       capturePushNotificationOpened: false,

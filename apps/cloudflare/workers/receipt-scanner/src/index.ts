@@ -4,7 +4,8 @@
 // returns the parsed transactions. The OpenRouter key lives only in this
 // Worker's secrets — never in the app.
 
-import { AiTrace, type OpenRouterUsage, type PostHogEnv } from './posthog';
+import { AiTrace, type OpenRouterUsage, type PostHogEnv, readSessionId } from './posthog';
+import type { PromptEnv, ResolvedPrompt } from './prompts';
 import { checkQuota, consumeQuota } from './ratelimit';
 import { getEntitlement } from './revenuecat';
 import {
@@ -15,7 +16,7 @@ import {
   type ScannedReceiptDetail,
 } from './scanModes';
 
-export interface Env extends PostHogEnv {
+export interface Env extends PostHogEnv, PromptEnv {
   // Rate-limit counters + entitlement cache (schema in apps/cloudflare/d1/receipt-scanner/schema.sql).
   MONEY2TIME_D1_RECEIPT_SCANNER: D1Database;
   OPENROUTER_API_KEY: string;
@@ -193,7 +194,12 @@ export default {
     }
 
     // One PostHog AI trace per scan; sent after the response via waitUntil.
-    const trace = new AiTrace(reqId, body.appUserId, { scan_mode: mode, is_pro: isPro });
+    const trace = new AiTrace(
+      reqId,
+      body.appUserId,
+      { scan_mode: mode, is_pro: isPro },
+      readSessionId(request),
+    );
     let transactions: ScannedTransaction[] = [];
     let receiptDetail: ScannedReceiptDetail | null = null;
     try {
@@ -356,6 +362,8 @@ interface AttemptOptions {
   attempt: number;
   mode: ScanMode;
   trace: AiTrace;
+  /** The hosted prompt this attempt used, linked on its generation. */
+  promptRef: ResolvedPrompt;
 }
 
 // Sends the receipt image + prompt to OpenRouter and returns the raw output.
@@ -452,6 +460,7 @@ async function completeScan(
       maxTokens: opts.maxTokens,
       isBackupModel,
       attempt: opts.attempt,
+      prompt: opts.promptRef,
       error: failure,
     });
   }
@@ -505,7 +514,14 @@ async function runInference(
   transactions: ScannedTransaction[];
   receiptDetail: ScannedReceiptDetail | null;
 }> {
-  const prompt = buildReceiptPrompt(body.categories, body.currency, mode, body.accounts ?? []);
+  const built = await buildReceiptPrompt(
+    env,
+    body.categories,
+    body.currency,
+    mode,
+    body.accounts ?? [],
+  );
+  const prompt = built.text;
   const maxTokens = maxTokensForMode(mode);
 
   // An empty transactions array is not an error — the failover above never sees
@@ -528,6 +544,7 @@ async function runInference(
         attempt,
         mode,
         trace,
+        promptRef: built.prompt,
       });
     } catch (err) {
       // The first attempt's failure is the request's failure, as before. A

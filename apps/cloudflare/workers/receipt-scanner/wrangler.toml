@@ -70,3 +70,7 @@ POSTHOG_HOST = "https://us.i.posthog.com"
 #   REVENUECAT_SECRET_KEY          — RevenueCat v1 secret API key
 #   MONEY2TIME_REQUEST_SIGNING_KEY — shared secret the app signs requests with
 #                                    (same value as EXPO_PUBLIC_REQUEST_SIGNING_KEY)
+#   POSTHOG_PROMPTS_API_KEY        — PostHog personal API key scoped to
+#                                    llm_prompt:read only; serves the prompts
+#                                    hosted in PostHog (src/prompts.ts). Unset,
+#                                    the Worker uses its bundled prompt copies.

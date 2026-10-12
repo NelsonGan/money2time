@@ -15,11 +15,12 @@ export const POSTHOG_HOST = 'https://us.i.posthog.com';
 
 /**
  * Session replay sampling, decided once per app launch by the app itself (see
- * `startSessionReplayForLaunch`). The free tier allows 5,000 recordings a month
- * across the app and the website, so launches on an install's first day, when
- * onboarding happens and replays teach the most, are sampled far more often
- * than everyday launches. At ~19K installs and ~375K launches a month this is
- * roughly 1,900 + 1,100 recordings.
+ * `startSessionReplayForLaunch`). The free tier allows 2,500 mobile recordings
+ * a month (the website's 5,000 are a separate allowance), so launches on an
+ * install's first day, when onboarding happens and replays teach the most, are
+ * sampled far more often than everyday launches. At ~38K first-day launches
+ * (~19K installs) and ~375K later launches a month this is roughly
+ * 1,500 + 560 recordings, leaving headroom for growth.
  */
-export const SESSION_REPLAY_NEW_INSTALL_RATE = 0.05;
-export const SESSION_REPLAY_RETURNING_RATE = 0.003;
+export const SESSION_REPLAY_NEW_INSTALL_RATE = 0.04;
+export const SESSION_REPLAY_RETURNING_RATE = 0.0015;

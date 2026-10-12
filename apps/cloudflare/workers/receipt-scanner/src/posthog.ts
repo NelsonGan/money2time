@@ -45,6 +45,8 @@ export interface GenerationRecord {
   isBackupModel: boolean;
   /** Which empty-result attempt this call belonged to (0 = first). */
   attempt: number;
+  /** The hosted prompt the call used (see ../prompts.ts). */
+  prompt?: { name: string; version: number | null; source: 'posthog' | 'bundled' };
   error?: string;
 }
 
@@ -53,6 +55,15 @@ interface CapturedEvent {
   distinct_id: string;
   timestamp: string;
   properties: Record<string, unknown>;
+}
+
+/**
+ * The PostHog session ID the app's SDK adds to scan requests, when it looks
+ * like one (a UUID). Anything else is ignored rather than trusted.
+ */
+export function readSessionId(request: Request): string | null {
+  const value = request.headers.get('X-POSTHOG-SESSION-ID')?.trim();
+  return value && /^[0-9a-f-]{32,40}$/i.test(value) ? value : null;
 }
 
 function finite(value: unknown): number | undefined {
@@ -67,6 +78,8 @@ export class AiTrace {
     readonly traceId: string,
     private readonly distinctId: string,
     private readonly context: Record<string, string | number | boolean>,
+    /** The app's PostHog session (`X-POSTHOG-SESSION-ID`), linking the trace to its replay. */
+    private readonly sessionId: string | null = null,
   ) {}
 
   recordGeneration(record: GenerationRecord): void {
@@ -91,6 +104,7 @@ export class AiTrace {
       $ai_output_choices: record.error
         ? []
         : [{ role: 'assistant', content: '[scan result withheld]' }],
+      ...(this.sessionId ? { $session_id: this.sessionId, $ai_session_id: this.sessionId } : {}),
       is_backup_model: record.isBackupModel,
       attempt: record.attempt,
       ...this.context,
@@ -103,6 +117,13 @@ export class AiTrace {
       // OpenRouter reports the real charge, so PostHog should not re-price it.
       properties.$ai_total_cost_usd = cost;
       properties.$ai_cost_passthrough = true;
+    }
+    if (record.prompt) {
+      // Links the generation to its prompt in PostHog prompt management. The
+      // bundled fallback has no PostHog version, so only its name is sent.
+      properties.$ai_prompt_name = record.prompt.name;
+      if (record.prompt.version !== null) properties.$ai_prompt_version = record.prompt.version;
+      properties.prompt_source = record.prompt.source;
     }
     if (record.error) properties.$ai_error = record.error.slice(0, ERROR_MESSAGE_LIMIT);
 
