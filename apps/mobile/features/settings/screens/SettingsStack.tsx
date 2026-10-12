@@ -31,6 +31,7 @@ import { AppLockScreen } from './AppLockScreen';
 import { AutoBackupScreen } from './AutoBackupScreen';
 import { AutoLogSettingsScreen } from './AutoLogSettingsScreen';
 import { AutoLogTutorialScreen } from './AutoLogTutorialScreen';
+import { BottomBarScreen } from './BottomBarScreen';
 import { CategoriesScreen } from './CategoriesScreen';
 import { DataManagementScreen } from './DataManagementScreen';
 import { DisplaySettingsScreen } from './DisplaySettingsScreen';
@@ -236,6 +237,7 @@ export function SettingsStack({
             <DisplaySettingsScreen
               onBack={() => props.navigation.goBack()}
               onOpenAppIcon={() => props.navigation.navigate('AppIcon')}
+              onOpenBottomBar={() => props.navigation.navigate('BottomBar')}
               onOpenMonthCycle={() => props.navigation.navigate('MonthCycle')}
             />
           );
@@ -245,6 +247,12 @@ export function SettingsStack({
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return <AppIconScreen onBack={() => props.navigation.goBack()} />;
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="BottomBar">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return <BottomBarScreen onBack={() => props.navigation.goBack()} />;
         }}
       </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="MonthCycle">

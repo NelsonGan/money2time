@@ -103,6 +103,8 @@ class SettingsRepository {
         | 'defaultPaybackAccountId'
         | 'reimbursementsCountAsExpense'
         | 'showTransactionAccount'
+        | 'showAccountPickerBalances'
+        | 'navTabsJson'
       >
     >,
   ) {
@@ -260,6 +262,8 @@ class SettingsRepository {
         defaultPaybackAccountId: null,
         reimbursementsCountAsExpense: true,
         showTransactionAccount: true,
+        showAccountPickerBalances: true,
+        navTabsJson: null,
         updatedAt: now,
       })
       .where(eq(settingsTable.id, SETTINGS_ID))

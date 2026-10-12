@@ -22,7 +22,8 @@ import { currencySymbolForCode } from '~/utils/currency';
 import { formatCurrency, formatRelativeDate } from '~/utils/formatters';
 
 interface ReimbursementsScreenProps {
-  onBack: () => void;
+  /** Omitted when the page sits in the bottom bar, which hides the back button. */
+  onBack?: () => void;
   onOpenSettings: () => void;
 }
 

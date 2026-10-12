@@ -47,6 +47,7 @@ function makeTx(overrides: Partial<TransactionWithRelations>): TransactionWithRe
     toAccountId: null,
     categoryId: 'c1',
     note: null,
+    details: null,
     receiptUri: null,
     recurrencePattern: 'none',
     recurrenceInterval: 1,

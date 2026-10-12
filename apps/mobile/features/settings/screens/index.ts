@@ -16,6 +16,7 @@ export { HourlyValueSettingsScreen } from './HourlyValueSettingsScreen';
 export { MonthCycleScreen } from './MonthCycleScreen';
 export { ProPaywallScreen } from './ProPaywallScreen';
 export { QuickEntrySettingsScreen } from './QuickEntrySettingsScreen';
+export { ReceiptsScreen } from './ReceiptsScreen';
 export { RecurringScreen } from './RecurringScreen';
 export { SettingsScreen } from './SettingsScreen';
 export { SettingsStack } from './SettingsStack';

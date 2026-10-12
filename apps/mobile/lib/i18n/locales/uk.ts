@@ -89,6 +89,11 @@ const uk = {
     name: 'Money2Time',
   },
   nav: {
+    tab_goals: 'Цілі',
+    tab_recurring: 'Регулярні',
+    tab_reimbursements: 'Відшкодування',
+    tab_receipts: 'Чеки',
+    tab_settle_up: 'Хто вам винен',
     tab_calendar: 'Календар',
     tab_accounts: 'Рахунки',
     tab_insights: 'Аналітика',
@@ -779,6 +784,11 @@ const uk = {
       placeholder_income: 'Наприклад: "Зарплата 30000", "Бонус 5000", "Повернення 500".',
     },
     editor: {
+      details: {
+        title: 'Подробиці',
+        placeholder: 'З ким, на що, усе, що варто пам’ятати',
+        empty: 'Додайте довшу нотатку',
+      },
       transfer_expense_label: 'Рахувати як витрату',
       transfer_expense_tooltip:
         'Враховує цей переказ як витрату в підсумках, бюджетах і графіках у вибраній категорії. Гроші, як і раніше, переміщуються між двома рахунками.',
@@ -1124,6 +1134,17 @@ const uk = {
     },
   },
   settings: {
+    visibility_show: 'Показувати',
+    visibility_hide: 'Приховувати',
+    bottom_bar: {
+      title: 'Нижня панель',
+      home: 'Головна',
+      more_pages: 'Інші сторінки',
+      pinned: 'Завжди на панелі',
+      remove: 'Прибрати {{page}}',
+      add: 'Додати {{page}}',
+      reset: 'Скинути до типових',
+    },
     app_lock: {
       delay_section: 'Блокувати через',
       delay_immediately: 'Одразу',
@@ -1560,6 +1581,7 @@ const uk = {
       column_category: 'Категорія',
       column_subcategory: 'Підкатегорія',
       column_note: 'Нотатка',
+      column_details: 'Подробиці',
       column_sentiment: 'Настрій',
       column_recurring: 'Регулярна',
       column_name: 'Назва',

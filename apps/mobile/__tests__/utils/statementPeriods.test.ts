@@ -25,6 +25,7 @@ function makeTx(id: string, date: string): TransactionWithRelations {
     fxRate: 1,
     toAmount: null,
     accountAmount: null,
+    details: null,
     receiptUri: null,
     date,
     accountId: null,

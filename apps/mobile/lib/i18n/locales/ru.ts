@@ -89,6 +89,11 @@ const ru = {
     name: 'Money2Time',
   },
   nav: {
+    tab_goals: 'Цели',
+    tab_recurring: 'Регулярные',
+    tab_reimbursements: 'Возмещения',
+    tab_receipts: 'Чеки',
+    tab_settle_up: 'Кто вам должен',
     tab_calendar: 'Календарь',
     tab_accounts: 'Счета',
     tab_insights: 'Аналитика',
@@ -780,6 +785,11 @@ const ru = {
       placeholder_income: 'Попробуйте "Зарплата 3000", "Бонус 500", "Возврат 50".',
     },
     editor: {
+      details: {
+        title: 'Подробности',
+        placeholder: 'С кем, на что, всё, что стоит запомнить',
+        empty: 'Добавьте заметку подлиннее',
+      },
       transfer_expense_label: 'Считать расходом',
       transfer_expense_tooltip:
         'Учитывает этот перевод как расход в итогах, бюджетах и графиках в выбранной категории. Деньги по-прежнему переводятся между двумя счетами как обычно.',
@@ -1128,6 +1138,17 @@ const ru = {
     },
   },
   settings: {
+    visibility_show: 'Показывать',
+    visibility_hide: 'Скрывать',
+    bottom_bar: {
+      title: 'Нижняя панель',
+      home: 'Главная',
+      more_pages: 'Другие страницы',
+      pinned: 'Всегда на панели',
+      remove: 'Убрать {{page}}',
+      add: 'Добавить {{page}}',
+      reset: 'Сбросить по умолчанию',
+    },
     app_lock: {
       delay_section: 'Блокировать через',
       delay_immediately: 'Сразу',
@@ -1566,6 +1587,7 @@ const ru = {
       column_category: 'Категория',
       column_subcategory: 'Подкатегория',
       column_note: 'Заметка',
+      column_details: 'Подробности',
       column_sentiment: 'Настроение',
       column_recurring: 'Регулярная',
       column_name: 'Название',

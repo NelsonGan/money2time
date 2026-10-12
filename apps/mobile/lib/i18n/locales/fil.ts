@@ -89,6 +89,11 @@ const fil = {
     name: 'Money2Time',
   },
   nav: {
+    tab_goals: 'Mga goal',
+    tab_recurring: 'Paulit-ulit',
+    tab_reimbursements: 'Mga reimbursement',
+    tab_receipts: 'Mga Resibo',
+    tab_settle_up: 'Sino ang may utang sa iyo',
     tab_calendar: 'Kalendaryo',
     tab_accounts: 'Mga account',
     tab_insights: 'Insights',
@@ -782,6 +787,11 @@ const fil = {
       placeholder_income: 'Subukan ang "Sahod 3000", "Bonus 500", "Refund 50".',
     },
     editor: {
+      details: {
+        title: 'Mga detalye',
+        placeholder: 'Sino ang kasama, para saan, anumang dapat tandaan',
+        empty: 'Magdagdag ng mas mahabang tala',
+      },
       transfer_expense_label: 'Ibilang bilang gastos',
       transfer_expense_tooltip:
         'Ibinibilang ang transfer na ito bilang gastos sa iyong mga kabuuan, budget at chart, sa ilalim ng kategoryang pipiliin mo. Gumagalaw pa rin ang pera sa pagitan ng dalawang account gaya ng dati.',
@@ -1135,6 +1145,17 @@ const fil = {
     },
   },
   settings: {
+    visibility_show: 'Ipakita',
+    visibility_hide: 'Itago',
+    bottom_bar: {
+      title: 'Bottom bar',
+      home: 'Home',
+      more_pages: 'Iba pang page',
+      pinned: 'Laging nasa bar',
+      remove: 'Alisin ang {{page}}',
+      add: 'Idagdag ang {{page}}',
+      reset: 'I-reset sa default',
+    },
     app_lock: {
       delay_section: 'I-lock pagkalipas ng',
       delay_immediately: 'Kaagad',
@@ -1583,6 +1604,7 @@ const fil = {
       column_category: 'Kategorya',
       column_subcategory: 'Subkategorya',
       column_note: 'Tala',
+      column_details: 'Mga detalye',
       column_sentiment: 'Damdamin',
       column_recurring: 'Paulit-ulit',
       column_name: 'Pangalan',

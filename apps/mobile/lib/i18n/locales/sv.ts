@@ -89,6 +89,11 @@ const sv = {
     name: 'Money2Time',
   },
   nav: {
+    tab_goals: 'Mål',
+    tab_recurring: 'Återkommande',
+    tab_reimbursements: 'Ersättningar',
+    tab_receipts: 'Kvitton',
+    tab_settle_up: 'Vem är skyldig dig',
     tab_calendar: 'Kalender',
     tab_accounts: 'Konton',
     tab_insights: 'Insikter',
@@ -780,6 +785,11 @@ const sv = {
       placeholder_income: 'Prova "Lön 3000", "Bonus 500", "Återbetalning 50".',
     },
     editor: {
+      details: {
+        title: 'Detaljer',
+        placeholder: 'Vem du var med, vad det gällde, allt som är värt att komma ihåg',
+        empty: 'Lägg till en längre anteckning',
+      },
       transfer_expense_label: 'Räkna som utgift',
       transfer_expense_tooltip:
         'Räknar den här överföringen som utgift i dina summor, budgetar och diagram, under kategorin du väljer. Pengarna flyttas fortfarande mellan de två kontona som vanligt.',
@@ -1126,6 +1136,17 @@ const sv = {
     },
   },
   settings: {
+    visibility_show: 'Visa',
+    visibility_hide: 'Dölj',
+    bottom_bar: {
+      title: 'Nedre fältet',
+      home: 'Hem',
+      more_pages: 'Fler sidor',
+      pinned: 'Alltid i fältet',
+      remove: 'Ta bort {{page}}',
+      add: 'Lägg till {{page}}',
+      reset: 'Återställ standard',
+    },
     app_lock: {
       delay_section: 'Lås efter',
       delay_immediately: 'Omedelbart',
@@ -1560,6 +1581,7 @@ const sv = {
       column_category: 'Kategori',
       column_subcategory: 'Underkategori',
       column_note: 'Anteckning',
+      column_details: 'Detaljer',
       column_sentiment: 'Känsla',
       column_recurring: 'Återkommande',
       column_name: 'Namn',

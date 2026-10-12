@@ -28,11 +28,13 @@ import {
   formatMonthYearLabel,
   parseMonthKey,
 } from '~/utils/formatters';
+import { transactionSearchText } from '~/utils/transactions';
 
 import { ReceiptCard } from '../components/ReceiptCard';
 
 interface ReceiptsScreenProps {
-  onBack: () => void;
+  /** Omitted when the page sits in the bottom bar, which hides the back button. */
+  onBack?: () => void;
   onOpenEditTransaction: (transaction: TransactionWithRelations) => void;
   onOpenSettings: () => void;
 }
@@ -163,14 +165,14 @@ export function ReceiptsScreen({
   }, [searchInput]);
 
   // Every transaction with a receipt, filtered by search + date range, newest first.
-  // Search matches the note plus the category name, so a card shown under its
+  // Search matches the note, the details and the category name, so a card shown under its
   // category title (when the note is empty) is still findable by that title.
   const filteredReceipts = useMemo(() => {
     const query = search.trim().toLowerCase();
     const result = transactions.filter((tx) => {
       if (!tx.receiptUri) return false;
       if (query) {
-        const haystack = `${tx.note ?? ''}\n${tx.categoryName ?? ''}`.toLowerCase();
+        const haystack = `${transactionSearchText(tx)}\n${(tx.categoryName ?? '').toLowerCase()}`;
         if (!haystack.includes(query)) return false;
       }
       if (startDate || endDate) {

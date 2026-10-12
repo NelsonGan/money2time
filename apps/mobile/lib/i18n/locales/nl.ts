@@ -89,6 +89,11 @@ const nl = {
     name: 'Money2Time',
   },
   nav: {
+    tab_goals: 'Doelen',
+    tab_recurring: 'Terugkerend',
+    tab_reimbursements: 'Vergoedingen',
+    tab_receipts: 'Bonnen',
+    tab_settle_up: 'Wie jou nog moet betalen',
     tab_calendar: 'Agenda',
     tab_accounts: 'Rekeningen',
     tab_insights: 'Inzichten',
@@ -782,6 +787,11 @@ const nl = {
       placeholder_income: 'Probeer "Salaris 3000", "Bonus 500", "Terugbetaling 50".',
     },
     editor: {
+      details: {
+        title: 'Details',
+        placeholder: 'Met wie, waarvoor, alles wat het onthouden waard is',
+        empty: 'Langere notitie toevoegen',
+      },
       transfer_expense_label: 'Tellen als uitgave',
       transfer_expense_tooltip:
         'Telt deze overboeking als uitgave in je totalen, budgetten en grafieken, onder de gekozen categorie. Het geld gaat nog steeds gewoon van de ene rekening naar de andere.',
@@ -1135,6 +1145,17 @@ const nl = {
     },
   },
   settings: {
+    visibility_show: 'Tonen',
+    visibility_hide: 'Verbergen',
+    bottom_bar: {
+      title: 'Onderbalk',
+      home: 'Start',
+      more_pages: 'Meer pagina’s',
+      pinned: 'Altijd in de balk',
+      remove: '{{page}} verwijderen',
+      add: '{{page}} toevoegen',
+      reset: 'Standaard herstellen',
+    },
     app_lock: {
       delay_section: 'Vergrendelen na',
       delay_immediately: 'Onmiddellijk',
@@ -1576,6 +1597,7 @@ const nl = {
       column_category: 'Categorie',
       column_subcategory: 'Subcategorie',
       column_note: 'Notitie',
+      column_details: 'Details',
       column_sentiment: 'Gevoel',
       column_recurring: 'Terugkerend',
       column_name: 'Naam',

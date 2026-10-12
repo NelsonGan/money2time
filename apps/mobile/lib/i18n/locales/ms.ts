@@ -89,6 +89,11 @@ const ms = {
     name: 'Money2Time',
   },
   nav: {
+    tab_goals: 'Matlamat',
+    tab_recurring: 'Berulang',
+    tab_reimbursements: 'Bayaran balik',
+    tab_receipts: 'Resit',
+    tab_settle_up: 'Siapa berhutang dengan anda',
     tab_calendar: 'Kalendar',
     tab_accounts: 'Akaun',
     tab_insights: 'Wawasan',
@@ -786,6 +791,11 @@ const ms = {
       placeholder_income: 'Cuba "Gaji 3000", "Bonus 500", "Bayaran balik 50".',
     },
     editor: {
+      details: {
+        title: 'Butiran',
+        placeholder: 'Dengan siapa, untuk apa, apa-apa yang patut diingat',
+        empty: 'Tambah nota yang lebih panjang',
+      },
       transfer_expense_label: 'Kira sebagai perbelanjaan',
       transfer_expense_tooltip:
         'Mengira pemindahan ini sebagai perbelanjaan dalam jumlah, bajet dan carta anda, di bawah kategori yang anda pilih. Wang tetap berpindah antara kedua-dua akaun seperti biasa.',
@@ -1134,6 +1144,17 @@ const ms = {
     },
   },
   settings: {
+    visibility_show: 'Tunjuk',
+    visibility_hide: 'Sembunyi',
+    bottom_bar: {
+      title: 'Bar bawah',
+      home: 'Utama',
+      more_pages: 'Halaman lain',
+      pinned: 'Sentiasa dalam bar',
+      remove: 'Buang {{page}}',
+      add: 'Tambah {{page}}',
+      reset: 'Set semula ke lalai',
+    },
     app_lock: {
       delay_section: 'Kunci selepas',
       delay_immediately: 'Serta-merta',
@@ -1572,6 +1593,7 @@ const ms = {
       column_category: 'Kategori',
       column_subcategory: 'Subkategori',
       column_note: 'Nota',
+      column_details: 'Butiran',
       column_sentiment: 'Perasaan',
       column_recurring: 'Berulang',
       column_name: 'Nama',

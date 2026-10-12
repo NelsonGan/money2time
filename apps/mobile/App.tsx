@@ -35,6 +35,7 @@ import {
   BottomNavMinimizeProvider,
   useBottomNavMinimize,
 } from '~/components/navigation/BottomNavMinimize';
+import { homeNavTab, parseNavTabs } from '~/components/navigation/navTabs';
 import { TodayJumpFab } from '~/components/navigation/TodayJumpFab';
 import {
   AccountLogoPickerSheet,
@@ -84,7 +85,12 @@ import {
 import { CalendarScreen } from '~/features/calendar/screens';
 import { AddGoalButton } from '~/features/goals/components/AddGoalButton';
 import { GoalCelebrationOverlay } from '~/features/goals/components/GoalCelebrationOverlay';
-import { GoalDetailScreen, GoalEditorScreen, GoalsScreen } from '~/features/goals/screens';
+import {
+  GoalDetailScreen,
+  GoalEditorScreen,
+  GoalsScreen,
+  GoalsTabScreen,
+} from '~/features/goals/screens';
 import { InsightsDrilldownScreen, InsightsScreen } from '~/features/insights/screens';
 import { AssetsTab } from '~/features/items/components';
 import {
@@ -97,6 +103,7 @@ import { loanRepaymentReporting } from '~/features/loans/lib/loanMath';
 import { FeatureAnnouncementModal } from '~/features/news/components/FeatureAnnouncementModal';
 import type { FeatureAnnouncement } from '~/features/news/featureAnnouncements';
 import { OnboardingFlow } from '~/features/onboarding/screens';
+import { ReimbursementsScreen } from '~/features/reimbursements/screens/ReimbursementsScreen';
 import { ReviewPrePromptSheet } from '~/features/reviewPrompt/components/ReviewPrePromptSheet';
 import { BiometricLockGate } from '~/features/settings/components/BiometricLockGate';
 import { CloudBackupPromptModal } from '~/features/settings/components/CloudBackupPromptModal';
@@ -126,6 +133,7 @@ import {
   PayCreditCardScreen,
   ProPaywallScreen,
   QuickEntrySettingsScreen,
+  ReceiptsScreen,
   RecurringScreen,
   SettingsStack,
   ShareAndEarnScreen,
@@ -246,7 +254,20 @@ type MainTab = TabName;
 
 // Hidden tabs mounted ahead of their first visit, in this order, starting a
 // beat after the splash lifts and spaced out after that (see MainShellScreen).
-const TAB_PRELOAD_ORDER: MainTab[] = ['settings', 'insights', 'accounts', 'albums'];
+// Only the ones in the user's bottom bar are preloaded; a page that is not in
+// the bar mounts on its first visit.
+const TAB_PRELOAD_ORDER: MainTab[] = [
+  'settings',
+  'calendar',
+  'insights',
+  'accounts',
+  'albums',
+  'goals',
+  'recurring',
+  'reimbursements',
+  'receipts',
+  'settleUp',
+];
 const TAB_PRELOAD_START_DELAY_MS = 800;
 const TAB_PRELOAD_GAP_MS = 300;
 // The quick-add warm-up goes first, before the tab preloads start (and after
@@ -302,6 +323,11 @@ const MemoInsightsScreen = React.memo(InsightsScreen);
 const MemoAlbumsScreen = React.memo(AlbumsScreen);
 const MemoSettingsStack = React.memo(SettingsStack);
 const MemoAssetsTab = React.memo(AssetsTab);
+const MemoGoalsTabScreen = React.memo(GoalsTabScreen);
+const MemoRecurringScreen = React.memo(RecurringScreen);
+const MemoReimbursementsScreen = React.memo(ReimbursementsScreen);
+const MemoReceiptsScreen = React.memo(ReceiptsScreen);
+const MemoSettleUpScreen = React.memo(SettleUpScreen);
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
@@ -401,6 +427,7 @@ function MainShellScreen({
     useApp();
   const { checkLimit, isPro } = useProGate();
   const { startScan } = useReceiptScans();
+  const navTabs = useMemo(() => parseNavTabs(settings.navTabsJson), [settings.navTabsJson]);
   const [addSheetVisible, setAddSheetVisible] = useState(false);
   const voiceHandleRef = useRef<VoiceQuickAddHandle | null>(null);
   const [voiceSupported, setVoiceSupported] = useState(false);
@@ -454,7 +481,14 @@ function MainShellScreen({
     voiceStartPendingRef.current = false;
     voiceHandleRef.current?.startTap();
   }, [voiceEnabled]);
-  const [activeTab, setActiveTab] = useState<MainTab>('calendar');
+  // The app opens on the first page in the bar, which is Calendar unless the
+  // user moved something else to the top.
+  const [activeTab, setActiveTab] = useState<MainTab>(() => homeNavTab(navTabs));
+  // A page outside the bar still opens when something asks for it (Settings >
+  // Albums, the over-limit prompt), but only stays mounted while it is in the
+  // bar or on screen, so one the user removed stops re-rendering in the
+  // background.
+  const hostsTab = (tab: MainTab) => navTabs.includes(tab) || activeTab === tab;
   const [isCalendarSelectionMode, setIsCalendarSelectionMode] = useState(false);
   const [showCalendarTodayButton, setShowCalendarTodayButton] = useState(false);
   const [accountsScrollTopToken, setAccountsScrollTopToken] = useState(0);
@@ -541,7 +575,9 @@ function MainShellScreen({
 
   useEffect(() => {
     if (!tabPreloadStarted) return undefined;
-    const tab = TAB_PRELOAD_ORDER.find((candidate) => !preloadedTabs.has(candidate));
+    const tab = TAB_PRELOAD_ORDER.find(
+      (candidate) => navTabs.includes(candidate) && !preloadedTabs.has(candidate),
+    );
     if (!tab) return undefined;
     let cancelled = false;
     let interaction: ReturnType<typeof InteractionManager.runAfterInteractions> | null = null;
@@ -569,7 +605,7 @@ function MainShellScreen({
       clearTimeout(timer);
       interaction?.cancel();
     };
-  }, [preloadedTabs, tabPreloadStarted]);
+  }, [navTabs, preloadedTabs, tabPreloadStarted]);
 
   useEffect(() => {
     // Warm up the quick-add sheet off-screen shortly after the splash lifts,
@@ -1020,6 +1056,40 @@ function MainShellScreen({
     [navigation],
   );
 
+  // The pages that can be added to the bottom bar. Each normally lives behind
+  // a push (Settings, or the root stack for Who owes you), so as a tab it has
+  // no back button and reaches its own settings through the Settings tab.
+  const openReimbursementSettings = useCallback(() => {
+    requestOpenTab('settings');
+    requestOpenSettingsScreen('ReimbursementSettings');
+  }, []);
+  const openReceiptSettings = useCallback(() => {
+    requestOpenTab('settings');
+    requestOpenSettingsScreen('ReceiptSettings');
+  }, []);
+  const openSettleUpPerson = useCallback(
+    (personKey: string) => navigation.navigate('SettleUpPerson', { personKey }),
+    [navigation],
+  );
+  const openSettleUpTransaction = useCallback(
+    (transactionId: string) => navigation.navigate('SettleUpTransaction', { transactionId }),
+    [navigation],
+  );
+  const openSettleUpSettings = useCallback(
+    () => navigation.navigate('SettleUpSettings'),
+    [navigation],
+  );
+  const openSettleUpSplitReceipt = useCallback(
+    () => promptSettleUpSplitReceipt(navigation, startScan),
+    [navigation, startScan],
+  );
+
+  // The + button lives on Calendar. With Calendar out of the bar it moves to
+  // the home page, so adding an entry is never more than a tab away.
+  const showAddFab =
+    activeTab === 'calendar' ||
+    (!navTabs.includes('calendar') && activeTab === homeNavTab(navTabs));
+
   const shouldHideBottomNav =
     (activeTab === 'calendar' && isCalendarSelectionMode) ||
     // The auto-log tutorial is a full-page walkthrough with its own bottom nav
@@ -1088,60 +1158,72 @@ function MainShellScreen({
   return (
     <View className="flex-1 bg-background">
       <View style={styles.flex}>
-        <MountedTab
-          name="accounts"
-          active={activeTab === 'accounts'}
-          shouldPreload={preloadedTabs.has('accounts')}
-        >
-          <MemoAssetsTab
-            resetToAccountsToken={accountsResetToken}
-            onAddItem={openItemEditorFromAssets}
-            onOpenAccountSettings={openAccountSettings}
-            onAddAccount={openNewAccount}
-            renderAccounts={renderAssetsAccounts}
-            renderGoals={renderAssetsGoals}
-            goalsActions={assetsGoalsActions}
-            renderItems={renderAssetsItems}
-          />
-        </MountedTab>
-        <MountedTab name="calendar" active={activeTab === 'calendar'}>
-          <MemoCalendarScreen
-            resetToCurrentMonthToken={calendarResetToken}
-            goToDayRequest={calendarGoToDayRequest}
-            onOpenTransaction={openTransactionEditor}
-            onOpenTransactionSplitBadge={openTransactionSplitBill}
-            onSelectionModeChange={setIsCalendarSelectionMode}
-            onShowTodayButtonChange={setShowCalendarTodayButton}
-          />
-        </MountedTab>
-        <MountedTab
-          name="insights"
-          active={activeTab === 'insights'}
-          shouldPreload={preloadedTabs.has('insights')}
-        >
-          <MemoInsightsScreen
-            resetToCurrentMonthToken={insightsResetToMonthToken}
-            onOpenDrilldown={openInsightsDrilldown}
-            onOpenTransaction={openTransactionEditor}
-            onOpenProPaywall={openInsightsTrendPaywall}
-            onOpenBudgetTemplates={openBudgetTemplates}
-            onOpenBudgetTemplateEditor={openBudgetTemplateEditor}
-            onOpenMonthlyBudgetEditor={openMonthlyBudgetEditor}
-            onCreateCustomBudget={openCustomBudgetCreator}
-            activityBreakdownInsightRequest={activityBreakdownInsightRequest}
-          />
-        </MountedTab>
-        <MountedTab
-          name="albums"
-          active={activeTab === 'albums'}
-          shouldPreload={preloadedTabs.has('albums')}
-        >
-          <MemoAlbumsScreen
-            scrollToTopToken={albumsScrollTopToken}
-            onOpenCreateAlbum={openCreateAlbum}
-            onOpenAlbumDetail={openAlbumDetail}
-          />
-        </MountedTab>
+        {hostsTab('accounts') ? (
+          <MountedTab
+            name="accounts"
+            active={activeTab === 'accounts'}
+            shouldPreload={preloadedTabs.has('accounts')}
+          >
+            <MemoAssetsTab
+              resetToAccountsToken={accountsResetToken}
+              onAddItem={openItemEditorFromAssets}
+              onOpenAccountSettings={openAccountSettings}
+              onAddAccount={openNewAccount}
+              renderAccounts={renderAssetsAccounts}
+              renderGoals={renderAssetsGoals}
+              goalsActions={assetsGoalsActions}
+              renderItems={renderAssetsItems}
+            />
+          </MountedTab>
+        ) : null}
+        {hostsTab('calendar') ? (
+          <MountedTab
+            name="calendar"
+            active={activeTab === 'calendar'}
+            shouldPreload={preloadedTabs.has('calendar')}
+          >
+            <MemoCalendarScreen
+              resetToCurrentMonthToken={calendarResetToken}
+              goToDayRequest={calendarGoToDayRequest}
+              onOpenTransaction={openTransactionEditor}
+              onOpenTransactionSplitBadge={openTransactionSplitBill}
+              onSelectionModeChange={setIsCalendarSelectionMode}
+              onShowTodayButtonChange={setShowCalendarTodayButton}
+            />
+          </MountedTab>
+        ) : null}
+        {hostsTab('insights') ? (
+          <MountedTab
+            name="insights"
+            active={activeTab === 'insights'}
+            shouldPreload={preloadedTabs.has('insights')}
+          >
+            <MemoInsightsScreen
+              resetToCurrentMonthToken={insightsResetToMonthToken}
+              onOpenDrilldown={openInsightsDrilldown}
+              onOpenTransaction={openTransactionEditor}
+              onOpenProPaywall={openInsightsTrendPaywall}
+              onOpenBudgetTemplates={openBudgetTemplates}
+              onOpenBudgetTemplateEditor={openBudgetTemplateEditor}
+              onOpenMonthlyBudgetEditor={openMonthlyBudgetEditor}
+              onCreateCustomBudget={openCustomBudgetCreator}
+              activityBreakdownInsightRequest={activityBreakdownInsightRequest}
+            />
+          </MountedTab>
+        ) : null}
+        {hostsTab('albums') ? (
+          <MountedTab
+            name="albums"
+            active={activeTab === 'albums'}
+            shouldPreload={preloadedTabs.has('albums')}
+          >
+            <MemoAlbumsScreen
+              scrollToTopToken={albumsScrollTopToken}
+              onOpenCreateAlbum={openCreateAlbum}
+              onOpenAlbumDetail={openAlbumDetail}
+            />
+          </MountedTab>
+        ) : null}
         <MountedTab
           name="settings"
           active={activeTab === 'settings'}
@@ -1167,12 +1249,65 @@ function MainShellScreen({
             onScreenChange={handleSettingsScreenChange}
           />
         </MountedTab>
+        {hostsTab('goals') ? (
+          <MountedTab
+            name="goals"
+            active={activeTab === 'goals'}
+            shouldPreload={preloadedTabs.has('goals')}
+          >
+            <MemoGoalsTabScreen onOpenGoal={openGoalDetail} onOpenGoalEditor={openGoalEditor} />
+          </MountedTab>
+        ) : null}
+        {hostsTab('recurring') ? (
+          <MountedTab
+            name="recurring"
+            active={activeTab === 'recurring'}
+            shouldPreload={preloadedTabs.has('recurring')}
+          >
+            <MemoRecurringScreen onOpenEditor={openRecurringEditor} />
+          </MountedTab>
+        ) : null}
+        {hostsTab('reimbursements') ? (
+          <MountedTab
+            name="reimbursements"
+            active={activeTab === 'reimbursements'}
+            shouldPreload={preloadedTabs.has('reimbursements')}
+          >
+            <MemoReimbursementsScreen onOpenSettings={openReimbursementSettings} />
+          </MountedTab>
+        ) : null}
+        {hostsTab('receipts') ? (
+          <MountedTab
+            name="receipts"
+            active={activeTab === 'receipts'}
+            shouldPreload={preloadedTabs.has('receipts')}
+          >
+            <MemoReceiptsScreen
+              onOpenEditTransaction={openTransactionEditor}
+              onOpenSettings={openReceiptSettings}
+            />
+          </MountedTab>
+        ) : null}
+        {hostsTab('settleUp') ? (
+          <MountedTab
+            name="settleUp"
+            active={activeTab === 'settleUp'}
+            shouldPreload={preloadedTabs.has('settleUp')}
+          >
+            <MemoSettleUpScreen
+              onOpenPerson={openSettleUpPerson}
+              onOpenTransaction={openSettleUpTransaction}
+              onOpenSettings={openSettleUpSettings}
+              onSplitReceipt={openSettleUpSplitReceipt}
+            />
+          </MountedTab>
+        ) : null}
       </View>
 
       {!shouldHideBottomNav ? (
         <>
-          <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
-          {activeTab === 'calendar' ? (
+          <BottomNav tabs={navTabs} activeTab={activeTab} onTabChange={handleTabChange} />
+          {showAddFab ? (
             <AddFab
               onPress={handleFabPress}
               onLongPress={holdAction === 'none' ? undefined : handleFabLongPress}
@@ -2191,6 +2326,37 @@ function ShareAndEarnRouteScreen({ navigation }: RootStackRouteProps<'ShareAndEa
   return <ShareAndEarnScreen onBack={() => navigation.goBack()} />;
 }
 
+/**
+ * Who owes you's "split a receipt" action, shared by its stack route and its
+ * bottom-bar tab. Scan is the headline path (itemized OCR, metered by the scan
+ * quota); manual entry stays available for offline / no-quota use.
+ */
+function promptSettleUpSplitReceipt(
+  navigation: Pick<RootMainNavigationProp, 'navigate' | 'popToTop'>,
+  startScan: (mode?: 'split') => unknown,
+) {
+  Alert.alert(I18n.t('transactions.receiptSplit.settleup_cta'), undefined, [
+    { text: I18n.t('common.cancel'), style: 'cancel' },
+    {
+      text: I18n.t('add_action.split_manual_title'),
+      onPress: () => {
+        setReceiptSplitLaunch({ mode: 'create', source: 'manual', entryPoint: 'settleup' });
+        navigation.navigate('ReceiptSplit');
+      },
+    },
+    {
+      text: I18n.t('add_action.scan_title'),
+      onPress: () => {
+        // Return to the home tab first so the scan progress banner (which
+        // lives on the calendar) is visible while the receipt is parsed.
+        navigation.popToTop();
+        requestOpenTab('calendar');
+        void startScan('split');
+      },
+    },
+  ]);
+}
+
 function SettleUpRouteScreen({ navigation }: RootStackRouteProps<'SettleUp'>) {
   const { startScan } = useReceiptScans();
   return (
@@ -2201,30 +2367,7 @@ function SettleUpRouteScreen({ navigation }: RootStackRouteProps<'SettleUp'>) {
         navigation.navigate('SettleUpTransaction', { transactionId })
       }
       onOpenSettings={() => navigation.navigate('SettleUpSettings')}
-      onSplitReceipt={() => {
-        // Scan is the headline path (itemized OCR, metered by the scan quota);
-        // manual entry stays available for offline / no-quota use.
-        Alert.alert(I18n.t('transactions.receiptSplit.settleup_cta'), undefined, [
-          { text: I18n.t('common.cancel'), style: 'cancel' },
-          {
-            text: I18n.t('add_action.split_manual_title'),
-            onPress: () => {
-              setReceiptSplitLaunch({ mode: 'create', source: 'manual', entryPoint: 'settleup' });
-              navigation.navigate('ReceiptSplit');
-            },
-          },
-          {
-            text: I18n.t('add_action.scan_title'),
-            onPress: () => {
-              // Return to the home tab first so the scan progress banner (which
-              // lives on the calendar) is visible while the receipt is parsed.
-              navigation.popToTop();
-              requestOpenTab('calendar');
-              void startScan('split');
-            },
-          },
-        ]);
-      }}
+      onSplitReceipt={() => promptSettleUpSplitReceipt(navigation, startScan)}
     />
   );
 }

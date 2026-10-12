@@ -9,6 +9,7 @@ import PagerView, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
+import { useBottomNavContentInset } from '~/components/navigation/BottomNavMinimize';
 import { CategoryEmoji, SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { ActivitySearchRow } from '~/features/transactions/components/ActivitySearchRow';
@@ -40,7 +41,8 @@ type SettleUpTab = 'people' | 'transactions';
 const TAB_ORDER: SettleUpTab[] = ['people', 'transactions'];
 
 interface SettleUpScreenProps {
-  onBack: () => void;
+  /** Omitted when the page sits in the bottom bar, which hides the back button. */
+  onBack?: () => void;
   onOpenPerson: (personKey: string) => void;
   onOpenTransaction: (transactionId: string) => void;
   onOpenSettings: () => void;
@@ -79,6 +81,7 @@ export function SettleUpScreen({
 }: SettleUpScreenProps) {
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
+  const bottomNavInset = useBottomNavContentInset();
   const { settings } = useApp();
 
   const [tab, setTab] = useState<SettleUpTab>('people');
@@ -185,7 +188,9 @@ export function SettleUpScreen({
   const scrollContentStyle = {
     paddingHorizontal: 20,
     paddingTop: 4,
-    paddingBottom: insets.bottom + 24,
+    // As a page in the bottom bar the floating bar overlays the list; as a
+    // pushed route the inset is 0 and only the home indicator needs clearing.
+    paddingBottom: Math.max(insets.bottom, bottomNavInset) + 24,
   };
 
   // Outstanding hero — a clean centered total (matching the split subtotal /

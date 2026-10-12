@@ -1,16 +1,19 @@
-import { Check, X } from 'lucide-react-native';
-import React, { useMemo } from 'react';
+import { Check, Eye, EyeOff, X } from 'lucide-react-native';
+import React, { useCallback, useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AccountLogo } from '~/components/ui/AccountLogo';
 import { Text } from '~/components/ui/text';
 import { ThemeModal } from '~/components/ui/theme-modal';
+import { useApp, useTransactions } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { Account, AccountGroup } from '~/types';
 import { cn } from '~/utils';
+import { getNetAssetContribution } from '~/utils/accountBalances';
+import { formatAmount } from '~/utils/formatters';
 
 interface AccountPickerSheetBaseProps {
   visible: boolean;
@@ -59,6 +62,130 @@ const styles = StyleSheet.create({
   },
 });
 
+/**
+ * Each account's balance, formatted the way the Accounts tab shows it: in the
+ * account's own currency, or as hours in time mode. Read in the sheet's body,
+ * which only mounts while the sheet is open, so the many screens that keep a
+ * picker mounted do not re-render on every transaction write.
+ */
+function useAccountBalanceLabel(enabled: boolean) {
+  const { settings, currentMonthWage } = useApp();
+  const { accountBalances } = useTransactions();
+  const trueHourlyRate = currentMonthWage?.trueHourlyRate ?? 0;
+  const balanceById = useMemo(
+    () => new Map(accountBalances.map((entry) => [entry.accountId, entry.balance])),
+    [accountBalances],
+  );
+  return useCallback(
+    (account: Account): { text: string; negative: boolean } | null => {
+      if (!enabled) return null;
+      // An account with no rows yet has no balance entry; it holds its
+      // starting balance.
+      const balance = balanceById.get(account.id) ?? account.startingBalance;
+      return {
+        text: formatAmount(balance, settings, { trueHourlyRate, currencyCode: account.currency }),
+        // For a card or loan a positive balance is money owed, so "against
+        // you" is the net-asset sign, not the raw one.
+        negative: getNetAssetContribution(account.type, balance) < 0,
+      };
+    },
+    [balanceById, enabled, settings, trueHourlyRate],
+  );
+}
+
+interface AccountPickerSectionsProps {
+  sections: { key: string; label: string; accounts: Account[] }[];
+  showBalances: boolean;
+  disabledId?: string | null;
+  isAccountSelected: (accountId: string) => boolean;
+  onPressAccount: (accountId: string) => void;
+}
+
+function AccountPickerSections({
+  sections,
+  showBalances,
+  disabledId,
+  isAccountSelected,
+  onPressAccount,
+}: AccountPickerSectionsProps) {
+  const themeColors = useThemeColors();
+  const balanceLabel = useAccountBalanceLabel(showBalances);
+
+  return (
+    <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
+      {sections.map((section, sectionIndex) => (
+        <View key={section.key} className={cn(sectionIndex > 0 && 'mt-4')}>
+          {section.label ? (
+            <Text variant="caption" tone="muted" className="mb-2 px-1 uppercase">
+              {section.label}
+            </Text>
+          ) : null}
+          <View className="flex-row flex-wrap -mx-1">
+            {section.accounts.map((acct) => {
+              const isSelected = isAccountSelected(acct.id);
+              const isDisabled = disabledId === acct.id;
+              const balance = balanceLabel(acct);
+              return (
+                <View key={acct.id} className="w-1/2 px-1 mb-2">
+                  <Pressable
+                    onPress={() => {
+                      if (isDisabled) return;
+                      onPressAccount(acct.id);
+                    }}
+                    disabled={isDisabled}
+                    style={({ pressed }) => ({
+                      opacity: isDisabled ? 0.45 : pressed ? 0.6 : 1,
+                    })}
+                    className={cn(
+                      'rounded-2xl px-3 py-3 flex-row items-center gap-2',
+                      isSelected
+                        ? 'bg-primary/15 border border-primary/30'
+                        : isDisabled
+                          ? 'bg-secondary/20 border border-transparent'
+                          : 'bg-secondary/40 border border-transparent',
+                    )}
+                  >
+                    <AccountLogo
+                      logoId={acct.logoId}
+                      type={acct.type}
+                      goalEmoji={acct.goalEmoji}
+                      size={28}
+                    />
+                    <View className="flex-1">
+                      <Text
+                        variant="body"
+                        numberOfLines={1}
+                        className={cn(
+                          isSelected && 'text-primary font-medium',
+                          isDisabled && !isSelected && 'text-muted-foreground',
+                        )}
+                      >
+                        {acct.name}
+                      </Text>
+                      {balance ? (
+                        <Text
+                          variant="caption"
+                          numberOfLines={1}
+                          className={
+                            balance.negative ? 'text-destructive' : 'text-muted-foreground'
+                          }
+                        >
+                          {balance.text}
+                        </Text>
+                      ) : null}
+                    </View>
+                    {isSelected ? <Check size={14} color={themeColors.primary} /> : null}
+                  </Pressable>
+                </View>
+              );
+            })}
+          </View>
+        </View>
+      ))}
+    </ScrollView>
+  );
+}
+
 export function AccountPickerSheet(props: AccountPickerSheetProps) {
   const { visible, onClose, accounts, accountGroups, disabledId, overlay = false } = props;
   const isMultiSelect = 'selectedIds' in props && props.selectedIds !== undefined;
@@ -69,6 +196,12 @@ export function AccountPickerSheet(props: AccountPickerSheetProps) {
 
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
+  const { settings, updateSettings } = useApp();
+  const showBalances = settings.showAccountPickerBalances;
+  const handleToggleBalances = () => {
+    void triggerHaptic('selection');
+    updateSettings({ showAccountPickerBalances: !showBalances });
+  };
   const singleSelectedId = isMultiSelect ? null : props.selectedAccountId;
 
   const isAccountSelected = (accountId: string) =>
@@ -152,6 +285,24 @@ export function AccountPickerSheet(props: AccountPickerSheetProps) {
             <Text variant="subheading" numberOfLines={1} className="shrink">
               {I18n.t('accounts.title')}
             </Text>
+            {/* Hides the balances outright rather than masking them, so the
+                tiles go back to one line. The choice is saved for every
+                picker in the app. */}
+            <Pressable
+              onPress={handleToggleBalances}
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t(
+                showBalances ? 'accounts.hide_balances' : 'accounts.show_balances',
+              )}
+              hitSlop={8}
+              className="h-8 w-8 rounded-full items-center justify-center bg-secondary/50 active:opacity-70"
+            >
+              {showBalances ? (
+                <Eye size={16} color={themeColors.textMuted} />
+              ) : (
+                <EyeOff size={16} color={themeColors.textMuted} />
+              )}
+            </Pressable>
             {isMultiSelect && props.onClear && selectedIdSet.size > 0 ? (
               <Pressable
                 onPress={() => {
@@ -178,64 +329,13 @@ export function AccountPickerSheet(props: AccountPickerSheetProps) {
               <X size={18} color={themeColors.textMuted} />
             </Pressable>
           </View>
-          <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
-            {sections.map((section, sectionIndex) => (
-              <View key={section.key} className={cn(sectionIndex > 0 && 'mt-4')}>
-                {section.label ? (
-                  <Text variant="caption" tone="muted" className="mb-2 px-1 uppercase">
-                    {section.label}
-                  </Text>
-                ) : null}
-                <View className="flex-row flex-wrap -mx-1">
-                  {section.accounts.map((acct) => {
-                    const isSelected = isAccountSelected(acct.id);
-                    const isDisabled = disabledId === acct.id;
-                    return (
-                      <View key={acct.id} className="w-1/2 px-1 mb-2">
-                        <Pressable
-                          onPress={() => {
-                            if (isDisabled) return;
-                            handleAccountPress(acct.id);
-                          }}
-                          disabled={isDisabled}
-                          style={({ pressed }) => ({
-                            opacity: isDisabled ? 0.45 : pressed ? 0.6 : 1,
-                          })}
-                          className={cn(
-                            'rounded-2xl px-3 py-3 flex-row items-center gap-2',
-                            isSelected
-                              ? 'bg-primary/15 border border-primary/30'
-                              : isDisabled
-                                ? 'bg-secondary/20 border border-transparent'
-                                : 'bg-secondary/40 border border-transparent',
-                          )}
-                        >
-                          <AccountLogo
-                            logoId={acct.logoId}
-                            type={acct.type}
-                            goalEmoji={acct.goalEmoji}
-                            size={28}
-                          />
-                          <Text
-                            variant="body"
-                            numberOfLines={1}
-                            className={cn(
-                              'flex-1',
-                              isSelected && 'text-primary font-medium',
-                              isDisabled && !isSelected && 'text-muted-foreground',
-                            )}
-                          >
-                            {acct.name}
-                          </Text>
-                          {isSelected ? <Check size={14} color={themeColors.primary} /> : null}
-                        </Pressable>
-                      </View>
-                    );
-                  })}
-                </View>
-              </View>
-            ))}
-          </ScrollView>
+          <AccountPickerSections
+            sections={sections}
+            showBalances={showBalances}
+            disabledId={disabledId}
+            isAccountSelected={isAccountSelected}
+            onPressAccount={handleAccountPress}
+          />
         </View>
       </Pressable>
     </Pressable>

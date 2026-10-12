@@ -89,6 +89,11 @@ const pt = {
     name: 'Money2Time',
   },
   nav: {
+    tab_goals: 'Metas',
+    tab_recurring: 'Recorrentes',
+    tab_reimbursements: 'Reembolsos',
+    tab_receipts: 'Recibos',
+    tab_settle_up: 'Quem te deve',
     tab_calendar: 'Calendário',
     tab_accounts: 'Contas',
     tab_insights: 'Análises',
@@ -780,6 +785,11 @@ const pt = {
       placeholder_income: 'Tente "Salário 3000", "Bônus 500", "Reembolso 50".',
     },
     editor: {
+      details: {
+        title: 'Detalhes',
+        placeholder: 'Com quem foi, o que cobriu, qualquer coisa que valha lembrar',
+        empty: 'Adicione uma nota mais longa',
+      },
       transfer_expense_label: 'Contar como despesa',
       transfer_expense_tooltip:
         'Conta esta transferência como despesa nos totais, orçamentos e gráficos, na categoria que escolher. O dinheiro continua a passar entre as duas contas como sempre.',
@@ -1131,6 +1141,17 @@ const pt = {
     },
   },
   settings: {
+    visibility_show: 'Mostrar',
+    visibility_hide: 'Ocultar',
+    bottom_bar: {
+      title: 'Barra inferior',
+      home: 'Início',
+      more_pages: 'Mais páginas',
+      pinned: 'Sempre na barra',
+      remove: 'Remover {{page}}',
+      add: 'Adicionar {{page}}',
+      reset: 'Repor padrão',
+    },
     app_lock: {
       delay_section: 'Bloquear após',
       delay_immediately: 'Imediatamente',
@@ -1569,6 +1590,7 @@ const pt = {
       column_category: 'Categoria',
       column_subcategory: 'Subcategoria',
       column_note: 'Nota',
+      column_details: 'Detalhes',
       column_sentiment: 'Sentimento',
       column_recurring: 'Recorrente',
       column_name: 'Nome',

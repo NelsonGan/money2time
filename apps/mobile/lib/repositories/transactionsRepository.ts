@@ -56,6 +56,8 @@ export interface CreateTransactionInput {
   toAccountId?: string | null;
   categoryId?: string | null;
   note?: string | null;
+  /** Longer free-text note kept beside `note`. */
+  details?: string | null;
   /** Relative path of an attached receipt image, e.g. `receipts/9f3c.jpg`. */
   receiptUri?: string | null;
   sentiment?: TransactionSentiment;
@@ -341,7 +343,12 @@ function buildSqlPredicates(normalized: TransactionFilters, options?: Transactio
 
   if (normalized.search.trim()) {
     const term = `%${normalized.search.trim().toLowerCase()}%`;
-    predicates.push(or(sql`lower(coalesce(${transactionsTable.note}, '')) like ${term}`));
+    predicates.push(
+      or(
+        sql`lower(coalesce(${transactionsTable.note}, '')) like ${term}`,
+        sql`lower(coalesce(${transactionsTable.details}, '')) like ${term}`,
+      ),
+    );
   }
 
   return predicates;
@@ -591,6 +598,7 @@ class TransactionsRepository {
         toAccountId: normalizedInput.toAccountId ?? null,
         categoryId: normalizedInput.categoryId ?? null,
         note: normalizedInput.note ?? null,
+        details: normalizedInput.details ?? null,
         receiptUri: normalizedInput.receiptUri ?? null,
         sentiment: normalizedInput.sentiment ?? 'neutral',
         reimbursable: normalizedInput.reimbursable ?? false,

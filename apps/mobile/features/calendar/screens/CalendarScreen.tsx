@@ -94,7 +94,7 @@ import {
 } from '~/utils/selectionFilter';
 import { countsAsExpenseRow } from '~/utils/spending';
 import { whenSplashHidden } from '~/utils/splashState';
-import { reuseUnchangedGroups } from '~/utils/transactions';
+import { reuseUnchangedGroups, transactionSearchText } from '~/utils/transactions';
 import { compareTransactionsByDateDesc } from '~/utils/transactionSorting';
 
 import { CalendarMonthGrid } from '../components/CalendarMonthGrid';
@@ -630,13 +630,12 @@ export function CalendarScreen({
   const searchIndex = useMemo(() => {
     if (!isSearchOpen) return [];
     return filteredTransactions.map((tx) => {
-      let haystack = '';
-      if (tx.note) haystack += tx.note;
-      if (tx.categoryName) haystack += `\n${tx.categoryName}`;
-      if (tx.categoryParentName) haystack += `\n${tx.categoryParentName}`;
+      let haystack = transactionSearchText(tx);
+      if (tx.categoryName) haystack += `\n${tx.categoryName.toLowerCase()}`;
+      if (tx.categoryParentName) haystack += `\n${tx.categoryParentName.toLowerCase()}`;
       return {
         tx,
-        haystack: haystack.toLowerCase(),
+        haystack,
         amountKeys: transactionAmountSearchKeys(tx),
       };
     });
@@ -1668,12 +1667,15 @@ export function CalendarScreen({
             ) : null}
 
             {/* Background receipt-scan status — sits below the income/expense
-                summary and above the transaction list on the home view. */}
+                summary and above the transaction list on the home view. A
+                fragment, not a wrapping View: the header's gap applies to any
+                child it has, so an always-mounted wrapper put an empty gap
+                under the summary whenever both banners were hidden. */}
             {viewMode === 'day' && !isSearchOpen ? (
-              <View className="gap-2">
+              <>
                 <ScanStatusBanner />
                 <NotificationReviewBanner />
-              </View>
+              </>
             ) : null}
           </View>
         </View>

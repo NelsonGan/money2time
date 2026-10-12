@@ -153,3 +153,18 @@ export function reconcileTransactionRow(
   next[index] = persisted;
   return next;
 }
+
+/**
+ * The text a search runs against: the one-line note and the longer details,
+ * lowercased and joined by a newline so a query never matches across the
+ * seam. Every text search over transactions goes through this, so a word
+ * written only in the details is found the same way as one in the note.
+ */
+export function transactionSearchText(transaction: {
+  note: string | null;
+  details: string | null;
+}): string {
+  const { note, details } = transaction;
+  if (!details) return (note ?? '').toLowerCase();
+  return `${note ?? ''}\n${details}`.toLowerCase();
+}

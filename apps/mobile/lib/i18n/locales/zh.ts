@@ -87,6 +87,11 @@ const zh = {
     name: 'Money2Time',
   },
   nav: {
+    tab_goals: '目标',
+    tab_recurring: '定期',
+    tab_reimbursements: '报销',
+    tab_receipts: '收据',
+    tab_settle_up: '谁欠你钱',
     tab_calendar: '日历',
     tab_accounts: '账户',
     tab_insights: '洞察',
@@ -746,6 +751,11 @@ const zh = {
       placeholder_income: '试试 "工资 5000"，"奖金 1000"，"退款 30"。',
     },
     editor: {
+      details: {
+        title: '详细信息',
+        placeholder: '和谁一起、用在什么地方、任何值得记住的事',
+        empty: '添加更长的备注',
+      },
       transfer_expense_label: '计为支出',
       transfer_expense_tooltip:
         '将此转账计为支出，按你选择的分类计入总额、预算和图表。资金仍照常在两个账户之间转移。',
@@ -1081,6 +1091,17 @@ const zh = {
     },
   },
   settings: {
+    visibility_show: '显示',
+    visibility_hide: '隐藏',
+    bottom_bar: {
+      title: '底部栏',
+      home: '首页',
+      more_pages: '更多页面',
+      pinned: '始终显示在底部栏',
+      remove: '移除{{page}}',
+      add: '添加{{page}}',
+      reset: '恢复默认',
+    },
     app_lock: {
       delay_section: '多久后锁定',
       delay_immediately: '立即',
@@ -1483,6 +1504,7 @@ const zh = {
       column_category: '分类',
       column_subcategory: '子分类',
       column_note: '备注',
+      column_details: '详细信息',
       column_sentiment: '心情',
       column_recurring: '定期',
       column_name: '名称',

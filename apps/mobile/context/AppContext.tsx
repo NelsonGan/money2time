@@ -193,7 +193,11 @@ import { newId, nowIso } from '~/utils/id';
 import { runAfterInteractionsCapped } from '~/utils/interactions';
 import { perfMark } from '~/utils/perfTrace';
 import { countsAsExpenseRow } from '~/utils/spending';
-import { reconcileTransactionRow, reuseUnchangedTransactions } from '~/utils/transactions';
+import {
+  reconcileTransactionRow,
+  reuseUnchangedTransactions,
+  transactionSearchText,
+} from '~/utils/transactions';
 import { insertTransactionsByDateDesc, sortTransactions } from '~/utils/transactionSorting';
 
 export interface SplitDraftInput {
@@ -492,6 +496,8 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
         | 'defaultPaybackAccountId'
         | 'reimbursementsCountAsExpense'
         | 'showTransactionAccount'
+        | 'showAccountPickerBalances'
+        | 'navTabsJson'
       >
     >,
   ) => void;
@@ -1018,9 +1024,8 @@ function applyTransactionFilters(
     if (hasMaxAmount && maxAmount !== null && transaction.amount > maxAmount) continue;
 
     if (hasSearchFilter) {
-      const note =
-        noteSearchTextById?.get(transaction.id) ?? (transaction.note ?? '').toLowerCase();
-      if (!note.includes(searchTerm)) continue;
+      const text = noteSearchTextById?.get(transaction.id) ?? transactionSearchText(transaction);
+      if (!text.includes(searchTerm)) continue;
     }
 
     filtered.push(transaction);
@@ -1516,7 +1521,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const noteSearchTextByTransactionId = useMemo(() => {
     if (!hasSearchFilter) return undefined;
     return new Map(
-      transactions.map((transaction) => [transaction.id, (transaction.note ?? '').toLowerCase()]),
+      transactions.map((transaction) => [transaction.id, transactionSearchText(transaction)]),
     );
   }, [hasSearchFilter, transactions]);
 
@@ -2211,6 +2216,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         toAccountId: normalizedInput.toAccountId ?? null,
         categoryId: normalizedInput.categoryId ?? null,
         note: normalizedInput.note ?? null,
+        details: normalizedInput.details ?? null,
         receiptUri: normalizedInput.receiptUri ?? null,
         sentiment: normalizedInput.sentiment ?? 'neutral',
         reimbursable: normalizedInput.reimbursable ?? false,
@@ -2765,6 +2771,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         toAccountId: null,
         categoryId: null,
         note,
+        details: null,
         receiptUri: null,
         sentiment: 'neutral',
         ...NO_REIMBURSEMENT,
@@ -2944,6 +2951,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         toAccountId: t.toAccountId,
         categoryId: null,
         note: t.note,
+        details: null,
         receiptUri: null,
         sentiment: 'neutral',
         ...NO_REIMBURSEMENT,
@@ -2978,6 +2986,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         toAccountId: normalizedInput.toAccountId ?? null,
         categoryId: normalizedInput.categoryId ?? null,
         note: normalizedInput.note ?? null,
+        details: normalizedInput.details ?? null,
         receiptUri: normalizedInput.receiptUri ?? null,
         sentiment: normalizedInput.sentiment ?? 'neutral',
         ...NO_REIMBURSEMENT,
@@ -3230,6 +3239,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               toAccountId: paybackAccountId,
               categoryId: null,
               note,
+              details: null,
               receiptUri: null,
               sentiment: 'neutral',
               ...NO_REIMBURSEMENT,
@@ -3501,6 +3511,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           | 'defaultPaybackAccountId'
           | 'reimbursementsCountAsExpense'
           | 'showTransactionAccount'
+          | 'showAccountPickerBalances'
+          | 'navTabsJson'
         >
       >,
     ) => {
