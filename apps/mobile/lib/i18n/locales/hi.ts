@@ -787,7 +787,6 @@ const hi = {
     editor: {
       details: {
         title: 'विवरण',
-        placeholder: 'किसके साथ थे, किस लिए था, जो कुछ भी याद रखने लायक हो',
         empty: 'लंबा नोट जोड़ें',
       },
       transfer_expense_label: 'खर्च के रूप में गिनें',

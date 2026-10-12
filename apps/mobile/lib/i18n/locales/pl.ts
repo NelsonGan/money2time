@@ -788,7 +788,6 @@ const pl = {
     editor: {
       details: {
         title: 'Szczegóły',
-        placeholder: 'Z kim, na co, cokolwiek warto zapamiętać',
         empty: 'Dodaj dłuższą notatkę',
       },
       transfer_expense_label: 'Licz jako wydatek',

@@ -787,7 +787,6 @@ const pt = {
     editor: {
       details: {
         title: 'Detalhes',
-        placeholder: 'Com quem foi, o que cobriu, qualquer coisa que valha lembrar',
         empty: 'Adicione uma nota mais longa',
       },
       transfer_expense_label: 'Contar como despesa',

@@ -789,7 +789,6 @@ const id = {
     editor: {
       details: {
         title: 'Detail',
-        placeholder: 'Dengan siapa, untuk apa, apa pun yang perlu diingat',
         empty: 'Tambahkan catatan yang lebih panjang',
       },
       transfer_expense_label: 'Hitung sebagai pengeluaran',

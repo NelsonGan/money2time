@@ -96,6 +96,8 @@ function useAccountBalanceLabel(enabled: boolean) {
 interface AccountPickerSectionsProps {
   sections: { key: string; label: string; accounts: Account[] }[];
   showBalances: boolean;
+  /** Space below the last row, so it can scroll clear of the home indicator. */
+  bottomInset: number;
   disabledId?: string | null;
   isAccountSelected: (accountId: string) => boolean;
   onPressAccount: (accountId: string) => void;
@@ -104,6 +106,7 @@ interface AccountPickerSectionsProps {
 function AccountPickerSections({
   sections,
   showBalances,
+  bottomInset,
   disabledId,
   isAccountSelected,
   onPressAccount,
@@ -112,7 +115,11 @@ function AccountPickerSections({
   const balanceLabel = useAccountBalanceLabel(showBalances);
 
   return (
-    <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
+    <ScrollView
+      className="flex-1 px-4"
+      contentContainerStyle={{ paddingBottom: bottomInset }}
+      showsVerticalScrollIndicator={false}
+    >
       {sections.map((section, sectionIndex) => (
         <View key={section.key} className={cn(sectionIndex > 0 && 'mt-4')}>
           {section.label ? (
@@ -277,10 +284,10 @@ export function AccountPickerSheet(props: AccountPickerSheetProps) {
   const sheetContent = (
     <Pressable style={styles.backdrop} onPress={onClose}>
       <Pressable onPress={(e) => e.stopPropagation()} style={styles.sheet}>
-        <View
-          className="bg-card rounded-t-[28px] flex-1"
-          style={{ paddingBottom: Math.max(insets.bottom, 16) }}
-        >
+        {/* The bottom inset pads the list rather than the card, so rows run
+            to the screen edge instead of stopping mid-tile above an empty
+            band, and the last row still scrolls clear of the home indicator. */}
+        <View className="bg-card rounded-t-[28px] flex-1">
           <View className="px-5 pt-5 pb-5 flex-row items-center gap-2">
             <Text variant="subheading" numberOfLines={1} className="shrink">
               {I18n.t('accounts.title')}
@@ -332,6 +339,7 @@ export function AccountPickerSheet(props: AccountPickerSheetProps) {
           <AccountPickerSections
             sections={sections}
             showBalances={showBalances}
+            bottomInset={Math.max(insets.bottom, 16) + 8}
             disabledId={disabledId}
             isAccountSelected={isAccountSelected}
             onPressAccount={handleAccountPress}

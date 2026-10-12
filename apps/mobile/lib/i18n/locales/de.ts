@@ -793,7 +793,6 @@ const de = {
     editor: {
       details: {
         title: 'Details',
-        placeholder: 'Mit wem, wofür, alles, was du dir merken willst',
         empty: 'Längere Notiz hinzufügen',
       },
       transfer_expense_label: 'Als Ausgabe zählen',

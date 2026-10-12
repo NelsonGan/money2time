@@ -786,7 +786,6 @@ const tr = {
     editor: {
       details: {
         title: 'Ayrıntılar',
-        placeholder: 'Kiminle, neyi kapsadığı, hatırlamaya değer her şey',
         empty: 'Daha uzun bir not ekleyin',
       },
       transfer_expense_label: 'Gider olarak say',

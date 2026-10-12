@@ -793,7 +793,6 @@ const ms = {
     editor: {
       details: {
         title: 'Butiran',
-        placeholder: 'Dengan siapa, untuk apa, apa-apa yang patut diingat',
         empty: 'Tambah nota yang lebih panjang',
       },
       transfer_expense_label: 'Kira sebagai perbelanjaan',

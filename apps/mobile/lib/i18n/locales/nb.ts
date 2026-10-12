@@ -787,7 +787,6 @@ const nb = {
     editor: {
       details: {
         title: 'Detaljer',
-        placeholder: 'Hvem du var med, hva det dekket, alt som er verdt å huske',
         empty: 'Legg til et lengre notat',
       },
       transfer_expense_label: 'Tell som utgift',
