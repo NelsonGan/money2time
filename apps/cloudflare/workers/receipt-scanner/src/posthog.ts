@@ -108,6 +108,10 @@ export class AiTrace {
       is_backup_model: record.isBackupModel,
       attempt: record.attempt,
       ...this.context,
+      // Sent from Cloudflare's network, so the request IP is a data centre's.
+      // GeoIP would stamp that location on the event and on the person,
+      // overwriting where the person actually is.
+      $geoip_disable: true,
     };
     if (record.httpStatus !== undefined) properties.$ai_http_status = record.httpStatus;
     if (inputTokens !== undefined) properties.$ai_input_tokens = inputTokens;
