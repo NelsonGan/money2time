@@ -1,9 +1,11 @@
 const path = require('path');
 
 const { withNativeWind } = require('nativewind/metro');
-const { getSentryExpoConfig } = require('@sentry/react-native/metro');
+const { getPostHogExpoConfig } = require('posthog-react-native/metro');
 
-const config = getSentryExpoConfig(__dirname);
+// Injects debug IDs into each bundle so PostHog can match an exception's
+// minified Hermes frames to the source map the build uploaded.
+const config = getPostHogExpoConfig(__dirname);
 config.transformer = {
   ...config.transformer,
   unstable_allowRequireContext: true,

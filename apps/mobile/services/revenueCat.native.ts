@@ -85,7 +85,7 @@ let loginPromise: Promise<void> | null = null;
 let desiredRevenueCatAppUserId: string | null = null;
 let activeRevenueCatAppUserId: string | null = null;
 let analyticsIdentityPromise: Promise<void> | null = null;
-let mixpanelAttributeUserId: string | null = null;
+let postHogAttributeUserId: string | null = null;
 let firebaseAttributeSignature: string | null = null;
 let firebaseSyncedSignature: string | null = null;
 let analyticsAttributesPendingSync = false;
@@ -136,15 +136,12 @@ async function syncConfiguredAnalyticsIdentifiers(): Promise<void> {
   if (!appUserId || appUserId !== desiredRevenueCatAppUserId) return;
 
   analyticsIdentityPromise = (async () => {
-    if (mixpanelAttributeUserId !== appUserId) {
-      try {
-        // The app identifies Mixpanel with this same stable pseudonymous ID.
-        await Purchases.setMixpanelDistinctID(appUserId);
-        mixpanelAttributeUserId = appUserId;
-        analyticsAttributesPendingSync = true;
-      } catch {
-        // Retry on the next refresh/purchase. Analytics must not deny Pro access.
-      }
+    if (postHogAttributeUserId !== appUserId) {
+      // The app identifies PostHog with this same stable pseudonymous ID. The
+      // SDK has no PostHog setter, so the reserved attribute rides on the
+      // explicit upload below (RevenueCat would also fall back to this ID).
+      postHogAttributeUserId = appUserId;
+      analyticsAttributesPendingSync = true;
     }
     try {
       const instanceId = await getFirebaseAppInstanceId(appUserId);
@@ -172,8 +169,8 @@ async function syncConfiguredAnalyticsIdentifiers(): Promise<void> {
         // acknowledgement, without bringing store product loading into startup.
         const attributes: Record<string, { value: string; updated_at_ms: number }> = {};
         const updated_at_ms = Date.now();
-        if (mixpanelAttributeUserId === appUserId) {
-          attributes.$mixpanelDistinctId = { value: appUserId, updated_at_ms };
+        if (postHogAttributeUserId === appUserId) {
+          attributes.$posthogUserId = { value: appUserId, updated_at_ms };
         }
         if (instanceId && signature === firebaseAttributeSignature) {
           attributes.$firebaseAppInstanceId = { value: instanceId, updated_at_ms };
@@ -358,7 +355,7 @@ function toRevenueCatErrorResult(error: unknown): RevenueCatActionResult {
   if (purchasesError?.code === PURCHASES_ERROR_CODE.PURCHASE_NOT_ALLOWED_ERROR) {
     // The store uses this for device/account restrictions such as unavailable
     // billing, an outdated Play Store, or purchase controls. Retrying in-app
-    // cannot fix it, and treating it as an app failure only creates Sentry noise.
+    // cannot fix it, and treating it as an app failure only creates error-tracking noise.
     return {
       customerState: null,
       message:

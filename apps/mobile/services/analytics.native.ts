@@ -1,26 +1,40 @@
 /**
  * Native product analytics integration.
  *
- * GA4 receives every event from every user. Mixpanel also receives every user,
- * but only the events in `MIXPANEL_EVENTS` (see `analytics.shared.ts`): it
- * bills per event, so it gets the install, activation and purchase funnels and
- * product usage as milestones, and none of the per-use telemetry. Its automatic
- * mobile events (`$ae_session`, `$ae_first_open`, ...) are switched off for the
- * same reason; `First App Open` replaces the one worth keeping.
+ * GA4 receives every event from every user. PostHog also receives every user,
+ * but only the events in `POSTHOG_EVENTS` (see `analytics.shared.ts`): its free
+ * tier is a million events a month, so it gets installs, activation, daily
+ * engagement, the purchase funnel and low-volume moments, and none of the
+ * per-use telemetry. Daily engagement is capped on the device (`DailyState`), so
+ * a user who opens the app ten times a day still sends one `Daily App Open`.
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { NativeModules, Platform } from 'react-native';
+import { AppState, type AppStateStatus, Platform } from 'react-native';
+
+import {
+  SESSION_REPLAY_NEW_INSTALL_RATE,
+  SESSION_REPLAY_RETURNING_RATE,
+} from '~/constants/posthog';
 
 import {
   type AnalyticsEventName,
   AnalyticsEvents,
   type AnalyticsProperties,
   type AnalyticsSuperProperties,
+  claimDailyAppOpen,
+  claimDailyFeature,
+  claimDailyTransaction,
+  DAILY_STATE_STORAGE_KEY,
+  type DailyFeature,
+  type DailyState,
   daysSinceInstall,
   EMPTY_USAGE_STATE,
   featureUsedBy,
-  isMixpanelEvent,
+  featureViewedOn,
+  isPostHogEvent,
+  localDayKey,
+  parseDailyState,
   parseUsageState,
   type ProductFeature,
   toGa4EventName,
@@ -30,75 +44,39 @@ import {
   USAGE_STATE_STORAGE_KEY,
   type UsageState,
 } from './analytics.shared';
+import { addErrorStep } from './errorReporting';
+import { getPostHog } from './posthog';
 
 export * from './analytics.shared';
 
-type MixpanelInstance = any;
 type FirebaseAnalyticsSdk = typeof import('@react-native-firebase/analytics');
 type FirebaseAnalyticsInstance = ReturnType<FirebaseAnalyticsSdk['getAnalytics']>;
+type PersonValue = string | number | boolean | string[];
 const IS_DEVELOPMENT = typeof __DEV__ !== 'undefined' && __DEV__;
-
-/**
- * Mixpanel's legacy automatic mobile events. Off: `$ae_session` fired on every
- * app background and was the bulk of the bill while answering nothing GA4's
- * own session reporting does not.
- */
-const TRACK_AUTOMATIC_EVENTS = false;
-
-/**
- * Super properties earlier releases registered. The SDK persists super
- * properties on the device, so each would ride on every future event until
- * explicitly removed:
- *
- * - `sample_rate`: the retired 50% cohort sampling's marker, which was also
- *   written to the profile;
- * - `current_screen`: registered on every navigation, which rewrote the SDK's
- *   persisted store on each screen change. `trackEvent` stamps the screen on
- *   each event instead, so a persisted copy could only ever be a stale one.
- */
-const RETIRED_SUPER_PROPERTIES = ['sample_rate', 'current_screen'] as const;
-const RETIRED_PROFILE_PROPERTIES: ReadonlySet<string> = new Set(['sample_rate']);
 
 /** Past the last milestone the count has nothing left to report. */
 const LAST_TRANSACTION_MILESTONE = Math.max(...TRANSACTION_MILESTONES);
 
-let hasWarnedMissingMixpanelToken = false;
-let hasWarnedMissingMixpanelSdk = false;
-let hasWarnedUsingMixpanelJsMode = false;
+/**
+ * The person properties last written to PostHog, per user, so a launch that
+ * finds nothing changed sends no `$set` (each one is a billable event).
+ */
+const PERSON_STATE_STORAGE_KEY = '@m2t/analytics_person/v1';
+
 let hasWarnedMissingFirebaseSdk = false;
 let hasWarnedAnalyticsFailure = false;
 
-function warnOnce(
-  kind: 'mixpanel-token' | 'mixpanel-sdk' | 'mixpanel-js' | 'firebase-sdk',
-  error?: unknown,
-) {
-  if (!IS_DEVELOPMENT) return;
-  if (kind === 'mixpanel-token') {
-    if (hasWarnedMissingMixpanelToken) return;
-    hasWarnedMissingMixpanelToken = true;
-    console.warn(
-      '[Analytics] EXPO_PUBLIC_MIXPANEL_TOKEN is missing. Mixpanel tracking is disabled.',
-    );
-  } else if (kind === 'mixpanel-sdk') {
-    if (hasWarnedMissingMixpanelSdk) return;
-    hasWarnedMissingMixpanelSdk = true;
-    console.warn('[Analytics] mixpanel-react-native is unavailable in this build.', error);
-  } else if (kind === 'mixpanel-js') {
-    if (hasWarnedUsingMixpanelJsMode) return;
-    hasWarnedUsingMixpanelJsMode = true;
-    console.warn('[Analytics] Mixpanel native module is unavailable; using JavaScript mode.');
-  } else {
-    if (hasWarnedMissingFirebaseSdk) return;
-    hasWarnedMissingFirebaseSdk = true;
-    console.warn(
-      '[Analytics] Firebase Analytics is unavailable. Add Firebase app config and rebuild the native app.',
-      error,
-    );
-  }
+function warnMissingFirebase(error?: unknown) {
+  if (!IS_DEVELOPMENT || hasWarnedMissingFirebaseSdk) return;
+  hasWarnedMissingFirebaseSdk = true;
+  console.warn(
+    '[Analytics] Firebase Analytics is unavailable. Add Firebase app config and rebuild the native app.',
+    error,
+  );
 }
 
 function reportProviderFailure(
-  provider: 'Mixpanel' | 'Firebase',
+  provider: 'PostHog' | 'Firebase',
   operation: string,
   error: unknown,
 ) {
@@ -107,25 +85,30 @@ function reportProviderFailure(
   console.warn(`[Analytics] ${provider} ${operation} failed:`, error);
 }
 
-let mixpanelInstance: MixpanelInstance | null = null;
-let mixpanelInitPromise: Promise<void> | null = null;
-let mixpanelIdentifiedUserId: string | null = null;
-let mixpanelIdentityPromise: Promise<MixpanelInstance | null> | null = null;
 let firebaseAnalytics:
   | { sdk: FirebaseAnalyticsSdk; instance: FirebaseAnalyticsInstance }
   | null
   | undefined;
 let analyticsUserId: string | null = null;
 let firebaseConfiguredUserId: string | null = null;
+let postHogIdentifiedUserId: string | null = null;
 let revenueCatRevenueUserId: string | null = null;
 let installDate: string | null = null;
 let currentScreen: string | null = null;
 let lastFirebaseScreen: string | null = null;
 let usageState: UsageState | null = null;
 let usageUpdates: Promise<unknown> = Promise.resolve();
+let dailyState: DailyState | null = null;
+let dailyUpdates: Promise<unknown> = Promise.resolve();
+let personUpdates: Promise<unknown> = Promise.resolve();
+/** The last person-property write, loaded from storage on first use. */
+let personState: PersonState | null | undefined;
 let providerConfigurationPromise: Promise<void> | null = null;
 let firebaseMutations: Promise<unknown> = Promise.resolve();
 let analyticsReadyResolved = false;
+let appStateSubscription: { remove(): void } | null = null;
+let lastAppState: AppStateStatus | null = null;
+let sessionReplayDecided = false;
 
 let resolveAnalyticsReady: () => void;
 let analyticsReadyPromise = new Promise<void>((resolve) => {
@@ -146,53 +129,6 @@ function mutateFirebase<T>(operation: () => Promise<T>): Promise<T> {
   return next;
 }
 
-function getMixpanelToken(): string | null {
-  const token = process.env.EXPO_PUBLIC_MIXPANEL_TOKEN?.trim();
-  return token || null;
-}
-
-function isMixpanelNativeModuleAvailable(): boolean {
-  return Boolean(NativeModules.MixpanelReactNative);
-}
-
-function getMixpanelClass(): (new (...args: unknown[]) => MixpanelInstance) | null {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    return require('mixpanel-react-native').Mixpanel;
-  } catch (error) {
-    warnOnce('mixpanel-sdk', error);
-    return null;
-  }
-}
-
-async function ensureMixpanelInitialized(): Promise<MixpanelInstance | null> {
-  const token = getMixpanelToken();
-  if (!token) {
-    warnOnce('mixpanel-token');
-    return null;
-  }
-  if (mixpanelInstance) return mixpanelInstance;
-
-  if (!mixpanelInitPromise) {
-    mixpanelInitPromise = (async () => {
-      const MixpanelClass = getMixpanelClass();
-      if (!MixpanelClass) return;
-      const useNativeMixpanel = isMixpanelNativeModuleAvailable();
-      if (!useNativeMixpanel) warnOnce('mixpanel-js');
-
-      const mp = new MixpanelClass(token, TRACK_AUTOMATIC_EVENTS, useNativeMixpanel);
-      await mp.init();
-      mixpanelInstance = mp;
-    })().catch((error) => {
-      mixpanelInitPromise = null;
-      reportProviderFailure('Mixpanel', 'initialization', error);
-    });
-  }
-
-  await mixpanelInitPromise;
-  return mixpanelInstance;
-}
-
 function getFirebaseAnalytics(): {
   sdk: FirebaseAnalyticsSdk;
   instance: FirebaseAnalyticsInstance;
@@ -206,7 +142,7 @@ function getFirebaseAnalytics(): {
     firebaseAnalytics = { sdk, instance: sdk.getAnalytics() };
   } catch (error) {
     firebaseAnalytics = null;
-    warnOnce('firebase-sdk', error);
+    warnMissingFirebase(error);
   }
   return firebaseAnalytics;
 }
@@ -223,52 +159,6 @@ async function logFirebaseScreen(screen: string): Promise<void> {
     lastFirebaseScreen = screen;
   } catch (error) {
     reportProviderFailure('Firebase', 'screen tracking', error);
-  }
-}
-
-/**
- * Drop `RETIRED_SUPER_PROPERTIES` from an install that still carries them.
- * Keyed off the persisted super properties themselves, so it runs once per
- * affected install and is a single local read for everyone else.
- */
-async function clearRetiredProperties(mp: MixpanelInstance): Promise<void> {
-  const superProperties: Record<string, unknown> | null = await mp.getSuperProperties();
-  if (!superProperties) return;
-  for (const property of RETIRED_SUPER_PROPERTIES) {
-    if (!(property in superProperties)) continue;
-    await mp.unregisterSuperProperty(property);
-    if (RETIRED_PROFILE_PROPERTIES.has(property)) await mp.getPeople().unset(property);
-  }
-}
-
-/** Never send anonymous events while identification is pending or has failed. */
-async function ensureMixpanelIdentified(): Promise<MixpanelInstance | null> {
-  const mp = await ensureMixpanelInitialized();
-  if (!mp || !analyticsUserId) return null;
-  if (mixpanelIdentityPromise) {
-    await mixpanelIdentityPromise;
-    return mixpanelIdentifiedUserId === analyticsUserId ? mp : null;
-  }
-  if (mixpanelIdentifiedUserId === analyticsUserId) return mp;
-
-  const userId = analyticsUserId;
-  mixpanelIdentityPromise = (async () => {
-    try {
-      await mp.identify(userId);
-      await mp.getPeople().set({ $name: userId, platform: Platform.OS });
-      await clearRetiredProperties(mp);
-      mixpanelIdentifiedUserId = userId;
-      return mp;
-    } catch (error) {
-      reportProviderFailure('Mixpanel', 'identification', error);
-      return null;
-    }
-  })();
-  try {
-    const identified = await mixpanelIdentityPromise;
-    return analyticsUserId === userId ? identified : null;
-  } finally {
-    mixpanelIdentityPromise = null;
   }
 }
 
@@ -307,9 +197,31 @@ async function configureFirebase(appUserId: string): Promise<void> {
   }
 }
 
+/**
+ * Identify PostHog with the stable app user ID. The SDK persists the identity,
+ * so this sends `$identify` once per install (and once more after a reset), not
+ * once per launch. No properties ride on identify: for an already-identified
+ * ID the SDK turns them into a `$set` plus a flag reload on every launch, since
+ * its duplicate check is in memory only. `platform` goes through
+ * `syncPersonProperties` instead, which persists what it last wrote.
+ */
+function identifyPostHog(appUserId: string): void {
+  const posthog = getPostHog();
+  if (!posthog || postHogIdentifiedUserId === appUserId) return;
+  try {
+    posthog.identify(appUserId);
+    postHogIdentifiedUserId = appUserId;
+  } catch (error) {
+    reportProviderFailure('PostHog', 'identification', error);
+  }
+}
+
 async function configureProviders(appUserId: string): Promise<void> {
   await configureFirebase(appUserId);
-  await ensureMixpanelIdentified();
+  identifyPostHog(appUserId);
+  if (postHogIdentifiedUserId === appUserId) {
+    void syncPersonProperties({ platform: Platform.OS }, {}, appUserId);
+  }
 
   if (currentScreen) await logFirebaseScreen(currentScreen);
 }
@@ -322,7 +234,7 @@ export async function identifyUser(appUserId: string): Promise<void> {
     normalizedId === analyticsUserId &&
     !providerConfigurationPromise &&
     (!getFirebaseAnalytics() || firebaseConfiguredUserId === normalizedId) &&
-    (!getMixpanelToken() || mixpanelIdentifiedUserId === normalizedId)
+    (!getPostHog() || postHogIdentifiedUserId === normalizedId)
   ) {
     await waitForAnalyticsReady();
     return;
@@ -346,6 +258,8 @@ export async function identifyUser(appUserId: string): Promise<void> {
   if (analyticsUserId === normalizedId) {
     analyticsReadyResolved = true;
     resolveAnalyticsReady();
+    watchAppForeground();
+    void recordDailyAppOpen();
   }
 }
 
@@ -392,22 +306,38 @@ export async function markRevenueCatRevenueSource(appUserId: string): Promise<bo
 
 /**
  * Anchor for the `days_since_install` every event carries, from
- * `settings.firstAppOpen`. Also stamped once on the Mixpanel profile as
+ * `settings.firstAppOpen`. Also stamped once on the PostHog person as
  * `first_app_open`, so users who installed before `First App Open` existed
- * still fall into an install cohort. GA4 records its own first open.
+ * still fall into an install cohort, and used to pick this launch's session
+ * replay sample rate. GA4 records its own first open.
  */
 export async function setInstallDate(firstAppOpen: string | null): Promise<void> {
   installDate = firstAppOpen;
   if (!firstAppOpen) return;
   await waitForAnalyticsReady();
+  await syncPersonProperties({}, { first_app_open: firstAppOpen });
+  startSessionReplayForLaunch(daysSinceInstall(firstAppOpen) === 0);
+}
 
-  const mp = await ensureMixpanelIdentified();
-  if (!mp) return;
-  try {
-    await mp.getPeople().setOnce({ first_app_open: firstAppOpen });
-  } catch (error) {
-    reportProviderFailure('Mixpanel', 'install date', error);
-  }
+/**
+ * Decide once per launch whether to record this session, at a higher rate on an
+ * install's first day (see `SESSION_REPLAY_NEW_INSTALL_RATE`). `random` is
+ * injectable for tests.
+ */
+export function startSessionReplayForLaunch(
+  isFirstDay: boolean,
+  random: () => number = Math.random,
+): boolean {
+  if (sessionReplayDecided) return false;
+  sessionReplayDecided = true;
+  const posthog = getPostHog();
+  if (!posthog) return false;
+  const rate = isFirstDay ? SESSION_REPLAY_NEW_INSTALL_RATE : SESSION_REPLAY_RETURNING_RATE;
+  if (random() >= rate) return false;
+  posthog.startSessionRecording().catch((error: unknown) => {
+    reportProviderFailure('PostHog', 'session replay', error);
+  });
+  return true;
 }
 
 // Storage failures, thrown or rejected, must never reach `trackEvent`'s
@@ -446,6 +376,97 @@ function updateUsageState<T>(change: (state: UsageState) => [UsageState, T]): Pr
   return result;
 }
 
+/** The same serialized read-modify-write, for today's `DailyState`. */
+function updateDailyState<T>(change: (state: DailyState) => [DailyState, T]): Promise<T> {
+  const result = dailyUpdates.then(async () => {
+    if (!dailyState) {
+      try {
+        dailyState = parseDailyState(await AsyncStorage.getItem(DAILY_STATE_STORAGE_KEY));
+      } catch {
+        dailyState = parseDailyState(null);
+      }
+    }
+    const [next, value] = change(dailyState);
+    if (next !== dailyState) {
+      dailyState = next;
+      try {
+        await AsyncStorage.setItem(DAILY_STATE_STORAGE_KEY, JSON.stringify(next));
+      } catch {
+        // Kept in memory; at worst a relaunch repeats today's daily event.
+      }
+    }
+    return value;
+  });
+  dailyUpdates = result.catch(() => undefined);
+  return result;
+}
+
+type PersonState = { userId: string; set: Record<string, PersonValue>; setOnce: string[] };
+
+function samePersonValue(a: PersonValue | undefined, b: PersonValue): boolean {
+  return Array.isArray(a) && Array.isArray(b)
+    ? a.length === b.length && a.every((value, index) => value === b[index])
+    : a === b;
+}
+
+/**
+ * Write person properties to PostHog, sending only what changed since the last
+ * write stored for this user. Returns false while PostHog is configured but the
+ * user is not identified, so profile callers can retry.
+ */
+function syncPersonProperties(
+  set: Record<string, PersonValue>,
+  setOnce: Record<string, PersonValue> = {},
+  expectedAppUserId?: string,
+): Promise<boolean> {
+  const result = personUpdates.then(async () => {
+    const posthog = getPostHog();
+    if (!posthog) return true;
+    const userId = expectedAppUserId ?? analyticsUserId;
+    if (!userId || userId !== analyticsUserId || postHogIdentifiedUserId !== userId) return false;
+
+    if (personState === undefined) {
+      try {
+        const raw = await AsyncStorage.getItem(PERSON_STATE_STORAGE_KEY);
+        personState = raw ? (JSON.parse(raw) as PersonState) : null;
+      } catch {
+        personState = null;
+      }
+    }
+    const known = personState?.userId === userId ? personState : { userId, set: {}, setOnce: [] };
+    const changed = Object.fromEntries(
+      Object.entries(set).filter(([key, value]) => !samePersonValue(known.set[key], value)),
+    );
+    const once = Object.fromEntries(
+      Object.entries(setOnce).filter(([key]) => !known.setOnce.includes(key)),
+    );
+    if (Object.keys(changed).length === 0 && Object.keys(once).length === 0) return true;
+
+    try {
+      // No flag reload: flags are fetched at launch and on identify, and each
+      // reload would be another billable flag request.
+      posthog.setPersonProperties(changed, once, false);
+    } catch (error) {
+      reportProviderFailure('PostHog', 'person properties', error);
+      return false;
+    }
+    const next: PersonState = {
+      userId,
+      set: { ...known.set, ...changed },
+      setOnce: [...known.setOnce, ...Object.keys(once)],
+    };
+    personState = next;
+    try {
+      await AsyncStorage.setItem(PERSON_STATE_STORAGE_KEY, JSON.stringify(next));
+    } catch {
+      // Unsaved: the next launch rewrites the same values once.
+    }
+    return true;
+  });
+  personUpdates = result.catch(() => undefined);
+  return result;
+}
+
 /**
  * A milestone is reported after a storage round trip, by which time the user
  * may have left the screen they reached it on (an editor that closed on save),
@@ -456,38 +477,82 @@ function onScreen(screen: string | null): AnalyticsProperties {
 }
 
 /**
- * Record a feature use: on the Mixpanel profile the first time this install
- * uses it (not billed), and as `Feature First Used` when the install has been
- * tracked since its first launch.
+ * Record a feature use: on the PostHog person the first time this install
+ * uses it, and as `Feature First Used` when the install has been tracked since
+ * its first launch.
  */
 async function recordFeatureUse(feature: ProductFeature, screen: string | null): Promise<void> {
-  const isFirstUseSinceInstall = await updateUsageState<boolean | null>((state) =>
-    state.features.includes(feature)
-      ? [state, null]
-      : [{ ...state, features: [...state.features, feature] }, state.fromInstall],
+  const firstUse = await updateUsageState<{ fromInstall: boolean; features: string[] } | null>(
+    (state) =>
+      state.features.includes(feature)
+        ? [state, null]
+        : [
+            { ...state, features: [...state.features, feature] },
+            { fromInstall: state.fromInstall, features: [...state.features, feature] },
+          ],
   );
-  if (isFirstUseSinceInstall === null) return;
+  if (firstUse === null) return;
 
-  const mp = await ensureMixpanelIdentified();
-  if (mp) {
-    try {
-      await mp.getPeople().union('features_used', [feature]);
-    } catch (error) {
-      reportProviderFailure('Mixpanel', 'feature profile', error);
-    }
-  }
-  if (isFirstUseSinceInstall) {
+  await syncPersonProperties({ features_used: firstUse.features });
+  if (firstUse.fromInstall) {
     await trackEvent(AnalyticsEvents.FEATURE_FIRST_USED, { feature, ...onScreen(screen) });
   }
 }
 
+/** `Feature Used`, at most once per feature per local day. */
+async function recordDailyFeatureUse(feature: DailyFeature, screen: string | null): Promise<void> {
+  const today = localDayKey();
+  const claimed = await updateDailyState((state) => claimDailyFeature(state, today, feature));
+  if (claimed) await trackEvent(AnalyticsEvents.FEATURE_USED, { feature, ...onScreen(screen) });
+}
+
 /**
- * Count an expense or income the user logged, and report each of
- * `TRANSACTION_MILESTONES` as the install reaches it. Counts only on installs
- * tracked since their first launch, whose count starts at zero (`UsageState`).
+ * `Daily App Open`, at most once per local day. Runs when analytics becomes
+ * ready at launch and on every return to the foreground; the day claim makes
+ * all but the first of those a single local storage read.
  */
-export async function recordLoggedTransaction(): Promise<void> {
+export async function recordDailyAppOpen(): Promise<void> {
+  await waitForAnalyticsReady();
+  const today = localDayKey();
+  const claim = await updateDailyState((state) => claimDailyAppOpen(state, today));
+  if (claim) await trackEvent(AnalyticsEvents.DAILY_APP_OPEN, claim);
+}
+
+function watchAppForeground(): void {
+  if (appStateSubscription) return;
+  lastAppState = AppState.currentState;
+  appStateSubscription = AppState.addEventListener('change', (next) => {
+    const cameToForeground = next === 'active' && lastAppState !== 'active';
+    lastAppState = next;
+    if (cameToForeground) void recordDailyAppOpen();
+  });
+}
+
+export interface LoggedTransactionDetails {
+  /** Expense or income. */
+  type: string;
+  /** The entry path, as in `First Transaction Created`'s `source`. */
+  source: string;
+}
+
+/**
+ * Count an expense or income the user logged. The first one each local day is
+ * `Daily Transaction Logged`, on every install. Each of `TRANSACTION_MILESTONES`
+ * is reported as the install reaches it, counted only on installs tracked since
+ * their first launch, whose count starts at zero (`UsageState`).
+ */
+export async function recordLoggedTransaction(details?: LoggedTransactionDetails): Promise<void> {
   const screen = currentScreen;
+  const today = localDayKey();
+  const daily = await updateDailyState((state) => claimDailyTransaction(state, today));
+  if (daily) {
+    await trackEvent(AnalyticsEvents.DAILY_TRANSACTION_LOGGED, {
+      ...daily,
+      ...(details ?? {}),
+      ...onScreen(screen),
+    });
+  }
+
   const milestone = await updateUsageState<number | null>((state) => {
     if (!state.fromInstall || state.loggedTransactions >= LAST_TRANSACTION_MILESTONE) {
       return [state, null];
@@ -507,7 +572,7 @@ export async function recordLoggedTransaction(): Promise<void> {
 }
 
 /**
- * Track every event in GA4, and `MIXPANEL_EVENTS` in Mixpanel. An event that is
+ * Track every event in GA4, and `POSTHOG_EVENTS` in PostHog. An event that is
  * a feature use (`featureUsedBy`) also records that use once it has been sent.
  */
 export async function trackEvent(
@@ -535,17 +600,22 @@ export async function trackEvent(
   const installAge = daysSinceInstall(installDate, trackedAt);
   if (installAge != null) eventProperties.days_since_install ??= installAge;
 
-  // Start both independently: a slow or rejected Mixpanel operation must not
-  // hold up GA4. Each provider handles its own failures for void callers.
+  // Start both independently: a failed PostHog capture must not hold up GA4.
+  // Each provider handles its own failures for void callers.
   await Promise.all([
     (async () => {
-      if (!isMixpanelEvent(eventName)) return;
-      const mp = await ensureMixpanelIdentified();
-      if (!mp) return;
+      if (!isPostHogEvent(eventName)) return;
+      const posthog = getPostHog();
+      const appUserId = analyticsUserId;
+      if (!posthog || !appUserId || postHogIdentifiedUserId !== appUserId) return;
       try {
-        await mp.track(eventName, eventProperties);
+        // Undefined values are dropped; PostHog stores nulls as explicit nulls.
+        const payload = Object.fromEntries(
+          Object.entries(eventProperties).filter(([, value]) => value !== undefined),
+        ) as Record<string, string | number | boolean | null>;
+        posthog.capture(eventName, payload, { timestamp: new Date(trackedAt) });
       } catch (error) {
-        reportProviderFailure('Mixpanel', 'event tracking', error);
+        reportProviderFailure('PostHog', 'event tracking', error);
       }
     })(),
     (async () => {
@@ -568,23 +638,37 @@ export async function trackEvent(
   ]);
 
   const feature = featureUsedBy(eventName, properties);
-  if (feature) await recordFeatureUse(feature, screen);
+  if (feature) {
+    await recordFeatureUse(feature, screen);
+    await recordDailyFeatureUse(feature, screen);
+  }
 }
 
 /**
  * Follow the visible React Navigation screen: `trackEvent` stamps it on each
- * event as `current_screen`, and GA4 gets a `screen_view` per change.
+ * event as `current_screen`, GA4 gets a `screen_view` per change, crash reports
+ * get it as an exception step, and a screen that is itself a feature (Insights)
+ * counts toward that feature's `Feature Used`. PostHog gets no `$screen`
+ * events; they would be the largest line in the event budget.
  */
 export async function setCurrentScreen(screen: string | null): Promise<void> {
   if (screen === currentScreen) return;
   currentScreen = screen;
   if (!screen) return;
+  addErrorStep(`Screen: ${screen}`);
   await waitForAnalyticsReady();
   if (screen !== currentScreen) return;
   await logFirebaseScreen(screen);
+  const feature = featureViewedOn(screen);
+  if (feature) await recordDailyFeatureUse(feature, screen);
 }
 
-/** Register context; false lets profile callers retry an incomplete sync. */
+/**
+ * Register context on every later event; false lets profile callers retry an
+ * incomplete sync. PostHog super properties are local to the device and cost
+ * nothing; the stable ones are also written to the person (`$set`, only when
+ * changed) so cohorts can use them.
+ */
 export async function setSuperProperties(
   properties: AnalyticsSuperProperties,
   expectedAppUserId?: string,
@@ -593,15 +677,20 @@ export async function setSuperProperties(
   const appUserId = expectedAppUserId ?? analyticsUserId;
   if (appUserId !== analyticsUserId) return false;
 
-  const mp = await ensureMixpanelIdentified();
-  if (appUserId !== analyticsUserId) return false;
-  let succeeded = !getMixpanelToken() || Boolean(mp);
-  if (mp) {
+  let succeeded = true;
+  const definedProperties = Object.fromEntries(
+    Object.entries(properties).filter(([, value]) => value !== undefined && value !== null),
+  ) as Record<string, string | number | boolean>;
+  const posthog = getPostHog();
+  if (posthog) {
     try {
-      await mp.registerSuperProperties(properties);
+      posthog.register(definedProperties);
     } catch (error) {
       succeeded = false;
-      reportProviderFailure('Mixpanel', 'super properties', error);
+      reportProviderFailure('PostHog', 'super properties', error);
+    }
+    if (!(await syncPersonProperties(definedProperties, {}, appUserId ?? undefined))) {
+      succeeded = false;
     }
   }
 
@@ -632,17 +721,7 @@ export async function setUserProperties(
   const appUserId = expectedAppUserId ?? analyticsUserId;
   if (appUserId !== analyticsUserId) return false;
 
-  const mp = await ensureMixpanelIdentified();
-  if (appUserId !== analyticsUserId) return false;
-  let succeeded = !getMixpanelToken() || Boolean(mp);
-  if (mp) {
-    try {
-      await mp.getPeople().set(properties);
-    } catch (error) {
-      succeeded = false;
-      reportProviderFailure('Mixpanel', 'user properties', error);
-    }
-  }
+  let succeeded = await syncPersonProperties(properties, {}, appUserId ?? undefined);
 
   const firebase = getFirebaseAnalytics();
   if (appUserId !== analyticsUserId) return false;
@@ -659,25 +738,25 @@ export async function setUserProperties(
   return succeeded;
 }
 
-/** Firebase manages its own batches; Mixpanel exposes the explicit flush. */
+/** Firebase manages its own batches; PostHog exposes the explicit flush. */
 export async function flushAnalytics(): Promise<void> {
   await waitForAnalyticsReady();
-  const mp = await ensureMixpanelIdentified();
-  if (!mp) return;
+  const posthog = getPostHog();
+  if (!posthog) return;
   try {
-    await mp.flush();
+    await posthog.flush();
   } catch (error) {
-    reportProviderFailure('Mixpanel', 'flush', error);
+    reportProviderFailure('PostHog', 'flush', error);
   }
 }
 
 export async function resetAnalytics(): Promise<void> {
-  const mp = await ensureMixpanelInitialized();
-  if (mp) {
+  const posthog = getPostHog();
+  if (posthog) {
     try {
-      await mp.reset();
+      posthog.reset();
     } catch (error) {
-      reportProviderFailure('Mixpanel', 'reset', error);
+      reportProviderFailure('PostHog', 'reset', error);
     }
   }
 
@@ -695,7 +774,7 @@ export async function resetAnalytics(): Promise<void> {
   analyticsUserId = null;
   firebaseConfiguredUserId = null;
   revenueCatRevenueUserId = null;
-  mixpanelIdentifiedUserId = null;
+  postHogIdentifiedUserId = null;
   installDate = null;
   currentScreen = null;
   lastFirebaseScreen = null;

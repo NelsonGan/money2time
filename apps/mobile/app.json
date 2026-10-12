@@ -307,14 +307,6 @@
         {
           "iosUrlScheme": "com.googleusercontent.apps.229377044166-7hkgkf8se5duonne5tgbph71ld6to3pg"
         }
-      ],
-      [
-        "@sentry/react-native/expo",
-        {
-          "url": "https://sentry.io/",
-          "project": "money2time",
-          "organization": "nelsons-project"
-        }
       ]
     ],
     "extra": {

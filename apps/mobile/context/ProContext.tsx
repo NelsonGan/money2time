@@ -186,7 +186,7 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
     };
   }, [customerState, refreshStatus]);
 
-  // Mirror Pro state onto the Mixpanel profile (People) and super-properties, so
+  // Mirror Pro state onto the PostHog person profile and super-properties, so
   // "is this user Pro" is answerable both per-user and per-event.
   //
   // Three things this effect has to get right:
@@ -195,11 +195,11 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
   //    exists to exercise gated UI locally and must never reach analytics.
   //  * It waits out `isLoading`. Pro starts false and resolves asynchronously,
   //    so writing eagerly would downgrade every returning subscriber to free for
-  //    the first few hundred ms of each launch, and Mixpanel would keep the last
+  //    the first few hundred ms of each launch, and PostHog would keep the last
   //    write of whichever race won.
   //  * It compares a signature rather than the state object. `refreshStatus`
   //    runs on every foreground and hands back a fresh object each time, so
-  //    without this the app would POST an identical profile on every resume.
+  //    without this the app would rewrite an identical profile on every resume.
   //    The signature is scoped to the identity it was written for, so a change
   //    of appUserId re-sends rather than reading as already-sent.
   const proProfileSignatureRef = useRef<string | null>(null);
@@ -214,7 +214,7 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
     let completed = false;
 
     void (async () => {
-      // People updates are attributed to whoever is identified at the time, and
+      // Person updates are attributed to whoever is identified at the time, and
       // effects in this provider run *before* the AppContext effect that calls
       // identify (React commits children first). Identifying here is a cheap
       // no-op once it has already happened, and removes that ordering hazard.

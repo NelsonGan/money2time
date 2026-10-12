@@ -4,6 +4,7 @@
 // returns the parsed transactions. The OpenRouter key lives only in this
 // Worker's secrets — never in the app.
 
+import { AiTrace, type OpenRouterUsage, type PostHogEnv } from './posthog';
 import { checkQuota, consumeQuota } from './ratelimit';
 import { getEntitlement } from './revenuecat';
 import {
@@ -14,7 +15,7 @@ import {
   type ScannedReceiptDetail,
 } from './scanModes';
 
-export interface Env {
+export interface Env extends PostHogEnv {
   // Rate-limit counters + entitlement cache (schema in apps/cloudflare/d1/receipt-scanner/schema.sql).
   MONEY2TIME_D1_RECEIPT_SCANNER: D1Database;
   OPENROUTER_API_KEY: string;
@@ -191,6 +192,8 @@ export default {
       );
     }
 
+    // One PostHog AI trace per scan; sent after the response via waitUntil.
+    const trace = new AiTrace(reqId, body.appUserId, { scan_mode: mode, is_pro: isPro });
     let transactions: ScannedTransaction[] = [];
     let receiptDetail: ScannedReceiptDetail | null = null;
     try {
@@ -201,8 +204,10 @@ export default {
         mode,
         now,
         startedAt + SCAN_BUDGET_MS,
+        trace,
       ));
     } catch (err) {
+      ctx.waitUntil(trace.flush(env));
       const message = err instanceof Error ? err.message : 'inference_failed';
       const capacity = /429|overloaded|capacity|concurren/i.test(message);
       logError('inference_failed', {
@@ -220,6 +225,7 @@ export default {
     // Consume quota only when the parse yielded something — an unreadable
     // receipt returns 200 but must not burn a scan. Written via waitUntil so the
     // response isn't held on a D1 round trip; `used` is the optimistic total.
+    ctx.waitUntil(trace.flush(env));
     const count = transactions.length;
     let used = quota.used;
     if (count > 0) {
@@ -346,6 +352,10 @@ interface AttemptOptions {
   temperature: number;
   /** Epoch ms after which no further inference may start (INFERENCE_BUDGET_MS). */
   deadline: number;
+  /** Empty-result attempt this belongs to (0 = first), for AI observability. */
+  attempt: number;
+  mode: ScanMode;
+  trace: AiTrace;
 }
 
 // Sends the receipt image + prompt to OpenRouter and returns the raw output.
@@ -355,6 +365,7 @@ async function completeScan(
   reqId: string,
   opts: AttemptOptions,
   model: string,
+  isBackupModel: boolean,
 ): Promise<string> {
   const dataUrl = `data:${body.mime};base64,${body.image}`;
   // Resolution hint attached only when set (see Env.IMAGE_DETAIL).
@@ -370,6 +381,9 @@ async function completeScan(
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), Math.min(INFERENCE_TIMEOUT_MS, remaining));
   const calledAt = Date.now();
+  let httpStatus: number | undefined;
+  let usage: OpenRouterUsage | undefined;
+  let failure: string | undefined;
   try {
     const res = await fetch(OPENROUTER_URL, {
       method: 'POST',
@@ -392,6 +406,9 @@ async function completeScan(
         // otherwise be billed as output tokens and add latency for no accuracy
         // gain. OpenRouter normalizes this across model families.
         reasoning: { enabled: false },
+        // Usage accounting adds the real USD cost to `usage`, which the
+        // PostHog generation records instead of re-pricing from tokens.
+        usage: { include: true },
         messages: [{ role: 'user', content: [
           { type: 'text', text: opts.prompt },
           { type: 'image_url', image_url: imageUrl },
@@ -399,6 +416,7 @@ async function completeScan(
       }),
     });
 
+    httpStatus = res.status;
     log('openrouter_response', {
       reqId,
       model,
@@ -414,10 +432,28 @@ async function completeScan(
 
     const completion = (await res.json()) as {
       choices?: { message?: { content?: string } }[];
+      usage?: OpenRouterUsage;
     };
+    usage = completion?.usage;
     return completion?.choices?.[0]?.message?.content ?? '';
+  } catch (err) {
+    failure = err instanceof Error ? err.message : String(err);
+    throw err;
   } finally {
     clearTimeout(timer);
+    opts.trace.recordGeneration({
+      model,
+      spanName: `receipt_scan_${opts.mode}`,
+      startedAt: calledAt,
+      endedAt: Date.now(),
+      httpStatus,
+      usage,
+      temperature: opts.temperature,
+      maxTokens: opts.maxTokens,
+      isBackupModel,
+      attempt: opts.attempt,
+      error: failure,
+    });
   }
 }
 
@@ -434,7 +470,7 @@ async function completeWithFailover(
   for (let i = 0; i < models.length; i += 1) {
     const model = models[i];
     try {
-      const content = await completeScan(body, env, reqId, opts, model);
+      const content = await completeScan(body, env, reqId, opts, model, i > 0);
       validateContent?.(content);
       return content;
     } catch (err) {
@@ -464,6 +500,7 @@ async function runInference(
   mode: ScanMode,
   now: Date,
   deadline: number,
+  trace: AiTrace,
 ): Promise<{
   transactions: ScannedTransaction[];
   receiptDetail: ScannedReceiptDetail | null;
@@ -488,6 +525,9 @@ async function runInference(
         maxTokens,
         deadline,
         temperature: attempt === 0 ? 0 : RETRY_TEMPERATURE,
+        attempt,
+        mode,
+        trace,
       });
     } catch (err) {
       // The first attempt's failure is the request's failure, as before. A
@@ -506,6 +546,10 @@ async function runInference(
     const transactions = parseTransactions(parsed, now);
     const receiptDetail = mode === 'itemized' ? normalizeReceiptDetail(parsed) : null;
     if (receiptDetail) receiptDetail.date = clampReceiptDate(receiptDetail.date, now);
+    trace.annotateLatest({
+      parsed_transactions: transactions.length,
+      parsed_items: receiptDetail?.items.length ?? 0,
+    });
     log('parsed', {
       reqId,
       attempt,

@@ -5,16 +5,18 @@
  * in the same change as event names, payloads, routing or usage milestones.
  *
  * Event names follow a consistent `Category Action` naming convention
- * so they sort naturally inside Mixpanel. GA4 receives a namespaced snake-case
+ * so they sort naturally inside PostHog. GA4 receives a namespaced snake-case
  * form produced by `toGa4EventName`.
  *
- * Every event goes to GA4, which is free and unsampled. Mixpanel bills per
- * event, so it only receives the events in `MIXPANEL_EVENTS`: installs,
- * activation, product-usage milestones, and every step of the path to a Pro
- * purchase, plus explicitly approved promotional clicks. Everything else is
- * per-use telemetry that GA4 answers on its own. A
- * new event has to be placed in one of the two groups below, and that placement
- * is the decision about whether it is worth paying for.
+ * Every event goes to GA4, which is free and unsampled. PostHog's free tier is
+ * one million events a month, so it only receives the events in
+ * `POSTHOG_EVENTS`: installs, activation, daily engagement, feature adoption,
+ * every step of the path to a Pro purchase, and low-volume moments worth a
+ * funnel or a cohort. Per-use telemetry for frequent actions stays in GA4, and
+ * PostHog sees those actions through the daily-capped `Feature Used` and
+ * `Daily Transaction Logged` events instead. A new event has to be placed in one
+ * of the two groups below, and that placement is the decision about whether it
+ * fits the PostHog budget (see "PostHog event budget" in the README).
  */
 
 import type { RevenueCatPeriodType } from './revenueCat.shared';
@@ -22,23 +24,25 @@ import type { RevenueCatPeriodType } from './revenueCat.shared';
 // Event name constants
 
 /**
- * Sent to Mixpanel and GA4. Keep this list to events that answer "where do new
- * users come from, do they activate, which features do they take up, and what
- * gets them to pay", and that fire a bounded number of times per user. A per-use
- * event for a frequent action does not belong here even if the feature matters:
- * its first use arrives as `Feature First Used`, every use is in GA4, and the Pro
- * gate it eventually hits already arrives as `Pro Paywall Viewed` with the gate
- * as its `source`. RiceCal ad clicks are an explicitly approved per-tap
- * exception for measuring promotional engagement.
+ * Sent to PostHog and GA4. Keep this list to events that answer "where do new
+ * users come from, do they activate, do they come back, which features do they
+ * take up, and what gets them to pay", and that fire a bounded number of times
+ * per user. A per-use event for a frequent action does not belong here even if
+ * the feature matters: every use is in GA4, PostHog gets one `Feature Used` per
+ * feature per day, and the Pro gate it eventually hits already arrives as
+ * `Pro Paywall Viewed` with the gate as its `source`. RiceCal ad clicks are an
+ * explicitly approved per-tap exception for measuring promotional engagement.
  */
-export const MIXPANEL_EVENTS = {
+export const POSTHOG_EVENTS = {
   // Approved promotional engagement: one event per explicit Settings ad tap.
   RICECAL_AD_CLICKED: 'RiceCal Ad Clicked',
 
   // Install and activation. One-off per user.
-  /** A fresh install's first launch. Replaces Mixpanel's automatic `$ae_first_open`. */
+  /** A fresh install's first launch. */
   FIRST_APP_OPEN: 'First App Open',
   ONBOARDING_STARTED: 'Onboarding Started',
+  /** A step with no outcome event of its own (`basics`, `wage`) is finished. */
+  ONBOARDING_STEP_COMPLETED: 'Onboarding Step Completed',
   ONBOARDING_COMPLETED: 'Onboarding Completed',
   ONBOARDING_SOURCE_SELECTED: 'Onboarding Source Selected',
   ONBOARDING_NOTIFICATIONS_ENABLED: 'Onboarding Notifications Enabled',
@@ -49,6 +53,15 @@ export const MIXPANEL_EVENTS = {
   FIRST_TRANSACTION_CREATED: 'First Transaction Created',
   /** Setting a wage is what unlocks the time view, the app's core idea. */
   WAGE_CONFIG_UPDATED: 'Wage Config Updated',
+
+  // Engagement, capped at once per local calendar day so DAU, retention and
+  // habit questions cost at most a few events per active user per day.
+  /** The first time the app comes to the foreground on a day: DAU and retention. */
+  DAILY_APP_OPEN: 'Daily App Open',
+  /** The first expense or income logged on a day: the habit a tracker lives on. */
+  DAILY_TRANSACTION_LOGGED: 'Daily Transaction Logged',
+  /** The first use of a feature (`DailyFeature`) on a day: feature stickiness. */
+  FEATURE_USED: 'Feature Used',
 
   // Product usage, as milestones rather than per use: each fires at most once
   // per feature or threshold, and only on installs tracked from their first
@@ -78,6 +91,48 @@ export const MIXPANEL_EVENTS = {
   PRO_LIMIT_HIT: 'Pro Limit Hit',
   PRO_CANCEL_SUB_PROMPT_ACTIONED: 'Pro Cancel Sub Prompt Actioned',
   PRO_REDUNDANT_SUB_CANCEL_TAPPED: 'Pro Redundant Sub Cancel Tapped',
+
+  // AI receipt scanning: outcome quality, joined to the Worker's `$ai_generation`
+  // traces in PostHog AI observability.
+  RECEIPT_SCAN_COMPLETED: 'Receipt Scan Completed',
+  RECEIPT_SCAN_FAILED: 'Receipt Scan Failed',
+  RECEIPT_SPLIT_ABANDONED: 'Receipt Split Abandoned',
+
+  // Sharing a settlement receipt puts the app in front of someone new.
+  SETTLE_UP_RECEIPT_SHARED: 'Settle Up Receipt Shared',
+
+  // Android payment-alert setup funnel, one event per step reached.
+  AUTOLOG_ALERTS_SETUP: 'Autolog Alerts Setup',
+
+  // Rare payoff moments, worth correlating with retention.
+  GOAL_ACHIEVED: 'Goal Achieved',
+  LOAN_PAID_OFF: 'Loan Paid Off',
+
+  // Data migration in and out: switching from another app, or starting over.
+  DATA_IMPORTED: 'Data Imported',
+  STATEMENT_IMPORT_COMPLETED: 'Statement Import Completed',
+  /** `scope` tells a full reset (which replays onboarding) from the narrower ones. */
+  DATA_RESET: 'Data Reset',
+
+  // Data-safety health and the opt-in prompt.
+  AUTO_BACKUP_FAILED: 'Auto Backup Failed',
+  CLOUD_BACKUP_PROMPT_SHOWN: 'Cloud Backup Prompt Shown',
+  CLOUD_BACKUP_PROMPT_CTA_TAPPED: 'Cloud Backup Prompt CTA Tapped',
+  CLOUD_BACKUP_PROMPT_DISMISSED: 'Cloud Backup Prompt Dismissed',
+
+  // Satisfaction: the happy/unhappy pre-prompt is a continuous NPS-like signal.
+  REVIEW_PREPROMPT_SHOWN: 'Review Preprompt Shown',
+  REVIEW_PREPROMPT_HAPPY: 'Review Preprompt Happy',
+  REVIEW_PREPROMPT_UNHAPPY: 'Review Preprompt Unhappy',
+  REVIEW_PREPROMPT_DISMISSED: 'Review Preprompt Dismissed',
+  REVIEW_PREPROMPT_FEEDBACK_OPENED: 'Review Preprompt Feedback Opened',
+  REVIEW_PREPROMPT_FEEDBACK_DECLINED: 'Review Preprompt Feedback Declined',
+
+  // Help-seeking: which tutorials people need, and from where.
+  TUTORIAL_OPENED: 'Tutorial Opened',
+
+  // A Pro-only personalization people choose deliberately.
+  APP_ICON_CHANGED: 'App Icon Changed',
 } as const;
 
 /** Per-use product telemetry and data maintenance, which only GA4 receives. */
@@ -95,21 +150,17 @@ export const GA4_ONLY_EVENTS = {
   BACK_TAP_TRIGGERED: 'Back Tap Triggered',
 
   // Automatic payment alerts (bank and wallet notifications, Log Notification)
-  AUTOLOG_ALERTS_SETUP: 'Autolog Alerts Setup',
   AUTOLOG_ALERTS_DRAINED: 'Autolog Alerts Drained',
   TRANSACTION_DELETED: 'Transaction Deleted',
   TRANSACTIONS_BULK_DELETED: 'Transactions Bulk Deleted',
 
   // Receipt scanning
   RECEIPT_SCAN_STARTED: 'Receipt Scan Started',
-  RECEIPT_SCAN_COMPLETED: 'Receipt Scan Completed',
   RECEIPT_SCAN_SAVED: 'Receipt Scan Saved',
-  RECEIPT_SCAN_FAILED: 'Receipt Scan Failed',
 
   // Itemized receipt split (Split by Item)
   RECEIPT_SPLIT_STARTED: 'Receipt Split Started',
   RECEIPT_SPLIT_SAVED: 'Receipt Split Saved',
-  RECEIPT_SPLIT_ABANDONED: 'Receipt Split Abandoned',
   RECEIPT_SPLIT_REOPENED: 'Receipt Split Reopened',
 
   // Split bills (Pay First)
@@ -117,7 +168,6 @@ export const GA4_ONLY_EVENTS = {
   SPLIT_BILL_CREATED: 'Split Bill Created',
   SPLIT_MARKED_PAID: 'Split Marked Paid',
   SPLIT_MARKED_UNPAID: 'Split Marked Unpaid',
-  SETTLE_UP_RECEIPT_SHARED: 'Settle Up Receipt Shared',
   SETTLE_UP_QR_SET: 'Settle Up Payment QR Set',
 
   // Reimbursements
@@ -135,14 +185,12 @@ export const GA4_ONLY_EVENTS = {
   GOAL_UPDATED: 'Goal Updated',
   GOAL_DEPOSIT_OPENED: 'Goal Deposit Opened',
   GOAL_WITHDRAW_OPENED: 'Goal Withdraw Opened',
-  GOAL_ACHIEVED: 'Goal Achieved',
   GOAL_ARCHIVED: 'Goal Archived',
   GOAL_UNARCHIVED: 'Goal Unarchived',
 
   // Loans
   LOAN_CREATED: 'Loan Created',
   LOAN_PAYMENT_RECORDED: 'Loan Payment Recorded',
-  LOAN_PAID_OFF: 'Loan Paid Off',
   LOAN_ARCHIVED: 'Loan Archived',
   LOAN_UNARCHIVED: 'Loan Unarchived',
 
@@ -177,49 +225,29 @@ export const GA4_ONLY_EVENTS = {
   // Tutorials. `source` says whether a website link or the settings list
   // opened them, which the screen view alone cannot.
   TUTORIAL_LIST_OPENED: 'Tutorial List Opened',
-  TUTORIAL_OPENED: 'Tutorial Opened',
 
   // Settings with a product question behind them
   DISPLAY_MODE_TOGGLED: 'Display Mode Toggled',
-  APP_ICON_CHANGED: 'App Icon Changed',
-
-  // Data management
-  /** `scope` tells a full reset (which replays onboarding) from the narrower ones. */
-  DATA_RESET: 'Data Reset',
-  DATA_IMPORTED: 'Data Imported',
-  STATEMENT_IMPORT_COMPLETED: 'Statement Import Completed',
 
   // Auto-backup
   AUTO_BACKUP_RESTORED: 'Auto Backup Restored',
   AUTO_BACKUP_DELETED: 'Auto Backup Deleted',
   AUTO_BACKUP_SETTING_TOGGLED: 'Auto Backup Setting Toggled',
   AUTO_BACKUP_TARGET_CHANGED: 'Auto Backup Target Changed',
-  AUTO_BACKUP_FAILED: 'Auto Backup Failed',
 
   // Review prompt
   REVIEW_PROMPT_MANUAL_OPENED: 'Review Prompt Manual Opened',
-  REVIEW_PREPROMPT_SHOWN: 'Review Preprompt Shown',
-  REVIEW_PREPROMPT_HAPPY: 'Review Preprompt Happy',
-  REVIEW_PREPROMPT_UNHAPPY: 'Review Preprompt Unhappy',
-  REVIEW_PREPROMPT_DISMISSED: 'Review Preprompt Dismissed',
-  REVIEW_PREPROMPT_FEEDBACK_OPENED: 'Review Preprompt Feedback Opened',
-  REVIEW_PREPROMPT_FEEDBACK_DECLINED: 'Review Preprompt Feedback Declined',
-
-  // Cloud-backup opt-in prompt
-  CLOUD_BACKUP_PROMPT_SHOWN: 'Cloud Backup Prompt Shown',
-  CLOUD_BACKUP_PROMPT_CTA_TAPPED: 'Cloud Backup Prompt CTA Tapped',
-  CLOUD_BACKUP_PROMPT_DISMISSED: 'Cloud Backup Prompt Dismissed',
 } as const;
 
-export const AnalyticsEvents = { ...MIXPANEL_EVENTS, ...GA4_ONLY_EVENTS } as const;
+export const AnalyticsEvents = { ...POSTHOG_EVENTS, ...GA4_ONLY_EVENTS } as const;
 
 export type AnalyticsEventName = (typeof AnalyticsEvents)[keyof typeof AnalyticsEvents];
 
-const MIXPANEL_EVENT_NAMES: ReadonlySet<string> = new Set(Object.values(MIXPANEL_EVENTS));
+export const POSTHOG_EVENT_NAMES: ReadonlySet<string> = new Set(Object.values(POSTHOG_EVENTS));
 
-/** Whether Mixpanel receives this event. GA4 receives every event. */
-export function isMixpanelEvent(eventName: AnalyticsEventName): boolean {
-  return MIXPANEL_EVENT_NAMES.has(eventName);
+/** Whether PostHog receives this event. GA4 receives every event. */
+export function isPostHogEvent(eventName: AnalyticsEventName): boolean {
+  return POSTHOG_EVENT_NAMES.has(eventName);
 }
 
 // Common property types
@@ -248,11 +276,12 @@ export function daysSinceInstall(
 
 /**
  * The event that marks a real use of each feature reported by
- * `Feature First Used`. Features are capabilities, not screens: opening a
- * screen is already a GA4 `screen_view`.
+ * `Feature First Used` and `Feature Used`. Features are capabilities, not
+ * screens: opening a screen is already a GA4 `screen_view`. Insights is the one
+ * screen-shaped exception (`SCREEN_FEATURES`), because reading it is the use.
  */
 const FEATURE_BY_EVENT = {
-  [GA4_ONLY_EVENTS.RECEIPT_SCAN_COMPLETED]: 'receipt_scan',
+  [POSTHOG_EVENTS.RECEIPT_SCAN_COMPLETED]: 'receipt_scan',
   [GA4_ONLY_EVENTS.VOICE_TRANSACTION_CREATED]: 'voice_entry',
   [GA4_ONLY_EVENTS.AUTOLOG_TRANSACTION_CREATED]: 'autolog',
   [GA4_ONLY_EVENTS.BACK_TAP_TRIGGERED]: 'back_tap',
@@ -261,7 +290,7 @@ const FEATURE_BY_EVENT = {
   [GA4_ONLY_EVENTS.DISPLAY_MODE_TOGGLED]: 'time_display',
   [GA4_ONLY_EVENTS.SPLIT_BILL_CREATED]: 'split_bill',
   [GA4_ONLY_EVENTS.RECEIPT_SPLIT_SAVED]: 'split_by_item',
-  [GA4_ONLY_EVENTS.SETTLE_UP_RECEIPT_SHARED]: 'settle_up_share',
+  [POSTHOG_EVENTS.SETTLE_UP_RECEIPT_SHARED]: 'settle_up_share',
   [GA4_ONLY_EVENTS.REIMBURSEMENT_FLAGGED]: 'reimbursements',
   [GA4_ONLY_EVENTS.RECURRING_RULE_CREATED]: 'recurring',
   [GA4_ONLY_EVENTS.GOAL_CREATED]: 'goals',
@@ -293,6 +322,23 @@ export function featureUsedBy(
   return feature;
 }
 
+/**
+ * Screens whose visit is itself the use of a feature. Only `Feature Used` (daily)
+ * reports these; they never count as a `Feature First Used` product feature.
+ */
+const SCREEN_FEATURES = {
+  insights: 'insights',
+} as const satisfies Record<string, string>;
+
+/** Anything `Feature Used` can report: a product feature or a screen feature. */
+export type DailyFeature = ProductFeature | (typeof SCREEN_FEATURES)[keyof typeof SCREEN_FEATURES];
+
+/** The feature visiting `screen` is a use of, or null. */
+export function featureViewedOn(screen: string | null | undefined): DailyFeature | null {
+  if (!screen) return null;
+  return (SCREEN_FEATURES as Record<string, DailyFeature>)[screen] ?? null;
+}
+
 /** Logged expense and income counts that `Transaction Milestone Reached` reports. */
 export const TRANSACTION_MILESTONES: readonly number[] = [10, 50, 100, 250, 500, 1000];
 
@@ -304,7 +350,8 @@ export const TRANSACTION_MILESTONES: readonly number[] = [10, 50, 100, 250, 500,
  * and `Transaction Milestone Reached`. On an install that predates them, the
  * first use seen after updating is not a first use, and a transaction count
  * would start from zero. Every install still lists its features on the
- * Mixpanel profile (`features_used`), which is not billed.
+ * PostHog person profile (`features_used`), which costs one `$set` event each
+ * time the list grows.
  */
 export interface UsageState {
   fromInstall: boolean;
@@ -350,6 +397,132 @@ export function parseUsageState(raw: string | null): UsageState {
   };
 }
 
+// Daily engagement
+
+/**
+ * What analytics remembers about today's engagement on this install, so the
+ * daily events fire once per local calendar day however often the user opens
+ * the app, logs or uses a feature. Lifetime counters ride on those events, so a
+ * cohort of "users on their 30th active day" needs no extra event.
+ */
+export interface DailyState {
+  /** The local day (`YYYY-MM-DD`) the flags below describe. */
+  day: string | null;
+  opened: boolean;
+  transactionLogged: boolean;
+  features: DailyFeature[];
+  /** Days with a `Daily App Open` on this install. */
+  activeDays: number;
+  /** Days with a `Daily Transaction Logged` on this install. */
+  loggingDays: number;
+  /** The previous day with a `Daily App Open`, for `days_since_last_active`. */
+  lastActiveDay: string | null;
+}
+
+export const DAILY_STATE_STORAGE_KEY = '@m2t/analytics_daily/v1';
+
+export const EMPTY_DAILY_STATE: DailyState = {
+  day: null,
+  opened: false,
+  transactionLogged: false,
+  features: [],
+  activeDays: 0,
+  loggingDays: 0,
+  lastActiveDay: null,
+};
+
+/** The device's local calendar day as `YYYY-MM-DD`. */
+export function localDayKey(now: Date = new Date()): string {
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${now.getFullYear()}-${month}-${day}`;
+}
+
+/** Whole calendar days from `from` to `to`, both `YYYY-MM-DD`; null when unreadable. */
+export function daysBetween(from: string | null, to: string): number | null {
+  if (!from) return null;
+  const start = Date.parse(`${from}T00:00:00Z`);
+  const end = Date.parse(`${to}T00:00:00Z`);
+  if (!Number.isFinite(start) || !Number.isFinite(end)) return null;
+  return Math.max(0, Math.round((end - start) / DAY_MS));
+}
+
+function readCount(value: unknown): number {
+  return typeof value === 'number' && Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
+}
+
+const DAY_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Read a stored `DailyState`; anything unreadable is a fresh state. */
+export function parseDailyState(raw: string | null): DailyState {
+  if (!raw) return EMPTY_DAILY_STATE;
+  let value: unknown;
+  try {
+    value = JSON.parse(raw);
+  } catch {
+    return EMPTY_DAILY_STATE;
+  }
+  if (!value || typeof value !== 'object') return EMPTY_DAILY_STATE;
+  const state = value as Record<string, unknown>;
+  const dayKey = (candidate: unknown) =>
+    typeof candidate === 'string' && DAY_KEY_PATTERN.test(candidate) ? candidate : null;
+  return {
+    day: dayKey(state.day),
+    opened: state.opened === true,
+    transactionLogged: state.transactionLogged === true,
+    features: Array.isArray(state.features)
+      ? state.features.filter(
+          (feature): feature is DailyFeature => typeof feature === 'string' && feature.length > 0,
+        )
+      : [],
+    activeDays: readCount(state.activeDays),
+    loggingDays: readCount(state.loggingDays),
+    lastActiveDay: dayKey(state.lastActiveDay),
+  };
+}
+
+/** The state for `today`: unchanged on the same day, today's flags cleared on a new one. */
+export function rollDailyState(state: DailyState, today: string): DailyState {
+  if (state.day === today) return state;
+  return { ...state, day: today, opened: false, transactionLogged: false, features: [] };
+}
+
+/** Claim today's `Daily App Open`; null when today already has one. */
+export function claimDailyAppOpen(
+  state: DailyState,
+  today: string,
+): [DailyState, { active_days: number; days_since_last_active: number | null } | null] {
+  const current = rollDailyState(state, today);
+  if (current.opened) return [current, null];
+  const activeDays = current.activeDays + 1;
+  return [
+    { ...current, opened: true, activeDays, lastActiveDay: today },
+    { active_days: activeDays, days_since_last_active: daysBetween(current.lastActiveDay, today) },
+  ];
+}
+
+/** Claim today's `Daily Transaction Logged`; null when today already has one. */
+export function claimDailyTransaction(
+  state: DailyState,
+  today: string,
+): [DailyState, { logging_days: number } | null] {
+  const current = rollDailyState(state, today);
+  if (current.transactionLogged) return [current, null];
+  const loggingDays = current.loggingDays + 1;
+  return [{ ...current, transactionLogged: true, loggingDays }, { logging_days: loggingDays }];
+}
+
+/** Claim today's `Feature Used` for `feature`; false when today already has it. */
+export function claimDailyFeature(
+  state: DailyState,
+  today: string,
+  feature: DailyFeature,
+): [DailyState, boolean] {
+  const current = rollDailyState(state, today);
+  if (current.features.includes(feature)) return [current, false];
+  return [{ ...current, features: [...current.features, feature] }, true];
+}
+
 const GA4_EVENT_NAME_LIMIT = 40;
 const GA4_PARAMETER_NAME_LIMIT = 40;
 const GA4_PARAMETER_VALUE_LIMIT = 100;
@@ -367,7 +540,7 @@ function toSnakeCase(value: string): string {
     .replace(/^_+|_+$/g, '');
 }
 
-/** Map a Mixpanel display name to a valid, clearly namespaced GA4 custom name. */
+/** Map an event display name to a valid, clearly namespaced GA4 custom name. */
 export function toGa4EventName(eventName: string): string {
   const normalized = toSnakeCase(eventName) || 'event';
   return `m2t_${normalized}`.slice(0, GA4_EVENT_NAME_LIMIT);
@@ -419,22 +592,21 @@ export function toGa4UserProperties(
 }
 
 /**
- * Mixpanel People (user profile) properties. Unlike event properties these are
- * a last-write-wins store on the profile: a key we stop sending keeps whatever
+ * PostHog person properties. Unlike event properties these are a
+ * last-write-wins store on the person: a key we stop sending keeps whatever
  * value it last had. So anything that must be *current* has to be written on
- * every sync, never conditionally — see `buildProAnalyticsProfile`. Profile
- * updates are not billed as Mixpanel events, which makes the profile the place
- * for state (plan, install date) rather than an event every time it changes.
+ * every sync, never conditionally — see `buildProAnalyticsProfile`. Each write
+ * is a billable `$set` event, so the native module only sends keys whose value
+ * changed since the last write it stored on the device.
  */
 export type AnalyticsUserProperties = Record<string, string | number | boolean>;
 
 // Super-property keys set once per session / user
 
 /**
- * Stable user state, on every Mixpanel event and mirrored to GA4 user
- * properties. The visible screen is not one: `trackEvent` stamps
- * `current_screen` on each event instead (see `RETIRED_SUPER_PROPERTIES` in the
- * native module).
+ * Stable user state, registered on every PostHog event (locally, at no cost)
+ * and mirrored to GA4 user properties. The visible screen is not one:
+ * `trackEvent` stamps `current_screen` on each event instead.
  */
 export interface AnalyticsSuperProperties {
   is_pro?: boolean;
@@ -492,7 +664,7 @@ export interface ProAnalyticsSource {
 }
 
 export interface ProAnalyticsProfile {
-  /** Written to the Mixpanel People profile — the answer to "who is Pro today". */
+  /** Written to the PostHog person profile — the answer to "who is Pro today". */
   userProperties: AnalyticsUserProperties;
   /** Registered as super-properties so every *event* is segmentable by Pro. */
   superProperties: AnalyticsSuperProperties;
@@ -506,7 +678,7 @@ export interface ProAnalyticsProfile {
 }
 
 /**
- * Build the Mixpanel profile for a user's Pro state.
+ * Build the PostHog person profile for a user's Pro state.
  *
  * `is_pro`, `pro_plan`, `pro_period_type` and `pro_renewing` are written
  * unconditionally, because they must reflect *now* and a People profile never

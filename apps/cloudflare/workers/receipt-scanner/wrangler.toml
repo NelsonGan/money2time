@@ -51,6 +51,12 @@ FREE_LIMIT = "20"
 FREE_INTERVAL = "100year"
 PRO_LIMIT = "500"
 PRO_INTERVAL = "month"
+# PostHog AI observability: one `$ai_generation` per OpenRouter call (model,
+# tokens, cost, latency, errors; never the image, prompt or result). The project
+# token is a public, write-only ingestion key shipped in the app too, so it is a
+# plain var rather than a secret. Remove it to stop sending. See src/posthog.ts.
+POSTHOG_PROJECT_TOKEN = "phc_zDp6LuXmZ7qkXkzHU5pKPPDnMPUK4wDoY8kqs4HRYqxR"
+POSTHOG_HOST = "https://us.i.posthog.com"
 # Optional image-resolution hint sent to the provider (OpenAI-style
 # image_url.detail): "low" | "high" | "auto". "low" downsamples the image to
 # cut input tokens, at some OCR-accuracy risk — flip it on here to A/B the
