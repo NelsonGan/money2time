@@ -2,9 +2,17 @@
 // shared inputs (categories, currency, and — screenshot only — account names)
 // and dispatches to exactly one mode.
 
-import { buildItemizedPrompt, ITEMIZED_MAX_TOKENS } from './itemized';
-import { buildQuickPrompt, QUICK_MAX_TOKENS } from './quick';
-import { buildScreenshotPrompt, SCREENSHOT_MAX_TOKENS } from './screenshot';
+import {
+  compilePrompt,
+  NO_ACCOUNTS_SECTION,
+  PROMPT_NAMES,
+  type PromptEnv,
+  type ResolvedPrompt,
+  resolvePrompt,
+} from '../prompts';
+import { ITEMIZED_MAX_TOKENS } from './itemized';
+import { QUICK_MAX_TOKENS } from './quick';
+import { SCREENSHOT_MAX_TOKENS } from './screenshot';
 
 export type { ScannedReceiptDetail, ScannedReceiptItem } from './itemized';
 export { normalizeReceiptDetail } from './itemized';
@@ -35,25 +43,49 @@ function toAllowedLine(list: string[]): string {
   return Array.from(new Set(list.map((c) => String(c).trim()).filter(Boolean))).join(', ');
 }
 
-// Build the prompt for `mode`. `accounts` feeds screenshot detection; other
-// modes ignore it.
-export function buildReceiptPrompt(
+export interface BuiltPrompt {
+  text: string;
+  /** The mode's main prompt, for `$ai_prompt_name` / `$ai_prompt_version`. */
+  prompt: ResolvedPrompt;
+}
+
+// Build the prompt for `mode` from its PostHog-hosted template (bundled copy as
+// fallback). `accounts` feeds screenshot detection; other modes ignore it.
+export async function buildReceiptPrompt(
+  env: PromptEnv,
   categories: string[],
   currency: string,
   mode: ScanMode = 'quick',
   accounts: string[] = [],
-): string {
+): Promise<BuiltPrompt> {
   const list =
     Array.isArray(categories) && categories.length > 0 ? categories : DEFAULT_EXPENSE_CATEGORIES;
-  const allowedLine = toAllowedLine(list);
-  const currencyCode = normalizeCurrencyCode(currency);
+  const variables: Record<string, string> = {
+    allowed_categories: toAllowedLine(list),
+    currency_code: normalizeCurrencyCode(currency),
+  };
 
-  if (mode === 'itemized') return buildItemizedPrompt(allowedLine, currencyCode);
   if (mode === 'screenshot') {
     const accountsLine = toAllowedLine(Array.isArray(accounts) ? accounts : []);
-    return buildScreenshotPrompt(allowedLine, currencyCode, accountsLine);
+    const [main, accountsPrompt] = await Promise.all([
+      resolvePrompt(env, PROMPT_NAMES.screenshot),
+      accountsLine
+        ? resolvePrompt(env, PROMPT_NAMES.screenshotAccounts)
+        : Promise.resolve(null),
+    ]);
+    // No account list to match against: pin `account` to "" and drop the
+    // matching section rather than invite a free-text guess the app can't use.
+    variables.accounts_section = accountsPrompt
+      ? compilePrompt(accountsPrompt.template, { allowed_accounts: accountsLine })
+      : NO_ACCOUNTS_SECTION;
+    return { text: compilePrompt(main.template, variables), prompt: main };
   }
-  return buildQuickPrompt(allowedLine, currencyCode);
+
+  const prompt = await resolvePrompt(
+    env,
+    mode === 'itemized' ? PROMPT_NAMES.itemized : PROMPT_NAMES.quick,
+  );
+  return { text: compilePrompt(prompt.template, variables), prompt };
 }
 
 /** The output-token budget for `mode` (each path owns its own). */

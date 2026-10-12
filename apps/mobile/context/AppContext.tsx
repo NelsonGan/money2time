@@ -105,7 +105,7 @@ import {
   runAutoBackupIfDue,
   unregisterBackgroundTask,
 } from '~/services/autoBackup';
-import { reportError, setErrorUser } from '~/services/errorReporting';
+import { reportError } from '~/services/errorReporting';
 import { refreshRatesNow, runRateRefreshIfDue } from '~/services/exchangeRates';
 import { setHapticsEnabled } from '~/services/haptics';
 import {
@@ -1162,7 +1162,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       const nextSettings = settingsRepository.get();
       if (databaseInit.isNewInstall) {
-        // Stands in for Mixpanel's automatic `$ae_first_open`, which is off.
+        // The install's first launch; PostHog's automatic lifecycle events are off.
         // Queued until the new appUserId is identified, like any early event.
         void trackEvent(AnalyticsEvents.FIRST_APP_OPEN, {
           locale: nextSettings.locale,
@@ -1332,7 +1332,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // This is the app's hard-failure path: settings stays null, so the user
       // gets the retry card instead of the app. It swallows migration throws and
       // repository read failures alike, so without an explicit report these are
-      // completely invisible in Sentry — the users worst affected are exactly
+      // completely invisible in error tracking — the users worst affected are exactly
       // the ones we hear nothing from.
       reportError(error, { scope: 'app_load' });
       setLoadError(getErrorMessage(error, I18n.t('errors.data_load_failed')));
@@ -2289,7 +2289,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             });
           }
           if (isLoggedEntryType(normalizedInput.type) && meta?.source !== 'statement_import') {
-            void recordLoggedTransaction();
+            void recordLoggedTransaction({
+              type: normalizedInput.type,
+              source: meta?.source ?? 'manual',
+            });
           }
           recordTransactionLogged();
           // Reconcile only the inserted row. A full refreshTransactions here
@@ -3042,7 +3045,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               source: receiptSplit ? 'receipt_split' : 'split',
             });
           }
-          if (isLoggedEntryType(normalizedInput.type)) void recordLoggedTransaction();
+          if (isLoggedEntryType(normalizedInput.type)) {
+            void recordLoggedTransaction({
+              type: normalizedInput.type,
+              source: receiptSplit ? 'receipt_split' : 'split',
+            });
+          }
           recordTransactionLogged();
         } catch {
           // optimistic rollback handled by refresh
@@ -3690,7 +3698,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!settings?.appUserId) return;
     void identifyUser(settings.appUserId);
-    setErrorUser(settings.appUserId);
   }, [settings?.appUserId]);
 
   // Every analytics event carries `days_since_install` measured from this.

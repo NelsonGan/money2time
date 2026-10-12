@@ -1,6 +1,7 @@
 // Itemized scan mode — the quick envelope PLUS a "receiptDetail" line-item list
-// (single-receipt images only) for the app's Split-by-Item flow. Holds its
-// prompt, token budget, receiptDetail shape, and that shape's normalization.
+// (single-receipt images only) for the app's Split-by-Item flow. Its prompt is
+// `receipt-scan-itemized` in ../prompts.ts (hosted in PostHog); this file holds
+// its token budget, receiptDetail shape, and that shape's normalization.
 
 // Bigger budget: the full line-item list needs far more room than a total.
 export const ITEMIZED_MAX_TOKENS = 5000;
@@ -21,31 +22,6 @@ export interface ScannedReceiptDetail {
   currency: string | null;
   items: ScannedReceiptItem[];
   itemsConfidence: Confidence;
-}
-
-export function buildItemizedPrompt(allowedLine: string, currencyCode: string): string {
-  return `You are a receipt-parsing engine for a personal finance app, given an image of one or more receipts. Return ONLY minified JSON — a single line, no extra whitespace, no prose, no markdown, no code fences.
-
-1. Emit exactly ONE transaction per receipt (the "transactions" array).
-2. When the image holds exactly ONE receipt, ALSO emit a "receiptDetail" object listing its line items. Omit "receiptDetail" entirely for multi-receipt images or when there is no readable receipt.
-
-## Finding the total (for the transaction amount)
-The final total is what the customer actually paid, AFTER tax, tip and discounts — usually the largest money figure near the bottom, labelled TOTAL, GRAND TOTAL, AMOUNT DUE, BALANCE DUE, or the amount charged to the card. If both a SUBTOTAL and a TOTAL are printed, use the TOTAL. Ignore SUBTOTAL, tax/VAT/GST lines, AMOUNT TENDERED / CASH / CARD / CHANGE, and loyalty balances.
-
-## Output schema
-{"transactions":[{"type":"expense","amount":0.00,"currency":"${currencyCode}","date":"YYYY-MM-DD","category":"Other","note":"string"}],"receiptDetail":{"merchant":"string","date":"YYYY-MM-DD","currency":"USD","items":[{"name":"string","quantity":1,"lineTotal":0.00,"confidence":"high"}],"itemsConfidence":"high"}}
-
-- transactions[].amount/currency follow the total rules above; "currency" is ALWAYS "${currencyCode}".
-- receiptDetail.currency: the ISO code detected from the receipt's own symbols/labels (e.g. "MYR", "JPY"); null when unsure — never guess.
-- items: one entry per purchased line, top to bottom. ALWAYS include "quantity": the printed count of units on that line (a whole number when the receipt shows "2", "3x", "2 @", etc.; default 1; a weight like 0.45 is allowed). "lineTotal" is that line's total pre-tax cost for ALL its units (fold in any per-item discount), number only, 2 decimals. Do NOT include subtotal, tax, service charge, tips, receipt-level discounts, rounding, change, loyalty points, or payment lines as items — the app adds tax/service itself.
-- "confidence" / "itemsConfidence": "high" | "low" ("low" when hard to read). If the item section is unreadable, return "items":[] with "itemsConfidence":"low". Never invent items.
-- date fields: "YYYY-MM-DD"; infer the recent plausible year from a day/month; null if absent.
-
-## Allowed categories (pick the single best fit — value must match EXACTLY, case included)
-${allowedLine}
-If nothing fits well, use "Other" when present, otherwise the closest general-purpose category. Never invent a category.
-
-If the image has no readable receipt, return {"transactions":[]} with no "receiptDetail".`;
 }
 
 function coerceConfidence(value: unknown): Confidence {

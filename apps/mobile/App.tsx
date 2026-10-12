@@ -4,7 +4,6 @@ import './global.css';
 import './services/autoBackupTaskRegistration';
 
 import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
-import * as Sentry from '@sentry/react-native';
 import { useFonts } from 'expo-font';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import * as SplashScreen from 'expo-splash-screen';
@@ -197,7 +196,7 @@ import {
   recordCloudBackupPromptShown,
 } from '~/services/cloudBackupPrompt';
 import { handleMoney2TimeDeepLink, subscribeMoney2TimeDeepLinks } from '~/services/deepLinks';
-import { beforeBreadcrumbFilter, beforeSendEvent, reportError } from '~/services/errorReporting';
+import { reportError } from '~/services/errorReporting';
 import {
   getLatestUnseenAnnouncementForUser,
   markCurrentFeatureAnnouncementsSeen,
@@ -213,6 +212,7 @@ import { requestFocusInsight } from '~/services/insightsNavigation';
 import { subscribeNotificationResponses } from '~/services/notifications';
 import { subscribeOpenPaymentAlerts } from '~/services/paymentAlertsNavigation';
 import { subscribeOpenPaywallRequest } from '~/services/paywallNavigation';
+import { initPostHog } from '~/services/posthog';
 import { downscaleReceiptForStorage } from '~/services/receiptImage';
 import { subscribeOpenReceiptSplit } from '~/services/receiptSplitNavigation';
 import { recordInsightsView } from '~/services/reviewPrompt';
@@ -237,22 +237,10 @@ import { financialMonthKeyForDate, monthCycleOf } from '~/utils/financialMonth';
 import { dayKeyFromIsoLocal, monthKeyFromIsoLocal } from '~/utils/formatters';
 import { perfInteraction, perfMark, perfStartupDone } from '~/utils/perfTrace';
 import { markSplashHidden, whenSplashHidden } from '~/utils/splashState';
-Sentry.init({
-  // Read from Expo public env (EXPO_PUBLIC_* is inlined at build time). Left
-  // undefined when unset, which disables Sentry rather than crashing.
-  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
-
-  // Finance app: never send IP, cookies, request bodies, or user PII.
-  sendDefaultPii: false,
-
-  // Sentry Logs product stays off; error monitoring does not need it.
-  enableLogs: false,
-
-  // Dedupe + volume-cap + PII scrub so a render loop can't burn the quota and
-  // no financial data leaves the device. See services/errorReporting.
-  beforeSend: (event) => beforeSendEvent(event),
-  beforeBreadcrumb: (breadcrumb) => beforeBreadcrumbFilter(breadcrumb),
-});
+// PostHog starts before anything renders so error autocapture (uncaught
+// JavaScript errors, unhandled rejections and native crashes) covers startup.
+// Its options, and why each is set, live in services/posthog.native.
+initPostHog();
 
 type MainTab = TabName;
 
@@ -2913,7 +2901,7 @@ function AppContent() {
   );
 }
 
-export default Sentry.wrap(function App() {
+export default function App() {
   perfMark('app_render');
   const [fontsLoaded, fontError] = useFonts(CUSTOM_FONTS);
 
@@ -2959,4 +2947,4 @@ export default Sentry.wrap(function App() {
       </KeyboardProvider>
     </GestureHandlerRootView>
   );
-});
+}

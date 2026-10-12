@@ -163,7 +163,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const handleSourceContinue = useCallback(() => {
     if (!acquisitionSource) return;
     void trackEvent(AnalyticsEvents.ONBOARDING_SOURCE_SELECTED, { source: acquisitionSource });
-    // Stamp the answer on the Mixpanel user profile so cohorts can be broken
+    // Stamp the answer on the PostHog person profile so cohorts can be broken
     // down by acquisition channel.
     void setUserProperties({ acquisition_source: acquisitionSource });
     setStep('notifications');
@@ -254,7 +254,13 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 updateSettings({ themeColor });
               }}
               onBack={() => setStep('welcome')}
-              onContinue={() => setStep('wage')}
+              onContinue={() => {
+                void trackEvent(AnalyticsEvents.ONBOARDING_STEP_COMPLETED, {
+                  step: 'basics',
+                  currency_code: settings.currencyCode,
+                });
+                setStep('wage');
+              }}
             />
           </Animated.View>
         )}
@@ -266,7 +272,13 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               currentMonthWage={currentMonthWage}
               wageIsSet={wageIsSet}
               onBack={() => setStep('basics')}
-              onContinue={() => setStep('backup')}
+              onContinue={() => {
+                void trackEvent(AnalyticsEvents.ONBOARDING_STEP_COMPLETED, {
+                  step: 'wage',
+                  wage_set: wageIsSet,
+                });
+                setStep('backup');
+              }}
               onOpenWageCalculator={() => {
                 void triggerHaptic('selection');
                 setShowWageCalculator(true);

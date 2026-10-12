@@ -1,9 +1,9 @@
 /**
- * `initializeDatabase().isNewInstall` is what fires `First App Open`, which
- * stands in for Mixpanel's automatic `$ae_first_open` now that those events are
- * off. It has to be true exactly once per install: on the call that seeds the
- * settings row (and with it the install's appUserId), never on a later load, a
- * retry, or an existing install's launch.
+ * `initializeDatabase().isNewInstall` is what fires `First App Open`, the
+ * install event (PostHog's automatic lifecycle events are off). It has to be
+ * true exactly once per install: on the call that seeds the settings row (and
+ * with it the install's appUserId), never on a later load, a retry, or an
+ * existing install's launch.
  */
 
 declare const global: Record<string, unknown>;

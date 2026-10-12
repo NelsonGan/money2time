@@ -19,7 +19,7 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 
-/** Stable ids sent to Mixpanel as the `acquisition_source` user property. */
+/** Stable ids sent to PostHog and GA4 as the `acquisition_source` user property. */
 export type AcquisitionSource =
   | 'xiaohongshu'
   | 'reddit'

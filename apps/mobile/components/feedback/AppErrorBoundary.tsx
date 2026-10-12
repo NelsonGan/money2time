@@ -33,7 +33,7 @@ export class AppErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error, info: React.ErrorInfo): void {
     // The boundary swallows the error (shows the fallback), so it never reaches
-    // Sentry's global handler on its own — report it here.
+    // PostHog's global error handler on its own — report it here.
     reportError(error, { componentStack: info.componentStack });
   }
 
