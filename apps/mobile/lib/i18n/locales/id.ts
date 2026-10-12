@@ -89,6 +89,11 @@ const id = {
     name: 'Money2Time',
   },
   nav: {
+    tab_goals: 'Target',
+    tab_recurring: 'Berulang',
+    tab_reimbursements: 'Penggantian',
+    tab_receipts: 'Struk',
+    tab_settle_up: 'Siapa yang berutang padamu',
     tab_calendar: 'Kalender',
     tab_accounts: 'Akun',
     tab_insights: 'Wawasan',
@@ -782,6 +787,11 @@ const id = {
       placeholder_income: 'Coba "Gaji 3000", "Bonus 500", "Refund 50".',
     },
     editor: {
+      details: {
+        title: 'Detail',
+        placeholder: 'Dengan siapa, untuk apa, apa pun yang perlu diingat',
+        empty: 'Tambahkan catatan yang lebih panjang',
+      },
       transfer_expense_label: 'Hitung sebagai pengeluaran',
       transfer_expense_tooltip:
         'Menghitung transfer ini sebagai pengeluaran di total, anggaran, dan grafik kamu, di bawah kategori yang kamu pilih. Uang tetap berpindah antara kedua akun seperti biasa.',
@@ -1133,6 +1143,17 @@ const id = {
     },
   },
   settings: {
+    visibility_show: 'Tampilkan',
+    visibility_hide: 'Sembunyikan',
+    bottom_bar: {
+      title: 'Bilah bawah',
+      home: 'Beranda',
+      more_pages: 'Halaman lain',
+      pinned: 'Selalu di bilah',
+      remove: 'Hapus {{page}}',
+      add: 'Tambah {{page}}',
+      reset: 'Kembalikan ke default',
+    },
     app_lock: {
       delay_section: 'Kunci setelah',
       delay_immediately: 'Segera',
@@ -1568,6 +1589,7 @@ const id = {
       column_category: 'Kategori',
       column_subcategory: 'Subkategori',
       column_note: 'Catatan',
+      column_details: 'Detail',
       column_sentiment: 'Perasaan',
       column_recurring: 'Berulang',
       column_name: 'Nama',

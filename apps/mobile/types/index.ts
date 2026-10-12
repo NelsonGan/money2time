@@ -322,6 +322,10 @@ export interface UserSettings {
   reimbursementsCountAsExpense: boolean;
   /** Whether transaction rows show their account (name and logo). */
   showTransactionAccount: boolean;
+  /** Whether account pickers show each account's balance under its name. */
+  showAccountPickerBalances: boolean;
+  /** The bottom bar's tabs as stored. Null means the default set; read with parseNavTabs. */
+  navTabsJson: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -865,6 +869,11 @@ export interface Transaction {
   toAccountId: string | null;
   categoryId: string | null;
   note: string | null;
+  /**
+   * A longer free-text note, kept apart from `note` (which is the row's
+   * title). Searched alongside it. Null when empty.
+   */
+  details: string | null;
   /**
    * Relative path (within the user-assets store) of an optional receipt image,
    * e.g. `receipts/9f3c.jpg`. Resolve to a file uri with `getReceiptUri`. Null

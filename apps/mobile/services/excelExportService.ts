@@ -73,6 +73,7 @@ function buildTransactionsSheet(data: ExcelExportData): XlsxSheet {
         category,
         subcategory,
         transaction.note ?? '',
+        transaction.details ?? '',
         transaction.sentiment,
         transaction.recurrencePattern === 'none' ? labels.no : labels.yes,
       ];

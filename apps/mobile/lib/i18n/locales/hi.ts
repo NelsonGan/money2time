@@ -89,6 +89,11 @@ const hi = {
     name: 'Money2Time',
   },
   nav: {
+    tab_goals: 'लक्ष्य',
+    tab_recurring: 'आवर्ती',
+    tab_reimbursements: 'प्रतिपूर्ति',
+    tab_receipts: 'रसीदें',
+    tab_settle_up: 'किस पर आपका बकाया है',
     tab_calendar: 'कैलेंडर',
     tab_accounts: 'खाते',
     tab_insights: 'जानकारी',
@@ -780,6 +785,11 @@ const hi = {
       placeholder_income: 'जैसे "Salary 30000", "Bonus 5000", "Refund 500"।',
     },
     editor: {
+      details: {
+        title: 'विवरण',
+        placeholder: 'किसके साथ थे, किस लिए था, जो कुछ भी याद रखने लायक हो',
+        empty: 'लंबा नोट जोड़ें',
+      },
       transfer_expense_label: 'खर्च के रूप में गिनें',
       transfer_expense_tooltip:
         'इस ट्रांसफ़र को आपके कुल, बजट और चार्ट में आपकी चुनी श्रेणी के तहत खर्च के रूप में गिनता है। पैसा दोनों खातों के बीच पहले की तरह ही जाता है।',
@@ -1123,6 +1133,17 @@ const hi = {
     },
   },
   settings: {
+    visibility_show: 'दिखाएँ',
+    visibility_hide: 'छिपाएँ',
+    bottom_bar: {
+      title: 'नीचे की पट्टी',
+      home: 'होम',
+      more_pages: 'और पेज',
+      pinned: 'हमेशा पट्टी में',
+      remove: '{{page}} हटाएँ',
+      add: '{{page}} जोड़ें',
+      reset: 'डिफ़ॉल्ट पर रीसेट करें',
+    },
     app_lock: {
       delay_section: 'इसके बाद लॉक करें',
       delay_immediately: 'तुरंत',
@@ -1554,6 +1575,7 @@ const hi = {
       column_category: 'श्रेणी',
       column_subcategory: 'उपश्रेणी',
       column_note: 'नोट',
+      column_details: 'विवरण',
       column_sentiment: 'भावना',
       column_recurring: 'आवर्ती',
       column_name: 'नाम',

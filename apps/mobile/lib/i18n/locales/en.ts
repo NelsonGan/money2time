@@ -89,6 +89,11 @@ const en = {
     name: 'Money2Time',
   },
   nav: {
+    tab_goals: 'Goals',
+    tab_recurring: 'Recurring',
+    tab_reimbursements: 'Reimbursements',
+    tab_receipts: 'Receipts',
+    tab_settle_up: 'Who owes you',
     tab_calendar: 'Calendar',
     tab_accounts: 'Accounts',
     tab_insights: 'Insights',
@@ -756,6 +761,11 @@ const en = {
       placeholder_income: 'Try "Salary 3000", "Bonus 500", "Refund 50".',
     },
     editor: {
+      details: {
+        title: 'Details',
+        placeholder: 'Who it was with, what it covered, anything worth remembering',
+        empty: 'Add a longer note',
+      },
       transfer_expense_label: 'Count as expense',
       transfer_expense_tooltip:
         'Counts this transfer as spending in your totals, budgets and charts, filed under the category you pick. The money still moves between the two accounts as usual.',
@@ -1103,6 +1113,17 @@ const en = {
     },
   },
   settings: {
+    visibility_show: 'Show',
+    visibility_hide: 'Hide',
+    bottom_bar: {
+      title: 'Bottom bar',
+      home: 'Home',
+      more_pages: 'More pages',
+      pinned: 'Always in the bar',
+      remove: 'Remove {{page}}',
+      add: 'Add {{page}}',
+      reset: 'Reset to default',
+    },
     app_lock: {
       delay_section: 'Lock after',
       delay_immediately: 'Immediately',
@@ -1568,6 +1589,7 @@ const en = {
       column_category: 'Category',
       column_subcategory: 'Subcategory',
       column_note: 'Note',
+      column_details: 'Details',
       column_sentiment: 'Sentiment',
       column_recurring: 'Recurring',
       column_name: 'Name',

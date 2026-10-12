@@ -105,6 +105,8 @@ export const transactionsTable = sqliteTable('transactions', {
   toAccountId: text('to_account_id'),
   categoryId: text('category_id'),
   note: text('note'),
+  // Longer free-text note kept beside `note` (which doubles as the title).
+  details: text('details'),
   // Relative path (within the user-assets store) of an optional receipt image,
   // e.g. `receipts/9f3c.jpg`. Null when no receipt is attached.
   receiptUri: text('receipt_uri'),
@@ -234,6 +236,13 @@ export const settingsTable = sqliteTable('settings', {
   showTransactionAccount: integer('show_transaction_account', { mode: 'boolean' })
     .notNull()
     .default(true),
+  // Whether account pickers show each account's balance. On by default.
+  showAccountPickerBalances: integer('show_account_picker_balances', { mode: 'boolean' })
+    .notNull()
+    .default(true),
+  // The bottom bar's tabs, in order. Null means the default set; parse with
+  // parseNavTabs.
+  navTabsJson: text('nav_tabs_json'),
   // Payment alerts: Android apps, selected accounts and capture preferences.
   // Null means defaults. Parse with parsePaymentAlertPrefs.
   autoLogPrefsJson: text('auto_log_prefs_json'),

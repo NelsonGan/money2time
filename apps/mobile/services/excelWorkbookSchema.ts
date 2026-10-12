@@ -27,6 +27,7 @@ export interface ExcelExportLabels {
   category: string;
   subcategory: string;
   note: string;
+  details: string;
   sentiment: string;
   recurring: string;
   name: string;
@@ -62,6 +63,7 @@ const LABEL_I18N_KEYS: Record<keyof ExcelExportLabels, string> = {
   category: 'column_category',
   subcategory: 'column_subcategory',
   note: 'column_note',
+  details: 'column_details',
   sentiment: 'column_sentiment',
   recurring: 'column_recurring',
   name: 'column_name',
@@ -108,6 +110,7 @@ export const TRANSACTION_COLUMNS = [
   'category',
   'subcategory',
   'note',
+  'details',
   'sentiment',
   'recurring',
 ] as const;

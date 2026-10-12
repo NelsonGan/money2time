@@ -707,6 +707,17 @@ describe('toSettings', () => {
     );
   });
 
+  it('shows picker balances and the default tabs unless changed', () => {
+    expect(toSettings({ ...baseRow }).showAccountPickerBalances).toBe(true);
+    expect(toSettings({ ...baseRow }).navTabsJson).toBeNull();
+    expect(
+      toSettings({ ...baseRow, showAccountPickerBalances: false }).showAccountPickerBalances,
+    ).toBe(false);
+    expect(toSettings({ ...baseRow, navTabsJson: '["calendar"]' }).navTabsJson).toBe(
+      '["calendar"]',
+    );
+  });
+
   it('maps working-day preferences with migration-safe defaults', () => {
     expect(toSettings({ ...baseRow }).workdayDisplayEnabled).toBe(false);
     expect(toSettings({ ...baseRow }).workingHoursPerDay).toBe(8);
@@ -846,6 +857,7 @@ describe('toTransactionWithRelationsFromRaw', () => {
       toAccountId: null,
       categoryId: 'c-lunch',
       note: 'noodles',
+      details: 'Team lunch after the quarterly review',
       receiptUri: 'receipts/1.jpg',
       recurrencePattern: 'monthly',
       recurrenceInterval: 2,
@@ -884,6 +896,7 @@ describe('toTransactionWithRelationsFromRaw', () => {
       toAccountId: 'a2',
       categoryId: null,
       note: null,
+      details: null,
       receiptUri: null,
       recurrencePattern: null,
       recurrenceInterval: 0,

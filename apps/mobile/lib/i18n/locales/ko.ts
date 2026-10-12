@@ -88,6 +88,11 @@ const ko = {
     name: 'Money2Time',
   },
   nav: {
+    tab_goals: '목표',
+    tab_recurring: '반복',
+    tab_reimbursements: '환급',
+    tab_receipts: '영수증',
+    tab_settle_up: '받을 돈',
     tab_calendar: '캘린더',
     tab_accounts: '계좌',
     tab_insights: '인사이트',
@@ -776,6 +781,11 @@ const ko = {
       placeholder_income: '"월급 3000", "보너스 500", "환불 50" 형식으로 입력해 보세요.',
     },
     editor: {
+      details: {
+        title: '상세',
+        placeholder: '누구와 함께였는지, 무엇에 쓴 돈인지, 기억해 둘 만한 것',
+        empty: '긴 메모 추가',
+      },
       transfer_expense_label: '지출로 계산',
       transfer_expense_tooltip:
         '이 이체를 선택한 카테고리의 지출로 합계, 예산, 차트에 반영합니다. 두 계정 사이의 자금 이동은 평소처럼 이루어집니다.',
@@ -1114,6 +1124,17 @@ const ko = {
     },
   },
   settings: {
+    visibility_show: '표시',
+    visibility_hide: '숨기기',
+    bottom_bar: {
+      title: '하단 바',
+      home: '홈',
+      more_pages: '더 많은 페이지',
+      pinned: '항상 바에 표시',
+      remove: '{{page}} 빼기',
+      add: '{{page}} 추가',
+      reset: '기본값으로 재설정',
+    },
     app_lock: {
       delay_section: '잠금 시점',
       delay_immediately: '즉시',
@@ -1540,6 +1561,7 @@ const ko = {
       column_category: '카테고리',
       column_subcategory: '하위 카테고리',
       column_note: '메모',
+      column_details: '상세',
       column_sentiment: '감정',
       column_recurring: '반복',
       column_name: '이름',

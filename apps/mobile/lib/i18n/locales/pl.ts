@@ -89,6 +89,11 @@ const pl = {
     name: 'Money2Time',
   },
   nav: {
+    tab_goals: 'Cele',
+    tab_recurring: 'Cykliczne',
+    tab_reimbursements: 'Zwroty kosztów',
+    tab_receipts: 'Paragony',
+    tab_settle_up: 'Kto jest ci winien',
     tab_calendar: 'Kalendarz',
     tab_accounts: 'Konta',
     tab_insights: 'Analizy',
@@ -781,6 +786,11 @@ const pl = {
       placeholder_income: 'Spróbuj "Pensja 3000", "Premia 500", "Zwrot 50".',
     },
     editor: {
+      details: {
+        title: 'Szczegóły',
+        placeholder: 'Z kim, na co, cokolwiek warto zapamiętać',
+        empty: 'Dodaj dłuższą notatkę',
+      },
       transfer_expense_label: 'Licz jako wydatek',
       transfer_expense_tooltip:
         'Liczy ten przelew jako wydatek w podsumowaniach, budżetach i wykresach, w wybranej kategorii. Pieniądze nadal przechodzą między dwoma kontami jak zwykle.',
@@ -1128,6 +1138,17 @@ const pl = {
     },
   },
   settings: {
+    visibility_show: 'Pokaż',
+    visibility_hide: 'Ukryj',
+    bottom_bar: {
+      title: 'Dolny pasek',
+      home: 'Start',
+      more_pages: 'Więcej stron',
+      pinned: 'Zawsze na pasku',
+      remove: 'Usuń {{page}}',
+      add: 'Dodaj {{page}}',
+      reset: 'Przywróć domyślne',
+    },
     app_lock: {
       delay_section: 'Zablokuj po',
       delay_immediately: 'Natychmiast',
@@ -1566,6 +1587,7 @@ const pl = {
       column_category: 'Kategoria',
       column_subcategory: 'Podkategoria',
       column_note: 'Notatka',
+      column_details: 'Szczegóły',
       column_sentiment: 'Nastrój',
       column_recurring: 'Cykliczna',
       column_name: 'Nazwa',

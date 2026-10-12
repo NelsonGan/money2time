@@ -97,7 +97,8 @@ type ListRow =
   | { kind: 'card'; key: string; card: RecurringCommitmentCardProps };
 
 interface RecurringScreenProps {
-  onBack: () => void;
+  /** Omitted when the page sits in the bottom bar, which hides the back button. */
+  onBack?: () => void;
   onOpenEditor: (ruleId?: string) => void;
   useNativeBackGesture?: boolean;
 }
@@ -487,7 +488,7 @@ export function RecurringScreen({
     </SettingsPageLayout>
   );
 
-  if (useNativeBackGesture) return content;
+  if (useNativeBackGesture || !onBack) return content;
   return <EdgeSwipeBackContainer onBack={onBack}>{content}</EdgeSwipeBackContainer>;
 }
 

@@ -89,6 +89,11 @@ const ja = {
     name: 'Money2Time',
   },
   nav: {
+    tab_goals: '目標',
+    tab_recurring: '定期',
+    tab_reimbursements: '立て替え',
+    tab_receipts: 'レシート',
+    tab_settle_up: '未精算の相手',
     tab_calendar: 'カレンダー',
     tab_accounts: '口座',
     tab_insights: 'インサイト',
@@ -779,6 +784,11 @@ const ja = {
       placeholder_income: '例：「給与 3000」「ボーナス 500」「返金 50」',
     },
     editor: {
+      details: {
+        title: '詳細',
+        placeholder: '誰と一緒だったか、何の費用か、覚えておきたいこと',
+        empty: '長めのメモを追加',
+      },
       transfer_expense_label: '支出として計上',
       transfer_expense_tooltip:
         'この振替を選んだカテゴリの支出として合計、予算、グラフに計上します。2つの口座間のお金の移動はこれまで通り行われます。',
@@ -1119,6 +1129,17 @@ const ja = {
     },
   },
   settings: {
+    visibility_show: '表示',
+    visibility_hide: '非表示',
+    bottom_bar: {
+      title: '下部バー',
+      home: 'ホーム',
+      more_pages: 'その他のページ',
+      pinned: '常にバーに表示',
+      remove: '{{page}}を外す',
+      add: '{{page}}を追加',
+      reset: 'デフォルトに戻す',
+    },
     app_lock: {
       delay_section: 'ロックまでの時間',
       delay_immediately: 'すぐに',
@@ -1554,6 +1575,7 @@ const ja = {
       column_category: 'カテゴリ',
       column_subcategory: 'サブカテゴリ',
       column_note: 'メモ',
+      column_details: '詳細',
       column_sentiment: '気分',
       column_recurring: '定期',
       column_name: '名前',
