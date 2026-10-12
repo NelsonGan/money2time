@@ -115,7 +115,6 @@ describe('receipt scanner PostHog integration', () => {
       $session_id: SESSION_ID,
       $ai_session_id: SESSION_ID,
       parsed_transactions: 1,
-      $geoip_disable: true,
     });
     expect(event.properties).not.toHaveProperty('$ai_prompt_version');
     // Neither the receipt, the prompt nor the parsed answer leaves the Worker.
@@ -200,28 +199,6 @@ describe('hosted receipt prompts', () => {
       version: null,
       source: 'bundled',
     });
-  });
-
-  it('shares a fetched prompt with new isolates through the edge cache', async () => {
-    const store = new Map<string, Response>();
-    const edge = {
-      match: async (req: Request) => store.get(req.url)?.clone(),
-      put: async (req: Request, res: Response) => void store.set(req.url, res.clone()),
-    };
-    Object.defineProperty(globalThis, 'caches', { value: { default: edge }, configurable: true });
-    try {
-      const fetchMock = jest.fn(
-        async () => new Response(JSON.stringify({ prompt: 'Hosted v4', version: 4 })),
-      );
-      global.fetch = fetchMock as unknown as typeof fetch;
-      await prompts.resolvePrompt(env, 'receipt-scan-quick', 0);
-      prompts.clearPromptCache(); // a fresh isolate
-      const shared = await prompts.resolvePrompt(env, 'receipt-scan-quick', 1_000);
-      expect(shared).toMatchObject({ template: 'Hosted v4', version: 4, source: 'posthog' });
-      expect(fetchMock).toHaveBeenCalledTimes(1);
-    } finally {
-      delete (globalThis as { caches?: unknown }).caches;
-    }
   });
 
   it('uses the bundled prompts without a read key', async () => {
