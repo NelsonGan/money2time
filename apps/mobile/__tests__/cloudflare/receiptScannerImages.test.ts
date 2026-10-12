@@ -137,7 +137,15 @@ describe('existing receipt image endpoint', () => {
           content: [
             {
               type: 'text',
-              text: buildReceiptPrompt(args.categories, args.currency, mode ?? 'quick', accounts),
+              text: (
+                await buildReceiptPrompt(
+                  {},
+                  args.categories,
+                  args.currency,
+                  mode ?? 'quick',
+                  accounts,
+                )
+              ).text,
             },
             { type: 'image_url', image_url: { url: 'data:image/png;base64,aW1hZ2U=' } },
           ],

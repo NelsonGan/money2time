@@ -45,7 +45,7 @@ scattered `docs/` folder, per-directory READMEs and design notes are what this
 layout replaced. Update the README section a change affects in the same change.
 
 **Analytics tables are part of the change.** The Analytics section of the
-README is the single source of truth for Mixpanel and Google Analytics
+README is the single source of truth for PostHog and Google Analytics
 tracking. For every product or code change, assess its analytics impact. If
 events, properties, triggers, frequency, routing, paywall sources, screens,
 user state, feature adoption, transaction milestones, provider configuration or
@@ -54,8 +54,9 @@ change with stale tracking documentation is unfinished; a change without
 analytics impact needs no artificial table edit. Use the
 `maintain-analytics-tracking` skill. `__tests__/services/analyticsTrackingPlan.test.ts`
 checks the tables against the code, but not payloads, triggers or sources:
-review those against the diff yourself, and review the expected Mixpanel event
-volume when adding an event or increasing its frequency.
+review those against the diff yourself, and add the expected PostHog event
+volume to the README's event budget when adding an event or increasing its
+frequency.
 
 **Keep the Simulator visible while testing.** Booting a device does not open
 the macOS Simulator window. Before iOS testing, run

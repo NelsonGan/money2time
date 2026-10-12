@@ -138,8 +138,8 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
     });
 
     // Successful runs are deliberately not tracked: a daily background job fires
-    // for every install every day, which drowned Mixpanel in an event nobody
-    // segmented on. Only failures below are worth an event.
+    // for every install every day, which would spend the event budget on an
+    // event nobody segments on. Only failures below are worth an event.
     if (errors.length > 0) {
       void trackEvent(AnalyticsEvents.AUTO_BACKUP_FAILED, {
         target: settings.autoBackupTarget,

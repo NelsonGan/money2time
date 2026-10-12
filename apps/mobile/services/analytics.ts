@@ -30,7 +30,18 @@ export async function trackEvent(
   _properties?: AnalyticsProperties,
 ): Promise<void> {}
 
-export async function recordLoggedTransaction(): Promise<void> {}
+export interface LoggedTransactionDetails {
+  type: string;
+  source: string;
+}
+
+export async function recordLoggedTransaction(_details?: LoggedTransactionDetails): Promise<void> {}
+
+export async function recordDailyAppOpen(): Promise<void> {}
+
+export function startSessionReplayForLaunch(_isFirstDay: boolean, _random?: () => number): boolean {
+  return false;
+}
 
 export async function setCurrentScreen(_screen: string | null): Promise<void> {}
 

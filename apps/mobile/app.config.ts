@@ -113,11 +113,40 @@ function applyUpdatesPolicy(cfg: ExpoConfig): ExpoConfig {
   };
 }
 
+// PostHog error tracking reads minified Hermes stacks and unsymbolicated native
+// crashes unless the build uploads source maps and debug symbols. The upload
+// needs a personal API key, which only exists as an EAS secret, so the config
+// plugin that adds the upload steps is applied only when that key is present:
+// local, CI and PR preview builds without it keep building exactly as before
+// (`eas-build-post-install` in package.json installs posthog-cli for the same
+// condition).
+const POSTHOG_SYMBOL_UPLOAD = Boolean(process.env.POSTHOG_CLI_API_KEY?.trim());
+
+function applyPostHogSymbolUpload(cfg: ExpoConfig): ExpoConfig {
+  if (!POSTHOG_SYMBOL_UPLOAD) return cfg;
+  return {
+    ...cfg,
+    plugins: [
+      ...(cfg.plugins ?? []),
+      ['posthog-react-native/expo', { uploadNativeSymbols: true, skipOnConflict: true }],
+    ],
+  };
+}
+
 export default ({ config }: ConfigContext): ExpoConfig => {
   const merged: ExpoConfig = {
     ...baseConfig,
     ...config,
+    extra: {
+      ...baseConfig.extra,
+      ...config.extra,
+      // Tags every PostHog event (`app_variant`), so development and per-PR
+      // preview traffic can be filtered out of production reports.
+      appVariant: process.env.APP_VARIANT || 'production',
+    },
   };
 
-  return applyUpdatesPolicy(IS_DEV_VARIANT ? applyDevVariant(merged) : merged);
+  return applyPostHogSymbolUpload(
+    applyUpdatesPolicy(IS_DEV_VARIANT ? applyDevVariant(merged) : merged),
+  );
 };

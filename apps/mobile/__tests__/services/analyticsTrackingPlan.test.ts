@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import {
   AnalyticsEvents,
   featureUsedBy,
-  isMixpanelEvent,
+  isPostHogEvent,
   toGa4EventName,
   TRANSACTION_MILESTONES,
 } from '~/services/analytics.shared';
@@ -43,12 +43,12 @@ describe('canonical analytics tracking table', () => {
     expect(new Set(rows.map(([key]) => key)).size).toBe(rows.length);
 
     const documented = Object.fromEntries(
-      rows.map(([key, name, ga4Name, mixpanel]) => [key, { name, ga4Name, mixpanel }]),
+      rows.map(([key, name, ga4Name, posthog]) => [key, { name, ga4Name, posthog }]),
     );
     const implemented = Object.fromEntries(
       Object.entries(AnalyticsEvents).map(([key, name]) => [
         key,
-        { name, ga4Name: toGa4EventName(name), mixpanel: isMixpanelEvent(name) ? 'Yes' : 'No' },
+        { name, ga4Name: toGa4EventName(name), posthog: isPostHogEvent(name) ? 'Yes' : 'No' },
       ]),
     );
     expect(documented).toEqual(implemented);
@@ -59,9 +59,9 @@ describe('canonical analytics tracking table', () => {
     const counts = Object.fromEntries(rows.map(([label, count]) => [label, Number(count)]));
     const events = Object.values(AnalyticsEvents);
     expect(counts['All custom events']).toBe(events.length);
-    expect(counts['Mixpanel + GA4 custom events']).toBe(events.filter(isMixpanelEvent).length);
+    expect(counts['PostHog + GA4 custom events']).toBe(events.filter(isPostHogEvent).length);
     expect(counts['GA4-only custom events']).toBe(
-      events.filter((name) => !isMixpanelEvent(name)).length,
+      events.filter((name) => !isPostHogEvent(name)).length,
     );
     const features = new Set(
       events

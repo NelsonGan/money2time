@@ -1,12 +1,20 @@
 import {
   AnalyticsEvents,
+  claimDailyAppOpen,
+  claimDailyFeature,
+  claimDailyTransaction,
+  daysBetween,
   daysSinceInstall,
+  EMPTY_DAILY_STATE,
   EMPTY_USAGE_STATE,
   featureUsedBy,
+  featureViewedOn,
   GA4_ONLY_EVENTS,
-  isMixpanelEvent,
-  MIXPANEL_EVENTS,
+  isPostHogEvent,
+  localDayKey,
+  parseDailyState,
   parseUsageState,
+  POSTHOG_EVENTS,
   toGa4EventName,
   toGa4EventParameters,
   toGa4UserProperties,
@@ -15,29 +23,29 @@ import {
 describe('analytics event routing', () => {
   it('routes each RiceCal ad click to both providers without marking feature adoption', () => {
     const event = AnalyticsEvents.RICECAL_AD_CLICKED;
-    expect(isMixpanelEvent(event)).toBe(true);
+    expect(isPostHogEvent(event)).toBe(true);
     expect(toGa4EventName(event)).toBe('m2t_rice_cal_ad_clicked');
     expect(featureUsedBy(event, { source: 'settings' })).toBeNull();
   });
 
   it('places every event in exactly one destination group', () => {
-    const mixpanelKeys = Object.keys(MIXPANEL_EVENTS);
+    const postHogKeys = Object.keys(POSTHOG_EVENTS);
     const ga4OnlyKeys = new Set(Object.keys(GA4_ONLY_EVENTS));
     // A key in both groups would be silently overwritten by the spread that
     // builds AnalyticsEvents, and the event would lose its routing decision.
-    expect(mixpanelKeys.filter((key) => ga4OnlyKeys.has(key))).toEqual([]);
+    expect(postHogKeys.filter((key) => ga4OnlyKeys.has(key))).toEqual([]);
 
     const names = Object.values(AnalyticsEvents);
     expect(new Set(names).size).toBe(names.length);
-    expect(names).toHaveLength(mixpanelKeys.length + ga4OnlyKeys.size);
+    expect(names).toHaveLength(postHogKeys.length + ga4OnlyKeys.size);
   });
 
-  it('sends Mixpanel only the Mixpanel group', () => {
-    Object.values(MIXPANEL_EVENTS).forEach((name) => expect(isMixpanelEvent(name)).toBe(true));
-    Object.values(GA4_ONLY_EVENTS).forEach((name) => expect(isMixpanelEvent(name)).toBe(false));
+  it('sends PostHog only the PostHog group', () => {
+    Object.values(POSTHOG_EVENTS).forEach((name) => expect(isPostHogEvent(name)).toBe(true));
+    Object.values(GA4_ONLY_EVENTS).forEach((name) => expect(isPostHogEvent(name)).toBe(false));
   });
 
-  it('keeps the whole path to a purchase in Mixpanel', () => {
+  it('keeps the whole path to a purchase in PostHog', () => {
     [
       AnalyticsEvents.FIRST_APP_OPEN,
       AnalyticsEvents.ONBOARDING_STARTED,
@@ -53,19 +61,25 @@ describe('analytics event routing', () => {
       AnalyticsEvents.PRO_RESTORE_STARTED,
       AnalyticsEvents.PRO_RESTORE_COMPLETED,
       AnalyticsEvents.PRO_RESTORE_FAILED,
-    ].forEach((name) => expect(isMixpanelEvent(name)).toBe(true));
+    ].forEach((name) => expect(isPostHogEvent(name)).toBe(true));
   });
 
-  it('sends Mixpanel product usage as milestones, and data maintenance to GA4 only', () => {
-    [AnalyticsEvents.FEATURE_FIRST_USED, AnalyticsEvents.TRANSACTION_MILESTONE_REACHED].forEach(
-      (name) => expect(isMixpanelEvent(name)).toBe(true),
-    );
+  it('sends PostHog daily engagement and milestones, and frequent per-use events to GA4 only', () => {
     [
+      AnalyticsEvents.DAILY_APP_OPEN,
+      AnalyticsEvents.DAILY_TRANSACTION_LOGGED,
+      AnalyticsEvents.FEATURE_USED,
+      AnalyticsEvents.FEATURE_FIRST_USED,
+      AnalyticsEvents.TRANSACTION_MILESTONE_REACHED,
       AnalyticsEvents.DATA_RESET,
-      AnalyticsEvents.DATA_IMPORTED,
-      AnalyticsEvents.STATEMENT_IMPORT_COMPLETED,
+    ].forEach((name) => expect(isPostHogEvent(name)).toBe(true));
+    [
+      AnalyticsEvents.VOICE_TRANSACTION_CREATED,
+      AnalyticsEvents.AUTOLOG_TRANSACTION_CREATED,
+      AnalyticsEvents.WIDGET_OPENED,
+      AnalyticsEvents.TRANSACTION_DELETED,
       AnalyticsEvents.AUTO_BACKUP_RESTORED,
-    ].forEach((name) => expect(isMixpanelEvent(name)).toBe(false));
+    ].forEach((name) => expect(isPostHogEvent(name)).toBe(false));
   });
 
   it('never names an event like the SDK automatic events it replaces', () => {
@@ -124,10 +138,22 @@ describe('featureUsedBy', () => {
     ).toBeNull();
   });
 
-  it('only reads uses from GA4-only events', () => {
-    // A billed per-use event would defeat the milestone, and `Feature First
-    // Used` must never count as a use of anything.
-    Object.values(MIXPANEL_EVENTS).forEach((name) => expect(featureUsedBy(name)).toBeNull());
+  it('never reads a use from the engagement events that report uses', () => {
+    // `Feature Used` reporting itself as a use would loop.
+    [
+      AnalyticsEvents.FEATURE_FIRST_USED,
+      AnalyticsEvents.FEATURE_USED,
+      AnalyticsEvents.DAILY_APP_OPEN,
+      AnalyticsEvents.DAILY_TRANSACTION_LOGGED,
+      AnalyticsEvents.TRANSACTION_MILESTONE_REACHED,
+    ].forEach((name) => expect(featureUsedBy(name, { feature: 'goals' })).toBeNull());
+  });
+
+  it('counts only Insights among screens as a daily feature use', () => {
+    expect(featureViewedOn('insights')).toBe('insights');
+    ['calendar', 'albums', 'accounts', 'settings', null, undefined].forEach((screen) =>
+      expect(featureViewedOn(screen)).toBeNull(),
+    );
   });
 });
 
@@ -157,6 +183,72 @@ describe('parseUsageState', () => {
     expect(
       parseUsageState(JSON.stringify({ fromInstall: true, loggedTransactions: 12.7 })),
     ).toEqual({ fromInstall: true, features: [], loggedTransactions: 12 });
+  });
+});
+
+describe('daily engagement state', () => {
+  it('formats the device-local day', () => {
+    expect(localDayKey(new Date(2026, 0, 5, 23, 59))).toBe('2026-01-05');
+    expect(localDayKey(new Date(2026, 11, 31, 0, 0))).toBe('2026-12-31');
+  });
+
+  it('counts calendar days between two day keys', () => {
+    expect(daysBetween('2026-10-01', '2026-10-01')).toBe(0);
+    expect(daysBetween('2026-10-01', '2026-10-08')).toBe(7);
+    expect(daysBetween('2026-02-28', '2026-03-01')).toBe(1);
+    expect(daysBetween(null, '2026-10-01')).toBeNull();
+    expect(daysBetween('garbage', '2026-10-01')).toBeNull();
+  });
+
+  it('claims one app open per day and counts active days across days', () => {
+    const [first, firstClaim] = claimDailyAppOpen(EMPTY_DAILY_STATE, '2026-10-01');
+    expect(firstClaim).toEqual({ active_days: 1, days_since_last_active: null });
+    const [same, sameClaim] = claimDailyAppOpen(first, '2026-10-01');
+    expect(sameClaim).toBeNull();
+    expect(same).toBe(first);
+    const [, nextClaim] = claimDailyAppOpen(same, '2026-10-04');
+    expect(nextClaim).toEqual({ active_days: 2, days_since_last_active: 3 });
+  });
+
+  it('claims one logged transaction per day and counts logging days', () => {
+    const [first, claim] = claimDailyTransaction(EMPTY_DAILY_STATE, '2026-10-01');
+    expect(claim).toEqual({ logging_days: 1 });
+    expect(claimDailyTransaction(first, '2026-10-01')[1]).toBeNull();
+    expect(claimDailyTransaction(first, '2026-10-02')[1]).toEqual({ logging_days: 2 });
+  });
+
+  it('claims each feature once per day, independently of the others', () => {
+    const [afterGoals, goals] = claimDailyFeature(EMPTY_DAILY_STATE, '2026-10-01', 'goals');
+    expect(goals).toBe(true);
+    expect(claimDailyFeature(afterGoals, '2026-10-01', 'goals')[1]).toBe(false);
+    expect(claimDailyFeature(afterGoals, '2026-10-01', 'insights')[1]).toBe(true);
+    expect(claimDailyFeature(afterGoals, '2026-10-02', 'goals')[1]).toBe(true);
+  });
+
+  it("a new day clears today's claims but keeps the lifetime counters", () => {
+    const [opened] = claimDailyAppOpen(EMPTY_DAILY_STATE, '2026-10-01');
+    const [logged] = claimDailyTransaction(opened, '2026-10-01');
+    const [next] = claimDailyFeature(logged, '2026-10-02', 'goals');
+    expect(next).toEqual({
+      day: '2026-10-02',
+      opened: false,
+      transactionLogged: false,
+      features: ['goals'],
+      activeDays: 1,
+      loggingDays: 1,
+      lastActiveDay: '2026-10-01',
+    });
+  });
+
+  it('reads back a stored state and falls back to a fresh one when unreadable', () => {
+    const [state] = claimDailyAppOpen(EMPTY_DAILY_STATE, '2026-10-01');
+    expect(parseDailyState(JSON.stringify(state))).toEqual(state);
+    [null, '', 'not json', '42'].forEach((raw) =>
+      expect(parseDailyState(raw)).toEqual(EMPTY_DAILY_STATE),
+    );
+    expect(
+      parseDailyState(JSON.stringify({ day: 'yesterday', activeDays: -2, opened: 'yes' })),
+    ).toEqual(EMPTY_DAILY_STATE);
   });
 });
 
