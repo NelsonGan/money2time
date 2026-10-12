@@ -148,9 +148,58 @@ interface CacheEntry {
   retryAt: number;
 }
 
-// Per-isolate cache. Isolates are reused across many requests, so this keeps
-// PostHog reads to roughly one per prompt per isolate every five minutes.
+// Per-isolate cache, for the requests one isolate serves back to back.
 const cache = new Map<PromptName, CacheEntry>();
+
+// Cloudflare starts and retires isolates so often that the map above alone
+// missed on almost every scan: the first day live logged 743 prompt fetches
+// (each one a `$llm_prompt_fetched` event in PostHog) against 744 model calls.
+// The data centre's cache sits between the two, shared by every isolate in the
+// location, so PostHog is asked about once per prompt per location every five
+// minutes. The key is a URL on the Worker's own hostname that is never served.
+const EDGE_CACHE_HOST = 'https://workers-receipt-scanner.money2time.com/__prompt-cache/';
+
+function edgeCache(): Cache | null {
+  try {
+    return (globalThis as { caches?: { default?: Cache } }).caches?.default ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function readEdgeCache(
+  name: PromptName,
+): Promise<{ template: string; version: number } | null> {
+  const edge = edgeCache();
+  if (!edge) return null;
+  try {
+    const hit = await edge.match(new Request(`${EDGE_CACHE_HOST}${name}`));
+    if (!hit) return null;
+    const body = (await hit.json()) as { template?: unknown; version?: unknown };
+    if (typeof body.template !== 'string' || typeof body.version !== 'number') return null;
+    return { template: body.template, version: body.version };
+  } catch {
+    return null;
+  }
+}
+
+async function writeEdgeCache(name: PromptName, prompt: { template: string; version: number }) {
+  const edge = edgeCache();
+  if (!edge) return;
+  try {
+    await edge.put(
+      new Request(`${EDGE_CACHE_HOST}${name}`),
+      new Response(JSON.stringify(prompt), {
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': `max-age=${CACHE_TTL_MS / 1000}`,
+        },
+      }),
+    );
+  } catch {
+    // The edge cache is an optimisation; the isolate's own copy still serves.
+  }
+}
 
 async function fetchPrompt(
   env: PromptEnv,
@@ -207,9 +256,15 @@ export async function resolvePrompt(
   if (cached && (now - cached.fetchedAt < CACHE_TTL_MS || now < cached.retryAt)) {
     return { name, template: cached.template, version: cached.version, source: 'posthog' };
   }
+  const shared = await readEdgeCache(name);
+  if (shared) {
+    cache.set(name, { ...shared, fetchedAt: now, retryAt: 0 });
+    return { name, template: shared.template, version: shared.version, source: 'posthog' };
+  }
   const fetched = await fetchPrompt(env, name);
   if (fetched) {
     cache.set(name, { ...fetched, fetchedAt: now, retryAt: 0 });
+    await writeEdgeCache(name, fetched);
     return { name, template: fetched.template, version: fetched.version, source: 'posthog' };
   }
   if (cached) {
