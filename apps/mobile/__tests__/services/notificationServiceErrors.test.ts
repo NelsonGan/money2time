@@ -7,7 +7,7 @@ import { isTransientNotificationServiceError } from '~/services/notifications.sh
  * when it suspends the app mid-call. Every report had the app in the
  * background, and the identical call succeeds on the next foreground sync, so
  * the failure is noise rather than a bug. Anything outside that exact shape is
- * a real scheduling problem and must keep reaching Sentry.
+ * a real scheduling problem and must keep reaching error tracking.
  */
 describe('isTransientNotificationServiceError', () => {
   const real =
