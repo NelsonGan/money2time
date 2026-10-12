@@ -60,6 +60,7 @@ export function buildDuplicateInput(
     toAccountId: transaction.toAccountId ?? null,
     categoryId: transaction.categoryId ?? null,
     note: transaction.note ?? null,
+    details: transaction.details ?? null,
     sentiment: transaction.sentiment,
     reimbursable: transaction.reimbursable ?? false,
     countsAsExpense: transaction.countsAsExpense ?? false,

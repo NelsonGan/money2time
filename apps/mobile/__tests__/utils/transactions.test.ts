@@ -5,6 +5,7 @@ import {
   reconcileTransactionRow,
   reuseUnchangedGroups,
   reuseUnchangedTransactions,
+  transactionSearchText,
 } from '~/utils/transactions';
 
 function makeTx(overrides: Partial<TransactionWithRelations>): TransactionWithRelations {
@@ -19,6 +20,7 @@ function makeTx(overrides: Partial<TransactionWithRelations>): TransactionWithRe
     fxRate: overrides.fxRate ?? 1,
     toAmount: overrides.toAmount ?? null,
     accountAmount: overrides.accountAmount ?? null,
+    details: overrides.details ?? null,
     receiptUri: overrides.receiptUri ?? null,
     date: overrides.date ?? '2026-05-13T00:00:00.000Z',
     accountId: overrides.accountId ?? null,
@@ -191,5 +193,27 @@ describe('reconcileTransactionRow', () => {
   it('ignores an id that is no longer in the list', () => {
     const prev = [other];
     expect(reconcileTransactionRow(prev, 'new', optimistic)).toBe(prev);
+  });
+});
+
+describe('transactionSearchText', () => {
+  it('searches the note alone when there are no details', () => {
+    expect(transactionSearchText({ note: 'Coffee', details: null })).toBe('coffee');
+    expect(transactionSearchText({ note: null, details: null })).toBe('');
+  });
+
+  it('adds the details on their own line, lowercased', () => {
+    const text = transactionSearchText({ note: 'Dinner', details: 'With Aisha at Jalan Alor' });
+    expect(text).toBe('dinner\nwith aisha at jalan alor');
+    expect(text.includes('aisha')).toBe(true);
+  });
+
+  it('never matches a query across the note and details seam', () => {
+    const text = transactionSearchText({ note: 'Lunch', details: 'box' });
+    expect(text.includes('lunchbox')).toBe(false);
+  });
+
+  it('finds details on a row with no note', () => {
+    expect(transactionSearchText({ note: null, details: 'Parking at KLCC' })).toContain('klcc');
   });
 });

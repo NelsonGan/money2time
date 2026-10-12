@@ -26,6 +26,7 @@ export type SettingsStackParamList = {
   SettingsHome: undefined;
   DisplaySettings: undefined;
   AppIcon: undefined;
+  BottomBar: undefined;
   MonthCycle: undefined;
   HourlyValue: undefined;
   HourlyValueSettings: undefined;

@@ -88,6 +88,11 @@ const th = {
     name: 'Money2Time',
   },
   nav: {
+    tab_goals: 'เป้าหมาย',
+    tab_recurring: 'รายการประจำ',
+    tab_reimbursements: 'การเบิกคืน',
+    tab_receipts: 'ใบเสร็จ',
+    tab_settle_up: 'ใครติดเงินคุณ',
     tab_calendar: 'ปฏิทิน',
     tab_accounts: 'บัญชี',
     tab_insights: 'ข้อมูลเชิงลึก',
@@ -777,6 +782,11 @@ const th = {
       placeholder_income: 'ลอง "เงินเดือน 30000", "โบนัส 5000", "คืนเงิน 500"',
     },
     editor: {
+      details: {
+        title: 'รายละเอียด',
+        placeholder: 'ไปกับใคร ใช้จ่ายเรื่องอะไร หรืออะไรก็ตามที่ควรจำไว้',
+        empty: 'เพิ่มบันทึกที่ยาวขึ้น',
+      },
       transfer_expense_label: 'นับเป็นรายจ่าย',
       transfer_expense_tooltip:
         'นับการโอนนี้เป็นรายจ่ายในยอดรวม งบประมาณ และแผนภูมิของคุณ ภายใต้หมวดหมู่ที่คุณเลือก เงินยังคงย้ายระหว่างสองบัญชีตามปกติ',
@@ -1115,6 +1125,19 @@ const th = {
     },
   },
   settings: {
+    visibility_show: 'แสดง',
+    visibility_hide: 'ซ่อน',
+    bottom_bar: {
+      title: 'แถบด้านล่าง',
+      description:
+        'เลือกได้สูงสุดห้าหน้าสำหรับแถบด้านล่าง แล้วลากเพื่อจัดลำดับ ปฏิทินและการตั้งค่าจะอยู่เสมอ',
+      more_pages: 'หน้าอื่นๆ',
+      full_hint: 'นำหน้าหนึ่งออกเพื่อเพิ่มหน้าอื่น',
+      pinned: 'อยู่ในแถบเสมอ',
+      remove: 'นำ {{page}} ออก',
+      add: 'เพิ่ม {{page}}',
+      reset: 'รีเซ็ตเป็นค่าเริ่มต้น',
+    },
     app_lock: {
       delay_section: 'ล็อกหลังจาก',
       delay_immediately: 'ทันที',
@@ -1535,6 +1558,7 @@ const th = {
       column_category: 'หมวดหมู่',
       column_subcategory: 'หมวดหมู่ย่อย',
       column_note: 'บันทึก',
+      column_details: 'รายละเอียด',
       column_sentiment: 'ความรู้สึก',
       column_recurring: 'รายการประจำ',
       column_name: 'ชื่อ',

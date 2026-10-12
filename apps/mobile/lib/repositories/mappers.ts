@@ -405,6 +405,7 @@ export function toTransaction(row: TransactionRow): Transaction {
     toAccountId: row.toAccountId,
     categoryId: row.categoryId,
     note: row.note,
+    details: row.details ?? null,
     receiptUri: row.receiptUri ?? null,
     recurrencePattern: asRecurrencePattern(row.recurrencePattern),
     recurrenceInterval: Math.max(1, Math.trunc(row.recurrenceInterval ?? 1)),
@@ -440,7 +441,7 @@ export const TRANSACTION_RAW_COLUMNS_SQL = `
   t.recurrence_pattern, t.recurrence_interval, t.recurrence_end_date,
   t.recurrence_parent_id, t.sentiment, t.reimbursable, t.reimbursed_at,
   t.reimbursement_account_id, t.reimbursement_transaction_id, t.reimbursement_of_id,
-  t.counts_as_expense, t.day_order, t.created_at, t.updated_at, t.deleted_at`;
+  t.counts_as_expense, t.day_order, t.created_at, t.updated_at, t.deleted_at, t.details`;
 
 type RawValue = string | number | null;
 
@@ -485,13 +486,14 @@ export function toTransactionWithRelationsFromRaw(
     createdAt: values[28] as string,
     updatedAt: values[29] as string,
     deletedAt: values[30] as string | null,
-    accountName: (values[31] as string | null) ?? null,
-    fromAccountName: (values[32] as string | null) ?? null,
-    toAccountName: (values[33] as string | null) ?? null,
-    categoryName: (values[34] as string | null) ?? null,
-    categoryParentId: (values[36] as string | null) ?? null,
-    categoryParentName: (values[37] as string | null) ?? null,
-    categoryIcon: (values[35] as string | null) ?? null,
+    details: (values[31] as string | null) ?? null,
+    accountName: (values[32] as string | null) ?? null,
+    fromAccountName: (values[33] as string | null) ?? null,
+    toAccountName: (values[34] as string | null) ?? null,
+    categoryName: (values[35] as string | null) ?? null,
+    categoryParentId: (values[37] as string | null) ?? null,
+    categoryParentName: (values[38] as string | null) ?? null,
+    categoryIcon: (values[36] as string | null) ?? null,
   };
 }
 
@@ -626,6 +628,8 @@ export function toSettings(row: SettingsRow): UserSettings {
     defaultPaybackAccountId: row.defaultPaybackAccountId ?? null,
     reimbursementsCountAsExpense: row.reimbursementsCountAsExpense ?? true,
     showTransactionAccount: row.showTransactionAccount ?? true,
+    showAccountPickerBalances: row.showAccountPickerBalances ?? true,
+    navTabsJson: row.navTabsJson ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,

@@ -228,6 +228,8 @@ export const GA4_ONLY_EVENTS = {
 
   // Settings with a product question behind them
   DISPLAY_MODE_TOGGLED: 'Display Mode Toggled',
+  /** The bottom bar's pages were added, removed, reordered or reset. */
+  NAV_TABS_CHANGED: 'Nav Tabs Changed',
 
   // Auto-backup
   AUTO_BACKUP_RESTORED: 'Auto Backup Restored',

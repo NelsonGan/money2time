@@ -89,6 +89,11 @@ const da = {
     name: 'Money2Time',
   },
   nav: {
+    tab_goals: 'Mål',
+    tab_recurring: 'Faste',
+    tab_reimbursements: 'Refusioner',
+    tab_receipts: 'Kvitteringer',
+    tab_settle_up: 'Hvem skylder dig',
     tab_calendar: 'Kalender',
     tab_accounts: 'Konti',
     tab_insights: 'Indsigt',
@@ -779,6 +784,11 @@ const da = {
       placeholder_income: 'Prøv "Løn 20000", "Bonus 5000", "Refusion 200".',
     },
     editor: {
+      details: {
+        title: 'Detaljer',
+        placeholder: 'Hvem du var med, hvad det dækkede, alt der er værd at huske',
+        empty: 'Tilføj en længere note',
+      },
       transfer_expense_label: 'Tæl som udgift',
       transfer_expense_tooltip:
         'Tæller denne overførsel som forbrug i dine totaler, budgetter og diagrammer under den kategori, du vælger. Pengene flyttes stadig mellem de to konti som normalt.',
@@ -1129,6 +1139,19 @@ const da = {
     },
   },
   settings: {
+    visibility_show: 'Vis',
+    visibility_hide: 'Skjul',
+    bottom_bar: {
+      title: 'Bundbjælke',
+      description:
+        'Vælg op til fem sider til bundbjælken, og træk for at ændre rækkefølgen. Kalender og Indstillinger bliver altid.',
+      more_pages: 'Flere sider',
+      full_hint: 'Fjern en side for at tilføje en anden',
+      pinned: 'Altid i bjælken',
+      remove: 'Fjern {{page}}',
+      add: 'Tilføj {{page}}',
+      reset: 'Nulstil til standard',
+    },
     app_lock: {
       delay_section: 'Lås efter',
       delay_immediately: 'Med det samme',
@@ -1562,6 +1585,7 @@ const da = {
       column_category: 'Kategori',
       column_subcategory: 'Underkategori',
       column_note: 'Note',
+      column_details: 'Detaljer',
       column_sentiment: 'Stemning',
       column_recurring: 'Gentagen',
       column_name: 'Navn',

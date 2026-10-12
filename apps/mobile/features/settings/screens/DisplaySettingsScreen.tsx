@@ -3,10 +3,11 @@ import { Check, ChevronRight, Copy } from 'lucide-react-native';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
+import { NAV_TAB_META } from '~/components/navigation/BottomNav';
+import { parseNavTabs } from '~/components/navigation/navTabs';
 import {
   Card,
   CardContent,
-  FormSwitchRow,
   InfoTooltipButton,
   SelectField,
   SETTINGS_FORM_BOTTOM_PADDING,
@@ -16,6 +17,7 @@ import {
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
+import { ClayIcon } from '~/components/ui/ClayIcon';
 import { appIconById } from '~/constants/appIcons';
 import { getThemeColorSwatch, spacing, THEME_COLOR_OPTIONS } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
@@ -34,12 +36,14 @@ import { monthCycleDefaultDay, monthCycleOf } from '~/utils/financialMonth';
 interface DisplaySettingsScreenProps {
   onBack: () => void;
   onOpenAppIcon: () => void;
+  onOpenBottomBar: () => void;
   onOpenMonthCycle: () => void;
 }
 
 export function DisplaySettingsScreen({
   onBack,
   onOpenAppIcon,
+  onOpenBottomBar,
   onOpenMonthCycle,
 }: DisplaySettingsScreenProps) {
   const { settings, updateSettings, calendarPreferencesJson, updateCalendarPreferencesJson } =
@@ -167,6 +171,8 @@ export function DisplaySettingsScreen({
     updateSettings({ iconStyle: next });
   };
 
+  const navTabs = useMemo(() => parseNavTabs(settings.navTabsJson), [settings.navTabsJson]);
+
   const homeSummaryPreferences = useMemo(
     () => getHomeSummaryPreferences(calendarPreferencesJson),
     [calendarPreferencesJson],
@@ -184,6 +190,21 @@ export function DisplaySettingsScreen({
     updateCalendarPreferencesJson(
       updateHomeSummaryPreference(calendarPreferencesJson, side, metric),
     );
+  };
+
+  const visibilityOptions = useMemo(
+    () => [
+      { value: 'show', label: I18n.t('settings.visibility_show') },
+      { value: 'hide', label: I18n.t('settings.visibility_hide') },
+    ],
+    [],
+  );
+
+  const handleShowTransactionAccountChange = (value: string) => {
+    const next = value === 'show';
+    if (next === settings.showTransactionAccount) return;
+    void triggerHaptic('selection');
+    updateSettings({ showTransactionAccount: next });
   };
 
   const weekStartsOnOptions = useMemo(
@@ -324,6 +345,40 @@ export function DisplaySettingsScreen({
                   <ChevronRight size={16} color={themeColors.textMuted} />
                 </Pressable>
               </View>
+              {/* A page of its own too: the bar is a list to arrange, not a
+                  single pick. The row previews it with the same glyphs. */}
+              <View className="w-full">
+                <View className="mb-2.5 px-1 flex-row items-center gap-1.5">
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('settings.bottom_bar.title')}
+                  </Text>
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('settings.bottom_bar.title')}
+                  accessibilityValue={{
+                    text: navTabs.map((tab) => I18n.t(NAV_TAB_META[tab].labelKey)).join(', '),
+                  }}
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    onOpenBottomBar();
+                  }}
+                  className="h-[54px] flex-row items-center gap-3 rounded-3xl border border-border/40 bg-card/95 px-4"
+                >
+                  <View className="flex-1 flex-row items-center gap-2.5">
+                    {navTabs.map((tab) => (
+                      <ClayIcon
+                        key={tab}
+                        name={NAV_TAB_META[tab].icon}
+                        size={26}
+                        flatSize={18}
+                        flatColor={themeColors.textMuted}
+                      />
+                    ))}
+                  </View>
+                  <ChevronRight size={16} color={themeColors.textMuted} />
+                </Pressable>
+              </View>
               <SelectField
                 label={I18n.t('settings.first_day_of_week')}
                 value={String(settings.weekStartsOn)}
@@ -359,11 +414,12 @@ export function DisplaySettingsScreen({
                   <ChevronRight size={16} color={themeColors.textMuted} />
                 </Pressable>
               </View>
-              <FormSwitchRow
+              <SelectField
                 label={I18n.t('settings.show_transaction_account')}
-                info={I18n.t('settings.show_transaction_account_help')}
-                value={settings.showTransactionAccount}
-                onValueChange={(value) => updateSettings({ showTransactionAccount: value })}
+                value={settings.showTransactionAccount ? 'show' : 'hide'}
+                options={visibilityOptions}
+                onChange={handleShowTransactionAccountChange}
+                infoTooltip={I18n.t('settings.show_transaction_account_help')}
               />
             </CardContent>
           </Card>

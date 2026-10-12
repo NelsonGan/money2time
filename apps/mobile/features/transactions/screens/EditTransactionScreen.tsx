@@ -185,6 +185,7 @@ export function EditTransactionScreen({
         fxRate: transaction.fxRate,
         categoryId: transaction.categoryId,
         note: transaction.note ?? '',
+        details: transaction.details ?? '',
         receiptUri: transaction.receiptUri ?? null,
         sentiment: transaction.sentiment ?? 'neutral',
         reimbursable: transaction.reimbursable,

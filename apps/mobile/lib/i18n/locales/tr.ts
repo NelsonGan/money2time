@@ -89,6 +89,11 @@ const tr = {
     name: 'Money2Time',
   },
   nav: {
+    tab_goals: 'Hedefler',
+    tab_recurring: 'Tekrarlayan',
+    tab_reimbursements: 'Geri ödemeler',
+    tab_receipts: 'Fişler',
+    tab_settle_up: 'Size kim borçlu',
     tab_calendar: 'Takvim',
     tab_accounts: 'Hesaplar',
     tab_insights: 'Analizler',
@@ -779,6 +784,11 @@ const tr = {
       placeholder_income: '"Maaş 3000", "Prim 500", "İade 50" gibi yazın.',
     },
     editor: {
+      details: {
+        title: 'Ayrıntılar',
+        placeholder: 'Kiminle, neyi kapsadığı, hatırlamaya değer her şey',
+        empty: 'Daha uzun bir not ekleyin',
+      },
       transfer_expense_label: 'Gider olarak say',
       transfer_expense_tooltip:
         'Bu transferi seçtiğin kategori altında toplamlarında, bütçelerinde ve grafiklerinde gider olarak sayar. Para iki hesap arasında her zamanki gibi hareket eder.',
@@ -1129,6 +1139,19 @@ const tr = {
     },
   },
   settings: {
+    visibility_show: 'Göster',
+    visibility_hide: 'Gizle',
+    bottom_bar: {
+      title: 'Alt çubuk',
+      description:
+        'Alt çubuk için en fazla beş sayfa seçin ve sıralamak için sürükleyin. Takvim ve Ayarlar her zaman kalır.',
+      more_pages: 'Diğer sayfalar',
+      full_hint: 'Başka bir sayfa eklemek için birini kaldırın',
+      pinned: 'Her zaman çubukta',
+      remove: '{{page}} kaldır',
+      add: '{{page}} ekle',
+      reset: 'Varsayılana sıfırla',
+    },
     app_lock: {
       delay_section: 'Şu süre sonra kilitle',
       delay_immediately: 'Hemen',
@@ -1571,6 +1594,7 @@ const tr = {
       column_category: 'Kategori',
       column_subcategory: 'Alt kategori',
       column_note: 'Not',
+      column_details: 'Ayrıntılar',
       column_sentiment: 'Duygu',
       column_recurring: 'Yinelenen',
       column_name: 'Ad',

@@ -17,6 +17,7 @@ import {
 import { useBottomNavMinimize } from '~/components/navigation/BottomNavMinimize';
 import { FLOATING_NAV_HEIGHT, getFloatingNavBottomGap } from '~/components/navigation/floatingNav';
 import { getLiquidGlassNavView } from '~/components/navigation/liquidGlass';
+import type { TabName } from '~/components/navigation/navTabs';
 import { ClayIcon, type ClayIconName } from '~/components/ui/ClayIcon';
 import { useIsFlatIcons, useResolvedTheme } from '~/context/ThemeContext';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
@@ -25,67 +26,94 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 
-export type TabName = 'accounts' | 'calendar' | 'insights' | 'albums' | 'settings';
+export type { TabName };
 
 interface BottomNavProps {
+  tabs: readonly TabName[];
   activeTab: TabName;
   onTabChange: (tab: TabName) => void;
 }
 
 type NavIconComponent = typeof HomeIcon;
 
+interface NavTabMeta {
+  icon: ClayIconName;
+  activeIcon: ClayIconName;
+  /**
+   * The pre-clay SVG for the original five tabs. Pages added later have none
+   * and fall back to the flat Lucide glyph ClayIcon maps their art to.
+   */
+  flatIcon?: NavIconComponent;
+  labelKey: string;
+}
+
 /**
  * Tab glyphs in both icon styles.
  *
  * Clay artwork carries its own colour, so an active clay tab is a different
- * *file* rather than a tint — see components/ui/ClayIcon.tsx. The albums sheet
- * only ever drew one pose, so that tab reuses its resting art and leans on the
- * size and opacity step instead. The flat set is the pre-clay SVG pair, which
- * does the opposite: one component, tinted and filled when active.
+ * *file* rather than a tint — see components/ui/ClayIcon.tsx. Tabs with only
+ * one pose (albums, and every page that can be added to the bar) reuse their
+ * resting art and lean on the size and opacity step instead. The flat set is
+ * the pre-clay SVG pair, which does the opposite: one component, tinted and
+ * filled when active.
  */
-const TABS: {
-  name: TabName;
-  icon: ClayIconName;
-  activeIcon: ClayIconName;
-  flatIcon: NavIconComponent;
-  labelKey: string;
-}[] = [
-  {
-    name: 'calendar',
+export const NAV_TAB_META: Record<TabName, NavTabMeta> = {
+  calendar: {
     icon: 'nav/home',
     activeIcon: 'nav/home-active',
     flatIcon: HomeIcon,
     labelKey: 'nav.tab_calendar',
   },
-  {
-    name: 'accounts',
+  accounts: {
     icon: 'nav/wallet',
     activeIcon: 'nav/wallet-active',
     flatIcon: WalletIcon,
     labelKey: 'nav.tab_accounts',
   },
-  {
-    name: 'insights',
+  insights: {
     icon: 'nav/insights',
     activeIcon: 'nav/insights-active',
     flatIcon: InsightsIcon,
     labelKey: 'nav.tab_insights',
   },
-  {
-    name: 'albums',
+  albums: {
     icon: 'settings/albums',
     activeIcon: 'settings/albums',
     flatIcon: AlbumsIcon,
     labelKey: 'nav.tab_albums',
   },
-  {
-    name: 'settings',
+  settings: {
     icon: 'nav/settings',
     activeIcon: 'nav/settings-active',
     flatIcon: SettingsIcon,
     labelKey: 'nav.tab_settings',
   },
-];
+  goals: {
+    icon: 'status/goal-target',
+    activeIcon: 'status/goal-target',
+    labelKey: 'nav.tab_goals',
+  },
+  recurring: {
+    icon: 'settings/recurring',
+    activeIcon: 'settings/recurring',
+    labelKey: 'nav.tab_recurring',
+  },
+  reimbursements: {
+    icon: 'money-time/wallet-in',
+    activeIcon: 'money-time/wallet-in',
+    labelKey: 'nav.tab_reimbursements',
+  },
+  receipts: {
+    icon: 'settings/receipts',
+    activeIcon: 'settings/receipts',
+    labelKey: 'nav.tab_receipts',
+  },
+  settleUp: {
+    icon: 'settings/settle-up',
+    activeIcon: 'settings/settle-up',
+    labelKey: 'nav.tab_settle_up',
+  },
+};
 
 const NAV_ROW_HEIGHT = 58;
 const ICON_SIZE = 26;
@@ -130,7 +158,7 @@ const NavItem = memo(function NavItem({
   tab: TabName;
   icon: ClayIconName;
   activeIcon: ClayIconName;
-  FlatIcon: NavIconComponent;
+  FlatIcon: NavIconComponent | undefined;
   labelKey: string;
   isActive: boolean;
   onPressTab: (tab: TabName) => void;
@@ -155,7 +183,7 @@ const NavItem = memo(function NavItem({
           className="items-center justify-center rounded-2xl mx-0.5"
           style={{ height: NAV_ROW_HEIGHT }}
         >
-          {isFlat ? (
+          {isFlat && FlatIcon ? (
             <FlatIcon
               size={ICON_SIZE}
               color={isActive ? themeColors.primary : themeColors.textMuted}
@@ -167,6 +195,8 @@ const NavItem = memo(function NavItem({
               name={isActive ? activeIcon : icon}
               size={isActive ? ICON_SIZE_ACTIVE : ICON_SIZE}
               opacity={isActive ? undefined : ICON_OPACITY_RESTING}
+              flatSize={ICON_SIZE - 2}
+              flatColor={isActive ? themeColors.primary : themeColors.textMuted}
             />
           )}
         </Pressable>
@@ -175,7 +205,7 @@ const NavItem = memo(function NavItem({
   );
 });
 
-export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
+export function BottomNav({ tabs, activeTab, onTabChange }: BottomNavProps) {
   const { bottom: safeBottom } = useSafeAreaInsets();
   const resolvedTheme = useResolvedTheme();
   const { minimizeProgress, isScrolling } = useBottomNavMinimize();
@@ -215,18 +245,21 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   const fallbackTintStyle = useAnimatedStyle(() => ({
     opacity: !hasBlurView || (isAndroid && scrolling.value) ? 0.8 : 0.4,
   }));
-  const navItems = TABS.map((tab) => (
-    <NavItem
-      key={tab.name}
-      tab={tab.name}
-      icon={tab.icon}
-      activeIcon={tab.activeIcon}
-      FlatIcon={tab.flatIcon}
-      labelKey={tab.labelKey}
-      isActive={activeTab === tab.name}
-      onPressTab={handleTabPress}
-    />
-  ));
+  const navItems = tabs.map((tab) => {
+    const meta = NAV_TAB_META[tab];
+    return (
+      <NavItem
+        key={tab}
+        tab={tab}
+        icon={meta.icon}
+        activeIcon={meta.activeIcon}
+        FlatIcon={meta.flatIcon}
+        labelKey={meta.labelKey}
+        isActive={activeTab === tab}
+        onPressTab={handleTabPress}
+      />
+    );
+  });
 
   return (
     <View

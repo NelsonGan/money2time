@@ -89,6 +89,11 @@ const de = {
     name: 'Money2Time',
   },
   nav: {
+    tab_goals: 'Ziele',
+    tab_recurring: 'Wiederkehrend',
+    tab_reimbursements: 'Erstattungen',
+    tab_receipts: 'Belege',
+    tab_settle_up: 'Wer dir Geld schuldet',
     tab_calendar: 'Kalender',
     tab_accounts: 'Konten',
     tab_insights: 'Einblicke',
@@ -786,6 +791,11 @@ const de = {
       placeholder_income: 'Versuche „Gehalt 3000", „Bonus 500", „Rückerstattung 50".',
     },
     editor: {
+      details: {
+        title: 'Details',
+        placeholder: 'Mit wem, wofür, alles, was du dir merken willst',
+        empty: 'Längere Notiz hinzufügen',
+      },
       transfer_expense_label: 'Als Ausgabe zählen',
       transfer_expense_tooltip:
         'Zählt diese Überweisung als Ausgabe in deinen Summen, Budgets und Diagrammen, unter der gewählten Kategorie. Das Geld wird wie gewohnt zwischen den beiden Konten bewegt.',
@@ -1139,6 +1149,19 @@ const de = {
     },
   },
   settings: {
+    visibility_show: 'Anzeigen',
+    visibility_hide: 'Ausblenden',
+    bottom_bar: {
+      title: 'Leiste unten',
+      description:
+        'Wähle bis zu fünf Seiten für die Leiste unten und ziehe sie in die gewünschte Reihenfolge. Kalender und Einstellungen bleiben immer.',
+      more_pages: 'Weitere Seiten',
+      full_hint: 'Entferne eine Seite, um eine andere hinzuzufügen',
+      pinned: 'Immer in der Leiste',
+      remove: '{{page}} entfernen',
+      add: '{{page}} hinzufügen',
+      reset: 'Auf Standard zurücksetzen',
+    },
     app_lock: {
       delay_section: 'Sperren nach',
       delay_immediately: 'Sofort',
@@ -1580,6 +1603,7 @@ const de = {
       column_category: 'Kategorie',
       column_subcategory: 'Unterkategorie',
       column_note: 'Notiz',
+      column_details: 'Details',
       column_sentiment: 'Stimmung',
       column_recurring: 'Wiederkehrend',
       column_name: 'Name',

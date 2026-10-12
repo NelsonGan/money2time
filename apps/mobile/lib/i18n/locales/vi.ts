@@ -89,6 +89,11 @@ const vi = {
     name: 'Money2Time',
   },
   nav: {
+    tab_goals: 'Mục tiêu',
+    tab_recurring: 'Định kỳ',
+    tab_reimbursements: 'Hoàn tiền',
+    tab_receipts: 'Biên lai',
+    tab_settle_up: 'Ai nợ bạn',
     tab_calendar: 'Lịch',
     tab_accounts: 'Tài khoản',
     tab_insights: 'Thống kê',
@@ -780,6 +785,11 @@ const vi = {
       placeholder_income: 'Thử "Lương 5000", "Thưởng 500", "Hoàn tiền 50".',
     },
     editor: {
+      details: {
+        title: 'Chi tiết',
+        placeholder: 'Đi cùng ai, chi cho việc gì, bất cứ điều gì đáng nhớ',
+        empty: 'Thêm ghi chú dài hơn',
+      },
       transfer_expense_label: 'Tính là chi tiêu',
       transfer_expense_tooltip:
         'Tính khoản chuyển này là chi tiêu trong tổng, ngân sách và biểu đồ của bạn, theo danh mục bạn chọn. Tiền vẫn chuyển giữa hai tài khoản như thường.',
@@ -1122,6 +1132,19 @@ const vi = {
     },
   },
   settings: {
+    visibility_show: 'Hiện',
+    visibility_hide: 'Ẩn',
+    bottom_bar: {
+      title: 'Thanh dưới cùng',
+      description:
+        'Chọn tối đa năm trang cho thanh dưới cùng và kéo để sắp xếp lại. Lịch và Cài đặt luôn ở lại.',
+      more_pages: 'Trang khác',
+      full_hint: 'Bỏ một trang để thêm trang khác',
+      pinned: 'Luôn ở trên thanh',
+      remove: 'Bỏ {{page}}',
+      add: 'Thêm {{page}}',
+      reset: 'Đặt lại mặc định',
+    },
     app_lock: {
       delay_section: 'Khóa sau',
       delay_immediately: 'Ngay lập tức',
@@ -1549,6 +1572,7 @@ const vi = {
       column_category: 'Danh mục',
       column_subcategory: 'Danh mục con',
       column_note: 'Ghi chú',
+      column_details: 'Chi tiết',
       column_sentiment: 'Cảm xúc',
       column_recurring: 'Định kỳ',
       column_name: 'Tên',

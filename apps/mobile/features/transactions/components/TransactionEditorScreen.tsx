@@ -16,6 +16,7 @@ import {
   FileText,
   Hash,
   Layers,
+  NotebookPen,
   Pencil,
   Power,
   Repeat,
@@ -82,6 +83,7 @@ import { getSubscriptionLogoMeta, suggestSubscriptionLogo } from '~/constants/su
 import { useApp } from '~/context/AppContext';
 import { useSetSplitBillSession } from '~/context/SplitBillSession';
 import {
+  DetailsNoteModal,
   NumpadPanel,
   ReceiptViewerModal,
   type SplitDraft,
@@ -330,6 +332,8 @@ interface TransactionEditorInitialValues {
   fxRate: number | null;
   categoryId: string | null;
   note: string;
+  /** The longer free-text note kept beside `note`. */
+  details: string;
   /** Stored receipt relative path (e.g. `receipts/9f3c.jpg`), or null. */
   receiptUri: string | null;
   sentiment: TransactionSentiment;
@@ -729,6 +733,11 @@ export function TransactionEditorScreen({
   const [transferFxModalVisible, setTransferFxModalVisible] = useState(false);
   const [categoryId, setCategoryId] = useState<string | null>(initialCategorySelectionId);
   const [note, setNote] = useState(initialValues?.note ?? '');
+  // The longer note, edited in its own modal from the options panel so the
+  // one-line note can stay the row's title.
+  const [details, setDetails] = useState(initialValues?.details ?? '');
+  const [detailsModalVisible, setDetailsModalVisible] = useState(false);
+  const hasDetails = details.trim().length > 0;
   const [sentiment, setSentiment] = useState<TransactionSentiment>(
     initialValues?.sentiment ?? 'neutral',
   );
@@ -1175,7 +1184,10 @@ export function TransactionEditorScreen({
       const hasSavedNextSelection = hasSavedTypeSelectionRef.current[nextType];
 
       setType(nextType);
-      if (nextType !== 'expense' && nextType !== 'transfer') setOptionsOpen(false);
+      // Income keeps the panel too: it has no tick, but it has the details row.
+      if (nextType !== 'expense' && nextType !== 'transfer' && nextType !== 'income') {
+        setOptionsOpen(false);
+      }
       autoNoteFromCategoryRef.current = null;
       setActiveField((current) => mapActiveFieldForType(current, nextType));
 
@@ -1376,7 +1388,7 @@ export function TransactionEditorScreen({
   useEffect(() => {
     let target = 0;
     if (keyboardHeight > 0) {
-      if (reportingFxModalVisible || transferFxModalVisible) {
+      if (reportingFxModalVisible || transferFxModalVisible || detailsModalVisible) {
         // The modal sits above the keyboard on its own. Keep the transaction
         // drawer stationary so the background numpad does not jump with it.
         target = 0;
@@ -1411,6 +1423,7 @@ export function TransactionEditorScreen({
     optionsOpen,
     reportingFxModalVisible,
     transferFxModalVisible,
+    detailsModalVisible,
     panelTranslate,
   ]);
   const panelAnimatedStyle = useAnimatedStyle(() => ({
@@ -1980,6 +1993,7 @@ export function TransactionEditorScreen({
     const fallbackDefaultNote =
       autoNoteFromCategoryRef.current?.trim() || categoryPreview?.name?.trim() || '';
     const resolvedNote = normalizedNote.length > 0 ? normalizedNote : fallbackDefaultNote || null;
+    const resolvedDetails = details.trim() || null;
     if (!amountDraft || !Number.isFinite(numericAmount)) {
       // The inline field error can sit hidden behind the numpad, so also surface
       // a toast instead of the tap appearing to fail silently.
@@ -2020,6 +2034,13 @@ export function TransactionEditorScreen({
           fromAccountId: null,
           toAccountId: null,
           note: resolvedNote,
+          // An adjustment has no options panel, so there is no details row to
+          // show what was typed before switching to it. Keep what the row
+          // already had rather than saving text nobody can see.
+          details:
+            initialValues?.type === 'balance_adjustment'
+              ? initialValues.details?.trim() || null
+              : null,
           sentiment: 'neutral',
           reimbursable: false,
         };
@@ -2066,6 +2087,7 @@ export function TransactionEditorScreen({
           categoryId: transferCountsAsExpense ? transferCategoryId : null,
           countsAsExpense: transferCountsAsExpense,
           note: resolvedNote,
+          details: resolvedDetails,
           sentiment: 'neutral',
           reimbursable: false,
         };
@@ -2113,6 +2135,7 @@ export function TransactionEditorScreen({
           fromAccountId: null,
           toAccountId: null,
           note: resolvedNote,
+          details: resolvedDetails,
           receiptUri,
           sentiment,
           // Only an expense can be reimbursed; income keeps the column false so
@@ -2251,6 +2274,7 @@ export function TransactionEditorScreen({
         setAmount('');
         setAmountExpression('');
         setNote('');
+        setDetails('');
         setNoteSuggestions([]);
         setError(null);
         setFieldErrors({});
@@ -2422,12 +2446,17 @@ export function TransactionEditorScreen({
     !isTransferType && !isBalanceAdjustmentType && enabledCurrencies.length > 1;
   const showSentimentButton = useStickyNumpad && type === 'expense';
   // Gear opens the options panel: the reimbursement tick on an expense, the
-  // count-as-spending tick on a transfer. A recurring rule has its own editor
-  // shape (a loan's rule carries the setting from the loan itself).
+  // count-as-spending tick on a transfer, and the details note on all three.
+  // A recurring rule has its own editor shape (a loan's rule carries the
+  // setting from the loan itself).
   const showOptionsButton =
-    useStickyNumpad && (type === 'expense' || type === 'transfer') && !recurringOptions;
-  // Lit when the panel is open or holds a tick worth noticing.
-  const optionsActive = type === 'transfer' ? transferCountsAsExpense : reimbursable;
+    useStickyNumpad &&
+    (type === 'expense' || type === 'income' || type === 'transfer') &&
+    !recurringOptions;
+  // Lit when the panel is open or holds a tick or a note worth noticing.
+  const optionsActive =
+    hasDetails ||
+    (type === 'transfer' ? transferCountsAsExpense : type === 'expense' && reimbursable);
   // Receipt attach rides at the right end of the action row (money-in/out).
   const showReceiptButton = useStickyNumpad && (type === 'expense' || type === 'income');
   // Currency now lives on the amount card, not the action row.
@@ -4499,6 +4528,35 @@ export function TransactionEditorScreen({
                           ) : null}
                         </>
                       ) : null}
+                      {/* The longer note. A row that previews it and opens its
+                          own editor, rather than a text box in this slot: the
+                          slot sits where the keyboard comes up. */}
+                      <Pressable
+                        onPress={() => {
+                          void triggerHaptic('selection');
+                          setDetailsModalVisible(true);
+                        }}
+                        accessibilityRole="button"
+                        accessibilityLabel={I18n.t('transactions.editor.details.title')}
+                        accessibilityValue={hasDetails ? { text: details.trim() } : undefined}
+                        className={cn(
+                          'flex-row items-center gap-3 rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 active:opacity-70',
+                          type === 'transfer' && transferCountsAsExpense && 'mt-2.5',
+                        )}
+                      >
+                        <NotebookPen size={18} color={themeColors.textMuted} />
+                        <View className="min-w-0 flex-1">
+                          <Text variant="body" numberOfLines={1}>
+                            {I18n.t('transactions.editor.details.title')}
+                          </Text>
+                          <Text variant="caption" tone="muted" numberOfLines={2}>
+                            {hasDetails
+                              ? details.trim()
+                              : I18n.t('transactions.editor.details.empty')}
+                          </Text>
+                        </View>
+                        <ChevronRight size={16} color={themeColors.textMuted} />
+                      </Pressable>
                     </View>
                   ) : (
                     <NumpadPanel
@@ -4588,6 +4646,12 @@ export function TransactionEditorScreen({
           ))}
         </Animated.View>
       ) : null}
+      <DetailsNoteModal
+        visible={detailsModalVisible}
+        value={details}
+        onClose={() => setDetailsModalVisible(false)}
+        onApply={setDetails}
+      />
       {isTransferType && selectedFromAccount && selectedToAccount ? (
         <TransferFxModal
           visible={transferFxModalVisible}

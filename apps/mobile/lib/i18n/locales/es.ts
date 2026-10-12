@@ -89,6 +89,11 @@ const es = {
     name: 'Money2Time',
   },
   nav: {
+    tab_goals: 'Metas',
+    tab_recurring: 'Recurrentes',
+    tab_reimbursements: 'Reembolsos',
+    tab_receipts: 'Recibos',
+    tab_settle_up: 'Quién te debe',
     tab_calendar: 'Calendario',
     tab_accounts: 'Cuentas',
     tab_insights: 'Análisis',
@@ -780,6 +785,11 @@ const es = {
       placeholder_income: 'Prueba "Sueldo 3000", "Bono 500", "Reembolso 50".',
     },
     editor: {
+      details: {
+        title: 'Detalles',
+        placeholder: 'Con quién fue, qué cubrió, cualquier cosa que valga la pena recordar',
+        empty: 'Añade una nota más larga',
+      },
       transfer_expense_label: 'Contar como gasto',
       transfer_expense_tooltip:
         'Cuenta esta transferencia como gasto en tus totales, presupuestos y gráficos, bajo la categoría que elijas. El dinero sigue moviéndose entre las dos cuentas como siempre.',
@@ -1131,6 +1141,19 @@ const es = {
     },
   },
   settings: {
+    visibility_show: 'Mostrar',
+    visibility_hide: 'Ocultar',
+    bottom_bar: {
+      title: 'Barra inferior',
+      description:
+        'Elige hasta cinco páginas para la barra inferior y arrástralas para reordenarlas. Calendario y Ajustes siempre se quedan.',
+      more_pages: 'Más páginas',
+      full_hint: 'Quita una página para añadir otra',
+      pinned: 'Siempre en la barra',
+      remove: 'Quitar {{page}}',
+      add: 'Añadir {{page}}',
+      reset: 'Restablecer',
+    },
     app_lock: {
       delay_section: 'Bloquear después de',
       delay_immediately: 'Inmediatamente',
@@ -1568,6 +1591,7 @@ const es = {
       column_category: 'Categoría',
       column_subcategory: 'Subcategoría',
       column_note: 'Nota',
+      column_details: 'Detalles',
       column_sentiment: 'Sentimiento',
       column_recurring: 'Recurrente',
       column_name: 'Nombre',

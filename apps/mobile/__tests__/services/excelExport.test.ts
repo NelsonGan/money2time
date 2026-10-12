@@ -41,6 +41,7 @@ function transaction(overrides: Partial<TransactionWithRelations> = {}): Transac
     toAccountId: null,
     categoryId: 'c1',
     note: 'Lunch',
+    details: null,
     receiptUri: null,
     recurrencePattern: 'none',
     recurrenceInterval: 1,
@@ -203,7 +204,15 @@ describe('buildExcelSheets', () => {
         ],
       }),
     )[0].rows;
-    expect(rows.map((row) => row[13])).toEqual(['No', 'Yes']);
+    expect(rows.map((row) => row[14])).toEqual(['No', 'Yes']);
+  });
+
+  it('writes the details next to the note', () => {
+    const [row] = buildExcelSheets(
+      data({ transactions: [transaction({ note: 'Dinner', details: 'With Aisha, split later' })] }),
+    )[0].rows;
+    expect(row[11]).toBe('Dinner');
+    expect(row[12]).toBe('With Aisha, split later');
   });
 
   it('resolves the transfer account names', () => {

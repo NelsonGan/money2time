@@ -87,6 +87,11 @@ const zhHant = {
     name: 'Money2Time',
   },
   nav: {
+    tab_goals: '目標',
+    tab_recurring: '定期',
+    tab_reimbursements: '報銷',
+    tab_receipts: '收據',
+    tab_settle_up: '誰欠你錢',
     tab_calendar: '日曆',
     tab_accounts: '帳戶',
     tab_insights: '洞察',
@@ -746,6 +751,11 @@ const zhHant = {
       placeholder_income: '試試 "薪資 5000"，"獎金 1000"，"退款 30"。',
     },
     editor: {
+      details: {
+        title: '詳細資料',
+        placeholder: '和誰一起、用在什麼地方、任何值得記住的事',
+        empty: '新增較長的備註',
+      },
       transfer_expense_label: '計為支出',
       transfer_expense_tooltip:
         '將此轉帳計為支出，按你選擇的分類計入總額、預算和圖表。資金仍照常在兩個帳戶之間轉移。',
@@ -1081,6 +1091,18 @@ const zhHant = {
     },
   },
   settings: {
+    visibility_show: '顯示',
+    visibility_hide: '隱藏',
+    bottom_bar: {
+      title: '底部列',
+      description: '為底部列選擇最多五個頁面，並拖曳以調整順序。月曆和設定會一直保留。',
+      more_pages: '更多頁面',
+      full_hint: '移除一個頁面才能新增其他頁面',
+      pinned: '一律顯示在底部列',
+      remove: '移除{{page}}',
+      add: '新增{{page}}',
+      reset: '恢復預設',
+    },
     app_lock: {
       delay_section: '多久後鎖定',
       delay_immediately: '立即',
@@ -1483,6 +1505,7 @@ const zhHant = {
       column_category: '分類',
       column_subcategory: '子分類',
       column_note: '備註',
+      column_details: '詳細資料',
       column_sentiment: '心情',
       column_recurring: '定期',
       column_name: '名稱',

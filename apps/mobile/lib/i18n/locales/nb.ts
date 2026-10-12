@@ -89,6 +89,11 @@ const nb = {
     name: 'Money2Time',
   },
   nav: {
+    tab_goals: 'Mål',
+    tab_recurring: 'Faste',
+    tab_reimbursements: 'Refusjoner',
+    tab_receipts: 'Kvitteringer',
+    tab_settle_up: 'Hvem skylder deg',
     tab_calendar: 'Kalender',
     tab_accounts: 'Kontoer',
     tab_insights: 'Innsikt',
@@ -780,6 +785,11 @@ const nb = {
       placeholder_income: 'Prøv "Lønn 3000", "Bonus 500", "Refusjon 50".',
     },
     editor: {
+      details: {
+        title: 'Detaljer',
+        placeholder: 'Hvem du var med, hva det dekket, alt som er verdt å huske',
+        empty: 'Legg til et lengre notat',
+      },
       transfer_expense_label: 'Tell som utgift',
       transfer_expense_tooltip:
         'Teller denne overføringen som forbruk i totalene, budsjettene og diagrammene dine, under kategorien du velger. Pengene flyttes fortsatt mellom de to kontoene som vanlig.',
@@ -1127,6 +1137,19 @@ const nb = {
     },
   },
   settings: {
+    visibility_show: 'Vis',
+    visibility_hide: 'Skjul',
+    bottom_bar: {
+      title: 'Bunnlinje',
+      description:
+        'Velg opptil fem sider for bunnlinjen, og dra for å endre rekkefølgen. Kalender og Innstillinger blir alltid.',
+      more_pages: 'Flere sider',
+      full_hint: 'Fjern en side for å legge til en annen',
+      pinned: 'Alltid i linjen',
+      remove: 'Fjern {{page}}',
+      add: 'Legg til {{page}}',
+      reset: 'Tilbakestill til standard',
+    },
     app_lock: {
       delay_section: 'Lås etter',
       delay_immediately: 'Umiddelbart',
@@ -1562,6 +1585,7 @@ const nb = {
       column_category: 'Kategori',
       column_subcategory: 'Underkategori',
       column_note: 'Notat',
+      column_details: 'Detaljer',
       column_sentiment: 'Følelse',
       column_recurring: 'Gjentakende',
       column_name: 'Navn',

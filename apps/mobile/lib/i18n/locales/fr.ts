@@ -89,6 +89,11 @@ const fr = {
     name: 'Money2Time',
   },
   nav: {
+    tab_goals: 'Objectifs',
+    tab_recurring: 'Récurrents',
+    tab_reimbursements: 'Remboursements',
+    tab_receipts: 'Reçus',
+    tab_settle_up: "Qui vous doit de l'argent",
     tab_calendar: 'Calendrier',
     tab_accounts: 'Comptes',
     tab_insights: 'Analyses',
@@ -783,6 +788,11 @@ const fr = {
       placeholder_income: 'Essayez « Salaire 3000 », « Prime 500 », « Remboursement 50 ».',
     },
     editor: {
+      details: {
+        title: 'Détails',
+        placeholder: 'Avec qui, ce que ça couvrait, tout ce qui mérite d’être retenu',
+        empty: 'Ajouter une note plus longue',
+      },
       transfer_expense_label: 'Compter comme dépense',
       transfer_expense_tooltip:
         "Compte ce virement comme une dépense dans vos totaux, budgets et graphiques, dans la catégorie choisie. L'argent est toujours transféré entre les deux comptes comme d'habitude.",
@@ -1132,6 +1142,19 @@ const fr = {
     },
   },
   settings: {
+    visibility_show: 'Afficher',
+    visibility_hide: 'Masquer',
+    bottom_bar: {
+      title: 'Barre du bas',
+      description:
+        'Choisissez jusqu’à cinq pages pour la barre du bas, et faites-les glisser pour les réordonner. Calendrier et Réglages restent toujours.',
+      more_pages: 'Autres pages',
+      full_hint: 'Retirez une page pour en ajouter une autre',
+      pinned: 'Toujours dans la barre',
+      remove: 'Retirer {{page}}',
+      add: 'Ajouter {{page}}',
+      reset: 'Rétablir par défaut',
+    },
     app_lock: {
       delay_section: 'Verrouiller après',
       delay_immediately: 'Immédiatement',
@@ -1577,6 +1600,7 @@ const fr = {
       column_category: 'Catégorie',
       column_subcategory: 'Sous-catégorie',
       column_note: 'Note',
+      column_details: 'Détails',
       column_sentiment: 'Ressenti',
       column_recurring: 'Récurrent',
       column_name: 'Nom',
