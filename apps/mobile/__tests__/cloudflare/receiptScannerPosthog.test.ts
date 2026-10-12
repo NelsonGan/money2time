@@ -115,6 +115,7 @@ describe('receipt scanner PostHog integration', () => {
       $session_id: SESSION_ID,
       $ai_session_id: SESSION_ID,
       parsed_transactions: 1,
+      $geoip_disable: true,
     });
     expect(event.properties).not.toHaveProperty('$ai_prompt_version');
     // Neither the receipt, the prompt nor the parsed answer leaves the Worker.
