@@ -1142,10 +1142,8 @@ const pl = {
     visibility_hide: 'Ukryj',
     bottom_bar: {
       title: 'Dolny pasek',
-      description:
-        'Wybierz do pięciu stron na dolny pasek i przeciągnij, aby zmienić kolejność. Kalendarz i Ustawienia zostają zawsze.',
+      home: 'Start',
       more_pages: 'Więcej stron',
-      full_hint: 'Usuń stronę, aby dodać inną',
       pinned: 'Zawsze na pasku',
       remove: 'Usuń {{page}}',
       add: 'Dodaj {{page}}',

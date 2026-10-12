@@ -16,7 +16,6 @@ import {
   FileText,
   Hash,
   Layers,
-  NotebookPen,
   Pencil,
   Power,
   Repeat,
@@ -4431,6 +4430,38 @@ export function TransactionEditorScreen({
                        COLLAPSE_PEEK the drawer reserves above the keypad, which
                        is more air than a list of ticks needs. */
                     <View className="-mt-4 flex-1 px-5">
+                      {/* The longer note first, as a soft note area rather than
+                          a boxed row, previewing what was written. Tapping it
+                          opens its own editor instead of typing here, because
+                          this slot is where the keyboard comes up. */}
+                      <Text variant="caption" tone="muted" className="mb-1.5 px-1 uppercase">
+                        {I18n.t('transactions.editor.details.title')}
+                      </Text>
+                      <Pressable
+                        onPress={() => {
+                          void triggerHaptic('selection');
+                          setDetailsModalVisible(true);
+                        }}
+                        accessibilityRole="button"
+                        accessibilityLabel={I18n.t('transactions.editor.details.title')}
+                        accessibilityValue={hasDetails ? { text: details.trim() } : undefined}
+                        className="min-h-[68px] flex-row gap-3 rounded-2xl bg-secondary/40 px-4 py-3 active:opacity-70"
+                      >
+                        <Text
+                          variant="body"
+                          tone={hasDetails ? 'default' : 'muted'}
+                          numberOfLines={2}
+                          className="flex-1"
+                        >
+                          {hasDetails
+                            ? details.trim()
+                            : I18n.t('transactions.editor.details.empty')}
+                        </Text>
+                        <Pencil size={15} color={themeColors.textMuted} />
+                      </Pressable>
+                      {type === 'expense' || type === 'transfer' ? (
+                        <View className="my-3 h-[1px] bg-border/30" />
+                      ) : null}
                       {type === 'expense' ? (
                         <View
                           className="flex-row items-center gap-2 pb-2.5"
@@ -4528,35 +4559,6 @@ export function TransactionEditorScreen({
                           ) : null}
                         </>
                       ) : null}
-                      {/* The longer note. A row that previews it and opens its
-                          own editor, rather than a text box in this slot: the
-                          slot sits where the keyboard comes up. */}
-                      <Pressable
-                        onPress={() => {
-                          void triggerHaptic('selection');
-                          setDetailsModalVisible(true);
-                        }}
-                        accessibilityRole="button"
-                        accessibilityLabel={I18n.t('transactions.editor.details.title')}
-                        accessibilityValue={hasDetails ? { text: details.trim() } : undefined}
-                        className={cn(
-                          'flex-row items-center gap-3 rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 active:opacity-70',
-                          type === 'transfer' && transferCountsAsExpense && 'mt-2.5',
-                        )}
-                      >
-                        <NotebookPen size={18} color={themeColors.textMuted} />
-                        <View className="min-w-0 flex-1">
-                          <Text variant="body" numberOfLines={1}>
-                            {I18n.t('transactions.editor.details.title')}
-                          </Text>
-                          <Text variant="caption" tone="muted" numberOfLines={2}>
-                            {hasDetails
-                              ? details.trim()
-                              : I18n.t('transactions.editor.details.empty')}
-                          </Text>
-                        </View>
-                        <ChevronRight size={16} color={themeColors.textMuted} />
-                      </Pressable>
                     </View>
                   ) : (
                     <NumpadPanel

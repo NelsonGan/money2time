@@ -1144,10 +1144,8 @@ const it = {
     visibility_hide: 'Nascondi',
     bottom_bar: {
       title: 'Barra in basso',
-      description:
-        'Scegli fino a cinque pagine per la barra in basso e trascinale per riordinarle. Calendario e Impostazioni restano sempre.',
+      home: 'Home',
       more_pages: 'Altre pagine',
-      full_hint: 'Rimuovi una pagina per aggiungerne un’altra',
       pinned: 'Sempre nella barra',
       remove: 'Rimuovi {{page}}',
       add: 'Aggiungi {{page}}',

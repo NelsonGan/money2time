@@ -1136,10 +1136,8 @@ const vi = {
     visibility_hide: 'Ẩn',
     bottom_bar: {
       title: 'Thanh dưới cùng',
-      description:
-        'Chọn tối đa năm trang cho thanh dưới cùng và kéo để sắp xếp lại. Lịch và Cài đặt luôn ở lại.',
+      home: 'Trang chủ',
       more_pages: 'Trang khác',
-      full_hint: 'Bỏ một trang để thêm trang khác',
       pinned: 'Luôn ở trên thanh',
       remove: 'Bỏ {{page}}',
       add: 'Thêm {{page}}',

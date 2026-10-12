@@ -1149,10 +1149,8 @@ const nl = {
     visibility_hide: 'Verbergen',
     bottom_bar: {
       title: 'Onderbalk',
-      description:
-        'Kies tot vijf pagina’s voor de onderbalk en sleep om ze te herschikken. Kalender en Instellingen blijven altijd staan.',
+      home: 'Start',
       more_pages: 'Meer pagina’s',
-      full_hint: 'Haal een pagina weg om een andere toe te voegen',
       pinned: 'Altijd in de balk',
       remove: '{{page}} verwijderen',
       add: '{{page}} toevoegen',

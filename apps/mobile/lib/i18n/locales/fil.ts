@@ -1149,10 +1149,8 @@ const fil = {
     visibility_hide: 'Itago',
     bottom_bar: {
       title: 'Bottom bar',
-      description:
-        'Pumili ng hanggang limang page para sa bottom bar, at i-drag para ayusin ang pagkakasunod. Laging nandiyan ang Calendar at Settings.',
+      home: 'Home',
       more_pages: 'Iba pang page',
-      full_hint: 'Mag-alis ng page para makapagdagdag ng iba',
       pinned: 'Laging nasa bar',
       remove: 'Alisin ang {{page}}',
       add: 'Idagdag ang {{page}}',

@@ -1140,10 +1140,8 @@ const sv = {
     visibility_hide: 'Dölj',
     bottom_bar: {
       title: 'Nedre fältet',
-      description:
-        'Välj upp till fem sidor för nedre fältet och dra för att ändra ordningen. Kalender och Inställningar finns alltid kvar.',
+      home: 'Hem',
       more_pages: 'Fler sidor',
-      full_hint: 'Ta bort en sida för att lägga till en annan',
       pinned: 'Alltid i fältet',
       remove: 'Ta bort {{page}}',
       add: 'Lägg till {{page}}',

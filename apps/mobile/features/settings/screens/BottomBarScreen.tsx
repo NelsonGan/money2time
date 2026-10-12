@@ -8,6 +8,7 @@ import { NAV_TAB_META } from '~/components/navigation/BottomNav';
 import {
   addNavTab,
   availableNavTabs,
+  canRemoveNavTab,
   isPinnedNavTab,
   MAX_NAV_TABS,
   parseNavTabs,
@@ -89,10 +90,6 @@ export function BottomBarScreen({ onBack }: BottomBarScreenProps) {
         contentContainerStyle={[styles.scrollContent, bottomNavInset]}
         showsVerticalScrollIndicator={false}
       >
-        <Text variant="caption" tone="muted" className="mb-3 px-1">
-          {I18n.t('settings.bottom_bar.description')}
-        </Text>
-
         <Sortable.Flex
           activeItemScale={1.02}
           activeItemShadowOpacity={0.08}
@@ -109,10 +106,12 @@ export function BottomBarScreen({ onBack }: BottomBarScreenProps) {
           scrollableRef={scrollRef}
           width="fill"
         >
-          {tabs.map((tab) => {
+          {tabs.map((tab, index) => {
             const meta = NAV_TAB_META[tab];
             const label = I18n.t(meta.labelKey);
             const pinned = isPinnedNavTab(tab);
+            const removable = canRemoveNavTab(tabs, tab);
+            const isHome = index === 0;
             return (
               <View
                 key={tab}
@@ -136,9 +135,20 @@ export function BottomBarScreen({ onBack }: BottomBarScreenProps) {
                   </View>
                 </Sortable.Handle>
                 <ClayIcon name={meta.icon} size={ICON_SIZE} flatSize={20} />
-                <Text variant="body" numberOfLines={1} style={styles.label}>
-                  {label}
-                </Text>
+                <View style={styles.labelRow}>
+                  <Text variant="body" numberOfLines={1} className="shrink">
+                    {label}
+                  </Text>
+                  {/* The first page is where the app opens, so dragging a page
+                      to the top is how home is chosen. */}
+                  {isHome ? (
+                    <View className="rounded-full bg-primary/12 px-2 py-0.5">
+                      <Text variant="caption" style={{ color: themeColors.primary }}>
+                        {I18n.t('settings.bottom_bar.home')}
+                      </Text>
+                    </View>
+                  ) : null}
+                </View>
                 {pinned ? (
                   <View
                     accessible
@@ -150,10 +160,15 @@ export function BottomBarScreen({ onBack }: BottomBarScreenProps) {
                 ) : (
                   <Pressable
                     onPress={() => save(removeNavTab(tabs, tab), 'remove')}
+                    disabled={!removable}
                     accessibilityRole="button"
+                    accessibilityState={{ disabled: !removable }}
                     accessibilityLabel={I18n.t('settings.bottom_bar.remove', { page: label })}
                     hitSlop={6}
-                    style={({ pressed }) => [styles.trailingButton, { opacity: pressed ? 0.6 : 1 }]}
+                    style={({ pressed }) => [
+                      styles.trailingButton,
+                      { opacity: !removable ? 0.35 : pressed ? 0.6 : 1 },
+                    ]}
                   >
                     <View style={[styles.roundButton, { backgroundColor: themeColors.error }]}>
                       <Minus size={14} color="#fff" strokeWidth={3} />
@@ -167,16 +182,9 @@ export function BottomBarScreen({ onBack }: BottomBarScreenProps) {
 
         {morePages.length > 0 ? (
           <View className="mt-6">
-            <View className="mb-2 px-1 flex-row items-baseline justify-between gap-2">
-              <Text variant="caption" tone="muted" className="uppercase">
-                {I18n.t('settings.bottom_bar.more_pages')}
-              </Text>
-              {isFull ? (
-                <Text variant="caption" tone="muted" className="shrink text-right">
-                  {I18n.t('settings.bottom_bar.full_hint')}
-                </Text>
-              ) : null}
-            </View>
+            <Text variant="caption" tone="muted" className="mb-2 px-1 uppercase">
+              {I18n.t('settings.bottom_bar.more_pages')}
+            </Text>
             <Card>
               {morePages.map((tab, index) => {
                 const meta = NAV_TAB_META[tab];
@@ -259,6 +267,12 @@ const styles = StyleSheet.create({
   },
   label: {
     flex: 1,
+  },
+  labelRow: {
+    alignItems: 'center',
+    flex: 1,
+    flexDirection: 'row',
+    gap: spacing.xs,
   },
   trailingButton: {
     alignItems: 'center',

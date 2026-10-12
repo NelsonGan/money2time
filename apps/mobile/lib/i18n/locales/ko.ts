@@ -1128,10 +1128,8 @@ const ko = {
     visibility_hide: '숨기기',
     bottom_bar: {
       title: '하단 바',
-      description:
-        '하단 바에 넣을 페이지를 최대 5개까지 고르고, 드래그해 순서를 바꾸세요. 캘린더와 설정은 항상 남습니다.',
+      home: '홈',
       more_pages: '더 많은 페이지',
-      full_hint: '다른 페이지를 추가하려면 하나를 빼세요',
       pinned: '항상 바에 표시',
       remove: '{{page}} 빼기',
       add: '{{page}} 추가',

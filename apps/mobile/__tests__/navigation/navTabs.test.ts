@@ -1,7 +1,9 @@
 import {
   addNavTab,
   availableNavTabs,
+  canRemoveNavTab,
   DEFAULT_NAV_TABS,
+  homeNavTab,
   MAX_NAV_TABS,
   parseNavTabs,
   removeNavTab,
@@ -19,11 +21,15 @@ describe('parseNavTabs', () => {
     expect(parseNavTabs(stored)).toEqual(['calendar', 'recurring', 'settleUp', 'settings']);
   });
 
-  it('rejects a bar missing a pinned page', () => {
-    expect(parseNavTabs(JSON.stringify(['accounts', 'insights', 'settings']))).toEqual(
-      DEFAULT_NAV_TABS,
-    );
+  it('reads a bar without Calendar, whose first page is then home', () => {
+    const tabs = parseNavTabs(JSON.stringify(['accounts', 'insights', 'settings']));
+    expect(tabs).toEqual(['accounts', 'insights', 'settings']);
+    expect(homeNavTab(tabs)).toBe('accounts');
+  });
+
+  it('rejects a bar without Settings or with Settings alone', () => {
     expect(parseNavTabs(JSON.stringify(['calendar', 'accounts']))).toEqual(DEFAULT_NAV_TABS);
+    expect(parseNavTabs(JSON.stringify(['settings']))).toEqual(DEFAULT_NAV_TABS);
   });
 
   it('rejects duplicates, too many pages and junk', () => {
@@ -84,15 +90,28 @@ describe('editing the bar', () => {
     expect(addNavTab(['calendar', 'settings'], 'calendar')).toEqual(['calendar', 'settings']);
   });
 
-  it('keeps the pinned pages when asked to remove them', () => {
-    expect(removeNavTab(DEFAULT_NAV_TABS, 'calendar')).toEqual(DEFAULT_NAV_TABS);
+  it('keeps Settings and never shrinks the bar below two pages', () => {
     expect(removeNavTab(DEFAULT_NAV_TABS, 'settings')).toEqual(DEFAULT_NAV_TABS);
+    expect(canRemoveNavTab(DEFAULT_NAV_TABS, 'settings')).toBe(false);
+    expect(removeNavTab(['goals', 'settings'], 'goals')).toEqual(['goals', 'settings']);
+    expect(canRemoveNavTab(['goals', 'settings'], 'goals')).toBe(false);
+    expect(removeNavTab(DEFAULT_NAV_TABS, 'calendar')).toEqual([
+      'accounts',
+      'insights',
+      'albums',
+      'settings',
+    ]);
     expect(removeNavTab(DEFAULT_NAV_TABS, 'insights')).toEqual([
       'calendar',
       'accounts',
       'albums',
       'settings',
     ]);
+  });
+
+  it('makes the first page home', () => {
+    expect(homeNavTab(DEFAULT_NAV_TABS)).toBe('calendar');
+    expect(homeNavTab(['settings', 'goals'])).toBe('settings');
   });
 
   it('lists the pages not in the bar', () => {

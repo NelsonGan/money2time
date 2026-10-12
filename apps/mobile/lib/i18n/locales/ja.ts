@@ -1133,10 +1133,8 @@ const ja = {
     visibility_hide: '非表示',
     bottom_bar: {
       title: '下部バー',
-      description:
-        '下部バーに表示するページを最大5つまで選び、ドラッグで並べ替えられます。カレンダーと設定は常に表示されます。',
+      home: 'ホーム',
       more_pages: 'その他のページ',
-      full_hint: '別のページを追加するには、どれかを外してください',
       pinned: '常にバーに表示',
       remove: '{{page}}を外す',
       add: '{{page}}を追加',

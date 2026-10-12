@@ -1095,9 +1095,8 @@ const zhHant = {
     visibility_hide: '隱藏',
     bottom_bar: {
       title: '底部列',
-      description: '為底部列選擇最多五個頁面，並拖曳以調整順序。月曆和設定會一直保留。',
+      home: '首頁',
       more_pages: '更多頁面',
-      full_hint: '移除一個頁面才能新增其他頁面',
       pinned: '一律顯示在底部列',
       remove: '移除{{page}}',
       add: '新增{{page}}',

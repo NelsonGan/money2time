@@ -1141,10 +1141,8 @@ const nb = {
     visibility_hide: 'Skjul',
     bottom_bar: {
       title: 'Bunnlinje',
-      description:
-        'Velg opptil fem sider for bunnlinjen, og dra for å endre rekkefølgen. Kalender og Innstillinger blir alltid.',
+      home: 'Hjem',
       more_pages: 'Flere sider',
-      full_hint: 'Fjern en side for å legge til en annen',
       pinned: 'Alltid i linjen',
       remove: 'Fjern {{page}}',
       add: 'Legg til {{page}}',

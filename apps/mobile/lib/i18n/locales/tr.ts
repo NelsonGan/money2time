@@ -1143,10 +1143,8 @@ const tr = {
     visibility_hide: 'Gizle',
     bottom_bar: {
       title: 'Alt çubuk',
-      description:
-        'Alt çubuk için en fazla beş sayfa seçin ve sıralamak için sürükleyin. Takvim ve Ayarlar her zaman kalır.',
+      home: 'Ana sayfa',
       more_pages: 'Diğer sayfalar',
-      full_hint: 'Başka bir sayfa eklemek için birini kaldırın',
       pinned: 'Her zaman çubukta',
       remove: '{{page}} kaldır',
       add: '{{page}} ekle',

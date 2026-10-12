@@ -1143,10 +1143,8 @@ const da = {
     visibility_hide: 'Skjul',
     bottom_bar: {
       title: 'Bundbjælke',
-      description:
-        'Vælg op til fem sider til bundbjælken, og træk for at ændre rækkefølgen. Kalender og Indstillinger bliver altid.',
+      home: 'Hjem',
       more_pages: 'Flere sider',
-      full_hint: 'Fjern en side for at tilføje en anden',
       pinned: 'Altid i bjælken',
       remove: 'Fjern {{page}}',
       add: 'Tilføj {{page}}',

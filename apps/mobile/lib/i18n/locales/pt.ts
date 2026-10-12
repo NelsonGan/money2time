@@ -1145,10 +1145,8 @@ const pt = {
     visibility_hide: 'Ocultar',
     bottom_bar: {
       title: 'Barra inferior',
-      description:
-        'Escolha até cinco páginas para a barra inferior e arraste para reordenar. Calendário e Ajustes ficam sempre.',
+      home: 'Início',
       more_pages: 'Mais páginas',
-      full_hint: 'Remova uma página para adicionar outra',
       pinned: 'Sempre na barra',
       remove: 'Remover {{page}}',
       add: 'Adicionar {{page}}',

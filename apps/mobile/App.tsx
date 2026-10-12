@@ -35,7 +35,7 @@ import {
   BottomNavMinimizeProvider,
   useBottomNavMinimize,
 } from '~/components/navigation/BottomNavMinimize';
-import { parseNavTabs } from '~/components/navigation/navTabs';
+import { homeNavTab, parseNavTabs } from '~/components/navigation/navTabs';
 import { TodayJumpFab } from '~/components/navigation/TodayJumpFab';
 import {
   AccountLogoPickerSheet,
@@ -258,6 +258,7 @@ type MainTab = TabName;
 // the bar mounts on its first visit.
 const TAB_PRELOAD_ORDER: MainTab[] = [
   'settings',
+  'calendar',
   'insights',
   'accounts',
   'albums',
@@ -480,7 +481,9 @@ function MainShellScreen({
     voiceStartPendingRef.current = false;
     voiceHandleRef.current?.startTap();
   }, [voiceEnabled]);
-  const [activeTab, setActiveTab] = useState<MainTab>('calendar');
+  // The app opens on the first page in the bar, which is Calendar unless the
+  // user moved something else to the top.
+  const [activeTab, setActiveTab] = useState<MainTab>(() => homeNavTab(navTabs));
   // A page outside the bar still opens when something asks for it (Settings >
   // Albums, the over-limit prompt), but only stays mounted while it is in the
   // bar or on screen, so one the user removed stops re-rendering in the
@@ -1081,6 +1084,12 @@ function MainShellScreen({
     [navigation, startScan],
   );
 
+  // The + button lives on Calendar. With Calendar out of the bar it moves to
+  // the home page, so adding an entry is never more than a tab away.
+  const showAddFab =
+    activeTab === 'calendar' ||
+    (!navTabs.includes('calendar') && activeTab === homeNavTab(navTabs));
+
   const shouldHideBottomNav =
     (activeTab === 'calendar' && isCalendarSelectionMode) ||
     // The auto-log tutorial is a full-page walkthrough with its own bottom nav
@@ -1167,16 +1176,22 @@ function MainShellScreen({
             />
           </MountedTab>
         ) : null}
-        <MountedTab name="calendar" active={activeTab === 'calendar'}>
-          <MemoCalendarScreen
-            resetToCurrentMonthToken={calendarResetToken}
-            goToDayRequest={calendarGoToDayRequest}
-            onOpenTransaction={openTransactionEditor}
-            onOpenTransactionSplitBadge={openTransactionSplitBill}
-            onSelectionModeChange={setIsCalendarSelectionMode}
-            onShowTodayButtonChange={setShowCalendarTodayButton}
-          />
-        </MountedTab>
+        {hostsTab('calendar') ? (
+          <MountedTab
+            name="calendar"
+            active={activeTab === 'calendar'}
+            shouldPreload={preloadedTabs.has('calendar')}
+          >
+            <MemoCalendarScreen
+              resetToCurrentMonthToken={calendarResetToken}
+              goToDayRequest={calendarGoToDayRequest}
+              onOpenTransaction={openTransactionEditor}
+              onOpenTransactionSplitBadge={openTransactionSplitBill}
+              onSelectionModeChange={setIsCalendarSelectionMode}
+              onShowTodayButtonChange={setShowCalendarTodayButton}
+            />
+          </MountedTab>
+        ) : null}
         {hostsTab('insights') ? (
           <MountedTab
             name="insights"
@@ -1292,7 +1307,7 @@ function MainShellScreen({
       {!shouldHideBottomNav ? (
         <>
           <BottomNav tabs={navTabs} activeTab={activeTab} onTabChange={handleTabChange} />
-          {activeTab === 'calendar' ? (
+          {showAddFab ? (
             <AddFab
               onPress={handleFabPress}
               onLongPress={holdAction === 'none' ? undefined : handleFabLongPress}

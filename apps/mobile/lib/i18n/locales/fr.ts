@@ -1146,10 +1146,8 @@ const fr = {
     visibility_hide: 'Masquer',
     bottom_bar: {
       title: 'Barre du bas',
-      description:
-        'Choisissez jusqu’à cinq pages pour la barre du bas, et faites-les glisser pour les réordonner. Calendrier et Réglages restent toujours.',
+      home: 'Accueil',
       more_pages: 'Autres pages',
-      full_hint: 'Retirez une page pour en ajouter une autre',
       pinned: 'Toujours dans la barre',
       remove: 'Retirer {{page}}',
       add: 'Ajouter {{page}}',

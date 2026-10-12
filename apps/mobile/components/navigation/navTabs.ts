@@ -3,9 +3,10 @@
  * of tab names in `settings.nav_tabs_json`; null (or anything that does not
  * parse into a valid bar) means the default five.
  *
- * Calendar is the home page and carries the + button, and Settings is where
- * the bar is edited, so both are pinned: they can move but never leave. The
- * rest of the bar is the user's to fill with up to three more pages.
+ * Settings is where the bar is edited, so it is pinned: it can move but never
+ * leave. Everything else is the user's choice, from two to five pages. The
+ * first page is the home page: the app opens on it, and when Calendar is not
+ * in the bar the + button moves to it.
  */
 export type TabName =
   | 'calendar'
@@ -41,9 +42,10 @@ export const DEFAULT_NAV_TABS: readonly TabName[] = [
   'settings',
 ];
 
-export const PINNED_NAV_TABS: readonly TabName[] = ['calendar', 'settings'];
+export const PINNED_NAV_TABS: readonly TabName[] = ['settings'];
 
-/** The bar holds at most five pages and at least the pinned two. */
+/** The bar holds two to five pages: Settings and at least one other. */
+export const MIN_NAV_TABS = 2;
 export const MAX_NAV_TABS = 5;
 
 export function isNavTab(value: unknown): value is TabName {
@@ -56,7 +58,7 @@ export function isPinnedNavTab(tab: TabName): boolean {
 
 function isValidBar(tabs: readonly TabName[]): boolean {
   return (
-    tabs.length >= PINNED_NAV_TABS.length &&
+    tabs.length >= MIN_NAV_TABS &&
     tabs.length <= MAX_NAV_TABS &&
     new Set(tabs).size === tabs.length &&
     PINNED_NAV_TABS.every((tab) => tabs.includes(tab))
@@ -96,9 +98,19 @@ export function addNavTab(tabs: readonly TabName[], tab: TabName): TabName[] {
   return next;
 }
 
-/** Removes a page from the bar. Pinned pages stay. */
+/** The page the app opens on. */
+export function homeNavTab(tabs: readonly TabName[]): TabName {
+  return tabs[0] ?? DEFAULT_NAV_TABS[0];
+}
+
+/** Whether a page can leave the bar: never Settings, and never below two. */
+export function canRemoveNavTab(tabs: readonly TabName[], tab: TabName): boolean {
+  return !isPinnedNavTab(tab) && tabs.includes(tab) && tabs.length > MIN_NAV_TABS;
+}
+
+/** Removes a page from the bar. Pinned pages stay, and the bar keeps two. */
 export function removeNavTab(tabs: readonly TabName[], tab: TabName): TabName[] {
-  if (isPinnedNavTab(tab)) return [...tabs];
+  if (!canRemoveNavTab(tabs, tab)) return [...tabs];
   return tabs.filter((candidate) => candidate !== tab);
 }
 

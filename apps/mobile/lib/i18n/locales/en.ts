@@ -1117,10 +1117,8 @@ const en = {
     visibility_hide: 'Hide',
     bottom_bar: {
       title: 'Bottom bar',
-      description:
-        'Choose up to five pages for the bottom bar, and drag to reorder them. Calendar and Settings always stay.',
+      home: 'Home',
       more_pages: 'More pages',
-      full_hint: 'Remove a page to add another',
       pinned: 'Always in the bar',
       remove: 'Remove {{page}}',
       add: 'Add {{page}}',

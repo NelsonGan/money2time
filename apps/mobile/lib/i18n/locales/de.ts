@@ -1153,10 +1153,8 @@ const de = {
     visibility_hide: 'Ausblenden',
     bottom_bar: {
       title: 'Leiste unten',
-      description:
-        'Wähle bis zu fünf Seiten für die Leiste unten und ziehe sie in die gewünschte Reihenfolge. Kalender und Einstellungen bleiben immer.',
+      home: 'Start',
       more_pages: 'Weitere Seiten',
-      full_hint: 'Entferne eine Seite, um eine andere hinzuzufügen',
       pinned: 'Immer in der Leiste',
       remove: '{{page}} entfernen',
       add: '{{page}} hinzufügen',

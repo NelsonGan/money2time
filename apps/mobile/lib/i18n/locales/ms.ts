@@ -1148,10 +1148,8 @@ const ms = {
     visibility_hide: 'Sembunyi',
     bottom_bar: {
       title: 'Bar bawah',
-      description:
-        'Pilih sehingga lima halaman untuk bar bawah, dan seret untuk menyusun semula. Kalendar dan Tetapan sentiasa kekal.',
+      home: 'Utama',
       more_pages: 'Halaman lain',
-      full_hint: 'Buang satu halaman untuk menambah yang lain',
       pinned: 'Sentiasa dalam bar',
       remove: 'Buang {{page}}',
       add: 'Tambah {{page}}',

@@ -1145,10 +1145,8 @@ const es = {
     visibility_hide: 'Ocultar',
     bottom_bar: {
       title: 'Barra inferior',
-      description:
-        'Elige hasta cinco páginas para la barra inferior y arrástralas para reordenarlas. Calendario y Ajustes siempre se quedan.',
+      home: 'Inicio',
       more_pages: 'Más páginas',
-      full_hint: 'Quita una página para añadir otra',
       pinned: 'Siempre en la barra',
       remove: 'Quitar {{page}}',
       add: 'Añadir {{page}}',

@@ -1095,9 +1095,8 @@ const zh = {
     visibility_hide: '隐藏',
     bottom_bar: {
       title: '底部栏',
-      description: '为底部栏选择最多五个页面，并拖动调整顺序。日历和设置会一直保留。',
+      home: '首页',
       more_pages: '更多页面',
-      full_hint: '移除一个页面才能添加其他页面',
       pinned: '始终显示在底部栏',
       remove: '移除{{page}}',
       add: '添加{{page}}',

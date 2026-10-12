@@ -1147,10 +1147,8 @@ const id = {
     visibility_hide: 'Sembunyikan',
     bottom_bar: {
       title: 'Bilah bawah',
-      description:
-        'Pilih hingga lima halaman untuk bilah bawah, lalu seret untuk mengubah urutannya. Kalender dan Pengaturan selalu ada.',
+      home: 'Beranda',
       more_pages: 'Halaman lain',
-      full_hint: 'Hapus satu halaman untuk menambah yang lain',
       pinned: 'Selalu di bilah',
       remove: 'Hapus {{page}}',
       add: 'Tambah {{page}}',
