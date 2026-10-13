@@ -102,10 +102,10 @@ export function initPostHog(): PostHog | null {
         // are text (on iOS this flag covers labels as well as inputs). Images
         // are shown, so icons, logos and illustrations stay readable; pictures
         // the user supplied (receipts, covers, the profile photo, uploads, QR
-        // codes, the camera and the album map) carry `REPLAY_PRIVATE`
-        // (components/ui/replayPrivacy.ts) and are masked one by one. Fixed
-        // app copy that can never hold user data can opt back in with a
-        // `ph-no-mask` testID, as `FatButton` does.
+        // codes, the camera and the album map) and charts of their money carry
+        // `REPLAY_PRIVATE` (components/ui/replayPrivacy.ts) and are masked one
+        // by one. Fixed app copy that can never hold user data can opt back in
+        // with a `ph-no-mask` testID, as `FatButton` does.
         maskAllTextInputs: true,
         maskAllImages: false,
         maskAllSandboxedViews: true,

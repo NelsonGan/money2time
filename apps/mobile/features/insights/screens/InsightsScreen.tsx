@@ -65,6 +65,7 @@ import {
   ThemeModal,
   TimeValueInline,
 } from '~/components/ui';
+import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import type { GeneratedCategoryIconSource } from '~/constants/categoryIcons';
 import {
@@ -1966,7 +1967,7 @@ const AssetHistoryLineChart = React.memo(function AssetHistoryLineChart({
   }
 
   return (
-    <View style={buildSizeStyle(chartWidth, ASSET_HISTORY_CHART_HEIGHT)}>
+    <View {...REPLAY_PRIVATE} style={buildSizeStyle(chartWidth, ASSET_HISTORY_CHART_HEIGHT)}>
       {isChartReady ? (
         <>
           <LineGraph
@@ -5051,6 +5052,7 @@ export function InsightsScreen({
             {pagePieData.length > 0 ? (
               <View className="w-full items-center" style={styles.chartSizeCenter}>
                 <View
+                  {...REPLAY_PRIVATE}
                   style={buildSizeStyle(pieStageWidth, pieStageHeight)}
                   onStartShouldSetResponder={() => true}
                   onResponderRelease={(event) => {

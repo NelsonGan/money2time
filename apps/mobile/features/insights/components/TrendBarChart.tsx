@@ -3,6 +3,7 @@ import { PanResponder, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import Svg, { Defs, Line, LinearGradient, Rect, Stop, Text as SvgText } from 'react-native-svg';
 
+import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { triggerHaptic } from '~/services/haptics';
 import { FONT } from '~/utils/fonts';
 
@@ -144,7 +145,11 @@ export const TrendBarChart = React.memo(function TrendBarChart({
 
   return (
     <Animated.View entering={FadeIn.duration(300)}>
-      <View {...panResponder.panHandlers} style={{ width: chartWidth, height: chartHeight }}>
+      <View
+        {...REPLAY_PRIVATE}
+        {...panResponder.panHandlers}
+        style={{ width: chartWidth, height: chartHeight }}
+      >
         <Svg width={chartWidth} height={chartHeight}>
           <Defs>
             <LinearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
