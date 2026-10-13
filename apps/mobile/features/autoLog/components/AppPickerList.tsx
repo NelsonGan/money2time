@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { AppState, Image, Switch, View } from 'react-native';
 
 import { ClayIcon, InfoTooltipButton, Text } from '~/components/ui';
+import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -123,7 +124,12 @@ export function AppPickerList({ selected, onToggle, renderSelectedDetail }: AppP
       <View key={app.package} className="gap-3 px-4 py-3">
         <View className="flex-row items-center gap-3">
           {app.iconUri ? (
-            <Image source={{ uri: app.iconUri }} className="h-9 w-9 rounded-xl" />
+            // Which payment apps are installed is the user's information.
+            <Image
+              {...REPLAY_PRIVATE}
+              source={{ uri: app.iconUri }}
+              className="h-9 w-9 rounded-xl"
+            />
           ) : (
             <View className="h-9 w-9 items-center justify-center">
               <ClayIcon name="money-time/card" size={30} flatSize={20} />

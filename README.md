@@ -1119,9 +1119,12 @@ Readable stacks need uploaded symbols. `metro.config.js` uses `getPostHogExpoCon
 
 Recordings come from `@posthog/react-native-plugin` (native screenshots, not a DOM), so they need a native build. The app decides once per launch whether to record, after the install date is known: **4%** of launches on an install's first day (onboarding and first transactions, where replays teach the most) and **0.15%** of later launches, about 2,100 recordings a month against the free tier's separate 2,500 mobile recordings ([constants/posthog.ts](apps/mobile/constants/posthog.ts)). Recordings shorter than 5 seconds are discarded by the project setting.
 
-Privacy settings, all enforced in the client config ([posthog.native.ts](apps/mobile/services/posthog.native.ts)):
+Privacy settings, all enforced in the client config ([posthog.native.ts](apps/mobile/services/posthog.native.ts)). The rule is that the user's information is masked and the app around it is not:
 
-- every text, number, input field and image is masked (`maskAllTextInputs`, `maskAllImages`), and system pickers are masked (`maskAllSandboxedViews`); wrap any new sensitive view in `PostHogMaskView` if it renders through a custom native view;
+- every text and input is masked (`maskAllTextInputs`): amounts, notes, account and goal names are text, and on iOS the flag covers every label as well as every input field, so it cannot be narrowed to "inputs only". Fixed app copy that can never hold user data opts back in with a `ph-no-mask` `testID` (iOS honours it; Android keeps it masked). `FatButton` labels do, since every one is app copy plus at most a selection count; anything that renders an amount or a name must not carry it;
+- images are shown (`maskAllImages: false`), so category icons, bank and subscription logos, the mascot and illustrations stay readable;
+- pictures the user supplied are masked one by one with `REPLAY_PRIVATE` ([components/ui/replayPrivacy.ts](apps/mobile/components/ui/replayPrivacy.ts), the `ph-no-capture` token `PostHogMaskView` uses): receipts (card, viewer, crop editor, captured photo), the receipt camera, the profile photo, album and goal covers, album map pins and the album map itself (location history), uploaded account, subscription, category and item images, payment QR codes, and the installed-app icons in the payment alerts picker (which payment apps someone has). A new view that shows a user's picture must spread it too. Uploaded category icons drawn inside the Insights pie chart are part of a Skia canvas and cannot be masked separately;
+- system pickers are masked (`maskAllSandboxedViews`);
 - touch coordinates are not recorded (`captureTouches: false`): the app's number pads are custom views whose tap positions would reveal amounts;
 - Android Logcat and iOS network telemetry are off (`captureLog`, `captureNetworkTelemetry`), so log lines and request URLs never enter a recording.
 

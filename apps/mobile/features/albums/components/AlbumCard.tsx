@@ -6,6 +6,7 @@ import Animated from 'react-native-reanimated';
 import Sortable from 'react-native-sortables';
 
 import { Text, TimeValueInline } from '~/components/ui';
+import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { useApp } from '~/context/AppContext';
 import { usePressScale } from '~/hooks/usePressScale';
 import { I18n } from '~/lib/i18n';
@@ -70,6 +71,7 @@ export const AlbumCard = memo(function AlbumCard({
       >
         {effectiveCoverUri ? (
           <Image
+            {...REPLAY_PRIVATE}
             source={{ uri: effectiveCoverUri }}
             style={{ width: '100%', height: '100%' }}
             contentFit="cover"

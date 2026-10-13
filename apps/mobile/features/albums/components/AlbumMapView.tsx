@@ -3,6 +3,7 @@ import { Camera, type CameraRef, Map, Marker } from '@maplibre/maplibre-react-na
 import { type ReactNode, useCallback, useMemo, useRef, useState } from 'react';
 import { View } from 'react-native';
 
+import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import type { ColorPalette } from '~/constants/designSystem';
 import { useThemeColors } from '~/hooks/useThemeColors';
 
@@ -240,7 +241,8 @@ export function AlbumMapView({ pins, onSelectAlbum }: AlbumMapViewProps) {
   }, [stacks, frontByCoord, handlePinPress]);
 
   return (
-    <View className="flex-1">
+    // Where the user's albums are is their location history.
+    <View className="flex-1" {...REPLAY_PRIVATE}>
       <Map style={{ flex: 1 }} mapStyle={mapStyle} logo={false} attribution={false}>
         <Camera ref={cameraRef} initialViewState={initialViewState} />
         {markers}

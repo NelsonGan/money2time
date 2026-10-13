@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { FatButton, Input, SettingsHeader, Text } from '~/components/ui';
+import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -149,6 +150,7 @@ export function CreateAlbumScreen({
           >
             {effectiveCoverUri ? (
               <Image
+                {...REPLAY_PRIVATE}
                 source={{ uri: effectiveCoverUri }}
                 style={{ width: '100%', height: '100%' }}
                 contentFit="cover"
