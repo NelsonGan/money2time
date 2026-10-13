@@ -791,7 +791,6 @@ const it = {
     editor: {
       details: {
         title: 'Dettagli',
-        placeholder: 'Con chi eri, cosa copriva, qualsiasi cosa valga la pena ricordare',
         empty: 'Aggiungi una nota più lunga',
       },
       transfer_expense_label: 'Conta come spesa',

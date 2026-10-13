@@ -110,10 +110,9 @@ export function CurrencyPickerSheet({
     >
       <Pressable style={styles.backdrop} onPress={handleClose}>
         <Pressable onPress={(e) => e.stopPropagation()} style={styles.sheet}>
-          <View
-            className="bg-card rounded-t-[28px] flex-1"
-            style={{ paddingBottom: Math.max(insets.bottom, 16) }}
-          >
+          {/* The bottom inset pads the list, not the card, so it runs to the
+              screen edge and its last row scrolls clear of the home indicator. */}
+          <View className="bg-card rounded-t-[28px] flex-1">
             <View className="px-5 pt-5 pb-3 flex-row items-center gap-2">
               <Text variant="subheading" numberOfLines={1} className="shrink">
                 {title ?? I18n.t('exchange_rates.choose_currency')}
@@ -159,7 +158,10 @@ export function CurrencyPickerSheet({
               keyExtractor={(item) => item.code}
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 16 }}
+              contentContainerStyle={{
+                paddingHorizontal: 20,
+                paddingBottom: Math.max(insets.bottom, 16) + 16,
+              }}
               stickySectionHeadersEnabled={false}
               renderSectionHeader={({ section }) => (
                 <Text variant="caption" tone="muted" className="mt-3 mb-1 px-1 uppercase">

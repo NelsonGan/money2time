@@ -786,7 +786,6 @@ const da = {
     editor: {
       details: {
         title: 'Detaljer',
-        placeholder: 'Hvem du var med, hvad det dækkede, alt der er værd at huske',
         empty: 'Tilføj en længere note',
       },
       transfer_expense_label: 'Tæl som udgift',

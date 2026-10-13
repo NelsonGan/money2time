@@ -753,7 +753,6 @@ const zhHant = {
     editor: {
       details: {
         title: '詳細資料',
-        placeholder: '和誰一起、用在什麼地方、任何值得記住的事',
         empty: '新增較長的備註',
       },
       transfer_expense_label: '計為支出',

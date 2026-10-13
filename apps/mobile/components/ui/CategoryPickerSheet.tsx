@@ -1,5 +1,5 @@
 import { X } from 'lucide-react-native';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -88,9 +88,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     zIndex: 100,
   },
-  gridContent: {
-    paddingBottom: 8,
-  },
 });
 
 export function CategoryPickerSheet(props: CategoryPickerSheetProps) {
@@ -111,11 +108,19 @@ export function CategoryPickerSheet(props: CategoryPickerSheetProps) {
 
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
+  // The bottom inset pads the grid, not the card, so a long list runs to the
+  // screen edge and its last row still scrolls clear of the home indicator.
+  // Memoized because CategoryGrid is: a fresh object would re-render it on
+  // every render of the screen hosting the picker.
+  const gridContentStyle = useMemo(
+    () => ({ paddingBottom: Math.max(insets.bottom, 16) + 8 }),
+    [insets.bottom],
+  );
 
   const grid = isMultiSelect ? (
     <CategoryGrid
       className="flex-1 px-4"
-      contentContainerStyle={styles.gridContent}
+      contentContainerStyle={gridContentStyle}
       parents={parents}
       childByParent={childByParent}
       allowParentSelection={allowParentSelection}
@@ -125,7 +130,7 @@ export function CategoryPickerSheet(props: CategoryPickerSheetProps) {
   ) : (
     <CategoryGrid
       className="flex-1 px-4"
-      contentContainerStyle={styles.gridContent}
+      contentContainerStyle={gridContentStyle}
       parents={parents}
       childByParent={childByParent}
       allowParentSelection={allowParentSelection}
@@ -137,10 +142,7 @@ export function CategoryPickerSheet(props: CategoryPickerSheetProps) {
   const sheetContent = (
     <Pressable style={styles.backdrop} onPress={onClose}>
       <Pressable onPress={(e) => e.stopPropagation()} style={styles.sheet}>
-        <View
-          className="bg-card rounded-t-[28px] flex-1"
-          style={{ paddingBottom: Math.max(insets.bottom, 16) }}
-        >
+        <View className="bg-card rounded-t-[28px] flex-1">
           <View className="px-5 pt-5 pb-5 flex-row items-center gap-2">
             <Text variant="subheading" numberOfLines={1} className="shrink">
               {I18n.t('categories.title')}

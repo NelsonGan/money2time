@@ -790,7 +790,6 @@ const fr = {
     editor: {
       details: {
         title: 'Détails',
-        placeholder: 'Avec qui, ce que ça couvrait, tout ce qui mérite d’être retenu',
         empty: 'Ajouter une note plus longue',
       },
       transfer_expense_label: 'Compter comme dépense',

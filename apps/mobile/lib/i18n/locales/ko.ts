@@ -783,7 +783,6 @@ const ko = {
     editor: {
       details: {
         title: '상세',
-        placeholder: '누구와 함께였는지, 무엇에 쓴 돈인지, 기억해 둘 만한 것',
         empty: '긴 메모 추가',
       },
       transfer_expense_label: '지출로 계산',

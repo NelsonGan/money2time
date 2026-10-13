@@ -789,7 +789,6 @@ const nl = {
     editor: {
       details: {
         title: 'Details',
-        placeholder: 'Met wie, waarvoor, alles wat het onthouden waard is',
         empty: 'Langere notitie toevoegen',
       },
       transfer_expense_label: 'Tellen als uitgave',

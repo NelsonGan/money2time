@@ -789,7 +789,6 @@ const fil = {
     editor: {
       details: {
         title: 'Mga detalye',
-        placeholder: 'Sino ang kasama, para saan, anumang dapat tandaan',
         empty: 'Magdagdag ng mas mahabang tala',
       },
       transfer_expense_label: 'Ibilang bilang gastos',

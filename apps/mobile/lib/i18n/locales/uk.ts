@@ -786,7 +786,6 @@ const uk = {
     editor: {
       details: {
         title: 'Подробиці',
-        placeholder: 'З ким, на що, усе, що варто пам’ятати',
         empty: 'Додайте довшу нотатку',
       },
       transfer_expense_label: 'Рахувати як витрату',
