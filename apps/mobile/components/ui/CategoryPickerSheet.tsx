@@ -1,5 +1,5 @@
 import { X } from 'lucide-react-native';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -110,7 +110,12 @@ export function CategoryPickerSheet(props: CategoryPickerSheetProps) {
   const insets = useSafeAreaInsets();
   // The bottom inset pads the grid, not the card, so a long list runs to the
   // screen edge and its last row still scrolls clear of the home indicator.
-  const gridContentStyle = { paddingBottom: Math.max(insets.bottom, 16) + 8 };
+  // Memoized because CategoryGrid is: a fresh object would re-render it on
+  // every render of the screen hosting the picker.
+  const gridContentStyle = useMemo(
+    () => ({ paddingBottom: Math.max(insets.bottom, 16) + 8 }),
+    [insets.bottom],
+  );
 
   const grid = isMultiSelect ? (
     <CategoryGrid
