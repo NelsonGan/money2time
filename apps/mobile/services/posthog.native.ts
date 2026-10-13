@@ -97,9 +97,17 @@ export function initPostHog(): PostHog | null {
       // The app starts recording itself, sampled per launch.
       enableSessionReplay: false,
       sessionReplayConfig: {
-        // Finance app: every text, input and image is masked in recordings.
+        // Finance app: the user's information is masked, the app around it is
+        // not. Every text and input is masked, because amounts, notes and names
+        // are text (on iOS this flag covers labels as well as inputs). Images
+        // are shown, so icons, logos and illustrations stay readable; pictures
+        // the user supplied (receipts, covers, the profile photo, uploads, QR
+        // codes, the camera and the album map) and charts of their money carry
+        // `REPLAY_PRIVATE` (components/ui/replayPrivacy.ts) and are masked one
+        // by one. Fixed app copy that can never hold user data can opt back in
+        // with a `ph-no-mask` testID, as `FatButton` does.
         maskAllTextInputs: true,
-        maskAllImages: true,
+        maskAllImages: false,
         maskAllSandboxedViews: true,
         // The number pads are custom views, so tap positions would spell out
         // the amounts typed on them.

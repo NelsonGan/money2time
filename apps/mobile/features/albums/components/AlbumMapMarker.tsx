@@ -2,6 +2,7 @@ import { Image } from 'expo-image';
 import { memo } from 'react';
 import { Pressable, View } from 'react-native';
 
+import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { Text } from '~/components/ui/text';
 import { useThemeColors } from '~/hooks/useThemeColors';
 
@@ -40,6 +41,7 @@ export const AlbumMapMarker = memo(function AlbumMapMarker({
         {/* Cover image. */}
         {coverUri ? (
           <Image
+            {...REPLAY_PRIVATE}
             source={{ uri: coverUri }}
             style={{ width: '100%', height: IMAGE_HEIGHT }}
             contentFit="cover"

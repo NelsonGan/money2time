@@ -5,6 +5,7 @@ import { ActivityIndicator, Alert, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 
 import { Button, Text } from '~/components/ui';
+import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { cropReceiptImage } from '~/services/receiptImage';
@@ -275,6 +276,7 @@ export function ReceiptCropEditor({
         {loadedImage && imageFrame && crop ? (
           <>
             <Image
+              {...REPLAY_PRIVATE}
               source={{ uri: fileUri }}
               style={{ position: 'absolute', inset: 0 }}
               contentFit="contain"

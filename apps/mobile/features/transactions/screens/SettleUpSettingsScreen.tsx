@@ -10,6 +10,7 @@ import {
   SettingsPageLayout,
   Text,
 } from '~/components/ui';
+import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -153,6 +154,7 @@ export function SettleUpSettingsScreen({ onBack }: SettleUpSettingsScreenProps) 
             <View className="mt-4 items-center">
               <Pressable onPress={handlePickQr} className="active:opacity-80">
                 <Image
+                  {...REPLAY_PRIVATE}
                   source={{ uri: effectiveQrUri }}
                   style={{ width: 220, height: 220, borderRadius: 18, backgroundColor: '#fff' }}
                   resizeMode="contain"

@@ -5,6 +5,7 @@ import { ActivityIndicator, Alert, Platform, Pressable, StyleSheet, View } from 
 import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '~/components/ui';
+import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { ThemeModal } from '~/components/ui/theme-modal';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -168,6 +169,7 @@ export function ReceiptViewerModal({
             <View className="flex-1 items-center justify-center">
               {effectiveFileUri ? (
                 <Image
+                  {...REPLAY_PRIVATE}
                   source={{ uri: effectiveFileUri }}
                   style={styles.viewerImage}
                   contentFit="contain"

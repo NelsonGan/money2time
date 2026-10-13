@@ -7,6 +7,7 @@ import Svg, {
   TSpan,
 } from 'react-native-svg';
 
+import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { FONT } from '~/utils/fonts';
 
 export function lightenColor(hex: string, amount: number): string {
@@ -38,7 +39,8 @@ export function GradientPercent({
   const height = 50;
 
   return (
-    <Svg width={width} height={height}>
+    // SVG text is not a native label, so replays would show the user's rate.
+    <Svg {...REPLAY_PRIVATE} width={width} height={height}>
       <Defs>
         <SvgLinearGradient id={gradientId} x1="0" y1="0" x2="0.35" y2="1">
           <Stop offset="0" stopColor={lightenColor(color, 0.22)} />

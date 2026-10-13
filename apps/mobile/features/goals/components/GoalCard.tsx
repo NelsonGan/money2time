@@ -3,6 +3,7 @@ import React, { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { CategoryEmoji, Text } from '~/components/ui';
+import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -88,6 +89,7 @@ export const GoalCard = React.memo(function GoalCard({
           proportion the album cards use, so the two rails read as one idea. */}
       {effectiveCoverUri ? (
         <Image
+          {...REPLAY_PRIVATE}
           source={{ uri: effectiveCoverUri }}
           style={{ width: '100%', aspectRatio: 2 }}
           contentFit="cover"

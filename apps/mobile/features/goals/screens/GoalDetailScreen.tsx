@@ -13,6 +13,7 @@ import Animated, {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, CategoryEmoji, SettingsHeader, Text } from '~/components/ui';
+import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { useApp, useTransactions } from '~/context/AppContext';
 import {
   type DepositSource,
@@ -577,6 +578,7 @@ export function GoalDetailScreen({
       >
         <View style={{ height: heroHeight }}>
           <Image
+            {...REPLAY_PRIVATE}
             source={{ uri: effectiveCoverUri }}
             style={{ width: '100%', height: '100%' }}
             contentFit="cover"

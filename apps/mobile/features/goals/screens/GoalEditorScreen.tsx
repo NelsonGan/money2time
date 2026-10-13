@@ -16,6 +16,7 @@ import {
   Text,
 } from '~/components/ui';
 import { CategoryIconField } from '~/components/ui/CategoryIconField';
+import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { findGoalAutoSaveRule, type GoalAutoSaveCadence } from '~/features/goals/lib/goalMath';
 import type { CategoryIconPickerSession } from '~/features/settings/lib/categoryIconPickerBridge';
@@ -529,6 +530,7 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
             {effectiveCoverUri ? (
               <>
                 <Image
+                  {...REPLAY_PRIVATE}
                   source={{ uri: effectiveCoverUri }}
                   style={{ width: '100%', height: '100%' }}
                   contentFit="cover"
