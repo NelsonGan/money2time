@@ -2,6 +2,7 @@ import { Package } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 
+import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { resolveItemIconSource } from '~/constants/itemIcons';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { forgetCustomLogoUri, getCustomLogoUri, isCustomLogoId } from '~/services/userAssets';
@@ -34,6 +35,7 @@ export const ItemIcon = React.memo(function ItemIcon({ iconId, size = 40 }: Item
   if (source) {
     return (
       <Image
+        {...(customUri ? REPLAY_PRIVATE : null)}
         source={source}
         style={box}
         resizeMode="contain"

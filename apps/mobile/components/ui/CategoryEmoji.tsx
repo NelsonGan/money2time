@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { TextProps } from 'react-native';
 import { Image, Platform, View } from 'react-native';
 
+import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { Text } from '~/components/ui/text';
 import { CATEGORY_ICON_CELL_SIZE, classifyCategoryIcon } from '~/constants/categoryIcons';
 import { useResolvedTheme } from '~/context/ThemeContext';
@@ -78,6 +79,7 @@ export function CategoryEmoji({
     if (uri && uri !== brokenUri) {
       return (
         <Image
+          {...REPLAY_PRIVATE}
           source={{ uri }}
           style={{ width: dimension, height: dimension }}
           resizeMode="contain"

@@ -5,6 +5,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from 'react-native';
 
 import { ClayIcon } from '~/components/ui/ClayIcon';
+import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { Text } from '~/components/ui/text';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -200,10 +201,16 @@ export function InlineReceiptCamera({
     <View style={{ paddingHorizontal: horizontalInset }}>
       <View style={[styles.viewfinder, { height: viewfinderHeight }]}>
         {holding ? (
-          <Image source={{ uri: capturedUri }} style={styles.fill} contentFit="contain" />
+          <Image
+            {...REPLAY_PRIVATE}
+            source={{ uri: capturedUri }}
+            style={styles.fill}
+            contentFit="contain"
+          />
         ) : granted ? (
           <>
             <CameraView
+              {...REPLAY_PRIVATE}
               ref={cameraRef}
               style={styles.fill}
               facing="back"

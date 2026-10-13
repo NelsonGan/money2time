@@ -25,6 +25,7 @@ import { EmptyState } from '~/components/feedback/EmptyState';
 import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { Text } from '~/components/ui';
+import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { chartCategoryColor } from '~/constants/chartColors';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { type BreakdownChartRow, CategoryBreakdownChart } from '~/features/insights/components';
@@ -546,6 +547,7 @@ export function AlbumDetailScreen({
           <View style={{ height: coverHeight }} className="bg-secondary/40">
             {effectiveCoverUri ? (
               <Image
+                {...REPLAY_PRIVATE}
                 source={{ uri: effectiveCoverUri }}
                 style={{ width: '100%', height: '100%' }}
                 contentFit="cover"

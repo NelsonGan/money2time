@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 
 import { CategoryEmoji } from '~/components/ui/CategoryEmoji';
+import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { resolveAccountLogoSource } from '~/constants/accountLogos';
 import { forgetCustomLogoUri, getCustomLogoUri, isCustomLogoId } from '~/services/userAssets';
 import type { AccountType } from '~/types';
@@ -54,6 +55,7 @@ export const AccountLogo = React.memo(function AccountLogo({
     if (uri && uri !== brokenUri) {
       return (
         <Image
+          {...REPLAY_PRIVATE}
           source={{ uri }}
           style={{ width: size, height: size, borderRadius }}
           resizeMode="cover"

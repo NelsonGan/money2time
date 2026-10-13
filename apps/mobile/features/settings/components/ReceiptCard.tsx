@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import { Text, TimeValueInline } from '~/components/ui';
+import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { usePressScale } from '~/hooks/usePressScale';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -77,6 +78,7 @@ export const ReceiptCard = memo(function ReceiptCard({
         {/* Receipt image, or a placeholder when the file is missing. */}
         {effectiveReceiptFileUri ? (
           <Image
+            {...REPLAY_PRIVATE}
             source={{ uri: effectiveReceiptFileUri }}
             style={StyleSheet.absoluteFill}
             contentFit="cover"

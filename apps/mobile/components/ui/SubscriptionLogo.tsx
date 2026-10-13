@@ -2,6 +2,7 @@ import { Repeat } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 
+import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import {
   isDarkSubscriptionMark,
   resolveSubscriptionLogoSource,
@@ -70,6 +71,7 @@ export const SubscriptionLogo = React.memo(function SubscriptionLogo({
     if (uri && uri !== brokenUri) {
       return (
         <Image
+          {...REPLAY_PRIVATE}
           source={{ uri }}
           style={{ width: size, height: size, borderRadius }}
           resizeMode="cover"

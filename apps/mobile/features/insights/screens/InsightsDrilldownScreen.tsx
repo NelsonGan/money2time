@@ -21,6 +21,7 @@ import {
   Text,
   TimeValueInline,
 } from '~/components/ui';
+import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { categoryIconToEmoji } from '~/constants/categoryIcons';
 import { chartCategoryColor } from '~/constants/chartColors';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
@@ -1008,6 +1009,7 @@ export function InsightsDrilldownScreen({
                 {pagePieData.length > 0 && pageTotalAmount > 0 ? (
                   <View className="w-full items-center" style={styles.chartSizeCenter}>
                     <View
+                      {...REPLAY_PRIVATE}
                       style={buildSizeStyle(pieStageWidth, pieStageHeight)}
                       onStartShouldSetResponder={() => true}
                       onResponderRelease={(event) => {

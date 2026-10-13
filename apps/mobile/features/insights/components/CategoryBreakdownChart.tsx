@@ -4,6 +4,7 @@ import { PieChart } from 'react-native-gifted-charts';
 import Svg, { G, Polyline, Text as SvgText } from 'react-native-svg';
 
 import { CategoryEmoji, Text } from '~/components/ui';
+import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { categoryIconToEmoji } from '~/constants/categoryIcons';
 import { chartCategoryColor } from '~/constants/chartColors';
 import { useResolvedTheme } from '~/context/ThemeContext';
@@ -146,7 +147,7 @@ export function CategoryBreakdownChart({
       </View>
 
       <View className="items-center">
-        <View style={{ width: stageWidth, height: stageHeight }}>
+        <View style={{ width: stageWidth, height: stageHeight }} {...REPLAY_PRIVATE}>
           <View pointerEvents="none" style={{ marginTop: -verticalInset }}>
             <PieChart data={pieData} radius={radius} extraRadius={extraRadius} />
           </View>

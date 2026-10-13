@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import Svg, { ClipPath, Defs, G, Rect, Text as SvgText } from 'react-native-svg';
 
+import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { FONT } from '~/utils/fonts';
 
 interface SentimentDayData {
@@ -121,7 +122,7 @@ export const SentimentStackedBarChart = React.memo(function SentimentStackedBarC
 
   return (
     <Animated.View entering={FadeIn.duration(300)}>
-      <View style={{ width: chartWidth, height: chartHeight }}>
+      <View {...REPLAY_PRIVATE} style={{ width: chartWidth, height: chartHeight }}>
         <Svg width={chartWidth} height={chartHeight}>
           <Defs>
             {bars

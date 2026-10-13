@@ -41,6 +41,7 @@ import {
   useSettingsBottomNavInset,
 } from '~/components/ui';
 import { ClayIcon } from '~/components/ui/ClayIcon';
+import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
 import { useIsFlatIcons } from '~/context/ThemeContext';
@@ -269,6 +270,7 @@ export function SettingsScreen({
               >
                 {avatarUri ? (
                   <Image
+                    {...REPLAY_PRIVATE}
                     source={{ uri: avatarUri }}
                     style={{ height: 64, width: 64, borderRadius: 32 }}
                     contentFit="cover"
