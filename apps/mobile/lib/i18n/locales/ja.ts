@@ -786,7 +786,6 @@ const ja = {
     editor: {
       details: {
         title: '詳細',
-        placeholder: '誰と一緒だったか、何の費用か、覚えておきたいこと',
         empty: '長めのメモを追加',
       },
       transfer_expense_label: '支出として計上',

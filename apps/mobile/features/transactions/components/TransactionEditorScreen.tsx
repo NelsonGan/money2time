@@ -82,7 +82,6 @@ import { getSubscriptionLogoMeta, suggestSubscriptionLogo } from '~/constants/su
 import { useApp } from '~/context/AppContext';
 import { useSetSplitBillSession } from '~/context/SplitBillSession';
 import {
-  DetailsNoteModal,
   NumpadPanel,
   ReceiptViewerModal,
   type SplitDraft,
@@ -191,6 +190,20 @@ const numpadFooterPadFor = (safeAreaBottom: number) => Math.max(safeAreaBottom -
 const CARD_TO_COLLAPSIBLE_GAP = 13;
 // Air between the suggestions and the note row they belong to.
 const NOTE_SUGGESTIONS_GAP = 8;
+// The options panel is pulled up into the COLLAPSE_PEEK air above the keypad
+// slot; the details box's keyboard lift is measured from it.
+const OPTIONS_PANEL_PULL_UP = 16;
+// Air left between the expanded details box and the top of the keyboard.
+const DETAILS_KEYBOARD_GAP = 12;
+// The expanded details box's height before it grows with the text.
+const DETAILS_EXPANDED_MIN_HEIGHT = 112;
+// What the keypad slot spends on the details label row and the box's own
+// padding, so the growing field stops before it spills past the slot.
+const DETAILS_SLOT_CHROME = 48;
+/** Long enough for a paragraph or two; short enough to stay a note. */
+const DETAILS_MAX_LENGTH = 2000;
+// How close to the cap the details field starts showing its character count.
+const DETAILS_COUNTER_THRESHOLD = 200;
 
 const styles = StyleSheet.create({
   screenContainer: {
@@ -291,6 +304,11 @@ const styles = StyleSheet.create({
   noteInput: {
     flex: 1,
     fontSize: 16,
+  },
+  detailsInput: {
+    fontSize: 16,
+    lineHeight: 22,
+    padding: 0,
   },
   noteSuggestionRow: {
     paddingHorizontal: 16,
@@ -732,10 +750,14 @@ export function TransactionEditorScreen({
   const [transferFxModalVisible, setTransferFxModalVisible] = useState(false);
   const [categoryId, setCategoryId] = useState<string | null>(initialCategorySelectionId);
   const [note, setNote] = useState(initialValues?.note ?? '');
-  // The longer note, edited in its own modal from the options panel so the
-  // one-line note can stay the row's title.
+  // The longer note, kept apart from the one-line note so that one can stay the
+  // row's title. Its box in the options panel expands in place for typing.
   const [details, setDetails] = useState(initialValues?.details ?? '');
-  const [detailsModalVisible, setDetailsModalVisible] = useState(false);
+  const [detailsEditing, setDetailsEditing] = useState(false);
+  // Bottom edge of the details box inside the options panel, so the drawer can
+  // lift just far enough to sit it on the keyboard.
+  const [detailsBoxBottom, setDetailsBoxBottom] = useState(0);
+  const detailsInputRef = useRef<TextInput>(null);
   const hasDetails = details.trim().length > 0;
   const [sentiment, setSentiment] = useState<TransactionSentiment>(
     initialValues?.sentiment ?? 'neutral',
@@ -1073,6 +1095,7 @@ export function TransactionEditorScreen({
   };
   const blurNativeInputs = useCallback(() => {
     noteInputRef.current?.blur();
+    detailsInputRef.current?.blur();
     recurrenceNameRef.current?.blur();
     recurrenceIntervalRef.current?.blur();
   }, []);
@@ -1351,12 +1374,29 @@ export function TransactionEditorScreen({
     const showSub = Keyboard.addListener(showEvent, (event) => {
       setKeyboardHeight(event.endCoordinates?.height ?? 0);
     });
-    const hideSub = Keyboard.addListener(hideEvent, () => setKeyboardHeight(0));
+    const hideSub = Keyboard.addListener(hideEvent, () => {
+      setKeyboardHeight(0);
+      // A keyboard put away without Done (swiped down, or Android's back)
+      // folds the details box back into its preview.
+      detailsInputRef.current?.blur();
+    });
     return () => {
       showSub.remove();
       hideSub.remove();
     };
   }, [useStickyNumpad]);
+
+  // The details box lives in the options panel, so it folds away with it.
+  useEffect(() => {
+    if (!optionsOpen) setDetailsEditing(false);
+  }, [optionsOpen]);
+  // Focus once the expanded field has mounted. `autoFocus` on an input that
+  // mounts conditionally does not always raise the Android keyboard.
+  useEffect(() => {
+    if (!detailsEditing) return;
+    const frame = requestAnimationFrame(() => detailsInputRef.current?.focus());
+    return () => cancelAnimationFrame(frame);
+  }, [detailsEditing]);
 
   // Drive the panel's vertical offset as a Reanimated timing (signed: negative =
   // up for the keyboard, positive = down to collapse the numpad). The app is
@@ -1387,10 +1427,17 @@ export function TransactionEditorScreen({
   useEffect(() => {
     let target = 0;
     if (keyboardHeight > 0) {
-      if (reportingFxModalVisible || transferFxModalVisible || detailsModalVisible) {
+      if (reportingFxModalVisible || transferFxModalVisible) {
         // The modal sits above the keyboard on its own. Keep the transaction
         // drawer stationary so the background numpad does not jump with it.
         target = 0;
+      } else if (detailsEditing && optionsOpen && detailsBoxBottom > 0) {
+        // Like the note: lift only until the details box sits on the keyboard,
+        // so whatever is below it (the rest of the panel, Save) tucks behind
+        // the keys. As the box grows with the text it pushes the amount up.
+        const belowDetails =
+          collapsibleHeight - (COLLAPSE_PEEK - OPTIONS_PANEL_PULL_UP + detailsBoxBottom);
+        target = -Math.max(0, keyboardHeight - belowDetails + DETAILS_KEYBOARD_GAP);
       } else {
         // FX inputs live inside the collapsible slot, so their panel has to clear
         // the keyboard completely. The note sits above that slot and only needs
@@ -1422,7 +1469,8 @@ export function TransactionEditorScreen({
     optionsOpen,
     reportingFxModalVisible,
     transferFxModalVisible,
-    detailsModalVisible,
+    detailsEditing,
+    detailsBoxBottom,
     panelTranslate,
   ]);
   const panelAnimatedStyle = useAnimatedStyle(() => ({
@@ -4429,40 +4477,106 @@ export function TransactionEditorScreen({
                        below this one. The negative margin claws back the
                        COLLAPSE_PEEK the drawer reserves above the keypad, which
                        is more air than a list of ticks needs. */
-                    <View className="-mt-4 flex-1 px-5">
-                      {/* The longer note first, as a soft note area rather than
-                          a boxed row, previewing what was written. Tapping it
-                          opens its own editor instead of typing here, because
-                          this slot is where the keyboard comes up. */}
-                      <Text variant="caption" tone="muted" className="mb-1.5 px-1 uppercase">
-                        {I18n.t('transactions.editor.details.title')}
-                      </Text>
-                      <Pressable
-                        onPress={() => {
-                          void triggerHaptic('selection');
-                          setDetailsModalVisible(true);
-                        }}
-                        accessibilityRole="button"
-                        accessibilityLabel={I18n.t('transactions.editor.details.title')}
-                        accessibilityValue={hasDetails ? { text: details.trim() } : undefined}
-                        className="min-h-[68px] flex-row gap-3 rounded-2xl bg-secondary/40 px-4 py-3 active:opacity-70"
-                      >
-                        <Text
-                          variant="body"
-                          tone={hasDetails ? 'default' : 'muted'}
-                          numberOfLines={2}
-                          className="flex-1"
-                        >
-                          {hasDetails
-                            ? details.trim()
-                            : I18n.t('transactions.editor.details.empty')}
+                    <View className="flex-1 px-5" style={{ marginTop: -OPTIONS_PANEL_PULL_UP }}>
+                      {/* The longer note first, as a soft note area previewing
+                          two lines of what was written. Tapping it expands the
+                          box in place for typing: the drawer then rides the
+                          keyboard so the box sits right on it, and the rest of
+                          the panel steps aside until Done. */}
+                      <View className="mb-1.5 flex-row items-center justify-between px-1">
+                        <Text variant="caption" tone="muted" className="uppercase">
+                          {I18n.t('transactions.editor.details.title')}
                         </Text>
-                        <Pencil size={15} color={themeColors.textMuted} />
-                      </Pressable>
-                      {type === 'expense' || type === 'transfer' ? (
+                        {detailsEditing ? (
+                          <Pressable
+                            onPress={() => {
+                              void triggerHaptic('selection');
+                              detailsInputRef.current?.blur();
+                            }}
+                            accessibilityRole="button"
+                            hitSlop={8}
+                            className="active:opacity-70"
+                          >
+                            <Text variant="caption" tone="primary" className="font-semibold">
+                              {I18n.t('common.done')}
+                            </Text>
+                          </Pressable>
+                        ) : null}
+                      </View>
+                      <View
+                        onLayout={(event) => {
+                          const { y, height } = event.nativeEvent.layout;
+                          const bottom = y + height;
+                          setDetailsBoxBottom((prev) =>
+                            Math.abs(prev - bottom) < 1 ? prev : bottom,
+                          );
+                        }}
+                      >
+                        {detailsEditing ? (
+                          <View className="rounded-2xl border border-primary/30 bg-secondary/40 px-4 py-3">
+                            <TextInput
+                              ref={detailsInputRef}
+                              value={details}
+                              onChangeText={setDetails}
+                              multiline
+                              maxLength={DETAILS_MAX_LENGTH}
+                              textAlignVertical="top"
+                              onBlur={() => setDetailsEditing(false)}
+                              accessibilityLabel={I18n.t('transactions.editor.details.title')}
+                              placeholder={I18n.t('transactions.editor.details.empty')}
+                              placeholderTextColor={`${themeColors.mutedForeground}99`}
+                              selectionColor={themeColors.primary}
+                              style={[
+                                styles.detailsInput,
+                                {
+                                  color: themeColors.text,
+                                  minHeight: DETAILS_EXPANDED_MIN_HEIGHT,
+                                  // Grows with the text until it fills the
+                                  // slot, then scrolls inside.
+                                  maxHeight: Math.max(
+                                    DETAILS_EXPANDED_MIN_HEIGHT,
+                                    numpadBodyHeight - DETAILS_SLOT_CHROME,
+                                  ),
+                                },
+                              ]}
+                            />
+                            {/* Only near the cap, so a long paste is not cut
+                                off without a word. */}
+                            {details.length >= DETAILS_MAX_LENGTH - DETAILS_COUNTER_THRESHOLD ? (
+                              <Text variant="caption" tone="muted" className="mt-1 self-end">
+                                {`${details.length}/${DETAILS_MAX_LENGTH}`}
+                              </Text>
+                            ) : null}
+                          </View>
+                        ) : (
+                          <Pressable
+                            onPress={() => {
+                              void triggerHaptic('selection');
+                              setDetailsEditing(true);
+                            }}
+                            accessibilityRole="button"
+                            accessibilityLabel={I18n.t('transactions.editor.details.title')}
+                            accessibilityValue={hasDetails ? { text: details.trim() } : undefined}
+                            className="min-h-[68px] flex-row gap-3 rounded-2xl border border-transparent bg-secondary/40 px-4 py-3 active:opacity-70"
+                          >
+                            <Text
+                              variant="body"
+                              tone={hasDetails ? 'default' : 'muted'}
+                              numberOfLines={2}
+                              className="flex-1"
+                            >
+                              {hasDetails
+                                ? details.trim()
+                                : I18n.t('transactions.editor.details.empty')}
+                            </Text>
+                            <Pencil size={15} color={themeColors.textMuted} />
+                          </Pressable>
+                        )}
+                      </View>
+                      {!detailsEditing && (type === 'expense' || type === 'transfer') ? (
                         <View className="my-3 h-[1px] bg-border/30" />
                       ) : null}
-                      {type === 'expense' ? (
+                      {!detailsEditing && type === 'expense' ? (
                         <View
                           className="flex-row items-center gap-2 pb-2.5"
                           style={{ opacity: isReimbursed ? 0.6 : 1 }}
@@ -4497,7 +4611,7 @@ export function TransactionEditorScreen({
                           />
                         </View>
                       ) : null}
-                      {type === 'transfer' ? (
+                      {!detailsEditing && type === 'transfer' ? (
                         <>
                           <View className="flex-row items-center gap-2 pb-2.5">
                             <Pressable
@@ -4648,12 +4762,6 @@ export function TransactionEditorScreen({
           ))}
         </Animated.View>
       ) : null}
-      <DetailsNoteModal
-        visible={detailsModalVisible}
-        value={details}
-        onClose={() => setDetailsModalVisible(false)}
-        onApply={setDetails}
-      />
       {isTransferType && selectedFromAccount && selectedToAccount ? (
         <TransferFxModal
           visible={transferFxModalVisible}

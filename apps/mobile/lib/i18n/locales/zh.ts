@@ -753,7 +753,6 @@ const zh = {
     editor: {
       details: {
         title: '详细信息',
-        placeholder: '和谁一起、用在什么地方、任何值得记住的事',
         empty: '添加更长的备注',
       },
       transfer_expense_label: '计为支出',

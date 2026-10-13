@@ -787,7 +787,6 @@ const ru = {
     editor: {
       details: {
         title: 'Подробности',
-        placeholder: 'С кем, на что, всё, что стоит запомнить',
         empty: 'Добавьте заметку подлиннее',
       },
       transfer_expense_label: 'Считать расходом',

@@ -763,7 +763,6 @@ const en = {
     editor: {
       details: {
         title: 'Details',
-        placeholder: 'Who it was with, what it covered, anything worth remembering',
         empty: 'Add a longer note',
       },
       transfer_expense_label: 'Count as expense',

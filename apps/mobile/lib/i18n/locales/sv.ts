@@ -787,7 +787,6 @@ const sv = {
     editor: {
       details: {
         title: 'Detaljer',
-        placeholder: 'Vem du var med, vad det gällde, allt som är värt att komma ihåg',
         empty: 'Lägg till en längre anteckning',
       },
       transfer_expense_label: 'Räkna som utgift',

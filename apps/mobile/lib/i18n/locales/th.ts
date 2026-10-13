@@ -784,7 +784,6 @@ const th = {
     editor: {
       details: {
         title: 'รายละเอียด',
-        placeholder: 'ไปกับใคร ใช้จ่ายเรื่องอะไร หรืออะไรก็ตามที่ควรจำไว้',
         empty: 'เพิ่มบันทึกที่ยาวขึ้น',
       },
       transfer_expense_label: 'นับเป็นรายจ่าย',

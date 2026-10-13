@@ -787,7 +787,6 @@ const vi = {
     editor: {
       details: {
         title: 'Chi tiết',
-        placeholder: 'Đi cùng ai, chi cho việc gì, bất cứ điều gì đáng nhớ',
         empty: 'Thêm ghi chú dài hơn',
       },
       transfer_expense_label: 'Tính là chi tiêu',
