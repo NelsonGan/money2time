@@ -7,7 +7,8 @@
  * `REPLAY_PRIVATE` onto any image or view that shows one (receipts, the profile
  * photo, album and goal covers, uploaded logos and icons, payment QR codes, the
  * camera) and the recorder paints over it. Charts get it too: their shapes are
- * the user's money.
+ * the user's money. So does any number drawn outside a `Text` (SVG or canvas
+ * text), which the text masking does not reach.
  *
  * The recorder looks for `ph-no-capture` in the view's accessibility identifier
  * on iOS and its tag on Android, and `testID` sets both. It is not an
