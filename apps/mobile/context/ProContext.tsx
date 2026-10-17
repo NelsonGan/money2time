@@ -37,6 +37,11 @@ import { perfMark } from '~/utils/perfTrace';
 interface ProContextValue {
   isPro: boolean;
   isLoading: boolean;
+  /**
+   * Whether `isPro` reflects a settled RevenueCat answer for this identity.
+   * `isPro` is a `false` placeholder until then; see proCustomerStateRefresh.
+   */
+  isStatusKnown: boolean;
   customerState: RevenueCatCustomerState | null;
   offering: RevenueCatOffering | null;
   purchasePackage: (packageIdentifier: string) => Promise<RevenueCatActionResult>;
@@ -62,6 +67,7 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
   const appUserId = settings.appUserId?.trim() ? settings.appUserId : null;
   const [isPro, setIsPro] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isStatusKnown, setIsStatusKnown] = useState(false);
   const [devProOverride, setDevProOverrideState] = useState<boolean | null>(null);
   const setDevProOverride = useCallback((value: boolean | null) => {
     if (!__DEV__) return;
@@ -71,10 +77,14 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
   const [offering, setOffering] = useState<RevenueCatOffering | null>(null);
 
   const [customerStateRefresh] = useState(() =>
-    createProCustomerStateRefresh(fetchRevenueCatCustomerState, (state) => {
-      setCustomerState(state);
-      setIsPro(isRevenueCatCustomerStateActive(state));
-    }),
+    createProCustomerStateRefresh(
+      fetchRevenueCatCustomerState,
+      (state) => {
+        setCustomerState(state);
+        setIsPro(isRevenueCatCustomerStateActive(state));
+      },
+      setIsStatusKnown,
+    ),
   );
   const applyCustomerState = customerStateRefresh.apply;
 
@@ -278,6 +288,7 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
     () => ({
       isPro: effectiveIsPro,
       isLoading,
+      isStatusKnown,
       customerState,
       offering,
       purchasePackage,
@@ -289,6 +300,7 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
     [
       effectiveIsPro,
       isLoading,
+      isStatusKnown,
       customerState,
       offering,
       purchasePackage,
