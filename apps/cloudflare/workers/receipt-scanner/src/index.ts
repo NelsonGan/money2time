@@ -61,6 +61,10 @@ const ANTHROPIC_ONLY = { only: ['anthropic'], allow_fallbacks: false };
 // rules this out, so it only fires if that routing stops holding.
 let byokBroken = false;
 const INFERENCE_TIMEOUT_MS = 45000;
+// What a model with another behind it in the chain leaves for that one: a hung
+// primary times out early enough that the backup still has a real attempt
+// inside the budget, rather than starting with seconds left (or none).
+const BACKUP_RESERVE_MS = 25000;
 // Wall clock the whole request gets, spanning every attempt below (the model
 // failover and the empty-result retry). It is anchored at request entry rather
 // than at the first inference call on purpose: the entitlement lookup (8s of
@@ -367,32 +371,43 @@ function timingSafeEqual(a: string, b: string): boolean {
   return diff === 0;
 }
 
-// The image's type as its first bytes say, falling back to what the app
-// declared. Anthropic refuses an image whose declared type is not what it is
-// (a PNG sent as image/jpeg), where other providers never minded. HEIC, which
-// Claude cannot read at all, stays as declared and so goes to the backup.
-function imageMime(base64: string, declared: string | undefined): string {
+// The image's type as its first bytes say, or null for anything else (HEIC,
+// whatever its declared type). Anthropic refuses an image whose declared type
+// is not what it is (a PNG sent as image/jpeg), where other providers never
+// minded, and every type it reads that the request check allows has one of
+// these signatures.
+function sniffImageMime(base64: string): string | null {
   if (base64.startsWith('/9j/')) return 'image/jpeg';
   if (base64.startsWith('iVBOR')) return 'image/png';
   if (base64.startsWith('UklGR')) return 'image/webp';
-  return declared ?? 'image/jpeg';
+  return null;
 }
 
 interface ModelChoice {
   model: string;
   /** An Anthropic model: runs on our own key, locked to that provider (ANTHROPIC_ONLY). */
   byok: boolean;
+  /** BACKUP_MODEL's slot (or the default standing in), whether or not a model ran before it. */
+  isBackup: boolean;
+}
+
+// OpenRouter's `~anthropic/…-latest` aliases are Claude too, so they get the
+// same lock.
+function isAnthropicModel(model: string): boolean {
+  return /^~?anthropic\//i.test(model);
 }
 
 // Models to try in order: primary MODEL, then BACKUP_MODEL (skipped when equal).
-// Anthropic models drop out once one has been billed to credits (`byokBroken`).
-function resolveModels(env: Env): ModelChoice[] {
+// Anthropic models drop out once one has been billed to credits (`byokBroken`),
+// and for an image whose bytes are not a type Claude reads (`imageType` null):
+// HEIC, labelled as it is or as a JPEG, is refused every time with a 400.
+function resolveModels(env: Env, imageType: string | null): ModelChoice[] {
   const primary = env.MODEL?.trim() || DEFAULT_BACKUP_MODEL;
   const backup = env.BACKUP_MODEL?.trim() || DEFAULT_BACKUP_MODEL;
   const chain = (backup !== primary ? [primary, backup] : [primary])
-    .map((model) => ({ model, byok: model.startsWith('anthropic/') }))
-    .filter((choice) => !(choice.byok && byokBroken));
-  return chain.length ? chain : [{ model: DEFAULT_BACKUP_MODEL, byok: false }];
+    .map((model, i) => ({ model, byok: isAnthropicModel(model), isBackup: i > 0 }))
+    .filter((choice) => !(choice.byok && (byokBroken || !imageType)));
+  return chain.length ? chain : [{ model: DEFAULT_BACKUP_MODEL, byok: false, isBackup: true }];
 }
 
 // One attempt's inference settings, shared by the failover chain.
@@ -417,12 +432,12 @@ async function completeScan(
   reqId: string,
   opts: AttemptOptions,
   choice: ModelChoice,
-  isBackupModel: boolean,
+  mime: string,
 ): Promise<string> {
   const { model } = choice;
   // Claude takes no temperature: the empty-result retry resamples it anyway.
   const temperature = choice.byok ? undefined : opts.temperature;
-  const dataUrl = `data:${imageMime(body.image ?? '', body.mime)};base64,${body.image}`;
+  const dataUrl = `data:${mime};base64,${body.image}`;
   // Resolution hint attached only when set (see Env.IMAGE_DETAIL).
   const detail = env.IMAGE_DETAIL?.trim();
   const imageUrl: { url: string; detail?: string } = detail
@@ -494,6 +509,9 @@ async function completeScan(
     if (choice.byok && usage?.is_byok === false) {
       byokBroken = true;
       logError('byok_billed_to_credits', { reqId, model });
+    } else if (choice.byok && typeof usage?.is_byok !== 'boolean') {
+      // Nothing to check against: who paid for this call is unknown.
+      logError('byok_unverified', { reqId, model });
     }
     const content = completion?.choices?.[0]?.message?.content ?? '';
     // An answer with no JSON in it parses as no transactions, which is the
@@ -517,7 +535,7 @@ async function completeScan(
       usage,
       temperature,
       maxTokens: opts.maxTokens,
-      isBackupModel,
+      isBackupModel: choice.isBackup,
       attempt: opts.attempt,
       prompt: opts.promptRef,
       error: failure,
@@ -533,13 +551,22 @@ async function completeWithFailover(
   opts: AttemptOptions,
   validateContent?: (content: string) => void,
 ): Promise<string> {
-  const models = resolveModels(env);
+  const imageType = sniffImageMime(body.image ?? '');
+  const mime = imageType ?? (body.mime?.trim().toLowerCase() || 'image/jpeg');
+  const models = resolveModels(env, imageType);
   let lastError: unknown;
   for (let i = 0; i < models.length; i += 1) {
     const choice = models[i];
     const { model } = choice;
+    // A model with another behind it stops short of the deadline, keeping
+    // BACKUP_RESERVE_MS (or half of what is left) for the next one.
+    const remaining = opts.deadline - Date.now();
+    const deadline =
+      i < models.length - 1
+        ? opts.deadline - Math.min(BACKUP_RESERVE_MS, Math.max(0, remaining / 2))
+        : opts.deadline;
     try {
-      const content = await completeScan(body, env, reqId, opts, choice, i > 0);
+      const content = await completeScan(body, env, reqId, { ...opts, deadline }, choice, mime);
       validateContent?.(content);
       return content;
     } catch (err) {
@@ -552,7 +579,7 @@ async function completeWithFailover(
       logError('inference_model_failed', {
         reqId,
         model,
-        isBackup: i > 0,
+        isBackup: choice.isBackup,
         byok: choice.byok,
         willRetry,
         error: failure instanceof Error ? failure.message : String(failure),

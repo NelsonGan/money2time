@@ -1155,7 +1155,7 @@ The [receipt-scanner Worker](#receipt-scanner-worker) sends one `$ai_generation`
 | `byok`                                                                                     | `usage.is_byok`: `true` when our Anthropic key paid. An `anthropic/` generation with `false` means OpenRouter credits were spent on it, which the Worker's routing forbids (see [Config](#config)).                                                                  |
 | `$ai_latency`, `$ai_http_status`, `$ai_is_error`, `$ai_error`                              | Seconds, status, and a 200-character error message on failure.                                                                                                                                                                                                       |
 | `$ai_temperature`, `$ai_max_tokens`                                                        | The attempt's settings (temperature rises on the empty-result retry). Claude is sent no temperature, so its generations carry none.                                                                                                                                  |
-| `scan_mode`, `is_pro`, `is_backup_model`, `attempt`, `parsed_transactions`, `parsed_items` | Request context and the parsed outcome of that attempt.                                                                                                                                                                                                              |
+| `scan_mode`, `is_pro`, `is_backup_model`, `attempt`, `parsed_transactions`, `parsed_items` | Request context and the parsed outcome of that attempt. `is_backup_model` is the `BACKUP_MODEL` slot, true even when Claude was skipped (an image it cannot read) and nothing ran first.                                                                             |
 | `$ai_prompt_name`, `$ai_prompt_version`, `prompt_source`                                   | The hosted prompt the call used (below); version is absent and `prompt_source` is `bundled` when the fallback served it.                                                                                                                                             |
 | `$geoip_disable`                                                                           | Always `true`: the request comes from Cloudflare's network, whose location would otherwise overwrite the person's.                                                                                                                                                   |
 | `$session_id`, `$ai_session_id`                                                            | The app's PostHog session, from the `X-POSTHOG-SESSION-ID` header the SDK adds to scan requests (`addTracingHeaders`), so a trace links to that session's events and replay. Only a UUID-shaped value is accepted.                                                   |
@@ -1890,13 +1890,16 @@ input works.
 If the primary `MODEL` errors or times out (provider down or overloaded), the
 Worker automatically retries the request once with `BACKUP_MODEL`
 (`google/gemma-3-4b-it` when unset). Set `BACKUP_MODEL` to the same value as
-`MODEL` to disable failover.
+`MODEL` to disable failover. The primary times out early enough to leave the
+backup 25 seconds of the 70-second scan budget (`BACKUP_RESERVE_MS`, or half
+of what is left when less), so a hung primary cannot starve it.
 
 **`MODEL` is Claude Haiku 5.5 on our own Anthropic key, and `BACKUP_MODEL` is
 `qwen/qwen3.7-flash` on OpenRouter credits.** Claude must never run on credits,
 and three things hold that line:
 
-- Every request for an `anthropic/` model, in either slot, names
+- Every request for an `anthropic/` (or `~anthropic/` alias) model, in either
+  slot, names
   `provider: { only: ['anthropic'], allow_fallbacks: false }` (`ANTHROPIC_ONLY`
   in `src/index.ts`). OpenRouter also serves Claude from Bedrock, Vertex, Azure
   and Claude Platform on AWS, on its own accounts, which it bills to credits.
@@ -1907,9 +1910,13 @@ and three things hold that line:
 - Every Claude answer's `usage.is_byok` is checked. A `false` logs
   `byok_billed_to_credits` and drops Anthropic models from the rest of that
   isolate's scans, and PostHog records it as `byok: false` on the generation.
+  An answer with no `is_byok` at all logs `byok_unverified`.
 
 Claude is sent no temperature, and an answer from it with no JSON object in it
 counts as a failure rather than an empty result, so the backup gets the receipt.
+An image whose bytes are not a JPEG, PNG or WebP (HEIC, however it is labelled)
+skips Claude, which refuses it every time, and goes straight to the backup;
+Claude is sent the type the bytes are rather than the declared one.
 The Anthropic organisation's concurrency limit is low: a burst answers 429 and
 lands on Qwen rather than failing the scan. To put Qwen back in front, swap the
 two values in `wrangler.toml` and deploy.
