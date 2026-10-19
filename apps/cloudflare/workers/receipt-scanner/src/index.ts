@@ -54,8 +54,14 @@ const INFERENCE_TIMEOUT_MS = 45000;
 const SCAN_BUDGET_MS = 70000;
 // Vision models are flaky in one specific way: they occasionally return an
 // empty transactions array for a receipt they read perfectly well on a second
-// pass. One empty result therefore buys exactly one more attempt.
-const EMPTY_RESULT_RETRIES = 1;
+// pass. One empty result therefore buys exactly one more attempt, for photos.
+// Screenshots get none: most empty ones are screens with no payment on them,
+// and in the week of 2026-10-12 the second pass found a transaction in 46 of
+// 5,101 empty screenshots (0.9%), while adding ~2 s to each and a quarter of
+// all AI observability events. Photos still recover often enough to keep it.
+function emptyResultRetries(mode: ScanMode): number {
+  return mode === 'screenshot' ? 0 : 1;
+}
 // Floor on what is left before a retry may start: an attempt cut off partway is
 // a billed call thrown away and pushes the response past the client's timeout,
 // which is worse than the empty answer already in hand. The real gate is the
@@ -532,7 +538,8 @@ async function runInference(
     transactions: [],
     receiptDetail: null,
   };
-  for (let attempt = 0; attempt <= EMPTY_RESULT_RETRIES; attempt += 1) {
+  const emptyRetries = emptyResultRetries(mode);
+  for (let attempt = 0; attempt <= emptyRetries; attempt += 1) {
     const attemptStartedAt = Date.now();
     let content: string;
     try {
@@ -584,7 +591,7 @@ async function runInference(
     const attemptMs = Date.now() - attemptStartedAt;
     const remainingMs = deadline - Date.now();
     const willRetry =
-      attempt < EMPTY_RESULT_RETRIES && remainingMs >= Math.max(MIN_RETRY_BUDGET_MS, attemptMs);
+      attempt < emptyRetries && remainingMs >= Math.max(MIN_RETRY_BUDGET_MS, attemptMs);
     log('empty_result', { reqId, attempt, mode, attemptMs, remainingMs, willRetry });
     if (!willRetry) break;
   }

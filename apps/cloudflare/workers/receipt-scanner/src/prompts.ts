@@ -42,8 +42,12 @@ export interface ResolvedPrompt {
 const PROMPTS_PROJECT_ID = 658608;
 const DEFAULT_APP_HOST = 'https://us.posthog.com';
 const PROMPT_LABEL = 'production';
-/** Matches PostHog's SDK default: label moves reach the Worker within 5 minutes. */
-const CACHE_TTL_MS = 5 * 60 * 1000;
+/**
+ * A label move reaches the Worker within 30 minutes. Every fetch is a billable
+ * `$llm_prompt_fetched` event, and at 5 minutes the edge cache still logged
+ * ~37,000 a month (about one per prompt per Cloudflare location per refresh).
+ */
+const CACHE_TTL_MS = 30 * 60 * 1000;
 /** After a failed refresh, keep serving what we have for a minute before retrying. */
 const RETRY_AFTER_FAILURE_MS = 60 * 1000;
 /** A prompt fetch must never eat into the scan's own time budget. */
@@ -155,8 +159,8 @@ const cache = new Map<PromptName, CacheEntry>();
 // missed on almost every scan: the first day live logged 743 prompt fetches
 // (each one a `$llm_prompt_fetched` event in PostHog) against 744 model calls.
 // The data centre's cache sits between the two, shared by every isolate in the
-// location, so PostHog is asked about once per prompt per location every five
-// minutes. The key is a URL on the Worker's own hostname that is never served.
+// location, so PostHog is asked about once per prompt per location per cache
+// period (CACHE_TTL_MS). The key is a URL on the Worker's own hostname that is never served.
 const EDGE_CACHE_HOST = 'https://workers-receipt-scanner.money2time.com/__prompt-cache/';
 
 function edgeCache(): Cache | null {
@@ -243,8 +247,8 @@ async function fetchPrompt(
 }
 
 /**
- * The template for `name`: PostHog's `production` version, cached for five
- * minutes, served stale while a refresh fails, and the bundled copy when
+ * The template for `name`: PostHog's `production` version, cached for
+ * CACHE_TTL_MS, served stale while a refresh fails, and the bundled copy when
  * PostHog never answered.
  */
 export async function resolvePrompt(

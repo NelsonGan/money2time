@@ -155,14 +155,14 @@ describe('hosted receipt prompts', () => {
     jest.restoreAllMocks();
   });
 
-  it('serves the production label with the read key and caches it for five minutes', async () => {
+  it('serves the production label with the read key and caches it for 30 minutes', async () => {
     const fetchMock = jest.fn(
       async () => new Response(JSON.stringify({ prompt: 'Hosted {{currency_code}}', version: 3 })),
     );
     global.fetch = fetchMock as unknown as typeof fetch;
 
     const first = await prompts.resolvePrompt(env, 'receipt-scan-quick', 1_000);
-    const cached = await prompts.resolvePrompt(env, 'receipt-scan-quick', 1_000 + 4 * 60_000);
+    const cached = await prompts.resolvePrompt(env, 'receipt-scan-quick', 1_000 + 29 * 60_000);
     expect(first).toEqual({
       name: 'receipt-scan-quick',
       template: 'Hosted {{currency_code}}',
@@ -186,10 +186,10 @@ describe('hosted receipt prompts', () => {
 
     const failing = jest.fn(async () => new Response('down', { status: 503 }));
     global.fetch = failing as unknown as typeof fetch;
-    const stale = await prompts.resolvePrompt(env, 'receipt-scan-itemized', 10 * 60_000);
+    const stale = await prompts.resolvePrompt(env, 'receipt-scan-itemized', 40 * 60_000);
     expect(stale).toMatchObject({ template: 'Hosted v2', version: 2, source: 'posthog' });
     // Within the retry window the stale copy is served without another request.
-    await prompts.resolvePrompt(env, 'receipt-scan-itemized', 10 * 60_000 + 30_000);
+    await prompts.resolvePrompt(env, 'receipt-scan-itemized', 40 * 60_000 + 30_000);
     expect(failing).toHaveBeenCalledTimes(1);
 
     const bundled = await prompts.resolvePrompt(env, 'receipt-scan-screenshot', 0);

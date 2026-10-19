@@ -69,6 +69,7 @@ import {
 } from '~/features/albums/screens';
 import { checkApplePayTap, recordApplePayTap } from '~/features/autoLog/applePayTaps';
 import { PaymentAlertSync } from '~/features/autoLog/components/PaymentAlertSync';
+import { AutoLogLimitError } from '~/features/autoLog/persistTransaction';
 import { NotificationHistoryScreen } from '~/features/autoLog/screens/NotificationHistoryScreen';
 import { NotificationReviewEditorScreen } from '~/features/autoLog/screens/NotificationReviewEditorScreen';
 import { PaymentAlertsSetupScreen } from '~/features/autoLog/screens/PaymentAlertsSetupScreen';
@@ -1662,8 +1663,11 @@ function AutoLogSync() {
           });
           consumed.push(entry.id);
         } catch (error) {
-          // Leave it queued so the next foreground retries it.
-          reportError(error, { autoLogEntryId: entry.id });
+          // Leave it queued so the next foreground retries it. The free limit
+          // is expected, not a fault, so it is not reported.
+          if (!(error instanceof AutoLogLimitError)) {
+            reportError(error, { autoLogEntryId: entry.id });
+          }
         }
       }
 

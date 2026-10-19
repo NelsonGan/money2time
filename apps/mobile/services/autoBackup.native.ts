@@ -11,6 +11,7 @@ import {
   type BackupRunResult,
   buildAutoBackupName,
   isBackupStale,
+  isInFailureBackoff,
   MAX_AUTO_BACKUPS,
   selectExpiredRecords,
   sortRecordsNewestFirst,
@@ -88,6 +89,11 @@ function getProvider(target: BackupTarget): Provider {
 // staleness would silently swallow the user's explicit tap.
 let runningPromise: Promise<BackupRunResult> | null = null;
 
+// When the last automatic run failed outright (nothing written anywhere). Kept
+// in memory: a cold start may try again, but the foregrounds after a failure
+// wait out AUTO_BACKUP_FAILURE_BACKOFF_MS instead of each failing again.
+let lastAutomaticFailureAt: number | null = null;
+
 export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<BackupRunResult> {
   if (runningPromise) {
     const existing = await runningPromise;
@@ -103,6 +109,9 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
     if (!opts?.force && !isBackupStale(settings.lastAutoBackupAt)) {
       return { skipped: true, reason: 'fresh', written: [], errors: [] };
     }
+    if (!opts?.force && isInFailureBackoff(lastAutomaticFailureAt)) {
+      return { skipped: true, reason: 'backoff', written: [], errors: [] };
+    }
 
     const { json } = await buildBackupJson();
     const name = buildAutoBackupName();
@@ -112,11 +121,14 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
     const { targets, fellBackToLocalFrom } = await pickActiveTargets(settings.autoBackupTarget);
     const written: BackupRecord[] = [];
     const errors: string[] = [];
+    // Machine-readable reason for each entry in `errors`, for analytics.
+    const errorKinds: string[] = [];
 
     if (fellBackToLocalFrom) {
       errors.push(
         I18n.t('auto_backup.fallback_local_error', { target: targetLabel(fellBackToLocalFrom) }),
       );
+      errorKinds.push('unavailable');
     }
 
     for (const target of targets) {
@@ -127,11 +139,13 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
         await rotate(provider);
       } catch (e) {
         errors.push(describeBackupError(target, e));
+        errorKinds.push(backupErrorKind(e));
       }
     }
 
     // Persist outcome. Treat "any successful write" as success.
     const success = written.length > 0;
+    if (!opts?.force) lastAutomaticFailureAt = success ? null : Date.now();
     settingsRepository.updateSettings({
       lastAutoBackupAt: success ? new Date().toISOString() : settings.lastAutoBackupAt,
       lastAutoBackupError: success && errors.length === 0 ? null : errors.join('; ') || null,
@@ -144,6 +158,7 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
       void trackEvent(AnalyticsEvents.AUTO_BACKUP_FAILED, {
         target: settings.autoBackupTarget,
         error_count: errors.length,
+        error_kind: errorKinds[errorKinds.length - 1] ?? 'unknown',
         fell_back_to_local: Boolean(fellBackToLocalFrom),
       });
     }
@@ -189,6 +204,16 @@ function describeBackupError(target: BackupTarget, error: unknown): string {
       ? I18n.t(`auto_backup.error.${error.kind}`)
       : getErrorMessage(error, I18n.t('auto_backup.error.unknown'));
   return I18n.t('auto_backup.error.prefix', { target: targetLabel(target), reason });
+}
+
+/**
+ * A short reason for analytics: the Drive error kind, `aborted` for a cancelled
+ * request, `unknown` otherwise. Never the message, which can carry a file path.
+ */
+function backupErrorKind(error: unknown): string {
+  if (error instanceof DriveError) return error.kind;
+  if (error instanceof Error && error.name === 'AbortError') return 'aborted';
+  return 'unknown';
 }
 
 function targetLabel(target: BackupTarget): string {

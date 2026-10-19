@@ -193,7 +193,7 @@ describe('existing receipt image endpoint', () => {
     },
   );
 
-  it.each(['quick', 'itemized', 'screenshot'])(
+  it.each(['quick', 'itemized'])(
     'still retries an unreadable %s scan with the image',
     async (mode) => {
       fetchMock.mockResolvedValueOnce(completion({ transactions: [] }));
@@ -207,6 +207,19 @@ describe('existing receipt image endpoint', () => {
       expect(consumeQuota).toHaveBeenCalledTimes(1);
     },
   );
+
+  it('answers an empty screenshot from its one pass, without a retry', async () => {
+    fetchMock.mockImplementation(async () => completion({ transactions: [] }));
+    const response = await worker.fetch(
+      request({ ...args, mode: 'screenshot', accounts: ['Everyday Account'] }),
+      env,
+      ctx,
+    );
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ transactions: [] });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(consumeQuota).not.toHaveBeenCalled();
+  });
 
   it('returns an empty successful reply without charging an unreadable image twice', async () => {
     fetchMock.mockImplementation(async () => completion({ transactions: [] }));
