@@ -4,7 +4,7 @@ import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { Card, CategoryEmoji, Text, TimeValueInline } from '~/components/ui';
-import { appIconById, DEFAULT_APP_ICON_ID } from '~/constants/appIcons';
+import { APP_ICON_RADIUS, appIconById, DEFAULT_APP_ICON_ID } from '~/constants/appIcons';
 import { getThemeWordmarkPalette, spacing } from '~/constants/designSystem';
 import { useResolvedTheme, useThemeColor } from '~/context/ThemeContext';
 import { OnboardingActionBar } from '~/features/onboarding/components/OnboardingActionBar';
@@ -18,9 +18,6 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { formatCurrency, formatHours } from '~/utils/formatters';
 
-/** iOS's squircle is close enough to this fraction of the tile for our purposes. */
-const APP_ICON_RADIUS = 0.2237;
-
 interface OnboardingValuePropStepProps {
   currencySymbol: string;
   onGetStarted: () => void;
@@ -32,7 +29,7 @@ export function OnboardingValuePropStep({
 }: OnboardingValuePropStepProps) {
   const themeColors = useThemeColors();
   // The wordmark has its own three-colour palette, warm on the name and the
-  // theme's own colour on "Time" -- the same split `assets/banner.png` draws.
+  // theme's own colour on "Time".
   const resolvedTheme = useResolvedTheme();
   const wordmark = getThemeWordmarkPalette(useThemeColor(), resolvedTheme);
   const { height: windowHeight } = useWindowDimensions();
@@ -122,8 +119,8 @@ export function OnboardingValuePropStep({
               accessibilityRole="image"
               accessibilityLabel={I18n.t('app.name')}
             />
-            {/* Split the way the banner splits it. `app.name` is the same brand
-                string in all 24 locales, so this never has to translate. */}
+            {/* `app.name` is the same brand string in all 24 locales, so this
+                never has to translate. */}
             <Text variant="title" className="text-center" accessibilityLabel={I18n.t('app.name')}>
               <Text variant="title" style={{ color: wordmark.money }}>
                 Money

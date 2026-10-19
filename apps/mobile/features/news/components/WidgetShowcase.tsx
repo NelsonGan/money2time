@@ -1,4 +1,3 @@
-import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowDownRight, ArrowUpRight, Clock, Minus, Plus } from 'lucide-react-native';
 import React, { useMemo } from 'react';
@@ -7,6 +6,7 @@ import { StyleSheet, View } from 'react-native';
 import { Text } from '~/components/ui';
 import { SavingsHistoryWidgetContent } from '~/components/widget-preview/SavingsHistoryWidgetContent';
 import { SavingsRateWidgetContent } from '~/components/widget-preview/SavingsRateWidgetContent';
+import { WidgetWordmark } from '~/components/widget-preview/WidgetWordmark';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -22,8 +22,6 @@ export type WidgetShowcaseKind =
   | 'savings'
   | 'savingsHistory';
 
-const BANNER_SOURCE = require('../../../assets/banner.png');
-
 const RATIO: Record<WidgetShowcaseKind, number> = {
   monthly: 338 / 158,
   quickAdd: 1,
@@ -35,17 +33,6 @@ const RATIO: Record<WidgetShowcaseKind, number> = {
 
 const WIDGET_PADDING = 16;
 const GRID_GAP = 4;
-
-function Banner({ width = 112 }: { width?: number }) {
-  return (
-    <Image
-      source={BANNER_SOURCE}
-      contentFit="contain"
-      contentPosition="left center"
-      style={{ width, height: width * 0.27 }}
-    />
-  );
-}
 
 function ProRibbon() {
   const themeColors = useThemeColors();
@@ -91,7 +78,7 @@ function MonthlyContent({ snapshot }: { snapshot: ReturnType<typeof buildSampleW
   const data = snapshot.monthlyExpenseQuickLog;
   return (
     <View style={styles.pad}>
-      <Banner />
+      <WidgetWordmark width={112} />
       <View style={styles.monthlyBody}>
         <View style={styles.flexMin}>
           <Text variant="label" tone="muted" style={styles.eyebrow}>
@@ -182,7 +169,7 @@ function WeeklyContent({ snapshot }: { snapshot: ReturnType<typeof buildSampleWi
   return (
     <View style={styles.pad}>
       <View style={styles.rowBetween}>
-        <Banner />
+        <WidgetWordmark width={112} />
         <View style={{ alignItems: 'flex-end' }}>
           <Text variant="label" tone="muted" style={styles.eyebrow}>
             {I18n.t('news.showcase.past_7_days')}
@@ -350,7 +337,7 @@ function CalendarContent({ snapshot }: { snapshot: ReturnType<typeof buildSample
   return (
     <View style={styles.pad}>
       <View style={styles.calHeader}>
-        <Banner width={104} />
+        <WidgetWordmark width={104} />
         <View style={{ alignItems: 'flex-end', gap: 6 }}>
           <Text variant="bodyStrong" style={{ fontSize: 14, color: themeColors.text }}>
             {data.monthLabel}
