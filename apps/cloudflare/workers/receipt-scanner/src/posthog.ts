@@ -28,7 +28,12 @@ export interface OpenRouterUsage {
   prompt_tokens?: number;
   completion_tokens?: number;
   total_tokens?: number;
+  /** What OpenRouter charged to credits. Under BYOK, only its own fee. */
   cost?: number;
+  /** True when our own provider key paid for the inference. */
+  is_byok?: boolean;
+  /** Under BYOK, what the provider bills us directly. */
+  cost_details?: { upstream_inference_cost?: number };
   prompt_tokens_details?: { cached_tokens?: number };
 }
 
@@ -40,7 +45,8 @@ export interface GenerationRecord {
   endedAt: number;
   httpStatus?: number;
   usage?: OpenRouterUsage;
-  temperature: number;
+  /** Absent for the BYOK model (Claude), which is sent none. */
+  temperature?: number;
   maxTokens: number;
   isBackupModel: boolean;
   /** Which empty-result attempt this call belonged to (0 = first). */
@@ -85,7 +91,15 @@ export class AiTrace {
   recordGeneration(record: GenerationRecord): void {
     const inputTokens = finite(record.usage?.prompt_tokens);
     const outputTokens = finite(record.usage?.completion_tokens);
-    const cost = finite(record.usage?.cost);
+    const charged = finite(record.usage?.cost);
+    // Under BYOK, OpenRouter's `cost` is only its own fee (often 0) and the
+    // provider bills the inference directly; without adding that back, every
+    // Claude call would read as free.
+    const upstream = record.usage?.is_byok
+      ? finite(record.usage.cost_details?.upstream_inference_cost)
+      : undefined;
+    const cost =
+      charged === undefined && upstream === undefined ? undefined : (charged ?? 0) + (upstream ?? 0);
     const cachedTokens = finite(record.usage?.prompt_tokens_details?.cached_tokens);
     const properties: Record<string, unknown> = {
       $ai_trace_id: this.traceId,
@@ -94,7 +108,6 @@ export class AiTrace {
       $ai_provider: 'openrouter',
       $ai_base_url: OPENROUTER_BASE_URL,
       $ai_latency: (record.endedAt - record.startedAt) / 1000,
-      $ai_temperature: record.temperature,
       $ai_max_tokens: record.maxTokens,
       $ai_stream: false,
       $ai_is_error: Boolean(record.error),
@@ -113,12 +126,14 @@ export class AiTrace {
       // overwriting where the person actually is.
       $geoip_disable: true,
     };
+    if (record.temperature !== undefined) properties.$ai_temperature = record.temperature;
+    if (typeof record.usage?.is_byok === 'boolean') properties.byok = record.usage.is_byok;
     if (record.httpStatus !== undefined) properties.$ai_http_status = record.httpStatus;
     if (inputTokens !== undefined) properties.$ai_input_tokens = inputTokens;
     if (outputTokens !== undefined) properties.$ai_output_tokens = outputTokens;
     if (cachedTokens !== undefined) properties.$ai_cache_read_input_tokens = cachedTokens;
     if (cost !== undefined) {
-      // OpenRouter reports the real charge, so PostHog should not re-price it.
+      // What the call cost us as reported, so PostHog should not re-price it.
       properties.$ai_total_cost_usd = cost;
       properties.$ai_cost_passthrough = true;
     }
