@@ -6,6 +6,11 @@ export const AUTO_BACKUP_EXTENSION = '.json';
 export const MAX_AUTO_BACKUPS = 10;
 export const BACKUP_STALENESS_HOURS = 24;
 export const BACKGROUND_INTERVAL_MINUTES = 60 * 12; // 12h hint to the OS scheduler
+// After an automatic run fails, wait this long before the next automatic one.
+// A failed run leaves the backup due, so without it every foreground rebuilt the
+// whole database export, failed the same way and reported it again: up to 15
+// times a day for one Google Drive user in the week of 2026-10-12.
+export const AUTO_BACKUP_FAILURE_BACKOFF_MS = 6 * 60 * 60 * 1000;
 
 export const ICLOUD_FOLDER = 'Money2Time';
 export const GOOGLE_DRIVE_FOLDER = 'Money2Time';
@@ -21,7 +26,7 @@ export interface BackupRecord {
 
 export interface BackupRunResult {
   skipped: boolean;
-  reason?: 'disabled' | 'fresh' | 'in_progress';
+  reason?: 'disabled' | 'fresh' | 'in_progress' | 'backoff';
   written: BackupRecord[];
   errors: string[];
   // Set when the chosen cloud target was unreachable and the backup was written
@@ -50,6 +55,11 @@ export function isBackupStale(lastIso: string | null, hours = BACKUP_STALENESS_H
   const last = Date.parse(lastIso);
   if (Number.isNaN(last)) return true;
   return Date.now() - last >= hours * 60 * 60 * 1000;
+}
+
+/** Whether an automatic run must wait out the backoff after a failure at `failedAt`. */
+export function isInFailureBackoff(failedAt: number | null, now: number = Date.now()): boolean {
+  return failedAt !== null && now - failedAt < AUTO_BACKUP_FAILURE_BACKOFF_MS;
 }
 
 export function sortRecordsNewestFirst(records: BackupRecord[]): BackupRecord[] {
