@@ -542,7 +542,8 @@ As checked in the live Money2Time RevenueCat dashboard (read-only, 2026-09-08):
   continues to be checked locally.
 - `isPro` is a `false` placeholder until the first status read settles (a
   failed read counts) or an authoritative update arrives; `usePro().isStatusKnown`
-  says which. Code that would refuse a Pro user must wait for it. The Apple Pay
+  says which, for the current `appUserId` only (the first read can run before
+  settings name the user, and answers for an anonymous customer). Code that would refuse a Pro user must wait for it. The Apple Pay
   auto-log drain and the catalog it publishes for the App Intent do: drained on
   mount, they rejected Pro users' queued taps as "Auto-log limit reached".
 - Authorize access only from `entitlements.active[configuredEntitlement]`.
