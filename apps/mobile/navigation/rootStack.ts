@@ -63,6 +63,9 @@ export type RootStackParamList = {
   // module bridge (accountLogoPickerBridge) rather than params, so the route
   // stays serializable.
   AccountLogoPicker: undefined;
+  // Full-page card design picker for an account. Same bridge arrangement as
+  // AccountLogoPicker (cardDesignPickerBridge).
+  CardDesignPicker: undefined;
   // Full-page subscription logo picker for recurring rules. Same bridge
   // arrangement as AccountLogoPicker (subscriptionLogoPickerBridge).
   SubscriptionLogoPicker: undefined;

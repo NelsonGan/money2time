@@ -1760,6 +1760,44 @@ const it = {
     currency_change_message:
       'Il saldo verrà convertito da {{from}} a {{to}} al tasso più recente. I movimenti esistenti mantengono la loro valuta originale.',
     currency_change_action: 'Converti e cambia',
+    card_design: {
+      label: 'Design della carta',
+      title: 'Design della carta',
+      plain: 'Tinta unita',
+      clear: 'Rimuovi design della carta',
+      apply: 'Usa questo design',
+      filter_all: 'Tutti',
+      my_uploads: 'I miei caricamenti',
+      upload: 'Carica il tuo',
+      upload_pro: 'Carica (Pro)',
+      upload_label: 'Il tuo design {{number}}',
+      upload_pro_hint: 'Con Pro usa una tua foto o illustrazione come design della carta.',
+      upload_failed: 'Impossibile usare questa immagine. Provane un’altra.',
+      delete_title: 'Eliminare questo design?',
+      delete_label: 'Elimina design {{number}}',
+      delete_message: 'Le carte che lo usano tornano alla tinta unita.',
+      template_label: 'Design della carta {{genre}} {{number}}',
+      crop_title: 'Adatta il design',
+      crop_hint:
+        'Trascina e pizzica per inquadrarlo. Una carta chiusa mostra la fascia tra le linee tratteggiate; in una pila si vede solo la striscia in alto con il nome.',
+      text_label: 'Colore del testo',
+      text_light: 'Testo chiaro',
+      text_dark: 'Testo scuro',
+      save: 'Salva design',
+      genre_mascot: 'Mascotte',
+      genre_minimal: 'Minimal',
+      genre_gradient: 'Sfumatura',
+      genre_texture: 'Texture',
+      genre_pattern: 'Fantasia',
+      genre_luxury: 'Lusso',
+      genre_marble: 'Marmo e pietra',
+      genre_nature: 'Natura',
+      genre_space: 'Spazio',
+      genre_abstract: 'Arte astratta',
+      genre_anime: 'Anime',
+      genre_retro: 'Retrò',
+      genre_cute: 'Carino',
+    },
     logo: {
       label: 'Logo',
       add: 'Aggiungi un logo',
@@ -1985,6 +2023,8 @@ const it = {
       'Caricare icone personali è una funzione Pro. Passa a Pro per usare qualsiasi immagine in categorie, obiettivi e budget.',
     limit_app_icon:
       'Le icone extra sono una funzione Pro. Passa a Pro per dare a Money2Time un nuovo look sulla schermata Home.',
+    limit_custom_card_designs:
+      'I design personalizzati delle carte sono una funzione Pro. Passa a Pro per mettere qualsiasi foto o illustrazione sulle tue carte.',
     limit_icon_packs:
       'I pacchetti icone extra sono una funzione Pro. Passa a Pro per usarli tutti.',
     limit_live_earnings_auto_start:

@@ -1,6 +1,6 @@
 import { Settings } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, type TextStyle, View } from 'react-native';
 import Animated, {
   cancelAnimation,
   FadeIn,
@@ -17,6 +17,11 @@ import { AccountLogo, Text, useSettingsBottomNavInset } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { springPresets } from '~/constants/motion';
 import { useResolvedTheme } from '~/context/ThemeContext';
+import {
+  CardDesignBackground,
+  cardDesignInk,
+  useCardDesignAppearance,
+} from '~/features/settings/components/AccountCardDesign';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -69,6 +74,8 @@ interface AccountCardStackProps {
       iconColor?: string;
       /** Render in this currency instead of the reporting currency. */
       currencyCode?: string;
+      /** Explicit text colour, for figures drawn on card artwork. */
+      color?: string;
     },
   ) => React.ReactNode;
 }
@@ -79,6 +86,8 @@ const EXPANDED_DEBIT_HEIGHT = 195;
 const EXPANDED_CREDIT_HEIGHT = 302;
 const EXPANDED_LOAN_HEIGHT = 340;
 const CARD_BORDER_RADIUS = 18;
+/** A closed card's height: the part of its artwork a closed card shows. */
+export const COLLAPSED_CARD_HEIGHT = PEEK_HEIGHT + CARD_BODY_HEIGHT;
 const MASKED_BALANCE_VALUE = '••••';
 
 function getExpandedHeight(account: Account) {
@@ -99,6 +108,11 @@ interface CardPalette {
   border: string;
   shadow: string;
   shadowOpacity: number;
+  /** Set on artwork cards, where the theme's error red can be unreadable. */
+  negative?: string;
+  /** Backing for chips, tiles and buttons on artwork cards. */
+  panel?: string;
+  textShadow?: TextStyle;
 }
 
 const CARD_PALETTES_DARK: CardPalette[] = [
@@ -298,7 +312,26 @@ const EXCLUDED_PALETTE_LIGHT: CardPalette = {
   shadowOpacity: 1,
 };
 
-function getCardPalette(account: Account, index: number, isDark: boolean): CardPalette {
+/**
+ * The plain colour card an account gets without artwork, exactly as the stack
+ * draws it: a debit card's colour comes from its place in its section (pass
+ * stackPaletteIndex), and an account left out of totals is grey.
+ */
+export function getPlainCardColors(
+  type: Account['type'],
+  isDark: boolean,
+  stackIndex = 0,
+  includeInTotals = true,
+): { bg: string; text: string; border: string } {
+  const palette = getCardPalette({ type, includeInTotals }, stackIndex, isDark);
+  return { bg: palette.bg, text: palette.balance, border: palette.border };
+}
+
+function getCardPalette(
+  account: Pick<Account, 'type' | 'includeInTotals'>,
+  index: number,
+  isDark: boolean,
+): CardPalette {
   if (!account.includeInTotals) {
     return isDark ? EXCLUDED_PALETTE_DARK : EXCLUDED_PALETTE_LIGHT;
   }
@@ -312,6 +345,31 @@ function getCardPalette(account: Account, index: number, isDark: boolean): CardP
   return palettes[index % palettes.length]!;
 }
 
+/**
+ * The palette for a card carrying artwork: its ink comes from the design's
+ * text tone rather than the account type, since the artwork replaces the
+ * type's colour. `bg` only shows while the image decodes.
+ */
+function getDesignPalette(textTone: 'light' | 'dark', isDark: boolean): CardPalette {
+  const ink = cardDesignInk(textTone);
+  return {
+    bg: textTone === 'light' ? '#1E1E22' : '#EDECEA',
+    accent: ink.text,
+    balance: ink.text,
+    meta: ink.meta,
+    metaValue: ink.metaValue,
+    divider: ink.divider,
+    badge: ink.panel,
+    badgeText: ink.text,
+    border: ink.border,
+    shadow: '#000',
+    shadowOpacity: isDark ? 0.3 : 0.16,
+    negative: ink.negative,
+    panel: ink.panel,
+    textShadow: ink.textShadow,
+  };
+}
+
 function isNegativeForDisplay(value: number) {
   return normalizeMoneyAmount(value) < 0;
 }
@@ -321,7 +379,9 @@ interface StackCardProps {
   balance: number;
   creditSummary: CreditSummary | null;
   loanSummary: LoanCardSummary | null;
-  palette: CardPalette;
+  /** The account's colour palette, used when it has no artwork. */
+  basePalette: CardPalette;
+  isDark: boolean;
   isExpanded: boolean;
   targetTop: number;
   cardIndex: number;
@@ -342,7 +402,8 @@ function StackCard({
   balance,
   creditSummary,
   loanSummary,
-  palette,
+  basePalette,
+  isDark,
   isExpanded,
   targetTop,
   cardIndex,
@@ -358,6 +419,19 @@ function StackCard({
   accountGroupLabel,
 }: StackCardProps) {
   const themeColors = useThemeColors();
+  const design = useCardDesignAppearance(account.cardDesign);
+  const designTone = design?.textTone ?? null;
+  const palette = useMemo(
+    () => (designTone ? getDesignPalette(designTone, isDark) : basePalette),
+    [basePalette, designTone, isDark],
+  );
+  const negativeColor = palette.negative ?? themeColors.error;
+  // Urgent chips sit on a tint of the error red; artwork cards back them with
+  // their own panel instead, which the tint would not carry text on.
+  const urgentChipBackground = palette.panel ?? `${themeColors.error}1C`;
+  const creditBoxSurface = palette.panel
+    ? { borderColor: palette.border, backgroundColor: palette.panel }
+    : { borderColor: `${themeColors.error}30` };
   const normalizedBalance = normalizeMoneyAmount(balance);
   const isCredit = account.type === 'credit';
   const isLoan = account.type === 'loan';
@@ -567,6 +641,14 @@ function StackCard({
         animatedStyle,
       ]}
     >
+      {design ? (
+        <CardDesignBackground
+          value={account.cardDesign}
+          appearance={design}
+          expanded={isExpanded}
+          dimmed={!account.includeInTotals}
+        />
+      ) : null}
       <Pressable
         onPress={handleToggle}
         onPressIn={handlePressIn}
@@ -586,7 +668,10 @@ function StackCard({
           <View style={styles.peekNameCol}>
             <Text
               variant="bodyStrong"
-              style={{ color: palette.balance, fontSize: 14, letterSpacing: -0.3 }}
+              style={[
+                { color: palette.balance, fontSize: 14, letterSpacing: -0.3 },
+                palette.textShadow,
+              ]}
               numberOfLines={1}
             >
               {account.name}
@@ -601,16 +686,14 @@ function StackCard({
                     style={[
                       styles.billingChip,
                       {
-                        backgroundColor: hasUnpaidStatement
-                          ? `${themeColors.error}1C`
-                          : palette.badge,
+                        backgroundColor: hasUnpaidStatement ? urgentChipBackground : palette.badge,
                       },
                     ]}
                   >
                     <Text
                       style={[
                         styles.billingChipText,
-                        { color: hasUnpaidStatement ? themeColors.error : palette.metaValue },
+                        { color: hasUnpaidStatement ? negativeColor : palette.metaValue },
                       ]}
                       numberOfLines={1}
                     >
@@ -630,14 +713,14 @@ function StackCard({
                     style={[
                       styles.billingChip,
                       {
-                        backgroundColor: isRepaymentLate ? `${themeColors.error}1C` : palette.badge,
+                        backgroundColor: isRepaymentLate ? urgentChipBackground : palette.badge,
                       },
                     ]}
                   >
                     <Text
                       style={[
                         styles.billingChipText,
-                        { color: isRepaymentLate ? themeColors.error : palette.metaValue },
+                        { color: isRepaymentLate ? negativeColor : palette.metaValue },
                       ]}
                       numberOfLines={1}
                     >
@@ -653,7 +736,10 @@ function StackCard({
               <>
                 <Text
                   variant="bodyStrong"
-                  style={{ color: palette.balance, fontSize: 16, letterSpacing: -0.5 }}
+                  style={[
+                    { color: palette.balance, fontSize: 16, letterSpacing: -0.5 },
+                    palette.textShadow,
+                  ]}
                 >
                   {/* Everything still to hand over, matching the "Left to pay"
                       tile below and the debt total above, so the whole page is
@@ -661,7 +747,9 @@ function StackCard({
                   {formatBalance(loanRemainingToPay)}
                 </Text>
                 {loanMonthlyLabel ? (
-                  <Text style={[styles.peekSubValue, { color: palette.metaValue }]}>
+                  <Text
+                    style={[styles.peekSubValue, { color: palette.metaValue }, palette.textShadow]}
+                  >
                     {loanMonthlyLabel}
                   </Text>
                 ) : null}
@@ -669,20 +757,26 @@ function StackCard({
             ) : isCredit && creditSummary ? (
               <Text
                 variant="bodyStrong"
-                style={{ color: palette.balance, fontSize: 16, letterSpacing: -0.5 }}
+                style={[
+                  { color: palette.balance, fontSize: 16, letterSpacing: -0.5 },
+                  palette.textShadow,
+                ]}
               >
                 {formatBalance(creditSummary.payable + creditSummary.outstanding)}
               </Text>
             ) : (
               <Text
                 variant="bodyStrong"
-                style={{
-                  color: isNegativeForDisplay(normalizedBalance)
-                    ? themeColors.error
-                    : palette.balance,
-                  fontSize: 16,
-                  letterSpacing: -0.5,
-                }}
+                style={[
+                  {
+                    color: isNegativeForDisplay(normalizedBalance)
+                      ? negativeColor
+                      : palette.balance,
+                    fontSize: 16,
+                    letterSpacing: -0.5,
+                  },
+                  palette.textShadow,
+                ]}
               >
                 {formatBalance(normalizedBalance)}
               </Text>
@@ -732,27 +826,29 @@ function StackCard({
               {isCredit && creditSummary ? (
                 <>
                   <View style={styles.creditRow}>
-                    <View style={[styles.creditBox, { borderColor: `${themeColors.error}30` }]}>
+                    <View style={[styles.creditBox, creditBoxSurface]}>
                       <Text style={[styles.creditLabel, { color: palette.meta }]}>
                         {I18n.t('accounts.payable')}
                       </Text>
                       {onRenderBalanceNode(creditSummary.payable, {
                         variant: 'caption',
                         textClassName: 'text-destructive',
-                        iconColor: themeColors.error,
+                        iconColor: negativeColor,
+                        color: palette.negative,
                         // Both boxes split the balance shown in the peek row,
                         // so they carry the card's own currency too.
                         currencyCode: account.currency,
                       })}
                     </View>
-                    <View style={[styles.creditBox, { borderColor: `${themeColors.error}30` }]}>
+                    <View style={[styles.creditBox, creditBoxSurface]}>
                       <Text style={[styles.creditLabel, { color: palette.meta }]}>
                         {I18n.t('accounts.outstanding')}
                       </Text>
                       {onRenderBalanceNode(creditSummary.outstanding, {
                         variant: 'caption',
                         textClassName: 'text-destructive',
-                        iconColor: themeColors.error,
+                        iconColor: negativeColor,
+                        color: palette.negative,
                         currencyCode: account.currency,
                       })}
                     </View>
@@ -779,7 +875,7 @@ function StackCard({
                         styles.loanBox,
                         {
                           borderColor: `${palette.accent}30`,
-                          backgroundColor: `${palette.accent}0F`,
+                          backgroundColor: palette.panel ?? `${palette.accent}0F`,
                         },
                       ]}
                     >
@@ -789,6 +885,7 @@ function StackCard({
                       {onRenderBalanceNode(loanPaidSoFar, {
                         variant: 'caption',
                         currencyCode: account.currency,
+                        color: design ? palette.balance : undefined,
                       })}
                     </View>
                     <View
@@ -796,7 +893,7 @@ function StackCard({
                         styles.loanBox,
                         {
                           borderColor: `${palette.accent}30`,
-                          backgroundColor: `${palette.accent}0F`,
+                          backgroundColor: palette.panel ?? `${palette.accent}0F`,
                         },
                       ]}
                     >
@@ -809,6 +906,7 @@ function StackCard({
                       {onRenderBalanceNode(loanRemainingToPay, {
                         variant: 'caption',
                         currencyCode: account.currency,
+                        color: design ? palette.balance : undefined,
                       })}
                     </View>
                   </View>
@@ -852,7 +950,7 @@ function StackCard({
                     styles.ctaButton,
                     {
                       flex: 1,
-                      backgroundColor: `${palette.accent}18`,
+                      backgroundColor: palette.panel ?? `${palette.accent}18`,
                       borderColor: `${palette.accent}30`,
                     },
                   ]}
@@ -870,12 +968,15 @@ function StackCard({
                     style={[
                       styles.payButton,
                       {
-                        backgroundColor: `${themeColors.accent}20`,
-                        borderColor: `${themeColors.accent}40`,
+                        backgroundColor: palette.panel ?? `${themeColors.accent}20`,
+                        borderColor: design ? palette.border : `${themeColors.accent}40`,
                       },
                     ]}
                   >
-                    <Text variant="bodyStrong" style={{ color: themeColors.accent, fontSize: 13 }}>
+                    <Text
+                      variant="bodyStrong"
+                      style={{ color: design ? palette.accent : themeColors.accent, fontSize: 13 }}
+                    >
                       {I18n.t('accounts.pay')}
                     </Text>
                   </Pressable>
@@ -888,7 +989,7 @@ function StackCard({
                   style={[
                     styles.editButton,
                     {
-                      backgroundColor: `${palette.accent}12`,
+                      backgroundColor: palette.panel ?? `${palette.accent}12`,
                       borderColor: `${palette.accent}25`,
                     },
                   ]}
@@ -977,7 +1078,8 @@ function SectionStack({
             balance={bal}
             creditSummary={creditSummary}
             loanSummary={loanSummary}
-            palette={palette}
+            basePalette={palette}
+            isDark={isDark}
             isExpanded={expandedAccountId === account.id}
             targetTop={positions[index]!}
             cardIndex={index}
