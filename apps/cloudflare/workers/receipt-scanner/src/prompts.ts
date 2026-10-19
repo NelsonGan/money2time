@@ -159,8 +159,12 @@ const cache = new Map<PromptName, CacheEntry>();
 // missed on almost every scan: the first day live logged 743 prompt fetches
 // (each one a `$llm_prompt_fetched` event in PostHog) against 744 model calls.
 // The data centre's cache sits between the two, shared by every isolate in the
-// location, so PostHog is asked about once per prompt per location per cache
-// period (CACHE_TTL_MS). The key is a URL on the Worker's own hostname that is never served.
+// location, so PostHog is asked about once per prompt per location per
+// CACHE_TTL_MS. The key is a URL on the Worker's own hostname that is never
+// served. The copy carries its fetch time, and an isolate that reads it expires
+// it from then: restarting the clock at the read would let a copy read just
+// before it lapsed live another full period, doubling how long a label move
+// takes to land.
 const EDGE_CACHE_HOST = 'https://workers-receipt-scanner.money2time.com/__prompt-cache/';
 
 function edgeCache(): Cache | null {
@@ -171,23 +175,35 @@ function edgeCache(): Cache | null {
   }
 }
 
-async function readEdgeCache(
-  name: PromptName,
-): Promise<{ template: string; version: number } | null> {
+interface SharedPrompt {
+  template: string;
+  version: number;
+  /** When the Worker fetched this copy from PostHog. */
+  fetchedAt: number;
+}
+
+async function readEdgeCache(name: PromptName, now: number): Promise<SharedPrompt | null> {
   const edge = edgeCache();
   if (!edge) return null;
   try {
     const hit = await edge.match(new Request(`${EDGE_CACHE_HOST}${name}`));
     if (!hit) return null;
-    const body = (await hit.json()) as { template?: unknown; version?: unknown };
+    const body = (await hit.json()) as {
+      template?: unknown;
+      version?: unknown;
+      fetchedAt?: unknown;
+    };
     if (typeof body.template !== 'string' || typeof body.version !== 'number') return null;
-    return { template: body.template, version: body.version };
+    // A copy written before copies carried their fetch time counts as fresh now.
+    const fetchedAt = typeof body.fetchedAt === 'number' ? body.fetchedAt : now;
+    if (now - fetchedAt >= CACHE_TTL_MS) return null;
+    return { template: body.template, version: body.version, fetchedAt };
   } catch {
     return null;
   }
 }
 
-async function writeEdgeCache(name: PromptName, prompt: { template: string; version: number }) {
+async function writeEdgeCache(name: PromptName, prompt: SharedPrompt) {
   const edge = edgeCache();
   if (!edge) return;
   try {
@@ -260,15 +276,15 @@ export async function resolvePrompt(
   if (cached && (now - cached.fetchedAt < CACHE_TTL_MS || now < cached.retryAt)) {
     return { name, template: cached.template, version: cached.version, source: 'posthog' };
   }
-  const shared = await readEdgeCache(name);
+  const shared = await readEdgeCache(name, now);
   if (shared) {
-    cache.set(name, { ...shared, fetchedAt: now, retryAt: 0 });
+    cache.set(name, { ...shared, retryAt: 0 });
     return { name, template: shared.template, version: shared.version, source: 'posthog' };
   }
   const fetched = await fetchPrompt(env, name);
   if (fetched) {
     cache.set(name, { ...fetched, fetchedAt: now, retryAt: 0 });
-    await writeEdgeCache(name, fetched);
+    await writeEdgeCache(name, { ...fetched, fetchedAt: now });
     return { name, template: fetched.template, version: fetched.version, source: 'posthog' };
   }
   if (cached) {

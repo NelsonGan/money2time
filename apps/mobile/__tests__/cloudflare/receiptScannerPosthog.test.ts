@@ -178,6 +178,38 @@ describe('hosted receipt prompts', () => {
     expect(init.headers).toEqual({ Authorization: 'Bearer phx_read' });
   });
 
+  it("expires the location cache's copy from its fetch time, not when an isolate read it", async () => {
+    // The data centre's cache, shared by isolates; clearPromptCache() stands in
+    // for a fresh isolate.
+    const stored = new Map<string, string>();
+    const edge = {
+      match: jest.fn(async (cacheKey: Request) => {
+        const copy = stored.get(cacheKey.url);
+        return copy === undefined ? undefined : new Response(copy);
+      }),
+      put: jest.fn(async (cacheKey: Request, response: Response) => {
+        stored.set(cacheKey.url, await response.text());
+      }),
+    };
+    Object.defineProperty(global, 'caches', { value: { default: edge }, configurable: true });
+    const fetchMock = jest.fn(
+      async () => new Response(JSON.stringify({ prompt: 'Hosted', version: 4 })),
+    );
+    global.fetch = fetchMock as unknown as typeof fetch;
+    try {
+      await prompts.resolvePrompt(env, 'receipt-scan-quick', 0);
+      prompts.clearPromptCache();
+      // A new isolate 29 minutes later reuses the shared copy...
+      await prompts.resolvePrompt(env, 'receipt-scan-quick', 29 * 60_000);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      // ...but cannot keep it past 30 minutes from the original fetch.
+      await prompts.resolvePrompt(env, 'receipt-scan-quick', 31 * 60_000);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    } finally {
+      delete (global as { caches?: unknown }).caches;
+    }
+  });
+
   it('serves a stale copy while PostHog fails, and the bundled one when it never answered', async () => {
     global.fetch = jest.fn(
       async () => new Response(JSON.stringify({ prompt: 'Hosted v2', version: 2 })),

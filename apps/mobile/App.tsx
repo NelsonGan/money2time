@@ -1500,6 +1500,9 @@ function WidgetSnapshotSync() {
   return null;
 }
 
+/** Longest the auto-log drain waits for the launch Pro status read. */
+const PRO_STATUS_WAIT_MS = 10_000;
+
 /**
  * The app half of iOS auto-log: publishes the catalog the Shortcuts App Intent
  * reads for its pickers, and drains the taps the intent queued back into real
@@ -1512,7 +1515,15 @@ function AutoLogSync() {
   // queued tap from a Pro user past the free cap as "Auto-log limit reached"
   // on cold start, and published a catalog telling the intent they had no
   // auto-logs left. Both wait for `isStatusKnown`.
-  const { isPro, isStatusKnown } = usePro();
+  const { isPro, isStatusKnown: isProStatusKnown } = usePro();
+  // A status read that never settles must not hold taps forever, so the wait
+  // is capped; a tap that then meets the free limit just stays queued.
+  const [proStatusWaitOver, setProStatusWaitOver] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setProStatusWaitOver(true), PRO_STATUS_WAIT_MS);
+    return () => clearTimeout(timer);
+  }, []);
+  const isStatusKnown = isProStatusKnown || proStatusWaitOver;
 
   // Read on every render rather than inside the effect so it is a real
   // dependency: switching app language changes the string, which republishes
