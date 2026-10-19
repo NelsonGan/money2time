@@ -1,3 +1,4 @@
+import { File } from 'expo-file-system/next';
 import { Image } from 'expo-image';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -38,6 +39,16 @@ import { cardCropPixels, clampPan, clampZoom, maxPan, type Size } from '~/utils/
 const SOURCE_MAX_EDGE = 2400;
 /** Width the saved crop is scaled down to: a 3x phone's full card width. */
 const OUTPUT_WIDTH = 1200;
+
+/** Removes a temporary file the manipulator wrote; a miss is not worth failing over. */
+function deleteTempFile(uri: string) {
+  try {
+    const file = new File(uri);
+    if (file.exists) file.delete();
+  } catch {
+    // The cache is the OS's to purge eventually.
+  }
+}
 
 interface CardDesignCropModalProps {
   /** The picked photo, or null while the modal is closed. */
@@ -123,6 +134,8 @@ function CropBody({
   // caps a 48 MP photo to something the gestures can move smoothly.
   useEffect(() => {
     let cancelled = false;
+    // The re-encoded copy lives only as long as this screen does.
+    let preparedUri: string | null = null;
     void (async () => {
       try {
         const rendered = await ImageManipulator.manipulate(sourceUri).renderAsync();
@@ -136,7 +149,12 @@ function CropBody({
         }
         const image = await context.renderAsync();
         const out = await image.saveAsync({ compress: 0.92, format: SaveFormat.JPEG });
-        if (!cancelled) setSource({ uri: out.uri, width: out.width, height: out.height });
+        if (cancelled) {
+          deleteTempFile(out.uri);
+          return;
+        }
+        preparedUri = out.uri;
+        setSource({ uri: out.uri, width: out.width, height: out.height });
       } catch {
         if (cancelled) return;
         Alert.alert(I18n.t('accounts.card_design.upload_failed'));
@@ -145,6 +163,7 @@ function CropBody({
     })();
     return () => {
       cancelled = true;
+      if (preparedUri) deleteTempFile(preparedUri);
     };
   }, [sourceUri]);
 
@@ -154,7 +173,11 @@ function CropBody({
   const imageWidth = imageSize.width;
   const imageHeight = imageSize.height;
 
+  // Off until the photo is measured: limits worked out against the 1x1
+  // placeholder would leave the photo offset once it appears.
+  const gesturesEnabled = source != null;
   const pinch = Gesture.Pinch()
+    .enabled(gesturesEnabled)
     .onUpdate((event) => {
       const nextZoom = clampZoom(savedZoom.value * event.scale);
       const limit = maxPan(
@@ -174,6 +197,7 @@ function CropBody({
     });
 
   const pan = Gesture.Pan()
+    .enabled(gesturesEnabled)
     .averageTouches(true)
     .onStart(() => {
       // From wherever the photo is now, including where a pinch's clamping
@@ -215,6 +239,8 @@ function CropBody({
       const image = await context.renderAsync();
       const out = await image.saveAsync({ compress: 0.85, format: SaveFormat.JPEG });
       const designId = saveCustomCardDesign(out.uri, textTone);
+      // Copied into user-assets above; the manipulator's output is now spare.
+      deleteTempFile(out.uri);
       void triggerHaptic('success');
       onSaved(designId);
     } catch {

@@ -102,7 +102,7 @@ export function CardDesignPickerScreen({ session, onClose }: CardDesignPickerScr
   const isDark = useResolvedTheme() === 'dark';
   const insets = useSafeAreaInsets();
   const { width: windowWidth } = useWindowDimensions();
-  const { settings, currentMonthWage, accounts, updateAccount } = useApp();
+  const { settings, currentMonthWage } = useApp();
   const { isPro, requirePro } = useProGate();
 
   const [selected, setSelected] = useState<string | null>(session.selectedDesign);
@@ -210,12 +210,11 @@ export function CardDesignPickerScreen({ session, onClose }: CardDesignPickerScr
             text: I18n.t('common.delete'),
             style: 'destructive',
             onPress: () => {
-              // As the prompt promises: every card wearing it goes back to its
-              // plain colour now, rather than keeping the design's ink over a
-              // missing image until it happens to re-render.
-              for (const other of accounts) {
-                if (other.cardDesign === designId) updateAccount(other.id, { cardDesign: null });
-              }
+              // Only the file goes. Accounts wearing it are not rewritten: a
+              // design that no longer resolves already draws the plain card, and
+              // an account write here would refresh the list, which re-seeds
+              // the editor underneath (losing its unsaved edits) and runs the
+              // orphan sweep over every other upload in this library.
               deleteCustomLogo(designId);
               if (designId === selected) setSelected(null);
               // The editor holds its own copy of the choice; without this a
@@ -227,7 +226,7 @@ export function CardDesignPickerScreen({ session, onClose }: CardDesignPickerScr
         ],
       );
     },
-    [accounts, refreshUploads, selected, session, updateAccount],
+    [refreshUploads, selected, session],
   );
 
   const handleApply = useCallback(() => {
@@ -244,7 +243,12 @@ export function CardDesignPickerScreen({ session, onClose }: CardDesignPickerScr
     onClose();
   }, [onClose, selected, session]);
 
-  const plainColors = getPlainCardColors(session.accountType, isDark, session.stackIndex);
+  const plainColors = getPlainCardColors(
+    session.accountType,
+    isDark,
+    session.stackIndex,
+    session.includeInTotals,
+  );
 
   const renderTile = (tile: Tile) => {
     const isSelected =

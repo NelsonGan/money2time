@@ -12,6 +12,8 @@ export interface CardDesignPickerSession {
   accountType: AccountType;
   /** The account's place in its stack section, for its plain colour. */
   stackIndex: number;
+  /** Left out of totals: its plain card is the grey excluded one. */
+  includeInTotals: boolean;
 }
 
 let pending: CardDesignPickerSession | null = null;

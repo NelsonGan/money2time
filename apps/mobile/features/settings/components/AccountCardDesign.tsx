@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import React from 'react';
+import React, { useSyncExternalStore } from 'react';
 import { StyleSheet, type TextStyle, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
@@ -10,7 +10,12 @@ import {
   type CardTextTone,
   resolveCardDesignAppearance,
 } from '~/constants/cardDesigns';
-import { forgetCustomLogoUri, getCustomLogoUri } from '~/services/userAssets';
+import {
+  forgetCustomLogoUri,
+  getCustomAssetRevision,
+  getCustomLogoUri,
+  subscribeCustomAssets,
+} from '~/services/userAssets';
 import type { AccountType } from '~/types';
 
 /**
@@ -80,11 +85,12 @@ export function cardDesignInk(textTone: CardTextTone): CardDesignInk {
 
 /**
  * Resolves a stored `accounts.card_design` value for drawing, or null.
- * Deliberately not memoised on the value: an upload can be deleted while the
- * value stays put, and the next render has to notice. Each call is a map
- * lookup or one cached stat.
+ * Subscribed to the upload store, so deleting an upload redraws every card
+ * wearing it as the plain card at once, without rewriting those accounts.
+ * Each call is a map lookup or one cached stat.
  */
 export function useCardDesignAppearance(value?: string | null): CardDesignAppearance | null {
+  useSyncExternalStore(subscribeCustomAssets, getCustomAssetRevision);
   return resolveCardDesignAppearance(value, getCustomLogoUri);
 }
 

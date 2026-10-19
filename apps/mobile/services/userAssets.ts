@@ -305,8 +305,30 @@ export function deletePaymentQr(relativePath?: string | null) {
  */
 const customUriCache = new Map<string, string | null>();
 
+/**
+ * Bumped whenever uploaded files are added or removed (everything that clears
+ * the cache above), so components drawing an upload can redraw when it goes
+ * away rather than when something unrelated happens to re-render them.
+ */
+let customAssetRevision = 0;
+const customAssetListeners = new Set<() => void>();
+
+/** For useSyncExternalStore: re-render when uploaded files change. */
+export function subscribeCustomAssets(listener: () => void): () => void {
+  customAssetListeners.add(listener);
+  return () => {
+    customAssetListeners.delete(listener);
+  };
+}
+
+export function getCustomAssetRevision(): number {
+  return customAssetRevision;
+}
+
 function invalidateCustomUriCache() {
   customUriCache.clear();
+  customAssetRevision += 1;
+  for (const listener of customAssetListeners) listener();
 }
 
 /** Resolves a `custom:` logo id to an on-disk file uri, or null if missing. */

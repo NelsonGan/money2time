@@ -313,15 +313,17 @@ const EXCLUDED_PALETTE_LIGHT: CardPalette = {
 };
 
 /**
- * The plain colour card an account gets without artwork. A debit card's colour
- * comes from its place in its section, so pass that (stackPaletteIndex).
+ * The plain colour card an account gets without artwork, exactly as the stack
+ * draws it: a debit card's colour comes from its place in its section (pass
+ * stackPaletteIndex), and an account left out of totals is grey.
  */
 export function getPlainCardColors(
   type: Account['type'],
   isDark: boolean,
   stackIndex = 0,
+  includeInTotals = true,
 ): { bg: string; text: string; border: string } {
-  const palette = getCardPalette({ type, includeInTotals: true }, stackIndex, isDark);
+  const palette = getCardPalette({ type, includeInTotals }, stackIndex, isDark);
   return { bg: palette.bg, text: palette.balance, border: palette.border };
 }
 

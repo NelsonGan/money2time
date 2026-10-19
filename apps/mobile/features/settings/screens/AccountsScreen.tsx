@@ -761,6 +761,7 @@ function AccountEditorSheet({
       setName('');
       setType('debit');
       setLogoId(null);
+      setCardDesign(null);
       setAccountGroupId(
         presetGroupName ? (accountGroupIdByName.get(presetGroupName) ?? 'none') : 'none',
       );
@@ -1396,6 +1397,7 @@ function AccountEditorSheet({
               value={cardDesign}
               accountType={isEdit ? account.type : type}
               stackIndex={cardStackIndex}
+              includeInTotals={includeInTotals}
               onOpen={() =>
                 onOpenCardDesignPicker({
                   selectedDesign: cardDesign,
@@ -1404,6 +1406,7 @@ function AccountEditorSheet({
                   logoId,
                   accountType: isEdit ? account.type : type,
                   stackIndex: cardStackIndex,
+                  includeInTotals,
                 })
               }
               onClear={() => setCardDesign(null)}

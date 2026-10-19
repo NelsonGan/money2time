@@ -23,6 +23,8 @@ interface CardDesignFieldProps {
   accountType: AccountType;
   /** The account's place in its stack section, for its plain colour. */
   stackIndex: number;
+  /** Left out of totals: its plain card is the grey excluded one. */
+  includeInTotals: boolean;
   onOpen: () => void;
   onClear: () => void;
 }
@@ -32,6 +34,7 @@ export function CardDesignField({
   value,
   accountType,
   stackIndex,
+  includeInTotals,
   onOpen,
   onClear,
 }: CardDesignFieldProps) {
@@ -39,7 +42,7 @@ export function CardDesignField({
   const isDark = useResolvedTheme() === 'dark';
   const appearance = useCardDesignAppearance(value);
   const template = getCardDesignTemplate(value);
-  const plain = getPlainCardColors(accountType, isDark, stackIndex);
+  const plain = getPlainCardColors(accountType, isDark, stackIndex, includeInTotals);
 
   const label = !appearance
     ? I18n.t('accounts.card_design.plain')
