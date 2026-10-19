@@ -1,6 +1,7 @@
 // Cloudflare Worker proxy for receipt scanning, served at /scan. Validates the
 // request, verifies the RevenueCat entitlement and per-user scan quota, runs
-// OpenRouter inference (primary MODEL, falling back to BACKUP_MODEL), and
+// OpenRouter inference (primary MODEL, falling back to BACKUP_MODEL; a Claude
+// model runs only on our own Anthropic key), and
 // returns the parsed transactions. The OpenRouter key lives only in this
 // Worker's secrets — never in the app.
 
@@ -25,6 +26,8 @@ export interface Env extends PostHogEnv, PromptEnv {
   // When unset, signature checking is skipped so preview builds still work.
   MONEY2TIME_REQUEST_SIGNING_KEY?: string;
   ENTITLEMENT_ID: string;
+  // An `anthropic/` model in MODEL or BACKUP_MODEL runs on our own Anthropic
+  // key through OpenRouter BYOK, never on OpenRouter credits (ANTHROPIC_ONLY).
   MODEL: string;
   // Backup model tried when the primary MODEL errors or times out. Unset falls
   // back to DEFAULT_BACKUP_MODEL; set equal to MODEL to disable failover.
@@ -43,6 +46,20 @@ export interface Env extends PostHogEnv, PromptEnv {
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 // Fallback for an unset MODEL / BACKUP_MODEL.
 const DEFAULT_BACKUP_MODEL = 'google/gemma-3-4b-it';
+// An Anthropic model runs on our own Anthropic key (BYOK) and never on
+// OpenRouter credits, whichever slot it is in. OpenRouter also serves Claude
+// from Bedrock, Vertex, Azure and Claude Platform on AWS, on its own accounts
+// and so on credits, so the request names Anthropic alone and allows no other
+// provider. The Anthropic key in OpenRouter (Settings, Integrations) must also
+// be set never to use shared capacity, or a rate-limited key runs on
+// OpenRouter's own Anthropic account instead of failing; no request field can
+// say that. `byokBroken` checks both.
+const ANTHROPIC_ONLY = { only: ['anthropic'], allow_fallbacks: false };
+// Set when an Anthropic answer says our key did not pay for it, so OpenRouter
+// charged credits. The rest of this isolate's scans skip Anthropic models
+// rather than risk another; a new isolate tries them again. The routing above
+// rules this out, so it only fires if that routing stops holding.
+let byokBroken = false;
 const INFERENCE_TIMEOUT_MS = 45000;
 // Wall clock the whole request gets, spanning every attempt below (the model
 // failover and the empty-result retry). It is anchored at request entry rather
@@ -350,11 +367,32 @@ function timingSafeEqual(a: string, b: string): boolean {
   return diff === 0;
 }
 
+// The image's type as its first bytes say, falling back to what the app
+// declared. Anthropic refuses an image whose declared type is not what it is
+// (a PNG sent as image/jpeg), where other providers never minded. HEIC, which
+// Claude cannot read at all, stays as declared and so goes to the backup.
+function imageMime(base64: string, declared: string | undefined): string {
+  if (base64.startsWith('/9j/')) return 'image/jpeg';
+  if (base64.startsWith('iVBOR')) return 'image/png';
+  if (base64.startsWith('UklGR')) return 'image/webp';
+  return declared ?? 'image/jpeg';
+}
+
+interface ModelChoice {
+  model: string;
+  /** An Anthropic model: runs on our own key, locked to that provider (ANTHROPIC_ONLY). */
+  byok: boolean;
+}
+
 // Models to try in order: primary MODEL, then BACKUP_MODEL (skipped when equal).
-function resolveModels(env: Env): string[] {
+// Anthropic models drop out once one has been billed to credits (`byokBroken`).
+function resolveModels(env: Env): ModelChoice[] {
   const primary = env.MODEL?.trim() || DEFAULT_BACKUP_MODEL;
   const backup = env.BACKUP_MODEL?.trim() || DEFAULT_BACKUP_MODEL;
-  return backup && backup !== primary ? [primary, backup] : [primary];
+  const chain = (backup !== primary ? [primary, backup] : [primary])
+    .map((model) => ({ model, byok: model.startsWith('anthropic/') }))
+    .filter((choice) => !(choice.byok && byokBroken));
+  return chain.length ? chain : [{ model: DEFAULT_BACKUP_MODEL, byok: false }];
 }
 
 // One attempt's inference settings, shared by the failover chain.
@@ -378,10 +416,13 @@ async function completeScan(
   env: Env,
   reqId: string,
   opts: AttemptOptions,
-  model: string,
+  choice: ModelChoice,
   isBackupModel: boolean,
 ): Promise<string> {
-  const dataUrl = `data:${body.mime};base64,${body.image}`;
+  const { model } = choice;
+  // Claude takes no temperature: the empty-result retry resamples it anyway.
+  const temperature = choice.byok ? undefined : opts.temperature;
+  const dataUrl = `data:${imageMime(body.image ?? '', body.mime)};base64,${body.image}`;
   // Resolution hint attached only when set (see Env.IMAGE_DETAIL).
   const detail = env.IMAGE_DETAIL?.trim();
   const imageUrl: { url: string; detail?: string } = detail
@@ -404,16 +445,17 @@ async function completeScan(
       headers: {
         Authorization: `Bearer ${env.OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
-        // OpenRouter attribution headers.
+        // OpenRouter app attribution: the referer is the app's identity there
+        // and the title its display name, so this names the app, not the Worker.
         'HTTP-Referer': 'https://money2time.com',
-        'X-Title': 'money2time receipt scanner',
+        'X-Title': 'Money2Time',
       },
       signal: controller.signal,
       body: JSON.stringify({
         // No response_format/structured outputs: not every provider accepts it.
         // The prompt pins JSON-only output and the parsers tolerate fences/prose.
         model,
-        temperature: opts.temperature,
+        ...(choice.byok ? { provider: ANTHROPIC_ONLY } : { temperature }),
         max_tokens: opts.maxTokens,
         // Receipt parsing is a mechanical OCR/extraction task, so disable
         // reasoning: on reasoning-capable models the chain-of-thought would
@@ -449,7 +491,18 @@ async function completeScan(
       usage?: OpenRouterUsage;
     };
     usage = completion?.usage;
-    return completion?.choices?.[0]?.message?.content ?? '';
+    if (choice.byok && usage?.is_byok === false) {
+      byokBroken = true;
+      logError('byok_billed_to_credits', { reqId, model });
+    }
+    const content = completion?.choices?.[0]?.message?.content ?? '';
+    // An answer with no JSON in it parses as no transactions, which is the
+    // empty result rather than a failure, and would stop at Claude. From Claude
+    // it is a failure, so the backup model gets the receipt.
+    if (choice.byok && extractParsedObject(content) === null) {
+      throw new Error('answer held no JSON object');
+    }
+    return content;
   } catch (err) {
     failure = err instanceof Error ? err.message : String(err);
     throw err;
@@ -462,7 +515,7 @@ async function completeScan(
       endedAt: Date.now(),
       httpStatus,
       usage,
-      temperature: opts.temperature,
+      temperature,
       maxTokens: opts.maxTokens,
       isBackupModel,
       attempt: opts.attempt,
@@ -483,9 +536,10 @@ async function completeWithFailover(
   const models = resolveModels(env);
   let lastError: unknown;
   for (let i = 0; i < models.length; i += 1) {
-    const model = models[i];
+    const choice = models[i];
+    const { model } = choice;
     try {
-      const content = await completeScan(body, env, reqId, opts, model, i > 0);
+      const content = await completeScan(body, env, reqId, opts, choice, i > 0);
       validateContent?.(content);
       return content;
     } catch (err) {
@@ -499,6 +553,7 @@ async function completeWithFailover(
         reqId,
         model,
         isBackup: i > 0,
+        byok: choice.byok,
         willRetry,
         error: failure instanceof Error ? failure.message : String(failure),
       });

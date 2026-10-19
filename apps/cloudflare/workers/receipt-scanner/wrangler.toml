@@ -37,11 +37,17 @@ enabled = true
 head_sampling_rate = 1
 
 [vars]
-MODEL = "qwen/qwen3.7-flash"
-# Backup model tried automatically if the primary MODEL errors or times out
-# (provider down/overloaded). Any multimodal OpenRouter model works; set it to
-# the same value as MODEL to disable failover.
-BACKUP_MODEL = "google/gemini-2.5-flash-lite"
+# Claude Haiku 5.5 on our own Anthropic key through OpenRouter BYOK, never on
+# OpenRouter credits: any `anthropic/` model is sent locked to the Anthropic
+# provider (src/index.ts, ANTHROPIC_ONLY), and the Anthropic key in OpenRouter
+# (Settings → Integrations) must be set never to use shared capacity. Any
+# failure, or an answer with no JSON, moves on to BACKUP_MODEL.
+MODEL = "anthropic/claude-haiku-5.5"
+# Backup model tried automatically if the primary MODEL errors, times out or
+# (for Claude) answers without JSON. Paid from OpenRouter credits. Any
+# multimodal OpenRouter model works; set it to the same value as MODEL to
+# disable failover, or swap the two lines to put Qwen back in front.
+BACKUP_MODEL = "qwen/qwen3.7-flash"
 ENTITLEMENT_ID = "pro"
 # Per-tier scan cap + metering cadence. INTERVAL is day | week | month | year
 # with an optional count prefix ("100year" ≈ lifetime); change it to re-meter a

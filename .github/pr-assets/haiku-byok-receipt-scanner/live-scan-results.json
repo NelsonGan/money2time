@@ -1,0 +1,4183 @@
+{
+  "date": "2026-10-19",
+  "method": "Every case of the local receipt-scanner dataset (139 synthetic receipts and screenshots, manifest sourceHash 0f928af7faa1c4b2) POSTed through the Worker's real fetch handler with RevenueCat and the quota mocked and the bundled prompts (byte-identical to hosted version 1, which production serves). Live OpenRouter calls with a separate local key on the production OpenRouter account. A case passes when the transaction count, every amount, the category and (screenshots) the account match, and for itemized scans the item count and item sum.",
+  "runs": [
+    {
+      "run": "this PR",
+      "config": {
+        "MODEL": "anthropic/claude-haiku-5.5",
+        "BACKUP_MODEL": "qwen/qwen3.7-flash"
+      },
+      "cases": 139,
+      "passed": 131,
+      "scanLatencyMs": {
+        "p50": 1298,
+        "p90": 1953,
+        "max": 3108
+      },
+      "callsByModelAndStatus": {
+        "anthropic/claude-haiku-5.5 200": 142
+      },
+      "anthropicCallsIsByok": {
+        "True": 142
+      },
+      "results": [
+        {
+          "id": "quick-kopitiam-clean",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1631,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-cash-tendered-trap",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1197,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-us-sales-tax",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1445,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-handwritten-tip",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1142,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-service-sst-rounding",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1002,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-member-discount-gst",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1231,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-pharmacy-rounding",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1101,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-jp-konbini-inclusive",
+          "mode": "quick",
+          "pass": false,
+          "failedChecks": ["category"],
+          "ms": 1175,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-de-comma-decimal",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1057,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-idr-thousands",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1757,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-currency-pinned",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1135,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-two-receipts",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1923,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-three-receipts",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1280,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-long-grocery",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1235,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-faded-thermal",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1188,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-blurry",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 931,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-sideways",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1222,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-dim-noisy",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1404,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-old-date-clamped",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1245,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-no-date",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1186,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-day-month-only",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1719,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-us-date-order",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1217,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-utility-bill",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1184,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-no-other-category",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1261,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-nested-coffee",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1181,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-card-terminal-slip",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1168,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-hkd-chinese",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1015,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-thai-script",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1036,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-no-receipt-coffee-cup",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1925,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            },
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-no-receipt-menu",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2611,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            },
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-kopitiam-qty",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1544,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-service-sst-excluded",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1978,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-qty-at",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1707,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-qty-own-line",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1569,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-weighed",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1555,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-line-discount",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1449,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-receipt-discount",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1387,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-jp",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1531,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-pos-abbreviations",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1597,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-long-15",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 3108,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-multi-receipt-no-detail",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1432,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-dollar-ambiguous-currency",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1730,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-faded",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1713,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-modifiers",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1623,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-handwritten-tip-excluded",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2012,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-voided-line",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1669,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-no-receipt-menu",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1870,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            },
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-wallet-visa-last4",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1172,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-wallet-name-match",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1283,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-bank-detail-debit",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1351,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-ambiguous-two-visas",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1031,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-no-source-shown",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1036,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-no-accounts-list",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1348,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-decoy-last4",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1104,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-lockscreen-notification",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1300,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-lockscreen-promo-noise",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1358,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-transfer-receipt",
+          "mode": "screenshot",
+          "pass": false,
+          "failedChecks": ["account"],
+          "ms": 1217,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-txn-list-balance-trap",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1430,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-order-voucher",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1238,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-fx-billed-amount",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1262,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-eu-apple-pay",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1199,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-jp-qr-payment",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1362,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-idr-transfer",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1125,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-dark-mode-bank",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1138,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-no-payment-notifications",
+          "mode": "screenshot",
+          "pass": false,
+          "failedChecks": ["count"],
+          "ms": 942,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-cart-not-purchased",
+          "mode": "screenshot",
+          "pass": false,
+          "failedChecks": ["count"],
+          "ms": 1130,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-receipt-photo-card",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1225,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-01-myr",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1324,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-02-usd",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1070,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-03-sgd",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1012,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-04-gbp",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 986,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-05-jpy",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1274,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-06-idr",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1100,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-07-eur",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1151,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-08-php",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1099,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-09-aud",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1343,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-10-myr",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1368,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-11-usd",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1040,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-12-sgd",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 841,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-13-gbp",
+          "mode": "quick",
+          "pass": false,
+          "failedChecks": ["category"],
+          "ms": 1298,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-14-jpy",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1127,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-15-idr",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1086,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-16-eur",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 982,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-17-php",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 960,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-18-aud",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1044,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-19-myr",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1134,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-20-usd",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1099,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-21-sgd",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1287,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-22-gbp",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1274,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-23-jpy",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1925,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-24-idr",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1157,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-25-eur",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1172,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-26-php",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1951,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-01-myr",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2109,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-02-usd",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2346,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-03-sgd",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2252,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-04-gbp",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2722,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-05-jpy",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1851,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-06-idr",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1842,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-07-eur",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1953,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-08-php",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1693,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-09-aud",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1480,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-10-myr",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2456,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-11-usd",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1677,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-12-sgd",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1945,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-13-gbp",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1914,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-14-jpy",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1636,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-15-idr",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2244,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-16-eur",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2151,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-17-php",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2176,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-18-aud",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1569,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-19-myr",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1900,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-20-usd",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2425,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-21-sgd",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1788,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-22-gbp",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1723,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-01-walletPayment",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1376,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-02-lockScreen",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1203,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-03-walletPayment",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1352,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-04-walletPayment",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1113,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-05-walletPayment",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1155,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-06-walletPayment",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1105,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-07-bankTxnDetail",
+          "mode": "screenshot",
+          "pass": false,
+          "failedChecks": ["category"],
+          "ms": 1756,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-08-walletPayment",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1716,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-09-bankTxnDetail",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1201,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-10-walletPayment",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1295,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-11-bankTxnDetail",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 931,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-12-lockScreen",
+          "mode": "screenshot",
+          "pass": false,
+          "failedChecks": ["account"],
+          "ms": 1190,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-13-lockScreen",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1259,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-14-bankTxnDetail",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1329,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-15-walletPayment",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1945,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-16-bankTxnDetail",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1861,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-17-bankTxnDetail",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1056,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-18-walletPayment",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1607,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-19-bankTxnDetail",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1563,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-20-bankTxnDetail",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1109,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-21-lockScreen",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1168,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-22-bankTxnDetail",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1252,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-23-bankTxnDetail",
+          "mode": "screenshot",
+          "pass": false,
+          "failedChecks": ["category"],
+          "ms": 1404,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-24-bankTxnDetail",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1360,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-5.5",
+              "status": 200,
+              "byok": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "run": "before (production today)",
+      "config": {
+        "MODEL": "qwen/qwen3.7-flash",
+        "BACKUP_MODEL": "google/gemini-2.5-flash-lite"
+      },
+      "cases": 139,
+      "passed": 131,
+      "scanLatencyMs": {
+        "p50": 2473,
+        "p90": 5166,
+        "max": 8089
+      },
+      "callsByModelAndStatus": {
+        "qwen/qwen3.7-flash 200": 142
+      },
+      "anthropicCallsIsByok": {},
+      "results": [
+        {
+          "id": "quick-kopitiam-clean",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2490,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-cash-tendered-trap",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2042,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-us-sales-tax",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2324,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-handwritten-tip",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 3076,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-service-sst-rounding",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1947,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-member-discount-gst",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2206,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-pharmacy-rounding",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1982,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-jp-konbini-inclusive",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2121,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-de-comma-decimal",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1792,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-idr-thousands",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1370,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-currency-pinned",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1376,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-two-receipts",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 3030,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-three-receipts",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 3877,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-long-grocery",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1995,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-faded-thermal",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1905,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-blurry",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1359,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-sideways",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2266,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-dim-noisy",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 3417,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-old-date-clamped",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1859,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-no-date",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2603,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-day-month-only",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2110,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-us-date-order",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2473,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-utility-bill",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2123,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-no-other-category",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2092,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-nested-coffee",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1783,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-card-terminal-slip",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2255,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-hkd-chinese",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2050,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-thai-script",
+          "mode": "quick",
+          "pass": false,
+          "failedChecks": ["category"],
+          "ms": 2624,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-no-receipt-coffee-cup",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 3136,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            },
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-no-receipt-menu",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 3241,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            },
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-kopitiam-qty",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 3803,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-service-sst-excluded",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 5112,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-qty-at",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 4326,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-qty-own-line",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 4499,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-weighed",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 3830,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-line-discount",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 4869,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-receipt-discount",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 3703,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-jp",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 3833,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-pos-abbreviations",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 5097,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-long-15",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 8089,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-multi-receipt-no-detail",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2778,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-dollar-ambiguous-currency",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 4147,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-faded",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 4520,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-modifiers",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 4324,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-handwritten-tip-excluded",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 4770,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-voided-line",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 4011,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-no-receipt-menu",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 3394,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            },
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-wallet-visa-last4",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2371,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-wallet-name-match",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2622,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-bank-detail-debit",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2190,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-ambiguous-two-visas",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1999,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-no-source-shown",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2464,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-no-accounts-list",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2141,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-decoy-last4",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2408,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-lockscreen-notification",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 3333,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-lockscreen-promo-noise",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 5046,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-transfer-receipt",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2045,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-txn-list-balance-trap",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 4191,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-order-voucher",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2038,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-fx-billed-amount",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1884,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-eu-apple-pay",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2746,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-jp-qr-payment",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1482,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-idr-transfer",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2986,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-dark-mode-bank",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2682,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-no-payment-notifications",
+          "mode": "screenshot",
+          "pass": false,
+          "failedChecks": ["count"],
+          "ms": 2282,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-cart-not-purchased",
+          "mode": "screenshot",
+          "pass": false,
+          "failedChecks": ["count"],
+          "ms": 2294,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-receipt-photo-card",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2450,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-01-myr",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1539,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-02-usd",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2194,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-03-sgd",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 4100,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-04-gbp",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 3144,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-05-jpy",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2184,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-06-idr",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1674,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-07-eur",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2430,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-08-php",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2522,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-09-aud",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2018,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-10-myr",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 3338,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-11-usd",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1897,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-12-sgd",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2515,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-13-gbp",
+          "mode": "quick",
+          "pass": false,
+          "failedChecks": ["category"],
+          "ms": 2462,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-14-jpy",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1824,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-15-idr",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2129,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-16-eur",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2246,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-17-php",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2100,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-18-aud",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 3145,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-19-myr",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2093,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-20-usd",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2130,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-21-sgd",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2256,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-22-gbp",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1985,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-23-jpy",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1358,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-24-idr",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1788,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-25-eur",
+          "mode": "quick",
+          "pass": false,
+          "failedChecks": ["category"],
+          "ms": 1835,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-gen-26-php",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1819,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-01-myr",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 4695,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-02-usd",
+          "mode": "itemized",
+          "pass": false,
+          "failedChecks": ["items", "itemsSum"],
+          "ms": 3928,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-03-sgd",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 7555,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-04-gbp",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 5249,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-05-jpy",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 5517,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-06-idr",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 4533,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-07-eur",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 5663,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-08-php",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 4396,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-09-aud",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 3455,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-10-myr",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 4306,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-11-usd",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 5692,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-12-sgd",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 6371,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-13-gbp",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 5491,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-14-jpy",
+          "mode": "itemized",
+          "pass": false,
+          "failedChecks": ["category"],
+          "ms": 4164,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-15-idr",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 6119,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-16-eur",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 5598,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-17-php",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 6533,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-18-aud",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 4030,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-19-myr",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 6218,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-20-usd",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 5166,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-21-sgd",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 4422,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "itemized-gen-22-gbp",
+          "mode": "itemized",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 6448,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-01-walletPayment",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 3413,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-02-lockScreen",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2557,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-03-walletPayment",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2622,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-04-walletPayment",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1782,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-05-walletPayment",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2313,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-06-walletPayment",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2577,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-07-bankTxnDetail",
+          "mode": "screenshot",
+          "pass": false,
+          "failedChecks": ["category"],
+          "ms": 1942,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-08-walletPayment",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2443,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-09-bankTxnDetail",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2797,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-10-walletPayment",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2400,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-11-bankTxnDetail",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2479,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-12-lockScreen",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1921,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-13-lockScreen",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 1929,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-14-bankTxnDetail",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2196,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-15-walletPayment",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2246,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-16-bankTxnDetail",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2313,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-17-bankTxnDetail",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2322,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-18-walletPayment",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2462,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-19-bankTxnDetail",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2566,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-20-bankTxnDetail",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2365,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-21-lockScreen",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2135,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-22-bankTxnDetail",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2296,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-23-bankTxnDetail",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2306,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "screenshot-gen-24-bankTxnDetail",
+          "mode": "screenshot",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 3096,
+          "calls": [
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "run": "forced failover (unavailable Claude slug)",
+      "config": {
+        "MODEL": "anthropic/claude-haiku-does-not-exist",
+        "BACKUP_MODEL": "qwen/qwen3.7-flash"
+      },
+      "cases": 10,
+      "passed": 10,
+      "scanLatencyMs": {
+        "p50": 2346,
+        "p90": 2425,
+        "max": 2425
+      },
+      "callsByModelAndStatus": {
+        "anthropic/claude-haiku-does-not-exist 400": 10,
+        "qwen/qwen3.7-flash 200": 10
+      },
+      "anthropicCallsIsByok": {
+        "None": 10
+      },
+      "results": [
+        {
+          "id": "quick-kopitiam-clean",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2406,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-does-not-exist",
+              "status": 400,
+              "byok": null
+            },
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-cash-tendered-trap",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2379,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-does-not-exist",
+              "status": 400,
+              "byok": null
+            },
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-us-sales-tax",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2245,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-does-not-exist",
+              "status": 400,
+              "byok": null
+            },
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-handwritten-tip",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2219,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-does-not-exist",
+              "status": 400,
+              "byok": null
+            },
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-service-sst-rounding",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2425,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-does-not-exist",
+              "status": 400,
+              "byok": null
+            },
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-member-discount-gst",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2250,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-does-not-exist",
+              "status": 400,
+              "byok": null
+            },
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-pharmacy-rounding",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2316,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-does-not-exist",
+              "status": 400,
+              "byok": null
+            },
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-jp-konbini-inclusive",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2346,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-does-not-exist",
+              "status": 400,
+              "byok": null
+            },
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-de-comma-decimal",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2349,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-does-not-exist",
+              "status": 400,
+              "byok": null
+            },
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        },
+        {
+          "id": "quick-idr-thousands",
+          "mode": "quick",
+          "pass": true,
+          "failedChecks": [],
+          "ms": 2338,
+          "calls": [
+            {
+              "model": "anthropic/claude-haiku-does-not-exist",
+              "status": 400,
+              "byok": null
+            },
+            {
+              "model": "qwen/qwen3.7-flash",
+              "status": 200,
+              "byok": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
