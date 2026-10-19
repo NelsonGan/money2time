@@ -18,9 +18,11 @@ export const POSTHOG_HOST = 'https://us.i.posthog.com';
  * `startSessionReplayForLaunch`). The free tier allows 2,500 mobile recordings
  * a month (the website's 5,000 are a separate allowance), so launches on an
  * install's first day, when onboarding happens and replays teach the most, are
- * sampled far more often than everyday launches. At ~38K first-day launches
- * (~19K installs) and ~375K later launches a month this is roughly
- * 1,500 + 560 recordings, leaving headroom for growth.
+ * sampled far more often than everyday launches. PostHog measured ~6K
+ * first-day launches and, once every install runs this build, ~150K later
+ * launches a month (week of 2026-10-12), so this is roughly 900 + 600
+ * recordings, leaving headroom for growth. The earlier 4% and 0.15%, set from
+ * Mixpanel's install count, recorded about 300 a month.
  */
-export const SESSION_REPLAY_NEW_INSTALL_RATE = 0.04;
-export const SESSION_REPLAY_RETURNING_RATE = 0.0015;
+export const SESSION_REPLAY_NEW_INSTALL_RATE = 0.15;
+export const SESSION_REPLAY_RETURNING_RATE = 0.004;
