@@ -1764,6 +1764,40 @@ const es = {
     currency_change_message:
       'El saldo se convertirá de {{from}} a {{to}} al tipo de cambio más reciente. Los movimientos existentes mantienen su moneda original.',
     currency_change_action: 'Convertir y cambiar',
+    card_design: {
+      label: 'Diseño de tarjeta',
+      title: 'Diseño de tarjeta',
+      plain: 'Color liso',
+      clear: 'Quitar diseño de tarjeta',
+      apply: 'Usar este diseño',
+      filter_all: 'Todos',
+      my_uploads: 'Mis subidas',
+      upload: 'Sube el tuyo',
+      upload_pro: 'Subir (Pro)',
+      upload_label: 'Tu diseño {{number}}',
+      upload_pro_hint: 'Con Pro, usa tu propia foto o ilustración como diseño de tarjeta.',
+      upload_failed: 'No se pudo usar esa imagen. Prueba con otra.',
+      delete_title: '¿Eliminar este diseño?',
+      delete_label: 'Eliminar diseño {{number}}',
+      delete_message: 'Las tarjetas que lo usan vuelven a su color liso.',
+      template_label: 'Diseño de tarjeta {{genre}} {{number}}',
+      crop_title: 'Ajusta tu diseño',
+      crop_hint:
+        'Arrastra y pellizca para encuadrarlo. Una tarjeta cerrada muestra la franja entre las líneas discontinuas; en una pila solo asoma la parte superior con el nombre.',
+      text_label: 'Color del texto',
+      text_light: 'Texto claro',
+      text_dark: 'Texto oscuro',
+      save: 'Guardar diseño',
+      genre_minimal: 'Minimalista',
+      genre_luxury: 'Lujo',
+      genre_marble: 'Mármol y piedra',
+      genre_nature: 'Naturaleza',
+      genre_space: 'Espacio',
+      genre_abstract: 'Arte abstracto',
+      genre_anime: 'Anime',
+      genre_retro: 'Retro',
+      genre_cute: 'Tierno',
+    },
     logo: {
       label: 'Logo',
       add: 'Añadir un logo',
@@ -1988,6 +2022,8 @@ const es = {
       'Subir tus propios iconos es una función Pro. Mejora tu plan para usar cualquier imagen en categorías, metas y presupuestos.',
     limit_app_icon:
       'Los iconos adicionales son una función Pro. Mejora a Pro para dar a Money2Time un nuevo aspecto en tu pantalla de inicio.',
+    limit_custom_card_designs:
+      'Los diseños de tarjeta propios son una función Pro. Mejora para poner cualquier foto o ilustración en tus tarjetas.',
     limit_icon_packs:
       'Los paquetes extra de iconos son una función Pro. Mejora tu plan para usarlos todos.',
     limit_live_earnings_auto_start:

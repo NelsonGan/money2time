@@ -112,6 +112,10 @@ import {
   consumePendingAccountLogoPicker,
   setPendingAccountLogoPicker,
 } from '~/features/settings/lib/accountLogoPickerBridge';
+import {
+  consumePendingCardDesignPicker,
+  setPendingCardDesignPicker,
+} from '~/features/settings/lib/cardDesignPickerBridge';
 import type { CategoryIconPickerSession } from '~/features/settings/lib/categoryIconPickerBridge';
 import {
   consumePendingCategoryIconPicker,
@@ -127,6 +131,7 @@ import {
   AccountsScreen,
   AddWageMonthScreen,
   AutoBackupScreen,
+  CardDesignPickerScreen,
   CategoryEditorScreen,
   ExchangeRatesScreen,
   HourlyValueScreen,
@@ -2127,6 +2132,10 @@ function AccountEditorRouteScreen({ route, navigation }: RootStackRouteProps<'Ac
         setPendingAccountLogoPicker(session);
         navigation.navigate('AccountLogoPicker');
       }}
+      onOpenCardDesignPicker={(session) => {
+        setPendingCardDesignPicker(session);
+        navigation.navigate('CardDesignPicker');
+      }}
     />
   );
 }
@@ -2148,6 +2157,17 @@ function AccountLogoPickerRouteScreen({ navigation }: RootStackRouteProps<'Accou
       onClose={() => navigation.goBack()}
     />
   );
+}
+
+function CardDesignPickerRouteScreen({ navigation }: RootStackRouteProps<'CardDesignPicker'>) {
+  // Same module-bridge hand-off as the account logo picker above.
+  const sessionRef = useRef(consumePendingCardDesignPicker());
+  const session = sessionRef.current;
+  useEffect(() => {
+    if (!session) navigation.goBack();
+  }, [navigation, session]);
+  if (!session) return null;
+  return <CardDesignPickerScreen session={session} onClose={() => navigation.goBack()} />;
 }
 
 function SubscriptionLogoPickerRouteScreen({
@@ -2933,6 +2953,7 @@ function AppContent() {
             <RootStack.Screen name="GoalDetail" component={GoalDetailRouteScreen} />
             <RootStack.Screen name="GoalEditor" component={GoalEditorRouteScreen} />
             <RootStack.Screen name="AccountLogoPicker" component={AccountLogoPickerRouteScreen} />
+            <RootStack.Screen name="CardDesignPicker" component={CardDesignPickerRouteScreen} />
             <RootStack.Screen
               name="SubscriptionLogoPicker"
               component={SubscriptionLogoPickerRouteScreen}

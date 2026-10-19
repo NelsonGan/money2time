@@ -1773,6 +1773,41 @@ const fr = {
     currency_change_message:
       "Le solde sera converti de {{from}} en {{to}} au dernier taux. Les écritures existantes conservent leur devise d'origine.",
     currency_change_action: 'Convertir et changer',
+    card_design: {
+      label: 'Design de la carte',
+      title: 'Design de la carte',
+      plain: 'Couleur unie',
+      clear: 'Retirer le design de la carte',
+      apply: 'Utiliser ce design',
+      filter_all: 'Tous',
+      my_uploads: 'Mes imports',
+      upload: 'Importer le vôtre',
+      upload_pro: 'Importer (Pro)',
+      upload_label: 'Votre design {{number}}',
+      upload_pro_hint:
+        'Avec Pro, utilisez votre propre photo ou illustration comme design de carte.',
+      upload_failed: "Impossible d'utiliser cette image. Essayez-en une autre.",
+      delete_title: 'Supprimer ce design ?',
+      delete_label: 'Supprimer le design {{number}}',
+      delete_message: 'Les cartes qui l’utilisent reprennent leur couleur unie.',
+      template_label: 'Design de carte {{genre}} {{number}}',
+      crop_title: 'Ajustez votre design',
+      crop_hint:
+        'Faites glisser et pincez pour cadrer. Une carte fermée montre la bande entre les pointillés ; dans une pile, seul le haut avec le nom dépasse.',
+      text_label: 'Couleur du texte',
+      text_light: 'Texte clair',
+      text_dark: 'Texte foncé',
+      save: 'Enregistrer le design',
+      genre_minimal: 'Minimaliste',
+      genre_luxury: 'Luxe',
+      genre_marble: 'Marbre et pierre',
+      genre_nature: 'Nature',
+      genre_space: 'Espace',
+      genre_abstract: 'Art abstrait',
+      genre_anime: 'Anime',
+      genre_retro: 'Rétro',
+      genre_cute: 'Mignon',
+    },
     logo: {
       label: 'Logo',
       add: 'Ajouter un logo',
@@ -1999,6 +2034,8 @@ const fr = {
       "Importer vos propres icônes est une fonction Pro. Passez à Pro pour utiliser n'importe quelle image dans les catégories, objectifs et budgets.",
     limit_app_icon:
       'Les icônes supplémentaires sont une fonctionnalité Pro. Passez à Pro pour donner un nouveau look à Money2Time sur votre écran d’accueil.',
+    limit_custom_card_designs:
+      'Les designs de carte personnalisés sont une fonction Pro. Passez à Pro pour mettre n’importe quelle photo ou illustration sur vos cartes.',
     limit_icon_packs:
       "Les packs d'icônes supplémentaires sont une fonction Pro. Passez à Pro pour tous les utiliser.",
     limit_live_earnings_auto_start:

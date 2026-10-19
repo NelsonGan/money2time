@@ -179,6 +179,8 @@ export const GA4_ONLY_EVENTS = {
   // Accounts
   ACCOUNT_CREATED: 'Account Created',
   ACCOUNT_DELETED: 'Account Deleted',
+  ACCOUNT_CARD_DESIGN_CHOSEN: 'Account Card Design Chosen',
+  CARD_DESIGN_UPLOADED: 'Card Design Uploaded',
 
   // Savings goals
   GOAL_CREATED: 'Goal Created',

@@ -234,6 +234,7 @@ export function toAccount(row: AccountRow): Account {
     type: asAccountType(row.type),
     accountGroup: row.accountGroup,
     logoId: row.logoId ?? null,
+    cardDesign: row.cardDesign ?? null,
     creditStatementDay: row.creditStatementDay,
     creditDueDay: row.creditDueDay,
     currency: row.currency,

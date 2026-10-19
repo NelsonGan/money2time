@@ -1772,6 +1772,40 @@ const nl = {
     currency_change_message:
       'Het saldo wordt tegen de nieuwste koers omgerekend van {{from}} naar {{to}}. Bestaande boekingen behouden hun oorspronkelijke valuta.',
     currency_change_action: 'Omrekenen en wijzigen',
+    card_design: {
+      label: 'Kaartontwerp',
+      title: 'Kaartontwerp',
+      plain: 'Effen kleur',
+      clear: 'Kaartontwerp verwijderen',
+      apply: 'Dit ontwerp gebruiken',
+      filter_all: 'Alle',
+      my_uploads: 'Mijn uploads',
+      upload: 'Upload je eigen',
+      upload_pro: 'Uploaden (Pro)',
+      upload_label: 'Jouw ontwerp {{number}}',
+      upload_pro_hint: 'Gebruik met Pro je eigen foto of kunstwerk als kaartontwerp.',
+      upload_failed: 'Die afbeelding kon niet worden gebruikt. Probeer een andere.',
+      delete_title: 'Dit ontwerp verwijderen?',
+      delete_label: 'Ontwerp verwijderen {{number}}',
+      delete_message: 'Kaarten die het gebruiken, krijgen weer hun effen kleur.',
+      template_label: 'Kaartontwerp {{genre}} {{number}}',
+      crop_title: 'Ontwerp aanpassen',
+      crop_hint:
+        'Sleep en knijp om het uit te snijden. Een gesloten kaart toont de strook tussen de stippellijnen; in een stapel steekt alleen de bovenrand met de naam uit.',
+      text_label: 'Tekstkleur',
+      text_light: 'Lichte tekst',
+      text_dark: 'Donkere tekst',
+      save: 'Ontwerp opslaan',
+      genre_minimal: 'Minimalistisch',
+      genre_luxury: 'Luxe',
+      genre_marble: 'Marmer & steen',
+      genre_nature: 'Natuur',
+      genre_space: 'Ruimte',
+      genre_abstract: 'Abstracte kunst',
+      genre_anime: 'Anime',
+      genre_retro: 'Retro',
+      genre_cute: 'Schattig',
+    },
     logo: {
       label: 'Logo',
       add: 'Logo toevoegen',
@@ -1996,6 +2030,8 @@ const nl = {
       'Eigen pictogrammen uploaden is een Pro-functie. Upgrade om elke afbeelding te gebruiken voor categorieën, doelen en budgetten.',
     limit_app_icon:
       'Extra app-iconen zijn een Pro-functie. Upgrade om Money2Time een nieuw uiterlijk op je beginscherm te geven.',
+    limit_custom_card_designs:
+      'Eigen kaartontwerpen zijn een Pro-functie. Upgrade om elke foto of elk kunstwerk op je kaarten te zetten.',
     limit_icon_packs:
       'Extra pictogrampakketten zijn een Pro-functie. Upgrade om ze allemaal te gebruiken.',
     limit_live_earnings_auto_start:

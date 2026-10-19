@@ -1,5 +1,6 @@
 import { Directory, File, Paths } from 'expo-file-system/next';
 
+import { type CardTextTone, customCardDesignFileName } from '~/constants/cardDesigns';
 import { newId } from '~/utils/id';
 
 /**
@@ -10,6 +11,7 @@ import { newId } from '~/utils/id';
  *     account-logos/<id>.<ext>   ← accounts.logo_id
  *     album-covers/<id>.<ext>    ← albums.cover_photo_uri
  *     avatars/<id>.<ext>         ← settings.profile_avatar_uri
+ *     card-designs/<id>.text-<tone>.jpg ← accounts.card_design
  *     goal-covers/<id>.<ext>     ← accounts.goal_cover_uri
  *     category-icons/<id>.<ext>  ← categories.icon, accounts.goal_emoji,
  *                                  budget_templates.emoji,
@@ -38,6 +40,7 @@ const CATEGORY_ICONS_KIND = 'category-icons';
 const RECEIPTS_KIND = 'receipts';
 const PAYMENT_QR_KIND = 'payment-qr';
 const SUBSCRIPTION_LOGOS_KIND = 'subscription-logos';
+const CARD_DESIGNS_KIND = 'card-designs';
 
 export interface UserAssetBackupEntry {
   /** Path relative to the user-assets root, e.g. `account-logos/9f3c.png`. */
@@ -413,6 +416,32 @@ export function listCustomCategoryIcons(): { id: string; uri: string }[] {
     .filter((entry): entry is File => entry instanceof File)
     .map((file) => ({
       id: `${CUSTOM_LOGO_PREFIX}${CATEGORY_ICONS_KIND}/${file.name}`,
+      uri: file.uri,
+    }));
+}
+
+/**
+ * Copies an already-cropped card design (a JPEG from the crop screen) into the
+ * card-design store, returning its `custom:` id for `accounts.card_design`. The
+ * text colour is part of the file name; see customCardDesignFileName.
+ */
+export function saveCustomCardDesign(sourceUri: string, textTone: CardTextTone): string {
+  ensureDir(kindDir(CARD_DESIGNS_KIND));
+  const fileName = customCardDesignFileName(newId(), textTone);
+  const dest = new File(Paths.document, ROOT, CARD_DESIGNS_KIND, fileName);
+  new File(sourceUri).copy(dest);
+  invalidateCustomUriCache();
+  return `${CUSTOM_LOGO_PREFIX}${CARD_DESIGNS_KIND}/${fileName}`;
+}
+
+export function listCustomCardDesigns(): { id: string; uri: string }[] {
+  const dir = kindDir(CARD_DESIGNS_KIND);
+  if (!dir.exists) return [];
+  return dir
+    .list()
+    .filter((entry): entry is File => entry instanceof File)
+    .map((file) => ({
+      id: `${CUSTOM_LOGO_PREFIX}${CARD_DESIGNS_KIND}/${file.name}`,
       uri: file.uri,
     }));
 }

@@ -1776,6 +1776,41 @@ const de = {
     currency_change_message:
       'Der Saldo wird zum aktuellen Kurs von {{from}} in {{to}} umgerechnet. Vorhandene Buchungen behalten ihre ursprüngliche Währung.',
     currency_change_action: 'Umrechnen & ändern',
+    card_design: {
+      label: 'Kartendesign',
+      title: 'Kartendesign',
+      plain: 'Einfarbig',
+      clear: 'Kartendesign entfernen',
+      apply: 'Dieses Design verwenden',
+      filter_all: 'Alle',
+      my_uploads: 'Meine Uploads',
+      upload: 'Eigenes hochladen',
+      upload_pro: 'Hochladen (Pro)',
+      upload_label: 'Dein Design {{number}}',
+      upload_pro_hint:
+        'Mit Pro kannst du dein eigenes Foto oder Kunstwerk als Kartendesign verwenden.',
+      upload_failed: 'Dieses Bild konnte nicht verwendet werden. Versuche ein anderes.',
+      delete_title: 'Dieses Design löschen?',
+      delete_label: 'Design löschen {{number}}',
+      delete_message: 'Karten, die es verwenden, werden wieder einfarbig.',
+      template_label: 'Kartendesign {{genre}} {{number}}',
+      crop_title: 'Design anpassen',
+      crop_hint:
+        'Ziehen und zoomen, um den Ausschnitt zu wählen. Eine geschlossene Karte zeigt den Streifen zwischen den gestrichelten Linien; im Stapel ist nur der obere Rand mit dem Namen sichtbar.',
+      text_label: 'Textfarbe',
+      text_light: 'Heller Text',
+      text_dark: 'Dunkler Text',
+      save: 'Design speichern',
+      genre_minimal: 'Minimalistisch',
+      genre_luxury: 'Luxus',
+      genre_marble: 'Marmor & Stein',
+      genre_nature: 'Natur',
+      genre_space: 'Weltall',
+      genre_abstract: 'Abstrakte Kunst',
+      genre_anime: 'Anime',
+      genre_retro: 'Retro',
+      genre_cute: 'Niedlich',
+    },
     logo: {
       label: 'Logo',
       add: 'Logo hinzufügen',
@@ -2002,6 +2037,8 @@ const de = {
       'Eigene Symbole hochzuladen ist eine Pro-Funktion. Upgrade, um jedes Bild für Kategorien, Ziele und Budgets zu nutzen.',
     limit_app_icon:
       'Weitere App-Symbole sind eine Pro-Funktion. Hol dir Pro und gib Money2Time einen neuen Look auf deinem Home-Bildschirm.',
+    limit_custom_card_designs:
+      'Eigene Kartendesigns sind eine Pro-Funktion. Upgrade, um beliebige Fotos oder Kunstwerke auf deinen Karten zu verwenden.',
     limit_icon_packs: 'Weitere Symbolpakete sind eine Pro-Funktion. Upgrade für alle Pakete.',
     limit_live_earnings_auto_start:
       'Die Uhr nach Zeitplan zu starten ist eine Pro-Funktion. Mit einem Upgrade beginnt Ihre Schicht von selbst. Der manuelle Start bleibt immer kostenlos.',
