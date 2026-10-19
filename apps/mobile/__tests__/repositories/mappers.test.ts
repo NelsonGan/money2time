@@ -92,6 +92,24 @@ describe('toAccount', () => {
     expect(toAccount(row).goalCoverUri).toBeNull();
   });
 
+  it('maps the card design, and reads a row from before the column as the plain card', () => {
+    const base: any = {
+      id: 'a1',
+      name: 'Everyday',
+      sortOrder: 0,
+      type: 'debit',
+      accountGroup: null,
+      creditStatementDay: null,
+      creditDueDay: null,
+      currency: 'USD',
+      startingBalance: 0,
+      includeInTotals: true,
+      ...STAMPS,
+    };
+    expect(toAccount({ ...base, cardDesign: 'marble/black' }).cardDesign).toBe('marble/black');
+    expect(toAccount(base).cardDesign).toBeNull();
+  });
+
   it('passes through the loan type and maps loan fields', () => {
     const row: any = {
       id: 'l1',

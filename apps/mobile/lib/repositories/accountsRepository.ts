@@ -24,6 +24,7 @@ interface CreateAccountInput {
   type: Account['type'];
   accountGroup?: string | null;
   logoId?: string | null;
+  cardDesign?: string | null;
   creditStatementDay?: number | null;
   creditDueDay?: number | null;
   currency: string;
@@ -95,6 +96,7 @@ class AccountsRepository {
         loanRateChangesJson: serializeLoanRateChanges(loanRateChanges),
         sortOrder: nextSortOrder,
         accountGroup: input.accountGroup ?? null,
+        cardDesign: input.cardDesign ?? null,
         creditStatementDay: input.creditStatementDay ?? null,
         creditDueDay: input.creditDueDay ?? null,
         goalTargetAmount: input.goalTargetAmount ?? null,

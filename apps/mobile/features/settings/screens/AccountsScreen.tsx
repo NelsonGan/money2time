@@ -80,7 +80,10 @@ import {
   AccountCardStack,
   type LoanCardSummary,
 } from '~/features/settings/components/AccountCardStack';
+import { CardDesignField } from '~/features/settings/components/CardDesignField';
 import type { AccountLogoPickerSession } from '~/features/settings/lib/accountLogoPickerBridge';
+import type { CardDesignPickerSession } from '~/features/settings/lib/cardDesignPickerBridge';
+import { stackPaletteIndex } from '~/features/settings/lib/cardStackIndex';
 import {
   ActivityTransactionList,
   buildBulkUpdateInputs,
@@ -167,6 +170,7 @@ interface AccountEditorInput {
   type: AccountType;
   accountGroup: string | null;
   logoId: string | null;
+  cardDesign: string | null;
   creditStatementDay: number | null;
   creditDueDay: number | null;
   includeInTotals: boolean;
@@ -523,6 +527,7 @@ function AccountEditorSheet({
   onArchiveLoan,
   onOpenMultiCurrency,
   onOpenLogoPicker,
+  onOpenCardDesignPicker,
 }: {
   account: Account | null;
   presetGroupName?: string | null;
@@ -535,6 +540,7 @@ function AccountEditorSheet({
   onArchiveLoan?: (archived: boolean) => void;
   onOpenMultiCurrency?: () => void;
   onOpenLogoPicker: (session: AccountLogoPickerSession) => void;
+  onOpenCardDesignPicker: (session: CardDesignPickerSession) => void;
 }) {
   const themeColors = useThemeColors();
   const isEdit = account !== null;
@@ -544,6 +550,7 @@ function AccountEditorSheet({
   const [type, setType] = useState<AccountType>('debit');
   const [accountGroupId, setAccountGroupId] = useState<string>('none');
   const [logoId, setLogoId] = useState<string | null>(null);
+  const [cardDesign, setCardDesign] = useState<string | null>(null);
   const [includeInTotals, setIncludeInTotals] = useState(true);
   const [balanceInput, setBalanceInput] = useState('0');
   const [creditStatementDay, setCreditStatementDay] = useState('25');
@@ -682,6 +689,7 @@ function AccountEditorSheet({
       setName(account.name);
       setType(account.type);
       setLogoId(account.logoId ?? null);
+      setCardDesign(account.cardDesign ?? null);
       const matchedGroupId = account.accountGroup
         ? (accountGroupIdByName.get(account.accountGroup) ?? 'none')
         : 'none';
@@ -753,6 +761,7 @@ function AccountEditorSheet({
       setName('');
       setType('debit');
       setLogoId(null);
+      setCardDesign(null);
       setAccountGroupId(
         presetGroupName ? (accountGroupIdByName.get(presetGroupName) ?? 'none') : 'none',
       );
@@ -1040,6 +1049,12 @@ function AccountEditorSheet({
 
   const logoMeta = getAccountLogoMeta(logoId);
   const normalizedName = name.trim();
+  const cardStackIndex = stackPaletteIndex(
+    account?.id ?? null,
+    accountGroupId === 'none' ? null : (accountGroupNameById.get(accountGroupId) ?? null),
+    appAccounts,
+    account?.type === 'loan' && account.loanArchivedAt != null,
+  );
 
   /**
    * What the borrower's own statement says is left, spelled out under the
@@ -1155,6 +1170,7 @@ function AccountEditorSheet({
       name: normalizedName,
       type: resolvedType,
       logoId,
+      cardDesign,
       accountGroup:
         accountGroupId === 'none' ? null : (accountGroupNameById.get(accountGroupId) ?? null),
       creditStatementDay: resolvedType === 'credit' ? normalizedStatementDay : null,
@@ -1377,6 +1393,24 @@ function AccountEditorSheet({
                 )}
               </Pressable>
             </View>
+            <CardDesignField
+              value={cardDesign}
+              accountType={isEdit ? account.type : type}
+              stackIndex={cardStackIndex}
+              includeInTotals={includeInTotals}
+              onOpen={() =>
+                onOpenCardDesignPicker({
+                  selectedDesign: cardDesign,
+                  onSelect: setCardDesign,
+                  accountName: normalizedName,
+                  logoId,
+                  accountType: isEdit ? account.type : type,
+                  stackIndex: cardStackIndex,
+                  includeInTotals,
+                })
+              }
+              onClear={() => setCardDesign(null)}
+            />
             <SelectField
               label={I18n.t('accounts.account_group')}
               value={accountGroupId}
@@ -1982,12 +2016,14 @@ export function AccountEditorScreen({
   onClose,
   onOpenMultiCurrency,
   onOpenLogoPicker,
+  onOpenCardDesignPicker,
 }: {
   accountId?: string;
   presetGroupName?: string | null;
   onClose: () => void;
   onOpenMultiCurrency?: () => void;
   onOpenLogoPicker: (session: AccountLogoPickerSession) => void;
+  onOpenCardDesignPicker: (session: CardDesignPickerSession) => void;
 }) {
   const {
     accounts,
@@ -2168,6 +2204,7 @@ export function AccountEditorScreen({
         name: input.name,
         accountGroup: input.accountGroup,
         logoId: input.logoId,
+        cardDesign: input.cardDesign,
         creditStatementDay: input.creditStatementDay,
         creditDueDay: input.creditDueDay,
         includeInTotals: input.includeInTotals,
@@ -2212,6 +2249,7 @@ export function AccountEditorScreen({
                   name: input.name,
                   accountGroup: input.accountGroup,
                   logoId: input.logoId,
+                  cardDesign: input.cardDesign,
                   creditStatementDay: input.creditStatementDay,
                   creditDueDay: input.creditDueDay,
                   includeInTotals: input.includeInTotals,
@@ -2334,6 +2372,7 @@ export function AccountEditorScreen({
       onArchiveLoan={account?.type === 'loan' ? handleArchiveLoan : undefined}
       onOpenMultiCurrency={onOpenMultiCurrency}
       onOpenLogoPicker={onOpenLogoPicker}
+      onOpenCardDesignPicker={onOpenCardDesignPicker}
     />
   );
 }
@@ -3362,6 +3401,8 @@ export function AccountsScreen({
         textClassName?: string;
         iconColor?: string;
         currencyCode?: string;
+        /** Explicit text colour, over the tone and class (a card's artwork). */
+        color?: string;
       } = {},
     ) => {
       const {
@@ -3370,11 +3411,13 @@ export function AccountsScreen({
         textClassName,
         iconColor,
         currencyCode,
+        color,
       } = options;
       const label = formatVisibleBalance(amount, currencyCode);
+      const colorStyle = color ? { color } : undefined;
       if (hideAccountBalances || settings.displayMode !== 'time') {
         return (
-          <Text variant={variant} tone={tone} className={textClassName}>
+          <Text variant={variant} tone={tone} className={textClassName} style={colorStyle}>
             {label}
           </Text>
         );
@@ -3385,7 +3428,8 @@ export function AccountsScreen({
           variant={variant}
           tone={tone}
           textClassName={textClassName}
-          iconColor={iconColor}
+          iconColor={iconColor ?? color}
+          style={colorStyle}
         />
       );
     },

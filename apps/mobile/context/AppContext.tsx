@@ -1557,7 +1557,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const updateAccount = useCallback(
     (id: string, input: Partial<Omit<Account, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>>) => {
       const before =
-        'logoId' in input || 'goalEmoji' in input || 'goalCoverUri' in input
+        'logoId' in input ||
+        'goalEmoji' in input ||
+        'goalCoverUri' in input ||
+        'cardDesign' in input
           ? accountsRepository.getById(id)
           : null;
       runMutation(
@@ -1582,6 +1585,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         // needs it.
         if ('logoId' in input) sweepIfCustomAssetDropped(before.logoId, input.logoId);
         if ('goalEmoji' in input) sweepIfCustomAssetDropped(before.goalEmoji, input.goalEmoji);
+        if ('cardDesign' in input) sweepIfCustomAssetDropped(before.cardDesign, input.cardDesign);
         // A goal's cover photo is owned outright by that one goal — it never
         // comes from a shared picker library the way logos and icons do — so a
         // replace or clear can unlink it directly instead of paying for the
@@ -1669,6 +1673,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if ('goalCoverUri' in otherUpdates && acct.goalCoverUri !== otherUpdates.goalCoverUri) {
         deleteGoalCover(acct.goalCoverUri);
       }
+      if ('cardDesign' in otherUpdates) {
+        sweepIfCustomAssetDropped(acct.cardDesign, otherUpdates.cardDesign);
+      }
     },
     [accounts, refreshAccountsAndGroups, refreshTransactions, runMutation, updateAccount],
   );
@@ -1682,7 +1689,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const account = accountsRepository.getById(id);
       // A savings goal's icon lives in the same uploaded-icon library, so a
       // goal account can hold a custom ref in goal_emoji as well as logo_id.
-      const hadCustomLogo = isCustomLogoId(account?.logoId) || isCustomLogoId(account?.goalEmoji);
+      const hadCustomLogo =
+        isCustomLogoId(account?.logoId) ||
+        isCustomLogoId(account?.goalEmoji) ||
+        isCustomLogoId(account?.cardDesign);
       // A goal's cover photo is not shared, but it is reclaimed through the same
       // sweep rather than unlinked here: the soft-delete has already run by the
       // time this fires, so the row no longer counts as a live reference.

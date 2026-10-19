@@ -45,6 +45,7 @@ const LIMIT_MAP: Record<LimitType, number> = {
  */
 type ProOnlyFeature =
   | 'app_icon'
+  | 'custom_card_designs'
   | 'custom_category_icons'
   | 'custom_subscription_logos'
   | 'icon_packs'

@@ -7,6 +7,9 @@ export const accountsTable = sqliteTable('accounts', {
   type: text('type').notNull(),
   accountGroup: text('account_group'),
   logoId: text('logo_id'),
+  // Card artwork: a bundled template id or a `custom:card-designs/…` upload.
+  // Null = the plain colour card. See constants/cardDesigns.ts.
+  cardDesign: text('card_design'),
   creditStatementDay: integer('credit_statement_day'),
   creditDueDay: integer('credit_due_day'),
   currency: text('currency').notNull(),

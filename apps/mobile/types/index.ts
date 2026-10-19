@@ -451,6 +451,12 @@ export interface Account {
   accountGroup: string | null;
   /** Bundled bank/institution logo id (`<countrySlug>/<brandSlug>`), or null. */
   logoId?: string | null;
+  /**
+   * Artwork behind the account's card: a bundled template id
+   * (`<genre>/<name>`) or a `custom:card-designs/…` upload. Null or unknown
+   * renders the plain colour card. Resolve with `resolveCardDesign`.
+   */
+  cardDesign?: string | null;
   creditStatementDay: number | null;
   creditDueDay: number | null;
   currency: string;

@@ -77,6 +77,9 @@ describe('collectReferencedAssetPaths', () => {
       if (sql.includes('logo_id')) return [{ v: 'custom:account-logos/bank.png' }, { v: 'dbs' }];
       if (sql.includes('goal_emoji')) return [{ v: 'custom:category-icons/goal.png' }];
       if (sql.includes('goal_cover_uri')) return [{ v: 'goal-covers/japan.jpg' }];
+      // A bundled template id names no file, like a built-in logo id.
+      if (sql.includes('card_design'))
+        return [{ v: 'custom:card-designs/mine.text-light.jpg' }, { v: 'marble/black' }];
       // The icon columns are a mixed namespace: only the `custom:` value names
       // a file, but a bundled id and an `emoji:` glyph must survive the pass
       // without throwing or matching anything real.
@@ -96,6 +99,8 @@ describe('collectReferencedAssetPaths', () => {
         'receipts/split.jpg',
         'album-covers/trip.jpg',
         'goal-covers/japan.jpg',
+        'card-designs/mine.text-light.jpg',
+        'marble/black',
         'account-logos/bank.png',
         'dbs',
         'category-icons/goal.png',
@@ -116,6 +121,12 @@ describe('collectReferencedAssetPaths', () => {
     // that is every goal cover being deleted on the next GC.
     queryHandler = (sql) => (sql.includes('goal_cover_uri') ? [{ v: 'goal-covers/live.jpg' }] : []);
     expect(collectReferencedAssetPaths().has('goal-covers/live.jpg')).toBe(true);
+  });
+
+  it("keeps an account's uploaded card design out of the sweep", () => {
+    queryHandler = (sql) =>
+      sql.includes('card_design') ? [{ v: 'custom:card-designs/live.text-dark.jpg' }] : [];
+    expect(collectReferencedAssetPaths().has('card-designs/live.text-dark.jpg')).toBe(true);
   });
 
   it('keeps an uploaded category icon out of the sweep', () => {
