@@ -51,7 +51,7 @@ import {
   useApp,
   useTransactions,
 } from '~/context/AppContext';
-import { ProProvider, useIsPro } from '~/context/ProContext';
+import { ProProvider, useIsPro, usePro } from '~/context/ProContext';
 import {
   ReceiptScanProvider,
   type ScanOutcome,
@@ -1506,7 +1506,12 @@ function WidgetSnapshotSync() {
  */
 function AutoLogSync() {
   const { accounts, categories, settings, quickEntryPrefs, createTransaction } = useApp();
-  const isPro = useIsPro();
+  // `isPro` is a `false` placeholder until RevenueCat answers, and the drain
+  // runs on mount, before it does. Acting on the placeholder rejected every
+  // queued tap from a Pro user past the free cap as "Auto-log limit reached"
+  // on cold start, and published a catalog telling the intent they had no
+  // auto-logs left. Both wait for `isStatusKnown`.
+  const { isPro, isStatusKnown } = usePro();
 
   // Read on every render rather than inside the effect so it is a real
   // dependency: switching app language changes the string, which republishes
@@ -1523,12 +1528,21 @@ function AutoLogSync() {
     quickEntryPrefs,
     createTransaction,
     isPro,
+    isStatusKnown,
   });
-  stateRef.current = { accounts, categories, settings, quickEntryPrefs, createTransaction, isPro };
+  stateRef.current = {
+    accounts,
+    categories,
+    settings,
+    quickEntryPrefs,
+    createTransaction,
+    isPro,
+    isStatusKnown,
+  };
   const drainingRef = useRef(false);
 
   useEffect(() => {
-    if (!isAutoLogSupported()) return undefined;
+    if (!isAutoLogSupported() || !isStatusKnown) return undefined;
     // Same reasoning as WidgetSnapshotSync: these inputs settle over several
     // renders during cold start, so a synchronous write here would rebuild and
     // re-encode the catalog repeatedly on the JS thread mid-startup. The intent
@@ -1566,6 +1580,7 @@ function AutoLogSync() {
     failureNotificationBody,
     failureNotificationTitle,
     isPro,
+    isStatusKnown,
     notificationTitle,
     quickEntryPrefs.autoLogAutoCategorize,
     quickEntryPrefs.autoLogIncludeSubcategories,
@@ -1578,6 +1593,9 @@ function AutoLogSync() {
 
   const drain = useCallback(async () => {
     if (!isAutoLogSupported()) return;
+    // A drain skipped here loses nothing: the entries stay queued, and the
+    // effect below drains as soon as the status is known.
+    if (!stateRef.current.isStatusKnown) return;
     // Mount, AppState 'active' and the dev test button can all ask for a drain
     // at once. Reading the queue is async, so two overlapping runs would each
     // see the same entries before either cleared them and post every tap twice.
@@ -1664,6 +1682,10 @@ function AutoLogSync() {
   // Also drain on an explicit request (the dev test button) since that enqueues
   // a tap this component owns.
   useForegroundAutoLogDrain(drain, true);
+  // The mount drain usually runs before Pro status is known and skips.
+  useEffect(() => {
+    if (isStatusKnown) void drain();
+  }, [drain, isStatusKnown]);
 
   return null;
 }

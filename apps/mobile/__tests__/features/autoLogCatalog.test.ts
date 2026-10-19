@@ -81,6 +81,17 @@ describe('buildAutoLogCatalog', () => {
       expect(catalog.remaining).toBe(0);
     });
 
+    // The app refuses every auto-log for a free account over the account limit
+    // (autoLogAllowance). A catalog that still counted down let the intent
+    // queue the tap and notify "logged", then the drain threw "Auto-log limit
+    // reached" on every foreground and the tap never posted.
+    it('is zero for a free account over the account limit, matching the app', () => {
+      const accounts = Array.from({ length: PRO_LIMITS.FREE_MAX_ACCOUNTS + 1 }, (_, i) =>
+        account({ id: `a${i}`, name: `Account ${i}` }),
+      );
+      expect(buildAutoLogCatalog(input({ accounts, autoLogUsageCount: 0 })).remaining).toBe(0);
+    });
+
     it('is null (unlimited) for Pro', () => {
       expect(
         buildAutoLogCatalog(input({ isPro: true, autoLogUsageCount: 999 })).remaining,

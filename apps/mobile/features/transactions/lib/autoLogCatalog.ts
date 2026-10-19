@@ -7,7 +7,7 @@
 // lines of generated Swift for no gain.
 
 import { categoryIconToEmoji } from '~/constants/categoryIcons';
-import { PRO_LIMITS } from '~/constants/proLimits';
+import { autoLogAllowance } from '~/features/autoLog/lib/decide';
 import type { Account, AddButtonAction, Category } from '~/types';
 
 import { pickDefaultAccountId } from './entryDefaults';
@@ -135,9 +135,13 @@ export function buildAutoLogCatalog(input: BuildAutoLogCatalogInput): AutoLogCat
     generatedAt: input.generatedAt,
     reportingCurrency: input.reportingCurrency,
     isPro: input.isPro,
-    remaining: input.isPro
-      ? null
-      : Math.max(0, PRO_LIMITS.FREE_MAX_AUTO_LOGS - input.autoLogUsageCount),
+    // The same allowance the drain enforces, so the intent never queues (and
+    // tells the user it logged) a tap the app will refuse.
+    remaining: autoLogAllowance({
+      isPro: input.isPro,
+      accounts: input.accounts,
+      usedAutoLogs: input.autoLogUsageCount,
+    }),
     defaultAccountId,
     defaultExpenseCategoryId,
     backTapAction: input.backTapAction,

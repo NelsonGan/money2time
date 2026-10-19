@@ -37,6 +37,11 @@ import { perfMark } from '~/utils/perfTrace';
 interface ProContextValue {
   isPro: boolean;
   isLoading: boolean;
+  /**
+   * Whether `isPro` reflects a settled RevenueCat answer for this identity.
+   * `isPro` is a `false` placeholder until then; see proCustomerStateRefresh.
+   */
+  isStatusKnown: boolean;
   customerState: RevenueCatCustomerState | null;
   offering: RevenueCatOffering | null;
   purchasePackage: (packageIdentifier: string) => Promise<RevenueCatActionResult>;
@@ -62,6 +67,13 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
   const appUserId = settings.appUserId?.trim() ? settings.appUserId : null;
   const [isPro, setIsPro] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isStatusSettled, setIsStatusSettled] = useState(false);
+  // The user the settled flag belongs to, set with the reset below. Children's
+  // effects run before this provider's, so in the commit that changes the user
+  // a child would still read the previous user's settled flag; comparing in
+  // render closes that window.
+  const [statusUserId, setStatusUserId] = useState<string | null | undefined>(undefined);
+  const isStatusKnown = isStatusSettled && statusUserId === appUserId;
   const [devProOverride, setDevProOverrideState] = useState<boolean | null>(null);
   const setDevProOverride = useCallback((value: boolean | null) => {
     if (!__DEV__) return;
@@ -71,10 +83,14 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
   const [offering, setOffering] = useState<RevenueCatOffering | null>(null);
 
   const [customerStateRefresh] = useState(() =>
-    createProCustomerStateRefresh(fetchRevenueCatCustomerState, (state) => {
-      setCustomerState(state);
-      setIsPro(isRevenueCatCustomerStateActive(state));
-    }),
+    createProCustomerStateRefresh(
+      fetchRevenueCatCustomerState,
+      (state) => {
+        setCustomerState(state);
+        setIsPro(isRevenueCatCustomerStateActive(state));
+      },
+      setIsStatusSettled,
+    ),
   );
   const applyCustomerState = customerStateRefresh.apply;
 
@@ -115,6 +131,7 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setRevenueCatAppUserId(appUserId);
     applyCustomerState(null);
+    setStatusUserId(appUserId);
     // `Purchases.configure` does synchronous StoreKit setup on the main thread
     // (Sentry MONEY2TIME-8), so defer past first interactions — Pro state isn't
     // needed to paint the first screen. Use the status-only refresh so we skip
@@ -278,6 +295,7 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
     () => ({
       isPro: effectiveIsPro,
       isLoading,
+      isStatusKnown,
       customerState,
       offering,
       purchasePackage,
@@ -289,6 +307,7 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
     [
       effectiveIsPro,
       isLoading,
+      isStatusKnown,
       customerState,
       offering,
       purchasePackage,

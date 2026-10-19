@@ -80,3 +80,46 @@ it('invalidates old customer reads when the app identity is reset', async () => 
   await refresh;
   expect(apply.mock.calls).toEqual([[null]]);
 });
+
+describe('known status', () => {
+  // Pro starts false while the first read is in flight. Auto-log must not act
+  // on that placeholder: a Pro user past the free cap would have their queued
+  // taps rejected as "Auto-log limit reached" on every cold start.
+  it('stays unknown until the first refresh settles', async () => {
+    const request = deferred();
+    const known = jest.fn();
+    const state = createProCustomerStateRefresh(() => request.promise, jest.fn(), known);
+    const refresh = state.refresh();
+    expect(known).not.toHaveBeenCalledWith(true);
+    request.resolve(pro);
+    await refresh;
+    expect(known).toHaveBeenLastCalledWith(true);
+  });
+
+  it('counts a failed read as settled, so free logic still applies without RevenueCat', async () => {
+    const known = jest.fn();
+    const state = createProCustomerStateRefresh(() => Promise.resolve(null), jest.fn(), known);
+    await state.refresh();
+    expect(known).toHaveBeenLastCalledWith(true);
+  });
+
+  it('becomes known from an authoritative update before any read finishes', () => {
+    const known = jest.fn();
+    const state = createProCustomerStateRefresh(() => new Promise(() => {}), jest.fn(), known);
+    void state.refresh();
+    state.apply(pro);
+    expect(known).toHaveBeenLastCalledWith(true);
+  });
+
+  it('goes back to unknown when the app identity is reset', async () => {
+    const request = deferred();
+    const known = jest.fn();
+    const state = createProCustomerStateRefresh(() => request.promise, jest.fn(), known);
+    state.apply(pro);
+    const staleRefresh = state.refresh();
+    state.apply(null);
+    request.resolve(pro);
+    await staleRefresh;
+    expect(known).toHaveBeenLastCalledWith(false);
+  });
+});
