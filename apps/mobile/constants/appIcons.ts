@@ -167,6 +167,9 @@ export function isRetiredAlternateName(name: string | null | undefined): boolean
 /** The icon a fresh install ships with. */
 export const DEFAULT_APP_ICON_ID: AppIconId = 'classic';
 
+/** iOS's squircle is close enough to this fraction of the tile for our purposes. */
+export const APP_ICON_RADIUS = 0.2237;
+
 export function isAppIconId(value: unknown): value is AppIconId {
   return typeof value === 'string' && APP_ICONS.some((icon) => icon.id === value);
 }

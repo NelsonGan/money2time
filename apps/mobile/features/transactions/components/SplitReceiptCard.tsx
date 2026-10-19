@@ -3,12 +3,17 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { CategoryEmoji } from '~/components/ui';
 import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
+import { APP_ICON_RADIUS, appIconById, DEFAULT_APP_ICON_ID } from '~/constants/appIcons';
+import { getThemeWordmarkPalette } from '~/constants/designSystem';
 import { I18n } from '~/lib/i18n';
 import { FONT } from '~/utils/fonts';
 
-const BANNER_SOURCE = require('../../../assets/banner.png');
-const BANNER_ASPECT = 2120 / 742;
-const BANNER_WIDTH = 156;
+// The shipped app icon, never the user's alternate: the receipt is the app's
+// signature on an image sent to someone else.
+const APP_LOGO_SOURCE = appIconById(DEFAULT_APP_ICON_ID).previewLight;
+const APP_LOGO_SIZE = 34;
+// The brand's own warm split, fixed like the rest of the card.
+const WORDMARK = getThemeWordmarkPalette('rosewood', 'light');
 
 /** One row on the receipt: a bill (category icon) or a person (initial). */
 export interface ReceiptLine {
@@ -85,11 +90,14 @@ export const SplitReceiptCard = forwardRef<View, SplitReceiptCardProps>(function
 ) {
   return (
     <View ref={ref} collapsable={false} style={styles.card}>
-      <Image
-        source={BANNER_SOURCE}
-        style={{ width: BANNER_WIDTH, height: BANNER_WIDTH / BANNER_ASPECT }}
-        resizeMode="contain"
-      />
+      <View style={styles.brand} accessible accessibilityLabel={I18n.t('app.name')}>
+        <Image source={APP_LOGO_SOURCE} style={styles.brandLogo} resizeMode="cover" />
+        <Text allowFontScaling={false} style={styles.brandName}>
+          <Text style={{ color: WORDMARK.money }}>Money</Text>
+          <Text style={{ color: WORDMARK.two }}>2</Text>
+          <Text style={{ color: WORDMARK.time }}>Time</Text>
+        </Text>
+      </View>
 
       {qrUri ? (
         <View style={styles.qrBlock}>
@@ -160,6 +168,21 @@ const styles = StyleSheet.create({
     paddingTop: 22,
     paddingBottom: 20,
     alignItems: 'center',
+  },
+  brand: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  brandLogo: {
+    width: APP_LOGO_SIZE,
+    height: APP_LOGO_SIZE,
+    borderRadius: APP_LOGO_SIZE * APP_ICON_RADIUS,
+  },
+  brandName: {
+    fontFamily: FONT.extrabold,
+    fontWeight: '800',
+    fontSize: 21,
   },
   qrBlock: {
     alignItems: 'center',
