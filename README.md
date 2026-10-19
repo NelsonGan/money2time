@@ -763,12 +763,12 @@ The free tier is **1,000,000 product-analytics events a month** (identified even
 | Website (anonymous `$pageview` and CTA events)                           | 5,000                    | Production host only, Do Not Track respected (~500 a week measured).                                                                                                      |
 | **Total**                                                                | **~560,000 (56%)**       | ~44% headroom for growth.                                                                                                                                                 |
 
-| Other PostHog product               | Free allowance / month              | Expected use                                                                                                                                                                                                                                      |
-| ----------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Error tracking (`$exception`)       | 100,000 exceptions                  | Deduplicated and capped on the device at 25 distinct exceptions per 5 minutes.                                                                                                                                                                    |
-| Session replay                      | 2,500 mobile + 5,000 web recordings | App ~1,500 (15% of first-day launches, 0.4% of later ones) against the mobile allowance; the website's 10% sample against the web one. Recordings under 5 s are dropped.                                                                          |
-| AI observability (`$ai_generation`) | 100,000 events                      | One per OpenRouter call from the receipt scanner: ~60,000. Every app version scans through the Worker, so this already counts all users; screenshot scans (~1,700 a day) dominate. Without the screenshot empty-result retry it measured ~85,000. |
-| Feature flags                       | 1,000,000 requests                  | Zero while no flag is active; then about one request per app launch, plus one when an install is first identified.                                                                                                                                |
+| Other PostHog product               | Free allowance / month              | Expected use                                                                                                                                                                                                                                                                                                   |
+| ----------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Error tracking (`$exception`)       | 100,000 exceptions                  | Deduplicated and capped on the device at 25 distinct exceptions per 5 minutes.                                                                                                                                                                                                                                 |
+| Session replay                      | 2,500 mobile + 5,000 web recordings | App ~1,500 (15% of first-day launches, 0.4% of later ones) against the mobile allowance; the website's 10% sample against the web one. Recordings under 5 s are dropped.                                                                                                                                       |
+| AI observability (`$ai_generation`) | 100,000 events                      | One per OpenRouter call from the receipt scanner: ~60,000. Every app version scans through the Worker, so this already counts all users; screenshot scans (~1,700 a day) dominate. Without the screenshot empty-result retry it measured ~85,000. A scan Claude fails adds one generation for the Qwen backup. |
+| Feature flags                       | 1,000,000 requests                  | Zero while no flag is active; then about one request per app launch, plus one when an install is first identified.                                                                                                                                                                                             |
 
 Rules that keep it inside the free tier:
 
@@ -1152,18 +1152,19 @@ Replays answer "what did the user see and do" next to an exception or a funnel d
 
 The [receipt-scanner Worker](#receipt-scanner-worker) sends one `$ai_generation` event per OpenRouter call to the same PostHog project (100K free events a month, separate from product analytics). Events share `$ai_trace_id` (the request's `reqId`), so each scan shows as one trace with its failover and, for photo scans, the empty-result retry (screenshot scans answer from one pass), and use the app's `m2t_<uuid>` as distinct ID, so a trace sits next to that person's `Receipt Scan Completed` / `Receipt Scan Failed`.
 
-| Property                                                                                   | Value                                                                                                                                                                                                              |
-| ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `$ai_model`, `$ai_provider`, `$ai_base_url`                                                | The OpenRouter model tried, `openrouter`, `https://openrouter.ai/api/v1`.                                                                                                                                          |
-| `$ai_span_name`                                                                            | `receipt_scan_quick`, `receipt_scan_itemized` or `receipt_scan_screenshot`.                                                                                                                                        |
-| `$ai_input_tokens`, `$ai_output_tokens`, `$ai_cache_read_input_tokens`                     | From OpenRouter's `usage`.                                                                                                                                                                                         |
-| `$ai_total_cost_usd`, `$ai_cost_passthrough`                                               | OpenRouter's reported charge (usage accounting is requested on every call), passed through rather than re-priced.                                                                                                  |
-| `$ai_latency`, `$ai_http_status`, `$ai_is_error`, `$ai_error`                              | Seconds, status, and a 200-character error message on failure.                                                                                                                                                     |
-| `$ai_temperature`, `$ai_max_tokens`                                                        | The attempt's settings (temperature rises on the empty-result retry).                                                                                                                                              |
-| `scan_mode`, `is_pro`, `is_backup_model`, `attempt`, `parsed_transactions`, `parsed_items` | Request context and the parsed outcome of that attempt.                                                                                                                                                            |
-| `$ai_prompt_name`, `$ai_prompt_version`, `prompt_source`                                   | The hosted prompt the call used (below); version is absent and `prompt_source` is `bundled` when the fallback served it.                                                                                           |
-| `$geoip_disable`                                                                           | Always `true`: the request comes from Cloudflare's network, whose location would otherwise overwrite the person's.                                                                                                 |
-| `$session_id`, `$ai_session_id`                                                            | The app's PostHog session, from the `X-POSTHOG-SESSION-ID` header the SDK adds to scan requests (`addTracingHeaders`), so a trace links to that session's events and replay. Only a UUID-shaped value is accepted. |
+| Property                                                                                   | Value                                                                                                                                                                                                                                                                |
+| ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `$ai_model`, `$ai_provider`, `$ai_base_url`                                                | The OpenRouter model tried, `openrouter`, `https://openrouter.ai/api/v1`.                                                                                                                                                                                            |
+| `$ai_span_name`                                                                            | `receipt_scan_quick`, `receipt_scan_itemized` or `receipt_scan_screenshot`.                                                                                                                                                                                          |
+| `$ai_input_tokens`, `$ai_output_tokens`, `$ai_cache_read_input_tokens`                     | From OpenRouter's `usage`.                                                                                                                                                                                                                                           |
+| `$ai_total_cost_usd`, `$ai_cost_passthrough`                                               | What the call cost, passed through rather than re-priced: OpenRouter's charge (`usage.cost`), plus, when our own Anthropic key paid, what Anthropic bills directly (`usage.cost_details.upstream_inference_cost`), since under BYOK `cost` is only OpenRouter's fee. |
+| `byok`                                                                                     | `usage.is_byok`: `true` when our Anthropic key paid. An `anthropic/` generation with `false` means OpenRouter credits were spent on it, which the Worker's routing forbids (see [Config](#config)).                                                                  |
+| `$ai_latency`, `$ai_http_status`, `$ai_is_error`, `$ai_error`                              | Seconds, status, and a 200-character error message on failure.                                                                                                                                                                                                       |
+| `$ai_temperature`, `$ai_max_tokens`                                                        | The attempt's settings (temperature rises on the empty-result retry). Claude is sent no temperature, so its generations carry none.                                                                                                                                  |
+| `scan_mode`, `is_pro`, `is_backup_model`, `attempt`, `parsed_transactions`, `parsed_items` | Request context and the parsed outcome of that attempt. `is_backup_model` is the `BACKUP_MODEL` slot, true even when Claude was skipped (an image it cannot read) and nothing ran first.                                                                             |
+| `$ai_prompt_name`, `$ai_prompt_version`, `prompt_source`                                   | The hosted prompt the call used (below); version is absent and `prompt_source` is `bundled` when the fallback served it.                                                                                                                                             |
+| `$geoip_disable`                                                                           | Always `true`: the request comes from Cloudflare's network, whose location would otherwise overwrite the person's.                                                                                                                                                   |
+| `$session_id`, `$ai_session_id`                                                            | The app's PostHog session, from the `X-POSTHOG-SESSION-ID` header the SDK adds to scan requests (`addTracingHeaders`), so a trace links to that session's events and replay. Only a UUID-shaped value is accepted.                                                   |
 
 `$ai_input` and `$ai_output_choices` carry fixed placeholders: the receipt image, the prompt (which includes the user's category and account names) and the model's answer never leave the Worker. Capture runs in `ctx.waitUntil` after the response and never fails a scan. The project token is a plain `[vars]` entry in `wrangler.toml` (public, write-only); removing it stops capture.
 
@@ -1895,7 +1896,40 @@ input works.
 If the primary `MODEL` errors or times out (provider down or overloaded), the
 Worker automatically retries the request once with `BACKUP_MODEL`
 (`google/gemma-3-4b-it` when unset). Set `BACKUP_MODEL` to the same value as
-`MODEL` to disable failover.
+`MODEL` to disable failover. The primary times out early enough to leave the
+backup 25 seconds of the 70-second scan budget (`BACKUP_RESERVE_MS`, or half
+of what is left when less), so a hung primary cannot starve it.
+
+**`MODEL` is Claude Haiku 5.5 on our own Anthropic key, and `BACKUP_MODEL` is
+`qwen/qwen3.7-flash` on OpenRouter credits.** Claude must never run on credits,
+and three things hold that line:
+
+- Every request for an `anthropic/` (or `~anthropic/` alias) model, in either
+  slot, names
+  `provider: { only: ['anthropic'], allow_fallbacks: false }` (`ANTHROPIC_ONLY`
+  in `src/index.ts`). OpenRouter also serves Claude from Bedrock, Vertex, Azure
+  and Claude Platform on AWS, on its own accounts, which it bills to credits.
+- The Anthropic key in OpenRouter (Settings → Integrations) must be set never to
+  use shared capacity. Without that, a key that is rate limited or failing runs
+  the call on OpenRouter's own Anthropic account instead of answering with an
+  error. No request field can say this; it lives only in that setting.
+- Every Claude answer's `usage.is_byok` is checked. A `false` logs
+  `byok_billed_to_credits` and drops Anthropic models from the rest of that
+  isolate's scans, and PostHog records it as `byok: false` on the generation.
+  An answer with no `is_byok` at all logs `byok_unverified`.
+
+Claude is sent no temperature, and an answer from it with no JSON object in it
+counts as a failure rather than an empty result, so the backup gets the receipt.
+An image whose bytes are not a JPEG, PNG or WebP (HEIC, however it is labelled)
+skips Claude, which refuses it every time, and goes straight to the backup;
+Claude is sent the type the bytes are rather than the declared one.
+The Anthropic organisation's concurrency limit is low: a burst answers 429 and
+lands on Qwen rather than failing the scan. To put Qwen back in front, swap the
+two values in `wrangler.toml` and deploy.
+
+Requests carry OpenRouter's app attribution headers, `HTTP-Referer:
+https://money2time.com` (which identifies the app there) and `X-Title:
+Money2Time` (its display name), the same pair RiceCal sends for itself.
 
 `POSTHOG_PROJECT_TOKEN` and `POSTHOG_HOST` send one `$ai_generation` per
 OpenRouter call to PostHog AI observability (model, tokens, OpenRouter's
