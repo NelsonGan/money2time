@@ -28,8 +28,12 @@ export interface CardDesignInk {
   /** Behind chips, badges and tiles. */
   panel: string;
   border: string;
-  /** Behind an open card's details, below the top row. */
-  sheet: string;
+  /**
+   * Opacity of the wash behind an open card's details, below the top row. A
+   * floor: a design whose band is stronger (the busiest patterns) gets its
+   * band's strength here too.
+   */
+  sheetOpacity: number;
   /** Negative balances and urgent chips, tuned to read on the band. */
   negative: string;
   textShadow: TextStyle;
@@ -43,7 +47,7 @@ const INK: Record<CardTextTone, CardDesignInk> = {
     divider: 'rgba(255,255,255,0.24)',
     panel: 'rgba(0,0,0,0.3)',
     border: 'rgba(255,255,255,0.2)',
-    sheet: 'rgba(0,0,0,0.42)',
+    sheetOpacity: 0.42,
     negative: '#FFB4AB',
     textShadow: {
       textShadowColor: 'rgba(0,0,0,0.55)',
@@ -58,7 +62,7 @@ const INK: Record<CardTextTone, CardDesignInk> = {
     divider: 'rgba(26,26,26,0.2)',
     panel: 'rgba(255,255,255,0.6)',
     border: 'rgba(0,0,0,0.14)',
-    sheet: 'rgba(255,255,255,0.66)',
+    sheetOpacity: 0.66,
     negative: '#A8201A',
     // A soft light halo, so a motif that survives the band (a strawberry, a
     // terrazzo chip) still cannot run through a letter.
@@ -148,7 +152,15 @@ export function CardDesignBackground({
         <Animated.View
           entering={FadeIn.duration(220)}
           exiting={FadeOut.duration(160)}
-          style={[styles.sheet, { backgroundColor: cardDesignInk(appearance.textTone).sheet }]}
+          style={[
+            styles.sheet,
+            {
+              backgroundColor: `rgba(${wash},${Math.max(
+                cardDesignInk(appearance.textTone).sheetOpacity,
+                appearance.scrim,
+              )})`,
+            },
+          ]}
         />
       ) : null}
     </View>

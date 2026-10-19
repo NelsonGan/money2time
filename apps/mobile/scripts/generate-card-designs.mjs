@@ -25,14 +25,14 @@
 //             pale pattern (dark text on cream terrazzo) that is still too
 //             busy to read through, so the band also never drops below a
 //             floor that rises with the art's edge energy: MIN_SCRIM on calm
-//             art, up to MAX_BUSY_SCRIM on the busiest.
+//             art, up to MAX_BUSY_SCRIM on the busiest (houndstooth).
 //
 // The band fades out below the row, so the rest of a closed card (which holds
 // no text) shows the artwork at full strength.
 //
 // New artwork arrives as PNGs (the codex-imagegen skill writes 1536x1024).
 // Import them first, which centre-crops to the 16:10 card shape and encodes a
-// 960x600 WebP, then regenerate:
+// 960x600 WebP within a ~110 KB budget, then regenerate:
 //
 //   node scripts/generate-card-designs.mjs --import <dir-of-genre__name.png>
 //   node scripts/generate-card-designs.mjs
@@ -47,12 +47,16 @@ const OUT_FILE = path.join(ROOT, 'constants', 'cardDesigns.generated.ts');
 
 const WIDTH = 960;
 const HEIGHT = 600;
+const MAX_QUALITY = 80;
+const MIN_QUALITY = 56;
+const QUALITY_STEP = 8;
+const SIZE_BUDGET_BYTES = 110 * 1024;
 const TARGET_CONTRAST = 4.5;
 // The share of the band allowed to fall short of the target: specks finer
 // than a stroke of a letter.
 const PERCENTILE = 0.02;
 const MIN_SCRIM = 0.2;
-const MAX_BUSY_SCRIM = 0.6;
+const MAX_BUSY_SCRIM = 0.72;
 // Edge energy (mean neighbour difference in sqrt-luminance) below which art
 // counts as calm, and how fast the floor climbs above it. Calibrated on the
 // bundled set, which runs from ~0.001 (graphite) to ~0.035 (sakura street).
@@ -162,11 +166,22 @@ async function importArtwork(sourceDir) {
     }
     const outDir = path.join(ASSET_DIR, genre);
     await fs.mkdir(outDir, { recursive: true });
-    await sharp(path.join(sourceDir, name))
+    const resized = await sharp(path.join(sourceDir, name))
       .resize(WIDTH, HEIGHT, { fit: 'cover', position: 'centre' })
-      .webp({ quality: 80, effort: 6 })
-      .toFile(path.join(outDir, `${design}.webp`));
-    console.log(`imported ${genre}/${design}`);
+      .toBuffer();
+    // Fine textures (glitter, denim, houndstooth) compress poorly, so step the
+    // quality down until the file fits the budget; at card size the loss does
+    // not show, and every design ships in the binary.
+    let quality = MAX_QUALITY;
+    let encoded = await sharp(resized).webp({ quality, effort: 6 }).toBuffer();
+    while (encoded.length > SIZE_BUDGET_BYTES && quality > MIN_QUALITY) {
+      quality -= QUALITY_STEP;
+      encoded = await sharp(resized).webp({ quality, effort: 6 }).toBuffer();
+    }
+    await fs.writeFile(path.join(outDir, `${design}.webp`), encoded);
+    console.log(
+      `imported ${genre}/${design} (q${quality}, ${Math.round(encoded.length / 1024)} KB)`,
+    );
   }
 }
 

@@ -21,8 +21,11 @@ export type CardTextTone = 'light' | 'dark';
 /** Template genres in display order. Folder names under assets/card-designs/. */
 export const CARD_DESIGN_GENRES = [
   'minimal',
+  'gradient',
   'luxury',
+  'texture',
   'marble',
+  'pattern',
   'nature',
   'space',
   'abstract',
