@@ -44,7 +44,7 @@ const BYOK_USAGE = {
   cost_details: { upstream_inference_cost: 0.0002 },
 };
 
-function request(): Request {
+function request(overrides: Record<string, unknown> = {}): Request {
   const timestamp = String(Date.now());
   const signature = createHmac('sha256', SECRET)
     .update(`${timestamp}.${body.appUserId}`)
@@ -52,7 +52,7 @@ function request(): Request {
   return new Request('https://scanner.test/scan', {
     method: 'POST',
     headers: { 'X-Signature': signature, 'X-Timestamp': timestamp },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ ...body, ...overrides }),
   });
 }
 
@@ -155,19 +155,7 @@ describe('receipt scanner with Claude as MODEL', () => {
   it('sends an image as the type its bytes are, not the type it was declared', async () => {
     answers.push(completion(ANSWER, BYOK_USAGE));
     const png = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]).toString('base64');
-    const timestamp = String(Date.now());
-    const signature = createHmac('sha256', SECRET)
-      .update(`${timestamp}.${body.appUserId}`)
-      .digest('hex');
-    await worker.fetch(
-      new Request('https://scanner.test/scan', {
-        method: 'POST',
-        headers: { 'X-Signature': signature, 'X-Timestamp': timestamp },
-        body: JSON.stringify({ ...body, image: png, mime: 'image/jpeg' }),
-      }),
-      env,
-      ctx,
-    );
+    await worker.fetch(request({ image: png, mime: 'image/jpeg' }), env, ctx);
     expect(sent()[0].messages[0].content[1].image_url.url).toBe(`data:image/png;base64,${png}`);
   });
 
