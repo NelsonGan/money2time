@@ -61,6 +61,15 @@ const ANTHROPIC_ONLY = { only: ['anthropic'], allow_fallbacks: false };
 // rules this out, so it only fires if that routing stops holding.
 let byokBroken = false;
 const INFERENCE_TIMEOUT_MS = 45000;
+// Claude's prompt text, ahead of the receipt, goes in Anthropic's prompt cache:
+// a hit is a tenth of the input price. The prompt carries the user's currency,
+// categories and accounts, so the cache is per user (and shared by users with
+// the same settings, the defaults most of all), and the fixed part before the
+// first of those is under Haiku's 512-token minimum. The same user repeats a
+// scan within 5 minutes about 40% of the time and barely more within an hour,
+// so the 5-minute cache (1.25x to write, repaid at a 20% hit rate) and not the
+// 1-hour one (2x, needing over 50%).
+const PROMPT_CACHE = { type: 'ephemeral' };
 // What a model with another behind it in the chain leaves for that one: a hung
 // primary times out early enough that the backup still has a real attempt
 // inside the budget, rather than starting with seconds left (or none).
@@ -481,7 +490,9 @@ async function completeScan(
         // PostHog generation records instead of re-pricing from tokens.
         usage: { include: true },
         messages: [{ role: 'user', content: [
-          { type: 'text', text: opts.prompt },
+          choice.byok
+            ? { type: 'text', text: opts.prompt, cache_control: PROMPT_CACHE }
+            : { type: 'text', text: opts.prompt },
           { type: 'image_url', image_url: imageUrl },
         ] }],
       }),
