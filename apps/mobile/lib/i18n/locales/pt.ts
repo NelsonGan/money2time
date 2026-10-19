@@ -1788,6 +1788,7 @@ const pt = {
       text_light: 'Texto claro',
       text_dark: 'Texto escuro',
       save: 'Salvar design',
+      genre_mascot: 'Mascote',
       genre_minimal: 'Minimalista',
       genre_gradient: 'Degradê',
       genre_texture: 'Textura',

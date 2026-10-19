@@ -1785,6 +1785,7 @@ const pl = {
       text_light: 'Jasny tekst',
       text_dark: 'Ciemny tekst',
       save: 'Zapisz wzór',
+      genre_mascot: 'Maskotka',
       genre_minimal: 'Minimalizm',
       genre_gradient: 'Gradient',
       genre_texture: 'Faktura',

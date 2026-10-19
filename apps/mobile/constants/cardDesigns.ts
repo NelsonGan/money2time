@@ -20,6 +20,8 @@ export type CardTextTone = 'light' | 'dark';
 
 /** Template genres in display order. Folder names under assets/card-designs/. */
 export const CARD_DESIGN_GENRES = [
+  // The app's own coin-purse chick leads: no other app has these.
+  'mascot',
   'minimal',
   'gradient',
   'luxury',

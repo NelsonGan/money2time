@@ -1779,6 +1779,7 @@ const uk = {
       text_light: 'Світлий текст',
       text_dark: 'Темний текст',
       save: 'Зберегти дизайн',
+      genre_mascot: 'Маскот',
       genre_minimal: 'Мінімалізм',
       genre_gradient: 'Градієнт',
       genre_texture: 'Фактура',

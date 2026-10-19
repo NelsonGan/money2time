@@ -1784,6 +1784,7 @@ const it = {
       text_light: 'Testo chiaro',
       text_dark: 'Testo scuro',
       save: 'Salva design',
+      genre_mascot: 'Mascotte',
       genre_minimal: 'Minimal',
       genre_gradient: 'Sfumatura',
       genre_texture: 'Texture',

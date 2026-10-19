@@ -1690,6 +1690,7 @@ const zhHant = {
       text_light: '淺色文字',
       text_dark: '深色文字',
       save: '儲存設計',
+      genre_mascot: '吉祥物',
       genre_minimal: '極簡',
       genre_gradient: '漸層',
       genre_texture: '質感',

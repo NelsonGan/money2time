@@ -1772,6 +1772,7 @@ const hi = {
       text_light: 'हल्का टेक्स्ट',
       text_dark: 'गहरा टेक्स्ट',
       save: 'डिज़ाइन सेव करें',
+      genre_mascot: 'मैस्कॉट',
       genre_minimal: 'मिनिमल',
       genre_gradient: 'ग्रेडिएंट',
       genre_texture: 'टेक्सचर',

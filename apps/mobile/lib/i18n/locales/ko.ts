@@ -1757,6 +1757,7 @@ const ko = {
       text_light: '밝은 글자',
       text_dark: '어두운 글자',
       save: '디자인 저장',
+      genre_mascot: '마스코트',
       genre_minimal: '미니멀',
       genre_gradient: '그라데이션',
       genre_texture: '질감',

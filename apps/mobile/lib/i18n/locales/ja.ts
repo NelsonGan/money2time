@@ -1772,6 +1772,7 @@ const ja = {
       text_light: '明るい文字',
       text_dark: '暗い文字',
       save: 'デザインを保存',
+      genre_mascot: 'マスコット',
       genre_minimal: 'ミニマル',
       genre_gradient: 'グラデーション',
       genre_texture: '素材感',

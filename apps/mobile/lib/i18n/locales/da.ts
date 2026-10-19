@@ -1780,6 +1780,7 @@ const da = {
       text_light: 'Lys tekst',
       text_dark: 'Mørk tekst',
       save: 'Gem design',
+      genre_mascot: 'Maskot',
       genre_minimal: 'Minimalistisk',
       genre_gradient: 'Gradient',
       genre_texture: 'Tekstur',

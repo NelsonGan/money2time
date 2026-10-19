@@ -1803,6 +1803,7 @@ const fil = {
       text_light: 'Maliwanag na text',
       text_dark: 'Madilim na text',
       save: 'I-save ang disenyo',
+      genre_mascot: 'Mascot',
       genre_minimal: 'Minimal',
       genre_gradient: 'Gradient',
       genre_texture: 'Texture',

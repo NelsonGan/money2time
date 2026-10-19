@@ -1792,6 +1792,7 @@ const ms = {
       text_light: 'Teks cerah',
       text_dark: 'Teks gelap',
       save: 'Simpan reka bentuk',
+      genre_mascot: 'Maskot',
       genre_minimal: 'Minimal',
       genre_gradient: 'Gradien',
       genre_texture: 'Tekstur',

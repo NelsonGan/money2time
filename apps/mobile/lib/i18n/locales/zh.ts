@@ -1690,6 +1690,7 @@ const zh = {
       text_light: '浅色文字',
       text_dark: '深色文字',
       save: '保存设计',
+      genre_mascot: '吉祥物',
       genre_minimal: '极简',
       genre_gradient: '渐变',
       genre_texture: '质感',

@@ -1798,6 +1798,7 @@ const fr = {
       text_light: 'Texte clair',
       text_dark: 'Texte foncé',
       save: 'Enregistrer le design',
+      genre_mascot: 'Mascotte',
       genre_minimal: 'Minimaliste',
       genre_gradient: 'Dégradé',
       genre_texture: 'Texture',

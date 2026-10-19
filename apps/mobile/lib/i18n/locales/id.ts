@@ -1788,6 +1788,7 @@ const id = {
       text_light: 'Teks terang',
       text_dark: 'Teks gelap',
       save: 'Simpan desain',
+      genre_mascot: 'Maskot',
       genre_minimal: 'Minimalis',
       genre_gradient: 'Gradasi',
       genre_texture: 'Tekstur',

@@ -1752,6 +1752,7 @@ const th = {
       text_light: 'ตัวอักษรสีอ่อน',
       text_dark: 'ตัวอักษรสีเข้ม',
       save: 'บันทึกดีไซน์',
+      genre_mascot: 'มาสคอต',
       genre_minimal: 'มินิมอล',
       genre_gradient: 'ไล่สี',
       genre_texture: 'พื้นผิว',

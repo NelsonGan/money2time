@@ -1785,6 +1785,7 @@ const ru = {
       text_light: 'Светлый текст',
       text_dark: 'Тёмный текст',
       save: 'Сохранить дизайн',
+      genre_mascot: 'Маскот',
       genre_minimal: 'Минимализм',
       genre_gradient: 'Градиент',
       genre_texture: 'Фактура',

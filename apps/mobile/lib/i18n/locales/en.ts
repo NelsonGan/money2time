@@ -1745,6 +1745,7 @@ const en = {
       text_light: 'Light text',
       text_dark: 'Dark text',
       save: 'Save design',
+      genre_mascot: 'Mascot',
       genre_minimal: 'Minimal',
       genre_gradient: 'Gradient',
       genre_texture: 'Texture',

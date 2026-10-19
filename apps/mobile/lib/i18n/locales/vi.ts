@@ -1768,6 +1768,7 @@ const vi = {
       text_light: 'Chữ sáng',
       text_dark: 'Chữ tối',
       save: 'Lưu thiết kế',
+      genre_mascot: 'Linh vật',
       genre_minimal: 'Tối giản',
       genre_gradient: 'Chuyển màu',
       genre_texture: 'Chất liệu',

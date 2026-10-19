@@ -1790,6 +1790,7 @@ const tr = {
       text_light: 'Açık yazı',
       text_dark: 'Koyu yazı',
       save: 'Tasarımı kaydet',
+      genre_mascot: 'Maskot',
       genre_minimal: 'Minimal',
       genre_gradient: 'Gradyan',
       genre_texture: 'Doku',

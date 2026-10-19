@@ -1796,6 +1796,7 @@ const nl = {
       text_light: 'Lichte tekst',
       text_dark: 'Donkere tekst',
       save: 'Ontwerp opslaan',
+      genre_mascot: 'Mascotte',
       genre_minimal: 'Minimalistisch',
       genre_gradient: 'Kleurverloop',
       genre_texture: 'Textuur',

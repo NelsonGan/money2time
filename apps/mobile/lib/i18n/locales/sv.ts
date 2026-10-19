@@ -1779,6 +1779,7 @@ const sv = {
       text_light: 'Ljus text',
       text_dark: 'Mörk text',
       save: 'Spara design',
+      genre_mascot: 'Maskot',
       genre_minimal: 'Minimalistiskt',
       genre_gradient: 'Gradient',
       genre_texture: 'Textur',

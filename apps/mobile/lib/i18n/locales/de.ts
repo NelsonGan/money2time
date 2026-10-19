@@ -1801,6 +1801,7 @@ const de = {
       text_light: 'Heller Text',
       text_dark: 'Dunkler Text',
       save: 'Design speichern',
+      genre_mascot: 'Maskottchen',
       genre_minimal: 'Minimalistisch',
       genre_gradient: 'Verlauf',
       genre_texture: 'Textur',
