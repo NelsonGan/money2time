@@ -40,9 +40,9 @@ export interface CardDesignTemplate {
   source: ImageSourcePropType;
   textTone: CardTextTone;
   /**
-   * Opacity of the uniform wash drawn over the artwork (black under light
-   * text, white under dark text), measured by the generator as the least that
-   * brings the card to WCAG AA contrast.
+   * Opacity of the band behind the card's top row (black under light text,
+   * white under dark text), measured by the generator from the art's contrast
+   * and busyness. The rest of a closed card shows the art unwashed.
    */
   scrim: number;
 }
@@ -56,14 +56,13 @@ export const CARD_DESIGN_ASPECT_RATIO = 1.6;
 export const CUSTOM_CARD_DESIGN_PREFIX = 'custom:card-designs/';
 
 /**
- * Wash under an upload's text. A photo has not been measured the way the
- * bundled artwork has, so it gets a veil heavy enough to carry text over
- * anything short of a white sky (dark text: a pale one), and the uploader
- * picks the text colour while looking at the result.
+ * Band behind an upload's top row. A photo has not been measured the way the
+ * bundled artwork has, so it gets a band as strong as the busiest template's,
+ * and the uploader picks the text colour while looking at the result.
  */
 export const CUSTOM_CARD_DESIGN_SCRIM: Record<CardTextTone, number> = {
-  light: 0.42,
-  dark: 0.5,
+  light: 0.55,
+  dark: 0.62,
 };
 
 const TEMPLATE_BY_ID = new Map(CARD_DESIGN_TEMPLATES.map((template) => [template.id, template]));

@@ -337,7 +337,11 @@ export function CardDesignPickerScreen({ session, onClose }: CardDesignPickerScr
         >
           <View style={styles.tileInner}>
             {tileAppearance ? (
-              <CardDesignBackground value={tile.value} appearance={tileAppearance} />
+              <CardDesignBackground
+                value={tile.value}
+                appearance={tileAppearance}
+                variant="thumb"
+              />
             ) : (
               <View style={[StyleSheet.absoluteFill, { backgroundColor: themeColors.border }]} />
             )}

@@ -1,5 +1,6 @@
 import { Image } from 'expo-image';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
+import { LinearGradient } from 'expo-linear-gradient';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -21,7 +22,11 @@ import {
   CUSTOM_CARD_DESIGN_SCRIM,
 } from '~/constants/cardDesigns';
 import { spacing } from '~/constants/designSystem';
-import { cardDesignInk } from '~/features/settings/components/AccountCardDesign';
+import {
+  CARD_TEXT_BAND_FADE_END,
+  CARD_TEXT_BAND_HEIGHT,
+  cardDesignInk,
+} from '~/features/settings/components/AccountCardDesign';
 import { COLLAPSED_CARD_HEIGHT } from '~/features/settings/components/AccountCardStack';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -221,6 +226,7 @@ function CropBody({
   const ink = cardDesignInk(textTone);
   const scrim = CUSTOM_CARD_DESIGN_SCRIM[textTone];
   const washColor = textTone === 'light' ? '0,0,0' : '255,255,255';
+  const band = `rgba(${washColor},${scrim})`;
   // A closed card shows the middle band of the design; mark it so the uploader
   // puts what matters there.
   const bandHeight = Math.min(COLLAPSED_CARD_HEIGHT, frameHeight);
@@ -254,9 +260,13 @@ function CropBody({
             ) : (
               <ActivityIndicator style={styles.flexOne} />
             )}
-            <View
+            {/* The same band the card draws behind its top row, placed where
+                that row lands, so the uploader judges the real legibility. */}
+            <LinearGradient
               pointerEvents="none"
-              style={[StyleSheet.absoluteFill, { backgroundColor: `rgba(${washColor},${scrim})` }]}
+              colors={[band, band, `rgba(${washColor},0)`]}
+              locations={[0, CARD_TEXT_BAND_HEIGHT / CARD_TEXT_BAND_FADE_END, 1]}
+              style={[styles.bandWash, { top: bandTop }]}
             />
             <View
               pointerEvents="none"
@@ -326,6 +336,12 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     overflow: 'hidden',
     backgroundColor: '#1E1E22',
+  },
+  bandWash: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: CARD_TEXT_BAND_FADE_END,
   },
   band: {
     position: 'absolute',

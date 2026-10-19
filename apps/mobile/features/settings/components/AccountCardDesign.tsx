@@ -1,6 +1,8 @@
 import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import { StyleSheet, type TextStyle, View } from 'react-native';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 import { AccountLogo, Text } from '~/components/ui';
 import {
@@ -12,10 +14,11 @@ import { forgetCustomLogoUri, getCustomLogoUri } from '~/services/userAssets';
 import type { AccountType } from '~/types';
 
 /**
- * Colours for everything drawn on top of card artwork. The wash under the text
- * (see CardDesignBackground) carries the contrast; these keep the secondary
- * text strong enough to survive on it, and give chips and tiles a backing of
- * their own because they hold the smallest type on the card.
+ * Colours for everything drawn on top of card artwork. Text only sits in two
+ * places: the top row, over the measured band (see CardDesignBackground), and
+ * an open card's details, over the sheet. These keep the secondary text close
+ * to full strength on both, and give chips, tiles and buttons a panel of their
+ * own because they hold the smallest type on the card.
  */
 export interface CardDesignInk {
   text: string;
@@ -25,7 +28,9 @@ export interface CardDesignInk {
   /** Behind chips, badges and tiles. */
   panel: string;
   border: string;
-  /** Negative balances and urgent chips, tuned to read on the wash. */
+  /** Behind an open card's details, below the top row. */
+  sheet: string;
+  /** Negative balances and urgent chips, tuned to read on the band. */
   negative: string;
   textShadow: TextStyle;
 }
@@ -33,31 +38,32 @@ export interface CardDesignInk {
 const INK: Record<CardTextTone, CardDesignInk> = {
   light: {
     text: '#FFFFFF',
-    meta: 'rgba(255,255,255,0.78)',
-    metaValue: 'rgba(255,255,255,0.92)',
+    meta: 'rgba(255,255,255,0.88)',
+    metaValue: 'rgba(255,255,255,0.96)',
     divider: 'rgba(255,255,255,0.24)',
-    panel: 'rgba(0,0,0,0.32)',
+    panel: 'rgba(0,0,0,0.3)',
     border: 'rgba(255,255,255,0.2)',
+    sheet: 'rgba(0,0,0,0.42)',
     negative: '#FFB4AB',
     textShadow: {
-      textShadowColor: 'rgba(0,0,0,0.45)',
+      textShadowColor: 'rgba(0,0,0,0.55)',
       textShadowOffset: { width: 0, height: 1 },
-      textShadowRadius: 3,
+      textShadowRadius: 4,
     },
   },
   dark: {
     text: '#1A1A1A',
-    meta: 'rgba(26,26,26,0.74)',
-    metaValue: 'rgba(26,26,26,0.9)',
+    meta: 'rgba(26,26,26,0.86)',
+    metaValue: 'rgba(26,26,26,0.96)',
     divider: 'rgba(26,26,26,0.2)',
-    panel: 'rgba(255,255,255,0.55)',
-    border: 'rgba(0,0,0,0.12)',
+    panel: 'rgba(255,255,255,0.6)',
+    border: 'rgba(0,0,0,0.14)',
+    sheet: 'rgba(255,255,255,0.66)',
     negative: '#A8201A',
-    // A soft light halo: contrast is measured on the blurred artwork, and a
-    // patterned design (gingham, terrazzo) can still run a motif through a
-    // letter. The halo separates the glyph from it without veiling the card.
+    // A soft light halo, so a motif that survives the band (a strawberry, a
+    // terrazzo chip) still cannot run through a letter.
     textShadow: {
-      textShadowColor: 'rgba(255,255,255,0.75)',
+      textShadowColor: 'rgba(255,255,255,0.9)',
       textShadowOffset: { width: 0, height: 0 },
       textShadowRadius: 4,
     },
@@ -78,21 +84,48 @@ export function useCardDesignAppearance(value?: string | null): CardDesignAppear
   return resolveCardDesignAppearance(value, getCustomLogoUri);
 }
 
+/** Height of the top row (name, balance, chips): the strip a stacked card shows. */
+export const CARD_TEXT_BAND_HEIGHT = 54;
+/** Where the band has faded out completely, below the top row. */
+export const CARD_TEXT_BAND_FADE_END = 100;
+
 interface CardDesignBackgroundProps {
   value: string | null | undefined;
   appearance: CardDesignAppearance;
+  /**
+   * `card` draws the band behind the top row (and the sheet when `expanded`);
+   * `thumb` is the bare artwork, for swatches that carry no text.
+   */
+  variant?: 'card' | 'thumb';
+  /** An open card: its details get the sheet behind them. */
+  expanded?: boolean;
+  /** Where the top row sits, when the face is taller than the row's card. */
+  bandTop?: number;
   /** An account left out of totals: the artwork stays, but recedes. */
   dimmed?: boolean;
 }
 
 /**
- * The artwork and its wash, filling the card behind its content. The image is
- * cover-fitted and centred, so a collapsed card shows the middle band of the
- * design and expanding it reveals the rest, the same framing the crop screen
- * shows an uploader.
+ * The artwork and what keeps text readable on it, filling the card behind its
+ * content. The image is cover-fitted and centred, so a closed card shows the
+ * middle of the design and opening it reveals the rest, the framing the crop
+ * screen shows an uploader.
+ *
+ * Nothing is washed uniformly. A band, as strong as the generator measured,
+ * sits behind the top row and fades out below it, so the rest of a closed card
+ * (which holds no text) keeps the artwork at full strength. An open card's
+ * details sit on a frosted sheet instead, whatever the artwork is doing there.
  */
-export function CardDesignBackground({ value, appearance, dimmed }: CardDesignBackgroundProps) {
-  const washColor = appearance.textTone === 'light' ? '0,0,0' : '255,255,255';
+export function CardDesignBackground({
+  value,
+  appearance,
+  variant = 'card',
+  expanded = false,
+  bandTop = 0,
+  dimmed,
+}: CardDesignBackgroundProps) {
+  const wash = appearance.textTone === 'light' ? '0,0,0' : '255,255,255';
+  const band = `rgba(${wash},${appearance.scrim})`;
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
       <Image
@@ -104,12 +137,18 @@ export function CardDesignBackground({ value, appearance, dimmed }: CardDesignBa
         recyclingKey={value ?? undefined}
         onError={() => forgetCustomLogoUri(value)}
       />
-      {appearance.scrim > 0 ? (
-        <View
-          style={[
-            StyleSheet.absoluteFill,
-            { backgroundColor: `rgba(${washColor},${appearance.scrim})` },
-          ]}
+      {variant === 'card' ? (
+        <LinearGradient
+          colors={[band, band, `rgba(${wash},0)`]}
+          locations={[0, CARD_TEXT_BAND_HEIGHT / CARD_TEXT_BAND_FADE_END, 1]}
+          style={[styles.band, { top: bandTop }]}
+        />
+      ) : null}
+      {variant === 'card' && expanded ? (
+        <Animated.View
+          entering={FadeIn.duration(220)}
+          exiting={FadeOut.duration(160)}
+          style={[styles.sheet, { backgroundColor: cardDesignInk(appearance.textTone).sheet }]}
         />
       ) : null}
     </View>
@@ -168,6 +207,20 @@ export function CardDesignPreview({
 const styles = StyleSheet.create({
   dimmed: {
     opacity: 0.45,
+  },
+  band: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: CARD_TEXT_BAND_FADE_END,
+  },
+  sheet: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    // Just under the top row and its divider.
+    top: CARD_TEXT_BAND_HEIGHT + 2,
+    bottom: 0,
   },
   preview: {
     borderRadius: 18,

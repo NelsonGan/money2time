@@ -643,6 +643,7 @@ function StackCard({
         <CardDesignBackground
           value={account.cardDesign}
           appearance={design}
+          expanded={isExpanded}
           dimmed={!account.includeInTotals}
         />
       ) : null}

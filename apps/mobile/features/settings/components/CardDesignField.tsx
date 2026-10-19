@@ -78,7 +78,9 @@ export function CardDesignField({
             { backgroundColor: plain.bg, borderColor: appearance ? 'transparent' : plain.border },
           ]}
         >
-          {appearance ? <CardDesignBackground value={value} appearance={appearance} /> : null}
+          {appearance ? (
+            <CardDesignBackground value={value} appearance={appearance} variant="thumb" />
+          ) : null}
         </View>
         <Text
           variant="body"

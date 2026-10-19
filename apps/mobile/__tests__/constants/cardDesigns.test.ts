@@ -36,11 +36,11 @@ describe('card design templates', () => {
     }
   });
 
-  it('keeps every measured wash light enough to leave the artwork visible', () => {
+  it('gives every design a band behind its top row, light enough to keep the art', () => {
     for (const template of CARD_DESIGN_TEMPLATES) {
       expect(['light', 'dark']).toContain(template.textTone);
-      expect(template.scrim).toBeGreaterThanOrEqual(0);
-      expect(template.scrim).toBeLessThanOrEqual(0.5);
+      expect(template.scrim).toBeGreaterThanOrEqual(0.2);
+      expect(template.scrim).toBeLessThanOrEqual(0.8);
     }
   });
 

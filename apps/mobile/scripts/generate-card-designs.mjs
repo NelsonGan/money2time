@@ -10,18 +10,25 @@
 // `accounts.card_design`. Ids are persisted, so never rename a file that has
 // shipped.
 //
-// Legibility is measured here rather than eyeballed. The card draws its name,
-// balance and chips straight on the artwork, so for every design this script
-// works out:
+// Legibility is measured here rather than eyeballed. Text only ever sits in two
+// places on an artwork card: the name and balance row along the top (the part
+// that peeks out of a stack), and the details under it when the card is open,
+// which sit on a frosted sheet of their own. So the artwork itself only has to
+// carry the top row, and for every design this script works out:
 //
 //   textTone  'light' (white text) or 'dark' (near-black text), whichever
-//             reads better over the artwork as it is;
-//   scrim     the smallest uniform wash (black under light text, white under
-//             dark text) that brings 95% of the card, blurred to the scale of
-//             a glyph, to WCAG AA contrast (4.5:1) against that text.
+//             needs the lighter band;
+//   scrim     the strength of the band behind the top row (black under light
+//             text, white under dark text): the least that brings 98% of the
+//             artwork's upper half, barely blurred so a busy motif still
+//             counts, to WCAG AA contrast (4.5:1). Contrast alone passes a
+//             pale pattern (dark text on cream terrazzo) that is still too
+//             busy to read through, so the band also never drops below a
+//             floor that rises with the art's edge energy: MIN_SCRIM on calm
+//             art, up to MAX_BUSY_SCRIM on the busiest.
 //
-// The card renders exactly that wash, so a busy design gets just enough of a
-// veil and a calm one keeps its colour.
+// The band fades out below the row, so the rest of a closed card (which holds
+// no text) shows the artwork at full strength.
 //
 // New artwork arrives as PNGs (the codex-imagegen skill writes 1536x1024).
 // Import them first, which centre-crops to the 16:10 card shape and encodes a
@@ -41,10 +48,17 @@ const OUT_FILE = path.join(ROOT, 'constants', 'cardDesigns.generated.ts');
 const WIDTH = 960;
 const HEIGHT = 600;
 const TARGET_CONTRAST = 4.5;
-// The share of the card allowed to fall short of the target (detail too fine
-// to sit under a whole glyph).
-const PERCENTILE = 0.05;
-const MAX_SCRIM = 0.7;
+// The share of the band allowed to fall short of the target: specks finer
+// than a stroke of a letter.
+const PERCENTILE = 0.02;
+const MIN_SCRIM = 0.2;
+const MAX_BUSY_SCRIM = 0.6;
+// Edge energy (mean neighbour difference in sqrt-luminance) below which art
+// counts as calm, and how fast the floor climbs above it. Calibrated on the
+// bundled set, which runs from ~0.001 (graphite) to ~0.035 (sakura street).
+const CALM_EDGE_ENERGY = 0.006;
+const BUSY_SCRIM_PER_EDGE = 18;
+const MAX_SCRIM = 0.8;
 const SCRIM_STEP = 0.02;
 
 const ID_SEGMENT = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -76,12 +90,47 @@ function percentileContrast(pixels, textLum, washValue, alpha) {
   return values[Math.floor(values.length * PERCENTILE)];
 }
 
+/** How busy the art is at letter scale: mean neighbour difference. */
+function edgeEnergy(pixels, width, height) {
+  const perceptual = new Float64Array(width * height);
+  for (let i = 0, p = 0; i < pixels.length; i += 3, p += 1) {
+    perceptual[p] = Math.sqrt(luminance(pixels[i], pixels[i + 1], pixels[i + 2]));
+  }
+  let total = 0;
+  let count = 0;
+  for (let y = 0; y < height - 1; y += 1) {
+    for (let x = 0; x < width - 1; x += 1) {
+      const i = y * width + x;
+      total += Math.abs(perceptual[i] - perceptual[i + 1]);
+      total += Math.abs(perceptual[i] - perceptual[i + width]);
+      count += 2;
+    }
+  }
+  return total / count;
+}
+
+async function busyFloor(file) {
+  const { data, info } = await sharp(file)
+    .resize(384, 240, { fit: 'fill' })
+    .extract({ left: 0, top: 0, width: 384, height: 120 })
+    .blur(0.8)
+    .removeAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const energy = edgeEnergy(data, info.width, info.height);
+  const floor = MIN_SCRIM + Math.max(0, energy - CALM_EDGE_ENERGY) * BUSY_SCRIM_PER_EDGE;
+  return Math.round(Math.min(MAX_BUSY_SCRIM, floor) * 50) / 50;
+}
+
 async function measure(file) {
-  // Down-sampled and blurred to roughly glyph scale: film grain and specks
-  // below the size of a letter do not decide whether a word can be read.
+  const floor = await busyFloor(file);
+  // The upper half, which is where the top row lands however tall the card
+  // is drawn (it is cover-fitted and centred). Only lightly blurred: film
+  // grain does not decide whether a word reads, but a strawberry does.
   const { data } = await sharp(file)
     .resize(192, 120, { fit: 'fill' })
-    .blur(1.2)
+    .extract({ left: 0, top: 0, width: 192, height: 60 })
+    .blur(0.6)
     .removeAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });
@@ -90,8 +139,8 @@ async function measure(file) {
     { textTone: 'light', textLum: 1, washValue: 0 },
     { textTone: 'dark', textLum: luminance(0x1a, 0x1a, 0x1a), washValue: 255 },
   ].map((option) => {
-    let scrim = 0;
-    let achieved = percentileContrast(data, option.textLum, option.washValue, 0);
+    let scrim = floor;
+    let achieved = percentileContrast(data, option.textLum, option.washValue, scrim);
     while (achieved < TARGET_CONTRAST && scrim < MAX_SCRIM) {
       scrim = Math.round((scrim + SCRIM_STEP) * 100) / 100;
       achieved = percentileContrast(data, option.textLum, option.washValue, scrim);
