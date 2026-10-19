@@ -1,0 +1,30 @@
+    ✓ stamps the schema version so Swift can reject a shape it does not know (1 ms)
+    ✓ carries the configured Back Tap action through to the intent
+    ✓ carries the auto-categorize preference through for the intent to skip the prompt
+    ✓ carries the notification strings the intent posts on success and failure
+      ✓ counts down from the free cap
+      ✓ clamps at zero rather than going negative (4 ms)
+      ✕ is zero for a free account over the account limit, matching the app (1 ms)
+      ✓ is null (unlimited) for Pro
+      ✓ lists accounts in sort order (1 ms)
+      ✓ resolves the default account through the shared entry fallback
+      ✓ drops a stale default account id
+      ✓ offers the former wallet alongside every account after conversion
+      ✓ lists expense categories only, in sort order
+      ✓ renders every icon form as a glyph the Shortcuts picker can show
+      ✓ ships subcategories even while the picker is roots only, flagged as non-root
+      ✓ carries the subcategory preference through for the picker to apply (1 ms)
+      ✓ keeps a subcategory default
+      ✓ keeps a valid default expense category
+      ✓ drops a default that is stale or the wrong type
+  ✓ keeps restored Pro when an older foreground refresh finishes later (1 ms)
+  ✓ keeps a revocation from the SDK listener when an older Pro refresh completes
+  ✓ uses the newest refresh when responses arrive out of order
+  ✓ preserves the last known access on a failed fetch, but accepts a confirmed free result
+  ✓ invalidates old customer reads when the app identity is reset
+    ✕ stays unknown until the first refresh settles (1 ms)
+    ✕ counts a failed read as settled, so free logic still applies without RevenueCat
+    ✕ becomes known from an authoritative update before any read finishes
+    ✕ goes back to unknown when the app identity is reset
+Test Suites: 2 failed, 2 total
+Tests:       5 failed, 23 passed, 28 total
