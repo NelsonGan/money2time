@@ -2348,19 +2348,8 @@ const ms = {
   web_dashboard: {
     title: 'Papan Pemuka Web',
     subtitle:
-      'Lihat data anda pada komputer di app.money2time.com. Telefon anda menghantarnya terus ke pelayar, dengan penyulitan hujung ke hujung. Tiada apa-apa disimpan dalam talian dan tiada akaun diperlukan.',
-    intro_title: 'Data anda pada skrin besar',
-    intro_body:
-      'Buka app.money2time.com pada komputer, imbas kod yang dipaparkan dengan telefon ini, dan terokai data anda dalam 17 papan pemuka.',
-    private_note:
-      'Tiada apa-apa disimpan dalam talian. Telefon anda menghantar data terus ke pelayar, disulitkan dengan kunci yang hanya dipegang oleh kedua-duanya. Pelayar menyimpan salinan terakhir sehingga anda memutuskan pautannya.',
-    source_of_truth:
-      'Telefon anda kekal sebagai sumber data. Papan pemuka web hanya membaca, dan tiada apa-apa dihantar balik.',
-    computer_hint: 'Buka pada komputer, kemudian imbas kod QR.',
-    encrypted_label: 'Disulitkan hujung ke hujung',
+      'Lihat data anda pada komputer di app.money2time.com. Telefon anda menghantarnya terus ke pelayar. Tiada apa-apa disimpan dalam talian dan tiada akaun diperlukan.',
     link_title: 'Pautkan komputer',
-    link_body: 'Buka app.money2time.com pada komputer anda, kemudian imbas kod pada skrinnya.',
-    link_action: 'Imbas kod',
     linking: 'Memautkan…',
     confirm_title: 'Pautkan {{name}}?',
     confirm_title_unnamed: 'Pautkan pelayar ini?',

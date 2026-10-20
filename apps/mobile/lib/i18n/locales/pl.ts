@@ -2340,20 +2340,8 @@ const pl = {
   web_dashboard: {
     title: 'Panel webowy',
     subtitle:
-      'Zobacz swoje dane na komputerze pod adresem app.money2time.com. Telefon wysyła je bezpośrednio do przeglądarki, z szyfrowaniem end-to-end. Nic nie jest przechowywane online i nie ma żadnego konta.',
-    intro_title: 'Twoje dane na dużym ekranie',
-    intro_body:
-      'Otwórz app.money2time.com na komputerze, zeskanuj wyświetlony tam kod tym telefonem i przeglądaj swoje dane w 17 panelach.',
-    private_note:
-      'Nic nie jest przechowywane online. Telefon wysyła Twoje dane bezpośrednio do przeglądarki, zaszyfrowane kluczem, który mają tylko te dwa urządzenia. Przeglądarka zachowuje ostatnią kopię, dopóki jej nie odłączysz.',
-    source_of_truth:
-      'Źródłem danych pozostaje telefon. Panel webowy tylko je odczytuje i nic nie jest odsyłane z powrotem.',
-    computer_hint: 'Otwórz na komputerze i zeskanuj kod QR.',
-    encrypted_label: 'Szyfrowanie end-to-end',
+      'Zobacz swoje dane na komputerze pod adresem app.money2time.com. Telefon wysyła je bezpośrednio do przeglądarki. Nic nie jest przechowywane online i nie ma żadnego konta.',
     link_title: 'Połącz komputer',
-    link_body:
-      'Otwórz app.money2time.com na komputerze, a potem zeskanuj kod widoczny na jego ekranie.',
-    link_action: 'Zeskanuj kod',
     linking: 'Łączenie…',
     confirm_title: 'Połączyć {{name}}?',
     confirm_title_unnamed: 'Połączyć tę przeglądarkę?',

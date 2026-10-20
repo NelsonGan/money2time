@@ -2231,18 +2231,8 @@ const zh = {
   web_dashboard: {
     title: '网页仪表盘',
     subtitle:
-      '在电脑上通过 app.money2time.com 查看你的数据。手机会以端到端加密的方式将数据直接发送到浏览器。数据不会存储在线上，也无需账号。',
-    intro_title: '在大屏幕上查看数据',
-    intro_body:
-      '在电脑上打开 app.money2time.com，用这部手机扫描屏幕上的二维码，即可在 17 个仪表盘中浏览你的数据。',
-    private_note:
-      '数据不会存储在线上。手机会将数据直接发送到浏览器，并用只有这两端持有的密钥加密。浏览器会保留最近一份副本，直到你解除关联。',
-    source_of_truth: '数据以手机为准。网页仪表盘只读，不会向手机回传任何内容。',
-    computer_hint: '在电脑上打开，然后扫描二维码。',
-    encrypted_label: '端到端加密',
+      '在电脑上通过 app.money2time.com 查看你的数据。手机会将数据直接发送到浏览器。数据不会存储在线上，也无需账号。',
     link_title: '关联电脑',
-    link_body: '在电脑上打开 app.money2time.com，然后扫描屏幕上的二维码。',
-    link_action: '扫描二维码',
     linking: '正在关联…',
     confirm_title: '关联 {{name}}？',
     confirm_title_unnamed: '要关联这个浏览器吗？',

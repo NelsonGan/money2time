@@ -2356,19 +2356,8 @@ const nl = {
   web_dashboard: {
     title: 'Webdashboard',
     subtitle:
-      'Bekijk je gegevens op een computer via app.money2time.com. Je telefoon stuurt ze rechtstreeks naar de browser, end-to-end versleuteld. Er wordt niets online opgeslagen en er is geen account.',
-    intro_title: 'Je gegevens op een groot scherm',
-    intro_body:
-      'Open app.money2time.com op een computer, scan de code die daar verschijnt met deze telefoon en bekijk je gegevens in 17 dashboards.',
-    private_note:
-      'Er wordt niets online opgeslagen. Je telefoon stuurt je gegevens rechtstreeks naar de browser, versleuteld met een sleutel die alleen die twee hebben. De browser bewaart de laatste kopie totdat je de koppeling verbreekt.',
-    source_of_truth:
-      'Je telefoon blijft de bron van je gegevens. Het webdashboard leest alleen mee en er wordt niets teruggestuurd.',
-    computer_hint: 'Open op je computer en scan de QR-code.',
-    encrypted_label: 'End-to-end versleuteld',
+      'Bekijk je gegevens op een computer via app.money2time.com. Je telefoon stuurt ze rechtstreeks naar de browser. Er wordt niets online opgeslagen en er is geen account.',
     link_title: 'Een computer koppelen',
-    link_body: 'Open app.money2time.com op je computer en scan daarna de code op het scherm.',
-    link_action: 'Code scannen',
     linking: 'Koppelen…',
     confirm_title: '{{name}} koppelen?',
     confirm_title_unnamed: 'Deze browser koppelen?',

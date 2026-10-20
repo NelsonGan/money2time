@@ -2301,19 +2301,8 @@ const ko = {
   web_dashboard: {
     title: '웹 대시보드',
     subtitle:
-      '컴퓨터에서 app.money2time.com으로 내 데이터를 확인하세요. 휴대폰이 데이터를 브라우저로 직접, 종단 간 암호화하여 전송합니다. 온라인에는 아무것도 저장되지 않으며 계정도 필요 없습니다.',
-    intro_title: '큰 화면으로 보는 내 데이터',
-    intro_body:
-      '컴퓨터에서 app.money2time.com을 열고, 화면에 표시되는 코드를 이 휴대폰으로 스캔하면 17개의 대시보드에서 데이터를 살펴볼 수 있습니다.',
-    private_note:
-      '온라인에는 아무것도 저장되지 않습니다. 휴대폰이 데이터를 브라우저로 직접 전송하며, 두 기기만 가진 키로 암호화됩니다. 브라우저에는 연결을 해제할 때까지 마지막 사본이 남아 있습니다.',
-    source_of_truth:
-      '원본 데이터는 항상 휴대폰에 있습니다. 웹 대시보드는 읽기만 하며, 아무것도 다시 전송하지 않습니다.',
-    computer_hint: '컴퓨터에서 연 다음 QR 코드를 스캔하세요.',
-    encrypted_label: '종단 간 암호화',
+      '컴퓨터에서 app.money2time.com으로 내 데이터를 확인하세요. 휴대폰이 데이터를 브라우저로 직접 전송합니다. 온라인에는 아무것도 저장되지 않으며 계정도 필요 없습니다.',
     link_title: '컴퓨터 연결',
-    link_body: '컴퓨터에서 app.money2time.com을 연 다음, 화면에 표시된 코드를 스캔하세요.',
-    link_action: '코드 스캔',
     linking: '연결하는 중…',
     confirm_title: '{{name}} 연결할까요?',
     confirm_title_unnamed: '이 브라우저를 연결할까요?',

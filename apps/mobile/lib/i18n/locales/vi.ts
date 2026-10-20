@@ -2317,19 +2317,8 @@ const vi = {
   web_dashboard: {
     title: 'Bảng điều khiển web',
     subtitle:
-      'Xem dữ liệu của bạn trên máy tính tại app.money2time.com. Điện thoại gửi thẳng đến trình duyệt, được mã hóa đầu cuối. Không có gì được lưu trực tuyến và không cần tài khoản.',
-    intro_title: 'Dữ liệu của bạn trên màn hình lớn',
-    intro_body:
-      'Mở app.money2time.com trên máy tính, quét mã hiển thị trên màn hình bằng điện thoại này và khám phá dữ liệu của bạn qua 17 bảng điều khiển.',
-    private_note:
-      'Không có gì được lưu trực tuyến. Điện thoại gửi dữ liệu thẳng đến trình duyệt, được mã hóa bằng khóa mà chỉ hai bên nắm giữ. Trình duyệt giữ bản sao gần nhất cho đến khi bạn hủy liên kết.',
-    source_of_truth:
-      'Điện thoại vẫn là nguồn dữ liệu gốc. Bảng điều khiển web chỉ đọc và không gửi gì ngược lại.',
-    computer_hint: 'Mở trên máy tính, rồi quét mã QR.',
-    encrypted_label: 'Mã hóa đầu cuối',
+      'Xem dữ liệu của bạn trên máy tính tại app.money2time.com. Điện thoại gửi thẳng đến trình duyệt. Không có gì được lưu trực tuyến và không cần tài khoản.',
     link_title: 'Liên kết máy tính',
-    link_body: 'Mở app.money2time.com trên máy tính, rồi quét mã trên màn hình.',
-    link_action: 'Quét mã',
     linking: 'Đang liên kết…',
     confirm_title: 'Liên kết {{name}}?',
     confirm_title_unnamed: 'Liên kết trình duyệt này?',

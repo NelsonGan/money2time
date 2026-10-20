@@ -2340,20 +2340,8 @@ const tr = {
   web_dashboard: {
     title: 'Web Gösterge Paneli',
     subtitle:
-      'Verilerinizi bilgisayarda app.money2time.com adresinde görün. Telefonunuz verileri uçtan uca şifreli olarak doğrudan tarayıcıya gönderir. Hiçbir şey çevrimiçi saklanmaz ve hesap gerekmez.',
-    intro_title: 'Verileriniz büyük ekranda',
-    intro_body:
-      'Bilgisayarda app.money2time.com adresini açın, ekranda görünen kodu bu telefonla tarayın ve verilerinizi 17 gösterge panelinde inceleyin.',
-    private_note:
-      'Hiçbir şey çevrimiçi saklanmaz. Telefonunuz verileri doğrudan tarayıcıya gönderir; veriler yalnızca bu ikisinde bulunan bir anahtarla şifrelenir. Tarayıcı, bağlantıyı kaldırana kadar son kopyayı saklar.',
-    source_of_truth:
-      'Verilerin asıl kaynağı telefonunuz olmaya devam eder. Web gösterge paneli yalnızca okur, geriye hiçbir şey göndermez.',
-    computer_hint: 'Bilgisayarınızda açın, ardından QR kodunu tarayın.',
-    encrypted_label: 'Uçtan uca şifreli',
+      'Verilerinizi bilgisayarda app.money2time.com adresinde görün. Telefonunuz verileri doğrudan tarayıcıya gönderir. Hiçbir şey çevrimiçi saklanmaz ve hesap gerekmez.',
     link_title: 'Bilgisayar bağla',
-    link_body:
-      'Bilgisayarınızda app.money2time.com adresini açın, ardından ekrandaki kodu tarayın.',
-    link_action: 'Kodu tara',
     linking: 'Bağlanıyor…',
     confirm_title: '{{name}} bağlansın mı?',
     confirm_title_unnamed: 'Bu tarayıcı bağlansın mı?',

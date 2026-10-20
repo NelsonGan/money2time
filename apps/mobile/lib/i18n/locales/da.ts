@@ -2332,19 +2332,8 @@ const da = {
   web_dashboard: {
     title: 'Webdashboard',
     subtitle:
-      'Se dine data på en computer på app.money2time.com. Din telefon sender dem direkte til browseren, end-to-end-krypteret. Intet gemmes online, og der er ingen konto.',
-    intro_title: 'Dine data på en stor skærm',
-    intro_body:
-      'Åbn app.money2time.com på en computer, scan den viste kode med din telefon, og udforsk dine data i 17 dashboards.',
-    private_note:
-      'Intet gemmes online. Din telefon sender dine data direkte til browseren, krypteret med en nøgle, som kun de to har. Browseren beholder den seneste kopi, indtil du fjerner forbindelsen.',
-    source_of_truth:
-      'Din telefon er stadig den primære kilde. Webdashboardet læser kun, og intet sendes tilbage.',
-    computer_hint: 'Åbn på din computer, og scan QR-koden.',
-    encrypted_label: 'End-to-end-krypteret',
+      'Se dine data på en computer på app.money2time.com. Din telefon sender dem direkte til browseren. Intet gemmes online, og der er ingen konto.',
     link_title: 'Forbind en computer',
-    link_body: 'Åbn app.money2time.com på din computer, og scan derefter koden på skærmen.',
-    link_action: 'Scan koden',
     linking: 'Forbinder…',
     confirm_title: 'Forbind {{name}}?',
     confirm_title_unnamed: 'Forbind denne browser?',

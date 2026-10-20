@@ -2341,19 +2341,8 @@ const id = {
   web_dashboard: {
     title: 'Dasbor Web',
     subtitle:
-      'Lihat datamu di komputer lewat app.money2time.com. Ponselmu mengirimnya langsung ke browser dengan enkripsi end-to-end. Tidak ada yang disimpan secara online dan tidak perlu akun.',
-    intro_title: 'Datamu di layar besar',
-    intro_body:
-      'Buka app.money2time.com di komputer, pindai kode yang tampil dengan ponsel ini, lalu jelajahi datamu di 17 dasbor.',
-    private_note:
-      'Tidak ada yang disimpan secara online. Ponselmu mengirim datamu langsung ke browser, terenkripsi dengan kunci yang hanya dipegang keduanya. Browser menyimpan salinan terakhir sampai kamu memutus tautannya.',
-    source_of_truth:
-      'Ponselmu tetap menjadi sumber data utama. Dasbor web hanya membaca, dan tidak ada yang dikirim balik.',
-    computer_hint: 'Buka di komputer, lalu pindai kode QR.',
-    encrypted_label: 'Terenkripsi end-to-end',
+      'Lihat datamu di komputer lewat app.money2time.com. Ponselmu mengirimnya langsung ke browser. Tidak ada yang disimpan secara online dan tidak perlu akun.',
     link_title: 'Tautkan komputer',
-    link_body: 'Buka app.money2time.com di komputermu, lalu pindai kode di layarnya.',
-    link_action: 'Pindai kode',
     linking: 'Menautkan…',
     confirm_title: 'Tautkan {{name}}?',
     confirm_title_unnamed: 'Tautkan browser ini?',

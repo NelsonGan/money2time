@@ -2346,19 +2346,8 @@ const pt = {
   web_dashboard: {
     title: 'Painel web',
     subtitle:
-      'Veja seus dados em um computador, em app.money2time.com. O telefone os envia direto para o navegador, com criptografia de ponta a ponta. Nada fica armazenado online e não há conta.',
-    intro_title: 'Seus dados em uma tela maior',
-    intro_body:
-      'Abra app.money2time.com em um computador, escaneie o código exibido com este telefone e explore seus dados em 17 painéis.',
-    private_note:
-      'Nada fica armazenado online. O telefone envia seus dados direto para o navegador, criptografados com uma chave que só os dois possuem. O navegador guarda a última cópia até você desvincular.',
-    source_of_truth:
-      'O telefone continua sendo a fonte dos seus dados. O painel web só lê, e nada é enviado de volta.',
-    computer_hint: 'Abra no computador e escaneie o código QR.',
-    encrypted_label: 'Criptografia de ponta a ponta',
+      'Veja seus dados em um computador, em app.money2time.com. O telefone os envia direto para o navegador. Nada fica armazenado online e não há conta.',
     link_title: 'Vincular um computador',
-    link_body: 'Abra app.money2time.com no computador e escaneie o código na tela dele.',
-    link_action: 'Escanear o código',
     linking: 'Vinculando…',
     confirm_title: 'Vincular {{name}}?',
     confirm_title_unnamed: 'Vincular este navegador?',

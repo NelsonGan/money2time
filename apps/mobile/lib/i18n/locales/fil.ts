@@ -2361,20 +2361,8 @@ const fil = {
   web_dashboard: {
     title: 'Web Dashboard',
     subtitle:
-      'Tingnan ang iyong data sa computer sa app.money2time.com. Direktang ipinapadala ito ng iyong telepono sa browser, may end-to-end encryption. Walang iniimbak online at walang account.',
-    intro_title: 'Ang iyong data sa malaking screen',
-    intro_body:
-      'Buksan ang app.money2time.com sa computer, i-scan gamit ang telepono mong ito ang code na lalabas, at tuklasin ang iyong data sa 17 dashboard.',
-    private_note:
-      'Walang iniimbak online. Direktang ipinapadala ng iyong telepono ang iyong data sa browser, naka-encrypt gamit ang key na silang dalawa lang ang may hawak. Itinatago ng browser ang huling kopya hanggang i-unlink mo ito.',
-    source_of_truth:
-      'Ang iyong telepono pa rin ang pinagmumulan ng tamang data. Nagbabasa lang ang Web Dashboard, at walang ibinabalik na anuman.',
-    computer_hint: 'Buksan sa computer, saka i-scan ang QR code.',
-    encrypted_label: 'End-to-end encrypted',
+      'Tingnan ang iyong data sa computer sa app.money2time.com. Direktang ipinapadala ito ng iyong telepono sa browser. Walang iniimbak online at walang account.',
     link_title: 'Mag-link ng computer',
-    link_body:
-      'Buksan ang app.money2time.com sa iyong computer, saka i-scan ang code sa screen nito.',
-    link_action: 'I-scan ang code',
     linking: 'Nagli-link…',
     confirm_title: 'I-link ang {{name}}?',
     confirm_title_unnamed: 'I-link ang browser na ito?',

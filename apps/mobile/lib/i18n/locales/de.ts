@@ -2362,20 +2362,8 @@ const de = {
   web_dashboard: {
     title: 'Web-Dashboard',
     subtitle:
-      'Sieh deine Daten auf dem Computer unter app.money2time.com. Dein Handy sendet sie direkt an den Browser, Ende-zu-Ende-verschlüsselt. Online wird nichts gespeichert, und es gibt kein Konto.',
-    intro_title: 'Deine Daten auf dem großen Bildschirm',
-    intro_body:
-      'Öffne app.money2time.com auf einem Computer, scanne den angezeigten Code mit diesem Handy und erkunde deine Daten in 17 Dashboards.',
-    private_note:
-      'Online wird nichts gespeichert. Dein Handy sendet deine Daten direkt an den Browser, verschlüsselt mit einem Schlüssel, den nur beide kennen. Der Browser behält die letzte Kopie, bis du die Verknüpfung aufhebst.',
-    source_of_truth:
-      'Dein Handy bleibt die maßgebliche Quelle. Das Web-Dashboard liest nur, und es wird nichts zurückgesendet.',
-    computer_hint: 'Am Computer öffnen und den QR-Code scannen.',
-    encrypted_label: 'Ende-zu-Ende-verschlüsselt',
+      'Sieh deine Daten auf dem Computer unter app.money2time.com. Dein Handy sendet sie direkt an den Browser. Online wird nichts gespeichert, und es gibt kein Konto.',
     link_title: 'Computer verknüpfen',
-    link_body:
-      'Öffne app.money2time.com auf deinem Computer und scanne dann den Code auf dem Bildschirm.',
-    link_action: 'Code scannen',
     linking: 'Wird verknüpft…',
     confirm_title: '{{name}} verknüpfen?',
     confirm_title_unnamed: 'Diesen Browser verknüpfen?',

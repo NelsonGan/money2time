@@ -2361,20 +2361,8 @@ const fr = {
   web_dashboard: {
     title: 'Tableau de bord web',
     subtitle:
-      'Consultez vos données sur un ordinateur, à l’adresse app.money2time.com. Votre téléphone les envoie directement au navigateur, chiffrées de bout en bout. Rien n’est stocké en ligne et il n’y a pas de compte.',
-    intro_title: 'Vos données sur grand écran',
-    intro_body:
-      'Ouvrez app.money2time.com sur un ordinateur, scannez le code affiché avec ce téléphone et explorez vos données dans 17 tableaux de bord.',
-    private_note:
-      'Rien n’est stocké en ligne. Votre téléphone envoie vos données directement au navigateur, chiffrées avec une clé que seuls les deux détiennent. Le navigateur conserve la dernière copie jusqu’à ce que vous le dissociiez.',
-    source_of_truth:
-      'Votre téléphone reste la source de référence. Le tableau de bord web est en lecture seule et rien n’est renvoyé.',
-    computer_hint: 'Ouvrez sur votre ordinateur, puis scannez le code QR.',
-    encrypted_label: 'Chiffrement de bout en bout',
+      'Consultez vos données sur un ordinateur, à l’adresse app.money2time.com. Votre téléphone les envoie directement au navigateur. Rien n’est stocké en ligne et il n’y a pas de compte.',
     link_title: 'Associer un ordinateur',
-    link_body:
-      'Ouvrez app.money2time.com sur votre ordinateur, puis scannez le code affiché à l’écran.',
-    link_action: 'Scanner le code',
     linking: 'Association…',
     confirm_title: 'Associer {{name}} ?',
     confirm_title_unnamed: 'Associer ce navigateur ?',

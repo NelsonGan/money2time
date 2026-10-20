@@ -2332,19 +2332,8 @@ const sv = {
   web_dashboard: {
     title: 'Webbpanel',
     subtitle:
-      'Se dina data på en dator på app.money2time.com. Telefonen skickar dem direkt till webbläsaren, end-to-end-krypterat. Inget lagras online och det finns inget konto.',
-    intro_title: 'Dina data på en stor skärm',
-    intro_body:
-      'Öppna app.money2time.com på en dator, skanna koden som visas med den här telefonen och utforska dina data i 17 paneler.',
-    private_note:
-      'Inget lagras online. Telefonen skickar dina data direkt till webbläsaren, krypterade med en nyckel som bara de två har. Webbläsaren behåller den senaste kopian tills du kopplar bort den.',
-    source_of_truth:
-      'Telefonen är fortfarande den primära källan. Webbpanelen läser bara, och inget skickas tillbaka.',
-    computer_hint: 'Öppna på datorn och skanna QR-koden.',
-    encrypted_label: 'Totalsträckskrypterat',
+      'Se dina data på en dator på app.money2time.com. Telefonen skickar dem direkt till webbläsaren. Inget lagras online och det finns inget konto.',
     link_title: 'Koppla en dator',
-    link_body: 'Öppna app.money2time.com på datorn och skanna sedan koden på dess skärm.',
-    link_action: 'Skanna koden',
     linking: 'Kopplar…',
     confirm_title: 'Koppla {{name}}?',
     confirm_title_unnamed: 'Koppla den här webbläsaren?',

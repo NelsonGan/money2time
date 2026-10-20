@@ -2331,19 +2331,8 @@ const nb = {
   web_dashboard: {
     title: 'Web-dashbord',
     subtitle:
-      'Se dataene dine på en datamaskin på app.money2time.com. Telefonen sender dem rett til nettleseren, ende-til-ende-kryptert. Ingenting lagres på nett, og du trenger ingen konto.',
-    intro_title: 'Dataene dine på en stor skjerm',
-    intro_body:
-      'Åpne app.money2time.com på en datamaskin, skann koden som vises med denne telefonen, og utforsk dataene dine i 17 dashbord.',
-    private_note:
-      'Ingenting lagres på nett. Telefonen sender dataene dine rett til nettleseren, kryptert med en nøkkel som bare de to har. Nettleseren beholder den siste kopien til du kobler den fra.',
-    source_of_truth:
-      'Telefonen din er fortsatt kilden til dataene. Web-dashbordet leser bare, og ingenting sendes tilbake.',
-    computer_hint: 'Åpne på datamaskinen, og skann QR-koden.',
-    encrypted_label: 'Ende-til-ende-kryptert',
+      'Se dataene dine på en datamaskin på app.money2time.com. Telefonen sender dem rett til nettleseren. Ingenting lagres på nett, og du trenger ingen konto.',
     link_title: 'Koble til en datamaskin',
-    link_body: 'Åpne app.money2time.com på datamaskinen, og skann koden på skjermen.',
-    link_action: 'Skann koden',
     linking: 'Kobler til…',
     confirm_title: 'Koble til {{name}}?',
     confirm_title_unnamed: 'Koble til denne nettleseren?',

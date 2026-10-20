@@ -1,5 +1,5 @@
 import { useIsFocused } from '@react-navigation/native';
-import { ExternalLink, ShieldCheck } from 'lucide-react-native';
+import { ExternalLink } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -358,15 +358,9 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
                 }
                 onScanned={handleScanned}
               />
-              <Text variant="caption" tone="muted" className="px-4 text-center">
+              <Text variant="caption" tone="muted" className="px-4 pb-2 text-center">
                 {I18n.t(linking ? 'web_dashboard.linking' : 'web_dashboard.scan_hint')}
               </Text>
-              <View className="flex-row items-center gap-2 pb-2">
-                <ShieldCheck size={14} color={colors.textMuted} />
-                <Text variant="caption" tone="muted">
-                  {I18n.t('web_dashboard.encrypted_label')}
-                </Text>
-              </View>
             </View>
 
             {links.length > 0 ? (
