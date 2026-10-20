@@ -153,7 +153,7 @@ const sv = {
       },
       notificationReview: {
         title: 'Registrera betalningar från notiser',
-        body: 'Notiser från banken och e-plånboken väntar nu på dig som utkast. Välj Inkomst, Utgift eller Ignorera, en i taget eller alla på en gång. De läses på din telefon, aldrig av AI. Ställ in det i Inställningar > Automatisering.',
+        body: 'Notiser från banken och e-plånboken väntar nu på dig som utkast. Välj Inkomst, Utgift eller Ignorera, en i taget eller alla på en gång. Ställ in det i Inställningar > Automatisering.',
       },
       fasterScans: {
         title: 'Kvittoskanning 50 % snabbare',

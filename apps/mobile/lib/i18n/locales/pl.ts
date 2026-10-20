@@ -153,7 +153,7 @@ const pl = {
       },
       notificationReview: {
         title: 'Zapisuj płatności z powiadomień',
-        body: 'Powiadomienia z banku i e-portfela czekają teraz na Ciebie jako wersje robocze. Wybierz Przychód, Wydatek lub Pomiń, pojedynczo albo wszystkie naraz. Są odczytywane na Twoim telefonie, nigdy przez AI. Włącz to w Ustawienia > Automatyzacja.',
+        body: 'Powiadomienia z banku i e-portfela czekają teraz na Ciebie jako wersje robocze. Wybierz Przychód, Wydatek lub Pomiń, pojedynczo albo wszystkie naraz. Włącz to w Ustawienia > Automatyzacja.',
       },
       fasterScans: {
         title: 'Skanowanie paragonów o 50% szybsze',

@@ -128,7 +128,7 @@ const en = {
       },
       notificationReview: {
         title: 'Log payments from notifications',
-        body: 'Bank and e-wallet notifications now wait for you as drafts. Choose Income, Expense or Ignore, one by one or all at once. They are read on your phone, never by AI. Set it up in Settings > Automation.',
+        body: 'Bank and e-wallet notifications now wait for you as drafts. Choose Income, Expense or Ignore, one by one or all at once. Set it up in Settings > Automation.',
       },
       fasterScans: {
         title: 'Receipt scanning, 50% faster',

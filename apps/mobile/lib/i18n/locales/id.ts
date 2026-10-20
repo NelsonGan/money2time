@@ -153,7 +153,7 @@ const id = {
       },
       notificationReview: {
         title: 'Catat pembayaran dari notifikasi',
-        body: 'Notifikasi bank dan e-wallet kini menunggumu sebagai draf. Pilih Pemasukan, Pengeluaran, atau Abaikan, satu per satu atau sekaligus. Notifikasi dibaca di ponselmu, tidak pernah oleh AI. Atur di Pengaturan > Otomatisasi.',
+        body: 'Notifikasi bank dan e-wallet kini menunggumu sebagai draf. Pilih Pemasukan, Pengeluaran, atau Abaikan, satu per satu atau sekaligus. Atur di Pengaturan > Otomatisasi.',
       },
       fasterScans: {
         title: 'Pindai struk 50% lebih cepat',
