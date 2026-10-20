@@ -10,6 +10,7 @@ import type { PromptEnv, ResolvedPrompt } from './prompts';
 import { checkQuota, consumeQuota } from './ratelimit';
 import { getEntitlement } from './revenuecat';
 import {
+  type BuiltPrompt,
   buildReceiptPrompt,
   maxTokensForMode,
   normalizeReceiptDetail,
@@ -62,16 +63,19 @@ const ANTHROPIC_ONLY = { only: ['anthropic'], allow_fallbacks: false };
 let byokBroken = false;
 const INFERENCE_TIMEOUT_MS = 45000;
 // Claude's prompt text, ahead of the receipt, goes in Anthropic's prompt cache:
-// a hit is a tenth of the input price. The prompt carries the user's currency,
-// categories and accounts, so the cache is per user (and shared by users with
-// the same settings, the defaults most of all). The templates put the currency
-// early, in the output schema, so the fixed part before it is under Haiku's
-// 512-token minimum; moving the per-user values to the end of the hosted
-// prompts would let every user share one cached block. The same user repeats a
-// scan (of the same mode) within 5 minutes 36-40% of the time and barely more
-// within an hour, so the 5-minute cache (1.25x to write, repaid at a 22% hit
-// rate) and not the 1-hour one (2x, needing over 52%).
-const PROMPT_CACHE = { type: 'ephemeral' };
+// a hit is a tenth of the input price, a write 1.25x it for 5 minutes or 2x for
+// an hour. The templates end with the user's settings (USER_SETTINGS_HEADING),
+// so the text above them is the same for every user and is cached once for
+// all: any user's scan keeps it warm. A scan follows another of its mode
+// within an hour 100% (screenshot), 99% (quick) and 74% (itemized) of the time
+// but within 5 minutes only 98%, 75% and 35%, which makes the hour the cheaper
+// of the two for every mode. A hosted template from before the settings moved
+// to the end has no shared part, so the whole prompt is cached per user, where
+// the same user repeats within 5 minutes 36-40% of the time and barely more
+// within an hour: 5 minutes is the cheaper there (22% hits to repay against
+// over 52%).
+const SHARED_PROMPT_CACHE = { type: 'ephemeral', ttl: '1h' };
+const PER_USER_PROMPT_CACHE = { type: 'ephemeral' };
 // What a model with another behind it in the chain leaves for that one: a hung
 // primary times out early enough that the backup still has a real attempt
 // inside the budget, rather than starting with seconds left (or none).
@@ -423,7 +427,7 @@ function resolveModels(env: Env, imageType: string | null): ModelChoice[] {
 
 // One attempt's inference settings, shared by the failover chain.
 interface AttemptOptions {
-  prompt: string;
+  prompt: BuiltPrompt;
   maxTokens: number;
   temperature: number;
   /** Epoch ms after which no further inference may start (INFERENCE_BUDGET_MS). */
@@ -434,6 +438,21 @@ interface AttemptOptions {
   trace: AiTrace;
   /** The hosted prompt this attempt used, linked on its generation. */
   promptRef: ResolvedPrompt;
+}
+
+// The prompt as the text blocks ahead of the image. Claude gets the shared part
+// and the user's settings as two blocks, the first cached for everyone; a
+// template without a shared part is cached whole, per user. Other models get
+// the one block they always did, the same text either way.
+function promptBlocks(prompt: BuiltPrompt, claude: boolean) {
+  if (!claude) return [{ type: 'text', text: prompt.text }];
+  if (!prompt.personal) {
+    return [{ type: 'text', text: prompt.text, cache_control: PER_USER_PROMPT_CACHE }];
+  }
+  return [
+    { type: 'text', text: prompt.shared, cache_control: SHARED_PROMPT_CACHE },
+    { type: 'text', text: prompt.personal },
+  ];
 }
 
 // Sends the receipt image + prompt to OpenRouter and returns the raw output.
@@ -492,7 +511,7 @@ async function completeScan(
         // PostHog generation records instead of re-pricing from tokens.
         usage: { include: true },
         messages: [{ role: 'user', content: [
-          { type: 'text', text: opts.prompt, ...(choice.byok ? { cache_control: PROMPT_CACHE } : {}) },
+          ...promptBlocks(opts.prompt, choice.byok),
           { type: 'image_url', image_url: imageUrl },
         ] }],
       }),
@@ -620,7 +639,6 @@ async function runInference(
     mode,
     body.accounts ?? [],
   );
-  const prompt = built.text;
   const maxTokens = maxTokensForMode(mode);
 
   // An empty transactions array is not an error — the failover above never sees
@@ -637,7 +655,7 @@ async function runInference(
     let content: string;
     try {
       content = await completeWithFailover(body, env, reqId, {
-        prompt,
+        prompt: built,
         maxTokens,
         deadline,
         temperature: attempt === 0 ? 0 : RETRY_TEMPERATURE,

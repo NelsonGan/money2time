@@ -44,9 +44,46 @@ function toAllowedLine(list: string[]): string {
 }
 
 export interface BuiltPrompt {
+  /** The whole prompt: `shared` followed by `personal`. */
   text: string;
+  /** The part every user is sent word for word, which Claude caches once for all of them. */
+  shared: string;
+  /**
+   * This user's settings (currency, categories, accounts); empty when the
+   * template has no shareable part, and `shared` is then the whole prompt.
+   */
+  personal: string;
   /** The mode's main prompt, for `$ai_prompt_name` / `$ai_prompt_version`. */
   prompt: ResolvedPrompt;
+}
+
+/**
+ * Where a template's per-user part starts. Everything above it is the same for
+ * every user, so Claude's prompt cache can hold it once for all of them; a
+ * template without it (an older hosted version) is cached per user as a whole.
+ */
+export const USER_SETTINGS_HEADING = "## This user's settings";
+
+/**
+ * The compiled prompt, split where the template's per-user part starts. A
+ * template whose part above the heading is blank or fills in a variable (a
+ * hosted edit that put the currency back in the schema, say) has nothing every
+ * user shares, so it is treated like one without the heading: cached whole and
+ * per user, rather than an hour-long cache write per user that nobody reads,
+ * or an empty block Anthropic rejects.
+ */
+function built(
+  template: string,
+  variables: Record<string, string>,
+  prompt: ResolvedPrompt,
+): BuiltPrompt {
+  const text = compilePrompt(template, variables);
+  const at = template.indexOf(USER_SETTINGS_HEADING);
+  const shared = at < 0 ? '' : template.slice(0, at);
+  if (!shared.trim() || compilePrompt(shared, variables) !== shared) {
+    return { text, shared: text, personal: '', prompt };
+  }
+  return { text, shared, personal: compilePrompt(template.slice(at), variables), prompt };
 }
 
 // Build the prompt for `mode` from its PostHog-hosted template (bundled copy as
@@ -69,23 +106,21 @@ export async function buildReceiptPrompt(
     const accountsLine = toAllowedLine(Array.isArray(accounts) ? accounts : []);
     const [main, accountsPrompt] = await Promise.all([
       resolvePrompt(env, PROMPT_NAMES.screenshot),
-      accountsLine
-        ? resolvePrompt(env, PROMPT_NAMES.screenshotAccounts)
-        : Promise.resolve(null),
+      accountsLine ? resolvePrompt(env, PROMPT_NAMES.screenshotAccounts) : Promise.resolve(null),
     ]);
     // No account list to match against: pin `account` to "" and drop the
     // matching section rather than invite a free-text guess the app can't use.
     variables.accounts_section = accountsPrompt
       ? compilePrompt(accountsPrompt.template, { allowed_accounts: accountsLine })
       : NO_ACCOUNTS_SECTION;
-    return { text: compilePrompt(main.template, variables), prompt: main };
+    return built(main.template, variables, main);
   }
 
   const prompt = await resolvePrompt(
     env,
     mode === 'itemized' ? PROMPT_NAMES.itemized : PROMPT_NAMES.quick,
   );
-  return { text: compilePrompt(prompt.template, variables), prompt };
+  return built(prompt.template, variables, prompt);
 }
 
 /** The output-token budget for `mode` (each path owns its own). */
