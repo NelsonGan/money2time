@@ -1,3 +1,4 @@
+import { useIsFocused } from '@react-navigation/native';
 import { ExternalLink, ShieldCheck } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -23,7 +24,7 @@ import {
   useSettingsBottomNavInset,
 } from '~/components/ui';
 import { usePro } from '~/context/ProContext';
-import { QrScannerModal } from '~/features/settings/components/QrScannerModal';
+import { QrScannerView } from '~/features/settings/components/QrScannerView';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
@@ -94,12 +95,13 @@ function statusLine(link: LinkedBrowser, status: WebDashboardStatus[string] | un
  */
 export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScreenProps) {
   const colors = useThemeColors();
+  const isFocused = useIsFocused();
+  const [foreground, setForeground] = useState(AppState.currentState === 'active');
   const bottomNavInset = useSettingsBottomNavInset();
   const { isPro, isStatusKnown } = usePro();
   const [available, setAvailable] = useState<boolean | null>(null);
   const [links, setLinks] = useState<LinkedBrowser[]>([]);
   const [status, setStatus] = useState<WebDashboardStatus>({});
-  const [scannerOpen, setScannerOpen] = useState(!initialPairLink);
   const [linking, setLinking] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -165,6 +167,7 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
     // Only a real trip to the background closes the seats: iOS goes
     // `inactive` for the camera prompt, Face ID and Control Center too.
     const subscription = AppState.addEventListener('change', (state) => {
+      setForeground(state === 'active');
       if (state === 'active' && usable && proKnownRef.current) {
         void listLinkedBrowsers().then(
           (list) => active && setLinks(list),
@@ -200,7 +203,6 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
   }, [isStatusKnown]);
 
   const handleScanned = (text: string) => {
-    setScannerOpen(false);
     setProblem(null);
     setNotice(null);
     setLinking(true);
@@ -330,50 +332,42 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
           </Text>
         ) : (
           <>
-            <Card className="mt-6">
-              <CardContent className="items-center gap-5 py-8">
-                <Image
-                  source={require('../../../assets/illustrations/link-computer.png')}
-                  className="h-40 w-full"
-                  resizeMode="contain"
-                  accessible={false}
-                />
-                <View className="items-center gap-2">
-                  <Text variant="headingSm" className="text-center">
-                    {I18n.t('web_dashboard.link_title')}
-                  </Text>
-                  <Text variant="caption" tone="muted" className="text-center">
-                    {I18n.t('web_dashboard.computer_hint')}
-                  </Text>
-                </View>
-                <Button
-                  variant="secondary"
-                  className="w-full gap-2 px-3"
-                  onPress={openWeb}
-                  accessibilityLabel={I18n.t('web_dashboard.open_web')}
-                >
-                  <Text>app.money2time.com</Text>
-                  <ExternalLink size={16} color={colors.primary} />
-                </Button>
-                <Button
-                  className="w-full gap-2"
-                  onPress={() => setScannerOpen(true)}
-                  disabled={linking}
-                >
-                  <Text>
-                    {linking
-                      ? I18n.t('web_dashboard.linking')
-                      : I18n.t('web_dashboard.link_action')}
-                  </Text>
-                </Button>
-                <View className="flex-row items-center gap-2">
-                  <ShieldCheck size={14} color={colors.textMuted} />
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('web_dashboard.encrypted_label')}
-                  </Text>
-                </View>
-              </CardContent>
-            </Card>
+            <View className="items-center gap-3 pt-3">
+              <Image
+                source={require('../../../assets/illustrations/link-computer.png')}
+                className="h-24 w-48"
+                resizeMode="contain"
+                accessible={false}
+              />
+              <Text variant="headingSm" className="text-center">
+                {I18n.t('web_dashboard.link_title')}
+              </Text>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-2"
+                onPress={openWeb}
+                accessibilityLabel={I18n.t('web_dashboard.open_web')}
+              >
+                <Text>app.money2time.com</Text>
+                <ExternalLink size={14} color={colors.primary} />
+              </Button>
+              <QrScannerView
+                active={
+                  isFocused && foreground && !linking && (!initialPairLink || pairHandled.current)
+                }
+                onScanned={handleScanned}
+              />
+              <Text variant="caption" tone="muted" className="px-4 text-center">
+                {I18n.t(linking ? 'web_dashboard.linking' : 'web_dashboard.scan_hint')}
+              </Text>
+              <View className="flex-row items-center gap-2 pb-2">
+                <ShieldCheck size={14} color={colors.textMuted} />
+                <Text variant="caption" tone="muted">
+                  {I18n.t('web_dashboard.encrypted_label')}
+                </Text>
+              </View>
+            </View>
 
             {links.length > 0 ? (
               <Card className="mt-4">
@@ -434,11 +428,6 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
           </Text>
         ) : null}
       </ScrollView>
-      <QrScannerModal
-        visible={scannerOpen && available === true}
-        onClose={() => setScannerOpen(false)}
-        onScanned={handleScanned}
-      />
     </SettingsPageLayout>
   );
 }
