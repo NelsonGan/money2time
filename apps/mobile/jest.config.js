@@ -14,8 +14,11 @@ module.exports = {
     '\\.(png|jpg|jpeg|gif|webp|svg)$': '<rootDir>/__tests__/__mocks__/imageAsset.ts',
     '^~/(.*)$': '<rootDir>/$1',
   },
+  // @noble/* ship ES modules only (the Web Dashboard's crypto); compile them
+  // like the app's own sources.
+  transformIgnorePatterns: ['/node_modules/(?!@noble/)'],
   transform: {
-    '^.+\\.tsx?$': [
+    '^.+\\.[tj]sx?$': [
       'ts-jest',
       {
         tsconfig: {

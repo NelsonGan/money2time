@@ -39,7 +39,7 @@
         "ITSAppUsesNonExemptEncryption": false,
         "LSApplicationQueriesSchemes": ["chatgpt", "claude", "gemini"],
         "NSPhotoLibraryUsageDescription": "Money2Time may access your photo library if you choose to attach an image to a transaction.",
-        "NSCameraUsageDescription": "Money2Time may use your camera if you choose to take a photo of a receipt for a transaction.",
+        "NSCameraUsageDescription": "Money2Time uses your camera if you choose to photograph a receipt, or to scan the code that links the Web Dashboard on your computer.",
         "NSLocationWhenInUseUsageDescription": "Money2Time can use your location to show your current position on the trip album map. Your location is never stored or shared.",
         "BGTaskSchedulerPermittedIdentifiers": ["money2time-auto-backup"],
         "NSUbiquitousContainers": {
@@ -255,12 +255,13 @@
         }
       ],
       "expo-notifications",
+      "expo-secure-store",
       "expo-screen-orientation",
       "expo-background-task",
       [
         "expo-camera",
         {
-          "cameraPermission": "Money2Time may use your camera if you choose to take a photo of a receipt for a transaction.",
+          "cameraPermission": "Money2Time uses your camera if you choose to photograph a receipt, or to scan the code that links the Web Dashboard on your computer.",
           "recordAudioAndroid": false
         }
       ],

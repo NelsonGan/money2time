@@ -49,6 +49,7 @@ import { RecurringScreen } from './RecurringScreen';
 import { SettingsScreen } from './SettingsScreen';
 import { ShareAndEarnScreen } from './ShareAndEarnScreen';
 import { StatementImportListScreen, StatementImportScreen } from './StatementImportScreen';
+import { WebDashboardScreen } from './WebDashboardScreen';
 import { WidgetPreviewsScreen } from './WidgetPreviewsScreen';
 
 interface SettingsStackProps {
@@ -111,6 +112,7 @@ function SettingsHomeRoute({
       onOpenRecurring={() => navigation.navigate('Recurring')}
       onOpenNotifications={() => navigation.navigate('Notifications')}
       onOpenDataManagement={() => navigation.navigate('DataManagement')}
+      onOpenWebDashboard={() => navigation.navigate('WebDashboard')}
       onOpenNews={() => navigation.navigate('News')}
       onOpenStatementImport={() => navigation.navigate('StatementImport')}
       onOpenQuickEntry={() => navigation.navigate('QuickEntrySettings')}
@@ -406,6 +408,12 @@ export function SettingsStack({
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return <AutoBackupScreen onBack={() => props.navigation.goBack()} />;
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="WebDashboard">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return <WebDashboardScreen onBack={() => props.navigation.goBack()} />;
         }}
       </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="StatementImport">

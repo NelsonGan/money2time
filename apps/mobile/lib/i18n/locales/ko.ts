@@ -1460,6 +1460,7 @@ const ko = {
     haptics: '햅틱',
     haptics_subtitle: '앱 전체의 터치 피드백을 켜거나 끕니다.',
     data_management: '데이터 관리',
+    web_dashboard: '웹 대시보드',
     statement_import: '명세서 가져오기',
   },
   statement_import: {
@@ -2295,6 +2296,50 @@ const ko = {
       weekly_review_body: '지난주 돈과 시간이 어디로 갔는지 확인해 보세요.',
       monthly_review_title: '지난달 돌아보기',
       monthly_review_body: '지난달 돈과 시간이 어디로 갔는지 확인해 보세요.',
+    },
+  },
+  web_dashboard: {
+    title: '웹 대시보드',
+    subtitle:
+      '컴퓨터에서 app.money2time.com으로 내 데이터를 확인하세요. 휴대폰이 데이터를 브라우저로 직접 전송합니다. 온라인에는 아무것도 저장되지 않으며 계정도 필요 없습니다.',
+    link_title: '컴퓨터 연결',
+    linking: '연결하는 중…',
+    confirm_title: '{{name}} 연결할까요?',
+    confirm_title_unnamed: '이 브라우저를 연결할까요?',
+    confirm_message:
+      '컴퓨터에 코드 {{code}}가 표시되는지 확인하세요. 지금 사용 중인 컴퓨터에서 직접 app.money2time.com을 연 경우에만 계속하세요. 이 화면이 열려 있을 때마다 그 컴퓨터가 모든 데이터를 받게 돼요.',
+    confirm_waiting: '이제 컴퓨터에서도 연결을 클릭하세요.',
+    confirm_action: '연결',
+    browsers_title: '연결됨',
+    unknown_browser: '브라우저',
+    status_connecting: '연결 중…',
+    status_open: '연결됨',
+    status_sending: '전송 중… {{percent}}%',
+    status_closed: '열려 있지 않음',
+    just_now: '방금',
+    last_sent: '마지막 전송 {{date}}',
+    send_now: '지금 보내기',
+    open_web: 'app.money2time.com 열기',
+    unlink: '연결 해제',
+    unlink_title: '이 브라우저의 연결을 해제할까요?',
+    unlink_message: '{{name}}은(는) 더 이상 데이터를 받지 않으며 사본을 삭제해요.',
+    scan_hint: '컴퓨터의 코드를 스캔하세요',
+    camera_permission: '코드를 스캔하려면 카메라 접근을 허용하세요.',
+    camera_allow: '카메라 허용',
+    camera_settings: '설정 열기',
+    errors: {
+      unavailable:
+        '웹 대시보드를 사용하려면 최신 버전의 앱이 필요합니다. Money2Time을 업데이트한 후 다시 시도하세요.',
+      invalid_qr:
+        'Money2Time 웹 대시보드 코드가 아닙니다. app.money2time.com을 열고 거기에 표시된 코드를 스캔하세요.',
+      timeout:
+        '브라우저가 응답하지 않았습니다. app.money2time.com을 새로고침하고 새 코드를 스캔하세요.',
+      offline: '인터넷에 연결되어 있지 않습니다. 온라인 상태에서 다시 시도하세요.',
+      rejected: '브라우저에서 데이터를 열지 못했습니다. 다시 시도하세요.',
+      closed: '연결이 끝나기 전에 브라우저가 닫혔습니다. 새로고침한 뒤 다시 스캔하세요.',
+      too_many: '브라우저는 최대 {{max}}개까지 연결할 수 있어요. 먼저 하나의 연결을 해제하세요.',
+      too_large: '데이터가 너무 커서 웹 대시보드로 보낼 수 없어요.',
+      failed: '문제가 발생했어요. 다시 시도하세요.',
     },
   },
   auto_backup: {

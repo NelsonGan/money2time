@@ -1474,6 +1474,7 @@ const ja = {
     haptics: '触覚フィードバック',
     haptics_subtitle: 'アプリ全体の触覚フィードバックのオン・オフを切り替えます。',
     data_management: 'データ管理',
+    web_dashboard: 'Webダッシュボード',
     statement_import: '明細インポート',
   },
   statement_import: {
@@ -2313,6 +2314,51 @@ const ja = {
       weekly_review_body: '先週、お金と時間がどこに使われたか見てみましょう。',
       monthly_review_title: '先月の振り返り',
       monthly_review_body: '先月、お金と時間がどこに使われたか見てみましょう。',
+    },
+  },
+  web_dashboard: {
+    title: 'Webダッシュボード',
+    subtitle:
+      'app.money2time.com で、パソコンからデータを確認できます。データはスマートフォンからブラウザへ直接送信されます。オンラインには何も保存されず、アカウントも不要です。',
+    link_title: 'パソコンを連携',
+    linking: '連携中…',
+    confirm_title: '{{name}} を連携しますか？',
+    confirm_title_unnamed: 'このブラウザを連携しますか？',
+    confirm_message:
+      'パソコンにコード {{code}} が表示されていることを確認してください。使用中のパソコンでご自身が app.money2time.com を開いた場合のみ続けてください。この画面を開くたびに、そのパソコンにすべてのデータが送られます。',
+    confirm_waiting: '次に、パソコンでも「連携する」をクリックしてください。',
+    confirm_action: '連携する',
+    browsers_title: '連携中',
+    unknown_browser: 'ブラウザ',
+    status_connecting: '接続中…',
+    status_open: '接続中',
+    status_sending: '送信中… {{percent}}%',
+    status_closed: '開いていません',
+    just_now: '今',
+    last_sent: '最終送信 {{date}}',
+    send_now: '今すぐ送信',
+    open_web: 'app.money2time.com を開く',
+    unlink: '連携を解除',
+    unlink_title: 'このブラウザの連携を解除しますか？',
+    unlink_message: '{{name}} にはデータが送られなくなり、保存中のコピーは削除されます。',
+    scan_hint: 'パソコンのコードをスキャン',
+    camera_permission: 'コードを読み取るには、カメラへのアクセスを許可してください。',
+    camera_allow: 'カメラを許可',
+    camera_settings: '設定を開く',
+    errors: {
+      unavailable:
+        'Webダッシュボードを使うには、アプリを最新バージョンにする必要があります。Money2Time を更新してもう一度お試しください。',
+      invalid_qr:
+        'Money2Time の Webダッシュボードのコードではありません。app.money2time.com を開き、表示されるコードを読み取ってください。',
+      timeout:
+        'ブラウザから応答がありませんでした。app.money2time.com を再読み込みして、新しいコードを読み取ってください。',
+      offline: 'インターネットに接続されていません。オンラインになってからもう一度お試しください。',
+      rejected: 'ブラウザがデータを開けませんでした。もう一度お試しください。',
+      closed:
+        '連携が完了する前にブラウザが閉じられました。再読み込みして、もう一度コードを読み取ってください。',
+      too_many: '連携できるブラウザは最大 {{max}} 台です。先にいずれかの連携を解除してください。',
+      too_large: 'データが大きすぎるため、Webダッシュボードに送信できません。',
+      failed: '問題が発生しました。もう一度お試しください。',
     },
   },
   auto_backup: {

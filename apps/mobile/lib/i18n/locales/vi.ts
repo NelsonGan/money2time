@@ -1470,6 +1470,7 @@ const vi = {
     haptics: 'Phản hồi xúc giác',
     haptics_subtitle: 'Bật hoặc tắt phản hồi chạm trong toàn ứng dụng.',
     data_management: 'Quản lý dữ liệu',
+    web_dashboard: 'Bảng điều khiển web',
     statement_import: 'Nhập sao kê',
   },
   statement_import: {
@@ -2311,6 +2312,50 @@ const vi = {
       weekly_review_body: 'Xem tiền và thời gian của bạn đã đi đâu trong tuần trước.',
       monthly_review_title: 'Tổng kết tháng của bạn',
       monthly_review_body: 'Xem tiền và thời gian của bạn đã đi đâu trong tháng trước.',
+    },
+  },
+  web_dashboard: {
+    title: 'Bảng điều khiển web',
+    subtitle:
+      'Xem dữ liệu của bạn trên máy tính tại app.money2time.com. Điện thoại gửi thẳng đến trình duyệt. Không có gì được lưu trực tuyến và không cần tài khoản.',
+    link_title: 'Liên kết máy tính',
+    linking: 'Đang liên kết…',
+    confirm_title: 'Liên kết {{name}}?',
+    confirm_title_unnamed: 'Liên kết trình duyệt này?',
+    confirm_message:
+      'Hãy kiểm tra máy tính có hiển thị mã {{code}} không. Chỉ tiếp tục nếu chính bạn đã mở app.money2time.com trên máy tính bạn đang dùng: máy đó sẽ nhận toàn bộ dữ liệu của bạn mỗi khi màn hình này mở.',
+    confirm_waiting: 'Giờ hãy nhấp Liên kết trên máy tính nữa.',
+    confirm_action: 'Liên kết',
+    browsers_title: 'Đã liên kết',
+    unknown_browser: 'Một trình duyệt',
+    status_connecting: 'Đang kết nối…',
+    status_open: 'Đã kết nối',
+    status_sending: 'Đang gửi… {{percent}}%',
+    status_closed: 'Chưa mở',
+    just_now: 'vừa xong',
+    last_sent: 'Gửi lần cuối {{date}}',
+    send_now: 'Gửi ngay',
+    open_web: 'Mở app.money2time.com',
+    unlink: 'Hủy liên kết',
+    unlink_title: 'Hủy liên kết trình duyệt này?',
+    unlink_message: '{{name}} sẽ không nhận dữ liệu của bạn nữa và xóa bản sao của mình.',
+    scan_hint: 'Quét mã trên máy tính của bạn',
+    camera_permission: 'Cho phép truy cập camera để quét mã.',
+    camera_allow: 'Cho phép camera',
+    camera_settings: 'Mở Cài đặt',
+    errors: {
+      unavailable:
+        'Bảng điều khiển web cần phiên bản mới nhất của ứng dụng. Hãy cập nhật Money2Time rồi thử lại.',
+      invalid_qr:
+        'Đây không phải mã Bảng điều khiển web của Money2Time. Hãy mở app.money2time.com và quét mã ở đó.',
+      timeout: 'Trình duyệt không phản hồi. Hãy tải lại app.money2time.com và quét mã mới.',
+      offline: 'Không có kết nối internet. Hãy thử lại khi bạn trực tuyến.',
+      rejected: 'Trình duyệt không thể mở dữ liệu. Hãy thử lại.',
+      closed: 'Trình duyệt đã đóng trước khi liên kết xong. Hãy tải lại và quét lại.',
+      too_many:
+        'Bạn có thể liên kết tối đa {{max}} trình duyệt. Hãy hủy liên kết một trình duyệt trước.',
+      too_large: 'Dữ liệu của bạn quá lớn để gửi tới Bảng điều khiển web.',
+      failed: 'Đã xảy ra lỗi. Hãy thử lại.',
     },
   },
   auto_backup: {

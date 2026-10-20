@@ -5,6 +5,7 @@ import { AppState, View } from 'react-native';
 import { Button, Text, ThemeModal } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
+import { setAppLocked } from '~/features/settings/lib/appLockState';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { authenticateWithBiometrics, getBiometricLabel } from '~/services/biometricAuth';
@@ -118,6 +119,7 @@ export function BiometricLockGate({
   // Surface the overlay's presented state so the root can avoid co-presenting
   // another native modal on top of it.
   useEffect(() => {
+    setAppLocked(visible);
     onLockStateChange?.(visible);
   }, [visible, onLockStateChange]);
 

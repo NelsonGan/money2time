@@ -157,6 +157,14 @@ export function handleMoney2TimeDeepLink(url: string, navigationRef: RootNavigat
     return true;
   }
 
+  // `money2time://pair?r=…&pk=…&s=…` — the Web Dashboard's QR code, scanned
+  // with the system camera instead of the app's own scanner. The screen still
+  // asks before linking anything.
+  if (parsed.action === 'pair') {
+    runDeepLinkNavigation(navigationRef, { name: 'SettingsWebDashboard', params: { pair: url } });
+    return true;
+  }
+
   if (parsed.action === 'pro') {
     const source = parsed.params.source ?? 'widget';
     runDeepLinkNavigation(navigationRef, { name: 'ProPaywall', params: { source } });

@@ -79,6 +79,8 @@ export type RootStackParamList = {
   SettingsHourlyValue: undefined;
   /** Root-level alias so the auto-start reminder's deep link can reach it. */
   SettingsLiveEarnings: undefined;
+  /** Root-level alias so a pairing link from the system camera can reach it. */
+  SettingsWebDashboard: { pair?: string } | undefined;
   SettingsTimeDisplay: undefined;
   AddWageMonth: undefined;
   SettingsQuickEntry: undefined;

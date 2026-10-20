@@ -1491,6 +1491,7 @@ const tr = {
     haptics: 'Dokunsal Geri Bildirim',
     haptics_subtitle: 'Uygulama genelinde dokunsal geri bildirimi açın veya kapatın.',
     data_management: 'Veri Yönetimi',
+    web_dashboard: 'Web Gösterge Paneli',
     statement_import: 'Ekstre İçe Aktarma',
   },
   statement_import: {
@@ -2334,6 +2335,50 @@ const tr = {
       weekly_review_body: 'Geçen hafta paranızın ve zamanınızın nereye gittiğini görün.',
       monthly_review_title: 'Ayınızın özeti',
       monthly_review_body: 'Geçen ay paranızın ve zamanınızın nereye gittiğini görün.',
+    },
+  },
+  web_dashboard: {
+    title: 'Web Gösterge Paneli',
+    subtitle:
+      'Verilerinizi bilgisayarda app.money2time.com adresinde görün. Telefonunuz verileri doğrudan tarayıcıya gönderir. Hiçbir şey çevrimiçi saklanmaz ve hesap gerekmez.',
+    link_title: 'Bilgisayar bağla',
+    linking: 'Bağlanıyor…',
+    confirm_title: '{{name}} bağlansın mı?',
+    confirm_title_unnamed: 'Bu tarayıcı bağlansın mı?',
+    confirm_message:
+      'Bilgisayarın {{code}} kodunu gösterdiğini kontrol edin. Yalnızca app.money2time.com adresini kullandığınız bir bilgisayarda kendiniz açtıysanız devam edin: bu ekran her açık olduğunda tüm verilerinizi alacak.',
+    confirm_waiting: 'Şimdi bilgisayarda da Bağla’ya tıklayın.',
+    confirm_action: 'Bağla',
+    browsers_title: 'Bağlı',
+    unknown_browser: 'Bir tarayıcı',
+    status_connecting: 'Bağlanıyor…',
+    status_open: 'Bağlı',
+    status_sending: 'Gönderiliyor… %{{percent}}',
+    status_closed: 'Açık değil',
+    just_now: 'şimdi',
+    last_sent: 'Son gönderim {{date}}',
+    send_now: 'Şimdi gönder',
+    open_web: 'app.money2time.com adresini aç',
+    unlink: 'Bağlantıyı kaldır',
+    unlink_title: 'Bu tarayıcının bağlantısı kaldırılsın mı?',
+    unlink_message: '{{name}} artık verilerinizi almaz ve kopyasını siler.',
+    scan_hint: 'Bilgisayarınızdaki kodu tarayın',
+    camera_permission: 'Kodu taramak için kamera erişimine izin verin.',
+    camera_allow: 'Kameraya izin ver',
+    camera_settings: 'Ayarlar’ı aç',
+    errors: {
+      unavailable:
+        'Web Gösterge Paneli için uygulamanın en son sürümü gerekir. Money2Time’ı güncelleyip tekrar deneyin.',
+      invalid_qr:
+        'Bu bir Money2Time Web Gösterge Paneli kodu değil. app.money2time.com adresini açın ve kodu orada tarayın.',
+      timeout:
+        'Tarayıcı yanıt vermedi. app.money2time.com sayfasını yenileyin ve yeni kodu tarayın.',
+      offline: 'İnternet bağlantısı yok. Çevrimiçi olduğunuzda tekrar deneyin.',
+      rejected: 'Tarayıcı verileri açamadı. Tekrar deneyin.',
+      closed: 'Bağlantı kurulmadan önce tarayıcı kapandı. Sayfayı yenileyip tekrar tarayın.',
+      too_many: 'En fazla {{max}} tarayıcı bağlayabilirsiniz. Önce birinin bağlantısını kaldırın.',
+      too_large: 'Verileriniz Web Panosu’na gönderilemeyecek kadar büyük.',
+      failed: 'Bir sorun oluştu. Tekrar deneyin.',
     },
   },
   auto_backup: {

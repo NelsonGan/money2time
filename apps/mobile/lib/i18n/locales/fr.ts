@@ -1497,6 +1497,7 @@ const fr = {
     haptics: 'Retour haptique',
     haptics_subtitle: "Activer ou désactiver le retour tactile dans toute l'application.",
     data_management: 'Gestion des données',
+    web_dashboard: 'Tableau de bord web',
     statement_import: 'Import de relevé',
   },
   statement_import: {
@@ -2355,6 +2356,51 @@ const fr = {
         'Découvrez où sont passés votre argent et votre temps la semaine dernière.',
       monthly_review_title: 'Votre mois en revue',
       monthly_review_body: 'Découvrez où sont passés votre argent et votre temps le mois dernier.',
+    },
+  },
+  web_dashboard: {
+    title: 'Tableau de bord web',
+    subtitle:
+      'Consultez vos données sur un ordinateur, à l’adresse app.money2time.com. Votre téléphone les envoie directement au navigateur. Rien n’est stocké en ligne et il n’y a pas de compte.',
+    link_title: 'Associer un ordinateur',
+    linking: 'Association…',
+    confirm_title: 'Associer {{name}} ?',
+    confirm_title_unnamed: 'Associer ce navigateur ?',
+    confirm_message:
+      "Vérifiez que l'ordinateur affiche le code {{code}}. Ne continuez que si vous avez ouvert vous-même app.money2time.com sur un ordinateur que vous utilisez : il recevra toutes vos données chaque fois que cet écran est ouvert.",
+    confirm_waiting: "Cliquez maintenant aussi sur Associer sur l'ordinateur.",
+    confirm_action: 'Associer',
+    browsers_title: 'Associés',
+    unknown_browser: 'Un navigateur',
+    status_connecting: 'Connexion…',
+    status_open: 'Connecté',
+    status_sending: 'Envoi… {{percent}} %',
+    status_closed: 'Non ouvert',
+    just_now: 'à l’instant',
+    last_sent: 'Dernier envoi {{date}}',
+    send_now: 'Envoyer',
+    open_web: 'Ouvrir app.money2time.com',
+    unlink: 'Dissocier',
+    unlink_title: 'Dissocier ce navigateur ?',
+    unlink_message: '{{name}} ne reçoit plus vos données et supprime sa copie.',
+    scan_hint: 'Scannez le code sur votre ordinateur',
+    camera_permission: 'Autorisez l’accès à la caméra pour scanner le code.',
+    camera_allow: 'Autoriser la caméra',
+    camera_settings: 'Ouvrir les Réglages',
+    errors: {
+      unavailable:
+        'Le tableau de bord web nécessite la dernière version de l’application. Mettez à jour Money2Time et réessayez.',
+      invalid_qr:
+        'Ce n’est pas un code du tableau de bord web Money2Time. Ouvrez app.money2time.com et scannez le code qui s’y affiche.',
+      timeout:
+        'Le navigateur n’a pas répondu. Rechargez app.money2time.com et scannez le nouveau code.',
+      offline: 'Pas de connexion internet. Réessayez une fois en ligne.',
+      rejected: 'Le navigateur n’a pas pu ouvrir les données. Réessayez.',
+      closed:
+        'Le navigateur s’est fermé avant la fin de l’association. Rechargez-le et scannez à nouveau.',
+      too_many: "Vous pouvez associer jusqu'à {{max}} navigateurs. Dissociez-en un d'abord.",
+      too_large: 'Vos données sont trop volumineuses pour être envoyées au tableau de bord web.',
+      failed: 'Un problème est survenu. Réessayez.',
     },
   },
   auto_backup: {

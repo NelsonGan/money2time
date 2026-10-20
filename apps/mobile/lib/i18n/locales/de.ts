@@ -1499,6 +1499,7 @@ const de = {
     haptics: 'Haptik',
     haptics_subtitle: 'Taktiles Feedback in der gesamten App ein- oder ausschalten.',
     data_management: 'Datenverwaltung',
+    web_dashboard: 'Web-Dashboard',
     statement_import: 'Kontoauszug importieren',
   },
   statement_import: {
@@ -2356,6 +2357,51 @@ const de = {
       weekly_review_body: 'Sieh, wohin dein Geld und deine Zeit letzte Woche geflossen sind.',
       monthly_review_title: 'Dein Monat im Rückblick',
       monthly_review_body: 'Sieh, wohin dein Geld und deine Zeit letzten Monat geflossen sind.',
+    },
+  },
+  web_dashboard: {
+    title: 'Web-Dashboard',
+    subtitle:
+      'Sieh deine Daten auf dem Computer unter app.money2time.com. Dein Handy sendet sie direkt an den Browser. Online wird nichts gespeichert, und es gibt kein Konto.',
+    link_title: 'Computer verknüpfen',
+    linking: 'Wird verknüpft…',
+    confirm_title: '{{name}} verknüpfen?',
+    confirm_title_unnamed: 'Diesen Browser verknüpfen?',
+    confirm_message:
+      'Prüfe, ob der Computer den Code {{code}} anzeigt. Fahre nur fort, wenn du app.money2time.com selbst auf einem Computer geöffnet hast, den du gerade nutzt: Er erhält alle deine Daten, jedes Mal wenn dieser Bildschirm geöffnet ist.',
+    confirm_waiting: 'Klicke jetzt auch auf dem Computer auf „Verknüpfen“.',
+    confirm_action: 'Verknüpfen',
+    browsers_title: 'Verknüpft',
+    unknown_browser: 'Ein Browser',
+    status_connecting: 'Verbindung wird hergestellt…',
+    status_open: 'Verbunden',
+    status_sending: 'Wird gesendet… {{percent}} %',
+    status_closed: 'Nicht geöffnet',
+    just_now: 'jetzt',
+    last_sent: 'Zuletzt gesendet {{date}}',
+    send_now: 'Jetzt senden',
+    open_web: 'app.money2time.com öffnen',
+    unlink: 'Verknüpfung aufheben',
+    unlink_title: 'Verknüpfung mit diesem Browser aufheben?',
+    unlink_message: '{{name}} erhält keine Daten mehr und löscht seine Kopie.',
+    scan_hint: 'Scanne den Code auf deinem Computer',
+    camera_permission: 'Erlaube den Kamerazugriff, um den Code zu scannen.',
+    camera_allow: 'Kamera erlauben',
+    camera_settings: 'Einstellungen öffnen',
+    errors: {
+      unavailable:
+        'Das Web-Dashboard benötigt die neueste Version der App. Aktualisiere Money2Time und versuche es erneut.',
+      invalid_qr:
+        'Das ist kein Code für das Money2Time Web-Dashboard. Öffne app.money2time.com und scanne den Code dort.',
+      timeout:
+        'Der Browser hat nicht geantwortet. Lade app.money2time.com neu und scanne den neuen Code.',
+      offline: 'Keine Internetverbindung. Versuche es erneut, wenn du online bist.',
+      rejected: 'Der Browser konnte die Daten nicht öffnen. Versuche es erneut.',
+      closed:
+        'Der Browser wurde geschlossen, bevor die Verknüpfung abgeschlossen war. Lade ihn neu und scanne erneut.',
+      too_many: 'Du kannst bis zu {{max}} Browser verknüpfen. Hebe zuerst eine Verknüpfung auf.',
+      too_large: 'Deine Daten sind zu groß, um sie an das Web-Dashboard zu senden.',
+      failed: 'Etwas ist schiefgelaufen. Versuche es erneut.',
     },
   },
   auto_backup: {
