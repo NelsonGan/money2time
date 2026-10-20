@@ -2068,9 +2068,9 @@ database, no bucket, no account and no secrets. Served at
 - **Phone UI:** Settings → Web Dashboard keeps the computer address and scan
   action together in one compact card, with a custom chick-and-computer
   illustration and a short encrypted-transfer label. The camera opens once on
-  arrival when no browsers are linked, after availability and saved links load.
-  Dismissing it keeps it closed for that visit; existing links and pairing deep
-  links skip the automatic camera.
+  every visit once availability is confirmed, including with linked browsers.
+  Dismissing it reveals the connection controls and keeps it closed for that
+  visit. Incoming pairing deep links go straight to confirmation.
   The header info button holds the detailed explanation; linked-browser status
   and the two-device confirmation remain available.
 - **Linking:** the browser shows `money2time://pair?r=…&pk=…&s=…`: a one-off

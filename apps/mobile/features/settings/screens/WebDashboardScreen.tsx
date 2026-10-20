@@ -97,11 +97,9 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
   const bottomNavInset = useSettingsBottomNavInset();
   const { isPro, isStatusKnown } = usePro();
   const [available, setAvailable] = useState<boolean | null>(null);
-  const [linksLoaded, setLinksLoaded] = useState(false);
-  const scannerOffered = useRef(false);
   const [links, setLinks] = useState<LinkedBrowser[]>([]);
   const [status, setStatus] = useState<WebDashboardStatus>({});
-  const [scannerOpen, setScannerOpen] = useState(false);
+  const [scannerOpen, setScannerOpen] = useState(!initialPairLink);
   const [linking, setLinking] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -159,7 +157,6 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
         (list) => {
           if (!active) return;
           setLinks(list);
-          setLinksLoaded(true);
         },
         () => undefined,
       );
@@ -201,15 +198,6 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
     proKnownRef.current = isStatusKnown;
     if (isStatusKnown) openRef.current();
   }, [isStatusKnown]);
-
-  // Offer the camera once on an unlinked visit, after availability and stored
-  // links resolve. Closing it stays closed; existing links and pairing URLs
-  // go directly to their own controls instead.
-  useEffect(() => {
-    if (!available || !linksLoaded || scannerOffered.current) return;
-    scannerOffered.current = true;
-    if (!initialPairLink && links.length === 0) setScannerOpen(true);
-  }, [available, linksLoaded, links.length, initialPairLink]);
 
   const handleScanned = (text: string) => {
     setScannerOpen(false);
@@ -447,7 +435,7 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
         ) : null}
       </ScrollView>
       <QrScannerModal
-        visible={scannerOpen}
+        visible={scannerOpen && available === true}
         onClose={() => setScannerOpen(false)}
         onScanned={handleScanned}
       />
