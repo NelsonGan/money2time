@@ -2378,6 +2378,8 @@ const pl = {
     confirm_title_unnamed: 'Połączyć tę przeglądarkę?',
     confirm_message:
       'Sprawdź, czy komputer pokazuje kod {{code}}. Kontynuuj tylko wtedy, gdy sam otworzyłeś app.money2time.com na komputerze, którego używasz: będzie on dostawać wszystkie Twoje dane za każdym razem, gdy ten ekran jest otwarty.',
+    confirm_edits:
+      'Gdy ten ekran jest otwarty, będzie też mogła dodawać, zmieniać i usuwać Twoje wpisy.',
     confirm_waiting: 'Teraz kliknij też Połącz na komputerze.',
     confirm_action: 'Połącz',
     browsers_title: 'Połączone',
@@ -2388,6 +2390,18 @@ const pl = {
     status_closed: 'Nie otwarto',
     just_now: 'teraz',
     last_sent: 'Ostatnio wysłano {{date}}',
+    edit_hint:
+      'Gdy ten ekran jest otwarty, połączona przeglądarka może też dodawać, edytować i usuwać wpisy. Zmiany są zapisywane na tym telefonie.',
+    edit_saved: 'Zapisano zmiany z przeglądarki.',
+    browser_options: 'Opcje przeglądarki',
+    edits_on: 'Ta przeglądarka może dodawać, edytować i usuwać wpisy, gdy ten ekran jest otwarty.',
+    edits_off:
+      'Ta przeglądarka może tylko przeglądać Twoje dane. Zezwól na zmiany, aby mogła dodawać, edytować i usuwać wpisy, gdy ten ekran jest otwarty.',
+    edits_allow: 'Zezwól na zmiany',
+    edits_disallow: 'Tylko podgląd',
+    read_only: 'Tylko podgląd',
+    edit_hint_some_read_only:
+      'Gdy ten ekran jest otwarty, przeglądarki, na które zezwolisz, mogą też dodawać, edytować i usuwać wpisy. Stuknij ⋯ obok przeglądarki, aby na to zezwolić. Zmiany są zapisywane na tym telefonie.',
     send_now: 'Wyślij teraz',
     open_web: 'Otwórz app.money2time.com',
     unlink: 'Odłącz',

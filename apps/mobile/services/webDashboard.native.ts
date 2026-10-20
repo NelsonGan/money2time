@@ -4,7 +4,10 @@
  * that stores nothing (apps/cloudflare/workers/web-dashboard). Nothing is
  * kept online: a browser shows the last copy it received, and gets a fresh
  * one whenever this phone opens the Web Dashboard screen while the browser is
- * open. The phone stays the source of truth; the browser only reads.
+ * open. The phone stays the source of truth: a browser may also send changes,
+ * but only while this phone is connected to it, and the phone checks each
+ * batch against its own data and saves it the way its own editor would
+ * (webDashboardEdits.ts), then sends the browser the result.
  *
  * Each link is a key in the keychain (webDashboardLink.ts has the protocol).
  * An unlinked browser stays in a second list until it has heard about it, so
@@ -15,6 +18,7 @@ import * as Application from 'expo-application';
 import * as Device from 'expo-device';
 import { Gzip, strToU8 } from 'fflate';
 
+import { transactionsRepository } from '~/lib/repositories/transactionsRepository';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { buildBackupJson, yieldToEventLoop } from '~/services/dataManagementService';
 
@@ -23,9 +27,19 @@ import {
   type LinkedBrowser,
   MAX_LINKED_BROWSERS,
   type PendingBrowser,
+  type WebDashboardEditor,
   WebDashboardError,
   type WebDashboardStatus,
 } from './webDashboard.shared';
+import { toBase64Url } from './webDashboardCrypto';
+import {
+  type EditRefusal,
+  editTransactionIds,
+  planEdit,
+  planKind,
+  type ProFeature,
+  readEditRequest,
+} from './webDashboardEdits';
 import {
   type LinkDeps,
   LinkError,
@@ -48,6 +62,8 @@ const RELAY_DEFAULT_URL = 'https://workers-web-dashboard.money2time.com';
 /** A browser that just got data is not sent it again for this long unless it asks with Refresh. */
 const RESEND_AFTER_MS = 60_000;
 const FORCED_SEND_GAP_MS = 10_000;
+/** Edits that may wait for the phone at once, across browsers. */
+const MAX_QUEUED_EDITS = 4;
 /**
  * The user-asset folders the dashboard shows: logos, icons and covers.
  * Receipts, payment QR codes, the avatar and card designs stay on the phone.
@@ -142,12 +158,28 @@ const updateLinks = (change: (links: LinkRecord[]) => LinkRecord[]) =>
 const updateUnlinks = (change: (unlinks: Unlink[]) => Unlink[]) =>
   updateList<Unlink>(UNLINKS_KEY, change);
 
-const publicLink = ({ roomId, name, createdAt, lastSentAt }: LinkRecord): LinkedBrowser => ({
+const publicLink = ({ roomId, name, createdAt, lastSentAt, edits }: LinkRecord): LinkedBrowser => ({
   roomId,
   name,
   createdAt,
   lastSentAt,
+  edits: edits === true,
 });
+
+/**
+ * Goes up with every change a browser saves, and travels with each transfer,
+ * so a browser can tell data made before its change from data made after, and
+ * a transfer already on its way when a change was saved hands out no token.
+ * Started from the clock so it keeps rising across launches.
+ */
+let dataVersion = Date.now();
+
+/** Lets a linked browser make changes, or takes that away. */
+export async function setBrowserEdits(roomId: string, allowed: boolean): Promise<void> {
+  await updateLinks((links) =>
+    links.map((link) => (link.roomId === roomId ? { ...link, edits: allowed } : link)),
+  );
+}
 
 /** Whether this build can use the Web Dashboard (it has the native modules). */
 export async function isWebDashboardAvailable(): Promise<boolean> {
@@ -188,6 +220,8 @@ export async function beginLink(qrText: string): Promise<PendingBrowser> {
         } catch (error) {
           throw errorFrom(error);
         }
+        // The person agreed to this browser's changes when they confirmed the link.
+        record = { ...record, edits: true };
         await updateLinks((links) => [
           ...links.filter((link) => link.roomId !== record.roomId),
           record,
@@ -207,6 +241,9 @@ export async function beginLink(qrText: string): Promise<PendingBrowser> {
  * and shared by every browser that asks within a few seconds.
  */
 async function buildTransfer(isPro: boolean): Promise<PreparedTransfer> {
+  // The version the data is read at: a change saved while this export is
+  // built is not in it, so the copy must not claim that change's version.
+  const version = dataVersion;
   const { randomBytes } = await requireNative();
   const { json, data } = await buildBackupJson({
     includeAsset: (path) => DASHBOARD_ASSET_FOLDERS.some((folder) => path.startsWith(folder)),
@@ -242,19 +279,22 @@ async function buildTransfer(isPro: boolean): Promise<PreparedTransfer> {
       deviceName: phoneName(),
       timeZone,
       pro: isPro,
+      version,
     },
     randomBytes,
     yieldToEventLoop,
   );
 }
 
-type Trigger = 'browser_opened' | 'refresh' | 'manual';
+type Trigger = 'browser_opened' | 'refresh' | 'manual' | 'edit';
 
 /**
  * While the Web Dashboard screen is open: a seat in every linked browser's
  * room. A browser that is open asks for data as soon as the phone arrives and
  * gets it; `sendNow` pushes to every browser that is there. Unlinked browsers
- * that have not heard yet get a seat that only tells them.
+ * that have not heard yet get a seat that only tells them. With an `editor`,
+ * a browser that is here may also send changes, which are checked and saved
+ * one batch at a time.
  */
 export class WebDashboardConnections {
   private sessions = new Map<string, PhoneSession>();
@@ -263,25 +303,45 @@ export class WebDashboardConnections {
   private readonly onChange: (status: WebDashboardStatus) => void;
   private readonly onLinksChanged: () => void;
   private readonly onSendFailed: (error: WebDashboardError) => void;
+  private readonly editor: WebDashboardEditor | null;
   private isPro: boolean;
   private closed = false;
   /** Rooms being unlinked right now, so a concurrent `sync` does not reopen them. */
   private removing = new Set<string>();
   /** Rooms whose next request answers a Send now. */
   private offered = new Set<string>();
+  /** Rooms whose next request answers a saved edit. */
+  private editOffered = new Set<string>();
+  /** Rooms that were busy when fresh data was due: offered it once their send ends. */
+  private owed = new Set<string>();
+  /**
+   * Each browser's single-use edit token: the one sent with the data it has.
+   * Only for this visit to the screen; a browser holding an older one is sent
+   * fresh data (and a new token) as soon as it is here.
+   */
+  private editTokens = new Map<string, string>();
+  /** Edits are saved one batch at a time, whichever browser sent them. */
+  private editQueue: Promise<unknown> = Promise.resolve();
+  /** Edits waiting in the queue; a browser that floods it is told to wait. */
+  private queued = 0;
+  /** Each browser's last copy: the data version and when, so a resend of the same data waits. */
+  private lastSent = new Map<string, { version: number; at: number }>();
   private lastForced = new Map<string, number>();
-  private prepared: { at: number; promise: Promise<PreparedTransfer> } | null = null;
+  private prepared: { at: number; version: number; promise: Promise<PreparedTransfer> } | null =
+    null;
 
   constructor(opts: {
     isPro: boolean;
     onChange: (status: WebDashboardStatus) => void;
     onLinksChanged: () => void;
     onSendFailed?: (error: WebDashboardError) => void;
+    editor?: WebDashboardEditor;
   }) {
     this.isPro = opts.isPro;
     this.onChange = opts.onChange;
     this.onLinksChanged = opts.onLinksChanged;
     this.onSendFailed = opts.onSendFailed ?? (() => undefined);
+    this.editor = opts.editor ?? null;
   }
 
   setPro(isPro: boolean) {
@@ -327,6 +387,7 @@ export class WebDashboardConnections {
         onProgress: (ratio) => this.update(link.roomId, { progress: ratio }),
         onWant: (force) => void this.answer(link.roomId, force),
         onUnlinked: () => void this.dropLink(link.roomId),
+        onEdit: (message) => this.queueEdit(link.roomId, message),
       });
       this.sessions.set(link.roomId, session);
       this.update(link.roomId, { state: session.state });
@@ -369,21 +430,135 @@ export class WebDashboardConnections {
   }
 
   private answer(roomId: string, force: boolean) {
-    const trigger: Trigger = this.offered.delete(roomId)
-      ? 'manual'
-      : force
-        ? 'refresh'
-        : 'browser_opened';
+    const edited = this.editOffered.delete(roomId);
+    const offered = this.offered.delete(roomId);
+    const trigger: Trigger = edited
+      ? 'edit'
+      : offered
+        ? 'manual'
+        : force
+          ? 'refresh'
+          : 'browser_opened';
     return this.sendTo(roomId, trigger);
+  }
+
+  private queueEdit(roomId: string, message: Record<string, unknown>) {
+    // One browser cannot hold up the others with a stream of edits.
+    if (this.queued >= MAX_QUEUED_EDITS) return Promise.resolve({ ok: false, error: 'busy' });
+    this.queued++;
+    const run = this.editQueue
+      .then(() => this.edit(roomId, message))
+      .finally(() => {
+        this.queued--;
+      });
+    this.editQueue = run.catch(() => undefined);
+    return run;
+  }
+
+  /** Checks one batch from a browser, saves it, and sends every open browser the result. */
+  private async edit(
+    roomId: string,
+    message: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
+    const refuse = (error: EditRefusal, feature?: ProFeature) => {
+      void trackEvent(AnalyticsEvents.WEB_DASHBOARD_EDITED, { result: error });
+      return feature ? { ok: false, error, feature } : { ok: false, error };
+    };
+    let read: ReturnType<typeof readEditRequest>;
+    try {
+      read = readEditRequest(message);
+    } catch {
+      read = { kind: 'invalid' };
+    }
+    if (read.kind === 'invalid') return refuse('invalid');
+    const editor = this.editor;
+    if (!editor || this.closed) return refuse('failed');
+    const link = (await readLinks()).find((item) => item.roomId === roomId);
+    if (!link?.edits) return refuse('off');
+    // Made against data that is no longer the phone's latest, or replayed.
+    const token = this.editTokens.get(roomId);
+    if (!token || read.request.token !== token) {
+      this.offerFresh(roomId);
+      return refuse('stale');
+    }
+    const ids = editTransactionIds(read.request);
+    let result: ReturnType<typeof planEdit>;
+    try {
+      result = planEdit(read.request, {
+        ...editor.lookup(),
+        transactions: ids.length ? transactionsRepository.listByIds(ids) : [],
+      });
+    } catch {
+      return refuse('failed');
+    }
+    if (!result.ok) {
+      // Something changed on the phone: the browser needs the latest to retry.
+      if (result.error === 'conflict') this.offerFresh(roomId);
+      return refuse(result.error, result.feature);
+    }
+    // The screen may have closed while the rows were read; nothing is saved then.
+    if (this.closed) return refuse('failed');
+    // Every browser's token is spent: none may edit until it has the changed data.
+    this.editTokens.clear();
+    dataVersion += 1;
+    try {
+      await editor.apply(result.plan);
+    } catch {
+      // Saved in steps, so a later step failing can leave earlier ones saved:
+      // the browser is told it may or may not be, and gets the data to see.
+      dataVersion += 1;
+      this.offerAll();
+      return refuse('unknown');
+    }
+    // Raised again once every write has landed: a copy read while they were
+    // landing has the version in between, so it neither counts as the change
+    // nor carries a token.
+    dataVersion += 1;
+    const version = dataVersion;
+    void trackEvent(AnalyticsEvents.WEB_DASHBOARD_EDITED, {
+      result: 'applied',
+      kind: planKind(result.plan),
+      count: result.plan.count,
+    });
+    editor.onApplied?.(result.plan.count);
+    this.offerAll();
+    return { ok: true, count: result.plan.count, version };
+  }
+
+  /** Fresh data for one browser, past the usual gap; owed until its current send ends. */
+  private offerFresh(roomId: string) {
+    const session = this.sessions.get(roomId);
+    if (!session) return;
+    if (session.offer()) this.editOffered.add(roomId);
+    // A browser that is not here gets fresh data when it arrives anyway.
+    else if (session.state === 'sending') this.owed.add(roomId);
+  }
+
+  /** Fresh data (and a token, if it may now edit) for one browser: after its permission changed. */
+  refreshBrowser(roomId: string) {
+    this.lastSent.delete(roomId);
+    this.offerFresh(roomId);
+  }
+
+  /** The changed data for every browser here, all from one new export. */
+  private offerAll() {
+    this.prepared = null;
+    for (const roomId of this.sessions.keys()) this.offerFresh(roomId);
   }
 
   /** The export for a send: shared within a refresh, made fresh when asked for. */
   private transfer(fresh: boolean): Promise<PreparedTransfer> {
-    if (!fresh && this.prepared && Date.now() - this.prepared.at < 30_000) {
+    // An export from before a saved change is never reused.
+    if (
+      !fresh &&
+      this.prepared &&
+      this.prepared.version === dataVersion &&
+      Date.now() - this.prepared.at < 30_000
+    ) {
       return this.prepared.promise;
     }
     const promise = buildTransfer(this.isPro);
-    const prepared = { at: Date.now(), promise };
+    const prepared = { at: Date.now(), version: dataVersion, promise };
     this.prepared = prepared;
     promise.catch(() => {
       if (this.prepared === prepared) this.prepared = null;
@@ -396,16 +571,44 @@ export class WebDashboardConnections {
     if (!session || session.state !== 'online') return;
     const now = Date.now();
     if (trigger === 'browser_opened') {
-      // A browser reconnecting a few times in a row gets one copy, not several.
-      const last = (await readLinks()).find((link) => link.roomId === roomId)?.lastSentAt ?? 0;
-      if (now - last < RESEND_AFTER_MS) return;
-    } else {
+      // A browser reconnecting a few times in a row gets one copy, not several,
+      // unless it may make changes: it needs a token from this visit to edit with.
+      const link = (await readLinks()).find((item) => item.roomId === roomId);
+      const editable = !!this.editor && link?.edits === true;
+      if (now - (link?.lastSentAt ?? 0) < RESEND_AFTER_MS && !editable) return;
+    } else if (trigger !== 'edit') {
       // Refresh is the person's, but each one rebuilds the export: not too often.
       if (now - (this.lastForced.get(roomId) ?? 0) < FORCED_SEND_GAP_MS) return;
       this.lastForced.set(roomId, now);
     }
+    if (trigger === 'browser_opened' || trigger === 'edit') {
+      // The same data again within moments, to a browser that holds a token
+      // for it, is a loop (a flaky network, a stale retry), not a need.
+      const last = this.lastSent.get(roomId);
+      const same = last?.version === dataVersion && now - last.at < FORCED_SEND_GAP_MS;
+      if (same && this.editTokens.has(roomId)) return;
+    }
+    // A browser may change things only if the person allowed it on this phone.
+    const allowed = (await readLinks()).find((link) => link.roomId === roomId)?.edits === true;
+    const editToken =
+      this.editor && allowed ? toBase64Url((await requireNative()).randomBytes(16)) : null;
+    let sent: PreparedTransfer | null = null;
     try {
-      await session.send(() => this.transfer(trigger === 'refresh'));
+      await session.send(
+        async () => {
+          sent = await this.transfer(trigger === 'refresh');
+          return sent;
+        },
+        { editToken },
+      );
+      // A token is good only for data that is still the phone's latest: data
+      // made before a change saved meanwhile is followed by fresh data instead.
+      const latest = (sent as PreparedTransfer | null)?.meta.version === dataVersion;
+      if (editToken && latest) this.editTokens.set(roomId, editToken);
+      else if (!latest) this.owed.add(roomId);
+      const sentVersion = (sent as PreparedTransfer | null)?.meta.version;
+      if (sentVersion !== undefined)
+        this.lastSent.set(roomId, { version: sentVersion, at: Date.now() });
       await updateLinks((links) =>
         links.map((link) => (link.roomId === roomId ? { ...link, lastSentAt: Date.now() } : link)),
       ).catch(() => undefined);
@@ -420,6 +623,9 @@ export class WebDashboardConnections {
       if (!this.closed && (trigger !== 'browser_opened' || failure.code === 'too_large')) {
         this.onSendFailed(failure);
       }
+    } finally {
+      // Fresh data this browser was owed while it was busy.
+      if (this.owed.delete(roomId) && !this.closed) this.offerFresh(roomId);
     }
   }
 
@@ -463,6 +669,9 @@ export class WebDashboardConnections {
     for (const session of this.unlinkSessions.values()) session.close();
     this.sessions.clear();
     this.unlinkSessions.clear();
+    this.editTokens.clear();
+    this.owed.clear();
+    this.lastSent.clear();
     // The export holds the whole database in memory; let it go.
     this.prepared = null;
   }

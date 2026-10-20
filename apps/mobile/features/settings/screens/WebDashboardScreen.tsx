@@ -27,6 +27,7 @@ import {
 import { usePro } from '~/context/ProContext';
 import { QrScannerView } from '~/features/settings/components/QrScannerView';
 import { whenAppUnlocked } from '~/features/settings/lib/appLockState';
+import { useWebDashboardEditor } from '~/features/settings/lib/useWebDashboardEditor';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
@@ -37,6 +38,7 @@ import {
   type LinkedBrowser,
   listLinkedBrowsers,
   MAX_LINKED_BROWSERS,
+  setBrowserEdits,
   unlinkBrowserOffline,
   WEB_DASHBOARD_URL,
   WebDashboardConnections,
@@ -104,7 +106,9 @@ function statusLine(status: WebDashboardStatus[string] | undefined): string {
  * code app.money2time.com shows, then, while this screen is open, sends the
  * latest data straight to every linked browser that is open: end-to-end
  * encrypted, through a relay that stores nothing. Opening this screen is how
- * the dashboard refreshes. The phone stays the source of truth.
+ * the dashboard refreshes. The phone stays the source of truth: a linked
+ * browser can change entries only while this screen is open, and each change
+ * is checked here and saved through AppContext like one made in the app.
  */
 export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScreenProps) {
   const colors = useThemeColors();
@@ -126,6 +130,13 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
   const proKnownRef = useRef(isStatusKnown);
   const openRef = useRef<() => void>(() => undefined);
   const pairHandled = useRef(false);
+  // Saves a linked browser's changes; the connections keep it for the screen's life.
+  const editor = useWebDashboardEditor(() => {
+    const saved = I18n.t('web_dashboard.edit_saved');
+    setProblem(null);
+    setNotice(saved);
+    setTimeout(() => setNotice((current) => (current === saved ? null : current)), 4000);
+  });
 
   const reloadLinks = useCallback(async () => {
     setLinks(await listLinkedBrowsers());
@@ -153,6 +164,7 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
           if (active) void listLinkedBrowsers().then(setLinks, () => undefined);
         },
         onSendFailed: (error) => active && setProblem(errorMessage(error)),
+        editor,
       });
       connections.current = manager;
       void manager.sync().catch(() => undefined);
@@ -202,8 +214,8 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
       seatHolders.splice(seatHolders.indexOf(holder), 1);
       if (wasTop) seatHolders.at(-1)?.resume();
     };
-    // Opened once per visit; Pro changes are passed on below.
-  }, []);
+    // Opened once per visit; Pro changes are passed on below. `editor` never changes.
+  }, [editor]);
 
   useEffect(() => {
     isProRef.current = isPro;
@@ -232,9 +244,9 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
           pending.browserName
             ? I18n.t('web_dashboard.confirm_title', { name: pending.browserName })
             : I18n.t('web_dashboard.confirm_title_unnamed'),
-          I18n.t('web_dashboard.confirm_message', {
+          `${I18n.t('web_dashboard.confirm_message', {
             code: `${pending.code.slice(0, 3)} ${pending.code.slice(3)}`,
-          }),
+          })}\n\n${I18n.t('web_dashboard.confirm_edits')}`,
           [
             {
               text: I18n.t('common.cancel'),
@@ -282,6 +294,29 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
     // handleScanned only reads setters and the link itself.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [available, initialPairLink]);
+
+  /** The row's menu: allow or stop this browser's changes, or unlink it. */
+  const handleMenu = (link: LinkedBrowser) => {
+    const name = String(link.name ?? I18n.t('web_dashboard.unknown_browser'));
+    Alert.alert(name, I18n.t(link.edits ? 'web_dashboard.edits_on' : 'web_dashboard.edits_off'), [
+      {
+        text: I18n.t(link.edits ? 'web_dashboard.edits_disallow' : 'web_dashboard.edits_allow'),
+        onPress: () => {
+          void setBrowserEdits(link.roomId, !link.edits)
+            .then(reloadLinks)
+            // That browser gets data with (or without) a token at once.
+            .then(() => connections.current?.refreshBrowser(link.roomId))
+            .catch((error: unknown) => setProblem(errorMessage(error)));
+        },
+      },
+      {
+        text: I18n.t('web_dashboard.unlink'),
+        style: 'destructive',
+        onPress: () => handleUnlink(link),
+      },
+      { text: I18n.t('common.cancel'), style: 'cancel' },
+    ]);
+  };
 
   const handleUnlink = (link: LinkedBrowser) => {
     Alert.alert(
@@ -407,6 +442,13 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
                     )}
                   </Pressable>
                 </View>
+                <Text variant="caption" tone="muted" className="px-1">
+                  {I18n.t(
+                    links.every((link) => link.edits)
+                      ? 'web_dashboard.edit_hint'
+                      : 'web_dashboard.edit_hint_some_read_only',
+                  )}
+                </Text>
                 {links.map((link) => {
                   const state = status[link.roomId]?.state;
                   const live = state === 'online' || state === 'sending';
@@ -429,6 +471,7 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
                             />
                             <Text variant="caption" tone="muted" numberOfLines={1}>
                               {statusLine(status[link.roomId])}
+                              {link.edits ? '' : ` · ${I18n.t('web_dashboard.read_only')}`}
                             </Text>
                           </View>
                         </View>
@@ -447,10 +490,10 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
                           </View>
                         ) : null}
                         <Pressable
-                          onPress={() => handleUnlink(link)}
+                          onPress={() => handleMenu(link)}
                           hitSlop={12}
                           accessibilityRole="button"
-                          accessibilityLabel={`${I18n.t('web_dashboard.unlink')} ${name}`}
+                          accessibilityLabel={`${I18n.t('web_dashboard.browser_options')} ${name}`}
                         >
                           <Ellipsis size={20} color={colors.textMuted} />
                         </Pressable>

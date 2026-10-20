@@ -13,6 +13,18 @@ export function isLiabilityAccountType(accountType: AccountType): boolean {
   return accountType === 'credit' || accountType === 'loan';
 }
 
+/**
+ * Whether a balance correction records as income or as spending. On a
+ * liability a rising balance is more debt, so it records as spending.
+ */
+export function flowTypeForBalanceDelta(
+  accountType: AccountType,
+  delta: number,
+): 'income' | 'expense' {
+  if (isLiabilityAccountType(accountType)) return delta >= 0 ? 'expense' : 'income';
+  return delta >= 0 ? 'income' : 'expense';
+}
+
 export function getNetAssetContribution(accountType: AccountType, balance: number) {
   return isLiabilityAccountType(accountType) ? -balance : balance;
 }

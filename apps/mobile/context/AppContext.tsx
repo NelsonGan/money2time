@@ -222,7 +222,9 @@ export type TransactionSource =
   | 'receipt'
   | 'autolog'
   | 'notification_review'
-  | 'statement_import';
+  | 'statement_import'
+  /** Added in a linked browser's Web Dashboard while this phone was connected. */
+  | 'web_dashboard';
 
 export interface CreateTransactionMeta {
   source?: TransactionSource;
@@ -627,6 +629,16 @@ function computeAlbumStats(
 const DEFERRED_WRITE_MAX_DELAY_MS = 300;
 function runDeferredWrite(task: () => void) {
   runAfterInteractionsCapped(task, DEFERRED_WRITE_MAX_DELAY_MS);
+}
+
+/**
+ * Resolves once every write deferred before the call has run: deferred
+ * writes run in the order they were queued, so this one lands after them.
+ * For callers that read the database right after a save (the Web Dashboard
+ * builds its export from it).
+ */
+export function afterDeferredWrites(): Promise<void> {
+  return new Promise((resolve) => runDeferredWrite(() => setTimeout(resolve, 0)));
 }
 
 // How long the foreground auto-backup waits after launch or a return to the

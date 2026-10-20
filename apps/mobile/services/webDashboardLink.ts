@@ -21,13 +21,20 @@
  *                     at most WINDOW ahead of
  *             browser → {t:'ack', id, n}
  *             phone → sealed {type:'end', id};  browser → sealed {type:'done', id, ok}
+ *   edit:     browser → sealed {type:'edit', id, token, ops}  (webDashboardEdits.ts)
+ *             phone → sealed {type:'offer'} to every browser here, so each asks for
+ *                     the changed data, and to this one a sealed
+ *                     {type:'edited', id, ok, count, version | error, feature?}
  *   unlink:   either → sealed {type:'unlink'};  the other → sealed {type:'unlinked'}
  *             (repeated whenever they meet until acknowledged, so an unlink
  *             made while the other side is closed still arrives)
  *
  * A transfer must echo the nonce of a request the browser made, each nonce
  * is answered once, and every chunk is bound to its transfer, index and count,
- * so a relay cannot reflect, replay, reorder or truncate anything. Both sides
+ * so a relay cannot reflect, replay, reorder or truncate anything. An edit
+ * must carry the single-use token sent with the browser's latest data
+ * (`meta.editToken`, per browser), so it is made against the phone's current
+ * copy and cannot be replayed. Both sides
  * send "ping" every 25 s; the relay answers "pong" without waking, and a
  * missing pong means the socket is dead.
  */
@@ -67,6 +74,11 @@ export type LinkRecord = {
   name: string | null;
   createdAt: number;
   lastSentAt: number | null;
+  /**
+   * The person allowed this browser to make changes. Set when a link is
+   * confirmed; links made before web edits existed lack it until allowed.
+   */
+  edits?: boolean;
 };
 
 type TransferMeta = {
@@ -78,6 +90,13 @@ type TransferMeta = {
   timeZone: string | null;
   /** Money2Time Pro on this phone, so the dashboard can unlock Pro views. */
   pro: boolean;
+  /**
+   * The single-use token this browser's next edit must carry; set per browser
+   * when it is sent. Its presence also tells the browser this phone takes edits.
+   */
+  editToken?: string | null;
+  /** The phone's data version this copy was made at; a saved change raises it. */
+  version?: number;
   /** Gzipped bytes in all. */
   size: number;
   count: number;
@@ -327,6 +346,11 @@ type SessionEvents = {
    * with `unlinking`) the browser acknowledged this phone's unlink.
    */
   onUnlinked?: () => void;
+  /**
+   * The browser sent changes to save. Resolves with the reply it gets; the
+   * session sends it. Without a handler every edit is refused.
+   */
+  onEdit?: (message: Record<string, unknown>) => Promise<Record<string, unknown>>;
 };
 
 type Transfer = {
@@ -362,6 +386,8 @@ export class PhoneSession {
   private nonce: string | null = null;
   /** Requests already answered, so a replayed one does nothing. */
   private seen: string[] = [];
+  /** Edits already handled; the edit token refuses a replay too. */
+  private seenEdits: string[] = [];
   private sending = false;
   private transfer: Transfer | null = null;
 
@@ -506,6 +532,26 @@ export class PhoneSession {
       this.events.onWant?.(Boolean(inner.force));
     } else if (inner.type === 'done' && this.transfer && inner.id === this.transfer.id) {
       this.transfer.done?.(inner.ok === true);
+    } else if (
+      inner.type === 'edit' &&
+      typeof inner.id === 'string' &&
+      /^[\w-]{16}$/.test(inner.id)
+    ) {
+      const id = inner.id;
+      if (this.seenEdits.includes(id)) return;
+      this.seenEdits = [...this.seenEdits.slice(-(SEEN_NONCES - 1)), id];
+      const socket = this.socket;
+      const handle = this.events.onEdit;
+      void (
+        handle
+          ? handle(inner as Record<string, unknown>)
+          : Promise.resolve({ ok: false, error: 'invalid' })
+      )
+        .catch(() => ({ ok: false, error: 'failed' }))
+        .then((reply) => {
+          // The reply belongs to the connection the edit came on.
+          if (this.socket === socket) this.sendSealed({ ...reply, type: 'edited', id });
+        });
     }
   }
 
@@ -526,7 +572,10 @@ export class PhoneSession {
    * there and has asked, so an absent browser costs nothing. Resolves when the
    * browser has checked and opened it.
    */
-  async send(prepare: () => Promise<PreparedTransfer>): Promise<void> {
+  async send(
+    prepare: () => Promise<PreparedTransfer>,
+    opts: { editToken?: string | null } = {},
+  ): Promise<void> {
     if (this.sending || this.unlinking) throw new LinkError('rejected');
     if (this.state !== 'online' || !this.socket || !this.nonce) throw new LinkError('closed');
     this.sending = true;
@@ -538,7 +587,7 @@ export class PhoneSession {
     try {
       const prepared = await prepare();
       if (this.socket !== socket || !this.browserHere) throw new LinkError('closed');
-      const { meta } = prepared;
+      const meta: TransferMeta = { ...prepared.meta, editToken: opts.editToken ?? null };
       const transfer: Transfer = {
         id: meta.id,
         sent: 0,

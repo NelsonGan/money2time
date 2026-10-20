@@ -2399,6 +2399,8 @@ const fil = {
     confirm_title_unnamed: 'I-link ang browser na ito?',
     confirm_message:
       'Tiyaking ipinapakita ng computer ang code na {{code}}. Magpatuloy lang kung ikaw mismo ang nagbukas ng app.money2time.com sa computer na ginagamit mo: matatanggap nito ang lahat ng data mo tuwing bukas ang screen na ito.',
+    confirm_edits:
+      'Habang bukas ang screen na ito, puwede rin itong magdagdag, magbago at magbura ng iyong mga entry.',
     confirm_waiting: 'Ngayon, i-click din ang I-link sa computer.',
     confirm_action: 'I-link',
     browsers_title: 'Naka-link',
@@ -2409,6 +2411,19 @@ const fil = {
     status_closed: 'Hindi bukas',
     just_now: 'ngayon',
     last_sent: 'Huling naipadala {{date}}',
+    edit_hint:
+      'Habang bukas ang screen na ito, puwede ring magdagdag, mag-edit at magbura ng mga entry ang naka-link na browser. Sine-save ang mga pagbabago sa phone na ito.',
+    edit_saved: 'Na-save ang mga pagbabago mula sa browser.',
+    browser_options: 'Mga opsyon ng browser',
+    edits_on:
+      'Puwedeng magdagdag, mag-edit at magbura ng mga entry ang browser na ito habang bukas ang screen na ito.',
+    edits_off:
+      'Pagtingin lang ang magagawa ng browser na ito sa iyong data. Payagan ang mga pagbabago para makapagdagdag, makapag-edit at makapagbura ng mga entry mula rito habang bukas ang screen na ito.',
+    edits_allow: 'Payagan ang mga pagbabago',
+    edits_disallow: 'Pagtingin lang',
+    read_only: 'Pagtingin lang',
+    edit_hint_some_read_only:
+      'Habang bukas ang screen na ito, puwede ring magdagdag, mag-edit at magbura ng mga entry ang mga browser na pinayagan mo. I-tap ang ⋯ sa tabi ng browser para payagan ito. Sine-save ang mga pagbabago sa phone na ito.',
     send_now: 'Ipadala ngayon',
     open_web: 'Buksan ang app.money2time.com',
     unlink: 'I-unlink',

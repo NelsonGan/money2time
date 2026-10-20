@@ -2399,6 +2399,8 @@ const fr = {
     confirm_title_unnamed: 'Associer ce navigateur ?',
     confirm_message:
       "Vérifiez que l'ordinateur affiche le code {{code}}. Ne continuez que si vous avez ouvert vous-même app.money2time.com sur un ordinateur que vous utilisez : il recevra toutes vos données chaque fois que cet écran est ouvert.",
+    confirm_edits:
+      'Tant que cet écran est ouvert, il pourra aussi ajouter, modifier et supprimer vos opérations.',
     confirm_waiting: "Cliquez maintenant aussi sur Associer sur l'ordinateur.",
     confirm_action: 'Associer',
     browsers_title: 'Associés',
@@ -2409,6 +2411,19 @@ const fr = {
     status_closed: 'Non ouvert',
     just_now: 'à l’instant',
     last_sent: 'Dernier envoi {{date}}',
+    edit_hint:
+      'Tant que cet écran est ouvert, un navigateur associé peut aussi ajouter, modifier et supprimer des opérations. Les modifications sont enregistrées sur ce téléphone.',
+    edit_saved: 'Modifications du navigateur enregistrées.',
+    browser_options: 'Options du navigateur',
+    edits_on:
+      'Ce navigateur peut ajouter, modifier et supprimer des opérations tant que cet écran est ouvert.',
+    edits_off:
+      'Ce navigateur peut seulement consulter vos données. Autorisez les modifications pour ajouter, modifier et supprimer des opérations depuis celui-ci tant que cet écran est ouvert.',
+    edits_allow: 'Autoriser les modifications',
+    edits_disallow: 'Lecture seule',
+    read_only: 'Lecture seule',
+    edit_hint_some_read_only:
+      "Tant que cet écran est ouvert, les navigateurs que vous autorisez peuvent aussi ajouter, modifier et supprimer des opérations. Touchez ⋯ à côté d'un navigateur pour l'autoriser. Les modifications sont enregistrées sur ce téléphone.",
     send_now: 'Envoyer',
     open_web: 'Ouvrir app.money2time.com',
     unlink: 'Dissocier',
