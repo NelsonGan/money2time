@@ -44,9 +44,29 @@ function toAllowedLine(list: string[]): string {
 }
 
 export interface BuiltPrompt {
+  /** The whole prompt: `shared` followed by `personal`. */
   text: string;
+  /** The part every user is sent word for word, which Claude caches once for all of them. */
+  shared: string;
+  /** This user's settings (currency, categories, accounts); empty for a template without them. */
+  personal: string;
   /** The mode's main prompt, for `$ai_prompt_name` / `$ai_prompt_version`. */
   prompt: ResolvedPrompt;
+}
+
+/**
+ * Where a template's per-user part starts. Everything above it is the same for
+ * every user, so Claude's prompt cache can hold it once for all of them; a
+ * template without it (an older hosted version) is cached per user as a whole.
+ */
+export const USER_SETTINGS_HEADING = "## This user's settings";
+
+/** The compiled prompt, split where the template's per-user part starts. */
+function built(template: string, variables: Record<string, string>, prompt: ResolvedPrompt) {
+  const at = template.indexOf(USER_SETTINGS_HEADING);
+  const shared = compilePrompt(at < 0 ? template : template.slice(0, at), variables);
+  const personal = at < 0 ? '' : compilePrompt(template.slice(at), variables);
+  return { text: shared + personal, shared, personal, prompt };
 }
 
 // Build the prompt for `mode` from its PostHog-hosted template (bundled copy as
@@ -78,14 +98,14 @@ export async function buildReceiptPrompt(
     variables.accounts_section = accountsPrompt
       ? compilePrompt(accountsPrompt.template, { allowed_accounts: accountsLine })
       : NO_ACCOUNTS_SECTION;
-    return { text: compilePrompt(main.template, variables), prompt: main };
+    return built(main.template, variables, main);
   }
 
   const prompt = await resolvePrompt(
     env,
     mode === 'itemized' ? PROMPT_NAMES.itemized : PROMPT_NAMES.quick,
   );
-  return { text: compilePrompt(prompt.template, variables), prompt };
+  return built(prompt.template, variables, prompt);
 }
 
 /** The output-token budget for `mode` (each path owns its own). */

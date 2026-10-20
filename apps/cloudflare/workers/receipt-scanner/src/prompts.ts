@@ -62,19 +62,22 @@ Emit exactly ONE transaction per receipt (one array element each). Never split a
 The final total is what the customer actually paid, AFTER tax, tip and discounts — usually the largest money figure near the bottom, labelled TOTAL, GRAND TOTAL, AMOUNT DUE, BALANCE DUE, or the amount charged to the card. If both a SUBTOTAL and a TOTAL are printed, use the TOTAL. Ignore SUBTOTAL, individual TAX/VAT/GST lines, AMOUNT TENDERED / CASH / CARD / PAID, CHANGE, loyalty balances, and per-item unit prices.
 
 ## Output schema
-{"transactions":[{"type":"expense","amount":0.00,"currency":"{{currency_code}}","date":"YYYY-MM-DD","category":"Other","note":"string"}]}
+{"transactions":[{"type":"expense","amount":0.00,"currency":"XXX","date":"YYYY-MM-DD","category":"Other","note":"string"}]}
 
 - type: "expense" | "income" — receipts are almost always "expense".
 - amount: the receipt's FINAL TOTAL. Number only, 2 decimals, "." decimal separator, strip currency symbols and thousands separators (e.g. "1.234,56" -> 1234.56).
-- currency: ALWAYS "{{currency_code}}". Never detect or convert currency.
+- currency: ALWAYS the currency code under "This user's settings" below ("XXX" in the schema stands for it). Never detect or convert currency.
 - date: "YYYY-MM-DD" from the receipt. If only day/month show, infer the most recent plausible year; null if absent.
 - note: the merchant name (e.g. "Walmart").
 
-## Allowed categories (pick the single best fit — value must match EXACTLY, case included)
-{{allowed_categories}}
-If nothing fits well, use "Other" when present, otherwise the closest general-purpose category. Never invent a category.
+## Category
+Pick the single best fit from the allowed categories under "This user's settings" below; the value must match EXACTLY, case included. If nothing fits well, use "Other" when present, otherwise the closest general-purpose category. Never invent a category.
 
-If the image has no readable receipt, return {"transactions":[]}.`,
+If the image has no readable receipt, return {"transactions":[]}.
+
+## This user's settings
+Currency: {{currency_code}}
+Allowed categories: {{allowed_categories}}`,
 
   'receipt-scan-itemized': `You are a receipt-parsing engine for a personal finance app, given an image of one or more receipts. Return ONLY minified JSON — a single line, no extra whitespace, no prose, no markdown, no code fences.
 
@@ -85,19 +88,22 @@ If the image has no readable receipt, return {"transactions":[]}.`,
 The final total is what the customer actually paid, AFTER tax, tip and discounts — usually the largest money figure near the bottom, labelled TOTAL, GRAND TOTAL, AMOUNT DUE, BALANCE DUE, or the amount charged to the card. If both a SUBTOTAL and a TOTAL are printed, use the TOTAL. Ignore SUBTOTAL, tax/VAT/GST lines, AMOUNT TENDERED / CASH / CARD / CHANGE, and loyalty balances.
 
 ## Output schema
-{"transactions":[{"type":"expense","amount":0.00,"currency":"{{currency_code}}","date":"YYYY-MM-DD","category":"Other","note":"string"}],"receiptDetail":{"merchant":"string","date":"YYYY-MM-DD","currency":"USD","items":[{"name":"string","quantity":1,"lineTotal":0.00,"confidence":"high"}],"itemsConfidence":"high"}}
+{"transactions":[{"type":"expense","amount":0.00,"currency":"XXX","date":"YYYY-MM-DD","category":"Other","note":"string"}],"receiptDetail":{"merchant":"string","date":"YYYY-MM-DD","currency":"USD","items":[{"name":"string","quantity":1,"lineTotal":0.00,"confidence":"high"}],"itemsConfidence":"high"}}
 
-- transactions[].amount/currency follow the total rules above; "currency" is ALWAYS "{{currency_code}}".
+- transactions[].amount/currency follow the total rules above; "currency" is ALWAYS the currency code under "This user's settings" below ("XXX" in the schema stands for it).
 - receiptDetail.currency: the ISO code detected from the receipt's own symbols/labels (e.g. "MYR", "JPY"); null when unsure — never guess.
 - items: one entry per purchased line, top to bottom. ALWAYS include "quantity": the printed count of units on that line (a whole number when the receipt shows "2", "3x", "2 @", etc.; default 1; a weight like 0.45 is allowed). "lineTotal" is that line's total pre-tax cost for ALL its units (fold in any per-item discount), number only, 2 decimals. Do NOT include subtotal, tax, service charge, tips, receipt-level discounts, rounding, change, loyalty points, or payment lines as items — the app adds tax/service itself.
 - "confidence" / "itemsConfidence": "high" | "low" ("low" when hard to read). If the item section is unreadable, return "items":[] with "itemsConfidence":"low". Never invent items.
 - date fields: "YYYY-MM-DD"; infer the recent plausible year from a day/month; null if absent.
 
-## Allowed categories (pick the single best fit — value must match EXACTLY, case included)
-{{allowed_categories}}
-If nothing fits well, use "Other" when present, otherwise the closest general-purpose category. Never invent a category.
+## Category
+Pick the single best fit from the allowed categories under "This user's settings" below; the value must match EXACTLY, case included. If nothing fits well, use "Other" when present, otherwise the closest general-purpose category. Never invent a category.
 
-If the image has no readable receipt, return {"transactions":[]} with no "receiptDetail".`,
+If the image has no readable receipt, return {"transactions":[]} with no "receiptDetail".
+
+## This user's settings
+Currency: {{currency_code}}
+Allowed categories: {{allowed_categories}}`,
 
   'receipt-scan-screenshot': `You are a transaction-parsing engine for a personal finance app, given a screenshot from a phone: a bank or card app, a payment/wallet confirmation (PayPal, Apple Pay, GCash, etc.), a transfer receipt, a purchase notification, or a photo of a paper receipt. Return ONLY minified JSON — a single line, no extra whitespace, no prose, no markdown, no code fences.
 
@@ -109,22 +115,25 @@ Every transaction is an "expense" — the app records these as money spent. Repo
 Use the amount actually transacted — the total charged or sent. On a paper receipt that is the final TOTAL after tax, tip and discounts (ignore SUBTOTAL, tax lines, AMOUNT TENDERED / CASH / CARD / PAID, and CHANGE). On a payment or banking screen it is the headline amount of the payment. Number only, 2 decimals, "." decimal separator, strip currency symbols and thousands separators (e.g. "1.234,56" -> 1234.56).
 
 ## Output schema
-{"transactions":[{"type":"expense","amount":0.00,"currency":"{{currency_code}}","date":"YYYY-MM-DD","category":"Other","note":"string","account":""}]}
+{"transactions":[{"type":"expense","amount":0.00,"currency":"XXX","date":"YYYY-MM-DD","category":"Other","note":"string","account":""}]}
 
 - type: ALWAYS "expense".
 - amount: per the amount rule above.
-- currency: ALWAYS "{{currency_code}}". Never detect or convert currency.
+- currency: ALWAYS the currency code under "This user's settings" below ("XXX" in the schema stands for it). Never detect or convert currency.
 - date: "YYYY-MM-DD" from the screen. If only day/month show, infer the most recent plausible year; null if absent.
 - note: the merchant, payee, or payer shown (e.g. "Walmart", "John Smith").
-- account: per the account rules below; "" when unknown.
+- account: per the account rules at the end; "" when unknown.
 
-## Allowed categories (pick the single best fit — value must match EXACTLY, case included)
-{{allowed_categories}}
-If nothing fits well, use "Other" when present, otherwise the closest general-purpose category. Never invent a category.
+## Category
+Pick the single best fit from the allowed categories under "This user's settings" below; the value must match EXACTLY, case included. If nothing fits well, use "Other" when present, otherwise the closest general-purpose category. Never invent a category.
 
-{{accounts_section}}
+If the image shows no readable payment or receipt, return {"transactions":[]}.
 
-If the image shows no readable payment or receipt, return {"transactions":[]}.`,
+## This user's settings
+Currency: {{currency_code}}
+Allowed categories: {{allowed_categories}}
+
+{{accounts_section}}`,
 
   'receipt-scan-screenshot-accounts': `## Detecting the account (the payment source)
 Screenshots usually show WHERE the money moved: a card ("Visa ••1234", "•• 4242"), a bank or account name ("Chase Checking"), or a wallet/app ("GCash", "PayPal", "Apple Pay"). If the source shown clearly corresponds to exactly ONE of the user's accounts below, set "account" to that account's name — the value must match EXACTLY, case included. If no source is shown, or no listed account is a clear match, set "account" to "". Never invent an account name and never guess between two candidates.

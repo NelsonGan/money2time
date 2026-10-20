@@ -1184,7 +1184,7 @@ The [receipt-scanner Worker](#receipt-scanner-worker) sends one `$ai_generation`
 
 The four receipt-scan prompts live in PostHog prompt management (AI observability → Prompts): `receipt-scan-quick`, `receipt-scan-itemized`, `receipt-scan-screenshot` and `receipt-scan-screenshot-accounts` (the account-matching section inserted into the screenshot prompt when the app sends account names). Variables use `{{currency_code}}`, `{{allowed_categories}}`, `{{accounts_section}}` and `{{allowed_accounts}}`, filled in one pass so a category or account name containing `{{…}}` stays literal text.
 
-- The Worker ([src/prompts.ts](apps/cloudflare/workers/receipt-scanner/src/prompts.ts)) serves the version the `production` label points at, cached for 30 minutes in the Cloudflare location's cache (shared by every isolate there) and in the isolate (each fetch is a billable `$llm_prompt_fetched` event; at 5 minutes they measured ~37,000 a month), served stale for a minute while a refresh fails, with a 2-second fetch timeout. The location cache exists because isolates are so short-lived that an isolate-only cache missed on almost every scan (743 fetches for 744 model calls on the first day). Without a usable PostHog answer it uses its bundled copies, which were published as version 1 and are byte-identical to the prompts the Worker used before.
+- The Worker ([src/prompts.ts](apps/cloudflare/workers/receipt-scanner/src/prompts.ts)) serves the version the `production` label points at, cached for 30 minutes in the Cloudflare location's cache (shared by every isolate there) and in the isolate (each fetch is a billable `$llm_prompt_fetched` event; at 5 minutes they measured ~37,000 a month), served stale for a minute while a refresh fails, with a 2-second fetch timeout. The location cache exists because isolates are so short-lived that an isolate-only cache missed on almost every scan (743 fetches for 744 model calls on the first day). Without a usable PostHog answer it uses its bundled copies, which match the version the `production` label should point at (version 2 of the three receipt prompts, which moved the user's settings to the end; version 1 of `receipt-scan-screenshot-accounts`).
 - Reads use `POSTHOG_PROMPTS_API_KEY`, a Worker secret holding a personal API key ("Receipt prompts read") scoped to `llm_prompt:read` only. Unset, the Worker serves the bundled copies.
 - To check which prompt production uses, filter `$ai_generation` by `prompt_source`: `posthog` with a `$ai_prompt_version` means the hosted prompt was served; `bundled` means the key is missing or PostHog was unreachable. Each fetch also appears as a `$llm_prompt_fetched` event (see the budget).
 - To change a prompt: edit it in PostHog (each save is a new immutable version), compare its generations, then move the `production` label; the Worker picks it up within 30 minutes (an isolate that reads the location cache's copy expires it 30 minutes after that copy was fetched, not after the read). Roll back by moving the label back. Copy a change that should survive a PostHog outage into `BUNDLED_PROMPTS` too.
@@ -1930,17 +1930,22 @@ and three things hold that line:
   isolate's scans, and PostHog records it as `byok: false` on the generation.
   An answer with no `is_byok` at all logs `byok_unverified`.
 
-Claude's prompt text, ahead of the receipt, is marked for Anthropic's 5-minute
-prompt cache (`PROMPT_CACHE`); a hit costs a tenth of the input price. The
-prompt carries the user's currency, categories and accounts, so a cache entry
-serves one user's next scans and anyone with the same settings, the defaults
-most of all. The fixed part before the first of those is under Haiku's
-512-token minimum, so no prefix is shared by everyone. 5 minutes rather than an
-hour because the same user repeats a scan of the same mode within 5 minutes
-36-40% of the time and barely more within an hour: the 5-minute write costs
-1.25x and is repaid at a 22% hit rate, the hour's costs 2x and needs over 52%.
-In testing, a scan that hit read the 717-token prompt from cache and cost about 20% less in all, the
-receipt image being most of the input.
+Each receipt prompt ends with a `## This user's settings` section holding the
+user's currency, categories and accounts (`USER_SETTINGS_HEADING`), and nothing
+above it changes from user to user. Claude is sent the two parts as separate
+text blocks ahead of the image, and the shared one is marked for Anthropic's
+1-hour prompt cache (`SHARED_PROMPT_CACHE`), so one cached copy serves every
+user; a hit costs a tenth of the input price, a write twice it. An hour rather
+than 5 minutes because any user's scan keeps it warm: a scan follows another of
+its mode within an hour 100% (screenshot), 99% (quick) and 74% (itemized) of
+the time, but within 5 minutes only 98%, 75% and 35%. Other models are sent the
+same text as one block, as before. A hosted template without the settings
+section (anything published before it) has no shared part, so the whole prompt
+is cached per user for 5 minutes (`PER_USER_PROMPT_CACHE`), which is how it
+worked before the settings moved: the same user repeats a scan within 5 minutes
+36-40% of the time and barely more within an hour, so there 5 minutes is the
+cheaper. Keep per-user text out of the part above the heading, or every scan
+writes a cache entry nobody else reads.
 
 Claude is sent no temperature, and an answer from it with no JSON object in it
 counts as a failure rather than an empty result, so the backup gets the receipt.
