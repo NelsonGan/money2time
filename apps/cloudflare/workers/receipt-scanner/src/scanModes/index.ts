@@ -48,7 +48,10 @@ export interface BuiltPrompt {
   text: string;
   /** The part every user is sent word for word, which Claude caches once for all of them. */
   shared: string;
-  /** This user's settings (currency, categories, accounts); empty for a template without them. */
+  /**
+   * This user's settings (currency, categories, accounts); empty when the
+   * template has no shareable part, and `shared` is then the whole prompt.
+   */
   personal: string;
   /** The mode's main prompt, for `$ai_prompt_name` / `$ai_prompt_version`. */
   prompt: ResolvedPrompt;
@@ -61,12 +64,26 @@ export interface BuiltPrompt {
  */
 export const USER_SETTINGS_HEADING = "## This user's settings";
 
-/** The compiled prompt, split where the template's per-user part starts. */
-function built(template: string, variables: Record<string, string>, prompt: ResolvedPrompt) {
+/**
+ * The compiled prompt, split where the template's per-user part starts. A
+ * template whose part above the heading is blank or fills in a variable (a
+ * hosted edit that put the currency back in the schema, say) has nothing every
+ * user shares, so it is treated like one without the heading: cached whole and
+ * per user, rather than an hour-long cache write per user that nobody reads,
+ * or an empty block Anthropic rejects.
+ */
+function built(
+  template: string,
+  variables: Record<string, string>,
+  prompt: ResolvedPrompt,
+): BuiltPrompt {
+  const text = compilePrompt(template, variables);
   const at = template.indexOf(USER_SETTINGS_HEADING);
-  const shared = compilePrompt(at < 0 ? template : template.slice(0, at), variables);
-  const personal = at < 0 ? '' : compilePrompt(template.slice(at), variables);
-  return { text: shared + personal, shared, personal, prompt };
+  const shared = at < 0 ? '' : template.slice(0, at);
+  if (!shared.trim() || compilePrompt(shared, variables) !== shared) {
+    return { text, shared: text, personal: '', prompt };
+  }
+  return { text, shared, personal: compilePrompt(template.slice(at), variables), prompt };
 }
 
 // Build the prompt for `mode` from its PostHog-hosted template (bundled copy as
@@ -89,9 +106,7 @@ export async function buildReceiptPrompt(
     const accountsLine = toAllowedLine(Array.isArray(accounts) ? accounts : []);
     const [main, accountsPrompt] = await Promise.all([
       resolvePrompt(env, PROMPT_NAMES.screenshot),
-      accountsLine
-        ? resolvePrompt(env, PROMPT_NAMES.screenshotAccounts)
-        : Promise.resolve(null),
+      accountsLine ? resolvePrompt(env, PROMPT_NAMES.screenshotAccounts) : Promise.resolve(null),
     ]);
     // No account list to match against: pin `account` to "" and drop the
     // matching section rather than invite a free-text guess the app can't use.

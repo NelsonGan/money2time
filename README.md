@@ -1940,8 +1940,8 @@ than 5 minutes because any user's scan keeps it warm: a scan follows another of
 its mode within an hour 100% (screenshot), 99% (quick) and 74% (itemized) of
 the time, but within 5 minutes only 98%, 75% and 35%. Other models are sent the
 same text as one block, as before. A hosted template without the settings
-section (anything published before it) has no shared part, so the whole prompt
-is cached per user for 5 minutes (`PER_USER_PROMPT_CACHE`), which is how it
+section (anything published before it), or with nothing or a `{{…}}` variable
+above it, has no shared part, so the whole prompt is cached per user for 5 minutes (`PER_USER_PROMPT_CACHE`), which is how it
 worked before the settings moved: the same user repeats a scan within 5 minutes
 36-40% of the time and barely more within an hour, so there 5 minutes is the
 cheaper. Keep per-user text out of the part above the heading, or every scan

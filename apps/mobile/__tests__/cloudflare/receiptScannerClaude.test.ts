@@ -209,6 +209,40 @@ describe('receipt scanner with Claude as MODEL', () => {
     });
   });
 
+  it.each([
+    [
+      'fills in a variable above the settings',
+      "Pay in {{currency_code}}\n## This user's settings\n{{allowed_categories}}",
+      "Pay in MYR\n## This user's settings\nFood, Other",
+    ],
+    [
+      'has nothing above the settings',
+      "## This user's settings\n{{currency_code}}",
+      "## This user's settings\nMYR",
+    ],
+  ])('caches a hosted template that %s whole and per user', async (_, prompt, text) => {
+    fetchMock.mockImplementation(async (url: string) => {
+      if (url.includes('/llm_prompts/'))
+        return new Response(JSON.stringify({ prompt, version: 3 }));
+      if (url.includes('openrouter.ai')) return completion(ANSWER, BYOK_USAGE)();
+      return new Response('{"status":"Ok"}');
+    });
+    await worker.fetch(request(), { ...env, POSTHOG_PROMPTS_API_KEY: 'phx_test' }, ctx);
+    const content = sent()[0].messages[0].content;
+    expect(content).toHaveLength(2);
+    expect(content[0]).toEqual({ type: 'text', text, cache_control: { type: 'ephemeral' } });
+  });
+
+  it.each(['receipt-scan-quick', 'receipt-scan-itemized', 'receipt-scan-screenshot'])(
+    'keeps every variable of the bundled %s below the settings heading',
+    (name) => {
+      const template: string = prompts.BUNDLED_PROMPTS[name];
+      const at = template.indexOf("## This user's settings");
+      expect(at).toBeGreaterThan(0);
+      expect(template.slice(0, at)).not.toContain('{{');
+    },
+  );
+
   it('sends an image as the type its bytes are, not the type it was declared', async () => {
     answers.push(completion(ANSWER, BYOK_USAGE));
     await worker.fetch(request({ image: PNG, mime: 'image/jpeg' }), env, ctx);
