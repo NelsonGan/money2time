@@ -153,7 +153,7 @@ const fr = {
       },
       notificationReview: {
         title: 'Enregistrez vos paiements depuis les notifications',
-        body: 'Les notifications de votre banque et de votre portefeuille électronique vous attendent désormais en brouillon. Choisissez Revenus, Dépenses ou Ignorer, une par une ou toutes d’un coup. Elles sont lues sur votre téléphone, jamais par une IA. Activez-le dans Réglages > Automatisation.',
+        body: 'Les notifications de votre banque et de votre portefeuille électronique vous attendent désormais en brouillon. Choisissez Revenus, Dépenses ou Ignorer, une par une ou toutes d’un coup. Activez-le dans Réglages > Automatisation.',
       },
       fasterScans: {
         title: 'Scan des reçus 50 % plus rapide',

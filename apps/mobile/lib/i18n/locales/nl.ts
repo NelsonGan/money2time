@@ -153,7 +153,7 @@ const nl = {
       },
       notificationReview: {
         title: 'Betalingen vastleggen uit meldingen',
-        body: 'Meldingen van je bank en e-wallet staan nu als concept voor je klaar. Kies Inkomsten, Uitgaven of Negeren, één voor één of allemaal tegelijk. Ze worden op je telefoon gelezen, nooit door AI. Stel het in via Instellingen > Automatisering.',
+        body: 'Meldingen van je bank en e-wallet staan nu als concept voor je klaar. Kies Inkomsten, Uitgaven of Negeren, één voor één of allemaal tegelijk. Stel het in via Instellingen > Automatisering.',
       },
       fasterScans: {
         title: 'Bonnen scannen, 50% sneller',

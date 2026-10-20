@@ -153,7 +153,7 @@ const ms = {
       },
       notificationReview: {
         title: 'Rekod bayaran daripada pemberitahuan',
-        body: 'Pemberitahuan bank dan e-dompet kini menunggu anda sebagai draf. Pilih Pendapatan, Perbelanjaan atau Abaikan, satu demi satu atau semuanya sekali gus. Ia dibaca pada telefon anda, tidak sekali-kali oleh AI. Sediakannya di Tetapan > Automasi.',
+        body: 'Pemberitahuan bank dan e-dompet kini menunggu anda sebagai draf. Pilih Pendapatan, Perbelanjaan atau Abaikan, satu demi satu atau semuanya sekali gus. Sediakannya di Tetapan > Automasi.',
       },
       fasterScans: {
         title: 'Imbasan resit 50% lebih pantas',

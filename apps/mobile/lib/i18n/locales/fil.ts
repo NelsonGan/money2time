@@ -153,7 +153,7 @@ const fil = {
       },
       notificationReview: {
         title: 'Itala ang mga bayad mula sa notification',
-        body: 'Naghihintay na ngayon bilang draft ang mga notification mula sa bangko at e-wallet. Piliin ang Kita, Gastos o Huwag pansinin, isa-isa o lahat nang sabay. Binabasa ang mga ito sa phone mo, hindi kailanman ng AI. I-set up sa Settings > Automation.',
+        body: 'Naghihintay na ngayon bilang draft ang mga notification mula sa bangko at e-wallet. Piliin ang Kita, Gastos o Huwag pansinin, isa-isa o lahat nang sabay. I-set up sa Settings > Automation.',
       },
       fasterScans: {
         title: 'Pag-scan ng resibo, 50% mas mabilis',

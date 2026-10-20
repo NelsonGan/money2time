@@ -153,7 +153,7 @@ const tr = {
       },
       notificationReview: {
         title: 'Bildirimlerden ödeme kaydı',
-        body: 'Banka ve e-cüzdan bildirimleri artık taslak olarak sizi bekliyor. Gelir, Gider veya Yok say seçeneğini tek tek ya da hepsine birden uygulayın. Bildirimler telefonunuzda okunur, asla yapay zekâya gönderilmez. Ayarlar > Otomasyon bölümünden açın.',
+        body: 'Banka ve e-cüzdan bildirimleri artık taslak olarak sizi bekliyor. Gelir, Gider veya Yok say seçeneğini tek tek ya da hepsine birden uygulayın. Ayarlar > Otomasyon bölümünden açın.',
       },
       fasterScans: {
         title: 'Fiş tarama %50 daha hızlı',

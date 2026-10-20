@@ -153,7 +153,7 @@ const nb = {
       },
       notificationReview: {
         title: 'Registrer betalinger fra varsler',
-        body: 'Varsler fra banken og e-lommeboken venter nå på deg som utkast. Velg Inntekt, Utgift eller Ignorer, ett om gangen eller alle samtidig. De leses på telefonen din, aldri av KI. Slå det på under Innstillinger > Automatisering.',
+        body: 'Varsler fra banken og e-lommeboken venter nå på deg som utkast. Velg Inntekt, Utgift eller Ignorer, ett om gangen eller alle samtidig. Slå det på under Innstillinger > Automatisering.',
       },
       fasterScans: {
         title: 'Kvitteringsskanning 50 % raskere',

@@ -153,7 +153,7 @@ const es = {
       },
       notificationReview: {
         title: 'Registra pagos desde las notificaciones',
-        body: 'Las notificaciones de tu banco y tu billetera digital ahora te esperan como borradores. Elige Ingresos, Gastos o Ignorar, una a una o todas a la vez. Se leen en tu teléfono, nunca con IA. Actívalo en Ajustes > Automatización.',
+        body: 'Las notificaciones de tu banco y tu billetera digital ahora te esperan como borradores. Elige Ingresos, Gastos o Ignorar, una a una o todas a la vez. Actívalo en Ajustes > Automatización.',
       },
       fasterScans: {
         title: 'Escaneo de recibos un 50 % más rápido',

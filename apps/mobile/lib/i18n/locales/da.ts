@@ -153,7 +153,7 @@ const da = {
       },
       notificationReview: {
         title: 'Registrer betalinger fra notifikationer',
-        body: 'Notifikationer fra banken og e-tegnebogen venter nu på dig som kladder. Vælg Indtægt, Udgift eller Ignorer, en ad gangen eller alle på én gang. De læses på din telefon, aldrig af AI. Slå det til under Indstillinger > Automatisering.',
+        body: 'Notifikationer fra banken og e-tegnebogen venter nu på dig som kladder. Vælg Indtægt, Udgift eller Ignorer, en ad gangen eller alle på én gang. Slå det til under Indstillinger > Automatisering.',
       },
       fasterScans: {
         title: 'Kvitteringsscanning 50 % hurtigere',
