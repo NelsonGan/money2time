@@ -239,7 +239,7 @@ async function api(request: Request, env: Env, url: URL): Promise<Response> {
       const primary = primaryId ? await getDevice(env, userId, primaryId) : null;
       throw new HttpError(409, 'not_primary', { primaryDevice: devicePublic(primary) });
     }
-    const max = Number(env.MAX_BACKUP_BYTES) || 100 * 1024 * 1024;
+    const max = Number(env.MAX_BACKUP_BYTES) || 64 * 1024 * 1024;
     if (!Number.isInteger(body.size) || (body.size as number) <= 0 || (body.size as number) > max) {
       throw new HttpError(413, 'invalid_size', { maxBytes: max });
     }

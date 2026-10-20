@@ -53,8 +53,10 @@ EMAIL_FROM = "hello@money2time.com"
 GOOGLE_CLIENT_IDS = ""
 # RevenueCat entitlement that counts as Pro (same as the receipt scanner).
 ENTITLEMENT_ID = "pro"
-# Largest compressed backup accepted, in bytes.
-MAX_BACKUP_BYTES = "104857600"
+# Largest compressed backup accepted, in bytes. The Worker holds an upload in
+# memory to check its size and checksum, so this stays well under the 128 MB
+# isolate limit; a five-year database with photos gzips to about 9 MB.
+MAX_BACKUP_BYTES = "67108864"
 
 # Secrets — add in the Cloudflare dashboard (Workers & Pages → this Worker →
 # Settings → Variables and Secrets → add as "Secret"), never commit:
