@@ -13,6 +13,15 @@ export function webDashboardRelayUrl(): string {
   return (raw || WEB_DASHBOARD_RELAY_DEFAULT_URL).replace(/\/+$/, '');
 }
 
+/** A browser that answered a scanned QR, waiting for the person to confirm. */
+export type PendingBrowser = {
+  browserName: string | null;
+  /** Six digits, shown on both screens. */
+  code: string;
+  confirm: () => Promise<LinkedBrowser>;
+  cancel: () => void;
+};
+
 /** A linked browser as the screen shows it. */
 export type LinkedBrowser = {
   roomId: string;
@@ -36,6 +45,7 @@ export type WebDashboardErrorCode =
   | 'offline'
   | 'rejected'
   | 'closed'
+  | 'cancelled'
   | 'too_many';
 
 export class WebDashboardError extends Error {

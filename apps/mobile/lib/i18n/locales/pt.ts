@@ -2358,6 +2358,10 @@ const pt = {
     link_body: 'Abra app.money2time.com no computador e escaneie o código na tela dele.',
     link_action: 'Escanear o código',
     linking: 'Vinculando…',
+    confirm_title: 'Vincular {{name}}?',
+    confirm_message:
+      'Confira se o computador mostra o código {{code}}. Vincule apenas um computador que você esteja usando: ele receberá todos os seus dados sempre que esta tela estiver aberta.',
+    confirm_action: 'Vincular',
     linked: '{{name}} vinculado. Seus dados estão a caminho.',
     browsers_title: 'Navegadores vinculados',
     unknown_browser: 'Um navegador',

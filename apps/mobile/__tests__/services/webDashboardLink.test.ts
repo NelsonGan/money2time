@@ -42,15 +42,19 @@ describe('link crypto', () => {
     const b = deriveLink(browser.secretKey, phone.publicKey, secret);
     expect(toBase64Url(a.key)).toBe(toBase64Url(b.key));
     expect(a.roomId).toBe(b.roomId);
+    expect(a.code).toMatch(/^\d{6}$/);
+    expect(a.code).toBe(b.code);
     const wrong = deriveLink(phone.secretKey, browser.publicKey, random(16));
     expect(toBase64Url(wrong.key)).not.toBe(toBase64Url(a.key));
   });
 
   it('seals messages and data so only the link key opens them', () => {
     const key = random(32);
-    const sealed = sealMessage(key, { type: 'want' }, random);
-    expect(openMessage(key, sealed)).toEqual({ type: 'want' });
-    expect(openMessage(random(32), sealed)).toBeNull();
+    const sealed = sealMessage(key, { type: 'want' }, random, 'b2p');
+    expect(openMessage(key, sealed, 'b2p')).toEqual({ type: 'want' });
+    // Reflected back the other way, it does not open.
+    expect(openMessage(key, sealed, 'p2b')).toBeNull();
+    expect(openMessage(random(32), sealed, 'b2p')).toBeNull();
     const data = random(1000);
     expect(Array.from(decryptBackup(key, encryptBackup(key, data, random)))).toEqual(
       Array.from(data),

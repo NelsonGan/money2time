@@ -2356,6 +2356,10 @@ const it = {
     link_body: 'Apri app.money2time.com sul computer, poi inquadra il codice sul suo schermo.',
     link_action: 'Scansiona il codice',
     linking: 'Collegamento…',
+    confirm_title: 'Collegare {{name}}?',
+    confirm_message:
+      'Controlla che il computer mostri il codice {{code}}. Collega solo un computer che stai usando: riceverà tutti i tuoi dati ogni volta che questa schermata è aperta.',
+    confirm_action: 'Collega',
     linked: '{{name}} collegato. I tuoi dati sono in arrivo.',
     browsers_title: 'Browser collegati',
     unknown_browser: 'Un browser',

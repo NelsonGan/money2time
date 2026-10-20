@@ -27,9 +27,9 @@ import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import {
+  beginLink,
   isWebDashboardAvailable,
   type LinkedBrowser,
-  linkScannedBrowser,
   listLinkedBrowsers,
   WEB_DASHBOARD_URL,
   WebDashboardConnections,
@@ -87,6 +87,8 @@ export function WebDashboardScreen({ onBack }: WebDashboardScreenProps) {
   const [problem, setProblem] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const connections = useRef<WebDashboardConnections | null>(null);
+  // A manager made later (back from the background) starts with today's Pro.
+  const isProRef = useRef(isPro);
 
   const reloadLinks = useCallback(async () => {
     setLinks(await listLinkedBrowsers());
@@ -100,7 +102,7 @@ export function WebDashboardScreen({ onBack }: WebDashboardScreenProps) {
     const open = () => {
       if (connections.current) return;
       const manager = new WebDashboardConnections({
-        isPro,
+        isPro: isProRef.current,
         onChange: (next) => active && setStatus(next),
         onLinksChanged: () => {
           if (active) void listLinkedBrowsers().then(setLinks);
@@ -114,16 +116,18 @@ export function WebDashboardScreen({ onBack }: WebDashboardScreenProps) {
       connections.current = null;
       setStatus({});
     };
+    let usable = false;
     void isWebDashboardAvailable().then((yes) => {
       if (!active) return;
+      usable = yes;
       setAvailable(yes);
       if (!yes) return;
       void listLinkedBrowsers().then((list) => active && setLinks(list));
       open();
     });
     const subscription = AppState.addEventListener('change', (state) => {
-      if (state === 'active') open();
-      else close();
+      if (state === 'active' && usable) open();
+      else if (state !== 'active') close();
     });
     return () => {
       active = false;
@@ -131,10 +135,10 @@ export function WebDashboardScreen({ onBack }: WebDashboardScreenProps) {
       close();
     };
     // Opened once per visit; Pro changes are passed on below.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
+    isProRef.current = isPro;
     connections.current?.setPro(isPro);
   }, [isPro]);
 
@@ -143,18 +147,50 @@ export function WebDashboardScreen({ onBack }: WebDashboardScreenProps) {
     setProblem(null);
     setNotice(null);
     setLinking(true);
-    void linkScannedBrowser(text)
-      .then(async (link) => {
-        void triggerHaptic('success');
-        setNotice(
-          I18n.t('web_dashboard.linked', {
-            name: link.name ?? I18n.t('web_dashboard.unknown_browser'),
+    void beginLink(text)
+      .then((pending) => {
+        const name = pending.browserName ?? I18n.t('web_dashboard.unknown_browser');
+        // Nothing is linked until the person checks the code and agrees: a
+        // code from someone else's screen would send them this phone's data.
+        Alert.alert(
+          I18n.t('web_dashboard.confirm_title', { name }),
+          I18n.t('web_dashboard.confirm_message', {
+            code: `${pending.code.slice(0, 3)} ${pending.code.slice(3)}`,
           }),
+          [
+            {
+              text: I18n.t('common.cancel'),
+              style: 'cancel',
+              onPress: () => {
+                pending.cancel();
+                setLinking(false);
+              },
+            },
+            {
+              text: I18n.t('web_dashboard.confirm_action'),
+              onPress: () =>
+                void pending
+                  .confirm()
+                  .then(async (link) => {
+                    void triggerHaptic('success');
+                    setNotice(
+                      I18n.t('web_dashboard.linked', {
+                        name: link.name ?? I18n.t('web_dashboard.unknown_browser'),
+                      }),
+                    );
+                    await reloadLinks();
+                  })
+                  .catch((error: unknown) => setProblem(errorMessage(error)))
+                  .finally(() => setLinking(false)),
+            },
+          ],
+          { cancelable: false },
         );
-        await reloadLinks();
       })
-      .catch((error: unknown) => setProblem(errorMessage(error)))
-      .finally(() => setLinking(false));
+      .catch((error: unknown) => {
+        setProblem(errorMessage(error));
+        setLinking(false);
+      });
   };
 
   const handleUnlink = (link: LinkedBrowser) => {

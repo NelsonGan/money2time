@@ -2375,6 +2375,10 @@ const de = {
       'Öffne app.money2time.com auf deinem Computer und scanne dann den Code auf dem Bildschirm.',
     link_action: 'Code scannen',
     linking: 'Wird verknüpft…',
+    confirm_title: '{{name}} verknüpfen?',
+    confirm_message:
+      'Prüfe, ob der Computer den Code {{code}} anzeigt. Verknüpfe nur einen Computer, den du selbst nutzt: Er erhält alle deine Daten, jedes Mal wenn dieser Bildschirm geöffnet ist.',
+    confirm_action: 'Verknüpfen',
     linked: '{{name}} verknüpft. Deine Daten sind unterwegs.',
     browsers_title: 'Verknüpfte Browser',
     unknown_browser: 'Ein Browser',

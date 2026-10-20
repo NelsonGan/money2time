@@ -2374,6 +2374,10 @@ const fil = {
       'Buksan ang app.money2time.com sa iyong computer, saka i-scan ang code sa screen nito.',
     link_action: 'I-scan ang code',
     linking: 'Nagli-link…',
+    confirm_title: 'I-link ang {{name}}?',
+    confirm_message:
+      'Tiyaking ipinapakita ng computer ang code na {{code}}. Mag-link lang ng computer na ginagamit mo: tatanggap ito ng lahat ng iyong data tuwing bukas ang screen na ito.',
+    confirm_action: 'I-link',
     linked: 'Na-link ang {{name}}. Papunta na ang iyong data.',
     browsers_title: 'Mga naka-link na browser',
     unknown_browser: 'Isang browser',

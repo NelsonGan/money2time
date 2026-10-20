@@ -2360,6 +2360,10 @@ const ms = {
     link_body: 'Buka app.money2time.com pada komputer anda, kemudian imbas kod pada skrinnya.',
     link_action: 'Imbas kod',
     linking: 'Memautkan…',
+    confirm_title: 'Pautkan {{name}}?',
+    confirm_message:
+      'Semak bahawa komputer memaparkan kod {{code}}. Pautkan hanya komputer yang anda gunakan: komputer itu akan menerima semua data anda setiap kali skrin ini dibuka.',
+    confirm_action: 'Pautkan',
     linked: '{{name}} dipautkan. Data anda sedang dihantar.',
     browsers_title: 'Pelayar yang dipautkan',
     unknown_browser: 'Sebuah pelayar',

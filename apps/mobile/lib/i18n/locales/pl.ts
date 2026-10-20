@@ -2353,6 +2353,10 @@ const pl = {
       'Otwórz app.money2time.com na komputerze, a potem zeskanuj kod widoczny na jego ekranie.',
     link_action: 'Zeskanuj kod',
     linking: 'Łączenie…',
+    confirm_title: 'Połączyć {{name}}?',
+    confirm_message:
+      'Sprawdź, czy komputer pokazuje kod {{code}}. Łącz tylko komputer, z którego korzystasz: będzie otrzymywał wszystkie Twoje dane za każdym razem, gdy ten ekran jest otwarty.',
+    confirm_action: 'Połącz',
     linked: 'Połączono: {{name}}. Twoje dane są w drodze.',
     browsers_title: 'Połączone przeglądarki',
     unknown_browser: 'Przeglądarka',

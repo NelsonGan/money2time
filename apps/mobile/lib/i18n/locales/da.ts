@@ -2344,6 +2344,10 @@ const da = {
     link_body: 'Åbn app.money2time.com på din computer, og scan derefter koden på skærmen.',
     link_action: 'Scan koden',
     linking: 'Forbinder…',
+    confirm_title: 'Forbind {{name}}?',
+    confirm_message:
+      'Tjek, at computeren viser koden {{code}}. Forbind kun en computer, du selv bruger: Den modtager alle dine data, hver gang denne skærm er åben.',
+    confirm_action: 'Forbind',
     linked: '{{name}} er forbundet. Dine data er på vej.',
     browsers_title: 'Forbundne browsere',
     unknown_browser: 'En browser',

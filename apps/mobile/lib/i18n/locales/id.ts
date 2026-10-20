@@ -2353,6 +2353,10 @@ const id = {
     link_body: 'Buka app.money2time.com di komputermu, lalu pindai kode di layarnya.',
     link_action: 'Pindai kode',
     linking: 'Menautkan…',
+    confirm_title: 'Tautkan {{name}}?',
+    confirm_message:
+      'Pastikan komputer menampilkan kode {{code}}. Tautkan hanya komputer yang sedang kamu gunakan: komputer itu akan menerima semua datamu setiap kali layar ini terbuka.',
+    confirm_action: 'Tautkan',
     linked: '{{name}} tertaut. Datamu sedang dikirim.',
     browsers_title: 'Browser tertaut',
     unknown_browser: 'Sebuah browser',

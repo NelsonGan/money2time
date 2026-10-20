@@ -2353,6 +2353,10 @@ const tr = {
       'Bilgisayarınızda app.money2time.com adresini açın, ardından ekrandaki kodu tarayın.',
     link_action: 'Kodu tara',
     linking: 'Bağlanıyor…',
+    confirm_title: '{{name}} bağlansın mı?',
+    confirm_message:
+      'Bilgisayarda {{code}} kodunun göründüğünü kontrol edin. Yalnızca kullandığınız bir bilgisayarı bağlayın: bu ekran her açıldığında tüm verilerinizi alır.',
+    confirm_action: 'Bağla',
     linked: '{{name}} bağlandı. Verileriniz yolda.',
     browsers_title: 'Bağlı tarayıcılar',
     unknown_browser: 'Bir tarayıcı',

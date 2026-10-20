@@ -2329,6 +2329,10 @@ const vi = {
     link_body: 'Mở app.money2time.com trên máy tính, rồi quét mã trên màn hình.',
     link_action: 'Quét mã',
     linking: 'Đang liên kết…',
+    confirm_title: 'Liên kết {{name}}?',
+    confirm_message:
+      'Hãy kiểm tra máy tính đang hiển thị mã {{code}}. Chỉ liên kết máy tính bạn đang dùng: máy sẽ nhận toàn bộ dữ liệu của bạn mỗi khi màn hình này được mở.',
+    confirm_action: 'Liên kết',
     linked: 'Đã liên kết {{name}}. Dữ liệu của bạn đang được gửi.',
     browsers_title: 'Trình duyệt đã liên kết',
     unknown_browser: 'Một trình duyệt',

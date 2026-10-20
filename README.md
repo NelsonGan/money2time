@@ -2064,15 +2064,19 @@ database, no bucket, no account and no secrets. Served at
   own public key through that room, and both derive the link key with ECDH →
   HKDF-SHA256 salted with the QR secret, plus a private room id for later
   visits. The secret only travels through the camera, so the relay cannot stand
-  in for either side. Each proves it holds the key with a sealed `paired`
-  message (`services/webDashboardLink.ts`).
+  in for either side. Both screens then show a six-digit code from the same
+  derivation, and nothing is linked until the person confirms it on the phone
+  (`services/webDashboardLink.ts`): anyone who sees a QR could answer it, so
+  the phone never links a browser on its own.
 - **Transfer:** whenever the phone's Web Dashboard screen is open and a
   linked browser is too, the browser asks and the phone builds the Export
   Database JSON, gzips it, seals it with AES-256-GCM and sends it in 256 KB
   chunks with a small ack window. The browser checks the SHA-256, decrypts,
   and keeps the encrypted copy and a non-extractable WebCrypto key in
   IndexedDB until it is unlinked. Every message between the two is sealed with
-  the link key; the relay sees only ciphertext.
+  the link key and its direction, and a transfer must echo the nonce of the
+  browser's request, so the relay sees only ciphertext and cannot reflect or
+  replay one. Both sides ping every 25 s; the room answers without waking.
 - **Pro:** the phone says whether it has Pro with each transfer, and the web
   can gate dashboards via `PRO_VIEWS` in the website repo (empty at launch).
 - **Unlinking:** either side sends a sealed `unlink`; the browser deletes its

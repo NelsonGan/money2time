@@ -2344,6 +2344,10 @@ const sv = {
     link_body: 'Öppna app.money2time.com på datorn och skanna sedan koden på dess skärm.',
     link_action: 'Skanna koden',
     linking: 'Kopplar…',
+    confirm_title: 'Koppla {{name}}?',
+    confirm_message:
+      'Kontrollera att datorn visar koden {{code}}. Koppla bara en dator som du själv använder: den får alla dina data varje gång den här skärmen är öppen.',
+    confirm_action: 'Koppla',
     linked: 'Kopplade {{name}}. Dina data är på väg.',
     browsers_title: 'Kopplade webbläsare',
     unknown_browser: 'En webbläsare',

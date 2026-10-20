@@ -2242,6 +2242,10 @@ const zh = {
     link_body: '在电脑上打开 app.money2time.com，然后扫描屏幕上的二维码。',
     link_action: '扫描二维码',
     linking: '正在关联…',
+    confirm_title: '关联 {{name}}？',
+    confirm_message:
+      '请确认电脑上显示的代码是 {{code}}。只关联你正在使用的电脑：每次打开此屏幕时，它都会收到你的全部数据。',
+    confirm_action: '关联',
     linked: '已关联 {{name}}，数据正在发送。',
     browsers_title: '已关联的浏览器',
     unknown_browser: '某个浏览器',

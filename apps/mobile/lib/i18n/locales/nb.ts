@@ -2343,6 +2343,10 @@ const nb = {
     link_body: 'Åpne app.money2time.com på datamaskinen, og skann koden på skjermen.',
     link_action: 'Skann koden',
     linking: 'Kobler til…',
+    confirm_title: 'Koble til {{name}}?',
+    confirm_message:
+      'Sjekk at datamaskinen viser koden {{code}}. Koble bare til en datamaskin du bruker selv: Den får alle dataene dine hver gang denne skjermen er åpen.',
+    confirm_action: 'Koble til',
     linked: '{{name}} er koblet til. Dataene dine er på vei.',
     browsers_title: 'Tilkoblede nettlesere',
     unknown_browser: 'En nettleser',

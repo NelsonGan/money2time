@@ -2374,6 +2374,10 @@ const fr = {
       'Ouvrez app.money2time.com sur votre ordinateur, puis scannez le code affiché à l’écran.',
     link_action: 'Scanner le code',
     linking: 'Association…',
+    confirm_title: 'Associer {{name}} ?',
+    confirm_message:
+      'Vérifiez que l’ordinateur affiche le code {{code}}. N’associez qu’un ordinateur que vous utilisez : il recevra toutes vos données chaque fois que cet écran sera ouvert.',
+    confirm_action: 'Associer',
     linked: '{{name}} associé. Vos données sont en route.',
     browsers_title: 'Navigateurs associés',
     unknown_browser: 'Un navigateur',

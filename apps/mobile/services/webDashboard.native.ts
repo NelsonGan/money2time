@@ -21,6 +21,7 @@ import {
   type BrowserConnection,
   type LinkedBrowser,
   MAX_LINKED_BROWSERS,
+  type PendingBrowser,
   RESEND_AFTER_MS,
   WebDashboardError,
   webDashboardRelayUrl,
@@ -28,11 +29,11 @@ import {
 } from './webDashboard.shared';
 import { encryptBackup, fromBase64Url } from './webDashboardCrypto';
 import {
-  linkBrowser,
   type LinkDeps,
   LinkError,
   type LinkRecord,
   PhoneSession,
+  startLink,
 } from './webDashboardLink';
 
 export * from './webDashboard.shared';
@@ -78,12 +79,23 @@ async function readLinks(): Promise<LinkRecord[]> {
   }
 }
 
-async function writeLinks(links: LinkRecord[]): Promise<void> {
-  const { secureStore } = await requireNative();
-  // Only on this device, and not into iCloud Keychain backups of other ones.
-  await secureStore.setItemAsync(LINKS_KEY, JSON.stringify(links), {
-    keychainAccessible: secureStore.AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY,
+let linkWrites: Promise<unknown> = Promise.resolve();
+
+/**
+ * Changes the stored links, one change at a time and always on a fresh read,
+ * so a link made or removed meanwhile is never written back over.
+ */
+function updateLinks(change: (links: LinkRecord[]) => LinkRecord[]): Promise<void> {
+  const next = linkWrites.then(async () => {
+    const { secureStore } = await requireNative();
+    const links = change(await readLinks());
+    // Only on this device, and not into iCloud Keychain backups of other ones.
+    await secureStore.setItemAsync(LINKS_KEY, JSON.stringify(links), {
+      keychainAccessible: secureStore.AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY,
+    });
   });
+  linkWrites = next.catch(() => undefined);
+  return next;
 }
 
 const publicLink = ({ roomId, name, createdAt, lastSentAt }: LinkRecord): LinkedBrowser => ({
@@ -112,30 +124,46 @@ function errorFrom(error: unknown): WebDashboardError {
   return new WebDashboardError('offline');
 }
 
-/** Links the browser whose QR code was just scanned. */
-export async function linkScannedBrowser(qrText: string): Promise<LinkedBrowser> {
-  const links = await readLinks();
-  if (links.length >= MAX_LINKED_BROWSERS) throw new WebDashboardError('too_many');
-  let record: LinkRecord;
+/**
+ * Starts linking the browser whose QR code was just scanned. Resolves once
+ * that browser answers, with the code both screens show; it is linked only
+ * when the person confirms.
+ */
+export async function beginLink(qrText: string): Promise<PendingBrowser> {
+  if ((await readLinks()).length >= MAX_LINKED_BROWSERS) throw new WebDashboardError('too_many');
   try {
-    record = await linkBrowser(qrText, phoneName(), await deps());
+    const pending = await startLink(qrText, phoneName(), await deps());
+    return {
+      browserName: pending.browserName,
+      code: pending.code,
+      cancel: pending.cancel,
+      confirm: async () => {
+        let record: LinkRecord;
+        try {
+          record = await pending.confirm();
+        } catch (error) {
+          throw errorFrom(error);
+        }
+        await updateLinks((links) => [
+          ...links.filter((link) => link.roomId !== record.roomId),
+          record,
+        ]);
+        void trackEvent(AnalyticsEvents.WEB_DASHBOARD_LINKED);
+        return publicLink(record);
+      },
+    };
   } catch (error) {
     throw errorFrom(error);
   }
-  await writeLinks([...links.filter((link) => link.roomId !== record.roomId), record]);
-  void trackEvent(AnalyticsEvents.WEB_DASHBOARD_LINKED);
-  return publicLink(record);
 }
 
-async function forgetLink(roomId: string): Promise<void> {
-  await writeLinks((await readLinks()).filter((link) => link.roomId !== roomId));
+function forgetLink(roomId: string): Promise<void> {
+  return updateLinks((links) => links.filter((link) => link.roomId !== roomId));
 }
 
-async function markSent(roomId: string, at: number): Promise<void> {
-  await writeLinks(
-    (await readLinks()).map((link) =>
-      link.roomId === roomId ? { ...link, lastSentAt: at } : link,
-    ),
+function markSent(roomId: string, at: number): Promise<void> {
+  return updateLinks((links) =>
+    links.map((link) => (link.roomId === roomId ? { ...link, lastSentAt: at } : link)),
   );
 }
 
@@ -202,6 +230,8 @@ export class WebDashboardConnections {
     if (this.closed) return;
     const links = await readLinks();
     const linkDeps = await deps();
+    // The screen may have closed while the keychain was read.
+    if (this.closed) return;
     const wanted = new Set(links.map((link) => link.roomId));
     for (const [roomId, session] of this.sessions) {
       if (!wanted.has(roomId)) {

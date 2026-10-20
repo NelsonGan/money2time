@@ -7,6 +7,7 @@
 
 import {
   type LinkedBrowser,
+  type PendingBrowser,
   WebDashboardError,
   type WebDashboardStatus,
 } from './webDashboard.shared';
@@ -21,7 +22,7 @@ export async function listLinkedBrowsers(): Promise<LinkedBrowser[]> {
   return [];
 }
 
-export async function linkScannedBrowser(_qrText: string): Promise<LinkedBrowser> {
+export async function beginLink(_qrText: string): Promise<PendingBrowser> {
   throw new WebDashboardError('unavailable');
 }
 

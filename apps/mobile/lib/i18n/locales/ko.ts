@@ -2313,6 +2313,10 @@ const ko = {
     link_body: '컴퓨터에서 app.money2time.com을 연 다음, 화면에 표시된 코드를 스캔하세요.',
     link_action: '코드 스캔',
     linking: '연결하는 중…',
+    confirm_title: '{{name}} 연결할까요?',
+    confirm_message:
+      '컴퓨터에 다음 코드가 표시되는지 확인하세요: {{code}}. 지금 사용 중인 컴퓨터만 연결하세요. 이 화면을 열 때마다 모든 데이터가 해당 컴퓨터로 전송됩니다.',
+    confirm_action: '연결',
     linked: '{{name}} 연결 완료. 데이터를 보내는 중입니다.',
     browsers_title: '연결된 브라우저',
     unknown_browser: '브라우저',

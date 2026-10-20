@@ -10,10 +10,14 @@
  *   key through the relay, and both derive the link key:
  *   ECDH (x-coordinate) → HKDF-SHA256 (salt: the QR secret). The secret only
  *   ever travels through the camera, so the relay cannot stand in for either
- *   side; the ECDH half means a photo of the QR is not enough either.
+ *   side. Anyone who sees the QR itself (a photo, a screen share) could
+ *   answer it too, which is why the phone asks before linking and both
+ *   screens show the code below.
  * - The same HKDF also gives the link's private room id, where the two meet
- *   from then on.
- * - Messages are JSON sealed with AES-256-GCM: `{ t: 'e', iv, d }`.
+ *   from then on, and a six-digit code both screens show, so the person
+ *   linking can see the phone and the computer agree before it is confirmed.
+ * - Messages are JSON sealed with AES-256-GCM: `{ t: 'e', iv, d }`, with the
+ *   direction in the AAD so a message cannot be reflected back to its sender.
  * - The data itself is gzip → AES-256-GCM: `M2TB` · version 1 · 12-byte IV ·
  *   ciphertext with its 16-byte tag, sent in chunks and checked whole.
  */
@@ -32,9 +36,13 @@ const IV_LENGTH = 12;
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 const BACKUP_AAD = encoder.encode('money2time-backup-v1');
-const MESSAGE_AAD = encoder.encode('money2time-msg-v1');
+const MESSAGE_AAD = {
+  p2b: encoder.encode('money2time-msg-v1:p2b'),
+  b2p: encoder.encode('money2time-msg-v1:b2p'),
+};
 const KEY_INFO = encoder.encode('money2time-pair-key-v1');
 const ROOM_INFO = encoder.encode('money2time-pair-room-v1');
+const CODE_INFO = encoder.encode('money2time-pair-code-v1');
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 
 export function toBase64Url(bytes: Uint8Array): string {
@@ -80,7 +88,10 @@ export function linkKeyPair(random: RandomBytes): { secretKey: Uint8Array; publi
   return { secretKey, publicKey: p256.getPublicKey(secretKey, false) };
 }
 
-export type DerivedLink = { key: Uint8Array; roomId: string };
+export type DerivedLink = { key: Uint8Array; roomId: string; code: string };
+
+/** Phone to browser, or browser to phone. */
+export type Direction = 'p2b' | 'b2p';
 
 /** The link key and private room id both sides derive from one QR scan. */
 export function deriveLink(
@@ -91,24 +102,37 @@ export function deriveLink(
   // noble returns the compressed shared point; WebCrypto's ECDH gives its
   // x-coordinate, so both sides use the 32 bytes after the prefix.
   const shared = p256.getSharedSecret(secretKey, otherPublicKey, true).subarray(1);
+  const codeBytes = hkdf(sha256, shared, qrSecret, CODE_INFO, 4);
+  const codeNumber =
+    new DataView(codeBytes.buffer, codeBytes.byteOffset, 4).getUint32(0) % 1_000_000;
   return {
     key: hkdf(sha256, shared, qrSecret, KEY_INFO, 32),
     roomId: toBase64Url(hkdf(sha256, shared, qrSecret, ROOM_INFO, 16)),
+    code: String(codeNumber).padStart(6, '0'),
   };
 }
 
 export type Sealed = { t: 'e'; iv: string; d: string };
 
-export function sealMessage(key: Uint8Array, message: unknown, random: RandomBytes): Sealed {
+export function sealMessage(
+  key: Uint8Array,
+  message: unknown,
+  random: RandomBytes,
+  direction: Direction,
+): Sealed {
   const iv = random(IV_LENGTH);
-  const data = gcm(key, iv, MESSAGE_AAD).encrypt(encoder.encode(JSON.stringify(message)));
+  const data = gcm(key, iv, MESSAGE_AAD[direction]).encrypt(
+    encoder.encode(JSON.stringify(message)),
+  );
   return { t: 'e', iv: toBase64Url(iv), d: toBase64Url(data) };
 }
 
 /** The message inside, or null if it was not sealed with this key. */
-export function openMessage<T>(key: Uint8Array, sealed: Sealed): T | null {
+export function openMessage<T>(key: Uint8Array, sealed: Sealed, direction: Direction): T | null {
   try {
-    const plain = gcm(key, fromBase64Url(sealed.iv), MESSAGE_AAD).decrypt(fromBase64Url(sealed.d));
+    const plain = gcm(key, fromBase64Url(sealed.iv), MESSAGE_AAD[direction]).decrypt(
+      fromBase64Url(sealed.d),
+    );
     return JSON.parse(decoder.decode(plain)) as T;
   } catch {
     return null;

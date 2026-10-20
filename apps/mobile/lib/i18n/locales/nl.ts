@@ -2368,6 +2368,10 @@ const nl = {
     link_body: 'Open app.money2time.com op je computer en scan daarna de code op het scherm.',
     link_action: 'Code scannen',
     linking: 'Koppelen…',
+    confirm_title: '{{name}} koppelen?',
+    confirm_message:
+      'Controleer of de computer de code {{code}} toont. Koppel alleen een computer die je zelf gebruikt: die ontvangt al je gegevens elke keer dat dit scherm open is.',
+    confirm_action: 'Koppelen',
     linked: '{{name}} gekoppeld. Je gegevens zijn onderweg.',
     browsers_title: 'Gekoppelde browsers',
     unknown_browser: 'Een browser',

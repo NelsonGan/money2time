@@ -2242,6 +2242,10 @@ const zhHant = {
     link_body: '在電腦上開啟 app.money2time.com，然後掃描畫面上的 QR Code。',
     link_action: '掃描 QR Code',
     linking: '連結中…',
+    confirm_title: '要連結 {{name}} 嗎？',
+    confirm_message:
+      '請確認電腦上顯示的代碼是 {{code}}。只連結你正在使用的電腦：每次開啟此畫面時，它都會收到你的全部資料。',
+    confirm_action: '連結',
     linked: '已連結 {{name}}，資料正在傳送。',
     browsers_title: '已連結的瀏覽器',
     unknown_browser: '某個瀏覽器',

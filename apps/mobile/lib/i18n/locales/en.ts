@@ -2341,6 +2341,10 @@ const en = {
     link_body: 'Open app.money2time.com on your computer, then scan the code on its screen.',
     link_action: 'Scan the code',
     linking: 'Linking…',
+    confirm_title: 'Link {{name}}?',
+    confirm_message:
+      'Check that the computer shows the code {{code}}. Only link a computer you are using: it will receive all your data each time this screen is open.',
+    confirm_action: 'Link',
     linked: 'Linked {{name}}. Your data is on its way.',
     browsers_title: 'Linked browsers',
     unknown_browser: 'A browser',

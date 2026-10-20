@@ -2331,6 +2331,10 @@ const ja = {
     link_body: 'パソコンで app.money2time.com を開き、画面に表示されるコードを読み取ってください。',
     link_action: 'コードを読み取る',
     linking: '連携中…',
+    confirm_title: '{{name}} を連携しますか？',
+    confirm_message:
+      'パソコンにコード {{code}} が表示されていることを確認してください。連携するのは、いま使っているパソコンだけにしてください。この画面を開くたびに、すべてのデータが送信されます。',
+    confirm_action: '連携する',
     linked: '{{name}} を連携しました。データを送信しています。',
     browsers_title: '連携中のブラウザ',
     unknown_browser: 'ブラウザ',
