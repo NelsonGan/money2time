@@ -50,6 +50,7 @@ const BYOK_USAGE = {
   cost: 0,
   is_byok: true,
   cost_details: { upstream_inference_cost: 0.0002 },
+  prompt_tokens_details: { cached_tokens: 900, cache_write_tokens: 0 },
 };
 
 function request(overrides: Record<string, unknown> = {}): Request {
@@ -120,6 +121,8 @@ describe('receipt scanner with Claude as MODEL', () => {
     expect(first.model).toBe(CLAUDE);
     expect(first.provider).toEqual({ only: ['anthropic'], allow_fallbacks: false });
     expect(first).not.toHaveProperty('temperature');
+    // The prompt text ahead of the receipt goes in the 5-minute prompt cache.
+    expect(first.messages[0].content[0].cache_control).toEqual({ type: 'ephemeral' });
     // OpenRouter files calls under the referer and shows the title as the app.
     const [, init] = fetchMock.mock.calls.find(([url]) => String(url).includes('openrouter.ai'))!;
     expect(init.headers).toMatchObject({
@@ -135,6 +138,8 @@ describe('receipt scanner with Claude as MODEL', () => {
       byok: true,
       $ai_total_cost_usd: 0.0002,
       is_backup_model: false,
+      $ai_cache_read_input_tokens: 900,
+      $ai_cache_creation_input_tokens: 0,
     });
     expect(event.properties).not.toHaveProperty('$ai_temperature');
   });
@@ -152,6 +157,7 @@ describe('receipt scanner with Claude as MODEL', () => {
     expect(claude.model).toBe(CLAUDE);
     expect(backup.model).toBe('backup');
     expect(backup).not.toHaveProperty('provider');
+    expect(backup.messages[0].content[0]).not.toHaveProperty('cache_control');
     expect(backup.temperature).toBe(0);
 
     await Promise.all(waits);

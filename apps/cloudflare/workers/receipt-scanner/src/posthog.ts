@@ -34,7 +34,7 @@ export interface OpenRouterUsage {
   is_byok?: boolean;
   /** Under BYOK, what the provider bills us directly. */
   cost_details?: { upstream_inference_cost?: number };
-  prompt_tokens_details?: { cached_tokens?: number };
+  prompt_tokens_details?: { cached_tokens?: number; cache_write_tokens?: number };
 }
 
 export interface GenerationRecord {
@@ -132,6 +132,8 @@ export class AiTrace {
     if (inputTokens !== undefined) properties.$ai_input_tokens = inputTokens;
     if (outputTokens !== undefined) properties.$ai_output_tokens = outputTokens;
     if (cachedTokens !== undefined) properties.$ai_cache_read_input_tokens = cachedTokens;
+    const writtenTokens = finite(record.usage?.prompt_tokens_details?.cache_write_tokens);
+    if (writtenTokens !== undefined) properties.$ai_cache_creation_input_tokens = writtenTokens;
     if (cost !== undefined) {
       // What the call cost us as reported, so PostHog should not re-price it.
       properties.$ai_total_cost_usd = cost;
