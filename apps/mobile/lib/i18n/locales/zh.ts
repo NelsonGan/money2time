@@ -118,6 +118,29 @@ const zh = {
     },
   },
   news: {
+    web_dashboard: {
+      title: '网页仪表盘及更多更新',
+      webDashboard: {
+        title: '全新网页仪表盘',
+        body: '在电脑上打开 app.money2time.com，然后在设置 > 网页仪表盘中扫描网页上的二维码。手机会把数据加密后发送到浏览器。不会在线存储任何数据，也无需注册账号。',
+      },
+      notificationReview: {
+        title: '从通知记录收支',
+        body: '银行和电子钱包的通知现在会作为草稿等你确认。可逐条或一次性选择收入、支出或忽略。通知只在你的手机上读取，绝不经过 AI。在设置 > 自动化中开启。',
+      },
+      fasterScans: {
+        title: '收据扫描提速 50%',
+        body: '现在扫描一张收据只需原来大约一半的时间，准确度不变。拍张照片，金额、明细和分类就会自动填好。',
+      },
+      cardDesigns: {
+        title: '全新卡面设计',
+        body: '为每张账户卡片换上专属外观，70 多款设计任你挑选，从渐变、大理石到我们的钱包小鸡。编辑账户并点按卡面设计即可。Pro 用户还能上传自己的照片。',
+      },
+      bottomBar: {
+        title: '打造你的底部栏',
+        body: '选择哪些页面放在底部栏，并拖动调整顺序。可添加目标、定期、收据等页面。第一个页面会成为你的首页。在设置 > 显示 > 底部栏中设置。',
+      },
+    },
     transaction_updates: {
       title: '记账更轻松',
       androidScreenshot: {
@@ -345,6 +368,7 @@ const zh = {
       open_app_icon: '选择图标',
       open_ricecal: '试试 RiceCal',
       open_pro_paywall: '查看 Pro 套餐',
+      open_bottom_bar: '编辑底部栏',
       open_share_earn: '免费获取 Pro',
       open_quick_entry_settings: '打开快速记账设置',
       open_auto_log: '设置自动化',
@@ -355,6 +379,12 @@ const zh = {
       open_review: '打开消费回顾',
     },
     showcase: {
+      notification_bank: '你的银行',
+      notification_text: '你的卡刚完成一笔消费。',
+      scan_before: '以前',
+      scan_now: '现在',
+      card_everyday: '日常',
+      card_travel: '旅行',
       ricecal_kcal_left: '剩余千卡',
       ricecal_carbs: '碳水',
       ricecal_protein: '蛋白质',
@@ -2592,7 +2622,7 @@ const zh = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: '忽略',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',

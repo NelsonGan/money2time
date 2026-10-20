@@ -145,6 +145,29 @@ const da = {
     reset_action: 'Slet og skift',
   },
   news: {
+    web_dashboard: {
+      title: 'Webdashboard og mere',
+      webDashboard: {
+        title: 'Nyt webdashboard',
+        body: 'Åbn app.money2time.com på computeren, og scan koden under Indstillinger > Webdashboard. Telefonen sender dine data krypteret til browseren. Intet gemmes online, og du skal ikke have en konto.',
+      },
+      notificationReview: {
+        title: 'Registrer betalinger fra notifikationer',
+        body: 'Notifikationer fra banken og e-tegnebogen venter nu på dig som kladder. Vælg Indtægt, Udgift eller Ignorer, en ad gangen eller alle på én gang. De læses på din telefon, aldrig af AI. Slå det til under Indstillinger > Automatisering.',
+      },
+      fasterScans: {
+        title: 'Kvitteringsscanning 50 % hurtigere',
+        body: 'Det tager nu cirka halvt så lang tid at scanne en kvittering, med samme nøjagtighed. Tag et billede, så udfyldes beløb, varer og kategori for dig.',
+      },
+      cardDesigns: {
+        title: 'Nye kortdesigns',
+        body: 'Giv hvert kontokort sit eget udseende med over 70 designs, fra farveforløb og marmor til vores mønt-pung-kylling. Rediger en konto, og tryk på Kortdesign. Med Pro kan du også uploade dit eget billede.',
+      },
+      bottomBar: {
+        title: 'Gør bundbjælken til din',
+        body: 'Vælg, hvilke sider der skal være i bundbjælken, og træk dem i den rækkefølge, du vil. Tilføj Mål, Faste, Kvitteringer og mere. Den første side bliver din startskærm. Du finder det under Indstillinger > Visning > Bundbjælke.',
+      },
+    },
     transaction_updates: {
       title: 'Nemmere registrering af transaktioner',
       androidScreenshot: {
@@ -372,6 +395,7 @@ const da = {
       open_app_icon: 'Vælg dit ikon',
       open_ricecal: 'Prøv RiceCal',
       open_pro_paywall: 'Se Pro-planer',
+      open_bottom_bar: 'Rediger bundbjælken',
       open_share_earn: 'Få Pro gratis',
       open_quick_entry_settings: 'Åbn indstillinger for Hurtig registrering',
       open_auto_log: 'Opsæt automatiseringer',
@@ -382,6 +406,12 @@ const da = {
       open_review: 'Åbn Gennemgå forbrug',
     },
     showcase: {
+      notification_bank: 'Din bank',
+      notification_text: 'Dit kort blev brugt til et køb.',
+      scan_before: 'Før',
+      scan_now: 'Nu',
+      card_everyday: 'Hverdag',
+      card_travel: 'Rejser',
       ricecal_kcal_left: 'kcal tilbage',
       ricecal_carbs: 'Kulhydrat',
       ricecal_protein: 'Protein',
@@ -2703,7 +2733,7 @@ const da = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: 'Ignorer',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',

@@ -120,6 +120,29 @@ const en = {
     },
   },
   news: {
+    web_dashboard: {
+      title: 'Web Dashboard and more',
+      webDashboard: {
+        title: 'New Web Dashboard',
+        body: 'Open app.money2time.com on your computer and scan its code in Settings > Web Dashboard. Your phone sends your data to the browser, encrypted. Nothing is stored online and there is no account.',
+      },
+      notificationReview: {
+        title: 'Log payments from notifications',
+        body: 'Bank and e-wallet notifications now wait for you as drafts. Choose Income, Expense or Ignore, one by one or all at once. They are read on your phone, never by AI. Set it up in Settings > Automation.',
+      },
+      fasterScans: {
+        title: 'Receipt scanning, 50% faster',
+        body: 'Scanning a receipt now takes about half as long, with the same accuracy. Snap a photo and the amount, items and category are filled in for you.',
+      },
+      cardDesigns: {
+        title: 'New card designs',
+        body: 'Give each account card its own look, with over 70 designs from gradients and marble to our coin-purse chick. Edit an account and tap Card design. With Pro, you can upload your own photo too.',
+      },
+      bottomBar: {
+        title: 'Make the bottom bar yours',
+        body: 'Choose which pages sit in the bottom bar and drag them into any order. Add Goals, Recurring, Receipts and more. The first page becomes your home screen. Find it in Settings > Display > Bottom bar.',
+      },
+    },
     transaction_updates: {
       title: 'Easier transaction tracking',
       androidScreenshot: {
@@ -357,8 +380,15 @@ const en = {
       open_app_icon: 'Pick your icon',
       open_ricecal: 'Try RiceCal',
       open_pro_paywall: 'Explore Pro plans',
+      open_bottom_bar: 'Edit bottom bar',
     },
     showcase: {
+      notification_bank: 'Your bank',
+      notification_text: 'Your card was used for a purchase.',
+      scan_before: 'Before',
+      scan_now: 'Now',
+      card_everyday: 'Everyday',
+      card_travel: 'Travel',
       ricecal_kcal_left: 'kcal left',
       ricecal_carbs: 'Carbs',
       ricecal_protein: 'Protein',

@@ -56,7 +56,12 @@ export interface FeatureAnnouncementPage {
     | 'goalCovers'
     | 'androidScreenshot'
     | 'accountLabels'
-    | 'amountSearch';
+    | 'amountSearch'
+    | 'webDashboard'
+    | 'notificationReview'
+    | 'fasterScans'
+    | 'cardDesigns'
+    | 'bottomBar';
   /**
    * Optional call-to-action for this page. On the last page it replaces the
    * primary button; on earlier pages it sits above the Back/Next row so the
@@ -79,7 +84,9 @@ export interface FeatureAnnouncementPage {
     | 'openLiveEarnings'
     | 'openAppIcon'
     | 'openRiceCal'
-    | 'openProPaywall';
+    | 'openProPaywall'
+    | 'openWebDashboard'
+    | 'openBottomBar';
   /** Mark sponsored or promotional content clearly in the announcement panel. */
   badge?: 'ad';
   /**
@@ -200,6 +207,10 @@ export function announcementCtaLabel(cta: NonNullable<FeatureAnnouncementPage['c
       return I18n.t('news.cta.open_ricecal');
     case 'openProPaywall':
       return I18n.t('news.cta.open_pro_paywall');
+    case 'openWebDashboard':
+      return I18n.t('web_dashboard.open_web');
+    case 'openBottomBar':
+      return I18n.t('news.cta.open_bottom_bar');
     case 'openShareEarn':
     default:
       return I18n.t('news.cta.open_share_earn');

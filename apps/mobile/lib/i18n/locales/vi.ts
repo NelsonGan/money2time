@@ -145,6 +145,29 @@ const vi = {
     reset_action: 'Xóa và chuyển',
   },
   news: {
+    web_dashboard: {
+      title: 'Bảng điều khiển web và hơn thế',
+      webDashboard: {
+        title: 'Bảng điều khiển web mới',
+        body: 'Mở app.money2time.com trên máy tính rồi quét mã trong Cài đặt > Bảng điều khiển web. Điện thoại gửi dữ liệu đã mã hóa đến trình duyệt. Không có gì được lưu trực tuyến và không cần tài khoản.',
+      },
+      notificationReview: {
+        title: 'Ghi khoản thanh toán từ thông báo',
+        body: 'Thông báo từ ngân hàng và ví điện tử giờ được giữ làm bản nháp chờ bạn. Chọn Thu nhập, Chi tiêu hoặc Bỏ qua, từng mục hoặc tất cả cùng lúc. Thông báo được đọc ngay trên điện thoại, không bao giờ qua AI. Thiết lập trong Cài đặt > Tự động hóa.',
+      },
+      fasterScans: {
+        title: 'Quét hóa đơn nhanh hơn 50%',
+        body: 'Quét một hóa đơn giờ chỉ mất khoảng một nửa thời gian, độ chính xác vẫn như cũ. Chụp ảnh là số tiền, các món và danh mục được điền sẵn.',
+      },
+      cardDesigns: {
+        title: 'Thiết kế thẻ mới',
+        body: 'Cho mỗi thẻ tài khoản một diện mạo riêng với hơn 70 thiết kế, từ chuyển màu, đá cẩm thạch đến chú gà ví tiền của chúng tôi. Sửa một tài khoản và chạm vào Thiết kế thẻ. Với Pro, bạn còn có thể tải ảnh của riêng mình lên.',
+      },
+      bottomBar: {
+        title: 'Thanh dưới cùng theo ý bạn',
+        body: 'Chọn những trang nằm trên thanh dưới cùng và kéo để sắp xếp theo thứ tự bất kỳ. Thêm Mục tiêu, Định kỳ, Biên lai và nhiều hơn nữa. Trang đầu tiên sẽ là màn hình chính. Tìm trong Cài đặt > Hiển thị > Thanh dưới cùng.',
+      },
+    },
     transaction_updates: {
       title: 'Theo dõi giao dịch dễ dàng hơn',
       androidScreenshot: {
@@ -372,6 +395,7 @@ const vi = {
       open_app_icon: 'Chọn biểu tượng',
       open_ricecal: 'Thử RiceCal',
       open_pro_paywall: 'Xem các gói Pro',
+      open_bottom_bar: 'Sửa thanh dưới',
       open_share_earn: 'Nhận Pro miễn phí',
       open_quick_entry_settings: 'Mở cài đặt Nhập nhanh',
       open_auto_log: 'Thiết lập tự động hóa',
@@ -382,6 +406,12 @@ const vi = {
       open_review: 'Mở Tổng kết chi tiêu',
     },
     showcase: {
+      notification_bank: 'Ngân hàng của bạn',
+      notification_text: 'Thẻ của bạn vừa được dùng để mua hàng.',
+      scan_before: 'Trước đây',
+      scan_now: 'Bây giờ',
+      card_everyday: 'Hằng ngày',
+      card_travel: 'Du lịch',
       ricecal_kcal_left: 'kcal còn lại',
       ricecal_carbs: 'Carb',
       ricecal_protein: 'Protein',
@@ -2685,7 +2715,7 @@ const vi = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: 'Bỏ qua',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',
