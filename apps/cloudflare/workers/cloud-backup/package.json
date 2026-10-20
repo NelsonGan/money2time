@@ -1,0 +1,20 @@
+{
+  "name": "money2time-workers-cloud-backup",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cloudflare Worker for Cloud Backup & Web Dashboard: Better Auth sign-in, primary-device rules, and short-lived upload/download URLs for private R2 backups.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy --tsconfig tsconfig.json",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@better-auth/expo": "^1.7.11",
+    "better-auth": "^1.7.11"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261019.1",
+    "typescript": "^7.0.2",
+    "wrangler": "^4.151.2"
+  }
+}
