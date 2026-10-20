@@ -9,21 +9,47 @@
 //   GET    /v1/backups/latest         latest backup metadata + short-lived GET URL
 //   GET    /v1/backups/download?token=
 //   DELETE /v1/backups                delete the cloud backup
+//   POST   /v1/account/key            set the backup key's fingerprint (first phone)
+//   POST   /v1/account/key/reset      start over with a new key (old backup deleted)
+//   POST   /v1/link/start             QR link: a browser or new phone shows its public key
+//   GET    /v1/link/:id/poll?token=   …and polls for the wrapped backup key
+//   GET    /v1/link/:id               the scanning phone reads what it is linking
+//   POST   /v1/link/:id/approve       …and posts the backup key wrapped for it
+//   GET    /v1/web/sessions           linked browsers;  DELETE /v1/web/sessions/:id
+//   GET    /v1/web/latest             the browser's view of the latest backup (web token)
+//   DELETE /v1/web/session            the browser unlinks itself (web token)
 //
-// The phone is the source of truth. The web dashboard only reads, and nothing
-// syncs between phones: one primary device writes, everyone else reads.
+// The phone is the source of truth. Backups are end-to-end encrypted on the
+// phone; this Worker stores and relays ciphertext and wrapped keys only. The
+// web dashboard only reads, and nothing syncs between phones: one primary
+// device writes, everyone else reads.
 
 import { allowedOrigins, createAuth } from './auth';
 import type { Env } from './env';
+import {
+  approveLink,
+  describeLink,
+  LinkError,
+  listWebSessions,
+  pollLink,
+  pruneLinks,
+  revokeAllWebSessions,
+  revokeWebSession,
+  startLink,
+  webSessionUser,
+} from './link';
 import { isAccountPro } from './revenuecat';
 import {
   claimPrimaryIfUnset,
   deleteBackup,
   getBackup,
   getDevice,
+  getKeyCheck,
   getPrimaryDeviceId,
   listDevices,
   putBackup,
+  replaceKeyCheck,
+  setKeyCheckIfUnset,
   setPrimary,
   upsertDevice,
   type BackupRow,
@@ -34,6 +60,7 @@ import { sha256Hex, signToken, verifyToken, type DownloadClaims, type UploadClai
 const URL_TTL_MS = 10 * 60 * 1000;
 const DEVICE_ID = /^[A-Za-z0-9_-]{8,64}$/;
 const APP_USER_ID = /^[A-Za-z0-9$:_.-]{1,100}$/;
+const KEY_CHECK = /^[A-Za-z0-9_-]{43}$/;
 const SHA256 = /^[a-f0-9]{64}$/;
 
 class HttpError extends Error {
@@ -117,20 +144,49 @@ function backupPublic(backup: BackupRow | null) {
 }
 
 async function status(env: Env, userId: string, deviceId: string | null) {
-  const [primaryId, backup, devices, pro] = await Promise.all([
+  const [primaryId, backup, devices, pro, keyCheck, webSessions] = await Promise.all([
     getPrimaryDeviceId(env, userId),
     getBackup(env, userId),
     listDevices(env, userId),
     isAccountPro(env, userId),
+    getKeyCheck(env, userId),
+    listWebSessions(env, userId),
   ]);
   const primary = primaryId ? (devices.find((d) => d.id === primaryId) ?? null) : null;
   return {
     isPrimary: deviceId !== null && primaryId === deviceId,
     pro,
+    keyCheck,
+    webSessions,
     primaryDevice: devicePublic(primary),
     devices: devices.map(devicePublic),
     backup: backupPublic(backup),
   };
+}
+
+async function latestFor(env: Env, userId: string) {
+  const [backup, pro] = await Promise.all([getBackup(env, userId), isAccountPro(env, userId)]);
+  if (!backup) return { backup: null, pro };
+  const exp = Date.now() + URL_TTL_MS;
+  const token = await signToken<DownloadClaims>(env.BETTER_AUTH_SECRET, 'download', {
+    uid: userId,
+    key: backup.r2_key,
+    sha256: backup.sha256,
+    exp,
+  });
+  const device = await getDevice(env, userId, backup.device_id);
+  return {
+    backup: backupPublic(backup),
+    pro,
+    device: devicePublic(device),
+    downloadUrl: `${env.BETTER_AUTH_URL}/v1/backups/download?token=${encodeURIComponent(token)}`,
+    expiresAt: exp,
+  };
+}
+
+function bearer(request: Request): string | null {
+  const header = request.headers.get('Authorization') ?? '';
+  return header.startsWith('Bearer ') ? header.slice(7).trim() : null;
 }
 
 async function api(request: Request, env: Env, url: URL): Promise<Response> {
@@ -185,6 +241,44 @@ async function api(request: Request, env: Env, url: URL): Promise<Response> {
     });
   }
 
+  // QR link: the newcomer's side needs no account (a browser never signs in).
+  const linkPoll = path.match(/^\/v1\/link\/([A-Za-z0-9_-]+)\/poll$/);
+  if (linkPoll && request.method === 'GET') {
+    return json(await pollLink(env, linkPoll[1], url.searchParams.get('token') ?? ''));
+  }
+  if (path === '/v1/link/start' && request.method === 'POST') {
+    const body = await readJson<{ kind?: string; publicKey?: string; name?: string }>(request);
+    const kind = body.kind === 'phone' ? 'phone' : 'web';
+    // A new phone asks its own account's phones for the key, so it signs in first.
+    const session = kind === 'phone' ? await createAuth(env).api.getSession({ headers: request.headers }) : null;
+    if (kind === 'phone' && !session) throw new HttpError(401, 'unauthenticated');
+    return json(
+      await startLink(env, {
+        kind,
+        publicKey: body.publicKey ?? '',
+        name: body.name ? body.name.slice(0, 80) : (request.headers.get('User-Agent') ?? '').slice(0, 80) || null,
+        ip: request.headers.get('cf-connecting-ip'),
+        userId: session?.user.id ?? null,
+      }),
+    );
+  }
+
+  // A linked browser: its web token is its only credential.
+  if (path.startsWith('/v1/web/') && (path === '/v1/web/latest' || path === '/v1/web/session')) {
+    const web = await webSessionUser(env, bearer(request) ?? '');
+    if (!web) throw new HttpError(401, 'unlinked');
+    if (path === '/v1/web/latest' && request.method === 'GET') {
+      const user = await env.MONEY2TIME_D1_CLOUD_BACKUP.prepare('select email from "user" where id = ?1')
+        .bind(web.userId)
+        .first<{ email: string }>();
+      return json({ ...(await latestFor(env, web.userId)), email: user?.email ?? null, keyCheck: await getKeyCheck(env, web.userId) });
+    }
+    if (path === '/v1/web/session' && request.method === 'DELETE') {
+      await revokeWebSession(env, web.userId, web.sessionId);
+      return json({ unlinked: true });
+    }
+  }
+
   const session = await createAuth(env).api.getSession({ headers: request.headers });
   if (!session) throw new HttpError(401, 'unauthenticated');
   const userId = session.user.id;
@@ -227,6 +321,7 @@ async function api(request: Request, env: Env, url: URL): Promise<Response> {
   if (path === '/v1/backups/upload-url' && request.method === 'POST') {
     const body = await readJson<{
       deviceId?: string;
+      keyCheck?: string;
       size?: number;
       sha256?: string;
       schemaVersion?: number;
@@ -234,6 +329,10 @@ async function api(request: Request, env: Env, url: URL): Promise<Response> {
       exportedAt?: string;
     }>(request);
     if (!body.deviceId) throw new HttpError(400, 'invalid_device');
+    // Encrypted with the account's current key, or the other devices could
+    // not open it.
+    const keyCheck = await getKeyCheck(env, userId);
+    if (!keyCheck || body.keyCheck !== keyCheck) throw new HttpError(409, 'key_mismatch');
     const primaryId = await getPrimaryDeviceId(env, userId);
     if (primaryId !== body.deviceId) {
       const primary = primaryId ? await getDevice(env, userId, primaryId) : null;
@@ -267,28 +366,68 @@ async function api(request: Request, env: Env, url: URL): Promise<Response> {
   }
 
   if (path === '/v1/backups/latest' && request.method === 'GET') {
-    const [backup, pro] = await Promise.all([getBackup(env, userId), isAccountPro(env, userId)]);
-    if (!backup) return json({ backup: null, pro });
-    const exp = Date.now() + URL_TTL_MS;
-    const token = await signToken<DownloadClaims>(env.BETTER_AUTH_SECRET, 'download', {
-      uid: userId,
-      key: backup.r2_key,
-      sha256: backup.sha256,
-      exp,
-    });
-    const device = await getDevice(env, userId, backup.device_id);
-    return json({
-      backup: backupPublic(backup),
-      pro,
-      device: devicePublic(device),
-      downloadUrl: `${env.BETTER_AUTH_URL}/v1/backups/download?token=${encodeURIComponent(token)}`,
-      expiresAt: exp,
-    });
+    return json(await latestFor(env, userId));
   }
 
   if (path === '/v1/backups' && request.method === 'DELETE') {
     await deleteBackup(env, userId);
     return json({ backup: null });
+  }
+
+  if (path === '/v1/account/key' && request.method === 'POST') {
+    const body = await readJson<{ keyCheck?: string }>(request);
+    if (!body.keyCheck || !KEY_CHECK.test(body.keyCheck)) throw new HttpError(400, 'invalid_key_check');
+    return json({ keyCheck: await setKeyCheckIfUnset(env, userId, body.keyCheck) });
+  }
+
+  if (path === '/v1/account/key/reset' && request.method === 'POST') {
+    // Every copy of the old key is lost: the old backup can never be opened
+    // again, so it goes, and so does every browser that held that key.
+    const body = await readJson<{ keyCheck?: string }>(request);
+    if (!body.keyCheck || !KEY_CHECK.test(body.keyCheck)) throw new HttpError(400, 'invalid_key_check');
+    await deleteBackup(env, userId);
+    await revokeAllWebSessions(env, userId);
+    await replaceKeyCheck(env, userId, body.keyCheck);
+    return json({ keyCheck: body.keyCheck });
+  }
+
+  const linkMatch = path.match(/^\/v1\/link\/([A-Za-z0-9_-]+)$/);
+  if (linkMatch && request.method === 'GET') {
+    return json(await describeLink(env, linkMatch[1]));
+  }
+
+  const approveMatch = path.match(/^\/v1\/link\/([A-Za-z0-9_-]+)\/approve$/);
+  if (approveMatch && request.method === 'POST') {
+    const body = await readJson<{
+      deviceId?: string;
+      publicKey?: string;
+      phonePublicKey?: string;
+      wrappedKey?: string;
+      iv?: string;
+    }>(request);
+    if (!body.deviceId || !(await getDevice(env, userId, body.deviceId))) throw new HttpError(404, 'device_not_registered');
+    if (!(await getKeyCheck(env, userId))) throw new HttpError(409, 'no_backup_key');
+    return json(
+      await approveLink(env, {
+        linkId: approveMatch[1],
+        userId,
+        deviceId: body.deviceId,
+        publicKey: body.publicKey ?? '',
+        phonePublicKey: body.phonePublicKey ?? '',
+        wrappedKey: body.wrappedKey ?? '',
+        iv: body.iv ?? '',
+      }),
+    );
+  }
+
+  if (path === '/v1/web/sessions' && request.method === 'GET') {
+    return json({ webSessions: await listWebSessions(env, userId) });
+  }
+
+  const webSessionMatch = path.match(/^\/v1\/web\/sessions\/([A-Za-z0-9-]+)$/);
+  if (webSessionMatch && request.method === 'DELETE') {
+    await revokeWebSession(env, userId, webSessionMatch[1]);
+    return json({ webSessions: await listWebSessions(env, userId) });
   }
 
   throw new HttpError(404, 'not_found');
@@ -307,11 +446,18 @@ export default {
       }
       return new Response('Not found', { status: 404 });
     } catch (error) {
+      if (error instanceof LinkError) {
+        return withCors(request, json({ error: error.code }, error.status), env);
+      }
       if (error instanceof HttpError) {
         return withCors(request, json({ error: error.code, ...error.extra }, error.status), env);
       }
       console.error(error);
       return withCors(request, json({ error: 'internal_error' }, 500), env);
     }
+  },
+
+  async scheduled(_controller: ScheduledController, env: Env): Promise<void> {
+    await pruneLinks(env);
   },
 } satisfies ExportedHandler<Env>;

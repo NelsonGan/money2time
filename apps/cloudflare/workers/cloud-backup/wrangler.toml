@@ -35,6 +35,10 @@ bucket_name = "money2time-r2-cloud-backup"
 [[send_email]]
 name = "EMAIL"
 
+# Daily cleanup of expired QR link requests (D1 has no TTL).
+[triggers]
+crons = ["30 3 * * *"]
+
 [observability]
 enabled = true
 head_sampling_rate = 1

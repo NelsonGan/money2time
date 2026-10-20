@@ -70,3 +70,49 @@ create table if not exists backup (
   app_version text,
   exported_at text
 );
+
+-- End-to-end encryption. Backups are encrypted on the phone with a key the
+-- server never sees. This is only an HMAC fingerprint of that key, so a phone
+-- can tell whether the key it holds is the account's current one.
+create table if not exists account_key (
+  user_id text not null primary key references "user" ("id") on delete cascade,
+  key_check text not null,
+  created_at integer not null
+);
+
+-- A QR-code link in progress, WhatsApp-style. A browser (or a new phone)
+-- generates a key pair and shows its public half in a QR code; a signed-in
+-- phone scans it and posts the backup key wrapped for that public key. The
+-- server only relays the wrapped key and cannot unwrap it. Rows live for two
+-- minutes; the daily cron removes old ones.
+create table if not exists link_request (
+  id text not null primary key,
+  kind text not null,
+  poll_token_hash text not null,
+  public_key text not null,
+  name text,
+  ip_hash text,
+  user_id text,
+  status text not null,
+  phone_public_key text,
+  wrapped_key text,
+  wrapped_iv text,
+  approved_by_device text,
+  web_token text,
+  created_at integer not null,
+  expires_at integer not null
+);
+create index if not exists link_request_ip_idx on link_request (ip_hash, created_at);
+
+-- A browser linked by scanning: the web dashboard's only credential. Revocable
+-- from the phone; the token itself is stored hashed.
+create table if not exists web_session (
+  id text not null primary key,
+  user_id text not null references "user" ("id") on delete cascade,
+  token_hash text not null unique,
+  name text,
+  created_at integer not null,
+  last_seen_at integer not null,
+  revoked_at integer
+);
+create index if not exists web_session_user_idx on web_session (user_id);

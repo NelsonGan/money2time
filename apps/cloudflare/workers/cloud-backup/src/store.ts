@@ -141,6 +141,31 @@ export async function deleteBackup(env: Env, userId: string): Promise<void> {
   await db(env).prepare('delete from backup where user_id = ?1').bind(userId).run();
 }
 
+/** The fingerprint of the account's backup key, if a phone has set one. */
+export async function getKeyCheck(env: Env, userId: string): Promise<string | null> {
+  const row = await db(env).prepare('select key_check from account_key where user_id = ?1').bind(userId).first<{ key_check: string }>();
+  return row?.key_check ?? null;
+}
+
+/** The first phone sets the key; later calls keep the existing one. */
+export async function setKeyCheckIfUnset(env: Env, userId: string, keyCheck: string): Promise<string> {
+  await db(env)
+    .prepare('insert into account_key (user_id, key_check, created_at) values (?1, ?2, ?3) on conflict (user_id) do nothing')
+    .bind(userId, keyCheck, Date.now())
+    .run();
+  return (await getKeyCheck(env, userId)) ?? keyCheck;
+}
+
+export async function replaceKeyCheck(env: Env, userId: string, keyCheck: string): Promise<void> {
+  await db(env)
+    .prepare(
+      `insert into account_key (user_id, key_check, created_at) values (?1, ?2, ?3)
+       on conflict (user_id) do update set key_check = excluded.key_check, created_at = excluded.created_at`,
+    )
+    .bind(userId, keyCheck, Date.now())
+    .run();
+}
+
 /** Everything the account owns outside Better Auth's own tables. */
 export async function deleteUserData(env: Env, userId: string): Promise<void> {
   // Any object under the user's prefix, not just the one D1 points at, so an
@@ -157,5 +182,8 @@ export async function deleteUserData(env: Env, userId: string): Promise<void> {
     db(env).prepare('delete from backup where user_id = ?1').bind(userId),
     db(env).prepare('delete from primary_device where user_id = ?1').bind(userId),
     db(env).prepare('delete from device where user_id = ?1').bind(userId),
+    db(env).prepare('delete from account_key where user_id = ?1').bind(userId),
+    db(env).prepare('delete from web_session where user_id = ?1').bind(userId),
+    db(env).prepare('delete from link_request where user_id = ?1').bind(userId),
   ]);
 }
