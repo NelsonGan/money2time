@@ -2361,10 +2361,13 @@ const ms = {
     link_action: 'Imbas kod',
     linking: 'Memautkan…',
     confirm_title: 'Pautkan {{name}}?',
+    confirm_title_unnamed: 'Pautkan pelayar ini?',
     confirm_message:
-      'Semak bahawa komputer memaparkan kod {{code}}. Pautkan hanya komputer yang anda gunakan: komputer itu akan menerima semua data anda setiap kali skrin ini dibuka.',
+      'Semak bahawa komputer memaparkan kod {{code}}. Teruskan hanya jika anda sendiri yang membuka app.money2time.com pada komputer yang anda gunakan: komputer itu akan menerima semua data anda setiap kali skrin ini dibuka.',
+    confirm_waiting: 'Sekarang klik Pautkan pada komputer juga.',
     confirm_action: 'Pautkan',
     linked: '{{name}} dipautkan. Data anda sedang dihantar.',
+    linked_unnamed: 'Pelayar dipautkan. Data anda sedang dihantar.',
     browsers_title: 'Pelayar yang dipautkan',
     unknown_browser: 'Sebuah pelayar',
     status_connecting: 'Menyambung…',
@@ -2383,11 +2386,12 @@ const ms = {
     unlink: 'Nyahpaut',
     unlink_title: 'Nyahpaut pelayar ini?',
     unlink_message:
-      '{{name}} tidak lagi menerima data anda. Jika sedang dibuka, salinan yang disimpannya turut dipadam.',
+      '{{name}} berhenti menerima data anda dan memadamkan salinan yang disimpannya: serta-merta jika ia dibuka, atau kali seterusnya ia dibuka semasa skrin ini dibuka.',
     close: 'Tutup',
     scan_hint: 'Halakan kamera ke kod pada skrin komputer anda.',
     camera_permission: 'Benarkan akses kamera untuk mengimbas kod.',
     camera_allow: 'Benarkan kamera',
+    camera_settings: 'Buka Tetapan',
     errors: {
       unavailable:
         'Papan Pemuka Web memerlukan versi terkini apl. Kemas kini Money2Time dan cuba lagi.',
@@ -2397,7 +2401,9 @@ const ms = {
       offline: 'Tiada sambungan internet. Cuba lagi apabila anda dalam talian.',
       rejected: 'Pelayar tidak dapat membuka data. Cuba lagi.',
       closed: 'Pelayar ditutup sebelum pemautan selesai. Muat semula dan imbas semula.',
-      too_many: 'Anda boleh memautkan sehingga 8 pelayar. Nyahpaut satu dahulu.',
+      too_many: 'Anda boleh memautkan sehingga {{max}} pelayar. Nyahpaut satu dahulu.',
+      too_large: 'Data anda terlalu besar untuk dihantar ke Papan Pemuka Web.',
+      failed: 'Ada masalah. Cuba lagi.',
     },
   },
   auto_backup: {

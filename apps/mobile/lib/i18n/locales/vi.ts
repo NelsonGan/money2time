@@ -2330,10 +2330,13 @@ const vi = {
     link_action: 'Quét mã',
     linking: 'Đang liên kết…',
     confirm_title: 'Liên kết {{name}}?',
+    confirm_title_unnamed: 'Liên kết trình duyệt này?',
     confirm_message:
-      'Hãy kiểm tra máy tính đang hiển thị mã {{code}}. Chỉ liên kết máy tính bạn đang dùng: máy sẽ nhận toàn bộ dữ liệu của bạn mỗi khi màn hình này được mở.',
+      'Hãy kiểm tra máy tính có hiển thị mã {{code}} không. Chỉ tiếp tục nếu chính bạn đã mở app.money2time.com trên máy tính bạn đang dùng: máy đó sẽ nhận toàn bộ dữ liệu của bạn mỗi khi màn hình này mở.',
+    confirm_waiting: 'Giờ hãy nhấp Liên kết trên máy tính nữa.',
     confirm_action: 'Liên kết',
     linked: 'Đã liên kết {{name}}. Dữ liệu của bạn đang được gửi.',
+    linked_unnamed: 'Đã liên kết trình duyệt. Dữ liệu của bạn đang được gửi.',
     browsers_title: 'Trình duyệt đã liên kết',
     unknown_browser: 'Một trình duyệt',
     status_connecting: 'Đang kết nối…',
@@ -2352,11 +2355,12 @@ const vi = {
     unlink: 'Hủy liên kết',
     unlink_title: 'Hủy liên kết trình duyệt này?',
     unlink_message:
-      '{{name}} sẽ không nhận dữ liệu của bạn nữa. Nếu đang mở, trình duyệt cũng sẽ xóa bản sao đang giữ.',
+      '{{name}} sẽ không nhận dữ liệu của bạn nữa và xóa bản sao đang giữ: ngay lập tức nếu đang mở, nếu không thì vào lần tới nó mở cùng lúc với màn hình này.',
     close: 'Đóng',
     scan_hint: 'Hướng camera vào mã trên màn hình máy tính của bạn.',
     camera_permission: 'Cho phép truy cập camera để quét mã.',
     camera_allow: 'Cho phép camera',
+    camera_settings: 'Mở Cài đặt',
     errors: {
       unavailable:
         'Bảng điều khiển web cần phiên bản mới nhất của ứng dụng. Hãy cập nhật Money2Time rồi thử lại.',
@@ -2366,7 +2370,10 @@ const vi = {
       offline: 'Không có kết nối internet. Hãy thử lại khi bạn trực tuyến.',
       rejected: 'Trình duyệt không thể mở dữ liệu. Hãy thử lại.',
       closed: 'Trình duyệt đã đóng trước khi liên kết xong. Hãy tải lại và quét lại.',
-      too_many: 'Bạn có thể liên kết tối đa 8 trình duyệt. Hãy hủy liên kết một trình duyệt trước.',
+      too_many:
+        'Bạn có thể liên kết tối đa {{max}} trình duyệt. Hãy hủy liên kết một trình duyệt trước.',
+      too_large: 'Dữ liệu của bạn quá lớn để gửi tới Bảng điều khiển web.',
+      failed: 'Đã xảy ra lỗi. Hãy thử lại.',
     },
   },
   auto_backup: {

@@ -2359,10 +2359,13 @@ const es = {
     link_action: 'Escanear el código',
     linking: 'Vinculando…',
     confirm_title: '¿Vincular {{name}}?',
+    confirm_title_unnamed: '¿Vincular este navegador?',
     confirm_message:
-      'Comprueba que el ordenador muestre el código {{code}}. Vincula solo un ordenador que estés usando: recibirá todos tus datos cada vez que esta pantalla esté abierta.',
+      'Comprueba que el ordenador muestre el código {{code}}. Continúa solo si abriste tú mismo app.money2time.com en un ordenador que estás usando: recibirá todos tus datos cada vez que esta pantalla esté abierta.',
+    confirm_waiting: 'Ahora haz clic también en Vincular en el ordenador.',
     confirm_action: 'Vincular',
     linked: '{{name}} vinculado. Tus datos van en camino.',
+    linked_unnamed: 'Navegador vinculado. Tus datos están en camino.',
     browsers_title: 'Navegadores vinculados',
     unknown_browser: 'Un navegador',
     status_connecting: 'Conectando…',
@@ -2381,11 +2384,12 @@ const es = {
     unlink: 'Desvincular',
     unlink_title: '¿Desvincular este navegador?',
     unlink_message:
-      '{{name}} deja de recibir tus datos. Si está abierto ahora, también elimina la copia que guarda.',
+      '{{name}} deja de recibir tus datos y elimina la copia que guarda: al instante si está abierto, o la próxima vez que esté abierto mientras esta pantalla también lo esté.',
     close: 'Cerrar',
     scan_hint: 'Apunta la cámara al código que aparece en la pantalla de tu ordenador.',
     camera_permission: 'Permite el acceso a la cámara para escanear el código.',
     camera_allow: 'Permitir cámara',
+    camera_settings: 'Abrir Ajustes',
     errors: {
       unavailable:
         'El panel web necesita la última versión de la app. Actualiza Money2Time e inténtalo de nuevo.',
@@ -2396,7 +2400,9 @@ const es = {
       rejected: 'El navegador no pudo abrir los datos. Inténtalo de nuevo.',
       closed:
         'El navegador se cerró antes de terminar la vinculación. Recárgalo y vuelve a escanear.',
-      too_many: 'Puedes vincular hasta 8 navegadores. Desvincula uno primero.',
+      too_many: 'Puedes vincular hasta {{max}} navegadores. Desvincula uno primero.',
+      too_large: 'Tus datos son demasiado grandes para enviarlos al panel web.',
+      failed: 'Algo salió mal. Inténtalo de nuevo.',
     },
   },
   auto_backup: {

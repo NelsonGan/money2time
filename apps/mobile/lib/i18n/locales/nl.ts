@@ -2369,10 +2369,13 @@ const nl = {
     link_action: 'Code scannen',
     linking: 'Koppelen…',
     confirm_title: '{{name}} koppelen?',
+    confirm_title_unnamed: 'Deze browser koppelen?',
     confirm_message:
-      'Controleer of de computer de code {{code}} toont. Koppel alleen een computer die je zelf gebruikt: die ontvangt al je gegevens elke keer dat dit scherm open is.',
+      'Controleer of de computer de code {{code}} toont. Ga alleen verder als je app.money2time.com zelf hebt geopend op een computer die je gebruikt: die krijgt al je gegevens telkens als dit scherm open is.',
+    confirm_waiting: 'Klik nu ook op Koppelen op de computer.',
     confirm_action: 'Koppelen',
     linked: '{{name}} gekoppeld. Je gegevens zijn onderweg.',
+    linked_unnamed: 'Browser gekoppeld. Je gegevens zijn onderweg.',
     browsers_title: 'Gekoppelde browsers',
     unknown_browser: 'Een browser',
     status_connecting: 'Verbinden…',
@@ -2391,11 +2394,12 @@ const nl = {
     unlink: 'Ontkoppelen',
     unlink_title: 'Deze browser ontkoppelen?',
     unlink_message:
-      '{{name}} krijgt je gegevens niet meer. Als de browser nu open is, wordt ook de kopie verwijderd die hij bewaart.',
+      '{{name}} krijgt je gegevens niet meer en verwijdert de kopie die hij bewaart: meteen als hij open is, anders de volgende keer dat hij open is terwijl dit scherm open is.',
     close: 'Sluiten',
     scan_hint: 'Richt de camera op de code op het scherm van je computer.',
     camera_permission: 'Geef toegang tot de camera om de code te scannen.',
     camera_allow: 'Camera toestaan',
+    camera_settings: 'Instellingen openen',
     errors: {
       unavailable:
         'Het Webdashboard heeft de nieuwste versie van de app nodig. Werk Money2Time bij en probeer het opnieuw.',
@@ -2406,7 +2410,9 @@ const nl = {
       rejected: 'De browser kon de gegevens niet openen. Probeer het opnieuw.',
       closed:
         'De browser is gesloten voordat het koppelen klaar was. Laad hem opnieuw en scan nogmaals.',
-      too_many: 'Je kunt maximaal 8 browsers koppelen. Ontkoppel er eerst een.',
+      too_many: 'Je kunt maximaal {{max}} browsers koppelen. Ontkoppel er eerst een.',
+      too_large: 'Je gegevens zijn te groot om naar het webdashboard te sturen.',
+      failed: 'Er ging iets mis. Probeer het opnieuw.',
     },
   },
   auto_backup: {

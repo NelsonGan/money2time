@@ -1,7 +1,8 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import { StatusBar } from 'expo-status-bar';
 import { X } from 'lucide-react-native';
 import React, { useEffect, useRef } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Linking, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, Text, ThemeModal } from '~/components/ui';
@@ -40,8 +41,16 @@ export function QrScannerModal({
     if (visible) handled.current = false;
   }, [visible]);
 
+  // Ask once when the scanner opens, while the system can still prompt.
+  useEffect(() => {
+    if (visible && permission && !permission.granted && permission.canAskAgain) {
+      void requestPermission();
+    }
+  }, [visible, permission, requestPermission]);
+
   return (
     <ThemeModal visible={visible} animationType="slide" onRequestClose={onClose}>
+      <StatusBar style="light" />
       <View style={[styles.scanner, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
         <View style={styles.scannerHeader}>
           <CloseButton onPress={onClose} />
@@ -69,8 +78,20 @@ export function QrScannerModal({
                 <Text className="text-center text-base font-semibold text-white">
                   {I18n.t('web_dashboard.camera_permission')}
                 </Text>
-                <Button className="mt-4" onPress={() => void requestPermission()}>
-                  <Text>{I18n.t('web_dashboard.camera_allow')}</Text>
+                {/* Once declined for good, only Settings can turn it back on. */}
+                <Button
+                  className="mt-4"
+                  onPress={() =>
+                    void (permission.canAskAgain ? requestPermission() : Linking.openSettings())
+                  }
+                >
+                  <Text>
+                    {I18n.t(
+                      permission.canAskAgain
+                        ? 'web_dashboard.camera_allow'
+                        : 'web_dashboard.camera_settings',
+                    )}
+                  </Text>
                 </Button>
               </>
             )}
@@ -93,16 +114,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
+  // A phone-width square, centred: on an iPad the full width is far too big.
   viewfinder: {
     aspectRatio: 1,
-    marginHorizontal: 24,
+    width: '86%',
+    maxWidth: 420,
+    alignSelf: 'center',
     marginTop: 32,
     borderRadius: 24,
     overflow: 'hidden',
   },
   permission: {
     aspectRatio: 1,
-    marginHorizontal: 24,
+    width: '86%',
+    maxWidth: 420,
+    alignSelf: 'center',
     marginTop: 32,
     alignItems: 'center',
     justifyContent: 'center',

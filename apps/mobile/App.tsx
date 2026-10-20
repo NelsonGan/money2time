@@ -145,6 +145,7 @@ import {
   ShareAndEarnScreen,
   WageCalculatorFlowScreen,
 } from '~/features/settings/screens';
+import { WebDashboardScreen } from '~/features/settings/screens/WebDashboardScreen';
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import { QuickAddWarmup } from '~/features/transactions/components/QuickAddWarmup';
 import { ReceiptCameraSheet } from '~/features/transactions/components/ReceiptCameraSheet';
@@ -2348,6 +2349,19 @@ function SettingsLiveEarningsRouteScreen({
   );
 }
 
+/**
+ * Root-level alias for the Web Dashboard screen: scanning the website's code
+ * with the system camera opens `money2time://pair?…`, which links from here.
+ */
+function SettingsWebDashboardRouteScreen({
+  navigation,
+  route,
+}: RootStackRouteProps<'SettingsWebDashboard'>) {
+  return (
+    <WebDashboardScreen onBack={() => navigation.goBack()} initialPairLink={route.params?.pair} />
+  );
+}
+
 function SettingsTimeDisplayRouteScreen({
   navigation,
 }: RootStackRouteProps<'SettingsTimeDisplay'>) {
@@ -2974,6 +2988,10 @@ function AppContent() {
             <RootStack.Screen
               name="SettingsLiveEarnings"
               component={SettingsLiveEarningsRouteScreen}
+            />
+            <RootStack.Screen
+              name="SettingsWebDashboard"
+              component={SettingsWebDashboardRouteScreen}
             />
             <RootStack.Screen name="AddWageMonth" component={AddWageMonthRouteScreen} />
             <RootStack.Screen name="SettingsQuickEntry" component={SettingsQuickEntryRouteScreen} />

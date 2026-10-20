@@ -2345,10 +2345,13 @@ const sv = {
     link_action: 'Skanna koden',
     linking: 'Kopplar…',
     confirm_title: 'Koppla {{name}}?',
+    confirm_title_unnamed: 'Koppla den här webbläsaren?',
     confirm_message:
-      'Kontrollera att datorn visar koden {{code}}. Koppla bara en dator som du själv använder: den får alla dina data varje gång den här skärmen är öppen.',
+      'Kontrollera att datorn visar koden {{code}}. Fortsätt bara om du själv öppnade app.money2time.com på en dator som du använder: den får alla dina data varje gång den här skärmen är öppen.',
+    confirm_waiting: 'Klicka nu på Koppla på datorn också.',
     confirm_action: 'Koppla',
     linked: 'Kopplade {{name}}. Dina data är på väg.',
+    linked_unnamed: 'Webbläsaren är kopplad. Dina data är på väg.',
     browsers_title: 'Kopplade webbläsare',
     unknown_browser: 'En webbläsare',
     status_connecting: 'Ansluter…',
@@ -2367,11 +2370,12 @@ const sv = {
     unlink: 'Koppla bort',
     unlink_title: 'Koppla bort den här webbläsaren?',
     unlink_message:
-      '{{name}} slutar få dina data. Om den är öppen nu raderas även kopian den har sparat.',
+      '{{name}} slutar få dina data och raderar kopian den sparar: direkt om den är öppen, annars nästa gång den är öppen samtidigt som den här skärmen.',
     close: 'Stäng',
     scan_hint: 'Rikta kameran mot koden på datorns skärm.',
     camera_permission: 'Tillåt kameraåtkomst för att skanna koden.',
     camera_allow: 'Tillåt kamera',
+    camera_settings: 'Öppna Inställningar',
     errors: {
       unavailable:
         'Webbpanelen kräver den senaste versionen av appen. Uppdatera Money2Time och försök igen.',
@@ -2381,7 +2385,9 @@ const sv = {
       offline: 'Ingen internetanslutning. Försök igen när du är online.',
       rejected: 'Webbläsaren kunde inte öppna data. Försök igen.',
       closed: 'Webbläsaren stängdes innan kopplingen var klar. Ladda om den och skanna igen.',
-      too_many: 'Du kan koppla upp till 8 webbläsare. Koppla bort en först.',
+      too_many: 'Du kan koppla upp till {{max}} webbläsare. Koppla bort en först.',
+      too_large: 'Dina data är för stora för att skickas till webbpanelen.',
+      failed: 'Något gick fel. Försök igen.',
     },
   },
   auto_backup: {

@@ -2243,10 +2243,13 @@ const zhHant = {
     link_action: '掃描 QR Code',
     linking: '連結中…',
     confirm_title: '要連結 {{name}} 嗎？',
+    confirm_title_unnamed: '要連結這個瀏覽器嗎？',
     confirm_message:
-      '請確認電腦上顯示的代碼是 {{code}}。只連結你正在使用的電腦：每次開啟此畫面時，它都會收到你的全部資料。',
+      '請確認電腦上顯示的代碼是 {{code}}。只有在你親自於正在使用的電腦上開啟 app.money2time.com 時才繼續：每次開啟此畫面，它都會收到你的所有資料。',
+    confirm_waiting: '現在也在電腦上點按「連結」。',
     confirm_action: '連結',
     linked: '已連結 {{name}}，資料正在傳送。',
+    linked_unnamed: '瀏覽器已連結，你的資料正在傳送。',
     browsers_title: '已連結的瀏覽器',
     unknown_browser: '某個瀏覽器',
     status_connecting: '連線中…',
@@ -2263,11 +2266,13 @@ const zhHant = {
     open_web: '開啟 app.money2time.com',
     unlink: '解除連結',
     unlink_title: '要解除此瀏覽器的連結嗎？',
-    unlink_message: '{{name}} 將不再接收你的資料。如果它目前已開啟，也會刪除它保留的副本。',
+    unlink_message:
+      '{{name}} 將不再接收你的資料，並刪除它保存的副本：若它正開啟，會立即刪除；否則在下次它與此畫面同時開啟時刪除。',
     close: '關閉',
     scan_hint: '請將相機對準電腦螢幕上的 QR Code。',
     camera_permission: '請允許存取相機以掃描 QR Code。',
     camera_allow: '允許使用相機',
+    camera_settings: '開啟設定',
     errors: {
       unavailable: '網頁儀表板需要最新版本的應用程式。請更新 Money2Time 後再試一次。',
       invalid_qr:
@@ -2276,7 +2281,9 @@ const zhHant = {
       offline: '沒有網路連線。請連上網路後再試一次。',
       rejected: '瀏覽器無法開啟資料。請再試一次。',
       closed: '連結完成前瀏覽器就關閉了。請重新載入後再掃描一次。',
-      too_many: '最多可連結 8 個瀏覽器。請先解除其中一個的連結。',
+      too_many: '最多可連結 {{max}} 個瀏覽器。請先解除其中一個的連結。',
+      too_large: '你的資料太大，無法傳送到網頁儀表板。',
+      failed: '發生問題，請再試一次。',
     },
   },
   auto_backup: {

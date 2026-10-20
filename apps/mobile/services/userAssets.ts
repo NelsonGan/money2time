@@ -484,7 +484,9 @@ export function listCustomItemIcons(): { id: string; uri: string }[] {
  * Reads every file under the user-assets root as base64 for inclusion in a
  * backup. Walks all kinds so future asset types are covered automatically.
  */
-export async function collectUserAssetsForBackup(): Promise<UserAssetBackupEntry[]> {
+export async function collectUserAssetsForBackup(
+  include?: (path: string) => boolean,
+): Promise<UserAssetBackupEntry[]> {
   const root = rootDir();
   if (!root.exists) return [];
   const out: UserAssetBackupEntry[] = [];
@@ -492,6 +494,8 @@ export async function collectUserAssetsForBackup(): Promise<UserAssetBackupEntry
     for (const entry of dir.list()) {
       if (entry instanceof Directory) {
         await walk(entry, `${prefix}${entry.name}/`);
+      } else if (include && !include(`${prefix}${entry.name}`)) {
+        continue;
       } else {
         // The orphan GC (runUserAssetGc in userAssetGc.ts) can delete a file
         // between this listing and the read below, e.g. the user deletes its

@@ -2357,10 +2357,13 @@ const it = {
     link_action: 'Scansiona il codice',
     linking: 'Collegamento…',
     confirm_title: 'Collegare {{name}}?',
+    confirm_title_unnamed: 'Collegare questo browser?',
     confirm_message:
-      'Controlla che il computer mostri il codice {{code}}. Collega solo un computer che stai usando: riceverà tutti i tuoi dati ogni volta che questa schermata è aperta.',
+      'Controlla che il computer mostri il codice {{code}}. Continua solo se hai aperto tu app.money2time.com su un computer che stai usando: riceverà tutti i tuoi dati ogni volta che questa schermata è aperta.',
+    confirm_waiting: 'Ora fai clic su Collega anche sul computer.',
     confirm_action: 'Collega',
     linked: '{{name}} collegato. I tuoi dati sono in arrivo.',
+    linked_unnamed: 'Browser collegato. I tuoi dati stanno arrivando.',
     browsers_title: 'Browser collegati',
     unknown_browser: 'Un browser',
     status_connecting: 'Connessione…',
@@ -2379,11 +2382,12 @@ const it = {
     unlink: 'Scollega',
     unlink_title: 'Scollegare questo browser?',
     unlink_message:
-      '{{name}} smette di ricevere i tuoi dati. Se è aperto in questo momento, elimina anche la copia che conserva.',
+      '{{name}} smette di ricevere i tuoi dati ed elimina la copia che conserva: subito se è aperto, altrimenti la prossima volta che è aperto insieme a questa schermata.',
     close: 'Chiudi',
     scan_hint: 'Inquadra con la fotocamera il codice sullo schermo del computer.',
     camera_permission: 'Consenti l’accesso alla fotocamera per scansionare il codice.',
     camera_allow: 'Consenti fotocamera',
+    camera_settings: 'Apri Impostazioni',
     errors: {
       unavailable:
         'La dashboard web richiede l’ultima versione dell’app. Aggiorna Money2Time e riprova.',
@@ -2395,7 +2399,9 @@ const it = {
       rejected: 'Il browser non è riuscito ad aprire i dati. Riprova.',
       closed:
         'Il browser si è chiuso prima della fine del collegamento. Ricaricalo e inquadra di nuovo il codice.',
-      too_many: 'Puoi collegare fino a 8 browser. Scollegane prima uno.',
+      too_many: 'Puoi collegare fino a {{max}} browser. Scollegane prima uno.',
+      too_large: 'I tuoi dati sono troppo grandi per essere inviati alla dashboard web.',
+      failed: 'Qualcosa è andato storto. Riprova.',
     },
   },
   auto_backup: {

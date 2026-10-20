@@ -13,13 +13,14 @@
  *   side. Anyone who sees the QR itself (a photo, a screen share) could
  *   answer it too, which is why the phone asks before linking and both
  *   screens show the code below.
- * - The same HKDF also gives the link's private room id, where the two meet
- *   from then on, and a six-digit code both screens show, so the person
- *   linking can see the phone and the computer agree before it is confirmed.
+ * - The same HKDF also gives the link's private room token (the relay keeps
+ *   only a hash of it), where the two meet from then on, and a six-digit code
+ *   both screens show, so the person linking can see the phone and the
+ *   computer agree before either confirms.
  * - Messages are JSON sealed with AES-256-GCM: `{ t: 'e', iv, d }`, with the
  *   direction in the AAD so a message cannot be reflected back to its sender.
- * - The data itself is gzip → AES-256-GCM: `M2TB` · version 1 · 12-byte IV ·
- *   ciphertext with its 16-byte tag, sent in chunks and checked whole.
+ * - The data itself is gzip, cut into chunks, each sealed with AES-256-GCM
+ *   under a fresh data key per transfer (`encryptChunk`).
  */
 
 import { gcm } from '@noble/ciphers/aes.js';
@@ -29,13 +30,9 @@ import { sha256 } from '@noble/hashes/sha2.js';
 
 export type RandomBytes = (length: number) => Uint8Array;
 
-const MAGIC = [0x4d, 0x32, 0x54, 0x42]; // "M2TB"
-const VERSION = 1;
-const HEADER = MAGIC.length + 1;
 const IV_LENGTH = 12;
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
-const BACKUP_AAD = encoder.encode('money2time-backup-v1');
 const MESSAGE_AAD = {
   p2b: encoder.encode('money2time-msg-v1:p2b'),
   b2p: encoder.encode('money2time-msg-v1:b2p'),
@@ -139,17 +136,39 @@ export function openMessage<T>(key: Uint8Array, sealed: Sealed, direction: Direc
   }
 }
 
-export function encryptBackup(
-  key: Uint8Array,
+/**
+ * One chunk of a transfer: AES-256-GCM under the transfer's own data key,
+ * with the chunk's place (transfer id, index, count) in the IV and AAD, so
+ * chunks cannot be swapped, dropped, repeated or moved to another transfer.
+ * The data key travels to each browser sealed with that browser's link key,
+ * so one encryption serves every linked browser.
+ */
+export function encryptChunk(
+  dataKey: Uint8Array,
+  ivPrefix: Uint8Array,
+  place: { id: string; index: number; count: number },
   plaintext: Uint8Array,
-  random: RandomBytes,
 ): Uint8Array {
-  const iv = random(IV_LENGTH);
-  const sealed = gcm(key, iv, BACKUP_AAD).encrypt(plaintext);
-  const out = new Uint8Array(HEADER + IV_LENGTH + sealed.length);
-  out.set(MAGIC, 0);
-  out[MAGIC.length] = VERSION;
-  out.set(iv, HEADER);
-  out.set(sealed, HEADER + IV_LENGTH);
-  return out;
+  return gcm(dataKey, chunkIv(ivPrefix, place.index), chunkAad(place)).encrypt(plaintext);
+}
+
+/** For tests: the website does this side. */
+export function decryptChunk(
+  dataKey: Uint8Array,
+  ivPrefix: Uint8Array,
+  place: { id: string; index: number; count: number },
+  ciphertext: Uint8Array,
+): Uint8Array {
+  return gcm(dataKey, chunkIv(ivPrefix, place.index), chunkAad(place)).decrypt(ciphertext);
+}
+
+function chunkIv(ivPrefix: Uint8Array, index: number): Uint8Array {
+  const iv = new Uint8Array(IV_LENGTH);
+  iv.set(ivPrefix.subarray(0, 8), 0);
+  new DataView(iv.buffer).setUint32(8, index);
+  return iv;
+}
+
+function chunkAad(place: { id: string; index: number; count: number }): Uint8Array {
+  return encoder.encode(`money2time-chunk-v1:${place.id}:${place.index}:${place.count}`);
 }

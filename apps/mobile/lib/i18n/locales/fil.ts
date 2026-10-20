@@ -2375,10 +2375,13 @@ const fil = {
     link_action: 'I-scan ang code',
     linking: 'Nagli-link…',
     confirm_title: 'I-link ang {{name}}?',
+    confirm_title_unnamed: 'I-link ang browser na ito?',
     confirm_message:
-      'Tiyaking ipinapakita ng computer ang code na {{code}}. Mag-link lang ng computer na ginagamit mo: tatanggap ito ng lahat ng iyong data tuwing bukas ang screen na ito.',
+      'Tiyaking ipinapakita ng computer ang code na {{code}}. Magpatuloy lang kung ikaw mismo ang nagbukas ng app.money2time.com sa computer na ginagamit mo: matatanggap nito ang lahat ng data mo tuwing bukas ang screen na ito.',
+    confirm_waiting: 'Ngayon, i-click din ang I-link sa computer.',
     confirm_action: 'I-link',
     linked: 'Na-link ang {{name}}. Papunta na ang iyong data.',
+    linked_unnamed: 'Naka-link na ang browser. Papunta na ang data mo.',
     browsers_title: 'Mga naka-link na browser',
     unknown_browser: 'Isang browser',
     status_connecting: 'Kumokonekta…',
@@ -2397,11 +2400,12 @@ const fil = {
     unlink: 'I-unlink',
     unlink_title: 'I-unlink ang browser na ito?',
     unlink_message:
-      'Hindi na makakatanggap ng iyong data ang {{name}}. Kung bukas ito ngayon, buburahin din nito ang kopyang itinatago nito.',
+      'Hindi na matatanggap ng {{name}} ang data mo at buburahin nito ang kopyang itinatago nito: agad kung bukas ito, o sa susunod na bukas ito habang bukas din ang screen na ito.',
     close: 'Isara',
     scan_hint: 'Itutok ang camera sa code sa screen ng iyong computer.',
     camera_permission: 'Payagan ang access sa camera para ma-scan ang code.',
     camera_allow: 'Payagan ang camera',
+    camera_settings: 'Buksan ang Settings',
     errors: {
       unavailable:
         'Kailangan ng Web Dashboard ang pinakabagong bersyon ng app. I-update ang Money2Time at subukan ulit.',
@@ -2412,7 +2416,9 @@ const fil = {
       offline: 'Walang koneksyon sa internet. Subukan ulit kapag online ka na.',
       rejected: 'Hindi mabuksan ng browser ang data. Subukan ulit.',
       closed: 'Nagsara ang browser bago natapos ang pag-link. I-reload ito at mag-scan ulit.',
-      too_many: 'Hanggang 8 browser ang puwede mong i-link. Mag-unlink muna ng isa.',
+      too_many: 'Hanggang {{max}} browser ang maaari mong i-link. Mag-unlink muna ng isa.',
+      too_large: 'Masyadong malaki ang data mo para ipadala sa Web Dashboard.',
+      failed: 'May nangyaring mali. Subukang muli.',
     },
   },
   auto_backup: {

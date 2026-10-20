@@ -150,6 +150,7 @@ EXPO_PUBLIC_REVENUECAT_ENTITLEMENT_ID=
 EXPO_PUBLIC_REVENUECAT_OFFERING_ID=
 EXPO_PUBLIC_MONEY2TIME_WORKERS_RECEIPT_SCANNER=
 EXPO_PUBLIC_MONEY2TIME_WORKERS_LIVE_EARNINGS=
+EXPO_PUBLIC_MONEY2TIME_WORKERS_WEB_DASHBOARD=
 EXPO_PUBLIC_REQUEST_SIGNING_KEY=
 EXPO_PUBLIC_BRANDFETCH_CLIENT_ID=
 BRANDFETCH_API_KEY=
@@ -2053,34 +2054,46 @@ computer, read only. Nothing is stored online: this Worker is a relay with no
 database, no bucket, no account and no secrets. Served at
 `workers-web-dashboard.money2time.com`.
 
-- **Rooms:** `GET /v1/rooms/:roomId?role=phone|browser` upgrades to a
-  WebSocket into a Durable Object room (hibernation API) with at most one
-  phone and one browser. Each message from one goes straight to the other; the
-  room makes no storage calls and keeps nothing after forwarding. It tells each
-  side when the other arrives or leaves. Only the dashboard's origin may take
-  the browser seat, and connections are rate limited per address.
+- **Rooms:** `GET /v1/room?role=phone|browser` upgrades to a WebSocket into a
+  Durable Object room (hibernation API) with at most one phone and one browser.
+  The room's token travels in `Sec-WebSocket-Protocol: m2t-v1, <token>`, never
+  in the URL, and the room is named after its SHA-256, so request logs and the
+  Durable Object id never show a token. Each message from one side goes
+  straight to the other; the room makes no storage calls and keeps nothing
+  after forwarding. It tells each side when the other arrives or leaves, drops
+  any `peer` notice a client tries to forge, and a newer connection for a seat
+  replaces the old one (close code `4000`, shown as "open in another tab").
+  Only the dashboard's origin may take the browser seat, and connections are
+  rate limited per address (per /64 for IPv6). Invocation logs are off.
 - **Linking:** the browser shows `money2time://pair?r=…&pk=…&s=…`: a one-off
-  room, a P-256 public key and a 16-byte secret. The phone scans it, sends its
-  own public key through that room, and both derive the link key with ECDH →
-  HKDF-SHA256 salted with the QR secret, plus a private room id for later
-  visits. The secret only travels through the camera, so the relay cannot stand
-  in for either side. Both screens then show a six-digit code from the same
-  derivation, and nothing is linked until the person confirms it on the phone
-  (`services/webDashboardLink.ts`): anyone who sees a QR could answer it, so
-  the phone never links a browser on its own.
+  room token, a P-256 public key and a 16-byte secret. The phone scans it,
+  sends its own public key through that room, and both derive, with ECDH →
+  HKDF-SHA256 salted with the QR secret, the link key, a private room token
+  for later visits and a six-digit code. The secret only travels through the
+  camera, so the relay cannot stand in for either side. Both screens show the
+  code, and the link needs a tap on each: the phone first, then the browser
+  (`services/webDashboardLink.ts`). A second phone answering the same QR makes
+  the browser show a new one.
 - **Transfer:** whenever the phone's Web Dashboard screen is open and a
-  linked browser is too, the browser asks and the phone builds the Export
-  Database JSON, gzips it, seals it with AES-256-GCM and sends it in 256 KB
-  chunks with a small ack window. The browser checks the SHA-256, decrypts,
-  and keeps the encrypted copy and a non-extractable WebCrypto key in
-  IndexedDB until it is unlinked. Every message between the two is sealed with
-  the link key and its direction, and a transfer must echo the nonce of the
-  browser's request, so the relay sees only ciphertext and cannot reflect or
-  replay one. Both sides ping every 25 s; the room answers without waking.
+  linked browser is too, the browser asks with a fresh nonce and the phone
+  builds the Export Database JSON (with logos, icons and covers, never
+  receipts or payment QR codes), gzips it and sends it in 256 KB chunks, each
+  sealed with AES-256-GCM under a per-transfer key and bound to its index and
+  count, with an ack window of 8. The per-transfer key travels inside the
+  sealed `begin`. The browser decrypts each chunk as it arrives, then keeps the
+  encrypted chunks and a non-extractable WebCrypto key in IndexedDB until it
+  is unlinked. Every message is sealed with the link key and its direction,
+  and a transfer must echo the nonce of a request the phone has not answered
+  before, so the relay sees only ciphertext and cannot reflect or replay one.
+  Transfers are capped at 128 MB. Both sides ping every 25 s; the room answers
+  without waking.
 - **Pro:** the phone says whether it has Pro with each transfer, and the web
   can gate dashboards via `PRO_VIEWS` in the website repo (empty at launch).
-- **Unlinking:** either side sends a sealed `unlink`; the browser deletes its
-  key and copy. Link keys live in the phone's keychain (at most eight).
+- **Unlinking:** either side sends a sealed `unlink` and keeps a tombstone
+  until the other confirms, so an unlink made while the other side is closed
+  is delivered the next time both are open (the phone keeps its tombstones for
+  180 days). The browser then deletes its key and copy. Link keys live in the
+  phone's keychain (at most eight).
 
 No secrets. Vars in `wrangler.toml`: `ALLOWED_ORIGINS`. The app reads the base
 URL from `EXPO_PUBLIC_MONEY2TIME_WORKERS_WEB_DASHBOARD` (defaults to

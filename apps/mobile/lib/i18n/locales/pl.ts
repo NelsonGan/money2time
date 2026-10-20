@@ -2354,10 +2354,13 @@ const pl = {
     link_action: 'Zeskanuj kod',
     linking: 'Łączenie…',
     confirm_title: 'Połączyć {{name}}?',
+    confirm_title_unnamed: 'Połączyć tę przeglądarkę?',
     confirm_message:
-      'Sprawdź, czy komputer pokazuje kod {{code}}. Łącz tylko komputer, z którego korzystasz: będzie otrzymywał wszystkie Twoje dane za każdym razem, gdy ten ekran jest otwarty.',
+      'Sprawdź, czy komputer pokazuje kod {{code}}. Kontynuuj tylko wtedy, gdy sam otworzyłeś app.money2time.com na komputerze, którego używasz: będzie on dostawać wszystkie Twoje dane za każdym razem, gdy ten ekran jest otwarty.',
+    confirm_waiting: 'Teraz kliknij też Połącz na komputerze.',
     confirm_action: 'Połącz',
     linked: 'Połączono: {{name}}. Twoje dane są w drodze.',
+    linked_unnamed: 'Przeglądarka połączona. Twoje dane są w drodze.',
     browsers_title: 'Połączone przeglądarki',
     unknown_browser: 'Przeglądarka',
     status_connecting: 'Łączenie…',
@@ -2376,11 +2379,12 @@ const pl = {
     unlink: 'Odłącz',
     unlink_title: 'Odłączyć tę przeglądarkę?',
     unlink_message:
-      '{{name}} przestanie otrzymywać Twoje dane. Jeśli ta przeglądarka jest teraz otwarta, usunie też przechowywaną kopię.',
+      '{{name}} przestanie dostawać Twoje dane i usunie przechowywaną kopię: od razu, jeśli jest otwarta, a w przeciwnym razie przy następnym otwarciu, gdy ten ekran też będzie otwarty.',
     close: 'Zamknij',
     scan_hint: 'Skieruj aparat na kod na ekranie komputera.',
     camera_permission: 'Zezwól na dostęp do aparatu, aby zeskanować kod.',
     camera_allow: 'Zezwól na aparat',
+    camera_settings: 'Otwórz Ustawienia',
     errors: {
       unavailable:
         'Panel webowy wymaga najnowszej wersji aplikacji. Zaktualizuj Money2Time i spróbuj ponownie.',
@@ -2391,7 +2395,9 @@ const pl = {
       rejected: 'Przeglądarka nie mogła otworzyć danych. Spróbuj ponownie.',
       closed:
         'Przeglądarka zamknęła się przed zakończeniem łączenia. Odśwież ją i zeskanuj ponownie.',
-      too_many: 'Możesz połączyć maksymalnie 8 przeglądarek. Najpierw odłącz jedną.',
+      too_many: 'Możesz połączyć maksymalnie {{max}} przeglądarek. Najpierw odłącz jedną.',
+      too_large: 'Twoje dane są zbyt duże, by wysłać je do Panelu WWW.',
+      failed: 'Coś poszło nie tak. Spróbuj ponownie.',
     },
   },
   auto_backup: {

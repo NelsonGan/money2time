@@ -2243,10 +2243,13 @@ const zh = {
     link_action: '扫描二维码',
     linking: '正在关联…',
     confirm_title: '关联 {{name}}？',
+    confirm_title_unnamed: '要关联这个浏览器吗？',
     confirm_message:
-      '请确认电脑上显示的代码是 {{code}}。只关联你正在使用的电脑：每次打开此屏幕时，它都会收到你的全部数据。',
+      '请确认电脑上显示的代码是 {{code}}。只有在你亲自于正在使用的电脑上打开 app.money2time.com 时才继续：每次打开此页面，它都会收到你的全部数据。',
+    confirm_waiting: '现在也在电脑上点击“关联”。',
     confirm_action: '关联',
     linked: '已关联 {{name}}，数据正在发送。',
+    linked_unnamed: '浏览器已关联，你的数据正在发送。',
     browsers_title: '已关联的浏览器',
     unknown_browser: '某个浏览器',
     status_connecting: '正在连接…',
@@ -2263,11 +2266,13 @@ const zh = {
     open_web: '打开 app.money2time.com',
     unlink: '解除关联',
     unlink_title: '解除此浏览器的关联？',
-    unlink_message: '{{name}} 将不再接收你的数据。如果它当前已打开，还会删除它保留的副本。',
+    unlink_message:
+      '{{name}} 将不再接收你的数据，并删除它保存的副本：如果它正打开，则立即删除；否则在下次它与此页面同时打开时删除。',
     close: '关闭',
     scan_hint: '将相机对准电脑屏幕上的二维码。',
     camera_permission: '请允许访问相机以扫描二维码。',
     camera_allow: '允许使用相机',
+    camera_settings: '打开设置',
     errors: {
       unavailable: '网页仪表盘需要最新版本的应用。请更新 Money2Time 后重试。',
       invalid_qr:
@@ -2276,7 +2281,9 @@ const zh = {
       offline: '没有网络连接。请联网后重试。',
       rejected: '浏览器无法打开数据。请重试。',
       closed: '关联完成前浏览器已关闭。请重新加载并再次扫描。',
-      too_many: '最多可关联 8 个浏览器。请先解除一个。',
+      too_many: '最多可关联 {{max}} 个浏览器。请先解除其中一个的关联。',
+      too_large: '你的数据太大，无法发送到网页看板。',
+      failed: '出了点问题，请重试。',
     },
   },
   auto_backup: {

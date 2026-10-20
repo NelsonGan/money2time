@@ -2354,10 +2354,13 @@ const id = {
     link_action: 'Pindai kode',
     linking: 'Menautkan…',
     confirm_title: 'Tautkan {{name}}?',
+    confirm_title_unnamed: 'Tautkan browser ini?',
     confirm_message:
-      'Pastikan komputer menampilkan kode {{code}}. Tautkan hanya komputer yang sedang kamu gunakan: komputer itu akan menerima semua datamu setiap kali layar ini terbuka.',
+      'Pastikan komputer menampilkan kode {{code}}. Lanjutkan hanya jika kamu sendiri yang membuka app.money2time.com di komputer yang sedang kamu pakai: komputer itu akan menerima semua datamu setiap kali layar ini terbuka.',
+    confirm_waiting: 'Sekarang klik juga Tautkan di komputer.',
     confirm_action: 'Tautkan',
     linked: '{{name}} tertaut. Datamu sedang dikirim.',
+    linked_unnamed: 'Browser tertaut. Datamu sedang dikirim.',
     browsers_title: 'Browser tertaut',
     unknown_browser: 'Sebuah browser',
     status_connecting: 'Menghubungkan…',
@@ -2376,11 +2379,12 @@ const id = {
     unlink: 'Putuskan tautan',
     unlink_title: 'Putuskan tautan browser ini?',
     unlink_message:
-      '{{name}} tidak lagi menerima datamu. Jika sedang terbuka, salinan yang disimpannya juga dihapus.',
+      '{{name}} berhenti menerima datamu dan menghapus salinan yang disimpannya: langsung jika sedang terbuka, atau saat berikutnya terbuka bersamaan dengan layar ini.',
     close: 'Tutup',
     scan_hint: 'Arahkan kamera ke kode di layar komputermu.',
     camera_permission: 'Izinkan akses kamera untuk memindai kode.',
     camera_allow: 'Izinkan kamera',
+    camera_settings: 'Buka Pengaturan',
     errors: {
       unavailable:
         'Dasbor Web memerlukan versi terbaru aplikasi. Perbarui Money2Time lalu coba lagi.',
@@ -2390,7 +2394,9 @@ const id = {
       offline: 'Tidak ada koneksi internet. Coba lagi saat kamu online.',
       rejected: 'Browser tidak dapat membuka datanya. Coba lagi.',
       closed: 'Browser tertutup sebelum penautan selesai. Muat ulang dan pindai lagi.',
-      too_many: 'Kamu dapat menautkan hingga 8 browser. Putuskan tautan salah satunya dulu.',
+      too_many: 'Kamu bisa menautkan hingga {{max}} browser. Putuskan tautan salah satunya dulu.',
+      too_large: 'Datamu terlalu besar untuk dikirim ke Dasbor Web.',
+      failed: 'Terjadi kesalahan. Coba lagi.',
     },
   },
   auto_backup: {

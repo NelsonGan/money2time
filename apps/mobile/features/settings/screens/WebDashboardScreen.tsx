@@ -21,7 +21,7 @@ import {
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
-import { useIsPro } from '~/context/ProContext';
+import { usePro } from '~/context/ProContext';
 import { QrScannerModal } from '~/features/settings/components/QrScannerModal';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
@@ -31,6 +31,8 @@ import {
   isWebDashboardAvailable,
   type LinkedBrowser,
   listLinkedBrowsers,
+  MAX_LINKED_BROWSERS,
+  unlinkBrowserOffline,
   WEB_DASHBOARD_URL,
   WebDashboardConnections,
   WebDashboardError,
@@ -39,12 +41,24 @@ import {
 
 interface WebDashboardScreenProps {
   onBack: () => void;
+  /** A `money2time://pair?…` link the system camera opened the app with. */
+  initialPairLink?: string;
 }
 
+/**
+ * The screen can be open twice: in Settings, and again on top of it from a
+ * scanned `money2time://pair` link. Two seats in one room would keep replacing
+ * each other, so only the topmost screen holds them; the one beneath takes
+ * them back when the top one closes.
+ */
+type SeatHolder = { pause: () => void; resume: () => void };
+const seatHolders: SeatHolder[] = [];
+
 function errorMessage(error: unknown): string {
-  const code = error instanceof WebDashboardError ? error.code : 'offline';
+  const code = error instanceof WebDashboardError ? error.code : 'failed';
   return I18n.t(`web_dashboard.errors.${code}`, {
-    defaultValue: I18n.t('web_dashboard.errors.offline'),
+    max: MAX_LINKED_BROWSERS,
+    defaultValue: I18n.t('web_dashboard.errors.failed'),
   });
 }
 
@@ -76,9 +90,9 @@ function statusLine(link: LinkedBrowser, status: WebDashboardStatus[string] | un
  * encrypted, through a relay that stores nothing. Opening this screen is how
  * the dashboard refreshes. The phone stays the source of truth.
  */
-export function WebDashboardScreen({ onBack }: WebDashboardScreenProps) {
+export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScreenProps) {
   const bottomNavInset = useSettingsBottomNavInset();
-  const isPro = useIsPro();
+  const { isPro, isStatusKnown } = usePro();
   const [available, setAvailable] = useState<boolean | null>(null);
   const [links, setLinks] = useState<LinkedBrowser[]>([]);
   const [status, setStatus] = useState<WebDashboardStatus>({});
@@ -89,6 +103,11 @@ export function WebDashboardScreen({ onBack }: WebDashboardScreenProps) {
   const connections = useRef<WebDashboardConnections | null>(null);
   // A manager made later (back from the background) starts with today's Pro.
   const isProRef = useRef(isPro);
+  // Until RevenueCat has answered, `isPro` is a placeholder `false`: a browser
+  // that asks meanwhile is answered once it has.
+  const proKnownRef = useRef(isStatusKnown);
+  const openRef = useRef<() => void>(() => undefined);
+  const pairHandled = useRef(false);
 
   const reloadLinks = useCallback(async () => {
     setLinks(await listLinkedBrowsers());
@@ -99,17 +118,26 @@ export function WebDashboardScreen({ onBack }: WebDashboardScreenProps) {
   // and the app is in the foreground.
   useEffect(() => {
     let active = true;
+    const holder: SeatHolder = {
+      pause: () => close(),
+      resume: () => {
+        if (usable && proKnownRef.current && AppState.currentState === 'active') open();
+      },
+    };
+    seatHolders.at(-1)?.pause();
+    seatHolders.push(holder);
     const open = () => {
-      if (connections.current) return;
+      if (connections.current || seatHolders.at(-1) !== holder) return;
       const manager = new WebDashboardConnections({
         isPro: isProRef.current,
         onChange: (next) => active && setStatus(next),
         onLinksChanged: () => {
-          if (active) void listLinkedBrowsers().then(setLinks);
+          if (active) void listLinkedBrowsers().then(setLinks, () => undefined);
         },
+        onSendFailed: (error) => active && setProblem(errorMessage(error)),
       });
       connections.current = manager;
-      void manager.sync();
+      void manager.sync().catch(() => undefined);
     };
     const close = () => {
       connections.current?.close();
@@ -122,17 +150,35 @@ export function WebDashboardScreen({ onBack }: WebDashboardScreenProps) {
       usable = yes;
       setAvailable(yes);
       if (!yes) return;
-      void listLinkedBrowsers().then((list) => active && setLinks(list));
-      open();
+      void listLinkedBrowsers().then(
+        (list) => active && setLinks(list),
+        () => undefined,
+      );
+      if (proKnownRef.current) open();
     });
+    // Only a real trip to the background closes the seats: iOS goes
+    // `inactive` for the camera prompt, Face ID and Control Center too.
     const subscription = AppState.addEventListener('change', (state) => {
-      if (state === 'active' && usable) open();
-      else if (state !== 'active') close();
+      if (state === 'active' && usable && proKnownRef.current) {
+        void listLinkedBrowsers().then(
+          (list) => active && setLinks(list),
+          () => undefined,
+        );
+        open();
+      } else if (state === 'background') {
+        close();
+      }
     });
+    openRef.current = () => {
+      if (usable) open();
+    };
     return () => {
       active = false;
       subscription.remove();
       close();
+      const wasTop = seatHolders.at(-1) === holder;
+      seatHolders.splice(seatHolders.indexOf(holder), 1);
+      if (wasTop) seatHolders.at(-1)?.resume();
     };
     // Opened once per visit; Pro changes are passed on below.
   }, []);
@@ -142,6 +188,11 @@ export function WebDashboardScreen({ onBack }: WebDashboardScreenProps) {
     connections.current?.setPro(isPro);
   }, [isPro]);
 
+  useEffect(() => {
+    proKnownRef.current = isStatusKnown;
+    if (isStatusKnown) openRef.current();
+  }, [isStatusKnown]);
+
   const handleScanned = (text: string) => {
     setScannerOpen(false);
     setProblem(null);
@@ -149,11 +200,13 @@ export function WebDashboardScreen({ onBack }: WebDashboardScreenProps) {
     setLinking(true);
     void beginLink(text)
       .then((pending) => {
-        const name = pending.browserName ?? I18n.t('web_dashboard.unknown_browser');
-        // Nothing is linked until the person checks the code and agrees: a
-        // code from someone else's screen would send them this phone's data.
+        // Nothing is linked until the person checks the code and agrees, on
+        // this phone and on the computer: a code from someone else's screen
+        // would send them this phone's data.
         Alert.alert(
-          I18n.t('web_dashboard.confirm_title', { name }),
+          pending.browserName
+            ? I18n.t('web_dashboard.confirm_title', { name: pending.browserName })
+            : I18n.t('web_dashboard.confirm_title_unnamed'),
           I18n.t('web_dashboard.confirm_message', {
             code: `${pending.code.slice(0, 3)} ${pending.code.slice(3)}`,
           }),
@@ -168,20 +221,26 @@ export function WebDashboardScreen({ onBack }: WebDashboardScreenProps) {
             },
             {
               text: I18n.t('web_dashboard.confirm_action'),
-              onPress: () =>
+              onPress: () => {
+                // The computer asks too, and links only when both agree.
+                setNotice(I18n.t('web_dashboard.confirm_waiting'));
                 void pending
                   .confirm()
                   .then(async (link) => {
                     void triggerHaptic('success');
                     setNotice(
-                      I18n.t('web_dashboard.linked', {
-                        name: link.name ?? I18n.t('web_dashboard.unknown_browser'),
-                      }),
+                      link.name
+                        ? I18n.t('web_dashboard.linked', { name: link.name })
+                        : I18n.t('web_dashboard.linked_unnamed'),
                     );
                     await reloadLinks();
                   })
-                  .catch((error: unknown) => setProblem(errorMessage(error)))
-                  .finally(() => setLinking(false)),
+                  .catch((error: unknown) => {
+                    setNotice(null);
+                    setProblem(errorMessage(error));
+                  })
+                  .finally(() => setLinking(false));
+              },
             },
           ],
           { cancelable: false },
@@ -192,6 +251,15 @@ export function WebDashboardScreen({ onBack }: WebDashboardScreenProps) {
         setLinking(false);
       });
   };
+
+  // Opened from the system camera with a code: link it as if scanned here.
+  useEffect(() => {
+    if (!available || !initialPairLink || pairHandled.current) return;
+    pairHandled.current = true;
+    handleScanned(initialPairLink);
+    // handleScanned only reads setters and the link itself.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [available, initialPairLink]);
 
   const handleUnlink = (link: LinkedBrowser) => {
     Alert.alert(
@@ -204,7 +272,15 @@ export function WebDashboardScreen({ onBack }: WebDashboardScreenProps) {
         {
           text: I18n.t('web_dashboard.unlink'),
           style: 'destructive',
-          onPress: () => void connections.current?.unlink(link.roomId),
+          onPress: () => {
+            const manager = connections.current;
+            const unlink = manager
+              ? manager.unlink(link.roomId)
+              : unlinkBrowserOffline(link.roomId).then(async () =>
+                  setLinks(await listLinkedBrowsers()),
+                );
+            void unlink.catch((error: unknown) => setProblem(errorMessage(error)));
+          },
         },
       ],
     );
@@ -221,7 +297,6 @@ export function WebDashboardScreen({ onBack }: WebDashboardScreenProps) {
     void Linking.openURL(WEB_DASHBOARD_URL);
   };
 
-  const anyOpen = Object.values(status).some((s) => s.state === 'online');
   const anySending = Object.values(status).some((s) => s.state === 'sending');
 
   return (
@@ -317,7 +392,7 @@ export function WebDashboardScreen({ onBack }: WebDashboardScreenProps) {
                     variant="secondary"
                     className="mt-1"
                     onPress={handleSendNow}
-                    disabled={!anyOpen || anySending}
+                    disabled={anySending}
                   >
                     <Text>
                       {anySending

@@ -85,14 +85,21 @@ function withPreservedAppUserId(
   }));
 }
 
-export async function buildBackupData(): Promise<BackupData> {
+/**
+ * `includeAsset` limits which user-asset files are read into the backup, by
+ * path under user-assets/ (the Web Dashboard leaves out receipts it never
+ * shows). Every real backup includes them all.
+ */
+export async function buildBackupData(opts?: {
+  includeAsset?: (path: string) => boolean;
+}): Promise<BackupData> {
   const sqlite = getSQLite();
   const now = nowIso();
 
   return {
     version: BACKUP_VERSION,
     exportedAt: now,
-    userAssets: await collectUserAssetsForBackup(),
+    userAssets: await collectUserAssetsForBackup(opts?.includeAsset),
     tables: {
       accounts: sqlite.getAllSync('SELECT * FROM accounts') as Record<string, unknown>[],
       account_groups: sqlite.getAllSync('SELECT * FROM account_groups') as Record<
@@ -147,8 +154,9 @@ function tryReadTable(
 
 export async function buildBackupJson(opts?: {
   pretty?: boolean;
+  includeAsset?: (path: string) => boolean;
 }): Promise<{ json: string; data: BackupData }> {
-  const data = await buildBackupData();
+  const data = await buildBackupData({ includeAsset: opts?.includeAsset });
   // Reading every table and serializing the result each take a noticeable
   // slice of the JS thread on a large database. Let a frame render between the
   // two so the auto-backup reads as two short stalls rather than one long one.

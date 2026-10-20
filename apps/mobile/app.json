@@ -255,6 +255,7 @@
         }
       ],
       "expo-notifications",
+      "expo-secure-store",
       "expo-screen-orientation",
       "expo-background-task",
       [

@@ -2354,10 +2354,13 @@ const tr = {
     link_action: 'Kodu tara',
     linking: 'Bağlanıyor…',
     confirm_title: '{{name}} bağlansın mı?',
+    confirm_title_unnamed: 'Bu tarayıcı bağlansın mı?',
     confirm_message:
-      'Bilgisayarda {{code}} kodunun göründüğünü kontrol edin. Yalnızca kullandığınız bir bilgisayarı bağlayın: bu ekran her açıldığında tüm verilerinizi alır.',
+      'Bilgisayarın {{code}} kodunu gösterdiğini kontrol edin. Yalnızca app.money2time.com adresini kullandığınız bir bilgisayarda kendiniz açtıysanız devam edin: bu ekran her açık olduğunda tüm verilerinizi alacak.',
+    confirm_waiting: 'Şimdi bilgisayarda da Bağla’ya tıklayın.',
     confirm_action: 'Bağla',
     linked: '{{name}} bağlandı. Verileriniz yolda.',
+    linked_unnamed: 'Tarayıcı bağlandı. Verileriniz yolda.',
     browsers_title: 'Bağlı tarayıcılar',
     unknown_browser: 'Bir tarayıcı',
     status_connecting: 'Bağlanıyor…',
@@ -2375,11 +2378,13 @@ const tr = {
     open_web: 'app.money2time.com adresini aç',
     unlink: 'Bağlantıyı kaldır',
     unlink_title: 'Bu tarayıcının bağlantısı kaldırılsın mı?',
-    unlink_message: '{{name}} artık verilerinizi almaz. Şu anda açıksa tuttuğu kopya da silinir.',
+    unlink_message:
+      '{{name}} artık verilerinizi almaz ve sakladığı kopyayı siler: açıksa hemen, değilse bu ekranla birlikte bir sonraki açılışında.',
     close: 'Kapat',
     scan_hint: 'Kamerayı bilgisayarınızın ekranındaki koda doğrultun.',
     camera_permission: 'Kodu taramak için kamera erişimine izin verin.',
     camera_allow: 'Kameraya izin ver',
+    camera_settings: 'Ayarlar’ı aç',
     errors: {
       unavailable:
         'Web Gösterge Paneli için uygulamanın en son sürümü gerekir. Money2Time’ı güncelleyip tekrar deneyin.',
@@ -2390,7 +2395,9 @@ const tr = {
       offline: 'İnternet bağlantısı yok. Çevrimiçi olduğunuzda tekrar deneyin.',
       rejected: 'Tarayıcı verileri açamadı. Tekrar deneyin.',
       closed: 'Bağlantı kurulmadan önce tarayıcı kapandı. Sayfayı yenileyip tekrar tarayın.',
-      too_many: 'En fazla 8 tarayıcı bağlayabilirsiniz. Önce birinin bağlantısını kaldırın.',
+      too_many: 'En fazla {{max}} tarayıcı bağlayabilirsiniz. Önce birinin bağlantısını kaldırın.',
+      too_large: 'Verileriniz Web Panosu’na gönderilemeyecek kadar büyük.',
+      failed: 'Bir sorun oluştu. Tekrar deneyin.',
     },
   },
   auto_backup: {

@@ -45,7 +45,10 @@ export type WebDashboardErrorCode =
   | 'offline'
   | 'rejected'
   | 'closed'
-  | 'too_many';
+  | 'too_many'
+  | 'too_large'
+  /** Anything unexpected, such as the keychain refusing a write. */
+  | 'failed';
 
 export class WebDashboardError extends Error {
   readonly code: WebDashboardErrorCode;

@@ -2375,10 +2375,13 @@ const fr = {
     link_action: 'Scanner le code',
     linking: 'Association…',
     confirm_title: 'Associer {{name}} ?',
+    confirm_title_unnamed: 'Associer ce navigateur ?',
     confirm_message:
-      'Vérifiez que l’ordinateur affiche le code {{code}}. N’associez qu’un ordinateur que vous utilisez : il recevra toutes vos données chaque fois que cet écran sera ouvert.',
+      "Vérifiez que l'ordinateur affiche le code {{code}}. Ne continuez que si vous avez ouvert vous-même app.money2time.com sur un ordinateur que vous utilisez : il recevra toutes vos données chaque fois que cet écran est ouvert.",
+    confirm_waiting: "Cliquez maintenant aussi sur Associer sur l'ordinateur.",
     confirm_action: 'Associer',
     linked: '{{name}} associé. Vos données sont en route.',
+    linked_unnamed: 'Navigateur associé. Vos données sont en route.',
     browsers_title: 'Navigateurs associés',
     unknown_browser: 'Un navigateur',
     status_connecting: 'Connexion…',
@@ -2397,11 +2400,12 @@ const fr = {
     unlink: 'Dissocier',
     unlink_title: 'Dissocier ce navigateur ?',
     unlink_message:
-      '{{name}} ne reçoit plus vos données. S’il est ouvert en ce moment, il supprime aussi la copie qu’il conserve.',
+      "{{name}} ne reçoit plus vos données et supprime la copie qu'il conserve : tout de suite s'il est ouvert, sinon la prochaine fois qu'il est ouvert en même temps que cet écran.",
     close: 'Fermer',
     scan_hint: 'Pointez l’appareil photo vers le code affiché sur l’écran de votre ordinateur.',
     camera_permission: 'Autorisez l’accès à la caméra pour scanner le code.',
     camera_allow: 'Autoriser la caméra',
+    camera_settings: 'Ouvrir les Réglages',
     errors: {
       unavailable:
         'Le tableau de bord web nécessite la dernière version de l’application. Mettez à jour Money2Time et réessayez.',
@@ -2413,7 +2417,9 @@ const fr = {
       rejected: 'Le navigateur n’a pas pu ouvrir les données. Réessayez.',
       closed:
         'Le navigateur s’est fermé avant la fin de l’association. Rechargez-le et scannez à nouveau.',
-      too_many: 'Vous pouvez associer jusqu’à 8 navigateurs. Dissociez-en un d’abord.',
+      too_many: "Vous pouvez associer jusqu'à {{max}} navigateurs. Dissociez-en un d'abord.",
+      too_large: 'Vos données sont trop volumineuses pour être envoyées au tableau de bord web.',
+      failed: 'Un problème est survenu. Réessayez.',
     },
   },
   auto_backup: {

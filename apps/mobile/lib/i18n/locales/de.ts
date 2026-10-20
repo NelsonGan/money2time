@@ -2376,10 +2376,13 @@ const de = {
     link_action: 'Code scannen',
     linking: 'Wird verknüpft…',
     confirm_title: '{{name}} verknüpfen?',
+    confirm_title_unnamed: 'Diesen Browser verknüpfen?',
     confirm_message:
-      'Prüfe, ob der Computer den Code {{code}} anzeigt. Verknüpfe nur einen Computer, den du selbst nutzt: Er erhält alle deine Daten, jedes Mal wenn dieser Bildschirm geöffnet ist.',
+      'Prüfe, ob der Computer den Code {{code}} anzeigt. Fahre nur fort, wenn du app.money2time.com selbst auf einem Computer geöffnet hast, den du gerade nutzt: Er erhält alle deine Daten, jedes Mal wenn dieser Bildschirm geöffnet ist.',
+    confirm_waiting: 'Klicke jetzt auch auf dem Computer auf „Verknüpfen“.',
     confirm_action: 'Verknüpfen',
     linked: '{{name}} verknüpft. Deine Daten sind unterwegs.',
+    linked_unnamed: 'Browser verknüpft. Deine Daten sind unterwegs.',
     browsers_title: 'Verknüpfte Browser',
     unknown_browser: 'Ein Browser',
     status_connecting: 'Verbindung wird hergestellt…',
@@ -2398,11 +2401,12 @@ const de = {
     unlink: 'Verknüpfung aufheben',
     unlink_title: 'Verknüpfung mit diesem Browser aufheben?',
     unlink_message:
-      '{{name}} erhält keine Daten mehr von dir. Ist der Browser gerade geöffnet, löscht er außerdem die gespeicherte Kopie.',
+      '{{name}} erhält keine Daten mehr und löscht die gespeicherte Kopie: sofort, wenn der Browser geöffnet ist, sonst beim nächsten Mal, wenn er geöffnet ist, während dieser Bildschirm offen ist.',
     close: 'Schließen',
     scan_hint: 'Richte die Kamera auf den Code auf dem Bildschirm deines Computers.',
     camera_permission: 'Erlaube den Kamerazugriff, um den Code zu scannen.',
     camera_allow: 'Kamera erlauben',
+    camera_settings: 'Einstellungen öffnen',
     errors: {
       unavailable:
         'Das Web-Dashboard benötigt die neueste Version der App. Aktualisiere Money2Time und versuche es erneut.',
@@ -2414,8 +2418,9 @@ const de = {
       rejected: 'Der Browser konnte die Daten nicht öffnen. Versuche es erneut.',
       closed:
         'Der Browser wurde geschlossen, bevor die Verknüpfung abgeschlossen war. Lade ihn neu und scanne erneut.',
-      too_many:
-        'Du kannst bis zu 8 Browser verknüpfen. Hebe zuerst die Verknüpfung eines Browsers auf.',
+      too_many: 'Du kannst bis zu {{max}} Browser verknüpfen. Hebe zuerst eine Verknüpfung auf.',
+      too_large: 'Deine Daten sind zu groß, um sie an das Web-Dashboard zu senden.',
+      failed: 'Etwas ist schiefgelaufen. Versuche es erneut.',
     },
   },
   auto_backup: {

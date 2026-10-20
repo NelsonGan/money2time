@@ -2342,10 +2342,13 @@ const en = {
     link_action: 'Scan the code',
     linking: 'Linking…',
     confirm_title: 'Link {{name}}?',
+    confirm_title_unnamed: 'Link this browser?',
     confirm_message:
-      'Check that the computer shows the code {{code}}. Only link a computer you are using: it will receive all your data each time this screen is open.',
+      'Check that the computer shows the code {{code}}. Only continue if you opened app.money2time.com yourself on a computer you are using: it will receive all your data each time this screen is open.',
+    confirm_waiting: 'Now click Link on the computer too.',
     confirm_action: 'Link',
     linked: 'Linked {{name}}. Your data is on its way.',
+    linked_unnamed: 'Browser linked. Your data is on its way.',
     browsers_title: 'Linked browsers',
     unknown_browser: 'A browser',
     status_connecting: 'Connecting…',
@@ -2364,11 +2367,12 @@ const en = {
     unlink: 'Unlink',
     unlink_title: 'Unlink this browser?',
     unlink_message:
-      '{{name}} stops getting your data. If it is open now, it also deletes the copy it keeps.',
+      '{{name}} stops getting your data and deletes the copy it keeps: straight away if it is open, otherwise the next time it is open while this screen is.',
     close: 'Close',
     scan_hint: 'Point the camera at the code on your computer’s screen.',
     camera_permission: 'Allow camera access to scan the code.',
     camera_allow: 'Allow camera',
+    camera_settings: 'Open Settings',
     errors: {
       unavailable:
         'The Web Dashboard needs the latest version of the app. Update Money2Time and try again.',
@@ -2378,7 +2382,9 @@ const en = {
       offline: 'No internet connection. Try again when you are online.',
       rejected: 'The browser could not open the data. Try again.',
       closed: 'The browser closed before linking finished. Reload it and scan again.',
-      too_many: 'You can link up to 8 browsers. Unlink one first.',
+      too_many: 'You can link up to {{max}} browsers. Unlink one first.',
+      too_large: 'Your data is too large to send to the Web Dashboard.',
+      failed: 'Something went wrong. Try again.',
     },
   },
   auto_backup: {

@@ -2314,10 +2314,13 @@ const ko = {
     link_action: '코드 스캔',
     linking: '연결하는 중…',
     confirm_title: '{{name}} 연결할까요?',
+    confirm_title_unnamed: '이 브라우저를 연결할까요?',
     confirm_message:
-      '컴퓨터에 다음 코드가 표시되는지 확인하세요: {{code}}. 지금 사용 중인 컴퓨터만 연결하세요. 이 화면을 열 때마다 모든 데이터가 해당 컴퓨터로 전송됩니다.',
+      '컴퓨터에 코드 {{code}}가 표시되는지 확인하세요. 지금 사용 중인 컴퓨터에서 직접 app.money2time.com을 연 경우에만 계속하세요. 이 화면이 열려 있을 때마다 그 컴퓨터가 모든 데이터를 받게 돼요.',
+    confirm_waiting: '이제 컴퓨터에서도 연결을 클릭하세요.',
     confirm_action: '연결',
     linked: '{{name}} 연결 완료. 데이터를 보내는 중입니다.',
+    linked_unnamed: '브라우저가 연결됐어요. 데이터를 보내는 중이에요.',
     browsers_title: '연결된 브라우저',
     unknown_browser: '브라우저',
     status_connecting: '연결 중…',
@@ -2336,11 +2339,12 @@ const ko = {
     unlink: '연결 해제',
     unlink_title: '이 브라우저의 연결을 해제할까요?',
     unlink_message:
-      '{{name}}에 더 이상 데이터가 전송되지 않습니다. 지금 열려 있는 경우 보관 중인 사본도 삭제됩니다.',
+      '{{name}}은(는) 더 이상 데이터를 받지 않고 보관 중인 사본을 삭제해요. 열려 있으면 바로, 아니면 이 화면과 함께 다음에 열릴 때 삭제돼요.',
     close: '닫기',
     scan_hint: '컴퓨터 화면에 표시된 코드에 카메라를 비춰 주세요.',
     camera_permission: '코드를 스캔하려면 카메라 접근을 허용하세요.',
     camera_allow: '카메라 허용',
+    camera_settings: '설정 열기',
     errors: {
       unavailable:
         '웹 대시보드를 사용하려면 최신 버전의 앱이 필요합니다. Money2Time을 업데이트한 후 다시 시도하세요.',
@@ -2351,7 +2355,9 @@ const ko = {
       offline: '인터넷에 연결되어 있지 않습니다. 온라인 상태에서 다시 시도하세요.',
       rejected: '브라우저에서 데이터를 열지 못했습니다. 다시 시도하세요.',
       closed: '연결이 끝나기 전에 브라우저가 닫혔습니다. 새로고침한 뒤 다시 스캔하세요.',
-      too_many: '브라우저는 최대 8개까지 연결할 수 있습니다. 먼저 하나를 연결 해제하세요.',
+      too_many: '브라우저는 최대 {{max}}개까지 연결할 수 있어요. 먼저 하나의 연결을 해제하세요.',
+      too_large: '데이터가 너무 커서 웹 대시보드로 보낼 수 없어요.',
+      failed: '문제가 발생했어요. 다시 시도하세요.',
     },
   },
   auto_backup: {

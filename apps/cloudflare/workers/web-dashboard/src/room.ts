@@ -69,12 +69,21 @@ export class Room extends DurableObject<Env> {
     const peers = this.live(other(role));
     trySend(server, JSON.stringify({ t: 'peer', present: peers.length > 0 }));
     for (const peer of peers) trySend(peer, JSON.stringify({ t: 'peer', present: true }));
-    return new Response(null, { status: 101, webSocket: client });
+    // The client offered `m2t-v1, <token>`; the handshake must name one back.
+    return new Response(null, { status: 101, webSocket: client, headers: { 'Sec-WebSocket-Protocol': 'm2t-v1' } });
   }
 
   webSocketMessage(ws: WebSocket, message: string | ArrayBuffer): void {
     const from = attachment(ws);
     if (!from || from.replaced) return;
+    // Presence comes only from the room; a peer cannot fake the other's leaving.
+    if (typeof message === 'string' && message.includes('"peer"')) {
+      try {
+        if ((JSON.parse(message) as { t?: unknown }).t === 'peer') return;
+      } catch {
+        // Not JSON: the peers' own business.
+      }
+    }
     for (const peer of this.live(other(from.role))) trySend(peer, message);
   }
 

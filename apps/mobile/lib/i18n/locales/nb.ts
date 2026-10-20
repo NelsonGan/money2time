@@ -2344,10 +2344,13 @@ const nb = {
     link_action: 'Skann koden',
     linking: 'Kobler til…',
     confirm_title: 'Koble til {{name}}?',
+    confirm_title_unnamed: 'Koble til denne nettleseren?',
     confirm_message:
-      'Sjekk at datamaskinen viser koden {{code}}. Koble bare til en datamaskin du bruker selv: Den får alle dataene dine hver gang denne skjermen er åpen.',
+      'Sjekk at datamaskinen viser koden {{code}}. Fortsett bare hvis du selv åpnet app.money2time.com på en datamaskin du bruker: den får alle dataene dine hver gang denne skjermen er åpen.',
+    confirm_waiting: 'Klikk nå på Koble til på datamaskinen også.',
     confirm_action: 'Koble til',
     linked: '{{name}} er koblet til. Dataene dine er på vei.',
+    linked_unnamed: 'Nettleseren er koblet til. Dataene dine er på vei.',
     browsers_title: 'Tilkoblede nettlesere',
     unknown_browser: 'En nettleser',
     status_connecting: 'Kobler til…',
@@ -2366,11 +2369,12 @@ const nb = {
     unlink: 'Koble fra',
     unlink_title: 'Koble fra denne nettleseren?',
     unlink_message:
-      '{{name}} slutter å få dataene dine. Hvis den er åpen nå, sletter den også kopien den har lagret.',
+      '{{name}} slutter å få dataene dine og sletter kopien den har: med en gang hvis den er åpen, ellers neste gang den er åpen mens denne skjermen er det.',
     close: 'Lukk',
     scan_hint: 'Rett kameraet mot koden på datamaskinens skjerm.',
     camera_permission: 'Gi tilgang til kameraet for å skanne koden.',
     camera_allow: 'Tillat kamera',
+    camera_settings: 'Åpne Innstillinger',
     errors: {
       unavailable:
         'Web-dashbordet krever den nyeste versjonen av appen. Oppdater Money2Time og prøv igjen.',
@@ -2382,7 +2386,9 @@ const nb = {
       rejected: 'Nettleseren kunne ikke åpne dataene. Prøv igjen.',
       closed:
         'Nettleseren ble lukket før tilkoblingen var ferdig. Last den inn på nytt og skann igjen.',
-      too_many: 'Du kan koble til opptil 8 nettlesere. Koble fra en først.',
+      too_many: 'Du kan koble til opptil {{max}} nettlesere. Koble fra én først.',
+      too_large: 'Dataene dine er for store til å sendes til nettdashbordet.',
+      failed: 'Noe gikk galt. Prøv igjen.',
     },
   },
   auto_backup: {

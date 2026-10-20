@@ -2345,10 +2345,13 @@ const da = {
     link_action: 'Scan koden',
     linking: 'Forbinder…',
     confirm_title: 'Forbind {{name}}?',
+    confirm_title_unnamed: 'Forbind denne browser?',
     confirm_message:
-      'Tjek, at computeren viser koden {{code}}. Forbind kun en computer, du selv bruger: Den modtager alle dine data, hver gang denne skærm er åben.',
+      'Tjek, at computeren viser koden {{code}}. Fortsæt kun, hvis du selv har åbnet app.money2time.com på en computer, du bruger: den modtager alle dine data, hver gang denne skærm er åben.',
+    confirm_waiting: 'Klik nu også på Forbind på computeren.',
     confirm_action: 'Forbind',
     linked: '{{name}} er forbundet. Dine data er på vej.',
+    linked_unnamed: 'Browseren er forbundet. Dine data er på vej.',
     browsers_title: 'Forbundne browsere',
     unknown_browser: 'En browser',
     status_connecting: 'Opretter forbindelse…',
@@ -2367,11 +2370,12 @@ const da = {
     unlink: 'Fjern forbindelsen',
     unlink_title: 'Fjern forbindelsen til denne browser?',
     unlink_message:
-      '{{name}} får ikke længere dine data. Hvis den er åben nu, sletter den også den kopi, den har gemt.',
+      '{{name}} holder op med at få dine data og sletter den kopi, den gemmer: med det samme, hvis den er åben, ellers næste gang den er åben, mens denne skærm er.',
     close: 'Luk',
     scan_hint: 'Ret kameraet mod koden på computerens skærm.',
     camera_permission: 'Giv adgang til kameraet for at scanne koden.',
     camera_allow: 'Tillad kamera',
+    camera_settings: 'Åbn Indstillinger',
     errors: {
       unavailable:
         'Webdashboardet kræver den nyeste version af appen. Opdater Money2Time, og prøv igen.',
@@ -2381,7 +2385,9 @@ const da = {
       offline: 'Ingen internetforbindelse. Prøv igen, når du er online.',
       rejected: 'Browseren kunne ikke åbne dataene. Prøv igen.',
       closed: 'Browseren blev lukket, før forbindelsen var oprettet. Genindlæs den, og scan igen.',
-      too_many: 'Du kan forbinde op til 8 browsere. Fjern forbindelsen til én først.',
+      too_many: 'Du kan forbinde op til {{max}} browsere. Fjern forbindelsen til en først.',
+      too_large: 'Dine data er for store til at sende til webdashboardet.',
+      failed: 'Noget gik galt. Prøv igen.',
     },
   },
   auto_backup: {

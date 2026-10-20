@@ -22,19 +22,24 @@ class_name = "Room"
 tag = "v1"
 new_sqlite_classes = ["Room"]
 
-# Connections per address per minute. A tab that reconnects with backoff
-# stays far below it.
+# Connections per address (IPv6: per /64) per minute. A phone with all eight
+# links reconnecting with backoff stays below it.
 [[ratelimits]]
 name = "CONNECT_LIMITER"
 namespace_id = "2401"
 
   [ratelimits.simple]
-  limit = 60
+  limit = 120
   period = 60
 
+# Errors and console output only: invocation logs would record every
+# connection's address, which this relay has no need to keep.
 [observability]
 enabled = true
 head_sampling_rate = 1
+
+[observability.logs]
+invocation_logs = false
 
 [vars]
 # Browser origins allowed to open a browser seat in a room.

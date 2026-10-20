@@ -31,6 +31,7 @@ export class WebDashboardConnections {
     isPro: boolean;
     onChange: (status: WebDashboardStatus) => void;
     onLinksChanged: () => void;
+    onSendFailed?: (error: WebDashboardError) => void;
   }) {
     void opts;
   }
@@ -46,4 +47,8 @@ export class WebDashboardConnections {
   async unlink(_roomId: string): Promise<void> {}
 
   close() {}
+}
+
+export async function unlinkBrowserOffline(_roomId: string): Promise<void> {
+  throw new WebDashboardError('unavailable');
 }
