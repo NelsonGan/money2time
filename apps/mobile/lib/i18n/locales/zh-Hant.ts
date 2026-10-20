@@ -118,6 +118,29 @@ const zhHant = {
     },
   },
   news: {
+    web_dashboard: {
+      title: '網頁儀表板及更多更新',
+      webDashboard: {
+        title: '在大螢幕上查看你的財務',
+        body: '在電腦上開啟 app.money2time.com，然後在設定 > 網頁儀表板中掃描網頁上的 QR 碼。手機會把資料直接傳送到瀏覽器。不會在線上儲存任何資料，也不需要註冊帳號。',
+      },
+      notificationReview: {
+        title: '從通知記錄收支',
+        body: '銀行和電子錢包的通知現在會以草稿形式等你確認。可逐筆或一次選擇收入、支出或忽略。通知只在你的手機上讀取，絕不經過 AI。在設定 > 自動化中開啟。',
+      },
+      fasterScans: {
+        title: '收據掃描提速 50%',
+        body: '現在掃描一張收據只需原本大約一半的時間，準確度不變。拍張照片，金額、明細和分類就會自動填好。',
+      },
+      cardDesigns: {
+        title: '全新卡面設計',
+        body: '為每張帳戶卡片換上專屬外觀，70 多款設計任你挑選，從漸層、大理石到我們的錢包小雞。編輯帳戶並點一下卡面設計即可。Pro 用戶還能上傳自己的照片。',
+      },
+      bottomBar: {
+        title: '打造你的底部列',
+        body: '選擇哪些頁面放在底部列，並拖曳調整順序。可加入目標、定期、收據等頁面。第一個頁面會成為你的首頁。在設定 > 顯示 > 底部列中設定。',
+      },
+    },
     transaction_updates: {
       title: '記帳更輕鬆',
       androidScreenshot: {
@@ -345,6 +368,7 @@ const zhHant = {
       open_app_icon: '選擇圖示',
       open_ricecal: '試試 RiceCal',
       open_pro_paywall: '檢視 Pro 套餐',
+      open_bottom_bar: '編輯底部列',
       open_share_earn: '免費獲取 Pro',
       open_quick_entry_settings: '開啟快速記帳設定',
       open_auto_log: '設定自動化',
@@ -355,6 +379,14 @@ const zhHant = {
       open_review: '開啟消費回顧',
     },
     showcase: {
+      notification_bank: '你的銀行',
+      notification_text: '你的卡片剛完成一筆消費。',
+      scan_before: '以前',
+      scan_now: '現在',
+      card_everyday: '日常',
+      card_savings: '儲蓄',
+      card_travel: '旅行',
+      ignore: '忽略',
       ricecal_kcal_left: '剩餘千卡',
       ricecal_carbs: '碳水',
       ricecal_protein: '蛋白質',

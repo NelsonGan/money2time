@@ -145,6 +145,29 @@ const id = {
     reset_action: 'Hapus & ganti',
   },
   news: {
+    web_dashboard: {
+      title: 'Dasbor Web dan lainnya',
+      webDashboard: {
+        title: 'Keuanganmu di layar besar',
+        body: 'Buka app.money2time.com di komputer, lalu pindai kodenya di Pengaturan > Dasbor Web. Ponselmu mengirim data langsung ke browser. Tidak ada yang disimpan online dan tidak perlu akun.',
+      },
+      notificationReview: {
+        title: 'Catat pembayaran dari notifikasi',
+        body: 'Notifikasi bank dan e-wallet kini menunggumu sebagai draf. Pilih Pemasukan, Pengeluaran, atau Abaikan, satu per satu atau sekaligus. Notifikasi dibaca di ponselmu, tidak pernah oleh AI. Atur di Pengaturan > Otomatisasi.',
+      },
+      fasterScans: {
+        title: 'Pindai struk 50% lebih cepat',
+        body: 'Memindai struk kini hanya butuh sekitar separuh waktu, dengan akurasi yang sama. Ambil foto, lalu jumlah, item, dan kategori langsung terisi.',
+      },
+      cardDesigns: {
+        title: 'Desain kartu baru',
+        body: 'Beri setiap kartu akun tampilannya sendiri, dengan lebih dari 70 desain, dari gradasi dan marmer hingga anak ayam dompet koin kami. Edit akun dan ketuk Desain kartu. Dengan Pro, kamu juga bisa mengunggah fotomu sendiri.',
+      },
+      bottomBar: {
+        title: 'Bilah bawah sesuai seleramu',
+        body: 'Pilih halaman yang ada di bilah bawah dan seret ke urutan mana pun. Tambahkan Target, Berulang, Struk, dan lainnya. Halaman pertama menjadi layar utamamu. Temukan di Pengaturan > Tampilan > Bilah bawah.',
+      },
+    },
     transaction_updates: {
       title: 'Pencatatan transaksi lebih mudah',
       androidScreenshot: {
@@ -372,6 +395,7 @@ const id = {
       open_app_icon: 'Pilih ikon Anda',
       open_ricecal: 'Coba RiceCal',
       open_pro_paywall: 'Lihat paket Pro',
+      open_bottom_bar: 'Ubah bilah bawah',
       open_share_earn: 'Dapatkan Pro gratis',
       open_quick_entry_settings: 'Buka pengaturan Entri Cepat',
       open_auto_log: 'Atur otomatisasi',
@@ -382,6 +406,14 @@ const id = {
       open_review: 'Buka Tinjau Pengeluaran',
     },
     showcase: {
+      notification_bank: 'Bankmu',
+      notification_text: 'Kartumu dipakai untuk pembelian.',
+      scan_before: 'Dulu',
+      scan_now: 'Sekarang',
+      card_everyday: 'Harian',
+      card_savings: 'Tabungan',
+      card_travel: 'Liburan',
+      ignore: 'Abaikan',
       ricecal_kcal_left: 'sisa kkal',
       ricecal_carbs: 'Karbohidrat',
       ricecal_protein: 'Protein',

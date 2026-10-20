@@ -3106,6 +3106,12 @@ function AppContent() {
           requestOpenSettingsScreen('AppIcon');
         }}
         onOpenProPaywall={() => navigationRef.navigate('ProPaywall', { source: 'news' })}
+        onOpenBottomBar={() => {
+          // BottomBar only exists inside the settings stack, so switch to the
+          // settings tab and let the stack handle the push.
+          requestOpenTab('settings');
+          requestOpenSettingsScreen('BottomBar');
+        }}
       />
       <CloudBackupPromptModal
         visible={cloudBackupPromptVisible && !biometricLocked && rootPromptsAllowed}

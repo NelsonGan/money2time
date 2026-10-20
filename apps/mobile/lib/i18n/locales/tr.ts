@@ -145,6 +145,29 @@ const tr = {
     reset_action: 'Sil ve değiştir',
   },
   news: {
+    web_dashboard: {
+      title: 'Web Gösterge Paneli ve daha fazlası',
+      webDashboard: {
+        title: 'Paranız büyük ekranda',
+        body: 'Bilgisayarınızda app.money2time.com adresini açın ve kodunu Ayarlar > Web Gösterge Paneli bölümünden tarayın. Telefonunuz verilerinizi doğrudan tarayıcıya gönderir. Çevrimiçi hiçbir şey saklanmaz ve hesap gerekmez.',
+      },
+      notificationReview: {
+        title: 'Bildirimlerden ödeme kaydı',
+        body: 'Banka ve e-cüzdan bildirimleri artık taslak olarak sizi bekliyor. Gelir, Gider veya Yok say seçeneğini tek tek ya da hepsine birden uygulayın. Bildirimler telefonunuzda okunur, asla yapay zekâya gönderilmez. Ayarlar > Otomasyon bölümünden açın.',
+      },
+      fasterScans: {
+        title: 'Fiş tarama %50 daha hızlı',
+        body: 'Bir fişi taramak artık yaklaşık yarı yarıya daha kısa sürüyor, doğruluk aynı. Fotoğraf çekin; tutar, kalemler ve kategori sizin için doldurulsun.',
+      },
+      cardDesigns: {
+        title: 'Yeni kart tasarımları',
+        body: 'Her hesap kartına kendi görünümünü verin: renk geçişlerinden mermere, bozuk para kesesi civcivimize kadar 70’ten fazla tasarım. Bir hesabı düzenleyip Kart tasarımı’na dokunun. Pro ile kendi fotoğrafınızı da yükleyebilirsiniz.',
+      },
+      bottomBar: {
+        title: 'Alt çubuğu size göre',
+        body: 'Alt çubukta hangi sayfaların olacağını seçin ve istediğiniz sıraya sürükleyin. Hedefler, Tekrarlayan, Fişler ve daha fazlasını ekleyin. İlk sayfa ana ekranınız olur. Ayarlar > Görünüm > Alt çubuk bölümünde bulabilirsiniz.',
+      },
+    },
     transaction_updates: {
       title: 'İşlemleri takip etmek artık daha kolay',
       androidScreenshot: {
@@ -372,6 +395,7 @@ const tr = {
       open_app_icon: 'Simgeni seç',
       open_ricecal: "RiceCal'i dene",
       open_pro_paywall: 'Pro planlarını gör',
+      open_bottom_bar: 'Alt çubuğu düzenle',
       open_share_earn: 'Pro’yu ücretsiz al',
       open_quick_entry_settings: 'Hızlı Giriş ayarlarını aç',
       open_auto_log: 'Otomasyonları kur',
@@ -382,6 +406,14 @@ const tr = {
       open_review: 'Harcamaları İncele sayfasını aç',
     },
     showcase: {
+      notification_bank: 'Bankanız',
+      notification_text: 'Kartınız bir alışverişte kullanıldı.',
+      scan_before: 'Önce',
+      scan_now: 'Şimdi',
+      card_everyday: 'Günlük',
+      card_savings: 'Birikim',
+      card_travel: 'Seyahat',
+      ignore: 'Yok say',
       ricecal_kcal_left: 'kalan kcal',
       ricecal_carbs: 'Karbonhidrat',
       ricecal_protein: 'Protein',

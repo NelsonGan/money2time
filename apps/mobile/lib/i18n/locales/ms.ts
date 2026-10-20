@@ -145,6 +145,29 @@ const ms = {
     reset_action: 'Padam & tukar',
   },
   news: {
+    web_dashboard: {
+      title: 'Papan Pemuka Web dan banyak lagi',
+      webDashboard: {
+        title: 'Wang anda di skrin besar',
+        body: 'Buka app.money2time.com pada komputer dan imbas kodnya di Tetapan > Papan Pemuka Web. Telefon anda menghantar data terus ke pelayar. Tiada apa-apa disimpan dalam talian dan tiada akaun diperlukan.',
+      },
+      notificationReview: {
+        title: 'Rekod bayaran daripada pemberitahuan',
+        body: 'Pemberitahuan bank dan e-dompet kini menunggu anda sebagai draf. Pilih Pendapatan, Perbelanjaan atau Abaikan, satu demi satu atau semuanya sekali gus. Ia dibaca pada telefon anda, tidak sekali-kali oleh AI. Sediakannya di Tetapan > Automasi.',
+      },
+      fasterScans: {
+        title: 'Imbasan resit 50% lebih pantas',
+        body: 'Mengimbas resit kini mengambil kira-kira separuh masa, dengan ketepatan yang sama. Ambil foto dan jumlah, item serta kategori diisi untuk anda.',
+      },
+      cardDesigns: {
+        title: 'Reka bentuk kad baharu',
+        body: 'Beri setiap kad akaun rupanya sendiri, dengan lebih 70 reka bentuk daripada gradien dan marmar hingga anak ayam dompet syiling kami. Edit akaun dan ketik Reka bentuk kad. Dengan Pro, anda juga boleh memuat naik foto sendiri.',
+      },
+      bottomBar: {
+        title: 'Bar bawah ikut citarasa anda',
+        body: 'Pilih halaman yang berada di bar bawah dan seretnya mengikut susunan yang anda mahu. Tambah Matlamat, Berulang, Resit dan banyak lagi. Halaman pertama menjadi skrin utama anda. Cari di Tetapan > Paparan > Bar bawah.',
+      },
+    },
     transaction_updates: {
       title: 'Penjejakan transaksi lebih mudah',
       androidScreenshot: {
@@ -372,6 +395,7 @@ const ms = {
       open_app_icon: 'Pilih ikon anda',
       open_ricecal: 'Cuba RiceCal',
       open_pro_paywall: 'Lihat pelan Pro',
+      open_bottom_bar: 'Edit bar bawah',
       open_share_earn: 'Dapatkan Pro percuma',
       open_quick_entry_settings: 'Buka tetapan Kemasukan Pantas',
       open_auto_log: 'Sediakan automasi',
@@ -382,6 +406,14 @@ const ms = {
       open_review: 'Buka Semak Perbelanjaan',
     },
     showcase: {
+      notification_bank: 'Bank anda',
+      notification_text: 'Kad anda digunakan untuk satu pembelian.',
+      scan_before: 'Dulu',
+      scan_now: 'Kini',
+      card_everyday: 'Harian',
+      card_savings: 'Simpanan',
+      card_travel: 'Percutian',
+      ignore: 'Abaikan',
       ricecal_kcal_left: 'baki kcal',
       ricecal_carbs: 'Karbohidrat',
       ricecal_protein: 'Protein',

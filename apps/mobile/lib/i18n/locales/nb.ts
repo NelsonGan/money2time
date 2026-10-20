@@ -145,6 +145,29 @@ const nb = {
     reset_action: 'Slett og bytt',
   },
   news: {
+    web_dashboard: {
+      title: 'Web-dashbord og mer',
+      webDashboard: {
+        title: 'Økonomien din på stor skjerm',
+        body: 'Åpne app.money2time.com på datamaskinen og skann koden under Innstillinger > Web-dashbord. Telefonen sender dataene rett til nettleseren. Ingenting lagres på nett, og du trenger ingen konto.',
+      },
+      notificationReview: {
+        title: 'Registrer betalinger fra varsler',
+        body: 'Varsler fra banken og e-lommeboken venter nå på deg som utkast. Velg Inntekt, Utgift eller Ignorer, ett om gangen eller alle samtidig. De leses på telefonen din, aldri av KI. Slå det på under Innstillinger > Automatisering.',
+      },
+      fasterScans: {
+        title: 'Kvitteringsskanning 50 % raskere',
+        body: 'Å skanne en kvittering tar nå omtrent halve tiden, med samme nøyaktighet. Ta et bilde, så fylles beløp, varer og kategori inn for deg.',
+      },
+      cardDesigns: {
+        title: 'Nye kortdesign',
+        body: 'Gi hvert kontokort sitt eget utseende, med over 70 design fra fargeoverganger og marmor til myntpungkyllingen vår. Rediger en konto og trykk på Kortdesign. Med Pro kan du også laste opp ditt eget bilde.',
+      },
+      bottomBar: {
+        title: 'Gjør bunnlinjen til din',
+        body: 'Velg hvilke sider som skal ligge i bunnlinjen, og dra dem i den rekkefølgen du vil. Legg til Mål, Faste, Kvitteringer og mer. Den første siden blir startskjermen din. Du finner det under Innstillinger > Visning > Bunnlinje.',
+      },
+    },
     transaction_updates: {
       title: 'Enklere registrering av transaksjoner',
       androidScreenshot: {
@@ -372,6 +395,7 @@ const nb = {
       open_app_icon: 'Velg ikonet ditt',
       open_ricecal: 'Prøv RiceCal',
       open_pro_paywall: 'Se Pro-planer',
+      open_bottom_bar: 'Endre bunnlinjen',
       open_share_earn: 'Få Pro gratis',
       open_quick_entry_settings: 'Åpne innstillinger for Hurtigregistrering',
       open_auto_log: 'Sett opp automatiseringer',
@@ -382,6 +406,14 @@ const nb = {
       open_review: 'Åpne Gjennomgang av forbruk',
     },
     showcase: {
+      notification_bank: 'Banken din',
+      notification_text: 'Kortet ditt ble brukt til et kjøp.',
+      scan_before: 'Før',
+      scan_now: 'Nå',
+      card_everyday: 'Hverdag',
+      card_savings: 'Sparing',
+      card_travel: 'Reise',
+      ignore: 'Ignorer',
       ricecal_kcal_left: 'kcal igjen',
       ricecal_carbs: 'Karbohydrater',
       ricecal_protein: 'Protein',

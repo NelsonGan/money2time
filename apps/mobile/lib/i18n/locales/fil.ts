@@ -145,6 +145,29 @@ const fil = {
     reset_action: 'Burahin at palitan',
   },
   news: {
+    web_dashboard: {
+      title: 'Web Dashboard at iba pa',
+      webDashboard: {
+        title: 'Ang pera mo sa malaking screen',
+        body: 'Buksan ang app.money2time.com sa computer at i-scan ang code nito sa Settings > Web Dashboard. Direktang ipinapadala ng phone mo ang data sa browser. Walang naiimbak online at hindi kailangan ng account.',
+      },
+      notificationReview: {
+        title: 'Itala ang mga bayad mula sa notification',
+        body: 'Naghihintay na ngayon bilang draft ang mga notification mula sa bangko at e-wallet. Piliin ang Kita, Gastos o Huwag pansinin, isa-isa o lahat nang sabay. Binabasa ang mga ito sa phone mo, hindi kailanman ng AI. I-set up sa Settings > Automation.',
+      },
+      fasterScans: {
+        title: 'Pag-scan ng resibo, 50% mas mabilis',
+        body: 'Halos kalahati na lang ng dating oras ang pag-scan ng resibo, at ganoon pa rin katumpak. Kumuha ng litrato at mapupunan ang halaga, mga item at kategorya.',
+      },
+      cardDesigns: {
+        title: 'Mga bagong disenyo ng card',
+        body: 'Bigyan ng sariling itsura ang bawat account card, na may mahigit 70 disenyo mula gradient at marmol hanggang sa aming coin-purse na sisiw. I-edit ang account at i-tap ang Disenyo ng card. Sa Pro, puwede ka ring mag-upload ng sarili mong litrato.',
+      },
+      bottomBar: {
+        title: 'Gawing iyo ang bottom bar',
+        body: 'Piliin kung aling mga page ang nasa bottom bar at i-drag ang mga ito sa anumang pagkakasunod-sunod. Magdagdag ng Mga goal, Paulit-ulit, Mga Resibo at iba pa. Ang unang page ang magiging home screen mo. Makikita ito sa Settings > Display > Bottom bar.',
+      },
+    },
     transaction_updates: {
       title: 'Mas madaling pagsubaybay sa transaksyon',
       androidScreenshot: {
@@ -372,6 +395,7 @@ const fil = {
       open_app_icon: 'Piliin ang icon mo',
       open_ricecal: 'Subukan ang RiceCal',
       open_pro_paywall: 'Tingnan ang mga Pro plan',
+      open_bottom_bar: 'I-edit ang bottom bar',
       open_share_earn: 'Kunin ang Pro nang libre',
       open_quick_entry_settings: 'Buksan ang Quick Entry settings',
       open_auto_log: 'I-set up ang mga automation',
@@ -382,6 +406,14 @@ const fil = {
       open_review: 'Buksan ang I-review ang gastos',
     },
     showcase: {
+      notification_bank: 'Ang bangko mo',
+      notification_text: 'Nagamit ang card mo sa isang pagbili.',
+      scan_before: 'Dati',
+      scan_now: 'Ngayon',
+      card_everyday: 'Pang-araw-araw',
+      card_savings: 'Ipon',
+      card_travel: 'Biyahe',
+      ignore: 'Huwag pansinin',
       ricecal_kcal_left: 'natitirang kcal',
       ricecal_carbs: 'Karbohidrat',
       ricecal_protein: 'Protina',

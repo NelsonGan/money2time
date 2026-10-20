@@ -145,6 +145,29 @@ const sv = {
     reset_action: 'Radera och byt',
   },
   news: {
+    web_dashboard: {
+      title: 'Webbpanel med mera',
+      webDashboard: {
+        title: 'Din ekonomi på stor skärm',
+        body: 'Öppna app.money2time.com på datorn och skanna koden i Inställningar > Webbpanel. Telefonen skickar dina data direkt till webbläsaren. Inget sparas på nätet och du behöver inget konto.',
+      },
+      notificationReview: {
+        title: 'Registrera betalningar från notiser',
+        body: 'Notiser från banken och e-plånboken väntar nu på dig som utkast. Välj Inkomst, Utgift eller Ignorera, en i taget eller alla på en gång. De läses på din telefon, aldrig av AI. Ställ in det i Inställningar > Automatisering.',
+      },
+      fasterScans: {
+        title: 'Kvittoskanning 50 % snabbare',
+        body: 'Att skanna ett kvitto tar nu ungefär halva tiden, med samma precision. Ta ett foto så fylls belopp, artiklar och kategori i åt dig.',
+      },
+      cardDesigns: {
+        title: 'Nya kortdesigner',
+        body: 'Ge varje kontokort ett eget utseende, med över 70 designer från toningar och marmor till vår portmonnäkyckling. Redigera ett konto och tryck på Kortdesign. Med Pro kan du också ladda upp ett eget foto.',
+      },
+      bottomBar: {
+        title: 'Gör det nedre fältet till ditt',
+        body: 'Välj vilka sidor som ska finnas i det nedre fältet och dra dem i valfri ordning. Lägg till Mål, Återkommande, Kvitton och mer. Den första sidan blir din startskärm. Du hittar det i Inställningar > Visning > Nedre fältet.',
+      },
+    },
     transaction_updates: {
       title: 'Enklare att hålla koll på transaktioner',
       androidScreenshot: {
@@ -372,6 +395,7 @@ const sv = {
       open_app_icon: 'Välj din ikon',
       open_ricecal: 'Prova RiceCal',
       open_pro_paywall: 'Se Pro-planer',
+      open_bottom_bar: 'Ändra fältet',
       open_share_earn: 'Få Pro gratis',
       open_quick_entry_settings: 'Öppna inställningar för Snabbregistrering',
       open_auto_log: 'Ställ in automatiseringar',
@@ -382,6 +406,14 @@ const sv = {
       open_review: 'Öppna Gå igenom utgifter',
     },
     showcase: {
+      notification_bank: 'Din bank',
+      notification_text: 'Ditt kort användes för ett köp.',
+      scan_before: 'Förut',
+      scan_now: 'Nu',
+      card_everyday: 'Vardag',
+      card_savings: 'Sparande',
+      card_travel: 'Resor',
+      ignore: 'Ignorera',
       ricecal_kcal_left: 'kcal kvar',
       ricecal_carbs: 'Kolhydrater',
       ricecal_protein: 'Protein',

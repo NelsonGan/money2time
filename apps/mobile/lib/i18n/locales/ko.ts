@@ -144,6 +144,29 @@ const ko = {
     reset_action: '삭제 후 전환',
   },
   news: {
+    web_dashboard: {
+      title: '웹 대시보드 외 새 기능',
+      webDashboard: {
+        title: '큰 화면으로 보는 내 돈',
+        body: '컴퓨터에서 app.money2time.com을 열고 설정 > 웹 대시보드에서 코드를 스캔하세요. 휴대폰이 데이터를 브라우저로 바로 보냅니다. 온라인에는 아무것도 저장되지 않고 계정도 필요 없어요.',
+      },
+      notificationReview: {
+        title: '알림으로 결제 기록하기',
+        body: '은행과 전자지갑 알림이 이제 초안으로 기다려요. 수입, 지출, 무시를 하나씩 또는 한 번에 고르세요. 알림은 휴대폰에서만 읽으며 AI로 보내지 않아요. 설정 > 자동화에서 켤 수 있어요.',
+      },
+      fasterScans: {
+        title: '영수증 스캔 50% 더 빠르게',
+        body: '이제 영수증 스캔 시간이 절반 정도로 줄었고 정확도는 그대로예요. 사진만 찍으면 금액, 항목, 카테고리가 채워져요.',
+      },
+      cardDesigns: {
+        title: '새로운 카드 디자인',
+        body: '계좌 카드마다 원하는 디자인을 입혀 보세요. 그라데이션과 대리석부터 동전지갑 병아리까지 70가지가 넘어요. 계좌를 편집하고 카드 디자인을 탭하세요. Pro라면 내 사진도 올릴 수 있어요.',
+      },
+      bottomBar: {
+        title: '나만의 하단 바',
+        body: '하단 바에 둘 페이지를 고르고 원하는 순서로 끌어서 옮기세요. 목표, 반복, 영수증 등을 추가할 수 있어요. 첫 번째 페이지가 홈 화면이 돼요. 설정 > 화면 > 하단 바에서 바꿀 수 있어요.',
+      },
+    },
     transaction_updates: {
       title: '더 쉬워진 거래 기록',
       androidScreenshot: {
@@ -371,6 +394,7 @@ const ko = {
       open_app_icon: '아이콘 고르기',
       open_ricecal: 'RiceCal 사용해 보기',
       open_pro_paywall: 'Pro 플랜 보기',
+      open_bottom_bar: '하단 바 편집',
       open_share_earn: 'Pro 무료로 받기',
       open_quick_entry_settings: '빠른 입력 설정 열기',
       open_auto_log: '자동화 설정하기',
@@ -381,6 +405,14 @@ const ko = {
       open_review: '지출 리뷰 열기',
     },
     showcase: {
+      notification_bank: '내 은행',
+      notification_text: '카드로 결제가 이루어졌어요.',
+      scan_before: '이전',
+      scan_now: '지금',
+      card_everyday: '생활비',
+      card_savings: '저축',
+      card_travel: '여행',
+      ignore: '무시',
       ricecal_kcal_left: '남은 kcal',
       ricecal_carbs: '탄수화물',
       ricecal_protein: '단백질',

@@ -145,6 +145,29 @@ const pt = {
     reset_action: 'Excluir e trocar',
   },
   news: {
+    web_dashboard: {
+      title: 'Painel web e mais',
+      webDashboard: {
+        title: 'Seu dinheiro na tela grande',
+        body: 'Abra app.money2time.com no computador e escaneie o código em Configurações > Painel web. Seu celular envia os dados direto para o navegador. Nada fica armazenado online e não é preciso criar conta.',
+      },
+      notificationReview: {
+        title: 'Registre pagamentos pelas notificações',
+        body: 'Notificações do banco e da carteira digital agora ficam esperando por você como rascunhos. Escolha Receita, Despesa ou Ignorar, uma por uma ou todas de uma vez. Elas são lidas no seu celular, nunca por IA. Ative em Configurações > Automação.',
+      },
+      fasterScans: {
+        title: 'Escaneamento de recibos 50% mais rápido',
+        body: 'Escanear um recibo agora leva cerca de metade do tempo, com a mesma precisão. Tire uma foto e o valor, os itens e a categoria são preenchidos para você.',
+      },
+      cardDesigns: {
+        title: 'Novos designs de cartão',
+        body: 'Dê a cada cartão de conta um visual próprio, com mais de 70 designs, de degradês e mármore ao nosso pintinho porta-moedas. Edite uma conta e toque em Design do cartão. Com o Pro, você também pode enviar sua própria foto.',
+      },
+      bottomBar: {
+        title: 'Uma barra inferior do seu jeito',
+        body: 'Escolha quais páginas ficam na barra inferior e arraste-as na ordem que quiser. Adicione Metas, Recorrentes, Recibos e mais. A primeira página vira sua tela inicial. Encontre em Configurações > Exibição > Barra inferior.',
+      },
+    },
     transaction_updates: {
       title: 'Registro de transações mais fácil',
       androidScreenshot: {
@@ -372,6 +395,7 @@ const pt = {
       open_app_icon: 'Escolher ícone',
       open_ricecal: 'Experimentar o RiceCal',
       open_pro_paywall: 'Ver planos Pro',
+      open_bottom_bar: 'Editar a barra',
       open_share_earn: 'Ganhe o Pro grátis',
       open_quick_entry_settings: 'Abrir configurações de Lançamento rápido',
       open_auto_log: 'Configurar automações',
@@ -382,6 +406,14 @@ const pt = {
       open_review: 'Abrir Revisão de gastos',
     },
     showcase: {
+      notification_bank: 'Seu banco',
+      notification_text: 'Seu cartão foi usado em uma compra.',
+      scan_before: 'Antes',
+      scan_now: 'Agora',
+      card_everyday: 'Dia a dia',
+      card_savings: 'Poupança',
+      card_travel: 'Viagens',
+      ignore: 'Ignorar',
       ricecal_kcal_left: 'kcal restantes',
       ricecal_carbs: 'Carboidratos',
       ricecal_protein: 'Proteína',
