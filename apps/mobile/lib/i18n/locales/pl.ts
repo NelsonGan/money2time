@@ -1487,6 +1487,7 @@ const pl = {
     haptics: 'Wibracje',
     haptics_subtitle: 'Włącz lub wyłącz wibracje w całej aplikacji.',
     data_management: 'Zarządzanie danymi',
+    web_dashboard: 'Panel webowy',
     statement_import: 'Import wyciągu',
   },
   statement_import: {
@@ -2334,6 +2335,50 @@ const pl = {
       weekly_review_body: 'Zobacz, gdzie w zeszłym tygodniu trafiły twoje pieniądze i czas.',
       monthly_review_title: 'Twój miesiąc w skrócie',
       monthly_review_body: 'Zobacz, gdzie w zeszłym miesiącu trafiły twoje pieniądze i czas.',
+    },
+  },
+  web_dashboard: {
+    title: 'Panel webowy',
+    subtitle:
+      'Zobacz swoje dane na komputerze pod adresem app.money2time.com. Telefon wysyła je bezpośrednio do przeglądarki. Nic nie jest przechowywane online i nie ma żadnego konta.',
+    link_title: 'Połącz komputer',
+    linking: 'Łączenie…',
+    confirm_title: 'Połączyć {{name}}?',
+    confirm_title_unnamed: 'Połączyć tę przeglądarkę?',
+    confirm_message:
+      'Sprawdź, czy komputer pokazuje kod {{code}}. Kontynuuj tylko wtedy, gdy sam otworzyłeś app.money2time.com na komputerze, którego używasz: będzie on dostawać wszystkie Twoje dane za każdym razem, gdy ten ekran jest otwarty.',
+    confirm_waiting: 'Teraz kliknij też Połącz na komputerze.',
+    confirm_action: 'Połącz',
+    browsers_title: 'Połączone',
+    unknown_browser: 'Przeglądarka',
+    status_connecting: 'Łączenie…',
+    status_open: 'Połączono',
+    status_sending: 'Wysyłanie… {{percent}}%',
+    status_closed: 'Nie otwarto',
+    just_now: 'teraz',
+    last_sent: 'Ostatnio wysłano {{date}}',
+    send_now: 'Wyślij teraz',
+    open_web: 'Otwórz app.money2time.com',
+    unlink: 'Odłącz',
+    unlink_title: 'Odłączyć tę przeglądarkę?',
+    unlink_message: '{{name}} przestanie dostawać Twoje dane i usunie swoją kopię.',
+    scan_hint: 'Zeskanuj kod na komputerze',
+    camera_permission: 'Zezwól na dostęp do aparatu, aby zeskanować kod.',
+    camera_allow: 'Zezwól na aparat',
+    camera_settings: 'Otwórz Ustawienia',
+    errors: {
+      unavailable:
+        'Panel webowy wymaga najnowszej wersji aplikacji. Zaktualizuj Money2Time i spróbuj ponownie.',
+      invalid_qr:
+        'To nie jest kod panelu webowego Money2Time. Otwórz app.money2time.com i zeskanuj kod stamtąd.',
+      timeout: 'Przeglądarka nie odpowiedziała. Odśwież app.money2time.com i zeskanuj nowy kod.',
+      offline: 'Brak połączenia z internetem. Spróbuj ponownie, gdy będziesz online.',
+      rejected: 'Przeglądarka nie mogła otworzyć danych. Spróbuj ponownie.',
+      closed:
+        'Przeglądarka zamknęła się przed zakończeniem łączenia. Odśwież ją i zeskanuj ponownie.',
+      too_many: 'Możesz połączyć maksymalnie {{max}} przeglądarek. Najpierw odłącz jedną.',
+      too_large: 'Twoje dane są zbyt duże, by wysłać je do Panelu WWW.',
+      failed: 'Coś poszło nie tak. Spróbuj ponownie.',
     },
   },
   auto_backup: {

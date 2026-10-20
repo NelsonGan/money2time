@@ -1489,6 +1489,7 @@ const pt = {
     haptics: 'Vibração',
     haptics_subtitle: 'Ativar ou desativar o feedback tátil em todo o app.',
     data_management: 'Gerenciamento de dados',
+    web_dashboard: 'Painel web',
     statement_import: 'Importar extrato',
   },
   statement_import: {
@@ -2340,6 +2341,50 @@ const pt = {
       weekly_review_body: 'Veja para onde foram seu dinheiro e seu tempo na semana passada.',
       monthly_review_title: 'Seu mês em revisão',
       monthly_review_body: 'Veja para onde foram seu dinheiro e seu tempo no mês passado.',
+    },
+  },
+  web_dashboard: {
+    title: 'Painel web',
+    subtitle:
+      'Veja seus dados em um computador, em app.money2time.com. O telefone os envia direto para o navegador. Nada fica armazenado online e não há conta.',
+    link_title: 'Vincular um computador',
+    linking: 'Vinculando…',
+    confirm_title: 'Vincular {{name}}?',
+    confirm_title_unnamed: 'Vincular este navegador?',
+    confirm_message:
+      'Confira se o computador mostra o código {{code}}. Só continue se foi você quem abriu app.money2time.com num computador que está usando: ele vai receber todos os seus dados sempre que esta tela estiver aberta.',
+    confirm_waiting: 'Agora clique em Vincular no computador também.',
+    confirm_action: 'Vincular',
+    browsers_title: 'Vinculados',
+    unknown_browser: 'Um navegador',
+    status_connecting: 'Conectando…',
+    status_open: 'Conectado',
+    status_sending: 'Enviando… {{percent}}%',
+    status_closed: 'Não aberto',
+    just_now: 'agora',
+    last_sent: 'Último envio {{date}}',
+    send_now: 'Enviar agora',
+    open_web: 'Abrir app.money2time.com',
+    unlink: 'Desvincular',
+    unlink_title: 'Desvincular este navegador?',
+    unlink_message: '{{name}} deixa de receber seus dados e apaga a cópia.',
+    scan_hint: 'Escaneie o código no computador',
+    camera_permission: 'Permita o acesso à câmera para escanear o código.',
+    camera_allow: 'Permitir câmera',
+    camera_settings: 'Abrir Ajustes',
+    errors: {
+      unavailable:
+        'O painel web precisa da versão mais recente do app. Atualize o Money2Time e tente novamente.',
+      invalid_qr:
+        'Esse não é um código do painel web do Money2Time. Abra app.money2time.com e escaneie o código de lá.',
+      timeout: 'O navegador não respondeu. Recarregue app.money2time.com e escaneie o novo código.',
+      offline: 'Sem conexão com a internet. Tente novamente quando estiver online.',
+      rejected: 'O navegador não conseguiu abrir os dados. Tente novamente.',
+      closed:
+        'O navegador foi fechado antes de a vinculação terminar. Recarregue-o e escaneie de novo.',
+      too_many: 'Você pode vincular até {{max}} navegadores. Desvincule um primeiro.',
+      too_large: 'Seus dados são grandes demais para enviar ao painel web.',
+      failed: 'Algo deu errado. Tente novamente.',
     },
   },
   auto_backup: {

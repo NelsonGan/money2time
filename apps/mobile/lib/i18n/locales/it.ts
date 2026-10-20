@@ -1486,6 +1486,7 @@ const it = {
     haptics: 'Aptico',
     haptics_subtitle: "Attiva o disattiva il feedback tattile nell'app.",
     data_management: 'Gestione dati',
+    web_dashboard: 'Dashboard web',
     statement_import: 'Importa estratto conto',
   },
   statement_import: {
@@ -2338,6 +2339,51 @@ const it = {
         'Scopri dove sono andati i tuoi soldi e il tuo tempo la settimana scorsa.',
       monthly_review_title: 'Il tuo mese in sintesi',
       monthly_review_body: 'Scopri dove sono andati i tuoi soldi e il tuo tempo il mese scorso.',
+    },
+  },
+  web_dashboard: {
+    title: 'Dashboard web',
+    subtitle:
+      'Guarda i tuoi dati su un computer, su app.money2time.com. Il telefono li invia direttamente al browser. Non viene salvato nulla online e non serve alcun account.',
+    link_title: 'Collega un computer',
+    linking: 'Collegamento…',
+    confirm_title: 'Collegare {{name}}?',
+    confirm_title_unnamed: 'Collegare questo browser?',
+    confirm_message:
+      'Controlla che il computer mostri il codice {{code}}. Continua solo se hai aperto tu app.money2time.com su un computer che stai usando: riceverà tutti i tuoi dati ogni volta che questa schermata è aperta.',
+    confirm_waiting: 'Ora fai clic su Collega anche sul computer.',
+    confirm_action: 'Collega',
+    browsers_title: 'Collegati',
+    unknown_browser: 'Un browser',
+    status_connecting: 'Connessione…',
+    status_open: 'Connesso',
+    status_sending: 'Invio… {{percent}}%',
+    status_closed: 'Non aperto',
+    just_now: 'ora',
+    last_sent: 'Ultimo invio {{date}}',
+    send_now: 'Invia ora',
+    open_web: 'Apri app.money2time.com',
+    unlink: 'Scollega',
+    unlink_title: 'Scollegare questo browser?',
+    unlink_message: '{{name}} non riceverà più i tuoi dati ed eliminerà la sua copia.',
+    scan_hint: 'Scansiona il codice sul computer',
+    camera_permission: 'Consenti l’accesso alla fotocamera per scansionare il codice.',
+    camera_allow: 'Consenti fotocamera',
+    camera_settings: 'Apri Impostazioni',
+    errors: {
+      unavailable:
+        'La dashboard web richiede l’ultima versione dell’app. Aggiorna Money2Time e riprova.',
+      invalid_qr:
+        'Questo non è un codice della dashboard web di Money2Time. Apri app.money2time.com e inquadra il codice che trovi lì.',
+      timeout:
+        'Il browser non ha risposto. Ricarica app.money2time.com e inquadra il nuovo codice.',
+      offline: 'Nessuna connessione a internet. Riprova quando sei online.',
+      rejected: 'Il browser non è riuscito ad aprire i dati. Riprova.',
+      closed:
+        'Il browser si è chiuso prima della fine del collegamento. Ricaricalo e inquadra di nuovo il codice.',
+      too_many: 'Puoi collegare fino a {{max}} browser. Scollegane prima uno.',
+      too_large: 'I tuoi dati sono troppo grandi per essere inviati alla dashboard web.',
+      failed: 'Qualcosa è andato storto. Riprova.',
     },
   },
   auto_backup: {

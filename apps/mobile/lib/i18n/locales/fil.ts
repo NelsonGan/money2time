@@ -1503,6 +1503,7 @@ const fil = {
     haptics: 'Haptics',
     haptics_subtitle: 'I-on o i-off ang touch feedback sa buong app.',
     data_management: 'Data Management',
+    web_dashboard: 'Web Dashboard',
     statement_import: 'Statement Import',
   },
   statement_import: {
@@ -2355,6 +2356,51 @@ const fil = {
       monthly_review_title: 'Ang iyong buwan sa review',
       monthly_review_body:
         'Tingnan kung saan napunta ang iyong pera at oras noong nakaraang buwan.',
+    },
+  },
+  web_dashboard: {
+    title: 'Web Dashboard',
+    subtitle:
+      'Tingnan ang iyong data sa computer sa app.money2time.com. Direktang ipinapadala ito ng iyong telepono sa browser. Walang iniimbak online at walang account.',
+    link_title: 'Mag-link ng computer',
+    linking: 'Nagli-link…',
+    confirm_title: 'I-link ang {{name}}?',
+    confirm_title_unnamed: 'I-link ang browser na ito?',
+    confirm_message:
+      'Tiyaking ipinapakita ng computer ang code na {{code}}. Magpatuloy lang kung ikaw mismo ang nagbukas ng app.money2time.com sa computer na ginagamit mo: matatanggap nito ang lahat ng data mo tuwing bukas ang screen na ito.',
+    confirm_waiting: 'Ngayon, i-click din ang I-link sa computer.',
+    confirm_action: 'I-link',
+    browsers_title: 'Naka-link',
+    unknown_browser: 'Isang browser',
+    status_connecting: 'Kumokonekta…',
+    status_open: 'Konektado',
+    status_sending: 'Ipinapadala… {{percent}}%',
+    status_closed: 'Hindi bukas',
+    just_now: 'ngayon',
+    last_sent: 'Huling naipadala {{date}}',
+    send_now: 'Ipadala ngayon',
+    open_web: 'Buksan ang app.money2time.com',
+    unlink: 'I-unlink',
+    unlink_title: 'I-unlink ang browser na ito?',
+    unlink_message:
+      'Hindi na makakatanggap ng data mo ang {{name}} at buburahin nito ang kopya nito.',
+    scan_hint: 'I-scan ang code sa computer mo',
+    camera_permission: 'Payagan ang access sa camera para ma-scan ang code.',
+    camera_allow: 'Payagan ang camera',
+    camera_settings: 'Buksan ang Settings',
+    errors: {
+      unavailable:
+        'Kailangan ng Web Dashboard ang pinakabagong bersyon ng app. I-update ang Money2Time at subukan ulit.',
+      invalid_qr:
+        'Hindi iyan code ng Money2Time Web Dashboard. Buksan ang app.money2time.com at doon i-scan ang code.',
+      timeout:
+        'Hindi sumagot ang browser. I-reload ang app.money2time.com at i-scan ang bagong code.',
+      offline: 'Walang koneksyon sa internet. Subukan ulit kapag online ka na.',
+      rejected: 'Hindi mabuksan ng browser ang data. Subukan ulit.',
+      closed: 'Nagsara ang browser bago natapos ang pag-link. I-reload ito at mag-scan ulit.',
+      too_many: 'Hanggang {{max}} browser ang maaari mong i-link. Mag-unlink muna ng isa.',
+      too_large: 'Masyadong malaki ang data mo para ipadala sa Web Dashboard.',
+      failed: 'May nangyaring mali. Subukang muli.',
     },
   },
   auto_backup: {

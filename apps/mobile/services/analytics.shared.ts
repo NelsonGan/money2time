@@ -239,6 +239,13 @@ export const GA4_ONLY_EVENTS = {
   AUTO_BACKUP_SETTING_TOGGLED: 'Auto Backup Setting Toggled',
   AUTO_BACKUP_TARGET_CHANGED: 'Auto Backup Target Changed',
 
+  // Web Dashboard
+  WEB_DASHBOARD_LINKED: 'Web Dashboard Linked',
+  WEB_DASHBOARD_UNLINKED: 'Web Dashboard Unlinked',
+  WEB_DASHBOARD_SENT: 'Web Dashboard Sent',
+  WEB_DASHBOARD_SEND_FAILED: 'Web Dashboard Send Failed',
+  WEB_DASHBOARD_OPENED: 'Web Dashboard Opened',
+
   // Review prompt
   REVIEW_PROMPT_MANUAL_OPENED: 'Review Prompt Manual Opened',
 } as const;

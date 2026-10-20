@@ -1,0 +1,16 @@
+{
+  "name": "money2time-workers-web-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cloudflare Worker for the Web Dashboard: a stateless relay that passes end-to-end encrypted messages between a phone and the browser it linked by QR code, storing nothing.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy --tsconfig tsconfig.json",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261019.1",
+    "typescript": "^5.9.3",
+    "wrangler": "^4.151.2"
+  }
+}

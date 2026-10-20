@@ -1496,6 +1496,7 @@ const nl = {
     haptics: 'Haptisch',
     haptics_subtitle: 'Tactiele feedback in de hele app in- of uitschakelen.',
     data_management: 'Gegevensbeheer',
+    web_dashboard: 'Webdashboard',
     statement_import: 'Afschrift importeren',
   },
   statement_import: {
@@ -2350,6 +2351,50 @@ const nl = {
       weekly_review_body: 'Bekijk waar je geld en tijd vorige week naartoe gingen.',
       monthly_review_title: 'Je maand in terugblik',
       monthly_review_body: 'Bekijk waar je geld en tijd vorige maand naartoe gingen.',
+    },
+  },
+  web_dashboard: {
+    title: 'Webdashboard',
+    subtitle:
+      'Bekijk je gegevens op een computer via app.money2time.com. Je telefoon stuurt ze rechtstreeks naar de browser. Er wordt niets online opgeslagen en er is geen account.',
+    link_title: 'Een computer koppelen',
+    linking: 'Koppelen…',
+    confirm_title: '{{name}} koppelen?',
+    confirm_title_unnamed: 'Deze browser koppelen?',
+    confirm_message:
+      'Controleer of de computer de code {{code}} toont. Ga alleen verder als je app.money2time.com zelf hebt geopend op een computer die je gebruikt: die krijgt al je gegevens telkens als dit scherm open is.',
+    confirm_waiting: 'Klik nu ook op Koppelen op de computer.',
+    confirm_action: 'Koppelen',
+    browsers_title: 'Gekoppeld',
+    unknown_browser: 'Een browser',
+    status_connecting: 'Verbinden…',
+    status_open: 'Verbonden',
+    status_sending: 'Verzenden… {{percent}}%',
+    status_closed: 'Niet open',
+    just_now: 'nu',
+    last_sent: 'Laatst verstuurd {{date}}',
+    send_now: 'Nu versturen',
+    open_web: 'Open app.money2time.com',
+    unlink: 'Ontkoppelen',
+    unlink_title: 'Deze browser ontkoppelen?',
+    unlink_message: '{{name}} krijgt je gegevens niet meer en verwijdert zijn kopie.',
+    scan_hint: 'Scan de code op je computer',
+    camera_permission: 'Geef toegang tot de camera om de code te scannen.',
+    camera_allow: 'Camera toestaan',
+    camera_settings: 'Instellingen openen',
+    errors: {
+      unavailable:
+        'Het Webdashboard heeft de nieuwste versie van de app nodig. Werk Money2Time bij en probeer het opnieuw.',
+      invalid_qr:
+        'Dat is geen Money2Time Webdashboard-code. Open app.money2time.com en scan de code daar.',
+      timeout: 'De browser reageerde niet. Laad app.money2time.com opnieuw en scan de nieuwe code.',
+      offline: 'Geen internetverbinding. Probeer het opnieuw als je online bent.',
+      rejected: 'De browser kon de gegevens niet openen. Probeer het opnieuw.',
+      closed:
+        'De browser is gesloten voordat het koppelen klaar was. Laad hem opnieuw en scan nogmaals.',
+      too_many: 'Je kunt maximaal {{max}} browsers koppelen. Ontkoppel er eerst een.',
+      too_large: 'Je gegevens zijn te groot om naar het webdashboard te sturen.',
+      failed: 'Er ging iets mis. Probeer het opnieuw.',
     },
   },
   auto_backup: {

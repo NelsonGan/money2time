@@ -1483,6 +1483,7 @@ const nb = {
     haptics: 'Haptikk',
     haptics_subtitle: 'Slå berøringstilbakemelding av eller på i appen.',
     data_management: 'Dataadministrasjon',
+    web_dashboard: 'Web-dashbord',
     statement_import: 'Kontoutskriftsimport',
   },
   statement_import: {
@@ -2325,6 +2326,51 @@ const nb = {
       weekly_review_body: 'Se hvor pengene og tiden din gikk forrige uke.',
       monthly_review_title: 'Din måned oppsummert',
       monthly_review_body: 'Se hvor pengene og tiden din gikk forrige måned.',
+    },
+  },
+  web_dashboard: {
+    title: 'Web-dashbord',
+    subtitle:
+      'Se dataene dine på en datamaskin på app.money2time.com. Telefonen sender dem rett til nettleseren. Ingenting lagres på nett, og du trenger ingen konto.',
+    link_title: 'Koble til en datamaskin',
+    linking: 'Kobler til…',
+    confirm_title: 'Koble til {{name}}?',
+    confirm_title_unnamed: 'Koble til denne nettleseren?',
+    confirm_message:
+      'Sjekk at datamaskinen viser koden {{code}}. Fortsett bare hvis du selv åpnet app.money2time.com på en datamaskin du bruker: den får alle dataene dine hver gang denne skjermen er åpen.',
+    confirm_waiting: 'Klikk nå på Koble til på datamaskinen også.',
+    confirm_action: 'Koble til',
+    browsers_title: 'Tilkoblet',
+    unknown_browser: 'En nettleser',
+    status_connecting: 'Kobler til…',
+    status_open: 'Tilkoblet',
+    status_sending: 'Sender… {{percent}}%',
+    status_closed: 'Ikke åpen',
+    just_now: 'nå',
+    last_sent: 'Sist sendt {{date}}',
+    send_now: 'Send nå',
+    open_web: 'Åpne app.money2time.com',
+    unlink: 'Koble fra',
+    unlink_title: 'Koble fra denne nettleseren?',
+    unlink_message: '{{name}} får ikke lenger dataene dine og sletter kopien sin.',
+    scan_hint: 'Skann koden på datamaskinen',
+    camera_permission: 'Gi tilgang til kameraet for å skanne koden.',
+    camera_allow: 'Tillat kamera',
+    camera_settings: 'Åpne Innstillinger',
+    errors: {
+      unavailable:
+        'Web-dashbordet krever den nyeste versjonen av appen. Oppdater Money2Time og prøv igjen.',
+      invalid_qr:
+        'Dette er ikke en kode for Money2Time Web-dashbord. Åpne app.money2time.com og skann koden der.',
+      timeout:
+        'Nettleseren svarte ikke. Last inn app.money2time.com på nytt og skann den nye koden.',
+      offline: 'Ingen internettforbindelse. Prøv igjen når du er på nett.',
+      rejected: 'Nettleseren kunne ikke åpne dataene. Prøv igjen.',
+      closed:
+        'Nettleseren ble lukket før tilkoblingen var ferdig. Last den inn på nytt og skann igjen.',
+      too_many: 'Du kan koble til opptil {{max}} nettlesere. Koble fra én først.',
+      too_large: 'Dataene dine er for store til å sendes til nettdashbordet.',
+      failed: 'Noe gikk galt. Prøv igjen.',
     },
   },
   auto_backup: {
