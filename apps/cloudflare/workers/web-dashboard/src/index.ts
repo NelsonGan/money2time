@@ -33,7 +33,16 @@ function text(status: number, body: string): Response {
 /** IPv6 clients share a limit per /64, the block one subscriber usually gets. */
 function rateKey(ip: string): string {
   if (!ip.includes(':')) return ip;
-  return ip.split(':').slice(0, 4).join(':');
+  // Addresses arrive compressed (`2a01:4f8::1`): expand `::` before taking
+  // the first four groups, or every interface id would get its own key.
+  const [head, tail = ''] = ip.split('::');
+  const left = head ? head.split(':') : [];
+  const right = ip.includes('::') && tail ? tail.split(':') : [];
+  const groups = ip.includes('::') ? [...left, ...Array(8 - left.length - right.length).fill('0'), ...right] : left;
+  return groups
+    .slice(0, 4)
+    .map((group) => group.toLowerCase().replace(/^0+(?=.)/, ''))
+    .join(':');
 }
 
 async function roomName(token: string): Promise<string> {

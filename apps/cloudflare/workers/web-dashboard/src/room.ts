@@ -20,6 +20,17 @@ type Attachment = { role: Role; replaced?: boolean };
 
 const other = (role: Role): Role => (role === 'phone' ? 'browser' : 'phone');
 
+/** The largest sealed control message is a few kilobytes; nothing needs more. */
+const MAX_TEXT_BYTES = 64 * 1024;
+/** One data chunk: a 4-byte index, 256 KiB of ciphertext and the GCM tag. */
+const MAX_BINARY_BYTES = 256 * 1024 + 64;
+/**
+ * What one connection may push before the room closes it: a whole 128 MiB
+ * transfer (and a resend) from the phone, and only control messages and acks
+ * from the browser. Counted while the room is awake, which a transfer keeps it.
+ */
+const BUDGET_BYTES: Record<Role, number> = { phone: 300 * 1024 * 1024, browser: 2 * 1024 * 1024 };
+
 function attachment(ws: WebSocket): Attachment | null {
   return (ws.deserializeAttachment() as Attachment | null) ?? null;
 }
@@ -34,6 +45,8 @@ function trySend(ws: WebSocket, message: string | ArrayBuffer): void {
 }
 
 export class Room extends DurableObject<Env> {
+  private sent = new Map<WebSocket, number>();
+
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
     this.ctx.setWebSocketAutoResponse(new WebSocketRequestResponsePair('ping', 'pong'));
@@ -76,8 +89,25 @@ export class Room extends DurableObject<Env> {
   webSocketMessage(ws: WebSocket, message: string | ArrayBuffer): void {
     const from = attachment(ws);
     if (!from || from.replaced) return;
+    // Only the phone sends data chunks; every other frame is a small message.
+    // Anything else is not this protocol, and the room is not a free pipe.
+    const size = typeof message === 'string' ? message.length * 3 : message.byteLength;
+    const sent = (this.sent.get(ws) ?? 0) + size;
+    this.sent.set(ws, sent);
+    const tooBig =
+      typeof message === 'string'
+        ? size > MAX_TEXT_BYTES * 3
+        : from.role !== 'phone' || size > MAX_BINARY_BYTES;
+    if (tooBig || sent > BUDGET_BYTES[from.role]) {
+      try {
+        ws.close(1009, 'too much');
+      } catch {
+        // Already closed.
+      }
+      return;
+    }
     // Presence comes only from the room; a peer cannot fake the other's leaving.
-    if (typeof message === 'string' && message.includes('"peer"')) {
+    if (typeof message === 'string') {
       try {
         if ((JSON.parse(message) as { t?: unknown }).t === 'peer') return;
       } catch {
@@ -101,6 +131,7 @@ export class Room extends DurableObject<Env> {
   }
 
   private left(ws: WebSocket): void {
+    this.sent.delete(ws);
     const gone = attachment(ws);
     // A replaced socket leaving does not mean the role is gone.
     if (!gone || gone.replaced) return;

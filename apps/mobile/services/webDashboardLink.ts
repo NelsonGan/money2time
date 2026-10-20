@@ -1,7 +1,7 @@
 /**
  * The Web Dashboard's link protocol, the phone's side. Plain TypeScript over
- * an injected WebSocket and randomness, so it runs in the app and in Node
- * against the website's half (src/lib/cloud/relay.ts in the website repo).
+ * the platform WebSocket and injected randomness; the browser's half is
+ * src/lib/cloud/relay.ts in the website repo.
  *
  * The phone and the browser meet in a relay room (the web-dashboard Worker)
  * that forwards messages and stores nothing. A socket joins a room by
@@ -45,7 +45,7 @@ import {
   toBase64Url,
 } from './webDashboardCrypto';
 
-export const RELAY_PROTOCOL = 'm2t-v1';
+const RELAY_PROTOCOL = 'm2t-v1';
 export const CHUNK_BYTES = 256 * 1024;
 export const WINDOW = 8;
 /** The largest gzipped export that is sent; past this the phone says so. */
@@ -69,7 +69,7 @@ export type LinkRecord = {
   lastSentAt: number | null;
 };
 
-export type TransferMeta = {
+type TransferMeta = {
   id: string;
   exportedAt: string | null;
   appVersion: string | null;
@@ -96,9 +96,6 @@ export type LinkDeps = {
   /** The relay's base URL, e.g. https://workers-web-dashboard.money2time.com */
   relayUrl: string;
   random: RandomBytes;
-  createSocket?: (url: string, protocols: string[]) => WebSocket;
-  /** How long linking waits for the browser's first answer. */
-  pairTimeoutMs?: number;
 };
 
 export class LinkError extends Error {
@@ -179,9 +176,7 @@ export function cleanBrowserName(name: unknown): string | null {
 function socketFor(deps: LinkDeps, token: string): WebSocket {
   const url = `${deps.relayUrl.replace(/^http/, 'ws').replace(/\/+$/, '')}/v1/room?role=phone`;
   const protocols = [RELAY_PROTOCOL, token];
-  const socket = deps.createSocket
-    ? deps.createSocket(url, protocols)
-    : new WebSocket(url, protocols);
+  const socket = new WebSocket(url, protocols);
   socket.binaryType = 'arraybuffer';
   return socket;
 }
@@ -203,7 +198,7 @@ function backoff(attempt: number): number {
 }
 
 /** A browser that answered the scanned QR, waiting for the person to confirm. */
-export type PendingLink = {
+type PendingLink = {
   browserName: string | null;
   /** Six digits the browser shows too; the person checks they match. */
   code: string;
@@ -249,10 +244,7 @@ export function startLink(
       clearTimeout(timer);
       reject(error);
     };
-    const timer = setTimeout(
-      () => end(new LinkError('timeout')),
-      deps.pairTimeoutMs ?? PAIR_TIMEOUT_MS,
-    );
+    const timer = setTimeout(() => end(new LinkError('timeout')), PAIR_TIMEOUT_MS);
     let sentPair = false;
     socket.onerror = () => end(new LinkError('offline'));
     socket.onclose = () => end(new LinkError('closed'));
@@ -323,9 +315,9 @@ export function startLink(
   });
 }
 
-export type SessionState = 'connecting' | 'waiting' | 'online' | 'sending' | 'closed';
+type SessionState = 'connecting' | 'waiting' | 'online' | 'sending' | 'closed';
 
-export type SessionEvents = {
+type SessionEvents = {
   onState?: (state: SessionState) => void;
   /** The browser asked for fresh data (it just opened, or Refresh was pressed). */
   onWant?: (force: boolean) => void;

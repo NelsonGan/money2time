@@ -1,5 +1,5 @@
 import { useIsFocused } from '@react-navigation/native';
-import { ExternalLink } from 'lucide-react-native';
+import { CircleCheck, Ellipsis, ExternalLink, RefreshCw } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -7,6 +7,7 @@ import {
   AppState,
   Image,
   Linking,
+  Pressable,
   ScrollView,
   StyleSheet,
   View,
@@ -25,6 +26,7 @@ import {
 } from '~/components/ui';
 import { usePro } from '~/context/ProContext';
 import { QrScannerView } from '~/features/settings/components/QrScannerView';
+import { whenAppUnlocked } from '~/features/settings/lib/appLockState';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
@@ -65,25 +67,36 @@ function errorMessage(error: unknown): string {
   });
 }
 
-function formatWhen(value: number | null | undefined): string {
-  if (value == null) return I18n.t('web_dashboard.never');
-  return new Date(value).toLocaleString(I18n.locale);
+/** How long ago, as short as a badge allows: "now", "4m", "3h", "2d". */
+function formatAge(value: number, now: number): string {
+  const minutes = Math.max(0, Math.floor((now - value) / 60_000));
+  if (minutes < 1) return I18n.t('web_dashboard.just_now');
+  const [amount, unit] =
+    minutes < 60
+      ? [minutes, 'minute']
+      : minutes < 60 * 24
+        ? [Math.floor(minutes / 60), 'hour']
+        : [Math.floor(minutes / (60 * 24)), 'day'];
+  return new Intl.NumberFormat(I18n.locale, { style: 'unit', unit, unitDisplay: 'narrow' }).format(
+    amount,
+  );
 }
 
-function statusLine(link: LinkedBrowser, status: WebDashboardStatus[string] | undefined): string {
+/** The browser's state in a word or two. */
+function statusLine(status: WebDashboardStatus[string] | undefined): string {
   const state = status?.state ?? 'connecting';
   if (state === 'sending') {
     return I18n.t('web_dashboard.status_sending', {
       percent: Math.round((status?.progress ?? 0) * 100),
     });
   }
-  if (state === 'online') {
-    return link.lastSentAt
-      ? I18n.t('web_dashboard.status_open_sent', { date: formatWhen(link.lastSentAt) })
-      : I18n.t('web_dashboard.status_open');
-  }
-  if (state === 'connecting') return I18n.t('web_dashboard.status_connecting');
-  return I18n.t('web_dashboard.status_closed', { date: formatWhen(link.lastSentAt) });
+  return I18n.t(
+    state === 'online'
+      ? 'web_dashboard.status_open'
+      : state === 'connecting'
+        ? 'web_dashboard.status_connecting'
+        : 'web_dashboard.status_closed',
+  );
 }
 
 /**
@@ -207,7 +220,11 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
     setNotice(null);
     setLinking(true);
     void beginLink(text)
-      .then((pending) => {
+      .then(async (pending) => {
+        // A pairing link can arrive while the app is locked, and the alert
+        // would draw above the lock screen: whoever holds the phone could
+        // link their own computer. Ask only once the owner has unlocked.
+        await whenAppUnlocked();
         // Nothing is linked until the person checks the code and agrees, on
         // this phone and on the computer: a code from someone else's screen
         // would send them this phone's data.
@@ -234,13 +251,10 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
                 setNotice(I18n.t('web_dashboard.confirm_waiting'));
                 void pending
                   .confirm()
-                  .then(async (link) => {
+                  .then(async () => {
+                    // The new row below is the confirmation.
                     void triggerHaptic('success');
-                    setNotice(
-                      link.name
-                        ? I18n.t('web_dashboard.linked', { name: link.name })
-                        : I18n.t('web_dashboard.linked_unnamed'),
-                    );
+                    setNotice(null);
                     await reloadLinks();
                   })
                   .catch((error: unknown) => {
@@ -296,16 +310,24 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
 
   const handleSendNow = () => {
     setProblem(null);
-    const count = connections.current?.sendNow() ?? 0;
-    setNotice(count ? null : I18n.t('web_dashboard.none_open'));
+    connections.current?.sendNow();
   };
+
+  const [now, setNow] = useState(Date.now);
+  useEffect(() => {
+    if (links.length === 0) return undefined;
+    setNow(Date.now());
+    const timer = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(timer);
+  }, [links]);
+
+  const anyOpen = Object.values(status).some((s) => s.state === 'online');
+  const anySending = Object.values(status).some((s) => s.state === 'sending');
 
   const openWeb = () => {
     void trackEvent(AnalyticsEvents.WEB_DASHBOARD_OPENED);
     void Linking.openURL(WEB_DASHBOARD_URL);
   };
-
-  const anySending = Object.values(status).some((s) => s.state === 'sending');
 
   return (
     <SettingsPageLayout>
@@ -364,49 +386,79 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
             </View>
 
             {links.length > 0 ? (
-              <Card className="mt-4">
-                <CardContent className="py-5 gap-3">
-                  <Text variant="bodyStrong">{I18n.t('web_dashboard.browsers_title')}</Text>
-                  {links.map((link) => (
-                    <View key={link.roomId} style={styles.row}>
-                      <View
-                        className={`h-2.5 w-2.5 rounded-full ${
-                          status[link.roomId]?.state === 'online' ||
-                          status[link.roomId]?.state === 'sending'
-                            ? 'bg-success'
-                            : 'bg-muted-foreground'
-                        }`}
-                      />
-                      <View style={styles.flex}>
-                        <Text variant="body" numberOfLines={1}>
-                          {link.name ?? I18n.t('web_dashboard.unknown_browser')}
-                        </Text>
-                        <Text variant="caption" tone="muted">
-                          {statusLine(link, status[link.roomId])}
-                        </Text>
-                      </View>
-                      <Button variant="ghost" size="sm" onPress={() => handleUnlink(link)}>
-                        <Text>{I18n.t('web_dashboard.unlink')}</Text>
-                      </Button>
-                    </View>
-                  ))}
-                  <Button
-                    variant="secondary"
-                    className="mt-1"
-                    onPress={handleSendNow}
-                    disabled={anySending}
-                  >
-                    <Text>
-                      {anySending
-                        ? I18n.t('web_dashboard.sending')
-                        : I18n.t('web_dashboard.send_now')}
-                    </Text>
-                  </Button>
+              <View className="mt-4 gap-2">
+                <View className="flex-row items-center justify-between px-1">
                   <Text variant="caption" tone="muted">
-                    {I18n.t('web_dashboard.refresh_hint')}
+                    {I18n.t('web_dashboard.browsers_title')}
                   </Text>
-                </CardContent>
-              </Card>
+                  <Pressable
+                    onPress={handleSendNow}
+                    disabled={!anyOpen || anySending}
+                    hitSlop={12}
+                    accessibilityRole="button"
+                    accessibilityLabel={I18n.t('web_dashboard.send_now')}
+                    accessibilityState={{ disabled: !anyOpen || anySending }}
+                    style={[styles.syncButton, !anyOpen && styles.dimmed]}
+                  >
+                    {anySending ? (
+                      <ActivityIndicator size="small" color={colors.primary} />
+                    ) : (
+                      <RefreshCw size={16} color={colors.primary} />
+                    )}
+                  </Pressable>
+                </View>
+                {links.map((link) => {
+                  const state = status[link.roomId]?.state;
+                  const live = state === 'online' || state === 'sending';
+                  const name = link.name ?? I18n.t('web_dashboard.unknown_browser');
+                  return (
+                    <Card key={link.roomId} className="px-4 py-3">
+                      <CardContent className="flex-row items-center gap-3">
+                        <Image
+                          source={require('../../../assets/illustrations/linked-computer.png')}
+                          style={styles.deviceIcon}
+                          accessible={false}
+                        />
+                        <View style={styles.flex}>
+                          <Text variant="bodyStrong" numberOfLines={1}>
+                            {name}
+                          </Text>
+                          <View className="mt-0.5 flex-row items-center gap-1.5">
+                            <View
+                              className={`h-2 w-2 rounded-full ${live ? 'bg-success' : 'bg-muted-foreground'}`}
+                            />
+                            <Text variant="caption" tone="muted" numberOfLines={1}>
+                              {statusLine(status[link.roomId])}
+                            </Text>
+                          </View>
+                        </View>
+                        {link.lastSentAt ? (
+                          <View
+                            className="flex-row items-center gap-1"
+                            accessible
+                            accessibilityLabel={I18n.t('web_dashboard.last_sent', {
+                              date: new Date(link.lastSentAt).toLocaleString(I18n.locale),
+                            })}
+                          >
+                            <CircleCheck size={14} color={colors.success} />
+                            <Text variant="caption" tone="muted">
+                              {formatAge(link.lastSentAt, now)}
+                            </Text>
+                          </View>
+                        ) : null}
+                        <Pressable
+                          onPress={() => handleUnlink(link)}
+                          hitSlop={12}
+                          accessibilityRole="button"
+                          accessibilityLabel={`${I18n.t('web_dashboard.unlink')} ${name}`}
+                        >
+                          <Ellipsis size={20} color={colors.textMuted} />
+                        </Pressable>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </View>
             ) : null}
           </>
         )}
@@ -432,7 +484,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
     paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
   },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   flex: { flex: 1 },
+  deviceIcon: { width: 44, height: 44 },
+  syncButton: { width: 28, height: 28, alignItems: 'center', justifyContent: 'center' },
+  dimmed: { opacity: 0.4 },
   loading: { paddingVertical: 32, alignItems: 'center' },
 });

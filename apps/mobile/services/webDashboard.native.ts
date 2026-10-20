@@ -23,9 +23,7 @@ import {
   type LinkedBrowser,
   MAX_LINKED_BROWSERS,
   type PendingBrowser,
-  RESEND_AFTER_MS,
   WebDashboardError,
-  webDashboardRelayUrl,
   type WebDashboardStatus,
 } from './webDashboard.shared';
 import {
@@ -46,6 +44,9 @@ const UNLINKS_KEY = 'money2time_web_dashboard_unlinks';
 /** An unlink nobody collects in this long is dropped: that browser's data is long stale. */
 const UNLINK_TTL_MS = 180 * 24 * 60 * 60 * 1000;
 /** Refresh and Send now each send at most this often per browser. */
+const RELAY_DEFAULT_URL = 'https://workers-web-dashboard.money2time.com';
+/** A browser that just got data is not sent it again for this long unless it asks with Refresh. */
+const RESEND_AFTER_MS = 60_000;
 const FORCED_SEND_GAP_MS = 10_000;
 /**
  * The user-asset folders the dashboard shows: logos, icons and covers.
@@ -79,7 +80,10 @@ async function requireNative(): Promise<Native> {
 
 async function deps(): Promise<LinkDeps> {
   const { randomBytes } = await requireNative();
-  return { relayUrl: webDashboardRelayUrl(), random: randomBytes };
+  // `EXPO_PUBLIC_MONEY2TIME_WORKERS_WEB_DASHBOARD` points a dev build at a local relay.
+  const relayUrl =
+    process.env.EXPO_PUBLIC_MONEY2TIME_WORKERS_WEB_DASHBOARD?.trim() || RELAY_DEFAULT_URL;
+  return { relayUrl: relayUrl.replace(/\/+$/, ''), random: randomBytes };
 }
 
 type Unlink = LinkRecord & { unlinkedAt: number };
@@ -217,7 +221,6 @@ async function buildTransfer(isPro: boolean): Promise<PreparedTransfer> {
     gzip.push(bytes.subarray(offset, end), end === bytes.length);
     await yieldToEventLoop();
   }
-  if (bytes.length === 0) gzip.push(new Uint8Array(0), true);
   const size = parts.reduce((sum, part) => sum + part.length, 0);
   const gzipped = new Uint8Array(size);
   let offset = 0;
@@ -402,7 +405,7 @@ export class WebDashboardConnections {
       this.lastForced.set(roomId, now);
     }
     try {
-      await session.send(() => this.transfer(trigger !== 'browser_opened'));
+      await session.send(() => this.transfer(trigger === 'refresh'));
       await updateLinks((links) =>
         links.map((link) => (link.roomId === roomId ? { ...link, lastSentAt: Date.now() } : link)),
       ).catch(() => undefined);
@@ -428,6 +431,8 @@ export class WebDashboardConnections {
       this.offered.add(roomId);
       count++;
     }
+    // One fresh export for all of them: each browser's answer shares it.
+    if (count) this.prepared = null;
     return count;
   }
 
@@ -438,19 +443,11 @@ export class WebDashboardConnections {
   async unlink(roomId: string): Promise<void> {
     this.removing.add(roomId);
     try {
-      const link = (await readLinks()).find((item) => item.roomId === roomId);
       this.sessions.get(roomId)?.close();
       this.sessions.delete(roomId);
       const { [roomId]: _gone, ...rest } = this.status;
       this.status = rest;
-      if (link) {
-        await updateUnlinks((unlinks) => [
-          ...unlinks.filter((unlink) => unlink.roomId !== roomId),
-          { ...link, unlinkedAt: Date.now() },
-        ]);
-      }
-      await updateLinks((links) => links.filter((item) => item.roomId !== roomId));
-      void trackEvent(AnalyticsEvents.WEB_DASHBOARD_UNLINKED);
+      await unlinkBrowserOffline(roomId);
     } finally {
       this.removing.delete(roomId);
     }
@@ -472,9 +469,9 @@ export class WebDashboardConnections {
 }
 
 /**
- * Unlinks a browser when the screen has no connections open (the app just
- * came back from the background): the same pending-unlink list, delivered
- * next time the screen is open.
+ * Unlinks a browser without a connection to it: the key moves to the
+ * pending-unlink list, delivered the next time the screen and the browser are
+ * both open. Also used while the screen's connections are not open yet.
  */
 export async function unlinkBrowserOffline(roomId: string): Promise<void> {
   const link = (await readLinks()).find((item) => item.roomId === roomId);

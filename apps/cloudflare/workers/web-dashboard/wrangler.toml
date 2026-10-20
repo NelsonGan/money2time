@@ -7,10 +7,10 @@ routes = [
   { pattern = "workers-web-dashboard.money2time.com", custom_domain = true }
 ]
 
-# Same rationale as the other Workers: production only on the custom domain,
-# versioned preview URLs kept for branch builds.
+# Production only, on the custom domain. Preview URLs are off: Cloudflare does
+# not make them for Workers with Durable Objects, and nothing uses them.
 workers_dev = false
-preview_urls = true
+preview_urls = false
 
 # One relay room per link. Rooms store nothing: they forward each message
 # between the phone and the browser and keep no copy (see src/room.ts).

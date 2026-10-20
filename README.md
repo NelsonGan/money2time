@@ -2065,13 +2065,12 @@ database, no bucket, no account and no secrets. Served at
   replaces the old one (close code `4000`, shown as "open in another tab").
   Only the dashboard's origin may take the browser seat, and connections are
   rate limited per address (per /64 for IPv6). Invocation logs are off.
-- **Phone UI:** Settings → Web Dashboard is the scanner itself: a custom
-  chick-and-computer illustration, computer address and inline camera, with no
-  scan button or separate scanner page. Linked-browser controls sit below the
-  camera. Camera permission is requested on arrival; the preview pauses during
-  pairing, in the background and when another screen is on top. Incoming
-  pairing links go straight to confirmation. The header info button holds the
-  detailed explanation; the two-device confirmation remains required.
+- **Phone UI:** Settings → Web Dashboard shows the camera inline, with each
+  linked browser below it as one row (status and last-sync age), a sync
+  button beside the section title, and Unlink under the row's menu. A scanned `money2time://pair`
+  link opens the same screen. The Link prompt waits until the app lock is
+  unlocked, and the camera pauses while linking, in the background and under
+  other screens.
 - **Linking:** the browser shows `money2time://pair?r=…&pk=…&s=…`: a one-off
   room token, a P-256 public key and a 16-byte secret. The phone scans it,
   sends its own public key through that room, and both derive, with ECDH →
