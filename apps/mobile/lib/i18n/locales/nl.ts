@@ -145,6 +145,29 @@ const nl = {
     reset_action: 'Verwijderen en wisselen',
   },
   news: {
+    web_dashboard: {
+      title: 'Webdashboard en meer',
+      webDashboard: {
+        title: 'Nieuw webdashboard',
+        body: 'Open app.money2time.com op je computer en scan de code via Instellingen > Webdashboard. Je telefoon stuurt je gegevens versleuteld naar de browser. Er wordt niets online opgeslagen en je hebt geen account nodig.',
+      },
+      notificationReview: {
+        title: 'Betalingen vastleggen uit meldingen',
+        body: 'Meldingen van je bank en e-wallet staan nu als concept voor je klaar. Kies Inkomsten, Uitgaven of Negeren, één voor één of allemaal tegelijk. Ze worden op je telefoon gelezen, nooit door AI. Stel het in via Instellingen > Automatisering.',
+      },
+      fasterScans: {
+        title: 'Bonnen scannen, 50% sneller',
+        body: 'Een bon scannen duurt nu ongeveer half zo lang, net zo nauwkeurig als voorheen. Maak een foto en het bedrag, de artikelen en de categorie worden voor je ingevuld.',
+      },
+      cardDesigns: {
+        title: 'Nieuwe kaartontwerpen',
+        body: 'Geef elke rekeningkaart een eigen look, met meer dan 70 ontwerpen, van kleurverlopen en marmer tot ons portemonneekuiken. Bewerk een rekening en tik op Kaartontwerp. Met Pro kun je ook je eigen foto uploaden.',
+      },
+      bottomBar: {
+        title: 'Maak de onderbalk van jou',
+        body: 'Kies welke pagina’s in de onderbalk staan en sleep ze in elke gewenste volgorde. Voeg Doelen, Terugkerend, Bonnen en meer toe. De eerste pagina wordt je startscherm. Je vindt het in Instellingen > Weergave > Onderbalk.',
+      },
+    },
     transaction_updates: {
       title: 'Transacties eenvoudiger bijhouden',
       androidScreenshot: {
@@ -372,6 +395,7 @@ const nl = {
       open_app_icon: 'Kies je icoon',
       open_ricecal: 'Probeer RiceCal',
       open_pro_paywall: 'Bekijk Pro-plannen',
+      open_bottom_bar: 'Onderbalk wijzigen',
       open_share_earn: 'Pro gratis krijgen',
       open_quick_entry_settings: 'Instellingen voor Snelle invoer openen',
       open_auto_log: 'Automatiseringen instellen',
@@ -382,6 +406,12 @@ const nl = {
       open_review: 'Uitgaven terugkijken openen',
     },
     showcase: {
+      notification_bank: 'Je bank',
+      notification_text: 'Je kaart is gebruikt voor een aankoop.',
+      scan_before: 'Eerst',
+      scan_now: 'Nu',
+      card_everyday: 'Dagelijks',
+      card_travel: 'Reizen',
       ricecal_kcal_left: 'kcal over',
       ricecal_carbs: 'Koolhydraten',
       ricecal_protein: 'Eiwit',
@@ -2732,7 +2762,7 @@ const nl = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: 'Negeren',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',

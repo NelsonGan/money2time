@@ -145,6 +145,29 @@ const fr = {
     reset_action: 'Supprimer et changer',
   },
   news: {
+    web_dashboard: {
+      title: 'Tableau de bord web et plus',
+      webDashboard: {
+        title: 'Nouveau tableau de bord web',
+        body: 'Ouvrez app.money2time.com sur votre ordinateur et scannez son code dans Réglages > Tableau de bord web. Votre téléphone envoie vos données chiffrées au navigateur. Rien n’est stocké en ligne et aucun compte n’est nécessaire.',
+      },
+      notificationReview: {
+        title: 'Enregistrez vos paiements depuis les notifications',
+        body: 'Les notifications de votre banque et de votre portefeuille électronique vous attendent désormais en brouillon. Choisissez Revenus, Dépenses ou Ignorer, une par une ou toutes d’un coup. Elles sont lues sur votre téléphone, jamais par une IA. Activez-le dans Réglages > Automatisation.',
+      },
+      fasterScans: {
+        title: 'Scan des reçus 50 % plus rapide',
+        body: 'Scanner un reçu prend désormais environ deux fois moins de temps, avec la même précision. Prenez une photo, et le montant, les articles et la catégorie sont remplis pour vous.',
+      },
+      cardDesigns: {
+        title: 'Nouveaux designs de carte',
+        body: 'Donnez à chaque carte de compte son propre style, avec plus de 70 designs, des dégradés au marbre en passant par notre poussin porte-monnaie. Modifiez un compte et touchez Design de la carte. Avec Pro, vous pouvez aussi importer votre propre photo.',
+      },
+      bottomBar: {
+        title: 'Une barre du bas à votre image',
+        body: 'Choisissez les pages de la barre du bas et faites-les glisser dans l’ordre de votre choix. Ajoutez Objectifs, Récurrents, Reçus et plus encore. La première page devient votre écran d’accueil. Rendez-vous dans Réglages > Affichage > Barre du bas.',
+      },
+    },
     transaction_updates: {
       title: 'Un suivi des transactions plus simple',
       androidScreenshot: {
@@ -372,6 +395,7 @@ const fr = {
       open_app_icon: 'Choisir une icône',
       open_ricecal: 'Essayer RiceCal',
       open_pro_paywall: 'Voir les offres Pro',
+      open_bottom_bar: 'Modifier la barre',
       open_share_earn: 'Obtenir Pro gratuitement',
       open_quick_entry_settings: 'Ouvrir les réglages de la Saisie rapide',
       open_auto_log: 'Configurer les automatisations',
@@ -382,6 +406,12 @@ const fr = {
       open_review: 'Ouvrir le bilan des dépenses',
     },
     showcase: {
+      notification_bank: 'Votre banque',
+      notification_text: 'Votre carte a été utilisée pour un achat.',
+      scan_before: 'Avant',
+      scan_now: 'Maintenant',
+      card_everyday: 'Quotidien',
+      card_travel: 'Voyages',
       ricecal_kcal_left: 'kcal restantes',
       ricecal_carbs: 'Glucides',
       ricecal_protein: 'Protéines',
@@ -2738,7 +2768,7 @@ const fr = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: 'Ignorer',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',

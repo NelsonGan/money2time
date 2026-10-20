@@ -145,6 +145,29 @@ const ja = {
     reset_action: '削除して切り替え',
   },
   news: {
+    web_dashboard: {
+      title: 'Webダッシュボードほか',
+      webDashboard: {
+        title: '新しいWebダッシュボード',
+        body: 'パソコンで app.money2time.com を開き、設定 > Webダッシュボードでそのコードをスキャンします。データは暗号化されてスマホからブラウザへ送られます。オンラインには何も保存されず、アカウントも不要です。',
+      },
+      notificationReview: {
+        title: '通知から支払いを記録',
+        body: '銀行や電子マネーの通知が下書きとして届くようになりました。収入・支出・無視を1件ずつ、またはまとめて選べます。通知はスマホの中で読み取られ、AIには送られません。設定 > 自動化で設定できます。',
+      },
+      fasterScans: {
+        title: 'レシートのスキャンが50%高速に',
+        body: 'レシートのスキャンにかかる時間がおよそ半分になり、精度はそのままです。写真を撮るだけで、金額・品目・カテゴリが入力されます。',
+      },
+      cardDesigns: {
+        title: '新しいカードデザイン',
+        body: '口座カードごとに好きな見た目を。グラデーションや大理石から、おなじみのがま口ひよこまで、70種類以上のデザインがあります。口座を編集してカードデザインをタップしてください。Proなら自分の写真もアップロードできます。',
+      },
+      bottomBar: {
+        title: '下部バーを自分好みに',
+        body: '下部バーに置くページを選び、ドラッグで好きな順番に並べ替えられます。目標・定期・レシートなども追加できます。最初のページがホーム画面になります。設定 > 表示 > 下部バーから変更できます。',
+      },
+    },
     transaction_updates: {
       title: '取引の記録がもっと簡単に',
       androidScreenshot: {
@@ -372,6 +395,7 @@ const ja = {
       open_app_icon: 'アイコンを選ぶ',
       open_ricecal: 'RiceCalを試す',
       open_pro_paywall: 'Proプランを見る',
+      open_bottom_bar: '下部バーを編集',
       open_share_earn: 'Proを無料で手に入れる',
       open_quick_entry_settings: 'クイック入力の設定を開く',
       open_auto_log: '自動化を設定',
@@ -382,6 +406,12 @@ const ja = {
       open_review: '支出レビューを開く',
     },
     showcase: {
+      notification_bank: 'あなたの銀行',
+      notification_text: 'カードでのお支払いがありました。',
+      scan_before: '以前',
+      scan_now: '今',
+      card_everyday: '普段使い',
+      card_travel: '旅行',
       ricecal_kcal_left: '残りkcal',
       ricecal_carbs: '炭水化物',
       ricecal_protein: 'タンパク質',
@@ -2689,7 +2719,7 @@ const ja = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: '無視',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',

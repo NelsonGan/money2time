@@ -36,23 +36,31 @@ describe('feature announcement state', () => {
     );
   });
 
-  it('surfaces the transaction updates with the screenshot page only on Android', () => {
+  it('surfaces the web dashboard release with all five pages on both platforms', () => {
     const latest = getLatestFeatureAnnouncement()!;
     expect(latest).toMatchObject({
-      id: 'transaction_updates_2026_10',
-      announcementNumber: 20,
+      id: 'web_dashboard_2026_10',
+      announcementNumber: 21,
       pages: [
-        { key: 'androidScreenshot', visual: 'androidScreenshot', platform: 'android' },
-        { key: 'accountLabels', visual: 'accountLabels' },
-        { key: 'amountSearch', visual: 'amountSearch' },
+        { key: 'webDashboard', visual: 'webDashboard', cta: 'openWebDashboard' },
+        { key: 'notificationReview', visual: 'notificationReview', cta: 'openAutoLog' },
+        { key: 'fasterScans', visual: 'fasterScans' },
+        { key: 'cardDesigns', visual: 'cardDesigns', cta: 'openAccounts' },
+        { key: 'bottomBar', visual: 'bottomBar', cta: 'openBottomBar' },
       ],
     });
-    expect(announcementPagesForPlatform(latest, 'android').map((page) => page.key)).toEqual([
+    expect(announcementPagesForPlatform(latest, 'ios')).toHaveLength(5);
+    expect(announcementPagesForPlatform(latest, 'android')).toHaveLength(5);
+  });
+
+  it('keeps the transaction updates screenshot page on Android only', () => {
+    const announcement = getFeatureAnnouncementById('transaction_updates_2026_10')!;
+    expect(announcementPagesForPlatform(announcement, 'android').map((page) => page.key)).toEqual([
       'androidScreenshot',
       'accountLabels',
       'amountSearch',
     ]);
-    expect(announcementPagesForPlatform(latest, 'ios').map((page) => page.key)).toEqual([
+    expect(announcementPagesForPlatform(announcement, 'ios').map((page) => page.key)).toEqual([
       'accountLabels',
       'amountSearch',
     ]);

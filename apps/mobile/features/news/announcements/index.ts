@@ -18,6 +18,7 @@ import { riceCalAnnouncement } from './017_ricecal';
 import { proTrialAccountsAnnouncement } from './018_pro_trial_accounts';
 import { everydayPersonalizationAnnouncement } from './019_everyday_personalization';
 import { transactionUpdatesAnnouncement } from './020_transaction_updates';
+import { webDashboardAnnouncement } from './021_web_dashboard';
 
 export const FEATURE_ANNOUNCEMENTS = [
   homeWidgetsAnnouncement,
@@ -40,4 +41,5 @@ export const FEATURE_ANNOUNCEMENTS = [
   proTrialAccountsAnnouncement,
   everydayPersonalizationAnnouncement,
   transactionUpdatesAnnouncement,
+  webDashboardAnnouncement,
 ] as const;

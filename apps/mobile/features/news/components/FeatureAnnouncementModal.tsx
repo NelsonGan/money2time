@@ -17,6 +17,7 @@ import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import { WEB_DASHBOARD_URL } from '~/services/webDashboard.shared';
 import { withColorAlpha } from '~/utils/color';
 
 import {
@@ -34,6 +35,13 @@ import { AddSplitShowcase } from './AddSplitShowcase';
 import { AlbumShowcase } from './AlbumShowcase';
 import { AppIconShowcase } from './AppIconShowcase';
 import { AppLockShowcase } from './AppLockShowcase';
+import {
+  BottomBarShowcase,
+  CardDesignsShowcase,
+  FasterScansShowcase,
+  NotificationReviewShowcase,
+  WebDashboardShowcase,
+} from './AppUpdatesShowcases';
 import { AutoLogShowcase } from './AutoLogShowcase';
 import { BackupShowcase } from './BackupShowcase';
 import { BudgetShowcase } from './BudgetShowcase';
@@ -109,6 +117,8 @@ export interface FeatureAnnouncementCtaHandlers {
   onOpenAppIcon?: () => void;
   /** Invoked when a page links to the Pro plan selection page. */
   onOpenProPaywall?: () => void;
+  /** Invoked when a page links to the bottom bar editor. */
+  onOpenBottomBar?: () => void;
 }
 
 interface FeatureAnnouncementModalProps extends FeatureAnnouncementCtaHandlers {
@@ -179,6 +189,7 @@ export function FeatureAnnouncementModal({
   onOpenLiveEarnings,
   onOpenAppIcon,
   onOpenProPaywall,
+  onOpenBottomBar,
 }: FeatureAnnouncementModalProps) {
   const colors = useThemeColors();
   const { settings } = useApp();
@@ -237,8 +248,12 @@ export function FeatureAnnouncementModal({
     openLiveEarnings: onOpenLiveEarnings,
     openAppIcon: onOpenAppIcon,
     openProPaywall: onOpenProPaywall,
+    openBottomBar: onOpenBottomBar,
     openRiceCal: () => {
       void Linking.openURL(riceCalStoreUrl(Platform.OS)).catch(() => undefined);
+    },
+    openWebDashboard: () => {
+      void Linking.openURL(WEB_DASHBOARD_URL).catch(() => undefined);
     },
   };
   const activeCta = page.cta ?? null;
@@ -248,6 +263,8 @@ export function FeatureAnnouncementModal({
   const ctaIsPrimary = isLastPage && !!ctaHandler;
   const secondaryCta = !isLastPage && ctaHandler ? activeCta : null;
   const isRiceCalCta = activeCta === 'openRiceCal';
+  // CTAs that leave the app get the external-link glyph instead of an arrow.
+  const isExternalCta = isRiceCalCta || activeCta === 'openWebDashboard';
   const riceCalPlatformIcon =
     Platform.OS === 'android' ? (
       <AndroidStoreIcon color="#fff" cutoutColor={accentColor} />
@@ -348,7 +365,17 @@ export function FeatureAnnouncementModal({
               </View>
             ) : null}
             <View style={styles.showcaseSlot}>
-              {page.visual === 'androidScreenshot' ? (
+              {page.visual === 'webDashboard' ? (
+                <WebDashboardShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'notificationReview' ? (
+                <NotificationReviewShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'fasterScans' ? (
+                <FasterScansShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'cardDesigns' ? (
+                <CardDesignsShowcase width={Math.round(showcaseWidth * 0.8)} />
+              ) : page.visual === 'bottomBar' ? (
+                <BottomBarShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'androidScreenshot' ? (
                 <AndroidScreenshotShowcase width={Math.round(showcaseWidth * 0.92)} />
               ) : page.visual === 'accountLabels' ? (
                 <TransactionAccountsShowcase width={Math.round(showcaseWidth * 0.92)} />
@@ -491,7 +518,11 @@ export function FeatureAnnouncementModal({
                 <Text variant="bodyStrong" numberOfLines={1} style={{ color: accentColor }}>
                   {announcementCtaLabel(secondaryCta)}
                 </Text>
-                <ArrowRight size={16} color={accentColor} />
+                {isExternalCta ? (
+                  <ExternalLink size={16} color={accentColor} />
+                ) : (
+                  <ArrowRight size={16} color={accentColor} />
+                )}
               </Pressable>
             ) : null}
 
@@ -514,7 +545,7 @@ export function FeatureAnnouncementModal({
                 }
                 onPress={ctaIsPrimary ? handleCta : handleNext}
                 trailing={
-                  ctaIsPrimary && isRiceCalCta ? (
+                  ctaIsPrimary && isExternalCta ? (
                     <ExternalLink size={17} color="#fff" strokeWidth={2.5} />
                   ) : undefined
                 }

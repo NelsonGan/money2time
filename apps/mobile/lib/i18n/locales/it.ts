@@ -145,6 +145,29 @@ const it = {
     reset_action: 'Elimina e cambia',
   },
   news: {
+    web_dashboard: {
+      title: 'Dashboard web e altro',
+      webDashboard: {
+        title: 'Nuova dashboard web',
+        body: 'Apri app.money2time.com sul computer e scansiona il codice in Impostazioni > Dashboard web. Il telefono invia i tuoi dati crittografati al browser. Nulla viene salvato online e non serve un account.',
+      },
+      notificationReview: {
+        title: 'Registra i pagamenti dalle notifiche',
+        body: 'Le notifiche della banca e del portafoglio digitale ora ti aspettano come bozze. Scegli Entrate, Uscite o Ignora, una alla volta o tutte insieme. Vengono lette sul tuo telefono, mai da un’IA. Attivalo in Impostazioni > Automazione.',
+      },
+      fasterScans: {
+        title: 'Scansione ricevute più veloce del 50%',
+        body: 'Scansionare una ricevuta ora richiede circa la metà del tempo, con la stessa precisione. Scatta una foto e importo, articoli e categoria vengono compilati per te.',
+      },
+      cardDesigns: {
+        title: 'Nuovi design della carta',
+        body: 'Dai a ogni carta del conto il suo stile, con oltre 70 design, dai gradienti al marmo fino al nostro pulcino portamonete. Modifica un conto e tocca Design della carta. Con Pro puoi anche caricare una tua foto.',
+      },
+      bottomBar: {
+        title: 'Una barra in basso tutta tua',
+        body: 'Scegli quali pagine stanno nella barra in basso e trascinale nell’ordine che preferisci. Aggiungi Obiettivi, Ricorrenti, Ricevute e altro. La prima pagina diventa la tua schermata iniziale. La trovi in Impostazioni > Visualizzazione > Barra in basso.',
+      },
+    },
     transaction_updates: {
       title: 'Traccia le transazioni più facilmente',
       androidScreenshot: {
@@ -372,6 +395,7 @@ const it = {
       open_app_icon: "Scegli l'icona",
       open_ricecal: 'Prova RiceCal',
       open_pro_paywall: 'Scopri i piani Pro',
+      open_bottom_bar: 'Modifica la barra',
       open_share_earn: 'Ottieni Pro gratis',
       open_quick_entry_settings: 'Apri le impostazioni di Inserimento rapido',
       open_auto_log: 'Configura le automazioni',
@@ -382,6 +406,12 @@ const it = {
       open_review: 'Apri Resoconto spese',
     },
     showcase: {
+      notification_bank: 'La tua banca',
+      notification_text: 'La tua carta è stata usata per un acquisto.',
+      scan_before: 'Prima',
+      scan_now: 'Ora',
+      card_everyday: 'Quotidiano',
+      card_travel: 'Viaggi',
       ricecal_kcal_left: 'kcal rimanenti',
       ricecal_carbs: 'Carboidrati',
       ricecal_protein: 'Proteine',
@@ -2719,7 +2749,7 @@ const it = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: 'Ignora',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',

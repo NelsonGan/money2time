@@ -145,6 +145,29 @@ const hi = {
     reset_action: 'हटाएँ और बदलें',
   },
   news: {
+    web_dashboard: {
+      title: 'वेब डैशबोर्ड और भी बहुत कुछ',
+      webDashboard: {
+        title: 'नया वेब डैशबोर्ड',
+        body: 'अपने कंप्यूटर पर app.money2time.com खोलें और सेटिंग्स > वेब डैशबोर्ड में उसका कोड स्कैन करें। आपका फ़ोन डेटा एन्क्रिप्ट करके ब्राउज़र को भेजता है। ऑनलाइन कुछ भी स्टोर नहीं होता और कोई अकाउंट नहीं चाहिए।',
+      },
+      notificationReview: {
+        title: 'नोटिफ़िकेशन से भुगतान दर्ज करें',
+        body: 'बैंक और ई-वॉलेट के नोटिफ़िकेशन अब ड्राफ़्ट बनकर आपका इंतज़ार करते हैं। एक-एक करके या सभी एक साथ आय, खर्च या अनदेखा चुनें। इन्हें आपके फ़ोन पर ही पढ़ा जाता है, AI से कभी नहीं। सेटिंग्स > ऑटोमेशन में चालू करें।',
+      },
+      fasterScans: {
+        title: 'रसीद स्कैन 50% तेज़',
+        body: 'अब रसीद स्कैन करने में लगभग आधा समय लगता है, सटीकता वही रहती है। फ़ोटो लें और राशि, आइटम और श्रेणी अपने आप भर जाते हैं।',
+      },
+      cardDesigns: {
+        title: 'नए कार्ड डिज़ाइन',
+        body: 'हर खाते के कार्ड को अपना अलग लुक दें, ग्रेडिएंट और मार्बल से लेकर हमारे बटुए वाले चूज़े तक 70 से ज़्यादा डिज़ाइन। किसी खाते को एडिट करें और कार्ड डिज़ाइन पर टैप करें। Pro के साथ आप अपनी फ़ोटो भी अपलोड कर सकते हैं।',
+      },
+      bottomBar: {
+        title: 'नीचे की पट्टी अपने हिसाब से',
+        body: 'चुनें कि नीचे की पट्टी में कौन से पेज रहें और उन्हें किसी भी क्रम में खींचकर लगाएँ। लक्ष्य, आवर्ती, रसीदें और भी जोड़ें। पहला पेज आपकी होम स्क्रीन बन जाता है। सेटिंग्स > डिस्प्ले > नीचे की पट्टी में देखें।',
+      },
+    },
     transaction_updates: {
       title: 'लेनदेन ट्रैक करना और आसान',
       androidScreenshot: {
@@ -372,6 +395,7 @@ const hi = {
       open_app_icon: 'अपना आइकन चुनें',
       open_ricecal: 'RiceCal आज़माएँ',
       open_pro_paywall: 'Pro प्लान देखें',
+      open_bottom_bar: 'पट्टी बदलें',
       open_share_earn: 'मुफ़्त Pro पाएं',
       open_quick_entry_settings: 'क्विक एंट्री सेटिंग्स खोलें',
       open_auto_log: 'ऑटोमेशन सेट करें',
@@ -382,6 +406,12 @@ const hi = {
       open_review: 'खर्च की समीक्षा खोलें',
     },
     showcase: {
+      notification_bank: 'आपका बैंक',
+      notification_text: 'आपके कार्ड से एक खरीदारी हुई।',
+      scan_before: 'पहले',
+      scan_now: 'अब',
+      card_everyday: 'रोज़मर्रा',
+      card_travel: 'यात्रा',
       ricecal_kcal_left: 'बची हुई kcal',
       ricecal_carbs: 'कार्ब्स',
       ricecal_protein: 'प्रोटीन',
@@ -2693,7 +2723,7 @@ const hi = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: 'अनदेखा करें',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',

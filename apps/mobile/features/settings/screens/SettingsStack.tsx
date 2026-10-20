@@ -400,6 +400,7 @@ export function SettingsStack({
               onOpenLiveEarnings={() => props.navigation.navigate('LiveEarnings')}
               onOpenAppIcon={() => props.navigation.navigate('AppIcon')}
               onOpenProPaywall={() => onOpenProPaywall('news_list')}
+              onOpenBottomBar={() => props.navigation.navigate('BottomBar')}
             />
           );
         }}

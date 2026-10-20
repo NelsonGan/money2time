@@ -145,6 +145,29 @@ const de = {
     reset_action: 'Löschen & wechseln',
   },
   news: {
+    web_dashboard: {
+      title: 'Web-Dashboard und mehr',
+      webDashboard: {
+        title: 'Neues Web-Dashboard',
+        body: 'Öffne app.money2time.com auf deinem Computer und scanne den Code unter Einstellungen > Web-Dashboard. Dein Handy sendet deine Daten verschlüsselt an den Browser. Online wird nichts gespeichert, und du brauchst kein Konto.',
+      },
+      notificationReview: {
+        title: 'Zahlungen aus Mitteilungen erfassen',
+        body: 'Mitteilungen von Bank und E-Wallet warten jetzt als Entwürfe auf dich. Wähle Einnahmen, Ausgaben oder Ignorieren, einzeln oder alle auf einmal. Gelesen werden sie auf deinem Handy, nie von einer KI. Richte es unter Einstellungen > Automatisierung ein.',
+      },
+      fasterScans: {
+        title: 'Belege scannen, 50 % schneller',
+        body: 'Ein Beleg-Scan dauert jetzt nur noch etwa halb so lange, bei gleicher Genauigkeit. Mach ein Foto, und Betrag, Positionen und Kategorie werden für dich ausgefüllt.',
+      },
+      cardDesigns: {
+        title: 'Neue Kartendesigns',
+        body: 'Gib jeder Kontokarte ihren eigenen Look, mit über 70 Designs von Farbverläufen und Marmor bis zu unserem Geldbörsen-Küken. Bearbeite ein Konto und tippe auf Kartendesign. Mit Pro kannst du auch ein eigenes Foto hochladen.',
+      },
+      bottomBar: {
+        title: 'Deine eigene Leiste unten',
+        body: 'Wähle, welche Seiten in der Leiste unten stehen, und zieh sie in jede beliebige Reihenfolge. Füge Ziele, Wiederkehrend, Belege und mehr hinzu. Die erste Seite wird deine Startseite. Du findest es unter Einstellungen > Anzeige > Leiste unten.',
+      },
+    },
     transaction_updates: {
       title: 'Transaktionen einfacher erfassen',
       androidScreenshot: {
@@ -372,6 +395,7 @@ const de = {
       open_app_icon: 'Symbol auswählen',
       open_ricecal: 'RiceCal ausprobieren',
       open_pro_paywall: 'Pro-Pläne ansehen',
+      open_bottom_bar: 'Leiste bearbeiten',
       open_share_earn: 'Pro gratis sichern',
       open_quick_entry_settings: 'Schnelleingabe-Einstellungen öffnen',
       open_auto_log: 'Automatisierungen einrichten',
@@ -382,6 +406,12 @@ const de = {
       open_review: 'Ausgaben-Rückblick öffnen',
     },
     showcase: {
+      notification_bank: 'Deine Bank',
+      notification_text: 'Mit deiner Karte wurde ein Einkauf bezahlt.',
+      scan_before: 'Vorher',
+      scan_now: 'Jetzt',
+      card_everyday: 'Alltag',
+      card_travel: 'Reisen',
       ricecal_kcal_left: 'kcal übrig',
       ricecal_carbs: 'Kohlenhydrate',
       ricecal_protein: 'Eiweiß',
@@ -2741,7 +2771,7 @@ const de = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: 'Ignorieren',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',

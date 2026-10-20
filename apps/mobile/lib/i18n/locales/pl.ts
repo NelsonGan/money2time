@@ -145,6 +145,29 @@ const pl = {
     reset_action: 'Usuń i zmień',
   },
   news: {
+    web_dashboard: {
+      title: 'Panel webowy i nie tylko',
+      webDashboard: {
+        title: 'Nowy panel webowy',
+        body: 'Otwórz app.money2time.com na komputerze i zeskanuj kod w Ustawienia > Panel webowy. Telefon wysyła zaszyfrowane dane do przeglądarki. Nic nie jest przechowywane online i nie potrzebujesz konta.',
+      },
+      notificationReview: {
+        title: 'Zapisuj płatności z powiadomień',
+        body: 'Powiadomienia z banku i e-portfela czekają teraz na Ciebie jako wersje robocze. Wybierz Przychód, Wydatek lub Pomiń, pojedynczo albo wszystkie naraz. Są odczytywane na Twoim telefonie, nigdy przez AI. Włącz to w Ustawienia > Automatyzacja.',
+      },
+      fasterScans: {
+        title: 'Skanowanie paragonów o 50% szybsze',
+        body: 'Skanowanie paragonu trwa teraz mniej więcej o połowę krócej, z tą samą dokładnością. Zrób zdjęcie, a kwota, pozycje i kategoria uzupełnią się same.',
+      },
+      cardDesigns: {
+        title: 'Nowe wzory kart',
+        body: 'Nadaj każdej karcie konta własny wygląd: ponad 70 wzorów, od gradientów i marmuru po naszego kurczaka z sakiewką. Edytuj konto i stuknij Wygląd karty. Z Pro możesz też przesłać własne zdjęcie.',
+      },
+      bottomBar: {
+        title: 'Dolny pasek po Twojemu',
+        body: 'Wybierz, które strony są na dolnym pasku, i przeciągnij je w dowolnej kolejności. Dodaj Cele, Cykliczne, Paragony i więcej. Pierwsza strona staje się ekranem głównym. Znajdziesz to w Ustawienia > Wyświetlanie > Dolny pasek.',
+      },
+    },
     transaction_updates: {
       title: 'Łatwiejsze śledzenie transakcji',
       androidScreenshot: {
@@ -372,6 +395,7 @@ const pl = {
       open_app_icon: 'Wybierz ikonę',
       open_ricecal: 'Wypróbuj RiceCal',
       open_pro_paywall: 'Zobacz plany Pro',
+      open_bottom_bar: 'Edytuj pasek',
       open_share_earn: 'Zdobądź Pro za darmo',
       open_quick_entry_settings: 'Otwórz ustawienia Szybkiego dodawania',
       open_auto_log: 'Skonfiguruj automatyzacje',
@@ -382,6 +406,12 @@ const pl = {
       open_review: 'Otwórz Przegląd wydatków',
     },
     showcase: {
+      notification_bank: 'Twój bank',
+      notification_text: 'Twoja karta została użyta do zakupu.',
+      scan_before: 'Wcześniej',
+      scan_now: 'Teraz',
+      card_everyday: 'Na co dzień',
+      card_travel: 'Podróże',
       ricecal_kcal_left: 'pozostało kcal',
       ricecal_carbs: 'Węglowodany',
       ricecal_protein: 'Białko',
@@ -2712,7 +2742,7 @@ const pl = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: 'Pomiń',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',
