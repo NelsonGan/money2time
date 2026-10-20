@@ -2,23 +2,25 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import { StatusBar } from 'expo-status-bar';
 import { X } from 'lucide-react-native';
 import React, { useEffect, useRef } from 'react';
-import { ActivityIndicator, Linking, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Image, Linking, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, Text, ThemeModal } from '~/components/ui';
 import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
+import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 
 function CloseButton({ onPress }: { onPress: () => void }) {
+  const colors = useThemeColors();
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={I18n.t('web_dashboard.close')}
       hitSlop={12}
-      style={styles.close}
+      className="h-11 w-11 items-center justify-center rounded-full bg-secondary"
     >
-      <X size={24} color="#FFFFFF" />
+      <X size={22} color={colors.text} />
     </Pressable>
   );
 }
@@ -34,6 +36,7 @@ export function QrScannerModal({
   onScanned: (text: string) => void;
 }) {
   const insets = useSafeAreaInsets();
+  const colors = useThemeColors();
   const [permission, requestPermission] = useCameraPermissions();
   const handled = useRef(false);
 
@@ -50,13 +53,28 @@ export function QrScannerModal({
 
   return (
     <ThemeModal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <StatusBar style="light" />
-      <View style={[styles.scanner, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-        <View style={styles.scannerHeader}>
+      <StatusBar style="auto" />
+      <View
+        className="flex-1 bg-background"
+        style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
+      >
+        <View className="flex-row justify-end px-4 py-2">
           <CloseButton onPress={onClose} />
         </View>
+        <View className="items-center gap-2">
+          <Image
+            source={require('../../../assets/illustrations/link-computer.png')}
+            className="h-24 w-48"
+            resizeMode="contain"
+            accessible={false}
+          />
+          <Text variant="headingSm">{I18n.t('web_dashboard.link_title')}</Text>
+          <Text variant="caption" tone="muted">
+            app.money2time.com
+          </Text>
+        </View>
         {permission?.granted ? (
-          <View style={styles.viewfinder}>
+          <View className="mt-6 aspect-square w-[86%] max-w-[420px] self-center overflow-hidden rounded-3xl border-2 border-primary/30 bg-secondary">
             <CameraView
               {...REPLAY_PRIVATE}
               style={StyleSheet.absoluteFill}
@@ -70,12 +88,12 @@ export function QrScannerModal({
             />
           </View>
         ) : (
-          <View style={styles.permission}>
+          <View className="mt-6 aspect-square w-[86%] max-w-[420px] self-center items-center justify-center rounded-3xl bg-secondary px-6">
             {permission == null ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color={colors.primary} />
             ) : (
               <>
-                <Text className="text-center text-base font-semibold text-white">
+                <Text variant="bodyStrong" className="text-center">
                   {I18n.t('web_dashboard.camera_permission')}
                 </Text>
                 {/* Once declined for good, only Settings can turn it back on. */}
@@ -97,40 +115,10 @@ export function QrScannerModal({
             )}
           </View>
         )}
-        <Text className="mt-4 px-8 text-center text-sm text-white/80">
+        <Text variant="caption" tone="muted" className="mt-5 px-8 text-center">
           {I18n.t('web_dashboard.scan_hint')}
         </Text>
       </View>
     </ThemeModal>
   );
 }
-
-const styles = StyleSheet.create({
-  close: { padding: 4 },
-  scanner: { flex: 1, backgroundColor: '#000000' },
-  scannerHeader: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  // A phone-width square, centred: on an iPad the full width is far too big.
-  viewfinder: {
-    aspectRatio: 1,
-    width: '86%',
-    maxWidth: 420,
-    alignSelf: 'center',
-    marginTop: 32,
-    borderRadius: 24,
-    overflow: 'hidden',
-  },
-  permission: {
-    aspectRatio: 1,
-    width: '86%',
-    maxWidth: 420,
-    alignSelf: 'center',
-    marginTop: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

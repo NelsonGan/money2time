@@ -1,9 +1,10 @@
-import { ExternalLink, Monitor, ShieldCheck } from 'lucide-react-native';
+import { ExternalLink, ShieldCheck } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
   AppState,
+  Image,
   Linking,
   ScrollView,
   StyleSheet,
@@ -96,6 +97,8 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
   const bottomNavInset = useSettingsBottomNavInset();
   const { isPro, isStatusKnown } = usePro();
   const [available, setAvailable] = useState<boolean | null>(null);
+  const [linksLoaded, setLinksLoaded] = useState(false);
+  const scannerOffered = useRef(false);
   const [links, setLinks] = useState<LinkedBrowser[]>([]);
   const [status, setStatus] = useState<WebDashboardStatus>({});
   const [scannerOpen, setScannerOpen] = useState(false);
@@ -153,7 +156,11 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
       setAvailable(yes);
       if (!yes) return;
       void listLinkedBrowsers().then(
-        (list) => active && setLinks(list),
+        (list) => {
+          if (!active) return;
+          setLinks(list);
+          setLinksLoaded(true);
+        },
         () => undefined,
       );
       if (proKnownRef.current) open();
@@ -194,6 +201,15 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
     proKnownRef.current = isStatusKnown;
     if (isStatusKnown) openRef.current();
   }, [isStatusKnown]);
+
+  // Offer the camera once on an unlinked visit, after availability and stored
+  // links resolve. Closing it stays closed; existing links and pairing URLs
+  // go directly to their own controls instead.
+  useEffect(() => {
+    if (!available || !linksLoaded || scannerOffered.current) return;
+    scannerOffered.current = true;
+    if (!initialPairLink && links.length === 0) setScannerOpen(true);
+  }, [available, linksLoaded, links.length, initialPairLink]);
 
   const handleScanned = (text: string) => {
     setScannerOpen(false);
@@ -328,9 +344,12 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
           <>
             <Card className="mt-6">
               <CardContent className="items-center gap-5 py-8">
-                <View className="h-20 w-20 items-center justify-center rounded-3xl bg-primary/10">
-                  <Monitor size={40} color={colors.primary} strokeWidth={1.5} />
-                </View>
+                <Image
+                  source={require('../../../assets/illustrations/link-computer.png')}
+                  className="h-40 w-full"
+                  resizeMode="contain"
+                  accessible={false}
+                />
                 <View className="items-center gap-2">
                   <Text variant="headingSm" className="text-center">
                     {I18n.t('web_dashboard.link_title')}
