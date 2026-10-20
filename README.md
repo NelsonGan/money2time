@@ -1156,7 +1156,7 @@ The [receipt-scanner Worker](#receipt-scanner-worker) sends one `$ai_generation`
 | --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `$ai_model`, `$ai_provider`, `$ai_base_url`                                                               | The OpenRouter model tried, `openrouter`, `https://openrouter.ai/api/v1`.                                                                                                                                                                                            |
 | `$ai_span_name`                                                                                           | `receipt_scan_quick`, `receipt_scan_itemized` or `receipt_scan_screenshot`.                                                                                                                                                                                          |
-| `$ai_input_tokens`, `$ai_output_tokens`, `$ai_cache_read_input_tokens`, `$ai_cache_creation_input_tokens` | From OpenRouter's `usage`; the cache pair is Claude's prompt text read from or written to Anthropic's prompt cache.                                                                                                                                                  |
+| `$ai_input_tokens`, `$ai_output_tokens`, `$ai_cache_read_input_tokens`, `$ai_cache_creation_input_tokens` | From OpenRouter's `usage`. On Claude, the cache pair is the prompt text read from or written to Anthropic's prompt cache; other models can report implicit cache reads of their own.                                                                                 |
 | `$ai_total_cost_usd`, `$ai_cost_passthrough`                                                              | What the call cost, passed through rather than re-priced: OpenRouter's charge (`usage.cost`), plus, when our own Anthropic key paid, what Anthropic bills directly (`usage.cost_details.upstream_inference_cost`), since under BYOK `cost` is only OpenRouter's fee. |
 | `byok`                                                                                                    | `usage.is_byok`: `true` when our Anthropic key paid. An `anthropic/` generation with `false` means OpenRouter credits were spent on it, which the Worker's routing forbids (see [Config](#config)).                                                                  |
 | `$ai_latency`, `$ai_http_status`, `$ai_is_error`, `$ai_error`                                             | Seconds, status, and a 200-character error message on failure.                                                                                                                                                                                                       |
@@ -1924,10 +1924,10 @@ prompt carries the user's currency, categories and accounts, so a cache entry
 serves one user's next scans and anyone with the same settings, the defaults
 most of all. The fixed part before the first of those is under Haiku's
 512-token minimum, so no prefix is shared by everyone. 5 minutes rather than an
-hour because the same user repeats a scan within 5 minutes about 40% of the time
-and barely more within an hour: the 5-minute write costs 1.25x and is repaid at
-a 20% hit rate, the hour's costs 2x and needs over 50%. In testing, a scan that
-hit read the 717-token prompt from cache and cost about 20% less in all, the
+hour because the same user repeats a scan of the same mode within 5 minutes
+36-40% of the time and barely more within an hour: the 5-minute write costs
+1.25x and is repaid at a 22% hit rate, the hour's costs 2x and needs over 52%.
+In testing, a scan that hit read the 717-token prompt from cache and cost about 20% less in all, the
 receipt image being most of the input.
 
 Claude is sent no temperature, and an answer from it with no JSON object in it
