@@ -1,0 +1,43 @@
+name = "money2time-workers-web-dashboard"
+main = "src/index.ts"
+compatibility_date = "2026-10-15"
+
+# Custom domain — the money2time.com zone must be on this Cloudflare account.
+routes = [
+  { pattern = "workers-web-dashboard.money2time.com", custom_domain = true }
+]
+
+# Same rationale as the other Workers: production only on the custom domain,
+# versioned preview URLs kept for branch builds.
+workers_dev = false
+preview_urls = true
+
+# One relay room per link. Rooms store nothing: they forward each message
+# between the phone and the browser and keep no copy (see src/room.ts).
+[[durable_objects.bindings]]
+name = "ROOMS"
+class_name = "Room"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Room"]
+
+# Connections per address per minute. A tab that reconnects with backoff
+# stays far below it.
+[[ratelimits]]
+name = "CONNECT_LIMITER"
+namespace_id = "2401"
+
+  [ratelimits.simple]
+  limit = 60
+  period = 60
+
+[observability]
+enabled = true
+head_sampling_rate = 1
+
+[vars]
+# Browser origins allowed to open a browser seat in a room.
+ALLOWED_ORIGINS = "https://app.money2time.com"
+
+# No secrets: the relay holds no keys and no data.

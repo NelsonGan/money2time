@@ -1,8 +1,8 @@
 {
-  "name": "money2time-workers-cloud-backup",
+  "name": "money2time-workers-web-dashboard",
   "version": "1.0.0",
   "private": true,
-  "description": "Cloudflare Worker for Cloud Backup & Web Dashboard: anonymous end-to-end encrypted vaults, QR-code linking for browsers and phones, and short-lived upload/download URLs for private R2 backups.",
+  "description": "Cloudflare Worker for the Web Dashboard: a stateless relay that passes end-to-end encrypted messages between a phone and the browser it linked by QR code, storing nothing.",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy --tsconfig tsconfig.json",

@@ -4,7 +4,7 @@ name: Cloudflare
 # and its D1 database schema). Only runs when those files change, so it never
 # fires on app-only commits. Both jobs run over the same matrix, so adding a
 # Worker is one entry: its directory name under apps/cloudflare/workers/ plus the D1
-# database its schema belongs to.
+# database its schema belongs to (none for a Worker without one).
 run-name: >-
   ${{ github.event_name == 'pull_request' && format('Cloudflare · PR #{0}', github.event.number)
    || github.ref == 'refs/heads/main' && 'Cloudflare · Production deploy'
@@ -46,8 +46,7 @@ jobs:
             database: money2time-d1-receipt-scanner
           - worker: live-earnings
             database: money2time-d1-live-earnings
-          - worker: cloud-backup
-            database: money2time-d1-cloud-backup
+          - worker: web-dashboard
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -81,9 +80,8 @@ jobs:
           - worker: live-earnings
             database: money2time-d1-live-earnings
             schema: live-earnings
-          - worker: cloud-backup
-            database: money2time-d1-cloud-backup
-            schema: cloud-backup
+          # Stateless: no D1 database, so no schema to apply.
+          - worker: web-dashboard
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -102,6 +100,7 @@ jobs:
       # future additive schema changes ship automatically on merge to main. The
       # CLOUDFLARE_API_TOKEN must include D1 edit permission for this step.
       - name: Apply D1 schema
+        if: matrix.database
         working-directory: apps/cloudflare/workers/${{ matrix.worker }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
