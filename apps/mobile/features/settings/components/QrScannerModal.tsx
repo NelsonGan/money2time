@@ -6,11 +6,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, Text, ThemeModal } from '~/components/ui';
 import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
-import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 
-function CloseButton({ onPress, light }: { onPress: () => void; light?: boolean }) {
-  const themeColors = useThemeColors();
+function CloseButton({ onPress }: { onPress: () => void }) {
   return (
     <Pressable
       onPress={onPress}
@@ -19,7 +17,7 @@ function CloseButton({ onPress, light }: { onPress: () => void; light?: boolean 
       hitSlop={12}
       style={styles.close}
     >
-      <X size={24} color={light ? '#FFFFFF' : themeColors.textMuted} />
+      <X size={24} color="#FFFFFF" />
     </Pressable>
   );
 }
@@ -46,7 +44,7 @@ export function QrScannerModal({
     <ThemeModal visible={visible} animationType="slide" onRequestClose={onClose}>
       <View style={[styles.scanner, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
         <View style={styles.scannerHeader}>
-          <CloseButton onPress={onClose} light />
+          <CloseButton onPress={onClose} />
         </View>
         {permission?.granted ? (
           <View style={styles.viewfinder}>

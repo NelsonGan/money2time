@@ -83,7 +83,7 @@ export type LinkDeps = {
 };
 
 export class LinkError extends Error {
-  readonly code: 'invalid_qr' | 'timeout' | 'offline' | 'rejected' | 'closed' | 'cancelled';
+  readonly code: 'invalid_qr' | 'timeout' | 'offline' | 'rejected' | 'closed';
 
   constructor(code: LinkError['code']) {
     super(code);

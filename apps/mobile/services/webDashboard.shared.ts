@@ -45,7 +45,6 @@ export type WebDashboardErrorCode =
   | 'offline'
   | 'rejected'
   | 'closed'
-  | 'cancelled'
   | 'too_many';
 
 export class WebDashboardError extends Error {

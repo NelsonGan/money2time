@@ -1,7 +1,7 @@
+import { gcm } from '@noble/ciphers/aes.js';
 import { randomBytes } from 'crypto';
 
 import {
-  decryptBackup,
   deriveLink,
   encryptBackup,
   fromBase64Url,
@@ -13,6 +13,14 @@ import {
 import { parsePairQr } from '~/services/webDashboardLink';
 
 const random = (length: number) => new Uint8Array(randomBytes(length));
+
+/** The website's side of the data format (src/lib/cloud/crypto.ts there), in noble. */
+function decryptBackup(key: Uint8Array, data: Uint8Array): Uint8Array {
+  expect(Array.from(data.subarray(0, 5))).toEqual([0x4d, 0x32, 0x54, 0x42, 1]);
+  return gcm(key, data.subarray(5, 17), new TextEncoder().encode('money2time-backup-v1')).decrypt(
+    data.subarray(17),
+  );
+}
 
 describe('parsePairQr', () => {
   const browser = linkKeyPair(random);

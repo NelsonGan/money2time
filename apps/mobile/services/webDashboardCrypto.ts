@@ -153,20 +153,3 @@ export function encryptBackup(
   out.set(sealed, HEADER + IV_LENGTH);
   return out;
 }
-
-export class BackupDecryptError extends Error {}
-
-/** For tests: the website does this side. */
-export function decryptBackup(key: Uint8Array, data: Uint8Array): Uint8Array {
-  if (data.length < HEADER + IV_LENGTH + 16 || MAGIC.some((byte, i) => data[i] !== byte)) {
-    throw new BackupDecryptError('not an encrypted backup');
-  }
-  if (data[MAGIC.length] !== VERSION) throw new BackupDecryptError('unsupported version');
-  try {
-    return gcm(key, data.subarray(HEADER, HEADER + IV_LENGTH), BACKUP_AAD).decrypt(
-      data.subarray(HEADER + IV_LENGTH),
-    );
-  } catch {
-    throw new BackupDecryptError('wrong key or damaged backup');
-  }
-}
