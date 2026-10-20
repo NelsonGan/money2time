@@ -51,6 +51,8 @@ EMAIL_FROM = "hello@money2time.com"
 # Google OAuth client IDs: web first (used for the redirect flow), then the
 # iOS and Android clients whose ID tokens the app signs in with.
 GOOGLE_CLIENT_IDS = ""
+# RevenueCat entitlement that counts as Pro (same as the receipt scanner).
+ENTITLEMENT_ID = "pro"
 # Largest compressed backup accepted, in bytes.
 MAX_BACKUP_BYTES = "104857600"
 
@@ -58,3 +60,4 @@ MAX_BACKUP_BYTES = "104857600"
 # Settings → Variables and Secrets → add as "Secret"), never commit:
 #   BETTER_AUTH_SECRET    32+ random bytes; signs sessions and transfer URLs
 #   GOOGLE_CLIENT_SECRET  secret of the web OAuth client
+#   REVENUECAT_SECRET_KEY RevenueCat v1 secret API key (Pro checks); unset = nobody is Pro

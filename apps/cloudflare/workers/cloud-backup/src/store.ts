@@ -28,19 +28,33 @@ const db = (env: Env) => env.MONEY2TIME_D1_CLOUD_BACKUP;
 export async function upsertDevice(
   env: Env,
   userId: string,
-  device: { id: string; platform: string; name: string | null; appVersion: string | null },
+  device: { id: string; platform: string; name: string | null; appVersion: string | null; appUserId: string | null },
 ): Promise<void> {
   const now = Date.now();
   await db(env)
     .prepare(
-      `insert into device (user_id, id, platform, name, app_version, created_at, last_seen_at)
-       values (?1, ?2, ?3, ?4, ?5, ?6, ?6)
+      `insert into device (user_id, id, platform, name, app_version, app_user_id, created_at, last_seen_at)
+       values (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?7)
        on conflict (user_id, id) do update set
-         platform = excluded.platform, name = excluded.name,
-         app_version = excluded.app_version, last_seen_at = excluded.last_seen_at`,
+         platform = excluded.platform, name = excluded.name, app_version = excluded.app_version,
+         app_user_id = coalesce(excluded.app_user_id, device.app_user_id), last_seen_at = excluded.last_seen_at`,
     )
-    .bind(userId, device.id, device.platform, device.name, device.appVersion, now)
+    .bind(userId, device.id, device.platform, device.name, device.appVersion, device.appUserId, now)
     .run();
+}
+
+/** RevenueCat App User IDs the account's phones run with, primary first. */
+export async function listAppUserIds(env: Env, userId: string): Promise<string[]> {
+  const result = await db(env)
+    .prepare(
+      `select distinct d.app_user_id as id from device d
+       left join primary_device p on p.user_id = d.user_id and p.device_id = d.id
+       where d.user_id = ?1 and d.app_user_id is not null
+       order by p.device_id is null, d.last_seen_at desc`,
+    )
+    .bind(userId)
+    .all<{ id: string }>();
+  return result.results.map((row) => row.id);
 }
 
 export async function getDevice(env: Env, userId: string, deviceId: string): Promise<DeviceRow | null> {

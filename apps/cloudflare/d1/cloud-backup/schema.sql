@@ -32,6 +32,9 @@ create table if not exists device (
   platform text not null,
   name text,
   app_version text,
+  -- The RevenueCat App User ID the app runs with, so the account's Pro
+  -- entitlement can be checked for the web dashboard.
+  app_user_id text,
   created_at integer not null,
   last_seen_at integer not null,
   primary key (user_id, id)
@@ -43,6 +46,14 @@ create table if not exists primary_device (
   user_id text not null primary key references "user" ("id") on delete cascade,
   device_id text not null,
   assigned_at integer not null
+);
+
+-- Short-lived RevenueCat Pro/free answers, keyed by App User ID (1h Pro,
+-- 60s free), so a dashboard visit does not wait on RevenueCat each time.
+create table if not exists entitlement_cache (
+  app_user_id text not null primary key,
+  is_pro integer not null,
+  expires_at integer not null
 );
 
 -- The account's backup. Only the latest is kept: an upload replaces the row

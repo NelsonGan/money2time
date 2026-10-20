@@ -2,7 +2,7 @@
 // API at /v1/*:
 //
 //   POST   /v1/devices                register this phone; the first one becomes primary
-//   GET    /v1/status?deviceId=…      account, primary device and latest backup
+//   GET    /v1/status?deviceId=…      account, primary device, latest backup, Pro
 //   POST   /v1/devices/primary        Transfer Primary Device to this phone
 //   POST   /v1/backups/upload-url     short-lived PUT URL (primary device only)
 //   PUT    /v1/backups/upload?token=  the gzipped backup itself
@@ -15,6 +15,7 @@
 
 import { allowedOrigins, createAuth } from './auth';
 import type { Env } from './env';
+import { isAccountPro } from './revenuecat';
 import {
   claimPrimaryIfUnset,
   deleteBackup,
@@ -32,6 +33,7 @@ import { sha256Hex, signToken, verifyToken, type DownloadClaims, type UploadClai
 
 const URL_TTL_MS = 10 * 60 * 1000;
 const DEVICE_ID = /^[A-Za-z0-9_-]{8,64}$/;
+const APP_USER_ID = /^[A-Za-z0-9$:_.-]{1,100}$/;
 const SHA256 = /^[a-f0-9]{64}$/;
 
 class HttpError extends Error {
@@ -115,14 +117,16 @@ function backupPublic(backup: BackupRow | null) {
 }
 
 async function status(env: Env, userId: string, deviceId: string | null) {
-  const [primaryId, backup, devices] = await Promise.all([
+  const [primaryId, backup, devices, pro] = await Promise.all([
     getPrimaryDeviceId(env, userId),
     getBackup(env, userId),
     listDevices(env, userId),
+    isAccountPro(env, userId),
   ]);
   const primary = primaryId ? (devices.find((d) => d.id === primaryId) ?? null) : null;
   return {
     isPrimary: deviceId !== null && primaryId === deviceId,
+    pro,
     primaryDevice: devicePublic(primary),
     devices: devices.map(devicePublic),
     backup: backupPublic(backup),
@@ -186,13 +190,22 @@ async function api(request: Request, env: Env, url: URL): Promise<Response> {
   const userId = session.user.id;
 
   if (path === '/v1/devices' && request.method === 'POST') {
-    const body = await readJson<{ deviceId?: string; platform?: string; name?: string; appVersion?: string }>(request);
+    const body = await readJson<{
+      deviceId?: string;
+      platform?: string;
+      name?: string;
+      appVersion?: string;
+      appUserId?: string;
+    }>(request);
     if (!body.deviceId || !DEVICE_ID.test(body.deviceId)) throw new HttpError(400, 'invalid_device');
     await upsertDevice(env, userId, {
       id: body.deviceId,
       platform: (body.platform ?? 'unknown').slice(0, 16),
       name: body.name ? body.name.slice(0, 80) : null,
       appVersion: body.appVersion ? body.appVersion.slice(0, 32) : null,
+      // The RevenueCat App User ID links the account to the phone's
+      // purchases. It is only ever looked up server side with the secret key.
+      appUserId: body.appUserId && APP_USER_ID.test(body.appUserId) ? body.appUserId : null,
     });
     // The first phone on an account becomes its primary; later ones must ask.
     await claimPrimaryIfUnset(env, userId, body.deviceId);
@@ -254,8 +267,8 @@ async function api(request: Request, env: Env, url: URL): Promise<Response> {
   }
 
   if (path === '/v1/backups/latest' && request.method === 'GET') {
-    const backup = await getBackup(env, userId);
-    if (!backup) return json({ backup: null });
+    const [backup, pro] = await Promise.all([getBackup(env, userId), isAccountPro(env, userId)]);
+    if (!backup) return json({ backup: null, pro });
     const exp = Date.now() + URL_TTL_MS;
     const token = await signToken<DownloadClaims>(env.BETTER_AUTH_SECRET, 'download', {
       uid: userId,
@@ -266,6 +279,7 @@ async function api(request: Request, env: Env, url: URL): Promise<Response> {
     const device = await getDevice(env, userId, backup.device_id);
     return json({
       backup: backupPublic(backup),
+      pro,
       device: devicePublic(device),
       downloadUrl: `${env.BETTER_AUTH_URL}/v1/backups/download?token=${encodeURIComponent(token)}`,
       expiresAt: exp,

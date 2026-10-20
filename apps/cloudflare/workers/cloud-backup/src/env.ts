@@ -22,4 +22,6 @@ export interface Env {
   GOOGLE_CLIENT_IDS: string;
   GOOGLE_CLIENT_SECRET?: string;
   MAX_BACKUP_BYTES: string;
+  ENTITLEMENT_ID: string;
+  REVENUECAT_SECRET_KEY?: string;
 }
