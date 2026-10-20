@@ -2348,6 +2348,8 @@ const tr = {
       'Hiçbir şey çevrimiçi saklanmaz. Telefonunuz verileri doğrudan tarayıcıya gönderir; veriler yalnızca bu ikisinde bulunan bir anahtarla şifrelenir. Tarayıcı, bağlantıyı kaldırana kadar son kopyayı saklar.',
     source_of_truth:
       'Verilerin asıl kaynağı telefonunuz olmaya devam eder. Web gösterge paneli yalnızca okur, geriye hiçbir şey göndermez.',
+    computer_hint: 'Bilgisayarınızda açın, ardından QR kodunu tarayın.',
+    encrypted_label: 'Uçtan uca şifreli',
     link_title: 'Bilgisayar bağla',
     link_body:
       'Bilgisayarınızda app.money2time.com adresini açın, ardından ekrandaki kodu tarayın.',

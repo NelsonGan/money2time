@@ -1,3 +1,4 @@
+import { ExternalLink, Monitor, ShieldCheck } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -13,7 +14,6 @@ import {
   Button,
   Card,
   CardContent,
-  ClayIcon,
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
   SettingsHeader,
@@ -23,6 +23,7 @@ import {
 } from '~/components/ui';
 import { usePro } from '~/context/ProContext';
 import { QrScannerModal } from '~/features/settings/components/QrScannerModal';
+import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
@@ -91,6 +92,7 @@ function statusLine(link: LinkedBrowser, status: WebDashboardStatus[string] | un
  * the dashboard refreshes. The phone stays the source of truth.
  */
 export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScreenProps) {
+  const colors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
   const { isPro, isStatusKnown } = usePro();
   const [available, setAvailable] = useState<boolean | null>(null);
@@ -314,26 +316,6 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
         contentContainerStyle={[styles.scrollContent, bottomNavInset]}
         keyboardShouldPersistTaps="handled"
       >
-        <Card>
-          <CardContent className="py-5 gap-3">
-            <View style={styles.introRow}>
-              <ClayIcon name="insights/growth-analysis" size={44} flatSize={28} />
-              <View style={styles.flex}>
-                <Text variant="bodyStrong">{I18n.t('web_dashboard.intro_title')}</Text>
-                <Text variant="caption" tone="muted" className="mt-1">
-                  {I18n.t('web_dashboard.intro_body')}
-                </Text>
-              </View>
-            </View>
-            <Text variant="caption" tone="secondary">
-              {I18n.t('web_dashboard.private_note')}
-            </Text>
-            <Text variant="caption" tone="secondary">
-              {I18n.t('web_dashboard.source_of_truth')}
-            </Text>
-          </CardContent>
-        </Card>
-
         {available === null ? (
           <View style={styles.loading}>
             <ActivityIndicator />
@@ -344,19 +326,45 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
           </Text>
         ) : (
           <>
-            <Card className="mt-4">
-              <CardContent className="py-5 gap-3">
-                <Text variant="bodyStrong">{I18n.t('web_dashboard.link_title')}</Text>
-                <Text variant="caption" tone="muted">
-                  {I18n.t('web_dashboard.link_body')}
-                </Text>
-                <Button onPress={() => setScannerOpen(true)} disabled={linking}>
+            <Card className="mt-6">
+              <CardContent className="items-center gap-5 py-8">
+                <View className="h-20 w-20 items-center justify-center rounded-3xl bg-primary/10">
+                  <Monitor size={40} color={colors.primary} strokeWidth={1.5} />
+                </View>
+                <View className="items-center gap-2">
+                  <Text variant="headingSm" className="text-center">
+                    {I18n.t('web_dashboard.link_title')}
+                  </Text>
+                  <Text variant="caption" tone="muted" className="text-center">
+                    {I18n.t('web_dashboard.computer_hint')}
+                  </Text>
+                </View>
+                <Button
+                  variant="secondary"
+                  className="w-full gap-2 px-3"
+                  onPress={openWeb}
+                  accessibilityLabel={I18n.t('web_dashboard.open_web')}
+                >
+                  <Text>app.money2time.com</Text>
+                  <ExternalLink size={16} color={colors.primary} />
+                </Button>
+                <Button
+                  className="w-full gap-2"
+                  onPress={() => setScannerOpen(true)}
+                  disabled={linking}
+                >
                   <Text>
                     {linking
                       ? I18n.t('web_dashboard.linking')
                       : I18n.t('web_dashboard.link_action')}
                   </Text>
                 </Button>
+                <View className="flex-row items-center gap-2">
+                  <ShieldCheck size={14} color={colors.textMuted} />
+                  <Text variant="caption" tone="muted">
+                    {I18n.t('web_dashboard.encrypted_label')}
+                  </Text>
+                </View>
               </CardContent>
             </Card>
 
@@ -367,13 +375,12 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
                   {links.map((link) => (
                     <View key={link.roomId} style={styles.row}>
                       <View
-                        style={[
-                          styles.dot,
+                        className={`h-2.5 w-2.5 rounded-full ${
                           status[link.roomId]?.state === 'online' ||
                           status[link.roomId]?.state === 'sending'
-                            ? styles.dotOn
-                            : styles.dotOff,
-                        ]}
+                            ? 'bg-success'
+                            : 'bg-muted-foreground'
+                        }`}
                       />
                       <View style={styles.flex}>
                         <Text variant="body" numberOfLines={1}>
@@ -406,10 +413,6 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
                 </CardContent>
               </Card>
             ) : null}
-
-            <Button variant="ghost" className="mt-4" onPress={openWeb}>
-              <Text>{I18n.t('web_dashboard.open_web')}</Text>
-            </Button>
           </>
         )}
 
@@ -439,11 +442,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
     paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
   },
-  introRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  dot: { width: 10, height: 10, borderRadius: 5 },
-  dotOn: { backgroundColor: '#2BB673' },
-  dotOff: { backgroundColor: '#B8C2BF' },
   flex: { flex: 1 },
   loading: { paddingVertical: 32, alignItems: 'center' },
 });

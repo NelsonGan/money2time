@@ -2369,6 +2369,8 @@ const fil = {
       'Walang iniimbak online. Direktang ipinapadala ng iyong telepono ang iyong data sa browser, naka-encrypt gamit ang key na silang dalawa lang ang may hawak. Itinatago ng browser ang huling kopya hanggang i-unlink mo ito.',
     source_of_truth:
       'Ang iyong telepono pa rin ang pinagmumulan ng tamang data. Nagbabasa lang ang Web Dashboard, at walang ibinabalik na anuman.',
+    computer_hint: 'Buksan sa computer, saka i-scan ang QR code.',
+    encrypted_label: 'End-to-end encrypted',
     link_title: 'Mag-link ng computer',
     link_body:
       'Buksan ang app.money2time.com sa iyong computer, saka i-scan ang code sa screen nito.',

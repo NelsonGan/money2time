@@ -2065,6 +2065,10 @@ database, no bucket, no account and no secrets. Served at
   replaces the old one (close code `4000`, shown as "open in another tab").
   Only the dashboard's origin may take the browser seat, and connections are
   rate limited per address (per /64 for IPv6). Invocation logs are off.
+- **Phone UI:** Settings → Web Dashboard keeps the computer address and scan
+  action together in one compact card, with a short encrypted-transfer label.
+  The header info button holds the detailed explanation; linked-browser status
+  and the two-device confirmation remain available.
 - **Linking:** the browser shows `money2time://pair?r=…&pk=…&s=…`: a one-off
   room token, a P-256 public key and a 16-byte secret. The phone scans it,
   sends its own public key through that room, and both derive, with ECDH →

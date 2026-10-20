@@ -2369,6 +2369,8 @@ const fr = {
       'Rien n’est stocké en ligne. Votre téléphone envoie vos données directement au navigateur, chiffrées avec une clé que seuls les deux détiennent. Le navigateur conserve la dernière copie jusqu’à ce que vous le dissociiez.',
     source_of_truth:
       'Votre téléphone reste la source de référence. Le tableau de bord web est en lecture seule et rien n’est renvoyé.',
+    computer_hint: 'Ouvrez sur votre ordinateur, puis scannez le code QR.',
+    encrypted_label: 'Chiffrement de bout en bout',
     link_title: 'Associer un ordinateur',
     link_body:
       'Ouvrez app.money2time.com sur votre ordinateur, puis scannez le code affiché à l’écran.',

@@ -2325,6 +2325,8 @@ const vi = {
       'Không có gì được lưu trực tuyến. Điện thoại gửi dữ liệu thẳng đến trình duyệt, được mã hóa bằng khóa mà chỉ hai bên nắm giữ. Trình duyệt giữ bản sao gần nhất cho đến khi bạn hủy liên kết.',
     source_of_truth:
       'Điện thoại vẫn là nguồn dữ liệu gốc. Bảng điều khiển web chỉ đọc và không gửi gì ngược lại.',
+    computer_hint: 'Mở trên máy tính, rồi quét mã QR.',
+    encrypted_label: 'Mã hóa đầu cuối',
     link_title: 'Liên kết máy tính',
     link_body: 'Mở app.money2time.com trên máy tính, rồi quét mã trên màn hình.',
     link_action: 'Quét mã',

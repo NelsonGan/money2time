@@ -2364,6 +2364,8 @@ const nl = {
       'Er wordt niets online opgeslagen. Je telefoon stuurt je gegevens rechtstreeks naar de browser, versleuteld met een sleutel die alleen die twee hebben. De browser bewaart de laatste kopie totdat je de koppeling verbreekt.',
     source_of_truth:
       'Je telefoon blijft de bron van je gegevens. Het webdashboard leest alleen mee en er wordt niets teruggestuurd.',
+    computer_hint: 'Open op je computer en scan de QR-code.',
+    encrypted_label: 'End-to-end versleuteld',
     link_title: 'Een computer koppelen',
     link_body: 'Open app.money2time.com op je computer en scan daarna de code op het scherm.',
     link_action: 'Code scannen',

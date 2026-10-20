@@ -2356,6 +2356,8 @@ const ms = {
       'Tiada apa-apa disimpan dalam talian. Telefon anda menghantar data terus ke pelayar, disulitkan dengan kunci yang hanya dipegang oleh kedua-duanya. Pelayar menyimpan salinan terakhir sehingga anda memutuskan pautannya.',
     source_of_truth:
       'Telefon anda kekal sebagai sumber data. Papan pemuka web hanya membaca, dan tiada apa-apa dihantar balik.',
+    computer_hint: 'Buka pada komputer, kemudian imbas kod QR.',
+    encrypted_label: 'Disulitkan hujung ke hujung',
     link_title: 'Pautkan komputer',
     link_body: 'Buka app.money2time.com pada komputer anda, kemudian imbas kod pada skrinnya.',
     link_action: 'Imbas kod',

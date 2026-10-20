@@ -2354,6 +2354,8 @@ const es = {
       'No se guarda nada en línea. Tu teléfono envía tus datos directamente al navegador, cifrados con una clave que solo tienen los dos. El navegador conserva la última copia hasta que lo desvincules.',
     source_of_truth:
       'Tu teléfono sigue siendo la fuente de verdad. El panel web solo lee y no se envía nada de vuelta.',
+    computer_hint: 'Abre en tu ordenador y escanea el código QR.',
+    encrypted_label: 'Cifrado de extremo a extremo',
     link_title: 'Vincular un ordenador',
     link_body: 'Abre app.money2time.com en tu ordenador y luego escanea el código de su pantalla.',
     link_action: 'Escanear el código',

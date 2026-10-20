@@ -2352,6 +2352,8 @@ const it = {
       'Non viene salvato nulla online. Il telefono invia i tuoi dati direttamente al browser, cifrati con una chiave che solo i due dispositivi possiedono. Il browser conserva l’ultima copia finché non lo scolleghi.',
     source_of_truth:
       'Il telefono resta la fonte dei dati. La dashboard web si limita a leggerli e non rimanda nulla indietro.',
+    computer_hint: 'Apri sul computer, poi scansiona il codice QR.',
+    encrypted_label: 'Crittografia end-to-end',
     link_title: 'Collega un computer',
     link_body: 'Apri app.money2time.com sul computer, poi inquadra il codice sul suo schermo.',
     link_action: 'Scansiona il codice',

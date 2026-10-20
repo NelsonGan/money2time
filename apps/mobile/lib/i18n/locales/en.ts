@@ -2337,6 +2337,8 @@ const en = {
       'Nothing is stored online. Your phone sends your data straight to the browser, encrypted with a key only the two of them hold. The browser keeps the last copy until you unlink it.',
     source_of_truth:
       'Your phone stays the source of truth. The web dashboard only reads, and nothing is sent back.',
+    computer_hint: 'Open on your computer, then scan the QR code.',
+    encrypted_label: 'End-to-end encrypted',
     link_title: 'Link a computer',
     link_body: 'Open app.money2time.com on your computer, then scan the code on its screen.',
     link_action: 'Scan the code',

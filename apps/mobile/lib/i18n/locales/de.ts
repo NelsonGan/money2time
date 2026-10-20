@@ -2370,6 +2370,8 @@ const de = {
       'Online wird nichts gespeichert. Dein Handy sendet deine Daten direkt an den Browser, verschlüsselt mit einem Schlüssel, den nur beide kennen. Der Browser behält die letzte Kopie, bis du die Verknüpfung aufhebst.',
     source_of_truth:
       'Dein Handy bleibt die maßgebliche Quelle. Das Web-Dashboard liest nur, und es wird nichts zurückgesendet.',
+    computer_hint: 'Am Computer öffnen und den QR-Code scannen.',
+    encrypted_label: 'Ende-zu-Ende-verschlüsselt',
     link_title: 'Computer verknüpfen',
     link_body:
       'Öffne app.money2time.com auf deinem Computer und scanne dann den Code auf dem Bildschirm.',

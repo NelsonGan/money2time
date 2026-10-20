@@ -2339,6 +2339,8 @@ const nb = {
       'Ingenting lagres på nett. Telefonen sender dataene dine rett til nettleseren, kryptert med en nøkkel som bare de to har. Nettleseren beholder den siste kopien til du kobler den fra.',
     source_of_truth:
       'Telefonen din er fortsatt kilden til dataene. Web-dashbordet leser bare, og ingenting sendes tilbake.',
+    computer_hint: 'Åpne på datamaskinen, og skann QR-koden.',
+    encrypted_label: 'Ende-til-ende-kryptert',
     link_title: 'Koble til en datamaskin',
     link_body: 'Åpne app.money2time.com på datamaskinen, og skann koden på skjermen.',
     link_action: 'Skann koden',

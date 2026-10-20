@@ -2238,6 +2238,8 @@ const zhHant = {
     private_note:
       '資料不會儲存在網路上。手機會將資料直接傳送到瀏覽器，並以只有這兩端持有的金鑰加密。瀏覽器會保留最近一份副本，直到你解除連結。',
     source_of_truth: '資料以手機為準。網頁儀表板僅供讀取，不會回傳任何內容。',
+    computer_hint: '在電腦上開啟，然後掃描 QR 碼。',
+    encrypted_label: '端對端加密',
     link_title: '連結電腦',
     link_body: '在電腦上開啟 app.money2time.com，然後掃描畫面上的 QR Code。',
     link_action: '掃描 QR Code',

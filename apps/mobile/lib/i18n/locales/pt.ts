@@ -2354,6 +2354,8 @@ const pt = {
       'Nada fica armazenado online. O telefone envia seus dados direto para o navegador, criptografados com uma chave que só os dois possuem. O navegador guarda a última cópia até você desvincular.',
     source_of_truth:
       'O telefone continua sendo a fonte dos seus dados. O painel web só lê, e nada é enviado de volta.',
+    computer_hint: 'Abra no computador e escaneie o código QR.',
+    encrypted_label: 'Criptografia de ponta a ponta',
     link_title: 'Vincular um computador',
     link_body: 'Abra app.money2time.com no computador e escaneie o código na tela dele.',
     link_action: 'Escanear o código',

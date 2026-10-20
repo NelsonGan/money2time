@@ -2349,6 +2349,8 @@ const id = {
       'Tidak ada yang disimpan secara online. Ponselmu mengirim datamu langsung ke browser, terenkripsi dengan kunci yang hanya dipegang keduanya. Browser menyimpan salinan terakhir sampai kamu memutus tautannya.',
     source_of_truth:
       'Ponselmu tetap menjadi sumber data utama. Dasbor web hanya membaca, dan tidak ada yang dikirim balik.',
+    computer_hint: 'Buka di komputer, lalu pindai kode QR.',
+    encrypted_label: 'Terenkripsi end-to-end',
     link_title: 'Tautkan komputer',
     link_body: 'Buka app.money2time.com di komputermu, lalu pindai kode di layarnya.',
     link_action: 'Pindai kode',

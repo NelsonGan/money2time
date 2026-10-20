@@ -2238,6 +2238,8 @@ const zh = {
     private_note:
       '数据不会存储在线上。手机会将数据直接发送到浏览器，并用只有这两端持有的密钥加密。浏览器会保留最近一份副本，直到你解除关联。',
     source_of_truth: '数据以手机为准。网页仪表盘只读，不会向手机回传任何内容。',
+    computer_hint: '在电脑上打开，然后扫描二维码。',
+    encrypted_label: '端到端加密',
     link_title: '关联电脑',
     link_body: '在电脑上打开 app.money2time.com，然后扫描屏幕上的二维码。',
     link_action: '扫描二维码',

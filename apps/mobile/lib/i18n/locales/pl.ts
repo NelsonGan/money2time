@@ -2348,6 +2348,8 @@ const pl = {
       'Nic nie jest przechowywane online. Telefon wysyła Twoje dane bezpośrednio do przeglądarki, zaszyfrowane kluczem, który mają tylko te dwa urządzenia. Przeglądarka zachowuje ostatnią kopię, dopóki jej nie odłączysz.',
     source_of_truth:
       'Źródłem danych pozostaje telefon. Panel webowy tylko je odczytuje i nic nie jest odsyłane z powrotem.',
+    computer_hint: 'Otwórz na komputerze i zeskanuj kod QR.',
+    encrypted_label: 'Szyfrowanie end-to-end',
     link_title: 'Połącz komputer',
     link_body:
       'Otwórz app.money2time.com na komputerze, a potem zeskanuj kod widoczny na jego ekranie.',

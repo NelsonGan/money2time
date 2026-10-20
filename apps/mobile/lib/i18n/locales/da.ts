@@ -2340,6 +2340,8 @@ const da = {
       'Intet gemmes online. Din telefon sender dine data direkte til browseren, krypteret med en nøgle, som kun de to har. Browseren beholder den seneste kopi, indtil du fjerner forbindelsen.',
     source_of_truth:
       'Din telefon er stadig den primære kilde. Webdashboardet læser kun, og intet sendes tilbage.',
+    computer_hint: 'Åbn på din computer, og scan QR-koden.',
+    encrypted_label: 'End-to-end-krypteret',
     link_title: 'Forbind en computer',
     link_body: 'Åbn app.money2time.com på din computer, og scan derefter koden på skærmen.',
     link_action: 'Scan koden',
