@@ -153,7 +153,7 @@ const vi = {
       },
       notificationReview: {
         title: 'Ghi khoản thanh toán từ thông báo',
-        body: 'Thông báo từ ngân hàng và ví điện tử giờ được giữ làm bản nháp chờ bạn. Chọn Thu nhập, Chi tiêu hoặc Bỏ qua, từng mục hoặc tất cả cùng lúc. Thông báo được đọc ngay trên điện thoại, không bao giờ qua AI. Thiết lập trong Cài đặt > Tự động hóa.',
+        body: 'Thông báo từ ngân hàng và ví điện tử giờ được giữ làm bản nháp chờ bạn. Chọn Thu nhập, Chi tiêu hoặc Bỏ qua, từng mục hoặc tất cả cùng lúc. Thiết lập trong Cài đặt > Tự động hóa.',
       },
       fasterScans: {
         title: 'Quét hóa đơn nhanh hơn 50%',

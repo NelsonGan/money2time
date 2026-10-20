@@ -153,7 +153,7 @@ const it = {
       },
       notificationReview: {
         title: 'Registra i pagamenti dalle notifiche',
-        body: 'Le notifiche della banca e del portafoglio digitale ora ti aspettano come bozze. Scegli Entrate, Uscite o Ignora, una alla volta o tutte insieme. Vengono lette sul tuo telefono, mai da un’IA. Attivalo in Impostazioni > Automazione.',
+        body: 'Le notifiche della banca e del portafoglio digitale ora ti aspettano come bozze. Scegli Entrate, Uscite o Ignora, una alla volta o tutte insieme. Attivalo in Impostazioni > Automazione.',
       },
       fasterScans: {
         title: 'Scansione ricevute più veloce del 50%',

@@ -153,7 +153,7 @@ const pt = {
       },
       notificationReview: {
         title: 'Registre pagamentos pelas notificações',
-        body: 'Notificações do banco e da carteira digital agora ficam esperando por você como rascunhos. Escolha Receita, Despesa ou Ignorar, uma por uma ou todas de uma vez. Elas são lidas no seu celular, nunca por IA. Ative em Configurações > Automação.',
+        body: 'Notificações do banco e da carteira digital agora ficam esperando por você como rascunhos. Escolha Receita, Despesa ou Ignorar, uma por uma ou todas de uma vez. Ative em Configurações > Automação.',
       },
       fasterScans: {
         title: 'Escaneamento de recibos 50% mais rápido',

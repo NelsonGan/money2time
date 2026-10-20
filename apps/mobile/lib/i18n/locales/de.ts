@@ -153,7 +153,7 @@ const de = {
       },
       notificationReview: {
         title: 'Zahlungen aus Mitteilungen erfassen',
-        body: 'Mitteilungen von Bank und E-Wallet warten jetzt als Entwürfe auf dich. Wähle Einnahmen, Ausgaben oder Ignorieren, einzeln oder alle auf einmal. Gelesen werden sie auf deinem Handy, nie von einer KI. Richte es unter Einstellungen > Automatisierung ein.',
+        body: 'Mitteilungen von Bank und E-Wallet warten jetzt als Entwürfe auf dich. Wähle Einnahmen, Ausgaben oder Ignorieren, einzeln oder alle auf einmal. Richte es unter Einstellungen > Automatisierung ein.',
       },
       fasterScans: {
         title: 'Belege scannen, 50 % schneller',
