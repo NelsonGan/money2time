@@ -148,8 +148,8 @@ const ms = {
     web_dashboard: {
       title: 'Papan Pemuka Web dan banyak lagi',
       webDashboard: {
-        title: 'Wang anda di skrin besar',
-        body: 'Buka app.money2time.com pada komputer dan imbas kodnya di Tetapan > Papan Pemuka Web. Telefon anda menghantar data terus ke pelayar. Tiada apa-apa disimpan dalam talian dan tiada akaun diperlukan.',
+        title: 'Papan Pemuka Web baharu',
+        body: 'Buka app.money2time.com pada komputer dan imbas kodnya di Tetapan > Papan Pemuka Web. Telefon anda menghantar data yang disulitkan ke pelayar. Tiada apa-apa disimpan dalam talian dan tiada akaun diperlukan.',
       },
       notificationReview: {
         title: 'Rekod bayaran daripada pemberitahuan',
@@ -411,9 +411,7 @@ const ms = {
       scan_before: 'Dulu',
       scan_now: 'Kini',
       card_everyday: 'Harian',
-      card_savings: 'Simpanan',
       card_travel: 'Percutian',
-      ignore: 'Abaikan',
       ricecal_kcal_left: 'baki kcal',
       ricecal_carbs: 'Karbohidrat',
       ricecal_protein: 'Protein',
@@ -2755,7 +2753,7 @@ const ms = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: 'Abaikan',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',

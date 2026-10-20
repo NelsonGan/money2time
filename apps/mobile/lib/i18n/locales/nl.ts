@@ -148,12 +148,12 @@ const nl = {
     web_dashboard: {
       title: 'Webdashboard en meer',
       webDashboard: {
-        title: 'Je geld op een groot scherm',
-        body: 'Open app.money2time.com op je computer en scan de code via Instellingen > Webdashboard. Je telefoon stuurt je gegevens rechtstreeks naar de browser. Er wordt niets online opgeslagen en je hebt geen account nodig.',
+        title: 'Nieuw webdashboard',
+        body: 'Open app.money2time.com op je computer en scan de code via Instellingen > Webdashboard. Je telefoon stuurt je gegevens versleuteld naar de browser. Er wordt niets online opgeslagen en je hebt geen account nodig.',
       },
       notificationReview: {
         title: 'Betalingen vastleggen uit meldingen',
-        body: 'Meldingen van je bank en e-wallet staan nu als concept voor je klaar. Kies Inkomsten, Uitgave of Negeren, één voor één of allemaal tegelijk. Ze worden op je telefoon gelezen, nooit door AI. Stel het in via Instellingen > Automatisering.',
+        body: 'Meldingen van je bank en e-wallet staan nu als concept voor je klaar. Kies Inkomsten, Uitgaven of Negeren, één voor één of allemaal tegelijk. Ze worden op je telefoon gelezen, nooit door AI. Stel het in via Instellingen > Automatisering.',
       },
       fasterScans: {
         title: 'Bonnen scannen, 50% sneller',
@@ -411,9 +411,7 @@ const nl = {
       scan_before: 'Eerst',
       scan_now: 'Nu',
       card_everyday: 'Dagelijks',
-      card_savings: 'Sparen',
       card_travel: 'Reizen',
-      ignore: 'Negeren',
       ricecal_kcal_left: 'kcal over',
       ricecal_carbs: 'Koolhydraten',
       ricecal_protein: 'Eiwit',
@@ -2764,7 +2762,7 @@ const nl = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: 'Negeren',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',

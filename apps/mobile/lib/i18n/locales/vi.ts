@@ -148,8 +148,8 @@ const vi = {
     web_dashboard: {
       title: 'Bảng điều khiển web và hơn thế',
       webDashboard: {
-        title: 'Xem tài chính trên màn hình lớn',
-        body: 'Mở app.money2time.com trên máy tính rồi quét mã trong Cài đặt > Bảng điều khiển web. Điện thoại gửi dữ liệu thẳng đến trình duyệt. Không có gì được lưu trực tuyến và không cần tài khoản.',
+        title: 'Bảng điều khiển web mới',
+        body: 'Mở app.money2time.com trên máy tính rồi quét mã trong Cài đặt > Bảng điều khiển web. Điện thoại gửi dữ liệu đã mã hóa đến trình duyệt. Không có gì được lưu trực tuyến và không cần tài khoản.',
       },
       notificationReview: {
         title: 'Ghi khoản thanh toán từ thông báo',
@@ -411,9 +411,7 @@ const vi = {
       scan_before: 'Trước đây',
       scan_now: 'Bây giờ',
       card_everyday: 'Hằng ngày',
-      card_savings: 'Tiết kiệm',
       card_travel: 'Du lịch',
-      ignore: 'Bỏ qua',
       ricecal_kcal_left: 'kcal còn lại',
       ricecal_carbs: 'Carb',
       ricecal_protein: 'Protein',
@@ -2717,7 +2715,7 @@ const vi = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: 'Bỏ qua',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',

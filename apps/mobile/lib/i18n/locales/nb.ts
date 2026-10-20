@@ -148,8 +148,8 @@ const nb = {
     web_dashboard: {
       title: 'Web-dashbord og mer',
       webDashboard: {
-        title: 'Økonomien din på stor skjerm',
-        body: 'Åpne app.money2time.com på datamaskinen og skann koden under Innstillinger > Web-dashbord. Telefonen sender dataene rett til nettleseren. Ingenting lagres på nett, og du trenger ingen konto.',
+        title: 'Nytt web-dashbord',
+        body: 'Åpne app.money2time.com på datamaskinen og skann koden under Innstillinger > Web-dashbord. Telefonen sender dataene kryptert til nettleseren. Ingenting lagres på nett, og du trenger ingen konto.',
       },
       notificationReview: {
         title: 'Registrer betalinger fra varsler',
@@ -411,9 +411,7 @@ const nb = {
       scan_before: 'Før',
       scan_now: 'Nå',
       card_everyday: 'Hverdag',
-      card_savings: 'Sparing',
       card_travel: 'Reise',
-      ignore: 'Ignorer',
       ricecal_kcal_left: 'kcal igjen',
       ricecal_carbs: 'Karbohydrater',
       ricecal_protein: 'Protein',
@@ -2736,7 +2734,7 @@ const nb = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: 'Ignorer',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',

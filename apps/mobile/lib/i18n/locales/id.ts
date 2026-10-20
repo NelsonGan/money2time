@@ -148,8 +148,8 @@ const id = {
     web_dashboard: {
       title: 'Dasbor Web dan lainnya',
       webDashboard: {
-        title: 'Keuanganmu di layar besar',
-        body: 'Buka app.money2time.com di komputer, lalu pindai kodenya di Pengaturan > Dasbor Web. Ponselmu mengirim data langsung ke browser. Tidak ada yang disimpan online dan tidak perlu akun.',
+        title: 'Dasbor Web baru',
+        body: 'Buka app.money2time.com di komputer, lalu pindai kodenya di Pengaturan > Dasbor Web. Ponselmu mengirim data terenkripsi ke browser. Tidak ada yang disimpan online dan tidak perlu akun.',
       },
       notificationReview: {
         title: 'Catat pembayaran dari notifikasi',
@@ -411,9 +411,7 @@ const id = {
       scan_before: 'Dulu',
       scan_now: 'Sekarang',
       card_everyday: 'Harian',
-      card_savings: 'Tabungan',
       card_travel: 'Liburan',
-      ignore: 'Abaikan',
       ricecal_kcal_left: 'sisa kkal',
       ricecal_carbs: 'Karbohidrat',
       ricecal_protein: 'Protein',
@@ -2747,7 +2745,7 @@ const id = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: 'Abaikan',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',

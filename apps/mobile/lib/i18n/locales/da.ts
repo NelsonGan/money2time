@@ -148,8 +148,8 @@ const da = {
     web_dashboard: {
       title: 'Webdashboard og mere',
       webDashboard: {
-        title: 'Din økonomi på stor skærm',
-        body: 'Åbn app.money2time.com på computeren, og scan koden under Indstillinger > Webdashboard. Telefonen sender dine data direkte til browseren. Intet gemmes online, og du skal ikke have en konto.',
+        title: 'Nyt webdashboard',
+        body: 'Åbn app.money2time.com på computeren, og scan koden under Indstillinger > Webdashboard. Telefonen sender dine data krypteret til browseren. Intet gemmes online, og du skal ikke have en konto.',
       },
       notificationReview: {
         title: 'Registrer betalinger fra notifikationer',
@@ -411,9 +411,7 @@ const da = {
       scan_before: 'Før',
       scan_now: 'Nu',
       card_everyday: 'Hverdag',
-      card_savings: 'Opsparing',
       card_travel: 'Rejser',
-      ignore: 'Ignorer',
       ricecal_kcal_left: 'kcal tilbage',
       ricecal_carbs: 'Kulhydrat',
       ricecal_protein: 'Protein',
@@ -2735,7 +2733,7 @@ const da = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: 'Ignorer',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',

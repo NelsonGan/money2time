@@ -148,8 +148,8 @@ const sv = {
     web_dashboard: {
       title: 'Webbpanel med mera',
       webDashboard: {
-        title: 'Din ekonomi på stor skärm',
-        body: 'Öppna app.money2time.com på datorn och skanna koden i Inställningar > Webbpanel. Telefonen skickar dina data direkt till webbläsaren. Inget sparas på nätet och du behöver inget konto.',
+        title: 'Ny webbpanel',
+        body: 'Öppna app.money2time.com på datorn och skanna koden i Inställningar > Webbpanel. Telefonen skickar dina data krypterade till webbläsaren. Inget sparas på nätet och du behöver inget konto.',
       },
       notificationReview: {
         title: 'Registrera betalningar från notiser',
@@ -411,9 +411,7 @@ const sv = {
       scan_before: 'Förut',
       scan_now: 'Nu',
       card_everyday: 'Vardag',
-      card_savings: 'Sparande',
       card_travel: 'Resor',
-      ignore: 'Ignorera',
       ricecal_kcal_left: 'kcal kvar',
       ricecal_carbs: 'Kolhydrater',
       ricecal_protein: 'Protein',
@@ -2735,7 +2733,7 @@ const sv = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: 'Ignorera',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',

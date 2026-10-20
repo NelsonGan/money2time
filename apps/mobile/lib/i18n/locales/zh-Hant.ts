@@ -121,8 +121,8 @@ const zhHant = {
     web_dashboard: {
       title: '網頁儀表板及更多更新',
       webDashboard: {
-        title: '在大螢幕上查看你的財務',
-        body: '在電腦上開啟 app.money2time.com，然後在設定 > 網頁儀表板中掃描網頁上的 QR 碼。手機會把資料直接傳送到瀏覽器。不會在線上儲存任何資料，也不需要註冊帳號。',
+        title: '全新網頁儀表板',
+        body: '在電腦上開啟 app.money2time.com，然後在設定 > 網頁儀表板中掃描網頁上的 QR 碼。手機會把資料加密後傳送到瀏覽器。不會在線上儲存任何資料，也不需要註冊帳號。',
       },
       notificationReview: {
         title: '從通知記錄收支',
@@ -384,9 +384,7 @@ const zhHant = {
       scan_before: '以前',
       scan_now: '現在',
       card_everyday: '日常',
-      card_savings: '儲蓄',
       card_travel: '旅行',
-      ignore: '忽略',
       ricecal_kcal_left: '剩餘千卡',
       ricecal_carbs: '碳水',
       ricecal_protein: '蛋白質',
@@ -2624,7 +2622,7 @@ const zhHant = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: '忽略',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',

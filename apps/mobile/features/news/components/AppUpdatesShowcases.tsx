@@ -121,17 +121,17 @@ export function NotificationReviewShowcase({ width }: ShowcaseProps) {
       <View className="flex-row gap-2">
         <View className="min-w-0 flex-1 items-center rounded-full border border-border/40 bg-card py-2">
           <Text variant="label" tone="success" numberOfLines={1}>
-            {I18n.t('news.showcase.income')}
+            {I18n.t('nav.income')}
           </Text>
         </View>
         <View className="min-w-0 flex-1 items-center rounded-full bg-destructive py-2">
           <Text variant="label" numberOfLines={1} style={{ color: '#fff' }}>
-            {I18n.t('news.showcase.expense')}
+            {I18n.t('nav.expense')}
           </Text>
         </View>
         <View className="min-w-0 flex-1 items-center rounded-full border border-border/40 bg-card py-2">
           <Text variant="label" tone="muted" numberOfLines={1}>
-            {I18n.t('news.showcase.ignore')}
+            {I18n.t('payment_alerts.review_ignore')}
           </Text>
         </View>
       </View>
@@ -145,7 +145,7 @@ export function FasterScansShowcase({ width }: ShowcaseProps) {
   return (
     <View className="gap-4" style={{ width }}>
       <View className="flex-row items-center justify-center gap-2">
-        <View className="h-11 w-11 items-center justify-center rounded-2xl bg-success/12">
+        <View className="h-11 w-11 items-center justify-center rounded-2xl bg-success/15">
           <Receipt size={22} color={colors.success} />
         </View>
         <Text variant="bodyStrong">{I18n.t('add_action.scan_title')}</Text>
@@ -172,13 +172,12 @@ export function FasterScansShowcase({ width }: ShowcaseProps) {
 }
 
 const SHOWCASE_CARDS = [
-  { design: 'mascot/coin-pattern', nameKey: 'news.showcase.card_everyday', balance: 1280 },
-  { design: 'luxury/gold-foil', nameKey: 'news.showcase.card_savings', balance: 8450 },
-  { design: 'space/nebula', nameKey: 'news.showcase.card_travel', balance: 620 },
+  { design: 'mascot/coin-pattern', nameKey: 'news.showcase.card_everyday', balance: 320 },
+  { design: 'space/nebula', nameKey: 'news.showcase.card_travel', balance: 85 },
 ] as const;
 
 /** How much of each card above the front one peeks out of the stack. */
-const STACK_PEEK = 50;
+const STACK_PEEK = 42;
 
 export function CardDesignsShowcase({ width }: ShowcaseProps) {
   const money = useMoneySettings();

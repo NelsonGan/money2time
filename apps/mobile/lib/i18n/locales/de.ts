@@ -148,12 +148,12 @@ const de = {
     web_dashboard: {
       title: 'Web-Dashboard und mehr',
       webDashboard: {
-        title: 'Deine Finanzen auf dem großen Bildschirm',
-        body: 'Öffne app.money2time.com auf deinem Computer und scanne den Code unter Einstellungen > Web-Dashboard. Dein Handy sendet deine Daten direkt an den Browser. Online wird nichts gespeichert, und du brauchst kein Konto.',
+        title: 'Neues Web-Dashboard',
+        body: 'Öffne app.money2time.com auf deinem Computer und scanne den Code unter Einstellungen > Web-Dashboard. Dein Handy sendet deine Daten verschlüsselt an den Browser. Online wird nichts gespeichert, und du brauchst kein Konto.',
       },
       notificationReview: {
         title: 'Zahlungen aus Mitteilungen erfassen',
-        body: 'Mitteilungen von Bank und E-Wallet warten jetzt als Entwürfe auf dich. Wähle Einnahme, Ausgabe oder Ignorieren, einzeln oder alle auf einmal. Gelesen werden sie auf deinem Handy, nie von einer KI. Richte es unter Einstellungen > Automatisierung ein.',
+        body: 'Mitteilungen von Bank und E-Wallet warten jetzt als Entwürfe auf dich. Wähle Einnahmen, Ausgaben oder Ignorieren, einzeln oder alle auf einmal. Gelesen werden sie auf deinem Handy, nie von einer KI. Richte es unter Einstellungen > Automatisierung ein.',
       },
       fasterScans: {
         title: 'Belege scannen, 50 % schneller',
@@ -411,9 +411,7 @@ const de = {
       scan_before: 'Vorher',
       scan_now: 'Jetzt',
       card_everyday: 'Alltag',
-      card_savings: 'Sparen',
       card_travel: 'Reisen',
-      ignore: 'Ignorieren',
       ricecal_kcal_left: 'kcal übrig',
       ricecal_carbs: 'Kohlenhydrate',
       ricecal_protein: 'Eiweiß',
@@ -2773,7 +2771,7 @@ const de = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: 'Ignorieren',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',

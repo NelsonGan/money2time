@@ -372,7 +372,7 @@ export function FeatureAnnouncementModal({
               ) : page.visual === 'fasterScans' ? (
                 <FasterScansShowcase width={Math.round(showcaseWidth * 0.92)} />
               ) : page.visual === 'cardDesigns' ? (
-                <CardDesignsShowcase width={Math.round(showcaseWidth * 0.86)} />
+                <CardDesignsShowcase width={Math.round(showcaseWidth * 0.8)} />
               ) : page.visual === 'bottomBar' ? (
                 <BottomBarShowcase width={Math.round(showcaseWidth * 0.92)} />
               ) : page.visual === 'androidScreenshot' ? (

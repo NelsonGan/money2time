@@ -148,8 +148,8 @@ const ja = {
     web_dashboard: {
       title: 'Webダッシュボードほか',
       webDashboard: {
-        title: 'お金の管理を大きな画面で',
-        body: 'パソコンで app.money2time.com を開き、設定 > Webダッシュボードでそのコードをスキャンします。データはスマホからブラウザへ直接送られます。オンラインには何も保存されず、アカウントも不要です。',
+        title: '新しいWebダッシュボード',
+        body: 'パソコンで app.money2time.com を開き、設定 > Webダッシュボードでそのコードをスキャンします。データは暗号化されてスマホからブラウザへ送られます。オンラインには何も保存されず、アカウントも不要です。',
       },
       notificationReview: {
         title: '通知から支払いを記録',
@@ -411,9 +411,7 @@ const ja = {
       scan_before: '以前',
       scan_now: '今',
       card_everyday: '普段使い',
-      card_savings: '貯金',
       card_travel: '旅行',
-      ignore: '無視',
       ricecal_kcal_left: '残りkcal',
       ricecal_carbs: '炭水化物',
       ricecal_protein: 'タンパク質',
@@ -2721,7 +2719,7 @@ const ja = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: '無視',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',

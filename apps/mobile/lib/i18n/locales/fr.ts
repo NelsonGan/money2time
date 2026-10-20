@@ -148,12 +148,12 @@ const fr = {
     web_dashboard: {
       title: 'Tableau de bord web et plus',
       webDashboard: {
-        title: 'Vos finances sur grand écran',
-        body: 'Ouvrez app.money2time.com sur votre ordinateur et scannez son code dans Réglages > Tableau de bord web. Votre téléphone envoie vos données directement au navigateur. Rien n’est stocké en ligne et aucun compte n’est nécessaire.',
+        title: 'Nouveau tableau de bord web',
+        body: 'Ouvrez app.money2time.com sur votre ordinateur et scannez son code dans Réglages > Tableau de bord web. Votre téléphone envoie vos données chiffrées au navigateur. Rien n’est stocké en ligne et aucun compte n’est nécessaire.',
       },
       notificationReview: {
         title: 'Enregistrez vos paiements depuis les notifications',
-        body: 'Les notifications de votre banque et de votre portefeuille électronique vous attendent désormais en brouillon. Choisissez Revenu, Dépense ou Ignorer, une par une ou toutes d’un coup. Elles sont lues sur votre téléphone, jamais par une IA. Activez-le dans Réglages > Automatisation.',
+        body: 'Les notifications de votre banque et de votre portefeuille électronique vous attendent désormais en brouillon. Choisissez Revenus, Dépenses ou Ignorer, une par une ou toutes d’un coup. Elles sont lues sur votre téléphone, jamais par une IA. Activez-le dans Réglages > Automatisation.',
       },
       fasterScans: {
         title: 'Scan des reçus 50 % plus rapide',
@@ -411,9 +411,7 @@ const fr = {
       scan_before: 'Avant',
       scan_now: 'Maintenant',
       card_everyday: 'Quotidien',
-      card_savings: 'Épargne',
       card_travel: 'Voyages',
-      ignore: 'Ignorer',
       ricecal_kcal_left: 'kcal restantes',
       ricecal_carbs: 'Glucides',
       ricecal_protein: 'Protéines',
@@ -2770,7 +2768,7 @@ const fr = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: 'Ignorer',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',

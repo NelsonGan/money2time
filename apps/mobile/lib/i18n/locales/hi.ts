@@ -148,8 +148,8 @@ const hi = {
     web_dashboard: {
       title: 'वेब डैशबोर्ड और भी बहुत कुछ',
       webDashboard: {
-        title: 'अपना पैसा बड़ी स्क्रीन पर देखें',
-        body: 'अपने कंप्यूटर पर app.money2time.com खोलें और सेटिंग्स > वेब डैशबोर्ड में उसका कोड स्कैन करें। आपका फ़ोन डेटा सीधे ब्राउज़र को भेजता है। ऑनलाइन कुछ भी स्टोर नहीं होता और कोई अकाउंट नहीं चाहिए।',
+        title: 'नया वेब डैशबोर्ड',
+        body: 'अपने कंप्यूटर पर app.money2time.com खोलें और सेटिंग्स > वेब डैशबोर्ड में उसका कोड स्कैन करें। आपका फ़ोन डेटा एन्क्रिप्ट करके ब्राउज़र को भेजता है। ऑनलाइन कुछ भी स्टोर नहीं होता और कोई अकाउंट नहीं चाहिए।',
       },
       notificationReview: {
         title: 'नोटिफ़िकेशन से भुगतान दर्ज करें',
@@ -411,9 +411,7 @@ const hi = {
       scan_before: 'पहले',
       scan_now: 'अब',
       card_everyday: 'रोज़मर्रा',
-      card_savings: 'बचत',
       card_travel: 'यात्रा',
-      ignore: 'अनदेखा करें',
       ricecal_kcal_left: 'बची हुई kcal',
       ricecal_carbs: 'कार्ब्स',
       ricecal_protein: 'प्रोटीन',
@@ -2725,7 +2723,7 @@ const hi = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: 'अनदेखा करें',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',

@@ -148,8 +148,8 @@ const ru = {
     web_dashboard: {
       title: 'Веб-панель и не только',
       webDashboard: {
-        title: 'Ваши финансы на большом экране',
-        body: 'Откройте app.money2time.com на компьютере и отсканируйте код в разделе Настройки > Веб-панель. Телефон отправит данные прямо в браузер. Ничего не хранится онлайн, и аккаунт не нужен.',
+        title: 'Новая веб-панель',
+        body: 'Откройте app.money2time.com на компьютере и отсканируйте код в разделе Настройки > Веб-панель. Телефон отправит данные в браузер в зашифрованном виде. Ничего не хранится онлайн, и аккаунт не нужен.',
       },
       notificationReview: {
         title: 'Записи из уведомлений',
@@ -411,9 +411,7 @@ const ru = {
       scan_before: 'Раньше',
       scan_now: 'Сейчас',
       card_everyday: 'На каждый день',
-      card_savings: 'Сбережения',
       card_travel: 'Путешествия',
-      ignore: 'Пропустить',
       ricecal_kcal_left: 'ккал осталось',
       ricecal_carbs: 'Углеводы',
       ricecal_protein: 'Белки',
@@ -2739,7 +2737,7 @@ const ru = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: 'Пропустить',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',

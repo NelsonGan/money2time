@@ -121,8 +121,8 @@ const zh = {
     web_dashboard: {
       title: '网页仪表盘及更多更新',
       webDashboard: {
-        title: '在大屏幕上查看你的财务',
-        body: '在电脑上打开 app.money2time.com，然后在设置 > 网页仪表盘中扫描网页上的二维码。手机会把数据直接发送到浏览器。不会在线存储任何数据，也无需注册账号。',
+        title: '全新网页仪表盘',
+        body: '在电脑上打开 app.money2time.com，然后在设置 > 网页仪表盘中扫描网页上的二维码。手机会把数据加密后发送到浏览器。不会在线存储任何数据，也无需注册账号。',
       },
       notificationReview: {
         title: '从通知记录收支',
@@ -384,9 +384,7 @@ const zh = {
       scan_before: '以前',
       scan_now: '现在',
       card_everyday: '日常',
-      card_savings: '储蓄',
       card_travel: '旅行',
-      ignore: '忽略',
       ricecal_kcal_left: '剩余千卡',
       ricecal_carbs: '碳水',
       ricecal_protein: '蛋白质',
@@ -2624,7 +2622,7 @@ const zh = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: '忽略',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',

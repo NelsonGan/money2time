@@ -148,8 +148,8 @@ const tr = {
     web_dashboard: {
       title: 'Web Gösterge Paneli ve daha fazlası',
       webDashboard: {
-        title: 'Paranız büyük ekranda',
-        body: 'Bilgisayarınızda app.money2time.com adresini açın ve kodunu Ayarlar > Web Gösterge Paneli bölümünden tarayın. Telefonunuz verilerinizi doğrudan tarayıcıya gönderir. Çevrimiçi hiçbir şey saklanmaz ve hesap gerekmez.',
+        title: 'Yeni Web Gösterge Paneli',
+        body: 'Bilgisayarınızda app.money2time.com adresini açın ve kodunu Ayarlar > Web Gösterge Paneli bölümünden tarayın. Telefonunuz verilerinizi şifreli olarak tarayıcıya gönderir. Çevrimiçi hiçbir şey saklanmaz ve hesap gerekmez.',
       },
       notificationReview: {
         title: 'Bildirimlerden ödeme kaydı',
@@ -411,9 +411,7 @@ const tr = {
       scan_before: 'Önce',
       scan_now: 'Şimdi',
       card_everyday: 'Günlük',
-      card_savings: 'Birikim',
       card_travel: 'Seyahat',
-      ignore: 'Yok say',
       ricecal_kcal_left: 'kalan kcal',
       ricecal_carbs: 'Karbonhidrat',
       ricecal_protein: 'Protein',
@@ -2746,7 +2744,7 @@ const tr = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: 'Yok say',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',

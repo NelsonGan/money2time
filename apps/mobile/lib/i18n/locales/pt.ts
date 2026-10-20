@@ -148,8 +148,8 @@ const pt = {
     web_dashboard: {
       title: 'Painel web e mais',
       webDashboard: {
-        title: 'Seu dinheiro na tela grande',
-        body: 'Abra app.money2time.com no computador e escaneie o código em Configurações > Painel web. Seu celular envia os dados direto para o navegador. Nada fica armazenado online e não é preciso criar conta.',
+        title: 'Novo painel web',
+        body: 'Abra app.money2time.com no computador e escaneie o código em Configurações > Painel web. Seu celular envia os dados criptografados para o navegador. Nada fica armazenado online e não é preciso criar conta.',
       },
       notificationReview: {
         title: 'Registre pagamentos pelas notificações',
@@ -411,9 +411,7 @@ const pt = {
       scan_before: 'Antes',
       scan_now: 'Agora',
       card_everyday: 'Dia a dia',
-      card_savings: 'Poupança',
       card_travel: 'Viagens',
-      ignore: 'Ignorar',
       ricecal_kcal_left: 'kcal restantes',
       ricecal_carbs: 'Carboidratos',
       ricecal_protein: 'Proteína',
@@ -2750,7 +2748,7 @@ const pt = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: 'Ignorar',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',

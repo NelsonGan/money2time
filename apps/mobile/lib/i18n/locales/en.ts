@@ -123,8 +123,8 @@ const en = {
     web_dashboard: {
       title: 'Web Dashboard and more',
       webDashboard: {
-        title: 'Your money on a big screen',
-        body: 'Open app.money2time.com on your computer and scan its code in Settings > Web Dashboard. Your phone sends your data straight to the browser. Nothing is stored online and there is no account.',
+        title: 'New Web Dashboard',
+        body: 'Open app.money2time.com on your computer and scan its code in Settings > Web Dashboard. Your phone sends your data to the browser, encrypted. Nothing is stored online and there is no account.',
       },
       notificationReview: {
         title: 'Log payments from notifications',
@@ -388,9 +388,7 @@ const en = {
       scan_before: 'Before',
       scan_now: 'Now',
       card_everyday: 'Everyday',
-      card_savings: 'Savings',
       card_travel: 'Travel',
-      ignore: 'Ignore',
       ricecal_kcal_left: 'kcal left',
       ricecal_carbs: 'Carbs',
       ricecal_protein: 'Protein',

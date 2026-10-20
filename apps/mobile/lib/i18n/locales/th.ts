@@ -147,8 +147,8 @@ const th = {
     web_dashboard: {
       title: 'แดชบอร์ดเว็บและอื่นๆ',
       webDashboard: {
-        title: 'ดูเงินของคุณบนจอใหญ่',
-        body: 'เปิด app.money2time.com บนคอมพิวเตอร์ แล้วสแกนโค้ดที่ ตั้งค่า > แดชบอร์ดเว็บ โทรศัพท์จะส่งข้อมูลตรงไปยังเบราว์เซอร์ ไม่มีการเก็บข้อมูลออนไลน์และไม่ต้องมีบัญชี',
+        title: 'แดชบอร์ดเว็บใหม่',
+        body: 'เปิด app.money2time.com บนคอมพิวเตอร์ แล้วสแกนโค้ดที่ ตั้งค่า > แดชบอร์ดเว็บ โทรศัพท์จะส่งข้อมูลที่เข้ารหัสไปยังเบราว์เซอร์ ไม่มีการเก็บข้อมูลออนไลน์และไม่ต้องมีบัญชี',
       },
       notificationReview: {
         title: 'บันทึกการชำระเงินจากการแจ้งเตือน',
@@ -410,9 +410,7 @@ const th = {
       scan_before: 'ก่อนหน้า',
       scan_now: 'ตอนนี้',
       card_everyday: 'ใช้จ่ายประจำวัน',
-      card_savings: 'เงินออม',
       card_travel: 'ท่องเที่ยว',
-      ignore: 'ข้าม',
       ricecal_kcal_left: 'เหลือ kcal',
       ricecal_carbs: 'คาร์โบไฮเดรต',
       ricecal_protein: 'โปรตีน',
@@ -2687,7 +2685,7 @@ const th = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: 'ข้าม',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',

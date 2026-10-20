@@ -148,8 +148,8 @@ const uk = {
     web_dashboard: {
       title: 'Веб-панель та інше',
       webDashboard: {
-        title: 'Ваші гроші на великому екрані',
-        body: 'Відкрийте app.money2time.com на комп’ютері та відскануйте код у Налаштування > Веб-панель. Телефон надсилає дані прямо в браузер. Нічого не зберігається онлайн, і обліковий запис не потрібен.',
+        title: 'Нова веб-панель',
+        body: 'Відкрийте app.money2time.com на комп’ютері та відскануйте код у Налаштування > Веб-панель. Телефон надсилає дані в браузер у зашифрованому вигляді. Нічого не зберігається онлайн, і обліковий запис не потрібен.',
       },
       notificationReview: {
         title: 'Записи зі сповіщень',
@@ -411,9 +411,7 @@ const uk = {
       scan_before: 'Раніше',
       scan_now: 'Зараз',
       card_everyday: 'Щоденні',
-      card_savings: 'Заощадження',
       card_travel: 'Подорожі',
-      ignore: 'Пропустити',
       ricecal_kcal_left: 'ккал залишилося',
       ricecal_carbs: 'Вуглеводи',
       ricecal_protein: 'Білки',
@@ -2733,7 +2731,7 @@ const uk = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: 'Пропустити',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',

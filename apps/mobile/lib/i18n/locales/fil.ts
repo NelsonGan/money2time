@@ -148,8 +148,8 @@ const fil = {
     web_dashboard: {
       title: 'Web Dashboard at iba pa',
       webDashboard: {
-        title: 'Ang pera mo sa malaking screen',
-        body: 'Buksan ang app.money2time.com sa computer at i-scan ang code nito sa Settings > Web Dashboard. Direktang ipinapadala ng phone mo ang data sa browser. Walang naiimbak online at hindi kailangan ng account.',
+        title: 'Bagong Web Dashboard',
+        body: 'Buksan ang app.money2time.com sa computer at i-scan ang code nito sa Settings > Web Dashboard. Ipinapadala ng phone mo ang naka-encrypt na data sa browser. Walang naiimbak online at hindi kailangan ng account.',
       },
       notificationReview: {
         title: 'Itala ang mga bayad mula sa notification',
@@ -411,9 +411,7 @@ const fil = {
       scan_before: 'Dati',
       scan_now: 'Ngayon',
       card_everyday: 'Pang-araw-araw',
-      card_savings: 'Ipon',
       card_travel: 'Biyahe',
-      ignore: 'Huwag pansinin',
       ricecal_kcal_left: 'natitirang kcal',
       ricecal_carbs: 'Karbohidrat',
       ricecal_protein: 'Protina',
@@ -2773,7 +2771,7 @@ const fil = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: 'Huwag pansinin',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',

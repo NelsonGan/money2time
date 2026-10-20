@@ -147,8 +147,8 @@ const ko = {
     web_dashboard: {
       title: '웹 대시보드 외 새 기능',
       webDashboard: {
-        title: '큰 화면으로 보는 내 돈',
-        body: '컴퓨터에서 app.money2time.com을 열고 설정 > 웹 대시보드에서 코드를 스캔하세요. 휴대폰이 데이터를 브라우저로 바로 보냅니다. 온라인에는 아무것도 저장되지 않고 계정도 필요 없어요.',
+        title: '새로운 웹 대시보드',
+        body: '컴퓨터에서 app.money2time.com을 열고 설정 > 웹 대시보드에서 코드를 스캔하세요. 휴대폰이 데이터를 암호화해 브라우저로 보냅니다. 온라인에는 아무것도 저장되지 않고 계정도 필요 없어요.',
       },
       notificationReview: {
         title: '알림으로 결제 기록하기',
@@ -410,9 +410,7 @@ const ko = {
       scan_before: '이전',
       scan_now: '지금',
       card_everyday: '생활비',
-      card_savings: '저축',
       card_travel: '여행',
-      ignore: '무시',
       ricecal_kcal_left: '남은 kcal',
       ricecal_carbs: '탄수화물',
       ricecal_protein: '단백질',
@@ -2701,7 +2699,7 @@ const ko = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: '무시',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',

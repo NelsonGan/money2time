@@ -148,8 +148,8 @@ const pl = {
     web_dashboard: {
       title: 'Panel webowy i nie tylko',
       webDashboard: {
-        title: 'Twoje pieniądze na dużym ekranie',
-        body: 'Otwórz app.money2time.com na komputerze i zeskanuj kod w Ustawienia > Panel webowy. Telefon wysyła dane prosto do przeglądarki. Nic nie jest przechowywane online i nie potrzebujesz konta.',
+        title: 'Nowy panel webowy',
+        body: 'Otwórz app.money2time.com na komputerze i zeskanuj kod w Ustawienia > Panel webowy. Telefon wysyła zaszyfrowane dane do przeglądarki. Nic nie jest przechowywane online i nie potrzebujesz konta.',
       },
       notificationReview: {
         title: 'Zapisuj płatności z powiadomień',
@@ -411,9 +411,7 @@ const pl = {
       scan_before: 'Wcześniej',
       scan_now: 'Teraz',
       card_everyday: 'Na co dzień',
-      card_savings: 'Oszczędności',
       card_travel: 'Podróże',
-      ignore: 'Pomiń',
       ricecal_kcal_left: 'pozostało kcal',
       ricecal_carbs: 'Węglowodany',
       ricecal_protein: 'Białko',
@@ -2744,7 +2742,7 @@ const pl = {
   payment_alerts: {
     review_pending: 'To review',
     review_recent: 'Recent',
-    review_ignore: 'Ignore',
+    review_ignore: 'Pomiń',
     review_income_all: 'Income All',
     review_expense_all: 'Expense All',
     review_ignore_all: 'Ignore All',
