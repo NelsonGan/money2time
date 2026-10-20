@@ -1,6 +1,6 @@
 // Short-lived, single-purpose URLs for R2. The bucket is private and has no
 // credentials outside this Worker, so a client can reach a backup only through
-// a URL signed here after its session (and, for uploads, its primary device)
+// a URL signed here after its vault (and, for uploads, its primary device)
 // was checked. The token carries everything the transfer needs; it is an
 // HMAC over its own payload, so it cannot be altered or reused past `exp`.
 
@@ -30,7 +30,7 @@ async function hmacKey(secret: string, purpose: string): Promise<CryptoKey> {
 export type UploadClaims = {
   /** Backup id, also the R2 object name. */
   bid: string;
-  uid: string;
+  vid: string;
   did: string;
   size: number;
   sha256: string;
@@ -40,7 +40,7 @@ export type UploadClaims = {
   exp: number;
 };
 
-export type DownloadClaims = { uid: string; key: string; sha256: string; exp: number };
+export type DownloadClaims = { vid: string; key: string; sha256: string; exp: number };
 
 export async function signToken<T extends { exp: number }>(
   secret: string,

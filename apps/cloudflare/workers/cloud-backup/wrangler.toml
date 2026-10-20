@@ -1,12 +1,8 @@
 name = "money2time-workers-cloud-backup"
 main = "src/index.ts"
 compatibility_date = "2026-10-15"
-compatibility_flags = ["nodejs_compat"]
 
 # Custom domain — the money2time.com zone must be on this Cloudflare account.
-# It shares money2time.com with app.money2time.com, so the session cookie
-# (scoped to the parent domain) reaches the web dashboard without a third
-# party cookie.
 routes = [
   { pattern = "workers-cloud-backup.money2time.com", custom_domain = true }
 ]
@@ -16,26 +12,22 @@ routes = [
 workers_dev = false
 preview_urls = true
 
-# Users, sessions, devices and backup metadata
-# (schema: apps/cloudflare/d1/cloud-backup/schema.sql).
+# Vaults, devices, linked browsers and backup metadata — no accounts and
+# nothing personal (schema: apps/cloudflare/d1/cloud-backup/schema.sql).
 [[d1_databases]]
 binding = "MONEY2TIME_D1_CLOUD_BACKUP"
 database_name = "money2time-d1-cloud-backup"
 database_id = "c8edd581-ec47-449d-b732-44096673f864"
 
-# The backups themselves, gzipped JSON. Private: no public access and no
-# r2.dev URL; every read and write goes through a short-lived URL this Worker
-# signs after checking the session.
+# The backups themselves, end-to-end encrypted on the phone before upload.
+# Private: no public access and no r2.dev URL; every read and write goes
+# through a short-lived URL this Worker signs after checking the vault.
 [[r2_buckets]]
 binding = "MONEY2TIME_R2_CLOUD_BACKUP"
 bucket_name = "money2time-r2-cloud-backup"
 
-# Sign-in codes, sent with Cloudflare Email Service. money2time.com must be
-# onboarded as a sending domain (Email Service → Sending → Domains).
-[[send_email]]
-name = "EMAIL"
-
-# Daily cleanup of expired QR link requests (D1 has no TTL).
+# Daily cleanup (D1 has no TTL): expired QR links, rate-limit windows, and
+# vaults nobody has opened in 180 days.
 [triggers]
 crons = ["30 3 * * *"]
 
@@ -44,17 +36,9 @@ enabled = true
 head_sampling_rate = 1
 
 [vars]
-BETTER_AUTH_URL = "https://workers-cloud-backup.money2time.com"
-# Cookie domain shared by the Worker and the web dashboard.
-COOKIE_DOMAIN = "money2time.com"
-# Browser origins allowed to call the API with credentials.
+PUBLIC_URL = "https://workers-cloud-backup.money2time.com"
+# Browser origins allowed to call the API.
 ALLOWED_ORIGINS = "https://app.money2time.com"
-# The app's URL scheme, for Better Auth's Expo plugin.
-APP_SCHEME = "money2time"
-EMAIL_FROM = "hello@money2time.com"
-# Google OAuth client IDs: web first (used for the redirect flow), then the
-# iOS and Android clients whose ID tokens the app signs in with.
-GOOGLE_CLIENT_IDS = ""
 # RevenueCat entitlement that counts as Pro (same as the receipt scanner).
 ENTITLEMENT_ID = "pro"
 # Largest compressed backup accepted, in bytes. The Worker holds an upload in
@@ -64,6 +48,5 @@ MAX_BACKUP_BYTES = "67108864"
 
 # Secrets — add in the Cloudflare dashboard (Workers & Pages → this Worker →
 # Settings → Variables and Secrets → add as "Secret"), never commit:
-#   BETTER_AUTH_SECRET    32+ random bytes; signs sessions and transfer URLs
-#   GOOGLE_CLIENT_SECRET  secret of the web OAuth client
+#   URL_SIGNING_SECRET    32+ random bytes; signs the short-lived upload/download URLs
 #   REVENUECAT_SECRET_KEY RevenueCat v1 secret API key (Pro checks); unset = nobody is Pro

@@ -3,12 +3,12 @@
 //   1. A browser (or a new phone) makes a P-256 key pair and calls
 //      POST /v1/link/start with its public key. It shows
 //      money2time://link?id=…&pk=…&kind=… as a QR code and polls.
-//   2. A signed-in phone that holds the account's backup key scans it, wraps
-//      that key for the shown public key (ECDH → HKDF → AES-GCM) and posts the
-//      wrapped key to /v1/link/:id/approve.
+//   2. A phone that holds the vault's backup key scans it, wraps that key for
+//      the shown public key (ECDH → HKDF → AES-GCM) and posts the wrapped key
+//      to /v1/link/:id/approve.
 //   3. The next poll hands the wrapped key to the newcomer exactly once. A
 //      browser also gets a web token: its only credential, revocable from the
-//      phone. A new phone gets just the key; it signs in on its own.
+//      phone. A new phone gets just the key, and with it the vault.
 //
 // The server relays the wrapped key and cannot open it: it never sees the
 // backup key, only the public halves of the two key pairs.
@@ -43,7 +43,7 @@ export type LinkRow = {
   poll_token_hash: string;
   public_key: string;
   name: string | null;
-  user_id: string | null;
+  vault_id: string | null;
   status: 'pending' | 'approved' | 'consumed';
   phone_public_key: string | null;
   wrapped_key: string | null;
@@ -65,7 +65,7 @@ export class LinkError extends Error {
 
 export async function startLink(
   env: Env,
-  input: { kind: LinkKind; publicKey: string; name: string | null; ip: string | null; userId: string | null },
+  input: { kind: LinkKind; publicKey: string; name: string | null; ip: string | null },
 ): Promise<{ linkId: string; pollToken: string; expiresAt: number }> {
   if (!PUBLIC_KEY.test(input.publicKey)) throw new LinkError(400, 'invalid_public_key');
   const now = Date.now();
@@ -82,10 +82,10 @@ export async function startLink(
   const expiresAt = now + LINK_TTL_MS;
   await db(env)
     .prepare(
-      `insert into link_request (id, kind, poll_token_hash, public_key, name, ip_hash, user_id, status, created_at, expires_at)
-       values (?1, ?2, ?3, ?4, ?5, ?6, ?7, 'pending', ?8, ?9)`,
+      `insert into link_request (id, kind, poll_token_hash, public_key, name, ip_hash, status, created_at, expires_at)
+       values (?1, ?2, ?3, ?4, ?5, ?6, 'pending', ?7, ?8)`,
     )
-    .bind(linkId, input.kind, await hashToken(pollToken), input.publicKey, input.name, ipHash, input.userId, now, expiresAt)
+    .bind(linkId, input.kind, await hashToken(pollToken), input.publicKey, input.name, ipHash, now, expiresAt)
     .run();
   return { linkId, pollToken, expiresAt };
 }
@@ -108,13 +108,10 @@ export async function pollLink(env: Env, linkId: string, pollToken: string) {
     .bind(linkId)
     .run();
   if (!consumed.meta.changes) throw new LinkError(410, 'link_used');
-  const user = link.user_id
-    ? await db(env).prepare('select email from "user" where id = ?1').bind(link.user_id).first<{ email: string }>()
-    : null;
   const device = link.approved_by_device
     ? await db(env)
-        .prepare('select name from device where user_id = ?1 and id = ?2')
-        .bind(link.user_id, link.approved_by_device)
+        .prepare('select name from device where vault_id = ?1 and id = ?2')
+        .bind(link.vault_id, link.approved_by_device)
         .first<{ name: string | null }>()
     : null;
   return {
@@ -122,7 +119,6 @@ export async function pollLink(env: Env, linkId: string, pollToken: string) {
     phonePublicKey: link.phone_public_key,
     wrappedKey: link.wrapped_key,
     iv: link.wrapped_iv,
-    email: user?.email ?? null,
     deviceName: device?.name ?? null,
     webToken: link.kind === 'web' ? link.web_token : null,
   };
@@ -139,7 +135,7 @@ export async function approveLink(
   env: Env,
   input: {
     linkId: string;
-    userId: string;
+    vaultId: string;
     deviceId: string;
     publicKey: string;
     phonePublicKey: string;
@@ -155,8 +151,6 @@ export async function approveLink(
   // The phone must have wrapped for the key in the QR it scanned, not some
   // other link's: a mismatch means the QR and the request do not belong together.
   if (link.public_key !== input.publicKey) throw new LinkError(409, 'public_key_mismatch');
-  // A new phone hands its key request to its own account only.
-  if (link.kind === 'phone' && link.user_id !== input.userId) throw new LinkError(403, 'different_account');
 
   let webToken: string | null = null;
   if (link.kind === 'web') {
@@ -164,45 +158,45 @@ export async function approveLink(
     const now = Date.now();
     await db(env)
       .prepare(
-        `insert into web_session (id, user_id, token_hash, name, created_at, last_seen_at)
+        `insert into web_session (id, vault_id, token_hash, name, created_at, last_seen_at)
          values (?1, ?2, ?3, ?4, ?5, ?5)`,
       )
-      .bind(crypto.randomUUID(), input.userId, await hashToken(webToken), link.name, now)
+      .bind(crypto.randomUUID(), input.vaultId, await hashToken(webToken), link.name, now)
       .run();
   }
   const updated = await db(env)
     .prepare(
-      `update link_request set status = 'approved', user_id = ?2, phone_public_key = ?3, wrapped_key = ?4,
+      `update link_request set status = 'approved', vault_id = ?2, phone_public_key = ?3, wrapped_key = ?4,
          wrapped_iv = ?5, approved_by_device = ?6, web_token = ?7
        where id = ?1 and status = 'pending'`,
     )
-    .bind(input.linkId, input.userId, input.phonePublicKey, input.wrappedKey, input.iv, input.deviceId, webToken)
+    .bind(input.linkId, input.vaultId, input.phonePublicKey, input.wrappedKey, input.iv, input.deviceId, webToken)
     .run();
   if (!updated.meta.changes) throw new LinkError(409, 'link_not_pending');
   return { kind: link.kind };
 }
 
-/** The account a browser's web token belongs to, or null if unknown or revoked. */
-export async function webSessionUser(env: Env, token: string): Promise<{ userId: string; sessionId: string } | null> {
+/** The vault a browser's web token reaches, or null if unknown or revoked. */
+export async function webSessionVault(env: Env, token: string): Promise<{ vaultId: string; sessionId: string } | null> {
   if (!B64URL.test(token)) return null;
   const row = await db(env)
-    .prepare('select id, user_id, last_seen_at from web_session where token_hash = ?1 and revoked_at is null')
+    .prepare('select id, vault_id, last_seen_at from web_session where token_hash = ?1 and revoked_at is null')
     .bind(await hashToken(token))
-    .first<{ id: string; user_id: string; last_seen_at: number }>();
+    .first<{ id: string; vault_id: string; last_seen_at: number }>();
   if (!row) return null;
   // Touch at most hourly, so a busy tab does not write on every request.
   if (Date.now() - row.last_seen_at > 60 * 60 * 1000) {
     await db(env).prepare('update web_session set last_seen_at = ?2 where id = ?1').bind(row.id, Date.now()).run();
   }
-  return { userId: row.user_id, sessionId: row.id };
+  return { vaultId: row.vault_id, sessionId: row.id };
 }
 
-export async function listWebSessions(env: Env, userId: string) {
+export async function listWebSessions(env: Env, vaultId: string) {
   const result = await db(env)
     .prepare(
-      'select id, name, created_at, last_seen_at from web_session where user_id = ?1 and revoked_at is null order by last_seen_at desc',
+      'select id, name, created_at, last_seen_at from web_session where vault_id = ?1 and revoked_at is null order by last_seen_at desc',
     )
-    .bind(userId)
+    .bind(vaultId)
     .all<{ id: string; name: string | null; created_at: number; last_seen_at: number }>();
   return result.results.map((row) => ({
     id: row.id,
@@ -212,21 +206,17 @@ export async function listWebSessions(env: Env, userId: string) {
   }));
 }
 
-export async function revokeWebSession(env: Env, userId: string, sessionId: string): Promise<void> {
+export async function revokeWebSession(env: Env, vaultId: string, sessionId: string): Promise<void> {
   await db(env)
-    .prepare('update web_session set revoked_at = ?3 where id = ?1 and user_id = ?2 and revoked_at is null')
-    .bind(sessionId, userId, Date.now())
+    .prepare('update web_session set revoked_at = ?3 where id = ?1 and vault_id = ?2 and revoked_at is null')
+    .bind(sessionId, vaultId, Date.now())
     .run();
 }
 
-export async function revokeAllWebSessions(env: Env, userId: string): Promise<void> {
-  await db(env)
-    .prepare('update web_session set revoked_at = ?2 where user_id = ?1 and revoked_at is null')
-    .bind(userId, Date.now())
-    .run();
-}
-
-/** Daily: link requests are only ever two minutes long. */
+/** Daily: link requests are only ever two minutes long, and a revoked browser token is never used again. */
 export async function pruneLinks(env: Env): Promise<void> {
-  await db(env).prepare('delete from link_request where expires_at < ?1').bind(Date.now() - 24 * 60 * 60 * 1000).run();
+  await db(env).batch([
+    db(env).prepare('delete from link_request where expires_at < ?1').bind(Date.now() - 24 * 60 * 60 * 1000),
+    db(env).prepare('delete from web_session where revoked_at < ?1').bind(Date.now() - 24 * 60 * 60 * 1000),
+  ]);
 }

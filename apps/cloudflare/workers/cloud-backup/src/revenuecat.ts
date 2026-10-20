@@ -1,8 +1,8 @@
 // Whether an account is Pro, for gating parts of the web dashboard. The same
 // server-side check as the receipt scanner (apps/cloudflare/workers/
 // receipt-scanner/src/revenuecat.ts): the entitlement, read with the secret
-// key, never trusted from the client. An account is Pro when any of its
-// phones' RevenueCat App User IDs is.
+// key, never trusted from the client. A vault is Pro when any of its phones'
+// RevenueCat App User IDs is.
 
 import type { Env } from './env';
 import { listAppUserIds } from './store';
@@ -12,9 +12,9 @@ const PRO_CACHE_TTL_MS = 60 * 60 * 1000;
 const FREE_CACHE_TTL_MS = 60 * 1000;
 const FETCH_TIMEOUT_MS = 8000;
 
-export async function isAccountPro(env: Env, userId: string): Promise<boolean> {
+export async function isVaultPro(env: Env, vaultId: string): Promise<boolean> {
   if (!env.REVENUECAT_SECRET_KEY) return false;
-  for (const appUserId of await listAppUserIds(env, userId)) {
+  for (const appUserId of await listAppUserIds(env, vaultId)) {
     if (await isPro(env, appUserId)) return true;
   }
   return false;
