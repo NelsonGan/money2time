@@ -121,8 +121,17 @@ describe('receipt scanner with Claude as MODEL', () => {
     expect(first.model).toBe(CLAUDE);
     expect(first.provider).toEqual({ only: ['anthropic'], allow_fallbacks: false });
     expect(first).not.toHaveProperty('temperature');
-    // The prompt text ahead of the receipt goes in the 5-minute prompt cache.
-    expect(first.messages[0].content[0].cache_control).toEqual({ type: 'ephemeral' });
+    // The text every user shares goes in the 1-hour prompt cache; this user's
+    // settings follow it uncached, then the receipt.
+    const [shared, personal, image] = first.messages[0].content;
+    expect(shared.cache_control).toEqual({ type: 'ephemeral', ttl: '1h' });
+    expect(shared.text).not.toContain('MYR');
+    expect(personal).toEqual({
+      type: 'text',
+      text: expect.stringContaining("## This user's settings"),
+    });
+    expect(personal.text).toContain('Currency: MYR');
+    expect(image.type).toBe('image_url');
     // OpenRouter files calls under the referer and shows the title as the app.
     const [, init] = fetchMock.mock.calls.find(([url]) => String(url).includes('openrouter.ai'))!;
     expect(init.headers).toMatchObject({
@@ -166,10 +175,81 @@ describe('receipt scanner with Claude as MODEL', () => {
     expect(served.properties.is_backup_model).toBe(true);
   });
 
+  it('sends every user the same cached text, whatever their settings', async () => {
+    answers.push(completion(ANSWER, BYOK_USAGE), completion(ANSWER, BYOK_USAGE));
+    await worker.fetch(request({ currency: 'MYR', categories: ['Food', 'Other'] }), env, ctx);
+    await worker.fetch(
+      request({ currency: 'SGD', categories: ['Makan', 'Grab'], accounts: ['Visa 4242'] }),
+      env,
+      ctx,
+    );
+    const [a, b] = sent().map((s) => s.messages[0].content);
+    expect(a[0].text).toBe(b[0].text);
+    expect(a[1].text).not.toBe(b[1].text);
+    expect(b[1].text).toContain('Visa 4242');
+  });
+
+  it('caches an older hosted template, with no shared part, whole and per user', async () => {
+    fetchMock.mockImplementation(async (url: string) => {
+      if (url.includes('/llm_prompts/')) {
+        return new Response(
+          JSON.stringify({ prompt: 'Old {{currency_code}} {{allowed_categories}}', version: 1 }),
+        );
+      }
+      if (url.includes('openrouter.ai')) return completion(ANSWER, BYOK_USAGE)();
+      return new Response('{"status":"Ok"}');
+    });
+    await worker.fetch(request(), { ...env, POSTHOG_PROMPTS_API_KEY: 'phx_test' }, ctx);
+    const content = sent()[0].messages[0].content;
+    expect(content).toHaveLength(2);
+    expect(content[0]).toEqual({
+      type: 'text',
+      text: 'Old MYR Food, Other',
+      cache_control: { type: 'ephemeral' },
+    });
+  });
+
+  it.each([
+    [
+      'fills in a variable above the settings',
+      "Pay in {{currency_code}}\n## This user's settings\n{{allowed_categories}}",
+      "Pay in MYR\n## This user's settings\nFood, Other",
+    ],
+    [
+      'has nothing above the settings',
+      "## This user's settings\n{{currency_code}}",
+      "## This user's settings\nMYR",
+    ],
+  ])('caches a hosted template that %s whole and per user', async (_, prompt, text) => {
+    fetchMock.mockImplementation(async (url: string) => {
+      if (url.includes('/llm_prompts/'))
+        return new Response(JSON.stringify({ prompt, version: 3 }));
+      if (url.includes('openrouter.ai')) return completion(ANSWER, BYOK_USAGE)();
+      return new Response('{"status":"Ok"}');
+    });
+    await worker.fetch(request(), { ...env, POSTHOG_PROMPTS_API_KEY: 'phx_test' }, ctx);
+    const content = sent()[0].messages[0].content;
+    expect(content).toHaveLength(2);
+    expect(content[0]).toEqual({ type: 'text', text, cache_control: { type: 'ephemeral' } });
+  });
+
+  it.each(['receipt-scan-quick', 'receipt-scan-itemized', 'receipt-scan-screenshot'])(
+    'keeps every variable of the bundled %s below the settings heading',
+    (name) => {
+      const template: string = prompts.BUNDLED_PROMPTS[name];
+      const at = template.indexOf("## This user's settings");
+      expect(at).toBeGreaterThan(0);
+      expect(template.slice(0, at)).not.toContain('{{');
+    },
+  );
+
   it('sends an image as the type its bytes are, not the type it was declared', async () => {
     answers.push(completion(ANSWER, BYOK_USAGE));
     await worker.fetch(request({ image: PNG, mime: 'image/jpeg' }), env, ctx);
-    expect(sent()[0].messages[0].content[1].image_url.url).toBe(`data:image/png;base64,${PNG}`);
+    const image = sent()[0].messages[0].content.find(
+      (part: { type: string }) => part.type === 'image_url',
+    );
+    expect(image.image_url.url).toBe(`data:image/png;base64,${PNG}`);
   });
 
   it.each([
