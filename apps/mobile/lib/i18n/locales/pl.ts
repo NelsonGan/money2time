@@ -1487,6 +1487,7 @@ const pl = {
     haptics: 'Wibracje',
     haptics_subtitle: 'Włącz lub wyłącz wibracje w całej aplikacji.',
     data_management: 'Zarządzanie danymi',
+    cloud_backup: 'Kopia w chmurze',
     statement_import: 'Import wyciągu',
   },
   statement_import: {
@@ -2334,6 +2335,85 @@ const pl = {
       weekly_review_body: 'Zobacz, gdzie w zeszłym tygodniu trafiły twoje pieniądze i czas.',
       monthly_review_title: 'Twój miesiąc w skrócie',
       monthly_review_body: 'Zobacz, gdzie w zeszłym miesiącu trafiły twoje pieniądze i czas.',
+    },
+  },
+  cloud_backup: {
+    title: 'Kopia w chmurze i panel webowy',
+    subtitle:
+      'Zaloguj się, aby przechowywać w chmurze jedną skompresowaną kopię tego telefonu, aktualizowaną codziennie, i przeglądać ją na komputerze pod adresem app.money2time.com.',
+    intro_title: 'Twoje dane na dużym ekranie',
+    intro_body:
+      'Po zalogowaniu ten telefon codziennie wysyła skompresowaną kopię. Otwórz app.money2time.com na komputerze, aby przeglądać ją w 17 panelach.',
+    source_of_truth:
+      'Źródłem prawdy pozostaje Twój telefon. Panel webowy tylko odczytuje dane, a dane nie są synchronizowane między telefonami.',
+    sign_in_title: 'Zaloguj się',
+    google: 'Kontynuuj z Google',
+    or: 'lub',
+    email_label: 'E-mail',
+    send_code: 'Wyślij mi kod logowania e-mailem',
+    code_label: 'Wpisz 6-cyfrowy kod wysłany na adres {{email}}',
+    verify: 'Zaloguj się',
+    change_email: 'Użyj innego adresu e-mail',
+    working: 'Przetwarzanie…',
+    signed_in_as: 'Zalogowano jako {{email}}',
+    primary_yes: 'Ten telefon tworzy kopie',
+    primary_yes_body: 'To główne urządzenie tego konta, które raz dziennie wysyła kopię zapasową.',
+    primary_no: 'Kopie tworzy inny telefon',
+    primary_no_body:
+      '{{device}} jest urządzeniem głównym. Ten telefon może przywrócić jego kopię, ale wysyła ją tylko jeden telefon, więc nigdy się nie nadpisują.',
+    another_phone: 'inny telefon',
+    back_up_now: 'Utwórz kopię teraz',
+    backing_up: 'Tworzenie kopii…',
+    transfer_title: 'Ustawić ten telefon jako główne urządzenie?',
+    transfer_message:
+      'Od teraz ten telefon wysyła kopię zapasową, a drugi telefon przestaje to robić. Następna kopia z tego telefonu zastąpi tę w chmurze.',
+    transfer_action: 'Ustaw ten telefon jako główny',
+    latest_title: 'Kopia w chmurze',
+    latest_body: 'Ostatnia kopia: {{date}} z urządzenia {{device}} · {{size}}',
+    latest_none: 'Brak kopii. Pierwsza zostanie wysłana wkrótce po zalogowaniu.',
+    never: 'nigdy',
+    open_web: 'Otwórz panel webowy',
+    open_web_hint: 'Zaloguj się na to samo konto na app.money2time.com.',
+    restore_section: 'Przywróć na tym telefonie',
+    restore_hint:
+      'Konfigurujesz nowy telefon? Przywróć kopię z chmury, aby przenieść tu swoje dane. Zastąpi to wszystko na tym telefonie.',
+    restore_title: 'Zastąpić dane na tym telefonie kopią z chmury?',
+    restore_summary: 'Konta: {{accounts}} · transakcje: {{transactions}}',
+    restore_warning: 'Wszystko na tym telefonie zostanie zastąpione. Nie można tego cofnąć.',
+    restore_action: 'Przywróć kopię z chmury',
+    restoring: 'Przywracanie…',
+    restore_done_title: 'Przywrócono',
+    restore_done_message: 'Twoje dane zostały przywrócone z kopii w chmurze.',
+    restore_failed_title: 'Przywracanie nie powiodło się',
+    delete_title: 'Usunąć kopię z chmury?',
+    delete_message:
+      'Kopia zostanie usunięta z chmury i z panelu webowego. Dane na tym telefonie pozostaną nietknięte; następna codzienna kopia wyśle nową.',
+    delete_action: 'Usuń kopię z chmury',
+    sign_out: 'Wyloguj się',
+    sign_out_title: 'Wylogować się z kopii w chmurze?',
+    sign_out_message:
+      'Ten telefon przestanie tworzyć kopie. Dane na tym telefonie i kopia w chmurze pozostaną bez zmian.',
+    delete_account_title: 'Usunąć konto kopii w chmurze?',
+    delete_account_message:
+      'Twoje konto i jego kopia w chmurze zostaną usunięte na stałe. Dane na tym telefonie pozostaną nietknięte.',
+    delete_account_action: 'Usuń konto',
+    errors: {
+      unauthenticated: 'Nastąpiło wylogowanie. Zaloguj się ponownie.',
+      not_primary: 'Urządzeniem głównym jest inny telefon, więc ten nie wysyła kopii.',
+      offline: 'Brak połączenia z internetem. Spróbuj ponownie, gdy będziesz online.',
+      server: 'Nie udało się połączyć z kopią w chmurze. Spróbuj ponownie za chwilę.',
+      no_backup: 'Nie ma jeszcze kopii w chmurze do przywrócenia.',
+      checksum:
+        'Pobrana kopia nie zgadzała się z sumą kontrolną, więc nic nie zostało zmienione. Spróbuj ponownie.',
+      corrupt: 'Nie udało się odczytać kopii z chmury.',
+      rate_limited: 'Zbyt wiele prób. Odczekaj minutę i spróbuj ponownie.',
+      invalid_code: 'Ten kod nie zadziałał. Sprawdź go lub poproś o nowy.',
+      invalid_email: 'Wpisz prawidłowy adres e-mail.',
+      google_unavailable:
+        'Logowanie przez Google jest teraz niedostępne. Użyj zamiast tego kodu z e-maila.',
+      cancelled: 'Logowanie zostało anulowane.',
+      session_not_fresh:
+        'Ze względów bezpieczeństwa wyloguj się i zaloguj ponownie, a potem usuń konto.',
     },
   },
   auto_backup: {

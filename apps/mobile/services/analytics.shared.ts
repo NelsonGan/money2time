@@ -239,6 +239,17 @@ export const GA4_ONLY_EVENTS = {
   AUTO_BACKUP_SETTING_TOGGLED: 'Auto Backup Setting Toggled',
   AUTO_BACKUP_TARGET_CHANGED: 'Auto Backup Target Changed',
 
+  // Cloud Backup & Web Dashboard
+  CLOUD_BACKUP_SIGNED_IN: 'Cloud Backup Signed In',
+  CLOUD_BACKUP_SIGNED_OUT: 'Cloud Backup Signed Out',
+  CLOUD_BACKUP_UPLOADED: 'Cloud Backup Uploaded',
+  CLOUD_BACKUP_FAILED: 'Cloud Backup Failed',
+  CLOUD_BACKUP_PRIMARY_TRANSFERRED: 'Cloud Backup Primary Transferred',
+  CLOUD_BACKUP_RESTORED: 'Cloud Backup Restored',
+  CLOUD_BACKUP_DELETED: 'Cloud Backup Deleted',
+  CLOUD_BACKUP_ACCOUNT_DELETED: 'Cloud Backup Account Deleted',
+  WEB_DASHBOARD_OPENED: 'Web Dashboard Opened',
+
   // Review prompt
   REVIEW_PROMPT_MANUAL_OPENED: 'Review Prompt Manual Opened',
 } as const;

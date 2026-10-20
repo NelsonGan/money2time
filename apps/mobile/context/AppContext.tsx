@@ -105,6 +105,7 @@ import {
   runAutoBackupIfDue,
   unregisterBackgroundTask,
 } from '~/services/autoBackup';
+import { hasCloudSession, runCloudBackupIfDue } from '~/services/cloudBackup';
 import { reportError } from '~/services/errorReporting';
 import { refreshRatesNow, runRateRefreshIfDue } from '~/services/exchangeRates';
 import { setHapticsEnabled } from '~/services/haptics';
@@ -3729,14 +3730,51 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [firstAppOpen]);
 
   // Auto-backup: register/unregister background task when the toggle changes.
+  // The same task carries Cloud Backup, so it stays registered while this
+  // phone is signed in to it.
   const autoBackupEnabled = settings?.autoBackupEnabled ?? true;
   useEffect(() => {
     if (autoBackupEnabled) {
       void registerBackgroundTask();
-    } else {
-      void unregisterBackgroundTask();
+      return;
     }
+    void hasCloudSession().then((signedIn) => {
+      if (signedIn) void registerBackgroundTask();
+      else void unregisterBackgroundTask();
+    });
   }, [autoBackupEnabled]);
+
+  // Cloud Backup: foreground trigger, on the same settle-then-idle schedule as
+  // the auto-backup below. It skips on its own when signed out, not primary,
+  // or already backed up today.
+  const cloudSettingsLoaded = Boolean(settings);
+  useEffect(() => {
+    if (!cloudSettingsLoaded) return;
+    let settleTimer: ReturnType<typeof setTimeout> | null = null;
+    let interaction: { cancel: () => void } | null = null;
+    const trigger = () => {
+      if (settleTimer) clearTimeout(settleTimer);
+      interaction?.cancel();
+      settleTimer = setTimeout(() => {
+        settleTimer = null;
+        interaction = InteractionManager.runAfterInteractions(() => {
+          interaction = null;
+          void runCloudBackupIfDue().catch((error: unknown) => {
+            reportError(error, { scope: 'cloud_backup' });
+          });
+        });
+      }, AUTO_BACKUP_SETTLE_DELAY_MS * 2);
+    };
+    trigger();
+    const sub = RNAppState.addEventListener('change', (state: AppStateStatus) => {
+      if (state === 'active') trigger();
+    });
+    return () => {
+      sub.remove();
+      if (settleTimer) clearTimeout(settleTimer);
+      interaction?.cancel();
+    };
+  }, [cloudSettingsLoaded]);
 
   // Auto-backup: foreground trigger. The background task is best-effort on iOS;
   // this is the reliable path that fires on every cold start and every return

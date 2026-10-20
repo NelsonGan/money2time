@@ -1488,6 +1488,7 @@ const es = {
     haptics: 'Vibración',
     haptics_subtitle: 'Activa o desactiva la respuesta táctil en toda la app.',
     data_management: 'Gestión de datos',
+    cloud_backup: 'Respaldo en la nube',
     statement_import: 'Importar extracto',
   },
   statement_import: {
@@ -2340,6 +2341,86 @@ const es = {
       weekly_review_body: 'Mira a dónde fueron tu dinero y tu tiempo la semana pasada.',
       monthly_review_title: 'Tu mes en revisión',
       monthly_review_body: 'Mira a dónde fueron tu dinero y tu tiempo el mes pasado.',
+    },
+  },
+  cloud_backup: {
+    title: 'Respaldo en la nube y panel web',
+    subtitle:
+      'Inicia sesión para guardar en la nube un respaldo comprimido de este teléfono, actualizado a diario, y verlo en una computadora en app.money2time.com.',
+    intro_title: 'Tus datos en pantalla grande',
+    intro_body:
+      'Una vez que inicies sesión, este teléfono sube un respaldo comprimido cada día. Abre app.money2time.com en una computadora para explorarlo en 17 paneles.',
+    source_of_truth:
+      'Tu teléfono sigue siendo la fuente de verdad. El panel web solo lee, y los datos no se sincronizan entre teléfonos.',
+    sign_in_title: 'Iniciar sesión',
+    google: 'Continuar con Google',
+    or: 'o',
+    email_label: 'Correo electrónico',
+    send_code: 'Enviarme un código por correo',
+    code_label: 'Introduce el código de 6 dígitos enviado a {{email}}',
+    verify: 'Iniciar sesión',
+    change_email: 'Usar otro correo',
+    working: 'Procesando…',
+    signed_in_as: 'Sesión iniciada como {{email}}',
+    primary_yes: 'Este teléfono hace el respaldo',
+    primary_yes_body:
+      'Es el dispositivo principal de esta cuenta y sube un respaldo una vez al día.',
+    primary_no: 'Otro teléfono hace el respaldo',
+    primary_no_body:
+      '{{device}} es el dispositivo principal. Este teléfono puede restaurar su respaldo, pero solo un teléfono sube, así que nunca se sobrescriben entre sí.',
+    another_phone: 'otro teléfono',
+    back_up_now: 'Respaldar ahora',
+    backing_up: 'Respaldando…',
+    transfer_title: '¿Hacer de este teléfono el dispositivo principal?',
+    transfer_message:
+      'A partir de ahora este teléfono sube el respaldo y el otro deja de hacerlo. El próximo respaldo de este teléfono reemplaza el que está en la nube.',
+    transfer_action: 'Hacer principal este teléfono',
+    latest_title: 'Respaldo en la nube',
+    latest_body: 'Último respaldo {{date}} desde {{device}} · {{size}}',
+    latest_none: 'Aún no hay respaldo. El primero se sube poco después de iniciar sesión.',
+    never: 'nunca',
+    open_web: 'Abrir el panel web',
+    open_web_hint: 'Inicia sesión en app.money2time.com con la misma cuenta.',
+    restore_section: 'Restaurar en este teléfono',
+    restore_hint:
+      '¿Configurando un teléfono nuevo? Restaura el respaldo en la nube para traer tus datos aquí. Esto reemplaza todo lo que hay en este teléfono.',
+    restore_title: '¿Reemplazar los datos de este teléfono con el respaldo en la nube?',
+    restore_summary: '{{accounts}} cuentas · {{transactions}} transacciones',
+    restore_warning: 'Todo en este teléfono se reemplaza. No se puede deshacer.',
+    restore_action: 'Restaurar respaldo en la nube',
+    restoring: 'Restaurando…',
+    restore_done_title: 'Restaurado',
+    restore_done_message: 'Tus datos se restauraron desde el respaldo en la nube.',
+    restore_failed_title: 'Error al restaurar',
+    delete_title: '¿Eliminar el respaldo en la nube?',
+    delete_message:
+      'El respaldo se elimina de la nube y del panel web. Los datos de este teléfono no se tocan; el próximo respaldo diario sube uno nuevo.',
+    delete_action: 'Eliminar respaldo en la nube',
+    sign_out: 'Cerrar sesión',
+    sign_out_title: '¿Cerrar sesión en el respaldo en la nube?',
+    sign_out_message:
+      'Este teléfono deja de hacer respaldos. Tus datos en este teléfono y el respaldo en la nube quedan como están.',
+    delete_account_title: '¿Eliminar tu cuenta de respaldo en la nube?',
+    delete_account_message:
+      'Tu cuenta y su respaldo en la nube se eliminan para siempre. Los datos de este teléfono no se tocan.',
+    delete_account_action: 'Eliminar cuenta',
+    errors: {
+      unauthenticated: 'Se cerró tu sesión. Inicia sesión de nuevo.',
+      not_primary: 'Otro teléfono es el dispositivo principal, así que este no sube respaldos.',
+      offline: 'Sin conexión a internet. Inténtalo de nuevo cuando estés en línea.',
+      server: 'No se pudo conectar con el respaldo en la nube. Inténtalo en un momento.',
+      no_backup: 'Todavía no hay un respaldo en la nube para restaurar.',
+      checksum:
+        'El respaldo descargado no coincidió con su suma de verificación, así que no se cambió nada. Inténtalo de nuevo.',
+      corrupt: 'No se pudo leer el respaldo en la nube.',
+      rate_limited: 'Demasiados intentos. Espera un minuto e inténtalo de nuevo.',
+      invalid_code: 'Ese código no funcionó. Revísalo o pide uno nuevo.',
+      invalid_email: 'Introduce un correo electrónico válido.',
+      google_unavailable:
+        'El inicio de sesión con Google no está disponible ahora. Usa un código por correo.',
+      cancelled: 'Se canceló el inicio de sesión.',
+      session_not_fresh:
+        'Por tu seguridad, cierra sesión e inicia sesión de nuevo, y luego elimina la cuenta.',
     },
   },
   auto_backup: {

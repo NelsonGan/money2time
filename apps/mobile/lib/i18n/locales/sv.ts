@@ -1481,6 +1481,7 @@ const sv = {
     haptics: 'Haptik',
     haptics_subtitle: 'Slå på eller av taktil återkoppling i hela appen.',
     data_management: 'Datahantering',
+    cloud_backup: 'Molnbackup',
     statement_import: 'Kontoutdragsimport',
   },
   statement_import: {
@@ -2326,6 +2327,85 @@ const sv = {
       weekly_review_body: 'Se vart dina pengar och din tid tog vägen förra veckan.',
       monthly_review_title: 'Din månad i genomgång',
       monthly_review_body: 'Se vart dina pengar och din tid tog vägen förra månaden.',
+    },
+  },
+  cloud_backup: {
+    title: 'Molnbackup och webbpanel',
+    subtitle:
+      'Logga in för att spara en komprimerad säkerhetskopia av den här telefonen i molnet, uppdaterad varje dag, och se den på en dator på app.money2time.com.',
+    intro_title: 'Din data på en stor skärm',
+    intro_body:
+      'När du har loggat in laddar den här telefonen upp en komprimerad säkerhetskopia varje dag. Öppna app.money2time.com på en dator för att utforska den i 17 instrumentpaneler.',
+    source_of_truth:
+      'Din telefon är fortfarande den ursprungliga källan. Webbpanelen kan bara läsa, och data synkas inte mellan telefoner.',
+    sign_in_title: 'Logga in',
+    google: 'Fortsätt med Google',
+    or: 'eller',
+    email_label: 'E-post',
+    send_code: 'Skicka en inloggningskod till min e-post',
+    code_label: 'Ange den 6-siffriga koden som skickats till {{email}}',
+    verify: 'Logga in',
+    change_email: 'Använd en annan e-postadress',
+    working: 'Arbetar…',
+    signed_in_as: 'Inloggad som {{email}}',
+    primary_yes: 'Den här telefonen säkerhetskopierar',
+    primary_yes_body:
+      'Det är kontots primära enhet och laddar upp en säkerhetskopia en gång om dagen.',
+    primary_no: 'En annan telefon säkerhetskopierar',
+    primary_no_body:
+      '{{device}} är den primära enheten. Den här telefonen kan återställa dess säkerhetskopia, men bara en telefon laddar upp, så de skriver aldrig över varandra.',
+    another_phone: 'en annan telefon',
+    back_up_now: 'Säkerhetskopiera nu',
+    backing_up: 'Säkerhetskopierar…',
+    transfer_title: 'Göra den här telefonen till primär enhet?',
+    transfer_message:
+      'Från och med nu laddar den här telefonen upp säkerhetskopian och den andra telefonen slutar. Nästa säkerhetskopia från den här telefonen ersätter den i molnet.',
+    transfer_action: 'Gör den här telefonen primär',
+    latest_title: 'Molnbackup',
+    latest_body: 'Senaste säkerhetskopia {{date}} från {{device}} · {{size}}',
+    latest_none: 'Ingen säkerhetskopia än. Den första laddas upp strax efter att du loggat in.',
+    never: 'aldrig',
+    open_web: 'Öppna webbpanelen',
+    open_web_hint: 'Logga in på app.money2time.com med samma konto.',
+    restore_section: 'Återställ till den här telefonen',
+    restore_hint:
+      'Ställer du in en ny telefon? Återställ molnbackupen för att få hit din data. Det ersätter allt på den här telefonen.',
+    restore_title: 'Ersätta den här telefonens data med molnbackupen?',
+    restore_summary: 'Konton: {{accounts}} · Transaktioner: {{transactions}}',
+    restore_warning: 'Allt på den här telefonen ersätts. Det går inte att ångra.',
+    restore_action: 'Återställ molnbackup',
+    restoring: 'Återställer…',
+    restore_done_title: 'Återställt',
+    restore_done_message: 'Din data har återställts från molnbackupen.',
+    restore_failed_title: 'Återställningen misslyckades',
+    delete_title: 'Ta bort molnbackupen?',
+    delete_message:
+      'Säkerhetskopian tas bort från molnet och webbpanelen. Data på den här telefonen påverkas inte; nästa dagliga säkerhetskopia laddar upp en ny.',
+    delete_action: 'Ta bort molnbackup',
+    sign_out: 'Logga ut',
+    sign_out_title: 'Logga ut från Molnbackup?',
+    sign_out_message:
+      'Den här telefonen slutar säkerhetskopiera. Din data på telefonen och molnbackupen förblir som de är.',
+    delete_account_title: 'Ta bort ditt Molnbackup-konto?',
+    delete_account_message:
+      'Ditt konto och dess molnbackup tas bort permanent. Data på den här telefonen påverkas inte.',
+    delete_account_action: 'Ta bort konto',
+    errors: {
+      unauthenticated: 'Du har loggats ut. Logga in igen.',
+      not_primary: 'En annan telefon är den primära enheten, så den här laddar inte upp.',
+      offline: 'Ingen internetanslutning. Försök igen när du är online.',
+      server: 'Det gick inte att nå Molnbackup. Försök igen om en stund.',
+      no_backup: 'Det finns ingen molnbackup att återställa än.',
+      checksum:
+        'Den nedladdade säkerhetskopian matchade inte sin kontrollsumma, så ingenting ändrades. Försök igen.',
+      corrupt: 'Molnbackupen kunde inte läsas.',
+      rate_limited: 'För många försök. Vänta en minut och försök igen.',
+      invalid_code: 'Koden fungerade inte. Kontrollera den eller be om en ny.',
+      invalid_email: 'Ange en giltig e-postadress.',
+      google_unavailable:
+        'Google-inloggning är inte tillgänglig just nu. Använd en e-postkod i stället.',
+      cancelled: 'Inloggningen avbröts.',
+      session_not_fresh: 'Av säkerhetsskäl: logga ut och logga in igen och ta sedan bort kontot.',
     },
   },
   auto_backup: {

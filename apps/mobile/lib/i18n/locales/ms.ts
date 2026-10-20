@@ -1492,6 +1492,7 @@ const ms = {
     haptics: 'Getaran sentuh',
     haptics_subtitle: 'Hidupkan atau matikan maklum balas sentuhan di seluruh apl.',
     data_management: 'Pengurusan Data',
+    cloud_backup: 'Sandaran Awan',
     statement_import: 'Import Penyata',
   },
   statement_import: {
@@ -2342,6 +2343,86 @@ const ms = {
       weekly_review_body: 'Lihat ke mana wang dan masa anda pergi minggu lepas.',
       monthly_review_title: 'Ulasan bulan anda',
       monthly_review_body: 'Lihat ke mana wang dan masa anda pergi bulan lepas.',
+    },
+  },
+  cloud_backup: {
+    title: 'Sandaran Awan & Papan Pemuka Web',
+    subtitle:
+      'Log masuk untuk menyimpan satu sandaran termampat telefon ini dalam awan, dikemas kini setiap hari, dan lihatnya pada komputer di app.money2time.com.',
+    intro_title: 'Data anda pada skrin besar',
+    intro_body:
+      'Selepas anda log masuk, telefon ini memuat naik sandaran termampat setiap hari. Buka app.money2time.com pada komputer untuk menerokanya dalam 17 papan pemuka.',
+    source_of_truth:
+      'Telefon anda kekal sebagai sumber utama. Papan pemuka web hanya membaca, dan data tidak disegerakkan antara telefon.',
+    sign_in_title: 'Log masuk',
+    google: 'Teruskan dengan Google',
+    or: 'atau',
+    email_label: 'E-mel',
+    send_code: 'E-melkan saya kod log masuk',
+    code_label: 'Masukkan kod 6 digit yang dihantar ke {{email}}',
+    verify: 'Log masuk',
+    change_email: 'Guna e-mel lain',
+    working: 'Sedang diproses…',
+    signed_in_as: 'Log masuk sebagai {{email}}',
+    primary_yes: 'Telefon ini membuat sandaran',
+    primary_yes_body:
+      'Ia ialah peranti utama untuk akaun ini dan memuat naik sandaran sekali sehari.',
+    primary_no: 'Telefon lain membuat sandaran',
+    primary_no_body:
+      '{{device}} ialah peranti utama. Telefon ini boleh memulihkan sandarannya, tetapi hanya satu telefon memuat naik, jadi sandaran tidak akan saling menimpa.',
+    another_phone: 'telefon lain',
+    back_up_now: 'Sandar sekarang',
+    backing_up: 'Sedang menyandar…',
+    transfer_title: 'Jadikan telefon ini peranti utama?',
+    transfer_message:
+      'Mulai sekarang telefon ini memuat naik sandaran, dan telefon lain berhenti. Sandaran seterusnya daripada telefon ini menggantikan sandaran dalam awan.',
+    transfer_action: 'Jadikan telefon ini peranti utama',
+    latest_title: 'Sandaran awan',
+    latest_body: 'Sandaran terakhir {{date}} daripada {{device}} · {{size}}',
+    latest_none: 'Belum ada sandaran. Yang pertama dimuat naik sejurus selepas anda log masuk.',
+    never: 'tidak pernah',
+    open_web: 'Buka papan pemuka web',
+    open_web_hint: 'Log masuk di app.money2time.com dengan akaun yang sama.',
+    restore_section: 'Pulihkan ke telefon ini',
+    restore_hint:
+      'Menyediakan telefon baharu? Pulihkan sandaran awan untuk membawa data anda ke sini. Ini menggantikan semua data pada telefon ini.',
+    restore_title: 'Gantikan data telefon ini dengan sandaran awan?',
+    restore_summary: '{{accounts}} akaun · {{transactions}} transaksi',
+    restore_warning:
+      'Semua data pada telefon ini akan diganti. Tindakan ini tidak boleh dibuat asal.',
+    restore_action: 'Pulihkan sandaran awan',
+    restoring: 'Sedang memulihkan…',
+    restore_done_title: 'Dipulihkan',
+    restore_done_message: 'Data anda telah dipulihkan daripada sandaran awan.',
+    restore_failed_title: 'Pemulihan gagal',
+    delete_title: 'Padam sandaran awan?',
+    delete_message:
+      'Sandaran dibuang daripada awan dan papan pemuka web. Data pada telefon ini tidak disentuh; sandaran harian seterusnya akan memuat naik yang baharu.',
+    delete_action: 'Padam sandaran awan',
+    sign_out: 'Log keluar',
+    sign_out_title: 'Log keluar daripada Sandaran Awan?',
+    sign_out_message:
+      'Telefon ini berhenti membuat sandaran. Data pada telefon ini dan sandaran awan kekal seperti sedia ada.',
+    delete_account_title: 'Padam akaun Sandaran Awan anda?',
+    delete_account_message:
+      'Akaun anda dan sandaran awannya dipadam selama-lamanya. Data pada telefon ini tidak disentuh.',
+    delete_account_action: 'Padam akaun',
+    errors: {
+      unauthenticated: 'Anda telah dilog keluar. Sila log masuk semula.',
+      not_primary: 'Telefon lain ialah peranti utama, jadi telefon ini tidak memuat naik.',
+      offline: 'Tiada sambungan internet. Cuba lagi apabila anda dalam talian.',
+      server: 'Sandaran Awan tidak dapat dihubungi. Cuba lagi sebentar nanti.',
+      no_backup: 'Belum ada sandaran awan untuk dipulihkan.',
+      checksum:
+        'Sandaran yang dimuat turun tidak sepadan dengan checksumnya, jadi tiada apa-apa yang diubah. Cuba lagi.',
+      corrupt: 'Sandaran awan tidak dapat dibaca.',
+      rate_limited: 'Terlalu banyak percubaan. Tunggu seminit dan cuba lagi.',
+      invalid_code: 'Kod itu tidak berfungsi. Semak kod anda, atau minta kod baharu.',
+      invalid_email: 'Masukkan alamat e-mel yang sah.',
+      google_unavailable: 'Log masuk Google tidak tersedia sekarang. Gunakan kod e-mel sebaliknya.',
+      cancelled: 'Log masuk dibatalkan.',
+      session_not_fresh:
+        'Demi keselamatan anda, log keluar dan log masuk semula, kemudian padam akaun.',
     },
   },
   auto_backup: {

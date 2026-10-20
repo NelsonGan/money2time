@@ -46,6 +46,8 @@ jobs:
             database: money2time-d1-receipt-scanner
           - worker: live-earnings
             database: money2time-d1-live-earnings
+          - worker: cloud-backup
+            database: money2time-d1-cloud-backup
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -79,6 +81,9 @@ jobs:
           - worker: live-earnings
             database: money2time-d1-live-earnings
             schema: live-earnings
+          - worker: cloud-backup
+            database: money2time-d1-cloud-backup
+            schema: cloud-backup
     steps:
       - name: Check out repository
         uses: actions/checkout@v4

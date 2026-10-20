@@ -33,6 +33,7 @@ import { AutoLogSettingsScreen } from './AutoLogSettingsScreen';
 import { AutoLogTutorialScreen } from './AutoLogTutorialScreen';
 import { BottomBarScreen } from './BottomBarScreen';
 import { CategoriesScreen } from './CategoriesScreen';
+import { CloudBackupScreen } from './CloudBackupScreen';
 import { DataManagementScreen } from './DataManagementScreen';
 import { DisplaySettingsScreen } from './DisplaySettingsScreen';
 import { ExchangeRatesScreen } from './ExchangeRatesScreen';
@@ -111,6 +112,7 @@ function SettingsHomeRoute({
       onOpenRecurring={() => navigation.navigate('Recurring')}
       onOpenNotifications={() => navigation.navigate('Notifications')}
       onOpenDataManagement={() => navigation.navigate('DataManagement')}
+      onOpenCloudBackup={() => navigation.navigate('CloudBackup')}
       onOpenNews={() => navigation.navigate('News')}
       onOpenStatementImport={() => navigation.navigate('StatementImport')}
       onOpenQuickEntry={() => navigation.navigate('QuickEntrySettings')}
@@ -406,6 +408,12 @@ export function SettingsStack({
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return <AutoBackupScreen onBack={() => props.navigation.goBack()} />;
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="CloudBackup">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return <CloudBackupScreen onBack={() => props.navigation.goBack()} />;
         }}
       </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="StatementImport">

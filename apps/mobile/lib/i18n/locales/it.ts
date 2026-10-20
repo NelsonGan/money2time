@@ -1486,6 +1486,7 @@ const it = {
     haptics: 'Aptico',
     haptics_subtitle: "Attiva o disattiva il feedback tattile nell'app.",
     data_management: 'Gestione dati',
+    cloud_backup: 'Backup nel cloud',
     statement_import: 'Importa estratto conto',
   },
   statement_import: {
@@ -2338,6 +2339,86 @@ const it = {
         'Scopri dove sono andati i tuoi soldi e il tuo tempo la settimana scorsa.',
       monthly_review_title: 'Il tuo mese in sintesi',
       monthly_review_body: 'Scopri dove sono andati i tuoi soldi e il tuo tempo il mese scorso.',
+    },
+  },
+  cloud_backup: {
+    title: 'Backup nel cloud e dashboard web',
+    subtitle:
+      'Accedi per tenere nel cloud un backup compresso di questo telefono, aggiornato ogni giorno, e consultarlo da un computer su app.money2time.com.',
+    intro_title: 'I tuoi dati su un grande schermo',
+    intro_body:
+      'Dopo l’accesso, questo telefono carica ogni giorno un backup compresso. Apri app.money2time.com da un computer per esplorarlo in 17 dashboard.',
+    source_of_truth:
+      'Il tuo telefono resta la fonte di verità. La dashboard web è solo in lettura e i dati non si sincronizzano tra telefoni.',
+    sign_in_title: 'Accedi',
+    google: 'Continua con Google',
+    or: 'oppure',
+    email_label: 'Email',
+    send_code: 'Inviami un codice di accesso via email',
+    code_label: 'Inserisci il codice a 6 cifre inviato a {{email}}',
+    verify: 'Accedi',
+    change_email: 'Usa un’altra email',
+    working: 'Elaborazione…',
+    signed_in_as: 'Accesso eseguito come {{email}}',
+    primary_yes: 'Questo telefono esegue il backup',
+    primary_yes_body:
+      'È il dispositivo principale di questo account e carica un backup una volta al giorno.',
+    primary_no: 'Un altro telefono esegue il backup',
+    primary_no_body:
+      '{{device}} è il dispositivo principale. Questo telefono può ripristinarne il backup, ma solo un telefono carica, così non si sovrascrivono mai a vicenda.',
+    another_phone: 'un altro telefono',
+    back_up_now: 'Esegui backup ora',
+    backing_up: 'Backup in corso…',
+    transfer_title: 'Rendere questo telefono il dispositivo principale?',
+    transfer_message:
+      'Da ora questo telefono carica il backup e l’altro smette. Il prossimo backup di questo telefono sostituisce quello nel cloud.',
+    transfer_action: 'Rendi principale questo telefono',
+    latest_title: 'Backup nel cloud',
+    latest_body: 'Ultimo backup {{date}} da {{device}} · {{size}}',
+    latest_none: 'Nessun backup per ora. Il primo viene caricato poco dopo l’accesso.',
+    never: 'mai',
+    open_web: 'Apri la dashboard web',
+    open_web_hint: 'Accedi a app.money2time.com con lo stesso account.',
+    restore_section: 'Ripristina su questo telefono',
+    restore_hint:
+      'Stai configurando un nuovo telefono? Ripristina il backup nel cloud per portare qui i tuoi dati. Questo sostituisce tutto su questo telefono.',
+    restore_title: 'Sostituire i dati di questo telefono con il backup nel cloud?',
+    restore_summary: '{{accounts}} conti · {{transactions}} transazioni',
+    restore_warning:
+      'Tutto su questo telefono viene sostituito. L’operazione non può essere annullata.',
+    restore_action: 'Ripristina backup nel cloud',
+    restoring: 'Ripristino in corso…',
+    restore_done_title: 'Ripristinato',
+    restore_done_message: 'I tuoi dati sono stati ripristinati dal backup nel cloud.',
+    restore_failed_title: 'Ripristino non riuscito',
+    delete_title: 'Eliminare il backup nel cloud?',
+    delete_message:
+      'Il backup viene rimosso dal cloud e dalla dashboard web. I dati su questo telefono non vengono toccati; il prossimo backup giornaliero ne caricherà uno nuovo.',
+    delete_action: 'Elimina backup nel cloud',
+    sign_out: 'Esci',
+    sign_out_title: 'Uscire dal backup nel cloud?',
+    sign_out_message:
+      'Questo telefono smette di eseguire il backup. I tuoi dati su questo telefono e il backup nel cloud restano come sono.',
+    delete_account_title: 'Eliminare il tuo account di backup nel cloud?',
+    delete_account_message:
+      'Il tuo account e il suo backup nel cloud vengono eliminati definitivamente. I dati su questo telefono non vengono toccati.',
+    delete_account_action: 'Elimina account',
+    errors: {
+      unauthenticated: 'La sessione è terminata. Accedi di nuovo.',
+      not_primary: 'Un altro telefono è il dispositivo principale, quindi questo non carica.',
+      offline: 'Nessuna connessione a internet. Riprova quando sei online.',
+      server: 'Impossibile raggiungere il backup nel cloud. Riprova tra poco.',
+      no_backup: 'Non c’è ancora un backup nel cloud da ripristinare.',
+      checksum:
+        'Il backup scaricato non corrispondeva al suo checksum, quindi non è cambiato nulla. Riprova.',
+      corrupt: 'Impossibile leggere il backup nel cloud.',
+      rate_limited: 'Troppi tentativi. Aspetta un minuto e riprova.',
+      invalid_code: 'Quel codice non ha funzionato. Controllalo o richiedine uno nuovo.',
+      invalid_email: 'Inserisci un indirizzo email valido.',
+      google_unavailable:
+        'L’accesso con Google non è disponibile al momento. Usa invece un codice via email.',
+      cancelled: 'Accesso annullato.',
+      session_not_fresh: 'Per la tua sicurezza, esci e accedi di nuovo, poi elimina l’account.',
     },
   },
   auto_backup: {

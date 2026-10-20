@@ -1499,6 +1499,7 @@ const de = {
     haptics: 'Haptik',
     haptics_subtitle: 'Taktiles Feedback in der gesamten App ein- oder ausschalten.',
     data_management: 'Datenverwaltung',
+    cloud_backup: 'Cloud-Backup',
     statement_import: 'Kontoauszug importieren',
   },
   statement_import: {
@@ -2356,6 +2357,86 @@ const de = {
       weekly_review_body: 'Sieh, wohin dein Geld und deine Zeit letzte Woche geflossen sind.',
       monthly_review_title: 'Dein Monat im Rückblick',
       monthly_review_body: 'Sieh, wohin dein Geld und deine Zeit letzten Monat geflossen sind.',
+    },
+  },
+  cloud_backup: {
+    title: 'Cloud-Backup & Web-Dashboard',
+    subtitle:
+      'Melde dich an, um ein komprimiertes Backup dieses Handys in der Cloud zu speichern, täglich aktualisiert, und sieh es dir am Computer unter app.money2time.com an.',
+    intro_title: 'Deine Daten auf dem großen Bildschirm',
+    intro_body:
+      'Sobald du angemeldet bist, lädt dieses Handy täglich ein komprimiertes Backup hoch. Öffne app.money2time.com am Computer und entdecke es in 17 Dashboards.',
+    source_of_truth:
+      'Dein Handy bleibt die maßgebliche Quelle. Das Web-Dashboard liest nur, und Daten werden nicht zwischen Handys synchronisiert.',
+    sign_in_title: 'Anmelden',
+    google: 'Weiter mit Google',
+    or: 'oder',
+    email_label: 'E-Mail',
+    send_code: 'Anmeldecode per E-Mail senden',
+    code_label: 'Gib den 6-stelligen Code ein, der an {{email}} gesendet wurde',
+    verify: 'Anmelden',
+    change_email: 'Andere E-Mail verwenden',
+    working: 'Wird verarbeitet…',
+    signed_in_as: 'Angemeldet als {{email}}',
+    primary_yes: 'Dieses Handy sichert',
+    primary_yes_body:
+      'Es ist das primäre Gerät für dieses Konto und lädt einmal täglich ein Backup hoch.',
+    primary_no: 'Ein anderes Handy sichert',
+    primary_no_body:
+      '{{device}} ist das primäre Gerät. Dieses Handy kann dessen Backup wiederherstellen, aber nur ein Handy lädt hoch, damit sie sich nie gegenseitig überschreiben.',
+    another_phone: 'ein anderes Handy',
+    back_up_now: 'Jetzt sichern',
+    backing_up: 'Wird gesichert…',
+    transfer_title: 'Dieses Handy zum primären Gerät machen?',
+    transfer_message:
+      'Ab jetzt lädt dieses Handy das Backup hoch, und das andere Handy hört auf. Das nächste Backup von diesem Handy ersetzt das in der Cloud.',
+    transfer_action: 'Dieses Handy zum primären Gerät machen',
+    latest_title: 'Cloud-Backup',
+    latest_body: 'Letztes Backup {{date}} von {{device}} · {{size}}',
+    latest_none: 'Noch kein Backup. Das erste wird kurz nach der Anmeldung hochgeladen.',
+    never: 'nie',
+    open_web: 'Web-Dashboard öffnen',
+    open_web_hint: 'Melde dich auf app.money2time.com mit demselben Konto an.',
+    restore_section: 'Auf diesem Handy wiederherstellen',
+    restore_hint:
+      'Richtest du ein neues Handy ein? Stelle das Cloud-Backup wieder her, um deine Daten hierher zu holen. Dadurch wird alles auf diesem Handy ersetzt.',
+    restore_title: 'Daten dieses Handys durch das Cloud-Backup ersetzen?',
+    restore_summary: '{{accounts}} Konten · {{transactions}} Transaktionen',
+    restore_warning: 'Alles auf diesem Handy wird ersetzt. Das lässt sich nicht rückgängig machen.',
+    restore_action: 'Cloud-Backup wiederherstellen',
+    restoring: 'Wird wiederhergestellt…',
+    restore_done_title: 'Wiederhergestellt',
+    restore_done_message: 'Deine Daten wurden aus dem Cloud-Backup wiederhergestellt.',
+    restore_failed_title: 'Wiederherstellung fehlgeschlagen',
+    delete_title: 'Cloud-Backup löschen?',
+    delete_message:
+      'Das Backup wird aus der Cloud und dem Web-Dashboard entfernt. Daten auf diesem Handy bleiben unberührt; das nächste tägliche Backup lädt ein neues hoch.',
+    delete_action: 'Cloud-Backup löschen',
+    sign_out: 'Abmelden',
+    sign_out_title: 'Vom Cloud-Backup abmelden?',
+    sign_out_message:
+      'Dieses Handy sichert nicht mehr. Deine Daten auf diesem Handy und das Cloud-Backup bleiben unverändert.',
+    delete_account_title: 'Dein Cloud-Backup-Konto löschen?',
+    delete_account_message:
+      'Dein Konto und sein Cloud-Backup werden endgültig gelöscht. Daten auf diesem Handy bleiben unberührt.',
+    delete_account_action: 'Konto löschen',
+    errors: {
+      unauthenticated: 'Du wurdest abgemeldet. Melde dich erneut an.',
+      not_primary: 'Ein anderes Handy ist das primäre Gerät, daher lädt dieses nicht hoch.',
+      offline: 'Keine Internetverbindung. Versuche es erneut, wenn du online bist.',
+      server: 'Cloud-Backup ist nicht erreichbar. Versuche es gleich noch einmal.',
+      no_backup: 'Es gibt noch kein Cloud-Backup zum Wiederherstellen.',
+      checksum:
+        'Das heruntergeladene Backup stimmte nicht mit seiner Prüfsumme überein, daher wurde nichts geändert. Versuche es erneut.',
+      corrupt: 'Das Cloud-Backup konnte nicht gelesen werden.',
+      rate_limited: 'Zu viele Versuche. Warte eine Minute und versuche es erneut.',
+      invalid_code: 'Dieser Code hat nicht funktioniert. Prüfe ihn oder fordere einen neuen an.',
+      invalid_email: 'Gib eine gültige E-Mail-Adresse ein.',
+      google_unavailable:
+        'Die Anmeldung mit Google ist gerade nicht verfügbar. Verwende stattdessen einen E-Mail-Code.',
+      cancelled: 'Anmeldung abgebrochen.',
+      session_not_fresh:
+        'Aus Sicherheitsgründen: Melde dich ab und wieder an, dann lösche das Konto.',
     },
   },
   auto_backup: {

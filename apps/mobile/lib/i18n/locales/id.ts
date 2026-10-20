@@ -1489,6 +1489,7 @@ const id = {
     haptics: 'Haptics',
     haptics_subtitle: 'Aktifkan atau nonaktifkan umpan balik sentuhan di seluruh aplikasi.',
     data_management: 'Manajemen Data',
+    cloud_backup: 'Cadangan Cloud',
     statement_import: 'Impor Rekening Koran',
   },
   statement_import: {
@@ -2335,6 +2336,85 @@ const id = {
       weekly_review_body: 'Lihat ke mana uang dan waktumu pergi minggu lalu.',
       monthly_review_title: 'Bulananmu dalam tinjauan',
       monthly_review_body: 'Lihat ke mana uang dan waktumu pergi bulan lalu.',
+    },
+  },
+  cloud_backup: {
+    title: 'Cadangan Cloud & Dasbor Web',
+    subtitle:
+      'Masuk untuk menyimpan satu cadangan terkompresi dari ponsel ini di cloud, diperbarui setiap hari, lalu lihat di komputer lewat app.money2time.com.',
+    intro_title: 'Datamu di layar besar',
+    intro_body:
+      'Setelah masuk, ponsel ini mengunggah cadangan terkompresi setiap hari. Buka app.money2time.com di komputer untuk menjelajahinya di 17 dasbor.',
+    source_of_truth:
+      'Ponselmu tetap menjadi sumber utama. Dasbor web hanya membaca, dan data tidak disinkronkan antarponsel.',
+    sign_in_title: 'Masuk',
+    google: 'Lanjutkan dengan Google',
+    or: 'atau',
+    email_label: 'Email',
+    send_code: 'Kirim kode masuk lewat email',
+    code_label: 'Masukkan kode 6 digit yang dikirim ke {{email}}',
+    verify: 'Masuk',
+    change_email: 'Gunakan email lain',
+    working: 'Memproses…',
+    signed_in_as: 'Masuk sebagai {{email}}',
+    primary_yes: 'Ponsel ini yang mencadangkan',
+    primary_yes_body:
+      'Ini adalah perangkat utama untuk akun ini dan mengunggah cadangan sekali sehari.',
+    primary_no: 'Ponsel lain yang mencadangkan',
+    primary_no_body:
+      '{{device}} adalah perangkat utama. Ponsel ini bisa memulihkan cadangannya, tetapi hanya satu ponsel yang mengunggah, jadi cadangan tidak saling menimpa.',
+    another_phone: 'ponsel lain',
+    back_up_now: 'Cadangkan sekarang',
+    backing_up: 'Mencadangkan…',
+    transfer_title: 'Jadikan ponsel ini perangkat utama?',
+    transfer_message:
+      'Mulai sekarang ponsel ini yang mengunggah cadangan, dan ponsel lainnya berhenti. Cadangan berikutnya dari ponsel ini menggantikan yang ada di cloud.',
+    transfer_action: 'Jadikan ponsel ini utama',
+    latest_title: 'Cadangan cloud',
+    latest_body: 'Cadangan terakhir {{date}} dari {{device}} · {{size}}',
+    latest_none: 'Belum ada cadangan. Yang pertama diunggah tak lama setelah kamu masuk.',
+    never: 'belum pernah',
+    open_web: 'Buka dasbor web',
+    open_web_hint: 'Masuk di app.money2time.com dengan akun yang sama.',
+    restore_section: 'Pulihkan ke ponsel ini',
+    restore_hint:
+      'Menyiapkan ponsel baru? Pulihkan cadangan cloud untuk membawa datamu ke sini. Ini menggantikan semua data di ponsel ini.',
+    restore_title: 'Ganti data ponsel ini dengan cadangan cloud?',
+    restore_summary: '{{accounts}} akun · {{transactions}} transaksi',
+    restore_warning: 'Semua data di ponsel ini akan diganti. Tindakan ini tidak dapat dibatalkan.',
+    restore_action: 'Pulihkan cadangan cloud',
+    restoring: 'Memulihkan…',
+    restore_done_title: 'Dipulihkan',
+    restore_done_message: 'Datamu telah dipulihkan dari cadangan cloud.',
+    restore_failed_title: 'Pemulihan gagal',
+    delete_title: 'Hapus cadangan cloud?',
+    delete_message:
+      'Cadangan dihapus dari cloud dan dasbor web. Data di ponsel ini tidak disentuh; cadangan harian berikutnya akan mengunggah yang baru.',
+    delete_action: 'Hapus cadangan cloud',
+    sign_out: 'Keluar',
+    sign_out_title: 'Keluar dari Cadangan Cloud?',
+    sign_out_message:
+      'Ponsel ini berhenti mencadangkan. Datamu di ponsel ini dan cadangan cloud tetap seperti semula.',
+    delete_account_title: 'Hapus akun Cadangan Cloud?',
+    delete_account_message:
+      'Akun dan cadangan cloud-nya dihapus selamanya. Data di ponsel ini tidak disentuh.',
+    delete_account_action: 'Hapus akun',
+    errors: {
+      unauthenticated: 'Kamu telah keluar. Silakan masuk lagi.',
+      not_primary: 'Ponsel lain adalah perangkat utama, jadi ponsel ini tidak mengunggah.',
+      offline: 'Tidak ada koneksi internet. Coba lagi saat kamu online.',
+      server: 'Cadangan Cloud tidak dapat dijangkau. Coba lagi sebentar lagi.',
+      no_backup: 'Belum ada cadangan cloud untuk dipulihkan.',
+      checksum:
+        'Cadangan yang diunduh tidak cocok dengan checksum-nya, jadi tidak ada yang diubah. Coba lagi.',
+      corrupt: 'Cadangan cloud tidak dapat dibaca.',
+      rate_limited: 'Terlalu banyak percobaan. Tunggu semenit lalu coba lagi.',
+      invalid_code: 'Kode itu tidak berhasil. Periksa kembali, atau minta kode baru.',
+      invalid_email: 'Masukkan alamat email yang valid.',
+      google_unavailable:
+        'Masuk dengan Google sedang tidak tersedia. Gunakan kode email sebagai gantinya.',
+      cancelled: 'Proses masuk dibatalkan.',
+      session_not_fresh: 'Demi keamananmu, keluar lalu masuk lagi, kemudian hapus akunnya.',
     },
   },
   auto_backup: {

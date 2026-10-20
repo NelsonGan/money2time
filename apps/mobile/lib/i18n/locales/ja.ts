@@ -1474,6 +1474,7 @@ const ja = {
     haptics: '触覚フィードバック',
     haptics_subtitle: 'アプリ全体の触覚フィードバックのオン・オフを切り替えます。',
     data_management: 'データ管理',
+    cloud_backup: 'クラウドバックアップ',
     statement_import: '明細インポート',
   },
   statement_import: {
@@ -2313,6 +2314,87 @@ const ja = {
       weekly_review_body: '先週、お金と時間がどこに使われたか見てみましょう。',
       monthly_review_title: '先月の振り返り',
       monthly_review_body: '先月、お金と時間がどこに使われたか見てみましょう。',
+    },
+  },
+  cloud_backup: {
+    title: 'クラウドバックアップ & Webダッシュボード',
+    subtitle:
+      'サインインすると、この端末のバックアップを圧縮して毎日クラウドに1件保管し、パソコンの app.money2time.com で確認できます。',
+    intro_title: 'データを大きな画面で',
+    intro_body:
+      'サインインすると、この端末から毎日圧縮バックアップがアップロードされます。パソコンで app.money2time.com を開いて、17種類のダッシュボードで確認しましょう。',
+    source_of_truth:
+      '基準となるのは常にこの端末のデータです。Webダッシュボードは閲覧専用で、端末間でデータが同期されることはありません。',
+    sign_in_title: 'サインイン',
+    google: 'Google で続ける',
+    or: 'または',
+    email_label: 'メールアドレス',
+    send_code: 'サインインコードをメールで送信',
+    code_label: '{{email}} に送信された6桁のコードを入力',
+    verify: 'サインイン',
+    change_email: '別のメールアドレスを使う',
+    working: '処理中…',
+    signed_in_as: '{{email}} でサインイン中',
+    primary_yes: 'この端末でバックアップ',
+    primary_yes_body: 'このアカウントのメイン端末として、1日1回バックアップをアップロードします。',
+    primary_no: '別の端末でバックアップ',
+    primary_no_body:
+      '{{device}} がメイン端末です。この端末ではそのバックアップを復元できますが、アップロードするのは1台だけなので、上書きし合うことはありません。',
+    another_phone: '別の端末',
+    back_up_now: '今すぐバックアップ',
+    backing_up: 'バックアップ中…',
+    transfer_title: 'この端末をメイン端末にしますか？',
+    transfer_message:
+      '今後はこの端末がバックアップをアップロードし、もう一方の端末はアップロードを停止します。この端末の次回のバックアップで、クラウド上のバックアップが置き換わります。',
+    transfer_action: 'この端末をメインにする',
+    latest_title: 'クラウドバックアップ',
+    latest_body: '前回のバックアップ: {{date}}（{{device}}）· {{size}}',
+    latest_none:
+      'まだバックアップがありません。サインイン後まもなく最初のバックアップがアップロードされます。',
+    never: 'なし',
+    open_web: 'Webダッシュボードを開く',
+    open_web_hint: '同じアカウントで app.money2time.com にサインインしてください。',
+    restore_section: 'この端末に復元',
+    restore_hint:
+      '新しい端末をセットアップ中ですか？クラウドバックアップを復元して、データを引き継ぎましょう。この端末のデータはすべて置き換えられます。',
+    restore_title: 'この端末のデータをクラウドバックアップで置き換えますか？',
+    restore_summary: '口座{{accounts}}件 · 取引{{transactions}}件',
+    restore_warning: 'この端末のデータはすべて置き換えられます。元に戻すことはできません。',
+    restore_action: 'クラウドバックアップを復元',
+    restoring: '復元中…',
+    restore_done_title: '復元しました',
+    restore_done_message: 'クラウドバックアップからデータを復元しました。',
+    restore_failed_title: '復元に失敗しました',
+    delete_title: 'クラウドバックアップを削除しますか？',
+    delete_message:
+      'バックアップはクラウドとWebダッシュボードから削除されます。この端末のデータには影響せず、次回の毎日のバックアップで新しく作成されます。',
+    delete_action: 'クラウドバックアップを削除',
+    sign_out: 'サインアウト',
+    sign_out_title: 'クラウドバックアップからサインアウトしますか？',
+    sign_out_message:
+      'この端末でのバックアップが停止します。この端末のデータとクラウドバックアップはそのまま残ります。',
+    delete_account_title: 'クラウドバックアップのアカウントを削除しますか？',
+    delete_account_message:
+      'アカウントとクラウドバックアップが完全に削除されます。この端末のデータには影響しません。',
+    delete_account_action: 'アカウントを削除',
+    errors: {
+      unauthenticated: 'サインアウトされました。もう一度サインインしてください。',
+      not_primary: '別の端末がメイン端末のため、この端末ではアップロードしません。',
+      offline: 'インターネットに接続されていません。接続してからもう一度お試しください。',
+      server:
+        'クラウドバックアップに接続できませんでした。しばらくしてからもう一度お試しください。',
+      no_backup: '復元できるクラウドバックアップはまだありません。',
+      checksum:
+        'ダウンロードしたバックアップがチェックサムと一致しなかったため、何も変更していません。もう一度お試しください。',
+      corrupt: 'クラウドバックアップを読み込めませんでした。',
+      rate_limited: '試行回数が多すぎます。1分ほど待ってからもう一度お試しください。',
+      invalid_code: 'コードが正しくありません。確認するか、新しいコードをリクエストしてください。',
+      invalid_email: '有効なメールアドレスを入力してください。',
+      google_unavailable:
+        '現在 Google でのサインインは利用できません。代わりにメールのコードをご利用ください。',
+      cancelled: 'サインインがキャンセルされました。',
+      session_not_fresh:
+        'セキュリティのため、一度サインアウトして再度サインインしてから、アカウントを削除してください。',
     },
   },
   auto_backup: {
