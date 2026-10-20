@@ -1488,7 +1488,7 @@ const es = {
     haptics: 'Vibración',
     haptics_subtitle: 'Activa o desactiva la respuesta táctil en toda la app.',
     data_management: 'Gestión de datos',
-    cloud_backup: 'Respaldo en la nube',
+    web_dashboard: 'Panel web',
     statement_import: 'Importar extracto',
   },
   statement_import: {
@@ -2343,84 +2343,56 @@ const es = {
       monthly_review_body: 'Mira a dónde fueron tu dinero y tu tiempo el mes pasado.',
     },
   },
-  cloud_backup: {
-    title: 'Respaldo en la nube y panel web',
+  web_dashboard: {
+    title: 'Panel web',
     subtitle:
-      'Inicia sesión para guardar en la nube un respaldo comprimido de este teléfono, actualizado a diario, y verlo en una computadora en app.money2time.com.',
-    intro_title: 'Tus datos en pantalla grande',
+      'Mira tus datos en un ordenador en app.money2time.com. Tu teléfono los envía directamente al navegador, cifrados de extremo a extremo. No se guarda nada en línea y no hay ninguna cuenta.',
+    intro_title: 'Tus datos en una pantalla grande',
     intro_body:
-      'Una vez que inicies sesión, este teléfono sube un respaldo comprimido cada día. Abre app.money2time.com en una computadora para explorarlo en 17 paneles.',
+      'Abre app.money2time.com en un ordenador, escanea con este teléfono el código que aparece y explora tus datos en 17 paneles.',
+    private_note:
+      'No se guarda nada en línea. Tu teléfono envía tus datos directamente al navegador, cifrados con una clave que solo tienen los dos. El navegador conserva la última copia hasta que lo desvincules.',
     source_of_truth:
-      'Tu teléfono sigue siendo la fuente de verdad. El panel web solo lee, y los datos no se sincronizan entre teléfonos.',
-    sign_in_title: 'Iniciar sesión',
-    google: 'Continuar con Google',
-    or: 'o',
-    email_label: 'Correo electrónico',
-    send_code: 'Enviarme un código por correo',
-    code_label: 'Introduce el código de 6 dígitos enviado a {{email}}',
-    verify: 'Iniciar sesión',
-    change_email: 'Usar otro correo',
-    working: 'Procesando…',
-    signed_in_as: 'Sesión iniciada como {{email}}',
-    primary_yes: 'Este teléfono hace el respaldo',
-    primary_yes_body:
-      'Es el dispositivo principal de esta cuenta y sube un respaldo una vez al día.',
-    primary_no: 'Otro teléfono hace el respaldo',
-    primary_no_body:
-      '{{device}} es el dispositivo principal. Este teléfono puede restaurar su respaldo, pero solo un teléfono sube, así que nunca se sobrescriben entre sí.',
-    another_phone: 'otro teléfono',
-    back_up_now: 'Respaldar ahora',
-    backing_up: 'Respaldando…',
-    transfer_title: '¿Hacer de este teléfono el dispositivo principal?',
-    transfer_message:
-      'A partir de ahora este teléfono sube el respaldo y el otro deja de hacerlo. El próximo respaldo de este teléfono reemplaza el que está en la nube.',
-    transfer_action: 'Hacer principal este teléfono',
-    latest_title: 'Respaldo en la nube',
-    latest_body: 'Último respaldo {{date}} desde {{device}} · {{size}}',
-    latest_none: 'Aún no hay respaldo. El primero se sube poco después de iniciar sesión.',
+      'Tu teléfono sigue siendo la fuente de verdad. El panel web solo lee y no se envía nada de vuelta.',
+    link_title: 'Vincular un ordenador',
+    link_body: 'Abre app.money2time.com en tu ordenador y luego escanea el código de su pantalla.',
+    link_action: 'Escanear el código',
+    linking: 'Vinculando…',
+    linked: '{{name}} vinculado. Tus datos van en camino.',
+    browsers_title: 'Navegadores vinculados',
+    unknown_browser: 'Un navegador',
+    status_connecting: 'Conectando…',
+    status_open: 'Abierto ahora',
+    status_open_sent: 'Abierto ahora · enviado {{date}}',
+    status_sending: 'Enviando… {{percent}} %',
+    status_closed: 'No abierto · último envío {{date}}',
     never: 'nunca',
-    open_web: 'Abrir el panel web',
-    open_web_hint: 'Inicia sesión en app.money2time.com con la misma cuenta.',
-    restore_section: 'Restaurar en este teléfono',
-    restore_hint:
-      '¿Configurando un teléfono nuevo? Restaura el respaldo en la nube para traer tus datos aquí. Esto reemplaza todo lo que hay en este teléfono.',
-    restore_title: '¿Reemplazar los datos de este teléfono con el respaldo en la nube?',
-    restore_summary: '{{accounts}} cuentas · {{transactions}} transacciones',
-    restore_warning: 'Todo en este teléfono se reemplaza. No se puede deshacer.',
-    restore_action: 'Restaurar respaldo en la nube',
-    restoring: 'Restaurando…',
-    restore_done_title: 'Restaurado',
-    restore_done_message: 'Tus datos se restauraron desde el respaldo en la nube.',
-    restore_failed_title: 'Error al restaurar',
-    delete_title: '¿Eliminar el respaldo en la nube?',
-    delete_message:
-      'El respaldo se elimina de la nube y del panel web. Los datos de este teléfono no se tocan; el próximo respaldo diario sube uno nuevo.',
-    delete_action: 'Eliminar respaldo en la nube',
-    sign_out: 'Cerrar sesión',
-    sign_out_title: '¿Cerrar sesión en el respaldo en la nube?',
-    sign_out_message:
-      'Este teléfono deja de hacer respaldos. Tus datos en este teléfono y el respaldo en la nube quedan como están.',
-    delete_account_title: '¿Eliminar tu cuenta de respaldo en la nube?',
-    delete_account_message:
-      'Tu cuenta y su respaldo en la nube se eliminan para siempre. Los datos de este teléfono no se tocan.',
-    delete_account_action: 'Eliminar cuenta',
+    send_now: 'Enviar los datos más recientes ahora',
+    sending: 'Enviando…',
+    none_open:
+      'Ninguno de tus navegadores vinculados está abierto ahora mismo. Primero abre app.money2time.com en el ordenador.',
+    refresh_hint:
+      'Para actualizar el panel, abre app.money2time.com en el ordenador y esta pantalla en tu teléfono. Los datos más recientes se envían solos.',
+    open_web: 'Abrir app.money2time.com',
+    unlink: 'Desvincular',
+    unlink_title: '¿Desvincular este navegador?',
+    unlink_message:
+      '{{name}} deja de recibir tus datos. Si está abierto ahora, también elimina la copia que guarda.',
+    close: 'Cerrar',
+    scan_hint: 'Apunta la cámara al código que aparece en la pantalla de tu ordenador.',
+    camera_permission: 'Permite el acceso a la cámara para escanear el código.',
+    camera_allow: 'Permitir cámara',
     errors: {
-      unauthenticated: 'Se cerró tu sesión. Inicia sesión de nuevo.',
-      not_primary: 'Otro teléfono es el dispositivo principal, así que este no sube respaldos.',
-      offline: 'Sin conexión a internet. Inténtalo de nuevo cuando estés en línea.',
-      server: 'No se pudo conectar con el respaldo en la nube. Inténtalo en un momento.',
-      no_backup: 'Todavía no hay un respaldo en la nube para restaurar.',
-      checksum:
-        'El respaldo descargado no coincidió con su suma de verificación, así que no se cambió nada. Inténtalo de nuevo.',
-      corrupt: 'No se pudo leer el respaldo en la nube.',
-      rate_limited: 'Demasiados intentos. Espera un minuto e inténtalo de nuevo.',
-      invalid_code: 'Ese código no funcionó. Revísalo o pide uno nuevo.',
-      invalid_email: 'Introduce un correo electrónico válido.',
-      google_unavailable:
-        'El inicio de sesión con Google no está disponible ahora. Usa un código por correo.',
-      cancelled: 'Se canceló el inicio de sesión.',
-      session_not_fresh:
-        'Por tu seguridad, cierra sesión e inicia sesión de nuevo, y luego elimina la cuenta.',
+      unavailable:
+        'El panel web necesita la última versión de la app. Actualiza Money2Time e inténtalo de nuevo.',
+      invalid_qr:
+        'Ese no es un código del panel web de Money2Time. Abre app.money2time.com y escanea el código de allí.',
+      timeout: 'El navegador no respondió. Recarga app.money2time.com y escanea el código nuevo.',
+      offline: 'Sin conexión a internet. Inténtalo de nuevo cuando tengas conexión.',
+      rejected: 'El navegador no pudo abrir los datos. Inténtalo de nuevo.',
+      closed:
+        'El navegador se cerró antes de terminar la vinculación. Recárgalo y vuelve a escanear.',
+      too_many: 'Puedes vincular hasta 8 navegadores. Desvincula uno primero.',
     },
   },
   auto_backup: {

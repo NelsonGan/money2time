@@ -33,7 +33,6 @@ import { AutoLogSettingsScreen } from './AutoLogSettingsScreen';
 import { AutoLogTutorialScreen } from './AutoLogTutorialScreen';
 import { BottomBarScreen } from './BottomBarScreen';
 import { CategoriesScreen } from './CategoriesScreen';
-import { CloudBackupScreen } from './CloudBackupScreen';
 import { DataManagementScreen } from './DataManagementScreen';
 import { DisplaySettingsScreen } from './DisplaySettingsScreen';
 import { ExchangeRatesScreen } from './ExchangeRatesScreen';
@@ -50,6 +49,7 @@ import { RecurringScreen } from './RecurringScreen';
 import { SettingsScreen } from './SettingsScreen';
 import { ShareAndEarnScreen } from './ShareAndEarnScreen';
 import { StatementImportListScreen, StatementImportScreen } from './StatementImportScreen';
+import { WebDashboardScreen } from './WebDashboardScreen';
 import { WidgetPreviewsScreen } from './WidgetPreviewsScreen';
 
 interface SettingsStackProps {
@@ -112,7 +112,7 @@ function SettingsHomeRoute({
       onOpenRecurring={() => navigation.navigate('Recurring')}
       onOpenNotifications={() => navigation.navigate('Notifications')}
       onOpenDataManagement={() => navigation.navigate('DataManagement')}
-      onOpenCloudBackup={() => navigation.navigate('CloudBackup')}
+      onOpenWebDashboard={() => navigation.navigate('WebDashboard')}
       onOpenNews={() => navigation.navigate('News')}
       onOpenStatementImport={() => navigation.navigate('StatementImport')}
       onOpenQuickEntry={() => navigation.navigate('QuickEntrySettings')}
@@ -410,10 +410,10 @@ export function SettingsStack({
           return <AutoBackupScreen onBack={() => props.navigation.goBack()} />;
         }}
       </SettingsStackNavigator.Screen>
-      <SettingsStackNavigator.Screen name="CloudBackup">
+      <SettingsStackNavigator.Screen name="WebDashboard">
         {(props) => {
           stackNavigationRef.current = props.navigation;
-          return <CloudBackupScreen onBack={() => props.navigation.goBack()} />;
+          return <WebDashboardScreen onBack={() => props.navigation.goBack()} />;
         }}
       </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="StatementImport">

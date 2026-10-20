@@ -1483,7 +1483,7 @@ const nb = {
     haptics: 'Haptikk',
     haptics_subtitle: 'Slå berøringstilbakemelding av eller på i appen.',
     data_management: 'Dataadministrasjon',
-    cloud_backup: 'Sikkerhetskopi i skyen',
+    web_dashboard: 'Web-dashbord',
     statement_import: 'Kontoutskriftsimport',
   },
   statement_import: {
@@ -2328,85 +2328,57 @@ const nb = {
       monthly_review_body: 'Se hvor pengene og tiden din gikk forrige måned.',
     },
   },
-  cloud_backup: {
-    title: 'Sikkerhetskopi i skyen og nettdashbord',
+  web_dashboard: {
+    title: 'Web-dashbord',
     subtitle:
-      'Logg inn for å ha én komprimert sikkerhetskopi av denne telefonen i skyen, oppdatert daglig, og se den på en datamaskin på app.money2time.com.',
+      'Se dataene dine på en datamaskin på app.money2time.com. Telefonen sender dem rett til nettleseren, ende-til-ende-kryptert. Ingenting lagres på nett, og du trenger ingen konto.',
     intro_title: 'Dataene dine på en stor skjerm',
     intro_body:
-      'Når du har logget inn, laster denne telefonen opp en komprimert sikkerhetskopi hver dag. Åpne app.money2time.com på en datamaskin for å utforske den i 17 dashbord.',
+      'Åpne app.money2time.com på en datamaskin, skann koden som vises med denne telefonen, og utforsk dataene dine i 17 dashbord.',
+    private_note:
+      'Ingenting lagres på nett. Telefonen sender dataene dine rett til nettleseren, kryptert med en nøkkel som bare de to har. Nettleseren beholder den siste kopien til du kobler den fra.',
     source_of_truth:
-      'Telefonen din er fortsatt kilden til sannheten. Nettdashbordet kan bare lese, og data synkroniseres ikke mellom telefoner.',
-    sign_in_title: 'Logg inn',
-    google: 'Fortsett med Google',
-    or: 'eller',
-    email_label: 'E-post',
-    send_code: 'Send meg en innloggingskode på e-post',
-    code_label: 'Skriv inn den sekssifrede koden som er sendt til {{email}}',
-    verify: 'Logg inn',
-    change_email: 'Bruk en annen e-postadresse',
-    working: 'Jobber…',
-    signed_in_as: 'Logget inn som {{email}}',
-    primary_yes: 'Denne telefonen sikkerhetskopierer',
-    primary_yes_body:
-      'Den er hovedenheten for denne kontoen og laster opp en sikkerhetskopi én gang om dagen.',
-    primary_no: 'En annen telefon sikkerhetskopierer',
-    primary_no_body:
-      '{{device}} er hovedenheten. Denne telefonen kan gjenopprette kopien, men bare én telefon laster opp, så de overskriver aldri hverandre.',
-    another_phone: 'en annen telefon',
-    back_up_now: 'Sikkerhetskopier nå',
-    backing_up: 'Sikkerhetskopierer…',
-    transfer_title: 'Gjøre denne telefonen til hovedenhet?',
-    transfer_message:
-      'Fra nå av laster denne telefonen opp sikkerhetskopien, og den andre telefonen slutter. Neste sikkerhetskopi fra denne telefonen erstatter den i skyen.',
-    transfer_action: 'Gjør denne telefonen til hovedenhet',
-    latest_title: 'Sikkerhetskopi i skyen',
-    latest_body: 'Siste sikkerhetskopi {{date}} fra {{device}} · {{size}}',
-    latest_none:
-      'Ingen sikkerhetskopi ennå. Den første lastes opp kort tid etter at du har logget inn.',
+      'Telefonen din er fortsatt kilden til dataene. Web-dashbordet leser bare, og ingenting sendes tilbake.',
+    link_title: 'Koble til en datamaskin',
+    link_body: 'Åpne app.money2time.com på datamaskinen, og skann koden på skjermen.',
+    link_action: 'Skann koden',
+    linking: 'Kobler til…',
+    linked: '{{name}} er koblet til. Dataene dine er på vei.',
+    browsers_title: 'Tilkoblede nettlesere',
+    unknown_browser: 'En nettleser',
+    status_connecting: 'Kobler til…',
+    status_open: 'Åpen nå',
+    status_open_sent: 'Åpen nå · sendt {{date}}',
+    status_sending: 'Sender… {{percent}}%',
+    status_closed: 'Ikke åpen · sist sendt {{date}}',
     never: 'aldri',
-    open_web: 'Åpne nettdashbordet',
-    open_web_hint: 'Logg inn på app.money2time.com med samme konto.',
-    restore_section: 'Gjenopprett på denne telefonen',
-    restore_hint:
-      'Setter du opp en ny telefon? Gjenopprett sikkerhetskopien fra skyen for å få dataene dine hit. Dette erstatter alt på denne telefonen.',
-    restore_title: 'Erstatte dataene på denne telefonen med sikkerhetskopien fra skyen?',
-    restore_summary: '{{accounts}} kontoer · {{transactions}} transaksjoner',
-    restore_warning: 'Alt på denne telefonen erstattes. Dette kan ikke angres.',
-    restore_action: 'Gjenopprett fra skyen',
-    restoring: 'Gjenoppretter…',
-    restore_done_title: 'Gjenopprettet',
-    restore_done_message: 'Dataene dine er gjenopprettet fra sikkerhetskopien i skyen.',
-    restore_failed_title: 'Gjenopprettingen mislyktes',
-    delete_title: 'Slette sikkerhetskopien i skyen?',
-    delete_message:
-      'Sikkerhetskopien fjernes fra skyen og nettdashbordet. Dataene på denne telefonen berøres ikke; neste daglige sikkerhetskopi laster opp en ny.',
-    delete_action: 'Slett sikkerhetskopi i skyen',
-    sign_out: 'Logg ut',
-    sign_out_title: 'Logge ut av sikkerhetskopiering i skyen?',
-    sign_out_message:
-      'Denne telefonen slutter å sikkerhetskopiere. Dataene på denne telefonen og sikkerhetskopien i skyen forblir som de er.',
-    delete_account_title: 'Slette kontoen din for sikkerhetskopi i skyen?',
-    delete_account_message:
-      'Kontoen din og sikkerhetskopien i skyen slettes for godt. Dataene på denne telefonen berøres ikke.',
-    delete_account_action: 'Slett konto',
+    send_now: 'Send siste data nå',
+    sending: 'Sender…',
+    none_open:
+      'Ingen av de tilkoblede nettleserne er åpne akkurat nå. Åpne app.money2time.com på datamaskinen først.',
+    refresh_hint:
+      'For å oppdatere dashbordet åpner du app.money2time.com på datamaskinen og denne skjermen på telefonen. De siste dataene sendes over av seg selv.',
+    open_web: 'Åpne app.money2time.com',
+    unlink: 'Koble fra',
+    unlink_title: 'Koble fra denne nettleseren?',
+    unlink_message:
+      '{{name}} slutter å få dataene dine. Hvis den er åpen nå, sletter den også kopien den har lagret.',
+    close: 'Lukk',
+    scan_hint: 'Rett kameraet mot koden på datamaskinens skjerm.',
+    camera_permission: 'Gi tilgang til kameraet for å skanne koden.',
+    camera_allow: 'Tillat kamera',
     errors: {
-      unauthenticated: 'Du ble logget ut. Logg inn igjen.',
-      not_primary: 'En annen telefon er hovedenheten, så denne laster ikke opp.',
+      unavailable:
+        'Web-dashbordet krever den nyeste versjonen av appen. Oppdater Money2Time og prøv igjen.',
+      invalid_qr:
+        'Dette er ikke en kode for Money2Time Web-dashbord. Åpne app.money2time.com og skann koden der.',
+      timeout:
+        'Nettleseren svarte ikke. Last inn app.money2time.com på nytt og skann den nye koden.',
       offline: 'Ingen internettforbindelse. Prøv igjen når du er på nett.',
-      server: 'Fikk ikke kontakt med skytjenesten for sikkerhetskopi. Prøv igjen om litt.',
-      no_backup: 'Det finnes ingen sikkerhetskopi i skyen å gjenopprette ennå.',
-      checksum:
-        'Den nedlastede sikkerhetskopien samsvarte ikke med kontrollsummen, så ingenting ble endret. Prøv igjen.',
-      corrupt: 'Sikkerhetskopien i skyen kunne ikke leses.',
-      rate_limited: 'For mange forsøk. Vent et minutt og prøv igjen.',
-      invalid_code: 'Den koden fungerte ikke. Sjekk den, eller be om en ny.',
-      invalid_email: 'Skriv inn en gyldig e-postadresse.',
-      google_unavailable:
-        'Innlogging med Google er ikke tilgjengelig akkurat nå. Bruk en e-postkode i stedet.',
-      cancelled: 'Innloggingen ble avbrutt.',
-      session_not_fresh:
-        'Av sikkerhetshensyn må du logge ut og logge inn igjen, og deretter slette kontoen.',
+      rejected: 'Nettleseren kunne ikke åpne dataene. Prøv igjen.',
+      closed:
+        'Nettleseren ble lukket før tilkoblingen var ferdig. Last den inn på nytt og skann igjen.',
+      too_many: 'Du kan koble til opptil 8 nettlesere. Koble fra en først.',
     },
   },
   auto_backup: {

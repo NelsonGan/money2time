@@ -83,7 +83,7 @@ interface SettingsScreenProps {
   onOpenRecurring: () => void;
   onOpenNotifications: () => void;
   onOpenDataManagement: () => void;
-  onOpenCloudBackup: () => void;
+  onOpenWebDashboard: () => void;
   onOpenNews: () => void;
   onOpenTutorials: () => void;
   onOpenStatementImport: () => void;
@@ -115,7 +115,7 @@ export function SettingsScreen({
   onOpenRecurring,
   onOpenNotifications,
   onOpenDataManagement,
-  onOpenCloudBackup,
+  onOpenWebDashboard,
   onOpenNews,
   onOpenTutorials,
   onOpenStatementImport,
@@ -628,9 +628,9 @@ export function SettingsScreen({
                 onPress={onOpenDataManagement}
               />
               <SettingsGridTile
-                icon={<ClayIcon name="status/cloud-upload" size={34} flatSize={20} />}
-                label={I18n.t('settings.cloud_backup')}
-                onPress={onOpenCloudBackup}
+                icon={<ClayIcon name="insights/growth-analysis" size={34} flatSize={20} />}
+                label={I18n.t('settings.web_dashboard')}
+                onPress={onOpenWebDashboard}
               />
               <SettingsGridTile
                 icon={<ClayIcon name="settings/app-lock" size={34} flatSize={20} />}

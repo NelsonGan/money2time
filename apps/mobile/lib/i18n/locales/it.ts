@@ -1486,7 +1486,7 @@ const it = {
     haptics: 'Aptico',
     haptics_subtitle: "Attiva o disattiva il feedback tattile nell'app.",
     data_management: 'Gestione dati',
-    cloud_backup: 'Backup nel cloud',
+    web_dashboard: 'Dashboard web',
     statement_import: 'Importa estratto conto',
   },
   statement_import: {
@@ -2341,84 +2341,57 @@ const it = {
       monthly_review_body: 'Scopri dove sono andati i tuoi soldi e il tuo tempo il mese scorso.',
     },
   },
-  cloud_backup: {
-    title: 'Backup nel cloud e dashboard web',
+  web_dashboard: {
+    title: 'Dashboard web',
     subtitle:
-      'Accedi per tenere nel cloud un backup compresso di questo telefono, aggiornato ogni giorno, e consultarlo da un computer su app.money2time.com.',
-    intro_title: 'I tuoi dati su un grande schermo',
+      'Guarda i tuoi dati su un computer, su app.money2time.com. Il telefono li invia direttamente al browser, con crittografia end-to-end. Non viene salvato nulla online e non serve alcun account.',
+    intro_title: 'I tuoi dati su uno schermo grande',
     intro_body:
-      'Dopo l’accesso, questo telefono carica ogni giorno un backup compresso. Apri app.money2time.com da un computer per esplorarlo in 17 dashboard.',
+      'Apri app.money2time.com su un computer, inquadra il codice che compare con questo telefono ed esplora i tuoi dati in 17 dashboard.',
+    private_note:
+      'Non viene salvato nulla online. Il telefono invia i tuoi dati direttamente al browser, cifrati con una chiave che solo i due dispositivi possiedono. Il browser conserva l’ultima copia finché non lo scolleghi.',
     source_of_truth:
-      'Il tuo telefono resta la fonte di verità. La dashboard web è solo in lettura e i dati non si sincronizzano tra telefoni.',
-    sign_in_title: 'Accedi',
-    google: 'Continua con Google',
-    or: 'oppure',
-    email_label: 'Email',
-    send_code: 'Inviami un codice di accesso via email',
-    code_label: 'Inserisci il codice a 6 cifre inviato a {{email}}',
-    verify: 'Accedi',
-    change_email: 'Usa un’altra email',
-    working: 'Elaborazione…',
-    signed_in_as: 'Accesso eseguito come {{email}}',
-    primary_yes: 'Questo telefono esegue il backup',
-    primary_yes_body:
-      'È il dispositivo principale di questo account e carica un backup una volta al giorno.',
-    primary_no: 'Un altro telefono esegue il backup',
-    primary_no_body:
-      '{{device}} è il dispositivo principale. Questo telefono può ripristinarne il backup, ma solo un telefono carica, così non si sovrascrivono mai a vicenda.',
-    another_phone: 'un altro telefono',
-    back_up_now: 'Esegui backup ora',
-    backing_up: 'Backup in corso…',
-    transfer_title: 'Rendere questo telefono il dispositivo principale?',
-    transfer_message:
-      'Da ora questo telefono carica il backup e l’altro smette. Il prossimo backup di questo telefono sostituisce quello nel cloud.',
-    transfer_action: 'Rendi principale questo telefono',
-    latest_title: 'Backup nel cloud',
-    latest_body: 'Ultimo backup {{date}} da {{device}} · {{size}}',
-    latest_none: 'Nessun backup per ora. Il primo viene caricato poco dopo l’accesso.',
+      'Il telefono resta la fonte dei dati. La dashboard web si limita a leggerli e non rimanda nulla indietro.',
+    link_title: 'Collega un computer',
+    link_body: 'Apri app.money2time.com sul computer, poi inquadra il codice sul suo schermo.',
+    link_action: 'Scansiona il codice',
+    linking: 'Collegamento…',
+    linked: '{{name}} collegato. I tuoi dati sono in arrivo.',
+    browsers_title: 'Browser collegati',
+    unknown_browser: 'Un browser',
+    status_connecting: 'Connessione…',
+    status_open: 'Aperto ora',
+    status_open_sent: 'Aperto ora · inviato {{date}}',
+    status_sending: 'Invio… {{percent}}%',
+    status_closed: 'Non aperto · ultimo invio {{date}}',
     never: 'mai',
-    open_web: 'Apri la dashboard web',
-    open_web_hint: 'Accedi a app.money2time.com con lo stesso account.',
-    restore_section: 'Ripristina su questo telefono',
-    restore_hint:
-      'Stai configurando un nuovo telefono? Ripristina il backup nel cloud per portare qui i tuoi dati. Questo sostituisce tutto su questo telefono.',
-    restore_title: 'Sostituire i dati di questo telefono con il backup nel cloud?',
-    restore_summary: '{{accounts}} conti · {{transactions}} transazioni',
-    restore_warning:
-      'Tutto su questo telefono viene sostituito. L’operazione non può essere annullata.',
-    restore_action: 'Ripristina backup nel cloud',
-    restoring: 'Ripristino in corso…',
-    restore_done_title: 'Ripristinato',
-    restore_done_message: 'I tuoi dati sono stati ripristinati dal backup nel cloud.',
-    restore_failed_title: 'Ripristino non riuscito',
-    delete_title: 'Eliminare il backup nel cloud?',
-    delete_message:
-      'Il backup viene rimosso dal cloud e dalla dashboard web. I dati su questo telefono non vengono toccati; il prossimo backup giornaliero ne caricherà uno nuovo.',
-    delete_action: 'Elimina backup nel cloud',
-    sign_out: 'Esci',
-    sign_out_title: 'Uscire dal backup nel cloud?',
-    sign_out_message:
-      'Questo telefono smette di eseguire il backup. I tuoi dati su questo telefono e il backup nel cloud restano come sono.',
-    delete_account_title: 'Eliminare il tuo account di backup nel cloud?',
-    delete_account_message:
-      'Il tuo account e il suo backup nel cloud vengono eliminati definitivamente. I dati su questo telefono non vengono toccati.',
-    delete_account_action: 'Elimina account',
+    send_now: 'Invia ora i dati più recenti',
+    sending: 'Invio…',
+    none_open:
+      'Nessuno dei browser collegati è aperto in questo momento. Apri prima app.money2time.com sul computer.',
+    refresh_hint:
+      'Per aggiornare la dashboard, apri app.money2time.com sul computer e questa schermata sul telefono. I dati più recenti arrivano in automatico.',
+    open_web: 'Apri app.money2time.com',
+    unlink: 'Scollega',
+    unlink_title: 'Scollegare questo browser?',
+    unlink_message:
+      '{{name}} smette di ricevere i tuoi dati. Se è aperto in questo momento, elimina anche la copia che conserva.',
+    close: 'Chiudi',
+    scan_hint: 'Inquadra con la fotocamera il codice sullo schermo del computer.',
+    camera_permission: 'Consenti l’accesso alla fotocamera per scansionare il codice.',
+    camera_allow: 'Consenti fotocamera',
     errors: {
-      unauthenticated: 'La sessione è terminata. Accedi di nuovo.',
-      not_primary: 'Un altro telefono è il dispositivo principale, quindi questo non carica.',
+      unavailable:
+        'La dashboard web richiede l’ultima versione dell’app. Aggiorna Money2Time e riprova.',
+      invalid_qr:
+        'Questo non è un codice della dashboard web di Money2Time. Apri app.money2time.com e inquadra il codice che trovi lì.',
+      timeout:
+        'Il browser non ha risposto. Ricarica app.money2time.com e inquadra il nuovo codice.',
       offline: 'Nessuna connessione a internet. Riprova quando sei online.',
-      server: 'Impossibile raggiungere il backup nel cloud. Riprova tra poco.',
-      no_backup: 'Non c’è ancora un backup nel cloud da ripristinare.',
-      checksum:
-        'Il backup scaricato non corrispondeva al suo checksum, quindi non è cambiato nulla. Riprova.',
-      corrupt: 'Impossibile leggere il backup nel cloud.',
-      rate_limited: 'Troppi tentativi. Aspetta un minuto e riprova.',
-      invalid_code: 'Quel codice non ha funzionato. Controllalo o richiedine uno nuovo.',
-      invalid_email: 'Inserisci un indirizzo email valido.',
-      google_unavailable:
-        'L’accesso con Google non è disponibile al momento. Usa invece un codice via email.',
-      cancelled: 'Accesso annullato.',
-      session_not_fresh: 'Per la tua sicurezza, esci e accedi di nuovo, poi elimina l’account.',
+      rejected: 'Il browser non è riuscito ad aprire i dati. Riprova.',
+      closed:
+        'Il browser si è chiuso prima della fine del collegamento. Ricaricalo e inquadra di nuovo il codice.',
+      too_many: 'Puoi collegare fino a 8 browser. Scollegane prima uno.',
     },
   },
   auto_backup: {

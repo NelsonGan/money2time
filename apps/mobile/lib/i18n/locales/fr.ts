@@ -1497,7 +1497,7 @@ const fr = {
     haptics: 'Retour haptique',
     haptics_subtitle: "Activer ou désactiver le retour tactile dans toute l'application.",
     data_management: 'Gestion des données',
-    cloud_backup: 'Sauvegarde cloud',
+    web_dashboard: 'Tableau de bord web',
     statement_import: 'Import de relevé',
   },
   statement_import: {
@@ -2358,86 +2358,58 @@ const fr = {
       monthly_review_body: 'Découvrez où sont passés votre argent et votre temps le mois dernier.',
     },
   },
-  cloud_backup: {
-    title: 'Sauvegarde cloud et tableau de bord web',
+  web_dashboard: {
+    title: 'Tableau de bord web',
     subtitle:
-      'Connectez-vous pour conserver dans le cloud une sauvegarde compressée de ce téléphone, mise à jour chaque jour, et la consulter sur ordinateur à l’adresse app.money2time.com.',
+      'Consultez vos données sur un ordinateur, à l’adresse app.money2time.com. Votre téléphone les envoie directement au navigateur, chiffrées de bout en bout. Rien n’est stocké en ligne et il n’y a pas de compte.',
     intro_title: 'Vos données sur grand écran',
     intro_body:
-      'Après votre connexion, ce téléphone envoie chaque jour une sauvegarde compressée. Ouvrez app.money2time.com sur un ordinateur pour l’explorer dans 17 tableaux de bord.',
+      'Ouvrez app.money2time.com sur un ordinateur, scannez le code affiché avec ce téléphone et explorez vos données dans 17 tableaux de bord.',
+    private_note:
+      'Rien n’est stocké en ligne. Votre téléphone envoie vos données directement au navigateur, chiffrées avec une clé que seuls les deux détiennent. Le navigateur conserve la dernière copie jusqu’à ce que vous le dissociiez.',
     source_of_truth:
-      'Votre téléphone reste la source de référence. Le tableau de bord web est en lecture seule, et les données ne se synchronisent pas entre téléphones.',
-    sign_in_title: 'Connexion',
-    google: 'Continuer avec Google',
-    or: 'ou',
-    email_label: 'E-mail',
-    send_code: 'M’envoyer un code de connexion par e-mail',
-    code_label: 'Saisissez le code à 6 chiffres envoyé à {{email}}',
-    verify: 'Se connecter',
-    change_email: 'Utiliser un autre e-mail',
-    working: 'Traitement…',
-    signed_in_as: 'Connecté en tant que {{email}}',
-    primary_yes: 'Ce téléphone sauvegarde',
-    primary_yes_body:
-      'C’est l’appareil principal de ce compte ; il envoie une sauvegarde une fois par jour.',
-    primary_no: 'Un autre téléphone sauvegarde',
-    primary_no_body:
-      '{{device}} est l’appareil principal. Ce téléphone peut restaurer sa sauvegarde, mais un seul téléphone envoie, afin qu’ils ne s’écrasent jamais l’un l’autre.',
-    another_phone: 'un autre téléphone',
-    back_up_now: 'Sauvegarder maintenant',
-    backing_up: 'Sauvegarde en cours…',
-    transfer_title: 'Faire de ce téléphone l’appareil principal ?',
-    transfer_message:
-      'Désormais, ce téléphone envoie la sauvegarde et l’autre s’arrête. La prochaine sauvegarde de ce téléphone remplace celle du cloud.',
-    transfer_action: 'Définir ce téléphone comme principal',
-    latest_title: 'Sauvegarde cloud',
-    latest_body: 'Dernière sauvegarde {{date}} depuis {{device}} · {{size}}',
-    latest_none:
-      'Aucune sauvegarde pour l’instant. La première est envoyée peu après votre connexion.',
+      'Votre téléphone reste la source de référence. Le tableau de bord web est en lecture seule et rien n’est renvoyé.',
+    link_title: 'Associer un ordinateur',
+    link_body:
+      'Ouvrez app.money2time.com sur votre ordinateur, puis scannez le code affiché à l’écran.',
+    link_action: 'Scanner le code',
+    linking: 'Association…',
+    linked: '{{name}} associé. Vos données sont en route.',
+    browsers_title: 'Navigateurs associés',
+    unknown_browser: 'Un navigateur',
+    status_connecting: 'Connexion…',
+    status_open: 'Ouvert actuellement',
+    status_open_sent: 'Ouvert actuellement · envoyé {{date}}',
+    status_sending: 'Envoi… {{percent}} %',
+    status_closed: 'Fermé · dernier envoi {{date}}',
     never: 'jamais',
-    open_web: 'Ouvrir le tableau de bord web',
-    open_web_hint: 'Connectez-vous sur app.money2time.com avec le même compte.',
-    restore_section: 'Restaurer sur ce téléphone',
-    restore_hint:
-      'Vous configurez un nouveau téléphone ? Restaurez la sauvegarde cloud pour y retrouver vos données. Cela remplace tout ce qui se trouve sur ce téléphone.',
-    restore_title: 'Remplacer les données de ce téléphone par la sauvegarde cloud ?',
-    restore_summary: '{{accounts}} comptes · {{transactions}} transactions',
-    restore_warning: 'Tout ce qui se trouve sur ce téléphone est remplacé. Action irréversible.',
-    restore_action: 'Restaurer la sauvegarde cloud',
-    restoring: 'Restauration…',
-    restore_done_title: 'Restauré',
-    restore_done_message: 'Vos données ont été restaurées depuis la sauvegarde cloud.',
-    restore_failed_title: 'Échec de la restauration',
-    delete_title: 'Supprimer la sauvegarde cloud ?',
-    delete_message:
-      'La sauvegarde est supprimée du cloud et du tableau de bord web. Les données de ce téléphone ne sont pas touchées ; la prochaine sauvegarde quotidienne en enverra une nouvelle.',
-    delete_action: 'Supprimer la sauvegarde cloud',
-    sign_out: 'Se déconnecter',
-    sign_out_title: 'Se déconnecter de la sauvegarde cloud ?',
-    sign_out_message:
-      'Ce téléphone arrête de sauvegarder. Vos données sur ce téléphone et la sauvegarde cloud restent telles quelles.',
-    delete_account_title: 'Supprimer votre compte de sauvegarde cloud ?',
-    delete_account_message:
-      'Votre compte et sa sauvegarde cloud sont supprimés définitivement. Les données de ce téléphone ne sont pas touchées.',
-    delete_account_action: 'Supprimer le compte',
+    send_now: 'Envoyer les dernières données maintenant',
+    sending: 'Envoi…',
+    none_open:
+      'Aucun de vos navigateurs associés n’est ouvert pour le moment. Ouvrez d’abord app.money2time.com sur l’ordinateur.',
+    refresh_hint:
+      'Pour actualiser le tableau de bord, ouvrez app.money2time.com sur l’ordinateur et cet écran sur votre téléphone. Les dernières données sont envoyées automatiquement.',
+    open_web: 'Ouvrir app.money2time.com',
+    unlink: 'Dissocier',
+    unlink_title: 'Dissocier ce navigateur ?',
+    unlink_message:
+      '{{name}} ne reçoit plus vos données. S’il est ouvert en ce moment, il supprime aussi la copie qu’il conserve.',
+    close: 'Fermer',
+    scan_hint: 'Pointez l’appareil photo vers le code affiché sur l’écran de votre ordinateur.',
+    camera_permission: 'Autorisez l’accès à la caméra pour scanner le code.',
+    camera_allow: 'Autoriser la caméra',
     errors: {
-      unauthenticated: 'Votre session a pris fin. Reconnectez-vous.',
-      not_primary:
-        'Un autre téléphone est l’appareil principal, donc celui-ci n’envoie pas de sauvegarde.',
-      offline: 'Aucune connexion internet. Réessayez une fois en ligne.',
-      server: 'Impossible de joindre la sauvegarde cloud. Réessayez dans un instant.',
-      no_backup: 'Il n’y a pas encore de sauvegarde cloud à restaurer.',
-      checksum:
-        'La sauvegarde téléchargée ne correspondait pas à sa somme de contrôle, rien n’a donc été modifié. Réessayez.',
-      corrupt: 'La sauvegarde cloud n’a pas pu être lue.',
-      rate_limited: 'Trop de tentatives. Attendez une minute et réessayez.',
-      invalid_code: 'Ce code n’a pas fonctionné. Vérifiez-le ou demandez-en un nouveau.',
-      invalid_email: 'Saisissez une adresse e-mail valide.',
-      google_unavailable:
-        'La connexion avec Google n’est pas disponible pour le moment. Utilisez plutôt un code par e-mail.',
-      cancelled: 'La connexion a été annulée.',
-      session_not_fresh:
-        'Pour votre sécurité, déconnectez-vous puis reconnectez-vous, avant de supprimer le compte.',
+      unavailable:
+        'Le tableau de bord web nécessite la dernière version de l’application. Mettez à jour Money2Time et réessayez.',
+      invalid_qr:
+        'Ce n’est pas un code du tableau de bord web Money2Time. Ouvrez app.money2time.com et scannez le code qui s’y affiche.',
+      timeout:
+        'Le navigateur n’a pas répondu. Rechargez app.money2time.com et scannez le nouveau code.',
+      offline: 'Pas de connexion internet. Réessayez une fois en ligne.',
+      rejected: 'Le navigateur n’a pas pu ouvrir les données. Réessayez.',
+      closed:
+        'Le navigateur s’est fermé avant la fin de l’association. Rechargez-le et scannez à nouveau.',
+      too_many: 'Vous pouvez associer jusqu’à 8 navigateurs. Dissociez-en un d’abord.',
     },
   },
   auto_backup: {

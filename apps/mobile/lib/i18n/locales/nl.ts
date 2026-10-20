@@ -1496,7 +1496,7 @@ const nl = {
     haptics: 'Haptisch',
     haptics_subtitle: 'Tactiele feedback in de hele app in- of uitschakelen.',
     data_management: 'Gegevensbeheer',
-    cloud_backup: 'Cloudback-up',
+    web_dashboard: 'Webdashboard',
     statement_import: 'Afschrift importeren',
   },
   statement_import: {
@@ -2353,85 +2353,56 @@ const nl = {
       monthly_review_body: 'Bekijk waar je geld en tijd vorige maand naartoe gingen.',
     },
   },
-  cloud_backup: {
-    title: 'Cloudback-up en webdashboard',
+  web_dashboard: {
+    title: 'Webdashboard',
     subtitle:
-      'Meld je aan om één gecomprimeerde back-up van deze telefoon in de cloud te bewaren, dagelijks bijgewerkt, en bekijk hem op een computer via app.money2time.com.',
+      'Bekijk je gegevens op een computer via app.money2time.com. Je telefoon stuurt ze rechtstreeks naar de browser, end-to-end versleuteld. Er wordt niets online opgeslagen en er is geen account.',
     intro_title: 'Je gegevens op een groot scherm',
     intro_body:
-      'Zodra je bent aangemeld, uploadt deze telefoon elke dag een gecomprimeerde back-up. Open app.money2time.com op een computer om hem te verkennen in 17 dashboards.',
+      'Open app.money2time.com op een computer, scan de code die daar verschijnt met deze telefoon en bekijk je gegevens in 17 dashboards.',
+    private_note:
+      'Er wordt niets online opgeslagen. Je telefoon stuurt je gegevens rechtstreeks naar de browser, versleuteld met een sleutel die alleen die twee hebben. De browser bewaart de laatste kopie totdat je de koppeling verbreekt.',
     source_of_truth:
-      'Je telefoon blijft de bron van waarheid. Het webdashboard leest alleen mee en er worden geen gegevens tussen telefoons gesynchroniseerd.',
-    sign_in_title: 'Aanmelden',
-    google: 'Doorgaan met Google',
-    or: 'of',
-    email_label: 'E-mail',
-    send_code: 'Mail me een aanmeldcode',
-    code_label: 'Voer de 6-cijferige code in die naar {{email}} is gestuurd',
-    verify: 'Aanmelden',
-    change_email: 'Gebruik een ander e-mailadres',
-    working: 'Bezig…',
-    signed_in_as: 'Aangemeld als {{email}}',
-    primary_yes: 'Deze telefoon maakt de back-up',
-    primary_yes_body:
-      'Dit is het hoofdapparaat voor dit account en uploadt één keer per dag een back-up.',
-    primary_no: 'Een andere telefoon maakt de back-up',
-    primary_no_body:
-      '{{device}} is het hoofdapparaat. Deze telefoon kan de back-up herstellen, maar slechts één telefoon uploadt, zodat ze elkaar nooit overschrijven.',
-    another_phone: 'een andere telefoon',
-    back_up_now: 'Nu back-up maken',
-    backing_up: 'Back-up maken…',
-    transfer_title: 'Van deze telefoon het hoofdapparaat maken?',
-    transfer_message:
-      'Vanaf nu uploadt deze telefoon de back-up en stopt de andere telefoon daarmee. De volgende back-up van deze telefoon vervangt die in de cloud.',
-    transfer_action: 'Maak deze telefoon het hoofdapparaat',
-    latest_title: 'Cloudback-up',
-    latest_body: 'Laatste back-up {{date}} van {{device}} · {{size}}',
-    latest_none: 'Nog geen back-up. De eerste wordt kort na het aanmelden geüpload.',
+      'Je telefoon blijft de bron van je gegevens. Het webdashboard leest alleen mee en er wordt niets teruggestuurd.',
+    link_title: 'Een computer koppelen',
+    link_body: 'Open app.money2time.com op je computer en scan daarna de code op het scherm.',
+    link_action: 'Code scannen',
+    linking: 'Koppelen…',
+    linked: '{{name}} gekoppeld. Je gegevens zijn onderweg.',
+    browsers_title: 'Gekoppelde browsers',
+    unknown_browser: 'Een browser',
+    status_connecting: 'Verbinden…',
+    status_open: 'Nu open',
+    status_open_sent: 'Nu open · verzonden {{date}}',
+    status_sending: 'Verzenden… {{percent}}%',
+    status_closed: 'Niet open · laatst verzonden {{date}}',
     never: 'nooit',
-    open_web: 'Open het webdashboard',
-    open_web_hint: 'Meld je aan op app.money2time.com met hetzelfde account.',
-    restore_section: 'Herstellen op deze telefoon',
-    restore_hint:
-      'Een nieuwe telefoon instellen? Herstel de cloudback-up om je gegevens hierheen te halen. Dit vervangt alles op deze telefoon.',
-    restore_title: 'De gegevens van deze telefoon vervangen door de cloudback-up?',
-    restore_summary: '{{accounts}} rekeningen · {{transactions}} transacties',
-    restore_warning:
-      'Alles op deze telefoon wordt vervangen. Dit kan niet ongedaan worden gemaakt.',
-    restore_action: 'Cloudback-up herstellen',
-    restoring: 'Herstellen…',
-    restore_done_title: 'Hersteld',
-    restore_done_message: 'Je gegevens zijn hersteld vanuit de cloudback-up.',
-    restore_failed_title: 'Herstellen mislukt',
-    delete_title: 'De cloudback-up verwijderen?',
-    delete_message:
-      'De back-up wordt verwijderd uit de cloud en het webdashboard. Gegevens op deze telefoon blijven ongemoeid; de volgende dagelijkse back-up uploadt een nieuwe.',
-    delete_action: 'Cloudback-up verwijderen',
-    sign_out: 'Afmelden',
-    sign_out_title: 'Afmelden bij Cloudback-up?',
-    sign_out_message:
-      'Deze telefoon stopt met back-ups maken. Je gegevens op deze telefoon en de cloudback-up blijven zoals ze zijn.',
-    delete_account_title: 'Je account voor cloudback-up verwijderen?',
-    delete_account_message:
-      'Je account en de bijbehorende cloudback-up worden definitief verwijderd. Gegevens op deze telefoon blijven ongemoeid.',
-    delete_account_action: 'Account verwijderen',
+    send_now: 'Nieuwste gegevens nu verzenden',
+    sending: 'Verzenden…',
+    none_open:
+      'Geen van je gekoppelde browsers is nu open. Open eerst app.money2time.com op de computer.',
+    refresh_hint:
+      'Om het dashboard te vernieuwen open je app.money2time.com op de computer en dit scherm op je telefoon. De nieuwste gegevens worden vanzelf verzonden.',
+    open_web: 'Open app.money2time.com',
+    unlink: 'Ontkoppelen',
+    unlink_title: 'Deze browser ontkoppelen?',
+    unlink_message:
+      '{{name}} krijgt je gegevens niet meer. Als de browser nu open is, wordt ook de kopie verwijderd die hij bewaart.',
+    close: 'Sluiten',
+    scan_hint: 'Richt de camera op de code op het scherm van je computer.',
+    camera_permission: 'Geef toegang tot de camera om de code te scannen.',
+    camera_allow: 'Camera toestaan',
     errors: {
-      unauthenticated: 'Je bent afgemeld. Meld je opnieuw aan.',
-      not_primary: 'Een andere telefoon is het hoofdapparaat, dus deze uploadt niet.',
+      unavailable:
+        'Het Webdashboard heeft de nieuwste versie van de app nodig. Werk Money2Time bij en probeer het opnieuw.',
+      invalid_qr:
+        'Dat is geen Money2Time Webdashboard-code. Open app.money2time.com en scan de code daar.',
+      timeout: 'De browser reageerde niet. Laad app.money2time.com opnieuw en scan de nieuwe code.',
       offline: 'Geen internetverbinding. Probeer het opnieuw als je online bent.',
-      server: 'Cloudback-up is niet bereikbaar. Probeer het zo meteen opnieuw.',
-      no_backup: 'Er is nog geen cloudback-up om te herstellen.',
-      checksum:
-        'De gedownloade back-up kwam niet overeen met de controlesom, dus er is niets gewijzigd. Probeer het opnieuw.',
-      corrupt: 'De cloudback-up kon niet worden gelezen.',
-      rate_limited: 'Te veel pogingen. Wacht een minuut en probeer het opnieuw.',
-      invalid_code: 'Die code werkte niet. Controleer hem of vraag een nieuwe aan.',
-      invalid_email: 'Voer een geldig e-mailadres in.',
-      google_unavailable:
-        'Aanmelden met Google is nu niet beschikbaar. Gebruik in plaats daarvan een e-mailcode.',
-      cancelled: 'Aanmelden is geannuleerd.',
-      session_not_fresh:
-        'Meld je voor je veiligheid af en weer aan, en verwijder daarna het account.',
+      rejected: 'De browser kon de gegevens niet openen. Probeer het opnieuw.',
+      closed:
+        'De browser is gesloten voordat het koppelen klaar was. Laad hem opnieuw en scan nogmaals.',
+      too_many: 'Je kunt maximaal 8 browsers koppelen. Ontkoppel er eerst een.',
     },
   },
   auto_backup: {

@@ -1503,7 +1503,7 @@ const fil = {
     haptics: 'Haptics',
     haptics_subtitle: 'I-on o i-off ang touch feedback sa buong app.',
     data_management: 'Data Management',
-    cloud_backup: 'Cloud Backup',
+    web_dashboard: 'Web Dashboard',
     statement_import: 'Statement Import',
   },
   statement_import: {
@@ -2358,84 +2358,57 @@ const fil = {
         'Tingnan kung saan napunta ang iyong pera at oras noong nakaraang buwan.',
     },
   },
-  cloud_backup: {
-    title: 'Cloud Backup at Web Dashboard',
+  web_dashboard: {
+    title: 'Web Dashboard',
     subtitle:
-      'Mag-sign in para magtago ng isang naka-compress na backup ng phone na ito sa cloud, na ina-update araw-araw, at tingnan ito sa computer sa app.money2time.com.',
-    intro_title: 'Ang data mo sa malaking screen',
+      'Tingnan ang iyong data sa computer sa app.money2time.com. Direktang ipinapadala ito ng iyong telepono sa browser, may end-to-end encryption. Walang iniimbak online at walang account.',
+    intro_title: 'Ang iyong data sa malaking screen',
     intro_body:
-      'Kapag naka-sign in ka na, mag-a-upload ang phone na ito ng naka-compress na backup araw-araw. Buksan ang app.money2time.com sa computer para i-explore ito sa 17 dashboard.',
+      'Buksan ang app.money2time.com sa computer, i-scan gamit ang telepono mong ito ang code na lalabas, at tuklasin ang iyong data sa 17 dashboard.',
+    private_note:
+      'Walang iniimbak online. Direktang ipinapadala ng iyong telepono ang iyong data sa browser, naka-encrypt gamit ang key na silang dalawa lang ang may hawak. Itinatago ng browser ang huling kopya hanggang i-unlink mo ito.',
     source_of_truth:
-      'Nananatiling source of truth ang phone mo. Nagbabasa lang ang web dashboard, at hindi nagsi-sync ang data sa pagitan ng mga phone.',
-    sign_in_title: 'Mag-sign in',
-    google: 'Magpatuloy gamit ang Google',
-    or: 'o',
-    email_label: 'Email',
-    send_code: 'Padalhan ako ng sign-in code sa email',
-    code_label: 'Ilagay ang 6-digit na code na ipinadala sa {{email}}',
-    verify: 'Mag-sign in',
-    change_email: 'Gumamit ng ibang email',
-    working: 'Pinoproseso…',
-    signed_in_as: 'Naka-sign in bilang {{email}}',
-    primary_yes: 'Ang phone na ito ang nagba-backup',
-    primary_yes_body:
-      'Ito ang pangunahing device ng account na ito at nag-a-upload ng backup isang beses sa isang araw.',
-    primary_no: 'Ibang phone ang nagba-backup',
-    primary_no_body:
-      "Ang {{device}} ang pangunahing device. Maaaring i-restore ng phone na ito ang backup nito, pero isang phone lang ang nag-a-upload, kaya hindi nila nao-overwrite ang isa't isa.",
-    another_phone: 'ibang phone',
-    back_up_now: 'I-backup ngayon',
-    backing_up: 'Nagba-backup…',
-    transfer_title: 'Gawing pangunahing device ang phone na ito?',
-    transfer_message:
-      'Mula ngayon, ang phone na ito na ang mag-a-upload ng backup, at hihinto ang isa pa. Papalitan ng susunod na backup mula sa phone na ito ang nasa cloud.',
-    transfer_action: 'Gawing pangunahin ang phone na ito',
-    latest_title: 'Cloud backup',
-    latest_body: 'Huling backup {{date}} mula sa {{device}} · {{size}}',
-    latest_none: 'Wala pang backup. Mag-a-upload ang una pagkatapos mong mag-sign in.',
-    never: 'wala pa',
-    open_web: 'Buksan ang web dashboard',
-    open_web_hint: 'Mag-sign in sa app.money2time.com gamit ang parehong account.',
-    restore_section: 'I-restore sa phone na ito',
-    restore_hint:
-      'Nagse-set up ng bagong phone? I-restore ang cloud backup para dalhin dito ang data mo. Papalitan nito ang lahat sa phone na ito.',
-    restore_title: 'Palitan ang data ng phone na ito ng cloud backup?',
-    restore_summary: '{{accounts}} account · {{transactions}} transaksyon',
-    restore_warning: 'Papalitan ang lahat sa phone na ito. Hindi na ito maibabalik.',
-    restore_action: 'I-restore ang cloud backup',
-    restoring: 'Nire-restore…',
-    restore_done_title: 'Na-restore na',
-    restore_done_message: 'Na-restore na ang data mo mula sa cloud backup.',
-    restore_failed_title: 'Nabigo ang pag-restore',
-    delete_title: 'Burahin ang cloud backup?',
-    delete_message:
-      'Aalisin ang backup sa cloud at sa web dashboard. Hindi gagalawin ang data sa phone na ito; mag-a-upload ng bago ang susunod na araw-araw na backup.',
-    delete_action: 'Burahin ang cloud backup',
-    sign_out: 'Mag-sign out',
-    sign_out_title: 'Mag-sign out sa Cloud Backup?',
-    sign_out_message:
-      'Hihinto na sa pag-backup ang phone na ito. Walang magbabago sa data mo sa phone na ito at sa cloud backup.',
-    delete_account_title: 'Burahin ang iyong Cloud Backup account?',
-    delete_account_message:
-      'Permanenteng buburahin ang iyong account at ang cloud backup nito. Hindi gagalawin ang data sa phone na ito.',
-    delete_account_action: 'Burahin ang account',
+      'Ang iyong telepono pa rin ang pinagmumulan ng tamang data. Nagbabasa lang ang Web Dashboard, at walang ibinabalik na anuman.',
+    link_title: 'Mag-link ng computer',
+    link_body:
+      'Buksan ang app.money2time.com sa iyong computer, saka i-scan ang code sa screen nito.',
+    link_action: 'I-scan ang code',
+    linking: 'Nagli-link…',
+    linked: 'Na-link ang {{name}}. Papunta na ang iyong data.',
+    browsers_title: 'Mga naka-link na browser',
+    unknown_browser: 'Isang browser',
+    status_connecting: 'Kumokonekta…',
+    status_open: 'Bukas ngayon',
+    status_open_sent: 'Bukas ngayon · ipinadala {{date}}',
+    status_sending: 'Ipinapadala… {{percent}}%',
+    status_closed: 'Hindi bukas · huling ipinadala {{date}}',
+    never: 'hindi pa',
+    send_now: 'Ipadala ngayon ang pinakabagong data',
+    sending: 'Ipinapadala…',
+    none_open:
+      'Walang bukas ngayon sa mga naka-link mong browser. Buksan muna ang app.money2time.com sa computer.',
+    refresh_hint:
+      'Para i-refresh ang dashboard, buksan ang app.money2time.com sa computer at ang screen na ito sa iyong telepono. Kusang ipapadala ang pinakabagong data.',
+    open_web: 'Buksan ang app.money2time.com',
+    unlink: 'I-unlink',
+    unlink_title: 'I-unlink ang browser na ito?',
+    unlink_message:
+      'Hindi na makakatanggap ng iyong data ang {{name}}. Kung bukas ito ngayon, buburahin din nito ang kopyang itinatago nito.',
+    close: 'Isara',
+    scan_hint: 'Itutok ang camera sa code sa screen ng iyong computer.',
+    camera_permission: 'Payagan ang access sa camera para ma-scan ang code.',
+    camera_allow: 'Payagan ang camera',
     errors: {
-      unauthenticated: 'Na-sign out ka. Mag-sign in ulit.',
-      not_primary: 'Ibang phone ang pangunahing device, kaya hindi nag-a-upload ang isang ito.',
+      unavailable:
+        'Kailangan ng Web Dashboard ang pinakabagong bersyon ng app. I-update ang Money2Time at subukan ulit.',
+      invalid_qr:
+        'Hindi iyan code ng Money2Time Web Dashboard. Buksan ang app.money2time.com at doon i-scan ang code.',
+      timeout:
+        'Hindi sumagot ang browser. I-reload ang app.money2time.com at i-scan ang bagong code.',
       offline: 'Walang koneksyon sa internet. Subukan ulit kapag online ka na.',
-      server: 'Hindi maabot ang Cloud Backup. Subukan ulit maya-maya.',
-      no_backup: 'Wala pang cloud backup na maire-restore.',
-      checksum:
-        'Hindi tumugma sa checksum nito ang na-download na backup, kaya walang binago. Subukan ulit.',
-      corrupt: 'Hindi mabasa ang cloud backup.',
-      rate_limited: 'Napakaraming subok. Maghintay ng isang minuto at subukan ulit.',
-      invalid_code: 'Hindi gumana ang code na iyon. Suriin ito, o humingi ng bago.',
-      invalid_email: 'Maglagay ng wastong email address.',
-      google_unavailable:
-        'Hindi available ang Google sign-in ngayon. Gumamit na lang ng email code.',
-      cancelled: 'Nakansela ang pag-sign in.',
-      session_not_fresh:
-        'Para sa seguridad mo, mag-sign out at mag-sign in ulit, tapos burahin ang account.',
+      rejected: 'Hindi mabuksan ng browser ang data. Subukan ulit.',
+      closed: 'Nagsara ang browser bago natapos ang pag-link. I-reload ito at mag-scan ulit.',
+      too_many: 'Hanggang 8 browser ang puwede mong i-link. Mag-unlink muna ng isa.',
     },
   },
   auto_backup: {

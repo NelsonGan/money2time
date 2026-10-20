@@ -1474,7 +1474,7 @@ const ja = {
     haptics: '触覚フィードバック',
     haptics_subtitle: 'アプリ全体の触覚フィードバックのオン・オフを切り替えます。',
     data_management: 'データ管理',
-    cloud_backup: 'クラウドバックアップ',
+    web_dashboard: 'Webダッシュボード',
     statement_import: '明細インポート',
   },
   statement_import: {
@@ -2316,85 +2316,57 @@ const ja = {
       monthly_review_body: '先月、お金と時間がどこに使われたか見てみましょう。',
     },
   },
-  cloud_backup: {
-    title: 'クラウドバックアップ & Webダッシュボード',
+  web_dashboard: {
+    title: 'Webダッシュボード',
     subtitle:
-      'サインインすると、この端末のバックアップを圧縮して毎日クラウドに1件保管し、パソコンの app.money2time.com で確認できます。',
-    intro_title: 'データを大きな画面で',
+      'app.money2time.com で、パソコンからデータを確認できます。データはスマートフォンからブラウザへ直接、エンドツーエンドで暗号化されて送信されます。オンラインには何も保存されず、アカウントも不要です。',
+    intro_title: '大きな画面でデータを見る',
     intro_body:
-      'サインインすると、この端末から毎日圧縮バックアップがアップロードされます。パソコンで app.money2time.com を開いて、17種類のダッシュボードで確認しましょう。',
+      'パソコンで app.money2time.com を開き、表示されるコードをこのスマートフォンで読み取ると、17種類のダッシュボードでデータを確認できます。',
+    private_note:
+      'オンラインには何も保存されません。データは、スマートフォンとブラウザの2つだけが持つ鍵で暗号化され、直接ブラウザへ送信されます。ブラウザには、連携を解除するまで最後のコピーが残ります。',
     source_of_truth:
-      '基準となるのは常にこの端末のデータです。Webダッシュボードは閲覧専用で、端末間でデータが同期されることはありません。',
-    sign_in_title: 'サインイン',
-    google: 'Google で続ける',
-    or: 'または',
-    email_label: 'メールアドレス',
-    send_code: 'サインインコードをメールで送信',
-    code_label: '{{email}} に送信された6桁のコードを入力',
-    verify: 'サインイン',
-    change_email: '別のメールアドレスを使う',
-    working: '処理中…',
-    signed_in_as: '{{email}} でサインイン中',
-    primary_yes: 'この端末でバックアップ',
-    primary_yes_body: 'このアカウントのメイン端末として、1日1回バックアップをアップロードします。',
-    primary_no: '別の端末でバックアップ',
-    primary_no_body:
-      '{{device}} がメイン端末です。この端末ではそのバックアップを復元できますが、アップロードするのは1台だけなので、上書きし合うことはありません。',
-    another_phone: '別の端末',
-    back_up_now: '今すぐバックアップ',
-    backing_up: 'バックアップ中…',
-    transfer_title: 'この端末をメイン端末にしますか？',
-    transfer_message:
-      '今後はこの端末がバックアップをアップロードし、もう一方の端末はアップロードを停止します。この端末の次回のバックアップで、クラウド上のバックアップが置き換わります。',
-    transfer_action: 'この端末をメインにする',
-    latest_title: 'クラウドバックアップ',
-    latest_body: '前回のバックアップ: {{date}}（{{device}}）· {{size}}',
-    latest_none:
-      'まだバックアップがありません。サインイン後まもなく最初のバックアップがアップロードされます。',
+      'データの原本は常にスマートフォンです。Webダッシュボードは閲覧専用で、何も書き戻されません。',
+    link_title: 'パソコンを連携',
+    link_body: 'パソコンで app.money2time.com を開き、画面に表示されるコードを読み取ってください。',
+    link_action: 'コードを読み取る',
+    linking: '連携中…',
+    linked: '{{name}} を連携しました。データを送信しています。',
+    browsers_title: '連携中のブラウザ',
+    unknown_browser: 'ブラウザ',
+    status_connecting: '接続中…',
+    status_open: '現在開いています',
+    status_open_sent: '現在開いています · {{date}} に送信',
+    status_sending: '送信中… {{percent}}%',
+    status_closed: '閉じています · 最終送信 {{date}}',
     never: 'なし',
-    open_web: 'Webダッシュボードを開く',
-    open_web_hint: '同じアカウントで app.money2time.com にサインインしてください。',
-    restore_section: 'この端末に復元',
-    restore_hint:
-      '新しい端末をセットアップ中ですか？クラウドバックアップを復元して、データを引き継ぎましょう。この端末のデータはすべて置き換えられます。',
-    restore_title: 'この端末のデータをクラウドバックアップで置き換えますか？',
-    restore_summary: '口座{{accounts}}件 · 取引{{transactions}}件',
-    restore_warning: 'この端末のデータはすべて置き換えられます。元に戻すことはできません。',
-    restore_action: 'クラウドバックアップを復元',
-    restoring: '復元中…',
-    restore_done_title: '復元しました',
-    restore_done_message: 'クラウドバックアップからデータを復元しました。',
-    restore_failed_title: '復元に失敗しました',
-    delete_title: 'クラウドバックアップを削除しますか？',
-    delete_message:
-      'バックアップはクラウドとWebダッシュボードから削除されます。この端末のデータには影響せず、次回の毎日のバックアップで新しく作成されます。',
-    delete_action: 'クラウドバックアップを削除',
-    sign_out: 'サインアウト',
-    sign_out_title: 'クラウドバックアップからサインアウトしますか？',
-    sign_out_message:
-      'この端末でのバックアップが停止します。この端末のデータとクラウドバックアップはそのまま残ります。',
-    delete_account_title: 'クラウドバックアップのアカウントを削除しますか？',
-    delete_account_message:
-      'アカウントとクラウドバックアップが完全に削除されます。この端末のデータには影響しません。',
-    delete_account_action: 'アカウントを削除',
+    send_now: '最新のデータを今すぐ送信',
+    sending: '送信中…',
+    none_open:
+      '現在開いている連携済みのブラウザはありません。先にパソコンで app.money2time.com を開いてください。',
+    refresh_hint:
+      'ダッシュボードを更新するには、パソコンで app.money2time.com を、スマートフォンでこの画面を開いてください。最新のデータが自動で送信されます。',
+    open_web: 'app.money2time.com を開く',
+    unlink: '連携を解除',
+    unlink_title: 'このブラウザの連携を解除しますか？',
+    unlink_message:
+      '{{name}} にはデータが送信されなくなります。現在開いている場合は、保存されているコピーも削除されます。',
+    close: '閉じる',
+    scan_hint: 'パソコンの画面に表示されたコードにカメラを向けてください。',
+    camera_permission: 'コードを読み取るには、カメラへのアクセスを許可してください。',
+    camera_allow: 'カメラを許可',
     errors: {
-      unauthenticated: 'サインアウトされました。もう一度サインインしてください。',
-      not_primary: '別の端末がメイン端末のため、この端末ではアップロードしません。',
-      offline: 'インターネットに接続されていません。接続してからもう一度お試しください。',
-      server:
-        'クラウドバックアップに接続できませんでした。しばらくしてからもう一度お試しください。',
-      no_backup: '復元できるクラウドバックアップはまだありません。',
-      checksum:
-        'ダウンロードしたバックアップがチェックサムと一致しなかったため、何も変更していません。もう一度お試しください。',
-      corrupt: 'クラウドバックアップを読み込めませんでした。',
-      rate_limited: '試行回数が多すぎます。1分ほど待ってからもう一度お試しください。',
-      invalid_code: 'コードが正しくありません。確認するか、新しいコードをリクエストしてください。',
-      invalid_email: '有効なメールアドレスを入力してください。',
-      google_unavailable:
-        '現在 Google でのサインインは利用できません。代わりにメールのコードをご利用ください。',
-      cancelled: 'サインインがキャンセルされました。',
-      session_not_fresh:
-        'セキュリティのため、一度サインアウトして再度サインインしてから、アカウントを削除してください。',
+      unavailable:
+        'Webダッシュボードを使うには、アプリを最新バージョンにする必要があります。Money2Time を更新してもう一度お試しください。',
+      invalid_qr:
+        'Money2Time の Webダッシュボードのコードではありません。app.money2time.com を開き、表示されるコードを読み取ってください。',
+      timeout:
+        'ブラウザから応答がありませんでした。app.money2time.com を再読み込みして、新しいコードを読み取ってください。',
+      offline: 'インターネットに接続されていません。オンラインになってからもう一度お試しください。',
+      rejected: 'ブラウザがデータを開けませんでした。もう一度お試しください。',
+      closed:
+        '連携が完了する前にブラウザが閉じられました。再読み込みして、もう一度コードを読み取ってください。',
+      too_many: '連携できるブラウザは最大8台です。先に1台の連携を解除してください。',
     },
   },
   auto_backup: {
