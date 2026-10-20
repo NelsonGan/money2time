@@ -81,6 +81,25 @@ describe('Android release keep rules', () => {
     expect(missing).toEqual([]);
   });
 
+  it('keeps the screen class name that expo-blur looks up to scope its Android blur', () => {
+    // ExpoBlurView finds its blur root by walking up to the nearest view whose
+    // class name equals this literal, and falls back to the whole content view.
+    // R8 renamed the class (to `com.swmansion.rnscreens.s`), so in release the
+    // bottom bar's blur redrew the entire window, root stack and pushed screens
+    // included, on every frame, and crashed in `ViewGroup.dispatchDraw` under
+    // `ScreenStack.performDraw` (PostHog 01a14e87, 01a15667, 01a15708).
+    const source = readFileSync(
+      path.join(NODE_MODULES, 'expo-blur/android/src/main/java/expo/modules/blur/ExpoBlurView.kt'),
+      'utf8',
+    );
+    const lookedUp = [...source.matchAll(/className == "([\w.$]+)"/g)].map((match) => match[1]);
+    expect(lookedUp).toEqual(['com.swmansion.rnscreens.Screen']);
+    const applied = (buildPropertiesAndroid().extraProguardRules ?? '').split('\n');
+    for (const className of lookedUp) {
+      expect(applied).toContain(`-keepnames class ${className}`);
+    }
+  });
+
   it('keeps expo-notifications, whose scheduled reminders fail to save without it', () => {
     expect(unappliedRules().map(({ pkg }) => pkg)).toContain('expo-notifications');
     expect(buildPropertiesAndroid().extraProguardRules).toContain(
