@@ -2380,6 +2380,7 @@ const pt = {
       'Veja seus dados em um computador, em app.money2time.com. O telefone os envia direto para o navegador. Nada fica armazenado online e não há conta.',
     link_title: 'Vincular um computador',
     linking: 'Vinculando…',
+    link_device: 'Vincular um dispositivo',
     confirm_title: 'Vincular {{name}}?',
     confirm_title_unnamed: 'Vincular este navegador?',
     confirm_message:

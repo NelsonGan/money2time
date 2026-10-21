@@ -2362,6 +2362,7 @@ const en = {
       'See your data on a computer at app.money2time.com. Your phone sends it straight to the browser. Nothing is stored online and there is no account.',
     link_title: 'Link a computer',
     linking: 'Linking…',
+    link_device: 'Link a device',
     confirm_title: 'Link {{name}}?',
     confirm_title_unnamed: 'Link this browser?',
     confirm_message:

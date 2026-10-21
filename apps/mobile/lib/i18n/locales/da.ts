@@ -2366,6 +2366,7 @@ const da = {
       'Se dine data på en computer på app.money2time.com. Din telefon sender dem direkte til browseren. Intet gemmes online, og der er ingen konto.',
     link_title: 'Forbind en computer',
     linking: 'Forbinder…',
+    link_device: 'Forbind en enhed',
     confirm_title: 'Forbind {{name}}?',
     confirm_title_unnamed: 'Forbind denne browser?',
     confirm_message:

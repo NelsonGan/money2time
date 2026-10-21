@@ -2396,6 +2396,7 @@ const de = {
       'Sieh deine Daten auf dem Computer unter app.money2time.com. Dein Handy sendet sie direkt an den Browser. Online wird nichts gespeichert, und es gibt kein Konto.',
     link_title: 'Computer verknüpfen',
     linking: 'Wird verknüpft…',
+    link_device: 'Gerät verknüpfen',
     confirm_title: '{{name}} verknüpfen?',
     confirm_title_unnamed: 'Diesen Browser verknüpfen?',
     confirm_message:

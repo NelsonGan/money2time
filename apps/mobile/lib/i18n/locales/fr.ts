@@ -2395,6 +2395,7 @@ const fr = {
       'Consultez vos données sur un ordinateur, à l’adresse app.money2time.com. Votre téléphone les envoie directement au navigateur. Rien n’est stocké en ligne et il n’y a pas de compte.',
     link_title: 'Associer un ordinateur',
     linking: 'Association…',
+    link_device: 'Associer un appareil',
     confirm_title: 'Associer {{name}} ?',
     confirm_title_unnamed: 'Associer ce navigateur ?',
     confirm_message:

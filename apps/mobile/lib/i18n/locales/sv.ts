@@ -2366,6 +2366,7 @@ const sv = {
       'Se dina data på en dator på app.money2time.com. Telefonen skickar dem direkt till webbläsaren. Inget lagras online och det finns inget konto.',
     link_title: 'Koppla en dator',
     linking: 'Kopplar…',
+    link_device: 'Koppla en enhet',
     confirm_title: 'Koppla {{name}}?',
     confirm_title_unnamed: 'Koppla den här webbläsaren?',
     confirm_message:

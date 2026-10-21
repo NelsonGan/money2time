@@ -2084,12 +2084,17 @@ database, no bucket, no account and no secrets. Served at
   replaces the old one (close code `4000`, shown as "open in another tab").
   Only the dashboard's origin may take the browser seat, and connections are
   rate limited per address (per /64 for IPv6). Invocation logs are off.
-- **Phone UI:** Settings → Web Dashboard shows the camera inline, with each
-  linked browser below it as one row (status and last-sync age), a sync
-  button beside the section title, and Allow changes / Make view only and Unlink under the row's menu. A scanned `money2time://pair`
-  link opens the same screen. The Link prompt waits until the app lock is
-  unlocked, says the browser can change entries while the screen is open, and
-  the camera pauses while linking, in the background and under other screens.
+- **Phone UI:** Settings → Web Dashboard shows a **Link a device** button,
+  with each linked browser below it as one row (status and last-sync age), a
+  sync button beside the section title, and Allow changes / Make view only and
+  Unlink under the row's menu. The camera opens inline only after that button
+  is tapped, with a Cancel under it, and closes again once the attempt is over
+  (linked, cancelled or failed), when the screen loses focus and when the app
+  goes to the background, so the screen never holds the camera while it is
+  only being used to sync. A scanned `money2time://pair` link opens the same
+  screen and links without the camera. The Link prompt waits until the app
+  lock is unlocked, says the browser can change entries while the screen is
+  open, and the camera pauses while linking and under other screens.
   A line above the list says allowed browsers can edit while it is open, a
   view-only browser says so on its row, and a saved batch shows a short
   notice.
