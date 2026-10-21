@@ -2130,10 +2130,24 @@ database, no bucket, no account and no secrets. Served at
   names the transfer whose data the browser holds (`have`). While the Web
   Dashboard screen is open, the phone keeps an index of its last 3 transfers
   (each row as JSON, by id; `WebDashboardConnections.snapshots`), so a reload
-  or reconnect within the visit is patched too, and a new visit starts with
-  the whole export. With a known `have` it reads the database again, diffs it
-  against that index and sends the patch as an ordinary transfer with
-  `meta.base` set to that transfer's id (`services/webDashboardPatch.ts`). The
+  or reconnect within the visit is patched too. The copy each browser accepted
+  is also kept for the next visit (back from the background, or after a
+  relaunch), so reconnecting with nothing changed costs a few hundred bytes
+  instead of the whole export: once the browser has it, it is written to the
+  cache directory (`web-dashboard-copies/`, one file per browser, named after
+  its room token's SHA-256) as row ids and a 64-bit hash per row and per photo
+  (`hashIndex`, `writeIndex`), with no amounts, notes or names. A whole export
+  is hashed once, a slice at a time, for every browser it went to; a patch
+  carries the hashes on and hashes only the rows it changed. A `have` the
+  screen does not have in memory is looked up there, every row of the
+  database is hashed, a slice at a time, and compared. A copy from before an
+  app update that changed the backup's top-level fields (which a patch does
+  not carry, such as `version`) is not patched (`sameFormat`); unlinking
+  deletes the file, and a missing or cleared one only means the whole export.
+  With a
+  known `have` it reads the database again, diffs it against that index and
+  sends the patch as an ordinary transfer with `meta.base` set to that
+  transfer's id (`services/webDashboardPatch.ts`). The
   whole export is built from the same row strings (`exportJson`), so every row
   is serialized once per transfer either way. Tables whose rows all have a
   unique `id` change row by row (`put`, `del`), any other table is sent whole

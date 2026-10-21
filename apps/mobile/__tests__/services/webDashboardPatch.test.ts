@@ -1,8 +1,13 @@
 import {
+  contentHash,
   diffBackup,
   exportJson,
+  hashIndex,
   indexBackup,
   type PatchSource,
+  readIndex,
+  sameFormat,
+  writeIndex,
 } from '~/services/webDashboardPatch';
 
 const tx = (id: string, amount: number) => ({ id, amount, note: `tx ${id}` });
@@ -91,5 +96,91 @@ describe('exportJson', () => {
     expect(JSON.parse(exportJson(data, indexBackup(data)))).toEqual(
       JSON.parse(JSON.stringify(data)),
     );
+  });
+});
+
+describe('a copy kept as hashes', () => {
+  const pause = () => Promise.resolve();
+  const kept = async (data: PatchSource) =>
+    readIndex(writeIndex(await hashIndex(indexBackup(data), pause)))!;
+
+  it('patches the same as the copy itself', async () => {
+    const nexts = [
+      backup(),
+      backup({ transactions: [tx('a', 1), tx('c', 30), tx('d', 4)] }),
+      backup({ album_transactions: [{ album_id: 'trip', transaction_id: 'c' }] }),
+      backup({ exchange_rates: undefined, items: [] }),
+      backup({ transactions: [tx('a', 1), tx('a', 2)] }),
+      { ...backup(), userAssets: [{ path: 'category-icons/y.png', base64: 'CCCC' }] },
+    ];
+    const base = await kept(backup());
+    for (const next of nexts) {
+      expect(diffBackup(base, next).patch).toEqual(diffBackup(indexBackup(backup()), next).patch);
+    }
+  });
+
+  it('patches the same with the hashes made ahead', async () => {
+    const next = backup({ transactions: [tx('a', 1), tx('c', 30)] });
+    const index = indexBackup(next);
+    const hashes = await hashIndex(index, pause);
+    const base = await kept(backup());
+    const ahead = diffBackup(base, next, { index, hashes });
+    expect(ahead.patch).toEqual(diffBackup(base, next).patch);
+    expect(ahead.hashes).toBe(hashes);
+  });
+
+  it('carries hashes on from patch to patch, hashing only what changed', async () => {
+    const first = indexBackup(backup());
+    const firstHashes = await hashIndex(first, pause);
+    const next = {
+      ...backup({ transactions: [tx('a', 1), tx('c', 30), tx('d', 4)], items: [] }),
+      userAssets: [{ path: 'category-icons/y.png', base64: 'CCCC' }],
+    };
+    const { index, hashes } = diffBackup(first, next, { baseHashes: firstHashes });
+    expect(hashes).toEqual(await hashIndex(index, pause));
+    expect(diffBackup(first, next).hashes).toBeUndefined();
+  });
+
+  it('is not patched across a change of backup format', async () => {
+    const base = await kept({ version: 3, ...backup() } as PatchSource);
+    expect(sameFormat(base, { version: 3, ...backup() } as PatchSource)).toBe(true);
+    expect(sameFormat(base, { version: 4, ...backup() } as PatchSource)).toBe(false);
+    expect(sameFormat(base, backup())).toBe(false);
+  });
+
+  it('keeps ids and hashes, not the rows', async () => {
+    const text = writeIndex(await hashIndex(indexBackup(backup()), pause));
+    expect(text).not.toContain('tx a');
+    expect(text).not.toContain('AAAA');
+    expect(text).toContain('"a"');
+  });
+
+  it('returns a full index for the next patch, which the next copy is kept from', async () => {
+    const second = backup({ transactions: [tx('a', 1)] });
+    const { index } = diffBackup(await kept(backup()), second);
+    expect(index.hashed).toBeUndefined();
+    expect(JSON.parse(exportJson(second, index))).toEqual(JSON.parse(JSON.stringify(second)));
+  });
+
+  it('reads back only what it wrote', () => {
+    for (const text of [
+      '',
+      'null',
+      '{"v":2,"head":"{}","tables":{},"assets":[]}',
+      '{"v":1,"tables":{},"assets":[]}',
+      '{"v":1,"head":"{}","tables":[],"assets":[]}',
+      '{"v":1,"head":"{}","tables":{"transactions":["a"]},"assets":[]}',
+      '{"v":1,"head":"{}","tables":{"transactions":[1,"x"]},"assets":[]}',
+      '{"v":1,"head":"{}","tables":{}}',
+    ]) {
+      expect(readIndex(text)).toBeNull();
+    }
+    expect(() => writeIndex(indexBackup(backup()))).toThrow();
+  });
+
+  it('hashes different content differently', () => {
+    expect(contentHash('{"id":"a","amount":1}')).toBe(contentHash('{"id":"a","amount":1}'));
+    expect(contentHash('{"id":"a","amount":1}')).not.toBe(contentHash('{"id":"a","amount":2}'));
+    expect(contentHash('')).not.toBe(contentHash(' '));
   });
 });
