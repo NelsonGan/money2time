@@ -10,17 +10,21 @@
  * (webDashboardEdits.ts), then sends the browser the result.
  *
  * After the first copy, a browser is sent only what changed since the copy
- * it holds (webDashboardPatch.ts), while this screen still has that copy in
- * memory; a change saved from the browser comes back as a few rows instead of
- * the whole export.
+ * it holds (webDashboardPatch.ts); a change saved from the browser comes back
+ * as a few rows instead of the whole export. The copy each browser holds is
+ * also kept on disk, as a hash per row, so the next visit to the screen (back
+ * from the background, or after a relaunch) patches it too instead of
+ * starting again with everything.
  *
  * Each link is a key in the keychain (webDashboardLink.ts has the protocol).
  * An unlinked browser stays in a second list until it has heard about it, so
  * a browser that was closed at the time still forgets its copy.
  */
 
+import { sha256 } from '@noble/hashes/sha2.js';
 import * as Application from 'expo-application';
 import * as Device from 'expo-device';
+import { Directory, File, Paths } from 'expo-file-system/next';
 import { Gzip, strToU8 } from 'fflate';
 
 import { transactionsRepository } from '~/lib/repositories/transactionsRepository';
@@ -56,7 +60,16 @@ import {
   startLink,
   type WantRequest,
 } from './webDashboardLink';
-import { type BackupIndex, diffBackup, exportJson, indexBackup } from './webDashboardPatch';
+import {
+  type BackupIndex,
+  diffBackup,
+  exportJson,
+  hashIndex,
+  indexBackup,
+  readIndex,
+  sameFormat,
+  writeIndex,
+} from './webDashboardPatch';
 
 export * from './webDashboard.shared';
 
@@ -87,6 +100,8 @@ const DASHBOARD_ASSET_FOLDERS = [
 const GZIP_SLICE_BYTES = 1024 * 1024;
 /** Copies kept to patch against: one per browser in step, plus the one before. */
 const MAX_SNAPSHOTS = 3;
+/** Where each browser's copy waits for the next visit, as hashes (in the cache: the system may clear it). */
+const SNAPSHOT_FOLDER = 'web-dashboard-copies';
 
 type Native = typeof import('./webDashboardNative');
 
@@ -200,6 +215,90 @@ const publicLink = ({ roomId, name, createdAt, lastSentAt, edits }: LinkRecord):
   edits: edits === true,
 });
 
+/** One file per browser, named after its room token's hash, so no file name shows a token. */
+function snapshotFile(roomId: string): File {
+  const name = toBase64Url(sha256(strToU8(roomId))).slice(0, 22);
+  return new File(Paths.cache, SNAPSHOT_FOLDER, `${name}.txt`);
+}
+
+/**
+ * A copy to patch against: its index, and its hashes once made (and their
+ * file text, made once for every browser that holds it). A copy loaded from
+ * disk is hashes only, so both are the same hashed index.
+ */
+type Snapshot = { index: BackupIndex; hashes?: BackupIndex; text?: string };
+
+/**
+ * Copies to write, by room: the latest one each browser accepted. They
+ * outlive the screen's connections, so a copy sent just before the app went
+ * to the background is still found when it comes back.
+ */
+const unstored = new Map<string, { id: string; snapshot: Snapshot }>();
+let storing = false;
+
+/** Keeps the copy a browser now holds for the screen's next visit; written in the background. */
+function storeSnapshot(roomId: string, id: string, snapshot: Snapshot) {
+  unstored.set(roomId, { id, snapshot });
+  if (!storing) void writeSnapshots();
+}
+
+async function writeSnapshots() {
+  storing = true;
+  try {
+    while (unstored.size) {
+      const [roomId, entry] = unstored.entries().next().value!;
+      // A patch comes with its hashes. A whole export is hashed here, once
+      // for every browser it went to, and its patches carry them on.
+      entry.snapshot.hashes ??= await hashIndex(entry.snapshot.index, yieldToEventLoop);
+      // Never on the send's own turn: writing a large copy takes a moment.
+      await yieldToEventLoop();
+      // A newer copy for this browser came meanwhile: that one is written instead.
+      if (unstored.get(roomId) !== entry) continue;
+      unstored.delete(roomId);
+      try {
+        new Directory(Paths.cache, SNAPSHOT_FOLDER).create({
+          intermediates: true,
+          idempotent: true,
+        });
+        entry.snapshot.text ??= writeIndex(entry.snapshot.hashes);
+        snapshotFile(roomId).write(`${entry.id}\n${entry.snapshot.text}`);
+      } catch {
+        // Only a quicker next visit is lost: it starts with the whole export.
+      }
+    }
+  } finally {
+    storing = false;
+  }
+}
+
+/** The copy `id` kept for this browser from an earlier visit, or null when that is not the one kept. */
+async function loadSnapshot(roomId: string, id: string): Promise<Snapshot | null> {
+  const pending = unstored.get(roomId);
+  if (pending?.id === id) return pending.snapshot;
+  try {
+    const file = snapshotFile(roomId);
+    if (!file.exists) return null;
+    const text = await file.text();
+    const newline = text.indexOf('\n');
+    if (newline < 0 || text.slice(0, newline) !== id) return null;
+    const index = readIndex(text.slice(newline + 1));
+    return index ? { index, hashes: index } : null;
+  } catch {
+    return null;
+  }
+}
+
+/** An unlinked browser's copy goes with it. */
+function forgetSnapshot(roomId: string) {
+  unstored.delete(roomId);
+  try {
+    const file = snapshotFile(roomId);
+    if (file.exists) file.delete();
+  } catch {
+    // Hashes only, and the system clears its cache in time.
+  }
+}
+
 /**
  * Goes up with every change a browser saves, and travels with each transfer,
  * so a browser can tell data made before its change from data made after, and
@@ -293,6 +392,9 @@ async function gzipJson(json: string): Promise<Uint8Array> {
   return gzipped;
 }
 
+/** A transfer ready to send, and the copy it carries, which the next patch is made against. */
+type Built = { prepared: PreparedTransfer; snapshot: Snapshot };
+
 /**
  * One transfer's data, gzipped and encrypted, and shared by every browser
  * that asks within a few seconds: the JSON without the photos the dashboard
@@ -301,25 +403,36 @@ async function gzipJson(json: string): Promise<Uint8Array> {
 async function buildTransfer(
   isPro: boolean,
   assetCache: UserAssetReadCache,
-  base: { id: string; index: BackupIndex } | null,
-): Promise<{ prepared: PreparedTransfer; index: BackupIndex }> {
+  base: { id: string; snapshot: Snapshot } | null,
+): Promise<Built> {
   // The version the data is read at: a change saved while this export is
   // built is not in it, so the copy must not claim that change's version.
   const version = dataVersion;
   const { randomBytes } = await requireNative();
   const data = await buildBackupData({ includeAsset: includeDashboardAsset, assetCache });
   await yieldToEventLoop();
-  // Either way every row is serialized once, and that index is what the
-  // next patch to this browser is made against.
+  // A copy from before an app update that changed the backup's format is
+  // not patched. Either way every row is serialized once, and that index is
+  // what the next patch to this browser is made against.
+  const from = base && sameFormat(base.snapshot.index, data) ? base : null;
   let json: string;
-  let index: BackupIndex;
-  if (base) {
-    const diff = diffBackup(base.index, data);
+  let snapshot: Snapshot;
+  if (from) {
+    const { index: before, hashes: beforeHashes } = from.snapshot;
+    let diff: ReturnType<typeof diffBackup>;
+    if (before.hashed) {
+      // A copy kept from an earlier visit: every row is hashed to compare, a slice at a time.
+      const index = indexBackup(data);
+      diff = diffBackup(before, data, { index, hashes: await hashIndex(index, yieldToEventLoop) });
+    } else {
+      diff = diffBackup(before, data, { baseHashes: beforeHashes });
+    }
     json = JSON.stringify(diff.patch);
-    index = diff.index;
+    snapshot = { index: diff.index, hashes: diff.hashes };
   } else {
-    index = indexBackup(data);
+    const index = indexBackup(data);
     json = exportJson(data, index);
+    snapshot = { index };
   }
   await yieldToEventLoop();
   const gzipped = await gzipJson(json);
@@ -338,12 +451,12 @@ async function buildTransfer(
       timeZone,
       pro: isPro,
       version,
-      ...(base ? { base: base.id } : {}),
+      ...(from ? { base: from.id } : {}),
     },
     randomBytes,
     yieldToEventLoop,
   );
-  return { prepared, index };
+  return { prepared, snapshot };
 }
 
 type Trigger = 'browser_opened' | 'refresh' | 'manual' | 'edit';
@@ -390,12 +503,9 @@ export class WebDashboardConnections {
   /** Each browser's sends, one after another: two quick requests must not share a send. */
   private sends = new Map<string, Promise<void>>();
   /** Builds shared within a refresh, by the copy they patch ('' for a whole export). */
-  private prepared = new Map<
-    string,
-    { at: number; version: number; promise: Promise<PreparedTransfer> }
-  >();
+  private prepared = new Map<string, { at: number; version: number; promise: Promise<Built> }>();
   /** The data each recent transfer carried, by transfer id, to patch against. */
-  private snapshots = new Map<string, BackupIndex>();
+  private snapshots = new Map<string, Snapshot>();
   /** Files read for the last export, reused while unchanged. */
   private assetCache: UserAssetReadCache = new Map();
   /** Rooms last sent a patch: one request for everything is answered at once if it fails. */
@@ -486,6 +596,7 @@ export class WebDashboardConnections {
   private async dropLink(roomId: string) {
     this.sessions.get(roomId)?.close();
     this.sessions.delete(roomId);
+    forgetSnapshot(roomId);
     await updateLinks((links) => links.filter((link) => link.roomId !== roomId)).catch(
       () => undefined,
     );
@@ -627,25 +738,41 @@ export class WebDashboardConnections {
   }
 
   /**
-   * The data for a send: a patch against the copy the browser holds while
-   * that copy is still here, otherwise the whole export. Shared within a
-   * refresh, made fresh when asked for.
+   * The copy a request names, to patch against: still in memory from this
+   * visit, or kept on disk from an earlier one. Null when neither has it.
    */
-  private transfer(fresh: boolean, have: string | null): Promise<PreparedTransfer> {
-    const index = have ? this.snapshots.get(have) : undefined;
-    const base = have && index ? { id: have, index } : null;
+  private async baseFor(
+    roomId: string,
+    have: string | null,
+  ): Promise<{ id: string; snapshot: Snapshot } | null> {
+    if (!have) return null;
+    const known = this.snapshots.get(have);
+    if (known) return { id: have, snapshot: known };
+    const snapshot = await loadSnapshot(roomId, have);
+    if (!snapshot || this.closed) return null;
+    this.keepSnapshot(have, snapshot);
+    return { id: have, snapshot };
+  }
+
+  /**
+   * The data for a send: a patch against `base`, the copy the browser holds,
+   * otherwise the whole export. Shared within a refresh, made fresh when
+   * asked for.
+   */
+  private transfer(
+    fresh: boolean,
+    base: { id: string; snapshot: Snapshot } | null,
+  ): Promise<Built> {
     const key = base?.id ?? '';
     const cached = this.prepared.get(key);
     // An export from before a saved change is never reused.
     if (!fresh && cached && cached.version === dataVersion && Date.now() - cached.at < 30_000) {
       return cached.promise;
     }
-    const promise = buildTransfer(this.isPro, this.assetCache, base).then(
-      ({ prepared, index: next }) => {
-        if (!this.closed) this.keepSnapshot(prepared.meta.id, next);
-        return prepared;
-      },
-    );
+    const promise = buildTransfer(this.isPro, this.assetCache, base).then((built) => {
+      if (!this.closed) this.keepSnapshot(built.prepared.meta.id, built.snapshot);
+      return built;
+    });
     const entry = { at: Date.now(), version: dataVersion, promise };
     // Each patch has its own base, so builds past their reuse window go.
     for (const [old, item] of this.prepared) {
@@ -658,8 +785,8 @@ export class WebDashboardConnections {
     return promise;
   }
 
-  private keepSnapshot(id: string, index: BackupIndex) {
-    this.snapshots.set(id, index);
+  private keepSnapshot(id: string, snapshot: Snapshot) {
+    this.snapshots.set(id, snapshot);
     for (const old of this.snapshots.keys()) {
       if (this.snapshots.size <= MAX_SNAPSHOTS) break;
       this.snapshots.delete(old);
@@ -674,10 +801,11 @@ export class WebDashboardConnections {
     // The browser could not apply the patch it was just sent: everything,
     // now, once. Not a loop: the next send is a whole export.
     const repair = request.repair && this.patched.delete(roomId);
+    const base = repair ? null : await this.baseFor(roomId, request.have);
     if (!repair) {
-      // A browser that holds a copy still here costs only a patch, so the
-      // limits that keep whole exports apart do not apply to it.
-      const patchable = !!request.have && this.snapshots.has(request.have);
+      // A browser that holds a copy the phone still has costs only a patch,
+      // so the limits that keep whole exports apart do not apply to it.
+      const patchable = !!base;
       const last = this.lastSent.get(roomId);
       if (patchable) {
         // Nothing to limit.
@@ -717,23 +845,28 @@ export class WebDashboardConnections {
       this.editor && allowed ? toBase64Url((await requireNative()).randomBytes(16)) : null;
     // A newer request came in while the link was read: it is answered instead.
     if (!session.isPending(request.nonce)) return;
-    let sent: PreparedTransfer | null = null;
+    let built: Built | null = null;
     try {
       await session.send(
         async () => {
-          sent = await this.transfer(trigger === 'refresh', repair ? null : request.have);
-          return sent;
+          built = await this.transfer(trigger === 'refresh', base);
+          return built.prepared;
         },
         { editToken },
       );
+      // Set by the callback above, which TypeScript cannot follow.
+      const done = built as Built | null;
+      const sent = done?.prepared ?? null;
       // A token is good only for data that is still the phone's latest: data
       // made before a change saved meanwhile is followed by fresh data instead.
-      const latest = (sent as PreparedTransfer | null)?.meta.version === dataVersion;
+      const latest = sent?.meta.version === dataVersion;
       if (editToken && latest) this.editTokens.set(roomId, editToken);
       else if (!latest) this.owed.add(roomId);
-      const sentMeta = (sent as PreparedTransfer | null)?.meta;
+      const sentMeta = sent?.meta;
       if (sentMeta?.version !== undefined)
         this.lastSent.set(roomId, { id: sentMeta.id, version: sentMeta.version, at: Date.now() });
+      // What this browser holds now, for the next visit to patch.
+      if (done) storeSnapshot(roomId, done.prepared.meta.id, done.snapshot);
       if (sentMeta?.base) this.patched.add(roomId);
       else this.patched.delete(roomId);
       await updateLinks((links) =>
@@ -816,6 +949,7 @@ export class WebDashboardConnections {
  * both open. Also used while the screen's connections are not open yet.
  */
 export async function unlinkBrowserOffline(roomId: string): Promise<void> {
+  forgetSnapshot(roomId);
   const link = (await readLinks()).find((item) => item.roomId === roomId);
   if (link) {
     await updateUnlinks((unlinks) => [
