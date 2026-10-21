@@ -220,6 +220,28 @@ describe('PhoneSession requests', () => {
     session.close();
   });
 
+  it('drops a send whose tab was replaced while the export was built', async () => {
+    const { session, want, replies } = open();
+    want({ nonce: 'a'.repeat(16) });
+    let finish: () => void = () => undefined;
+    const sending = session.send(async () => {
+      await new Promise<void>((resolve) => (finish = resolve));
+      return prepareTransfer(
+        random(10),
+        { exportedAt: null, appVersion: null, deviceName: null, timeZone: null, pro: false },
+        random,
+        async () => undefined,
+      );
+    });
+    // A reload takes the browser's seat before the export is ready.
+    FakeSocket.last.onmessage?.({ data: JSON.stringify({ t: 'peer', present: true }) });
+    finish();
+    await expect(sending).rejects.toMatchObject({ code: 'closed' });
+    // Nothing was sent to the new tab for the old request.
+    expect(replies().some((reply) => reply?.type === 'begin')).toBe(false);
+    session.close();
+  });
+
   it('answers a request whose data could not be prepared', async () => {
     const { session, want, replies } = open();
     want({ nonce: 'a'.repeat(16) });

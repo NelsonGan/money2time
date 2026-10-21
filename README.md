@@ -2087,9 +2087,9 @@ database, no bucket, no account and no secrets. Served at
   Only the dashboard's origin may take the browser seat (this keeps other web
   pages out, not scripts, which can claim any origin: the room token is the
   access control), and connections are rate limited per address (per /64 for
-  IPv6). Each connection has a byte budget (300 MB from the phone, 24 MB from
-  the browser), kept in the socket's attachment so hibernation does not reset
-  it. Invocation logs are off. CI redeploys this Worker only when its own
+  IPv6). Each connection has a byte budget while the room is awake (300 MB
+  from the phone, 24 MB from the browser), so a busy visit is not cut off but
+  a socket cannot be used as a free pipe. Invocation logs are off. CI redeploys this Worker only when its own
   files change: a new version restarts the rooms and drops every connection.
 - **Phone UI:** Settings → Web Dashboard shows a **Link a device** button,
   with each linked browser below it as one row (status and last-sync age), a
@@ -2571,7 +2571,7 @@ App CI/CD is [.github/workflows/deploy.yml](.github/workflows/deploy.yml), gated
 - **Plan** — manual dispatch, or push-to-main **when `app` is set**. A Worker-only or docs-only merge to `main` therefore never cuts a store build. Resolves the build matrix (push = both iOS+Android production; dispatch = the chosen single platform/profile).
 - **Deploy** — from `apps/mobile`, `eas build --local` on the matched runner (macos-15 for iOS, ubuntu-latest for Android), then `eas submit`. `fail-fast: false` so a single-platform failure doesn't kill the other build.
 
-Cloudflare has its own workflow, [.github/workflows/cloudflare.yml](.github/workflows/cloudflare.yml) (typecheck and a `wrangler deploy --dry-run` bundle on PRs; on push to `main`, for each Worker whose own files or schema changed, the D1 schema apply where it has a database, then `wrangler deploy`), path-filtered to non-markdown `apps/cloudflare/**` so an app-only change never redeploys the Worker and vice versa. Both directions of that split are deliberate: **gate jobs with `if:`, not workflow-level `paths:`** — a job skipped by `if:` reports success to branch protection, while a whole workflow skipped by a path filter leaves its required checks pending forever.
+Cloudflare has its own workflow, [.github/workflows/cloudflare.yml](.github/workflows/cloudflare.yml) (typecheck and a `wrangler deploy --dry-run` bundle on PRs; on push to `main`, for each Worker whose own files or schema changed since the last successful production deploy, the D1 schema apply where it has a database, then `wrangler deploy`), path-filtered to non-markdown `apps/cloudflare/**` so an app-only change never redeploys the Worker and vice versa. Both directions of that split are deliberate: **gate jobs with `if:`, not workflow-level `paths:`** — a job skipped by `if:` reports success to branch protection, while a whole workflow skipped by a path filter leaves its required checks pending forever.
 
 **Over-the-air updates are internal-only.** `app.config.ts` sets `updates.enabled` from `APP_VARIANT`: on for `development` / `preview` (so the PR-preview `eas update` QR flow works), **off for store builds**. Nothing is ever published to the `production` channel — releases go out as store binaries. A store build therefore launches straight from its embedded bundle and skips the expo-updates launcher entirely; when that launcher failed to resolve an update's launch asset, React Native never received a bundle and the user was stuck on the native splash until their next store update changed the runtime version (hundreds of users across 1.3.3–1.4.3 in Sentry, `Expo Updates emergency launch`). If you ever want production OTA back, that failure mode comes back with it.
 
@@ -2591,7 +2591,7 @@ Two workflows, split so an app-only change never redeploys the Workers and vice 
 | `plan`                                             | push to `main` when `app` is set, or dispatch | Resolves the build matrix (push = both platforms production; dispatch = the chosen one)                     |
 | `deploy`                                           | after `plan`                                  | `eas build --local` on macos-15 (iOS) / ubuntu-latest (Android), then `eas submit`                          |
 
-[.github/workflows/cloudflare.yml](.github/workflows/cloudflare.yml) — the Workers: typecheck and dry-run bundle on PRs; on push to `main`, only the Workers that changed get their D1 schema applied (where they have one) and `wrangler deploy`. A production deploy is never cancelled by a newer push.
+[.github/workflows/cloudflare.yml](.github/workflows/cloudflare.yml) — the Workers: typecheck and dry-run bundle on PRs; on push to `main`, only the Workers changed since the last successful deploy get their D1 schema applied (where they have one) and `wrangler deploy`, so a run cancelled while queued or failed is caught up by the next. A deploy that has started is never cancelled by a newer push.
 
 A failing test blocks everything downstream. Concurrency cancels in-flight runs when a newer commit lands on the same ref. Requires repo secret `EXPO_TOKEN`. Pushes to `main` auto-submit to TestFlight (iOS) and the Play **production** track (Android); the App Store release is promoted by hand.
 

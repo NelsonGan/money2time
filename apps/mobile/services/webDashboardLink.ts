@@ -410,6 +410,8 @@ export class PhoneSession {
   private heartbeat: ReturnType<typeof setInterval> | null = null;
   private pongTimer: ReturnType<typeof setTimeout> | null = null;
   private browserHere = false;
+  /** Raised each time a browser takes the seat, so a send knows its browser left. */
+  private browserSeat = 0;
   /** The browser's latest request; a transfer must echo it. */
   private nonce: string | null = null;
   /** Requests already answered, so a replayed one does nothing. */
@@ -512,6 +514,7 @@ export class PhoneSession {
       // browser's seat (the room says nothing when a replaced seat leaves).
       const replaced = Boolean(message.present) && this.browserHere;
       this.browserHere = Boolean(message.present);
+      if (this.browserHere) this.browserSeat++;
       if (!this.browserHere || replaced) {
         // Nobody is left to answer the old request or open a transfer to it.
         this.nonce = null;
@@ -638,13 +641,17 @@ export class PhoneSession {
     this.sending = true;
     this.settle();
     const socket = this.socket;
+    const seat = this.browserSeat;
     const nonce = this.nonce;
     // Each request is answered once.
     this.nonce = null;
     let begun = false;
     try {
       const prepared = await prepare();
-      if (this.socket !== socket || !this.browserHere) throw new LinkError('closed');
+      // A reload while the export was built: the tab that asked is gone.
+      if (this.socket !== socket || !this.browserHere || this.browserSeat !== seat) {
+        throw new LinkError('closed');
+      }
       const meta: TransferMeta = { ...prepared.meta, editToken: opts.editToken ?? null };
       const transfer: Transfer = {
         id: meta.id,

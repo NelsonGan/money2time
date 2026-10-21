@@ -26,9 +26,10 @@ on:
       - '.github/workflows/cloudflare.yml'
   workflow_dispatch:
 
-# A newer PR push replaces an older check, but a production deploy always runs
-# to the end: cancelling one between the schema step and `wrangler deploy`
-# would leave the schema ahead of the code.
+# A newer PR push replaces an older check, but a production deploy that has
+# started runs to the end: cancelling one between the schema step and
+# `wrangler deploy` would leave the schema ahead of the code. A deploy still
+# queued can be replaced by a newer push; that one catches up (see below).
 concurrency:
   group: cloudflare-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -75,6 +76,10 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    # actions: read finds the last successful deploy to compare against.
+    permissions:
+      contents: read
+      actions: read
     strategy:
       # One Worker failing to deploy must not strand the others half-shipped.
       fail-fast: false
@@ -92,23 +97,28 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      # Deploy only the Workers this push changed. A new version restarts the
-      # Worker's Durable Objects, which drops every live Web Dashboard
-      # connection, so a receipt-scanner change must not redeploy the relay.
+      # Deploy only the Workers changed since the last production deploy that
+      # succeeded. A new version restarts the Worker's Durable Objects, which
+      # drops every live Web Dashboard connection, so a receipt-scanner change
+      # must not redeploy the relay. Comparing with that deploy, not the
+      # previous push, catches up a run that was cancelled while queued or
+      # failed. Anything unclear deploys.
       - name: Check whether this Worker changed
         id: changes
         env:
-          BEFORE: ${{ github.event.before }}
+          GH_TOKEN: ${{ github.token }}
           WORKER: ${{ matrix.worker }}
           SCHEMA: ${{ matrix.schema }}
         run: |
           paths=("apps/cloudflare/workers/$WORKER" .github/workflows/cloudflare.yml)
-          [ -n "$SCHEMA" ] && paths+=("apps/cloudflare/d1/$SCHEMA")
-          if [[ "$BEFORE" =~ ^0+$ ]] || ! git fetch --quiet --depth=1 origin "$BEFORE"; then
+          if [ -n "$SCHEMA" ]; then paths+=("apps/cloudflare/d1/$SCHEMA"); fi
+          base=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow cloudflare.yml --branch main \
+            --event push --status success --limit 1 --json headSha --jq '.[0].headSha // empty' || true)
+          if [ -z "$base" ] || ! git fetch --quiet --depth=1 origin "$base"; then
             echo "deploy=true" >> "$GITHUB_OUTPUT"
-          elif git diff --quiet "$BEFORE" HEAD -- "${paths[@]}" ':!*.md'; then
+          elif git diff --quiet "$base" HEAD -- "${paths[@]}" ':!*.md'; then
             echo "deploy=false" >> "$GITHUB_OUTPUT"
-            echo "No changes to $WORKER; skipping its deploy."
+            echo "No changes to $WORKER since ${base:0:7}, the last successful deploy; skipping it."
           else
             echo "deploy=true" >> "$GITHUB_OUTPUT"
           fi

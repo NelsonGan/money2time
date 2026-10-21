@@ -139,14 +139,14 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
   // A link waiting for the person's answer; dropped if the screen closes first.
   const pendingLink = useRef<PendingBrowser | null>(null);
   const mounted = useRef(true);
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
       mounted.current = false;
       if (noticeTimer.current) clearTimeout(noticeTimer.current);
       pendingLink.current?.cancel();
-    },
-    [],
-  );
+    };
+  }, []);
   // Saves a linked browser's changes; the connections keep it for the screen's life.
   const editor = useWebDashboardEditor(() => {
     const saved = I18n.t('web_dashboard.edit_saved');
@@ -266,9 +266,13 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
         // A pairing link can arrive while the app is locked, and the alert
         // would draw above the lock screen: whoever holds the phone could
         // link their own computer. Ask only once the owner has unlocked.
-        await whenAppUnlocked();
-        // Closed meanwhile: the unmount cancelled the link, so ask nothing.
-        if (!mounted.current) return;
+        if (mounted.current) await whenAppUnlocked();
+        // Closed meanwhile (perhaps before the browser answered, when the
+        // unmount had nothing to cancel yet): drop the link and ask nothing.
+        if (!mounted.current) {
+          pending.cancel();
+          return;
+        }
         // Nothing is linked until the person checks the code and agrees, on
         // this phone and on the computer: a code from someone else's screen
         // would send them this phone's data.
