@@ -31,6 +31,7 @@ import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accoun
 import type { TransactionSplit, TransactionWithRelations } from '~/types';
 
 import type { EditModule, EditStep, ModuleOp, PlanTools, TxFields } from '../webDashboardEdits';
+import { changedFields, isAt, isId, isMoney, isRecord, isText, readTx } from './shared';
 
 /** What the planner reads from the app (the apply module's `select`). */
 export type SplitExtra = {
@@ -92,50 +93,7 @@ type SplitOp =
 
 const MAX_ROWS = 50;
 const MAX_NAME = 80;
-const MAX_AMOUNT = 1e12;
 const EPSILON = 0.005;
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  !!value && typeof value === 'object' && !Array.isArray(value);
-const isId = (value: unknown): value is string =>
-  typeof value === 'string' && value.length > 0 && value.length <= 64;
-const isAt = (value: unknown): value is string | null =>
-  value === null || typeof value === 'string';
-const isMoney = (value: unknown): value is number =>
-  typeof value === 'number' && Number.isFinite(value) && Math.abs(value) <= MAX_AMOUNT;
-const isText = (value: unknown, max: number): value is string =>
-  typeof value === 'string' && value.length <= max;
-const isDay = (value: unknown) => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
-
-/** The transaction editor's fields, as the core planner reads them. */
-const TX_KEYS: Record<keyof TxFields, (value: unknown) => boolean> = {
-  type: (v) => v === 'expense' || v === 'income' || v === 'transfer' || v === 'balance_adjustment',
-  amount: isMoney,
-  currency: (v) => typeof v === 'string' && /^[A-Z]{3}$/.test(v),
-  toAmount: (v) => v === null || (isMoney(v) && v >= 0),
-  date: isDay,
-  accountId: (v) => v === null || isId(v),
-  fromAccountId: (v) => v === null || isId(v),
-  toAccountId: (v) => v === null || isId(v),
-  categoryId: (v) => v === null || isId(v),
-  note: (v) => isText(v, 500),
-  details: (v) => isText(v, 2000),
-  sentiment: (v) => v === 'happy' || v === 'neutral' || v === 'sad',
-  reimbursable: (v) => typeof v === 'boolean',
-  countsAsExpense: (v) => typeof v === 'boolean',
-};
-
-function readTx(value: unknown): TxFields | null {
-  if (!isRecord(value)) return null;
-  for (const [key, item] of Object.entries(value)) {
-    const check = Object.prototype.hasOwnProperty.call(TX_KEYS, key)
-      ? TX_KEYS[key as keyof TxFields]
-      : undefined;
-    if (!check || !check(item)) return null;
-  }
-  return value as TxFields;
-}
-
 function readRows(value: unknown, update: boolean): SplitRow[] | null {
   if (!Array.isArray(value) || value.length > MAX_ROWS) return null;
   const rows: SplitRow[] = [];
@@ -198,14 +156,6 @@ function read(raw: Record<string, unknown>): ModuleOp | null {
 const liveSplits = (tx: TransactionWithRelations): TransactionSplit[] =>
   (tx.splits ?? []).filter((split) => !split.deletedAt);
 
-function localDay(stored: string): string {
-  if (/^\d{4}-\d{2}-\d{2}$/.test(stored)) return stored;
-  const date = new Date(stored);
-  if (Number.isNaN(date.getTime())) return stored.slice(0, 10);
-  const pad = (value: number) => String(value).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-}
-
 /** SplitBillModal's rows as `toSplitDraftInputs` turns them into the writer's input. */
 function drafts(rows: SplitRow[], fallbackAccountId: string | null): SplitDraftPayload[] {
   return rows.map((row, index) => ({
@@ -259,7 +209,6 @@ function planCreate(
   ) {
     return tools.refuse('pro_required', 'accounts');
   }
-  if (op.tx.date !== undefined && !tools.isDayKey(op.tx.date)) return tools.refuse('invalid');
   const payload = tools.transactionPayload(op.tx, null);
   if (!payload.ok) return payload;
   const input = payload.value;
@@ -299,7 +248,6 @@ function planUpdate(
   if (moves && (current.reimbursementOfId || current.reimbursementTransactionId)) {
     return tools.refuse('amount_locked');
   }
-  if (set.date !== undefined && !tools.isDayKey(set.date)) return tools.refuse('invalid');
   const payload = tools.transactionPayload(set, current);
   if (!payload.ok) return payload;
   const next = payload.value;
@@ -381,18 +329,10 @@ function planUpdate(
   }
 
   // The transaction's own change: only what differs, as the core planner sends it.
-  const input: Record<string, unknown> = {};
-  const before = current as unknown as Record<string, unknown>;
-  for (const [key, value] of Object.entries(next)) {
-    const same =
-      key === 'date'
-        ? localDay(current.date) === localDay(String(value))
-        : (value ?? null) === (before[key] ?? null);
-    if (!same) input[key] = value;
-  }
+  const input = changedFields(next, current);
   // Mark paid / Undo move the amount; the editor's final amount is written last.
-  if (markPaid.length || markUnpaid.length) input.amount = amount;
-  if ('accountId' in input || 'currency' in input || 'amount' in input) {
+  if (markPaid.length || markUnpaid.length) {
+    input.amount = amount;
     input.accountAmount = next.accountAmount ?? null;
   }
 
@@ -427,6 +367,11 @@ function planSettle(
   steps: EditStep[],
 ) {
   if (!tools.claim(`split:${op.id}`)) return tools.refuse('invalid');
+  // The expense is this batch's to settle, not also to update or delete; its
+  // other shares may still be settled alongside.
+  if (tools.claim(`shares:${op.txId}`) && !tools.claim(`tx:${op.txId}`)) {
+    return tools.refuse('invalid');
+  }
   const parent = tools.lookup.transactions.find((tx) => tx.id === op.txId);
   const split = parent ? liveSplits(parent).find((item) => item.id === op.id) : undefined;
   if (!parent || parent.deletedAt || !split || split.updatedAt !== op.at) {
@@ -491,8 +436,7 @@ export const splitModule: EditModule = {
   },
   plan: (tools, raw, steps) => {
     const op = raw as unknown as SplitOp;
-    const extra = tools.extra as SplitExtra | undefined;
-    if (!extra) return tools.refuse('invalid');
+    const extra = tools.extra as SplitExtra;
     switch (op.op) {
       case 'create':
         return planCreate(tools, op, extra, steps);

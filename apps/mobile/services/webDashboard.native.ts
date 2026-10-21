@@ -57,10 +57,10 @@ const LINKS_KEY = 'money2time_web_dashboard_links';
 const UNLINKS_KEY = 'money2time_web_dashboard_unlinks';
 /** An unlink nobody collects in this long is dropped: that browser's data is long stale. */
 const UNLINK_TTL_MS = 180 * 24 * 60 * 60 * 1000;
-/** Refresh and Send now each send at most this often per browser. */
 const RELAY_DEFAULT_URL = 'https://workers-web-dashboard.money2time.com';
 /** A browser that just got data is not sent it again for this long unless it asks with Refresh. */
 const RESEND_AFTER_MS = 60_000;
+/** Refresh and Send now each send at most this often per browser. */
 const FORCED_SEND_GAP_MS = 10_000;
 /** Edits that may wait for the phone at once, across browsers. */
 const MAX_QUEUED_EDITS = 4;
@@ -104,7 +104,26 @@ async function deps(): Promise<LinkDeps> {
 
 type Unlink = LinkRecord & { unlinkedAt: number };
 
+/**
+ * The stored lists as last read or written, so an edit or a send does not
+ * read the keychain each time. Every write goes through `updateList`, which
+ * refreshes the entry; `cacheEpoch` keeps a read that started before a write
+ * from putting the older list back.
+ */
+const listCache = new Map<string, unknown[]>();
+let cacheEpoch = 0;
+
 async function readList<T extends { roomId: string }>(key: string): Promise<T[]> {
+  const cached = listCache.get(key);
+  if (cached) return cached as T[];
+  const epoch = cacheEpoch;
+  const items = await readStoredList<T>(key);
+  if (items && epoch === cacheEpoch) listCache.set(key, items);
+  return items ?? [];
+}
+
+/** The list in the keychain; null when it could not be read (not cached then). */
+async function readStoredList<T extends { roomId: string }>(key: string): Promise<T[] | null> {
   const native = await loadNative();
   let raw: string | null | undefined;
   try {
@@ -112,8 +131,9 @@ async function readList<T extends { roomId: string }>(key: string): Promise<T[]>
   } catch {
     // Android can fail to decrypt an entry restored onto another device;
     // the links were for this phone only, so start again.
-    return [];
+    return null;
   }
+  if (!native) return null;
   if (!raw) return [];
   try {
     const parsed = JSON.parse(raw) as T[];
@@ -143,11 +163,15 @@ function updateList<T extends { roomId: string }>(
 ): Promise<void> {
   const next = keychainWrites.then(async () => {
     const { secureStore } = await requireNative();
-    const items = change(await readList<T>(key));
+    const items = change((await readStoredList<T>(key)) ?? []);
+    cacheEpoch++;
+    listCache.delete(key);
     // Only on this device, and not into iCloud Keychain backups of other ones.
     await secureStore.setItemAsync(key, JSON.stringify(items), {
       keychainAccessible: secureStore.AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY,
     });
+    cacheEpoch++;
+    listCache.set(key, items);
   });
   keychainWrites = next.catch(() => undefined);
   return next;
@@ -327,6 +351,8 @@ export class WebDashboardConnections {
   /** Each browser's last copy: the data version and when, so a resend of the same data waits. */
   private lastSent = new Map<string, { version: number; at: number }>();
   private lastForced = new Map<string, number>();
+  /** Each browser's sends, one after another: two quick requests must not share a send. */
+  private sends = new Map<string, Promise<void>>();
   private prepared: { at: number; version: number; promise: Promise<PreparedTransfer> } | null =
     null;
 
@@ -439,7 +465,15 @@ export class WebDashboardConnections {
         : force
           ? 'refresh'
           : 'browser_opened';
-    return this.sendTo(roomId, trigger);
+    const run = (this.sends.get(roomId) ?? Promise.resolve()).then(() =>
+      this.sendTo(roomId, trigger),
+    );
+    const tail = run.catch(() => undefined);
+    this.sends.set(roomId, tail);
+    void tail.then(() => {
+      if (this.sends.get(roomId) === tail) this.sends.delete(roomId);
+    });
+    return run;
   }
 
   private queueEdit(roomId: string, message: Record<string, unknown>) {
@@ -485,7 +519,7 @@ export class WebDashboardConnections {
     let result: ReturnType<typeof planEdit>;
     try {
       result = planEdit(read.request, {
-        ...editor.lookup(),
+        ...editor.lookup(read.request.ops.map((op) => op.entity)),
         transactions: ids.length ? transactionsRepository.listByIds(ids) : [],
       });
     } catch {
@@ -568,7 +602,8 @@ export class WebDashboardConnections {
 
   private async sendTo(roomId: string, trigger: Trigger): Promise<void> {
     const session = this.sessions.get(roomId);
-    if (!session || session.state !== 'online') return;
+    // A request a send before this one already answered needs no second send.
+    if (!session || session.state !== 'online' || !session.hasRequest) return;
     const now = Date.now();
     if (trigger === 'browser_opened') {
       // A browser reconnecting a few times in a row gets one copy, not several,

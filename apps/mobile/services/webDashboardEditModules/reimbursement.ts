@@ -14,6 +14,7 @@
  */
 
 import type { EditModule, ModuleOp } from '../webDashboardEdits';
+import { isAt, isDayKey, isId } from './shared';
 
 type ReimbursementOp =
   | {
@@ -25,13 +26,6 @@ type ReimbursementOp =
       date?: string;
     }
   | { entity: 'module:reimbursement'; op: 'unmark'; id: string; at: string | null };
-
-const isId = (value: unknown): value is string =>
-  typeof value === 'string' && value.length > 0 && value.length <= 64;
-const isAt = (value: unknown): value is string | null =>
-  value === null || typeof value === 'string';
-const isDay = (value: unknown): value is string =>
-  typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
 
 function read(raw: Record<string, unknown>): ModuleOp | null {
   const { op } = raw;
@@ -45,7 +39,7 @@ function read(raw: Record<string, unknown>): ModuleOp | null {
   const allowed = ['entity', 'op', 'id', 'at', 'accountId', 'date'];
   if (keys.some((key) => !allowed.includes(key))) return null;
   if ('accountId' in raw && !isId(raw.accountId)) return null;
-  if ('date' in raw && !isDay(raw.date)) return null;
+  if ('date' in raw && !isDayKey(raw.date)) return null;
   return {
     entity,
     op,
@@ -83,7 +77,6 @@ export const reimbursementModule: EditModule = {
     if (expense.type !== 'expense' || !expense.reimbursable || expense.reimbursedAt) {
       return tools.refuse('invalid');
     }
-    if (op.date !== undefined && !tools.isDayKey(op.date)) return tools.refuse('invalid');
     const accountId = op.accountId ?? expense.reimbursementAccountId ?? expense.accountId;
     // "Add an account first": the page will not claim into nowhere.
     if (!tools.findAccount(accountId)) return tools.refuse('invalid');

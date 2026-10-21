@@ -15,9 +15,9 @@ import { PRO_LIMITS } from '~/constants/proLimits';
 import type { MonthlyWageSettings, WageConfig, WageType } from '~/types';
 
 import type { EditModule, ModuleOp } from '../webDashboardEdits';
+import { isMonth, isRecord, MAX_AMOUNT } from './shared';
 
 const WAGE_TYPES: WageType[] = ['hourly', 'monthly', 'yearly'];
-const MAX_AMOUNT = 1e12;
 /** Hours, days and minutes: far past any real week, short of anything absurd. */
 const MAX_TIME = 1e6;
 
@@ -26,17 +26,8 @@ type WageOp =
   | { entity: 'module:wage'; op: 'update'; month: string; at: string | null; config: WageConfig }
   | { entity: 'module:wage'; op: 'delete'; month: string; at: string | null };
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  !!value && typeof value === 'object' && !Array.isArray(value);
 const isNumber = (value: unknown, max: number): value is number =>
   typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= max;
-
-/** `YYYY-MM`, as the app's month picker builds one. */
-function isMonth(value: unknown): value is string {
-  if (typeof value !== 'string' || !/^\d{4}-(0[1-9]|1[0-2])$/.test(value)) return false;
-  const year = Number(value.slice(0, 4));
-  return year >= 1970 && year <= 2200;
-}
 
 const CONFIG_KEYS: Record<keyof WageConfig, (value: unknown) => boolean> = {
   wageType: (v) => WAGE_TYPES.includes(v as WageType),
@@ -97,7 +88,7 @@ function read(raw: Record<string, unknown>): ModuleOp | null {
 
 /** The app's list: one entry per month, the latest saved one winning, as the screen dedupes. */
 function entriesByMonth(extra: unknown): Map<string, MonthlyWageSettings> {
-  const rows = Array.isArray(extra) ? (extra as MonthlyWageSettings[]) : [];
+  const rows = extra as MonthlyWageSettings[];
   const byMonth = new Map<string, MonthlyWageSettings>();
   for (const row of rows) {
     if (row.deletedAt) continue;

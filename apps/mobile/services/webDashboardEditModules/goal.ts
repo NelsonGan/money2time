@@ -19,12 +19,12 @@ import { findGoalAutoSaveRule } from '~/features/goals/lib/goalMath';
 import type { Account, RecurringTransactionRule } from '~/types';
 
 import type { EditModule, EditStep, ModuleOp, PlanTools, Result } from '../webDashboardEdits';
+import { isAt, isDayKey, isId, isMoney, isRecord, localDay, validIcon } from './shared';
 
 const ENTITY = 'module:goal';
 const MAX_NAME = 200;
 /** What a read lets through; the plan holds a changed name to MAX_NAME. */
 const MAX_TEXT = 10000;
-const MAX_AMOUNT = 1e12;
 
 type Cadence = 'monthly' | 'weekly';
 export type GoalAutoSave = { amount: number; cadence: Cadence; fromAccountId: string };
@@ -80,17 +80,6 @@ export type GoalUpdatePayload = {
   rules: GoalRuleOp[];
 };
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  !!value && typeof value === 'object' && !Array.isArray(value);
-const isId = (value: unknown): value is string =>
-  typeof value === 'string' && value.length > 0 && value.length <= 64;
-const isAt = (value: unknown): value is string | null =>
-  value === null || typeof value === 'string';
-const isMoney = (value: unknown): value is number =>
-  typeof value === 'number' && Number.isFinite(value) && Math.abs(value) <= MAX_AMOUNT;
-const isDayText = (value: unknown): value is string =>
-  typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
-
 function readAutoSave(value: unknown): GoalAutoSave | null | undefined {
   if (value === null) return null;
   if (!isRecord(value)) return undefined;
@@ -112,7 +101,7 @@ const FIELD_CHECKS: Record<string, (value: unknown) => boolean> = {
   emoji: (v) => typeof v === 'string' && v.length <= 64,
   target: isMoney,
   currency: (v) => typeof v === 'string' && /^[A-Z]{3}$/.test(v),
-  targetDate: (v) => v === null || isDayText(v),
+  targetDate: (v) => v === null || isDayKey(v),
   includeInTotals: (v) => typeof v === 'boolean',
   startingBalance: isMoney,
   autoSave: (v) => readAutoSave(v) !== undefined,
@@ -178,13 +167,8 @@ function read(raw: Record<string, unknown>): ModuleOp | null {
 
 // ------------------------------------------------------------------ planning --
 
-function localDay(date: Date): string {
-  const pad = (value: number) => String(value).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-}
-
 /** When a new or re-timed auto-save first runs, as GoalEditorScreen's `nextRunDateFor`. */
-export function goalNextRunDate(cadence: Cadence, now: Date): string {
+function goalNextRunDate(cadence: Cadence, now: Date): string {
   if (cadence === 'weekly') {
     return localDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7));
   }
@@ -192,21 +176,6 @@ export function goalNextRunDate(cadence: Cadence, now: Date): string {
   const lastDay = new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate();
   next.setDate(Math.min(now.getDate(), lastDay));
   return localDay(next);
-}
-
-/** No icon, an emoji, or a bundled icon of the default pack, as the web offers them. */
-function validEmoji(tools: PlanTools, icon: string): boolean {
-  if (icon === '') return true;
-  if (icon.startsWith('emoji:')) {
-    const glyph = icon.slice('emoji:'.length);
-    return glyph.length > 0 && glyph.length <= 16 && !/[\x00-\x7f]/.test(glyph);
-  }
-  return !icon.includes('/') && tools.lookup.isCategoryIcon(icon);
-}
-
-function extraOf(tools: PlanTools): GoalExtra {
-  const extra = tools.extra as Partial<GoalExtra> | undefined;
-  return { ruleName: extra?.ruleName ?? ((name) => name) };
 }
 
 const liveRules = (tools: PlanTools): RecurringTransactionRule[] =>
@@ -240,19 +209,19 @@ function planCreate(tools: PlanTools, fields: GoalFields, steps: EditStep[]): Re
     return tools.refuse('invalid');
   }
   if (!tools.lookup.currencies.includes(currency)) return tools.refuse('invalid');
-  if (targetDate && !(tools.isDayKey(targetDate) && targetDate > localDay(tools.lookup.now))) {
+  if (targetDate && targetDate <= localDay(tools.lookup.now)) {
     return tools.refuse('invalid');
   }
   // Left untouched, the editor suggests an icon from the name.
   let emoji = fields.emoji;
-  if (emoji === undefined) emoji = tools.lookup.suggestIcon?.(name) ?? '';
-  else if (!validEmoji(tools, emoji)) return tools.refuse('invalid');
+  if (emoji === undefined) emoji = tools.lookup.suggestIcon(name) ?? '';
+  else if (!validIcon(emoji, tools.lookup.isCategoryIcon)) return tools.refuse('invalid');
   let autoSave: GoalCreatePayload['autoSave'] = null;
   if (fields.autoSave) {
     const source = autoSaveSource(tools, fields.autoSave.fromAccountId, currency);
     if (!(fields.autoSave.amount > 0) || !source) return tools.refuse('invalid');
     autoSave = {
-      name: extraOf(tools).ruleName(name),
+      name: (tools.extra as GoalExtra).ruleName(name),
       type: 'transfer',
       amount: fields.autoSave.amount,
       currency,
@@ -316,13 +285,13 @@ function planUpdate(
     return tools.refuse('invalid');
   }
   // As the editor's Save: a deadline that is set must lie ahead.
-  if (targetDate && !(tools.isDayKey(targetDate) && targetDate > localDay(lookup.now))) {
+  if (targetDate && targetDate <= localDay(lookup.now)) {
     return tools.refuse('invalid');
   }
   if (currencyChanged && !lookup.currencies.includes(currency)) return tools.refuse('invalid');
   let emoji = current.goalEmoji ?? '';
   if (set.emoji !== undefined && set.emoji !== emoji) {
-    if (!validEmoji(tools, set.emoji)) return tools.refuse('invalid');
+    if (!validIcon(set.emoji, tools.lookup.isCategoryIcon)) return tools.refuse('invalid');
     emoji = set.emoji;
   }
 
@@ -371,7 +340,7 @@ function planUpdate(
 
   const ruleOps: GoalRuleOp[] = [];
   if (showAutoSave) {
-    const ruleName = extraOf(tools).ruleName;
+    const { ruleName } = tools.extra as GoalExtra;
     if (!wanted) {
       if (inlineRule) ruleOps.push({ op: 'delete', id: inlineRule.id });
     } else {
@@ -417,6 +386,10 @@ function planUpdate(
     }
   }
 
+  // The rule is this goal's to change: the same batch must not also edit it as a recurring rule.
+  for (const rule of ruleOps) {
+    if (rule.op !== 'create' && !tools.claim(`rule:${rule.id}`)) return tools.refuse('invalid');
+  }
   const payload: GoalUpdatePayload = { id: current.id, updates, rules: ruleOps };
   if (currencyChanged) {
     // Re-denominating runs as its own operation; the saved amount waits for a later edit.

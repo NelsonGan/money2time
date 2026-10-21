@@ -1,5 +1,4 @@
 import type { SplitDraftInput } from '~/context/AppContext';
-import { countUnpaidSplitBills } from '~/features/transactions/lib/settleUp';
 import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
@@ -30,10 +29,11 @@ function trackReimbursable(input: Record<string, unknown>) {
  * with the calls AddTransactionScreen, EditTransactionScreen and SettleUpShareList make.
  */
 export const splitApply: ApplyModule = {
-  select: (_app, transactions): SplitExtra => ({
-    unpaidBills: countUnpaidSplitBills(transactions.transactions),
+  select: (app): SplitExtra => ({
+    // The editor's own count, read from AppContext's live transactions.
+    unpaidBills: app.getUnpaidSplitBillCount(),
   }),
-  apply: (app, step, created) => {
+  apply: (app, step, { created }) => {
     const payload = step.payload;
     switch (step.action) {
       case 'create': {

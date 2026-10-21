@@ -1,9 +1,10 @@
 import { useRef } from 'react';
 
 import { CATEGORY_ICON_SOURCES } from '~/constants/categoryIcons';
-import { afterDeferredWrites, useApp, useTransactions } from '~/context/AppContext';
+import { afterDeferredWrites, useApp } from '~/context/AppContext';
 import { useIsPro } from '~/context/ProContext';
 import { I18n } from '~/lib/i18n';
+import { accountsRepository } from '~/lib/repositories/accountsRepository';
 import type { CreateRecurringRuleInput } from '~/lib/repositories/recurringRulesRepository';
 import { transactionsRepository } from '~/lib/repositories/transactionsRepository';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
@@ -14,6 +15,7 @@ import { suggestCategoryIcon } from '~/utils/categoryIconMatcher';
 import { convert } from '~/utils/currency';
 
 import { APPLY_MODULES } from './webDashboardApply';
+import type { ApplyTrack } from './webDashboardApply/types';
 
 type AccountInput = Omit<Account, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
 type CategoryInput = Omit<Category, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
@@ -22,27 +24,31 @@ type CategoryInput = Omit<Category, 'id' | 'createdAt' | 'updatedAt' | 'deletedA
  * How the Web Dashboard screen saves a linked browser's changes: checked
  * against the app's state as it is now, then saved through the same AppContext
  * calls the app's own editors make. One stable object for the screen's life;
- * it reads the latest state through refs.
+ * it reads the latest state through refs. Nothing here subscribes to
+ * `useTransactions()`: the Settings tab holds that still while it is hidden,
+ * and the screen need not re-render on every transaction. What an edit needs
+ * from the transactions (balances, counts) is read when it arrives.
  */
 export function useWebDashboardEditor(onApplied: (count: number) => void): WebDashboardEditor {
   const app = useApp();
-  const transactionsState = useTransactions();
-  const { accountBalances } = transactionsState;
   const isPro = useIsPro();
-  const latest = useRef({ app, accountBalances, transactionsState, isPro, onApplied });
-  latest.current = { app, accountBalances, transactionsState, isPro, onApplied };
+  const latest = useRef({ app, isPro, onApplied });
+  latest.current = { app, isPro, onApplied };
 
   const editor = useRef<WebDashboardEditor | null>(null);
   editor.current ??= {
-    lookup: () => {
-      const { app: current, accountBalances: balances, isPro: pro } = latest.current;
+    lookup: (entities) => {
+      const { app: current, isPro: pro } = latest.current;
       const main = current.settings.currencyCode;
       return {
         accounts: current.accounts,
         accountGroups: current.accountGroups,
         categories: current.categories,
         recurringRules: current.recurringRules,
-        balances: new Map(balances.map((item) => [item.accountId, item.balance])),
+        // From the database, as the app's own balances are refreshed after each write.
+        balances: new Map(
+          accountsRepository.getBalances().map((item) => [item.accountId, item.balance]),
+        ),
         reportingCurrency: main,
         currencies: [
           ...new Set([main, ...current.fxCurrencies, ...current.accounts.map((a) => a.currency)]),
@@ -55,39 +61,37 @@ export function useWebDashboardEditor(onApplied: (count: number) => void): WebDa
         isCategoryIcon: (id) => Object.prototype.hasOwnProperty.call(CATEGORY_ICON_SOURCES, id),
         suggestIcon: suggestCategoryIcon,
         now: new Date(),
+        // Only the modules this batch names: each select reads the app's data.
         extras: Object.fromEntries(
-          Object.entries(APPLY_MODULES).map(([entity, module]) => [
-            entity,
-            module.select?.(current, latest.current.transactionsState),
-          ]),
+          [...new Set(entities)].flatMap((entity) => {
+            const module = APPLY_MODULES[entity];
+            return module ? [[entity, module.select?.(current)]] : [];
+          }),
         ),
       };
     },
     apply: async (plan: EditPlan) => {
-      const created: string[] = [];
-      const deleted: string[] = [];
+      const track: ApplyTrack = { created: [], deleted: [], checks: [] };
       for (const step of plan.steps) {
-        applyStep(latest.current.app, step, created, deleted);
+        applyStep(latest.current.app, step, track);
       }
       // The browser's fresh copy is built from the database.
       await afterDeferredWrites();
       // The app's deferred writes report nothing back; check the rows did land.
+      const { created, deleted, checks } = track;
       if (created.some((id) => !transactionsRepository.getById(id))) throw new Error('not saved');
       if (deleted.length && transactionsRepository.listByIds(deleted).length) {
         throw new Error('not deleted');
       }
+      if (checks.some((check) => !check())) throw new Error('not applied');
     },
     onApplied: (count) => latest.current.onApplied(count),
   };
   return editor.current;
 }
 
-function applyStep(
-  app: ReturnType<typeof useApp>,
-  step: EditStep,
-  created: string[],
-  deleted: string[],
-) {
+function applyStep(app: ReturnType<typeof useApp>, step: EditStep, track: ApplyTrack) {
+  const { created, deleted } = track;
   switch (step.kind) {
     case 'tx.create':
       created.push(
@@ -181,7 +185,7 @@ function applyStep(
     case 'module': {
       const module = APPLY_MODULES[step.entity];
       if (!module) throw new Error(`no saver for ${step.entity}`);
-      module.apply(app, step, created, deleted);
+      module.apply(app, step, track);
       return;
     }
   }

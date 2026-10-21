@@ -555,6 +555,11 @@ export class PhoneSession {
     }
   }
 
+  /** Whether the browser has asked for data that no send has answered yet. */
+  get hasRequest(): boolean {
+    return this.nonce !== null && !this.sending;
+  }
+
   /** Send now: asks the browser for a fresh request, which `onWant` then answers. */
   offer(): boolean {
     if (this.state !== 'online' || this.unlinking) return false;

@@ -23,6 +23,7 @@ function lookup(fxCurrencies: string[], patch: Partial<EditLookup> = {}): EditLo
     isPro: false,
     convert: () => null,
     isCategoryIcon: () => false,
+    suggestIcon: () => null,
     now: new Date(2026, 9, 20),
     extras: { 'module:currency': { reporting: 'MYR', fxCurrencies } },
     ...patch,

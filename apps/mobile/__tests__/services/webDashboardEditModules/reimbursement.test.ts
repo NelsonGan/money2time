@@ -58,7 +58,9 @@ function lookup(
     isPro: false,
     convert: () => null,
     isCategoryIcon: () => true,
+    suggestIcon: () => null,
     now: new Date(2026, 9, 20),
+    extras: {},
     ...patch,
   };
 }
@@ -130,8 +132,9 @@ describe('module:reimbursement', () => {
     expect(plan([{ op: 'mark', id: 'flagless', at: AT, accountId: 'old' }], data)).toMatchObject({
       error: 'invalid',
     });
+    // An impossible day is not even read.
     expect(plan([{ op: 'mark', id: 'done', at: AT, date: '2026-02-30' }], data)).toMatchObject({
-      error: 'invalid',
+      error: 'unread',
     });
   });
 

@@ -100,6 +100,7 @@ function lookup(patch: Partial<EditLookup> = {}): EditLookup {
     isPro: true,
     convert: (amount) => amount,
     isCategoryIcon: () => true,
+    suggestIcon: () => null,
     now: NOW,
     extras: { 'module:loan': { ruleName: (name: string) => `${name} repayment` } },
     ...patch,
@@ -311,6 +312,16 @@ describe('module:loan update', () => {
     expect(payloadOf(steps([update({ collectFromAccountId: 'cash' })], other)[0]).rules).toEqual([
       { op: 'update', id: 'r1', input: { fromAccountId: 'cash' } },
     ]);
+  });
+
+  it('keeps its repayment rule to itself within a batch', () => {
+    const data = { ...withCar(), recurringRules: [repayment()] };
+    // Two changes to one rule from the loan's own save are one claim.
+    const loanOp = update({ total: 14400, countAsExpense: false, collectFromAccountId: 'myr' });
+    expect(steps([loanOp], data)).toHaveLength(1);
+    const ruleOp = { entity: 'recurring', op: 'delete', id: 'r1', at: AT };
+    expect(refusal([loanOp, ruleOp], data)).toEqual({ error: 'invalid' });
+    expect(refusal([ruleOp, loanOp], data)).toEqual({ error: 'invalid' });
   });
 
   it('rebuilds a deleted repayment rule from the loan', () => {

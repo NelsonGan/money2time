@@ -13,16 +13,11 @@
  */
 
 import type { EditModule, ModuleOp } from '../webDashboardEdits';
-
-/** A batch's row limit (MAX_EDIT_ROWS), kept here so this module imports no values from the planner. */
-const MAX_IDS = 500;
+import { isId, MAX_EDIT_ROWS } from './shared';
 
 type ReorderOp =
   | { entity: 'module:reorder'; op: 'accounts' | 'groups'; ids: string[] }
   | { entity: 'module:reorder'; op: 'categories'; type: 'expense' | 'income'; ids: string[] };
-
-const isId = (value: unknown): value is string =>
-  typeof value === 'string' && value.length > 0 && value.length <= 64;
 
 function read(raw: Record<string, unknown>): ModuleOp | null {
   const { op, ids } = raw;
@@ -31,7 +26,7 @@ function read(raw: Record<string, unknown>): ModuleOp | null {
   if (Object.keys(raw).some((key) => key !== 'entity' && key !== 'op' && !keys.includes(key))) {
     return null;
   }
-  if (!Array.isArray(ids) || ids.length === 0 || ids.length > MAX_IDS) return null;
+  if (!Array.isArray(ids) || ids.length === 0 || ids.length > MAX_EDIT_ROWS) return null;
   if (!ids.every(isId) || new Set(ids).size !== ids.length) return null;
   if (op === 'categories') {
     if (raw.type !== 'expense' && raw.type !== 'income') return null;

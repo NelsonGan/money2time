@@ -335,6 +335,14 @@ describe('module:goal update', () => {
     expect(payloadOf(removed[0]).rules).toEqual([{ op: 'delete', id: 'r1' }]);
   });
 
+  it('keeps its auto-save rule to itself within a batch', () => {
+    const goalOp = update({ autoSave: null }, { rule: { id: 'r1', at: AT } });
+    const ruleOp = { entity: 'recurring', op: 'delete', id: 'r1', at: AT };
+    const data = { recurringRules: [autoSave()] };
+    expect(refusal([goalOp, ruleOp], data)).toEqual({ error: 'invalid' });
+    expect(refusal([ruleOp, goalOp], data)).toEqual({ error: 'invalid' });
+  });
+
   it('refuses an auto-save edit against a rule that changed or one it cannot show', () => {
     const save = { autoSave: { amount: 5, cadence: 'monthly', fromAccountId: 'myr' } };
     expect(

@@ -1,5 +1,6 @@
 import { computeBudgetPagerMonths } from '~/features/budget/lib/budgetMath';
 import type { BudgetAllocationInput } from '~/lib/repositories/budgetTemplatesRepository';
+import { transactionsRepository } from '~/lib/repositories/transactionsRepository';
 import { monthCycleOf } from '~/utils/financialMonth';
 
 import type { ApplyModule } from './types';
@@ -19,13 +20,13 @@ type MonthInput = { totalAmount: number; countUnbudgeted: boolean; lines: Budget
  * MonthlyBudgetEditorScreen and BudgetScreen make.
  */
 export const budgetApply: ApplyModule = {
-  select: (app, transactionsState) => ({
+  select: (app) => ({
     templates: app.budgetTemplates,
     budgets: app.monthlyBudgets,
     // The months the budget pager offers, so a month is only made where the app makes one.
     months: computeBudgetPagerMonths({
       budgets: app.monthlyBudgets,
-      transactions: transactionsState.transactions,
+      transactions: transactionsRepository.listForSummary({ type: 'expense' }),
       monthCycle: monthCycleOf(app.settings),
     }),
   }),

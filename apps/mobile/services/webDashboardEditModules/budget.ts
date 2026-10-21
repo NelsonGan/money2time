@@ -22,10 +22,10 @@ import { PRO_LIMITS } from '~/constants/proLimits';
 import type { BudgetTemplate, MonthlyBudget } from '~/types';
 
 import type { EditModule, EditStep, ModuleOp, PlanTools, Result } from '../webDashboardEdits';
+import { isAt, isId, isMoney, isMonth, isRecord, validIcon } from './shared';
 
 const ENTITY = 'module:budget';
 const MAX_NAME = 80;
-const MAX_AMOUNT = 1e12;
 const MAX_LINES = 300;
 
 type Allocation = { categoryId: string; amount: number };
@@ -47,19 +47,6 @@ export type BudgetExtra = {
   months: string[];
 };
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  !!value && typeof value === 'object' && !Array.isArray(value);
-const isId = (value: unknown): value is string =>
-  typeof value === 'string' && value.length > 0 && value.length <= 64;
-const isAt = (value: unknown): value is string | null =>
-  value === null || typeof value === 'string';
-const isMoney = (value: unknown): value is number =>
-  typeof value === 'number' && Number.isFinite(value) && Math.abs(value) <= MAX_AMOUNT;
-const isMonth = (value: unknown): value is string => {
-  if (typeof value !== 'string' || !/^\d{4}-(0[1-9]|1[0-2])$/.test(value)) return false;
-  const year = Number(value.slice(0, 4));
-  return year >= 1970 && year <= 2200;
-};
 /** Rounded to cents, as the app's editor compares amounts (`normalizeMoneyAmount`). */
 const cents = (amount: number) => {
   const rounded = Math.round(amount * 100) / 100;
@@ -166,11 +153,11 @@ function read(raw: Record<string, unknown>): ModuleOp | null {
 }
 
 function extraOf(tools: PlanTools): BudgetExtra {
-  const extra = tools.extra as Partial<BudgetExtra> | undefined;
+  const extra = tools.extra as BudgetExtra;
   return {
-    templates: (extra?.templates ?? []).filter((template) => !template.deletedAt),
-    budgets: (extra?.budgets ?? []).filter((budget) => !budget.deletedAt),
-    months: extra?.months ?? [],
+    templates: extra.templates.filter((template) => !template.deletedAt),
+    budgets: extra.budgets.filter((budget) => !budget.deletedAt),
+    months: extra.months,
   };
 }
 
@@ -227,11 +214,7 @@ function allocationsFor(tools: PlanTools, total: number, lines: Allocation[]): A
 /** No icon, an emoji, a bundled icon of the default pack, or the one it already has. */
 function validEmoji(tools: PlanTools, emoji: string | null, current?: string | null): boolean {
   if (emoji === null || emoji === (current ?? null)) return true;
-  if (emoji.startsWith('emoji:')) {
-    const glyph = emoji.slice('emoji:'.length);
-    return glyph.length > 0 && glyph.length <= 16 && !/[\x00-\x7f]/.test(glyph);
-  }
-  return emoji !== '' && !emoji.includes('/') && tools.lookup.isCategoryIcon(emoji);
+  return emoji !== '' && validIcon(emoji, tools.lookup.isCategoryIcon);
 }
 
 const step = (action: string, payload: Record<string, unknown>): EditStep => ({
@@ -302,6 +285,15 @@ function plan(tools: PlanTools, op: ModuleOp, steps: EditStep[]): Result<number>
     // One live budget a month: one made since the browser's copy wins.
     if (budgets.some((budget) => budget.month === month)) return tools.refuse('conflict');
     if (op.op === 'month_create') {
+      // The template is read as it is now: the same batch must not also change
+      // it, though more months may still be made from it.
+      const templateId = op.templateId as string;
+      if (
+        tools.claim(`budget-template-use:${templateId}`) &&
+        !tools.claim(`budget-template:${templateId}`)
+      ) {
+        return tools.refuse('invalid');
+      }
       const template = templates.find((item) => item.id === op.templateId);
       if (!template) return tools.refuse('conflict');
       steps.push(step('month_create', { month, templateId: template.id }));

@@ -16,6 +16,7 @@ import { PRO_LIMITS } from '~/constants/proLimits';
 import type { Item } from '~/types';
 
 import type { EditModule, ModuleOp } from '../webDashboardEdits';
+import { isAt, isCurrency, isDayKey, isId, isMoney, isRecord, MAX_EDIT_ROWS } from './shared';
 
 /** What the planner reads from the app (the apply module's `select`). */
 export type ItemExtra = {
@@ -45,26 +46,17 @@ type ItemOp =
 
 const MAX_NAME = 80;
 const MAX_NOTE = 500;
-const DAY = /^\d{4}-\d{2}-\d{2}$/;
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  !!value && typeof value === 'object' && !Array.isArray(value);
-const isId = (value: unknown): value is string =>
-  typeof value === 'string' && value.length > 0 && value.length <= 64;
-const isAt = (value: unknown): value is string | null =>
-  value === null || typeof value === 'string';
-const isMoney = (value: unknown): value is number =>
-  typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 1e12;
-const isDay = (value: unknown): value is string => typeof value === 'string' && DAY.test(value);
+const isPrice = (value: unknown): value is number => isMoney(value) && value >= 0;
 
 const FIELDS: Record<keyof ItemFields, (value: unknown) => boolean> = {
   name: (v) => typeof v === 'string' && v.length <= MAX_NAME,
   iconId: (v) => v === null || (typeof v === 'string' && v.length > 0 && v.length <= 200),
-  purchasePrice: isMoney,
-  currency: (v) => typeof v === 'string' && /^[A-Z]{3}$/.test(v),
-  purchaseDate: isDay,
-  endDate: (v) => v === null || isDay(v),
-  salePrice: (v) => v === null || isMoney(v),
+  purchasePrice: isPrice,
+  currency: isCurrency,
+  purchaseDate: isDayKey,
+  endDate: (v) => v === null || isDayKey(v),
+  salePrice: (v) => v === null || isPrice(v),
   note: (v) => typeof v === 'string' && v.length <= MAX_NOTE,
 };
 
@@ -101,7 +93,12 @@ function read(raw: Record<string, unknown>): ModuleOp | null {
   }
   if (op === 'reorder') {
     const { ids } = raw;
-    if (keys !== 'entity,ids,op' || !Array.isArray(ids) || !ids.length || ids.length > 500) {
+    if (
+      keys !== 'entity,ids,op' ||
+      !Array.isArray(ids) ||
+      !ids.length ||
+      ids.length > MAX_EDIT_ROWS
+    ) {
       return null;
     }
     if (!ids.every(isId) || new Set(ids).size !== ids.length) return null;
@@ -119,8 +116,7 @@ export const itemModule: EditModule = {
   },
   plan: (tools, raw, steps) => {
     const op = raw as unknown as ItemOp;
-    const extra = tools.extra as ItemExtra | undefined;
-    if (!extra) return tools.refuse('invalid');
+    const extra = tools.extra as ItemExtra;
     const live = extra.items.filter((item) => !item.deletedAt);
 
     if (op.op === 'reorder') {
@@ -160,8 +156,6 @@ export const itemModule: EditModule = {
     const name = fields.name.trim();
     // What the editor's Save needs: a name and a price that reads as >= 0.
     if (!name) return tools.refuse('invalid');
-    if (!tools.isDayKey(fields.purchaseDate)) return tools.refuse('invalid');
-    if (fields.endDate !== null && !tools.isDayKey(fields.endDate)) return tools.refuse('invalid');
     // A sale price only comes with an end date ("I sold it" sits under "Mark as inactive").
     if (fields.salePrice !== null && fields.endDate === null) return tools.refuse('invalid');
     // The currency picker offers the main and added currencies, plus the item's own.

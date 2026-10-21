@@ -74,6 +74,7 @@ function lookup(
     isPro: true,
     convert: () => null,
     isCategoryIcon: (id) => id === 'meal',
+    suggestIcon: () => null,
     now: new Date(2026, 9, 20),
     extras: {
       [ENTITY]: {
@@ -407,6 +408,22 @@ describe('budget module: monthly budgets', () => {
         { entity: ENTITY, op: 'month_custom', month: '2026-11', budget: body() },
       ]),
     ).toEqual({ error: 'invalid' });
+  });
+
+  it('makes months from a template the batch does not also change', () => {
+    const fromT1 = (month: string) => ({
+      entity: ENTITY,
+      op: 'month_create',
+      month,
+      templateId: 't1',
+    });
+    expect(steps([fromT1('2026-11'), fromT1('2026-12')])).toHaveLength(2);
+    const change = { entity: ENTITY, op: 'template_update', id: 't1', at: AT, template: fields() };
+    const remove = { entity: ENTITY, op: 'template_delete', id: 't1', at: AT };
+    for (const op of [change, remove]) {
+      expect(refusal([fromT1('2026-11'), op])).toEqual({ error: 'invalid' });
+      expect(refusal([op, fromT1('2026-11')])).toEqual({ error: 'invalid' });
+    }
   });
 
   it('only makes a month the budget pager offers', () => {

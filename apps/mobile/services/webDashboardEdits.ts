@@ -38,16 +38,30 @@ import type {
 import { flowTypeForBalanceDelta } from '~/utils/accountBalances';
 
 import { EDIT_MODULES } from './webDashboardEditModules';
+import {
+  changedFields,
+  type Checks,
+  isAt,
+  isCurrency,
+  isDayKey,
+  isId,
+  isLogo,
+  isMoney,
+  isRecord,
+  isText,
+  localDay,
+  MAX_EDIT_ROWS,
+  readFields,
+  readTx,
+  validIcon,
+} from './webDashboardEditModules/shared';
 
-/** Rows one batch may touch: an edit message must fit the relay's 64 KB text frame. */
-export const MAX_EDIT_ROWS = 500;
+export { isDayKey, MAX_EDIT_ROWS };
+
 const MAX_OPS = 50;
 const MAX_NOTE = 500;
-const MAX_DETAILS = 2000;
 /** The app limits no name; this only keeps a batch inside one message. */
 const MAX_NAME = 200;
-const MAX_AMOUNT = 1e12;
-const SENTIMENTS: TransactionSentiment[] = ['happy', 'neutral', 'sad'];
 const PATTERNS = ['daily', 'weekly', 'monthly', 'yearly'] as const;
 type Pattern = (typeof PATTERNS)[number];
 type TxType = 'expense' | 'income' | 'transfer' | 'balance_adjustment';
@@ -232,10 +246,13 @@ export type EditLookup = {
   /** Whether a bundled category icon id exists (the web offers the default pack). */
   isCategoryIcon: (id: string) => boolean;
   /** The icon the app suggests for a name, as its editor does for a new top-level category. */
-  suggestIcon?: (name: string) => string | null;
+  suggestIcon: (name: string) => string | null;
   now: Date;
-  /** What each module reads from the app, by module entity (its `select`). */
-  extras?: Record<string, unknown>;
+  /**
+   * What each module reads from the app, by module entity (its `select`): read
+   * for the modules the batch names only.
+   */
+  extras: Record<string, unknown>;
 };
 
 /**
@@ -243,6 +260,7 @@ export type EditLookup = {
  * checks, and the same answers the built-in entities give.
  */
 export type PlanTools = {
+  /** The phone's data, with what this batch's earlier ops changed (groups, deleted rows). */
   lookup: EditLookup;
   /** This module's data from the app (its `select`). */
   extra: unknown;
@@ -250,6 +268,8 @@ export type PlanTools = {
   liveCategories: Category[];
   findAccount: (id: string | null | undefined) => Account | null;
   findCategory: (id: string | null | undefined) => Category | null;
+  /** Whether an account group of this name exists, counting this batch's creates and renames. */
+  groupExists: (name: string) => boolean;
   /** False when the batch already named this key: one thing twice is refused. */
   claim: (key: string) => boolean;
   /** An account or category this batch deletes: later ops in it can no longer use it. */
@@ -263,10 +283,6 @@ export type PlanTools = {
     fields: TxFields,
     current: TransactionWithRelations | null,
   ) => Result<Record<string, unknown>>;
-  isDayKey: (value: unknown) => value is string;
-  createdAt: (day: string) => string;
-  dayStart: (day: string) => string;
-  dayEnd: (day: string) => string;
 };
 
 /** A module: how one more entity's ops are read and planned. */
@@ -288,62 +304,13 @@ const refuse = (error: EditRefusal, feature?: ProFeature): Refuse =>
   feature ? { ok: false, error, feature } : { ok: false, error };
 const ok = <T>(value: T): Result<T> => ({ ok: true, value });
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  !!value && typeof value === 'object' && !Array.isArray(value);
-const isId = (value: unknown): value is string =>
-  typeof value === 'string' && value.length > 0 && value.length <= 64;
-const isAt = (value: unknown): value is string | null =>
-  value === null || typeof value === 'string';
-const isCurrency = (value: unknown): value is string =>
-  typeof value === 'string' && /^[A-Z]{3}$/.test(value);
-const isMoney = (value: unknown): value is number =>
-  typeof value === 'number' && Number.isFinite(value) && Math.abs(value) <= MAX_AMOUNT;
-const isText = (value: unknown, max: number): value is string =>
-  typeof value === 'string' && value.length <= max;
 const isDay = (value: unknown) =>
   Number.isInteger(value) && Number(value) >= 1 && Number(value) <= 31;
-/** A catalog logo, or an uploaded one (which the plan only lets a row keep). */
-const isLogo = (value: unknown) =>
-  value === null ||
-  (typeof value === 'string' &&
-    (/^[a-z0-9-]+\/[a-z0-9-]+$/.test(value) || /^custom:[\w./-]{1,200}$/.test(value)));
 /** An uploaded logo stays only where the row already has it: the web cannot upload one. */
 const keepsUpload = (next: string | null | undefined, current: string | null | undefined) =>
   !next?.startsWith('custom:') || next === current;
 
-export function isDayKey(value: unknown): value is string {
-  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-  const [y, m, d] = value.split('-').map(Number);
-  const date = new Date(Date.UTC(y, m - 1, d));
-  return (
-    y >= 1970 &&
-    y <= 2200 &&
-    date.getUTCFullYear() === y &&
-    date.getUTCMonth() === m - 1 &&
-    date.getUTCDate() === d
-  );
-}
-
 // ------------------------------------------------------------------ reading --
-
-type Checks = Record<string, (value: unknown) => boolean>;
-
-const TX_KEYS: Checks = {
-  type: (v) => v === 'expense' || v === 'income' || v === 'transfer' || v === 'balance_adjustment',
-  amount: isMoney,
-  currency: isCurrency,
-  toAmount: (v) => v === null || (isMoney(v) && v >= 0),
-  date: isDayKey,
-  accountId: (v) => v === null || isId(v),
-  fromAccountId: (v) => v === null || isId(v),
-  toAccountId: (v) => v === null || isId(v),
-  categoryId: (v) => v === null || isId(v),
-  note: (v) => isText(v, MAX_NOTE),
-  details: (v) => isText(v, MAX_DETAILS),
-  sentiment: (v) => SENTIMENTS.includes(v as TransactionSentiment),
-  reimbursable: (v) => typeof v === 'boolean',
-  countsAsExpense: (v) => typeof v === 'boolean',
-};
 
 const ACCOUNT_KEYS: Checks = {
   name: (v) => isText(v, MAX_NAME),
@@ -384,17 +351,6 @@ const RULE_KEYS: Checks = {
   isActive: (v) => typeof v === 'boolean',
 };
 
-/** Only known keys, each of the right shape; null if anything is off. */
-function readFields<T>(value: unknown, checks: Checks): T | null {
-  if (!isRecord(value)) return null;
-  for (const [key, item] of Object.entries(value)) {
-    // Own keys only: `constructor` or `toString` must not pass as a field.
-    const check = Object.prototype.hasOwnProperty.call(checks, key) ? checks[key] : undefined;
-    if (!check || !check(item)) return null;
-  }
-  return value as T;
-}
-
 function readRows(value: unknown): EditRow[] | null {
   if (!Array.isArray(value) || value.length === 0) return null;
   const rows: EditRow[] = [];
@@ -411,13 +367,13 @@ function readOp(raw: Record<string, unknown>): EditOp | null {
   if (module) return typeof op === 'string' ? module.read(raw) : null;
   if (entity === 'transaction') {
     if (op === 'create') {
-      const tx = readFields<TxFields>(raw.tx, TX_KEYS);
+      const tx = readTx(raw.tx);
       return tx ? { entity, op, tx } : null;
     }
     const rows = readRows(raw.rows);
     if (!rows) return null;
     if (op === 'delete') return { entity, op, rows };
-    const set = readFields<TxFields>(raw.set, TX_KEYS);
+    const set = readTx(raw.set);
     return op === 'update' && set && Object.keys(set).length ? { entity, op, rows, set } : null;
   }
   if (entity === 'group') {
@@ -486,18 +442,6 @@ export function editTransactionIds(request: EditRequest): string[] {
 
 // -------------------------------------------------------------------- dates --
 
-function localDay(date: Date): string {
-  const pad = (value: number) => String(value).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-}
-
-/** The day a stored date falls on, on this phone. */
-function storedDay(stored: string): string {
-  if (/^\d{4}-\d{2}-\d{2}$/.test(stored)) return stored;
-  const date = new Date(stored);
-  return Number.isNaN(date.getTime()) ? stored.slice(0, 10) : localDay(date);
-}
-
 /** A new entry's date: now for today, else the day's local midnight, as the app's editor stores it. */
 export function createdAt(day: string, now: Date = new Date()): string {
   if (localDay(now) === day) return now.toISOString();
@@ -525,7 +469,15 @@ type Ctx = EditLookup & {
   created: { accounts: number; categories: number; rules: number } & Record<string, number>;
   /** Everything the batch names, so one named twice is refused. */
   named: Set<string>;
+  /** Account groups this batch creates, by name. */
+  newGroups: string[];
 };
+
+/**
+ * The `updated_at` of a row an earlier op in the batch changes: no browser's
+ * copy has it, so a later op naming that row by its old `at` is a conflict.
+ */
+const CHANGED_IN_BATCH = 'changed-in-this-batch';
 
 const findAccount = (ctx: Ctx, id: string | null | undefined) =>
   id ? (ctx.liveAccounts.find((item) => item.id === id) ?? null) : null;
@@ -702,29 +654,7 @@ function transactionPayload(
   });
 }
 
-/**
- * Only what changes, so an update does not re-freeze a snapshot or rewrite a
- * time it did not touch.
- */
-function changedFields(
-  next: Record<string, unknown>,
-  current: TransactionWithRelations,
-): Record<string, unknown> {
-  const out: Record<string, unknown> = {};
-  const before = current as unknown as Record<string, unknown>;
-  for (const [key, value] of Object.entries(next)) {
-    const same =
-      key === 'date'
-        ? storedDay(current.date) === storedDay(String(value))
-        : (value ?? null) === (before[key] ?? null);
-    if (!same) out[key] = value;
-  }
-  // A new account or currency carries the value in the account's currency with it.
-  if ('accountId' in out || 'currency' in out || 'amount' in out) {
-    out.accountAmount = next.accountAmount ?? null;
-  }
-  return out;
-}
+const BULK_KEYS: (keyof TxFields)[] = ['date', 'note', 'categoryId', 'accountId'];
 
 function planTransaction(
   ctx: Ctx,
@@ -756,17 +686,20 @@ function planTransaction(
   }
   const { set } = op;
   const bulk = rows.length > 1;
-  // One amount, type or currency for many rows is never what someone meant.
-  if (bulk && ('amount' in set || 'type' in set || 'toAmount' in set || 'currency' in set)) {
+  // Many rows change only as a bulk edit changes them: the app's bulk sheet
+  // (day, note, category) and the web's bulk toolbar (those, and the account).
+  if (bulk && Object.keys(set).some((key) => !BULK_KEYS.includes(key as keyof TxFields))) {
     return refuse('invalid');
   }
   const updates: { id: string; input: Record<string, unknown> }[] = [];
   for (const current of rows) {
     const flow = current.type === 'expense' || current.type === 'income';
-    if (bulk && !flow && ('accountId' in set || 'reimbursable' in set || 'sentiment' in set)) {
+    if (bulk && !flow && 'accountId' in set) return refuse('invalid');
+    if (bulk && !flow && 'categoryId' in set && !current.countsAsExpense) return refuse('invalid');
+    // A bulk move keeps each amount as it is, so only into an account of the row's currency.
+    if (bulk && set.accountId && findAccount(ctx, set.accountId)?.currency !== current.currency) {
       return refuse('invalid');
     }
-    if (bulk && !flow && 'categoryId' in set && !current.countsAsExpense) return refuse('invalid');
     // The app keeps these amounts in step with something else: shared splits,
     // or the expense a refund pays back.
     const moves = 'amount' in set || 'currency' in set || 'type' in set || 'accountId' in set;
@@ -784,7 +717,35 @@ function planTransaction(
 }
 
 function groupExists(ctx: Ctx, group: string | null | undefined): boolean {
-  return !group || ctx.accountGroups.some((item) => !item.deletedAt && item.name === group);
+  return (
+    !group ||
+    ctx.newGroups.includes(group) ||
+    ctx.accountGroups.some((item) => !item.deletedAt && item.name === group)
+  );
+}
+
+/**
+ * What a group rename or delete does to the rest of the batch's view, as
+ * `accountGroupsRepository` does it: the group gets its new name or goes, and
+ * every account in it follows (renamed into it, or ungrouped), with a new
+ * `updated_at`.
+ */
+function changeGroup(ctx: Ctx, id: string, name: string | null) {
+  const group = ctx.accountGroups.find((item) => item.id === id);
+  if (!group) return;
+  const old = group.name;
+  ctx.accountGroups = ctx.accountGroups.map((item) =>
+    item.id !== id
+      ? item
+      : name === null
+        ? { ...item, deletedAt: CHANGED_IN_BATCH, updatedAt: CHANGED_IN_BATCH }
+        : { ...item, name, updatedAt: CHANGED_IN_BATCH },
+  );
+  ctx.liveAccounts = ctx.liveAccounts.map((account) =>
+    account.accountGroup === old
+      ? { ...account, accountGroup: name, updatedAt: CHANGED_IN_BATCH }
+      : account,
+  );
 }
 
 function planAccount(
@@ -916,34 +877,29 @@ function planGroup(
     if (!claim(ctx, `group:${op.id}`)) return refuse('invalid');
     if (stale(op.id, op.at)) return refuse('conflict');
     steps.push({ kind: 'group.delete', id: op.id });
+    changeGroup(ctx, op.id, null);
     return ok(1);
   }
   const name = op.name.trim();
   // The database treats group names without case, so "cards" is "Cards".
-  const taken = live.some(
-    (group) =>
-      group.name.toLocaleLowerCase() === name.toLocaleLowerCase() &&
-      (op.op === 'create' || group.id !== op.id),
-  );
+  const lower = name.toLocaleLowerCase();
+  const taken =
+    ctx.newGroups.some((item) => item.toLocaleLowerCase() === lower) ||
+    live.some(
+      (group) =>
+        group.name.toLocaleLowerCase() === lower && (op.op === 'create' || group.id !== op.id),
+    );
   if (!name || taken) return refuse('invalid');
   if (op.op === 'create') {
     steps.push({ kind: 'group.create', name });
+    ctx.newGroups.push(name);
     return ok(1);
   }
   if (!claim(ctx, `group:${op.id}`)) return refuse('invalid');
   if (stale(op.id, op.at)) return refuse('conflict');
   steps.push({ kind: 'group.rename', id: op.id, name });
+  changeGroup(ctx, op.id, name);
   return ok(1);
-}
-
-/** No icon, an emoji, or a bundled icon of the default pack (the others are Pro and app-only). */
-function validIcon(ctx: Ctx, icon: string): boolean {
-  if (icon === '') return true;
-  if (icon.startsWith('emoji:')) {
-    const glyph = icon.slice('emoji:'.length);
-    return glyph.length > 0 && glyph.length <= 16 && !/[\x00-\x7f]/.test(glyph);
-  }
-  return !icon.includes('/') && ctx.isCategoryIcon(icon);
 }
 
 function planCategory(
@@ -966,9 +922,9 @@ function planCategory(
       return refuse('invalid');
     }
     let icon = fields.icon ?? '';
-    if (!validIcon(ctx, icon)) return refuse('invalid');
+    if (!validIcon(icon, ctx.isCategoryIcon)) return refuse('invalid');
     // A new top-level category gets an icon, as the app's editor gives one.
-    if (!icon && !parent) icon = ctx.suggestIcon?.(name) ?? 'meal';
+    if (!icon && !parent) icon = ctx.suggestIcon(name) ?? 'meal';
     ctx.created.categories++;
     steps.push({
       kind: 'category.create',
@@ -1000,7 +956,7 @@ function planCategory(
     input.name = set.name.trim();
   }
   if (set.icon !== undefined && set.icon !== current.icon) {
-    if (!validIcon(ctx, set.icon)) return refuse('invalid');
+    if (!validIcon(set.icon, ctx.isCategoryIcon)) return refuse('invalid');
     input.icon = set.icon;
   }
   if ('parentId' in set && (set.parentId ?? null) !== current.parentId) {
@@ -1150,27 +1106,25 @@ export function planEdit(
     liveCategories: lookup.categories.filter((item) => !item.deletedAt),
     created: { accounts: 0, categories: 0, rules: 0 },
     named: new Set(),
+    newGroups: [],
   };
   const steps: EditStep[] = [];
   const kinds = new Set<string>();
   let count = 0;
   const tools = (entity: string): PlanTools => ({
-    lookup,
-    extra: lookup.extras?.[entity],
+    lookup: ctx,
+    extra: lookup.extras[entity],
     liveAccounts: ctx.liveAccounts,
     liveCategories: ctx.liveCategories,
     findAccount: (id) => findAccount(ctx, id),
     findCategory: (id) => findCategory(ctx, id),
+    groupExists: (name) => groupExists(ctx, name),
     claim: (key) => claim(ctx, key),
     forget: (kind, id) => forget(ctx, kind, id),
     created: ctx.created,
     refuse,
     ok,
     transactionPayload: (fields, current) => transactionPayload(ctx, fields, current),
-    isDayKey,
-    createdAt: (day) => createdAt(day, ctx.now),
-    dayStart,
-    dayEnd,
   });
   for (const op of request.ops) {
     const module = moduleOf(op.entity);

@@ -15,6 +15,7 @@ import { PRO_LIMITS } from '~/constants/proLimits';
 import { isAutoRateSupported } from '~/utils/currency';
 
 import type { EditModule, ModuleOp, PlanTools } from '../webDashboardEdits';
+import { isCurrency as isCode } from './shared';
 
 const MAX_RATE = 1e12;
 /** More than every currency there is. */
@@ -28,9 +29,6 @@ type CurrencyOp =
 
 /** What the planner reads from the app (the apply module's `select`). */
 export type CurrencyExtra = { reporting: string; fxCurrencies: string[] };
-
-const isCode = (value: unknown): value is string =>
-  typeof value === 'string' && /^[A-Z]{3}$/.test(value);
 
 const KEYS: Record<CurrencyOp['op'], string[]> = {
   add: ['code'],
@@ -68,9 +66,7 @@ function read(raw: Record<string, unknown>): ModuleOp | null {
  * account currency not added yet; never the main one.
  */
 function screenState(tools: PlanTools) {
-  const extra = tools.extra as CurrencyExtra | undefined;
-  const reporting = extra?.reporting ?? tools.lookup.reportingCurrency;
-  const fxCurrencies = extra?.fxCurrencies ?? [];
+  const { reporting, fxCurrencies } = tools.extra as CurrencyExtra;
   const inUse = new Set(
     tools.liveAccounts
       .map((account) => account.currency)

@@ -39,6 +39,7 @@ function lookup(items: Item[], isPro = false): EditLookup {
     isPro,
     convert: () => null,
     isCategoryIcon: () => false,
+    suggestIcon: () => null,
     now: new Date(2026, 9, 20),
     extras: { 'module:item': extra },
   };
@@ -118,8 +119,9 @@ describe('module:item planning', () => {
     expect(plan([{ op: 'create', item: fields({ name: '  ' }) }])).toMatchObject({
       error: 'invalid',
     });
+    // An impossible day is not even read.
     expect(plan([{ op: 'create', item: fields({ purchaseDate: '2026-02-30' }) }])).toMatchObject({
-      error: 'invalid',
+      error: 'unread',
     });
     expect(plan([{ op: 'create', item: fields({ salePrice: 10 }) }])).toMatchObject({
       error: 'invalid',

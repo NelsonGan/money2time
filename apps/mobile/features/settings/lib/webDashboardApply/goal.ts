@@ -30,7 +30,7 @@ export const goalApply: ApplyModule = {
   select: (): GoalExtra => ({
     ruleName: (name) => String(I18n.t('goals.auto_save_rule_name', { name })),
   }),
-  apply: (app, step, created) => {
+  apply: (app, step, { created }) => {
     if (step.action === 'create') {
       const payload = step.payload as unknown as GoalCreatePayload;
       const id = app.createAccount(payload.input as unknown as AccountInput);

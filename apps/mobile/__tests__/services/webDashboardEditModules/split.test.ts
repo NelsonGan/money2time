@@ -97,6 +97,7 @@ function lookup(
     isPro: true,
     convert: () => null,
     isCategoryIcon: () => true,
+    suggestIcon: () => null,
     now: new Date(2026, 9, 20, 14, 30),
     extras: { [ENTITY]: { unpaidBills } },
     ...patch,
@@ -466,11 +467,38 @@ describe('module:split share and settings ops', () => {
     expect(plan([{ op: 'default_payback', accountId: 'old' }])).toMatchObject({ error: 'invalid' });
   });
 
-  it('refuses an impossible day', () => {
+  it('settles several shares of one bill, but never alongside a change to the bill', () => {
+    const two = lookup([bill([split('ann'), split('cy')])]);
+    const settle = (id: string) => ({ op: 'settle', id, txId: 'bill', at: SPLIT_AT });
+    expect(plan([settle('ann'), settle('cy')], two)).toMatchObject({ ok: true });
+    const note = {
+      entity: 'transaction',
+      op: 'update',
+      rows: [{ id: 'bill', at: AT }],
+      set: { note: 'x' },
+    };
+    const remove = { entity: 'transaction', op: 'delete', rows: [{ id: 'bill', at: AT }] };
+    for (const change of [note, remove]) {
+      expect(plan([settle('ann'), change], two)).toMatchObject({ error: 'invalid' });
+      expect(plan([change, settle('ann')], two)).toMatchObject({ error: 'invalid' });
+    }
+    const paid = lookup([bill([split('ann'), split('bo', { paidAt: AT })])]);
+    for (const [op, id] of [
+      ['unsettle', 'bo'],
+      ['remove', 'ann'],
+    ]) {
+      expect(plan([{ op, id, txId: 'bill', at: SPLIT_AT }], paid)).toMatchObject({ ok: true });
+      expect(plan([{ op, id, txId: 'bill', at: SPLIT_AT }, note], paid)).toMatchObject({
+        error: 'invalid',
+      });
+    }
+  });
+
+  it('does not read an impossible day', () => {
     expect(
       plan([
         { op: 'create', tx: { ...NEW_TX, date: '2026-02-30' }, splits: [me(15), friend('A', 15)] },
       ]),
-    ).toMatchObject({ error: 'invalid' });
+    ).toMatchObject({ error: 'unread' });
   });
 });

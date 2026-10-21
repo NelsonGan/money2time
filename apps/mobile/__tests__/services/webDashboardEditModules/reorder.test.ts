@@ -35,7 +35,9 @@ function lookup(patch: Partial<EditLookup> = {}): EditLookup {
     isPro: false,
     convert: () => null,
     isCategoryIcon: () => false,
+    suggestIcon: () => null,
     now: new Date(2026, 9, 20),
+    extras: {},
     ...patch,
   };
 }

@@ -30,8 +30,11 @@ export type LinkedBrowser = {
  * connections while it is open, built on AppContext.
  */
 export type WebDashboardEditor = {
-  /** Accounts, categories and the main currency as the app holds them now. */
-  lookup: () => Omit<EditLookup, 'transactions'>;
+  /**
+   * Accounts, categories, balances and the main currency as the app holds them
+   * now, with the data of the modules `entities` (the batch's ops) name.
+   */
+  lookup: (entities: string[]) => Omit<EditLookup, 'transactions'>;
   /** Saves a checked plan; resolves once it is in the database. */
   apply: (plan: EditPlan) => Promise<void>;
   /** A batch was saved, with how many entries it changed. */

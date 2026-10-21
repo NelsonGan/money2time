@@ -20,6 +20,7 @@ import { PRO_LIMITS } from '~/constants/proLimits';
 import type { Album } from '~/types';
 
 import type { EditModule, ModuleOp, PlanTools, Result } from '../webDashboardEdits';
+import { isAt, isDayKey, isId, isRecord, MAX_EDIT_ROWS } from './shared';
 
 /** What the planner reads from the app (the apply module's `select`). */
 export type AlbumExtra = { albums: Album[] };
@@ -42,24 +43,14 @@ type AlbumOp =
   | { entity: 'module:album'; op: 'active'; id: string | null };
 
 const MAX_NAME = 80;
-/** Transactions one op may name; the batch's own row limit applies on top. */
-const MAX_IDS = 500;
-const DAY = /^\d{4}-\d{2}-\d{2}$/;
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  !!value && typeof value === 'object' && !Array.isArray(value);
-const isId = (value: unknown): value is string =>
-  typeof value === 'string' && value.length > 0 && value.length <= 64;
-const isAt = (value: unknown): value is string | null =>
-  value === null || typeof value === 'string';
-const isDayOrNull = (value: unknown): value is string | null =>
-  value === null || (typeof value === 'string' && DAY.test(value));
+const isDayOrNull = (value: unknown): value is string | null => value === null || isDayKey(value);
 const hasKeys = (value: Record<string, unknown>, keys: string) =>
   Object.keys(value).sort().join(',') === keys;
 
-/** Distinct ids, at most MAX_IDS; null otherwise. */
+/** Distinct ids, at most a batch's worth; null otherwise. */
 function readIds(value: unknown): string[] | null {
-  if (!Array.isArray(value) || value.length > MAX_IDS || !value.every(isId)) return null;
+  if (!Array.isArray(value) || value.length > MAX_EDIT_ROWS || !value.every(isId)) return null;
   return new Set(value).size === value.length ? value : null;
 }
 
@@ -120,11 +111,9 @@ function checkExpenses(tools: PlanTools, ids: string[]): Result<true> {
   return tools.ok(true);
 }
 
-function checkDetails(tools: PlanTools, details: Details): Details | null {
+function checkDetails(details: Details): Details | null {
   const name = details.name.trim();
   if (!name) return null;
-  if (details.startDate !== null && !tools.isDayKey(details.startDate)) return null;
-  if (details.endDate !== null && !tools.isDayKey(details.endDate)) return null;
   return { name, startDate: details.startDate, endDate: details.endDate };
 }
 
@@ -144,12 +133,11 @@ export const albumModule: EditModule = {
   },
   plan: (tools, raw, steps) => {
     const op = raw as unknown as AlbumOp;
-    const extra = tools.extra as AlbumExtra | undefined;
-    if (!extra) return tools.refuse('invalid');
+    const extra = tools.extra as AlbumExtra;
     const live = extra.albums.filter((album) => !album.deletedAt);
 
     if (op.op === 'create') {
-      const details = checkDetails(tools, op.album);
+      const details = checkDetails(op.album);
       if (!details) return tools.refuse('invalid');
       // AlbumsScreen's checkLimit('albums', albums.length) before the create screen opens.
       const made = tools.created.albums ?? 0;
@@ -186,6 +174,8 @@ export const albumModule: EditModule = {
     if (op.op === 'active') {
       // AlbumsScreen's "Auto-add new transactions to": one album, or none.
       if (!tools.claim('albums:active')) return tools.refuse('invalid');
+      // The album is read as it is now: the same batch must not also change it.
+      if (op.id !== null && !tools.claim(`album:${op.id}`)) return tools.refuse('invalid');
       if (op.id !== null && !live.some((album) => album.id === op.id)) {
         return tools.refuse('conflict');
       }
@@ -213,7 +203,7 @@ export const albumModule: EditModule = {
       return tools.ok(1);
     }
     if (op.op === 'update') {
-      const details = checkDetails(tools, op.album);
+      const details = checkDetails(op.album);
       if (!details) return tools.refuse('invalid');
       steps.push({
         kind: 'module',

@@ -21,7 +21,7 @@ export const loanApply: ApplyModule = {
   select: (): LoanExtra => ({
     ruleName: (name) => String(I18n.t('accounts.loan.autopay_rule_name', { name })),
   }),
-  apply: (app, step, created) => {
+  apply: (app, step, { created }) => {
     if (step.action === 'create') {
       const payload = step.payload as unknown as LoanCreatePayload;
       const id = app.createAccount(payload.input as unknown as AccountInput);

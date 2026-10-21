@@ -46,6 +46,7 @@ function lookup(albums: Album[], isPro = false): EditLookup {
     isPro,
     convert: () => null,
     isCategoryIcon: () => false,
+    suggestIcon: () => null,
     now: new Date(2026, 9, 20),
     extras: { 'module:album': extra },
   };
@@ -124,7 +125,7 @@ describe('module:album planning', () => {
       plan([
         { op: 'create', album: { ...details({ endDate: '2026-02-31' }), transactionIds: [] } },
       ]),
-    ).toMatchObject({ error: 'invalid' });
+    ).toMatchObject({ error: 'unread' });
   });
 
   it('adds only live expenses, as the picker lists them', () => {
@@ -202,5 +203,24 @@ describe('module:album order and active album', () => {
     expect(plan([{ op: 'active', id: null }], albums)).toMatchObject({ ok: true });
     expect(plan([{ op: 'active', id: 'gone' }], albums)).toMatchObject({ error: 'conflict' });
     expect(read([{ op: 'active', id: 'a1', at: AT }]).kind).toBe('invalid');
+    // The album it picks is not also changed in the same batch.
+    expect(
+      plan(
+        [
+          { op: 'active', id: 'a2' },
+          { op: 'delete', id: 'a2', at: AT },
+        ],
+        albums,
+      ),
+    ).toMatchObject({ error: 'invalid' });
+    expect(
+      plan(
+        [
+          { op: 'delete', id: 'a2', at: AT },
+          { op: 'active', id: 'a2' },
+        ],
+        albums,
+      ),
+    ).toMatchObject({ error: 'invalid' });
   });
 });

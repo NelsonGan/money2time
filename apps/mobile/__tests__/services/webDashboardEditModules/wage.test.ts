@@ -37,6 +37,7 @@ function lookup(wages: MonthlyWageSettings[], patch: Partial<EditLookup> = {}): 
     isPro: false,
     convert: () => null,
     isCategoryIcon: () => false,
+    suggestIcon: () => null,
     now: new Date(2026, 9, 20),
     extras: { 'module:wage': wages },
     ...patch,

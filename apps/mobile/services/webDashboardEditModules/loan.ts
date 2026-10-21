@@ -35,12 +35,12 @@ import { normalizeMoneyAmount } from '~/utils/formatters';
 import { nextOccurrenceOfMonthDay } from '~/utils/statementPeriods';
 
 import type { EditModule, EditStep, ModuleOp, PlanTools, Result } from '../webDashboardEdits';
+import { isAt, isDayKey, isId, isLogo, isMoney, isRecord, localDay } from './shared';
 
 const ENTITY = 'module:loan';
 const MAX_NAME = 200;
 /** What a read lets through; the plan holds a changed name to MAX_NAME. */
 const MAX_TEXT = 10000;
-const MAX_AMOUNT = 1e12;
 /** The seeded expense category a loan repayment is filed under by default. */
 const DEFAULT_LOAN_CATEGORY_NAME = 'bills';
 
@@ -116,21 +116,8 @@ export type LoanUpdatePayload = {
   rules: LoanRuleOp[];
 };
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  !!value && typeof value === 'object' && !Array.isArray(value);
-const isId = (value: unknown): value is string =>
-  typeof value === 'string' && value.length > 0 && value.length <= 64;
-const isAt = (value: unknown): value is string | null =>
-  value === null || typeof value === 'string';
-const isMoney = (value: unknown): value is number =>
-  typeof value === 'number' && Number.isFinite(value) && Math.abs(value) <= MAX_AMOUNT;
 const isCount = (value: unknown, max: number) =>
   Number.isInteger(value) && Number(value) >= 0 && Number(value) <= max;
-/** A catalog logo, or an uploaded one (which the plan only lets a loan keep). */
-const isLogo = (value: unknown) =>
-  value === null ||
-  (typeof value === 'string' &&
-    (/^[a-z0-9-]+\/[a-z0-9-]+$/.test(value) || /^custom:[\w./-]{1,200}$/.test(value)));
 
 const FORM_KEYS: Record<string, { check: (value: unknown) => boolean; optional?: boolean }> = {
   name: { check: (v) => typeof v === 'string' && v.length <= MAX_TEXT },
@@ -148,7 +135,7 @@ const FORM_KEYS: Record<string, { check: (value: unknown) => boolean; optional?:
   total: { check: (v) => v === null || isMoney(v) },
   instalment: { check: (v) => v === null || isMoney(v) },
   paidPeriods: { check: (v) => isCount(v, 100000), optional: true },
-  startDate: { check: (v) => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) },
+  startDate: { check: isDayKey },
   countAsExpense: { check: (v) => typeof v === 'boolean' },
   paymentCategoryId: { check: (v) => v === null || isId(v) },
   collectFromAccountId: { check: (v) => v === null || isId(v), optional: true },
@@ -214,16 +201,6 @@ function read(raw: Record<string, unknown>): ModuleOp | null {
 }
 
 // ------------------------------------------------------------------ planning --
-
-function localDay(date: Date): string {
-  const pad = (value: number) => String(value).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-}
-
-function extraOf(tools: PlanTools): LoanExtra {
-  const extra = tools.extra as Partial<LoanExtra> | undefined;
-  return { ruleName: extra?.ruleName ?? ((name) => name) };
-}
 
 /** A collect account as the editor's picker offers it: a debit account in the loan's currency. */
 function collectSource(tools: PlanTools, id: string | null | undefined, currency: string) {
@@ -295,7 +272,6 @@ function contractOf(
   }
   const group = groupOf(tools, form.group, current);
   if (group === undefined) return tools.refuse('invalid');
-  if (!tools.isDayKey(form.startDate)) return tools.refuse('invalid');
   const principal = form.principal;
   const termEmpty = form.termMonths === null;
   const term = form.termMonths ?? 0;
@@ -400,7 +376,7 @@ function repaymentRule(
   const { input } = contract;
   const today = localDay(tools.lookup.now);
   return {
-    name: extraOf(tools).ruleName(input.name),
+    name: (tools.extra as LoanExtra).ruleName(input.name),
     type: 'transfer',
     amount: instalment,
     currency: input.currency,
@@ -425,8 +401,7 @@ function repaymentRule(
  */
 function groupOf(tools: PlanTools, group: string | null, current: Account | null) {
   if (!group) return null;
-  if (tools.lookup.accountGroups.some((item) => !item.deletedAt && item.name === group))
-    return group;
+  if (tools.groupExists(group)) return group;
   return current && group === current.accountGroup ? null : undefined;
 }
 
@@ -582,6 +557,10 @@ function planUpdate(tools: PlanTools, current: Account, op: ModuleOp, steps: Edi
     }
   }
 
+  // These rules are this loan's to change: the same batch must not also edit them as recurring rules.
+  for (const id of new Set(ruleOps.flatMap((rule) => (rule.op === 'create' ? [] : [rule.id])))) {
+    if (!tools.claim(`rule:${id}`)) return tools.refuse('invalid');
+  }
   const payload: LoanUpdatePayload = {
     id: current.id,
     updates: { ...common, currency: input.currency, ...loanUpdates },

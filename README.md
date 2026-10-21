@@ -2137,12 +2137,24 @@ database, no bucket, no account and no secrets. Served at
     type, what a free plan allows, what a loan or goal lets change, two-level
     categories of one type, an uploaded logo only kept, never set). Every
     update and delete names the row's `updated_at` from the browser's copy,
-    and a row changed or gone on the phone refuses the batch (`conflict`); an
-    account or category the batch deletes cannot be used by its later ops.
+    and a row changed or gone on the phone refuses the batch (`conflict`). A
+    batch names each row once (`invalid` otherwise): a split share, a goal's
+    auto-save or a loan's repayment rule, the active album and a template a
+    month is made from all count as their parent row. Later ops see what
+    earlier ones did: an account or category deleted cannot be used, a group
+    created can, and a group renamed or deleted moves its accounts with it (so
+    the browser's `updated_at` for them no longer matches). An update of many
+    transactions changes only what a bulk edit changes (day, note, category,
+    and the account of expenses and income, into one of each row's
+    currency). Balances, the unpaid split-bill count and the expense months
+    the budget pager offers are read when an edit arrives, never from the
+    hidden Settings tab's held `useTransactions()`, and a module's data is
+    read only when the batch names it.
   - **Saving:** through the AppContext calls the app's own screens make
     (`features/settings/lib/useWebDashboardEditor.ts`), then
     `afterDeferredWrites`, then a check that new and deleted transactions
-    landed. Saving is step by step, not atomic: a step failing partway answers
+    landed and that a reimbursement was marked or unmarked (the app skips an
+    expense it cannot find without a word). Saving is step by step, not atomic: a step failing partway answers
     `unknown` (some may be saved), and fresh data follows. At most 4 edits wait
     at once (`busy` past that).
   - **Freshness:** each transfer carries a per-browser, single-use `editToken`

@@ -114,6 +114,7 @@ function lookup(patch: Partial<EditLookup> = {}): EditLookup {
     convert: (amount, from, to) => (from === 'USD' && to === 'MYR' ? amount * 4 : amount / 4),
     isCategoryIcon: (id) => id === 'meal' || id === 'coffee',
     suggestIcon: () => 'coffee',
+    extras: {},
     now: NOW,
     ...patch,
   };
@@ -412,6 +413,29 @@ describe('transactions', () => {
     ).toEqual({ error: 'invalid' });
   });
 
+  it('changes many rows only as a bulk edit does, and moves them within their currency', () => {
+    const data = {
+      transactions: [tx('a'), tx('b'), tx('c', { currency: 'USD', accountId: 'usd' })],
+    };
+    const rows = (...ids: string[]) => ids.map((id) => ({ id, at: AT }));
+    const bulk = (set: Record<string, unknown>, ...ids: string[]) => [
+      { entity: 'transaction', op: 'update', rows: rows(...ids), set },
+    ];
+    // What the bulk sheet and the web's toolbar change.
+    expect(steps(bulk({ note: 'Trip', date: '2026-10-02' }, 'a', 'b'), data)).toHaveLength(1);
+    expect(steps(bulk({ accountId: 'card' }, 'a', 'b'), data)).toHaveLength(1);
+    // Nothing else, not even what one row's editor may change.
+    for (const set of [{ sentiment: 'happy' }, { reimbursable: true }, { details: 'x' }]) {
+      expect(refusal(bulk(set, 'a', 'b'), data)).toEqual({ error: 'invalid' });
+    }
+    expect(refusal(bulk({ fromAccountId: 'usd' }, 'a', 'b'), data)).toEqual({ error: 'invalid' });
+    // An account of another currency would leave an amount in the wrong one.
+    expect(refusal(bulk({ accountId: 'usd' }, 'a', 'b'), data)).toEqual({ error: 'invalid' });
+    expect(refusal(bulk({ accountId: 'myr' }, 'a', 'c'), data)).toEqual({ error: 'invalid' });
+    // One row moves like the editor moves it.
+    expect(steps([update('a', { accountId: 'usd' })], data)).toHaveLength(1);
+  });
+
   it('stops new entries once a free plan is over its accounts', () => {
     const accounts = Array.from({ length: 7 }, (_, index) => account(`a${index}`));
     expect(
@@ -497,6 +521,54 @@ describe('accounts and groups', () => {
         { accounts: [account('goal', { type: 'goal' })] },
       ),
     ).toEqual({ error: 'invalid' });
+  });
+
+  it('plans later ops against the groups earlier ones change', () => {
+    const data = {
+      accounts: [account('myr', { accountGroup: 'Bank' }), account('usd', { currency: 'USD' })],
+    };
+    const rename = { entity: 'group', op: 'update', id: 'g1', name: 'Banks' };
+    const remove = { entity: 'group', op: 'delete', id: 'g1' };
+    // A group made earlier in the batch can be used; a renamed or deleted one cannot.
+    expect(
+      steps(
+        [
+          { entity: 'group', op: 'create', name: 'Cards' },
+          { entity: 'account', op: 'update', id: 'usd', at: AT, set: { group: 'Cards' } },
+        ],
+        data,
+      ),
+    ).toHaveLength(2);
+    expect(
+      refusal(
+        [
+          { entity: 'group', op: 'create', name: 'Cards' },
+          { entity: 'group', op: 'create', name: 'cards' },
+        ],
+        data,
+      ),
+    ).toEqual({ error: 'invalid' });
+    expect(
+      steps(
+        [rename, { entity: 'account', op: 'update', id: 'usd', at: AT, set: { group: 'Banks' } }],
+        data,
+      ),
+    ).toHaveLength(2);
+    for (const first of [rename, remove]) {
+      expect(
+        refusal(
+          [first, { entity: 'account', op: 'update', id: 'usd', at: AT, set: { group: 'Bank' } }],
+          data,
+        ),
+      ).toEqual({ error: 'invalid' });
+      // Its accounts changed with it, so the browser's copy of them is behind.
+      expect(
+        refusal(
+          [first, { entity: 'account', op: 'update', id: 'myr', at: AT, set: { name: 'Main' } }],
+          data,
+        ),
+      ).toEqual({ error: 'conflict' });
+    }
   });
 
   it('refuses a group name already taken, and an unknown group', () => {
