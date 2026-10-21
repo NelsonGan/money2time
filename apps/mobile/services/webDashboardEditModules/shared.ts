@@ -6,13 +6,14 @@
  */
 
 import type { TransactionSentiment, TransactionWithRelations } from '~/types';
+import { dayKeyFromIsoLocal } from '~/utils/formatters';
 
 import type { TxFields } from '../webDashboardEdits';
 
 /** Rows one batch may touch: an edit message must fit the relay's 64 KB text frame. */
 export const MAX_EDIT_ROWS = 500;
 export const MAX_AMOUNT = 1e12;
-const MAX_NOTE = 500;
+export const MAX_NOTE = 500;
 const MAX_DETAILS = 2000;
 const SENTIMENTS: TransactionSentiment[] = ['happy', 'neutral', 'sad'];
 
@@ -56,19 +57,6 @@ export const isLogo = (value: unknown) =>
   value === null ||
   (typeof value === 'string' &&
     (/^[a-z0-9-]+\/[a-z0-9-]+$/.test(value) || /^custom:[\w./-]{1,200}$/.test(value)));
-
-/** The day a date falls on, on this phone. */
-export function localDay(date: Date): string {
-  const pad = (value: number) => String(value).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-}
-
-/** The day a stored date falls on, on this phone. */
-export function storedDay(stored: string): string {
-  if (/^\d{4}-\d{2}-\d{2}$/.test(stored)) return stored;
-  const date = new Date(stored);
-  return Number.isNaN(date.getTime()) ? stored.slice(0, 10) : localDay(date);
-}
 
 /**
  * No icon, an emoji, or a bundled icon of the default pack, as the web offers
@@ -129,7 +117,7 @@ export function changedFields(
   for (const [key, value] of Object.entries(next)) {
     const same =
       key === 'date'
-        ? storedDay(current.date) === storedDay(String(value))
+        ? dayKeyFromIsoLocal(current.date) === dayKeyFromIsoLocal(String(value))
         : (value ?? null) === (before[key] ?? null);
     if (!same) out[key] = value;
   }

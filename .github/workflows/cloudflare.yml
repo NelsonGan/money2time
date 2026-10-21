@@ -26,9 +26,13 @@ on:
       - '.github/workflows/cloudflare.yml'
   workflow_dispatch:
 
+# A newer PR push replaces an older check, but a production deploy that has
+# started runs to the end: cancelling one between the schema step and
+# `wrangler deploy` would leave the schema ahead of the code. A deploy still
+# queued can be replaced by a newer push; that one catches up (see below).
 concurrency:
   group: cloudflare-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -57,11 +61,14 @@ jobs:
         with:
           node-version: 22
 
-      - name: Typecheck Worker
+      # The dry run bundles the Worker and validates wrangler.toml (bindings,
+      # migrations, compatibility date) without touching Cloudflare.
+      - name: Typecheck and bundle Worker
         working-directory: apps/cloudflare/workers/${{ matrix.worker }}
         run: |
           npm ci
           npm run typecheck
+          npx wrangler deploy --dry-run --outdir dist --tsconfig tsconfig.json
 
   deploy:
     name: Cloudflare · Deploy ${{ matrix.worker }} (production)
@@ -69,6 +76,10 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    # actions: read finds the last successful deploy to compare against.
+    permissions:
+      contents: read
+      actions: read
     strategy:
       # One Worker failing to deploy must not strand the others half-shipped.
       fail-fast: false
@@ -86,12 +97,40 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      # Deploy only the Workers changed since the last production deploy that
+      # succeeded. A new version restarts the Worker's Durable Objects, which
+      # drops every live Web Dashboard connection, so a receipt-scanner change
+      # must not redeploy the relay. Comparing with that deploy, not the
+      # previous push, catches up a run that was cancelled while queued or
+      # failed. Anything unclear deploys.
+      - name: Check whether this Worker changed
+        id: changes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WORKER: ${{ matrix.worker }}
+          SCHEMA: ${{ matrix.schema }}
+        run: |
+          paths=("apps/cloudflare/workers/$WORKER" .github/workflows/cloudflare.yml)
+          if [ -n "$SCHEMA" ]; then paths+=("apps/cloudflare/d1/$SCHEMA"); fi
+          base=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow cloudflare.yml --branch main \
+            --event push --status success --limit 1 --json headSha --jq '.[0].headSha // empty' || true)
+          if [ -z "$base" ] || ! git fetch --quiet --depth=1 origin "$base"; then
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          elif git diff --quiet "$base" HEAD -- "${paths[@]}" ':!*.md'; then
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+            echo "No changes to $WORKER since ${base:0:7}, the last successful deploy; skipping it."
+          else
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Set up Node.js
+        if: steps.changes.outputs.deploy == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 22
 
       - name: Install dependencies
+        if: steps.changes.outputs.deploy == 'true'
         working-directory: apps/cloudflare/workers/${{ matrix.worker }}
         run: npm ci
 
@@ -100,7 +139,7 @@ jobs:
       # future additive schema changes ship automatically on merge to main. The
       # CLOUDFLARE_API_TOKEN must include D1 edit permission for this step.
       - name: Apply D1 schema
-        if: matrix.database
+        if: matrix.database && steps.changes.outputs.deploy == 'true'
         working-directory: apps/cloudflare/workers/${{ matrix.worker }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -108,6 +147,7 @@ jobs:
         run: npx wrangler d1 execute ${{ matrix.database }} --remote --file=../../d1/${{ matrix.schema }}/schema.sql
 
       - name: Deploy Worker to production
+        if: steps.changes.outputs.deploy == 'true'
         working-directory: apps/cloudflare/workers/${{ matrix.worker }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

@@ -17,9 +17,10 @@
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { findGoalAutoSaveRule } from '~/features/goals/lib/goalMath';
 import type { Account, RecurringTransactionRule } from '~/types';
+import { dayKeyFromDateLocal as localDay } from '~/utils/formatters';
 
 import type { EditModule, EditStep, ModuleOp, PlanTools, Result } from '../webDashboardEdits';
-import { isAt, isDayKey, isId, isMoney, isRecord, localDay, validIcon } from './shared';
+import { isAt, isDayKey, isId, isMoney, isRecord, validIcon } from './shared';
 
 const ENTITY = 'module:goal';
 const MAX_NAME = 200;

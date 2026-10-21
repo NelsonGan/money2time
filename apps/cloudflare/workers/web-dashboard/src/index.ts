@@ -60,8 +60,9 @@ export default {
     const protocols = (request.headers.get('Sec-WebSocket-Protocol') ?? '').split(',').map((p) => p.trim());
     const token = protocols.find((p) => p !== PROTOCOL && TOKEN.test(p));
     if (!protocols.includes(PROTOCOL) || !token) return text(400, 'Bad token');
-    // Browsers send an Origin; only the dashboard's may open a browser seat.
-    // The app is not a browser and sends none.
+    // Only the dashboard's origin may open a browser seat. This keeps other
+    // web pages out; a script can claim any Origin, so it is no access control
+    // (holding the room token is). The app's sockets send the relay's own origin.
     const origin = request.headers.get('Origin');
     if (role === 'browser' && (!origin || !allowedOrigins(env).includes(origin))) return text(403, 'Origin');
 
