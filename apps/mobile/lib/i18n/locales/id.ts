@@ -2379,6 +2379,8 @@ const id = {
     confirm_title_unnamed: 'Tautkan browser ini?',
     confirm_message:
       'Pastikan komputer menampilkan kode {{code}}. Lanjutkan hanya jika kamu sendiri yang membuka app.money2time.com di komputer yang sedang kamu pakai: komputer itu akan menerima semua datamu setiap kali layar ini terbuka.',
+    confirm_edits:
+      'Selama layar ini terbuka, browser itu juga bisa menambah, mengubah, dan menghapus entri Anda.',
     confirm_waiting: 'Sekarang klik juga Tautkan di komputer.',
     confirm_action: 'Tautkan',
     browsers_title: 'Tertaut',
@@ -2389,6 +2391,18 @@ const id = {
     status_closed: 'Tidak terbuka',
     just_now: 'baru saja',
     last_sent: 'Terakhir dikirim {{date}}',
+    edit_hint:
+      'Selama layar ini terbuka, browser yang tertaut juga bisa menambah, mengubah, dan menghapus entri. Perubahan disimpan di ponsel ini.',
+    edit_saved: 'Perubahan dari browser disimpan.',
+    browser_options: 'Opsi browser',
+    edits_on: 'Browser ini bisa menambah, mengubah, dan menghapus entri selama layar ini terbuka.',
+    edits_off:
+      'Browser ini hanya bisa melihat data Anda. Izinkan perubahan untuk menambah, mengubah, dan menghapus entri dari browser ini selama layar ini terbuka.',
+    edits_allow: 'Izinkan perubahan',
+    edits_disallow: 'Hanya lihat',
+    read_only: 'Hanya lihat',
+    edit_hint_some_read_only:
+      'Selama layar ini terbuka, browser yang Anda izinkan juga bisa menambah, mengubah, dan menghapus entri. Ketuk ⋯ di samping browser untuk mengizinkannya. Perubahan disimpan di ponsel ini.',
     send_now: 'Kirim sekarang',
     open_web: 'Buka app.money2time.com',
     unlink: 'Putuskan tautan',

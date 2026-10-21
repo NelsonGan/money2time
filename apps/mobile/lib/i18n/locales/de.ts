@@ -2400,6 +2400,8 @@ const de = {
     confirm_title_unnamed: 'Diesen Browser verknüpfen?',
     confirm_message:
       'Prüfe, ob der Computer den Code {{code}} anzeigt. Fahre nur fort, wenn du app.money2time.com selbst auf einem Computer geöffnet hast, den du gerade nutzt: Er erhält alle deine Daten, jedes Mal wenn dieser Bildschirm geöffnet ist.',
+    confirm_edits:
+      'Solange dieser Bildschirm geöffnet ist, kann er auch deine Einträge hinzufügen, ändern und löschen.',
     confirm_waiting: 'Klicke jetzt auch auf dem Computer auf „Verknüpfen“.',
     confirm_action: 'Verknüpfen',
     browsers_title: 'Verknüpft',
@@ -2410,6 +2412,19 @@ const de = {
     status_closed: 'Nicht geöffnet',
     just_now: 'jetzt',
     last_sent: 'Zuletzt gesendet {{date}}',
+    edit_hint:
+      'Solange dieser Bildschirm geöffnet ist, kann ein verknüpfter Browser auch Einträge hinzufügen, bearbeiten und löschen. Änderungen werden auf diesem Handy gespeichert.',
+    edit_saved: 'Änderungen aus dem Browser gespeichert.',
+    browser_options: 'Browser-Optionen',
+    edits_on:
+      'Dieser Browser kann Einträge hinzufügen, bearbeiten und löschen, solange dieser Bildschirm geöffnet ist.',
+    edits_off:
+      'Dieser Browser kann deine Daten nur ansehen. Erlaube Änderungen, damit er Einträge hinzufügen, bearbeiten und löschen kann, solange dieser Bildschirm geöffnet ist.',
+    edits_allow: 'Änderungen erlauben',
+    edits_disallow: 'Nur Ansicht',
+    read_only: 'Nur Ansicht',
+    edit_hint_some_read_only:
+      'Solange dieser Bildschirm geöffnet ist, können Browser, die du erlaubst, auch Einträge hinzufügen, bearbeiten und löschen. Tippe auf ⋯ neben einem Browser, um es zu erlauben. Änderungen werden auf diesem Handy gespeichert.',
     send_now: 'Jetzt senden',
     open_web: 'app.money2time.com öffnen',
     unlink: 'Verknüpfung aufheben',

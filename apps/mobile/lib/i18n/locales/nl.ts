@@ -2394,6 +2394,8 @@ const nl = {
     confirm_title_unnamed: 'Deze browser koppelen?',
     confirm_message:
       'Controleer of de computer de code {{code}} toont. Ga alleen verder als je app.money2time.com zelf hebt geopend op een computer die je gebruikt: die krijgt al je gegevens telkens als dit scherm open is.',
+    confirm_edits:
+      'Zolang dit scherm open is, kan die ook je boekingen toevoegen, wijzigen en verwijderen.',
     confirm_waiting: 'Klik nu ook op Koppelen op de computer.',
     confirm_action: 'Koppelen',
     browsers_title: 'Gekoppeld',
@@ -2404,6 +2406,19 @@ const nl = {
     status_closed: 'Niet open',
     just_now: 'nu',
     last_sent: 'Laatst verstuurd {{date}}',
+    edit_hint:
+      'Zolang dit scherm open is, kan een gekoppelde browser ook boekingen toevoegen, bewerken en verwijderen. Wijzigingen worden op deze telefoon opgeslagen.',
+    edit_saved: 'Wijzigingen uit de browser opgeslagen.',
+    browser_options: 'Browseropties',
+    edits_on:
+      'Deze browser kan boekingen toevoegen, bewerken en verwijderen zolang dit scherm open is.',
+    edits_off:
+      'Deze browser kan je gegevens alleen bekijken. Sta wijzigingen toe om hiermee boekingen toe te voegen, te bewerken en te verwijderen zolang dit scherm open is.',
+    edits_allow: 'Wijzigingen toestaan',
+    edits_disallow: 'Alleen bekijken',
+    read_only: 'Alleen bekijken',
+    edit_hint_some_read_only:
+      'Zolang dit scherm open is, kunnen browsers die je toestaat ook boekingen toevoegen, bewerken en verwijderen. Tik op ⋯ naast een browser om dit toe te staan. Wijzigingen worden op deze telefoon opgeslagen.',
     send_now: 'Nu versturen',
     open_web: 'Open app.money2time.com',
     unlink: 'Ontkoppelen',

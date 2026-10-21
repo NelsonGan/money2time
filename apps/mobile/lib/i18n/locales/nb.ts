@@ -2368,6 +2368,8 @@ const nb = {
     confirm_title_unnamed: 'Koble til denne nettleseren?',
     confirm_message:
       'Sjekk at datamaskinen viser koden {{code}}. Fortsett bare hvis du selv åpnet app.money2time.com på en datamaskin du bruker: den får alle dataene dine hver gang denne skjermen er åpen.',
+    confirm_edits:
+      'Mens denne skjermen er åpen, kan den også legge til, endre og slette oppføringene dine.',
     confirm_waiting: 'Klikk nå på Koble til på datamaskinen også.',
     confirm_action: 'Koble til',
     browsers_title: 'Tilkoblet',
@@ -2378,6 +2380,19 @@ const nb = {
     status_closed: 'Ikke åpen',
     just_now: 'nå',
     last_sent: 'Sist sendt {{date}}',
+    edit_hint:
+      'Mens denne skjermen er åpen, kan en tilkoblet nettleser også legge til, redigere og slette oppføringer. Endringer lagres på denne telefonen.',
+    edit_saved: 'Endringer fra nettleseren er lagret.',
+    browser_options: 'Nettleseralternativer',
+    edits_on:
+      'Denne nettleseren kan legge til, redigere og slette oppføringer mens denne skjermen er åpen.',
+    edits_off:
+      'Denne nettleseren kan bare se dataene dine. Tillat endringer for å legge til, redigere og slette oppføringer fra den mens denne skjermen er åpen.',
+    edits_allow: 'Tillat endringer',
+    edits_disallow: 'Bare visning',
+    read_only: 'Bare visning',
+    edit_hint_some_read_only:
+      'Mens denne skjermen er åpen, kan nettlesere du tillater også legge til, redigere og slette oppføringer. Trykk på ⋯ ved siden av en nettleser for å tillate det. Endringer lagres på denne telefonen.',
     send_now: 'Send nå',
     open_web: 'Åpne app.money2time.com',
     unlink: 'Koble fra',

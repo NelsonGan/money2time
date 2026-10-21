@@ -2386,6 +2386,8 @@ const ms = {
     confirm_title_unnamed: 'Pautkan pelayar ini?',
     confirm_message:
       'Semak bahawa komputer memaparkan kod {{code}}. Teruskan hanya jika anda sendiri yang membuka app.money2time.com pada komputer yang anda gunakan: komputer itu akan menerima semua data anda setiap kali skrin ini dibuka.',
+    confirm_edits:
+      'Semasa skrin ini dibuka, ia juga boleh menambah, menukar dan memadam entri anda.',
     confirm_waiting: 'Sekarang klik Pautkan pada komputer juga.',
     confirm_action: 'Pautkan',
     browsers_title: 'Dipautkan',
@@ -2396,6 +2398,18 @@ const ms = {
     status_closed: 'Tidak dibuka',
     just_now: 'baru',
     last_sent: 'Terakhir dihantar {{date}}',
+    edit_hint:
+      'Semasa skrin ini dibuka, pelayar yang dipautkan juga boleh menambah, mengedit dan memadam entri. Perubahan disimpan pada telefon ini.',
+    edit_saved: 'Perubahan daripada pelayar disimpan.',
+    browser_options: 'Pilihan pelayar',
+    edits_on: 'Pelayar ini boleh menambah, mengedit dan memadam entri semasa skrin ini dibuka.',
+    edits_off:
+      'Pelayar ini hanya boleh melihat data anda. Benarkan perubahan untuk menambah, mengedit dan memadam entri daripadanya semasa skrin ini dibuka.',
+    edits_allow: 'Benarkan perubahan',
+    edits_disallow: 'Lihat sahaja',
+    read_only: 'Lihat sahaja',
+    edit_hint_some_read_only:
+      'Semasa skrin ini dibuka, pelayar yang anda benarkan juga boleh menambah, mengedit dan memadam entri. Ketik ⋯ di sebelah pelayar untuk membenarkannya. Perubahan disimpan pada telefon ini.',
     send_now: 'Hantar sekarang',
     open_web: 'Buka app.money2time.com',
     unlink: 'Nyahpaut',

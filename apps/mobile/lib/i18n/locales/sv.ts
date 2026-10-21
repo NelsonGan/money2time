@@ -2370,6 +2370,8 @@ const sv = {
     confirm_title_unnamed: 'Koppla den här webbläsaren?',
     confirm_message:
       'Kontrollera att datorn visar koden {{code}}. Fortsätt bara om du själv öppnade app.money2time.com på en dator som du använder: den får alla dina data varje gång den här skärmen är öppen.',
+    confirm_edits:
+      'Medan den här skärmen är öppen kan den också lägga till, ändra och ta bort dina poster.',
     confirm_waiting: 'Klicka nu på Koppla på datorn också.',
     confirm_action: 'Koppla',
     browsers_title: 'Kopplade',
@@ -2380,6 +2382,19 @@ const sv = {
     status_closed: 'Inte öppen',
     just_now: 'nu',
     last_sent: 'Senast skickat {{date}}',
+    edit_hint:
+      'Medan den här skärmen är öppen kan en kopplad webbläsare också lägga till, redigera och ta bort poster. Ändringar sparas på den här telefonen.',
+    edit_saved: 'Ändringar från webbläsaren sparade.',
+    browser_options: 'Webbläsaralternativ',
+    edits_on:
+      'Den här webbläsaren kan lägga till, redigera och ta bort poster medan den här skärmen är öppen.',
+    edits_off:
+      'Den här webbläsaren kan bara visa dina data. Tillåt ändringar för att lägga till, redigera och ta bort poster från den medan den här skärmen är öppen.',
+    edits_allow: 'Tillåt ändringar',
+    edits_disallow: 'Endast visning',
+    read_only: 'Endast visning',
+    edit_hint_some_read_only:
+      'Medan den här skärmen är öppen kan webbläsare du tillåter också lägga till, redigera och ta bort poster. Tryck på ⋯ bredvid en webbläsare för att tillåta det. Ändringar sparas på den här telefonen.',
     send_now: 'Skicka nu',
     open_web: 'Öppna app.money2time.com',
     unlink: 'Koppla bort',

@@ -26,10 +26,11 @@ const MAX_TEXT_BYTES = 64 * 1024;
 const MAX_BINARY_BYTES = 256 * 1024 + 64;
 /**
  * What one connection may push before the room closes it: a whole 128 MiB
- * transfer (and a resend) from the phone, and only control messages and acks
- * from the browser. Counted while the room is awake, which a transfer keeps it.
+ * transfer (and a resend) from the phone, and from the browser its control
+ * messages, acks and edits (a bulk edit is up to 64K characters, counted at
+ * three bytes each). Counted while the room is awake, which a transfer keeps it.
  */
-const BUDGET_BYTES: Record<Role, number> = { phone: 300 * 1024 * 1024, browser: 2 * 1024 * 1024 };
+const BUDGET_BYTES: Record<Role, number> = { phone: 300 * 1024 * 1024, browser: 24 * 1024 * 1024 };
 
 function attachment(ws: WebSocket): Attachment | null {
   return (ws.deserializeAttachment() as Attachment | null) ?? null;

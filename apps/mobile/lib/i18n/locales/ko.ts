@@ -2337,6 +2337,7 @@ const ko = {
     confirm_title_unnamed: '이 브라우저를 연결할까요?',
     confirm_message:
       '컴퓨터에 코드 {{code}}가 표시되는지 확인하세요. 지금 사용 중인 컴퓨터에서 직접 app.money2time.com을 연 경우에만 계속하세요. 이 화면이 열려 있을 때마다 그 컴퓨터가 모든 데이터를 받게 돼요.',
+    confirm_edits: '이 화면이 열려 있는 동안 항목을 추가, 변경, 삭제할 수도 있습니다.',
     confirm_waiting: '이제 컴퓨터에서도 연결을 클릭하세요.',
     confirm_action: '연결',
     browsers_title: '연결됨',
@@ -2347,6 +2348,18 @@ const ko = {
     status_closed: '열려 있지 않음',
     just_now: '방금',
     last_sent: '마지막 전송 {{date}}',
+    edit_hint:
+      '이 화면이 열려 있는 동안 연결된 브라우저에서 항목을 추가, 수정, 삭제할 수도 있습니다. 변경 사항은 이 휴대폰에 저장됩니다.',
+    edit_saved: '브라우저의 변경 사항을 저장했습니다.',
+    browser_options: '브라우저 옵션',
+    edits_on: '이 화면이 열려 있는 동안 이 브라우저에서 항목을 추가, 수정, 삭제할 수 있습니다.',
+    edits_off:
+      '이 브라우저에서는 데이터를 볼 수만 있습니다. 이 화면이 열려 있는 동안 이 브라우저에서 항목을 추가, 수정, 삭제하려면 변경을 허용하세요.',
+    edits_allow: '변경 허용',
+    edits_disallow: '보기 전용',
+    read_only: '보기 전용',
+    edit_hint_some_read_only:
+      '이 화면이 열려 있는 동안 허용한 브라우저에서도 항목을 추가, 수정, 삭제할 수 있습니다. 허용하려면 브라우저 옆의 ⋯를 탭하세요. 변경 사항은 이 휴대폰에 저장됩니다.',
     send_now: '지금 보내기',
     open_web: 'app.money2time.com 열기',
     unlink: '연결 해제',

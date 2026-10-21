@@ -283,7 +283,8 @@ export function computeBudgetPagerMonths({
   monthCycle = 1,
 }: {
   budgets: MonthlyBudget[];
-  transactions: TransactionWithRelations[];
+  /** Only each row's type, date and deletion are read. */
+  transactions: Pick<TransactionWithRelations, 'type' | 'date' | 'deletedAt'>[];
   now?: Date;
   monthCycle?: MonthCycleInput;
 }): string[] {

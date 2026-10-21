@@ -2384,6 +2384,8 @@ const es = {
     confirm_title_unnamed: '¿Vincular este navegador?',
     confirm_message:
       'Comprueba que el ordenador muestre el código {{code}}. Continúa solo si abriste tú mismo app.money2time.com en un ordenador que estás usando: recibirá todos tus datos cada vez que esta pantalla esté abierta.',
+    confirm_edits:
+      'Mientras esta pantalla esté abierta, también podrá añadir, cambiar y eliminar tus movimientos.',
     confirm_waiting: 'Ahora haz clic también en Vincular en el ordenador.',
     confirm_action: 'Vincular',
     browsers_title: 'Vinculados',
@@ -2394,6 +2396,19 @@ const es = {
     status_closed: 'No abierto',
     just_now: 'ahora',
     last_sent: 'Último envío {{date}}',
+    edit_hint:
+      'Mientras esta pantalla esté abierta, un navegador vinculado también puede añadir, editar y eliminar movimientos. Los cambios se guardan en este teléfono.',
+    edit_saved: 'Cambios del navegador guardados.',
+    browser_options: 'Opciones del navegador',
+    edits_on:
+      'Este navegador puede añadir, editar y eliminar movimientos mientras esta pantalla esté abierta.',
+    edits_off:
+      'Este navegador solo puede ver tus datos. Permite los cambios para añadir, editar y eliminar movimientos desde él mientras esta pantalla esté abierta.',
+    edits_allow: 'Permitir cambios',
+    edits_disallow: 'Solo lectura',
+    read_only: 'Solo lectura',
+    edit_hint_some_read_only:
+      'Mientras esta pantalla esté abierta, los navegadores que permitas también pueden añadir, editar y eliminar movimientos. Toca ⋯ junto a un navegador para permitirlo. Los cambios se guardan en este teléfono.',
     send_now: 'Enviar ahora',
     open_web: 'Abrir app.money2time.com',
     unlink: 'Desvincular',

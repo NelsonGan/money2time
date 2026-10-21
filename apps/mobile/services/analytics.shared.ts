@@ -244,6 +244,8 @@ export const GA4_ONLY_EVENTS = {
   WEB_DASHBOARD_UNLINKED: 'Web Dashboard Unlinked',
   WEB_DASHBOARD_SENT: 'Web Dashboard Sent',
   WEB_DASHBOARD_SEND_FAILED: 'Web Dashboard Send Failed',
+  /** A batch of changes made in the browser, saved or refused by this phone. */
+  WEB_DASHBOARD_EDITED: 'Web Dashboard Edited',
   WEB_DASHBOARD_OPENED: 'Web Dashboard Opened',
 
   // Review prompt
