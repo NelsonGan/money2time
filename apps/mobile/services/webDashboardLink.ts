@@ -31,7 +31,7 @@
  *                     the changed data, and to this one a sealed
  *                     {type:'edited', id, ok, count, version | error, feature?}
  *   patch:    `have` names the transfer whose data the browser holds. While the
- *             phone still has that copy in memory, it may answer with only what
+ *             phone still has that copy (in memory, or on disk as row hashes), it may answer with only what
  *             changed since (webDashboardPatch.ts): `meta.base` is that transfer's
  *             id, and the gzipped data is a patch instead of an export. A browser
  *             that cannot apply one asks again with `repair`, and gets everything.
@@ -410,6 +410,8 @@ export class PhoneSession {
   private heartbeat: ReturnType<typeof setInterval> | null = null;
   private pongTimer: ReturnType<typeof setTimeout> | null = null;
   private browserHere = false;
+  /** Raised each time a browser takes the seat, so a send knows its browser left. */
+  private browserSeat = 0;
   /** The browser's latest request; a transfer must echo it. */
   private nonce: string | null = null;
   /** Requests already answered, so a replayed one does nothing. */
@@ -508,13 +510,17 @@ export class PhoneSession {
     const message = parse(data);
     if (!message) return;
     if (message.t === 'peer') {
+      // Arriving again while already here: a reload or a new tab took the
+      // browser's seat (the room says nothing when a replaced seat leaves).
+      const replaced = Boolean(message.present) && this.browserHere;
       this.browserHere = Boolean(message.present);
-      if (!this.browserHere) {
+      if (this.browserHere) this.browserSeat++;
+      if (!this.browserHere || replaced) {
+        // Nobody is left to answer the old request or open a transfer to it.
         this.nonce = null;
         this.abort();
-      } else if (this.unlinking) {
-        this.sendSealed({ type: 'unlink' });
       }
+      if (this.browserHere && this.unlinking) this.sendSealed({ type: 'unlink' });
       this.settle();
       return;
     }
@@ -575,7 +581,6 @@ export class PhoneSession {
       const id = inner.id;
       if (this.seenEdits.includes(id)) return;
       this.seenEdits = [...this.seenEdits.slice(-(SEEN_NONCES - 1)), id];
-      const socket = this.socket;
       const handle = this.events.onEdit;
       void (
         handle
@@ -583,10 +588,9 @@ export class PhoneSession {
           : Promise.resolve({ ok: false, error: 'invalid' })
       )
         .catch(() => ({ ok: false, error: 'failed' }))
-        .then((reply) => {
-          // The reply belongs to the connection the edit came on.
-          if (this.socket === socket) this.sendSealed({ ...reply, type: 'edited', id });
-        });
+        // Sent on whichever connection is open now: a reconnect while the
+        // edit was saving must not lose its result. The browser matches it by id.
+        .then((reply) => this.sendSealed({ ...reply, type: 'edited', id }));
     }
   }
 
@@ -637,12 +641,17 @@ export class PhoneSession {
     this.sending = true;
     this.settle();
     const socket = this.socket;
+    const seat = this.browserSeat;
     const nonce = this.nonce;
     // Each request is answered once.
     this.nonce = null;
+    let begun = false;
     try {
       const prepared = await prepare();
-      if (this.socket !== socket || !this.browserHere) throw new LinkError('closed');
+      // A reload while the export was built: the tab that asked is gone.
+      if (this.socket !== socket || !this.browserHere || this.browserSeat !== seat) {
+        throw new LinkError('closed');
+      }
       const meta: TransferMeta = { ...prepared.meta, editToken: opts.editToken ?? null };
       const transfer: Transfer = {
         id: meta.id,
@@ -668,6 +677,7 @@ export class PhoneSession {
         key: toBase64Url(prepared.dataKey),
         iv: toBase64Url(prepared.ivPrefix),
       });
+      begun = true;
       for (let index = 0; index < meta.count; index++) {
         while (index - transfer.acked >= WINDOW && !transfer.aborted) {
           const acked = transfer.acked;
@@ -694,6 +704,11 @@ export class PhoneSession {
       }
       this.sendSealed({ type: 'end', id: meta.id });
       if (!(await done)) throw new LinkError(transfer.aborted ? 'closed' : 'rejected');
+    } catch (error) {
+      // Failed before anything was sent (too large, an export error): answer
+      // the request, or the browser waits for data that never comes.
+      if (!begun && this.socket === socket) this.sendSealed({ type: 'unchanged', nonce });
+      throw error;
     } finally {
       this.transfer = null;
       this.sending = false;

@@ -13,6 +13,7 @@ import type { EditPlan, EditStep } from '~/services/webDashboardEdits';
 import type { Account, Category } from '~/types';
 import { suggestCategoryIcon } from '~/utils/categoryIconMatcher';
 import { convert } from '~/utils/currency';
+import { nowIso } from '~/utils/id';
 
 import { APPLY_MODULES } from './webDashboardApply';
 import type { ApplyTrack } from './webDashboardApply/types';
@@ -106,8 +107,17 @@ function applyStep(app: ReturnType<typeof useApp>, step: EditStep, track: ApplyT
         void trackEvent(AnalyticsEvents.REIMBURSEMENT_FLAGGED, { reimbursable: true });
       }
       return;
-    case 'tx.update':
+    case 'tx.update': {
+      // updateTransactionsBulk swallows a failed write, so check each row was
+      // written (its updatedAt stamped) at or after this step began.
+      const startedAt = nowIso();
       app.updateTransactionsBulk(step.updates);
+      track.checks.push(() =>
+        step.updates.every((update) => {
+          const row = transactionsRepository.getById(update.id);
+          return !!row && row.updatedAt >= startedAt;
+        }),
+      );
       // The app's editor reports each change of the tick (and its adoption) itself.
       for (const update of step.updates) {
         if (typeof update.input.reimbursable === 'boolean') {
@@ -117,6 +127,7 @@ function applyStep(app: ReturnType<typeof useApp>, step: EditStep, track: ApplyT
         }
       }
       return;
+    }
     case 'tx.delete':
       app.deleteTransactionsBulk(step.ids);
       deleted.push(...step.ids);

@@ -16,7 +16,16 @@ import { PRO_LIMITS } from '~/constants/proLimits';
 import type { Item } from '~/types';
 
 import type { EditModule, ModuleOp } from '../webDashboardEdits';
-import { isAt, isCurrency, isDayKey, isId, isMoney, isRecord, MAX_EDIT_ROWS } from './shared';
+import {
+  isAt,
+  isCurrency,
+  isDayKey,
+  isId,
+  isMoney,
+  isRecord,
+  MAX_EDIT_ROWS,
+  MAX_NOTE,
+} from './shared';
 
 /** What the planner reads from the app (the apply module's `select`). */
 export type ItemExtra = {
@@ -45,7 +54,6 @@ type ItemOp =
   | { entity: 'module:item'; op: 'reorder'; ids: string[] };
 
 const MAX_NAME = 80;
-const MAX_NOTE = 500;
 
 const isPrice = (value: unknown): value is number => isMoney(value) && value >= 0;
 

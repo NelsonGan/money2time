@@ -31,11 +31,11 @@ import {
 import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accountEntryGate';
 import type { Account, LoanInterestModel, LoanRateChange } from '~/types';
 import { flowTypeForBalanceDelta } from '~/utils/accountBalances';
-import { normalizeMoneyAmount } from '~/utils/formatters';
+import { dayKeyFromDateLocal as localDay, normalizeMoneyAmount } from '~/utils/formatters';
 import { nextOccurrenceOfMonthDay } from '~/utils/statementPeriods';
 
 import type { EditModule, EditStep, ModuleOp, PlanTools, Result } from '../webDashboardEdits';
-import { isAt, isDayKey, isId, isLogo, isMoney, isRecord, localDay } from './shared';
+import { isAt, isDayKey, isId, isLogo, isMoney, isRecord } from './shared';
 
 const ENTITY = 'module:loan';
 const MAX_NAME = 200;

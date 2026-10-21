@@ -438,6 +438,7 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
     input: CreateTransactionInput,
     splits: SplitDraftInput[],
     receiptSplit?: ReceiptSplitDraftInput,
+    meta?: { source?: 'web_dashboard' },
   ) => string;
   updateTransactionSplits: (transactionId: string, splits: SplitDraftInput[]) => void;
   /** Rewrites a transaction's bridge splits AND its itemized receipt detail
@@ -2899,8 +2900,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       input: CreateTransactionInput,
       splits: SplitDraftInput[],
       receiptSplit?: ReceiptSplitDraftInput,
+      meta?: { source?: 'web_dashboard' },
     ): string => {
       const claimFirstEntry = prepareFirstEntry(input.type);
+      const source = meta?.source ?? (receiptSplit ? 'receipt_split' : 'split');
       const parentSnapshot = buildSnapshot(
         input.type,
         normalizeMoneyAmount(input.amount),
@@ -3073,13 +3076,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           if (claimFirstEntry()) {
             void trackEvent(AnalyticsEvents.FIRST_TRANSACTION_CREATED, {
               type: normalizedInput.type,
-              source: receiptSplit ? 'receipt_split' : 'split',
+              source,
             });
           }
           if (isLoggedEntryType(normalizedInput.type)) {
             void recordLoggedTransaction({
               type: normalizedInput.type,
-              source: receiptSplit ? 'receipt_split' : 'split',
+              source,
             });
           }
           recordTransactionLogged();

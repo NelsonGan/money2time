@@ -635,7 +635,10 @@ export class WebDashboardConnections {
 
   private queueEdit(roomId: string, message: Record<string, unknown>) {
     // One browser cannot hold up the others with a stream of edits.
-    if (this.queued >= MAX_QUEUED_EDITS) return Promise.resolve({ ok: false, error: 'busy' });
+    if (this.queued >= MAX_QUEUED_EDITS) {
+      void trackEvent(AnalyticsEvents.WEB_DASHBOARD_EDITED, { result: 'busy' });
+      return Promise.resolve({ ok: false, error: 'busy' });
+    }
     this.queued++;
     const run = this.editQueue
       .then(() => this.edit(roomId, message))
@@ -698,13 +701,15 @@ export class WebDashboardConnections {
       // Saved in steps, so a later step failing can leave earlier ones saved:
       // the browser is told it may or may not be, and gets the data to see.
       dataVersion += 1;
+      this.editTokens.clear();
       this.offerAll();
       return refuse('unknown');
     }
     // Raised again once every write has landed: a copy read while they were
     // landing has the version in between, so it neither counts as the change
-    // nor carries a token.
+    // nor carries a token (one handed out while they landed is spent here).
     dataVersion += 1;
+    this.editTokens.clear();
     const version = dataVersion;
     void trackEvent(AnalyticsEvents.WEB_DASHBOARD_EDITED, {
       result: 'applied',
@@ -855,19 +860,19 @@ export class WebDashboardConnections {
         { editToken },
       );
       // Set by the callback above, which TypeScript cannot follow.
-      const done = built as Built | null;
-      const sent = done?.prepared ?? null;
+      const done = built as unknown as Built;
+      const sentMeta = done.prepared.meta;
       // A token is good only for data that is still the phone's latest: data
       // made before a change saved meanwhile is followed by fresh data instead.
-      const latest = sent?.meta.version === dataVersion;
+      const latest = sentMeta.version === dataVersion;
       if (editToken && latest) this.editTokens.set(roomId, editToken);
-      else if (!latest) this.owed.add(roomId);
-      const sentMeta = sent?.meta;
-      if (sentMeta?.version !== undefined)
+      else this.editTokens.delete(roomId);
+      if (!latest) this.owed.add(roomId);
+      if (sentMeta.version !== undefined)
         this.lastSent.set(roomId, { id: sentMeta.id, version: sentMeta.version, at: Date.now() });
       // What this browser holds now, for the next visit to patch.
-      if (done) storeSnapshot(roomId, done.prepared.meta.id, done.snapshot);
-      if (sentMeta?.base) this.patched.add(roomId);
+      storeSnapshot(roomId, sentMeta.id, done.snapshot);
+      if (sentMeta.base) this.patched.add(roomId);
       else this.patched.delete(roomId);
       await updateLinks((links) =>
         links.map((link) => (link.roomId === roomId ? { ...link, lastSentAt: Date.now() } : link)),
@@ -876,7 +881,7 @@ export class WebDashboardConnections {
       if (!this.closed) this.onLinksChanged();
       void trackEvent(AnalyticsEvents.WEB_DASHBOARD_SENT, {
         trigger,
-        payload: sentMeta?.base ? 'patch' : 'full',
+        payload: sentMeta.base ? 'patch' : 'full',
       });
     } catch (error) {
       this.update(roomId, { progress: null });

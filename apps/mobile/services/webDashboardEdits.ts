@@ -18,8 +18,9 @@
  * `token` is the single-use edit token sent with the data on the browser's
  * screen, so an edit is always made against the phone's latest copy and a
  * replayed one is refused. `at` is each row's `updated_at` in that copy: a row
- * changed or gone on the phone since refuses the whole batch. A batch is saved
- * whole or not at all, and each change follows the rules of the app's own
+ * changed or gone on the phone since refuses the whole batch. A batch is
+ * checked whole before anything is saved, then saved step by step (there is no
+ * database transaction across steps), and each change follows the rules of the app's own
  * editor for it: the payload it builds per transaction type, what a free plan
  * allows, what may change on a loan or a goal.
  */
@@ -36,6 +37,7 @@ import type {
   TransactionWithRelations,
 } from '~/types';
 import { flowTypeForBalanceDelta } from '~/utils/accountBalances';
+import { dateFromDayKeyLocal, dayKeyFromDateLocal } from '~/utils/formatters';
 
 import { EDIT_MODULES } from './webDashboardEditModules';
 import {
@@ -49,17 +51,16 @@ import {
   isMoney,
   isRecord,
   isText,
-  localDay,
   MAX_EDIT_ROWS,
+  MAX_NOTE,
   readFields,
   readTx,
   validIcon,
 } from './webDashboardEditModules/shared';
 
-export { isDayKey, MAX_EDIT_ROWS };
+export { MAX_EDIT_ROWS };
 
 const MAX_OPS = 50;
-const MAX_NOTE = 500;
 /** The app limits no name; this only keeps a batch inside one message. */
 const MAX_NAME = 200;
 const PATTERNS = ['daily', 'weekly', 'monthly', 'yearly'] as const;
@@ -144,8 +145,8 @@ export type EditOp =
   | { entity: 'account'; op: 'update'; id: string; at: string | null; set: AccountFields }
   | { entity: 'account'; op: 'delete'; id: string; at: string | null }
   | { entity: 'group'; op: 'create'; name: string }
-  | { entity: 'group'; op: 'update'; id: string; name: string; at?: string | null }
-  | { entity: 'group'; op: 'delete'; id: string; at?: string | null }
+  | { entity: 'group'; op: 'update'; id: string; name: string; at: string | null }
+  | { entity: 'group'; op: 'delete'; id: string; at: string | null }
   | { entity: 'category'; op: 'create'; category: CategoryFields }
   | { entity: 'category'; op: 'update'; id: string; at: string | null; set: CategoryFields }
   | { entity: 'category'; op: 'delete'; id: string; at: string | null; reassignTo?: string | null }
@@ -378,13 +379,10 @@ function readOp(raw: Record<string, unknown>): EditOp | null {
   }
   if (entity === 'group') {
     if (op === 'create') return isText(raw.name, MAX_NAME) ? { entity, op, name: raw.name } : null;
-    if (!isId(raw.id)) return null;
-    // `at` is optional: older web builds sent none.
-    if (raw.at !== undefined && !isAt(raw.at)) return null;
-    const at = raw.at as string | null | undefined;
-    if (op === 'delete') return { entity, op, id: raw.id, ...(at !== undefined ? { at } : {}) };
+    if (!isId(raw.id) || !isAt(raw.at)) return null;
+    if (op === 'delete') return { entity, op, id: raw.id, at: raw.at };
     return op === 'update' && isText(raw.name, MAX_NAME)
-      ? { entity, op, id: raw.id, name: raw.name, ...(at !== undefined ? { at } : {}) }
+      ? { entity, op, id: raw.id, name: raw.name, at: raw.at }
       : null;
   }
   const spec =
@@ -444,15 +442,10 @@ export function editTransactionIds(request: EditRequest): string[] {
 
 /** A new entry's date: now for today, else the day's local midnight, as the app's editor stores it. */
 export function createdAt(day: string, now: Date = new Date()): string {
-  if (localDay(now) === day) return now.toISOString();
-  const [y, m, d] = day.split('-').map(Number);
-  return new Date(y, m - 1, d).toISOString();
+  return dayKeyFromDateLocal(now) === day ? now.toISOString() : dayStart(day);
 }
 
-function dayStart(day: string): string {
-  const [y, m, d] = day.split('-').map(Number);
-  return new Date(y, m - 1, d).toISOString();
-}
+const dayStart = (day: string) => dateFromDayKeyLocal(day).toISOString();
 
 /** A rule's end date: the end of that local day, as the app's rule editor stores it. */
 function dayEnd(day: string): string {
@@ -868,10 +861,10 @@ function planGroup(
   steps: EditStep[],
 ): Result<number> {
   const live = ctx.accountGroups.filter((group) => !group.deletedAt);
-  // Gone, or changed on the phone since the browser's copy (when it says which copy).
-  const stale = (id: string, at: string | null | undefined) => {
+  // Gone, or changed on the phone since the browser's copy.
+  const stale = (id: string, at: string | null) => {
     const group = live.find((item) => item.id === id);
-    return !group || (at !== undefined && group.updatedAt !== at);
+    return !group || group.updatedAt !== at;
   };
   if (op.op === 'delete') {
     if (!claim(ctx, `group:${op.id}`)) return refuse('invalid');

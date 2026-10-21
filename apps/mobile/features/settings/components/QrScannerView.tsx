@@ -18,13 +18,19 @@ export function QrScannerView({
   const colors = useThemeColors();
   const [permission, requestPermission] = useCameraPermissions();
   const handled = useRef(false);
+  // The code last handed on. A wrong code stays in front of the camera, which
+  // reports it again once it resumes; it is answered once, not in a loop.
+  const lastScanned = useRef<string | null>(null);
+  // Asked once per camera: after a denial, the button asks again.
+  const asked = useRef(false);
 
   useEffect(() => {
     if (active) handled.current = false;
   }, [active]);
 
   useEffect(() => {
-    if (active && permission && !permission.granted && permission.canAskAgain) {
+    if (active && permission && !permission.granted && permission.canAskAgain && !asked.current) {
+      asked.current = true;
       void requestPermission();
     }
   }, [active, permission, requestPermission]);
@@ -40,8 +46,9 @@ export function QrScannerView({
           facing="back"
           barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
           onBarcodeScanned={({ data }) => {
-            if (handled.current) return;
+            if (handled.current || data === lastScanned.current) return;
             handled.current = true;
+            lastScanned.current = data;
             onScanned(data);
           }}
         />

@@ -100,7 +100,7 @@ function lookup(patch: Partial<EditLookup> = {}): EditLookup {
       account('card', { type: 'credit' }),
       account('old', { deletedAt: AT }),
     ],
-    accountGroups: [{ id: 'g1', name: 'Bank', deletedAt: null } as AccountGroup],
+    accountGroups: [{ id: 'g1', name: 'Bank', updatedAt: AT, deletedAt: null } as AccountGroup],
     categories: [
       category('food', 'expense'),
       category('coffee', 'expense', { parentId: 'food' }),
@@ -158,7 +158,7 @@ describe('readEditRequest', () => {
       update('a', { note: 'x' }),
       { entity: 'transaction', op: 'delete', rows: [{ id: 'b', at: AT }] },
       { entity: 'account', op: 'create', account: { name: 'Wallet' } },
-      { entity: 'group', op: 'update', id: 'g1', name: 'Banks' },
+      { entity: 'group', op: 'update', id: 'g1', name: 'Banks', at: AT },
       { entity: 'category', op: 'delete', id: 'food', at: AT, reassignTo: 'coffee' },
       { entity: 'recurring', op: 'update', id: 'r1', at: AT, set: { isActive: false } },
     ]);
@@ -527,8 +527,8 @@ describe('accounts and groups', () => {
     const data = {
       accounts: [account('myr', { accountGroup: 'Bank' }), account('usd', { currency: 'USD' })],
     };
-    const rename = { entity: 'group', op: 'update', id: 'g1', name: 'Banks' };
-    const remove = { entity: 'group', op: 'delete', id: 'g1' };
+    const rename = { entity: 'group', op: 'update', id: 'g1', name: 'Banks', at: AT };
+    const remove = { entity: 'group', op: 'delete', id: 'g1', at: AT };
     // A group made earlier in the batch can be used; a renamed or deleted one cannot.
     expect(
       steps(
