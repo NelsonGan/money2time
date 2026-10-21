@@ -2,6 +2,7 @@ import { useIsFocused } from '@react-navigation/native';
 import { CircleCheck, Ellipsis, ExternalLink, RefreshCw, ScanQrCode } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  AccessibilityInfo,
   ActivityIndicator,
   Alert,
   AppState,
@@ -220,16 +221,13 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
     // Opened once per visit; Pro changes are passed on below. `editor` never changes.
   }, [editor]);
 
-  // Leaving the screen, or the app, puts the camera away.
+  // Leaving the screen puts the camera away. In the background it only
+  // pauses (`foreground`): Android reports the camera permission dialog as
+  // the app going to the background, and closing here would close the very
+  // camera the person just allowed.
   useEffect(() => {
     if (!isFocused) setScanning(false);
   }, [isFocused]);
-  useEffect(() => {
-    const subscription = AppState.addEventListener('change', (state) => {
-      if (state === 'background') setScanning(false);
-    });
-    return () => subscription.remove();
-  }, []);
 
   useEffect(() => {
     isProRef.current = isPro;
@@ -301,7 +299,10 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
       .catch((error: unknown) => {
         setProblem(errorMessage(error));
         setLinking(false);
-        setScanning(false);
+        // A code that is not a pairing code: the camera stays up for the right one.
+        if (!(error instanceof WebDashboardError && error.code === 'invalid_qr')) {
+          setScanning(false);
+        }
       });
   };
 
@@ -431,12 +432,7 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
               {scanning ? (
                 <>
                   <QrScannerView
-                    active={
-                      isFocused &&
-                      foreground &&
-                      !linking &&
-                      (!initialPairLink || pairHandled.current)
-                    }
+                    active={isFocused && foreground && !linking}
                     onScanned={handleScanned}
                   />
                   <Text variant="caption" tone="muted" className="px-4 text-center">
@@ -457,9 +453,11 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
                       setProblem(null);
                       setNotice(null);
                       setScanning(true);
+                      // The button goes away under the reader's focus: say what is next.
+                      AccessibilityInfo.announceForAccessibility(I18n.t('web_dashboard.scan_hint'));
                     }}
                   >
-                    <ScanQrCode size={20} color="#FFFFFF" />
+                    <ScanQrCode size={18} color="#fff" />
                     <Text>{I18n.t('web_dashboard.link_device')}</Text>
                   </Button>
                   {linking ? (

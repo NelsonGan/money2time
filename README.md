@@ -2089,12 +2089,15 @@ database, no bucket, no account and no secrets. Served at
   sync button beside the section title, and Allow changes / Make view only and
   Unlink under the row's menu. The camera opens inline only after that button
   is tapped, with a Cancel under it, and closes again once the attempt is over
-  (linked, cancelled or failed), when the screen loses focus and when the app
-  goes to the background, so the screen never holds the camera while it is
-  only being used to sync. A scanned `money2time://pair` link opens the same
-  screen and links without the camera. The Link prompt waits until the app
-  lock is unlocked, says the browser can change entries while the screen is
-  open, and the camera pauses while linking and under other screens.
+  (linked, cancelled or failed; a code that is not a pairing code leaves it up
+  for another try) and when the screen loses focus, so the screen never holds
+  the camera while it is only being used to sync. In the background it only
+  pauses: Android reports its camera permission dialog as the app going to the
+  background, so closing there would close the camera just allowed. A scanned
+  `money2time://pair` link opens the same screen and links without the camera.
+  The Link prompt waits until the app lock is unlocked and says the browser
+  can change entries while the screen is open; the camera pauses while a code
+  is linking.
   A line above the list says allowed browsers can edit while it is open, a
   view-only browser says so on its row, and a saved batch shows a short
   notice.
