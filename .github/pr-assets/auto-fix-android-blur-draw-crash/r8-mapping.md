@@ -1,6 +1,6 @@
 # R8 mapping for the release build, before and after the keep rule
 
-## Before: local release build of 1.5.13-era main (apps/mobile/android, 2026-10-12)
+## Before: a local release build made on 2026-10-12, without the keep rule
 
 com.swmansion.rnscreens.Screen -> com.swmansion.rnscreens.s:
 com.swmansion.rnscreens.ScreenStack -> com.swmansion.rnscreens.L:
