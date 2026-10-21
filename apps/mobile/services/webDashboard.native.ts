@@ -25,12 +25,7 @@ import { Gzip, strToU8 } from 'fflate';
 
 import { transactionsRepository } from '~/lib/repositories/transactionsRepository';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
-import {
-  type BackupData,
-  buildBackupData,
-  buildBackupJson,
-  yieldToEventLoop,
-} from '~/services/dataManagementService';
+import { buildBackupData, yieldToEventLoop } from '~/services/dataManagementService';
 import type { UserAssetReadCache } from '~/services/userAssets';
 
 import {
@@ -59,8 +54,9 @@ import {
   type PreparedTransfer,
   prepareTransfer,
   startLink,
+  type WantRequest,
 } from './webDashboardLink';
-import { type BackupIndex, diffBackup, indexBackup } from './webDashboardPatch';
+import { type BackupIndex, diffBackup, exportJson, indexBackup } from './webDashboardPatch';
 
 export * from './webDashboard.shared';
 
@@ -273,21 +269,6 @@ export async function beginLink(qrText: string): Promise<PendingBrowser> {
   }
 }
 
-/**
- * The data one transfer carried, kept so the next transfer to a browser that
- * holds it can be a patch. The export as built until the first patch against
- * it is made; from then on only its index.
- */
-type Snapshot = { data: BackupData | null; index: BackupIndex | null };
-
-function snapshotIndex(snapshot: Snapshot): BackupIndex {
-  if (!snapshot.index) {
-    snapshot.index = indexBackup(snapshot.data!);
-    snapshot.data = null;
-  }
-  return snapshot.index;
-}
-
 const includeDashboardAsset = (path: string) =>
   DASHBOARD_ASSET_FOLDERS.some((folder) => path.startsWith(folder));
 
@@ -320,27 +301,25 @@ async function gzipJson(json: string): Promise<Uint8Array> {
 async function buildTransfer(
   isPro: boolean,
   assetCache: UserAssetReadCache,
-  base: { id: string; snapshot: Snapshot } | null,
-): Promise<{ prepared: PreparedTransfer; snapshot: Snapshot }> {
+  base: { id: string; index: BackupIndex } | null,
+): Promise<{ prepared: PreparedTransfer; index: BackupIndex }> {
   // The version the data is read at: a change saved while this export is
   // built is not in it, so the copy must not claim that change's version.
   const version = dataVersion;
   const { randomBytes } = await requireNative();
+  const data = await buildBackupData({ includeAsset: includeDashboardAsset, assetCache });
+  await yieldToEventLoop();
+  // Either way every row is serialized once, and that index is what the
+  // next patch to this browser is made against.
   let json: string;
-  let snapshot: Snapshot;
-  let exportedAt: string | null;
+  let index: BackupIndex;
   if (base) {
-    const data = await buildBackupData({ includeAsset: includeDashboardAsset, assetCache });
-    await yieldToEventLoop();
-    const diff = diffBackup(snapshotIndex(base.snapshot), data);
+    const diff = diffBackup(base.index, data);
     json = JSON.stringify(diff.patch);
-    snapshot = { data: null, index: diff.index };
-    exportedAt = data.exportedAt ?? null;
+    index = diff.index;
   } else {
-    const built = await buildBackupJson({ includeAsset: includeDashboardAsset, assetCache });
-    json = built.json;
-    snapshot = { data: built.data, index: null };
-    exportedAt = built.data.exportedAt ?? null;
+    index = indexBackup(data);
+    json = exportJson(data, index);
   }
   await yieldToEventLoop();
   const gzipped = await gzipJson(json);
@@ -353,7 +332,7 @@ async function buildTransfer(
   const prepared = await prepareTransfer(
     gzipped,
     {
-      exportedAt,
+      exportedAt: data.exportedAt ?? null,
       appVersion: Application.nativeApplicationVersion ?? null,
       deviceName: phoneName(),
       timeZone,
@@ -364,7 +343,7 @@ async function buildTransfer(
     randomBytes,
     yieldToEventLoop,
   );
-  return { prepared, snapshot };
+  return { prepared, index };
 }
 
 type Trigger = 'browser_opened' | 'refresh' | 'manual' | 'edit';
@@ -405,8 +384,8 @@ export class WebDashboardConnections {
   private editQueue: Promise<unknown> = Promise.resolve();
   /** Edits waiting in the queue; a browser that floods it is told to wait. */
   private queued = 0;
-  /** Each browser's last copy: the data version and when, so a resend of the same data waits. */
-  private lastSent = new Map<string, { version: number; at: number }>();
+  /** Each browser's last copy: which, its data version and when, so a resend of the same data waits. */
+  private lastSent = new Map<string, { id: string; version: number; at: number }>();
   private lastForced = new Map<string, number>();
   /** Each browser's sends, one after another: two quick requests must not share a send. */
   private sends = new Map<string, Promise<void>>();
@@ -416,7 +395,7 @@ export class WebDashboardConnections {
     { at: number; version: number; promise: Promise<PreparedTransfer> }
   >();
   /** The data each recent transfer carried, by transfer id, to patch against. */
-  private snapshots = new Map<string, Snapshot>();
+  private snapshots = new Map<string, BackupIndex>();
   /** Files read for the last export, reused while unchanged. */
   private assetCache: UserAssetReadCache = new Map();
   /** Rooms last sent a patch: one request for everything is answered at once if it fails. */
@@ -521,10 +500,7 @@ export class WebDashboardConnections {
     );
   }
 
-  private answer(
-    roomId: string,
-    request: { force: boolean; have: string | null; repair: boolean },
-  ) {
+  private answer(roomId: string, request: WantRequest) {
     const { force } = request;
     const edited = this.editOffered.delete(roomId);
     const offered = this.offered.delete(roomId);
@@ -656,8 +632,8 @@ export class WebDashboardConnections {
    * refresh, made fresh when asked for.
    */
   private transfer(fresh: boolean, have: string | null): Promise<PreparedTransfer> {
-    const snapshot = have ? this.snapshots.get(have) : undefined;
-    const base = have && snapshot ? { id: have, snapshot } : null;
+    const index = have ? this.snapshots.get(have) : undefined;
+    const base = have && index ? { id: have, index } : null;
     const key = base?.id ?? '';
     const cached = this.prepared.get(key);
     // An export from before a saved change is never reused.
@@ -665,12 +641,16 @@ export class WebDashboardConnections {
       return cached.promise;
     }
     const promise = buildTransfer(this.isPro, this.assetCache, base).then(
-      ({ prepared, snapshot: next }) => {
+      ({ prepared, index: next }) => {
         if (!this.closed) this.keepSnapshot(prepared.meta.id, next);
         return prepared;
       },
     );
     const entry = { at: Date.now(), version: dataVersion, promise };
+    // Each patch has its own base, so builds past their reuse window go.
+    for (const [old, item] of this.prepared) {
+      if (entry.at - item.at >= 30_000) this.prepared.delete(old);
+    }
     this.prepared.set(key, entry);
     promise.catch(() => {
       if (this.prepared.get(key) === entry) this.prepared.delete(key);
@@ -678,54 +658,55 @@ export class WebDashboardConnections {
     return promise;
   }
 
-  private keepSnapshot(id: string, snapshot: Snapshot) {
-    this.snapshots.set(id, snapshot);
+  private keepSnapshot(id: string, index: BackupIndex) {
+    this.snapshots.set(id, index);
     for (const old of this.snapshots.keys()) {
       if (this.snapshots.size <= MAX_SNAPSHOTS) break;
       this.snapshots.delete(old);
     }
   }
 
-  private async sendTo(
-    roomId: string,
-    trigger: Trigger,
-    request: { have: string | null; repair: boolean },
-  ): Promise<void> {
+  private async sendTo(roomId: string, trigger: Trigger, request: WantRequest): Promise<void> {
     const session = this.sessions.get(roomId);
-    // A request a send before this one already answered needs no second send.
-    if (!session || session.state !== 'online' || !session.hasRequest) return;
+    // Answered already, or replaced by a newer request, which has its own turn.
+    if (!session || session.state !== 'online' || !session.isPending(request.nonce)) return;
     const now = Date.now();
     // The browser could not apply the patch it was just sent: everything,
     // now, once. Not a loop: the next send is a whole export.
     const repair = request.repair && this.patched.delete(roomId);
-    // A browser that holds a copy still here costs only a patch, so it is
-    // answered whenever it asks; the limits below keep whole exports apart.
-    const patchable = !repair && !!request.have && this.snapshots.has(request.have);
-    if (!repair && !patchable) {
-      if (trigger === 'browser_opened') {
+    if (!repair) {
+      // A browser that holds a copy still here costs only a patch, so the
+      // limits that keep whole exports apart do not apply to it.
+      const patchable = !!request.have && this.snapshots.has(request.have);
+      const last = this.lastSent.get(roomId);
+      if (patchable) {
+        // Nothing to limit.
+      } else if (trigger === 'browser_opened') {
         // A browser reconnecting a few times in a row gets one copy, not several,
         // unless it may make changes: it needs a token from this visit to edit with.
         const link = (await readLinks()).find((item) => item.roomId === roomId);
         const editable = !!this.editor && link?.edits === true;
         if (now - (link?.lastSentAt ?? 0) < RESEND_AFTER_MS && !editable) {
-          session.decline();
+          session.decline(request.nonce, false);
           return;
         }
       } else if (trigger !== 'edit') {
         // Refresh is the person's, but each one rebuilds the export: not too often.
         if (now - (this.lastForced.get(roomId) ?? 0) < FORCED_SEND_GAP_MS) {
-          session.decline();
+          session.decline(request.nonce, false);
           return;
         }
         this.lastForced.set(roomId, now);
       }
       if (trigger === 'browser_opened' || trigger === 'edit') {
         // The same data again within moments, to a browser that holds a token
-        // for it, is a loop (a flaky network, a stale retry), not a need.
-        const last = this.lastSent.get(roomId);
+        // for it, is a loop (a flaky network, a stale retry), not a need. If
+        // it holds that very copy, saying so lets it make changes again; if it
+        // holds an older one still here, it gets the patch.
         const same = last?.version === dataVersion && now - last.at < FORCED_SEND_GAP_MS;
-        if (same && this.editTokens.has(roomId)) {
-          session.decline();
+        const holdsLast = !!last && request.have === last.id;
+        if (same && this.editTokens.has(roomId) && (holdsLast || !patchable)) {
+          session.decline(request.nonce, holdsLast);
           return;
         }
       }
@@ -734,6 +715,8 @@ export class WebDashboardConnections {
     const allowed = (await readLinks()).find((link) => link.roomId === roomId)?.edits === true;
     const editToken =
       this.editor && allowed ? toBase64Url((await requireNative()).randomBytes(16)) : null;
+    // A newer request came in while the link was read: it is answered instead.
+    if (!session.isPending(request.nonce)) return;
     let sent: PreparedTransfer | null = null;
     try {
       await session.send(
@@ -750,7 +733,7 @@ export class WebDashboardConnections {
       else if (!latest) this.owed.add(roomId);
       const sentMeta = (sent as PreparedTransfer | null)?.meta;
       if (sentMeta?.version !== undefined)
-        this.lastSent.set(roomId, { version: sentMeta.version, at: Date.now() });
+        this.lastSent.set(roomId, { id: sentMeta.id, version: sentMeta.version, at: Date.now() });
       if (sentMeta?.base) this.patched.add(roomId);
       else this.patched.delete(roomId);
       await updateLinks((links) =>

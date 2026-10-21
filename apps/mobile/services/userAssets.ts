@@ -481,16 +481,18 @@ export function listCustomItemIcons(): { id: string; uri: string }[] {
 }
 
 /**
- * Reads every file under the user-assets root as base64 for inclusion in a
- * backup. Walks all kinds so future asset types are covered automatically.
- */
-/**
  * Each file read last time, by path, with the size and modification time it
  * had then, so a caller that exports again and again (the Web Dashboard)
  * re-reads only the files that changed.
  */
 export type UserAssetReadCache = Map<string, { stamp: string; base64: string }>;
 
+/**
+ * Reads every file under the user-assets root as base64 for inclusion in a
+ * backup. Walks all kinds so future asset types are covered automatically.
+ * `include` is asked about each file and each folder (its path ends in `/`);
+ * a folder it refuses is not listed at all.
+ */
 export async function collectUserAssetsForBackup(
   include?: (path: string) => boolean,
   cache?: UserAssetReadCache,
@@ -501,7 +503,8 @@ export async function collectUserAssetsForBackup(
   const walk = async (dir: Directory, prefix: string) => {
     for (const entry of dir.list()) {
       if (entry instanceof Directory) {
-        await walk(entry, `${prefix}${entry.name}/`);
+        const folder = `${prefix}${entry.name}/`;
+        if (!include || include(folder)) await walk(entry, folder);
       } else if (include && !include(`${prefix}${entry.name}`)) {
         continue;
       } else {

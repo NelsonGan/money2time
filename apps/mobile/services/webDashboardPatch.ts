@@ -78,6 +78,23 @@ export function indexBackup(data: PatchSource): BackupIndex {
 }
 
 /**
+ * The whole export as JSON, built from the index's row strings so a copy is
+ * serialized once whether it is sent whole or kept to patch against. Parses
+ * to the same backup as `JSON.stringify(data)`; only the key order differs.
+ */
+export function exportJson(data: PatchSource, index: BackupIndex): string {
+  const { tables: _tables, ...rest } = data;
+  const tables: string[] = [];
+  for (const [name, table] of index.tables) {
+    if (table.kind === 'absent') continue;
+    const rows = table.kind === 'rows' ? `[${[...table.rows.values()].join(',')}]` : table.json;
+    tables.push(`${JSON.stringify(name)}:${rows}`);
+  }
+  const head = JSON.stringify(rest);
+  return `${head.slice(0, -1)}${head.length > 2 ? ',' : ''}"tables":{${tables.join(',')}}}`;
+}
+
+/**
  * The patch that turns the copy `base` describes into `next`, and the index
  * of `next`, which the following patch is made against.
  */

@@ -1,4 +1,9 @@
-import { diffBackup, indexBackup, type PatchSource } from '~/services/webDashboardPatch';
+import {
+  diffBackup,
+  exportJson,
+  indexBackup,
+  type PatchSource,
+} from '~/services/webDashboardPatch';
 
 const tx = (id: string, amount: number) => ({ id, amount, note: `tx ${id}` });
 
@@ -77,5 +82,14 @@ describe('diffBackup', () => {
     expect(diffBackup(index, third).patch.tables).toEqual({
       transactions: { put: [tx('e', 5)] },
     });
+  });
+});
+
+describe('exportJson', () => {
+  it('parses to the same backup as JSON.stringify', () => {
+    const data = { version: 3, ...backup({ items: undefined }) };
+    expect(JSON.parse(exportJson(data, indexBackup(data)))).toEqual(
+      JSON.parse(JSON.stringify(data)),
+    );
   });
 });

@@ -23,7 +23,9 @@
  *             phone → sealed {type:'end', id};  browser → sealed {type:'done', id, ok}
  *             or, when the phone has nothing new to send for now (the browser
  *             already has it, or asked again too soon):
- *             phone → sealed {type:'unchanged', nonce}, so it stops waiting
+ *             phone → sealed {type:'unchanged', nonce, current?}, so it stops
+ *             waiting; `current` says it holds the latest copy and its edit
+ *             token is still good
  *   edit:     browser → sealed {type:'edit', id, token, ops}  (webDashboardEdits.ts)
  *             phone → sealed {type:'offer'} to every browser here, so each asks for
  *                     the changed data, and to this one a sealed
@@ -356,7 +358,7 @@ type SessionEvents = {
    * `have` is the transfer whose data it holds; `repair`, that it could not
    * apply the patch it was last sent.
    */
-  onWant?: (request: { force: boolean; have: string | null; repair: boolean }) => void;
+  onWant?: (request: WantRequest) => void;
   onProgress?: (ratio: number) => void;
   /**
    * The link is over: the browser unlinked itself, or (for a session opened
@@ -368,6 +370,15 @@ type SessionEvents = {
    * session sends it. Without a handler every edit is refused.
    */
   onEdit?: (message: Record<string, unknown>) => Promise<Record<string, unknown>>;
+};
+
+/** A browser's request for data, as `onWant` passes it on. */
+export type WantRequest = {
+  /** The request's nonce: a send or a decline answers this request only. */
+  nonce: string;
+  force: boolean;
+  have: string | null;
+  repair: boolean;
 };
 
 type Transfer = {
@@ -549,6 +560,7 @@ export class PhoneSession {
       this.nonce = inner.nonce;
       this.settle();
       this.events.onWant?.({
+        nonce: inner.nonce,
         force: Boolean(inner.force),
         have: typeof inner.have === 'string' && /^[\w-]{16}$/.test(inner.have) ? inner.have : null,
         repair: inner.repair === true,
@@ -578,20 +590,24 @@ export class PhoneSession {
     }
   }
 
-  /** Whether the browser has asked for data that no send has answered yet. */
-  get hasRequest(): boolean {
-    return this.nonce !== null && !this.sending;
+  /**
+   * Whether this request is the browser's latest and no send has answered it
+   * yet. A newer request replaces it, and is answered in its own turn.
+   */
+  isPending(nonce: string): boolean {
+    return this.nonce === nonce && !this.sending;
   }
 
   /**
-   * Answers the browser's request with nothing: it has the latest already, or
-   * asked again too soon. Without this it would wait for data that never comes.
+   * Answers the request with nothing: the browser has the latest already, or
+   * asked again too soon. Without this it would wait for data that never
+   * comes. `current`: it holds the copy last sent to it, so the edit token
+   * that came with it is still good.
    */
-  decline() {
-    const nonce = this.nonce;
-    if (!nonce || this.sending) return;
+  decline(nonce: string, current: boolean) {
+    if (!this.isPending(nonce)) return;
     this.nonce = null;
-    this.sendSealed({ type: 'unchanged', nonce });
+    this.sendSealed({ type: 'unchanged', nonce, ...(current ? { current: true } : {}) });
     this.settle();
   }
 

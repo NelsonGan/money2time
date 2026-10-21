@@ -2115,31 +2115,40 @@ database, no bucket, no account and no secrets. Served at
   before, so the relay sees only ciphertext and cannot reflect or replay one.
   Transfers are capped at 128 MB. Both sides ping every 25 s; the room answers
   without waking.
-- **Patches:** after the first transfer of a visit, the phone sends only what
-  changed, which is what keeps a change made from the browser quick: deleting
-  one entry comes back as a few hundred bytes instead of the whole export, and
-  the phone reads the tables but no longer serializes and gzips everything.
-  Each `want` names the transfer whose data the browser holds (`have`). The
-  phone keeps the data of its last 3 transfers in memory while the screen is
-  open (`WebDashboardConnections.snapshots`); if `have` is one of them, it
-  reads the database again, diffs it against that copy and sends the patch as
-  an ordinary transfer with `meta.base` set to that transfer's id
-  (`services/webDashboardPatch.ts`). Tables whose rows all have a unique `id`
-  change row by row (`put`, `del`), any other table is sent whole when it
-  changed (`all`, `null` when gone), and logos and covers change by path. The
-  browser applies it to the data on screen (`src/lib/cloud/patch.ts`, same
-  rules), then gzips and seals the result under a key it makes itself, in the
-  same chunk format, so its cache and `have` stay in step with the phone. A
-  browser that holds anything else (a new visit, another tab, an older copy)
-  gets the whole export, and one that cannot apply a patch asks again with
-  `repair` and gets the whole export at once, past the Refresh limit. Older
+- **Patches:** a browser whose copy the phone still has gets only what
+  changed since it, which is what keeps a change made from the browser quick:
+  deleting one entry comes back as a few hundred bytes instead of the whole
+  export, and nothing big is gzipped, encrypted, sent or opened. Each `want`
+  names the transfer whose data the browser holds (`have`). While the Web
+  Dashboard screen is open, the phone keeps an index of its last 3 transfers
+  (each row as JSON, by id; `WebDashboardConnections.snapshots`), so a reload
+  or reconnect within the visit is patched too, and a new visit starts with
+  the whole export. With a known `have` it reads the database again, diffs it
+  against that index and sends the patch as an ordinary transfer with
+  `meta.base` set to that transfer's id (`services/webDashboardPatch.ts`). The
+  whole export is built from the same row strings (`exportJson`), so every row
+  is serialized once per transfer either way. Tables whose rows all have a
+  unique `id` change row by row (`put`, `del`), any other table is sent whole
+  when it changed (`all`, `null` when gone), and logos and covers change by
+  path. The browser applies it to the data on screen (`src/lib/cloud/patch.ts`,
+  same rules), shows it, then gzips and seals the result under a key it makes
+  itself, in the same chunk format, so its cache and `have` stay in step with
+  the phone. A browser that cannot apply a patch asks again with `repair` and
+  gets the whole export at once, past every limit, once per patch. Older
   browsers never send `have` and older apps ignore it, so either side can
   update first. Logos, icons and covers are read once per screen visit and
-  re-read only when a file's size or modification time changes
-  (`collectUserAssetsForBackup`'s cache). A request the phone skips (the browser has the latest already, or asked
-  again within the Refresh limit for a whole export) is answered with a sealed
-  `unchanged`, so the page stops showing data on its way; a browser that
-  holds a copy still in memory is never skipped, since a patch costs little.
+  re-read only when a file's size or modification time changes, and folders
+  the dashboard never shows (receipts, payment QR codes) are not listed
+  (`collectUserAssetsForBackup`'s cache and `include`).
+- **Skipped requests:** the limits above (one copy per minute to a view-only
+  browser, Refresh at most every 10 s, the same data twice within 10 s) apply
+  only to whole exports; a browser with a known `have` is always answered. A
+  request the phone does skip is answered with a sealed `unchanged`, so the
+  page stops showing data on its way. Each decision is about one request
+  (`WantRequest.nonce`): a newer request replaces it and is answered in its
+  own turn. `unchanged` carries `current` when the browser holds the very copy
+  last sent to it, so the edit token that came with it is still good and the
+  page can take changes again after a reconnect without waiting for data.
 - **Editing:** the web has the app's create, edit and delete flows, and they
   run only while the phone is connected (its Web Dashboard screen is open and
   the app is in the foreground), so the browser never edits a copy that has

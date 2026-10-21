@@ -158,12 +158,8 @@ function tryReadTable(
 export async function buildBackupJson(opts?: {
   pretty?: boolean;
   includeAsset?: (path: string) => boolean;
-  assetCache?: UserAssetReadCache;
 }): Promise<{ json: string; data: BackupData }> {
-  const data = await buildBackupData({
-    includeAsset: opts?.includeAsset,
-    assetCache: opts?.assetCache,
-  });
+  const data = await buildBackupData({ includeAsset: opts?.includeAsset });
   // Reading every table and serializing the result each take a noticeable
   // slice of the JS thread on a large database. Let a frame render between the
   // two so the auto-backup reads as two short stalls rather than one long one.
