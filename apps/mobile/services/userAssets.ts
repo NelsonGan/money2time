@@ -484,8 +484,16 @@ export function listCustomItemIcons(): { id: string; uri: string }[] {
  * Reads every file under the user-assets root as base64 for inclusion in a
  * backup. Walks all kinds so future asset types are covered automatically.
  */
+/**
+ * Each file read last time, by path, with the size and modification time it
+ * had then, so a caller that exports again and again (the Web Dashboard)
+ * re-reads only the files that changed.
+ */
+export type UserAssetReadCache = Map<string, { stamp: string; base64: string }>;
+
 export async function collectUserAssetsForBackup(
   include?: (path: string) => boolean,
+  cache?: UserAssetReadCache,
 ): Promise<UserAssetBackupEntry[]> {
   const root = rootDir();
   if (!root.exists) return [];
@@ -502,15 +510,25 @@ export async function collectUserAssetsForBackup(
         // owning transaction while a backup is mid-walk (Sentry MONEY2TIME-R:
         // "the file ... couldn't be opened because there is no such file").
         // Skip the vanished file rather than failing the whole backup.
+        const path = `${prefix}${entry.name}`;
         try {
-          out.push({ path: `${prefix}${entry.name}`, base64: await entry.base64() });
+          const stamp = cache ? `${entry.size}:${entry.modificationTime}` : '';
+          const known = cache?.get(path);
+          const base64 = known?.stamp === stamp ? known.base64 : await entry.base64();
+          cache?.set(path, { stamp, base64 });
+          out.push({ path, base64 });
         } catch (error) {
-          console.warn(`[userAssets] skipping vanished backup file: ${prefix}${entry.name}`, error);
+          cache?.delete(path);
+          console.warn(`[userAssets] skipping vanished backup file: ${path}`, error);
         }
       }
     }
   };
   await walk(root, '');
+  if (cache) {
+    const kept = new Set(out.map((asset) => asset.path));
+    for (const path of cache.keys()) if (!kept.has(path)) cache.delete(path);
+  }
   return out;
 }
 
