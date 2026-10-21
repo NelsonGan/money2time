@@ -123,7 +123,7 @@ import {
   type TransactionWithRelations,
 } from '~/types';
 import { cn } from '~/utils';
-import { isLiabilityAccountType } from '~/utils/accountBalances';
+import { flowTypeForBalanceDelta, isLiabilityAccountType } from '~/utils/accountBalances';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { withColorAlpha } from '~/utils/color';
 import { convert, currencyNameForCode, currencySymbolForCode } from '~/utils/currency';
@@ -2394,17 +2394,6 @@ function accountTypeLabel(type: AccountType): string {
   if (type === 'loan') return String(I18n.t('accounts.type_loan'));
   if (type === 'debit') return String(I18n.t('accounts.type_debit'));
   return ACCOUNT_TYPE_OPTIONS.find((option) => option.value === type)?.label ?? type;
-}
-
-function flowTypeForBalanceDelta(
-  accountType: AccountType,
-  delta: number,
-): Extract<TransactionWithRelations['type'], 'income' | 'expense'> {
-  // On a liability a rising balance is more debt, so it records as spending.
-  if (isLiabilityAccountType(accountType)) {
-    return delta >= 0 ? 'expense' : 'income';
-  }
-  return delta >= 0 ? 'income' : 'expense';
 }
 
 function PayCreditCardSheet({

@@ -2267,6 +2267,7 @@ const zh = {
     confirm_title_unnamed: '要关联这个浏览器吗？',
     confirm_message:
       '请确认电脑上显示的代码是 {{code}}。只有在你亲自于正在使用的电脑上打开 app.money2time.com 时才继续：每次打开此页面，它都会收到你的全部数据。',
+    confirm_edits: '此页面打开期间，它也可以添加、更改和删除你的记录。',
     confirm_waiting: '现在也在电脑上点击“关联”。',
     confirm_action: '关联',
     browsers_title: '已关联',
@@ -2277,6 +2278,17 @@ const zh = {
     status_closed: '未打开',
     just_now: '刚刚',
     last_sent: '上次发送 {{date}}',
+    edit_hint: '此页面打开期间，已关联的浏览器也可以添加、编辑和删除记录。更改会保存在这部手机上。',
+    edit_saved: '已保存来自浏览器的更改。',
+    browser_options: '浏览器选项',
+    edits_on: '此页面打开期间，此浏览器可以添加、编辑和删除记录。',
+    edits_off:
+      '此浏览器只能查看你的数据。允许更改后，此页面打开期间可从该浏览器添加、编辑和删除记录。',
+    edits_allow: '允许更改',
+    edits_disallow: '仅查看',
+    read_only: '仅查看',
+    edit_hint_some_read_only:
+      '此页面打开期间，你允许的浏览器也可以添加、编辑和删除记录。点按浏览器旁边的 ⋯ 即可允许。更改会保存在这部手机上。',
     send_now: '立即发送',
     open_web: '打开 app.money2time.com',
     unlink: '解除关联',

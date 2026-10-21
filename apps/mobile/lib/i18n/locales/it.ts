@@ -2382,6 +2382,8 @@ const it = {
     confirm_title_unnamed: 'Collegare questo browser?',
     confirm_message:
       'Controlla che il computer mostri il codice {{code}}. Continua solo se hai aperto tu app.money2time.com su un computer che stai usando: riceverà tutti i tuoi dati ogni volta che questa schermata è aperta.',
+    confirm_edits:
+      'Finché questa schermata è aperta, potrà anche aggiungere, modificare ed eliminare i tuoi movimenti.',
     confirm_waiting: 'Ora fai clic su Collega anche sul computer.',
     confirm_action: 'Collega',
     browsers_title: 'Collegati',
@@ -2392,6 +2394,19 @@ const it = {
     status_closed: 'Non aperto',
     just_now: 'ora',
     last_sent: 'Ultimo invio {{date}}',
+    edit_hint:
+      'Finché questa schermata è aperta, un browser collegato può anche aggiungere, modificare ed eliminare movimenti. Le modifiche vengono salvate su questo telefono.',
+    edit_saved: 'Modifiche dal browser salvate.',
+    browser_options: 'Opzioni del browser',
+    edits_on:
+      'Questo browser può aggiungere, modificare ed eliminare movimenti finché questa schermata è aperta.',
+    edits_off:
+      'Questo browser può solo vedere i tuoi dati. Consenti le modifiche per aggiungere, modificare ed eliminare movimenti da qui finché questa schermata è aperta.',
+    edits_allow: 'Consenti modifiche',
+    edits_disallow: 'Sola lettura',
+    read_only: 'Sola lettura',
+    edit_hint_some_read_only:
+      'Finché questa schermata è aperta, i browser che consenti possono anche aggiungere, modificare ed eliminare movimenti. Tocca ⋯ accanto a un browser per consentirlo. Le modifiche vengono salvate su questo telefono.',
     send_now: 'Invia ora',
     open_web: 'Apri app.money2time.com',
     unlink: 'Scollega',

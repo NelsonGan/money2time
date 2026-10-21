@@ -2353,6 +2353,8 @@ const vi = {
     confirm_title_unnamed: 'Liên kết trình duyệt này?',
     confirm_message:
       'Hãy kiểm tra máy tính có hiển thị mã {{code}} không. Chỉ tiếp tục nếu chính bạn đã mở app.money2time.com trên máy tính bạn đang dùng: máy đó sẽ nhận toàn bộ dữ liệu của bạn mỗi khi màn hình này mở.',
+    confirm_edits:
+      'Khi màn hình này đang mở, trình duyệt đó cũng có thể thêm, sửa và xóa giao dịch của bạn.',
     confirm_waiting: 'Giờ hãy nhấp Liên kết trên máy tính nữa.',
     confirm_action: 'Liên kết',
     browsers_title: 'Đã liên kết',
@@ -2363,6 +2365,18 @@ const vi = {
     status_closed: 'Chưa mở',
     just_now: 'vừa xong',
     last_sent: 'Gửi lần cuối {{date}}',
+    edit_hint:
+      'Khi màn hình này đang mở, trình duyệt đã liên kết cũng có thể thêm, sửa và xóa giao dịch. Thay đổi được lưu trên điện thoại này.',
+    edit_saved: 'Đã lưu thay đổi từ trình duyệt.',
+    browser_options: 'Tùy chọn trình duyệt',
+    edits_on: 'Khi màn hình này đang mở, trình duyệt này có thể thêm, sửa và xóa giao dịch.',
+    edits_off:
+      'Trình duyệt này chỉ có thể xem dữ liệu của bạn. Hãy cho phép thay đổi để thêm, sửa và xóa giao dịch từ trình duyệt này khi màn hình này đang mở.',
+    edits_allow: 'Cho phép thay đổi',
+    edits_disallow: 'Chỉ xem',
+    read_only: 'Chỉ xem',
+    edit_hint_some_read_only:
+      'Khi màn hình này đang mở, các trình duyệt bạn cho phép cũng có thể thêm, sửa và xóa giao dịch. Chạm ⋯ cạnh một trình duyệt để cho phép. Thay đổi được lưu trên điện thoại này.',
     send_now: 'Gửi ngay',
     open_web: 'Mở app.money2time.com',
     unlink: 'Hủy liên kết',

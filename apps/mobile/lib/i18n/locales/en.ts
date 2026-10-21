@@ -2366,6 +2366,7 @@ const en = {
     confirm_title_unnamed: 'Link this browser?',
     confirm_message:
       'Check that the computer shows the code {{code}}. Only continue if you opened app.money2time.com yourself on a computer you are using: it will receive all your data each time this screen is open.',
+    confirm_edits: 'While this screen is open, it can also add, change and delete your entries.',
     confirm_waiting: 'Now click Link on the computer too.',
     confirm_action: 'Link',
     browsers_title: 'Linked',
@@ -2376,6 +2377,18 @@ const en = {
     status_closed: 'Not open',
     just_now: 'now',
     last_sent: 'Last sent {{date}}',
+    edit_hint:
+      'While this screen is open, a linked browser can also add, edit and delete entries. Changes are saved on this phone.',
+    edit_saved: 'Saved changes from the browser.',
+    browser_options: 'Browser options',
+    edits_on: 'This browser can add, edit and delete entries while this screen is open.',
+    edits_off:
+      'This browser can only view your data. Allow changes to add, edit and delete entries from it while this screen is open.',
+    edits_allow: 'Allow changes',
+    edits_disallow: 'Make view only',
+    read_only: 'View only',
+    edit_hint_some_read_only:
+      'While this screen is open, browsers you allow can also add, edit and delete entries. Tap ⋯ next to a browser to allow it. Changes are saved on this phone.',
     send_now: 'Send now',
     open_web: 'Open app.money2time.com',
     unlink: 'Unlink',

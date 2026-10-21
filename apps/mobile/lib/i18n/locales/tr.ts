@@ -2378,6 +2378,7 @@ const tr = {
     confirm_title_unnamed: 'Bu tarayıcı bağlansın mı?',
     confirm_message:
       'Bilgisayarın {{code}} kodunu gösterdiğini kontrol edin. Yalnızca app.money2time.com adresini kullandığınız bir bilgisayarda kendiniz açtıysanız devam edin: bu ekran her açık olduğunda tüm verilerinizi alacak.',
+    confirm_edits: 'Bu ekran açıkken kayıtlarınızı ekleyebilir, değiştirebilir ve silebilir.',
     confirm_waiting: 'Şimdi bilgisayarda da Bağla’ya tıklayın.',
     confirm_action: 'Bağla',
     browsers_title: 'Bağlı',
@@ -2388,6 +2389,18 @@ const tr = {
     status_closed: 'Açık değil',
     just_now: 'şimdi',
     last_sent: 'Son gönderim {{date}}',
+    edit_hint:
+      'Bu ekran açıkken bağlı bir tarayıcı kayıt ekleyebilir, düzenleyebilir ve silebilir. Değişiklikler bu telefona kaydedilir.',
+    edit_saved: 'Tarayıcıdaki değişiklikler kaydedildi.',
+    browser_options: 'Tarayıcı seçenekleri',
+    edits_on: 'Bu ekran açıkken bu tarayıcı kayıt ekleyebilir, düzenleyebilir ve silebilir.',
+    edits_off:
+      'Bu tarayıcı yalnızca verilerinizi görüntüleyebilir. Bu ekran açıkken bu tarayıcıdan kayıt eklemek, düzenlemek ve silmek için değişikliklere izin verin.',
+    edits_allow: 'Değişikliklere izin ver',
+    edits_disallow: 'Salt görüntüleme',
+    read_only: 'Salt görüntüleme',
+    edit_hint_some_read_only:
+      'Bu ekran açıkken izin verdiğiniz tarayıcılar da kayıt ekleyebilir, düzenleyebilir ve silebilir. İzin vermek için tarayıcının yanındaki ⋯ simgesine dokunun. Değişiklikler bu telefona kaydedilir.',
     send_now: 'Şimdi gönder',
     open_web: 'app.money2time.com adresini aç',
     unlink: 'Bağlantıyı kaldır',

@@ -2267,6 +2267,7 @@ const zhHant = {
     confirm_title_unnamed: '要連結這個瀏覽器嗎？',
     confirm_message:
       '請確認電腦上顯示的代碼是 {{code}}。只有在你親自於正在使用的電腦上開啟 app.money2time.com 時才繼續：每次開啟此畫面，它都會收到你的所有資料。',
+    confirm_edits: '此畫面開啟期間，它也可以新增、變更和刪除你的記錄。',
     confirm_waiting: '現在也在電腦上點按「連結」。',
     confirm_action: '連結',
     browsers_title: '已連結',
@@ -2277,6 +2278,17 @@ const zhHant = {
     status_closed: '未開啟',
     just_now: '剛剛',
     last_sent: '上次傳送 {{date}}',
+    edit_hint: '此畫面開啟期間，已連結的瀏覽器也可以新增、編輯和刪除記錄。變更會儲存在這支手機上。',
+    edit_saved: '已儲存來自瀏覽器的變更。',
+    browser_options: '瀏覽器選項',
+    edits_on: '此畫面開啟期間，此瀏覽器可以新增、編輯和刪除記錄。',
+    edits_off:
+      '此瀏覽器只能檢視你的資料。允許變更後，此畫面開啟期間可從該瀏覽器新增、編輯和刪除記錄。',
+    edits_allow: '允許變更',
+    edits_disallow: '僅檢視',
+    read_only: '僅檢視',
+    edit_hint_some_read_only:
+      '此畫面開啟期間，你允許的瀏覽器也可以新增、編輯和刪除記錄。點一下瀏覽器旁邊的 ⋯ 即可允許。變更會儲存在這支手機上。',
     send_now: '立即傳送',
     open_web: '開啟 app.money2time.com',
     unlink: '解除連結',

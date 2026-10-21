@@ -2370,6 +2370,7 @@ const da = {
     confirm_title_unnamed: 'Forbind denne browser?',
     confirm_message:
       'Tjek, at computeren viser koden {{code}}. Fortsæt kun, hvis du selv har åbnet app.money2time.com på en computer, du bruger: den modtager alle dine data, hver gang denne skærm er åben.',
+    confirm_edits: 'Mens denne skærm er åben, kan den også tilføje, ændre og slette dine poster.',
     confirm_waiting: 'Klik nu også på Forbind på computeren.',
     confirm_action: 'Forbind',
     browsers_title: 'Forbundet',
@@ -2380,6 +2381,18 @@ const da = {
     status_closed: 'Ikke åben',
     just_now: 'nu',
     last_sent: 'Sidst sendt {{date}}',
+    edit_hint:
+      'Mens denne skærm er åben, kan en forbundet browser også tilføje, redigere og slette poster. Ændringer gemmes på denne telefon.',
+    edit_saved: 'Ændringer fra browseren er gemt.',
+    browser_options: 'Browserindstillinger',
+    edits_on: 'Denne browser kan tilføje, redigere og slette poster, mens denne skærm er åben.',
+    edits_off:
+      'Denne browser kan kun se dine data. Tillad ændringer for at tilføje, redigere og slette poster fra den, mens denne skærm er åben.',
+    edits_allow: 'Tillad ændringer',
+    edits_disallow: 'Kun visning',
+    read_only: 'Kun visning',
+    edit_hint_some_read_only:
+      'Mens denne skærm er åben, kan browsere, du tillader, også tilføje, redigere og slette poster. Tryk på ⋯ ved siden af en browser for at tillade det. Ændringer gemmes på denne telefon.',
     send_now: 'Send nu',
     open_web: 'Åbn app.money2time.com',
     unlink: 'Fjern forbindelsen',
