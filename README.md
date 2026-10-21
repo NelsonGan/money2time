@@ -1757,6 +1757,17 @@ artwork are generator inputs and were retained.
   `extraProguardRules` in `app.json`, and `__tests__/build/androidKeepRules.test.ts`
   fails if any installed module ships rules that are neither consumed nor
   copied. Check that test after adding a native dependency.
+- **R8 also renames classes that native code finds by name.** expo-blur's
+  Android `ExpoBlurView` scopes its blur to the nearest view whose class name is
+  `com.swmansion.rnscreens.Screen`, and falls back to the whole content view.
+  R8 renamed that class, so in store builds the bottom bar's
+  `dimezisBlurView` redrew the entire window (root stack and pushed screens
+  included) on every frame. It crashed with a `NullPointerException` in
+  `ViewGroup.dispatchDraw` under `ScreenStack.performDraw` while RecurringEditor
+  or Tutorials covered the tabs (PostHog 01a14e87, 01a15667, 01a15708; 1.5.13).
+  Debug dev clients keep class names, so they never showed it.
+  `-keepnames class com.swmansion.rnscreens.Screen` in `extraProguardRules`
+  fixes it, and the keep-rules test reads the name from expo-blur's source.
 - Include a shared native-image revision in internal update runtimes. A renamed
   or recompressed image excluded from OTA uploads now requires a matching
   rebuilt development/preview app. Production configuration is unchanged.
