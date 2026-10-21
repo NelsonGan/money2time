@@ -39,6 +39,7 @@ import {
   type LinkedBrowser,
   listLinkedBrowsers,
   MAX_LINKED_BROWSERS,
+  type PendingBrowser,
   setBrowserEdits,
   unlinkBrowserOffline,
   WEB_DASHBOARD_URL,
@@ -134,12 +135,28 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
   const proKnownRef = useRef(isStatusKnown);
   const openRef = useRef<() => void>(() => undefined);
   const pairHandled = useRef(false);
+  const noticeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // A link waiting for the person's answer; dropped if the screen closes first.
+  const pendingLink = useRef<PendingBrowser | null>(null);
+  const mounted = useRef(true);
+  useEffect(
+    () => () => {
+      mounted.current = false;
+      if (noticeTimer.current) clearTimeout(noticeTimer.current);
+      pendingLink.current?.cancel();
+    },
+    [],
+  );
   // Saves a linked browser's changes; the connections keep it for the screen's life.
   const editor = useWebDashboardEditor(() => {
     const saved = I18n.t('web_dashboard.edit_saved');
     setProblem(null);
     setNotice(saved);
-    setTimeout(() => setNotice((current) => (current === saved ? null : current)), 4000);
+    if (noticeTimer.current) clearTimeout(noticeTimer.current);
+    noticeTimer.current = setTimeout(
+      () => setNotice((current) => (current === saved ? null : current)),
+      4000,
+    );
   });
 
   const reloadLinks = useCallback(async () => {
@@ -245,10 +262,13 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
     setLinking(true);
     void beginLink(text)
       .then(async (pending) => {
+        pendingLink.current = pending;
         // A pairing link can arrive while the app is locked, and the alert
         // would draw above the lock screen: whoever holds the phone could
         // link their own computer. Ask only once the owner has unlocked.
         await whenAppUnlocked();
+        // Closed meanwhile: the unmount cancelled the link, so ask nothing.
+        if (!mounted.current) return;
         // Nothing is linked until the person checks the code and agrees, on
         // this phone and on the computer: a code from someone else's screen
         // would send them this phone's data.
@@ -265,6 +285,7 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
               style: 'cancel',
               onPress: () => {
                 pending.cancel();
+                pendingLink.current = null;
                 setLinking(false);
                 setScanning(false);
               },
@@ -287,6 +308,7 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
                     setProblem(errorMessage(error));
                   })
                   .finally(() => {
+                    pendingLink.current = null;
                     setLinking(false);
                     setScanning(false);
                   });

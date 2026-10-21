@@ -43,6 +43,8 @@ export const splitApply: ApplyModule = {
           app.createTransactionWithSplits(
             payload.input as unknown as CreateTransactionInput,
             toInputs(payload.splits as SplitDraftPayload[]),
+            undefined,
+            { source: 'web_dashboard' },
           ),
         );
         if ((payload.input as Record<string, unknown>).reimbursable === true) {

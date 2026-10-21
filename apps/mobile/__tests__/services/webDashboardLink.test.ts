@@ -209,4 +209,24 @@ describe('PhoneSession requests', () => {
     expect(session.isPending('b'.repeat(16))).toBe(false);
     session.close();
   });
+
+  it('forgets the request when a reload or new tab takes the browser seat', () => {
+    const { session, want } = open();
+    want({ nonce: 'a'.repeat(16) });
+    expect(session.isPending('a'.repeat(16))).toBe(true);
+    // The room says the browser arrived again; the old tab is gone.
+    FakeSocket.last.onmessage?.({ data: JSON.stringify({ t: 'peer', present: true }) });
+    expect(session.isPending('a'.repeat(16))).toBe(false);
+    session.close();
+  });
+
+  it('answers a request whose data could not be prepared', async () => {
+    const { session, want, replies } = open();
+    want({ nonce: 'a'.repeat(16) });
+    await expect(
+      session.send(() => Promise.reject(new LinkError('too_large'))),
+    ).rejects.toMatchObject({ code: 'too_large' });
+    expect(replies()).toEqual([{ type: 'unchanged', nonce: 'a'.repeat(16) }]);
+    session.close();
+  });
 });

@@ -16,21 +16,24 @@ import type { Env } from './env';
 
 export type Role = 'phone' | 'browser';
 
-type Attachment = { role: Role; replaced?: boolean };
+/** `sent` is the connection's byte count, saved each MiB so hibernation cannot reset it. */
+type Attachment = { role: Role; replaced?: boolean; sent?: number };
 
 const other = (role: Role): Role => (role === 'phone' ? 'browser' : 'phone');
 
 /** The largest sealed control message is a few kilobytes; nothing needs more. */
-const MAX_TEXT_BYTES = 64 * 1024;
+const MAX_TEXT_CHARS = 64 * 1024;
 /** One data chunk: a 4-byte index, 256 KiB of ciphertext and the GCM tag. */
 const MAX_BINARY_BYTES = 256 * 1024 + 64;
 /**
  * What one connection may push before the room closes it: a whole 128 MiB
  * transfer (and a resend) from the phone, and from the browser its control
  * messages, acks and edits (a bulk edit is up to 64K characters, counted at
- * three bytes each). Counted while the room is awake, which a transfer keeps it.
+ * three bytes each). Kept in the socket's attachment, so a room that
+ * hibernates between messages still counts what came before.
  */
 const BUDGET_BYTES: Record<Role, number> = { phone: 300 * 1024 * 1024, browser: 24 * 1024 * 1024 };
+const SAVE_EVERY_BYTES = 1024 * 1024;
 
 function attachment(ws: WebSocket): Attachment | null {
   return (ws.deserializeAttachment() as Attachment | null) ?? null;
@@ -92,12 +95,17 @@ export class Room extends DurableObject<Env> {
     if (!from || from.replaced) return;
     // Only the phone sends data chunks; every other frame is a small message.
     // Anything else is not this protocol, and the room is not a free pipe.
+    // Text is counted at three bytes a character, its most in UTF-8.
     const size = typeof message === 'string' ? message.length * 3 : message.byteLength;
-    const sent = (this.sent.get(ws) ?? 0) + size;
+    const before = this.sent.get(ws) ?? from.sent ?? 0;
+    const sent = before + size;
     this.sent.set(ws, sent);
+    if (Math.floor(sent / SAVE_EVERY_BYTES) !== Math.floor(before / SAVE_EVERY_BYTES)) {
+      ws.serializeAttachment({ ...from, sent } satisfies Attachment);
+    }
     const tooBig =
       typeof message === 'string'
-        ? size > MAX_TEXT_BYTES * 3
+        ? message.length > MAX_TEXT_CHARS
         : from.role !== 'phone' || size > MAX_BINARY_BYTES;
     if (tooBig || sent > BUDGET_BYTES[from.role]) {
       try {
@@ -118,13 +126,10 @@ export class Room extends DurableObject<Env> {
     for (const peer of this.live(other(from.role))) trySend(peer, message);
   }
 
-  webSocketClose(ws: WebSocket, code: number, reason: string): void {
+  // The runtime answers the peer's Close frame itself (web_socket_auto_reply_to_close,
+  // on from compatibility date 2026-04-07), so there is nothing to close here.
+  webSocketClose(ws: WebSocket): void {
     this.left(ws);
-    try {
-      ws.close(code === 1005 || code === 1006 ? 1000 : code, reason);
-    } catch {
-      // Already closed.
-    }
   }
 
   webSocketError(ws: WebSocket): void {

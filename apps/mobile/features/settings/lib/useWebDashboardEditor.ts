@@ -106,8 +106,21 @@ function applyStep(app: ReturnType<typeof useApp>, step: EditStep, track: ApplyT
         void trackEvent(AnalyticsEvents.REIMBURSEMENT_FLAGGED, { reimbursable: true });
       }
       return;
-    case 'tx.update':
+    case 'tx.update': {
+      // updateTransactionsBulk swallows a failed write, so check each row's
+      // updatedAt moved once the write has run.
+      const before = new Map(
+        transactionsRepository
+          .listByIds(step.updates.map((update) => update.id))
+          .map((row) => [row.id, row.updatedAt]),
+      );
       app.updateTransactionsBulk(step.updates);
+      track.checks.push(() =>
+        step.updates.every(
+          (update) =>
+            transactionsRepository.getById(update.id)?.updatedAt !== before.get(update.id),
+        ),
+      );
       // The app's editor reports each change of the tick (and its adoption) itself.
       for (const update of step.updates) {
         if (typeof update.input.reimbursable === 'boolean') {
@@ -117,6 +130,7 @@ function applyStep(app: ReturnType<typeof useApp>, step: EditStep, track: ApplyT
         }
       }
       return;
+    }
     case 'tx.delete':
       app.deleteTransactionsBulk(step.ids);
       deleted.push(...step.ids);
