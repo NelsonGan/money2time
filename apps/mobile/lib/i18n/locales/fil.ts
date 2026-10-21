@@ -2395,6 +2395,7 @@ const fil = {
       'Tingnan ang iyong data sa computer sa app.money2time.com. Direktang ipinapadala ito ng iyong telepono sa browser. Walang iniimbak online at walang account.',
     link_title: 'Mag-link ng computer',
     linking: 'Nagli-link…',
+    link_device: 'Mag-link ng device',
     confirm_title: 'I-link ang {{name}}?',
     confirm_title_unnamed: 'I-link ang browser na ito?',
     confirm_message:

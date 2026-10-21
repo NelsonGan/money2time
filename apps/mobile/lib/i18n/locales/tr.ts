@@ -2374,6 +2374,7 @@ const tr = {
       'Verilerinizi bilgisayarda app.money2time.com adresinde görün. Telefonunuz verileri doğrudan tarayıcıya gönderir. Hiçbir şey çevrimiçi saklanmaz ve hesap gerekmez.',
     link_title: 'Bilgisayar bağla',
     linking: 'Bağlanıyor…',
+    link_device: 'Cihaz bağla',
     confirm_title: '{{name}} bağlansın mı?',
     confirm_title_unnamed: 'Bu tarayıcı bağlansın mı?',
     confirm_message:

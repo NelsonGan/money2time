@@ -2375,6 +2375,7 @@ const id = {
       'Lihat datamu di komputer lewat app.money2time.com. Ponselmu mengirimnya langsung ke browser. Tidak ada yang disimpan secara online dan tidak perlu akun.',
     link_title: 'Tautkan komputer',
     linking: 'Menautkan…',
+    link_device: 'Tautkan perangkat',
     confirm_title: 'Tautkan {{name}}?',
     confirm_title_unnamed: 'Tautkan browser ini?',
     confirm_message:

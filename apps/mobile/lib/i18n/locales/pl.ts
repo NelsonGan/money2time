@@ -2374,6 +2374,7 @@ const pl = {
       'Zobacz swoje dane na komputerze pod adresem app.money2time.com. Telefon wysyła je bezpośrednio do przeglądarki. Nic nie jest przechowywane online i nie ma żadnego konta.',
     link_title: 'Połącz komputer',
     linking: 'Łączenie…',
+    link_device: 'Połącz urządzenie',
     confirm_title: 'Połączyć {{name}}?',
     confirm_title_unnamed: 'Połączyć tę przeglądarkę?',
     confirm_message:

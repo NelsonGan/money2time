@@ -2263,6 +2263,7 @@ const zh = {
       '在电脑上通过 app.money2time.com 查看你的数据。手机会将数据直接发送到浏览器。数据不会存储在线上，也无需账号。',
     link_title: '关联电脑',
     linking: '正在关联…',
+    link_device: '关联设备',
     confirm_title: '关联 {{name}}？',
     confirm_title_unnamed: '要关联这个浏览器吗？',
     confirm_message:

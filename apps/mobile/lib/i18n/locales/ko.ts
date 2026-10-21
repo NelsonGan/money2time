@@ -2333,6 +2333,7 @@ const ko = {
       '컴퓨터에서 app.money2time.com으로 내 데이터를 확인하세요. 휴대폰이 데이터를 브라우저로 직접 전송합니다. 온라인에는 아무것도 저장되지 않으며 계정도 필요 없습니다.',
     link_title: '컴퓨터 연결',
     linking: '연결하는 중…',
+    link_device: '기기 연결',
     confirm_title: '{{name}} 연결할까요?',
     confirm_title_unnamed: '이 브라우저를 연결할까요?',
     confirm_message:
