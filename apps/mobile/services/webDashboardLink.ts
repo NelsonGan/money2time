@@ -14,17 +14,27 @@
  *             browser → sealed {type:'hello', name}; both screens show the code
  *             phone → sealed {type:'paired', name}   (the person confirmed on the phone)
  *             browser → sealed {type:'linked'}       (…and on the computer)
- *   refresh:  browser → sealed {type:'want', nonce, force}   (when the phone arrives,
- *             on Refresh, or answering the phone's sealed {type:'offer'})
+ *   refresh:  browser → sealed {type:'want', nonce, force, have?, repair?}   (when the
+ *             phone arrives, on Refresh, or answering the phone's sealed {type:'offer'})
  *             phone → sealed {type:'begin', nonce, meta, key, iv}, then binary
  *                     chunks [u32 index][AES-GCM under the transfer key],
  *                     at most WINDOW ahead of
  *             browser → {t:'ack', id, n}
  *             phone → sealed {type:'end', id};  browser → sealed {type:'done', id, ok}
+ *             or, when the phone has nothing new to send for now (the browser
+ *             already has it, or asked again too soon):
+ *             phone → sealed {type:'unchanged', nonce, current?}, so it stops
+ *             waiting; `current` says it holds the latest copy and its edit
+ *             token is still good
  *   edit:     browser → sealed {type:'edit', id, token, ops}  (webDashboardEdits.ts)
  *             phone → sealed {type:'offer'} to every browser here, so each asks for
  *                     the changed data, and to this one a sealed
  *                     {type:'edited', id, ok, count, version | error, feature?}
+ *   patch:    `have` names the transfer whose data the browser holds. While the
+ *             phone still has that copy in memory, it may answer with only what
+ *             changed since (webDashboardPatch.ts): `meta.base` is that transfer's
+ *             id, and the gzipped data is a patch instead of an export. A browser
+ *             that cannot apply one asks again with `repair`, and gets everything.
  *   unlink:   either → sealed {type:'unlink'};  the other → sealed {type:'unlinked'}
  *             (repeated whenever they meet until acknowledged, so an unlink
  *             made while the other side is closed still arrives)
@@ -97,6 +107,11 @@ type TransferMeta = {
   editToken?: string | null;
   /** The phone's data version this copy was made at; a saved change raises it. */
   version?: number;
+  /**
+   * Set when this transfer is a patch: the id of the transfer whose data it
+   * changes. The browser applies it to that copy, or asks for everything.
+   */
+  base?: string;
   /** Gzipped bytes in all. */
   size: number;
   count: number;
@@ -338,8 +353,12 @@ type SessionState = 'connecting' | 'waiting' | 'online' | 'sending' | 'closed';
 
 type SessionEvents = {
   onState?: (state: SessionState) => void;
-  /** The browser asked for fresh data (it just opened, or Refresh was pressed). */
-  onWant?: (force: boolean) => void;
+  /**
+   * The browser asked for fresh data (it just opened, or Refresh was pressed).
+   * `have` is the transfer whose data it holds; `repair`, that it could not
+   * apply the patch it was last sent.
+   */
+  onWant?: (request: WantRequest) => void;
   onProgress?: (ratio: number) => void;
   /**
    * The link is over: the browser unlinked itself, or (for a session opened
@@ -351,6 +370,15 @@ type SessionEvents = {
    * session sends it. Without a handler every edit is refused.
    */
   onEdit?: (message: Record<string, unknown>) => Promise<Record<string, unknown>>;
+};
+
+/** A browser's request for data, as `onWant` passes it on. */
+export type WantRequest = {
+  /** The request's nonce: a send or a decline answers this request only. */
+  nonce: string;
+  force: boolean;
+  have: string | null;
+  repair: boolean;
 };
 
 type Transfer = {
@@ -507,6 +535,8 @@ export class PhoneSession {
       ok?: boolean;
       nonce?: unknown;
       id?: string;
+      have?: unknown;
+      repair?: unknown;
     }>(this.key, message as Sealed, 'b2p');
     if (!inner) return;
     if (inner.type === 'unlink') {
@@ -529,7 +559,12 @@ export class PhoneSession {
       this.seen = [...this.seen.slice(-(SEEN_NONCES - 1)), inner.nonce];
       this.nonce = inner.nonce;
       this.settle();
-      this.events.onWant?.(Boolean(inner.force));
+      this.events.onWant?.({
+        nonce: inner.nonce,
+        force: Boolean(inner.force),
+        have: typeof inner.have === 'string' && /^[\w-]{16}$/.test(inner.have) ? inner.have : null,
+        repair: inner.repair === true,
+      });
     } else if (inner.type === 'done' && this.transfer && inner.id === this.transfer.id) {
       this.transfer.done?.(inner.ok === true);
     } else if (
@@ -555,9 +590,25 @@ export class PhoneSession {
     }
   }
 
-  /** Whether the browser has asked for data that no send has answered yet. */
-  get hasRequest(): boolean {
-    return this.nonce !== null && !this.sending;
+  /**
+   * Whether this request is the browser's latest and no send has answered it
+   * yet. A newer request replaces it, and is answered in its own turn.
+   */
+  isPending(nonce: string): boolean {
+    return this.nonce === nonce && !this.sending;
+  }
+
+  /**
+   * Answers the request with nothing: the browser has the latest already, or
+   * asked again too soon. Without this it would wait for data that never
+   * comes. `current`: it holds the copy last sent to it, so the edit token
+   * that came with it is still good.
+   */
+  decline(nonce: string, current: boolean) {
+    if (!this.isPending(nonce)) return;
+    this.nonce = null;
+    this.sendSealed({ type: 'unchanged', nonce, ...(current ? { current: true } : {}) });
+    this.settle();
   }
 
   /** Send now: asks the browser for a fresh request, which `onWant` then answers. */

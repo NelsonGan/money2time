@@ -16,6 +16,7 @@ import {
   LinkError,
   MAX_TRANSFER_BYTES,
   parsePairQr,
+  PhoneSession,
   prepareTransfer,
 } from '~/services/webDashboardLink';
 
@@ -125,5 +126,87 @@ describe('prepareTransfer', () => {
     await expect(prepareTransfer(big, meta, random, async () => undefined)).rejects.toEqual(
       new LinkError('too_large'),
     );
+  });
+});
+
+describe('PhoneSession requests', () => {
+  class FakeSocket {
+    static last: FakeSocket;
+    readyState = 1;
+    binaryType = '';
+    sent: string[] = [];
+    onopen: (() => void) | null = null;
+    onmessage: ((event: { data: unknown }) => void) | null = null;
+    onclose: (() => void) | null = null;
+    constructor() {
+      FakeSocket.last = this;
+    }
+    send(data: string) {
+      this.sent.push(data);
+    }
+    close() {}
+  }
+
+  const key = random(32);
+  const link = {
+    roomId: toBase64Url(random(16)),
+    key: toBase64Url(key),
+    name: null,
+    createdAt: 0,
+    lastSentAt: null,
+  };
+  let original: unknown;
+  beforeAll(() => {
+    original = (globalThis as { WebSocket?: unknown }).WebSocket;
+    (globalThis as { WebSocket?: unknown }).WebSocket = FakeSocket;
+  });
+  afterAll(() => {
+    (globalThis as { WebSocket?: unknown }).WebSocket = original;
+  });
+
+  function open() {
+    const wants: unknown[] = [];
+    const session = new PhoneSession(
+      link,
+      { relayUrl: 'https://relay.test', random },
+      { onWant: (request) => wants.push(request) },
+    );
+    const socket = FakeSocket.last;
+    socket.onopen?.();
+    socket.onmessage?.({ data: JSON.stringify({ t: 'peer', present: true }) });
+    const want = (body: Record<string, unknown>) =>
+      socket.onmessage?.({
+        data: JSON.stringify(sealMessage(key, { type: 'want', ...body }, random, 'b2p')),
+      });
+    const replies = () =>
+      socket.sent
+        .filter((data) => data.startsWith('{'))
+        .map((data) => openMessage<Record<string, unknown>>(key, JSON.parse(data), 'p2b'));
+    return { session, wants, want, replies };
+  }
+
+  it('passes on which copy the browser holds, and a repair', () => {
+    const { session, wants, want } = open();
+    want({ nonce: 'a'.repeat(16), force: true, have: 'h'.repeat(16), repair: true });
+    want({ nonce: 'b'.repeat(16), have: 'not an id' });
+    expect(wants).toEqual([
+      { nonce: 'a'.repeat(16), force: true, have: 'h'.repeat(16), repair: true },
+      { nonce: 'b'.repeat(16), force: false, have: null, repair: false },
+    ]);
+    session.close();
+  });
+
+  it('declines only the request it was asked about', () => {
+    const { session, want, replies } = open();
+    want({ nonce: 'a'.repeat(16) });
+    want({ nonce: 'b'.repeat(16) });
+    // The older request's turn: the newer one is still waiting to be answered.
+    session.decline('a'.repeat(16), false);
+    expect(replies()).toEqual([]);
+    expect(session.isPending('b'.repeat(16))).toBe(true);
+    session.decline('b'.repeat(16), true);
+    expect(replies()).toEqual([{ type: 'unchanged', nonce: 'b'.repeat(16), current: true }]);
+    expect(session.isPending('b'.repeat(16))).toBe(false);
+    session.close();
   });
 });
