@@ -2349,6 +2349,7 @@ const vi = {
       'Xem dữ liệu của bạn trên máy tính tại app.money2time.com. Điện thoại gửi thẳng đến trình duyệt. Không có gì được lưu trực tuyến và không cần tài khoản.',
     link_title: 'Liên kết máy tính',
     linking: 'Đang liên kết…',
+    link_device: 'Liên kết thiết bị',
     confirm_title: 'Liên kết {{name}}?',
     confirm_title_unnamed: 'Liên kết trình duyệt này?',
     confirm_message:

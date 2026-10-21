@@ -1,7 +1,8 @@
 import { useIsFocused } from '@react-navigation/native';
-import { CircleCheck, Ellipsis, ExternalLink, RefreshCw } from 'lucide-react-native';
+import { CircleCheck, Ellipsis, ExternalLink, RefreshCw, ScanQrCode } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  AccessibilityInfo,
   ActivityIndicator,
   Alert,
   AppState,
@@ -120,6 +121,9 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
   const [links, setLinks] = useState<LinkedBrowser[]>([]);
   const [status, setStatus] = useState<WebDashboardStatus>({});
   const [linking, setLinking] = useState(false);
+  // The camera opens only when the person asks to link a device, and closes
+  // once that attempt is over.
+  const [scanning, setScanning] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const connections = useRef<WebDashboardConnections | null>(null);
@@ -217,6 +221,14 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
     // Opened once per visit; Pro changes are passed on below. `editor` never changes.
   }, [editor]);
 
+  // Leaving the screen puts the camera away. In the background it only
+  // pauses (`foreground`): Android reports the camera permission dialog as
+  // the app going to the background, and closing here would close the very
+  // camera the person just allowed.
+  useEffect(() => {
+    if (!isFocused) setScanning(false);
+  }, [isFocused]);
+
   useEffect(() => {
     isProRef.current = isPro;
     connections.current?.setPro(isPro);
@@ -254,6 +266,7 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
               onPress: () => {
                 pending.cancel();
                 setLinking(false);
+                setScanning(false);
               },
             },
             {
@@ -273,7 +286,10 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
                     setNotice(null);
                     setProblem(errorMessage(error));
                   })
-                  .finally(() => setLinking(false));
+                  .finally(() => {
+                    setLinking(false);
+                    setScanning(false);
+                  });
               },
             },
           ],
@@ -283,6 +299,10 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
       .catch((error: unknown) => {
         setProblem(errorMessage(error));
         setLinking(false);
+        // A code that is not a pairing code: the camera stays up for the right one.
+        if (!(error instanceof WebDashboardError && error.code === 'invalid_qr')) {
+          setScanning(false);
+        }
       });
   };
 
@@ -409,15 +429,44 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
                 <Text>app.money2time.com</Text>
                 <ExternalLink size={14} color={colors.primary} />
               </Button>
-              <QrScannerView
-                active={
-                  isFocused && foreground && !linking && (!initialPairLink || pairHandled.current)
-                }
-                onScanned={handleScanned}
-              />
-              <Text variant="caption" tone="muted" className="px-4 pb-2 text-center">
-                {I18n.t(linking ? 'web_dashboard.linking' : 'web_dashboard.scan_hint')}
-              </Text>
+              {scanning ? (
+                <>
+                  <QrScannerView
+                    active={isFocused && foreground && !linking}
+                    onScanned={handleScanned}
+                  />
+                  <Text variant="caption" tone="muted" className="px-4 text-center">
+                    {I18n.t(linking ? 'web_dashboard.linking' : 'web_dashboard.scan_hint')}
+                  </Text>
+                  {linking ? null : (
+                    <Button variant="ghost" size="sm" onPress={() => setScanning(false)}>
+                      <Text>{I18n.t('common.cancel')}</Text>
+                    </Button>
+                  )}
+                </>
+              ) : (
+                <>
+                  <Button
+                    className="mt-1 w-full max-w-[360px] gap-2"
+                    disabled={linking}
+                    onPress={() => {
+                      setProblem(null);
+                      setNotice(null);
+                      setScanning(true);
+                      // The button goes away under the reader's focus: say what is next.
+                      AccessibilityInfo.announceForAccessibility(I18n.t('web_dashboard.scan_hint'));
+                    }}
+                  >
+                    <ScanQrCode size={18} color="#fff" />
+                    <Text>{I18n.t('web_dashboard.link_device')}</Text>
+                  </Button>
+                  {linking ? (
+                    <Text variant="caption" tone="muted" className="px-4 text-center">
+                      {I18n.t('web_dashboard.linking')}
+                    </Text>
+                  ) : null}
+                </>
+              )}
             </View>
 
             {links.length > 0 ? (

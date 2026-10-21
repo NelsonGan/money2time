@@ -2364,6 +2364,7 @@ const nb = {
       'Se dataene dine på en datamaskin på app.money2time.com. Telefonen sender dem rett til nettleseren. Ingenting lagres på nett, og du trenger ingen konto.',
     link_title: 'Koble til en datamaskin',
     linking: 'Kobler til…',
+    link_device: 'Koble til en enhet',
     confirm_title: 'Koble til {{name}}?',
     confirm_title_unnamed: 'Koble til denne nettleseren?',
     confirm_message:

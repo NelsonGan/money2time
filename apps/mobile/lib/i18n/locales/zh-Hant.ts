@@ -2263,6 +2263,7 @@ const zhHant = {
       '在電腦上透過 app.money2time.com 查看你的資料。手機會將資料直接傳送到瀏覽器。資料不會儲存在網路上，也不需要帳號。',
     link_title: '連結電腦',
     linking: '連結中…',
+    link_device: '連結裝置',
     confirm_title: '要連結 {{name}} 嗎？',
     confirm_title_unnamed: '要連結這個瀏覽器嗎？',
     confirm_message:

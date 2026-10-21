@@ -2352,6 +2352,7 @@ const ja = {
       'app.money2time.com で、パソコンからデータを確認できます。データはスマートフォンからブラウザへ直接送信されます。オンラインには何も保存されず、アカウントも不要です。',
     link_title: 'パソコンを連携',
     linking: '連携中…',
+    link_device: 'デバイスを連携',
     confirm_title: '{{name}} を連携しますか？',
     confirm_title_unnamed: 'このブラウザを連携しますか？',
     confirm_message:

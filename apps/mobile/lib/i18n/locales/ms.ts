@@ -2382,6 +2382,7 @@ const ms = {
       'Lihat data anda pada komputer di app.money2time.com. Telefon anda menghantarnya terus ke pelayar. Tiada apa-apa disimpan dalam talian dan tiada akaun diperlukan.',
     link_title: 'Pautkan komputer',
     linking: 'Memautkan…',
+    link_device: 'Pautkan peranti',
     confirm_title: 'Pautkan {{name}}?',
     confirm_title_unnamed: 'Pautkan pelayar ini?',
     confirm_message:

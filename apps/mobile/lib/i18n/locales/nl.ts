@@ -2390,6 +2390,7 @@ const nl = {
       'Bekijk je gegevens op een computer via app.money2time.com. Je telefoon stuurt ze rechtstreeks naar de browser. Er wordt niets online opgeslagen en er is geen account.',
     link_title: 'Een computer koppelen',
     linking: 'Koppelen…',
+    link_device: 'Een apparaat koppelen',
     confirm_title: '{{name}} koppelen?',
     confirm_title_unnamed: 'Deze browser koppelen?',
     confirm_message:

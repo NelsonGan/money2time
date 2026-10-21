@@ -2378,6 +2378,7 @@ const it = {
       'Guarda i tuoi dati su un computer, su app.money2time.com. Il telefono li invia direttamente al browser. Non viene salvato nulla online e non serve alcun account.',
     link_title: 'Collega un computer',
     linking: 'Collegamento…',
+    link_device: 'Collega un dispositivo',
     confirm_title: 'Collegare {{name}}?',
     confirm_title_unnamed: 'Collegare questo browser?',
     confirm_message:
