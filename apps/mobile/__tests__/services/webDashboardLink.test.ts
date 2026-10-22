@@ -121,6 +121,16 @@ describe('prepareTransfer', () => {
     expect(Buffer.concat(parts).equals(Buffer.from(data))).toBe(true);
   });
 
+  it('carries the analytics ID so the browser reports as the same person', async () => {
+    const prepared = await prepareTransfer(
+      random(10),
+      { ...meta, analyticsId: 'm2t_00000000-0000-4000-8000-000000000000' },
+      random,
+      async () => undefined,
+    );
+    expect(prepared.meta.analyticsId).toBe('m2t_00000000-0000-4000-8000-000000000000');
+  });
+
   it('refuses an export too large to send', async () => {
     const big = { length: MAX_TRANSFER_BYTES + 1 } as Uint8Array;
     await expect(prepareTransfer(big, meta, random, async () => undefined)).rejects.toEqual(

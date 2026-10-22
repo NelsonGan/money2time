@@ -43,6 +43,10 @@ export function startSessionReplayForLaunch(_isFirstDay: boolean, _random?: () =
   return false;
 }
 
+export function pauseSessionReplay(): () => void {
+  return () => {};
+}
+
 export async function setCurrentScreen(_screen: string | null): Promise<void> {}
 
 export async function setSuperProperties(

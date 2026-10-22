@@ -402,6 +402,7 @@ type Built = { prepared: PreparedTransfer; snapshot: Snapshot };
  */
 async function buildTransfer(
   isPro: boolean,
+  analyticsId: string | null,
   assetCache: UserAssetReadCache,
   base: { id: string; snapshot: Snapshot } | null,
 ): Promise<Built> {
@@ -450,6 +451,7 @@ async function buildTransfer(
       deviceName: phoneName(),
       timeZone,
       pro: isPro,
+      ...(analyticsId ? { analyticsId } : {}),
       version,
       ...(from ? { base: from.id } : {}),
     },
@@ -478,6 +480,7 @@ export class WebDashboardConnections {
   private readonly onSendFailed: (error: WebDashboardError) => void;
   private readonly editor: WebDashboardEditor | null;
   private isPro: boolean;
+  private readonly analyticsId: () => string | null;
   private closed = false;
   /** Rooms being unlinked right now, so a concurrent `sync` does not reopen them. */
   private removing = new Set<string>();
@@ -513,12 +516,15 @@ export class WebDashboardConnections {
 
   constructor(opts: {
     isPro: boolean;
+    /** The app's analytics ID, read as each transfer is built. */
+    analyticsId?: () => string | null;
     onChange: (status: WebDashboardStatus) => void;
     onLinksChanged: () => void;
     onSendFailed?: (error: WebDashboardError) => void;
     editor?: WebDashboardEditor;
   }) {
     this.isPro = opts.isPro;
+    this.analyticsId = opts.analyticsId ?? (() => null);
     this.onChange = opts.onChange;
     this.onLinksChanged = opts.onLinksChanged;
     this.onSendFailed = opts.onSendFailed ?? (() => undefined);
@@ -774,7 +780,12 @@ export class WebDashboardConnections {
     if (!fresh && cached && cached.version === dataVersion && Date.now() - cached.at < 30_000) {
       return cached.promise;
     }
-    const promise = buildTransfer(this.isPro, this.assetCache, base).then((built) => {
+    const promise = buildTransfer(
+      this.isPro,
+      this.analyticsId()?.trim() || null,
+      this.assetCache,
+      base,
+    ).then((built) => {
       if (!this.closed) this.keepSnapshot(built.prepared.meta.id, built.snapshot);
       return built;
     });
