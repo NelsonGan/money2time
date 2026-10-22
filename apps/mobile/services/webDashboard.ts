@@ -30,6 +30,7 @@ export async function beginLink(_qrText: string): Promise<PendingBrowser> {
 export class WebDashboardConnections {
   constructor(opts: {
     isPro: boolean;
+    analyticsId?: () => string | null;
     onChange: (status: WebDashboardStatus) => void;
     onLinksChanged: () => void;
     onSendFailed?: (error: WebDashboardError) => void;

@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '~/components/ui';
+import { usePauseSessionReplay } from '~/components/ui/replayPrivacy';
 import { I18n } from '~/lib/i18n';
 
 import { reduceNumpadKey, sanitizeInitialAmount } from './calculatorEngine';
@@ -25,6 +26,8 @@ interface MiniNumpadProps {
  * in the bottom-right of the grid. Used for per-row amount entry in Split Bill.
  */
 export function MiniNumpad({ initialExpression, onValueChange, onConfirm }: MiniNumpadProps) {
+  // Tap positions on these keys would spell out the amount.
+  usePauseSessionReplay();
   const { bottom: bottomInset } = useSafeAreaInsets();
 
   const [expression, setExpression] = useState(() => sanitizeInitialAmount(initialExpression));

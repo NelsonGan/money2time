@@ -4,6 +4,7 @@ import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '~/components/ui';
+import { usePauseSessionReplay } from '~/components/ui/replayPrivacy';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -37,6 +38,11 @@ interface NumpadPanelProps {
   onDatePress?: () => void;
   /** Compact only: label shown on the date button (e.g. "Jul 7"). */
   dateLabel?: string;
+  /**
+   * Whether the pad can be tapped now (default true). The sticky drawer keeps
+   * it mounted while collapsed; session replay pauses only while it shows.
+   */
+  onScreen?: boolean;
 }
 
 export function NumpadPanel({
@@ -48,7 +54,10 @@ export function NumpadPanel({
   compact = false,
   onDatePress,
   dateLabel,
+  onScreen = true,
 }: NumpadPanelProps) {
+  // Tap positions on these keys would spell out the amount.
+  usePauseSessionReplay(onScreen);
   const themeColors = useThemeColors();
   const { bottom: bottomInset } = useSafeAreaInsets();
   // The live expression is held only in a ref: it drives the key handlers but is

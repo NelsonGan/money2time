@@ -109,9 +109,13 @@ export function initPostHog(): PostHog | null {
         maskAllTextInputs: true,
         maskAllImages: false,
         maskAllSandboxedViews: true,
-        // The number pads are custom views, so tap positions would spell out
-        // the amounts typed on them.
-        captureTouches: false,
+        // Taps are what PostHog counts as activity on mobile: without them
+        // every recording is all inactivity, which the player skips straight
+        // through. The number pads are custom views whose tap positions would
+        // spell out the amounts typed on them, so recording pauses while one
+        // is on screen (`usePauseSessionReplay`). System keyboards draw in
+        // their own window, which neither recorder sees.
+        captureTouches: true,
         // Logcat and request URLs can carry identifiers; neither is needed.
         captureLog: false,
         captureNetworkTelemetry: false,
