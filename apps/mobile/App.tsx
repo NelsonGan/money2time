@@ -27,6 +27,8 @@ import { initialWindowMetrics, SafeAreaProvider } from 'react-native-safe-area-c
 
 import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
 import { MascotWarmup } from '~/components/feedback/Mascot';
+import { ShellContentFrame, SideStripSafeArea } from '~/components/layout/AdaptiveFrames';
+import { ContentFrameProvider, useContentFrame } from '~/components/layout/ContentFrame';
 import { AddActionSheet } from '~/components/navigation/AddActionSheet';
 import { AddFab } from '~/components/navigation/AddFab';
 import { BottomNav, type TabName } from '~/components/navigation/BottomNav';
@@ -35,6 +37,7 @@ import {
   useBottomNavMinimize,
 } from '~/components/navigation/BottomNavMinimize';
 import { homeNavTab, parseNavTabs } from '~/components/navigation/navTabs';
+import { SideNavRail } from '~/components/navigation/SideNavRail';
 import { TodayJumpFab } from '~/components/navigation/TodayJumpFab';
 import {
   AccountLogoPickerSheet,
@@ -247,6 +250,7 @@ import {
   writeMoney2TimeWidgetSnapshot,
 } from '~/services/widgetSnapshot';
 import type { AddButtonAction, CategoryType, TransactionWithRelations, WageConfig } from '~/types';
+import { readableColumn } from '~/utils/adaptiveLayout';
 import { financialMonthKeyForDate, monthCycleOf } from '~/utils/financialMonth';
 import { dayKeyFromIsoLocal, monthKeyFromIsoLocal } from '~/utils/formatters';
 import { runAfterInteractions } from '~/utils/interactions';
@@ -370,16 +374,48 @@ function MountedTab({
     if (shouldMount) perfMark(`tab_${name}_mounted`);
   }, [name, shouldMount]);
 
+  // Open iPhone Duo: Home lays out its own two panes; every other page sits
+  // in a readable column. Only the slot's insets change when the device
+  // folds, so a page keeps its state. The frame is the window elsewhere.
+  const { isTwoPane } = useDeviceLayout();
+  const frame = useContentFrame();
+  const column = readableColumn(frame.width, isTwoPane && name !== 'calendar');
+
   return (
     <View
       pointerEvents={active ? 'auto' : 'none'}
-      style={[styles.tabSlot, active ? styles.tabVisible : styles.tabHidden]}
+      style={[
+        styles.tabSlot,
+        column.margin > 0 && { left: column.margin, right: column.margin },
+        active ? styles.tabVisible : styles.tabHidden,
+      ]}
     >
       {shouldMount ? (
-        <TransactionsWhileVisible visible={active}>{children}</TransactionsWhileVisible>
+        <ContentFrameProvider width={column.width} height={frame.height}>
+          <TransactionsWhileVisible visible={active}>{children}</TransactionsWhileVisible>
+        </ContentFrameProvider>
       ) : null}
     </View>
   );
+}
+
+/**
+ * Every full-screen root route keeps out of iPhone Duo's side strip (and is
+ * centred in a readable column on the open display). The shell lays itself
+ * out around its own rail, and transparent overlays draw their own sheet over
+ * the shell, so both are left alone.
+ */
+function rootScreenLayout({
+  route,
+  options,
+  children,
+}: {
+  route: { name: string };
+  options: { presentation?: string };
+  children: React.ReactElement;
+}) {
+  if (route.name === 'Main' || options.presentation === 'transparentModal') return children;
+  return <SideStripSafeArea>{children}</SideStripSafeArea>;
 }
 
 function ThemeGate({ children }: { children: React.ReactNode }) {
@@ -435,6 +471,9 @@ function MainShellScreen({
   const { checkLimit, isPro } = useProGate();
   const { startScan } = useReceiptScans();
   const navTabs = useMemo(() => parseNavTabs(settings.navTabsJson), [settings.navTabsJson]);
+  // iPhone Duo: tabs in a rail down the side strip, pages beside it.
+  const { navPlacement, navEdge, navRailInset } = useDeviceLayout();
+  const TabNav = navPlacement === 'side' ? SideNavRail : BottomNav;
   const [addSheetVisible, setAddSheetVisible] = useState(false);
   const voiceHandleRef = useRef<VoiceQuickAddHandle | null>(null);
   const [voiceSupported, setVoiceSupported] = useState(false);
@@ -1164,7 +1203,14 @@ function MainShellScreen({
 
   return (
     <View className="flex-1 bg-background">
-      <View style={styles.flex}>
+      {/* Margin, not padding, clears the rail: the tab slots are absolutely positioned. */}
+      <View
+        style={[
+          styles.flex,
+          navRailInset > 0 &&
+            (navEdge === 'right' ? { marginRight: navRailInset } : { marginLeft: navRailInset }),
+        ]}
+      >
         {hostsTab('accounts') ? (
           <MountedTab
             name="accounts"
@@ -1313,7 +1359,7 @@ function MainShellScreen({
 
       {!shouldHideBottomNav ? (
         <>
-          <BottomNav tabs={navTabs} activeTab={activeTab} onTabChange={handleTabChange} />
+          <TabNav tabs={navTabs} activeTab={activeTab} onTabChange={handleTabChange} />
           {showAddFab ? (
             <AddFab
               onPress={handleFabPress}
@@ -2898,7 +2944,9 @@ function AppContent() {
   if (!settings.onboardingCompleted) {
     return (
       <View style={[styles.flex, themeStyle]} onLayout={handleContentLayout}>
-        <OnboardingFlow onComplete={handleOnboardingComplete} />
+        <SideStripSafeArea>
+          <OnboardingFlow onComplete={handleOnboardingComplete} />
+        </SideStripSafeArea>
       </View>
     );
   }
@@ -2907,7 +2955,9 @@ function AppContent() {
     return (
       <View className="flex-1 bg-background" style={themeStyle} onLayout={handleContentLayout}>
         <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
-        <ProPaywallScreen source="onboarding" onClose={() => setIntroPaywallPending(false)} />
+        <SideStripSafeArea>
+          <ProPaywallScreen source="onboarding" onClose={() => setIntroPaywallPending(false)} />
+        </SideStripSafeArea>
       </View>
     );
   }
@@ -2930,15 +2980,18 @@ function AppContent() {
           <RootStack.Navigator
             screenOptions={SHARED_NATIVE_STACK_OPTIONS}
             screenListeners={rootScreenListeners}
+            screenLayout={rootScreenLayout}
           >
             <RootStack.Screen name="Main">
               {(props) => (
                 <BottomNavMinimizeProvider>
-                  <MainShellScreen
-                    navigation={props.navigation}
-                    onVisibleScreenChange={setMainShellCurrentScreen}
-                    onEnterSettingsTab={handleEnterSettingsTab}
-                  />
+                  <ShellContentFrame>
+                    <MainShellScreen
+                      navigation={props.navigation}
+                      onVisibleScreenChange={setMainShellCurrentScreen}
+                      onEnterSettingsTab={handleEnterSettingsTab}
+                    />
+                  </ShellContentFrame>
                 </BottomNavMinimizeProvider>
               )}
             </RootStack.Screen>

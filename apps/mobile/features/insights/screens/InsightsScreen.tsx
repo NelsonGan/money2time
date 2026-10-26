@@ -27,7 +27,6 @@ import {
   ScrollView,
   type ScrollViewInstance,
   StyleSheet,
-  useWindowDimensions,
   View,
   type ViewInstance,
 } from 'react-native';
@@ -48,6 +47,7 @@ import Svg, {
 import { DatePickerModal } from '~/components/datePicker';
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { LoadingDots } from '~/components/feedback/LoadingDots';
+import { useContentFrame } from '~/components/layout/ContentFrame';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import {
   useBottomNavContentInset,
@@ -2973,7 +2973,7 @@ export function InsightsScreen({
   );
   const lastScrubHapticAtRef = useRef(0);
 
-  const { width, height } = useWindowDimensions();
+  const { width, height } = useContentFrame();
   const bottomNavInset = useBottomNavContentInset();
   const { isTablet } = useDeviceLayout();
   const pageWidth = Math.max(1, width);

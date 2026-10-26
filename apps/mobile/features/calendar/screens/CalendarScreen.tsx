@@ -1,15 +1,7 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { TextInputInstance } from 'react-native';
-import {
-  Alert,
-  FlatList,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { Alert, FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Reanimated, {
   Easing as REasing,
   useAnimatedStyle,
@@ -20,6 +12,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { MonthYearWheelPicker } from '~/components/datePicker';
 import { monthsBetween, shiftYearMonth, yearMonthFromKey } from '~/components/datePicker/monthJump';
+import { useContentFrame } from '~/components/layout/ContentFrame';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { useBottomNavMinimize } from '~/components/navigation/BottomNavMinimize';
 import { FilterIconButton } from '~/components/navigation/FilterIconButton';
@@ -126,6 +119,8 @@ import { formatSummaryAmount, formatSummaryHours } from '../lib/summaryValue';
 
 const CALENDAR_HORIZONTAL_PADDING = spacing.screenHorizontal;
 const CALENDAR_GRID_HORIZONTAL_PADDING = spacing.xs;
+/** Side padding of the month grid in the open iPhone Duo's left pane. */
+const MONTH_OVERVIEW_HORIZONTAL_PADDING = spacing.lg;
 const ZOOM_TIMING = { duration: 350, easing: REasing.out(REasing.cubic) } as const;
 const MONTH_HEADER_CHROME_HEIGHT = 114;
 const HEADER_CONTENT_GAP = 10;
@@ -205,9 +200,14 @@ export function CalendarScreen({
   } = useApp();
   const monthCycle = monthCycleOf(settings);
   const themeColors = useThemeColors();
-  const { contentWidth } = useDeviceLayout();
+  const { contentWidth: frameContentWidth, panes: twoPane } = useDeviceLayout();
   const safeAreaInsets = useSafeAreaInsets();
-  const { width: screenWidth } = useWindowDimensions();
+  const { width: frameWidth } = useContentFrame();
+  // Open iPhone Duo: the header and a live month grid fill the left pane and
+  // the list / month / year layers the right one, so the layers are sized to
+  // that pane. Everywhere else they span the screen.
+  const screenWidth = twoPane ? twoPane.right : frameWidth;
+  const contentWidth = twoPane ? twoPane.right : frameContentWidth;
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
   const isTimeMode = settings.displayMode === 'time';
 
@@ -917,10 +917,16 @@ export function CalendarScreen({
       scheduleFrame(() => {
         horizontalListRef.current?.scrollToIndex({ index: idx, animated: false });
       });
-      setViewMode('month');
       dayMonthZoom.value = withTiming(1, ZOOM_TIMING);
-    } else if (viewMode === 'month') {
-      const yr = activeMonthDate.getFullYear();
+      // With two panes the month grid is already showing in the left pane, so
+      // zooming out of the list goes straight on to the year.
+      if (!twoPane) {
+        setViewMode('month');
+        return;
+      }
+    }
+    if (viewMode !== 'year') {
+      const yr = (viewMode === 'day' ? activeListMonthDate : activeMonthDate).getFullYear();
       const yearIdx = yearViewIndexForYear(yr, centerYear, CENTER_YEAR_INDEX, TOTAL_YEAR_SLOTS);
       setViewMode('year');
       scheduleFrame(() => {
@@ -934,7 +940,9 @@ export function CalendarScreen({
     }
   }, [
     viewMode,
+    twoPane,
     activeMonthDate,
+    activeListMonthDate,
     activeListMonthIndex,
     scheduleFrame,
     setActiveMonthIndex,
@@ -957,8 +965,19 @@ export function CalendarScreen({
       });
       setViewMode('day');
       dayMonthZoom.value = withTiming(0, ZOOM_TIMING);
+      // With two panes the left grid stays tappable while the year shows on
+      // the right, so come back from the year as well. A no-op on a phone,
+      // where the grid is only reachable with the year closed.
+      monthYearZoom.value = withTiming(0, ZOOM_TIMING);
     },
-    [getMonthIndexForDay, scheduleFrame, setActiveListMonthIndex, scrollListToDay, dayMonthZoom],
+    [
+      getMonthIndexForDay,
+      scheduleFrame,
+      setActiveListMonthIndex,
+      scrollListToDay,
+      dayMonthZoom,
+      monthYearZoom,
+    ],
   );
 
   const handleSelectMonthFromYear = useCallback(
@@ -980,9 +999,29 @@ export function CalendarScreen({
           monthYearZoom.value = withTiming(0, ZOOM_TIMING);
         });
       });
-      setViewMode('month');
+      if (!twoPane) {
+        setViewMode('month');
+        return;
+      }
+      // Two panes: the month lands in the left pane, so the right one goes
+      // back to the list, on that month.
+      setActiveListMonthIndex(idx);
+      scheduleFrame(() => {
+        listPagerRef.current?.scrollToIndex({ index: idx, animated: false });
+      });
+      setViewMode('day');
+      dayMonthZoom.value = withTiming(0, ZOOM_TIMING);
     },
-    [monthPagerAnchorDate, clampMonthIndex, scheduleFrame, setActiveMonthIndex, monthYearZoom],
+    [
+      monthPagerAnchorDate,
+      clampMonthIndex,
+      scheduleFrame,
+      setActiveMonthIndex,
+      setActiveListMonthIndex,
+      twoPane,
+      monthYearZoom,
+      dayMonthZoom,
+    ],
   );
 
   // When active month changes in month view, pick a day inside it
@@ -1490,8 +1529,14 @@ export function CalendarScreen({
     ],
   );
 
+  // The button names where it zooms out to: the month, or with two panes
+  // (month already beside the list) the year.
   const backButtonLabel =
-    viewMode === 'day' ? displayedMonthLabel : String(activeMonthDate.getFullYear());
+    viewMode === 'day'
+      ? twoPane
+        ? String(activeListMonthDate.getFullYear())
+        : displayedMonthLabel
+      : String(activeMonthDate.getFullYear());
 
   const BackButton = useMemo(
     () =>
@@ -1532,7 +1577,12 @@ export function CalendarScreen({
     // very first frame after launch it paints with a 0 inset and then jumps
     // down once measured — the visible "button starts at the top, then snaps"
     // shift on first open. Reading the context value avoids that flash.
-    <View className="flex-1 bg-background" style={{ paddingTop: safeAreaInsets.top }}>
+    <View
+      className="flex-1 bg-background"
+      // Two panes: the padding keeps the header and the grid in the left pane;
+      // the absolutely positioned layers below take the right one.
+      style={[{ paddingTop: safeAreaInsets.top }, twoPane && { paddingRight: twoPane.right }]}
+    >
       {/* --- Header --- */}
       <TabletContentContainer>
         <View className="bg-background pb-1.5 pt-1">
@@ -1681,14 +1731,39 @@ export function CalendarScreen({
         </View>
       </TabletContentContainer>
 
+      {/* --- Two panes: the month at a glance under the header, in step with
+          the list beside it. Tapping a day scrolls the list to it. --- */}
+      {twoPane ? (
+        <View style={styles.monthOverviewPane}>
+          <CalendarMonthGrid
+            monthData={activeListMonthData}
+            weekdayLabels={weekdayLabels}
+            selectedDayKey={selectedDayKey}
+            isTimeMode={isTimeMode}
+            locale={activeLocale}
+            onSelectDay={handleSelectDayFromMonth}
+            chartWidth={twoPane.left - MONTH_OVERVIEW_HORIZONTAL_PADDING * 2}
+          />
+        </View>
+      ) : null}
+
       {/* --- Calendar area: three stacked reanimated layers --- */}
-      <View className="flex-1" style={!isSearchOpen ? styles.yearCalendarOverlap : undefined}>
+      <View
+        className="flex-1"
+        style={
+          twoPane
+            ? [styles.twoPaneLayers, { top: safeAreaInsets.top + spacing.sm, left: twoPane.left }]
+            : !isSearchOpen
+              ? styles.yearCalendarOverlap
+              : undefined
+        }
+      >
         {/* List layer — the monthly transaction list (home view) */}
         <Reanimated.View
           style={[
             styles.zoomLayer,
             styles.dayLayerZ,
-            !isSearchOpen && styles.normalCalendarLayerOffset,
+            !isSearchOpen && !twoPane && styles.normalCalendarLayerOffset,
             dayLayerStyle,
           ]}
           pointerEvents={viewMode === 'day' ? 'auto' : 'none'}
@@ -1715,7 +1790,7 @@ export function CalendarScreen({
           style={[
             styles.zoomLayer,
             styles.monthLayerZ,
-            !isSearchOpen && styles.normalCalendarLayerOffset,
+            !isSearchOpen && !twoPane && styles.normalCalendarLayerOffset,
             monthLayerStyle,
           ]}
           pointerEvents={viewMode === 'month' ? 'auto' : 'none'}
@@ -1753,6 +1828,7 @@ export function CalendarScreen({
         >
           {yearLayerMounted ? (
             <CalendarYearView
+              width={screenWidth}
               centerYear={centerYear}
               todayDayKey={todayDayKey}
               dailyByDayKey={globalDailyByDayKey}
@@ -1954,6 +2030,16 @@ const styles = StyleSheet.create({
   },
   yearCalendarOverlap: {
     marginTop: -YEAR_HEADER_OVERLAP,
+  },
+  twoPaneLayers: {
+    position: 'absolute',
+    right: 0,
+    bottom: 0,
+  },
+  monthOverviewPane: {
+    flex: 1,
+    paddingHorizontal: MONTH_OVERVIEW_HORIZONTAL_PADDING,
+    paddingTop: spacing.sm,
   },
   normalCalendarLayerOffset: {
     top: YEAR_HEADER_OVERLAP,

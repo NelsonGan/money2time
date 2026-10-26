@@ -1,8 +1,9 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowDownRight, ArrowUpRight, Clock, Minus, Plus } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
+import { useContentFrame } from '~/components/layout/ContentFrame';
 import {
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
@@ -94,7 +95,7 @@ function WidgetFrame({
   children: (dimensions: { width: number; height: number }) => React.ReactNode;
 }) {
   const themeColors = useThemeColors();
-  const { width } = useWindowDimensions();
+  const { width } = useContentFrame();
   const availableWidth = width - SETTINGS_HORIZONTAL_PADDING * 2;
   // A small widget is a 158pt square on-device; medium/large span the 338pt grid width.
   const targetWidth = size === 'small' ? 158 : 338;
@@ -382,7 +383,7 @@ function IoChip({ tone, label }: { tone: 'income' | 'expense'; label: string }) 
 
 function CalendarWidgetPreview({ data }: { data: CalendarMonthSnapshot }) {
   const themeColors = useThemeColors();
-  const { width } = useWindowDimensions();
+  const { width } = useContentFrame();
   const availableWidth = width - SETTINGS_HORIZONTAL_PADDING * 2;
   const previewWidth = Math.min(338, availableWidth);
   const previewHeight = previewWidth / SIZE_RATIOS.large;

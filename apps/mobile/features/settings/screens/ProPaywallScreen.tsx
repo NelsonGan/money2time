@@ -8,7 +8,6 @@ import {
   ScrollView,
   type ScrollViewInstance,
   StyleSheet,
-  useWindowDimensions,
   View,
 } from 'react-native';
 import Animated, { FadeIn, FadeInUp, FadeOutUp } from 'react-native-reanimated';
@@ -17,6 +16,7 @@ import Svg, { Ellipse, Path } from 'react-native-svg';
 
 import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { Mascot, type MascotName } from '~/components/feedback/Mascot';
+import { useContentFrame } from '~/components/layout/ContentFrame';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { Button, Text } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
@@ -295,7 +295,7 @@ function TestimonialCarousel({ colors }: { colors: PaywallColors }) {
   // The carousel is full-bleed, so it starts at the window width and renders
   // fully-formed on first paint (no empty-then-populated flash); onLayout only
   // corrects it on tablets, where the content column is narrower.
-  const { width: windowWidth } = useWindowDimensions();
+  const { width: windowWidth } = useContentFrame();
   const [width, setWidth] = useState(windowWidth);
   const scrollRef = useRef<ScrollViewInstance>(null);
   const data = TESTIMONIALS;

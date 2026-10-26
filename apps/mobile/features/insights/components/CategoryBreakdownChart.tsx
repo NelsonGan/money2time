@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { PieChart } from 'react-native-gifted-charts';
 import Svg, { G, Polyline, Text as SvgText } from 'react-native-svg';
 
+import { useContentFrame } from '~/components/layout/ContentFrame';
 import { CategoryEmoji, Text } from '~/components/ui';
 import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { categoryIconToEmoji } from '~/constants/categoryIcons';
@@ -62,7 +63,7 @@ export function CategoryBreakdownChart({
   const resolvedTheme = useResolvedTheme();
   const themeColors = useThemeColors();
   const isDark = resolvedTheme === 'dark';
-  const { width } = useWindowDimensions();
+  const { width } = useContentFrame();
 
   const total = useMemo(() => rows.reduce((sum, row) => sum + row.amount, 0), [rows]);
 

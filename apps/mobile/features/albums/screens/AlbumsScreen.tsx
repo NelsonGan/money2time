@@ -8,7 +8,6 @@ import {
   ScrollView,
   type ScrollViewInstance,
   StatusBar,
-  useWindowDimensions,
   View,
 } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
@@ -16,6 +15,7 @@ import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-
 import Sortable from 'react-native-sortables';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
+import { useContentFrame } from '~/components/layout/ContentFrame';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import {
   useBottomNavContentInset,
@@ -65,7 +65,7 @@ export function AlbumsScreen({
   const bottomNavInset = useBottomNavContentInset();
   const { resetMinimize } = useBottomNavMinimize();
   const reportBottomNavScroll = useBottomNavScrollReporter();
-  const { width: windowWidth } = useWindowDimensions();
+  const { width: windowWidth } = useContentFrame();
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
 
   const [tab, setTab] = useState<AlbumsTab>('albums');
