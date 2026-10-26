@@ -239,7 +239,7 @@ describe('budget module: templates', () => {
     expect(refusal([create({ totalAmount: 10, allocations: lines([['coffee', 10]]) })])).toEqual({
       error: 'invalid',
     });
-    // A breakdown that does not sum to its parent.
+    // A breakdown larger than its parent.
     expect(
       refusal([
         create({
@@ -247,6 +247,7 @@ describe('budget module: templates', () => {
             ['rent', 60],
             ['food', 40],
             ['coffee', 30],
+            ['lunch', 25],
           ]),
         }),
       ]),
@@ -274,6 +275,20 @@ describe('budget module: templates', () => {
           allocations: lines([
             ['rent', 0.1],
             ['food', 0.2],
+          ]),
+        }),
+      ]),
+    ).toHaveLength(1);
+  });
+
+  it('accepts a partial subcategory breakdown, leaving the rest on the parent', () => {
+    expect(
+      steps([
+        create({
+          allocations: lines([
+            ['rent', 60],
+            ['food', 40],
+            ['coffee', 30],
           ]),
         }),
       ]),
