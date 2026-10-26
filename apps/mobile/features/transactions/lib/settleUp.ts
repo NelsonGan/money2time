@@ -401,6 +401,25 @@ export function buildReceiptText(input: ReceiptTextInput): string {
 }
 
 /**
+ * File name for one shared receipt image. Every share gets its own name: iOS
+ * and the receiving apps cache a shared file by its URL, so reusing one fixed
+ * path made them send the first person's receipt again for everyone after.
+ * Accents are folded (José → jose) and only ASCII letters and digits are
+ * kept, so the name stays safe on every file system; the timestamp alone keeps it unique.
+ */
+export function receiptShareFileName(title: string, now: number): string {
+  const slug = title
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 40)
+    .replace(/-+$/, '');
+  return slug ? `settle-up-receipt-${slug}-${now}.png` : `settle-up-receipt-${now}.png`;
+}
+
+/**
  * Distinct person names previously entered on splits, most-recently-used first.
  * Powers the name autocomplete in the split editor. Self splits and blank names
  * are skipped; for a given name the casing from its most recent use wins.
