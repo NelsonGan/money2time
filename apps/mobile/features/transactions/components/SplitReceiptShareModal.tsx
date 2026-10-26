@@ -23,7 +23,7 @@ import { hasSeenQrPrompt, markQrPromptSeen } from '~/services/settleUpQrPromptSt
 import { getPaymentQrUri } from '~/services/userAssets';
 import { getErrorMessage } from '~/utils/errorHandling';
 
-import { buildReceiptText } from '../lib/settleUp';
+import { buildReceiptText, receiptShareFileName } from '../lib/settleUp';
 import type { ReceiptContent } from './SplitReceiptCard';
 import { SplitReceiptCard } from './SplitReceiptCard';
 
@@ -77,7 +77,8 @@ export function SplitReceiptShareModal({
     // would get a second share sheet popping up unprompted.
     let nativeShareInvoked = false;
     // Temp PNG written for the share; deleted afterwards so captures don't pile
-    // up in the cache. A fixed name also caps it at a single reused file.
+    // up in the cache. Each share gets its own name (see receiptShareFileName):
+    // a reused path made iOS resend the first person's cached receipt.
     let tempFile: File | null = null;
     try {
       // Skia is loaded lazily so the screen still works if the native module
@@ -86,7 +87,7 @@ export function SplitReceiptShareModal({
       const image = await makeImageFromView(cardRef);
       const base64 = image?.encodeToBase64();
       if (base64) {
-        const file = new File(Paths.cache, 'settle-up-receipt.png');
+        const file = new File(Paths.cache, receiptShareFileName(content.title, Date.now()));
         file.create({ overwrite: true });
         file.write(base64, { encoding: 'base64' });
         tempFile = file;

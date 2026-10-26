@@ -6,6 +6,7 @@ import {
   buildReceiptText,
   countUnpaidDebtors,
   countUnpaidSplitBills,
+  receiptShareFileName,
   recentSplitPersonNames,
   UNNAMED_PERSON_KEY,
 } from '~/features/transactions/lib/settleUp';
@@ -726,5 +727,35 @@ describe('buildPaybackTransferNote', () => {
   it('returns null when neither a name nor a note exists', () => {
     expect(buildPaybackTransferNote(null, null)).toBeNull();
     expect(buildPaybackTransferNote('', '')).toBeNull();
+  });
+});
+
+describe('receiptShareFileName', () => {
+  it('gives each share its own file so a cached image is never reused', () => {
+    const first = receiptShareFileName('Person A', 1000);
+    const second = receiptShareFileName('Person B', 1000);
+    const again = receiptShareFileName('Person A', 2000);
+    expect(new Set([first, second, again]).size).toBe(3);
+  });
+
+  it('names the file after the receipt title', () => {
+    expect(receiptShareFileName('Sarah Tan', 1700000000000)).toBe(
+      'settle-up-receipt-sarah-tan-1700000000000.png',
+    );
+  });
+
+  it('drops characters that are unsafe in a file name', () => {
+    expect(receiptShareFileName(" Dinner @ Joe's / Bar ", 5)).toBe(
+      'settle-up-receipt-dinner-joe-s-bar-5.png',
+    );
+  });
+
+  it('folds accents to plain letters', () => {
+    expect(receiptShareFileName('José Müller', 3)).toBe('settle-up-receipt-jose-muller-3.png');
+  });
+
+  it('falls back to the timestamp alone when nothing usable is left', () => {
+    expect(receiptShareFileName('陈伟', 7)).toBe('settle-up-receipt-7.png');
+    expect(receiptShareFileName('', 7)).toBe('settle-up-receipt-7.png');
   });
 });
