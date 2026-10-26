@@ -75,6 +75,13 @@ open. Use these devices and no others:
 The Hub and `expo run:android` need the Android SDK and a JDK: start Metro
 with `ANDROID_HOME` and `JAVA_HOME` set (see Getting set up in the README).
 
+On Android the Hub and Argent both drive the emulator through its single UI
+automation service. While both are attached, an occasional Argent gesture is
+not acknowledged, the Hub logs `could not read emulator display size`, and
+logcat's crash buffer shows `uiautomator` with `UiAutomationService ...
+already registered`. That is the tools colliding, not the app: confirm with
+`adb shell pidof com.nelsongan.money2time` and retry the action once.
+
 **Always include screenshots in PR descriptions after UI testing.** Capture the
 final UI and save it, with any recording or other evidence, in
 `.github/pr-assets/<topic>/` (one kebab-case folder per PR), committed on the
