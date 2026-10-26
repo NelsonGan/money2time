@@ -11,6 +11,8 @@ export function setRevenueCatAppUserId(_appUserId: string | null) {}
 
 export async function syncRevenueCatAnalyticsIdentifiers(): Promise<void> {}
 
+export async function invalidateRevenueCatCustomerInfoCache(): Promise<void> {}
+
 export async function fetchRevenueCatCustomerState(): Promise<RevenueCatCustomerState | null> {
   return null;
 }

@@ -2087,6 +2087,10 @@ const ms = {
     purchase_pending_title: 'Pembelian diproses',
     purchase_pending_message:
       'Pembelian anda telah diproses, tetapi akses Pro belum diaktifkan. Sila tunggu sebentar atau pulihkan pembelian.',
+    payment_pending_message:
+      'Pembayaran anda sedang menunggu kelulusan. Pro akan dibuka secara automatik sebaik sahaja ia selesai, jadi anda tidak perlu membeli lagi.',
+    already_owned_not_restored:
+      'Akaun kedai ini sudah memiliki Pro, tetapi ia tidak dapat digunakan di sini. Ketik Pulihkan Pembelian, dan pastikan anda log masuk ke akaun kedai yang membelinya.',
     monthly: 'Bulanan',
     yearly: 'Tahunan',
     lifetime: 'Seumur Hidup',
