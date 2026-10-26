@@ -1,5 +1,11 @@
 import { categoryIconToEmoji } from '~/constants/categoryIcons';
-import { buildBudgetMonthSummary } from '~/features/budget/lib/budgetMath';
+import { buildBudgetSummary } from '~/features/budget/lib/budgetMath';
+import {
+  budgetCoveringDay,
+  budgetDaysLeft,
+  budgetPeriodRange,
+} from '~/features/budget/lib/budgetPeriods';
+import { budgetPeriodLabel, budgetShortDayLabel } from '~/features/budget/lib/format';
 import { weekdayColumnIndex } from '~/features/calendar/lib/calendarBuild';
 import {
   buildSavingsIncludePredicate,
@@ -11,7 +17,7 @@ import { filterSpendingTransactions } from '~/features/reimbursements/lib/reimbu
 import { I18n } from '~/lib/i18n';
 import type {
   Category,
-  MonthlyBudget,
+  PeriodBudget,
   TransactionWithRelations,
   UserSettings,
   WeekStartsOn,
@@ -22,12 +28,12 @@ import {
   financialMonthDayKeys,
   financialMonthKeyForDate,
   financialMonthKeyForIso,
-  financialMonthRange,
   financialMonthStartDate,
   monthCycleOf,
 } from '~/utils/financialMonth';
 import {
   amountToHoursByRate,
+  dateFromDayKeyLocal,
   dayKeyFromDateLocal,
   dayKeyFromIsoLocal,
   formatCompactCurrency,
@@ -259,7 +265,7 @@ export interface Money2TimeWidgetSnapshot {
  * Summing `amount` mixes currencies (a ¥82,935 hotel counted as RM82,935), which
  * is what made the widget's month total disagree with the app's. Legacy rows and
  * same-currency rows have no snapshot and fall back to `amount`. Mirrors
- * `buildBudgetMonthSummary` and the calendar/insights aggregations.
+ * `buildBudgetSummary` and the calendar/insights aggregations.
  */
 function reportingValue(
   transaction: Pick<TransactionWithRelations, 'amount' | 'reportingAmount'>,
@@ -703,25 +709,36 @@ function categoryEmojiForWidget(icon: string | undefined): string {
 // 4 lines: the fifth clipped on smaller Android widget grids.
 const BUDGET_BREAKDOWN_MAX_LINES = 4;
 
+/** Which running budget the widgets show: this month's, else this week's, else this year's. */
+const BUDGET_WIDGET_PERIOD_ORDER = ['month', 'week', 'year'] as const;
+
 function buildBudgetWidgetSnapshots(
   transactions: TransactionWithRelations[],
   settings: UserSettings,
-  monthlyBudgets: MonthlyBudget[],
+  periodBudgets: PeriodBudget[],
   categories: Pick<Category, 'id' | 'parentId' | 'name' | 'icon'>[],
   now: Date,
 ): { budgetRing: BudgetRingSnapshot; budgetBreakdown: BudgetBreakdownSnapshot } {
   const monthCycle = monthCycleOf(settings);
-  const monthKey = financialMonthKeyForDate(now, monthCycle);
-  const { start: periodStart, endInclusive: periodEnd } = financialMonthRange(monthKey, monthCycle);
-  const monthLabel = getMonthLabelFormatter(settings.locale).format(periodStart);
-  const budget = monthlyBudgets.find((entry) => entry.month === monthKey) ?? null;
-  const summary = buildBudgetMonthSummary({
-    month: monthKey,
-    budget,
-    transactions,
-    categories,
-    monthCycle,
-  });
+  let budget: PeriodBudget | null = null;
+  const live = periodBudgets.filter((entry) => !entry.deletedAt);
+  const todayKey = dayKeyFromDateLocal(now);
+  for (const period of BUDGET_WIDGET_PERIOD_ORDER) {
+    budget = budgetCoveringDay(live, period, todayKey, monthCycle);
+    if (budget) break;
+  }
+  // Without any running budget the set-up state names the current month.
+  const monthKey = budget?.periodKey ?? financialMonthKeyForDate(now, monthCycle);
+  const range = budget
+    ? budgetPeriodRange(budget.period, budget.periodKey, monthCycle)
+    : budgetPeriodRange('month', monthKey, monthCycle);
+  const periodStart = dateFromDayKeyLocal(range.start);
+  const periodEnd = dateFromDayKeyLocal(range.end);
+  const isMonthly = !budget || budget.period === 'month';
+  const monthLabel = isMonthly
+    ? getMonthLabelFormatter(settings.locale).format(periodStart)
+    : budgetPeriodLabel(budget!.period, budget!.periodKey, settings.locale, monthCycle);
+  const summary = buildBudgetSummary({ budget, transactions, categories, monthCycle });
 
   const DAY_MS = 24 * 60 * 60 * 1000;
   const daysInMonth = Math.round((periodEnd.getTime() - periodStart.getTime()) / DAY_MS) + 1;
@@ -730,7 +747,8 @@ function buildBudgetWidgetSnapshots(
     daysInMonth,
   );
   const paceRatio = Math.max(0, Math.min(dayOfPeriod / daysInMonth, 1));
-  const daysLeft = Math.max(daysInMonth - dayOfPeriod, 0);
+  // Today included, as the budget page counts them (on the last day: 1 day left).
+  const daysLeft = budgetDaysLeft(range, now);
   const budgetUrl = buildBudgetWidgetUrl();
   const setupLabel = I18n.t('widgets.budget_setup');
 
@@ -744,7 +762,12 @@ function buildBudgetWidgetSnapshots(
     title: 'Budget',
     monthKey,
     monthLabel,
-    monthShortLabel: getShortMonthYearFormatter(settings.locale).format(periodStart),
+    // The small widget's header has room for one date: a week shows its first day.
+    monthShortLabel: isMonthly
+      ? getShortMonthYearFormatter(settings.locale).format(periodStart)
+      : budget!.period === 'week'
+        ? budgetShortDayLabel(range.start, settings.locale)
+        : monthLabel,
     hasBudget,
     usageRatio: summary?.usageRatio ?? 0,
     isOver,
@@ -824,7 +847,7 @@ export function buildMoney2TimeWidgetSnapshot({
   isPro,
   getTrueHourlyRateForDate,
   categories = [],
-  monthlyBudgets = [],
+  periodBudgets = [],
   excludedSavingsIncomeCategoryIds = [],
   excludedSavingsExpenseCategoryIds = [],
   savingsIncomeMode = DEFAULT_SELECTION_FILTER_MODE,
@@ -837,8 +860,8 @@ export function buildMoney2TimeWidgetSnapshot({
   /** Used to resolve a transaction's root category for the savings filter,
    *  and for the budget widgets' names/emoji and subcategory roll-up. */
   categories?: Pick<Category, 'id' | 'parentId' | 'name' | 'icon'>[];
-  /** Frozen per-month budgets; the budget widgets read the current month's. */
-  monthlyBudgets?: MonthlyBudget[];
+  /** Frozen week, month and year budgets; the budget widgets read the running one. */
+  periodBudgets?: PeriodBudget[];
   /** Insights "Savings rate" category picks; applied to the savings widgets. */
   excludedSavingsIncomeCategoryIds?: string[];
   excludedSavingsExpenseCategoryIds?: string[];
@@ -877,7 +900,7 @@ export function buildMoney2TimeWidgetSnapshot({
   const budgetSnapshots = buildBudgetWidgetSnapshots(
     spendingTransactions,
     settings,
-    monthlyBudgets,
+    periodBudgets,
     categories,
     now,
   );
@@ -1048,9 +1071,10 @@ export function buildSampleWidgetSnapshot(settings: UserSettings): Money2TimeWid
     { id: 'sample-cat-fun', parentId: null, name: 'Fun', icon: '🎬' },
     { id: 'sample-cat-shopping', parentId: null, name: 'Shopping', icon: '🛍️' },
   ];
-  const sampleBudget: MonthlyBudget = {
+  const sampleBudget: PeriodBudget = {
     id: 'sample-budget',
-    month: monthKey,
+    period: 'month',
+    periodKey: monthKey,
     templateId: null,
     templateName: 'Everyday',
     templateEmoji: null,
@@ -1088,6 +1112,6 @@ export function buildSampleWidgetSnapshot(settings: UserSettings): Money2TimeWid
     isPro: true,
     getTrueHourlyRateForDate: () => 15,
     categories: sampleCategories,
-    monthlyBudgets: [sampleBudget],
+    periodBudgets: [sampleBudget],
   });
 }

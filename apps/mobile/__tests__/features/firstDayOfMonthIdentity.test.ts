@@ -1,7 +1,7 @@
 import {
-  buildBudgetMonthSummary,
+  buildBudgetSummary,
   computeBackPopulateRange,
-  computeBudgetPagerMonths,
+  computeBudgetPagerKeys,
 } from '~/features/budget/lib/budgetMath';
 /**
  * Regression guard: a user on the default `firstDayOfMonth = 1` must get exactly
@@ -13,7 +13,7 @@ import {
  */
 import { buildCalendarMonthFromGrouped } from '~/features/calendar/lib/calendarBuild';
 import { NO_REIMBURSEMENT } from '~/features/reimbursements/lib/reimbursementMath';
-import type { Category, MonthlyBudget, TransactionWithRelations } from '~/types';
+import type { Category, PeriodBudget, TransactionWithRelations } from '~/types';
 import { monthKeyFromIsoLocal } from '~/utils/formatters';
 import {
   bucketTransactionsByAccountPeriod,
@@ -61,10 +61,11 @@ function makeCategory(id: string, parentId: string | null = null): Category {
   };
 }
 
-function makeBudget(overrides: Partial<MonthlyBudget>): MonthlyBudget {
+function makeBudget(overrides: Partial<PeriodBudget>): PeriodBudget {
   return {
     id: 'b1',
-    month: '2026-07',
+    period: 'month',
+    periodKey: '2026-07',
     templateId: 'tpl1',
     templateName: 'Everyday',
     templateEmoji: null,
@@ -184,7 +185,7 @@ describe('bucketTransactionsByMonth — day 1 matches monthKeyFromIsoLocal', () 
 describe('budget math — day 1 matches calendar-month behaviour', () => {
   const categories = [makeCategory('food'), makeCategory('transport')];
 
-  it('buildBudgetMonthSummary is identical at day 1 vs omitted, calendar-bucketed', () => {
+  it('buildBudgetSummary is identical at day 1 vs omitted, calendar-bucketed', () => {
     const transactions = [
       makeTx({ id: 'a', categoryId: 'food', amount: 100, date: '2026-07-01' }),
       makeTx({ id: 'b', categoryId: 'food', amount: 50, date: '2026-07-31' }),
@@ -193,45 +194,47 @@ describe('budget math — day 1 matches calendar-month behaviour', () => {
       makeTx({ id: 'd', categoryId: 'food', amount: 999, date: '2026-08-01' }),
     ];
     const budget = makeBudget({});
-    const withDay1 = buildBudgetMonthSummary({
-      month: '2026-07',
+    const withDay1 = buildBudgetSummary({
       budget,
       transactions,
       categories,
       monthCycle: 1,
     });
-    const omitted = buildBudgetMonthSummary({ month: '2026-07', budget, transactions, categories });
+    const omitted = buildBudgetSummary({ budget, transactions, categories });
 
     expect(withDay1?.totalSpent).toBe(150);
     expect(withDay1).toEqual(omitted);
   });
 
-  it('computeBudgetPagerMonths is identical at day 1 vs omitted', () => {
+  it('computeBudgetPagerKeys lays out calendar months at day 1', () => {
     const now = new Date(2026, 6, 15);
-    const budgets = [makeBudget({ month: '2026-05' })];
+    const budgets = [makeBudget({ periodKey: '2026-05' })];
     const transactions = [makeTx({ date: '2026-04-10T12:00:00.000Z' })];
-    const withDay1 = computeBudgetPagerMonths({ budgets, transactions, now, monthCycle: 1 });
-    const omitted = computeBudgetPagerMonths({ budgets, transactions, now });
-    expect(withDay1).toEqual(omitted);
-    expect(withDay1[0]).toBe('2026-04');
-    expect(withDay1).toContain('2026-07');
+    const months = computeBudgetPagerKeys({
+      period: 'month',
+      budgets,
+      transactions,
+      now,
+      clock: { weekStartsOn: 1, monthCycle: 1 },
+    });
+    expect(months[0]).toBe('2026-04');
+    expect(months).toContain('2026-07');
   });
 
-  it('computeBackPopulateRange is identical at day 1 vs omitted', () => {
+  it('computeBackPopulateRange fills calendar months at day 1', () => {
     const now = new Date(2026, 6, 15);
     const transactions = [
       makeTx({ id: 'a', type: 'expense', date: '2026-04-10T12:00:00.000Z' }),
       makeTx({ id: 'b', type: 'expense', date: '2026-05-20T12:00:00.000Z' }),
     ];
-    const withDay1 = computeBackPopulateRange({
+    const range = computeBackPopulateRange({
+      period: 'month',
       transactions,
-      existingMonths: [],
+      existingKeys: [],
       now,
-      monthCycle: 1,
+      clock: { weekStartsOn: 1, monthCycle: 1 },
     });
-    const omitted = computeBackPopulateRange({ transactions, existingMonths: [], now });
-    expect(withDay1).toEqual(omitted);
-    expect(withDay1?.firstMonthKey).toBe('2026-04');
+    expect(range?.keys).toEqual(['2026-04', '2026-05', '2026-06']);
   });
 });
 

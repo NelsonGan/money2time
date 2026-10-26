@@ -1,5 +1,7 @@
 /**
- * Web Dashboard edits: Budget templates and monthly budgets (BudgetTemplateEditorScreen, MonthlyBudgetEditorScreen).
+ * Web Dashboard edits: Budget templates and monthly budgets (BudgetTemplateEditorScreen, PeriodBudgetEditorScreen).
+ * The web knows monthly budgets only: weekly and yearly ones are never sent to it
+ * (`webDashboardBudgetsOnly`) and every op here is about a monthly template or budget.
  * Planned on the phone like the app's own editor; applied by
  * features/settings/lib/webDashboardApply/budget.ts.
  *
@@ -19,7 +21,7 @@
  */
 
 import { PRO_LIMITS } from '~/constants/proLimits';
-import type { BudgetTemplate, MonthlyBudget } from '~/types';
+import type { BudgetTemplate, PeriodBudget } from '~/types';
 
 import type { EditModule, EditStep, ModuleOp, PlanTools, Result } from '../webDashboardEdits';
 import { isAt, isId, isMoney, isMonth, isRecord, validIcon } from './shared';
@@ -41,9 +43,13 @@ type TemplateFields = {
 
 /** What the planner reads from the app: see webDashboardApply/budget.ts `select`. */
 export type BudgetExtra = {
+  /** Monthly templates only. */
   templates: BudgetTemplate[];
-  budgets: MonthlyBudget[];
-  /** The budget pager's months (`computeBudgetPagerMonths`): first budget or expense month to a year ahead. */
+  /** Month budgets only. */
+  budgets: PeriodBudget[];
+  /** Live templates of every period, which the free plan's limit counts. */
+  templateCount: number;
+  /** The budget pager's months (`computeBudgetPagerKeys`): first budget or expense month to a year ahead. */
   months: string[];
 };
 
@@ -157,6 +163,7 @@ function extraOf(tools: PlanTools): BudgetExtra {
   return {
     templates: extra.templates.filter((template) => !template.deletedAt),
     budgets: extra.budgets.filter((budget) => !budget.deletedAt),
+    templateCount: extra.templateCount,
     months: extra.months,
   };
 }
@@ -225,7 +232,7 @@ const step = (action: string, payload: Record<string, unknown>): EditStep => ({
 });
 
 function plan(tools: PlanTools, op: ModuleOp, steps: EditStep[]): Result<number> {
-  const { templates, budgets, months } = extraOf(tools);
+  const { templates, budgets, months, templateCount } = extraOf(tools);
 
   if (op.op === 'template_create' || op.op === 'template_update') {
     const fields = op.template as TemplateFields;
@@ -237,7 +244,7 @@ function plan(tools: PlanTools, op: ModuleOp, steps: EditStep[]): Result<number>
     } else {
       // As the templates screen checks before opening a new template's editor.
       const made = tools.created.budget_templates ?? 0;
-      if (!tools.lookup.isPro && templates.length + made >= PRO_LIMITS.FREE_MAX_BUDGET_TEMPLATES) {
+      if (!tools.lookup.isPro && templateCount + made >= PRO_LIMITS.FREE_MAX_BUDGET_TEMPLATES) {
         return tools.refuse('pro_required', 'budget_templates');
       }
     }
@@ -283,7 +290,7 @@ function plan(tools: PlanTools, op: ModuleOp, steps: EditStep[]): Result<number>
     }
     if (!tools.claim(`budget-month:${month}`)) return tools.refuse('invalid');
     // One live budget a month: one made since the browser's copy wins.
-    if (budgets.some((budget) => budget.month === month)) return tools.refuse('conflict');
+    if (budgets.some((budget) => budget.periodKey === month)) return tools.refuse('conflict');
     if (op.op === 'month_create') {
       // The template is read as it is now: the same batch must not also change
       // it, though more months may still be made from it.
@@ -315,7 +322,7 @@ function plan(tools: PlanTools, op: ModuleOp, steps: EditStep[]): Result<number>
     if (!tools.claim(`budget:${op.id as string}`)) return tools.refuse('invalid');
     const current = budgets.find((budget) => budget.id === op.id);
     if (!current || current.updatedAt !== op.at) return tools.refuse('conflict');
-    if (!tools.claim(`budget-month:${current.month}`)) return tools.refuse('invalid');
+    if (!tools.claim(`budget-month:${current.periodKey}`)) return tools.refuse('invalid');
     if (op.op === 'month_delete') {
       steps.push(step('month_delete', { id: current.id }));
       return tools.ok(1);

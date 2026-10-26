@@ -5,7 +5,7 @@ import {
   buildSavingsIncludePredicate,
   parseSavingsExclusions,
 } from '~/services/widgetSnapshot.shared';
-import type { TransactionWithRelations, UserSettings } from '~/types';
+import type { PeriodBudget, TransactionWithRelations, UserSettings } from '~/types';
 
 const baseSettings: UserSettings = {
   id: 'settings',
@@ -491,6 +491,72 @@ describe('buildMoney2TimeWidgetSnapshot', () => {
 
     expect(snapshot.monthlyExpenseQuickLog.expenseAmount).toBe(40);
     expect(snapshot.savingsRate).toMatchObject({ income: 500, expense: 40 });
+  });
+});
+
+function periodBudget(overrides: Partial<PeriodBudget>): PeriodBudget {
+  return {
+    id: 'b',
+    period: 'month',
+    periodKey: '2026-10',
+    templateId: null,
+    templateName: null,
+    templateEmoji: null,
+    totalAmount: 100,
+    countUnbudgeted: true,
+    lines: [],
+    createdAt: '2026-10-01T00:00:00.000Z',
+    updatedAt: '2026-10-01T00:00:00.000Z',
+    deletedAt: null,
+    ...overrides,
+  };
+}
+
+describe('budget widgets', () => {
+  beforeEach(() => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-10-28T12:00:00')); // a Wednesday
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  const build = (periodBudgets: PeriodBudget[]) =>
+    buildMoney2TimeWidgetSnapshot({
+      transactions: [
+        transaction({ id: 'this-week', amount: 30, date: '2026-10-27T12:00:00' }),
+        transaction({ id: 'last-week', amount: 50, date: '2026-10-20T12:00:00' }),
+      ],
+      settings: { ...baseSettings, weekStartsOn: 1 },
+      isPro: true,
+      getTrueHourlyRateForDate: () => 0,
+      periodBudgets,
+    });
+
+  it('shows the running month first, counting today in the days left', () => {
+    const { budgetRing } = build([
+      periodBudget({ id: 'w', period: 'week', periodKey: '2026-10-26', totalAmount: 60 }),
+      periodBudget({ id: 'm', totalAmount: 1000 }),
+    ]);
+    expect(budgetRing).toMatchObject({ hasBudget: true, monthKey: '2026-10' });
+    expect(budgetRing.daysLeftLabel).toBe('4 days left'); // 28–31 Oct
+  });
+
+  it('falls back to the running week, counting only its days', () => {
+    const { budgetRing, budgetBreakdown } = build([
+      periodBudget({ id: 'w', period: 'week', periodKey: '2026-10-26', totalAmount: 60 }),
+      periodBudget({ id: 'y', period: 'year', periodKey: '2026', totalAmount: 5000 }),
+    ]);
+    expect(budgetRing).toMatchObject({ hasBudget: true, monthKey: '2026-10-26' });
+    expect(budgetRing.usageRatio).toBeCloseTo(0.5);
+    expect(budgetRing.daysLeftLabel).toBe('5 days left'); // Wed–Sun
+    expect(budgetBreakdown.monthLabel).toBe('Oct 26 – Nov 1');
+  });
+
+  it('falls back to the running year, then to the set-up state', () => {
+    expect(build([periodBudget({ period: 'year', periodKey: '2026' })]).budgetRing.monthKey).toBe(
+      '2026',
+    );
+    expect(build([periodBudget({ periodKey: '2026-09' })]).budgetRing.hasBudget).toBe(false);
   });
 });
 

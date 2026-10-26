@@ -1,5 +1,5 @@
 import { Copy, Trash2 } from 'lucide-react-native';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
@@ -16,7 +16,8 @@ import type { ColorPalette } from '~/constants/designSystem';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { countRootAllocations } from '~/features/budget/lib/budgetMath';
-import { categoriesCountLabel, money } from '~/features/budget/lib/format';
+import { BUDGET_PERIODS } from '~/features/budget/lib/budgetPeriods';
+import { budgetPeriodName, categoriesCountLabel, money } from '~/features/budget/lib/format';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -150,6 +151,15 @@ export function BudgetTemplatesScreen({ onBack, onOpenEditor }: BudgetTemplatesS
   const themeColors = useThemeColors();
   const listNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
 
+  const sections = useMemo(
+    () =>
+      BUDGET_PERIODS.map((period) => ({
+        period,
+        templates: budgetTemplates.filter((template) => template.period === period),
+      })).filter((section) => section.templates.length > 0),
+    [budgetTemplates],
+  );
+
   const handleAdd = useCallback(
     (duplicateFromId?: string) => {
       if (!checkLimit('budget_templates', budgetTemplates.length)) return;
@@ -211,19 +221,30 @@ export function BudgetTemplatesScreen({ onBack, onOpenEditor }: BudgetTemplatesS
           ]}
           showsVerticalScrollIndicator={false}
         >
-          <View className="gap-2.5">
-            {budgetTemplates.map((template) => (
-              <TemplateCard
-                key={template.id}
-                template={template}
-                categories={categories}
-                settings={settings}
-                themeColors={themeColors}
-                onSetDefault={() => setDefaultBudgetTemplate(template.id)}
-                onEdit={() => onOpenEditor({ templateId: template.id })}
-                onDuplicate={() => handleAdd(template.id)}
-                onDelete={() => handleDelete(template)}
-              />
+          {/* One section per period: each has its own default, which is the
+              template its budgets are made from automatically. */}
+          <View className="gap-5">
+            {sections.map(({ period, templates }) => (
+              <View key={period}>
+                <Text variant="label" tone="muted" className="mb-2 px-1 uppercase">
+                  {budgetPeriodName(period)}
+                </Text>
+                <View className="gap-2.5">
+                  {templates.map((template) => (
+                    <TemplateCard
+                      key={template.id}
+                      template={template}
+                      categories={categories}
+                      settings={settings}
+                      themeColors={themeColors}
+                      onSetDefault={() => setDefaultBudgetTemplate(template.id)}
+                      onEdit={() => onOpenEditor({ templateId: template.id })}
+                      onDuplicate={() => handleAdd(template.id)}
+                      onDelete={() => handleDelete(template)}
+                    />
+                  ))}
+                </View>
+              </View>
             ))}
           </View>
         </ScrollView>

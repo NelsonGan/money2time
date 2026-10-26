@@ -148,6 +148,7 @@ import {
 } from '~/services/insightsNavigation';
 import { getCustomLogoUri } from '~/services/userAssets';
 import type {
+  BudgetPeriod,
   Category,
   CategoryType,
   MonthCycleInput,
@@ -2841,9 +2842,13 @@ interface InsightsScreenProps {
   onOpenProPaywall?: () => void;
   /** Budget view (embedded as an insights page via the type menu). */
   onOpenBudgetTemplates: () => void;
-  onOpenBudgetTemplateEditor: (params?: { templateId?: string; duplicateFromId?: string }) => void;
-  onOpenMonthlyBudgetEditor: (budgetId: string) => void;
-  onCreateCustomBudget: (month: string) => void;
+  onOpenBudgetTemplateEditor: (params?: {
+    templateId?: string;
+    duplicateFromId?: string;
+    period?: BudgetPeriod;
+  }) => void;
+  onOpenPeriodBudgetEditor: (budgetId: string) => void;
+  onCreateCustomBudget: (period: BudgetPeriod, periodKey: string) => void;
   activityBreakdownInsightRequest?: {
     insightType: NavigableInsightType;
     anchorDateKey?: string;
@@ -2862,7 +2867,7 @@ export function InsightsScreen({
   onOpenProPaywall,
   onOpenBudgetTemplates,
   onOpenBudgetTemplateEditor,
-  onOpenMonthlyBudgetEditor,
+  onOpenPeriodBudgetEditor,
   onCreateCustomBudget,
   activityBreakdownInsightRequest = null,
 }: InsightsScreenProps) {
@@ -3011,7 +3016,9 @@ export function InsightsScreen({
   const [periodPickerAnchorRect, setPeriodPickerAnchorRect] =
     useState<PeriodPickerAnchorRect | null>(null);
   const [isInsightMenuOpen, setIsInsightMenuOpen] = useState(false);
-  const [budgetMonthLabel, setBudgetMonthLabel] = useState('');
+  const [budgetPeriodLabel, setBudgetPeriodLabel] = useState('');
+  // Years have no jump picker: the arrows cover the few there are.
+  const [budgetPeriodPickable, setBudgetPeriodPickable] = useState(true);
   const budgetPagerRef = useRef<BudgetPagerViewHandle>(null);
   // The review page's zoom and exclusions live here so its filter button can
   // sit in the header and its choices ride along in the insights preferences;
@@ -7079,7 +7086,7 @@ export function InsightsScreen({
                   </View>
                 </View>
               }
-              monthLabel={isBudgetView ? budgetMonthLabel : activePeriodLabel}
+              monthLabel={isBudgetView ? budgetPeriodLabel : activePeriodLabel}
               onPrevMonth={
                 isBudgetView ? () => budgetPagerRef.current?.scrollToRelative(-1) : handlePrevMonth
               }
@@ -7092,7 +7099,9 @@ export function InsightsScreen({
               disableNavArrows={!isTakeoverView && displayPeriodPreset === 'lifetime'}
               onMonthPress={
                 isBudgetView
-                  ? () => budgetPagerRef.current?.openMonthPicker()
+                  ? budgetPeriodPickable
+                    ? () => budgetPagerRef.current?.openPeriodPicker()
+                    : undefined
                   : isTakeoverView || displayPeriodPreset === 'lifetime'
                     ? undefined
                     : handleOpenPeriodPicker
@@ -7123,10 +7132,11 @@ export function InsightsScreen({
               <BudgetPagerView
                 ref={budgetPagerRef}
                 onOpenTemplateEditor={onOpenBudgetTemplateEditor}
-                onOpenBudgetEditor={onOpenMonthlyBudgetEditor}
+                onOpenBudgetEditor={onOpenPeriodBudgetEditor}
                 onCreateCustomBudget={onCreateCustomBudget}
                 onOpenDrilldown={onOpenDrilldown}
-                onActiveMonthLabelChange={setBudgetMonthLabel}
+                onActivePeriodLabelChange={setBudgetPeriodLabel}
+                onPeriodPickerAvailableChange={setBudgetPeriodPickable}
               />
             ) : !isPro && proTrendTypeSet.has(displaySelectedInsightType) ? (
               // Locked Pro trend: every pager page would just render the paywall

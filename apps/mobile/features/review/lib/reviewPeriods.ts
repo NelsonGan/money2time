@@ -195,7 +195,11 @@ export function periodContains(period: ReviewPeriod, dayKey: string): boolean {
   return dayKey >= period.start && dayKey <= period.end;
 }
 
-/** The financial-month key a `month` period refers to (`null` for other zooms). */
-export function monthKeyOfPeriod(period: ReviewPeriod): string | null {
-  return period.zoom === 'month' ? period.key.slice('month:'.length) : null;
+/**
+ * The budget key of the same period: the week's first day, the month key, or
+ * the year (see `features/budget/lib/budgetPeriods.ts`).
+ */
+export function budgetKeyOfPeriod(period: ReviewPeriod): string {
+  if (period.zoom === 'week') return period.start;
+  return period.key.slice(period.key.indexOf(':') + 1);
 }

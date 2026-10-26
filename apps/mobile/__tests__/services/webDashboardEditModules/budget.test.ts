@@ -4,7 +4,7 @@ import {
   planEdit,
   readEditRequest,
 } from '~/services/webDashboardEdits';
-import type { BudgetTemplate, Category, MonthlyBudget } from '~/types';
+import type { BudgetTemplate, Category, PeriodBudget } from '~/types';
 
 const AT = '2026-10-01T10:00:00.000Z';
 const ENTITY = 'module:budget';
@@ -25,6 +25,7 @@ const template = (id: string, patch: Partial<BudgetTemplate> = {}): BudgetTempla
   id,
   name: 'Monthly',
   emoji: null,
+  period: 'month',
   totalAmount: 100,
   isDefault: true,
   countUnbudgeted: true,
@@ -36,9 +37,10 @@ const template = (id: string, patch: Partial<BudgetTemplate> = {}): BudgetTempla
   ...patch,
 });
 
-const budget = (id: string, month: string, patch: Partial<MonthlyBudget> = {}): MonthlyBudget => ({
+const budget = (id: string, month: string, patch: Partial<PeriodBudget> = {}): PeriodBudget => ({
   id,
-  month,
+  period: 'month',
+  periodKey: month,
   templateId: null,
   templateName: null,
   templateEmoji: null,
@@ -52,7 +54,7 @@ const budget = (id: string, month: string, patch: Partial<MonthlyBudget> = {}): 
 });
 
 function lookup(
-  extra: { templates?: BudgetTemplate[]; budgets?: MonthlyBudget[] } = {},
+  extra: { templates?: BudgetTemplate[]; budgets?: PeriodBudget[]; templateCount?: number } = {},
   patch: Partial<EditLookup> = {},
 ): EditLookup {
   return {
@@ -80,6 +82,7 @@ function lookup(
       [ENTITY]: {
         templates: extra.templates ?? [template('t1')],
         budgets: extra.budgets ?? [budget('b1', '2026-10')],
+        templateCount: extra.templateCount ?? (extra.templates ?? [template('t1')]).length,
         months: ['2026-09', '2026-10', '2026-11', '2026-12', '2027-01'],
       },
     },
@@ -305,6 +308,11 @@ describe('budget module: templates', () => {
       feature: 'budget_templates',
     });
     expect(plan([create()], { templates: [] }, { isPro: false }).ok).toBe(true);
+    // A weekly or yearly template (never shown to the web) still counts.
+    expect(refusal([create()], { templates: [], templateCount: 1 }, { isPro: false })).toEqual({
+      error: 'pro_required',
+      feature: 'budget_templates',
+    });
   });
 
   it('updates, keeping an icon the web cannot pick', () => {

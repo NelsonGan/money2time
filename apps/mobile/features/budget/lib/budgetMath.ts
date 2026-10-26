@@ -1,46 +1,49 @@
 import type {
   BudgetCategoryProgress,
-  BudgetMonthSummary,
+  BudgetPeriod,
+  BudgetSummary,
   BudgetTemplate,
   Category,
   MonthCycleInput,
-  MonthlyBudget,
+  PeriodBudget,
   TransactionWithRelations,
   UnbudgetedCategorySpend,
 } from '~/types';
-import { financialMonthKeyForDate, financialMonthKeyForIso } from '~/utils/financialMonth';
+import { dateFromDayKeyLocal, dayKeyFromIsoLocal, normalizeMoneyAmount } from '~/utils/formatters';
+
 import {
-  addMonthsAtMonthStart,
-  monthKeyFromDateLocal,
-  normalizeMoneyAmount,
-  parseMonthKey,
-} from '~/utils/formatters';
+  addBudgetPeriods,
+  type BudgetPeriodClock,
+  budgetPeriodKeyForDate,
+  budgetPeriodRange,
+  budgetSlotKey,
+  isIsoInBudgetRange,
+} from './budgetPeriods';
 
 /**
- * Aggregates one month's expense spend against its (possibly absent) budget.
- * Spend is valued at the frozen reporting-currency amount so budget numbers
- * always agree with Insights.
+ * Aggregates one period's expense spend against its budget. Spend is valued
+ * at the frozen reporting-currency amount so budget numbers always agree with
+ * Insights, and only transactions inside the budget's own period count.
  *
  * Lines on root categories are the primary rows; their spend rolls all
  * subcategory activity up. Lines on subcategories render as children of their
  * root line with that category's own spend (no roll-up). Whether unbudgeted
- * spend counts toward the month total follows the frozen `countUnbudgeted`
- * flag. Returns null when there is no budget for the month.
+ * spend counts toward the period total follows the frozen `countUnbudgeted`
+ * flag. Returns null when there is no budget.
  */
-export function buildBudgetMonthSummary({
-  month,
+export function buildBudgetSummary({
   budget,
   transactions,
   categories,
   monthCycle = 1,
 }: {
-  month: string;
-  budget: MonthlyBudget | null;
+  budget: PeriodBudget | null;
   transactions: TransactionWithRelations[];
   categories: Pick<Category, 'id' | 'parentId'>[];
   monthCycle?: MonthCycleInput;
-}): BudgetMonthSummary | null {
+}): BudgetSummary | null {
   if (!budget) return null;
+  const range = budgetPeriodRange(budget.period, budget.periodKey, monthCycle);
 
   const parentById = new Map(categories.map((category) => [category.id, category.parentId]));
   const rootById = new Map(
@@ -70,7 +73,7 @@ export function buildBudgetMonthSummary({
   for (const transaction of transactions) {
     if (transaction.deletedAt) continue;
     if (transaction.type !== 'expense') continue;
-    if (financialMonthKeyForIso(transaction.date, monthCycle) !== month) continue;
+    if (!isIsoInBudgetRange(transaction.date, range)) continue;
     const value = transaction.reportingAmount ?? transaction.amount;
     const categoryId = transaction.categoryId;
     if (!categoryId) {
@@ -137,7 +140,8 @@ export function buildBudgetMonthSummary({
   const remaining = normalizeMoneyAmount(totalBudget - totalSpent);
 
   return {
-    month,
+    period: budget.period,
+    periodKey: budget.periodKey,
     totalBudget,
     totalSpent,
     budgetedSpent,
@@ -180,79 +184,89 @@ export function childAllocationExceedsParent(
 }
 
 export interface BackPopulateRange {
-  /** Missing past months ('YYYY-MM', ascending) a back-populate would fill. */
-  months: string[];
-  firstMonthKey: string;
-  lastMonthKey: string;
+  /** Missing past period keys (ascending) a back-populate would fill. */
+  keys: string[];
+  firstKey: string;
+  lastKey: string;
 }
 
-function addMonthsToKey(monthKey: string, offset: number): string {
-  return monthKeyFromDateLocal(
-    addMonthsAtMonthStart(parseMonthKey(monthKey) ?? new Date(), offset),
-  );
-}
-
-/**
- * Past months a back-populate would create budgets for: from the month of the
- * earliest live expense transaction through last month, skipping months that
- * have or ever had a budget (deletion tombstones stick, same as auto-create,
- * so a bulk fill can't resurrect a deliberately deleted month). Returns null
- * when there is nothing to fill (no expense history, or the first expense is
- * in the current month).
- */
-export function computeBackPopulateRange({
-  transactions,
-  existingMonths,
-  now = new Date(),
-  monthCycle = 1,
-}: {
-  transactions: TransactionWithRelations[];
-  /** Months that have or ever had a budget, soft-deleted included. */
-  existingMonths: string[];
-  now?: Date;
-  monthCycle?: MonthCycleInput;
-}): BackPopulateRange | null {
-  let firstExpenseMonth: string | null = null;
+/** Key of the period the earliest live expense falls in, or null without expenses. */
+function firstExpenseKey(
+  period: BudgetPeriod,
+  transactions: Pick<TransactionWithRelations, 'type' | 'date' | 'deletedAt'>[],
+  clock: BudgetPeriodClock,
+): string | null {
+  let firstDay: string | null = null;
   for (const transaction of transactions) {
     if (transaction.deletedAt) continue;
     if (transaction.type !== 'expense') continue;
-    const monthKey = financialMonthKeyForIso(transaction.date, monthCycle);
-    if (!firstExpenseMonth || monthKey < firstExpenseMonth) firstExpenseMonth = monthKey;
+    const dayKey = dayKeyFromIsoLocal(transaction.date);
+    if (!firstDay || dayKey < firstDay) firstDay = dayKey;
   }
-  if (!firstExpenseMonth) return null;
-
-  const currentMonth = financialMonthKeyForDate(now, monthCycle);
-  if (firstExpenseMonth >= currentMonth) return null;
-
-  const taken = new Set(existingMonths);
-  const months: string[] = [];
-  for (let month = firstExpenseMonth; month < currentMonth; month = addMonthsToKey(month, 1)) {
-    if (!taken.has(month)) months.push(month);
-  }
-  if (months.length === 0) return null;
-
-  return {
-    months,
-    firstMonthKey: months[0],
-    lastMonthKey: months[months.length - 1],
-  };
+  return firstDay ? budgetPeriodKeyForDate(period, dateFromDayKeyLocal(firstDay), clock) : null;
 }
 
 /**
- * Month-rollover auto-create decision: returns the template to create the
- * current month's budget from, or null to skip. Skips when the month has or
- * ever had a budget (deletion tombstones stick) or no templates exist.
+ * Past periods a back-populate would create budgets for: from the period of
+ * the earliest live expense transaction through the last completed one,
+ * skipping periods that have or ever had a budget (deletion tombstones stick,
+ * same as auto-create, so a bulk fill can't resurrect a deliberately deleted
+ * period). Returns null when there is nothing to fill (no expense history, or
+ * the first expense is in the current period).
+ */
+export function computeBackPopulateRange({
+  period,
+  transactions,
+  existingKeys,
+  now = new Date(),
+  clock,
+}: {
+  period: BudgetPeriod;
+  transactions: Pick<TransactionWithRelations, 'type' | 'date' | 'deletedAt'>[];
+  /** Keys of this period that have or ever had a budget, soft-deleted included. */
+  existingKeys: string[];
+  now?: Date;
+  clock: BudgetPeriodClock;
+}): BackPopulateRange | null {
+  const firstKey = firstExpenseKey(period, transactions, clock);
+  if (!firstKey) return null;
+
+  const currentKey = budgetPeriodKeyForDate(period, now, clock);
+  if (firstKey >= currentKey) return null;
+
+  const taken = new Set(existingKeys.map((key) => budgetSlotKey(period, key, clock.weekStartsOn)));
+  const keys: string[] = [];
+  for (
+    let key = firstKey;
+    key < currentKey;
+    key = addBudgetPeriods(period, key, 1, clock.monthCycle)
+  ) {
+    if (!taken.has(key)) keys.push(key);
+  }
+  if (keys.length === 0) return null;
+
+  return { keys, firstKey: keys[0], lastKey: keys[keys.length - 1] };
+}
+
+/**
+ * Period-rollover auto-create decision: returns the template of `period` to
+ * create the current period's budget from, or null to skip. Skips when the
+ * period has or ever had a budget (deletion tombstones stick) or the period
+ * has no templates.
  */
 export function pickAutoCreateTemplate({
-  currentMonthHasEverHadBudget,
+  period,
+  currentPeriodHasEverHadBudget,
   templates,
 }: {
-  currentMonthHasEverHadBudget: boolean;
+  period: BudgetPeriod;
+  currentPeriodHasEverHadBudget: boolean;
   templates: BudgetTemplate[];
 }): BudgetTemplate | null {
-  if (currentMonthHasEverHadBudget) return null;
-  if (templates.length === 0) return null;
-  return templates.find((template) => template.isDefault) ?? templates[0];
+  if (currentPeriodHasEverHadBudget) return null;
+  const ofPeriod = templates.filter((template) => template.period === period);
+  if (ofPeriod.length === 0) return null;
+  return ofPeriod.find((template) => template.isDefault) ?? ofPeriod[0];
 }
 
 /**
@@ -281,43 +295,57 @@ export function computeAllocationRemaining(
   return normalizeMoneyAmount(totalAmount - allocated);
 }
 
-/** How far past the current month the pager reaches, so future months can be
- *  planned well ahead. */
-export const BUDGET_PAGER_FUTURE_MONTHS = 12;
+/** How far past the current period the pager reaches, so budgets can be
+ *  planned ahead. */
+export const BUDGET_PAGER_FUTURE_PERIODS: Record<BudgetPeriod, number> = {
+  week: 12,
+  month: 12,
+  year: 2,
+};
 
 /**
- * Months shown by the budget pager: earliest budget/expense month through a
- * year ahead (or the latest existing budget, whichever is further).
+ * Period keys shown by the budget pager for one period length: the earliest
+ * budget or expense period through the future reach (or the latest existing
+ * budget, whichever is further). Week budgets are placed by `budgetSlotKey`.
  */
-export function computeBudgetPagerMonths({
+export function computeBudgetPagerKeys({
+  period,
   budgets,
   transactions,
   now = new Date(),
-  monthCycle = 1,
+  clock,
 }: {
-  budgets: MonthlyBudget[];
+  period: BudgetPeriod;
+  budgets: PeriodBudget[];
   /** Only each row's type, date and deletion are read. */
   transactions: Pick<TransactionWithRelations, 'type' | 'date' | 'deletedAt'>[];
   now?: Date;
-  monthCycle?: MonthCycleInput;
+  clock: BudgetPeriodClock;
 }): string[] {
-  const currentMonth = financialMonthKeyForDate(now, monthCycle);
-  let firstMonth = currentMonth;
-  let lastMonth = addMonthsToKey(currentMonth, BUDGET_PAGER_FUTURE_MONTHS);
+  const currentKey = budgetPeriodKeyForDate(period, now, clock);
+  let firstKey = currentKey;
+  let lastKey = addBudgetPeriods(
+    period,
+    currentKey,
+    BUDGET_PAGER_FUTURE_PERIODS[period],
+    clock.monthCycle,
+  );
   for (const budget of budgets) {
-    if (budget.month < firstMonth) firstMonth = budget.month;
-    if (budget.month > lastMonth) lastMonth = budget.month;
+    if (budget.period !== period) continue;
+    const key = budgetSlotKey(period, budget.periodKey, clock.weekStartsOn);
+    if (key < firstKey) firstKey = key;
+    if (key > lastKey) lastKey = key;
   }
-  for (const transaction of transactions) {
-    if (transaction.deletedAt) continue;
-    if (transaction.type !== 'expense') continue;
-    const monthKey = financialMonthKeyForIso(transaction.date, monthCycle);
-    if (monthKey < firstMonth) firstMonth = monthKey;
-  }
+  const expenseKey = firstExpenseKey(period, transactions, clock);
+  if (expenseKey && expenseKey < firstKey) firstKey = expenseKey;
 
-  const months: string[] = [];
-  for (let month = firstMonth; month <= lastMonth; month = addMonthsToKey(month, 1)) {
-    months.push(month);
+  const keys: string[] = [];
+  for (
+    let key = firstKey;
+    key <= lastKey;
+    key = addBudgetPeriods(period, key, 1, clock.monthCycle)
+  ) {
+    keys.push(key);
   }
-  return months;
+  return keys;
 }

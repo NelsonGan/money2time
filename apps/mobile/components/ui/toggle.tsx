@@ -13,6 +13,10 @@ interface ToggleOption<T extends string> {
   value: T;
   label: string;
   disabled?: boolean;
+  /** Small dot after the label, marking the option as having something live. */
+  badge?: boolean;
+  /** Screen-reader label when the visible one is not enough (e.g. with a badge). */
+  accessibilityLabel?: string;
 }
 
 interface SegmentedToggleProps<T extends string> {
@@ -100,6 +104,9 @@ export function SegmentedToggle<T extends string>({
               void triggerHaptic('selection');
               onChange(option.value);
             }}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: active, disabled: option.disabled }}
+            accessibilityLabel={option.accessibilityLabel}
             className={cn(
               isHomeVariant
                 ? 'min-h-[40px] min-w-[64px] flex-1 items-center justify-center rounded-[16px] px-3 py-2.5 z-10'
@@ -109,20 +116,30 @@ export function SegmentedToggle<T extends string>({
               option.disabled && 'opacity-45',
             )}
           >
-            <Text
-              variant="caption"
-              className={cn(
-                isHomeVariant
-                  ? active
-                    ? 'text-foreground'
-                    : 'text-muted-foreground'
-                  : active
-                    ? 'text-primary-foreground'
-                    : 'text-muted-foreground',
-              )}
-            >
-              {option.label}
-            </Text>
+            <View className="flex-row items-center">
+              <Text
+                variant="caption"
+                className={cn(
+                  isHomeVariant
+                    ? active
+                      ? 'text-foreground'
+                      : 'text-muted-foreground'
+                    : active
+                      ? 'text-primary-foreground'
+                      : 'text-muted-foreground',
+                )}
+              >
+                {option.label}
+              </Text>
+              {option.badge ? (
+                <View
+                  className={cn(
+                    'ml-1.5 h-1.5 w-1.5 rounded-full',
+                    active && !isHomeVariant ? 'bg-primary-foreground' : 'bg-primary',
+                  )}
+                />
+              ) : null}
+            </View>
           </Pressable>
         );
       })}

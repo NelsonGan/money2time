@@ -29,6 +29,13 @@ import { PRO_LIMITS } from '~/constants/proLimits';
 import { parsePaymentAlertPrefs, serializePaymentAlertPrefs } from '~/features/autoLog/lib/prefs';
 import { persistAutoLogTransaction } from '~/features/autoLog/persistTransaction';
 import { computeBackPopulateRange, pickAutoCreateTemplate } from '~/features/budget/lib/budgetMath';
+import {
+  BUDGET_PERIODS,
+  budgetCoveringDay,
+  type BudgetPeriodClock,
+  budgetPeriodKeyForDate,
+  isBudgetPeriodKey,
+} from '~/features/budget/lib/budgetPeriods';
 import { computeItemStats } from '~/features/items/utils';
 import {
   buildRefundNote,
@@ -71,9 +78,9 @@ import {
 import { categoriesRepository } from '~/lib/repositories/categoriesRepository';
 import { exchangeRatesRepository } from '~/lib/repositories/exchangeRatesRepository';
 import { itemsRepository } from '~/lib/repositories/itemsRepository';
-import { monthlyBudgetsRepository } from '~/lib/repositories/monthlyBudgetsRepository';
 import { monthlyWageRepository } from '~/lib/repositories/monthlyWageRepository';
 import { paymentAlertCapturesRepository } from '~/lib/repositories/paymentAlertCapturesRepository';
+import { periodBudgetsRepository } from '~/lib/repositories/periodBudgetsRepository';
 import {
   type ReceiptSplitDraftInput,
   receiptSplitsRepository,
@@ -133,6 +140,7 @@ import {
   type AlbumStats,
   type AppState,
   type BreakdownItem,
+  type BudgetPeriod,
   type BudgetTemplate,
   type CashflowSummary,
   type Category,
@@ -144,11 +152,11 @@ import {
   type ItemWithStats,
   type LocatedAlbum,
   type MonthCycleInput,
-  type MonthlyBudget,
   type MonthlyWageSettings,
   type NotificationPreferences,
   type PaymentAlertChannel,
   type PaymentAlertPrefs,
+  type PeriodBudget,
   type QuickEntryPrefs,
   type RateRefreshResult,
   type RateTable,
@@ -254,11 +262,13 @@ export interface CreateBudgetTemplateInput {
   name: string;
   /** Optional emoji shown next to the template name. */
   emoji?: string | null;
+  /** How often budgets made from it repeat. */
+  period: BudgetPeriod;
   totalAmount: number;
-  /** Whether unbudgeted spend counts toward the month total (default true). */
+  /** Whether unbudgeted spend counts toward the period total (default true). */
   countUnbudgeted?: boolean;
   allocations: BudgetAllocationInput[];
-  /** Also create budgets for missing past months (first expense month → last month). */
+  /** Also create budgets for missing past periods (first expense period → last one). */
   backPopulate?: boolean;
 }
 
@@ -391,10 +401,10 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   deleteItem: (id: string) => void;
   reorderItems: (ids: string[]) => void;
 
-  /** Reusable budget definitions; exactly one is default while any exist. */
+  /** Reusable budget definitions; exactly one per period is default while that period has any. */
   budgetTemplates: BudgetTemplate[];
-  /** Frozen per-month budgets, ascending by month. */
-  monthlyBudgets: MonthlyBudget[];
+  /** Frozen week, month and year budgets, ascending by period then key. */
+  periodBudgets: PeriodBudget[];
   createBudgetTemplate: (input: CreateBudgetTemplateInput) => string;
   updateBudgetTemplate: (
     id: string,
@@ -402,25 +412,28 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   ) => void;
   deleteBudgetTemplate: (id: string) => void;
   setDefaultBudgetTemplate: (id: string) => void;
-  /** Months that have or ever had a budget (deletion tombstones included) —
-   *  the back-populate preview must skip exactly what the fill will skip. */
-  getBudgetMonthsEverExisted: () => string[];
-  /** Creates a month's budget from a template; no-ops if the month has one. */
-  createMonthlyBudget: (month: string, templateId: string) => void;
-  /** Creates a one-off custom budget for the month (no template involved). */
-  createCustomMonthlyBudget: (
-    month: string,
+  /** Keys of `period` that have or ever had a budget (deletion tombstones
+   *  included) — the back-populate preview must skip exactly what the fill
+   *  will skip. */
+  getBudgetKeysEverExisted: (period: BudgetPeriod) => string[];
+  /** Creates a budget for period `key` from a template of that period; no-ops
+   *  if the period has one. */
+  createPeriodBudget: (key: string, templateId: string) => void;
+  /** Creates a one-off custom budget for one period (no template involved). */
+  createCustomPeriodBudget: (
+    period: BudgetPeriod,
+    key: string,
     input: { totalAmount: number; countUnbudgeted: boolean; lines: BudgetAllocationInput[] },
   ) => void;
   /**
-   * Edits one month's frozen budget in place (total, options, lines). A local
-   * override for that month only; the source template is untouched.
+   * Edits one period's frozen budget in place (total, options, lines). A local
+   * override for that period only; the source template is untouched.
    */
-  updateMonthlyBudget: (
+  updatePeriodBudget: (
     id: string,
     input: { totalAmount: number; countUnbudgeted: boolean; lines: BudgetAllocationInput[] },
   ) => void;
-  deleteMonthlyBudget: (id: string) => void;
+  deletePeriodBudget: (id: string) => void;
 
   /** Returns the id of the newly created (optimistically inserted) transaction. */
   createTransaction: (input: CreateTransactionInput, meta?: CreateTransactionMeta) => string;
@@ -785,6 +798,49 @@ const fallbackStyles = StyleSheet.create({
   },
 });
 
+/**
+ * Creates the running week's, month's and year's budget (or only `only`'s)
+ * from each period's default template when that period has never had one, so
+ * a deleted budget stays deleted. A week budget made under another first day
+ * of the week counts while its own seven days include today. Must run inside a
+ * mutation. Returns how many budgets were made.
+ */
+function autoCreateCurrentBudgets(
+  templates: BudgetTemplate[],
+  clock: BudgetPeriodClock,
+  only?: BudgetPeriod,
+): number {
+  let created = 0;
+  const now = new Date();
+  for (const period of only ? [only] : BUDGET_PERIODS) {
+    const key = budgetPeriodKeyForDate(period, now, clock);
+    // A week budget made under another first day of the week still covers
+    // some of these days: making another would count them twice.
+    const hasEverHadBudget =
+      period === 'week'
+        ? budgetCoveringDay(
+            periodBudgetsRepository
+              .everExistedKeys('week')
+              .map((periodKey) => ({ period, periodKey })),
+            'week',
+            dayKeyFromDateLocal(now),
+            clock.monthCycle,
+          ) != null
+        : periodBudgetsRepository.hasEverExisted(period, key);
+    const template = pickAutoCreateTemplate({
+      period,
+      currentPeriodHasEverHadBudget: hasEverHadBudget,
+      templates,
+    });
+    if (!template) continue;
+    if (periodBudgetsRepository.createFromTemplate(key, template)) {
+      created += 1;
+      void trackEvent(AnalyticsEvents.BUDGET_MONTH_CREATED, { source: 'auto', period });
+    }
+  }
+  return created;
+}
+
 /** The wage row that applies right now: the current month's entry, else the
  *  first listed one. Shared by refreshAll and refreshWages so the two paths
  *  can't drift. */
@@ -1081,7 +1137,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [budgetTemplates, setBudgetTemplates] = useState<BudgetTemplate[]>([]);
-  const [monthlyBudgets, setMonthlyBudgets] = useState<MonthlyBudget[]>([]);
+  const [periodBudgets, setPeriodBudgets] = useState<PeriodBudget[]>([]);
   const [transactionFilters, setTransactionFiltersState] = useState<TransactionFilters>(
     DEFAULT_TRANSACTION_FILTERS,
   );
@@ -1284,20 +1340,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const nextAlbums = albumsRepository.list();
       const nextItems = itemsRepository.list();
 
-      // Month-rollover auto-create: materialize the current month's budget from
-      // the default template. Runs on every load — idempotent (one indexed
-      // lookup) and tombstone-aware, so a user-deleted month never resurrects.
+      // Period-rollover auto-create: materialize the current week's, month's
+      // and year's budget from each period's default template. Runs on every
+      // load — idempotent (one indexed lookup per period) and tombstone-aware,
+      // so a user-deleted period never resurrects.
       const nextBudgetTemplates = budgetTemplatesRepository.list();
-      const budgetMonthKey = financialMonthKeyForDate(new Date(), monthCycleOf(nextSettings));
-      const autoCreateTemplate = pickAutoCreateTemplate({
-        currentMonthHasEverHadBudget: monthlyBudgetsRepository.hasEverExisted(budgetMonthKey),
-        templates: nextBudgetTemplates,
+      autoCreateCurrentBudgets(nextBudgetTemplates, {
+        weekStartsOn: nextSettings.weekStartsOn,
+        monthCycle: monthCycleOf(nextSettings),
       });
-      if (autoCreateTemplate) {
-        monthlyBudgetsRepository.createFromTemplate(budgetMonthKey, autoCreateTemplate);
-        void trackEvent(AnalyticsEvents.BUDGET_MONTH_CREATED, { source: 'auto' });
-      }
-      const nextMonthlyBudgets = monthlyBudgetsRepository.list();
+      const nextPeriodBudgets = periodBudgetsRepository.list();
 
       const nextRawAccountBalances = accountsRepository.getBalances();
       perfMark('balances');
@@ -1342,7 +1394,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setAlbums(nextAlbums);
       setItems(nextItems);
       setBudgetTemplates(nextBudgetTemplates);
-      setMonthlyBudgets(nextMonthlyBudgets);
+      setPeriodBudgets(nextPeriodBudgets);
       setRawAccountBalances(nextRawAccountBalances);
       setLoadError(null);
     } catch (error) {
@@ -1424,7 +1476,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const refreshBudgets = useCallback(() => {
     setBudgetTemplates(budgetTemplatesRepository.list());
-    setMonthlyBudgets(monthlyBudgetsRepository.list());
+    setPeriodBudgets(periodBudgetsRepository.list());
   }, []);
 
   const refreshWages = useCallback(() => {
@@ -1911,7 +1963,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           // and every month's frozen budget. The freed amount becomes
           // unallocated (templates) / unbudgeted spend (months).
           budgetTemplatesRepository.removeCategoryFromAllTemplates(id);
-          monthlyBudgetsRepository.removeCategoryFromAllBudgets(id);
+          periodBudgetsRepository.removeCategoryFromAllBudgets(id);
         },
         {
           refresh: () => {
@@ -4407,11 +4459,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const createBudgetTemplate = useCallback(
     (input: CreateBudgetTemplateInput) => {
+      const clock = { weekStartsOn: weekStartsOnRef.current, monthCycle: monthCycleRef.current };
       const result = runMutation(
         () => {
           const id = budgetTemplatesRepository.create({
             name: input.name,
             emoji: input.emoji ?? null,
+            period: input.period,
             totalAmount: input.totalAmount,
             countUnbudgeted: input.countUnbudgeted ?? true,
             allocations: input.allocations,
@@ -4419,48 +4473,43 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           const templates = budgetTemplatesRepository.list();
           const template = templates.find((candidate) => candidate.id === id);
 
-          let backfilledMonths = 0;
+          let backfilled = 0;
           if (template && input.backPopulate) {
             const range = computeBackPopulateRange({
+              period: template.period,
               transactions: transactionsRef.current,
-              existingMonths: monthlyBudgetsRepository.everExistedMonths(),
+              existingKeys: periodBudgetsRepository.everExistedKeys(template.period),
+              clock,
             });
             if (range) {
-              backfilledMonths = monthlyBudgetsRepository.createManyFromTemplate(
-                range.months,
+              backfilled = periodBudgetsRepository.createManyFromTemplate(
+                range.keys,
                 template,
               ).length;
             }
           }
 
-          // Saving a template (especially the first) materializes the current
-          // month's budget right away — rollover isn't deferred to the next launch.
-          const currentMonth = financialMonthKeyForDate(new Date(), monthCycleRef.current);
-          const autoTemplate = pickAutoCreateTemplate({
-            currentMonthHasEverHadBudget: monthlyBudgetsRepository.hasEverExisted(currentMonth),
-            templates,
-          });
-          if (autoTemplate) {
-            monthlyBudgetsRepository.createFromTemplate(currentMonth, autoTemplate);
-          }
+          // Saving a template (especially the first of its period) materializes
+          // the current period's budget right away — rollover isn't deferred to
+          // the next launch.
+          autoCreateCurrentBudgets(templates, clock, input.period);
 
-          return { id, backfilledMonths, autoCreated: autoTemplate != null };
+          return { id, backfilled };
         },
         { refresh: refreshBudgets },
       );
 
-      if (result.backfilledMonths > 0) {
+      if (result.backfilled > 0) {
         void trackEvent(AnalyticsEvents.BUDGET_MONTH_CREATED, {
           source: 'backfill',
-          months: result.backfilledMonths,
+          period: input.period,
+          months: result.backfilled,
         });
-      }
-      if (result.autoCreated) {
-        void trackEvent(AnalyticsEvents.BUDGET_MONTH_CREATED, { source: 'auto' });
       }
       void trackEvent(AnalyticsEvents.BUDGET_TEMPLATE_CREATED, {
         categories: input.allocations.length,
         backPopulate: Boolean(input.backPopulate),
+        period: input.period,
       });
       return result.id;
     },
@@ -4475,16 +4524,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           budgetTemplatesRepository.update(id, {
             name: input.name,
             emoji: input.emoji ?? null,
+            period: input.period,
             totalAmount: input.totalAmount,
             countUnbudgeted: input.countUnbudgeted ?? true,
             allocations: input.allocations,
           });
+          // A template moved to a period with no budget yet starts it now.
+          if (before && before.period !== input.period) {
+            autoCreateCurrentBudgets(
+              budgetTemplatesRepository.list(),
+              { weekStartsOn: weekStartsOnRef.current, monthCycle: monthCycleRef.current },
+              input.period,
+            );
+          }
         },
         { refresh: refreshBudgets },
       );
       sweepIfCustomAssetDropped(before?.emoji, input.emoji ?? null);
       void trackEvent(AnalyticsEvents.BUDGET_TEMPLATE_UPDATED, {
         categories: input.allocations.length,
+        period: input.period,
       });
     },
     [refreshBudgets, runMutation],
@@ -4520,78 +4579,91 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [refreshBudgets, runMutation],
   );
 
-  const getBudgetMonthsEverExisted = useCallback(
-    () => monthlyBudgetsRepository.everExistedMonths(),
+  const getBudgetKeysEverExisted = useCallback(
+    (period: BudgetPeriod) => periodBudgetsRepository.everExistedKeys(period),
     [],
   );
 
-  const createMonthlyBudget = useCallback(
-    (month: string, templateId: string) => {
+  const createPeriodBudget = useCallback(
+    (key: string, templateId: string) => {
       const created = runMutation(
         () => {
           const template = budgetTemplatesRepository
             .list()
             .find((candidate) => candidate.id === templateId);
-          if (!template) return false;
-          // null = the month already had a live budget (double-tap, or the
+          if (!template || !isBudgetPeriodKey(template.period, key)) return null;
+          // null = the period already had a live budget (double-tap, or the
           // auto-create raced us) — nothing was written, so don't report one.
-          return monthlyBudgetsRepository.createFromTemplate(month, template) != null;
+          return periodBudgetsRepository.createFromTemplate(key, template) != null
+            ? template.period
+            : null;
         },
         { refresh: refreshBudgets },
       );
       if (created) {
-        void trackEvent(AnalyticsEvents.BUDGET_MONTH_CREATED, { source: 'manual' });
+        void trackEvent(AnalyticsEvents.BUDGET_MONTH_CREATED, {
+          source: 'manual',
+          period: created,
+        });
       }
     },
     [refreshBudgets, runMutation],
   );
 
-  const createCustomMonthlyBudget = useCallback(
+  const createCustomPeriodBudget = useCallback(
     (
-      month: string,
+      period: BudgetPeriod,
+      key: string,
       input: { totalAmount: number; countUnbudgeted: boolean; lines: BudgetAllocationInput[] },
     ) => {
-      const id = runMutation(() => monthlyBudgetsRepository.createCustom(month, input), {
+      if (!isBudgetPeriodKey(period, key)) return;
+      const id = runMutation(() => periodBudgetsRepository.createCustom(period, key, input), {
         refresh: refreshBudgets,
       });
       if (id) {
-        void trackEvent(AnalyticsEvents.BUDGET_MONTH_CREATED, { source: 'custom' });
+        void trackEvent(AnalyticsEvents.BUDGET_MONTH_CREATED, { source: 'custom', period });
       }
     },
     [refreshBudgets, runMutation],
   );
 
-  const updateMonthlyBudget = useCallback(
+  const updatePeriodBudget = useCallback(
     (
       id: string,
       input: { totalAmount: number; countUnbudgeted: boolean; lines: BudgetAllocationInput[] },
     ) => {
+      const period = periodBudgetsRepository.list().find((budget) => budget.id === id)?.period;
       runMutation(
         () => {
-          monthlyBudgetsRepository.update(id, input);
+          periodBudgetsRepository.update(id, input);
         },
         { refresh: refreshBudgets },
       );
-      void trackEvent(AnalyticsEvents.BUDGET_MONTH_UPDATED, { categories: input.lines.length });
+      void trackEvent(AnalyticsEvents.BUDGET_MONTH_UPDATED, {
+        categories: input.lines.length,
+        ...(period ? { period } : {}),
+      });
     },
     [refreshBudgets, runMutation],
   );
 
-  const deleteMonthlyBudget = useCallback(
+  const deletePeriodBudget = useCallback(
     (id: string) => {
-      // A month's frozen icon usually shares its file with the template it was
+      // A period's frozen icon usually shares its file with the template it was
       // copied from, so this only reclaims once every referencing row is gone.
-      const hadCustomIcon = isCustomLogoId(
-        monthlyBudgetsRepository.list().find((budget) => budget.id === id)?.templateEmoji,
-      );
+      const budget = periodBudgetsRepository.list().find((candidate) => candidate.id === id);
+      const hadCustomIcon = isCustomLogoId(budget?.templateEmoji);
       runMutation(
         () => {
-          monthlyBudgetsRepository.softDelete(id);
+          periodBudgetsRepository.softDelete(id);
         },
         { refresh: refreshBudgets },
       );
       if (hadCustomIcon) runDeferredWrite(() => runUserAssetGc());
-      void trackEvent(AnalyticsEvents.BUDGET_MONTH_DELETED);
+      void trackEvent(
+        AnalyticsEvents.BUDGET_MONTH_DELETED,
+        budget ? { period: budget.period } : undefined,
+      );
     },
     [refreshBudgets, runMutation],
   );
@@ -4908,16 +4980,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             deleteItem,
             reorderItems,
             budgetTemplates,
-            monthlyBudgets,
+            periodBudgets,
             createBudgetTemplate,
             updateBudgetTemplate,
             deleteBudgetTemplate,
             setDefaultBudgetTemplate,
-            getBudgetMonthsEverExisted,
-            createMonthlyBudget,
-            createCustomMonthlyBudget,
-            updateMonthlyBudget,
-            deleteMonthlyBudget,
+            getBudgetKeysEverExisted,
+            createPeriodBudget,
+            createCustomPeriodBudget,
+            updatePeriodBudget,
+            deletePeriodBudget,
             createTransaction,
             updateTransaction,
             deleteTransaction,
@@ -5034,16 +5106,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       deleteItem,
       reorderItems,
       budgetTemplates,
-      monthlyBudgets,
+      periodBudgets,
       createBudgetTemplate,
       updateBudgetTemplate,
       deleteBudgetTemplate,
       setDefaultBudgetTemplate,
-      getBudgetMonthsEverExisted,
-      createMonthlyBudget,
-      createCustomMonthlyBudget,
-      updateMonthlyBudget,
-      deleteMonthlyBudget,
+      getBudgetKeysEverExisted,
+      createPeriodBudget,
+      createCustomPeriodBudget,
+      updatePeriodBudget,
+      deletePeriodBudget,
       createTransaction,
       updateTransaction,
       deleteTransaction,
