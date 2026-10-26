@@ -27,7 +27,7 @@ import { triggerHaptic } from '~/services/haptics';
 type NavIconComponent = typeof HomeIcon;
 
 /** Which way a bar runs: a row along the bottom, or a column down the side. */
-export type NavAxis = 'horizontal' | 'vertical';
+type NavAxis = 'horizontal' | 'vertical';
 
 export interface TabNavProps {
   tabs: readonly TabName[];

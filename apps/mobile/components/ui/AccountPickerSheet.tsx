@@ -7,6 +7,7 @@ import { AccountLogo } from '~/components/ui/AccountLogo';
 import { Text } from '~/components/ui/text';
 import { ThemeModal } from '~/components/ui/theme-modal';
 import { useApp, useTransactions } from '~/context/AppContext';
+import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -194,6 +195,7 @@ function AccountPickerSections({
 }
 
 export function AccountPickerSheet(props: AccountPickerSheetProps) {
+  const sheetColumnStyle = useSheetColumnStyle();
   const { visible, onClose, accounts, accountGroups, disabledId, overlay = false } = props;
   const isMultiSelect = 'selectedIds' in props && props.selectedIds !== undefined;
   const selectedIdSet = useMemo(
@@ -283,7 +285,7 @@ export function AccountPickerSheet(props: AccountPickerSheetProps) {
 
   const sheetContent = (
     <Pressable style={styles.backdrop} onPress={onClose}>
-      <Pressable onPress={(e) => e.stopPropagation()} style={styles.sheet}>
+      <Pressable onPress={(e) => e.stopPropagation()} style={[styles.sheet, sheetColumnStyle]}>
         {/* The bottom inset pads the list rather than the card, so rows run
             to the screen edge instead of stopping mid-tile above an empty
             band, and the last row still scrolls clear of the home indicator. */}

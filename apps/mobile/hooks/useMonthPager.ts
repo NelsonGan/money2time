@@ -2,6 +2,8 @@ import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FlatList, NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
 
+import { usePagerWidthResnap } from '~/hooks/usePagerWidthResnap';
+
 interface UseMonthPagerParams {
   listRef: React.RefObject<FlatList<number> | null>;
   pageWidth: number;
@@ -74,6 +76,7 @@ export function useMonthPager({
     });
     return () => cancelAnimationFrame(frame);
   }, [listRef, pageWidth]);
+  usePagerWidthResnap(listRef, pageWidth, activeIndexRef);
 
   const commitOffsetToIndex = useCallback(
     (offsetX: number) => {

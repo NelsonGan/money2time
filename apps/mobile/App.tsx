@@ -349,6 +349,9 @@ const styles = StyleSheet.create({
   tabHidden: { opacity: 0 },
 });
 
+/** Tabs with a two-pane layout of their own on the open iPhone Duo. */
+const TWO_PANE_TABS: ReadonlySet<MainTab> = new Set<MainTab>(['calendar', 'insights']);
+
 function MountedTab({
   name,
   active,
@@ -374,12 +377,13 @@ function MountedTab({
     if (shouldMount) perfMark(`tab_${name}_mounted`);
   }, [name, shouldMount]);
 
-  // Open iPhone Duo: Home lays out its own two panes; every other page sits
-  // in a readable column. Only the slot's insets change when the device
-  // folds, so a page keeps its state. The frame is the window elsewhere.
+  // Open iPhone Duo: Home and Insights lay out their own two panes; every
+  // other page sits in a readable column. Only the slot's insets change when
+  // the device folds, so a page keeps its state. The frame is the window
+  // elsewhere.
   const { isTwoPane } = useDeviceLayout();
   const frame = useContentFrame();
-  const column = readableColumn(frame.width, isTwoPane && name !== 'calendar');
+  const column = readableColumn(frame.width, isTwoPane && !TWO_PANE_TABS.has(name));
 
   return (
     <View

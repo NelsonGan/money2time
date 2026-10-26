@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text, ThemeModal } from '~/components/ui';
+import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -40,11 +41,12 @@ function GoalMoneySheet<T extends string>({
   onSelect: (value: T) => void;
 }) {
   const insets = useSafeAreaInsets();
+  const sheetColumnStyle = useSheetColumnStyle();
 
   return (
     <ThemeModal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable style={styles.backdrop} onPress={onClose}>
-        <Pressable onPress={(e) => e.stopPropagation()}>
+        <Pressable onPress={(e) => e.stopPropagation()} style={sheetColumnStyle}>
           <View
             className="rounded-t-[28px] bg-card px-5 pt-5"
             style={{ paddingBottom: Math.max(insets.bottom, 16) + 8 }}

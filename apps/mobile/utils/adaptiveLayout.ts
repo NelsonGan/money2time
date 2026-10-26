@@ -1,3 +1,5 @@
+import type { EdgeInsets } from 'react-native-safe-area-context';
+
 /**
  * Where the app's chrome goes for the space it is given. Pure, so the rules
  * are testable and every screen reads the same answer through
@@ -15,22 +17,15 @@
 
 export type NavPlacement = 'bottom' | 'side';
 
-export interface EdgeInsets {
-  top: number;
-  right: number;
-  bottom: number;
-  left: number;
-}
-
-export interface AdaptiveLayoutInput {
-  platform: 'ios' | 'android' | string;
+interface AdaptiveLayoutInput {
+  platform: string;
   isPad: boolean;
   width: number;
   height: number;
   insets: EdgeInsets;
 }
 
-export interface AdaptiveLayout {
+interface AdaptiveLayout {
   /** Bottom floating bar (every phone and tablet) or a vertical side rail. */
   navPlacement: NavPlacement;
   /** The window edge the side rail sits on. Always the trailing hardware edge. */

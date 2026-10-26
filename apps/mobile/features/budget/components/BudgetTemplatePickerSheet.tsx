@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CategoryEmoji, Text, ThemeModal } from '~/components/ui';
 import { countRootAllocations } from '~/features/budget/lib/budgetMath';
 import { categoriesCountLabel, money } from '~/features/budget/lib/format';
+import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -44,13 +45,14 @@ export function BudgetTemplatePickerSheet({
   onSelect,
   onSelectCustom,
 }: BudgetTemplatePickerSheetProps) {
+  const sheetColumnStyle = useSheetColumnStyle();
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
 
   return (
     <ThemeModal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable style={styles.backdrop} onPress={onClose}>
-        <Pressable onPress={(e) => e.stopPropagation()} style={styles.sheet}>
+        <Pressable onPress={(e) => e.stopPropagation()} style={[styles.sheet, sheetColumnStyle]}>
           <View
             className="rounded-t-[28px] bg-card"
             style={{ paddingBottom: Math.max(insets.bottom, 16) }}

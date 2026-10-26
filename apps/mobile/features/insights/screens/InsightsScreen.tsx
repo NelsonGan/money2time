@@ -21,6 +21,7 @@ import {
   FlatList,
   Image,
   type ImageSourcePropType,
+  type LayoutChangeEvent,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
   Pressable,
@@ -47,7 +48,7 @@ import Svg, {
 import { DatePickerModal } from '~/components/datePicker';
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { LoadingDots } from '~/components/feedback/LoadingDots';
-import { useContentFrame } from '~/components/layout/ContentFrame';
+import { ContentFrameProvider, useContentFrame } from '~/components/layout/ContentFrame';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import {
   useBottomNavContentInset,
@@ -99,6 +100,11 @@ import {
   toggleAssetHistoryAccount,
 } from '~/features/insights/assetHistory';
 import { buildInsightsCategoryPickerData } from '~/features/insights/categoryPickerData';
+import {
+  InsightPaneSlotProvider,
+  InsightPaneSplit,
+  isSplitInsightPane,
+} from '~/features/insights/components/InsightPaneSplit';
 import { ProTrendPreviewOverlay } from '~/features/insights/components/ProTrendPreviewOverlay';
 import { SavingsRateRing } from '~/features/insights/components/SavingsRateRing';
 import { SentimentStackedBarChart } from '~/features/insights/components/SentimentStackedBarChart';
@@ -131,6 +137,7 @@ import {
 } from '~/features/transactions/components';
 import { canDuplicateTransaction } from '~/features/transactions/lib/duplicateTransaction';
 import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
+import { usePagerWidthResnap } from '~/hooks/usePagerWidthResnap';
 import { usePersistedJsonSnapshot } from '~/hooks/usePersistedJsonSnapshot';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -149,6 +156,7 @@ import type {
   WeekStartsOn,
 } from '~/types';
 import { cn } from '~/utils';
+import { readableColumn } from '~/utils/adaptiveLayout';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { withColorAlpha } from '~/utils/color';
 import { convert } from '~/utils/currency';
@@ -407,7 +415,12 @@ const BREAKDOWN_PIE_LABEL_MARGIN = 4;
 const BREAKDOWN_PIE_MIN_RADIUS = 48;
 const BREAKDOWN_PIE_MAX_RADIUS = 108;
 
+/** Header height assumed for the first frame of a split page, before it is measured. */
+const SPLIT_HEADER_HEIGHT_ESTIMATE = 112;
+
 const styles = StyleSheet.create({
+  flexOne: { flex: 1 },
+  splitHeader: { position: 'absolute', top: 0, left: 0, zIndex: 2 },
   absoluteOverlay: {
     position: 'absolute',
     left: 0,
@@ -2707,10 +2720,13 @@ const InsightsWindowPage = React.memo(
     getPageScrollRef,
     renderInsightsPane,
     onScrollNearEnd,
+    split,
   }: {
     item: number;
     pageData: InsightPageData;
     pageStyle: { width: number };
+    /** Open iPhone Duo: pane widths and the header's height; else null. */
+    split: InsightsSplit | null;
     isChartScrubbing: boolean;
     paneRenderVersion: string;
     getPageScrollRef: (index: number) => { current: ScrollViewInstance | null };
@@ -2736,23 +2752,65 @@ const InsightsWindowPage = React.memo(
       },
       [reportBottomNavScroll, onScrollNearEnd, pageData],
     );
+    const pane = renderInsightsPane(pageData);
+    // The scroll view the page's list lives in: the only one when stacked,
+    // the right pane when split. It reports scrolling and scrolls to top.
+    const listScrollProps = {
+      ref: (ref: ScrollViewInstance | null) => {
+        getPageScrollRef(item).current = ref;
+      },
+      className: 'flex-1',
+      scrollEnabled: !isChartScrubbing,
+      contentContainerStyle: contentStyle,
+      onScroll: handleScroll,
+      scrollEventThrottle: 32,
+    };
     // A horizontal list cell sizes itself from this width. flex-1 gives the
     // page a zero flex basis, which can collapse a newly mounted Android
     // cell and shift every following month away from getItemLayout.
+    if (!split) {
+      return (
+        <View style={pageStyle} className="h-full shrink-0 bg-background">
+          <ScrollView {...listScrollProps}>
+            <TabletContentContainer>{pane}</TabletContentContainer>
+          </ScrollView>
+        </View>
+      );
+    }
+    if (!isSplitInsightPane(pane)) {
+      // Empty states: under the header, in the left pane.
+      return (
+        <View style={pageStyle} className="h-full shrink-0 bg-background">
+          <View style={[styles.flexOne, { width: split.left, paddingTop: split.top }]}>
+            <ContentFrameProvider width={split.left} height={split.height}>
+              <ScrollView {...listScrollProps}>{pane}</ScrollView>
+            </ContentFrameProvider>
+          </View>
+        </View>
+      );
+    }
+    // Chart in the left pane under the header, details from the top of the
+    // right pane: one half each, nothing across the fold.
     return (
-      <View style={pageStyle} className="h-full shrink-0 bg-background">
-        <ScrollView
-          ref={(ref) => {
-            getPageScrollRef(item).current = ref;
-          }}
-          className="flex-1"
-          scrollEnabled={!isChartScrubbing}
-          contentContainerStyle={contentStyle}
-          onScroll={handleScroll}
-          scrollEventThrottle={32}
-        >
-          <TabletContentContainer>{renderInsightsPane(pageData)}</TabletContentContainer>
-        </ScrollView>
+      <View style={pageStyle} className="h-full shrink-0 flex-row bg-background">
+        <View style={{ width: split.left, paddingTop: split.top }}>
+          <ContentFrameProvider width={split.left} height={split.height}>
+            <ScrollView
+              className="flex-1"
+              scrollEnabled={!isChartScrubbing}
+              contentContainerStyle={contentStyle}
+            >
+              <InsightPaneSlotProvider value="primary">{pane}</InsightPaneSlotProvider>
+            </ScrollView>
+          </ContentFrameProvider>
+        </View>
+        <View style={{ width: split.right, paddingTop: spacing.md }}>
+          <ContentFrameProvider width={split.right} height={split.height}>
+            <ScrollView {...listScrollProps}>
+              <InsightPaneSlotProvider value="secondary">{pane}</InsightPaneSlotProvider>
+            </ScrollView>
+          </ContentFrameProvider>
+        </View>
       </View>
     );
   },
@@ -2764,8 +2822,17 @@ const InsightsWindowPage = React.memo(
     prev.paneRenderVersion === next.paneRenderVersion &&
     prev.getPageScrollRef === next.getPageScrollRef &&
     prev.renderInsightsPane === next.renderInsightsPane &&
-    prev.onScrollNearEnd === next.onScrollNearEnd,
+    prev.onScrollNearEnd === next.onScrollNearEnd &&
+    prev.split === next.split,
 );
+
+/** The open iPhone Duo's split: pane widths, the header's height, the page height. */
+interface InsightsSplit {
+  left: number;
+  right: number;
+  top: number;
+  height: number;
+}
 
 interface InsightsScreenProps {
   resetToCurrentMonthToken?: number;
@@ -2975,10 +3042,21 @@ export function InsightsScreen({
 
   const { width, height } = useContentFrame();
   const bottomNavInset = useBottomNavContentInset();
-  const { isTablet } = useDeviceLayout();
+  const { isTablet, panes } = useDeviceLayout();
   const pageWidth = Math.max(1, width);
   const insightsPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
-  const effectiveChartBasis = isTablet ? Math.min(width, TABLET_CONTENT_MAX_WIDTH) : width;
+  // Open iPhone Duo: charts are drawn in the left pane.
+  const effectiveChartBasis = panes
+    ? panes.left
+    : isTablet
+      ? Math.min(width, TABLET_CONTENT_MAX_WIDTH)
+      : width;
+  // Measured height of the header, which sits over the left pane when split.
+  const [splitHeaderHeight, setSplitHeaderHeight] = useState(SPLIT_HEADER_HEIGHT_ESTIMATE);
+  const handleSplitHeaderLayout = useCallback((event: LayoutChangeEvent) => {
+    const next = Math.round(event.nativeEvent.layout.height);
+    if (next > 0) setSplitHeaderHeight(next);
+  }, []);
   const chartWidth = Math.max(260, effectiveChartBasis - 76);
   const lineChartWidth = Math.max(260, effectiveChartBasis - INSIGHTS_LINE_CHART_SIDE_INSET * 2);
   const lineChartSectionStyle = useMemo(
@@ -4505,6 +4583,19 @@ export function InsightsScreen({
   const isReviewView = displaySelectedInsightType === 'review';
   // Both takeovers replace the pager body and drive the header's controls.
   const isTakeoverView = isBudgetView || isReviewView;
+  // Open iPhone Duo. The paged insights split across the panes, with the
+  // header over the left one; Budget, Review and the locked Pro preview are
+  // single pages, so they sit in a readable column instead.
+  const isLockedProTrend = !isPro && proTrendTypeSet.has(displaySelectedInsightType);
+  const splitPanes = panes && !isLoading && !isTakeoverView && !isLockedProTrend ? panes : null;
+  const column = readableColumn(width, panes !== null && splitPanes === null);
+  const insightsSplit = useMemo<InsightsSplit | null>(
+    () =>
+      splitPanes
+        ? { left: splitPanes.left, right: splitPanes.right, top: splitHeaderHeight, height }
+        : null,
+    [splitPanes, splitHeaderHeight, height],
+  );
   const displayPeriodPreset = pendingActivityBreakdownTarget
     ? (pendingActivityBreakdownTarget.periodPreset ??
       getInsightFilterConfig(pendingActivityBreakdownTarget.insightType).fixedPeriodPreset ??
@@ -4711,6 +4802,7 @@ export function InsightsScreen({
     });
     return () => cancelAnimationFrame(frame);
   }, [pageWidth]);
+  usePagerWidthResnap(horizontalListRef, pageWidth, committedPageIndexRef);
 
   const commitInsightsPageByIndex = useCallback(
     (nextIndex: number) => {
@@ -4940,7 +5032,9 @@ export function InsightsScreen({
       : null;
     const pieLayoutBleed = Math.max(24, spacing.screenHorizontal * 2);
     const pieSideMargin = 14;
-    const pieLayoutWidth = Math.max(chartWidth, pageWidth + pieLayoutBleed - pieSideMargin * 2);
+    // The pie lives in the left pane on the open iPhone Duo.
+    const pieBasisWidth = panes ? panes.left : pageWidth;
+    const pieLayoutWidth = Math.max(chartWidth, pieBasisWidth + pieLayoutBleed - pieSideMargin * 2);
     const pieLabelWidth = Math.max(
       BREAKDOWN_PIE_LABEL_MIN_WIDTH,
       Math.min(BREAKDOWN_PIE_LABEL_MAX_WIDTH, Math.floor(pieLayoutWidth * 0.25)),
@@ -5028,233 +5122,247 @@ export function InsightsScreen({
     }
 
     return (
-      <View className="gap-1">
-        <View className="items-center px-1">
-          <View className="w-full items-center gap-0.5 py-1">
-            {renderValueNode(pageTotalAmount, {
-              variant: 'heading',
-              textClassName: 'text-[24px] leading-[38px] font-black tracking-tight',
-              style: { color: totalRowAccentColor },
-              containerClassName: 'justify-center',
-              iconColor: totalRowAccentColor,
-              iconSize: 22,
-            })}
-            <View
-              style={{
-                width: 36,
-                height: 3,
-                borderRadius: 2,
-                backgroundColor: withColorAlpha(totalRowAccentColor, isDark ? 0.38 : 0.28),
-                marginTop: 1,
-              }}
-            />
-          </View>
-
-          <View className="mt-2 w-full items-center overflow-visible">
-            {pagePieData.length > 0 ? (
-              <View className="w-full items-center" style={styles.chartSizeCenter}>
+      <InsightPaneSplit
+        className="gap-1"
+        primary={
+          <>
+            <View className="items-center px-1">
+              <View className="w-full items-center gap-0.5 py-1">
+                {renderValueNode(pageTotalAmount, {
+                  variant: 'heading',
+                  textClassName: 'text-[24px] leading-[38px] font-black tracking-tight',
+                  style: { color: totalRowAccentColor },
+                  containerClassName: 'justify-center',
+                  iconColor: totalRowAccentColor,
+                  iconSize: 22,
+                })}
                 <View
-                  {...REPLAY_PRIVATE}
-                  style={buildSizeStyle(pieStageWidth, pieStageHeight)}
-                  onStartShouldSetResponder={() => true}
-                  onResponderRelease={(event) => {
-                    const { locationX, locationY } = event.nativeEvent;
-                    const nextId = pieSliceIdFromTouch(
-                      {
-                        x: locationX - pieExtraRadius,
-                        y: locationY + pieStageVerticalInset - pieExtraRadius,
-                      },
-                      pagePieData,
-                      pageTotalAmount,
-                      pieRadius,
-                    );
-                    if (!nextId) {
-                      setActiveBreakdownSlice(null, false);
-                      return;
-                    }
-                    if (activeBreakdownSliceId === nextId) return;
-                    setActiveBreakdownSlice(nextId, true);
+                  style={{
+                    width: 36,
+                    height: 3,
+                    borderRadius: 2,
+                    backgroundColor: withColorAlpha(totalRowAccentColor, isDark ? 0.38 : 0.28),
+                    marginTop: 1,
                   }}
-                >
-                  <View pointerEvents="none" style={{ marginTop: -pieStageVerticalInset }}>
-                    <PieChart
-                      data={interactivePieData}
-                      radius={pieRadius}
-                      extraRadius={pieExtraRadius}
-                    />
-                  </View>
-                  <Svg
-                    pointerEvents="none"
-                    width={pieStageWidth}
-                    height={pieStageHeight}
-                    style={StyleSheet.absoluteFill}
-                  >
-                    {pieLabels.map((label) => {
-                      const style = pieLabelStyleById.get(label.id);
-                      if (!style) return null;
-                      return (
-                        <G key={label.id} opacity={style.dimmed ? 0.72 : 1}>
-                          <Polyline
-                            points={`${label.anchorX},${label.anchorY} ${label.outerX},${label.outerY} ${label.innerX},${label.labelY}`}
-                            fill="none"
-                            stroke={style.labelStroke}
-                            strokeWidth={style.lineThickness}
-                            strokeLinejoin="round"
-                            strokeLinecap="round"
-                          />
-                          <G x={label.boxLeft} y={label.labelY}>
-                            {style.labelIconSource?.kind === 'sprite' ? (
-                              <>
-                                <ClipPath id={`pie-label-icon-${label.id}`}>
-                                  <Rect x={pieLabelWidth / 2 - 7} y={-16} width={14} height={14} />
-                                </ClipPath>
-                                <G clipPath={`url(#pie-label-icon-${label.id})`}>
-                                  <SvgImage
-                                    href={style.labelIconSource.sprite.atlas.source}
-                                    x={
-                                      pieLabelWidth / 2 -
-                                      7 -
-                                      style.labelIconSource.sprite.column * 14
-                                    }
-                                    y={-16 - style.labelIconSource.sprite.row * 14}
-                                    width={
-                                      (style.labelIconSource.sprite.atlas.width * 14) /
-                                      CATEGORY_ICON_CELL_SIZE
-                                    }
-                                    height={
-                                      (style.labelIconSource.sprite.atlas.height * 14) /
-                                      CATEGORY_ICON_CELL_SIZE
-                                    }
-                                    preserveAspectRatio="none"
-                                  />
-                                </G>
-                              </>
-                            ) : style.labelIconSource?.kind === 'image' ? (
-                              <SvgImage
-                                href={style.labelIconSource.source}
-                                x={pieLabelWidth / 2 - 7}
-                                y={-16}
-                                width={14}
-                                height={14}
-                                preserveAspectRatio="xMidYMid meet"
-                              />
-                            ) : null}
-                            <SvgText
-                              x={pieLabelWidth / 2}
-                              y={style.labelIconSource ? 3 : -4}
-                              textAnchor="middle"
-                              alignmentBaseline="middle"
-                              fontSize={9.2}
-                              fontFamily={FONT.bold}
-                              fontWeight="700"
-                              fill={style.labelTextColor}
-                            >
-                              {style.labelIconSource
-                                ? style.categoryLabel
-                                : `${categoryIconToEmoji(style.emoji)} ${style.categoryLabel}`.trim()}
-                            </SvgText>
-                            <SvgText
-                              x={pieLabelWidth / 2}
-                              y={style.labelIconSource ? 13 : 8}
-                              textAnchor="middle"
-                              alignmentBaseline="middle"
-                              fontSize={8}
-                              fontFamily={FONT.semibold}
-                              fontWeight="600"
-                              fill={withColorAlpha(style.labelTextColor, isDark ? 0.75 : 0.55)}
-                            >
-                              {`${style.pct.toFixed(1)}%`}
-                            </SvgText>
-                          </G>
-                        </G>
-                      );
-                    })}
-                  </Svg>
-                </View>
+                />
               </View>
-            ) : (
-              <View className="rounded-[16px] bg-secondary/45 border border-border/30 px-4 py-3">
-                <Text variant="label" tone="muted">
-                  {noPositiveSlicesMessage}
-                </Text>
-              </View>
-            )}
-          </View>
-        </View>
 
-        <View className="gap-1.5">
-          {pagePieData.map((item) => {
-            const isSelected = activeBreakdownSliceId === item.id;
-            const hasSelection = activeBreakdownSliceId !== null;
-            const pctRatio = Math.min(1, Math.max(0, item.pct / 100));
-            const rowBackgroundColor = isSelected
-              ? withColorAlpha(item.color, 0.28)
-              : hasSelection
-                ? withColorAlpha(item.color, 0.04)
-                : withColorAlpha(item.color, 0.07 + pctRatio * 0.22);
-            const rowBorderColor = isSelected
-              ? withColorAlpha(item.color, 0.7)
-              : hasSelection
-                ? withColorAlpha(item.color, 0.1)
-                : withColorAlpha(item.color, 0.2 + pctRatio * 0.32);
-            const percentBadgeColor = isSelected
-              ? withColorAlpha(item.color, 0.38)
-              : withColorAlpha(item.color, 0.24);
-
-            return (
-              <Pressable
-                key={item.id}
-                onPress={() => {
-                  setActiveBreakdownSlice(null, false);
-                  const rowTransactions = pageData.breakdownTransactionsById.get(item.id) ?? [];
-                  const rootCategory = categoryById.get(item.id) ?? null;
-                  openDrilldown({
-                    label: item.name,
-                    transactions: rowTransactions,
-                    categoryRootId: rootCategory?.id,
-                    categoryRootLabel: rootCategory?.name ?? item.name,
-                    categoryRootEmoji: rootCategory?.icon ?? item.emoji,
-                    categoryRootColor: item.color,
-                    triggerSelectionHaptic: true,
-                  });
-                }}
-                accessibilityRole="button"
-                accessibilityLabel={`${categoryIconToEmoji(item.emoji)} ${item.name}`.trim()}
-                className="rounded-xl px-2.5 py-1.5 active:opacity-85 border"
-                style={[
-                  { backgroundColor: rowBackgroundColor, borderColor: rowBorderColor },
-                  isSelected && { borderWidth: 2 },
-                  hasSelection && !isSelected && { opacity: 0.5 },
-                ]}
-              >
-                <View className="flex-row items-center justify-between gap-2">
-                  <View className="flex-1 flex-row items-center gap-1.5 pr-2">
-                    <CategoryEmoji icon={item.emoji} size={16} />
-                    <Text variant="caption" className="flex-1" numberOfLines={2}>
-                      {item.name}
-                    </Text>
-                  </View>
-                  <View className="flex-row items-center gap-1.5">
-                    {renderValueNode(item.amount, {
-                      variant: 'label',
-                      textClassName: 'text-foreground',
-                      iconColor: themeColors.text,
-                    })}
+              <View className="mt-2 w-full items-center overflow-visible">
+                {pagePieData.length > 0 ? (
+                  <View className="w-full items-center" style={styles.chartSizeCenter}>
                     <View
-                      className="rounded-full px-1.5 py-0.5"
-                      style={[styles.breakdownPercentBadge, { backgroundColor: percentBadgeColor }]}
+                      {...REPLAY_PRIVATE}
+                      style={buildSizeStyle(pieStageWidth, pieStageHeight)}
+                      onStartShouldSetResponder={() => true}
+                      onResponderRelease={(event) => {
+                        const { locationX, locationY } = event.nativeEvent;
+                        const nextId = pieSliceIdFromTouch(
+                          {
+                            x: locationX - pieExtraRadius,
+                            y: locationY + pieStageVerticalInset - pieExtraRadius,
+                          },
+                          pagePieData,
+                          pageTotalAmount,
+                          pieRadius,
+                        );
+                        if (!nextId) {
+                          setActiveBreakdownSlice(null, false);
+                          return;
+                        }
+                        if (activeBreakdownSliceId === nextId) return;
+                        setActiveBreakdownSlice(nextId, true);
+                      }}
                     >
-                      <Text variant="label" className="text-foreground">
-                        {item.pct.toFixed(1)}%
-                      </Text>
+                      <View pointerEvents="none" style={{ marginTop: -pieStageVerticalInset }}>
+                        <PieChart
+                          data={interactivePieData}
+                          radius={pieRadius}
+                          extraRadius={pieExtraRadius}
+                        />
+                      </View>
+                      <Svg
+                        pointerEvents="none"
+                        width={pieStageWidth}
+                        height={pieStageHeight}
+                        style={StyleSheet.absoluteFill}
+                      >
+                        {pieLabels.map((label) => {
+                          const style = pieLabelStyleById.get(label.id);
+                          if (!style) return null;
+                          return (
+                            <G key={label.id} opacity={style.dimmed ? 0.72 : 1}>
+                              <Polyline
+                                points={`${label.anchorX},${label.anchorY} ${label.outerX},${label.outerY} ${label.innerX},${label.labelY}`}
+                                fill="none"
+                                stroke={style.labelStroke}
+                                strokeWidth={style.lineThickness}
+                                strokeLinejoin="round"
+                                strokeLinecap="round"
+                              />
+                              <G x={label.boxLeft} y={label.labelY}>
+                                {style.labelIconSource?.kind === 'sprite' ? (
+                                  <>
+                                    <ClipPath id={`pie-label-icon-${label.id}`}>
+                                      <Rect
+                                        x={pieLabelWidth / 2 - 7}
+                                        y={-16}
+                                        width={14}
+                                        height={14}
+                                      />
+                                    </ClipPath>
+                                    <G clipPath={`url(#pie-label-icon-${label.id})`}>
+                                      <SvgImage
+                                        href={style.labelIconSource.sprite.atlas.source}
+                                        x={
+                                          pieLabelWidth / 2 -
+                                          7 -
+                                          style.labelIconSource.sprite.column * 14
+                                        }
+                                        y={-16 - style.labelIconSource.sprite.row * 14}
+                                        width={
+                                          (style.labelIconSource.sprite.atlas.width * 14) /
+                                          CATEGORY_ICON_CELL_SIZE
+                                        }
+                                        height={
+                                          (style.labelIconSource.sprite.atlas.height * 14) /
+                                          CATEGORY_ICON_CELL_SIZE
+                                        }
+                                        preserveAspectRatio="none"
+                                      />
+                                    </G>
+                                  </>
+                                ) : style.labelIconSource?.kind === 'image' ? (
+                                  <SvgImage
+                                    href={style.labelIconSource.source}
+                                    x={pieLabelWidth / 2 - 7}
+                                    y={-16}
+                                    width={14}
+                                    height={14}
+                                    preserveAspectRatio="xMidYMid meet"
+                                  />
+                                ) : null}
+                                <SvgText
+                                  x={pieLabelWidth / 2}
+                                  y={style.labelIconSource ? 3 : -4}
+                                  textAnchor="middle"
+                                  alignmentBaseline="middle"
+                                  fontSize={9.2}
+                                  fontFamily={FONT.bold}
+                                  fontWeight="700"
+                                  fill={style.labelTextColor}
+                                >
+                                  {style.labelIconSource
+                                    ? style.categoryLabel
+                                    : `${categoryIconToEmoji(style.emoji)} ${style.categoryLabel}`.trim()}
+                                </SvgText>
+                                <SvgText
+                                  x={pieLabelWidth / 2}
+                                  y={style.labelIconSource ? 13 : 8}
+                                  textAnchor="middle"
+                                  alignmentBaseline="middle"
+                                  fontSize={8}
+                                  fontFamily={FONT.semibold}
+                                  fontWeight="600"
+                                  fill={withColorAlpha(style.labelTextColor, isDark ? 0.75 : 0.55)}
+                                >
+                                  {`${style.pct.toFixed(1)}%`}
+                                </SvgText>
+                              </G>
+                            </G>
+                          );
+                        })}
+                      </Svg>
                     </View>
                   </View>
-                </View>
-              </Pressable>
-            );
-          })}
-        </View>
-      </View>
+                ) : (
+                  <View className="rounded-[16px] bg-secondary/45 border border-border/30 px-4 py-3">
+                    <Text variant="label" tone="muted">
+                      {noPositiveSlicesMessage}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            </View>
+          </>
+        }
+        secondary={
+          <View className="gap-1.5">
+            {pagePieData.map((item) => {
+              const isSelected = activeBreakdownSliceId === item.id;
+              const hasSelection = activeBreakdownSliceId !== null;
+              const pctRatio = Math.min(1, Math.max(0, item.pct / 100));
+              const rowBackgroundColor = isSelected
+                ? withColorAlpha(item.color, 0.28)
+                : hasSelection
+                  ? withColorAlpha(item.color, 0.04)
+                  : withColorAlpha(item.color, 0.07 + pctRatio * 0.22);
+              const rowBorderColor = isSelected
+                ? withColorAlpha(item.color, 0.7)
+                : hasSelection
+                  ? withColorAlpha(item.color, 0.1)
+                  : withColorAlpha(item.color, 0.2 + pctRatio * 0.32);
+              const percentBadgeColor = isSelected
+                ? withColorAlpha(item.color, 0.38)
+                : withColorAlpha(item.color, 0.24);
+
+              return (
+                <Pressable
+                  key={item.id}
+                  onPress={() => {
+                    setActiveBreakdownSlice(null, false);
+                    const rowTransactions = pageData.breakdownTransactionsById.get(item.id) ?? [];
+                    const rootCategory = categoryById.get(item.id) ?? null;
+                    openDrilldown({
+                      label: item.name,
+                      transactions: rowTransactions,
+                      categoryRootId: rootCategory?.id,
+                      categoryRootLabel: rootCategory?.name ?? item.name,
+                      categoryRootEmoji: rootCategory?.icon ?? item.emoji,
+                      categoryRootColor: item.color,
+                      triggerSelectionHaptic: true,
+                    });
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${categoryIconToEmoji(item.emoji)} ${item.name}`.trim()}
+                  className="rounded-xl px-2.5 py-1.5 active:opacity-85 border"
+                  style={[
+                    { backgroundColor: rowBackgroundColor, borderColor: rowBorderColor },
+                    isSelected && { borderWidth: 2 },
+                    hasSelection && !isSelected && { opacity: 0.5 },
+                  ]}
+                >
+                  <View className="flex-row items-center justify-between gap-2">
+                    <View className="flex-1 flex-row items-center gap-1.5 pr-2">
+                      <CategoryEmoji icon={item.emoji} size={16} />
+                      <Text variant="caption" className="flex-1" numberOfLines={2}>
+                        {item.name}
+                      </Text>
+                    </View>
+                    <View className="flex-row items-center gap-1.5">
+                      {renderValueNode(item.amount, {
+                        variant: 'label',
+                        textClassName: 'text-foreground',
+                        iconColor: themeColors.text,
+                      })}
+                      <View
+                        className="rounded-full px-1.5 py-0.5"
+                        style={[
+                          styles.breakdownPercentBadge,
+                          { backgroundColor: percentBadgeColor },
+                        ]}
+                      >
+                        <Text variant="label" className="text-foreground">
+                          {item.pct.toFixed(1)}%
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                </Pressable>
+              );
+            })}
+          </View>
+        }
+      />
     );
   };
 
@@ -5299,68 +5407,75 @@ export function InsightsScreen({
     };
 
     return (
-      <View className="gap-3">
-        {renderTrendBucketTotal(selectedMonthRow.totalExpense, trendAccentColor)}
-        <View style={lineChartSectionStyle} className="py-1">
-          <View
-            style={[
-              styles.chartSizeCenter,
-              buildSizeStyle(lineChartWidth, EXPENSE_TREND_CHART_HEIGHT),
-            ]}
-            onTouchStart={lockChartScrub}
-            onTouchEnd={unlockChartScrub}
-            onTouchCancel={unlockChartScrub}
-          >
-            <GraphYAxisGrid
-              ticks={expenseAxisTicks}
-              chartWidth={expenseGraphWidth}
-              chartHeight={EXPENSE_TREND_CHART_HEIGHT}
-              labelWidth={EXPENSE_TREND_CHART_PADDING_RIGHT}
-              lineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
-              formatTick={formatAxisAssetValue}
-            />
-            <TrendBarChart
-              data={pageData.monthRows.map((row) => ({
-                monthKey: row.monthKey,
-                value: row.totalExpense,
-                label: row.axisLabel,
-                subLabel: row.axisSubLabel ?? undefined,
-              }))}
-              chartWidth={expenseGraphWidth}
-              chartHeight={EXPENSE_TREND_CHART_HEIGHT}
-              primaryColor={trendAccentColor}
-              averageValue={pageData.averageMonthExpense}
-              referenceColor={themeColors.error}
-              selectedMonthKey={selectedMonthRow.monthKey}
-              onSelectMonthKey={selectExpenseTrendMonth}
-              onGestureStart={lockChartScrub}
-              onGestureEnd={unlockChartScrub}
-              labelColor={themeColors.textMuted}
-              gridLineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
-            />
-          </View>
-        </View>
-
-        <TrendMonthTransactions
-          key={`expense-${selectedMonthRow.monthKey}`}
-          transactions={selectedMonthRow.transactions}
-          visibleCount={
-            trendListVisibleCounts[`expense|${pageData.periodKey}|${selectedMonthRow.monthKey}`] ??
-            TREND_TRANSACTIONS_INITIAL_EXPENSE_INCOME
-          }
-          locale={activeLocale}
-          displaySettings={settings}
-          reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
-          getDisplayValueForTransaction={getDisplayValueForTransaction}
-          getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-          onOpenTransaction={handleTransactionPress}
-          onTransactionLongPress={handleTransactionLongPress}
-          selectedTransactionIds={selectedTransactionIds}
-          selectionMode={isSelectionMode}
-          emptyTitle={I18n.t('insights.analytics.expense_trend.no_data_title')}
-          emptyMessage={I18n.t('insights.analytics.expense_trend.no_data_message')}
-        />
-      </View>
+      <InsightPaneSplit
+        className="gap-3"
+        primary={
+          <>
+            {renderTrendBucketTotal(selectedMonthRow.totalExpense, trendAccentColor)}
+            <View style={lineChartSectionStyle} className="py-1">
+              <View
+                style={[
+                  styles.chartSizeCenter,
+                  buildSizeStyle(lineChartWidth, EXPENSE_TREND_CHART_HEIGHT),
+                ]}
+                onTouchStart={lockChartScrub}
+                onTouchEnd={unlockChartScrub}
+                onTouchCancel={unlockChartScrub}
+              >
+                <GraphYAxisGrid
+                  ticks={expenseAxisTicks}
+                  chartWidth={expenseGraphWidth}
+                  chartHeight={EXPENSE_TREND_CHART_HEIGHT}
+                  labelWidth={EXPENSE_TREND_CHART_PADDING_RIGHT}
+                  lineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
+                  formatTick={formatAxisAssetValue}
+                />
+                <TrendBarChart
+                  data={pageData.monthRows.map((row) => ({
+                    monthKey: row.monthKey,
+                    value: row.totalExpense,
+                    label: row.axisLabel,
+                    subLabel: row.axisSubLabel ?? undefined,
+                  }))}
+                  chartWidth={expenseGraphWidth}
+                  chartHeight={EXPENSE_TREND_CHART_HEIGHT}
+                  primaryColor={trendAccentColor}
+                  averageValue={pageData.averageMonthExpense}
+                  referenceColor={themeColors.error}
+                  selectedMonthKey={selectedMonthRow.monthKey}
+                  onSelectMonthKey={selectExpenseTrendMonth}
+                  onGestureStart={lockChartScrub}
+                  onGestureEnd={unlockChartScrub}
+                  labelColor={themeColors.textMuted}
+                  gridLineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
+                />
+              </View>
+            </View>
+          </>
+        }
+        secondary={
+          <TrendMonthTransactions
+            key={`expense-${selectedMonthRow.monthKey}`}
+            transactions={selectedMonthRow.transactions}
+            visibleCount={
+              trendListVisibleCounts[
+                `expense|${pageData.periodKey}|${selectedMonthRow.monthKey}`
+              ] ?? TREND_TRANSACTIONS_INITIAL_EXPENSE_INCOME
+            }
+            locale={activeLocale}
+            displaySettings={settings}
+            reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
+            getDisplayValueForTransaction={getDisplayValueForTransaction}
+            getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+            onOpenTransaction={handleTransactionPress}
+            onTransactionLongPress={handleTransactionLongPress}
+            selectedTransactionIds={selectedTransactionIds}
+            selectionMode={isSelectionMode}
+            emptyTitle={I18n.t('insights.analytics.expense_trend.no_data_title')}
+            emptyMessage={I18n.t('insights.analytics.expense_trend.no_data_message')}
+          />
+        }
+      />
     );
   };
 
@@ -5405,68 +5520,74 @@ export function InsightsScreen({
     };
 
     return (
-      <View className="gap-3">
-        {renderTrendBucketTotal(selectedMonthRow.totalIncome, trendAccentColor)}
-        <View style={lineChartSectionStyle} className="py-1">
-          <View
-            style={[
-              styles.chartSizeCenter,
-              buildSizeStyle(lineChartWidth, EXPENSE_TREND_CHART_HEIGHT),
-            ]}
-            onTouchStart={lockChartScrub}
-            onTouchEnd={unlockChartScrub}
-            onTouchCancel={unlockChartScrub}
-          >
-            <GraphYAxisGrid
-              ticks={incomeAxisTicks}
-              chartWidth={incomeGraphWidth}
-              chartHeight={EXPENSE_TREND_CHART_HEIGHT}
-              labelWidth={EXPENSE_TREND_CHART_PADDING_RIGHT}
-              lineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
-              formatTick={formatAxisAssetValue}
-            />
-            <TrendBarChart
-              data={pageData.monthRows.map((row) => ({
-                monthKey: row.monthKey,
-                value: row.totalIncome,
-                label: row.axisLabel,
-                subLabel: row.axisSubLabel ?? undefined,
-              }))}
-              chartWidth={incomeGraphWidth}
-              chartHeight={EXPENSE_TREND_CHART_HEIGHT}
-              primaryColor={trendAccentColor}
-              averageValue={pageData.averageMonthIncome}
-              referenceColor={themeColors.success}
-              selectedMonthKey={selectedMonthRow.monthKey}
-              onSelectMonthKey={selectIncomeTrendMonth}
-              onGestureStart={lockChartScrub}
-              onGestureEnd={unlockChartScrub}
-              labelColor={themeColors.textMuted}
-              gridLineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
-            />
-          </View>
-        </View>
-
-        <TrendMonthTransactions
-          key={`income-${selectedMonthRow.monthKey}`}
-          transactions={selectedMonthRow.transactions}
-          visibleCount={
-            trendListVisibleCounts[`income|${pageData.periodKey}|${selectedMonthRow.monthKey}`] ??
-            TREND_TRANSACTIONS_INITIAL_EXPENSE_INCOME
-          }
-          locale={activeLocale}
-          displaySettings={settings}
-          reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
-          getDisplayValueForTransaction={getDisplayValueForTransaction}
-          getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-          onOpenTransaction={handleTransactionPress}
-          onTransactionLongPress={handleTransactionLongPress}
-          selectedTransactionIds={selectedTransactionIds}
-          selectionMode={isSelectionMode}
-          emptyTitle={I18n.t('insights.analytics.income_trend.no_data_title')}
-          emptyMessage={I18n.t('insights.analytics.income_trend.no_data_message')}
-        />
-      </View>
+      <InsightPaneSplit
+        className="gap-3"
+        primary={
+          <>
+            {renderTrendBucketTotal(selectedMonthRow.totalIncome, trendAccentColor)}
+            <View style={lineChartSectionStyle} className="py-1">
+              <View
+                style={[
+                  styles.chartSizeCenter,
+                  buildSizeStyle(lineChartWidth, EXPENSE_TREND_CHART_HEIGHT),
+                ]}
+                onTouchStart={lockChartScrub}
+                onTouchEnd={unlockChartScrub}
+                onTouchCancel={unlockChartScrub}
+              >
+                <GraphYAxisGrid
+                  ticks={incomeAxisTicks}
+                  chartWidth={incomeGraphWidth}
+                  chartHeight={EXPENSE_TREND_CHART_HEIGHT}
+                  labelWidth={EXPENSE_TREND_CHART_PADDING_RIGHT}
+                  lineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
+                  formatTick={formatAxisAssetValue}
+                />
+                <TrendBarChart
+                  data={pageData.monthRows.map((row) => ({
+                    monthKey: row.monthKey,
+                    value: row.totalIncome,
+                    label: row.axisLabel,
+                    subLabel: row.axisSubLabel ?? undefined,
+                  }))}
+                  chartWidth={incomeGraphWidth}
+                  chartHeight={EXPENSE_TREND_CHART_HEIGHT}
+                  primaryColor={trendAccentColor}
+                  averageValue={pageData.averageMonthIncome}
+                  referenceColor={themeColors.success}
+                  selectedMonthKey={selectedMonthRow.monthKey}
+                  onSelectMonthKey={selectIncomeTrendMonth}
+                  onGestureStart={lockChartScrub}
+                  onGestureEnd={unlockChartScrub}
+                  labelColor={themeColors.textMuted}
+                  gridLineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
+                />
+              </View>
+            </View>
+          </>
+        }
+        secondary={
+          <TrendMonthTransactions
+            key={`income-${selectedMonthRow.monthKey}`}
+            transactions={selectedMonthRow.transactions}
+            visibleCount={
+              trendListVisibleCounts[`income|${pageData.periodKey}|${selectedMonthRow.monthKey}`] ??
+              TREND_TRANSACTIONS_INITIAL_EXPENSE_INCOME
+            }
+            locale={activeLocale}
+            displaySettings={settings}
+            reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
+            getDisplayValueForTransaction={getDisplayValueForTransaction}
+            getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+            onOpenTransaction={handleTransactionPress}
+            onTransactionLongPress={handleTransactionLongPress}
+            selectedTransactionIds={selectedTransactionIds}
+            selectionMode={isSelectionMode}
+            emptyTitle={I18n.t('insights.analytics.income_trend.no_data_title')}
+            emptyMessage={I18n.t('insights.analytics.income_trend.no_data_message')}
+          />
+        }
+      />
     );
   };
 
@@ -5513,68 +5634,74 @@ export function InsightsScreen({
     };
 
     return (
-      <View className="gap-3">
-        {renderTrendBucketTotal(selectedRow.totalExpense, trendAccentColor)}
-        <View style={lineChartSectionStyle} className="py-1">
-          <View
-            style={[
-              styles.chartSizeCenter,
-              buildSizeStyle(lineChartWidth, CATEGORY_TREND_CHART_HEIGHT),
-            ]}
-            onTouchStart={lockChartScrub}
-            onTouchEnd={unlockChartScrub}
-            onTouchCancel={unlockChartScrub}
-          >
-            <GraphYAxisGrid
-              ticks={categoryAxisTicks}
-              chartWidth={categoryGraphWidth}
-              chartHeight={CATEGORY_TREND_CHART_HEIGHT}
-              labelWidth={CATEGORY_TREND_CHART_PADDING_RIGHT}
-              lineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
-              formatTick={formatAxisAssetValue}
-            />
-            <TrendBarChart
-              data={pageData.monthRows.map((row) => ({
-                monthKey: row.monthKey,
-                value: row.totalExpense,
-                label: row.axisLabel,
-                subLabel: row.axisSubLabel ?? undefined,
-              }))}
-              chartWidth={categoryGraphWidth}
-              chartHeight={CATEGORY_TREND_CHART_HEIGHT}
-              primaryColor={trendAccentColor}
-              averageValue={0}
-              referenceColor={trendAccentColor}
-              selectedMonthKey={selectedRow.monthKey}
-              onSelectMonthKey={selectCategoryTrendBucket}
-              onGestureStart={lockChartScrub}
-              onGestureEnd={unlockChartScrub}
-              labelColor={themeColors.textMuted}
-              gridLineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
-            />
-          </View>
-        </View>
-
-        <TrendMonthTransactions
-          key={`category-${selectedRow.monthKey}`}
-          transactions={selectedRow.transactions}
-          visibleCount={
-            trendListVisibleCounts[`category|${selectedPeriodKey}|${selectedRow.monthKey}`] ??
-            TREND_TRANSACTIONS_INITIAL
-          }
-          locale={activeLocale}
-          displaySettings={settings}
-          reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
-          getDisplayValueForTransaction={getDisplayValueForTransaction}
-          getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-          onOpenTransaction={handleTransactionPress}
-          onTransactionLongPress={handleTransactionLongPress}
-          selectedTransactionIds={selectedTransactionIds}
-          selectionMode={isSelectionMode}
-          emptyTitle={I18n.t('insights.analytics.category_trend.no_data_title')}
-          emptyMessage={I18n.t('insights.analytics.category_trend.no_data_message')}
-        />
-      </View>
+      <InsightPaneSplit
+        className="gap-3"
+        primary={
+          <>
+            {renderTrendBucketTotal(selectedRow.totalExpense, trendAccentColor)}
+            <View style={lineChartSectionStyle} className="py-1">
+              <View
+                style={[
+                  styles.chartSizeCenter,
+                  buildSizeStyle(lineChartWidth, CATEGORY_TREND_CHART_HEIGHT),
+                ]}
+                onTouchStart={lockChartScrub}
+                onTouchEnd={unlockChartScrub}
+                onTouchCancel={unlockChartScrub}
+              >
+                <GraphYAxisGrid
+                  ticks={categoryAxisTicks}
+                  chartWidth={categoryGraphWidth}
+                  chartHeight={CATEGORY_TREND_CHART_HEIGHT}
+                  labelWidth={CATEGORY_TREND_CHART_PADDING_RIGHT}
+                  lineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
+                  formatTick={formatAxisAssetValue}
+                />
+                <TrendBarChart
+                  data={pageData.monthRows.map((row) => ({
+                    monthKey: row.monthKey,
+                    value: row.totalExpense,
+                    label: row.axisLabel,
+                    subLabel: row.axisSubLabel ?? undefined,
+                  }))}
+                  chartWidth={categoryGraphWidth}
+                  chartHeight={CATEGORY_TREND_CHART_HEIGHT}
+                  primaryColor={trendAccentColor}
+                  averageValue={0}
+                  referenceColor={trendAccentColor}
+                  selectedMonthKey={selectedRow.monthKey}
+                  onSelectMonthKey={selectCategoryTrendBucket}
+                  onGestureStart={lockChartScrub}
+                  onGestureEnd={unlockChartScrub}
+                  labelColor={themeColors.textMuted}
+                  gridLineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
+                />
+              </View>
+            </View>
+          </>
+        }
+        secondary={
+          <TrendMonthTransactions
+            key={`category-${selectedRow.monthKey}`}
+            transactions={selectedRow.transactions}
+            visibleCount={
+              trendListVisibleCounts[`category|${selectedPeriodKey}|${selectedRow.monthKey}`] ??
+              TREND_TRANSACTIONS_INITIAL
+            }
+            locale={activeLocale}
+            displaySettings={settings}
+            reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
+            getDisplayValueForTransaction={getDisplayValueForTransaction}
+            getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+            onOpenTransaction={handleTransactionPress}
+            onTransactionLongPress={handleTransactionLongPress}
+            selectedTransactionIds={selectedTransactionIds}
+            selectionMode={isSelectionMode}
+            emptyTitle={I18n.t('insights.analytics.category_trend.no_data_title')}
+            emptyMessage={I18n.t('insights.analytics.category_trend.no_data_message')}
+          />
+        }
+      />
     );
   };
 
@@ -5592,66 +5719,75 @@ export function InsightsScreen({
 
     const sentimentChartWidth = Math.max(140, lineChartWidth - SENTIMENT_CHART_PADDING_RIGHT);
     return (
-      <View className="mt-2 gap-3">
-        <View style={lineChartSectionStyle} className="py-1">
-          <View
-            style={[styles.chartSizeCenter, buildSizeStyle(lineChartWidth, SENTIMENT_CHART_HEIGHT)]}
-          >
-            <SentimentStackedBarChart
-              data={pageData.dayRows}
-              chartWidth={sentimentChartWidth}
-              chartHeight={SENTIMENT_CHART_HEIGHT}
-              labelColor={themeColors.textMuted}
-              happyColor={SENTIMENT_COLORS.happy}
-              neutralColor={SENTIMENT_COLORS.neutral}
-              sadColor={SENTIMENT_COLORS.sad}
-            />
-          </View>
-        </View>
-
-        <Card className="gap-3 p-4">
-          <Text variant="label" tone="muted">
-            {I18n.t('insights.analytics.expense_sentiment.summary_title')}
-          </Text>
-          <View className="flex-row items-center pt-1">
-            <View className="flex-1 items-center justify-center py-1">
-              <View className="flex-row items-center justify-center gap-1.5">
-                <SentimentIcon sentiment="sad" size={26} />
-                <X size={12} color="#000000" strokeWidth={2.4} />
-                <Text variant="subheading" style={{ color: SENTIMENT_COLORS.sad }}>
-                  {pageData.totals.sad}
-                </Text>
+      <InsightPaneSplit
+        className="mt-2 gap-3"
+        primary={
+          <>
+            <View style={lineChartSectionStyle} className="py-1">
+              <View
+                style={[
+                  styles.chartSizeCenter,
+                  buildSizeStyle(lineChartWidth, SENTIMENT_CHART_HEIGHT),
+                ]}
+              >
+                <SentimentStackedBarChart
+                  data={pageData.dayRows}
+                  chartWidth={sentimentChartWidth}
+                  chartHeight={SENTIMENT_CHART_HEIGHT}
+                  labelColor={themeColors.textMuted}
+                  happyColor={SENTIMENT_COLORS.happy}
+                  neutralColor={SENTIMENT_COLORS.neutral}
+                  sadColor={SENTIMENT_COLORS.sad}
+                />
               </View>
             </View>
-            <View
-              className="mx-3 w-px"
-              style={{ backgroundColor: withColorAlpha(themeColors.border, isDark ? 0.4 : 0.3) }}
-            />
-            <View className="flex-1 items-center justify-center py-1">
-              <View className="flex-row items-center justify-center gap-1.5">
-                <SentimentIcon sentiment="neutral" size={26} />
-                <X size={12} color="#000000" strokeWidth={2.4} />
-                <Text variant="subheading" style={{ color: SENTIMENT_COLORS.neutral }}>
-                  {pageData.totals.neutral}
-                </Text>
+          </>
+        }
+        secondary={
+          <Card className="gap-3 p-4">
+            <Text variant="label" tone="muted">
+              {I18n.t('insights.analytics.expense_sentiment.summary_title')}
+            </Text>
+            <View className="flex-row items-center pt-1">
+              <View className="flex-1 items-center justify-center py-1">
+                <View className="flex-row items-center justify-center gap-1.5">
+                  <SentimentIcon sentiment="sad" size={26} />
+                  <X size={12} color="#000000" strokeWidth={2.4} />
+                  <Text variant="subheading" style={{ color: SENTIMENT_COLORS.sad }}>
+                    {pageData.totals.sad}
+                  </Text>
+                </View>
+              </View>
+              <View
+                className="mx-3 w-px"
+                style={{ backgroundColor: withColorAlpha(themeColors.border, isDark ? 0.4 : 0.3) }}
+              />
+              <View className="flex-1 items-center justify-center py-1">
+                <View className="flex-row items-center justify-center gap-1.5">
+                  <SentimentIcon sentiment="neutral" size={26} />
+                  <X size={12} color="#000000" strokeWidth={2.4} />
+                  <Text variant="subheading" style={{ color: SENTIMENT_COLORS.neutral }}>
+                    {pageData.totals.neutral}
+                  </Text>
+                </View>
+              </View>
+              <View
+                className="mx-3 w-px"
+                style={{ backgroundColor: withColorAlpha(themeColors.border, isDark ? 0.4 : 0.3) }}
+              />
+              <View className="flex-1 items-center justify-center py-1">
+                <View className="flex-row items-center justify-center gap-1.5">
+                  <SentimentIcon sentiment="happy" size={26} />
+                  <X size={12} color="#000000" strokeWidth={2.4} />
+                  <Text variant="subheading" style={{ color: SENTIMENT_COLORS.happy }}>
+                    {pageData.totals.happy}
+                  </Text>
+                </View>
               </View>
             </View>
-            <View
-              className="mx-3 w-px"
-              style={{ backgroundColor: withColorAlpha(themeColors.border, isDark ? 0.4 : 0.3) }}
-            />
-            <View className="flex-1 items-center justify-center py-1">
-              <View className="flex-row items-center justify-center gap-1.5">
-                <SentimentIcon sentiment="happy" size={26} />
-                <X size={12} color="#000000" strokeWidth={2.4} />
-                <Text variant="subheading" style={{ color: SENTIMENT_COLORS.happy }}>
-                  {pageData.totals.happy}
-                </Text>
-              </View>
-            </View>
-          </View>
-        </Card>
-      </View>
+          </Card>
+        }
+      />
     );
   };
 
@@ -5714,76 +5850,88 @@ export function InsightsScreen({
     };
 
     return (
-      <View className="mt-2 gap-2.5">
-        <View style={lineChartSectionStyle} className="py-1">
-          <View
-            style={[
-              styles.chartSizeCenter,
-              buildSizeStyle(lineChartWidth, ASSET_HISTORY_CHART_HEIGHT),
-            ]}
-            onTouchStart={lockChartScrub}
-            onTouchEnd={unlockChartScrub}
-            onTouchCancel={unlockChartScrub}
-          >
-            <GraphYAxisGrid
-              ticks={assetAxisTicks}
-              chartWidth={assetGraphWidth}
-              chartHeight={ASSET_HISTORY_CHART_HEIGHT}
-              labelWidth={ASSET_HISTORY_CHART_PADDING_RIGHT}
-              lineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
-              formatTick={formatAxisAssetValue}
-            />
-            <AssetHistoryLineChart
-              monthRows={assetDisplayRows}
-              chartWidth={assetGraphWidth}
-              primaryColor={themeColors.primary}
-              onSelectMonthKey={selectAssetHistoryMonth}
-              onGestureStart={lockChartScrub}
-              onGestureEnd={unlockChartScrub}
-            />
-          </View>
-        </View>
-
-        <Card className="p-4">
-          <View className="flex-row items-center gap-2">
-            <View
-              className="rounded-full px-2.5 py-1"
-              style={{ backgroundColor: withColorAlpha(themeColors.primary, isDark ? 0.2 : 0.12) }}
-            >
-              <Text
-                variant="label"
-                style={{ color: themeColors.primary, fontFamily: FONT.semibold, fontWeight: '600' }}
+      <InsightPaneSplit
+        className="mt-2 gap-2.5"
+        primary={
+          <>
+            <View style={lineChartSectionStyle} className="py-1">
+              <View
+                style={[
+                  styles.chartSizeCenter,
+                  buildSizeStyle(lineChartWidth, ASSET_HISTORY_CHART_HEIGHT),
+                ]}
+                onTouchStart={lockChartScrub}
+                onTouchEnd={unlockChartScrub}
+                onTouchCancel={unlockChartScrub}
               >
-                {selectedAssetLabel}
-              </Text>
-            </View>
-          </View>
-
-          <View className="mt-1.5 flex-row items-center">
-            {settings.displayMode === 'time' ? (
-              <TimeValueInline
-                value={selectedAssetHoursLabel}
-                variant="heading"
-                iconColor={selectedAssetToneColor}
-                style={selectedAssetToneStyle}
-              />
-            ) : (
-              <>
-                <Text variant="heading" style={selectedAssetToneStyle}>
-                  {selectedAssetCurrencyPrefix}
-                </Text>
-                <ScrubRollingNumber
-                  value={selectedAssetAbsoluteValue}
-                  formattedText={selectedAssetDisplayValue}
-                  color={selectedAssetToneColor}
-                  resetKey={`asset-${selectedYearKey}`}
-                  containerClassName="ml-1"
+                <GraphYAxisGrid
+                  ticks={assetAxisTicks}
+                  chartWidth={assetGraphWidth}
+                  chartHeight={ASSET_HISTORY_CHART_HEIGHT}
+                  labelWidth={ASSET_HISTORY_CHART_PADDING_RIGHT}
+                  lineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
+                  formatTick={formatAxisAssetValue}
                 />
-              </>
-            )}
-          </View>
-        </Card>
-      </View>
+                <AssetHistoryLineChart
+                  monthRows={assetDisplayRows}
+                  chartWidth={assetGraphWidth}
+                  primaryColor={themeColors.primary}
+                  onSelectMonthKey={selectAssetHistoryMonth}
+                  onGestureStart={lockChartScrub}
+                  onGestureEnd={unlockChartScrub}
+                />
+              </View>
+            </View>
+          </>
+        }
+        secondary={
+          <Card className="p-4">
+            <View className="flex-row items-center gap-2">
+              <View
+                className="rounded-full px-2.5 py-1"
+                style={{
+                  backgroundColor: withColorAlpha(themeColors.primary, isDark ? 0.2 : 0.12),
+                }}
+              >
+                <Text
+                  variant="label"
+                  style={{
+                    color: themeColors.primary,
+                    fontFamily: FONT.semibold,
+                    fontWeight: '600',
+                  }}
+                >
+                  {selectedAssetLabel}
+                </Text>
+              </View>
+            </View>
+
+            <View className="mt-1.5 flex-row items-center">
+              {settings.displayMode === 'time' ? (
+                <TimeValueInline
+                  value={selectedAssetHoursLabel}
+                  variant="heading"
+                  iconColor={selectedAssetToneColor}
+                  style={selectedAssetToneStyle}
+                />
+              ) : (
+                <>
+                  <Text variant="heading" style={selectedAssetToneStyle}>
+                    {selectedAssetCurrencyPrefix}
+                  </Text>
+                  <ScrubRollingNumber
+                    value={selectedAssetAbsoluteValue}
+                    formattedText={selectedAssetDisplayValue}
+                    color={selectedAssetToneColor}
+                    resetKey={`asset-${selectedYearKey}`}
+                    containerClassName="ml-1"
+                  />
+                </>
+              )}
+            </View>
+          </Card>
+        }
+      />
     );
   };
 
@@ -5831,265 +5979,273 @@ export function InsightsScreen({
       });
 
       return (
-        <View className="mt-2 gap-3">
-          <Card className="gap-4 p-5">
-            <View className="flex-row items-center gap-4">
-              <SavingsRateRing
-                size={SAVINGS_RATE_RING_SIZE}
-                strokeWidth={SAVINGS_RATE_RING_STROKE_WIDTH}
-                progress={savingsRate ?? 0}
-                color={toneColor}
-                trackColor={ringTrackColor}
-                goal={HEALTHY_SAVINGS_RATE_THRESHOLD}
-                goalColor={themeColors.accent}
-              >
-                {piggyIconSource ? (
-                  <Image
-                    source={piggyIconSource}
-                    resizeMode="contain"
-                    style={styles.savingsRateRingIcon}
-                  />
-                ) : (
-                  <PiggyBank size={36} color={toneColor} strokeWidth={1.8} />
-                )}
-              </SavingsRateRing>
-
-              <View className="flex-1">
-                <View className="mt-0.5">
-                  {formattedSavingsRate === null ? (
-                    <Text variant="monoLg" tone="muted">
-                      {I18n.t('insights.analytics.savings_rate.no_income_short')}
-                    </Text>
-                  ) : (
-                    // The gradient number is SVG glyphs, invisible to screen
-                    // readers — announce the figure on the wrapper instead.
-                    <View
-                      accessible
-                      accessibilityRole="text"
-                      accessibilityLabel={formattedSavingsRate}
-                    >
-                      <GradientPercent
-                        label={formattedSavingsRate}
-                        color={toneColor}
-                        gradientId="insightsSavingsRateHero"
-                      />
-                    </View>
-                  )}
-                </View>
-                {savingsRate !== null ? (
-                  <Text variant="caption" tone="muted">
-                    {I18n.t('widgets.of_income_saved')}
-                  </Text>
-                ) : null}
-                <View className="mt-2 flex-row flex-wrap items-center gap-1.5">
-                  <View
-                    className="flex-row items-center gap-1 rounded-full px-2 py-[3px]"
-                    style={{ backgroundColor: statusChipColor }}
+        <InsightPaneSplit
+          className="mt-2 gap-3"
+          primary={
+            <>
+              <Card className="gap-4 p-5">
+                <View className="flex-row items-center gap-4">
+                  <SavingsRateRing
+                    size={SAVINGS_RATE_RING_SIZE}
+                    strokeWidth={SAVINGS_RATE_RING_STROKE_WIDTH}
+                    progress={savingsRate ?? 0}
+                    color={toneColor}
+                    trackColor={ringTrackColor}
+                    goal={HEALTHY_SAVINGS_RATE_THRESHOLD}
+                    goalColor={themeColors.accent}
                   >
-                    <StatusIcon size={11} color={toneColor} strokeWidth={2.6} />
-                    <Text
-                      variant="label"
-                      style={{ color: toneColor, fontFamily: FONT.semibold, fontWeight: '600' }}
-                    >
-                      {statusLabel}
-                    </Text>
+                    {piggyIconSource ? (
+                      <Image
+                        source={piggyIconSource}
+                        resizeMode="contain"
+                        style={styles.savingsRateRingIcon}
+                      />
+                    ) : (
+                      <PiggyBank size={36} color={toneColor} strokeWidth={1.8} />
+                    )}
+                  </SavingsRateRing>
+
+                  <View className="flex-1">
+                    <View className="mt-0.5">
+                      {formattedSavingsRate === null ? (
+                        <Text variant="monoLg" tone="muted">
+                          {I18n.t('insights.analytics.savings_rate.no_income_short')}
+                        </Text>
+                      ) : (
+                        // The gradient number is SVG glyphs, invisible to screen
+                        // readers — announce the figure on the wrapper instead.
+                        <View
+                          accessible
+                          accessibilityRole="text"
+                          accessibilityLabel={formattedSavingsRate}
+                        >
+                          <GradientPercent
+                            label={formattedSavingsRate}
+                            color={toneColor}
+                            gradientId="insightsSavingsRateHero"
+                          />
+                        </View>
+                      )}
+                    </View>
+                    {savingsRate !== null ? (
+                      <Text variant="caption" tone="muted">
+                        {I18n.t('widgets.of_income_saved')}
+                      </Text>
+                    ) : null}
+                    <View className="mt-2 flex-row flex-wrap items-center gap-1.5">
+                      <View
+                        className="flex-row items-center gap-1 rounded-full px-2 py-[3px]"
+                        style={{ backgroundColor: statusChipColor }}
+                      >
+                        <StatusIcon size={11} color={toneColor} strokeWidth={2.6} />
+                        <Text
+                          variant="label"
+                          style={{ color: toneColor, fontFamily: FONT.semibold, fontWeight: '600' }}
+                        >
+                          {statusLabel}
+                        </Text>
+                      </View>
+                      <View
+                        className={cn('rounded-full border px-2 py-[3px]', yearlySavedBadgeClass)}
+                      >
+                        {renderCompactValueNode(yearlySavedAmount, {
+                          variant: 'label',
+                          textClassName: cn(yearlySavedAmountClass),
+                          iconColor:
+                            pageData.totalNet > 0
+                              ? themeColors.success
+                              : pageData.totalNet < 0
+                                ? themeColors.error
+                                : themeColors.textMuted,
+                        })}
+                      </View>
+                    </View>
                   </View>
-                  <View className={cn('rounded-full border px-2 py-[3px]', yearlySavedBadgeClass)}>
-                    {renderCompactValueNode(yearlySavedAmount, {
-                      variant: 'label',
-                      textClassName: cn(yearlySavedAmountClass),
-                      iconColor:
-                        pageData.totalNet > 0
-                          ? themeColors.success
-                          : pageData.totalNet < 0
-                            ? themeColors.error
-                            : themeColors.textMuted,
+                </View>
+
+                <View className="flex-row items-stretch border-t border-border/40 pt-3">
+                  <View className="flex-1">
+                    <View className="flex-row items-center gap-1.5">
+                      <View className="h-1.5 w-1.5 rounded-full bg-success" />
+                      <Text variant="label" tone="muted">
+                        {I18n.t('calendar.income')}
+                      </Text>
+                    </View>
+                    {renderCompactValueNode(pageData.totalIncome, {
+                      variant: 'caption',
+                      textClassName: 'mt-0.5 text-success',
+                      iconColor: themeColors.success,
+                    })}
+                  </View>
+                  <View className="mx-3 w-px bg-border/40" />
+                  <View className="flex-1">
+                    <View className="flex-row items-center gap-1.5">
+                      <View className="h-1.5 w-1.5 rounded-full bg-destructive" />
+                      <Text variant="label" tone="muted">
+                        {I18n.t('calendar.expense')}
+                      </Text>
+                    </View>
+                    {renderCompactValueNode(pageData.totalExpense, {
+                      variant: 'caption',
+                      textClassName: 'mt-0.5 text-destructive',
+                      iconColor: themeColors.error,
+                    })}
+                  </View>
+                  <View className="mx-3 w-px bg-border/40" />
+                  <View className="flex-1">
+                    <View className="flex-row items-center gap-1.5">
+                      <View
+                        className={cn(
+                          'h-1.5 w-1.5 rounded-full',
+                          pageData.totalNet >= 0 ? 'bg-success' : 'bg-destructive',
+                        )}
+                      />
+                      <Text variant="label" tone="muted">
+                        {I18n.t('calendar.net')}
+                      </Text>
+                    </View>
+                    {renderCompactValueNode(Math.abs(pageData.totalNet), {
+                      variant: 'caption',
+                      textClassName: cn(
+                        'mt-0.5',
+                        pageData.totalNet >= 0 ? 'text-success' : 'text-destructive',
+                      ),
+                      iconColor: pageData.totalNet >= 0 ? themeColors.success : themeColors.error,
                     })}
                   </View>
                 </View>
-              </View>
-            </View>
-
-            <View className="flex-row items-stretch border-t border-border/40 pt-3">
-              <View className="flex-1">
-                <View className="flex-row items-center gap-1.5">
-                  <View className="h-1.5 w-1.5 rounded-full bg-success" />
-                  <Text variant="label" tone="muted">
-                    {I18n.t('calendar.income')}
-                  </Text>
-                </View>
-                {renderCompactValueNode(pageData.totalIncome, {
-                  variant: 'caption',
-                  textClassName: 'mt-0.5 text-success',
-                  iconColor: themeColors.success,
-                })}
-              </View>
-              <View className="mx-3 w-px bg-border/40" />
-              <View className="flex-1">
-                <View className="flex-row items-center gap-1.5">
-                  <View className="h-1.5 w-1.5 rounded-full bg-destructive" />
-                  <Text variant="label" tone="muted">
-                    {I18n.t('calendar.expense')}
-                  </Text>
-                </View>
-                {renderCompactValueNode(pageData.totalExpense, {
-                  variant: 'caption',
-                  textClassName: 'mt-0.5 text-destructive',
-                  iconColor: themeColors.error,
-                })}
-              </View>
-              <View className="mx-3 w-px bg-border/40" />
-              <View className="flex-1">
-                <View className="flex-row items-center gap-1.5">
-                  <View
-                    className={cn(
-                      'h-1.5 w-1.5 rounded-full',
-                      pageData.totalNet >= 0 ? 'bg-success' : 'bg-destructive',
-                    )}
-                  />
-                  <Text variant="label" tone="muted">
-                    {I18n.t('calendar.net')}
-                  </Text>
-                </View>
-                {renderCompactValueNode(Math.abs(pageData.totalNet), {
-                  variant: 'caption',
-                  textClassName: cn(
-                    'mt-0.5',
-                    pageData.totalNet >= 0 ? 'text-success' : 'text-destructive',
-                  ),
-                  iconColor: pageData.totalNet >= 0 ? themeColors.success : themeColors.error,
-                })}
-              </View>
-            </View>
-          </Card>
-
-          <View className="gap-1.5">
-            {pageData.savingsRateRows.map((row) => {
-              const monthlyRate = row.savingsRate;
-              const hasActivity =
-                row.transactions.length > 0 || row.income !== 0 || row.expense !== 0;
-              if (!hasActivity) {
-                return (
-                  <View
-                    key={row.monthKey}
-                    className="flex-row items-center justify-between rounded-2xl border border-dashed border-border/40 px-3 py-2 opacity-60"
-                  >
-                    <Text variant="caption" tone="muted">
-                      {row.label}
-                    </Text>
-                    <Text variant="caption" tone="muted">
-                      —
-                    </Text>
-                  </View>
-                );
-              }
-
-              const monthlySavedAmount = Math.abs(row.net);
-              const monthlyDisplayPercent =
-                monthlyRate === null ? null : Number((monthlyRate * 100).toFixed(1));
-              const monthlyRateLabel =
-                monthlyDisplayPercent === null
-                  ? '—'
-                  : formatSavingsRatePercentLabel(monthlyDisplayPercent);
-              const monthlySavedAmountClass =
-                row.net > 0
-                  ? 'text-success'
-                  : row.net < 0
-                    ? 'text-destructive'
-                    : 'text-muted-foreground';
-              const monthlyFillFraction =
-                monthlyRate === null ? 0 : Math.max(0, Math.min(1, monthlyRate));
-              const monthlyToneColor = resolveSavingsRateStatus(
-                monthlyDisplayPercent,
-                themeColors,
-              ).color;
-              const isBestMonth = row.monthKey === bestMonthKey;
-              return (
-                <Pressable
-                  key={row.monthKey}
-                  onPress={() => {
-                    openDrilldown({
-                      label: row.label,
-                      transactions: row.transactions,
-                      showTypeFilter: true,
-                      triggerSelectionHaptic: true,
-                    });
-                  }}
-                  accessibilityRole="button"
-                  accessibilityLabel={row.label}
-                  className="rounded-2xl border border-border/30 bg-card px-3.5 py-3 active:opacity-85"
-                >
-                  <View className="flex-row items-center gap-3">
-                    <View className="w-11">
-                      <View className="flex-row items-center gap-1">
-                        <Text variant="caption" numberOfLines={1}>
-                          {row.label}
-                        </Text>
-                        {isBestMonth ? <Sparkles size={10} color={themeColors.accent} /> : null}
-                      </View>
+              </Card>
+            </>
+          }
+          secondary={
+            <View className="gap-1.5">
+              {pageData.savingsRateRows.map((row) => {
+                const monthlyRate = row.savingsRate;
+                const hasActivity =
+                  row.transactions.length > 0 || row.income !== 0 || row.expense !== 0;
+                if (!hasActivity) {
+                  return (
+                    <View
+                      key={row.monthKey}
+                      className="flex-row items-center justify-between rounded-2xl border border-dashed border-border/40 px-3 py-2 opacity-60"
+                    >
+                      <Text variant="caption" tone="muted">
+                        {row.label}
+                      </Text>
+                      <Text variant="caption" tone="muted">
+                        —
+                      </Text>
                     </View>
-                    <View className="flex-1 gap-2">
-                      <View
-                        className="h-2 overflow-hidden rounded-full"
-                        style={{
-                          backgroundColor:
-                            row.income > 0 || row.expense > 0
-                              ? monthTrackSpentColor
-                              : monthTrackIdleColor,
-                        }}
-                      >
+                  );
+                }
+
+                const monthlySavedAmount = Math.abs(row.net);
+                const monthlyDisplayPercent =
+                  monthlyRate === null ? null : Number((monthlyRate * 100).toFixed(1));
+                const monthlyRateLabel =
+                  monthlyDisplayPercent === null
+                    ? '—'
+                    : formatSavingsRatePercentLabel(monthlyDisplayPercent);
+                const monthlySavedAmountClass =
+                  row.net > 0
+                    ? 'text-success'
+                    : row.net < 0
+                      ? 'text-destructive'
+                      : 'text-muted-foreground';
+                const monthlyFillFraction =
+                  monthlyRate === null ? 0 : Math.max(0, Math.min(1, monthlyRate));
+                const monthlyToneColor = resolveSavingsRateStatus(
+                  monthlyDisplayPercent,
+                  themeColors,
+                ).color;
+                const isBestMonth = row.monthKey === bestMonthKey;
+                return (
+                  <Pressable
+                    key={row.monthKey}
+                    onPress={() => {
+                      openDrilldown({
+                        label: row.label,
+                        transactions: row.transactions,
+                        showTypeFilter: true,
+                        triggerSelectionHaptic: true,
+                      });
+                    }}
+                    accessibilityRole="button"
+                    accessibilityLabel={row.label}
+                    className="rounded-2xl border border-border/30 bg-card px-3.5 py-3 active:opacity-85"
+                  >
+                    <View className="flex-row items-center gap-3">
+                      <View className="w-11">
+                        <View className="flex-row items-center gap-1">
+                          <Text variant="caption" numberOfLines={1}>
+                            {row.label}
+                          </Text>
+                          {isBestMonth ? <Sparkles size={10} color={themeColors.accent} /> : null}
+                        </View>
+                      </View>
+                      <View className="flex-1 gap-2">
                         <View
-                          style={[
-                            styles.progressFill,
-                            buildWidthStyle(`${Math.round(monthlyFillFraction * 100)}%`),
-                            { backgroundColor: themeColors.success },
-                          ]}
-                        />
-                        {row.income > 0 ? (
+                          className="h-2 overflow-hidden rounded-full"
+                          style={{
+                            backgroundColor:
+                              row.income > 0 || row.expense > 0
+                                ? monthTrackSpentColor
+                                : monthTrackIdleColor,
+                          }}
+                        >
                           <View
-                            pointerEvents="none"
                             style={[
-                              styles.savingsRateHealthyMarker,
-                              buildLeftStyle(healthyMarkerLeft),
-                              { backgroundColor: healthyMarkerColor },
+                              styles.progressFill,
+                              buildWidthStyle(`${Math.round(monthlyFillFraction * 100)}%`),
+                              { backgroundColor: themeColors.success },
                             ]}
                           />
-                        ) : null}
+                          {row.income > 0 ? (
+                            <View
+                              pointerEvents="none"
+                              style={[
+                                styles.savingsRateHealthyMarker,
+                                buildLeftStyle(healthyMarkerLeft),
+                                { backgroundColor: healthyMarkerColor },
+                              ]}
+                            />
+                          ) : null}
+                        </View>
+                        <View className="flex-row items-center justify-between gap-2">
+                          {renderCompactValueNode(row.income, {
+                            variant: 'label',
+                            textClassName: 'text-success/90',
+                            iconColor: themeColors.success,
+                          })}
+                          {renderCompactValueNode(row.expense, {
+                            variant: 'label',
+                            textClassName: 'text-destructive/90',
+                            iconColor: themeColors.error,
+                          })}
+                        </View>
                       </View>
-                      <View className="flex-row items-center justify-between gap-2">
-                        {renderCompactValueNode(row.income, {
+                      <View className="w-20 items-end gap-0.5">
+                        <Text variant="mono" numberOfLines={1} style={{ color: monthlyToneColor }}>
+                          {monthlyRateLabel}
+                        </Text>
+                        {renderCompactValueNode(monthlySavedAmount, {
                           variant: 'label',
-                          textClassName: 'text-success/90',
-                          iconColor: themeColors.success,
-                        })}
-                        {renderCompactValueNode(row.expense, {
-                          variant: 'label',
-                          textClassName: 'text-destructive/90',
-                          iconColor: themeColors.error,
+                          textClassName: cn(monthlySavedAmountClass),
+                          iconColor:
+                            row.net > 0
+                              ? themeColors.success
+                              : row.net < 0
+                                ? themeColors.error
+                                : themeColors.textMuted,
                         })}
                       </View>
                     </View>
-                    <View className="w-20 items-end gap-0.5">
-                      <Text variant="mono" numberOfLines={1} style={{ color: monthlyToneColor }}>
-                        {monthlyRateLabel}
-                      </Text>
-                      {renderCompactValueNode(monthlySavedAmount, {
-                        variant: 'label',
-                        textClassName: cn(monthlySavedAmountClass),
-                        iconColor:
-                          row.net > 0
-                            ? themeColors.success
-                            : row.net < 0
-                              ? themeColors.error
-                              : themeColors.textMuted,
-                      })}
-                    </View>
-                  </View>
-                </Pressable>
-              );
-            })}
-          </View>
-        </View>
+                  </Pressable>
+                );
+              })}
+            </View>
+          }
+        />
       );
     }
 
@@ -6415,10 +6571,12 @@ export function InsightsScreen({
           getPageScrollRef={getPageScrollRef}
           renderInsightsPane={renderInsightsPaneStable}
           onScrollNearEnd={handlePaneScrollNearEnd}
+          split={insightsSplit}
         />
       );
     },
     [
+      insightsSplit,
       displayCommittedPageIndex,
       displayCurrentPeriodState,
       displayPeriodPreset,
@@ -6856,729 +7014,762 @@ export function InsightsScreen({
   );
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      <MonthControlsHeader
-        titleNode={
-          <View className="flex-row items-center gap-2">
-            <View ref={insightsTypeSelectorRef}>
-              <Pressable
-                onPress={openInsightMenu}
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('insights.insight_type')}
-                accessibilityValue={{
-                  text: String(I18n.t(`insights.${displaySelectedInsightType}`)),
-                }}
-                accessibilityState={{ expanded: isInsightMenuOpen }}
-                className="h-10 w-10 items-center justify-center rounded-full border-2 border-primary/40 bg-primary/10 shadow-soft active:scale-90"
-              >
-                {renderInsightTypeIcon(displaySelectedInsightType)}
-                <View className="absolute -bottom-1 -right-1 h-[18px] w-[18px] items-center justify-center rounded-full border-2 border-background bg-primary shadow-sm">
-                  <ChevronDown size={11} color="#FFFFFF" strokeWidth={3} />
-                </View>
-              </Pressable>
-            </View>
-            <View className="flex-1 items-center px-1">
-              <Text
-                variant={width < 380 ? 'subheading' : 'headingSm'}
-                numberOfLines={1}
-                className="text-center tracking-tight"
-              >
-                {String(I18n.t(`insights.${displaySelectedInsightType}`))}
-              </Text>
-            </View>
-            {/* Every insight type puts a 40px control here, which is what keeps
+      <View style={[styles.flexOne, { paddingHorizontal: column.margin }]}>
+        <ContentFrameProvider width={column.width} height={height}>
+          <View
+            style={splitPanes ? [styles.splitHeader, { width: splitPanes.left }] : undefined}
+            onLayout={splitPanes ? handleSplitHeaderLayout : undefined}
+          >
+            <MonthControlsHeader
+              titleNode={
+                <View className="flex-row items-center gap-2">
+                  <View ref={insightsTypeSelectorRef}>
+                    <Pressable
+                      onPress={openInsightMenu}
+                      accessibilityRole="button"
+                      accessibilityLabel={I18n.t('insights.insight_type')}
+                      accessibilityValue={{
+                        text: String(I18n.t(`insights.${displaySelectedInsightType}`)),
+                      }}
+                      accessibilityState={{ expanded: isInsightMenuOpen }}
+                      className="h-10 w-10 items-center justify-center rounded-full border-2 border-primary/40 bg-primary/10 shadow-soft active:scale-90"
+                    >
+                      {renderInsightTypeIcon(displaySelectedInsightType)}
+                      <View className="absolute -bottom-1 -right-1 h-[18px] w-[18px] items-center justify-center rounded-full border-2 border-background bg-primary shadow-sm">
+                        <ChevronDown size={11} color="#FFFFFF" strokeWidth={3} />
+                      </View>
+                    </Pressable>
+                  </View>
+                  <View className="flex-1 items-center px-1">
+                    <Text
+                      variant={width < 380 ? 'subheading' : 'headingSm'}
+                      numberOfLines={1}
+                      className="text-center tracking-tight"
+                    >
+                      {String(I18n.t(`insights.${displaySelectedInsightType}`))}
+                    </Text>
+                  </View>
+                  {/* Every insight type puts a 40px control here, which is what keeps
                 the title above centred between it and the type selector. */}
-            <View className="w-10 items-end justify-center">
-              {isReviewView ? (
-                <FilterIconButton
-                  onPress={openReviewFilters}
-                  count={reviewFilterCount(reviewFilters)}
-                />
-              ) : isBudgetView ? (
-                <Pressable
-                  onPress={() => {
-                    void triggerHaptic('selection');
-                    onOpenBudgetTemplates();
-                  }}
-                  hitSlop={8}
-                  accessibilityRole="button"
-                  accessibilityLabel={I18n.t('budget.templates_title')}
-                  className="h-10 w-10 items-center justify-center rounded-full border border-border/30 bg-card"
-                >
-                  <ClayIcon name="ui/filter-sliders" size={24} flatSize={18} />
-                </Pressable>
-              ) : displayHasInsightsFilters ? (
-                <FilterIconButton
-                  onPress={handleOpenFiltersModal}
-                  count={displayInsightsFilterCount}
-                />
-              ) : null}
-            </View>
+                  <View className="w-10 items-end justify-center">
+                    {isReviewView ? (
+                      <FilterIconButton
+                        onPress={openReviewFilters}
+                        count={reviewFilterCount(reviewFilters)}
+                      />
+                    ) : isBudgetView ? (
+                      <Pressable
+                        onPress={() => {
+                          void triggerHaptic('selection');
+                          onOpenBudgetTemplates();
+                        }}
+                        hitSlop={8}
+                        accessibilityRole="button"
+                        accessibilityLabel={I18n.t('budget.templates_title')}
+                        className="h-10 w-10 items-center justify-center rounded-full border border-border/30 bg-card"
+                      >
+                        <ClayIcon name="ui/filter-sliders" size={24} flatSize={18} />
+                      </Pressable>
+                    ) : displayHasInsightsFilters ? (
+                      <FilterIconButton
+                        onPress={handleOpenFiltersModal}
+                        count={displayInsightsFilterCount}
+                      />
+                    ) : null}
+                  </View>
+                </View>
+              }
+              monthLabel={isBudgetView ? budgetMonthLabel : activePeriodLabel}
+              onPrevMonth={
+                isBudgetView ? () => budgetPagerRef.current?.scrollToRelative(-1) : handlePrevMonth
+              }
+              onNextMonth={
+                isBudgetView ? () => budgetPagerRef.current?.scrollToRelative(1) : handleNextMonth
+              }
+              // Review picks its period from its own rail of pills, so the month
+              // capsule would be a second, redundant control.
+              hideNavigation={isReviewView}
+              disableNavArrows={!isTakeoverView && displayPeriodPreset === 'lifetime'}
+              onMonthPress={
+                isBudgetView
+                  ? () => budgetPagerRef.current?.openMonthPicker()
+                  : isTakeoverView || displayPeriodPreset === 'lifetime'
+                    ? undefined
+                    : handleOpenPeriodPicker
+              }
+              monthTriggerRef={periodPickerTriggerRef}
+              onMonthTriggerLayout={handlePeriodPickerTriggerLayout}
+            />
           </View>
-        }
-        monthLabel={isBudgetView ? budgetMonthLabel : activePeriodLabel}
-        onPrevMonth={
-          isBudgetView ? () => budgetPagerRef.current?.scrollToRelative(-1) : handlePrevMonth
-        }
-        onNextMonth={
-          isBudgetView ? () => budgetPagerRef.current?.scrollToRelative(1) : handleNextMonth
-        }
-        // Review picks its period from its own rail of pills, so the month
-        // capsule would be a second, redundant control.
-        hideNavigation={isReviewView}
-        disableNavArrows={!isTakeoverView && displayPeriodPreset === 'lifetime'}
-        onMonthPress={
-          isBudgetView
-            ? () => budgetPagerRef.current?.openMonthPicker()
-            : isTakeoverView || displayPeriodPreset === 'lifetime'
-              ? undefined
-              : handleOpenPeriodPicker
-        }
-        monthTriggerRef={periodPickerTriggerRef}
-        onMonthTriggerLayout={handlePeriodPickerTriggerLayout}
-      />
 
-      <View className="flex-1 overflow-hidden bg-background">
-        {isLoading ? (
-          <View className="flex-1 items-center justify-center">
-            <LoadingDots size="large" />
-            <Text variant="friendly" tone="muted" className="mt-3">
-              {I18n.t('insights.loading')}
-            </Text>
-          </View>
-        ) : isReviewView ? (
-          <ReviewPagerView
-            ref={reviewPagerRef}
-            zoom={reviewZoom}
-            onZoomChange={setReviewZoom}
-            filters={reviewFilters}
-            onFiltersChange={setReviewFilters}
-            onOpenTransaction={onOpenTransaction}
-          />
-        ) : isBudgetView ? (
-          <BudgetPagerView
-            ref={budgetPagerRef}
-            onOpenTemplateEditor={onOpenBudgetTemplateEditor}
-            onOpenBudgetEditor={onOpenMonthlyBudgetEditor}
-            onCreateCustomBudget={onCreateCustomBudget}
-            onOpenDrilldown={onOpenDrilldown}
-            onActiveMonthLabelChange={setBudgetMonthLabel}
-          />
-        ) : !isPro && proTrendTypeSet.has(displaySelectedInsightType) ? (
-          // Locked Pro trend: every pager page would just render the paywall
-          // overlay, so skip the horizontal VirtualizedList (4801 slots) entirely
-          // and mount a single static overlay. Mounting that windowed list — with
-          // its layout pass — during the cold-start preload was a large chunk of
-          // the launch commit, especially on the New-Architecture iOS simulator.
-          <View className="flex-1">
-            <TabletContentContainer>
-              <ProTrendPreviewOverlay onUpgrade={handleTrendUpgrade} />
-            </TabletContentContainer>
-          </View>
-        ) : (
-          <FlatList
-            ref={horizontalListRef}
-            data={insightsPagerSlots}
-            keyExtractor={insightsPagerKeyExtractor}
-            style={INSIGHTS_LIST_STYLE}
-            horizontal
-            pagingEnabled
-            disableIntervalMomentum
-            scrollEnabled={
-              !isChartScrubbing && !isSelectionMode && displayPeriodPreset !== 'lifetime'
-            }
-            bounces={false}
-            directionalLockEnabled
-            decelerationRate="fast"
-            showsHorizontalScrollIndicator={false}
-            overScrollMode="never"
-            nestedScrollEnabled
-            // FlatList defaults clipping to true on Android. Nested scrollable
-            // pages can stay detached after a swipe, leaving the chart blank.
-            // Disable it explicitly; windowSize still limits mounted pages.
-            removeClippedSubviews={false}
-            initialNumToRender={3}
-            maxToRenderPerBatch={3}
-            windowSize={3}
-            renderItem={renderInsightsWindowPage}
-            initialScrollIndex={INSIGHTS_PAGER_CENTER_INDEX}
-            getItemLayout={getHorizontalItemLayout}
-            onScroll={handleHorizontalScroll}
-            scrollEventThrottle={16}
-            onScrollBeginDrag={handleHorizontalScrollBeginDrag}
-            onScrollEndDrag={handleHorizontalScrollEndDrag}
-            onMomentumScrollEnd={handleHorizontalMomentumEnd}
-            onScrollToIndexFailed={handleHorizontalScrollToIndexFailed}
-          />
-        )}
-
-        {isSelectionMode ? (
-          <TransactionSelectionToolbar
-            selectedCount={selectedTransactionCount}
-            totalNode={
-              settings.displayMode === 'time' ? (
-                <TimeValueInline
-                  value={selectedTransactionTotalLabel}
-                  variant="label"
-                  iconColor={themeColors.text}
-                />
-              ) : (
-                <Text variant="label" className="text-foreground">
-                  {selectedTransactionTotalLabel}
+          <View className="flex-1 overflow-hidden bg-background">
+            {isLoading ? (
+              <View className="flex-1 items-center justify-center">
+                <LoadingDots size="large" />
+                <Text variant="friendly" tone="muted" className="mt-3">
+                  {I18n.t('insights.loading')}
                 </Text>
-              )
-            }
-            onCancel={clearSelection}
-            onDuplicate={
-              duplicableSelectedTransactions.length > 0 ? handleOpenDuplicatePicker : undefined
-            }
-            onEdit={handleOpenBulkUpdate}
-            onDelete={handleDeleteSelectedTransactions}
-          />
-        ) : null}
-      </View>
-
-      {displaySelectedInsightType === 'category_trend' && !isSelectionMode
-        ? (() => {
-            const stickyOption =
-              categoryTrendCategoryOptions.find(
-                (category) => category.id === effectiveCategoryTrendCategoryId,
-              ) ??
-              categoryTrendCategoryOptions[0] ??
-              null;
-            if (!stickyOption) return null;
-            return (
-              <View className="bg-background px-5 pt-1.5" style={{ paddingBottom: bottomNavInset }}>
+              </View>
+            ) : isReviewView ? (
+              <ReviewPagerView
+                ref={reviewPagerRef}
+                zoom={reviewZoom}
+                onZoomChange={setReviewZoom}
+                filters={reviewFilters}
+                onFiltersChange={setReviewFilters}
+                onOpenTransaction={onOpenTransaction}
+              />
+            ) : isBudgetView ? (
+              <BudgetPagerView
+                ref={budgetPagerRef}
+                onOpenTemplateEditor={onOpenBudgetTemplateEditor}
+                onOpenBudgetEditor={onOpenMonthlyBudgetEditor}
+                onCreateCustomBudget={onCreateCustomBudget}
+                onOpenDrilldown={onOpenDrilldown}
+                onActiveMonthLabelChange={setBudgetMonthLabel}
+              />
+            ) : !isPro && proTrendTypeSet.has(displaySelectedInsightType) ? (
+              // Locked Pro trend: every pager page would just render the paywall
+              // overlay, so skip the horizontal VirtualizedList (4801 slots) entirely
+              // and mount a single static overlay. Mounting that windowed list — with
+              // its layout pass — during the cold-start preload was a large chunk of
+              // the launch commit, especially on the New-Architecture iOS simulator.
+              <View className="flex-1">
                 <TabletContentContainer>
+                  <ProTrendPreviewOverlay onUpgrade={handleTrendUpgrade} />
+                </TabletContentContainer>
+              </View>
+            ) : (
+              <FlatList
+                ref={horizontalListRef}
+                data={insightsPagerSlots}
+                keyExtractor={insightsPagerKeyExtractor}
+                style={INSIGHTS_LIST_STYLE}
+                horizontal
+                pagingEnabled
+                disableIntervalMomentum
+                scrollEnabled={
+                  !isChartScrubbing && !isSelectionMode && displayPeriodPreset !== 'lifetime'
+                }
+                bounces={false}
+                directionalLockEnabled
+                decelerationRate="fast"
+                showsHorizontalScrollIndicator={false}
+                overScrollMode="never"
+                nestedScrollEnabled
+                // FlatList defaults clipping to true on Android. Nested scrollable
+                // pages can stay detached after a swipe, leaving the chart blank.
+                // Disable it explicitly; windowSize still limits mounted pages.
+                removeClippedSubviews={false}
+                initialNumToRender={3}
+                maxToRenderPerBatch={3}
+                windowSize={3}
+                renderItem={renderInsightsWindowPage}
+                initialScrollIndex={INSIGHTS_PAGER_CENTER_INDEX}
+                getItemLayout={getHorizontalItemLayout}
+                onScroll={handleHorizontalScroll}
+                scrollEventThrottle={16}
+                onScrollBeginDrag={handleHorizontalScrollBeginDrag}
+                onScrollEndDrag={handleHorizontalScrollEndDrag}
+                onMomentumScrollEnd={handleHorizontalMomentumEnd}
+                onScrollToIndexFailed={handleHorizontalScrollToIndexFailed}
+              />
+            )}
+
+            {isSelectionMode ? (
+              <TransactionSelectionToolbar
+                selectedCount={selectedTransactionCount}
+                totalNode={
+                  settings.displayMode === 'time' ? (
+                    <TimeValueInline
+                      value={selectedTransactionTotalLabel}
+                      variant="label"
+                      iconColor={themeColors.text}
+                    />
+                  ) : (
+                    <Text variant="label" className="text-foreground">
+                      {selectedTransactionTotalLabel}
+                    </Text>
+                  )
+                }
+                onCancel={clearSelection}
+                onDuplicate={
+                  duplicableSelectedTransactions.length > 0 ? handleOpenDuplicatePicker : undefined
+                }
+                onEdit={handleOpenBulkUpdate}
+                onDelete={handleDeleteSelectedTransactions}
+              />
+            ) : null}
+          </View>
+
+          {displaySelectedInsightType === 'category_trend' && !isSelectionMode
+            ? (() => {
+                const stickyOption =
+                  categoryTrendCategoryOptions.find(
+                    (category) => category.id === effectiveCategoryTrendCategoryId,
+                  ) ??
+                  categoryTrendCategoryOptions[0] ??
+                  null;
+                if (!stickyOption) return null;
+                return (
+                  <View
+                    className="bg-background px-5 pt-1.5"
+                    // Split: under the chart, in the left pane.
+                    style={{ paddingBottom: bottomNavInset, marginRight: splitPanes?.right ?? 0 }}
+                  >
+                    <TabletContentContainer>
+                      <Pressable
+                        onPress={() => {
+                          void triggerHaptic('selection');
+                          setIsCategoryTrendPickerOpen(true);
+                        }}
+                        className="flex-row items-center justify-between rounded-2xl border border-border/50 bg-card px-3.5 py-3 active:opacity-80"
+                      >
+                        <View className="flex-row items-center gap-2">
+                          <CategoryEmoji icon={stickyOption.emoji} size={20} />
+                          <Text
+                            variant="body"
+                            style={{
+                              color: themeColors.text,
+                              fontFamily: FONT.semibold,
+                              fontWeight: '600',
+                            }}
+                          >
+                            {stickyOption.label}
+                          </Text>
+                        </View>
+                        <ChevronDown size={18} color={themeColors.textMuted} />
+                      </Pressable>
+                    </TabletContentContainer>
+                  </View>
+                );
+              })()
+            : null}
+
+          <BulkEditTransactionsSheet
+            visible={showBulkUpdate}
+            selectedCount={selectedTransactionCount}
+            categoryTypes={selectionCategoryTypes}
+            onClose={handleCloseBulkUpdate}
+            onApply={handleApplyBulkUpdate}
+          />
+
+          <DuplicateTransactionsDatePicker
+            visible={showDuplicatePicker}
+            transactions={duplicableSelectedTransactions}
+            onClose={() => setShowDuplicatePicker(false)}
+            onDuplicated={handleDuplicated}
+          />
+
+          <PeriodPickerPopover
+            visible={isPeriodPickerOpen}
+            anchorRect={periodPickerAnchorRect}
+            screenWidth={width}
+            screenHeight={height}
+            locale={activeLocale}
+            weekStartsOn={weekStartsOn}
+            monthCycle={monthCycle}
+            currentPreset={effectivePeriodPreset}
+            currentAnchorDate={currentPeriodState.anchorDate}
+            currentCustomStart={customStart}
+            currentCustomEnd={customEnd}
+            currentCustomDateField={activeCustomDateField}
+            onClose={() => setIsPeriodPickerOpen(false)}
+            onCommit={applyPeriodPickerSelection}
+          />
+
+          <InsightTypeMenuPopover
+            visible={isInsightMenuOpen}
+            anchorRect={insightMenuAnchorRect}
+            screenWidth={width}
+            screenHeight={height}
+            options={insightTypeOptions}
+            selectedValue={displaySelectedInsightType}
+            onSelect={handleInsightMenuSelect}
+            onClose={() => setIsInsightMenuOpen(false)}
+          />
+
+          <ThemeModal
+            visible={hasInsightsFilters && isFilterModalOpen}
+            animationType="slide"
+            presentationStyle="pageSheet"
+            onRequestClose={() => {
+              if (activeInsightsFilterPicker) {
+                setActiveInsightsFilterPicker(null);
+                return;
+              }
+              setIsFilterModalOpen(false);
+            }}
+          >
+            <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+              <View style={styles.insightsFilterModalHeader}>
+                <View>
+                  <Text variant="subheading">{I18n.t('insights.filters.title')}</Text>
+                </View>
+                <View className="flex-row items-center gap-2">
                   <Pressable
                     onPress={() => {
                       void triggerHaptic('selection');
-                      setIsCategoryTrendPickerOpen(true);
+                      resetInsightsFilters();
                     }}
-                    className="flex-row items-center justify-between rounded-2xl border border-border/50 bg-card px-3.5 py-3 active:opacity-80"
+                    className="bg-secondary/70"
+                    style={styles.insightsFilterActionButton}
+                    accessibilityRole="button"
+                    accessibilityLabel={I18n.t('common.reset')}
                   >
-                    <View className="flex-row items-center gap-2">
-                      <CategoryEmoji icon={stickyOption.emoji} size={20} />
-                      <Text
-                        variant="body"
-                        style={{
-                          color: themeColors.text,
-                          fontFamily: FONT.semibold,
-                          fontWeight: '600',
-                        }}
-                      >
-                        {stickyOption.label}
-                      </Text>
-                    </View>
-                    <ChevronDown size={18} color={themeColors.textMuted} />
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('common.reset')}
+                    </Text>
                   </Pressable>
-                </TabletContentContainer>
+                  <Pressable
+                    onPress={() => {
+                      void triggerHaptic('selection');
+                      setIsFilterModalOpen(false);
+                    }}
+                    className="bg-secondary"
+                    style={styles.insightsFilterActionButton}
+                    accessibilityRole="button"
+                    accessibilityLabel={I18n.t('common.done')}
+                  >
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('common.done')}
+                    </Text>
+                  </Pressable>
+                </View>
               </View>
-            );
-          })()
-        : null}
 
-      <BulkEditTransactionsSheet
-        visible={showBulkUpdate}
-        selectedCount={selectedTransactionCount}
-        categoryTypes={selectionCategoryTypes}
-        onClose={handleCloseBulkUpdate}
-        onApply={handleApplyBulkUpdate}
-      />
-
-      <DuplicateTransactionsDatePicker
-        visible={showDuplicatePicker}
-        transactions={duplicableSelectedTransactions}
-        onClose={() => setShowDuplicatePicker(false)}
-        onDuplicated={handleDuplicated}
-      />
-
-      <PeriodPickerPopover
-        visible={isPeriodPickerOpen}
-        anchorRect={periodPickerAnchorRect}
-        screenWidth={width}
-        screenHeight={height}
-        locale={activeLocale}
-        weekStartsOn={weekStartsOn}
-        monthCycle={monthCycle}
-        currentPreset={effectivePeriodPreset}
-        currentAnchorDate={currentPeriodState.anchorDate}
-        currentCustomStart={customStart}
-        currentCustomEnd={customEnd}
-        currentCustomDateField={activeCustomDateField}
-        onClose={() => setIsPeriodPickerOpen(false)}
-        onCommit={applyPeriodPickerSelection}
-      />
-
-      <InsightTypeMenuPopover
-        visible={isInsightMenuOpen}
-        anchorRect={insightMenuAnchorRect}
-        screenWidth={width}
-        screenHeight={height}
-        options={insightTypeOptions}
-        selectedValue={displaySelectedInsightType}
-        onSelect={handleInsightMenuSelect}
-        onClose={() => setIsInsightMenuOpen(false)}
-      />
-
-      <ThemeModal
-        visible={hasInsightsFilters && isFilterModalOpen}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={() => {
-          if (activeInsightsFilterPicker) {
-            setActiveInsightsFilterPicker(null);
-            return;
-          }
-          setIsFilterModalOpen(false);
-        }}
-      >
-        <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-          <View style={styles.insightsFilterModalHeader}>
-            <View>
-              <Text variant="subheading">{I18n.t('insights.filters.title')}</Text>
-            </View>
-            <View className="flex-row items-center gap-2">
-              <Pressable
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  resetInsightsFilters();
-                }}
-                className="bg-secondary/70"
-                style={styles.insightsFilterActionButton}
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('common.reset')}
+              <ScrollView
+                className="flex-1"
+                contentContainerStyle={INSIGHTS_FILTER_MODAL_CONTENT_STYLE}
               >
-                <Text variant="caption" tone="muted">
-                  {I18n.t('common.reset')}
-                </Text>
-              </Pressable>
-              <Pressable
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  setIsFilterModalOpen(false);
-                }}
-                className="bg-secondary"
-                style={styles.insightsFilterActionButton}
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('common.done')}
-              >
-                <Text variant="caption" tone="muted">
-                  {I18n.t('common.done')}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-
-          <ScrollView
-            className="flex-1"
-            contentContainerStyle={INSIGHTS_FILTER_MODAL_CONTENT_STYLE}
-          >
-            {hasPeriodFilter ? (
-              <View className="gap-2.5">
-                <Text variant="caption" tone="muted">
-                  {I18n.t('insights.filters.period')}
-                </Text>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.insightsFilterPillsContent}
-                >
-                  {(activeInsightFilterConfig.allowedPeriodPresets ?? PERIOD_TABS).map((tab) => (
-                    <FilterPill
-                      key={tab}
-                      label={I18n.t(
-                        tab === 'lifetime' ? 'insights.period.all_time' : `insights.period.${tab}`,
+                {hasPeriodFilter ? (
+                  <View className="gap-2.5">
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('insights.filters.period')}
+                    </Text>
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={styles.insightsFilterPillsContent}
+                    >
+                      {(activeInsightFilterConfig.allowedPeriodPresets ?? PERIOD_TABS).map(
+                        (tab) => (
+                          <FilterPill
+                            key={tab}
+                            label={I18n.t(
+                              tab === 'lifetime'
+                                ? 'insights.period.all_time'
+                                : `insights.period.${tab}`,
+                            )}
+                            active={periodPreset === tab}
+                            onPress={() => {
+                              if (tab === 'week' && periodPreset !== 'week') {
+                                const currentRange = getPeriodRange(
+                                  effectivePeriodPreset,
+                                  currentPeriodState.anchorDate,
+                                  currentPeriodState.customStart,
+                                  currentPeriodState.customEnd,
+                                  weekStartsOn,
+                                  monthCycle,
+                                );
+                                setAnchorDate(resolveWeekAnchorDateFromRange(currentRange));
+                              }
+                              setPeriodPreset(tab);
+                              if (tab === 'custom') setActiveCustomDateField('start');
+                            }}
+                          />
+                        ),
                       )}
-                      active={periodPreset === tab}
-                      onPress={() => {
-                        if (tab === 'week' && periodPreset !== 'week') {
-                          const currentRange = getPeriodRange(
-                            effectivePeriodPreset,
-                            currentPeriodState.anchorDate,
-                            currentPeriodState.customStart,
-                            currentPeriodState.customEnd,
-                            weekStartsOn,
-                            monthCycle,
-                          );
-                          setAnchorDate(resolveWeekAnchorDateFromRange(currentRange));
-                        }
-                        setPeriodPreset(tab);
-                        if (tab === 'custom') setActiveCustomDateField('start');
-                      }}
-                    />
-                  ))}
-                </ScrollView>
-                {periodPreset === 'custom' ? (
-                  <View className="gap-2">
-                    <View className="flex-row gap-2">
-                      <Pressable
-                        onPress={() => {
-                          void triggerHaptic('selection');
-                          setActiveCustomDateField('start');
-                          setFilterCustomDateModalVisible(true);
-                        }}
-                        accessibilityRole="button"
-                        accessibilityLabel={I18n.t('insights.filters.start')}
-                        className="flex-1 rounded-xl border border-border/30 bg-card px-3 py-2.5"
-                      >
-                        <Text variant="label" tone="muted">
-                          {I18n.t('insights.filters.start')}
-                        </Text>
-                        <Text variant="caption" className="mt-0.5">
-                          {customStart}
-                        </Text>
-                      </Pressable>
-                      <Pressable
-                        onPress={() => {
-                          void triggerHaptic('selection');
-                          setActiveCustomDateField('end');
-                          setFilterCustomDateModalVisible(true);
-                        }}
-                        accessibilityRole="button"
-                        accessibilityLabel={I18n.t('insights.filters.end')}
-                        className="flex-1 rounded-xl border border-border/30 bg-card px-3 py-2.5"
-                      >
-                        <Text variant="label" tone="muted">
-                          {I18n.t('insights.filters.end')}
-                        </Text>
-                        <Text variant="caption" className="mt-0.5">
-                          {customEnd}
-                        </Text>
-                      </Pressable>
-                    </View>
+                    </ScrollView>
+                    {periodPreset === 'custom' ? (
+                      <View className="gap-2">
+                        <View className="flex-row gap-2">
+                          <Pressable
+                            onPress={() => {
+                              void triggerHaptic('selection');
+                              setActiveCustomDateField('start');
+                              setFilterCustomDateModalVisible(true);
+                            }}
+                            accessibilityRole="button"
+                            accessibilityLabel={I18n.t('insights.filters.start')}
+                            className="flex-1 rounded-xl border border-border/30 bg-card px-3 py-2.5"
+                          >
+                            <Text variant="label" tone="muted">
+                              {I18n.t('insights.filters.start')}
+                            </Text>
+                            <Text variant="caption" className="mt-0.5">
+                              {customStart}
+                            </Text>
+                          </Pressable>
+                          <Pressable
+                            onPress={() => {
+                              void triggerHaptic('selection');
+                              setActiveCustomDateField('end');
+                              setFilterCustomDateModalVisible(true);
+                            }}
+                            accessibilityRole="button"
+                            accessibilityLabel={I18n.t('insights.filters.end')}
+                            className="flex-1 rounded-xl border border-border/30 bg-card px-3 py-2.5"
+                          >
+                            <Text variant="label" tone="muted">
+                              {I18n.t('insights.filters.end')}
+                            </Text>
+                            <Text variant="caption" className="mt-0.5">
+                              {customEnd}
+                            </Text>
+                          </Pressable>
+                        </View>
+                      </View>
+                    ) : null}
                   </View>
                 ) : null}
-              </View>
-            ) : null}
 
-            {hasAccountFilter ? (
-              <View className="gap-2.5">
-                <Text variant="caption" tone="muted">
-                  {I18n.t('insights.filters.accounts')}
-                </Text>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.insightsFilterPillsContent}
-                >
-                  <FilterPill
-                    label={I18n.t('insights.filters.all')}
-                    active={selectedAccountIds.length === 0}
-                    onPress={() => setSelectedAccountIds([])}
+                {hasAccountFilter ? (
+                  <View className="gap-2.5">
+                    <Text variant="caption" tone="muted">
+                      {I18n.t('insights.filters.accounts')}
+                    </Text>
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={styles.insightsFilterPillsContent}
+                    >
+                      <FilterPill
+                        label={I18n.t('insights.filters.all')}
+                        active={selectedAccountIds.length === 0}
+                        onPress={() => setSelectedAccountIds([])}
+                      />
+                      {accountOptions.map((a) => (
+                        <FilterPill
+                          key={a.id}
+                          label={a.name}
+                          active={selectedAccountIds.includes(a.id)}
+                          onPress={() =>
+                            setSelectedAccountIds((prev) => toggleStringId(prev, a.id))
+                          }
+                        />
+                      ))}
+                    </ScrollView>
+                  </View>
+                ) : null}
+
+                {hasAssetHistoryAccountExclusionFilter ? (
+                  <SelectionFilterField
+                    label={I18n.t('insights.filters.accounts')}
+                    mode={filterModeOf(insightsFilterModes, 'assetHistoryAccounts')}
+                    count={assetHistoryPickedAccountIds.length}
+                    emptyLabel={I18n.t('common.none')}
+                    onModeChange={(mode) => {
+                      setInsightsFilterMode('assetHistoryAccounts', mode);
+                      // Include counts the shown accounts and reads none as "All",
+                      // so with every account hidden the row would claim "All" over
+                      // an empty chart. Bring them back instead, which is what
+                      // "All" promises.
+                      if (
+                        mode === 'include' &&
+                        excludedAssetHistoryAccountIds.length === assetHistoryAccountOptions.length
+                      ) {
+                        setAssetHistoryAccountOverrides(
+                          includeAllAssetHistoryAccounts(assetHistoryAccountOptions),
+                        );
+                      }
+                    }}
+                    onPress={() => setActiveInsightsFilterPicker('assetHistoryAccounts')}
                   />
-                  {accountOptions.map((a) => (
-                    <FilterPill
-                      key={a.id}
-                      label={a.name}
-                      active={selectedAccountIds.includes(a.id)}
-                      onPress={() => setSelectedAccountIds((prev) => toggleStringId(prev, a.id))}
+                ) : null}
+
+                {hasExpenseTrendExclusionFilter ? (
+                  <View className="gap-3">
+                    <SelectionFilterField
+                      label={I18n.t('insights.filters.accounts')}
+                      mode={filterModeOf(insightsFilterModes, 'expenseTrendAccounts')}
+                      count={excludedExpenseTrendAccountIds.length}
+                      emptyLabel={I18n.t('common.none')}
+                      onModeChange={(mode) => setInsightsFilterMode('expenseTrendAccounts', mode)}
+                      onPress={() => setActiveInsightsFilterPicker('expenseTrendAccounts')}
                     />
-                  ))}
-                </ScrollView>
-              </View>
-            ) : null}
+                    <SelectionFilterField
+                      label={I18n.t('insights.filters.expense_categories')}
+                      mode={filterModeOf(insightsFilterModes, 'expenseTrendExpenseCategories')}
+                      count={excludedExpenseTrendExpenseCategoryIds.length}
+                      emptyLabel={I18n.t('common.none')}
+                      onModeChange={(mode) =>
+                        setInsightsFilterMode('expenseTrendExpenseCategories', mode)
+                      }
+                      onPress={() => setActiveInsightsFilterPicker('expenseTrendExpenseCategories')}
+                    />
+                  </View>
+                ) : null}
 
-            {hasAssetHistoryAccountExclusionFilter ? (
-              <SelectionFilterField
-                label={I18n.t('insights.filters.accounts')}
-                mode={filterModeOf(insightsFilterModes, 'assetHistoryAccounts')}
-                count={assetHistoryPickedAccountIds.length}
-                emptyLabel={I18n.t('common.none')}
-                onModeChange={(mode) => {
-                  setInsightsFilterMode('assetHistoryAccounts', mode);
-                  // Include counts the shown accounts and reads none as "All",
-                  // so with every account hidden the row would claim "All" over
-                  // an empty chart. Bring them back instead, which is what
-                  // "All" promises.
-                  if (
-                    mode === 'include' &&
-                    excludedAssetHistoryAccountIds.length === assetHistoryAccountOptions.length
-                  ) {
-                    setAssetHistoryAccountOverrides(
-                      includeAllAssetHistoryAccounts(assetHistoryAccountOptions),
-                    );
-                  }
+                {hasIncomeTrendExclusionFilter ? (
+                  <View className="gap-3">
+                    <SelectionFilterField
+                      label={I18n.t('insights.filters.accounts')}
+                      mode={filterModeOf(insightsFilterModes, 'incomeTrendAccounts')}
+                      count={excludedIncomeTrendAccountIds.length}
+                      emptyLabel={I18n.t('common.none')}
+                      onModeChange={(mode) => setInsightsFilterMode('incomeTrendAccounts', mode)}
+                      onPress={() => setActiveInsightsFilterPicker('incomeTrendAccounts')}
+                    />
+                    <SelectionFilterField
+                      label={I18n.t('insights.filters.income_categories')}
+                      mode={filterModeOf(insightsFilterModes, 'incomeTrendIncomeCategories')}
+                      count={excludedIncomeTrendIncomeCategoryIds.length}
+                      emptyLabel={I18n.t('common.none')}
+                      onModeChange={(mode) =>
+                        setInsightsFilterMode('incomeTrendIncomeCategories', mode)
+                      }
+                      onPress={() => setActiveInsightsFilterPicker('incomeTrendIncomeCategories')}
+                    />
+                  </View>
+                ) : null}
+
+                {hasCategoryTrendExclusionFilter ? (
+                  <SelectionFilterField
+                    label={I18n.t('insights.filters.accounts')}
+                    mode={filterModeOf(insightsFilterModes, 'categoryTrendAccounts')}
+                    count={excludedCategoryTrendAccountIds.length}
+                    emptyLabel={I18n.t('common.none')}
+                    onModeChange={(mode) => setInsightsFilterMode('categoryTrendAccounts', mode)}
+                    onPress={() => setActiveInsightsFilterPicker('categoryTrendAccounts')}
+                  />
+                ) : null}
+
+                {hasExpenseBreakdownExclusionFilter ? (
+                  <SelectionFilterField
+                    label={I18n.t('insights.filters.expense_categories')}
+                    mode={filterModeOf(insightsFilterModes, 'expenseBreakdownCategories')}
+                    count={excludedExpenseBreakdownCategoryIds.length}
+                    emptyLabel={I18n.t('common.none')}
+                    onModeChange={(mode) =>
+                      setInsightsFilterMode('expenseBreakdownCategories', mode)
+                    }
+                    onPress={() => setActiveInsightsFilterPicker('expenseBreakdownCategories')}
+                  />
+                ) : null}
+
+                {hasIncomeBreakdownExclusionFilter ? (
+                  <SelectionFilterField
+                    label={I18n.t('insights.filters.income_categories')}
+                    mode={filterModeOf(insightsFilterModes, 'incomeBreakdownCategories')}
+                    count={excludedIncomeBreakdownCategoryIds.length}
+                    emptyLabel={I18n.t('common.none')}
+                    onModeChange={(mode) =>
+                      setInsightsFilterMode('incomeBreakdownCategories', mode)
+                    }
+                    onPress={() => setActiveInsightsFilterPicker('incomeBreakdownCategories')}
+                  />
+                ) : null}
+
+                {hasSavingsCategoryExclusionFilter ? (
+                  <View className="gap-3">
+                    <SelectionFilterField
+                      label={I18n.t('insights.filters.income_categories')}
+                      mode={filterModeOf(insightsFilterModes, 'savingsIncomeCategories')}
+                      count={excludedSavingsIncomeCategoryIds.length}
+                      emptyLabel={I18n.t('common.none')}
+                      onModeChange={(mode) =>
+                        setInsightsFilterMode('savingsIncomeCategories', mode)
+                      }
+                      onPress={() => setActiveInsightsFilterPicker('savingsIncomeCategories')}
+                    />
+                    <SelectionFilterField
+                      label={I18n.t('insights.filters.expense_categories')}
+                      mode={filterModeOf(insightsFilterModes, 'savingsExpenseCategories')}
+                      count={excludedSavingsExpenseCategoryIds.length}
+                      emptyLabel={I18n.t('common.none')}
+                      onModeChange={(mode) =>
+                        setInsightsFilterMode('savingsExpenseCategories', mode)
+                      }
+                      onPress={() => setActiveInsightsFilterPicker('savingsExpenseCategories')}
+                    />
+                  </View>
+                ) : null}
+              </ScrollView>
+              <AccountPickerSheet
+                overlay
+                visible={activeInsightsFilterPicker === 'assetHistoryAccounts'}
+                onClose={closeInsightsFilterPicker}
+                accounts={assetHistoryAccountOptions}
+                accountGroups={accountGroups}
+                selectedIds={assetHistoryPickedAccountIds}
+                onToggleSelect={(accountId) => {
+                  const account = assetHistoryAccountOptions.find((item) => item.id === accountId);
+                  if (!account) return;
+                  setAssetHistoryAccountOverrides((previous) => {
+                    if (assetHistoryIncludeMode && assetHistoryPickedAccountIds.length === 0) {
+                      return showOnlyAssetHistoryAccount(assetHistoryAccountOptions, account.id);
+                    }
+                    const next = toggleAssetHistoryAccount(previous, account);
+                    // In include mode an empty pick means "all", so unticking the
+                    // last shown account brings every account back rather than
+                    // leaving a chart with nothing on it.
+                    return assetHistoryIncludeMode &&
+                      assetHistoryExcludedAccountIds(assetHistoryAccountOptions, next).length ===
+                        assetHistoryAccountOptions.length
+                      ? includeAllAssetHistoryAccounts(assetHistoryAccountOptions)
+                      : next;
+                  });
                 }}
-                onPress={() => setActiveInsightsFilterPicker('assetHistoryAccounts')}
-              />
-            ) : null}
-
-            {hasExpenseTrendExclusionFilter ? (
-              <View className="gap-3">
-                <SelectionFilterField
-                  label={I18n.t('insights.filters.accounts')}
-                  mode={filterModeOf(insightsFilterModes, 'expenseTrendAccounts')}
-                  count={excludedExpenseTrendAccountIds.length}
-                  emptyLabel={I18n.t('common.none')}
-                  onModeChange={(mode) => setInsightsFilterMode('expenseTrendAccounts', mode)}
-                  onPress={() => setActiveInsightsFilterPicker('expenseTrendAccounts')}
-                />
-                <SelectionFilterField
-                  label={I18n.t('insights.filters.expense_categories')}
-                  mode={filterModeOf(insightsFilterModes, 'expenseTrendExpenseCategories')}
-                  count={excludedExpenseTrendExpenseCategoryIds.length}
-                  emptyLabel={I18n.t('common.none')}
-                  onModeChange={(mode) =>
-                    setInsightsFilterMode('expenseTrendExpenseCategories', mode)
-                  }
-                  onPress={() => setActiveInsightsFilterPicker('expenseTrendExpenseCategories')}
-                />
-              </View>
-            ) : null}
-
-            {hasIncomeTrendExclusionFilter ? (
-              <View className="gap-3">
-                <SelectionFilterField
-                  label={I18n.t('insights.filters.accounts')}
-                  mode={filterModeOf(insightsFilterModes, 'incomeTrendAccounts')}
-                  count={excludedIncomeTrendAccountIds.length}
-                  emptyLabel={I18n.t('common.none')}
-                  onModeChange={(mode) => setInsightsFilterMode('incomeTrendAccounts', mode)}
-                  onPress={() => setActiveInsightsFilterPicker('incomeTrendAccounts')}
-                />
-                <SelectionFilterField
-                  label={I18n.t('insights.filters.income_categories')}
-                  mode={filterModeOf(insightsFilterModes, 'incomeTrendIncomeCategories')}
-                  count={excludedIncomeTrendIncomeCategoryIds.length}
-                  emptyLabel={I18n.t('common.none')}
-                  onModeChange={(mode) =>
-                    setInsightsFilterMode('incomeTrendIncomeCategories', mode)
-                  }
-                  onPress={() => setActiveInsightsFilterPicker('incomeTrendIncomeCategories')}
-                />
-              </View>
-            ) : null}
-
-            {hasCategoryTrendExclusionFilter ? (
-              <SelectionFilterField
-                label={I18n.t('insights.filters.accounts')}
-                mode={filterModeOf(insightsFilterModes, 'categoryTrendAccounts')}
-                count={excludedCategoryTrendAccountIds.length}
-                emptyLabel={I18n.t('common.none')}
-                onModeChange={(mode) => setInsightsFilterMode('categoryTrendAccounts', mode)}
-                onPress={() => setActiveInsightsFilterPicker('categoryTrendAccounts')}
-              />
-            ) : null}
-
-            {hasExpenseBreakdownExclusionFilter ? (
-              <SelectionFilterField
-                label={I18n.t('insights.filters.expense_categories')}
-                mode={filterModeOf(insightsFilterModes, 'expenseBreakdownCategories')}
-                count={excludedExpenseBreakdownCategoryIds.length}
-                emptyLabel={I18n.t('common.none')}
-                onModeChange={(mode) => setInsightsFilterMode('expenseBreakdownCategories', mode)}
-                onPress={() => setActiveInsightsFilterPicker('expenseBreakdownCategories')}
-              />
-            ) : null}
-
-            {hasIncomeBreakdownExclusionFilter ? (
-              <SelectionFilterField
-                label={I18n.t('insights.filters.income_categories')}
-                mode={filterModeOf(insightsFilterModes, 'incomeBreakdownCategories')}
-                count={excludedIncomeBreakdownCategoryIds.length}
-                emptyLabel={I18n.t('common.none')}
-                onModeChange={(mode) => setInsightsFilterMode('incomeBreakdownCategories', mode)}
-                onPress={() => setActiveInsightsFilterPicker('incomeBreakdownCategories')}
-              />
-            ) : null}
-
-            {hasSavingsCategoryExclusionFilter ? (
-              <View className="gap-3">
-                <SelectionFilterField
-                  label={I18n.t('insights.filters.income_categories')}
-                  mode={filterModeOf(insightsFilterModes, 'savingsIncomeCategories')}
-                  count={excludedSavingsIncomeCategoryIds.length}
-                  emptyLabel={I18n.t('common.none')}
-                  onModeChange={(mode) => setInsightsFilterMode('savingsIncomeCategories', mode)}
-                  onPress={() => setActiveInsightsFilterPicker('savingsIncomeCategories')}
-                />
-                <SelectionFilterField
-                  label={I18n.t('insights.filters.expense_categories')}
-                  mode={filterModeOf(insightsFilterModes, 'savingsExpenseCategories')}
-                  count={excludedSavingsExpenseCategoryIds.length}
-                  emptyLabel={I18n.t('common.none')}
-                  onModeChange={(mode) => setInsightsFilterMode('savingsExpenseCategories', mode)}
-                  onPress={() => setActiveInsightsFilterPicker('savingsExpenseCategories')}
-                />
-              </View>
-            ) : null}
-          </ScrollView>
-          <AccountPickerSheet
-            overlay
-            visible={activeInsightsFilterPicker === 'assetHistoryAccounts'}
-            onClose={closeInsightsFilterPicker}
-            accounts={assetHistoryAccountOptions}
-            accountGroups={accountGroups}
-            selectedIds={assetHistoryPickedAccountIds}
-            onToggleSelect={(accountId) => {
-              const account = assetHistoryAccountOptions.find((item) => item.id === accountId);
-              if (!account) return;
-              setAssetHistoryAccountOverrides((previous) => {
-                if (assetHistoryIncludeMode && assetHistoryPickedAccountIds.length === 0) {
-                  return showOnlyAssetHistoryAccount(assetHistoryAccountOptions, account.id);
+                onClear={() =>
+                  setAssetHistoryAccountOverrides(
+                    includeAllAssetHistoryAccounts(assetHistoryAccountOptions),
+                  )
                 }
-                const next = toggleAssetHistoryAccount(previous, account);
-                // In include mode an empty pick means "all", so unticking the
-                // last shown account brings every account back rather than
-                // leaving a chart with nothing on it.
-                return assetHistoryIncludeMode &&
-                  assetHistoryExcludedAccountIds(assetHistoryAccountOptions, next).length ===
-                    assetHistoryAccountOptions.length
-                  ? includeAllAssetHistoryAccounts(assetHistoryAccountOptions)
-                  : next;
-              });
-            }}
-            onClear={() =>
-              setAssetHistoryAccountOverrides(
-                includeAllAssetHistoryAccounts(assetHistoryAccountOptions),
-              )
-            }
-          />
-          <AccountPickerSheet
-            overlay
-            visible={activeInsightsFilterPicker === 'expenseTrendAccounts'}
-            onClose={closeInsightsFilterPicker}
-            accounts={accounts}
-            accountGroups={accountGroups}
-            selectedIds={excludedExpenseTrendAccountIds}
-            onToggleSelect={(accountId) =>
-              setExcludedExpenseTrendAccountIds((previous) => toggleStringId(previous, accountId))
-            }
-            onClear={() => setExcludedExpenseTrendAccountIds([])}
-          />
-          <CategoryPickerSheet
-            overlay
-            allowParentSelection
-            visible={activeInsightsFilterPicker === 'expenseTrendExpenseCategories'}
-            onClose={closeInsightsFilterPicker}
-            parents={savingsExpenseCategoryPicker.parents}
-            childByParent={savingsExpenseCategoryPicker.childByParent}
-            selectedCategoryIds={excludedExpenseTrendExpenseCategoryIds}
-            onToggleSelect={(categoryId) =>
-              setExcludedExpenseTrendExpenseCategoryIds((previous) =>
-                toggleStringId(previous, categoryId),
-              )
-            }
-            onClear={() => setExcludedExpenseTrendExpenseCategoryIds([])}
-          />
-          <AccountPickerSheet
-            overlay
-            visible={activeInsightsFilterPicker === 'incomeTrendAccounts'}
-            onClose={closeInsightsFilterPicker}
-            accounts={accounts}
-            accountGroups={accountGroups}
-            selectedIds={excludedIncomeTrendAccountIds}
-            onToggleSelect={(accountId) =>
-              setExcludedIncomeTrendAccountIds((previous) => toggleStringId(previous, accountId))
-            }
-            onClear={() => setExcludedIncomeTrendAccountIds([])}
-          />
-          <AccountPickerSheet
-            overlay
-            visible={activeInsightsFilterPicker === 'categoryTrendAccounts'}
-            onClose={closeInsightsFilterPicker}
-            accounts={accounts}
-            accountGroups={accountGroups}
-            selectedIds={excludedCategoryTrendAccountIds}
-            onToggleSelect={(accountId) =>
-              setExcludedCategoryTrendAccountIds((previous) => toggleStringId(previous, accountId))
-            }
-            onClear={() => setExcludedCategoryTrendAccountIds([])}
-          />
-          <CategoryPickerSheet
-            overlay
-            allowParentSelection
-            visible={activeInsightsFilterPicker === 'incomeTrendIncomeCategories'}
-            onClose={closeInsightsFilterPicker}
-            parents={savingsIncomeCategoryPicker.parents}
-            childByParent={savingsIncomeCategoryPicker.childByParent}
-            selectedCategoryIds={excludedIncomeTrendIncomeCategoryIds}
-            onToggleSelect={(categoryId) =>
-              setExcludedIncomeTrendIncomeCategoryIds((previous) =>
-                toggleStringId(previous, categoryId),
-              )
-            }
-            onClear={() => setExcludedIncomeTrendIncomeCategoryIds([])}
-          />
-          <CategoryPickerSheet
-            overlay
-            allowParentSelection
-            visible={activeInsightsFilterPicker === 'expenseBreakdownCategories'}
-            onClose={closeInsightsFilterPicker}
-            parents={savingsExpenseCategoryPicker.parents}
-            childByParent={savingsExpenseCategoryPicker.childByParent}
-            selectedCategoryIds={excludedExpenseBreakdownCategoryIds}
-            onToggleSelect={(categoryId) =>
-              setExcludedExpenseBreakdownCategoryIds((prev) => toggleStringId(prev, categoryId))
-            }
-            onClear={() => setExcludedExpenseBreakdownCategoryIds([])}
-          />
-          <CategoryPickerSheet
-            overlay
-            allowParentSelection
-            visible={activeInsightsFilterPicker === 'incomeBreakdownCategories'}
-            onClose={closeInsightsFilterPicker}
-            parents={savingsIncomeCategoryPicker.parents}
-            childByParent={savingsIncomeCategoryPicker.childByParent}
-            selectedCategoryIds={excludedIncomeBreakdownCategoryIds}
-            onToggleSelect={(categoryId) =>
-              setExcludedIncomeBreakdownCategoryIds((prev) => toggleStringId(prev, categoryId))
-            }
-            onClear={() => setExcludedIncomeBreakdownCategoryIds([])}
-          />
-          <CategoryPickerSheet
-            overlay
-            allowParentSelection
-            visible={activeInsightsFilterPicker === 'savingsIncomeCategories'}
-            onClose={closeInsightsFilterPicker}
-            parents={savingsIncomeCategoryPicker.parents}
-            childByParent={savingsIncomeCategoryPicker.childByParent}
-            selectedCategoryIds={excludedSavingsIncomeCategoryIds}
-            onToggleSelect={(categoryId) =>
-              setExcludedSavingsIncomeCategoryIds((prev) => toggleStringId(prev, categoryId))
-            }
-            onClear={() => setExcludedSavingsIncomeCategoryIds([])}
-          />
-          <CategoryPickerSheet
-            overlay
-            allowParentSelection
-            visible={activeInsightsFilterPicker === 'savingsExpenseCategories'}
-            onClose={closeInsightsFilterPicker}
-            parents={savingsExpenseCategoryPicker.parents}
-            childByParent={savingsExpenseCategoryPicker.childByParent}
-            selectedCategoryIds={excludedSavingsExpenseCategoryIds}
-            onToggleSelect={(categoryId) =>
-              setExcludedSavingsExpenseCategoryIds((prev) => toggleStringId(prev, categoryId))
-            }
-            onClear={() => setExcludedSavingsExpenseCategoryIds([])}
-          />
-          <DatePickerModal
-            visible={filterCustomDateModalVisible}
-            value={activeCustomDateField === 'start' ? customStart : customEnd}
-            showQuickDays={false}
-            overlay
-            onSelect={(value) => {
-              handleCustomDateSelect(activeCustomDateField, value);
-              setFilterCustomDateModalVisible(false);
-            }}
-            onClose={() => setFilterCustomDateModalVisible(false)}
-          />
-        </SafeAreaView>
-      </ThemeModal>
+              />
+              <AccountPickerSheet
+                overlay
+                visible={activeInsightsFilterPicker === 'expenseTrendAccounts'}
+                onClose={closeInsightsFilterPicker}
+                accounts={accounts}
+                accountGroups={accountGroups}
+                selectedIds={excludedExpenseTrendAccountIds}
+                onToggleSelect={(accountId) =>
+                  setExcludedExpenseTrendAccountIds((previous) =>
+                    toggleStringId(previous, accountId),
+                  )
+                }
+                onClear={() => setExcludedExpenseTrendAccountIds([])}
+              />
+              <CategoryPickerSheet
+                overlay
+                allowParentSelection
+                visible={activeInsightsFilterPicker === 'expenseTrendExpenseCategories'}
+                onClose={closeInsightsFilterPicker}
+                parents={savingsExpenseCategoryPicker.parents}
+                childByParent={savingsExpenseCategoryPicker.childByParent}
+                selectedCategoryIds={excludedExpenseTrendExpenseCategoryIds}
+                onToggleSelect={(categoryId) =>
+                  setExcludedExpenseTrendExpenseCategoryIds((previous) =>
+                    toggleStringId(previous, categoryId),
+                  )
+                }
+                onClear={() => setExcludedExpenseTrendExpenseCategoryIds([])}
+              />
+              <AccountPickerSheet
+                overlay
+                visible={activeInsightsFilterPicker === 'incomeTrendAccounts'}
+                onClose={closeInsightsFilterPicker}
+                accounts={accounts}
+                accountGroups={accountGroups}
+                selectedIds={excludedIncomeTrendAccountIds}
+                onToggleSelect={(accountId) =>
+                  setExcludedIncomeTrendAccountIds((previous) =>
+                    toggleStringId(previous, accountId),
+                  )
+                }
+                onClear={() => setExcludedIncomeTrendAccountIds([])}
+              />
+              <AccountPickerSheet
+                overlay
+                visible={activeInsightsFilterPicker === 'categoryTrendAccounts'}
+                onClose={closeInsightsFilterPicker}
+                accounts={accounts}
+                accountGroups={accountGroups}
+                selectedIds={excludedCategoryTrendAccountIds}
+                onToggleSelect={(accountId) =>
+                  setExcludedCategoryTrendAccountIds((previous) =>
+                    toggleStringId(previous, accountId),
+                  )
+                }
+                onClear={() => setExcludedCategoryTrendAccountIds([])}
+              />
+              <CategoryPickerSheet
+                overlay
+                allowParentSelection
+                visible={activeInsightsFilterPicker === 'incomeTrendIncomeCategories'}
+                onClose={closeInsightsFilterPicker}
+                parents={savingsIncomeCategoryPicker.parents}
+                childByParent={savingsIncomeCategoryPicker.childByParent}
+                selectedCategoryIds={excludedIncomeTrendIncomeCategoryIds}
+                onToggleSelect={(categoryId) =>
+                  setExcludedIncomeTrendIncomeCategoryIds((previous) =>
+                    toggleStringId(previous, categoryId),
+                  )
+                }
+                onClear={() => setExcludedIncomeTrendIncomeCategoryIds([])}
+              />
+              <CategoryPickerSheet
+                overlay
+                allowParentSelection
+                visible={activeInsightsFilterPicker === 'expenseBreakdownCategories'}
+                onClose={closeInsightsFilterPicker}
+                parents={savingsExpenseCategoryPicker.parents}
+                childByParent={savingsExpenseCategoryPicker.childByParent}
+                selectedCategoryIds={excludedExpenseBreakdownCategoryIds}
+                onToggleSelect={(categoryId) =>
+                  setExcludedExpenseBreakdownCategoryIds((prev) => toggleStringId(prev, categoryId))
+                }
+                onClear={() => setExcludedExpenseBreakdownCategoryIds([])}
+              />
+              <CategoryPickerSheet
+                overlay
+                allowParentSelection
+                visible={activeInsightsFilterPicker === 'incomeBreakdownCategories'}
+                onClose={closeInsightsFilterPicker}
+                parents={savingsIncomeCategoryPicker.parents}
+                childByParent={savingsIncomeCategoryPicker.childByParent}
+                selectedCategoryIds={excludedIncomeBreakdownCategoryIds}
+                onToggleSelect={(categoryId) =>
+                  setExcludedIncomeBreakdownCategoryIds((prev) => toggleStringId(prev, categoryId))
+                }
+                onClear={() => setExcludedIncomeBreakdownCategoryIds([])}
+              />
+              <CategoryPickerSheet
+                overlay
+                allowParentSelection
+                visible={activeInsightsFilterPicker === 'savingsIncomeCategories'}
+                onClose={closeInsightsFilterPicker}
+                parents={savingsIncomeCategoryPicker.parents}
+                childByParent={savingsIncomeCategoryPicker.childByParent}
+                selectedCategoryIds={excludedSavingsIncomeCategoryIds}
+                onToggleSelect={(categoryId) =>
+                  setExcludedSavingsIncomeCategoryIds((prev) => toggleStringId(prev, categoryId))
+                }
+                onClear={() => setExcludedSavingsIncomeCategoryIds([])}
+              />
+              <CategoryPickerSheet
+                overlay
+                allowParentSelection
+                visible={activeInsightsFilterPicker === 'savingsExpenseCategories'}
+                onClose={closeInsightsFilterPicker}
+                parents={savingsExpenseCategoryPicker.parents}
+                childByParent={savingsExpenseCategoryPicker.childByParent}
+                selectedCategoryIds={excludedSavingsExpenseCategoryIds}
+                onToggleSelect={(categoryId) =>
+                  setExcludedSavingsExpenseCategoryIds((prev) => toggleStringId(prev, categoryId))
+                }
+                onClear={() => setExcludedSavingsExpenseCategoryIds([])}
+              />
+              <DatePickerModal
+                visible={filterCustomDateModalVisible}
+                value={activeCustomDateField === 'start' ? customStart : customEnd}
+                showQuickDays={false}
+                overlay
+                onSelect={(value) => {
+                  handleCustomDateSelect(activeCustomDateField, value);
+                  setFilterCustomDateModalVisible(false);
+                }}
+                onClose={() => setFilterCustomDateModalVisible(false)}
+              />
+            </SafeAreaView>
+          </ThemeModal>
 
-      <CategoryPickerSheet
-        allowParentSelection
-        visible={isCategoryTrendPickerOpen}
-        onClose={() => setIsCategoryTrendPickerOpen(false)}
-        parents={savingsExpenseCategoryPicker.parents}
-        childByParent={EMPTY_CATEGORY_CHILD_MAP}
-        selectedCategoryId={effectiveCategoryTrendCategoryId}
-        onSelect={(categoryId) => {
-          void triggerHaptic('selection');
-          setCategoryTrendSelectedCategoryId(categoryId);
-          setIsCategoryTrendPickerOpen(false);
-        }}
-      />
+          <CategoryPickerSheet
+            allowParentSelection
+            visible={isCategoryTrendPickerOpen}
+            onClose={() => setIsCategoryTrendPickerOpen(false)}
+            parents={savingsExpenseCategoryPicker.parents}
+            childByParent={EMPTY_CATEGORY_CHILD_MAP}
+            selectedCategoryId={effectiveCategoryTrendCategoryId}
+            onSelect={(categoryId) => {
+              void triggerHaptic('selection');
+              setCategoryTrendSelectedCategoryId(categoryId);
+              setIsCategoryTrendPickerOpen(false);
+            }}
+          />
+        </ContentFrameProvider>
+      </View>
     </SafeAreaView>
   );
 }
