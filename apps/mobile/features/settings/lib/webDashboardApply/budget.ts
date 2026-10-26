@@ -1,4 +1,4 @@
-import { computeBudgetPagerKeys } from '~/features/budget/lib/budgetMath';
+import { computeBudgetPagerMonths } from '~/features/budget/lib/budgetMath';
 import type { BudgetAllocationInput } from '~/lib/repositories/budgetTemplatesRepository';
 import { transactionsRepository } from '~/lib/repositories/transactionsRepository';
 import { monthCycleOf } from '~/utils/financialMonth';
@@ -28,8 +28,7 @@ export const budgetApply: ApplyModule = {
     budgets: app.periodBudgets.filter((budget) => budget.period === 'month'),
     templateCount: app.budgetTemplates.length,
     // The months the budget pager offers, so a month is only made where the app makes one.
-    months: computeBudgetPagerKeys({
-      period: 'month',
+    months: computeBudgetPagerMonths({
       budgets: app.periodBudgets,
       transactions: transactionsRepository.listForSummary({ type: 'expense' }),
       clock: { weekStartsOn: app.settings.weekStartsOn, monthCycle: monthCycleOf(app.settings) },

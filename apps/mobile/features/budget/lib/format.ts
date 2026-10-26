@@ -27,6 +27,19 @@ export function monthKeyLabel(monthKey: string, locale?: string): string {
   return formatMonthYearLabel(parseMonthKey(monthKey) ?? new Date(), locale);
 }
 
+const monthNameFormatterCache = new Map<string, Intl.DateTimeFormat>();
+
+/** 'YYYY-MM' → the month's name alone, e.g. "October". */
+export function monthNameLabel(monthKey: string, locale?: string): string {
+  const resolved = locale ?? I18n.locale ?? 'en';
+  let formatter = monthNameFormatterCache.get(resolved);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(resolved, { month: 'long' });
+    monthNameFormatterCache.set(resolved, formatter);
+  }
+  return formatter.format(parseMonthKey(monthKey) ?? new Date());
+}
+
 /** '46%', capped at '999%+' so a wildly blown budget can't stretch layouts. */
 export function usagePercentLabel(ratio: number): string {
   const percent = Math.round(ratio * 100);

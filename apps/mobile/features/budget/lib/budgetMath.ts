@@ -295,57 +295,107 @@ export function computeAllocationRemaining(
   return normalizeMoneyAmount(totalAmount - allocated);
 }
 
-/** How far past the current period the pager reaches, so budgets can be
- *  planned ahead. */
-export const BUDGET_PAGER_FUTURE_PERIODS: Record<BudgetPeriod, number> = {
-  week: 12,
-  month: 12,
-  year: 2,
-};
+/** How far past the current month the pager reaches, so budgets can be
+ *  planned well ahead. */
+export const BUDGET_PAGER_FUTURE_MONTHS = 12;
 
 /**
- * Period keys shown by the budget pager for one period length: the earliest
- * budget or expense period through the future reach (or the latest existing
- * budget, whichever is further). Week budgets are placed by `budgetSlotKey`.
+ * Months shown by the budget pager: from the month of the earliest budget
+ * (of any period) or expense to a year ahead, or to the latest budget's
+ * month when that is further.
  */
-export function computeBudgetPagerKeys({
-  period,
+export function computeBudgetPagerMonths({
   budgets,
   transactions,
   now = new Date(),
   clock,
 }: {
-  period: BudgetPeriod;
   budgets: PeriodBudget[];
   /** Only each row's type, date and deletion are read. */
   transactions: Pick<TransactionWithRelations, 'type' | 'date' | 'deletedAt'>[];
   now?: Date;
   clock: BudgetPeriodClock;
 }): string[] {
-  const currentKey = budgetPeriodKeyForDate(period, now, clock);
+  const { monthCycle } = clock;
+  const monthOfDay = (dayKey: string) =>
+    budgetPeriodKeyForDate('month', dateFromDayKeyLocal(dayKey), clock);
+  const currentKey = budgetPeriodKeyForDate('month', now, clock);
   let firstKey = currentKey;
-  let lastKey = addBudgetPeriods(
-    period,
-    currentKey,
-    BUDGET_PAGER_FUTURE_PERIODS[period],
-    clock.monthCycle,
-  );
+  let lastKey = addBudgetPeriods('month', currentKey, BUDGET_PAGER_FUTURE_MONTHS, monthCycle);
   for (const budget of budgets) {
-    if (budget.period !== period) continue;
-    const key = budgetSlotKey(period, budget.periodKey, clock.weekStartsOn);
-    if (key < firstKey) firstKey = key;
-    if (key > lastKey) lastKey = key;
+    const range = budgetPeriodRange(budget.period, budget.periodKey, monthCycle);
+    const first = monthOfDay(range.start);
+    // A year budget reaches the pager's end only through its first month, so
+    // planning next year does not stretch the pager to next December.
+    const last = budget.period === 'year' ? first : monthOfDay(range.end);
+    if (first < firstKey) firstKey = first;
+    if (last > lastKey) lastKey = last;
   }
-  const expenseKey = firstExpenseKey(period, transactions, clock);
+  const expenseKey = firstExpenseKey('month', transactions, clock);
   if (expenseKey && expenseKey < firstKey) firstKey = expenseKey;
 
   const keys: string[] = [];
-  for (
-    let key = firstKey;
-    key <= lastKey;
-    key = addBudgetPeriods(period, key, 1, clock.monthCycle)
-  ) {
+  for (let key = firstKey; key <= lastKey; key = addBudgetPeriods('month', key, 1, monthCycle)) {
     keys.push(key);
   }
   return keys;
+}
+
+/** What one month's page of the budget pager holds. */
+export interface BudgetMonthPage {
+  monthKey: string;
+  /** The month's own budget. */
+  month: PeriodBudget | null;
+  /**
+   * Every week (laid out with the current first day of the week) with a day
+   * in the month, oldest first, with its budget. A week budget made under
+   * another first day of the week sits on the week its first day falls in;
+   * should two land on one week, the one keyed on it wins, else the later.
+   */
+  weeks: { key: string; budget: PeriodBudget | null }[];
+  /** The calendar year the month's key belongs to, and its budget. */
+  yearKey: string;
+  year: PeriodBudget | null;
+}
+
+export function buildBudgetMonthPage({
+  monthKey,
+  budgets,
+  clock,
+}: {
+  monthKey: string;
+  budgets: PeriodBudget[];
+  clock: BudgetPeriodClock;
+}): BudgetMonthPage {
+  const { monthCycle, weekStartsOn } = clock;
+  const range = budgetPeriodRange('month', monthKey, monthCycle);
+  const yearKey = monthKey.slice(0, 4);
+
+  const weekBySlot = new Map<string, PeriodBudget>();
+  let month: PeriodBudget | null = null;
+  let year: PeriodBudget | null = null;
+  for (const budget of budgets) {
+    if (budget.deletedAt) continue;
+    if (budget.period === 'month') {
+      if (budget.periodKey === monthKey) month = budget;
+    } else if (budget.period === 'year') {
+      if (budget.periodKey === yearKey) year = budget;
+    } else {
+      const slot = budgetSlotKey('week', budget.periodKey, weekStartsOn);
+      const taken = weekBySlot.get(slot);
+      if (taken && (taken.periodKey === slot || taken.periodKey > budget.periodKey)) continue;
+      weekBySlot.set(slot, budget);
+    }
+  }
+
+  const weeks: BudgetMonthPage['weeks'] = [];
+  for (
+    let key = budgetPeriodKeyForDate('week', dateFromDayKeyLocal(range.start), clock);
+    key <= range.end;
+    key = addBudgetPeriods('week', key, 1, monthCycle)
+  ) {
+    weeks.push({ key, budget: weekBySlot.get(key) ?? null });
+  }
+
+  return { monthKey, month, weeks, yearKey, year };
 }

@@ -1,9 +1,10 @@
 import {
+  buildBudgetMonthPage,
   buildBudgetSummary,
   childAllocationExceedsParent,
   computeAllocationRemaining,
   computeBackPopulateRange,
-  computeBudgetPagerKeys,
+  computeBudgetPagerMonths,
   computeChildAllocationGap,
   countRootAllocations,
   pickAutoCreateTemplate,
@@ -442,12 +443,11 @@ describe('countRootAllocations', () => {
   });
 });
 
-describe('computeBudgetPagerKeys', () => {
+describe('computeBudgetPagerMonths', () => {
   const now = new Date(2026, 6, 15); // July 2026
 
   it('spans current month through a year ahead with no history', () => {
-    const months = computeBudgetPagerKeys({
-      period: 'month',
+    const months = computeBudgetPagerMonths({
       clock: CLOCK,
       budgets: [],
       transactions: [],
@@ -461,8 +461,7 @@ describe('computeBudgetPagerKeys', () => {
   it('starts at the earliest budget or expense month', () => {
     const budgets = [makeBudget({ periodKey: '2026-05' })];
     const transactions = [makeTransaction({ date: '2026-04-10T12:00:00.000Z' })];
-    const months = computeBudgetPagerKeys({
-      period: 'month',
+    const months = computeBudgetPagerMonths({
       clock: CLOCK,
       budgets,
       transactions,
@@ -475,8 +474,7 @@ describe('computeBudgetPagerKeys', () => {
 
   it('extends past the future window to reach an existing later budget', () => {
     const budgets = [makeBudget({ periodKey: '2027-10' })];
-    const months = computeBudgetPagerKeys({
-      period: 'month',
+    const months = computeBudgetPagerMonths({
       clock: CLOCK,
       budgets,
       transactions: [],
@@ -625,28 +623,42 @@ describe('weekly and yearly budgets', () => {
     ).toBeNull();
   });
 
-  it('lays out the week pager from the first expense to 12 weeks ahead', () => {
-    const keys = computeBudgetPagerKeys({
-      period: 'week',
+  it('stretches the month pager to cover week and year budgets', () => {
+    const months = computeBudgetPagerMonths({
       clock: CLOCK,
-      budgets: [makeBudget({ period: 'month', periodKey: '2020-01' })], // other periods ignored
-      transactions: [makeTransaction({ date: '2026-10-14' })],
-      now: new Date(2026, 9, 28),
-    });
-    expect(keys[0]).toBe('2026-10-12');
-    expect(keys).toContain('2026-10-26');
-    expect(keys[keys.length - 1]).toBe('2027-01-18');
-    expect(keys).toHaveLength(15);
-  });
-
-  it('lays out the year pager two years ahead', () => {
-    const keys = computeBudgetPagerKeys({
-      period: 'year',
-      clock: CLOCK,
-      budgets: [],
+      budgets: [
+        makeBudget({ period: 'week', periodKey: '2026-03-30' }), // 30 Mar – 5 Apr
+        makeBudget({ period: 'year', periodKey: '2028' }),
+      ],
       transactions: [],
       now: new Date(2026, 9, 28),
     });
-    expect(keys).toEqual(['2026', '2027', '2028']);
+    expect(months[0]).toBe('2026-03');
+    // A year reaches the pager only through its first month.
+    expect(months[months.length - 1]).toBe('2028-01');
+  });
+
+  it('builds a month page from the month, its weeks and its year', () => {
+    const page = buildBudgetMonthPage({
+      monthKey: '2026-10',
+      clock: CLOCK,
+      budgets: [
+        makeBudget({ id: 'm', periodKey: '2026-10' }),
+        makeBudget({ id: 'other-month', periodKey: '2026-09' }),
+        makeBudget({ id: 'w1', period: 'week', periodKey: '2026-09-28' }),
+        makeBudget({ id: 'w-sunday', period: 'week', periodKey: '2026-10-18' }), // lands on 12 Oct
+        makeBudget({ id: 'w-gone', period: 'week', periodKey: '2026-10-19', deletedAt: 'x' }),
+        makeBudget({ id: 'y', period: 'year', periodKey: '2026' }),
+      ],
+    });
+    expect(page.month?.id).toBe('m');
+    expect(page.year?.id).toBe('y');
+    expect(page.weeks.map((week) => [week.key, week.budget?.id ?? null])).toEqual([
+      ['2026-09-28', 'w1'],
+      ['2026-10-05', null],
+      ['2026-10-12', 'w-sunday'],
+      ['2026-10-19', null],
+      ['2026-10-26', null],
+    ]);
   });
 });

@@ -1,4 +1,4 @@
-import { Pencil, Trash2 } from 'lucide-react-native';
+import { ChevronLeft, Pencil, Trash2 } from 'lucide-react-native';
 import React, {
   forwardRef,
   useCallback,
@@ -10,13 +10,12 @@ import React, {
 } from 'react';
 import { Alert, FlatList, Pressable, ScrollView, View } from 'react-native';
 
-import { DatePickerModal, MonthYearWheelPicker } from '~/components/datePicker';
+import { MonthYearWheelPicker } from '~/components/datePicker';
 import { yearMonthFromKey, yearMonthToKey } from '~/components/datePicker/monthJump';
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { useContentFrame } from '~/components/layout/ContentFrame';
 import {
   CategoryEmoji,
-  SegmentedToggle,
   SETTINGS_LIST_BOTTOM_PADDING,
   Text,
   useSettingsBottomNavInset,
@@ -25,22 +24,30 @@ import { chartCategoryColor } from '~/constants/chartColors';
 import type { ColorPalette } from '~/constants/designSystem';
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
-import { BudgetTemplatePickerSheet } from '~/features/budget/components/BudgetTemplatePickerSheet';
-import { buildBudgetSummary, computeBudgetPagerKeys } from '~/features/budget/lib/budgetMath';
 import {
-  BUDGET_PERIODS,
-  budgetCoveringDay,
+  CreateBudgetRow,
+  WeekStrip,
+  YearBudgetRow,
+} from '~/features/budget/components/BudgetPeriodRows';
+import { BudgetTemplatePickerSheet } from '~/features/budget/components/BudgetTemplatePickerSheet';
+import {
+  type BudgetMonthPage,
+  buildBudgetMonthPage,
+  buildBudgetSummary,
+  computeBudgetPagerMonths,
+} from '~/features/budget/lib/budgetMath';
+import {
   budgetDaysLeft,
-  type BudgetPeriodClock,
   budgetPeriodKeyForDate,
   type BudgetPeriodRange,
   budgetPeriodRange,
-  budgetSlotKey,
+  budgetRangeLength,
 } from '~/features/budget/lib/budgetPeriods';
 import {
   budgetPeriodLabel,
-  budgetPeriodName,
   money,
+  monthKeyLabel,
+  monthNameLabel,
   usageColor,
   usagePercentLabel,
 } from '~/features/budget/lib/format';
@@ -441,8 +448,8 @@ function UnbudgetedRow({
 
 export interface BudgetPagerViewHandle {
   scrollToRelative: (direction: 1 | -1) => void;
-  /** Open the period jump picker, for the host header's period label (none for years). */
-  openPeriodPicker: () => void;
+  /** Open the month wheel, for the host header's month label. */
+  openMonthPicker: () => void;
 }
 
 interface BudgetPagerViewProps {
@@ -455,106 +462,39 @@ interface BudgetPagerViewProps {
   onCreateCustomBudget: (period: BudgetPeriod, periodKey: string) => void;
   /** Opens the transactions drilldown for a tapped category. */
   onOpenDrilldown: (payload: InsightsDrilldownPayload) => void;
-  /** Reports the active period's label so the embedding host (Insights) can
+  /** Reports the active month's label so the embedding host (Insights) can
    *  drive the pager from its own header controls. */
-  onActivePeriodLabelChange?: (label: string) => void;
-  /** Whether the header's period label opens a picker for the shown period. */
-  onPeriodPickerAvailableChange?: (available: boolean) => void;
+  onActiveMonthLabelChange?: (label: string) => void;
 }
 
-/** The period the budget page showed last in this session. */
-let rememberedPeriod: BudgetPeriod | null = null;
+/** A budget the page can show in its card and category list. */
+interface FocusTarget {
+  period: BudgetPeriod;
+  key: string;
+}
+
+interface BudgetPageModel extends BudgetMonthPage {
+  summaries: Map<string, { summary: BudgetSummary; range: BudgetPeriodRange }>;
+}
+
+const summaryId = (budget: PeriodBudget) => budget.id;
 
 /**
- * The budget page without any screen chrome: a Weekly / Monthly / Yearly
- * switch above one pager per period (summary ring card, per-category
- * depletion, unbudgeted section) plus the create-from-template picker.
- * Embedded as an insights page.
+ * The budget month pager without any screen chrome. Each month page shows
+ * every budget that touches the month, with no period switch: the month's
+ * own budget, a strip of its weeks, and the year's budget as a slim row.
+ * One of them (the month's, else this or the first budgeted week, else the
+ * year's) fills the summary card and category list; tapping a week or the
+ * year shows that one instead. Embedded as an insights page.
  */
 export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerViewProps>(
-  function BudgetPagerViewImpl({ onPeriodPickerAvailableChange, ...props }, ref) {
-    const { settings, periodBudgets } = useApp();
-    const clock = useMemo(
-      () => ({ weekStartsOn: settings.weekStartsOn, monthCycle: monthCycleOf(settings) }),
-      [settings],
-    );
-
-    // Periods whose running budget exists get a dot on the switch, so a
-    // weekly budget is not hidden behind the Monthly tab.
-    const todayKey = dayKeyFromDateLocal(new Date());
-    const livePeriods = useMemo(() => {
-      const live = new Set<BudgetPeriod>();
-      for (const period of BUDGET_PERIODS) {
-        if (budgetCoveringDay(periodBudgets, period, todayKey, clock.monthCycle)) live.add(period);
-      }
-      return live;
-    }, [clock.monthCycle, periodBudgets, todayKey]);
-
-    // Until the user picks a tab (remembered for the session): the month when
-    // it has a running budget (the classic view), else whichever period does,
-    // else the month. Derived, not stored, so it settles once budgets load.
-    const [chosenPeriod, setChosenPeriod] = useState<BudgetPeriod | null>(rememberedPeriod);
-    const period: BudgetPeriod =
-      chosenPeriod ??
-      (livePeriods.has('month')
-        ? 'month'
-        : (BUDGET_PERIODS.find((candidate) => livePeriods.has(candidate)) ?? 'month'));
-    const setPeriod = useCallback((next: BudgetPeriod) => {
-      rememberedPeriod = next;
-      setChosenPeriod(next);
-    }, []);
-    useEffect(() => {
-      onPeriodPickerAvailableChange?.(period !== 'year');
-    }, [onPeriodPickerAvailableChange, period]);
-
-    const periodOptions = useMemo(
-      () =>
-        BUDGET_PERIODS.map((value) => ({
-          value,
-          label: budgetPeriodName(value),
-          badge: livePeriods.has(value) && value !== period,
-          accessibilityLabel: livePeriods.has(value)
-            ? I18n.t('budget.period_has_budget', { period: budgetPeriodName(value) })
-            : undefined,
-        })),
-      [livePeriods, period],
-    );
-
-    return (
-      <View className="flex-1">
-        <View style={{ paddingHorizontal: spacing.lg }} className="pb-2 pt-1">
-          <SegmentedToggle
-            value={period}
-            options={periodOptions}
-            onChange={setPeriod}
-            variant="home"
-          />
-        </View>
-        <BudgetPeriodPager key={period} ref={ref} period={period} clock={clock} {...props} />
-      </View>
-    );
-  },
-);
-
-interface BudgetPeriodPagerProps extends Omit<
-  BudgetPagerViewProps,
-  'onPeriodPickerAvailableChange'
-> {
-  period: BudgetPeriod;
-  clock: BudgetPeriodClock;
-}
-
-/** One period length's pager; remounted (keyed) when the period changes. */
-const BudgetPeriodPager = forwardRef<BudgetPagerViewHandle, BudgetPeriodPagerProps>(
-  function BudgetPeriodPagerImpl(
+  function BudgetPagerViewImpl(
     {
-      period,
-      clock,
       onOpenTemplateEditor,
       onOpenBudgetEditor,
       onCreateCustomBudget,
       onOpenDrilldown,
-      onActivePeriodLabelChange,
+      onActiveMonthLabelChange,
     },
     ref,
   ) {
@@ -566,96 +506,82 @@ const BudgetPeriodPager = forwardRef<BudgetPagerViewHandle, BudgetPeriodPagerPro
       createPeriodBudget,
       deletePeriodBudget,
     } = useApp();
-    const { monthCycle, weekStartsOn } = clock;
+    const clock = useMemo(
+      () => ({ weekStartsOn: settings.weekStartsOn, monthCycle: monthCycleOf(settings) }),
+      [settings],
+    );
+    const { monthCycle } = clock;
     const { transactions } = useTransactions();
     const themeColors = useThemeColors();
     const listNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
     const { width: pageWidth } = useContentFrame();
 
-    const [pickerKey, setPickerKey] = useState<string | null>(null);
+    // A day key, so it only changes (and re-renders pages) when the day does.
+    const todayKey = dayKeyFromDateLocal(new Date());
 
-    const templates = useMemo(
-      () => budgetTemplates.filter((template) => template.period === period),
-      [budgetTemplates, period],
+    const templatesByPeriod = useMemo(() => {
+      const map: Record<BudgetPeriod, typeof budgetTemplates> = { week: [], month: [], year: [] };
+      for (const template of budgetTemplates) map[template.period].push(template);
+      return map;
+    }, [budgetTemplates]);
+
+    const [picker, setPicker] = useState<FocusTarget | null>(null);
+    // The budget each page shows when the user tapped a week or the year.
+    const [focusByMonth, setFocusByMonth] = useState<Record<string, FocusTarget>>({});
+
+    const months = useMemo(
+      () => computeBudgetPagerMonths({ budgets: periodBudgets, transactions, clock }),
+      [clock, periodBudgets, transactions],
     );
 
-    const keys = useMemo(
-      () =>
-        computeBudgetPagerKeys({
-          period,
-          budgets: periodBudgets,
-          transactions,
-          clock,
-        }),
-      [clock, period, periodBudgets, transactions],
-    );
-
-    const currentIndex = useMemo(() => {
-      const currentKey = budgetPeriodKeyForDate(period, new Date(), clock);
-      const index = keys.indexOf(currentKey);
-      return index >= 0 ? index : Math.max(keys.length - 2, 0);
-    }, [clock, keys, period]);
+    const currentMonthIndex = useMemo(() => {
+      const index = months.indexOf(budgetPeriodKeyForDate('month', new Date(), clock));
+      return index >= 0 ? index : Math.max(months.length - 2, 0);
+    }, [clock, months]);
 
     const listRef = useRef<FlatList<number>>(null);
     const pager = useMonthPager({
       listRef,
       pageWidth,
-      totalSlots: keys.length,
-      initialIndex: currentIndex,
+      totalSlots: months.length,
+      initialIndex: currentMonthIndex,
     });
 
-    const [isPeriodPickerOpen, setIsPeriodPickerOpen] = useState(false);
+    const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
     useImperativeHandle(
       ref,
       () => ({
         scrollToRelative: pager.scrollToRelative,
-        openPeriodPicker: () => {
-          if (period !== 'year') setIsPeriodPickerOpen(true);
-        },
+        openMonthPicker: () => setIsMonthPickerOpen(true),
       }),
-      [pager.scrollToRelative, period],
+      [pager.scrollToRelative],
     );
 
-    // The pager tracks a bare slot index, but `keys` can gain/lose leading
+    // The pager tracks a bare slot index, but `months` can gain/lose leading
     // entries while mounted (a backdated expense, an import, a bulk delete).
-    // Re-anchor the index to the period the user was actually viewing so the
+    // Re-anchor the index to the month the user was actually viewing so the
     // page doesn't silently jump.
-    const previousKeysRef = useRef(keys);
+    const previousMonthsRef = useRef(months);
     useEffect(() => {
-      const previousKeys = previousKeysRef.current;
-      if (previousKeys === keys) return;
-      previousKeysRef.current = keys;
-      const previousActiveKey = previousKeys[pager.activeIndexRef.current];
-      if (!previousActiveKey) return;
-      // If the viewed period itself disappeared (its anchoring data was
-      // deleted), land on the nearest surviving one instead of letting the
-      // slot index silently point at a different period.
-      let nextIndex = keys.indexOf(previousActiveKey);
+      const previousMonths = previousMonthsRef.current;
+      if (previousMonths === months) return;
+      previousMonthsRef.current = months;
+      const previousActiveMonth = previousMonths[pager.activeIndexRef.current];
+      if (!previousActiveMonth) return;
+      // If the viewed month itself disappeared (its anchoring data was
+      // deleted), land on the nearest surviving month instead of letting the
+      // slot index silently point at a different month.
+      let nextIndex = months.indexOf(previousActiveMonth);
       if (nextIndex < 0) {
-        const nearest = keys.findIndex((key) => key >= previousActiveKey);
-        nextIndex = nearest >= 0 ? nearest : keys.length - 1;
+        const nearest = months.findIndex((month) => month >= previousActiveMonth);
+        nextIndex = nearest >= 0 ? nearest : months.length - 1;
       }
       if (nextIndex === pager.activeIndexRef.current) return;
       pager.setActiveIndex(nextIndex);
       listRef.current?.scrollToOffset({ offset: nextIndex * pageWidth, animated: false });
-    }, [keys, pageWidth, pager]);
+    }, [months, pageWidth, pager]);
 
-    // Week budgets made under another first day of the week land on the week
-    // their first day falls in. Should two land on one week (the setting
-    // changed twice), the one keyed exactly on it wins, else the later one.
-    const budgetsBySlot = useMemo(() => {
-      const map = new Map<string, PeriodBudget>();
-      for (const budget of periodBudgets) {
-        if (budget.period !== period) continue;
-        const slot = budgetSlotKey(period, budget.periodKey, weekStartsOn);
-        const taken = map.get(slot);
-        if (taken && (taken.periodKey === slot || taken.periodKey > budget.periodKey)) continue;
-        map.set(slot, budget);
-      }
-      return map;
-    }, [period, periodBudgets, weekStartsOn]);
-
-    // One O(N) pass bucketing expenses by day, so each page below collects
+    // One O(N) pass bucketing expenses by day, so each budget below collects
     // only its own days instead of rescanning the full transaction list.
     const expensesByDay = useMemo(() => {
       const map = new Map<string, TransactionWithRelations[]>();
@@ -693,46 +619,29 @@ const BudgetPeriodPager = forwardRef<BudgetPagerViewHandle, BudgetPeriodPagerPro
       [expensesByDay],
     );
 
-    // Precomputed once per data change — renderItem runs per page swipe and
-    // must not re-aggregate a period's transactions or rebuild display maps.
-    const pageModelByKey = useMemo(() => {
-      const map = new Map<
-        string,
-        {
-          summary: BudgetSummary;
-          range: BudgetPeriodRange;
-          expenses: TransactionWithRelations[];
-          /** Over-budget lines floated to the top for display. */
-          orderedCategories: BudgetCategoryProgress[];
-          /** Colors follow the frozen line order (stable across periods from
-           *  the same template). */
-          colorByCategoryId: Map<string, string>;
-        }
-      >();
-      for (const [slotKey, budget] of budgetsBySlot) {
+    // Precomputed once per data change: every budget's summary (a budget
+    // can appear on several pages, a year on twelve), then each page's model.
+    const pageModelByMonth = useMemo(() => {
+      const summaries: BudgetPageModel['summaries'] = new Map();
+      for (const budget of periodBudgets) {
         const range = budgetPeriodRange(budget.period, budget.periodKey, monthCycle);
-        const expenses = expensesInRange(range);
         const summary = buildBudgetSummary({
           budget,
-          transactions: expenses,
+          transactions: expensesInRange(range),
           categories,
           monthCycle,
         });
-        if (!summary) continue;
-        map.set(slotKey, {
-          summary,
-          range,
-          expenses,
-          orderedCategories: [...summary.categories].sort(
-            (a, b) => Number(b.isOver) - Number(a.isOver),
-          ),
-          colorByCategoryId: new Map(
-            summary.categories.map((line, index) => [line.categoryId, chartCategoryColor(index)]),
-          ),
+        if (summary) summaries.set(summaryId(budget), { summary, range });
+      }
+      const map = new Map<string, BudgetPageModel>();
+      for (const month of months) {
+        map.set(month, {
+          ...buildBudgetMonthPage({ monthKey: month, budgets: periodBudgets, clock }),
+          summaries,
         });
       }
       return map;
-    }, [budgetsBySlot, categories, expensesInRange, monthCycle]);
+    }, [categories, clock, expensesInRange, monthCycle, months, periodBudgets]);
 
     const categoriesById = useMemo(
       () => new Map(categories.map((category) => [category.id, category])),
@@ -744,12 +653,8 @@ const BudgetPeriodPager = forwardRef<BudgetPagerViewHandle, BudgetPeriodPagerPro
     // uncategorized bucket. Unlike the breakdown pie, tapping a parent goes
     // straight to its transactions (no subcategory-selection stage).
     const openCategoryDrilldown = useCallback(
-      (
-        expenses: TransactionWithRelations[],
-        categoryId: string | null,
-        includeChildren: boolean,
-      ) => {
-        const transactionIds = expenses
+      (range: BudgetPeriodRange, categoryId: string | null, includeChildren: boolean) => {
+        const transactionIds = expensesInRange(range)
           .filter((transaction) => {
             if (categoryId === null) return !transaction.categoryId;
             if (!transaction.categoryId) return false;
@@ -776,34 +681,29 @@ const BudgetPeriodPager = forwardRef<BudgetPagerViewHandle, BudgetPeriodPagerPro
             : {}),
         });
       },
-      [categoriesById, onOpenDrilldown],
+      [categoriesById, expensesInRange, onOpenDrilldown],
     );
 
-    const activeKey = keys[pager.activeIndex] ?? keys[keys.length - 1];
-    // A page with a budget is titled by the budget's own days (a week made
-    // under another first day of the week does not match its slot).
-    const periodLabel = budgetPeriodLabel(
-      period,
-      budgetsBySlot.get(activeKey)?.periodKey ?? activeKey,
-      settings.locale,
-      monthCycle,
-    );
+    const activeMonth = months[pager.activeIndex] ?? months[months.length - 1];
+    const monthLabel = monthKeyLabel(activeMonth, settings.locale);
+    const activeYearMonth = yearMonthFromKey(activeMonth);
 
     useEffect(() => {
-      onActivePeriodLabelChange?.(periodLabel);
-    }, [onActivePeriodLabelChange, periodLabel]);
+      onActiveMonthLabelChange?.(monthLabel);
+    }, [monthLabel, onActiveMonthLabelChange]);
 
     // Always route through the picker (even with one template) so the Custom
-    // one-off option is always reachable.
-    const handleCreateFor = useCallback(
-      (key: string) => {
-        if (templates.length === 0) {
-          onOpenTemplateEditor({ period });
+    // one-off option is always reachable. With no template of that period,
+    // a new template starts on it.
+    const handleCreate = useCallback(
+      (target: FocusTarget) => {
+        if (templatesByPeriod[target.period].length === 0) {
+          onOpenTemplateEditor({ period: target.period });
           return;
         }
-        setPickerKey(key);
+        setPicker(target);
       },
-      [onOpenTemplateEditor, period, templates.length],
+      [onOpenTemplateEditor, templatesByPeriod],
     );
 
     const handleDeleteBudget = useCallback(
@@ -825,43 +725,101 @@ const BudgetPeriodPager = forwardRef<BudgetPagerViewHandle, BudgetPeriodPagerPro
       [deletePeriodBudget],
     );
 
-    // A day key, so it only changes (and re-renders pages) when the day does.
-    const todayKey = dayKeyFromDateLocal(new Date());
+    const setFocus = useCallback((month: string, target: FocusTarget | null) => {
+      setFocusByMonth((previous) => {
+        const next = { ...previous };
+        if (target) next[month] = target;
+        else delete next[month];
+        return next;
+      });
+    }, []);
 
-    const renderPage = useCallback(
+    const renderMonthPage = useCallback(
       ({ item: slotIndex }: { item: number }) => {
-        const key = keys[slotIndex];
-        const budget = budgetsBySlot.get(key) ?? null;
-        const model = pageModelByKey.get(key) ?? null;
+        const month = months[slotIndex];
+        const model = pageModelByMonth.get(month);
+        if (!model) return <View style={{ width: pageWidth }} />;
 
-        if (!budget || !model) {
+        const budgetFor = (target: FocusTarget): PeriodBudget | null => {
+          if (target.period === 'month') return model.month;
+          if (target.period === 'year') return model.year;
+          return model.weeks.find((week) => week.key === target.key)?.budget ?? null;
+        };
+        const thisWeek = model.weeks.find(
+          (week) => week.budget && week.key <= todayKey && todayKey <= addDaysKey(week.key, 6),
+        );
+        const firstBudgetedWeek = thisWeek ?? model.weeks.find((week) => week.budget);
+        const defaultFocus: FocusTarget | null = model.month
+          ? { period: 'month', key: month }
+          : firstBudgetedWeek
+            ? { period: 'week', key: firstBudgetedWeek.key }
+            : model.year
+              ? { period: 'year', key: model.yearKey }
+              : null;
+        const chosen = focusByMonth[month];
+        const focus = chosen && budgetFor(chosen) ? chosen : defaultFocus;
+        const focusBudget = focus ? budgetFor(focus) : null;
+        const focusModel = focusBudget ? model.summaries.get(summaryId(focusBudget)) : undefined;
+
+        const showWeeks =
+          templatesByPeriod.week.length > 0 || model.weeks.some((week) => week.budget);
+        const yearModel = model.year ? model.summaries.get(summaryId(model.year)) : undefined;
+        const showMonthCreate = !model.month && templatesByPeriod.month.length > 0;
+        const showYearCreate = !model.year && templatesByPeriod.year.length > 0;
+
+        // Nothing touches this month: the familiar empty state.
+        if (!focusModel && !showWeeks && !showYearCreate) {
           return (
             <View style={{ width: pageWidth }} className="flex-1">
               <EmptyState
                 title={I18n.t('budget.no_budget_title', {
-                  month: budgetPeriodLabel(period, key, settings.locale, monthCycle),
+                  month: monthKeyLabel(month, settings.locale),
                 })}
                 message={
-                  templates.length === 0
-                    ? I18n.t(`budget.no_templates_message_${period}`)
-                    : I18n.t(`budget.no_budget_message_${period}`)
+                  budgetTemplates.length === 0
+                    ? I18n.t('budget.no_templates_message_month')
+                    : I18n.t('budget.no_budget_message_month')
                 }
                 mascotMood="curious"
                 animateIn={false}
                 action={{
                   label:
-                    templates.length === 0
+                    budgetTemplates.length === 0
                       ? I18n.t('budget.create_template')
                       : I18n.t('budget.create_budget'),
-                  onPress: () => handleCreateFor(key),
+                  onPress: () => handleCreate({ period: 'month', key: month }),
                 }}
               />
             </View>
           );
         }
 
-        const { summary, range, expenses, orderedCategories, colorByCategoryId } = model;
-        const isRunning = range.start <= todayKey && todayKey <= range.end;
+        const focusLabel =
+          focus && focusBudget
+            ? budgetPeriodLabel(focus.period, focusBudget.periodKey, settings.locale, monthCycle)
+            : null;
+        const showBackToMonth = model.month != null && focus?.period !== 'month';
+        const isRunning =
+          focusModel != null &&
+          focusModel.range.start <= todayKey &&
+          todayKey <= focusModel.range.end;
+        const orderedCategories = focusModel
+          ? [...focusModel.summary.categories].sort((a, b) => Number(b.isOver) - Number(a.isOver))
+          : [];
+        // Colors follow the frozen line order (stable across periods from the
+        // same template).
+        const colorByCategoryId = new Map(
+          (focusModel?.summary.categories ?? []).map((line, index) => [
+            line.categoryId,
+            chartCategoryColor(index),
+          ]),
+        );
+        const yearElapsedRatio =
+          yearModel && yearModel.range.start <= todayKey && todayKey <= yearModel.range.end
+            ? 1 -
+              budgetDaysLeft(yearModel.range, dateFromDayKeyLocal(todayKey)) /
+                budgetRangeLength(yearModel.range)
+            : null;
 
         return (
           <View style={{ width: pageWidth }} className="flex-1">
@@ -872,19 +830,119 @@ const BudgetPeriodPager = forwardRef<BudgetPagerViewHandle, BudgetPeriodPagerPro
               ]}
               showsVerticalScrollIndicator={false}
             >
-              <BudgetSummaryCard
-                summary={summary}
-                daysLeft={isRunning ? budgetDaysLeft(range, dateFromDayKeyLocal(todayKey)) : null}
-                settings={settings}
-                themeColors={themeColors}
-                onEdit={() => onOpenBudgetEditor(budget.id)}
-                onDelete={() => handleDeleteBudget(budget)}
-              />
+              {showMonthCreate ? (
+                <CreateBudgetRow
+                  label={monthKeyLabel(month, settings.locale)}
+                  className="mb-3"
+                  themeColors={themeColors}
+                  onPress={() => handleCreate({ period: 'month', key: month })}
+                />
+              ) : null}
+
+              {focus && focusBudget && focusModel ? (
+                <>
+                  {/* Which budget the card shows: it can be the month's, a
+                      week's or the year's, so it is always named. */}
+                  <View className="mb-2 flex-row items-center gap-2 px-1">
+                    <Text
+                      variant="label"
+                      tone="muted"
+                      numberOfLines={1}
+                      className="flex-1 uppercase"
+                    >
+                      {focusBudget.templateName
+                        ? `${focusLabel} · ${focusBudget.templateName}`
+                        : focusLabel}
+                    </Text>
+                    {showBackToMonth ? (
+                      <Pressable
+                        onPress={() => {
+                          void triggerHaptic('selection');
+                          setFocus(month, null);
+                        }}
+                        hitSlop={8}
+                        accessibilityRole="button"
+                        accessibilityLabel={I18n.t('budget.back_to', {
+                          label: monthKeyLabel(month, settings.locale),
+                        })}
+                        className="shrink-0 flex-row items-center gap-0.5 rounded-full bg-secondary/40 py-1 pl-1.5 pr-2.5 active:opacity-70"
+                      >
+                        <ChevronLeft size={13} color={themeColors.primary} />
+                        <Text variant="caption" className="text-[11px] text-primary">
+                          {monthNameLabel(month, settings.locale)}
+                        </Text>
+                      </Pressable>
+                    ) : null}
+                  </View>
+                  <BudgetSummaryCard
+                    summary={focusModel.summary}
+                    daysLeft={
+                      isRunning
+                        ? budgetDaysLeft(focusModel.range, dateFromDayKeyLocal(todayKey))
+                        : null
+                    }
+                    settings={settings}
+                    themeColors={themeColors}
+                    onEdit={() => onOpenBudgetEditor(focusBudget.id)}
+                    onDelete={() => handleDeleteBudget(focusBudget)}
+                  />
+                </>
+              ) : null}
+
+              {showWeeks ? (
+                <WeekStrip
+                  weeks={model.weeks.map((week) => ({
+                    ...week,
+                    summary: week.budget
+                      ? (model.summaries.get(summaryId(week.budget))?.summary ?? null)
+                      : null,
+                  }))}
+                  todayKey={todayKey}
+                  selectedKey={focus?.period === 'week' ? focus.key : null}
+                  canCreate={templatesByPeriod.week.length > 0}
+                  settings={settings}
+                  themeColors={themeColors}
+                  onSelect={(key) =>
+                    setFocus(
+                      month,
+                      focus?.period === 'week' && focus.key === key
+                        ? null
+                        : { period: 'week', key },
+                    )
+                  }
+                  onCreate={(key) => handleCreate({ period: 'week', key })}
+                />
+              ) : null}
+
+              {model.year && yearModel ? (
+                <YearBudgetRow
+                  budget={model.year}
+                  summary={yearModel.summary}
+                  label={model.yearKey}
+                  yearElapsedRatio={yearElapsedRatio}
+                  selected={focus?.period === 'year'}
+                  settings={settings}
+                  themeColors={themeColors}
+                  onPress={() =>
+                    setFocus(
+                      month,
+                      focus?.period === 'year' ? null : { period: 'year', key: model.yearKey },
+                    )
+                  }
+                />
+              ) : showYearCreate ? (
+                <CreateBudgetRow
+                  label={model.yearKey}
+                  className="mt-3"
+                  themeColors={themeColors}
+                  onPress={() => handleCreate({ period: 'year', key: model.yearKey })}
+                />
+              ) : null}
 
               {/* A budget can lose all its lines (category-delete cascade);
                   don't render an empty bordered shell. */}
-              {orderedCategories.length > 0 ? (
-                <View className="mt-4 overflow-hidden rounded-2xl border border-border/45 bg-card">
+              {focusModel && orderedCategories.length > 0 ? (
+                <View className="mt-5 overflow-hidden rounded-2xl border border-border/45 bg-card">
                   {orderedCategories.map((line, index) => (
                     <BudgetCategoryRow
                       key={line.categoryId}
@@ -894,27 +952,31 @@ const BudgetPeriodPager = forwardRef<BudgetPagerViewHandle, BudgetPeriodPagerPro
                       categoriesById={categoriesById}
                       settings={settings}
                       themeColors={themeColors}
-                      onPress={() => openCategoryDrilldown(expenses, line.categoryId, true)}
-                      onPressChild={(childId) => openCategoryDrilldown(expenses, childId, false)}
+                      onPress={() => openCategoryDrilldown(focusModel.range, line.categoryId, true)}
+                      onPressChild={(childId) =>
+                        openCategoryDrilldown(focusModel.range, childId, false)
+                      }
                     />
                   ))}
                 </View>
               ) : null}
 
-              {summary.countUnbudgeted && summary.unbudgeted.length > 0 ? (
+              {focusModel?.summary.countUnbudgeted && focusModel.summary.unbudgeted.length > 0 ? (
                 <View className="mt-5">
                   <Text variant="label" tone="muted" className="mb-2 px-1 uppercase">
                     {I18n.t('budget.unbudgeted_section')}
                   </Text>
                   <View className="gap-2">
-                    {summary.unbudgeted.map((entry) => (
+                    {focusModel.summary.unbudgeted.map((entry) => (
                       <UnbudgetedRow
                         key={entry.categoryId ?? '__uncategorized__'}
                         categoryId={entry.categoryId}
                         spent={entry.spent}
                         categoriesById={categoriesById}
                         settings={settings}
-                        onPress={() => openCategoryDrilldown(expenses, entry.categoryId, true)}
+                        onPress={() =>
+                          openCategoryDrilldown(focusModel.range, entry.categoryId, true)
+                        }
                       />
                     ))}
                   </View>
@@ -925,32 +987,24 @@ const BudgetPeriodPager = forwardRef<BudgetPagerViewHandle, BudgetPeriodPagerPro
         );
       },
       [
-        budgetsBySlot,
+        budgetTemplates.length,
         categoriesById,
-        handleCreateFor,
+        focusByMonth,
+        handleCreate,
         handleDeleteBudget,
-        keys,
         listNavInset,
         monthCycle,
+        months,
         onOpenBudgetEditor,
         openCategoryDrilldown,
-        pageModelByKey,
+        pageModelByMonth,
         pageWidth,
-        period,
+        setFocus,
         settings,
-        templates.length,
+        templatesByPeriod,
         themeColors,
         todayKey,
       ],
-    );
-
-    const jumpToKey = useCallback(
-      (key: string) => {
-        const exact = keys.indexOf(key);
-        const next = exact >= 0 ? exact : keys.findIndex((candidate) => candidate >= key);
-        pager.jumpToIndex(next >= 0 ? next : keys.length - 1);
-      },
-      [keys, pager],
     );
 
     return (
@@ -958,7 +1012,8 @@ const BudgetPeriodPager = forwardRef<BudgetPagerViewHandle, BudgetPeriodPagerPro
         <FlatList
           ref={listRef}
           data={pager.slots}
-          renderItem={renderPage}
+          renderItem={renderMonthPage}
+          extraData={focusByMonth}
           keyExtractor={pager.keyExtractor}
           getItemLayout={pager.getItemLayout}
           onMomentumScrollEnd={pager.handleMomentumEnd}
@@ -975,60 +1030,50 @@ const BudgetPeriodPager = forwardRef<BudgetPagerViewHandle, BudgetPeriodPagerPro
           className="flex-1"
         />
 
-        {period === 'month' ? (
-          <MonthYearWheelPicker
-            visible={isPeriodPickerOpen}
-            year={yearMonthFromKey(activeKey).year}
-            monthIndex={yearMonthFromKey(activeKey).monthIndex}
-            // The pager only holds the months that have a budget or spending, so
-            // the wheel stops at the same ends.
-            min={yearMonthFromKey(keys[0])}
-            max={yearMonthFromKey(keys[keys.length - 1])}
-            locale={settings.locale}
-            onSelect={(year, monthIndex) => {
-              setIsPeriodPickerOpen(false);
-              jumpToKey(yearMonthToKey({ year, monthIndex }));
-            }}
-            onClose={() => setIsPeriodPickerOpen(false)}
-          />
-        ) : null}
-
-        {period === 'week' ? (
-          <DatePickerModal
-            visible={isPeriodPickerOpen}
-            value={activeKey}
-            title={I18n.t('budget.pick_week_title')}
-            showQuickDays={false}
-            onSelect={(dayKey) => {
-              setIsPeriodPickerOpen(false);
-              jumpToKey(
-                budgetPeriodKeyForDate('week', dateFromDayKeyLocal(dayKey.slice(0, 10)), clock),
-              );
-            }}
-            onClose={() => setIsPeriodPickerOpen(false)}
-          />
-        ) : null}
+        <MonthYearWheelPicker
+          visible={isMonthPickerOpen}
+          year={activeYearMonth.year}
+          monthIndex={activeYearMonth.monthIndex}
+          // The pager only holds the months that have a budget or spending, so
+          // the wheel stops at the same ends.
+          min={yearMonthFromKey(months[0])}
+          max={yearMonthFromKey(months[months.length - 1])}
+          locale={settings.locale}
+          onSelect={(year, monthIndex) => {
+            setIsMonthPickerOpen(false);
+            const key = yearMonthToKey({ year, monthIndex });
+            const exact = months.indexOf(key);
+            const next = exact >= 0 ? exact : months.findIndex((month) => month >= key);
+            pager.jumpToIndex(next >= 0 ? next : months.length - 1);
+          }}
+          onClose={() => setIsMonthPickerOpen(false)}
+        />
 
         <BudgetTemplatePickerSheet
-          visible={pickerKey != null}
-          onClose={() => setPickerKey(null)}
-          templates={templates}
-          period={period}
+          visible={picker != null}
+          onClose={() => setPicker(null)}
+          templates={picker ? templatesByPeriod[picker.period] : []}
+          period={picker?.period ?? 'month'}
           categories={categories}
           settings={settings}
           onSelect={(templateId) => {
-            if (pickerKey) {
+            if (picker) {
               void triggerHaptic('success');
-              createPeriodBudget(pickerKey, templateId);
+              createPeriodBudget(picker.key, templateId);
             }
-            setPickerKey(null);
+            setPicker(null);
           }}
           onSelectCustom={() => {
-            if (pickerKey) onCreateCustomBudget(period, pickerKey);
-            setPickerKey(null);
+            if (picker) onCreateCustomBudget(picker.period, picker.key);
+            setPicker(null);
           }}
         />
       </>
     );
   },
 );
+
+function addDaysKey(dayKey: string, days: number): string {
+  const date = dateFromDayKeyLocal(dayKey);
+  return dayKeyFromDateLocal(new Date(date.getFullYear(), date.getMonth(), date.getDate() + days));
+}

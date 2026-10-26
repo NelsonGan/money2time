@@ -2668,16 +2668,10 @@ const fil = {
     no_templates_title: 'Wala pang template',
     no_templates_message:
       'Gumawa ng template ng badyet para simulan ang pagpaplano ng iyong gastos.',
-    no_templates_message_week:
-      'Gumawa ng lingguhang template ng badyet para simulan ang pagpaplano ng iyong mga linggo.',
     no_templates_message_month:
       'Gumawa ng template ng badyet para simulan ang pagpaplano ng iyong mga buwan.',
-    no_templates_message_year:
-      'Gumawa ng taunang template ng badyet para simulan ang pagpaplano ng iyong mga taon.',
     no_budget_title: 'Walang badyet para sa {{month}}',
-    no_budget_message_week: 'Gumawa mula sa template para subaybayan ang linggong ito.',
     no_budget_message_month: 'Gumawa mula sa template para subaybayan ang buwang ito.',
-    no_budget_message_year: 'Gumawa mula sa template para subaybayan ang taong ito.',
     create_budget: 'Gumawa ng badyet',
     choose_template: 'Pumili ng template',
     custom_option: 'Custom',
@@ -2707,9 +2701,12 @@ const fil = {
     period_week: 'Lingguhan',
     period_month: 'Buwanan',
     period_year: 'Taunan',
-    period_has_budget: '{{period}}, may tumatakbong badyet',
     week_range: '{{start}} – {{end}}',
-    pick_week_title: 'Pumunta sa linggo',
+    weeks_title: 'Mga linggo',
+    week_tile_label: 'Linggo ng {{date}}, {{percent}} nagamit',
+    week_tile_empty: 'Linggo ng {{date}}, walang badyet',
+    year_elapsed: '{{percent}} ng taon ang lumipas na',
+    back_to: 'Bumalik sa {{label}}',
     repeats_label: 'Umuulit',
     repeats_hint_week: 'Magsisimula ang bagong badyet tuwing {{day}}.',
     repeats_hint_month: 'Magsisimula ang bagong badyet bawat buwan.',

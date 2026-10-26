@@ -1,7 +1,7 @@
 import {
   buildBudgetSummary,
   computeBackPopulateRange,
-  computeBudgetPagerKeys,
+  computeBudgetPagerMonths,
 } from '~/features/budget/lib/budgetMath';
 /**
  * Regression guard: a user on the default `firstDayOfMonth = 1` must get exactly
@@ -206,12 +206,11 @@ describe('budget math — day 1 matches calendar-month behaviour', () => {
     expect(withDay1).toEqual(omitted);
   });
 
-  it('computeBudgetPagerKeys lays out calendar months at day 1', () => {
+  it('computeBudgetPagerMonths lays out calendar months at day 1', () => {
     const now = new Date(2026, 6, 15);
     const budgets = [makeBudget({ periodKey: '2026-05' })];
     const transactions = [makeTx({ date: '2026-04-10T12:00:00.000Z' })];
-    const months = computeBudgetPagerKeys({
-      period: 'month',
+    const months = computeBudgetPagerMonths({
       budgets,
       transactions,
       now,
