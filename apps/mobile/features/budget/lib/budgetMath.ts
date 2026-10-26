@@ -155,7 +155,8 @@ export function buildBudgetMonthSummary({
  * Editor helper: how far a parent's subcategory allocations are from the
  * parent amount. Zero when no child is allocated (children are optional) or
  * when they sum exactly to the parent; positive = still unassigned, negative
- * = over-assigned. Save must be blocked while any parent is non-zero.
+ * = over-assigned. A partial breakdown is fine (the rest stays on the parent
+ * line); Save is blocked only while a parent is over-assigned (negative).
  */
 export function computeChildAllocationGap(
   parentAmount: number,
@@ -164,6 +165,18 @@ export function computeChildAllocationGap(
   const allocated = childAllocations.reduce((sum, allocation) => sum + allocation.amount, 0);
   if (allocated === 0) return 0;
   return normalizeMoneyAmount(parentAmount - allocated);
+}
+
+/**
+ * Whether a parent's subcategory breakdown blocks Save: only when the children
+ * claim more than the parent. Splitting part of the parent is fine; the
+ * unassigned rest simply stays on the parent line.
+ */
+export function childAllocationExceedsParent(
+  parentAmount: number,
+  childAllocations: { amount: number }[],
+): boolean {
+  return computeChildAllocationGap(parentAmount, childAllocations) < 0;
 }
 
 export interface BackPopulateRange {

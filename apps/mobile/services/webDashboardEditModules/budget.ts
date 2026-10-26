@@ -14,8 +14,8 @@
  *
  * Allocations (and a month's lines) are `{ categoryId, amount }`, as the app's
  * allocation editor builds them: root expense categories that sum exactly to
- * the total, plus optional subcategory breakdowns that sum exactly to their
- * parent's amount.
+ * the total, plus optional subcategory breakdowns that do not exceed their
+ * parent's amount (a partial breakdown leaves the rest on the parent).
  */
 
 import { PRO_LIMITS } from '~/constants/proLimits';
@@ -164,7 +164,7 @@ function extraOf(tools: PlanTools): BudgetExtra {
 /**
  * The allocations as the app's allocation editor saves them, or null when it
  * would keep Save disabled: root expense categories summing exactly to a
- * positive total, each subcategory breakdown summing exactly to its parent,
+ * positive total, each subcategory breakdown no larger than its parent,
  * roots first (in the order given) and then each root's subcategories.
  */
 function allocationsFor(tools: PlanTools, total: number, lines: Allocation[]): Allocation[] | null {
@@ -200,7 +200,7 @@ function allocationsFor(tools: PlanTools, total: number, lines: Allocation[]): A
     const children = childrenByRoot.get(root.categoryId) ?? [];
     if (!children.length) continue;
     const childSum = children.reduce((sum, child) => sum + child.amount, 0);
-    if (cents(root.amount - childSum) !== 0) return null;
+    if (cents(root.amount - childSum) < 0) return null;
     // In the category list's order, as the editor builds them.
     out.push(
       ...[...children].sort(

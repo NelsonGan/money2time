@@ -8,7 +8,7 @@ import {
   AllocationFooter,
   parseAllocationAmount,
 } from '~/features/budget/components/AllocationEditor';
-import { computeChildAllocationGap } from '~/features/budget/lib/budgetMath';
+import { childAllocationExceedsParent } from '~/features/budget/lib/budgetMath';
 import { money } from '~/features/budget/lib/format';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -56,7 +56,7 @@ export function CategoryAllocationScreen({
     amount: parseAllocationAmount(amounts[child.id] ?? ''),
   }));
   const childAllocated = childAllocations.reduce((sum, entry) => sum + entry.amount, 0);
-  const childGap = computeChildAllocationGap(parentAmount, childAllocations);
+  const childOverAllocated = childAllocationExceedsParent(parentAmount, childAllocations);
   const remainingLeft = normalizeMoneyAmount(remainingExcludingThis - parentAmount);
 
   const handleChange = useCallback((id: string, next: string) => {
@@ -64,11 +64,11 @@ export function CategoryAllocationScreen({
   }, []);
 
   const handleSave = useCallback(() => {
-    if (childGap !== 0) return;
+    if (childOverAllocated) return;
     void triggerHaptic('success');
     onDone(amounts);
     onClose();
-  }, [amounts, childGap, onClose, onDone]);
+  }, [amounts, childOverAllocated, onClose, onDone]);
 
   if (!category) return null;
 
@@ -170,7 +170,7 @@ export function CategoryAllocationScreen({
         themeColors={themeColors}
         onCancel={onClose}
         onSave={handleSave}
-        saveDisabled={childGap !== 0}
+        saveDisabled={childOverAllocated}
       />
     </SafeAreaView>
   );

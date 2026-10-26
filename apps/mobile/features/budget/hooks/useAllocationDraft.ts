@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { parseAllocationAmount } from '~/features/budget/components/AllocationEditor';
 import {
+  childAllocationExceedsParent,
   computeAllocationRemaining,
   computeChildAllocationGap,
 } from '~/features/budget/lib/budgetMath';
@@ -19,8 +20,8 @@ export interface OpenCategoryAllocationParams {
 /**
  * Shared draft state for the template and month-budget editors: the total,
  * per-category amount strings, and the derived validation — root allocations
- * must sum exactly to the total, and each parent's subcategory breakdown (when
- * any child is allocated) must sum exactly to the parent.
+ * must sum exactly to the total, and each parent's subcategory breakdown must
+ * not exceed the parent (a partial breakdown leaves the rest on the parent).
  */
 export function useAllocationDraft({
   categories,
@@ -126,16 +127,22 @@ export function useAllocationDraft({
 
   const remaining = computeAllocationRemaining(parsedTotal, rootAllocations);
 
+  // Parents whose subcategory breakdown exceeds them (gap is negative). A
+  // partial breakdown is fine: the unassigned rest stays on the parent line.
   const childGaps = useMemo(() => {
     const gaps = new Map<string, number>();
     for (const allocation of rootAllocations) {
       const children = childrenByParent.get(allocation.categoryId) ?? [];
       if (children.length === 0) continue;
-      const gap = computeChildAllocationGap(
-        allocation.amount,
-        children.map((child) => ({ amount: parseAllocationAmount(amounts[child.id] ?? '') })),
-      );
-      if (gap !== 0) gaps.set(allocation.categoryId, gap);
+      const childAllocations = children.map((child) => ({
+        amount: parseAllocationAmount(amounts[child.id] ?? ''),
+      }));
+      if (childAllocationExceedsParent(allocation.amount, childAllocations)) {
+        gaps.set(
+          allocation.categoryId,
+          computeChildAllocationGap(allocation.amount, childAllocations),
+        );
+      }
     }
     return gaps;
   }, [amounts, childrenByParent, rootAllocations]);
@@ -165,7 +172,7 @@ export function useAllocationDraft({
     [amounts, childrenByParent, onOpenCategoryAllocation, remaining],
   );
 
-  /** Root allocations plus any child breakdowns (already validated to sum to their parents). */
+  /** Root allocations plus any child breakdowns (already validated not to exceed their parents). */
   const buildAllocations = useCallback(() => {
     const allocations = [...rootAllocations];
     for (const rootAllocation of rootAllocations) {
