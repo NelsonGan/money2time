@@ -2083,6 +2083,10 @@ const es = {
     purchase_pending_title: 'Compra en proceso',
     purchase_pending_message:
       'Tu compra fue procesada, pero el acceso Pro aún no se activó. Espera un momento o restaura las compras.',
+    payment_pending_message:
+      'Tu pago está pendiente de aprobación. Pro se desbloqueará automáticamente cuando se complete, así que no hace falta volver a comprar.',
+    already_owned_not_restored:
+      'Esta cuenta de la tienda ya tiene Pro, pero no se pudo aplicar aquí. Toca Restaurar compras y asegúrate de haber iniciado sesión con la cuenta de la tienda que lo compró.',
     monthly: 'Mensual',
     yearly: 'Anual',
     lifetime: 'De por vida',

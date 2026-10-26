@@ -282,6 +282,12 @@ async function ensureRevenueCatConfigured(waitForAnalytics = true) {
   }
 
   if (!configured) {
+    // Settings can still be loading. Configuring anonymously would create a
+    // throwaway customer whose late listener update could settle Pro status
+    // for the real user, so wait until the App User ID is known.
+    if (!desiredRevenueCatAppUserId) {
+      throw new Error('RevenueCat App User ID is not ready yet.');
+    }
     Purchases.configure({
       apiKey: getRevenueCatApiKey()!,
       appUserID: desiredRevenueCatAppUserId,
@@ -352,6 +358,19 @@ function toRevenueCatErrorResult(error: unknown): RevenueCatActionResult {
     };
   }
 
+  if (purchasesError?.code === PURCHASES_ERROR_CODE.PAYMENT_PENDING_ERROR) {
+    // Google Play slow payment methods and Ask to Buy: the payment is awaiting
+    // approval, not failed. Pro unlocks through the customer-info listener when
+    // it completes, so the user must not be told to try again.
+    return {
+      customerState: null,
+      message: null,
+      status: 'pending',
+      reason: 'payment_pending',
+      errorCode,
+    };
+  }
+
   if (purchasesError?.code === PURCHASES_ERROR_CODE.PURCHASE_NOT_ALLOWED_ERROR) {
     // The store uses this for device/account restrictions such as unavailable
     // billing, an outdated Play Store, or purchase controls. Retrying in-app
@@ -375,6 +394,20 @@ function toRevenueCatErrorResult(error: unknown): RevenueCatActionResult {
     status: 'error',
     errorCode,
   };
+}
+
+/**
+ * Drop the SDK's cached CustomerInfo so the next read goes to the network.
+ * Used when a subscription passes its expiry: the cache can still list the
+ * entitlement as active for a grace period after it ends.
+ */
+export async function invalidateRevenueCatCustomerInfoCache(): Promise<void> {
+  if (!configured) return;
+  try {
+    await Purchases.invalidateCustomerInfoCache();
+  } catch {
+    // The read that follows still returns usable (cached) state.
+  }
 }
 
 export async function fetchRevenueCatCustomerState(): Promise<RevenueCatCustomerState | null> {
@@ -594,6 +627,16 @@ export function subscribeToRevenueCatCustomerStateUpdates(
   }
 
   const customerInfoListener: CustomerInfoUpdateListener = (customerInfo) => {
+    // Drop updates while the SDK's customer is not (yet) the app's user, e.g.
+    // during a pending logIn. The refresh that follows the login reads the
+    // right customer.
+    if (
+      !desiredRevenueCatAppUserId ||
+      loginPromise ||
+      activeRevenueCatAppUserId !== desiredRevenueCatAppUserId
+    ) {
+      return;
+    }
     listener(toRevenueCatCustomerState(customerInfo));
   };
 
@@ -670,12 +713,19 @@ export async function purchaseRevenueCatPackage(
     const purchasesError = error as Partial<PurchasesError> | null;
     if (purchasesError?.code === PURCHASES_ERROR_CODE.PRODUCT_ALREADY_PURCHASED_ERROR) {
       const restoreResult = await restoreRevenueCatPurchases();
-      if (
-        restoreResult.status !== 'success' ||
-        isRevenueCatCustomerStateActive(restoreResult.customerState)
-      ) {
+      if (restoreResult.status !== 'success') {
         return restoreResult;
       }
+      // A restore, not a sale: the paywall reports it as one.
+      return {
+        ...restoreResult,
+        message: null,
+        status: isRevenueCatCustomerStateActive(restoreResult.customerState) ? 'success' : 'error',
+        reason: isRevenueCatCustomerStateActive(restoreResult.customerState)
+          ? 'restored_owned_product'
+          : 'owned_product_not_restored',
+        errorCode: getRevenueCatErrorCode(purchasesError),
+      };
     }
 
     return toRevenueCatErrorResult(error);
@@ -698,8 +748,9 @@ export async function restoreRevenueCatPurchases(): Promise<RevenueCatActionResu
 
     // Explicit restore posts Play purchases with isRestore=true. Background
     // sync uses the SDK's account-sharing policy instead, and must not precede
-    // or short-circuit this user-requested restore. Neither API can recover a
-    // consumed lifetime purchase on Billing Client 8; see "Purchase identity and restore" in the repository README.
+    // or short-circuit this user-requested restore. Android restore needs SDK
+    // 10+: 9.x silently returned no one-time purchases. Neither API recovers a
+    // consumed purchase; see "Purchase identity and restore" in the README.
     const customerInfo = await Purchases.restorePurchases();
     const customerState = toRevenueCatCustomerState(customerInfo);
     return {
@@ -709,7 +760,11 @@ export async function restoreRevenueCatPurchases(): Promise<RevenueCatActionResu
     };
   } catch (error) {
     const result = toRevenueCatErrorResult(error);
-    if (result.status === 'error') {
+    const code = (error as Partial<PurchasesError> | null)?.code;
+    const isConnectivity =
+      code === PURCHASES_ERROR_CODE.NETWORK_ERROR ||
+      code === PURCHASES_ERROR_CODE.OFFLINE_CONNECTION_ERROR;
+    if (result.status === 'error' && !isConnectivity) {
       reportError(error, { context: 'revenueCat.restore', platform: Platform.OS });
     }
     return result;

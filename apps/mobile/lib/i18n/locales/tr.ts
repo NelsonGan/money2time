@@ -2083,6 +2083,10 @@ const tr = {
     purchase_pending_title: 'Satın alma işleniyor',
     purchase_pending_message:
       'Satın almanız tamamlandı ancak Pro erişimi henüz etkinleşmedi. Lütfen bir an bekleyin veya satın almaları geri yükleyin.',
+    payment_pending_message:
+      'Ödemeniz onay bekliyor. Tamamlandığında Pro otomatik olarak açılır, bu yüzden tekrar satın almanıza gerek yok.',
+    already_owned_not_restored:
+      "Bu mağaza hesabı zaten Pro'ya sahip, ancak burada uygulanamadı. Satın Alımları Geri Yükle'ye dokunun ve satın alan mağaza hesabıyla oturum açtığınızdan emin olun.",
     monthly: 'Aylık',
     yearly: 'Yıllık',
     lifetime: 'Ömür Boyu',

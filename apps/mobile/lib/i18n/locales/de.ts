@@ -2097,6 +2097,10 @@ const de = {
     purchase_pending_title: 'Kauf wird verarbeitet',
     purchase_pending_message:
       'Dein Kauf wurde durchgeführt, aber der Pro-Zugang wurde noch nicht aktiviert. Bitte warte einen Moment oder stelle Käufe wieder her.',
+    payment_pending_message:
+      'Deine Zahlung wartet auf Bestätigung. Pro wird automatisch freigeschaltet, sobald sie abgeschlossen ist. Du musst also nicht erneut kaufen.',
+    already_owned_not_restored:
+      'Dieses Store-Konto besitzt Pro bereits, es konnte hier aber nicht angewendet werden. Tippe auf „Käufe wiederherstellen“ und prüfe, ob du mit dem Store-Konto angemeldet bist, mit dem gekauft wurde.',
     monthly: 'Monatlich',
     yearly: 'Jährlich',
     lifetime: 'Dauerhaft',

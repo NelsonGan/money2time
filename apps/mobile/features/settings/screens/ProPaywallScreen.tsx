@@ -714,9 +714,39 @@ function getPlanKind(pkg: RevenueCatPackage): PaywallPlanKind {
   }
 }
 
+/**
+ * Lifetime is a separate one-time product; an old subscription keeps renewing
+ * until cancelled. Nudge the user to stop the double charge.
+ */
+function promptToCancelRedundantSubscription() {
+  Alert.alert(I18n.t('pro.lifetime_purchased_title'), I18n.t('pro.lifetime_purchased_body'), [
+    {
+      text: I18n.t('pro.cancel_subscription'),
+      onPress: () => {
+        void trackEvent(AnalyticsEvents.PRO_CANCEL_SUB_PROMPT_ACTIONED, { choice: 'cancel' });
+        openStoreSubscriptions();
+      },
+    },
+    {
+      text: I18n.t('pro.not_now'),
+      style: 'cancel',
+      onPress: () =>
+        void trackEvent(AnalyticsEvents.PRO_CANCEL_SUB_PROMPT_ACTIONED, { choice: 'not_now' }),
+    },
+  ]);
+}
+
 export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallScreenProps) {
-  const { isLoading, isPro, customerState, offering, purchasePackage, refresh, restorePurchases } =
-    usePro();
+  const {
+    isLoading,
+    isPro,
+    isStatusKnown,
+    customerState,
+    offering,
+    purchasePackage,
+    refresh,
+    restorePurchases,
+  } = usePro();
   const packages = usePackagesByType(offering);
   const isSubscriber = isRevenueCatCustomerStateSubscriber(customerState);
   // A subscriber can still move to Lifetime — but only if the offering exposes it.
@@ -907,7 +937,21 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
       void trackEvent(AnalyticsEvents.PRO_PURCHASE_STARTED, purchaseAnalytics);
       try {
         const result = await purchasePackage(pkgId);
-        if (result.status === 'success') {
+        if (result.reason === 'restored_owned_product') {
+          // The store account already owned this product; the restore that
+          // applied it is not a new sale.
+          void trackEvent(AnalyticsEvents.PRO_RESTORE_COMPLETED, {
+            source: paywallSource,
+            found: true,
+          });
+          onClose();
+          if (wasSubscriber && boughtLifetime) {
+            // They own Lifetime and are still billed for the subscription.
+            promptToCancelRedundantSubscription();
+          } else {
+            Alert.alert(I18n.t('pro.restore_success'));
+          }
+        } else if (result.status === 'success') {
           void trackEvent(AnalyticsEvents.PRO_PURCHASE_COMPLETED, {
             ...purchaseAnalytics,
             // What the store granted, rather than what the package offered:
@@ -917,38 +961,14 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
           });
           recordProPurchase();
           onClose();
-          if (wasSubscriber && boughtLifetime) {
-            // Lifetime is a separate one-time product; the old subscription keeps
-            // renewing until cancelled. Nudge the user to stop the double charge.
-            Alert.alert(
-              I18n.t('pro.lifetime_purchased_title'),
-              I18n.t('pro.lifetime_purchased_body'),
-              [
-                {
-                  text: I18n.t('pro.cancel_subscription'),
-                  onPress: () => {
-                    void trackEvent(AnalyticsEvents.PRO_CANCEL_SUB_PROMPT_ACTIONED, {
-                      choice: 'cancel',
-                    });
-                    openStoreSubscriptions();
-                  },
-                },
-                {
-                  text: I18n.t('pro.not_now'),
-                  style: 'cancel',
-                  onPress: () =>
-                    void trackEvent(AnalyticsEvents.PRO_CANCEL_SUB_PROMPT_ACTIONED, {
-                      choice: 'not_now',
-                    }),
-                },
-              ],
-            );
-          }
+          if (wasSubscriber && boughtLifetime) promptToCancelRedundantSubscription();
         } else if (result.status === 'pending') {
           void trackEvent(AnalyticsEvents.PRO_PURCHASE_PENDING, purchaseAnalytics);
           Alert.alert(
             I18n.t('pro.purchase_pending_title'),
-            result.message ?? I18n.t('pro.purchase_pending_message'),
+            result.reason === 'payment_pending'
+              ? I18n.t('pro.payment_pending_message')
+              : (result.message ?? I18n.t('pro.purchase_pending_message')),
           );
         } else if (result.status === 'cancelled') {
           void trackEvent(AnalyticsEvents.PRO_PURCHASE_CANCELLED, purchaseAnalytics);
@@ -960,7 +980,9 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
           });
           Alert.alert(
             I18n.t('pro.purchase_failed'),
-            result.message ?? I18n.t('errors.generic_operation_failed'),
+            result.reason === 'owned_product_not_restored'
+              ? I18n.t('pro.already_owned_not_restored')
+              : (result.message ?? I18n.t('errors.generic_operation_failed')),
           );
         }
       } finally {
@@ -1247,7 +1269,9 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
               </Text>
               <Button
                 onPress={() => selectedPlan.pkg && handleBuyPlan(selectedPlan.pkg)}
-                disabled={isPurchasing || isRestoring}
+                // Until Pro status is known for this user, isPro is a false
+                // placeholder: a Pro owner could buy a plan on top of it.
+                disabled={isPurchasing || isRestoring || isLoading || !isStatusKnown}
                 variant="default"
                 size="default"
                 className="h-[54px] w-full shadow-glow-lg"

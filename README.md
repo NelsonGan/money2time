@@ -574,6 +574,23 @@ As checked in the live Money2Time RevenueCat dashboard (read-only, 2026-09-08):
   an expiration date and must not unlock Pro.
 - Report actual restore failures to PostHog error tracking under `revenueCat.restore`, with the
   platform, and preserve the restore error during already-owned purchase recovery.
+  Network and offline errors are not reported: they are not app failures.
+- An already-owned purchase that restore applies is a restore, not a sale
+  (`reason: 'restored_owned_product'`): the paywall sends `Pro Restore
+Completed`, so that attempt's `Pro Purchase Started` has no purchase outcome.
+  A subscriber who turns out to own Lifetime still gets the prompt to cancel the
+  subscription. When the restore cannot apply it, tell the user to restore from
+  the store account that bought it.
+- A Play slow payment or iOS Ask to Buy (`PAYMENT_PENDING_ERROR`) is pending,
+  not failed. Saying it failed invites a second purchase. Pro unlocks through
+  the customer-info listener when the payment completes.
+- The paywall's buy button stays disabled until Pro status is known for the
+  current user, so a Pro owner can't buy a plan on top of the placeholder.
+- Never configure the SDK anonymously: wait for `settings.appUserId`. Drop
+  customer-info listener updates while a login is switching users.
+- When a subscription passes its expiry, invalidate the SDK cache and re-read
+  once for that expiry. The cache can keep listing the entitlement as active for
+  a grace period, and re-reading on every new state object loops.
 
 #### Verification
 
@@ -618,20 +635,36 @@ order ID (`GPA...`), the exact restore message, app version, and approximate res
 time. Inspect that customer's history and the scoped PostHog exception before assigning
 a store-side cause. Do not log receipts, purchase tokens, or Google credentials.
 
+#### Android SDK version
+
+Keep `react-native-purchases` on 10.x or later (10.15.1 ships purchases-android
+10.28.1 on Billing Library 8.3). Android restore in 9.x (purchases-android
+9.16 to 9.29) read one-time purchases through an unofficial Play Store AIDL
+`getPurchaseHistory` call. When Play answered it with an error code, the SDK
+returned an empty list instead of an error and never fell back to
+`queryPurchasesAsync`. Restore then reported success with no purchases.
+Explicit restores and syncs both took that path. From 2026-09-27 to 2026-10-27
+every Android restore found nothing (0 of 17, 7 users), including a customer
+whose Lifetime order was still owned on the same device and Google account. The
+10.x SDK always reads `queryPurchasesAsync`, which returns active subscriptions
+and unconsumed one-time purchases. Subscriptions never used the AIDL path.
+
 #### Historical consumed purchases
 
-RevenueCat React Native SDK 9+ uses Google Billing Client 8+, which cannot query
-already-consumed one-time purchases. Neither restore nor repeated sync calls can
-recover those tokens on a new installation. The current lifetime product is
-non-consumable; there is no evidence from this inspection that it was previously
-consumed. If an affected order was consumed historically, verify ownership and
-follow RevenueCat's manual recovery procedure using its order ID. Do not grant
-access just because an editable backup contains a previous App User ID.
+Billing Library 8 cannot query already-consumed one-time purchases, and SDK 10
+removed the workaround that could. Neither restore nor repeated sync calls can
+recover those tokens on a new installation. The lifetime product is
+non-consumable, so the SDK acknowledges it instead of consuming it. If an order
+was consumed historically, or restore still finds nothing for a customer who
+paid, verify ownership and transfer it by its Google order ID (`GPA...`) in the
+RevenueCat dashboard. Do not grant access just because an editable backup
+contains a previous App User ID.
 
 #### Sources
 
 - [RevenueCat restore behavior](https://www.revenuecat.com/docs/projects/restore-behavior)
 - [Android SDK restore/sync implementation](https://github.com/RevenueCat/purchases-android/blob/main/purchases/src/main/kotlin/com/revenuecat/purchases/PurchasesOrchestrator.kt)
+- [Removal of the AIDL purchase-history workaround (purchases-android #3255)](https://github.com/RevenueCat/purchases-android/pull/3255)
 - [Google Play non-consumable product setup](https://www.revenuecat.com/docs/getting-started/entitlements/android-products)
 - [Consumed purchase limitations in Billing Client 8](https://www.revenuecat.com/docs/known-store-issues/play-billing-library/restore-consumable-purchases-bc8)
 
@@ -837,21 +870,21 @@ Explicitly requested tracking measures engagement with the RiceCal promotion: on
 
 #### PostHog and GA4: Pro purchase and restore
 
-| Constant                          | Event name                        | GA4 name                              | PostHog | Trigger and frequency                                                                                                               | Extra properties                                                                                                                               | Call sites                                                                                                         |
-| --------------------------------- | --------------------------------- | ------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `PRO_PAYWALL_VIEWED`              | `Pro Paywall Viewed`              | `m2t_pro_paywall_viewed`              | Yes     | The paywall opens (or its source changes); each visit, with no lifetime cap.                                                        | `source`, `variant`                                                                                                                            | [features/settings/screens/ProPaywallScreen.tsx](apps/mobile/features/settings/screens/ProPaywallScreen.tsx)       |
-| `PRO_PLANS_UNAVAILABLE`           | `Pro Plans Unavailable`           | `m2t_pro_plans_unavailable`           | Yes     | A paywall offering refresh returns no packages; each unsuccessful load, including a retry.                                          | `source`, `variant`                                                                                                                            | [features/settings/screens/ProPaywallScreen.tsx](apps/mobile/features/settings/screens/ProPaywallScreen.tsx)       |
-| `PRO_PURCHASE_STARTED`            | `Pro Purchase Started`            | `m2t_pro_purchase_started`            | Yes     | A purchase attempt starts; each attempt.                                                                                            | `source`, `plan`, `package`, `price`, `currency`, `has_free_trial`, `trial_duration`, `plan_selection`, `upgrade_from`                         | [features/settings/screens/ProPaywallScreen.tsx](apps/mobile/features/settings/screens/ProPaywallScreen.tsx)       |
-| `PRO_PURCHASE_COMPLETED`          | `Pro Purchase Completed`          | `m2t_pro_purchase_completed`          | Yes     | Purchase grants active Pro access; each successful attempt, including trials and the restore fallback for an already-owned product. | `source`, `plan`, `package`, `price`, `currency`, `has_free_trial`, `trial_duration`, `plan_selection`, `upgrade_from`, `period_type`          | [features/settings/screens/ProPaywallScreen.tsx](apps/mobile/features/settings/screens/ProPaywallScreen.tsx)       |
-| `PRO_PURCHASE_PENDING`            | `Pro Purchase Pending`            | `m2t_pro_purchase_pending`            | Yes     | The store returns a pending purchase; each pending attempt.                                                                         | `source`, `plan`, `package`, `price`, `currency`, `has_free_trial`, `trial_duration`, `plan_selection`, `upgrade_from`                         | [features/settings/screens/ProPaywallScreen.tsx](apps/mobile/features/settings/screens/ProPaywallScreen.tsx)       |
-| `PRO_PURCHASE_CANCELLED`          | `Pro Purchase Cancelled`          | `m2t_pro_purchase_cancelled`          | Yes     | The user cancels the store purchase sheet; each cancelled attempt.                                                                  | `source`, `plan`, `package`, `price`, `currency`, `has_free_trial`, `trial_duration`, `plan_selection`, `upgrade_from`                         | [features/settings/screens/ProPaywallScreen.tsx](apps/mobile/features/settings/screens/ProPaywallScreen.tsx)       |
-| `PRO_PURCHASE_FAILED`             | `Pro Purchase Failed`             | `m2t_pro_purchase_failed`             | Yes     | The purchase returns a failure; each failed attempt.                                                                                | `source`, `plan`, `package`, `price`, `currency`, `has_free_trial`, `trial_duration`, `plan_selection`, `upgrade_from`, `reason`, `error_code` | [features/settings/screens/ProPaywallScreen.tsx](apps/mobile/features/settings/screens/ProPaywallScreen.tsx)       |
-| `PRO_RESTORE_STARTED`             | `Pro Restore Started`             | `m2t_pro_restore_started`             | Yes     | Restore purchases is tapped; each restore attempt.                                                                                  | `source`                                                                                                                                       | [features/settings/screens/ProPaywallScreen.tsx](apps/mobile/features/settings/screens/ProPaywallScreen.tsx)       |
-| `PRO_RESTORE_COMPLETED`           | `Pro Restore Completed`           | `m2t_pro_restore_completed`           | Yes     | Restore returns successfully, whether or not Pro was found; each result.                                                            | `source`, `found`                                                                                                                              | [features/settings/screens/ProPaywallScreen.tsx](apps/mobile/features/settings/screens/ProPaywallScreen.tsx)       |
-| `PRO_RESTORE_FAILED`              | `Pro Restore Failed`              | `m2t_pro_restore_failed`              | Yes     | Restore returns a failure; each failed attempt.                                                                                     | `source`, `reason`, `error_code`                                                                                                               | [features/settings/screens/ProPaywallScreen.tsx](apps/mobile/features/settings/screens/ProPaywallScreen.tsx)       |
-| `PRO_LIMIT_HIT`                   | `Pro Limit Hit`                   | `m2t_pro_limit_hit`                   | Yes     | The account-count limit blocks transaction entry behind an alert, each block, before any paywall visit.                             | `type`, `active_account_count`                                                                                                                 | [App.tsx](apps/mobile/App.tsx)                                                                                     |
-| `PRO_CANCEL_SUB_PROMPT_ACTIONED`  | `Pro Cancel Sub Prompt Actioned`  | `m2t_pro_cancel_sub_prompt_actioned`  | Yes     | A subscriber who bought Lifetime chooses cancel or not now in the subscription prompt; each choice.                                 | `choice`                                                                                                                                       | [features/settings/screens/ProPaywallScreen.tsx](apps/mobile/features/settings/screens/ProPaywallScreen.tsx)       |
-| `PRO_REDUNDANT_SUB_CANCEL_TAPPED` | `Pro Redundant Sub Cancel Tapped` | `m2t_pro_redundant_sub_cancel_tapped` | Yes     | A Lifetime owner taps cancel for a still-renewing subscription in Pro management; each tap.                                         | None                                                                                                                                           | [features/settings/screens/ProManagementScreen.tsx](apps/mobile/features/settings/screens/ProManagementScreen.tsx) |
+| Constant                          | Event name                        | GA4 name                              | PostHog | Trigger and frequency                                                                                                                                            | Extra properties                                                                                                                               | Call sites                                                                                                         |
+| --------------------------------- | --------------------------------- | ------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `PRO_PAYWALL_VIEWED`              | `Pro Paywall Viewed`              | `m2t_pro_paywall_viewed`              | Yes     | The paywall opens (or its source changes); each visit, with no lifetime cap.                                                                                     | `source`, `variant`                                                                                                                            | [features/settings/screens/ProPaywallScreen.tsx](apps/mobile/features/settings/screens/ProPaywallScreen.tsx)       |
+| `PRO_PLANS_UNAVAILABLE`           | `Pro Plans Unavailable`           | `m2t_pro_plans_unavailable`           | Yes     | A paywall offering refresh returns no packages; each unsuccessful load, including a retry.                                                                       | `source`, `variant`                                                                                                                            | [features/settings/screens/ProPaywallScreen.tsx](apps/mobile/features/settings/screens/ProPaywallScreen.tsx)       |
+| `PRO_PURCHASE_STARTED`            | `Pro Purchase Started`            | `m2t_pro_purchase_started`            | Yes     | A purchase attempt starts; each attempt.                                                                                                                         | `source`, `plan`, `package`, `price`, `currency`, `has_free_trial`, `trial_duration`, `plan_selection`, `upgrade_from`                         | [features/settings/screens/ProPaywallScreen.tsx](apps/mobile/features/settings/screens/ProPaywallScreen.tsx)       |
+| `PRO_PURCHASE_COMPLETED`          | `Pro Purchase Completed`          | `m2t_pro_purchase_completed`          | Yes     | Purchase grants active Pro access; each successful attempt, including trials. An already-owned product applied by restore sends `PRO_RESTORE_COMPLETED` instead. | `source`, `plan`, `package`, `price`, `currency`, `has_free_trial`, `trial_duration`, `plan_selection`, `upgrade_from`, `period_type`          | [features/settings/screens/ProPaywallScreen.tsx](apps/mobile/features/settings/screens/ProPaywallScreen.tsx)       |
+| `PRO_PURCHASE_PENDING`            | `Pro Purchase Pending`            | `m2t_pro_purchase_pending`            | Yes     | The store returns a pending purchase (a payment awaiting approval, or a purchase whose entitlement is not active yet); each pending attempt.                     | `source`, `plan`, `package`, `price`, `currency`, `has_free_trial`, `trial_duration`, `plan_selection`, `upgrade_from`                         | [features/settings/screens/ProPaywallScreen.tsx](apps/mobile/features/settings/screens/ProPaywallScreen.tsx)       |
+| `PRO_PURCHASE_CANCELLED`          | `Pro Purchase Cancelled`          | `m2t_pro_purchase_cancelled`          | Yes     | The user cancels the store purchase sheet; each cancelled attempt.                                                                                               | `source`, `plan`, `package`, `price`, `currency`, `has_free_trial`, `trial_duration`, `plan_selection`, `upgrade_from`                         | [features/settings/screens/ProPaywallScreen.tsx](apps/mobile/features/settings/screens/ProPaywallScreen.tsx)       |
+| `PRO_PURCHASE_FAILED`             | `Pro Purchase Failed`             | `m2t_pro_purchase_failed`             | Yes     | The purchase returns a failure; each failed attempt.                                                                                                             | `source`, `plan`, `package`, `price`, `currency`, `has_free_trial`, `trial_duration`, `plan_selection`, `upgrade_from`, `reason`, `error_code` | [features/settings/screens/ProPaywallScreen.tsx](apps/mobile/features/settings/screens/ProPaywallScreen.tsx)       |
+| `PRO_RESTORE_STARTED`             | `Pro Restore Started`             | `m2t_pro_restore_started`             | Yes     | Restore purchases is tapped; each restore attempt.                                                                                                               | `source`                                                                                                                                       | [features/settings/screens/ProPaywallScreen.tsx](apps/mobile/features/settings/screens/ProPaywallScreen.tsx)       |
+| `PRO_RESTORE_COMPLETED`           | `Pro Restore Completed`           | `m2t_pro_restore_completed`           | Yes     | Restore returns successfully, whether or not Pro was found, or a purchase of an already-owned product is applied by restore (`found: true`); each result.        | `source`, `found`                                                                                                                              | [features/settings/screens/ProPaywallScreen.tsx](apps/mobile/features/settings/screens/ProPaywallScreen.tsx)       |
+| `PRO_RESTORE_FAILED`              | `Pro Restore Failed`              | `m2t_pro_restore_failed`              | Yes     | Restore returns a failure; each failed attempt.                                                                                                                  | `source`, `reason`, `error_code`                                                                                                               | [features/settings/screens/ProPaywallScreen.tsx](apps/mobile/features/settings/screens/ProPaywallScreen.tsx)       |
+| `PRO_LIMIT_HIT`                   | `Pro Limit Hit`                   | `m2t_pro_limit_hit`                   | Yes     | The account-count limit blocks transaction entry behind an alert, each block, before any paywall visit.                                                          | `type`, `active_account_count`                                                                                                                 | [App.tsx](apps/mobile/App.tsx)                                                                                     |
+| `PRO_CANCEL_SUB_PROMPT_ACTIONED`  | `Pro Cancel Sub Prompt Actioned`  | `m2t_pro_cancel_sub_prompt_actioned`  | Yes     | A subscriber who bought Lifetime chooses cancel or not now in the subscription prompt; each choice.                                                              | `choice`                                                                                                                                       | [features/settings/screens/ProPaywallScreen.tsx](apps/mobile/features/settings/screens/ProPaywallScreen.tsx)       |
+| `PRO_REDUNDANT_SUB_CANCEL_TAPPED` | `Pro Redundant Sub Cancel Tapped` | `m2t_pro_redundant_sub_cancel_tapped` | Yes     | A Lifetime owner taps cancel for a still-renewing subscription in Pro management; each tap.                                                                      | None                                                                                                                                           | [features/settings/screens/ProManagementScreen.tsx](apps/mobile/features/settings/screens/ProManagementScreen.tsx) |
 
 #### PostHog and GA4: AI scans, sharing, setup and payoff moments
 

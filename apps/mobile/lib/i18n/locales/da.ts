@@ -2074,6 +2074,10 @@ const da = {
     purchase_pending_title: 'Køb behandles',
     purchase_pending_message:
       'Dit køb er gennemført, men Pro-adgang er endnu ikke aktiveret. Vent et øjeblik, eller gendan køb.',
+    payment_pending_message:
+      'Din betaling venter på godkendelse. Pro låses automatisk op, når den er gennemført, så du behøver ikke købe igen.',
+    already_owned_not_restored:
+      'Denne butikskonto ejer allerede Pro, men det kunne ikke anvendes her. Tryk på Gendan køb, og sørg for, at du er logget ind på den butikskonto, der købte det.',
     monthly: 'Månedlig',
     yearly: 'Årlig',
     lifetime: 'Livstid',

@@ -56,6 +56,15 @@ export interface RevenueCatActionResult {
    * is what the user sees.
    */
   errorCode?: string | null;
+  /**
+   * Why a non-obvious status was returned:
+   * - `payment_pending`: the store is waiting for payment approval.
+   * - `restored_owned_product`: buying hit an already-owned product and a
+   *   restore applied it. A restore, not a new sale.
+   * - `owned_product_not_restored`: the store account owns the product, but
+   *   the restore could not apply it to this user.
+   */
+  reason?: 'payment_pending' | 'restored_owned_product' | 'owned_product_not_restored';
 }
 
 export interface RevenueCatPackage {

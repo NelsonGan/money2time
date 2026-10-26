@@ -2062,6 +2062,10 @@ const ja = {
     purchase_pending_title: '購入処理中',
     purchase_pending_message:
       '購入は完了しましたが、Pro アクセスがまだ有効化されていません。しばらく待つか、購入を復元してください。',
+    payment_pending_message:
+      'お支払いは承認待ちです。完了すると Pro は自動的に有効になるため、もう一度購入する必要はありません。',
+    already_owned_not_restored:
+      'このストアアカウントはすでに Pro を所有していますが、ここで適用できませんでした。「購入を復元」をタップし、購入したストアアカウントでサインインしていることを確認してください。',
     monthly: '月次',
     yearly: '年次',
     lifetime: '永久',

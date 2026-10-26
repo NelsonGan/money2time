@@ -2073,6 +2073,10 @@ const nb = {
     purchase_pending_title: 'Kjøp behandles',
     purchase_pending_message:
       'Kjøpet gikk gjennom, men Pro-tilgang er ikke aktivert ennå. Vent litt eller gjenopprett kjøp.',
+    payment_pending_message:
+      'Betalingen din venter på godkjenning. Pro låses opp automatisk når den er fullført, så du trenger ikke å kjøpe på nytt.',
+    already_owned_not_restored:
+      'Denne butikkontoen eier allerede Pro, men det kunne ikke tas i bruk her. Trykk på Gjenopprett kjøp, og sørg for at du er logget på butikkontoen som kjøpte det.',
     monthly: 'Månedlig',
     yearly: 'Årlig',
     lifetime: 'Livstid',

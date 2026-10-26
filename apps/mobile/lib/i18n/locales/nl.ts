@@ -2091,6 +2091,10 @@ const nl = {
     purchase_pending_title: 'Aankoop wordt verwerkt',
     purchase_pending_message:
       'Je aankoop is verwerkt, maar Pro-toegang is nog niet geactiveerd. Wacht even of herstel aankopen.',
+    payment_pending_message:
+      'Je betaling wacht op goedkeuring. Pro wordt automatisch ontgrendeld zodra deze is afgerond, dus je hoeft niet opnieuw te kopen.',
+    already_owned_not_restored:
+      'Dit store-account heeft Pro al, maar het kon hier niet worden toegepast. Tik op Aankopen herstellen en controleer of je bent ingelogd met het store-account waarmee je het hebt gekocht.',
     monthly: 'Maandelijks',
     yearly: 'Jaarlijks',
     lifetime: 'Levenslang',

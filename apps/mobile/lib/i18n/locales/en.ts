@@ -2043,6 +2043,10 @@ const en = {
     purchase_pending_title: 'Purchase processing',
     purchase_pending_message:
       'Your purchase went through, but Pro access has not activated yet. Please wait a moment or restore purchases.',
+    payment_pending_message:
+      "Your payment is waiting for approval. Pro unlocks automatically once it completes, so there's no need to buy again.",
+    already_owned_not_restored:
+      "This store account already owns Pro, but it couldn't be applied here. Tap Restore Purchases, and make sure you're signed in to the store account that bought it.",
     monthly: 'Monthly',
     yearly: 'Annually',
     lifetime: 'Lifetime',

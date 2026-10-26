@@ -21,6 +21,7 @@ import { createProCustomerStateRefresh } from '~/services/proCustomerStateRefres
 import {
   fetchRevenueCatCustomerState,
   fetchRevenueCatOfferings,
+  invalidateRevenueCatCustomerInfoCache,
   isRevenueCatCustomerStateActive,
   purchaseRevenueCatPackage,
   restoreRevenueCatPurchases,
@@ -66,6 +67,10 @@ const ProStatusContext = createContext<boolean | null>(null);
 export function ProProvider({ children }: { children: React.ReactNode }) {
   const { settings } = useApp();
   const appUserId = settings.appUserId?.trim() ? settings.appUserId : null;
+  // Name the RevenueCat user during render, not in an effect: children's
+  // effects run first, and a paywall mounted in the same commit would otherwise
+  // reach the SDK before it knows who the user is. Idempotent.
+  setRevenueCatAppUserId(appUserId);
   const [isPro, setIsPro] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isStatusSettled, setIsStatusSettled] = useState(false);
@@ -164,6 +169,21 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.remove();
   }, [refreshStatus]);
 
+  // The expiry a network re-read was last requested for. The SDK's cache can
+  // keep listing an entitlement as active for a grace period after it ends,
+  // and each read builds a new state object that re-runs the effect below, so
+  // without this an expired-but-cached subscription refreshed in a tight loop.
+  const refreshedExpirationRef = useRef<string | null>(null);
+  const refreshAfterExpiration = useCallback(
+    (expirationDate: string) => {
+      if (refreshedExpirationRef.current === expirationDate) return;
+      refreshedExpirationRef.current = expirationDate;
+      // A renewal shows up as a new expiry, which earns its own re-read.
+      void invalidateRevenueCatCustomerInfoCache().then(refreshStatus);
+    },
+    [refreshStatus],
+  );
+
   useEffect(() => {
     if (!customerState?.activeProductIdentifier || !customerState.expirationDate) {
       return;
@@ -176,7 +196,7 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
 
       if (msUntilExpiration <= 0) {
         setIsPro(false);
-        void refreshStatus();
+        refreshAfterExpiration(customerState.expirationDate!);
         return;
       }
 
@@ -188,7 +208,7 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
           if (stillActive) {
             syncExpiration();
           } else {
-            void refreshStatus();
+            refreshAfterExpiration(customerState.expirationDate!);
           }
         },
         Math.min(msUntilExpiration, 60 * 60 * 1000),
@@ -202,7 +222,7 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
         clearTimeout(timeoutId);
       }
     };
-  }, [customerState, refreshStatus]);
+  }, [customerState, refreshAfterExpiration]);
 
   // Mirror Pro state onto the PostHog person profile and super-properties, so
   // "is this user Pro" is answerable both per-user and per-event.

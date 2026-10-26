@@ -20,11 +20,17 @@ jest.mock('react-native-purchases', () => ({
     checkTrialOrIntroductoryPriceEligibility: jest.fn(),
     setFirebaseAppInstanceID: jest.fn(),
     syncAttributesAndOfferingsIfNeeded: jest.fn(),
+    invalidateCustomerInfoCache: jest.fn(),
+    addCustomerInfoUpdateListener: jest.fn(),
+    removeCustomerInfoUpdateListener: jest.fn(),
   },
   PURCHASES_ERROR_CODE: {
     PURCHASE_CANCELLED_ERROR: '1',
     PURCHASE_NOT_ALLOWED_ERROR: '3',
     PRODUCT_ALREADY_PURCHASED_ERROR: '6',
+    NETWORK_ERROR: '10',
+    PAYMENT_PENDING_ERROR: '20',
+    OFFLINE_CONNECTION_ERROR: '35',
   },
   INTRO_ELIGIBILITY_STATUS: {
     INTRO_ELIGIBILITY_STATUS_UNKNOWN: 0,
@@ -604,6 +610,109 @@ describe('native Pro restore', () => {
     sdk.purchasePackage.mockRejectedValue({ code: '6', message: 'Already owned' });
     sdk.restorePurchases.mockRejectedValue(new Error('Transfer blocked'));
     expect((await service.purchaseRevenueCatPackage('lifetime')).message).toBe('Transfer blocked');
+  });
+
+  it('reports a restored already-owned purchase as a restore, not a sale', async () => {
+    const { sdk, service } = setup();
+    sdk.getOfferings.mockResolvedValue({
+      current: { availablePackages: [{ identifier: 'lifetime' }] },
+    });
+    sdk.purchasePackage.mockRejectedValue({ code: '6', message: 'Already owned' });
+    const result = await service.purchaseRevenueCatPackage('lifetime');
+    expect(result.reason).toBe('restored_owned_product');
+    expect(result.status).toBe('success');
+  });
+
+  it('explains an already-owned purchase the restore could not apply', async () => {
+    const { sdk, service } = setup();
+    sdk.getOfferings.mockResolvedValue({
+      current: { availablePackages: [{ identifier: 'lifetime' }] },
+    });
+    sdk.purchasePackage.mockRejectedValue({ code: '6', message: 'Already owned' });
+    sdk.restorePurchases.mockResolvedValue(emptyCustomerInfo());
+    const result = await service.purchaseRevenueCatPackage('lifetime');
+    expect(result).toMatchObject({
+      status: 'error',
+      reason: 'owned_product_not_restored',
+      message: null,
+      errorCode: '6',
+    });
+  });
+
+  it('treats a payment awaiting approval as pending, not failed', async () => {
+    const { sdk, service, reportError } = setup();
+    sdk.getOfferings.mockResolvedValue({
+      current: { availablePackages: [{ identifier: 'annual' }] },
+    });
+    sdk.purchasePackage.mockRejectedValue({
+      code: '20',
+      message: 'The payment is pending.',
+      userInfo: { readableErrorCode: 'PaymentPendingError' },
+    });
+    expect(await service.purchaseRevenueCatPackage('annual')).toEqual({
+      customerState: null,
+      message: null,
+      status: 'pending',
+      reason: 'payment_pending',
+      errorCode: 'PaymentPendingError',
+    });
+    expect(sdk.restorePurchases).not.toHaveBeenCalled();
+    expect(reportError).not.toHaveBeenCalled();
+  });
+
+  it.each(['10', '35'])('does not report connectivity restore failures (code %s)', async (code) => {
+    const { sdk, service, reportError } = setup();
+    sdk.restorePurchases.mockRejectedValue(Object.assign(new Error('Offline'), { code }));
+    expect((await service.restoreRevenueCatPurchases()).status).toBe('error');
+    expect(reportError).not.toHaveBeenCalled();
+  });
+
+  it('does not configure an anonymous customer before the App User ID is known', async () => {
+    const { sdk, service } = setup();
+    service.setRevenueCatAppUserId(null);
+    expect(await service.fetchRevenueCatCustomerState()).toBeNull();
+    expect(sdk.configure).not.toHaveBeenCalled();
+    service.setRevenueCatAppUserId('m2t_second_device');
+    await service.fetchRevenueCatCustomerState();
+    expect(sdk.configure).toHaveBeenCalledWith(
+      expect.objectContaining({ appUserID: 'm2t_second_device' }),
+    );
+  });
+
+  it('ignores customer updates while the SDK is switching to another user', async () => {
+    const { sdk, service } = setup();
+    const listener = jest.fn();
+    service.subscribeToRevenueCatCustomerStateUpdates(listener);
+    const sdkListener = sdk.addCustomerInfoUpdateListener.mock.calls[0][0];
+    await service.fetchRevenueCatCustomerState();
+    sdkListener(customerInfo());
+    expect(listener).toHaveBeenCalledTimes(1);
+
+    service.setRevenueCatAppUserId('m2t_changed');
+    let finishLogin!: () => void;
+    sdk.logIn.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          finishLogin = resolve;
+        }),
+    );
+    const refresh = service.fetchRevenueCatCustomerState();
+    sdkListener(emptyCustomerInfo());
+    expect(listener).toHaveBeenCalledTimes(1);
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    finishLogin();
+    await refresh;
+    sdkListener(customerInfo());
+    expect(listener).toHaveBeenCalledTimes(2);
+  });
+
+  it('only invalidates the customer cache once the SDK is configured', async () => {
+    const { sdk, service } = setup();
+    await service.invalidateRevenueCatCustomerInfoCache();
+    expect(sdk.invalidateCustomerInfoCache).not.toHaveBeenCalled();
+    await service.fetchRevenueCatCustomerState();
+    await service.invalidateRevenueCatCustomerInfoCache();
+    expect(sdk.invalidateCustomerInfoCache).toHaveBeenCalledTimes(1);
   });
 });
 
