@@ -58,16 +58,22 @@ review those against the diff yourself, and add the expected PostHog event
 volume to the README's event budget when adding an event or increasing its
 frequency.
 
-**Keep the Simulator visible while testing.** Booting a device does not open
-the macOS Simulator window. Before iOS testing, run
-`open -a Simulator --args -CurrentDeviceUDID <udid>`, then
-`osascript -e 'tell application "Simulator" to activate'`. On Xcode 27+,
-Simulator.app is replaced by DeviceHub.app: use
-`open "devices://device/open?id=<udid>"` and
-`tell application "DeviceHub" to activate` instead. Verify that the selected
-device window is visible, and leave it open on the tested screen so the user
-can follow along. Keep the Android emulator window visible when testing Android
-too.
+**Show the device in Expo Device Hub while testing.** `expo-device-hub` is a
+dev dependency, so every `npx expo start` serves a live, interactive view of
+the running simulators and emulators. Open
+<http://localhost:8081/_expo/plugins/expo-device-hub> (not the `127.0.0.1`
+link Metro prints: `--localhost` binds Metro to IPv6 only) in the browser
+pane, select the device you are testing, and leave it on the tested screen so
+the user can follow along. The Hub only starts listing devices once a page is
+open. Use these devices and no others:
+
+| Platform | Device                                                                     | Boot with Argent             |
+| -------- | -------------------------------------------------------------------------- | ---------------------------- |
+| iOS      | Money2Time iPhone 18 Pro simulator, `D33ACD74-8FC1-4F53-B7B8-690086AC1223` | `boot-device` with `udid`    |
+| Android  | `Money2Time_Pixel_10` emulator (Pixel 10, Android 16)                      | `boot-device` with `avdName` |
+
+The Hub and `expo run:android` need the Android SDK and a JDK: start Metro
+with `ANDROID_HOME` and `JAVA_HOME` set (see Getting set up in the README).
 
 **Always include screenshots in PR descriptions after UI testing.** Capture the
 final UI and save it, with any recording or other evidence, in
