@@ -1,5 +1,5 @@
 import * as React from 'react';
-import type { ViewProps } from 'react-native';
+import type { ViewInstance, ViewProps } from 'react-native';
 import { View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
@@ -12,7 +12,7 @@ interface CardProps extends ViewProps {
   interactive?: boolean;
 }
 
-const Card = React.forwardRef<View, CardProps>(
+const Card = React.forwardRef<ViewInstance, CardProps>(
   ({ className, children, variant = 'default', interactive = false, ...props }, ref) => {
     const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.985 });
 
@@ -47,7 +47,7 @@ const Card = React.forwardRef<View, CardProps>(
 
 Card.displayName = 'Card';
 
-const CardContent = React.forwardRef<View, ViewProps>(({ className, ...props }, ref) => (
+const CardContent = React.forwardRef<ViewInstance, ViewProps>(({ className, ...props }, ref) => (
   <View ref={ref} className={cn('', className)} {...props} />
 ));
 CardContent.displayName = 'CardContent';

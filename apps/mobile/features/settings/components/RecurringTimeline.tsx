@@ -42,7 +42,7 @@ interface TimelineDayHeaderProps {
   isToday: boolean;
 }
 
-export const TimelineDayHeader = React.memo(function TimelineDayHeader({
+export const TimelineDayHeader = React.memo(function TimelineDayHeaderImpl({
   label,
   dateLabel,
   totalLabel,

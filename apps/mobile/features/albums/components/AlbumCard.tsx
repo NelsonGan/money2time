@@ -31,7 +31,7 @@ interface AlbumCardProps {
   statsVersion: unknown;
 }
 
-export const AlbumCard = memo(function AlbumCard({
+export const AlbumCard = memo(function AlbumCardImpl({
   album,
   width,
   isActive,

@@ -64,7 +64,7 @@ const EMPTY_CHILDREN: CategoryPickerOption[] = [];
  * transaction editor's background) and inside the modal sheet. Memoised so the
  * editor's inactive pager pages don't re-render on every amount keystroke.
  */
-export const CategoryGrid = React.memo(function CategoryGrid(props: CategoryGridProps) {
+export const CategoryGrid = React.memo(function CategoryGridImpl(props: CategoryGridProps) {
   const {
     parents,
     childByParent,

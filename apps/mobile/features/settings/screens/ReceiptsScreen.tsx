@@ -1,6 +1,6 @@
 import { FlashList } from '@shopify/flash-list';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { TextInput } from 'react-native';
+import type { TextInputInstance } from 'react-native';
 import { ActivityIndicator, Alert, Pressable, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
@@ -64,7 +64,7 @@ export function ReceiptsScreen({
   const bottomNavInset = useSettingsBottomNavInset();
   const locale = I18n.locale ?? 'en';
 
-  const searchInputRef = useRef<TextInput | null>(null);
+  const searchInputRef = useRef<TextInputInstance | null>(null);
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [startDate, setStartDate] = useState<string | null>(null);

@@ -36,7 +36,7 @@ const NEUTRAL_COLOR = '#FFFFFF';
  * with the date, note and amount overlaid on a bottom scrim and a single edit
  * button pinned to the top-right. Tapping the image opens the receipt viewer.
  */
-export const ReceiptCard = memo(function ReceiptCard({
+export const ReceiptCard = memo(function ReceiptCardImpl({
   transaction,
   receiptFileUri,
   amountText,

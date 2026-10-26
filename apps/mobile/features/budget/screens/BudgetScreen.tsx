@@ -428,7 +428,7 @@ interface BudgetPagerViewProps {
  * create-from-template picker. Embedded as an insights page.
  */
 export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerViewProps>(
-  function BudgetPagerView(
+  function BudgetPagerViewImpl(
     {
       onOpenTemplateEditor,
       onOpenBudgetEditor,

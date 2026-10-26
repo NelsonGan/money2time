@@ -445,7 +445,7 @@ export function CategoryIconPickerSheet({
               { paddingHorizontal: 12, paddingBottom: GRID_BOTTOM_PADDING },
             ]}
             ListHeaderComponent={
-              isPro ? null : (
+              isPro ? undefined : (
                 <View className="px-2 pb-2">
                   <Text variant="caption" tone="muted">
                     {I18n.t('category_icon.upload_pro_hint')}
@@ -560,7 +560,7 @@ export function CategoryIconPickerSheet({
                   <View className="items-center py-16">
                     <Text tone="muted">{I18n.t('category_icon.no_results')}</Text>
                   </View>
-                ) : null
+                ) : undefined
               }
               renderItem={({ item: row }) => {
                 if (row.type === 'header') return renderSectionHeader(row.label);
@@ -634,7 +634,7 @@ export function CategoryIconPickerSheet({
                       {I18n.t('category_icon.pack_pro_banner')}
                     </Text>
                   </Pressable>
-                ) : null
+                ) : undefined
               }
               initialNumToRender={8}
               windowSize={7}

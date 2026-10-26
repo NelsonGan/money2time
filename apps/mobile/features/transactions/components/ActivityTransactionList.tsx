@@ -1,7 +1,12 @@
 import type { FlashListRef } from '@shopify/flash-list';
 import { FlashList } from '@shopify/flash-list';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { LayoutChangeEvent, NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
+import type {
+  LayoutChangeEvent,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  ScrollViewInstance,
+} from 'react-native';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import { useAnimatedRef } from 'react-native-reanimated';
@@ -187,7 +192,7 @@ interface DayHeaderRowProps {
   onToggleSelectAll?: (transactionIds: string[]) => void;
 }
 
-export const DayHeaderRow = memo(function DayHeaderRow({
+export const DayHeaderRow = memo(function DayHeaderRowImpl({
   dateLabel,
   weekdayLabel,
   incomeSubtotal,
@@ -287,7 +292,7 @@ function dayItemType(count: number): string {
   return 'day-many';
 }
 
-export const ActivityTransactionList = memo(function ActivityTransactionList({
+export const ActivityTransactionList = memo(function ActivityTransactionListImpl({
   transactions: transactionsProp,
   displaySettings,
   subtotalCurrencyCode,
@@ -322,7 +327,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
   highlightOnCreate = false,
 }: ActivityTransactionListProps) {
   const flashListRef = useRef<FlashListRef<ActivityRow> | null>(null);
-  const scrollViewRef = useRef<ScrollView | null>(null);
+  const scrollViewRef = useRef<ScrollViewInstance | null>(null);
   // The same list, for Reanimated: a drag scrolls it from the UI thread.
   const listScrollRef = useAnimatedRef<any>();
   const { updateTransactionsBulk } = useApp();
@@ -868,7 +873,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionList({
     [listScrollRef],
   );
   const setScrollViewRef = useCallback(
-    (node: ScrollView | null) => {
+    (node: ScrollViewInstance | null) => {
       scrollViewRef.current = node;
       listScrollRef(node);
     },

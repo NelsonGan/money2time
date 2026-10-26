@@ -1,0 +1,18 @@
+diff --git a/node_modules/@react-native-firebase/app/plugin/build/ios/appDelegate.js b/node_modules/@react-native-firebase/app/plugin/build/ios/appDelegate.js
+index 322970e..b0aed80 100644
+--- a/node_modules/@react-native-firebase/app/plugin/build/ios/appDelegate.js
++++ b/node_modules/@react-native-firebase/app/plugin/build/ios/appDelegate.js
+@@ -74,9 +74,11 @@ function modifyObjcAppDelegate(contents) {
+ }
+ function modifySwiftAppDelegate(contents) {
+     const methodInvocationBlock = `FirebaseApp.configure()`;
+-    const methodInvocationLineMatcher = /(?:self\.moduleName\s*=\s*"([^"]*)")|(?:factory\.startReactNative\()/;
++    // Backported from 27.1.0 (dce165d): Expo SDK 58's scene-based AppDelegate starts React from
++    // SceneDelegate, so `factory.startReactNative(` is gone; anchor on `return super.application`.
++    const methodInvocationLineMatcher = /(?:self\.moduleName\s*=\s*"([^"]*)")|(?:factory\.startReactNative\()|(?:return\s+super\.application\(\s*application\s*,\s*didFinishLaunchingWithOptions:\s*launchOptions\s*\))/;
+     // Add import
+-    contents = addImport(contents, 'import FirebaseCore', /^[ \t]*import\s+FirebaseCore[ \t]*$/m, /^[ \t]*import\s+Expo[ \t]*$/m, /^[ \t]*import\b[^\r\n]*$/m);
++    contents = addImport(contents, 'import FirebaseCore', /^[ \t]*import\s+FirebaseCore[ \t]*$/m, /^[ \t]*(?:internal\s+)?import\s+Expo[ \t]*$/m, /^[ \t]*import\b[^\r\n]*$/m);
+     // To avoid potential issues with existing changes from older plugin versions
+     if (contents.includes(methodInvocationBlock)) {
+         return contents;

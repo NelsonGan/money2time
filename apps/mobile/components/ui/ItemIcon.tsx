@@ -21,7 +21,7 @@ interface ItemIconProps {
  *
  * Memoized since it renders in long lists with stable primitive props.
  */
-export const ItemIcon = React.memo(function ItemIcon({ iconId, size = 40 }: ItemIconProps) {
+export const ItemIcon = React.memo(function ItemIconImpl({ iconId, size = 40 }: ItemIconProps) {
   const themeColors = useThemeColors();
   const box = { width: size, height: size } as const;
   // Skip a uri that failed to load natively; see CategoryEmoji for why.

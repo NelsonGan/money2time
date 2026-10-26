@@ -1,9 +1,11 @@
 diff --git a/node_modules/expo-camera/ios/Current/CameraPhotoCapture.swift b/node_modules/expo-camera/ios/Current/CameraPhotoCapture.swift
+index 9236b1b..bcf6558 100644
 --- a/node_modules/expo-camera/ios/Current/CameraPhotoCapture.swift
 +++ b/node_modules/expo-camera/ios/Current/CameraPhotoCapture.swift
-@@ -55,15 +55,20 @@
+@@ -69,19 +69,24 @@ class CameraPhotoCapture: NSObject, AVCapturePhotoCaptureDelegate {
+       throw CameraNotReadyException()
      }
-
+ 
 +    // The preview can stop between camera readiness and a capture request.
 +    guard let connection = photoOutput.connection(with: .video),
 +      connection.isActive, connection.isEnabled else {
@@ -13,21 +15,25 @@ diff --git a/node_modules/expo-camera/ios/Current/CameraPhotoCapture.swift b/nod
      return try await withCheckedThrowingContinuation { continuation in
        photoCapturedContinuation = continuation
        photoCaptureOptions = options
-
+ 
 -      let connection = photoOutput.connection(with: .video)
-       let orientation = captureDelegate?.responsiveWhenOrientationLocked == true ?
-         captureDelegate?.physicalOrientation ?? .unknown : UIDevice.current.orientation
--      connection?.videoOrientation = ExpoCameraUtils.videoOrientation(for: orientation)
-+      connection.videoOrientation = ExpoCameraUtils.videoOrientation(for: orientation)
-
+-      connection?.videoOrientation = ExpoCameraUtils.captureOrientation(
++      connection.videoOrientation = ExpoCameraUtils.captureOrientation(
+         responsiveWhenOrientationLocked: captureDelegate?.responsiveWhenOrientationLocked == true,
+         physicalOrientation: captureDelegate?.physicalOrientation ?? .unknown,
+         interfaceOrientation: captureDelegate?.deviceOrientation ?? .unknown
+       )
+ 
        // options.mirror is deprecated but should continue to work until removed
 -      connection?.isVideoMirrored = captureDelegate?.presetCamera == .front &&
 +      connection.isVideoMirrored = captureDelegate?.presetCamera == .front &&
          ((captureDelegate?.mirror ?? false) || options.mirror)
        var photoSettings = AVCapturePhotoSettings()
-@@ -93,5 +98,15 @@
+ 
+@@ -109,7 +114,17 @@ class CameraPhotoCapture: NSObject, AVCapturePhotoCaptureDelegate {
+ 
        photoSettings.photoQualityPrioritization = .balanced
-
+ 
 -      photoOutput.capturePhoto(with: photoSettings, delegate: self)
 +      do {
 +        // AVFoundation raises an Objective-C exception if the connection stops
@@ -42,3 +48,4 @@ diff --git a/node_modules/expo-camera/ios/Current/CameraPhotoCapture.swift b/nod
 +      }
      }
    }
+ 

@@ -19,6 +19,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  type ScrollViewInstance,
   StyleSheet,
   TextInput,
   View,
@@ -140,7 +141,7 @@ export function SettingsScreen({
   const isFlatIcons = useIsFlatIcons();
   const bottomNavInset = useSettingsBottomNavInset();
   const reportBottomNavScroll = useBottomNavScrollReporter();
-  const scrollViewRef = useRef<ScrollView | null>(null);
+  const scrollViewRef = useRef<ScrollViewInstance | null>(null);
 
   const profileStats = useMemo(() => {
     // Anchor "days tracking" on the earliest transaction, falling back to the

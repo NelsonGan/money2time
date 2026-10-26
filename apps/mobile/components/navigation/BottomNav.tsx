@@ -136,6 +136,11 @@ let cachedBlurNavView: BlurNavView | null | undefined;
 function getBlurNavView(): BlurNavView | null {
   if (cachedBlurNavView !== undefined) return cachedBlurNavView;
   cachedBlurNavView = null;
+  // expo-blur 58 only blurs on Android inside an explicit BlurTargetView and
+  // otherwise draws just its tint, so Android uses the solid fallback surface.
+  // (expo-blur 15 blurred the whole window instead, which crashed release
+  // builds when R8 renamed the class it scoped to; see the keep-rules test.)
+  if (Platform.OS === 'android') return cachedBlurNavView;
   try {
     // Older binaries may have Liquid Glass but not the newer blur module.
     // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -146,7 +151,7 @@ function getBlurNavView(): BlurNavView | null {
   return cachedBlurNavView;
 }
 
-const NavItem = memo(function NavItem({
+const NavItem = memo(function NavItemImpl({
   tab,
   icon,
   activeIcon,
@@ -208,11 +213,9 @@ const NavItem = memo(function NavItem({
 export function BottomNav({ tabs, activeTab, onTabChange }: BottomNavProps) {
   const { bottom: safeBottom } = useSafeAreaInsets();
   const resolvedTheme = useResolvedTheme();
-  const { minimizeProgress, isScrolling } = useBottomNavMinimize();
+  const { minimizeProgress } = useBottomNavMinimize();
   const staticProgress = useSharedValue(0);
-  const staticScrolling = useSharedValue(false);
   const progress = minimizeProgress ?? staticProgress;
-  const scrolling = isScrolling ?? staticScrolling;
 
   const minimizeStyle = useAnimatedStyle(() => ({
     transform: [
@@ -237,14 +240,9 @@ export function BottomNav({ tabs, activeTab, onTabChange }: BottomNavProps) {
     () => (BlurNavView ? Animated.createAnimatedComponent(BlurNavView) : null),
     [BlurNavView],
   );
-  const isAndroid = Platform.OS === 'android';
   const hasBlurView = Boolean(BlurNavView);
-  const blurAnimatedProps = useAnimatedProps(() => ({
-    intensity: isAndroid && scrolling.value ? 0 : 70,
-  }));
-  const fallbackTintStyle = useAnimatedStyle(() => ({
-    opacity: !hasBlurView || (isAndroid && scrolling.value) ? 0.8 : 0.4,
-  }));
+  const blurAnimatedProps = useAnimatedProps(() => ({ intensity: 70 }));
+  const fallbackTintStyle = useAnimatedStyle(() => ({ opacity: hasBlurView ? 0.4 : 0.8 }));
   const navItems = tabs.map((tab) => {
     const meta = NAV_TAB_META[tab];
     return (
@@ -301,7 +299,6 @@ export function BottomNav({ tabs, activeTab, onTabChange }: BottomNavProps) {
                   pointerEvents="none"
                   animatedProps={blurAnimatedProps}
                   tint={resolvedTheme === 'dark' ? 'dark' : 'light'}
-                  experimentalBlurMethod={isAndroid ? 'dimezisBlurView' : 'none'}
                   style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
                 />
               ) : null}

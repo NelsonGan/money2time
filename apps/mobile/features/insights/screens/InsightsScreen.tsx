@@ -25,9 +25,11 @@ import {
   type NativeSyntheticEvent,
   Pressable,
   ScrollView,
+  type ScrollViewInstance,
   StyleSheet,
   useWindowDimensions,
   View,
+  type ViewInstance,
 } from 'react-native';
 import { AnimatedRollingNumber } from 'react-native-animated-rolling-numbers';
 import { PieChart } from 'react-native-gifted-charts';
@@ -1676,7 +1678,7 @@ function ScrubRollingNumber({
   );
 }
 
-const GraphYAxisGrid = React.memo(function GraphYAxisGrid({
+const GraphYAxisGrid = React.memo(function GraphYAxisGridImpl({
   ticks,
   chartWidth,
   chartHeight,
@@ -1769,7 +1771,7 @@ const GraphYAxisGrid = React.memo(function GraphYAxisGrid({
   );
 });
 
-const ChartLoadingSkeleton = React.memo(function ChartLoadingSkeleton({
+const ChartLoadingSkeleton = React.memo(function ChartLoadingSkeletonImpl({
   chartWidth,
   chartHeight,
 }: {
@@ -1829,7 +1831,7 @@ const TREND_TRANSACTIONS_PAGE = 10;
 // Renders a selected month's transaction list capped at `visibleCount` rows. The cap
 // is owned by the screen (keyed per list) and grown as the page scrolls near its end,
 // so the non-virtualized list stays cheap to render while the chart is scrubbed.
-const TrendMonthTransactions = React.memo(function TrendMonthTransactions({
+const TrendMonthTransactions = React.memo(function TrendMonthTransactionsImpl({
   transactions,
   visibleCount,
   locale,
@@ -1900,7 +1902,7 @@ const TrendMonthTransactions = React.memo(function TrendMonthTransactions({
   );
 });
 
-const AssetHistoryLineChart = React.memo(function AssetHistoryLineChart({
+const AssetHistoryLineChart = React.memo(function AssetHistoryLineChartImpl({
   monthRows,
   chartWidth,
   primaryColor,
@@ -2696,7 +2698,7 @@ function InsightTypeMenuPopover({
 }
 
 const InsightsWindowPage = React.memo(
-  function InsightsWindowPage({
+  function InsightsWindowPageImpl({
     item,
     pageData,
     pageStyle,
@@ -2711,7 +2713,7 @@ const InsightsWindowPage = React.memo(
     pageStyle: { width: number };
     isChartScrubbing: boolean;
     paneRenderVersion: string;
-    getPageScrollRef: (index: number) => { current: ScrollView | null };
+    getPageScrollRef: (index: number) => { current: ScrollViewInstance | null };
     renderInsightsPane: (pageData: InsightPageData) => React.ReactNode;
     onScrollNearEnd: (pageData: InsightPageData) => void;
   }) {
@@ -2955,8 +2957,8 @@ export function InsightsScreen({
   );
   const [isChartScrubbing, setIsChartScrubbing] = useState(false);
   const breakdownHeaderDotPulse = useRef(new RNAnimated.Value(0)).current;
-  const insightsTypeSelectorRef = useRef<View | null>(null);
-  const periodPickerTriggerRef = useRef<View | null>(null);
+  const insightsTypeSelectorRef = useRef<ViewInstance | null>(null);
+  const periodPickerTriggerRef = useRef<ViewInstance | null>(null);
   const expenseTrendScrubMonthByYearRef = useRef<Record<string, string>>(
     expenseTrendScrubMonthByYear,
   );
@@ -3022,12 +3024,12 @@ export function InsightsScreen({
   const [headerPreviewPageIndex, setHeaderPreviewPageIndex] = useState(INSIGHTS_PAGER_CENTER_INDEX);
   const headerPreviewPageIndexRef = useRef(INSIGHTS_PAGER_CENTER_INDEX);
   const activeBreakdownSliceIdRef = useRef<string | null>(null);
-  const pageScrollRefs = useRef(new Map<number, { current: ScrollView | null }>());
+  const pageScrollRefs = useRef(new Map<number, { current: ScrollViewInstance | null }>());
   const pageDataCacheRef = useRef(new Map<string, InsightPageData>());
   const getPageScrollRef = useCallback((index: number) => {
     const existing = pageScrollRefs.current.get(index);
     if (existing) return existing;
-    const next: { current: ScrollView | null } = { current: null };
+    const next: { current: ScrollViewInstance | null } = { current: null };
     pageScrollRefs.current.set(index, next);
     return next;
   }, []);

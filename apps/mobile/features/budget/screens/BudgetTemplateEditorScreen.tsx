@@ -1,5 +1,5 @@
 import { SmilePlus, X } from 'lucide-react-native';
-import React, { type ElementRef, useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -52,7 +52,7 @@ export function BudgetTemplateEditorScreen({
   } = useApp();
   const { transactions } = useTransactions();
   const themeColors = useThemeColors();
-  const scrollRef = useAnimatedRef<ElementRef<typeof Animated.ScrollView>>();
+  const scrollRef = useAnimatedRef<Animated.ScrollView>();
 
   const existing = useMemo(
     () => budgetTemplates.find((template) => template.id === templateId) ?? null,

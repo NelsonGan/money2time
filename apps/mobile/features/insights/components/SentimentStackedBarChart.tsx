@@ -31,7 +31,7 @@ const DOUBLE_LINE_LABEL_HEIGHT = 30;
 const TOP_PADDING = 12;
 const SIDE_PADDING = 4;
 
-export const SentimentStackedBarChart = React.memo(function SentimentStackedBarChart({
+export const SentimentStackedBarChart = React.memo(function SentimentStackedBarChartImpl({
   data,
   chartWidth,
   chartHeight,

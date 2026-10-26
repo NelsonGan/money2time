@@ -701,8 +701,10 @@ export class PhoneSession {
         if (transfer.aborted || this.socket !== socket) throw new LinkError('closed');
         const frame = prepared.frames[index];
         socket.send(
+          // The frames are plain Uint8Arrays over an ArrayBuffer; TypeScript 6 types
+          // `.buffer` as ArrayBufferLike, which WebSocket.send does not accept.
           frame.byteOffset === 0 && frame.buffer.byteLength === frame.byteLength
-            ? frame.buffer
+            ? (frame.buffer as ArrayBuffer)
             : frame.slice().buffer,
         );
         transfer.sent = index + 1;

@@ -1,6 +1,13 @@
 import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react-native';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import {
+  Pressable,
+  ScrollView,
+  type ScrollViewInstance,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   runOnJS,
@@ -316,7 +323,7 @@ export function InlineDatePicker({ value, onSelect, showQuickDays = true }: Inli
   }));
 
   const quickRowWidthRef = useRef(0);
-  const quickScrollRef = useRef<ScrollView | null>(null);
+  const quickScrollRef = useRef<ScrollViewInstance | null>(null);
   const quickInitialScrollDoneRef = useRef(false);
   // Seed the scroll position before the row is laid out (using the window width
   // as a close estimate of the viewport) so the first painted frame is already

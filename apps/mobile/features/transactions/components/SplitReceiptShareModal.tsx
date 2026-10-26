@@ -5,11 +5,11 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  InteractionManager,
   Pressable,
   ScrollView,
   Share,
   View,
+  type ViewInstance,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -22,6 +22,7 @@ import { triggerHaptic } from '~/services/haptics';
 import { hasSeenQrPrompt, markQrPromptSeen } from '~/services/settleUpQrPromptState';
 import { getPaymentQrUri } from '~/services/userAssets';
 import { getErrorMessage } from '~/utils/errorHandling';
+import { runAfterInteractions } from '~/utils/interactions';
 
 import { buildReceiptText, receiptShareFileName } from '../lib/settleUp';
 import type { ReceiptContent } from './SplitReceiptCard';
@@ -47,7 +48,7 @@ export function SplitReceiptShareModal({
 }: SplitReceiptShareModalProps) {
   const themeColors = useThemeColors();
   const { settings } = useApp();
-  const cardRef = useRef<View>(null);
+  const cardRef = useRef<ViewInstance>(null);
   const [busy, setBusy] = useState(false);
 
   const qrUri = useMemo(() => getPaymentQrUri(settings.paymentQrUri), [settings.paymentQrUri]);
@@ -84,7 +85,11 @@ export function SplitReceiptShareModal({
       // Skia is loaded lazily so the screen still works if the native module
       // isn't linked — capture then falls back to a plain-text receipt.
       const { makeImageFromView } = await import('@shopify/react-native-skia');
-      const image = await makeImageFromView(cardRef);
+      // Skia still types the ref as a legacy class component; it only passes
+      // `cardRef.current` to findNodeHandle, which accepts the host instance.
+      const image = await makeImageFromView(
+        cardRef as unknown as Parameters<typeof makeImageFromView>[0],
+      );
       const base64 = image?.encodeToBase64();
       if (base64) {
         const file = new File(Paths.cache, receiptShareFileName(content.title, Date.now()));
@@ -169,7 +174,7 @@ export function SplitReceiptShareModal({
               // animated out — navigating while the pageSheet modal is still
               // dismissing drops the push under the modal on iOS.
               onClose();
-              InteractionManager.runAfterInteractions(() => onSetupQr?.());
+              runAfterInteractions(() => onSetupQr?.());
             },
           },
         ],

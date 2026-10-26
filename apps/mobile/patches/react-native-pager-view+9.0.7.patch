@@ -1,0 +1,114 @@
+diff --git a/node_modules/react-native-pager-view/ios/PagerScrollDelegate.swift b/node_modules/react-native-pager-view/ios/PagerScrollDelegate.swift
+index 5b09e03..358be8a 100644
+--- a/node_modules/react-native-pager-view/ios/PagerScrollDelegate.swift
++++ b/node_modules/react-native-pager-view/ios/PagerScrollDelegate.swift
+@@ -4,10 +4,25 @@ import UIKit
+  Scroll delegate used to control underlying TabView's collection view.
+  */
+ class PagerScrollDelegate: NSObject, UIScrollViewDelegate, UICollectionViewDelegate {
+-  weak var originalDelegate: UICollectionViewDelegate?
++  weak var originalDelegate: UICollectionViewDelegate? {
++    didSet {
++      // money2time patch (upstream PR #1147, issue #1146): never proxy to
++      // ourselves, or `responds(to:)` recurses until the stack overflows.
++      if originalDelegate === self { originalDelegate = nil }
++    }
++  }
+   weak var delegate: PagerViewProviderDelegate?
+   var orientation: UICollectionView.ScrollDirection = .horizontal
+ 
++  /// money2time patch: the collection view this delegate is installed in.
++  /// Identity, not `originalDelegate == nil`, tells PagerView the install
++  /// already ran: `originalDelegate` is weak and goes nil on its own when
++  /// SwiftUI rebuilds the TabView (`.id(children.count)`, e.g. while React
++  /// unmounts the pages one by one).
++  weak var installedCollectionView: UICollectionView?
++
++  private var isQueryingOriginalDelegate = false
++  
+   private let handledSelectors: Set<Selector> = [
+     #selector(scrollViewDidScroll(_:)),
+     #selector(scrollViewWillBeginDragging(_:)),
+@@ -86,11 +101,19 @@ class PagerScrollDelegate: NSObject, UIScrollViewDelegate, UICollectionViewDeleg
+   }
+   
+   override func responds(to aSelector: Selector!) -> Bool {
+-    handledSelectors.contains(aSelector) || (originalDelegate?.responds(to: aSelector) ?? false)
++    if handledSelectors.contains(aSelector) { return true }
++    // money2time patch: a re-entrant query means the delegate chain loops
++    // back here; answer false so it terminates instead of overflowing.
++    guard !isQueryingOriginalDelegate else { return false }
++    isQueryingOriginalDelegate = true
++    defer { isQueryingOriginalDelegate = false }
++    return originalDelegate?.responds(to: aSelector) ?? false
+   }
+   
+   override func forwardingTarget(for aSelector: Selector!) -> Any? {
+-    handledSelectors.contains(aSelector) ? nil : originalDelegate
++    guard !handledSelectors.contains(aSelector) else { return nil }
++    let target = originalDelegate
++    return target === self ? nil : target
+   }
+ }
+ 
+diff --git a/node_modules/react-native-pager-view/ios/PagerView.swift b/node_modules/react-native-pager-view/ios/PagerView.swift
+index a4a850a..ce41558 100644
+--- a/node_modules/react-native-pager-view/ios/PagerView.swift
++++ b/node_modules/react-native-pager-view/ios/PagerView.swift
+@@ -54,11 +54,17 @@ struct PagerView: View {
+           collectionView.rightEdgeEffect.isHidden = true
+         }
+ 
+-        if scrollDelegate.originalDelegate == nil {
++        // money2time patch (upstream PR #1147): install once per collection
++        // view. This closure re-runs on every layout pass; keyed on the weak
++        // `originalDelegate` it re-adopted `collectionView.delegate` (this
++        // object) once SwiftUI's own delegate died, and the cycle overflowed
++        // the stack (upstream issue #1146).
++        if scrollDelegate.installedCollectionView !== collectionView {
+           scrollDelegate.originalDelegate = collectionView.delegate
+           scrollDelegate.delegate = delegate
+           // VTabView-style rotation preserves TabView's horizontal collection view.
+           scrollDelegate.orientation = .horizontal
++          scrollDelegate.installedCollectionView = collectionView
+           collectionView.delegate = scrollDelegate
+         }
+       }
+diff --git a/node_modules/react-native-pager-view/ios/RNCPagerViewComponentView.mm b/node_modules/react-native-pager-view/ios/RNCPagerViewComponentView.mm
+index eeeecde..b729756 100644
+--- a/node_modules/react-native-pager-view/ios/RNCPagerViewComponentView.mm
++++ b/node_modules/react-native-pager-view/ios/RNCPagerViewComponentView.mm
+@@ -108,11 +108,21 @@ - (void)onPageScrollWithData:(OnPageScrollEventData *)data {
+ 
+ - (void)onPageSelectedWithPosition:(NSInteger)position {
+   const auto eventEmitter = [self pagerEventEmitter];
++  // money2time patch (upstream issue #1113): SwiftUI can report a scroll or
++  // page change before Fabric attaches the emitter or after it is gone.
++  if (!eventEmitter) {
++    return;
++  }
+   eventEmitter->onPageSelected(RNCViewPagerEventEmitter::OnPageSelected{.position =  static_cast<double>(position)});
+ }
+ 
+ - (void)onPageScrollStateChangedWithState:(enum PageScrollState)state {
+   const auto eventEmitter = [self pagerEventEmitter];
++  // money2time patch (upstream issue #1113): SwiftUI can report a scroll or
++  // page change before Fabric attaches the emitter or after it is gone.
++  if (!eventEmitter) {
++    return;
++  }
+ 
+   RNCViewPagerEventEmitter::OnPageScrollStateChangedPageScrollState scrollState;
+ 
+@@ -171,6 +181,11 @@ - (void)setScrollEnabledImperatively:(BOOL)scrollEnabled {
+ 
+ - (void)sendScrollEventsForPosition:(NSInteger)position offset:(CGFloat)offset {
+   const auto eventEmitter = [self pagerEventEmitter];
++  // money2time patch (upstream issue #1113): SwiftUI can report a scroll or
++  // page change before Fabric attaches the emitter or after it is gone.
++  if (!eventEmitter) {
++    return;
++  }
+   eventEmitter->onPageScroll(RNCViewPagerEventEmitter::OnPageScroll{
+     .position = static_cast<double>(position),
+     .offset = offset

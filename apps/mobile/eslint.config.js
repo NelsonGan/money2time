@@ -64,6 +64,24 @@ module.exports = defineConfig([
     },
   },
   {
+    // eslint-config-expo 58 turns on eslint-plugin-react-hooks' React Compiler
+    // rules. They check that components are safe for the compiler to memoize,
+    // and the app does not enable React Compiler (no `experiments.reactCompiler`
+    // in app.json), so they flag patterns that work correctly today (over 300
+    // findings across 66 files at the SDK 58 upgrade). Turn them back on in the
+    // change that enables React Compiler.
+    files: ['**/*.{js,jsx,ts,tsx}'],
+    rules: {
+      'react-hooks/refs': 'off',
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/immutability': 'off',
+      'react-hooks/preserve-manual-memoization': 'off',
+      'react-hooks/purity': 'off',
+      'react-hooks/static-components': 'off',
+      'react-hooks/use-memo': 'off',
+    },
+  },
+  {
     // Node scripts run outside the app bundle.
     files: ['scripts/**/*.mjs'],
     languageOptions: { globals: { Buffer: 'readonly' } },
