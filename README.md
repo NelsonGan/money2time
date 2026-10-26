@@ -119,8 +119,10 @@ apps/mobile/
 ### Prerequisites
 
 - Node.js 22+ and npm 10+ (CI runs Node 22; Wrangler 4 needs it)
-- Xcode (iOS) / Android Studio (Android) for simulator builds
-- For local EAS builds: `ANDROID_HOME=$HOME/Library/Android/sdk` exported
+- Xcode (iOS) / Android Studio or the Android command-line tools (Android) for simulator and emulator builds
+- `ANDROID_HOME` (the Android SDK, e.g. `$HOME/Library/Android/sdk`) and `JAVA_HOME` (JDK 17) exported in the shell that runs `npx expo start`, `expo run:android` or a local EAS build. Expo Device Hub reads them to list and boot emulators; without them it shows only iOS simulators.
+
+**Expo Device Hub** (`expo-device-hub`, a dev dependency) adds a live device dashboard to every `npx expo start`: stream, tap and type into simulators and emulators, and boot, shut down or create them, at `http://localhost:8081/_expo/plugins/expo-device-hub`. It is a dev-server plugin only and adds nothing to the app. Test on one dedicated device per platform: the "Money2Time iPhone 18 Pro" simulator and the `Money2Time_Pixel_10` emulator (Pixel 10, Android 16).
 
 ### Setup
 
