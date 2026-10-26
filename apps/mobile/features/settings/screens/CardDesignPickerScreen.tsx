@@ -5,6 +5,7 @@ import {
   FlatList,
   Pressable,
   ScrollView,
+  type ScrollViewInstance,
   StyleSheet,
   useWindowDimensions,
   View,
@@ -111,7 +112,7 @@ export function CardDesignPickerScreen({ session, onClose }: CardDesignPickerScr
   const [cropUri, setCropUri] = useState<string | null>(null);
 
   // Chip positions, so a chip tapped at the edge of the row slides into view.
-  const filterScrollRef = useRef<ScrollView>(null);
+  const filterScrollRef = useRef<ScrollViewInstance>(null);
   const filterChipX = useRef(new Map<Filter, number>());
 
   const refreshUploads = useCallback(() => setUploads(listCustomCardDesigns()), []);
@@ -472,7 +473,7 @@ export function CardDesignPickerScreen({ session, onClose }: CardDesignPickerScr
             <Text variant="caption" tone="muted" className="pb-3">
               {I18n.t('accounts.card_design.upload_pro_hint')}
             </Text>
-          ) : null
+          ) : undefined
         }
         renderItem={({ item }) =>
           item.kind === 'header' ? (

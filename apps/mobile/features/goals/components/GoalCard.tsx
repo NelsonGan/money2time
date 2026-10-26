@@ -40,7 +40,7 @@ function PaceChip({ pace }: { pace: NonNullable<GoalWithProgress['progress']['pa
 }
 
 /** Compact progress card for one savings goal on the Goals rail. */
-export const GoalCard = React.memo(function GoalCard({
+export const GoalCard = React.memo(function GoalCardImpl({
   goal,
   hideBalances,
   onPress,

@@ -36,6 +36,8 @@ const IS_OTA_VARIANT = OTA_VARIANTS.includes(process.env.APP_VARIANT ?? '');
 
 const DEV_BUNDLE_IDENTIFIER = 'com.nelsongan.money2time.dev';
 
+const EXPO_SDK_MAJOR = (require('expo/package.json') as { version: string }).version.split('.')[0];
+
 type ExtraShape = Record<string, unknown> & {
   eas?: Record<string, unknown> & {
     build?: Record<string, unknown> & { experimental?: unknown };
@@ -103,8 +105,11 @@ function applyUpdatesPolicy(cfg: ExpoConfig): ExpoConfig {
     // load a bundle whose renamed/recompressed assets it cannot resolve.
     // Both internal variants share the revision so dev clients can open PR
     // previews despite their different bundle IDs and widget configuration.
+    // The Expo SDK major is in it too: an SDK upgrade replaces the native code
+    // without necessarily bumping the app version, and a dev client built on
+    // the old SDK must not load a bundle written for the new one.
     runtimeVersion: IS_OTA_VARIANT
-      ? `${cfg.version}-assets-${getNativeAssetRevision(__dirname)}`
+      ? `${cfg.version}-sdk${EXPO_SDK_MAJOR}-assets-${getNativeAssetRevision(__dirname)}`
       : cfg.runtimeVersion,
     updates: {
       ...cfg.updates,

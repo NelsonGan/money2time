@@ -1,6 +1,6 @@
 import * as Slot from '@rn-primitives/slot';
 import * as React from 'react';
-import { Platform, Text as RNText, type TextStyle } from 'react-native';
+import { Platform, Text as RNText, type TextInstance, type TextStyle } from 'react-native';
 
 import { cn } from '~/utils';
 import { FONT } from '~/utils/fonts';
@@ -99,7 +99,7 @@ const toneMap: Record<TextTone, string> = {
 };
 
 const Text = React.forwardRef<
-  React.ElementRef<typeof RNText>,
+  TextInstance,
   React.ComponentPropsWithoutRef<typeof RNText> & {
     asChild?: boolean;
     variant?: TextVariant;

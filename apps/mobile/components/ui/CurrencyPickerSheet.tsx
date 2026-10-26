@@ -199,7 +199,7 @@ export function CurrencyPickerSheet({
                   {I18n.t('exchange_rates.no_currency_match')}
                 </Text>
               }
-              ListFooterComponent={footer ? <View className="mt-2">{footer}</View> : null}
+              ListFooterComponent={footer ? <View className="mt-2">{footer}</View> : undefined}
             />
           </View>
         </Pressable>

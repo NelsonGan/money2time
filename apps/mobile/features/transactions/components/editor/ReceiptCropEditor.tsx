@@ -2,7 +2,7 @@ import { Image, useImage } from 'expo-image';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { AccessibilityActionEvent, LayoutChangeEvent } from 'react-native';
 import { ActivityIndicator, Alert, View } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { Gesture, GestureDetector, type GestureType } from 'react-native-gesture-handler';
 
 import { Button, Text } from '~/components/ui';
 import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
@@ -32,7 +32,7 @@ const HANDLE_DOT_SIZE = 18;
 const MINIMUM_CROP_SIZE = 64;
 const MASK_COLOR = 'rgba(0,0,0,0.62)';
 
-type CropGesture = React.ComponentProps<typeof GestureDetector>['gesture'];
+type CropGesture = GestureType;
 
 const CROP_HANDLE_LABEL_KEYS: Record<CropHandle, string> = {
   topLeft: 'transactions.editor.receipt.crop_top_left',

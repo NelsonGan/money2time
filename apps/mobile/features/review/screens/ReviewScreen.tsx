@@ -15,7 +15,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, type ScrollViewInstance, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import Svg, { Circle } from 'react-native-svg';
 
@@ -104,7 +104,7 @@ function resolveSelectedIndex(periods: ReviewPeriod[], rememberedKey: string | u
 }
 
 export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerViewProps>(
-  function ReviewPagerView(
+  function ReviewPagerViewImpl(
     { zoom, onZoomChange, filters, onFiltersChange, onOpenTransaction },
     ref,
   ) {
@@ -359,7 +359,7 @@ function PeriodRail({
   onSelect: (period: ReviewPeriod) => void;
 }) {
   const themeColors = useThemeColors();
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
   const offsetsRef = useRef<number[]>([]);
   const widthRef = useRef(0);
 
@@ -1104,7 +1104,7 @@ const styles = StyleSheet.create({
     height: RING_SIZE,
   },
   ringCenter: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
   },

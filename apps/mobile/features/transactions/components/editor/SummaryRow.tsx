@@ -76,7 +76,7 @@ export function SummaryRow({
     <View className="overflow-hidden">
       <Animated.View
         pointerEvents="none"
-        style={[StyleSheet.absoluteFillObject, { backgroundColor: highlightBg }, backgroundStyle]}
+        style={[StyleSheet.absoluteFill, { backgroundColor: highlightBg }, backgroundStyle]}
       />
       <Animated.View
         pointerEvents="none"

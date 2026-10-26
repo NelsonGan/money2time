@@ -19,7 +19,7 @@ interface AlbumMapMarkerProps {
   onPress: () => void;
 }
 
-export const AlbumMapMarker = memo(function AlbumMapMarker({
+export const AlbumMapMarker = memo(function AlbumMapMarkerImpl({
   name,
   coverUri,
   spendLabel,

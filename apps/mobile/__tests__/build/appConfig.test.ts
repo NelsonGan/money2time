@@ -18,7 +18,10 @@ describe('update compatibility for bundled assets', () => {
     const config = configure(variant);
     expect(config.updates.enabled).toBe(true);
     expect(config.runtimeVersion).toMatch(/-assets-[a-f0-9]{16}$/);
-    expect(config.runtimeVersion.split('-assets-')[0]).toBe(require('../../app.json').expo.version);
+    const sdkMajor = require('expo/package.json').version.split('.')[0];
+    expect(config.runtimeVersion.split('-assets-')[0]).toBe(
+      `${require('../../app.json').expo.version}-sdk${sdkMajor}`,
+    );
   });
 
   it('lets a rebuilt development client load the matching preview bundle', () => {

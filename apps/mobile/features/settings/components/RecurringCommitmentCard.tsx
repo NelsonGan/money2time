@@ -84,7 +84,7 @@ function CommitmentIcon({
  * timeline and for a rule in the full list — the two differ only in what the
  * meta line says and whether a delete affordance is offered.
  */
-export const RecurringCommitmentCard = React.memo(function RecurringCommitmentCard({
+export const RecurringCommitmentCard = React.memo(function RecurringCommitmentCardImpl({
   ruleId,
   name,
   type,

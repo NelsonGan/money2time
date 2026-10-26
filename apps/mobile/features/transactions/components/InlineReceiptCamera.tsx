@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     backgroundColor: VIEWFINDER_BG,
     overflow: 'hidden',
   },
-  fill: StyleSheet.absoluteFillObject,
+  fill: StyleSheet.absoluteFill,
   bracket: {
     position: 'absolute',
     width: 26,

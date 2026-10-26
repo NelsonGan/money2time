@@ -29,15 +29,16 @@ import {
   ActivityIndicator,
   Alert,
   type GestureResponderEvent,
-  InteractionManager,
   Keyboard,
   type LayoutChangeEvent,
   Platform,
   Pressable,
   ScrollView,
+  type ScrollViewInstance,
   StatusBar,
   StyleSheet,
   TextInput,
+  type TextInputInstance,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -128,7 +129,7 @@ import {
   normalizeMoneyAmount,
 } from '~/utils/formatters';
 import { newId } from '~/utils/id';
-import { runAfterInteractionsCapped } from '~/utils/interactions';
+import { runAfterInteractions, runAfterInteractionsCapped } from '~/utils/interactions';
 import { perfInteraction } from '~/utils/perfTrace';
 
 type ActiveField =
@@ -757,7 +758,7 @@ export function TransactionEditorScreen({
   // Bottom edge of the details box inside the options panel, so the drawer can
   // lift just far enough to sit it on the keyboard.
   const [detailsBoxBottom, setDetailsBoxBottom] = useState(0);
-  const detailsInputRef = useRef<TextInput>(null);
+  const detailsInputRef = useRef<TextInputInstance>(null);
   const hasDetails = details.trim().length > 0;
   const [sentiment, setSentiment] = useState<TransactionSentiment>(
     initialValues?.sentiment ?? 'neutral',
@@ -1042,9 +1043,9 @@ export function TransactionEditorScreen({
     [],
   );
   const autoNoteFromCategoryRef = useRef<string | null>(null);
-  const editorScrollRef = useRef<ScrollView>(null);
+  const editorScrollRef = useRef<ScrollViewInstance>(null);
   const fieldOffsetsRef = useRef<Partial<Record<NonNullActiveField, number>>>({});
-  const noteInputRef = useRef<TextInput>(null);
+  const noteInputRef = useRef<TextInputInstance>(null);
   const noteBlurFrameRef = useRef<number | null>(null);
   const noteSuggestionsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // The suggestion just picked, held until the IME's deferred commit has had its
@@ -1053,8 +1054,8 @@ export function TransactionEditorScreen({
   const pickedNoteRef = useRef<string | null>(null);
   const [noteSuggestions, setNoteSuggestions] = useState<string[]>([]);
   const [noteFieldFrame, setNoteFieldFrame] = useState<{ y: number; height: number } | null>(null);
-  const recurrenceNameRef = useRef<TextInput>(null);
-  const recurrenceIntervalRef = useRef<TextInput>(null);
+  const recurrenceNameRef = useRef<TextInputInstance>(null);
+  const recurrenceIntervalRef = useRef<TextInputInstance>(null);
   const hasSavedTypeSelectionRef = useRef<Record<TransactionType, boolean>>({
     expense: initialType === 'expense',
     income: initialType === 'income',
@@ -1753,7 +1754,7 @@ export function TransactionEditorScreen({
   // the gating fields are ready, open it once. Re-fires only if the prop flips
   // back to true.
   //
-  // Deferred past the mount commit via InteractionManager: opening synchronously
+  // Deferred past the mount commit via runAfterInteractions: opening synchronously
   // on mount publishes the split session in the same commit whose effects also
   // run the session-teardown (which still sees the pre-open splitRouteOpen and
   // nulls it), and pushes SplitBill while this screen (and the add sheet it came
@@ -1769,7 +1770,7 @@ export function TransactionEditorScreen({
     if (autoOpenedRef.current) return;
     if (!canOpenSplitBill) return;
     autoOpenedRef.current = true;
-    const task = InteractionManager.runAfterInteractions(() => {
+    const task = runAfterInteractions(() => {
       handleOpenSplitBillRef.current({ skipHaptic: true });
     });
     return () => task.cancel();

@@ -1,4 +1,4 @@
-import type { ImageSourcePropType } from 'react-native';
+import type { ImageRequireSource } from 'react-native';
 
 import type { AppIconId } from '~/types';
 
@@ -39,9 +39,9 @@ export interface AppIconVariant {
    */
   free: boolean;
   /** Tile as it appears in light mode, for the in-app picker. */
-  previewLight: ImageSourcePropType;
+  previewLight: ImageRequireSource;
   /** Tile as it appears in dark mode, for the in-app picker. */
-  previewDark: ImageSourcePropType;
+  previewDark: ImageRequireSource;
 }
 
 export const APP_ICONS: readonly AppIconVariant[] = [

@@ -55,7 +55,7 @@ const PLATED_MARK_SCALE = 0.78;
  * is what keeps light mode free of the paper-card look a baked-in plate gives
  * (see scripts/lib/darkMark.mjs).
  */
-export const SubscriptionLogo = React.memo(function SubscriptionLogo({
+export const SubscriptionLogo = React.memo(function SubscriptionLogoImpl({
   logoId,
   size = 32,
   hideFallback = false,

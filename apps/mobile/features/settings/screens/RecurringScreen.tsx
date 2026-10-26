@@ -380,7 +380,7 @@ export function RecurringScreen({
   }, [activeDayKey, cardFor, formatValue, pausedRules, rulesByDay, todayKey, toReporting]);
 
   const listHeader = useMemo(() => {
-    if (recurringRules.length === 0) return null;
+    if (recurringRules.length === 0) return undefined;
     return (
       <View className="gap-5 pb-4 pt-1">
         <RecurringSummary

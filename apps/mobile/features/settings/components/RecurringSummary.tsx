@@ -47,7 +47,7 @@ function StatTile({ label, value }: { label: string; value: string }) {
  * a card on the page surface, so leaving this bare is what puts it at the top
  * of the hierarchy rather than on the same level as a row in the list.
  */
-export const RecurringSummary = React.memo(function RecurringSummary({
+export const RecurringSummary = React.memo(function RecurringSummaryImpl({
   monthlyLabel,
   thisMonthLabel,
   thisYearLabel,

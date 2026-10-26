@@ -59,6 +59,9 @@ export function initNotificationHandler(): void {
   if (Platform.OS === 'android') {
     void Notifications.setNotificationChannelAsync('default', {
       name: I18n.t('notifications.channel_name'),
+      // expo-notifications 58's build output (`export var X = /*#__PURE__*/ …`)
+      // hides the enum from eslint-plugin-import; it is exported at runtime.
+      // eslint-disable-next-line import/namespace
       importance: Notifications.AndroidImportance.DEFAULT,
     });
   }

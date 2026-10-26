@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View, type ViewInstance } from 'react-native';
 
 import { CategoryEmoji } from '~/components/ui';
 import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
@@ -84,80 +84,79 @@ function initialColor(seed: string): string {
  * via Skia's makeImageFromView on the forwarded ref, so the root View carries
  * `collapsable={false}` for a reliable Android snapshot.
  */
-export const SplitReceiptCard = forwardRef<View, SplitReceiptCardProps>(function SplitReceiptCard(
-  { content, qrUri },
-  ref,
-) {
-  return (
-    <View ref={ref} collapsable={false} style={styles.card}>
-      <View style={styles.brand} accessible accessibilityLabel={I18n.t('app.name')}>
-        <Image source={APP_LOGO_SOURCE} style={styles.brandLogo} resizeMode="cover" />
-        <Text allowFontScaling={false} style={styles.brandName}>
-          <Text style={{ color: WORDMARK.money }}>Money</Text>
-          <Text style={{ color: WORDMARK.two }}>2</Text>
-          <Text style={{ color: WORDMARK.time }}>Time</Text>
-        </Text>
-      </View>
-
-      {qrUri ? (
-        <View style={styles.qrBlock}>
-          <View style={styles.qrFrame}>
-            <Image
-              {...REPLAY_PRIVATE}
-              source={{ uri: qrUri }}
-              style={styles.qrImage}
-              resizeMode="contain"
-            />
-          </View>
-          <Text style={styles.scan}>{I18n.t('transactions.settleUp.receipt_scan_short')}</Text>
+export const SplitReceiptCard = forwardRef<ViewInstance, SplitReceiptCardProps>(
+  function SplitReceiptCardImpl({ content, qrUri }, ref) {
+    return (
+      <View ref={ref} collapsable={false} style={styles.card}>
+        <View style={styles.brand} accessible accessibilityLabel={I18n.t('app.name')}>
+          <Image source={APP_LOGO_SOURCE} style={styles.brandLogo} resizeMode="cover" />
+          <Text allowFontScaling={false} style={styles.brandName}>
+            <Text style={{ color: WORDMARK.money }}>Money</Text>
+            <Text style={{ color: WORDMARK.two }}>2</Text>
+            <Text style={{ color: WORDMARK.time }}>Time</Text>
+          </Text>
         </View>
-      ) : null}
 
-      <Text style={styles.title}>{content.title}</Text>
-      {content.subtitle ? <Text style={styles.subtitle}>{content.subtitle}</Text> : null}
-
-      <View style={styles.divider} />
-
-      <View style={styles.lines}>
-        {content.lines.map((line) => (
-          <View key={line.key} style={styles.line}>
-            {line.categoryIcon ? (
-              <CategoryEmoji icon={line.categoryIcon} size={18} />
-            ) : line.initial ? (
-              <View style={[styles.initialCircle, { backgroundColor: initialColor(line.key) }]}>
-                <Text style={styles.initialText}>{line.initial}</Text>
-              </View>
-            ) : null}
-            <View style={styles.lineText}>
-              <Text style={styles.lineLabel} numberOfLines={1}>
-                {line.label}
-              </Text>
-              {line.sublabel ? <Text style={styles.lineSublabel}>{line.sublabel}</Text> : null}
-              {line.bullets && line.bullets.length > 0
-                ? line.bullets.map((bullet, index) => (
-                    <Text key={index} style={styles.lineBullet} numberOfLines={1}>
-                      {`• ${bullet}`}
-                    </Text>
-                  ))
-                : null}
+        {qrUri ? (
+          <View style={styles.qrBlock}>
+            <View style={styles.qrFrame}>
+              <Image
+                {...REPLAY_PRIVATE}
+                source={{ uri: qrUri }}
+                style={styles.qrImage}
+                resizeMode="contain"
+              />
             </View>
-            <Text style={styles.lineAmount}>{line.amount}</Text>
+            <Text style={styles.scan}>{I18n.t('transactions.settleUp.receipt_scan_short')}</Text>
           </View>
-        ))}
-      </View>
+        ) : null}
 
-      {content.totalLabel && content.totalText ? (
-        <>
-          <View style={styles.divider} />
-          <View style={styles.totalRow}>
-            <Text style={styles.totalLabel}>{content.totalLabel}</Text>
-            <Text style={styles.totalAmount}>{content.totalText}</Text>
-          </View>
-        </>
-      ) : null}
-    </View>
-  );
-});
+        <Text style={styles.title}>{content.title}</Text>
+        {content.subtitle ? <Text style={styles.subtitle}>{content.subtitle}</Text> : null}
+
+        <View style={styles.divider} />
+
+        <View style={styles.lines}>
+          {content.lines.map((line) => (
+            <View key={line.key} style={styles.line}>
+              {line.categoryIcon ? (
+                <CategoryEmoji icon={line.categoryIcon} size={18} />
+              ) : line.initial ? (
+                <View style={[styles.initialCircle, { backgroundColor: initialColor(line.key) }]}>
+                  <Text style={styles.initialText}>{line.initial}</Text>
+                </View>
+              ) : null}
+              <View style={styles.lineText}>
+                <Text style={styles.lineLabel} numberOfLines={1}>
+                  {line.label}
+                </Text>
+                {line.sublabel ? <Text style={styles.lineSublabel}>{line.sublabel}</Text> : null}
+                {line.bullets && line.bullets.length > 0
+                  ? line.bullets.map((bullet, index) => (
+                      <Text key={index} style={styles.lineBullet} numberOfLines={1}>
+                        {`• ${bullet}`}
+                      </Text>
+                    ))
+                  : null}
+              </View>
+              <Text style={styles.lineAmount}>{line.amount}</Text>
+            </View>
+          ))}
+        </View>
+
+        {content.totalLabel && content.totalText ? (
+          <>
+            <View style={styles.divider} />
+            <View style={styles.totalRow}>
+              <Text style={styles.totalLabel}>{content.totalLabel}</Text>
+              <Text style={styles.totalAmount}>{content.totalText}</Text>
+            </View>
+          </>
+        ) : null}
+      </View>
+    );
+  },
+);
 
 const styles = StyleSheet.create({
   card: {

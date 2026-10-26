@@ -9,7 +9,13 @@ import { requestOpenTab } from '~/services/tabNavigation';
 jest.mock('react-native', () => ({
   Linking: { addEventListener: jest.fn(), getInitialURL: jest.fn() },
   Keyboard: { dismiss: jest.fn() },
-  InteractionManager: { runAfterInteractions: (cb: () => void) => cb() },
+}));
+
+jest.mock('~/utils/interactions', () => ({
+  runAfterInteractions: (cb: () => void) => {
+    cb();
+    return { cancel: jest.fn() };
+  },
 }));
 
 jest.mock('~/services/analytics', () => ({

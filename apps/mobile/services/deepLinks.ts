@@ -1,5 +1,5 @@
 import type { NavigationContainerRefWithCurrent } from '@react-navigation/native';
-import { InteractionManager, Keyboard, Linking } from 'react-native';
+import { Keyboard, Linking } from 'react-native';
 
 import { getTutorial } from '~/features/tutorials/content/tutorials';
 import { clampSessionHours } from '~/features/widgets/lib/liveEarnings';
@@ -14,6 +14,7 @@ import {
 import { parseReviewZoomParam, requestReviewZoom } from '~/services/reviewNavigation';
 import { requestOpenTab } from '~/services/tabNavigation';
 import { ADD_BUTTON_ACTIONS, type AddButtonAction } from '~/types';
+import { runAfterInteractions } from '~/utils/interactions';
 
 type RootNavigationRef = NavigationContainerRefWithCurrent<RootStackParamList>;
 
@@ -215,7 +216,7 @@ function runDeepLinkNavigation(
   afterReset?: () => void,
 ) {
   Keyboard.dismiss();
-  InteractionManager.runAfterInteractions(() => {
+  runAfterInteractions(() => {
     const rootState = navigationRef.getRootState();
     const existingMain = rootState?.routes.find((route) => route.name === 'Main');
     const mainRoute = existingMain

@@ -220,7 +220,7 @@ function TransactionAccountBadge({
  * memoized apart from the selection chrome around it.
  */
 const TransactionItemBody = memo(
-  function TransactionItemBody({
+  function TransactionItemBodyImpl({
     transaction,
     compact,
     showDateInSubtitle,

@@ -9,7 +9,15 @@ import {
   X,
 } from 'lucide-react-native';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  Alert,
+  Linking,
+  Pressable,
+  ScrollView,
+  type ScrollViewInstance,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { SvgXml } from 'react-native-svg';
 
 import { Mascot } from '~/components/feedback/Mascot';
@@ -155,7 +163,7 @@ export function StatementImportScreen({ onBack, onOpenList }: StatementImportScr
   const [importExpenses, setImportExpenses] = useState(true);
   const [importIncome, setImportIncome] = useState(true);
   const [excludedIndices, setExcludedIndices] = useState<Set<number>>(new Set());
-  const scrollViewRef = useRef<ScrollView>(null);
+  const scrollViewRef = useRef<ScrollViewInstance>(null);
 
   const prompt = useMemo(() => buildPrompt(accounts, categories), [accounts, categories]);
 

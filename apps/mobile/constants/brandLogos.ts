@@ -1,4 +1,4 @@
-import type { ImageSourcePropType } from 'react-native';
+import type { ImageRequireSource } from 'react-native';
 
 /**
  * Bundled brand app-icon logos, downloaded from Brandfetch into
@@ -18,7 +18,7 @@ export const BRAND_LOGOS = {
   appstore: require('../assets/brands/social/appstore.jpg'),
   googleplay: require('../assets/brands/social/googleplay.png'),
   xiaohongshu: require('../assets/brands/social/xiaohongshu.png'),
-} satisfies Record<string, ImageSourcePropType>;
+} satisfies Record<string, ImageRequireSource>;
 
 export type BrandLogoKey = keyof typeof BRAND_LOGOS;
 
@@ -27,7 +27,7 @@ export type BrandLogoKey = keyof typeof BRAND_LOGOS;
  * option is recognizable to users migrating from that app. Same edge-to-edge
  * square-icon shape as BRAND_LOGOS above.
  */
-export const MONEY_MANAGER_LOGO: ImageSourcePropType = require('../assets/brands/money-manager-realbyte-logo.png');
+export const MONEY_MANAGER_LOGO: ImageRequireSource = require('../assets/brands/money-manager-realbyte-logo.png');
 
 /**
  * Our own app icon, used on the Data Management rows that read and write the
@@ -35,7 +35,7 @@ export const MONEY_MANAGER_LOGO: ImageSourcePropType = require('../assets/brands
  * third-party formats. Full-bleed square, like the logos above; downscaled from
  * assets/ios/AppIcon~ios-marketing.png.
  */
-export const MONEY2TIME_LOGO: ImageSourcePropType = require('../assets/brands/money2time-app-icon.png');
+export const MONEY2TIME_LOGO: ImageRequireSource = require('../assets/brands/money2time-app-icon.png');
 
 /**
  * Microsoft Excel's document mark, shown on the spreadsheet export row.
@@ -44,4 +44,4 @@ export const MONEY2TIME_LOGO: ImageSourcePropType = require('../assets/brands/mo
  * icon, so it renders at icon size inside the tinted tile instead of filling
  * it. Rasterized from vscode-icons' `file_type_excel.svg` (MIT).
  */
-export const EXCEL_LOGO: ImageSourcePropType = require('../assets/brands/microsoft-excel-logo.png');
+export const EXCEL_LOGO: ImageRequireSource = require('../assets/brands/microsoft-excel-logo.png');

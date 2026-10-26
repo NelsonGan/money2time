@@ -1,5 +1,5 @@
 import * as React from 'react';
-import type { TextInputProps } from 'react-native';
+import type { TextInputInstance, TextInputProps } from 'react-native';
 import { Platform, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
@@ -28,7 +28,7 @@ interface InputProps extends TextInputProps {
 
 const TIMING_CONFIG = { duration: 150 };
 
-const Input = React.forwardRef<TextInput, InputProps>(
+const Input = React.forwardRef<TextInputInstance, InputProps>(
   (
     {
       containerClassName,

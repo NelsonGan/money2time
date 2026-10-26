@@ -7,7 +7,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { AppState, InteractionManager } from 'react-native';
+import { AppState } from 'react-native';
 
 import { useApp } from '~/context/AppContext';
 import {
@@ -32,6 +32,7 @@ import {
   subscribeToRevenueCatCustomerStateUpdates,
   syncRevenueCatAnalyticsIdentifiers,
 } from '~/services/revenueCat';
+import { runAfterInteractions } from '~/utils/interactions';
 import { perfMark } from '~/utils/perfTrace';
 
 interface ProContextValue {
@@ -136,7 +137,7 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
     // (Sentry MONEY2TIME-8), so defer past first interactions — Pro state isn't
     // needed to paint the first screen. Use the status-only refresh so we skip
     // the offerings/StoreKit-product fetch (needed only on the paywall).
-    const task = InteractionManager.runAfterInteractions(() => {
+    const task = runAfterInteractions(() => {
       perfMark('pro_status_refresh');
       void refreshStatus();
     });

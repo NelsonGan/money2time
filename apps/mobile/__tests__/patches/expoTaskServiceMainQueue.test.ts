@@ -12,11 +12,15 @@ import path from 'node:path';
  * collections from two threads at once and crash with EXC_BAD_ACCESS inside
  * EXTaskService (Sentry MONEY2TIME-3G, MONEY2TIME-5Z, MONEY2TIME-23).
  *
- * patches/expo-background-task+1.0.10.patch and
- * patches/expo-task-manager+14.0.9.patch put every entry point on the main
+ * SDK 58 (expo-task-manager 58.0.7) added @synchronized locking to
+ * EXTaskService's own collections, but EXTaskExecutionRequest and the task
+ * consumers are still unlocked, so the main-queue serialization stays.
+ *
+ * patches/expo-background-task+58.0.11.patch and
+ * patches/expo-task-manager+58.0.12.patch put every entry point on the main
  * queue. This reads the installed modules so an upgrade that drops a patch
  * fails here instead of quietly bringing the crash back. Upstream still uses a
- * nil launch queue as of SDK 57.
+ * nil launch queue as of SDK 58.
  */
 
 const modulePath = (...segments: string[]) =>
@@ -46,13 +50,24 @@ describe('EXTaskService runs on the main queue only', () => {
     }
   });
 
-  it('runs the task manager module methods on the main queue', () => {
+  it('runs the task manager module functions on the main queue', () => {
     const source = readFileSync(
-      modulePath('expo-task-manager/ios/EXTaskManager/EXTaskManager.m'),
+      modulePath('expo-task-manager/ios/TaskManagerModule.swift'),
       'utf8',
     );
-    expect(source).toMatch(
-      /- \(dispatch_queue_t\)methodQueue\s*\{\s*return dispatch_get_main_queue\(\);\s*\}/,
-    );
+    for (const name of [
+      'notifyTaskFinishedAsync',
+      'isTaskRegisteredAsync',
+      'getRegisteredTasksAsync',
+      'getTaskOptionsAsync',
+      'unregisterTaskAsync',
+      'unregisterAllTasksAsync',
+    ]) {
+      const start = source.indexOf(`AsyncFunction("${name}")`);
+      expect(start).toBeGreaterThanOrEqual(0);
+      const next = source.indexOf('AsyncFunction(', start + 1);
+      const end = next === -1 ? source.indexOf('// MARK:', start) : next;
+      expect(source.slice(start, end)).toContain('.runOnQueue(.main)');
+    }
   });
 });

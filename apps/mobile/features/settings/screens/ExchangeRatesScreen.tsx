@@ -1,5 +1,4 @@
 import { ChevronRight, GripVertical, Plus, RefreshCw, Trash2 } from 'lucide-react-native';
-import type { ElementRef } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
@@ -50,7 +49,7 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
   const bottomNavInset = useSettingsBottomNavInset();
   const themeColors = useThemeColors();
   const { checkLimit } = useProGate();
-  const scrollRef = useAnimatedRef<ElementRef<typeof Animated.ScrollView>>();
+  const scrollRef = useAnimatedRef<Animated.ScrollView>();
   // Sortable items are absolutely positioned while dragging, so '100%' width
   // doesn't resolve — give each row an explicit pixel width like the other
   // reorderable settings lists.

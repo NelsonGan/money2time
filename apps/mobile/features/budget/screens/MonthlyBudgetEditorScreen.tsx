@@ -1,4 +1,4 @@
-import React, { type ElementRef, useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { View } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -47,7 +47,7 @@ export function MonthlyBudgetEditorScreen({
   const { settings, categories, monthlyBudgets, updateMonthlyBudget, createCustomMonthlyBudget } =
     useApp();
   const themeColors = useThemeColors();
-  const scrollRef = useAnimatedRef<ElementRef<typeof Animated.ScrollView>>();
+  const scrollRef = useAnimatedRef<Animated.ScrollView>();
 
   const budget = useMemo(
     () =>

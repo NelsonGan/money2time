@@ -27,7 +27,7 @@ export const PLUS_TIMES_ICON = (
   </Text>
 );
 
-export const NumpadKey = React.memo(function NumpadKey({
+export const NumpadKey = React.memo(function NumpadKeyImpl({
   value,
   onPress,
   onLongPress,

@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import React from 'react';
-import { Pressable, useWindowDimensions, View } from 'react-native';
+import { Pressable, useWindowDimensions, View, type ViewInstance } from 'react-native';
 
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { Text } from '~/components/ui';
@@ -35,7 +35,7 @@ export function MonthControlsHeader({
   onPrevMonth: () => void;
   onNextMonth: () => void;
   onMonthPress?: () => void;
-  monthTriggerRef?: React.Ref<View>;
+  monthTriggerRef?: React.Ref<ViewInstance>;
   onMonthTriggerLayout?: () => void;
   variant?: 'default' | 'transactions';
   actions?: React.ReactNode;

@@ -1,4 +1,4 @@
-import type { ImageSourcePropType } from 'react-native';
+import type { ImageRequireSource } from 'react-native';
 
 import { CARD_DESIGN_TEMPLATES } from './cardDesigns.generated';
 
@@ -42,7 +42,7 @@ export interface CardDesignTemplate {
   /** `<genre>/<name>`, the value stored on the account. Never rename. */
   id: string;
   genre: CardDesignGenre;
-  source: ImageSourcePropType;
+  source: ImageRequireSource;
   textTone: CardTextTone;
   /**
    * Opacity of the band behind the card's top row (black under light text,
@@ -99,8 +99,11 @@ export function customCardDesignTextTone(value: string): CardTextTone {
   return /\.text-dark\.[a-z0-9]+$/i.test(value) ? 'dark' : 'light';
 }
 
+/** A bundled template (`require()`) or a Pro upload's file uri. */
+export type CardDesignSource = ImageRequireSource | { uri: string };
+
 export interface CardDesignAppearance {
-  source: ImageSourcePropType;
+  source: CardDesignSource;
   textTone: CardTextTone;
   scrim: number;
 }

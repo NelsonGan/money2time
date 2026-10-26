@@ -46,7 +46,7 @@ interface MiniMonthProps {
   onSelectMonth: (year: number, monthIndex: number) => void;
 }
 
-const MiniMonth = memo(function MiniMonth({
+const MiniMonth = memo(function MiniMonthImpl({
   year,
   monthIndex,
   monthWidth,
@@ -107,7 +107,7 @@ const MiniMonth = memo(function MiniMonth({
                 {isToday ? (
                   <View
                     style={[
-                      StyleSheet.absoluteFillObject,
+                      StyleSheet.absoluteFill,
                       {
                         borderRadius: cellSize / 2,
                         backgroundColor: themeColors.primary,
@@ -152,7 +152,7 @@ interface YearPageProps {
   onSelectMonth: (year: number, monthIndex: number) => void;
 }
 
-const YearPage = memo(function YearPage({
+const YearPage = memo(function YearPageImpl({
   year,
   monthWidth,
   cellSize,
@@ -200,7 +200,7 @@ const YearPage = memo(function YearPage({
   );
 });
 
-export const CalendarYearView = memo(function CalendarYearView({
+export const CalendarYearView = memo(function CalendarYearViewImpl({
   centerYear,
   todayDayKey,
   dailyByDayKey,

@@ -81,9 +81,10 @@ describe('Android release keep rules', () => {
     expect(missing).toEqual([]);
   });
 
-  it('keeps the screen class name that expo-blur looks up to scope its Android blur', () => {
-    // ExpoBlurView finds its blur root by walking up to the nearest view whose
-    // class name equals this literal, and falls back to the whole content view.
+  it('keeps every class name that expo-blur looks up to scope its Android blur', () => {
+    // expo-blur 15's ExpoBlurView found its blur root by walking up to the
+    // nearest view whose class name equalled a literal, and fell back to the
+    // whole content view.
     // R8 renamed the class (to `com.swmansion.rnscreens.s`), so in release the
     // bottom bar's blur redrew the entire window, root stack and pushed screens
     // included, on every frame, and crashed in `ViewGroup.dispatchDraw` under
@@ -92,18 +93,33 @@ describe('Android release keep rules', () => {
       path.join(NODE_MODULES, 'expo-blur/android/src/main/java/expo/modules/blur/ExpoBlurView.kt'),
       'utf8',
     );
+    // expo-blur 58 dropped the lookup (Android blurs only inside an explicit
+    // BlurTargetView, and BottomNav no longer blurs there), so the list is empty
+    // today; the keep rule stays as a backstop and this fails if a later version
+    // looks a class up by name again without one.
     const lookedUp = [...source.matchAll(/className == "([\w.$]+)"/g)].map((match) => match[1]);
-    expect(lookedUp).toEqual(['com.swmansion.rnscreens.Screen']);
     const applied = (buildPropertiesAndroid().extraProguardRules ?? '').split('\n');
     for (const className of lookedUp) {
       expect(applied).toContain(`-keepnames class ${className}`);
     }
   });
 
-  it('keeps expo-notifications, whose scheduled reminders fail to save without it', () => {
-    expect(unappliedRules().map(({ pkg }) => pkg)).toContain('expo-notifications');
-    expect(buildPropertiesAndroid().extraProguardRules).toContain(
-      '-keep class expo.modules.notifications.** { *; }',
+  // Since Expo SDK 58 both modules declare `consumerProguardFiles` themselves.
+  // The app.json copies stay as a backstop in case a later version drops it.
+  it.each([
+    ['expo-notifications', '-keep class expo.modules.notifications.** { *; }'],
+    ['expo-task-manager', '-keep class expo.modules.taskmanager.** { *; }'],
+  ])('keeps %s, whose saved state fails to load without it', (pkg, rule) => {
+    expect(buildPropertiesAndroid().extraProguardRules).toContain(rule);
+    const gradle = readFileSync(path.join(NODE_MODULES, pkg, 'android', 'build.gradle'), 'utf8');
+    const ownRules = readFileSync(
+      path.join(NODE_MODULES, pkg, 'android', 'proguard-rules.pro'),
+      'utf8',
     );
+    if (gradle.includes('consumerProguardFiles')) {
+      expect(ownRules.split('\n').map(normalize)).toContain(normalize(rule));
+    } else {
+      expect(unappliedRules().map((entry) => entry.pkg)).toContain(pkg);
+    }
   });
 });

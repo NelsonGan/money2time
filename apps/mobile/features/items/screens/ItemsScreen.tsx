@@ -306,7 +306,7 @@ export function ItemsScreen({
   const themeColors = useThemeColors();
   const listNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
   const reportBottomNavScroll = useBottomNavScrollReporter();
-  const listScrollRef = useAnimatedRef<React.ElementRef<typeof Animated.ScrollView>>();
+  const listScrollRef = useAnimatedRef<Animated.ScrollView>();
   const { contentWidth } = useDeviceLayout();
   // The list pads `spacing.lg` on each side; cards span the remaining width.
   const cardWidth = Math.max(contentWidth - spacing.lg * 2, 0);

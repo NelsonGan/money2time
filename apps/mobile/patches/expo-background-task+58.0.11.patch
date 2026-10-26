@@ -1,25 +1,26 @@
 diff --git a/node_modules/expo-background-task/ios/BackgroundTaskAppDelegate.swift b/node_modules/expo-background-task/ios/BackgroundTaskAppDelegate.swift
-index 14d9e93..71e29e2 100644
+index 98d87f8..0e7bd21 100644
 --- a/node_modules/expo-background-task/ios/BackgroundTaskAppDelegate.swift
 +++ b/node_modules/expo-background-task/ios/BackgroundTaskAppDelegate.swift
-@@ -7,7 +7,11 @@ import ExpoModulesCore
+@@ -7,7 +7,12 @@ import ExpoModulesCore
  public class BackgroundTaskAppDelegateSubscriber: ExpoAppDelegateSubscriber {
    public func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
      if BackgroundTaskScheduler.supportsBackgroundTasks() {
 -      BGTaskScheduler.shared.register(forTaskWithIdentifier: BackgroundTaskConstants.BackgroundWorkerIdentifier, using: nil) { task in
-+      // money2time patch: launch on the main queue. EXTaskService keeps its
-+      // tasks and requests in plain NSMutable collections that it also mutates
-+      // on the main thread during launch; a nil queue raced it from a background
-+      // queue and crashed (Sentry MONEY2TIME-3G / MONEY2TIME-5Z).
++      // money2time patch: launch on the main queue. EXTaskService is also
++      // driven on the main thread during launch, and although SDK 58 locks its
++      // own collections, the EXTaskExecutionRequest this handler creates and
++      // the task consumers are still unlocked. A nil queue raced them from a
++      // background queue and crashed (Sentry MONEY2TIME-3G / MONEY2TIME-5Z).
 +      BGTaskScheduler.shared.register(forTaskWithIdentifier: BackgroundTaskConstants.BackgroundWorkerIdentifier, using: .main) { task in
          log.debug("Expo Background Tasks - starting background work")
  
          // Set up expiration handler
 diff --git a/node_modules/expo-background-task/ios/BackgroundTaskModule.swift b/node_modules/expo-background-task/ios/BackgroundTaskModule.swift
-index 52d2c32..1693169 100644
+index f0f4e41..5172a50 100644
 --- a/node_modules/expo-background-task/ios/BackgroundTaskModule.swift
 +++ b/node_modules/expo-background-task/ios/BackgroundTaskModule.swift
-@@ -50,6 +50,7 @@ public class BackgroundTaskModule: Module {
+@@ -46,6 +46,7 @@ public class BackgroundTaskModule: Module {
        taskManager.registerTask(
          withName: name, consumer: BackgroundTaskConsumer.self, options: options)
      }
@@ -27,7 +28,7 @@ index 52d2c32..1693169 100644
  
      AsyncFunction("unregisterTaskAsync") { (name: String) in
        guard let taskManager else {
-@@ -68,6 +69,7 @@ public class BackgroundTaskModule: Module {
+@@ -64,6 +65,7 @@ public class BackgroundTaskModule: Module {
          taskManager.unregisterTask(withName: name, consumerClass: BackgroundTaskConsumer.self)
        }
      }

@@ -1,6 +1,6 @@
 import { Search, X } from 'lucide-react-native';
 import React, { useEffect, useRef } from 'react';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, TextInput, type TextInputInstance, View } from 'react-native';
 
 import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
 import { spacing } from '~/constants/designSystem';
@@ -9,7 +9,7 @@ import { I18n } from '~/lib/i18n';
 import { FONT } from '~/utils/fonts';
 
 interface ActivitySearchRowProps {
-  inputRef: React.RefObject<TextInput | null>;
+  inputRef: React.RefObject<TextInputInstance | null>;
   visible: boolean;
   value: string;
   onChangeText: (text: string) => void;

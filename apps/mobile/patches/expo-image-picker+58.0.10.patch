@@ -1,5 +1,5 @@
 diff --git a/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/ImagePickerUtils.kt b/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/ImagePickerUtils.kt
-index a6fe83f..f65849f 100644
+index d8c125b..6789a0e 100644
 --- a/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/ImagePickerUtils.kt
 +++ b/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/ImagePickerUtils.kt
 @@ -11,7 +11,6 @@ import android.provider.DocumentsContract
@@ -10,7 +10,7 @@ index a6fe83f..f65849f 100644
  import androidx.exifinterface.media.ExifInterface
  import expo.modules.core.utilities.FileUtilities
  import expo.modules.imagepicker.ImagePickerConstants.TAG
-@@ -186,7 +185,13 @@ internal suspend fun copyFile(
+@@ -193,7 +192,13 @@ internal suspend fun copyFile(
          inputStream.copyTo(fileOutputStream)
          return@runInterruptible
        }
@@ -25,7 +25,7 @@ index a6fe83f..f65849f 100644
    } catch (cause: FileNotFoundException) {
      throw FailedToWriteFileException(targetFile, cause)
    }
-@@ -225,7 +230,10 @@ internal suspend fun copyExifData(
+@@ -232,7 +237,10 @@ internal suspend fun copyExifData(
        } catch (cause: IOException) {
          throw FailedToWriteExifDataToFileException(targetFile, cause)
        }
@@ -37,30 +37,8 @@ index a6fe83f..f65849f 100644
    } catch (cause: FileNotFoundException) {
      throw FailedToWriteFileException(targetFile, cause)
    }
-diff --git a/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/contracts/CropImageContract.kt b/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/contracts/CropImageContract.kt
-index adc53e4..8f144d1 100644
---- a/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/contracts/CropImageContract.kt
-+++ b/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/contracts/CropImageContract.kt
-@@ -68,7 +68,16 @@ internal class CropImageContract(
-     if (resultCode == Activity.RESULT_CANCELED || result == null) {
-       return ImagePickerContractResult.Cancelled
-     }
--    val targetUri = requireNotNull(result.uriContent)
-+    // result.error is non-null (and uriContent is null) when the crop activity
-+    // itself failed, e.g. it lost its source uri across an OS-driven process
-+    // death and restart while the crop UI was open. Every other contract in
-+    // this module (ImageLibraryContract, CameraContract) reports that as
-+    // ImagePickerContractResult.Error, which the JS layer turns into a
-+    // rejected promise; this one used requireNotNull and threw a raw
-+    // IllegalArgumentException instead, which is never caught anywhere in the
-+    // activity-result dispatch chain and crashes the app (Sentry MONEY2TIME-J:
-+    // "IllegalArgumentException: Required value was null").
-+    val targetUri = result.uriContent ?: return ImagePickerContractResult.Error
-     val contentResolver = requireNotNull(appContextProvider.appContext.reactContext) { "React Application Context is null" }.contentResolver
-     runBlocking { copyExifData(input.sourceUri.toUri(), targetUri.toFile(), contentResolver) }
-     return ImagePickerContractResult.Success(listOf(MediaType.IMAGE to targetUri))
 diff --git a/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/exporters/CompressionImageExporter.kt b/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/exporters/CompressionImageExporter.kt
-index 46a059f..438144c 100644
+index 9ffeaaa..a4973a9 100644
 --- a/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/exporters/CompressionImageExporter.kt
 +++ b/node_modules/expo-image-picker/android/src/main/java/expo/modules/imagepicker/exporters/CompressionImageExporter.kt
 @@ -4,7 +4,6 @@ import android.content.ContentResolver
@@ -71,7 +49,7 @@ index 46a059f..438144c 100644
  import expo.modules.imagepicker.FailedToReadFileException
  import expo.modules.imagepicker.FailedToWriteFileException
  import expo.modules.imagepicker.MissingModuleException
-@@ -57,7 +56,15 @@ class CompressionImageExporter(
+@@ -58,7 +57,15 @@ class CompressionImageExporter(
      try {
        loaderResult.get()
      } catch (cause: ExecutionException) {

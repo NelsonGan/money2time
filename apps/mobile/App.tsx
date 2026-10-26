@@ -15,7 +15,6 @@ import {
   Appearance,
   AppState,
   Image,
-  InteractionManager,
   Platform,
   StyleSheet,
   Text as RNText,
@@ -250,6 +249,7 @@ import {
 import type { AddButtonAction, CategoryType, TransactionWithRelations, WageConfig } from '~/types';
 import { financialMonthKeyForDate, monthCycleOf } from '~/utils/financialMonth';
 import { dayKeyFromIsoLocal, monthKeyFromIsoLocal } from '~/utils/formatters';
+import { runAfterInteractions } from '~/utils/interactions';
 import { perfInteraction, perfMark, perfStartupDone } from '~/utils/perfTrace';
 import { markSplashHidden, whenSplashHidden } from '~/utils/splashState';
 // PostHog starts before anything renders so error autocapture (uncaught
@@ -339,7 +339,7 @@ const MemoSettleUpScreen = React.memo(SettleUpScreen);
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   tabSlot: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   tabVisible: { opacity: 1 },
   tabHidden: { opacity: 0 },
@@ -361,7 +361,7 @@ function MountedTab({
   // data loads would stagger the home tab as the others run FlashList
   // measurements, effects, and theme resolution in parallel — so the shell
   // mounts home first, then progressively flips `shouldPreload` per tab via
-  // InteractionManager, paying each mount cost in the background instead of
+  // runAfterInteractions, paying each mount cost in the background instead of
   // on the user's first tap. Once mounted, the tab stays mounted.
   const hasBeenActiveRef = useRef(active);
   if (active) hasBeenActiveRef.current = true;
@@ -587,12 +587,12 @@ function MainShellScreen({
     );
     if (!tab) return undefined;
     let cancelled = false;
-    let interaction: ReturnType<typeof InteractionManager.runAfterInteractions> | null = null;
+    let interaction: ReturnType<typeof runAfterInteractions> | null = null;
     // Runs again once the previous tab has committed, so the gap is measured
     // from the end of one mount to the start of the next.
     const timer = setTimeout(
       () => {
-        interaction = InteractionManager.runAfterInteractions(() => {
+        interaction = runAfterInteractions(() => {
           if (cancelled) return;
           perfMark(`tab_${tab}_preload`);
           startTransition(() => {
@@ -624,11 +624,11 @@ function MainShellScreen({
     let cancelled = false;
     let mountTimer: ReturnType<typeof setTimeout> | null = null;
     let unmountTimer: ReturnType<typeof setTimeout> | null = null;
-    let interaction: ReturnType<typeof InteractionManager.runAfterInteractions> | null = null;
+    let interaction: ReturnType<typeof runAfterInteractions> | null = null;
 
     const stopWaiting = whenSplashHidden(() => {
       mountTimer = setTimeout(() => {
-        interaction = InteractionManager.runAfterInteractions(() => {
+        interaction = runAfterInteractions(() => {
           if (cancelled) return;
           perfMark('quick_add_warmup');
           // A transition for the same reason as the tab preloads above.
@@ -1465,7 +1465,7 @@ function WidgetSnapshotSync() {
     // It also waits for the launch splash to lift, as the first screen needs
     // the JS thread more than the home-screen widgets need fresh data.
     let cancelled = false;
-    let handle: ReturnType<typeof InteractionManager.runAfterInteractions> | null = null;
+    let handle: ReturnType<typeof runAfterInteractions> | null = null;
     const buildSnapshot = () => {
       if (cancelled) return;
       perfMark('widget_snapshot_start');
@@ -1486,7 +1486,7 @@ function WidgetSnapshotSync() {
       void writeMoney2TimeWidgetSnapshot(snapshot).then(() => reloadMoney2TimeWidgets());
     };
     const stopWaiting = whenSplashHidden(() => {
-      handle = InteractionManager.runAfterInteractions(buildSnapshot);
+      handle = runAfterInteractions(buildSnapshot);
     });
     return () => {
       cancelled = true;
@@ -1566,7 +1566,7 @@ function AutoLogSync() {
     // re-encode the catalog repeatedly on the JS thread mid-startup. The intent
     // only reads it when the user taps to pay, so it is never needed to paint.
     let cancelled = false;
-    const handle = InteractionManager.runAfterInteractions(() => {
+    const handle = runAfterInteractions(() => {
       if (cancelled) return;
       // Same rejection path as the drain: report rather than leave it unhandled.
       void writeAutoLogCatalog(
@@ -2753,7 +2753,7 @@ function AppContent() {
     checkedFeatureAnnouncementUserRef.current = settings.appUserId;
 
     let cancelled = false;
-    const interactionHandle = InteractionManager.runAfterInteractions(() => {
+    const interactionHandle = runAfterInteractions(() => {
       void (async () => {
         const voiceSupported = await isSpeechRecognitionAvailable();
         if (cancelled) return;

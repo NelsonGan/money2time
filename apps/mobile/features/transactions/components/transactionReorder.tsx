@@ -291,7 +291,7 @@ export function ReorderGhost({
 }: {
   store: DraggedStore;
   version: number;
-  style: StyleProp<ViewStyle>;
+  style: React.ComponentProps<typeof Animated.View>['style'];
   onLayout: () => void;
   renderRow: (id: string) => React.ReactNode;
 }) {

@@ -558,7 +558,8 @@ export async function recordDailyAppOpen(): Promise<void> {
 
 function watchAppForeground(): void {
   if (appStateSubscription) return;
-  lastAppState = AppState.currentState;
+  // RN 0.88 types currentState as a plain string; the values are AppStateStatus.
+  lastAppState = (AppState.currentState as AppStateStatus | null | undefined) ?? null;
   appStateSubscription = AppState.addEventListener('change', (next) => {
     const cameToForeground = next === 'active' && lastAppState !== 'active';
     lastAppState = next;

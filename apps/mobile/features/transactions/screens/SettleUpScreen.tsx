@@ -1,6 +1,6 @@
 import { ChevronRight, ReceiptText, Search, Settings2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { TextInput } from 'react-native';
+import type { TextInputInstance } from 'react-native';
 import { Keyboard, Pressable, ScrollView, View } from 'react-native';
 import PagerView, {
   type PagerViewOnPageSelectedEvent,
@@ -88,7 +88,7 @@ export function SettleUpScreen({
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
-  const searchInputRef = useRef<TextInput | null>(null);
+  const searchInputRef = useRef<TextInputInstance | null>(null);
   const summary = useSettleUpSummary();
   const byTransaction = useSettleUpByTransaction();
   const people = useMemo(

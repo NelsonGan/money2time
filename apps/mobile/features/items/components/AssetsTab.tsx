@@ -43,7 +43,7 @@ interface AssetsTabProps {
 }
 
 const styles = StyleSheet.create({
-  pane: { ...StyleSheet.absoluteFillObject },
+  pane: { ...StyleSheet.absoluteFill },
   paneVisible: { opacity: 1 },
   paneHidden: { opacity: 0 },
 });

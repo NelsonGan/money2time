@@ -1,6 +1,13 @@
 import { Settings } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, type TextStyle, View } from 'react-native';
+import {
+  Pressable,
+  ScrollView,
+  type ScrollViewInstance,
+  StyleSheet,
+  type TextStyle,
+  View,
+} from 'react-native';
 import Animated, {
   cancelAnimation,
   FadeIn,
@@ -58,7 +65,7 @@ interface AccountCardStackProps {
   convertedBalanceMap: Map<string, number>;
   creditSummaryByAccountId: Map<string, CreditSummary>;
   loanSummaryByAccountId: Map<string, LoanCardSummary>;
-  scrollViewRef?: React.RefObject<ScrollView | null>;
+  scrollViewRef?: React.RefObject<ScrollViewInstance | null>;
   settings: UserSettings;
   trueHourlyRate: number;
   hideBalances: boolean;

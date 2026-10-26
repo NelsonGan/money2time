@@ -87,7 +87,7 @@ function formatWorkDuration(workdays: number, workdaysPerWeek: number) {
   return `${weekLabel} ${I18n.t(remainingDayKey, { count: fmt(remainingDays) })}`;
 }
 
-const TryItNumKey = React.memo(function TryItNumKey({
+const TryItNumKey = React.memo(function TryItNumKeyImpl({
   label,
   onPress,
   onLongPress,

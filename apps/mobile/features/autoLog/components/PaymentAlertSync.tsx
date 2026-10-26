@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { AppState, InteractionManager } from 'react-native';
+import { AppState } from 'react-native';
 
 import { useApp } from '~/context/AppContext';
 import { paymentAlertCapturesRepository } from '~/lib/repositories/paymentAlertCapturesRepository';
@@ -17,6 +17,7 @@ import {
   subscribeCaptureQueued,
   writeListenerConfig,
 } from '~/services/paymentCapture';
+import { runAfterInteractions } from '~/utils/interactions';
 
 import type { CaptureInput } from '../lib/captureQueue';
 import { androidCapturePackages } from '../lib/prefs';
@@ -160,7 +161,7 @@ export function PaymentAlertSync() {
   useEffect(() => {
     if (!isPaymentAlertCaptureSupported()) return undefined;
     // Off the startup path: the first screen needs the JS thread more.
-    const handle = InteractionManager.runAfterInteractions(() => void drainRef.current());
+    const handle = runAfterInteractions(() => void drainRef.current());
     const appState = AppState.addEventListener('change', (state) => {
       if (state !== 'active') return;
       void drainRef.current();

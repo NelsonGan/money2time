@@ -23,7 +23,7 @@ import path from 'node:path';
 
 const SERVICE = path.resolve(
   __dirname,
-  '../../node_modules/@shopify/react-native-skia/android/src/main/java/com/shopify/reactnative/skia/ViewScreenshotService.java',
+  '../../node_modules/@shopify/react-native-skia/android/src/main/java/com/reactnative/skia/ViewScreenshotService.java',
 );
 
 describe('skia android view capture', () => {

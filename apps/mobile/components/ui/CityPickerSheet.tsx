@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
-  InteractionManager,
   Keyboard,
   Pressable,
   StyleSheet,
@@ -19,6 +18,7 @@ import { searchCities } from '~/lib/db/citiesDb';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { AlbumLocation, City } from '~/types';
+import { runAfterInteractions } from '~/utils/interactions';
 
 interface CityPickerSheetProps {
   visible: boolean;
@@ -90,7 +90,7 @@ export function CityPickerSheet({ visible, onClose, onSelect }: CityPickerSheetP
     // selection: onSelect persists the location, which triggers a synchronous
     // refreshAll() in AppContext — running it now would block the close animation.
     handleClose();
-    InteractionManager.runAfterInteractions(() => onSelect(location));
+    runAfterInteractions(() => onSelect(location));
   };
 
   const trimmed = query.trim();

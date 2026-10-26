@@ -10,15 +10,8 @@ import {
   Trash2,
 } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
-import {
-  Alert,
-  InteractionManager,
-  Pressable,
-  ScrollView,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import type { NativeScrollEvent, NativeSyntheticEvent, ScrollViewInstance } from 'react-native';
+import { Alert, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
@@ -48,6 +41,7 @@ import { deleteAlbumCover, getAlbumCoverUri, saveAlbumCover } from '~/services/u
 import type { CategoryType, TransactionWithRelations } from '~/types';
 import { cn } from '~/utils';
 import { formatAmount, formatHours } from '~/utils/formatters';
+import { runAfterInteractions } from '~/utils/interactions';
 import { countsAsExpenseRow } from '~/utils/spending';
 
 import { formatAlbumDateRange } from '../utils';
@@ -101,8 +95,8 @@ export function AlbumDetailScreen({
   const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
   const [showDuplicatePicker, setShowDuplicatePicker] = useState(false);
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
-  const pagerRef = useRef<ScrollView | null>(null);
-  const outerScrollRef = useRef<ScrollView | null>(null);
+  const pagerRef = useRef<ScrollViewInstance | null>(null);
+  const outerScrollRef = useRef<ScrollViewInstance | null>(null);
   // Whether the cover hero is scrolled off-screen (content snapped to the top).
   // Drives the tab-bar toggle arrow's direction and action.
   const [coverCollapsed, setCoverCollapsed] = useState(false);
@@ -117,7 +111,7 @@ export function AlbumDetailScreen({
   // once the navigation transition has settled.
   const [contentReady, setContentReady] = useState(false);
   useEffect(() => {
-    const task = InteractionManager.runAfterInteractions(() => setContentReady(true));
+    const task = runAfterInteractions(() => setContentReady(true));
     return () => task.cancel();
   }, []);
 

@@ -139,20 +139,17 @@ export function WheelPicker({ items, selectedIndex, onChange }: WheelPickerProps
     void triggerHaptic('selection');
   }, []);
 
-  const scrollHandler = useAnimatedScrollHandler(
-    {
-      onScroll: (event) => {
-        scrollY.value = event.contentOffset.y;
-        const rounded = Math.round(event.contentOffset.y / WHEEL_ITEM_HEIGHT);
-        const clamped = Math.max(0, Math.min(itemsLength - 1, rounded));
-        if (clamped !== lastHapticIndexSv.value) {
-          lastHapticIndexSv.value = clamped;
-          runOnJS(fireHaptic)();
-        }
-      },
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+      const rounded = Math.round(event.contentOffset.y / WHEEL_ITEM_HEIGHT);
+      const clamped = Math.max(0, Math.min(itemsLength - 1, rounded));
+      if (clamped !== lastHapticIndexSv.value) {
+        lastHapticIndexSv.value = clamped;
+        runOnJS(fireHaptic)();
+      }
     },
-    [fireHaptic, itemsLength, lastHapticIndexSv, scrollY],
-  );
+  });
 
   const handleMomentumEnd = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {

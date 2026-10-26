@@ -18,6 +18,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  type ScrollViewInstance,
   StyleSheet,
   Switch,
   View,
@@ -3147,8 +3148,8 @@ export function AccountsScreen({
   const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
   const [showDuplicatePicker, setShowDuplicatePicker] = useState(false);
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
-  const accountsOverviewScrollRef = useRef<ScrollView | null>(null);
-  const managementScrollRef = useAnimatedRef<React.ElementRef<typeof Animated.ScrollView>>();
+  const accountsOverviewScrollRef = useRef<ScrollViewInstance | null>(null);
+  const managementScrollRef = useAnimatedRef<Animated.ScrollView>();
   const transactionDisplaySettings = useMemo(
     () => ({
       currencySymbol: settings.currencySymbol,
