@@ -12,6 +12,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { Text, TimeValueInline } from '~/components/ui';
+import { usePauseSessionReplay } from '~/components/ui/replayPrivacy';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -28,6 +29,8 @@ interface OnboardingTryItConverterProps {
   trueRateLabel: string;
   onChangeAmount: (value: string) => void;
   onEditRate: () => void;
+  /** False while something covers the keypad (the wage calculator); default true. */
+  onScreen?: boolean;
 }
 
 const MAX_INPUT_VALUE = 1_000_000_000;
@@ -166,7 +169,10 @@ export function OnboardingTryItConverter({
   trueRateLabel,
   onChangeAmount,
   onEditRate,
+  onScreen = true,
 }: OnboardingTryItConverterProps) {
+  // Tap positions on its keypad would spell out the amount.
+  usePauseSessionReplay(onScreen);
   const themeColors = useThemeColors();
   const amountRef = useRef(amount);
 

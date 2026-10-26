@@ -4,7 +4,8 @@ const mockRegister = jest.fn();
 const mockSetPersonProperties = jest.fn();
 const mockFlush = jest.fn(async () => undefined);
 const mockReset = jest.fn();
-const mockStartSessionRecording = jest.fn(async () => undefined);
+const mockStartSessionRecording = jest.fn(async (_resumeCurrent?: boolean) => undefined);
+const mockStopSessionRecording = jest.fn(async () => undefined);
 const mockPostHogClient = {
   capture: mockCapture,
   identify: mockIdentify,
@@ -13,6 +14,7 @@ const mockPostHogClient = {
   flush: mockFlush,
   reset: mockReset,
   startSessionRecording: mockStartSessionRecording,
+  stopSessionRecording: mockStopSessionRecording,
 };
 const mockPostHog = { enabled: true };
 const mockAppStateListeners: ((state: string) => void)[] = [];
@@ -705,6 +707,42 @@ describe('native daily engagement', () => {
     jest.resetModules();
     const sampled = await import('~/services/analytics.native');
     expect(sampled.startSessionReplayForLaunch(false, () => 0.001)).toBe(true);
+  });
+
+  it('pauses a recording while a number pad is on screen and resumes the same session', async () => {
+    const analytics = await import('~/services/analytics.native');
+    expect(analytics.startSessionReplayForLaunch(true, () => 0)).toBe(true);
+    expect(mockStartSessionRecording).toHaveBeenLastCalledWith(true);
+
+    const endFirst = analytics.pauseSessionReplay();
+    const endSecond = analytics.pauseSessionReplay();
+    expect(mockStopSessionRecording).toHaveBeenCalledTimes(1);
+
+    endFirst();
+    endFirst();
+    expect(mockStartSessionRecording).toHaveBeenCalledTimes(1);
+    endSecond();
+    expect(mockStartSessionRecording).toHaveBeenCalledTimes(2);
+    expect(mockStartSessionRecording).toHaveBeenLastCalledWith(true);
+  });
+
+  it('starts a sampled recording only once the number pad on screen goes', async () => {
+    const analytics = await import('~/services/analytics.native');
+    const end = analytics.pauseSessionReplay();
+    expect(analytics.startSessionReplayForLaunch(true, () => 0)).toBe(true);
+    expect(mockStartSessionRecording).not.toHaveBeenCalled();
+    expect(mockStopSessionRecording).not.toHaveBeenCalled();
+
+    end();
+    expect(mockStartSessionRecording).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores number pads on a launch that is not recorded', async () => {
+    const analytics = await import('~/services/analytics.native');
+    expect(analytics.startSessionReplayForLaunch(false, () => 0.5)).toBe(false);
+    analytics.pauseSessionReplay()();
+    expect(mockStopSessionRecording).not.toHaveBeenCalled();
+    expect(mockStartSessionRecording).not.toHaveBeenCalled();
   });
 });
 
