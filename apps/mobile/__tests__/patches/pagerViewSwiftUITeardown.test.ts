@@ -44,11 +44,11 @@ describe('pager-view iOS teardown', () => {
     }
   });
 
-  it('installs the scroll delegate once per collection view', () => {
+  it('installs the scroll delegate only when it is not already the delegate', () => {
     const pagerView = read('PagerView.swift');
     expect(pagerView).not.toContain('if scrollDelegate.originalDelegate == nil');
     expect(pagerView).toMatch(
-      /if scrollDelegate\.installedCollectionView !== collectionView \{[\s\S]*?scrollDelegate\.installedCollectionView = collectionView/,
+      /if collectionView\.delegate !== scrollDelegate \{[\s\S]*?collectionView\.delegate = scrollDelegate/,
     );
   });
 

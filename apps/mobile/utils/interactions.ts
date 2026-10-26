@@ -1,8 +1,11 @@
 export type InteractionTask = { cancel: () => void };
 
 /**
- * Run a task on the next turn of the event loop, after the current render and
- * any touch handling have finished.
+ * Run a task as soon as the current JavaScript task finishes. In React Native
+ * `setImmediate` is a microtask, so this is still before the next frame is
+ * drawn: it moves work out of the current call stack (a commit, a handler), it
+ * does not wait for animations. Use a timer when the work must land after a
+ * transition.
  *
  * This replaces React Native's `InteractionManager.runAfterInteractions`,
  * which React Native 0.88 removed (accessing it throws in development and is

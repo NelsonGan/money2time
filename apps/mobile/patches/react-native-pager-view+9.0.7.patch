@@ -1,8 +1,8 @@
 diff --git a/node_modules/react-native-pager-view/ios/PagerScrollDelegate.swift b/node_modules/react-native-pager-view/ios/PagerScrollDelegate.swift
-index 5b09e03..358be8a 100644
+index 5b09e03..bf29da6 100644
 --- a/node_modules/react-native-pager-view/ios/PagerScrollDelegate.swift
 +++ b/node_modules/react-native-pager-view/ios/PagerScrollDelegate.swift
-@@ -4,10 +4,25 @@ import UIKit
+@@ -4,10 +4,18 @@ import UIKit
   Scroll delegate used to control underlying TabView's collection view.
   */
  class PagerScrollDelegate: NSObject, UIScrollViewDelegate, UICollectionViewDelegate {
@@ -17,19 +17,12 @@ index 5b09e03..358be8a 100644
    weak var delegate: PagerViewProviderDelegate?
    var orientation: UICollectionView.ScrollDirection = .horizontal
  
-+  /// money2time patch: the collection view this delegate is installed in.
-+  /// Identity, not `originalDelegate == nil`, tells PagerView the install
-+  /// already ran: `originalDelegate` is weak and goes nil on its own when
-+  /// SwiftUI rebuilds the TabView (`.id(children.count)`, e.g. while React
-+  /// unmounts the pages one by one).
-+  weak var installedCollectionView: UICollectionView?
-+
 +  private var isQueryingOriginalDelegate = false
 +  
    private let handledSelectors: Set<Selector> = [
      #selector(scrollViewDidScroll(_:)),
      #selector(scrollViewWillBeginDragging(_:)),
-@@ -86,11 +101,19 @@ class PagerScrollDelegate: NSObject, UIScrollViewDelegate, UICollectionViewDeleg
+@@ -86,11 +94,19 @@ class PagerScrollDelegate: NSObject, UIScrollViewDelegate, UICollectionViewDeleg
    }
    
    override func responds(to aSelector: Selector!) -> Bool {
@@ -52,28 +45,25 @@ index 5b09e03..358be8a 100644
  }
  
 diff --git a/node_modules/react-native-pager-view/ios/PagerView.swift b/node_modules/react-native-pager-view/ios/PagerView.swift
-index a4a850a..ce41558 100644
+index a4a850a..b7aa43f 100644
 --- a/node_modules/react-native-pager-view/ios/PagerView.swift
 +++ b/node_modules/react-native-pager-view/ios/PagerView.swift
-@@ -54,11 +54,17 @@ struct PagerView: View {
+@@ -54,7 +54,14 @@ struct PagerView: View {
            collectionView.rightEdgeEffect.isHidden = true
          }
  
 -        if scrollDelegate.originalDelegate == nil {
-+        // money2time patch (upstream PR #1147): install once per collection
-+        // view. This closure re-runs on every layout pass; keyed on the weak
-+        // `originalDelegate` it re-adopted `collectionView.delegate` (this
-+        // object) once SwiftUI's own delegate died, and the cycle overflowed
-+        // the stack (upstream issue #1146).
-+        if scrollDelegate.installedCollectionView !== collectionView {
++        // money2time patch (upstream PR #1147): install whenever the
++        // collection view's delegate is not already this object. This closure
++        // re-runs on every layout pass; keyed on the weak `originalDelegate` it
++        // re-adopted `collectionView.delegate` (this object) once SwiftUI's own
++        // delegate died, and the cycle overflowed the stack (upstream issue
++        // #1146). Keyed on the delegate itself, it never adopts itself and still
++        // reinstalls if SwiftUI swaps in a new delegate.
++        if collectionView.delegate !== scrollDelegate {
            scrollDelegate.originalDelegate = collectionView.delegate
            scrollDelegate.delegate = delegate
            // VTabView-style rotation preserves TabView's horizontal collection view.
-           scrollDelegate.orientation = .horizontal
-+          scrollDelegate.installedCollectionView = collectionView
-           collectionView.delegate = scrollDelegate
-         }
-       }
 diff --git a/node_modules/react-native-pager-view/ios/RNCPagerViewComponentView.mm b/node_modules/react-native-pager-view/ios/RNCPagerViewComponentView.mm
 index eeeecde..b729756 100644
 --- a/node_modules/react-native-pager-view/ios/RNCPagerViewComponentView.mm
