@@ -14,6 +14,7 @@ import { useReceiptScans } from '~/context/ReceiptScanContext';
 import { useIsFlatIcons } from '~/context/ThemeContext';
 import { VoiceCaptureOverlay } from '~/features/transactions/components/VoiceCaptureOverlay';
 import { offscreenPageLimitFor, usePagerTabSync } from '~/hooks/usePagerTabSync';
+import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -145,6 +146,7 @@ export function AddActionSheet({
 }: AddActionSheetProps) {
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
+  const sheetColumnStyle = useSheetColumnStyle();
   const { canStartScan, scanReceiptImage } = useReceiptScans();
   const [accountPickerVisible, setAccountPickerVisible] = useState(false);
   const [tab, setTab] = useState<SheetTab>('add');
@@ -444,7 +446,7 @@ export function AddActionSheet({
           onClose();
         }}
       >
-        <Pressable onPress={(e) => e.stopPropagation()}>
+        <Pressable onPress={(e) => e.stopPropagation()} style={sheetColumnStyle}>
           <View
             className="bg-card rounded-t-[28px]"
             style={{ paddingBottom: Math.max(insets.bottom, 16) }}

@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useMemo } from 'react';
-import { FlatList, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 
 import {
   useBottomNavContentInset,
@@ -25,6 +25,8 @@ export const TOTAL_YEAR_SLOTS = 21;
 export const CENTER_YEAR_INDEX = 10;
 
 interface CalendarYearViewProps {
+  /** Width of the area the year is laid out in. */
+  width: number;
   centerYear: number;
   todayDayKey: string;
   dailyByDayKey: Map<string, CalendarDayAggregate>;
@@ -201,6 +203,7 @@ const YearPage = memo(function YearPageImpl({
 });
 
 export const CalendarYearView = memo(function CalendarYearViewImpl({
+  width,
   centerYear,
   todayDayKey,
   dailyByDayKey,
@@ -209,11 +212,10 @@ export const CalendarYearView = memo(function CalendarYearViewImpl({
   onSelectMonth,
   onListRef,
 }: CalendarYearViewProps) {
-  const { width: screenWidth } = useWindowDimensions();
   const bottomNavInset = useBottomNavContentInset();
   const reportBottomNavScroll = useBottomNavScrollReporter();
 
-  const { monthWidth, cellSize, yearItemHeight } = getCalendarYearLayout(screenWidth);
+  const { monthWidth, cellSize, yearItemHeight } = getCalendarYearLayout(width);
 
   const slots = useMemo(() => Array.from({ length: TOTAL_YEAR_SLOTS }, (_, i) => i), []);
 

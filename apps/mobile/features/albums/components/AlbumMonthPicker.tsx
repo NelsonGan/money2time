@@ -1,8 +1,9 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { FlatList, useWindowDimensions, View } from 'react-native';
+import { FlatList, View } from 'react-native';
 
 import { MonthYearWheelPicker } from '~/components/datePicker';
 import { monthsBetween, shiftYearMonth, yearMonthFromKey } from '~/components/datePicker/monthJump';
+import { useContentFrame } from '~/components/layout/ContentFrame';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { MonthPagerPage } from '~/features/transactions/components';
@@ -43,7 +44,7 @@ export function AlbumMonthPicker({ selectedIds, onChange }: AlbumMonthPickerProp
   const { settings, getDisplayValueForTransaction, getTrueHourlyRateForDate } = useApp();
   const monthCycle = monthCycleOf(settings);
   const { transactions } = useTransactions();
-  const { width } = useWindowDimensions();
+  const { width } = useContentFrame();
   const pageWidth = Math.max(1, width);
   const monthPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
   const monthPagerAnchorDate = useMemo(

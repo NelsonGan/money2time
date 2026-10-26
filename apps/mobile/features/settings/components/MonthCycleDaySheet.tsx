@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Dimensions, Pressable, View } from 'react-native';
 
 import { Text, ThemeModal } from '~/components/ui';
-import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
+import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -57,7 +57,7 @@ export function MonthCycleDaySheet({
   onClose,
 }: MonthCycleDaySheetProps) {
   const themeColors = useThemeColors();
-  const { isTablet } = useDeviceLayout();
+  const sheetColumnStyle = useSheetColumnStyle({ onTablet: true });
   const [draftDay, setDraftDay] = useState(selectedDay);
   const days = useMemo(() => Array.from({ length: dayCount }, (_, index) => index + 1), [dayCount]);
   const translateY = useRef(new Animated.Value(Dimensions.get('window').height)).current;
@@ -94,12 +94,7 @@ export function MonthCycleDaySheet({
         />
         <Animated.View
           className="rounded-t-[32px] bg-card px-5 pt-3 pb-8"
-          style={[
-            { transform: [{ translateY }] },
-            isTablet
-              ? { maxWidth: TABLET_CONTENT_MAX_WIDTH, width: '100%', alignSelf: 'center' }
-              : null,
-          ]}
+          style={[{ transform: [{ translateY }] }, sheetColumnStyle]}
         >
           <View className="mb-3.5 h-[5px] w-11 self-center rounded-full bg-border" />
 

@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '~/components/ui/text';
 import { ThemeModal } from '~/components/ui/theme-modal';
+import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { searchCities } from '~/lib/db/citiesDb';
 import { I18n } from '~/lib/i18n';
@@ -44,6 +45,7 @@ function citySubtitle(city: City): string {
 }
 
 export function CityPickerSheet({ visible, onClose, onSelect }: CityPickerSheetProps) {
+  const sheetColumnStyle = useSheetColumnStyle();
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
   const [query, setQuery] = useState('');
@@ -98,7 +100,7 @@ export function CityPickerSheet({ visible, onClose, onSelect }: CityPickerSheetP
   return (
     <ThemeModal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
       <Pressable style={styles.backdrop} onPress={handleClose}>
-        <Pressable onPress={(e) => e.stopPropagation()} style={styles.sheet}>
+        <Pressable onPress={(e) => e.stopPropagation()} style={[styles.sheet, sheetColumnStyle]}>
           <View
             className="bg-card rounded-t-[28px] flex-1"
             style={{ paddingBottom: Math.max(insets.bottom, 16) }}

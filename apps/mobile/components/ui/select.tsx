@@ -9,7 +9,8 @@ import {
   View,
 } from 'react-native';
 
-import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
+import { TABLET_CONTENT_MAX_WIDTH } from '~/hooks/useDeviceLayout';
+import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -87,7 +88,12 @@ export function SelectField({
   const themeColors = useThemeColors();
   const [open, setOpen] = useState(false);
   const { width: screenWidth, height: windowHeight } = useWindowDimensions();
-  const { contentWidth: windowWidth, isTablet } = useDeviceLayout();
+  const sheetColumnStyle = useSheetColumnStyle({ onTablet: true });
+  // The icon grid fills the sheet, which is centred in a column on tablets
+  // and the open iPhone Duo, and spans the window everywhere else.
+  const windowWidth = sheetColumnStyle
+    ? Math.min(screenWidth, TABLET_CONTENT_MAX_WIDTH)
+    : screenWidth;
   const isSmallScreen = screenWidth < 380;
   const [sheetHeight, setSheetHeight] = useState(SHEET_HEIGHT);
   const [translateY] = useState(() => new RNAnimated.Value(SHEET_HEIGHT));
@@ -498,13 +504,7 @@ export function SelectField({
               maxHeight: fullHeight
                 ? windowHeight * 0.92
                 : Math.max(320, Math.min(windowHeight * 0.74, 620)),
-              ...(isTablet
-                ? {
-                    maxWidth: TABLET_CONTENT_MAX_WIDTH,
-                    width: '100%',
-                    alignSelf: 'center' as const,
-                  }
-                : {}),
+              ...sheetColumnStyle,
             }}
             onLayout={(event) => {
               const next = event.nativeEvent.layout.height;

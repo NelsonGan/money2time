@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import Sortable from 'react-native-sortables';
 
-import { NAV_TAB_META } from '~/components/navigation/BottomNav';
+import { NAV_TAB_META } from '~/components/navigation/NavChrome';
 import {
   addNavTab,
   availableNavTabs,

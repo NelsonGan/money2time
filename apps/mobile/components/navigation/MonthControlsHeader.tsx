@@ -1,7 +1,8 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import React from 'react';
-import { Pressable, useWindowDimensions, View, type ViewInstance } from 'react-native';
+import { Pressable, View, type ViewInstance } from 'react-native';
 
+import { useContentFrame } from '~/components/layout/ContentFrame';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -48,7 +49,7 @@ export function MonthControlsHeader({
   showAccent?: boolean;
 }) {
   const themeColors = useThemeColors();
-  const { width: screenWidth } = useWindowDimensions();
+  const { width: screenWidth } = useContentFrame();
   const isSmallScreen = screenWidth < 380;
 
   return (

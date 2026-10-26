@@ -1,26 +1,14 @@
 import { ChevronLeft, X } from 'lucide-react-native';
 import React from 'react';
-import {
-  type LayoutChangeEvent,
-  Platform,
-  Pressable,
-  StatusBar,
-  Switch,
-  View,
-  type ViewProps,
-} from 'react-native';
+import { type LayoutChangeEvent, Pressable, Switch, View, type ViewProps } from 'react-native';
 import { GestureDetector, type GestureType } from 'react-native-gesture-handler';
-import {
-  type Edge,
-  initialWindowMetrics,
-  SafeAreaView,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+import { type Edge, SafeAreaView } from 'react-native-safe-area-context';
 
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { useBottomNavContentInset } from '~/components/navigation/BottomNavMinimize';
 import { LIST_BOTTOM_PADDING, spacing } from '~/constants/designSystem';
 import { useIsFlatIcons, useResolvedTheme } from '~/context/ThemeContext';
+import { useStableSafeAreaInsets } from '~/hooks/useStableSafeAreaInsets';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { type HapticKind, triggerHaptic } from '~/services/haptics';
@@ -65,18 +53,11 @@ export function SettingsPageLayout({
   className,
   ...props
 }: SettingsPageLayoutProps) {
-  const insets = useSafeAreaInsets();
   // Native-stack screens can report 0 insets on their first frame, which makes
-  // the header flash flush against the top before snapping down. Fall back to
-  // the metrics captured at module init so the inset is correct immediately.
-  const edgeInset = (edge: Edge, live: number) =>
-    edges.includes(edge)
-      ? Math.max(
-          live,
-          initialWindowMetrics?.insets[edge] ?? 0,
-          edge === 'top' && Platform.OS === 'android' ? (StatusBar.currentHeight ?? 0) : 0,
-        )
-      : 0;
+  // the header flash flush against the top before snapping down; the stable
+  // insets are correct immediately.
+  const insets = useStableSafeAreaInsets();
+  const edgeInset = (edge: Edge, value: number) => (edges.includes(edge) ? value : 0);
   const insetStyle = {
     paddingTop: edgeInset('top', insets.top),
     paddingBottom: edgeInset('bottom', insets.bottom),
