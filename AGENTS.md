@@ -65,7 +65,8 @@ the running simulators and emulators. Open
 link Metro prints: `--localhost` binds Metro to IPv6 only) in the browser
 pane, select the device you are testing, and leave it on the tested screen so
 the user can follow along. The Hub only starts listing devices once a page is
-open. Use these devices and no others:
+open, and a page opened right after Metro starts can stay on "Connecting to the
+Expo dev server": reload it. Use these devices and no others:
 
 | Platform | Device                                                                     | Boot with Argent             |
 | -------- | -------------------------------------------------------------------------- | ---------------------------- |
