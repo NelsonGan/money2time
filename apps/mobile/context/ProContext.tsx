@@ -67,6 +67,10 @@ const ProStatusContext = createContext<boolean | null>(null);
 export function ProProvider({ children }: { children: React.ReactNode }) {
   const { settings } = useApp();
   const appUserId = settings.appUserId?.trim() ? settings.appUserId : null;
+  // Name the RevenueCat user during render, not in an effect: children's
+  // effects run first, and a paywall mounted in the same commit would otherwise
+  // reach the SDK before it knows who the user is. Idempotent.
+  setRevenueCatAppUserId(appUserId);
   const [isPro, setIsPro] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isStatusSettled, setIsStatusSettled] = useState(false);

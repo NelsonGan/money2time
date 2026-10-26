@@ -714,6 +714,28 @@ function getPlanKind(pkg: RevenueCatPackage): PaywallPlanKind {
   }
 }
 
+/**
+ * Lifetime is a separate one-time product; an old subscription keeps renewing
+ * until cancelled. Nudge the user to stop the double charge.
+ */
+function promptToCancelRedundantSubscription() {
+  Alert.alert(I18n.t('pro.lifetime_purchased_title'), I18n.t('pro.lifetime_purchased_body'), [
+    {
+      text: I18n.t('pro.cancel_subscription'),
+      onPress: () => {
+        void trackEvent(AnalyticsEvents.PRO_CANCEL_SUB_PROMPT_ACTIONED, { choice: 'cancel' });
+        openStoreSubscriptions();
+      },
+    },
+    {
+      text: I18n.t('pro.not_now'),
+      style: 'cancel',
+      onPress: () =>
+        void trackEvent(AnalyticsEvents.PRO_CANCEL_SUB_PROMPT_ACTIONED, { choice: 'not_now' }),
+    },
+  ]);
+}
+
 export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallScreenProps) {
   const {
     isLoading,
@@ -922,8 +944,13 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
             source: paywallSource,
             found: true,
           });
-          Alert.alert(I18n.t('pro.restore_success'));
           onClose();
+          if (wasSubscriber && boughtLifetime) {
+            // They own Lifetime and are still billed for the subscription.
+            promptToCancelRedundantSubscription();
+          } else {
+            Alert.alert(I18n.t('pro.restore_success'));
+          }
         } else if (result.status === 'success') {
           void trackEvent(AnalyticsEvents.PRO_PURCHASE_COMPLETED, {
             ...purchaseAnalytics,
@@ -934,33 +961,7 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
           });
           recordProPurchase();
           onClose();
-          if (wasSubscriber && boughtLifetime) {
-            // Lifetime is a separate one-time product; the old subscription keeps
-            // renewing until cancelled. Nudge the user to stop the double charge.
-            Alert.alert(
-              I18n.t('pro.lifetime_purchased_title'),
-              I18n.t('pro.lifetime_purchased_body'),
-              [
-                {
-                  text: I18n.t('pro.cancel_subscription'),
-                  onPress: () => {
-                    void trackEvent(AnalyticsEvents.PRO_CANCEL_SUB_PROMPT_ACTIONED, {
-                      choice: 'cancel',
-                    });
-                    openStoreSubscriptions();
-                  },
-                },
-                {
-                  text: I18n.t('pro.not_now'),
-                  style: 'cancel',
-                  onPress: () =>
-                    void trackEvent(AnalyticsEvents.PRO_CANCEL_SUB_PROMPT_ACTIONED, {
-                      choice: 'not_now',
-                    }),
-                },
-              ],
-            );
-          }
+          if (wasSubscriber && boughtLifetime) promptToCancelRedundantSubscription();
         } else if (result.status === 'pending') {
           void trackEvent(AnalyticsEvents.PRO_PURCHASE_PENDING, purchaseAnalytics);
           Alert.alert(

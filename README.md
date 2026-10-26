@@ -576,8 +576,11 @@ As checked in the live Money2Time RevenueCat dashboard (read-only, 2026-09-08):
   platform, and preserve the restore error during already-owned purchase recovery.
   Network and offline errors are not reported: they are not app failures.
 - An already-owned purchase that restore applies is a restore, not a sale
-  (`reason: 'restored_owned_product'`). When the restore cannot apply it, tell
-  the user to restore from the store account that bought it.
+  (`reason: 'restored_owned_product'`): the paywall sends `Pro Restore
+Completed`, so that attempt's `Pro Purchase Started` has no purchase outcome.
+  A subscriber who turns out to own Lifetime still gets the prompt to cancel the
+  subscription. When the restore cannot apply it, tell the user to restore from
+  the store account that bought it.
 - A Play slow payment or iOS Ask to Buy (`PAYMENT_PENDING_ERROR`) is pending,
   not failed. Saying it failed invites a second purchase. Pro unlocks through
   the customer-info listener when the payment completes.
