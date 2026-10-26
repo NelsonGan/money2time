@@ -149,6 +149,7 @@ describe('receipt scanner with Claude as MODEL', () => {
       is_backup_model: false,
       $ai_cache_read_input_tokens: 900,
       $ai_cache_creation_input_tokens: 0,
+      prompt_cache: 'shared',
     });
     expect(event.properties).not.toHaveProperty('$ai_temperature');
   });
@@ -173,6 +174,8 @@ describe('receipt scanner with Claude as MODEL', () => {
     const [failed, served] = generations();
     expect(failed.properties.$ai_is_error).toBe(true);
     expect(served.properties.is_backup_model).toBe(true);
+    // Only Claude is sent a cache marker, so only its generation says which.
+    expect(served.properties).not.toHaveProperty('prompt_cache');
   });
 
   it('sends every user the same cached text, whatever their settings', async () => {
@@ -199,13 +202,28 @@ describe('receipt scanner with Claude as MODEL', () => {
       if (url.includes('openrouter.ai')) return completion(ANSWER, BYOK_USAGE)();
       return new Response('{"status":"Ok"}');
     });
-    await worker.fetch(request(), { ...env, POSTHOG_PROMPTS_API_KEY: 'phx_test' }, ctx);
+    const hosted = { ...env, POSTHOG_PROMPTS_API_KEY: 'phx_test' };
+    await worker.fetch(request(), hosted, ctx);
+    await worker.fetch(request(), hosted, ctx);
     const content = sent()[0].messages[0].content;
     expect(content).toHaveLength(2);
     expect(content[0]).toEqual({
       type: 'text',
       text: 'Old MYR Food, Other',
       cache_control: { type: 'ephemeral' },
+    });
+
+    // Flagged, so a stale `production` label shows in PostHog and in the logs
+    // (once per isolate) instead of quietly costing every scan its cache hit.
+    await Promise.all(waits);
+    expect(generations().map((e) => e.properties.prompt_cache)).toEqual(['per_user', 'per_user']);
+    const flagged = (console.error as jest.Mock).mock.calls.filter(([line]) =>
+      String(line).includes('prompt_cache_per_user'),
+    );
+    expect(flagged).toHaveLength(1);
+    expect(JSON.parse(flagged[0][0])).toMatchObject({
+      prompt: 'receipt-scan-screenshot',
+      version: 1,
     });
   });
 

@@ -1179,6 +1179,7 @@ The [receipt-scanner Worker](#receipt-scanner-worker) sends one `$ai_generation`
 | `$ai_temperature`, `$ai_max_tokens`                                                                       | The attempt's settings (temperature rises on the empty-result retry). Claude is sent no temperature, so its generations carry none.                                                                                                                                  |
 | `scan_mode`, `is_pro`, `is_backup_model`, `attempt`, `parsed_transactions`, `parsed_items`                | Request context and the parsed outcome of that attempt. `is_backup_model` is the `BACKUP_MODEL` slot, true even when Claude was skipped (an image it cannot read) and nothing ran first.                                                                             |
 | `$ai_prompt_name`, `$ai_prompt_version`, `prompt_source`                                                  | The hosted prompt the call used (below); version is absent and `prompt_source` is `bundled` when the fallback served it.                                                                                                                                             |
+| `prompt_cache`                                                                                            | Claude only: `shared` when the prompt went in the 1-hour cache every user shares, `per_user` when its template has no shared part and was cached whole for that user. `per_user` with a hosted version means `production` is on a pre-split template.                |
 | `$geoip_disable`                                                                                          | Always `true`: the request comes from Cloudflare's network, whose location would otherwise overwrite the person's.                                                                                                                                                   |
 | `$session_id`, `$ai_session_id`                                                                           | The app's PostHog session, from the `X-POSTHOG-SESSION-ID` header the SDK adds to scan requests (`addTracingHeaders`), so a trace links to that session's events and replay. Only a UUID-shaped value is accepted.                                                   |
 
@@ -1960,7 +1961,18 @@ above it, has no shared part, so the whole prompt is cached per user for 5 minut
 worked before the settings moved: the same user repeats a scan within 5 minutes
 36-40% of the time and barely more within an hour, so there 5 minutes is the
 cheaper. Keep per-user text out of the part above the heading, or every scan
-writes a cache entry nobody else reads.
+writes a cache entry nobody else reads. Each Claude generation records which
+of the two it got as `prompt_cache`, and the first per-user scan of a hosted
+version in an isolate logs `prompt_cache_per_user`: version 1 stayed on the
+`production` label for a week after the shared cache shipped, and with nothing
+to say so every Claude scan was cached per user, about half of them writes.
+
+The receipt image is most of a scan's input (about 1,400 of a screenshot's
+2,450 tokens) and is new every time, so it is never cached. Even with every
+scan hitting the shared prompt, cache reads are about a third of Claude's input
+tokens (720, 786 and 1,053 tokens of prompt for quick, screenshot and itemized),
+well below a text-only workload whose cached system prompt is most of the
+request.
 
 Claude is sent no temperature, and an answer from it with no JSON object in it
 counts as a failure rather than an empty result, so the backup gets the receipt.
