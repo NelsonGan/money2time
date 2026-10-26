@@ -6,6 +6,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  type ScrollViewInstance,
   StyleSheet,
   useWindowDimensions,
   View,
@@ -296,7 +297,7 @@ function TestimonialCarousel({ colors }: { colors: PaywallColors }) {
   // corrects it on tablets, where the content column is narrower.
   const { width: windowWidth } = useWindowDimensions();
   const [width, setWidth] = useState(windowWidth);
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
   const data = TESTIMONIALS;
   const n = data.length;
   // Triple the reviews so there's always a copy to the left and right; the active

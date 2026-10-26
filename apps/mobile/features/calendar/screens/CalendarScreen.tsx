@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import type { TextInput } from 'react-native';
+import type { TextInputInstance } from 'react-native';
 import {
   Alert,
   FlatList,
@@ -257,7 +257,7 @@ export function CalendarScreen({
   // Debounced copy that actually drives the (potentially expensive) filtering,
   // so typing stays responsive instead of re-filtering on every keystroke.
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
-  const searchInputRef = useRef<TextInput | null>(null);
+  const searchInputRef = useRef<TextInputInstance | null>(null);
 
   const [showFilters, setShowFilters] = useState(false);
   const [activeFilterPicker, setActiveFilterPicker] = useState<FilterPickerKind | null>(null);
@@ -480,7 +480,7 @@ export function CalendarScreen({
       transformOrigin: 'top left',
       transform: [{ translateX }, { translateY }, { scale }],
     };
-  }, [monthToYearGeometry]);
+  });
 
   const yearLayerStyle = useAnimatedStyle(() => {
     const my = Math.min(1, Math.max(0, monthYearZoom.value));
@@ -1769,10 +1769,7 @@ export function CalendarScreen({
             away. Shows matching transactions across all history, grouped by
             date (newest first); an empty query browses everything. */}
         {isSearchOpen ? (
-          <View
-            style={[StyleSheet.absoluteFillObject, styles.searchLayerZ]}
-            className="bg-background"
-          >
+          <View style={[StyleSheet.absoluteFill, styles.searchLayerZ]} className="bg-background">
             <ActivityTransactionList
               transactions={searchResults}
               displaySettings={transactionDisplaySettings}
@@ -1953,7 +1950,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   zoomLayer: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   yearCalendarOverlap: {
     marginTop: -YEAR_HEADER_OVERLAP,

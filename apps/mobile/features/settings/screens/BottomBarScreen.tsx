@@ -1,5 +1,5 @@
 import { GripVertical, Lock, Minus, Plus } from 'lucide-react-native';
-import React, { type ElementRef, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import Sortable from 'react-native-sortables';
@@ -51,7 +51,7 @@ export function BottomBarScreen({ onBack }: BottomBarScreenProps) {
   const { settings, updateSettings } = useApp();
   const themeColors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
-  const scrollRef = useAnimatedRef<ElementRef<typeof Animated.ScrollView>>();
+  const scrollRef = useAnimatedRef<Animated.ScrollView>();
   // Sortable rows are absolutely positioned while dragging, so they need an
   // explicit width rather than '100%' (as in the other reorderable lists).
   const { contentWidth } = useDeviceLayout();

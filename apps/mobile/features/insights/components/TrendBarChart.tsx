@@ -27,7 +27,7 @@ const DOUBLE_LINE_LABEL_HEIGHT = 30;
 const TOP_PADDING = 12;
 const SIDE_PADDING = 4;
 
-export const TrendBarChart = React.memo(function TrendBarChart({
+export const TrendBarChart = React.memo(function TrendBarChartImpl({
   data,
   chartWidth,
   chartHeight,

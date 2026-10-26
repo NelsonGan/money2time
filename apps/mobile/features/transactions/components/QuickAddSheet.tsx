@@ -1,7 +1,15 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { Calendar, Check, ChevronDown, History, Maximize2, Settings2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Keyboard, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import {
+  Keyboard,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  type TextInputInstance,
+  View,
+} from 'react-native';
 import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller';
 import Animated, {
   Easing,
@@ -354,7 +362,7 @@ export function QuickAddSheet({
   onOpenQuickEntrySettings,
 }: QuickAddSheetProps) {
   const themeColors = useThemeColors();
-  const inputRef = useRef<TextInput | null>(null);
+  const inputRef = useRef<TextInputInstance | null>(null);
 
   const defaultType: SheetType = useMemo(() => {
     if (initialType === 'income') return 'income';

@@ -48,7 +48,7 @@ const DAY_CELL_GAP = 5;
 const MAX_UNSHRUNK_ROWS = 6;
 const MIN_DAY_CELL_HEIGHT = 34;
 
-export const CalendarMonthGrid = memo(function CalendarMonthGrid({
+export const CalendarMonthGrid = memo(function CalendarMonthGridImpl({
   monthData,
   weekdayLabels,
   selectedDayKey,

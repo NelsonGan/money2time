@@ -1,11 +1,12 @@
 import { Sparkles } from 'lucide-react-native';
-import { type ElementRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
   Platform,
   Pressable,
   ScrollView,
+  type ScrollViewInstance,
   StatusBar,
   useWindowDimensions,
   View,
@@ -65,10 +66,10 @@ export function AlbumsScreen({
   const { resetMinimize } = useBottomNavMinimize();
   const reportBottomNavScroll = useBottomNavScrollReporter();
   const { width: windowWidth } = useWindowDimensions();
-  const scrollRef = useAnimatedRef<ElementRef<typeof Animated.ScrollView>>();
+  const scrollRef = useAnimatedRef<Animated.ScrollView>();
 
   const [tab, setTab] = useState<AlbumsTab>('albums');
-  const pagerRef = useRef<ScrollView | null>(null);
+  const pagerRef = useRef<ScrollViewInstance | null>(null);
   const [pageWidth, setPageWidth] = useState(Math.min(windowWidth, 640));
   const [pageHeight, setPageHeight] = useState(0);
   // Defer mounting the (native, GL-backed) map until the user first swipes

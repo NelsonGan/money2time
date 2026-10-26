@@ -13,7 +13,7 @@ interface EdgeSwipeBackContainerProps {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   overlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   edgeZone: {
     position: 'absolute',

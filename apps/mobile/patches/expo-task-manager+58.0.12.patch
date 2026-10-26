@@ -1,0 +1,49 @@
+diff --git a/node_modules/expo-task-manager/ios/TaskManagerModule.swift b/node_modules/expo-task-manager/ios/TaskManagerModule.swift
+index 6322978..0bbcb94 100644
+--- a/node_modules/expo-task-manager/ios/TaskManagerModule.swift
++++ b/node_modules/expo-task-manager/ios/TaskManagerModule.swift
+@@ -40,31 +40,44 @@ public final class TaskManagerModule: Module, EXTaskManagerInterface {
+       return true
+     }
+ 
++    // money2time patch: every function below reaches EXTaskService, which the
++    // BGTaskScheduler launch handler and app launch drive on the main thread.
++    // Upstream locks EXTaskService's own collections since SDK 58, but not the
++    // EXTaskExecutionRequest that notifyTaskFinishedAsync completes, nor the
++    // check-then-register sequences. Running these on the module's background
++    // queue raced the main thread and crashed in
++    // -[EXTaskExecutionRequest _maybeExecuteCallback] (Sentry MONEY2TIME-23).
+     AsyncFunction("notifyTaskFinishedAsync") { (taskName: TaskName, response: [String: Any]) in
+       EXTaskService.shared.notifyTask(withName: taskName, forAppId: appId, didFinishWithResponse: response)
+     }
++    .runOnQueue(.main)
+ 
+     AsyncFunction("isTaskRegisteredAsync") { (taskName: TaskName) in
+       return hasRegisteredTask(withName: taskName)
+     }
++    .runOnQueue(.main)
+ 
+     AsyncFunction("getRegisteredTasksAsync") {
+       return EXTaskService.shared.getRegisteredTasks(forAppId: appId)
+     }
++    .runOnQueue(.main)
+ 
+     AsyncFunction("getTaskOptionsAsync") { (taskName: TaskName) in
+       return EXTaskService.shared.getOptionsForTaskName(taskName, forAppId: appId)
+     }
++    .runOnQueue(.main)
+ 
+     AsyncFunction("unregisterTaskAsync") { (taskName: TaskName) in
+       try EXUtilities.catchException {
+         self.unregisterTask(withName: taskName, consumerClass: nil)
+       }
+     }
++    .runOnQueue(.main)
+ 
+     AsyncFunction("unregisterAllTasksAsync") {
+       EXTaskService.shared.unregisterAllTasks(forAppId: appId)
+     }
++    .runOnQueue(.main)
+   }
+ 
+   // MARK: - EXTaskManagerInterface

@@ -23,7 +23,7 @@ interface AccountLogoProps {
  *
  * Memoized since it renders in long lists and grids with stable primitive props.
  */
-export const AccountLogo = React.memo(function AccountLogo({
+export const AccountLogo = React.memo(function AccountLogoImpl({
   logoId,
   type = 'debit',
   goalEmoji,

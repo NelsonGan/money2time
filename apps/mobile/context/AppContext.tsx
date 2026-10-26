@@ -11,7 +11,6 @@ import React, {
 import {
   AppState as RNAppState,
   type AppStateStatus,
-  InteractionManager,
   Pressable,
   StyleSheet,
   Text,
@@ -190,7 +189,7 @@ import {
   normalizeMonthKey,
 } from '~/utils/formatters';
 import { newId, nowIso } from '~/utils/id';
-import { runAfterInteractionsCapped } from '~/utils/interactions';
+import { runAfterInteractions, runAfterInteractionsCapped } from '~/utils/interactions';
 import { perfMark } from '~/utils/perfTrace';
 import { countsAsExpenseRow } from '~/utils/spending';
 import {
@@ -3796,7 +3795,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       interaction?.cancel();
       settleTimer = setTimeout(() => {
         settleTimer = null;
-        interaction = InteractionManager.runAfterInteractions(() => {
+        interaction = runAfterInteractions(() => {
           interaction = null;
           runBackup();
         });

@@ -7,7 +7,7 @@ import {
   Trash2,
   X,
 } from 'lucide-react-native';
-import { type ElementRef, useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { StyleProp, TextStyle, ViewStyle } from 'react-native';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import type { AnimatedRef } from 'react-native-reanimated';
@@ -836,7 +836,7 @@ export function CategoriesScreen({
   const { contentWidth: windowWidth } = useDeviceLayout();
   const [type, setType] = useState<CategoryType>('expense');
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
-  const scrollRef = useAnimatedRef<ElementRef<typeof Animated.ScrollView>>();
+  const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const rowWidth = Math.max(windowWidth - SETTINGS_HORIZONTAL_PADDING * 2, 0);
 
   const { topLevel, childrenByParent } = useMemo(() => {

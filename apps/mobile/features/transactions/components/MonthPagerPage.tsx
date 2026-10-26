@@ -55,7 +55,7 @@ const EMPTY_TRANSACTIONS: TransactionWithRelations[] = [];
 // render, so every page's memoized list re-rendered whenever the pager did.
 const NO_SELECTED_IDS: string[] = [];
 
-export const MonthPagerPage = memo(function MonthPagerPage({
+export const MonthPagerPage = memo(function MonthPagerPageImpl({
   item,
   monthPagerAnchorDate,
   centerIndex,

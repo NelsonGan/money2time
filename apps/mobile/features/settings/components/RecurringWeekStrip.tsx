@@ -113,7 +113,7 @@ function DayPill({
  * A week of day pills over the timeline: which of the next seven days have
  * something due, and a tap to narrow the timeline to one of them.
  */
-export const RecurringWeekStrip = React.memo(function RecurringWeekStrip({
+export const RecurringWeekStrip = React.memo(function RecurringWeekStripImpl({
   days,
   selectedDayKey,
   onSelectDay,

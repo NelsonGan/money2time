@@ -10,3 +10,7 @@ declare module '*.db' {
   const asset: number;
   export default asset;
 }
+
+// Side-effect stylesheet imports (NativeWind's global.css). TypeScript 6 checks
+// side-effect imports, so the module needs a declaration.
+declare module '*.css';
