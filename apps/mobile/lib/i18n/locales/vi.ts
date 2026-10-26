@@ -2059,6 +2059,10 @@ const vi = {
     purchase_pending_title: 'Đang xử lý giao dịch',
     purchase_pending_message:
       'Giao dịch đã hoàn tất nhưng quyền Pro chưa được kích hoạt. Vui lòng chờ một lúc hoặc khôi phục giao dịch mua.',
+    payment_pending_message:
+      'Thanh toán của bạn đang chờ phê duyệt. Pro sẽ tự động mở khóa khi thanh toán hoàn tất, vì vậy bạn không cần mua lại.',
+    already_owned_not_restored:
+      'Tài khoản cửa hàng này đã sở hữu Pro nhưng không thể áp dụng ở đây. Nhấn Khôi phục giao dịch mua và đảm bảo bạn đã đăng nhập bằng tài khoản cửa hàng đã mua.',
     monthly: 'Hàng tháng',
     yearly: 'Hàng năm',
     lifetime: 'Trọn đời',

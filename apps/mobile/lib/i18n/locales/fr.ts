@@ -2093,6 +2093,10 @@ const fr = {
     purchase_pending_title: 'Achat en cours de traitement',
     purchase_pending_message:
       "Votre achat a été effectué, mais l'accès Pro n'est pas encore activé. Veuillez patienter ou restaurer vos achats.",
+    payment_pending_message:
+      "Votre paiement est en attente d'approbation. Pro se débloquera automatiquement une fois le paiement finalisé : inutile d'acheter à nouveau.",
+    already_owned_not_restored:
+      "Ce compte de la boutique possède déjà Pro, mais il n'a pas pu être appliqué ici. Touchez Restaurer les achats et vérifiez que vous êtes connecté au compte de la boutique qui l'a acheté.",
     monthly: 'Mensuel',
     yearly: 'Annuel',
     lifetime: 'À vie',

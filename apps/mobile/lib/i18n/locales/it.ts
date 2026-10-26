@@ -2080,6 +2080,10 @@ const it = {
     purchase_pending_title: 'Acquisto in elaborazione',
     purchase_pending_message:
       "L'acquisto è andato a buon fine, ma l'accesso Pro non è ancora attivato. Attendi un momento o ripristina gli acquisti.",
+    payment_pending_message:
+      'Il tuo pagamento è in attesa di approvazione. Pro si sbloccherà automaticamente al completamento, quindi non serve acquistare di nuovo.',
+    already_owned_not_restored:
+      "Questo account dello store possiede già Pro, ma non è stato possibile applicarlo qui. Tocca Ripristina acquisti e assicurati di aver effettuato l'accesso con l'account dello store che l'ha acquistato.",
     monthly: 'Mensile',
     yearly: 'Annuale',
     lifetime: 'A vita',

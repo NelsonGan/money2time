@@ -2082,6 +2082,10 @@ const id = {
     purchase_pending_title: 'Pembelian sedang diproses',
     purchase_pending_message:
       'Pembelianmu berhasil, tetapi akses Pro belum aktif. Tunggu sebentar atau pulihkan pembelian.',
+    payment_pending_message:
+      'Pembayaranmu sedang menunggu persetujuan. Pro akan terbuka otomatis setelah pembayaran selesai, jadi tidak perlu membeli lagi.',
+    already_owned_not_restored:
+      'Akun toko ini sudah memiliki Pro, tetapi tidak dapat diterapkan di sini. Ketuk Pulihkan Pembelian, dan pastikan kamu masuk dengan akun toko yang membelinya.',
     monthly: 'Bulanan',
     yearly: 'Tahunan',
     lifetime: 'Seumur Hidup',
