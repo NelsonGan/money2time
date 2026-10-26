@@ -1,5 +1,6 @@
 import {
   buildBudgetMonthSummary,
+  childAllocationExceedsParent,
   computeAllocationRemaining,
   computeBackPopulateRange,
   computeBudgetPagerMonths,
@@ -384,6 +385,25 @@ describe('computeChildAllocationGap', () => {
 
   it('goes negative when children exceed the parent', () => {
     expect(computeChildAllocationGap(100, [{ amount: 150 }])).toBe(-50);
+  });
+});
+
+describe('childAllocationExceedsParent', () => {
+  it('allows a partial breakdown, leaving the rest on the parent', () => {
+    expect(childAllocationExceedsParent(200, [{ amount: 120 }])).toBe(false);
+  });
+
+  it('allows no breakdown and an exact breakdown', () => {
+    expect(childAllocationExceedsParent(200, [])).toBe(false);
+    expect(childAllocationExceedsParent(200, [{ amount: 120 }, { amount: 80 }])).toBe(false);
+  });
+
+  it('blocks a breakdown larger than the parent', () => {
+    expect(childAllocationExceedsParent(200, [{ amount: 120 }, { amount: 90 }])).toBe(true);
+  });
+
+  it('blocks child amounts on a parent with no amount', () => {
+    expect(childAllocationExceedsParent(0, [{ amount: 50 }])).toBe(true);
   });
 });
 
