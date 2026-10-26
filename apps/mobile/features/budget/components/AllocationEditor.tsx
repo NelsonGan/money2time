@@ -116,7 +116,7 @@ export function AllocationCategoryList({
 }: {
   rootCategories: Category[];
   amounts: Record<string, string>;
-  /** Root category ids whose subcategory breakdown doesn't sum to the parent. */
+  /** Root category ids whose subcategory breakdown exceeds the parent. */
   childGaps: Map<string, number>;
   onPressCategory: (categoryId: string) => void;
   /** Receives the reordered root category ids after a drag. */
