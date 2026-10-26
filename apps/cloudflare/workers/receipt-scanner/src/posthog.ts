@@ -53,6 +53,11 @@ export interface GenerationRecord {
   attempt: number;
   /** The hosted prompt the call used (see ../prompts.ts). */
   prompt?: { name: string; version: number | null; source: 'posthog' | 'bundled' };
+  /**
+   * Claude only: whether the prompt went in the cache every user shares, or
+   * whole and per user because its template has no shared part.
+   */
+  promptCache?: 'shared' | 'per_user';
   error?: string;
 }
 
@@ -146,6 +151,7 @@ export class AiTrace {
       if (record.prompt.version !== null) properties.$ai_prompt_version = record.prompt.version;
       properties.prompt_source = record.prompt.source;
     }
+    if (record.promptCache) properties.prompt_cache = record.promptCache;
     if (record.error) properties.$ai_error = record.error.slice(0, ERROR_MESSAGE_LIMIT);
 
     this.events.push({
