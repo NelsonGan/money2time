@@ -1,0 +1,245 @@
+diff --git a/node_modules/react-native-graph/lib/commonjs/AnimatedLineGraph.js b/node_modules/react-native-graph/lib/commonjs/AnimatedLineGraph.js
+index dd9628d..abd5b0f 100644
+--- a/node_modules/react-native-graph/lib/commonjs/AnimatedLineGraph.js
++++ b/node_modules/react-native-graph/lib/commonjs/AnimatedLineGraph.js
+@@ -101,17 +101,18 @@ function AnimatedLineGraph(_ref) {
+     setHeight(Math.round(layout.height));
+   }, []);
+   const straightLine = (0, _react.useMemo)(() => {
+-    const path = _reactNativeSkia.Skia.Path.Make();
++    // Skia 2.14 paths are immutable: build them with an SkPathBuilder.
++    const builder = _reactNativeSkia.Skia.PathBuilder.Make();
+ 
+-    path.moveTo(0, height / 2);
++    builder.moveTo(0, height / 2);
+ 
+     for (let i = 0; i < width - 1; i += 2) {
+       const x = i;
+       const y = height / 2;
+-      path.cubicTo(x, y, x, y, x, y);
++      builder.cubicTo(x, y, x, y, x, y);
+     }
+ 
+-    return path;
++    return builder.detach();
+   }, [height, width]);
+   const paths = (0, _reactNativeReanimated.useSharedValue)({});
+   const gradientPaths = (0, _reactNativeReanimated.useSharedValue)({});
+diff --git a/node_modules/react-native-graph/lib/commonjs/CreateGraphPath.js b/node_modules/react-native-graph/lib/commonjs/CreateGraphPath.js
+index 5202642..d2aceeb 100644
+--- a/node_modules/react-native-graph/lib/commonjs/CreateGraphPath.js
++++ b/node_modules/react-native-graph/lib/commonjs/CreateGraphPath.js
+@@ -79,13 +79,13 @@ function createGraphPathBase(_ref3) {
+     shouldFillGradient
+   } = _ref3;
+ 
+-  const path = _reactNativeSkia.Skia.Path.Make(); // Canvas width substracted by the horizontal padding => Actual drawing width
++  const builder = _reactNativeSkia.Skia.PathBuilder.Make(); // Canvas width substracted by the horizontal padding => Actual drawing width
+ 
+ 
+   const drawingWidth = width - 2 * horizontalPadding; // Canvas height substracted by the vertical padding => Actual drawing height
+ 
+   const drawingHeight = height - 2 * verticalPadding;
+-  if (graphData[0] == null) return path;
++  if (graphData[0] == null) return builder.detach();
+   const points = [];
+   const startX = getXInRange(drawingWidth, graphData[0].date, range.x) + horizontalPadding;
+   const endX = getXInRange(drawingWidth, graphData[graphData.length - 1].date, range.x) + horizontalPadding;
+@@ -124,7 +124,7 @@ function createGraphPathBase(_ref3) {
+   for (let i = 0; i < points.length; i++) {
+     const point = points[i]; // first point needs to start the path
+ 
+-    if (i === 0) path.moveTo(point.x, point.y);
++    if (i === 0) builder.moveTo(point.x, point.y);
+     const prev = points[i - 1];
+     const prevPrev = points[i - 2];
+     if (prev == null) continue;
+@@ -136,17 +136,20 @@ function createGraphPathBase(_ref3) {
+     const cp2y = (p0.y + 2 * p1.y) / 3;
+     const cp3x = (p0.x + 4 * p1.x + point.x) / 6;
+     const cp3y = (p0.y + 4 * p1.y + point.y) / 6;
+-    path.cubicTo(cp1x, cp1y, cp2x, cp2y, cp3x, cp3y);
++    builder.cubicTo(cp1x, cp1y, cp2x, cp2y, cp3x, cp3y);
+ 
+     if (i === points.length - 1) {
+-      path.cubicTo(point.x, point.y, point.x, point.y, point.x, point.y);
++      builder.cubicTo(point.x, point.y, point.x, point.y, point.x, point.y);
+     }
+   }
+ 
++  // Skia 2.14 paths are immutable: build them with an SkPathBuilder.
++  const path = builder.build();
++
+   if (!shouldFillGradient) return path;
+-  const gradientPath = path.copy();
+-  gradientPath.lineTo(endX, height + verticalPadding);
+-  gradientPath.lineTo(0 + horizontalPadding, height + verticalPadding);
++  builder.lineTo(endX, height + verticalPadding);
++  builder.lineTo(0 + horizontalPadding, height + verticalPadding);
++  const gradientPath = builder.detach();
+   return {
+     path: path,
+     gradientPath: gradientPath
+diff --git a/node_modules/react-native-graph/lib/module/AnimatedLineGraph.js b/node_modules/react-native-graph/lib/module/AnimatedLineGraph.js
+index 7384892..017f981 100644
+--- a/node_modules/react-native-graph/lib/module/AnimatedLineGraph.js
++++ b/node_modules/react-native-graph/lib/module/AnimatedLineGraph.js
+@@ -78,16 +78,17 @@ export function AnimatedLineGraph(_ref) {
+     setHeight(Math.round(layout.height));
+   }, []);
+   const straightLine = useMemo(() => {
+-    const path = Skia.Path.Make();
+-    path.moveTo(0, height / 2);
++    // Skia 2.14 paths are immutable: build them with an SkPathBuilder.
++    const builder = Skia.PathBuilder.Make();
++    builder.moveTo(0, height / 2);
+ 
+     for (let i = 0; i < width - 1; i += 2) {
+       const x = i;
+       const y = height / 2;
+-      path.cubicTo(x, y, x, y, x, y);
++      builder.cubicTo(x, y, x, y, x, y);
+     }
+ 
+-    return path;
++    return builder.detach();
+   }, [height, width]);
+   const paths = useSharedValue({});
+   const gradientPaths = useSharedValue({});
+diff --git a/node_modules/react-native-graph/lib/module/CreateGraphPath.js b/node_modules/react-native-graph/lib/module/CreateGraphPath.js
+index 8d08450..1224970 100644
+--- a/node_modules/react-native-graph/lib/module/CreateGraphPath.js
++++ b/node_modules/react-native-graph/lib/module/CreateGraphPath.js
+@@ -51,12 +51,12 @@ function createGraphPathBase(_ref3) {
+     canvasWidth: width,
+     shouldFillGradient
+   } = _ref3;
+-  const path = Skia.Path.Make(); // Canvas width substracted by the horizontal padding => Actual drawing width
++  const builder = Skia.PathBuilder.Make(); // Canvas width substracted by the horizontal padding => Actual drawing width
+ 
+   const drawingWidth = width - 2 * horizontalPadding; // Canvas height substracted by the vertical padding => Actual drawing height
+ 
+   const drawingHeight = height - 2 * verticalPadding;
+-  if (graphData[0] == null) return path;
++  if (graphData[0] == null) return builder.detach();
+   const points = [];
+   const startX = getXInRange(drawingWidth, graphData[0].date, range.x) + horizontalPadding;
+   const endX = getXInRange(drawingWidth, graphData[graphData.length - 1].date, range.x) + horizontalPadding;
+@@ -95,7 +95,7 @@ function createGraphPathBase(_ref3) {
+   for (let i = 0; i < points.length; i++) {
+     const point = points[i]; // first point needs to start the path
+ 
+-    if (i === 0) path.moveTo(point.x, point.y);
++    if (i === 0) builder.moveTo(point.x, point.y);
+     const prev = points[i - 1];
+     const prevPrev = points[i - 2];
+     if (prev == null) continue;
+@@ -107,17 +107,20 @@ function createGraphPathBase(_ref3) {
+     const cp2y = (p0.y + 2 * p1.y) / 3;
+     const cp3x = (p0.x + 4 * p1.x + point.x) / 6;
+     const cp3y = (p0.y + 4 * p1.y + point.y) / 6;
+-    path.cubicTo(cp1x, cp1y, cp2x, cp2y, cp3x, cp3y);
++    builder.cubicTo(cp1x, cp1y, cp2x, cp2y, cp3x, cp3y);
+ 
+     if (i === points.length - 1) {
+-      path.cubicTo(point.x, point.y, point.x, point.y, point.x, point.y);
++      builder.cubicTo(point.x, point.y, point.x, point.y, point.x, point.y);
+     }
+   }
+ 
++  // Skia 2.14 paths are immutable: build them with an SkPathBuilder.
++  const path = builder.build();
++
+   if (!shouldFillGradient) return path;
+-  const gradientPath = path.copy();
+-  gradientPath.lineTo(endX, height + verticalPadding);
+-  gradientPath.lineTo(0 + horizontalPadding, height + verticalPadding);
++  builder.lineTo(endX, height + verticalPadding);
++  builder.lineTo(0 + horizontalPadding, height + verticalPadding);
++  const gradientPath = builder.detach();
+   return {
+     path: path,
+     gradientPath: gradientPath
+diff --git a/node_modules/react-native-graph/src/AnimatedLineGraph.tsx b/node_modules/react-native-graph/src/AnimatedLineGraph.tsx
+index bee225a..9949f3c 100644
+--- a/node_modules/react-native-graph/src/AnimatedLineGraph.tsx
++++ b/node_modules/react-native-graph/src/AnimatedLineGraph.tsx
+@@ -125,15 +125,16 @@ export function AnimatedLineGraph({
+   )
+ 
+   const straightLine = useMemo(() => {
+-    const path = Skia.Path.Make()
+-    path.moveTo(0, height / 2)
++    // Skia 2.14 paths are immutable: build them with an SkPathBuilder.
++    const builder = Skia.PathBuilder.Make()
++    builder.moveTo(0, height / 2)
+     for (let i = 0; i < width - 1; i += 2) {
+       const x = i
+       const y = height / 2
+-      path.cubicTo(x, y, x, y, x, y)
++      builder.cubicTo(x, y, x, y, x, y)
+     }
+ 
+-    return path
++    return builder.detach()
+   }, [height, width])
+ 
+   const paths = useSharedValue<{ from?: SkPath; to?: SkPath }>({})
+diff --git a/node_modules/react-native-graph/src/CreateGraphPath.ts b/node_modules/react-native-graph/src/CreateGraphPath.ts
+index 67e9a2e..d38447e 100644
+--- a/node_modules/react-native-graph/src/CreateGraphPath.ts
++++ b/node_modules/react-native-graph/src/CreateGraphPath.ts
+@@ -143,14 +143,14 @@ function createGraphPathBase({
+ }: GraphPathConfigWithGradient | GraphPathConfigWithoutGradient):
+   | SkPath
+   | GraphPathWithGradient {
+-  const path = Skia.Path.Make()
++  const builder = Skia.PathBuilder.Make()
+ 
+   // Canvas width substracted by the horizontal padding => Actual drawing width
+   const drawingWidth = width - 2 * horizontalPadding
+   // Canvas height substracted by the vertical padding => Actual drawing height
+   const drawingHeight = height - 2 * verticalPadding
+ 
+-  if (graphData[0] == null) return path
++  if (graphData[0] == null) return builder.detach()
+ 
+   const points: SkPoint[] = []
+ 
+@@ -209,7 +209,7 @@ function createGraphPathBase({
+     const point = points[i]!
+ 
+     // first point needs to start the path
+-    if (i === 0) path.moveTo(point.x, point.y)
++    if (i === 0) builder.moveTo(point.x, point.y)
+ 
+     const prev = points[i - 1]
+     const prevPrev = points[i - 2]
+@@ -225,19 +225,22 @@ function createGraphPathBase({
+     const cp3x = (p0.x + 4 * p1.x + point.x) / 6
+     const cp3y = (p0.y + 4 * p1.y + point.y) / 6
+ 
+-    path.cubicTo(cp1x, cp1y, cp2x, cp2y, cp3x, cp3y)
++    builder.cubicTo(cp1x, cp1y, cp2x, cp2y, cp3x, cp3y)
+ 
+     if (i === points.length - 1) {
+-      path.cubicTo(point.x, point.y, point.x, point.y, point.x, point.y)
++      builder.cubicTo(point.x, point.y, point.x, point.y, point.x, point.y)
+     }
+   }
+ 
++  // Skia 2.14 paths are immutable: build them with an SkPathBuilder.
++  const path = builder.build()
++
+   if (!shouldFillGradient) return path
+ 
+-  const gradientPath = path.copy()
++  builder.lineTo(endX, height + verticalPadding)
++  builder.lineTo(0 + horizontalPadding, height + verticalPadding)
+ 
+-  gradientPath.lineTo(endX, height + verticalPadding)
+-  gradientPath.lineTo(0 + horizontalPadding, height + verticalPadding)
++  const gradientPath = builder.detach()
+ 
+   return { path: path, gradientPath: gradientPath }
+ }
