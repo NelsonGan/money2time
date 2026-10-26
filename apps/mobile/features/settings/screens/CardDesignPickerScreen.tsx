@@ -7,11 +7,11 @@ import {
   ScrollView,
   type ScrollViewInstance,
   StyleSheet,
-  useWindowDimensions,
   View,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useContentFrame } from '~/components/layout/ContentFrame';
 import { AccountLogo, Button, Text } from '~/components/ui';
 import { SettingsHeader } from '~/components/ui/settings';
 import {
@@ -102,7 +102,7 @@ export function CardDesignPickerScreen({ session, onClose }: CardDesignPickerScr
   const themeColors = useThemeColors();
   const isDark = useResolvedTheme() === 'dark';
   const insets = useSafeAreaInsets();
-  const { width: windowWidth } = useWindowDimensions();
+  const { width: windowWidth } = useContentFrame();
   const { settings, currentMonthWage } = useApp();
   const { isPro, requirePro } = useProGate();
 

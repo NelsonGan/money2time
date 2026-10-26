@@ -7,6 +7,7 @@ import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
 import { Text } from '~/components/ui/text';
 import { ThemeModal } from '~/components/ui/theme-modal';
 import { useReceiptScans } from '~/context/ReceiptScanContext';
+import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -36,6 +37,7 @@ const VIEWFINDER_HEIGHT = 296;
  */
 export function ReceiptCameraSheet() {
   const insets = useSafeAreaInsets();
+  const sheetColumnStyle = useSheetColumnStyle();
   const themeColors = useThemeColors();
   const { scanReceiptImage } = useReceiptScans();
   const [intent, setIntent] = useState<ScanIntent | null>(null);
@@ -61,7 +63,7 @@ export function ReceiptCameraSheet() {
   return (
     <ThemeModal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
       <Pressable className="flex-1 justify-end bg-black/40" onPress={handleClose}>
-        <Pressable onPress={(event) => event.stopPropagation()}>
+        <Pressable onPress={(event) => event.stopPropagation()} style={sheetColumnStyle}>
           <View
             className="rounded-t-[28px] bg-card"
             style={{ paddingBottom: Math.max(insets.bottom, 16) }}

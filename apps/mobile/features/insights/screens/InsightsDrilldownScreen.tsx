@@ -1,18 +1,11 @@
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  Alert,
-  BackHandler,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { Alert, BackHandler, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { PieChart } from 'react-native-gifted-charts';
 import Svg, { G, Polyline, Text as SvgText } from 'react-native-svg';
 
+import { useContentFrame } from '~/components/layout/ContentFrame';
 import {
   CategoryEmoji,
   SETTINGS_HORIZONTAL_PADDING,
@@ -202,7 +195,7 @@ export function InsightsDrilldownScreen({
   const themeColors = useThemeColors();
   const resolvedTheme = useResolvedTheme();
   const isDark = resolvedTheme === 'dark';
-  const { width } = useWindowDimensions();
+  const { width } = useContentFrame();
   const { isTablet } = useDeviceLayout();
   const {
     albums,

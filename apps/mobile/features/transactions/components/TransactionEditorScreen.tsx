@@ -35,7 +35,6 @@ import {
   Pressable,
   ScrollView,
   type ScrollViewInstance,
-  StatusBar,
   StyleSheet,
   TextInput,
   type TextInputInstance,
@@ -53,11 +52,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import {
-  initialWindowMetrics,
-  SafeAreaView,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle, Path } from 'react-native-svg';
 
 import { DatePickerModal } from '~/components/datePicker';
@@ -99,6 +94,7 @@ import { resolveSplitSaveRoute } from '~/features/transactions/lib/splitSaveRout
 import { offscreenPageLimitFor, usePagerTabSync } from '~/hooks/usePagerTabSync';
 import { usePressScale } from '~/hooks/usePressScale';
 import { useProGate } from '~/hooks/useProGate';
+import { useStableSafeAreaInsets } from '~/hooks/useStableSafeAreaInsets';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
@@ -680,19 +676,12 @@ export function TransactionEditorScreen({
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const setSplitSession = useSetSplitBillSession();
   const { height: windowHeight } = useWindowDimensions();
-  const safeAreaInsets = useSafeAreaInsets();
   // This screen is presented as a transparentModal. When opened via a widget
   // deep link on a cold launch, the modal mounts before safe-area insets are
-  // measured, so SafeAreaView's `top` edge can resolve to 0 and tuck the
-  // header under the status bar / Dynamic Island. Use every synchronous source
-  // available so at least one is non-zero: initialWindowMetrics (populated at
-  // module init), StatusBar.currentHeight (Android only, always synchronous),
-  // and the live context insets as a final fallback.
-  const topInset = Math.max(
-    safeAreaInsets.top,
-    initialWindowMetrics?.insets.top ?? 0,
-    Platform.OS === 'android' ? (StatusBar.currentHeight ?? 0) : 0,
-  );
+  // measured, so a `top` edge of 0 would tuck the header under the status
+  // bar / Dynamic Island; the stable insets cover that first frame.
+  const safeAreaInsets = useStableSafeAreaInsets();
+  const topInset = safeAreaInsets.top;
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
 
   const initialType = initialValues?.type ?? 'expense';

@@ -11,7 +11,7 @@ import {
 import React from 'react';
 import { View } from 'react-native';
 
-import { NAV_TAB_META } from '~/components/navigation/BottomNav';
+import { NAV_TAB_META } from '~/components/navigation/NavChrome';
 import type { TabName } from '~/components/navigation/navTabs';
 import { Text } from '~/components/ui';
 import { ClayIcon } from '~/components/ui/ClayIcon';

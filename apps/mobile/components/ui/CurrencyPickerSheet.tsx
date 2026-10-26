@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text } from '~/components/ui/text';
 import { ThemeModal } from '~/components/ui/theme-modal';
 import { ALL_CURRENCIES } from '~/constants/appDefaults';
+import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -49,6 +50,7 @@ export function CurrencyPickerSheet({
   footer,
   title,
 }: CurrencyPickerSheetProps) {
+  const sheetColumnStyle = useSheetColumnStyle();
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
   const [query, setQuery] = useState('');
@@ -109,7 +111,7 @@ export function CurrencyPickerSheet({
       onDismiss={onDismiss}
     >
       <Pressable style={styles.backdrop} onPress={handleClose}>
-        <Pressable onPress={(e) => e.stopPropagation()} style={styles.sheet}>
+        <Pressable onPress={(e) => e.stopPropagation()} style={[styles.sheet, sheetColumnStyle]}>
           {/* The bottom inset pads the list, not the card, so it runs to the
               screen edge and its last row scrolls clear of the home indicator. */}
           <View className="bg-card rounded-t-[28px] flex-1">

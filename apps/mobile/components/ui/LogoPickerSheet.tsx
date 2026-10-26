@@ -11,6 +11,7 @@ import { Text } from '~/components/ui/text';
 import { ThemeModal } from '~/components/ui/theme-modal';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
+import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { getDeviceRegionCode, I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -207,6 +208,7 @@ export function LogoPickerSheet({
   const { Logo } = catalog;
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
+  const sheetColumnStyle = useSheetColumnStyle();
   const { settings, updateSettings } = useApp();
   const [tab, setTab] = useState<PickerTab>('library');
   const [query, setQuery] = useState('');
@@ -536,7 +538,10 @@ export function LogoPickerSheet({
         onRequestClose={() => setShowCountryModal(false)}
       >
         <Pressable style={styles.countryBackdrop} onPress={() => setShowCountryModal(false)}>
-          <Pressable onPress={(e) => e.stopPropagation()} style={styles.countrySheet}>
+          <Pressable
+            onPress={(e) => e.stopPropagation()}
+            style={[styles.countrySheet, sheetColumnStyle]}
+          >
             <View
               className="bg-card rounded-t-[28px] flex-1"
               style={{ paddingBottom: Math.max(insets.bottom, 16) }}

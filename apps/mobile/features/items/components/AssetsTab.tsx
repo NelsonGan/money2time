@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Platform, StatusBar, StyleSheet, View } from 'react-native';
-import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StyleSheet, View } from 'react-native';
 
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { useBottomNavMinimize } from '~/components/navigation/BottomNavMinimize';
@@ -11,6 +10,7 @@ import {
   type AssetsTab as AssetsTabName,
   AssetsTabBar,
 } from '~/features/items/components/AssetsTabBar';
+import { useStableSafeAreaInsets } from '~/hooks/useStableSafeAreaInsets';
 import { I18n } from '~/lib/i18n';
 
 interface AccountsRenderOptions {
@@ -83,7 +83,7 @@ export function AssetsTab({
   onAddAccount,
   resetToAccountsToken,
 }: AssetsTabProps) {
-  const insets = useSafeAreaInsets();
+  const insets = useStableSafeAreaInsets();
   const [tab, setTab] = useState<AssetsTabName>('accounts');
   const [hideBalances, setHideBalances] = useState(false);
   const { resetMinimize } = useBottomNavMinimize();
@@ -100,11 +100,7 @@ export function AssetsTab({
     if (resetToAccountsToken !== undefined) handleTabChange('accounts');
   }, [handleTabChange, resetToAccountsToken]);
 
-  const topInset = Math.max(
-    insets.top,
-    initialWindowMetrics?.insets.top ?? 0,
-    Platform.OS === 'android' ? (StatusBar.currentHeight ?? 0) : 0,
-  );
+  const topInset = insets.top;
 
   // Shared by the Accounts and Goals sub-tabs, which share the visibility state.
   const balancesToggle = (

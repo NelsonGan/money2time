@@ -3,19 +3,16 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
-  Platform,
   Pressable,
   ScrollView,
   type ScrollViewInstance,
-  StatusBar,
-  useWindowDimensions,
   View,
 } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
-import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Sortable from 'react-native-sortables';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
+import { useContentFrame } from '~/components/layout/ContentFrame';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import {
   useBottomNavContentInset,
@@ -25,6 +22,7 @@ import {
 import { AddIconButton, SelectField, Text } from '~/components/ui';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { useProGate } from '~/hooks/useProGate';
+import { useStableSafeAreaInsets } from '~/hooks/useStableSafeAreaInsets';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -55,17 +53,12 @@ export function AlbumsScreen({
   const { transactions: statsVersion } = useTransactions();
   const { checkLimit } = useProGate();
   const themeColors = useThemeColors();
-  const insets = useSafeAreaInsets();
   // Match the accounts/items page's top inset exactly.
-  const topInset = Math.max(
-    insets.top,
-    initialWindowMetrics?.insets.top ?? 0,
-    Platform.OS === 'android' ? (StatusBar.currentHeight ?? 0) : 0,
-  );
+  const topInset = useStableSafeAreaInsets().top;
   const bottomNavInset = useBottomNavContentInset();
   const { resetMinimize } = useBottomNavMinimize();
   const reportBottomNavScroll = useBottomNavScrollReporter();
-  const { width: windowWidth } = useWindowDimensions();
+  const { width: windowWidth } = useContentFrame();
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
 
   const [tab, setTab] = useState<AlbumsTab>('albums');

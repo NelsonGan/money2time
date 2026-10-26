@@ -5,7 +5,11 @@ import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PlusIcon } from '~/components/icons/NavIcons';
-import { getFloatingNavReservedInset } from '~/components/navigation/floatingNav';
+import {
+  getFloatingNavReservedInset,
+  getSideRailFootGap,
+  SIDE_RAIL_FAB_SLOT,
+} from '~/components/navigation/floatingNav';
 import { ClayIcon } from '~/components/ui/ClayIcon';
 import { spacing } from '~/constants/designSystem';
 import { useIsFlatIcons } from '~/context/ThemeContext';
@@ -38,7 +42,7 @@ export function AddFab({
   const themeColors = useThemeColors();
   const isFlat = useIsFlatIcons();
   const { bottom: safeBottom } = useSafeAreaInsets();
-  const { isTablet } = useDeviceLayout();
+  const { isTablet, navPlacement, navEdge, navRailInset } = useDeviceLayout();
   const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.92 });
   const longPressActiveRef = useRef(false);
   // Guards against a rapid double-fire of the press — on a cold start the JS
@@ -78,32 +82,40 @@ export function AddFab({
     }
   }, [onLongPressEnd]);
 
-  const bottomOffset = getFloatingNavReservedInset(safeBottom) + FAB_BOTTOM_GAP;
-
-  return (
-    <View
-      pointerEvents="box-none"
-      style={{
-        position: 'absolute',
+  // Side rail (iPhone Duo): centred in the slot kept at the rail's foot.
+  // Otherwise: above the bottom bar, at the content's trailing edge.
+  const isRail = navPlacement === 'side';
+  const anchorStyle = isRail
+    ? {
+        [navEdge]: 0,
+        width: navRailInset,
+        height: SIDE_RAIL_FAB_SLOT,
+        bottom: getSideRailFootGap(safeBottom),
+        alignItems: 'center' as const,
+        justifyContent: 'center' as const,
+      }
+    : {
         left: 0,
         right: 0,
-        bottom: bottomOffset,
-        zIndex: 10,
-      }}
-    >
+        bottom: getFloatingNavReservedInset(safeBottom) + FAB_BOTTOM_GAP,
+      };
+
+  return (
+    <View pointerEvents="box-none" style={[{ position: 'absolute', zIndex: 10 }, anchorStyle]}>
       <View
         pointerEvents="box-none"
         style={[
-          {
+          !isRail && {
             flexDirection: 'row',
             justifyContent: 'flex-end',
             paddingRight: FAB_RIGHT_MARGIN,
           },
-          isTablet && {
-            maxWidth: TABLET_CONTENT_MAX_WIDTH,
-            alignSelf: 'center',
-            width: '100%',
-          },
+          !isRail &&
+            isTablet && {
+              maxWidth: TABLET_CONTENT_MAX_WIDTH,
+              alignSelf: 'center',
+              width: '100%',
+            },
         ]}
       >
         <Animated.View style={animatedStyle}>

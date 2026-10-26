@@ -2,11 +2,11 @@ import { Image } from 'expo-image';
 import { Crop, Download, ImageOff, Trash2, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Platform, Pressable, StyleSheet, View } from 'react-native';
-import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '~/components/ui';
 import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { ThemeModal } from '~/components/ui/theme-modal';
+import { useStableSafeAreaInsets } from '~/hooks/useStableSafeAreaInsets';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { saveReceiptToPhotoLibrary } from '~/services/receiptLibrary';
@@ -47,11 +47,11 @@ export function ReceiptViewerModal({
   onCrop,
   onRemove,
 }: ReceiptViewerModalProps) {
-  const insets = useSafeAreaInsets();
-  // Fall back to the synchronously-available window metrics so the controls
-  // never tuck under the notch if the in-modal context insets read 0.
-  const topInset = Math.max(insets.top, initialWindowMetrics?.insets.top ?? 0, 12);
-  const bottomInset = Math.max(insets.bottom, initialWindowMetrics?.insets.bottom ?? 0);
+  // Stable insets, so the controls never tuck under the notch if the
+  // in-modal context insets read 0.
+  const insets = useStableSafeAreaInsets();
+  const topInset = Math.max(insets.top, 12);
+  const bottomInset = insets.bottom;
   // Skip a uri that failed to load natively; see CategoryEmoji for why.
   const [brokenUri, setBrokenUri] = useState<string | null>(null);
   const effectiveFileUri = fileUri !== brokenUri ? fileUri : null;

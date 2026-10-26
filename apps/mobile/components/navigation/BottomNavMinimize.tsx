@@ -4,6 +4,7 @@ import { Easing, type SharedValue, useSharedValue, withTiming } from 'react-nati
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { getFloatingNavReservedInset } from '~/components/navigation/floatingNav';
+import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 
 // Scroll must travel this far in one direction before the bar reacts,
 // filtering out bounce and micro-adjustments.
@@ -21,8 +22,9 @@ interface BottomNavMinimizeContextValue {
   reportScrollOffset: (offsetY: number) => void;
   resetMinimize: () => void;
   /**
-   * Bottom padding scroll content needs to clear the floating bar.
-   * Zero outside the main tab shell, where root-stack screens have no bottom nav.
+   * Bottom padding scroll content needs to clear the floating bar (or, with
+   * the side rail, just the home indicator). Zero outside the main tab shell,
+   * where root-stack screens have no bottom nav.
    */
   contentInset: number;
 }
@@ -36,7 +38,8 @@ const BottomNavMinimizeContext = createContext<BottomNavMinimizeContextValue>({
 
 export function BottomNavMinimizeProvider({ children }: { children: React.ReactNode }) {
   const { bottom: safeBottom } = useSafeAreaInsets();
-  const contentInset = getFloatingNavReservedInset(safeBottom);
+  const { navPlacement } = useDeviceLayout();
+  const contentInset = getFloatingNavReservedInset(safeBottom, navPlacement);
   const minimizeProgress = useSharedValue(0);
   const lastOffsetRef = useRef<number | null>(null);
   const directionalTravelRef = useRef(0);

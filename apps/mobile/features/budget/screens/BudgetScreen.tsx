@@ -8,11 +8,12 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { Alert, FlatList, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
+import { Alert, FlatList, Pressable, ScrollView, View } from 'react-native';
 
 import { MonthYearWheelPicker } from '~/components/datePicker';
 import { yearMonthFromKey, yearMonthToKey } from '~/components/datePicker/monthJump';
 import { EmptyState } from '~/components/feedback/EmptyState';
+import { useContentFrame } from '~/components/layout/ContentFrame';
 import {
   CategoryEmoji,
   SETTINGS_LIST_BOTTOM_PADDING,
@@ -450,7 +451,7 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
     const { transactions } = useTransactions();
     const themeColors = useThemeColors();
     const listNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
-    const { width: pageWidth } = useWindowDimensions();
+    const { width: pageWidth } = useContentFrame();
 
     const [pickerMonth, setPickerMonth] = useState<string | null>(null);
 

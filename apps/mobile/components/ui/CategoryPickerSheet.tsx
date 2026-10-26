@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CategoryGrid, type CategoryPickerOption } from '~/components/ui/CategoryGrid';
 import { Text } from '~/components/ui/text';
 import { ThemeModal } from '~/components/ui/theme-modal';
+import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -91,6 +92,7 @@ const styles = StyleSheet.create({
 });
 
 export function CategoryPickerSheet(props: CategoryPickerSheetProps) {
+  const sheetColumnStyle = useSheetColumnStyle();
   const {
     visible,
     onClose,
@@ -141,7 +143,7 @@ export function CategoryPickerSheet(props: CategoryPickerSheetProps) {
 
   const sheetContent = (
     <Pressable style={styles.backdrop} onPress={onClose}>
-      <Pressable onPress={(e) => e.stopPropagation()} style={styles.sheet}>
+      <Pressable onPress={(e) => e.stopPropagation()} style={[styles.sheet, sheetColumnStyle]}>
         <View className="bg-card rounded-t-[28px] flex-1">
           <View className="px-5 pt-5 pb-5 flex-row items-center gap-2">
             <Text variant="subheading" numberOfLines={1} className="shrink">

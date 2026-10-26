@@ -27,7 +27,7 @@ const FAB_BOTTOM_GAP = 12;
 export function TodayJumpFab({ onPress }: TodayJumpFabProps) {
   const themeColors = useThemeColors();
   const { bottom: safeBottom } = useSafeAreaInsets();
-  const { isTablet } = useDeviceLayout();
+  const { isTablet, navPlacement, navEdge, navRailInset } = useDeviceLayout();
 
   const handlePress = useCallback(() => {
     void triggerHaptic('selection');
@@ -37,7 +37,12 @@ export function TodayJumpFab({ onPress }: TodayJumpFabProps) {
   return (
     <View
       pointerEvents="box-none"
-      style={[styles.anchor, { bottom: getFloatingNavReservedInset(safeBottom) + FAB_BOTTOM_GAP }]}
+      style={[
+        styles.anchor,
+        { bottom: getFloatingNavReservedInset(safeBottom, navPlacement) + FAB_BOTTOM_GAP },
+        // Beside the side rail (iPhone Duo), not under it.
+        navPlacement === 'side' && { [navEdge]: navRailInset },
+      ]}
     >
       <View pointerEvents="box-none" style={[styles.inner, isTablet && styles.innerTablet]}>
         <Pressable
