@@ -76,6 +76,10 @@ const INFERENCE_TIMEOUT_MS = 45000;
 // over 52%).
 const SHARED_PROMPT_CACHE = { type: 'ephemeral', ttl: '1h' };
 const PER_USER_PROMPT_CACHE = { type: 'ephemeral' };
+// Hosted prompts (name@version) already logged as having no shared part, so a
+// `production` label left on a pre-split template shows in Workers Logs once
+// per isolate rather than on every scan.
+const reportedUnsharedPrompts = new Set<string>();
 // What a model with another behind it in the chain leaves for that one: a hung
 // primary times out early enough that the backup still has a real attempt
 // inside the budget, rather than starting with seconds left (or none).
@@ -480,6 +484,15 @@ async function completeScan(
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), Math.min(INFERENCE_TIMEOUT_MS, remaining));
+  const promptCache = choice.byok ? (opts.prompt.personal ? 'shared' : 'per_user') : undefined;
+  if (promptCache === 'per_user') {
+    const { name, version } = opts.promptRef;
+    const key = `${name}@${version ?? 'bundled'}`;
+    if (!reportedUnsharedPrompts.has(key)) {
+      reportedUnsharedPrompts.add(key);
+      logError('prompt_cache_per_user', { reqId, prompt: name, version });
+    }
+  }
   const calledAt = Date.now();
   let httpStatus: number | undefined;
   let usage: OpenRouterUsage | undefined;
@@ -568,6 +581,7 @@ async function completeScan(
       isBackupModel: choice.isBackup,
       attempt: opts.attempt,
       prompt: opts.promptRef,
+      promptCache,
       error: failure,
     });
   }
