@@ -404,11 +404,13 @@ export function buildReceiptText(input: ReceiptTextInput): string {
  * File name for one shared receipt image. Every share gets its own name: iOS
  * and the receiving apps cache a shared file by its URL, so reusing one fixed
  * path made them send the first person's receipt again for everyone after.
- * Only ASCII letters and digits from the title are kept, so the name stays
- * safe on every file system; the timestamp alone keeps it unique.
+ * Accents are folded (José → jose) and only ASCII letters and digits are
+ * kept, so the name stays safe on every file system; the timestamp alone keeps it unique.
  */
 export function receiptShareFileName(title: string, now: number): string {
   const slug = title
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')

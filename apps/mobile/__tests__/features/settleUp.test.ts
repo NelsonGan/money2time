@@ -750,6 +750,10 @@ describe('receiptShareFileName', () => {
     );
   });
 
+  it('folds accents to plain letters', () => {
+    expect(receiptShareFileName('José Müller', 3)).toBe('settle-up-receipt-jose-muller-3.png');
+  });
+
   it('falls back to the timestamp alone when nothing usable is left', () => {
     expect(receiptShareFileName('陈伟', 7)).toBe('settle-up-receipt-7.png');
     expect(receiptShareFileName('', 7)).toBe('settle-up-receipt-7.png');
