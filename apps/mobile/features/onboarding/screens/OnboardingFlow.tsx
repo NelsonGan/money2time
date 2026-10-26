@@ -283,6 +283,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 void triggerHaptic('selection');
                 setShowWageCalculator(true);
               }}
+              wageCalculatorOpen={showWageCalculator}
             />
           </Animated.View>
         )}

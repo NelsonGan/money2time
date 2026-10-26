@@ -27,6 +27,8 @@ interface OnboardingWageStepProps {
   onBack: () => void;
   onContinue: () => void;
   onOpenWageCalculator: () => void;
+  /** The wage calculator is open over this step, covering the try-it keypad. */
+  wageCalculatorOpen?: boolean;
 }
 
 const styles = StyleSheet.create({
@@ -61,6 +63,7 @@ export function OnboardingWageStep({
   onBack,
   onContinue,
   onOpenWageCalculator,
+  wageCalculatorOpen = false,
 }: OnboardingWageStepProps) {
   const themeColors = useThemeColors();
   const swipeBackGesture = useEdgeSwipeBack(onBack);
@@ -119,6 +122,7 @@ export function OnboardingWageStep({
                 workdaysPerWeek={demoWorkdaysPerWeek}
                 trueRateLabel={trueRateLabel}
                 onChangeAmount={setDemoAmount}
+                onScreen={!wageCalculatorOpen}
                 onEditRate={() => {
                   void triggerHaptic('selection');
                   onOpenWageCalculator();

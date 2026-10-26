@@ -101,6 +101,12 @@ type TransferMeta = {
   /** Money2Time Pro on this phone, so the dashboard can unlock Pro views. */
   pro: boolean;
   /**
+   * The app's pseudonymous analytics ID (`settings.appUserId`, `m2t_<uuid>`),
+   * so the browser reports its dashboard use as the same person in PostHog
+   * and GA4. Absent when the phone has none yet.
+   */
+  analyticsId?: string;
+  /**
    * The single-use token this browser's next edit must carry; set per browser
    * when it is sent. Its presence also tells the browser this phone takes edits.
    */

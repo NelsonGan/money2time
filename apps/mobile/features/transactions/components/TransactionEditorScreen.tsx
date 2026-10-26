@@ -4677,6 +4677,7 @@ export function TransactionEditorScreen({
                   ) : (
                     <NumpadPanel
                       compact
+                      onScreen={numpadExpanded}
                       resetNonce={bulkEntryNonce}
                       key={splitAmountRevision}
                       initialExpression={amount}

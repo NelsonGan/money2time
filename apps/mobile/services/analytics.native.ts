@@ -109,6 +109,10 @@ let analyticsReadyResolved = false;
 let appStateSubscription: { remove(): void } | null = null;
 let lastAppState: AppStateStatus | null = null;
 let sessionReplayDecided = false;
+/** This launch was sampled for session replay. */
+let sessionReplaySampled = false;
+/** Number pads on screen now; recording waits while any is. */
+let sessionReplayPauses = 0;
 
 let resolveAnalyticsReady: () => void;
 let analyticsReadyPromise = new Promise<void>((resolve) => {
@@ -334,10 +338,44 @@ export function startSessionReplayForLaunch(
   if (!posthog) return false;
   const rate = isFirstDay ? SESSION_REPLAY_NEW_INSTALL_RATE : SESSION_REPLAY_RETURNING_RATE;
   if (random() >= rate) return false;
-  posthog.startSessionRecording().catch((error: unknown) => {
-    reportProviderFailure('PostHog', 'session replay', error);
-  });
+  sessionReplaySampled = true;
+  // A number pad already on screen (onboarding's) starts it when it goes.
+  if (sessionReplayPauses === 0) startSessionRecording();
   return true;
+}
+
+/** Starts this launch's recording, or resumes it after a pause, in the same session. */
+function startSessionRecording(): void {
+  getPostHog()
+    ?.startSessionRecording(true)
+    .catch((error: unknown) => {
+      reportProviderFailure('PostHog', 'session replay', error);
+    });
+}
+
+/**
+ * Stop recording until the returned function runs. Recordings capture touch
+ * positions, and on the app's own number pads a tap's position is the digit
+ * typed, so every pad pauses the recording while it is on screen (see
+ * `usePauseSessionReplay`). Pauses nest; the recording resumes in the same
+ * session when the last one ends. A launch that is not recording ignores them.
+ */
+export function pauseSessionReplay(): () => void {
+  sessionReplayPauses += 1;
+  if (sessionReplayPauses === 1 && sessionReplaySampled) {
+    getPostHog()
+      ?.stopSessionRecording()
+      .catch((error: unknown) => {
+        reportProviderFailure('PostHog', 'session replay', error);
+      });
+  }
+  let ended = false;
+  return () => {
+    if (ended) return;
+    ended = true;
+    sessionReplayPauses -= 1;
+    if (sessionReplayPauses === 0 && sessionReplaySampled) startSessionRecording();
+  };
 }
 
 // Storage failures, thrown or rejected, must never reach `trackEvent`'s

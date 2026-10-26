@@ -25,6 +25,7 @@ import {
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
+import { useApp } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
 import { QrScannerView } from '~/features/settings/components/QrScannerView';
 import { whenAppUnlocked } from '~/features/settings/lib/appLockState';
@@ -118,6 +119,10 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
   const [foreground, setForeground] = useState(AppState.currentState === 'active');
   const bottomNavInset = useSettingsBottomNavInset();
   const { isPro, isStatusKnown } = usePro();
+  const { settings } = useApp();
+  // Sent with each transfer so the browser reports as the same analytics user.
+  const appUserIdRef = useRef<string | null>(settings.appUserId || null);
+  appUserIdRef.current = settings.appUserId || null;
   const [available, setAvailable] = useState<boolean | null>(null);
   const [links, setLinks] = useState<LinkedBrowser[]>([]);
   const [status, setStatus] = useState<WebDashboardStatus>({});
@@ -180,6 +185,7 @@ export function WebDashboardScreen({ onBack, initialPairLink }: WebDashboardScre
       if (connections.current || seatHolders.at(-1) !== holder) return;
       const manager = new WebDashboardConnections({
         isPro: isProRef.current,
+        analyticsId: () => appUserIdRef.current,
         onChange: (next) => active && setStatus(next),
         onLinksChanged: () => {
           if (active) void listLinkedBrowsers().then(setLinks, () => undefined);
