@@ -23,7 +23,7 @@ Three jobs, gated `test → plan → deploy`:
 
 - **test** — runs on every push, PR, and dispatch: `npm ci`, `npm run check` (typecheck + lint + format), then `npm test`. A red check here blocks `plan` and `deploy`.
 - **plan** — push-to-`main` and manual-dispatch only. Resolves the build matrix (push = iOS + Android production; dispatch = the chosen single platform/profile).
-- **deploy** — push-to-`main` and manual-dispatch only. `eas build --local` on the matched runner (macos-latest for iOS, ubuntu-latest for Android), then `eas submit`. `fail-fast: false`, so one platform failing doesn't kill the other.
+- **deploy** — push-to-`main` and manual-dispatch only. `eas build --local` on the matched runner (`xcode-27` with Xcode 27.1 pinned for iOS, ubuntu-latest for Android; see the README for why the pin matters), then `eas submit`. `fail-fast: false`, so one platform failing doesn't kill the other.
 
 Concurrency cancels in-flight runs on a new push to the same ref.
 
