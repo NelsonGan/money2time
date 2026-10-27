@@ -21,7 +21,7 @@ This skill is the loop that fixes that. Work through it in order.
 | Annotated frames | `assets/tutorials/<image>.png` | yes |
 | Metro `require()` registry | `features/tutorials/content/images.generated.ts` | yes, generated |
 | Raw simulator captures | `.tutorial-raw/<name>.png` | **no**, gitignored |
-| Website copy of both | `money2time-web` `src/lib/tutorials.generated.ts`, `public/tutorials/` | yes, generated |
+| Website copy of both | `money2time-web` `src/lib/tutorials.generated.ts`, `media/tutorials/` | yes, generated |
 
 `image` names and tutorial `id`s are independent. Renumbering a tutorial's steps renames the
 **output**, not the raw capture: the spec entry keeps pointing at whatever the file on disk is
@@ -170,9 +170,10 @@ node scripts/sync-tutorials-web.mjs      # ../money2time-web, or --web <path>
 npm run check && npm test
 ```
 
-Then in `money2time-web`: `npx tsc --noEmit && npm run lint && npm run build`.
+Then in `money2time-web`: `node scripts/upload-media.mjs` to publish the screenshots to its
+R2 bucket, then `npm run lint && npm run build && npm run typecheck`.
 
-Never hand-edit `src/lib/tutorials.generated.ts` or `public/tutorials/` — this script owns them.
+Never hand-edit `src/lib/tutorials.generated.ts` or `media/tutorials/` — this script owns them.
 
 ## 8. Adding a whole new tutorial
 
