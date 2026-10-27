@@ -2645,8 +2645,6 @@ const vi = {
     ring_year: 'Năm',
     ring_month: 'Tháng',
     ring_week: 'Tuần',
-    left_word: 'còn lại',
-    over_word: 'vượt',
     repeats_label: 'Lặp lại',
     repeats_hint_week: 'Ngân sách mới bắt đầu vào mỗi {{day}}.',
     repeats_hint_month: 'Ngân sách mới bắt đầu mỗi tháng.',

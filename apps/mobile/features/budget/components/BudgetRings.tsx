@@ -34,9 +34,10 @@ export function budgetRingColor(period: BudgetPeriod, themeColors: ColorPalette)
 }
 
 /**
- * The year, month and week budgets as nested rings around the focused
- * budget's figure (the `children`). The focused ring is drawn full strength
- * and the others faded; tapping a ring, or its legend entry, focuses it.
+ * The year, month and week budgets as nested activity-style rings, with the
+ * focused budget's figure (the `children`) and a legend beside them. The
+ * focused ring is drawn full strength and the others faded; tapping a ring,
+ * or its legend row, focuses it.
  */
 export function BudgetRings({
   rings,
@@ -61,7 +62,6 @@ export function BudgetRings({
     ring: rings.find((candidate) => candidate.period === period) ?? null,
   }));
   const center = size / 2;
-  const innerRadius = radiusOf(RING_ORDER.length - 1, size) - STROKE / 2;
 
   // Which ring a tap landed on, by its distance from the centre.
   const handlePress = (event: GestureResponderEvent) => {
@@ -78,13 +78,12 @@ export function BudgetRings({
   };
 
   return (
-    <View className="items-center">
+    <View className="flex-row items-center gap-5">
       <Pressable
         onPress={handlePress}
-        // Screen readers use the legend below, which lists the same rings.
+        // Screen readers use the legend beside it, which lists the same rings.
         accessible={false}
         style={{ width: size, height: size }}
-        className="items-center justify-center"
       >
         <Svg width={size} height={size} style={StyleSheet.absoluteFill} pointerEvents="none">
           {placed.map(({ index, ring }) => {
@@ -134,54 +133,52 @@ export function BudgetRings({
             );
           })}
         </Svg>
-        {/* Taps pass through the figure to the rings' own hit test. */}
-        <View
-          pointerEvents="none"
-          className="items-center justify-center"
-          style={{ width: innerRadius * 2 - 8 }}
-        >
-          {children}
-        </View>
       </Pressable>
 
-      <View className="mt-4 flex-row justify-center gap-1">
-        {placed.map(({ ring }) =>
-          ring ? (
-            <Pressable
-              key={ring.period}
-              onPress={() => {
-                if (ring.period === focused) return;
-                void triggerHaptic('selection');
-                onFocus(ring.period);
-              }}
-              accessibilityRole="button"
-              accessibilityState={{ selected: ring.period === focused }}
-              accessibilityLabel={`${I18n.t(`budget.ring_${ring.period}`)}, ${ring.percentLabel}`}
-              className={cn(
-                'flex-row items-center gap-1.5 rounded-full px-2.5 py-1.5 active:opacity-70',
-                ring.period === focused ? 'bg-secondary/60' : '',
-              )}
-            >
-              <View
-                className="h-2.5 w-2.5 rounded-full"
-                style={{ backgroundColor: budgetRingColor(ring.period, themeColors) }}
-              />
-              <Text
-                variant="caption"
-                tone={ring.period === focused ? undefined : 'muted'}
-                className={cn(ring.period === focused && 'text-foreground')}
+      {/* Beside the rings: the focused budget's figure, then one row per
+          ring, each focusing it on tap. */}
+      <View className="min-w-0 flex-1">
+        {children}
+        <View className="mt-2 gap-0.5">
+          {placed.map(({ ring }) =>
+            ring ? (
+              <Pressable
+                key={ring.period}
+                onPress={() => {
+                  if (ring.period === focused) return;
+                  void triggerHaptic('selection');
+                  onFocus(ring.period);
+                }}
+                accessibilityRole="button"
+                accessibilityState={{ selected: ring.period === focused }}
+                accessibilityLabel={`${I18n.t(`budget.ring_${ring.period}`)}, ${ring.percentLabel}`}
+                className={cn(
+                  '-mx-2 flex-row items-center gap-2 rounded-xl px-2 py-1.5 active:opacity-70',
+                  ring.period === focused ? 'bg-secondary/50' : '',
+                )}
               >
-                {I18n.t(`budget.ring_${ring.period}`)}{' '}
+                <View
+                  className="h-2.5 w-2.5 rounded-full"
+                  style={{ backgroundColor: budgetRingColor(ring.period, themeColors) }}
+                />
+                <Text
+                  variant="caption"
+                  numberOfLines={1}
+                  tone={ring.period === focused ? undefined : 'muted'}
+                  className={cn('min-w-0 flex-1', ring.period === focused && 'text-foreground')}
+                >
+                  {I18n.t(`budget.ring_${ring.period}`)}
+                </Text>
                 <Text
                   variant="caption"
                   style={ring.isOver ? { color: themeColors.error } : undefined}
                 >
                   {ring.percentLabel}
                 </Text>
-              </Text>
-            </Pressable>
-          ) : null,
-        )}
+              </Pressable>
+            ) : null,
+          )}
+        </View>
       </View>
     </View>
   );

@@ -2629,8 +2629,6 @@ const ko = {
     ring_year: '연',
     ring_month: '월',
     ring_week: '주',
-    left_word: '남음',
-    over_word: '초과',
     repeats_label: '반복',
     repeats_hint_week: '매주 {{day}}에 새 예산이 시작됩니다.',
     repeats_hint_month: '매달 새 예산이 시작됩니다.',

@@ -2680,8 +2680,6 @@ const pt = {
     ring_year: 'Ano',
     ring_month: 'Mês',
     ring_week: 'Semana',
-    left_word: 'restante',
-    over_word: 'a mais',
     repeats_label: 'Repete',
     repeats_hint_week: 'Um novo orçamento começa a cada {{day}}.',
     repeats_hint_month: 'Um novo orçamento começa todos os meses.',

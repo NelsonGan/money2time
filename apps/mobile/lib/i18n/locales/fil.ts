@@ -2701,8 +2701,6 @@ const fil = {
     ring_year: 'Taon',
     ring_month: 'Buwan',
     ring_week: 'Linggo',
-    left_word: 'natitira',
-    over_word: 'lampas',
     repeats_label: 'Umuulit',
     repeats_hint_week: 'Magsisimula ang bagong badyet tuwing {{day}}.',
     repeats_hint_month: 'Magsisimula ang bagong badyet bawat buwan.',

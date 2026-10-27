@@ -2665,8 +2665,6 @@ const nb = {
     ring_year: 'År',
     ring_month: 'Måned',
     ring_week: 'Uke',
-    left_word: 'igjen',
-    over_word: 'over',
     repeats_label: 'Gjentas',
     repeats_hint_week: 'Et nytt budsjett starter hver {{day}}.',
     repeats_hint_month: 'Et nytt budsjett starter hver måned.',

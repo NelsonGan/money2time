@@ -2681,8 +2681,6 @@ const es = {
     ring_year: 'Año',
     ring_month: 'Mes',
     ring_week: 'Semana',
-    left_word: 'restante',
-    over_word: 'de más',
     repeats_label: 'Se repite',
     repeats_hint_week: 'Cada {{day}} empieza un nuevo presupuesto.',
     repeats_hint_month: 'Cada mes empieza un nuevo presupuesto.',

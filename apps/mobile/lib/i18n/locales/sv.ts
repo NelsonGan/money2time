@@ -2664,8 +2664,6 @@ const sv = {
     ring_year: 'År',
     ring_month: 'Månad',
     ring_week: 'Vecka',
-    left_word: 'kvar',
-    over_word: 'över',
     repeats_label: 'Upprepas',
     repeats_hint_week: 'En ny budget börjar varje {{day}}.',
     repeats_hint_month: 'En ny budget börjar varje månad.',

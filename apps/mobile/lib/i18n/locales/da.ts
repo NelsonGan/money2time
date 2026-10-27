@@ -2663,8 +2663,6 @@ const da = {
     ring_year: 'År',
     ring_month: 'Måned',
     ring_week: 'Uge',
-    left_word: 'tilbage',
-    over_word: 'over',
     repeats_label: 'Gentages',
     repeats_hint_week: 'Et nyt budget starter hver {{day}}.',
     repeats_hint_month: 'Et nyt budget starter hver måned.',

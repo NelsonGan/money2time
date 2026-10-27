@@ -2662,8 +2662,6 @@ const uk = {
     ring_year: 'Рік',
     ring_month: 'Місяць',
     ring_week: 'Тиждень',
-    left_word: 'залишилось',
-    over_word: 'понад',
     repeats_label: 'Повтор',
     repeats_hint_week: 'Новий бюджет починається щотижня. Перший день: {{day}}.',
     repeats_hint_month: 'Новий бюджет починається щомісяця.',

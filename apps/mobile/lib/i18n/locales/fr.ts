@@ -2699,8 +2699,6 @@ const fr = {
     ring_year: 'Année',
     ring_month: 'Mois',
     ring_week: 'Semaine',
-    left_word: 'restant',
-    over_word: 'de trop',
     repeats_label: 'Répétition',
     repeats_hint_week: 'Un nouveau budget commence chaque {{day}}.',
     repeats_hint_month: 'Un nouveau budget commence chaque mois.',

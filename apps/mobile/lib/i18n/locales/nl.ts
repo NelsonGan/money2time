@@ -2693,8 +2693,6 @@ const nl = {
     ring_year: 'Jaar',
     ring_month: 'Maand',
     ring_week: 'Week',
-    left_word: 'over',
-    over_word: 'te veel',
     repeats_label: 'Herhaalt',
     repeats_hint_week: 'Elke {{day}} begint een nieuw budget.',
     repeats_hint_month: 'Elke maand begint een nieuw budget.',

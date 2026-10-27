@@ -2552,8 +2552,6 @@ const zh = {
     ring_year: '年',
     ring_month: '月',
     ring_week: '周',
-    left_word: '剩余',
-    over_word: '超出',
     repeats_label: '重复',
     repeats_hint_week: '每{{day}}开始新的预算。',
     repeats_hint_month: '每月开始新的预算。',

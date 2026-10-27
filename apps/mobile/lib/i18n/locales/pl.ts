@@ -2673,8 +2673,6 @@ const pl = {
     ring_year: 'Rok',
     ring_month: 'Miesiąc',
     ring_week: 'Tydzień',
-    left_word: 'zostało',
-    over_word: 'ponad',
     repeats_label: 'Powtarzanie',
     repeats_hint_week: 'Nowy budżet zaczyna się co tydzień. Pierwszy dzień: {{day}}.',
     repeats_hint_month: 'Nowy budżet zaczyna się co miesiąc.',

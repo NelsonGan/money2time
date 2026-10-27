@@ -2653,8 +2653,6 @@ const hi = {
     ring_year: 'साल',
     ring_month: 'महीना',
     ring_week: 'हफ़्ता',
-    left_word: 'शेष',
-    over_word: 'अधिक',
     repeats_label: 'दोहराव',
     repeats_hint_week: 'हर {{day}} को नया बजट शुरू होता है।',
     repeats_hint_month: 'हर महीने नया बजट शुरू होता है।',

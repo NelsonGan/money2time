@@ -2668,8 +2668,6 @@ const ru = {
     ring_year: 'Год',
     ring_month: 'Месяц',
     ring_week: 'Неделя',
-    left_word: 'осталось',
-    over_word: 'сверх',
     repeats_label: 'Повтор',
     repeats_hint_week: 'Новый бюджет начинается каждую неделю. Первый день: {{day}}.',
     repeats_hint_month: 'Новый бюджет начинается каждый месяц.',

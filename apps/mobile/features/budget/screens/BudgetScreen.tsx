@@ -665,23 +665,39 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
                       <Text variant="bodyStrong" numberOfLines={1}>
                         {focusBudget.templateName ?? budgetPeriodName(focus.period)}
                       </Text>
-                      <View
-                        className="mt-1 self-start rounded-full px-2 py-0.5"
-                        style={{
-                          backgroundColor: withColorAlpha(
-                            budgetRingColor(focus.period, themeColors),
-                            0.12,
-                          ),
-                        }}
-                      >
-                        <Text
-                          variant="caption"
-                          numberOfLines={1}
-                          className="text-[11px]"
-                          style={{ color: budgetRingColor(focus.period, themeColors) }}
+                      {/* The period, and how long it still runs, beside it. */}
+                      <View className="mt-1 flex-row items-center gap-1.5">
+                        <View
+                          className="rounded-full px-2 py-0.5"
+                          style={{
+                            backgroundColor: withColorAlpha(
+                              budgetRingColor(focus.period, themeColors),
+                              0.12,
+                            ),
+                          }}
                         >
-                          {focusLabel}
-                        </Text>
+                          <Text
+                            variant="caption"
+                            numberOfLines={1}
+                            className="text-[11px]"
+                            style={{ color: budgetRingColor(focus.period, themeColors) }}
+                          >
+                            {focusLabel}
+                          </Text>
+                        </View>
+                        {daysLeft != null && daysLeft > 0 ? (
+                          <Text
+                            variant="caption"
+                            tone="muted"
+                            numberOfLines={1}
+                            className="shrink text-[11px]"
+                          >
+                            {I18n.t(
+                              daysLeft === 1 ? 'budget.days_left_one' : 'budget.days_left_other',
+                              { count: daysLeft },
+                            )}
+                          </Text>
+                        ) : null}
                       </View>
                     </View>
                     <Pressable
@@ -708,7 +724,7 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
                     <BudgetRings
                       rings={rings}
                       focused={focus.period}
-                      size={Math.min(pageWidth - spacing.lg * 2 - 32, 220)}
+                      size={150}
                       themeColors={themeColors}
                       onFocus={(period) =>
                         setFocus(
@@ -723,34 +739,33 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
                         )
                       }
                     >
+                      {/* Just the amount: green while some is left, red with a
+                          minus sign once over. */}
                       <Text
                         variant="monoLg"
                         numberOfLines={1}
                         adjustsFontSizeToFit
-                        className="text-[24px] leading-[30px]"
-                        style={
+                        accessibilityLabel={
                           focusModel.summary.remaining < 0
-                            ? { color: themeColors.error }
-                            : undefined
+                            ? I18n.t('budget.over', {
+                                amount: money(-focusModel.summary.remaining, settings),
+                              })
+                            : I18n.t('budget.left', {
+                                amount: money(focusModel.summary.remaining, settings),
+                              })
                         }
+                        className="text-[26px] leading-[32px] self-start"
+                        style={{
+                          color:
+                            focusModel.summary.remaining < 0
+                              ? themeColors.error
+                              : themeColors.success,
+                        }}
                       >
-                        {money(Math.abs(focusModel.summary.remaining), settings)}
+                        {focusModel.summary.remaining < 0
+                          ? `-${money(-focusModel.summary.remaining, settings)}`
+                          : money(focusModel.summary.remaining, settings)}
                       </Text>
-                      <Text variant="body" numberOfLines={1}>
-                        {I18n.t(
-                          focusModel.summary.remaining < 0
-                            ? 'budget.over_word'
-                            : 'budget.left_word',
-                        )}
-                      </Text>
-                      {daysLeft != null && daysLeft > 0 ? (
-                        <Text variant="caption" tone="muted" numberOfLines={1} className="mt-1">
-                          {I18n.t(
-                            daysLeft === 1 ? 'budget.days_left_one' : 'budget.days_left_other',
-                            { count: daysLeft },
-                          )}
-                        </Text>
-                      ) : null}
                     </BudgetRings>
                   </View>
 

@@ -2650,8 +2650,6 @@ const ja = {
     ring_year: '年',
     ring_month: '月',
     ring_week: '週',
-    left_word: '残り',
-    over_word: '超過',
     repeats_label: '繰り返し',
     repeats_hint_week: '毎週{{day}}に新しい予算が始まります。',
     repeats_hint_month: '毎月新しい予算が始まります。',

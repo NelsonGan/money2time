@@ -2700,8 +2700,6 @@ const de = {
     ring_year: 'Jahr',
     ring_month: 'Monat',
     ring_week: 'Woche',
-    left_word: 'übrig',
-    over_word: 'darüber',
     repeats_label: 'Wiederholung',
     repeats_hint_week: 'Jeden {{day}} beginnt ein neues Budget.',
     repeats_hint_month: 'Jeden Monat beginnt ein neues Budget.',

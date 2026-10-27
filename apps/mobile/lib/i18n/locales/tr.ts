@@ -2673,8 +2673,6 @@ const tr = {
     ring_year: 'Yıl',
     ring_month: 'Ay',
     ring_week: 'Hafta',
-    left_word: 'kaldı',
-    over_word: 'aşım',
     repeats_label: 'Tekrar',
     repeats_hint_week: 'Her {{day}} yeni bir bütçe başlar.',
     repeats_hint_month: 'Her ay yeni bir bütçe başlar.',

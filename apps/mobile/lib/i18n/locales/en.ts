@@ -2658,8 +2658,6 @@ const en = {
     ring_year: 'Year',
     ring_month: 'Month',
     ring_week: 'Week',
-    left_word: 'left',
-    over_word: 'over',
     repeats_label: 'Repeats',
     repeats_hint_week: 'A new budget starts every {{day}}.',
     repeats_hint_month: 'A new budget starts every month.',

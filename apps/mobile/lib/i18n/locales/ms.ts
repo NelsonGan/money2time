@@ -2682,8 +2682,6 @@ const ms = {
     ring_year: 'Tahun',
     ring_month: 'Bulan',
     ring_week: 'Minggu',
-    left_word: 'baki',
-    over_word: 'lebih',
     repeats_label: 'Berulang',
     repeats_hint_week: 'Bajet baharu bermula setiap {{day}}.',
     repeats_hint_month: 'Bajet baharu bermula setiap bulan.',

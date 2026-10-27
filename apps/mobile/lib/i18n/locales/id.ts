@@ -2674,8 +2674,6 @@ const id = {
     ring_year: 'Tahun',
     ring_month: 'Bulan',
     ring_week: 'Minggu',
-    left_word: 'sisa',
-    over_word: 'lebih',
     repeats_label: 'Berulang',
     repeats_hint_week: 'Anggaran baru dimulai setiap {{day}}.',
     repeats_hint_month: 'Anggaran baru dimulai setiap bulan.',

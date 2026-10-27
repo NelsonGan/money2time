@@ -2615,8 +2615,6 @@ const th = {
     ring_year: 'ปี',
     ring_month: 'เดือน',
     ring_week: 'สัปดาห์',
-    left_word: 'เหลือ',
-    over_word: 'เกิน',
     repeats_label: 'ทำซ้ำ',
     repeats_hint_week: 'งบประมาณใหม่จะเริ่มทุก{{day}}',
     repeats_hint_month: 'งบประมาณใหม่จะเริ่มทุกเดือน',

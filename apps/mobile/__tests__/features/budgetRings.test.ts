@@ -1,18 +1,18 @@
 import { ringAtDistance } from '~/features/budget/lib/budgetRings';
 
 describe('ringAtDistance', () => {
-  // size 280: year ring radius 133.5, month 116.5, week 99.5 (stroke 13, gap 4).
+  // size 160: year ring radius 71.5, month 51.5, week 31.5 (stroke 17, gap 3).
   const all = ['year', 'month', 'week'] as const;
 
   it('finds the ring under a tap, outermost the year', () => {
-    expect(ringAtDistance(133, 280, [...all])).toBe('year');
-    expect(ringAtDistance(116, 280, [...all])).toBe('month');
-    expect(ringAtDistance(98, 280, [...all])).toBe('week');
+    expect(ringAtDistance(72, 160, [...all])).toBe('year');
+    expect(ringAtDistance(52, 160, [...all])).toBe('month');
+    expect(ringAtDistance(30, 160, [...all])).toBe('week');
   });
 
   it('ignores the centre, the outside and rings not drawn', () => {
-    expect(ringAtDistance(40, 280, [...all])).toBeNull();
-    expect(ringAtDistance(150, 280, [...all])).toBeNull();
-    expect(ringAtDistance(133, 280, ['month', 'week'])).toBeNull();
+    expect(ringAtDistance(15, 160, [...all])).toBeNull();
+    expect(ringAtDistance(85, 160, [...all])).toBeNull();
+    expect(ringAtDistance(72, 160, ['month', 'week'])).toBeNull();
   });
 });
