@@ -17,6 +17,7 @@ import {
   budgetPeriodKeyForDate,
   budgetPeriodRange,
   budgetSlotKey,
+  budgetWeekOverlaps,
   isIsoInBudgetRange,
 } from './budgetPeriods';
 
@@ -140,8 +141,6 @@ export function buildBudgetSummary({
   const remaining = normalizeMoneyAmount(totalBudget - totalSpent);
 
   return {
-    period: budget.period,
-    periodKey: budget.periodKey,
     totalBudget,
     totalSpent,
     budgetedSpent,
@@ -234,14 +233,18 @@ export function computeBackPopulateRange({
   const currentKey = budgetPeriodKeyForDate(period, now, clock);
   if (firstKey >= currentKey) return null;
 
-  const taken = new Set(existingKeys.map((key) => budgetSlotKey(period, key, clock.weekStartsOn)));
+  // A week made under another first day of the week blocks every week it
+  // shares a day with.
+  const taken = new Set(existingKeys);
+  const isTaken = (key: string) =>
+    period === 'week' ? budgetWeekOverlaps(key, existingKeys) : taken.has(key);
   const keys: string[] = [];
   for (
     let key = firstKey;
     key < currentKey;
     key = addBudgetPeriods(period, key, 1, clock.monthCycle)
   ) {
-    if (!taken.has(key)) keys.push(key);
+    if (!isTaken(key)) keys.push(key);
   }
   if (keys.length === 0) return null;
 
@@ -343,7 +346,6 @@ export function computeBudgetPagerMonths({
 
 /** What one month's page of the budget pager holds. */
 export interface BudgetMonthPage {
-  monthKey: string;
   /** The month's own budget. */
   month: PeriodBudget | null;
   /**
@@ -397,5 +399,5 @@ export function buildBudgetMonthPage({
     weeks.push({ key, budget: weekBySlot.get(key) ?? null });
   }
 
-  return { monthKey, month, weeks, yearKey, year };
+  return { month, weeks, yearKey, year };
 }

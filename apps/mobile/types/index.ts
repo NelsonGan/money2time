@@ -838,8 +838,6 @@ export interface UnbudgetedCategorySpend {
 
 /** Everything the budget page / widgets need for one period, computed in one pass. */
 export interface BudgetSummary {
-  period: BudgetPeriod;
-  periodKey: string;
   totalBudget: number;
   /**
    * Spend counted against the budget: budgeted + unbudgeted when the budget

@@ -3,7 +3,7 @@ import type { BudgetPeriod } from '~/types';
 /** Outermost first: the year, then the month, then the week. */
 export const RING_ORDER: BudgetPeriod[] = ['year', 'month', 'week'];
 export const RING_STROKE = 17;
-export const RING_GAP = 3;
+const RING_GAP = 3;
 
 /** The radius of the ring at `index` (0 = outermost) in a `size`-wide drawing. */
 export function ringRadius(index: number, size: number): number {

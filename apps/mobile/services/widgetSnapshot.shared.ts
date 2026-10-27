@@ -4,6 +4,7 @@ import {
   budgetCoveringDay,
   budgetDaysLeft,
   budgetPeriodRange,
+  budgetRangeLength,
 } from '~/features/budget/lib/budgetPeriods';
 import { budgetPeriodLabel, budgetShortDayLabel } from '~/features/budget/lib/format';
 import { weekdayColumnIndex } from '~/features/calendar/lib/calendarBuild';
@@ -729,19 +730,17 @@ function buildBudgetWidgetSnapshots(
   }
   // Without any running budget the set-up state names the current month.
   const monthKey = budget?.periodKey ?? financialMonthKeyForDate(now, monthCycle);
-  const range = budget
-    ? budgetPeriodRange(budget.period, budget.periodKey, monthCycle)
-    : budgetPeriodRange('month', monthKey, monthCycle);
+  const period = budget?.period ?? 'month';
+  const range = budgetPeriodRange(period, monthKey, monthCycle);
   const periodStart = dateFromDayKeyLocal(range.start);
-  const periodEnd = dateFromDayKeyLocal(range.end);
-  const isMonthly = !budget || budget.period === 'month';
-  const monthLabel = isMonthly
-    ? getMonthLabelFormatter(settings.locale).format(periodStart)
-    : budgetPeriodLabel(budget!.period, budget!.periodKey, settings.locale, monthCycle);
+  const monthLabel =
+    period === 'month'
+      ? getMonthLabelFormatter(settings.locale).format(periodStart)
+      : budgetPeriodLabel(period, monthKey, settings.locale, monthCycle);
   const summary = buildBudgetSummary({ budget, transactions, categories, monthCycle });
 
   const DAY_MS = 24 * 60 * 60 * 1000;
-  const daysInMonth = Math.round((periodEnd.getTime() - periodStart.getTime()) / DAY_MS) + 1;
+  const daysInMonth = budgetRangeLength(range);
   const dayOfPeriod = Math.min(
     Math.max(Math.floor((startOfDayLocal(now).getTime() - periodStart.getTime()) / DAY_MS) + 1, 1),
     daysInMonth,
@@ -763,11 +762,12 @@ function buildBudgetWidgetSnapshots(
     monthKey,
     monthLabel,
     // The small widget's header has room for one date: a week shows its first day.
-    monthShortLabel: isMonthly
-      ? getShortMonthYearFormatter(settings.locale).format(periodStart)
-      : budget!.period === 'week'
-        ? budgetShortDayLabel(range.start, settings.locale)
-        : monthLabel,
+    monthShortLabel:
+      period === 'month'
+        ? getShortMonthYearFormatter(settings.locale).format(periodStart)
+        : period === 'week'
+          ? budgetShortDayLabel(range.start, settings.locale)
+          : monthLabel,
     hasBudget,
     usageRatio: summary?.usageRatio ?? 0,
     isOver,

@@ -49,7 +49,7 @@ export function BudgetRings({
 }: {
   /** The rings to draw; a period without a budget is left out. */
   rings: BudgetRing[];
-  focused: BudgetPeriod | null;
+  focused: BudgetPeriod;
   size: number;
   themeColors: ColorPalette;
   onFocus: (period: BudgetPeriod) => void;
@@ -104,7 +104,7 @@ export function BudgetRings({
               );
             }
             const color = budgetRingColor(ring.period, themeColors);
-            const dim = focused != null && ring.period !== focused;
+            const dim = ring.period !== focused;
             const filled = circumference * Math.max(0, Math.min(ring.usageRatio, 1));
             return (
               <React.Fragment key={index}>

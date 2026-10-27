@@ -21,10 +21,6 @@ import { dateFromDayKeyLocal, dayKeyFromDateLocal, dayKeyFromIsoLocal } from '~/
  */
 export const BUDGET_PERIODS = ['week', 'month', 'year'] as const satisfies readonly BudgetPeriod[];
 
-export function isBudgetPeriod(value: unknown): value is BudgetPeriod {
-  return value === 'week' || value === 'month' || value === 'year';
-}
-
 export interface BudgetPeriodClock {
   weekStartsOn: WeekStartsOn;
   monthCycle: MonthCycleInput;
@@ -36,6 +32,7 @@ export interface BudgetPeriodRange {
   end: string;
 }
 
+const DAY_MS = 24 * 60 * 60 * 1000;
 const WEEK_KEY = /^\d{4}-\d{2}-\d{2}$/;
 const MONTH_KEY = /^\d{4}-\d{2}$/;
 const YEAR_KEY = /^\d{4}$/;
@@ -52,7 +49,7 @@ function addDays(date: Date, days: number): Date {
 }
 
 /** Local midnight of the first day of the week `date` falls in. */
-export function startOfBudgetWeek(date: Date, weekStartsOn: WeekStartsOn): Date {
+function startOfBudgetWeek(date: Date, weekStartsOn: WeekStartsOn): Date {
   const day = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   return addDays(day, -((day.getDay() - weekStartsOn + 7) % 7));
 }
@@ -139,6 +136,19 @@ export function budgetRangeLength(range: BudgetPeriodRange): number {
   const start = dateFromDayKeyLocal(range.start);
   const end = dateFromDayKeyLocal(range.end);
   return Math.round((end.getTime() - start.getTime()) / 86_400_000) + 1;
+}
+
+/**
+ * Whether a week starting on `key` shares a day with any of `weekKeys`. Week
+ * budgets made before the user changed the week's first day keep their own
+ * seven days, so a new week must not overlap one of them, or those days would
+ * count twice.
+ */
+export function budgetWeekOverlaps(key: string, weekKeys: readonly string[]): boolean {
+  const start = dateFromDayKeyLocal(key).getTime();
+  return weekKeys.some(
+    (other) => Math.abs(Math.round((dateFromDayKeyLocal(other).getTime() - start) / DAY_MS)) < 7,
+  );
 }
 
 /**

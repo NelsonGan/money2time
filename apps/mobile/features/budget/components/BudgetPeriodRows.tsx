@@ -64,8 +64,8 @@ export function WeekChips({
   );
 }
 
-/** A dashed "No budget for …" row that makes one: shown for a month or year
- *  with a template of its period but no budget yet. */
+/** A dashed "No budget for …" row that makes one: shown for a month, week or
+ *  year with a template of its period but no budget yet. */
 export function CreateBudgetRow({
   label,
   className,

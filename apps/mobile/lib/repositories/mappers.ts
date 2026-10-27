@@ -341,7 +341,7 @@ export function toBudgetTemplate(
 }
 
 /** A stored period; anything unknown (a row from a future app) reads as monthly. */
-export function toBudgetPeriod(value: string | null | undefined): BudgetPeriod {
+function toBudgetPeriod(value: string | null | undefined): BudgetPeriod {
   return value === 'week' || value === 'year' ? value : 'month';
 }
 

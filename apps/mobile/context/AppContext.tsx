@@ -31,9 +31,9 @@ import { persistAutoLogTransaction } from '~/features/autoLog/persistTransaction
 import { computeBackPopulateRange, pickAutoCreateTemplate } from '~/features/budget/lib/budgetMath';
 import {
   BUDGET_PERIODS,
-  budgetCoveringDay,
   type BudgetPeriodClock,
   budgetPeriodKeyForDate,
+  budgetWeekOverlaps,
   isBudgetPeriodKey,
 } from '~/features/budget/lib/budgetPeriods';
 import { computeItemStats } from '~/features/items/utils';
@@ -802,7 +802,7 @@ const fallbackStyles = StyleSheet.create({
  * Creates the running week's, month's and year's budget (or only `only`'s)
  * from each period's default template when that period has never had one, so
  * a deleted budget stays deleted. A week budget made under another first day
- * of the week counts while its own seven days include today. Must run inside a
+ * of the week counts while it shares a day with this week. Must run inside a
  * mutation. Returns how many budgets were made.
  */
 function autoCreateCurrentBudgets(
@@ -814,18 +814,11 @@ function autoCreateCurrentBudgets(
   const now = new Date();
   for (const period of only ? [only] : BUDGET_PERIODS) {
     const key = budgetPeriodKeyForDate(period, now, clock);
-    // A week budget made under another first day of the week still covers
-    // some of these days: making another would count them twice.
+    // A week budget made under another first day of the week may share some
+    // of these days: making another would count them twice.
     const hasEverHadBudget =
       period === 'week'
-        ? budgetCoveringDay(
-            periodBudgetsRepository
-              .everExistedKeys('week')
-              .map((periodKey) => ({ period, periodKey })),
-            'week',
-            dayKeyFromDateLocal(now),
-            clock.monthCycle,
-          ) != null
+        ? budgetWeekOverlaps(key, periodBudgetsRepository.everExistedKeys('week'))
         : periodBudgetsRepository.hasEverExisted(period, key);
     const template = pickAutoCreateTemplate({
       period,
@@ -1138,6 +1131,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<Item[]>([]);
   const [budgetTemplates, setBudgetTemplates] = useState<BudgetTemplate[]>([]);
   const [periodBudgets, setPeriodBudgets] = useState<PeriodBudget[]>([]);
+  // The latest list, for callbacks that only look a budget up.
+  const periodBudgetsRef = useRef(periodBudgets);
+  periodBudgetsRef.current = periodBudgets;
   const [transactionFilters, setTransactionFiltersState] = useState<TransactionFilters>(
     DEFAULT_TRANSACTION_FILTERS,
   );
@@ -4632,7 +4628,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       id: string,
       input: { totalAmount: number; countUnbudgeted: boolean; lines: BudgetAllocationInput[] },
     ) => {
-      const period = periodBudgetsRepository.list().find((budget) => budget.id === id)?.period;
+      const period = periodBudgetsRef.current.find((budget) => budget.id === id)?.period;
       runMutation(
         () => {
           periodBudgetsRepository.update(id, input);
@@ -4651,7 +4647,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     (id: string) => {
       // A period's frozen icon usually shares its file with the template it was
       // copied from, so this only reclaims once every referencing row is gone.
-      const budget = periodBudgetsRepository.list().find((candidate) => candidate.id === id);
+      const budget = periodBudgetsRef.current.find((candidate) => candidate.id === id);
       const hadCustomIcon = isCustomLogoId(budget?.templateEmoji);
       runMutation(
         () => {

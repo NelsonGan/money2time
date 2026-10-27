@@ -5,6 +5,7 @@ import {
   budgetPeriodKeyForDate,
   budgetPeriodRange,
   budgetSlotKey,
+  budgetWeekOverlaps,
   isBudgetPeriodKey,
   isIsoInBudgetRange,
 } from '~/features/budget/lib/budgetPeriods';
@@ -102,6 +103,23 @@ describe('isBudgetPeriodKey', () => {
     expect(isBudgetPeriodKey('month', '2026-10')).toBe(true);
     expect(isBudgetPeriodKey('year', '2026')).toBe(true);
     expect(isBudgetPeriodKey('year', '2026-10')).toBe(false);
+  });
+});
+
+describe('budgetWeekOverlaps', () => {
+  it('is true for a week sharing any day, false for one that only touches', () => {
+    // Sunday 25 Oct – Saturday 31 Oct against Monday-start weeks.
+    expect(budgetWeekOverlaps('2026-10-26', ['2026-10-25'])).toBe(true);
+    expect(budgetWeekOverlaps('2026-10-19', ['2026-10-25'])).toBe(true);
+    expect(budgetWeekOverlaps('2026-11-02', ['2026-10-25'])).toBe(false);
+    expect(budgetWeekOverlaps('2026-10-18', ['2026-10-25'])).toBe(false);
+    expect(budgetWeekOverlaps('2026-10-26', [])).toBe(false);
+  });
+
+  it('counts whole days across a daylight-saving change', () => {
+    // Europe and the US change clocks around these dates.
+    expect(budgetWeekOverlaps('2026-03-30', ['2026-03-23'])).toBe(false);
+    expect(budgetWeekOverlaps('2026-11-02', ['2026-10-26'])).toBe(false);
   });
 });
 

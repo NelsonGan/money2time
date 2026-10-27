@@ -79,12 +79,6 @@ import { monthCycleOf } from '~/utils/financialMonth';
 import { dateFromDayKeyLocal, dayKeyFromDateLocal, dayKeyFromIsoLocal } from '~/utils/formatters';
 import { asSpendingRow } from '~/utils/spending';
 
-/** Green while healthy, amber from 80%, red when over (isOver wins, so a
- *  zero-budget overspend still reads red). */
-function healthOf(line: { usageRatio: number; remaining: number }, themeColors: ColorPalette) {
-  return line.remaining < 0 ? themeColors.error : usageColor(line.usageRatio, themeColors);
-}
-
 /** "RM180 left" / "RM40 over". */
 function leftLabel(remaining: number, settings: UserSettings): string {
   return remaining < 0
@@ -115,7 +109,6 @@ function BudgetLineRow({
   themeColors: ColorPalette;
   onPress: () => void;
 }) {
-  const color = healthOf(line, themeColors);
   const name = category?.name ?? I18n.t('common.uncategorized');
   return (
     <Pressable
@@ -143,8 +136,16 @@ function BudgetLineRow({
         variant={indent ? 'caption' : 'body'}
         numberOfLines={1}
         className="shrink-0 text-right"
-        // Plain while healthy; the colour only speaks up when it matters.
-        style={{ color: line.usageRatio >= 0.8 || line.remaining < 0 ? color : themeColors.text }}
+        // Plain while healthy, amber from 80%, red when over (a zero-budget
+        // overspend included).
+        style={{
+          color:
+            line.remaining < 0
+              ? themeColors.error
+              : line.usageRatio >= 0.8
+                ? usageColor(line.usageRatio, themeColors)
+                : themeColors.text,
+        }}
       >
         {leftLabel(line.remaining, settings)}
       </Text>
@@ -250,19 +251,20 @@ interface FocusTarget {
   key: string;
 }
 
-interface BudgetPageModel extends BudgetMonthPage {
-  summaries: Map<string, { summary: BudgetSummary; range: BudgetPeriodRange }>;
+/** What the user picked on one month's page. */
+interface PageView {
+  period?: BudgetPeriod;
+  /** The week (its first day) on the inner ring. */
+  week?: string;
 }
 
-const summaryId = (budget: PeriodBudget) => budget.id;
-
 /**
- * The budget month pager without any screen chrome. Each month page shows
- * every budget that touches the month, with no period switch: the month's
- * own budget, a strip of its weeks, and the year's budget as a slim row.
- * One of them (the month's, else this or the first budgeted week, else the
- * year's) fills the summary card and category list; tapping a week or the
- * year shows that one instead. Embedded as an insights page.
+ * The budget month pager without any screen chrome. Each month page draws
+ * the year, month and week budgets that touch the month as nested rings.
+ * One of them (the month's, else the running or latest budgeted week, else
+ * the year's) is in focus: its header, amount and category list fill the
+ * page, and tapping another ring focuses that one. Embedded as an insights
+ * page.
  */
 export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerViewProps>(
   function BudgetPagerViewImpl(
@@ -303,13 +305,22 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
     }, [budgetTemplates]);
 
     const [picker, setPicker] = useState<FocusTarget | null>(null);
-    // The budget each page shows when the user tapped a week or the year.
-    const [focusByMonth, setFocusByMonth] = useState<Record<string, FocusTarget>>({});
+    // Per page, the ring the user focused and the week they picked, kept
+    // apart so a picked week stays on the inner ring while another is focused.
+    const [viewByMonth, setViewByMonth] = useState<Record<string, PageView>>({});
 
-    const months = useMemo(
-      () => computeBudgetPagerMonths({ budgets: periodBudgets, transactions, clock }),
-      [clock, periodBudgets, transactions],
-    );
+    // Kept as the same array while its months are unchanged, so an edit that
+    // does not move the pager's ends doesn't rebuild every page.
+    const monthsRef = useRef<string[]>([]);
+    const months = useMemo(() => {
+      const next = computeBudgetPagerMonths({ budgets: periodBudgets, transactions, clock });
+      const previous = monthsRef.current;
+      if (next.length === previous.length && next.every((month, i) => month === previous[i])) {
+        return previous;
+      }
+      monthsRef.current = next;
+      return next;
+    }, [clock, periodBudgets, transactions]);
 
     const currentMonthIndex = useMemo(() => {
       const index = months.indexOf(budgetPeriodKeyForDate('month', new Date(), clock));
@@ -396,10 +407,10 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
       [expensesByDay],
     );
 
-    // Precomputed once per data change: every budget's summary (a budget
-    // can appear on several pages, a year on twelve), then each page's model.
-    const pageModelByMonth = useMemo(() => {
-      const summaries: BudgetPageModel['summaries'] = new Map();
+    // Every budget's summary, by budget id, computed once per data change (a
+    // budget can appear on several pages, a year on twelve).
+    const summaries = useMemo(() => {
+      const map = new Map<string, { summary: BudgetSummary; range: BudgetPeriodRange }>();
       for (const budget of periodBudgets) {
         const range = budgetPeriodRange(budget.period, budget.periodKey, monthCycle);
         const summary = buildBudgetSummary({
@@ -408,17 +419,24 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
           categories,
           monthCycle,
         });
-        if (summary) summaries.set(summaryId(budget), { summary, range });
-      }
-      const map = new Map<string, BudgetPageModel>();
-      for (const month of months) {
-        map.set(month, {
-          ...buildBudgetMonthPage({ monthKey: month, budgets: periodBudgets, clock }),
-          summaries,
-        });
+        if (summary) map.set(budget.id, { summary, range });
       }
       return map;
-    }, [categories, clock, expensesInRange, monthCycle, months, periodBudgets]);
+    }, [categories, expensesInRange, monthCycle, periodBudgets]);
+
+    const pageByMonth = useMemo(
+      () =>
+        new Map<string, BudgetMonthPage>(
+          months.map((month) => [
+            month,
+            buildBudgetMonthPage({ monthKey: month, budgets: periodBudgets, clock }),
+          ]),
+        ),
+      [clock, months, periodBudgets],
+    );
+
+    // The running week's key, for the "No budget for this week" row.
+    const todayWeekKey = budgetPeriodKeyForDate('week', dateFromDayKeyLocal(todayKey), clock);
 
     const categoriesById = useMemo(
       () => new Map(categories.map((category) => [category.id, category])),
@@ -502,58 +520,53 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
       [deletePeriodBudget],
     );
 
-    const setFocus = useCallback((month: string, target: FocusTarget | null) => {
-      setFocusByMonth((previous) => {
-        const next = { ...previous };
-        if (target) next[month] = target;
-        else delete next[month];
-        return next;
-      });
+    const updateView = useCallback((month: string, change: PageView) => {
+      setViewByMonth((previous) => ({ ...previous, [month]: { ...previous[month], ...change } }));
     }, []);
 
     const renderMonthPage = useCallback(
       ({ item: slotIndex }: { item: number }) => {
         const month = months[slotIndex];
-        const model = pageModelByMonth.get(month);
+        const model = pageByMonth.get(month);
         if (!model) return <View style={{ width: pageWidth }} />;
 
-        const budgetFor = (target: FocusTarget): PeriodBudget | null => {
-          if (target.period === 'month') return model.month;
-          if (target.period === 'year') return model.year;
-          return model.weeks.find((week) => week.key === target.key)?.budget ?? null;
-        };
-        const thisWeek = model.weeks.find(
-          (week) => week.budget && week.key <= todayKey && todayKey <= addDaysKey(week.key, 6),
-        );
+        const weekBudget = (key: string | undefined) =>
+          (key && model.weeks.find((week) => week.key === key)?.budget) || null;
+        const thisWeek = model.weeks.find((week) => {
+          const range = week.budget && summaries.get(week.budget.id)?.range;
+          return range && range.start <= todayKey && todayKey <= range.end;
+        });
         // The week the inner ring shows when none is picked: the running one,
         // else the month's latest budgeted week.
         const defaultWeek =
           thisWeek ?? [...model.weeks].reverse().find((week) => week.budget) ?? null;
-        const defaultFocus: FocusTarget | null = model.month
-          ? { period: 'month', key: month }
-          : defaultWeek
-            ? { period: 'week', key: defaultWeek.key }
-            : model.year
-              ? { period: 'year', key: model.yearKey }
-              : null;
-        const chosen = focusByMonth[month];
-        const focus = chosen && budgetFor(chosen) ? chosen : defaultFocus;
-        // A picked week stays on the inner ring after focus moves elsewhere.
-        const ringWeekKey =
-          (chosen?.period === 'week' && budgetFor(chosen) ? chosen.key : null) ??
-          defaultWeek?.key ??
-          null;
-        const focusBudget = focus ? budgetFor(focus) : null;
-        const focusModel = focusBudget ? model.summaries.get(summaryId(focusBudget)) : undefined;
+        const view = viewByMonth[month] ?? {};
+        // The inner ring's week: the one picked here, else the default.
+        const ringWeekKey = weekBudget(view.week) ? view.week! : (defaultWeek?.key ?? null);
+        const ringWeek = weekBudget(ringWeekKey ?? undefined);
+        const budgetOf = (period: BudgetPeriod) =>
+          period === 'month' ? model.month : period === 'year' ? model.year : ringWeek;
+        // The focused ring: the one tapped here, else the month's, the week's,
+        // then the year's, whichever has a budget.
+        const focusPeriod =
+          view.period && budgetOf(view.period)
+            ? view.period
+            : (['month', 'week', 'year'] as const).find((period) => budgetOf(period));
+        const focusBudget = focusPeriod ? budgetOf(focusPeriod) : null;
+        const focus: FocusTarget | null =
+          focusPeriod && focusBudget ? { period: focusPeriod, key: focusBudget.periodKey } : null;
+        const focusModel = focusBudget ? summaries.get(focusBudget.id) : undefined;
 
         const showWeekCreate =
           templatesByPeriod.week.length > 0 && !model.weeks.some((week) => week.budget);
-        const yearModel = model.year ? model.summaries.get(summaryId(model.year)) : undefined;
-        const monthModel = model.month ? model.summaries.get(summaryId(model.month)) : undefined;
-        const ringWeek = ringWeekKey
-          ? (model.weeks.find((week) => week.key === ringWeekKey)?.budget ?? null)
-          : null;
-        const weekModel = ringWeek ? model.summaries.get(summaryId(ringWeek)) : undefined;
+        // The week the "No budget for …" row offers: the running one when it
+        // is on this page, else the month's first.
+        const createWeekKey = model.weeks.some((week) => week.key === todayWeekKey)
+          ? todayWeekKey
+          : model.weeks[0]?.key;
+        const yearModel = model.year ? summaries.get(model.year.id) : undefined;
+        const monthModel = model.month ? summaries.get(model.month.id) : undefined;
+        const weekModel = ringWeek ? summaries.get(ringWeek.id) : undefined;
         const showMonthCreate = !model.month && templatesByPeriod.month.length > 0;
         const showYearCreate = !model.year && templatesByPeriod.year.length > 0;
 
@@ -618,6 +631,8 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
             ? budgetDaysLeft(focusModel.range, dateFromDayKeyLocal(todayKey))
             : null;
         const weekChoices = model.weeks.filter((week) => week.budget);
+        const focusColor = focus ? budgetRingColor(focus.period, themeColors) : themeColors.primary;
+        const remaining = focusModel?.summary.remaining ?? 0;
 
         return (
           <View style={{ width: pageWidth }} className="flex-1">
@@ -646,19 +661,13 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
                     <View
                       className="h-10 w-10 items-center justify-center rounded-2xl"
                       style={{
-                        backgroundColor: withColorAlpha(
-                          budgetRingColor(focus.period, themeColors),
-                          0.14,
-                        ),
+                        backgroundColor: withColorAlpha(focusColor, 0.14),
                       }}
                     >
                       {focusBudget.templateEmoji ? (
                         <CategoryEmoji icon={focusBudget.templateEmoji} size={22} />
                       ) : (
-                        <CalendarDays
-                          size={18}
-                          color={budgetRingColor(focus.period, themeColors)}
-                        />
+                        <CalendarDays size={18} color={focusColor} />
                       )}
                     </View>
                     <View className="ml-1.5 min-w-0 flex-1">
@@ -670,17 +679,14 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
                         <View
                           className="rounded-full px-2 py-0.5"
                           style={{
-                            backgroundColor: withColorAlpha(
-                              budgetRingColor(focus.period, themeColors),
-                              0.12,
-                            ),
+                            backgroundColor: withColorAlpha(focusColor, 0.12),
                           }}
                         >
                           <Text
                             variant="caption"
                             numberOfLines={1}
                             className="text-[11px]"
-                            style={{ color: budgetRingColor(focus.period, themeColors) }}
+                            style={{ color: focusColor }}
                           >
                             {focusLabel}
                           </Text>
@@ -726,18 +732,7 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
                       focused={focus.period}
                       size={150}
                       themeColors={themeColors}
-                      onFocus={(period) =>
-                        setFocus(
-                          month,
-                          period === 'month'
-                            ? null
-                            : period === 'year'
-                              ? { period, key: model.yearKey }
-                              : ringWeekKey
-                                ? { period, key: ringWeekKey }
-                                : null,
-                        )
-                      }
+                      onFocus={(period) => updateView(month, { period })}
                     >
                       {/* Just the amount: green while some is left, red with a
                           minus sign once over. */}
@@ -745,26 +740,15 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
                         variant="monoLg"
                         numberOfLines={1}
                         adjustsFontSizeToFit
-                        accessibilityLabel={
-                          focusModel.summary.remaining < 0
-                            ? I18n.t('budget.over', {
-                                amount: money(-focusModel.summary.remaining, settings),
-                              })
-                            : I18n.t('budget.left', {
-                                amount: money(focusModel.summary.remaining, settings),
-                              })
-                        }
+                        accessibilityLabel={leftLabel(remaining, settings)}
                         className="text-[26px] leading-[32px] self-start"
                         style={{
-                          color:
-                            focusModel.summary.remaining < 0
-                              ? themeColors.error
-                              : themeColors.success,
+                          color: remaining < 0 ? themeColors.error : themeColors.success,
                         }}
                       >
-                        {focusModel.summary.remaining < 0
-                          ? `-${money(-focusModel.summary.remaining, settings)}`
-                          : money(focusModel.summary.remaining, settings)}
+                        {remaining < 0
+                          ? `-${money(-remaining, settings)}`
+                          : money(remaining, settings)}
                       </Text>
                     </BudgetRings>
                   </View>
@@ -776,34 +760,18 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
                       selectedKey={focus.key}
                       todayKey={todayKey}
                       settings={settings}
-                      onSelect={(key) => setFocus(month, { period: 'week', key })}
+                      onSelect={(key) => updateView(month, { week: key })}
                     />
                   ) : null}
                 </View>
               ) : null}
 
-              {showWeekCreate ? (
+              {showWeekCreate && createWeekKey ? (
                 <CreateBudgetRow
-                  label={budgetPeriodLabel(
-                    'week',
-                    budgetPeriodKeyForDate('week', dateFromDayKeyLocal(todayKey), clock),
-                    settings.locale,
-                    monthCycle,
-                  )}
+                  label={budgetPeriodLabel('week', createWeekKey, settings.locale, monthCycle)}
                   className="mt-3"
                   themeColors={themeColors}
-                  onPress={() =>
-                    handleCreate({
-                      period: 'week',
-                      key: model.weeks.some(
-                        (week) =>
-                          week.key ===
-                          budgetPeriodKeyForDate('week', dateFromDayKeyLocal(todayKey), clock),
-                      )
-                        ? budgetPeriodKeyForDate('week', dateFromDayKeyLocal(todayKey), clock)
-                        : model.weeks[0].key,
-                    })
-                  }
+                  onPress={() => handleCreate({ period: 'week', key: createWeekKey })}
                 />
               ) : null}
               {showYearCreate ? (
@@ -870,8 +838,6 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
       [
         budgetTemplates.length,
         categoriesById,
-        clock,
-        focusByMonth,
         handleCreate,
         handleDeleteBudget,
         listNavInset,
@@ -879,13 +845,16 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
         months,
         onOpenBudgetEditor,
         openCategoryDrilldown,
-        pageModelByMonth,
+        pageByMonth,
         pageWidth,
-        setFocus,
+        updateView,
+        viewByMonth,
         settings,
+        summaries,
         templatesByPeriod,
         themeColors,
         todayKey,
+        todayWeekKey,
       ],
     );
 
@@ -895,7 +864,6 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
           ref={listRef}
           data={pager.slots}
           renderItem={renderMonthPage}
-          extraData={focusByMonth}
           keyExtractor={pager.keyExtractor}
           getItemLayout={pager.getItemLayout}
           onMomentumScrollEnd={pager.handleMomentumEnd}
@@ -954,8 +922,3 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
     );
   },
 );
-
-function addDaysKey(dayKey: string, days: number): string {
-  const date = dateFromDayKeyLocal(dayKey);
-  return dayKeyFromDateLocal(new Date(date.getFullYear(), date.getMonth(), date.getDate() + days));
-}

@@ -559,7 +559,7 @@ describe('weekly and yearly budgets', () => {
       makeTransaction({ id: 'after', categoryId: 'food', amount: 40, date: '2026-11-02' }),
     ];
     const summary = buildBudgetSummary({ budget, transactions, categories });
-    expect(summary).toMatchObject({ period: 'week', periodKey: '2026-10-26', totalSpent: 30 });
+    expect(summary!.totalSpent).toBe(30);
   });
 
   it('counts a whole calendar year for a yearly budget', () => {
@@ -585,16 +585,16 @@ describe('weekly and yearly budgets', () => {
     expect(range!.keys).toEqual(['2026-10-05', '2026-10-19']);
   });
 
-  it('treats a week budget made under another first weekday as taking its week', () => {
-    // A Sunday-start week (18 Oct) falls in the Monday-start week of 12 Oct.
+  it('skips every week that shares a day with one made under another first weekday', () => {
+    // A Sunday-start week (18–24 Oct) overlaps the Monday weeks of 12 and 19 Oct.
     const range = computeBackPopulateRange({
       period: 'week',
       clock: CLOCK,
-      transactions: [makeTransaction({ date: '2026-10-13' })],
+      transactions: [makeTransaction({ date: '2026-10-06' })],
       existingKeys: ['2026-10-18'],
       now: new Date(2026, 9, 28),
     });
-    expect(range!.keys).toEqual(['2026-10-19']);
+    expect(range!.keys).toEqual(['2026-10-05']);
   });
 
   it('back-fills past years', () => {

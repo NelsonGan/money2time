@@ -12,7 +12,6 @@ import {
   MAX_FIRST_DAY_OF_MONTH,
 } from '~/utils/financialMonth';
 import {
-  addMonthsAtMonthStart,
   dayKeyFromDateLocal,
   monthKeyFromDateLocal,
   monthKeyFromIsoLocal,
@@ -63,10 +62,10 @@ describe('financialMonth — identity at firstDay = 1', () => {
     expect(financialMonthStartDate('2025-07', 1)).toEqual(new Date(2025, 6, 1));
   });
 
-  it('addFinancialMonths matches addMonthsAtMonthStart from a month start', () => {
+  it('addFinancialMonths moves whole calendar months from a month start', () => {
     const anchor = startOfMonthDate(new Date(2025, 6, 1));
     for (const offset of [-13, -1, 0, 1, 5, 18]) {
-      expect(addFinancialMonths(anchor, offset, 1)).toEqual(addMonthsAtMonthStart(anchor, offset));
+      expect(addFinancialMonths(anchor, offset, 1)).toEqual(new Date(2025, 6 + offset, 1));
     }
   });
 

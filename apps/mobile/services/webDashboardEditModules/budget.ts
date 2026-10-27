@@ -49,7 +49,7 @@ export type BudgetExtra = {
   budgets: PeriodBudget[];
   /** Live templates of every period, which the free plan's limit counts. */
   templateCount: number;
-  /** The budget pager's months (`computeBudgetPagerKeys`): first budget or expense month to a year ahead. */
+  /** The budget pager's months (`computeBudgetPagerMonths`), weekly and yearly budgets included: first budget or expense month to a year ahead. */
   months: string[];
 };
 
