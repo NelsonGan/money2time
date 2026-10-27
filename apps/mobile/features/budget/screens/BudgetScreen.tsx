@@ -1,11 +1,4 @@
-import {
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  ChevronUp,
-  Pencil,
-  Trash2,
-} from 'lucide-react-native';
+import { ChevronDown, ChevronRight, ChevronUp, Pencil, Trash2 } from 'lucide-react-native';
 import React, {
   forwardRef,
   useCallback,
@@ -30,11 +23,8 @@ import {
 import type { ColorPalette } from '~/constants/designSystem';
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
-import {
-  CreateBudgetRow,
-  WeekStrip,
-  YearBudgetBanner,
-} from '~/features/budget/components/BudgetPeriodRows';
+import { CreateBudgetRow, WeekChips } from '~/features/budget/components/BudgetPeriodRows';
+import { type BudgetRing, BudgetRings } from '~/features/budget/components/BudgetRings';
 import { BudgetTemplatePickerSheet } from '~/features/budget/components/BudgetTemplatePickerSheet';
 import {
   type BudgetMonthPage,
@@ -72,7 +62,6 @@ import type {
   UserSettings,
 } from '~/types';
 import { cn } from '~/utils';
-import { withColorAlpha } from '~/utils/color';
 import { monthCycleOf } from '~/utils/financialMonth';
 import { dateFromDayKeyLocal, dayKeyFromDateLocal, dayKeyFromIsoLocal } from '~/utils/formatters';
 import { asSpendingRow } from '~/utils/spending';
@@ -88,129 +77,6 @@ function leftLabel(remaining: number, settings: UserSettings): string {
   return remaining < 0
     ? I18n.t('budget.over', { amount: money(Math.abs(remaining), settings) })
     : I18n.t('budget.left', { amount: money(remaining, settings) });
-}
-
-function Bar({ ratio, color, height }: { ratio: number; color: string; height: number }) {
-  const clamped = Math.max(0, Math.min(ratio, 1));
-  return (
-    <View
-      className="w-full overflow-hidden rounded-full"
-      style={{ height, backgroundColor: withColorAlpha(color, 0.15) }}
-    >
-      <View
-        className="rounded-full"
-        style={{ height, width: `${clamped * 100}%`, backgroundColor: color }}
-      />
-    </View>
-  );
-}
-
-/**
- * The budget the page is showing, reduced to one answer: how much is left
- * (or over), of what, for how long, and one bar.
- */
-function BudgetSummaryCard({
-  summary,
-  label,
-  backLabel,
-  onBack,
-  daysLeft,
-  settings,
-  themeColors,
-  onEdit,
-  onDelete,
-}: {
-  summary: BudgetSummary;
-  /** Which budget this is: "October", "Oct 19 – Oct 25", "2026". */
-  label: string;
-  /** Chip back to the month's own budget, when showing a week or the year. */
-  backLabel: string | null;
-  onBack: () => void;
-  /** Days left in the period, today included; null unless the period is running. */
-  daysLeft: number | null;
-  settings: UserSettings;
-  themeColors: ColorPalette;
-  onEdit: () => void;
-  onDelete: () => void;
-}) {
-  const isOver = summary.remaining < 0;
-  const color = healthOf(summary, themeColors);
-  const details = [I18n.t('budget.of_total', { amount: money(summary.totalBudget, settings) })];
-  if (daysLeft != null && daysLeft > 0) {
-    details.push(
-      I18n.t(daysLeft === 1 ? 'budget.days_left_one' : 'budget.days_left_other', {
-        count: daysLeft,
-      }),
-    );
-  }
-
-  return (
-    <View className="w-full overflow-hidden rounded-2xl border border-border/45 bg-card px-4 pb-4 pt-3.5">
-      {/* An accent edge marks the card as the page's main budget. */}
-      <View className="absolute left-0 right-0 top-0 h-[3px] bg-primary" />
-      <View className="flex-row items-center gap-1.5">
-        <Text variant="bodyStrong" numberOfLines={1} className="min-w-0 flex-1">
-          {label}
-        </Text>
-        {backLabel ? (
-          <Pressable
-            onPress={() => {
-              void triggerHaptic('selection');
-              onBack();
-            }}
-            hitSlop={8}
-            accessibilityRole="button"
-            accessibilityLabel={I18n.t('budget.back_to', { label: backLabel })}
-            className="shrink-0 flex-row items-center gap-0.5 rounded-full bg-secondary/40 py-1 pl-1.5 pr-2.5 active:opacity-70"
-          >
-            <ChevronLeft size={13} color={themeColors.primary} />
-            <Text variant="caption" className="text-[11px] text-primary">
-              {backLabel}
-            </Text>
-          </Pressable>
-        ) : null}
-        <Pressable
-          onPress={onEdit}
-          hitSlop={10}
-          accessibilityRole="button"
-          accessibilityLabel={I18n.t('budget.edit_budget')}
-          className="h-7 w-7 items-center justify-center rounded-full active:opacity-70"
-        >
-          <Pencil size={14} color={themeColors.textMuted} />
-        </Pressable>
-        <Pressable
-          onPress={onDelete}
-          hitSlop={10}
-          accessibilityRole="button"
-          accessibilityLabel={I18n.t('budget.delete_budget')}
-          className="h-7 w-7 items-center justify-center rounded-full active:opacity-70"
-        >
-          <Trash2 size={14} color={themeColors.textMuted} />
-        </Pressable>
-      </View>
-
-      <Text
-        variant="monoLg"
-        numberOfLines={1}
-        adjustsFontSizeToFit
-        className="mt-1.5 text-[38px] leading-[44px]"
-        style={isOver ? { color: themeColors.error } : undefined}
-      >
-        {leftLabel(summary.remaining, settings)}
-      </Text>
-      <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
-        {details.join(' · ')}
-      </Text>
-      <View className="mt-3.5 flex-row items-center gap-3">
-        <View className="flex-1">
-          <Bar ratio={summary.usageRatio} color={color} height={10} />
-        </View>
-        <Text variant="bodyStrong" className="text-[13px]" style={{ color }}>
-          {usagePercentLabel(summary.usageRatio)}
-        </Text>
-      </View>
-    </View>
-  );
 }
 
 /**
@@ -646,27 +512,40 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
         const thisWeek = model.weeks.find(
           (week) => week.budget && week.key <= todayKey && todayKey <= addDaysKey(week.key, 6),
         );
-        const firstBudgetedWeek = thisWeek ?? model.weeks.find((week) => week.budget);
+        // The week the inner ring shows when none is picked: the running one,
+        // else the month's latest budgeted week.
+        const defaultWeek =
+          thisWeek ?? [...model.weeks].reverse().find((week) => week.budget) ?? null;
         const defaultFocus: FocusTarget | null = model.month
           ? { period: 'month', key: month }
-          : firstBudgetedWeek
-            ? { period: 'week', key: firstBudgetedWeek.key }
+          : defaultWeek
+            ? { period: 'week', key: defaultWeek.key }
             : model.year
               ? { period: 'year', key: model.yearKey }
               : null;
         const chosen = focusByMonth[month];
         const focus = chosen && budgetFor(chosen) ? chosen : defaultFocus;
+        // A picked week stays on the inner ring after focus moves elsewhere.
+        const ringWeekKey =
+          (chosen?.period === 'week' && budgetFor(chosen) ? chosen.key : null) ??
+          defaultWeek?.key ??
+          null;
         const focusBudget = focus ? budgetFor(focus) : null;
         const focusModel = focusBudget ? model.summaries.get(summaryId(focusBudget)) : undefined;
 
-        const showWeeks =
-          templatesByPeriod.week.length > 0 || model.weeks.some((week) => week.budget);
+        const showWeekCreate =
+          templatesByPeriod.week.length > 0 && !model.weeks.some((week) => week.budget);
         const yearModel = model.year ? model.summaries.get(summaryId(model.year)) : undefined;
+        const monthModel = model.month ? model.summaries.get(summaryId(model.month)) : undefined;
+        const ringWeek = ringWeekKey
+          ? (model.weeks.find((week) => week.key === ringWeekKey)?.budget ?? null)
+          : null;
+        const weekModel = ringWeek ? model.summaries.get(summaryId(ringWeek)) : undefined;
         const showMonthCreate = !model.month && templatesByPeriod.month.length > 0;
         const showYearCreate = !model.year && templatesByPeriod.year.length > 0;
 
         // Nothing touches this month: the familiar empty state.
-        if (!focusModel && !showWeeks && !showYearCreate) {
+        if (!focusModel && !showWeekCreate && !showYearCreate) {
           return (
             <View style={{ width: pageWidth }} className="flex-1">
               <EmptyState
@@ -698,7 +577,6 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
               ? monthNameLabel(month, settings.locale)
               : budgetPeriodLabel(focus.period, focusBudget.periodKey, settings.locale, monthCycle)
             : null;
-        const showBackToMonth = model.month != null && focus?.period !== 'month';
         const isRunning =
           focusModel != null &&
           focusModel.range.start <= todayKey &&
@@ -706,6 +584,27 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
         const orderedCategories = focusModel
           ? [...focusModel.summary.categories].sort((a, b) => Number(b.isOver) - Number(a.isOver))
           : [];
+        const rings: BudgetRing[] = [
+          { period: 'year' as const, model: yearModel },
+          { period: 'month' as const, model: monthModel },
+          { period: 'week' as const, model: weekModel },
+        ].flatMap(({ period, model: ringModel }) =>
+          ringModel
+            ? [
+                {
+                  period,
+                  usageRatio: ringModel.summary.usageRatio,
+                  percentLabel: usagePercentLabel(ringModel.summary.usageRatio),
+                  isOver: ringModel.summary.remaining < 0,
+                },
+              ]
+            : [],
+        );
+        const daysLeft =
+          isRunning && focusModel
+            ? budgetDaysLeft(focusModel.range, dateFromDayKeyLocal(todayKey))
+            : null;
+        const weekChoices = model.weeks.filter((week) => week.budget);
 
         return (
           <View style={{ width: pageWidth }} className="flex-1">
@@ -716,36 +615,6 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
               ]}
               showsVerticalScrollIndicator={false}
             >
-              {/* The year first: the big picture above the month. */}
-              {model.year && yearModel ? (
-                <YearBudgetBanner
-                  budget={model.year}
-                  summary={yearModel.summary}
-                  label={model.yearKey}
-                  daysLeft={
-                    yearModel.range.start <= todayKey && todayKey <= yearModel.range.end
-                      ? budgetDaysLeft(yearModel.range, dateFromDayKeyLocal(todayKey))
-                      : null
-                  }
-                  selected={focus?.period === 'year'}
-                  settings={settings}
-                  themeColors={themeColors}
-                  onPress={() =>
-                    setFocus(
-                      month,
-                      focus?.period === 'year' ? null : { period: 'year', key: model.yearKey },
-                    )
-                  }
-                />
-              ) : showYearCreate ? (
-                <CreateBudgetRow
-                  label={model.yearKey}
-                  className="mb-3"
-                  themeColors={themeColors}
-                  onPress={() => handleCreate({ period: 'year', key: model.yearKey })}
-                />
-              ) : null}
-
               {showMonthCreate ? (
                 <CreateBudgetRow
                   label={monthKeyLabel(month, settings.locale)}
@@ -756,60 +625,127 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
               ) : null}
 
               {focus && focusBudget && focusModel ? (
-                <BudgetSummaryCard
-                  summary={focusModel.summary}
-                  // Which budget the card shows: the month's, a week's or the
-                  // year's, so it is always named.
-                  label={
-                    focusBudget.templateName
-                      ? `${focusLabel} · ${focusBudget.templateName}`
-                      : (focusLabel ?? '')
-                  }
-                  backLabel={showBackToMonth ? monthNameLabel(month, settings.locale) : null}
-                  onBack={() => setFocus(month, null)}
-                  daysLeft={
-                    isRunning
-                      ? budgetDaysLeft(focusModel.range, dateFromDayKeyLocal(todayKey))
-                      : null
-                  }
-                  settings={settings}
-                  themeColors={themeColors}
-                  onEdit={() => onOpenBudgetEditor(focusBudget.id)}
-                  onDelete={() => handleDeleteBudget(focusBudget)}
-                />
+                <View className="rounded-3xl border border-border/45 bg-card px-4 pb-4 pt-3">
+                  {/* Which budget is in focus, and its edit and delete. */}
+                  <View className="flex-row items-center gap-1.5">
+                    <Text variant="bodyStrong" numberOfLines={1} className="min-w-0 flex-1">
+                      {focusBudget.templateName
+                        ? `${focusLabel} · ${focusBudget.templateName}`
+                        : focusLabel}
+                    </Text>
+                    <Pressable
+                      onPress={() => onOpenBudgetEditor(focusBudget.id)}
+                      hitSlop={10}
+                      accessibilityRole="button"
+                      accessibilityLabel={I18n.t('budget.edit_budget')}
+                      className="h-7 w-7 items-center justify-center rounded-full active:opacity-70"
+                    >
+                      <Pencil size={14} color={themeColors.textMuted} />
+                    </Pressable>
+                    <Pressable
+                      onPress={() => handleDeleteBudget(focusBudget)}
+                      hitSlop={10}
+                      accessibilityRole="button"
+                      accessibilityLabel={I18n.t('budget.delete_budget')}
+                      className="h-7 w-7 items-center justify-center rounded-full active:opacity-70"
+                    >
+                      <Trash2 size={14} color={themeColors.textMuted} />
+                    </Pressable>
+                  </View>
+
+                  <View className="mt-3">
+                    <BudgetRings
+                      rings={rings}
+                      focused={focus.period}
+                      size={Math.min(pageWidth - spacing.lg * 2 - 32, 280)}
+                      themeColors={themeColors}
+                      onFocus={(period) =>
+                        setFocus(
+                          month,
+                          period === 'month'
+                            ? null
+                            : period === 'year'
+                              ? { period, key: model.yearKey }
+                              : ringWeekKey
+                                ? { period, key: ringWeekKey }
+                                : null,
+                        )
+                      }
+                    >
+                      <Text
+                        variant="monoLg"
+                        numberOfLines={1}
+                        adjustsFontSizeToFit
+                        className="text-[30px] leading-[36px]"
+                        style={
+                          focusModel.summary.remaining < 0
+                            ? { color: themeColors.error }
+                            : undefined
+                        }
+                      >
+                        {money(Math.abs(focusModel.summary.remaining), settings)}
+                      </Text>
+                      <Text variant="body" numberOfLines={1}>
+                        {I18n.t(
+                          focusModel.summary.remaining < 0
+                            ? 'budget.over_word'
+                            : 'budget.left_word',
+                        )}
+                      </Text>
+                      {daysLeft != null && daysLeft > 0 ? (
+                        <Text variant="caption" tone="muted" numberOfLines={1} className="mt-1">
+                          {I18n.t(
+                            daysLeft === 1 ? 'budget.days_left_one' : 'budget.days_left_other',
+                            { count: daysLeft },
+                          )}
+                        </Text>
+                      ) : null}
+                    </BudgetRings>
+                  </View>
+
+                  {/* With the week in focus, its siblings in the month to pick from. */}
+                  {focus.period === 'week' && weekChoices.length > 1 ? (
+                    <WeekChips
+                      weeks={weekChoices.map((week) => week.key)}
+                      selectedKey={focus.key}
+                      todayKey={todayKey}
+                      settings={settings}
+                      onSelect={(key) => setFocus(month, { period: 'week', key })}
+                    />
+                  ) : null}
+                </View>
               ) : null}
 
-              {showWeeks ? (
-                <WeekStrip
-                  title={weekStripTitle(
-                    (focus?.period === 'week'
-                      ? model.weeks.find((week) => week.key === focus.key)?.budget
-                      : null) ??
-                      thisWeek?.budget ??
-                      firstBudgetedWeek?.budget ??
-                      null,
-                    settings,
+              {showWeekCreate ? (
+                <CreateBudgetRow
+                  label={budgetPeriodLabel(
+                    'week',
+                    budgetPeriodKeyForDate('week', dateFromDayKeyLocal(todayKey), clock),
+                    settings.locale,
+                    monthCycle,
                   )}
-                  weeks={model.weeks.map((week) => ({
-                    ...week,
-                    summary: week.budget
-                      ? (model.summaries.get(summaryId(week.budget))?.summary ?? null)
-                      : null,
-                  }))}
-                  todayKey={todayKey}
-                  selectedKey={focus?.period === 'week' ? focus.key : null}
-                  canCreate={templatesByPeriod.week.length > 0}
-                  settings={settings}
+                  className="mt-3"
                   themeColors={themeColors}
-                  onSelect={(key) =>
-                    setFocus(
-                      month,
-                      focus?.period === 'week' && focus.key === key
-                        ? null
-                        : { period: 'week', key },
-                    )
+                  onPress={() =>
+                    handleCreate({
+                      period: 'week',
+                      key: model.weeks.some(
+                        (week) =>
+                          week.key ===
+                          budgetPeriodKeyForDate('week', dateFromDayKeyLocal(todayKey), clock),
+                      )
+                        ? budgetPeriodKeyForDate('week', dateFromDayKeyLocal(todayKey), clock)
+                        : model.weeks[0].key,
+                    })
                   }
-                  onCreate={(key) => handleCreate({ period: 'week', key })}
+                />
+              ) : null}
+              {showYearCreate ? (
+                <CreateBudgetRow
+                  label={model.yearKey}
+                  className="mt-3"
+                  themeColors={themeColors}
+                  onPress={() => handleCreate({ period: 'year', key: model.yearKey })}
                 />
               ) : null}
 
@@ -868,6 +804,7 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
       [
         budgetTemplates.length,
         categoriesById,
+        clock,
         focusByMonth,
         handleCreate,
         handleDeleteBudget,
@@ -951,13 +888,6 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
     );
   },
 );
-
-/** "Weekly spending · RM400 a week", named after the week's budget, or "Weeks". */
-function weekStripTitle(budget: PeriodBudget | null, settings: UserSettings): string {
-  if (!budget) return I18n.t('budget.weeks_title');
-  const perWeek = I18n.t('budget.per_week', { amount: money(budget.totalAmount, settings) });
-  return `${budget.templateName ?? I18n.t('budget.weeks_title')} · ${perWeek}`;
-}
 
 function addDaysKey(dayKey: string, days: number): string {
   const date = dateFromDayKeyLocal(dayKey);
