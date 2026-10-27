@@ -1,5 +1,4 @@
 import {
-  addMonthsAtMonthStart,
   amountToHoursByRate,
   computeHourlyRates,
   dayKeyFromDateLocal,
@@ -159,19 +158,6 @@ describe('month date arithmetic', () => {
     const start = startOfMonthDate(new Date(2026, 4, 25));
     expect(start.getDate()).toBe(1);
     expect(start.getMonth()).toBe(4);
-  });
-
-  it('adds months at month start', () => {
-    const result = addMonthsAtMonthStart(new Date(2026, 4, 13), 2);
-    expect(result.getFullYear()).toBe(2026);
-    expect(result.getMonth()).toBe(6);
-    expect(result.getDate()).toBe(1);
-  });
-
-  it('wraps months across year boundary', () => {
-    const result = addMonthsAtMonthStart(new Date(2026, 11, 1), 2);
-    expect(result.getFullYear()).toBe(2027);
-    expect(result.getMonth()).toBe(1);
   });
 });
 

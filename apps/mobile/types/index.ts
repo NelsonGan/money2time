@@ -755,18 +755,24 @@ export interface BudgetTemplateAllocation {
   sortOrder: number;
 }
 
+/** How often a budget repeats. */
+export type BudgetPeriod = 'week' | 'month' | 'year';
+
 /**
- * A reusable monthly budget definition: a total amount fully allocated across
- * root expense categories. Monthly budgets are frozen copies of a template
- * taken at creation time — editing a template never rewrites created months.
+ * A reusable budget definition for one period length: a total amount fully
+ * allocated across root expense categories. Each week's, month's or year's
+ * budget is a frozen copy of a template taken at creation time — editing a
+ * template never rewrites created budgets.
  */
 export interface BudgetTemplate {
   id: string;
   name: string;
   /** Optional emoji shown next to the template name. */
   emoji: string | null;
+  /** How often a budget made from this template repeats. */
+  period: BudgetPeriod;
   totalAmount: number;
-  /** Exactly one live template is the default while any template exists. */
+  /** Exactly one live template of each period is the default while that period has any. */
   isDefault: boolean;
   /** Whether spend in categories without a budget line counts toward the total. */
   countUnbudgeted: boolean;
@@ -777,19 +783,23 @@ export interface BudgetTemplate {
   deletedAt: string | null;
 }
 
-/** One category line of a month's frozen budget. */
-export interface MonthlyBudgetLine {
+/** One category line of a period's frozen budget. */
+export interface PeriodBudgetLine {
   id: string;
   categoryId: string;
   amount: number;
   sortOrder: number;
 }
 
-/** A single month's budget — a frozen copy of a template at creation time. */
-export interface MonthlyBudget {
+/** A single week's, month's or year's budget — a frozen copy of a template at creation time. */
+export interface PeriodBudget {
   id: string;
-  /** 'YYYY-MM' month key. */
-  month: string;
+  period: BudgetPeriod;
+  /**
+   * The period's key: 'YYYY-MM-DD' (its first day) for a week, 'YYYY-MM' for a
+   * (financial) month, 'YYYY' for a calendar year.
+   */
+  periodKey: string;
   /** Provenance only; the template may have been renamed or deleted since. */
   templateId: string | null;
   templateName: string | null;
@@ -797,13 +807,13 @@ export interface MonthlyBudget {
   totalAmount: number;
   /** Frozen from the template: whether unbudgeted spend counts toward the total. */
   countUnbudgeted: boolean;
-  lines: MonthlyBudgetLine[];
+  lines: PeriodBudgetLine[];
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
 }
 
-/** Depletion of one budget line for a month (subcategory spend rolled up). */
+/** Depletion of one budget line for a period (subcategory spend rolled up). */
 export interface BudgetCategoryProgress {
   categoryId: string;
   budgeted: number;
@@ -826,9 +836,8 @@ export interface UnbudgetedCategorySpend {
   spent: number;
 }
 
-/** Everything the budget month page / widgets need, computed in one pass. */
-export interface BudgetMonthSummary {
-  month: string;
+/** Everything the budget page / widgets need for one period, computed in one pass. */
+export interface BudgetSummary {
   totalBudget: number;
   /**
    * Spend counted against the budget: budgeted + unbudgeted when the budget
@@ -839,7 +848,7 @@ export interface BudgetMonthSummary {
   unbudgetedSpent: number;
   /** Frozen from the template: whether unbudgetedSpent is part of totalSpent. */
   countUnbudgeted: boolean;
-  /** totalBudget − totalSpent; negative when the month is over budget. */
+  /** totalBudget − totalSpent; negative when the period is over budget. */
   remaining: number;
   /** max(0, −remaining). */
   exceededBy: number;

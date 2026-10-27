@@ -336,11 +336,14 @@ export const budgetTemplatesTable = sqliteTable('budget_templates', {
   // Optional emoji shown next to the template name (category-style picker).
   emoji: text('emoji'),
   totalAmount: real('total_amount').notNull().default(0),
-  // Exactly one live template has is_default = 1 while any template exists.
+  // Exactly one live template of each period has is_default = 1 while that
+  // period has any template.
   isDefault: integer('is_default', { mode: 'boolean' }).notNull().default(false),
   // Whether spending in categories without a budget line counts toward the
   // month's total (the original behavior).
   countUnbudgeted: integer('count_unbudgeted', { mode: 'boolean' }).notNull().default(true),
+  // How often a budget made from the template repeats: 'week', 'month' or 'year'.
+  period: text('period').notNull().default('month'),
   sortOrder: integer('sort_order').notNull().default(0),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
@@ -358,11 +361,16 @@ export const budgetTemplateCategoriesTable = sqliteTable('budget_template_catego
   deletedAt: text('deleted_at'),
 });
 
+// One budget per week, month or year (the table predates weekly and yearly
+// budgets, hence its name).
 export const monthlyBudgetsTable = sqliteTable('monthly_budgets', {
   id: text('id').primaryKey(),
-  // 'YYYY-MM' month key. A partial unique index allows one live row per month;
-  // soft-deleted rows double as tombstones so auto-create never resurrects a
-  // month the user deleted.
+  // 'week', 'month' or 'year'.
+  period: text('period').notNull().default('month'),
+  // The period's key: 'YYYY-MM-DD' (first day) for a week, 'YYYY-MM' for a
+  // month, 'YYYY' for a year. A partial unique index allows one live row per
+  // period and key; soft-deleted rows double as tombstones so auto-create
+  // never resurrects a period the user deleted.
   month: text('month').notNull(),
   // Provenance only — the source template may be renamed or deleted later.
   templateId: text('template_id'),

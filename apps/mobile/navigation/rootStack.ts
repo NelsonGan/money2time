@@ -5,7 +5,13 @@ import {
 } from '@react-navigation/native-stack';
 
 import type { InsightsDrilldownPayload } from '~/features/insights/screens';
-import type { CategoryType, TransactionSentiment, TransactionType, WageConfig } from '~/types';
+import type {
+  BudgetPeriod,
+  CategoryType,
+  TransactionSentiment,
+  TransactionType,
+  WageConfig,
+} from '~/types';
 
 export interface AddTransactionInitialValues {
   type?: TransactionType;
@@ -103,10 +109,15 @@ export type RootStackParamList = {
   // templates. Same bridge arrangement as ItemIconPicker, via
   // categoryIconPickerBridge.
   CategoryIconPicker: undefined;
-  BudgetTemplateEditor: { templateId?: string; duplicateFromId?: string } | undefined;
+  BudgetTemplateEditor:
+    | { templateId?: string; duplicateFromId?: string; period?: BudgetPeriod }
+    | undefined;
   // Edit an existing month budget (budgetId) or create a one-off custom
-  // budget for a month with no live budget (createForMonth, 'YYYY-MM').
-  BudgetMonthEditor: { budgetId: string } | { createForMonth: string };
+  // budget for a week, month or year with no live budget (createFor, see
+  // features/budget/lib/budgetPeriods.ts for the key shapes).
+  BudgetPeriodEditor:
+    | { budgetId: string }
+    | { createFor: { period: BudgetPeriod; periodKey: string } };
   // Full-page per-category allocation editor. Its draft slice + commit callback
   // ride a module bridge (categoryAllocationBridge) rather than params, so the
   // route stays serializable.

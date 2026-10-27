@@ -83,7 +83,7 @@ import {
   BudgetTemplateEditorScreen,
   BudgetTemplatesScreen,
   CategoryAllocationScreen,
-  MonthlyBudgetEditorScreen,
+  PeriodBudgetEditorScreen,
 } from '~/features/budget/screens';
 import { CalendarScreen } from '~/features/calendar/screens';
 import { AddGoalButton } from '~/features/goals/components/AddGoalButton';
@@ -249,7 +249,13 @@ import {
   reloadMoney2TimeWidgets,
   writeMoney2TimeWidgetSnapshot,
 } from '~/services/widgetSnapshot';
-import type { AddButtonAction, CategoryType, TransactionWithRelations, WageConfig } from '~/types';
+import type {
+  AddButtonAction,
+  BudgetPeriod,
+  CategoryType,
+  TransactionWithRelations,
+  WageConfig,
+} from '~/types';
 import { readableColumn } from '~/utils/adaptiveLayout';
 import { financialMonthKeyForDate, monthCycleOf } from '~/utils/financialMonth';
 import { dayKeyFromIsoLocal, monthKeyFromIsoLocal } from '~/utils/formatters';
@@ -470,8 +476,15 @@ function MainShellScreen({
   onVisibleScreenChange,
   onEnterSettingsTab,
 }: MainShellScreenProps) {
-  const { quickEntryPrefs, items, accounts, accountGroups, updateQuickEntryPrefs, settings } =
-    useApp();
+  const {
+    quickEntryPrefs,
+    items,
+    budgetTemplates,
+    accounts,
+    accountGroups,
+    updateQuickEntryPrefs,
+    settings,
+  } = useApp();
   const { checkLimit, isPro } = useProGate();
   const { startScan } = useReceiptScans();
   const navTabs = useMemo(() => parseNavTabs(settings.navTabsJson), [settings.navTabsJson]);
@@ -933,22 +946,25 @@ function MainShellScreen({
   );
 
   const openBudgetTemplateEditor = useCallback(
-    (params?: { templateId?: string; duplicateFromId?: string }) => {
+    (params?: { templateId?: string; duplicateFromId?: string; period?: BudgetPeriod }) => {
+      // A new template counts toward the free plan's limit, whichever period
+      // it is for (the budget page offers one on any period with none).
+      if (!params?.templateId && !checkLimit('budget_templates', budgetTemplates.length)) return;
       navigation.navigate('BudgetTemplateEditor', params);
     },
-    [navigation],
+    [budgetTemplates.length, checkLimit, navigation],
   );
 
-  const openMonthlyBudgetEditor = useCallback(
+  const openPeriodBudgetEditor = useCallback(
     (budgetId: string) => {
-      navigation.navigate('BudgetMonthEditor', { budgetId });
+      navigation.navigate('BudgetPeriodEditor', { budgetId });
     },
     [navigation],
   );
 
   const openCustomBudgetCreator = useCallback(
-    (month: string) => {
-      navigation.navigate('BudgetMonthEditor', { createForMonth: month });
+    (period: BudgetPeriod, periodKey: string) => {
+      navigation.navigate('BudgetPeriodEditor', { createFor: { period, periodKey } });
     },
     [navigation],
   );
@@ -1262,7 +1278,7 @@ function MainShellScreen({
               onOpenProPaywall={openInsightsTrendPaywall}
               onOpenBudgetTemplates={openBudgetTemplates}
               onOpenBudgetTemplateEditor={openBudgetTemplateEditor}
-              onOpenMonthlyBudgetEditor={openMonthlyBudgetEditor}
+              onOpenPeriodBudgetEditor={openPeriodBudgetEditor}
               onCreateCustomBudget={openCustomBudgetCreator}
               activityBreakdownInsightRequest={activityBreakdownInsightRequest}
             />
@@ -1495,13 +1511,8 @@ function PaymentAlertsSetupRouteScreen({
 }
 
 function WidgetSnapshotSync() {
-  const {
-    settings,
-    categories,
-    monthlyBudgets,
-    insightsPreferencesJson,
-    getTrueHourlyRateForDate,
-  } = useApp();
+  const { settings, categories, periodBudgets, insightsPreferencesJson, getTrueHourlyRateForDate } =
+    useApp();
   const { transactions } = useTransactions();
   const isPro = useIsPro();
 
@@ -1526,7 +1537,7 @@ function WidgetSnapshotSync() {
         isPro,
         getTrueHourlyRateForDate,
         categories,
-        monthlyBudgets,
+        periodBudgets,
         excludedSavingsIncomeCategoryIds: savingsExclusions.income,
         excludedSavingsExpenseCategoryIds: savingsExclusions.expense,
         savingsIncomeMode: savingsExclusions.incomeMode,
@@ -1548,7 +1559,7 @@ function WidgetSnapshotSync() {
     getTrueHourlyRateForDate,
     insightsPreferencesJson,
     isPro,
-    monthlyBudgets,
+    periodBudgets,
     settings,
     transactions,
   ]);
@@ -2092,6 +2103,7 @@ function BudgetTemplateEditorRouteScreen({
     <BudgetTemplateEditorScreen
       templateId={route.params?.templateId}
       duplicateFromId={route.params?.duplicateFromId}
+      initialPeriod={route.params?.period}
       onOpenCategoryAllocation={(params) => {
         setPendingCategoryAllocation(params);
         navigation.navigate('BudgetCategoryAllocation');
@@ -2128,14 +2140,14 @@ function BudgetCategoryAllocationRouteScreen({
   );
 }
 
-function BudgetMonthEditorRouteScreen({
+function BudgetPeriodEditorRouteScreen({
   route,
   navigation,
-}: RootStackRouteProps<'BudgetMonthEditor'>) {
+}: RootStackRouteProps<'BudgetPeriodEditor'>) {
   return (
-    <MonthlyBudgetEditorScreen
+    <PeriodBudgetEditorScreen
       budgetId={'budgetId' in route.params ? route.params.budgetId : undefined}
-      createForMonth={'createForMonth' in route.params ? route.params.createForMonth : undefined}
+      createFor={'createFor' in route.params ? route.params.createFor : undefined}
       onOpenCategoryAllocation={(params) => {
         setPendingCategoryAllocation(params);
         navigation.navigate('BudgetCategoryAllocation');
@@ -3074,7 +3086,7 @@ function AppContent() {
               name="BudgetTemplateEditor"
               component={BudgetTemplateEditorRouteScreen}
             />
-            <RootStack.Screen name="BudgetMonthEditor" component={BudgetMonthEditorRouteScreen} />
+            <RootStack.Screen name="BudgetPeriodEditor" component={BudgetPeriodEditorRouteScreen} />
             <RootStack.Screen
               name="BudgetCategoryAllocation"
               component={BudgetCategoryAllocationRouteScreen}

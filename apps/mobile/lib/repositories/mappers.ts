@@ -26,6 +26,7 @@ import type {
   Album,
   AppIconId,
   BackupTarget,
+  BudgetPeriod,
   BudgetTemplate,
   BudgetTemplateAllocation,
   Category,
@@ -34,14 +35,14 @@ import type {
   IconStyle,
   Item,
   LoanRateChange,
-  MonthlyBudget,
-  MonthlyBudgetLine,
   MonthlyWageSettings,
   PaymentAlertCapture,
   PaymentAlertChannel,
   PaymentAlertReason,
   PaymentAlertResolution,
   PaymentAlertStatus,
+  PeriodBudget,
+  PeriodBudgetLine,
   ReceiptSplit,
   ReceiptSplitItem,
   ReceiptSplitItemShare,
@@ -327,6 +328,7 @@ export function toBudgetTemplate(
     id: row.id,
     name: row.name,
     emoji: row.emoji ?? null,
+    period: toBudgetPeriod(row.period),
     totalAmount: row.totalAmount ?? 0,
     isDefault: row.isDefault ?? false,
     countUnbudgeted: row.countUnbudgeted ?? true,
@@ -338,7 +340,12 @@ export function toBudgetTemplate(
   };
 }
 
-export function toMonthlyBudgetLine(row: MonthlyBudgetCategoryRow): MonthlyBudgetLine {
+/** A stored period; anything unknown (a row from a future app) reads as monthly. */
+function toBudgetPeriod(value: string | null | undefined): BudgetPeriod {
+  return value === 'week' || value === 'year' ? value : 'month';
+}
+
+export function toPeriodBudgetLine(row: MonthlyBudgetCategoryRow): PeriodBudgetLine {
   return {
     id: row.id,
     categoryId: row.categoryId,
@@ -347,10 +354,11 @@ export function toMonthlyBudgetLine(row: MonthlyBudgetCategoryRow): MonthlyBudge
   };
 }
 
-export function toMonthlyBudget(row: MonthlyBudgetRow, lines: MonthlyBudgetLine[]): MonthlyBudget {
+export function toPeriodBudget(row: MonthlyBudgetRow, lines: PeriodBudgetLine[]): PeriodBudget {
   return {
     id: row.id,
-    month: row.month,
+    period: toBudgetPeriod(row.period),
+    periodKey: row.month,
     templateId: row.templateId ?? null,
     templateName: row.templateName ?? null,
     templateEmoji: row.templateEmoji ?? null,

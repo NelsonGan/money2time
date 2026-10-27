@@ -4,7 +4,7 @@ import { Pressable, View } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { CategoryEmoji, Input, SettingsHeader } from '~/components/ui';
+import { CategoryEmoji, Input, SegmentedToggle, SettingsHeader, Text } from '~/components/ui';
 import { useApp, useTransactions } from '~/context/AppContext';
 import {
   AllocationCategoryList,
@@ -16,16 +16,25 @@ import {
   useAllocationDraft,
 } from '~/features/budget/hooks/useAllocationDraft';
 import { computeBackPopulateRange } from '~/features/budget/lib/budgetMath';
-import { monthKeyLabel } from '~/features/budget/lib/format';
+import { BUDGET_PERIODS } from '~/features/budget/lib/budgetPeriods';
+import {
+  budgetPeriodName,
+  budgetPeriodStartHint,
+  budgetSpanLabels,
+} from '~/features/budget/lib/format';
 import type { CategoryIconPickerSession } from '~/features/settings/lib/categoryIconPickerBridge';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import type { BudgetPeriod } from '~/types';
 import { currencySymbolForCode } from '~/utils/currency';
+import { monthCycleOf } from '~/utils/financialMonth';
 
 interface BudgetTemplateEditorScreenProps {
   templateId?: string;
   duplicateFromId?: string;
+  /** A new template's starting period (the budget page's current one). */
+  initialPeriod?: BudgetPeriod;
   /** Pushes the full-page per-category allocation editor. */
   onOpenCategoryAllocation: (params: OpenCategoryAllocationParams) => void;
   /** Pushes the shared icon picker. */
@@ -38,6 +47,7 @@ const SCROLL_CONTENT = { paddingBottom: 40 } as const;
 export function BudgetTemplateEditorScreen({
   templateId,
   duplicateFromId,
+  initialPeriod,
   onOpenCategoryAllocation,
   onOpenIconPicker,
   onClose,
@@ -46,7 +56,7 @@ export function BudgetTemplateEditorScreen({
     settings,
     categories,
     budgetTemplates,
-    getBudgetMonthsEverExisted,
+    getBudgetKeysEverExisted,
     createBudgetTemplate,
     updateBudgetTemplate,
   } = useApp();
@@ -70,6 +80,7 @@ export function BudgetTemplateEditorScreen({
       (duplicateSource ? `${duplicateSource.name} ${I18n.t('budget.duplicate_suffix')}` : ''),
   );
   const [emoji, setEmoji] = useState<string | null>(seed?.emoji ?? null);
+  const [period, setPeriod] = useState<BudgetPeriod>(seed?.period ?? initialPeriod ?? 'month');
   const [countUnbudgeted, setCountUnbudgeted] = useState(seed?.countUnbudgeted ?? true);
   const [backPopulate, setBackPopulate] = useState(false);
 
@@ -97,16 +108,26 @@ export function BudgetTemplateEditorScreen({
   const currencySymbol = currencySymbolForCode(settings.currencyCode);
   const canSave = name.trim().length > 0 && draft.allocationsValid;
 
+  const monthCycle = monthCycleOf(settings);
+  const { weekStartsOn } = settings;
+
   // Back-populate is only offered on create, and only when there are missing
-  // past months to fill (range copy names the exact span). Tombstoned months
+  // past periods to fill (range copy names the exact span). Tombstoned periods
   // count as existing so the preview matches what the fill will actually skip.
   const backPopulateRange = useMemo(() => {
     if (isEditing) return null;
     return computeBackPopulateRange({
+      period,
       transactions,
-      existingMonths: getBudgetMonthsEverExisted(),
+      existingKeys: getBudgetKeysEverExisted(period),
+      clock: { weekStartsOn, monthCycle },
     });
-  }, [getBudgetMonthsEverExisted, isEditing, transactions]);
+  }, [getBudgetKeysEverExisted, isEditing, monthCycle, period, transactions, weekStartsOn]);
+
+  const periodOptions = useMemo(
+    () => BUDGET_PERIODS.map((value) => ({ value, label: budgetPeriodName(value) })),
+    [],
+  );
 
   const handleSave = useCallback(() => {
     if (!canSave) return;
@@ -114,6 +135,7 @@ export function BudgetTemplateEditorScreen({
     const input = {
       name: name.trim(),
       emoji,
+      period,
       totalAmount: draft.parsedTotal,
       countUnbudgeted,
       allocations: draft.buildAllocations(),
@@ -136,6 +158,7 @@ export function BudgetTemplateEditorScreen({
     isEditing,
     name,
     onClose,
+    period,
     updateBudgetTemplate,
   ]);
 
@@ -203,8 +226,18 @@ export function BudgetTemplateEditorScreen({
             </View>
           </View>
 
+          <View>
+            <Text variant="label" tone="muted" className="mb-2.5 px-1">
+              {I18n.t('budget.repeats_label')}
+            </Text>
+            <SegmentedToggle value={period} options={periodOptions} onChange={setPeriod} />
+            <Text variant="caption" tone="muted" className="mt-2 px-1">
+              {budgetPeriodStartHint(period, weekStartsOn, settings.locale)}
+            </Text>
+          </View>
+
           <Input
-            label={I18n.t('budget.total_label')}
+            label={I18n.t(`budget.total_label_${period}`)}
             variant="currency"
             currencySymbol={currencySymbol}
             value={draft.total}
@@ -225,7 +258,7 @@ export function BudgetTemplateEditorScreen({
 
           <AllocationOptionRow
             title={I18n.t('budget.count_unbudgeted_title')}
-            caption={I18n.t('budget.count_unbudgeted_caption')}
+            caption={I18n.t(`budget.count_unbudgeted_caption_${period}`)}
             value={countUnbudgeted}
             onChange={setCountUnbudgeted}
             themeColors={themeColors}
@@ -233,12 +266,22 @@ export function BudgetTemplateEditorScreen({
 
           {backPopulateRange ? (
             <AllocationOptionRow
-              title={I18n.t('budget.back_populate_title')}
-              caption={I18n.t('budget.back_populate_caption', {
-                first: monthKeyLabel(backPopulateRange.firstMonthKey, settings.locale),
-                last: monthKeyLabel(backPopulateRange.lastMonthKey, settings.locale),
-                count: backPopulateRange.months.length,
-              })}
+              title={I18n.t(`budget.back_populate_title_${period}`)}
+              caption={I18n.t(
+                backPopulateRange.keys.length === 1
+                  ? `budget.back_populate_caption_${period}_one`
+                  : `budget.back_populate_caption_${period}_other`,
+                {
+                  ...budgetSpanLabels(
+                    period,
+                    backPopulateRange.firstKey,
+                    backPopulateRange.lastKey,
+                    settings.locale,
+                    monthCycle,
+                  ),
+                  count: backPopulateRange.keys.length,
+                },
+              )}
               value={backPopulate}
               onChange={setBackPopulate}
               themeColors={themeColors}

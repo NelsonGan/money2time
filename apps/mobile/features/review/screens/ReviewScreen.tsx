@@ -25,6 +25,7 @@ import { CategoryEmoji, ClayIcon, Text } from '~/components/ui';
 import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
+import { budgetCoveringDay } from '~/features/budget/lib/budgetPeriods';
 import { useGoals } from '~/features/goals/useGoals';
 import { filterSpendingTransactions } from '~/features/reimbursements/lib/reimbursementMath';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -62,8 +63,8 @@ import {
   UNCATEGORIZED_ID,
 } from '../lib/reviewMath';
 import {
+  budgetKeyOfPeriod,
   listCompletedPeriods,
-  monthKeyOfPeriod,
   type ReviewPeriod,
   type ReviewZoom,
   shiftPeriod,
@@ -108,7 +109,7 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
     { zoom, onZoomChange, filters, onFiltersChange, onOpenTransaction },
     ref,
   ) {
-    const { settings, categories, monthlyBudgets, getTrueHourlyRateForDate } = useApp();
+    const { settings, categories, periodBudgets, getTrueHourlyRateForDate } = useApp();
     const monthCycle = monthCycleOf(settings);
     const { transactions } = useTransactions();
 
@@ -219,10 +220,14 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
 
     const summary = useMemo(() => {
       if (!period) return null;
-      const monthKey = monthKeyOfPeriod(period);
-      const budget = monthKey
-        ? monthlyBudgets.find((entry) => entry.month === monthKey && !entry.deletedAt)
-        : null;
+      // The budget of the same week, month or year, when there is one: the
+      // one with this exact key, else (a week budget made under another first
+      // day of the week) one covering the period's first day.
+      const budgetKey = budgetKeyOfPeriod(period);
+      const live = periodBudgets.filter((entry) => !entry.deletedAt);
+      const budget =
+        live.find((entry) => entry.period === period.zoom && entry.periodKey === budgetKey) ??
+        budgetCoveringDay(live, period.zoom, period.start, monthCycle);
       return buildReviewSummary({
         period,
         transactions: spendingTransactions,
@@ -236,8 +241,9 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
     }, [
       categories,
       getTrueHourlyRateForDate,
-      monthlyBudgets,
       period,
+      periodBudgets,
+      monthCycle,
       previousExpenses,
       spendingTransactions,
     ]);

@@ -10,17 +10,19 @@ import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { BudgetTemplate, Category, UserSettings } from '~/types';
+import type { BudgetPeriod, BudgetTemplate, Category, UserSettings } from '~/types';
 
 interface BudgetTemplatePickerSheetProps {
   visible: boolean;
   onClose: () => void;
+  /** The templates of `period`. */
   templates: BudgetTemplate[];
+  period: BudgetPeriod;
   /** Used to tell root allocations from subcategory breakdown rows. */
   categories: Pick<Category, 'id' | 'parentId'>[];
   settings: UserSettings;
   onSelect: (templateId: string) => void;
-  /** Builds a one-off custom budget for the month instead (no template). */
+  /** Builds a one-off custom budget for this period instead (no template). */
   onSelectCustom: () => void;
 }
 
@@ -35,11 +37,12 @@ const styles = StyleSheet.create({
   },
 });
 
-/** Bottom sheet for choosing which template a month's budget is created from. */
+/** Bottom sheet for choosing which template a period's budget is created from. */
 export function BudgetTemplatePickerSheet({
   visible,
   onClose,
   templates,
+  period,
   categories,
   settings,
   onSelect,
@@ -127,7 +130,7 @@ export function BudgetTemplatePickerSheet({
                       {I18n.t('budget.custom_option')}
                     </Text>
                     <Text variant="caption" tone="muted" className="mt-0.5">
-                      {I18n.t('budget.custom_option_caption')}
+                      {I18n.t(`budget.custom_option_caption_${period}`)}
                     </Text>
                   </View>
                 </Pressable>

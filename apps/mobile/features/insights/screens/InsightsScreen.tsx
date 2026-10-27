@@ -148,6 +148,7 @@ import {
 } from '~/services/insightsNavigation';
 import { getCustomLogoUri } from '~/services/userAssets';
 import type {
+  BudgetPeriod,
   Category,
   CategoryType,
   MonthCycleInput,
@@ -2841,9 +2842,13 @@ interface InsightsScreenProps {
   onOpenProPaywall?: () => void;
   /** Budget view (embedded as an insights page via the type menu). */
   onOpenBudgetTemplates: () => void;
-  onOpenBudgetTemplateEditor: (params?: { templateId?: string; duplicateFromId?: string }) => void;
-  onOpenMonthlyBudgetEditor: (budgetId: string) => void;
-  onCreateCustomBudget: (month: string) => void;
+  onOpenBudgetTemplateEditor: (params?: {
+    templateId?: string;
+    duplicateFromId?: string;
+    period?: BudgetPeriod;
+  }) => void;
+  onOpenPeriodBudgetEditor: (budgetId: string) => void;
+  onCreateCustomBudget: (period: BudgetPeriod, periodKey: string) => void;
   activityBreakdownInsightRequest?: {
     insightType: NavigableInsightType;
     anchorDateKey?: string;
@@ -2862,7 +2867,7 @@ export function InsightsScreen({
   onOpenProPaywall,
   onOpenBudgetTemplates,
   onOpenBudgetTemplateEditor,
-  onOpenMonthlyBudgetEditor,
+  onOpenPeriodBudgetEditor,
   onCreateCustomBudget,
   activityBreakdownInsightRequest = null,
 }: InsightsScreenProps) {
@@ -7123,7 +7128,7 @@ export function InsightsScreen({
               <BudgetPagerView
                 ref={budgetPagerRef}
                 onOpenTemplateEditor={onOpenBudgetTemplateEditor}
-                onOpenBudgetEditor={onOpenMonthlyBudgetEditor}
+                onOpenBudgetEditor={onOpenPeriodBudgetEditor}
                 onCreateCustomBudget={onCreateCustomBudget}
                 onOpenDrilldown={onOpenDrilldown}
                 onActiveMonthLabelChange={setBudgetMonthLabel}

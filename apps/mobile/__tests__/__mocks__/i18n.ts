@@ -23,6 +23,9 @@ const translations: Translations = {
   'review.range': '{start} to {end}',
   'review.range_short': '{start} – {end}',
   'review.in_progress': 'In progress, ends {date}',
+  'widgets.budget_days_left_one': '{count} day left',
+  'widgets.budget_days_left_other': '{count} days left',
+  'budget.week_range': '{start} – {end}',
 };
 
 export const I18n = {
