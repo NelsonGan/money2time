@@ -1,0 +1,12 @@
+--------- beginning of crash
+FATAL EXCEPTION: main
+Process: com.nelsongan.money2time, PID: 21322
+java.lang.IllegalStateException: Manually handled gesture had not been assigned to any detector
+	at com.swmansion.gesturehandler.core.GestureHandler.moveToState(GestureHandler.kt:624)
+	at com.swmansion.gesturehandler.core.GestureHandler.cancel(GestureHandler.kt:741)
+	at com.swmansion.gesturehandler.core.GestureHandlerOrchestrator.cancelAllLegacyHandlers(GestureHandlerOrchestrator.kt:1049)
+	at com.swmansion.gesturehandler.react.RNGestureHandlerRootHelper.requestDisallowInterceptTouchEvent(RNGestureHandlerRootHelper.kt:131)
+	at com.swmansion.gesturehandler.react.RNGestureHandlerRootView.requestDisallowInterceptTouchEvent(RNGestureHandlerRootView.kt:83)
+	at android.view.ViewGroup.requestDisallowInterceptTouchEvent(ViewGroup.java:3273)
+	at android.view.ViewGroup.requestDisallowInterceptTouchEvent(ViewGroup.java:3273)
+	at android.view.ViewGroup.requestDisallowInterceptTouchEvent(ViewGroup.java:3273)
