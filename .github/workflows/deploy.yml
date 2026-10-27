@@ -497,8 +497,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: apps/mobile/ios/Pods
-          key: ${{ runner.os }}-xcode27-pods-${{ hashFiles('apps/mobile/ios/Podfile.lock', 'apps/mobile/patches/**') }}
-          restore-keys: ${{ runner.os }}-xcode27-pods-
+          key: ${{ runner.os }}-pods-${{ hashFiles('apps/mobile/ios/Podfile.lock', 'apps/mobile/patches/**') }}
+          restore-keys: ${{ runner.os }}-pods-
 
       - name: Cache Gradle
         if: matrix.platform == 'android'
