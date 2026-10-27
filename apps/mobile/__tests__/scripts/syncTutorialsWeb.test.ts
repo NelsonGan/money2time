@@ -11,9 +11,9 @@ it('syncs tutorials with shared plan limits and their actual images to the websi
 
   try {
     mkdirSync(path.join(web, 'src/lib'), { recursive: true });
-    mkdirSync(path.join(web, 'public'), { recursive: true });
+    mkdirSync(path.join(web, 'media'), { recursive: true });
     writeFileSync(path.join(web, 'package.json'), '{}');
-    writeFileSync(path.join(web, 'public/keep.txt'), 'outside the generated tutorial directory');
+    writeFileSync(path.join(web, 'media/keep.txt'), 'outside the generated tutorial directory');
 
     const result = spawnSync(
       process.execPath,
@@ -25,10 +25,10 @@ it('syncs tutorials with shared plan limits and their actual images to the websi
     const catalog = readFileSync(path.join(web, 'src/lib/tutorials.generated.ts'), 'utf8');
     expect(catalog).toContain(`The free plan includes ${PRO_LIMITS.FREE_MAX_ACCOUNTS} accounts.`);
     expect(catalog).toContain('Add the calendar');
-    expect(readFileSync(path.join(web, 'public/tutorials/widgets-4.png'))).toEqual(
+    expect(readFileSync(path.join(web, 'media/tutorials/widgets-4.png'))).toEqual(
       readFileSync(path.join(root, 'assets/tutorials/widgets-4.png')),
     );
-    expect(readFileSync(path.join(web, 'public/keep.txt'), 'utf8')).toBe(
+    expect(readFileSync(path.join(web, 'media/keep.txt'), 'utf8')).toBe(
       'outside the generated tutorial directory',
     );
   } finally {
