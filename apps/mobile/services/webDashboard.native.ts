@@ -31,6 +31,7 @@ import { transactionsRepository } from '~/lib/repositories/transactionsRepositor
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { buildBackupData, yieldToEventLoop } from '~/services/dataManagementService';
 import type { UserAssetReadCache } from '~/services/userAssets';
+import { webDashboardBudgetsOnly } from '~/services/webDashboardBudgets';
 
 import {
   type BrowserConnection,
@@ -410,7 +411,9 @@ async function buildTransfer(
   // built is not in it, so the copy must not claim that change's version.
   const version = dataVersion;
   const { randomBytes } = await requireNative();
-  const data = await buildBackupData({ includeAsset: includeDashboardAsset, assetCache });
+  const data = webDashboardBudgetsOnly(
+    await buildBackupData({ includeAsset: includeDashboardAsset, assetCache }),
+  );
   await yieldToEventLoop();
   // A copy from before an app update that changed the backup's format is
   // not patched. Either way every row is serialized once, and that index is

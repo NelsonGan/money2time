@@ -559,13 +559,8 @@ function DataSourceToggle({
 }
 
 export function WidgetPreviewsScreen({ onBack }: WidgetPreviewsScreenProps) {
-  const {
-    settings,
-    categories,
-    monthlyBudgets,
-    insightsPreferencesJson,
-    getTrueHourlyRateForDate,
-  } = useApp();
+  const { settings, categories, periodBudgets, insightsPreferencesJson, getTrueHourlyRateForDate } =
+    useApp();
   const { transactions } = useTransactions();
   const isPro = useIsPro();
   const bottomNavInset = useSettingsBottomNavInset();
@@ -581,7 +576,7 @@ export function WidgetPreviewsScreen({ onBack }: WidgetPreviewsScreenProps) {
       isPro,
       getTrueHourlyRateForDate,
       categories,
-      monthlyBudgets,
+      periodBudgets,
       excludedSavingsIncomeCategoryIds: savingsExclusions.income,
       excludedSavingsExpenseCategoryIds: savingsExclusions.expense,
       savingsIncomeMode: savingsExclusions.incomeMode,
@@ -593,7 +588,7 @@ export function WidgetPreviewsScreen({ onBack }: WidgetPreviewsScreenProps) {
     getTrueHourlyRateForDate,
     insightsPreferencesJson,
     isPro,
-    monthlyBudgets,
+    periodBudgets,
     settings,
     transactions,
   ]);

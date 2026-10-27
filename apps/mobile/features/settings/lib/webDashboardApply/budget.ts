@@ -17,27 +17,37 @@ type MonthInput = { totalAmount: number; countUnbudgeted: boolean; lines: Budget
 /**
  * Saves the `module:budget` steps planned in services/webDashboardEditModules/budget.ts,
  * with the calls BudgetTemplateEditorScreen, BudgetTemplatesScreen,
- * MonthlyBudgetEditorScreen and BudgetScreen make.
+ * PeriodBudgetEditorScreen and BudgetScreen make.
+ *
+ * The Web Dashboard knows monthly budgets only, so it is shown and may change
+ * only monthly templates and month budgets (see `webDashboardBudgetsOnly`).
  */
 export const budgetApply: ApplyModule = {
   select: (app) => ({
-    templates: app.budgetTemplates,
-    budgets: app.monthlyBudgets,
+    templates: app.budgetTemplates.filter((template) => template.period === 'month'),
+    budgets: app.periodBudgets.filter((budget) => budget.period === 'month'),
+    templateCount: app.budgetTemplates.length,
     // The months the budget pager offers, so a month is only made where the app makes one.
     months: computeBudgetPagerMonths({
-      budgets: app.monthlyBudgets,
+      budgets: app.periodBudgets,
       transactions: transactionsRepository.listForSummary({ type: 'expense' }),
-      monthCycle: monthCycleOf(app.settings),
+      clock: { weekStartsOn: app.settings.weekStartsOn, monthCycle: monthCycleOf(app.settings) },
     }),
   }),
   apply: (app, step) => {
     const payload = step.payload;
     switch (step.action) {
       case 'template_create':
-        app.createBudgetTemplate(payload.input as TemplateInput & { backPopulate: boolean });
+        app.createBudgetTemplate({
+          ...(payload.input as TemplateInput & { backPopulate: boolean }),
+          period: 'month',
+        });
         return;
       case 'template_update':
-        app.updateBudgetTemplate(payload.id as string, payload.input as TemplateInput);
+        app.updateBudgetTemplate(payload.id as string, {
+          ...(payload.input as TemplateInput),
+          period: 'month',
+        });
         return;
       case 'template_delete':
         app.deleteBudgetTemplate(payload.id as string);
@@ -46,16 +56,16 @@ export const budgetApply: ApplyModule = {
         app.setDefaultBudgetTemplate(payload.id as string);
         return;
       case 'month_create':
-        app.createMonthlyBudget(payload.month as string, payload.templateId as string);
+        app.createPeriodBudget(payload.month as string, payload.templateId as string);
         return;
       case 'month_custom':
-        app.createCustomMonthlyBudget(payload.month as string, payload.input as MonthInput);
+        app.createCustomPeriodBudget('month', payload.month as string, payload.input as MonthInput);
         return;
       case 'month_update':
-        app.updateMonthlyBudget(payload.id as string, payload.input as MonthInput);
+        app.updatePeriodBudget(payload.id as string, payload.input as MonthInput);
         return;
       case 'month_delete':
-        app.deleteMonthlyBudget(payload.id as string);
+        app.deletePeriodBudget(payload.id as string);
         return;
       default:
         throw new Error(`unknown budget step ${step.action}`);

@@ -14,17 +14,19 @@ import {
   type OpenCategoryAllocationParams,
   useAllocationDraft,
 } from '~/features/budget/hooks/useAllocationDraft';
-import { monthKeyLabel } from '~/features/budget/lib/format';
+import { budgetPeriodLabel } from '~/features/budget/lib/format';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import type { BudgetPeriod } from '~/types';
 import { currencySymbolForCode } from '~/utils/currency';
+import { monthCycleOf } from '~/utils/financialMonth';
 
-interface MonthlyBudgetEditorScreenProps {
-  /** Existing month budget to edit in place. */
+interface PeriodBudgetEditorScreenProps {
+  /** Existing week, month or year budget to edit in place. */
   budgetId?: string;
-  /** 'YYYY-MM' month to create a one-off custom budget for (no template). */
-  createForMonth?: string;
+  /** Period to create a one-off custom budget for (no template). */
+  createFor?: { period: BudgetPeriod; periodKey: string };
   /** Pushes the full-page per-category allocation editor. */
   onOpenCategoryAllocation: (params: OpenCategoryAllocationParams) => void;
   onClose: () => void;
@@ -33,26 +35,26 @@ interface MonthlyBudgetEditorScreenProps {
 const SCROLL_CONTENT = { paddingBottom: 40 } as const;
 
 /**
- * Edits one month's frozen budget in place (total, allocations including
- * subcategory breakdowns, count-unbudgeted) — or, with `createForMonth`,
- * creates a custom budget for that month only. Neither mode touches any
- * template.
+ * Edits one week's, month's or year's frozen budget in place (total,
+ * allocations including subcategory breakdowns, count-unbudgeted) — or, with
+ * `createFor`, creates a custom budget for that period only. Neither mode
+ * touches any template.
  */
-export function MonthlyBudgetEditorScreen({
+export function PeriodBudgetEditorScreen({
   budgetId,
-  createForMonth,
+  createFor,
   onOpenCategoryAllocation,
   onClose,
-}: MonthlyBudgetEditorScreenProps) {
-  const { settings, categories, monthlyBudgets, updateMonthlyBudget, createCustomMonthlyBudget } =
+}: PeriodBudgetEditorScreenProps) {
+  const { settings, categories, periodBudgets, updatePeriodBudget, createCustomPeriodBudget } =
     useApp();
   const themeColors = useThemeColors();
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
 
   const budget = useMemo(
     () =>
-      budgetId ? (monthlyBudgets.find((candidate) => candidate.id === budgetId) ?? null) : null,
-    [budgetId, monthlyBudgets],
+      budgetId ? (periodBudgets.find((candidate) => candidate.id === budgetId) ?? null) : null,
+    [budgetId, periodBudgets],
   );
 
   const [countUnbudgeted, setCountUnbudgeted] = useState(budget?.countUnbudgeted ?? true);
@@ -79,8 +81,10 @@ export function MonthlyBudgetEditorScreen({
   });
 
   const currencySymbol = currencySymbolForCode(settings.currencyCode);
-  const month = budget?.month ?? createForMonth ?? null;
-  const canSave = (budget != null || createForMonth != null) && draft.allocationsValid;
+  const target = budget
+    ? { period: budget.period, periodKey: budget.periodKey }
+    : (createFor ?? null);
+  const canSave = target != null && draft.allocationsValid;
 
   const handleSave = useCallback(() => {
     if (!canSave) return;
@@ -91,30 +95,35 @@ export function MonthlyBudgetEditorScreen({
       lines: draft.buildAllocations(),
     };
     if (budget) {
-      updateMonthlyBudget(budget.id, input);
-    } else if (createForMonth) {
-      createCustomMonthlyBudget(createForMonth, input);
+      updatePeriodBudget(budget.id, input);
+    } else if (createFor) {
+      createCustomPeriodBudget(createFor.period, createFor.periodKey, input);
     }
     onClose();
   }, [
     budget,
     canSave,
     countUnbudgeted,
-    createCustomMonthlyBudget,
-    createForMonth,
+    createCustomPeriodBudget,
+    createFor,
     draft,
     onClose,
-    updateMonthlyBudget,
+    updatePeriodBudget,
   ]);
 
-  if (!month) return null;
+  if (!target) return null;
 
-  const monthLabel = monthKeyLabel(month, settings.locale);
+  const title = budgetPeriodLabel(
+    target.period,
+    target.periodKey,
+    settings.locale,
+    monthCycleOf(settings),
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <View className="px-5">
-        <SettingsHeader className="px-0 pt-5 pb-3" onBack={onClose} title={monthLabel} />
+        <SettingsHeader className="px-0 pt-5 pb-3" onBack={onClose} title={title} />
       </View>
 
       <Animated.ScrollView
@@ -125,7 +134,7 @@ export function MonthlyBudgetEditorScreen({
       >
         <View className="gap-4 px-5 pt-1">
           <Input
-            label={I18n.t('budget.total_label')}
+            label={I18n.t(`budget.total_label_${target.period}`)}
             variant="currency"
             currencySymbol={currencySymbol}
             value={draft.total}
@@ -146,7 +155,7 @@ export function MonthlyBudgetEditorScreen({
 
           <AllocationOptionRow
             title={I18n.t('budget.count_unbudgeted_title')}
-            caption={I18n.t('budget.count_unbudgeted_caption')}
+            caption={I18n.t(`budget.count_unbudgeted_caption_${target.period}`)}
             value={countUnbudgeted}
             onChange={setCountUnbudgeted}
             themeColors={themeColors}
