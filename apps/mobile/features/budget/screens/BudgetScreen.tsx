@@ -1,4 +1,4 @@
-import { ChevronLeft, Pencil, Trash2 } from 'lucide-react-native';
+import { ChevronDown, ChevronLeft, ChevronUp, Pencil, Trash2 } from 'lucide-react-native';
 import React, {
   forwardRef,
   useCallback,
@@ -20,7 +20,6 @@ import {
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
-import { chartCategoryColor } from '~/constants/chartColors';
 import type { ColorPalette } from '~/constants/designSystem';
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
@@ -41,7 +40,6 @@ import {
   budgetPeriodKeyForDate,
   type BudgetPeriodRange,
   budgetPeriodRange,
-  budgetRangeLength,
 } from '~/features/budget/lib/budgetPeriods';
 import {
   budgetPeriodLabel,
@@ -49,9 +47,7 @@ import {
   monthKeyLabel,
   monthNameLabel,
   usageColor,
-  usagePercentLabel,
 } from '~/features/budget/lib/format';
-import { SavingsRateRing } from '~/features/insights/components/SavingsRateRing';
 import type { InsightsDrilldownPayload } from '~/features/insights/screens/InsightsDrilldownScreen';
 import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
 import { useMonthPager } from '~/hooks/useMonthPager';
@@ -70,30 +66,28 @@ import type {
 import { cn } from '~/utils';
 import { withColorAlpha } from '~/utils/color';
 import { monthCycleOf } from '~/utils/financialMonth';
-import {
-  dateFromDayKeyLocal,
-  dayKeyFromDateLocal,
-  dayKeyFromIsoLocal,
-  normalizeMoneyAmount,
-} from '~/utils/formatters';
+import { dateFromDayKeyLocal, dayKeyFromDateLocal, dayKeyFromIsoLocal } from '~/utils/formatters';
 import { asSpendingRow } from '~/utils/spending';
 
-function ProgressBar({
-  ratio,
-  color,
-  trackColor,
-  height,
-}: {
-  ratio: number;
-  color: string;
-  trackColor: string;
-  height: number;
-}) {
+/** Green while healthy, amber from 80%, red when over (isOver wins, so a
+ *  zero-budget overspend still reads red). */
+function healthOf(line: { usageRatio: number; remaining: number }, themeColors: ColorPalette) {
+  return line.remaining < 0 ? themeColors.error : usageColor(line.usageRatio, themeColors);
+}
+
+/** "RM180 left" / "RM40 over". */
+function leftLabel(remaining: number, settings: UserSettings): string {
+  return remaining < 0
+    ? I18n.t('budget.over', { amount: money(Math.abs(remaining), settings) })
+    : I18n.t('budget.left', { amount: money(remaining, settings) });
+}
+
+function Bar({ ratio, color, height }: { ratio: number; color: string; height: number }) {
   const clamped = Math.max(0, Math.min(ratio, 1));
   return (
     <View
       className="w-full overflow-hidden rounded-full"
-      style={{ height, backgroundColor: trackColor }}
+      style={{ height, backgroundColor: withColorAlpha(color, 0.15) }}
     >
       <View
         className="rounded-full"
@@ -103,8 +97,15 @@ function ProgressBar({
   );
 }
 
+/**
+ * The budget the page is showing, reduced to one answer: how much is left
+ * (or over), of what, for how long, and one bar.
+ */
 function BudgetSummaryCard({
   summary,
+  label,
+  backLabel,
+  onBack,
   daysLeft,
   settings,
   themeColors,
@@ -112,6 +113,11 @@ function BudgetSummaryCard({
   onDelete,
 }: {
   summary: BudgetSummary;
+  /** Which budget this is: "October", "Oct 19 – Oct 25", "2026". */
+  label: string;
+  /** Chip back to the month's own budget, when showing a week or the year. */
+  backLabel: string | null;
+  onBack: () => void;
   /** Days left in the period, today included; null unless the period is running. */
   daysLeft: number | null;
   settings: UserSettings;
@@ -120,329 +126,203 @@ function BudgetSummaryCard({
   onDelete: () => void;
 }) {
   const isOver = summary.remaining < 0;
-  // Health-colored ring: green while healthy, amber from 80%, red when over;
-  // isOver wins so a zero-budget overspend (ratio 0) still reads red.
-  const ringColor = isOver ? themeColors.error : usageColor(summary.usageRatio, themeColors);
+  const color = healthOf(summary, themeColors);
+  const details = [I18n.t('budget.of_total', { amount: money(summary.totalBudget, settings) })];
+  if (daysLeft != null && daysLeft > 0) {
+    details.push(
+      I18n.t(daysLeft === 1 ? 'budget.days_left_one' : 'budget.days_left_other', {
+        count: daysLeft,
+      }),
+    );
+  }
 
   return (
-    <View className="w-full overflow-hidden rounded-2xl border border-border/45 bg-card">
-      {/* Ring gauge (savings-rate style) on a soft tinted disc, figures and a
-          remaining chip beside it — structure over plain text lines. */}
-      <View className="flex-row items-center gap-4 px-4 py-4">
-        <View
-          className="items-center justify-center rounded-full p-1.5"
-          style={{ backgroundColor: withColorAlpha(ringColor, 0.07) }}
-        >
-          <SavingsRateRing
-            size={88}
-            strokeWidth={9}
-            progress={Math.min(summary.usageRatio, 1)}
-            color={ringColor}
-            trackColor={withColorAlpha(ringColor, 0.16)}
-          >
-            <Text
-              variant="bodyStrong"
-              className="text-base"
-              style={{ color: isOver ? themeColors.error : themeColors.text }}
-            >
-              {usagePercentLabel(summary.usageRatio)}
-            </Text>
-          </SavingsRateRing>
-        </View>
-
-        <View className="min-w-0 flex-1">
-          <View className="flex-row items-baseline gap-1.5">
-            <Text variant="monoLg" numberOfLines={1} className="shrink">
-              {money(summary.totalSpent, settings)}
-            </Text>
-          </View>
-          <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
-            / {money(summary.totalBudget, settings)}
-          </Text>
-          {/* Remaining as a tinted chip so the key number pops off the card. */}
-          <View
-            className="mt-2.5 self-start rounded-full px-2.5 py-1"
-            style={{
-              backgroundColor: withColorAlpha(isOver ? themeColors.error : ringColor, 0.12),
+    <View className="w-full rounded-2xl border border-border/45 bg-card px-4 pb-4 pt-3">
+      <View className="flex-row items-center gap-1.5">
+        <Text variant="caption" tone="muted" numberOfLines={1} className="min-w-0 flex-1">
+          {label}
+        </Text>
+        {backLabel ? (
+          <Pressable
+            onPress={() => {
+              void triggerHaptic('selection');
+              onBack();
             }}
-          >
-            <Text
-              variant="caption"
-              numberOfLines={1}
-              className="text-[11px]"
-              style={{ color: isOver ? themeColors.error : ringColor }}
-            >
-              {isOver
-                ? I18n.t('budget.summary_exceeded', {
-                    amount: money(summary.exceededBy, settings),
-                  })
-                : I18n.t('budget.left', { amount: money(summary.remaining, settings) })}
-            </Text>
-          </View>
-          {/* How long the rest has to last, and what that allows a day. */}
-          {daysLeft != null && daysLeft > 0 ? (
-            <Text variant="caption" tone="muted" numberOfLines={1} className="mt-1.5 text-[11px]">
-              {I18n.t(daysLeft === 1 ? 'budget.days_left_one' : 'budget.days_left_other', {
-                count: daysLeft,
-              })}
-              {!isOver && summary.remaining > 0
-                ? ` · ${I18n.t('budget.per_day', {
-                    amount: money(normalizeMoneyAmount(summary.remaining / daysLeft), settings),
-                  })}`
-                : ''}
-            </Text>
-          ) : null}
-        </View>
-
-        <View className="gap-1.5">
-          <Pressable
-            onPress={onEdit}
-            hitSlop={10}
+            hitSlop={8}
             accessibilityRole="button"
-            accessibilityLabel={I18n.t('budget.edit_budget')}
-            className="h-8 w-8 items-center justify-center rounded-full bg-secondary/40 active:opacity-70"
+            accessibilityLabel={I18n.t('budget.back_to', { label: backLabel })}
+            className="shrink-0 flex-row items-center gap-0.5 rounded-full bg-secondary/40 py-1 pl-1.5 pr-2.5 active:opacity-70"
           >
-            <Pencil size={14} color={themeColors.textMuted} />
+            <ChevronLeft size={13} color={themeColors.primary} />
+            <Text variant="caption" className="text-[11px] text-primary">
+              {backLabel}
+            </Text>
           </Pressable>
-          <Pressable
-            onPress={onDelete}
-            hitSlop={10}
-            accessibilityRole="button"
-            accessibilityLabel={I18n.t('budget.delete_budget')}
-            className="h-8 w-8 items-center justify-center rounded-full bg-secondary/40 active:opacity-70"
-          >
-            <Trash2 size={14} color={themeColors.textMuted} />
-          </Pressable>
-        </View>
+        ) : null}
+        <Pressable
+          onPress={onEdit}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel={I18n.t('budget.edit_budget')}
+          className="h-7 w-7 items-center justify-center rounded-full active:opacity-70"
+        >
+          <Pencil size={14} color={themeColors.textMuted} />
+        </Pressable>
+        <Pressable
+          onPress={onDelete}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel={I18n.t('budget.delete_budget')}
+          className="h-7 w-7 items-center justify-center rounded-full active:opacity-70"
+        >
+          <Trash2 size={14} color={themeColors.textMuted} />
+        </Pressable>
       </View>
 
-      {/* The budgeted/unbudgeted split only makes sense when unbudgeted spend
-          counts toward the month; when it doesn't, the month total already
-          says everything. */}
-      {summary.countUnbudgeted ? (
-        <>
-          <View className="h-px bg-border/40" />
-
-          <View className="flex-row">
-            <View className="flex-1 px-4 py-2.5">
-              <Text variant="label" className="text-[10px]" tone="muted" numberOfLines={1}>
-                {I18n.t('budget.summary_budgeted')}
-              </Text>
-              <Text variant="mono" className="mt-1" numberOfLines={1}>
-                {money(summary.budgetedSpent, settings)}
-              </Text>
-            </View>
-            <View className="w-px bg-border/40" />
-            <View className="flex-1 px-4 py-2.5">
-              <Text variant="label" className="text-[10px]" tone="muted" numberOfLines={1}>
-                {I18n.t('budget.summary_unbudgeted')}
-              </Text>
-              <Text variant="mono" className="mt-1" numberOfLines={1}>
-                {money(summary.unbudgetedSpent, settings)}
-              </Text>
-            </View>
-          </View>
-        </>
-      ) : null}
+      <Text
+        variant="monoLg"
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        className="mt-1 text-[34px] leading-[40px]"
+        style={isOver ? { color: themeColors.error } : undefined}
+      >
+        {leftLabel(summary.remaining, settings)}
+      </Text>
+      <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
+        {details.join(' · ')}
+      </Text>
+      <View className="mt-3">
+        <Bar ratio={summary.usageRatio} color={color} height={10} />
+      </View>
     </View>
   );
 }
 
-function BudgetChildRow({
+/** One budget line on one row: emoji, name, a thin bar and what is left. */
+function BudgetLineRow({
   line,
-  color,
-  categoriesById,
+  category,
+  indent,
   settings,
   themeColors,
   onPress,
 }: {
   line: BudgetCategoryProgress;
-  color: string;
-  categoriesById: Map<string, Category>;
+  category: Category | undefined;
+  /** A subcategory line, nested under its parent. */
+  indent: boolean;
   settings: UserSettings;
   themeColors: ColorPalette;
   onPress: () => void;
 }) {
-  const category = categoriesById.get(line.categoryId);
-  const fillColor = line.isOver ? themeColors.error : color;
-  const fillPct = Math.max(0, Math.min(line.usageRatio, 1)) * 100;
-
-  return (
-    <View className="flex-row items-center gap-2">
-      {/* Tree elbow tying the subcategory to its parent row. */}
-      <View className="h-4 w-3.5 self-start rounded-bl-lg border-b border-l border-border/50" />
-      {/* One-line pill: the tinted fill behind the content IS the progress bar. */}
-      <Pressable
-        onPress={onPress}
-        accessibilityRole="button"
-        accessibilityLabel={category?.name ?? I18n.t('common.uncategorized')}
-        className="relative min-w-0 flex-1 overflow-hidden rounded-xl active:opacity-80"
-        style={{ backgroundColor: withColorAlpha(fillColor, 0.08) }}
-      >
-        <View
-          pointerEvents="none"
-          style={{
-            position: 'absolute',
-            left: 0,
-            top: 0,
-            bottom: 0,
-            width: `${fillPct}%`,
-            backgroundColor: withColorAlpha(fillColor, 0.18),
-          }}
-        />
-        <View className="flex-row items-center gap-2 px-3 py-2">
-          {/* Only an explicitly-set emoji renders — no falling back to the
-              parent's icon, which just repeated it on every child row. */}
-          {category?.icon ? <CategoryEmoji icon={category.icon} size={13} /> : null}
-          <Text variant="caption" numberOfLines={1} className="min-w-0 flex-1 text-foreground">
-            {category?.name ?? I18n.t('common.uncategorized')}
-          </Text>
-          <Text
-            variant="caption"
-            numberOfLines={1}
-            className="shrink-0 text-right"
-            style={{ color: line.isOver ? themeColors.error : themeColors.mutedForeground }}
-          >
-            {money(line.spent, settings)} / {money(line.budgeted, settings)}
-          </Text>
-        </View>
-      </Pressable>
-    </View>
-  );
-}
-
-function BudgetCategoryRow({
-  line,
-  color,
-  first,
-  categoriesById,
-  settings,
-  themeColors,
-  onPress,
-  onPressChild,
-}: {
-  line: BudgetCategoryProgress;
-  /** Palette color for this category, shared with the breakdown pie. */
-  color: string;
-  first: boolean;
-  categoriesById: Map<string, Category>;
-  settings: UserSettings;
-  themeColors: ColorPalette;
-  /** Opens the drilldown for this root (children rolled up). */
-  onPress: () => void;
-  /** Opens the drilldown for one subcategory only. */
-  onPressChild: (categoryId: string) => void;
-}) {
-  const category = categoriesById.get(line.categoryId);
-  const barColor = line.isOver ? themeColors.error : color;
-  // isOver wins so a zero-budget overspend (ratio 0) still reads red.
-  const healthColor = line.isOver ? themeColors.error : usageColor(line.usageRatio, themeColors);
-
-  return (
-    // The child pills are siblings of the root Pressable, not descendants:
-    // an accessible Pressable collapses its subtree for screen readers, which
-    // would make the per-subcategory drilldowns unreachable (and pressing a
-    // pill would flash the parent's press feedback).
-    <View className={cn(!first && 'border-t border-border/25')}>
-      <Pressable
-        onPress={onPress}
-        accessibilityRole="button"
-        accessibilityLabel={category?.name ?? I18n.t('common.uncategorized')}
-        className={cn('px-4 py-3 active:bg-secondary/20', line.children.length > 0 && 'pb-2')}
-      >
-        {/* Emoji inline with the title, then a full-width depletion bar with
-            the spent/total figures and usage badge beneath it — the bar spans
-            the whole row so its length is comparable across categories. */}
-        <View className="gap-2">
-          <View className="flex-row items-center gap-2">
-            <CategoryEmoji icon={category?.icon} size={20} />
-            <Text variant="bodyStrong" numberOfLines={1} className="flex-1">
-              {category?.name ?? I18n.t('common.uncategorized')}
-            </Text>
-            <Text
-              variant="caption"
-              numberOfLines={1}
-              className="shrink-0 text-[11px]"
-              tone={line.isOver ? undefined : 'muted'}
-              style={line.isOver ? { color: themeColors.error } : undefined}
-            >
-              {line.isOver
-                ? I18n.t('budget.over', { amount: money(Math.abs(line.remaining), settings) })
-                : I18n.t('budget.left', { amount: money(line.remaining, settings) })}
-            </Text>
-          </View>
-          <View className="gap-1">
-            <ProgressBar
-              ratio={line.usageRatio}
-              color={barColor}
-              trackColor={withColorAlpha(barColor, 0.14)}
-              height={6}
-            />
-            <View className="flex-row items-center gap-2">
-              <Text variant="caption" tone="muted" numberOfLines={1} className="flex-1 text-[11px]">
-                {money(line.spent, settings)} / {money(line.budgeted, settings)}
-              </Text>
-              <View
-                className="shrink-0 rounded-full px-1.5 py-0.5"
-                style={{ backgroundColor: withColorAlpha(healthColor, 0.12) }}
-              >
-                <Text variant="label" className="text-[10px]" style={{ color: healthColor }}>
-                  {usagePercentLabel(line.usageRatio)}
-                </Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      </Pressable>
-
-      {line.children.length > 0 ? (
-        <View className="gap-1.5 px-4 pt-1.5 pb-3.5 pl-6">
-          {line.children.map((child) => (
-            <BudgetChildRow
-              key={child.categoryId}
-              line={child}
-              color={color}
-              categoriesById={categoriesById}
-              settings={settings}
-              themeColors={themeColors}
-              onPress={() => onPressChild(child.categoryId)}
-            />
-          ))}
-        </View>
-      ) : null}
-    </View>
-  );
-}
-
-function UnbudgetedRow({
-  categoryId,
-  spent,
-  categoriesById,
-  settings,
-  onPress,
-}: {
-  categoryId: string | null;
-  spent: number;
-  categoriesById: Map<string, Category>;
-  settings: UserSettings;
-  onPress: () => void;
-}) {
-  const category = categoryId ? categoriesById.get(categoryId) : undefined;
+  const color = healthOf(line, themeColors);
+  const name = category?.name ?? I18n.t('common.uncategorized');
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={category?.name ?? I18n.t('common.uncategorized')}
-      className="flex-row items-center gap-2.5 rounded-2xl border border-border/30 bg-secondary/20 px-4 py-2.5 active:opacity-80"
+      accessibilityLabel={`${name}, ${leftLabel(line.remaining, settings)}`}
+      className={cn(
+        'flex-row items-center gap-2.5 py-2.5 pr-4 active:bg-secondary/20',
+        indent ? 'pl-10' : 'pl-4',
+      )}
     >
-      <CategoryEmoji icon={category?.icon} size={16} />
-      <Text variant="body" numberOfLines={1} className="flex-1">
-        {category?.name ?? I18n.t('common.uncategorized')}
+      {indent ? (
+        category?.icon ? (
+          <CategoryEmoji icon={category.icon} size={13} />
+        ) : null
+      ) : (
+        <CategoryEmoji icon={category?.icon} size={20} />
+      )}
+      <Text
+        variant={indent ? 'caption' : 'body'}
+        numberOfLines={1}
+        className={cn('w-[30%] shrink-0', indent && 'text-foreground')}
+      >
+        {name}
       </Text>
-      <Text variant="mono" className="text-sm">
-        {money(spent, settings)}
+      <View className="min-w-0 flex-1">
+        <Bar ratio={line.usageRatio} color={color} height={indent ? 4 : 6} />
+      </View>
+      <Text
+        variant="caption"
+        numberOfLines={1}
+        className="shrink-0 text-right"
+        style={{ color: line.remaining < 0 ? themeColors.error : themeColors.text }}
+      >
+        {leftLabel(line.remaining, settings)}
       </Text>
     </Pressable>
+  );
+}
+
+/**
+ * Spending outside the budget's lines, folded into one total row; tapping it
+ * lists the categories (each opening its transactions).
+ */
+function UnbudgetedGroup({
+  entries,
+  total,
+  categoriesById,
+  settings,
+  themeColors,
+  onPressCategory,
+}: {
+  entries: { categoryId: string | null; spent: number }[];
+  total: number;
+  categoriesById: Map<string, Category>;
+  settings: UserSettings;
+  themeColors: ColorPalette;
+  onPressCategory: (categoryId: string | null) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <View className="mt-3 overflow-hidden rounded-2xl border border-border/45 bg-card">
+      <Pressable
+        onPress={() => {
+          void triggerHaptic('selection');
+          setOpen((value) => !value);
+        }}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: open }}
+        className="flex-row items-center gap-2.5 px-4 py-3 active:bg-secondary/20"
+      >
+        <Text variant="body" tone="muted" numberOfLines={1} className="flex-1">
+          {I18n.t('budget.unbudgeted_section')}
+        </Text>
+        <Text variant="caption" numberOfLines={1}>
+          {money(total, settings)}
+        </Text>
+        {open ? (
+          <ChevronUp size={16} color={themeColors.textMuted} />
+        ) : (
+          <ChevronDown size={16} color={themeColors.textMuted} />
+        )}
+      </Pressable>
+      {open
+        ? entries.map((entry) => {
+            const category = entry.categoryId ? categoriesById.get(entry.categoryId) : undefined;
+            const name = category?.name ?? I18n.t('common.uncategorized');
+            return (
+              <Pressable
+                key={entry.categoryId ?? '__uncategorized__'}
+                onPress={() => onPressCategory(entry.categoryId)}
+                accessibilityRole="button"
+                accessibilityLabel={name}
+                className="flex-row items-center gap-2.5 border-t border-border/25 px-4 py-2.5 active:bg-secondary/20"
+              >
+                <CategoryEmoji icon={category?.icon} size={16} />
+                <Text variant="body" numberOfLines={1} className="flex-1">
+                  {name}
+                </Text>
+                <Text variant="caption" tone="muted" numberOfLines={1}>
+                  {money(entry.spent, settings)}
+                </Text>
+              </Pressable>
+            );
+          })
+        : null}
+    </View>
   );
 }
 
@@ -796,7 +676,9 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
 
         const focusLabel =
           focus && focusBudget
-            ? budgetPeriodLabel(focus.period, focusBudget.periodKey, settings.locale, monthCycle)
+            ? focus.period === 'month'
+              ? monthNameLabel(month, settings.locale)
+              : budgetPeriodLabel(focus.period, focusBudget.periodKey, settings.locale, monthCycle)
             : null;
         const showBackToMonth = model.month != null && focus?.period !== 'month';
         const isRunning =
@@ -806,20 +688,6 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
         const orderedCategories = focusModel
           ? [...focusModel.summary.categories].sort((a, b) => Number(b.isOver) - Number(a.isOver))
           : [];
-        // Colors follow the frozen line order (stable across periods from the
-        // same template).
-        const colorByCategoryId = new Map(
-          (focusModel?.summary.categories ?? []).map((line, index) => [
-            line.categoryId,
-            chartCategoryColor(index),
-          ]),
-        );
-        const yearElapsedRatio =
-          yearModel && yearModel.range.start <= todayKey && todayKey <= yearModel.range.end
-            ? 1 -
-              budgetDaysLeft(yearModel.range, dateFromDayKeyLocal(todayKey)) /
-                budgetRangeLength(yearModel.range)
-            : null;
 
         return (
           <View style={{ width: pageWidth }} className="flex-1">
@@ -840,53 +708,27 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
               ) : null}
 
               {focus && focusBudget && focusModel ? (
-                <>
-                  {/* Which budget the card shows: it can be the month's, a
-                      week's or the year's, so it is always named. */}
-                  <View className="mb-2 flex-row items-center gap-2 px-1">
-                    <Text
-                      variant="label"
-                      tone="muted"
-                      numberOfLines={1}
-                      className="flex-1 uppercase"
-                    >
-                      {focusBudget.templateName
-                        ? `${focusLabel} · ${focusBudget.templateName}`
-                        : focusLabel}
-                    </Text>
-                    {showBackToMonth ? (
-                      <Pressable
-                        onPress={() => {
-                          void triggerHaptic('selection');
-                          setFocus(month, null);
-                        }}
-                        hitSlop={8}
-                        accessibilityRole="button"
-                        accessibilityLabel={I18n.t('budget.back_to', {
-                          label: monthKeyLabel(month, settings.locale),
-                        })}
-                        className="shrink-0 flex-row items-center gap-0.5 rounded-full bg-secondary/40 py-1 pl-1.5 pr-2.5 active:opacity-70"
-                      >
-                        <ChevronLeft size={13} color={themeColors.primary} />
-                        <Text variant="caption" className="text-[11px] text-primary">
-                          {monthNameLabel(month, settings.locale)}
-                        </Text>
-                      </Pressable>
-                    ) : null}
-                  </View>
-                  <BudgetSummaryCard
-                    summary={focusModel.summary}
-                    daysLeft={
-                      isRunning
-                        ? budgetDaysLeft(focusModel.range, dateFromDayKeyLocal(todayKey))
-                        : null
-                    }
-                    settings={settings}
-                    themeColors={themeColors}
-                    onEdit={() => onOpenBudgetEditor(focusBudget.id)}
-                    onDelete={() => handleDeleteBudget(focusBudget)}
-                  />
-                </>
+                <BudgetSummaryCard
+                  summary={focusModel.summary}
+                  // Which budget the card shows: the month's, a week's or the
+                  // year's, so it is always named.
+                  label={
+                    focusBudget.templateName
+                      ? `${focusLabel} · ${focusBudget.templateName}`
+                      : (focusLabel ?? '')
+                  }
+                  backLabel={showBackToMonth ? monthNameLabel(month, settings.locale) : null}
+                  onBack={() => setFocus(month, null)}
+                  daysLeft={
+                    isRunning
+                      ? budgetDaysLeft(focusModel.range, dateFromDayKeyLocal(todayKey))
+                      : null
+                  }
+                  settings={settings}
+                  themeColors={themeColors}
+                  onEdit={() => onOpenBudgetEditor(focusBudget.id)}
+                  onDelete={() => handleDeleteBudget(focusBudget)}
+                />
               ) : null}
 
               {showWeeks ? (
@@ -919,7 +761,6 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
                   budget={model.year}
                   summary={yearModel.summary}
                   label={model.yearKey}
-                  yearElapsedRatio={yearElapsedRatio}
                   selected={focus?.period === 'year'}
                   settings={settings}
                   themeColors={themeColors}
@@ -942,45 +783,48 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
               {/* A budget can lose all its lines (category-delete cascade);
                   don't render an empty bordered shell. */}
               {focusModel && orderedCategories.length > 0 ? (
-                <View className="mt-5 overflow-hidden rounded-2xl border border-border/45 bg-card">
-                  {orderedCategories.map((line, index) => (
-                    <BudgetCategoryRow
-                      key={line.categoryId}
-                      line={line}
-                      color={colorByCategoryId.get(line.categoryId) ?? themeColors.primary}
-                      first={index === 0}
-                      categoriesById={categoriesById}
-                      settings={settings}
-                      themeColors={themeColors}
-                      onPress={() => openCategoryDrilldown(focusModel.range, line.categoryId, true)}
-                      onPressChild={(childId) =>
-                        openCategoryDrilldown(focusModel.range, childId, false)
-                      }
-                    />
+                <View className="mt-4 overflow-hidden rounded-2xl border border-border/45 bg-card py-1.5">
+                  {orderedCategories.map((line) => (
+                    <React.Fragment key={line.categoryId}>
+                      <BudgetLineRow
+                        line={line}
+                        category={categoriesById.get(line.categoryId)}
+                        indent={false}
+                        settings={settings}
+                        themeColors={themeColors}
+                        onPress={() =>
+                          openCategoryDrilldown(focusModel.range, line.categoryId, true)
+                        }
+                      />
+                      {line.children.map((child) => (
+                        <BudgetLineRow
+                          key={child.categoryId}
+                          line={child}
+                          category={categoriesById.get(child.categoryId)}
+                          indent
+                          settings={settings}
+                          themeColors={themeColors}
+                          onPress={() =>
+                            openCategoryDrilldown(focusModel.range, child.categoryId, false)
+                          }
+                        />
+                      ))}
+                    </React.Fragment>
                   ))}
                 </View>
               ) : null}
 
               {focusModel?.summary.countUnbudgeted && focusModel.summary.unbudgeted.length > 0 ? (
-                <View className="mt-5">
-                  <Text variant="label" tone="muted" className="mb-2 px-1 uppercase">
-                    {I18n.t('budget.unbudgeted_section')}
-                  </Text>
-                  <View className="gap-2">
-                    {focusModel.summary.unbudgeted.map((entry) => (
-                      <UnbudgetedRow
-                        key={entry.categoryId ?? '__uncategorized__'}
-                        categoryId={entry.categoryId}
-                        spent={entry.spent}
-                        categoriesById={categoriesById}
-                        settings={settings}
-                        onPress={() =>
-                          openCategoryDrilldown(focusModel.range, entry.categoryId, true)
-                        }
-                      />
-                    ))}
-                  </View>
-                </View>
+                <UnbudgetedGroup
+                  entries={focusModel.summary.unbudgeted}
+                  total={focusModel.summary.unbudgetedSpent}
+                  categoriesById={categoriesById}
+                  settings={settings}
+                  themeColors={themeColors}
+                  onPressCategory={(categoryId) =>
+                    openCategoryDrilldown(focusModel.range, categoryId, true)
+                  }
+                />
               ) : null}
             </ScrollView>
           </View>
