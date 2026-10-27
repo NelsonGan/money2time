@@ -26,7 +26,7 @@ import { useApp, useTransactions } from '~/context/AppContext';
 import {
   CreateBudgetRow,
   WeekStrip,
-  YearBudgetRow,
+  YearBudgetBanner,
 } from '~/features/budget/components/BudgetPeriodRows';
 import { BudgetTemplatePickerSheet } from '~/features/budget/components/BudgetTemplatePickerSheet';
 import {
@@ -698,6 +698,36 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
               ]}
               showsVerticalScrollIndicator={false}
             >
+              {/* The year first: the big picture above the month. */}
+              {model.year && yearModel ? (
+                <YearBudgetBanner
+                  budget={model.year}
+                  summary={yearModel.summary}
+                  label={model.yearKey}
+                  daysLeft={
+                    yearModel.range.start <= todayKey && todayKey <= yearModel.range.end
+                      ? budgetDaysLeft(yearModel.range, dateFromDayKeyLocal(todayKey))
+                      : null
+                  }
+                  selected={focus?.period === 'year'}
+                  settings={settings}
+                  themeColors={themeColors}
+                  onPress={() =>
+                    setFocus(
+                      month,
+                      focus?.period === 'year' ? null : { period: 'year', key: model.yearKey },
+                    )
+                  }
+                />
+              ) : showYearCreate ? (
+                <CreateBudgetRow
+                  label={model.yearKey}
+                  className="mb-3"
+                  themeColors={themeColors}
+                  onPress={() => handleCreate({ period: 'year', key: model.yearKey })}
+                />
+              ) : null}
+
               {showMonthCreate ? (
                 <CreateBudgetRow
                   label={monthKeyLabel(month, settings.locale)}
@@ -753,30 +783,6 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
                     )
                   }
                   onCreate={(key) => handleCreate({ period: 'week', key })}
-                />
-              ) : null}
-
-              {model.year && yearModel ? (
-                <YearBudgetRow
-                  budget={model.year}
-                  summary={yearModel.summary}
-                  label={model.yearKey}
-                  selected={focus?.period === 'year'}
-                  settings={settings}
-                  themeColors={themeColors}
-                  onPress={() =>
-                    setFocus(
-                      month,
-                      focus?.period === 'year' ? null : { period: 'year', key: model.yearKey },
-                    )
-                  }
-                />
-              ) : showYearCreate ? (
-                <CreateBudgetRow
-                  label={model.yearKey}
-                  className="mt-3"
-                  themeColors={themeColors}
-                  onPress={() => handleCreate({ period: 'year', key: model.yearKey })}
                 />
               ) : null}
 

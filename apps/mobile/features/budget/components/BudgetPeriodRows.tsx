@@ -1,8 +1,8 @@
-import { Plus } from 'lucide-react-native';
+import { ChevronRight, Plus } from 'lucide-react-native';
 import React from 'react';
 import { Pressable, View } from 'react-native';
 
-import { CategoryEmoji, Text } from '~/components/ui';
+import { Text } from '~/components/ui';
 import type { ColorPalette } from '~/constants/designSystem';
 import { budgetPeriodRange } from '~/features/budget/lib/budgetPeriods';
 import {
@@ -11,6 +11,7 @@ import {
   usageColor,
   usagePercentLabel,
 } from '~/features/budget/lib/format';
+import { SavingsRateRing } from '~/features/insights/components/SavingsRateRing';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { BudgetSummary, PeriodBudget, UserSettings } from '~/types';
@@ -153,13 +154,15 @@ export function WeekStrip({
 }
 
 /**
- * The year's budget on one line: its name, what is left, and a thin bar.
- * Tapping it shows the year in the card above.
+ * The year's budget as a quiet banner at the top of the page: the big
+ * picture above the month. A small ring, its name, and how much of the
+ * total is spent. Tapping it shows the year in the card below.
  */
-export function YearBudgetRow({
+export function YearBudgetBanner({
   budget,
   summary,
   label,
+  daysLeft,
   selected,
   settings,
   themeColors,
@@ -167,15 +170,30 @@ export function YearBudgetRow({
 }: {
   budget: PeriodBudget;
   summary: BudgetSummary;
+  /** The year, e.g. "2026". */
   label: string;
+  /** Days left in the year, today included; null unless it is running. */
+  daysLeft: number | null;
   selected: boolean;
   settings: UserSettings;
   themeColors: ColorPalette;
   onPress: () => void;
 }) {
   const color = healthColor(summary, themeColors);
+  const percent = usagePercentLabel(summary.usageRatio);
   const title = budget.templateName ? `${budget.templateName} ${label}` : label;
-  const left = leftLabel(summary, settings);
+  const details = [
+    `${money(summary.totalSpent, settings)} ${I18n.t('budget.of_total', {
+      amount: money(summary.totalBudget, settings),
+    })}`,
+  ];
+  if (daysLeft != null && daysLeft > 0) {
+    details.push(
+      I18n.t(daysLeft === 1 ? 'budget.days_left_one' : 'budget.days_left_other', {
+        count: daysLeft,
+      }),
+    );
+  }
   return (
     <Pressable
       onPress={() => {
@@ -184,37 +202,37 @@ export function YearBudgetRow({
       }}
       accessibilityRole="button"
       accessibilityState={{ selected }}
-      accessibilityLabel={`${title}, ${left}`}
+      accessibilityLabel={`${title}, ${leftLabel(summary, settings)}`}
       className={cn(
-        'mt-4 gap-2.5 rounded-2xl border px-4 py-3.5 active:opacity-80',
-        selected ? 'border-primary bg-primary/10' : 'border-border/45 bg-card',
+        'mb-3 flex-row items-center gap-3 rounded-2xl border px-3 py-2.5 active:opacity-80',
+        selected ? 'border-primary bg-primary/10' : 'border-transparent bg-secondary/35',
       )}
     >
-      <View className="flex-row items-center gap-2.5">
-        {budget.templateEmoji ? <CategoryEmoji icon={budget.templateEmoji} size={18} /> : null}
-        <Text variant="bodyStrong" numberOfLines={1} className="min-w-0 flex-1">
+      <SavingsRateRing
+        size={42}
+        strokeWidth={5}
+        progress={Math.min(summary.usageRatio, 1)}
+        color={color}
+        trackColor={withColorAlpha(color, 0.16)}
+      >
+        {/* "259%" needs a smaller size than "65%" to fit the small ring. */}
+        <Text
+          variant="label"
+          className={percent.length > 3 ? 'text-[8px]' : 'text-[10px]'}
+          style={{ color }}
+        >
+          {percent}
+        </Text>
+      </SavingsRateRing>
+      <View className="min-w-0 flex-1">
+        <Text variant="bodyStrong" numberOfLines={1}>
           {title}
         </Text>
-        <Text
-          variant="caption"
-          numberOfLines={1}
-          style={{ color: summary.remaining < 0 ? themeColors.error : themeColors.text }}
-        >
-          {left}
+        <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
+          {details.join(' · ')}
         </Text>
       </View>
-      <View
-        className="h-1.5 w-full overflow-hidden rounded-full"
-        style={{ backgroundColor: withColorAlpha(color, 0.15) }}
-      >
-        <View
-          className="h-1.5 rounded-full"
-          style={{
-            width: `${Math.max(0, Math.min(summary.usageRatio, 1)) * 100}%`,
-            backgroundColor: color,
-          }}
-        />
-      </View>
+      <ChevronRight size={16} color={themeColors.textMuted} />
     </Pressable>
   );
 }
