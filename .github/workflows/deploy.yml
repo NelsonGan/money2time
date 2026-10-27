@@ -425,10 +425,10 @@ jobs:
         shell: bash
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then
-            echo 'include=[{"platform":"ios","label":"iOS","os":"macos-15","profile":"production"},{"platform":"android","label":"Android","os":"ubuntu-latest","profile":"production"}]' >> "$GITHUB_OUTPUT"
+            echo 'include=[{"platform":"ios","label":"iOS","os":"xcode-27","profile":"production"},{"platform":"android","label":"Android","os":"ubuntu-latest","profile":"production"}]' >> "$GITHUB_OUTPUT"
           else
             if [ "${{ inputs.platform }}" = "ios" ]; then
-              os="macos-15"
+              os="xcode-27"
               label="iOS"
             else
               os="ubuntu-latest"
@@ -463,7 +463,7 @@ jobs:
         if: matrix.platform == 'ios'
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: latest-stable
+          xcode-version: '27.1'
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
