@@ -2047,6 +2047,10 @@ const ko = {
     purchase_pending_title: '구매 처리 중',
     purchase_pending_message:
       '구매가 완료되었지만 Pro 접근이 아직 활성화되지 않았습니다. 잠시 기다리거나 구매를 복원해 주세요.',
+    payment_pending_message:
+      '결제가 승인 대기 중입니다. 결제가 완료되면 Pro가 자동으로 잠금 해제되므로 다시 구매할 필요가 없습니다.',
+    already_owned_not_restored:
+      '이 스토어 계정은 이미 Pro를 보유하고 있지만 여기에 적용할 수 없었습니다. 구매 복원을 탭하고, 구매한 스토어 계정으로 로그인되어 있는지 확인하세요.',
     monthly: '월간',
     yearly: '연간',
     lifetime: '평생',

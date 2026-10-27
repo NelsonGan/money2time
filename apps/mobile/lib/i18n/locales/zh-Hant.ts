@@ -1969,6 +1969,9 @@ const zhHant = {
     purchase_failed: '購買失敗，請稍後再試。',
     purchase_pending_title: '購買處理中',
     purchase_pending_message: '購買已完成，但 Pro 資格尚未啟用。請稍等片刻，或嘗試恢復購買。',
+    payment_pending_message: '你的付款正在等待核准。完成後 Pro 會自動解鎖，無須再次購買。',
+    already_owned_not_restored:
+      '此商店帳號已擁有 Pro，但無法在這裡套用。請點一下「恢復購買」，並確認你已登入當初購買的商店帳號。',
     monthly: '月度',
     yearly: '年度',
     lifetime: '永久',

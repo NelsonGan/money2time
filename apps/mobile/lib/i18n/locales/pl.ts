@@ -2079,6 +2079,10 @@ const pl = {
     purchase_pending_title: 'Zakup w toku',
     purchase_pending_message:
       'Zakup przeszedł, ale dostęp do Pro jeszcze się nie aktywował. Poczekaj chwilę lub przywróć zakupy.',
+    payment_pending_message:
+      'Twoja płatność czeka na zatwierdzenie. Pro odblokuje się automatycznie po jej zakończeniu, więc nie musisz kupować ponownie.',
+    already_owned_not_restored:
+      'To konto sklepu ma już Pro, ale nie udało się go tutaj zastosować. Stuknij Przywróć zakupy i upewnij się, że logujesz się na konto sklepu, z którego dokonano zakupu.',
     monthly: 'Miesięcznie',
     yearly: 'Rocznie',
     lifetime: 'Dożywotnio',

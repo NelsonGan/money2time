@@ -2083,6 +2083,10 @@ const pt = {
     purchase_pending_title: 'Compra em processamento',
     purchase_pending_message:
       'Sua compra foi processada, mas o acesso Pro ainda não foi ativado. Aguarde um momento ou restaure as compras.',
+    payment_pending_message:
+      'O seu pagamento está aguardando aprovação. O Pro será desbloqueado automaticamente quando ele for concluído, então não é preciso comprar de novo.',
+    already_owned_not_restored:
+      'Esta conta da loja já tem o Pro, mas não foi possível aplicá-lo aqui. Toque em Restaurar compras e verifique se você entrou com a conta da loja que fez a compra.',
     monthly: 'Mensal',
     yearly: 'Anual',
     lifetime: 'Vitalício',

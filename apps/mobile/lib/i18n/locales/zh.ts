@@ -1969,6 +1969,9 @@ const zh = {
     purchase_failed: '购买失败，请稍后再试。',
     purchase_pending_title: '购买处理中',
     purchase_pending_message: '购买已完成，但 Pro 权限尚未激活。请稍等片刻，或尝试恢复购买。',
+    payment_pending_message: '你的付款正在等待批准。完成后 Pro 会自动解锁，无需再次购买。',
+    already_owned_not_restored:
+      '此商店账号已拥有 Pro，但无法在此应用。请点按“恢复购买”，并确认你已登录当初购买的商店账号。',
     monthly: '月度',
     yearly: '年度',
     lifetime: '永久',

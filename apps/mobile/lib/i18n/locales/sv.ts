@@ -2074,6 +2074,10 @@ const sv = {
     purchase_pending_title: 'Köp bearbetas',
     purchase_pending_message:
       'Ditt köp gick igenom, men Pro-åtkomst har inte aktiverats ännu. Vänta en stund eller återställ köpen.',
+    payment_pending_message:
+      'Din betalning väntar på godkännande. Pro låses upp automatiskt när den är klar, så du behöver inte köpa igen.',
+    already_owned_not_restored:
+      'Det här butikskontot äger redan Pro, men det kunde inte tillämpas här. Tryck på Återställ köp och kontrollera att du är inloggad med butikskontot som köpte det.',
     monthly: 'Månadsvis',
     yearly: 'Årsvis',
     lifetime: 'Livstid',

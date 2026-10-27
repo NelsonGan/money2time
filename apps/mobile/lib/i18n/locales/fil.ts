@@ -2096,6 +2096,10 @@ const fil = {
     purchase_pending_title: 'Pinoproseso ang pagbili',
     purchase_pending_message:
       'Dumaan ang iyong pagbili, pero hindi pa naka-activate ang Pro access. Mangyaring maghintay sandali o i-restore ang mga binili.',
+    payment_pending_message:
+      'Naghihintay pa ng pag-apruba ang bayad mo. Kusang mabubuksan ang Pro kapag nakumpleto ito, kaya hindi mo na kailangang bumili ulit.',
+    already_owned_not_restored:
+      'May Pro na ang store account na ito, pero hindi ito mailapat dito. I-tap ang Restore Purchases, at siguraduhing naka-sign in ka sa store account na bumili nito.',
     monthly: 'Buwanan',
     yearly: 'Taunan',
     lifetime: 'Habambuhay',
