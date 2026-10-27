@@ -1,4 +1,11 @@
-import { ChevronDown, ChevronRight, ChevronUp, Pencil, Trash2 } from 'lucide-react-native';
+import {
+  CalendarDays,
+  ChevronDown,
+  ChevronRight,
+  ChevronUp,
+  Pencil,
+  Trash2,
+} from 'lucide-react-native';
 import React, {
   forwardRef,
   useCallback,
@@ -24,7 +31,11 @@ import type { ColorPalette } from '~/constants/designSystem';
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { CreateBudgetRow, WeekChips } from '~/features/budget/components/BudgetPeriodRows';
-import { type BudgetRing, BudgetRings } from '~/features/budget/components/BudgetRings';
+import {
+  type BudgetRing,
+  budgetRingColor,
+  BudgetRings,
+} from '~/features/budget/components/BudgetRings';
 import { BudgetTemplatePickerSheet } from '~/features/budget/components/BudgetTemplatePickerSheet';
 import {
   type BudgetMonthPage,
@@ -40,6 +51,7 @@ import {
 } from '~/features/budget/lib/budgetPeriods';
 import {
   budgetPeriodLabel,
+  budgetPeriodName,
   money,
   monthKeyLabel,
   monthNameLabel,
@@ -62,6 +74,7 @@ import type {
   UserSettings,
 } from '~/types';
 import { cn } from '~/utils';
+import { withColorAlpha } from '~/utils/color';
 import { monthCycleOf } from '~/utils/financialMonth';
 import { dateFromDayKeyLocal, dayKeyFromDateLocal, dayKeyFromIsoLocal } from '~/utils/formatters';
 import { asSpendingRow } from '~/utils/spending';
@@ -628,11 +641,49 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
                 <View className="rounded-3xl border border-border/45 bg-card px-4 pb-4 pt-3">
                   {/* Which budget is in focus, and its edit and delete. */}
                   <View className="flex-row items-center gap-1.5">
-                    <Text variant="bodyStrong" numberOfLines={1} className="min-w-0 flex-1">
-                      {focusBudget.templateName
-                        ? `${focusLabel} · ${focusBudget.templateName}`
-                        : focusLabel}
-                    </Text>
+                    {/* The budget's icon on its ring's colour, its name, and a
+                        pill naming the period it covers. */}
+                    <View
+                      className="h-10 w-10 items-center justify-center rounded-2xl"
+                      style={{
+                        backgroundColor: withColorAlpha(
+                          budgetRingColor(focus.period, themeColors),
+                          0.14,
+                        ),
+                      }}
+                    >
+                      {focusBudget.templateEmoji ? (
+                        <CategoryEmoji icon={focusBudget.templateEmoji} size={22} />
+                      ) : (
+                        <CalendarDays
+                          size={18}
+                          color={budgetRingColor(focus.period, themeColors)}
+                        />
+                      )}
+                    </View>
+                    <View className="ml-1.5 min-w-0 flex-1">
+                      <Text variant="bodyStrong" numberOfLines={1}>
+                        {focusBudget.templateName ?? budgetPeriodName(focus.period)}
+                      </Text>
+                      <View
+                        className="mt-1 self-start rounded-full px-2 py-0.5"
+                        style={{
+                          backgroundColor: withColorAlpha(
+                            budgetRingColor(focus.period, themeColors),
+                            0.12,
+                          ),
+                        }}
+                      >
+                        <Text
+                          variant="caption"
+                          numberOfLines={1}
+                          className="text-[11px]"
+                          style={{ color: budgetRingColor(focus.period, themeColors) }}
+                        >
+                          {focusLabel}
+                        </Text>
+                      </View>
+                    </View>
                     <Pressable
                       onPress={() => onOpenBudgetEditor(focusBudget.id)}
                       hitSlop={10}
@@ -657,7 +708,7 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
                     <BudgetRings
                       rings={rings}
                       focused={focus.period}
-                      size={Math.min(pageWidth - spacing.lg * 2 - 32, 280)}
+                      size={Math.min(pageWidth - spacing.lg * 2 - 32, 220)}
                       themeColors={themeColors}
                       onFocus={(period) =>
                         setFocus(
@@ -676,7 +727,7 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
                         variant="monoLg"
                         numberOfLines={1}
                         adjustsFontSizeToFit
-                        className="text-[30px] leading-[36px]"
+                        className="text-[24px] leading-[30px]"
                         style={
                           focusModel.summary.remaining < 0
                             ? { color: themeColors.error }
