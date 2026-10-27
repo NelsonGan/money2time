@@ -1,8 +1,8 @@
-import { ChevronRight, Plus } from 'lucide-react-native';
+import { Plus } from 'lucide-react-native';
 import React from 'react';
 import { Pressable, View } from 'react-native';
 
-import { Text } from '~/components/ui';
+import { CategoryEmoji, Text } from '~/components/ui';
 import type { ColorPalette } from '~/constants/designSystem';
 import { budgetPeriodRange } from '~/features/budget/lib/budgetPeriods';
 import {
@@ -11,7 +11,6 @@ import {
   usageColor,
   usagePercentLabel,
 } from '~/features/budget/lib/format';
-import { SavingsRateRing } from '~/features/insights/components/SavingsRateRing';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { BudgetSummary, PeriodBudget, UserSettings } from '~/types';
@@ -30,8 +29,6 @@ function leftLabel(summary: BudgetSummary, settings: UserSettings): string {
     : I18n.t('budget.left', { amount: money(summary.remaining, settings) });
 }
 
-const WEEK_BAR_HEIGHT = 64;
-
 export interface WeekTile {
   /** The week's first day (`YYYY-MM-DD`). */
   key: string;
@@ -39,13 +36,28 @@ export interface WeekTile {
   summary: BudgetSummary | null;
 }
 
+function MiniBar({ ratio, color, thin }: { ratio: number; color: string; thin?: boolean }) {
+  return (
+    <View
+      className={cn('w-full overflow-hidden rounded-full', thin ? 'h-1' : 'h-2')}
+      style={{ backgroundColor: withColorAlpha(color, 0.16) }}
+    >
+      <View
+        className={cn('rounded-full', thin ? 'h-1' : 'h-2')}
+        style={{ width: `${Math.max(0, Math.min(ratio, 1)) * 100}%`, backgroundColor: color }}
+      />
+    </View>
+  );
+}
+
 /**
- * The weeks with a day in the month as a small bar chart: each bar fills
- * with how much of that week's budget is used, coloured by health, with only
- * the week's first day under it. Tapping a bar shows that week in the card
- * above; an empty week offers a + when a weekly template exists.
+ * The weeks with a day in the month, in one card under the month: a title
+ * naming the weekly budget, then per week its first day, a small bar and the
+ * share used, with "this week" under the running one. Tapping a week shows it
+ * in the card above; an empty week offers a + when a weekly template exists.
  */
 export function WeekStrip({
+  title,
   weeks,
   todayKey,
   selectedKey,
@@ -55,6 +67,8 @@ export function WeekStrip({
   onSelect,
   onCreate,
 }: {
+  /** "Weekly spending · RM400 a week", or "Weeks" with no weekly budget yet. */
+  title: string;
   weeks: WeekTile[];
   todayKey: string;
   /** The week the page is showing, if it is showing one. */
@@ -66,21 +80,20 @@ export function WeekStrip({
   onCreate: (key: string) => void;
 }) {
   return (
-    <View className="mt-5">
-      <Text variant="bodyStrong" className="mb-2 px-1">
-        {I18n.t('budget.weeks_title')}
+    <View className="mt-4 rounded-2xl border border-border/45 bg-card px-2 pb-2 pt-3.5">
+      <Text variant="bodyStrong" numberOfLines={1} className="mb-2.5 px-2">
+        {title}
       </Text>
       {/* A month has four to six weeks: they share the row rather than
           scroll, since the page itself pages sideways. */}
-      <View className="flex-row gap-2">
+      <View className="flex-row">
         {weeks.map(({ key, budget, summary }) => {
           const date = budgetShortDayLabel(key, settings.locale);
           const isCurrent = key <= todayKey && todayKey <= budgetPeriodRange('week', key, 1).end;
           const isSelected = key === selectedKey;
           const usage = budget && summary ? summary : null;
           const color = usage ? healthColor(usage, themeColors) : themeColors.textMuted;
-          const fill = usage ? Math.max(0, Math.min(usage.usageRatio, 1)) : 0;
-          const highlighted = isSelected || isCurrent;
+          const percent = usage ? usagePercentLabel(usage.usageRatio) : null;
 
           return (
             <Pressable
@@ -94,57 +107,51 @@ export function WeekStrip({
               accessibilityRole="button"
               accessibilityState={{ selected: isSelected }}
               accessibilityLabel={
-                usage
-                  ? I18n.t('budget.week_tile_label', {
-                      date,
-                      percent: usagePercentLabel(usage.usageRatio),
-                    })
+                percent
+                  ? I18n.t('budget.week_tile_label', { date, percent })
                   : I18n.t('budget.week_tile_empty', { date })
               }
-              className="min-w-0 flex-1 items-center gap-1.5 active:opacity-70"
+              className={cn(
+                'min-w-0 flex-1 items-center gap-1.5 rounded-xl border px-1.5 py-2 active:opacity-70',
+                isSelected ? 'border-primary bg-primary/10' : 'border-transparent',
+              )}
             >
-              <View
-                className={cn(
-                  'w-full max-w-[44px] justify-end overflow-hidden rounded-xl p-[3px]',
-                  highlighted ? 'border-2' : 'border',
-                  !usage && 'border-dashed',
-                )}
-                style={{
-                  height: WEEK_BAR_HEIGHT,
-                  borderColor: isSelected
-                    ? themeColors.primary
-                    : isCurrent
-                      ? withColorAlpha(themeColors.primary, 0.45)
-                      : withColorAlpha(themeColors.border, usage ? 0.5 : 0.9),
-                  backgroundColor: isSelected
-                    ? withColorAlpha(themeColors.primary, 0.08)
-                    : usage
-                      ? withColorAlpha(color, 0.12)
-                      : 'transparent',
-                }}
-              >
-                {usage ? (
-                  <View
-                    className="w-full rounded-lg"
-                    style={{
-                      height: Math.max(fill * (WEEK_BAR_HEIGHT - 10), fill > 0 ? 4 : 0),
-                      backgroundColor: color,
-                    }}
-                  />
-                ) : canCreate ? (
-                  <View className="flex-1 items-center justify-center">
-                    <Plus size={14} color={themeColors.textMuted} />
-                  </View>
-                ) : null}
-              </View>
-              <Text
-                variant="caption"
-                numberOfLines={1}
-                tone={highlighted ? undefined : 'muted'}
-                className="text-[11px]"
-              >
+              <Text variant="caption" numberOfLines={1} className="text-[11px]">
                 {date}
               </Text>
+              {usage ? (
+                <MiniBar ratio={usage.usageRatio} color={color} />
+              ) : (
+                <View className="h-2 w-full rounded-full border border-dashed border-border/70" />
+              )}
+              {percent ? (
+                <Text
+                  variant="caption"
+                  numberOfLines={1}
+                  className="text-[11px]"
+                  style={{ color: usage && usage.remaining < 0 ? color : themeColors.text }}
+                >
+                  {percent}
+                </Text>
+              ) : canCreate ? (
+                <Plus size={12} color={themeColors.textMuted} />
+              ) : (
+                <Text variant="caption" tone="muted" className="text-[11px]">
+                  –
+                </Text>
+              )}
+              {isCurrent ? (
+                <Text
+                  variant="caption"
+                  numberOfLines={1}
+                  // Six-week months leave narrow tiles: shrink rather than clip.
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.7}
+                  className="text-[10px] text-primary"
+                >
+                  {I18n.t('budget.this_week')}
+                </Text>
+              ) : null}
             </Pressable>
           );
         })}
@@ -154,9 +161,10 @@ export function WeekStrip({
 }
 
 /**
- * The year's budget as a quiet banner at the top of the page: the big
- * picture above the month. A small ring, its name, and how much of the
- * total is spent. Tapping it shows the year in the card below.
+ * The year's budget as one slim row above the month: smaller than the month
+ * (most people plan by the month) but first, as the widest view. Its name and
+ * spent of total, a short bar, and the share used with the days left.
+ * Tapping it shows the year in the card below.
  */
 export function YearBudgetBanner({
   budget,
@@ -180,20 +188,10 @@ export function YearBudgetBanner({
   onPress: () => void;
 }) {
   const color = healthColor(summary, themeColors);
-  const percent = usagePercentLabel(summary.usageRatio);
-  const title = budget.templateName ? `${budget.templateName} ${label}` : label;
-  const details = [
-    `${money(summary.totalSpent, settings)} ${I18n.t('budget.of_total', {
-      amount: money(summary.totalBudget, settings),
-    })}`,
-  ];
-  if (daysLeft != null && daysLeft > 0) {
-    details.push(
-      I18n.t(daysLeft === 1 ? 'budget.days_left_one' : 'budget.days_left_other', {
-        count: daysLeft,
-      }),
-    );
-  }
+  const title = budget.templateName ? `${budget.templateName} · ${label}` : label;
+  const spentOfTotal = `${money(summary.totalSpent, settings)} ${I18n.t('budget.of_total', {
+    amount: money(summary.totalBudget, settings),
+  })}`;
   return (
     <Pressable
       onPress={() => {
@@ -204,35 +202,39 @@ export function YearBudgetBanner({
       accessibilityState={{ selected }}
       accessibilityLabel={`${title}, ${leftLabel(summary, settings)}`}
       className={cn(
-        'mb-3 flex-row items-center gap-3 rounded-2xl border px-3 py-2.5 active:opacity-80',
-        selected ? 'border-primary bg-primary/10' : 'border-transparent bg-secondary/35',
+        'mb-3 gap-2 rounded-2xl border px-3.5 py-2.5 active:opacity-80',
+        selected ? 'border-primary bg-primary/10' : 'border-border/45 bg-card',
       )}
     >
-      <SavingsRateRing
-        size={42}
-        strokeWidth={5}
-        progress={Math.min(summary.usageRatio, 1)}
-        color={color}
-        trackColor={withColorAlpha(color, 0.16)}
-      >
-        {/* "259%" needs a smaller size than "65%" to fit the small ring. */}
-        <Text
-          variant="label"
-          className={percent.length > 3 ? 'text-[8px]' : 'text-[10px]'}
-          style={{ color }}
-        >
-          {percent}
-        </Text>
-      </SavingsRateRing>
-      <View className="min-w-0 flex-1">
-        <Text variant="bodyStrong" numberOfLines={1}>
-          {title}
-        </Text>
-        <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
-          {details.join(' · ')}
-        </Text>
+      <View className="flex-row items-center gap-2.5">
+        {budget.templateEmoji ? <CategoryEmoji icon={budget.templateEmoji} size={20} /> : null}
+        <View className="min-w-0 flex-1">
+          <Text variant="caption" numberOfLines={1} className="font-semibold text-foreground">
+            {title}
+          </Text>
+          <Text variant="caption" tone="muted" numberOfLines={1} className="text-[11px]">
+            {spentOfTotal}
+          </Text>
+        </View>
+        <View className="items-end">
+          <Text
+            variant="caption"
+            numberOfLines={1}
+            className="text-[11px]"
+            style={{ color: summary.remaining < 0 ? color : themeColors.text }}
+          >
+            {I18n.t('budget.percent_used', { percent: usagePercentLabel(summary.usageRatio) })}
+          </Text>
+          {daysLeft != null && daysLeft > 0 ? (
+            <Text variant="caption" tone="muted" numberOfLines={1} className="text-[10px]">
+              {I18n.t(daysLeft === 1 ? 'budget.days_left_one' : 'budget.days_left_other', {
+                count: daysLeft,
+              })}
+            </Text>
+          ) : null}
+        </View>
       </View>
-      <ChevronRight size={16} color={themeColors.textMuted} />
+      <MiniBar ratio={summary.usageRatio} color={color} thin />
     </Pressable>
   );
 }

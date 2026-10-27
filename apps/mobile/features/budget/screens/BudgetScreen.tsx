@@ -1,4 +1,11 @@
-import { ChevronDown, ChevronLeft, ChevronUp, Pencil, Trash2 } from 'lucide-react-native';
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  Pencil,
+  Trash2,
+} from 'lucide-react-native';
 import React, {
   forwardRef,
   useCallback,
@@ -47,6 +54,7 @@ import {
   monthKeyLabel,
   monthNameLabel,
   usageColor,
+  usagePercentLabel,
 } from '~/features/budget/lib/format';
 import type { InsightsDrilldownPayload } from '~/features/insights/screens/InsightsDrilldownScreen';
 import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
@@ -137,9 +145,11 @@ function BudgetSummaryCard({
   }
 
   return (
-    <View className="w-full rounded-2xl border border-border/45 bg-card px-4 pb-4 pt-3">
+    <View className="w-full overflow-hidden rounded-2xl border border-border/45 bg-card px-4 pb-4 pt-3.5">
+      {/* An accent edge marks the card as the page's main budget. */}
+      <View className="absolute left-0 right-0 top-0 h-[3px] bg-primary" />
       <View className="flex-row items-center gap-1.5">
-        <Text variant="caption" tone="muted" numberOfLines={1} className="min-w-0 flex-1">
+        <Text variant="bodyStrong" numberOfLines={1} className="min-w-0 flex-1">
           {label}
         </Text>
         {backLabel ? (
@@ -183,7 +193,7 @@ function BudgetSummaryCard({
         variant="monoLg"
         numberOfLines={1}
         adjustsFontSizeToFit
-        className="mt-1 text-[34px] leading-[40px]"
+        className="mt-1.5 text-[38px] leading-[44px]"
         style={isOver ? { color: themeColors.error } : undefined}
       >
         {leftLabel(summary.remaining, settings)}
@@ -191,18 +201,27 @@ function BudgetSummaryCard({
       <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
         {details.join(' · ')}
       </Text>
-      <View className="mt-3">
-        <Bar ratio={summary.usageRatio} color={color} height={10} />
+      <View className="mt-3.5 flex-row items-center gap-3">
+        <View className="flex-1">
+          <Bar ratio={summary.usageRatio} color={color} height={10} />
+        </View>
+        <Text variant="bodyStrong" className="text-[13px]" style={{ color }}>
+          {usagePercentLabel(summary.usageRatio)}
+        </Text>
       </View>
     </View>
   );
 }
 
-/** One budget line on one row: emoji, name, a thin bar and what is left. */
+/**
+ * One budget line on one row: emoji, name and what is left (amber when it
+ * runs low, red when over), opening its transactions.
+ */
 function BudgetLineRow({
   line,
   category,
   indent,
+  first,
   settings,
   themeColors,
   onPress,
@@ -211,6 +230,8 @@ function BudgetLineRow({
   category: Category | undefined;
   /** A subcategory line, nested under its parent. */
   indent: boolean;
+  /** The card's first row, which needs no divider above it. */
+  first: boolean;
   settings: UserSettings;
   themeColors: ColorPalette;
   onPress: () => void;
@@ -223,8 +244,10 @@ function BudgetLineRow({
       accessibilityRole="button"
       accessibilityLabel={`${name}, ${leftLabel(line.remaining, settings)}`}
       className={cn(
-        'flex-row items-center gap-2.5 py-2.5 pr-4 active:bg-secondary/20',
-        indent ? 'pl-10' : 'pl-4',
+        'flex-row items-center gap-3 pr-3',
+        !first && 'border-t border-border/25',
+        indent ? 'py-2.5 pl-12' : 'py-3.5 pl-4',
+        'active:bg-secondary/20',
       )}
     >
       {indent ? (
@@ -232,26 +255,21 @@ function BudgetLineRow({
           <CategoryEmoji icon={category.icon} size={13} />
         ) : null
       ) : (
-        <CategoryEmoji icon={category?.icon} size={20} />
+        <CategoryEmoji icon={category?.icon} size={22} />
       )}
+      <Text variant={indent ? 'caption' : 'body'} numberOfLines={1} className="min-w-0 flex-1">
+        {name}
+      </Text>
       <Text
         variant={indent ? 'caption' : 'body'}
         numberOfLines={1}
-        className={cn('w-[30%] shrink-0', indent && 'text-foreground')}
-      >
-        {name}
-      </Text>
-      <View className="min-w-0 flex-1">
-        <Bar ratio={line.usageRatio} color={color} height={indent ? 4 : 6} />
-      </View>
-      <Text
-        variant="caption"
-        numberOfLines={1}
         className="shrink-0 text-right"
-        style={{ color: line.remaining < 0 ? themeColors.error : themeColors.text }}
+        // Plain while healthy; the colour only speaks up when it matters.
+        style={{ color: line.usageRatio >= 0.8 || line.remaining < 0 ? color : themeColors.text }}
       >
         {leftLabel(line.remaining, settings)}
       </Text>
+      <ChevronRight size={16} color={themeColors.textMuted} />
     </Pressable>
   );
 }
@@ -763,6 +781,15 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
 
               {showWeeks ? (
                 <WeekStrip
+                  title={weekStripTitle(
+                    (focus?.period === 'week'
+                      ? model.weeks.find((week) => week.key === focus.key)?.budget
+                      : null) ??
+                      thisWeek?.budget ??
+                      firstBudgetedWeek?.budget ??
+                      null,
+                    settings,
+                  )}
                   weeks={model.weeks.map((week) => ({
                     ...week,
                     summary: week.budget
@@ -789,13 +816,14 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
               {/* A budget can lose all its lines (category-delete cascade);
                   don't render an empty bordered shell. */}
               {focusModel && orderedCategories.length > 0 ? (
-                <View className="mt-4 overflow-hidden rounded-2xl border border-border/45 bg-card py-1.5">
-                  {orderedCategories.map((line) => (
+                <View className="mt-4 overflow-hidden rounded-2xl border border-border/45 bg-card">
+                  {orderedCategories.map((line, index) => (
                     <React.Fragment key={line.categoryId}>
                       <BudgetLineRow
                         line={line}
                         category={categoriesById.get(line.categoryId)}
                         indent={false}
+                        first={index === 0}
                         settings={settings}
                         themeColors={themeColors}
                         onPress={() =>
@@ -808,6 +836,7 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
                           line={child}
                           category={categoriesById.get(child.categoryId)}
                           indent
+                          first={false}
                           settings={settings}
                           themeColors={themeColors}
                           onPress={() =>
@@ -922,6 +951,13 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
     );
   },
 );
+
+/** "Weekly spending · RM400 a week", named after the week's budget, or "Weeks". */
+function weekStripTitle(budget: PeriodBudget | null, settings: UserSettings): string {
+  if (!budget) return I18n.t('budget.weeks_title');
+  const perWeek = I18n.t('budget.per_week', { amount: money(budget.totalAmount, settings) });
+  return `${budget.templateName ?? I18n.t('budget.weeks_title')} · ${perWeek}`;
+}
 
 function addDaysKey(dayKey: string, days: number): string {
   const date = dateFromDayKeyLocal(dayKey);
