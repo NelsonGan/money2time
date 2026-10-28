@@ -518,15 +518,18 @@ app side lives in `features/ledgers/`.
   (`MountedTab`'s `resetKey`), so no selection, filter or scroll position
   carries over. Hidden pages mount again only when visited.
 - **New ledger** (Pro, `LedgerEditorScreen`): icon, name, main currency, and
-  what it starts with:
+  what it starts with. One card names the open ledger once ("Copy from") and
+  has a switch each for accounts and categories, on by default. Each row's
+  subtitle says what the choice gives: the copied count, or the starter set
+  when off.
   - **Accounts:** copy the open ledger's debit and credit accounts and their
     groups at a zero balance, or use the starter accounts. Copied accounts in
     the open ledger's main currency take the new ledger's currency. Goals and
     loans are not copied.
   - **Categories:** copy the open ledger's categories and subcategories, or use
     the starter set.
-  - No transactions are copied, and creating a ledger opens it. The
-    explanations sit behind info buttons.
+  - No transactions are copied, and creating a ledger opens it. That note
+    sits behind the Start with info button.
 - **Manage ledgers** (`LedgersScreen`) is open to every user, so a free user
   can rename Main. It can rename and re-icon any ledger, add one (Pro) and
   delete one that is not open. The default ledger cannot be deleted.

@@ -2822,14 +2822,13 @@ const fr = {
     start_with: 'Commencer avec',
     accounts: 'Comptes',
     categories: 'Catégories',
-    copy_from: 'Copier {{name}}',
-    starter_accounts: 'Comptes de départ',
-    starter_categories: 'Ensemble de départ',
-    copy_accounts_caption:
-      'Copie vos {{count}} comptes de débit et de crédit, avec des soldes remis à zéro.',
+    copy_from: 'Copier depuis',
+    copy_accounts_one: '{{count}} compte, solde à zéro',
+    copy_accounts_other: '{{count}} comptes, soldes à zéro',
     starter_accounts_caption:
       'Espèces, portefeuille numérique, compte courant, épargne et une carte de crédit.',
-    copy_categories_caption: 'Copie les {{count}} catégories et sous-catégories.',
+    copy_categories_one: '{{count}} catégorie',
+    copy_categories_other: '{{count}} catégories',
     starter_categories_caption: 'Une courte liste de catégories du quotidien.',
     create_footnote:
       "Aucune transaction n'est copiée. Vous pouvez renommer le carnet à tout moment.",

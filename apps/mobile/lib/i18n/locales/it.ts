@@ -2803,14 +2803,13 @@ const it = {
     start_with: 'Inizia con',
     accounts: 'Conti',
     categories: 'Categorie',
-    copy_from: 'Copia {{name}}',
-    starter_accounts: 'Conti iniziali',
-    starter_categories: 'Set iniziale',
-    copy_accounts_caption:
-      'Copia i tuoi {{count}} conti di debito e credito, con saldi che partono da zero.',
+    copy_from: 'Copia da',
+    copy_accounts_one: '{{count}} conto, saldo a zero',
+    copy_accounts_other: '{{count}} conti, saldi a zero',
     starter_accounts_caption:
       'Contanti, portafoglio digitale, conto corrente, risparmi e una carta di credito.',
-    copy_categories_caption: 'Copia tutte le {{count}} categorie e sottocategorie.',
+    copy_categories_one: '{{count}} categoria',
+    copy_categories_other: '{{count}} categorie',
     starter_categories_caption: 'Un breve elenco di categorie di tutti i giorni.',
     create_footnote:
       'Nessuna transazione viene copiata. Puoi rinominare il registro in qualsiasi momento.',

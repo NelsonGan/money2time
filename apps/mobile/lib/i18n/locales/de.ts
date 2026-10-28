@@ -2825,13 +2825,13 @@ const de = {
     start_with: 'Starten mit',
     accounts: 'Konten',
     categories: 'Kategorien',
-    copy_from: '{{name}} kopieren',
-    starter_accounts: 'Startkonten',
-    starter_categories: 'Startset',
-    copy_accounts_caption: 'Kopiert deine {{count}} Debit- und Kreditkonten, mit Salden ab null.',
+    copy_from: 'Kopieren aus',
+    copy_accounts_one: '{{count}} Konto, Saldo bei null',
+    copy_accounts_other: '{{count}} Konten, Salden bei null',
     starter_accounts_caption:
       'Bargeld, digitale Geldbörse, Girokonto, Sparkonto und eine Kreditkarte.',
-    copy_categories_caption: 'Kopiert alle {{count}} Kategorien und Unterkategorien.',
+    copy_categories_one: '{{count}} Kategorie',
+    copy_categories_other: '{{count}} Kategorien',
     starter_categories_caption: 'Eine kurze Liste alltäglicher Kategorien.',
     create_footnote:
       'Es werden keine Transaktionen kopiert. Du kannst das Buch jederzeit umbenennen.',

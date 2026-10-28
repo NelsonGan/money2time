@@ -1,6 +1,6 @@
-import { ChevronRight, Pencil } from 'lucide-react-native';
+import { ChevronRight, CreditCard, type LucideIcon, Pencil, Tag } from 'lucide-react-native';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Pressable, View } from 'react-native';
+import { Alert, Pressable, Switch, View } from 'react-native';
 
 import {
   Button,
@@ -9,7 +9,6 @@ import {
   FormScrollView,
   InfoTooltipButton,
   Input,
-  SegmentedToggle,
   SettingsHeader,
   SettingsPageLayout,
   Text,
@@ -25,8 +24,6 @@ import { currencyNameForCode, currencySymbolForCode } from '~/utils/currency';
 import { getErrorMessage } from '~/utils/errorHandling';
 
 import { ledgerDisplayName, ledgerIcon } from '../lib/ledgerDisplay';
-
-type StartWith = 'copy' | 'starter';
 
 const SCROLL_CONTENT = { gap: 16, paddingHorizontal: 20, paddingTop: 8 };
 
@@ -75,8 +72,9 @@ export function LedgerEditorScreen({
   const [name, setName] = useState(() => existing?.name ?? '');
   const [currencyCode, setCurrencyCode] = useState(settings.currencyCode);
   const [currencyPickerVisible, setCurrencyPickerVisible] = useState(false);
-  const [accountsStart, setAccountsStart] = useState<StartWith>('copy');
-  const [categoriesStart, setCategoriesStart] = useState<StartWith>('copy');
+  // On copies from the open ledger; off starts with the starter set.
+  const [copyAccounts, setCopyAccounts] = useState(true);
+  const [copyCategories, setCopyCategories] = useState(true);
 
   const openLedgerName = ledgerDisplayName(activeLedger);
   const copyableAccountCount = useMemo(
@@ -84,10 +82,6 @@ export function LedgerEditorScreen({
       accounts.filter((account) => account.type === 'debit' || account.type === 'credit').length,
     [accounts],
   );
-  const startOptions = (starterKey: string) => [
-    { value: 'copy' as const, label: I18n.t('ledgers.copy_from', { name: openLedgerName }) },
-    { value: 'starter' as const, label: I18n.t(starterKey) },
-  ];
 
   const trimmedName = name.trim();
   const isDefaultLedger = existing?.id === DEFAULT_LEDGER_ID;
@@ -108,8 +102,8 @@ export function LedgerEditorScreen({
         emoji: icon,
         currencyCode,
         currencySymbol: currencySymbolForCode(currencyCode),
-        copyAccounts: accountsStart === 'copy',
-        copyCategories: categoriesStart === 'copy',
+        copyAccounts,
+        copyCategories,
       });
     } catch (error) {
       savedRef.current = false;
@@ -194,28 +188,53 @@ export function LedgerEditorScreen({
                 iconSize={14}
               />
             </View>
-            <StartWithCard
-              title={I18n.t('ledgers.accounts')}
-              value={accountsStart}
-              options={startOptions('ledgers.starter_accounts')}
-              onChange={setAccountsStart}
-              caption={
-                accountsStart === 'copy'
-                  ? I18n.t('ledgers.copy_accounts_caption', { count: copyableAccountCount })
-                  : I18n.t('ledgers.starter_accounts_caption')
-              }
-            />
-            <StartWithCard
-              title={I18n.t('ledgers.categories')}
-              value={categoriesStart}
-              options={startOptions('ledgers.starter_categories')}
-              onChange={setCategoriesStart}
-              caption={
-                categoriesStart === 'copy'
-                  ? I18n.t('ledgers.copy_categories_caption', { count: categories.length })
-                  : I18n.t('ledgers.starter_categories_caption')
-              }
-            />
+            <View className="rounded-3xl border border-border/30 bg-card">
+              <View className="flex-row items-center gap-3 px-4 pb-3 pt-4">
+                <Text variant="body" tone="muted">
+                  {I18n.t('ledgers.copy_from')}
+                </Text>
+                <View className="flex-1 items-start">
+                  <View className="max-w-full flex-row items-center gap-2 rounded-full bg-primary/10 py-1.5 pl-2 pr-3">
+                    <CategoryEmoji icon={ledgerIcon(activeLedger)} size={18} />
+                    <Text variant="bodyStrong" numberOfLines={1} className="shrink">
+                      {openLedgerName}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+              <StartWithRow
+                icon={CreditCard}
+                title={I18n.t('ledgers.accounts')}
+                subtitle={
+                  copyAccounts
+                    ? I18n.t(
+                        copyableAccountCount === 1
+                          ? 'ledgers.copy_accounts_one'
+                          : 'ledgers.copy_accounts_other',
+                        { count: copyableAccountCount },
+                      )
+                    : I18n.t('ledgers.starter_accounts_caption')
+                }
+                value={copyAccounts}
+                onChange={setCopyAccounts}
+              />
+              <StartWithRow
+                icon={Tag}
+                title={I18n.t('ledgers.categories')}
+                subtitle={
+                  copyCategories
+                    ? I18n.t(
+                        categories.length === 1
+                          ? 'ledgers.copy_categories_one'
+                          : 'ledgers.copy_categories_other',
+                        { count: categories.length },
+                      )
+                    : I18n.t('ledgers.starter_categories_caption')
+                }
+                value={copyCategories}
+                onChange={setCopyCategories}
+              />
+            </View>
           </>
         ) : null}
 
@@ -234,26 +253,50 @@ export function LedgerEditorScreen({
   );
 }
 
-function StartWithCard({
+/**
+ * One thing the new ledger can copy from the open one. The subtitle says what
+ * the choice gives: the copied count, or the starter set when off.
+ */
+function StartWithRow({
+  icon: Icon,
   title,
+  subtitle,
   value,
-  options,
   onChange,
-  caption,
 }: {
+  icon: LucideIcon;
   title: string;
-  value: StartWith;
-  options: { value: StartWith; label: string }[];
-  onChange: (value: StartWith) => void;
-  caption: string;
+  subtitle: string;
+  value: boolean;
+  onChange: (value: boolean) => void;
 }) {
+  const themeColors = useThemeColors();
+  const toggle = (next: boolean) => {
+    void triggerHaptic('selection');
+    onChange(next);
+  };
   return (
-    <View className="gap-3 rounded-3xl border border-border/30 bg-card p-4">
-      <View className="flex-row items-center gap-2">
-        <Text variant="bodyStrong">{title}</Text>
-        <InfoTooltipButton title={title} infoTooltip={caption} />
+    <Pressable
+      accessible={false}
+      onPress={() => toggle(!value)}
+      className="flex-row items-center gap-3 border-t border-border/30 px-4 py-3.5 active:opacity-80"
+    >
+      <View className="h-10 w-10 items-center justify-center rounded-2xl bg-primary/10">
+        <Icon size={20} color={themeColors.primary} />
       </View>
-      <SegmentedToggle value={value} options={options} onChange={onChange} />
-    </View>
+      <View className="flex-1">
+        <Text variant="bodyStrong">{title}</Text>
+        <Text variant="caption" tone="muted">
+          {subtitle}
+        </Text>
+      </View>
+      <Switch
+        accessibilityLabel={title}
+        accessibilityHint={subtitle}
+        value={value}
+        onValueChange={toggle}
+        trackColor={{ true: themeColors.primary }}
+      />
+    </Pressable>
   );
 }

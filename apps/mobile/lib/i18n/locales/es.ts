@@ -2804,14 +2804,13 @@ const es = {
     start_with: 'Empezar con',
     accounts: 'Cuentas',
     categories: 'Categorías',
-    copy_from: 'Copiar {{name}}',
-    starter_accounts: 'Cuentas iniciales',
-    starter_categories: 'Conjunto inicial',
-    copy_accounts_caption:
-      'Copia tus {{count}} cuentas de débito y crédito, con saldos que empiezan en cero.',
+    copy_from: 'Copiar de',
+    copy_accounts_one: '{{count}} cuenta, con saldo cero',
+    copy_accounts_other: '{{count}} cuentas, con saldo cero',
     starter_accounts_caption:
       'Efectivo, billetera digital, cuenta corriente, ahorros y una tarjeta de crédito.',
-    copy_categories_caption: 'Copia las {{count}} categorías y subcategorías.',
+    copy_categories_one: '{{count}} categoría',
+    copy_categories_other: '{{count}} categorías',
     starter_categories_caption: 'Una lista breve de categorías cotidianas.',
     create_footnote:
       'No se copia ningún movimiento. Puedes cambiar el nombre del libro cuando quieras.',

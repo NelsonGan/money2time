@@ -2806,13 +2806,12 @@ const ms = {
     start_with: 'Mula dengan',
     accounts: 'Akaun',
     categories: 'Kategori',
-    copy_from: 'Salin {{name}}',
-    starter_accounts: 'Akaun permulaan',
-    starter_categories: 'Set permulaan',
-    copy_accounts_caption:
-      'Menyalin {{count}} akaun debit dan kredit anda, dengan baki bermula dari sifar.',
+    copy_from: 'Salin daripada',
+    copy_accounts_one: '{{count}} akaun, baki bermula sifar',
+    copy_accounts_other: '{{count}} akaun, baki bermula sifar',
     starter_accounts_caption: 'Tunai, e-dompet, akaun semasa, simpanan dan kad kredit.',
-    copy_categories_caption: 'Menyalin kesemua {{count}} kategori dan subkategori.',
+    copy_categories_one: '{{count}} kategori',
+    copy_categories_other: '{{count}} kategori',
     starter_categories_caption: 'Senarai ringkas kategori harian.',
     create_footnote:
       'Tiada transaksi disalin. Anda boleh menamakan semula buku pada bila-bila masa.',

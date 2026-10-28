@@ -2826,13 +2826,12 @@ const fil = {
     start_with: 'Simulan sa',
     accounts: 'Mga Account',
     categories: 'Mga Kategorya',
-    copy_from: 'Kopyahin ang {{name}}',
-    starter_accounts: 'Mga panimulang account',
-    starter_categories: 'Panimulang set',
-    copy_accounts_caption:
-      'Kinokopya ang iyong {{count}} debit at credit na account, na nagsisimula sa zero ang balanse.',
+    copy_from: 'Kopyahin mula sa',
+    copy_accounts_one: '{{count}} account, zero ang balanse',
+    copy_accounts_other: '{{count}} na account, zero ang balanse',
     starter_accounts_caption: 'Cash, digital wallet, checking, savings at isang credit card.',
-    copy_categories_caption: 'Kinokopya ang lahat ng {{count}} kategorya at subkategorya.',
+    copy_categories_one: '{{count}} kategorya',
+    copy_categories_other: '{{count}} na kategorya',
     starter_categories_caption: 'Maikling listahan ng mga pang-araw-araw na kategorya.',
     create_footnote:
       'Walang transaksyong kinokopya. Puwede mong palitan ang pangalan ng ledger anumang oras.',

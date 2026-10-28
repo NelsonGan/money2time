@@ -2816,14 +2816,13 @@ const nl = {
     start_with: 'Beginnen met',
     accounts: 'Rekeningen',
     categories: 'Categorieën',
-    copy_from: '{{name}} kopiëren',
-    starter_accounts: 'Startrekeningen',
-    starter_categories: 'Startset',
-    copy_accounts_caption:
-      'Kopieert je {{count}} debet- en creditrekeningen, met saldi die op nul beginnen.',
+    copy_from: 'Kopiëren uit',
+    copy_accounts_one: '{{count}} rekening, saldo op nul',
+    copy_accounts_other: '{{count}} rekeningen, saldo op nul',
     starter_accounts_caption:
       'Contant, digitale portemonnee, betaalrekening, spaarrekening en een creditcard.',
-    copy_categories_caption: 'Kopieert alle {{count}} categorieën en subcategorieën.',
+    copy_categories_one: '{{count}} categorie',
+    copy_categories_other: '{{count}} categorieën',
     starter_categories_caption: 'Een korte lijst met alledaagse categorieën.',
     create_footnote:
       'Er worden geen transacties gekopieerd. Je kunt het boek altijd een andere naam geven.',
