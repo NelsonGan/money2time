@@ -9,7 +9,6 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "googleServicesFile": "./GoogleService-Info.plist",
-      "usesAppleSignIn": true,
       "icon": {
         "light": "./assets/app-icons/classic/icon-light.png",
         "dark": "./assets/app-icons/classic/icon-dark.png",
@@ -258,7 +257,6 @@
       ],
       "expo-notifications",
       "expo-secure-store",
-      "expo-apple-authentication",
       "expo-screen-orientation",
       "expo-background-task",
       [

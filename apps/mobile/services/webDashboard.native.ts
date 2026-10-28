@@ -412,11 +412,7 @@ async function buildTransfer(
   const version = dataVersion;
   const { randomBytes } = await requireNative();
   const data = webDashboardBudgetsOnly(
-    await buildBackupData({
-      includeAsset: includeDashboardAsset,
-      assetCache,
-      openLedgerOnly: true,
-    }),
+    await buildBackupData({ includeAsset: includeDashboardAsset, assetCache }),
   );
   await yieldToEventLoop();
   // A copy from before an app update that changed the backup's format is

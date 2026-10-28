@@ -12,7 +12,7 @@ import { account, category, prefs, source } from './helpers';
 
 jest.mock('~/lib/repositories/paymentAlertCapturesRepository', () => ({
   paymentAlertCapturesRepository: {
-    getStored: jest.fn(() => null),
+    getById: jest.fn(() => null),
     insert: jest.fn(() => true),
     update: jest.fn(),
   },
@@ -51,7 +51,7 @@ const deps = (): AlertProcessingDeps => ({
 });
 beforeEach(() => {
   jest.clearAllMocks();
-  jest.mocked(paymentAlertCapturesRepository.getStored).mockReturnValue(null);
+  jest.mocked(paymentAlertCapturesRepository.getById).mockReturnValue(null);
   jest.mocked(getNotificationScanHistoryGeneration).mockReturnValue(0);
 });
 it('queues a local amount for review without creating a transaction or using AI/quotas', async () => {

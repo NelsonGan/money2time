@@ -87,8 +87,6 @@ export type RootStackParamList = {
   SettingsLiveEarnings: undefined;
   /** Root-level alias so a pairing link from the system camera can reach it. */
   SettingsWebDashboard: { pair?: string } | undefined;
-  /** An invite link to a shared ledger (`money2time://join/<code>`). */
-  JoinLedger: { code: string };
   SettingsTimeDisplay: undefined;
   AddWageMonth: undefined;
   SettingsQuickEntry: undefined;

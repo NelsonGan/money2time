@@ -10,7 +10,6 @@ import {
   type ReducingBalanceLedger,
 } from '~/features/loans/lib/loanMath';
 import { getDb, getSQLite } from '~/lib/db/client';
-import { getActiveLedgerId, inActiveLedger } from '~/lib/db/ledgerScope';
 import { accountsTable, recurringRulesTable, transactionsTable } from '~/lib/db/schema';
 import type { Account, AccountBalance, LoanInterestModel, LoanRateChange } from '~/types';
 import { computeAccountBalance } from '~/utils/accountBalances';
@@ -60,7 +59,7 @@ class AccountsRepository {
     return db
       .select()
       .from(accountsTable)
-      .where(and(isNull(accountsTable.deletedAt), inActiveLedger(accountsTable)))
+      .where(isNull(accountsTable.deletedAt))
       .orderBy(accountsTable.sortOrder, accountsTable.name)
       .all()
       .map(toAccount);
@@ -71,13 +70,7 @@ class AccountsRepository {
     const row = db
       .select()
       .from(accountsTable)
-      .where(
-        and(
-          eq(accountsTable.id, id),
-          isNull(accountsTable.deletedAt),
-          inActiveLedger(accountsTable),
-        ),
-      )
+      .where(and(eq(accountsTable.id, id), isNull(accountsTable.deletedAt)))
       .get();
     return row ? toAccount(row) : null;
   }
@@ -89,7 +82,7 @@ class AccountsRepository {
     const maxSort = db
       .select({ maxSort: sql<number>`coalesce(max(${accountsTable.sortOrder}), -1)` })
       .from(accountsTable)
-      .where(and(isNull(accountsTable.deletedAt), inActiveLedger(accountsTable)))
+      .where(isNull(accountsTable.deletedAt))
       .get();
     const nextSortOrder = input.sortOrder ?? (maxSort?.maxSort ?? -1) + 1;
     // The rate changes are a domain array; the row holds them as JSON.
@@ -99,7 +92,6 @@ class AccountsRepository {
       .values({
         id,
         ...columns,
-        ledgerId: getActiveLedgerId(),
         loanLedgerAnchorDate: input.loanLedgerAnchorDate ?? null,
         loanRateChangesJson: serializeLoanRateChanges(loanRateChanges),
         sortOrder: nextSortOrder,
@@ -215,45 +207,40 @@ class AccountsRepository {
     const accounts = this.list();
     if (accounts.length === 0) return [];
 
-    // Totals for the open ledger's accounts only, so a small ledger stays fast
-    // beside a large one. Single round-trip instead of five GROUP BY queries:
-    // balances recompute on every transaction change, and the JS-bridge round
-    // trips dominate. `+type` keeps SQLite on the per-account indexes; with the
-    // type index it would read every row of that type in every ledger.
+    // Single round-trip instead of five separate GROUP BY queries. Each branch
+    // hits the partial (type, account) indexes; aggregating in one statement
+    // removes four JS-bridge round trips, which is what dominates here since
+    // balances recompute on every transaction change.
     const rows = getSQLite().getAllSync<{
       bucket: 'income' | 'expense' | 'transfer_in' | 'transfer_out' | 'adjustment';
       accountId: string | null;
       total: number | null;
-    }>(
-      `
-      WITH open_accounts(id) AS (SELECT value FROM json_each(?))
+    }>(`
       SELECT 'income' AS bucket, account_id AS accountId, SUM(COALESCE(account_amount, amount)) AS total
         FROM transactions
-        WHERE deleted_at IS NULL AND +type = 'income' AND account_id IN open_accounts
+        WHERE deleted_at IS NULL AND type = 'income' AND account_id IS NOT NULL
         GROUP BY account_id
       UNION ALL
       SELECT 'expense', account_id, SUM(COALESCE(account_amount, amount))
         FROM transactions
-        WHERE deleted_at IS NULL AND +type = 'expense' AND account_id IN open_accounts
+        WHERE deleted_at IS NULL AND type = 'expense' AND account_id IS NOT NULL
         GROUP BY account_id
       UNION ALL
       SELECT 'transfer_in', to_account_id, SUM(COALESCE(to_amount, amount))
         FROM transactions
-        WHERE deleted_at IS NULL AND +type = 'transfer' AND to_account_id IN open_accounts
+        WHERE deleted_at IS NULL AND type = 'transfer' AND to_account_id IS NOT NULL
         GROUP BY to_account_id
       UNION ALL
       SELECT 'transfer_out', from_account_id, SUM(amount)
         FROM transactions
-        WHERE deleted_at IS NULL AND +type = 'transfer' AND from_account_id IN open_accounts
+        WHERE deleted_at IS NULL AND type = 'transfer' AND from_account_id IS NOT NULL
         GROUP BY from_account_id
       UNION ALL
       SELECT 'adjustment', account_id, SUM(COALESCE(account_amount, amount))
         FROM transactions
-        WHERE deleted_at IS NULL AND +type = 'balance_adjustment' AND account_id IN open_accounts
+        WHERE deleted_at IS NULL AND type = 'balance_adjustment' AND account_id IS NOT NULL
         GROUP BY account_id
-    `,
-      [JSON.stringify(accounts.map((account) => account.id))],
-    );
+    `);
 
     const incomeMap = new Map<string, number>();
     const expenseMap = new Map<string, number>();
