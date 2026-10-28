@@ -951,7 +951,11 @@ builds, off in store builds until rollout.
 
 - **Settings > Data > Cloud Sync.** Signed out, the screen shows the mascot
   illustration and three sign-in buttons: Continue with Apple (iOS only),
-  Google and email (a 6-digit code, no password). Cloud Sync is Pro: for a
+  Google and email (a 6-digit code, no password). All three titles are the
+  same size: the Apple button is a custom one built to Apple's rules (black in
+  light mode, white in dark, the Apple logo, its title in the system font),
+  because Apple's own button sizes its title from its height and came out
+  larger than the other two. Cloud Sync is Pro: for a
   free user every one of them opens the paywall (source `cloud_sync`); the
   paywall's Free vs Pro table lists Cloud Sync, and Shared ledgers (free: Join, Pro: Share), while the flag is on. Signed in,
   it shows the last sync, Sync now, Sign out (data stays on the phone) and

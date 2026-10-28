@@ -2533,6 +2533,7 @@ const it = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Sync su tutti i telefoni',
+    continue_apple: 'Continua con Apple',
     continue_google: 'Continua con Google',
     continue_email: 'Continua con email',
     email_title: 'Accedi con email',

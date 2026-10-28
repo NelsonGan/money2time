@@ -2519,6 +2519,7 @@ const nb = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Synk på alle telefoner',
+    continue_apple: 'Fortsett med Apple',
     continue_google: 'Fortsett med Google',
     continue_email: 'Fortsett med e-post',
     email_title: 'Logg inn med e-post',

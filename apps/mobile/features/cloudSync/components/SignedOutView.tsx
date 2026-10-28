@@ -1,4 +1,3 @@
-import * as AppleAuthentication from 'expo-apple-authentication';
 import { Mail } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, StyleSheet, View } from 'react-native';
@@ -14,6 +13,7 @@ import { withColorAlpha } from '~/utils/color';
 import { useCloudSync } from '../CloudSyncContext';
 import { errorMessage, kindMessage } from '../lib/messages';
 import { NATIVE_PROVIDERS, type NativeProvider } from '../services/nativeSignIn';
+import { AppleLogoIcon } from './AppleLogoIcon';
 import { CLOUD_SYNC_ART } from './art';
 import { EmailSignInForm } from './EmailSignInForm';
 import { GoogleGIcon } from './GoogleGIcon';
@@ -87,19 +87,13 @@ export function SignedOutView({
 
       <View className={hideHero ? 'mt-2 gap-3' : 'mt-10 gap-3'}>
         {available.apple ? (
-          // Apple's own button, as its guidelines ask.
-          <AppleAuthentication.AppleAuthenticationButton
-            buttonType={AppleAuthentication.AppleAuthenticationButtonType.CONTINUE}
-            buttonStyle={
-              resolvedTheme === 'dark'
-                ? AppleAuthentication.AppleAuthenticationButtonStyle.WHITE
-                : AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
-            }
-            cornerRadius={18}
-            style={[styles.button, busy !== null && styles.dimmed]}
-            onPress={() => {
-              if (!busy) void signIn('apple');
-            }}
+          <ProviderButton
+            apple={APPLE_BUTTON[resolvedTheme]}
+            label={I18n.t('cloud_sync.continue_apple')}
+            icon={<AppleLogoIcon color={APPLE_BUTTON[resolvedTheme].ink} />}
+            loading={busy === 'apple'}
+            disabled={busy !== null}
+            onPress={() => void signIn('apple')}
           />
         ) : null}
         {available.google ? (
@@ -146,20 +140,36 @@ function Hero() {
   );
 }
 
+/**
+ * The Continue with Apple button's colours. It is a custom button built to
+ * Apple's rules (Human Interface Guidelines > Sign in with Apple): black in
+ * light mode and white in dark, the logo and title in the other colour, the
+ * title in the system font. Apple's own button sizes its title from the
+ * button's height, larger than the other options' titles; this one matches.
+ */
+const APPLE_BUTTON = {
+  light: { fill: '#000000', ink: '#FFFFFF' },
+  dark: { fill: '#FFFFFF', ink: '#000000' },
+} as const;
+
+/** One sign-in option, outlined, or filled when `apple` gives its colours. */
 function ProviderButton({
   label,
   icon,
   onPress,
   loading,
   disabled,
+  apple,
 }: {
   label: string;
   icon: React.ReactNode;
   onPress: () => void;
   loading?: boolean;
   disabled?: boolean;
+  apple?: { fill: string; ink: string };
 }) {
   const colors = useThemeColors();
+  const foreground = apple?.ink ?? colors.text;
   return (
     <Pressable
       accessibilityRole="button"
@@ -173,12 +183,19 @@ function ProviderButton({
       style={[
         styles.button,
         styles.outline,
-        { backgroundColor: colors.card, borderColor: withColorAlpha(colors.text, 0.14) },
+        apple
+          ? { backgroundColor: apple.fill, borderColor: apple.fill }
+          : { backgroundColor: colors.card, borderColor: withColorAlpha(colors.text, 0.14) },
         disabled && styles.dimmed,
       ]}
     >
-      {loading ? <ActivityIndicator color={colors.text} /> : icon}
-      <Text variant="bodyStrong">{label}</Text>
+      {loading ? <ActivityIndicator color={foreground} /> : icon}
+      <Text
+        variant="bodyStrong"
+        style={apple ? { color: foreground, fontFamily: 'System' } : undefined}
+      >
+        {label}
+      </Text>
     </Pressable>
   );
 }
