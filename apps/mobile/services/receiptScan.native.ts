@@ -37,7 +37,9 @@ export async function scanReceipt(args: ScanReceiptArgs): Promise<ReceiptScanRes
   if (!apiBaseUrl())
     throw new ReceiptScanError('not_available', 'Receipt scanning is not configured.');
   const image = await readReceiptBase64(args.receiptRelPath);
-  if (!image) throw new ReceiptScanError('server', 'Could not read the captured receipt.');
+  // Kept apart from 'server' so a local file problem is never mistaken for
+  // a Worker rejection in the scan failure analytics.
+  if (!image) throw new ReceiptScanError('unreadable', 'Could not read the captured receipt.');
   if (image.base64.length > MAX_IMAGE_BASE64_BYTES)
     throw new ReceiptScanError('too_large', 'The receipt photo is too large to scan.');
   const body = await postScan({

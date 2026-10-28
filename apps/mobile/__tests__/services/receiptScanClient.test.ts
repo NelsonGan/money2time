@@ -113,7 +113,8 @@ describe('native receipt image client compatibility', () => {
 
   it('rejects a missing local image before uploading', async () => {
     jest.mocked(readReceiptBase64).mockResolvedValue(null);
-    await expect(scanReceipt(args)).rejects.toMatchObject({ code: 'server' });
+    // Not 'server': a local read failure must not look like a Worker rejection.
+    await expect(scanReceipt(args)).rejects.toMatchObject({ code: 'unreadable' });
     expect(fetchMock).not.toHaveBeenCalled();
   });
 

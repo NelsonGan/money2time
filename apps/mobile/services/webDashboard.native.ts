@@ -262,7 +262,7 @@ async function writeSnapshots() {
           idempotent: true,
         });
         entry.snapshot.text ??= writeIndex(entry.snapshot.hashes);
-        snapshotFile(roomId).write(`${entry.id}\n${entry.snapshot.text}`);
+        await snapshotFile(roomId).write(`${entry.id}\n${entry.snapshot.text}`);
       } catch {
         // Only a quicker next visit is lost: it starts with the whole export.
       }
