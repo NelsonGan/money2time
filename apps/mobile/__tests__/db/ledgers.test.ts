@@ -11,7 +11,7 @@ import {
   setActiveLedgerId,
   withLedgerScope,
 } from '~/lib/db/ledgerScope';
-import migration073Ledgers from '~/lib/db/migrations/073_ledgers';
+import migration075LedgersAndCloudSync from '~/lib/db/migrations/075_ledgers_and_cloud_sync';
 import { applyMigrations } from '~/lib/db/migrations/runner';
 import type { DbMigration } from '~/lib/db/migrations/types';
 import { accountsRepository } from '~/lib/repositories/accountsRepository';
@@ -98,7 +98,7 @@ function seedPreLedgerData(harness: ReturnType<typeof openDatabase>) {
   `);
 }
 
-describe('migration 073 (ledgers)', () => {
+describe('migration 075 (ledgers)', () => {
   let harness: ReturnType<typeof openDatabase>;
   afterEach(() => harness.connection.close());
 
@@ -108,7 +108,9 @@ describe('migration 073 (ledgers)', () => {
     seedPreLedgerData(harness);
     const before = harness.all('SELECT * FROM transactions');
 
-    expect(applyMigrations(harness.db, [migration073Ledgers]).appliedVersions).toEqual([73]);
+    expect(applyMigrations(harness.db, [migration075LedgersAndCloudSync]).appliedVersions).toEqual([
+      75,
+    ]);
 
     const after = harness.all('SELECT * FROM transactions');
     expect(after).toEqual(before.map((row) => ({ ...row, ledger_id: DEFAULT_LEDGER_ID })));
@@ -124,7 +126,7 @@ describe('migration 073 (ledgers)', () => {
   it('can be replayed', () => {
     harness = openDatabase();
     applyMigrations(harness.db, loadMigrations());
-    expect(() => migration073Ledgers.up(harness.db)).not.toThrow();
+    expect(() => migration075LedgersAndCloudSync.up(harness.db)).not.toThrow();
     expect(harness.all('SELECT id FROM ledgers')).toEqual([{ id: 'default' }]);
   });
 

@@ -267,7 +267,7 @@ Other contexts:
 
 ### Database
 
-SQLite via `expo-sqlite` + Drizzle ORM. Schema is in `lib/db/schema.ts`. The DB client is initialized in `lib/db/client.ts` (database file: `money2time.db`, migrations in `lib/db/migrations/` numbered `001`–`073`, with no `072` on this branch: see [Ledgers](#ledgers)). `lib/db/normalizeCurrencies.ts` collapses legacy single-currency rows on restore/upgrade.
+SQLite via `expo-sqlite` + Drizzle ORM. Schema is in `lib/db/schema.ts`. The DB client is initialized in `lib/db/client.ts` (database file: `money2time.db`, migrations in `lib/db/migrations/` numbered `001`–`075`, with no `072`–`074`: ledgers, Cloud Sync and shared ledgers are all in `075_ledgers_and_cloud_sync`, see [Ledgers](#ledgers)). `lib/db/normalizeCurrencies.ts` collapses legacy single-currency rows on restore/upgrade.
 
 **Migration runner contract** (`lib/db/migrations/runner.ts`, wired up by `index.ts`'s `require.context` loader):
 
@@ -582,7 +582,7 @@ app side lives in `features/ledgers/`.
 ### How it works
 
 One database, with a `ledger_id` column on each ledger's root tables
-(migration `073_ledgers`). A separate SQLite file per ledger was considered and
+(migration `075_ledgers_and_cloud_sync`). A separate SQLite file per ledger was considered and
 rejected. Cloud Sync replicates one database through triggers into
 `sync_rows`, so a column needs no change there. A file per ledger would need
 its own sync engine and replica.
@@ -655,9 +655,12 @@ its own sync engine and replica.
   - `ledgers` belongs in `SYNC_TABLES` and in the backup-table parity list,
     and `active_ledger_id` in `DEVICE_LOCAL_SETTINGS_COLUMNS`.
   - The per-ledger budget index above is a natural key to resolve.
-  - Cloud Sync's branch uses migration `072`, which is why this one is `073`.
-    Whichever of the two merges second must renumber after the first, or
-    installs that ran the higher number skip the lower one.
+  - Ledgers first shipped as migration `073` (build 493), before Cloud Sync's
+    `072` and `074` (build 494). Phones on build 493 skipped `072`, and `074`
+    then failed on the missing sync tables. All three were merged into `075`,
+    which brings every one of those phones to the same schema. A migration
+    must be numbered above every migration already in a store build, or
+    installs that ran the higher number skip it.
 
 ## Notification review
 
@@ -1029,7 +1032,7 @@ app tables ◀──apply──── diff of revisions ◀──── replica.
   `sync_state`, `shapeAdditions`).
 - **Capture.** While Cloud Sync is on, `AFTER INSERT/UPDATE/DELETE` triggers on
   each synced table record `(table, id, seq)` in `sync_outbox` (migration
-  `072_cloud_sync`, which also holds `sync_row_meta`, `sync_media_pending`,
+  `075_ledgers_and_cloud_sync`, which also holds `sync_row_meta`, `sync_media_pending`,
   `sync_media_missing` and `sync_state`). The triggers are created at runtime,
   dropped on sign-out and when the flag is off, and stay quiet while pulled
   rows are written (`sync_state.applying = '1'`).
@@ -1202,7 +1205,7 @@ The app side is `features/sharedLedgers/` (screens) and
   items, album joins, budget lines) through their parent, `ledgers` by its
   id. Settings, wage months and exchange rates are always personal.
   `sync_row_meta.channel` records where a row last synced, and the image
-  queues are per channel too (migration 074).
+  queues are per channel too (migration 075).
 - **A pulled row is written only if it belongs to that channel**, and so does
   the row it would replace. A shared database (which members write to) can
   therefore never reach the owner's settings or another ledger, and the
