@@ -86,6 +86,8 @@ import {
   PeriodBudgetEditorScreen,
 } from '~/features/budget/screens';
 import { CalendarScreen } from '~/features/calendar/screens';
+import { CloudSyncProvider } from '~/features/cloudSync/CloudSyncContext';
+import { CloudSyncPromptHost } from '~/features/cloudSync/components/CloudSyncPromptHost';
 import { AddGoalButton } from '~/features/goals/components/AddGoalButton';
 import { GoalCelebrationOverlay } from '~/features/goals/components/GoalCelebrationOverlay';
 import {
@@ -101,6 +103,7 @@ import {
   setPendingItemIconPicker,
 } from '~/features/items/lib/itemIconPickerBridge';
 import { ItemEditorScreen, ItemsScreen } from '~/features/items/screens';
+import { LedgerProGuard } from '~/features/ledgers/components/LedgerProGuard';
 import { LoanPayoffOverlay } from '~/features/loans/components';
 import { loanRepaymentReporting } from '~/features/loans/lib/loanMath';
 import { FeatureAnnouncementModal } from '~/features/news/components/FeatureAnnouncementModal';
@@ -148,6 +151,7 @@ import {
   WageCalculatorFlowScreen,
 } from '~/features/settings/screens';
 import { WebDashboardScreen } from '~/features/settings/screens/WebDashboardScreen';
+import { JoinLedgerScreen } from '~/features/sharedLedgers/screens/JoinLedgerScreen';
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import { QuickAddWarmup } from '~/features/transactions/components/QuickAddWarmup';
 import { ReceiptCameraSheet } from '~/features/transactions/components/ReceiptCameraSheet';
@@ -362,11 +366,17 @@ function MountedTab({
   name,
   active,
   shouldPreload = false,
+  resetKey,
   children,
 }: {
   name: MainTab;
   active: boolean;
   shouldPreload?: boolean;
+  /**
+   * A change remounts the page with fresh state. Pages pass the open ledger, so
+   * a switch drops the old ledger's selections, scroll and filters.
+   */
+  resetKey?: string;
   children: React.ReactNode;
 }) {
   // Each tab renders nothing until it either becomes active or is flagged
@@ -376,9 +386,27 @@ function MountedTab({
   // mounts home first, then progressively flips `shouldPreload` per tab via
   // runAfterInteractions, paying each mount cost in the background instead of
   // on the user's first tap. Once mounted, the tab stays mounted.
-  const hasBeenActiveRef = useRef(active);
-  if (active) hasBeenActiveRef.current = true;
-  const shouldMount = hasBeenActiveRef.current || shouldPreload;
+  //
+  // After a ledger switch (`resetKey`) a hidden page waits to be shown before
+  // it mounts again, instead of every page remounting in the same frame as the
+  // switch. Kept as state adjusted during render (React's pattern for state
+  // derived from changing props), so a render React throws away leaves
+  // nothing behind.
+  const [mountState, setMountState] = useState({
+    resetKey,
+    hasBeenActive: active,
+    waitForShow: false,
+  });
+  let nextMountState = mountState;
+  if (nextMountState.resetKey !== resetKey) {
+    nextMountState = { resetKey, hasBeenActive: active, waitForShow: !active };
+  }
+  if (active && (!nextMountState.hasBeenActive || nextMountState.waitForShow)) {
+    nextMountState = { ...nextMountState, hasBeenActive: true, waitForShow: false };
+  }
+  if (nextMountState !== mountState) setMountState(nextMountState);
+  const shouldMount =
+    nextMountState.hasBeenActive || (shouldPreload && !nextMountState.waitForShow);
   useEffect(() => {
     if (shouldMount) perfMark(`tab_${name}_mounted`);
   }, [name, shouldMount]);
@@ -402,7 +430,9 @@ function MountedTab({
     >
       {shouldMount ? (
         <ContentFrameProvider width={column.width} height={frame.height}>
-          <TransactionsWhileVisible visible={active}>{children}</TransactionsWhileVisible>
+          <TransactionsWhileVisible key={resetKey} visible={active}>
+            {children}
+          </TransactionsWhileVisible>
         </ContentFrameProvider>
       ) : null}
     </View>
@@ -1234,6 +1264,7 @@ function MainShellScreen({
         {hostsTab('accounts') ? (
           <MountedTab
             name="accounts"
+            resetKey={settings.activeLedgerId}
             active={activeTab === 'accounts'}
             shouldPreload={preloadedTabs.has('accounts')}
           >
@@ -1252,6 +1283,7 @@ function MainShellScreen({
         {hostsTab('calendar') ? (
           <MountedTab
             name="calendar"
+            resetKey={settings.activeLedgerId}
             active={activeTab === 'calendar'}
             shouldPreload={preloadedTabs.has('calendar')}
           >
@@ -1268,6 +1300,7 @@ function MainShellScreen({
         {hostsTab('insights') ? (
           <MountedTab
             name="insights"
+            resetKey={settings.activeLedgerId}
             active={activeTab === 'insights'}
             shouldPreload={preloadedTabs.has('insights')}
           >
@@ -1287,6 +1320,7 @@ function MainShellScreen({
         {hostsTab('albums') ? (
           <MountedTab
             name="albums"
+            resetKey={settings.activeLedgerId}
             active={activeTab === 'albums'}
             shouldPreload={preloadedTabs.has('albums')}
           >
@@ -1325,6 +1359,7 @@ function MainShellScreen({
         {hostsTab('goals') ? (
           <MountedTab
             name="goals"
+            resetKey={settings.activeLedgerId}
             active={activeTab === 'goals'}
             shouldPreload={preloadedTabs.has('goals')}
           >
@@ -1334,6 +1369,7 @@ function MainShellScreen({
         {hostsTab('recurring') ? (
           <MountedTab
             name="recurring"
+            resetKey={settings.activeLedgerId}
             active={activeTab === 'recurring'}
             shouldPreload={preloadedTabs.has('recurring')}
           >
@@ -1343,6 +1379,7 @@ function MainShellScreen({
         {hostsTab('reimbursements') ? (
           <MountedTab
             name="reimbursements"
+            resetKey={settings.activeLedgerId}
             active={activeTab === 'reimbursements'}
             shouldPreload={preloadedTabs.has('reimbursements')}
           >
@@ -1352,6 +1389,7 @@ function MainShellScreen({
         {hostsTab('receipts') ? (
           <MountedTab
             name="receipts"
+            resetKey={settings.activeLedgerId}
             active={activeTab === 'receipts'}
             shouldPreload={preloadedTabs.has('receipts')}
           >
@@ -1364,6 +1402,7 @@ function MainShellScreen({
         {hostsTab('settleUp') ? (
           <MountedTab
             name="settleUp"
+            resetKey={settings.activeLedgerId}
             active={activeTab === 'settleUp'}
             shouldPreload={preloadedTabs.has('settleUp')}
           >
@@ -2424,6 +2463,17 @@ function SettingsWebDashboardRouteScreen({
   );
 }
 
+/** A shared-ledger invite link (`money2time://join/<code>`). */
+function JoinLedgerRouteScreen({ navigation, route }: RootStackRouteProps<'JoinLedger'>) {
+  return (
+    <JoinLedgerScreen
+      code={route.params.code}
+      onClose={() => navigation.goBack()}
+      onJoined={() => navigation.goBack()}
+    />
+  );
+}
+
 function SettingsTimeDisplayRouteScreen({
   navigation,
 }: RootStackRouteProps<'SettingsTimeDisplay'>) {
@@ -2943,6 +2993,11 @@ function AppContent() {
     void trackEvent(AnalyticsEvents.CLOUD_BACKUP_PROMPT_DISMISSED);
   }, []);
 
+  const handleTurnOnCloudSync = useCallback(() => {
+    requestOpenTab('settings');
+    requestOpenSettingsScreen('CloudSync');
+  }, []);
+
   const handleEnableCloudBackup = useCallback(() => {
     setCloudBackupPromptVisible(false);
     cloudBackupShowingRef.current = false;
@@ -3062,6 +3117,7 @@ function AppContent() {
               name="SettingsWebDashboard"
               component={SettingsWebDashboardRouteScreen}
             />
+            <RootStack.Screen name="JoinLedger" component={JoinLedgerRouteScreen} />
             <RootStack.Screen name="AddWageMonth" component={AddWageMonthRouteScreen} />
             <RootStack.Screen name="SettingsQuickEntry" component={SettingsQuickEntryRouteScreen} />
             <RootStack.Screen
@@ -3187,7 +3243,21 @@ function AppContent() {
         onEnable={handleEnableCloudBackup}
         onDismiss={handleDismissCloudBackupPrompt}
       />
+      <CloudSyncPromptHost
+        allowed={!biometricLocked && rootPromptsAllowed}
+        onTurnOn={handleTurnOnCloudSync}
+      />
       <ReviewPrePromptSheet />
+      <LedgerProGuard
+        canSwitch={rootPromptsAllowed}
+        suppressed={
+          biometricLocked ||
+          !rootPromptsAllowed ||
+          featureAnnouncementVisible ||
+          cloudBackupPromptVisible
+        }
+        onRenewPro={() => navigationRef.navigate('ProPaywall', { source: 'ledgers_pro_ended' })}
+      />
       <GoalCelebrationOverlay />
       <LoanPayoffOverlay />
       <BiometricLockGate onLockStateChange={setBiometricLocked} />
@@ -3228,11 +3298,13 @@ export default function App() {
           <AppErrorBoundary>
             <AppProvider>
               <ProProvider>
-                <ReceiptScanProvider>
-                  <ThemeGate>
-                    <AppContent />
-                  </ThemeGate>
-                </ReceiptScanProvider>
+                <CloudSyncProvider>
+                  <ReceiptScanProvider>
+                    <ThemeGate>
+                      <AppContent />
+                    </ThemeGate>
+                  </ReceiptScanProvider>
+                </CloudSyncProvider>
               </ProProvider>
             </AppProvider>
           </AppErrorBoundary>

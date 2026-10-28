@@ -1,6 +1,7 @@
 import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
 
 import { getDb, getSQLite } from '~/lib/db/client';
+import { getActiveLedgerId, inActiveLedger } from '~/lib/db/ledgerScope';
 import { albumsTable, albumTransactionsTable } from '~/lib/db/schema';
 import type { Album } from '~/types';
 import { newId, nowIso } from '~/utils/id';
@@ -28,7 +29,7 @@ class AlbumsRepository {
     return db
       .select()
       .from(albumsTable)
-      .where(isNull(albumsTable.deletedAt))
+      .where(and(isNull(albumsTable.deletedAt), inActiveLedger(albumsTable)))
       .orderBy(albumsTable.sortOrder, albumsTable.name)
       .all()
       .map(toAlbum);
@@ -39,7 +40,9 @@ class AlbumsRepository {
     const row = db
       .select()
       .from(albumsTable)
-      .where(and(eq(albumsTable.id, id), isNull(albumsTable.deletedAt)))
+      .where(
+        and(eq(albumsTable.id, id), isNull(albumsTable.deletedAt), inActiveLedger(albumsTable)),
+      )
       .get();
     return row ? toAlbum(row) : null;
   }
@@ -53,13 +56,14 @@ class AlbumsRepository {
     const minSort = db
       .select({ minSort: sql<number>`coalesce(min(${albumsTable.sortOrder}), 0)` })
       .from(albumsTable)
-      .where(isNull(albumsTable.deletedAt))
+      .where(and(isNull(albumsTable.deletedAt), inActiveLedger(albumsTable)))
       .get();
     const nextSortOrder = input.sortOrder ?? (minSort?.minSort ?? 0) - 1;
 
     db.insert(albumsTable)
       .values({
         id,
+        ledgerId: getActiveLedgerId(),
         name: input.name,
         coverPhotoUri: input.coverPhotoUri ?? null,
         startDate: input.startDate ?? null,
@@ -116,7 +120,13 @@ class AlbumsRepository {
     const now = nowIso();
     db.update(albumsTable)
       .set({ isActive: false, updatedAt: now })
-      .where(and(eq(albumsTable.isActive, true), isNull(albumsTable.deletedAt)))
+      .where(
+        and(
+          eq(albumsTable.isActive, true),
+          isNull(albumsTable.deletedAt),
+          inActiveLedger(albumsTable),
+        ),
+      )
       .run();
     if (id) {
       db.update(albumsTable)
@@ -131,7 +141,13 @@ class AlbumsRepository {
     const row = db
       .select({ id: albumsTable.id })
       .from(albumsTable)
-      .where(and(eq(albumsTable.isActive, true), isNull(albumsTable.deletedAt)))
+      .where(
+        and(
+          eq(albumsTable.isActive, true),
+          isNull(albumsTable.deletedAt),
+          inActiveLedger(albumsTable),
+        ),
+      )
       .get();
     return row?.id ?? null;
   }
@@ -177,7 +193,9 @@ class AlbumsRepository {
       .getAllSync<{ albumId: string; transactionId: string }>(
         `SELECT album_id AS albumId, transaction_id AS transactionId
        FROM album_transactions
-       WHERE deleted_at IS NULL`,
+       WHERE deleted_at IS NULL
+         AND album_id IN (SELECT id FROM albums WHERE ledger_id = ?)`,
+        [getActiveLedgerId()],
       )
       .forEach((row) => {
         const ids = byAlbum.get(row.albumId);

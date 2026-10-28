@@ -10,6 +10,7 @@ import { newAppUserId, nowIso } from '~/utils/id';
 
 import { backfillFirstAppOpen } from './backfillFirstAppOpen';
 import { busyWaitSync } from './busyWaitSync';
+import { DEFAULT_LEDGER_ID, setActiveLedgerId } from './ledgerScope';
 import { type MigrationRunResult, runMigrations } from './migrations';
 import { settingsTable } from './schema';
 
@@ -185,10 +186,33 @@ export interface DatabaseInitResult extends MigrationRunResult {
   isNewInstall: boolean;
 }
 
+/**
+ * Point the repositories at the ledger stored as open. A stored ledger that no
+ * longer exists (deleted on this phone, or missing after a restore) falls back
+ * to the default ledger, and the fallback is stored.
+ */
+function openStoredLedger(sqliteDb: SQLiteDatabase): void {
+  const row = sqliteDb.getFirstSync<{ id: string | null }>(
+    `SELECT l.id AS id FROM settings s
+       JOIN ledgers l ON l.id = s.active_ledger_id AND l.deleted_at IS NULL
+     WHERE s.id = 'primary'`,
+  );
+  const ledgerId = row?.id ?? DEFAULT_LEDGER_ID;
+  if (ledgerId === DEFAULT_LEDGER_ID) {
+    sqliteDb.runSync(
+      "UPDATE settings SET active_ledger_id = NULL WHERE id = 'primary' AND active_ledger_id IS NOT NULL",
+    );
+  }
+  setActiveLedgerId(ledgerId);
+}
+
 export function initializeDatabase(): DatabaseInitResult {
   const sqliteDb = getSQLite();
   const result = runMigrations(sqliteDb);
   const isNewInstall = ensureCoreData();
   backfillFirstAppOpen(sqliteDb);
+  // A database newer than this build has the ledger tables too: migrations
+  // only ever add.
+  openStoredLedger(sqliteDb);
   return { ...result, isNewInstall };
 }

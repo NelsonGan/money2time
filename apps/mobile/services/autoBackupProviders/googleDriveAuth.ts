@@ -7,17 +7,22 @@ const SCOPES = ['https://www.googleapis.com/auth/drive.file'];
 const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_OAUTH_WEB_CLIENT_ID ?? '';
 const IOS_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_OAUTH_IOS_CLIENT_ID ?? '';
 
-let configured = false;
+/** The scopes the SDK is configured with now, or null before the first call. */
+let configuredFor: 'drive' | 'sign_in' | null = null;
 
-function configureOnce() {
-  if (configured) return;
+/**
+ * Configures the Google SDK, with the Drive scope by default. Cloud Sync
+ * sign-in asks for `sign_in` (no Drive scope, so no Drive consent screen).
+ */
+function configureOnce(purpose: 'drive' | 'sign_in' = 'drive') {
+  if (configuredFor === purpose) return;
   GoogleSignin.configure({
-    scopes: SCOPES,
+    ...(purpose === 'drive' ? { scopes: SCOPES } : {}),
     webClientId: WEB_CLIENT_ID || undefined,
     iosClientId: IOS_CLIENT_ID || undefined,
     offlineAccess: false,
   });
-  configured = true;
+  configuredFor = purpose;
 }
 
 export function isGoogleDriveConfigured(): boolean {
@@ -141,5 +146,55 @@ export async function getGoogleAccessToken(): Promise<string | null> {
     } catch {
       return null;
     }
+  }
+}
+
+export type GoogleIdTokenResult =
+  | { ok: true; idToken: string }
+  | { ok: false; reason: 'cancelled' | 'unavailable' | 'error'; message?: string };
+
+/**
+ * A fresh Google ID token for Cloud Sync sign-in. The Google SDK holds one
+ * signed-in account, shared with Drive backup:
+ * - Already signed in for Drive: restore that session and use its ID token.
+ * - Otherwise: sign in once without the Drive scope (no Drive consent screen),
+ *   take the token, and sign out again so Drive backup still asks for its own
+ *   access when the user turns it on.
+ */
+export async function getGoogleIdToken(): Promise<GoogleIdTokenResult> {
+  if (!WEB_CLIENT_ID) return { ok: false, reason: 'unavailable', message: 'not configured' };
+  configureOnce();
+  const hadDriveAccount = GoogleSignin.hasPreviousSignIn();
+  if (await ensureGoogleSession({ force: true })) {
+    try {
+      const tokens = await GoogleSignin.getTokens();
+      if (tokens.idToken) return { ok: true, idToken: tokens.idToken };
+    } catch {
+      // Fall through to an interactive sign-in.
+    }
+  }
+  // A Drive account is remembered but could not be restored (offline, token
+  // refresh): stop here rather than sign it out below and disconnect backups.
+  if (hadDriveAccount) {
+    return { ok: false, reason: 'error', message: 'google session unavailable' };
+  }
+  configureOnce('sign_in');
+  try {
+    await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+    const result = await GoogleSignin.signIn();
+    if (result.type !== 'success') return { ok: false, reason: 'cancelled' };
+    const idToken = result.data.idToken;
+    if (!idToken) return { ok: false, reason: 'error', message: 'no id token' };
+    return { ok: true, idToken };
+  } catch (e) {
+    const code = (e as { code?: string })?.code;
+    if (code === statusCodes.SIGN_IN_CANCELLED) return { ok: false, reason: 'cancelled' };
+    if (code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+      return { ok: false, reason: 'unavailable', message: 'Google Play Services unavailable' };
+    }
+    return { ok: false, reason: 'error', message: e instanceof Error ? e.message : String(e) };
+  } finally {
+    await GoogleSignin.signOut().catch(() => undefined);
+    restorePromise = null;
   }
 }

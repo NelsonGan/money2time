@@ -12,6 +12,7 @@ import { GestureDetector } from 'react-native-gesture-handler';
 import { useAnimatedRef } from 'react-native-reanimated';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
+import { useContentFrame } from '~/components/layout/ContentFrame';
 import {
   useBottomNavContentInset,
   useBottomNavScrollReporter,
@@ -34,11 +35,13 @@ import {
   type ReorderUpdate,
   reorderUpdatesForDrag,
 } from '~/features/transactions/lib/reorderTransactionDate';
+import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { subscribeHighlightTransaction } from '~/services/transactionsNavigation';
 import type { TransactionWithRelations, UserSettings } from '~/types';
 import { cn } from '~/utils';
+import { readableColumnPadding } from '~/utils/adaptiveLayout';
 import { currencySymbolForCode } from '~/utils/currency';
 import { formatDayHeaderParts } from '~/utils/dayHeader';
 import { dayKeyFromIsoLocal, formatAmount, formatHours } from '~/utils/formatters';
@@ -311,7 +314,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
   emptyMessage,
   listHeaderComponent,
   contentPaddingBottom = LIST_BOTTOM_PADDING,
-  contentPaddingHorizontal = 18,
+  contentPaddingHorizontal: basePaddingHorizontal = 18,
   contentPaddingTop = 4,
   listKey,
   disableItemAnimations = false,
@@ -601,9 +604,25 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
   const spacerEnabled = fillLastSectionToViewport && groupByDate;
   const hasTrailingSpacer = spacerEnabled && rows.length > 0;
   const [listViewportHeight, setListViewportHeight] = useState(0);
-  const handleListLayout = useCallback((event: LayoutChangeEvent) => {
-    setListViewportHeight(event.nativeEvent.layout.height);
-  }, []);
+  // On a tablet the rows keep to a readable column in the middle of a wide
+  // list instead of stretching edge to edge. The first frame assumes the list
+  // spans the content frame, as it does on Home, so it does not jump.
+  const { isTablet, panes } = useDeviceLayout();
+  const { width: frameWidth } = useContentFrame();
+  const [listWidth, setListWidth] = useState(frameWidth);
+  const contentPaddingHorizontal =
+    isTablet && !panes
+      ? readableColumnPadding(listWidth, basePaddingHorizontal)
+      : basePaddingHorizontal;
+  const handleListLayout = useCallback(
+    (event: LayoutChangeEvent) => {
+      const { width, height } = event.nativeEvent.layout;
+      // Phones never use the width: no extra render at mount.
+      if (isTablet) setListWidth(width);
+      if (spacerEnabled) setListViewportHeight(height);
+    },
+    [isTablet, spacerEnabled],
+  );
 
   const lastDayKey = useMemo(() => {
     if (!hasTrailingSpacer) return null;
@@ -938,7 +957,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
       nestedScrollEnabled
       keyboardShouldPersistTaps="always"
       contentContainerStyle={contentContainerStyle}
-      onLayout={spacerEnabled ? handleListLayout : undefined}
+      onLayout={handleListLayout}
       onContentSizeChange={reorder.handleContentSizeChange}
       {...navScrollProps}
     >
@@ -963,7 +982,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
       nestedScrollEnabled
       keyboardShouldPersistTaps="always"
       contentContainerStyle={contentContainerStyle}
-      onLayout={spacerEnabled ? handleListLayout : undefined}
+      onLayout={handleListLayout}
       onContentSizeChange={reorder.handleContentSizeChange}
       renderItem={renderListItem}
       ListHeaderComponent={listHeader}

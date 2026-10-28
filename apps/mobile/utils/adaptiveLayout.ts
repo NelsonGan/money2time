@@ -108,3 +108,12 @@ export function readableColumn(available: number, isTwoPane: boolean) {
   const width = isTwoPane ? Math.min(available, READABLE_COLUMN_MAX_WIDTH) : available;
   return { width, margin: (available - width) / 2 };
 }
+
+/**
+ * Side padding that keeps a list's rows in a readable column of at most
+ * `READABLE_COLUMN_MAX_WIDTH` (plus `minPadding` each side) on a wide screen,
+ * and `minPadding` when the list is narrower than that.
+ */
+export function readableColumnPadding(listWidth: number, minPadding: number): number {
+  return Math.max(minPadding, (listWidth - READABLE_COLUMN_MAX_WIDTH) / 2);
+}

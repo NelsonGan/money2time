@@ -1,4 +1,5 @@
 import { DEFAULT_APP_ICON_ID, isAppIconId } from '~/constants/appIcons';
+import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
 import type {
   AccountGroupRow,
   AccountRow,
@@ -9,6 +10,7 @@ import type {
   CategoryRow,
   ExchangeRateRow,
   ItemRow,
+  LedgerRow,
   MonthlyBudgetCategoryRow,
   MonthlyBudgetRow,
   MonthlyWageSettingsRow,
@@ -34,6 +36,7 @@ import type {
   ExchangeRateSource,
   IconStyle,
   Item,
+  Ledger,
   LoanRateChange,
   MonthlyWageSettings,
   PaymentAlertCapture,
@@ -639,6 +642,7 @@ export function toSettings(row: SettingsRow): UserSettings {
     showTransactionAccount: row.showTransactionAccount ?? true,
     showAccountPickerBalances: row.showAccountPickerBalances ?? true,
     navTabsJson: row.navTabsJson ?? null,
+    activeLedgerId: row.activeLedgerId || DEFAULT_LEDGER_ID,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,
@@ -743,6 +747,20 @@ export function toPaymentAlertCapture(row: AutoLogCaptureRow): PaymentAlertCaptu
     transactionId: row.transactionId ?? null,
     duplicateOf: row.duplicateOf ?? null,
     dedupeKey: row.dedupeKey ?? null,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt ?? null,
+  };
+}
+
+export function toLedger(row: LedgerRow): Ledger {
+  return {
+    id: row.id,
+    name: row.name ?? null,
+    emoji: row.emoji ?? null,
+    currencyCode: row.currencyCode ?? null,
+    currencySymbol: row.currencySymbol ?? null,
+    sortOrder: row.sortOrder ?? 0,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt ?? null,

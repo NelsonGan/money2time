@@ -1,4 +1,9 @@
-import { readableColumn, resolveAdaptiveLayout, SIDE_RAIL_WIDTH } from '~/utils/adaptiveLayout';
+import {
+  readableColumn,
+  readableColumnPadding,
+  resolveAdaptiveLayout,
+  SIDE_RAIL_WIDTH,
+} from '~/utils/adaptiveLayout';
 
 const NO_INSETS = { top: 0, right: 0, bottom: 0, left: 0 };
 
@@ -140,5 +145,18 @@ describe('readableColumn', () => {
 
   it('uses the whole width with one pane', () => {
     expect(readableColumn(382, false)).toEqual({ width: 382, margin: 0 });
+  });
+});
+
+describe('readableColumnPadding', () => {
+  it('keeps rows to a 600 pt column on a wide tablet list', () => {
+    // iPad Pro 13" landscape: rows 600 wide, centred.
+    expect(readableColumnPadding(1376, 20)).toBe(388);
+    expect(1376 - 2 * readableColumnPadding(1376, 20)).toBe(600);
+  });
+
+  it('never goes below the list’s own padding', () => {
+    expect(readableColumnPadding(640, 20)).toBe(20);
+    expect(readableColumnPadding(390, 18)).toBe(18);
   });
 });

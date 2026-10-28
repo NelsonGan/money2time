@@ -1,6 +1,7 @@
-import { and, eq, inArray, isNull } from 'drizzle-orm';
+import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
 
 import { getDb, getSQLite } from '~/lib/db/client';
+import { getActiveLedgerId } from '~/lib/db/ledgerScope';
 import { transactionSplitsTable } from '~/lib/db/schema';
 import type { TransactionSplit } from '~/types';
 import { normalizeMoneyAmount } from '~/utils/formatters';
@@ -84,12 +85,20 @@ class TransactionSplitsRepository {
     return grouped;
   }
 
+  /** Every live split of the open ledger's transactions. */
   listAllActive(): TransactionSplit[] {
     const db = getDb();
     return db
       .select()
       .from(transactionSplitsTable)
-      .where(isNull(transactionSplitsTable.deletedAt))
+      .where(
+        and(
+          isNull(transactionSplitsTable.deletedAt),
+          // A primary-key probe per split (splits are few), not a scan of
+          // every transaction to build an IN set.
+          sql`exists (select 1 from transactions t where t.id = ${transactionSplitsTable.transactionId} and t.ledger_id = ${getActiveLedgerId()})`,
+        ),
+      )
       .all()
       .map(toTransactionSplit);
   }

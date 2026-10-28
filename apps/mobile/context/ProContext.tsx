@@ -6,10 +6,12 @@ import React, {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from 'react';
 import { AppState } from 'react-native';
 
 import { useApp } from '~/context/AppContext';
+import { isAccountPro, isAccountProLoaded, subscribeAccountPro } from '~/services/accountPro';
 import {
   buildProAnalyticsProfile,
   identifyUser,
@@ -37,7 +39,15 @@ import { runAfterInteractions } from '~/utils/interactions';
 import { perfMark } from '~/utils/perfTrace';
 
 interface ProContextValue {
+  /** This phone's purchase (`isStorePro`) or the Cloud Sync account's Pro. */
   isPro: boolean;
+  /** This install's own RevenueCat entitlement, without the account's. */
+  isStorePro: boolean;
+  /**
+   * Pro only through the signed-in Cloud Sync account: a purchase made, or
+   * restored, on another phone (services/accountPro.ts).
+   */
+  isAccountPro: boolean;
   isLoading: boolean;
   /**
    * Whether `isPro` reflects a settled RevenueCat answer for this identity.
@@ -79,7 +89,11 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
   // a child would still read the previous user's settled flag; comparing in
   // render closes that window.
   const [statusUserId, setStatusUserId] = useState<string | null | undefined>(undefined);
-  const isStatusKnown = isStatusSettled && statusUserId === appUserId;
+  // The account's stored answer is read at launch too: without it a phone
+  // that is Pro only through its account would read as free for a moment.
+  const accountPro = useSyncExternalStore(subscribeAccountPro, isAccountPro);
+  const accountProLoaded = useSyncExternalStore(subscribeAccountPro, isAccountProLoaded);
+  const isStatusKnown = isStatusSettled && statusUserId === appUserId && accountProLoaded;
   const [devProOverride, setDevProOverrideState] = useState<boolean | null>(null);
   const setDevProOverride = useCallback((value: boolean | null) => {
     if (!__DEV__) return;
@@ -311,10 +325,12 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
     return result;
   }, [applyCustomerState]);
 
-  const effectiveIsPro = __DEV__ && devProOverride !== null ? devProOverride : isPro;
+  const effectiveIsPro = __DEV__ && devProOverride !== null ? devProOverride : isPro || accountPro;
   const value = useMemo<ProContextValue>(
     () => ({
       isPro: effectiveIsPro,
+      isStorePro: isPro,
+      isAccountPro: accountPro && !isPro,
       isLoading,
       isStatusKnown,
       customerState,
@@ -327,6 +343,8 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
     }),
     [
       effectiveIsPro,
+      isPro,
+      accountPro,
       isLoading,
       isStatusKnown,
       customerState,

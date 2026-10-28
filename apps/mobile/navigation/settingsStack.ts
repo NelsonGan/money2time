@@ -42,6 +42,7 @@ export type SettingsStackParamList = {
   News: undefined;
   AutoBackupSettings: undefined;
   WebDashboard: undefined;
+  CloudSync: undefined;
   StatementImport: undefined;
   StatementImportList: {
     section: 'expense' | 'income';
@@ -74,6 +75,11 @@ export type SettingsStackParamList = {
   WidgetPreviews: undefined;
   PaymentAlerts: undefined;
   PaymentAlertSource: { channel: PaymentAlertChannel; sourceKey: string };
+  Ledgers: undefined;
+  /** No ledger id creates one. */
+  LedgerEditor: { ledgerId?: string } | undefined;
+  /** One ledger's sharing: share it, invite and remove people, or leave it. */
+  LedgerSharing: { ledgerId: string };
 };
 
 export type SettingsStackNavigationProp = NativeStackNavigationProp<SettingsStackParamList>;
