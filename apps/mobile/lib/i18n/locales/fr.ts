@@ -2127,6 +2127,9 @@ const fr = {
     limit_albums:
       'Vous pouvez créer jusqu’à {{count}} albums avec le forfait gratuit. Passez à Pro pour un nombre illimité.',
     cloud_sync_label: 'Cloud Sync',
+    shared_ledgers_label: 'Carnets partagés',
+    shared_ledgers_free: 'Rejoindre',
+    shared_ledgers_pro: 'Partager',
     biometric_label: 'Verrouillage (biométrie)',
     compare_title: 'Tout dans Pro',
     compare_subtitle: 'Découvrez exactement ce que débloque la mise à niveau.',

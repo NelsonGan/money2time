@@ -2117,6 +2117,9 @@ const tr = {
     limit_albums:
       'Ücretsiz planda en fazla {{count}} albüm oluşturabilirsiniz. Sınırsız için Pro’ya yükseltin.',
     cloud_sync_label: 'Cloud Sync',
+    shared_ledgers_label: 'Paylaşılan defterler',
+    shared_ledgers_free: 'Katıl',
+    shared_ledgers_pro: 'Paylaş',
     biometric_label: 'Uygulama kilidi (biyometrik)',
     compare_title: 'Pro’daki her şey',
     compare_subtitle: 'Yükselttiğinde neyin açıldığını tam olarak gör.',

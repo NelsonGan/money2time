@@ -2125,6 +2125,9 @@ const nl = {
     limit_albums:
       'Je kunt maximaal {{count}} albums maken met het gratis abonnement. Upgrade naar Pro voor onbeperkt.',
     cloud_sync_label: 'Cloud Sync',
+    shared_ledgers_label: 'Gedeelde boeken',
+    shared_ledgers_free: 'Meedoen',
+    shared_ledgers_pro: 'Delen',
     biometric_label: 'App-vergrendeling (biometrisch)',
     compare_title: 'Alles in Pro',
     compare_subtitle: 'Zie precies wat je ontgrendelt met een upgrade.',

@@ -2121,6 +2121,9 @@ const ms = {
     limit_albums:
       'Anda boleh mencipta sehingga {{count}} album pada pelan percuma. Naik taraf ke Pro untuk tanpa had.',
     cloud_sync_label: 'Cloud Sync',
+    shared_ledgers_label: 'Buku dikongsi',
+    shared_ledgers_free: 'Sertai',
+    shared_ledgers_pro: 'Kongsi',
     biometric_label: 'Kunci apl (biometrik)',
     compare_title: 'Semua dalam Pro',
     compare_subtitle: 'Lihat dengan tepat apa yang terbuka apabila anda menaik taraf.',

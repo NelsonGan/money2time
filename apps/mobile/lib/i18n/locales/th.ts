@@ -2075,6 +2075,9 @@ const th = {
     limit_albums:
       'คุณสามารถสร้างอัลบั้มได้สูงสุด {{count}} อัลบั้มในแผนฟรี อัปเกรดเป็น Pro เพื่อใช้ได้ไม่จำกัด',
     cloud_sync_label: 'Cloud Sync',
+    shared_ledgers_label: 'สมุดบัญชีที่แชร์',
+    shared_ledgers_free: 'เข้าร่วม',
+    shared_ledgers_pro: 'แชร์',
     biometric_label: 'ล็อกแอป (ไบโอเมตริก)',
     compare_title: 'ทุกอย่างใน Pro',
     compare_subtitle: 'ดูว่าคุณจะปลดล็อกอะไรบ้างเมื่ออัปเกรด',

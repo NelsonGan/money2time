@@ -2116,6 +2116,9 @@ const id = {
     limit_albums:
       'Anda dapat membuat hingga {{count}} album di paket gratis. Tingkatkan ke Pro untuk tanpa batas.',
     cloud_sync_label: 'Cloud Sync',
+    shared_ledgers_label: 'Buku bersama',
+    shared_ledgers_free: 'Gabung',
+    shared_ledgers_pro: 'Bagikan',
     biometric_label: 'Kunci aplikasi (biometrik)',
     compare_title: 'Semua di Pro',
     compare_subtitle: 'Lihat apa saja yang terbuka saat kamu meningkatkan.',

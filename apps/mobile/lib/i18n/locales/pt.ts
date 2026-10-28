@@ -2117,6 +2117,9 @@ const pt = {
     limit_albums:
       'Você pode criar até {{count}} álbuns no plano gratuito. Faça upgrade para o Pro para ilimitado.',
     cloud_sync_label: 'Cloud Sync',
+    shared_ledgers_label: 'Livros compartilhados',
+    shared_ledgers_free: 'Entrar',
+    shared_ledgers_pro: 'Compartilhar',
     biometric_label: 'Bloqueio do app (biometria)',
     compare_title: 'Tudo no Pro',
     compare_subtitle: 'Veja exatamente o que você desbloqueia ao fazer upgrade.',

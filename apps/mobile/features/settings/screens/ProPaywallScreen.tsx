@@ -547,7 +547,15 @@ function useCompareRows(voiceSupported: boolean): CompareRow[] {
       },
       // Only while the feature is rolled out (its PostHog flag).
       ...(cloudSyncEnabled
-        ? [{ label: I18n.t('pro.cloud_sync_label'), free: false, pro: true }]
+        ? [
+            { label: I18n.t('pro.cloud_sync_label'), free: false, pro: true },
+            // Anyone can join a ledger someone shares; sharing one is Pro.
+            {
+              label: I18n.t('pro.shared_ledgers_label'),
+              free: I18n.t('pro.shared_ledgers_free'),
+              pro: I18n.t('pro.shared_ledgers_pro'),
+            },
+          ]
         : []),
       { label: I18n.t('pro.biometric_label'), free: false, pro: true },
       { label: I18n.t('pro.trends_label'), free: false, pro: true },
@@ -582,7 +590,11 @@ function CompareCell({
 
   const isUnlimited = value === UNLIMITED;
   return (
+    // One line in the narrow column: a long translation shrinks instead of wrapping.
     <Text
+      numberOfLines={1}
+      adjustsFontSizeToFit
+      minimumFontScale={0.6}
       style={[
         s.cellValue,
         {

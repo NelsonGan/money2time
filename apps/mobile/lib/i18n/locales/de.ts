@@ -2131,6 +2131,9 @@ const de = {
     limit_albums:
       'Im kostenlosen Plan kannst du bis zu {{count}} Alben erstellen. Upgrade auf Pro für unbegrenzt.',
     cloud_sync_label: 'Cloud Sync',
+    shared_ledgers_label: 'Geteilte Bücher',
+    shared_ledgers_free: 'Beitreten',
+    shared_ledgers_pro: 'Teilen',
     biometric_label: 'App-Sperre (biometrisch)',
     compare_title: 'Alles in Pro',
     compare_subtitle: 'Sieh genau, was du mit dem Upgrade freischaltest.',

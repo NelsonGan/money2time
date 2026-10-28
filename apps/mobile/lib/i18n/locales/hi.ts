@@ -2098,6 +2098,9 @@ const hi = {
     limit_albums:
       'मुफ़्त प्लान पर आप अधिकतम {{count}} एल्बम बना सकते हैं। असीमित के लिए Pro में अपग्रेड करें।',
     cloud_sync_label: 'Cloud Sync',
+    shared_ledgers_label: 'साझा बहियाँ',
+    shared_ledgers_free: 'जुड़ें',
+    shared_ledgers_pro: 'साझा करें',
     biometric_label: 'ऐप लॉक (बायोमेट्रिक)',
     compare_title: 'Pro में सब कुछ',
     compare_subtitle: 'देखें कि अपग्रेड करने पर आपको क्या मिलता है।',

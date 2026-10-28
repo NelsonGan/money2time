@@ -2114,6 +2114,9 @@ const it = {
     limit_albums:
       'Puoi creare fino a {{count}} album con il piano gratuito. Passa a Pro per averne illimitati.',
     cloud_sync_label: 'Cloud Sync',
+    shared_ledgers_label: 'Registri condivisi',
+    shared_ledgers_free: 'Unisciti',
+    shared_ledgers_pro: 'Condividi',
     biometric_label: 'Blocco app (biometrico)',
     compare_title: 'Tutto in Pro',
     compare_subtitle: 'Scopri esattamente cosa sblocchi con l’upgrade.',

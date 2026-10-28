@@ -2113,6 +2113,9 @@ const pl = {
     limit_albums:
       'W planie darmowym możesz utworzyć maksymalnie {{count}} albumów. Przejdź na Pro, aby mieć nieograniczoną liczbę.',
     cloud_sync_label: 'Cloud Sync',
+    shared_ledgers_label: 'Wspólne księgi',
+    shared_ledgers_free: 'Dołącz',
+    shared_ledgers_pro: 'Udostępnij',
     biometric_label: 'Blokada aplikacji (biometria)',
     compare_title: 'Wszystko w Pro',
     compare_subtitle: 'Zobacz dokładnie, co odblokujesz po przejściu na wyższą wersję.',

@@ -2093,6 +2093,9 @@ const vi = {
     limit_albums:
       'Bạn có thể tạo tối đa {{count}} album trong gói miễn phí. Nâng cấp lên Pro để không giới hạn.',
     cloud_sync_label: 'Cloud Sync',
+    shared_ledgers_label: 'Sổ chia sẻ',
+    shared_ledgers_free: 'Tham gia',
+    shared_ledgers_pro: 'Chia sẻ',
     biometric_label: 'Khóa ứng dụng (sinh trắc học)',
     compare_title: 'Mọi thứ trong Pro',
     compare_subtitle: 'Xem chính xác những gì được mở khóa khi bạn nâng cấp.',

@@ -2081,6 +2081,9 @@ const ko = {
     limit_albums:
       '무료 플랜에서는 최대 {{count}}개의 앨범을 만들 수 있습니다. 무제한으로 사용하려면 Pro로 업그레이드하세요.',
     cloud_sync_label: 'Cloud Sync',
+    shared_ledgers_label: '공유 가계부',
+    shared_ledgers_free: '참여',
+    shared_ledgers_pro: '공유',
     biometric_label: '앱 잠금(생체 인증)',
     compare_title: 'Pro의 모든 기능',
     compare_subtitle: '업그레이드하면 무엇이 열리는지 확인하세요.',

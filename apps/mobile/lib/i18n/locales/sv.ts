@@ -2108,6 +2108,9 @@ const sv = {
     limit_albums:
       'Du kan skapa upp till {{count}} album i gratisplanen. Uppgradera till Pro för obegränsat.',
     cloud_sync_label: 'Cloud Sync',
+    shared_ledgers_label: 'Delade kassaböcker',
+    shared_ledgers_free: 'Gå med',
+    shared_ledgers_pro: 'Dela',
     biometric_label: 'Applås (biometriskt)',
     compare_title: 'Allt i Pro',
     compare_subtitle: 'Se exakt vad du låser upp när du uppgraderar.',

@@ -953,7 +953,7 @@ builds, off in store builds until rollout.
   illustration and three sign-in buttons: Continue with Apple (iOS only),
   Google and email (a 6-digit code, no password). Cloud Sync is Pro: for a
   free user every one of them opens the paywall (source `cloud_sync`); the
-  paywall's Free vs Pro table lists Cloud Sync while the flag is on. Signed in,
+  paywall's Free vs Pro table lists Cloud Sync, and Shared ledgers (free: Join, Pro: Share), while the flag is on. Signed in,
   it shows the last sync, Sync now, Sign out (data stays on the phone) and
   Delete account (cloud copy, images and sign-in, required by App Store rule
   5.1.1(v)). A green tick on the tile means Cloud Sync is on.

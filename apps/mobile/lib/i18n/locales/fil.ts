@@ -2130,6 +2130,9 @@ const fil = {
     limit_albums:
       'Maaari kang gumawa ng hanggang {{count}} album sa libreng plano. Mag-upgrade sa Pro para walang limitasyon.',
     cloud_sync_label: 'Cloud Sync',
+    shared_ledgers_label: 'Mga shared ledger',
+    shared_ledgers_free: 'Sumali',
+    shared_ledgers_pro: 'I-share',
     biometric_label: 'App Lock (biometric)',
     compare_title: 'Lahat sa Pro',
     compare_subtitle: 'Tingnan kung ano ang mabubuksan kapag nag-upgrade ka.',

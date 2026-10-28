@@ -2105,6 +2105,9 @@ const uk = {
     limit_albums:
       'У безкоштовному тарифі можна створити до {{count}} альбомів. Перейдіть на Pro для необмеженої кількості.',
     cloud_sync_label: 'Cloud Sync',
+    shared_ledgers_label: 'Спільні книги',
+    shared_ledgers_free: 'Приєднатися',
+    shared_ledgers_pro: 'Ділитися',
     biometric_label: 'Блокування застосунку (біометрія)',
     compare_title: 'Усе в Pro',
     compare_subtitle: 'Подивіться, що саме відкривається після оновлення.',

@@ -2117,6 +2117,9 @@ const es = {
     limit_albums:
       'Puedes crear hasta {{count}} álbumes en el plan gratuito. Mejora a Pro para ilimitados.',
     cloud_sync_label: 'Cloud Sync',
+    shared_ledgers_label: 'Libros compartidos',
+    shared_ledgers_free: 'Unirse',
+    shared_ledgers_pro: 'Compartir',
     biometric_label: 'Bloqueo con biometría',
     compare_title: 'Todo en Pro',
     compare_subtitle: 'Mira exactamente qué desbloqueas al mejorar.',

@@ -2096,6 +2096,9 @@ const ja = {
     limit_albums:
       '無料プランでは最大{{count}}個のアルバムを作成できます。無制限にするにはProにアップグレードしてください。',
     cloud_sync_label: 'Cloud Sync',
+    shared_ledgers_label: '共有帳簿',
+    shared_ledgers_free: '参加',
+    shared_ledgers_pro: '共有',
     biometric_label: 'アプリロック（生体認証）',
     compare_title: 'Pro のすべて',
     compare_subtitle: 'アップグレードで何が使えるようになるかを確認できます。',

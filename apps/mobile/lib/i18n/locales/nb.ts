@@ -2107,6 +2107,9 @@ const nb = {
     limit_albums:
       'Du kan opprette opptil {{count}} album på gratisplanen. Oppgrader til Pro for ubegrenset.',
     cloud_sync_label: 'Cloud Sync',
+    shared_ledgers_label: 'Delte regnskap',
+    shared_ledgers_free: 'Bli med',
+    shared_ledgers_pro: 'Del',
     biometric_label: 'App-lås (biometrisk)',
     compare_title: 'Alt i Pro',
     compare_subtitle: 'Se nøyaktig hva du låser opp når du oppgraderer.',

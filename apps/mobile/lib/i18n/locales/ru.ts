@@ -2112,6 +2112,9 @@ const ru = {
     limit_albums:
       'В бесплатном тарифе можно создать до {{count}} альбомов. Перейдите на Pro для неограниченного количества.',
     cloud_sync_label: 'Cloud Sync',
+    shared_ledgers_label: 'Общие книги',
+    shared_ledgers_free: 'Вступить',
+    shared_ledgers_pro: 'Делиться',
     biometric_label: 'Блокировка приложения (биометрия)',
     compare_title: 'Всё в Pro',
     compare_subtitle: 'Узнайте, что именно открывается после перехода на Pro.',
