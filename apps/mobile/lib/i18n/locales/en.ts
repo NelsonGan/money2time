@@ -2513,6 +2513,7 @@ const en = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Sync across phones',
+    continue_apple: 'Continue with Apple',
     continue_google: 'Continue with Google',
     continue_email: 'Continue with email',
     email_title: 'Sign in with email',

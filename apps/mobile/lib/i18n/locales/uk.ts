@@ -2517,6 +2517,7 @@ const uk = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Синхронізація телефонів',
+    continue_apple: 'Продовжити з Apple',
     continue_google: 'Продовжити з Google',
     continue_email: 'Продовжити через email',
     email_title: 'Вхід через email',
