@@ -1,6 +1,7 @@
 import { and, eq, gte, inArray, isNull, lte, or, sql } from 'drizzle-orm';
 
 import { getDb, getSQLite } from '~/lib/db/client';
+import { getActiveLedgerId, inActiveLedger } from '~/lib/db/ledgerScope';
 import { transactionsTable } from '~/lib/db/schema';
 import type {
   CashflowSummary,
@@ -185,12 +186,12 @@ function loadAllWithRelations(): TransactionWithRelations[] {
     SELECT ${TRANSACTION_RAW_COLUMNS_SQL},
       a.name, fa.name, ta.name, c.name, ${CATEGORY_ICON_SQL}, c.parent_id, p.name
     FROM transactions t ${RELATION_JOINS_SQL}
-    WHERE t.deleted_at IS NULL
+    WHERE t.deleted_at IS NULL AND t.ledger_id = ?
     ORDER BY t.date DESC, t.created_at DESC, t.id DESC
   `);
   try {
     const rows = statement
-      .executeForRawResultSync<Record<string, string | number | null>>([])
+      .executeForRawResultSync<Record<string, string | number | null>>([getActiveLedgerId()])
       .getAllSync();
     const transactions = new Array<TransactionWithRelations>(rows.length);
     for (let index = 0; index < rows.length; index += 1) {
@@ -216,7 +217,7 @@ function attachRelations(transactions: Transaction[]): TransactionWithRelations[
   // whether the query returned a superset or an exact match.
   const scanAllNonDeleted = txIds.length > IN_CLAUSE_SCAN_THRESHOLD;
   const relationFilterSql = scanAllNonDeleted
-    ? 't.deleted_at IS NULL'
+    ? 't.deleted_at IS NULL AND t.ledger_id = ?'
     : `t.id IN (${getInClausePlaceholders(txIds.length)})`;
 
   const rows = sqlite.getAllSync<{
@@ -250,7 +251,7 @@ function attachRelations(transactions: Transaction[]): TransactionWithRelations[
     FROM transactions t ${RELATION_JOINS_SQL}
     WHERE ${relationFilterSql}
   `,
-    scanAllNonDeleted ? [] : txIds,
+    scanAllNonDeleted ? [getActiveLedgerId()] : txIds,
   );
 
   const relationMap = new Map<string, RelationRow>();
@@ -314,6 +315,7 @@ export interface TransactionQueryOptions {
 function buildSqlPredicates(normalized: TransactionFilters, options?: TransactionQueryOptions) {
   const predicates = [
     isNull(transactionsTable.deletedAt),
+    inActiveLedger(transactionsTable),
     normalized.type === 'balance_adjustment'
       ? or(eq(transactionsTable.type, 'balance_adjustment'), eq(transactionsTable.type, 'transfer'))
       : normalized.type === 'transfer'
@@ -355,6 +357,9 @@ function buildSqlPredicates(normalized: TransactionFilters, options?: Transactio
   return predicates;
 }
 
+/** The predicates `buildSqlPredicates` always adds: not deleted, in the open ledger. */
+const ALWAYS_ON_PREDICATES = 2;
+
 class TransactionsRepository {
   // Plain rows matching the SQL-level filters only — no relation JOINs and no
   // splits lookup. Used by aggregations (cashflow, category breakdowns) which
@@ -378,10 +383,11 @@ class TransactionsRepository {
     const normalized = normalizeTransactionFilters(filters);
     const predicates = buildSqlPredicates(normalized);
 
-    // The soft-delete check is always there. With nothing else narrowing the
-    // query every live row is wanted, which the one-query loader reads fastest.
+    // The soft-delete and ledger checks are always there. With nothing else
+    // narrowing the query every live row of the ledger is wanted, which the
+    // one-query loader reads fastest.
     const transactions =
-      predicates.filter(Boolean).length > 1
+      predicates.filter(Boolean).length > ALWAYS_ON_PREDICATES
         ? attachRelations(
             getDb()
               .select()
@@ -540,7 +546,13 @@ class TransactionsRepository {
     const row = db
       .select()
       .from(transactionsTable)
-      .where(and(eq(transactionsTable.id, id), isNull(transactionsTable.deletedAt)))
+      .where(
+        and(
+          eq(transactionsTable.id, id),
+          isNull(transactionsTable.deletedAt),
+          inActiveLedger(transactionsTable),
+        ),
+      )
       .get();
 
     if (!row) return null;
@@ -560,7 +572,13 @@ class TransactionsRepository {
     const rows = db
       .select()
       .from(transactionsTable)
-      .where(and(inArray(transactionsTable.id, ids), isNull(transactionsTable.deletedAt)))
+      .where(
+        and(
+          inArray(transactionsTable.id, ids),
+          isNull(transactionsTable.deletedAt),
+          inActiveLedger(transactionsTable),
+        ),
+      )
       .all();
     const withRelations = attachRelations(rows.map(toTransaction));
     attachSplits(withRelations);
@@ -585,6 +603,7 @@ class TransactionsRepository {
     db.insert(transactionsTable)
       .values({
         id,
+        ledgerId: getActiveLedgerId(),
         type: normalizedInput.type,
         amount: normalizedInput.amount,
         currency: normalizedInput.currency,
@@ -688,6 +707,7 @@ class TransactionsRepository {
       .where(
         and(
           isNull(transactionsTable.deletedAt),
+          inActiveLedger(transactionsTable),
           inArray(transactionsTable.categoryId, fromCategoryIds),
         ),
       )
@@ -720,6 +740,7 @@ class TransactionsRepository {
       .where(
         and(
           isNull(transactionsTable.deletedAt),
+          inActiveLedger(transactionsTable),
           gte(transactionsTable.date, range.start),
           lte(transactionsTable.date, range.end),
           inArray(transactionsTable.type, ['income', 'expense']),
@@ -757,6 +778,7 @@ class TransactionsRepository {
       .where(
         and(
           isNull(transactionsTable.deletedAt),
+          inActiveLedger(transactionsTable),
           eq(transactionsTable.type, 'transfer'),
           eq(transactionsTable.fromAccountId, fromAccountId),
           eq(transactionsTable.toAccountId, toAccountId),
@@ -781,8 +803,8 @@ export function getDistinctNotesSuggestions(prefix: string): string[] {
   // "Local" pushing out "Cafe").
   const escaped = escapeLike(prefix);
   const rows = sqlite.getAllSync<{ note: string }>(
-    "SELECT note, MAX(date) AS latest FROM transactions WHERE note IS NOT NULL AND note LIKE ? ESCAPE '\\' AND deleted_at IS NULL GROUP BY note ORDER BY note LIKE ? ESCAPE '\\' DESC, latest DESC LIMIT 100",
-    [`%${escaped}%`, `${escaped}%`],
+    "SELECT note, MAX(date) AS latest FROM transactions WHERE note IS NOT NULL AND note LIKE ? ESCAPE '\\' AND deleted_at IS NULL AND ledger_id = ? GROUP BY note ORDER BY note LIKE ? ESCAPE '\\' DESC, latest DESC LIMIT 100",
+    [`%${escaped}%`, getActiveLedgerId(), `${escaped}%`],
   );
   return rankNoteSuggestions(
     rows.map((r) => r.note),
@@ -800,8 +822,8 @@ export function getLatestTransactionFieldsByNote(
     account_id: string | null;
     amount: number | null;
   }>(
-    'SELECT category_id, account_id, amount FROM transactions WHERE note = ? AND deleted_at IS NULL ORDER BY date DESC, created_at DESC LIMIT 1',
-    [exactNote],
+    'SELECT category_id, account_id, amount FROM transactions WHERE note = ? AND deleted_at IS NULL AND ledger_id = ? ORDER BY date DESC, created_at DESC LIMIT 1',
+    [exactNote, getActiveLedgerId()],
   );
   if (!row) return null;
   return { categoryId: row.category_id, accountId: row.account_id, amount: row.amount };

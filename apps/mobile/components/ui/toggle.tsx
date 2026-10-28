@@ -111,7 +111,9 @@ export function SegmentedToggle<T extends string>({
           >
             <Text
               variant="caption"
+              numberOfLines={2}
               className={cn(
+                'text-center',
                 isHomeVariant
                   ? active
                     ? 'text-foreground'

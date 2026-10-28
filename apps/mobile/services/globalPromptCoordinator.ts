@@ -11,7 +11,11 @@
  * showing, so wiring it up cannot regress current behavior.
  */
 
-export type GlobalPromptId = 'featureAnnouncement' | 'reviewPrePrompt' | 'cloudBackupPrompt';
+export type GlobalPromptId =
+  | 'featureAnnouncement'
+  | 'reviewPrePrompt'
+  | 'cloudBackupPrompt'
+  | 'cloudSyncPrompt';
 
 const visiblePrompts = new Set<GlobalPromptId>();
 

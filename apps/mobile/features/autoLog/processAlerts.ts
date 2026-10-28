@@ -93,7 +93,7 @@ export async function processAlertCaptures(
     try {
       const current = deps.getCurrent?.() ?? deps;
       const initial = analyzeCapture(capture, buildPipelineContext(current));
-      const stored = paymentAlertCapturesRepository.getById(capture.id);
+      const stored = paymentAlertCapturesRepository.getStored(capture.id);
       if (stored && stored.status !== 'failed') {
         summary.captureIds.push(capture.id);
         continue;
