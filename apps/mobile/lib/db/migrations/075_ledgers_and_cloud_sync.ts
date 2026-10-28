@@ -141,6 +141,7 @@ export const migration075LedgersAndCloudSync: DbMigration = {
     `);
 
     // A phone that ran 072 but not 074 has the sync tables without a channel.
+    // No store build shipped 072 alone; internal and dev builds did.
     // sync_row_meta takes the column in place. The image queues need a new
     // key, so they are rebuilt with their rows kept under 'personal'.
     addColumnIfMissing(db, 'sync_row_meta', 'channel', `TEXT NOT NULL DEFAULT 'personal'`);

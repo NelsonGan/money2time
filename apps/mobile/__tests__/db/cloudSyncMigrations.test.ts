@@ -33,11 +33,13 @@ function loadMigrations(upTo = Infinity): DbMigration[] {
 
 function openDatabase() {
   const connection = new DatabaseSync(':memory:');
+  const flat = (params: unknown[]) => params.flat() as (string | number | null)[];
   const db = {
     execSync: (sql: string) => connection.exec(sql),
-    getAllSync: (sql: string) => connection.prepare(sql).all(),
-    getFirstSync: (sql: string) => connection.prepare(sql).get() ?? null,
-    runSync: (sql: string) => connection.prepare(sql).run(),
+    getAllSync: (sql: string, ...params: unknown[]) => connection.prepare(sql).all(...flat(params)),
+    getFirstSync: (sql: string, ...params: unknown[]) =>
+      connection.prepare(sql).get(...flat(params)) ?? null,
+    runSync: (sql: string, ...params: unknown[]) => connection.prepare(sql).run(...flat(params)),
     withTransactionSync: (task: () => void) => {
       connection.exec('BEGIN');
       try {
@@ -55,13 +57,17 @@ function openDatabase() {
 
 type Harness = ReturnType<typeof openDatabase>;
 
-/** Every table's columns, keys and indexes, without the CREATE text (which
- * differs between a table created whole and one altered into shape). */
+/**
+ * Every table's columns, keys and indexes (with their SQL, so a partial index's
+ * WHERE counts), any triggers and views, and the rows migrations seed. Not a
+ * table's CREATE text, which differs between a table created whole and one
+ * altered into shape.
+ */
 function schemaOf(harness: Harness) {
   const tables = harness
     .all("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name")
     .map((row) => String(row.name));
-  return Object.fromEntries(
+  const byTable = Object.fromEntries(
     tables.map((table) => [
       table,
       {
@@ -75,11 +81,22 @@ function schemaOf(harness: Harness) {
             columns: harness
               .all(`PRAGMA index_info(${String(index.name)})`)
               .map((column) => column.name),
+            sql: harness.all(`SELECT sql FROM sqlite_master WHERE name = '${String(index.name)}'`),
           }))
           .sort((a, b) => String(a.name).localeCompare(String(b.name))),
       },
     ]),
   );
+  return {
+    tables: byTable,
+    triggersAndViews: harness.all(
+      "SELECT type, name, sql FROM sqlite_master WHERE type IN ('trigger', 'view') ORDER BY name",
+    ),
+    seeded: {
+      ledgers: harness.all('SELECT id FROM ledgers ORDER BY id'),
+      syncState: harness.all('SELECT key, value FROM sync_state ORDER BY key'),
+    },
+  };
 }
 
 function freshSchema() {
@@ -105,7 +122,7 @@ describe('migration 075 (ledgers and Cloud Sync)', () => {
     harness = openDatabase();
     applyMigrations(harness.db, loadMigrations());
     const schema = schemaOf(harness);
-    expect(Object.keys(schema)).toEqual(
+    expect(Object.keys(schema.tables)).toEqual(
       expect.arrayContaining([
         'ledgers',
         'shared_ledgers',
