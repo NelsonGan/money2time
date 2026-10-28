@@ -20,11 +20,6 @@ export function ledgerIcon(ledger: Pick<Ledger, 'id' | 'emoji'> | null): string 
   return ledger?.id === DEFAULT_LEDGER_ID ? DEFAULT_LEDGER_ICON : NEW_LEDGER_ICON;
 }
 
-/** Whether the open ledger needs Pro: every ledger but the default one does. */
-export function ledgerNeedsPro(ledgerId: string): boolean {
-  return ledgerId !== DEFAULT_LEDGER_ID;
-}
-
 /** The line under a ledger's name: its currency and how many entries it holds. */
 export function ledgerSummary(ledger: Pick<Ledger, 'currencyCode'>, entryCount: number): string {
   const entries = I18n.t(entryCount === 1 ? 'ledgers.entries_one' : 'ledgers.entries_other', {
