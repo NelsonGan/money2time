@@ -328,13 +328,11 @@ describe('existing receipt image endpoint', () => {
     );
   });
 
-  // Request signing is switched off for now, so a stale signature no longer
-  // blocks the scan.
-  it('scans a request whose signature has expired', async () => {
+  it('rejects expired receipt signatures before metering or inference', async () => {
     const response = await worker.fetch(request(args, String(Date.now() - 300001)), env, ctx);
-    expect(response.status).toBe(200);
-    expect(checkQuota).toHaveBeenCalled();
-    expect(fetchMock).toHaveBeenCalled();
+    expect(response.status).toBe(401);
+    expect(checkQuota).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it.each([
