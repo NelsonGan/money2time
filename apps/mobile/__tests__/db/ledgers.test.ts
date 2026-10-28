@@ -14,6 +14,7 @@ import {
 import migration073Ledgers from '~/lib/db/migrations/073_ledgers';
 import { applyMigrations } from '~/lib/db/migrations/runner';
 import type { DbMigration } from '~/lib/db/migrations/types';
+import { accountsRepository } from '~/lib/repositories/accountsRepository';
 import { ledgersRepository } from '~/lib/repositories/ledgersRepository';
 import { applyBackupData, buildBackupData } from '~/services/dataManagementService';
 
@@ -202,6 +203,30 @@ describe('ledgersRepository on SQLite', () => {
     expect(live('accounts')).toEqual(['cash']);
     expect(live('transaction_splits')).toEqual(['lunch-split']);
     expect(ledgersRepository.entryCounts()).toEqual({ default: 1 });
+  });
+
+  it("sums balances from the open ledger's accounts only", () => {
+    harness.connection.exec(`
+      INSERT INTO accounts (id, ledger_id, name, type, currency, starting_balance, created_at, updated_at)
+        VALUES ('work-bank', 'work', 'Bank', 'debit', 'USD', 100, '${NOW}', '${NOW}');
+      INSERT INTO transactions (id, ledger_id, type, amount, currency, date, from_account_id, to_account_id, created_at, updated_at)
+        VALUES ('top-up', 'work', 'transfer', 40, 'USD', '2026-10-27', 'work-bank', 'work-cash', '${NOW}', '${NOW}');
+    `);
+    const workAccounts = [
+      { id: 'work-cash', type: 'debit', startingBalance: 0 },
+      { id: 'work-bank', type: 'debit', startingBalance: 100 },
+    ];
+    const list = jest
+      .spyOn(accountsRepository, 'list')
+      .mockReturnValue(workAccounts as ReturnType<typeof accountsRepository.list>);
+
+    const balances = accountsRepository.getBalances();
+    list.mockRestore();
+
+    expect(balances.map((b) => [b.accountId, b.balance])).toEqual([
+      ['work-cash', -80],
+      ['work-bank', 60],
+    ]);
   });
 
   it('never deletes the default ledger', () => {

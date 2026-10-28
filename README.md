@@ -607,8 +607,10 @@ its own sync engine and replica.
     that forgets it does not compile.
   - Writes by id need no filter, since ids are unique across ledgers. Reads by
     id are filtered anyway, so a stale id from another ledger finds nothing.
-  - Name-matched writes (account groups) are filtered. Totals keyed by account
-    id (balances) need no filter.
+  - Name-matched writes (account groups) are filtered. Balances sum only the
+    open ledger's accounts (`account_id IN` the listed ids, with `+type` so
+    SQLite stays on the per-account indexes), so a small ledger beside a large
+    one stays fast.
   - `withLedgerScope` runs synchronous work in another ledger, to seed or copy
     into a new one.
 - **Ledger settings.** The settings row keeps the default ledger's own

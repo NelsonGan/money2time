@@ -215,42 +215,45 @@ class AccountsRepository {
     const accounts = this.list();
     if (accounts.length === 0) return [];
 
-    // No ledger filter: the totals are keyed by account id and only the open
-    // ledger's accounts are read out of them below.
-    // Single round-trip instead of five separate GROUP BY queries. Each branch
-    // hits the partial (type, account) indexes; aggregating in one statement
-    // removes four JS-bridge round trips, which is what dominates here since
-    // balances recompute on every transaction change.
+    // Totals for the open ledger's accounts only, so a small ledger stays fast
+    // beside a large one. Single round-trip instead of five GROUP BY queries:
+    // balances recompute on every transaction change, and the JS-bridge round
+    // trips dominate. `+type` keeps SQLite on the per-account indexes; with the
+    // type index it would read every row of that type in every ledger.
     const rows = getSQLite().getAllSync<{
       bucket: 'income' | 'expense' | 'transfer_in' | 'transfer_out' | 'adjustment';
       accountId: string | null;
       total: number | null;
-    }>(`
+    }>(
+      `
+      WITH open_accounts(id) AS (SELECT value FROM json_each(?))
       SELECT 'income' AS bucket, account_id AS accountId, SUM(COALESCE(account_amount, amount)) AS total
         FROM transactions
-        WHERE deleted_at IS NULL AND type = 'income' AND account_id IS NOT NULL
+        WHERE deleted_at IS NULL AND +type = 'income' AND account_id IN open_accounts
         GROUP BY account_id
       UNION ALL
       SELECT 'expense', account_id, SUM(COALESCE(account_amount, amount))
         FROM transactions
-        WHERE deleted_at IS NULL AND type = 'expense' AND account_id IS NOT NULL
+        WHERE deleted_at IS NULL AND +type = 'expense' AND account_id IN open_accounts
         GROUP BY account_id
       UNION ALL
       SELECT 'transfer_in', to_account_id, SUM(COALESCE(to_amount, amount))
         FROM transactions
-        WHERE deleted_at IS NULL AND type = 'transfer' AND to_account_id IS NOT NULL
+        WHERE deleted_at IS NULL AND +type = 'transfer' AND to_account_id IN open_accounts
         GROUP BY to_account_id
       UNION ALL
       SELECT 'transfer_out', from_account_id, SUM(amount)
         FROM transactions
-        WHERE deleted_at IS NULL AND type = 'transfer' AND from_account_id IS NOT NULL
+        WHERE deleted_at IS NULL AND +type = 'transfer' AND from_account_id IN open_accounts
         GROUP BY from_account_id
       UNION ALL
       SELECT 'adjustment', account_id, SUM(COALESCE(account_amount, amount))
         FROM transactions
-        WHERE deleted_at IS NULL AND type = 'balance_adjustment' AND account_id IS NOT NULL
+        WHERE deleted_at IS NULL AND +type = 'balance_adjustment' AND account_id IN open_accounts
         GROUP BY account_id
-    `);
+    `,
+      [JSON.stringify(accounts.map((account) => account.id))],
+    );
 
     const incomeMap = new Map<string, number>();
     const expenseMap = new Map<string, number>();
