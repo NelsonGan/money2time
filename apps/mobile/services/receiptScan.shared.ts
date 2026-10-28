@@ -96,7 +96,8 @@ export type ReceiptScanErrorCode =
   | 'too_large' // receipt image exceeds the Worker's payload cap
   | 'not_available' // platform without native support
   | 'network' // request failed / timed out
-  | 'server'; // 4xx/5xx from the Worker
+  | 'unreadable' // the saved receipt image could not be read on the device
+  | 'server'; // 4xx/5xx or an unexpected answer from the Worker
 
 export class ReceiptScanError extends Error {
   code: ReceiptScanErrorCode;

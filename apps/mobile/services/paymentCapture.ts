@@ -181,7 +181,7 @@ export function writeListenerConfig(input: {
     const dir = capturesDir();
     if (!dir.exists) dir.create({ intermediates: true, idempotent: true });
     const file = new File(dir, PAYMENT_CAPTURE_CONFIG_FILE);
-    file.write(buildListenerConfigJson(input));
+    file.writeSync(buildListenerConfigJson(input));
   } catch {
     // The listener treats a missing config as "capture nothing", which is safe.
   }

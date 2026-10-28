@@ -102,7 +102,7 @@ export function saveCustomAccountLogo(sourceUri: string): string {
   ensureDir(kindDir(ACCOUNT_LOGOS_KIND));
   const fileName = `${newId()}.${extensionFor(sourceUri)}`;
   const dest = new File(Paths.document, ROOT, ACCOUNT_LOGOS_KIND, fileName);
-  new File(sourceUri).copy(dest);
+  new File(sourceUri).copySync(dest);
   invalidateCustomUriCache();
   return `${CUSTOM_LOGO_PREFIX}${ACCOUNT_LOGOS_KIND}/${fileName}`;
 }
@@ -113,7 +113,7 @@ export function saveProfileAvatar(sourceUri: string): string {
   ensureDir(kindDir(AVATARS_KIND));
   const fileName = `${newId()}.${extensionFor(sourceUri)}`;
   const dest = new File(Paths.document, ROOT, AVATARS_KIND, fileName);
-  new File(sourceUri).copy(dest);
+  new File(sourceUri).copySync(dest);
   return `${AVATARS_KIND}/${fileName}`;
 }
 
@@ -137,7 +137,7 @@ export function saveAlbumCover(sourceUri: string): string {
   ensureDir(kindDir(ALBUM_COVERS_KIND));
   const fileName = `${newId()}.${extensionFor(sourceUri)}`;
   const dest = new File(Paths.document, ROOT, ALBUM_COVERS_KIND, fileName);
-  new File(sourceUri).copy(dest);
+  new File(sourceUri).copySync(dest);
   return `${ALBUM_COVERS_KIND}/${fileName}`;
 }
 
@@ -168,7 +168,7 @@ export function saveGoalCover(sourceUri: string): string {
   ensureDir(kindDir(GOAL_COVERS_KIND));
   const fileName = `${newId()}.${extensionFor(sourceUri)}`;
   const dest = new File(Paths.document, ROOT, GOAL_COVERS_KIND, fileName);
-  new File(sourceUri).copy(dest);
+  new File(sourceUri).copySync(dest);
   return `${GOAL_COVERS_KIND}/${fileName}`;
 }
 
@@ -212,7 +212,7 @@ export function saveReceiptImage(sourceUri: string): string {
   ensureDir(kindDir(RECEIPTS_KIND));
   const fileName = `${newId()}.${extensionFor(sourceUri)}`;
   const dest = new File(Paths.document, ROOT, RECEIPTS_KIND, fileName);
-  new File(sourceUri).copy(dest);
+  new File(sourceUri).copySync(dest);
   return `${RECEIPTS_KIND}/${fileName}`;
 }
 
@@ -229,7 +229,7 @@ export function copyReceiptImage(relativePath?: string | null): string | null {
   ensureDir(kindDir(RECEIPTS_KIND));
   const fileName = `${newId()}.${extensionFor(relativePath)}`;
   const dest = new File(Paths.document, ROOT, RECEIPTS_KIND, fileName);
-  source.copy(dest);
+  source.copySync(dest);
   return `${RECEIPTS_KIND}/${fileName}`;
 }
 
@@ -277,7 +277,7 @@ export function savePaymentQr(sourceUri: string): string {
   ensureDir(kindDir(PAYMENT_QR_KIND));
   const fileName = `${newId()}.${extensionFor(sourceUri)}`;
   const dest = new File(Paths.document, ROOT, PAYMENT_QR_KIND, fileName);
-  new File(sourceUri).copy(dest);
+  new File(sourceUri).copySync(dest);
   return `${PAYMENT_QR_KIND}/${fileName}`;
 }
 
@@ -380,7 +380,7 @@ export function saveCustomSubscriptionLogo(sourceUri: string): string {
   ensureDir(kindDir(SUBSCRIPTION_LOGOS_KIND));
   const fileName = `${newId()}.${extensionFor(sourceUri)}`;
   const dest = new File(Paths.document, ROOT, SUBSCRIPTION_LOGOS_KIND, fileName);
-  new File(sourceUri).copy(dest);
+  new File(sourceUri).copySync(dest);
   invalidateCustomUriCache();
   return `${CUSTOM_LOGO_PREFIX}${SUBSCRIPTION_LOGOS_KIND}/${fileName}`;
 }
@@ -411,7 +411,7 @@ export function saveCustomItemIcon(sourceUri: string): string {
   ensureDir(kindDir(ITEM_ICONS_KIND));
   const fileName = `${newId()}.${extensionFor(sourceUri)}`;
   const dest = new File(Paths.document, ROOT, ITEM_ICONS_KIND, fileName);
-  new File(sourceUri).copy(dest);
+  new File(sourceUri).copySync(dest);
   invalidateCustomUriCache();
   return `${CUSTOM_LOGO_PREFIX}${ITEM_ICONS_KIND}/${fileName}`;
 }
@@ -425,7 +425,7 @@ export function saveCustomCategoryIcon(sourceUri: string): string {
   ensureDir(kindDir(CATEGORY_ICONS_KIND));
   const fileName = `${newId()}.${extensionFor(sourceUri)}`;
   const dest = new File(Paths.document, ROOT, CATEGORY_ICONS_KIND, fileName);
-  new File(sourceUri).copy(dest);
+  new File(sourceUri).copySync(dest);
   invalidateCustomUriCache();
   return `${CUSTOM_LOGO_PREFIX}${CATEGORY_ICONS_KIND}/${fileName}`;
 }
@@ -451,7 +451,7 @@ export function saveCustomCardDesign(sourceUri: string, textTone: CardTextTone):
   ensureDir(kindDir(CARD_DESIGNS_KIND));
   const fileName = customCardDesignFileName(newId(), textTone);
   const dest = new File(Paths.document, ROOT, CARD_DESIGNS_KIND, fileName);
-  new File(sourceUri).copy(dest);
+  new File(sourceUri).copySync(dest);
   invalidateCustomUriCache();
   return `${CUSTOM_LOGO_PREFIX}${CARD_DESIGNS_KIND}/${fileName}`;
 }
@@ -581,7 +581,7 @@ export function restoreUserAssetsFromBackup(assets?: UserAssetBackupEntry[]) {
     ensureDir(dir);
     const file = new File(Paths.document, ROOT, ...parts, fileName);
     file.create({ overwrite: true });
-    file.write(asset.base64, { encoding: 'base64' });
+    file.writeSync(asset.base64, { encoding: 'base64' });
   }
   invalidateCustomUriCache();
 }
