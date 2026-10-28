@@ -776,10 +776,13 @@ export function getDistinctNotesSuggestions(prefix: string): string[] {
   const sqlite = getSQLite();
   // LIKE narrows to notes containing the text anywhere; rankNoteSuggestions
   // then keeps only those where it starts the note or a word, so "burger"
-  // finds "Mcd Burger". The cap leaves room for mid-word hits it drops.
+  // finds "Mcd Burger". Notes starting with the text sort first so the cap
+  // never drops one of them for a run of recent mid-word hits ("ca" in
+  // "Local" pushing out "Cafe").
+  const escaped = escapeLike(prefix);
   const rows = sqlite.getAllSync<{ note: string }>(
-    "SELECT note, MAX(date) AS latest FROM transactions WHERE note IS NOT NULL AND note LIKE ? ESCAPE '\\' AND deleted_at IS NULL GROUP BY note ORDER BY latest DESC LIMIT 100",
-    [`%${escapeLike(prefix)}%`],
+    "SELECT note, MAX(date) AS latest FROM transactions WHERE note IS NOT NULL AND note LIKE ? ESCAPE '\\' AND deleted_at IS NULL GROUP BY note ORDER BY note LIKE ? ESCAPE '\\' DESC, latest DESC LIMIT 100",
+    [`%${escaped}%`, `${escaped}%`],
   );
   return rankNoteSuggestions(
     rows.map((r) => r.note),
