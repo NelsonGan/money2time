@@ -2723,14 +2723,12 @@ test destructive schema changes locally first.
 
 One-time: add the secrets in the Cloudflare dashboard — Workers & Pages →
 money2time-workers-receipt-scanner → Settings → Variables and Secrets → add each
-as a "Secret" (encrypted): `OPENROUTER_API_KEY` and `REVENUECAT_SECRET_KEY`,
+as a "Secret" (encrypted): `OPENROUTER_API_KEY`, `REVENUECAT_SECRET_KEY`, and
+`MONEY2TIME_REQUEST_SIGNING_KEY` (the same value as the app's
+`EXPO_PUBLIC_REQUEST_SIGNING_KEY`; leave unset to accept unsigned requests),
 plus the optional `POSTHOG_PROMPTS_API_KEY` (a PostHog personal API key scoped to
 `llm_prompt:read` only; unset serves the bundled prompts).
 Dashboard secrets survive every deploy, so they only need to be set once.
-**Request signing is switched off for now** (temporary): the Worker no longer
-checks `X-Signature` / `X-Timestamp`, so `MONEY2TIME_REQUEST_SIGNING_KEY` is
-unused here, though the app still signs with `EXPO_PUBLIC_REQUEST_SIGNING_KEY`.
-Per-user scan quotas are the only limit until it is switched back on.
 (Equivalent CLI, if you prefer: `npx wrangler secret put <NAME>`. When the
 latest Worker version is an undeployed PR preview, `secret put` refuses; use
 `npx wrangler versions secret put <NAME>`, which takes effect on the next deploy.)
