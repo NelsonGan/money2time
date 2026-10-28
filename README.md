@@ -501,111 +501,154 @@ Traditional Chinese is `zh-Hant`. Device tags for Taiwan, Hong Kong, and Macau s
 
 ## Ledgers
 
-A ledger is a separate book: Personal, Work, a side business. Each one has its
-own accounts, account groups, categories, transactions (with their splits and
-itemized receipts), recurring rules, albums, items, budgets, payment-alert
-captures and merchant learning. The app side lives in `features/ledgers/`.
+A ledger is a separate book, such as Personal, Work or a side business. The
+app side lives in `features/ledgers/`.
 
 ### What the user sees
 
 - **Every install has the default ledger**, shown as "Main" until renamed. It
   holds all data from before ledgers existed, so an existing user's app is
   unchanged. Free users only ever use it.
-- **Settings > Ledger card** (top of Settings) names the open ledger; a tap
-  opens the switcher sheet (`LedgerSwitcherSheet`): every ledger with its
-  currency and entry count, the open one ticked, then New ledger and Manage
-  ledgers. Picking a ledger opens it at once.
+- **The ledger card** sits under the profile card in Settings and names the
+  open ledger. A tap opens the switcher (`LedgerSwitcherSheet`): every ledger
+  with its currency and entry count, the open one ticked, then New ledger and
+  Manage ledgers. The entry counts are read when the sheet opens.
+- **Switching** happens after the sheet has closed and after any save still in
+  flight. It reloads the app's data and remounts every page but Settings
+  (`MountedTab`'s `resetKey`), so no selection, filter or scroll position
+  carries over. Hidden pages mount again only when visited.
 - **New ledger** (Pro, `LedgerEditorScreen`): icon, name, main currency, and
-  what it starts with. Accounts: copy the open ledger's debit and credit
-  accounts and groups at a zero balance (accounts in the open ledger's main
-  currency take the new ledger's; goals and loans are not copied), or the
-  starter accounts. Categories: copy the open ledger's tree, or the starter
-  set. No transactions are copied. Creating a ledger opens it.
-- **Manage ledgers** (`LedgersScreen`): rename and re-icon any ledger, add
-  one, and delete one that is not open (the default ledger cannot be deleted).
-  Deleting soft-deletes the ledger and every row in it, in one transaction. A
-  ledger's currency is set when it is made; changing it later is the Multi
-  currency page's start-over, which with other ledgers clears the open ledger
-  only.
-- **Switching** reloads the data for the new ledger and remounts every page
-  but Settings (`MountedTab`'s `resetKey`), so no selection, filter or scroll
-  position carries over. Hidden pages mount again only when visited, so a
-  switch never mounts every page at once.
-- **When Pro ends** (RevenueCat has settled on free, `isStatusKnown`) while a
-  ledger other than the default one is open, `LedgerProGuard` opens the
-  default ledger and says so once. Nothing is deleted: other ledgers show a
-  lock in the switcher and open again, as they were, when Pro is back.
-- **Shared by every ledger:** settings (theme, language, app lock, backup,
-  notifications, bottom bar, payment-alert setup, profile, payment QR), the
-  hourly value and wage history, the exchange-rate cache, and Pro.
-- **Each ledger's own settings:** main currency, default payback account, the
-  quick-entry defaults that name its accounts and categories
-  (`LEDGER_QUICK_ENTRY_KEYS`: keyword map, default categories, account and
-  currency), and Insights preferences. The default ledger keeps reading these
-  from the settings row; other ledgers keep them on their `ledgers` row
-  (`currency_code`, `prefs_json`). `settingsRepository` merges them, so the
-  rest of the app reads `settings` and `quickEntryPrefs` as before.
-- **Reset all data** removes every ledger. **Reset transactions** and the
-  Money Manager import change the open ledger only.
-- **Recurring rules** run for the open ledger; another ledger's rules catch up
+  what it starts with:
+  - **Accounts:** copy the open ledger's debit and credit accounts and their
+    groups at a zero balance, or use the starter accounts. Copied accounts in
+    the open ledger's main currency take the new ledger's currency. Goals and
+    loans are not copied.
+  - **Categories:** copy the open ledger's categories and subcategories, or use
+    the starter set.
+  - No transactions are copied, and creating a ledger opens it. The
+    explanations sit behind info buttons.
+- **Manage ledgers** (`LedgersScreen`) is open to every user, so a free user
+  can rename Main. It can rename and re-icon any ledger, add one (Pro) and
+  delete one that is not open. The default ledger cannot be deleted.
+  - Deleting soft-deletes the ledger and every row in it, in one transaction,
+    after a confirmation that gives its entry count.
+  - A ledger's currency is set when it is made. Changing it later is the Multi
+    currency page's start-over.
+- **When Pro ends** while another ledger is open, `LedgerProGuard` opens the
+  default ledger and shows a notice once, with Done and Renew Pro.
+  - The guard acts only on an answer from RevenueCat that the customer is
+    free. A failed or missing read is not one, so an offline Pro user keeps
+    their ledger.
+  - It waits until no editor is open: an editor holds the closing ledger's
+    accounts and categories.
+  - The notice is held back by the app lock and by other launch prompts. It is
+    kept in AsyncStorage until seen, and dropped if Pro is back by then.
+  - Nothing is deleted. The other ledgers show a lock in the switcher (a tap
+    opens the paywall) and open again, as they were, when Pro is back.
+- **Shared by every ledger:**
+  - settings: theme, language, app lock, backup, notifications, bottom bar,
+    profile and payment QR;
+  - which apps payment alerts watch;
+  - the hourly value and wage history;
+  - the exchange-rate cache;
+  - Pro.
+- **Each ledger's own:**
+  - accounts, account groups, categories, transactions with their splits and
+    itemized receipts;
+  - recurring rules, albums, items, budgets;
+  - payment-alert captures;
+  - main currency and default payback account;
+  - the quick-entry picks that name its accounts and categories
+    (`LEDGER_QUICK_ENTRY_KEYS`);
+  - the account each payment-alert source logs into;
+  - Insights preferences.
+- **Resets and imports:**
+  - Reset all data removes every ledger.
+  - A Money Manager import replaces the open ledger's data, in that ledger's
+    currency.
+  - With other ledgers present, the currency start-over clears only the open
+    ledger and its own preferences.
+- **Recurring rules** run for the open ledger. Another ledger's rules catch up
   on missed dates when it is opened.
+- **Backups** hold every ledger, and a restore opens the default ledger. The
+  Web Dashboard shows the open ledger only.
 
 ### How it works
 
 One database, with a `ledger_id` column on each ledger's root tables
-(migration `073_ledgers`). One SQLite file per ledger was considered and
-rejected: Cloud Sync replicates one database through triggers into
-`sync_rows`, and a column needs no change there, where a file per ledger would
-need an engine and a replica each.
+(migration `073_ledgers`). A separate SQLite file per ledger was considered and
+rejected. Cloud Sync replicates one database through triggers into
+`sync_rows`, so a column needs no change there. A file per ledger would need
+its own sync engine and replica.
 
-- `ledger_id TEXT NOT NULL DEFAULT 'default'` is on `accounts`,
+- **Tables.** `ledger_id TEXT NOT NULL DEFAULT 'default'` is on `accounts`,
   `account_groups`, `categories`, `transactions`, `recurring_rules`, `albums`,
   `items`, `budget_templates`, `monthly_budgets`, `auto_log_captures` and
-  `merchant_categories` (`LEDGER_TABLES` in `lib/db/ledgerScope.ts`). Child
-  tables (splits, receipt splits, album joins, budget lines) follow their
-  parent. A constant-default `ADD COLUMN` rewrites no rows, so the migration
-  is instant on any database, and every existing row lands in the default
-  ledger.
-- `ledgers` lists the ledgers; the `default` row is made by the migration and
-  restored if a backup lacks it. `settings.active_ledger_id` is the open one
-  (null = default); it is device-local.
-- **Scoping.** `lib/db/ledgerScope.ts` holds the open ledger id, set by
-  `initializeDatabase()` (from `settings.active_ledger_id`, falling back to the
-  default ledger when the stored one is gone) and by `switchLedger`. Every
-  repository read of a ledger table filters with `inActiveLedger(table)` (or
-  `ledger_id = ?` in raw SQL), and every insert stamps `getActiveLedgerId()`.
-  The Drizzle schema gives `ledgerId` no default on purpose, so an insert that
-  forgets it does not compile. Writes by id need no filter, since ids are
-  unique across ledgers; reads by id are filtered anyway, so a stale id from
-  another ledger finds nothing. Name-matched writes (account groups) are
-  filtered. Aggregates keyed by account id (balances) need no filter.
-  `withLedgerScope` runs synchronous work in another ledger, for seeding or
-  copying into a new one.
+  `merchant_categories` (`LEDGER_TABLES` in `lib/db/ledgerScope.ts`).
+  - Child tables (splits, receipt splits, album joins, budget lines) follow
+    their parent.
+  - A constant-default `ADD COLUMN` rewrites no rows. The migration is instant
+    on any database, and every existing row lands in the default ledger.
+- **Ledger rows.** `ledgers` lists the ledgers. The migration makes the
+  `default` row, and a restore makes it again if the backup has none. Its null
+  name and currency mean "Main" and the settings row's currency.
+  `settings.active_ledger_id` is the open ledger (null means the default); it
+  is device-local.
+- **Scoping.** `lib/db/ledgerScope.ts` holds the open ledger id.
+  - It is set by `initializeDatabase()`, from `settings.active_ledger_id`, or
+    the default ledger when the stored one is gone. `switchLedger` also sets
+    it.
+  - Every repository read of a ledger table filters with
+    `inActiveLedger(table)`, or `ledger_id = ?` in raw SQL. Every insert stamps
+    `getActiveLedgerId()`.
+  - The Drizzle schema gives `ledgerId` no default on purpose, so an insert
+    that forgets it does not compile.
+  - Writes by id need no filter, since ids are unique across ledgers. Reads by
+    id are filtered anyway, so a stale id from another ledger finds nothing.
+  - Name-matched writes (account groups) are filtered. Totals keyed by account
+    id (balances) need no filter.
+  - `withLedgerScope` runs synchronous work in another ledger, to seed or copy
+    into a new one.
+- **Ledger settings.** The settings row keeps the default ledger's own
+  settings. A non-default ledger keeps its own on its `ledgers` row:
+  `currency_code` and `currency_symbol`, plus the `LedgerPrefs` JSON in
+  `prefs_json` (payback account, quick-entry picks, payment-alert accounts and
+  Insights).
+  - `settingsRepository` merges the two, through the pure helpers in
+    `lib/repositories/ledgerPrefs.ts`, so the rest of the app reads `settings`,
+    `quickEntryPrefs` and the payment-alert prefs as before.
+  - A write that spans both rows runs in one transaction.
 - **Indexes.** The natural-key unique indexes are per ledger
   (`idx_monthly_budgets_ledger_period_key`,
-  `idx_merchant_categories_ledger_key`). There is deliberately no plain
-  `ledger_id` index: with few ledgers it is barely selective, and without
-  `ANALYZE` statistics SQLite could prefer it over the date and account
-  indexes the transaction queries use. The ledger filter is a residual check.
-- **Exchange rates** are shared, keyed by base currency.
-  `runRateRefreshIfDue` treats a base with no rates as due even on a day
-  already fetched, so opening a ledger in another currency fills its rates.
-- **Backup.** Rows carry `ledger_id`, and the backup has a `ledgers` table. A
-  backup holding more than one ledger is version 4, which an app from before
-  ledgers refuses instead of restoring every ledger into one book; otherwise
-  it stays version 3. A backup without ledgers restores into the default
-  ledger through the column default. A restore always opens the default
-  ledger. The Web Dashboard gets the open ledger only (`openLedgerOnly`), as
-  version 3, with the settings row showing that ledger's currency.
-- **Images.** Copied accounts and categories share their logo and icon files;
-  the orphan sweep reads every row in every ledger, so a file stays while any
+  `idx_merchant_categories_ledger_key`).
+  - There is deliberately no plain `ledger_id` index. With few ledgers it is
+    barely selective, and without `ANALYZE` statistics SQLite could prefer it
+    over the date and account indexes the transaction queries use.
+  - The ledger filter is a residual check. Splits are scoped with a
+    primary-key `EXISTS` probe per split.
+- **Exchange rates** are shared and keyed by base currency.
+  `runRateRefreshIfDue` judges staleness per base, from when that base's feed
+  rates were last stored. The fetch timestamp on the settings row is shared by
+  every ledger, so it cannot answer that.
+- **Backup.** Rows carry `ledger_id`, and the backup has a `ledgers` table.
+  - A backup holding more than one ledger is version 4. An app from before
+    ledgers refuses it, instead of restoring every ledger into one book.
+    Otherwise the backup stays version 3.
+  - A backup without ledgers restores into the default ledger through the
+    column default.
+  - The Web Dashboard gets the open ledger only (`openLedgerOnly`), as
+    version 3. Its settings row shows the ledger's own settings, and it holds
+    only the images that ledger's rows use.
+- **Images.** Copied accounts and categories share their logo and icon files.
+  The orphan sweep reads every row in every ledger, so a file stays while any
   ledger uses it.
-- **Cloud Sync.** `ledgers` belongs in `SYNC_TABLES` and in the backup-table
-  parity list, `active_ledger_id` in `DEVICE_LOCAL_SETTINGS_COLUMNS`, and the
-  per-ledger unique indexes above are the natural keys to resolve. Cloud
-  Sync's branch uses migration `072`, which is why this one is `073`: whichever
-  of the two merges second must renumber after the first, or installs that ran
-  the higher number skip the lower one.
+- **Cloud Sync.**
+  - `ledgers` belongs in `SYNC_TABLES` and in the backup-table parity list,
+    and `active_ledger_id` in `DEVICE_LOCAL_SETTINGS_COLUMNS`.
+  - The per-ledger unique indexes above are the natural keys to resolve.
+  - Cloud Sync's branch uses migration `072`, which is why this one is `073`.
+    Whichever of the two merges second must renumber after the first, or
+    installs that ran the higher number skip the lower one.
 
 ## Notification review
 

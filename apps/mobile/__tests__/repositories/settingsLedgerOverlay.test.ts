@@ -1,4 +1,7 @@
-jest.mock('~/lib/db/client', () => ({ getDb: jest.fn() }));
+jest.mock('~/lib/db/client', () => ({
+  getDb: jest.fn(),
+  getSQLite: () => ({ withTransactionSync: (task: () => void) => task() }),
+}));
 jest.mock('~/lib/repositories/ledgersRepository', () => ({
   ledgersRepository: { update: jest.fn(), updatePrefs: jest.fn(), getPrefs: jest.fn() },
 }));
@@ -138,6 +141,54 @@ describe('settings with a ledger open', () => {
       defaultAccountId: 'main-cash',
       categoryMap: { food: 'main-food' },
     });
+  });
+
+  it("reads each payment-alert source's account from the open ledger", () => {
+    setActiveLedgerId('work');
+    fakeDb([
+      {
+        autoLogPrefsJson: JSON.stringify({
+          alertsEnabled: true,
+          sources: { 'ios_alert:bank': { sourceKey: 'bank', accountId: 'main-card' } },
+        }),
+      },
+    ]);
+    ledgers.getPrefs.mockReturnValue({ paymentAlertAccounts: { 'ios_alert:bank': 'work-card' } });
+    expect(JSON.parse(settingsRepository.getAutoLogPrefsJson() as string)).toEqual({
+      alertsEnabled: true,
+      sources: { 'ios_alert:bank': { sourceKey: 'bank', accountId: 'work-card' } },
+    });
+  });
+
+  it("saves a ledger's payment-alert accounts to it, keeping the default ledger's", () => {
+    setActiveLedgerId('work');
+    const writes = fakeDb([
+      {
+        autoLogPrefsJson: JSON.stringify({
+          sources: { 'ios_alert:bank': { sourceKey: 'bank', accountId: 'main-card' } },
+        }),
+      },
+    ]);
+    settingsRepository.updateAutoLogPrefsJson(
+      JSON.stringify({
+        alertsEnabled: false,
+        sources: { 'ios_alert:bank': { sourceKey: 'bank', accountId: 'work-card' } },
+      }),
+    );
+    expect(ledgers.updatePrefs).toHaveBeenCalledWith('work', {
+      paymentAlertAccounts: { 'ios_alert:bank': 'work-card' },
+    });
+    expect(JSON.parse(writes[0]?.autoLogPrefsJson as string)).toEqual({
+      alertsEnabled: false,
+      sources: { 'ios_alert:bank': { sourceKey: 'bank', accountId: 'main-card' } },
+    });
+  });
+
+  it("never carries a legacy default-ledger account into another ledger's quick entry", () => {
+    setActiveLedgerId('work');
+    fakeDb([{ quickEntryPrefsJson: JSON.stringify({ voiceDefaultAccountId: 'main-cash' }) }]);
+    ledgers.getPrefs.mockReturnValue({});
+    expect(JSON.parse(settingsRepository.getQuickEntryPrefsJson() as string)).toEqual({});
   });
 
   it('keeps Insights preferences per ledger', () => {

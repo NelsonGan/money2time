@@ -191,7 +191,7 @@ export interface DatabaseInitResult extends MigrationRunResult {
  * longer exists (deleted on this phone, or missing after a restore) falls back
  * to the default ledger, and the fallback is stored.
  */
-export function openStoredLedger(sqliteDb: SQLiteDatabase = getSQLite()): string {
+function openStoredLedger(sqliteDb: SQLiteDatabase): void {
   const row = sqliteDb.getFirstSync<{ id: string | null }>(
     `SELECT l.id AS id FROM settings s
        JOIN ledgers l ON l.id = s.active_ledger_id AND l.deleted_at IS NULL
@@ -204,7 +204,6 @@ export function openStoredLedger(sqliteDb: SQLiteDatabase = getSQLite()): string
     );
   }
   setActiveLedgerId(ledgerId);
-  return ledgerId;
 }
 
 export function initializeDatabase(): DatabaseInitResult {
@@ -212,16 +211,8 @@ export function initializeDatabase(): DatabaseInitResult {
   const result = runMigrations(sqliteDb);
   const isNewInstall = ensureCoreData();
   backfillFirstAppOpen(sqliteDb);
-  // On a downgraded database (newer than this build) the ledger tables may
-  // still be missing; the default ledger is then the only one there is.
-  if (result.isDowngrade) {
-    try {
-      openStoredLedger(sqliteDb);
-    } catch {
-      setActiveLedgerId(DEFAULT_LEDGER_ID);
-    }
-  } else {
-    openStoredLedger(sqliteDb);
-  }
+  // A database newer than this build has the ledger tables too: migrations
+  // only ever add.
+  openStoredLedger(sqliteDb);
   return { ...result, isNewInstall };
 }

@@ -19,6 +19,12 @@ import { ledgerDisplayName, ledgerIcon, ledgerNeedsPro } from '../lib/ledgerDisp
 const PENDING_NOTICE_KEY = '@m2t/ledger_pro_ended_notice/v1';
 
 interface LedgerProGuardProps {
+  /**
+   * Whether the app is on its main screens, with no editor open. The switch
+   * waits for it: an open editor holds the closing ledger's accounts and
+   * categories, and saving one after the switch would mix the two ledgers.
+   */
+  canSwitch: boolean;
   /** Hold the notice while another prompt or the app lock is up. */
   suppressed: boolean;
   onRenewPro: () => void;
@@ -26,13 +32,16 @@ interface LedgerProGuardProps {
 
 /**
  * Ledgers other than the default one are Pro. When Pro ends (RevenueCat has
- * settled on free, not merely not answered yet) while one is open, this opens
+ * answered free; a read that failed or has not come back yet says nothing,
+ * so an offline Pro user keeps their ledger) while one is open, this opens
  * the default ledger and says so once. Nothing is deleted: the other ledgers
  * show a lock in the switcher and open again as they were when Pro is back.
  */
-export function LedgerProGuard({ suppressed, onRenewPro }: LedgerProGuardProps) {
+export function LedgerProGuard({ canSwitch, suppressed, onRenewPro }: LedgerProGuardProps) {
   const { activeLedger, ledgers, switchLedger } = useApp();
-  const { isPro, isStatusKnown } = usePro();
+  const { isPro, isStatusKnown, customerState } = usePro();
+  // A real answer from RevenueCat, not the placeholder a failed read leaves.
+  const hasAnswer = isStatusKnown && customerState !== null;
   const insets = useSafeAreaInsets();
   // The name of the ledger that was closed, while the notice is due.
   const [closedLedgerName, setClosedLedgerName] = useState<string | null>(null);
@@ -46,12 +55,19 @@ export function LedgerProGuard({ suppressed, onRenewPro }: LedgerProGuardProps) 
   }, []);
 
   useEffect(() => {
-    if (!isStatusKnown || isPro || !ledgerNeedsPro(activeLedger.id)) return;
+    if (!hasAnswer) return;
+    if (isPro) {
+      // Renewed before an unseen notice showed: it no longer applies.
+      setClosedLedgerName(null);
+      AsyncStorage.removeItem(PENDING_NOTICE_KEY).catch(() => undefined);
+      return;
+    }
+    if (!canSwitch || !ledgerNeedsPro(activeLedger.id)) return;
     const name = ledgerDisplayName(activeLedger);
     setClosedLedgerName(name);
     AsyncStorage.setItem(PENDING_NOTICE_KEY, name).catch(() => undefined);
     switchLedger(DEFAULT_LEDGER_ID);
-  }, [activeLedger, isPro, isStatusKnown, switchLedger]);
+  }, [activeLedger, canSwitch, hasAnswer, isPro, switchLedger]);
 
   const defaultLedger = ledgers.find((ledger) => ledger.id === DEFAULT_LEDGER_ID) ?? activeLedger;
   const dismiss = () => {
@@ -61,7 +77,7 @@ export function LedgerProGuard({ suppressed, onRenewPro }: LedgerProGuardProps) 
 
   return (
     <ThemeModal
-      visible={closedLedgerName != null && !suppressed}
+      visible={closedLedgerName != null && !suppressed && !(hasAnswer && isPro)}
       transparent
       animationType="fade"
       presentationStyle="overFullScreen"

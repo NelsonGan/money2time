@@ -29,7 +29,11 @@ jest.mock('expo-document-picker', () => ({}));
 jest.mock('expo-file-system/next', () => ({ File: class {}, Paths: {} }));
 jest.mock('expo-sharing', () => ({}));
 jest.mock('~/services/userAssets', () => ({
-  collectUserAssetsForBackup: jest.fn(async () => []),
+  collectUserAssetsForBackup: jest.fn(async () => [
+    { path: 'receipts/taxi.jpg', base64: 'taxi' },
+    { path: 'receipts/lunch.jpg', base64: 'lunch' },
+  ]),
+  assetRelativePathFromRef: (ref?: string | null) => ref ?? null,
   restoreUserAssetsFromBackup: jest.fn(),
 }));
 jest.mock('~/services/userAssetGc', () => ({ runUserAssetGc: jest.fn() }));
@@ -224,10 +228,12 @@ describe('backup and restore across ledgers', () => {
 
   function addWorkLedger() {
     harness.connection.exec(`
-      INSERT INTO ledgers (id, name, currency_code, currency_symbol, created_at, updated_at)
-        VALUES ('work', 'Work', 'USD', '$', '${NOW}', '${NOW}');
-      INSERT INTO transactions (id, ledger_id, type, amount, currency, date, created_at, updated_at)
-        VALUES ('taxi', 'work', 'expense', 30, 'USD', '2026-10-27', '${NOW}', '${NOW}');
+      INSERT INTO ledgers (id, name, currency_code, currency_symbol, prefs_json, created_at, updated_at)
+        VALUES ('work', 'Work', 'USD', '$', '{"defaultPaybackAccountId":"work-bank"}', '${NOW}', '${NOW}');
+      INSERT INTO transactions (id, ledger_id, type, amount, currency, date, receipt_uri, created_at, updated_at)
+        VALUES ('taxi', 'work', 'expense', 30, 'USD', '2026-10-27', 'receipts/taxi.jpg', '${NOW}', '${NOW}');
+      UPDATE transactions SET receipt_uri = 'receipts/lunch.jpg' WHERE id = 'lunch';
+      UPDATE settings SET default_payback_account_id = 'main-bank';
       INSERT INTO transaction_splits (id, transaction_id, amount, created_at, updated_at)
         VALUES ('taxi-split', 'taxi', 15, '${NOW}', '${NOW}');
       UPDATE settings SET active_ledger_id = 'work';
@@ -258,7 +264,12 @@ describe('backup and restore across ledgers', () => {
     expect(backup.tables.transactions.map((row) => row.id)).toEqual(['taxi']);
     expect(backup.tables.transaction_splits.map((row) => row.id)).toEqual(['taxi-split']);
     expect(backup.tables.accounts).toEqual([]);
-    expect(backup.tables.settings[0]).toMatchObject({ currency_code: 'USD', currency_symbol: '$' });
+    expect(backup.tables.settings[0]).toMatchObject({
+      currency_code: 'USD',
+      currency_symbol: '$',
+      default_payback_account_id: 'work-bank',
+    });
+    expect(backup.userAssets?.map((asset) => asset.path)).toEqual(['receipts/taxi.jpg']);
   });
 
   it('restores every ledger and opens the default one', async () => {

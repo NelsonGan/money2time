@@ -24,3 +24,26 @@ export function ledgerIcon(ledger: Pick<Ledger, 'id' | 'emoji'> | null): string 
 export function ledgerNeedsPro(ledgerId: string): boolean {
   return ledgerId !== DEFAULT_LEDGER_ID;
 }
+
+/** The line under a ledger's name: its currency and how many entries it holds. */
+export function ledgerSummary(ledger: Pick<Ledger, 'currencyCode'>, entryCount: number): string {
+  const entries = I18n.t(entryCount === 1 ? 'ledgers.entries_one' : 'ledgers.entries_other', {
+    count: entryCount,
+  });
+  return ledger.currencyCode ? `${ledger.currencyCode} · ${entries}` : entries;
+}
+
+/** What a screen reader says for a ledger row. */
+export function ledgerAccessibilityLabel(
+  ledger: Pick<Ledger, 'id' | 'name' | 'currencyCode'>,
+  entryCount: number,
+  locked: boolean,
+): string {
+  return [
+    ledgerDisplayName(ledger),
+    ledgerSummary(ledger, entryCount),
+    locked ? I18n.t('ledgers.locked_note') : null,
+  ]
+    .filter(Boolean)
+    .join(', ');
+}

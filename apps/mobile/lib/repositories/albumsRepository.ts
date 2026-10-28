@@ -193,7 +193,9 @@ class AlbumsRepository {
       .getAllSync<{ albumId: string; transactionId: string }>(
         `SELECT album_id AS albumId, transaction_id AS transactionId
        FROM album_transactions
-       WHERE deleted_at IS NULL`,
+       WHERE deleted_at IS NULL
+         AND album_id IN (SELECT id FROM albums WHERE ledger_id = ?)`,
+        [getActiveLedgerId()],
       )
       .forEach((row) => {
         const ids = byAlbum.get(row.albumId);

@@ -86,6 +86,17 @@ export function isRateStale(lastFetchAt: string | null, now: Date = new Date()):
   return now.getTime() - last >= RATE_STALE_HOURS * 60 * 60 * 1000;
 }
 
+/** When `base`'s feed rates were last stored; null when it has none. */
+function lastApiFetchFor(base: string): string | null {
+  let latest: string | null = null;
+  for (const rate of exchangeRatesRepository.listByBase(base)) {
+    if (rate.source === 'api' && (latest === null || rate.updatedAt > latest)) {
+      latest = rate.updatedAt;
+    }
+  }
+  return latest;
+}
+
 async function fetchJson(url: string): Promise<FrankfurterRate[]> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
@@ -167,13 +178,10 @@ export async function runRateRefreshIfDue(opts?: { force?: boolean }): Promise<R
       return { ok: false, asOfDate: null, error: null };
     }
     const base = settings.currencyCode;
-    // Fresh rates for one base say nothing about another: a ledger in a
-    // different currency that has none yet is due even on a fresh fetch day.
-    if (
-      !opts?.force &&
-      !isRateStale(settings.lastRateFetchAt) &&
-      exchangeRatesRepository.listByBase(base).length > 0
-    ) {
+    // Staleness is per base currency, from when its own feed rates were last
+    // stored: ledgers in different currencies share the one fetch timestamp
+    // on the settings row, which only says that some base was fetched.
+    if (!opts?.force && !isRateStale(lastApiFetchFor(base))) {
       return { ok: true, asOfDate: null, error: null };
     }
 

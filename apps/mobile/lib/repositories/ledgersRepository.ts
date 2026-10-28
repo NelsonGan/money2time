@@ -6,6 +6,7 @@ import { ledgersTable, settingsTable } from '~/lib/db/schema';
 import type { Ledger, LedgerPrefs } from '~/types';
 import { newId, nowIso } from '~/utils/id';
 
+import { parseLedgerPrefs } from './ledgerPrefs';
 import { toLedger } from './mappers';
 
 export interface LedgerInput {
@@ -27,18 +28,6 @@ const LEDGER_CHILD_TABLES = [
   ['budget_template_categories', 'template_id', 'budget_templates'],
   ['monthly_budget_categories', 'budget_id', 'monthly_budgets'],
 ] as const;
-
-function parsePrefs(json: string | null | undefined): LedgerPrefs {
-  if (!json) return {};
-  try {
-    const parsed: unknown = JSON.parse(json);
-    return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
-      ? (parsed as LedgerPrefs)
-      : {};
-  } catch {
-    return {};
-  }
-}
 
 class LedgersRepository {
   /**
@@ -128,7 +117,7 @@ class LedgersRepository {
       .from(ledgersTable)
       .where(eq(ledgersTable.id, id))
       .get();
-    return parsePrefs(row?.prefsJson);
+    return parseLedgerPrefs(row?.prefsJson);
   }
 
   /** Merge `patch` into a ledger's prefs. */

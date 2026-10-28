@@ -139,11 +139,14 @@ export function SettingsScreen({
   onCreateLedger,
   onManageLedgers,
 }: SettingsScreenProps) {
-  const { settings, updateSettings } = useApp();
+  const { settings, updateSettings, getLedgerEntryCounts } = useApp();
   const monthCycle = monthCycleOf(settings);
   const { transactions } = useTransactions();
   const { isPro, setDevProOverride } = usePro();
   const [ledgerSheetVisible, setLedgerSheetVisible] = useState(false);
+  // Read when the switcher opens, not on every render, and kept while it
+  // fades out so its rows do not flash to zero.
+  const [ledgerEntryCounts, setLedgerEntryCounts] = useState<Record<string, number>>({});
   const themeColors = useThemeColors();
   const isFlatIcons = useIsFlatIcons();
   const bottomNavInset = useSettingsBottomNavInset();
@@ -412,7 +415,12 @@ export function SettingsScreen({
           </View>
 
           <View className="mt-3">
-            <LedgerSwitcherCard onPress={() => setLedgerSheetVisible(true)} />
+            <LedgerSwitcherCard
+              onPress={() => {
+                setLedgerEntryCounts(getLedgerEntryCounts());
+                setLedgerSheetVisible(true);
+              }}
+            />
           </View>
 
           {!isPro ? (
@@ -805,6 +813,7 @@ export function SettingsScreen({
       </ThemeModal>
       <LedgerSwitcherSheet
         visible={ledgerSheetVisible}
+        entryCounts={ledgerEntryCounts}
         onClose={() => setLedgerSheetVisible(false)}
         onOpenProPaywall={onOpenProPaywall}
         onCreateLedger={onCreateLedger}

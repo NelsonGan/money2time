@@ -596,7 +596,7 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   getLedgerEntryCounts: () => Record<string, number>;
 }
 
-export interface CreateLedgerInput extends LedgerInput {
+interface CreateLedgerInput extends LedgerInput {
   /** Copy the open ledger's regular accounts and groups (balances start at zero); else starters. */
   copyAccounts: boolean;
   /** Copy the open ledger's categories and subcategories; else the starter set. */
@@ -3849,6 +3849,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       runMutation(() => {
         if (otherLedgersKept) {
           purgeOpenLedgerData();
+          settingsRepository.clearOpenLedgerPrefs();
           settingsRepository.updateSettings({
             currencyCode: code,
             currencySymbol: currencySymbolForCode(code),
@@ -4850,19 +4851,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const switchLedger = useCallback(
     (ledgerId: string) => {
-      if (ledgerId === getActiveLedgerId()) return;
-      if (!ledgersRepository.getById(ledgerId)) return;
-      settingsRepository.updateActiveLedgerId(ledgerId);
-      setActiveLedgerId(ledgerId);
-      // Filters name the old ledger's accounts and categories.
-      setTransactionFiltersState(DEFAULT_TRANSACTION_FILTERS);
-      setActiveAccountFilter(null);
-      // Drop the old ledger's rows rather than diff against them: no id is
-      // shared between ledgers, so nothing could be reused.
-      setTransactions([]);
-      refreshAll();
-      void trackEvent(AnalyticsEvents.LEDGER_SWITCHED, {
-        to_default: ledgerId === DEFAULT_LEDGER_ID,
+      // Queued behind the writes already deferred (they run in order), so a
+      // save still in flight lands in, and refreshes, the ledger it was made
+      // in. Waiting for interactions also lets the switcher sheet close first.
+      runDeferredWrite(() => {
+        if (ledgerId === getActiveLedgerId()) return;
+        if (!ledgersRepository.getById(ledgerId)) return;
+        settingsRepository.updateActiveLedgerId(ledgerId);
+        setActiveLedgerId(ledgerId);
+        // Filters name the old ledger's accounts and categories.
+        setTransactionFiltersState(DEFAULT_TRANSACTION_FILTERS);
+        setActiveAccountFilter(null);
+        // Drop the old ledger's rows rather than diff against them: no id is
+        // shared between ledgers, so nothing could be reused.
+        setTransactions([]);
+        refreshAll();
+        void trackEvent(AnalyticsEvents.LEDGER_SWITCHED, {
+          to_default: ledgerId === DEFAULT_LEDGER_ID,
+        });
       });
     },
     [refreshAll],
@@ -4973,8 +4979,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const symbol = settings?.currencySymbol ?? '$';
         const summary = await importMoneyManagerBackupFromUri(uri, symbol);
         // Money Manager rows are written with the currency symbol — normalize to
-        // ISO codes so multi-currency treats them correctly.
-        normalizeCurrencyColumns(getSQLite());
+        // ISO codes so multi-currency treats them correctly, in the currency of
+        // the ledger they were imported into.
+        normalizeCurrencyColumns(getSQLite(), {
+          mainCode: ledgersRepository.activeReportingCurrency().code,
+        });
         // The importer writes icons via suggestCategoryIcon, but a re-import of
         // an older export can still carry bare glyphs; fold them in too.
         normalizeIconColumns(getSQLite());

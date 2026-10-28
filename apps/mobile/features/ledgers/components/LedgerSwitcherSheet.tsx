@@ -1,5 +1,5 @@
 import { Check, Lock, Plus } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -13,11 +13,19 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
 
-import { ledgerDisplayName, ledgerIcon, ledgerNeedsPro } from '../lib/ledgerDisplay';
+import {
+  ledgerAccessibilityLabel,
+  ledgerDisplayName,
+  ledgerIcon,
+  ledgerNeedsPro,
+  ledgerSummary,
+} from '../lib/ledgerDisplay';
 import { ProChip } from './ProChip';
 
 interface LedgerSwitcherSheetProps {
   visible: boolean;
+  /** Live entries per ledger id, read when the sheet was opened. */
+  entryCounts: Readonly<Record<string, number>>;
   onClose: () => void;
   /** Opens the paywall; `source` is the paywall funnel's attribution. */
   onOpenProPaywall: (source: string) => void;
@@ -32,27 +40,17 @@ interface LedgerSwitcherSheetProps {
  */
 export function LedgerSwitcherSheet({
   visible,
+  entryCounts,
   onClose,
   onOpenProPaywall,
   onCreateLedger,
   onManageLedgers,
 }: LedgerSwitcherSheetProps) {
-  const { ledgers, activeLedger, switchLedger, getLedgerEntryCounts } = useApp();
+  const { ledgers, activeLedger, switchLedger } = useApp();
   const isPro = useIsPro();
   const themeColors = useThemeColors();
   const sheetColumnStyle = useSheetColumnStyle();
   const insets = useSafeAreaInsets();
-
-  // Counted each time the sheet opens, not on every transaction change, and
-  // kept while it fades out so the rows do not flash to zero.
-  const [entryCounts, setEntryCounts] = useState<Record<string, number>>({});
-  const [countedForOpen, setCountedForOpen] = useState(false);
-  if (visible && !countedForOpen) {
-    setCountedForOpen(true);
-    setEntryCounts(getLedgerEntryCounts());
-  } else if (!visible && countedForOpen) {
-    setCountedForOpen(false);
-  }
 
   const handlePick = (ledgerId: string) => {
     if (ledgerId === activeLedger.id) {
@@ -113,7 +111,7 @@ export function LedgerSwitcherSheet({
                     key={ledger.id}
                     accessibilityRole="button"
                     accessibilityState={{ selected: isOpen }}
-                    accessibilityLabel={ledgerDisplayName(ledger)}
+                    accessibilityLabel={ledgerAccessibilityLabel(ledger, count, locked)}
                     testID={`ledger-row-${ledger.id}`}
                     onPress={() => handlePick(ledger.id)}
                     className={cn(
@@ -129,14 +127,7 @@ export function LedgerSwitcherSheet({
                         {ledgerDisplayName(ledger)}
                       </Text>
                       <Text variant="caption" tone="muted" numberOfLines={1}>
-                        {[
-                          ledger.currencyCode,
-                          I18n.t(count === 1 ? 'ledgers.entries_one' : 'ledgers.entries_other', {
-                            count,
-                          }),
-                        ]
-                          .filter(Boolean)
-                          .join(' · ')}
+                        {ledgerSummary(ledger, count)}
                       </Text>
                     </View>
                     {isOpen ? (

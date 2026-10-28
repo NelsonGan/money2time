@@ -1417,5 +1417,7 @@ export const LEDGER_QUICK_ENTRY_KEYS = [
 export interface LedgerPrefs {
   defaultPaybackAccountId?: string | null;
   quickEntry?: Partial<Pick<QuickEntryPrefs, (typeof LEDGER_QUICK_ENTRY_KEYS)[number]>>;
+  /** The account each payment-alert source logs into, keyed like `PaymentAlertPrefs.sources`. */
+  paymentAlertAccounts?: Record<string, string | null>;
   insightsPrefsJson?: string | null;
 }

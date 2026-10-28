@@ -2,14 +2,22 @@ import { and, eq, isNull } from 'drizzle-orm';
 
 import { DEFAULT_APP_ICON_ID } from '~/constants/appIcons';
 import { busyWaitSync } from '~/lib/db/busyWaitSync';
-import { getDb } from '~/lib/db/client';
+import { getDb, getSQLite } from '~/lib/db/client';
 import { DEFAULT_LEDGER_ID, getActiveLedgerId } from '~/lib/db/ledgerScope';
 import { ledgersTable, settingsTable } from '~/lib/db/schema';
 import { getDeviceLocale } from '~/lib/i18n';
-import { LEDGER_QUICK_ENTRY_KEYS, type LedgerPrefs, type UserSettings } from '~/types';
+import { LEDGER_QUICK_ENTRY_KEYS, type UserSettings } from '~/types';
 import { getLocaleCurrencyCode, getLocaleCurrencySymbol } from '~/utils/formatters';
 import { nowIso } from '~/utils/id';
 
+import {
+  parseJsonObject,
+  parseLedgerPrefs,
+  paymentAlertsJsonForLedger,
+  quickEntryJsonForLedger,
+  splitPaymentAlertsForLedger,
+  splitQuickEntryForLedger,
+} from './ledgerPrefs';
 import { ledgersRepository } from './ledgersRepository';
 import { toSettings } from './mappers';
 
@@ -19,8 +27,8 @@ const SETTINGS_ID = 'primary';
  * Settings a non-default ledger keeps for itself, because they name its own
  * accounts or define its money. The default ledger keeps them in the settings
  * row, so for it every read and write below is exactly what it always was.
- * Quick entry and Insights preferences are split the same way, see
- * `getQuickEntryPrefsJson` and `getInsightsPreferencesJson`.
+ * Quick entry, payment-alert and Insights preferences are split the same
+ * way; see lib/repositories/ledgerPrefs.ts.
  */
 const LEDGER_SETTING_KEYS = ['currencyCode', 'currencySymbol', 'defaultPaybackAccountId'] as const;
 type LedgerSettingKey = (typeof LEDGER_SETTING_KEYS)[number];
@@ -29,18 +37,6 @@ type LedgerSettingKey = (typeof LEDGER_SETTING_KEYS)[number];
 function openNonDefaultLedgerId(): string | null {
   const id = getActiveLedgerId();
   return id === DEFAULT_LEDGER_ID ? null : id;
-}
-
-function parseJsonObject(json: string | null): Record<string, unknown> | null {
-  if (!json) return null;
-  try {
-    const parsed: unknown = JSON.parse(json);
-    return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
-      ? (parsed as Record<string, unknown>)
-      : null;
-  } catch {
-    return null;
-  }
 }
 
 /** Retries for the settings read below; see the comment inside `get`. */
@@ -107,15 +103,14 @@ class SettingsRepository {
         prefsJson: ledgersTable.prefsJson,
       })
       .from(ledgersTable)
-      .where(eq(ledgersTable.id, ledgerId))
+      .where(and(eq(ledgersTable.id, ledgerId), isNull(ledgersTable.deletedAt)))
       .get();
     if (!ledger) return settings;
-    const prefs = parseJsonObject(ledger.prefsJson) as LedgerPrefs | null;
     return {
       ...settings,
       currencyCode: ledger.currencyCode ?? settings.currencyCode,
       currencySymbol: ledger.currencySymbol ?? ledger.currencyCode ?? settings.currencySymbol,
-      defaultPaybackAccountId: prefs?.defaultPaybackAccountId ?? null,
+      defaultPaybackAccountId: parseLedgerPrefs(ledger.prefsJson).defaultPaybackAccountId ?? null,
     };
   }
 
@@ -198,6 +193,60 @@ class SettingsRepository {
       .run();
   }
 
+  /**
+   * Forget the open ledger's own preferences (default payback account,
+   * quick-entry and payment-alert account and category picks, Insights), for
+   * when its accounts and categories are replaced.
+   */
+  clearOpenLedgerPrefs() {
+    const ledgerId = openNonDefaultLedgerId();
+    if (ledgerId) {
+      ledgersRepository.updatePrefs(ledgerId, {
+        defaultPaybackAccountId: null,
+        quickEntry: {},
+        paymentAlertAccounts: {},
+        insightsPrefsJson: null,
+      });
+      return;
+    }
+    const app = this.readAppJson();
+    const quickEntry = parseJsonObject(app.quickEntryPrefsJson);
+    if (quickEntry) {
+      for (const key of LEDGER_QUICK_ENTRY_KEYS) delete quickEntry[key];
+    }
+    // The settings row's source accounts are the default ledger's own picks.
+    const alerts = app.autoLogPrefsJson
+      ? splitPaymentAlertsForLedger(app.autoLogPrefsJson, null).appJson
+      : null;
+    getDb()
+      .update(settingsTable)
+      .set({
+        defaultPaybackAccountId: null,
+        insightsPrefsJson: null,
+        quickEntryPrefsJson: quickEntry ? JSON.stringify(quickEntry) : null,
+        autoLogPrefsJson: alerts,
+        updatedAt: nowIso(),
+      })
+      .where(and(eq(settingsTable.id, SETTINGS_ID), isNull(settingsTable.deletedAt)))
+      .run();
+  }
+
+  /** The settings row's quick-entry and payment-alert blobs, as stored. */
+  private readAppJson(): { quickEntryPrefsJson: string | null; autoLogPrefsJson: string | null } {
+    const row = getDb()
+      .select({
+        quickEntryPrefsJson: settingsTable.quickEntryPrefsJson,
+        autoLogPrefsJson: settingsTable.autoLogPrefsJson,
+      })
+      .from(settingsTable)
+      .where(and(eq(settingsTable.id, SETTINGS_ID), isNull(settingsTable.deletedAt)))
+      .get();
+    return {
+      quickEntryPrefsJson: row?.quickEntryPrefsJson ?? null,
+      autoLogPrefsJson: row?.autoLogPrefsJson ?? null,
+    };
+  }
+
   /** Remember the ledger open on this phone (device-local, never synced). */
   updateActiveLedgerId(ledgerId: string) {
     getDb()
@@ -208,16 +257,6 @@ class SettingsRepository {
       })
       .where(and(eq(settingsTable.id, SETTINGS_ID), isNull(settingsTable.deletedAt)))
       .run();
-  }
-
-  /** The stored open ledger, read before anything else loads. */
-  readActiveLedgerId(): string {
-    const row = getDb()
-      .select({ activeLedgerId: settingsTable.activeLedgerId })
-      .from(settingsTable)
-      .where(and(eq(settingsTable.id, SETTINGS_ID), isNull(settingsTable.deletedAt)))
-      .get();
-    return row?.activeLedgerId || DEFAULT_LEDGER_ID;
   }
 
   updateAppUserId(appUserId: string) {
@@ -280,63 +319,58 @@ class SettingsRepository {
    * app's, shared by every ledger.
    */
   getQuickEntryPrefsJson(): string | null {
-    const appJson = this.readAppQuickEntryPrefsJson();
+    const appJson = this.readAppJson().quickEntryPrefsJson;
     const ledgerId = openNonDefaultLedgerId();
     if (!ledgerId) return appJson;
-    const app = parseJsonObject(appJson) ?? {};
-    for (const key of LEDGER_QUICK_ENTRY_KEYS) delete app[key];
-    const own = ledgersRepository.getPrefs(ledgerId).quickEntry ?? {};
-    return JSON.stringify({ ...app, ...own });
-  }
-
-  private readAppQuickEntryPrefsJson(): string | null {
-    const db = getDb();
-    const row = db
-      .select({ quickEntryPrefsJson: settingsTable.quickEntryPrefsJson })
-      .from(settingsTable)
-      .where(and(eq(settingsTable.id, SETTINGS_ID), isNull(settingsTable.deletedAt)))
-      .get();
-    return row?.quickEntryPrefsJson ?? null;
+    return quickEntryJsonForLedger(appJson, ledgersRepository.getPrefs(ledgerId));
   }
 
   updateQuickEntryPrefsJson(value: string | null) {
     const ledgerId = openNonDefaultLedgerId();
-    if (ledgerId) {
-      const next = parseJsonObject(value) ?? {};
-      const own: Record<string, unknown> = {};
-      for (const key of LEDGER_QUICK_ENTRY_KEYS) {
-        if (key in next) own[key] = next[key];
-        delete next[key];
-      }
-      ledgersRepository.updatePrefs(ledgerId, { quickEntry: own as LedgerPrefs['quickEntry'] });
-      // Keep the default ledger's own fields in the settings row untouched.
-      const app = parseJsonObject(this.readAppQuickEntryPrefsJson()) ?? {};
-      for (const key of LEDGER_QUICK_ENTRY_KEYS) {
-        if (key in app) next[key] = app[key];
-      }
-      value = JSON.stringify(next);
+    if (!ledgerId) {
+      this.writeAppJson({ quickEntryPrefsJson: value });
+      return;
     }
-    const db = getDb();
-    db.update(settingsTable)
-      .set({ quickEntryPrefsJson: value, updatedAt: nowIso() })
-      .where(and(eq(settingsTable.id, SETTINGS_ID), isNull(settingsTable.deletedAt)))
-      .run();
+    const split = splitQuickEntryForLedger(value, this.readAppJson().quickEntryPrefsJson);
+    // One transaction: the usage counters on the settings row and the
+    // ledger's own picks must never disagree.
+    getSQLite().withTransactionSync(() => {
+      ledgersRepository.updatePrefs(ledgerId, { quickEntry: split.own });
+      this.writeAppJson({ quickEntryPrefsJson: split.appJson });
+    });
   }
 
+  /**
+   * Payment-alert preferences. Which apps are watched is the phone's; the
+   * account each source logs into names a ledger's account, so a non-default
+   * ledger keeps its own (`LedgerPrefs.paymentAlertAccounts`).
+   */
   getAutoLogPrefsJson(): string | null {
-    const db = getDb();
-    const row = db
-      .select({ autoLogPrefsJson: settingsTable.autoLogPrefsJson })
-      .from(settingsTable)
-      .where(and(eq(settingsTable.id, SETTINGS_ID), isNull(settingsTable.deletedAt)))
-      .get();
-    return row?.autoLogPrefsJson ?? null;
+    const appJson = this.readAppJson().autoLogPrefsJson;
+    const ledgerId = openNonDefaultLedgerId();
+    if (!ledgerId) return appJson;
+    return paymentAlertsJsonForLedger(appJson, ledgersRepository.getPrefs(ledgerId));
   }
 
   updateAutoLogPrefsJson(value: string | null) {
-    const db = getDb();
-    db.update(settingsTable)
-      .set({ autoLogPrefsJson: value, updatedAt: nowIso() })
+    const ledgerId = openNonDefaultLedgerId();
+    if (!ledgerId || value === null) {
+      this.writeAppJson({ autoLogPrefsJson: value });
+      return;
+    }
+    const split = splitPaymentAlertsForLedger(value, this.readAppJson().autoLogPrefsJson);
+    getSQLite().withTransactionSync(() => {
+      ledgersRepository.updatePrefs(ledgerId, { paymentAlertAccounts: split.own });
+      this.writeAppJson({ autoLogPrefsJson: split.appJson });
+    });
+  }
+
+  private writeAppJson(
+    values: Partial<{ quickEntryPrefsJson: string | null; autoLogPrefsJson: string | null }>,
+  ) {
+    getDb()
+      .update(settingsTable)
+      .set({ ...values, updatedAt: nowIso() })
       .where(and(eq(settingsTable.id, SETTINGS_ID), isNull(settingsTable.deletedAt)))
       .run();
   }

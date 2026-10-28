@@ -1,4 +1,4 @@
-import { ChevronRight, Lock, Plus, Trash2 } from 'lucide-react-native';
+import { Lock, Plus, Trash2 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 
@@ -20,7 +20,7 @@ import type { Ledger } from '~/types';
 import { cn } from '~/utils';
 
 import { ProChip } from '../components/ProChip';
-import { ledgerDisplayName, ledgerIcon, ledgerNeedsPro } from '../lib/ledgerDisplay';
+import { ledgerDisplayName, ledgerIcon, ledgerNeedsPro, ledgerSummary } from '../lib/ledgerDisplay';
 
 interface LedgersScreenProps {
   onBack: () => void;
@@ -97,9 +97,9 @@ export function LedgersScreen({
             >
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel={I18n.t('ledgers.edit_named', {
+                accessibilityLabel={`${I18n.t('ledgers.edit_named', {
                   name: ledgerDisplayName(ledger),
-                })}
+                })}, ${ledgerSummary(ledger, count)}${locked ? `, ${I18n.t('ledgers.locked_note')}` : ''}`}
                 testID={`ledger-edit-${ledger.id}`}
                 onPress={() => {
                   void triggerHaptic('selection');
@@ -122,18 +122,10 @@ export function LedgersScreen({
                     ) : null}
                   </View>
                   <Text variant="caption" tone="muted" numberOfLines={1}>
-                    {[
-                      ledger.currencyCode,
-                      I18n.t(count === 1 ? 'ledgers.entries_one' : 'ledgers.entries_other', {
-                        count,
-                      }),
-                    ]
-                      .filter(Boolean)
-                      .join(' · ')}
+                    {ledgerSummary(ledger, count)}
                   </Text>
                 </View>
                 {locked ? <Lock size={16} color={themeColors.textMuted} /> : null}
-                <ChevronRight size={18} color={themeColors.textMuted} />
               </Pressable>
               {canDelete ? (
                 <Pressable

@@ -1,5 +1,5 @@
 import { ChevronRight, Pencil } from 'lucide-react-native';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Pressable, View } from 'react-native';
 
 import {
@@ -60,6 +60,14 @@ export function LedgerEditorScreen({
     [ledgerId, ledgers],
   );
   const isEditing = existing != null;
+  // The ledger being edited was deleted meanwhile: leave rather than turn
+  // into a New ledger form.
+  const isGone = ledgerId != null && existing == null;
+  useEffect(() => {
+    if (isGone) onBack();
+  }, [isGone, onBack]);
+  // A second tap while the screen animates away must not create a second ledger.
+  const savedRef = useRef(false);
 
   const [icon, setIcon] = useState(() => ledgerIcon(existing));
   // The default ledger's name stays empty until the user types one, so it
@@ -86,7 +94,8 @@ export function LedgerEditorScreen({
   const canSave = trimmedName.length > 0 || isDefaultLedger;
 
   const handleSave = () => {
-    if (!canSave) return;
+    if (!canSave || savedRef.current) return;
+    savedRef.current = true;
     void triggerHaptic('success');
     if (existing) {
       updateLedger(existing.id, { name: trimmedName, emoji: icon });
@@ -103,6 +112,7 @@ export function LedgerEditorScreen({
         copyCategories: categoriesStart === 'copy',
       });
     } catch (error) {
+      savedRef.current = false;
       Alert.alert(getErrorMessage(error, I18n.t('errors.generic_operation_failed')));
       return;
     }

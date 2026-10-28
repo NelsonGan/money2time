@@ -3219,7 +3219,13 @@ function AppContent() {
       />
       <ReviewPrePromptSheet />
       <LedgerProGuard
-        suppressed={biometricLocked || !rootPromptsAllowed}
+        canSwitch={rootPromptsAllowed}
+        suppressed={
+          biometricLocked ||
+          !rootPromptsAllowed ||
+          featureAnnouncementVisible ||
+          cloudBackupPromptVisible
+        }
         onRenewPro={() => navigationRef.navigate('ProPaywall', { source: 'ledgers_pro_ended' })}
       />
       <GoalCelebrationOverlay />

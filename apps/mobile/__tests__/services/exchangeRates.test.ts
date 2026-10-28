@@ -11,7 +11,9 @@ import {
 jest.mock('~/lib/repositories/exchangeRatesRepository', () => ({
   exchangeRatesRepository: {
     upsertApiRates: jest.fn(),
-    listByBase: jest.fn(() => [{ quoteCurrency: 'EUR', rate: 0.9 }]),
+    listByBase: jest.fn(() => [
+      { quoteCurrency: 'EUR', rate: 0.9, source: 'api', updatedAt: new Date().toISOString() },
+    ]),
   },
 }));
 jest.mock('~/lib/repositories/settingsRepository', () => ({
@@ -129,6 +131,18 @@ describe('runRateRefreshIfDue', () => {
     // A ledger in another currency: the day's fetch was for a different base.
     mockedSettings.get.mockReturnValue(settings({ lastRateFetchAt: new Date().toISOString() }));
     (mockedRates.listByBase as jest.Mock).mockReturnValueOnce([]);
+    (global.fetch as jest.Mock).mockResolvedValue({ ok: false, status: 503 });
+
+    await runRateRefreshIfDue();
+
+    expect(global.fetch).toHaveBeenCalled();
+  });
+
+  it("fetches when this currency's feed rates are old, whatever the last fetch was", async () => {
+    mockedSettings.get.mockReturnValue(settings({ lastRateFetchAt: new Date().toISOString() }));
+    (mockedRates.listByBase as jest.Mock).mockReturnValueOnce([
+      { quoteCurrency: 'EUR', rate: 0.9, source: 'api', updatedAt: '2020-01-01T00:00:00.000Z' },
+    ]);
     (global.fetch as jest.Mock).mockResolvedValue({ ok: false, status: 503 });
 
     await runRateRefreshIfDue();

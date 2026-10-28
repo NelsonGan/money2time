@@ -7,9 +7,15 @@ import { DEFAULT_LEDGER_ID, getActiveLedgerId } from '~/lib/db/ledgerScope';
 import { normalizeCurrencyColumns } from '~/lib/db/normalizeCurrencies';
 import { normalizeIconColumns } from '~/lib/db/normalizeIcons';
 import { retireSimpleMode } from '~/lib/db/retireSimpleMode';
+import {
+  parseLedgerPrefs,
+  paymentAlertsJsonForLedger,
+  quickEntryJsonForLedger,
+} from '~/lib/repositories/ledgerPrefs';
 import { resetAutomationCaptureData } from '~/services/resetAutomationCaptureData';
 import { runUserAssetGc } from '~/services/userAssetGc';
 import {
+  assetRelativePathFromRef,
   collectUserAssetsForBackup,
   restoreUserAssetsFromBackup,
   type UserAssetBackupEntry,
@@ -159,9 +165,9 @@ export async function buildBackupData(opts?: {
 }
 
 /**
- * The backup's rows that belong to the open ledger, with the settings row
- * showing that ledger's currency. Root rows match on `ledger_id`; child rows
- * follow their parents.
+ * The backup's rows and images that belong to the open ledger, with the
+ * settings row as that ledger reads it. Root rows match on `ledger_id`; child
+ * rows follow their parents.
  */
 function onlyOpenLedger(data: BackupData): BackupData {
   const ledgerId = getActiveLedgerId();
@@ -183,54 +189,89 @@ function onlyOpenLedger(data: BackupData): BackupData {
   const receiptSplits = childrenOf(tables.receipt_splits, 'transaction_id', transactionIds);
   const receiptSplitIds = idsOf(receiptSplits);
   const ledger = (tables.ledgers ?? []).find((row) => row.id === ledgerId);
-  const ledgerCurrency = typeof ledger?.currency_code === 'string' ? ledger.currency_code : null;
+
+  const filtered: BackupTables = {
+    ...tables,
+    accounts: inLedger(tables.accounts),
+    account_groups: inLedger(tables.account_groups),
+    categories: inLedger(tables.categories),
+    transactions,
+    transaction_splits: childrenOf(tables.transaction_splits, 'transaction_id', transactionIds),
+    recurring_rules: inLedger(tables.recurring_rules),
+    albums,
+    album_transactions: childrenOf(tables.album_transactions, 'album_id', idsOf(albums)),
+    items: inLedger(tables.items),
+    budget_templates: budgetTemplates,
+    budget_template_categories: childrenOf(
+      tables.budget_template_categories,
+      'template_id',
+      idsOf(budgetTemplates),
+    ),
+    monthly_budgets: monthlyBudgets,
+    monthly_budget_categories: childrenOf(
+      tables.monthly_budget_categories,
+      'budget_id',
+      idsOf(monthlyBudgets),
+    ),
+    receipt_splits: receiptSplits,
+    receipt_split_items: childrenOf(
+      tables.receipt_split_items,
+      'receipt_split_id',
+      receiptSplitIds,
+    ),
+    receipt_split_item_shares: childrenOf(
+      tables.receipt_split_item_shares,
+      'receipt_split_id',
+      receiptSplitIds,
+    ),
+    settings:
+      ledger && ledgerId !== DEFAULT_LEDGER_ID
+        ? tables.settings.map((row) => withLedgerSettings(row, ledger))
+        : tables.settings,
+    ledgers: ledger ? [ledger] : [],
+  };
+
+  // Only the images the kept rows name. Every string value is offered: one
+  // that is not an image path matches no file, which is harmless.
+  const referenced = new Set<string>();
+  for (const rows of Object.values(filtered)) {
+    for (const row of rows ?? []) {
+      for (const value of Object.values(row)) {
+        const path = typeof value === 'string' ? assetRelativePathFromRef(value) : null;
+        if (path) referenced.add(path);
+      }
+    }
+  }
 
   return {
     ...data,
     version: BACKUP_VERSION,
-    tables: {
-      ...tables,
-      accounts: inLedger(tables.accounts),
-      account_groups: inLedger(tables.account_groups),
-      categories: inLedger(tables.categories),
-      transactions,
-      transaction_splits: childrenOf(tables.transaction_splits, 'transaction_id', transactionIds),
-      recurring_rules: inLedger(tables.recurring_rules),
-      albums,
-      album_transactions: childrenOf(tables.album_transactions, 'album_id', idsOf(albums)),
-      items: inLedger(tables.items),
-      budget_templates: budgetTemplates,
-      budget_template_categories: childrenOf(
-        tables.budget_template_categories,
-        'template_id',
-        idsOf(budgetTemplates),
-      ),
-      monthly_budgets: monthlyBudgets,
-      monthly_budget_categories: childrenOf(
-        tables.monthly_budget_categories,
-        'budget_id',
-        idsOf(monthlyBudgets),
-      ),
-      receipt_splits: receiptSplits,
-      receipt_split_items: childrenOf(
-        tables.receipt_split_items,
-        'receipt_split_id',
-        receiptSplitIds,
-      ),
-      receipt_split_item_shares: childrenOf(
-        tables.receipt_split_item_shares,
-        'receipt_split_id',
-        receiptSplitIds,
-      ),
-      settings: ledgerCurrency
-        ? tables.settings.map((row) => ({
-            ...row,
-            currency_code: ledgerCurrency,
-            currency_symbol: ledger?.currency_symbol ?? ledgerCurrency,
-          }))
-        : tables.settings,
-      ledgers: ledger ? [ledger] : [],
-    },
+    userAssets: data.userAssets?.filter((asset) => referenced.has(asset.path)),
+    tables: filtered,
+  };
+}
+
+/**
+ * The settings row as a non-default ledger reads it: its own currency,
+ * payback account, quick-entry and payment-alert picks and Insights
+ * preferences over the default ledger's (see lib/repositories/ledgerPrefs.ts).
+ */
+function withLedgerSettings(
+  row: Record<string, unknown>,
+  ledger: Record<string, unknown>,
+): Record<string, unknown> {
+  const prefs = parseLedgerPrefs(typeof ledger.prefs_json === 'string' ? ledger.prefs_json : null);
+  const text = (value: unknown) => (typeof value === 'string' ? value : null);
+  const currency = text(ledger.currency_code);
+  return {
+    ...row,
+    ...(currency
+      ? { currency_code: currency, currency_symbol: text(ledger.currency_symbol) ?? currency }
+      : {}),
+    default_payback_account_id: prefs.defaultPaybackAccountId ?? null,
+    insights_prefs_json: prefs.insightsPrefsJson ?? null,
+    quick_entry_prefs_json: quickEntryJsonForLedger(text(row.quick_entry_prefs_json), prefs),
+    auto_log_prefs_json: paymentAlertsJsonForLedger(text(row.auto_log_prefs_json), prefs),
   };
 }
 

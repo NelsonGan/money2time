@@ -16,6 +16,12 @@ interface NormalizeOptions {
    * rewritten — genuine multi-currency rows are preserved.
    */
   collapseAll?: boolean;
+  /**
+   * The main currency to map symbols to. Defaults to the settings row's,
+   * which is the default ledger's; an import into another ledger passes that
+   * ledger's.
+   */
+  mainCode?: string;
 }
 
 /**
@@ -30,10 +36,11 @@ interface NormalizeOptions {
  * Idempotent. Safe to run from a migration and after a backup restore / import.
  */
 export function normalizeCurrencyColumns(db: SQLiteDatabase, options: NormalizeOptions = {}): void {
-  const settings = db.getFirstSync<{ code: string | null; symbol: string | null }>(
-    'SELECT currency_code AS code, currency_symbol AS symbol FROM settings LIMIT 1',
-  );
-  const mainCode = settings?.code || 'USD';
+  const mainCode =
+    options.mainCode ??
+    (db.getFirstSync<{ code: string | null }>('SELECT currency_code AS code FROM settings LIMIT 1')
+      ?.code ||
+      'USD');
 
   const validCodes = new Set(ALL_CURRENCIES.map((c) => c.code));
 
