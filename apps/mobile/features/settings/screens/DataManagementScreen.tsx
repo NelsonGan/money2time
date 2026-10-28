@@ -16,7 +16,6 @@ import {
 } from '~/components/ui';
 import { EXCEL_LOGO, MONEY_MANAGER_LOGO, MONEY2TIME_LOGO } from '~/constants/brandLogos';
 import { useApp } from '~/context/AppContext';
-import { useCloudSync } from '~/features/cloudSync/CloudSyncContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { exportDatabase, pickAndImportDatabase } from '~/services/dataManagementService';
@@ -96,10 +95,6 @@ function DataRow({
 
 export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagementScreenProps) {
   const { importMoneyManagerBackup, refreshAll, resetAllData, settings } = useApp();
-  // A restore or reset while Cloud Sync is on reaches every phone: say so.
-  const cloudSyncOn = useCloudSync().status === 'ready';
-  const withSyncWarning = (message: string, warning: string) =>
-    cloudSyncOn ? `${message}\n\n${I18n.t(warning)}` : message;
   const bottomNavInset = useSettingsBottomNavInset();
   const themeColors = useThemeColors();
   const [exportingKind, setExportingKind] = useState<ExportKind | null>(null);
@@ -144,10 +139,7 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
   const handleImport = () => {
     Alert.alert(
       I18n.t('data_management.import_confirm_title'),
-      withSyncWarning(
-        I18n.t('data_management.import_confirm_message'),
-        'cloud_sync.restore_warning',
-      ),
+      I18n.t('data_management.import_confirm_message'),
       [
         { text: I18n.t('common.cancel'), style: 'cancel' },
         {
@@ -255,18 +247,14 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
 
   const handleResetAllData = () => {
     void triggerHaptic('warning');
-    Alert.alert(
-      I18n.t('settings.reset_data_title'),
-      withSyncWarning(I18n.t('settings.reset_data_message'), 'cloud_sync.reset_warning'),
-      [
-        { text: I18n.t('common.cancel'), style: 'cancel' },
-        {
-          text: I18n.t('common.reset'),
-          style: 'destructive',
-          onPress: () => resetAllData(),
-        },
-      ],
-    );
+    Alert.alert(I18n.t('settings.reset_data_title'), I18n.t('settings.reset_data_message'), [
+      { text: I18n.t('common.cancel'), style: 'cancel' },
+      {
+        text: I18n.t('common.reset'),
+        style: 'destructive',
+        onPress: () => resetAllData(),
+      },
+    ]);
   };
 
   return (

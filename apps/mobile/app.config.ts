@@ -53,9 +53,6 @@ function applyDevVariant(cfg: ExpoConfig): ExpoConfig {
   ios.bundleIdentifier = DEV_BUNDLE_IDENTIFIER;
   ios.googleServicesFile = './GoogleService-Info.dev.plist';
   ios.usesIcloudStorage = false;
-  // Sign in with Apple is provisioned for the store bundle id only; Cloud Sync
-  // hides the Apple button when the build has no entitlement.
-  ios.usesAppleSignIn = false;
 
   // No iCloud container is provisioned for the variant id — strip the iCloud entitlements.
   if (ios.entitlements) {

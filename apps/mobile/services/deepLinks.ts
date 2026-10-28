@@ -166,15 +166,6 @@ export function handleMoney2TimeDeepLink(url: string, navigationRef: RootNavigat
     return true;
   }
 
-  // `money2time://join/<code>` — a shared-ledger invite, handed over by the
-  // page its link opens. The screen looks the invite up and asks before joining.
-  if (parsed.action === 'join') {
-    const code = parsed.rest[0] ?? parsed.params.code;
-    if (!code || !/^[A-Za-z0-9_-]{20,64}$/.test(code)) return false;
-    runDeepLinkNavigation(navigationRef, { name: 'JoinLedger', params: { code } });
-    return true;
-  }
-
   if (parsed.action === 'pro') {
     const source = parsed.params.source ?? 'widget';
     runDeepLinkNavigation(navigationRef, { name: 'ProPaywall', params: { source } });

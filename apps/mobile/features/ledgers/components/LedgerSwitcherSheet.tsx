@@ -1,13 +1,12 @@
-import { Check, Lock, Plus, Users } from 'lucide-react-native';
+import { Check, Lock, Plus } from 'lucide-react-native';
 import React from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CategoryEmoji, InfoTooltipButton, Text } from '~/components/ui';
 import { ThemeModal } from '~/components/ui/theme-modal';
 import { useApp } from '~/context/AppContext';
 import { useIsPro } from '~/context/ProContext';
-import { useLedgerLock, useSharedLedgers } from '~/features/sharedLedgers/hooks/useSharedLedgers';
 import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -18,6 +17,7 @@ import {
   ledgerAccessibilityLabel,
   ledgerDisplayName,
   ledgerIcon,
+  ledgerNeedsPro,
   ledgerSummary,
 } from '../lib/ledgerDisplay';
 import { ProChip } from './ProChip';
@@ -51,29 +51,13 @@ export function LedgerSwitcherSheet({
   const themeColors = useThemeColors();
   const sheetColumnStyle = useSheetColumnStyle();
   const insets = useSafeAreaInsets();
-  const lockOf = useLedgerLock();
-  const sharedLedgers = useSharedLedgers();
 
   const handlePick = (ledgerId: string) => {
     if (ledgerId === activeLedger.id) {
       onClose();
       return;
     }
-    const lock = lockOf(ledgerId);
-    if (lock === 'paused') {
-      // Someone else's ledger, paused until they renew: nothing to buy here.
-      const shared = sharedLedgers.find((l) => l.ledgerId === ledgerId);
-      void triggerHaptic('warning');
-      Alert.alert(
-        I18n.t('shared_ledgers.paused_title'),
-        I18n.t('shared_ledgers.paused_body', {
-          owner: shared?.ownerName ?? '',
-          name: shared?.name ?? '',
-        }),
-      );
-      return;
-    }
-    if (lock === 'pro') {
+    if (ledgerNeedsPro(ledgerId) && !isPro) {
       void triggerHaptic('selection');
       onClose();
       onOpenProPaywall('ledgers_switch');
@@ -120,27 +104,14 @@ export function LedgerSwitcherSheet({
             >
               {ledgers.map((ledger) => {
                 const isOpen = ledger.id === activeLedger.id;
-                const lock = lockOf(ledger.id);
-                const locked = lock !== null;
+                const locked = ledgerNeedsPro(ledger.id) && !isPro;
                 const count = entryCounts[ledger.id] ?? 0;
-                const shared = sharedLedgers.find((l) => l.ledgerId === ledger.id) ?? null;
                 return (
                   <Pressable
                     key={ledger.id}
                     accessibilityRole="button"
                     accessibilityState={{ selected: isOpen }}
-                    accessibilityLabel={[
-                      ledgerAccessibilityLabel(ledger, count, locked),
-                      shared?.role === 'member'
-                        ? I18n.t('shared_ledgers.status_shared_by', {
-                            name: shared.ownerName ?? '',
-                          })
-                        : shared
-                          ? I18n.t('shared_ledgers.status_shared')
-                          : null,
-                    ]
-                      .filter(Boolean)
-                      .join(', ')}
+                    accessibilityLabel={ledgerAccessibilityLabel(ledger, count, locked)}
                     testID={`ledger-row-${ledger.id}`}
                     onPress={() => handlePick(ledger.id)}
                     className={cn(
@@ -152,16 +123,11 @@ export function LedgerSwitcherSheet({
                       <CategoryEmoji icon={ledgerIcon(ledger)} size={26} />
                     </View>
                     <View className="min-w-0 flex-1">
-                      <View className="flex-row items-center gap-1.5">
-                        <Text variant="bodyStrong" numberOfLines={1} className="shrink">
-                          {ledgerDisplayName(ledger)}
-                        </Text>
-                        {shared ? <Users size={14} color={themeColors.primary} /> : null}
-                      </View>
+                      <Text variant="bodyStrong" numberOfLines={1}>
+                        {ledgerDisplayName(ledger)}
+                      </Text>
                       <Text variant="caption" tone="muted" numberOfLines={1}>
-                        {shared?.role === 'member'
-                          ? `${I18n.t('shared_ledgers.status_shared_by', { name: shared.ownerName ?? '' })} · ${ledgerSummary(ledger, count)}`
-                          : ledgerSummary(ledger, count)}
+                        {ledgerSummary(ledger, count)}
                       </Text>
                     </View>
                     {isOpen ? (
@@ -171,13 +137,7 @@ export function LedgerSwitcherSheet({
                     ) : locked ? (
                       <View className="flex-row items-center gap-2">
                         <Lock size={16} color={themeColors.textMuted} />
-                        {lock === 'pro' ? (
-                          <ProChip />
-                        ) : (
-                          <Text variant="label" tone="muted">
-                            {I18n.t('shared_ledgers.status_paused')}
-                          </Text>
-                        )}
+                        <ProChip />
                       </View>
                     ) : null}
                   </Pressable>
