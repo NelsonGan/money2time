@@ -202,7 +202,7 @@ export async function exportDatabase(): Promise<void> {
   const { json, data } = await buildBackupJson({ pretty: true });
   const fileName = `money2time-backup-${data.exportedAt.replace(/[:.]/g, '-').slice(0, 19)}.json`;
   const file = new File(Paths.document, fileName);
-  file.writeSync(json);
+  await file.write(json);
 
   if (await Sharing.isAvailableAsync()) {
     await Sharing.shareAsync(file.uri, {
