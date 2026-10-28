@@ -2470,6 +2470,7 @@ const th = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'ซิงค์ทุกเครื่อง',
+    continue_apple: 'ดำเนินการต่อด้วย Apple',
     continue_google: 'ดำเนินการต่อด้วย Google',
     continue_email: 'ดำเนินการต่อด้วยอีเมล',
     email_title: 'ลงชื่อเข้าใช้ด้วยอีเมล',

@@ -2552,6 +2552,7 @@ const fr = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Synchro sur tous vos téléphones',
+    continue_apple: 'Continuer avec Apple',
     continue_google: 'Continuer avec Google',
     continue_email: 'Continuer avec un e-mail',
     email_title: 'Se connecter par e-mail',

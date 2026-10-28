@@ -2534,6 +2534,7 @@ const pt = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Sincronize seus celulares',
+    continue_apple: 'Continuar com a Apple',
     continue_google: 'Continuar com o Google',
     continue_email: 'Continuar com e-mail',
     email_title: 'Entrar com e-mail',

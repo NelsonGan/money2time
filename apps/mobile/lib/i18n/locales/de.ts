@@ -2554,6 +2554,7 @@ const de = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Sync auf allen Handys',
+    continue_apple: 'Mit Apple fortfahren',
     continue_google: 'Mit Google fortfahren',
     continue_email: 'Mit E-Mail fortfahren',
     email_title: 'Mit E-Mail anmelden',
