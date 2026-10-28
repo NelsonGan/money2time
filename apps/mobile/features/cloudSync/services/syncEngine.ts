@@ -20,6 +20,7 @@
 import { Directory, File, Paths } from 'expo-file-system';
 
 import { getSQLite } from '~/lib/db/client';
+import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
 import { reportError } from '~/services/errorReporting';
 import { collectReferencedAssetPaths } from '~/services/userAssetGc';
 import { assetRelativePathFromRef } from '~/services/userAssets';
@@ -370,6 +371,30 @@ function catchUpSyncedShape(): void {
   });
 }
 
+/**
+ * Every phone needs the default ledger, and its open ledger must exist. After
+ * the cloud copy replaced this phone's data (which may come from an app
+ * before ledgers, or not have the ledger this phone had open), put both right,
+ * as a backup restore does. The app then reopens the default ledger.
+ */
+function ensureDefaultLedger(): void {
+  if (!tableExists('ledgers')) return;
+  const db = getSQLite();
+  const now = new Date().toISOString();
+  db.runSync(
+    `INSERT OR IGNORE INTO ledgers (id, sort_order, created_at, updated_at) VALUES (?, 0, ?, ?)`,
+    [DEFAULT_LEDGER_ID, now, now],
+  );
+  db.runSync('UPDATE ledgers SET deleted_at = NULL WHERE id = ? AND deleted_at IS NOT NULL', [
+    DEFAULT_LEDGER_ID,
+  ]);
+  db.runSync(
+    `UPDATE settings SET active_ledger_id = NULL
+     WHERE active_ledger_id IS NOT NULL
+       AND active_ledger_id NOT IN (SELECT id FROM ledgers WHERE deleted_at IS NULL)`,
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Capture
 
@@ -581,6 +606,7 @@ export class SyncEngine {
             recordRev(table, stored.row_id, stored.rev);
           }
         }
+        ensureDefaultLedger();
         saveSyncedShape();
       });
       enableCapture();

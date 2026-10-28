@@ -17,6 +17,8 @@ import React, {
 
 import { useApp } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
+import { DEFAULT_LEDGER_ID, getActiveLedgerId } from '~/lib/db/ledgerScope';
+import { ledgersRepository } from '~/lib/repositories/ledgersRepository';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { runAutoBackupIfDue } from '~/services/autoBackup';
 import { reportError } from '~/services/errorReporting';
@@ -124,7 +126,7 @@ function errorKind(error: unknown): CloudSyncErrorKind {
 
 export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   const enabled = useCloudSyncEnabled();
-  const { settings, refreshAll } = useApp();
+  const { settings, refreshAll, switchLedger } = useApp();
   const { isPro, isStatusKnown } = usePro();
   const appUserId = settings?.appUserId ?? null;
 
@@ -151,6 +153,22 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   appUserIdRef.current = appUserId;
   const refreshAllRef = useRef(refreshAll);
   refreshAllRef.current = refreshAll;
+  const switchLedgerRef = useRef(switchLedger);
+  switchLedgerRef.current = switchLedger;
+
+  /**
+   * Reloads the app after rows came from the cloud. If the ledger open on this
+   * phone is gone (deleted on another phone, or not in a cloud copy just
+   * taken), the default ledger opens instead.
+   */
+  const reloadAfterApply = useCallback(() => {
+    const open = getActiveLedgerId();
+    if (open !== DEFAULT_LEDGER_ID && !ledgersRepository.getById(open)) {
+      switchLedgerRef.current(DEFAULT_LEDGER_ID);
+    } else {
+      refreshAllRef.current();
+    }
+  }, []);
 
   const sessionToken = useCallback(async () => {
     const token = sessionRef.current?.token;
@@ -270,14 +288,14 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       setLastError(null);
       // No image sweep here: a photo just picked in an editor is not in a
       // row yet, and the sweep would delete it.
-      if (outcome.appliedRows > 0) refreshAllRef.current();
+      if (outcome.appliedRows > 0) reloadAfterApply();
     } catch (error) {
       retryRef.current = true;
       await handleError(error, 'sync', generation);
     } finally {
       setIsSyncing(false);
     }
-  }, [handleError, openEngine]);
+  }, [handleError, openEngine, reloadAfterApply]);
 
   const markLinked = useCallback(async (mode: LinkMode) => {
     const session = sessionRef.current;
@@ -296,12 +314,12 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   const adoptCloudCopy = useCallback(
     async (engine: SyncEngine, mode: 'downloaded' | 'kept_cloud') => {
       await engine.replaceLocalWithCloud();
-      refreshAllRef.current();
+      reloadAfterApply();
       runUserAssetGc();
       await markLinked(mode);
       void runSync();
     },
-    [markLinked, runSync],
+    [markLinked, reloadAfterApply, runSync],
   );
 
   /** Brings this phone and the cloud copy together after a sign-in. */

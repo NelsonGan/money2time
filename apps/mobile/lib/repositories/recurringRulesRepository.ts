@@ -2,12 +2,7 @@ import { and, eq, isNull, lte } from 'drizzle-orm';
 
 import { getDb } from '~/lib/db/client';
 import { getActiveLedgerId, inActiveLedger } from '~/lib/db/ledgerScope';
-import {
-  accountsTable,
-  recurringRulesTable,
-  settingsTable,
-  transactionsTable,
-} from '~/lib/db/schema';
+import { accountsTable, recurringRulesTable, transactionsTable } from '~/lib/db/schema';
 import type { ProcessedRecurringRule, RecurrencePattern, RecurringTransactionRule } from '~/types';
 import { buildRateTable, convert } from '~/utils/currency';
 import { newId, nowIso } from '~/utils/id';

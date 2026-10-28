@@ -19,8 +19,11 @@ const read = (path: string) => readFileSync(join(root, path), 'utf8');
 describe('synced tables', () => {
   it('are exactly the tables a backup holds', () => {
     const source = read('services/dataManagementService.ts');
-    const body = source.slice(source.indexOf('tables: {'), source.indexOf('},\n  };\n}'));
-    const backupTables = [...body.matchAll(/^\s{6}([a-z_]+):/gm)].map((m) => m[1]);
+    // The `tables: { … }` block of buildBackupData: one key per line, written
+    // `name: …` or as the shorthand `name,`.
+    const start = source.indexOf('tables: {');
+    const body = source.slice(start, source.indexOf('\n    },', start));
+    const backupTables = [...body.matchAll(/^\s{6}([a-z_]+)(?::|,$)/gm)].map((m) => m[1]);
     expect([...SYNC_TABLES].sort()).toEqual([...new Set(backupTables)].sort());
   });
 
@@ -38,6 +41,8 @@ describe('synced tables', () => {
   it('keep the purchase identity on the phone', () => {
     expect(DEVICE_LOCAL_SETTINGS_COLUMNS.has('app_user_id')).toBe(true);
     expect(isDeviceLocalColumn('settings', 'app_user_id')).toBe(true);
+    // Each phone keeps its own open ledger.
+    expect(isDeviceLocalColumn('settings', 'active_ledger_id')).toBe(true);
     expect(isDeviceLocalColumn('transactions', 'app_user_id')).toBe(false);
   });
 

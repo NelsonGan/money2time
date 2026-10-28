@@ -1066,9 +1066,18 @@ updated_at)`, with each row as JSON, plus `sync_info` (last device, last
   each run `rr:<ruleId>:<date>` (`recurringRunTransactionId`), so two phones
   that both run a due rule make one transaction.
 - **Device-local settings** never leave the phone and are never overwritten:
-  `app_user_id` (purchase identity), app lock, app icon, notification and
-  payment-alert setup, backup target and status, onboarding, first open and FX
-  fetch status (`DEVICE_LOCAL_SETTINGS_COLUMNS`). A pulled settings row only
+  `app_user_id` (purchase identity), the open ledger (`active_ledger_id`), app
+  lock, app icon, notification and payment-alert setup, backup target and
+  status, onboarding, first open and FX fetch status
+  (`DEVICE_LOCAL_SETTINGS_COLUMNS`).
+- **[Ledgers](#ledgers)** sync like any other data: the `ledgers` table is
+  synced (names, icons, currencies, per-ledger preferences), and every ledger's
+  rows go up, not only the open one's, since `ledger_id` is just a column.
+  Each phone keeps its own open ledger. If the open ledger is deleted on
+  another phone, or is missing from a cloud copy this phone takes, the
+  default ledger opens instead (`reloadAfterApply`), and taking a cloud copy
+  makes the default ledger row again if the copy has none, as a restore does.
+  The choice screen's counts cover every ledger. A pulled settings row only
   updates this phone's own row: an upsert would fail SQLite's NOT NULL check on
   the missing columns.
 - **Images** live in R2 under `u/<userId>/<asset path>`, the same relative

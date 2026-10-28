@@ -7,6 +7,7 @@
 
 export const SYNC_TABLES = [
   'settings',
+  'ledgers',
   'account_groups',
   'accounts',
   'categories',
@@ -39,6 +40,7 @@ export function isSyncTable(name: string): name is SyncTable {
  * - app lock, app icon, notification and payment-alert setup, backup target:
  *   tied to this device's hardware, OS permissions or files.
  * - onboarding, first open, FX fetch status, timestamps: this install's history.
+ * - active_ledger_id: the ledger open on this phone (each phone opens its own).
  */
 export const DEVICE_LOCAL_SETTINGS_COLUMNS: ReadonlySet<string> = new Set([
   'app_user_id',
@@ -54,6 +56,7 @@ export const DEVICE_LOCAL_SETTINGS_COLUMNS: ReadonlySet<string> = new Set([
   'last_rate_fetch_at',
   'last_rate_fetch_error',
   'onboarding_completed',
+  'active_ledger_id',
   'first_app_open',
   'created_at',
 ]);
