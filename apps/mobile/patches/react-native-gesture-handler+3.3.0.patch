@@ -1,0 +1,33 @@
+diff --git a/node_modules/react-native-gesture-handler/android/src/main/java/com/swmansion/gesturehandler/core/GestureHandler.kt b/node_modules/react-native-gesture-handler/android/src/main/java/com/swmansion/gesturehandler/core/GestureHandler.kt
+index 1b6c7a9..343f47d 100644
+--- a/node_modules/react-native-gesture-handler/android/src/main/java/com/swmansion/gesturehandler/core/GestureHandler.kt
++++ b/node_modules/react-native-gesture-handler/android/src/main/java/com/swmansion/gesturehandler/core/GestureHandler.kt
+@@ -606,10 +606,15 @@ open class GestureHandler {
+     }
+ 
+     // if there are tracked pointers and the gesture is about to end, send event cancelling all pointers
+-    if (trackedPointersCount > 0 &&
+-      (newState == STATE_END || newState == STATE_CANCELLED || newState == STATE_FAILED)
+-    ) {
++    if (trackedPointersCount > 0 && isFinished(newState)) {
+       cancelPointers()
++
++      // `cancelPointers` dispatches the event synchronously and its callback may change the state
++      // (e.g. via `GestureStateManager.fail`), in which case the transition is already complete.
++      // Backport of upstream #4584 (3.4.0).
++      if (isFinished(state)) {
++        return
++      }
+     }
+ 
+     val oldState = state
+@@ -634,6 +639,9 @@ open class GestureHandler {
+     onStateChange(newState, oldState)
+   }
+ 
++  private fun isFinished(someState: Int) =
++    someState == STATE_CANCELLED || someState == STATE_FAILED || someState == STATE_END
++
+   fun wantsEvent(event: MotionEvent): Boolean {
+     if (!isEnabled || state == STATE_FAILED || state == STATE_CANCELLED || state == STATE_END) {
+       return false
