@@ -151,6 +151,7 @@ import {
   WageCalculatorFlowScreen,
 } from '~/features/settings/screens';
 import { WebDashboardScreen } from '~/features/settings/screens/WebDashboardScreen';
+import { JoinLedgerScreen } from '~/features/sharedLedgers/screens/JoinLedgerScreen';
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import { QuickAddWarmup } from '~/features/transactions/components/QuickAddWarmup';
 import { ReceiptCameraSheet } from '~/features/transactions/components/ReceiptCameraSheet';
@@ -2462,6 +2463,17 @@ function SettingsWebDashboardRouteScreen({
   );
 }
 
+/** A shared-ledger invite link (`money2time://join/<code>`). */
+function JoinLedgerRouteScreen({ navigation, route }: RootStackRouteProps<'JoinLedger'>) {
+  return (
+    <JoinLedgerScreen
+      code={route.params.code}
+      onClose={() => navigation.goBack()}
+      onJoined={() => navigation.goBack()}
+    />
+  );
+}
+
 function SettingsTimeDisplayRouteScreen({
   navigation,
 }: RootStackRouteProps<'SettingsTimeDisplay'>) {
@@ -3105,6 +3117,7 @@ function AppContent() {
               name="SettingsWebDashboard"
               component={SettingsWebDashboardRouteScreen}
             />
+            <RootStack.Screen name="JoinLedger" component={JoinLedgerRouteScreen} />
             <RootStack.Screen name="AddWageMonth" component={AddWageMonthRouteScreen} />
             <RootStack.Screen name="SettingsQuickEntry" component={SettingsQuickEntryRouteScreen} />
             <RootStack.Screen

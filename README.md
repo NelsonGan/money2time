@@ -1145,6 +1145,115 @@ or R2. Without a real inbox, seed a test user, a session and a cached-Pro
 `saveSession` (`debugger-evaluate`) and reload; see
 [Cloud-sync Worker > Local](#cloud-sync-worker) for a fully local stack.
 
+### Shared ledgers
+
+A Pro user can share a ledger with up to five people: a household's book, say.
+The app side is `features/sharedLedgers/` (screens) and
+`features/cloudSync/services/sharedLedgerSync.ts`, `ledgerChannels.ts` and
+`sharedLedgerStore.ts` (sync); the server is `src/ledgers.ts` in the
+[Cloud-sync Worker](#cloud-sync-worker).
+
+**What the user sees**
+
+- **Sharing a ledger.** The New ledger form has a _Share this ledger_ switch,
+  and every ledger but the main one has a Sharing page (the people icon on
+  Manage ledgers, or the Sharing row of its editor). Sharing needs Pro and a
+  Cloud Sync sign-in (otherwise the row says so and leads to Cloud Sync). One
+  user shares at most **2** ledgers at a time, since each is a cloud database
+  of its own. The main ledger cannot be shared: its id is the same on every
+  phone.
+- **Inviting.** _Invite someone_ makes a link
+  (`https://workers-cloud-sync.money2time.com/join/<code>`) and opens the
+  share sheet. Each link works once and expires after 7 days. Members plus
+  open invites are at most **5**; open invites are listed and can be
+  cancelled.
+- **Joining.** The link's page opens `money2time://join/<code>` (deep link
+  `join`), which shows the Join screen: the ledger's name, who shares it and
+  how many people are in it. Members do not need Pro: a free user signs in
+  once (Apple, Google or email; the paywall is skipped here) and taps Join.
+  The ledger downloads and opens as its own ledger. Only it syncs for a free
+  member; their own data stays on the phone, and the Cloud Sync screen says
+  "Your shared ledgers sync" with Get Pro.
+- **People.** Everyone sees the owner and members (names; the owner also sees
+  addresses). The owner can remove anyone at any time; a member can leave.
+  Either way the ledger is deleted from that person's phone at their next
+  sync, entries they added stay in it.
+- **Stopping.** _Stop sharing_ (or deleting a shared ledger) first syncs the
+  ledger, so members' latest entries are in, then removes every member and
+  deletes the ledger's cloud database and images. The owner keeps the ledger
+  with everything in it, and it goes back into their own cloud copy. Deleting
+  the Cloud Sync account does the same for every ledger the user shares, and
+  its confirmation says so.
+- **When the owner's Pro ends** the ledger is paused for everyone: members see
+  it locked with "Paused" (and are moved to their main ledger if it was open),
+  nothing syncs and nothing is deleted. It picks up again when the owner
+  renews. A member's own Pro does not matter.
+- **Sign-out** deletes the ledgers the user joined from the phone (they are
+  someone else's data; signing in again brings them back). An owner keeps
+  theirs.
+
+**How it works**
+
+- **Channels.** Each shared ledger syncs with its own Turso database, the rest
+  with the user's own (`personal`). The engine runs once per channel
+  (`SyncEngine` with `channel`), and all of them share the outbox, the change
+  capture and one queue. `ledgerChannels.ts` routes a row by its ledger: root
+  tables by `ledger_id`, child tables (splits, receipt splits and their
+  items, album joins, budget lines) through their parent, `ledgers` by its
+  id. Settings, wage months and exchange rates are always personal.
+  `sync_row_meta.channel` records where a row last synced, and the image
+  queues are per channel too (migration 074).
+- **A pulled row is written only if it belongs to that channel**, and so does
+  the row it would replace. A shared database (which members write to) can
+  therefore never reach the owner's settings or another ledger, and the
+  personal copy skips rows of a ledger that is shared now.
+- **Sharing** records the ledger in `shared_ledgers` (device-local), so its
+  rows route to the new channel. That channel's first sync takes what the
+  cloud has, then queues every row it does not have yet (`attached:<id>`).
+  Once that channel has pushed them (`attached:<id>`), the personal channel
+  deletes the ledger's rows from the user's own cloud copy (`detached:<id>`),
+  so the owner's other phones stop reading them from there.
+- **The list.** Before each personal sync and with the shared syncs, the app
+  reads `GET /v1/ledgers` (at most once a minute with a shared ledger, every
+  15 minutes without one; always at sign-in, at launch, on a change of Pro
+  and before ledger rows are removed) and reconciles `shared_ledgers`: new
+  ledgers start syncing, changed ones update (paused, names, counts), and
+  ledgers no longer listed are let go. A member's copy is deleted from the
+  phone without recording deletions; an owner's other phones keep the ledger
+  and take it from the owner's cloud copy, where the phone that stopped
+  sharing put it. A ledger id that is already one of the phone's own ledgers,
+  or another share's, is never taken over.
+- **Access** is checked by the Worker on every credentials request: owner or
+  member, and the owner Pro. A removed member's app lets the ledger go at its
+  next list read (within a minute while open). Tokens are not revoked early,
+  because Turso's revocation is not per database (it can reach the whole
+  group); they last a day, so a lapsed owner or a removed member holding one
+  is cut off within a day. A phone whose sync fails drops its cached token and
+  asks again.
+- **Trust.** A member's token can write anything in the ledger's database,
+  as the app can (deleting entries, say). The owner's phone only applies rows
+  that belong to the ledger, so a member cannot reach the owner's other
+  ledgers or settings.
+- **Signing in again** (after sign-out or an expired session) re-attaches each
+  shared ledger: the cloud copy is taken, except rows this phone edited later
+  (newer `updated_at`), which go up instead; then rows only this phone has go
+  up. The ledger counts as attached once that is pushed, and only then does
+  the personal channel take its rows out of the user's own copy.
+- **Removals.** Before the personal channel deletes ledger rows that left the
+  user's own copy, it re-reads the shared list, so rows of a ledger just
+  shared from another phone are kept.
+- **Schedule.** Shared ledgers sync after each personal sync. When the
+  personal side is not ready (a member without Pro, Pro paused) they run on
+  their own `useSyncScheduler` (15 s when there are changes, else every 3
+  minutes). Changes in a paused ledger wait without counting as pending. For
+  a user with no personal cloud copy (signed in without Pro, never linked),
+  the outbox entries of their own data are dropped instead of piling up;
+  never while linking. Replacing the user's own copy (choice screen, restore)
+  keeps shared ledgers' queued changes.
+- **Images** of a shared ledger go to its own space,
+  `/v1/ledgers/<id>/media/…` (R2 prefix `l/<id>/`); writing needs the owner's
+  Pro.
+
 ## Analytics
 
 **This section is the single source of truth for Money2Time analytics.** The tables define the approved event names, destinations, triggers, frequency, properties and adoption milestones. Update this document in the same change as any affected tracking code or product flow. Implementation details belong in [the integration notes](#how-tracking-is-wired); do not maintain a second event inventory there.
@@ -1160,14 +1269,14 @@ Two providers, two jobs:
 
 | Coverage                                               | Definitions | Meaning                                                                                                 |
 | ------------------------------------------------------ | ----------- | ------------------------------------------------------------------------------------------------------- |
-| All custom events                                      | 131         | Every event in the custom-event tables goes to GA4.                                                     |
-| PostHog + GA4 custom events                            | 58          | Install, activation, daily engagement, adoption milestones, the Pro funnel and low-volume moments.      |
+| All custom events                                      | 137         | Every event in the custom-event tables goes to GA4.                                                     |
+| PostHog + GA4 custom events                            | 64          | Install, activation, daily engagement, adoption milestones, the Pro funnel and low-volume moments.      |
 | GA4-only custom events                                 | 73          | Frequent per-use telemetry and data maintenance; PostHog sees these uses only through `Feature Used`.   |
 | Feature first-use definitions                          | 18          | One adoption event per qualifying feature on eligible installs.                                         |
 | Transaction milestone thresholds                       | 6           | One event at each documented logged-transaction count.                                                  |
 | Maximum adoption/milestone events per eligible install | 24          | Feature first uses plus transaction milestones, with working persistent storage; not a total event cap. |
 
-Every native app user is identified in both providers with the same pseudonymous `settings.appUserId`; there is no user or event sampling of custom events. PostHog's automatic lifecycle events, screen events, touch autocapture and rage clicks are disabled. GA4 collects its SDK events after identity/consent configuration; manually emitted `screen_view` is documented below and is additional to the 119 custom definitions. RevenueCat server events are listed separately.
+Every native app user is identified in both providers with the same pseudonymous `settings.appUserId`; there is no user or event sampling of custom events. PostHog's automatic lifecycle events, screen events, touch autocapture and rage clicks are disabled. GA4 collects its SDK events after identity/consent configuration; manually emitted `screen_view` is documented below and is additional to the 137 custom definitions. RevenueCat server events are listed separately.
 
 ### PostHog event budget
 
@@ -1183,6 +1292,7 @@ The free tier is **1,000,000 product-analytics events a month** (identified even
 | Adoption milestones                                                      | 10,000                   | `Feature First Used` and `Transaction Milestone Reached`; high while existing users first run this build.                                                                                                                                                                                                                                                                                                                                              |
 | Scans, sharing, setup, payoff, data, backup and satisfaction (23 events) | 75,000                   | `Receipt Scan Completed` ~0.34 per active user per day; `Auto Backup Failed` capped by the six-hour retry backoff.                                                                                                                                                                                                                                                                                                                                     |
 | Cloud Sync (6 events)                                                    | 2,000                    | Only Pro users who see the one-time offer or sign in; `Cloud Sync Enabled` once per sign-in. Sync runs send nothing. Behind the `cloud_sync` flag until rollout.                                                                                                                                                                                                                                                                                       |
+| Shared ledgers (6 events)                                                | 500                      | Deliberate one-off actions: sharing (at most 2 ledgers per owner), invites and joins (at most 5 people per ledger), removals and leaving. Syncing a shared ledger sends nothing. Behind the `cloud_sync` flag.                                                                                                                                                                                                                                         |
 | `$identify` and `$set`                                                   | 30,000                   | One `$identify` per install; `$set` when a person property changes: four on an install's first sync, then theme and Pro changes. Existing users' first sync is a one-off.                                                                                                                                                                                                                                                                              |
 | RevenueCat server events                                                 | 3,000                    | Lifecycle events from RevenueCat's PostHog integration (~530 a week measured).                                                                                                                                                                                                                                                                                                                                                                         |
 | Prompt fetches (`$llm_prompt_fetched`)                                   | 7,000                    | Logged by PostHog per Worker prompt fetch: about one per prompt per Cloudflare location per 30 minutes. At 5 minutes it measured ~37,000.                                                                                                                                                                                                                                                                                                              |
@@ -1291,6 +1401,12 @@ Explicitly requested tracking measures engagement with the RiceCal promotion: on
 | `CLOUD_SYNC_SIGNED_IN`               | `Cloud Sync Signed In`               | `m2t_cloud_sync_signed_in`               | Yes     | A Cloud Sync sign-in succeeds (Apple, Google or email code); each sign-in.                                                                                                                                                       | `method`                                                    | [CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                                            |
 | `CLOUD_SYNC_ENABLED`                 | `Cloud Sync Enabled`                 | `m2t_cloud_sync_enabled`                 | Yes     | This phone and the cloud copy are linked; once per sign-in. `mode`: `uploaded` (empty cloud), `downloaded` (empty phone), `kept_cloud` or `kept_phone` (the user's choice).                                                      | `mode`                                                      | [CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                                            |
 | `CLOUD_SYNC_ACCOUNT_DELETED`         | `Cloud Sync Account Deleted`         | `m2t_cloud_sync_account_deleted`         | Yes     | The Cloud Sync account (cloud copy, images, sign-in) is deleted; each deletion.                                                                                                                                                  |                                                             | [CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                                            |
+| `SHARED_LEDGER_CREATED`              | `Shared Ledger Created`              | `m2t_shared_ledger_created`              | Yes     | A Pro owner shares a ledger (when creating it or later); each share.                                                                                                                                                             |                                                             | [CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                                            |
+| `SHARED_LEDGER_INVITE_CREATED`       | `Shared Ledger Invite Created`       | `m2t_shared_ledger_invite_created`       | Yes     | The owner makes an invite link; each link (at most 5 open per ledger).                                                                                                                                                           |                                                             | [LedgerSharingScreen.tsx](apps/mobile/features/sharedLedgers/screens/LedgerSharingScreen.tsx)                          |
+| `SHARED_LEDGER_JOINED`               | `Shared Ledger Joined`               | `m2t_shared_ledger_joined`               | Yes     | Someone joins a shared ledger from an invite link; each join.                                                                                                                                                                    | `is_pro`                                                    | [CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                                            |
+| `SHARED_LEDGER_MEMBER_REMOVED`       | `Shared Ledger Member Removed`       | `m2t_shared_ledger_member_removed`       | Yes     | The owner removes a member; each removal.                                                                                                                                                                                        |                                                             | [LedgerSharingScreen.tsx](apps/mobile/features/sharedLedgers/screens/LedgerSharingScreen.tsx)                          |
+| `SHARED_LEDGER_LEFT`                 | `Shared Ledger Left`                 | `m2t_shared_ledger_left`                 | Yes     | A member leaves a shared ledger; each leave.                                                                                                                                                                                     |                                                             | [CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                                            |
+| `SHARED_LEDGER_STOPPED`              | `Shared Ledger Stopped`              | `m2t_shared_ledger_stopped`              | Yes     | The owner stops sharing a ledger (or deletes a shared one); each stop.                                                                                                                                                           |                                                             | [CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                                            |
 | `REVIEW_PREPROMPT_SHOWN`             | `Review Preprompt Shown`             | `m2t_review_preprompt_shown`             | Yes     | The review preprompt is presented; each presentation after its eligibility checks.                                                                                                                                               | `trigger`                                                   | [services/reviewPrompt.native.ts](apps/mobile/services/reviewPrompt.native.ts)                                         |
 | `REVIEW_PREPROMPT_HAPPY`             | `Review Preprompt Happy`             | `m2t_review_preprompt_happy`             | Yes     | The happy response is selected; each response.                                                                                                                                                                                   | `trigger`                                                   | [services/reviewPrompt.native.ts](apps/mobile/services/reviewPrompt.native.ts)                                         |
 | `REVIEW_PREPROMPT_UNHAPPY`           | `Review Preprompt Unhappy`           | `m2t_review_preprompt_unhappy`           | Yes     | The unhappy response is selected; each response.                                                                                                                                                                                 | `trigger`                                                   | [services/reviewPrompt.native.ts](apps/mobile/services/reviewPrompt.native.ts)                                         |
@@ -2970,6 +3086,7 @@ with Better Auth, one Turso database per user, and the user's images.
 | `turso.ts`      | Per-user databases and tokens; `CLOUD_SCHEMA_SQL`            |
 | `media.ts`      | Images in R2 and the per-user quota                          |
 | `apple.ts`      | Apple refresh tokens and their revocation                    |
+| `ledgers.ts`    | Shared ledgers: sharing, members, invites, the invite page   |
 | `secretBox.ts`  | AES-GCM sealing for tokens stored in D1                      |
 | `http.ts`       | JSON responses and size-capped JSON bodies (8 KB)            |
 
@@ -2985,10 +3102,32 @@ with Better Auth, one Turso database per user, and the user's images.
 | `POST /v1/apple/authorization`          | `{code}` → trades Apple's one-time authorization code for a refresh token, stored sealed, if the code belongs to this user's Apple account                                                                                                 |
 | `DELETE /v1/account`                    | Revokes the user's Apple tokens, deletes the Turso database and every image under `u/<userId>/`, then the user (every other row cascades) and any pending email code                                                                       |
 
-Every `/v1` route needs `Authorization: Bearer <session token>` (Better Auth's
+Shared ledgers ([Shared ledgers](#shared-ledgers)):
+
+| Route                                          | What it does                                                                                                      |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `GET /v1/ledgers`                              | The user's shared ledgers, owned and joined, with role, owner name, member count and `active` (owner is Pro)      |
+| `POST /v1/ledgers`                             | `{ledgerId, name, emoji}` → shares a ledger: Pro, at most 2 per owner; makes its Turso database                   |
+| `DELETE /v1/ledgers/<id>`                      | Stop sharing (owner): deletes its database and images; members and invites cascade                                |
+| `POST /v1/ledgers/<id>/leave`                  | A member leaves                                                                                                   |
+| `POST /v1/ledgers/<id>/credentials`            | Its Turso URL and a 1-day token, for the owner or a member, while the owner is Pro (403 `owner_not_pro`)          |
+| `GET /v1/ledgers/<id>/members`                 | Owner and members (addresses for the owner only) and open invites (owner only)                                    |
+| `DELETE /v1/ledgers/<id>/members/<userId>`     | Owner removes a member                                                                                            |
+| `POST` / `DELETE /v1/ledgers/<id>/invites[/…]` | Owner makes a single-use 7-day invite link (409 `full` past 5 seats) / cancels one                                |
+| `/v1/ledgers/<id>/media/…`                     | Like `/v1/media`, under `l/<id>/` with its own quota; writing needs the owner's Pro                               |
+| `GET /v1/invites/<code>`                       | No sign-in: ledger name, owner, member count and `active`, for the Join screen; rate limited per IP               |
+| `POST /v1/invites/<code>/accept`               | Joins (any signed-in user, no Pro); the invite is used up                                                         |
+| `GET /join/<code>`                             | The page an invite link opens: hands `money2time://join/<code>` to the app, or links the stores. Static: no names |
+
+Invite codes are 18 random bytes; only their SHA-256 is stored. The join page
+shows nothing from the database and sends a strict Content-Security-Policy.
+Deleting an account also deletes the ledgers it shares (databases and images)
+and ends its memberships.
+
+Every `/v1` route except the invite preview needs `Authorization: Bearer <session token>` (Better Auth's
 bearer plugin; the app never uses cookies). Internal error text stays in the
 logs; responses carry only a code. A cron at 03:17 UTC daily deletes expired
-email codes and rate-limit rows older than a day.
+email codes, expired invites and rate-limit rows older than a day.
 
 - **Exposed surface.** An allowlist in `index.ts` (`AUTH_ROUTES`) passes only the routes above to Better Auth. Its other routes (OAuth callbacks, password reset by email code, change email, update-user, account and session listing, link and unlink) are refused before Better Auth sees them, and code emails go out for sign-in only. The Worker sets no CORS headers and no cookies are used; R2 has no public URL or custom domain; `workers.dev` and preview URLs are off.
 - **Rate limits.** Better Auth limits in D1 by `cf-connecting-ip` (three code
@@ -3054,8 +3193,10 @@ Secrets: `BETTER_AUTH_SECRET`, `TURSO_API_TOKEN` and `APPLE_PRIVATE_KEY`
 Schema in [`apps/cloudflare/d1/cloud-sync/schema.sql`](apps/cloudflare/d1/cloud-sync/schema.sql):
 Better Auth's `user`, `session`, `account`, `verification`, `rateLimit`, plus
 `sync_databases` (user → Turso database, sealed token), `pro_links`,
-`media_usage` and `apple_tokens`, each deleted with its user by `ON DELETE
-CASCADE`.
+`media_usage`, `apple_tokens`, and for shared ledgers `shared_ledgers` (its
+Turso database and sealed token), `ledger_members`, `ledger_invites` (code
+hashes) and `ledger_media_usage`, each deleted with its user or ledger by
+`ON DELETE CASCADE`.
 
 #### Resources
 
@@ -3072,12 +3213,14 @@ Made for this feature on 2026-10-28, all new (nothing existing is shared):
 | Sign in with Apple key   | `Money2Time Cloud Sync`, key id `F5629ZF4G6` (.p8 in `~/.config/money2time/` and the Worker secret `APPLE_PRIVATE_KEY`) | revoke it in the Apple Developer portal, Keys                                               |
 | Turso group              | `m2t-sync` (aws-ap-southeast-1), organization `nelsongan`                                                               | delete its databases, then the group, in the Turso dashboard                                |
 | Turso databases          | `m2t-sync-*`, one per user, in group `m2t-sync`                                                                         | `turso db destroy <name>`, or the Turso dashboard                                           |
+| Turso databases (shared) | `m2t-ledger-*`, one per shared ledger, in group `m2t-sync` (added 2026-10-28)                                           | `turso db destroy <name>`, or the Turso dashboard                                           |
+| D1 tables (shared)       | `shared_ledgers`, `ledger_members`, `ledger_invites`, `ledger_media_usage` in `money2time-cloud-sync-auth`              | go with the D1 database                                                                     |
 | Turso Platform API token | the Worker secret `TURSO_API_TOKEN` (copy in `~/.config/money2time/turso-api-token`)                                    | revoke it in the Turso dashboard, Settings > API Tokens                                     |
 | PostHog feature flag     | `cloud_sync` (to be created at rollout)                                                                                 | delete in PostHog                                                                           |
 
 Teardown order: delete the Worker first (nothing can make new databases), then
-the Turso databases listed in D1 (`SELECT db_name FROM sync_databases`), then
-D1 and R2.
+the Turso databases listed in D1 (`SELECT db_name FROM sync_databases` and
+`SELECT db_name FROM shared_ledgers`), then D1 and R2.
 
 #### Deploy
 

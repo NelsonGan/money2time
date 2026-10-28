@@ -128,6 +128,15 @@ export const POSTHOG_EVENTS = {
   CLOUD_SYNC_ENABLED: 'Cloud Sync Enabled',
   CLOUD_SYNC_ACCOUNT_DELETED: 'Cloud Sync Account Deleted',
 
+  // Shared ledgers: a Pro user shares a ledger, invites people, they join.
+  SHARED_LEDGER_CREATED: 'Shared Ledger Created',
+  SHARED_LEDGER_INVITE_CREATED: 'Shared Ledger Invite Created',
+  /** `is_pro`: whether the person joining is Pro (members need not be). */
+  SHARED_LEDGER_JOINED: 'Shared Ledger Joined',
+  SHARED_LEDGER_MEMBER_REMOVED: 'Shared Ledger Member Removed',
+  SHARED_LEDGER_LEFT: 'Shared Ledger Left',
+  SHARED_LEDGER_STOPPED: 'Shared Ledger Stopped',
+
   // Satisfaction: the happy/unhappy pre-prompt is a continuous NPS-like signal.
   REVIEW_PREPROMPT_SHOWN: 'Review Preprompt Shown',
   REVIEW_PREPROMPT_HAPPY: 'Review Preprompt Happy',

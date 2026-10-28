@@ -18,11 +18,18 @@ import { CLOUD_SYNC_ART } from './art';
 import { EmailSignInForm } from './EmailSignInForm';
 import { GoogleGIcon } from './GoogleGIcon';
 
-/** The sign-in options. Cloud Sync is Pro: a free user tapping one gets the paywall. */
+/**
+ * The sign-in options. Cloud Sync is Pro: a free user tapping one gets the
+ * paywall, except when signing in to join a shared ledger (`allowWithoutPro`).
+ */
 export function SignedOutView({
   onOpenProPaywall,
+  allowWithoutPro = false,
+  hideHero = false,
 }: {
-  onOpenProPaywall: (source: string) => void;
+  onOpenProPaywall?: (source: string) => void;
+  allowWithoutPro?: boolean;
+  hideHero?: boolean;
 }) {
   const sync = useCloudSync();
   const colors = useThemeColors();
@@ -51,8 +58,8 @@ export function SignedOutView({
 
   // Unknown Pro status (still loading) lets the sign-in through: the Worker
   // checks Pro again before anything syncs.
-  const needsPro = isStatusKnown && !isPro;
-  const openPaywall = () => onOpenProPaywall('cloud_sync');
+  const needsPro = !allowWithoutPro && isStatusKnown && !isPro;
+  const openPaywall = () => onOpenProPaywall?.('cloud_sync');
 
   const signIn = async (provider: NativeProvider) => {
     if (needsPro) {
@@ -76,9 +83,9 @@ export function SignedOutView({
 
   return (
     <View>
-      <Hero />
+      {hideHero ? null : <Hero />}
 
-      <View className="mt-10 gap-3">
+      <View className={hideHero ? 'mt-2 gap-3' : 'mt-10 gap-3'}>
         {available.apple ? (
           // Apple's own button, as its guidelines ask.
           <AppleAuthentication.AppleAuthenticationButton

@@ -3,6 +3,8 @@
 //
 // Linking happens once per sign-in on a phone (lib/linking.ts decides how).
 // Once linked, syncs run on the schedule in hooks/useSyncScheduler.ts.
+// Shared ledgers (services/sharedLedgerSync.ts) sync on the same schedule,
+// and also for a signed-in user who is not Pro (a member).
 
 import * as Device from 'expo-device';
 import React, {
@@ -26,12 +28,14 @@ import { FEATURE_FLAGS, useFeatureFlag } from '~/services/featureFlags';
 import { runUserAssetGc } from '~/services/userAssetGc';
 
 import { useSyncScheduler } from './hooks/useSyncScheduler';
+import { PERSONAL_CHANNEL } from './lib/ledgerRows';
 import { decideLink } from './lib/linking';
 import {
   CloudSyncApiError,
   type CloudUser,
   deleteAccount as apiDeleteAccount,
   getSyncCredentials,
+  PERSONAL_MEDIA_PATH,
   sendAppleAuthorization,
   sendEmailCode as apiSendEmailCode,
   signInWithEmailCode,
@@ -46,6 +50,8 @@ import {
   type StoredSession,
 } from './services/cloudSyncSession';
 import { NATIVE_PROVIDERS, type NativeProvider } from './services/nativeSignIn';
+import { type SharedLedger, subscribeSharedLedgers } from './services/sharedLedgerStore';
+import { sharedLedgerSync } from './services/sharedLedgerSync';
 import {
   type DataSummary,
   deleteReplicaFiles,
@@ -54,6 +60,7 @@ import {
   isCloudSyncAvailable,
   pendingChangeCount,
   resetLocalSyncState,
+  runExclusive,
   summarizeLocal,
   SyncEngine,
 } from './services/syncEngine';
@@ -98,6 +105,20 @@ interface CloudSyncContextValue {
   syncNow: () => Promise<void>;
   signOut: () => Promise<void>;
   deleteAccount: () => Promise<void>;
+  /** Shares one of the user's ledgers (Pro, signed in). */
+  shareLedger: (ledger: {
+    id: string;
+    name: string;
+    emoji: string | null;
+  }) => Promise<SharedLedger>;
+  /** Owner: stop sharing; members lose the ledger and its cloud database goes. */
+  stopSharingLedger: (ledgerId: string) => Promise<void>;
+  /** Member: leave; this phone's copy goes. */
+  leaveLedger: (ledgerId: string) => Promise<void>;
+  /** Joins with an invite code; returns the ledger's id, now on this phone. */
+  joinLedger: (code: string) => Promise<string>;
+  /** The Worker session token, for the shared-ledger screens' own calls. */
+  getSessionToken: () => Promise<string>;
 }
 
 const CloudSyncContext = createContext<CloudSyncContextValue | null>(null);
@@ -131,6 +152,8 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   const appUserId = settings?.appUserId ?? null;
 
   const [status, setStatus] = useState<CloudSyncStatus>(enabled ? 'loading' : 'unavailable');
+  const statusRef = useRef(status);
+  statusRef.current = status;
   const [user, setUser] = useState<CloudUser | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSyncedAt, setLastSyncedAt] = useState<number | null>(null);
@@ -176,6 +199,24 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
     return token;
   }, []);
 
+  /** Points the shared-ledger side at the session (or at none). */
+  const bindShared = useCallback(
+    (session: StoredSession | null) => {
+      sharedLedgerSync.configure(
+        session
+          ? {
+              userId: session.user.id,
+              getSessionToken: sessionToken,
+              deviceName: deviceName(),
+              personalInactive: () =>
+                statusRef.current === 'notPro' && sessionRef.current?.linked !== true,
+            }
+          : null,
+      );
+    },
+    [sessionToken],
+  );
+
   const fetchCredentials = useCallback(async (): Promise<SyncCredentials> => {
     const current = credentialsRef.current;
     if (current && current.expiresAt - Date.now() > TOKEN_REFRESH_MARGIN_MS) return current;
@@ -192,15 +233,24 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
     credentialsRef.current = null;
   }, []);
 
-  /** Drops the session but keeps this phone's data. */
+  /**
+   * Drops the session but keeps this phone's data. A deliberate sign-out also
+   * lets go of shared ledgers (a member's copies are deleted); an expired
+   * session keeps them for the next sign-in.
+   */
   const forgetSession = useCallback(
     async (opts: { deleteReplica: boolean }) => {
       generationRef.current += 1;
       const userId = sessionRef.current?.user.id;
-      closeEngine();
-      resetLocalSyncState();
-      if (opts.deleteReplica && userId) deleteReplicaFiles(userId);
       sessionRef.current = null;
+      // Between replica operations, so no engine is closed mid-sync.
+      await runExclusive(() => {
+        if (opts.deleteReplica) sharedLedgerSync.forgetAll();
+        bindShared(null);
+        closeEngine();
+        resetLocalSyncState();
+        if (opts.deleteReplica && userId) deleteReplicaFiles(userId);
+      });
       retryRef.current = false;
       reportedRef.current = false;
       await clearSession();
@@ -209,8 +259,9 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       setLastSyncedAt(null);
       setLastError(null);
       setStatus('signedOut');
+      if (opts.deleteReplica) reloadAfterApply();
     },
-    [closeEngine],
+    [bindShared, closeEngine, reloadAfterApply],
   );
 
   const report = useCallback((error: unknown, stage: string, kind: CloudSyncErrorKind) => {
@@ -254,10 +305,15 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       const credentials = await fetchCredentials();
       const engine = new SyncEngine({
         userId: session.user.id,
+        channel: PERSONAL_CHANNEL,
         url: credentials.url,
         getTursoToken: async () => (await fetchCredentials()).authToken,
         getSessionToken: sessionToken,
-        deviceName: Device.modelName ?? Device.deviceName ?? 'Phone',
+        mediaPath: PERSONAL_MEDIA_PATH,
+        beforeLedgerRemovals: async () => {
+          await sharedLedgerSync.refreshList(true, { letGo: false });
+        },
+        deviceName: deviceName(),
       });
       await engine.open();
       if (generation !== generationRef.current) {
@@ -273,11 +329,38 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
     return opening;
   }, [closeEngine, fetchCredentials, sessionToken]);
 
+  /** Syncs the shared ledgers; failures are retried on the next tick, not shown. */
+  const runSharedSync = useCallback(
+    async (opts: { forceList?: boolean } = {}) => {
+      if (!sessionRef.current) return;
+      const generation = generationRef.current;
+      try {
+        const outcome = await sharedLedgerSync.syncAll(opts);
+        if (generation !== generationRef.current) return;
+        if (outcome.appliedRows > 0 || outcome.removedLedgers > 0) reloadAfterApply();
+      } catch (error) {
+        if (generation !== generationRef.current) return;
+        if (errorKind(error) === 'session_expired') {
+          await forgetSession({ deleteReplica: false });
+          setLastError('session_expired');
+        }
+      }
+    },
+    [forgetSession, reloadAfterApply],
+  );
+
   const runSync = useCallback(async () => {
-    if (!sessionRef.current?.linked) return;
+    if (!sessionRef.current?.linked) {
+      await runSharedSync();
+      return;
+    }
     const generation = generationRef.current;
     setIsSyncing(true);
     try {
+      // Which ledgers are shared decides where rows go, so learn of a ledger
+      // shared from another phone before its rows leave the user's own copy.
+      const removed = await sharedLedgerSync.refreshList().catch(() => 0);
+      if (removed > 0) reloadAfterApply();
       const engine = await openEngine();
       const outcome = await engine.syncNow();
       if (generation !== generationRef.current) return;
@@ -295,7 +378,8 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsSyncing(false);
     }
-  }, [handleError, openEngine, reloadAfterApply]);
+    await runSharedSync();
+  }, [handleError, openEngine, reloadAfterApply, runSharedSync]);
 
   const markLinked = useCallback(async (mode: LinkMode) => {
     const session = sessionRef.current;
@@ -397,13 +481,18 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       resetLocalSyncState();
       const session: StoredSession = { token, user: signedIn, linked: false };
       sessionRef.current = session;
+      bindShared(session);
       await saveSession(session);
       setUser(signedIn);
       setLastError(null);
       void trackEvent(AnalyticsEvents.CLOUD_SYNC_SIGNED_IN, { method });
+      // Which ledgers are shared decides what linking compares and replaces.
+      await sharedLedgerSync.refreshList(true, { letGo: false }).catch(() => 0);
       await link();
+      // Shared ledgers this account already belongs to come down too.
+      void runSharedSync({ forceList: true });
     },
-    [link],
+    [bindShared, link, runSharedSync],
   );
 
   const signInWithNative = useCallback(
@@ -457,6 +546,8 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       await engine.waitIdle();
       if (pendingChangeCount() > 0) await engine.syncNow().catch(() => undefined);
     }
+    await sharedLedgerSync.waitIdle();
+    if (pendingChangeCount() > 0) await sharedLedgerSync.syncAll().catch(() => undefined);
     const token = sessionRef.current?.token;
     if (token) void signOutSession(token).catch(() => undefined);
     await forgetSession({ deleteReplica: true });
@@ -466,6 +557,7 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   const deleteAccount = useCallback(async () => {
     const token = await sessionToken();
     await engineRef.current?.waitIdle();
+    await sharedLedgerSync.waitIdle();
     await apiDeleteAccount(token);
     await forgetSession({ deleteReplica: true });
     void trackEvent(AnalyticsEvents.CLOUD_SYNC_ACCOUNT_DELETED);
@@ -485,6 +577,7 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       const session = await loadSession();
       if (cancelled) return;
       sessionRef.current = session;
+      bindShared(session);
       if (!session) {
         setStatus('signedOut');
         return;
@@ -492,7 +585,9 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       setUser(session.user);
       // Not linked: the app closed during linking, so start it again.
       if (!session.linked) {
+        await sharedLedgerSync.refreshList(true, { letGo: false }).catch(() => 0);
         await link();
+        void runSharedSync({ forceList: true });
         return;
       }
       // Record edits even if this launch cannot sync (offline, Pro ended):
@@ -520,6 +615,8 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
     if (status !== 'ready' && status !== 'notPro') return;
     if (!isPro) closeEngine();
     void syncNow();
+    // A shared ledger of this user's resumes (or pauses) with it.
+    void runSharedSync({ forceList: true });
     // Only a change of Pro matters here, not every new callback.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPro, isStatusKnown]);
@@ -538,6 +635,59 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   const always = useCallback(() => true, []);
   useSyncScheduler(status === 'linking' && lastError === 'offline', scheduledLink, always);
 
+  // Shared ledgers when the user's own data does not sync (a member without
+  // Pro, or Pro paused): on their own schedule. Ready runs them with runSync.
+  const hasShared = useHasSharedLedgers();
+  const scheduledShared = useCallback(() => void runSharedSync(), [runSharedSync]);
+  const sharedWanted = useCallback(() => sharedLedgerSync.retry || pendingChangeCount() > 0, []);
+  useSyncScheduler(
+    hasShared && user !== null && status !== 'ready' && status !== 'unavailable',
+    scheduledShared,
+    sharedWanted,
+  );
+
+  const shareLedger = useCallback(
+    async (ledger: { id: string; name: string; emoji: string | null }) => {
+      const shared = await sharedLedgerSync.share(ledger);
+      void trackEvent(AnalyticsEvents.SHARED_LEDGER_CREATED);
+      // The personal sync takes the ledger's rows out of the user's own copy.
+      void runSync();
+      return shared;
+    },
+    [runSync],
+  );
+
+  const stopSharingLedger = useCallback(
+    async (ledgerId: string) => {
+      await sharedLedgerSync.stopSharing(ledgerId);
+      void trackEvent(AnalyticsEvents.SHARED_LEDGER_STOPPED);
+      reloadAfterApply();
+      void runSync();
+    },
+    [reloadAfterApply, runSync],
+  );
+
+  const leaveLedger = useCallback(
+    async (ledgerId: string) => {
+      await sharedLedgerSync.leave(ledgerId);
+      void trackEvent(AnalyticsEvents.SHARED_LEDGER_LEFT);
+      reloadAfterApply();
+    },
+    [reloadAfterApply],
+  );
+
+  const joinLedger = useCallback(
+    async (code: string) => {
+      const ledgerId = await sharedLedgerSync.join(code);
+      void trackEvent(AnalyticsEvents.SHARED_LEDGER_JOINED, {
+        is_pro: isPro,
+      });
+      refreshAllRef.current();
+      return ledgerId;
+    },
+    [isPro],
+  );
+
   const value = useMemo<CloudSyncContextValue>(
     () => ({
       status,
@@ -553,6 +703,11 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       syncNow,
       signOut,
       deleteAccount,
+      shareLedger,
+      stopSharingLedger,
+      leaveLedger,
+      joinLedger,
+      getSessionToken: sessionToken,
     }),
     [
       status,
@@ -568,10 +723,24 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       syncNow,
       signOut,
       deleteAccount,
+      shareLedger,
+      stopSharingLedger,
+      leaveLedger,
+      joinLedger,
+      sessionToken,
     ],
   );
 
   return <CloudSyncContext.Provider value={value}>{children}</CloudSyncContext.Provider>;
+}
+
+function deviceName(): string {
+  return Device.modelName ?? Device.deviceName ?? 'Phone';
+}
+
+/** Whether this phone has any shared ledger, kept current as the list changes. */
+function useHasSharedLedgers(): boolean {
+  return React.useSyncExternalStore(subscribeSharedLedgers, () => sharedLedgerSync.hasLedgers());
 }
 
 export function useCloudSync(): CloudSyncContextValue {

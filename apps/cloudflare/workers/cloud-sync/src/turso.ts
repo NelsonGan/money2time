@@ -1,6 +1,6 @@
-// Per-user Turso databases through the Turso Platform API. Each user gets one
-// database in TURSO_GROUP; the phone syncs its local replica with it using a
-// token that opens only that database.
+// Turso databases through the Turso Platform API, all in TURSO_GROUP: one per
+// user (their cloud copy) and one per shared ledger (src/ledgers.ts). A phone
+// syncs its local replica with a database using a token that opens only it.
 
 import type { Env } from './env';
 import { open, seal } from './secretBox';
@@ -79,7 +79,7 @@ export async function getSyncDatabase(env: Env, userId: string): Promise<SyncDat
     created = true;
   }
   const expiresAt = now + TOKEN_TTL_MS;
-  const token = await createToken(env, dbName);
+  const token = await createToken(env, dbName, TOKEN_TTL_DAYS);
   if (created) await applyCloudSchema(url, token);
 
   try {
@@ -107,14 +107,14 @@ export async function deleteSyncDatabase(env: Env, userId: string): Promise<void
   await env.AUTH_DB.prepare('DELETE FROM sync_databases WHERE user_id = ?1').bind(userId).run();
 }
 
-async function deleteDatabase(env: Env, dbName: string): Promise<void> {
+export async function deleteDatabase(env: Env, dbName: string): Promise<void> {
   const res = await platform(env, `/organizations/${env.TURSO_ORG}/databases/${dbName}`, {
     method: 'DELETE',
   });
   if (!res.ok && res.status !== 404) throw new Error(`turso_delete_failed_${res.status}`);
 }
 
-async function createDatabase(env: Env, dbName: string): Promise<string> {
+export async function createDatabase(env: Env, dbName: string): Promise<string> {
   const res = await platform(env, `/organizations/${env.TURSO_ORG}/databases`, {
     method: 'POST',
     body: JSON.stringify({ name: dbName, group: env.TURSO_GROUP }),
@@ -133,10 +133,10 @@ async function createDatabase(env: Env, dbName: string): Promise<string> {
   return body.database.Hostname;
 }
 
-async function createToken(env: Env, dbName: string): Promise<string> {
+export async function createToken(env: Env, dbName: string, ttlDays: number): Promise<string> {
   const res = await platform(
     env,
-    `/organizations/${env.TURSO_ORG}/databases/${dbName}/auth/tokens?expiration=${TOKEN_TTL_DAYS}d&authorization=full-access`,
+    `/organizations/${env.TURSO_ORG}/databases/${dbName}/auth/tokens?expiration=${ttlDays}d&authorization=full-access`,
     { method: 'POST' },
   );
   if (!res.ok) throw new Error(`turso_token_failed_${res.status}`);
@@ -146,7 +146,7 @@ async function createToken(env: Env, dbName: string): Promise<string> {
 }
 
 /** Creates the sync tables over Turso's HTTP SQL API, before any phone connects. */
-async function applyCloudSchema(url: string, token: string): Promise<void> {
+export async function applyCloudSchema(url: string, token: string): Promise<void> {
   const httpUrl = url.replace(/^libsql:\/\//, 'https://');
   const res = await fetch(`${httpUrl}/v2/pipeline`, {
     method: 'POST',

@@ -16,6 +16,11 @@
 // The replica's sync_rows is never written with an upsert: in the Turso engine
 // (0.8.3) `INSERT … ON CONFLICT DO UPDATE` on its two-column key fails once the
 // replica has pulled. Plain UPDATE and INSERT are used instead.
+//
+// One engine runs per channel: the user's own cloud copy ('personal') and each
+// shared ledger's database (services/ledgerChannels.ts routes the rows). They
+// share the outbox and the bookkeeping, which records each row's channel, and
+// take turns on one queue.
 
 import { Directory, File, Paths } from 'expo-file-system';
 
@@ -32,6 +37,7 @@ import {
   ENQUEUE_ROW_SQL,
   enqueueAllSql,
 } from '../lib/capture';
+import { inLedgersSql, isLedgerScoped, PERSONAL_CHANNEL } from '../lib/ledgerRows';
 import {
   buildWrite,
   decodeRow,
@@ -53,6 +59,16 @@ import {
   type SyncTable,
 } from '../lib/syncTables';
 import { downloadMedia, existingMedia, uploadMedia } from './cloudSyncApi';
+import {
+  attachedKey,
+  channelOfRow,
+  detachedKey,
+  enqueueLedgerRows,
+  personalRowsSql,
+  recordedChannel,
+  sharedLedgerIds,
+} from './ledgerChannels';
+import { listSharedLedgers } from './sharedLedgerStore';
 
 type TursoModule = typeof import('@tursodatabase/sync-react-native');
 type Replica = InstanceType<TursoModule['Database']>;
@@ -90,11 +106,19 @@ export interface DataSummary {
 
 export interface EngineConfig {
   userId: string;
+  /** PERSONAL_CHANNEL, or a shared ledger's share id. */
+  channel: string;
+  /** A shared ledger's channel: the app's id of the ledger it carries. */
+  ledgerId?: string;
   url: string;
   /** Returns a current Turso token for the user's database. */
   getTursoToken: () => Promise<string>;
   /** Returns the Worker session token, for images. */
   getSessionToken: () => Promise<string>;
+  /** The channel's image routes on the Worker: `/v1/media` or `/v1/ledgers/<id>/media`. */
+  mediaPath: string;
+  /** Personal channel: refreshes the shared-ledger list before ledger rows are removed. */
+  beforeLedgerRemovals?: () => Promise<void>;
   deviceName: string;
 }
 
@@ -122,7 +146,8 @@ export function isCloudSyncAvailable(): boolean {
   return loadTurso() !== null;
 }
 
-function replicaFileName(userId: string): string {
+function replicaFileName(userId: string, channel: string): string {
+  if (channel !== PERSONAL_CHANNEL) return `m2t-ledger-${channel.replace(/[^a-z0-9]/gi, '')}.db`;
   let hash = 0;
   for (let i = 0; i < userId.length; i++) hash = (hash * 31 + userId.charCodeAt(i)) | 0;
   return `m2t-cloud-${(hash >>> 0).toString(36)}.db`;
@@ -205,11 +230,11 @@ function outboxKeys(): Set<string> {
   );
 }
 
-function recordRev(table: string, id: string, rev: string | null): void {
+function recordRev(table: string, id: string, rev: string | null, channel: string): void {
   if (rev) {
     getSQLite().runSync(
-      'INSERT OR REPLACE INTO sync_row_meta (table_name, row_id, rev) VALUES (?, ?, ?)',
-      [table, id, rev],
+      'INSERT OR REPLACE INTO sync_row_meta (table_name, row_id, rev, channel) VALUES (?, ?, ?, ?)',
+      [table, id, rev, channel],
     );
   } else {
     getSQLite().runSync('DELETE FROM sync_row_meta WHERE table_name = ? AND row_id = ?', [
@@ -247,11 +272,14 @@ function uniqueIndexes(table: string): UniqueIndex[] {
   return found;
 }
 
-/** Queues images to upload on the next sync (kept until they are up). */
-function queueMedia(paths: Iterable<string>): void {
+/** Queues images to upload on the next sync of `channel` (kept until they are up). */
+function queueMedia(paths: Iterable<string>, channel: string): void {
   const db = getSQLite();
   for (const path of paths) {
-    db.runSync('INSERT OR IGNORE INTO sync_media_pending (path) VALUES (?)', [path]);
+    db.runSync('INSERT OR IGNORE INTO sync_media_pending (path, channel) VALUES (?, ?)', [
+      path,
+      channel,
+    ]);
   }
 }
 
@@ -365,7 +393,7 @@ function catchUpSyncedShape(): void {
     for (const table of newTables) {
       if (tableExists(table)) db.execSync(enqueueAllSql(table));
     }
-    if (assetsChanged) queueMedia(collectReferencedAssetPaths());
+    if (assetsChanged) queueMedia(collectReferencedAssetPaths(), PERSONAL_CHANNEL);
     if (newTables.length) setState('apply_pending', '1');
     saveSyncedShape();
   });
@@ -410,8 +438,58 @@ export function disableCapture(): void {
   for (const table of SYNC_TABLES) db.execSync(dropCaptureTriggersSql(table));
 }
 
+/**
+ * Changes waiting to go up. Those of a paused shared ledger are left out:
+ * they wait for its owner's Pro, and must not keep the schedulers busy.
+ */
 export function pendingChangeCount(): number {
-  return getSQLite().getFirstSync<{ n: number }>('SELECT COUNT(*) AS n FROM sync_outbox')?.n ?? 0;
+  const db = getSQLite();
+  let count = db.getFirstSync<{ n: number }>('SELECT COUNT(*) AS n FROM sync_outbox')?.n ?? 0;
+  const paused = listSharedLedgers()
+    .filter((ledger) => !ledger.active)
+    .map((ledger) => ledger.ledgerId);
+  if (!count || !paused.length) return count;
+  for (const table of SYNC_TABLES) {
+    if (!isLedgerScoped(table) || !tableExists(table)) continue;
+    count -=
+      db.getFirstSync<{ n: number }>(
+        `SELECT COUNT(*) AS n FROM sync_outbox WHERE table_name = ?
+           AND row_id IN (SELECT id FROM "${table}" WHERE ${inLedgersSql(table, paused)})`,
+        [table],
+      )?.n ?? 0;
+  }
+  return Math.max(0, count);
+}
+
+/**
+ * Drops queued changes of the user's own data, keeping shared ledgers'. Run
+ * inside a transaction: when the user's own data has no cloud copy to go to
+ * (a member without Cloud Sync, whose linking uploads everything anyway), and
+ * when a full upload or download replaces the user's own copy.
+ */
+export function dropPersonalOutbox(): void {
+  const db = getSQLite();
+  if (!listSharedLedgers().length) {
+    db.runSync('DELETE FROM sync_outbox');
+    return;
+  }
+  const entries = db.getAllSync<{ table_name: string; row_id: string }>(
+    'SELECT table_name, row_id FROM sync_outbox',
+  );
+  for (const entry of entries) {
+    const local = isSyncTable(entry.table_name)
+      ? db.getFirstSync<Row>(`SELECT * FROM "${entry.table_name}" WHERE id = ?`, [entry.row_id])
+      : null;
+    const channel = local
+      ? channelOfRow(entry.table_name, local)
+      : (recordedChannel(entry.table_name, entry.row_id) ?? PERSONAL_CHANNEL);
+    if (channel === PERSONAL_CHANNEL) {
+      db.runSync('DELETE FROM sync_outbox WHERE table_name = ? AND row_id = ?', [
+        entry.table_name,
+        entry.row_id,
+      ]);
+    }
+  }
 }
 
 /** Forgets everything this phone knew about the cloud copy (sign-out, account switch). */
@@ -439,12 +517,13 @@ function summaryFromCounts(count: (table: string) => number): DataSummary {
   };
 }
 
+/** This phone's own data, without the shared ledgers (they sync on their own). */
 export function summarizeLocal(): DataSummary {
   const db = getSQLite();
   return summaryFromCounts((table) =>
     tableExists(table)
       ? (db.getFirstSync<{ n: number }>(
-          `SELECT COUNT(*) AS n FROM "${table}" WHERE deleted_at IS NULL`,
+          `SELECT COUNT(*) AS n FROM "${table}" WHERE deleted_at IS NULL AND ${personalRowsSql(table)}`,
         )?.n ?? 0)
       : 0,
   );
@@ -458,16 +537,57 @@ interface StoredRow {
   rev: string;
 }
 
+/**
+ * Routes worked out for outbox entries during one flush pass over the
+ * channels (see `entriesForChannel`), so each entry's row is read once rather
+ * than once per channel. Cleared at the start of every sync of the user's own
+ * channel and whenever the shared ledgers change: seq numbers restart once
+ * the outbox empties, so an entry key alone does not stay unique.
+ */
+const routeMemo = new Map<string, string>();
+let routeMemoList: unknown = null;
+
+function routeMemoFresh(): Map<string, string> {
+  const list = listSharedLedgers();
+  if (routeMemoList !== list) {
+    routeMemo.clear();
+    routeMemoList = list;
+  }
+  return routeMemo;
+}
+
+/**
+ * Serializes every operation on every replica (syncs, pulls, full
+ * replacements): engines share the outbox and the app tables.
+ */
+let replicaQueue: Promise<unknown> = Promise.resolve();
+
+/** Runs `fn` when no replica operation is in flight, holding the others back. */
+export function runExclusive<T>(fn: () => Promise<T> | T): Promise<T> {
+  const run = async () => fn();
+  const result = replicaQueue.then(run, run);
+  replicaQueue = result.catch(() => undefined);
+  return result;
+}
+
 export class SyncEngine {
   private replica: Replica | null = null;
   private running: Promise<SyncOutcome> | null = null;
-  /** Serializes every operation on the replica (syncs, pulls, full replacements). */
-  private queue: Promise<unknown> = Promise.resolve();
+  /** The last apply left ledger-row removals for later (see applyRemoteChanges). */
+  private removalsDeferred = false;
 
   constructor(private readonly config: EngineConfig) {}
 
   get userId(): string {
     return this.config.userId;
+  }
+
+  get channel(): string {
+    return this.config.channel;
+  }
+
+  private get isPersonal(): boolean {
+    return this.config.channel === PERSONAL_CHANNEL;
   }
 
   /** Opens the replica, downloading the cloud copy on first use. Needs the network then. */
@@ -476,7 +596,7 @@ export class SyncEngine {
     const mod = loadTurso();
     if (!mod) throw new Error('turso_unavailable');
     const replica = new mod.Database({
-      path: mod.getDbPath(replicaFileName(this.config.userId)),
+      path: mod.getDbPath(replicaFileName(this.config.userId, this.config.channel)),
       url: this.config.url,
       authToken: () => this.config.getTursoToken(),
       clientName: 'money2time',
@@ -493,9 +613,7 @@ export class SyncEngine {
   }
 
   private exclusive<T>(fn: () => Promise<T>): Promise<T> {
-    const result = this.queue.then(fn, fn);
-    this.queue = result.catch(() => undefined);
-    return result;
+    return runExclusive(fn);
   }
 
   /**
@@ -512,7 +630,7 @@ export class SyncEngine {
 
   /** Resolves once every operation started so far has finished (sign-out waits for it). */
   async waitIdle(): Promise<void> {
-    await this.queue;
+    await replicaQueue;
   }
 
   private db(): Replica {
@@ -558,11 +676,14 @@ export class SyncEngine {
       // The whole phone is queued before the cloud copy is cleared, so an app
       // killed in between still uploads everything on its next sync.
       db.withTransactionSync(() => {
-        db.execSync('DELETE FROM sync_row_meta; DELETE FROM sync_outbox;');
+        // Shared ledgers' rows are queued too: their channels find them
+        // unchanged and leave them be (a paused ledger's wait until it resumes).
+        db.execSync(`DELETE FROM sync_row_meta WHERE channel = '${PERSONAL_CHANNEL}'`);
+        dropPersonalOutbox();
         for (const table of SYNC_TABLES) {
           if (tableExists(table)) db.execSync(enqueueAllSql(table));
         }
-        queueMedia(collectReferencedAssetPaths());
+        queueMedia(collectReferencedAssetPaths(), PERSONAL_CHANNEL);
         saveSyncedShape();
       });
       enableCapture();
@@ -589,21 +710,34 @@ export class SyncEngine {
           rows.map((r) => ({ row_id: String(r.row_id), data: String(r.data), rev: String(r.rev) })),
         );
       }
+      const shared = sharedLedgerIds();
       applyQuietly(() => {
+        // Shared ledgers' changes waiting to go up stay queued.
+        dropPersonalOutbox();
         db.execSync(
-          'DELETE FROM sync_outbox; DELETE FROM sync_row_meta; DELETE FROM sync_media_pending;',
+          `DELETE FROM sync_row_meta WHERE channel = '${PERSONAL_CHANNEL}';
+           DELETE FROM sync_media_pending WHERE channel = '${PERSONAL_CHANNEL}';`,
         );
-        for (const table of SYNC_TABLES) {
-          if (!tableExists(table)) continue;
+        // Shared ledgers stay as they are: they sync with their own databases.
+        // Children go first, while their parents still say which ledger they are in.
+        for (const table of [...SYNC_TABLES].reverse()) {
           // The settings row is updated in place so this phone keeps its own
           // device-local settings (and its purchase identity).
-          if (table !== 'settings') db.execSync(`DELETE FROM "${table}"`);
+          if (!tableExists(table) || table === 'settings') continue;
+          db.execSync(
+            isLedgerScoped(table)
+              ? `DELETE FROM "${table}" WHERE NOT (${inLedgersSql(table, shared)})`
+              : `DELETE FROM "${table}"`,
+          );
+        }
+        for (const table of SYNC_TABLES) {
+          if (!tableExists(table)) continue;
           const cols = localColumns(table);
           for (const stored of perTable.get(table) ?? []) {
             const row = decodeRow(table, stored.data, cols);
-            if (!row) continue;
+            if (!row || channelOfRow(table, row) !== PERSONAL_CHANNEL) continue;
             if (writeRowSafely(table, row)) collectAssetRefs(table, row, assets);
-            recordRev(table, stored.row_id, stored.rev);
+            recordRev(table, stored.row_id, stored.rev, PERSONAL_CHANNEL);
           }
         }
         ensureDefaultLedger();
@@ -626,20 +760,37 @@ export class SyncEngine {
   private async runSync(): Promise<SyncOutcome> {
     const replica = this.db();
     enableCapture();
-    catchUpSyncedShape();
+    let appliedRows = 0;
+    // A ledger just shared, joined, or signed into again: take what the cloud
+    // has (keeping this phone's newer edits), then send what only this phone
+    // has. It counts as attached once that is pushed.
+    const attaching = !this.isPersonal && getState(attachedKey(this.channel)) !== '1';
+    if (this.isPersonal) {
+      // The personal sync starts each round of syncs: routes start afresh.
+      routeMemo.clear();
+      catchUpSyncedShape();
+      await this.detachSharedLedgers();
+    } else if (attaching) {
+      await replica.pull();
+      appliedRows += await this.applyRemoteChanges({ attaching: true });
+      enqueueLedgerRows(this.config.ledgerId ?? '', this.channel);
+    }
     const pushedRows = await this.flushOutbox();
     if (pushedRows > 0) await this.recordLastDevice();
     // Images first: a row must never reach another phone before its image can.
     await this.uploadPendingMedia();
     await replica.push();
+    if (attaching) setState(attachedKey(this.channel), '1');
     const pulled = await replica.pull();
-    let appliedRows = 0;
     // Also re-applies after an apply that failed, which a later pull with no
     // new changes would otherwise never retry.
-    if (pulled || getState('apply_pending') !== '0') {
-      setState('apply_pending', '1');
-      appliedRows = await this.applyRemoteChanges();
-      setState('apply_pending', '0');
+    const pendingKey = this.isPersonal ? 'apply_pending' : `apply_pending:${this.channel}`;
+    if (pulled || getState(pendingKey) !== '0') {
+      setState(pendingKey, '1');
+      this.removalsDeferred = false;
+      appliedRows += await this.applyRemoteChanges();
+      // Deferred removals keep the apply pending, so the next sync retries.
+      if (!this.removalsDeferred) setState(pendingKey, '0');
     }
     await this.downloadMedia(new Set());
     return { appliedRows };
@@ -676,18 +827,56 @@ export class SyncEngine {
     return found;
   }
 
-  /** Copies outbox rows into the replica. Returns how many rows changed there. */
+  /**
+   * The outbox entries this channel sends, with their rows as they are now.
+   * An entry for a row that is gone goes where the row was last synced.
+   */
+  private entriesForChannel(
+    batch: { table_name: string; row_id: string; seq: number }[],
+  ): { table_name: string; row_id: string; seq: number; local: Row | null }[] {
+    const db = getSQLite();
+    const mine: { table_name: string; row_id: string; seq: number; local: Row | null }[] = [];
+    for (const entry of batch) {
+      if (!isSyncTable(entry.table_name)) {
+        if (this.isPersonal) mine.push({ ...entry, local: null });
+        continue;
+      }
+      // Each channel walks the whole outbox: an entry another channel
+      // already routed (same change, same list of shared ledgers) is skipped
+      // without reading its row.
+      const key = `${entry.table_name}:${entry.row_id}:${entry.seq}`;
+      const memo = routeMemoFresh();
+      const known = memo.get(key);
+      if (known !== undefined && known !== this.channel) continue;
+      const local = db.getFirstSync<Row>(`SELECT * FROM "${entry.table_name}" WHERE id = ?`, [
+        entry.row_id,
+      ]);
+      const channel = local
+        ? channelOfRow(entry.table_name, local)
+        : (recordedChannel(entry.table_name, entry.row_id) ?? PERSONAL_CHANNEL);
+      memo.set(key, channel);
+      if (channel === this.channel) mine.push({ ...entry, local });
+    }
+    return mine;
+  }
+
+  /** Copies this channel's outbox rows into the replica. Returns how many rows changed there. */
   private async flushOutbox(): Promise<number> {
     const db = getSQLite();
     const replica = this.db();
     const origin = deviceId();
     let changedRows = 0;
+    // Other channels' entries stay behind, so walk the outbox by seq.
+    let afterSeq = -1;
     for (;;) {
-      const batch = db.getAllSync<{ table_name: string; row_id: string; seq: number }>(
-        'SELECT table_name, row_id, seq FROM sync_outbox ORDER BY seq LIMIT ?',
-        [FLUSH_BATCH],
+      const page = db.getAllSync<{ table_name: string; row_id: string; seq: number }>(
+        'SELECT table_name, row_id, seq FROM sync_outbox WHERE seq > ? ORDER BY seq LIMIT ?',
+        [afterSeq, FLUSH_BATCH],
       );
-      if (!batch.length) break;
+      if (!page.length) break;
+      afterSeq = page[page.length - 1].seq;
+      const batch = this.entriesForChannel(page);
+      if (!batch.length) continue;
       const stored = new Map<string, StoredRow>();
       const idsByTable = new Map<string, string[]>();
       for (const entry of batch) {
@@ -711,7 +900,7 @@ export class SyncEngine {
             results.push({ table, id, seq: entry.seq, rev: null });
             continue;
           }
-          const local = db.getFirstSync<Row>(`SELECT * FROM "${table}" WHERE id = ?`, [id]);
+          const local = entry.local;
           const before = stored.get(rowKey(table, id));
           if (!local) {
             if (before) {
@@ -752,7 +941,7 @@ export class SyncEngine {
       });
       db.withTransactionSync(() => {
         // Queued with the outbox change, so an upload that fails is retried.
-        queueMedia(assets);
+        queueMedia(assets, this.channel);
         for (const r of results) {
           // Only clear the entry if the row did not change again meanwhile.
           db.runSync('DELETE FROM sync_outbox WHERE table_name = ? AND row_id = ? AND seq = ?', [
@@ -760,7 +949,7 @@ export class SyncEngine {
             r.id,
             r.seq,
           ]);
-          recordRev(r.table, r.id, r.rev);
+          recordRev(r.table, r.id, r.rev, this.channel);
         }
       });
     }
@@ -777,20 +966,40 @@ export class SyncEngine {
     ).map((r) => ({ table: String(r.table_name), id: String(r.row_id), rev: String(r.rev) }));
     const local: RevEntry[] = getSQLite()
       .getAllSync<{ table_name: string; row_id: string; rev: string }>(
-        'SELECT table_name, row_id, rev FROM sync_row_meta',
+        'SELECT table_name, row_id, rev FROM sync_row_meta WHERE channel = ?',
+        [this.channel],
       )
       .map((r) => ({ table: r.table_name, id: r.row_id, rev: r.rev }));
     const pending = outboxKeys();
+    // A shared ledger's database only ever carries that ledger's rows.
     const keep = (e: { table: string; id: string }) =>
-      isSyncTable(e.table) && !pending.has(rowKey(e.table, e.id));
+      isSyncTable(e.table) &&
+      (this.isPersonal || isLedgerScoped(e.table)) &&
+      !pending.has(rowKey(e.table, e.id));
     const diff = diffRevs(remote, local);
     return { changed: diff.changed.filter(keep), removed: diff.removed.filter(keep) };
   }
 
   /** Writes rows other phones changed into the app tables. Returns rows written or removed. */
-  private async applyRemoteChanges(): Promise<number> {
+  private async applyRemoteChanges(opts: { attaching?: boolean } = {}): Promise<number> {
     const { changed, removed } = await this.remoteChanges();
     if (!changed.length && !removed.length) return 0;
+    // Ledger rows leaving the user's own copy may have moved to a ledger
+    // shared from another phone: learn of it first, so they are kept.
+    let deferLedgerRemovals = false;
+    if (
+      this.isPersonal &&
+      this.config.beforeLedgerRemovals &&
+      removed.some((item) => isLedgerScoped(item.table))
+    ) {
+      // Without the list (offline Worker), those removals wait for a later
+      // sync; everything else applies now.
+      deferLedgerRemovals = !(await this.config.beforeLedgerRemovals().then(
+        () => true,
+        () => false,
+      ));
+      this.removalsDeferred = deferLedgerRemovals;
+    }
 
     const fetched: { table: SyncTable; id: string; rev: string; data: string }[] = [];
     const idsByTable = new Map<SyncTable, string[]>();
@@ -805,6 +1014,9 @@ export class SyncEngine {
         fetched.push({ table, id, rev: row.rev, data: row.data });
       }
     }
+    // Parents before children, so a child row can tell which ledger it is in.
+    const order = (table: string) => SYNC_TABLES.indexOf(table as SyncTable);
+    fetched.sort((a, b) => order(a.table) - order(b.table));
 
     const db = getSQLite();
     const assets = new Set<string>();
@@ -817,23 +1029,104 @@ export class SyncEngine {
       // with the one it replaces.
       for (const item of removed) {
         if (pendingNow.has(rowKey(item.table, item.id))) continue;
-        if (tableExists(item.table)) {
+        if (deferLedgerRemovals && isLedgerScoped(item.table)) continue;
+        // A row that moved to another channel (its ledger was shared) stays.
+        if (tableExists(item.table) && this.ownsLocalRow(item.table, item.id)) {
           applied += db.runSync(`DELETE FROM "${item.table}" WHERE id = ?`, [item.id]).changes;
         }
-        recordRev(item.table, item.id, null);
+        recordRev(item.table, item.id, null, this.channel);
       }
       for (const item of fetched) {
         if (!tableExists(item.table) || pendingNow.has(rowKey(item.table, item.id))) continue;
         const row = decodeRow(item.table, item.data, localColumns(item.table));
-        if (row && writeRowSafely(item.table, row)) {
+        if (!row || !this.accepts(item.table, row)) continue;
+        if (opts.attaching && this.localIsNewer(item.table, row)) {
+          // Edited here while signed out: this phone's copy goes up instead.
+          db.runSync(ENQUEUE_ROW_SQL, [item.table, item.id]);
+          recordRev(item.table, item.id, item.rev, this.channel);
+          continue;
+        }
+        if (writeRowSafely(item.table, row)) {
           applied += 1;
           collectAssetRefs(item.table, row, assets);
         }
-        recordRev(item.table, item.id, item.rev);
+        recordRev(item.table, item.id, item.rev, this.channel);
       }
     });
     await this.downloadMedia(assets);
     return applied;
+  }
+
+  /** Whether this phone's copy of a row was edited after the pulled one. */
+  private localIsNewer(table: string, row: Row): boolean {
+    if (typeof row.updated_at !== 'string' || !localColumns(table).has('updated_at')) return false;
+    const local = getSQLite().getFirstSync<{ updated_at: string | null }>(
+      `SELECT updated_at FROM "${table}" WHERE id = ?`,
+      [String(row.id ?? '')],
+    );
+    return typeof local?.updated_at === 'string' && local.updated_at > row.updated_at;
+  }
+
+  /** Whether this phone's copy of a row (if any) belongs to this channel. */
+  private ownsLocalRow(table: string, id: string): boolean {
+    // Nothing shared: every row is the user's own.
+    if (!listSharedLedgers().length) return this.isPersonal;
+    const local = getSQLite().getFirstSync<Row>(`SELECT * FROM "${table}" WHERE id = ?`, [id]);
+    return !local || channelOfRow(table, local) === this.channel;
+  }
+
+  /**
+   * Whether a pulled row may be written. It must belong to this channel, and
+   * so must the row it would replace: the user's own copy skips rows of
+   * ledgers now shared, and a shared ledger's database (which its members
+   * write to) can never reach the user's settings or another ledger.
+   */
+  private accepts(table: string, row: Row): boolean {
+    if (channelOfRow(table, row) !== this.channel) return false;
+    return this.ownsLocalRow(table, String(row.id ?? ''));
+  }
+
+  /**
+   * Once a ledger is shared, its rows leave the user's own cloud copy (they
+   * live in the ledger's database now), so other phones stop reading them
+   * from there. Personal channel only; done once per shared ledger.
+   */
+  private async detachSharedLedgers(): Promise<void> {
+    for (const ledger of listSharedLedgers()) {
+      if (getState(detachedKey(ledger.shareId)) === '1') continue;
+      // Only once the ledger's own database has its rows (this phone's
+      // channel pushed them): until then the user's copy is the only one.
+      if (getState(attachedKey(ledger.shareId)) !== '1') continue;
+      await this.detachLedger(ledger.ledgerId);
+      setState(detachedKey(ledger.shareId), '1');
+    }
+  }
+
+  /**
+   * Deletes a ledger's rows from the user's own cloud copy. Found by this
+   * phone's rows of the ledger (their revisions are on the ledger's channel
+   * by now, so they cannot be found through sync_row_meta).
+   */
+  private async detachLedger(ledgerId: string): Promise<void> {
+    const replica = this.db();
+    const db = getSQLite();
+    await replica.transaction(async () => {
+      for (const table of SYNC_TABLES) {
+        if (!isLedgerScoped(table) || !tableExists(table)) continue;
+        const ids = db
+          .getAllSync<{
+            id: string;
+          }>(`SELECT id FROM "${table}" WHERE ${inLedgersSql(table, [ledgerId])}`)
+          .map((row) => row.id);
+        for (let i = 0; i < ids.length; i += FETCH_BATCH) {
+          const slice = ids.slice(i, i + FETCH_BATCH);
+          await replica.run(
+            `DELETE FROM sync_rows WHERE table_name = ? AND row_id IN (${slice.map(() => '?').join(',')})`,
+            [table, ...slice],
+          );
+        }
+      }
+    });
   }
 
   // -------------------------------------------------------------------------
@@ -842,24 +1135,30 @@ export class SyncEngine {
   /** Uploads every queued image the cloud does not have yet. */
   private async uploadPendingMedia(): Promise<void> {
     const db = getSQLite();
+    const channel = this.channel;
     const queued = db
-      .getAllSync<{ path: string }>('SELECT path FROM sync_media_pending')
+      .getAllSync<{
+        path: string;
+      }>('SELECT path FROM sync_media_pending WHERE channel = ?', [channel])
       .map((r) => r.path);
     if (!queued.length) return;
+    const done = (path: string) =>
+      db.runSync('DELETE FROM sync_media_pending WHERE path = ? AND channel = ?', [path, channel]);
     // An image no longer on disk cannot go up; nothing references it either.
     const onDisk: string[] = [];
     for (const path of queued) {
       if (assetFile(path).exists) onDisk.push(path);
-      else db.runSync('DELETE FROM sync_media_pending WHERE path = ?', [path]);
+      else done(path);
     }
     if (!onDisk.length) return;
     const token = await this.config.getSessionToken();
+    const { mediaPath } = this.config;
     for (let i = 0; i < onDisk.length; i += MEDIA_BATCH) {
       const slice = onDisk.slice(i, i + MEDIA_BATCH);
-      const existing = await existingMedia(token, slice);
+      const existing = await existingMedia(token, mediaPath, slice);
       for (const path of slice) {
-        if (!existing.has(path)) await uploadMedia(token, path, assetFile(path));
-        db.runSync('DELETE FROM sync_media_pending WHERE path = ?', [path]);
+        if (!existing.has(path)) await uploadMedia(token, mediaPath, path, assetFile(path));
+        done(path);
       }
     }
   }
@@ -871,15 +1170,22 @@ export class SyncEngine {
    */
   private async downloadMedia(paths: Set<string>): Promise<void> {
     const db = getSQLite();
+    const channel = this.channel;
     for (const path of paths) {
       if (!assetFile(path).exists) {
-        db.runSync('INSERT OR IGNORE INTO sync_media_missing (path) VALUES (?)', [path]);
+        db.runSync('INSERT OR IGNORE INTO sync_media_missing (path, channel) VALUES (?, ?)', [
+          path,
+          channel,
+        ]);
       }
     }
     const missing = db
       .getAllSync<{
         path: string;
-      }>('SELECT path FROM sync_media_missing WHERE attempts < ?', [MAX_DOWNLOAD_ATTEMPTS])
+      }>('SELECT path FROM sync_media_missing WHERE channel = ? AND attempts < ?', [
+        channel,
+        MAX_DOWNLOAD_ATTEMPTS,
+      ])
       .map((r) => r.path);
     if (!missing.length) return;
     let token: string;
@@ -896,11 +1202,17 @@ export class SyncEngine {
         if (!file.exists) {
           const parent = file.parentDirectory;
           if (!parent.exists) parent.create({ intermediates: true });
-          await downloadMedia(token, path, file);
+          await downloadMedia(token, this.config.mediaPath, path, file);
         }
-        db.runSync('DELETE FROM sync_media_missing WHERE path = ?', [path]);
+        db.runSync('DELETE FROM sync_media_missing WHERE path = ? AND channel = ?', [
+          path,
+          channel,
+        ]);
       } catch {
-        db.runSync('UPDATE sync_media_missing SET attempts = attempts + 1 WHERE path = ?', [path]);
+        db.runSync(
+          'UPDATE sync_media_missing SET attempts = attempts + 1 WHERE path = ? AND channel = ?',
+          [path, channel],
+        );
       }
       await next();
     };
@@ -912,12 +1224,15 @@ function assetFile(relativePath: string): File {
   return new File(Paths.document, 'user-assets', relativePath);
 }
 
-/** Deletes the local replica files of a user (sign-out, account deletion). */
-export function deleteReplicaFiles(userId: string): void {
+/**
+ * Deletes the local replica files of a channel: the user's own (sign-out,
+ * account deletion) or a shared ledger's (no longer shared or joined).
+ */
+export function deleteReplicaFiles(userId: string, channel: string = PERSONAL_CHANNEL): void {
   const mod = loadTurso();
   if (!mod) return;
   try {
-    const path = mod.getDbPath(replicaFileName(userId));
+    const path = mod.getDbPath(replicaFileName(userId, channel));
     const slash = path.lastIndexOf('/');
     const dir = new Directory(`file://${path.slice(0, slash)}`);
     const base = path.slice(slash + 1);

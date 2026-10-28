@@ -1,6 +1,6 @@
-import { ChevronRight, CreditCard, type LucideIcon, Pencil, Tag } from 'lucide-react-native';
+import { ChevronRight, CreditCard, type LucideIcon, Pencil, Tag, Users } from 'lucide-react-native';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Pressable, Switch, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, Switch, View } from 'react-native';
 
 import {
   Button,
@@ -15,7 +15,10 @@ import {
   useSettingsBottomNavInset,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import { useCloudSync, useCloudSyncEnabled } from '~/features/cloudSync/CloudSyncContext';
 import type { CategoryIconPickerSession } from '~/features/settings/lib/categoryIconPickerBridge';
+import { useSharedLedgers } from '~/features/sharedLedgers/hooks/useSharedLedgers';
+import { MAX_MEMBERS, MAX_SHARED_LEDGERS } from '~/features/sharedLedgers/lib/sharing';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
 import { I18n } from '~/lib/i18n';
@@ -34,6 +37,10 @@ interface LedgerEditorScreenProps {
   onBack: () => void;
   /** After a ledger is created and opened. */
   onCreated: () => void;
+  /** After a ledger is created, opened and shared: on to inviting people. */
+  onShared: (ledgerId: string) => void;
+  onOpenSharing: (ledgerId: string) => void;
+  onOpenCloudSync: () => void;
 }
 
 /**
@@ -46,6 +53,9 @@ export function LedgerEditorScreen({
   onOpenIconPicker,
   onBack,
   onCreated,
+  onShared,
+  onOpenSharing,
+  onOpenCloudSync,
 }: LedgerEditorScreenProps) {
   const { ledgers, activeLedger, settings, categories, accounts, createLedger, updateLedger } =
     useApp();
@@ -75,8 +85,19 @@ export function LedgerEditorScreen({
   // On copies from the open ledger; off starts with the starter set.
   const [copyAccounts, setCopyAccounts] = useState(true);
   const [copyCategories, setCopyCategories] = useState(true);
+  const sharingEnabled = useCloudSyncEnabled();
+  const sync = useCloudSync();
+  const sharedLedgers = useSharedLedgers();
+  const sharing = existing ? (sharedLedgers.find((l) => l.ledgerId === existing.id) ?? null) : null;
+  const atShareLimit = sharedLedgers.filter((l) => l.role === 'owner').length >= MAX_SHARED_LEDGERS;
+  const canShare = sync.status === 'ready' && !atShareLimit;
+  const [shareOnCreate, setShareOnCreate] = useState(false);
+  const [sharingBusy, setSharingBusy] = useState(false);
 
-  const openLedgerName = ledgerDisplayName(activeLedger);
+  // The ledger copied from, as it was when the form opened: creating opens
+  // the new ledger, which must not show here while sharing finishes.
+  const [copySource] = useState(() => activeLedger);
+  const openLedgerName = ledgerDisplayName(copySource);
   const copyableAccountCount = useMemo(
     () =>
       accounts.filter((account) => account.type === 'debit' || account.type === 'credit').length,
@@ -96,8 +117,9 @@ export function LedgerEditorScreen({
       onBack();
       return;
     }
+    let newId: string;
     try {
-      createLedger({
+      newId = createLedger({
         name: trimmedName,
         emoji: icon,
         currencyCode,
@@ -110,7 +132,19 @@ export function LedgerEditorScreen({
       Alert.alert(getErrorMessage(error, I18n.t('errors.generic_operation_failed')));
       return;
     }
-    onCreated();
+    if (!shareOnCreate || !canShare) {
+      onCreated();
+      return;
+    }
+    setSharingBusy(true);
+    sync
+      .shareLedger({ id: newId, name: trimmedName, emoji: icon })
+      .then(() => onShared(newId))
+      .catch(() => {
+        // The ledger is made either way; sharing can be tried from its page.
+        Alert.alert(I18n.t('shared_ledgers.share_failed'));
+        onCreated();
+      });
   };
 
   return (
@@ -195,7 +229,7 @@ export function LedgerEditorScreen({
                 </Text>
                 <View className="flex-1 items-start">
                   <View className="max-w-full flex-row items-center gap-2 rounded-full bg-primary/10 py-1.5 pl-2 pr-3">
-                    <CategoryEmoji icon={ledgerIcon(activeLedger)} size={18} />
+                    <CategoryEmoji icon={ledgerIcon(copySource)} size={18} />
                     <Text variant="bodyStrong" numberOfLines={1} className="shrink">
                       {openLedgerName}
                     </Text>
@@ -238,8 +272,77 @@ export function LedgerEditorScreen({
           </>
         ) : null}
 
-        <Button onPress={handleSave} disabled={!canSave} testID="ledger-save" className="mt-2">
-          <Text>{isEditing ? I18n.t('common.save') : I18n.t('ledgers.create')}</Text>
+        {sharingEnabled && !isDefaultLedger ? (
+          <View>
+            <Text variant="label" tone="muted" className="mb-2.5 px-1">
+              {I18n.t('shared_ledgers.title')}
+            </Text>
+            {isEditing && existing ? (
+              <Pressable
+                accessibilityRole="button"
+                testID="ledger-open-sharing"
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  onOpenSharing(existing.id);
+                }}
+                className="flex-row items-center gap-3 rounded-3xl border border-border/30 bg-card px-4 py-3.5 active:opacity-80"
+              >
+                <View className="h-10 w-10 items-center justify-center rounded-2xl bg-primary/10">
+                  <Users size={20} color={themeColors.primary} />
+                </View>
+                <View className="flex-1">
+                  <Text variant="bodyStrong">{I18n.t('shared_ledgers.share_toggle')}</Text>
+                  <Text variant="caption" tone="muted">
+                    {sharing
+                      ? sharing.role === 'member'
+                        ? I18n.t('shared_ledgers.status_shared_by', {
+                            name: sharing.ownerName ?? '',
+                          })
+                        : I18n.t(
+                            sharing.memberCount === 1
+                              ? 'shared_ledgers.status_with_one'
+                              : 'shared_ledgers.status_with_other',
+                            { count: sharing.memberCount },
+                          )
+                      : I18n.t('shared_ledgers.status_not_shared')}
+                  </Text>
+                </View>
+                <ChevronRight size={18} color={themeColors.textMuted} />
+              </Pressable>
+            ) : (
+              <View className="rounded-3xl border border-border/30 bg-card">
+                <StartWithRow
+                  icon={Users}
+                  title={I18n.t('shared_ledgers.share_toggle')}
+                  subtitle={
+                    atShareLimit
+                      ? I18n.t('shared_ledgers.limit_reached', { max: MAX_SHARED_LEDGERS })
+                      : sync.status !== 'ready'
+                        ? I18n.t('shared_ledgers.needs_cloud_sync')
+                        : I18n.t('shared_ledgers.share_toggle_caption', { max: MAX_MEMBERS })
+                  }
+                  value={shareOnCreate && canShare}
+                  disabled={!canShare}
+                  onDisabledPress={sync.status !== 'ready' ? onOpenCloudSync : undefined}
+                  onChange={setShareOnCreate}
+                  first
+                />
+              </View>
+            )}
+          </View>
+        ) : null}
+
+        <Button
+          onPress={handleSave}
+          disabled={!canSave || sharingBusy}
+          testID="ledger-save"
+          className="mt-2"
+        >
+          {sharingBusy ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text>{isEditing ? I18n.t('common.save') : I18n.t('ledgers.create')}</Text>
+          )}
         </Button>
       </FormScrollView>
 
@@ -263,12 +366,19 @@ function StartWithRow({
   subtitle,
   value,
   onChange,
+  disabled = false,
+  onDisabledPress,
+  first = false,
 }: {
   icon: LucideIcon;
   title: string;
   subtitle: string;
   value: boolean;
   onChange: (value: boolean) => void;
+  disabled?: boolean;
+  /** Where a tap on the disabled row leads (to turn on what it needs). */
+  onDisabledPress?: () => void;
+  first?: boolean;
 }) {
   const themeColors = useThemeColors();
   const toggle = (next: boolean) => {
@@ -278,8 +388,11 @@ function StartWithRow({
   return (
     <Pressable
       accessible={false}
-      onPress={() => toggle(!value)}
-      className="flex-row items-center gap-3 border-t border-border/30 px-4 py-3.5 active:opacity-80"
+      onPress={() => {
+        if (!disabled) toggle(!value);
+        else onDisabledPress?.();
+      }}
+      className={`flex-row items-center gap-3 px-4 py-3.5 active:opacity-80 ${first ? '' : 'border-t border-border/30'}`}
     >
       <View className="h-10 w-10 items-center justify-center rounded-2xl bg-primary/10">
         <Icon size={20} color={themeColors.primary} />
@@ -294,6 +407,7 @@ function StartWithRow({
         accessibilityLabel={title}
         accessibilityHint={subtitle}
         value={value}
+        disabled={disabled}
         onValueChange={toggle}
         trackColor={{ true: themeColors.primary }}
       />

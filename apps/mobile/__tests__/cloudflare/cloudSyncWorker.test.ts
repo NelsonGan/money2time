@@ -1,7 +1,13 @@
 // Loaded with require() on a path variable, like the receipt-scanner tests, so
 // the app's typecheck does not pull in the Worker's Cloudflare types.
 const WORKER_SRC = '../../../cloudflare/workers/cloud-sync/src';
-const { contentTypeFor, isValidAssetPath, mediaKey } = require(`${WORKER_SRC}/media`);
+const { contentTypeFor, isValidAssetPath, ledgerSpace, mediaKey, userSpace } = require(
+  `${WORKER_SRC}/media`,
+);
+const { invitePage, maskEmail } = require(`${WORKER_SRC}/ledgers`) as {
+  invitePage: (code: string) => Response;
+  maskEmail: (email: string) => string;
+};
 const { hasActiveEntitlement, isValidAppUserId } = require(`${WORKER_SRC}/revenuecat`);
 const { CLOUD_SCHEMA_SQL, databaseNameFor } = require(`${WORKER_SRC}/turso`) as {
   CLOUD_SCHEMA_SQL: string[];
@@ -29,8 +35,34 @@ describe('cloud-sync media paths', () => {
     expect(contentTypeFor('receipts/x.html')).toBeNull();
   });
 
-  it('keeps each user under their own prefix', () => {
-    expect(mediaKey('user1', 'receipts/x.jpg')).toBe('u/user1/receipts/x.jpg');
+  it('keeps each user and each shared ledger under their own prefix', () => {
+    expect(mediaKey(userSpace('user1'), 'receipts/x.jpg')).toBe('u/user1/receipts/x.jpg');
+    expect(mediaKey(ledgerSpace('abc123'), 'receipts/x.jpg')).toBe('l/abc123/receipts/x.jpg');
+    expect(userSpace('user1').usageTable).toBe('media_usage');
+    expect(ledgerSpace('abc123').usageTable).toBe('ledger_media_usage');
+  });
+});
+
+describe('cloud-sync shared ledgers', () => {
+  it('shows only part of an address', () => {
+    expect(maskEmail('jordan@example.com')).toBe('jo***@example.com');
+    expect(maskEmail('a@b.co')).toBe('a***@b.co');
+    expect(maskEmail('not-an-email')).toBe('');
+  });
+
+  it('hands a well-formed invite code to the app', async () => {
+    const code = 'AbCdEfGhIjKlMnOpQrStUvWx';
+    const page = invitePage(code);
+    expect(page.status).toBe(200);
+    expect(page.headers.get('Content-Security-Policy')).toContain("default-src 'none'");
+    const html = await page.text();
+    expect(html).toContain(`money2time://join/${code}`);
+  });
+
+  it('refuses anything else as an invite code', () => {
+    expect(invitePage('short').status).toBe(404);
+    expect(invitePage('<script>alert(1)</script>aaaaaaaaaaaa').status).toBe(404);
+    expect(invitePage('"onload="x"aaaaaaaaaaaaaaaaaa').status).toBe(404);
   });
 });
 

@@ -29,6 +29,16 @@ type CloudSyncErrorCode =
   | 'not_pro'
   | 'invalid_code'
   | 'rate_limited'
+  /** Shared ledgers: the owner's Pro ended, so the ledger is paused. */
+  | 'owner_not_pro'
+  /** Shared ledgers: no such ledger or invite, or no access to it any more. */
+  | 'not_found'
+  /** Shared ledgers: already sharing the most ledgers allowed. */
+  | 'limit_reached'
+  /** Shared ledgers: no seat left for another member. */
+  | 'full'
+  /** Shared ledgers: an invite to the user's own ledger. */
+  | 'own_ledger'
   | 'server';
 
 export class CloudSyncApiError extends Error {
@@ -59,7 +69,7 @@ export interface SyncCredentials {
   expiresAt: number;
 }
 
-async function request<T>(
+export async function request<T>(
   path: string,
   init: { method?: string; body?: unknown; token?: string | null } = {},
 ): Promise<T> {
@@ -103,6 +113,15 @@ function toError(status: number, body: unknown): CloudSyncApiError {
   const code = String(record.code ?? record.error ?? '');
   if (status === 401) return new CloudSyncApiError('unauthorized', status, code);
   if (status === 403 && code === 'not_pro') return new CloudSyncApiError('not_pro', status);
+  if (status === 403 && code === 'owner_not_pro') {
+    return new CloudSyncApiError('owner_not_pro', status);
+  }
+  if (status === 404 && (code === 'not_found' || code === 'invite_not_found')) {
+    return new CloudSyncApiError('not_found', status);
+  }
+  if (status === 409 && (code === 'limit_reached' || code === 'full' || code === 'own_ledger')) {
+    return new CloudSyncApiError(code, status);
+  }
   if (status === 429) return new CloudSyncApiError('rate_limited', status);
   if (/OTP|INVALID|EXPIRED|TOO_MANY_ATTEMPTS/i.test(code)) {
     return new CloudSyncApiError('invalid_code', status, code);
@@ -172,20 +191,36 @@ export function getSyncCredentials(token: string, appUserId: string): Promise<Sy
   return request<SyncCredentials>('/v1/sync/credentials', { body: { appUserId }, token });
 }
 
-export async function existingMedia(token: string, paths: string[]): Promise<Set<string>> {
-  const body = await request<{ existing?: string[] }>('/v1/media/exists', {
+/** The user's own images; a shared ledger's are under `ledgerMediaPath`. */
+export const PERSONAL_MEDIA_PATH = '/v1/media';
+
+export function ledgerMediaPath(shareId: string): string {
+  return `/v1/ledgers/${encodeURIComponent(shareId)}/media`;
+}
+
+export async function existingMedia(
+  token: string,
+  mediaPath: string,
+  paths: string[],
+): Promise<Set<string>> {
+  const body = await request<{ existing?: string[] }>(`${mediaPath}/exists`, {
     body: { paths },
     token,
   });
   return new Set(body.existing ?? []);
 }
 
-function mediaUrl(base: string, path: string): string {
-  return `${base}/v1/media/${path.split('/').map(encodeURIComponent).join('/')}`;
+function mediaUrl(base: string, mediaPath: string, path: string): string {
+  return `${base}${mediaPath}/${path.split('/').map(encodeURIComponent).join('/')}`;
 }
 
-export async function uploadMedia(token: string, path: string, file: File): Promise<void> {
-  const result = await file.upload(mediaUrl(await baseUrl(), path), {
+export async function uploadMedia(
+  token: string,
+  mediaPath: string,
+  path: string,
+  file: File,
+): Promise<void> {
+  const result = await file.upload(mediaUrl(await baseUrl(), mediaPath, path), {
     httpMethod: 'PUT',
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -194,8 +229,13 @@ export async function uploadMedia(token: string, path: string, file: File): Prom
   }
 }
 
-export async function downloadMedia(token: string, path: string, destination: File): Promise<void> {
-  await File.downloadFileAsync(mediaUrl(await baseUrl(), path), destination, {
+export async function downloadMedia(
+  token: string,
+  mediaPath: string,
+  path: string,
+  destination: File,
+): Promise<void> {
+  await File.downloadFileAsync(mediaUrl(await baseUrl(), mediaPath, path), destination, {
     headers: { Authorization: `Bearer ${token}` },
     idempotent: true,
   });

@@ -98,3 +98,46 @@ CREATE TABLE IF NOT EXISTS apple_tokens (
   user_id TEXT NOT NULL PRIMARY KEY REFERENCES "user" ("id") ON DELETE CASCADE,
   refresh_token TEXT NOT NULL
 );
+
+-- Shared ledgers (src/ledgers.ts). `id` is the Worker's own; `ledger_id` is
+-- the app's id of the ledger on the owner's phones. Each has its own Turso
+-- database, with the newest token kept sealed as in sync_databases.
+CREATE TABLE IF NOT EXISTS shared_ledgers (
+  id TEXT NOT NULL PRIMARY KEY,
+  ledger_id TEXT NOT NULL,
+  owner_user_id TEXT NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  emoji TEXT,
+  db_name TEXT NOT NULL UNIQUE,
+  db_url TEXT NOT NULL,
+  token TEXT,
+  token_expires_at INTEGER,
+  created_at INTEGER NOT NULL,
+  UNIQUE (owner_user_id, ledger_id)
+);
+
+-- People who joined a shared ledger with an invite. The owner is not listed.
+CREATE TABLE IF NOT EXISTS ledger_members (
+  ledger_id TEXT NOT NULL REFERENCES shared_ledgers ("id") ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE,
+  joined_at INTEGER NOT NULL,
+  PRIMARY KEY (ledger_id, user_id)
+);
+CREATE INDEX IF NOT EXISTS ledger_members_user_idx ON ledger_members (user_id);
+
+-- Single-use invite links. Only a hash of the code is kept; `id` names the
+-- invite to the owner, who can cancel it.
+CREATE TABLE IF NOT EXISTS ledger_invites (
+  code_hash TEXT NOT NULL PRIMARY KEY,
+  id TEXT NOT NULL UNIQUE,
+  ledger_id TEXT NOT NULL REFERENCES shared_ledgers ("id") ON DELETE CASCADE,
+  created_at INTEGER NOT NULL,
+  expires_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ledger_invites_ledger_idx ON ledger_invites (ledger_id);
+
+-- Images stored per shared ledger, for its upload quota.
+CREATE TABLE IF NOT EXISTS ledger_media_usage (
+  ledger_id TEXT NOT NULL PRIMARY KEY REFERENCES shared_ledgers ("id") ON DELETE CASCADE,
+  objects INTEGER NOT NULL DEFAULT 0
+);

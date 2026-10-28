@@ -6,6 +6,7 @@ import { Card, Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 
+import { useSharedLedgers } from '../../sharedLedgers/hooks/useSharedLedgers';
 import { useCloudSync } from '../CloudSyncContext';
 import { errorMessage } from '../lib/messages';
 
@@ -13,6 +14,7 @@ import { errorMessage } from '../lib/messages';
 export function AccountActions() {
   const sync = useCloudSync();
   const colors = useThemeColors();
+  const ownsShared = useSharedLedgers().some((ledger) => ledger.role === 'owner');
   const [busy, setBusy] = useState<'sign_out' | 'delete' | null>(null);
 
   const run = (action: 'sign_out' | 'delete', work: () => Promise<void>) => {
@@ -35,7 +37,9 @@ export function AccountActions() {
   const confirmDelete = () =>
     Alert.alert(
       I18n.t('cloud_sync.delete_confirm_title'),
-      I18n.t('cloud_sync.delete_confirm_body'),
+      ownsShared
+        ? `${I18n.t('cloud_sync.delete_confirm_body')}\n\n${I18n.t('shared_ledgers.delete_account_note')}`
+        : I18n.t('cloud_sync.delete_confirm_body'),
       [
         { text: I18n.t('common.cancel'), style: 'cancel' },
         {
