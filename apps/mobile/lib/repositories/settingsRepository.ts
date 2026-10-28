@@ -3,15 +3,45 @@ import { and, eq, isNull } from 'drizzle-orm';
 import { DEFAULT_APP_ICON_ID } from '~/constants/appIcons';
 import { busyWaitSync } from '~/lib/db/busyWaitSync';
 import { getDb } from '~/lib/db/client';
-import { settingsTable } from '~/lib/db/schema';
+import { DEFAULT_LEDGER_ID, getActiveLedgerId } from '~/lib/db/ledgerScope';
+import { ledgersTable, settingsTable } from '~/lib/db/schema';
 import { getDeviceLocale } from '~/lib/i18n';
-import type { UserSettings } from '~/types';
+import { LEDGER_QUICK_ENTRY_KEYS, type LedgerPrefs, type UserSettings } from '~/types';
 import { getLocaleCurrencyCode, getLocaleCurrencySymbol } from '~/utils/formatters';
 import { nowIso } from '~/utils/id';
 
+import { ledgersRepository } from './ledgersRepository';
 import { toSettings } from './mappers';
 
 const SETTINGS_ID = 'primary';
+
+/**
+ * Settings a non-default ledger keeps for itself, because they name its own
+ * accounts or define its money. The default ledger keeps them in the settings
+ * row, so for it every read and write below is exactly what it always was.
+ * Quick entry and Insights preferences are split the same way, see
+ * `getQuickEntryPrefsJson` and `getInsightsPreferencesJson`.
+ */
+const LEDGER_SETTING_KEYS = ['currencyCode', 'currencySymbol', 'defaultPaybackAccountId'] as const;
+type LedgerSettingKey = (typeof LEDGER_SETTING_KEYS)[number];
+
+/** The open ledger when it is not the default one; null otherwise. */
+function openNonDefaultLedgerId(): string | null {
+  const id = getActiveLedgerId();
+  return id === DEFAULT_LEDGER_ID ? null : id;
+}
+
+function parseJsonObject(json: string | null): Record<string, unknown> | null {
+  if (!json) return null;
+  try {
+    const parsed: unknown = JSON.parse(json);
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+      ? (parsed as Record<string, unknown>)
+      : null;
+  } catch {
+    return null;
+  }
+}
 
 /** Retries for the settings read below; see the comment inside `get`. */
 const MAX_READ_ATTEMPTS = 5;
@@ -56,7 +86,7 @@ class SettingsRepository {
           throw new Error('Settings row not found');
         }
 
-        return toSettings(row);
+        return this.withOpenLedger(toSettings(row));
       } catch (error) {
         lastError = error;
         const delay = READ_RETRY_DELAYS_MS[attempt - 1];
@@ -64,6 +94,29 @@ class SettingsRepository {
       }
     }
     throw lastError;
+  }
+
+  /** Overlay the open ledger's own settings on the settings row's. */
+  private withOpenLedger(settings: UserSettings): UserSettings {
+    const ledgerId = openNonDefaultLedgerId();
+    if (!ledgerId) return settings;
+    const ledger = getDb()
+      .select({
+        currencyCode: ledgersTable.currencyCode,
+        currencySymbol: ledgersTable.currencySymbol,
+        prefsJson: ledgersTable.prefsJson,
+      })
+      .from(ledgersTable)
+      .where(eq(ledgersTable.id, ledgerId))
+      .get();
+    if (!ledger) return settings;
+    const prefs = parseJsonObject(ledger.prefsJson) as LedgerPrefs | null;
+    return {
+      ...settings,
+      currencyCode: ledger.currencyCode ?? settings.currencyCode,
+      currencySymbol: ledger.currencySymbol ?? ledger.currencyCode ?? settings.currencySymbol,
+      defaultPaybackAccountId: prefs?.defaultPaybackAccountId ?? null,
+    };
   }
 
   updateSettings(
@@ -109,7 +162,31 @@ class SettingsRepository {
     >,
   ) {
     const db = getDb();
-    const normalizedInput = { ...input };
+    const normalizedInput: typeof input = { ...input };
+    const ledgerId = openNonDefaultLedgerId();
+    if (ledgerId) {
+      // The open ledger's own settings go to its row, never to the settings
+      // row, which holds the default ledger's.
+      const own: Partial<Pick<UserSettings, LedgerSettingKey>> = {};
+      for (const key of LEDGER_SETTING_KEYS) {
+        if (key in normalizedInput) {
+          (own as Record<string, unknown>)[key] = normalizedInput[key];
+          delete normalizedInput[key];
+        }
+      }
+      if (own.currencyCode !== undefined || own.currencySymbol !== undefined) {
+        ledgersRepository.update(ledgerId, {
+          ...(own.currencyCode !== undefined ? { currencyCode: own.currencyCode } : {}),
+          ...(own.currencySymbol !== undefined ? { currencySymbol: own.currencySymbol } : {}),
+        });
+      }
+      if (own.defaultPaybackAccountId !== undefined) {
+        ledgersRepository.updatePrefs(ledgerId, {
+          defaultPaybackAccountId: own.defaultPaybackAccountId,
+        });
+      }
+      if (Object.keys(normalizedInput).length === 0) return;
+    }
     if (normalizedInput.workingHoursPerDay !== undefined) {
       normalizedInput.workingHoursPerDay = Number.isFinite(normalizedInput.workingHoursPerDay)
         ? Math.min(24, Math.max(1, normalizedInput.workingHoursPerDay))
@@ -121,6 +198,28 @@ class SettingsRepository {
       .run();
   }
 
+  /** Remember the ledger open on this phone (device-local, never synced). */
+  updateActiveLedgerId(ledgerId: string) {
+    getDb()
+      .update(settingsTable)
+      .set({
+        activeLedgerId: ledgerId === DEFAULT_LEDGER_ID ? null : ledgerId,
+        updatedAt: nowIso(),
+      })
+      .where(and(eq(settingsTable.id, SETTINGS_ID), isNull(settingsTable.deletedAt)))
+      .run();
+  }
+
+  /** The stored open ledger, read before anything else loads. */
+  readActiveLedgerId(): string {
+    const row = getDb()
+      .select({ activeLedgerId: settingsTable.activeLedgerId })
+      .from(settingsTable)
+      .where(and(eq(settingsTable.id, SETTINGS_ID), isNull(settingsTable.deletedAt)))
+      .get();
+    return row?.activeLedgerId || DEFAULT_LEDGER_ID;
+  }
+
   updateAppUserId(appUserId: string) {
     const db = getDb();
     db.update(settingsTable)
@@ -130,6 +229,10 @@ class SettingsRepository {
   }
 
   getInsightsPreferencesJson(): string | null {
+    // Insights preferences name accounts and categories, so each ledger has
+    // its own; a new ledger starts from Insights' defaults.
+    const ledgerId = openNonDefaultLedgerId();
+    if (ledgerId) return ledgersRepository.getPrefs(ledgerId).insightsPrefsJson ?? null;
     const db = getDb();
     const row = db
       .select({ insightsPrefsJson: settingsTable.insightsPrefsJson })
@@ -140,6 +243,11 @@ class SettingsRepository {
   }
 
   updateInsightsPreferencesJson(value: string | null) {
+    const ledgerId = openNonDefaultLedgerId();
+    if (ledgerId) {
+      ledgersRepository.updatePrefs(ledgerId, { insightsPrefsJson: value });
+      return;
+    }
     const db = getDb();
     db.update(settingsTable)
       .set({ insightsPrefsJson: value, updatedAt: nowIso() })
@@ -165,7 +273,23 @@ class SettingsRepository {
       .run();
   }
 
+  /**
+   * Quick entry preferences, with the fields that name a ledger's accounts and
+   * categories (`LEDGER_QUICK_ENTRY_KEYS`) taken from the open ledger. The
+   * rest, such as the + button and the free-tier usage counters, are the
+   * app's, shared by every ledger.
+   */
   getQuickEntryPrefsJson(): string | null {
+    const appJson = this.readAppQuickEntryPrefsJson();
+    const ledgerId = openNonDefaultLedgerId();
+    if (!ledgerId) return appJson;
+    const app = parseJsonObject(appJson) ?? {};
+    for (const key of LEDGER_QUICK_ENTRY_KEYS) delete app[key];
+    const own = ledgersRepository.getPrefs(ledgerId).quickEntry ?? {};
+    return JSON.stringify({ ...app, ...own });
+  }
+
+  private readAppQuickEntryPrefsJson(): string | null {
     const db = getDb();
     const row = db
       .select({ quickEntryPrefsJson: settingsTable.quickEntryPrefsJson })
@@ -176,6 +300,22 @@ class SettingsRepository {
   }
 
   updateQuickEntryPrefsJson(value: string | null) {
+    const ledgerId = openNonDefaultLedgerId();
+    if (ledgerId) {
+      const next = parseJsonObject(value) ?? {};
+      const own: Record<string, unknown> = {};
+      for (const key of LEDGER_QUICK_ENTRY_KEYS) {
+        if (key in next) own[key] = next[key];
+        delete next[key];
+      }
+      ledgersRepository.updatePrefs(ledgerId, { quickEntry: own as LedgerPrefs['quickEntry'] });
+      // Keep the default ledger's own fields in the settings row untouched.
+      const app = parseJsonObject(this.readAppQuickEntryPrefsJson()) ?? {};
+      for (const key of LEDGER_QUICK_ENTRY_KEYS) {
+        if (key in app) next[key] = app[key];
+      }
+      value = JSON.stringify(next);
+    }
     const db = getDb();
     db.update(settingsTable)
       .set({ quickEntryPrefsJson: value, updatedAt: nowIso() })
@@ -264,6 +404,7 @@ class SettingsRepository {
         showTransactionAccount: true,
         showAccountPickerBalances: true,
         navTabsJson: null,
+        activeLedgerId: null,
         updatedAt: now,
       })
       .where(eq(settingsTable.id, SETTINGS_ID))

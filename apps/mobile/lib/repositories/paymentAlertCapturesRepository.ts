@@ -1,6 +1,7 @@
 import { and, eq, gte, inArray, isNull, lt } from 'drizzle-orm';
 
 import { getDb } from '~/lib/db/client';
+import { getActiveLedgerId, inActiveLedger } from '~/lib/db/ledgerScope';
 import { autoLogCapturesTable } from '~/lib/db/schema';
 import type {
   PaymentAlertCapture,
@@ -50,6 +51,8 @@ class PaymentAlertCapturesRepository {
     db.insert(autoLogCapturesTable)
       .values({
         id: input.id,
+        // Captured into the ledger that is open, whose accounts it was read against.
+        ledgerId: getActiveLedgerId(),
         channel: input.channel,
         sourceKey: input.sourceKey,
         sourceLabel: input.sourceLabel,
@@ -87,7 +90,13 @@ class PaymentAlertCapturesRepository {
     const row = db
       .select()
       .from(autoLogCapturesTable)
-      .where(and(eq(autoLogCapturesTable.id, id), isNull(autoLogCapturesTable.deletedAt)))
+      .where(
+        and(
+          eq(autoLogCapturesTable.id, id),
+          isNull(autoLogCapturesTable.deletedAt),
+          inActiveLedger(autoLogCapturesTable),
+        ),
+      )
       .get();
     return row ? toPaymentAlertCapture(row) : null;
   }
@@ -99,7 +108,11 @@ class PaymentAlertCapturesRepository {
       .select()
       .from(autoLogCapturesTable)
       .where(
-        and(gte(autoLogCapturesTable.capturedAt, sinceIso), isNull(autoLogCapturesTable.deletedAt)),
+        and(
+          gte(autoLogCapturesTable.capturedAt, sinceIso),
+          isNull(autoLogCapturesTable.deletedAt),
+          inActiveLedger(autoLogCapturesTable),
+        ),
       )
       .all()
       .map(toPaymentAlertCapture);
@@ -116,6 +129,7 @@ class PaymentAlertCapturesRepository {
           eq(autoLogCapturesTable.status, 'logged'),
           gte(autoLogCapturesTable.capturedAt, sinceIso),
           isNull(autoLogCapturesTable.deletedAt),
+          inActiveLedger(autoLogCapturesTable),
         ),
       )
       .all()

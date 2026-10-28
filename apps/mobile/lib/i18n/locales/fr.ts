@@ -2801,6 +2801,50 @@ const fr = {
       search_placeholder: 'Rechercher des icônes…',
     },
   },
+  ledgers: {
+    label: 'Carnet',
+    title: 'Carnets',
+    switcher_label: 'Carnet : {{name}}. Changer de carnet',
+    default_name: 'Principal',
+    untitled: 'Carnet sans nom',
+    entries_one: '{{count}} opération',
+    entries_other: '{{count}} opérations',
+    new: 'Nouveau carnet',
+    manage: 'Gérer les carnets',
+    edit_title: 'Modifier le carnet',
+    edit_named: 'Modifier {{name}}',
+    open_badge: 'OUVERT',
+    explainer:
+      'Chaque carnet a ses propres comptes, catégories, transactions, budgets, albums et opérations récurrentes. Vos réglages, votre valeur horaire et vos sauvegardes les couvrent tous.',
+    name_label: 'Nom',
+    name_placeholder: 'ex. Travail, Activité secondaire',
+    currency_label: 'Devise principale',
+    start_with: 'Commencer avec',
+    accounts: 'Comptes',
+    categories: 'Catégories',
+    copy_from: 'Copier {{name}}',
+    starter_accounts: 'Comptes de départ',
+    starter_categories: 'Ensemble de départ',
+    copy_accounts_caption:
+      'Copie vos {{count}} comptes de débit et de crédit, avec des soldes remis à zéro.',
+    starter_accounts_caption:
+      'Espèces, portefeuille numérique, compte courant, épargne et une carte de crédit.',
+    copy_categories_caption: 'Copie les {{count}} catégories et sous-catégories.',
+    starter_categories_caption: 'Une courte liste de catégories du quotidien.',
+    create_footnote:
+      "Aucune transaction n'est copiée. Vous pouvez renommer le carnet à tout moment.",
+    create: 'Créer le carnet',
+    delete_title: 'Supprimer {{name}} ?',
+    delete_message_one:
+      'Cela supprime {{name}} avec son {{count}} opération, ses comptes, catégories, budgets et albums. Les autres carnets ne sont pas touchés.',
+    delete_message_other:
+      'Cela supprime {{name}} avec ses {{count}} opérations, comptes, catégories, budgets et albums. Les autres carnets ne sont pas touchés.',
+    locked_note: 'Les carnets verrouillés sont conservés en sécurité et se rouvrent avec Pro.',
+    pro_ended_title: 'Vous êtes de retour dans {{name}}',
+    pro_ended_message:
+      "Votre abonnement Pro a pris fin, donc {{name}} et vos autres carnets supplémentaires sont verrouillés pour le moment. Rien n'a été supprimé : ils se rouvriront tels quels quand vous renouvellerez.",
+    renew_pro: 'Renouveler Pro',
+  },
   tutorials: {
     title: 'Tutoriels',
     search_placeholder: 'Rechercher un tutoriel',

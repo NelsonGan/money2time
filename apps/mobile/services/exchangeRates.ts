@@ -166,11 +166,17 @@ export async function runRateRefreshIfDue(opts?: { force?: boolean }): Promise<R
     if (!opts?.force && !settings.autoFxRefreshEnabled) {
       return { ok: false, asOfDate: null, error: null };
     }
-    if (!opts?.force && !isRateStale(settings.lastRateFetchAt)) {
+    const base = settings.currencyCode;
+    // Fresh rates for one base say nothing about another: a ledger in a
+    // different currency that has none yet is due even on a fresh fetch day.
+    if (
+      !opts?.force &&
+      !isRateStale(settings.lastRateFetchAt) &&
+      exchangeRatesRepository.listByBase(base).length > 0
+    ) {
       return { ok: true, asOfDate: null, error: null };
     }
 
-    const base = settings.currencyCode;
     if (!isAutoRateSupported(base)) {
       // Reporting currency itself isn't on the feed — can't auto-fetch a useful
       // table. Reachable via a legacy settings row or a restored backup, since

@@ -10,6 +10,7 @@ import {
   type ReducingBalanceLedger,
 } from '~/features/loans/lib/loanMath';
 import { getDb, getSQLite } from '~/lib/db/client';
+import { getActiveLedgerId, inActiveLedger } from '~/lib/db/ledgerScope';
 import { accountsTable, recurringRulesTable, transactionsTable } from '~/lib/db/schema';
 import type { Account, AccountBalance, LoanInterestModel, LoanRateChange } from '~/types';
 import { computeAccountBalance } from '~/utils/accountBalances';
@@ -59,7 +60,7 @@ class AccountsRepository {
     return db
       .select()
       .from(accountsTable)
-      .where(isNull(accountsTable.deletedAt))
+      .where(and(isNull(accountsTable.deletedAt), inActiveLedger(accountsTable)))
       .orderBy(accountsTable.sortOrder, accountsTable.name)
       .all()
       .map(toAccount);
@@ -70,7 +71,13 @@ class AccountsRepository {
     const row = db
       .select()
       .from(accountsTable)
-      .where(and(eq(accountsTable.id, id), isNull(accountsTable.deletedAt)))
+      .where(
+        and(
+          eq(accountsTable.id, id),
+          isNull(accountsTable.deletedAt),
+          inActiveLedger(accountsTable),
+        ),
+      )
       .get();
     return row ? toAccount(row) : null;
   }
@@ -82,7 +89,7 @@ class AccountsRepository {
     const maxSort = db
       .select({ maxSort: sql<number>`coalesce(max(${accountsTable.sortOrder}), -1)` })
       .from(accountsTable)
-      .where(isNull(accountsTable.deletedAt))
+      .where(and(isNull(accountsTable.deletedAt), inActiveLedger(accountsTable)))
       .get();
     const nextSortOrder = input.sortOrder ?? (maxSort?.maxSort ?? -1) + 1;
     // The rate changes are a domain array; the row holds them as JSON.
@@ -92,6 +99,7 @@ class AccountsRepository {
       .values({
         id,
         ...columns,
+        ledgerId: getActiveLedgerId(),
         loanLedgerAnchorDate: input.loanLedgerAnchorDate ?? null,
         loanRateChangesJson: serializeLoanRateChanges(loanRateChanges),
         sortOrder: nextSortOrder,
@@ -207,6 +215,8 @@ class AccountsRepository {
     const accounts = this.list();
     if (accounts.length === 0) return [];
 
+    // No ledger filter: the totals are keyed by account id and only the open
+    // ledger's accounts are read out of them below.
     // Single round-trip instead of five separate GROUP BY queries. Each branch
     // hits the partial (type, account) indexes; aggregating in one statement
     // removes four JS-bridge round trips, which is what dominates here since
