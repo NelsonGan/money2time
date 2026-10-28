@@ -1,6 +1,7 @@
 import { and, eq, isNull, sql } from 'drizzle-orm';
 
 import { getDb, getSQLite } from '~/lib/db/client';
+import { getActiveLedgerId, inActiveLedger } from '~/lib/db/ledgerScope';
 import { itemsTable } from '~/lib/db/schema';
 import type { Item } from '~/types';
 import { newId, nowIso } from '~/utils/id';
@@ -26,7 +27,7 @@ class ItemsRepository {
     return db
       .select()
       .from(itemsTable)
-      .where(isNull(itemsTable.deletedAt))
+      .where(and(isNull(itemsTable.deletedAt), inActiveLedger(itemsTable)))
       .orderBy(itemsTable.sortOrder, itemsTable.name)
       .all()
       .map(toItem);
@@ -41,13 +42,14 @@ class ItemsRepository {
     const minSort = db
       .select({ minSort: sql<number>`coalesce(min(${itemsTable.sortOrder}), 0)` })
       .from(itemsTable)
-      .where(isNull(itemsTable.deletedAt))
+      .where(and(isNull(itemsTable.deletedAt), inActiveLedger(itemsTable)))
       .get();
     const nextSortOrder = input.sortOrder ?? (minSort?.minSort ?? 0) - 1;
 
     db.insert(itemsTable)
       .values({
         id,
+        ledgerId: getActiveLedgerId(),
         name: input.name,
         iconId: input.iconId ?? null,
         purchasePrice: input.purchasePrice,

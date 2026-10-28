@@ -19,7 +19,8 @@ import { useEffect, useSyncExternalStore } from 'react';
 
 import { getPostHog } from './posthog';
 
-/** Flag keys as configured in PostHog. Empty until the first flag ships. */
+/** Flag keys as configured in PostHog. */
+// None at the moment: Cloud Sync's `cloud_sync` flag was removed at rollout.
 export const FEATURE_FLAGS = {} as const satisfies Record<string, string>;
 
 export type FeatureFlagValue = boolean | string | undefined;

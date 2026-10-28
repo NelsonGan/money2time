@@ -1,6 +1,7 @@
 import { and, eq, isNull, sql } from 'drizzle-orm';
 
 import { getDb, getSQLite } from '~/lib/db/client';
+import { getActiveLedgerId, inActiveLedger } from '~/lib/db/ledgerScope';
 import { accountGroupsTable, accountsTable } from '~/lib/db/schema';
 import type { AccountGroup } from '~/types';
 import { newId, nowIso } from '~/utils/id';
@@ -13,7 +14,7 @@ class AccountGroupsRepository {
     return db
       .select()
       .from(accountGroupsTable)
-      .where(isNull(accountGroupsTable.deletedAt))
+      .where(and(isNull(accountGroupsTable.deletedAt), inActiveLedger(accountGroupsTable)))
       .orderBy(accountGroupsTable.sortOrder, accountGroupsTable.name)
       .all()
       .map(toAccountGroup);
@@ -29,6 +30,7 @@ class AccountGroupsRepository {
       .where(
         and(
           isNull(accountGroupsTable.deletedAt),
+          inActiveLedger(accountGroupsTable),
           sql`lower(${accountGroupsTable.name}) = lower(${normalized})`,
         ),
       )
@@ -38,7 +40,7 @@ class AccountGroupsRepository {
     const maxSort = db
       .select({ maxSort: sql<number>`coalesce(max(${accountGroupsTable.sortOrder}), -1)` })
       .from(accountGroupsTable)
-      .where(isNull(accountGroupsTable.deletedAt))
+      .where(and(isNull(accountGroupsTable.deletedAt), inActiveLedger(accountGroupsTable)))
       .get();
 
     const id = newId();
@@ -49,6 +51,7 @@ class AccountGroupsRepository {
     db.insert(accountGroupsTable)
       .values({
         id,
+        ledgerId: getActiveLedgerId(),
         name: normalized,
         sortOrder: parsedSortOrder ?? (maxSort?.maxSort ?? -1) + 1,
         createdAt: now,
@@ -66,7 +69,13 @@ class AccountGroupsRepository {
     const row = db
       .select()
       .from(accountGroupsTable)
-      .where(and(eq(accountGroupsTable.id, id), isNull(accountGroupsTable.deletedAt)))
+      .where(
+        and(
+          eq(accountGroupsTable.id, id),
+          isNull(accountGroupsTable.deletedAt),
+          inActiveLedger(accountGroupsTable),
+        ),
+      )
       .get();
     if (!row) return;
 
@@ -76,6 +85,7 @@ class AccountGroupsRepository {
       .where(
         and(
           isNull(accountGroupsTable.deletedAt),
+          inActiveLedger(accountGroupsTable),
           sql`lower(${accountGroupsTable.name}) = lower(${normalized})`,
         ),
       )
@@ -85,12 +95,24 @@ class AccountGroupsRepository {
     const now = nowIso();
     db.update(accountGroupsTable)
       .set({ name: normalized, updatedAt: now })
-      .where(and(eq(accountGroupsTable.id, id), isNull(accountGroupsTable.deletedAt)))
+      .where(
+        and(
+          eq(accountGroupsTable.id, id),
+          isNull(accountGroupsTable.deletedAt),
+          inActiveLedger(accountGroupsTable),
+        ),
+      )
       .run();
 
     db.update(accountsTable)
       .set({ accountGroup: normalized, updatedAt: now })
-      .where(and(eq(accountsTable.accountGroup, row.name), isNull(accountsTable.deletedAt)))
+      .where(
+        and(
+          eq(accountsTable.accountGroup, row.name),
+          isNull(accountsTable.deletedAt),
+          inActiveLedger(accountsTable),
+        ),
+      )
       .run();
   }
 
@@ -106,7 +128,13 @@ class AccountGroupsRepository {
       ids.forEach((id, index) => {
         db.update(accountGroupsTable)
           .set({ sortOrder: index, updatedAt: now })
-          .where(and(eq(accountGroupsTable.id, id), isNull(accountGroupsTable.deletedAt)))
+          .where(
+            and(
+              eq(accountGroupsTable.id, id),
+              isNull(accountGroupsTable.deletedAt),
+              inActiveLedger(accountGroupsTable),
+            ),
+          )
           .run();
       });
       sqlite.execSync('COMMIT');
@@ -121,19 +149,37 @@ class AccountGroupsRepository {
     const row = db
       .select()
       .from(accountGroupsTable)
-      .where(and(eq(accountGroupsTable.id, id), isNull(accountGroupsTable.deletedAt)))
+      .where(
+        and(
+          eq(accountGroupsTable.id, id),
+          isNull(accountGroupsTable.deletedAt),
+          inActiveLedger(accountGroupsTable),
+        ),
+      )
       .get();
     if (!row) return;
 
     const now = nowIso();
     db.update(accountsTable)
       .set({ accountGroup: null, updatedAt: now })
-      .where(and(eq(accountsTable.accountGroup, row.name), isNull(accountsTable.deletedAt)))
+      .where(
+        and(
+          eq(accountsTable.accountGroup, row.name),
+          isNull(accountsTable.deletedAt),
+          inActiveLedger(accountsTable),
+        ),
+      )
       .run();
 
     db.update(accountGroupsTable)
       .set({ deletedAt: now, updatedAt: now })
-      .where(and(eq(accountGroupsTable.id, id), isNull(accountGroupsTable.deletedAt)))
+      .where(
+        and(
+          eq(accountGroupsTable.id, id),
+          isNull(accountGroupsTable.deletedAt),
+          inActiveLedger(accountGroupsTable),
+        ),
+      )
       .run();
   }
 
@@ -141,7 +187,9 @@ class AccountGroupsRepository {
     const names = getSQLite().getAllSync<{ name: string }>(
       `SELECT DISTINCT TRIM(account_group) as name
        FROM accounts
-       WHERE deleted_at IS NULL AND account_group IS NOT NULL AND TRIM(account_group) <> ''`,
+       WHERE deleted_at IS NULL AND ledger_id = ?
+         AND account_group IS NOT NULL AND TRIM(account_group) <> ''`,
+      [getActiveLedgerId()],
     );
     names.forEach((row) => {
       this.create(row.name);
