@@ -60,7 +60,7 @@ interface BackupTables {
   receipt_splits?: Record<string, unknown>[];
   receipt_split_items?: Record<string, unknown>[];
   receipt_split_item_shares?: Record<string, unknown>[];
-  // Ledgers (migration 073). Optional: a backup without it holds only the
+  // Ledgers (migration 075). Optional: a backup without it holds only the
   // default ledger, whose rows restore there through the column default.
   ledgers?: Record<string, unknown>[];
 }
