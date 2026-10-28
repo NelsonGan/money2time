@@ -219,11 +219,6 @@ export const GA4_ONLY_EVENTS = {
   // Items (owned things priced by cost per day)
   ITEM_CREATED: 'Item Created',
 
-  // Ledgers (separate books, Pro)
-  LEDGER_CREATED: 'Ledger Created',
-  LEDGER_SWITCHED: 'Ledger Switched',
-  LEDGER_DELETED: 'Ledger Deleted',
-
   // Recurring rules
   RECURRING_RULE_CREATED: 'Recurring Rule Created',
   RECURRING_RULE_UPDATED: 'Recurring Rule Updated',
@@ -316,7 +311,6 @@ const FEATURE_BY_EVENT = {
   [GA4_ONLY_EVENTS.BUDGET_TEMPLATE_CREATED]: 'budgets',
   [GA4_ONLY_EVENTS.ALBUM_CREATED]: 'albums',
   [GA4_ONLY_EVENTS.ITEM_CREATED]: 'items',
-  [GA4_ONLY_EVENTS.LEDGER_CREATED]: 'ledgers',
 } as const satisfies Partial<Record<AnalyticsEventName, string>>;
 
 export type ProductFeature = (typeof FEATURE_BY_EVENT)[keyof typeof FEATURE_BY_EVENT];

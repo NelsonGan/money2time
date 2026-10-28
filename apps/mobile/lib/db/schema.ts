@@ -2,9 +2,6 @@ import { integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 export const accountsTable = sqliteTable('accounts', {
   id: text('id').primaryKey(),
-  // The ledger this row belongs to (migration 073). No default here on
-  // purpose, so every insert must name its ledger (lib/db/ledgerScope.ts).
-  ledgerId: text('ledger_id').notNull(),
   name: text('name').notNull(),
   sortOrder: integer('sort_order').notNull().default(0),
   type: text('type').notNull(),
@@ -70,9 +67,6 @@ export const accountsTable = sqliteTable('accounts', {
 
 export const accountGroupsTable = sqliteTable('account_groups', {
   id: text('id').primaryKey(),
-  // The ledger this row belongs to (migration 073). No default here on
-  // purpose, so every insert must name its ledger (lib/db/ledgerScope.ts).
-  ledgerId: text('ledger_id').notNull(),
   name: text('name').notNull(),
   sortOrder: integer('sort_order').notNull().default(0),
   createdAt: text('created_at').notNull(),
@@ -82,9 +76,6 @@ export const accountGroupsTable = sqliteTable('account_groups', {
 
 export const categoriesTable = sqliteTable('categories', {
   id: text('id').primaryKey(),
-  // The ledger this row belongs to (migration 073). No default here on
-  // purpose, so every insert must name its ledger (lib/db/ledgerScope.ts).
-  ledgerId: text('ledger_id').notNull(),
   name: text('name').notNull(),
   sortOrder: integer('sort_order').notNull().default(0),
   type: text('type').notNull(),
@@ -98,9 +89,6 @@ export const categoriesTable = sqliteTable('categories', {
 
 export const transactionsTable = sqliteTable('transactions', {
   id: text('id').primaryKey(),
-  // The ledger this row belongs to (migration 073). No default here on
-  // purpose, so every insert must name its ledger (lib/db/ledgerScope.ts).
-  ledgerId: text('ledger_id').notNull(),
   type: text('type').notNull(),
   amount: real('amount').notNull(),
   currency: text('currency').notNull(),
@@ -153,9 +141,6 @@ export const transactionsTable = sqliteTable('transactions', {
 
 export const recurringRulesTable = sqliteTable('recurring_rules', {
   id: text('id').primaryKey(),
-  // The ledger this row belongs to (migration 073). No default here on
-  // purpose, so every insert must name its ledger (lib/db/ledgerScope.ts).
-  ledgerId: text('ledger_id').notNull(),
   name: text('name').notNull(),
   type: text('type').notNull(),
   amount: real('amount').notNull(),
@@ -264,8 +249,6 @@ export const settingsTable = sqliteTable('settings', {
   // Payment alerts: Android apps, selected accounts and capture preferences.
   // Null means defaults. Parse with parsePaymentAlertPrefs.
   autoLogPrefsJson: text('auto_log_prefs_json'),
-  // The ledger open on this phone; null means the default ledger. Device-local.
-  activeLedgerId: text('active_ledger_id'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),
@@ -298,9 +281,6 @@ export const transactionSplitsTable = sqliteTable('transaction_splits', {
 
 export const albumsTable = sqliteTable('albums', {
   id: text('id').primaryKey(),
-  // The ledger this row belongs to (migration 073). No default here on
-  // purpose, so every insert must name its ledger (lib/db/ledgerScope.ts).
-  ledgerId: text('ledger_id').notNull(),
   name: text('name').notNull(),
   coverPhotoUri: text('cover_photo_uri'),
   isActive: integer('is_active', { mode: 'boolean' }).notNull().default(false),
@@ -333,9 +313,6 @@ export const albumTransactionsTable = sqliteTable('album_transactions', {
 
 export const itemsTable = sqliteTable('items', {
   id: text('id').primaryKey(),
-  // The ledger this row belongs to (migration 073). No default here on
-  // purpose, so every insert must name its ledger (lib/db/ledgerScope.ts).
-  ledgerId: text('ledger_id').notNull(),
   name: text('name').notNull(),
   // Item-icon library id or a `custom:` uploaded-image id; null = package fallback.
   iconId: text('icon_id'),
@@ -355,9 +332,6 @@ export const itemsTable = sqliteTable('items', {
 
 export const budgetTemplatesTable = sqliteTable('budget_templates', {
   id: text('id').primaryKey(),
-  // The ledger this row belongs to (migration 073). No default here on
-  // purpose, so every insert must name its ledger (lib/db/ledgerScope.ts).
-  ledgerId: text('ledger_id').notNull(),
   name: text('name').notNull(),
   // Optional emoji shown next to the template name (category-style picker).
   emoji: text('emoji'),
@@ -391,9 +365,6 @@ export const budgetTemplateCategoriesTable = sqliteTable('budget_template_catego
 // budgets, hence its name).
 export const monthlyBudgetsTable = sqliteTable('monthly_budgets', {
   id: text('id').primaryKey(),
-  // The ledger this row belongs to (migration 073). No default here on
-  // purpose, so every insert must name its ledger (lib/db/ledgerScope.ts).
-  ledgerId: text('ledger_id').notNull(),
   // 'week', 'month' or 'year'.
   period: text('period').notNull().default('month'),
   // The period's key: 'YYYY-MM-DD' (first day) for a week, 'YYYY-MM' for a
@@ -479,9 +450,6 @@ export const monthlyWageSettingsTable = sqliteTable('monthly_wage_settings', {
 // Every payment alert the pipeline saw. See lib/db/migrations/067_payment_alerts.ts.
 export const autoLogCapturesTable = sqliteTable('auto_log_captures', {
   id: text('id').primaryKey(),
-  // The ledger this row belongs to (migration 073). No default here on
-  // purpose, so every insert must name its ledger (lib/db/ledgerScope.ts).
-  ledgerId: text('ledger_id').notNull(),
   channel: text('channel').notNull(),
   sourceKey: text('source_key').notNull(),
   sourceLabel: text('source_label'),
@@ -524,21 +492,3 @@ export type ReceiptSplitRow = typeof receiptSplitsTable.$inferSelect;
 export type ReceiptSplitItemRow = typeof receiptSplitItemsTable.$inferSelect;
 export type ReceiptSplitItemShareRow = typeof receiptSplitItemSharesTable.$inferSelect;
 export type AutoLogCaptureRow = typeof autoLogCapturesTable.$inferSelect;
-
-// Separate books (Personal, Work, …). See lib/db/migrations/073_ledgers.ts.
-// The 'default' row holds every install's original data; its null currency
-// means "use the settings row", so the default ledger reads exactly as before.
-export const ledgersTable = sqliteTable('ledgers', {
-  id: text('id').primaryKey(),
-  name: text('name'),
-  emoji: text('emoji'),
-  currencyCode: text('currency_code'),
-  currencySymbol: text('currency_symbol'),
-  // JSON LedgerPrefs: this ledger's own defaults (payback account, quick entry).
-  prefsJson: text('prefs_json'),
-  sortOrder: integer('sort_order').notNull().default(0),
-  createdAt: text('created_at').notNull(),
-  updatedAt: text('updated_at').notNull(),
-  deletedAt: text('deleted_at'),
-});
-export type LedgerRow = typeof ledgersTable.$inferSelect;

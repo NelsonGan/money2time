@@ -491,12 +491,6 @@ function useCompareRows(voiceSupported: boolean): CompareRow[] {
         pro: UNLIMITED,
       },
       {
-        // Free users keep the default ledger; each extra one is Pro.
-        label: I18n.t('ledgers.title'),
-        free: '1',
-        pro: UNLIMITED,
-      },
-      {
         label: I18n.t('pro.goals_label'),
         free: String(PRO_LIMITS.FREE_MAX_SAVINGS_GOALS),
         pro: UNLIMITED,

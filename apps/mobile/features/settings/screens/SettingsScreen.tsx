@@ -46,8 +46,6 @@ import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
 import { useIsFlatIcons } from '~/context/ThemeContext';
-import { LedgerSwitcherCard } from '~/features/ledgers/components/LedgerSwitcherCard';
-import { LedgerSwitcherSheet } from '~/features/ledgers/components/LedgerSwitcherSheet';
 import { riceCalAnnouncement } from '~/features/news/announcements/017_ricecal';
 import { FeatureAnnouncementModal } from '~/features/news/components/FeatureAnnouncementModal';
 import { ReimbursementTileBadge } from '~/features/reimbursements/components/ReimbursementTileBadge';
@@ -103,8 +101,6 @@ interface SettingsScreenProps {
   onOpenReimbursements: () => void;
   onOpenWidgets: () => void;
   onOpenWidgetPreviews?: () => void;
-  onCreateLedger: () => void;
-  onManageLedgers: () => void;
 }
 
 export function SettingsScreen({
@@ -136,17 +132,11 @@ export function SettingsScreen({
   onOpenReimbursements,
   onOpenWidgets,
   onOpenWidgetPreviews,
-  onCreateLedger,
-  onManageLedgers,
 }: SettingsScreenProps) {
-  const { settings, updateSettings, getLedgerEntryCounts } = useApp();
+  const { settings, updateSettings } = useApp();
   const monthCycle = monthCycleOf(settings);
   const { transactions } = useTransactions();
   const { isPro, setDevProOverride } = usePro();
-  const [ledgerSheetVisible, setLedgerSheetVisible] = useState(false);
-  // Read when the switcher opens, not on every render, and kept while it
-  // fades out so its rows do not flash to zero.
-  const [ledgerEntryCounts, setLedgerEntryCounts] = useState<Record<string, number>>({});
   const themeColors = useThemeColors();
   const isFlatIcons = useIsFlatIcons();
   const bottomNavInset = useSettingsBottomNavInset();
@@ -412,15 +402,6 @@ export function SettingsScreen({
                 label={I18n.t('settings.stat_this_month')}
               />
             </View>
-          </View>
-
-          <View className="mt-3">
-            <LedgerSwitcherCard
-              onPress={() => {
-                setLedgerEntryCounts(getLedgerEntryCounts());
-                setLedgerSheetVisible(true);
-              }}
-            />
           </View>
 
           {!isPro ? (
@@ -811,14 +792,6 @@ export function SettingsScreen({
           </Pressable>
         </Pressable>
       </ThemeModal>
-      <LedgerSwitcherSheet
-        visible={ledgerSheetVisible}
-        entryCounts={ledgerEntryCounts}
-        onClose={() => setLedgerSheetVisible(false)}
-        onOpenProPaywall={onOpenProPaywall}
-        onCreateLedger={onCreateLedger}
-        onManageLedgers={onManageLedgers}
-      />
     </SettingsPageLayout>
   );
 }

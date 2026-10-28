@@ -26,12 +26,7 @@ const mockDb = {
 };
 
 jest.mock('expo-sqlite', () => ({
-  openDatabaseSync: () => ({
-    execSync: jest.fn(),
-    closeSync: jest.fn(),
-    getFirstSync: jest.fn(() => null),
-    runSync: jest.fn(),
-  }),
+  openDatabaseSync: () => ({ execSync: jest.fn(), closeSync: jest.fn() }),
 }));
 jest.mock('drizzle-orm/expo-sqlite', () => ({ drizzle: () => mockDb }));
 jest.mock('../../lib/db/migrations', () => ({

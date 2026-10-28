@@ -74,9 +74,6 @@ export type SettingsStackParamList = {
   WidgetPreviews: undefined;
   PaymentAlerts: undefined;
   PaymentAlertSource: { channel: PaymentAlertChannel; sourceKey: string };
-  Ledgers: undefined;
-  /** No ledger id creates one. */
-  LedgerEditor: { ledgerId?: string } | undefined;
 };
 
 export type SettingsStackNavigationProp = NativeStackNavigationProp<SettingsStackParamList>;
