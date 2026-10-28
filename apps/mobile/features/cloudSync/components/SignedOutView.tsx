@@ -33,7 +33,6 @@ export function SignedOutView({
 }) {
   const sync = useCloudSync();
   const colors = useThemeColors();
-  const resolvedTheme = useResolvedTheme();
   const { isPro, isStatusKnown } = usePro();
   const [available, setAvailable] = useState<Record<NativeProvider, boolean>>({
     apple: false,
@@ -88,9 +87,8 @@ export function SignedOutView({
       <View className={hideHero ? 'mt-2 gap-3' : 'mt-10 gap-3'}>
         {available.apple ? (
           <ProviderButton
-            apple={APPLE_BUTTON[resolvedTheme]}
+            apple
             label={I18n.t('cloud_sync.continue_apple')}
-            icon={<AppleLogoIcon color={APPLE_BUTTON[resolvedTheme].ink} />}
             loading={busy === 'apple'}
             disabled={busy !== null}
             onPress={() => void signIn('apple')}
@@ -141,40 +139,43 @@ function Hero() {
 }
 
 /**
- * The Continue with Apple button's colours. It is a custom button built to
- * Apple's rules (Human Interface Guidelines > Sign in with Apple): black in
- * light mode and white in dark, the logo and title in the other colour, the
- * title in the system font. Apple's own button sizes its title from the
- * button's height, larger than the other options' titles; this one matches.
+ * Continue with Apple is a custom button built to Apple's rules (Human
+ * Interface Guidelines > Sign in with Apple): black in light mode and white in
+ * dark, the logo and title in the other colour. Apple's own button sizes its
+ * title from the button's height, larger than the other options' titles; this
+ * one matches them. Its title is already in the system font: it shows on iOS
+ * only, where the app's font is the system font.
  */
 const APPLE_BUTTON = {
   light: { fill: '#000000', ink: '#FFFFFF' },
   dark: { fill: '#FFFFFF', ink: '#000000' },
 } as const;
 
-/** One sign-in option, outlined, or filled when `apple` gives its colours. */
+/** One sign-in option: outlined, or Apple's black or white one with `apple`. */
 function ProviderButton({
   label,
   icon,
   onPress,
   loading,
   disabled,
-  apple,
+  apple = false,
 }: {
   label: string;
-  icon: React.ReactNode;
   onPress: () => void;
   loading?: boolean;
   disabled?: boolean;
-  apple?: { fill: string; ink: string };
-}) {
+} & ({ apple: true; icon?: undefined } | { apple?: false; icon: React.ReactNode })) {
   const colors = useThemeColors();
-  const foreground = apple?.ink ?? colors.text;
+  const appleColors = APPLE_BUTTON[useResolvedTheme()];
+  const [pressed, setPressed] = useState(false);
+  const foreground = apple ? appleColors.ink : colors.text;
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
       disabled={disabled}
+      onPressIn={() => setPressed(true)}
+      onPressOut={() => setPressed(false)}
       onPress={() => {
         triggerHaptic('selection');
         onPress();
@@ -182,18 +183,24 @@ function ProviderButton({
       // A plain style array: NativeWind's Pressable drops function styles.
       style={[
         styles.button,
-        styles.outline,
         apple
-          ? { backgroundColor: apple.fill, borderColor: apple.fill }
-          : { backgroundColor: colors.card, borderColor: withColorAlpha(colors.text, 0.14) },
+          ? { backgroundColor: appleColors.fill }
+          : [
+              styles.outline,
+              { backgroundColor: colors.card, borderColor: withColorAlpha(colors.text, 0.14) },
+            ],
+        pressed && styles.pressed,
         disabled && styles.dimmed,
       ]}
     >
-      {loading ? <ActivityIndicator color={foreground} /> : icon}
-      <Text
-        variant="bodyStrong"
-        style={apple ? { color: foreground, fontFamily: 'System' } : undefined}
-      >
+      {loading ? (
+        <ActivityIndicator color={foreground} />
+      ) : apple ? (
+        <AppleLogoIcon color={foreground} />
+      ) : (
+        icon
+      )}
+      <Text variant="bodyStrong" style={apple ? { color: foreground } : undefined}>
         {label}
       </Text>
     </Pressable>
@@ -202,14 +209,16 @@ function ProviderButton({
 
 const styles = StyleSheet.create({
   hero: { width: 280, height: 140 },
-  button: { height: 54, width: '100%' },
-  outline: {
+  button: {
+    height: 54,
+    width: '100%',
     borderRadius: 18,
-    borderWidth: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
   },
+  outline: { borderWidth: 1 },
+  pressed: { opacity: 0.8 },
   dimmed: { opacity: 0.6 },
 });
