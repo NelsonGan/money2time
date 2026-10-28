@@ -86,6 +86,8 @@ import {
   PeriodBudgetEditorScreen,
 } from '~/features/budget/screens';
 import { CalendarScreen } from '~/features/calendar/screens';
+import { CloudSyncProvider } from '~/features/cloudSync/CloudSyncContext';
+import { CloudSyncPromptHost } from '~/features/cloudSync/components/CloudSyncPromptHost';
 import { AddGoalButton } from '~/features/goals/components/AddGoalButton';
 import { GoalCelebrationOverlay } from '~/features/goals/components/GoalCelebrationOverlay';
 import {
@@ -149,6 +151,7 @@ import {
   WageCalculatorFlowScreen,
 } from '~/features/settings/screens';
 import { WebDashboardScreen } from '~/features/settings/screens/WebDashboardScreen';
+import { JoinLedgerScreen } from '~/features/sharedLedgers/screens/JoinLedgerScreen';
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import { QuickAddWarmup } from '~/features/transactions/components/QuickAddWarmup';
 import { ReceiptCameraSheet } from '~/features/transactions/components/ReceiptCameraSheet';
@@ -2460,6 +2463,17 @@ function SettingsWebDashboardRouteScreen({
   );
 }
 
+/** A shared-ledger invite link (`money2time://join/<code>`). */
+function JoinLedgerRouteScreen({ navigation, route }: RootStackRouteProps<'JoinLedger'>) {
+  return (
+    <JoinLedgerScreen
+      code={route.params.code}
+      onClose={() => navigation.goBack()}
+      onJoined={() => navigation.goBack()}
+    />
+  );
+}
+
 function SettingsTimeDisplayRouteScreen({
   navigation,
 }: RootStackRouteProps<'SettingsTimeDisplay'>) {
@@ -2979,6 +2993,11 @@ function AppContent() {
     void trackEvent(AnalyticsEvents.CLOUD_BACKUP_PROMPT_DISMISSED);
   }, []);
 
+  const handleTurnOnCloudSync = useCallback(() => {
+    requestOpenTab('settings');
+    requestOpenSettingsScreen('CloudSync');
+  }, []);
+
   const handleEnableCloudBackup = useCallback(() => {
     setCloudBackupPromptVisible(false);
     cloudBackupShowingRef.current = false;
@@ -3098,6 +3117,7 @@ function AppContent() {
               name="SettingsWebDashboard"
               component={SettingsWebDashboardRouteScreen}
             />
+            <RootStack.Screen name="JoinLedger" component={JoinLedgerRouteScreen} />
             <RootStack.Screen name="AddWageMonth" component={AddWageMonthRouteScreen} />
             <RootStack.Screen name="SettingsQuickEntry" component={SettingsQuickEntryRouteScreen} />
             <RootStack.Screen
@@ -3223,6 +3243,10 @@ function AppContent() {
         onEnable={handleEnableCloudBackup}
         onDismiss={handleDismissCloudBackupPrompt}
       />
+      <CloudSyncPromptHost
+        allowed={!biometricLocked && rootPromptsAllowed}
+        onTurnOn={handleTurnOnCloudSync}
+      />
       <ReviewPrePromptSheet />
       <LedgerProGuard
         canSwitch={rootPromptsAllowed}
@@ -3274,11 +3298,13 @@ export default function App() {
           <AppErrorBoundary>
             <AppProvider>
               <ProProvider>
-                <ReceiptScanProvider>
-                  <ThemeGate>
-                    <AppContent />
-                  </ThemeGate>
-                </ReceiptScanProvider>
+                <CloudSyncProvider>
+                  <ReceiptScanProvider>
+                    <ThemeGate>
+                      <AppContent />
+                    </ThemeGate>
+                  </ReceiptScanProvider>
+                </CloudSyncProvider>
               </ProProvider>
             </AppProvider>
           </AppErrorBoundary>

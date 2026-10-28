@@ -1,4 +1,4 @@
-import { Lock, Plus, Trash2 } from 'lucide-react-native';
+import { Lock, Plus, Trash2, Users } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 
@@ -12,6 +12,9 @@ import {
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { useIsPro } from '~/context/ProContext';
+import { useCloudSync, useCloudSyncEnabled } from '~/features/cloudSync/CloudSyncContext';
+import { useLedgerLock, useSharedLedgers } from '~/features/sharedLedgers/hooks/useSharedLedgers';
+import { sharingErrorMessage } from '~/features/sharedLedgers/lib/sharing';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
 import { I18n } from '~/lib/i18n';
@@ -20,12 +23,13 @@ import type { Ledger } from '~/types';
 import { cn } from '~/utils';
 
 import { ProChip } from '../components/ProChip';
-import { ledgerDisplayName, ledgerIcon, ledgerNeedsPro, ledgerSummary } from '../lib/ledgerDisplay';
+import { ledgerDisplayName, ledgerIcon, ledgerSummary } from '../lib/ledgerDisplay';
 
 interface LedgersScreenProps {
   onBack: () => void;
   onEditLedger: (ledgerId: string) => void;
   onCreateLedger: () => void;
+  onOpenSharing: (ledgerId: string) => void;
   onOpenProPaywall: (source: string) => void;
 }
 
@@ -34,10 +38,15 @@ export function LedgersScreen({
   onBack,
   onEditLedger,
   onCreateLedger,
+  onOpenSharing,
   onOpenProPaywall,
 }: LedgersScreenProps) {
   const { ledgers, activeLedger, deleteLedger, getLedgerEntryCounts } = useApp();
   const isPro = useIsPro();
+  const sync = useCloudSync();
+  const sharingEnabled = useCloudSyncEnabled();
+  const sharedLedgers = useSharedLedgers();
+  const lockOf = useLedgerLock();
   const themeColors = useThemeColors();
   const bottomInset = useSettingsBottomNavInset();
   // Read once per visit: nothing on this page adds or removes entries.
@@ -47,20 +56,30 @@ export function LedgersScreen({
     void triggerHaptic('warning');
     const name = ledgerDisplayName(ledger);
     const count = entryCounts[ledger.id] ?? 0;
+    const sharedByMe = sharedLedgers.some((l) => l.ledgerId === ledger.id && l.role === 'owner');
+    const message = I18n.t(
+      count === 1 ? 'ledgers.delete_message_one' : 'ledgers.delete_message_other',
+      { name, count },
+    );
     Alert.alert(
       I18n.t('ledgers.delete_title', { name }),
-      I18n.t(count === 1 ? 'ledgers.delete_message_one' : 'ledgers.delete_message_other', {
-        name,
-        count,
-      }),
+      sharedByMe ? `${message}\n\n${I18n.t('shared_ledgers.delete_shared_note')}` : message,
       [
         { text: I18n.t('common.cancel'), style: 'cancel' },
         {
           text: I18n.t('common.delete'),
           style: 'destructive',
           onPress: () => {
-            void triggerHaptic('success');
-            deleteLedger(ledger.id);
+            void (async () => {
+              try {
+                // Members lose it first, so nobody keeps syncing a deleted ledger.
+                if (sharedByMe) await sync.stopSharingLedger(ledger.id);
+                void triggerHaptic('success');
+                deleteLedger(ledger.id);
+              } catch (error) {
+                Alert.alert(sharingErrorMessage(error));
+              }
+            })();
           },
         },
       ],
@@ -84,9 +103,19 @@ export function LedgersScreen({
       >
         {ledgers.map((ledger) => {
           const isOpen = ledger.id === activeLedger.id;
-          const locked = ledgerNeedsPro(ledger.id) && !isPro;
+          const locked = lockOf(ledger.id) !== null;
           const count = entryCounts[ledger.id] ?? 0;
-          const canDelete = ledger.id !== DEFAULT_LEDGER_ID && !isOpen;
+          const shared = sharedLedgers.find((l) => l.ledgerId === ledger.id) ?? null;
+          const isMember = shared?.role === 'member';
+          // A member leaves from the ledger's sharing page instead.
+          const canDelete = ledger.id !== DEFAULT_LEDGER_ID && !isOpen && !isMember;
+          const summary = shared
+            ? `${
+                isMember
+                  ? I18n.t('shared_ledgers.status_shared_by', { name: shared.ownerName ?? '' })
+                  : I18n.t('shared_ledgers.status_shared')
+              } · ${ledgerSummary(ledger, count)}`
+            : ledgerSummary(ledger, count);
           return (
             <View
               key={ledger.id}
@@ -99,7 +128,7 @@ export function LedgersScreen({
                 accessibilityRole="button"
                 accessibilityLabel={`${I18n.t('ledgers.edit_named', {
                   name: ledgerDisplayName(ledger),
-                })}, ${ledgerSummary(ledger, count)}${locked ? `, ${I18n.t('ledgers.locked_note')}` : ''}`}
+                })}, ${summary}${locked ? `, ${I18n.t('ledgers.locked_note')}` : ''}`}
                 testID={`ledger-edit-${ledger.id}`}
                 onPress={() => {
                   void triggerHaptic('selection');
@@ -122,11 +151,26 @@ export function LedgersScreen({
                     ) : null}
                   </View>
                   <Text variant="caption" tone="muted" numberOfLines={1}>
-                    {ledgerSummary(ledger, count)}
+                    {summary}
                   </Text>
                 </View>
                 {locked ? <Lock size={16} color={themeColors.textMuted} /> : null}
               </Pressable>
+              {sharingEnabled && ledger.id !== DEFAULT_LEDGER_ID && (shared || isPro) ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('shared_ledgers.title')}
+                  testID={`ledger-sharing-${ledger.id}`}
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    onOpenSharing(ledger.id);
+                  }}
+                  hitSlop={6}
+                  className="h-10 w-10 items-center justify-center rounded-full active:bg-secondary/60"
+                >
+                  <Users size={18} color={shared ? themeColors.primary : themeColors.textMuted} />
+                </Pressable>
+              ) : null}
               {canDelete ? (
                 <Pressable
                   accessibilityRole="button"

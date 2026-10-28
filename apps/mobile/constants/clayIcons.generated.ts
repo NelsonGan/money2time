@@ -60,6 +60,7 @@ export const CLAY_ICON_SOURCES = {
   'settings/auto-log': require('../assets/clay-icons/settings/auto-log.png'),
   'settings/budget': require('../assets/clay-icons/settings/budget.png'),
   'settings/categories': require('../assets/clay-icons/settings/categories.png'),
+  'settings/cloud-sync': require('../assets/clay-icons/settings/cloud-sync.png'),
   'settings/contact': require('../assets/clay-icons/settings/contact.png'),
   'settings/data-management': require('../assets/clay-icons/settings/data-management.png'),
   'settings/display': require('../assets/clay-icons/settings/display.png'),

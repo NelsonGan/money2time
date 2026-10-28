@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { PaymentAlertSourceScreen } from '~/features/autoLog/screens/PaymentAlertSourceScreen';
 import { PaymentAlertsSettingsScreen } from '~/features/autoLog/screens/PaymentAlertsSettingsScreen';
+import { CloudSyncScreen } from '~/features/cloudSync/screens/CloudSyncScreen';
 import { ItemsScreen } from '~/features/items/screens';
 import { LedgerEditorScreen } from '~/features/ledgers/screens/LedgerEditorScreen';
 import { LedgersScreen } from '~/features/ledgers/screens/LedgersScreen';
@@ -10,6 +11,7 @@ import { NewsScreen } from '~/features/news/screens/NewsScreen';
 import { ReimbursementSettingsScreen } from '~/features/reimbursements/screens/ReimbursementSettingsScreen';
 import { ReimbursementsScreen } from '~/features/reimbursements/screens/ReimbursementsScreen';
 import type { CategoryIconPickerSession } from '~/features/settings/lib/categoryIconPickerBridge';
+import { LedgerSharingScreen } from '~/features/sharedLedgers/screens/LedgerSharingScreen';
 import { LiveEarningsScreen } from '~/features/widgets/screens/LiveEarningsScreen';
 import { WidgetsScreen } from '~/features/widgets/screens/WidgetsScreen';
 import {
@@ -115,6 +117,7 @@ function SettingsHomeRoute({
       onOpenNotifications={() => navigation.navigate('Notifications')}
       onOpenDataManagement={() => navigation.navigate('DataManagement')}
       onOpenWebDashboard={() => navigation.navigate('WebDashboard')}
+      onOpenCloudSync={() => navigation.navigate('CloudSync')}
       onOpenNews={() => navigation.navigate('News')}
       onOpenStatementImport={() => navigation.navigate('StatementImport')}
       onOpenQuickEntry={() => navigation.navigate('QuickEntrySettings')}
@@ -415,6 +418,17 @@ export function SettingsStack({
           return <AutoBackupScreen onBack={() => props.navigation.goBack()} />;
         }}
       </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="CloudSync">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return (
+            <CloudSyncScreen
+              onBack={() => props.navigation.goBack()}
+              onOpenProPaywall={onOpenProPaywall}
+            />
+          );
+        }}
+      </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="WebDashboard">
         {(props) => {
           stackNavigationRef.current = props.navigation;
@@ -539,6 +553,7 @@ export function SettingsStack({
               onBack={() => props.navigation.goBack()}
               onEditLedger={(ledgerId) => props.navigation.navigate('LedgerEditor', { ledgerId })}
               onCreateLedger={() => props.navigation.navigate('LedgerEditor')}
+              onOpenSharing={(ledgerId) => props.navigation.navigate('LedgerSharing', { ledgerId })}
               onOpenProPaywall={onOpenProPaywall}
             />
           );
@@ -554,6 +569,23 @@ export function SettingsStack({
               onBack={() => props.navigation.goBack()}
               // The new ledger is open: land on Settings, whose card now names it.
               onCreated={() => props.navigation.dispatch(StackActions.popToTop())}
+              // Shared as it was made: go on to inviting people.
+              onShared={(ledgerId) => props.navigation.replace('LedgerSharing', { ledgerId })}
+              onOpenSharing={(ledgerId) => props.navigation.navigate('LedgerSharing', { ledgerId })}
+              onOpenCloudSync={() => props.navigation.navigate('CloudSync')}
+            />
+          );
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="LedgerSharing">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return (
+            <LedgerSharingScreen
+              ledgerId={props.route.params.ledgerId}
+              onBack={() => props.navigation.goBack()}
+              onOpenCloudSync={() => props.navigation.navigate('CloudSync')}
+              onOpenProPaywall={onOpenProPaywall}
             />
           );
         }}

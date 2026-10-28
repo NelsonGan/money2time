@@ -1,11 +1,9 @@
 import { X } from 'lucide-react-native';
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { GoogleDriveIcon, ICloudIcon } from '~/components/icons/CloudProviderIcons';
-import { Button, FatButton, Text, ThemeModal } from '~/components/ui';
-import { spacing } from '~/constants/designSystem';
+import { Button, FatButton, PromptSheet, Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { withColorAlpha } from '~/utils/color';
@@ -26,101 +24,83 @@ export function CloudBackupPromptModal({
   onDismiss,
 }: CloudBackupPromptModalProps) {
   const colors = useThemeColors();
-  const insets = useSafeAreaInsets();
   const accentColor = colors.primary;
 
   return (
-    <ThemeModal
-      visible={visible}
-      transparent
-      animationType="fade"
-      presentationStyle="overFullScreen"
-      onRequestClose={onDismiss}
-    >
+    <PromptSheet visible={visible} onDismiss={onDismiss}>
+      {/* Tinted hero panel showing the two cloud destinations. */}
+      <View style={[styles.panel, { backgroundColor: withColorAlpha(accentColor, 0.1) }]}>
+        <View style={styles.providerRow}>
+          <View style={styles.provider}>
+            <View
+              style={[
+                styles.iconBubble,
+                {
+                  backgroundColor: colors.card,
+                  borderColor: withColorAlpha(colors.text, 0.08),
+                },
+              ]}
+            >
+              <ICloudIcon size={34} />
+            </View>
+            <Text variant="caption" tone="muted">
+              {I18n.t('auto_backup.target.icloud')}
+            </Text>
+          </View>
+          <View style={styles.provider}>
+            <View
+              style={[
+                styles.iconBubble,
+                {
+                  backgroundColor: colors.card,
+                  borderColor: withColorAlpha(colors.text, 0.08),
+                },
+              ]}
+            >
+              <GoogleDriveIcon size={30} />
+            </View>
+            <Text variant="caption" tone="muted">
+              {I18n.t('auto_backup.target.google_drive')}
+            </Text>
+          </View>
+        </View>
+      </View>
+
       <Pressable
-        className="flex-1 justify-end bg-black/50 px-4"
-        style={{ paddingTop: insets.top + spacing.md, paddingBottom: insets.bottom + spacing.md }}
+        accessibilityRole="button"
+        accessibilityLabel={I18n.t('common.close')}
         onPress={onDismiss}
+        hitSlop={8}
+        style={[
+          styles.closeBtn,
+          { backgroundColor: colors.card, borderColor: withColorAlpha(colors.text, 0.08) },
+        ]}
       >
-        <Pressable
-          onPress={(event) => event.stopPropagation()}
-          className="overflow-hidden rounded-[30px] border border-border/30 bg-background shadow-float"
-        >
-          {/* Tinted hero panel showing the two cloud destinations. */}
-          <View style={[styles.panel, { backgroundColor: withColorAlpha(accentColor, 0.1) }]}>
-            <View style={styles.providerRow}>
-              <View style={styles.provider}>
-                <View
-                  style={[
-                    styles.iconBubble,
-                    {
-                      backgroundColor: colors.card,
-                      borderColor: withColorAlpha(colors.text, 0.08),
-                    },
-                  ]}
-                >
-                  <ICloudIcon size={34} />
-                </View>
-                <Text variant="caption" tone="muted">
-                  {I18n.t('auto_backup.target.icloud')}
-                </Text>
-              </View>
-              <View style={styles.provider}>
-                <View
-                  style={[
-                    styles.iconBubble,
-                    {
-                      backgroundColor: colors.card,
-                      borderColor: withColorAlpha(colors.text, 0.08),
-                    },
-                  ]}
-                >
-                  <GoogleDriveIcon size={30} />
-                </View>
-                <Text variant="caption" tone="muted">
-                  {I18n.t('auto_backup.target.google_drive')}
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={I18n.t('common.close')}
-            onPress={onDismiss}
-            hitSlop={8}
-            style={[
-              styles.closeBtn,
-              { backgroundColor: colors.card, borderColor: withColorAlpha(colors.text, 0.08) },
-            ]}
-          >
-            <X size={17} color={colors.textSoft} />
-          </Pressable>
-
-          <View style={styles.body}>
-            <View style={styles.textArea}>
-              <Text variant="heading" style={{ color: colors.text }}>
-                {I18n.t('cloud_backup_prompt.title')}
-              </Text>
-              <Text variant="friendly" tone="muted" className="mt-2">
-                {I18n.t('cloud_backup_prompt.body')}
-              </Text>
-            </View>
-
-            <View style={styles.footer}>
-              <FatButton
-                color={accentColor}
-                label={I18n.t('cloud_backup_prompt.cta')}
-                onPress={onEnable}
-              />
-              <Button variant="ghost" size="sm" onPress={onDismiss}>
-                <Text tone="muted">{I18n.t('cloud_backup_prompt.dismiss')}</Text>
-              </Button>
-            </View>
-          </View>
-        </Pressable>
+        <X size={17} color={colors.textSoft} />
       </Pressable>
-    </ThemeModal>
+
+      <View style={styles.body}>
+        <View style={styles.textArea}>
+          <Text variant="heading" style={{ color: colors.text }}>
+            {I18n.t('cloud_backup_prompt.title')}
+          </Text>
+          <Text variant="friendly" tone="muted" className="mt-2">
+            {I18n.t('cloud_backup_prompt.body')}
+          </Text>
+        </View>
+
+        <View style={styles.footer}>
+          <FatButton
+            color={accentColor}
+            label={I18n.t('cloud_backup_prompt.cta')}
+            onPress={onEnable}
+          />
+          <Button variant="ghost" size="sm" onPress={onDismiss}>
+            <Text tone="muted">{I18n.t('cloud_backup_prompt.dismiss')}</Text>
+          </Button>
+        </View>
+      </View>
+    </PromptSheet>
   );
 }
 
