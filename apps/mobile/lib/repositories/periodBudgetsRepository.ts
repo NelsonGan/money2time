@@ -1,6 +1,7 @@
 import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
 
 import { getDb, getSQLite } from '~/lib/db/client';
+import { getActiveLedgerId, inActiveLedger } from '~/lib/db/ledgerScope';
 import { monthlyBudgetCategoriesTable, monthlyBudgetsTable } from '~/lib/db/schema';
 import type { BudgetPeriod, BudgetTemplate, PeriodBudget, PeriodBudgetLine } from '~/types';
 import { newId, nowIso } from '~/utils/id';
@@ -17,7 +18,7 @@ class PeriodBudgetsRepository {
     const budgetRows = db
       .select()
       .from(monthlyBudgetsTable)
-      .where(isNull(monthlyBudgetsTable.deletedAt))
+      .where(and(isNull(monthlyBudgetsTable.deletedAt), inActiveLedger(monthlyBudgetsTable)))
       .orderBy(monthlyBudgetsTable.period, monthlyBudgetsTable.month)
       .all();
     if (budgetRows.length === 0) return [];
@@ -56,7 +57,13 @@ class PeriodBudgetsRepository {
     const row = db
       .select({ count: sql<number>`count(*)` })
       .from(monthlyBudgetsTable)
-      .where(and(eq(monthlyBudgetsTable.period, period), eq(monthlyBudgetsTable.month, key)))
+      .where(
+        and(
+          eq(monthlyBudgetsTable.period, period),
+          eq(monthlyBudgetsTable.month, key),
+          inActiveLedger(monthlyBudgetsTable),
+        ),
+      )
       .get();
     return (row?.count ?? 0) > 0;
   }
@@ -72,7 +79,7 @@ class PeriodBudgetsRepository {
     return db
       .selectDistinct({ month: monthlyBudgetsTable.month })
       .from(monthlyBudgetsTable)
-      .where(eq(monthlyBudgetsTable.period, period))
+      .where(and(eq(monthlyBudgetsTable.period, period), inActiveLedger(monthlyBudgetsTable)))
       .all()
       .map((row) => row.month);
   }
@@ -145,6 +152,7 @@ class PeriodBudgetsRepository {
       db.insert(monthlyBudgetsTable)
         .values({
           id,
+          ledgerId: getActiveLedgerId(),
           period,
           month: key,
           templateId: null,
@@ -295,6 +303,7 @@ class PeriodBudgetsRepository {
           eq(monthlyBudgetsTable.period, period),
           eq(monthlyBudgetsTable.month, key),
           isNull(monthlyBudgetsTable.deletedAt),
+          inActiveLedger(monthlyBudgetsTable),
         ),
       )
       .get();
@@ -312,6 +321,7 @@ class PeriodBudgetsRepository {
     db.insert(monthlyBudgetsTable)
       .values({
         id,
+        ledgerId: getActiveLedgerId(),
         period: template.period,
         month: key,
         templateId: template.id,

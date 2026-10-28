@@ -1,6 +1,7 @@
 import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
 
 import { getDb, getSQLite } from '~/lib/db/client';
+import { getActiveLedgerId, inActiveLedger } from '~/lib/db/ledgerScope';
 import { budgetTemplateCategoriesTable, budgetTemplatesTable } from '~/lib/db/schema';
 import type { BudgetPeriod, BudgetTemplate, BudgetTemplateAllocation } from '~/types';
 import { newId, nowIso } from '~/utils/id';
@@ -27,7 +28,7 @@ class BudgetTemplatesRepository {
     const templateRows = db
       .select()
       .from(budgetTemplatesTable)
-      .where(isNull(budgetTemplatesTable.deletedAt))
+      .where(and(isNull(budgetTemplatesTable.deletedAt), inActiveLedger(budgetTemplatesTable)))
       .orderBy(budgetTemplatesTable.sortOrder, budgetTemplatesTable.name)
       .all();
     if (templateRows.length === 0) return [];
@@ -71,12 +72,13 @@ class BudgetTemplatesRepository {
       const maxSort = db
         .select({ maxSort: sql<number>`coalesce(max(${budgetTemplatesTable.sortOrder}), -1)` })
         .from(budgetTemplatesTable)
-        .where(isNull(budgetTemplatesTable.deletedAt))
+        .where(and(isNull(budgetTemplatesTable.deletedAt), inActiveLedger(budgetTemplatesTable)))
         .get();
 
       db.insert(budgetTemplatesTable)
         .values({
           id,
+          ledgerId: getActiveLedgerId(),
           name: input.name,
           emoji: input.emoji,
           period: input.period,
@@ -185,6 +187,7 @@ class BudgetTemplatesRepository {
             eq(budgetTemplatesTable.isDefault, true),
             eq(budgetTemplatesTable.period, target.period),
             isNull(budgetTemplatesTable.deletedAt),
+            inActiveLedger(budgetTemplatesTable),
           ),
         )
         .run();
@@ -264,7 +267,7 @@ class BudgetTemplatesRepository {
         isDefault: budgetTemplatesTable.isDefault,
       })
       .from(budgetTemplatesTable)
-      .where(isNull(budgetTemplatesTable.deletedAt))
+      .where(and(isNull(budgetTemplatesTable.deletedAt), inActiveLedger(budgetTemplatesTable)))
       .orderBy(budgetTemplatesTable.sortOrder, budgetTemplatesTable.name)
       .all();
     const byPeriod = new Map<string, typeof rows>();
