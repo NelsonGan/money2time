@@ -94,7 +94,7 @@ export function SplitReceiptShareModal({
       if (base64) {
         const file = new File(Paths.cache, receiptShareFileName(content.title, Date.now()));
         file.create({ overwrite: true });
-        file.write(base64, { encoding: 'base64' });
+        file.writeSync(base64, { encoding: 'base64' });
         tempFile = file;
         if (await Sharing.isAvailableAsync()) {
           nativeShareInvoked = true;

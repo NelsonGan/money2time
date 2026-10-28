@@ -129,11 +129,11 @@ async function copyAssetIfNeeded(): Promise<void> {
   if (!asset.localUri) throw new Error('cities.db asset has no localUri');
 
   if (dest.exists) dest.delete();
-  new File(asset.localUri).copy(dest);
+  new File(asset.localUri).copySync(dest);
 
   if (marker.exists) marker.delete();
   marker.create();
-  marker.write(String(CITIES_DB_VERSION));
+  marker.writeSync(String(CITIES_DB_VERSION));
 }
 
 async function openCitiesDb(): Promise<SQLiteDatabase | null> {

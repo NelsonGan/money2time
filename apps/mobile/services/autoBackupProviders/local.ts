@@ -27,7 +27,7 @@ export const localProvider = {
     const dir = ensureBackupsDir();
     const file = new File(dir, name);
     if (file.exists) file.delete();
-    file.write(json);
+    file.writeSync(json);
     const size = file.size ?? json.length;
     const createdAt = parseTimestampFromName(name) ?? new Date().toISOString();
     return {

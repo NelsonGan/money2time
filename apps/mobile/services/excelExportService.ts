@@ -188,7 +188,7 @@ const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.s
 export async function exportExcel(labels: ExcelExportLabels = excelExportLabels()): Promise<void> {
   const bytes = buildExcelWorkbook(labels);
   const file = new File(Paths.document, excelExportFileName(new Date()));
-  file.write(bytes);
+  file.writeSync(bytes);
 
   if (await Sharing.isAvailableAsync()) {
     await Sharing.shareAsync(file.uri, {
