@@ -1,7 +1,6 @@
 import { and, eq, isNull, sql } from 'drizzle-orm';
 
 import { getDb, getSQLite } from '~/lib/db/client';
-import { getActiveLedgerId, inActiveLedger } from '~/lib/db/ledgerScope';
 import { categoriesTable } from '~/lib/db/schema';
 import type { Category } from '~/types';
 import { newId, nowIso } from '~/utils/id';
@@ -25,11 +24,7 @@ class CategoriesRepository {
       .select()
       .from(categoriesTable)
       .where(
-        and(
-          isNull(categoriesTable.deletedAt),
-          inActiveLedger(categoriesTable),
-          type ? eq(categoriesTable.type, type) : undefined,
-        ),
+        and(isNull(categoriesTable.deletedAt), type ? eq(categoriesTable.type, type) : undefined),
       )
       .orderBy(categoriesTable.sortOrder, categoriesTable.name)
       .all()
@@ -45,13 +40,7 @@ class CategoriesRepository {
     const row = db
       .select()
       .from(categoriesTable)
-      .where(
-        and(
-          eq(categoriesTable.id, id),
-          isNull(categoriesTable.deletedAt),
-          inActiveLedger(categoriesTable),
-        ),
-      )
+      .where(and(eq(categoriesTable.id, id), isNull(categoriesTable.deletedAt)))
       .get();
     return row ? toCategory(row) : null;
   }
@@ -63,20 +52,13 @@ class CategoriesRepository {
     const maxSort = db
       .select({ maxSort: sql<number>`coalesce(max(${categoriesTable.sortOrder}), -1)` })
       .from(categoriesTable)
-      .where(
-        and(
-          isNull(categoriesTable.deletedAt),
-          inActiveLedger(categoriesTable),
-          eq(categoriesTable.type, input.type),
-        ),
-      )
+      .where(and(isNull(categoriesTable.deletedAt), eq(categoriesTable.type, input.type)))
       .get();
     const nextSortOrder = input.sortOrder ?? (maxSort?.maxSort ?? -1) + 1;
 
     db.insert(categoriesTable)
       .values({
         id,
-        ledgerId: getActiveLedgerId(),
         name: input.name,
         sortOrder: nextSortOrder,
         type: input.type,

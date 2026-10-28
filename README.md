@@ -16,10 +16,8 @@ Paths in `code` are relative to the app, `apps/mobile`, unless they start with
 - [Repo layout](#repo-layout)
 - [Getting set up](#getting-set-up)
 - [Architecture](#architecture)
-- [Ledgers](#ledgers)
 - [Notification review](#notification-review)
 - [Pro and purchases](#pro-and-purchases)
-- [Cloud Sync](#cloud-sync)
 - [Analytics](#analytics)
 - [App icons](#app-icons)
 - [App size and native-only assets](#app-size-and-native-only-assets)
@@ -79,7 +77,6 @@ apps/mobile/
 │   ├── widgets/                # Widgets hub + the live-earnings Live Activity
 │   ├── autoLog/                # Bank and wallet app notifications into automatic transactions
 │   ├── settings/               # All settings screens + nested stack
-│   ├── cloudSync/              # Cloud Sync: sign-in, the sync engine, its screen and prompt
 │   ├── onboarding/             # First-run flow (welcome, basics, wage, backup, source, notifications, features)
 │   ├── tutorials/              # Searchable how-to guides, mirrored to money2time.com
 │   ├── news/                   # In-app feature announcements & showcases
@@ -227,7 +224,7 @@ node scripts/sync-tutorials-web.mjs        # catalog -> ../money2time-web
 `Main`, `AddTransaction`, `AddTransactionDetailed`, `EditTransaction`, `SettleUp`, `SettleUpSettings`, `SettleUpPerson`, `SettleUpTransaction`, `SplitBill`, `ReceiptSplit`, `AccountDetail`, `AccountEditor`, `GoalEditor`, `GoalDetail`, `AccountLogoPicker`, `CardDesignPicker`, `SubscriptionLogoPicker`, `PayCreditCard`, `AccountGroupEditor`, `CategoryEditor`, `InsightsDrilldown`, `RecurringEditor`, `SettingsRecurring`, `SettingsAccounts`, `SettingsHourlyValue`, `SettingsLiveEarnings`, `SettingsTimeDisplay`, `AddWageMonth`, `SettingsQuickEntry`, `SettingsMultiCurrency`, `SettingsAutoBackup`, `SettingsWageCalculator`, `ShareAndEarn`, `ProPaywall`, `CreateAlbum`, `AlbumDetail`, `EditAlbumTransactions`, `AddAlbumTransactions`, `EditAlbumDetails`, `ItemEditor`, `ItemIconPicker`, `CategoryIconPicker`, `BudgetTemplateEditor`, `BudgetPeriodEditor`, `BudgetCategoryAllocation`, `SettingsBudgetTemplates`, `Tutorials`, `TutorialDetail`, `PaymentAlertsSetup`.
 
 **Settings has its own nested stack** (`navigation/settingsStack.ts`):
-`SettingsHome`, `DisplaySettings`, `AppIcon`, `BottomBar`, `HourlyValue`, `HourlyValueSettings`, `AccountSettings`, `Accounts`, `Items`, `ExchangeRates`, `Categories`, `Recurring`, `Notifications`, `NotificationDetail`, `DataManagement`, `News`, `AutoBackupSettings`, `StatementImport`, `StatementImportList`, `ProManagement`, `CloudSync`, `ShareAndEarn`, `QuickEntrySettings`, `AutoLogSettings`, `AutoLogTutorial`, `AppLock`, `Receipts`, `ReceiptSettings`, `Reimbursements`, `ReimbursementSettings`, `Widgets`, `LiveEarnings`, `WidgetPreviews`, `PaymentAlerts`, `PaymentAlertSource`.
+`SettingsHome`, `DisplaySettings`, `AppIcon`, `BottomBar`, `HourlyValue`, `HourlyValueSettings`, `AccountSettings`, `Accounts`, `Items`, `ExchangeRates`, `Categories`, `Recurring`, `Notifications`, `NotificationDetail`, `DataManagement`, `News`, `AutoBackupSettings`, `StatementImport`, `StatementImportList`, `ProManagement`, `ShareAndEarn`, `QuickEntrySettings`, `AutoLogSettings`, `AutoLogTutorial`, `AppLock`, `Receipts`, `ReceiptSettings`, `Reimbursements`, `ReimbursementSettings`, `Widgets`, `LiveEarnings`, `WidgetPreviews`, `PaymentAlerts`, `PaymentAlertSource`.
 
 Stack options live in `navigation/stackOptions.ts` (headerShown: false, slide animations, gesture-enabled back).
 
@@ -253,7 +250,6 @@ Key properties from `useApp()`:
 - **Queries**: `getAccountById`, `getCategoryById`, `getTransactionsByAccount`, `queryTransactions`, `getCashflowSummary`, `getExpenseBreakdownByCategory`, `getExpenseBreakdownBySubcategory`, `getIncomeBreakdown`, `getTransfersBetweenAccounts`, `getTrueHourlyRateForDate`, `getDisplayValueForTransaction`
 - **Data management**: `resetTransactionsOnly`, `resetAllData`, `importMoneyManagerBackup`
 - **Onboarding**: `completeOnboarding({ seedDefaultAccounts })` completes setup and optionally seeds accounts.
-- **Ledgers**: `ledgers`, `activeLedger`, `switchLedger`, `createLedger`, `updateLedger`, `deleteLedger`, `getLedgerEntryCounts` (separate books; see [Ledgers](#ledgers))
 - **Album ops**: `albums`, `activeAlbumId`, `createAlbum`, `updateAlbum`, `deleteAlbum`, `reorderAlbums`, `setActiveAlbum`, `addTransactionsToAlbum`, `removeTransactionsFromAlbum`, `getAlbumTransactionIds`, `getAlbumTransactions`, `getAlbumStats` (trip albums — group transactions with a cover, date range, and breakdown; Pro-limited to `FREE_MAX_ALBUMS`)
 - **Budget ops**: `budgetTemplates`, `periodBudgets`, `createBudgetTemplate`, `updateBudgetTemplate`, `deleteBudgetTemplate`, `setDefaultBudgetTemplate`, `getBudgetKeysEverExisted`, `createPeriodBudget`, `createCustomPeriodBudget`, `updatePeriodBudget`, `deletePeriodBudget` (weekly, monthly and yearly expense-only budgets built from reusable templates; Pro-limited to `FREE_MAX_BUDGET_TEMPLATES` across all periods)
 - **Multi-currency / FX ops**: `listExchangeRates`, `refreshExchangeRates`, `setManualExchangeRate` (reporting-currency rate table; transactions snapshot `reportingCurrency`/`reportingAmount`/`fxRate` at write time so historical aggregates never drift)
@@ -267,7 +263,7 @@ Other contexts:
 
 ### Database
 
-SQLite via `expo-sqlite` + Drizzle ORM. Schema is in `lib/db/schema.ts`. The DB client is initialized in `lib/db/client.ts` (database file: `money2time.db`, migrations in `lib/db/migrations/` numbered `001`–`075`, with no `072`–`074`: ledgers, Cloud Sync and shared ledgers are all in `075_ledgers_and_cloud_sync`, see [Ledgers](#ledgers)). `lib/db/normalizeCurrencies.ts` collapses legacy single-currency rows on restore/upgrade.
+SQLite via `expo-sqlite` + Drizzle ORM. Schema is in `lib/db/schema.ts`. The DB client is initialized in `lib/db/client.ts` (database file: `money2time.db`, migrations in `lib/db/migrations/` numbered `001`–`071`). `lib/db/normalizeCurrencies.ts` collapses legacy single-currency rows on restore/upgrade.
 
 **Migration runner contract** (`lib/db/migrations/runner.ts`, wired up by `index.ts`'s `require.context` loader):
 
@@ -280,59 +276,56 @@ SQLite via `expo-sqlite` + Drizzle ORM. Schema is in `lib/db/schema.ts`. The DB 
 
 **Album location map (`features/albums/`).** Albums with a location render on a full-page map, reached from the map FAB on `AlbumsScreen` → `AlbumLocations` root screen (`AlbumLocationsScreen` — full-bleed map, floating back button, no header). The map (`components/AlbumMapView.tsx`) is **MapLibre** (`@maplibre/maplibre-react-native`, open-source, no API key): photo `Marker`s showing each album's name + total spend (`AlbumMapMarker`) over a sleek, theme-tinted vector basemap (`buildThemedMapStyle` paints MapLibre's no-key demotiles vector source in the active `ColorPalette`), plus a "fit all" camera button. The path to full street-level/offline detail is a Protomaps PMTiles archive (`assets/map/style.json` is a bundled OSM-raster fallback). **MapLibre is a native module:** its Expo config plugin is registered in `app.json`, so adding/upgrading it needs a **dev-client / prebuild rebuild** (no Expo Go). `AlbumMapView` is `React.lazy`-loaded so the rest of the app works on a dev client that hasn't been rebuilt yet — only opening the location screen's map touches the native module. Pins come from `AlbumPin[]` (built from `locatedAlbums` + `getAlbumStats`); `locatedAlbums` is a selector on `useApp()`.
 
-**Tables** (all use soft-deletes via `deletedAt`, except `exchange_rates` which is a cache). Each ledger's root tables also carry `ledgerId`; see [Ledgers](#ledgers):
+**Tables** (all use soft-deletes via `deletedAt`, except `exchange_rates` which is a cache):
 
-| Table                           | Key columns                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `accountsTable`                 | id, name, sortOrder, type (debit/credit/goal/loan), accountGroup, logoId, creditStatementDay, creditDueDay, currency, startingBalance, includeInTotals, **goalTargetAmount, goalTargetDate, goalEmoji, goalAchievedAt, goalArchivedAt** (savings-goal fields, null on non-goal accounts), **loanOriginalPrincipal, loanMonthlyPayment, loanPaymentDay, loanInterestRate, loanTermMonths, loanTotalRepayable, loanStartDate, loanPaidOffAt, loanArchivedAt, loanCountAsExpense, loanPaymentCategoryId, loanInterestModel, loanLedgerAnchorDate, loanRateChangesJson** (loan fields, null on non-loan accounts)                                                                                                                                                                                                                                                                                                                   |
-| `accountGroupsTable`            | id, name, sortOrder                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `categoriesTable`               | id, name, sortOrder, type (expense/income), parentId, icon (tagged icon value, see Key Patterns), isDefault                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `transactionsTable`             | id, type (expense/income/transfer/balance_adjustment), amount, currency, **reportingCurrency, reportingAmount, fxRate** (frozen FX snapshot), **toAmount, accountAmount** (cross-currency), date, accountId, fromAccountId, toAccountId, categoryId, note, **details** (longer free-text note, migration `068`; searched with `note` via `transactionSearchText`), receiptUri, recurrence fields, sentiment, **reimbursable, reimbursedAt, reimbursementAccountId, reimbursementTransactionId, reimbursementOfId** (reimbursement link), countsAsExpense, **dayOrder** (drag position among same-time rows; null = by createdAt, so edits never reorder)                                                                                                                                                                                                                                                                        |
-| `transactionSplitsTable`        | id, transactionId, personName, amount, isSelf, paybackAccountId, paidAt, paidTransactionId, sortOrder                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `receiptSplitsTable`            | id, transactionId, currency, merchant, receiptDate, itemsSubtotal, taxAmount, serviceAmount, discountAmount, adjustmentAmount, totalAmount, source (scan/manual), receiptImageUri (itemized receipt-split header; one live row per transaction via partial unique index)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `receiptSplitItemsTable`        | id, receiptSplitId, name, quantity, lineTotal, sortOrder (line items on an itemized receipt split)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `receiptSplitItemSharesTable`   | id, receiptSplitId, itemId, personName, isSelf, weight (item × person portion weights)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `recurringRulesTable`           | id, name, type, amount, currency, toAmount, accountId, fromAccountId, toAccountId, categoryId, note, logoId, recurrencePattern, recurrenceInterval, nextRunDate, endDate, isActive, countsAsExpense                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `settingsTable`                 | id, appUserId, locale, currencyCode, currencySymbol, displayMode, workdayDisplayEnabled, workingHoursPerDay, hapticsEnabled, themeMode, themeColor, iconStyle, appIcon, accountLogoCountry, subscriptionLogoCountry, profileName, profileAvatarUri, insights/notification/quickEntry/calendar PrefsJson, onboardingCompleted, userMode, weekStartsOn, firstDayOfMonth, firstDayOverridesJson, biometricLockEnabled, biometricLockDelaySeconds, autoBackup fields, autoFxRefreshEnabled, lastRateFetchAt/Error, fxCurrenciesJson, firstAppOpen, paymentQrUri, defaultPaybackAccountId, reimbursementsCountAsExpense, showTransactionAccount, **showAccountPickerBalances** (account pickers show balances; the eye on the picker title, migration `069`), **navTabsJson** (bottom bar pages, see Navigation), autoLogPrefsJson (payment-alert sources and selected accounts), **activeLedgerId** (the open ledger, device-local) |
-| `exchangeRatesTable`            | id, baseCurrency, quoteCurrency, rate, asOfDate, source (api/manual), updatedAt (FX rate cache, no soft-delete)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `albumsTable`                   | id, name, coverPhotoUri, isActive, startDate, endDate, sortOrder                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `albumTransactionsTable`        | id, albumId, transactionId, sortOrder (join table)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `itemsTable`                    | id, name, iconId, purchasePrice, currency, purchaseDate, endDate, salePrice, note, sortOrder (owned things, for cost-per-day)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `monthlyWageSettingsTable`      | id, month (YYYY-MM), wageType, wageAmount, hoursWorkedPerWeek, workdaysPerWeek, commuteMinutesPerWorkday, baseHourlyRate, trueHourlyRate                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `budgetTemplatesTable`          | id, name, emoji, totalAmount, isDefault, countUnbudgeted, sortOrder (reusable budget template; exactly one live default)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `budgetTemplateCategoriesTable` | id, templateId, categoryId, amount, sortOrder (per-root-category allocation on a template)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `monthlyBudgetsTable`           | id, month (YYYY-MM), templateId, templateName, templateEmoji, totalAmount, countUnbudgeted (frozen at creation; one live row per month via partial unique index, soft-deleted rows are tombstones)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `monthlyBudgetCategoriesTable`  | id, budgetId, categoryId, amount, sortOrder (frozen budget line for a month)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `autoLogCapturesTable`          | id, channel (android_notification/ios_alert/paste/share_text/apple_pay), sourceKey, sourceLabel, capturedAt, nativeKey, title, body (raw text, nulled by the retention sweep), status (pending/logged/dismissed/ignored/duplicate/failed), reason, resolutionJson (what the pipeline read and bound), parserVersion, transactionId, duplicateOf, dedupeKey (internal payment-alert duplicate bookkeeping; `auto_log_captures`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `ledgersTable`                  | id, name, emoji, currencyCode, currencySymbol, prefsJson (the ledger's own settings), sortOrder (separate books; the `default` row holds pre-ledger data, see [Ledgers](#ledgers))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Table                           | Key columns                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `accountsTable`                 | id, name, sortOrder, type (debit/credit/goal/loan), accountGroup, logoId, creditStatementDay, creditDueDay, currency, startingBalance, includeInTotals, **goalTargetAmount, goalTargetDate, goalEmoji, goalAchievedAt, goalArchivedAt** (savings-goal fields, null on non-goal accounts), **loanOriginalPrincipal, loanMonthlyPayment, loanPaymentDay, loanInterestRate, loanTermMonths, loanTotalRepayable, loanStartDate, loanPaidOffAt, loanArchivedAt, loanCountAsExpense, loanPaymentCategoryId, loanInterestModel, loanLedgerAnchorDate, loanRateChangesJson** (loan fields, null on non-loan accounts)                                                                                                                                                                                                                                                               |
+| `accountGroupsTable`            | id, name, sortOrder                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `categoriesTable`               | id, name, sortOrder, type (expense/income), parentId, icon (tagged icon value, see Key Patterns), isDefault                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `transactionsTable`             | id, type (expense/income/transfer/balance_adjustment), amount, currency, **reportingCurrency, reportingAmount, fxRate** (frozen FX snapshot), **toAmount, accountAmount** (cross-currency), date, accountId, fromAccountId, toAccountId, categoryId, note, **details** (longer free-text note, migration `068`; searched with `note` via `transactionSearchText`), receiptUri, recurrence fields, sentiment, **reimbursable, reimbursedAt, reimbursementAccountId, reimbursementTransactionId, reimbursementOfId** (reimbursement link), countsAsExpense, **dayOrder** (drag position among same-time rows; null = by createdAt, so edits never reorder)                                                                                                                                                                                                                    |
+| `transactionSplitsTable`        | id, transactionId, personName, amount, isSelf, paybackAccountId, paidAt, paidTransactionId, sortOrder                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `receiptSplitsTable`            | id, transactionId, currency, merchant, receiptDate, itemsSubtotal, taxAmount, serviceAmount, discountAmount, adjustmentAmount, totalAmount, source (scan/manual), receiptImageUri (itemized receipt-split header; one live row per transaction via partial unique index)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `receiptSplitItemsTable`        | id, receiptSplitId, name, quantity, lineTotal, sortOrder (line items on an itemized receipt split)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `receiptSplitItemSharesTable`   | id, receiptSplitId, itemId, personName, isSelf, weight (item × person portion weights)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `recurringRulesTable`           | id, name, type, amount, currency, toAmount, accountId, fromAccountId, toAccountId, categoryId, note, logoId, recurrencePattern, recurrenceInterval, nextRunDate, endDate, isActive, countsAsExpense                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `settingsTable`                 | id, appUserId, locale, currencyCode, currencySymbol, displayMode, workdayDisplayEnabled, workingHoursPerDay, hapticsEnabled, themeMode, themeColor, iconStyle, appIcon, accountLogoCountry, subscriptionLogoCountry, profileName, profileAvatarUri, insights/notification/quickEntry/calendar PrefsJson, onboardingCompleted, userMode, weekStartsOn, firstDayOfMonth, firstDayOverridesJson, biometricLockEnabled, biometricLockDelaySeconds, autoBackup fields, autoFxRefreshEnabled, lastRateFetchAt/Error, fxCurrenciesJson, firstAppOpen, paymentQrUri, defaultPaybackAccountId, reimbursementsCountAsExpense, showTransactionAccount, **showAccountPickerBalances** (account pickers show balances; the eye on the picker title, migration `069`), **navTabsJson** (bottom bar pages, see Navigation), autoLogPrefsJson (payment-alert sources and selected accounts) |
+| `exchangeRatesTable`            | id, baseCurrency, quoteCurrency, rate, asOfDate, source (api/manual), updatedAt (FX rate cache, no soft-delete)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `albumsTable`                   | id, name, coverPhotoUri, isActive, startDate, endDate, sortOrder                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `albumTransactionsTable`        | id, albumId, transactionId, sortOrder (join table)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `itemsTable`                    | id, name, iconId, purchasePrice, currency, purchaseDate, endDate, salePrice, note, sortOrder (owned things, for cost-per-day)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `monthlyWageSettingsTable`      | id, month (YYYY-MM), wageType, wageAmount, hoursWorkedPerWeek, workdaysPerWeek, commuteMinutesPerWorkday, baseHourlyRate, trueHourlyRate                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `budgetTemplatesTable`          | id, name, emoji, totalAmount, isDefault, countUnbudgeted, sortOrder (reusable budget template; exactly one live default)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `budgetTemplateCategoriesTable` | id, templateId, categoryId, amount, sortOrder (per-root-category allocation on a template)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `monthlyBudgetsTable`           | id, month (YYYY-MM), templateId, templateName, templateEmoji, totalAmount, countUnbudgeted (frozen at creation; one live row per month via partial unique index, soft-deleted rows are tombstones)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `monthlyBudgetCategoriesTable`  | id, budgetId, categoryId, amount, sortOrder (frozen budget line for a month)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `autoLogCapturesTable`          | id, channel (android_notification/ios_alert/paste/share_text/apple_pay), sourceKey, sourceLabel, capturedAt, nativeKey, title, body (raw text, nulled by the retention sweep), status (pending/logged/dismissed/ignored/duplicate/failed), reason, resolutionJson (what the pipeline read and bound), parserVersion, transactionId, duplicateOf, dedupeKey (internal payment-alert duplicate bookkeeping; `auto_log_captures`)                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 
-Data access goes through repositories in `lib/repositories/`: `accountsRepository`, `accountGroupsRepository`, `categoriesRepository`, `transactionsRepository`, `transactionSplitsRepository`, `receiptSplitsRepository`, `recurringRulesRepository`, `settingsRepository`, `monthlyWageRepository`, `albumsRepository`, `exchangeRatesRepository`, `budgetTemplatesRepository`, `monthlyBudgetsRepository`, `itemsRepository`, `paymentAlertCapturesRepository`, `ledgersRepository`, plus `mappers.ts` for DB row → domain type transformations.
+Data access goes through repositories in `lib/repositories/`: `accountsRepository`, `accountGroupsRepository`, `categoriesRepository`, `transactionsRepository`, `transactionSplitsRepository`, `receiptSplitsRepository`, `recurringRulesRepository`, `settingsRepository`, `monthlyWageRepository`, `albumsRepository`, `exchangeRatesRepository`, `budgetTemplatesRepository`, `monthlyBudgetsRepository`, `itemsRepository`, `paymentAlertCapturesRepository`, plus `mappers.ts` for DB row → domain type transformations.
 
 ### Feature structure
 
 Features live under `features/` in domain folders. Each has `screens/` and sometimes `components/`, `services/`, `constants/`.
 
-| Feature           | Purpose                                                                                                                                                                                                                | Key screens / components                                                                                                                                                                                                                                                                                                                                                                                                           |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `transactions/`   | Transaction CRUD, month-paged activity list, search, bulk edit, voice quick-entry, split-bill, settle-up                                                                                                               | `AddTransactionScreen`, `EditTransactionScreen`, `QuickAddScreen`, `QuickAddSheet`, `VoiceQuickAddOverlay`, `VoiceCaptureOverlay`, `VoicePreviewSheet`, `TransactionEditorScreen`, `SettleUpScreen`, `SettleUpPersonScreen`, `SettleUpTransactionScreen`, `SplitReceiptCard`, `SplitReceiptShareModal`, `InlineReceiptCamera`/`ReceiptCameraSheet` (+ `transactions/lib/settleUp.ts`)                                              |
-| `calendar/`       | Calendar tab (app home) — three-level zoom (year/month/day), month grid of daily totals, day pager, search overlay                                                                                                     | `CalendarScreen`, `CalendarMonthGrid`, `CalendarMonthPage` (+ `calendar/lib/`)                                                                                                                                                                                                                                                                                                                                                     |
-| `albums/`         | Trip albums — group transactions with a cover photo, date range, breakdown drill-down, active auto-add                                                                                                                 | `AlbumsScreen`, `AlbumDetailScreen`, `CreateAlbumScreen`, album editor screens (+ `albums/utils.ts`)                                                                                                                                                                                                                                                                                                                               |
-| `insights/`       | Analytics charts — expense trends, category breakdown, sentiment                                                                                                                                                       | `InsightsScreen`, `InsightsDrilldownScreen` (+ `insights/breakdownPieLayout.ts`)                                                                                                                                                                                                                                                                                                                                                   |
-| `budget/`         | Weekly, monthly and yearly expense budgets from reusable templates — per-category depletion, a month pager of nested rings, widgets (embedded in Insights)                                                             | `BudgetScreen`/`BudgetPagerView`, `BudgetTemplatesScreen`, `BudgetTemplateEditorScreen`, `PeriodBudgetEditorScreen`, `CategoryAllocationScreen` (+ `budget/lib/budgetMath.ts`, `budget/lib/budgetPeriods.ts`, `budget/lib/categoryAllocationBridge.ts`)                                                                                                                                                                            |
-| `settings/`       | All configuration, account/category management, data import/export, auto-backup, multi-currency, App Lock                                                                                                              | `SettingsScreen`, `DisplaySettingsScreen`, `HourlyValueScreen`, `AccountsScreen`, `ExchangeRatesScreen`, `CategoriesScreen`, `RecurringScreen`, `NotificationsScreen`, `DataManagementScreen`, `AutoBackupScreen`, `WebDashboardScreen`, `StatementImportScreen`, `QuickEntrySettingsScreen`, `AppLockScreen`, `WidgetPreviewsScreen`, `ProManagementScreen`, `ProPaywallScreen`, `WageCalculatorFlowScreen`, `ShareAndEarnScreen` |
-| `cloudSync/`      | Cloud Sync for Pro users: Apple / Google / email-code sign-in, the local-first sync engine (Turso Sync replica + change capture), R2 images, the choice between this phone and the cloud copy, the post-purchase offer | `CloudSyncScreen`, `CloudSyncPromptHost`, `CloudSyncTileBadge`, `CloudSyncContext` (`useCloudSync`, `useCloudSyncEnabled`) (+ `cloudSync/services/syncEngine.ts`, `cloudSyncApi.ts`, `cloudSync/lib/`)                                                                                                                                                                                                                             |
-| `news/`           | In-app feature announcements & showcases (changelog-style)                                                                                                                                                             | `NewsScreen`, `FeatureAnnouncementModal`, per-feature `*Showcase` components, `announcements/` (numbered entries), `featureAnnouncements.ts`                                                                                                                                                                                                                                                                                       |
-| `onboarding/`     | First-time setup flow: welcome, basics + tracking-mode choice, wage (time-mode only), backup, acquisition source, notifications, feature highlights. No skip escape hatch.                                             | `OnboardingFlow` + step screens (`OnboardingValuePropStep`, `OnboardingPreferencesStep`, `OnboardingWageStep`, `OnboardingBackupStep`, `OnboardingSourceStep`, `OnboardingNotificationsStep`, `OnboardingFeaturesStep`)                                                                                                                                                                                                            |
-| `reviewPrompt/`   | In-app App Store / Play review request prompt                                                                                                                                                                          | review prompt components (paired with `services/reviewPrompt.ts`)                                                                                                                                                                                                                                                                                                                                                                  |
-| `tutorials/`      | Searchable how-to guides, built from annotated simulator screenshots; mirrored to money2time.com                                                                                                                       | `TutorialsScreen`, `TutorialDetailScreen`, `TutorialRow`, `content/` (the catalog), `links.ts`                                                                                                                                                                                                                                                                                                                                     |
-| `goals/`          | Savings goals — an account with a target, progress and auto-save; a sub-tab of the assets page                                                                                                                         | `GoalsScreen`, `GoalDetailScreen`, `GoalEditorScreen`, `GoalCard`, `GoalCelebrationOverlay` (+ `goals/lib/goalMath.ts`, `goals/useGoals.ts`)                                                                                                                                                                                                                                                                                       |
-| `items/`          | Owned things priced by cost-per-day, and the Accounts / Goals / Items tab bar over the assets page                                                                                                                     | `ItemsScreen`, `ItemEditorScreen`, `AssetsTab`, `AssetsTabBar` (+ `items/utils.ts`)                                                                                                                                                                                                                                                                                                                                                |
-| `loans/`          | Loan accounts — payoff progress, remaining instalments, interest disclosure                                                                                                                                            | `LoanPayoffOverlay`, `LoanQuoteDisclosure` (+ `loans/lib/loanMath.ts`); the screens are the account ones                                                                                                                                                                                                                                                                                                                           |
-| `reimbursements/` | Expenses someone else pays back — flag, track, settle. Optionally (`settings.reimbursementsCountAsExpense`) dropped from spending **analytics**; balances always count them                                            | `ReimbursementsScreen`, `ReimbursementSettingsScreen`, `ReimbursementTileBadge` (+ `reimbursements/lib/reimbursementMath.ts`)                                                                                                                                                                                                                                                                                                      |
-| `review/`         | Week / month / year recap of completed periods, embedded as an Insights page                                                                                                                                           | `ReviewScreen`/`ReviewPagerView`, `ReviewFilterSheet` (+ `review/lib/reviewMath.ts`, `reviewPeriods.ts`, `reviewFormat.ts`, `reviewFilters.ts`)                                                                                                                                                                                                                                                                                    |
-| `widgets/`        | Widgets settings hub plus the live-earnings Live Activity (Lock Screen / Dynamic Island)                                                                                                                               | `WidgetsScreen` (hub), `LiveEarningsScreen`, `LiveEarningsPreview`, `useLiveEarningsActivity` (+ `widgets/lib/liveEarnings.ts`)                                                                                                                                                                                                                                                                                                    |
-| `autoLog/`        | Completed notification income/expenses via text scanning, explicit selected accounts, and separate Apple Pay card logging                                                                                              | `PaymentAlertsSetupScreen`, `PaymentAlertsSettingsScreen`, `PaymentAlertSourceScreen`, `PaymentAlertSync` (+ `autoLog/lib/`: `notification`, `text`, `binding`, `categorize`, `dedupe`, `decide`, `pipeline`, `captureQueue`, `prefs`)                                                                                                                                                                                             |
-| `ledgers/`        | Separate books (Pro): the Settings ledger card and switcher, create/edit and manage screens, and the move back to the default ledger when Pro ends                                                                     | `LedgerSwitcherCard`, `LedgerSwitcherSheet`, `LedgerEditorScreen`, `LedgersScreen`, `LedgerProGuard` (+ `ledgers/lib/ledgerDisplay.ts`)                                                                                                                                                                                                                                                                                            |
+| Feature           | Purpose                                                                                                                                                                     | Key screens / components                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `transactions/`   | Transaction CRUD, month-paged activity list, search, bulk edit, voice quick-entry, split-bill, settle-up                                                                    | `AddTransactionScreen`, `EditTransactionScreen`, `QuickAddScreen`, `QuickAddSheet`, `VoiceQuickAddOverlay`, `VoiceCaptureOverlay`, `VoicePreviewSheet`, `TransactionEditorScreen`, `SettleUpScreen`, `SettleUpPersonScreen`, `SettleUpTransactionScreen`, `SplitReceiptCard`, `SplitReceiptShareModal`, `InlineReceiptCamera`/`ReceiptCameraSheet` (+ `transactions/lib/settleUp.ts`)                                              |
+| `calendar/`       | Calendar tab (app home) — three-level zoom (year/month/day), month grid of daily totals, day pager, search overlay                                                          | `CalendarScreen`, `CalendarMonthGrid`, `CalendarMonthPage` (+ `calendar/lib/`)                                                                                                                                                                                                                                                                                                                                                     |
+| `albums/`         | Trip albums — group transactions with a cover photo, date range, breakdown drill-down, active auto-add                                                                      | `AlbumsScreen`, `AlbumDetailScreen`, `CreateAlbumScreen`, album editor screens (+ `albums/utils.ts`)                                                                                                                                                                                                                                                                                                                               |
+| `insights/`       | Analytics charts — expense trends, category breakdown, sentiment                                                                                                            | `InsightsScreen`, `InsightsDrilldownScreen` (+ `insights/breakdownPieLayout.ts`)                                                                                                                                                                                                                                                                                                                                                   |
+| `budget/`         | Weekly, monthly and yearly expense budgets from reusable templates — per-category depletion, a month pager of nested rings, widgets (embedded in Insights)                  | `BudgetScreen`/`BudgetPagerView`, `BudgetTemplatesScreen`, `BudgetTemplateEditorScreen`, `PeriodBudgetEditorScreen`, `CategoryAllocationScreen` (+ `budget/lib/budgetMath.ts`, `budget/lib/budgetPeriods.ts`, `budget/lib/categoryAllocationBridge.ts`)                                                                                                                                                                            |
+| `settings/`       | All configuration, account/category management, data import/export, auto-backup, multi-currency, App Lock                                                                   | `SettingsScreen`, `DisplaySettingsScreen`, `HourlyValueScreen`, `AccountsScreen`, `ExchangeRatesScreen`, `CategoriesScreen`, `RecurringScreen`, `NotificationsScreen`, `DataManagementScreen`, `AutoBackupScreen`, `WebDashboardScreen`, `StatementImportScreen`, `QuickEntrySettingsScreen`, `AppLockScreen`, `WidgetPreviewsScreen`, `ProManagementScreen`, `ProPaywallScreen`, `WageCalculatorFlowScreen`, `ShareAndEarnScreen` |
+| `news/`           | In-app feature announcements & showcases (changelog-style)                                                                                                                  | `NewsScreen`, `FeatureAnnouncementModal`, per-feature `*Showcase` components, `announcements/` (numbered entries), `featureAnnouncements.ts`                                                                                                                                                                                                                                                                                       |
+| `onboarding/`     | First-time setup flow: welcome, basics + tracking-mode choice, wage (time-mode only), backup, acquisition source, notifications, feature highlights. No skip escape hatch.  | `OnboardingFlow` + step screens (`OnboardingValuePropStep`, `OnboardingPreferencesStep`, `OnboardingWageStep`, `OnboardingBackupStep`, `OnboardingSourceStep`, `OnboardingNotificationsStep`, `OnboardingFeaturesStep`)                                                                                                                                                                                                            |
+| `reviewPrompt/`   | In-app App Store / Play review request prompt                                                                                                                               | review prompt components (paired with `services/reviewPrompt.ts`)                                                                                                                                                                                                                                                                                                                                                                  |
+| `tutorials/`      | Searchable how-to guides, built from annotated simulator screenshots; mirrored to money2time.com                                                                            | `TutorialsScreen`, `TutorialDetailScreen`, `TutorialRow`, `content/` (the catalog), `links.ts`                                                                                                                                                                                                                                                                                                                                     |
+| `goals/`          | Savings goals — an account with a target, progress and auto-save; a sub-tab of the assets page                                                                              | `GoalsScreen`, `GoalDetailScreen`, `GoalEditorScreen`, `GoalCard`, `GoalCelebrationOverlay` (+ `goals/lib/goalMath.ts`, `goals/useGoals.ts`)                                                                                                                                                                                                                                                                                       |
+| `items/`          | Owned things priced by cost-per-day, and the Accounts / Goals / Items tab bar over the assets page                                                                          | `ItemsScreen`, `ItemEditorScreen`, `AssetsTab`, `AssetsTabBar` (+ `items/utils.ts`)                                                                                                                                                                                                                                                                                                                                                |
+| `loans/`          | Loan accounts — payoff progress, remaining instalments, interest disclosure                                                                                                 | `LoanPayoffOverlay`, `LoanQuoteDisclosure` (+ `loans/lib/loanMath.ts`); the screens are the account ones                                                                                                                                                                                                                                                                                                                           |
+| `reimbursements/` | Expenses someone else pays back — flag, track, settle. Optionally (`settings.reimbursementsCountAsExpense`) dropped from spending **analytics**; balances always count them | `ReimbursementsScreen`, `ReimbursementSettingsScreen`, `ReimbursementTileBadge` (+ `reimbursements/lib/reimbursementMath.ts`)                                                                                                                                                                                                                                                                                                      |
+| `review/`         | Week / month / year recap of completed periods, embedded as an Insights page                                                                                                | `ReviewScreen`/`ReviewPagerView`, `ReviewFilterSheet` (+ `review/lib/reviewMath.ts`, `reviewPeriods.ts`, `reviewFormat.ts`, `reviewFilters.ts`)                                                                                                                                                                                                                                                                                    |
+| `widgets/`        | Widgets settings hub plus the live-earnings Live Activity (Lock Screen / Dynamic Island)                                                                                    | `WidgetsScreen` (hub), `LiveEarningsScreen`, `LiveEarningsPreview`, `useLiveEarningsActivity` (+ `widgets/lib/liveEarnings.ts`)                                                                                                                                                                                                                                                                                                    |
+| `autoLog/`        | Completed notification income/expenses via text scanning, explicit selected accounts, and separate Apple Pay card logging                                                   | `PaymentAlertsSetupScreen`, `PaymentAlertsSettingsScreen`, `PaymentAlertSourceScreen`, `PaymentAlertSync` (+ `autoLog/lib/`: `notification`, `text`, `binding`, `categorize`, `dedupe`, `decide`, `pipeline`, `captureQueue`, `prefs`)                                                                                                                                                                                             |
 
 Shared UI primitives in `components/ui/`: `button`, `fat-button`, `card`, `input`, `select`, `settings`, `text`, `textInputStyles`, `theme-modal`, `time-value-inline`, `toggle`, plus the cross-feature sheets `AccountPickerSheet`, `CategoryPickerSheet`, `CurrencyPickerSheet`, `AccountLogoPickerSheet`, and icon/logo helpers `CategoryEmoji`, `ClayIcon`, `SentimentIcons`, `AccountLogo`.
 
@@ -501,166 +494,6 @@ Traditional Chinese is `zh-Hant`. Device tags for Taiwan, Hong Kong, and Macau s
 - **Transaction drag-to-reorder**: In selection mode the transaction list's grips drag rows on the FlashList itself (`features/transactions/components/transactionReorder.tsx`, geometry in `features/transactions/lib/dragReorder.ts`, the save in `reorderTransactionDate.ts`). A lifted copy of the row follows the finger, the rows it passes slide aside through the row's existing press-scale view, and the list scrolls near its edges, all on the UI thread. **Do not use `react-native-sortables` for a long, scrolling list.** It cannot virtualize, and Reanimated re-applies the last animated props of every view it has updated on each commit that is not its own. A scrolling ScrollView commits its offset every frame, so a month of Sortable rows was re-cloned, re-laid-out and re-diffed on every frame (10 to 30 dropped frames a second on the simulator). Sortable is fine for the short settings lists that still use it. The container, not the grip, follows the finger after pick-up, because a grip scrolled far enough away is clipped or recycled by FlashList and its touch is cancelled. **A drop renders in the list before it is saved:** `ActivityTransactionList` applies the drop to its own copy of the transactions (`applyReorderUpdates`) and calls `updateTransactionsBulk` on the next task. Waiting for the app-wide re-render instead kept the drag frozen for hundreds of milliseconds. During that time the lifted row stayed pinned while the list scrolled under it, and grabbing the row again scrolled the list. The render that shows the drop remounts only the rows and headers between the pick-up and drop spots, which sheds their drag styles. Remounting every row took most of that render. **The grip fails itself from `onTouchesCancelled`, which crashed Android on react-native-gesture-handler 3.3.0** (PostHog 01a17dd3, "Manually handled gesture had not been assigned to any detector", 1.6.2): `moveToState` sends the touch-cancel event before it sets the new state, so a scroll that cancels a grip still tracking a pointer (after a drag and drop) finished and reset the handler mid-transition. react-native-sortables does the same on the settings lists. `patches/react-native-gesture-handler+3.3.0.patch` backports the upstream fix (#4584, released in 3.4.0), and `__tests__/patches/gestureHandlerNestedCancel.test.ts` fails if an upgrade drops it before 3.4.0. Drop both when upgrading to 3.4.0 or later.
 - **Feature announcements**: Add a numbered entry under `features/news/announcements/` and a matching `*Showcase`; seen-state tracked by `services/featureAnnouncementState.ts`. A page `cta` that leaves the app (`openRiceCal`, `openWebDashboard` to app.money2time.com) is handled inside `FeatureAnnouncementModal` and shows the external-link glyph. One that navigates needs a handler in **both** places the modal is mounted: the root auto-popup in `App.tsx` (through `requestOpenTab` + `requestOpenSettingsScreen` for settings-stack routes) and the Settings > News list in `SettingsStack`. A CTA without a handler silently falls back to Next/Done.
 - **Notifications (`features/autoLog/`)**: Design: [Notification review](#notification-review). Native Android/iOS capture queues remain compatible. `PaymentAlertSync` stores captures for local review, without AI or network requests. `utils/notificationAmounts.ts` extracts currency-labelled money candidates; the user chooses Income, Expense or Ignore in root `NotificationHistory`, with bulk actions and a leave-warning. Missing or ambiguous amounts/accounts stay editable. All unfinished items persist; completed history is capped at 10. `NotificationReviewBanner` surfaces pending items on launch/foreground/live capture. Explicit review commits the transaction and capture link synchronously using `source: notification_review`; it has no free-tier limit and shares nothing with the Apple Pay allowance. Apple Pay stays automatic with its existing allowance; the catalog's `remaining` uses the same `autoLogAllowance` as the drain (zero for a free account over the account limit), so the intent never notifies "logged" for a tap the app will refuse. Android system access, master and selected apps still apply; iOS uses the action Account. Resets clear/invalidate pending work. Receipt photo/itemized/screenshot AI behavior remains intact; the retired Worker notification mode rejects before inference.
-
-## Ledgers
-
-A ledger is a separate book, such as Personal, Work or a side business. The
-app side lives in `features/ledgers/`.
-
-### What the user sees
-
-- **Every install has the default ledger**, shown as "Main" until renamed. It
-  holds all data from before ledgers existed, so an existing user's app is
-  unchanged. Free users only ever use it.
-- **The ledger card** sits under the profile card in Settings and names the
-  open ledger. A tap opens the switcher (`LedgerSwitcherSheet`): every ledger
-  with its currency and entry count, the open one ticked, then New ledger and
-  Manage ledgers. The entry counts are read when the sheet opens.
-- **Switching** happens after the sheet has closed and after any save still in
-  flight. It reloads the app's data and remounts every page but Settings
-  (`MountedTab`'s `resetKey`), so no selection, filter or scroll position
-  carries over. Hidden pages mount again only when visited.
-- **New ledger** (Pro, `LedgerEditorScreen`): icon, name, main currency, and
-  what it starts with. One card names the open ledger once ("Copy from") and
-  has a switch each for accounts and categories, on by default. Each row's
-  subtitle says what the choice gives: the copied count, or the starter set
-  when off.
-  - **Accounts:** copy the open ledger's debit and credit accounts and their
-    groups at a zero balance, or use the starter accounts. Copied accounts in
-    the open ledger's main currency take the new ledger's currency. Goals and
-    loans are not copied.
-  - **Categories:** copy the open ledger's categories and subcategories, or use
-    the starter set.
-  - No transactions are copied, and creating a ledger opens it. That note
-    sits behind the Start with info button.
-- **Manage ledgers** (`LedgersScreen`) is open to every user, so a free user
-  can rename Main. It can rename and re-icon any ledger, add one (Pro) and
-  delete one that is not open. The default ledger cannot be deleted.
-  - Deleting soft-deletes the ledger and every row in it, in one transaction,
-    after a confirmation that gives its entry count.
-  - A ledger's currency is set when it is made. Changing it later is the Multi
-    currency page's start-over.
-- **When Pro ends** while another ledger is open, `LedgerProGuard` opens the
-  default ledger and shows a notice once, with Done and Renew Pro.
-  - The guard acts only on an answer from RevenueCat that the customer is
-    free. A failed or missing read is not one, so an offline Pro user keeps
-    their ledger.
-  - It waits until no editor is open: an editor holds the closing ledger's
-    accounts and categories.
-  - The notice is held back by the app lock and by other launch prompts. It is
-    kept in AsyncStorage until seen, and dropped if Pro is back by then.
-  - Nothing is deleted. The other ledgers show a lock in the switcher (a tap
-    opens the paywall) and open again, as they were, when Pro is back.
-- **Shared by every ledger:**
-  - settings: theme, language, app lock, backup, notifications, bottom bar,
-    profile and payment QR;
-  - which apps payment alerts watch;
-  - the hourly value and wage history;
-  - the exchange-rate cache;
-  - Pro.
-- **Each ledger's own:**
-  - accounts, account groups, categories, transactions with their splits and
-    itemized receipts;
-  - recurring rules, albums, items, budgets;
-  - payment-alert captures;
-  - main currency and default payback account;
-  - the quick-entry picks that name its accounts and categories
-    (`LEDGER_QUICK_ENTRY_KEYS`);
-  - the account each payment-alert source logs into;
-  - Insights preferences.
-- **Resets and imports:**
-  - Reset all data removes every ledger.
-  - A Money Manager import replaces the open ledger's data, in that ledger's
-    currency.
-  - With other ledgers present, the currency start-over clears only the open
-    ledger and its own preferences.
-- **Recurring rules** run for the open ledger. Another ledger's rules catch up
-  on missed dates when it is opened.
-- **Backups** hold every ledger, and a restore opens the default ledger. The
-  Web Dashboard shows the open ledger only.
-
-### How it works
-
-One database, with a `ledger_id` column on each ledger's root tables
-(migration `075_ledgers_and_cloud_sync`). A separate SQLite file per ledger was considered and
-rejected. Cloud Sync replicates one database through triggers into
-`sync_rows`, so a column needs no change there. A file per ledger would need
-its own sync engine and replica.
-
-- **Tables.** `ledger_id TEXT NOT NULL DEFAULT 'default'` is on `accounts`,
-  `account_groups`, `categories`, `transactions`, `recurring_rules`, `albums`,
-  `items`, `budget_templates`, `monthly_budgets` and `auto_log_captures`
-  (`LEDGER_TABLES` in `lib/db/ledgerScope.ts`). The legacy
-  `merchant_categories` table has no column: no code reads it any more, and
-  resets and imports only clear it.
-  - Child tables (splits, receipt splits, album joins, budget lines) follow
-    their parent.
-  - A constant-default `ADD COLUMN` rewrites no rows. The migration is instant
-    on any database, and every existing row lands in the default ledger.
-- **Ledger rows.** `ledgers` lists the ledgers. The migration makes the
-  `default` row, and a restore makes it again if the backup has none. Its null
-  name and currency mean "Main" and the settings row's currency.
-  `settings.active_ledger_id` is the open ledger (null means the default); it
-  is device-local.
-- **Scoping.** `lib/db/ledgerScope.ts` holds the open ledger id.
-  - It is set by `initializeDatabase()`, from `settings.active_ledger_id`, or
-    the default ledger when the stored one is gone. `switchLedger` also sets
-    it.
-  - Every repository read of a ledger table filters with
-    `inActiveLedger(table)`, or `ledger_id = ?` in raw SQL. Every insert stamps
-    `getActiveLedgerId()`.
-  - The Drizzle schema gives `ledgerId` no default on purpose, so an insert
-    that forgets it does not compile.
-  - Writes by id need no filter, since ids are unique across ledgers. Reads by
-    id are filtered anyway, so a stale id from another ledger finds nothing.
-  - Name-matched writes (account groups) are filtered. Balances sum only the
-    open ledger's accounts (`account_id IN` the listed ids, with `+type` so
-    SQLite stays on the per-account indexes), so a small ledger beside a large
-    one stays fast.
-  - `withLedgerScope` runs synchronous work in another ledger, to seed or copy
-    into a new one.
-- **Ledger settings.** The settings row keeps the default ledger's own
-  settings. A non-default ledger keeps its own on its `ledgers` row:
-  `currency_code` and `currency_symbol`, plus the `LedgerPrefs` JSON in
-  `prefs_json` (payback account, quick-entry picks, payment-alert accounts and
-  Insights).
-  - `settingsRepository` merges the two, through the pure helpers in
-    `lib/repositories/ledgerPrefs.ts`, so the rest of the app reads `settings`,
-    `quickEntryPrefs` and the payment-alert prefs as before.
-  - A write that spans both rows runs in one transaction.
-- **Indexes.** The one-budget-per-period unique index is per ledger
-  (`idx_monthly_budgets_ledger_period_key`).
-  - There is deliberately no plain `ledger_id` index. With few ledgers it is
-    barely selective, and without `ANALYZE` statistics SQLite could prefer it
-    over the date and account indexes the transaction queries use.
-  - The ledger filter is a residual check. Splits are scoped with a
-    primary-key `EXISTS` probe per split.
-- **Exchange rates** are shared and keyed by base currency.
-  `runRateRefreshIfDue` judges staleness per base, from when that base's feed
-  rates were last stored. The fetch timestamp on the settings row is shared by
-  every ledger, so it cannot answer that.
-- **Backup.** Rows carry `ledger_id`, and the backup has a `ledgers` table.
-  - A backup holding more than one ledger is version 4. An app from before
-    ledgers refuses it, instead of restoring every ledger into one book.
-    Otherwise the backup stays version 3.
-  - A backup without ledgers restores into the default ledger through the
-    column default.
-  - The Web Dashboard gets the open ledger only (`openLedgerOnly`), as
-    version 3. Its settings row shows the ledger's own settings, and it holds
-    only the images that ledger's rows use.
-- **Images.** Copied accounts and categories share their logo and icon files.
-  The orphan sweep reads every row in every ledger, so a file stays while any
-  ledger uses it.
-- **Cloud Sync.**
-  - `ledgers` belongs in `SYNC_TABLES` and in the backup-table parity list,
-    and `active_ledger_id` in `DEVICE_LOCAL_SETTINGS_COLUMNS`.
-  - The per-ledger budget index above is a natural key to resolve.
-  - Ledgers first shipped as migration `073` (build 493), before Cloud Sync's
-    `072` and `074` (build 494). Phones on build 493 skipped `072`, and `074`
-    then failed on the missing sync tables. All three were merged into `075`,
-    which brings every one of those phones to the same schema. A migration
-    must be numbered above every migration already in a store build, or
-    installs that ran the higher number skip it.
 
 ## Notification review
 
@@ -942,325 +775,6 @@ Before enabling a production trial:
 6. Confirm analytics records trial starts with the matching package and ISO duration.
 7. Re-run `npm run check`, the focused paywall/RevenueCat tests, and the full Jest suite before release.
 
-## Cloud Sync
-
-Pro users can sign in and keep their data in sync between phones. The app side
-lives in `features/cloudSync/` and the server in
-[`apps/cloudflare/workers/cloud-sync`](#cloud-sync-worker). It is behind the
-PostHog flag `cloud_sync` ([Feature flags](#feature-flags)): on in development
-builds, off in store builds until rollout.
-
-### What the user sees
-
-- **Settings > Data > Cloud Sync.** Signed out, the screen shows the mascot
-  illustration and three sign-in buttons: Continue with Apple (iOS only),
-  Google and email (a 6-digit code, no password). All three titles are the
-  same size: the Apple button is a custom one built to Apple's rules (black in
-  light mode, white in dark, the Apple logo; its title is in the system font,
-  as the app's text is on iOS), because Apple's own button sizes its title
-  from its height and came out larger than the other two. Cloud Sync is Pro: for a
-  free user every one of them opens the paywall (source `cloud_sync`); the
-  paywall's Free vs Pro table lists Cloud Sync, and Shared ledgers (free: Join, Pro: Share), while the flag is on. Signed in,
-  it shows the last sync, Sync now, Sign out (data stays on the phone) and
-  Delete account (cloud copy, images and sign-in, required by App Store rule
-  5.1.1(v)). A green tick on the tile means Cloud Sync is on.
-- **First sign-in on a phone** brings the phone and the cloud copy together
-  (`decideLink` in `lib/linking.ts`):
-  - the cloud copy has nothing recorded: this phone's data becomes it;
-  - this phone has nothing recorded: it takes the cloud copy silently;
-  - both have data: **Keep which data?** with counts and the cloud
-    copy's last device and time. _Use cloud_ first writes a backup of the
-    phone (the normal backup target, restorable from Backup); _Use this
-    phone_ replaces the cloud copy, and every other phone follows.
-    _Cancel_ signs out and changes nothing.
-
-  "Recorded" means any transaction, recurring rule, album, item or budget
-  template; onboarding's accounts, categories and settings do not count. The
-  two sides are never merged: merging duplicates the default categories (each
-  install seeds its own ids) and double-counts balances. Offline during this
-  step, the phone stays signed in and tries again when it is back online.
-
-- **After a new Pro purchase** (not a restore) a one-time sheet offers Turn
-  on / Not now (`CloudSyncPromptHost`, prompt id `cloudSyncPrompt`). It waits
-  for the paywall to close and for no other prompt to be up, and never shows
-  on a signed-in phone or a second time.
-- **Restore and reset.** With Cloud Sync on, restoring a backup (Backup or
-  Data Management import) replaces the cloud copy too, and Reset all data
-  erases it; both confirmations say so.
-- **When Pro ends** (the Worker decides, per account: a subscription on any
-  linked phone keeps it Pro):
-  - Nothing is deleted. The phone keeps all its data and works as before;
-    the cloud copy stays as it was.
-  - Edits made while paused are still recorded in the outbox and go up by
-    themselves once Pro is back, so renewing needs no new link.
-  - When this phone's own Pro ends, its cached Turso token is dropped, so the
-    next sync asks the Worker instead of syncing on for up to 7 days.
-  - The screen shows Sync paused with Renew Pro (paywall), Sign out and
-    Delete account.
-  - Sync resumes by itself when this phone's Pro comes back (purchase or
-    restore), and the app checks again on return to the app and every 3
-    minutes, which covers a renewal on another phone.
-  - The cloud copy is kept while the account exists; there is no automatic
-    expiry yet.
-
-### How it works
-
-The app database (expo-sqlite, read synchronously everywhere) is the source of
-truth on the phone. Beside it sits a **local Turso Sync replica**
-(`@tursodatabase/sync-react-native`) of the user's own Turso Cloud database,
-which does the transport, offline queueing and first download.
-
-```
-app tables ──triggers──▶ sync_outbox ──flush──▶ replica.sync_rows ──push──▶ Turso Cloud
-app tables ◀──apply──── diff of revisions ◀──── replica.sync_rows ◀──pull── Turso Cloud
-```
-
-| Piece                               | What it does                                                                                      |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `CloudSyncContext.tsx`              | Provider: session, linking, the choice, errors, sign-out and deletion (`useCloudSync`)            |
-| `hooks/useSyncScheduler.ts`         | When syncs run                                                                                    |
-| `services/syncEngine.ts`            | The replica: flush, push, pull, apply, full upload or download, images                            |
-| `services/cloudSyncApi.ts`          | The Worker's HTTP API                                                                             |
-| `services/nativeSignIn.ts`          | `NATIVE_PROVIDERS`: Apple and Google sign-in (a new provider is one entry)                        |
-| `services/cloudSyncSession.ts`      | The session token in the keychain                                                                 |
-| `lib/syncTables.ts`                 | What syncs: tables, image columns, device-local settings                                          |
-| `lib/capture.ts`, `rowCodec.ts`     | Trigger SQL; rows to and from JSON, revisions                                                     |
-| `lib/linking.ts`, `lib/messages.ts` | The first-sign-in decision; error and time text                                                   |
-| `screens/CloudSyncScreen.tsx`       | Picks one view per status from `components/` (signed out, email, linking, choice, synced, paused) |
-
-- **Synced tables** are exactly the tables a backup holds (`SYNC_TABLES`; a
-  test keeps the two lists equal). Payment-alert captures and merchant
-  learning stay on the phone. To sync a new table or image column, add it to
-  `SYNC_TABLES` or `ASSET_COLUMNS`: on the first sync after the update the
-  engine queues the rows and images that already exist (`synced_shape` in
-  `sync_state`, `shapeAdditions`).
-- **Capture.** While Cloud Sync is on, `AFTER INSERT/UPDATE/DELETE` triggers on
-  each synced table record `(table, id, seq)` in `sync_outbox` (migration
-  `075_ledgers_and_cloud_sync`, which also holds `sync_row_meta`, `sync_media_pending`,
-  `sync_media_missing` and `sync_state`). The triggers are created at runtime,
-  dropped on sign-out and when the flag is off, and stay quiet while pulled
-  rows are written (`sync_state.applying = '1'`).
-- **Cloud shape.** One table, `sync_rows(table_name, row_id, data, rev, origin,
-updated_at)`, with each row as JSON, plus `sync_info` (last device, last
-  sync). App migrations therefore need no cloud migration. A write merges over
-  the stored JSON, so an older app version keeps fields it does not know; a
-  read keeps only the columns the phone has.
-- **Sync run** (`SyncEngine.syncNow`): flush the outbox into the replica with a
-  new revision per changed row (a row whose JSON did not change, such as one
-  where only a device-local setting moved, keeps its revision), upload queued
-  images, `push()`, `pull()`, then diff every replica revision against
-  `sync_row_meta` and write the rows other phones changed. A row still
-  waiting in the outbox wins over the pulled copy. Concurrent edits to the
-  same row, or two phones creating the same id: the last push wins, per row.
-  Deletions apply before changes. Each pulled row is written in its own
-  savepoint, so a row this version cannot store is skipped and reported
-  instead of blocking later syncs; a failed apply is retried even when the
-  next pull brings nothing new. All replica work (syncs, pulls, full upload
-  or download) runs one at a time.
-- **No upserts on the replica's `sync_rows`.** In the Turso engine (0.8.3),
-  `INSERT … ON CONFLICT(table_name, row_id) DO UPDATE` on an existing row fails
-  once the replica has pulled ("TEXT value contains invalid UTF-8", "Invalid
-  Text value" or a bad record header), while plain `UPDATE` and `INSERT` work.
-  The flush updates a row it already read, else inserts it, and `sync_info`
-  is rewritten with delete then insert. Re-check before using an upsert after
-  a Turso upgrade.
-- **Natural keys.** Some tables have a unique index besides the id (the
-  week's auto-created budget, an exchange-rate pair, a wage month), so two
-  phones can each make "the same" row under different ids. The lower id wins
-  on every phone: the losing local row is retired (soft-deleted where the
-  index only covers live rows, else deleted) and the change queued, and a
-  losing incoming row is skipped. Recurring rules avoid the problem by naming
-  each run `rr:<ruleId>:<date>` (`recurringRunTransactionId`), so two phones
-  that both run a due rule make one transaction.
-- **Device-local settings** never leave the phone and are never overwritten:
-  `app_user_id` (purchase identity), the open ledger (`active_ledger_id`), app
-  lock, app icon, notification and payment-alert setup, backup target and
-  status, onboarding, first open and FX fetch status
-  (`DEVICE_LOCAL_SETTINGS_COLUMNS`).
-- **[Ledgers](#ledgers)** sync like any other data: the `ledgers` table is
-  synced (names, icons, currencies, per-ledger preferences), and every ledger's
-  rows go up, not only the open one's, since `ledger_id` is just a column.
-  Each phone keeps its own open ledger. If the open ledger is deleted on
-  another phone, or is missing from a cloud copy this phone takes, the
-  default ledger opens instead (`reloadAfterApply`), and taking a cloud copy
-  makes the default ledger row again if the copy has none, as a restore does.
-  The choice screen's counts cover every ledger. A pulled settings row only
-  updates this phone's own row: an upsert would fail SQLite's NOT NULL check on
-  the missing columns.
-- **Images** live in R2 under `u/<userId>/<asset path>`, the same relative
-  path the rows store (`receipts/x.jpg`, `custom:account-logos/x.png`), so a
-  synced row finds its image under the same name. Images to upload are queued
-  in `sync_media_pending` with the outbox flush and uploaded before the push,
-  so a row never reaches another phone before its image can. A download that
-  fails is kept in `sync_media_missing` and retried on later syncs (ten tries).
-  The orphan sweep runs only after linking, never after a routine sync: a
-  photo just picked in an editor is not in a row yet. `ASSET_COLUMNS` must
-  stay in step with `collectReferencedAssetPaths` (a test checks it), or the
-  orphan sweep deletes a downloaded image. Images the app stops using are not
-  deleted from R2 (see [Cloud-sync Worker > Images](#cloud-sync-worker)).
-- **When it runs** (`useSyncScheduler`): at launch, on return to the app, on
-  going to the background, every 15 s while open when the outbox has rows or
-  the last sync failed (a failed sync has usually moved the outbox into the
-  replica already), and every 3 minutes otherwise. After rows are applied the
-  app runs `refreshAll()`. Linking pulls the latest cloud copy first, since a
-  replica kept from an earlier session is only refreshed by a pull.
-- **Failures.** Offline is shown, never reported. Any other failure sends
-  `Cloud Sync Failed` and an error report once per failure streak, not on
-  every retry. A rejected session signs the phone out with "Signed out. Sign
-  in again." Sign-out and Delete account wait for work in flight, and work
-  started before a sign-out is discarded.
-- **Purchase identity is unchanged** ([Purchase identity and restore](#purchase-identity-and-restore)):
-  each install keeps its own RevenueCat App User ID, and a new phone still
-  needs a store Restore to unlock Pro features on itself. The Worker treats an
-  _account_ as Pro while any Pro App User ID that signed in to it is Pro, so
-  the new phone can sync before that.
-- **Session:** a Better Auth session token in the keychain
-  (`cloudSyncSession.ts`, after-first-unlock, this device only). Turso tokens
-  last 7 days and are fetched from the Worker as needed.
-
-Native sign-in: Apple via `expo-apple-authentication` with a SHA-256 nonce
-(the entitlement is off in the M2T Dev variant, which then hides the button);
-Google via the Google Sign-In SDK shared with Drive backup: it reuses a Drive
-session when there is one (and stops with an error, rather than signing Drive
-out, when that session cannot be restored); otherwise it signs in once without
-the Drive scope and signs out again, so Drive backup keeps asking for its own
-access. Apple sign-in on Android is not offered (it would need an Apple
-Services ID and a web flow). Apple asks apps that offer Sign in with Apple to
-revoke the user's Apple tokens when they delete their account: right after an
-Apple sign-in the app posts Apple's one-time authorization code, which the
-Worker trades for a refresh token and revokes in `DELETE /v1/account`.
-
-**The Turso module needs a patch.** `@tursodatabase/sync-react-native` 0.8.3
-installs its JSI bindings through `RCTCxxBridge`, which React Native 0.88 no
-longer has. `patches/@tursodatabase+sync-react-native+0.8.3.patch` makes it a
-TurboModule that installs in `installJSIBindingsWithRuntime` on iOS, and reads
-the runtime and call invoker from the `ReactContext` on Android.
-`__tests__/patches/tursoBridgeless.test.ts` fails if an upgrade drops it. The
-module is native, so Cloud Sync needs a store build, not an update.
-
-### Testing
-
-`npm test` covers the row codec, revision diff, link decision, synced-shape
-additions, trigger SQL, backup-table and image-column parity, the Worker's
-path, Pro, naming and token-sealing rules, and the patch. On a device, the
-flows to check are: first upload to an empty cloud copy, the choice screen
-with both answers, an empty phone taking the cloud copy without a question,
-an edit and a receipt photo reaching another phone, offline edits catching up
-after reconnecting, sign-out, and Delete account leaving nothing in Turso, D1
-or R2. Without a real inbox, seed a test user, a session and a cached-Pro
-`pro_links` row in D1, put `{token, user, linked: false}` in the app with
-`saveSession` (`debugger-evaluate`) and reload; see
-[Cloud-sync Worker > Local](#cloud-sync-worker) for a fully local stack.
-
-### Shared ledgers
-
-A Pro user can share a ledger with up to five people: a household's book, say.
-The app side is `features/sharedLedgers/` (screens) and
-`features/cloudSync/services/sharedLedgerSync.ts`, `ledgerChannels.ts` and
-`sharedLedgerStore.ts` (sync); the server is `src/ledgers.ts` in the
-[Cloud-sync Worker](#cloud-sync-worker).
-
-**What the user sees**
-
-- **Sharing a ledger.** The New ledger form has a _Share this ledger_ switch,
-  and every ledger but the main one has a Sharing page (the people icon on
-  Manage ledgers, or the Sharing row of its editor). Sharing needs Pro and a
-  Cloud Sync sign-in (otherwise the row says so and leads to Cloud Sync). One
-  user shares at most **2** ledgers at a time, since each is a cloud database
-  of its own. The main ledger cannot be shared: its id is the same on every
-  phone.
-- **Inviting.** _Invite someone_ makes a link
-  (`https://workers-cloud-sync.money2time.com/join/<code>`) and opens the
-  share sheet. Each link works once and expires after 7 days. Members plus
-  open invites are at most **5**; open invites are listed and can be
-  cancelled.
-- **Joining.** The link's page opens `money2time://join/<code>` (deep link
-  `join`), which shows the Join screen: the ledger's name, who shares it and
-  how many people are in it. Members do not need Pro: a free user signs in
-  once (Apple, Google or email; the paywall is skipped here) and taps Join.
-  The ledger downloads and opens as its own ledger. Only it syncs for a free
-  member; their own data stays on the phone, and the Cloud Sync screen says
-  "Your shared ledgers sync" with Get Pro.
-- **People.** Everyone sees the owner and members (names; the owner also sees
-  addresses). The owner can remove anyone at any time; a member can leave.
-  Either way the ledger is deleted from that person's phone at their next
-  sync, entries they added stay in it.
-- **Stopping.** _Stop sharing_ (or deleting a shared ledger) first syncs the
-  ledger, so members' latest entries are in, then removes every member and
-  deletes the ledger's cloud database and images. The owner keeps the ledger
-  with everything in it, and it goes back into their own cloud copy. Deleting
-  the Cloud Sync account does the same for every ledger the user shares, and
-  its confirmation says so.
-- **When the owner's Pro ends** the ledger is paused for everyone: members see
-  it locked with "Paused" (and are moved to their main ledger if it was open),
-  nothing syncs and nothing is deleted. It picks up again when the owner
-  renews. A member's own Pro does not matter.
-- **Sign-out** deletes the ledgers the user joined from the phone (they are
-  someone else's data; signing in again brings them back). An owner keeps
-  theirs.
-
-**How it works**
-
-- **Channels.** Each shared ledger syncs with its own Turso database, the rest
-  with the user's own (`personal`). The engine runs once per channel
-  (`SyncEngine` with `channel`), and all of them share the outbox, the change
-  capture and one queue. `ledgerChannels.ts` routes a row by its ledger: root
-  tables by `ledger_id`, child tables (splits, receipt splits and their
-  items, album joins, budget lines) through their parent, `ledgers` by its
-  id. Settings, wage months and exchange rates are always personal.
-  `sync_row_meta.channel` records where a row last synced, and the image
-  queues are per channel too (migration 075).
-- **A pulled row is written only if it belongs to that channel**, and so does
-  the row it would replace. A shared database (which members write to) can
-  therefore never reach the owner's settings or another ledger, and the
-  personal copy skips rows of a ledger that is shared now.
-- **Sharing** records the ledger in `shared_ledgers` (device-local), so its
-  rows route to the new channel. That channel's first sync takes what the
-  cloud has, then queues every row it does not have yet (`attached:<id>`).
-  Once that channel has pushed them (`attached:<id>`), the personal channel
-  deletes the ledger's rows from the user's own cloud copy (`detached:<id>`),
-  so the owner's other phones stop reading them from there.
-- **The list.** Before each personal sync and with the shared syncs, the app
-  reads `GET /v1/ledgers` (at most once a minute with a shared ledger, every
-  15 minutes without one; always at sign-in, at launch, on a change of Pro
-  and before ledger rows are removed) and reconciles `shared_ledgers`: new
-  ledgers start syncing, changed ones update (paused, names, counts), and
-  ledgers no longer listed are let go. A member's copy is deleted from the
-  phone without recording deletions; an owner's other phones keep the ledger
-  and take it from the owner's cloud copy, where the phone that stopped
-  sharing put it. A ledger id that is already one of the phone's own ledgers,
-  or another share's, is never taken over.
-- **Access** is checked by the Worker on every credentials request: owner or
-  member, and the owner Pro. A removed member's app lets the ledger go at its
-  next list read (within a minute while open). Tokens are not revoked early,
-  because Turso's revocation is not per database (it can reach the whole
-  group); they last a day, so a lapsed owner or a removed member holding one
-  is cut off within a day. A phone whose sync fails drops its cached token and
-  asks again.
-- **Trust.** A member's token can write anything in the ledger's database,
-  as the app can (deleting entries, say). The owner's phone only applies rows
-  that belong to the ledger, so a member cannot reach the owner's other
-  ledgers or settings.
-- **Signing in again** (after sign-out or an expired session) re-attaches each
-  shared ledger: the cloud copy is taken, except rows this phone edited later
-  (newer `updated_at`), which go up instead; then rows only this phone has go
-  up. The ledger counts as attached once that is pushed, and only then does
-  the personal channel take its rows out of the user's own copy.
-- **Removals.** Before the personal channel deletes ledger rows that left the
-  user's own copy, it re-reads the shared list, so rows of a ledger just
-  shared from another phone are kept.
-- **Schedule.** Shared ledgers sync after each personal sync. When the
-  personal side is not ready (a member without Pro, Pro paused) they run on
-  their own `useSyncScheduler` (15 s when there are changes, else every 3
-  minutes). Changes in a paused ledger wait without counting as pending. For
-  a user with no personal cloud copy (signed in without Pro, never linked),
-  the outbox entries of their own data are dropped instead of piling up;
-  never while linking. Replacing the user's own copy (choice screen, restore)
-  keeps shared ledgers' queued changes.
-- **Images** of a shared ledger go to its own space,
-  `/v1/ledgers/<id>/media/…` (R2 prefix `l/<id>/`); writing needs the owner's
-  Pro.
-
 ## Analytics
 
 **This section is the single source of truth for Money2Time analytics.** The tables define the approved event names, destinations, triggers, frequency, properties and adoption milestones. Update this document in the same change as any affected tracking code or product flow. Implementation details belong in [the integration notes](#how-tracking-is-wired); do not maintain a second event inventory there.
@@ -1276,14 +790,14 @@ Two providers, two jobs:
 
 | Coverage                                               | Definitions | Meaning                                                                                                 |
 | ------------------------------------------------------ | ----------- | ------------------------------------------------------------------------------------------------------- |
-| All custom events                                      | 137         | Every event in the custom-event tables goes to GA4.                                                     |
-| PostHog + GA4 custom events                            | 64          | Install, activation, daily engagement, adoption milestones, the Pro funnel and low-volume moments.      |
-| GA4-only custom events                                 | 73          | Frequent per-use telemetry and data maintenance; PostHog sees these uses only through `Feature Used`.   |
-| Feature first-use definitions                          | 18          | One adoption event per qualifying feature on eligible installs.                                         |
+| All custom events                                      | 120         | Every event in the custom-event tables goes to GA4.                                                     |
+| PostHog + GA4 custom events                            | 52          | Install, activation, daily engagement, adoption milestones, the Pro funnel and low-volume moments.      |
+| GA4-only custom events                                 | 68          | Frequent per-use telemetry and data maintenance; PostHog sees these uses only through `Feature Used`.   |
+| Feature first-use definitions                          | 17          | One adoption event per qualifying feature on eligible installs.                                         |
 | Transaction milestone thresholds                       | 6           | One event at each documented logged-transaction count.                                                  |
-| Maximum adoption/milestone events per eligible install | 24          | Feature first uses plus transaction milestones, with working persistent storage; not a total event cap. |
+| Maximum adoption/milestone events per eligible install | 23          | Feature first uses plus transaction milestones, with working persistent storage; not a total event cap. |
 
-Every native app user is identified in both providers with the same pseudonymous `settings.appUserId`; there is no user or event sampling of custom events. PostHog's automatic lifecycle events, screen events, touch autocapture and rage clicks are disabled. GA4 collects its SDK events after identity/consent configuration; manually emitted `screen_view` is documented below and is additional to the 137 custom definitions. RevenueCat server events are listed separately.
+Every native app user is identified in both providers with the same pseudonymous `settings.appUserId`; there is no user or event sampling of custom events. PostHog's automatic lifecycle events, screen events, touch autocapture and rage clicks are disabled. GA4 collects its SDK events after identity/consent configuration; manually emitted `screen_view` is documented below and is additional to the 119 custom definitions. RevenueCat server events are listed separately.
 
 ### PostHog event budget
 
@@ -1298,20 +812,18 @@ The free tier is **1,000,000 product-analytics events a month** (identified even
 | Pro funnel (13 events)                                                   | 40,000                   | `Pro Paywall Viewed` ~0.23 per active user per day; purchase, restore and limit events ~5K.                                                                                                                                                                                                                                                                                                                                                            |
 | Adoption milestones                                                      | 10,000                   | `Feature First Used` and `Transaction Milestone Reached`; high while existing users first run this build.                                                                                                                                                                                                                                                                                                                                              |
 | Scans, sharing, setup, payoff, data, backup and satisfaction (23 events) | 75,000                   | `Receipt Scan Completed` ~0.34 per active user per day; `Auto Backup Failed` capped by the six-hour retry backoff.                                                                                                                                                                                                                                                                                                                                     |
-| Cloud Sync (6 events)                                                    | 2,000                    | Only Pro users who see the one-time offer or sign in; `Cloud Sync Enabled` once per sign-in. Sync runs send nothing. Behind the `cloud_sync` flag until rollout.                                                                                                                                                                                                                                                                                       |
-| Shared ledgers (6 events)                                                | 500                      | Deliberate one-off actions: sharing (at most 2 ledgers per owner), invites and joins (at most 5 people per ledger), removals and leaving. Syncing a shared ledger sends nothing. Behind the `cloud_sync` flag.                                                                                                                                                                                                                                         |
 | `$identify` and `$set`                                                   | 30,000                   | One `$identify` per install; `$set` when a person property changes: four on an install's first sync, then theme and Pro changes. Existing users' first sync is a one-off.                                                                                                                                                                                                                                                                              |
 | RevenueCat server events                                                 | 3,000                    | Lifecycle events from RevenueCat's PostHog integration (~530 a week measured).                                                                                                                                                                                                                                                                                                                                                                         |
 | Prompt fetches (`$llm_prompt_fetched`)                                   | 7,000                    | Logged by PostHog per Worker prompt fetch: about one per prompt per Cloudflare location per 30 minutes. At 5 minutes it measured ~37,000.                                                                                                                                                                                                                                                                                                              |
 | Website (`$pageview`, CTA and Web Dashboard events)                      | 5,000                    | Production host only, Do Not Track respected (~500 a week measured before the Web Dashboard). Marketing pages stay anonymous (the dashboard keeps its PostHog state and GA4 cookie on its own host); a linked dashboard identifies as the phone's `appUserId` (one `$identify` per linked browser, then its events are identified). Dashboard events scale with its use: a page view per page shown, one per transfer, one per edit batch; re-measure. |
-| **Total**                                                                | **~562,000 (56%)**       | ~44% headroom for growth.                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| **Total**                                                                | **~560,000 (56%)**       | ~44% headroom for growth.                                                                                                                                                                                                                                                                                                                                                                                                                              |
 
 | Other PostHog product               | Free allowance / month              | Expected use                                                                                                                                                                                                                                                                                                   |
 | ----------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Error tracking (`$exception`)       | 100,000 exceptions                  | Deduplicated and capped on the device at 25 distinct exceptions per 5 minutes.                                                                                                                                                                                                                                 |
 | Session replay                      | 2,500 mobile + 5,000 web recordings | App ~1,500 (15% of first-day launches, 0.4% of later ones) against the mobile allowance; the website's 10% sample against the web one. Recordings under 5 s are dropped.                                                                                                                                       |
 | AI observability (`$ai_generation`) | 100,000 events                      | One per OpenRouter call from the receipt scanner: ~60,000. Every app version scans through the Worker, so this already counts all users; screenshot scans (~1,700 a day) dominate. Without the screenshot empty-result retry it measured ~85,000. A scan Claude fails adds one generation for the Qwen backup. |
-| Feature flags                       | 1,000,000 requests                  | About one request per app launch (the `cloud_sync` flag is read with `sendEvent: false`), plus one when an install is first identified.                                                                                                                                                                        |
+| Feature flags                       | 1,000,000 requests                  | Zero while no flag is active; then about one request per app launch, plus one when an install is first identified.                                                                                                                                                                                             |
 
 Rules that keep it inside the free tier:
 
@@ -1402,18 +914,6 @@ Explicitly requested tracking measures engagement with the RiceCal promotion: on
 | `CLOUD_BACKUP_PROMPT_SHOWN`          | `Cloud Backup Prompt Shown`          | `m2t_cloud_backup_prompt_shown`          | Yes     | The eligible cloud-backup prompt is shown; each presentation after its eligibility checks.                                                                                                                                       | `transaction_count`                                         | [App.tsx](apps/mobile/App.tsx)                                                                                         |
 | `CLOUD_BACKUP_PROMPT_CTA_TAPPED`     | `Cloud Backup Prompt CTA Tapped`     | `m2t_cloud_backup_prompt_cta_tapped`     | Yes     | The cloud-backup prompt CTA opens backup settings; each tap.                                                                                                                                                                     | None                                                        | [App.tsx](apps/mobile/App.tsx)                                                                                         |
 | `CLOUD_BACKUP_PROMPT_DISMISSED`      | `Cloud Backup Prompt Dismissed`      | `m2t_cloud_backup_prompt_dismissed`      | Yes     | The cloud-backup prompt is dismissed; each dismissal.                                                                                                                                                                            | None                                                        | [App.tsx](apps/mobile/App.tsx)                                                                                         |
-| `CLOUD_SYNC_PROMPT_SHOWN`            | `Cloud Sync Prompt Shown`            | `m2t_cloud_sync_prompt_shown`            | Yes     | The post-purchase Cloud Sync offer is shown; at most once per install, only after a new purchase on a signed-out phone.                                                                                                          |                                                             | [CloudSyncPromptHost.tsx](apps/mobile/features/cloudSync/components/CloudSyncPromptHost.tsx)                           |
-| `CLOUD_SYNC_PROMPT_ACCEPTED`         | `Cloud Sync Prompt Accepted`         | `m2t_cloud_sync_prompt_accepted`         | Yes     | Turn on Cloud Sync is tapped on the offer; each tap.                                                                                                                                                                             |                                                             | [CloudSyncPromptHost.tsx](apps/mobile/features/cloudSync/components/CloudSyncPromptHost.tsx)                           |
-| `CLOUD_SYNC_PROMPT_DISMISSED`        | `Cloud Sync Prompt Dismissed`        | `m2t_cloud_sync_prompt_dismissed`        | Yes     | The offer is closed with Not now, the backdrop or back; each dismissal.                                                                                                                                                          |                                                             | [CloudSyncPromptHost.tsx](apps/mobile/features/cloudSync/components/CloudSyncPromptHost.tsx)                           |
-| `CLOUD_SYNC_SIGNED_IN`               | `Cloud Sync Signed In`               | `m2t_cloud_sync_signed_in`               | Yes     | A Cloud Sync sign-in succeeds (Apple, Google or email code); each sign-in.                                                                                                                                                       | `method`                                                    | [CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                                            |
-| `CLOUD_SYNC_ENABLED`                 | `Cloud Sync Enabled`                 | `m2t_cloud_sync_enabled`                 | Yes     | This phone and the cloud copy are linked; once per sign-in. `mode`: `uploaded` (empty cloud), `downloaded` (empty phone), `kept_cloud` or `kept_phone` (the user's choice).                                                      | `mode`                                                      | [CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                                            |
-| `CLOUD_SYNC_ACCOUNT_DELETED`         | `Cloud Sync Account Deleted`         | `m2t_cloud_sync_account_deleted`         | Yes     | The Cloud Sync account (cloud copy, images, sign-in) is deleted; each deletion.                                                                                                                                                  |                                                             | [CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                                            |
-| `SHARED_LEDGER_CREATED`              | `Shared Ledger Created`              | `m2t_shared_ledger_created`              | Yes     | A Pro owner shares a ledger (when creating it or later); each share.                                                                                                                                                             |                                                             | [CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                                            |
-| `SHARED_LEDGER_INVITE_CREATED`       | `Shared Ledger Invite Created`       | `m2t_shared_ledger_invite_created`       | Yes     | The owner makes an invite link; each link (at most 5 open per ledger).                                                                                                                                                           |                                                             | [LedgerSharingScreen.tsx](apps/mobile/features/sharedLedgers/screens/LedgerSharingScreen.tsx)                          |
-| `SHARED_LEDGER_JOINED`               | `Shared Ledger Joined`               | `m2t_shared_ledger_joined`               | Yes     | Someone joins a shared ledger from an invite link; each join.                                                                                                                                                                    | `is_pro`                                                    | [CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                                            |
-| `SHARED_LEDGER_MEMBER_REMOVED`       | `Shared Ledger Member Removed`       | `m2t_shared_ledger_member_removed`       | Yes     | The owner removes a member; each removal.                                                                                                                                                                                        |                                                             | [LedgerSharingScreen.tsx](apps/mobile/features/sharedLedgers/screens/LedgerSharingScreen.tsx)                          |
-| `SHARED_LEDGER_LEFT`                 | `Shared Ledger Left`                 | `m2t_shared_ledger_left`                 | Yes     | A member leaves a shared ledger; each leave.                                                                                                                                                                                     |                                                             | [CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                                            |
-| `SHARED_LEDGER_STOPPED`              | `Shared Ledger Stopped`              | `m2t_shared_ledger_stopped`              | Yes     | The owner stops sharing a ledger (or deletes a shared one); each stop.                                                                                                                                                           |                                                             | [CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                                            |
 | `REVIEW_PREPROMPT_SHOWN`             | `Review Preprompt Shown`             | `m2t_review_preprompt_shown`             | Yes     | The review preprompt is presented; each presentation after its eligibility checks.                                                                                                                                               | `trigger`                                                   | [services/reviewPrompt.native.ts](apps/mobile/services/reviewPrompt.native.ts)                                         |
 | `REVIEW_PREPROMPT_HAPPY`             | `Review Preprompt Happy`             | `m2t_review_preprompt_happy`             | Yes     | The happy response is selected; each response.                                                                                                                                                                                   | `trigger`                                                   | [services/reviewPrompt.native.ts](apps/mobile/services/reviewPrompt.native.ts)                                         |
 | `REVIEW_PREPROMPT_UNHAPPY`           | `Review Preprompt Unhappy`           | `m2t_review_preprompt_unhappy`           | Yes     | The unhappy response is selected; each response.                                                                                                                                                                                 | `trigger`                                                   | [services/reviewPrompt.native.ts](apps/mobile/services/reviewPrompt.native.ts)                                         |
@@ -1491,44 +991,39 @@ Bank and wallet notifications (Android listener) and the Log Notification Shortc
 | `CATEGORY_CREATED`           | `Category Created`           | `m2t_category_created`           | No      | A category is created; each successful creation.                                                                                                                          | `type`                                                                                                               | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                             |
 | `CATEGORY_DELETED`           | `Category Deleted`           | `m2t_category_deleted`           | No      | A category is deleted, optionally reassigning its transactions; each successful deletion.                                                                                 | `reassigned`                                                                                                         | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                             |
 
-#### GA4 only: albums, budgets, items, ledgers and recurring rules
+#### GA4 only: albums, budgets, items and recurring rules
 
-| Constant                  | Event name                | GA4 name                      | PostHog | Trigger and frequency                                                                                                                                                      | Extra properties                                       | Call sites                                                                                               |
-| ------------------------- | ------------------------- | ----------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
-| `ALBUM_CREATED`           | `Album Created`           | `m2t_album_created`           | No      | An album is created; each successful creation.                                                                                                                             | `transactionCount`                                     | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `ALBUM_UPDATED`           | `Album Updated`           | `m2t_album_updated`           | No      | Album details are updated; each successful update.                                                                                                                         | None                                                   | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `ALBUM_DELETED`           | `Album Deleted`           | `m2t_album_deleted`           | No      | An album is deleted; each successful deletion.                                                                                                                             | None                                                   | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `ALBUM_LOCATION_SET`      | `Album Location Set`      | `m2t_album_location_set`      | No      | An album location is set or cleared; each successful change.                                                                                                               | `cleared`                                              | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `ALBUM_LOCATIONS_OPENED`  | `Album Locations Opened`  | `m2t_album_locations_opened`  | No      | The album map panel opens; each panel mount.                                                                                                                               | `count`                                                | [features/albums/components/AlbumMapPanel.tsx](apps/mobile/features/albums/components/AlbumMapPanel.tsx) |
-| `BUDGET_TEMPLATE_CREATED` | `Budget Template Created` | `m2t_budget_template_created` | No      | A reusable budget template is created; each successful creation.                                                                                                           | `categories`, `backPopulate`, `period`                 | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `BUDGET_TEMPLATE_UPDATED` | `Budget Template Updated` | `m2t_budget_template_updated` | No      | A reusable budget template is updated; each successful update.                                                                                                             | `categories`, `period`                                 | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `BUDGET_TEMPLATE_DELETED` | `Budget Template Deleted` | `m2t_budget_template_deleted` | No      | A budget template is deleted; each successful deletion.                                                                                                                    | None                                                   | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `BUDGET_DEFAULT_CHANGED`  | `Budget Default Changed`  | `m2t_budget_default_changed`  | No      | A period's default budget template is changed; each successful action.                                                                                                     | None                                                   | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `BUDGET_MONTH_CREATED`    | `Budget Month Created`    | `m2t_budget_month_created`    | No      | A week's, month's or year's budget is created automatically (one event per period made), manually, custom, or by backfill; backfill is one aggregate event with the count. | `source`, `period`, `months`                           | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `BUDGET_MONTH_UPDATED`    | `Budget Month Updated`    | `m2t_budget_month_updated`    | No      | A week's, month's or year's budget is updated; each successful update.                                                                                                     | `categories`, `period`                                 | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `BUDGET_MONTH_DELETED`    | `Budget Month Deleted`    | `m2t_budget_month_deleted`    | No      | A week's, month's or year's budget is deleted; each successful deletion.                                                                                                   | `period`                                               | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `ITEM_CREATED`            | `Item Created`            | `m2t_item_created`            | No      | An owned item is created; each successful creation.                                                                                                                        | None                                                   | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `LEDGER_CREATED`          | `Ledger Created`          | `m2t_ledger_created`          | No      | A Pro user creates a ledger (which opens it); each successful creation.                                                                                                    | `copied_accounts`, `copied_categories`, `ledger_count` | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `LEDGER_SWITCHED`         | `Ledger Switched`         | `m2t_ledger_switched`         | No      | Another ledger is opened: from the switcher, after creating one, or by the move back to the default ledger when Pro ends; each switch.                                     | `to_default`                                           | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `LEDGER_DELETED`          | `Ledger Deleted`          | `m2t_ledger_deleted`          | No      | A ledger that is not open is deleted from Manage ledgers; each successful deletion.                                                                                        | None                                                   | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `RECURRING_RULE_CREATED`  | `Recurring Rule Created`  | `m2t_recurring_rule_created`  | No      | A recurring rule is created; each successful creation.                                                                                                                     | `type`, `pattern`                                      | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `RECURRING_RULE_UPDATED`  | `Recurring Rule Updated`  | `m2t_recurring_rule_updated`  | No      | A recurring rule is updated; each successful update.                                                                                                                       | None                                                   | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `RECURRING_RULE_DELETED`  | `Recurring Rule Deleted`  | `m2t_recurring_rule_deleted`  | No      | A recurring rule is deleted; each successful deletion.                                                                                                                     | None                                                   | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| Constant                  | Event name                | GA4 name                      | PostHog | Trigger and frequency                                                                                                                                                      | Extra properties                       | Call sites                                                                                               |
+| ------------------------- | ------------------------- | ----------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `ALBUM_CREATED`           | `Album Created`           | `m2t_album_created`           | No      | An album is created; each successful creation.                                                                                                                             | `transactionCount`                     | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `ALBUM_UPDATED`           | `Album Updated`           | `m2t_album_updated`           | No      | Album details are updated; each successful update.                                                                                                                         | None                                   | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `ALBUM_DELETED`           | `Album Deleted`           | `m2t_album_deleted`           | No      | An album is deleted; each successful deletion.                                                                                                                             | None                                   | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `ALBUM_LOCATION_SET`      | `Album Location Set`      | `m2t_album_location_set`      | No      | An album location is set or cleared; each successful change.                                                                                                               | `cleared`                              | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `ALBUM_LOCATIONS_OPENED`  | `Album Locations Opened`  | `m2t_album_locations_opened`  | No      | The album map panel opens; each panel mount.                                                                                                                               | `count`                                | [features/albums/components/AlbumMapPanel.tsx](apps/mobile/features/albums/components/AlbumMapPanel.tsx) |
+| `BUDGET_TEMPLATE_CREATED` | `Budget Template Created` | `m2t_budget_template_created` | No      | A reusable budget template is created; each successful creation.                                                                                                           | `categories`, `backPopulate`, `period` | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `BUDGET_TEMPLATE_UPDATED` | `Budget Template Updated` | `m2t_budget_template_updated` | No      | A reusable budget template is updated; each successful update.                                                                                                             | `categories`, `period`                 | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `BUDGET_TEMPLATE_DELETED` | `Budget Template Deleted` | `m2t_budget_template_deleted` | No      | A budget template is deleted; each successful deletion.                                                                                                                    | None                                   | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `BUDGET_DEFAULT_CHANGED`  | `Budget Default Changed`  | `m2t_budget_default_changed`  | No      | A period's default budget template is changed; each successful action.                                                                                                     | None                                   | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `BUDGET_MONTH_CREATED`    | `Budget Month Created`    | `m2t_budget_month_created`    | No      | A week's, month's or year's budget is created automatically (one event per period made), manually, custom, or by backfill; backfill is one aggregate event with the count. | `source`, `period`, `months`           | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `BUDGET_MONTH_UPDATED`    | `Budget Month Updated`    | `m2t_budget_month_updated`    | No      | A week's, month's or year's budget is updated; each successful update.                                                                                                     | `categories`, `period`                 | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `BUDGET_MONTH_DELETED`    | `Budget Month Deleted`    | `m2t_budget_month_deleted`    | No      | A week's, month's or year's budget is deleted; each successful deletion.                                                                                                   | `period`                               | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `ITEM_CREATED`            | `Item Created`            | `m2t_item_created`            | No      | An owned item is created; each successful creation.                                                                                                                        | None                                   | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `RECURRING_RULE_CREATED`  | `Recurring Rule Created`  | `m2t_recurring_rule_created`  | No      | A recurring rule is created; each successful creation.                                                                                                                     | `type`, `pattern`                      | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `RECURRING_RULE_UPDATED`  | `Recurring Rule Updated`  | `m2t_recurring_rule_updated`  | No      | A recurring rule is updated; each successful update.                                                                                                                       | None                                   | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `RECURRING_RULE_DELETED`  | `Recurring Rule Deleted`  | `m2t_recurring_rule_deleted`  | No      | A recurring rule is deleted; each successful deletion.                                                                                                                     | None                                   | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
 
 #### GA4 only: tutorials, settings, backup and review
 
-| Constant                      | Event name                    | GA4 name                          | PostHog | Trigger and frequency                                                                                                                                                                                                    | Extra properties              | Call sites                                                                                                   |
-| ----------------------------- | ----------------------------- | --------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `TUTORIAL_LIST_OPENED`        | `Tutorial List Opened`        | `m2t_tutorial_list_opened`        | No      | The tutorial list opens from settings or a deep link; every open.                                                                                                                                                        | `source`                      | [App.tsx](apps/mobile/App.tsx), [services/deepLinks.ts](apps/mobile/services/deepLinks.ts)                   |
-| `DISPLAY_MODE_TOGGLED`        | `Display Mode Toggled`        | `m2t_display_mode_toggled`        | No      | Display switches between money and time; each toggle.                                                                                                                                                                    | `mode`                        | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                 |
-| `NAV_TABS_CHANGED`            | `Nav Tabs Changed`            | `m2t_nav_tabs_changed`            | No      | A page is added to, removed from or reordered in the bottom bar, or the bar is reset, in Settings > Display > Bottom bar; each change.                                                                                   | `change`, `tabs`, `tab_count` | [features/settings/screens/BottomBarScreen.tsx](apps/mobile/features/settings/screens/BottomBarScreen.tsx)   |
-| `AUTO_BACKUP_RESTORED`        | `Auto Backup Restored`        | `m2t_auto_backup_restored`        | No      | An auto-backup is restored; each successful restore.                                                                                                                                                                     | `target`                      | [services/autoBackup.native.ts](apps/mobile/services/autoBackup.native.ts)                                   |
-| `AUTO_BACKUP_DELETED`         | `Auto Backup Deleted`         | `m2t_auto_backup_deleted`         | No      | An auto-backup is deleted; each successful deletion.                                                                                                                                                                     | `target`                      | [services/autoBackup.native.ts](apps/mobile/services/autoBackup.native.ts)                                   |
-| `AUTO_BACKUP_SETTING_TOGGLED` | `Auto Backup Setting Toggled` | `m2t_auto_backup_setting_toggled` | No      | Auto-backup is enabled or disabled in settings; each toggle.                                                                                                                                                             | `enabled`                     | [features/settings/screens/AutoBackupScreen.tsx](apps/mobile/features/settings/screens/AutoBackupScreen.tsx) |
-| `AUTO_BACKUP_TARGET_CHANGED`  | `Auto Backup Target Changed`  | `m2t_auto_backup_target_changed`  | No      | The auto-backup target is selected in settings; each change.                                                                                                                                                             | `target`                      | [features/settings/screens/AutoBackupScreen.tsx](apps/mobile/features/settings/screens/AutoBackupScreen.tsx) |
-| `CLOUD_SYNC_SIGNED_OUT`       | `Cloud Sync Signed Out`       | `m2t_cloud_sync_signed_out`       | No      | A phone that was syncing signs out of Cloud Sync (data stays on the phone); each sign-out. Cancelling the choice screen or signing out while paused sends nothing.                                                       |                               | [CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                                  |
-| `CLOUD_SYNC_FAILED`           | `Cloud Sync Failed`           | `m2t_cloud_sync_failed`           | No      | A sync, link or choice step fails for a reason other than being offline; once per failure streak, not on each retry (also sent to error tracking). `stage`: `sync`, `link`, `choice`; `error_kind`: `server`, `unknown`. | `stage`, `error_kind`         | [CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                                  |
-| `REVIEW_PROMPT_MANUAL_OPENED` | `Review Prompt Manual Opened` | `m2t_review_prompt_manual_opened` | No      | The manual review entry point is used; every use.                                                                                                                                                                        | None                          | [services/reviewPrompt.native.ts](apps/mobile/services/reviewPrompt.native.ts)                               |
+| Constant                      | Event name                    | GA4 name                          | PostHog | Trigger and frequency                                                                                                                  | Extra properties              | Call sites                                                                                                   |
+| ----------------------------- | ----------------------------- | --------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `TUTORIAL_LIST_OPENED`        | `Tutorial List Opened`        | `m2t_tutorial_list_opened`        | No      | The tutorial list opens from settings or a deep link; every open.                                                                      | `source`                      | [App.tsx](apps/mobile/App.tsx), [services/deepLinks.ts](apps/mobile/services/deepLinks.ts)                   |
+| `DISPLAY_MODE_TOGGLED`        | `Display Mode Toggled`        | `m2t_display_mode_toggled`        | No      | Display switches between money and time; each toggle.                                                                                  | `mode`                        | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                 |
+| `NAV_TABS_CHANGED`            | `Nav Tabs Changed`            | `m2t_nav_tabs_changed`            | No      | A page is added to, removed from or reordered in the bottom bar, or the bar is reset, in Settings > Display > Bottom bar; each change. | `change`, `tabs`, `tab_count` | [features/settings/screens/BottomBarScreen.tsx](apps/mobile/features/settings/screens/BottomBarScreen.tsx)   |
+| `AUTO_BACKUP_RESTORED`        | `Auto Backup Restored`        | `m2t_auto_backup_restored`        | No      | An auto-backup is restored; each successful restore.                                                                                   | `target`                      | [services/autoBackup.native.ts](apps/mobile/services/autoBackup.native.ts)                                   |
+| `AUTO_BACKUP_DELETED`         | `Auto Backup Deleted`         | `m2t_auto_backup_deleted`         | No      | An auto-backup is deleted; each successful deletion.                                                                                   | `target`                      | [services/autoBackup.native.ts](apps/mobile/services/autoBackup.native.ts)                                   |
+| `AUTO_BACKUP_SETTING_TOGGLED` | `Auto Backup Setting Toggled` | `m2t_auto_backup_setting_toggled` | No      | Auto-backup is enabled or disabled in settings; each toggle.                                                                           | `enabled`                     | [features/settings/screens/AutoBackupScreen.tsx](apps/mobile/features/settings/screens/AutoBackupScreen.tsx) |
+| `AUTO_BACKUP_TARGET_CHANGED`  | `Auto Backup Target Changed`  | `m2t_auto_backup_target_changed`  | No      | The auto-backup target is selected in settings; each change.                                                                           | `target`                      | [features/settings/screens/AutoBackupScreen.tsx](apps/mobile/features/settings/screens/AutoBackupScreen.tsx) |
+| `REVIEW_PROMPT_MANUAL_OPENED` | `Review Prompt Manual Opened` | `m2t_review_prompt_manual_opened` | No      | The manual review entry point is used; every use.                                                                                      | None                          | [services/reviewPrompt.native.ts](apps/mobile/services/reviewPrompt.native.ts)                               |
 
 #### GA4 only: Web Dashboard
 
@@ -1610,7 +1105,6 @@ A qualifying per-use event goes to GA4 (and to PostHog when its own row says so)
 | `budgets`         | `BUDGET_TEMPLATE_CREATED`     | `{}`                    | `[]`                          | Budget template created.                                                 |
 | `albums`          | `ALBUM_CREATED`               | `{}`                    | `[]`                          | Album created.                                                           |
 | `items`           | `ITEM_CREATED`                | `{}`                    | `[]`                          | Owned item created.                                                      |
-| `ledgers`         | `LEDGER_CREATED`              | `{}`                    | `[]`                          | Ledger created.                                                          |
 
 Usage state lives in AsyncStorage at `@m2t/analytics_usage/v1` and daily state at `@m2t/analytics_daily/v1`; both survive in-app data resets. Reinstalling starts a new install. With unreadable state, the app suppresses first-use/milestone claims; failed persistence can allow duplicate firsts after relaunch.
 
@@ -1681,7 +1175,7 @@ Sources: [native analytics](apps/mobile/services/analytics.native.ts), [shared P
 | SDK `first_open`, `session_start`, engagement/attribution events                                                   | None                                                                                                | SDK-managed after collection is enabled                           | Outside the custom-event inventory and its 119-definition count. Actual SDK event set depends on the configured native SDK.                                                                                                                                                                                                                                                                                                                                                                                             |
 | `Application Installed`, `Application Opened`, `Application Backgrounded`, `$screen`, `$autocapture`, `$rageclick` | Disabled (and dropped by the allowlist)                                                             | Not applicable                                                    | `First App Open` and `Daily App Open` replace them at a fraction of the volume.                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `$identify`, `$set`                                                                                                | Sent                                                                                                | Not applicable                                                    | Once per install and on person-property changes; see the budget.                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| Store trial conversions, renewals, cancellations, billing issues and refunds                                       | RevenueCat server lifecycle events below                                                            | RevenueCat server lifecycle events below plus legacy SDK coverage | External producer, outside the 128 app custom definitions. SDK store events become `m2t_store_revenue_observed` in GA4 only when the new client marks RevenueCat identity ready.                                                                                                                                                                                                                                                                                                                                        |
+| Store trial conversions, renewals, cancellations, billing issues and refunds                                       | RevenueCat server lifecycle events below                                                            | RevenueCat server lifecycle events below plus legacy SDK coverage | External producer, outside the 119 app custom definitions. SDK store events become `m2t_store_revenue_observed` in GA4 only when the new client marks RevenueCat identity ready.                                                                                                                                                                                                                                                                                                                                        |
 
 ### Error tracking
 
@@ -1720,12 +1214,6 @@ Replays answer "what did the user see and do" next to an exception or a funnel d
 ### Feature flags
 
 [services/featureFlags.ts](apps/mobile/services/featureFlags.ts) wraps PostHog flags for future rollouts and experiments: register each key in `FEATURE_FLAGS`, read it with `useFeatureFlag(key)` in components or `getFeatureFlag(key)` elsewhere, and treat `undefined` (not loaded, disabled, web, development) as off. Flags load at launch and on identify; person-property writes never trigger a reload. Each read sends `$feature_flag_called` once per flag per session for experiment exposure (pass `{ sendEvent: false }` for plain rollouts); add those events to the budget when a flag ships. Flag requests are only billed while at least one flag is active; archive a flag once its rollout is complete. The website never evaluates flags.
-
-Active flags:
-
-| Flag         | Gates                                                                                 | Off means                                                    |
-| ------------ | ------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| `cloud_sync` | [Cloud Sync](#cloud-sync): the Settings tile, the post-purchase offer and all syncing | The feature is invisible. Development builds treat it as on. |
 
 ### AI observability
 
@@ -1801,24 +1289,21 @@ These are external events, not entries in `AnalyticsEvents`; PostHog receives th
 
 Every paywall entry point must pass its own source. Sources segment `Pro Paywall Viewed`, unavailable plans, purchase outcomes and restore outcomes.
 
-| Source                                                                                                                                                                                           | Entry point                                                                                         |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
-| `onboarding`                                                                                                                                                                                     | Paywall after onboarding.                                                                           |
-| `settings_banner`                                                                                                                                                                                | Settings upgrade card.                                                                              |
-| `settings_subscription`                                                                                                                                                                          | Settings subscription tile for free users.                                                          |
-| `cloud_sync`                                                                                                                                                                                     | Cloud Sync screen: a free user tapping a sign-in button, or Renew Pro while paused.                 |
-| `app_lock`                                                                                                                                                                                       | Settings App Lock tile for free users.                                                              |
-| `pro_management`                                                                                                                                                                                 | Lifetime upgrade or upgrade after lapse.                                                            |
-| `news`, `news_list`                                                                                                                                                                              | Announcement modal or Settings news list CTA.                                                       |
-| `insights_trend`                                                                                                                                                                                 | Pro trend in Insights.                                                                              |
-| `accounts_transaction`                                                                                                                                                                           | Upgrade action on the transaction-entry account limit.                                              |
-| `accounts`, `categories`, `recurring`, `wage_entries`, `custom_logos`, `custom_item_images`, `subcurrencies`, `albums`, `items`, `budget_templates`, `receipts`, `split_bills`, `goals`, `loans` | Count-based free-tier gates in `useProGate`.                                                        |
-| `receipt_scan`, `voice`                                                                                                                                                                          | Receipt-scan or voice-use limits.                                                                   |
-| `app_icon`, `custom_card_designs`, `custom_category_icons`, `custom_subscription_logos`, `icon_packs`, `live_earnings_auto_start`, `reimbursements`                                              | Pro-only feature gates.                                                                             |
-| `ledgers_create`, `ledgers_switch`                                                                                                                                                               | Ledger switcher or Manage ledgers: a free user taps New ledger, or a ledger locked since Pro ended. |
-| `ledgers_pro_ended`                                                                                                                                                                              | Renew Pro on the notice shown when Pro ends while a ledger other than the default one is open.      |
-| `widget_<kind>`, `widget`                                                                                                                                                                        | Widget Pro CTA; iOS can specify kind, Android uses widget.                                          |
-| `unknown`                                                                                                                                                                                        | Fallback for a missing source; investigate as an attribution bug.                                   |
+| Source                                                                                                                                                                                           | Entry point                                                       |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| `onboarding`                                                                                                                                                                                     | Paywall after onboarding.                                         |
+| `settings_banner`                                                                                                                                                                                | Settings upgrade card.                                            |
+| `settings_subscription`                                                                                                                                                                          | Settings subscription tile for free users.                        |
+| `app_lock`                                                                                                                                                                                       | Settings App Lock tile for free users.                            |
+| `pro_management`                                                                                                                                                                                 | Lifetime upgrade or upgrade after lapse.                          |
+| `news`, `news_list`                                                                                                                                                                              | Announcement modal or Settings news list CTA.                     |
+| `insights_trend`                                                                                                                                                                                 | Pro trend in Insights.                                            |
+| `accounts_transaction`                                                                                                                                                                           | Upgrade action on the transaction-entry account limit.            |
+| `accounts`, `categories`, `recurring`, `wage_entries`, `custom_logos`, `custom_item_images`, `subcurrencies`, `albums`, `items`, `budget_templates`, `receipts`, `split_bills`, `goals`, `loans` | Count-based free-tier gates in `useProGate`.                      |
+| `receipt_scan`, `voice`                                                                                                                                                                          | Receipt-scan or voice-use limits.                                 |
+| `app_icon`, `custom_card_designs`, `custom_category_icons`, `custom_subscription_logos`, `icon_packs`, `live_earnings_auto_start`, `reimbursements`                                              | Pro-only feature gates.                                           |
+| `widget_<kind>`, `widget`                                                                                                                                                                        | Widget Pro CTA; iOS can specify kind, Android uses widget.        |
+| `unknown`                                                                                                                                                                                        | Fallback for a missing source; investigate as an attribution bug. |
 
 ### Product reports and interpretation
 
@@ -3078,190 +2563,6 @@ provider token end to end. `StartContract` is the one to know about: it reads th
 Swift `ActivityAttributes` struct out of the app's config plugin and fails if the
 start payload here stops matching it, because nothing else would notice — APNs
 returns 200 for a payload the device then discards.
-
-### Cloud-sync Worker
-
-`workers/cloud-sync` (`money2time-workers-cloud-sync`, custom domain
-`workers-cloud-sync.money2time.com`) serves [Cloud Sync](#cloud-sync): sign-in
-with Better Auth, one Turso database per user, and the user's images.
-
-| File            | What it holds                                                |
-| --------------- | ------------------------------------------------------------ |
-| `index.ts`      | Routing, rate limits, the daily cleanup                      |
-| `auth.ts`       | Better Auth (one instance per isolate) and the sign-in email |
-| `revenuecat.ts` | Linking App User IDs and the account-level Pro check         |
-| `turso.ts`      | Per-user databases and tokens; `CLOUD_SCHEMA_SQL`            |
-| `media.ts`      | Images in R2 and the per-user quota                          |
-| `apple.ts`      | Apple refresh tokens and their revocation                    |
-| `ledgers.ts`    | Shared ledgers: sharing, members, invites, the invite page   |
-| `secretBox.ts`  | AES-GCM sealing for tokens stored in D1                      |
-| `http.ts`       | JSON responses and size-capped JSON bodies (8 KB)            |
-
-#### Endpoints
-
-| Route                                   | What it does                                                                                                                                                                                                                               |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/api/auth/*`                           | Better Auth, only these routes (everything else it mounts answers 404): `POST sign-in/social` (Apple / Google ID token), `POST email-otp/send-verification-otp` (type `sign-in` only), `POST sign-in/email-otp`, `POST sign-out`, `GET ok` |
-| `GET /v1/account`                       | The signed-in user and whether the account is Pro                                                                                                                                                                                          |
-| `POST /v1/sync/credentials`             | `{appUserId}` → the user's Turso URL and a 7-day token; links the App User ID if it is Pro; makes the database on first use; 403 `not_pro`                                                                                                 |
-| `POST /v1/media/exists`                 | Which of up to 100 image paths are stored                                                                                                                                                                                                  |
-| `PUT` / `GET /v1/media/<folder>/<file>` | Store / read one image (15 MB cap, image types only, one folder level)                                                                                                                                                                     |
-| `POST /v1/apple/authorization`          | `{code}` → trades Apple's one-time authorization code for a refresh token, stored sealed, if the code belongs to this user's Apple account                                                                                                 |
-| `DELETE /v1/account`                    | Revokes the user's Apple tokens, deletes the Turso database and every image under `u/<userId>/`, then the user (every other row cascades) and any pending email code                                                                       |
-
-Shared ledgers ([Shared ledgers](#shared-ledgers)):
-
-| Route                                          | What it does                                                                                                      |
-| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `GET /v1/ledgers`                              | The user's shared ledgers, owned and joined, with role, owner name, member count and `active` (owner is Pro)      |
-| `POST /v1/ledgers`                             | `{ledgerId, name, emoji}` → shares a ledger: Pro, at most 2 per owner; makes its Turso database                   |
-| `DELETE /v1/ledgers/<id>`                      | Stop sharing (owner): deletes its database and images; members and invites cascade                                |
-| `POST /v1/ledgers/<id>/leave`                  | A member leaves                                                                                                   |
-| `POST /v1/ledgers/<id>/credentials`            | Its Turso URL and a 1-day token, for the owner or a member, while the owner is Pro (403 `owner_not_pro`)          |
-| `GET /v1/ledgers/<id>/members`                 | Owner and members (addresses for the owner only) and open invites (owner only)                                    |
-| `DELETE /v1/ledgers/<id>/members/<userId>`     | Owner removes a member                                                                                            |
-| `POST` / `DELETE /v1/ledgers/<id>/invites[/…]` | Owner makes a single-use 7-day invite link (409 `full` past 5 seats) / cancels one                                |
-| `/v1/ledgers/<id>/media/…`                     | Like `/v1/media`, under `l/<id>/` with its own quota; writing needs the owner's Pro                               |
-| `GET /v1/invites/<code>`                       | No sign-in: ledger name, owner, member count and `active`, for the Join screen; rate limited per IP               |
-| `POST /v1/invites/<code>/accept`               | Joins (any signed-in user, no Pro); the invite is used up                                                         |
-| `GET /join/<code>`                             | The page an invite link opens: hands `money2time://join/<code>` to the app, or links the stores. Static: no names |
-
-Invite codes are 18 random bytes; only their SHA-256 is stored. The join page
-shows nothing from the database and sends a strict Content-Security-Policy.
-Deleting an account also deletes the ledgers it shares (databases and images)
-and ends its memberships.
-
-Every `/v1` route except the invite preview needs `Authorization: Bearer <session token>` (Better Auth's
-bearer plugin; the app never uses cookies). Internal error text stays in the
-logs; responses carry only a code. A cron at 03:17 UTC daily deletes expired
-email codes, expired invites and rate-limit rows older than a day.
-
-- **Exposed surface.** An allowlist in `index.ts` (`AUTH_ROUTES`) passes only the routes above to Better Auth. Its other routes (OAuth callbacks, password reset by email code, change email, update-user, account and session listing, link and unlink) are refused before Better Auth sees them, and code emails go out for sign-in only. The Worker sets no CORS headers and no cookies are used; R2 has no public URL or custom domain; `workers.dev` and preview URLs are off.
-- **Rate limits.** Better Auth limits in D1 by `cf-connecting-ip` (three code
-  requests and ten code checks a minute). In front of it, `AUTH_LIMITER`
-  allows 30 POSTs a minute per IP, and `OTP_LIMITER` three code requests a
-  minute per recipient address, whatever the IP. Better Auth's own
-  delete-user endpoint is off: only `DELETE /v1/account` also removes the
-  Turso database and images.
-- **Sign-in.** Apple and Google tokens are verified against Apple's and
-  Google's keys and the audiences in `APPLE_CLIENT_IDS` (the bundle id) and
-  `GOOGLE_CLIENT_IDS` (iOS client, and the web client that Android tokens are
-  issued for); no client secrets are needed. Email codes are 6 digits, valid
-  10 minutes, five attempts, stored hashed, and sent with Email Service from
-  `EMAIL_FROM` (only a local `wrangler dev` without the binding prints them).
-  One verified email address is one user across methods (account linking
-  with no blindly trusted provider, so a Google account with an unverified
-  address cannot join an existing user; Apple's private-relay addresses
-  cannot match).
-- **Pro.** `pro_links` records the Pro RevenueCat App User IDs that asked for
-  credentials; a free ID is not recorded until it is Pro. The account is Pro
-  while any of its IDs has the `pro` entitlement, cached an hour when Pro and
-  a minute when not, read from RevenueCat's subscriber endpoint with
-  `REVENUECAT_SECRET_KEY` if set, else both public SDK keys at once. An ID
-  belongs to the first account that claims it (a unique index; a second claim
-  is refused and logged), so one purchase cannot unlock many accounts. The ID
-  is random but not a proof of ownership: someone who learns another
-  install's ID (it appears in analytics) could claim it first. Tying it to
-  the account through RevenueCat (`Purchases.logIn`) would close that, at the
-  cost of changing purchase identity. Staleness: a lapsed account stays Pro
-  for up to an hour of cache plus the 7 days of a token already issued, and
-  a RevenueCat outage keeps the last answer instead of downgrading.
-- **Images.** Uploads need a `Content-Length` (at most 15 MB), stream straight
-  to R2, and a failed write is uncounted. `media_usage` caps an account at
-  20,000 images; when the counter says full, the real count is read from R2
-  first, so drift never refuses an upload. Images the app stops using stay in
-  R2 until the account is deleted (there is no per-image delete yet).
-- **Turso.** A database `m2t-sync-<24 hex of sha256(userId)>` in
-  `TURSO_GROUP` of `TURSO_ORG`, made through the Platform API with
-  `TURSO_API_TOKEN`, with the `sync_rows` / `sync_info` schema applied over
-  the HTTP API (mirrored in the app's `syncEngine.ts`; a test keeps them
-  identical). Turso Sync works on these default-engine (libSQL) databases;
-  the organization's `tursodb` engine setting is not needed. Tokens are full
-  access to that one database, stored sealed in D1 and reused until a day
-  before they expire. If the account is deleted while its database is being
-  made, the new database is deleted too.
-- **Sealed tokens.** Turso tokens and Apple refresh tokens are AES-GCM
-  encrypted with keys derived from `BETTER_AUTH_SECRET`. Rotating that secret
-  signs everyone out and makes the stored tokens unreadable: Turso tokens are
-  simply minted again, but Apple tokens stored before the rotation can no
-  longer be revoked.
-
-#### Config
-
-`wrangler.toml` holds the bindings (`AUTH_DB` D1, `MEDIA` R2, `EMAIL` Email
-Service, `AUTH_LIMITER` and `OTP_LIMITER`), the cron and the public vars.
-Secrets: `BETTER_AUTH_SECRET`, `TURSO_API_TOKEN` and `APPLE_PRIVATE_KEY`
-(all set), optional `REVENUECAT_SECRET_KEY`. Apple's client secret is a
-5-minute ES256 JWT signed with the Sign in with Apple key `F5629ZF4G6` (team
-`A9QF26PBRS`, vars `APPLE_TEAM_ID` and `APPLE_KEY_ID`).
-
-#### Storage (D1)
-
-Schema in [`apps/cloudflare/d1/cloud-sync/schema.sql`](apps/cloudflare/d1/cloud-sync/schema.sql):
-Better Auth's `user`, `session`, `account`, `verification`, `rateLimit`, plus
-`sync_databases` (user → Turso database, sealed token), `pro_links`,
-`media_usage`, `apple_tokens`, and for shared ledgers `shared_ledgers` (its
-Turso database and sealed token), `ledger_members`, `ledger_invites` (code
-hashes) and `ledger_media_usage`, each deleted with its user or ledger by
-`ON DELETE CASCADE`.
-
-#### Resources
-
-Made for this feature on 2026-10-28, all new (nothing existing is shared):
-
-| Resource                 | Name / id                                                                                                               | Remove with                                                                                 |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| Worker + custom domain   | `money2time-workers-cloud-sync`, `workers-cloud-sync.money2time.com`, daily cron `17 3 * * *`                           | `npx wrangler delete` in `workers/cloud-sync` (removes the domain route and cron too)       |
-| D1 database              | `money2time-cloud-sync-auth`, `2154e310-6fce-49eb-aa4b-565e343c9eb7`                                                    | `npx wrangler d1 delete money2time-cloud-sync-auth`                                         |
-| R2 bucket (private)      | `money2time-cloud-sync-media`                                                                                           | empty it, then `npx wrangler r2 bucket delete money2time-cloud-sync-media`                  |
-| Rate limit namespaces    | `2402` (`AUTH_LIMITER`), `2403` (`OTP_LIMITER`)                                                                         | go with the Worker                                                                          |
-| Worker secrets           | `BETTER_AUTH_SECRET`, `TURSO_API_TOKEN`, `APPLE_PRIVATE_KEY`                                                            | go with the Worker                                                                          |
-| Apple App ID capability  | Sign in with Apple (`APPLE_ID_AUTH`, primary) on `com.nelsongan.money2time`                                             | `asc bundle-ids capabilities remove --id 2ASN39AS8V_APPLE_ID_AUTH --confirm` (then rebuild) |
-| Sign in with Apple key   | `Money2Time Cloud Sync`, key id `F5629ZF4G6` (.p8 in `~/.config/money2time/` and the Worker secret `APPLE_PRIVATE_KEY`) | revoke it in the Apple Developer portal, Keys                                               |
-| Turso group              | `m2t-sync` (aws-ap-southeast-1), organization `nelsongan`                                                               | delete its databases, then the group, in the Turso dashboard                                |
-| Turso databases          | `m2t-sync-*`, one per user, in group `m2t-sync`                                                                         | `turso db destroy <name>`, or the Turso dashboard                                           |
-| Turso databases (shared) | `m2t-ledger-*`, one per shared ledger, in group `m2t-sync` (added 2026-10-28)                                           | `turso db destroy <name>`, or the Turso dashboard                                           |
-| D1 tables (shared)       | `shared_ledgers`, `ledger_members`, `ledger_invites`, `ledger_media_usage` in `money2time-cloud-sync-auth`              | go with the D1 database                                                                     |
-| Turso Platform API token | the Worker secret `TURSO_API_TOKEN` (copy in `~/.config/money2time/turso-api-token`)                                    | revoke it in the Turso dashboard, Settings > API Tokens                                     |
-| PostHog feature flag     | `cloud_sync` (to be created at rollout)                                                                                 | delete in PostHog                                                                           |
-
-Teardown order: delete the Worker first (nothing can make new databases), then
-the Turso databases listed in D1 (`SELECT db_name FROM sync_databases` and
-`SELECT db_name FROM shared_ledgers`), then D1 and R2.
-
-#### Deploy
-
-CI deploys the Worker on merge (the `cloudflare.yml` matrix). By hand:
-
-```bash
-# schema (idempotent)
-npx wrangler d1 execute money2time-cloud-sync-auth --remote --file ../../d1/cloud-sync/schema.sql
-# secrets, once
-openssl rand -hex 32 | npx wrangler secret put BETTER_AUTH_SECRET
-npx wrangler secret put TURSO_API_TOKEN
-npx wrangler secret put APPLE_PRIVATE_KEY < ~/.config/money2time/AuthKey_F5629ZF4G6.p8
-npx wrangler deploy
-```
-
-#### Local
-
-Run a local sync server and the Worker against it, then point a dev build at
-the Worker:
-
-```bash
-tursodb ./server.db --sync-server 127.0.0.1:8080   # turso_cli 0.8.3 from the turso GitHub release
-# .dev.vars: BETTER_AUTH_SECRET=…, BETTER_AUTH_URL=http://localhost:8787,
-#            LOCAL_SYNC_URL=http://localhost:8080, DEV_ASSUME_PRO=true
-npx wrangler d1 execute money2time-cloud-sync-auth --local --file ../../d1/cloud-sync/schema.sql
-npx wrangler dev --local --port 8787
-```
-
-`LOCAL_SYNC_URL` hands every user that server instead of a Turso database, and
-`DEV_ASSUME_PRO` (honoured only with it) skips the Pro check. Email codes are
-printed in the `wrangler dev` log. In the app, a dev build reads the Worker URL
-from AsyncStorage `m2t.cloudSync.devBaseUrl` (set it with `debugger-evaluate`),
-else `EXPO_PUBLIC_MONEY2TIME_WORKERS_CLOUD_SYNC`, else production. On Android
-run `adb reverse tcp:8787 tcp:8787` and `adb reverse tcp:8080 tcp:8080`.
 
 ### Tutorial media (R2)
 

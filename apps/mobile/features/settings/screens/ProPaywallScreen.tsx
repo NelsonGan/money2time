@@ -23,8 +23,6 @@ import { spacing } from '~/constants/designSystem';
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { usePackagesByType, usePro } from '~/context/ProContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
-import { useCloudSyncEnabled } from '~/features/cloudSync/CloudSyncContext';
-import { requestCloudSyncPrompt } from '~/features/cloudSync/lib/promptRequest';
 import {
   buildPurchaseAnalytics,
   resolvePaywallVariant,
@@ -416,7 +414,6 @@ interface CompareRow {
 }
 
 function useCompareRows(voiceSupported: boolean): CompareRow[] {
-  const cloudSyncEnabled = useCloudSyncEnabled();
   return useMemo<CompareRow[]>(
     () => [
       {
@@ -494,12 +491,6 @@ function useCompareRows(voiceSupported: boolean): CompareRow[] {
         pro: UNLIMITED,
       },
       {
-        // Free users keep the default ledger; each extra one is Pro.
-        label: I18n.t('ledgers.title'),
-        free: '1',
-        pro: UNLIMITED,
-      },
-      {
         label: I18n.t('pro.goals_label'),
         free: String(PRO_LIMITS.FREE_MAX_SAVINGS_GOALS),
         pro: UNLIMITED,
@@ -545,23 +536,11 @@ function useCompareRows(voiceSupported: boolean): CompareRow[] {
         free: String(PRO_LIMITS.FREE_MAX_UNSETTLED_SPLIT_BILLS),
         pro: UNLIMITED,
       },
-      // Only while the feature is rolled out (its PostHog flag).
-      ...(cloudSyncEnabled
-        ? [
-            { label: I18n.t('pro.cloud_sync_label'), free: false, pro: true },
-            // Anyone can join a ledger someone shares; sharing one is Pro.
-            {
-              label: I18n.t('pro.shared_ledgers_label'),
-              free: I18n.t('pro.shared_ledgers_free'),
-              pro: I18n.t('pro.shared_ledgers_pro'),
-            },
-          ]
-        : []),
       { label: I18n.t('pro.biometric_label'), free: false, pro: true },
       { label: I18n.t('pro.trends_label'), free: false, pro: true },
       { label: I18n.t('pro.widgets_label'), free: '2', pro: '8' },
     ],
-    [cloudSyncEnabled, voiceSupported],
+    [voiceSupported],
   );
 }
 
@@ -590,11 +569,7 @@ function CompareCell({
 
   const isUnlimited = value === UNLIMITED;
   return (
-    // One line in the narrow column: a long translation shrinks instead of wrapping.
     <Text
-      numberOfLines={1}
-      adjustsFontSizeToFit
-      minimumFontScale={0.6}
       style={[
         s.cellValue,
         {
@@ -985,8 +960,6 @@ export function ProPaywallScreen({ onClose, source, flashMessage }: ProPaywallSc
             period_type: result.customerState?.periodType ?? null,
           });
           recordProPurchase();
-          // Offers Cloud Sync once the paywall has closed (features/cloudSync).
-          requestCloudSyncPrompt();
           onClose();
           if (wasSubscriber && boughtLifetime) promptToCancelRedundantSubscription();
         } else if (result.status === 'pending') {

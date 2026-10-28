@@ -3,19 +3,12 @@ import { File, Paths } from 'expo-file-system/next';
 import * as Sharing from 'expo-sharing';
 
 import { getSQLite } from '~/lib/db/client';
-import { DEFAULT_LEDGER_ID, getActiveLedgerId } from '~/lib/db/ledgerScope';
 import { normalizeCurrencyColumns } from '~/lib/db/normalizeCurrencies';
 import { normalizeIconColumns } from '~/lib/db/normalizeIcons';
 import { retireSimpleMode } from '~/lib/db/retireSimpleMode';
-import {
-  parseLedgerPrefs,
-  paymentAlertsJsonForLedger,
-  quickEntryJsonForLedger,
-} from '~/lib/repositories/ledgerPrefs';
 import { resetAutomationCaptureData } from '~/services/resetAutomationCaptureData';
 import { runUserAssetGc } from '~/services/userAssetGc';
 import {
-  assetRelativePathFromRef,
   collectUserAssetsForBackup,
   restoreUserAssetsFromBackup,
   type UserAssetBackupEntry,
@@ -24,13 +17,8 @@ import {
 import { getErrorMessage } from '~/utils/errorHandling';
 import { newAppUserId, nowIso } from '~/utils/id';
 
-// Version 4 is a backup holding more than one ledger. It is written only then,
-// so an app from before ledgers refuses it instead of restoring every ledger's
-// rows into one book. A backup of the default ledger alone stays version 3,
-// which every app version reads.
 const BACKUP_VERSION = 3;
-const MULTI_LEDGER_BACKUP_VERSION = 4;
-const SUPPORTED_BACKUP_VERSIONS = new Set([1, 2, 3, 4]);
+const SUPPORTED_BACKUP_VERSIONS = new Set([1, 2, 3]);
 
 interface BackupTables {
   accounts: Record<string, unknown>[];
@@ -60,9 +48,6 @@ interface BackupTables {
   receipt_splits?: Record<string, unknown>[];
   receipt_split_items?: Record<string, unknown>[];
   receipt_split_item_shares?: Record<string, unknown>[];
-  // Ledgers (migration 075). Optional: a backup without it holds only the
-  // default ledger, whose rows restore there through the column default.
-  ledgers?: Record<string, unknown>[];
 }
 
 export interface BackupData {
@@ -110,16 +95,12 @@ function withPreservedAppUserId(
 export async function buildBackupData(opts?: {
   includeAsset?: (path: string) => boolean;
   assetCache?: UserAssetReadCache;
-  /** Keep only the open ledger's rows (the Web Dashboard shows one ledger). */
-  openLedgerOnly?: boolean;
 }): Promise<BackupData> {
   const sqlite = getSQLite();
   const now = nowIso();
-  const ledgers = tryReadTable(sqlite, 'ledgers');
-  const liveLedgerCount = ledgers.filter((row) => row.deleted_at == null).length;
 
-  const data: BackupData = {
-    version: liveLedgerCount > 1 ? MULTI_LEDGER_BACKUP_VERSION : BACKUP_VERSION,
+  return {
+    version: BACKUP_VERSION,
     exportedAt: now,
     userAssets: await collectUserAssetsForBackup(opts?.includeAsset, opts?.assetCache),
     tables: {
@@ -158,120 +139,7 @@ export async function buildBackupData(opts?: {
       receipt_splits: tryReadTable(sqlite, 'receipt_splits'),
       receipt_split_items: tryReadTable(sqlite, 'receipt_split_items'),
       receipt_split_item_shares: tryReadTable(sqlite, 'receipt_split_item_shares'),
-      ledgers,
     },
-  };
-  return opts?.openLedgerOnly ? onlyOpenLedger(data) : data;
-}
-
-/**
- * The backup's rows and images that belong to the open ledger, with the
- * settings row as that ledger reads it. Root rows match on `ledger_id`; child
- * rows follow their parents.
- */
-function onlyOpenLedger(data: BackupData): BackupData {
-  const ledgerId = getActiveLedgerId();
-  const tables = data.tables;
-  const inLedger = (rows: Record<string, unknown>[] | undefined) =>
-    (rows ?? []).filter((row) => (row.ledger_id ?? DEFAULT_LEDGER_ID) === ledgerId);
-  const idsOf = (rows: Record<string, unknown>[]) => new Set(rows.map((row) => row.id));
-  const childrenOf = (
-    rows: Record<string, unknown>[] | undefined,
-    column: string,
-    parentIds: ReadonlySet<unknown>,
-  ) => (rows ?? []).filter((row) => parentIds.has(row[column]));
-
-  const transactions = inLedger(tables.transactions);
-  const transactionIds = idsOf(transactions);
-  const albums = inLedger(tables.albums);
-  const budgetTemplates = inLedger(tables.budget_templates);
-  const monthlyBudgets = inLedger(tables.monthly_budgets);
-  const receiptSplits = childrenOf(tables.receipt_splits, 'transaction_id', transactionIds);
-  const receiptSplitIds = idsOf(receiptSplits);
-  const ledger = (tables.ledgers ?? []).find((row) => row.id === ledgerId);
-
-  const filtered: BackupTables = {
-    ...tables,
-    accounts: inLedger(tables.accounts),
-    account_groups: inLedger(tables.account_groups),
-    categories: inLedger(tables.categories),
-    transactions,
-    transaction_splits: childrenOf(tables.transaction_splits, 'transaction_id', transactionIds),
-    recurring_rules: inLedger(tables.recurring_rules),
-    albums,
-    album_transactions: childrenOf(tables.album_transactions, 'album_id', idsOf(albums)),
-    items: inLedger(tables.items),
-    budget_templates: budgetTemplates,
-    budget_template_categories: childrenOf(
-      tables.budget_template_categories,
-      'template_id',
-      idsOf(budgetTemplates),
-    ),
-    monthly_budgets: monthlyBudgets,
-    monthly_budget_categories: childrenOf(
-      tables.monthly_budget_categories,
-      'budget_id',
-      idsOf(monthlyBudgets),
-    ),
-    receipt_splits: receiptSplits,
-    receipt_split_items: childrenOf(
-      tables.receipt_split_items,
-      'receipt_split_id',
-      receiptSplitIds,
-    ),
-    receipt_split_item_shares: childrenOf(
-      tables.receipt_split_item_shares,
-      'receipt_split_id',
-      receiptSplitIds,
-    ),
-    settings:
-      ledger && ledgerId !== DEFAULT_LEDGER_ID
-        ? tables.settings.map((row) => withLedgerSettings(row, ledger))
-        : tables.settings,
-    ledgers: ledger ? [ledger] : [],
-  };
-
-  // Only the images the kept rows name. Every string value is offered: one
-  // that is not an image path matches no file, which is harmless.
-  const referenced = new Set<string>();
-  for (const rows of Object.values(filtered)) {
-    for (const row of rows ?? []) {
-      for (const value of Object.values(row)) {
-        const path = typeof value === 'string' ? assetRelativePathFromRef(value) : null;
-        if (path) referenced.add(path);
-      }
-    }
-  }
-
-  return {
-    ...data,
-    version: BACKUP_VERSION,
-    userAssets: data.userAssets?.filter((asset) => referenced.has(asset.path)),
-    tables: filtered,
-  };
-}
-
-/**
- * The settings row as a non-default ledger reads it: its own currency,
- * payback account, quick-entry and payment-alert picks and Insights
- * preferences over the default ledger's (see lib/repositories/ledgerPrefs.ts).
- */
-function withLedgerSettings(
-  row: Record<string, unknown>,
-  ledger: Record<string, unknown>,
-): Record<string, unknown> {
-  const prefs = parseLedgerPrefs(typeof ledger.prefs_json === 'string' ? ledger.prefs_json : null);
-  const text = (value: unknown) => (typeof value === 'string' ? value : null);
-  const currency = text(ledger.currency_code);
-  return {
-    ...row,
-    ...(currency
-      ? { currency_code: currency, currency_symbol: text(ledger.currency_symbol) ?? currency }
-      : {}),
-    default_payback_account_id: prefs.defaultPaybackAccountId ?? null,
-    insights_prefs_json: prefs.insightsPrefsJson ?? null,
-    quick_entry_prefs_json: quickEntryJsonForLedger(text(row.quick_entry_prefs_json), prefs),
-    auto_log_prefs_json: paymentAlertsJsonForLedger(text(row.auto_log_prefs_json), prefs),
   };
 }
 
@@ -468,8 +336,6 @@ export function applyBackupData(backup: BackupData): ImportResult {
     sqlite.execSync('DELETE FROM categories');
     sqlite.execSync('DELETE FROM settings');
     sqlite.execSync('DELETE FROM monthly_wage_settings');
-    const hasLedgers = getTableColumnNames(sqlite, 'ledgers').size > 0;
-    if (hasLedgers) sqlite.execSync('DELETE FROM ledgers');
 
     insertRows(sqlite, 'account_groups', backup.tables.account_groups);
     insertRows(sqlite, 'accounts', backup.tables.accounts);
@@ -498,19 +364,6 @@ export function applyBackupData(backup: BackupData): ImportResult {
     insertRows(sqlite, 'monthly_budget_categories', backup.tables.monthly_budget_categories);
     insertRows(sqlite, 'settings', settingsRows);
     insertRows(sqlite, 'monthly_wage_settings', backup.tables.monthly_wage_settings);
-    if (hasLedgers) {
-      insertRows(sqlite, 'ledgers', backup.tables.ledgers);
-      // A backup from before ledgers has no ledger rows, and every ledger
-      // needs the default one. A restore always opens the default ledger: the
-      // one it was on may not be in this backup.
-      sqlite.runSync(
-        `INSERT OR IGNORE INTO ledgers (id, sort_order, created_at, updated_at)
-         VALUES (?, 0, ?, ?)`,
-        [DEFAULT_LEDGER_ID, nowIso(), nowIso()],
-      );
-      sqlite.runSync('UPDATE ledgers SET deleted_at = NULL WHERE id = ?', [DEFAULT_LEDGER_ID]);
-      sqlite.execSync('UPDATE settings SET active_ledger_id = NULL');
-    }
 
     // Old backups can restore the retired flag after migration 63 has already
     // run. Convert within this transaction so a failure rolls back the restore.

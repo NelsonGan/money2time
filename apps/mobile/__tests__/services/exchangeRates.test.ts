@@ -9,12 +9,7 @@ import {
 } from '~/services/exchangeRates';
 
 jest.mock('~/lib/repositories/exchangeRatesRepository', () => ({
-  exchangeRatesRepository: {
-    upsertApiRates: jest.fn(),
-    listByBase: jest.fn(() => [
-      { quoteCurrency: 'EUR', rate: 0.9, source: 'api', updatedAt: new Date().toISOString() },
-    ]),
-  },
+  exchangeRatesRepository: { upsertApiRates: jest.fn() },
 }));
 jest.mock('~/lib/repositories/settingsRepository', () => ({
   settingsRepository: { get: jest.fn(), updateSettings: jest.fn() },
@@ -125,29 +120,6 @@ describe('runRateRefreshIfDue', () => {
     expect(result.ok).toBe(true);
     expect(global.fetch).not.toHaveBeenCalled();
     expect(mockedRates.upsertApiRates).not.toHaveBeenCalled();
-  });
-
-  it('fetches on a fresh day when the reporting currency has no rates yet', async () => {
-    // A ledger in another currency: the day's fetch was for a different base.
-    mockedSettings.get.mockReturnValue(settings({ lastRateFetchAt: new Date().toISOString() }));
-    (mockedRates.listByBase as jest.Mock).mockReturnValueOnce([]);
-    (global.fetch as jest.Mock).mockResolvedValue({ ok: false, status: 503 });
-
-    await runRateRefreshIfDue();
-
-    expect(global.fetch).toHaveBeenCalled();
-  });
-
-  it("fetches when this currency's feed rates are old, whatever the last fetch was", async () => {
-    mockedSettings.get.mockReturnValue(settings({ lastRateFetchAt: new Date().toISOString() }));
-    (mockedRates.listByBase as jest.Mock).mockReturnValueOnce([
-      { quoteCurrency: 'EUR', rate: 0.9, source: 'api', updatedAt: '2020-01-01T00:00:00.000Z' },
-    ]);
-    (global.fetch as jest.Mock).mockResolvedValue({ ok: false, status: 503 });
-
-    await runRateRefreshIfDue();
-
-    expect(global.fetch).toHaveBeenCalled();
   });
 
   it('records an error and does not upsert on a failed request', async () => {

@@ -35,7 +35,6 @@ import {
   useSettingsBottomNavInset,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
-import { useCloudSync } from '~/features/cloudSync/CloudSyncContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
@@ -108,7 +107,6 @@ function formatSize(bytes: number): string {
 
 export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
   const { settings, updateSettings, refreshAll, refreshSettings } = useApp();
-  const cloudSyncOn = useCloudSync().status === 'ready';
   const bottomNavInset = useSettingsBottomNavInset();
   const themeColors = useThemeColors();
 
@@ -433,9 +431,7 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
 
     Alert.alert(
       I18n.t('auto_backup.restore_confirm_title'),
-      `${formatRelative(record.createdAt)}\n${summaryLine}\n\n${I18n.t('auto_backup.restore_confirm_warning')}${
-        cloudSyncOn ? `\n\n${I18n.t('cloud_sync.restore_warning')}` : ''
-      }`.trim(),
+      `${formatRelative(record.createdAt)}\n${summaryLine}\n\n${I18n.t('auto_backup.restore_confirm_warning')}`.trim(),
       [
         { text: I18n.t('common.cancel'), style: 'cancel' },
         {

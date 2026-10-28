@@ -51,8 +51,6 @@ jobs:
           - worker: live-earnings
             database: money2time-d1-live-earnings
           - worker: web-dashboard
-          - worker: cloud-sync
-            database: money2time-cloud-sync-auth
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -95,9 +93,6 @@ jobs:
             schema: live-earnings
           # Stateless: no D1 database, so no schema to apply.
           - worker: web-dashboard
-          - worker: cloud-sync
-            database: money2time-cloud-sync-auth
-            schema: cloud-sync
     steps:
       - name: Check out repository
         uses: actions/checkout@v4

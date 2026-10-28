@@ -170,7 +170,6 @@ export const FLAT_ICON_FOR_CLAY: Record<ClayIconName, FlatIconSpec> = {
   'settings/budget': { icon: PiggyBank, tone: 'primary' },
   'settings/categories': { icon: FolderTree, tone: 'primary' },
   'settings/contact': { icon: MessageCircle, tone: 'primary' },
-  'settings/cloud-sync': { icon: RefreshCcw, tone: 'primary' },
   'settings/data-management': { icon: DatabaseBackup, tone: 'primary' },
   'settings/display': { icon: Palette, tone: 'primary' },
   'settings/exchange-rates': { icon: Coins, tone: 'primary' },
