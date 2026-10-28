@@ -2,7 +2,12 @@ import { and, eq, isNull, lte } from 'drizzle-orm';
 
 import { getDb } from '~/lib/db/client';
 import { getActiveLedgerId, inActiveLedger } from '~/lib/db/ledgerScope';
-import { accountsTable, recurringRulesTable } from '~/lib/db/schema';
+import {
+  accountsTable,
+  recurringRulesTable,
+  settingsTable,
+  transactionsTable,
+} from '~/lib/db/schema';
 import type { ProcessedRecurringRule, RecurrencePattern, RecurringTransactionRule } from '~/types';
 import { buildRateTable, convert } from '~/utils/currency';
 import { newId, nowIso } from '~/utils/id';
@@ -179,6 +184,18 @@ class RecurringRulesRepository {
     const processed: ProcessedRecurringRule[] = [];
 
     dueRules.forEach((rule) => {
+      // One id per rule and run date: two phones that both run a due rule
+      // (Cloud Sync) make the same row instead of two, and a run that already
+      // happened (even if since deleted) is never made again.
+      const createRun = (input: Parameters<typeof transactionsRepository.create>[0]) => {
+        const id = recurringRunTransactionId(rule.id, input.date);
+        const exists = db
+          .select({ id: transactionsTable.id })
+          .from(transactionsTable)
+          .where(eq(transactionsTable.id, id))
+          .get();
+        if (!exists) transactionsRepository.createWithId(id, input);
+      };
       let cursor = rule.nextRunDate;
       let guard = 0;
       while (cursor <= todayIso && guard < 500) {
@@ -196,7 +213,7 @@ class RecurringRulesRepository {
               const snapshot = counted
                 ? convert(rule.amount, rule.currency, reporting, rateTable)
                 : null;
-              transactionsRepository.create({
+              createRun({
                 type: 'transfer',
                 amount: rule.amount,
                 currency: rule.currency,
@@ -225,7 +242,7 @@ class RecurringRulesRepository {
               reporting,
               rateTable,
             );
-            transactionsRepository.create({
+            createRun({
               type: rule.type,
               amount: rule.amount,
               currency: rule.currency,
@@ -270,6 +287,11 @@ class RecurringRulesRepository {
 
     return processed;
   }
+}
+
+/** The transaction a recurring rule makes on one run date. */
+export function recurringRunTransactionId(ruleId: string, date: string): string {
+  return `rr:${ruleId}:${date.slice(0, 10)}`;
 }
 
 export const recurringRulesRepository = new RecurringRulesRepository();

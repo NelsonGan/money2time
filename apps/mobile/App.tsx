@@ -86,6 +86,8 @@ import {
   PeriodBudgetEditorScreen,
 } from '~/features/budget/screens';
 import { CalendarScreen } from '~/features/calendar/screens';
+import { CloudSyncProvider } from '~/features/cloudSync/CloudSyncContext';
+import { CloudSyncPromptHost } from '~/features/cloudSync/components/CloudSyncPromptHost';
 import { AddGoalButton } from '~/features/goals/components/AddGoalButton';
 import { GoalCelebrationOverlay } from '~/features/goals/components/GoalCelebrationOverlay';
 import {
@@ -2979,6 +2981,11 @@ function AppContent() {
     void trackEvent(AnalyticsEvents.CLOUD_BACKUP_PROMPT_DISMISSED);
   }, []);
 
+  const handleTurnOnCloudSync = useCallback(() => {
+    requestOpenTab('settings');
+    requestOpenSettingsScreen('CloudSync');
+  }, []);
+
   const handleEnableCloudBackup = useCallback(() => {
     setCloudBackupPromptVisible(false);
     cloudBackupShowingRef.current = false;
@@ -3223,6 +3230,10 @@ function AppContent() {
         onEnable={handleEnableCloudBackup}
         onDismiss={handleDismissCloudBackupPrompt}
       />
+      <CloudSyncPromptHost
+        allowed={!biometricLocked && rootPromptsAllowed}
+        onTurnOn={handleTurnOnCloudSync}
+      />
       <ReviewPrePromptSheet />
       <LedgerProGuard
         canSwitch={rootPromptsAllowed}
@@ -3274,11 +3285,13 @@ export default function App() {
           <AppErrorBoundary>
             <AppProvider>
               <ProProvider>
-                <ReceiptScanProvider>
-                  <ThemeGate>
-                    <AppContent />
-                  </ThemeGate>
-                </ReceiptScanProvider>
+                <CloudSyncProvider>
+                  <ReceiptScanProvider>
+                    <ThemeGate>
+                      <AppContent />
+                    </ThemeGate>
+                  </ReceiptScanProvider>
+                </CloudSyncProvider>
               </ProProvider>
             </AppProvider>
           </AppErrorBoundary>

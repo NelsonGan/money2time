@@ -1,0 +1,134 @@
+diff --git a/node_modules/@tursodatabase/sync-react-native/android/src/main/java/com/turso/sync/reactnative/TursoBridge.java b/node_modules/@tursodatabase/sync-react-native/android/src/main/java/com/turso/sync/reactnative/TursoBridge.java
+index 3f36283..b943559 100644
+--- a/node_modules/@tursodatabase/sync-react-native/android/src/main/java/com/turso/sync/reactnative/TursoBridge.java
++++ b/node_modules/@tursodatabase/sync-react-native/android/src/main/java/com/turso/sync/reactnative/TursoBridge.java
+@@ -24,12 +24,16 @@ public class TursoBridge {
+   private native void clearStateNativeJsi();
+ 
+   public void install(ReactContext context) throws Exception {
++    // No CatalystInstance in bridgeless React Native (0.88): read the runtime
++    // and call invoker from the context. (Patched in money2time: patches/.)
++    if (context.getJavaScriptContextHolder() == null || context.getJSCallInvokerHolder() == null) {
++      throw new Exception("JS runtime not ready");
++    }
+     long jsContextPointer = context.getJavaScriptContextHolder().get();
+     if (jsContextPointer == 0) {
+       throw new Exception("jsContextPointer == 0");
+     }
+-    CallInvokerHolderImpl jsCallInvokerHolder = (CallInvokerHolderImpl) context.getCatalystInstance()
+-        .getJSCallInvokerHolder();
++    CallInvokerHolderImpl jsCallInvokerHolder = (CallInvokerHolderImpl) context.getJSCallInvokerHolder();
+ 
+     // getDatabasePath(...) returns file path - so we pass dummy value and remove it
+     // after to get directory path
+diff --git a/node_modules/@tursodatabase/sync-react-native/ios/TursoModule.h b/node_modules/@tursodatabase/sync-react-native/ios/TursoModule.h
+index de769be..d794be4 100644
+--- a/node_modules/@tursodatabase/sync-react-native/ios/TursoModule.h
++++ b/node_modules/@tursodatabase/sync-react-native/ios/TursoModule.h
+@@ -2,7 +2,9 @@
+ #import <React/RCTBridgeModule.h>
+ #import <React/RCTInvalidating.h>
+ 
+-@interface Turso : NSObject <RCTBridgeModule, RCTInvalidating>
++#import <ReactCommon/RCTTurboModuleWithJSIBindings.h>
++
++@interface Turso : NSObject <RCTBridgeModule, RCTInvalidating, RCTTurboModuleWithJSIBindings>
+ 
+ @property (nonatomic, assign) BOOL setBridgeOnMainQueue;
+ 
+diff --git a/node_modules/@tursodatabase/sync-react-native/ios/TursoModule.mm b/node_modules/@tursodatabase/sync-react-native/ios/TursoModule.mm
+index b8219b8..3e603ff 100644
+--- a/node_modules/@tursodatabase/sync-react-native/ios/TursoModule.mm
++++ b/node_modules/@tursodatabase/sync-react-native/ios/TursoModule.mm
+@@ -1,13 +1,22 @@
+ #import "TursoModule.h"
+ 
+-#import <React/RCTBridge+Private.h>
+ #import <React/RCTUtils.h>
+ #import <ReactCommon/RCTTurboModule.h>
++#import <ReactCommon/RCTTurboModuleWithJSIBindings.h>
++#import <ReactCommon/RCTInteropTurboModule.h>
+ #import <jsi/jsi.h>
+ 
+ #import "TursoHostObject.h"
+ 
+-@implementation Turso
++// A TurboModule (not a legacy interop module), so React Native calls
++// installJSIBindingsWithRuntime below; the interop TurboModule keeps the
++// exported methods and constants working. (Patched in money2time.)
++@interface Turso () <RCTTurboModule>
++@end
++
++@implementation Turso {
++    BOOL _installed;
++}
+ 
+ @synthesize bridge = _bridge;
+ 
+@@ -44,33 +53,14 @@ - (NSDictionary *)constantsToExport {
+     };
+ }
+ 
+-- (void)setBridge:(RCTBridge *)bridge {
+-    _bridge = bridge;
+-
+-    RCTCxxBridge *cxxBridge = (RCTCxxBridge *)self.bridge;
+-    if (!cxxBridge.runtime) {
+-        return;
+-    }
+-
+-    [self installLibrary];
+-}
+-
+-- (void)installLibrary {
+-    RCTCxxBridge *cxxBridge = (RCTCxxBridge *)self.bridge;
+-    if (!cxxBridge.runtime) {
+-        return;
+-    }
+-
+-    facebook::jsi::Runtime *runtime = (facebook::jsi::Runtime *)cxxBridge.runtime;
+-    if (!runtime) {
+-        return;
+-    }
+-
+-    // Get the documents directory for database storage
++// React Native 0.88 has no bridge (RCTCxxBridge is gone): the TurboModule
++// manager calls this when the module is created, on the JS thread, with the
++// runtime to install into. (Patched in money2time: patches/.)
++- (void)installJSIBindingsWithRuntime:(facebook::jsi::Runtime &)runtime
++                          callInvoker:(const std::shared_ptr<facebook::react::CallInvoker> &)callInvoker {
+     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+     NSString *documentsPath = [paths firstObject];
+ 
+-    // Check for app group (for sharing data between app and extensions)
+     NSString *appGroup = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"Turso_AppGroup"];
+     if (appGroup) {
+         NSURL *containerURL = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:appGroup];
+@@ -79,11 +69,13 @@ - (void)installLibrary {
+         }
+     }
+ 
+-    // Get the call invoker
+-    auto callInvoker = _bridge.jsCallInvoker;
++    turso::install(runtime, callInvoker, [documentsPath UTF8String]);
++    _installed = YES;
++}
+ 
+-    // Install the Turso module
+-    turso::install(*runtime, callInvoker, [documentsPath UTF8String]);
++- (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
++    (const facebook::react::ObjCTurboModule::InitParams &)params {
++    return std::make_shared<facebook::react::ObjCInteropTurboModule>(params);
+ }
+ 
+ - (void)invalidate {
+@@ -92,8 +84,7 @@ - (void)invalidate {
+ 
+ // Synchronous method to check if the module is installed
+ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(install) {
+-    [self installLibrary];
+-    return @YES;
++    return @(_installed);
+ }
+ 
+ @end

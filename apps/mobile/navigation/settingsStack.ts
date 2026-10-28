@@ -42,6 +42,7 @@ export type SettingsStackParamList = {
   News: undefined;
   AutoBackupSettings: undefined;
   WebDashboard: undefined;
+  CloudSync: undefined;
   StatementImport: undefined;
   StatementImportList: {
     section: 'expense' | 'income';

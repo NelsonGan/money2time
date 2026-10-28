@@ -1,14 +1,17 @@
 jest.mock('~/lib/db/client', () => ({ getDb: jest.fn() }));
 jest.mock('~/lib/repositories/transactionsRepository', () => ({
-  transactionsRepository: { create: jest.fn() },
+  transactionsRepository: { create: jest.fn(), createWithId: jest.fn() },
 }));
 jest.mock('~/lib/repositories/exchangeRatesRepository', () => ({
   exchangeRatesRepository: { listByBase: () => [] },
 }));
 
 import { getDb } from '~/lib/db/client';
-import { accountsTable, recurringRulesTable } from '~/lib/db/schema';
-import { recurringRulesRepository } from '~/lib/repositories/recurringRulesRepository';
+import { accountsTable, recurringRulesTable, transactionsTable } from '~/lib/db/schema';
+import {
+  recurringRulesRepository,
+  recurringRunTransactionId,
+} from '~/lib/repositories/recurringRulesRepository';
 import { transactionsRepository } from '~/lib/repositories/transactionsRepository';
 import type { RecurringTransactionRule } from '~/types';
 
@@ -51,6 +54,8 @@ function useRule(rule: RecurringTransactionRule) {
     select: () => ({
       from: (table: unknown) => {
         if (table === recurringRulesTable) return query;
+        // No run exists yet (the id lookup before each insert).
+        if (table === transactionsTable) return { where: () => ({ get: () => undefined }) };
         if (table === accountsTable) {
           return {
             all: () => [
@@ -80,19 +85,19 @@ describe('loan recurring end dates', () => {
     recurringRulesRepository.runDueTransactions('2026-09-30T23:59:59.999Z');
 
     expect(
-      jest.mocked(transactionsRepository.create).mock.calls.map(([input]) => input.date),
+      jest.mocked(transactionsRepository.createWithId).mock.calls.map(([, input]) => input.date),
     ).toEqual(['2026-07-30', '2026-08-30T00:00:00.000Z', '2026-09-30T00:00:00.000Z']);
     expect(rule.nextRunDate).toBe('2026-10-30T00:00:00.000Z');
     expect(rule.isActive).toBe(false);
     expect(recurringRulesRepository.runDueTransactions('2026-10-31T00:00:00.000Z')).toEqual([]);
-    expect(transactionsRepository.create).toHaveBeenCalledTimes(3);
+    expect(transactionsRepository.createWithId).toHaveBeenCalledTimes(3);
   });
 
   it('keeps the rule active while its final installment is still pending', () => {
     const rule = useRule(makeLoanRule());
     recurringRulesRepository.runDueTransactions('2026-08-31T23:59:59.999Z');
 
-    expect(transactionsRepository.create).toHaveBeenCalledTimes(2);
+    expect(transactionsRepository.createWithId).toHaveBeenCalledTimes(2);
     expect(rule.nextRunDate).toBe('2026-09-30T00:00:00.000Z');
     expect(rule.isActive).toBe(true);
   });
@@ -103,8 +108,9 @@ describe('loan recurring end dates', () => {
     );
     recurringRulesRepository.runDueTransactions(new Date('2026-09-30T23:59:59').toISOString());
 
-    expect(transactionsRepository.create).toHaveBeenCalledTimes(1);
-    expect(transactionsRepository.create).toHaveBeenCalledWith(
+    expect(transactionsRepository.createWithId).toHaveBeenCalledTimes(1);
+    expect(transactionsRepository.createWithId).toHaveBeenCalledWith(
+      'rr:repayment:2026-09-30',
       expect.objectContaining({ date: new Date('2026-09-30T23:59:58').toISOString(), amount: 100 }),
     );
     expect(rule.isActive).toBe(false);
@@ -119,7 +125,23 @@ describe('loan recurring end dates', () => {
     );
     recurringRulesRepository.runDueTransactions(new Date('2026-09-30T23:59:59').toISOString());
 
-    expect(transactionsRepository.create).not.toHaveBeenCalled();
+    expect(transactionsRepository.createWithId).not.toHaveBeenCalled();
     expect(rule.isActive).toBe(false);
+  });
+
+  it('names each run after its rule and date, so two phones make the same row', () => {
+    useRule(makeLoanRule());
+    recurringRulesRepository.runDueTransactions('2026-08-31T23:59:59.999Z');
+    expect(jest.mocked(transactionsRepository.createWithId).mock.calls.map(([id]) => id)).toEqual([
+      'rr:repayment:2026-07-30',
+      'rr:repayment:2026-08-30',
+    ]);
+  });
+});
+
+describe('recurringRunTransactionId', () => {
+  it('uses the run day only', () => {
+    expect(recurringRunTransactionId('r1', '2026-08-30T00:00:00.000Z')).toBe('rr:r1:2026-08-30');
+    expect(recurringRunTransactionId('r1', '2026-08-30')).toBe('rr:r1:2026-08-30');
   });
 });

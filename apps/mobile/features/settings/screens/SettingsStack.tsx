@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { PaymentAlertSourceScreen } from '~/features/autoLog/screens/PaymentAlertSourceScreen';
 import { PaymentAlertsSettingsScreen } from '~/features/autoLog/screens/PaymentAlertsSettingsScreen';
+import { CloudSyncScreen } from '~/features/cloudSync/screens/CloudSyncScreen';
 import { ItemsScreen } from '~/features/items/screens';
 import { LedgerEditorScreen } from '~/features/ledgers/screens/LedgerEditorScreen';
 import { LedgersScreen } from '~/features/ledgers/screens/LedgersScreen';
@@ -115,6 +116,7 @@ function SettingsHomeRoute({
       onOpenNotifications={() => navigation.navigate('Notifications')}
       onOpenDataManagement={() => navigation.navigate('DataManagement')}
       onOpenWebDashboard={() => navigation.navigate('WebDashboard')}
+      onOpenCloudSync={() => navigation.navigate('CloudSync')}
       onOpenNews={() => navigation.navigate('News')}
       onOpenStatementImport={() => navigation.navigate('StatementImport')}
       onOpenQuickEntry={() => navigation.navigate('QuickEntrySettings')}
@@ -413,6 +415,17 @@ export function SettingsStack({
         {(props) => {
           stackNavigationRef.current = props.navigation;
           return <AutoBackupScreen onBack={() => props.navigation.goBack()} />;
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="CloudSync">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return (
+            <CloudSyncScreen
+              onBack={() => props.navigation.goBack()}
+              onOpenProPaywall={onOpenProPaywall}
+            />
+          );
         }}
       </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="WebDashboard">

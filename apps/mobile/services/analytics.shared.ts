@@ -120,6 +120,14 @@ export const POSTHOG_EVENTS = {
   CLOUD_BACKUP_PROMPT_CTA_TAPPED: 'Cloud Backup Prompt CTA Tapped',
   CLOUD_BACKUP_PROMPT_DISMISSED: 'Cloud Backup Prompt Dismissed',
 
+  // Cloud Sync: the post-purchase offer, sign-in and turning it on.
+  CLOUD_SYNC_PROMPT_SHOWN: 'Cloud Sync Prompt Shown',
+  CLOUD_SYNC_PROMPT_ACCEPTED: 'Cloud Sync Prompt Accepted',
+  CLOUD_SYNC_PROMPT_DISMISSED: 'Cloud Sync Prompt Dismissed',
+  CLOUD_SYNC_SIGNED_IN: 'Cloud Sync Signed In',
+  CLOUD_SYNC_ENABLED: 'Cloud Sync Enabled',
+  CLOUD_SYNC_ACCOUNT_DELETED: 'Cloud Sync Account Deleted',
+
   // Satisfaction: the happy/unhappy pre-prompt is a continuous NPS-like signal.
   REVIEW_PREPROMPT_SHOWN: 'Review Preprompt Shown',
   REVIEW_PREPROMPT_HAPPY: 'Review Preprompt Happy',
@@ -240,6 +248,8 @@ export const GA4_ONLY_EVENTS = {
 
   // Auto-backup
   AUTO_BACKUP_RESTORED: 'Auto Backup Restored',
+  CLOUD_SYNC_SIGNED_OUT: 'Cloud Sync Signed Out',
+  CLOUD_SYNC_FAILED: 'Cloud Sync Failed',
   AUTO_BACKUP_DELETED: 'Auto Backup Deleted',
   AUTO_BACKUP_SETTING_TOGGLED: 'Auto Backup Setting Toggled',
   AUTO_BACKUP_TARGET_CHANGED: 'Auto Backup Target Changed',
