@@ -583,8 +583,10 @@ its own sync engine and replica.
 
 - **Tables.** `ledger_id TEXT NOT NULL DEFAULT 'default'` is on `accounts`,
   `account_groups`, `categories`, `transactions`, `recurring_rules`, `albums`,
-  `items`, `budget_templates`, `monthly_budgets`, `auto_log_captures` and
-  `merchant_categories` (`LEDGER_TABLES` in `lib/db/ledgerScope.ts`).
+  `items`, `budget_templates`, `monthly_budgets` and `auto_log_captures`
+  (`LEDGER_TABLES` in `lib/db/ledgerScope.ts`). The legacy
+  `merchant_categories` table has no column: no code reads it any more, and
+  resets and imports only clear it.
   - Child tables (splits, receipt splits, album joins, budget lines) follow
     their parent.
   - A constant-default `ADD COLUMN` rewrites no rows. The migration is instant
@@ -618,9 +620,8 @@ its own sync engine and replica.
     `lib/repositories/ledgerPrefs.ts`, so the rest of the app reads `settings`,
     `quickEntryPrefs` and the payment-alert prefs as before.
   - A write that spans both rows runs in one transaction.
-- **Indexes.** The natural-key unique indexes are per ledger
-  (`idx_monthly_budgets_ledger_period_key`,
-  `idx_merchant_categories_ledger_key`).
+- **Indexes.** The one-budget-per-period unique index is per ledger
+  (`idx_monthly_budgets_ledger_period_key`).
   - There is deliberately no plain `ledger_id` index. With few ledgers it is
     barely selective, and without `ANALYZE` statistics SQLite could prefer it
     over the date and account indexes the transaction queries use.
@@ -645,7 +646,7 @@ its own sync engine and replica.
 - **Cloud Sync.**
   - `ledgers` belongs in `SYNC_TABLES` and in the backup-table parity list,
     and `active_ledger_id` in `DEVICE_LOCAL_SETTINGS_COLUMNS`.
-  - The per-ledger unique indexes above are the natural keys to resolve.
+  - The per-ledger budget index above is a natural key to resolve.
   - Cloud Sync's branch uses migration `072`, which is why this one is `073`.
     Whichever of the two merges second must renumber after the first, or
     installs that ran the higher number skip the lower one.

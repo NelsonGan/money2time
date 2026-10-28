@@ -17,7 +17,6 @@ const LEDGER_ROOT_TABLES = [
   'budget_templates',
   'monthly_budgets',
   'auto_log_captures',
-  'merchant_categories',
 ] as const;
 
 // Ledgers: separate books (Personal, Work, …) in the one database.
@@ -29,7 +28,7 @@ const LEDGER_ROOT_TABLES = [
 //   ADD COLUMN only rewrites the schema, never the rows, so this is instant on
 //   any database size.
 // - `settings.active_ledger_id`: the ledger open on this phone (NULL = default).
-// - Natural-key unique indexes now hold per ledger.
+// - One live budget per period now holds per ledger.
 // No plain ledger_id index on purpose: with only one or a few ledgers it is
 // barely selective, and without ANALYZE stats SQLite could pick it over the
 // date and account indexes that the transaction queries rely on.
@@ -62,10 +61,6 @@ export const migration073Ledgers: DbMigration = {
       DROP INDEX IF EXISTS idx_monthly_budgets_period_key;
       CREATE UNIQUE INDEX IF NOT EXISTS idx_monthly_budgets_ledger_period_key
         ON monthly_budgets(ledger_id, period, month)
-        WHERE deleted_at IS NULL;
-      DROP INDEX IF EXISTS idx_merchant_categories_key;
-      CREATE UNIQUE INDEX IF NOT EXISTS idx_merchant_categories_ledger_key
-        ON merchant_categories(ledger_id, merchant_key)
         WHERE deleted_at IS NULL;
     `);
   },

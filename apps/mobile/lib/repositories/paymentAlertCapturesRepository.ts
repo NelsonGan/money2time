@@ -85,56 +85,52 @@ class PaymentAlertCapturesRepository {
     return !!row;
   }
 
+  /**
+   * A capture to review or log, in the open ledger: its account and category
+   * picks are that ledger's.
+   */
   getById(id: string): PaymentAlertCapture | null {
-    const db = getDb();
-    const row = db
+    return this.find(id, true);
+  }
+
+  /**
+   * A capture in any ledger. A payment is one event whichever ledger was open
+   * when its alert arrived, so "already captured" looks at every ledger.
+   */
+  getStored(id: string): PaymentAlertCapture | null {
+    return this.find(id, false);
+  }
+
+  private find(id: string, openLedgerOnly: boolean): PaymentAlertCapture | null {
+    const row = getDb()
       .select()
       .from(autoLogCapturesTable)
       .where(
         and(
           eq(autoLogCapturesTable.id, id),
           isNull(autoLogCapturesTable.deletedAt),
-          inActiveLedger(autoLogCapturesTable),
+          openLedgerOnly ? inActiveLedger(autoLogCapturesTable) : undefined,
         ),
       )
       .get();
     return row ? toPaymentAlertCapture(row) : null;
   }
 
-  /** Every capture since `sinceIso`, for de-duplication. */
+  /**
+   * Every capture since `sinceIso`, in every ledger, for de-duplication: the
+   * alerts of one payment can arrive either side of a ledger switch, and it
+   * must still be logged once.
+   */
   listSince(sinceIso: string): PaymentAlertCapture[] {
     const db = getDb();
     return db
       .select()
       .from(autoLogCapturesTable)
       .where(
-        and(
-          gte(autoLogCapturesTable.capturedAt, sinceIso),
-          isNull(autoLogCapturesTable.deletedAt),
-          inActiveLedger(autoLogCapturesTable),
-        ),
+        and(gte(autoLogCapturesTable.capturedAt, sinceIso), isNull(autoLogCapturesTable.deletedAt)),
       )
       .all()
       .map(toPaymentAlertCapture);
-  }
-
-  /** Ids of transactions an alert created, so dedupe never matches an alert against itself. */
-  listLoggedTransactionIds(sinceIso: string): string[] {
-    const db = getDb();
-    return db
-      .select({ transactionId: autoLogCapturesTable.transactionId })
-      .from(autoLogCapturesTable)
-      .where(
-        and(
-          eq(autoLogCapturesTable.status, 'logged'),
-          gte(autoLogCapturesTable.capturedAt, sinceIso),
-          isNull(autoLogCapturesTable.deletedAt),
-          inActiveLedger(autoLogCapturesTable),
-        ),
-      )
-      .all()
-      .map((row) => row.transactionId)
-      .filter((id): id is string => !!id);
   }
 
   update(

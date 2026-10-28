@@ -383,21 +383,27 @@ function MountedTab({
   // mounts home first, then progressively flips `shouldPreload` per tab via
   // runAfterInteractions, paying each mount cost in the background instead of
   // on the user's first tap. Once mounted, the tab stays mounted.
-  const hasBeenActiveRef = useRef(active);
-  // After a ledger switch a hidden page waits to be shown before it mounts
-  // again, instead of every page remounting in the same frame as the switch.
-  const resetKeyRef = useRef(resetKey);
-  const waitForShowRef = useRef(false);
-  if (resetKeyRef.current !== resetKey) {
-    resetKeyRef.current = resetKey;
-    hasBeenActiveRef.current = active;
-    waitForShowRef.current = !active;
+  //
+  // After a ledger switch (`resetKey`) a hidden page waits to be shown before
+  // it mounts again, instead of every page remounting in the same frame as the
+  // switch. Kept as state adjusted during render (React's pattern for state
+  // derived from changing props), so a render React throws away leaves
+  // nothing behind.
+  const [mountState, setMountState] = useState({
+    resetKey,
+    hasBeenActive: active,
+    waitForShow: false,
+  });
+  let nextMountState = mountState;
+  if (nextMountState.resetKey !== resetKey) {
+    nextMountState = { resetKey, hasBeenActive: active, waitForShow: !active };
   }
-  if (active) {
-    hasBeenActiveRef.current = true;
-    waitForShowRef.current = false;
+  if (active && (!nextMountState.hasBeenActive || nextMountState.waitForShow)) {
+    nextMountState = { ...nextMountState, hasBeenActive: true, waitForShow: false };
   }
-  const shouldMount = hasBeenActiveRef.current || (shouldPreload && !waitForShowRef.current);
+  if (nextMountState !== mountState) setMountState(nextMountState);
+  const shouldMount =
+    nextMountState.hasBeenActive || (shouldPreload && !nextMountState.waitForShow);
   useEffect(() => {
     if (shouldMount) perfMark(`tab_${name}_mounted`);
   }, [name, shouldMount]);

@@ -1048,7 +1048,8 @@ function purgeDataForImport() {
   // Same for payment alerts: their transaction, account and category ids are
   // all replaced by the import.
   db.delete(autoLogCapturesTable).where(inActiveLedger(autoLogCapturesTable)).run();
-  sqlite.runSync('DELETE FROM merchant_categories WHERE ledger_id = ?', [ledgerId]);
+  // Unused legacy merchant memory, cleared like every other import.
+  sqlite.execSync('DELETE FROM merchant_categories');
 }
 
 /** Everything in the open ledger, for starting it over in a new currency. */

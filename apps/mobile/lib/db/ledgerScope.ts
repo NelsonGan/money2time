@@ -28,7 +28,6 @@ export const LEDGER_TABLES = [
   'budget_templates',
   'monthly_budgets',
   'auto_log_captures',
-  'merchant_categories',
 ] as const;
 
 let activeLedgerId: string = DEFAULT_LEDGER_ID;
