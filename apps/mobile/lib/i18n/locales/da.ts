@@ -2517,7 +2517,6 @@ const da = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Synk på alle telefoner',
-    continue_apple: 'Fortsæt med Apple',
     continue_google: 'Fortsæt med Google',
     continue_email: 'Fortsæt med e-mail',
     email_title: 'Log ind med e-mail',

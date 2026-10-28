@@ -2519,7 +2519,6 @@ const sv = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Synka mellan telefoner',
-    continue_apple: 'Fortsätt med Apple',
     continue_google: 'Fortsätt med Google',
     continue_email: 'Fortsätt med e-post',
     email_title: 'Logga in med e-post',

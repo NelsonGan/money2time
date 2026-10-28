@@ -2484,7 +2484,6 @@ const ko = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: '모든 기기에서 동기화',
-    continue_apple: 'Apple로 계속하기',
     continue_google: 'Google로 계속하기',
     continue_email: '이메일로 계속하기',
     email_title: '이메일로 로그인',

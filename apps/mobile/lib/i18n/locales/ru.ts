@@ -2523,7 +2523,6 @@ const ru = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Синхронизация телефонов',
-    continue_apple: 'Продолжить с Apple',
     continue_google: 'Продолжить с Google',
     continue_email: 'Продолжить по email',
     email_title: 'Вход по email',

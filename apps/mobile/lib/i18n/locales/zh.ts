@@ -2406,7 +2406,6 @@ const zh = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: '多部手机同步',
-    continue_apple: '通过 Apple 继续',
     continue_google: '通过 Google 继续',
     continue_email: '通过邮箱继续',
     email_title: '用邮箱登录',

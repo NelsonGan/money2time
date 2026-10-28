@@ -2552,7 +2552,6 @@ const fil = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'I-sync sa lahat ng telepono',
-    continue_apple: 'Magpatuloy gamit ang Apple',
     continue_google: 'Magpatuloy gamit ang Google',
     continue_email: 'Magpatuloy gamit ang email',
     email_title: 'Mag-sign in gamit ang email',

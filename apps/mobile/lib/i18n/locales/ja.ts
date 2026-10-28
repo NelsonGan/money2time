@@ -2505,7 +2505,6 @@ const ja = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: '端末間で同期',
-    continue_apple: 'Appleで続ける',
     continue_google: 'Googleで続ける',
     continue_email: 'メールで続ける',
     email_title: 'メールでサインイン',

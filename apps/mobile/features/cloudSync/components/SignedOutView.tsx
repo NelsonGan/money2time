@@ -1,3 +1,4 @@
+import * as AppleAuthentication from 'expo-apple-authentication';
 import { Mail } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, StyleSheet, View } from 'react-native';
@@ -13,7 +14,6 @@ import { withColorAlpha } from '~/utils/color';
 import { useCloudSync } from '../CloudSyncContext';
 import { errorMessage, kindMessage } from '../lib/messages';
 import { NATIVE_PROVIDERS, type NativeProvider } from '../services/nativeSignIn';
-import { AppleLogoIcon } from './AppleLogoIcon';
 import { CLOUD_SYNC_ART } from './art';
 import { EmailSignInForm } from './EmailSignInForm';
 import { GoogleGIcon } from './GoogleGIcon';
@@ -33,6 +33,7 @@ export function SignedOutView({
 }) {
   const sync = useCloudSync();
   const colors = useThemeColors();
+  const resolvedTheme = useResolvedTheme();
   const { isPro, isStatusKnown } = usePro();
   const [available, setAvailable] = useState<Record<NativeProvider, boolean>>({
     apple: false,
@@ -86,12 +87,19 @@ export function SignedOutView({
 
       <View className={hideHero ? 'mt-2 gap-3' : 'mt-10 gap-3'}>
         {available.apple ? (
-          <ProviderButton
-            apple
-            label={I18n.t('cloud_sync.continue_apple')}
-            loading={busy === 'apple'}
-            disabled={busy !== null}
-            onPress={() => void signIn('apple')}
+          // Apple's own button, as its guidelines ask.
+          <AppleAuthentication.AppleAuthenticationButton
+            buttonType={AppleAuthentication.AppleAuthenticationButtonType.CONTINUE}
+            buttonStyle={
+              resolvedTheme === 'dark'
+                ? AppleAuthentication.AppleAuthenticationButtonStyle.WHITE
+                : AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
+            }
+            cornerRadius={18}
+            style={[styles.button, busy !== null && styles.dimmed]}
+            onPress={() => {
+              if (!busy) void signIn('apple');
+            }}
           />
         ) : null}
         {available.google ? (
@@ -138,44 +146,25 @@ function Hero() {
   );
 }
 
-/**
- * Continue with Apple is a custom button built to Apple's rules (Human
- * Interface Guidelines > Sign in with Apple): black in light mode and white in
- * dark, the logo and title in the other colour. Apple's own button sizes its
- * title from the button's height, larger than the other options' titles; this
- * one matches them. Its title is already in the system font: it shows on iOS
- * only, where the app's font is the system font.
- */
-const APPLE_BUTTON = {
-  light: { fill: '#000000', ink: '#FFFFFF' },
-  dark: { fill: '#FFFFFF', ink: '#000000' },
-} as const;
-
-/** One sign-in option: outlined, or Apple's black or white one with `apple`. */
 function ProviderButton({
   label,
   icon,
   onPress,
   loading,
   disabled,
-  apple = false,
 }: {
   label: string;
+  icon: React.ReactNode;
   onPress: () => void;
   loading?: boolean;
   disabled?: boolean;
-} & ({ apple: true; icon?: undefined } | { apple?: false; icon: React.ReactNode })) {
+}) {
   const colors = useThemeColors();
-  const appleColors = APPLE_BUTTON[useResolvedTheme()];
-  const [pressed, setPressed] = useState(false);
-  const foreground = apple ? appleColors.ink : colors.text;
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
       disabled={disabled}
-      onPressIn={() => setPressed(true)}
-      onPressOut={() => setPressed(false)}
       onPress={() => {
         triggerHaptic('selection');
         onPress();
@@ -183,42 +172,27 @@ function ProviderButton({
       // A plain style array: NativeWind's Pressable drops function styles.
       style={[
         styles.button,
-        apple
-          ? { backgroundColor: appleColors.fill }
-          : [
-              styles.outline,
-              { backgroundColor: colors.card, borderColor: withColorAlpha(colors.text, 0.14) },
-            ],
-        pressed && styles.pressed,
+        styles.outline,
+        { backgroundColor: colors.card, borderColor: withColorAlpha(colors.text, 0.14) },
         disabled && styles.dimmed,
       ]}
     >
-      {loading ? (
-        <ActivityIndicator color={foreground} />
-      ) : apple ? (
-        <AppleLogoIcon color={foreground} />
-      ) : (
-        icon
-      )}
-      <Text variant="bodyStrong" style={apple ? { color: foreground } : undefined}>
-        {label}
-      </Text>
+      {loading ? <ActivityIndicator color={colors.text} /> : icon}
+      <Text variant="bodyStrong">{label}</Text>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   hero: { width: 280, height: 140 },
-  button: {
-    height: 54,
-    width: '100%',
+  button: { height: 54, width: '100%' },
+  outline: {
     borderRadius: 18,
+    borderWidth: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
   },
-  outline: { borderWidth: 1 },
-  pressed: { opacity: 0.8 },
   dimmed: { opacity: 0.6 },
 });

@@ -2528,7 +2528,6 @@ const id = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Sinkron di semua ponsel',
-    continue_apple: 'Lanjutkan dengan Apple',
     continue_google: 'Lanjutkan dengan Google',
     continue_email: 'Lanjutkan dengan email',
     email_title: 'Masuk dengan email',

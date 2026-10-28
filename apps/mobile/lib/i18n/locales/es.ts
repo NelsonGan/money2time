@@ -2534,7 +2534,6 @@ const es = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Sincroniza tus teléfonos',
-    continue_apple: 'Continuar con Apple',
     continue_google: 'Continuar con Google',
     continue_email: 'Continuar con correo',
     email_title: 'Iniciar sesión con correo',

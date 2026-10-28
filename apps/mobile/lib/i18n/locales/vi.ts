@@ -2500,7 +2500,6 @@ const vi = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Đồng bộ mọi điện thoại',
-    continue_apple: 'Tiếp tục với Apple',
     continue_google: 'Tiếp tục với Google',
     continue_email: 'Tiếp tục với email',
     email_title: 'Đăng nhập bằng email',

@@ -2535,7 +2535,6 @@ const ms = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Segerak semua telefon',
-    continue_apple: 'Teruskan dengan Apple',
     continue_google: 'Teruskan dengan Google',
     continue_email: 'Teruskan dengan e-mel',
     email_title: 'Log masuk dengan e-mel',

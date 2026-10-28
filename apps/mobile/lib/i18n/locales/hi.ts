@@ -2508,7 +2508,6 @@ const hi = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'सभी फ़ोन पर सिंक',
-    continue_apple: 'Apple से जारी रखें',
     continue_google: 'Google से जारी रखें',
     continue_email: 'ईमेल से जारी रखें',
     email_title: 'ईमेल से साइन इन करें',

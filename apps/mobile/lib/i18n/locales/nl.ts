@@ -2546,7 +2546,6 @@ const nl = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Sync op al je telefoons',
-    continue_apple: 'Doorgaan met Apple',
     continue_google: 'Doorgaan met Google',
     continue_email: 'Doorgaan met e-mail',
     email_title: 'Aanmelden met e-mail',

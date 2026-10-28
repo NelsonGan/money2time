@@ -2406,7 +2406,6 @@ const zhHant = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: '多支手機同步',
-    continue_apple: '透過 Apple 繼續',
     continue_google: '透過 Google 繼續',
     continue_email: '透過電子郵件繼續',
     email_title: '用電子郵件登入',

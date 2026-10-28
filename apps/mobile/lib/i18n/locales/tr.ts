@@ -2527,7 +2527,6 @@ const tr = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Telefonlar arası senkron',
-    continue_apple: 'Apple ile devam et',
     continue_google: 'Google ile devam et',
     continue_email: 'E-posta ile devam et',
     email_title: 'E-posta ile giriş yap',

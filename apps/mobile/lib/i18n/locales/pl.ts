@@ -2527,7 +2527,6 @@ const pl = {
     title: 'Cloud Sync',
     tile_label: 'Cloud Sync',
     hero_title: 'Sync na wszystkich telefonach',
-    continue_apple: 'Kontynuuj z Apple',
     continue_google: 'Kontynuuj z Google',
     continue_email: 'Kontynuuj z e-mailem',
     email_title: 'Zaloguj się e-mailem',
