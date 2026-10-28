@@ -1,7 +1,8 @@
 import { and, eq, isNull, lte } from 'drizzle-orm';
 
 import { getDb } from '~/lib/db/client';
-import { accountsTable, recurringRulesTable, settingsTable } from '~/lib/db/schema';
+import { getActiveLedgerId, inActiveLedger } from '~/lib/db/ledgerScope';
+import { accountsTable, recurringRulesTable } from '~/lib/db/schema';
 import type { ProcessedRecurringRule, RecurrencePattern, RecurringTransactionRule } from '~/types';
 import { buildRateTable, convert } from '~/utils/currency';
 import { newId, nowIso } from '~/utils/id';
@@ -10,6 +11,7 @@ import { newId, nowIso } from '~/utils/id';
 import { isAfterRecurringEndDate, nextRunAfter } from '~/utils/recurringRules';
 
 import { exchangeRatesRepository } from './exchangeRatesRepository';
+import { ledgersRepository } from './ledgersRepository';
 import { toRecurringRule } from './mappers';
 import { transactionsRepository } from './transactionsRepository';
 
@@ -56,7 +58,7 @@ class RecurringRulesRepository {
     return db
       .select()
       .from(recurringRulesTable)
-      .where(isNull(recurringRulesTable.deletedAt))
+      .where(and(isNull(recurringRulesTable.deletedAt), inActiveLedger(recurringRulesTable)))
       .orderBy(recurringRulesTable.nextRunDate, recurringRulesTable.createdAt)
       .all()
       .map(toRecurringRule);
@@ -69,6 +71,7 @@ class RecurringRulesRepository {
     db.insert(recurringRulesTable)
       .values({
         id: newId(),
+        ledgerId: getActiveLedgerId(),
         name: input.name.trim(),
         type: input.type,
         amount: input.amount,
@@ -144,6 +147,9 @@ class RecurringRulesRepository {
       .where(
         and(
           isNull(recurringRulesTable.deletedAt),
+          // Only the open ledger's rules: the transactions they write land in
+          // it. Another ledger's rules catch up when that ledger is opened.
+          inActiveLedger(recurringRulesTable),
           eq(recurringRulesTable.isActive, true),
           lte(recurringRulesTable.nextRunDate, todayIso),
         ),
@@ -159,8 +165,8 @@ class RecurringRulesRepository {
     // reporting snapshot / account-currency value / cross-currency to-amount
     // that the editor would produce — otherwise foreign-currency rules would
     // be counted at face value in main-currency totals.
-    const reporting =
-      db.select({ c: settingsTable.currencyCode }).from(settingsTable).get()?.c ?? 'USD';
+    // The open ledger's currency, which is the settings row's on the default one.
+    const reporting = ledgersRepository.activeReportingCurrency().code;
     const rateTable = buildRateTable(reporting, exchangeRatesRepository.listByBase(reporting));
     const accountCurrencyById = new Map(
       db

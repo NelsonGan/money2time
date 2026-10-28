@@ -51,11 +51,19 @@ import {
 import { rescaleSplitAdjustedAmounts } from '~/features/transactions/lib/splitAmountSnapshot';
 import { normalizeLiveEarningsSchedule } from '~/features/widgets/lib/liveEarningsSchedule';
 import { getDb, getSQLite, initializeDatabase } from '~/lib/db/client';
+import {
+  DEFAULT_LEDGER_ID,
+  getActiveLedgerId,
+  inActiveLedger,
+  setActiveLedgerId,
+  withLedgerScope,
+} from '~/lib/db/ledgerScope';
 import { normalizeCurrencyColumns } from '~/lib/db/normalizeCurrencies';
 import { normalizeIconColumns } from '~/lib/db/normalizeIcons';
 import {
   accountGroupsTable,
   accountsTable,
+  albumsTable,
   autoLogCapturesTable,
   budgetTemplateCategoriesTable,
   budgetTemplatesTable,
@@ -78,6 +86,7 @@ import {
 import { categoriesRepository } from '~/lib/repositories/categoriesRepository';
 import { exchangeRatesRepository } from '~/lib/repositories/exchangeRatesRepository';
 import { itemsRepository } from '~/lib/repositories/itemsRepository';
+import { type LedgerInput, ledgersRepository } from '~/lib/repositories/ledgersRepository';
 import { monthlyWageRepository } from '~/lib/repositories/monthlyWageRepository';
 import { paymentAlertCapturesRepository } from '~/lib/repositories/paymentAlertCapturesRepository';
 import { periodBudgetsRepository } from '~/lib/repositories/periodBudgetsRepository';
@@ -150,6 +159,7 @@ import {
   isLocatedAlbum,
   type Item,
   type ItemWithStats,
+  type Ledger,
   type LocatedAlbum,
   type MonthCycleInput,
   type MonthlyWageSettings,
@@ -570,6 +580,27 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
     createdAccounts: number;
     createdCategories: number;
   };
+
+  /** Every live ledger, default first. See lib/db/ledgerScope.ts. */
+  ledgers: Ledger[];
+  /** The ledger open now. */
+  activeLedger: Ledger;
+  /** Open another ledger: every screen reloads with its data. Pro is checked by the caller. */
+  switchLedger: (ledgerId: string) => void;
+  /** Create a ledger, fill it from the open one or with starters, and open it. */
+  createLedger: (input: CreateLedgerInput) => string;
+  updateLedger: (ledgerId: string, input: Partial<LedgerInput>) => void;
+  /** Delete a ledger that is not open, with everything in it. */
+  deleteLedger: (ledgerId: string) => void;
+  /** Live transactions per ledger id; read on demand, e.g. when the switcher opens. */
+  getLedgerEntryCounts: () => Record<string, number>;
+}
+
+interface CreateLedgerInput extends LedgerInput {
+  /** Copy the open ledger's regular accounts and groups (balances start at zero); else starters. */
+  copyAccounts: boolean;
+  /** Copy the open ledger's categories and subcategories; else the starter set. */
+  copyCategories: boolean;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -752,6 +783,77 @@ function seedDefaultAccountsIfMissing(preferredCurrency: string) {
   return createdAccounts;
 }
 
+/**
+ * Copy the open ledger's categories (subcategories under their copied parents)
+ * into `targetLedgerId`. Run inside the caller's transaction.
+ */
+function copyCategoriesInto(targetLedgerId: string) {
+  const source = categoriesRepository.list();
+  withLedgerScope(targetLedgerId, () => {
+    const newIdByOldId = new Map<string, string>();
+    // Roots first, so every child has its new parent id to point at.
+    for (const category of source.filter((row) => !row.parentId)) {
+      newIdByOldId.set(
+        category.id,
+        categoriesRepository.create({
+          name: category.name,
+          sortOrder: category.sortOrder,
+          type: category.type,
+          parentId: null,
+          icon: category.icon,
+          isDefault: category.isDefault,
+        }),
+      );
+    }
+    for (const category of source.filter((row) => row.parentId)) {
+      const parentId = newIdByOldId.get(category.parentId as string);
+      if (!parentId) continue;
+      categoriesRepository.create({
+        name: category.name,
+        sortOrder: category.sortOrder,
+        type: category.type,
+        parentId,
+        icon: category.icon,
+        isDefault: category.isDefault,
+      });
+    }
+  });
+}
+
+/**
+ * Copy the open ledger's account groups and everyday accounts (debit and
+ * credit; not goals or loans, which describe this book's own history) into
+ * `targetLedgerId`, each starting at a zero balance. Accounts in the open
+ * ledger's main currency take the new ledger's; nothing needs converting at a
+ * zero balance. Run inside the caller's transaction.
+ */
+function copyAccountsInto(targetLedgerId: string, currencies: { from: string; to: string }) {
+  const groups = accountGroupsRepository.list();
+  const accounts = accountsRepository
+    .list()
+    .filter((account) => account.type === 'debit' || account.type === 'credit');
+  withLedgerScope(targetLedgerId, () => {
+    groups.forEach((group, index) => {
+      accountGroupsRepository.create(group.name, group.sortOrder ?? index);
+    });
+    for (const account of accounts) {
+      accountsRepository.create({
+        name: account.name,
+        sortOrder: account.sortOrder,
+        type: account.type,
+        accountGroup: account.accountGroup ?? null,
+        logoId: account.logoId ?? null,
+        cardDesign: account.cardDesign ?? null,
+        creditStatementDay: account.creditStatementDay ?? null,
+        creditDueDay: account.creditDueDay ?? null,
+        currency: account.currency === currencies.from ? currencies.to : account.currency,
+        startingBalance: 0,
+        includeInTotals: account.includeInTotals,
+      });
+    }
+  });
+}
+
 const fallbackStyles = StyleSheet.create({
   errorRoot: {
     flex: 1,
@@ -908,36 +1010,66 @@ function purgeAllData() {
   // Payment alerts point at transactions, accounts and categories that are gone.
   db.delete(autoLogCapturesTable).run();
   getSQLite().execSync('DELETE FROM merchant_categories');
+  // Every ledger goes with its data; the default ledger stays, unnamed.
+  getSQLite().runSync('DELETE FROM ledgers WHERE id <> ?', [DEFAULT_LEDGER_ID]);
+  getSQLite().runSync(
+    'UPDATE ledgers SET name = NULL, emoji = NULL, prefs_json = NULL WHERE id = ?',
+    [DEFAULT_LEDGER_ID],
+  );
   // Reset settings to defaults but preserve appUserId so the device identity
   // remains stable across in-app data resets. The ID only rotates on
   // uninstall/reinstall (when SQLite itself is wiped).
   settingsRepository.reset();
 }
 
+/** Replaces the open ledger's data only; the other ledgers keep theirs. */
 function purgeDataForImport() {
   const db = getDb();
-  db.delete(transactionsTable).run();
-  db.delete(categoriesTable).run();
-  db.delete(accountsTable).run();
-  db.delete(recurringRulesTable).run();
-  db.delete(accountGroupsTable).run();
+  const sqlite = getSQLite();
+  const ledgerId = getActiveLedgerId();
   // The import replaces every category id, so budget allocation lines can't
-  // survive it — drop budgets rather than leave them pointing at ghosts.
-  db.delete(budgetTemplateCategoriesTable).run();
-  db.delete(budgetTemplatesTable).run();
-  db.delete(monthlyBudgetCategoriesTable).run();
-  db.delete(monthlyBudgetsTable).run();
+  // survive it — drop budgets rather than leave them pointing at ghosts. The
+  // lines go first, while their parents still say which ledger they are in.
+  sqlite.runSync(
+    'DELETE FROM budget_template_categories WHERE template_id IN (SELECT id FROM budget_templates WHERE ledger_id = ?)',
+    [ledgerId],
+  );
+  sqlite.runSync(
+    'DELETE FROM monthly_budget_categories WHERE budget_id IN (SELECT id FROM monthly_budgets WHERE ledger_id = ?)',
+    [ledgerId],
+  );
+  db.delete(transactionsTable).where(inActiveLedger(transactionsTable)).run();
+  db.delete(categoriesTable).where(inActiveLedger(categoriesTable)).run();
+  db.delete(accountsTable).where(inActiveLedger(accountsTable)).run();
+  db.delete(recurringRulesTable).where(inActiveLedger(recurringRulesTable)).run();
+  db.delete(accountGroupsTable).where(inActiveLedger(accountGroupsTable)).run();
+  db.delete(budgetTemplatesTable).where(inActiveLedger(budgetTemplatesTable)).run();
+  db.delete(monthlyBudgetsTable).where(inActiveLedger(monthlyBudgetsTable)).run();
   // Same for payment alerts: their transaction, account and category ids are
   // all replaced by the import.
-  db.delete(autoLogCapturesTable).run();
-  getSQLite().execSync('DELETE FROM merchant_categories');
+  db.delete(autoLogCapturesTable).where(inActiveLedger(autoLogCapturesTable)).run();
+  // Unused legacy merchant memory, cleared like every other import.
+  sqlite.execSync('DELETE FROM merchant_categories');
 }
 
+/** Everything in the open ledger, for starting it over in a new currency. */
+function purgeOpenLedgerData() {
+  purgeDataForImport();
+  const db = getDb();
+  getSQLite().runSync(
+    'DELETE FROM album_transactions WHERE album_id IN (SELECT id FROM albums WHERE ledger_id = ?)',
+    [getActiveLedgerId()],
+  );
+  db.delete(albumsTable).where(inActiveLedger(albumsTable)).run();
+  db.delete(itemsTable).where(inActiveLedger(itemsTable)).run();
+}
+
+/** Clears the open ledger's transactions only. */
 function purgeTransactionsOnly() {
   const db = getDb();
-  db.delete(transactionsTable).run();
+  db.delete(transactionsTable).where(inActiveLedger(transactionsTable)).run();
   // Capture links cannot survive deletion of the entire ledger.
-  db.delete(autoLogCapturesTable).run();
+  db.delete(autoLogCapturesTable).where(inActiveLedger(autoLogCapturesTable)).run();
 }
 
 function applyTransactionFilters(
@@ -1101,6 +1233,7 @@ function applyTransactionFilters(
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [settings, setSettings] = useState<UserSettings | null>(null);
+  const [ledgers, setLedgers] = useState<Ledger[]>([]);
   // Kept in sync each render so identity-stable callbacks (refreshWages) can read
   // the current month cycle without taking `settings` as a dep.
   const monthCycleRef = useRef<MonthCycleInput>(1);
@@ -1229,6 +1362,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           scope: 'db_downgrade',
         });
       }
+      // initializeDatabase has opened the stored ledger; everything below
+      // reads that ledger's rows.
+      const nextLedgers = ledgersRepository.list();
       const nextSettings = settingsRepository.get();
       if (databaseInit.isNewInstall) {
         // The install's first launch; PostHog's automatic lifecycle events are off.
@@ -1370,6 +1506,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       setCurrentMonthWage(effectiveCurrentWage);
       setMonthlyWages(allWages);
+      setLedgers(nextLedgers);
       setSettings(nextSettings);
       setRateTable(nextRateTable);
       setInsightsPreferencesJson(nextInsightsPreferencesJson);
@@ -3706,14 +3843,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const resetAndChangeMainCurrency = useCallback(
     (code: string) => {
       const historyUserId = settings?.appUserId;
+      // With other ledgers this starts over the open ledger only: the others
+      // keep their data, the app keeps its settings, and the rate table keeps
+      // the rates the other ledgers' currencies use.
+      const otherLedgersKept = ledgersRepository.list().length > 1;
       runMutation(() => {
-        purgeAllData();
-        settingsRepository.updateSettings({
-          currencyCode: code,
-          currencySymbol: currencySymbolForCode(code),
-          onboardingCompleted: true,
-        });
-        exchangeRatesRepository.clearAll();
+        if (otherLedgersKept) {
+          purgeOpenLedgerData();
+          settingsRepository.clearOpenLedgerPrefs();
+          settingsRepository.updateSettings({
+            currencyCode: code,
+            currencySymbol: currencySymbolForCode(code),
+          });
+        } else {
+          purgeAllData();
+          settingsRepository.updateSettings({
+            currencyCode: code,
+            currencySymbol: currencySymbolForCode(code),
+            onboardingCompleted: true,
+          });
+          exchangeRatesRepository.clearAll();
+        }
         // Re-seed the default categories and accounts in the new currency so the
         // user lands in a usable (not empty) app rather than re-onboarding.
         seedMinimalCategoriesIfMissing();
@@ -4676,6 +4826,115 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
+  // Ledgers
+
+  const activeLedgerId = settings?.activeLedgerId ?? DEFAULT_LEDGER_ID;
+  const activeLedger = useMemo<Ledger>(
+    () =>
+      ledgers.find((ledger) => ledger.id === activeLedgerId) ??
+      ledgers.find((ledger) => ledger.id === DEFAULT_LEDGER_ID) ?? {
+        id: DEFAULT_LEDGER_ID,
+        name: null,
+        emoji: null,
+        currencyCode: null,
+        currencySymbol: null,
+        sortOrder: 0,
+        createdAt: '',
+        updatedAt: '',
+        deletedAt: null,
+      },
+    [activeLedgerId, ledgers],
+  );
+
+  const refreshLedgers = useCallback(() => {
+    setLedgers(ledgersRepository.list());
+  }, []);
+
+  const switchLedger = useCallback(
+    (ledgerId: string) => {
+      // Queued behind the writes already deferred (they run in order), so a
+      // save still in flight lands in, and refreshes, the ledger it was made
+      // in. Waiting for interactions also lets the switcher sheet close first.
+      runDeferredWrite(() => {
+        if (ledgerId === getActiveLedgerId()) return;
+        if (!ledgersRepository.getById(ledgerId)) return;
+        settingsRepository.updateActiveLedgerId(ledgerId);
+        setActiveLedgerId(ledgerId);
+        // Filters name the old ledger's accounts and categories.
+        setTransactionFiltersState(DEFAULT_TRANSACTION_FILTERS);
+        setActiveAccountFilter(null);
+        // Drop the old ledger's rows rather than diff against them: no id is
+        // shared between ledgers, so nothing could be reused.
+        setTransactions([]);
+        refreshAll();
+        void trackEvent(AnalyticsEvents.LEDGER_SWITCHED, {
+          to_default: ledgerId === DEFAULT_LEDGER_ID,
+        });
+      });
+    },
+    [refreshAll],
+  );
+
+  const createLedger = useCallback(
+    (input: CreateLedgerInput) => {
+      const { copyAccounts, copyCategories, ...ledgerInput } = input;
+      const sqlite = getSQLite();
+      let ledgerId = '';
+      try {
+        sqlite.withTransactionSync(() => {
+          ledgerId = ledgersRepository.create(ledgerInput);
+          if (copyCategories) {
+            copyCategoriesInto(ledgerId);
+          } else {
+            withLedgerScope(ledgerId, () => seedMinimalCategoriesIfMissing());
+          }
+          if (copyAccounts) {
+            copyAccountsInto(ledgerId, {
+              from: ledgersRepository.activeReportingCurrency().code,
+              to: ledgerInput.currencyCode,
+            });
+          } else {
+            withLedgerScope(ledgerId, () => seedDefaultAccountsIfMissing(ledgerInput.currencyCode));
+          }
+        });
+      } catch (error) {
+        // The transaction rolled back, so no half-made ledger is left behind.
+        reportError(error, { scope: 'ledger_create' });
+        throw toError(error, I18n.t('errors.generic_operation_failed'));
+      }
+      void trackEvent(AnalyticsEvents.LEDGER_CREATED, {
+        copied_accounts: copyAccounts,
+        copied_categories: copyCategories,
+        ledger_count: ledgersRepository.list().length,
+      });
+      switchLedger(ledgerId);
+      return ledgerId;
+    },
+    [switchLedger],
+  );
+
+  const updateLedger = useCallback(
+    (ledgerId: string, input: Partial<LedgerInput>) => {
+      runMutation(() => ledgersRepository.update(ledgerId, input), { refresh: refreshLedgers });
+    },
+    [refreshLedgers, runMutation],
+  );
+
+  const deleteLedger = useCallback(
+    (ledgerId: string) => {
+      // The open ledger is never deleted under the user: switch first.
+      if (ledgerId === getActiveLedgerId() || ledgerId === DEFAULT_LEDGER_ID) return;
+      runMutation(() => ledgersRepository.softDelete(ledgerId), { refresh: refreshLedgers });
+      // Its receipts, covers and logos are orphans now, unless another ledger
+      // still uses them (copied accounts share their logos).
+      runDeferredWrite(() => runUserAssetGc());
+      void trackEvent(AnalyticsEvents.LEDGER_DELETED);
+    },
+    [refreshLedgers, runMutation],
+  );
+
+  const getLedgerEntryCounts = useCallback(() => ledgersRepository.entryCounts(), []);
+
   const resetAllData = useCallback(() => {
     const historyUserId = settings?.appUserId;
     runMutation(() => {
@@ -4721,8 +4980,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const symbol = settings?.currencySymbol ?? '$';
         const summary = await importMoneyManagerBackupFromUri(uri, symbol);
         // Money Manager rows are written with the currency symbol — normalize to
-        // ISO codes so multi-currency treats them correctly.
-        normalizeCurrencyColumns(getSQLite());
+        // ISO codes so multi-currency treats them correctly, in the currency of
+        // the ledger they were imported into.
+        normalizeCurrencyColumns(getSQLite(), {
+          mainCode: ledgersRepository.activeReportingCurrency().code,
+        });
         // The importer writes icons via suggestCategoryIcon, but a re-import of
         // an older export can still carry bare glyphs; fold them in too.
         normalizeIconColumns(getSQLite());
@@ -5035,6 +5297,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             quickEntryPrefs,
             updateQuickEntryPrefs,
             completeOnboarding,
+            ledgers,
+            activeLedger,
+            switchLedger,
+            createLedger,
+            updateLedger,
+            deleteLedger,
+            getLedgerEntryCounts,
           }
         : null,
     [
@@ -5161,6 +5430,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       quickEntryPrefs,
       updateQuickEntryPrefs,
       completeOnboarding,
+      ledgers,
+      activeLedger,
+      switchLedger,
+      createLedger,
+      updateLedger,
+      deleteLedger,
+      getLedgerEntryCounts,
     ],
   );
 

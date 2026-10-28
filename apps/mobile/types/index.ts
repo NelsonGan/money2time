@@ -326,6 +326,12 @@ export interface UserSettings {
   showAccountPickerBalances: boolean;
   /** The bottom bar's tabs as stored. Null means the default set; read with parseNavTabs. */
   navTabsJson: string | null;
+  /**
+   * The ledger open on this phone ('default' when none is chosen). The
+   * settings the open ledger owns (currency, default payback account) are
+   * already its own here: see `settingsRepository.get`.
+   */
+  activeLedgerId: string;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -1374,4 +1380,44 @@ export interface PaymentAlertPrefs {
   sources: Record<string, PaymentAlertSource>;
   /** Phrases that make any alert ignored. */
   ignorePhrases: string[];
+}
+
+/**
+ * A separate book of accounts, categories and transactions (Personal, Work, …).
+ * Every install has the default ledger, which holds its original data.
+ */
+export interface Ledger {
+  id: string;
+  /** Null on the default ledger until the user renames it; show `ledgerDisplayName`. */
+  name: string | null;
+  /** A tagged icon value like a category's (`emoji:…` or a bundled id); null = default. */
+  emoji: string | null;
+  /** The ledger's reporting currency. Null on the default ledger: it uses the settings row. */
+  currencyCode: string | null;
+  currencySymbol: string | null;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
+/** The quick-entry fields that name a ledger's own accounts, categories or currency. */
+export const LEDGER_QUICK_ENTRY_KEYS = [
+  'categoryMap',
+  'defaultExpenseCategoryId',
+  'defaultIncomeCategoryId',
+  'defaultAccountId',
+  'defaultCurrency',
+] as const satisfies readonly (keyof QuickEntryPrefs)[];
+
+/**
+ * `ledgers.prefs_json`: a non-default ledger's own copy of the settings that
+ * point at its data. The default ledger keeps these in the settings row.
+ */
+export interface LedgerPrefs {
+  defaultPaybackAccountId?: string | null;
+  quickEntry?: Partial<Pick<QuickEntryPrefs, (typeof LEDGER_QUICK_ENTRY_KEYS)[number]>>;
+  /** The account each payment-alert source logs into, keyed like `PaymentAlertPrefs.sources`. */
+  paymentAlertAccounts?: Record<string, string | null>;
+  insightsPrefsJson?: string | null;
 }

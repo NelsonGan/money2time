@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { PaymentAlertSourceScreen } from '~/features/autoLog/screens/PaymentAlertSourceScreen';
 import { PaymentAlertsSettingsScreen } from '~/features/autoLog/screens/PaymentAlertsSettingsScreen';
 import { ItemsScreen } from '~/features/items/screens';
+import { LedgerEditorScreen } from '~/features/ledgers/screens/LedgerEditorScreen';
+import { LedgersScreen } from '~/features/ledgers/screens/LedgersScreen';
 import { NewsScreen } from '~/features/news/screens/NewsScreen';
 import { ReimbursementSettingsScreen } from '~/features/reimbursements/screens/ReimbursementSettingsScreen';
 import { ReimbursementsScreen } from '~/features/reimbursements/screens/ReimbursementsScreen';
@@ -131,6 +133,8 @@ function SettingsHomeRoute({
       onOpenShareAndEarn={() => navigation.navigate('ShareAndEarn')}
       onOpenSettleUp={onOpenSettleUp}
       onOpenTutorials={onOpenTutorials}
+      onCreateLedger={() => navigation.navigate('LedgerEditor')}
+      onManageLedgers={() => navigation.navigate('Ledgers')}
     />
   );
 }
@@ -523,6 +527,33 @@ export function SettingsStack({
             <AutoLogTutorialScreen
               topic={props.route.params.topic}
               onBack={() => props.navigation.goBack()}
+            />
+          );
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="Ledgers">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return (
+            <LedgersScreen
+              onBack={() => props.navigation.goBack()}
+              onEditLedger={(ledgerId) => props.navigation.navigate('LedgerEditor', { ledgerId })}
+              onCreateLedger={() => props.navigation.navigate('LedgerEditor')}
+              onOpenProPaywall={onOpenProPaywall}
+            />
+          );
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="LedgerEditor">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return (
+            <LedgerEditorScreen
+              ledgerId={props.route.params?.ledgerId}
+              onOpenIconPicker={onOpenCategoryIconPicker}
+              onBack={() => props.navigation.goBack()}
+              // The new ledger is open: land on Settings, whose card now names it.
+              onCreated={() => props.navigation.dispatch(StackActions.popToTop())}
             />
           );
         }}
