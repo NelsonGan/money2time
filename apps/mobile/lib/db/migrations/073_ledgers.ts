@@ -32,7 +32,8 @@ const LEDGER_ROOT_TABLES = [
 // No plain ledger_id index on purpose: with only one or a few ledgers it is
 // barely selective, and without ANALYZE stats SQLite could pick it over the
 // date and account indexes that the transaction queries rely on.
-// Numbered 073 because Cloud Sync's branch already uses 072.
+// Numbered 073 because Cloud Sync's branch already uses 072. 073 shipped first
+// (build 493), so phones that ran it skip 072: 074 creates 072's tables too.
 export const migration073Ledgers: DbMigration = {
   version: 73,
   name: '073_ledgers',

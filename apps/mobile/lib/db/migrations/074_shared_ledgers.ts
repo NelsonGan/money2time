@@ -1,3 +1,4 @@
+import { migration072CloudSync } from './072_cloud_sync';
 import { addColumnIfMissing, tableColumns } from './helpers';
 import type { DbMigration } from './types';
 
@@ -9,10 +10,15 @@ import type { DbMigration } from './types';
 // - A channel on the Cloud Sync bookkeeping: each shared ledger syncs with its
 //   own cloud database, the rest with the user's own ('personal'). A row's
 //   revision and its images are recorded per channel.
+// 073 (ledgers) shipped in build 493 before 072 did, so phones that ran that
+// build are at version 73 and the runner skips 072 on them. Its statements are
+// all IF NOT EXISTS, so they run again here first: a no-op where 072 ran, and
+// the Cloud Sync tables everywhere else.
 export const migration074SharedLedgers: DbMigration = {
   version: 74,
   name: '074_shared_ledgers',
   up(db) {
+    migration072CloudSync.up(db);
     db.execSync(`
       CREATE TABLE IF NOT EXISTS shared_ledgers (
         ledger_id TEXT NOT NULL PRIMARY KEY,
