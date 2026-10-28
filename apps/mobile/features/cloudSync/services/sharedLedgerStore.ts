@@ -1,4 +1,4 @@
-// This phone's shared ledgers (table shared_ledgers, migration 075), as the
+// This phone's shared ledgers (table shared_ledgers, migration 074), as the
 // Worker last reported them. Read synchronously by the sync engine to route
 // rows, and by the ledger screens through `useSharedLedgers`.
 
@@ -55,7 +55,7 @@ export function listSharedLedgers(): SharedLedger[] {
         active: row.active === 1,
       }));
   } catch {
-    // Before migration 075 has run.
+    // Before migration 074 has run.
     cache = [];
   }
   return cache;

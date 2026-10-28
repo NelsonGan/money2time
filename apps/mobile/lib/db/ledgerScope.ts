@@ -13,7 +13,7 @@ import { type AnyColumn, eq, type SQL } from 'drizzle-orm';
 export const DEFAULT_LEDGER_ID = 'default';
 
 /**
- * Tables whose rows belong to one ledger (migration 075). Their child tables
+ * Tables whose rows belong to one ledger (migration 073). Their child tables
  * (splits, receipt splits, album joins, budget lines) follow the parent row.
  * Deleting a ledger retires every row in these tables.
  */
