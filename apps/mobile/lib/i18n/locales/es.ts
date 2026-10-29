@@ -2610,6 +2610,11 @@ const es = {
     needs_pro_body:
       'Has iniciado sesión. Consigue Pro para empezar a sincronizar. ¿Compraste Pro en otro teléfono? Inicia sesión en Cloud Sync también allí y se desbloqueará aquí.',
     tile_on: 'Activado',
+    profile_off: 'Desactivado',
+    profile_paused: 'En pausa',
+    profile_needs_pro: 'Requiere Pro',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'Abre Cloud Sync',
     errors: {
       offline: 'Estás sin conexión',
       session_expired: 'Sesión cerrada. Vuelve a iniciar sesión.',

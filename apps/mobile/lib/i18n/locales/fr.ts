@@ -2628,6 +2628,11 @@ const fr = {
     needs_pro_body:
       'Vous êtes connecté. Passez à Pro pour lancer la synchro. Vous avez acheté Pro sur un autre téléphone ? Connectez-vous aussi à Cloud Sync sur ce téléphone-là, et il sera débloqué ici.',
     tile_on: 'Activé',
+    profile_off: 'Désactivé',
+    profile_paused: 'En pause',
+    profile_needs_pro: 'Pro requis',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'Ouvre Cloud Sync',
     errors: {
       offline: 'Vous êtes hors ligne',
       session_expired: 'Déconnecté. Reconnectez-vous.',

@@ -2587,6 +2587,11 @@ const en = {
     needs_pro_body:
       "You're signed in. Get Pro to start syncing. Bought Pro on another phone? Sign in to Cloud Sync there too, and it unlocks here.",
     tile_on: 'On',
+    profile_off: 'Off',
+    profile_paused: 'Paused',
+    profile_needs_pro: 'Needs Pro',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'Opens Cloud Sync',
     errors: {
       offline: "You're offline",
       session_expired: 'Signed out. Sign in again.',

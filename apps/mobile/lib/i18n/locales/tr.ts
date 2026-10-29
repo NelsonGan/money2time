@@ -2601,6 +2601,11 @@ const tr = {
     needs_pro_body:
       "Giriş yaptın. Senkronu başlatmak için Pro al. Pro'yu başka bir telefonda mı aldın? Orada da Cloud Sync'e giriş yap, burada da açılsın.",
     tile_on: 'Açık',
+    profile_off: 'Kapalı',
+    profile_paused: 'Duraklatıldı',
+    profile_needs_pro: 'Pro gerekli',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: "Cloud Sync'i açar",
     errors: {
       offline: 'Çevrimdışısınız',
       session_expired: 'Oturum kapandı. Tekrar giriş yapın.',

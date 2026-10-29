@@ -2601,6 +2601,11 @@ const pl = {
     needs_pro_body:
       'Jesteś zalogowany. Kup Pro, aby zacząć synchronizację. Kupiłeś Pro na innym telefonie? Zaloguj się tam też do Cloud Sync, a odblokuje się tutaj.',
     tile_on: 'Wł.',
+    profile_off: 'Wył.',
+    profile_paused: 'Wstrzymano',
+    profile_needs_pro: 'Wymaga Pro',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'Otwiera Cloud Sync',
     errors: {
       offline: 'Jesteś offline',
       session_expired: 'Wylogowano. Zaloguj się ponownie.',

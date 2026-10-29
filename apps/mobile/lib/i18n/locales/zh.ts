@@ -2480,6 +2480,11 @@ const zh = {
     needs_pro_body:
       '你已登录。获取 Pro 即可开始同步。在另一部手机上买了 Pro？在那部手机上也登录 Cloud Sync，这里就会解锁。',
     tile_on: '开',
+    profile_off: '关',
+    profile_paused: '已暂停',
+    profile_needs_pro: '需要 Pro',
+    profile_a11y_label: 'Cloud Sync，%{status}',
+    profile_a11y_hint: '打开 Cloud Sync',
     errors: {
       offline: '你已离线',
       session_expired: '已退出登录，请重新登录。',

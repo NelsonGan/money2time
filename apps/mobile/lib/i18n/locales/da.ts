@@ -2591,6 +2591,11 @@ const da = {
     needs_pro_body:
       'Du er logget ind. Få Pro for at begynde at synkronisere. Har du købt Pro på en anden telefon? Log også ind på Cloud Sync der, så låses det op her.',
     tile_on: 'Til',
+    profile_off: 'Fra',
+    profile_paused: 'På pause',
+    profile_needs_pro: 'Kræver Pro',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'Åbner Cloud Sync',
     errors: {
       offline: 'Du er offline',
       session_expired: 'Logget ud. Log ind igen.',

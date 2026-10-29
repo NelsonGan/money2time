@@ -2582,6 +2582,11 @@ const hi = {
     needs_pro_body:
       'आप साइन इन हैं। सिंक शुरू करने के लिए Pro लें। किसी दूसरे फ़ोन पर Pro खरीदा है? वहां भी Cloud Sync में साइन इन करें, और यह यहां अनलॉक हो जाएगा।',
     tile_on: 'चालू',
+    profile_off: 'बंद',
+    profile_paused: 'रुका हुआ',
+    profile_needs_pro: 'Pro चाहिए',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'Cloud Sync खोलता है',
     errors: {
       offline: 'आप ऑफ़लाइन हैं',
       session_expired: 'साइन आउट हो गया। फिर से साइन इन करें।',

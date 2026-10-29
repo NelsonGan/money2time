@@ -47,6 +47,7 @@ import { useApp, useTransactions } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
 import { useIsFlatIcons } from '~/context/ThemeContext';
 import { useCloudSync, useCloudSyncEnabled } from '~/features/cloudSync/CloudSyncContext';
+import { CloudSyncProfilePill } from '~/features/cloudSync/components/CloudSyncProfilePill';
 import { CloudSyncTileBadge } from '~/features/cloudSync/components/CloudSyncTileBadge';
 import { LedgerSwitcherCard } from '~/features/ledgers/components/LedgerSwitcherCard';
 import { LedgerSwitcherSheet } from '~/features/ledgers/components/LedgerSwitcherSheet';
@@ -394,6 +395,7 @@ export function SettingsScreen({
                     ? I18n.t('settings.profile_member_since', { date: profileStats.memberSince })
                     : I18n.t('settings.profile_member_new')}
                 </Text>
+                <CloudSyncProfilePill onPress={onOpenCloudSync} />
               </View>
             </View>
 

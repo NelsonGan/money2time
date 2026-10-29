@@ -2630,6 +2630,11 @@ const de = {
     needs_pro_body:
       'Du bist angemeldet. Hol dir Pro, um mit dem Sync zu beginnen. Pro auf einem anderen Handy gekauft? Melde dich auch dort bei Cloud Sync an, dann wird es hier freigeschaltet.',
     tile_on: 'An',
+    profile_off: 'Aus',
+    profile_paused: 'Pausiert',
+    profile_needs_pro: 'Pro nötig',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'Öffnet Cloud Sync',
     errors: {
       offline: 'Du bist offline',
       session_expired: 'Abgemeldet. Bitte neu anmelden.',

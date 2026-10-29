@@ -2622,6 +2622,11 @@ const nl = {
     needs_pro_body:
       'Je bent aangemeld. Neem Pro om te beginnen met synchroniseren. Pro gekocht op een andere telefoon? Meld je daar ook aan bij Cloud Sync, dan wordt het hier ontgrendeld.',
     tile_on: 'Aan',
+    profile_off: 'Uit',
+    profile_paused: 'Gepauzeerd',
+    profile_needs_pro: 'Pro nodig',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'Opent Cloud Sync',
     errors: {
       offline: 'Je bent offline',
       session_expired: 'Afgemeld. Meld je opnieuw aan.',

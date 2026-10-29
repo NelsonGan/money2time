@@ -2594,6 +2594,11 @@ const nb = {
     needs_pro_body:
       'Du er logget inn. Skaff deg Pro for å begynne å synkronisere. Kjøpt Pro på en annen telefon? Logg inn på Cloud Sync der også, så låses det opp her.',
     tile_on: 'På',
+    profile_off: 'Av',
+    profile_paused: 'På pause',
+    profile_needs_pro: 'Krever Pro',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'Åpner Cloud Sync',
     errors: {
       offline: 'Du er uten nett',
       session_expired: 'Logget ut. Logg inn igjen.',

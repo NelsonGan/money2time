@@ -2628,6 +2628,11 @@ const fil = {
     needs_pro_body:
       'Naka-sign in ka na. Kumuha ng Pro para magsimulang mag-sync. Bumili ng Pro sa ibang telepono? Mag-sign in din sa Cloud Sync doon, at maa-unlock ito dito.',
     tile_on: 'On',
+    profile_off: 'Off',
+    profile_paused: 'Naka-pause',
+    profile_needs_pro: 'Kailangan ng Pro',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'Binubuksan ang Cloud Sync',
     errors: {
       offline: 'Offline ka',
       session_expired: 'Na-sign out ka. Mag-sign in ulit.',

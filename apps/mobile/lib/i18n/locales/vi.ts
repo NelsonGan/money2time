@@ -2575,6 +2575,11 @@ const vi = {
     needs_pro_body:
       'Bạn đã đăng nhập. Nâng cấp Pro để bắt đầu đồng bộ. Đã mua Pro trên điện thoại khác? Hãy đăng nhập Cloud Sync trên đó nữa, và Pro sẽ được mở khóa ở đây.',
     tile_on: 'Bật',
+    profile_off: 'Tắt',
+    profile_paused: 'Tạm dừng',
+    profile_needs_pro: 'Cần Pro',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'Mở Cloud Sync',
     errors: {
       offline: 'Bạn đang ngoại tuyến',
       session_expired: 'Đã đăng xuất. Hãy đăng nhập lại.',

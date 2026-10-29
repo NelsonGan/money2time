@@ -2591,6 +2591,11 @@ const uk = {
     needs_pro_body:
       'Ви ввійшли. Оформіть Pro, щоб почати синхронізацію. Купили Pro на іншому телефоні? Увійдіть у Cloud Sync і там, і він відкриється тут.',
     tile_on: 'Увімк.',
+    profile_off: 'Вимк.',
+    profile_paused: 'Призупинено',
+    profile_needs_pro: 'Потрібен Pro',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'Відкриває Cloud Sync',
     errors: {
       offline: 'Немає з’єднання',
       session_expired: 'Ви вийшли. Увійдіть знову.',

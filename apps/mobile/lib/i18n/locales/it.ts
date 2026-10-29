@@ -2608,6 +2608,11 @@ const it = {
     needs_pro_body:
       "Hai effettuato l'accesso. Passa a Pro per iniziare a sincronizzare. Hai acquistato Pro su un altro telefono? Accedi a Cloud Sync anche lì e verrà sbloccato qui.",
     tile_on: 'Attivo',
+    profile_off: 'Disattivo',
+    profile_paused: 'In pausa',
+    profile_needs_pro: 'Serve Pro',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'Apre Cloud Sync',
     errors: {
       offline: 'Sei offline',
       session_expired: 'Disconnesso. Accedi di nuovo.',

@@ -2609,6 +2609,11 @@ const pt = {
     needs_pro_body:
       'Você entrou. Assine o Pro para começar a sincronizar. Comprou o Pro em outro celular? Entre no Cloud Sync lá também, e ele será desbloqueado aqui.',
     tile_on: 'Ligado',
+    profile_off: 'Desligado',
+    profile_paused: 'Pausado',
+    profile_needs_pro: 'Requer Pro',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'Abre o Cloud Sync',
     errors: {
       offline: 'Você está offline',
       session_expired: 'Você saiu. Entre de novo.',

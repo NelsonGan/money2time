@@ -2559,6 +2559,11 @@ const ko = {
     needs_pro_body:
       '로그인되었습니다. 동기화를 시작하려면 Pro를 구매하세요. 다른 휴대폰에서 Pro를 구매했나요? 그 휴대폰에서도 Cloud Sync에 로그인하면 여기서 잠금 해제됩니다.',
     tile_on: '켜짐',
+    profile_off: '꺼짐',
+    profile_paused: '일시 중지됨',
+    profile_needs_pro: 'Pro 필요',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'Cloud Sync를 엽니다',
     errors: {
       offline: '오프라인 상태예요',
       session_expired: '로그아웃되었어요. 다시 로그인하세요.',

@@ -2595,6 +2595,11 @@ const sv = {
     needs_pro_body:
       'Du är inloggad. Skaffa Pro för att börja synka. Köpt Pro på en annan telefon? Logga in på Cloud Sync där också, så låses det upp här.',
     tile_on: 'På',
+    profile_off: 'Av',
+    profile_paused: 'Pausad',
+    profile_needs_pro: 'Kräver Pro',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'Öppnar Cloud Sync',
     errors: {
       offline: 'Du är offline',
       session_expired: 'Utloggad. Logga in igen.',

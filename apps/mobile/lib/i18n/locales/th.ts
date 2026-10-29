@@ -2545,6 +2545,11 @@ const th = {
     needs_pro_body:
       'คุณลงชื่อเข้าใช้แล้ว อัปเกรดเป็น Pro เพื่อเริ่มซิงค์ ซื้อ Pro บนโทรศัพท์เครื่องอื่นไว้ใช่ไหม ลงชื่อเข้าใช้ Cloud Sync บนเครื่องนั้นด้วย แล้วจะปลดล็อกที่นี่',
     tile_on: 'เปิด',
+    profile_off: 'ปิด',
+    profile_paused: 'หยุดชั่วคราว',
+    profile_needs_pro: 'ต้องใช้ Pro',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'เปิด Cloud Sync',
     errors: {
       offline: 'คุณออฟไลน์อยู่',
       session_expired: 'ออกจากระบบแล้ว ลงชื่อเข้าใช้อีกครั้ง',

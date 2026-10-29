@@ -2611,6 +2611,11 @@ const ms = {
     needs_pro_body:
       'Anda telah log masuk. Dapatkan Pro untuk mula menyegerak. Membeli Pro pada telefon lain? Log masuk ke Cloud Sync di sana juga, dan ia akan dibuka di sini.',
     tile_on: 'Hidup',
+    profile_off: 'Mati',
+    profile_paused: 'Dijeda',
+    profile_needs_pro: 'Perlu Pro',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'Membuka Cloud Sync',
     errors: {
       offline: 'Anda di luar talian',
       session_expired: 'Dilog keluar. Log masuk semula.',

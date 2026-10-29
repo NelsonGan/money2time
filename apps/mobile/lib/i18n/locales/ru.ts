@@ -2598,6 +2598,11 @@ const ru = {
     needs_pro_body:
       'Вы вошли. Оформите Pro, чтобы начать синхронизацию. Купили Pro на другом телефоне? Войдите в Cloud Sync и там, и он откроется здесь.',
     tile_on: 'Вкл',
+    profile_off: 'Выкл',
+    profile_paused: 'Приостановлено',
+    profile_needs_pro: 'Нужен Pro',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'Открывает Cloud Sync',
     errors: {
       offline: 'Нет подключения',
       session_expired: 'Вы вышли. Войдите снова.',

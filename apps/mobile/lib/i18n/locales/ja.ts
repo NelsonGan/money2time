@@ -2580,6 +2580,11 @@ const ja = {
     needs_pro_body:
       'サインイン済みです。同期を始めるにはProを入手してください。別のスマホでProを購入した場合は、そのスマホでもCloud Syncにサインインすると、ここでも使えるようになります。',
     tile_on: 'オン',
+    profile_off: 'オフ',
+    profile_paused: '一時停止中',
+    profile_needs_pro: 'Proが必要',
+    profile_a11y_label: 'Cloud Sync、%{status}',
+    profile_a11y_hint: 'Cloud Syncを開きます',
     errors: {
       offline: 'オフラインです',
       session_expired: 'サインアウトされました。再度サインインしてください。',

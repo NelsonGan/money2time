@@ -2603,6 +2603,11 @@ const id = {
     needs_pro_body:
       'Anda sudah masuk. Dapatkan Pro untuk mulai sinkronisasi. Membeli Pro di ponsel lain? Masuk juga ke Cloud Sync di sana, dan Pro akan terbuka di sini.',
     tile_on: 'Aktif',
+    profile_off: 'Mati',
+    profile_paused: 'Dijeda',
+    profile_needs_pro: 'Perlu Pro',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'Membuka Cloud Sync',
     errors: {
       offline: 'Kamu sedang offline',
       session_expired: 'Kamu keluar. Masuk lagi.',
