@@ -147,18 +147,10 @@ const vi = {
   },
   news: {
     cloud_sync_ledgers: {
-      title: 'Cloud Sync và sổ dùng chung',
-      cloudSync: {
-        title: 'Cloud Sync đã có mặt',
-        body: 'Đăng nhập bằng Apple, Google hoặc email và dữ liệu của bạn sẽ giống nhau trên mọi điện thoại. Thay đổi đến trong vài giây. Đồng bộ là một phần của Pro. Tìm trong Cài đặt > Cloud Sync.',
-      },
+      title: 'Nhiều sổ',
       ledgers: {
         title: 'Nhiều sổ',
         body: 'Tách chi tiêu cá nhân, công việc và chuyến đi thành các sổ riêng, mỗi sổ có tài khoản, danh mục và tiền tệ riêng. Bắt đầu trống, từ tài khoản và danh mục của sổ khác, hoặc sao chép toàn bộ. Một phần của Pro.',
-      },
-      sharedLedgers: {
-        title: 'Sổ dùng chung',
-        body: 'Chia sẻ sổ với tối đa 5 người và cùng quản lý ngân sách gia đình. Mọi người thêm mục và xem trên điện thoại của mình. Tham gia miễn phí; chia sẻ cần Pro.',
       },
     },
     web_dashboard: {

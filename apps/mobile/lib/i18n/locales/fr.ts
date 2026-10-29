@@ -147,18 +147,10 @@ const fr = {
   },
   news: {
     cloud_sync_ledgers: {
-      title: 'Cloud Sync et carnets partagés',
-      cloudSync: {
-        title: 'Cloud Sync est arrivé',
-        body: 'Connectez-vous avec Apple, Google ou un e-mail et vos données sont les mêmes sur tous vos téléphones. Les modifications arrivent en quelques secondes. La synchronisation fait partie de Pro. Rendez-vous dans Réglages > Cloud Sync.',
-      },
+      title: 'Plusieurs carnets',
       ledgers: {
         title: 'Plusieurs carnets',
         body: 'Séparez vos dépenses perso, le travail et un voyage dans des carnets distincts, chacun avec ses comptes, catégories et devise. Commencez vide, avec les comptes et catégories d’un autre carnet, ou en copie complète. Inclus dans Pro.',
-      },
-      sharedLedgers: {
-        title: 'Carnets partagés',
-        body: 'Partagez un carnet avec jusqu’à 5 personnes et tenez le budget du foyer ensemble. Chacun ajoute des opérations et les voit sur son téléphone. Rejoindre est gratuit ; partager nécessite Pro.',
       },
     },
     web_dashboard: {

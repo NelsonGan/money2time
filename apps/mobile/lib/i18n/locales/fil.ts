@@ -147,18 +147,10 @@ const fil = {
   },
   news: {
     cloud_sync_ledgers: {
-      title: 'Cloud Sync at mga shared ledger',
-      cloudSync: {
-        title: 'Narito na ang Cloud Sync',
-        body: 'Mag-sign in gamit ang Apple, Google o email, at pareho ang data mo sa lahat ng phone mo. Dumarating ang mga pagbabago sa loob ng ilang segundo. Bahagi ng Pro ang pag-sync. Hanapin ito sa Settings > Cloud Sync.',
-      },
+      title: 'Maraming ledger',
       ledgers: {
         title: 'Maraming ledger',
         body: 'Ihiwalay ang personal na gastos, trabaho at biyahe sa magkakaibang ledger, bawat isa may sariling account, kategorya at currency. Simulan nang walang laman, mula sa account at kategorya ng ibang ledger, o bilang buong kopya. Bahagi ng Pro.',
-      },
-      sharedLedgers: {
-        title: 'Mga shared ledger',
-        body: 'Ibahagi ang ledger sa hanggang 5 tao at sabay na hawakan ang budget ng bahay. Lahat ay nagdadagdag ng entry at nakikita ito sa sarili nilang phone. Libre ang pagsali; kailangan ng Pro para magbahagi.',
       },
     },
     web_dashboard: {

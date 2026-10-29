@@ -29,6 +29,7 @@ import { clearAccountPro, getAccountProAnswer, setAccountPro } from '~/services/
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { runAutoBackupIfDue } from '~/services/autoBackup';
 import { reportError } from '~/services/errorReporting';
+import { FEATURE_FLAGS, useFeatureFlag } from '~/services/featureFlags';
 import { runUserAssetGc } from '~/services/userAssetGc';
 
 import { useSyncScheduler } from './hooks/useSyncScheduler';
@@ -152,9 +153,16 @@ interface CloudSyncContextValue {
 
 const CloudSyncContext = createContext<CloudSyncContextValue | null>(null);
 
-/** Whether this build can sync (it has the native Turso module). */
+/**
+ * Whether to show Cloud Sync and shared ledgers: the build can sync (it has
+ * the native Turso module) and this user is on the `cloud_sync` allow list.
+ * Only the UI is gated; a phone already signed in keeps syncing. Ledgers
+ * themselves are never gated.
+ */
 export function useCloudSyncEnabled(): boolean {
-  return isCloudSyncAvailable();
+  const flag = useFeatureFlag(FEATURE_FLAGS.cloudSync, { sendEvent: false });
+  // Flags never load in development builds, so the feature is on there.
+  return (__DEV__ || flag === true) && isCloudSyncAvailable();
 }
 
 /** The Worker refused this phone Pro: the account has none, or this phone is past its limit. */
@@ -181,7 +189,9 @@ function errorKind(error: unknown): CloudSyncErrorKind {
 }
 
 export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
-  const enabled = useCloudSyncEnabled();
+  // The engine runs whenever the build can sync; the allow-list flag only
+  // hides the UI (useCloudSyncEnabled).
+  const enabled = isCloudSyncAvailable();
   const { settings, refreshAll, switchLedger } = useApp();
   const { isPro, isStorePro, isStatusKnown } = usePro();
   const appUserId = settings?.appUserId ?? null;

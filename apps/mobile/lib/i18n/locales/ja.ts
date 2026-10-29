@@ -147,18 +147,10 @@ const ja = {
   },
   news: {
     cloud_sync_ledgers: {
-      title: 'Cloud Syncと共有帳簿',
-      cloudSync: {
-        title: 'Cloud Sync登場',
-        body: 'Apple、Google、メールでサインインすると、すべてのスマホで同じデータを使えます。変更は数秒で反映されます。同期はProの機能です。設定 > Cloud Syncから利用できます。',
-      },
+      title: '複数の帳簿',
       ledgers: {
         title: '複数の帳簿',
         body: '個人の支出、仕事、旅行を別々の帳簿に分けて管理。それぞれに口座、カテゴリ、通貨を持てます。空から始めるか、別の帳簿の口座とカテゴリから、または完全なコピーとして作成できます。Proの機能です。',
-      },
-      sharedLedgers: {
-        title: '共有帳簿',
-        body: '最大5人と帳簿を共有して、家計を一緒に管理できます。全員が記録を追加し、自分のスマホで確認できます。参加は無料、共有にはProが必要です。',
       },
     },
     web_dashboard: {

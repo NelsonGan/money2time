@@ -147,18 +147,10 @@ const ms = {
   },
   news: {
     cloud_sync_ledgers: {
-      title: 'Cloud Sync dan buku dikongsi',
-      cloudSync: {
-        title: 'Cloud Sync kini tersedia',
-        body: 'Log masuk dengan Apple, Google atau e-mel, dan data anda sama pada semua telefon anda. Perubahan tiba dalam beberapa saat. Penyegerakan ialah sebahagian daripada Pro. Cari di Tetapan > Cloud Sync.',
-      },
+      title: 'Berbilang buku',
       ledgers: {
         title: 'Berbilang buku',
         body: 'Asingkan perbelanjaan peribadi, kerja dan percutian dalam buku berasingan, masing-masing dengan akaun, kategori dan mata wang sendiri. Mula kosong, daripada akaun dan kategori buku lain, atau sebagai salinan penuh. Sebahagian daripada Pro.',
-      },
-      sharedLedgers: {
-        title: 'Buku dikongsi',
-        body: 'Kongsi buku dengan sehingga 5 orang dan urus belanjawan rumah bersama. Semua orang menambah catatan dan melihatnya pada telefon sendiri. Menyertai adalah percuma; berkongsi memerlukan Pro.',
       },
     },
     web_dashboard: {

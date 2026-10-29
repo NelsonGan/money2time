@@ -147,18 +147,10 @@ const nb = {
   },
   news: {
     cloud_sync_ledgers: {
-      title: 'Cloud Sync og delte regnskap',
-      cloudSync: {
-        title: 'Cloud Sync er her',
-        body: 'Logg på med Apple, Google eller e-post, så er dataene dine like på alle telefonene dine. Endringer kommer frem på sekunder. Synkronisering er en del av Pro. Finn det under Innstillinger > Cloud Sync.',
-      },
+      title: 'Flere regnskap',
       ledgers: {
         title: 'Flere regnskap',
         body: 'Hold privat forbruk, jobb og en reise i egne regnskap, hver med egne kontoer, kategorier og valuta. Start tomt, med kontoene og kategoriene fra et annet regnskap, eller som en full kopi. En del av Pro.',
-      },
-      sharedLedgers: {
-        title: 'Delte regnskap',
-        body: 'Del et regnskap med opptil 5 personer og hold husholdningsbudsjettet sammen. Alle legger inn poster og ser dem på sin egen telefon. Å bli med er gratis; deling krever Pro.',
       },
     },
     web_dashboard: {

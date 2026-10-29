@@ -21,29 +21,27 @@ import { Spinning } from './SyncStatusView';
  */
 export function CloudSyncProfilePill({ onPress }: { onPress: () => void }) {
   const enabled = useCloudSyncEnabled();
-  const { status, isSyncing, lastError, linked } = useCloudSync();
-  const { isPro } = usePro();
+  const { status, isSyncing, lastError, linked, phoneLimited } = useCloudSync();
+  const { isPro, isStatusKnown } = usePro();
   const colors = useThemeColors();
-  const state = enabled ? profileSyncState({ status, isSyncing, lastError, linked }) : null;
+  const state = enabled
+    ? profileSyncState({ status, isSyncing, lastError, linked, phoneLimited })
+    : null;
   if (!state) return null;
 
   const title = I18n.t('cloud_sync.tile_label');
   const statusText = state.statusKey ? I18n.t(`cloud_sync.${state.statusKey}`) : null;
-  // Same rule as the Data tile's Pro ribbon: syncing is Pro, signing in is not.
-  const showPro = !isPro && status === 'signedOut';
+  // Same rule as the Data tile's Pro ribbon: syncing is Pro, signing in is
+  // not. Waits for the Pro status so a Pro user never sees it flash.
+  const showPro = isStatusKnown && !isPro && status === 'signedOut';
 
   const tint =
     state.tone === 'on'
       ? colors.success
-      : state.tone === 'busy'
+      : state.tone === 'busy' || state.tone === 'action'
         ? colors.primary
         : colors.textMuted;
-  const background =
-    state.tone === 'on'
-      ? withColorAlpha(colors.success, 0.12)
-      : state.tone === 'busy'
-        ? withColorAlpha(colors.primary, 0.1)
-        : withColorAlpha(colors.textMuted, 0.12);
+  const background = withColorAlpha(tint, tint === colors.primary ? 0.1 : 0.12);
 
   const icon =
     state.tone === 'busy' ? (

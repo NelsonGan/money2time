@@ -973,8 +973,29 @@ Before enabling a production trial:
 Pro users keep their data in sync between phones; anyone can sign in. The app
 side lives in `features/cloudSync/` and the server in
 [`apps/cloudflare/workers/cloud-sync`](#cloud-sync-worker). It is on in every
-build that has the native Turso module (`isCloudSyncAvailable`); the PostHog
-flag `cloud_sync` that gated it before release was removed.
+build that has the native Turso module (`isCloudSyncAvailable`), but its UI is
+shown only to users on the PostHog allow-list flag `cloud_sync` (see
+[Allow list](#allow-list)). Ledgers are not gated: every Pro user has them.
+
+### Allow list
+
+`useCloudSyncEnabled()` (`features/cloudSync/CloudSyncContext.tsx`) is true when
+the build can sync and the flag `cloud_sync` is on for this user (always on in
+development builds, where flags never load). It gates only the UI: the Settings
+
+> Data tile, the profile card's Cloud Sync pill, the post-purchase Cloud Sync
+> offer (`CloudSyncPromptHost`), the paywall's Cloud Sync and Shared ledgers rows,
+> Share and members on the ledger screens, and joining from an invite link (which
+> lands on _Shared ledgers aren't available in this version yet_). The engine
+> itself (`CloudSyncProvider`) runs whenever the build can sync, so a phone that
+> was already signed in keeps syncing when it is off the list. Until flags load
+> (the SDK keeps the last values between launches), the UI stays hidden.
+
+The flag (PostHog id `1002314`) has one condition: person `distinct_id` is
+exactly one of a list of app user ids (`m2t_<uuid>`), at 100%. Users see only
+the last 8 characters of their id (Settings > Display > User ID); look the full
+id up in RevenueCat (it is the RevenueCat app user id) and add it to the list.
+The flag is read with `sendEvent: false`, so it sends no `$feature_flag_called`.
 
 ### What the user sees
 
@@ -1487,7 +1508,7 @@ The free tier is **1,000,000 product-analytics events a month** (identified even
 | Error tracking (`$exception`)       | 100,000 exceptions                  | Deduplicated and capped on the device at 25 distinct exceptions per 5 minutes.                                                                                                                                                                                                                                 |
 | Session replay                      | 2,500 mobile + 5,000 web recordings | App ~1,500 (15% of first-day launches, 0.4% of later ones) against the mobile allowance; the website's 10% sample against the web one. Recordings under 5 s are dropped.                                                                                                                                       |
 | AI observability (`$ai_generation`) | 100,000 events                      | One per OpenRouter call from the receipt scanner: ~60,000. Every app version scans through the Worker, so this already counts all users; screenshot scans (~1,700 a day) dominate. Without the screenshot empty-result retry it measured ~85,000. A scan Claude fails adds one generation for the Qwen backup. |
-| Feature flags                       | 1,000,000 requests                  | None while no flag is active (none is since `cloud_sync` was removed): requests are only billed while a flag exists.                                                                                                                                                                                           |
+| Feature flags                       | 1,000,000 requests                  | `cloud_sync` is active, so each launch and identify is one request: about one or two per active user per day.                                                                                                                                                                                                  |
 
 Rules that keep it inside the free tier:
 
@@ -1899,9 +1920,9 @@ Replays answer "what did the user see and do" next to an exception or a funnel d
 
 Active flags:
 
-| Flag   | Gates                                                                                | Off means |
-| ------ | ------------------------------------------------------------------------------------ | --------- |
-| _none_ | `cloud_sync` gated [Cloud Sync](#cloud-sync) until it shipped; archive it in PostHog | —         |
+| Flag         | Gates                                                                                  | Off means                                       |
+| ------------ | -------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| `cloud_sync` | The [Cloud Sync and shared-ledger UI](#allow-list), for allow-listed app user ids only | Hidden; a phone already signed in keeps syncing |
 
 ### AI observability
 
@@ -3505,7 +3526,7 @@ Made for this feature on 2026-10-28, all new (nothing existing is shared):
 | D1 tables (shared)       | `shared_ledgers`, `ledger_members`, `ledger_links`, `ledger_media_usage` in `money2time-cloud-sync-auth`                | go with the D1 database                                                                     |
 | Durable Object class     | `SyncHub` (live updates, one per user, SQLite-backed, added 2026-10-28)                                                 | goes with the Worker                                                                        |
 | Turso Platform API token | the Worker secret `TURSO_API_TOKEN` (copy in `~/.config/money2time/turso-api-token`)                                    | revoke it in the Turso dashboard, Settings > API Tokens                                     |
-| PostHog feature flag     | `cloud_sync`, no longer read by the app (removed 2026-10-28)                                                            | archive or delete in PostHog                                                                |
+| PostHog feature flag     | `cloud_sync`, the [allow list](#allow-list) for the Cloud Sync UI                                                       | archive or delete in PostHog once the UI is ungated                                         |
 
 Teardown order: delete the Worker first (nothing can make new databases), then
 the Turso databases listed in D1 (`SELECT db_name FROM sync_databases` and

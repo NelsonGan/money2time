@@ -120,18 +120,10 @@ const zh = {
   },
   news: {
     cloud_sync_ledgers: {
-      title: 'Cloud Sync 与共享账本',
-      cloudSync: {
-        title: 'Cloud Sync 来了',
-        body: '使用 Apple、Google 或邮箱登录，所有手机上的数据都会保持一致。更改几秒内就会同步。同步属于 Pro 功能。前往设置 > Cloud Sync。',
-      },
+      title: '多个账本',
       ledgers: {
         title: '多个账本',
         body: '把个人开销、工作和旅行分成不同账本，各自有独立的账户、分类和货币。可以从空白开始、沿用其他账本的账户和分类，或完整复制。属于 Pro 功能。',
-      },
-      sharedLedgers: {
-        title: '共享账本',
-        body: '与最多 5 人共享账本，一起管理家庭预算。每个人都能添加记录，并在自己的手机上看到。加入免费，共享需要 Pro。',
       },
     },
     web_dashboard: {

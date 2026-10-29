@@ -146,18 +146,10 @@ const ko = {
   },
   news: {
     cloud_sync_ledgers: {
-      title: 'Cloud Sync와 공유 가계부',
-      cloudSync: {
-        title: 'Cloud Sync 출시',
-        body: 'Apple, Google 또는 이메일로 로그인하면 모든 휴대폰에서 같은 데이터를 쓸 수 있습니다. 변경 사항은 몇 초 만에 반영됩니다. 동기화는 Pro 기능입니다. 설정 > Cloud Sync에서 확인하세요.',
-      },
+      title: '여러 가계부',
       ledgers: {
         title: '여러 가계부',
         body: '개인 지출, 업무, 여행을 각각의 가계부로 나눠 관리하세요. 가계부마다 계좌, 카테고리, 통화가 따로 있습니다. 빈 상태로, 다른 가계부의 계좌와 카테고리로, 또는 전체 복사본으로 시작할 수 있습니다. Pro 기능입니다.',
-      },
-      sharedLedgers: {
-        title: '공유 가계부',
-        body: '최대 5명과 가계부를 공유해 집안 예산을 함께 관리하세요. 모두가 항목을 추가하고 각자의 휴대폰에서 확인합니다. 참여는 무료이며 공유하려면 Pro가 필요합니다.',
       },
     },
     web_dashboard: {

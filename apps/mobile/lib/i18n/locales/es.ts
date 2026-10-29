@@ -147,18 +147,10 @@ const es = {
   },
   news: {
     cloud_sync_ledgers: {
-      title: 'Cloud Sync y libros compartidos',
-      cloudSync: {
-        title: 'Llega Cloud Sync',
-        body: 'Inicia sesión con Apple, Google o correo y tus datos serán los mismos en todos tus teléfonos. Los cambios llegan en segundos. La sincronización es parte de Pro. Está en Ajustes > Cloud Sync.',
-      },
+      title: 'Varios libros',
       ledgers: {
         title: 'Varios libros',
         body: 'Lleva tus gastos personales, el trabajo y un viaje en libros separados, cada uno con sus cuentas, categorías y moneda. Empieza uno vacío, con las cuentas y categorías de otro libro o como copia completa. Parte de Pro.',
-      },
-      sharedLedgers: {
-        title: 'Libros compartidos',
-        body: 'Comparte un libro con hasta 5 personas y llevad juntos el presupuesto de casa. Todos añaden movimientos y los ven en su teléfono. Unirse es gratis; compartir requiere Pro.',
       },
     },
     web_dashboard: {

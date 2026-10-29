@@ -147,18 +147,10 @@ const tr = {
   },
   news: {
     cloud_sync_ledgers: {
-      title: 'Cloud Sync ve paylaşılan defterler',
-      cloudSync: {
-        title: 'Cloud Sync geldi',
-        body: 'Apple, Google veya e-postayla giriş yap; verilerin tüm telefonlarında aynı olsun. Değişiklikler saniyeler içinde ulaşır. Eşitleme Pro’nun bir parçası. Ayarlar > Cloud Sync’te bulabilirsin.',
-      },
+      title: 'Birden fazla defter',
       ledgers: {
         title: 'Birden fazla defter',
         body: 'Kişisel harcamaları, işi ve bir seyahati ayrı defterlerde tut; her birinin kendi hesapları, kategorileri ve para birimi olsun. Boş başla, başka bir defterin hesap ve kategorileriyle ya da tam kopya olarak. Pro’nun bir parçası.',
-      },
-      sharedLedgers: {
-        title: 'Paylaşılan defterler',
-        body: 'Bir defteri en fazla 5 kişiyle paylaş ve ev bütçesini birlikte tutun. Herkes kayıt ekler ve kendi telefonunda görür. Katılmak ücretsiz; paylaşmak için Pro gerekir.',
       },
     },
     web_dashboard: {
