@@ -29,6 +29,12 @@ describe('new transaction account gate', () => {
     expect(isNewTransactionBlockedByAccounts(true, 7)).toBe(false);
   });
 
+  it('never blocks a free member in an active shared ledger', () => {
+    expect(isNewTransactionBlockedByAccounts(false, 7, true)).toBe(false);
+    expect(isNewTransactionBlockedByAccounts(false, 30, true)).toBe(false);
+    expect(isNewTransactionBlockedByAccounts(false, 7, false)).toBe(true);
+  });
+
   it('keeps savings goals out of the account limit and excludes deleted accounts', () => {
     const accounts = [
       account('wallet'),

@@ -2648,6 +2648,10 @@ const id = {
           q: 'Apakah buku bersama perlu Pro?',
           a: 'Hanya satu orang di dalamnya yang perlu Pro, pemilik atau anggota mana pun. Jika tidak ada yang punya Pro, buku itu dijeda untuk semua orang sampai ada yang punya. Tidak ada yang dihapus.',
         },
+        shared_free_limits: {
+          q: 'Bisakah saya menambah transaksi di buku bersama tanpa Pro?',
+          a: 'Bisa, meskipun buku itu punya lebih dari 6 akun. Batas paket gratis lainnya tetap berlaku, seperti menambah akun atau kategori melebihi batas. Minta pemilik buku untuk melakukan perubahan itu.',
+        },
         family_pro: {
           q: 'Bisakah keluargaku memakai Pro-ku?',
           a: 'Bagikan buku dengan mereka: orang yang kamu undang tidak perlu Pro. Masuk ke akunmu di ponsel mereka akan memperlihatkan semua data keuanganmu kepada mereka.',

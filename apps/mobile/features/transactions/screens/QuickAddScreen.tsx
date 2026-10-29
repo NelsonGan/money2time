@@ -1,15 +1,11 @@
 import React, { useCallback, useMemo } from 'react';
 
 import { useApp, useTransactions } from '~/context/AppContext';
-import { useIsPro } from '~/context/ProContext';
 import {
   type ExpandToDetailedValues,
   QuickAddSheet,
 } from '~/features/transactions/components/QuickAddSheet';
-import {
-  countAccountsTowardFreeLimit,
-  isNewTransactionBlockedByAccounts,
-} from '~/features/transactions/lib/accountEntryGate';
+import { useNewTransactionGate } from '~/features/transactions/hooks/useNewTransactionGate';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import type { AddTransactionInitialValues } from '~/navigation/rootStack';
 import { requestHighlightTransaction } from '~/services/transactionsNavigation';
@@ -50,7 +46,7 @@ export function QuickAddScreen({
     fxCurrencies,
     rateTable,
   } = useApp();
-  const isPro = useIsPro();
+  const { blocked, activeAccountCount } = useNewTransactionGate();
   const { transactions } = useTransactions();
 
   // Currencies the user can enter quick-add amounts in: the reporting currency,
@@ -103,8 +99,7 @@ export function QuickAddScreen({
     [initialAccountId, onExpandToDetailed],
   );
 
-  const activeAccountCount = countAccountsTowardFreeLimit(accounts);
-  if (isNewTransactionBlockedByAccounts(isPro, activeAccountCount)) {
+  if (blocked) {
     return (
       <TransactionEntryBlockedScreen activeAccountCount={activeAccountCount} onClose={onClose} />
     );

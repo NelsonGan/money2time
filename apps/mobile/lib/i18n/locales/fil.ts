@@ -2673,6 +2673,10 @@ const fil = {
           q: 'Kailangan ba ng Pro ang shared na ledger?',
           a: 'Isang tao lang dito ang kailangang may Pro, ang may-ari o kahit sinong miyembro. Kapag walang may Pro dito, mapo-pause ito para sa lahat hanggang may magka-Pro. Walang mabubura.',
         },
+        shared_free_limits: {
+          q: 'Puwede ba akong magdagdag ng entry sa shared ledger nang walang Pro?',
+          a: 'Oo, kahit may higit sa 6 na account ito. Nalalapat pa rin ang ibang limit ng libreng plan, gaya ng pagdagdag ng account o category lampas sa limit. Hilingin sa may-ari ng ledger na gawin ang mga pagbabagong iyon.',
+        },
         family_pro: {
           q: 'Puwede bang gamitin ng pamilya ko ang Pro ko?',
           a: 'Mag-share ng ledger sa kanila: hindi kailangan ng Pro ng mga inimbita mo. Kapag nag-sign in ka sa account mo sa telepono nila, makikita nila ang lahat ng data ng pera mo.',

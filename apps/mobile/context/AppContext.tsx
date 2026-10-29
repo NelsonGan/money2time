@@ -36,6 +36,7 @@ import {
   budgetWeekOverlaps,
   isBudgetPeriodKey,
 } from '~/features/budget/lib/budgetPeriods';
+import { openLedgerSharedAndActive } from '~/features/cloudSync/services/sharedLedgerStore';
 import { computeItemStats } from '~/features/items/utils';
 import {
   buildRefundNote,
@@ -2453,7 +2454,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       };
       if (meta?.source === 'autolog') {
         const nextPrefs = persistAutoLogTransaction(
-          { isPro: meta.autoLogIsPro ?? false, accounts, prefs: quickEntryPrefsRef.current },
+          {
+            isPro: meta.autoLogIsPro ?? false,
+            accounts,
+            prefs: quickEntryPrefsRef.current,
+            inSharedLedger: openLedgerSharedAndActive(),
+          },
           {
             transaction: (write) => getSQLite().withTransactionSync(write),
             create: () => transactionsRepository.createWithId(id, normalizedInput, now),

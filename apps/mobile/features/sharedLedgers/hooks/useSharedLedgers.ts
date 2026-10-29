@@ -1,5 +1,6 @@
 import { useCallback, useSyncExternalStore } from 'react';
 
+import { useApp } from '~/context/AppContext';
 import { useIsPro } from '~/context/ProContext';
 import {
   listSharedLedgers,
@@ -17,6 +18,15 @@ export function useSharedLedgers(): SharedLedger[] {
 export function useSharedLedger(ledgerId: string | undefined): SharedLedger | null {
   const ledgers = useSharedLedgers();
   return ledgers.find((ledger) => ledger.ledgerId === ledgerId) ?? null;
+}
+
+/**
+ * Whether the open ledger is shared and active (anyone in it Pro), so free
+ * members log in it whatever its account count. False for a paused one.
+ */
+export function useOpenLedgerSharedAndActive(): boolean {
+  const { activeLedger } = useApp();
+  return useSharedLedger(activeLedger.id)?.active === true;
 }
 
 /** Why each ledger cannot be opened now (see `ledgerLock`), kept current. */

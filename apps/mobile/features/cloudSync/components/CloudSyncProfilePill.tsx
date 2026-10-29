@@ -9,20 +9,20 @@ import { triggerHaptic } from '~/services/haptics';
 import { withColorAlpha } from '~/utils/color';
 import { FONT } from '~/utils/fonts';
 
-import { useCloudSync, useCloudSyncEnabled, useCloudSyncProTag } from '../CloudSyncContext';
+import { useCloudSync, useCloudSyncEnabled } from '../CloudSyncContext';
 import { profileSyncState } from '../lib/profileStatus';
 import { Spinning } from './SyncStatusView';
 
 /**
  * Cloud Sync's shortcut on the Settings profile card: a pill under the name
  * with the live sync state. Opens the same screen as Settings > Data > Cloud
- * Sync, which does its own sign-in and Pro gating.
+ * Sync, which does its own sign-in and Pro gating. No PRO tag here: the
+ * Settings tile carries it.
  */
 export function CloudSyncProfilePill({ onPress }: { onPress: () => void }) {
   const enabled = useCloudSyncEnabled();
   const { status, isSyncing, lastError, linked, phoneLimited } = useCloudSync();
   const colors = useThemeColors();
-  const showPro = useCloudSyncProTag();
   const state = enabled
     ? profileSyncState({ status, isSyncing, lastError, linked, phoneLimited })
     : null;
@@ -88,17 +88,6 @@ export function CloudSyncProfilePill({ onPress }: { onPress: () => void }) {
           </Text>
         ) : null}
       </Text>
-      {showPro ? (
-        <View className="rounded-full px-1.5 py-px" style={{ backgroundColor: colors.accent }}>
-          <Text
-            allowFontScaling={false}
-            className="text-[9px] font-bold tracking-[1px]"
-            style={{ color: '#fff' }}
-          >
-            PRO
-          </Text>
-        </View>
-      ) : null}
       <ChevronRight size={14} color={colors.textMuted} />
     </Pressable>
   );
