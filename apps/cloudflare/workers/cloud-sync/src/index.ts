@@ -1,6 +1,6 @@
 // Cloud Sync Worker. See README.md > Cloudflare > Cloud-sync Worker.
 //
-//   /api/auth/*                 Better Auth (Apple, Google, email code)
+//   /api/auth/*                 Better Auth (Apple, Google, email code; sending a code needs Turnstile)
 //   GET    /v1/account          who is signed in and whether the account is Pro
 //   POST   /v1/account/status {appUserId} → {isPro, limited} for this phone (Pro reaches 5 phones)
 //   DELETE /v1/account/install {appUserId} → sign-out: the install no longer counts for the account's Pro
@@ -32,7 +32,7 @@
 
 import { isAppleRevocationConfigured, revokeAppleTokens, storeAppleRefreshToken } from './apple';
 import { getAuth } from './auth';
-import type { Env } from './env';
+import { csv, type Env } from './env';
 import { json, readJson } from './http';
 import {
   audienceIfAllowed,
@@ -65,6 +65,7 @@ import {
   unlinkAppUserId,
 } from './revenuecat';
 import { databaseNameFor, deleteDatabase, deleteSyncDatabase, getSyncDatabase } from './turso';
+import { checkTurnstile, TURNSTILE_HEADER } from './turnstile';
 
 export { SyncHub } from './live';
 
@@ -138,8 +139,9 @@ export default {
 
 /**
  * In front of Better Auth: rate limits (every POST per client IP, code
- * requests also per recipient, so many IPs cannot flood one inbox), and code
- * requests only for signing in.
+ * requests also per recipient, so many IPs cannot flood one inbox), code
+ * requests only for signing in, and only with a Turnstile token that verifies
+ * (src/turnstile.ts, which also covers the rollout).
  */
 async function authGate(request: Request, url: URL, env: Env): Promise<Response | null> {
   if (request.method !== 'POST') return null;
@@ -150,6 +152,19 @@ async function authGate(request: Request, url: URL, env: Env): Promise<Response 
   if (url.pathname !== SEND_CODE_PATH) return null;
   const body = await readJson<{ email: unknown; type: unknown }>(request.clone());
   if (body?.type !== 'sign-in') return json({ error: 'bad_request' }, 400);
+  // Before the per-recipient limit, so requests without a valid token cannot
+  // use up someone's three codes a minute.
+  const captcha = await checkTurnstile({
+    token: request.headers.get(TURNSTILE_HEADER),
+    secret: env.TURNSTILE_SECRET_KEY,
+    enforce: env.TURNSTILE_ENFORCE === 'true',
+    remoteIp: request.headers.get('cf-connecting-ip'),
+    hostnames: csv(env.TURNSTILE_HOSTNAMES).map((host) => host.toLowerCase()),
+  });
+  if (!captcha.ok) {
+    console.warn('[cloud-sync] turnstile refused', captcha.reason, captcha.codes?.join(',') ?? '');
+    return json({ error: 'captcha_failed' }, 403);
+  }
   const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
   if (email && env.OTP_LIMITER && !(await env.OTP_LIMITER.limit({ key: email })).success) {
     return json({ error: 'rate_limited' }, 429);

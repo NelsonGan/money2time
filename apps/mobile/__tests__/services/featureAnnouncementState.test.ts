@@ -36,21 +36,32 @@ describe('feature announcement state', () => {
     );
   });
 
-  it('surfaces the web dashboard release with all five pages on both platforms', () => {
+  it('surfaces the Cloud Sync and ledgers release with all three pages on both platforms', () => {
     const latest = getLatestFeatureAnnouncement()!;
     expect(latest).toMatchObject({
-      id: 'web_dashboard_2026_10',
-      announcementNumber: 21,
+      id: 'cloud_sync_ledgers_2026_10',
+      announcementNumber: 22,
       pages: [
-        { key: 'webDashboard', visual: 'webDashboard', cta: 'openWebDashboard' },
-        { key: 'notificationReview', visual: 'notificationReview', cta: 'openAutoLog' },
-        { key: 'fasterScans', visual: 'fasterScans' },
-        { key: 'cardDesigns', visual: 'cardDesigns', cta: 'openAccounts' },
-        { key: 'bottomBar', visual: 'bottomBar', cta: 'openBottomBar' },
+        { key: 'cloudSync', visual: 'cloudSync', cta: 'openCloudSync' },
+        { key: 'ledgers', visual: 'ledgers', cta: 'openLedgers' },
+        { key: 'sharedLedgers', visual: 'sharedLedgers', cta: 'openLedgers' },
       ],
     });
-    expect(announcementPagesForPlatform(latest, 'ios')).toHaveLength(5);
-    expect(announcementPagesForPlatform(latest, 'android')).toHaveLength(5);
+    expect(announcementPagesForPlatform(latest, 'ios')).toHaveLength(3);
+    expect(announcementPagesForPlatform(latest, 'android')).toHaveLength(3);
+  });
+
+  it('keeps all five web dashboard pages on both platforms', () => {
+    const announcement = getFeatureAnnouncementById('web_dashboard_2026_10')!;
+    expect(announcement.pages.map((page) => page.key)).toEqual([
+      'webDashboard',
+      'notificationReview',
+      'fasterScans',
+      'cardDesigns',
+      'bottomBar',
+    ]);
+    expect(announcementPagesForPlatform(announcement, 'ios')).toHaveLength(5);
+    expect(announcementPagesForPlatform(announcement, 'android')).toHaveLength(5);
   });
 
   it('keeps the transaction updates screenshot page on Android only', () => {

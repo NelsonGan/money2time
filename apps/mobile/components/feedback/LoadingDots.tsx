@@ -4,6 +4,7 @@ import Animated, {
   cancelAnimation,
   Easing,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withDelay,
   withRepeat,
@@ -12,6 +13,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { I18n } from '~/lib/i18n';
 
 type LoadingDotsSize = 'tiny' | 'small' | 'large';
 
@@ -19,6 +21,8 @@ interface LoadingDotsProps {
   color?: string;
   size?: LoadingDotsSize;
   style?: ViewStyle;
+  /** What a screen reader says; "Loading…" by default. */
+  accessibilityLabel?: string;
 }
 
 // `container` is the row height; the rendered width is dot * 3 + gap * 2, which
@@ -30,10 +34,22 @@ const DIMENSIONS: Record<LoadingDotsSize, { dot: number; gap: number; container:
   large: { dot: 11, gap: 8, container: 14 },
 };
 
-function Dot({ delay, color, size }: { delay: number; color: string; size: number }) {
-  const v = useSharedValue(0);
+function Dot({
+  delay,
+  color,
+  size,
+  still,
+}: {
+  delay: number;
+  color: string;
+  size: number;
+  still: boolean;
+}) {
+  const v = useSharedValue(still ? 1 : 0);
 
   useEffect(() => {
+    // Reduce Motion: the dots hold still at full size.
+    if (still) return;
     v.value = withDelay(
       delay,
       withRepeat(
@@ -47,7 +63,7 @@ function Dot({ delay, color, size }: { delay: number; color: string; size: numbe
       ),
     );
     return () => cancelAnimation(v);
-  }, [v, delay]);
+  }, [v, delay, still]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: 0.35 + v.value * 0.65,
@@ -64,20 +80,33 @@ function Dot({ delay, color, size }: { delay: number; color: string; size: numbe
   );
 }
 
-export function LoadingDots({ color, size = 'small', style }: LoadingDotsProps) {
+/**
+ * Three pulsing dots: the app's loader. It keeps the size of what it replaces
+ * (a button label, a line of text), so nothing around it moves while work runs.
+ */
+export function LoadingDots({
+  color,
+  size = 'small',
+  style,
+  accessibilityLabel,
+}: LoadingDotsProps) {
   const themeColors = useThemeColors();
+  const still = useReducedMotion();
   const resolvedColor = color ?? themeColors.primary;
   const d = DIMENSIONS[size];
   return (
     <View
+      accessible
+      accessibilityRole="progressbar"
+      accessibilityLabel={accessibilityLabel ?? I18n.t('common.loading')}
       style={[
         { flexDirection: 'row', alignItems: 'center', gap: d.gap, height: d.container },
         style,
       ]}
     >
-      <Dot delay={0} color={resolvedColor} size={d.dot} />
-      <Dot delay={150} color={resolvedColor} size={d.dot} />
-      <Dot delay={300} color={resolvedColor} size={d.dot} />
+      <Dot delay={0} color={resolvedColor} size={d.dot} still={still} />
+      <Dot delay={150} color={resolvedColor} size={d.dot} still={still} />
+      <Dot delay={300} color={resolvedColor} size={d.dot} still={still} />
     </View>
   );
 }

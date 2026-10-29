@@ -1,6 +1,7 @@
 const tr = {
   common: {
     back: 'Geri',
+    loading: 'Yükleniyor…',
     close: 'Kapat',
     done: 'Tamam',
     save: 'Kaydet',
@@ -145,6 +146,21 @@ const tr = {
     reset_action: 'Sil ve değiştir',
   },
   news: {
+    cloud_sync_ledgers: {
+      title: 'Cloud Sync ve paylaşılan defterler',
+      cloudSync: {
+        title: 'Cloud Sync geldi',
+        body: 'Apple, Google veya e-postayla giriş yap; verilerin tüm telefonlarında aynı olsun. Değişiklikler saniyeler içinde ulaşır. Eşitleme Pro’nun bir parçası. Ayarlar > Cloud Sync’te bulabilirsin.',
+      },
+      ledgers: {
+        title: 'Birden fazla defter',
+        body: 'Kişisel harcamaları, işi ve bir seyahati ayrı defterlerde tut; her birinin kendi hesapları, kategorileri ve para birimi olsun. Boş başla, başka bir defterin hesap ve kategorileriyle ya da tam kopya olarak. Pro’nun bir parçası.',
+      },
+      sharedLedgers: {
+        title: 'Paylaşılan defterler',
+        body: 'Bir defteri en fazla 5 kişiyle paylaş ve ev bütçesini birlikte tutun. Herkes kayıt ekler ve kendi telefonunda görür. Katılmak ücretsiz; paylaşmak için Pro gerekir.',
+      },
+    },
     web_dashboard: {
       title: 'Web Gösterge Paneli ve daha fazlası',
       webDashboard: {
@@ -395,6 +411,7 @@ const tr = {
       open_app_icon: 'Simgeni seç',
       open_ricecal: "RiceCal'i dene",
       open_pro_paywall: 'Pro planlarını gör',
+      open_cloud_sync: 'Cloud Sync’i aç',
       open_bottom_bar: 'Alt çubuğu düzenle',
       open_share_earn: 'Pro’yu ücretsiz al',
       open_quick_entry_settings: 'Hızlı Giriş ayarlarını aç',
@@ -406,6 +423,11 @@ const tr = {
       open_review: 'Harcamaları İncele sayfasını aç',
     },
     showcase: {
+      synced_devices: 'Tüm telefonların güncel',
+      ledger_personal: 'Kişisel',
+      ledger_work: 'İş',
+      ledger_travel: 'Japonya gezisi',
+      ledger_family: 'Aile',
       notification_bank: 'Bankanız',
       notification_text: 'Kartınız bir alışverişte kullanıldı.',
       scan_before: 'Önce',
@@ -2536,10 +2558,12 @@ const tr = {
     email_placeholder: 'siz@ornek.com',
     send_code: 'Kod gönder',
     code_title: 'Kodu girin',
-    code_body: '%{email} adresine gönderildi',
     verify: 'Devam',
     resend: 'Kodu tekrar gönder',
     code_sent: 'Kod gönderildi',
+    code_sent_to: '6 haneli kodu şu adrese gönderdik',
+    other_options: 'Diğer giriş yöntemleri',
+    captcha_title: 'Kodunu göndermeden önce kısa bir kontrol',
     change_email: 'E-postayı değiştir',
     linking: 'Kuruluyor…',
     linking_body: 'Uygulamayı açık tutun.',
@@ -2583,6 +2607,7 @@ const tr = {
       server: 'Bir şeyler ters gitti',
       unknown: 'Bir şeyler ters gitti',
       invalid_code: 'Kod yanlış veya süresi dolmuş',
+      captcha_failed: 'Bu istek doğrulanamadı. Birazdan tekrar dene.',
       invalid_email: 'E-posta adresini kontrol edin',
       rate_limited: 'Çok fazla deneme. Bir dakika bekleyin.',
       backup_failed: 'Bu telefon yedeklenemedi. Hiçbir şey değişmedi.',
@@ -2912,6 +2937,12 @@ const tr = {
     start_with: 'Şununla başla',
     accounts: 'Hesaplar',
     categories: 'Kategoriler',
+    copy_from_hint: 'Kopyalanacak defteri seç',
+    everything: 'Tümü',
+    everything_caption_one: '{{count}} kayıt, bütçeler ve albümlerle tam kopya',
+    everything_caption_other: '{{count}} kayıt, bütçeler ve albümlerle tam kopya',
+    everything_currency_note: 'Tam kopya {{name}} defterinin para birimini korur.',
+    delete_open_note: 'Şu an açık olduğu için yerine {{name}} açılır.',
     copy_from: 'Şuradan kopyala',
     copy_accounts_one: '{{count}} hesap, sıfır bakiyeyle',
     copy_accounts_other: '{{count}} hesap, sıfır bakiyeyle',
@@ -2919,7 +2950,8 @@ const tr = {
     copy_categories_one: '{{count}} kategori',
     copy_categories_other: '{{count}} kategori',
     starter_categories_caption: 'Günlük kategorilerden oluşan kısa bir liste.',
-    create_footnote: 'Hiçbir işlem kopyalanmaz. Defterin adını istediğin zaman değiştirebilirsin.',
+    create_footnote:
+      'Kayıtları yalnızca Tümü kopyalar. Defterin adını istediğin zaman değiştirebilirsin.',
     create: 'Defter oluştur',
     delete_title: '{{name}} silinsin mi?',
     delete_message_one:
@@ -2996,7 +3028,9 @@ const tr = {
     people_other: '{{count}} kişi',
     join_sign_in: "Katılmak için giriş yap. Pro'ya ihtiyacın yok.",
     join_button: '{{name}} defterine katıl',
-    join_as: '{{email}} olarak katılıyorsun',
+    joining_as: 'Katılan hesap',
+    join_already: 'Bu deftere zaten katıldın.',
+    open_ledger: '{{name}} defterini aç',
     join_note: 'Ayrı bir defter olarak açılır. Kendi defterlerin gizli kalır.',
     join_invalid: 'Bu davet bağlantısının süresi doldu. Yeni bir tane iste.',
     join_full: 'Bu defter dolu. Sahibinden yer açmasını iste.',

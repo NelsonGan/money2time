@@ -1,6 +1,7 @@
 const id = {
   common: {
     back: 'Kembali',
+    loading: 'Memuat…',
     close: 'Tutup',
     done: 'Selesai',
     save: 'Simpan',
@@ -145,6 +146,21 @@ const id = {
     reset_action: 'Hapus & ganti',
   },
   news: {
+    cloud_sync_ledgers: {
+      title: 'Cloud Sync dan buku bersama',
+      cloudSync: {
+        title: 'Cloud Sync sudah hadir',
+        body: 'Masuk dengan Apple, Google, atau email, dan data Anda sama di semua ponsel Anda. Perubahan tiba dalam hitungan detik. Sinkronisasi termasuk dalam Pro. Temukan di Pengaturan > Cloud Sync.',
+      },
+      ledgers: {
+        title: 'Banyak buku',
+        body: 'Pisahkan pengeluaran pribadi, pekerjaan, dan perjalanan ke buku berbeda, masing-masing dengan akun, kategori, dan mata uang sendiri. Mulai kosong, dari akun dan kategori buku lain, atau sebagai salinan lengkap. Bagian dari Pro.',
+      },
+      sharedLedgers: {
+        title: 'Buku bersama',
+        body: 'Bagikan buku dengan hingga 5 orang dan kelola anggaran rumah tangga bersama. Semua orang menambah catatan dan melihatnya di ponsel masing-masing. Bergabung gratis; berbagi perlu Pro.',
+      },
+    },
     web_dashboard: {
       title: 'Dasbor Web dan lainnya',
       webDashboard: {
@@ -395,6 +411,7 @@ const id = {
       open_app_icon: 'Pilih ikon Anda',
       open_ricecal: 'Coba RiceCal',
       open_pro_paywall: 'Lihat paket Pro',
+      open_cloud_sync: 'Aktifkan Cloud Sync',
       open_bottom_bar: 'Ubah bilah bawah',
       open_share_earn: 'Dapatkan Pro gratis',
       open_quick_entry_settings: 'Buka pengaturan Entri Cepat',
@@ -406,6 +423,11 @@ const id = {
       open_review: 'Buka Tinjau Pengeluaran',
     },
     showcase: {
+      synced_devices: 'Semua ponsel Anda sudah terbaru',
+      ledger_personal: 'Pribadi',
+      ledger_work: 'Kerja',
+      ledger_travel: 'Liburan ke Jepang',
+      ledger_family: 'Keluarga',
       notification_bank: 'Bankmu',
       notification_text: 'Kartumu dipakai untuk pembelian.',
       scan_before: 'Dulu',
@@ -2537,10 +2559,12 @@ const id = {
     email_placeholder: 'kamu@contoh.com',
     send_code: 'Kirim kode',
     code_title: 'Masukkan kode',
-    code_body: 'Dikirim ke %{email}',
     verify: 'Lanjutkan',
     resend: 'Kirim ulang kode',
     code_sent: 'Kode terkirim',
+    code_sent_to: 'Kami mengirim kode 6 digit ke',
+    other_options: 'Cara masuk lainnya',
+    captcha_title: 'Pemeriksaan singkat sebelum kami mengirim kode',
     change_email: 'Ganti email',
     linking: 'Menyiapkan…',
     linking_body: 'Biarkan aplikasi tetap terbuka.',
@@ -2585,6 +2609,7 @@ const id = {
       server: 'Terjadi kesalahan',
       unknown: 'Terjadi kesalahan',
       invalid_code: 'Kode salah atau kedaluwarsa',
+      captcha_failed: 'Kami tidak dapat memverifikasi permintaan ini. Coba lagi sebentar lagi.',
       invalid_email: 'Periksa alamat email',
       rate_limited: 'Terlalu banyak percobaan. Tunggu sebentar.',
       backup_failed: 'Gagal mencadangkan ponsel ini. Tidak ada yang berubah.',
@@ -2915,6 +2940,12 @@ const id = {
     start_with: 'Mulai dengan',
     accounts: 'Akun',
     categories: 'Kategori',
+    copy_from_hint: 'Pilih buku yang akan disalin',
+    everything: 'Semuanya',
+    everything_caption_one: 'Salinan lengkap dengan {{count}} catatan, anggaran, dan album',
+    everything_caption_other: 'Salinan lengkap dengan {{count}} catatan, anggaran, dan album',
+    everything_currency_note: 'Salinan lengkap memakai mata uang {{name}}.',
+    delete_open_note: 'Buku ini sedang terbuka, jadi {{name}} akan dibuka.',
     copy_from: 'Salin dari',
     copy_accounts_one: '{{count}} akun, saldo mulai nol',
     copy_accounts_other: '{{count}} akun, saldo mulai nol',
@@ -2922,7 +2953,8 @@ const id = {
     copy_categories_one: '{{count}} kategori',
     copy_categories_other: '{{count}} kategori',
     starter_categories_caption: 'Daftar singkat kategori sehari-hari.',
-    create_footnote: 'Tidak ada transaksi yang disalin. Anda bisa mengganti nama buku kapan saja.',
+    create_footnote:
+      'Hanya Semuanya yang menyalin catatan. Anda bisa mengganti nama buku kapan saja.',
     create: 'Buat buku',
     delete_title: 'Hapus {{name}}?',
     delete_message_one:
@@ -3000,7 +3032,9 @@ const id = {
     people_other: '{{count}} orang',
     join_sign_in: 'Masuk untuk bergabung. Anda tidak perlu Pro.',
     join_button: 'Gabung ke {{name}}',
-    join_as: 'Bergabung sebagai {{email}}',
+    joining_as: 'Bergabung sebagai',
+    join_already: 'Anda sudah ada di buku ini.',
+    open_ledger: 'Buka {{name}}',
     join_note: 'Buku ini terbuka sebagai buku terpisah. Buku Anda sendiri tetap pribadi.',
     join_invalid: 'Tautan undangan ini sudah kedaluwarsa. Minta yang baru.',
     join_full: 'Buku ini sudah penuh. Minta pemiliknya untuk memberi tempat.',

@@ -3237,6 +3237,14 @@ function AppContent() {
           requestOpenTab('settings');
           requestOpenSettingsScreen('BottomBar');
         }}
+        onOpenCloudSync={() => {
+          requestOpenTab('settings');
+          requestOpenSettingsScreen('CloudSync');
+        }}
+        onOpenLedgers={() => {
+          requestOpenTab('settings');
+          requestOpenSettingsScreen('Ledgers');
+        }}
       />
       <CloudBackupPromptModal
         visible={cloudBackupPromptVisible && !biometricLocked && rootPromptsAllowed}

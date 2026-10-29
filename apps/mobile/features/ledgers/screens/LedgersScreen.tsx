@@ -61,33 +61,44 @@ export function LedgersScreen({
       count === 1 ? 'ledgers.delete_message_one' : 'ledgers.delete_message_other',
       { name, count },
     );
-    Alert.alert(
-      I18n.t('ledgers.delete_title', { name }),
-      sharedByMe ? `${message}\n\n${I18n.t('shared_ledgers.delete_shared_note')}` : message,
-      [
-        { text: I18n.t('common.cancel'), style: 'cancel' },
-        {
-          text: I18n.t('common.delete'),
-          style: 'destructive',
-          onPress: () => {
-            void (async () => {
-              try {
-                // Members lose it first, so nobody keeps syncing a deleted ledger.
-                // Signed out, offline, or after the account was deleted, it is
-                // still deleted here; the Worker is told at the next sign-in.
-                if (sharedByMe) {
-                  await sync.stopSharingLedger(ledger.id, { whenUnreachable: 'local' });
-                }
-                void triggerHaptic('success');
-                deleteLedger(ledger.id);
-              } catch (error) {
-                Alert.alert(sharingErrorMessage(error));
+    const notes = [
+      message,
+      sharedByMe ? I18n.t('shared_ledgers.delete_shared_note') : null,
+      // Deleting the open ledger opens the default one in its place.
+      ledger.id === activeLedger.id
+        ? I18n.t('ledgers.delete_open_note', {
+            name: ledgerDisplayName(
+              ledgers.find((l) => l.id === DEFAULT_LEDGER_ID) ?? {
+                id: DEFAULT_LEDGER_ID,
+                name: null,
+              },
+            ),
+          })
+        : null,
+    ];
+    Alert.alert(I18n.t('ledgers.delete_title', { name }), notes.filter(Boolean).join('\n\n'), [
+      { text: I18n.t('common.cancel'), style: 'cancel' },
+      {
+        text: I18n.t('common.delete'),
+        style: 'destructive',
+        onPress: () => {
+          void (async () => {
+            try {
+              // Members lose it first, so nobody keeps syncing a deleted ledger.
+              // Signed out, offline, or after the account was deleted, it is
+              // still deleted here; the Worker is told at the next sign-in.
+              if (sharedByMe) {
+                await sync.stopSharingLedger(ledger.id, { whenUnreachable: 'local' });
               }
-            })();
-          },
+              void triggerHaptic('success');
+              deleteLedger(ledger.id);
+            } catch (error) {
+              Alert.alert(sharingErrorMessage(error));
+            }
+          })();
         },
-      ],
-    );
+      },
+    ]);
   };
 
   return (
@@ -111,8 +122,9 @@ export function LedgersScreen({
           const count = entryCounts[ledger.id] ?? 0;
           const shared = sharedLedgers.find((l) => l.ledgerId === ledger.id) ?? null;
           const isMember = shared?.role === 'member';
-          // A member leaves from the ledger's sharing page instead.
-          const canDelete = ledger.id !== DEFAULT_LEDGER_ID && !isOpen && !isMember;
+          // A member leaves instead (its editor and sharing page). The open
+          // ledger can go too: the default ledger opens in its place.
+          const canDelete = ledger.id !== DEFAULT_LEDGER_ID && !isMember;
           const summary = shared
             ? `${
                 isMember

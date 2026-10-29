@@ -1,6 +1,7 @@
 const it = {
   common: {
     back: 'Indietro',
+    loading: 'Caricamento…',
     close: 'Chiudi',
     done: 'Fatto',
     save: 'Salva',
@@ -145,6 +146,21 @@ const it = {
     reset_action: 'Elimina e cambia',
   },
   news: {
+    cloud_sync_ledgers: {
+      title: 'Cloud Sync e registri condivisi',
+      cloudSync: {
+        title: 'Arriva Cloud Sync',
+        body: 'Accedi con Apple, Google o email e i tuoi dati sono uguali su tutti i tuoi telefoni. Le modifiche arrivano in pochi secondi. La sincronizzazione fa parte di Pro. La trovi in Impostazioni > Cloud Sync.',
+      },
+      ledgers: {
+        title: 'Più registri',
+        body: 'Tieni spese personali, lavoro e un viaggio in registri separati, ciascuno con conti, categorie e valuta propri. Inizia da zero, dai conti e categorie di un altro registro o come copia completa. Parte di Pro.',
+      },
+      sharedLedgers: {
+        title: 'Registri condivisi',
+        body: 'Condividi un registro con fino a 5 persone e gestite insieme il budget di casa. Tutti aggiungono voci e le vedono sul proprio telefono. Unirsi è gratis; condividere richiede Pro.',
+      },
+    },
     web_dashboard: {
       title: 'Dashboard web e altro',
       webDashboard: {
@@ -395,6 +411,7 @@ const it = {
       open_app_icon: "Scegli l'icona",
       open_ricecal: 'Prova RiceCal',
       open_pro_paywall: 'Scopri i piani Pro',
+      open_cloud_sync: 'Attiva Cloud Sync',
       open_bottom_bar: 'Modifica la barra',
       open_share_earn: 'Ottieni Pro gratis',
       open_quick_entry_settings: 'Apri le impostazioni di Inserimento rapido',
@@ -406,6 +423,11 @@ const it = {
       open_review: 'Apri Resoconto spese',
     },
     showcase: {
+      synced_devices: 'Tutti i tuoi telefoni sono aggiornati',
+      ledger_personal: 'Personale',
+      ledger_work: 'Lavoro',
+      ledger_travel: 'Viaggio in Giappone',
+      ledger_family: 'Famiglia',
       notification_bank: 'La tua banca',
       notification_text: 'La tua carta è stata usata per un acquisto.',
       scan_before: 'Prima',
@@ -2542,10 +2564,12 @@ const it = {
     email_placeholder: 'tu@esempio.it',
     send_code: 'Invia codice',
     code_title: 'Inserisci il codice',
-    code_body: 'Inviato a %{email}',
     verify: 'Continua',
     resend: 'Invia di nuovo',
     code_sent: 'Codice inviato',
+    code_sent_to: 'Abbiamo inviato un codice di 6 cifre a',
+    other_options: 'Altri modi per accedere',
+    captcha_title: 'Un rapido controllo prima di inviarti il codice',
     change_email: 'Cambia email',
     linking: 'Configurazione…',
     linking_body: "Tieni aperta l'app.",
@@ -2590,6 +2614,7 @@ const it = {
       server: 'Qualcosa è andato storto',
       unknown: 'Qualcosa è andato storto',
       invalid_code: 'Codice errato o scaduto',
+      captcha_failed: 'Non siamo riusciti a verificare la richiesta. Riprova tra poco.',
       invalid_email: "Controlla l'indirizzo email",
       rate_limited: 'Troppi tentativi. Attendi un minuto.',
       backup_failed: 'Backup di questo telefono non riuscito. Nulla è cambiato.',
@@ -2920,6 +2945,12 @@ const it = {
     start_with: 'Inizia con',
     accounts: 'Conti',
     categories: 'Categorie',
+    copy_from_hint: 'Scegli il registro da copiare',
+    everything: 'Tutto',
+    everything_caption_one: 'Una copia completa con la sua {{count}} voce, budget e album',
+    everything_caption_other: 'Una copia completa con le sue {{count}} voci, budget e album',
+    everything_currency_note: 'Una copia completa mantiene la valuta di {{name}}.',
+    delete_open_note: 'È aperto ora, quindi si aprirà {{name}}.',
     copy_from: 'Copia da',
     copy_accounts_one: '{{count}} conto, saldo a zero',
     copy_accounts_other: '{{count}} conti, saldi a zero',
@@ -2928,8 +2959,7 @@ const it = {
     copy_categories_one: '{{count}} categoria',
     copy_categories_other: '{{count}} categorie',
     starter_categories_caption: 'Un breve elenco di categorie di tutti i giorni.',
-    create_footnote:
-      'Nessuna transazione viene copiata. Puoi rinominare il registro in qualsiasi momento.',
+    create_footnote: 'Solo Tutto copia le voci. Puoi rinominare il registro in qualsiasi momento.',
     create: 'Crea registro',
     delete_title: 'Eliminare {{name}}?',
     delete_message_one:
@@ -3007,7 +3037,9 @@ const it = {
     people_other: '{{count}} persone',
     join_sign_in: 'Accedi per unirti. Non serve Pro.',
     join_button: 'Unisciti a {{name}}',
-    join_as: 'Accesso come {{email}}',
+    joining_as: 'Entrerai come',
+    join_already: 'Fai già parte di questo registro.',
+    open_ledger: 'Apri {{name}}',
     join_note: 'Si apre come registro separato. I tuoi registri restano privati.',
     join_invalid: 'Questo link di invito è scaduto. Chiedine uno nuovo.',
     join_full: 'Questo registro è pieno. Chiedi al proprietario di fare spazio.',

@@ -1,6 +1,7 @@
 const pt = {
   common: {
     back: 'Voltar',
+    loading: 'Carregando…',
     close: 'Fechar',
     done: 'Pronto',
     save: 'Salvar',
@@ -145,6 +146,21 @@ const pt = {
     reset_action: 'Excluir e trocar',
   },
   news: {
+    cloud_sync_ledgers: {
+      title: 'Cloud Sync e livros compartilhados',
+      cloudSync: {
+        title: 'Chegou o Cloud Sync',
+        body: 'Entre com Apple, Google ou e-mail e seus dados ficam iguais em todos os seus celulares. As mudanças chegam em segundos. A sincronização faz parte do Pro. Fica em Ajustes > Cloud Sync.',
+      },
+      ledgers: {
+        title: 'Vários livros',
+        body: 'Separe gastos pessoais, trabalho e uma viagem em livros diferentes, cada um com suas contas, categorias e moeda. Comece vazio, com as contas e categorias de outro livro ou como cópia completa. Parte do Pro.',
+      },
+      sharedLedgers: {
+        title: 'Livros compartilhados',
+        body: 'Compartilhe um livro com até 5 pessoas e cuidem juntos do orçamento da casa. Todos adicionam lançamentos e veem no próprio celular. Entrar é grátis; compartilhar exige Pro.',
+      },
+    },
     web_dashboard: {
       title: 'Painel web e mais',
       webDashboard: {
@@ -395,6 +411,7 @@ const pt = {
       open_app_icon: 'Escolher ícone',
       open_ricecal: 'Experimentar o RiceCal',
       open_pro_paywall: 'Ver planos Pro',
+      open_cloud_sync: 'Ativar o Cloud Sync',
       open_bottom_bar: 'Editar a barra',
       open_share_earn: 'Ganhe o Pro grátis',
       open_quick_entry_settings: 'Abrir configurações de Lançamento rápido',
@@ -406,6 +423,11 @@ const pt = {
       open_review: 'Abrir Revisão de gastos',
     },
     showcase: {
+      synced_devices: 'Todos os seus celulares estão em dia',
+      ledger_personal: 'Pessoal',
+      ledger_work: 'Trabalho',
+      ledger_travel: 'Viagem ao Japão',
+      ledger_family: 'Família',
       notification_bank: 'Seu banco',
       notification_text: 'Seu cartão foi usado em uma compra.',
       scan_before: 'Antes',
@@ -2543,10 +2565,12 @@ const pt = {
     email_placeholder: 'voce@exemplo.com',
     send_code: 'Enviar código',
     code_title: 'Digite o código',
-    code_body: 'Enviado para %{email}',
     verify: 'Continuar',
     resend: 'Reenviar código',
     code_sent: 'Código enviado',
+    code_sent_to: 'Enviamos um código de 6 dígitos para',
+    other_options: 'Outras formas de entrar',
+    captcha_title: 'Uma verificação rápida antes de enviarmos o código',
     change_email: 'Trocar e-mail',
     linking: 'Configurando…',
     linking_body: 'Mantenha o app aberto.',
@@ -2591,6 +2615,7 @@ const pt = {
       server: 'Algo deu errado',
       unknown: 'Algo deu errado',
       invalid_code: 'Código errado ou expirado',
+      captcha_failed: 'Não conseguimos verificar a solicitação. Tente novamente em instantes.',
       invalid_email: 'Confira o endereço de e-mail',
       rate_limited: 'Muitas tentativas. Aguarde um minuto.',
       backup_failed: 'Não foi possível fazer backup deste celular. Nada mudou.',
@@ -2919,6 +2944,13 @@ const pt = {
     start_with: 'Começar com',
     accounts: 'Contas',
     categories: 'Categorias',
+    copy_from_hint: 'Escolha de qual livro copiar',
+    everything: 'Tudo',
+    everything_caption_one: 'Uma cópia completa com seu {{count}} lançamento, orçamentos e álbuns',
+    everything_caption_other:
+      'Uma cópia completa com seus {{count}} lançamentos, orçamentos e álbuns',
+    everything_currency_note: 'Uma cópia completa mantém a moeda de {{name}}.',
+    delete_open_note: 'Ele está aberto agora, então {{name}} será aberto.',
     copy_from: 'Copiar de',
     copy_accounts_one: '{{count}} conta, saldo zerado',
     copy_accounts_other: '{{count}} contas, saldos zerados',
@@ -2927,7 +2959,7 @@ const pt = {
     copy_categories_one: '{{count}} categoria',
     copy_categories_other: '{{count}} categorias',
     starter_categories_caption: 'Uma lista curta de categorias do dia a dia.',
-    create_footnote: 'Nenhuma transação é copiada. Você pode renomear o livro a qualquer momento.',
+    create_footnote: 'Só Tudo copia lançamentos. Você pode renomear o livro a qualquer momento.',
     create: 'Criar livro',
     delete_title: 'Excluir {{name}}?',
     delete_message_one:
@@ -3005,7 +3037,9 @@ const pt = {
     people_other: '{{count}} pessoas',
     join_sign_in: 'Entre para participar. Você não precisa do Pro.',
     join_button: 'Entrar em {{name}}',
-    join_as: 'Entrando como {{email}}',
+    joining_as: 'Entrando como',
+    join_already: 'Você já está neste livro.',
+    open_ledger: 'Abrir {{name}}',
     join_note: 'Ele abre como um livro separado. Seus próprios livros continuam privados.',
     join_invalid: 'Este link de convite expirou. Peça um novo.',
     join_full: 'Este livro está cheio. Peça ao dono para liberar uma vaga.',

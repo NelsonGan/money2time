@@ -5,6 +5,7 @@ import { DatabaseSync } from 'node:sqlite';
 import type { SQLiteDatabase } from 'expo-sqlite';
 
 import { getSQLite } from '~/lib/db/client';
+import { copyLedgerRows } from '~/lib/db/ledgerCopy';
 import {
   DEFAULT_LEDGER_ID,
   getActiveLedgerId,
@@ -229,6 +230,51 @@ describe('ledgersRepository on SQLite', () => {
       ['work-cash', -80],
       ['work-bank', 60],
     ]);
+  });
+
+  it('copies a whole ledger with every reference following the copy', () => {
+    harness.connection.exec(`
+      INSERT INTO ledgers (id, name, created_at, updated_at) VALUES ('copy', 'Copy', '${NOW}', '${NOW}');
+      INSERT INTO transactions (id, ledger_id, type, amount, currency, date, account_id, deleted_at, created_at, updated_at)
+        VALUES ('gone', 'work', 'expense', 5, 'USD', '2026-10-27', 'work-cash', '${NOW}', '${NOW}', '${NOW}');
+      INSERT INTO albums (id, ledger_id, name, created_at, updated_at) VALUES ('trip', 'work', 'Trip', '${NOW}', '${NOW}');
+      -- An album still listing a deleted entry: the join must be left out, not nulled.
+      INSERT INTO album_transactions (id, album_id, transaction_id, created_at, updated_at)
+        VALUES ('trip-gone', 'trip', 'gone', '${NOW}', '${NOW}'), ('trip-taxi', 'trip', 'taxi', '${NOW}', '${NOW}');
+      -- A deleted budget period is a tombstone and comes along.
+      INSERT INTO monthly_budgets (id, ledger_id, period, month, total_amount, deleted_at, created_at, updated_at)
+        VALUES ('work-sep', 'work', 'month', '2026-09', 100, '${NOW}', '${NOW}', '${NOW}');
+    `);
+    let n = 0;
+    const copied = copyLedgerRows(harness.db, 'work', 'copy', () => `c${++n}`, NOW);
+
+    // Cash, taxi, hotel, taxi's split, the album, its taxi join and the
+    // budget tombstone; not the deleted entry, its album join, nor lunch's split.
+    expect(copied).toBe(7);
+    expect(
+      harness.all(
+        `SELECT a.transaction_id FROM album_transactions a JOIN albums b ON b.id = a.album_id WHERE b.ledger_id = 'copy'`,
+      ),
+    ).toEqual([{ transaction_id: 'c2' }]);
+    expect(
+      harness.all(`SELECT month, deleted_at FROM monthly_budgets WHERE ledger_id = 'copy'`),
+    ).toEqual([{ month: '2026-09', deleted_at: NOW }]);
+    const accounts = harness.all(`SELECT id, name FROM accounts WHERE ledger_id = 'copy'`);
+    expect(accounts).toEqual([{ id: 'c1', name: 'Cash' }]);
+    const transactions = harness.all(
+      `SELECT id, account_id, amount FROM transactions WHERE ledger_id = 'copy' ORDER BY amount`,
+    );
+    expect(transactions).toEqual([
+      { id: 'c2', account_id: 'c1', amount: 30 },
+      { id: 'c3', account_id: 'c1', amount: 90 },
+    ]);
+    expect(
+      harness.all(
+        `SELECT transaction_id, amount FROM transaction_splits WHERE transaction_id IN ('c2', 'c3')`,
+      ),
+    ).toEqual([{ transaction_id: 'c2', amount: 15 }]);
+    // The source is untouched.
+    expect(ledgersRepository.entryCounts()).toEqual({ default: 1, work: 2, copy: 2 });
   });
 
   it('never deletes the default ledger', () => {

@@ -1,6 +1,7 @@
 const ko = {
   common: {
     back: '뒤로',
+    loading: '불러오는 중…',
     close: '닫기',
     done: '완료',
     save: '저장',
@@ -144,6 +145,21 @@ const ko = {
     reset_action: '삭제 후 전환',
   },
   news: {
+    cloud_sync_ledgers: {
+      title: 'Cloud Sync와 공유 가계부',
+      cloudSync: {
+        title: 'Cloud Sync 출시',
+        body: 'Apple, Google 또는 이메일로 로그인하면 모든 휴대폰에서 같은 데이터를 쓸 수 있습니다. 변경 사항은 몇 초 만에 반영됩니다. 동기화는 Pro 기능입니다. 설정 > Cloud Sync에서 확인하세요.',
+      },
+      ledgers: {
+        title: '여러 가계부',
+        body: '개인 지출, 업무, 여행을 각각의 가계부로 나눠 관리하세요. 가계부마다 계좌, 카테고리, 통화가 따로 있습니다. 빈 상태로, 다른 가계부의 계좌와 카테고리로, 또는 전체 복사본으로 시작할 수 있습니다. Pro 기능입니다.',
+      },
+      sharedLedgers: {
+        title: '공유 가계부',
+        body: '최대 5명과 가계부를 공유해 집안 예산을 함께 관리하세요. 모두가 항목을 추가하고 각자의 휴대폰에서 확인합니다. 참여는 무료이며 공유하려면 Pro가 필요합니다.',
+      },
+    },
     web_dashboard: {
       title: '웹 대시보드 외 새 기능',
       webDashboard: {
@@ -394,6 +410,7 @@ const ko = {
       open_app_icon: '아이콘 고르기',
       open_ricecal: 'RiceCal 사용해 보기',
       open_pro_paywall: 'Pro 플랜 보기',
+      open_cloud_sync: 'Cloud Sync 켜기',
       open_bottom_bar: '하단 바 편집',
       open_share_earn: 'Pro 무료로 받기',
       open_quick_entry_settings: '빠른 입력 설정 열기',
@@ -405,6 +422,11 @@ const ko = {
       open_review: '지출 리뷰 열기',
     },
     showcase: {
+      synced_devices: '모든 휴대폰이 최신 상태입니다',
+      ledger_personal: '개인',
+      ledger_work: '업무',
+      ledger_travel: '일본 여행',
+      ledger_family: '가족',
       notification_bank: '내 은행',
       notification_text: '카드로 결제가 이루어졌어요.',
       scan_before: '이전',
@@ -2494,10 +2516,12 @@ const ko = {
     email_placeholder: 'you@example.com',
     send_code: '코드 보내기',
     code_title: '코드 입력',
-    code_body: '%{email}(으)로 보냈어요',
     verify: '계속',
     resend: '코드 다시 보내기',
     code_sent: '코드를 보냈어요',
+    code_sent_to: '6자리 코드를 보냈습니다:',
+    other_options: '다른 로그인 방법',
+    captcha_title: '코드를 보내기 전에 간단히 확인할게요',
     change_email: '이메일 변경',
     linking: '설정 중…',
     linking_body: '앱을 열어 두세요.',
@@ -2541,6 +2565,7 @@ const ko = {
       server: '문제가 발생했어요',
       unknown: '문제가 발생했어요',
       invalid_code: '코드가 틀렸거나 만료됐어요',
+      captcha_failed: '요청을 확인하지 못했습니다. 잠시 후 다시 시도하세요.',
       invalid_email: '이메일 주소를 확인하세요',
       rate_limited: '시도가 너무 많아요. 잠시 기다리세요.',
       backup_failed: '이 기기를 백업하지 못했어요. 바뀐 건 없어요.',
@@ -2864,6 +2889,12 @@ const ko = {
     start_with: '시작 구성',
     accounts: '계좌',
     categories: '카테고리',
+    copy_from_hint: '복사할 가계부를 선택하세요',
+    everything: '전체',
+    everything_caption_one: '항목 {{count}}건, 예산, 앨범을 포함한 전체 복사본',
+    everything_caption_other: '항목 {{count}}건, 예산, 앨범을 포함한 전체 복사본',
+    everything_currency_note: '전체 복사본은 {{name}}의 통화를 유지합니다.',
+    delete_open_note: '지금 열려 있으므로 대신 {{name}}이(가) 열립니다.',
     copy_from: '복사할 장부',
     copy_accounts_one: '계좌 {{count}}개, 잔액 0부터',
     copy_accounts_other: '계좌 {{count}}개, 잔액 0부터',
@@ -2871,7 +2902,8 @@ const ko = {
     copy_categories_one: '카테고리 {{count}}개',
     copy_categories_other: '카테고리 {{count}}개',
     starter_categories_caption: '자주 쓰는 일상 카테고리 목록.',
-    create_footnote: '거래는 복사되지 않습니다. 가계부 이름은 언제든지 바꿀 수 있습니다.',
+    create_footnote:
+      '항목은 전체를 선택할 때만 복사됩니다. 가계부 이름은 언제든지 바꿀 수 있습니다.',
     create: '가계부 만들기',
     delete_title: '{{name}}을(를) 삭제할까요?',
     delete_message_one:
@@ -2949,7 +2981,9 @@ const ko = {
     people_other: '{{count}}명',
     join_sign_in: '참여하려면 로그인하세요. Pro는 필요 없습니다.',
     join_button: '{{name}} 참여',
-    join_as: '{{email}}(으)로 참여',
+    joining_as: '참여 계정',
+    join_already: '이미 이 가계부에 참여하고 있습니다.',
+    open_ledger: '{{name}} 열기',
     join_note: '별도의 가계부로 열립니다. 내 가계부는 비공개로 유지됩니다.',
     join_invalid: '이 초대 링크는 만료되었습니다. 새 링크를 요청하세요.',
     join_full: '이 가계부는 자리가 가득 찼습니다. 소유자에게 자리를 만들어 달라고 요청하세요.',

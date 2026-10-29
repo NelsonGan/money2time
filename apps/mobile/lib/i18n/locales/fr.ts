@@ -1,6 +1,7 @@
 const fr = {
   common: {
     back: 'Retour',
+    loading: 'Chargement…',
     close: 'Fermer',
     done: 'Terminé',
     save: 'Enregistrer',
@@ -145,6 +146,21 @@ const fr = {
     reset_action: 'Supprimer et changer',
   },
   news: {
+    cloud_sync_ledgers: {
+      title: 'Cloud Sync et carnets partagés',
+      cloudSync: {
+        title: 'Cloud Sync est arrivé',
+        body: 'Connectez-vous avec Apple, Google ou un e-mail et vos données sont les mêmes sur tous vos téléphones. Les modifications arrivent en quelques secondes. La synchronisation fait partie de Pro. Rendez-vous dans Réglages > Cloud Sync.',
+      },
+      ledgers: {
+        title: 'Plusieurs carnets',
+        body: 'Séparez vos dépenses perso, le travail et un voyage dans des carnets distincts, chacun avec ses comptes, catégories et devise. Commencez vide, avec les comptes et catégories d’un autre carnet, ou en copie complète. Inclus dans Pro.',
+      },
+      sharedLedgers: {
+        title: 'Carnets partagés',
+        body: 'Partagez un carnet avec jusqu’à 5 personnes et tenez le budget du foyer ensemble. Chacun ajoute des opérations et les voit sur son téléphone. Rejoindre est gratuit ; partager nécessite Pro.',
+      },
+    },
     web_dashboard: {
       title: 'Tableau de bord web et plus',
       webDashboard: {
@@ -395,6 +411,7 @@ const fr = {
       open_app_icon: 'Choisir une icône',
       open_ricecal: 'Essayer RiceCal',
       open_pro_paywall: 'Voir les offres Pro',
+      open_cloud_sync: 'Activer Cloud Sync',
       open_bottom_bar: 'Modifier la barre',
       open_share_earn: 'Obtenir Pro gratuitement',
       open_quick_entry_settings: 'Ouvrir les réglages de la Saisie rapide',
@@ -406,6 +423,11 @@ const fr = {
       open_review: 'Ouvrir le bilan des dépenses',
     },
     showcase: {
+      synced_devices: 'Tous vos téléphones sont à jour',
+      ledger_personal: 'Perso',
+      ledger_work: 'Travail',
+      ledger_travel: 'Voyage au Japon',
+      ledger_family: 'Famille',
       notification_bank: 'Votre banque',
       notification_text: 'Votre carte a été utilisée pour un achat.',
       scan_before: 'Avant',
@@ -2562,10 +2584,12 @@ const fr = {
     email_placeholder: 'vous@exemple.com',
     send_code: 'Envoyer le code',
     code_title: 'Saisissez le code',
-    code_body: 'Envoyé à %{email}',
     verify: 'Continuer',
     resend: 'Renvoyer le code',
     code_sent: 'Code envoyé',
+    code_sent_to: 'Nous avons envoyé un code à 6 chiffres à',
+    other_options: 'Autres moyens de connexion',
+    captcha_title: 'Petite vérification avant l’envoi de votre code',
     change_email: 'Changer d’e-mail',
     linking: 'Configuration…',
     linking_body: 'Gardez l’app ouverte.',
@@ -2610,6 +2634,7 @@ const fr = {
       server: 'Une erreur s’est produite',
       unknown: 'Une erreur s’est produite',
       invalid_code: 'Code incorrect ou expiré',
+      captcha_failed: 'Impossible de vérifier la demande. Réessayez dans un instant.',
       invalid_email: 'Vérifiez l’adresse e-mail',
       rate_limited: 'Trop d’essais. Patientez une minute.',
       backup_failed: 'Sauvegarde de ce téléphone impossible. Rien n’a changé.',
@@ -2940,6 +2965,13 @@ const fr = {
     start_with: 'Commencer avec',
     accounts: 'Comptes',
     categories: 'Catégories',
+    copy_from_hint: 'Choisissez le carnet à copier',
+    everything: 'Tout',
+    everything_caption_one:
+      'Une copie complète avec son opération ({{count}}), ses budgets et albums',
+    everything_caption_other: 'Une copie complète avec ses {{count}} opérations, budgets et albums',
+    everything_currency_note: 'Une copie complète garde la devise de {{name}}.',
+    delete_open_note: 'Il est ouvert, donc {{name}} s’ouvre à la place.',
     copy_from: 'Copier depuis',
     copy_accounts_one: '{{count}} compte, solde à zéro',
     copy_accounts_other: '{{count}} comptes, soldes à zéro',
@@ -2949,7 +2981,7 @@ const fr = {
     copy_categories_other: '{{count}} catégories',
     starter_categories_caption: 'Une courte liste de catégories du quotidien.',
     create_footnote:
-      "Aucune transaction n'est copiée. Vous pouvez renommer le carnet à tout moment.",
+      'Seul Tout copie les opérations. Vous pouvez renommer le carnet à tout moment.',
     create: 'Créer le carnet',
     delete_title: 'Supprimer {{name}} ?',
     delete_message_one:
@@ -3028,7 +3060,9 @@ const fr = {
     people_other: '{{count}} personnes',
     join_sign_in: "Connectez-vous pour rejoindre. Vous n'avez pas besoin de Pro.",
     join_button: 'Rejoindre {{name}}',
-    join_as: 'Vous rejoignez en tant que {{email}}',
+    joining_as: 'Vous rejoignez en tant que',
+    join_already: 'Vous êtes déjà dans ce carnet.',
+    open_ledger: 'Ouvrir {{name}}',
     join_note: "Il s'ouvre comme un carnet distinct. Vos propres carnets restent privés.",
     join_invalid: "Ce lien d'invitation a expiré. Demandez-en un nouveau.",
     join_full: 'Ce carnet est complet. Demandez à son propriétaire de libérer une place.',

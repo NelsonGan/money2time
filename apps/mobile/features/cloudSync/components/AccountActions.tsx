@@ -1,7 +1,8 @@
 import { ChevronRight, LogOut, Trash2 } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
+import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { Card, Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -54,7 +55,11 @@ export function AccountActions() {
     <Card className="px-4 py-0">
       <ActionRow
         icon={
-          busy === 'sign_out' ? <ActivityIndicator /> : <LogOut size={20} color={colors.textSoft} />
+          busy === 'sign_out' ? (
+            <LoadingDots size="tiny" color={colors.textSoft} />
+          ) : (
+            <LogOut size={20} color={colors.textSoft} />
+          )
         }
         label={I18n.t('cloud_sync.sign_out')}
         disabled={busy !== null}
@@ -62,7 +67,13 @@ export function AccountActions() {
       />
       <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: colors.border }} />
       <ActionRow
-        icon={busy === 'delete' ? <ActivityIndicator /> : <Trash2 size={20} color={colors.error} />}
+        icon={
+          busy === 'delete' ? (
+            <LoadingDots size="tiny" color={colors.error} />
+          ) : (
+            <Trash2 size={20} color={colors.error} />
+          )
+        }
         label={I18n.t('cloud_sync.delete_account')}
         color={colors.error}
         disabled={busy !== null}

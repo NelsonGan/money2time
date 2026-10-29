@@ -1,6 +1,7 @@
 import { betterAuth } from 'better-auth';
 import { bearer, emailOTP } from 'better-auth/plugins';
 
+import { signInCodeEmail } from './email';
 import { csv, type Env } from './env';
 
 // Better Auth on D1. The app never uses cookies: every sign-in returns a
@@ -111,16 +112,12 @@ async function sendCodeEmail(env: Env, to: string, code: string): Promise<void> 
     console.log(`[cloud-sync] sign-in code for ${to}: ${code}`);
     return;
   }
-  const minutes = Math.round(OTP_TTL_SECONDS / 60);
+  const { subject, text, html } = signInCodeEmail(code, Math.round(OTP_TTL_SECONDS / 60));
   await env.EMAIL.send({
     from: { email: env.EMAIL_FROM, name: 'Money2Time' },
     to,
-    subject: `${code} is your Money2Time code`,
-    text: `Your Money2Time sign-in code is ${code}.\n\nIt expires in ${minutes} minutes. If you did not ask for it, you can ignore this email.`,
-    html: `<div style="font-family:-apple-system,Segoe UI,sans-serif;max-width:420px;margin:auto;padding:24px;color:#1f2a24">
-<p style="font-size:15px">Your Money2Time sign-in code is</p>
-<p style="font-size:32px;font-weight:700;letter-spacing:6px;margin:12px 0">${code}</p>
-<p style="font-size:13px;color:#6b7a70">It expires in ${minutes} minutes. If you did not ask for it, you can ignore this email.</p>
-</div>`,
+    subject,
+    text,
+    html,
   });
 }

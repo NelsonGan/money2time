@@ -119,7 +119,7 @@ interface CloudSyncContextValue {
   /** The account is Pro, but this phone is past the 5 phones its Pro reaches. */
   phoneLimited: boolean;
   signInWithNative: (provider: NativeProvider) => Promise<'ok' | 'cancelled'>;
-  sendEmailCode: (email: string) => Promise<void>;
+  sendEmailCode: (email: string, captchaToken?: string) => Promise<void>;
   verifyEmailCode: (email: string, code: string) => Promise<void>;
   resolveChoice: (keep: 'cloud' | 'phone') => Promise<void>;
   syncNow: () => Promise<void>;
@@ -704,8 +704,8 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
     [completeSignIn],
   );
 
-  const sendEmailCode = useCallback(async (email: string) => {
-    await apiSendEmailCode(email.trim().toLowerCase());
+  const sendEmailCode = useCallback(async (email: string, captchaToken?: string) => {
+    await apiSendEmailCode(email.trim().toLowerCase(), captchaToken);
   }, []);
 
   const verifyEmailCode = useCallback(

@@ -1,6 +1,15 @@
 import { Check, CloudOff, RefreshCw } from 'lucide-react-native';
-import React from 'react';
-import { ActivityIndicator, Image, Pressable, StyleSheet, View } from 'react-native';
+import React, { useEffect } from 'react';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
+import Animated, {
+  cancelAnimation,
+  Easing,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { Card, Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -39,7 +48,9 @@ export function SyncStatusView() {
             style={[styles.dot, { backgroundColor: healthy ? colors.success : colors.textMuted }]}
           >
             {sync.isSyncing ? (
-              <ActivityIndicator size="small" color={colors.card} />
+              <Spinning>
+                <RefreshCw size={17} color={colors.card} strokeWidth={2.6} />
+              </Spinning>
             ) : healthy ? (
               <Check size={18} color={colors.card} strokeWidth={3} />
             ) : (
@@ -57,6 +68,7 @@ export function SyncStatusView() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={I18n.t('cloud_sync.sync_now')}
+          accessibilityState={{ disabled: sync.isSyncing, busy: sync.isSyncing }}
           disabled={sync.isSyncing}
           onPress={() => {
             triggerHaptic('selection');
@@ -68,7 +80,13 @@ export function SyncStatusView() {
             sync.isSyncing && styles.dimmed,
           ]}
         >
-          <RefreshCw size={16} color={colors.primary} />
+          {sync.isSyncing ? (
+            <Spinning>
+              <RefreshCw size={16} color={colors.primary} />
+            </Spinning>
+          ) : (
+            <RefreshCw size={16} color={colors.primary} />
+          )}
           <Text variant="bodyStrong" style={{ color: colors.primary }}>
             {I18n.t('cloud_sync.sync_now')}
           </Text>
@@ -78,6 +96,19 @@ export function SyncStatusView() {
       <AccountActions />
     </View>
   );
+}
+
+/** Turns its child while mounted; holds still with Reduce Motion on. */
+function Spinning({ children }: { children: React.ReactNode }) {
+  const reduceMotion = useReducedMotion();
+  const turn = useSharedValue(0);
+  useEffect(() => {
+    if (reduceMotion) return;
+    turn.value = withRepeat(withTiming(1, { duration: 900, easing: Easing.linear }), -1, false);
+    return () => cancelAnimation(turn);
+  }, [reduceMotion, turn]);
+  const style = useAnimatedStyle(() => ({ transform: [{ rotate: `${turn.value * 360}deg` }] }));
+  return <Animated.View style={style}>{children}</Animated.View>;
 }
 
 const styles = StyleSheet.create({

@@ -1,6 +1,6 @@
 import { Check, ShieldCheck, Smartphone, TriangleAlert } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { ActivityIndicator, Image, Pressable, StyleSheet, View } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 
 import { Button, FatButton, Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -17,7 +17,7 @@ export function KeepDataChoice({ choice }: { choice: CloudSyncChoice }) {
   const sync = useCloudSync();
   const colors = useThemeColors();
   const [keep, setKeep] = useState<'cloud' | 'phone'>('cloud');
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<'confirm' | 'cancel' | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const { lastSyncedAt, lastDeviceName } = choice.cloud;
@@ -30,18 +30,18 @@ export function KeepDataChoice({ choice }: { choice: CloudSyncChoice }) {
       : null;
 
   const confirm = async () => {
-    setBusy(true);
+    setBusy('confirm');
     setError(null);
     try {
       await sync.resolveChoice(keep);
     } catch (e) {
       setError(errorMessage(e));
-      setBusy(false);
+      setBusy(null);
     }
   };
 
   const cancel = async () => {
-    setBusy(true);
+    setBusy('cancel');
     await sync.signOut();
   };
 
@@ -92,11 +92,11 @@ export function KeepDataChoice({ choice }: { choice: CloudSyncChoice }) {
       <FatButton
         color={colors.primary}
         label={keep === 'cloud' ? I18n.t('cloud_sync.use_cloud') : I18n.t('cloud_sync.use_phone')}
-        disabled={busy}
+        loading={busy === 'confirm'}
+        disabled={busy !== null}
         onPress={() => void confirm()}
       />
-      {busy ? <ActivityIndicator /> : null}
-      <Button variant="ghost" size="sm" disabled={busy} onPress={() => void cancel()}>
+      <Button variant="ghost" size="sm" disabled={busy !== null} onPress={() => void cancel()}>
         <Text tone="muted">{I18n.t('cloud_sync.cancel_sign_out')}</Text>
       </Button>
     </View>

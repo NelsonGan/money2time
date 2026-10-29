@@ -22,6 +22,7 @@ import { json, readJson } from './http';
 import { notifyUsers } from './live';
 import { deleteAllMedia, ledgerSpace } from './media';
 import { isAccountPro } from './revenuecat';
+import { brokenInvitePageHtml, invitePageHtml } from './pages';
 import { open, seal } from './secretBox';
 import { applyCloudSchema, createDatabase, createToken, deleteDatabase } from './turso';
 
@@ -622,57 +623,16 @@ export function expiredInvitesStatement(env: Env): D1PreparedStatement {
 // ---------------------------------------------------------------------------
 // GET /join/<code>: the page an invite link opens
 
-const APP_STORE_URL = 'https://apps.apple.com/app/id6760418898';
-const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.nelsongan.money2time';
-
 /**
- * Hands the link to the app, or points to the stores. It shows nothing about
- * the ledger, so the page needs no database read and has nothing to inject;
- * the app looks the invite up itself.
+ * Hands the link to the app, or points to the stores (pages.ts). It shows
+ * nothing about the ledger, so the page needs no database read and has
+ * nothing to inject; the app looks the invite up itself.
  */
 export function invitePage(code: string): Response {
-  if (!INVITE_CODE.test(code)) return new Response('Not found', { status: 404 });
-  const deepLink = `money2time://join/${code}`;
-  const html = `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex">
-<title>Join a shared ledger · Money2Time</title>
-<style>
-  :root { color-scheme: light dark; --bg: #fff8ef; --card: #ffffff; --text: #2b2118; --muted: #7a6a5c; --accent: #f08a24; }
-  @media (prefers-color-scheme: dark) { :root { --bg: #1b1612; --card: #26201a; --text: #f6efe7; --muted: #b5a493; } }
-  * { box-sizing: border-box; }
-  body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px 16px; background: var(--bg); color: var(--text); font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-  main { width: 100%; max-width: 380px; background: var(--card); border-radius: 28px; padding: 32px 24px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,.08); }
-  h1 { font-size: 22px; margin: 0 0 8px; }
-  p { margin: 0 0 24px; color: var(--muted); }
-  a.button { display: block; padding: 14px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 600; text-decoration: none; margin-bottom: 12px; }
-  a.store { display: inline-block; margin: 4px 8px; color: var(--muted); font-size: 14px; }
-</style>
-</head>
-<body>
-<main>
-  <h1>You're invited to a shared ledger</h1>
-  <p>Open the link in Money2Time to join.</p>
-  <a class="button" href="${deepLink}">Open in Money2Time</a>
-  <div>Don't have the app?<br>
-    <a class="store" href="${APP_STORE_URL}">App Store</a>
-    <a class="store" href="${PLAY_STORE_URL}">Google Play</a>
-  </div>
-</main>
-<script>setTimeout(function () { location.href = ${JSON.stringify(deepLink)}; }, 300);</script>
-</body>
-</html>`;
-  return new Response(html, {
-    headers: {
-      'Content-Type': 'text/html; charset=utf-8',
-      'Cache-Control': 'no-store',
-      'Referrer-Policy': 'no-referrer',
-      'Content-Security-Policy':
-        "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'",
-      'X-Frame-Options': 'DENY',
-    },
-  });
+  if (!INVITE_CODE.test(code)) {
+    const page = brokenInvitePageHtml();
+    return new Response(page.html, { status: 404, headers: page.headers });
+  }
+  const page = invitePageHtml(code, crypto.randomUUID().replace(/-/g, ''));
+  return new Response(page.html, { headers: page.headers });
 }

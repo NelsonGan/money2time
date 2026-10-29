@@ -51,6 +51,7 @@ import {
 import { rescaleSplitAdjustedAmounts } from '~/features/transactions/lib/splitAmountSnapshot';
 import { normalizeLiveEarningsSchedule } from '~/features/widgets/lib/liveEarningsSchedule';
 import { getDb, getSQLite, initializeDatabase } from '~/lib/db/client';
+import { copyLedgerRows } from '~/lib/db/ledgerCopy';
 import {
   DEFAULT_LEDGER_ID,
   getActiveLedgerId,
@@ -590,16 +591,24 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   /** Create a ledger, fill it from the open one or with starters, and open it. */
   createLedger: (input: CreateLedgerInput) => string;
   updateLedger: (ledgerId: string, input: Partial<LedgerInput>) => void;
-  /** Delete a ledger that is not open, with everything in it. */
+  /** Delete a ledger with everything in it; deleting the open one opens the default ledger first. */
   deleteLedger: (ledgerId: string) => void;
   /** Live transactions per ledger id; read on demand, e.g. when the switcher opens. */
   getLedgerEntryCounts: () => Record<string, number>;
 }
 
 interface CreateLedgerInput extends LedgerInput {
-  /** Copy the open ledger's regular accounts and groups (balances start at zero); else starters. */
+  /** The ledger copied from (any ledger on the phone); the open one when absent. */
+  copyFromLedgerId?: string;
+  /**
+   * Copy the whole ledger, history included (lib/db/ledgerCopy.ts). The new
+   * ledger must then be in the source's currency; the two flags below are
+   * ignored.
+   */
+  copyEverything?: boolean;
+  /** Copy the source's regular accounts and groups (balances start at zero); else starters. */
   copyAccounts: boolean;
-  /** Copy the open ledger's categories and subcategories; else the starter set. */
+  /** Copy the source's categories and subcategories; else the starter set. */
   copyCategories: boolean;
 }
 
@@ -4877,25 +4886,41 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const createLedger = useCallback(
     (input: CreateLedgerInput) => {
-      const { copyAccounts, copyCategories, ...ledgerInput } = input;
+      const {
+        copyAccounts,
+        copyCategories,
+        copyEverything = false,
+        copyFromLedgerId,
+        ...ledgerInput
+      } = input;
+      const sourceId = copyFromLedgerId ?? getActiveLedgerId();
       const sqlite = getSQLite();
       let ledgerId = '';
       try {
         sqlite.withTransactionSync(() => {
           ledgerId = ledgersRepository.create(ledgerInput);
-          if (copyCategories) {
-            copyCategoriesInto(ledgerId);
-          } else {
-            withLedgerScope(ledgerId, () => seedMinimalCategoriesIfMissing());
+          if (copyEverything) {
+            copyLedgerRows(sqlite, sourceId, ledgerId, newId, nowIso());
+            return;
           }
-          if (copyAccounts) {
-            copyAccountsInto(ledgerId, {
-              from: ledgersRepository.activeReportingCurrency().code,
-              to: ledgerInput.currencyCode,
-            });
-          } else {
-            withLedgerScope(ledgerId, () => seedDefaultAccountsIfMissing(ledgerInput.currencyCode));
-          }
+          // Read the source with its scope open; the copies write to the new one.
+          withLedgerScope(sourceId, () => {
+            if (copyCategories) {
+              copyCategoriesInto(ledgerId);
+            } else {
+              withLedgerScope(ledgerId, () => seedMinimalCategoriesIfMissing());
+            }
+            if (copyAccounts) {
+              copyAccountsInto(ledgerId, {
+                from: ledgersRepository.activeReportingCurrency().code,
+                to: ledgerInput.currencyCode,
+              });
+            } else {
+              withLedgerScope(ledgerId, () =>
+                seedDefaultAccountsIfMissing(ledgerInput.currencyCode),
+              );
+            }
+          });
         });
       } catch (error) {
         // The transaction rolled back, so no half-made ledger is left behind.
@@ -4903,8 +4928,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         throw toError(error, I18n.t('errors.generic_operation_failed'));
       }
       void trackEvent(AnalyticsEvents.LEDGER_CREATED, {
-        copied_accounts: copyAccounts,
-        copied_categories: copyCategories,
+        copied_accounts: copyEverything || copyAccounts,
+        copied_categories: copyEverything || copyCategories,
+        copied_everything: copyEverything,
+        copied_from_open: sourceId === getActiveLedgerId(),
         ledger_count: ledgersRepository.list().length,
       });
       switchLedger(ledgerId);
@@ -4922,15 +4949,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const deleteLedger = useCallback(
     (ledgerId: string) => {
-      // The open ledger is never deleted under the user: switch first.
-      if (ledgerId === getActiveLedgerId() || ledgerId === DEFAULT_LEDGER_ID) return;
-      runMutation(() => ledgersRepository.softDelete(ledgerId), { refresh: refreshLedgers });
-      // Its receipts, covers and logos are orphans now, unless another ledger
-      // still uses them (copied accounts share their logos).
-      runDeferredWrite(() => runUserAssetGc());
-      void trackEvent(AnalyticsEvents.LEDGER_DELETED);
+      if (ledgerId === DEFAULT_LEDGER_ID) return;
+      const remove = () => {
+        runMutation(() => ledgersRepository.softDelete(ledgerId), { refresh: refreshLedgers });
+        // Its receipts, covers and logos are orphans now, unless another ledger
+        // still uses them (copied accounts share their logos).
+        runDeferredWrite(() => runUserAssetGc());
+        void trackEvent(AnalyticsEvents.LEDGER_DELETED);
+      };
+      if (ledgerId !== getActiveLedgerId()) {
+        remove();
+        return;
+      }
+      // The open ledger is never deleted under the user: open the default one
+      // first. The switch is a deferred write, and deferred writes run in
+      // order, so the delete queued after it runs once the switch has.
+      switchLedger(DEFAULT_LEDGER_ID);
+      runDeferredWrite(() => {
+        if (ledgerId === getActiveLedgerId()) return;
+        remove();
+      });
     },
-    [refreshLedgers, runMutation],
+    [refreshLedgers, runMutation, switchLedger],
   );
 
   const getLedgerEntryCounts = useCallback(() => ledgersRepository.entryCounts(), []);

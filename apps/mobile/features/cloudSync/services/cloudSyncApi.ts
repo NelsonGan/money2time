@@ -41,6 +41,8 @@ type CloudSyncErrorCode =
   | 'full'
   /** Shared ledgers: an invite to the user's own ledger. */
   | 'own_ledger'
+  /** Email sign-in: the Turnstile check failed (the Worker thinks a bot is sending). */
+  | 'captcha_failed'
   | 'server';
 
 export class CloudSyncApiError extends Error {
@@ -73,7 +75,12 @@ export interface SyncCredentials {
 
 export async function request<T>(
   path: string,
-  init: { method?: string; body?: unknown; token?: string | null } = {},
+  init: {
+    method?: string;
+    body?: unknown;
+    token?: string | null;
+    headers?: Record<string, string>;
+  } = {},
 ): Promise<T> {
   const url = `${await baseUrl()}${path}`;
   const controller = new AbortController();
@@ -86,6 +93,7 @@ export async function request<T>(
         Accept: 'application/json',
         ...(init.body === undefined ? {} : { 'Content-Type': 'application/json' }),
         ...(init.token ? { Authorization: `Bearer ${init.token}` } : {}),
+        ...init.headers,
       },
       body: init.body === undefined ? undefined : JSON.stringify(init.body),
       signal: controller.signal,
@@ -115,6 +123,9 @@ function toError(status: number, body: unknown): CloudSyncApiError {
   const code = String(record.code ?? record.error ?? '');
   if (status === 401) return new CloudSyncApiError('unauthorized', status, code);
   if (status === 403 && code === 'not_pro') return new CloudSyncApiError('not_pro', status);
+  if (status === 403 && code === 'captcha_failed') {
+    return new CloudSyncApiError('captcha_failed', status);
+  }
   if (status === 403 && code === 'phone_limit') {
     return new CloudSyncApiError('phone_limit', status);
   }
@@ -172,9 +183,14 @@ export async function sendAppleAuthorization(token: string, code: string): Promi
   await request('/v1/apple/authorization', { body: { code }, token });
 }
 
-export async function sendEmailCode(email: string): Promise<void> {
+/**
+ * Mails a sign-in code. `captchaToken` is the Turnstile answer for this send
+ * (features/cloudSync/components/Turnstile.tsx); without one the Worker decides.
+ */
+export async function sendEmailCode(email: string, captchaToken?: string): Promise<void> {
   await request('/api/auth/email-otp/send-verification-otp', {
     body: { email, type: 'sign-in' },
+    headers: captchaToken ? { 'x-turnstile-token': captchaToken } : undefined,
   });
 }
 
