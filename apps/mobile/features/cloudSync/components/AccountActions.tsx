@@ -2,7 +2,8 @@ import { ChevronRight, LogOut, Trash2 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
-import { Card, LoadingDots, Text } from '~/components/ui';
+import { LoadingDots } from '~/components/feedback/LoadingDots';
+import { Card, Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 
@@ -55,7 +56,7 @@ export function AccountActions() {
       <ActionRow
         icon={
           busy === 'sign_out' ? (
-            <LoadingDots size={5} color={colors.textSoft} />
+            <LoadingDots size="tiny" color={colors.textSoft} />
           ) : (
             <LogOut size={20} color={colors.textSoft} />
           )
@@ -68,7 +69,7 @@ export function AccountActions() {
       <ActionRow
         icon={
           busy === 'delete' ? (
-            <LoadingDots size={5} color={colors.error} />
+            <LoadingDots size="tiny" color={colors.error} />
           ) : (
             <Trash2 size={20} color={colors.error} />
           )

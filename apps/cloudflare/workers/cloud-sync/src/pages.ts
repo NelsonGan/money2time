@@ -21,12 +21,12 @@ import {
 type Palette = typeof LIGHT | typeof DARK;
 
 function vars(p: Palette): string {
-  return `--background:${p.background};--card:${p.card};--surface-muted:${p.surfaceMuted};--border:${p.border};--foreground:${p.foreground};--foreground-soft:${p.foregroundSoft};--foreground-muted:${p.foregroundMuted};--primary:${p.primary};--primary-dark:${p.primaryDark};--primary-soft:${p.primarySoft};--primary-muted:${p.primaryMuted};--on-primary:${p.onPrimary};--wm-money:${p.wordmarkMoney};--wm-two:${p.wordmarkTwo};--wm-time:${p.wordmarkTime};`;
+  return `--background:${p.background};--card:${p.card};--border:${p.border};--foreground:${p.foreground};--foreground-soft:${p.foregroundSoft};--foreground-muted:${p.foregroundMuted};--primary:${p.primary};--primary-dark:${p.primaryDark};--primary-soft:${p.primarySoft};--on-primary:${p.onPrimary};--wm-money:${p.wordmarkMoney};--wm-two:${p.wordmarkTwo};--wm-time:${p.wordmarkTime};`;
 }
 
 const STYLE = `
-:root{color-scheme:light dark;${vars(LIGHT)}--shadow-soft:0 1px 2px rgba(74,56,40,.04),0 6px 18px rgba(74,56,40,.05);--shadow-float:0 4px 10px rgba(74,56,40,.05),0 18px 46px rgba(74,56,40,.1);--shadow-glow:0 10px 24px rgba(142,66,80,.22),0 20px 44px rgba(142,66,80,.18)}
-@media (prefers-color-scheme:dark){:root{${vars(DARK)}--shadow-soft:0 1px 2px rgba(0,0,0,.3);--shadow-float:0 18px 46px rgba(0,0,0,.35);--shadow-glow:0 10px 30px rgba(223,134,147,.18)}}
+:root{color-scheme:light dark;${vars(LIGHT)}--shadow-float:0 4px 10px rgba(74,56,40,.05),0 18px 46px rgba(74,56,40,.1);--shadow-glow:0 10px 24px rgba(142,66,80,.22),0 20px 44px rgba(142,66,80,.18)}
+@media (prefers-color-scheme:dark){:root{${vars(DARK)}--shadow-float:0 18px 46px rgba(0,0,0,.35);--shadow-glow:0 10px 30px rgba(223,134,147,.18)}}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{margin:0;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;padding:28px 16px 32px;background:var(--background);color:var(--foreground);font:16px/1.55 ${FONT_SANS};-webkit-font-smoothing:antialiased}

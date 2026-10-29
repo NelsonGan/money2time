@@ -8,9 +8,9 @@ import {
 } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, type TextInputInstance, View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 
-import { FatButton, Input, LoadingDots, Text } from '~/components/ui';
+import { LoadingDots } from '~/components/feedback/LoadingDots';
+import { FatButton, Input, NoticeBanner, Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -26,7 +26,7 @@ const CODE_LENGTH = 6;
  * Seconds before another code can be asked for. The Worker allows three per
  * address a minute; waiting this long keeps a tap from ever hitting that.
  */
-export const RESEND_COOLDOWN_SECONDS = 30;
+const RESEND_COOLDOWN_SECONDS = 30;
 
 /** Email sign-in: the address, then the 6-digit code sent to it. */
 export function EmailSignInForm({ onCancel }: { onCancel: () => void }) {
@@ -40,6 +40,15 @@ export function EmailSignInForm({ onCancel }: { onCancel: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
+  // A request finishing after the form went away (signed in, backed out)
+  // must not touch it.
+  const alive = useRef(true);
+  useEffect(
+    () => () => {
+      alive.current = false;
+    },
+    [],
+  );
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -58,9 +67,10 @@ export function EmailSignInForm({ onCancel }: { onCancel: () => void }) {
     setBusy('send');
     try {
       const token = await captcha.requestToken();
-      // Cancelled on the challenge: nothing is sent.
-      if (token === null) return;
+      // Cancelled on the challenge, or the form closed: nothing is sent.
+      if (token === null || !alive.current) return;
       await sync.sendEmailCode(trimmed, token);
+      if (!alive.current) return;
       if (step === 'code') {
         setNotice(I18n.t('cloud_sync.code_sent'));
         setCode('');
@@ -68,9 +78,9 @@ export function EmailSignInForm({ onCancel }: { onCancel: () => void }) {
       setStep('code');
       setCooldown(RESEND_COOLDOWN_SECONDS);
     } catch (e) {
-      setError(errorMessage(e));
+      if (alive.current) setError(errorMessage(e));
     } finally {
-      setBusy(null);
+      if (alive.current) setBusy(null);
     }
   };
 
@@ -83,6 +93,7 @@ export function EmailSignInForm({ onCancel }: { onCancel: () => void }) {
       await sync.verifyEmailCode(email, value);
       // Signed in: the provider swaps this form for the next view.
     } catch (e) {
+      if (!alive.current) return;
       setError(errorMessage(e));
       setBusy(null);
     }
@@ -118,24 +129,24 @@ export function EmailSignInForm({ onCancel }: { onCancel: () => void }) {
       </View>
 
       {error ? (
-        <FormAlert key={`e:${error}`} tone="error" text={error} />
+        <NoticeBanner key={`e:${error}`} icon={CircleAlert} tone="error" text={error} />
       ) : notice ? (
-        <FormAlert key={`n:${notice}`} tone="success" text={notice} />
+        <NoticeBanner key={`n:${notice}`} icon={CircleCheck} tone="success" text={notice} />
       ) : null}
 
       {isCode ? (
         <CodeBoxes
           value={code}
           onChange={(next) => {
-            // Held while a code is checked; the field stays editable so the
-            // keyboard stays up for a retry.
-            if (busy === 'verify') return;
+            // Held while a code is checked or a new one is sent (which clears
+            // the boxes); the field stays editable so the keyboard stays up.
+            if (busy) return;
             setCode(next);
             if (error) setError(null);
             // A full code (typed or filled from the keyboard) goes at once.
             if (next.length === CODE_LENGTH) void verify(next);
           }}
-          busy={busy === 'verify'}
+          busy={busy !== null}
           hasError={error !== null}
         />
       ) : (
@@ -201,35 +212,6 @@ export function EmailSignInForm({ onCancel }: { onCancel: () => void }) {
 }
 
 /**
- * What went wrong (or a notice) as a soft banner above the field: tinted, with
- * an icon, sliding in, rather than a red line squeezed under the input.
- */
-function FormAlert({ tone, text }: { tone: 'error' | 'success'; text: string }) {
-  const colors = useThemeColors();
-  const color = tone === 'error' ? colors.error : colors.success;
-  const Icon = tone === 'error' ? CircleAlert : CircleCheck;
-  return (
-    <Animated.View
-      entering={FadeInDown.duration(180)}
-      accessibilityRole="alert"
-      accessibilityLiveRegion="polite"
-      style={[
-        styles.alert,
-        {
-          backgroundColor: withColorAlpha(color, 0.08),
-          borderColor: withColorAlpha(color, 0.22),
-        },
-      ]}
-    >
-      <Icon size={18} color={color} />
-      <Text variant="caption" style={[styles.alertText, { color }]}>
-        {text}
-      </Text>
-    </Animated.View>
-  );
-}
-
-/**
  * The code as six boxes over one hidden input, so paste and the keyboard's
  * one-time-code suggestion fill all six at once.
  */
@@ -265,6 +247,9 @@ function CodeBoxes({
         return (
           <View
             key={index}
+            // The hidden input below is what a screen reader reads.
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
             style={[
               styles.codeBox,
               { borderColor, backgroundColor: colors.card },
@@ -341,7 +326,7 @@ function Chip({
         disabled && !loading && styles.dimmed,
       ]}
     >
-      {loading ? <LoadingDots size={6} /> : icon}
+      {loading ? <LoadingDots size="tiny" /> : icon}
       <Text variant="bodyStrong" tone={plain ? 'muted' : undefined} numberOfLines={1}>
         {label}
       </Text>
@@ -362,16 +347,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  alert: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    borderRadius: 16,
-    borderWidth: 1,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-  },
-  alertText: { flex: 1, fontWeight: '600' },
   codeRow: { flexDirection: 'row', justifyContent: 'center', gap: 8 },
   // A fixed size: a flex-sized box with an aspect ratio collapses in Yoga.
   codeBox: {

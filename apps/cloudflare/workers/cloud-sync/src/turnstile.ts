@@ -34,7 +34,7 @@ export interface TurnstileCheck {
   fetcher?: typeof fetch;
 }
 
-export type TurnstileResult =
+type TurnstileResult =
   | { ok: true; reason: 'not_configured' | 'no_token' | 'unreachable' | 'verified' }
   | { ok: false; reason: 'missing' | 'invalid' | 'hostname' | 'unreachable'; codes?: string[] };
 

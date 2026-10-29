@@ -18,7 +18,7 @@ export { InfoTooltipButton } from './info-tooltip';
 export { Input } from './input';
 export { ItemIcon } from './ItemIcon';
 export { ItemIconPickerSheet } from './ItemIconPickerSheet';
-export { LoadingDots } from './loading-dots';
+export { NoticeBanner } from './notice-banner';
 export { PromptSheet } from './prompt-sheet';
 export { SelectField } from './select';
 export { SelectionFilterField } from './SelectionFilterField';

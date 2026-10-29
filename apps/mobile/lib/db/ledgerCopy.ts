@@ -155,7 +155,7 @@ const ID_SPACE: Record<string, Target | undefined> = {
 };
 
 /** The rows of one table that a plan may copy (the plan filters further). */
-export type ReadRows = (spec: TableSpec) => Row[];
+type ReadRows = (spec: TableSpec) => Row[];
 
 /**
  * The rows to insert for a copy into `targetLedgerId`. `read` returns the

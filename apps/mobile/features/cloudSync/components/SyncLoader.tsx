@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Image, type ImageSourcePropType, StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 import Animated, {
   cancelAnimation,
   Easing,
@@ -10,14 +10,13 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { LoadingDots } from '~/components/ui';
+import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { withColorAlpha } from '~/utils/color';
 
 import { CLOUD_SYNC_ART } from './art';
 
 interface SyncLoaderProps {
-  art?: ImageSourcePropType;
   /** Width of the illustration; the halo and the block's height follow it. */
   width?: number;
   /** Hold still: the offline wait, where nothing is happening. */
@@ -30,12 +29,7 @@ interface SyncLoaderProps {
  * dots under it. It is the same size working or idle, so the text below never
  * moves when the work starts or stops.
  */
-export function SyncLoader({
-  art = CLOUD_SYNC_ART,
-  width = 260,
-  idle = false,
-  accessibilityLabel,
-}: SyncLoaderProps) {
+export function SyncLoader({ width = 260, idle = false, accessibilityLabel }: SyncLoaderProps) {
   const colors = useThemeColors();
   const reduceMotion = useReducedMotion();
   const still = idle || reduceMotion;
@@ -66,7 +60,7 @@ export function SyncLoader({
   }));
 
   return (
-    <View style={styles.root} accessibilityLabel={accessibilityLabel}>
+    <View style={styles.root}>
       <View style={{ width, height, alignItems: 'center', justifyContent: 'center' }}>
         <Animated.View
           style={[
@@ -81,7 +75,12 @@ export function SyncLoader({
           ]}
         />
         <Animated.View style={artStyle}>
-          <Image source={art} style={{ width, height }} resizeMode="contain" accessible={false} />
+          <Image
+            source={CLOUD_SYNC_ART}
+            style={{ width, height }}
+            resizeMode="contain"
+            accessible={false}
+          />
         </Animated.View>
       </View>
       {/* Kept in the layout while idle, so the text under it stays put. */}

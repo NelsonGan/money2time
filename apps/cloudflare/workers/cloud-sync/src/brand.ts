@@ -9,7 +9,6 @@
 export const LIGHT = {
   background: '#FCFAF5',
   card: '#FFFFFF',
-  surfaceMuted: '#F2EFE7',
   border: '#E4DFD1',
   foreground: '#1A2E2A',
   foregroundSoft: '#6B7A77',
@@ -27,7 +26,6 @@ export const LIGHT = {
 export const DARK = {
   background: '#121A24',
   card: '#1A1F28',
-  surfaceMuted: '#1E2A36',
   border: '#3C4353',
   foreground: '#E8EDF2',
   foregroundSoft: '#9AACA6',

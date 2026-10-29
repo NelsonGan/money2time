@@ -4,7 +4,7 @@ import { categoriesRepository } from '~/lib/repositories/categoriesRepository';
 import { ledgersRepository } from '~/lib/repositories/ledgersRepository';
 
 /** What a new ledger would get from copying `ledgerId`, for the editor's captions. */
-export interface LedgerCopySource {
+interface LedgerCopySource {
   /** Everyday accounts (debit and credit): what "Accounts" copies. */
   accounts: number;
   categories: number;

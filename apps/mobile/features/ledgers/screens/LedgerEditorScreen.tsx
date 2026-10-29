@@ -9,9 +9,10 @@ import {
   Tag,
   Users,
 } from 'lucide-react-native';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Switch, View } from 'react-native';
 
+import { LoadingDots } from '~/components/feedback/LoadingDots';
 import {
   Button,
   CategoryEmoji,
@@ -19,7 +20,6 @@ import {
   FormScrollView,
   InfoTooltipButton,
   Input,
-  LoadingDots,
   SettingsHeader,
   SettingsPageLayout,
   Text,
@@ -29,6 +29,7 @@ import { useApp } from '~/context/AppContext';
 import { useCloudSync, useCloudSyncEnabled } from '~/features/cloudSync/CloudSyncContext';
 import type { CategoryIconPickerSession } from '~/features/settings/lib/categoryIconPickerBridge';
 import { useSharedLedgers } from '~/features/sharedLedgers/hooks/useSharedLedgers';
+import { confirmLeaveLedger } from '~/features/sharedLedgers/lib/confirmLeave';
 import {
   MAX_MEMBERS,
   MAX_SHARED_LEDGERS,
@@ -88,11 +89,26 @@ export function LedgerEditorScreen({
   // The ledger being edited was deleted meanwhile: leave rather than turn
   // into a New ledger form.
   const isGone = ledgerId != null && existing == null;
+  // Closes once, whether the ledger went away or Leave finished first.
+  const closedRef = useRef(false);
+  const close = useCallback(() => {
+    if (closedRef.current) return;
+    closedRef.current = true;
+    onBack();
+  }, [onBack]);
   useEffect(() => {
-    if (isGone) onBack();
-  }, [isGone, onBack]);
+    if (isGone) close();
+  }, [isGone, close]);
   // A second tap while the screen animates away must not create a second ledger.
   const savedRef = useRef(false);
+  // The full copy's deferred start, dropped if the screen closes first.
+  const createTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (createTimer.current) clearTimeout(createTimer.current);
+    },
+    [],
+  );
 
   const [icon, setIcon] = useState(() => ledgerIcon(existing));
   // The default ledger's name stays empty until the user types one, so it
@@ -147,7 +163,7 @@ export function LedgerEditorScreen({
     if (copyEverything) {
       // A full copy runs on the JS thread: draw the button's loader first.
       setSharingBusy(true);
-      setTimeout(create, 32);
+      createTimer.current = setTimeout(create, 32);
       return;
     }
     create();
@@ -187,26 +203,22 @@ export function LedgerEditorScreen({
       });
   };
 
-  const confirmLeave = (id: string) => {
-    void triggerHaptic('warning');
-    Alert.alert(
-      I18n.t('shared_ledgers.leave_title', { name: existing ? ledgerDisplayName(existing) : '' }),
-      I18n.t('shared_ledgers.leave_message', { owner: sharing?.ownerName ?? '' }),
-      [
-        { text: I18n.t('common.cancel'), style: 'cancel' },
-        {
-          text: I18n.t('shared_ledgers.leave'),
-          style: 'destructive',
-          onPress: () => {
-            setLeaving(true);
-            // Gone from the phone: the editor closes itself (isGone above).
-            sync.leaveLedger(id).catch((error: unknown) => {
-              setLeaving(false);
-              Alert.alert(sharingErrorMessage(error));
-            });
-          },
-        },
-      ],
+  const leave = (id: string) => {
+    confirmLeaveLedger(
+      existing ? ledgerDisplayName(existing) : '',
+      sharing?.ownerName ?? '',
+      () => {
+        setLeaving(true);
+        sync
+          .leaveLedger(id)
+          // Left. An open ledger is only deleted once the app is back on its
+          // main screens (LedgerProGuard), so close the editor now.
+          .then(close)
+          .catch((error: unknown) => {
+            setLeaving(false);
+            Alert.alert(sharingErrorMessage(error));
+          });
+      },
     );
   };
 
@@ -441,10 +453,10 @@ export function LedgerEditorScreen({
             variant="secondary"
             testID="ledger-leave"
             disabled={leaving}
-            onPress={() => confirmLeave(existing.id)}
+            onPress={() => leave(existing.id)}
           >
             {leaving ? (
-              <LoadingDots color={themeColors.error} size={7} />
+              <LoadingDots color={themeColors.error} size="small" />
             ) : (
               <View className="flex-row items-center gap-2">
                 <LogOut size={18} color={themeColors.error} />
@@ -461,7 +473,7 @@ export function LedgerEditorScreen({
           className="mt-2"
         >
           {sharingBusy ? (
-            <LoadingDots color="#fff" size={7} />
+            <LoadingDots color="#fff" size="small" />
           ) : (
             <Text>{isEditing ? I18n.t('common.save') : I18n.t('ledgers.create')}</Text>
           )}

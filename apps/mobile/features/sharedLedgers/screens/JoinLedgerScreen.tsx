@@ -3,20 +3,20 @@ import {
   CircleAlert,
   Crown,
   Info,
-  type LucideIcon,
   PauseCircle,
   ShieldCheck,
   Users,
 } from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useSyncExternalStore } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { LoadingDots } from '~/components/feedback/LoadingDots';
 import {
   Card,
   CategoryEmoji,
   FatButton,
-  LoadingDots,
+  NoticeBanner,
   SETTINGS_HORIZONTAL_PADDING,
   SettingsHeader,
   SettingsPageLayout,
@@ -27,11 +27,14 @@ import { useCloudSync, useCloudSyncEnabled } from '~/features/cloudSync/CloudSyn
 import { KeepDataChoice } from '~/features/cloudSync/components/KeepDataChoice';
 import { SignedOutView } from '~/features/cloudSync/components/SignedOutView';
 import { type InvitePreview, previewInvite } from '~/features/cloudSync/services/sharedLedgersApi';
+import {
+  getDeferredLedgerDeletes,
+  subscribeDeferredLedgerDeletes,
+} from '~/features/cloudSync/services/sharedLedgerStore';
 import { ledgerDisplayName } from '~/features/ledgers/lib/ledgerDisplay';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import { withColorAlpha } from '~/utils/color';
 
 import { SharedLedgerHero } from '../components/SharedLedgerHero';
 import { useSharedLedgers } from '../hooks/useSharedLedgers';
@@ -91,20 +94,26 @@ export function JoinLedgerScreen({ code, onClose, onJoined }: JoinLedgerScreenPr
   const signedIn = sync.user !== null && sync.status !== 'signedOut';
   // The invited ledger is already on this phone: the user's own (sharing it
   // from here or another phone of theirs), or one they already joined.
-  const here = preview?.ledgerId ? (ledgers.find((l) => l.id === preview.ledgerId) ?? null) : null;
-  const hereRole = here
-    ? (sharedLedgers.find((l) => l.ledgerId === here.id)?.role ?? 'owner')
-    : null;
+  // A joined ledger left while open stays until the main screens (deferred):
+  // on its way out, it does not count, unless it was joined again since.
+  const deferred = useSyncExternalStore(subscribeDeferredLedgerDeletes, getDeferredLedgerDeletes);
+  const id = preview?.ledgerId ?? null;
+  const sharedHere = id ? (sharedLedgers.find((l) => l.ledgerId === id) ?? null) : null;
+  const here =
+    id && (sharedHere || !deferred.includes(id))
+      ? (ledgers.find((l) => l.id === id) ?? null)
+      : null;
+  const hereRole = here ? (sharedHere?.role ?? 'owner') : null;
 
   let action: React.ReactNode;
   if (!enabled) {
-    action = <Callout icon={Info} text={I18n.t('shared_ledgers.join_unavailable')} />;
+    action = <NoticeBanner icon={Info} text={I18n.t('shared_ledgers.join_unavailable')} />;
   } else if (!preview) {
     action = null;
   } else if (here && hereRole) {
     action = (
       <View className="gap-3">
-        <Callout
+        <NoticeBanner
           icon={hereRole === 'owner' ? Crown : Check}
           text={
             hereRole === 'owner'
@@ -122,9 +131,9 @@ export function JoinLedgerScreen({ code, onClose, onJoined }: JoinLedgerScreenPr
       </View>
     );
   } else if (!preview.active) {
-    action = <Callout icon={PauseCircle} text={I18n.t('shared_ledgers.join_paused')} />;
+    action = <NoticeBanner icon={PauseCircle} text={I18n.t('shared_ledgers.join_paused')} />;
   } else if (preview.full) {
-    action = <Callout icon={Users} text={I18n.t('shared_ledgers.join_full')} />;
+    action = <NoticeBanner icon={Users} text={I18n.t('shared_ledgers.join_full')} />;
   } else if (sync.status === 'loading' || sync.status === 'linking') {
     action = (
       <View className="items-center py-4">
@@ -149,10 +158,11 @@ export function JoinLedgerScreen({ code, onClose, onJoined }: JoinLedgerScreenPr
         <FatButton
           label={I18n.t('shared_ledgers.join_button', { name: preview.name })}
           loading={joining}
+          testID="ledger-join"
           onPress={() => void join()}
         />
         {sync.user?.email ? <IdentityRow email={sync.user.email} /> : null}
-        <Callout icon={ShieldCheck} text={I18n.t('shared_ledgers.join_note')} tinted />
+        <NoticeBanner icon={ShieldCheck} text={I18n.t('shared_ledgers.join_note')} />
       </View>
     );
   }
@@ -199,7 +209,7 @@ export function JoinLedgerScreen({ code, onClose, onJoined }: JoinLedgerScreenPr
             <LoadingDots accessibilityLabel={I18n.t('common.loading')} />
           </Card>
         )}
-        {error ? <Callout icon={CircleAlert} text={error} tone="error" /> : null}
+        {error ? <NoticeBanner icon={CircleAlert} text={error} tone="error" /> : null}
         {action}
       </ScrollView>
     </SettingsPageLayout>
@@ -225,40 +235,5 @@ function IdentityRow({ email }: { email: string }) {
         </Text>
       </View>
     </Card>
-  );
-}
-
-/** A short note with its icon, in a soft box: one idea, not a line of grey text. */
-function Callout({
-  icon: Icon,
-  text,
-  tinted = false,
-  tone,
-}: {
-  icon: LucideIcon;
-  text: string;
-  tinted?: boolean;
-  tone?: 'error';
-}) {
-  const colors = useThemeColors();
-  const accent = tone === 'error' ? colors.error : colors.primary;
-  return (
-    <View
-      className="flex-row items-center gap-3 rounded-3xl border px-4 py-3.5"
-      style={{
-        backgroundColor: withColorAlpha(accent, tinted || tone ? 0.08 : 0.04),
-        borderColor: withColorAlpha(accent, 0.16),
-      }}
-    >
-      <View
-        className="h-9 w-9 items-center justify-center rounded-full"
-        style={{ backgroundColor: withColorAlpha(accent, 0.14) }}
-      >
-        <Icon size={18} color={accent} />
-      </View>
-      <Text variant="body" tone={tone} className="flex-1">
-        {text}
-      </Text>
-    </View>
   );
 }

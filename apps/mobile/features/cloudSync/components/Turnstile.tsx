@@ -115,7 +115,7 @@ function page(siteKey: string): string {
  * A token, `undefined` for "none to be had" (send without one), or `null`
  * when the person cancelled the challenge (do not send).
  */
-export type TurnstileAnswer = string | undefined | null;
+type TurnstileAnswer = string | undefined | null;
 
 interface Pending {
   resolve: (token: TurnstileAnswer) => void;
@@ -161,8 +161,8 @@ export function useTurnstile(): {
     [settle],
   );
 
-  // Nobody waits on a form that went away.
-  useEffect(() => () => settle(undefined), [settle]);
+  // The form went away: whoever was waiting sends nothing.
+  useEffect(() => () => settle(null), [settle]);
 
   const onMessage = useCallback(
     (event: WebViewMessageEvent) => {
@@ -215,7 +215,8 @@ export function useTurnstile(): {
 
   const requestToken = useCallback((): Promise<TurnstileAnswer> => {
     if (!WebViewImpl || broken.current) return Promise.resolve(undefined);
-    settle(undefined);
+    // One at a time: an earlier request still waiting is superseded, not sent.
+    settle(null);
     return new Promise((resolve) => {
       const waiting: Pending = { resolve, timer: null, errors: 0, interactive: false };
       waiting.timer = setTimeout(() => {

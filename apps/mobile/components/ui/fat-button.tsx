@@ -1,12 +1,12 @@
 import React from 'react';
 import { Pressable, View, type ViewStyle } from 'react-native';
 
+import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { type HapticKind, triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
 import { darkenColor } from '~/utils/color';
 
-import { LoadingDots } from './loading-dots';
 import { Text } from './text';
 
 const LEDGE = 5;
@@ -32,6 +32,7 @@ interface FatButtonProps {
   height?: number;
   /** Applied to the layout wrapper — use for flex sizing (e.g. "flex-1"). */
   className?: string;
+  testID?: string;
 }
 
 /**
@@ -52,6 +53,7 @@ export function FatButton({
   loading = false,
   height = 52,
   className,
+  testID,
 }: FatButtonProps) {
   const themeColors = useThemeColors();
   const [pressed, setPressed] = React.useState(false);
@@ -80,6 +82,7 @@ export function FatButton({
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={label}
+        testID={testID}
         accessibilityState={{ disabled: disabled || loading, busy: loading }}
         disabled={disabled || loading}
         onPress={() => {
