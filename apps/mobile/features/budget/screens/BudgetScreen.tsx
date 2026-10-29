@@ -1,11 +1,4 @@
-import {
-  CalendarDays,
-  ChevronDown,
-  ChevronRight,
-  ChevronUp,
-  Pencil,
-  Trash2,
-} from 'lucide-react-native';
+import { CalendarDays, ChevronDown, ChevronUp, Pencil, Trash2 } from 'lucide-react-native';
 import React, {
   forwardRef,
   useCallback,
@@ -27,6 +20,7 @@ import {
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
+import { chartCategoryColor } from '~/constants/chartColors';
 import type { ColorPalette } from '~/constants/designSystem';
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
@@ -86,71 +80,192 @@ function leftLabel(remaining: number, settings: UserSettings): string {
     : I18n.t('budget.left', { amount: money(remaining, settings) });
 }
 
-/**
- * One budget line on one row: emoji, name and what is left (amber when it
- * runs low, red when over), opening its transactions.
- */
-function BudgetLineRow({
+function ProgressBar({
+  ratio,
+  color,
+  trackColor,
+  height,
+}: {
+  ratio: number;
+  color: string;
+  trackColor: string;
+  height: number;
+}) {
+  const clamped = Math.max(0, Math.min(ratio, 1));
+  return (
+    <View
+      className="w-full overflow-hidden rounded-full"
+      style={{ height, backgroundColor: trackColor }}
+    >
+      <View
+        className="rounded-full"
+        style={{ height, width: `${clamped * 100}%`, backgroundColor: color }}
+      />
+    </View>
+  );
+}
+
+function BudgetChildRow({
   line,
-  category,
-  indent,
-  first,
+  color,
+  categoriesById,
   settings,
   themeColors,
   onPress,
 }: {
   line: BudgetCategoryProgress;
-  category: Category | undefined;
-  /** A subcategory line, nested under its parent. */
-  indent: boolean;
-  /** The card's first row, which needs no divider above it. */
-  first: boolean;
+  color: string;
+  categoriesById: Map<string, Category>;
   settings: UserSettings;
   themeColors: ColorPalette;
   onPress: () => void;
 }) {
-  const name = category?.name ?? I18n.t('common.uncategorized');
+  const category = categoriesById.get(line.categoryId);
+  const fillColor = line.isOver ? themeColors.error : color;
+  const fillPct = Math.max(0, Math.min(line.usageRatio, 1)) * 100;
+
   return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={`${name}, ${leftLabel(line.remaining, settings)}`}
-      className={cn(
-        'flex-row items-center gap-3 pr-3',
-        !first && 'border-t border-border/25',
-        indent ? 'py-2.5 pl-12' : 'py-3.5 pl-4',
-        'active:bg-secondary/20',
-      )}
-    >
-      {indent ? (
-        category?.icon ? (
-          <CategoryEmoji icon={category.icon} size={13} />
-        ) : null
-      ) : (
-        <CategoryEmoji icon={category?.icon} size={22} />
-      )}
-      <Text variant={indent ? 'caption' : 'body'} numberOfLines={1} className="min-w-0 flex-1">
-        {name}
-      </Text>
-      <Text
-        variant={indent ? 'caption' : 'body'}
-        numberOfLines={1}
-        className="shrink-0 text-right"
-        // Plain while healthy, amber from 80%, red when over (a zero-budget
-        // overspend included).
-        style={{
-          color:
-            line.remaining < 0
-              ? themeColors.error
-              : line.usageRatio >= 0.8
-                ? usageColor(line.usageRatio, themeColors)
-                : themeColors.text,
-        }}
+    <View className="flex-row items-center gap-2">
+      {/* Tree elbow tying the subcategory to its parent row. */}
+      <View className="h-4 w-3.5 self-start rounded-bl-lg border-b border-l border-border/50" />
+      {/* One-line pill: the tinted fill behind the content IS the progress bar. */}
+      <Pressable
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={category?.name ?? I18n.t('common.uncategorized')}
+        className="relative min-w-0 flex-1 overflow-hidden rounded-xl active:opacity-80"
+        style={{ backgroundColor: withColorAlpha(fillColor, 0.08) }}
       >
-        {leftLabel(line.remaining, settings)}
-      </Text>
-      <ChevronRight size={16} color={themeColors.textMuted} />
-    </Pressable>
+        <View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: `${fillPct}%`,
+            backgroundColor: withColorAlpha(fillColor, 0.18),
+          }}
+        />
+        <View className="flex-row items-center gap-2 px-3 py-2">
+          {/* Only an explicitly-set emoji renders — no falling back to the
+              parent's icon, which just repeated it on every child row. */}
+          {category?.icon ? <CategoryEmoji icon={category.icon} size={13} /> : null}
+          <Text variant="caption" numberOfLines={1} className="min-w-0 flex-1 text-foreground">
+            {category?.name ?? I18n.t('common.uncategorized')}
+          </Text>
+          <Text
+            variant="caption"
+            numberOfLines={1}
+            className="shrink-0 text-right"
+            style={{ color: line.isOver ? themeColors.error : themeColors.mutedForeground }}
+          >
+            {money(line.spent, settings)} / {money(line.budgeted, settings)}
+          </Text>
+        </View>
+      </Pressable>
+    </View>
+  );
+}
+
+function BudgetCategoryRow({
+  line,
+  color,
+  first,
+  categoriesById,
+  settings,
+  themeColors,
+  onPress,
+  onPressChild,
+}: {
+  line: BudgetCategoryProgress;
+  /** Palette color for this category, shared with the breakdown pie. */
+  color: string;
+  first: boolean;
+  categoriesById: Map<string, Category>;
+  settings: UserSettings;
+  themeColors: ColorPalette;
+  /** Opens the drilldown for this root (children rolled up). */
+  onPress: () => void;
+  /** Opens the drilldown for one subcategory only. */
+  onPressChild: (categoryId: string) => void;
+}) {
+  const category = categoriesById.get(line.categoryId);
+  const barColor = line.isOver ? themeColors.error : color;
+  // isOver wins so a zero-budget overspend (ratio 0) still reads red.
+  const healthColor = line.isOver ? themeColors.error : usageColor(line.usageRatio, themeColors);
+
+  return (
+    // The child pills are siblings of the root Pressable, not descendants:
+    // an accessible Pressable collapses its subtree for screen readers, which
+    // would make the per-subcategory drilldowns unreachable (and pressing a
+    // pill would flash the parent's press feedback).
+    <View className={cn(!first && 'border-t border-border/25')}>
+      <Pressable
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={category?.name ?? I18n.t('common.uncategorized')}
+        className={cn('px-4 py-3 active:bg-secondary/20', line.children.length > 0 && 'pb-2')}
+      >
+        {/* Emoji inline with the title, then a full-width depletion bar with
+            the spent/total figures and usage badge beneath it — the bar spans
+            the whole row so its length is comparable across categories. */}
+        <View className="gap-2">
+          <View className="flex-row items-center gap-2">
+            <CategoryEmoji icon={category?.icon} size={20} />
+            <Text variant="bodyStrong" numberOfLines={1} className="flex-1">
+              {category?.name ?? I18n.t('common.uncategorized')}
+            </Text>
+            <Text
+              variant="caption"
+              numberOfLines={1}
+              className="shrink-0 text-[11px]"
+              tone={line.isOver ? undefined : 'muted'}
+              style={line.isOver ? { color: themeColors.error } : undefined}
+            >
+              {leftLabel(line.remaining, settings)}
+            </Text>
+          </View>
+          <View className="gap-1">
+            <ProgressBar
+              ratio={line.usageRatio}
+              color={barColor}
+              trackColor={withColorAlpha(barColor, 0.14)}
+              height={6}
+            />
+            <View className="flex-row items-center gap-2">
+              <Text variant="caption" tone="muted" numberOfLines={1} className="flex-1 text-[11px]">
+                {money(line.spent, settings)} / {money(line.budgeted, settings)}
+              </Text>
+              <View
+                className="shrink-0 rounded-full px-1.5 py-0.5"
+                style={{ backgroundColor: withColorAlpha(healthColor, 0.12) }}
+              >
+                <Text variant="label" className="text-[10px]" style={{ color: healthColor }}>
+                  {usagePercentLabel(line.usageRatio)}
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      </Pressable>
+
+      {line.children.length > 0 ? (
+        <View className="gap-1.5 px-4 pt-1.5 pb-3.5 pl-6">
+          {line.children.map((child) => (
+            <BudgetChildRow
+              key={child.categoryId}
+              line={child}
+              color={color}
+              categoriesById={categoriesById}
+              settings={settings}
+              themeColors={themeColors}
+              onPress={() => onPressChild(child.categoryId)}
+            />
+          ))}
+        </View>
+      ) : null}
+    </View>
   );
 }
 
@@ -610,6 +725,14 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
         const orderedCategories = focusModel
           ? [...focusModel.summary.categories].sort((a, b) => Number(b.isOver) - Number(a.isOver))
           : [];
+        // Palette colours by the budget's own line order (before the over-first
+        // sort), so a category keeps its colour as it goes over.
+        const colorByCategoryId = new Map(
+          (focusModel?.summary.categories ?? []).map((line, index) => [
+            line.categoryId,
+            chartCategoryColor(index),
+          ]),
+        );
         const rings: BudgetRing[] = [
           { period: 'year' as const, model: yearModel },
           { period: 'month' as const, model: monthModel },
@@ -788,33 +911,19 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
               {focusModel && orderedCategories.length > 0 ? (
                 <View className="mt-4 overflow-hidden rounded-2xl border border-border/45 bg-card">
                   {orderedCategories.map((line, index) => (
-                    <React.Fragment key={line.categoryId}>
-                      <BudgetLineRow
-                        line={line}
-                        category={categoriesById.get(line.categoryId)}
-                        indent={false}
-                        first={index === 0}
-                        settings={settings}
-                        themeColors={themeColors}
-                        onPress={() =>
-                          openCategoryDrilldown(focusModel.range, line.categoryId, true)
-                        }
-                      />
-                      {line.children.map((child) => (
-                        <BudgetLineRow
-                          key={child.categoryId}
-                          line={child}
-                          category={categoriesById.get(child.categoryId)}
-                          indent
-                          first={false}
-                          settings={settings}
-                          themeColors={themeColors}
-                          onPress={() =>
-                            openCategoryDrilldown(focusModel.range, child.categoryId, false)
-                          }
-                        />
-                      ))}
-                    </React.Fragment>
+                    <BudgetCategoryRow
+                      key={line.categoryId}
+                      line={line}
+                      color={colorByCategoryId.get(line.categoryId) ?? themeColors.primary}
+                      first={index === 0}
+                      categoriesById={categoriesById}
+                      settings={settings}
+                      themeColors={themeColors}
+                      onPress={() => openCategoryDrilldown(focusModel.range, line.categoryId, true)}
+                      onPressChild={(childId) =>
+                        openCategoryDrilldown(focusModel.range, childId, false)
+                      }
+                    />
                   ))}
                 </View>
               ) : null}
