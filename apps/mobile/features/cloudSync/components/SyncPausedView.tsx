@@ -60,6 +60,16 @@ export function SyncPausedView({
         <Text variant="body" tone="muted" className="text-center">
           {body}
         </Text>
+        {member && sync.lastError ? (
+          // The joined ledgers are what syncs here: say when they cannot.
+          <Text variant="caption" tone="warning" className="text-center">
+            {I18n.t(
+              sync.lastError === 'offline'
+                ? 'cloud_sync.status_offline'
+                : 'cloud_sync.status_error',
+            )}
+          </Text>
+        ) : null}
         {sync.user?.email ? <EmailPill email={sync.user.email} /> : null}
       </Card>
       <FatButton

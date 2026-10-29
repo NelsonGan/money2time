@@ -2980,6 +2980,9 @@ const vi = {
     leave_title: 'Rời {{name}}?',
     leave_message: 'Sổ sẽ bị gỡ khỏi điện thoại này. {{owner}} có thể mời bạn lại.',
     no_longer_shared: 'Sổ này không còn được chia sẻ.',
+    reset_keeps_shared:
+      'Sổ chia sẻ không bị thay đổi. Để gỡ một sổ, hãy rời sổ hoặc ngừng chia sẻ.',
+    changes_for_everyone: 'Sổ này được chia sẻ, nên thay đổi này áp dụng cho mọi người trong sổ.',
     removed_title: 'Đã gỡ sổ chia sẻ',
     removed_body: '{{names}} không còn được chia sẻ với bạn nên đã bị gỡ khỏi điện thoại này.',
     paused_title: 'Chia sẻ đang tạm dừng',

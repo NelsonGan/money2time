@@ -5,6 +5,10 @@
 // phone only keeps for itself. Payment-alert captures and learned merchant
 // categories stay on the phone that saw the notifications.
 
+import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
+
+import type { Row } from './rowCodec';
+
 export const SYNC_TABLES = [
   'settings',
   'ledgers',
@@ -83,17 +87,32 @@ export const ASSET_COLUMNS: Readonly<Partial<Record<SyncTable, readonly string[]
 };
 
 /**
- * Tables whose rows mean the user has recorded something. A phone with none of
- * them (only the settings, accounts and categories set up during onboarding)
- * takes the cloud copy without asking.
+ * Rows that mean the user has recorded something, by table: `true` for any
+ * live row, else a test on the row. A side with none (only the settings,
+ * starter accounts, categories and wage set up during onboarding) is replaced
+ * by the other without asking, so anything worth keeping must count here.
  */
-export const MEANINGFUL_DATA_TABLES = [
-  'transactions',
-  'recurring_rules',
-  'albums',
-  'items',
-  'budget_templates',
-] as const;
+export const MEANINGFUL_ROWS: Readonly<Partial<Record<SyncTable, true | ((row: Row) => boolean)>>> =
+  {
+    transactions: true,
+    recurring_rules: true,
+    albums: true,
+    items: true,
+    budget_templates: true,
+    // A balance, a savings goal or a loan; a starter account at zero is not.
+    accounts: (row) =>
+      row.type === 'goal' || row.type === 'loan' || Number(row.starting_balance ?? 0) !== 0,
+    // Any ledger the user made; the default one is on every install.
+    ledgers: (row) => row.id !== DEFAULT_LEDGER_ID,
+  };
+
+/** Whether `rowsOf` (a side's live rows by table) hold anything the user recorded. */
+export function hasMeaningfulRows(rowsOf: (table: SyncTable) => readonly Row[]): boolean {
+  return Object.entries(MEANINGFUL_ROWS).some(([table, test]) => {
+    const rows = rowsOf(table as SyncTable);
+    return test === true ? rows.length > 0 : rows.some(test);
+  });
+}
 
 /** What this app version syncs, saved on the phone to spot additions after an update. */
 export interface SyncedShape {

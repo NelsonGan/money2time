@@ -3021,6 +3021,10 @@ const pt = {
     leave_title: 'Sair de {{name}}?',
     leave_message: 'Ele será removido deste celular. {{owner}} pode convidar você de novo.',
     no_longer_shared: 'Este livro não é mais compartilhado.',
+    reset_keeps_shared:
+      'Os livros compartilhados não mudam. Para remover um, saia dele ou pare de compartilhá-lo.',
+    changes_for_everyone:
+      'Este livro é compartilhado, então isso o altera para todos que fazem parte dele.',
     removed_title: 'Livro compartilhado removido',
     removed_body: '{{names}} não é mais compartilhado com você, então foi removido deste celular.',
     paused_title: 'Compartilhamento pausado',

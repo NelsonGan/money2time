@@ -4,6 +4,11 @@ import { DatabaseSync } from 'node:sqlite';
 
 import type { SQLiteDatabase } from 'expo-sqlite';
 
+import { deletePersonalLedgerRows } from '~/features/cloudSync/services/ledgerChannels';
+import {
+  removeSharedLedger,
+  saveSharedLedger,
+} from '~/features/cloudSync/services/sharedLedgerStore';
 import { getSQLite } from '~/lib/db/client';
 import { copyLedgerRows } from '~/lib/db/ledgerCopy';
 import {
@@ -277,6 +282,41 @@ describe('ledgersRepository on SQLite', () => {
     expect(ledgersRepository.entryCounts()).toEqual({ default: 1, work: 2, copy: 2 });
   });
 
+  it('resets every ledger of the user but keeps the shared ones', () => {
+    saveSharedLedger({
+      ledgerId: 'work',
+      shareId: 'share-1',
+      role: 'member',
+      name: 'Work',
+      ownerName: 'Sam',
+      memberCount: 2,
+      active: true,
+    });
+    try {
+      deletePersonalLedgerRows();
+    } finally {
+      removeSharedLedger('work');
+    }
+    expect(harness.all('SELECT id FROM transactions ORDER BY id')).toEqual([
+      { id: 'hotel' },
+      { id: 'taxi' },
+    ]);
+    expect(harness.all('SELECT id FROM transaction_splits')).toEqual([{ id: 'taxi-split' }]);
+    expect(harness.all('SELECT id FROM accounts')).toEqual([{ id: 'work-cash' }]);
+    expect(harness.all('SELECT id FROM monthly_budgets')).toEqual([]);
+    expect(harness.all('SELECT id FROM ledgers ORDER BY id')).toEqual([
+      { id: 'default' },
+      { id: 'work' },
+    ]);
+  });
+
+  it('resets every ledger but the default one when nothing is shared', () => {
+    deletePersonalLedgerRows();
+    expect(harness.all('SELECT id FROM transactions')).toEqual([]);
+    expect(harness.all('SELECT id FROM transaction_splits')).toEqual([]);
+    expect(harness.all('SELECT id FROM ledgers')).toEqual([{ id: 'default' }]);
+  });
+
   it('never deletes the default ledger', () => {
     expect(() => ledgersRepository.softDelete(DEFAULT_LEDGER_ID)).toThrow();
     expect(harness.all('SELECT COUNT(*) AS n FROM transactions WHERE deleted_at IS NULL')).toEqual([
@@ -362,6 +402,42 @@ describe('backup and restore across ledgers', () => {
     expect(harness.all('SELECT active_ledger_id FROM settings')).toEqual([
       { active_ledger_id: null },
     ]);
+  });
+
+  it('leaves a shared ledger as it is: other people may have changed it since', async () => {
+    addWorkLedger();
+    const backup = await buildBackupData();
+    saveSharedLedger({
+      ledgerId: 'work',
+      shareId: 'share-1',
+      role: 'member',
+      name: 'Work',
+      ownerName: 'Sam',
+      memberCount: 2,
+      active: true,
+    });
+    try {
+      harness.connection.exec(`
+        UPDATE transactions SET amount = 35 WHERE id = 'taxi';
+        UPDATE transaction_splits SET amount = 20 WHERE id = 'taxi-split';
+        INSERT INTO transactions (id, ledger_id, type, amount, currency, date, created_at, updated_at)
+          VALUES ('dinner', 'work', 'expense', 50, 'USD', '2026-10-28', '${NOW}', '${NOW}');
+        DELETE FROM transactions WHERE id = 'lunch';
+      `);
+
+      expect(applyBackupData(backup).success).toBe(true);
+      expect(harness.all('SELECT id, ledger_id, amount FROM transactions ORDER BY id')).toEqual([
+        { id: 'dinner', ledger_id: 'work', amount: 50 },
+        { id: 'lunch', ledger_id: 'default', amount: 12 },
+        { id: 'taxi', ledger_id: 'work', amount: 35 },
+      ]);
+      expect(harness.all('SELECT id, amount FROM transaction_splits')).toEqual([
+        { id: 'taxi-split', amount: 20 },
+      ]);
+      expect(harness.all("SELECT name FROM ledgers WHERE id = 'work'")).toEqual([{ name: 'Work' }]);
+    } finally {
+      removeSharedLedger('work');
+    }
   });
 
   it('restores a backup from before ledgers into the default ledger', async () => {

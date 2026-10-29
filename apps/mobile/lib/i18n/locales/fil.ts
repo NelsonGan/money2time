@@ -3046,6 +3046,9 @@ const fil = {
     leave_title: 'Umalis sa {{name}}?',
     leave_message: 'Aalisin ito sa teleponong ito. Puwede kang imbitahan ulit ni {{owner}}.',
     no_longer_shared: 'Hindi na naka-share ang ledger na ito.',
+    reset_keeps_shared:
+      'Hindi babaguhin ang mga shared ledger. Para alisin ang isa, umalis dito o itigil ang pag-share nito.',
+    changes_for_everyone: 'Shared ang ledger na ito, kaya mababago ito para sa lahat ng kasali.',
     removed_title: 'Inalis ang shared ledger',
     removed_body: 'Hindi na naka-share sa iyo ang {{names}}, kaya inalis ito sa teleponong ito.',
     paused_title: 'Naka-pause ang pag-share',

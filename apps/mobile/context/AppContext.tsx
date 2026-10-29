@@ -36,6 +36,7 @@ import {
   budgetWeekOverlaps,
   isBudgetPeriodKey,
 } from '~/features/budget/lib/budgetPeriods';
+import { deletePersonalLedgerRows } from '~/features/cloudSync/services/ledgerChannels';
 import { openLedgerSharedAndActive } from '~/features/cloudSync/services/sharedLedgerStore';
 import { computeItemStats } from '~/features/items/utils';
 import {
@@ -67,11 +68,9 @@ import {
   accountsTable,
   albumsTable,
   autoLogCapturesTable,
-  budgetTemplateCategoriesTable,
   budgetTemplatesTable,
   categoriesTable,
   itemsTable,
-  monthlyBudgetCategoriesTable,
   monthlyBudgetsTable,
   monthlyWageSettingsTable,
   recurringRulesTable,
@@ -190,6 +189,8 @@ import {
   emptyRateTable,
   isAutoRateSupported,
   resolveRate,
+  storedWageConfig,
+  wageInCurrency,
 } from '~/utils/currency';
 import { getErrorMessage, toError } from '~/utils/errorHandling';
 import {
@@ -1002,30 +1003,15 @@ function trackSplitBillCreated(splits: readonly { isSelf: boolean }[]): void {
   if (people > 0) void trackEvent(AnalyticsEvents.SPLIT_BILL_CREATED, { people });
 }
 
+/** Erases the user's own data. Shared ledgers stay (see `deletePersonalLedgerRows`). */
 function purgeAllData() {
-  const db = getDb();
-  db.delete(transactionsTable).run();
-  db.delete(categoriesTable).run();
-  db.delete(accountsTable).run();
-  db.delete(recurringRulesTable).run();
-  db.delete(accountGroupsTable).run();
-  db.delete(monthlyWageSettingsTable).run();
-  db.delete(itemsTable).run();
-  // Budgets must go too — a surviving default template would auto-recreate a
-  // ghost budget (pointing at deleted categories) on the very next load.
-  db.delete(budgetTemplateCategoriesTable).run();
-  db.delete(budgetTemplatesTable).run();
-  db.delete(monthlyBudgetCategoriesTable).run();
-  db.delete(monthlyBudgetsTable).run();
+  // Budgets go too: a surviving default template would recreate a ghost
+  // budget (pointing at deleted categories) on the very next load.
+  deletePersonalLedgerRows();
+  getDb().delete(monthlyWageSettingsTable).run();
   // Payment alerts point at transactions, accounts and categories that are gone.
-  db.delete(autoLogCapturesTable).run();
+  getDb().delete(autoLogCapturesTable).run();
   getSQLite().execSync('DELETE FROM merchant_categories');
-  // Every ledger goes with its data; the default ledger stays, unnamed.
-  getSQLite().runSync('DELETE FROM ledgers WHERE id <> ?', [DEFAULT_LEDGER_ID]);
-  getSQLite().runSync(
-    'UPDATE ledgers SET name = NULL, emoji = NULL, prefs_json = NULL WHERE id = ?',
-    [DEFAULT_LEDGER_ID],
-  );
   // Reset settings to defaults but preserve appUserId so the device identity
   // remains stable across in-app data resets. The ID only rotates on
   // uninstall/reinstall (when SQLite itself is wiped).
@@ -1252,8 +1238,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // reminder fires on.
   const weekStartsOnRef = useRef<WeekStartsOn>(1);
   weekStartsOnRef.current = settings?.weekStartsOn ?? 1;
-  const [currentMonthWage, setCurrentMonthWage] = useState<MonthlyWageSettings | null>(null);
-  const [monthlyWages, setMonthlyWages] = useState<MonthlyWageSettings[]>([]);
+  const [storedCurrentWage, setCurrentMonthWage] = useState<MonthlyWageSettings | null>(null);
+  const [storedWages, setMonthlyWages] = useState<MonthlyWageSettings[]>([]);
   const [accountGroups, setAccountGroups] = useState<AccountGroup[]>([]);
   const [recurringRules, setRecurringRules] = useState<RecurringTransactionRule[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -1321,6 +1307,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (settings?.currencyCode) reportingCurrencyRef.current = settings.currencyCode;
   }, [settings?.currencyCode]);
+
+  // One wage serves every ledger, kept in the default ledger's currency. A
+  // ledger in another currency reads and saves it in its own.
+  const wageCurrency = ledgers.find((ledger) => ledger.id === DEFAULT_LEDGER_ID)?.currencyCode;
+  const wageRate = useMemo(() => {
+    const open = settings?.currencyCode;
+    if (!wageCurrency || !open) return 1;
+    return resolveRate(wageCurrency, open, rateTable) ?? 1;
+  }, [rateTable, settings?.currencyCode, wageCurrency]);
+  const wageRateRef = useRef(wageRate);
+  wageRateRef.current = wageRate;
+  const currentMonthWage = useMemo(
+    () => storedCurrentWage && wageInCurrency(storedCurrentWage, wageRate),
+    [storedCurrentWage, wageRate],
+  );
+  const monthlyWages = useMemo(
+    () => storedWages.map((wage) => wageInCurrency(wage, wageRate)),
+    [storedWages, wageRate],
+  );
 
   const reloadRateTable = useCallback((reportingCurrency: string) => {
     const rows = exchangeRatesRepository.listByBase(reportingCurrency);
@@ -4073,7 +4078,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     (config: WageConfig) => {
       runMutation(
         () => {
-          monthlyWageRepository.saveForCurrentMonth(config);
+          monthlyWageRepository.saveForCurrentMonth(storedWageConfig(config, wageRateRef.current));
         },
         { refresh: refreshWages },
       );
@@ -4085,7 +4090,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     (month: string, config: WageConfig) => {
       runMutation(
         () => {
-          monthlyWageRepository.saveForMonth(month, config);
+          monthlyWageRepository.saveForMonth(month, storedWageConfig(config, wageRateRef.current));
         },
         { refresh: refreshWages },
       );

@@ -3016,6 +3016,10 @@ const id = {
     leave_title: 'Keluar dari {{name}}?',
     leave_message: 'Buku ini dihapus dari ponsel ini. {{owner}} bisa mengundang Anda lagi.',
     no_longer_shared: 'Buku ini tidak lagi dibagikan.',
+    reset_keeps_shared:
+      'Buku bersama tidak diubah. Untuk menghapusnya, keluar dari buku itu atau berhenti membagikannya.',
+    changes_for_everyone:
+      'Buku ini dibagikan, jadi perubahan ini berlaku untuk semua orang di dalamnya.',
     removed_title: 'Buku bersama dihapus',
     removed_body: '{{names}} tidak lagi dibagikan dengan Anda, jadi dihapus dari ponsel ini.',
     paused_title: 'Berbagi dijeda',

@@ -2995,6 +2995,9 @@ const en = {
     leave_title: 'Leave {{name}}?',
     leave_message: 'It is removed from this phone. {{owner}} can invite you again.',
     no_longer_shared: 'This ledger is no longer shared.',
+    reset_keeps_shared:
+      'Shared ledgers are not changed. To remove one, leave it or stop sharing it.',
+    changes_for_everyone: 'This ledger is shared, so this changes it for everyone in it.',
     removed_title: 'Shared ledger removed',
     removed_body: '{{names}} is no longer shared with you, so it was removed from this phone.',
     paused_title: 'Sharing is paused',

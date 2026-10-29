@@ -3025,6 +3025,10 @@ const ms = {
     leave_title: 'Tinggalkan {{name}}?',
     leave_message: 'Buku ini dibuang daripada telefon ini. {{owner}} boleh menjemput anda semula.',
     no_longer_shared: 'Buku ini tidak lagi dikongsi.',
+    reset_keeps_shared:
+      'Buku dikongsi tidak diubah. Untuk membuangnya, tinggalkan buku itu atau hentikan perkongsiannya.',
+    changes_for_everyone:
+      'Buku ini dikongsi, jadi perubahan ini berlaku untuk semua orang di dalamnya.',
     removed_title: 'Buku dikongsi dibuang',
     removed_body:
       '{{names}} tidak lagi dikongsi dengan anda, jadi ia dibuang daripada telefon ini.',

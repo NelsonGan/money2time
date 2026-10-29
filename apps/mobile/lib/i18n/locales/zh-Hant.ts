@@ -2878,6 +2878,8 @@ const zhHant = {
     leave_title: '要退出{{name}}嗎？',
     leave_message: '它會從這支手機上移除。{{owner}} 可以再次邀請你。',
     no_longer_shared: '這個帳本已不再共享。',
+    reset_keeps_shared: '共享帳本不會更改。如需移除，請退出或停止共享。',
+    changes_for_everyone: '此帳本是共享的，因此會對其中的所有人生效。',
     removed_title: '共享帳本已移除',
     removed_body: '{{names}}已不再與你共享，因此已從這支手機上移除。',
     paused_title: '共享已暫停',

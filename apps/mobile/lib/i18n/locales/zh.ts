@@ -2878,6 +2878,8 @@ const zh = {
     leave_title: '退出{{name}}？',
     leave_message: '它会从这部手机上移除。{{owner}} 可以再次邀请你。',
     no_longer_shared: '这个账本已不再共享。',
+    reset_keeps_shared: '共享账本不会更改。如需移除，请退出或停止共享。',
+    changes_for_everyone: '此账本是共享的，因此会对其中的所有人生效。',
     removed_title: '共享账本已移除',
     removed_body: '{{names}}已不再与你共享，因此已从这部手机上移除。',
     paused_title: '共享已暂停',

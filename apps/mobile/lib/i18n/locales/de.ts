@@ -3043,6 +3043,9 @@ const de = {
     leave_title: '{{name}} verlassen?',
     leave_message: 'Es wird von diesem Handy entfernt. {{owner}} kann dich wieder einladen.',
     no_longer_shared: 'Dieses Buch wird nicht mehr geteilt.',
+    reset_keeps_shared:
+      'Geteilte Bücher bleiben unverändert. Verlasse ein Buch oder beende das Teilen, um es zu entfernen.',
+    changes_for_everyone: 'Dieses Buch ist geteilt, daher ändert sich das für alle darin.',
     removed_title: 'Geteiltes Buch entfernt',
     removed_body:
       '{{names}} wird nicht mehr mit dir geteilt und wurde daher von diesem Handy entfernt.',

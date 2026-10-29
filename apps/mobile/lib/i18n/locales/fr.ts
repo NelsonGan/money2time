@@ -3044,6 +3044,9 @@ const fr = {
     leave_title: 'Quitter {{name}} ?',
     leave_message: 'Il est retiré de ce téléphone. {{owner}} peut vous inviter à nouveau.',
     no_longer_shared: "Ce carnet n'est plus partagé.",
+    reset_keeps_shared:
+      'Les carnets partagés ne changent pas. Pour en retirer un, quittez-le ou arrêtez de le partager.',
+    changes_for_everyone: 'Ce carnet est partagé : cela le modifie pour tous ses membres.',
     removed_title: 'Carnet partagé retiré',
     removed_body: "{{names}} n'est plus partagé avec vous, il a donc été retiré de ce téléphone.",
     paused_title: 'Le partage est en pause',

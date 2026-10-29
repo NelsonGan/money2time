@@ -3026,6 +3026,10 @@ const es = {
     leave_title: '¿Salir de {{name}}?',
     leave_message: 'Se quita de este teléfono. {{owner}} puede volver a invitarte.',
     no_longer_shared: 'Este libro ya no se comparte.',
+    reset_keeps_shared:
+      'Los libros compartidos no cambian. Para quitar uno, sal de él o deja de compartirlo.',
+    changes_for_everyone:
+      'Este libro es compartido, así que esto lo cambia para todos los que están en él.',
     removed_title: 'Libro compartido eliminado',
     removed_body: '{{names}} ya no se comparte contigo, así que se quitó de este teléfono.',
     paused_title: 'Compartir está en pausa',

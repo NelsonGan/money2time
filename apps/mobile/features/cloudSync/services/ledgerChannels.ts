@@ -107,6 +107,28 @@ export function detachedKey(channel: string): string {
 }
 
 /**
+ * Deletes every ledger row that is the user's own (a reset): every ledger but
+ * the default one, which stays unnamed, and every row in them. Shared ledgers
+ * stay: they are other people's books too, and the deletions sync. Leaving or
+ * no longer sharing a ledger is what removes it. Children go first, while
+ * their parents still say which ledger they are in.
+ */
+export function deletePersonalLedgerRows(): void {
+  const db = getSQLite();
+  for (const table of [...SYNC_TABLES].filter(isLedgerScoped).reverse()) {
+    const where = personalRowsSql(table);
+    db.runSync(
+      table === 'ledgers'
+        ? `DELETE FROM ledgers WHERE id <> '${DEFAULT_LEDGER_ID}' AND ${where}`
+        : `DELETE FROM "${table}" WHERE ${where}`,
+    );
+  }
+  db.runSync('UPDATE ledgers SET name = NULL, emoji = NULL, prefs_json = NULL WHERE id = ?', [
+    DEFAULT_LEDGER_ID,
+  ]);
+}
+
+/**
  * Deletes a ledger and everything in it from this phone without recording the
  * deletion for sync: a member's copy of a ledger they no longer have access
  * to. Children go first, while their parents still say which ledger they are in.

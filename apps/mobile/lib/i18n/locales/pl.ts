@@ -3009,6 +3009,10 @@ const pl = {
     leave_title: 'Opuścić {{name}}?',
     leave_message: 'Zostanie usunięta z tego telefonu. {{owner}} może zaprosić Cię ponownie.',
     no_longer_shared: 'Ta księga nie jest już udostępniona.',
+    reset_keeps_shared:
+      'Udostępnione księgi nie zmienią się. Aby usunąć jedną, opuść ją lub przestań ją udostępniać.',
+    changes_for_everyone:
+      'Ta księga jest udostępniona, więc zmiana dotyczy wszystkich jej uczestników.',
     removed_title: 'Usunięto udostępnioną księgę',
     removed_body: '{{names}} nie jest już Ci udostępniona, więc została usunięta z tego telefonu.',
     paused_title: 'Udostępnianie wstrzymane',

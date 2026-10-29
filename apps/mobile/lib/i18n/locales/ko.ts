@@ -2965,6 +2965,8 @@ const ko = {
     leave_title: '{{name}}에서 나갈까요?',
     leave_message: '이 휴대폰에서 삭제됩니다. {{owner}} 님이 다시 초대할 수 있습니다.',
     no_longer_shared: '이 가계부는 더 이상 공유되지 않습니다.',
+    reset_keeps_shared: '공유 가계부는 변경되지 않습니다. 삭제하려면 나가거나 공유를 중지하세요.',
+    changes_for_everyone: '이 가계부는 공유되어 있어 참여한 모든 사람에게 적용됩니다.',
     removed_title: '공유 가계부가 삭제됨',
     removed_body: '{{names}}이(가) 더 이상 공유되지 않아 이 휴대폰에서 삭제되었습니다.',
     paused_title: '공유가 일시 중지됨',

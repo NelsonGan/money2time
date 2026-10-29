@@ -3020,6 +3020,10 @@ const it = {
     leave_title: 'Uscire da {{name}}?',
     leave_message: 'Viene rimosso da questo telefono. {{owner}} può invitarti di nuovo.',
     no_longer_shared: 'Questo registro non è più condiviso.',
+    reset_keeps_shared:
+      'I registri condivisi non cambiano. Per rimuoverne uno, abbandonalo o smetti di condividerlo.',
+    changes_for_everyone:
+      'Questo registro è condiviso, quindi la modifica vale per tutti i suoi membri.',
     removed_title: 'Registro condiviso rimosso',
     removed_body:
       '{{names}} non è più condiviso con te, quindi è stato rimosso da questo telefono.',

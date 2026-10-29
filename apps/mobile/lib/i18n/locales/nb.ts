@@ -3003,6 +3003,9 @@ const nb = {
     leave_title: 'Forlate {{name}}?',
     leave_message: 'Det fjernes fra denne telefonen. {{owner}} kan invitere deg igjen.',
     no_longer_shared: 'Dette regnskapet er ikke lenger delt.',
+    reset_keeps_shared:
+      'Delte regnskap endres ikke. Forlat et regnskap eller slutt å dele det for å fjerne det.',
+    changes_for_everyone: 'Dette regnskapet er delt, så dette endrer det for alle i det.',
     removed_title: 'Delt regnskap fjernet',
     removed_body: '{{names}} er ikke lenger delt med deg, så det ble fjernet fra denne telefonen.',
     paused_title: 'Delingen er satt på pause',

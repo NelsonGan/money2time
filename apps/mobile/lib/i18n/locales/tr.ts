@@ -3012,6 +3012,10 @@ const tr = {
     leave_title: '{{name}} defterinden ayrılınsın mı?',
     leave_message: 'Bu telefondan kaldırılır. {{owner}} seni tekrar davet edebilir.',
     no_longer_shared: 'Bu defter artık paylaşılmıyor.',
+    reset_keeps_shared:
+      'Paylaşılan defterler değişmez. Birini kaldırmak için defterden ayrılın veya paylaşmayı durdurun.',
+    changes_for_everyone:
+      'Bu defter paylaşılıyor, bu yüzden bu değişiklik içindeki herkesi etkiler.',
     removed_title: 'Paylaşılan defter kaldırıldı',
     removed_body: '{{names}} artık seninle paylaşılmıyor, bu yüzden bu telefondan kaldırıldı.',
     paused_title: 'Paylaşım duraklatıldı',

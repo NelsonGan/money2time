@@ -2984,6 +2984,9 @@ const ja = {
     leave_title: '{{name}}から退出しますか？',
     leave_message: 'このスマホから削除されます。{{owner}}さんは再びあなたを招待できます。',
     no_longer_shared: 'この帳簿は共有されなくなりました。',
+    reset_keeps_shared:
+      '共有帳簿は変更されません。削除するには、退出するか共有を停止してください。',
+    changes_for_everyone: 'この帳簿は共有されているため、参加している全員に反映されます。',
     removed_title: '共有帳簿を削除しました',
     removed_body: '{{names}}が共有されなくなったため、このスマホから削除されました。',
     paused_title: '共有は一時停止中です',

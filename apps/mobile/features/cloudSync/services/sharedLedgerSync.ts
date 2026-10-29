@@ -68,7 +68,8 @@ export interface SharedSyncOutcome {
   appliedRows: number;
   /** Ledgers removed from this phone (access gone, or no longer shared). */
   removedLedgers: number;
-  failed: boolean;
+  /** The first failure of the round (offline list read, a ledger's sync, a row), else null. */
+  error: unknown;
 }
 
 function fromRemote(remote: RemoteSharedLedger): SharedLedger {
@@ -334,7 +335,7 @@ class SharedLedgerSync {
   }
 
   private async runAll(forceList: boolean): Promise<SharedSyncOutcome> {
-    const outcome: SharedSyncOutcome = { appliedRows: 0, removedLedgers: 0, failed: false };
+    const outcome: SharedSyncOutcome = { appliedRows: 0, removedLedgers: 0, error: null };
     const session = this.session;
     if (!session) return outcome;
     try {
@@ -345,8 +346,9 @@ class SharedLedgerSync {
         this.retry = false;
         throw error;
       }
-      // Offline: sync what this phone knows of.
-      outcome.failed = true;
+      // Offline: sync what this phone knows of. With nothing shared yet,
+      // there is no ledger to show failing.
+      if (listSharedLedgers().length) outcome.error = error;
     }
     if (this.session === session && session.personalInactive()) {
       await runExclusive(() => getSQLite().withTransactionSync(dropPersonalOutbox));
@@ -360,24 +362,30 @@ class SharedLedgerSync {
         const engine = await this.engineFor(ledger);
         const result = await engine.syncNow();
         outcome.appliedRows += result.appliedRows;
+        outcome.error ??= result.applyError;
         if (result.pushed) session.announce?.(ledger.shareId);
       } catch (error) {
-        outcome.failed = true;
         // A token may have been revoked (a member was removed): ask again.
         this.credentials.delete(ledger.shareId);
+        // Paused or gone is the ledger's new state, not a failure to show.
         if (isCode(error, 'ledger_paused')) {
           this.closeEngine(ledger.shareId);
           saveSharedLedger({ ...ledger, active: false });
-        } else if (error instanceof CloudSyncApiError && error.code === 'not_found') {
+        } else if (isCode(error, 'not_found')) {
           // Removed from it, or it is no longer shared: the list says which.
-          outcome.removedLedgers += await this.refreshList(true).catch(() => 0);
-        } else if (error instanceof CloudSyncApiError && error.code === 'unauthorized') {
+          outcome.removedLedgers += await this.refreshList(true).catch((listError: unknown) => {
+            outcome.error ??= listError;
+            return 0;
+          });
+        } else if (isCode(error, 'unauthorized')) {
           this.retry = false;
           throw error;
+        } else {
+          outcome.error ??= error;
         }
       }
     }
-    this.retry = outcome.failed;
+    this.retry = outcome.error !== null;
     return outcome;
   }
 

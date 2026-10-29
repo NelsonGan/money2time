@@ -3005,6 +3005,9 @@ const sv = {
     leave_title: 'Lämna {{name}}?',
     leave_message: 'Den tas bort från den här telefonen. {{owner}} kan bjuda in dig igen.',
     no_longer_shared: 'Den här kassaboken delas inte längre.',
+    reset_keeps_shared:
+      'Delade kassaböcker ändras inte. Lämna en eller sluta dela den för att ta bort den.',
+    changes_for_everyone: 'Den här kassaboken är delad, så det här ändrar den för alla i den.',
     removed_title: 'Delad kassabok borttagen',
     removed_body: '{{names}} delas inte längre med dig, så den togs bort från den här telefonen.',
     paused_title: 'Delningen är pausad',

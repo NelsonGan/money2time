@@ -3034,6 +3034,9 @@ const nl = {
     leave_title: '{{name}} verlaten?',
     leave_message: 'Het wordt van deze telefoon verwijderd. {{owner}} kan je opnieuw uitnodigen.',
     no_longer_shared: 'Dit boek wordt niet meer gedeeld.',
+    reset_keeps_shared:
+      'Gedeelde boeken veranderen niet. Verlaat een boek of stop met delen om het te verwijderen.',
+    changes_for_everyone: 'Dit boek is gedeeld, dus dit verandert het voor iedereen erin.',
     removed_title: 'Gedeeld boek verwijderd',
     removed_body:
       '{{names}} wordt niet meer met je gedeeld en is daarom van deze telefoon verwijderd.',

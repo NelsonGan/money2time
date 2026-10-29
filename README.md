@@ -579,7 +579,10 @@ app side lives in `features/ledgers/`.
   - settings: theme, language, app lock, backup, notifications, bottom bar,
     profile and payment QR;
   - which apps payment alerts watch;
-  - the hourly value and wage history;
+  - the hourly value and wage history, kept in the default ledger's main
+    currency: a ledger in another currency shows, values time and saves the
+    wage converted at the exchange-rate table (`wageInCurrency`,
+    `storedWageConfig`), unconverted while it has no rate;
   - the exchange-rate cache;
   - Pro.
 - **Each ledger's own:**
@@ -593,9 +596,13 @@ app side lives in `features/ledgers/`.
   - the account each payment-alert source logs into;
   - Insights preferences.
 - **Resets and imports:**
-  - Reset all data removes every ledger.
+  - Reset all data removes every ledger but the shared ones, which are
+    other people's books too (`deletePersonalLedgerRows`); restoring a backup
+    keeps them the same way, skipping the backup's copies of their rows. Its
+    confirmations say so. Leaving or no longer sharing a ledger removes it.
   - A Money Manager import replaces the open ledger's data, in that ledger's
-    currency.
+    currency. In a shared ledger it does so for everyone, and the
+    confirmation says so; so does the currency start-over's.
   - With other ledgers present, the currency start-over clears only the open
     ledger and its own preferences.
 - **Recurring rules** run for the open ledger. Another ledger's rules catch up
@@ -1056,8 +1063,10 @@ The flag is read with `sendEvent: false`, so it sends no `$feature_flag_called`.
     phone_ replaces the cloud copy, and every other phone follows.
     _Cancel_ signs out and changes nothing.
 
-  "Recorded" means any transaction, recurring rule, album, item or budget
-  template; onboarding's accounts, categories and settings do not count. The
+  "Recorded" (`MEANINGFUL_ROWS`) means any transaction, recurring rule,
+  album, item or budget template, an account with a starting balance, a
+  savings goal or a loan, or a ledger besides the default one; onboarding's
+  starter accounts, categories, wage and settings do not count. The
   two sides are never merged: merging duplicates the default categories (each
   install seeds its own ids) and double-counts balances. Offline during this
   step, the phone stays signed in and tries again when it is back online.
@@ -1125,7 +1134,8 @@ The flag is read with `sendEvent: false`, so it sends no `$feature_flag_called`.
   on a signed-in phone or a second time.
 - **Restore and reset.** With Cloud Sync on, restoring a backup (Backup or
   Data Management import) replaces the cloud copy too, and Reset all data
-  erases it; both confirmations say so.
+  erases it; both confirmations say so. Both leave the shared ledgers as
+  they are (see [Ledgers](#ledgers)), with or without Cloud Sync on.
 - **When Pro ends** (the Worker decides, per account: a subscription on any
   linked phone keeps it Pro):
   - Nothing is deleted. The phone keeps all its data and works as before;
@@ -1195,9 +1205,10 @@ updated_at)`, with each row as JSON, plus `sync_info` (last device, last
   waiting in the outbox wins over the pulled copy. Concurrent edits to the
   same row, or two phones creating the same id: the last push wins, per row.
   Deletions apply before changes. Each pulled row is written in its own
-  savepoint, so a row this version cannot store is skipped and reported
-  instead of blocking later syncs; a failed apply is retried even when the
-  next pull brings nothing new. All replica work (syncs, pulls, full upload
+  savepoint, so a row this version cannot store does not block the rows
+  after it. Its revision is not recorded, so every later sync tries it again
+  (even when the next pull brings nothing new), and until it is written the
+  sync shows as failed (`applyError`). All replica work (syncs, pulls, full upload
   or download) runs one at a time.
 - **No upserts on the replica's `sync_rows`.** In the Turso engine (0.8.3),
   `INSERT … ON CONFLICT(table_name, row_id) DO UPDATE` on an existing row fails
@@ -1224,7 +1235,9 @@ updated_at)`, with each row as JSON, plus `sync_info` (last device, last
   rows go up, not only the open one's, since `ledger_id` is just a column.
   Each phone keeps its own open ledger. If the open ledger is deleted on
   another phone, or is missing from a cloud copy this phone takes, the
-  default ledger opens instead (`reloadAfterApply`), and taking a cloud copy
+  default ledger opens instead once the app is back on its main screens
+  (`LedgerProGuard`): an open editor holds the gone ledger's accounts and
+  categories, so switching under it would mix the two. Taking a cloud copy
   makes the default ledger row again if the copy has none, as a restore does.
   The choice screen's counts cover every ledger. A pulled settings row only
   updates this phone's own row: an upsert would fail SQLite's NOT NULL check on
@@ -1263,7 +1276,11 @@ updated_at)`, with each row as JSON, plus `sync_info` (last device, last
   also make the app re-read its shared-ledger list.
 - **Failures.** Offline is shown, never reported. Any other failure sends
   `Cloud Sync Failed` and an error report once per failure streak, not on
-  every retry. A rejected session (on a sync, or on the shared-ledger list
+  every retry. The shared ledgers' syncs have a streak of their own: a
+  failing round shows Sync failed or Offline on the Cloud Sync screen and the
+  profile pill like a personal failure (and under a free member's "Your
+  shared ledgers sync"), until a round succeeds (`sharedError`). A ledger
+  that is paused or no longer shared is not a failure. A rejected session (on a sync, or on the shared-ledger list
   read, which is how an account deleted on another phone is noticed while
   the Turso token is still valid) signs the phone out with "Signed out. Sign
   in again." It keeps the queued edits, the sync bookkeeping and the shared
@@ -1735,18 +1752,18 @@ Bank and wallet notifications (Android listener) and the Log Notification Shortc
 
 #### GA4 only: tutorials, settings, backup and review
 
-| Constant                      | Event name                    | GA4 name                          | PostHog | Trigger and frequency                                                                                                                                                                                                    | Extra properties              | Call sites                                                                                                   |
-| ----------------------------- | ----------------------------- | --------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `TUTORIAL_LIST_OPENED`        | `Tutorial List Opened`        | `m2t_tutorial_list_opened`        | No      | The tutorial list opens from settings or a deep link; every open.                                                                                                                                                        | `source`                      | [App.tsx](apps/mobile/App.tsx), [services/deepLinks.ts](apps/mobile/services/deepLinks.ts)                   |
-| `DISPLAY_MODE_TOGGLED`        | `Display Mode Toggled`        | `m2t_display_mode_toggled`        | No      | Display switches between money and time; each toggle.                                                                                                                                                                    | `mode`                        | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                 |
-| `NAV_TABS_CHANGED`            | `Nav Tabs Changed`            | `m2t_nav_tabs_changed`            | No      | A page is added to, removed from or reordered in the bottom bar, or the bar is reset, in Settings > Display > Bottom bar; each change.                                                                                   | `change`, `tabs`, `tab_count` | [features/settings/screens/BottomBarScreen.tsx](apps/mobile/features/settings/screens/BottomBarScreen.tsx)   |
-| `AUTO_BACKUP_RESTORED`        | `Auto Backup Restored`        | `m2t_auto_backup_restored`        | No      | An auto-backup is restored; each successful restore.                                                                                                                                                                     | `target`                      | [services/autoBackup.native.ts](apps/mobile/services/autoBackup.native.ts)                                   |
-| `AUTO_BACKUP_DELETED`         | `Auto Backup Deleted`         | `m2t_auto_backup_deleted`         | No      | An auto-backup is deleted; each successful deletion.                                                                                                                                                                     | `target`                      | [services/autoBackup.native.ts](apps/mobile/services/autoBackup.native.ts)                                   |
-| `AUTO_BACKUP_SETTING_TOGGLED` | `Auto Backup Setting Toggled` | `m2t_auto_backup_setting_toggled` | No      | Auto-backup is enabled or disabled in settings; each toggle.                                                                                                                                                             | `enabled`                     | [features/settings/screens/AutoBackupScreen.tsx](apps/mobile/features/settings/screens/AutoBackupScreen.tsx) |
-| `AUTO_BACKUP_TARGET_CHANGED`  | `Auto Backup Target Changed`  | `m2t_auto_backup_target_changed`  | No      | The auto-backup target is selected in settings; each change.                                                                                                                                                             | `target`                      | [features/settings/screens/AutoBackupScreen.tsx](apps/mobile/features/settings/screens/AutoBackupScreen.tsx) |
-| `CLOUD_SYNC_SIGNED_OUT`       | `Cloud Sync Signed Out`       | `m2t_cloud_sync_signed_out`       | No      | A phone that was syncing signs out of Cloud Sync (data stays on the phone); each sign-out. Cancelling the choice screen or signing out while paused sends nothing.                                                       |                               | [CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                                  |
-| `CLOUD_SYNC_FAILED`           | `Cloud Sync Failed`           | `m2t_cloud_sync_failed`           | No      | A sync, link or choice step fails for a reason other than being offline; once per failure streak, not on each retry (also sent to error tracking). `stage`: `sync`, `link`, `choice`; `error_kind`: `server`, `unknown`. | `stage`, `error_kind`         | [CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                                  |
-| `REVIEW_PROMPT_MANUAL_OPENED` | `Review Prompt Manual Opened` | `m2t_review_prompt_manual_opened` | No      | The manual review entry point is used; every use.                                                                                                                                                                        | None                          | [services/reviewPrompt.native.ts](apps/mobile/services/reviewPrompt.native.ts)                               |
+| Constant                      | Event name                    | GA4 name                          | PostHog | Trigger and frequency                                                                                                                                                                                                                                                                                         | Extra properties              | Call sites                                                                                                   |
+| ----------------------------- | ----------------------------- | --------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `TUTORIAL_LIST_OPENED`        | `Tutorial List Opened`        | `m2t_tutorial_list_opened`        | No      | The tutorial list opens from settings or a deep link; every open.                                                                                                                                                                                                                                             | `source`                      | [App.tsx](apps/mobile/App.tsx), [services/deepLinks.ts](apps/mobile/services/deepLinks.ts)                   |
+| `DISPLAY_MODE_TOGGLED`        | `Display Mode Toggled`        | `m2t_display_mode_toggled`        | No      | Display switches between money and time; each toggle.                                                                                                                                                                                                                                                         | `mode`                        | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                 |
+| `NAV_TABS_CHANGED`            | `Nav Tabs Changed`            | `m2t_nav_tabs_changed`            | No      | A page is added to, removed from or reordered in the bottom bar, or the bar is reset, in Settings > Display > Bottom bar; each change.                                                                                                                                                                        | `change`, `tabs`, `tab_count` | [features/settings/screens/BottomBarScreen.tsx](apps/mobile/features/settings/screens/BottomBarScreen.tsx)   |
+| `AUTO_BACKUP_RESTORED`        | `Auto Backup Restored`        | `m2t_auto_backup_restored`        | No      | An auto-backup is restored; each successful restore.                                                                                                                                                                                                                                                          | `target`                      | [services/autoBackup.native.ts](apps/mobile/services/autoBackup.native.ts)                                   |
+| `AUTO_BACKUP_DELETED`         | `Auto Backup Deleted`         | `m2t_auto_backup_deleted`         | No      | An auto-backup is deleted; each successful deletion.                                                                                                                                                                                                                                                          | `target`                      | [services/autoBackup.native.ts](apps/mobile/services/autoBackup.native.ts)                                   |
+| `AUTO_BACKUP_SETTING_TOGGLED` | `Auto Backup Setting Toggled` | `m2t_auto_backup_setting_toggled` | No      | Auto-backup is enabled or disabled in settings; each toggle.                                                                                                                                                                                                                                                  | `enabled`                     | [features/settings/screens/AutoBackupScreen.tsx](apps/mobile/features/settings/screens/AutoBackupScreen.tsx) |
+| `AUTO_BACKUP_TARGET_CHANGED`  | `Auto Backup Target Changed`  | `m2t_auto_backup_target_changed`  | No      | The auto-backup target is selected in settings; each change.                                                                                                                                                                                                                                                  | `target`                      | [features/settings/screens/AutoBackupScreen.tsx](apps/mobile/features/settings/screens/AutoBackupScreen.tsx) |
+| `CLOUD_SYNC_SIGNED_OUT`       | `Cloud Sync Signed Out`       | `m2t_cloud_sync_signed_out`       | No      | A phone that was syncing signs out of Cloud Sync (data stays on the phone); each sign-out. Cancelling the choice screen or signing out while paused sends nothing.                                                                                                                                            |                               | [CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                                  |
+| `CLOUD_SYNC_FAILED`           | `Cloud Sync Failed`           | `m2t_cloud_sync_failed`           | No      | A sync, link or choice step fails for a reason other than being offline; once per failure streak, not on each retry (also sent to error tracking). `stage`: `sync`, `apply` (a pulled row could not be written), `shared_sync` (a shared ledger's sync), `link`, `choice`; `error_kind`: `server`, `unknown`. | `stage`, `error_kind`         | [CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                                  |
+| `REVIEW_PROMPT_MANUAL_OPENED` | `Review Prompt Manual Opened` | `m2t_review_prompt_manual_opened` | No      | The manual review entry point is used; every use.                                                                                                                                                                                                                                                             | None                          | [services/reviewPrompt.native.ts](apps/mobile/services/reviewPrompt.native.ts)                               |
 
 #### GA4 only: Web Dashboard
 

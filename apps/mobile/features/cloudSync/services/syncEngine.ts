@@ -26,7 +26,6 @@ import { Directory, File, Paths } from 'expo-file-system';
 
 import { getSQLite } from '~/lib/db/client';
 import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
-import { reportError } from '~/services/errorReporting';
 import { collectReferencedAssetPaths } from '~/services/userAssetGc';
 import { assetRelativePathFromRef } from '~/services/userAssets';
 import { newId } from '~/utils/id';
@@ -51,8 +50,9 @@ import {
 import {
   ASSET_COLUMNS,
   CURRENT_SYNCED_SHAPE,
+  hasMeaningfulRows,
   isSyncTable,
-  MEANINGFUL_DATA_TABLES,
+  MEANINGFUL_ROWS,
   shapeAdditions,
   SYNC_TABLES,
   type SyncedShape,
@@ -127,6 +127,8 @@ export interface SyncOutcome {
   appliedRows: number;
   /** This phone's changes reached the cloud: other phones can be told to sync. */
   pushed: boolean;
+  /** A pulled row could not be written; it is retried on the next sync. */
+  applyError: Error | null;
 }
 
 let turso: TursoModule | null | undefined;
@@ -343,10 +345,10 @@ function writeRow(table: string, row: Row): boolean {
 
 /**
  * Writes one pulled row in its own savepoint, so a row this app version cannot
- * store (a constraint another version allows) is skipped and reported instead
- * of stopping every later sync.
+ * store (a constraint another version allows) does not stop the rows after it.
+ * Returns whether it was written, or the error that stopped it.
  */
-function writeRowSafely(table: string, row: Row): boolean {
+function writeRowSafely(table: string, row: Row): boolean | Error {
   const db = getSQLite();
   db.execSync('SAVEPOINT m2t_sync_row');
   try {
@@ -355,8 +357,7 @@ function writeRowSafely(table: string, row: Row): boolean {
     return written;
   } catch (error) {
     db.execSync('ROLLBACK TO m2t_sync_row; RELEASE m2t_sync_row');
-    reportError(error, { scope: 'cloud_sync', stage: 'apply_row', table });
-    return false;
+    return new Error(`Could not apply a pulled ${table} row`, { cause: error });
   }
 }
 
@@ -534,25 +535,26 @@ export function resetLocalSyncState(): void {
 // ---------------------------------------------------------------------------
 // Summaries for the "Keep which data?" choice
 
-const SUMMARY_TABLES = ['accounts', ...MEANINGFUL_DATA_TABLES] as const;
+const SUMMARY_TABLES = Object.keys(MEANINGFUL_ROWS) as SyncTable[];
 
-function summaryFromCounts(count: (table: string) => number): DataSummary {
+/** Counts and whether there is anything to keep, from a side's live rows by table. */
+function summaryOf(rowsOf: (table: SyncTable) => readonly Row[]): DataSummary {
   return {
-    transactions: count('transactions'),
-    accounts: count('accounts'),
-    hasMeaningfulData: MEANINGFUL_DATA_TABLES.some((t) => count(t) > 0),
+    transactions: rowsOf('transactions').length,
+    accounts: rowsOf('accounts').length,
+    hasMeaningfulData: hasMeaningfulRows(rowsOf),
   };
 }
 
 /** This phone's own data, without the shared ledgers (they sync on their own). */
 export function summarizeLocal(): DataSummary {
   const db = getSQLite();
-  return summaryFromCounts((table) =>
+  return summaryOf((table) =>
     tableExists(table)
-      ? (db.getFirstSync<{ n: number }>(
-          `SELECT COUNT(*) AS n FROM "${table}" WHERE deleted_at IS NULL AND ${personalRowsSql(table)}`,
-        )?.n ?? 0)
-      : 0,
+      ? db.getAllSync<Row>(
+          `SELECT * FROM "${table}" WHERE deleted_at IS NULL AND ${personalRowsSql(table)}`,
+        )
+      : [],
   );
 }
 
@@ -602,6 +604,8 @@ export class SyncEngine {
   private running: Promise<SyncOutcome> | null = null;
   /** The last apply left ledger-row removals for later (see applyRemoteChanges). */
   private removalsDeferred = false;
+  /** The first pulled row this sync could not write. */
+  private applyFailure: Error | null = null;
   /** Rows were flushed into the replica but no push has carried them yet. */
   private unannounced = false;
 
@@ -669,27 +673,30 @@ export class SyncEngine {
 
   async summarizeCloud(): Promise<DataSummary> {
     const replica = this.db();
-    const counts = new Map<string, number>();
+    const live = new Map<string, Row[]>();
     const rows = await replica.all(
       `SELECT table_name, data FROM sync_rows WHERE table_name IN (${SUMMARY_TABLES.map(() => '?').join(', ')})`,
       [...SUMMARY_TABLES],
     );
     for (const row of rows) {
+      let data: Row;
       try {
-        const data = JSON.parse(String(row.data)) as { deleted_at?: unknown };
-        if (data.deleted_at != null) continue;
+        data = JSON.parse(String(row.data)) as Row;
       } catch {
         continue;
       }
+      if (data.deleted_at != null) continue;
       const table = String(row.table_name);
-      counts.set(table, (counts.get(table) ?? 0) + 1);
+      const list = live.get(table) ?? [];
+      list.push(data);
+      live.set(table, list);
     }
     const info = await replica.all('SELECT key, value FROM sync_info');
     const infoMap = new Map(
       info.map((r) => [String(r.key), r.value == null ? null : String(r.value)]),
     );
     return {
-      ...summaryFromCounts((table) => counts.get(table) ?? 0),
+      ...summaryOf((table) => live.get(table) ?? []),
       lastSyncedAt: Number(infoMap.get('last_synced_at') ?? '') || null,
       lastDeviceName: infoMap.get('last_device_name') ?? null,
     };
@@ -765,7 +772,13 @@ export class SyncEngine {
           for (const stored of perTable.get(table) ?? []) {
             const row = decodeRow(table, stored.data, cols);
             if (!row || channelOfRow(table, row) !== PERSONAL_CHANNEL) continue;
-            if (writeRowSafely(table, row)) collectAssetRefs(table, row, assets);
+            const written = writeRowSafely(table, row);
+            if (written instanceof Error) {
+              // Unrecorded, so the next sync's apply tries it again.
+              setState('apply_pending', '1');
+              continue;
+            }
+            if (written) collectAssetRefs(table, row, assets);
             recordRev(table, stored.row_id, stored.rev, PERSONAL_CHANNEL);
           }
         }
@@ -790,6 +803,7 @@ export class SyncEngine {
     const replica = this.db();
     enableCapture();
     let appliedRows = 0;
+    this.applyFailure = null;
     // A ledger just shared, joined, or signed into again: take what the cloud
     // has (keeping this phone's newer edits), then send what only this phone
     // has. It counts as attached once that is pushed.
@@ -819,15 +833,16 @@ export class SyncEngine {
     // Also re-applies after an apply that failed, which a later pull with no
     // new changes would otherwise never retry.
     const pendingKey = this.isPersonal ? 'apply_pending' : `apply_pending:${this.channel}`;
-    if (pulled || getState(pendingKey) !== '0') {
+    if (pulled || this.applyFailure || getState(pendingKey) !== '0') {
       setState(pendingKey, '1');
       this.removalsDeferred = false;
       appliedRows += await this.applyRemoteChanges();
-      // Deferred removals keep the apply pending, so the next sync retries.
-      if (!this.removalsDeferred) setState(pendingKey, '0');
+      // Deferred removals and rows that failed keep the apply pending, so
+      // the next sync retries.
+      if (!this.removalsDeferred && !this.applyFailure) setState(pendingKey, '0');
     }
     await this.downloadMedia(new Set());
-    return { appliedRows, pushed };
+    return { appliedRows, pushed, applyError: this.applyFailure };
   }
 
   /** When and from which phone the cloud copy last changed, for the choice screen. */
@@ -1055,6 +1070,7 @@ export class SyncEngine {
     const db = getSQLite();
     const assets = new Set<string>();
     let applied = 0;
+    let failure: Error | null = null;
     applyQuietly(() => {
       // Re-read: the user may have edited a row while the data was fetched,
       // and their edit wins.
@@ -1080,13 +1096,20 @@ export class SyncEngine {
           recordRev(item.table, item.id, item.rev, this.channel);
           continue;
         }
-        if (writeRowSafely(item.table, row)) {
+        const written = writeRowSafely(item.table, row);
+        if (written instanceof Error) {
+          // Left unrecorded, so every later sync tries it again.
+          failure ??= written;
+          continue;
+        }
+        if (written) {
           applied += 1;
           collectAssetRefs(item.table, row, assets);
         }
         recordRev(item.table, item.id, item.rev, this.channel);
       }
     });
+    this.applyFailure ??= failure;
     await this.downloadMedia(assets);
     return applied;
   }

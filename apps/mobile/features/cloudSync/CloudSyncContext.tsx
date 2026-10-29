@@ -23,8 +23,6 @@ import { AppState } from 'react-native';
 
 import { useApp } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
-import { DEFAULT_LEDGER_ID, getActiveLedgerId } from '~/lib/db/ledgerScope';
-import { ledgersRepository } from '~/lib/repositories/ledgersRepository';
 import { clearAccountPro, getAccountProAnswer, setAccountPro } from '~/services/accountPro';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { runAutoBackupIfDue } from '~/services/autoBackup';
@@ -225,7 +223,7 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   // The engine runs whenever the build can sync; the allow-list flag only
   // hides the UI (useCloudSyncEnabled).
   const enabled = isCloudSyncAvailable();
-  const { settings, refreshAll, switchLedger } = useApp();
+  const { settings, refreshAll } = useApp();
   const { isPro, isStorePro, isStatusKnown } = usePro();
   const appUserId = settings?.appUserId ?? null;
 
@@ -236,6 +234,8 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSyncedAt, setLastSyncedAt] = useState<number | null>(null);
   const [lastError, setLastError] = useState<CloudSyncErrorKind | null>(null);
+  /** The last round of shared-ledger syncs failed: shown like a failed personal sync. */
+  const [sharedError, setSharedError] = useState<CloudSyncErrorKind | null>(null);
   const [choice, setChoice] = useState<CloudSyncChoice | null>(null);
   const [linked, setLinked] = useState(false);
   /** The account is Pro, but this phone is past the 5 phones its Pro reaches. */
@@ -259,6 +259,7 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   const retryRef = useRef(false);
   /** A failure streak is reported once, not on every retry. */
   const reportedRef = useRef(false);
+  const sharedReportedRef = useRef(false);
   const linkingRef = useRef(false);
   /** Signing out or deleting the account: no new sync may start. */
   const closingRef = useRef(false);
@@ -271,22 +272,14 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   appUserIdRef.current = appUserId;
   const refreshAllRef = useRef(refreshAll);
   refreshAllRef.current = refreshAll;
-  const switchLedgerRef = useRef(switchLedger);
-  switchLedgerRef.current = switchLedger;
 
   /**
    * Reloads the app after rows came from the cloud. If the ledger open on this
    * phone is gone (deleted on another phone, or not in a cloud copy just
-   * taken), the default ledger opens instead.
+   * taken), LedgerProGuard opens the default ledger once no editor is open:
+   * an editor holds the gone ledger's accounts and categories.
    */
-  const reloadAfterApply = useCallback(() => {
-    const open = getActiveLedgerId();
-    if (open !== DEFAULT_LEDGER_ID && !ledgersRepository.getById(open)) {
-      switchLedgerRef.current(DEFAULT_LEDGER_ID);
-    } else {
-      refreshAllRef.current();
-    }
-  }, []);
+  const reloadAfterApply = useCallback(() => refreshAllRef.current(), []);
 
   const sessionToken = useCallback(async () => {
     const token = sessionRef.current?.token;
@@ -411,18 +404,23 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       setChoice(null);
       setLastSyncedAt(null);
       setLastError(null);
+      setSharedError(null);
       setStatus('signedOut');
       if (opts.deleteReplica) reloadAfterApply();
     },
     [bindShared, closeEngine, reloadAfterApply],
   );
 
-  const report = useCallback((error: unknown, stage: string, kind: CloudSyncErrorKind) => {
-    if (kind === 'offline' || reportedRef.current) return;
-    reportedRef.current = true;
-    void trackEvent(AnalyticsEvents.CLOUD_SYNC_FAILED, { stage, error_kind: kind });
-    reportError(error, { scope: 'cloud_sync', stage });
-  }, []);
+  /** Reports a failure once per streak (`streak`: the personal sync's, or the shared ledgers'). */
+  const report = useCallback(
+    (error: unknown, stage: string, kind: CloudSyncErrorKind, streak = reportedRef) => {
+      if (kind === 'offline' || streak.current) return;
+      streak.current = true;
+      void trackEvent(AnalyticsEvents.CLOUD_SYNC_FAILED, { stage, error_kind: kind });
+      reportError(error, { scope: 'cloud_sync', stage });
+    },
+    [],
+  );
 
   const handleError = useCallback(
     async (error: unknown, stage: string, generation: number) => {
@@ -487,24 +485,36 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
     return opening;
   }, [closeEngine, fetchCredentials, sessionToken]);
 
-  /** Syncs the shared ledgers; failures are retried on the next tick, not shown. */
+  /** Syncs the shared ledgers. A failure shows until a round succeeds, and is retried soon. */
   const runSharedSync = useCallback(
     async (opts: { forceList?: boolean } = {}) => {
       if (!sessionRef.current || closingRef.current) return;
       const generation = generationRef.current;
+      let failure: unknown = null;
       try {
         const outcome = await sharedLedgerSync.syncAll(opts);
         if (generation !== generationRef.current) return;
         if (outcome.appliedRows > 0 || outcome.removedLedgers > 0) reloadAfterApply();
+        failure = outcome.error;
       } catch (error) {
         if (generation !== generationRef.current) return;
         if (errorKind(error) === 'session_expired') {
           await forgetSession({ deleteReplica: false });
           setLastError('session_expired');
+          return;
         }
+        failure = error;
       }
+      if (failure === null) {
+        sharedReportedRef.current = false;
+        setSharedError(null);
+        return;
+      }
+      const kind = errorKind(failure);
+      setSharedError(kind);
+      report(failure, 'shared_sync', kind, sharedReportedRef);
     },
-    [forgetSession, reloadAfterApply],
+    [forgetSession, reloadAfterApply, report],
   );
 
   const runSyncOnce = useCallback(async () => {
@@ -531,15 +541,21 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       const outcome = await engine.syncNow();
       if (generation !== generationRef.current) return;
       if (outcome.pushed) announce(PERSONAL_CHANNEL);
-      retryRef.current = false;
-      reportedRef.current = false;
       setStatus('ready');
       setPhoneLimited(false);
       setLastSyncedAt(Date.now());
-      setLastError(null);
       // No image sweep here: a photo just picked in an editor is not in a
       // row yet, and the sweep would delete it.
       if (outcome.appliedRows > 0) reloadAfterApply();
+      if (outcome.applyError) {
+        // A pulled row could not be written: it is retried, and shown until it is.
+        retryRef.current = true;
+        await handleError(outcome.applyError, 'apply', generation);
+      } else {
+        retryRef.current = false;
+        reportedRef.current = false;
+        setLastError(null);
+      }
     } catch (error) {
       retryRef.current = true;
       await handleError(error, 'sync', generation);
@@ -1055,7 +1071,8 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       user,
       isSyncing,
       lastSyncedAt,
-      lastError,
+      // A failing shared ledger shows like a failing personal sync.
+      lastError: lastError ?? sharedError,
       choice,
       linked,
       phoneLimited,
@@ -1080,6 +1097,7 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       isSyncing,
       lastSyncedAt,
       lastError,
+      sharedError,
       choice,
       linked,
       phoneLimited,

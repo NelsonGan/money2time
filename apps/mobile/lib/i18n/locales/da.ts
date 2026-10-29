@@ -2999,6 +2999,9 @@ const da = {
     leave_title: 'Forlad {{name}}?',
     leave_message: 'Det fjernes fra denne telefon. {{owner}} kan invitere dig igen.',
     no_longer_shared: 'Dette regnskab er ikke længere delt.',
+    reset_keeps_shared:
+      'Delte regnskaber ændres ikke. Forlad et eller stop med at dele det for at fjerne det.',
+    changes_for_everyone: 'Dette regnskab er delt, så det ændres for alle i det.',
     removed_title: 'Delt regnskab fjernet',
     removed_body: '{{names}} er ikke længere delt med dig, så det blev fjernet fra denne telefon.',
     paused_title: 'Delingen er sat på pause',
