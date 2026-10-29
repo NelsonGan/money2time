@@ -46,7 +46,7 @@ import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
 import { useIsFlatIcons } from '~/context/ThemeContext';
-import { useCloudSync, useCloudSyncEnabled } from '~/features/cloudSync/CloudSyncContext';
+import { useCloudSyncEnabled, useCloudSyncProTag } from '~/features/cloudSync/CloudSyncContext';
 import { CloudSyncProfilePill } from '~/features/cloudSync/components/CloudSyncProfilePill';
 import { CloudSyncTileBadge } from '~/features/cloudSync/components/CloudSyncTileBadge';
 import { LedgerSwitcherCard } from '~/features/ledgers/components/LedgerSwitcherCard';
@@ -147,13 +147,13 @@ export function SettingsScreen({
   const { settings, updateSettings, getLedgerEntryCounts } = useApp();
   const monthCycle = monthCycleOf(settings);
   const { transactions } = useTransactions();
-  const { isPro, isStatusKnown: isProStatusKnown, setDevProOverride } = usePro();
+  const { isPro, setDevProOverride } = usePro();
   const [ledgerSheetVisible, setLedgerSheetVisible] = useState(false);
   // Read when the switcher opens, not on every render, and kept while it
   // fades out so its rows do not flash to zero.
   const [ledgerEntryCounts, setLedgerEntryCounts] = useState<Record<string, number>>({});
   const cloudSyncEnabled = useCloudSyncEnabled();
-  const { status: cloudSyncStatus } = useCloudSync();
+  const cloudSyncProTag = useCloudSyncProTag();
   const themeColors = useThemeColors();
   const isFlatIcons = useIsFlatIcons();
   const bottomNavInset = useSettingsBottomNavInset();
@@ -649,7 +649,7 @@ export function SettingsScreen({
                 <SettingsGridTile
                   icon={<ClayIcon name="settings/cloud-sync" size={34} flatSize={20} />}
                   label={I18n.t('cloud_sync.tile_label')}
-                  pro={isProStatusKnown && !isPro && cloudSyncStatus === 'signedOut'}
+                  pro={cloudSyncProTag}
                   badge={<CloudSyncTileBadge />}
                   onPress={onOpenCloudSync}
                 />

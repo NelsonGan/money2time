@@ -3,14 +3,13 @@ import React from 'react';
 import { Pressable, View } from 'react-native';
 
 import { Text } from '~/components/ui';
-import { usePro } from '~/context/ProContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { withColorAlpha } from '~/utils/color';
 import { FONT } from '~/utils/fonts';
 
-import { useCloudSync, useCloudSyncEnabled } from '../CloudSyncContext';
+import { useCloudSync, useCloudSyncEnabled, useCloudSyncProTag } from '../CloudSyncContext';
 import { profileSyncState } from '../lib/profileStatus';
 import { Spinning } from './SyncStatusView';
 
@@ -22,8 +21,8 @@ import { Spinning } from './SyncStatusView';
 export function CloudSyncProfilePill({ onPress }: { onPress: () => void }) {
   const enabled = useCloudSyncEnabled();
   const { status, isSyncing, lastError, linked, phoneLimited } = useCloudSync();
-  const { isPro, isStatusKnown } = usePro();
   const colors = useThemeColors();
+  const showPro = useCloudSyncProTag();
   const state = enabled
     ? profileSyncState({ status, isSyncing, lastError, linked, phoneLimited })
     : null;
@@ -31,9 +30,6 @@ export function CloudSyncProfilePill({ onPress }: { onPress: () => void }) {
 
   const title = I18n.t('cloud_sync.tile_label');
   const statusText = state.statusKey ? I18n.t(`cloud_sync.${state.statusKey}`) : null;
-  // Same rule as the Data tile's Pro ribbon: syncing is Pro, signing in is
-  // not. Both wait for the Pro status so a Pro user never sees it flash.
-  const showPro = isStatusKnown && !isPro && status === 'signedOut';
 
   const tint =
     state.tone === 'on'

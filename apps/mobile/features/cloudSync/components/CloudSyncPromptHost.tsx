@@ -21,12 +21,15 @@ import { withColorAlpha } from '~/utils/color';
 import { useCloudSync, useCloudSyncAllowed } from '../CloudSyncContext';
 import {
   hasPendingCloudSyncPrompt,
+  pendingCloudSyncPromptAge,
   subscribeCloudSyncPrompt,
   takePendingCloudSyncPrompt,
 } from '../lib/promptRequest';
 import { CLOUD_SYNC_HAPPY_ART } from './art';
 
 const SHOWN_KEY = 'm2t.cloudSync.promptShown.v1';
+/** How long the offer waits for the allow list after a purchase. */
+const FLAG_WAIT_MS = 10_000;
 /** Lets the paywall's close animation finish before a modal presents. */
 const AFTER_PAYWALL_MS = 900;
 
@@ -50,8 +53,17 @@ export function CloudSyncPromptHost({
     if (!allowed || !hasPendingCloudSyncPrompt() || showingRef.current) return;
     // Nothing to offer when sync is unavailable or already on.
     if (status === 'unavailable' || status === 'loading') return;
-    // Waits for the allow list to load, and drops the offer when off it.
-    if (onAllowList === undefined) return;
+    // Waits a little for the allow list to load, so the offer still follows
+    // the purchase; drops it when off the list or the flags never come.
+    if (onAllowList === undefined) {
+      const left = FLAG_WAIT_MS - pendingCloudSyncPromptAge();
+      if (left <= 0) {
+        takePendingCloudSyncPrompt();
+        return;
+      }
+      const wait = setTimeout(() => setTick((n) => n + 1), left);
+      return () => clearTimeout(wait);
+    }
     if (status !== 'signedOut' || !onAllowList) {
       takePendingCloudSyncPrompt();
       return;

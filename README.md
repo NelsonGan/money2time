@@ -980,9 +980,11 @@ shown only to users on the PostHog allow-list flag `cloud_sync` (see
 ### Allow list
 
 `useCloudSyncEnabled()` (`features/cloudSync/CloudSyncContext.tsx`) is true when
-the build can sync and either the flag `cloud_sync` is on for this user or the
-phone is already signed in to Cloud Sync, so a signed-in phone off the list can
-still sign out, delete its account or finish linking. A development build
+the build can sync and the flag `cloud_sync` is on for this user, or this phone
+has used Cloud Sync: it is signed in, or the app signed it out (expired session,
+failed link) and the user has not signed out themselves since
+(`m2t.cloudSync.usedHere`). A phone off the list can so still sign back in,
+sign out, delete its account or finish linking. A development build
 counts as on the list until flags load (they load only with
 `EXPO_PUBLIC_POSTHOG_DEV=1`, which shows the real answer).
 
@@ -994,12 +996,16 @@ on _Shared ledgers aren't available in this version yet_ without asking the
 Worker about the invite). The engine itself (`CloudSyncProvider`) runs whenever
 the build can sync, so a phone that was already signed in keeps syncing. Until
 flags load (the SDK keeps the last values between launches) the UI stays
-hidden, and the post-purchase offer waits for them rather than being dropped.
+hidden, joining from an invite link shows nothing yet, and the post-purchase
+offer waits up to 10 seconds for them before it is dropped.
 
 The flag (PostHog id `1002314`) has one condition: person `distinct_id` is
 exactly one of a list of app user ids (`m2t_<uuid>`), at 100%. Users see only
 the last 8 characters of their id (Settings > Display > User ID); look the full
 id up in RevenueCat (it is the RevenueCat app user id) and add it to the list.
+The id belongs to the install, not the person: a second phone or a reinstall
+has its own, so add every phone a tester uses (signing in on one phone does not
+put the others on the list).
 The flag is read with `sendEvent: false`, so it sends no `$feature_flag_called`.
 
 ### What the user sees
@@ -1604,7 +1610,7 @@ Explicitly requested tracking measures engagement with the RiceCal promotion: on
 | `CLOUD_BACKUP_PROMPT_SHOWN`          | `Cloud Backup Prompt Shown`          | `m2t_cloud_backup_prompt_shown`          | Yes     | The eligible cloud-backup prompt is shown; each presentation after its eligibility checks.                                                                                                                                       | `transaction_count`                                         | [App.tsx](apps/mobile/App.tsx)                                                                                         |
 | `CLOUD_BACKUP_PROMPT_CTA_TAPPED`     | `Cloud Backup Prompt CTA Tapped`     | `m2t_cloud_backup_prompt_cta_tapped`     | Yes     | The cloud-backup prompt CTA opens backup settings; each tap.                                                                                                                                                                     | None                                                        | [App.tsx](apps/mobile/App.tsx)                                                                                         |
 | `CLOUD_BACKUP_PROMPT_DISMISSED`      | `Cloud Backup Prompt Dismissed`      | `m2t_cloud_backup_prompt_dismissed`      | Yes     | The cloud-backup prompt is dismissed; each dismissal.                                                                                                                                                                            | None                                                        | [App.tsx](apps/mobile/App.tsx)                                                                                         |
-| `CLOUD_SYNC_PROMPT_SHOWN`            | `Cloud Sync Prompt Shown`            | `m2t_cloud_sync_prompt_shown`            | Yes     | The post-purchase Cloud Sync offer is shown; at most once per install, only after a new purchase on a signed-out phone.                                                                                                          |                                                             | [CloudSyncPromptHost.tsx](apps/mobile/features/cloudSync/components/CloudSyncPromptHost.tsx)                           |
+| `CLOUD_SYNC_PROMPT_SHOWN`            | `Cloud Sync Prompt Shown`            | `m2t_cloud_sync_prompt_shown`            | Yes     | The post-purchase Cloud Sync offer is shown; at most once per install, only after a new purchase on a signed-out phone on the `cloud_sync` [allow list](#allow-list) (it waits up to 10 s for flags, then is dropped).           |                                                             | [CloudSyncPromptHost.tsx](apps/mobile/features/cloudSync/components/CloudSyncPromptHost.tsx)                           |
 | `CLOUD_SYNC_PROMPT_ACCEPTED`         | `Cloud Sync Prompt Accepted`         | `m2t_cloud_sync_prompt_accepted`         | Yes     | Turn on Cloud Sync is tapped on the offer; each tap.                                                                                                                                                                             |                                                             | [CloudSyncPromptHost.tsx](apps/mobile/features/cloudSync/components/CloudSyncPromptHost.tsx)                           |
 | `CLOUD_SYNC_PROMPT_DISMISSED`        | `Cloud Sync Prompt Dismissed`        | `m2t_cloud_sync_prompt_dismissed`        | Yes     | The offer is closed with Not now, the backdrop or back; each dismissal.                                                                                                                                                          |                                                             | [CloudSyncPromptHost.tsx](apps/mobile/features/cloudSync/components/CloudSyncPromptHost.tsx)                           |
 | `CLOUD_SYNC_SIGNED_IN`               | `Cloud Sync Signed In`               | `m2t_cloud_sync_signed_in`               | Yes     | A Cloud Sync sign-in succeeds (Apple, Google or email code); each sign-in.                                                                                                                                                       | `method`                                                    | [CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                                            |
