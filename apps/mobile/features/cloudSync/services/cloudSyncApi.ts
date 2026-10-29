@@ -41,6 +41,8 @@ type CloudSyncErrorCode =
   | 'full'
   /** Shared ledgers: an invite to the user's own ledger. */
   | 'own_ledger'
+  /** Shared ledgers (app only): leaving would lose entries not sent yet. */
+  | 'unsent_changes'
   /** Email sign-in: the Turnstile check failed (the Worker thinks a bot is sending). */
   | 'captcha_failed'
   | 'server';

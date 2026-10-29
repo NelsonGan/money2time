@@ -3013,6 +3013,8 @@ const pl = {
       'Udostępnione księgi nie zmienią się. Aby usunąć jedną, opuść ją lub przestań ją udostępniać.',
     changes_for_everyone:
       'Ta księga jest udostępniona, więc zmiana dotyczy wszystkich jej uczestników.',
+    leave_unsent:
+      'Twoje najnowsze wpisy w tej księdze nie zostały jeszcze wysłane. Opuść ją, gdy będziesz online, aby ich nie stracić.',
     removed_title: 'Usunięto udostępnioną księgę',
     removed_body: '{{names}} nie jest już Ci udostępniona, więc została usunięta z tego telefonu.',
     paused_title: 'Udostępnianie wstrzymane',

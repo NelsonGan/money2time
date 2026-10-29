@@ -2983,6 +2983,8 @@ const vi = {
     reset_keeps_shared:
       'Sổ chia sẻ không bị thay đổi. Để gỡ một sổ, hãy rời sổ hoặc ngừng chia sẻ.',
     changes_for_everyone: 'Sổ này được chia sẻ, nên thay đổi này áp dụng cho mọi người trong sổ.',
+    leave_unsent:
+      'Các mục mới nhất của bạn trong sổ này chưa được gửi. Hãy rời sổ khi bạn trực tuyến để không bị mất.',
     removed_title: 'Đã gỡ sổ chia sẻ',
     removed_body: '{{names}} không còn được chia sẻ với bạn nên đã bị gỡ khỏi điện thoại này.',
     paused_title: 'Chia sẻ đang tạm dừng',

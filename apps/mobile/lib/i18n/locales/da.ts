@@ -3002,6 +3002,8 @@ const da = {
     reset_keeps_shared:
       'Delte regnskaber ændres ikke. Forlad et eller stop med at dele det for at fjerne det.',
     changes_for_everyone: 'Dette regnskab er delt, så det ændres for alle i det.',
+    leave_unsent:
+      'Dine seneste poster i dette regnskab er ikke sendt endnu. Forlad det, når du er online, så de ikke går tabt.',
     removed_title: 'Delt regnskab fjernet',
     removed_body: '{{names}} er ikke længere delt med dig, så det blev fjernet fra denne telefon.',
     paused_title: 'Delingen er sat på pause',

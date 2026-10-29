@@ -2998,6 +2998,8 @@ const en = {
     reset_keeps_shared:
       'Shared ledgers are not changed. To remove one, leave it or stop sharing it.',
     changes_for_everyone: 'This ledger is shared, so this changes it for everyone in it.',
+    leave_unsent:
+      "Your latest entries in this ledger haven't been sent yet. Leave once you're online, so they aren't lost.",
     removed_title: 'Shared ledger removed',
     removed_body: '{{names}} is no longer shared with you, so it was removed from this phone.',
     paused_title: 'Sharing is paused',

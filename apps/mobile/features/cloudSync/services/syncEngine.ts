@@ -27,7 +27,7 @@ import { Directory, File, Paths } from 'expo-file-system';
 import { getSQLite } from '~/lib/db/client';
 import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
 import { collectReferencedAssetPaths } from '~/services/userAssetGc';
-import { assetRelativePathFromRef } from '~/services/userAssets';
+import { assetRelativePathFromRef, invalidateCustomUriCache } from '~/services/userAssets';
 import { newId } from '~/utils/id';
 
 import {
@@ -465,16 +465,18 @@ export function pendingChangeCount(): number {
 }
 
 /**
- * Changes waiting to go up in shared ledgers that sync now (active ones). The
+ * Changes waiting to go up in shared ledgers: by default those that sync now
+ * (active ones), else the given ones. The
  * shared-only schedule (a member without Pro, or Pro paused) asks this, not
  * `pendingChangeCount`: the user's own changes may be kept for when their
  * Pro is back, and must not make it sync every few seconds meanwhile.
  */
-export function pendingSharedChangeCount(): number {
-  const active = listSharedLedgers()
+export function pendingSharedChangeCount(
+  ledgerIds: readonly string[] = listSharedLedgers()
     .filter((ledger) => ledger.active)
-    .map((ledger) => ledger.ledgerId);
-  if (!active.length) return 0;
+    .map((ledger) => ledger.ledgerId),
+): number {
+  if (!ledgerIds.length) return 0;
   const db = getSQLite();
   let count = 0;
   for (const table of SYNC_TABLES) {
@@ -482,7 +484,7 @@ export function pendingSharedChangeCount(): number {
     count +=
       db.getFirstSync<{ n: number }>(
         `SELECT COUNT(*) AS n FROM sync_outbox WHERE table_name = ?
-           AND row_id IN (SELECT id FROM "${table}" WHERE ${inLedgersSql(table, active)})`,
+           AND row_id IN (SELECT id FROM "${table}" WHERE ${inLedgersSql(table, ledgerIds)})`,
         [table],
       )?.n ?? 0;
   }
@@ -658,6 +660,17 @@ export class SyncEngine {
   pullLatest(): Promise<void> {
     return this.exclusive(async () => {
       await this.db().pull();
+    });
+  }
+
+  /**
+   * Takes the cloud's changes into the app without sending anything: a paused
+   * shared ledger's last download, with a read-only token, before it stops.
+   */
+  pullAndApply(): Promise<number> {
+    return this.exclusive(async () => {
+      await this.db().pull();
+      return this.applyRemoteChanges();
     });
   }
 
@@ -915,15 +928,18 @@ export class SyncEngine {
     const replica = this.db();
     const origin = deviceId();
     let changedRows = 0;
-    // Other channels' entries stay behind, so walk the outbox by seq.
-    let afterSeq = -1;
+    // Other channels' entries stay behind, so walk the outbox in order. A
+    // bulk queue gives many rows one seq, so the key is (seq, table, id).
+    let after: [number, string, string] = [-1, '', ''];
     for (;;) {
       const page = db.getAllSync<{ table_name: string; row_id: string; seq: number }>(
-        'SELECT table_name, row_id, seq FROM sync_outbox WHERE seq > ? ORDER BY seq LIMIT ?',
-        [afterSeq, FLUSH_BATCH],
+        `SELECT table_name, row_id, seq FROM sync_outbox WHERE (seq, table_name, row_id) > (?, ?, ?)
+         ORDER BY seq, table_name, row_id LIMIT ?`,
+        [...after, FLUSH_BATCH],
       );
       if (!page.length) break;
-      afterSeq = page[page.length - 1].seq;
+      const last = page[page.length - 1];
+      after = [last.seq, last.table_name, last.row_id];
       const batch = this.entriesForChannel(page);
       if (!batch.length) continue;
       const stored = new Map<string, StoredRow>();
@@ -1251,21 +1267,29 @@ export class SyncEngine {
     } catch {
       return;
     }
+    let downloaded = 0;
     const next = async (): Promise<void> => {
       const path = missing.shift();
       if (!path) return;
       const file = assetFile(path);
+      // Downloaded beside the image and moved into place once complete: an
+      // interrupted download must not leave a partial file that looks done.
+      const partial = assetFile(`${path}.part`);
       try {
         if (!file.exists) {
           const parent = file.parentDirectory;
           if (!parent.exists) parent.create({ intermediates: true });
-          await downloadMedia(token, this.config.mediaPath, path, file);
+          if (partial.exists) partial.delete();
+          await downloadMedia(token, this.config.mediaPath, path, partial);
+          partial.moveSync(file);
+          downloaded += 1;
         }
         db.runSync('DELETE FROM sync_media_missing WHERE path = ? AND channel = ?', [
           path,
           channel,
         ]);
       } catch {
+        if (partial.exists) partial.delete();
         db.runSync(
           'UPDATE sync_media_missing SET attempts = attempts + 1 WHERE path = ? AND channel = ?',
           [path, channel],
@@ -1274,6 +1298,8 @@ export class SyncEngine {
       await next();
     };
     await Promise.all(Array.from({ length: DOWNLOAD_CONCURRENCY }, next));
+    // Icons drawn before their file arrived were remembered as missing.
+    if (downloaded > 0) invalidateCustomUriCache();
   }
 }
 

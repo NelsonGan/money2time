@@ -804,7 +804,9 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
     const engine = engineRef.current;
     if (engine) {
       await engine.waitIdle();
-      if (pendingChangeCount() > 0) await engine.syncNow().catch(() => undefined);
+      // Only once linked: Cancel on the keep-which-data choice signs out too,
+      // and must leave the cloud copy as it is.
+      if (wasLinked && pendingChangeCount() > 0) await engine.syncNow().catch(() => undefined);
     }
     await sharedLedgerSync.waitIdle();
     if (pendingChangeCount() > 0) await sharedLedgerSync.syncAll().catch(() => undefined);

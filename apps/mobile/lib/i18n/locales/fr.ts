@@ -3047,6 +3047,8 @@ const fr = {
     reset_keeps_shared:
       'Les carnets partagés ne changent pas. Pour en retirer un, quittez-le ou arrêtez de le partager.',
     changes_for_everyone: 'Ce carnet est partagé : cela le modifie pour tous ses membres.',
+    leave_unsent:
+      "Vos dernières entrées dans ce carnet n'ont pas encore été envoyées. Quittez-le une fois en ligne pour ne pas les perdre.",
     removed_title: 'Carnet partagé retiré',
     removed_body: "{{names}} n'est plus partagé avec vous, il a donc été retiré de ce téléphone.",
     paused_title: 'Le partage est en pause',

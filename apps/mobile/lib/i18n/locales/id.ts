@@ -3020,6 +3020,8 @@ const id = {
       'Buku bersama tidak diubah. Untuk menghapusnya, keluar dari buku itu atau berhenti membagikannya.',
     changes_for_everyone:
       'Buku ini dibagikan, jadi perubahan ini berlaku untuk semua orang di dalamnya.',
+    leave_unsent:
+      'Entri terbaru Anda di buku ini belum terkirim. Keluar setelah Anda online agar entri tersebut tidak hilang.',
     removed_title: 'Buku bersama dihapus',
     removed_body: '{{names}} tidak lagi dibagikan dengan Anda, jadi dihapus dari ponsel ini.',
     paused_title: 'Berbagi dijeda',

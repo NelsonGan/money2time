@@ -3037,6 +3037,8 @@ const nl = {
     reset_keeps_shared:
       'Gedeelde boeken veranderen niet. Verlaat een boek of stop met delen om het te verwijderen.',
     changes_for_everyone: 'Dit boek is gedeeld, dus dit verandert het voor iedereen erin.',
+    leave_unsent:
+      'Je nieuwste boekingen in dit boek zijn nog niet verstuurd. Verlaat het als je online bent, zodat ze niet verloren gaan.',
     removed_title: 'Gedeeld boek verwijderd',
     removed_body:
       '{{names}} wordt niet meer met je gedeeld en is daarom van deze telefoon verwijderd.',

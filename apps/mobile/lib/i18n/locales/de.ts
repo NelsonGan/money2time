@@ -3046,6 +3046,8 @@ const de = {
     reset_keeps_shared:
       'Geteilte Bücher bleiben unverändert. Verlasse ein Buch oder beende das Teilen, um es zu entfernen.',
     changes_for_everyone: 'Dieses Buch ist geteilt, daher ändert sich das für alle darin.',
+    leave_unsent:
+      'Deine neuesten Einträge in diesem Buch wurden noch nicht gesendet. Verlasse es, wenn du online bist, damit sie nicht verloren gehen.',
     removed_title: 'Geteiltes Buch entfernt',
     removed_body:
       '{{names}} wird nicht mehr mit dir geteilt und wurde daher von diesem Handy entfernt.',

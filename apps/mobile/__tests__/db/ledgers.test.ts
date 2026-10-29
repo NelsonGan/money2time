@@ -21,6 +21,7 @@ import migration075LedgersAndCloudSync from '~/lib/db/migrations/075_ledgers_and
 import { applyMigrations } from '~/lib/db/migrations/runner';
 import type { DbMigration } from '~/lib/db/migrations/types';
 import { accountsRepository } from '~/lib/repositories/accountsRepository';
+import { writeBudgetLines } from '~/lib/repositories/budgetLines';
 import { ledgersRepository } from '~/lib/repositories/ledgersRepository';
 import { applyBackupData, buildBackupData } from '~/services/dataManagementService';
 
@@ -454,5 +455,62 @@ describe('backup and restore across ledgers', () => {
     ]);
     // Restoring replaces everything, the other ledgers included.
     expect(harness.all('SELECT id FROM ledgers')).toEqual([{ id: 'default' }]);
+  });
+});
+
+describe('budget lines', () => {
+  let harness: ReturnType<typeof openDatabase>;
+
+  beforeEach(() => {
+    harness = openDatabase();
+    applyMigrations(harness.db, loadMigrations());
+    seedPreLedgerData(harness);
+    harness.connection.exec(`
+      INSERT INTO monthly_budget_categories (id, budget_id, category_id, amount, created_at, updated_at)
+        VALUES ('legacy', 'oct', 'food', 100, '${NOW}', '${NOW}');
+    `);
+    (getSQLite as jest.Mock).mockReturnValue(harness.db);
+  });
+  afterEach(() => harness.connection.close());
+
+  const live = () =>
+    harness.all(
+      'SELECT id, amount FROM monthly_budget_categories WHERE deleted_at IS NULL ORDER BY id',
+    );
+
+  it('keeps one line per category when two phones edit the same budget', () => {
+    // Each phone's edit, as it reaches the other: the same line ids.
+    writeBudgetLines(
+      'monthly_budget_categories',
+      'oct',
+      [{ categoryId: 'food', amount: 150 }],
+      NOW,
+    );
+    writeBudgetLines(
+      'monthly_budget_categories',
+      'oct',
+      [
+        { categoryId: 'food', amount: 200 },
+        { categoryId: 'rent', amount: 900 },
+      ],
+      NOW,
+    );
+    expect(live()).toEqual([
+      { id: 'oct:food', amount: 200 },
+      { id: 'oct:rent', amount: 900 },
+    ]);
+  });
+
+  it('retires lines left out, and brings one back when it returns', () => {
+    writeBudgetLines(
+      'monthly_budget_categories',
+      'oct',
+      [{ categoryId: 'food', amount: 150 }],
+      NOW,
+    );
+    writeBudgetLines('monthly_budget_categories', 'oct', [], NOW);
+    expect(live()).toEqual([]);
+    writeBudgetLines('monthly_budget_categories', 'oct', [{ categoryId: 'food', amount: 80 }], NOW);
+    expect(live()).toEqual([{ id: 'oct:food', amount: 80 }]);
   });
 });

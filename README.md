@@ -1224,7 +1224,10 @@ updated_at)`, with each row as JSON, plus `sync_info` (last device, last
   index only covers live rows, else deleted) and the change queued, and a
   losing incoming row is skipped. Recurring rules avoid the problem by naming
   each run `rr:<ruleId>:<date>` (`recurringRunTransactionId`), so two phones
-  that both run a due rule make one transaction.
+  that both run a due rule make one transaction. Budget and template lines
+  are named `<budgetId>:<categoryId>` (`lib/repositories/budgetLines.ts`), so
+  two phones editing one budget before they sync edit the same lines (the
+  last edit of each wins) instead of keeping two lines for a category.
 - **Device-local settings** never leave the phone and are never overwritten:
   `app_user_id` (purchase identity), the open ledger (`active_ledger_id`), app
   lock, app icon, notification and payment-alert setup, backup target and
@@ -1246,8 +1249,11 @@ updated_at)`, with each row as JSON, plus `sync_info` (last device, last
   path the rows store (`receipts/x.jpg`, `custom:account-logos/x.png`), so a
   synced row finds its image under the same name. Images to upload are queued
   in `sync_media_pending` with the outbox flush and uploaded before the push,
-  so a row never reaches another phone before its image can. A download that
-  fails is kept in `sync_media_missing` and retried on later syncs (ten tries).
+  so a row never reaches another phone before its image can. A download goes
+  to `<path>.part` and becomes the image only once complete, so an
+  interrupted one is never taken for done. One that fails is kept in
+  `sync_media_missing` and retried on later syncs (ten tries); a download
+  redraws custom icons drawn while their file was missing.
   The orphan sweep runs only after linking, never after a routine sync: a
   photo just picked in an editor is not in a row yet. `ASSET_COLUMNS` must
   stay in step with `collectReferencedAssetPaths` (a test checks it), or the
@@ -1385,9 +1391,13 @@ The app side is `features/sharedLedgers/` (screens) and
 - **People.** Everyone sees the owner and members (names; the owner also sees
   addresses). The owner can remove anyone at any time; a member can leave.
   Either way the ledger is deleted from that person's phone at their next
-  sync, entries they added stay in it.
+  sync, entries they added stay in it. Leaving sends the member's unsent
+  entries first, and refuses ("…haven't been sent yet") while it cannot;
+  a paused ledger's unsent entries, which could reach nobody, do not hold it.
 - **Stopping.** _Stop sharing_ (or deleting a shared ledger) first syncs the
-  ledger, so members' latest entries are in, then removes every member and
+  ledger, so members' latest entries are in (a paused one is downloaded with
+  a one-day read-only token the Worker gives only its owner for this,
+  `{ final: true }` on the credentials request), then removes every member and
   deletes the ledger's cloud database and images. The owner keeps the ledger
   with everything in it, and it goes back into their own cloud copy. Deleting
   the Cloud Sync account does the same for every ledger the user shares, and
@@ -1457,7 +1467,10 @@ The app side is `features/sharedLedgers/` (screens) and
   phone without recording deletions; an owner's other phones keep the ledger
   and take it from the owner's cloud copy, where the phone that stopped
   sharing put it. A ledger id that is already one of the phone's own ledgers,
-  or another share's, is never taken over.
+  or another share's, is never taken over. A copy that never synced on this
+  phone (no `sync_row_meta` for its `ledgers` row) is not its own: a backup
+  restored on a new phone brought it, and it rejoins the member's share,
+  taking the cloud copy and sending only its own newer edits.
 - **Access** is checked by the Worker on every credentials request: owner or
   member, and the ledger active (anyone in it Pro, `isLedgerActive`). A removed member's app is nudged and lets the
   ledger go at once (else at its next list read, within a minute while open). Tokens are not revoked early,

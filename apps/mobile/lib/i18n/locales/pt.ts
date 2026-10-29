@@ -3025,6 +3025,8 @@ const pt = {
       'Os livros compartilhados não mudam. Para remover um, saia dele ou pare de compartilhá-lo.',
     changes_for_everyone:
       'Este livro é compartilhado, então isso o altera para todos que fazem parte dele.',
+    leave_unsent:
+      'Seus lançamentos mais recentes neste livro ainda não foram enviados. Saia quando estiver online para não perdê-los.',
     removed_title: 'Livro compartilhado removido',
     removed_body: '{{names}} não é mais compartilhado com você, então foi removido deste celular.',
     paused_title: 'Compartilhamento pausado',

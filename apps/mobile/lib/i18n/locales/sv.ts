@@ -3008,6 +3008,8 @@ const sv = {
     reset_keeps_shared:
       'Delade kassaböcker ändras inte. Lämna en eller sluta dela den för att ta bort den.',
     changes_for_everyone: 'Den här kassaboken är delad, så det här ändrar den för alla i den.',
+    leave_unsent:
+      'Dina senaste poster i den här kassaboken har inte skickats än. Lämna den när du är online så att de inte går förlorade.',
     removed_title: 'Delad kassabok borttagen',
     removed_body: '{{names}} delas inte längre med dig, så den togs bort från den här telefonen.',
     paused_title: 'Delningen är pausad',

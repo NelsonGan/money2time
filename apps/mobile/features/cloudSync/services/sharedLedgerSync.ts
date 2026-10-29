@@ -9,7 +9,12 @@ import { getSQLite } from '~/lib/db/client';
 import { getActiveLedgerId } from '~/lib/db/ledgerScope';
 
 import { CloudSyncApiError, ledgerMediaPath, type SyncCredentials } from './cloudSyncApi';
-import { deleteLedgerLocally, enqueueLedgerRows, forgetChannel } from './ledgerChannels';
+import {
+  deleteLedgerLocally,
+  enqueueLedgerRows,
+  forgetChannel,
+  recordedChannel,
+} from './ledgerChannels';
 import {
   acceptInvite,
   getLedgerCredentials,
@@ -34,7 +39,13 @@ import {
   type SharedLedger,
   sharedLedgerFor,
 } from './sharedLedgerStore';
-import { deleteReplicaFiles, dropPersonalOutbox, runExclusive, SyncEngine } from './syncEngine';
+import {
+  deleteReplicaFiles,
+  dropPersonalOutbox,
+  pendingSharedChangeCount,
+  runExclusive,
+  SyncEngine,
+} from './syncEngine';
 
 /**
  * The list is asked for at most this often, unless something calls for it
@@ -204,7 +215,16 @@ class SharedLedgerSync {
       const known = sharedLedgerFor(item.ledgerId);
       // A member's ledger id that is already one of this phone's own ledgers
       // is never taken over, nor is one already synced under another share.
-      if (item.role === 'member' && !known && ledgerExists(item.ledgerId)) continue;
+      // A copy that never synced as the user's own is not theirs: a backup
+      // restored on this phone brought it, and it rejoins the share.
+      if (
+        item.role === 'member' &&
+        !known &&
+        ledgerExists(item.ledgerId) &&
+        recordedChannel('ledgers', item.ledgerId) !== null
+      ) {
+        continue;
+      }
       if (known && known.shareId !== item.id) continue;
       seen.add(item.ledgerId);
       saveSharedLedger(fromRemote(item));
@@ -303,15 +323,20 @@ class SharedLedgerSync {
     return opening;
   }
 
-  private async openEngine(ledger: SharedLedger): Promise<SyncEngine> {
+  /** `final`: a paused ledger's last download (see `stopSharing`), never kept. */
+  private async openEngine(ledger: SharedLedger, final = false): Promise<SyncEngine> {
     const session = this.requireSession();
-    const credentials = await this.credentialsFor(ledger.shareId);
+    const finalCredentials = final
+      ? await getLedgerCredentials(await this.token(), ledger.shareId, { final: true })
+      : null;
+    const credentials = finalCredentials ?? (await this.credentialsFor(ledger.shareId));
     const engine = new SyncEngine({
       userId: session.userId,
       channel: ledger.shareId,
       ledgerId: ledger.ledgerId,
       url: credentials.url,
-      getTursoToken: async () => (await this.credentialsFor(ledger.shareId)).authToken,
+      getTursoToken: async () =>
+        (finalCredentials ?? (await this.credentialsFor(ledger.shareId))).authToken,
       getSessionToken: session.getSessionToken,
       mediaPath: ledgerMediaPath(ledger.shareId),
       deviceName: session.deviceName,
@@ -321,7 +346,7 @@ class SharedLedgerSync {
       engine.close();
       throw new Error('signed_out');
     }
-    this.engines.set(ledger.shareId, engine);
+    if (!final) this.engines.set(ledger.shareId, engine);
     return engine;
   }
 
@@ -436,11 +461,14 @@ class SharedLedgerSync {
     if (!ledger || ledger.role !== 'owner') return;
     const local = opts.whenUnreachable === 'local';
     // Members' latest entries first: the ledger's database is about to go.
-    if (ledger.active && this.session) {
+    // A paused ledger takes them with a read-only token (nothing can go up).
+    if (this.session) {
       try {
-        await (await this.engineFor(ledger)).syncNow();
+        if (ledger.active) await (await this.engineFor(ledger)).syncNow();
+        else await this.takeFinalCopy(ledger);
       } catch (error) {
-        // Gone or paused on the Worker: nothing more to fetch from it.
+        // Gone on the Worker (or a Worker that refuses a paused ledger's last
+        // download): nothing more to fetch from it.
         if (!local && !isCode(error, 'not_found', 'ledger_paused')) throw error;
       }
     }
@@ -460,13 +488,36 @@ class SharedLedgerSync {
     await this.letGo(ledger, { requeue: true });
   }
 
+  private async takeFinalCopy(ledger: SharedLedger): Promise<void> {
+    const engine = await this.openEngine(ledger, true);
+    try {
+      await engine.pullAndApply();
+    } finally {
+      engine.close();
+    }
+  }
+
   /**
-   * Member: leaves, and this phone's copy of the ledger goes. Signed out or
-   * offline it still leaves here, and tells the Worker after the next sign-in.
+   * Member: leaves, and this phone's copy of the ledger goes. Entries not sent
+   * yet go up first: when they cannot (offline), it refuses rather than lose
+   * them. Otherwise, signed out or offline, it still leaves here and tells
+   * the Worker after the next sign-in. A paused ledger's unsent entries could
+   * never reach anyone, so they do not hold it.
    */
   async leave(ledgerId: string): Promise<void> {
     const ledger = sharedLedgerFor(ledgerId);
     if (!ledger || ledger.role !== 'member') return;
+    if (ledger.active && pendingSharedChangeCount([ledgerId]) > 0) {
+      const sent =
+        !!this.session &&
+        (await this.engineFor(ledger)
+          .then((engine) => engine.syncNow())
+          .then(
+            () => true,
+            () => false,
+          ));
+      if (!sent) throw new CloudSyncApiError('unsent_changes', 0);
+    }
     try {
       await leaveLedger(await this.token(), ledger.shareId);
     } catch (error) {

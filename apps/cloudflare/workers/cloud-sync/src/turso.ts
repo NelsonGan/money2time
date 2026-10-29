@@ -157,10 +157,15 @@ export async function createDatabase(env: Env, dbName: string): Promise<string> 
   return body.database.Hostname;
 }
 
-export async function createToken(env: Env, dbName: string, ttlDays: number): Promise<string> {
+export async function createToken(
+  env: Env,
+  dbName: string,
+  ttlDays: number,
+  authorization: 'full-access' | 'read-only' = 'full-access',
+): Promise<string> {
   const res = await platform(
     env,
-    `/organizations/${env.TURSO_ORG}/databases/${dbName}/auth/tokens?expiration=${ttlDays}d&authorization=full-access`,
+    `/organizations/${env.TURSO_ORG}/databases/${dbName}/auth/tokens?expiration=${ttlDays}d&authorization=${authorization}`,
     { method: 'POST' },
   );
   if (!res.ok) throw new Error(`turso_token_failed_${res.status}`);

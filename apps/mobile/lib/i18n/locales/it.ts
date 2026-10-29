@@ -3024,6 +3024,8 @@ const it = {
       'I registri condivisi non cambiano. Per rimuoverne uno, abbandonalo o smetti di condividerlo.',
     changes_for_everyone:
       'Questo registro è condiviso, quindi la modifica vale per tutti i suoi membri.',
+    leave_unsent:
+      'Le tue ultime voci in questo registro non sono ancora state inviate. Abbandonalo quando sei online, così non andranno perse.',
     removed_title: 'Registro condiviso rimosso',
     removed_body:
       '{{names}} non è più condiviso con te, quindi è stato rimosso da questo telefono.',

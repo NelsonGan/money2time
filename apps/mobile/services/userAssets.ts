@@ -325,7 +325,8 @@ export function getCustomAssetRevision(): number {
   return customAssetRevision;
 }
 
-function invalidateCustomUriCache() {
+/** Forgets every looked-up upload and redraws them: files were added or removed. */
+export function invalidateCustomUriCache() {
   customUriCache.clear();
   customAssetRevision += 1;
   for (const listener of customAssetListeners) listener();

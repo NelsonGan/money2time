@@ -3029,6 +3029,8 @@ const ms = {
       'Buku dikongsi tidak diubah. Untuk membuangnya, tinggalkan buku itu atau hentikan perkongsiannya.',
     changes_for_everyone:
       'Buku ini dikongsi, jadi perubahan ini berlaku untuk semua orang di dalamnya.',
+    leave_unsent:
+      'Catatan terkini anda dalam buku ini belum dihantar. Tinggalkannya apabila anda dalam talian supaya ia tidak hilang.',
     removed_title: 'Buku dikongsi dibuang',
     removed_body:
       '{{names}} tidak lagi dikongsi dengan anda, jadi ia dibuang daripada telefon ini.',
