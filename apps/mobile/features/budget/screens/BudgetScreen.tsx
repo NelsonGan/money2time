@@ -80,6 +80,12 @@ function leftLabel(remaining: number, settings: UserSettings): string {
     : I18n.t('budget.left', { amount: money(remaining, settings) });
 }
 
+/** How full a line's bar is: its usage, or full once over (a zero-budget
+ *  overspend has a usage ratio of 0). */
+function lineFill(line: BudgetCategoryProgress): number {
+  return line.isOver ? 1 : Math.max(0, Math.min(line.usageRatio, 1));
+}
+
 function ProgressBar({
   ratio,
   color,
@@ -121,8 +127,9 @@ function BudgetChildRow({
   onPress: () => void;
 }) {
   const category = categoriesById.get(line.categoryId);
+  const name = category?.name ?? I18n.t('common.uncategorized');
   const fillColor = line.isOver ? themeColors.error : color;
-  const fillPct = Math.max(0, Math.min(line.usageRatio, 1)) * 100;
+  const fillPct = lineFill(line) * 100;
 
   return (
     <View className="flex-row items-center gap-2">
@@ -132,7 +139,7 @@ function BudgetChildRow({
       <Pressable
         onPress={onPress}
         accessibilityRole="button"
-        accessibilityLabel={category?.name ?? I18n.t('common.uncategorized')}
+        accessibilityLabel={`${name}, ${leftLabel(line.remaining, settings)}`}
         className="relative min-w-0 flex-1 overflow-hidden rounded-xl active:opacity-80"
         style={{ backgroundColor: withColorAlpha(fillColor, 0.08) }}
       >
@@ -152,13 +159,20 @@ function BudgetChildRow({
               parent's icon, which just repeated it on every child row. */}
           {category?.icon ? <CategoryEmoji icon={category.icon} size={13} /> : null}
           <Text variant="caption" numberOfLines={1} className="min-w-0 flex-1 text-foreground">
-            {category?.name ?? I18n.t('common.uncategorized')}
+            {name}
           </Text>
           <Text
             variant="caption"
             numberOfLines={1}
             className="shrink-0 text-right"
-            style={{ color: line.isOver ? themeColors.error : themeColors.mutedForeground }}
+            // Muted while healthy, amber from 80%, red when over.
+            style={{
+              color: line.isOver
+                ? themeColors.error
+                : line.usageRatio >= 0.8
+                  ? usageColor(line.usageRatio, themeColors)
+                  : themeColors.mutedForeground,
+            }}
           >
             {money(line.spent, settings)} / {money(line.budgeted, settings)}
           </Text>
@@ -179,7 +193,7 @@ function BudgetCategoryRow({
   onPressChild,
 }: {
   line: BudgetCategoryProgress;
-  /** Palette color for this category, shared with the breakdown pie. */
+  /** Chart palette colour, by the line's place in the budget. */
   color: string;
   first: boolean;
   categoriesById: Map<string, Category>;
@@ -191,6 +205,7 @@ function BudgetCategoryRow({
   onPressChild: (categoryId: string) => void;
 }) {
   const category = categoriesById.get(line.categoryId);
+  const name = category?.name ?? I18n.t('common.uncategorized');
   const barColor = line.isOver ? themeColors.error : color;
   // isOver wins so a zero-budget overspend (ratio 0) still reads red.
   const healthColor = line.isOver ? themeColors.error : usageColor(line.usageRatio, themeColors);
@@ -204,7 +219,7 @@ function BudgetCategoryRow({
       <Pressable
         onPress={onPress}
         accessibilityRole="button"
-        accessibilityLabel={category?.name ?? I18n.t('common.uncategorized')}
+        accessibilityLabel={`${name}, ${leftLabel(line.remaining, settings)}, ${usagePercentLabel(line.usageRatio)}`}
         className={cn('px-4 py-3 active:bg-secondary/20', line.children.length > 0 && 'pb-2')}
       >
         {/* Emoji inline with the title, then a full-width depletion bar with
@@ -214,7 +229,7 @@ function BudgetCategoryRow({
           <View className="flex-row items-center gap-2">
             <CategoryEmoji icon={category?.icon} size={20} />
             <Text variant="bodyStrong" numberOfLines={1} className="flex-1">
-              {category?.name ?? I18n.t('common.uncategorized')}
+              {name}
             </Text>
             <Text
               variant="caption"
@@ -228,7 +243,7 @@ function BudgetCategoryRow({
           </View>
           <View className="gap-1">
             <ProgressBar
-              ratio={line.usageRatio}
+              ratio={lineFill(line)}
               color={barColor}
               trackColor={withColorAlpha(barColor, 0.14)}
               height={6}
