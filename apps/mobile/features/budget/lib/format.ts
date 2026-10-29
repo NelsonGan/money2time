@@ -1,6 +1,13 @@
+import { chartCategoryColor } from '~/constants/chartColors';
 import type { ColorPalette } from '~/constants/designSystem';
 import { I18n } from '~/lib/i18n';
-import type { BudgetPeriod, MonthCycleInput, UserSettings, WeekStartsOn } from '~/types';
+import type {
+  BudgetCategoryProgress,
+  BudgetPeriod,
+  MonthCycleInput,
+  UserSettings,
+  WeekStartsOn,
+} from '~/types';
 import {
   dateFromDayKeyLocal,
   formatAmount,
@@ -51,6 +58,41 @@ export function usageColor(ratio: number, themeColors: ColorPalette): string {
   if (ratio > 1) return themeColors.error;
   if (ratio >= 0.8) return themeColors.accent;
   return themeColors.success;
+}
+
+/** How full a budget line's bar is: its usage, or full once over (a
+ *  zero-budget overspend has a usage ratio of 0). */
+export function lineFill(line: BudgetCategoryProgress): number {
+  return line.isOver ? 1 : Math.max(0, Math.min(line.usageRatio, 1));
+}
+
+/** A line's usage percent; a zero-budget overspend reads as the cap, not 0%. */
+export function linePercentLabel(line: BudgetCategoryProgress): string {
+  return line.isOver && line.budgeted <= 0
+    ? usagePercentLabel(Number.POSITIVE_INFINITY)
+    : usagePercentLabel(line.usageRatio);
+}
+
+/** A line's health colour: red when over (a zero-budget overspend included),
+ *  amber from 80%, else `healthy`. */
+export function lineHealthColor(
+  line: BudgetCategoryProgress,
+  themeColors: ColorPalette,
+  healthy: string,
+): string {
+  if (line.isOver) return themeColors.error;
+  return line.usageRatio >= 0.8 ? usageColor(line.usageRatio, themeColors) : healthy;
+}
+
+// The chart palette without red, orange, yellow and magenta, which read as the
+// over and near-limit warnings on a budget bar.
+const BUDGET_LINE_PALETTE_INDEXES = [3, 4, 5, 6, 7, 8, 10, 11];
+
+/** A healthy budget line's bar colour, by its place in the budget. */
+export function budgetLineColor(index: number): string {
+  return chartCategoryColor(
+    BUDGET_LINE_PALETTE_INDEXES[index % BUDGET_LINE_PALETTE_INDEXES.length],
+  );
 }
 
 const dayFormatterCache = new Map<string, Intl.DateTimeFormat>();
