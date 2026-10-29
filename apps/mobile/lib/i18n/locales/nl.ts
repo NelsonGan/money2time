@@ -1,6 +1,7 @@
 const nl = {
   common: {
     back: 'Terug',
+    loading: 'Laden…',
     close: 'Sluiten',
     done: 'Klaar',
     save: 'Opslaan',
@@ -145,6 +146,21 @@ const nl = {
     reset_action: 'Verwijderen en wisselen',
   },
   news: {
+    cloud_sync_ledgers: {
+      title: 'Cloud Sync en gedeelde boeken',
+      cloudSync: {
+        title: 'Cloud Sync is er',
+        body: 'Log in met Apple, Google of e-mail en je gegevens zijn op al je telefoons hetzelfde. Wijzigingen komen binnen seconden aan. Synchroniseren hoort bij Pro. Je vindt het bij Instellingen > Cloud Sync.',
+      },
+      ledgers: {
+        title: 'Meerdere boeken',
+        body: 'Houd privé-uitgaven, werk en een reis bij in aparte boeken, elk met eigen rekeningen, categorieën en valuta. Begin leeg, met de rekeningen en categorieën van een ander boek of als volledige kopie. Onderdeel van Pro.',
+      },
+      sharedLedgers: {
+        title: 'Gedeelde boeken',
+        body: 'Deel een boek met maximaal 5 mensen en houd samen het huishoudbudget bij. Iedereen voegt posten toe en ziet ze op de eigen telefoon. Meedoen is gratis; delen vraagt Pro.',
+      },
+    },
     web_dashboard: {
       title: 'Webdashboard en meer',
       webDashboard: {
@@ -395,6 +411,7 @@ const nl = {
       open_app_icon: 'Kies je icoon',
       open_ricecal: 'Probeer RiceCal',
       open_pro_paywall: 'Bekijk Pro-plannen',
+      open_cloud_sync: 'Cloud Sync aanzetten',
       open_bottom_bar: 'Onderbalk wijzigen',
       open_share_earn: 'Pro gratis krijgen',
       open_quick_entry_settings: 'Instellingen voor Snelle invoer openen',
@@ -406,6 +423,11 @@ const nl = {
       open_review: 'Uitgaven terugkijken openen',
     },
     showcase: {
+      synced_devices: 'Al je telefoons zijn bijgewerkt',
+      ledger_personal: 'Privé',
+      ledger_work: 'Werk',
+      ledger_travel: 'Reis naar Japan',
+      ledger_family: 'Gezin',
       notification_bank: 'Je bank',
       notification_text: 'Je kaart is gebruikt voor een aankoop.',
       scan_before: 'Eerst',
@@ -2556,10 +2578,12 @@ const nl = {
     email_placeholder: 'jij@voorbeeld.nl',
     send_code: 'Code sturen',
     code_title: 'Code invoeren',
-    code_body: 'Verstuurd naar %{email}',
     verify: 'Doorgaan',
     resend: 'Code opnieuw sturen',
     code_sent: 'Code verstuurd',
+    code_sent_to: 'We hebben een 6-cijferige code gestuurd naar',
+    other_options: 'Andere manieren om in te loggen',
+    captcha_title: 'Even controleren voordat we je code sturen',
     change_email: 'E-mail wijzigen',
     linking: 'Instellen…',
     linking_body: 'Houd de app open.',
@@ -2604,6 +2628,7 @@ const nl = {
       server: 'Er ging iets mis',
       unknown: 'Er ging iets mis',
       invalid_code: 'Onjuiste of verlopen code',
+      captcha_failed: 'We konden dit verzoek niet controleren. Probeer het zo opnieuw.',
       invalid_email: 'Controleer het e-mailadres',
       rate_limited: 'Te veel pogingen. Wacht een minuut.',
       backup_failed: 'Back-up van deze telefoon mislukt. Er is niets gewijzigd.',
@@ -2934,6 +2959,12 @@ const nl = {
     start_with: 'Beginnen met',
     accounts: 'Rekeningen',
     categories: 'Categorieën',
+    copy_from_hint: 'Kies uit welk boek je kopieert',
+    everything: 'Alles',
+    everything_caption_one: 'Een volledige kopie met {{count}} post, budgetten en albums',
+    everything_caption_other: 'Een volledige kopie met {{count}} posten, budgetten en albums',
+    everything_currency_note: 'Een volledige kopie houdt de valuta van {{name}}.',
+    delete_open_note: 'Het is nu geopend, dus {{name}} wordt geopend.',
     copy_from: 'Kopiëren uit',
     copy_accounts_one: '{{count}} rekening, saldo op nul',
     copy_accounts_other: '{{count}} rekeningen, saldo op nul',
@@ -2942,8 +2973,7 @@ const nl = {
     copy_categories_one: '{{count}} categorie',
     copy_categories_other: '{{count}} categorieën',
     starter_categories_caption: 'Een korte lijst met alledaagse categorieën.',
-    create_footnote:
-      'Er worden geen transacties gekopieerd. Je kunt het boek altijd een andere naam geven.',
+    create_footnote: 'Alleen Alles kopieert posten. Je kunt het boek altijd een andere naam geven.',
     create: 'Boek aanmaken',
     delete_title: '{{name}} verwijderen?',
     delete_message_one:
@@ -3021,7 +3051,9 @@ const nl = {
     people_other: '{{count}} mensen',
     join_sign_in: 'Meld je aan om mee te doen. Je hebt geen Pro nodig.',
     join_button: 'Meedoen met {{name}}',
-    join_as: 'Meedoen als {{email}}',
+    joining_as: 'Je doet mee als',
+    join_already: 'Je zit al in dit boek.',
+    open_ledger: '{{name}} openen',
     join_note: 'Het opent als een apart boek. Je eigen boeken blijven privé.',
     join_invalid: 'Deze uitnodigingslink is verlopen. Vraag om een nieuwe.',
     join_full: 'Dit boek is vol. Vraag de eigenaar om ruimte te maken.',

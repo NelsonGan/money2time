@@ -1,6 +1,7 @@
 const fil = {
   common: {
     back: 'Bumalik',
+    loading: 'Naglo-load…',
     close: 'Isara',
     done: 'Tapos',
     save: 'I-save',
@@ -145,6 +146,21 @@ const fil = {
     reset_action: 'Burahin at palitan',
   },
   news: {
+    cloud_sync_ledgers: {
+      title: 'Cloud Sync at mga shared ledger',
+      cloudSync: {
+        title: 'Narito na ang Cloud Sync',
+        body: 'Mag-sign in gamit ang Apple, Google o email, at pareho ang data mo sa lahat ng phone mo. Dumarating ang mga pagbabago sa loob ng ilang segundo. Bahagi ng Pro ang pag-sync. Hanapin ito sa Settings > Cloud Sync.',
+      },
+      ledgers: {
+        title: 'Maraming ledger',
+        body: 'Ihiwalay ang personal na gastos, trabaho at biyahe sa magkakaibang ledger, bawat isa may sariling account, kategorya at currency. Simulan nang walang laman, mula sa account at kategorya ng ibang ledger, o bilang buong kopya. Bahagi ng Pro.',
+      },
+      sharedLedgers: {
+        title: 'Mga shared ledger',
+        body: 'Ibahagi ang ledger sa hanggang 5 tao at sabay na hawakan ang budget ng bahay. Lahat ay nagdadagdag ng entry at nakikita ito sa sarili nilang phone. Libre ang pagsali; kailangan ng Pro para magbahagi.',
+      },
+    },
     web_dashboard: {
       title: 'Web Dashboard at iba pa',
       webDashboard: {
@@ -395,6 +411,7 @@ const fil = {
       open_app_icon: 'Piliin ang icon mo',
       open_ricecal: 'Subukan ang RiceCal',
       open_pro_paywall: 'Tingnan ang mga Pro plan',
+      open_cloud_sync: 'I-on ang Cloud Sync',
       open_bottom_bar: 'I-edit ang bottom bar',
       open_share_earn: 'Kunin ang Pro nang libre',
       open_quick_entry_settings: 'Buksan ang Quick Entry settings',
@@ -406,6 +423,11 @@ const fil = {
       open_review: 'Buksan ang I-review ang gastos',
     },
     showcase: {
+      synced_devices: 'Updated ang lahat ng phone mo',
+      ledger_personal: 'Personal',
+      ledger_work: 'Trabaho',
+      ledger_travel: 'Biyahe sa Japan',
+      ledger_family: 'Pamilya',
       notification_bank: 'Ang bangko mo',
       notification_text: 'Nagamit ang card mo sa isang pagbili.',
       scan_before: 'Dati',
@@ -2562,10 +2584,12 @@ const fil = {
     email_placeholder: 'ikaw@example.com',
     send_code: 'Ipadala ang code',
     code_title: 'Ilagay ang code',
-    code_body: 'Ipinadala sa %{email}',
     verify: 'Magpatuloy',
     resend: 'Ipadala ulit',
     code_sent: 'Naipadala ang code',
+    code_sent_to: 'Nagpadala kami ng 6-digit na code sa',
+    other_options: 'Ibang paraan para mag-sign in',
+    captcha_title: 'Mabilis na pagsusuri bago namin ipadala ang code mo',
     change_email: 'Palitan ang email',
     linking: 'Sine-set up…',
     linking_body: 'Panatilihing bukas ang app.',
@@ -2610,6 +2634,7 @@ const fil = {
       server: 'May nangyaring mali',
       unknown: 'May nangyaring mali',
       invalid_code: 'Mali o expired na code',
+      captcha_failed: 'Hindi namin ma-verify ang request na ito. Subukan ulit mamaya.',
       invalid_email: 'Suriin ang email address',
       rate_limited: 'Sobrang daming subok. Maghintay ng isang minuto.',
       backup_failed: 'Hindi ma-back up ang teleponong ito. Walang nagbago.',
@@ -2944,6 +2969,12 @@ const fil = {
     start_with: 'Simulan sa',
     accounts: 'Mga Account',
     categories: 'Mga Kategorya',
+    copy_from_hint: 'Piliin kung aling ledger ang kokopyahin',
+    everything: 'Lahat',
+    everything_caption_one: 'Buong kopya kasama ang {{count}} entry nito, mga budget at album',
+    everything_caption_other: 'Buong kopya kasama ang {{count}} na entry nito, mga budget at album',
+    everything_currency_note: 'Pinapanatili ng buong kopya ang currency ng {{name}}.',
+    delete_open_note: 'Bukas ito ngayon, kaya ang {{name}} ang bubuksan.',
     copy_from: 'Kopyahin mula sa',
     copy_accounts_one: '{{count}} account, zero ang balanse',
     copy_accounts_other: '{{count}} na account, zero ang balanse',
@@ -2952,7 +2983,7 @@ const fil = {
     copy_categories_other: '{{count}} na kategorya',
     starter_categories_caption: 'Maikling listahan ng mga pang-araw-araw na kategorya.',
     create_footnote:
-      'Walang transaksyong kinokopya. Puwede mong palitan ang pangalan ng ledger anumang oras.',
+      'Ang Lahat lang ang kumokopya ng mga entry. Puwede mong palitan ang pangalan ng ledger anumang oras.',
     create: 'Gumawa ng ledger',
     delete_title: 'Burahin ang {{name}}?',
     delete_message_one:
@@ -3031,7 +3062,9 @@ const fil = {
     people_other: '{{count}} na tao',
     join_sign_in: 'Mag-sign in para sumali. Hindi mo kailangan ng Pro.',
     join_button: 'Sumali sa {{name}}',
-    join_as: 'Sasali bilang {{email}}',
+    joining_as: 'Sasali bilang',
+    join_already: 'Kasali ka na sa ledger na ito.',
+    open_ledger: 'Buksan ang {{name}}',
     join_note:
       'Magbubukas ito bilang hiwalay na ledger. Mananatiling private ang sarili mong mga ledger.',
     join_invalid: 'Expired na ang invite link na ito. Humingi ng bago.',

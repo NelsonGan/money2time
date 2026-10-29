@@ -11,6 +11,7 @@ export function errorMessage(error: unknown): string {
     if (error.code === 'invalid_code') return I18n.t('cloud_sync.errors.invalid_code');
     if (error.code === 'rate_limited') return I18n.t('cloud_sync.errors.rate_limited');
     if (error.code === 'network') return I18n.t('cloud_sync.errors.offline');
+    if (error.code === 'captcha_failed') return I18n.t('cloud_sync.errors.captcha_failed');
   }
   if (error instanceof Error && error.message === 'backup_failed') {
     return I18n.t('cloud_sync.errors.backup_failed');

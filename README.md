@@ -521,21 +521,42 @@ app side lives in `features/ledgers/`.
   (`MountedTab`'s `resetKey`), so no selection, filter or scroll position
   carries over. Hidden pages mount again only when visited.
 - **New ledger** (Pro, `LedgerEditorScreen`): icon, name, main currency, and
-  what it starts with. One card names the open ledger once ("Copy from") and
-  has a switch each for accounts and categories, on by default. Each row's
-  subtitle says what the choice gives: the copied count, or the starter set
-  when off.
-  - **Accounts:** copy the open ledger's debit and credit accounts and their
+  what it starts with. One card names the ledger it copies from ("Copy from",
+  the open ledger at first; a tap opens `LedgerPickerSheet` to pick any
+  ledger on the phone) and has a switch each for Everything (off by default),
+  accounts and categories (on by default). Each row's subtitle says what the
+  choice gives: the copied count, or the starter set when off. The counts are
+  read from the chosen ledger (`readLedgerCopySource`).
+  - **Everything:** a full copy of the chosen ledger, history included
+    (`lib/db/ledgerCopy.ts`): accounts with their balances, goals and loans,
+    categories, transactions with their splits and itemized receipts,
+    recurring rules, albums, items and budgets. Every row gets a new id and
+    every reference between them follows the copy, so the two ledgers share
+    nothing; a reference to a row outside the source becomes null, and a
+    row that cannot exist without it (an album's join to a deleted entry) is
+    left out. Deleted rows are not copied, except deleted budget periods,
+    which stop auto-create bringing a period back. Payment-alert captures, the
+    card digits they match on and the ledger's own preferences are not copied
+    either. Image paths are shared (the asset sweep keeps a file while any
+    row names it). The button shows its loader while the copy runs. While it is on, the accounts and categories rows are greyed
+    out (they are part of it), and the currency is the source's, since the
+    entries keep their amounts.
+  - **Accounts:** copy the chosen ledger's debit and credit accounts and their
     groups at a zero balance, or use the starter accounts. Copied accounts in
-    the open ledger's main currency take the new ledger's currency. Goals and
-    loans are not copied.
-  - **Categories:** copy the open ledger's categories and subcategories, or use
-    the starter set.
-  - No transactions are copied, and creating a ledger opens it. That note
+    its main currency take the new ledger's currency. Goals and loans are not
+    copied.
+  - **Categories:** copy the chosen ledger's categories and subcategories, or
+    use the starter set.
+  - Only Everything copies entries, and creating a ledger opens it. That note
     sits behind the Start with info button.
 - **Manage ledgers** (`LedgersScreen`) is open to every user, so a free user
   can rename Main. It can rename and re-icon any ledger, add one (Pro) and
-  delete one that is not open. The default ledger cannot be deleted.
+  delete any but the default one. Deleting the open ledger opens the default
+  one first (`deleteLedger` queues the delete behind the switch, both deferred
+  writes), and the confirmation says so. A ledger someone shared with the user
+  has no delete: they leave it instead, from its editor (Leave ledger) or its
+  sharing page, which then closes (an open one is deleted once the app is back
+  on its main screens).
   - Deleting soft-deletes the ledger and every row in it, in one transaction,
     after a confirmation that gives its entry count.
   - A ledger's currency is set when it is made. Changing it later is the Multi
@@ -959,7 +980,11 @@ flag `cloud_sync` that gated it before release was removed.
 
 - **Settings > Data > Cloud Sync.** Signed out, the screen shows the mascot
   illustration and three sign-in buttons: Continue with Apple (iOS only),
-  Google and email (a 6-digit code, no password). All three titles are the
+  Google and email (a 6-digit code, no password; the code goes in six boxes
+  over one hidden field, so paste and the keyboard's one-time-code
+  suggestion fill them, and a full code submits itself; Resend waits 30 s,
+  under the Worker's three codes a minute, and shows the countdown; sending a
+  code passes [Turnstile](#turnstile) first). All three titles are the
   same size: the Apple button is a custom one built to Apple's rules (black in
   light mode, white in dark, the Apple logo; its title is in the system font,
   as the app's text is on iOS), because Apple's own button sizes its title
@@ -972,6 +997,12 @@ flag `cloud_sync` that gated it before release was removed.
   it shows the last sync, Sync now, Sign out (data stays on the phone) and
   Delete account (cloud copy, images and sign-in, required by App Store rule
   5.1.1(v)). A green tick on the tile means Cloud Sync is on.
+- **Loading.** Nothing on these screens is a bare spinner: work in a button
+  shows `LoadingDots` in place of its label (`FatButton`'s `loading`), and
+  the screen's own loading and linking states show `SyncLoader` (the
+  illustration on a breathing halo with the dots) where the sign-in art sits,
+  so the page does not jump when the state arrives. Both hold still with
+  Reduce Motion on.
 - **First sign-in on a phone** brings the phone and the cloud copy together
   (`decideLink` in `lib/linking.ts`):
   - the cloud copy has nothing recorded: this phone's data becomes it;
@@ -1267,12 +1298,16 @@ The app side is `features/sharedLedgers/` (screens) and
   again. A ledger holds at most **5** members besides its owner; past that
   the link says the ledger is full. Links are not listed among the people.
 - **Joining.** The link's page opens `money2time://join/<code>` (deep link
-  `join`), which shows the Join screen: the ledger's name, who shares it and
-  how many people are in it. Members do not need Pro: a free user signs in
-  once (Apple, Google or email; the paywall is skipped here) and taps Join.
-  The ledger downloads and opens as its own ledger. A ledger whose id is
-  already on the phone (one of the user's own) is refused before a seat is
-  taken; if the first download fails, the screen says so and Join again
+  `join`), which shows the Join screen: a card with the ledger's icon, name,
+  who shares it and how many people are in it. Members do not need Pro: a
+  free user signs in once (Apple, Google or email; the paywall is skipped
+  here) and taps Join, above a "Joining as" row with the signed-in address and
+  a note that it opens as its own ledger. The ledger downloads and opens as
+  its own ledger. A ledger whose id is already on the phone is not joined: the
+  screen says it is one of the user's own (or that they are already in it)
+  and offers Open instead, and the app refuses it before a seat is taken
+  anyway (`assertJoinable`). Errors show in a callout, not as a line of text.
+  If the first download fails, the screen says so and Join again
   retries (the Worker answers a member with the same share). Only it syncs for a free
   member; their own data stays on the phone, and the Cloud Sync screen says
   "Your shared ledgers sync" with Get Pro.
@@ -1306,7 +1341,9 @@ The app side is `features/sharedLedgers/` (screens) and
   on its main screens, after the default ledger opens (`LedgerProGuard`,
   kept in AsyncStorage across a restart).
 - **The People page** re-reads the shared list when it opens, so its paused
-  banner and count are never a minute stale.
+  banner and count are never a minute stale. Who shares the ledger and that
+  everyone can add and edit entries is in the info button next to the
+  Sharing title, not under the name.
 - **Without a session** (signed out, or the account deleted on another
   phone) the People list says to sign in to Cloud Sync. Deleting a shared
   ledger, Stop sharing and Leave still work there, and deleting and Leave
@@ -1620,27 +1657,27 @@ Bank and wallet notifications (Android listener) and the Log Notification Shortc
 
 #### GA4 only: albums, budgets, items, ledgers and recurring rules
 
-| Constant                  | Event name                | GA4 name                      | PostHog | Trigger and frequency                                                                                                                                                      | Extra properties                                       | Call sites                                                                                               |
-| ------------------------- | ------------------------- | ----------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
-| `ALBUM_CREATED`           | `Album Created`           | `m2t_album_created`           | No      | An album is created; each successful creation.                                                                                                                             | `transactionCount`                                     | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `ALBUM_UPDATED`           | `Album Updated`           | `m2t_album_updated`           | No      | Album details are updated; each successful update.                                                                                                                         | None                                                   | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `ALBUM_DELETED`           | `Album Deleted`           | `m2t_album_deleted`           | No      | An album is deleted; each successful deletion.                                                                                                                             | None                                                   | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `ALBUM_LOCATION_SET`      | `Album Location Set`      | `m2t_album_location_set`      | No      | An album location is set or cleared; each successful change.                                                                                                               | `cleared`                                              | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `ALBUM_LOCATIONS_OPENED`  | `Album Locations Opened`  | `m2t_album_locations_opened`  | No      | The album map panel opens; each panel mount.                                                                                                                               | `count`                                                | [features/albums/components/AlbumMapPanel.tsx](apps/mobile/features/albums/components/AlbumMapPanel.tsx) |
-| `BUDGET_TEMPLATE_CREATED` | `Budget Template Created` | `m2t_budget_template_created` | No      | A reusable budget template is created; each successful creation.                                                                                                           | `categories`, `backPopulate`, `period`                 | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `BUDGET_TEMPLATE_UPDATED` | `Budget Template Updated` | `m2t_budget_template_updated` | No      | A reusable budget template is updated; each successful update.                                                                                                             | `categories`, `period`                                 | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `BUDGET_TEMPLATE_DELETED` | `Budget Template Deleted` | `m2t_budget_template_deleted` | No      | A budget template is deleted; each successful deletion.                                                                                                                    | None                                                   | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `BUDGET_DEFAULT_CHANGED`  | `Budget Default Changed`  | `m2t_budget_default_changed`  | No      | A period's default budget template is changed; each successful action.                                                                                                     | None                                                   | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `BUDGET_MONTH_CREATED`    | `Budget Month Created`    | `m2t_budget_month_created`    | No      | A week's, month's or year's budget is created automatically (one event per period made), manually, custom, or by backfill; backfill is one aggregate event with the count. | `source`, `period`, `months`                           | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `BUDGET_MONTH_UPDATED`    | `Budget Month Updated`    | `m2t_budget_month_updated`    | No      | A week's, month's or year's budget is updated; each successful update.                                                                                                     | `categories`, `period`                                 | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `BUDGET_MONTH_DELETED`    | `Budget Month Deleted`    | `m2t_budget_month_deleted`    | No      | A week's, month's or year's budget is deleted; each successful deletion.                                                                                                   | `period`                                               | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `ITEM_CREATED`            | `Item Created`            | `m2t_item_created`            | No      | An owned item is created; each successful creation.                                                                                                                        | None                                                   | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `LEDGER_CREATED`          | `Ledger Created`          | `m2t_ledger_created`          | No      | A Pro user creates a ledger (which opens it); each successful creation.                                                                                                    | `copied_accounts`, `copied_categories`, `ledger_count` | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `LEDGER_SWITCHED`         | `Ledger Switched`         | `m2t_ledger_switched`         | No      | Another ledger is opened: from the switcher, after creating one, or by the move back to the default ledger when Pro ends; each switch.                                     | `to_default`                                           | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `LEDGER_DELETED`          | `Ledger Deleted`          | `m2t_ledger_deleted`          | No      | A ledger that is not open is deleted from Manage ledgers; each successful deletion.                                                                                        | None                                                   | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `RECURRING_RULE_CREATED`  | `Recurring Rule Created`  | `m2t_recurring_rule_created`  | No      | A recurring rule is created; each successful creation.                                                                                                                     | `type`, `pattern`                                      | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `RECURRING_RULE_UPDATED`  | `Recurring Rule Updated`  | `m2t_recurring_rule_updated`  | No      | A recurring rule is updated; each successful update.                                                                                                                       | None                                                   | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `RECURRING_RULE_DELETED`  | `Recurring Rule Deleted`  | `m2t_recurring_rule_deleted`  | No      | A recurring rule is deleted; each successful deletion.                                                                                                                     | None                                                   | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| Constant                  | Event name                | GA4 name                      | PostHog | Trigger and frequency                                                                                                                                                      | Extra properties                                                                                | Call sites                                                                                               |
+| ------------------------- | ------------------------- | ----------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `ALBUM_CREATED`           | `Album Created`           | `m2t_album_created`           | No      | An album is created; each successful creation.                                                                                                                             | `transactionCount`                                                                              | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `ALBUM_UPDATED`           | `Album Updated`           | `m2t_album_updated`           | No      | Album details are updated; each successful update.                                                                                                                         | None                                                                                            | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `ALBUM_DELETED`           | `Album Deleted`           | `m2t_album_deleted`           | No      | An album is deleted; each successful deletion.                                                                                                                             | None                                                                                            | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `ALBUM_LOCATION_SET`      | `Album Location Set`      | `m2t_album_location_set`      | No      | An album location is set or cleared; each successful change.                                                                                                               | `cleared`                                                                                       | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `ALBUM_LOCATIONS_OPENED`  | `Album Locations Opened`  | `m2t_album_locations_opened`  | No      | The album map panel opens; each panel mount.                                                                                                                               | `count`                                                                                         | [features/albums/components/AlbumMapPanel.tsx](apps/mobile/features/albums/components/AlbumMapPanel.tsx) |
+| `BUDGET_TEMPLATE_CREATED` | `Budget Template Created` | `m2t_budget_template_created` | No      | A reusable budget template is created; each successful creation.                                                                                                           | `categories`, `backPopulate`, `period`                                                          | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `BUDGET_TEMPLATE_UPDATED` | `Budget Template Updated` | `m2t_budget_template_updated` | No      | A reusable budget template is updated; each successful update.                                                                                                             | `categories`, `period`                                                                          | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `BUDGET_TEMPLATE_DELETED` | `Budget Template Deleted` | `m2t_budget_template_deleted` | No      | A budget template is deleted; each successful deletion.                                                                                                                    | None                                                                                            | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `BUDGET_DEFAULT_CHANGED`  | `Budget Default Changed`  | `m2t_budget_default_changed`  | No      | A period's default budget template is changed; each successful action.                                                                                                     | None                                                                                            | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `BUDGET_MONTH_CREATED`    | `Budget Month Created`    | `m2t_budget_month_created`    | No      | A week's, month's or year's budget is created automatically (one event per period made), manually, custom, or by backfill; backfill is one aggregate event with the count. | `source`, `period`, `months`                                                                    | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `BUDGET_MONTH_UPDATED`    | `Budget Month Updated`    | `m2t_budget_month_updated`    | No      | A week's, month's or year's budget is updated; each successful update.                                                                                                     | `categories`, `period`                                                                          | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `BUDGET_MONTH_DELETED`    | `Budget Month Deleted`    | `m2t_budget_month_deleted`    | No      | A week's, month's or year's budget is deleted; each successful deletion.                                                                                                   | `period`                                                                                        | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `ITEM_CREATED`            | `Item Created`            | `m2t_item_created`            | No      | An owned item is created; each successful creation.                                                                                                                        | None                                                                                            | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `LEDGER_CREATED`          | `Ledger Created`          | `m2t_ledger_created`          | No      | A Pro user creates a ledger (which opens it); each successful creation.                                                                                                    | `copied_accounts`, `copied_categories`, `copied_everything`, `copied_from_open`, `ledger_count` | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `LEDGER_SWITCHED`         | `Ledger Switched`         | `m2t_ledger_switched`         | No      | Another ledger is opened: from the switcher, after creating one, or by the move back to the default ledger when Pro ends; each switch.                                     | `to_default`                                                                                    | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `LEDGER_DELETED`          | `Ledger Deleted`          | `m2t_ledger_deleted`          | No      | A ledger is deleted from Manage ledgers (the open one after the default ledger opens); each successful deletion.                                                           | None                                                                                            | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `RECURRING_RULE_CREATED`  | `Recurring Rule Created`  | `m2t_recurring_rule_created`  | No      | A recurring rule is created; each successful creation.                                                                                                                     | `type`, `pattern`                                                                               | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `RECURRING_RULE_UPDATED`  | `Recurring Rule Updated`  | `m2t_recurring_rule_updated`  | No      | A recurring rule is updated; each successful update.                                                                                                                       | None                                                                                            | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `RECURRING_RULE_DELETED`  | `Recurring Rule Deleted`  | `m2t_recurring_rule_deleted`  | No      | A recurring rule is deleted; each successful deletion.                                                                                                                     | None                                                                                            | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
 
 #### GA4 only: tutorials, settings, backup and review
 
@@ -3210,51 +3247,55 @@ returns 200 for a payload the device then discards.
 `workers-cloud-sync.money2time.com`) serves [Cloud Sync](#cloud-sync): sign-in
 with Better Auth, one Turso database per user, and the user's images.
 
-| File            | What it holds                                                |
-| --------------- | ------------------------------------------------------------ |
-| `index.ts`      | Routing, rate limits, the daily cleanup                      |
-| `auth.ts`       | Better Auth (one instance per isolate) and the sign-in email |
-| `revenuecat.ts` | Linking App User IDs and the account-level Pro check         |
-| `turso.ts`      | Per-user databases and tokens; `CLOUD_SCHEMA_SQL`            |
-| `media.ts`      | Images in R2 and the per-user quota                          |
-| `apple.ts`      | Apple refresh tokens and their revocation                    |
-| `ledgers.ts`    | Shared ledgers: sharing, members, invites, the invite page   |
-| `live.ts`       | Live updates: the `SyncHub` Durable Object and notify        |
-| `secretBox.ts`  | AES-GCM sealing for tokens stored in D1                      |
-| `http.ts`       | JSON responses and size-capped JSON bodies (8 KB)            |
+| File            | What it holds                                              |
+| --------------- | ---------------------------------------------------------- |
+| `index.ts`      | Routing, rate limits, the daily cleanup                    |
+| `auth.ts`       | Better Auth (one instance per isolate), sending the code   |
+| `email.ts`      | The sign-in code email: subject, plain text and HTML       |
+| `turnstile.ts`  | Turnstile check in front of sending a code                 |
+| `pages.ts`      | The HTML pages: the invite page and the broken-link page   |
+| `brand.ts`      | money2time.com's colours, font, icon and store links       |
+| `revenuecat.ts` | Linking App User IDs and the account-level Pro check       |
+| `turso.ts`      | Per-user databases and tokens; `CLOUD_SCHEMA_SQL`          |
+| `media.ts`      | Images in R2 and the per-user quota                        |
+| `apple.ts`      | Apple refresh tokens and their revocation                  |
+| `ledgers.ts`    | Shared ledgers: sharing, members, invites, the invite page |
+| `live.ts`       | Live updates: the `SyncHub` Durable Object and notify      |
+| `secretBox.ts`  | AES-GCM sealing for tokens stored in D1                    |
+| `http.ts`       | JSON responses and size-capped JSON bodies (8 KB)          |
 
 #### Endpoints
 
-| Route                                   | What it does                                                                                                                                                                                                                               |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/api/auth/*`                           | Better Auth, only these routes (everything else it mounts answers 404): `POST sign-in/social` (Apple / Google ID token), `POST email-otp/send-verification-otp` (type `sign-in` only), `POST sign-in/email-otp`, `POST sign-out`, `GET ok` |
-| `GET /v1/account`                       | The signed-in user and whether the account is Pro                                                                                                                                                                                          |
-| `DELETE /v1/account/install`            | `{appUserId}` → sign-out: this install no longer counts toward the account's Pro                                                                                                                                                           |
-| `POST /v1/account/status`               | `{appUserId}` → `{isPro, limited}` for this phone; links the App User ID if it is Pro and records the phone. The account's Pro reaches the first 5 phones to join (a place frees on sign-out or after 30 days unused)                      |
-| `GET /v1/live?device=…`                 | WebSocket upgrade; the user's `SyncHub` keeps it and sends `{type: 'changed', channel, reason}`. The app pings every 25 s (answered without waking the hub)                                                                                |
-| `POST /v1/sync/notify`                  | `{channel, device}` → tells the user's other phones (`personal`) or everyone in a shared ledger the user is in; 404 for a ledger that is not theirs                                                                                        |
-| `POST /v1/sync/credentials`             | `{appUserId}` → the user's Turso URL and a 7-day token; links the App User ID if it is Pro; makes the database on first use; 403 `not_pro`                                                                                                 |
-| `POST /v1/media/exists`                 | Which of up to 100 image paths are stored                                                                                                                                                                                                  |
-| `PUT` / `GET /v1/media/<folder>/<file>` | Store / read one image (15 MB cap, image types only, one folder level)                                                                                                                                                                     |
-| `POST /v1/apple/authorization`          | `{code}` → trades Apple's one-time authorization code for a refresh token, stored sealed, if the code belongs to this user's Apple account                                                                                                 |
-| `DELETE /v1/account`                    | Revokes the user's Apple tokens, deletes the Turso database and every image under `u/<userId>/`, then the user (every other row cascades) and any pending email code                                                                       |
+| Route                                   | What it does                                                                                                                                                                                                                                                        |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/auth/*`                           | Better Auth, only these routes (everything else it mounts answers 404): `POST sign-in/social` (Apple / Google ID token), `POST email-otp/send-verification-otp` (type `sign-in` only, [Turnstile](#turnstile)), `POST sign-in/email-otp`, `POST sign-out`, `GET ok` |
+| `GET /v1/account`                       | The signed-in user and whether the account is Pro                                                                                                                                                                                                                   |
+| `DELETE /v1/account/install`            | `{appUserId}` → sign-out: this install no longer counts toward the account's Pro                                                                                                                                                                                    |
+| `POST /v1/account/status`               | `{appUserId}` → `{isPro, limited}` for this phone; links the App User ID if it is Pro and records the phone. The account's Pro reaches the first 5 phones to join (a place frees on sign-out or after 30 days unused)                                               |
+| `GET /v1/live?device=…`                 | WebSocket upgrade; the user's `SyncHub` keeps it and sends `{type: 'changed', channel, reason}`. The app pings every 25 s (answered without waking the hub)                                                                                                         |
+| `POST /v1/sync/notify`                  | `{channel, device}` → tells the user's other phones (`personal`) or everyone in a shared ledger the user is in; 404 for a ledger that is not theirs                                                                                                                 |
+| `POST /v1/sync/credentials`             | `{appUserId}` → the user's Turso URL and a 7-day token; links the App User ID if it is Pro; makes the database on first use; 403 `not_pro`                                                                                                                          |
+| `POST /v1/media/exists`                 | Which of up to 100 image paths are stored                                                                                                                                                                                                                           |
+| `PUT` / `GET /v1/media/<folder>/<file>` | Store / read one image (15 MB cap, image types only, one folder level)                                                                                                                                                                                              |
+| `POST /v1/apple/authorization`          | `{code}` → trades Apple's one-time authorization code for a refresh token, stored sealed, if the code belongs to this user's Apple account                                                                                                                          |
+| `DELETE /v1/account`                    | Revokes the user's Apple tokens, deletes the Turso database and every image under `u/<userId>/`, then the user (every other row cascades) and any pending email code                                                                                                |
 
 Shared ledgers ([Shared ledgers](#shared-ledgers)):
 
-| Route                                      | What it does                                                                                                      |
-| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| `GET /v1/ledgers`                          | The user's shared ledgers, owned and joined, with role, owner name, member count and `active` (anyone in it Pro)  |
-| `POST /v1/ledgers`                         | `{ledgerId, name, emoji}` → shares a ledger: Pro, at most 2 per owner; makes its Turso database                   |
-| `DELETE /v1/ledgers/<id>`                  | Stop sharing (owner): deletes its database and images; members and the link cascade; everyone is nudged           |
-| `POST /v1/ledgers/<id>/leave`              | A member leaves                                                                                                   |
-| `POST /v1/ledgers/<id>/credentials`        | Its Turso URL and a 1-day token, for the owner or a member, while anyone in it is Pro (403 `ledger_paused`)       |
-| `GET /v1/ledgers/<id>/members`             | Owner and members (addresses for the owner only)                                                                  |
-| `DELETE /v1/ledgers/<id>/members/<userId>` | Owner removes a member (404 for anyone else), whose app is nudged; the link is retired                            |
-| `POST /v1/ledgers/<id>/invites`            | Owner gets the ledger's link: the open one, or a new one valid a day; two phones asking at once get the same one  |
-| `/v1/ledgers/<id>/media/…`                 | Like `/v1/media`, under `l/<id>/` with its own quota; writing needs the ledger active                             |
-| `GET /v1/invites/<code>`                   | No sign-in: the app's ledger id, name, owner, member count, `full` and `active`; rate limited per IP              |
-| `POST /v1/invites/<code>/accept`           | Joins (any signed-in user, no Pro) while active, with a place and the link not retired, in one statement          |
-| `GET /join/<code>`                         | The page an invite link opens: hands `money2time://join/<code>` to the app, or links the stores. Static: no names |
+| Route                                      | What it does                                                                                                                                                 |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `GET /v1/ledgers`                          | The user's shared ledgers, owned and joined, with role, owner name, member count and `active` (anyone in it Pro)                                             |
+| `POST /v1/ledgers`                         | `{ledgerId, name, emoji}` → shares a ledger: Pro, at most 2 per owner; makes its Turso database                                                              |
+| `DELETE /v1/ledgers/<id>`                  | Stop sharing (owner): deletes its database and images; members and the link cascade; everyone is nudged                                                      |
+| `POST /v1/ledgers/<id>/leave`              | A member leaves                                                                                                                                              |
+| `POST /v1/ledgers/<id>/credentials`        | Its Turso URL and a 1-day token, for the owner or a member, while anyone in it is Pro (403 `ledger_paused`)                                                  |
+| `GET /v1/ledgers/<id>/members`             | Owner and members (addresses for the owner only)                                                                                                             |
+| `DELETE /v1/ledgers/<id>/members/<userId>` | Owner removes a member (404 for anyone else), whose app is nudged; the link is retired                                                                       |
+| `POST /v1/ledgers/<id>/invites`            | Owner gets the ledger's link: the open one, or a new one valid a day; two phones asking at once get the same one                                             |
+| `/v1/ledgers/<id>/media/…`                 | Like `/v1/media`, under `l/<id>/` with its own quota; writing needs the ledger active                                                                        |
+| `GET /v1/invites/<code>`                   | No sign-in: the app's ledger id, name, owner, member count, `full` and `active`; rate limited per IP                                                         |
+| `POST /v1/invites/<code>/accept`           | Joins (any signed-in user, no Pro) while active, with a place and the link not retired, in one statement                                                     |
+| `GET /join/<code>`                         | The page an invite link opens: hands `money2time://join/<code>` to the app, or links the stores. Static: no names; a code that cannot be one gets a 404 page |
 
 Sharing a ledger checks the 2-ledger limit and inserts in one statement, and a
 second tap on the same ledger gets the first share back. Live sockets close
@@ -3267,7 +3308,10 @@ Invite codes are 18 random bytes, looked up by their SHA-256; the code itself
 is kept sealed (`secretBox.ts`, purpose `invite-code`) so the owner's phones
 get the same link back. Seats are counted and taken in one statement, so two
 people joining at once cannot pass 5. The join page
-shows nothing from the database and sends a strict Content-Security-Policy.
+shows nothing from the database and sends a strict Content-Security-Policy:
+its one inline script (the redirect to the app) runs by a per-response nonce,
+and it loads only DM Sans from Google Fonts and the icon and mascot from
+`media.money2time.com`.
 Deleting an account also deletes the ledgers it shares (databases and images)
 and ends its memberships.
 
@@ -3290,6 +3334,7 @@ email codes, expired invite links and rate-limit rows older than a day.
   issued for); no client secrets are needed. Email codes are 6 digits, valid
   10 minutes, five attempts, stored hashed, and sent with Email Service from
   `EMAIL_FROM` (only a local `wrangler dev` without the binding prints them).
+  Asking for one needs a [Turnstile](#turnstile) token.
   One verified email address is one user across methods (account linking
   with no blindly trusted provider, so a Google account with an unverified
   address cannot join an existing user; Apple's private-relay addresses
@@ -3332,13 +3377,88 @@ email codes, expired invite links and rate-limit rows older than a day.
   simply minted again, but Apple tokens stored before the rotation can no
   longer be revoked.
 
+#### Pages and email
+
+The invite page, its broken-link page and the sign-in code email look like
+money2time.com: `brand.ts` copies the site's tokens (`globals.css` in
+money2time-web, itself the app's `rosewood` theme) and, since the site has no
+dark mode, the app's rosewood dark palette for `prefers-color-scheme: dark`.
+DM Sans, the off-white page with white cards, the rosewood button, the eyebrow
+label, the icon with the three-colour Money₂Time wordmark, the waving chick
+from the site's mascot art and the site's App Store / Google Play buttons.
+Each is one self-contained document with inline CSS and no build step.
+
+The email (`email.ts`, a pure `signInCodeEmail(code, minutes)` returning
+`{subject, text, html}`) follows RiceCal's auth emails: table layout, every
+colour inline and again in a dark-mode block, a preheader, the code first, big
+and selectable in its own cell and in the subject, the plain-text part kept,
+and no link to act on, so mail scanners that open links spend nothing. The
+icon is a remote image on `media.money2time.com` with an empty alt (Gmail
+blocks data URIs); a client that blocks images still shows the wordmark.
+
+`npm test` (Node's test runner, no dependencies) covers the email, the pages
+and the Turnstile check. CI runs only the typecheck.
+
+#### Turnstile
+
+Cloudflare Turnstile in front of `POST /api/auth/email-otp/send-verification-otp`,
+so a script cannot make the Worker mail codes to addresses it does not own.
+The app runs the widget (mode Managed) in a hidden WebView whose page origin is
+`https://money2time.com` and sends the token in the `x-turnstile-token`
+header. `authGate` verifies it with Cloudflare's siteverify (secret,
+response, `remoteip` from `cf-connecting-ip`) after the per-IP limit and
+before the per-recipient one, so requests without a valid token cannot use up
+someone's three codes a minute. A refusal is 403 `{error: 'captcha_failed'}`.
+
+| `TURNSTILE_SECRET_KEY` | `TURNSTILE_ENFORCE` | No token | Invalid token | Siteverify down |
+| ---------------------- | ------------------- | -------- | ------------- | --------------- |
+| unset                  | any                 | sent     | sent          | not asked       |
+| set                    | not `true`          | sent     | refused       | sent            |
+| set                    | `true`              | refused  | refused       | refused         |
+
+A token must also come from a page on `TURNSTILE_HOSTNAMES`
+(`money2time.com`; empty skips that check).
+
+**It is enforced** (`TURNSTILE_ENFORCE = "true"`, secret set, since
+2026-10-29, while Cloud Sync was still in development and no shipped build
+mailed codes). Only email codes go through it: Apple and Google sign-ins carry
+an ID token Apple or Google signed, and entering a code sends nothing and is
+limited per address and attempt, so neither can be used to spam an inbox.
+
+- **Widget:** "Money2Time Turnstile", Managed, domain `money2time.com`
+  (`npx wrangler turnstile widget list`; `widget get <sitekey>` shows its
+  secret). Managed, not Invisible: a person Cloudflare is unsure of gets a
+  checkbox instead of a dead end.
+- **Site key** `0x4AAAAAAFqdQg_MRfc4cWPB` is public and checked in
+  (`Turnstile.tsx`), so every build, local ones included, sends a token;
+  `EXPO_PUBLIC_TURNSTILE_SITE_KEY` points a build at another widget and
+  `EXPO_PUBLIC_TURNSTILE_ORIGIN` changes the page origin (default
+  `money2time.com`, which must be on the widget's domain list).
+- **App side:** `features/cloudSync/components/Turnstile.tsx` (`useTurnstile`,
+  modelled on RiceCal's) needs the native `react-native-webview`. The widget
+  runs in execute mode, `interaction-only`, and when Cloudflare wants a human
+  the same WebView is shown over the email form (never remounted or
+  resized). A widget that will not load or 45 s without an answer sends the
+  request without a token, which the Worker refuses (`captcha_failed`, "We
+  couldn't check this request"). 45 s, not 20: Cloudflare can take over 20 s
+  before it asks for a click. A token that arrives after its request gave up
+  is kept 4 minutes for the next send, and a challenge with nobody waiting is
+  not shown. Cancel on a challenge sends nothing. The
+  hidden widget is kept out of the screen reader until a challenge shows.
+- **Local `wrangler dev`:** put `TURNSTILE_SECRET_KEY` in `.dev.vars` to
+  check tokens locally; without it the check is skipped.
+- **Back out** by setting `TURNSTILE_ENFORCE` to `"false"` (a token that is
+  sent must still verify) or deleting the secret
+  (`npx wrangler secret delete TURNSTILE_SECRET_KEY`), then deploy.
+
 #### Config
 
 `wrangler.toml` holds the bindings (`AUTH_DB` D1, `MEDIA` R2, `EMAIL` Email
 Service, `SYNC_HUB` Durable Object with its `v1` SQLite migration,
-`AUTH_LIMITER` and `OTP_LIMITER`), the cron and the public vars.
-Secrets: `BETTER_AUTH_SECRET`, `TURSO_API_TOKEN` and `APPLE_PRIVATE_KEY`
-(all set), optional `REVENUECAT_SECRET_KEY`. Apple's client secret is a
+`AUTH_LIMITER` and `OTP_LIMITER`), the cron and the public vars (among them
+`TURNSTILE_ENFORCE` and `TURNSTILE_HOSTNAMES`).
+Secrets: `BETTER_AUTH_SECRET`, `TURSO_API_TOKEN`, `APPLE_PRIVATE_KEY` and
+`TURNSTILE_SECRET_KEY` (all set), and an optional `REVENUECAT_SECRET_KEY`. Apple's client secret is a
 5-minute ES256 JWT signed with the Sign in with Apple key `F5629ZF4G6` (team
 `A9QF26PBRS`, vars `APPLE_TEAM_ID` and `APPLE_KEY_ID`).
 
@@ -3390,6 +3510,7 @@ npx wrangler d1 execute money2time-cloud-sync-auth --remote --file ../../d1/clou
 openssl rand -hex 32 | npx wrangler secret put BETTER_AUTH_SECRET
 npx wrangler secret put TURSO_API_TOKEN
 npx wrangler secret put APPLE_PRIVATE_KEY < ~/.config/money2time/AuthKey_F5629ZF4G6.p8
+npx wrangler secret put TURNSTILE_SECRET_KEY   # see Turnstile
 npx wrangler deploy
 ```
 

@@ -1,6 +1,7 @@
 const ms = {
   common: {
     back: 'Kembali',
+    loading: 'Memuatkan…',
     close: 'Tutup',
     done: 'Selesai',
     save: 'Simpan',
@@ -145,6 +146,21 @@ const ms = {
     reset_action: 'Padam & tukar',
   },
   news: {
+    cloud_sync_ledgers: {
+      title: 'Cloud Sync dan buku dikongsi',
+      cloudSync: {
+        title: 'Cloud Sync kini tersedia',
+        body: 'Log masuk dengan Apple, Google atau e-mel, dan data anda sama pada semua telefon anda. Perubahan tiba dalam beberapa saat. Penyegerakan ialah sebahagian daripada Pro. Cari di Tetapan > Cloud Sync.',
+      },
+      ledgers: {
+        title: 'Berbilang buku',
+        body: 'Asingkan perbelanjaan peribadi, kerja dan percutian dalam buku berasingan, masing-masing dengan akaun, kategori dan mata wang sendiri. Mula kosong, daripada akaun dan kategori buku lain, atau sebagai salinan penuh. Sebahagian daripada Pro.',
+      },
+      sharedLedgers: {
+        title: 'Buku dikongsi',
+        body: 'Kongsi buku dengan sehingga 5 orang dan urus belanjawan rumah bersama. Semua orang menambah catatan dan melihatnya pada telefon sendiri. Menyertai adalah percuma; berkongsi memerlukan Pro.',
+      },
+    },
     web_dashboard: {
       title: 'Papan Pemuka Web dan banyak lagi',
       webDashboard: {
@@ -395,6 +411,7 @@ const ms = {
       open_app_icon: 'Pilih ikon anda',
       open_ricecal: 'Cuba RiceCal',
       open_pro_paywall: 'Lihat pelan Pro',
+      open_cloud_sync: 'Hidupkan Cloud Sync',
       open_bottom_bar: 'Edit bar bawah',
       open_share_earn: 'Dapatkan Pro percuma',
       open_quick_entry_settings: 'Buka tetapan Kemasukan Pantas',
@@ -406,6 +423,11 @@ const ms = {
       open_review: 'Buka Semak Perbelanjaan',
     },
     showcase: {
+      synced_devices: 'Semua telefon anda terkini',
+      ledger_personal: 'Peribadi',
+      ledger_work: 'Kerja',
+      ledger_travel: 'Percutian ke Jepun',
+      ledger_family: 'Keluarga',
       notification_bank: 'Bank anda',
       notification_text: 'Kad anda digunakan untuk satu pembelian.',
       scan_before: 'Dulu',
@@ -2545,10 +2567,12 @@ const ms = {
     email_placeholder: 'anda@contoh.com',
     send_code: 'Hantar kod',
     code_title: 'Masukkan kod',
-    code_body: 'Dihantar ke %{email}',
     verify: 'Teruskan',
     resend: 'Hantar semula kod',
     code_sent: 'Kod dihantar',
+    code_sent_to: 'Kami telah menghantar kod 6 digit ke',
+    other_options: 'Cara lain untuk log masuk',
+    captcha_title: 'Semakan pantas sebelum kami menghantar kod anda',
     change_email: 'Tukar e-mel',
     linking: 'Menyediakan…',
     linking_body: 'Biarkan apl terbuka.',
@@ -2593,6 +2617,7 @@ const ms = {
       server: 'Ada masalah berlaku',
       unknown: 'Ada masalah berlaku',
       invalid_code: 'Kod salah atau tamat tempoh',
+      captcha_failed: 'Kami tidak dapat mengesahkan permintaan ini. Cuba lagi sebentar nanti.',
       invalid_email: 'Semak alamat e-mel',
       rate_limited: 'Terlalu banyak cubaan. Tunggu seminit.',
       backup_failed: 'Tidak dapat menyandarkan telefon ini. Tiada apa-apa berubah.',
@@ -2924,6 +2949,12 @@ const ms = {
     start_with: 'Mula dengan',
     accounts: 'Akaun',
     categories: 'Kategori',
+    copy_from_hint: 'Pilih buku untuk disalin',
+    everything: 'Semua',
+    everything_caption_one: 'Salinan penuh dengan {{count}} catatan, belanjawan dan album',
+    everything_caption_other: 'Salinan penuh dengan {{count}} catatan, belanjawan dan album',
+    everything_currency_note: 'Salinan penuh mengekalkan mata wang {{name}}.',
+    delete_open_note: 'Buku ini sedang dibuka, jadi {{name}} akan dibuka.',
     copy_from: 'Salin daripada',
     copy_accounts_one: '{{count}} akaun, baki bermula sifar',
     copy_accounts_other: '{{count}} akaun, baki bermula sifar',
@@ -2932,7 +2963,7 @@ const ms = {
     copy_categories_other: '{{count}} kategori',
     starter_categories_caption: 'Senarai ringkas kategori harian.',
     create_footnote:
-      'Tiada transaksi disalin. Anda boleh menamakan semula buku pada bila-bila masa.',
+      'Hanya Semua yang menyalin catatan. Anda boleh menamakan semula buku pada bila-bila masa.',
     create: 'Cipta buku',
     delete_title: 'Padam {{name}}?',
     delete_message_one:
@@ -3011,7 +3042,9 @@ const ms = {
     people_other: '{{count}} orang',
     join_sign_in: 'Log masuk untuk menyertai. Anda tidak perlukan Pro.',
     join_button: 'Sertai {{name}}',
-    join_as: 'Menyertai sebagai {{email}}',
+    joining_as: 'Menyertai sebagai',
+    join_already: 'Anda sudah berada dalam buku ini.',
+    open_ledger: 'Buka {{name}}',
     join_note: 'Buku ini dibuka sebagai buku berasingan. Buku anda sendiri kekal peribadi.',
     join_invalid: 'Pautan jemputan ini telah tamat tempoh. Minta yang baharu.',
     join_full: 'Buku ini sudah penuh. Minta pemiliknya untuk memberi ruang.',

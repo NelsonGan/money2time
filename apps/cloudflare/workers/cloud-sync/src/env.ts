@@ -32,6 +32,20 @@ export interface Env {
   /** Sender for sign-in codes, on a domain onboarded to Email Service. */
   EMAIL_FROM: string;
 
+  /**
+   * Cloudflare Turnstile secret for the widget the app shows before sending a
+   * sign-in code. Secret. Unset: no Turnstile check at all.
+   */
+  TURNSTILE_SECRET_KEY?: string;
+  /**
+   * `true`: a code request without a token that verifies is refused. Anything
+   * else: a missing token passes (app builds from before Turnstile) but a
+   * token that is sent must still verify.
+   */
+  TURNSTILE_ENFORCE?: string;
+  /** Comma-separated hostnames a token's page may be on (the app's WebView origin); empty skips the check. */
+  TURNSTILE_HOSTNAMES?: string;
+
   REVENUECAT_ENTITLEMENT_ID: string;
   /** RevenueCat secret key (sk_…). Optional: without it the public app keys below are used. */
   REVENUECAT_SECRET_KEY?: string;

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, View, type ViewStyle } from 'react-native';
 
+import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { type HapticKind, triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
@@ -22,10 +23,16 @@ interface FatButtonProps {
   trailing?: React.ReactNode;
   haptic?: HapticKind;
   disabled?: boolean;
+  /**
+   * Work is running: the dots take the label's place (the button keeps its
+   * size and stays at full colour) and presses are ignored.
+   */
+  loading?: boolean;
   /** Resting total height (face + ledge). */
   height?: number;
   /** Applied to the layout wrapper — use for flex sizing (e.g. "flex-1"). */
   className?: string;
+  testID?: string;
 }
 
 /**
@@ -43,15 +50,17 @@ export function FatButton({
   trailing,
   haptic = 'selection',
   disabled = false,
+  loading = false,
   height = 52,
   className,
+  testID,
 }: FatButtonProps) {
   const themeColors = useThemeColors();
   const [pressed, setPressed] = React.useState(false);
 
   const face = color ?? themeColors.primary;
   const edge = darkenColor(face, 0.2);
-  const isPressed = pressed && !disabled;
+  const isPressed = pressed && !disabled && !loading;
 
   const faceStyle: ViewStyle = {
     height: isPressed ? height - (LEDGE - 1) : height,
@@ -65,14 +74,17 @@ export function FatButton({
     backgroundColor: face,
     borderBottomWidth: isPressed ? 1 : LEDGE,
     borderBottomColor: edge,
-    opacity: disabled ? 0.5 : 1,
+    opacity: disabled && !loading ? 0.5 : 1,
   };
 
   return (
     <View className={cn(className)} style={{ height, justifyContent: 'flex-end' }}>
       <Pressable
         accessibilityRole="button"
-        disabled={disabled}
+        accessibilityLabel={label}
+        testID={testID}
+        accessibilityState={{ disabled: disabled || loading, busy: loading }}
+        disabled={disabled || loading}
         onPress={() => {
           void triggerHaptic(haptic);
           onPress();
@@ -81,18 +93,21 @@ export function FatButton({
         onPressOut={() => setPressed(false)}
         style={faceStyle}
       >
-        {leading}
+        {loading ? <LoadingDots color={textColor} accessibilityLabel={label} /> : null}
+        {loading ? null : leading}
         {/* `ph-no-mask`: every label is fixed app copy (at most a selection
             count), so session replays show it rather than a grey bar. Keep it
             that way: a label carrying an amount or a name must drop this. */}
-        <Text
-          testID="ph-no-mask"
-          numberOfLines={1}
-          style={{ color: textColor, fontWeight: '800', fontSize: 15 }}
-        >
-          {label}
-        </Text>
-        {trailing}
+        {loading ? null : (
+          <Text
+            testID="ph-no-mask"
+            numberOfLines={1}
+            style={{ color: textColor, fontWeight: '800', fontSize: 15 }}
+          >
+            {label}
+          </Text>
+        )}
+        {loading ? null : trailing}
       </Pressable>
     </View>
   );

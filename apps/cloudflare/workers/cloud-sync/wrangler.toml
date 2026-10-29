@@ -82,9 +82,17 @@ REVENUECAT_ENTITLEMENT_ID = "pro"
 REVENUECAT_PUBLIC_KEYS = "appl_ELByGHLlPQeZQeixSyXhATAqnGJ,goog_QiZPmlHUwoGpYQUqjtYMNjcnWsu"
 TURSO_ORG = "nelsongan"
 TURSO_GROUP = "m2t-sync"
+# Turnstile before sending a sign-in code (src/turnstile.ts), with the secret
+# TURNSTILE_SECRET_KEY. "true" refuses a request with no token or one that does
+# not verify; anything else lets a missing token through (for older builds).
+TURNSTILE_ENFORCE = "true"
+# The page origin of the app's Turnstile WebView.
+TURNSTILE_HOSTNAMES = "money2time.com"
 
 # Secrets (wrangler secret put):
 #   BETTER_AUTH_SECRET     random 32+ bytes
 #   TURSO_API_TOKEN        Turso Platform API token for the organization above
 #   APPLE_PRIVATE_KEY      the Sign in with Apple key's .p8 contents
 #   REVENUECAT_SECRET_KEY  optional, sk_… (otherwise the public keys above)
+#   TURNSTILE_SECRET_KEY   optional, the money2time.com Turnstile widget's secret
+#                          (unset: sign-in codes are sent without a Turnstile check)

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 
 import {
   SETTINGS_HORIZONTAL_PADDING,
@@ -14,6 +14,7 @@ import { CloudSyncFaq } from '../components/CloudSyncFaq';
 import { KeepDataChoice } from '../components/KeepDataChoice';
 import { LinkingView } from '../components/LinkingView';
 import { SignedOutView } from '../components/SignedOutView';
+import { SyncLoader } from '../components/SyncLoader';
 import { SyncPausedView } from '../components/SyncPausedView';
 import { SyncStatusView } from '../components/SyncStatusView';
 
@@ -31,9 +32,11 @@ export function CloudSyncScreen({ onBack, onOpenProPaywall }: CloudSyncScreenPro
   switch (sync.status) {
     case 'loading':
     case 'unavailable':
+      // Where the sign-in hero's art sits, so the page does not jump when
+      // the state arrives.
       content = (
         <View style={styles.center}>
-          <ActivityIndicator />
+          <SyncLoader width={280} accessibilityLabel={I18n.t('common.loading')} />
         </View>
       );
       break;
@@ -83,7 +86,7 @@ const styles = StyleSheet.create({
     paddingTop: 4,
   },
   center: {
-    paddingTop: 80,
+    paddingTop: 4,
     alignItems: 'center',
   },
 });
