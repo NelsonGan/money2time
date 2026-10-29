@@ -3,6 +3,7 @@ import { useRef } from 'react';
 import { CATEGORY_ICON_SOURCES } from '~/constants/categoryIcons';
 import { afterDeferredWrites, useApp } from '~/context/AppContext';
 import { useIsPro } from '~/context/ProContext';
+import { openLedgerSharedAndActive } from '~/features/cloudSync/services/sharedLedgerStore';
 import { I18n } from '~/lib/i18n';
 import { accountsRepository } from '~/lib/repositories/accountsRepository';
 import type { CreateRecurringRuleInput } from '~/lib/repositories/recurringRulesRepository';
@@ -55,6 +56,7 @@ export function useWebDashboardEditor(onApplied: (count: number) => void): WebDa
           ...new Set([main, ...current.fxCurrencies, ...current.accounts.map((a) => a.currency)]),
         ],
         isPro: pro,
+        inSharedLedger: openLedgerSharedAndActive(),
         convert: (amount, from, to) => {
           const result = convert(amount, from, to, current.rateTable);
           return result.rateUsed === null ? null : result.value;

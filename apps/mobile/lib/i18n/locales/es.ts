@@ -2655,6 +2655,10 @@ const es = {
           q: '¿Un libro compartido necesita Pro?',
           a: 'Solo una persona del libro necesita Pro, el dueño o cualquier miembro. Si nadie en él tiene Pro, se pausa para todos hasta que alguien lo tenga. No se borra nada.',
         },
+        shared_free_limits: {
+          q: '¿Puedo añadir movimientos a un libro compartido sin Pro?',
+          a: 'Sí, aunque tenga más de 6 cuentas. Los demás límites del plan gratuito siguen aplicándose, como añadir cuentas o categorías por encima del límite. Pide al propietario del libro que haga esos cambios.',
+        },
         family_pro: {
           q: '¿Mi familia puede usar mi Pro?',
           a: 'Comparte un libro con ellos: las personas que invitas no necesitan Pro. Iniciar sesión con tu cuenta en su teléfono les mostraría todos tus datos de dinero.',

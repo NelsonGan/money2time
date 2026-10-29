@@ -2636,6 +2636,10 @@ const da = {
           q: 'Kræver et delt regnskab Pro?',
           a: 'Kun én person i det skal have Pro, ejeren eller et hvilket som helst medlem. Hvis ingen i det har Pro, sættes det på pause for alle, indtil nogen får det. Intet bliver slettet.',
         },
+        shared_free_limits: {
+          q: 'Kan jeg tilføje poster i en delt kassebog uden Pro?',
+          a: 'Ja, også når den har mere end 6 konti. Gratisplanens andre grænser gælder stadig, fx når du vil tilføje konti eller kategorier ud over grænsen. Bed kassebogens ejer om at lave de ændringer.',
+        },
         family_pro: {
           q: 'Kan min familie bruge min Pro?',
           a: 'Del et regnskab med dem: personer, du inviterer, behøver ikke Pro. Hvis du loggede ind på din konto på deres telefon, ville de kunne se alle dine pengedata.',

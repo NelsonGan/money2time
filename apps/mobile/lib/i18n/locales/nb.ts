@@ -2639,6 +2639,10 @@ const nb = {
           q: 'Trenger et delt regnskap Pro?',
           a: 'Bare én person i det trenger Pro, eieren eller et hvilket som helst medlem. Hvis ingen i det har Pro, settes det på pause for alle til noen får det. Ingenting slettes.',
         },
+        shared_free_limits: {
+          q: 'Kan jeg legge til poster i en delt regnskapsbok uten Pro?',
+          a: 'Ja, også når den har mer enn 6 kontoer. Andre grenser i gratisplanen gjelder fortsatt, som å legge til kontoer eller kategorier utover grensen. Be eieren av regnskapsboken gjøre de endringene.',
+        },
         family_pro: {
           q: 'Kan familien min bruke Pro-en min?',
           a: 'Del et regnskap med dem: personer du inviterer, trenger ikke Pro. Hvis du logget inn på kontoen din på telefonen deres, ville de se alle pengedataene dine.',

@@ -11,6 +11,7 @@ export const CLOUD_SYNC_FAQ_KEYS = [
   'pro_ends',
   'how_fast',
   'shared_pro',
+  'shared_free_limits',
   'family_pro',
   'sign_out_delete',
 ] as const;

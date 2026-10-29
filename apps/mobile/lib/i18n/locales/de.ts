@@ -2675,6 +2675,10 @@ const de = {
           q: 'Braucht ein geteiltes Buch Pro?',
           a: 'Nur eine Person darin braucht Pro, der Besitzer oder ein beliebiges Mitglied. Hat niemand darin Pro, pausiert es für alle, bis jemand Pro hat. Nichts wird gelöscht.',
         },
+        shared_free_limits: {
+          q: 'Kann ich ohne Pro Einträge in einem geteilten Kassenbuch anlegen?',
+          a: 'Ja, auch wenn es mehr als 6 Konten hat. Die übrigen Grenzen des kostenlosen Plans gelten dort weiter, etwa für weitere Konten oder Kategorien über die Grenze hinaus. Bitte den Besitzer des Kassenbuchs, diese Änderungen vorzunehmen.',
+        },
         family_pro: {
           q: 'Kann meine Familie mein Pro nutzen?',
           a: 'Teile ein Buch mit ihnen: Personen, die du einlädst, brauchen kein Pro. Würdest du dich auf ihrem Handy bei deinem Konto anmelden, sähen sie alle deine Finanzdaten.',

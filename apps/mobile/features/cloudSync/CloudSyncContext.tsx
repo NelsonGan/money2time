@@ -189,7 +189,7 @@ export function useCloudSyncEnabled(): boolean {
 }
 
 /**
- * Whether the Cloud Sync tile and the profile pill show a PRO tag: syncing is
+ * Whether the Settings Cloud Sync tile shows a PRO tag: syncing is
  * Pro, signing in is not. Waits for the Pro status so a Pro user never sees it.
  */
 export function useCloudSyncProTag(): boolean {

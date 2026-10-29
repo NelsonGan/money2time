@@ -151,6 +151,7 @@ import {
   WageCalculatorFlowScreen,
 } from '~/features/settings/screens';
 import { WebDashboardScreen } from '~/features/settings/screens/WebDashboardScreen';
+import { useOpenLedgerSharedAndActive } from '~/features/sharedLedgers/hooks/useSharedLedgers';
 import { JoinLedgerScreen } from '~/features/sharedLedgers/screens/JoinLedgerScreen';
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import { QuickAddWarmup } from '~/features/transactions/components/QuickAddWarmup';
@@ -159,10 +160,8 @@ import {
   type VoiceQuickAddHandle,
   VoiceQuickAddOverlay,
 } from '~/features/transactions/components/VoiceQuickAddOverlay';
-import {
-  countAccountsTowardFreeLimit,
-  isNewTransactionBlockedByAccounts,
-} from '~/features/transactions/lib/accountEntryGate';
+import { useNewTransactionGate } from '~/features/transactions/hooks/useNewTransactionGate';
+import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accountEntryGate';
 import {
   resolveAutoLogEntry,
   selectDrainableAutoLogEntries,
@@ -515,7 +514,8 @@ function MainShellScreen({
     updateQuickEntryPrefs,
     settings,
   } = useApp();
-  const { checkLimit, isPro } = useProGate();
+  const { checkLimit } = useProGate();
+  const newTransactionGate = useNewTransactionGate();
   const { startScan } = useReceiptScans();
   const navTabs = useMemo(() => parseNavTabs(settings.navTabsJson), [settings.navTabsJson]);
   // iPhone Duo: tabs in a rail down the side strip, pages beside it.
@@ -606,8 +606,8 @@ function MainShellScreen({
   const overAccountLimitPromptVisibleRef = useRef(false);
 
   const checkCanStartNewTransaction = useCallback(() => {
-    const activeAccountCount = countAccountsTowardFreeLimit(accounts);
-    if (!isNewTransactionBlockedByAccounts(isPro, activeAccountCount)) return true;
+    const { blocked, activeAccountCount } = newTransactionGate;
+    if (!blocked) return true;
     if (overAccountLimitPromptVisibleRef.current) return false;
 
     overAccountLimitPromptVisibleRef.current = true;
@@ -645,7 +645,7 @@ function MainShellScreen({
       { cancelable: true, onDismiss: dismissPrompt },
     );
     return false;
-  }, [accounts, isPro, navigation]);
+  }, [newTransactionGate, navigation]);
 
   // The other tabs mount hidden ahead of their first visit so switching to
   // one is instant. Mounting one is a large render (Insights and Settings walk
@@ -1616,6 +1616,7 @@ const PRO_STATUS_WAIT_MS = 10_000;
  */
 function AutoLogSync() {
   const { accounts, categories, settings, quickEntryPrefs, createTransaction } = useApp();
+  const inSharedLedger = useOpenLedgerSharedAndActive();
   // `isPro` is a `false` placeholder until RevenueCat answers, and the drain
   // runs on mount, before it does. Acting on the placeholder rejected every
   // queued tap from a Pro user past the free cap as "Auto-log limit reached"
@@ -1674,6 +1675,7 @@ function AutoLogSync() {
           accounts,
           categories,
           isPro,
+          inSharedLedger,
           autoLogUsageCount: quickEntryPrefs.autoLogUsageCount,
           defaultAccountId: quickEntryPrefs.defaultAccountId,
           defaultExpenseCategoryId: quickEntryPrefs.defaultExpenseCategoryId,
@@ -1697,6 +1699,7 @@ function AutoLogSync() {
     categories,
     failureNotificationBody,
     failureNotificationTitle,
+    inSharedLedger,
     isPro,
     isStatusKnown,
     notificationTitle,

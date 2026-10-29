@@ -2653,6 +2653,10 @@ const it = {
           q: 'Un registro condiviso richiede Pro?',
           a: 'Basta che una sola persona del registro abbia Pro, il proprietario o qualsiasi membro. Se nessuno ha Pro, va in pausa per tutti finché qualcuno non lo ha. Non viene eliminato nulla.',
         },
+        shared_free_limits: {
+          q: 'Posso aggiungere movimenti a un registro condiviso senza Pro?',
+          a: 'Sì, anche se ha più di 6 conti. Gli altri limiti del piano gratuito restano validi, come aggiungere conti o categorie oltre il limite. Chiedi al proprietario del registro di fare queste modifiche.',
+        },
         family_pro: {
           q: 'La mia famiglia può usare il mio Pro?',
           a: 'Condividi un registro con loro: le persone che inviti non hanno bisogno di Pro. Accedere al tuo account sul loro telefono mostrerebbe loro tutti i tuoi dati finanziari.',

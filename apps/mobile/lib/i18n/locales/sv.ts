@@ -2640,6 +2640,10 @@ const sv = {
           q: 'Behöver en delad kassabok Pro?',
           a: 'Bara en person i den behöver Pro, ägaren eller vilken medlem som helst. Om ingen i den har Pro pausas den för alla tills någon har det. Inget raderas.',
         },
+        shared_free_limits: {
+          q: 'Kan jag lägga till poster i en delad kassabok utan Pro?',
+          a: 'Ja, även när den har fler än 6 konton. Gratisplanens andra gränser gäller fortfarande, som att lägga till konton eller kategorier utöver gränsen. Be kassabokens ägare att göra de ändringarna.',
+        },
         family_pro: {
           q: 'Kan min familj använda min Pro?',
           a: 'Dela en kassabok med dem: personer du bjuder in behöver inte Pro. Om du loggade in på ditt konto på deras telefon skulle de se all din ekonomidata.',
