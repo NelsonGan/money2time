@@ -147,18 +147,10 @@ const pl = {
   },
   news: {
     cloud_sync_ledgers: {
-      title: 'Cloud Sync i wspólne księgi',
-      cloudSync: {
-        title: 'Cloud Sync już jest',
-        body: 'Zaloguj się przez Apple, Google lub e-mail, a Twoje dane będą takie same na wszystkich telefonach. Zmiany docierają w kilka sekund. Synchronizacja jest częścią Pro. Znajdziesz ją w Ustawieniach > Cloud Sync.',
-      },
+      title: 'Wiele ksiąg',
       ledgers: {
         title: 'Wiele ksiąg',
         body: 'Prowadź wydatki osobiste, pracę i podróż w osobnych księgach, każdą z własnymi kontami, kategoriami i walutą. Zacznij od pustej, od kont i kategorii innej księgi albo jako pełną kopię. Część Pro.',
-      },
-      sharedLedgers: {
-        title: 'Wspólne księgi',
-        body: 'Udostępnij księgę maksymalnie 5 osobom i prowadźcie razem domowy budżet. Każdy dodaje wpisy i widzi je na swoim telefonie. Dołączenie jest bezpłatne; udostępnianie wymaga Pro.',
       },
     },
     web_dashboard: {
@@ -2601,6 +2593,11 @@ const pl = {
     needs_pro_body:
       'Jesteś zalogowany. Kup Pro, aby zacząć synchronizację. Kupiłeś Pro na innym telefonie? Zaloguj się tam też do Cloud Sync, a odblokuje się tutaj.',
     tile_on: 'Wł.',
+    profile_off: 'Wył.',
+    profile_paused: 'Wstrzymano',
+    profile_needs_pro: 'Wymaga Pro',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'Otwiera Cloud Sync',
     errors: {
       offline: 'Jesteś offline',
       session_expired: 'Wylogowano. Zaloguj się ponownie.',

@@ -147,18 +147,10 @@ const de = {
   },
   news: {
     cloud_sync_ledgers: {
-      title: 'Cloud Sync und geteilte Bücher',
-      cloudSync: {
-        title: 'Cloud Sync ist da',
-        body: 'Melde dich mit Apple, Google oder E-Mail an, und deine Daten sind auf all deinen Handys gleich. Änderungen kommen in Sekunden an. Synchronisieren ist Teil von Pro. Du findest es unter Einstellungen > Cloud Sync.',
-      },
+      title: 'Mehrere Bücher',
       ledgers: {
         title: 'Mehrere Bücher',
         body: 'Führe private Ausgaben, Arbeit und eine Reise in getrennten Büchern, jedes mit eigenen Konten, Kategorien und Währung. Starte leer, mit Konten und Kategorien eines anderen Buchs oder als vollständige Kopie. Teil von Pro.',
-      },
-      sharedLedgers: {
-        title: 'Geteilte Bücher',
-        body: 'Teile ein Buch mit bis zu 5 Personen und führt das Haushaltsbudget gemeinsam. Alle tragen ein und sehen die Einträge auf dem eigenen Handy. Beitreten ist kostenlos; Teilen braucht Pro.',
       },
     },
     web_dashboard: {
@@ -2630,6 +2622,11 @@ const de = {
     needs_pro_body:
       'Du bist angemeldet. Hol dir Pro, um mit dem Sync zu beginnen. Pro auf einem anderen Handy gekauft? Melde dich auch dort bei Cloud Sync an, dann wird es hier freigeschaltet.',
     tile_on: 'An',
+    profile_off: 'Aus',
+    profile_paused: 'Pausiert',
+    profile_needs_pro: 'Pro nötig',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'Öffnet Cloud Sync',
     errors: {
       offline: 'Du bist offline',
       session_expired: 'Abgemeldet. Bitte neu anmelden.',

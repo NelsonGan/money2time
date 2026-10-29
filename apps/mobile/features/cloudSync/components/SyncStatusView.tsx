@@ -99,7 +99,7 @@ export function SyncStatusView() {
 }
 
 /** Turns its child while mounted; holds still with Reduce Motion on. */
-function Spinning({ children }: { children: React.ReactNode }) {
+export function Spinning({ children }: { children: React.ReactNode }) {
   const reduceMotion = useReducedMotion();
   const turn = useSharedValue(0);
   useEffect(() => {

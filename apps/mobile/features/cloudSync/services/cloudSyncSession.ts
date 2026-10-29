@@ -93,3 +93,19 @@ export async function savePendingSignOut(pending: PendingSignOut): Promise<void>
 export async function clearPendingSignOut(): Promise<void> {
   await SecureStore.deleteItemAsync(PENDING_SIGN_OUT_KEY).catch(() => undefined);
 }
+
+// Whether this phone has signed in to Cloud Sync, kept through a sign-out the
+// app makes (expired session, failed link) and cleared when the user signs
+// out or deletes the account. Keeps the UI reachable off the allow list.
+
+const USED_HERE_KEY = 'm2t.cloudSync.usedHere';
+
+export async function getCloudSyncUsedHere(): Promise<boolean> {
+  return (await AsyncStorage.getItem(USED_HERE_KEY).catch(() => null)) === '1';
+}
+
+export async function setCloudSyncUsedHere(used: boolean): Promise<void> {
+  await (
+    used ? AsyncStorage.setItem(USED_HERE_KEY, '1') : AsyncStorage.removeItem(USED_HERE_KEY)
+  ).catch(() => undefined);
+}

@@ -36,19 +36,15 @@ describe('feature announcement state', () => {
     );
   });
 
-  it('surfaces the Cloud Sync and ledgers release with all three pages on both platforms', () => {
+  it('announces ledgers alone, leaving out the allow-listed Cloud Sync', () => {
     const latest = getLatestFeatureAnnouncement()!;
     expect(latest).toMatchObject({
       id: 'cloud_sync_ledgers_2026_10',
       announcementNumber: 22,
-      pages: [
-        { key: 'cloudSync', visual: 'cloudSync', cta: 'openCloudSync' },
-        { key: 'ledgers', visual: 'ledgers', cta: 'openLedgers' },
-        { key: 'sharedLedgers', visual: 'sharedLedgers', cta: 'openLedgers' },
-      ],
+      pages: [{ key: 'ledgers', visual: 'ledgers', cta: 'openLedgers' }],
     });
-    expect(announcementPagesForPlatform(latest, 'ios')).toHaveLength(3);
-    expect(announcementPagesForPlatform(latest, 'android')).toHaveLength(3);
+    expect(announcementPagesForPlatform(latest, 'ios')).toHaveLength(1);
+    expect(announcementPagesForPlatform(latest, 'android')).toHaveLength(1);
   });
 
   it('keeps all five web dashboard pages on both platforms', () => {

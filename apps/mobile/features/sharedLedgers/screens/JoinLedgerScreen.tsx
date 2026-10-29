@@ -23,7 +23,11 @@ import {
   Text,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
-import { useCloudSync, useCloudSyncEnabled } from '~/features/cloudSync/CloudSyncContext';
+import {
+  useCloudSync,
+  useCloudSyncAllowed,
+  useCloudSyncEnabled,
+} from '~/features/cloudSync/CloudSyncContext';
 import { KeepDataChoice } from '~/features/cloudSync/components/KeepDataChoice';
 import { SignedOutView } from '~/features/cloudSync/components/SignedOutView';
 import { type InvitePreview, previewInvite } from '~/features/cloudSync/services/sharedLedgersApi';
@@ -53,6 +57,8 @@ interface JoinLedgerScreenProps {
  */
 export function JoinLedgerScreen({ code, onClose, onJoined }: JoinLedgerScreenProps) {
   const enabled = useCloudSyncEnabled();
+  // Unknown until flags load: wait rather than say joining is unavailable.
+  const allowKnown = useCloudSyncAllowed() !== undefined;
   const sync = useCloudSync();
   const { ledgers, switchLedger } = useApp();
   const sharedLedgers = useSharedLedgers();
@@ -63,6 +69,8 @@ export function JoinLedgerScreen({ code, onClose, onJoined }: JoinLedgerScreenPr
   const [joining, setJoining] = useState(false);
 
   useEffect(() => {
+    // Off the allow list the screen only says joining isn't available.
+    if (!enabled) return;
     let cancelled = false;
     previewInvite(code)
       .then((result) => {
@@ -74,7 +82,7 @@ export function JoinLedgerScreen({ code, onClose, onJoined }: JoinLedgerScreenPr
     return () => {
       cancelled = true;
     };
-  }, [code]);
+  }, [code, enabled]);
 
   const join = async () => {
     if (joining) return;
@@ -106,7 +114,9 @@ export function JoinLedgerScreen({ code, onClose, onJoined }: JoinLedgerScreenPr
   const hereRole = here ? (sharedHere?.role ?? 'owner') : null;
 
   let action: React.ReactNode;
-  if (!enabled) {
+  if (!enabled && !allowKnown) {
+    action = null;
+  } else if (!enabled) {
     action = <NoticeBanner icon={Info} text={I18n.t('shared_ledgers.join_unavailable')} />;
   } else if (!preview) {
     action = null;

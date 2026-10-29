@@ -147,18 +147,10 @@ const id = {
   },
   news: {
     cloud_sync_ledgers: {
-      title: 'Cloud Sync dan buku bersama',
-      cloudSync: {
-        title: 'Cloud Sync sudah hadir',
-        body: 'Masuk dengan Apple, Google, atau email, dan data Anda sama di semua ponsel Anda. Perubahan tiba dalam hitungan detik. Sinkronisasi termasuk dalam Pro. Temukan di Pengaturan > Cloud Sync.',
-      },
+      title: 'Banyak buku',
       ledgers: {
         title: 'Banyak buku',
         body: 'Pisahkan pengeluaran pribadi, pekerjaan, dan perjalanan ke buku berbeda, masing-masing dengan akun, kategori, dan mata uang sendiri. Mulai kosong, dari akun dan kategori buku lain, atau sebagai salinan lengkap. Bagian dari Pro.',
-      },
-      sharedLedgers: {
-        title: 'Buku bersama',
-        body: 'Bagikan buku dengan hingga 5 orang dan kelola anggaran rumah tangga bersama. Semua orang menambah catatan dan melihatnya di ponsel masing-masing. Bergabung gratis; berbagi perlu Pro.',
       },
     },
     web_dashboard: {
@@ -2603,6 +2595,11 @@ const id = {
     needs_pro_body:
       'Anda sudah masuk. Dapatkan Pro untuk mulai sinkronisasi. Membeli Pro di ponsel lain? Masuk juga ke Cloud Sync di sana, dan Pro akan terbuka di sini.',
     tile_on: 'Aktif',
+    profile_off: 'Mati',
+    profile_paused: 'Dijeda',
+    profile_needs_pro: 'Perlu Pro',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'Membuka Cloud Sync',
     errors: {
       offline: 'Kamu sedang offline',
       session_expired: 'Kamu keluar. Masuk lagi.',

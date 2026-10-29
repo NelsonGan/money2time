@@ -122,18 +122,10 @@ const en = {
   },
   news: {
     cloud_sync_ledgers: {
-      title: 'Cloud Sync and shared ledgers',
-      cloudSync: {
-        title: 'Cloud Sync is here',
-        body: 'Sign in with Apple, Google or email, and your data stays the same on all your phones. Changes arrive in seconds. Syncing is part of Pro. Find it in Settings > Cloud Sync.',
-      },
+      title: 'Multiple ledgers',
       ledgers: {
         title: 'Multiple ledgers',
         body: "Keep personal spending, work and a trip in separate books, each with its own accounts, categories and currency. Start one empty, from another ledger's accounts and categories, or as a full copy. Part of Pro.",
-      },
-      sharedLedgers: {
-        title: 'Shared ledgers',
-        body: 'Share a ledger with up to 5 people and keep the household budget together. Everyone adds entries and sees them on their own phone. Joining is free; sharing needs Pro.',
       },
     },
     web_dashboard: {
@@ -2587,6 +2579,11 @@ const en = {
     needs_pro_body:
       "You're signed in. Get Pro to start syncing. Bought Pro on another phone? Sign in to Cloud Sync there too, and it unlocks here.",
     tile_on: 'On',
+    profile_off: 'Off',
+    profile_paused: 'Paused',
+    profile_needs_pro: 'Needs Pro',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'Opens Cloud Sync',
     errors: {
       offline: "You're offline",
       session_expired: 'Signed out. Sign in again.',
