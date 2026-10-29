@@ -9,6 +9,7 @@ import React, {
   useState,
 } from 'react';
 import {
+  Alert,
   AppState as RNAppState,
   type AppStateStatus,
   Pressable,
@@ -103,6 +104,7 @@ import { settingsRepository } from '~/lib/repositories/settingsRepository';
 import { transactionSplitsRepository } from '~/lib/repositories/transactionSplitsRepository';
 import {
   type CreateTransactionInput,
+  EntryLedgerGoneError,
   summarizeSplits,
   transactionsRepository,
 } from '~/lib/repositories/transactionsRepository';
@@ -2542,6 +2544,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             reportError(error, { scope: 'autolog_after_save' });
           } else {
             setTransactions((prev) => prev.filter((tx) => tx.id !== id));
+            if (error instanceof EntryLedgerGoneError) {
+              Alert.alert(I18n.t('ledgers.entry_ledger_gone'));
+            }
           }
         }
         refreshAccountBalances();

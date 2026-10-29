@@ -2926,6 +2926,8 @@ const it = {
     },
   },
   ledgers: {
+    entry_ledger_gone:
+      'Questa voce non è stata salvata: il suo registro è stato eliminato su un altro telefono.',
     label: 'Registro',
     title: 'Registri',
     switcher_label: 'Registro: {{name}}. Cambia registro',
@@ -3025,7 +3027,8 @@ const it = {
     changes_for_everyone:
       'Questo registro è condiviso, quindi la modifica vale per tutti i suoi membri.',
     leave_unsent:
-      'Le tue ultime voci in questo registro non sono ancora state inviate. Abbandonalo quando sei online, così non andranno perse.',
+      'Le tue ultime voci in questo registro non sono ancora state inviate. Se lo abbandoni ora, andranno perse.',
+    leave_anyway: 'Abbandona comunque',
     sign_out_unsent:
       'Alcune voci nei registri condivisi con te non sono ancora state inviate. Uscendo, quei registri vengono rimossi da questo telefono insieme alle voci.',
     sign_out_anyway: 'Esci comunque',

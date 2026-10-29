@@ -95,9 +95,10 @@ export function forgetChannel(channel: string): void {
   getSQLite().runSync('DELETE FROM sync_row_meta WHERE channel = ?', [channel]);
   getSQLite().runSync('DELETE FROM sync_media_pending WHERE channel = ?', [channel]);
   getSQLite().runSync('DELETE FROM sync_media_missing WHERE channel = ?', [channel]);
-  getSQLite().runSync('DELETE FROM sync_state WHERE key IN (?, ?, ?)', [
+  getSQLite().runSync('DELETE FROM sync_state WHERE key IN (?, ?, ?, ?)', [
     attachedKey(channel),
     detachedKey(channel),
+    unpushedKey(channel),
     `apply_pending:${channel}`,
   ]);
 }
@@ -105,6 +106,11 @@ export function forgetChannel(channel: string): void {
 /** sync_state key: the ledger's channel has taken the cloud copy and sent this phone's rows. */
 export function attachedKey(channel: string): string {
   return `attached:${channel}`;
+}
+
+/** sync_state key: rows were flushed into the channel's replica and not pushed yet. */
+export function unpushedKey(channel: string): string {
+  return `unpushed:${channel}`;
 }
 
 /** sync_state key: the ledger's rows have left the user's own cloud copy. */

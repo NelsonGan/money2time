@@ -42,6 +42,7 @@ import {
 import {
   deleteReplicaFiles,
   dropPersonalOutbox,
+  hasUnpushedChanges,
   pendingSharedChangeCount,
   runExclusive,
   SyncEngine,
@@ -475,11 +476,13 @@ class SharedLedgerSync {
     if (!ledger || ledger.role !== 'owner') return;
     const local = opts.whenUnreachable === 'local';
     if (this.session) {
-      try {
-        await this.takeLatest(ledger);
-      } catch (error) {
+      // Unreachable, a local delete goes ahead; a row this phone could not
+      // store never lets the database go.
+      const failure = await this.takeLatest(ledger).catch((error: unknown) => {
         if (!local) throw error;
-      }
+        return null;
+      });
+      if (failure) throw failure;
     }
     try {
       await stopSharing(await this.token(), ledger.shareId);
@@ -499,52 +502,60 @@ class SharedLedgerSync {
 
   /**
    * Before an owned ledger's database goes (stop sharing, deleting the
-   * account): takes members' latest entries. A paused ledger takes them with
-   * a read-only token, as nothing can go up. A ledger already gone on the
+   * account): takes members' latest entries. A paused ledger (or one the
+   * Worker turns out to have paused) takes them with a read-only token, as
+   * nothing can go up. Returns the first row that could not be written: the
+   * caller must not let the database go then. A ledger already gone on the
    * Worker, or a Worker that refuses a paused ledger's last download, has
    * nothing more to give.
    */
-  private async takeLatest(ledger: SharedLedger): Promise<void> {
-    try {
-      if (ledger.active) {
-        await (await this.engineFor(ledger)).syncNow();
-        return;
-      }
+  private async takeLatest(ledger: SharedLedger): Promise<Error | null> {
+    const download = async (paused: boolean): Promise<Error | null> => {
+      if (!paused) return (await (await this.engineFor(ledger)).syncNow()).applyError;
       const engine = await this.openEngine(ledger, true);
       try {
-        await engine.pullAndApply();
+        return await engine.pullAndApply();
       } finally {
         engine.close();
       }
+    };
+    try {
+      return await download(!ledger.active).catch((error: unknown) => {
+        if (ledger.active && isCode(error, 'ledger_paused')) return download(true);
+        throw error;
+      });
     } catch (error) {
-      if (!isCode(error, 'not_found', 'ledger_paused')) throw error;
+      if (isCode(error, 'not_found', 'ledger_paused')) return null;
+      throw error;
     }
   }
 
   /** Account deletion: every ledger the user shares takes members' latest entries first. */
   async takeLatestOfOwned(): Promise<void> {
     for (const ledger of listSharedLedgers()) {
-      if (ledger.role === 'owner') await this.takeLatest(ledger);
+      if (ledger.role !== 'owner') continue;
+      const failure = await this.takeLatest(ledger);
+      if (failure) throw failure;
     }
   }
 
   /**
    * Member: leaves, and this phone's copy of the ledger goes. Entries not sent
-   * yet go up first: when they cannot (offline), it refuses rather than lose
-   * them. Otherwise, signed out or offline, it still leaves here and tells
-   * the Worker after the next sign-in. A paused ledger's unsent entries could
-   * never reach anyone, so they do not hold it.
+   * yet go up first; when they cannot (offline, or the ledger is paused), it
+   * refuses with `unsent_changes` unless `force` (the user chose to lose
+   * them). Otherwise, signed out or offline, it still leaves here and tells
+   * the Worker after the next sign-in.
    */
-  async leave(ledgerId: string): Promise<void> {
+  async leave(ledgerId: string, opts: { force?: boolean } = {}): Promise<void> {
     const ledger = sharedLedgerFor(ledgerId);
     if (!ledger || ledger.role !== 'member') return;
-    if (ledger.active && (await this.hasUnsent(ledger))) {
-      if (this.session) {
+    if (!opts.force && this.hasUnsent(ledger)) {
+      if (ledger.active && this.session) {
         await this.engineFor(ledger)
           .then((engine) => engine.syncNow())
           .catch(() => undefined);
       }
-      if (await this.hasUnsent(ledger)) throw new CloudSyncApiError('unsent_changes', 0);
+      if (this.hasUnsent(ledger)) throw new CloudSyncApiError('unsent_changes', 0);
     }
     try {
       await leaveLedger(await this.token(), ledger.shareId);
@@ -563,20 +574,16 @@ class SharedLedgerSync {
 
   /**
    * Whether entries made on this phone have not all reached a ledger's
-   * database: still queued, or flushed into its replica by a sync whose push
-   * failed. An engine not opened since launch has nothing flushed yet.
+   * database, paused or not: still queued, or flushed into its replica by a
+   * sync whose push failed (recorded, so it holds across a restart).
    */
-  private async hasUnsent(ledger: SharedLedger): Promise<boolean> {
-    if (pendingSharedChangeCount([ledger.ledgerId]) > 0) return true;
-    return (await this.engines.get(ledger.shareId)?.hasUnpushedChanges()) ?? false;
+  private hasUnsent(ledger: SharedLedger): boolean {
+    return pendingSharedChangeCount([ledger.ledgerId]) > 0 || hasUnpushedChanges(ledger.shareId);
   }
 
   /** Sign-out: whether a joined ledger, which leaves the phone with it, has unsent entries. */
-  async joinedHaveUnsent(): Promise<boolean> {
-    for (const ledger of listSharedLedgers()) {
-      if (ledger.role === 'member' && ledger.active && (await this.hasUnsent(ledger))) return true;
-    }
-    return false;
+  joinedHaveUnsent(): boolean {
+    return listSharedLedgers().some((ledger) => ledger.role === 'member' && this.hasUnsent(ledger));
   }
 
   /** Joins with an invite code and downloads the ledger. Returns its id. */

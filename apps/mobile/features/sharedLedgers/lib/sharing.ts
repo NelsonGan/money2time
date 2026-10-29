@@ -26,8 +26,6 @@ export function sharingErrorMessage(error: unknown, context: 'share' | 'join' = 
         return I18n.t('shared_ledgers.join_paused');
       case 'own_ledger':
         return I18n.t('shared_ledgers.join_own');
-      case 'unsent_changes':
-        return I18n.t('shared_ledgers.leave_unsent');
       case 'not_pro':
         return I18n.t('cloud_sync.not_pro_body');
       default:

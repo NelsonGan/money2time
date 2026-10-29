@@ -10,39 +10,21 @@ import { I18n } from '~/lib/i18n';
 import { useSharedLedgers } from '../../sharedLedgers/hooks/useSharedLedgers';
 import { useCloudSync } from '../CloudSyncContext';
 import { errorMessage } from '../lib/messages';
-import { CloudSyncApiError } from '../services/cloudSyncApi';
+import { runAskingIfUnsent } from '../lib/unsentPrompt';
 
 /**
- * Signs out. While a ledger shared with the user still has entries that could
- * not be sent, asks first: those ledgers leave the phone with the sign-out.
- * Resolves false when the user stays signed in.
+ * Signs out, asking first while a ledger shared with the user holds unsent
+ * entries. Resolves false when the user stays signed in.
  */
-export async function signOutAskingFirst(
+export function signOutAskingFirst(
   signOut: ReturnType<typeof useCloudSync>['signOut'],
 ): Promise<boolean> {
-  try {
-    await signOut();
-    return true;
-  } catch (error) {
-    if (!(error instanceof CloudSyncApiError && error.code === 'unsent_changes')) throw error;
-  }
-  const anyway = await new Promise<boolean>((resolve) =>
-    Alert.alert(
-      I18n.t('cloud_sync.sign_out_confirm_title'),
-      I18n.t('shared_ledgers.sign_out_unsent'),
-      [
-        { text: I18n.t('common.cancel'), style: 'cancel', onPress: () => resolve(false) },
-        {
-          text: I18n.t('shared_ledgers.sign_out_anyway'),
-          style: 'destructive',
-          onPress: () => resolve(true),
-        },
-      ],
-      { onDismiss: () => resolve(false) },
-    ),
-  );
-  if (anyway) await signOut({ force: true });
-  return anyway;
+  return runAskingIfUnsent(signOut, {
+    title: I18n.t('cloud_sync.sign_out_confirm_title'),
+    message: I18n.t('shared_ledgers.sign_out_unsent'),
+    anyway: I18n.t('shared_ledgers.sign_out_anyway'),
+    cancel: I18n.t('common.cancel'),
+  });
 }
 
 /** Sign out and Delete account, each behind a confirmation. Shown whenever signed in. */

@@ -2918,6 +2918,7 @@ const tr = {
     },
   },
   ledgers: {
+    entry_ledger_gone: 'Bu kayıt kaydedilmedi: defteri başka bir telefonda silindi.',
     label: 'Defter',
     title: 'Defterler',
     switcher_label: 'Defter: {{name}}. Defter değiştir',
@@ -3017,7 +3018,8 @@ const tr = {
     changes_for_everyone:
       'Bu defter paylaşılıyor, bu yüzden bu değişiklik içindeki herkesi etkiler.',
     leave_unsent:
-      'Bu defterdeki son kayıtlarınız henüz gönderilmedi. Kaybolmamaları için çevrimiçi olduğunuzda ayrılın.',
+      'Bu defterdeki son kayıtlarınız henüz gönderilmedi. Şimdi ayrılırsanız kaybolurlar.',
+    leave_anyway: 'Yine de ayrıl',
     sign_out_unsent:
       'Sizinle paylaşılan defterlerdeki bazı kayıtlar henüz gönderilmedi. Çıkış yapmak bu defterleri kayıtlarla birlikte bu telefondan kaldırır.',
     sign_out_anyway: 'Yine de çıkış yap',

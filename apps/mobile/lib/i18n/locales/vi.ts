@@ -2888,6 +2888,7 @@ const vi = {
     },
   },
   ledgers: {
+    entry_ledger_gone: 'Mục này chưa được lưu: sổ của nó đã bị xoá trên điện thoại khác.',
     label: 'Sổ',
     title: 'Sổ',
     switcher_label: 'Sổ: {{name}}. Đổi sổ',
@@ -2984,7 +2985,8 @@ const vi = {
       'Sổ chia sẻ không bị thay đổi. Để gỡ một sổ, hãy rời sổ hoặc ngừng chia sẻ.',
     changes_for_everyone: 'Sổ này được chia sẻ, nên thay đổi này áp dụng cho mọi người trong sổ.',
     leave_unsent:
-      'Các mục mới nhất của bạn trong sổ này chưa được gửi. Hãy rời sổ khi bạn trực tuyến để không bị mất.',
+      'Các mục mới nhất của bạn trong sổ này chưa được gửi. Nếu rời sổ bây giờ, chúng sẽ bị mất.',
+    leave_anyway: 'Vẫn rời sổ',
     sign_out_unsent:
       'Một số mục trong sổ được chia sẻ với bạn chưa được gửi. Đăng xuất sẽ gỡ các sổ đó khỏi điện thoại này cùng các mục.',
     sign_out_anyway: 'Vẫn đăng xuất',

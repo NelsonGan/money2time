@@ -32,7 +32,7 @@ import { triggerHaptic } from '~/services/haptics';
 
 import { SharedLedgerHero } from '../components/SharedLedgerHero';
 import { useSharedLedger, useSharedLedgers } from '../hooks/useSharedLedgers';
-import { confirmLeaveLedger } from '../lib/confirmLeave';
+import { confirmLeaveLedger, leaveAskingFirst } from '../lib/confirmLeave';
 import { MAX_MEMBERS, MAX_SHARED_LEDGERS, sharingErrorMessage } from '../lib/sharing';
 
 interface LedgerSharingScreenProps {
@@ -227,7 +227,7 @@ export function LedgerSharingScreen({
       shared?.ownerName ?? '',
       () =>
         void run('leave', async () => {
-          await sync.leaveLedger(ledgerId);
+          if (!(await leaveAskingFirst((opts) => sync.leaveLedger(ledgerId, opts), name))) return;
           // An open ledger is only deleted back on the main screens; this page
           // has nothing left to show for it. Once, with the effect above.
           if (leftRef.current) return;

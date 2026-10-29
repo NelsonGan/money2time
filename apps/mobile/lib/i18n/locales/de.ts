@@ -2949,6 +2949,8 @@ const de = {
     },
   },
   ledgers: {
+    entry_ledger_gone:
+      'Dieser Eintrag wurde nicht gespeichert: Sein Buch wurde auf einem anderen Telefon gelöscht.',
     label: 'Buch',
     title: 'Bücher',
     switcher_label: 'Buch: {{name}}. Buch wechseln',
@@ -3047,7 +3049,8 @@ const de = {
       'Geteilte Bücher bleiben unverändert. Verlasse ein Buch oder beende das Teilen, um es zu entfernen.',
     changes_for_everyone: 'Dieses Buch ist geteilt, daher ändert sich das für alle darin.',
     leave_unsent:
-      'Deine neuesten Einträge in diesem Buch wurden noch nicht gesendet. Verlasse es, wenn du online bist, damit sie nicht verloren gehen.',
+      'Deine neuesten Einträge in diesem Buch wurden noch nicht gesendet. Wenn du es jetzt verlässt, gehen sie verloren.',
+    leave_anyway: 'Trotzdem verlassen',
     sign_out_unsent:
       'Einige Einträge in Büchern, die mit dir geteilt wurden, sind noch nicht gesendet. Beim Abmelden werden diese Bücher samt den Einträgen von diesem Telefon entfernt.',
     sign_out_anyway: 'Trotzdem abmelden',

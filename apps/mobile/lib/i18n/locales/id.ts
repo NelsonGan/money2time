@@ -2921,6 +2921,7 @@ const id = {
     },
   },
   ledgers: {
+    entry_ledger_gone: 'Entri ini tidak disimpan: bukunya dihapus di ponsel lain.',
     label: 'Buku',
     title: 'Buku',
     switcher_label: 'Buku: {{name}}. Ganti buku',
@@ -3021,7 +3022,8 @@ const id = {
     changes_for_everyone:
       'Buku ini dibagikan, jadi perubahan ini berlaku untuk semua orang di dalamnya.',
     leave_unsent:
-      'Entri terbaru Anda di buku ini belum terkirim. Keluar setelah Anda online agar entri tersebut tidak hilang.',
+      'Entri terbaru Anda di buku ini belum terkirim. Jika keluar sekarang, entri tersebut akan hilang.',
+    leave_anyway: 'Tetap keluar',
     sign_out_unsent:
       'Beberapa entri di buku yang dibagikan kepada Anda belum terkirim. Keluar akan menghapus buku tersebut dari ponsel ini beserta entrinya.',
     sign_out_anyway: 'Tetap keluar',

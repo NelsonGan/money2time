@@ -582,7 +582,9 @@ app side lives in `features/ledgers/`.
   - the hourly value and wage history, kept in the default ledger's main
     currency: a ledger in another currency shows, values time and saves the
     wage converted at the exchange-rate table (`wageInCurrency`,
-    `storedWageConfig`), unconverted while it has no rate;
+    `storedWageConfig`), unconverted while it has no rate. The Web
+    Dashboard's export converts it the same way; a full backup keeps it as
+    stored;
   - the exchange-rate cache;
   - Pro.
 - **Each ledger's own:**
@@ -1251,6 +1253,9 @@ updated_at)`, with each row as JSON, plus `sync_info` (last device, last
   another phone, or is missing from a cloud copy this phone takes, the
   default ledger opens instead (`reloadAfterApply`), and taking a cloud copy
   makes the default ledger row again if the copy has none, as a restore does.
+  An editor left open on the gone ledger cannot save into the default one: a
+  new entry naming another ledger's account or category is refused
+  (`EntryLedgerGoneError`) and the user is told it was not saved.
   The choice screen's counts cover every ledger. A pulled settings row only
   updates this phone's own row: an upsert would fail SQLite's NOT NULL check on
   the missing columns.
@@ -1401,13 +1406,18 @@ The app side is `features/sharedLedgers/` (screens) and
   addresses). The owner can remove anyone at any time; a member can leave.
   Either way the ledger is deleted from that person's phone at their next
   sync, entries they added stay in it. Leaving sends the member's unsent
-  entries first, and refuses ("…haven't been sent yet") while it cannot;
-  a paused ledger's unsent entries, which could reach nobody, do not hold it.
+  entries first; while it cannot (offline, or the ledger is paused) it asks
+  first ("…If you leave now, they're lost", Leave anyway). Unsent means
+  still in the outbox, or flushed into the ledger's replica by a sync whose
+  push failed (`unpushed:<channel>` in `sync_state`, so it holds across a
+  restart).
 - **Stopping.** _Stop sharing_ (or deleting a shared ledger) first syncs the
   ledger, so members' latest entries are in (a paused one is downloaded with
   a one-day read-only token the Worker gives only its owner for this,
   `{ final: true }` on the credentials request), then removes every member and
-  deletes the ledger's cloud database and images. The owner keeps the ledger
+  deletes the ledger's cloud database and images. A downloaded row this phone
+  cannot store stops it, so the database never goes with an entry only it
+  held. The owner keeps the ledger
   with everything in it, and it goes back into their own cloud copy. Deleting
   the Cloud Sync account does the same for every ledger the user shares, and
   its confirmation says so.
@@ -1447,8 +1457,9 @@ The app side is `features/sharedLedgers/` (screens) and
 - **Sign-out** deletes the ledgers the user joined from the phone (they are
   someone else's data; signing in again brings them back), and its
   confirmation says so. An owner keeps theirs. It sends their unsent entries
-  first; while one still cannot go (offline), it asks before signing out
-  (Sign out anyway), as those entries would go with the ledger. Cancel on the
+  first; while one still cannot go (offline, or the ledger is paused), it
+  asks before signing out (Sign out anyway), as those entries would go with
+  the ledger. Cancel on the
   keep-which-data choice signs out the same way.
 
 **How it works**

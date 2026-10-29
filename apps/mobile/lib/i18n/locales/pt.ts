@@ -2925,6 +2925,7 @@ const pt = {
     },
   },
   ledgers: {
+    entry_ledger_gone: 'Este lançamento não foi salvo: o livro dele foi excluído em outro celular.',
     label: 'Livro',
     title: 'Livros',
     switcher_label: 'Livro: {{name}}. Trocar de livro',
@@ -3026,7 +3027,8 @@ const pt = {
     changes_for_everyone:
       'Este livro é compartilhado, então isso o altera para todos que fazem parte dele.',
     leave_unsent:
-      'Seus lançamentos mais recentes neste livro ainda não foram enviados. Saia quando estiver online para não perdê-los.',
+      'Seus lançamentos mais recentes neste livro ainda não foram enviados. Se sair agora, eles serão perdidos.',
+    leave_anyway: 'Sair mesmo assim',
     sign_out_unsent:
       'Alguns lançamentos em livros compartilhados com você ainda não foram enviados. Sair remove esses livros deste celular, junto com os lançamentos.',
     sign_out_anyway: 'Sair mesmo assim',

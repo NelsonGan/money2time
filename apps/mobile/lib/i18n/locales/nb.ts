@@ -2909,6 +2909,7 @@ const nb = {
     },
   },
   ledgers: {
+    entry_ledger_gone: 'Posten ble ikke lagret: regnskapet ble slettet på en annen telefon.',
     label: 'Regnskap',
     title: 'Regnskap',
     switcher_label: 'Regnskap: {{name}}. Bytt regnskap',
@@ -3007,7 +3008,8 @@ const nb = {
       'Delte regnskap endres ikke. Forlat et regnskap eller slutt å dele det for å fjerne det.',
     changes_for_everyone: 'Dette regnskapet er delt, så dette endrer det for alle i det.',
     leave_unsent:
-      'De nyeste postene dine i dette regnskapet er ikke sendt ennå. Forlat det når du er på nett, så de ikke går tapt.',
+      'De nyeste postene dine i dette regnskapet er ikke sendt ennå. Hvis du forlater det nå, går de tapt.',
+    leave_anyway: 'Forlat likevel',
     sign_out_unsent:
       'Noen poster i regnskap som er delt med deg, er ikke sendt ennå. Når du logger ut, fjernes disse regnskapene fra telefonen sammen med postene.',
     sign_out_anyway: 'Logg ut likevel',

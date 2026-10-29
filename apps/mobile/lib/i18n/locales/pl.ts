@@ -2914,6 +2914,7 @@ const pl = {
     },
   },
   ledgers: {
+    entry_ledger_gone: 'Ten wpis nie został zapisany: jego księgę usunięto na innym telefonie.',
     label: 'Księga',
     title: 'Księgi',
     switcher_label: 'Księga: {{name}}. Zmień księgę',
@@ -3014,7 +3015,8 @@ const pl = {
     changes_for_everyone:
       'Ta księga jest udostępniona, więc zmiana dotyczy wszystkich jej uczestników.',
     leave_unsent:
-      'Twoje najnowsze wpisy w tej księdze nie zostały jeszcze wysłane. Opuść ją, gdy będziesz online, aby ich nie stracić.',
+      'Twoje najnowsze wpisy w tej księdze nie zostały jeszcze wysłane. Jeśli ją teraz opuścisz, przepadną.',
+    leave_anyway: 'Opuść mimo to',
     sign_out_unsent:
       'Niektóre wpisy w udostępnionych Ci księgach nie zostały jeszcze wysłane. Wylogowanie usunie te księgi z telefonu razem z tymi wpisami.',
     sign_out_anyway: 'Wyloguj mimo to',

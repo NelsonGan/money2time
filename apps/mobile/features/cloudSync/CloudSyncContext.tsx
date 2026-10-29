@@ -152,7 +152,8 @@ interface CloudSyncContextValue {
     opts?: { whenUnreachable?: 'fail' | 'local' },
   ) => Promise<void>;
   /** Member: leave; this phone's copy goes. */
-  leaveLedger: (ledgerId: string) => Promise<void>;
+  /** Leaves; throws `unsent_changes` while it holds unsent entries, unless `force`. */
+  leaveLedger: (ledgerId: string, opts?: { force?: boolean }) => Promise<void>;
   /** Joins with an invite code; returns the ledger's id, now on this phone. */
   joinLedger: (code: string) => Promise<string>;
   /** The Worker session token, for the shared-ledger screens' own calls. */
@@ -827,7 +828,7 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       await sharedLedgerSync.waitIdle();
       // A failed sync may have left changes in a replica, out of the outbox.
       await sharedLedgerSync.syncAll().catch(() => undefined);
-      if (!opts.force && (await sharedLedgerSync.joinedHaveUnsent())) {
+      if (!opts.force && sharedLedgerSync.joinedHaveUnsent()) {
         closingRef.current = false;
         throw new CloudSyncApiError('unsent_changes', 0);
       }
@@ -1066,8 +1067,8 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   );
 
   const leaveLedger = useCallback(
-    async (ledgerId: string) => {
-      await sharedLedgerSync.leave(ledgerId);
+    async (ledgerId: string, opts?: { force?: boolean }) => {
+      await sharedLedgerSync.leave(ledgerId, opts);
       void trackEvent(AnalyticsEvents.SHARED_LEDGER_LEFT);
       reloadAfterApply();
     },

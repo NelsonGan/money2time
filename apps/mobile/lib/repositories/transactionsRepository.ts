@@ -25,6 +25,35 @@ import {
 } from './mappers';
 import { transactionSplitsRepository } from './transactionSplitsRepository';
 
+/**
+ * A new entry naming another ledger's account or category: the ledger it was
+ * drafted in is gone (deleted on another phone while its editor was open,
+ * which opens the default ledger). Saving it here would mix the two.
+ */
+export class EntryLedgerGoneError extends Error {
+  constructor() {
+    super('entry_ledger_gone');
+    this.name = 'EntryLedgerGoneError';
+  }
+}
+
+function assertInOpenLedger(input: CreateTransactionInput): void {
+  const refs: [string, string | null | undefined][] = [
+    ['accounts', input.accountId],
+    ['accounts', input.fromAccountId],
+    ['accounts', input.toAccountId],
+    ['categories', input.categoryId],
+  ];
+  for (const [table, refId] of refs) {
+    if (!refId) continue;
+    const row = getSQLite().getFirstSync<{ ledger_id: string }>(
+      `SELECT ledger_id FROM ${table} WHERE id = ?`,
+      [refId],
+    );
+    if (row && row.ledger_id !== getActiveLedgerId()) throw new EntryLedgerGoneError();
+  }
+}
+
 type RelationRow = {
   txId: string;
   accountId: string | null;
@@ -597,8 +626,9 @@ class TransactionsRepository {
    * the reconcile after the write has nothing to change.
    */
   createWithId(id: string, input: CreateTransactionInput, now: string = nowIso()) {
-    const db = getDb();
     const normalizedInput = normalizeTransactionInput(input);
+    assertInOpenLedger(normalizedInput);
+    const db = getDb();
 
     db.insert(transactionsTable)
       .values({

@@ -2870,6 +2870,7 @@ const ko = {
     },
   },
   ledgers: {
+    entry_ledger_gone: '이 내역은 저장되지 않았습니다. 가계부가 다른 휴대폰에서 삭제되었습니다.',
     label: '가계부',
     title: '가계부',
     switcher_label: '가계부: {{name}}. 가계부 전환',
@@ -2967,8 +2968,8 @@ const ko = {
     no_longer_shared: '이 가계부는 더 이상 공유되지 않습니다.',
     reset_keeps_shared: '공유 가계부는 변경되지 않습니다. 삭제하려면 나가거나 공유를 중지하세요.',
     changes_for_everyone: '이 가계부는 공유되어 있어 참여한 모든 사람에게 적용됩니다.',
-    leave_unsent:
-      '이 가계부의 최근 내역이 아직 전송되지 않았습니다. 내역이 사라지지 않도록 온라인일 때 나가세요.',
+    leave_unsent: '이 가계부의 최근 내역이 아직 전송되지 않았습니다. 지금 나가면 사라집니다.',
+    leave_anyway: '그래도 나가기',
     sign_out_unsent:
       '공유받은 가계부에 아직 전송되지 않은 내역이 있습니다. 로그아웃하면 해당 가계부가 내역과 함께 이 휴대폰에서 삭제됩니다.',
     sign_out_anyway: '그래도 로그아웃',

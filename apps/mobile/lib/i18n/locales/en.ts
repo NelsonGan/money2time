@@ -2903,6 +2903,7 @@ const en = {
     },
   },
   ledgers: {
+    entry_ledger_gone: "This entry wasn't saved: its ledger was deleted on another phone.",
     label: 'Ledger',
     title: 'Ledgers',
     switcher_label: 'Ledger: {{name}}. Switch ledger',
@@ -2999,7 +3000,8 @@ const en = {
       'Shared ledgers are not changed. To remove one, leave it or stop sharing it.',
     changes_for_everyone: 'This ledger is shared, so this changes it for everyone in it.',
     leave_unsent:
-      "Your latest entries in this ledger haven't been sent yet. Leave once you're online, so they aren't lost.",
+      "Your latest entries in this ledger haven't been sent yet. If you leave now, they're lost.",
+    leave_anyway: 'Leave anyway',
     sign_out_unsent:
       "Some entries in ledgers shared with you haven't been sent yet. Signing out removes those ledgers from this phone, and those entries with them.",
     sign_out_anyway: 'Sign out anyway',

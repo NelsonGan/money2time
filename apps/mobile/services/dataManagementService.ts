@@ -24,6 +24,8 @@ import {
   type UserAssetBackupEntry,
   type UserAssetReadCache,
 } from '~/services/userAssets';
+import type { ExchangeRate } from '~/types';
+import { buildRateTable, resolveRate } from '~/utils/currency';
 import { getErrorMessage } from '~/utils/errorHandling';
 import { newAppUserId, nowIso } from '~/utils/id';
 
@@ -231,6 +233,7 @@ function onlyOpenLedger(data: BackupData): BackupData {
       ledger && ledgerId !== DEFAULT_LEDGER_ID
         ? tables.settings.map((row) => withLedgerSettings(row, ledger))
         : tables.settings,
+    monthly_wage_settings: wagesInLedgerCurrency(tables, ledger),
     ledgers: ledger ? [ledger] : [],
   };
 
@@ -259,6 +262,36 @@ function onlyOpenLedger(data: BackupData): BackupData {
  * payback account, quick-entry and payment-alert picks and Insights
  * preferences over the default ledger's (see lib/repositories/ledgerPrefs.ts).
  */
+/**
+ * Wages are kept in the default ledger's currency; the app shows them, and
+ * saves the browser's wage edits, in the open ledger's (`wageInCurrency`). The
+ * export follows, converted at the exported rates, unconverted without one.
+ */
+function wagesInLedgerCurrency(
+  tables: BackupTables,
+  ledger: Record<string, unknown> | undefined,
+): Record<string, unknown>[] {
+  const stored = tables.settings[0]?.currency_code;
+  const open = ledger?.currency_code ?? stored;
+  const rates = (tables.exchange_rates ?? []).map((row) => ({
+    baseCurrency: String(row.base_currency),
+    quoteCurrency: String(row.quote_currency),
+    rate: Number(row.rate),
+    asOfDate: String(row.as_of_date),
+  })) as ExchangeRate[];
+  const rate =
+    typeof stored === 'string' && typeof open === 'string'
+      ? (resolveRate(stored, open, buildRateTable(open, rates)) ?? 1)
+      : 1;
+  if (rate === 1) return tables.monthly_wage_settings;
+  return tables.monthly_wage_settings.map((row) => ({
+    ...row,
+    wage_amount: Number(row.wage_amount) * rate,
+    base_hourly_rate: Number(row.base_hourly_rate) * rate,
+    true_hourly_rate: Number(row.true_hourly_rate) * rate,
+  }));
+}
+
 function withLedgerSettings(
   row: Record<string, unknown>,
   ledger: Record<string, unknown>,

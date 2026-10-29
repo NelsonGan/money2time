@@ -2928,6 +2928,7 @@ const es = {
     },
   },
   ledgers: {
+    entry_ledger_gone: 'Este movimiento no se guardó: su libro se eliminó en otro teléfono.',
     label: 'Libro',
     title: 'Libros',
     switcher_label: 'Libro: {{name}}. Cambiar de libro',
@@ -3031,7 +3032,8 @@ const es = {
     changes_for_everyone:
       'Este libro es compartido, así que esto lo cambia para todos los que están en él.',
     leave_unsent:
-      'Tus últimos movimientos en este libro aún no se han enviado. Sal cuando tengas conexión para no perderlos.',
+      'Tus últimos movimientos en este libro aún no se han enviado. Si sales ahora, se perderán.',
+    leave_anyway: 'Salir igualmente',
     sign_out_unsent:
       'Algunos movimientos de libros compartidos contigo aún no se han enviado. Al cerrar sesión, esos libros se quitan de este teléfono junto con esos movimientos.',
     sign_out_anyway: 'Cerrar sesión igualmente',

@@ -7,6 +7,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import {
   channelOfRow,
   deletePersonalLedgerRows,
+  unpushedKey,
 } from '~/features/cloudSync/services/ledgerChannels';
 import {
   clearDeferredLedgerDeletes,
@@ -14,6 +15,7 @@ import {
   removeSharedLedger,
   saveSharedLedger,
 } from '~/features/cloudSync/services/sharedLedgerStore';
+import { sharedLedgerSync } from '~/features/cloudSync/services/sharedLedgerSync';
 import { getSQLite } from '~/lib/db/client';
 import { copyLedgerRows } from '~/lib/db/ledgerCopy';
 import {
@@ -28,6 +30,10 @@ import type { DbMigration } from '~/lib/db/migrations/types';
 import { accountsRepository } from '~/lib/repositories/accountsRepository';
 import { writeBudgetLines } from '~/lib/repositories/budgetLines';
 import { ledgersRepository } from '~/lib/repositories/ledgersRepository';
+import {
+  EntryLedgerGoneError,
+  transactionsRepository,
+} from '~/lib/repositories/transactionsRepository';
 import { applyBackupData, buildBackupData } from '~/services/dataManagementService';
 
 // Real SQL against real SQLite: every app migration, then the ledger code's
@@ -337,6 +343,47 @@ describe('ledgersRepository on SQLite', () => {
     }
   });
 
+  it('refuses to save a draft into another ledger (its own was deleted elsewhere)', () => {
+    setActiveLedgerId(DEFAULT_LEDGER_ID);
+    expect(() =>
+      transactionsRepository.createWithId('draft', {
+        type: 'expense',
+        amount: 5,
+        currency: 'USD',
+        date: '2026-10-28',
+        accountId: 'work-cash',
+      }),
+    ).toThrow(EntryLedgerGoneError);
+  });
+
+  it.each([true, false])(
+    'keeps a member from leaving with unsent entries after a restart (active: %s)',
+    async (active) => {
+      saveSharedLedger({
+        ledgerId: 'work',
+        shareId: 'share-1',
+        role: 'member',
+        name: 'Work',
+        ownerName: 'Sam',
+        memberCount: 2,
+        active,
+      });
+      try {
+        // A sync flushed them into the replica and its push failed: out of
+        // the outbox, and no engine open since the restart.
+        harness.connection.exec(
+          `INSERT INTO sync_state (key, value) VALUES ('${unpushedKey('share-1')}', '1')`,
+        );
+        await expect(sharedLedgerSync.leave('work')).rejects.toMatchObject({
+          code: 'unsent_changes',
+        });
+        expect(harness.all("SELECT id FROM ledgers WHERE id = 'work'")).toHaveLength(1);
+      } finally {
+        removeSharedLedger('work');
+      }
+    },
+  );
+
   it('never deletes the default ledger', () => {
     expect(() => ledgersRepository.softDelete(DEFAULT_LEDGER_ID)).toThrow();
     expect(harness.all('SELECT COUNT(*) AS n FROM transactions WHERE deleted_at IS NULL')).toEqual([
@@ -391,6 +438,14 @@ describe('backup and restore across ledgers', () => {
 
   it('gives the Web Dashboard the open ledger only, in its currency', async () => {
     addWorkLedger();
+    harness.connection.exec(`
+      UPDATE settings SET currency_code = 'MYR';
+      INSERT INTO exchange_rates (id, base_currency, quote_currency, rate, as_of_date, updated_at)
+        VALUES ('usd-myr', 'USD', 'MYR', 4, '2026-10-28', '${NOW}');
+      INSERT INTO monthly_wage_settings (id, month, wage_type, wage_amount, hours_worked_per_week,
+        workdays_per_week, commute_minutes_per_workday, base_hourly_rate, true_hourly_rate, created_at, updated_at)
+        VALUES ('oct', '2026-10', 'hourly', 40, 40, 5, 0, 40, 40, '${NOW}', '${NOW}');
+    `);
     setActiveLedgerId('work');
     const backup = await buildBackupData({ openLedgerOnly: true });
     expect(backup.version).toBe(3);
@@ -403,6 +458,11 @@ describe('backup and restore across ledgers', () => {
       default_payback_account_id: 'work-bank',
     });
     expect(backup.userAssets?.map((asset) => asset.path)).toEqual(['receipts/taxi.jpg']);
+    // RM40 an hour, as the app shows it in the USD ledger (RM4 to the dollar).
+    expect(backup.tables.monthly_wage_settings[0]).toMatchObject({
+      wage_amount: 10,
+      true_hourly_rate: 10,
+    });
   });
 
   it('restores every ledger and opens the default one', async () => {

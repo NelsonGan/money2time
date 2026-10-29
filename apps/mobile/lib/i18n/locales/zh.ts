@@ -2788,6 +2788,7 @@ const zh = {
     },
   },
   ledgers: {
+    entry_ledger_gone: '此记录未保存：其账本已在另一部手机上删除。',
     label: '账本',
     title: '账本',
     switcher_label: '账本：{{name}}。切换账本',
@@ -2880,7 +2881,8 @@ const zh = {
     no_longer_shared: '这个账本已不再共享。',
     reset_keeps_shared: '共享账本不会更改。如需移除，请退出或停止共享。',
     changes_for_everyone: '此账本是共享的，因此会对其中的所有人生效。',
-    leave_unsent: '你在此账本中的最新记录尚未发送。请在联网后再退出，以免丢失。',
+    leave_unsent: '你在此账本中的最新记录尚未发送。现在退出将丢失这些记录。',
+    leave_anyway: '仍然退出',
     sign_out_unsent: '与你共享的账本中有记录尚未发送。退出登录会将这些账本连同记录从此手机移除。',
     sign_out_anyway: '仍然退出',
     sign_out_joined_note: '与你共享的账本会从此手机移除，直到你再次登录。',

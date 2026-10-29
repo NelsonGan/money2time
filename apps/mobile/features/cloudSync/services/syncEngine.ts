@@ -68,6 +68,7 @@ import {
   personalRowsSql,
   recordedChannel,
   sharedLedgerIds,
+  unpushedKey,
 } from './ledgerChannels';
 import { listSharedLedgers } from './sharedLedgerStore';
 
@@ -523,6 +524,14 @@ export function dropPersonalOutbox(): void {
   }
 }
 
+/**
+ * Whether a channel has changes flushed into its replica that no push has
+ * carried yet (a sync failed after its flush). They are out of the outbox.
+ */
+export function hasUnpushedChanges(channel: string): boolean {
+  return getState(unpushedKey(channel)) === '1';
+}
+
 /** Forgets everything this phone knew about the cloud copy (sign-out, account switch). */
 export function resetLocalSyncState(): void {
   disableCapture();
@@ -609,8 +618,6 @@ export class SyncEngine {
   private removalsDeferred = false;
   /** The first pulled row this sync could not write. */
   private applyFailure: Error | null = null;
-  /** Rows were flushed into the replica but no push has carried them yet. */
-  private unannounced = false;
 
   constructor(private readonly config: EngineConfig) {}
 
@@ -667,20 +674,15 @@ export class SyncEngine {
   /**
    * Takes the cloud's changes into the app without sending anything: a paused
    * shared ledger's last download, with a read-only token, before it stops.
+   * Returns the first pulled row that could not be written, if any.
    */
-  pullAndApply(): Promise<number> {
+  pullAndApply(): Promise<Error | null> {
     return this.exclusive(async () => {
+      this.applyFailure = null;
       await this.db().pull();
-      return this.applyRemoteChanges();
+      await this.applyRemoteChanges();
+      return this.applyFailure;
     });
-  }
-
-  /**
-   * Whether changes made here wait in the replica for a push: a sync that
-   * failed after its flush leaves them there, out of the outbox.
-   */
-  async hasUnpushedChanges(): Promise<boolean> {
-    return (await this.db().stats()).cdcOperations > 0;
   }
 
   /** Resolves once every operation started so far has finished (sign-out waits for it). */
@@ -845,15 +847,16 @@ export class SyncEngine {
     const pulledFirst = !attaching && (await replica.pull());
     const { pushed: pushedRows, adopted } = await this.flushOutbox();
     appliedRows += adopted;
-    // Kept until a push succeeds: a failed push leaves the rows in the
-    // replica, and the retry that sends them flushes nothing new.
-    if (pushedRows > 0) this.unannounced = true;
+    // Kept until a push succeeds, across restarts: a failed push leaves the
+    // rows in the replica, out of the outbox, and the retry that sends them
+    // flushes nothing new.
+    if (pushedRows > 0) setState(unpushedKey(this.channel), '1');
     if (pushedRows > 0) await this.recordLastDevice();
     // Images first: a row must never reach another phone before its image can.
     await this.uploadPendingMedia();
     await replica.push();
-    const pushed = this.unannounced || attaching;
-    this.unannounced = false;
+    const pushed = hasUnpushedChanges(this.channel) || attaching;
+    setState(unpushedKey(this.channel), '0');
     if (attaching) setState(attachedKey(this.channel), '1');
     const pulled = (await replica.pull()) || pulledFirst;
     // Also re-applies after an apply that failed, which a later pull with no
