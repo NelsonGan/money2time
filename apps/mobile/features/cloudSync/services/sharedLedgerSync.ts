@@ -539,7 +539,11 @@ class SharedLedgerSync {
     const ledger = sharedLedgerFor(ledgerId);
     if (!ledger || ledger.role !== 'member') return;
     if (ledger.active && (await this.hasUnsent(ledger))) {
-      if (this.session) await this.syncNow(ledger).catch(() => undefined);
+      if (this.session) {
+        await this.engineFor(ledger)
+          .then((engine) => engine.syncNow())
+          .catch(() => undefined);
+      }
       if (await this.hasUnsent(ledger)) throw new CloudSyncApiError('unsent_changes', 0);
     }
     try {
@@ -573,10 +577,6 @@ class SharedLedgerSync {
       if (ledger.role === 'member' && ledger.active && (await this.hasUnsent(ledger))) return true;
     }
     return false;
-  }
-
-  private async syncNow(ledger: SharedLedger): Promise<void> {
-    await (await this.engineFor(ledger)).syncNow();
   }
 
   /** Joins with an invite code and downloads the ledger. Returns its id. */
