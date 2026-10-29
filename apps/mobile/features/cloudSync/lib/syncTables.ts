@@ -113,12 +113,18 @@ export const MEANINGFUL_ROWS: Readonly<Partial<Record<SyncTable, true | ((row: R
     ledgers: (row) => row.id !== DEFAULT_LEDGER_ID,
   };
 
-/** Whether `rowsOf` (a side's live rows by table) hold anything the user recorded. */
-export function hasMeaningfulRows(rowsOf: (table: SyncTable) => readonly Row[]): boolean {
-  return Object.entries(MEANINGFUL_ROWS).some(([table, test]) => {
-    const rows = rowsOf(table as SyncTable);
-    return test === true ? rows.length > 0 : rows.some(test);
-  });
+/** One side's live rows (this phone's, or the cloud copy's), by table. */
+export interface LiveRows {
+  count(table: SyncTable): number;
+  /** Read only for the tables whose rows need a test (small ones). */
+  rows(table: SyncTable): readonly Row[];
+}
+
+/** Whether a side holds anything the user recorded. */
+export function hasMeaningfulRows(side: LiveRows): boolean {
+  return Object.entries(MEANINGFUL_ROWS).some(([table, test]) =>
+    test === true ? side.count(table as SyncTable) > 0 : side.rows(table as SyncTable).some(test),
+  );
 }
 
 /** What this app version syncs, saved on the phone to spot additions after an update. */

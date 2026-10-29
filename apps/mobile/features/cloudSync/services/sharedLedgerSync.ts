@@ -512,6 +512,8 @@ class SharedLedgerSync {
   private async takeLatest(ledger: SharedLedger): Promise<Error | null> {
     const download = async (paused: boolean): Promise<Error | null> => {
       if (!paused) return (await (await this.engineFor(ledger)).syncNow()).applyError;
+      // One connection per replica file: the read-only one replaces any kept.
+      this.closeEngine(ledger.shareId);
       const engine = await this.openEngine(ledger, true);
       try {
         return await engine.pullAndApply();

@@ -194,6 +194,7 @@ import {
   resolveRate,
   storedWageConfig,
   wageInCurrency,
+  wageRate,
 } from '~/utils/currency';
 import { getErrorMessage, toError } from '~/utils/errorHandling';
 import {
@@ -1314,20 +1315,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // One wage serves every ledger, kept in the default ledger's currency. A
   // ledger in another currency reads and saves it in its own.
   const wageCurrency = ledgers.find((ledger) => ledger.id === DEFAULT_LEDGER_ID)?.currencyCode;
-  const wageRate = useMemo(() => {
-    const open = settings?.currencyCode;
-    if (!wageCurrency || !open) return 1;
-    return resolveRate(wageCurrency, open, rateTable) ?? 1;
-  }, [rateTable, settings?.currencyCode, wageCurrency]);
-  const wageRateRef = useRef(wageRate);
-  wageRateRef.current = wageRate;
+  const wageToLedgerRate = useMemo(
+    () => wageRate(wageCurrency, settings?.currencyCode, rateTable),
+    [rateTable, settings?.currencyCode, wageCurrency],
+  );
+  const wageRateRef = useRef(wageToLedgerRate);
+  wageRateRef.current = wageToLedgerRate;
   const currentMonthWage = useMemo(
-    () => storedCurrentWage && wageInCurrency(storedCurrentWage, wageRate),
-    [storedCurrentWage, wageRate],
+    () => storedCurrentWage && wageInCurrency(storedCurrentWage, wageToLedgerRate),
+    [storedCurrentWage, wageToLedgerRate],
   );
   const monthlyWages = useMemo(
-    () => storedWages.map((wage) => wageInCurrency(wage, wageRate)),
-    [storedWages, wageRate],
+    () =>
+      wageToLedgerRate === 1
+        ? storedWages
+        : storedWages.map((wage) => wageInCurrency(wage, wageToLedgerRate)),
+    [storedWages, wageToLedgerRate],
   );
 
   const reloadRateTable = useCallback((reportingCurrency: string) => {

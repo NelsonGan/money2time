@@ -29,6 +29,5 @@ export function leaveAskingFirst(
     title: I18n.t('shared_ledgers.leave_title', { name }),
     message: I18n.t('shared_ledgers.leave_unsent'),
     anyway: I18n.t('shared_ledgers.leave_anyway'),
-    cancel: I18n.t('common.cancel'),
   });
 }

@@ -12,7 +12,7 @@ const PARENT_COLUMN = {
 
 type BudgetLineTable = keyof typeof PARENT_COLUMN;
 
-export function budgetLineId(parentId: string, categoryId: string): string {
+function budgetLineId(parentId: string, categoryId: string): string {
   return `${parentId}:${categoryId}`;
 }
 

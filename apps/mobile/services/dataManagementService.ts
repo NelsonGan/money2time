@@ -25,7 +25,7 @@ import {
   type UserAssetReadCache,
 } from '~/services/userAssets';
 import type { ExchangeRate } from '~/types';
-import { buildRateTable, resolveRate } from '~/utils/currency';
+import { buildRateTable, wageRate } from '~/utils/currency';
 import { getErrorMessage } from '~/utils/errorHandling';
 import { newAppUserId, nowIso } from '~/utils/id';
 
@@ -281,7 +281,7 @@ function wagesInLedgerCurrency(
   })) as ExchangeRate[];
   const rate =
     typeof stored === 'string' && typeof open === 'string'
-      ? (resolveRate(stored, open, buildRateTable(open, rates)) ?? 1)
+      ? wageRate(stored, open, buildRateTable(open, rates))
       : 1;
   if (rate === 1) return tables.monthly_wage_settings;
   return tables.monthly_wage_settings.map((row) => ({

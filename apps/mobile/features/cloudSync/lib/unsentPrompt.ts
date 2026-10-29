@@ -4,6 +4,8 @@
 
 import { Alert } from 'react-native';
 
+import { I18n } from '~/lib/i18n';
+
 import { CloudSyncApiError } from '../services/cloudSyncApi';
 
 /**
@@ -13,7 +15,7 @@ import { CloudSyncApiError } from '../services/cloudSyncApi';
  */
 export async function runAskingIfUnsent(
   action: (opts?: { force?: boolean }) => Promise<void>,
-  prompt: { title: string; message: string; anyway: string; cancel: string },
+  prompt: { title: string; message: string; anyway: string },
 ): Promise<boolean> {
   try {
     await action();
@@ -26,7 +28,7 @@ export async function runAskingIfUnsent(
       prompt.title,
       prompt.message,
       [
-        { text: prompt.cancel, style: 'cancel', onPress: () => resolve(false) },
+        { text: I18n.t('common.cancel'), style: 'cancel', onPress: () => resolve(false) },
         { text: prompt.anyway, style: 'destructive', onPress: () => resolve(true) },
       ],
       { onDismiss: () => resolve(false) },

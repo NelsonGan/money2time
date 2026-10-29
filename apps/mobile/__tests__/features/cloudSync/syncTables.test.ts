@@ -77,7 +77,10 @@ describe('capture SQL', () => {
 });
 
 describe('what counts as recorded data', () => {
-  const side = (rows: Partial<Record<SyncTable, Row[]>>) => (table: SyncTable) => rows[table] ?? [];
+  const side = (rows: Partial<Record<SyncTable, Row[]>>) => ({
+    count: (table: SyncTable) => rows[table]?.length ?? 0,
+    rows: (table: SyncTable) => rows[table] ?? [],
+  });
   const starter: Row = { id: 'cash', type: 'debit', starting_balance: 0 };
 
   it('leaves out what onboarding sets up', () => {

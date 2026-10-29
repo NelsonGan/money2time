@@ -102,6 +102,18 @@ export function convert(amount: number, from: string, to: string, table: RateTab
   return { value: normalizeMoneyAmount(amount * rate), rateUsed: rate };
 }
 
+/**
+ * Wages are kept in the default ledger's currency (`stored`): the rate that
+ * shows them in the open ledger's (`open`), or 1 (unconverted) without one.
+ */
+export function wageRate(
+  stored: string | null | undefined,
+  open: string | null | undefined,
+  table: RateTable,
+): number {
+  return stored && open ? (resolveRate(stored, open, table) ?? 1) : 1;
+}
+
 /** A wage month in another currency: `rate` of it per unit of the stored currency. */
 export function wageInCurrency(wage: MonthlyWageSettings, rate: number): MonthlyWageSettings {
   if (rate === 1) return wage;

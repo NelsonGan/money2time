@@ -53,6 +53,7 @@ import {
   CURRENT_SYNCED_SHAPE,
   hasMeaningfulRows,
   isSyncTable,
+  type LiveRows,
   MEANINGFUL_ROWS,
   shapeAdditions,
   SYNC_TABLES,
@@ -467,11 +468,11 @@ export function pendingChangeCount(): number {
 }
 
 /**
- * Changes waiting to go up in shared ledgers: by default those that sync now
- * (active ones), else the given ones. The
- * shared-only schedule (a member without Pro, or Pro paused) asks this, not
- * `pendingChangeCount`: the user's own changes may be kept for when their
- * Pro is back, and must not make it sync every few seconds meanwhile.
+ * Changes waiting to go up in the given shared ledgers, by default those that
+ * sync now (active ones). The shared-only schedule (a member without Pro, or
+ * Pro paused) asks this, not `pendingChangeCount`: the user's own changes may
+ * be kept for when their Pro is back, and must not make it sync every few
+ * seconds meanwhile.
  */
 export function pendingSharedChangeCount(
   ledgerIds: readonly string[] = listSharedLedgers()
@@ -549,25 +550,29 @@ export function resetLocalSyncState(): void {
 
 const SUMMARY_TABLES = Object.keys(MEANINGFUL_ROWS) as SyncTable[];
 
-/** Counts and whether there is anything to keep, from a side's live rows by table. */
-function summaryOf(rowsOf: (table: SyncTable) => readonly Row[]): DataSummary {
+/** Counts and whether there is anything to keep, from a side's live rows. */
+function summaryOf(side: LiveRows): DataSummary {
   return {
-    transactions: rowsOf('transactions').length,
-    accounts: rowsOf('accounts').length,
-    hasMeaningfulData: hasMeaningfulRows(rowsOf),
+    transactions: side.count('transactions'),
+    accounts: side.count('accounts'),
+    hasMeaningfulData: hasMeaningfulRows(side),
   };
 }
 
 /** This phone's own data, without the shared ledgers (they sync on their own). */
 export function summarizeLocal(): DataSummary {
   const db = getSQLite();
-  return summaryOf((table) =>
-    tableExists(table)
-      ? db.getAllSync<Row>(
-          `SELECT * FROM "${table}" WHERE deleted_at IS NULL AND ${personalRowsSql(table)}`,
-        )
-      : [],
-  );
+  const live = (table: SyncTable) => `deleted_at IS NULL AND ${personalRowsSql(table)}`;
+  return summaryOf({
+    count: (table) =>
+      tableExists(table)
+        ? (db.getFirstSync<{ n: number }>(
+            `SELECT COUNT(*) AS n FROM "${table}" WHERE ${live(table)}`,
+          )?.n ?? 0)
+        : 0,
+    rows: (table) =>
+      tableExists(table) ? db.getAllSync<Row>(`SELECT * FROM "${table}" WHERE ${live(table)}`) : [],
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -720,7 +725,10 @@ export class SyncEngine {
       info.map((r) => [String(r.key), r.value == null ? null : String(r.value)]),
     );
     return {
-      ...summaryOf((table) => live.get(table) ?? []),
+      ...summaryOf({
+        count: (table) => live.get(table)?.length ?? 0,
+        rows: (table) => live.get(table) ?? [],
+      }),
       lastSyncedAt: Number(infoMap.get('last_synced_at') ?? '') || null,
       lastDeviceName: infoMap.get('last_device_name') ?? null,
     };
@@ -850,8 +858,10 @@ export class SyncEngine {
     // Kept until a push succeeds, across restarts: a failed push leaves the
     // rows in the replica, out of the outbox, and the retry that sends them
     // flushes nothing new.
-    if (pushedRows > 0) setState(unpushedKey(this.channel), '1');
-    if (pushedRows > 0) await this.recordLastDevice();
+    if (pushedRows > 0) {
+      setState(unpushedKey(this.channel), '1');
+      await this.recordLastDevice();
+    }
     // Images first: a row must never reach another phone before its image can.
     await this.uploadPendingMedia();
     await replica.push();

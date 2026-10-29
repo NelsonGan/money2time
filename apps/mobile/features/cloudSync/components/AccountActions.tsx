@@ -23,7 +23,6 @@ export function signOutAskingFirst(
     title: I18n.t('cloud_sync.sign_out_confirm_title'),
     message: I18n.t('shared_ledgers.sign_out_unsent'),
     anyway: I18n.t('shared_ledgers.sign_out_anyway'),
-    cancel: I18n.t('common.cancel'),
   });
 }
 
