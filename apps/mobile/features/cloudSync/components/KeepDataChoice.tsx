@@ -10,6 +10,7 @@ import { withColorAlpha } from '~/utils/color';
 
 import { type CloudSyncChoice, useCloudSync } from '../CloudSyncContext';
 import { errorMessage, formatSyncedAt } from '../lib/messages';
+import { signOutAskingFirst } from './AccountActions';
 import { CLOUD_SYNC_HAPPY_ART } from './art';
 
 /** "Keep which data?": both the phone and the cloud copy have data. */
@@ -42,7 +43,12 @@ export function KeepDataChoice({ choice }: { choice: CloudSyncChoice }) {
 
   const cancel = async () => {
     setBusy('cancel');
-    await sync.signOut();
+    try {
+      if (!(await signOutAskingFirst(sync.signOut))) setBusy(null);
+    } catch (e) {
+      setError(errorMessage(e));
+      setBusy(null);
+    }
   };
 
   const NoteIcon = keep === 'cloud' ? ShieldCheck : TriangleAlert;

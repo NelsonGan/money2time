@@ -2,6 +2,9 @@ import * as DocumentPicker from 'expo-document-picker';
 import { File, Paths } from 'expo-file-system/next';
 import * as Sharing from 'expo-sharing';
 
+import { isLedgerScoped, LEDGER_CHILD_SYNC_TABLES } from '~/features/cloudSync/lib/ledgerRows';
+import type { SyncTable } from '~/features/cloudSync/lib/syncTables';
+import { personalRowsSql, sharedLedgerIds } from '~/features/cloudSync/services/ledgerChannels';
 import { getSQLite } from '~/lib/db/client';
 import { DEFAULT_LEDGER_ID, getActiveLedgerId } from '~/lib/db/ledgerScope';
 import { normalizeCurrencyColumns } from '~/lib/db/normalizeCurrencies';
@@ -21,6 +24,8 @@ import {
   type UserAssetBackupEntry,
   type UserAssetReadCache,
 } from '~/services/userAssets';
+import type { ExchangeRate } from '~/types';
+import { buildRateTable, wageRate } from '~/utils/currency';
 import { getErrorMessage } from '~/utils/errorHandling';
 import { newAppUserId, nowIso } from '~/utils/id';
 
@@ -228,6 +233,7 @@ function onlyOpenLedger(data: BackupData): BackupData {
       ledger && ledgerId !== DEFAULT_LEDGER_ID
         ? tables.settings.map((row) => withLedgerSettings(row, ledger))
         : tables.settings,
+    monthly_wage_settings: wagesInLedgerCurrency(tables, ledger),
     ledgers: ledger ? [ledger] : [],
   };
 
@@ -256,6 +262,36 @@ function onlyOpenLedger(data: BackupData): BackupData {
  * payback account, quick-entry and payment-alert picks and Insights
  * preferences over the default ledger's (see lib/repositories/ledgerPrefs.ts).
  */
+/**
+ * Wages are kept in the default ledger's currency; the app shows them, and
+ * saves the browser's wage edits, in the open ledger's (`wageInCurrency`). The
+ * export follows, converted at the exported rates, unconverted without one.
+ */
+function wagesInLedgerCurrency(
+  tables: BackupTables,
+  ledger: Record<string, unknown> | undefined,
+): Record<string, unknown>[] {
+  const stored = tables.settings[0]?.currency_code;
+  const open = ledger?.currency_code ?? stored;
+  const rates = (tables.exchange_rates ?? []).map((row) => ({
+    baseCurrency: String(row.base_currency),
+    quoteCurrency: String(row.quote_currency),
+    rate: Number(row.rate),
+    asOfDate: String(row.as_of_date),
+  })) as ExchangeRate[];
+  const rate =
+    typeof stored === 'string' && typeof open === 'string'
+      ? wageRate(stored, open, buildRateTable(open, rates))
+      : 1;
+  if (rate === 1) return tables.monthly_wage_settings;
+  return tables.monthly_wage_settings.map((row) => ({
+    ...row,
+    wage_amount: Number(row.wage_amount) * rate,
+    base_hourly_rate: Number(row.base_hourly_rate) * rate,
+    true_hourly_rate: Number(row.true_hourly_rate) * rate,
+  }));
+}
+
 function withLedgerSettings(
   row: Record<string, unknown>,
   ledger: Record<string, unknown>,
@@ -369,12 +405,14 @@ function insertRows(
   sqlite: ReturnType<typeof getSQLite>,
   tableName: string,
   rows: Record<string, unknown>[] | undefined,
+  skip?: (table: string, row: Record<string, unknown>) => boolean,
 ) {
   if (!rows || rows.length === 0) return;
   const validColumns = getTableColumnNames(sqlite, tableName);
   if (validColumns.size === 0) return;
 
   for (const row of rows) {
+    if (skip?.(tableName, row)) continue;
     const keys = Object.keys(row).filter((key) => validColumns.has(key) && row[key] !== undefined);
     if (keys.length === 0) continue;
 
@@ -387,6 +425,45 @@ function insertRows(
   }
 }
 
+/**
+ * Whether a backup row belongs to one of the `shared` ledgers, which a restore
+ * leaves as they are. Run after the restore's deletes, which keep only those
+ * ledgers' rows, and over tables in insert order (parents first): a child
+ * follows its parent, kept or skipped.
+ */
+function sharedLedgerRowTest(
+  sqlite: ReturnType<typeof getSQLite>,
+  shared: readonly string[],
+): (table: string, row: Record<string, unknown>) => boolean {
+  const ledgerIds = new Set(shared);
+  const ids = new Map<string, Set<string>>();
+  const sharedIds = (table: string) => {
+    let set = ids.get(table);
+    if (!set) {
+      set = new Set(
+        sqlite
+          .getAllSync<{ id: string }>(`SELECT id FROM "${table}"`)
+          .map((kept) => String(kept.id)),
+      );
+      ids.set(table, set);
+    }
+    return set;
+  };
+  return (table, row) => {
+    if (!isLedgerScoped(table)) return false;
+    const child = LEDGER_CHILD_SYNC_TABLES[table as SyncTable];
+    const inShared =
+      sharedIds(table).has(String(row.id)) ||
+      (table === 'ledgers'
+        ? ledgerIds.has(String(row.id))
+        : child
+          ? sharedIds(child[1]).has(String(row[child[0]]))
+          : ledgerIds.has(String(row.ledger_id)));
+    if (inShared) sharedIds(table).add(String(row.id));
+    return inShared;
+  };
+}
+
 export function applyBackupData(backup: BackupData): ImportResult {
   const sqlite = getSQLite();
   const currentAppUserId =
@@ -397,33 +474,39 @@ export function applyBackupData(backup: BackupData): ImportResult {
     )[0]?.app_user_id ?? newAppUserId();
   const settingsRows = withPreservedAppUserId(backup.tables.settings, currentAppUserId);
 
+  // Shared ledgers are other people's books too: a restore leaves them as
+  // they are, like a reset. Leaving or no longer sharing one removes it.
+  const shared = sharedLedgerIds();
+  const keepShared = (table: string) =>
+    shared.length && isLedgerScoped(table) ? ` WHERE ${personalRowsSql(table)}` : '';
+
   try {
     sqlite.execSync('BEGIN TRANSACTION');
 
     // Delete in FK-safe order (splits depend on transactions; transactions on accounts/categories).
     try {
-      sqlite.execSync('DELETE FROM transaction_splits');
+      sqlite.execSync(`DELETE FROM transaction_splits${keepShared('transaction_splits')}`);
     } catch {
       // Older databases without the table — ignore.
     }
     try {
       // Join rows reference transactions/albums — clear them before either side.
-      sqlite.execSync('DELETE FROM album_transactions');
+      sqlite.execSync(`DELETE FROM album_transactions${keepShared('album_transactions')}`);
     } catch {
       // Older databases without the table — ignore.
     }
     try {
-      sqlite.execSync('DELETE FROM albums');
+      sqlite.execSync(`DELETE FROM albums${keepShared('albums')}`);
     } catch {
       // Older databases without the table — ignore.
     }
     try {
-      sqlite.execSync('DELETE FROM exchange_rates');
+      sqlite.execSync(`DELETE FROM exchange_rates${keepShared('exchange_rates')}`);
     } catch {
       // Older databases without the table — ignore.
     }
     try {
-      sqlite.execSync('DELETE FROM items');
+      sqlite.execSync(`DELETE FROM items${keepShared('items')}`);
     } catch {
       // Older databases without the table — ignore.
     }
@@ -436,7 +519,7 @@ export function applyBackupData(backup: BackupData): ImportResult {
       'monthly_budgets',
     ]) {
       try {
-        sqlite.execSync(`DELETE FROM ${budgetTable}`);
+        sqlite.execSync(`DELETE FROM ${budgetTable}${keepShared(budgetTable)}`);
       } catch {
         // Older databases without the table — ignore.
       }
@@ -448,7 +531,7 @@ export function applyBackupData(backup: BackupData): ImportResult {
       'receipt_splits',
     ]) {
       try {
-        sqlite.execSync(`DELETE FROM ${receiptSplitTable}`);
+        sqlite.execSync(`DELETE FROM ${receiptSplitTable}${keepShared(receiptSplitTable)}`);
       } catch {
         // Older databases without the table — ignore.
       }
@@ -456,50 +539,56 @@ export function applyBackupData(backup: BackupData): ImportResult {
     // Captures refer to replaced transactions. Also clear unused legacy category memory.
     for (const alertTable of ['auto_log_captures', 'merchant_categories']) {
       try {
-        sqlite.execSync(`DELETE FROM ${alertTable}`);
+        sqlite.execSync(`DELETE FROM ${alertTable}${keepShared(alertTable)}`);
       } catch {
         // Older databases without the table — ignore.
       }
     }
-    sqlite.execSync('DELETE FROM recurring_rules');
-    sqlite.execSync('DELETE FROM transactions');
-    sqlite.execSync('DELETE FROM accounts');
-    sqlite.execSync('DELETE FROM account_groups');
-    sqlite.execSync('DELETE FROM categories');
-    sqlite.execSync('DELETE FROM settings');
-    sqlite.execSync('DELETE FROM monthly_wage_settings');
+    sqlite.execSync(`DELETE FROM recurring_rules${keepShared('recurring_rules')}`);
+    sqlite.execSync(`DELETE FROM transactions${keepShared('transactions')}`);
+    sqlite.execSync(`DELETE FROM accounts${keepShared('accounts')}`);
+    sqlite.execSync(`DELETE FROM account_groups${keepShared('account_groups')}`);
+    sqlite.execSync(`DELETE FROM categories${keepShared('categories')}`);
+    sqlite.execSync(`DELETE FROM settings${keepShared('settings')}`);
+    sqlite.execSync(`DELETE FROM monthly_wage_settings${keepShared('monthly_wage_settings')}`);
     const hasLedgers = getTableColumnNames(sqlite, 'ledgers').size > 0;
-    if (hasLedgers) sqlite.execSync('DELETE FROM ledgers');
+    if (hasLedgers) sqlite.execSync(`DELETE FROM ledgers${keepShared('ledgers')}`);
+    const skip = shared.length ? sharedLedgerRowTest(sqlite, shared) : undefined;
 
-    insertRows(sqlite, 'account_groups', backup.tables.account_groups);
-    insertRows(sqlite, 'accounts', backup.tables.accounts);
-    insertRows(sqlite, 'categories', backup.tables.categories);
-    insertRows(sqlite, 'transactions', backup.tables.transactions);
-    insertRows(sqlite, 'transaction_splits', backup.tables.transaction_splits);
+    insertRows(sqlite, 'account_groups', backup.tables.account_groups, skip);
+    insertRows(sqlite, 'accounts', backup.tables.accounts, skip);
+    insertRows(sqlite, 'categories', backup.tables.categories, skip);
+    insertRows(sqlite, 'transactions', backup.tables.transactions, skip);
+    insertRows(sqlite, 'transaction_splits', backup.tables.transaction_splits, skip);
     // Itemized receipt splits after transactions (header references a
     // transaction id); header before its item/share rows.
-    insertRows(sqlite, 'receipt_splits', backup.tables.receipt_splits);
-    insertRows(sqlite, 'receipt_split_items', backup.tables.receipt_split_items);
-    insertRows(sqlite, 'receipt_split_item_shares', backup.tables.receipt_split_item_shares);
+    insertRows(sqlite, 'receipt_splits', backup.tables.receipt_splits, skip);
+    insertRows(sqlite, 'receipt_split_items', backup.tables.receipt_split_items, skip);
+    insertRows(sqlite, 'receipt_split_item_shares', backup.tables.receipt_split_item_shares, skip);
     if (backup.tables.exchange_rates && backup.tables.exchange_rates.length > 0) {
       insertRows(sqlite, 'exchange_rates', backup.tables.exchange_rates);
     }
-    insertRows(sqlite, 'recurring_rules', backup.tables.recurring_rules);
+    insertRows(sqlite, 'recurring_rules', backup.tables.recurring_rules, skip);
     // Albums before their join rows, both after transactions (join references both).
-    insertRows(sqlite, 'albums', backup.tables.albums);
-    insertRows(sqlite, 'album_transactions', backup.tables.album_transactions);
+    insertRows(sqlite, 'albums', backup.tables.albums, skip);
+    insertRows(sqlite, 'album_transactions', backup.tables.album_transactions, skip);
     // Items are standalone (no FK dependencies).
-    insertRows(sqlite, 'items', backup.tables.items);
+    insertRows(sqlite, 'items', backup.tables.items, skip);
     // Budgets after categories (allocation lines reference category ids);
     // parents before their line rows.
-    insertRows(sqlite, 'budget_templates', backup.tables.budget_templates);
-    insertRows(sqlite, 'budget_template_categories', backup.tables.budget_template_categories);
-    insertRows(sqlite, 'monthly_budgets', backup.tables.monthly_budgets);
-    insertRows(sqlite, 'monthly_budget_categories', backup.tables.monthly_budget_categories);
+    insertRows(sqlite, 'budget_templates', backup.tables.budget_templates, skip);
+    insertRows(
+      sqlite,
+      'budget_template_categories',
+      backup.tables.budget_template_categories,
+      skip,
+    );
+    insertRows(sqlite, 'monthly_budgets', backup.tables.monthly_budgets, skip);
+    insertRows(sqlite, 'monthly_budget_categories', backup.tables.monthly_budget_categories, skip);
     insertRows(sqlite, 'settings', settingsRows);
     insertRows(sqlite, 'monthly_wage_settings', backup.tables.monthly_wage_settings);
     if (hasLedgers) {
-      insertRows(sqlite, 'ledgers', backup.tables.ledgers);
+      insertRows(sqlite, 'ledgers', backup.tables.ledgers, skip);
       // A backup from before ledgers has no ledger rows, and every ledger
       // needs the default one. A restore always opens the default ledger: the
       // one it was on may not be in this backup.

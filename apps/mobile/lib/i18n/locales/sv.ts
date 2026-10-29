@@ -2911,6 +2911,7 @@ const sv = {
     },
   },
   ledgers: {
+    entry_ledger_gone: 'Posten sparades inte: kassaboken togs bort på en annan telefon.',
     label: 'Kassabok',
     title: 'Kassaböcker',
     switcher_label: 'Kassabok: {{name}}. Byt kassabok',
@@ -3005,6 +3006,17 @@ const sv = {
     leave_title: 'Lämna {{name}}?',
     leave_message: 'Den tas bort från den här telefonen. {{owner}} kan bjuda in dig igen.',
     no_longer_shared: 'Den här kassaboken delas inte längre.',
+    reset_keeps_shared:
+      'Delade kassaböcker ändras inte. Lämna en eller sluta dela den för att ta bort den.',
+    changes_for_everyone: 'Den här kassaboken är delad, så det här ändrar den för alla i den.',
+    leave_unsent:
+      'Dina senaste poster i den här kassaboken har inte skickats än. Om du lämnar den nu går de förlorade.',
+    leave_anyway: 'Lämna ändå',
+    sign_out_unsent:
+      'Vissa poster i kassaböcker som delas med dig har inte skickats än. Om du loggar ut tas de kassaböckerna bort från telefonen, med posterna.',
+    sign_out_anyway: 'Logga ut ändå',
+    sign_out_joined_note:
+      'Kassaböcker som delas med dig tas bort från telefonen tills du loggar in igen.',
     removed_title: 'Delad kassabok borttagen',
     removed_body: '{{names}} delas inte längre med dig, så den togs bort från den här telefonen.',
     paused_title: 'Delningen är pausad',

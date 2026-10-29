@@ -2918,6 +2918,7 @@ const tr = {
     },
   },
   ledgers: {
+    entry_ledger_gone: 'Bu kayıt kaydedilmedi: defteri başka bir telefonda silindi.',
     label: 'Defter',
     title: 'Defterler',
     switcher_label: 'Defter: {{name}}. Defter değiştir',
@@ -3012,6 +3013,18 @@ const tr = {
     leave_title: '{{name}} defterinden ayrılınsın mı?',
     leave_message: 'Bu telefondan kaldırılır. {{owner}} seni tekrar davet edebilir.',
     no_longer_shared: 'Bu defter artık paylaşılmıyor.',
+    reset_keeps_shared:
+      'Paylaşılan defterler değişmez. Birini kaldırmak için defterden ayrılın veya paylaşmayı durdurun.',
+    changes_for_everyone:
+      'Bu defter paylaşılıyor, bu yüzden bu değişiklik içindeki herkesi etkiler.',
+    leave_unsent:
+      'Bu defterdeki son kayıtlarınız henüz gönderilmedi. Şimdi ayrılırsanız kaybolurlar.',
+    leave_anyway: 'Yine de ayrıl',
+    sign_out_unsent:
+      'Sizinle paylaşılan defterlerdeki bazı kayıtlar henüz gönderilmedi. Çıkış yapmak bu defterleri kayıtlarla birlikte bu telefondan kaldırır.',
+    sign_out_anyway: 'Yine de çıkış yap',
+    sign_out_joined_note:
+      'Sizinle paylaşılan defterler, yeniden giriş yapana kadar bu telefondan kaldırılır.',
     removed_title: 'Paylaşılan defter kaldırıldı',
     removed_body: '{{names}} artık seninle paylaşılmıyor, bu yüzden bu telefondan kaldırıldı.',
     paused_title: 'Paylaşım duraklatıldı',

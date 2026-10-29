@@ -9,7 +9,12 @@ import { getSQLite } from '~/lib/db/client';
 import { getActiveLedgerId } from '~/lib/db/ledgerScope';
 
 import { CloudSyncApiError, ledgerMediaPath, type SyncCredentials } from './cloudSyncApi';
-import { deleteLedgerLocally, enqueueLedgerRows, forgetChannel } from './ledgerChannels';
+import {
+  deleteLedgerLocally,
+  enqueueLedgerRows,
+  forgetChannel,
+  recordedChannel,
+} from './ledgerChannels';
 import {
   acceptInvite,
   getLedgerCredentials,
@@ -34,7 +39,14 @@ import {
   type SharedLedger,
   sharedLedgerFor,
 } from './sharedLedgerStore';
-import { deleteReplicaFiles, dropPersonalOutbox, runExclusive, SyncEngine } from './syncEngine';
+import {
+  deleteReplicaFiles,
+  dropPersonalOutbox,
+  hasUnpushedChanges,
+  pendingSharedChangeCount,
+  runExclusive,
+  SyncEngine,
+} from './syncEngine';
 
 /**
  * The list is asked for at most this often, unless something calls for it
@@ -68,7 +80,8 @@ export interface SharedSyncOutcome {
   appliedRows: number;
   /** Ledgers removed from this phone (access gone, or no longer shared). */
   removedLedgers: number;
-  failed: boolean;
+  /** The first failure of the round (offline list read, a ledger's sync, a row), else null. */
+  error: unknown;
 }
 
 function fromRemote(remote: RemoteSharedLedger): SharedLedger {
@@ -85,6 +98,13 @@ function fromRemote(remote: RemoteSharedLedger): SharedLedger {
 
 function ledgerExists(ledgerId: string): boolean {
   return !!getSQLite().getFirstSync('SELECT 1 FROM ledgers WHERE id = ?', [ledgerId]);
+}
+
+function ledgerDeleted(ledgerId: string): boolean {
+  return !!getSQLite().getFirstSync(
+    'SELECT 1 FROM ledgers WHERE id = ? AND deleted_at IS NOT NULL',
+    [ledgerId],
+  );
 }
 
 function localLedgerName(ledger: SharedLedger): string {
@@ -203,8 +223,24 @@ class SharedLedgerSync {
       const known = sharedLedgerFor(item.ledgerId);
       // A member's ledger id that is already one of this phone's own ledgers
       // is never taken over, nor is one already synced under another share.
-      if (item.role === 'member' && !known && ledgerExists(item.ledgerId)) continue;
+      // A copy that never synced as the user's own is not theirs: a backup
+      // restored on this phone brought it, and it rejoins the share.
+      if (
+        item.role === 'member' &&
+        !known &&
+        ledgerExists(item.ledgerId) &&
+        recordedChannel('ledgers', item.ledgerId) !== null
+      ) {
+        continue;
+      }
       if (known && known.shareId !== item.id) continue;
+      if (item.role === 'owner' && !known && ledgerDeleted(item.ledgerId)) {
+        // Deleted on this phone while signed out, when it no longer knew the
+        // ledger was shared: sharing ends, rather than the deletion reaching
+        // the members as an empty ledger.
+        await this.finishPending(token, item.id, 'stop');
+        continue;
+      }
       seen.add(item.ledgerId);
       saveSharedLedger(fromRemote(item));
     }
@@ -302,15 +338,20 @@ class SharedLedgerSync {
     return opening;
   }
 
-  private async openEngine(ledger: SharedLedger): Promise<SyncEngine> {
+  /** `final`: a paused ledger's last download (see `stopSharing`), never kept. */
+  private async openEngine(ledger: SharedLedger, final = false): Promise<SyncEngine> {
     const session = this.requireSession();
-    const credentials = await this.credentialsFor(ledger.shareId);
+    const finalCredentials = final
+      ? await getLedgerCredentials(await this.token(), ledger.shareId, { final: true })
+      : null;
+    const credentials = finalCredentials ?? (await this.credentialsFor(ledger.shareId));
     const engine = new SyncEngine({
       userId: session.userId,
       channel: ledger.shareId,
       ledgerId: ledger.ledgerId,
       url: credentials.url,
-      getTursoToken: async () => (await this.credentialsFor(ledger.shareId)).authToken,
+      getTursoToken: async () =>
+        (finalCredentials ?? (await this.credentialsFor(ledger.shareId))).authToken,
       getSessionToken: session.getSessionToken,
       mediaPath: ledgerMediaPath(ledger.shareId),
       deviceName: session.deviceName,
@@ -320,7 +361,7 @@ class SharedLedgerSync {
       engine.close();
       throw new Error('signed_out');
     }
-    this.engines.set(ledger.shareId, engine);
+    if (!final) this.engines.set(ledger.shareId, engine);
     return engine;
   }
 
@@ -334,7 +375,7 @@ class SharedLedgerSync {
   }
 
   private async runAll(forceList: boolean): Promise<SharedSyncOutcome> {
-    const outcome: SharedSyncOutcome = { appliedRows: 0, removedLedgers: 0, failed: false };
+    const outcome: SharedSyncOutcome = { appliedRows: 0, removedLedgers: 0, error: null };
     const session = this.session;
     if (!session) return outcome;
     try {
@@ -345,8 +386,9 @@ class SharedLedgerSync {
         this.retry = false;
         throw error;
       }
-      // Offline: sync what this phone knows of.
-      outcome.failed = true;
+      // Offline: sync what this phone knows of. With nothing shared yet,
+      // there is no ledger to show failing.
+      if (listSharedLedgers().length) outcome.error = error;
     }
     if (this.session === session && session.personalInactive()) {
       await runExclusive(() => getSQLite().withTransactionSync(dropPersonalOutbox));
@@ -360,24 +402,30 @@ class SharedLedgerSync {
         const engine = await this.engineFor(ledger);
         const result = await engine.syncNow();
         outcome.appliedRows += result.appliedRows;
+        outcome.error ??= result.applyError;
         if (result.pushed) session.announce?.(ledger.shareId);
       } catch (error) {
-        outcome.failed = true;
         // A token may have been revoked (a member was removed): ask again.
         this.credentials.delete(ledger.shareId);
+        // Paused or gone is the ledger's new state, not a failure to show.
         if (isCode(error, 'ledger_paused')) {
           this.closeEngine(ledger.shareId);
           saveSharedLedger({ ...ledger, active: false });
-        } else if (error instanceof CloudSyncApiError && error.code === 'not_found') {
+        } else if (isCode(error, 'not_found')) {
           // Removed from it, or it is no longer shared: the list says which.
-          outcome.removedLedgers += await this.refreshList(true).catch(() => 0);
-        } else if (error instanceof CloudSyncApiError && error.code === 'unauthorized') {
+          outcome.removedLedgers += await this.refreshList(true).catch((listError: unknown) => {
+            outcome.error ??= listError;
+            return 0;
+          });
+        } else if (isCode(error, 'unauthorized')) {
           this.retry = false;
           throw error;
+        } else {
+          outcome.error ??= error;
         }
       }
     }
-    this.retry = outcome.failed;
+    this.retry = outcome.error !== null;
     return outcome;
   }
 
@@ -427,14 +475,14 @@ class SharedLedgerSync {
     const ledger = sharedLedgerFor(ledgerId);
     if (!ledger || ledger.role !== 'owner') return;
     const local = opts.whenUnreachable === 'local';
-    // Members' latest entries first: the ledger's database is about to go.
-    if (ledger.active && this.session) {
-      try {
-        await (await this.engineFor(ledger)).syncNow();
-      } catch (error) {
-        // Gone or paused on the Worker: nothing more to fetch from it.
-        if (!local && !isCode(error, 'not_found', 'ledger_paused')) throw error;
-      }
+    if (this.session) {
+      // Unreachable, a local delete goes ahead; a row this phone could not
+      // store never lets the database go.
+      const failure = await this.takeLatest(ledger).catch((error: unknown) => {
+        if (!local) throw error;
+        return null;
+      });
+      if (failure) throw failure;
     }
     try {
       await stopSharing(await this.token(), ledger.shareId);
@@ -453,12 +501,64 @@ class SharedLedgerSync {
   }
 
   /**
-   * Member: leaves, and this phone's copy of the ledger goes. Signed out or
-   * offline it still leaves here, and tells the Worker after the next sign-in.
+   * Before an owned ledger's database goes (stop sharing, deleting the
+   * account): takes members' latest entries. A paused ledger (or one the
+   * Worker turns out to have paused) takes them with a read-only token, as
+   * nothing can go up. Returns the first row that could not be written: the
+   * caller must not let the database go then. A ledger already gone on the
+   * Worker, or a Worker that refuses a paused ledger's last download, has
+   * nothing more to give.
    */
-  async leave(ledgerId: string): Promise<void> {
+  private async takeLatest(ledger: SharedLedger): Promise<Error | null> {
+    const download = async (paused: boolean): Promise<Error | null> => {
+      if (!paused) return (await (await this.engineFor(ledger)).syncNow()).applyError;
+      // One connection per replica file: the read-only one replaces any kept.
+      this.closeEngine(ledger.shareId);
+      const engine = await this.openEngine(ledger, true);
+      try {
+        return await engine.pullAndApply();
+      } finally {
+        engine.close();
+      }
+    };
+    try {
+      return await download(!ledger.active).catch((error: unknown) => {
+        if (ledger.active && isCode(error, 'ledger_paused')) return download(true);
+        throw error;
+      });
+    } catch (error) {
+      if (isCode(error, 'not_found', 'ledger_paused')) return null;
+      throw error;
+    }
+  }
+
+  /** Account deletion: every ledger the user shares takes members' latest entries first. */
+  async takeLatestOfOwned(): Promise<void> {
+    for (const ledger of listSharedLedgers()) {
+      if (ledger.role !== 'owner') continue;
+      const failure = await this.takeLatest(ledger);
+      if (failure) throw failure;
+    }
+  }
+
+  /**
+   * Member: leaves, and this phone's copy of the ledger goes. Entries not sent
+   * yet go up first; when they cannot (offline, or the ledger is paused), it
+   * refuses with `unsent_changes` unless `force` (the user chose to lose
+   * them). Otherwise, signed out or offline, it still leaves here and tells
+   * the Worker after the next sign-in.
+   */
+  async leave(ledgerId: string, opts: { force?: boolean } = {}): Promise<void> {
     const ledger = sharedLedgerFor(ledgerId);
     if (!ledger || ledger.role !== 'member') return;
+    if (!opts.force && this.hasUnsent(ledger)) {
+      if (ledger.active && this.session) {
+        await this.engineFor(ledger)
+          .then((engine) => engine.syncNow())
+          .catch(() => undefined);
+      }
+      if (this.hasUnsent(ledger)) throw new CloudSyncApiError('unsent_changes', 0);
+    }
     try {
       await leaveLedger(await this.token(), ledger.shareId);
     } catch (error) {
@@ -472,6 +572,20 @@ class SharedLedgerSync {
       }
     }
     await this.letGo(ledger, { requeue: false });
+  }
+
+  /**
+   * Whether entries made on this phone have not all reached a ledger's
+   * database, paused or not: still queued, or flushed into its replica by a
+   * sync whose push failed (recorded, so it holds across a restart).
+   */
+  private hasUnsent(ledger: SharedLedger): boolean {
+    return pendingSharedChangeCount([ledger.ledgerId]) > 0 || hasUnpushedChanges(ledger.shareId);
+  }
+
+  /** Sign-out: whether a joined ledger, which leaves the phone with it, has unsent entries. */
+  joinedHaveUnsent(): boolean {
+    return listSharedLedgers().some((ledger) => ledger.role === 'member' && this.hasUnsent(ledger));
   }
 
   /** Joins with an invite code and downloads the ledger. Returns its id. */

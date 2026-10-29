@@ -2930,6 +2930,7 @@ const ms = {
     },
   },
   ledgers: {
+    entry_ledger_gone: 'Catatan ini tidak disimpan: bukunya dipadam pada telefon lain.',
     label: 'Buku',
     title: 'Buku',
     switcher_label: 'Buku: {{name}}. Tukar buku',
@@ -3025,6 +3026,18 @@ const ms = {
     leave_title: 'Tinggalkan {{name}}?',
     leave_message: 'Buku ini dibuang daripada telefon ini. {{owner}} boleh menjemput anda semula.',
     no_longer_shared: 'Buku ini tidak lagi dikongsi.',
+    reset_keeps_shared:
+      'Buku dikongsi tidak diubah. Untuk membuangnya, tinggalkan buku itu atau hentikan perkongsiannya.',
+    changes_for_everyone:
+      'Buku ini dikongsi, jadi perubahan ini berlaku untuk semua orang di dalamnya.',
+    leave_unsent:
+      'Catatan terkini anda dalam buku ini belum dihantar. Jika anda meninggalkannya sekarang, ia akan hilang.',
+    leave_anyway: 'Tinggalkan juga',
+    sign_out_unsent:
+      'Beberapa catatan dalam buku yang dikongsi dengan anda belum dihantar. Log keluar akan membuang buku itu daripada telefon ini bersama catatannya.',
+    sign_out_anyway: 'Log keluar juga',
+    sign_out_joined_note:
+      'Buku yang dikongsi dengan anda dibuang daripada telefon ini sehingga anda log masuk semula.',
     removed_title: 'Buku dikongsi dibuang',
     removed_body:
       '{{names}} tidak lagi dikongsi dengan anda, jadi ia dibuang daripada telefon ini.',

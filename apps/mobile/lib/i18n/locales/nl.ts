@@ -2940,6 +2940,8 @@ const nl = {
     },
   },
   ledgers: {
+    entry_ledger_gone:
+      'Deze boeking is niet opgeslagen: het boek is op een andere telefoon verwijderd.',
     label: 'Boek',
     title: 'Boeken',
     switcher_label: 'Boek: {{name}}. Wissel van boek',
@@ -3034,6 +3036,17 @@ const nl = {
     leave_title: '{{name}} verlaten?',
     leave_message: 'Het wordt van deze telefoon verwijderd. {{owner}} kan je opnieuw uitnodigen.',
     no_longer_shared: 'Dit boek wordt niet meer gedeeld.',
+    reset_keeps_shared:
+      'Gedeelde boeken veranderen niet. Verlaat een boek of stop met delen om het te verwijderen.',
+    changes_for_everyone: 'Dit boek is gedeeld, dus dit verandert het voor iedereen erin.',
+    leave_unsent:
+      'Je nieuwste boekingen in dit boek zijn nog niet verstuurd. Als je het nu verlaat, gaan ze verloren.',
+    leave_anyway: 'Toch verlaten',
+    sign_out_unsent:
+      'Sommige boekingen in boeken die met je gedeeld zijn, zijn nog niet verstuurd. Uitloggen verwijdert die boeken van deze telefoon, met die boekingen.',
+    sign_out_anyway: 'Toch uitloggen',
+    sign_out_joined_note:
+      'Boeken die met je gedeeld zijn, verdwijnen van deze telefoon tot je weer inlogt.',
     removed_title: 'Gedeeld boek verwijderd',
     removed_body:
       '{{names}} wordt niet meer met je gedeeld en is daarom van deze telefoon verwijderd.',

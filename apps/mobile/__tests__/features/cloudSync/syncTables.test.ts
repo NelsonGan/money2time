@@ -6,11 +6,14 @@ import {
   dropCaptureTriggersSql,
   enqueueAllSql,
 } from '~/features/cloudSync/lib/capture';
+import type { Row } from '~/features/cloudSync/lib/rowCodec';
 import {
   ASSET_COLUMNS,
   DEVICE_LOCAL_SETTINGS_COLUMNS,
+  hasMeaningfulRows,
   isDeviceLocalColumn,
   SYNC_TABLES,
+  type SyncTable,
 } from '~/features/cloudSync/lib/syncTables';
 
 const root = join(__dirname, '../../..');
@@ -70,5 +73,36 @@ describe('capture SQL', () => {
 
   it('can queue a whole table', () => {
     expect(enqueueAllSql('albums')).toContain(`SELECT 'albums', id`);
+  });
+});
+
+describe('what counts as recorded data', () => {
+  const side = (rows: Partial<Record<SyncTable, Row[]>>) => ({
+    count: (table: SyncTable) => rows[table]?.length ?? 0,
+    rows: (table: SyncTable) => rows[table] ?? [],
+  });
+  const starter: Row = { id: 'cash', type: 'debit', starting_balance: 0 };
+
+  it('leaves out what onboarding sets up', () => {
+    expect(
+      hasMeaningfulRows(
+        side({
+          accounts: [starter],
+          categories: [{ id: 'food' }],
+          ledgers: [{ id: 'default', name: 'Home' }],
+          monthly_wage_settings: [{ id: 'wage' }],
+        }),
+      ),
+    ).toBe(false);
+  });
+
+  it.each<[string, Partial<Record<SyncTable, Row[]>>]>([
+    ['a transaction', { transactions: [{ id: 'lunch' }] }],
+    ['an account balance', { accounts: [starter, { ...starter, starting_balance: 20000 }] }],
+    ['a savings goal', { accounts: [{ id: 'trip', type: 'goal', starting_balance: 0 }] }],
+    ['a loan', { accounts: [{ id: 'car', type: 'loan', starting_balance: 0 }] }],
+    ['a ledger of its own', { ledgers: [{ id: 'default' }, { id: 'work' }] }],
+  ])('counts %s', (_label, rows) => {
+    expect(hasMeaningfulRows(side(rows))).toBe(true);
   });
 });

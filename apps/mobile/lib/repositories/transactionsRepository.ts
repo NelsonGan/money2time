@@ -25,6 +25,37 @@ import {
 } from './mappers';
 import { transactionSplitsRepository } from './transactionSplitsRepository';
 
+/**
+ * A new entry naming an account or category the open ledger does not have:
+ * the ledger it was drafted in is gone while its editor was open (deleted on
+ * another phone, or replaced by a reset or a cloud copy), and the default one
+ * opened. Saving it would mix the two or leave dangling references.
+ */
+export class EntryLedgerGoneError extends Error {
+  constructor() {
+    super('entry_ledger_gone');
+    this.name = 'EntryLedgerGoneError';
+  }
+}
+
+/** Throws `EntryLedgerGoneError` unless every account and category `input` names is the open ledger's. */
+export function assertInOpenLedger(input: CreateTransactionInput): void {
+  const refs: [string, string | null | undefined][] = [
+    ['accounts', input.accountId],
+    ['accounts', input.fromAccountId],
+    ['accounts', input.toAccountId],
+    ['categories', input.categoryId],
+  ];
+  for (const [table, refId] of refs) {
+    if (!refId) continue;
+    const row = getSQLite().getFirstSync<{ ledger_id: string }>(
+      `SELECT ledger_id FROM ${table} WHERE id = ?`,
+      [refId],
+    );
+    if (row?.ledger_id !== getActiveLedgerId()) throw new EntryLedgerGoneError();
+  }
+}
+
 type RelationRow = {
   txId: string;
   accountId: string | null;

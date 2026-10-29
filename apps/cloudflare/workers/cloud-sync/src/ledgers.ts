@@ -270,7 +270,8 @@ export async function routeLedgers(
     return json({ ok: true });
   }
   if (action === 'credentials' && method === 'POST' && parts.length === 4) {
-    return credentials(env, ledger);
+    const body = await readJson<{ final: unknown }>(request);
+    return credentials(env, ledger, role === 'owner' && body?.final === true);
   }
   if (action === 'members' && parts.length === 4 && method === 'GET') {
     return listMembers(env, ledger, role);
@@ -418,9 +419,21 @@ async function freeLocalServer(env: Env): Promise<string | null> {
   return csv(env.LOCAL_LEDGER_SYNC_URLS).find((url) => !used.has(url)) ?? null;
 }
 
-async function credentials(env: Env, ledger: SharedLedgerRow): Promise<Response> {
-  if (!(await isLedgerActive(env, ledger))) return json({ error: 'ledger_paused' }, 403);
+/**
+ * A token for the ledger's database while it is active. `final`: the owner
+ * stopping a paused ledger first takes members' last entries, with a
+ * read-only token of a day (not stored), so a pause still keeps anyone from
+ * syncing.
+ */
+async function credentials(env: Env, ledger: SharedLedgerRow, final: boolean): Promise<Response> {
   const now = Date.now();
+  if (!(await isLedgerActive(env, ledger))) {
+    if (!final) return json({ error: 'ledger_paused' }, 403);
+    const authToken = env.LOCAL_SYNC_URL
+      ? 'local'
+      : await createToken(env, ledger.db_name, 1, 'read-only');
+    return json({ url: ledger.db_url, authToken, expiresAt: now + DAY_MS });
+  }
   if (env.LOCAL_SYNC_URL) {
     return json({ url: ledger.db_url, authToken: 'local', expiresAt: now + DAY_MS });
   }

@@ -579,7 +579,12 @@ app side lives in `features/ledgers/`.
   - settings: theme, language, app lock, backup, notifications, bottom bar,
     profile and payment QR;
   - which apps payment alerts watch;
-  - the hourly value and wage history;
+  - the hourly value and wage history, kept in the default ledger's main
+    currency: a ledger in another currency shows, values time and saves the
+    wage converted at the exchange-rate table (`wageInCurrency`,
+    `storedWageConfig`), unconverted while it has no rate. The Web
+    Dashboard's export converts it the same way; a full backup keeps it as
+    stored;
   - the exchange-rate cache;
   - Pro.
 - **Each ledger's own:**
@@ -592,10 +597,18 @@ app side lives in `features/ledgers/`.
     (`LEDGER_QUICK_ENTRY_KEYS`);
   - the account each payment-alert source logs into;
   - Insights preferences.
+
+  In a shared ledger, these preferences are each member's own (see
+  [Shared ledgers](#shared-ledgers)).
+
 - **Resets and imports:**
-  - Reset all data removes every ledger.
+  - Reset all data removes every ledger but the shared ones, which are
+    other people's books too (`deletePersonalLedgerRows`); restoring a backup
+    keeps them the same way, skipping the backup's copies of their rows. Its
+    confirmations say so. Leaving or no longer sharing a ledger removes it.
   - A Money Manager import replaces the open ledger's data, in that ledger's
-    currency.
+    currency. In a shared ledger it does so for everyone, and the
+    confirmation says so; so does the currency start-over's.
   - With other ledgers present, the currency start-over clears only the open
     ledger and its own preferences.
 - **Recurring rules** run for the open ledger. Another ledger's rules catch up
@@ -1056,8 +1069,10 @@ The flag is read with `sendEvent: false`, so it sends no `$feature_flag_called`.
     phone_ replaces the cloud copy, and every other phone follows.
     _Cancel_ signs out and changes nothing.
 
-  "Recorded" means any transaction, recurring rule, album, item or budget
-  template; onboarding's accounts, categories and settings do not count. The
+  "Recorded" (`MEANINGFUL_ROWS`) means any transaction, recurring rule,
+  album, item or budget template, an account with a starting balance, a
+  savings goal or a loan, or a ledger besides the default one; onboarding's
+  starter accounts, categories, wage and settings do not count. The
   two sides are never merged: merging duplicates the default categories (each
   install seeds its own ids) and double-counts balances. Offline during this
   step, the phone stays signed in and tries again when it is back online.
@@ -1125,7 +1140,8 @@ The flag is read with `sendEvent: false`, so it sends no `$feature_flag_called`.
   on a signed-in phone or a second time.
 - **Restore and reset.** With Cloud Sync on, restoring a backup (Backup or
   Data Management import) replaces the cloud copy too, and Reset all data
-  erases it; both confirmations say so.
+  erases it; both confirmations say so. Both leave the shared ledgers as
+  they are (see [Ledgers](#ledgers)), with or without Cloud Sync on.
 - **When Pro ends** (the Worker decides, per account: a subscription on any
   linked phone keeps it Pro):
   - Nothing is deleted. The phone keeps all its data and works as before;
@@ -1187,17 +1203,25 @@ updated_at)`, with each row as JSON, plus `sync_info` (last device, last
   sync). App migrations therefore need no cloud migration. A write merges over
   the stored JSON, so an older app version keeps fields it does not know; a
   read keeps only the columns the phone has.
-- **Sync run** (`SyncEngine.syncNow`): flush the outbox into the replica with a
+- **Sync run** (`SyncEngine.syncNow`): `pull()` (so the flush sees what other
+  phones deleted meanwhile), flush the outbox into the replica with a
   new revision per changed row (a row whose JSON did not change, such as one
   where only a device-local setting moved, keeps its revision), upload queued
   images, `push()`, `pull()`, then diff every replica revision against
   `sync_row_meta` and write the rows other phones changed. A row still
   waiting in the outbox wins over the pulled copy. Concurrent edits to the
-  same row, or two phones creating the same id: the last push wins, per row.
-  Deletions apply before changes. Each pulled row is written in its own
-  savepoint, so a row this version cannot store is skipped and reported
-  instead of blocking later syncs; a failed apply is retried even when the
-  next pull brings nothing new. All replica work (syncs, pulls, full upload
+  same row, or two phones creating the same id: the last push wins, per row,
+  except that a delete wins over a stale edit. A row the cloud deleted (its
+  tombstone) after this phone last saw it takes the delete instead of going
+  up (`deletedElsewhere`), so a phone that was offline cannot bring back a
+  recurring rule or entry deleted elsewhere by running or editing its old
+  copy. A row this phone saw deleted and revived itself goes up as usual, and
+  a row merely missing from the cloud copy is not a delete (sharing a ledger
+  moves its rows out of the user's own copy). Deletions apply before changes. Each pulled row is written in its own
+  savepoint, so a row this version cannot store does not block the rows
+  after it. Its revision is not recorded, so every later sync tries it again
+  (even when the next pull brings nothing new), and until it is written the
+  sync shows as failed (`applyError`). All replica work (syncs, pulls, full upload
   or download) runs one at a time.
 - **No upserts on the replica's `sync_rows`.** In the Turso engine (0.8.3),
   `INSERT … ON CONFLICT(table_name, row_id) DO UPDATE` on an existing row fails
@@ -1213,7 +1237,10 @@ updated_at)`, with each row as JSON, plus `sync_info` (last device, last
   index only covers live rows, else deleted) and the change queued, and a
   losing incoming row is skipped. Recurring rules avoid the problem by naming
   each run `rr:<ruleId>:<date>` (`recurringRunTransactionId`), so two phones
-  that both run a due rule make one transaction.
+  that both run a due rule make one transaction. Budget and template lines
+  are named `<budgetId>:<categoryId>` (`lib/repositories/budgetLines.ts`), so
+  two phones editing one budget before they sync edit the same lines (the
+  last edit of each wins) instead of keeping two lines for a category.
 - **Device-local settings** never leave the phone and are never overwritten:
   `app_user_id` (purchase identity), the open ledger (`active_ledger_id`), app
   lock, app icon, notification and payment-alert setup, backup target and
@@ -1226,6 +1253,10 @@ updated_at)`, with each row as JSON, plus `sync_info` (last device, last
   another phone, or is missing from a cloud copy this phone takes, the
   default ledger opens instead (`reloadAfterApply`), and taking a cloud copy
   makes the default ledger row again if the copy has none, as a restore does.
+  An editor left open on the gone ledger cannot save into the default one: a
+  new entry the user saves that names an account or category the open ledger
+  does not have (another ledger's, or one a reset or cloud copy removed) is
+  refused (`assertInOpenLedger`) and the user is told it was not saved.
   The choice screen's counts cover every ledger. A pulled settings row only
   updates this phone's own row: an upsert would fail SQLite's NOT NULL check on
   the missing columns.
@@ -1233,8 +1264,11 @@ updated_at)`, with each row as JSON, plus `sync_info` (last device, last
   path the rows store (`receipts/x.jpg`, `custom:account-logos/x.png`), so a
   synced row finds its image under the same name. Images to upload are queued
   in `sync_media_pending` with the outbox flush and uploaded before the push,
-  so a row never reaches another phone before its image can. A download that
-  fails is kept in `sync_media_missing` and retried on later syncs (ten tries).
+  so a row never reaches another phone before its image can. A download goes
+  to `<path>.part` and becomes the image only once complete, so an
+  interrupted one is never taken for done. One that fails is kept in
+  `sync_media_missing` and retried on later syncs (ten tries); a download
+  redraws custom icons drawn while their file was missing.
   The orphan sweep runs only after linking, never after a routine sync: a
   photo just picked in an editor is not in a row yet. `ASSET_COLUMNS` must
   stay in step with `collectReferencedAssetPaths` (a test checks it), or the
@@ -1263,7 +1297,11 @@ updated_at)`, with each row as JSON, plus `sync_info` (last device, last
   also make the app re-read its shared-ledger list.
 - **Failures.** Offline is shown, never reported. Any other failure sends
   `Cloud Sync Failed` and an error report once per failure streak, not on
-  every retry. A rejected session (on a sync, or on the shared-ledger list
+  every retry. The shared ledgers' syncs have a streak of their own: a
+  failing round shows Sync failed or Offline on the Cloud Sync screen and the
+  profile pill like a personal failure (and under a free member's "Your
+  shared ledgers sync"), until a round succeeds (`sharedError`). A ledger
+  that is paused or no longer shared is not a failure. A rejected session (on a sync, or on the shared-ledger list
   read, which is how an account deleted on another phone is noticed while
   the Turso token is still valid) signs the phone out with "Signed out. Sign
   in again." It keeps the queued edits, the sync bookkeeping and the shared
@@ -1368,10 +1406,19 @@ The app side is `features/sharedLedgers/` (screens) and
 - **People.** Everyone sees the owner and members (names; the owner also sees
   addresses). The owner can remove anyone at any time; a member can leave.
   Either way the ledger is deleted from that person's phone at their next
-  sync, entries they added stay in it.
+  sync, entries they added stay in it. Leaving sends the member's unsent
+  entries first; while it cannot (offline, or the ledger is paused) it asks
+  first ("…If you leave now, they're lost", Leave anyway). Unsent means
+  still in the outbox, or flushed into the ledger's replica by a sync whose
+  push failed (`unpushed:<channel>` in `sync_state`, so it holds across a
+  restart).
 - **Stopping.** _Stop sharing_ (or deleting a shared ledger) first syncs the
-  ledger, so members' latest entries are in, then removes every member and
-  deletes the ledger's cloud database and images. The owner keeps the ledger
+  ledger, so members' latest entries are in (a paused one is downloaded with
+  a one-day read-only token the Worker gives only its owner for this,
+  `{ final: true }` on the credentials request), then removes every member and
+  deletes the ledger's cloud database and images. A downloaded row this phone
+  cannot store stops it, so the database never goes with an entry only it
+  held. The owner keeps the ledger
   with everything in it, and it goes back into their own cloud copy. Deleting
   the Cloud Sync account does the same for every ledger the user shares, and
   its confirmation says so.
@@ -1393,7 +1440,9 @@ The app side is `features/sharedLedgers/` (screens) and
   of an error. If the ledger is open at that moment it is not deleted under
   them (an editor may hold its accounts): it is deleted once the app is back
   on its main screens, after the default ledger opens (`LedgerProGuard`,
-  kept in AsyncStorage across a restart).
+  kept in AsyncStorage across a restart). Meanwhile its rows sync nowhere
+  (`NO_CHANNEL`), so an edit saved then reaches neither the share nor the
+  user's own cloud copy.
 - **The People page** re-reads the shared list when it opens, so its paused
   banner and count are never a minute stale. Who shares the ledger and that
   everyone can add and edit entries is in the info button next to the
@@ -1407,8 +1456,12 @@ The app side is `features/sharedLedgers/` (screens) and
   (pending actions in `sharedLedgerStore.ts`, kept per account), so the
   ledger never comes back from the cloud.
 - **Sign-out** deletes the ledgers the user joined from the phone (they are
-  someone else's data; signing in again brings them back). An owner keeps
-  theirs.
+  someone else's data; signing in again brings them back), and its
+  confirmation says so. An owner keeps theirs. It sends their unsent entries
+  first; while one still cannot go (offline, or the ledger is paused), it
+  asks before signing out (Sign out anyway), as those entries would go with
+  the ledger. Cancel on the
+  keep-which-data choice signs out the same way.
 
 **How it works**
 
@@ -1440,7 +1493,10 @@ The app side is `features/sharedLedgers/` (screens) and
   phone without recording deletions; an owner's other phones keep the ledger
   and take it from the owner's cloud copy, where the phone that stopped
   sharing put it. A ledger id that is already one of the phone's own ledgers,
-  or another share's, is never taken over.
+  or another share's, is never taken over. A copy that never synced on this
+  phone (no `sync_row_meta` for its `ledgers` row) is not its own: a backup
+  restored on a new phone brought it, and it rejoins the member's share,
+  taking the cloud copy and sending only its own newer edits.
 - **Access** is checked by the Worker on every credentials request: owner or
   member, and the ledger active (anyone in it Pro, `isLedgerActive`). A removed member's app is nudged and lets the
   ledger go at once (else at its next list read, within a minute while open). Tokens are not revoked early,
@@ -1454,7 +1510,15 @@ The app side is `features/sharedLedgers/` (screens) and
   ledgers or settings.
 - **Signing in** first reads the list and lets go of ledgers the account no
   longer has (stopped on another phone, or shared by an account since
-  deleted), so an owner's ledger is linked as part of their own data.
+  deleted), so an owner's ledger is linked as part of their own data. A
+  ledger the owner deleted on this phone while signed out (when it no longer
+  knew the ledger was shared) stops being shared then, instead of reaching
+  the members as an emptied ledger.
+- **Each member's own preferences.** A shared ledger's `prefs_json`
+  (payment-alert accounts, quick-entry picks, payback account, Insights
+  choices) stays on each phone (`isDeviceLocalColumn` with `shared`): it
+  names one person's accounts. Unshared, it syncs between the owner's phones
+  as before.
 - **Signing in again** (after sign-out or an expired session) re-attaches each
   shared ledger: the cloud copy is taken, except rows this phone edited later
   (newer `updated_at`), which go up instead; then rows only this phone has go
@@ -1735,18 +1799,18 @@ Bank and wallet notifications (Android listener) and the Log Notification Shortc
 
 #### GA4 only: tutorials, settings, backup and review
 
-| Constant                      | Event name                    | GA4 name                          | PostHog | Trigger and frequency                                                                                                                                                                                                    | Extra properties              | Call sites                                                                                                   |
-| ----------------------------- | ----------------------------- | --------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `TUTORIAL_LIST_OPENED`        | `Tutorial List Opened`        | `m2t_tutorial_list_opened`        | No      | The tutorial list opens from settings or a deep link; every open.                                                                                                                                                        | `source`                      | [App.tsx](apps/mobile/App.tsx), [services/deepLinks.ts](apps/mobile/services/deepLinks.ts)                   |
-| `DISPLAY_MODE_TOGGLED`        | `Display Mode Toggled`        | `m2t_display_mode_toggled`        | No      | Display switches between money and time; each toggle.                                                                                                                                                                    | `mode`                        | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                 |
-| `NAV_TABS_CHANGED`            | `Nav Tabs Changed`            | `m2t_nav_tabs_changed`            | No      | A page is added to, removed from or reordered in the bottom bar, or the bar is reset, in Settings > Display > Bottom bar; each change.                                                                                   | `change`, `tabs`, `tab_count` | [features/settings/screens/BottomBarScreen.tsx](apps/mobile/features/settings/screens/BottomBarScreen.tsx)   |
-| `AUTO_BACKUP_RESTORED`        | `Auto Backup Restored`        | `m2t_auto_backup_restored`        | No      | An auto-backup is restored; each successful restore.                                                                                                                                                                     | `target`                      | [services/autoBackup.native.ts](apps/mobile/services/autoBackup.native.ts)                                   |
-| `AUTO_BACKUP_DELETED`         | `Auto Backup Deleted`         | `m2t_auto_backup_deleted`         | No      | An auto-backup is deleted; each successful deletion.                                                                                                                                                                     | `target`                      | [services/autoBackup.native.ts](apps/mobile/services/autoBackup.native.ts)                                   |
-| `AUTO_BACKUP_SETTING_TOGGLED` | `Auto Backup Setting Toggled` | `m2t_auto_backup_setting_toggled` | No      | Auto-backup is enabled or disabled in settings; each toggle.                                                                                                                                                             | `enabled`                     | [features/settings/screens/AutoBackupScreen.tsx](apps/mobile/features/settings/screens/AutoBackupScreen.tsx) |
-| `AUTO_BACKUP_TARGET_CHANGED`  | `Auto Backup Target Changed`  | `m2t_auto_backup_target_changed`  | No      | The auto-backup target is selected in settings; each change.                                                                                                                                                             | `target`                      | [features/settings/screens/AutoBackupScreen.tsx](apps/mobile/features/settings/screens/AutoBackupScreen.tsx) |
-| `CLOUD_SYNC_SIGNED_OUT`       | `Cloud Sync Signed Out`       | `m2t_cloud_sync_signed_out`       | No      | A phone that was syncing signs out of Cloud Sync (data stays on the phone); each sign-out. Cancelling the choice screen or signing out while paused sends nothing.                                                       |                               | [CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                                  |
-| `CLOUD_SYNC_FAILED`           | `Cloud Sync Failed`           | `m2t_cloud_sync_failed`           | No      | A sync, link or choice step fails for a reason other than being offline; once per failure streak, not on each retry (also sent to error tracking). `stage`: `sync`, `link`, `choice`; `error_kind`: `server`, `unknown`. | `stage`, `error_kind`         | [CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                                  |
-| `REVIEW_PROMPT_MANUAL_OPENED` | `Review Prompt Manual Opened` | `m2t_review_prompt_manual_opened` | No      | The manual review entry point is used; every use.                                                                                                                                                                        | None                          | [services/reviewPrompt.native.ts](apps/mobile/services/reviewPrompt.native.ts)                               |
+| Constant                      | Event name                    | GA4 name                          | PostHog | Trigger and frequency                                                                                                                                                                                                                                                                                         | Extra properties              | Call sites                                                                                                   |
+| ----------------------------- | ----------------------------- | --------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `TUTORIAL_LIST_OPENED`        | `Tutorial List Opened`        | `m2t_tutorial_list_opened`        | No      | The tutorial list opens from settings or a deep link; every open.                                                                                                                                                                                                                                             | `source`                      | [App.tsx](apps/mobile/App.tsx), [services/deepLinks.ts](apps/mobile/services/deepLinks.ts)                   |
+| `DISPLAY_MODE_TOGGLED`        | `Display Mode Toggled`        | `m2t_display_mode_toggled`        | No      | Display switches between money and time; each toggle.                                                                                                                                                                                                                                                         | `mode`                        | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                 |
+| `NAV_TABS_CHANGED`            | `Nav Tabs Changed`            | `m2t_nav_tabs_changed`            | No      | A page is added to, removed from or reordered in the bottom bar, or the bar is reset, in Settings > Display > Bottom bar; each change.                                                                                                                                                                        | `change`, `tabs`, `tab_count` | [features/settings/screens/BottomBarScreen.tsx](apps/mobile/features/settings/screens/BottomBarScreen.tsx)   |
+| `AUTO_BACKUP_RESTORED`        | `Auto Backup Restored`        | `m2t_auto_backup_restored`        | No      | An auto-backup is restored; each successful restore.                                                                                                                                                                                                                                                          | `target`                      | [services/autoBackup.native.ts](apps/mobile/services/autoBackup.native.ts)                                   |
+| `AUTO_BACKUP_DELETED`         | `Auto Backup Deleted`         | `m2t_auto_backup_deleted`         | No      | An auto-backup is deleted; each successful deletion.                                                                                                                                                                                                                                                          | `target`                      | [services/autoBackup.native.ts](apps/mobile/services/autoBackup.native.ts)                                   |
+| `AUTO_BACKUP_SETTING_TOGGLED` | `Auto Backup Setting Toggled` | `m2t_auto_backup_setting_toggled` | No      | Auto-backup is enabled or disabled in settings; each toggle.                                                                                                                                                                                                                                                  | `enabled`                     | [features/settings/screens/AutoBackupScreen.tsx](apps/mobile/features/settings/screens/AutoBackupScreen.tsx) |
+| `AUTO_BACKUP_TARGET_CHANGED`  | `Auto Backup Target Changed`  | `m2t_auto_backup_target_changed`  | No      | The auto-backup target is selected in settings; each change.                                                                                                                                                                                                                                                  | `target`                      | [features/settings/screens/AutoBackupScreen.tsx](apps/mobile/features/settings/screens/AutoBackupScreen.tsx) |
+| `CLOUD_SYNC_SIGNED_OUT`       | `Cloud Sync Signed Out`       | `m2t_cloud_sync_signed_out`       | No      | A phone that was syncing signs out of Cloud Sync (data stays on the phone); each sign-out. Cancelling the choice screen or signing out while paused sends nothing.                                                                                                                                            |                               | [CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                                  |
+| `CLOUD_SYNC_FAILED`           | `Cloud Sync Failed`           | `m2t_cloud_sync_failed`           | No      | A sync, link or choice step fails for a reason other than being offline; once per failure streak, not on each retry (also sent to error tracking). `stage`: `sync`, `apply` (a pulled row could not be written), `shared_sync` (a shared ledger's sync), `link`, `choice`; `error_kind`: `server`, `unknown`. | `stage`, `error_kind`         | [CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                                  |
+| `REVIEW_PROMPT_MANUAL_OPENED` | `Review Prompt Manual Opened` | `m2t_review_prompt_manual_opened` | No      | The manual review entry point is used; every use.                                                                                                                                                                                                                                                             | None                          | [services/reviewPrompt.native.ts](apps/mobile/services/reviewPrompt.native.ts)                               |
 
 #### GA4 only: Web Dashboard
 

@@ -26,9 +26,8 @@ import { Directory, File, Paths } from 'expo-file-system';
 
 import { getSQLite } from '~/lib/db/client';
 import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
-import { reportError } from '~/services/errorReporting';
 import { collectReferencedAssetPaths } from '~/services/userAssetGc';
-import { assetRelativePathFromRef } from '~/services/userAssets';
+import { assetRelativePathFromRef, invalidateCustomUriCache } from '~/services/userAssets';
 import { newId } from '~/utils/id';
 
 import {
@@ -37,10 +36,11 @@ import {
   ENQUEUE_ROW_SQL,
   enqueueAllSql,
 } from '../lib/capture';
-import { inLedgersSql, isLedgerScoped, PERSONAL_CHANNEL } from '../lib/ledgerRows';
+import { inLedgersSql, isLedgerScoped, NO_CHANNEL, PERSONAL_CHANNEL } from '../lib/ledgerRows';
 import {
   buildWrite,
   decodeRow,
+  deletedElsewhere,
   diffRevs,
   encodeRow,
   makeRev,
@@ -51,8 +51,10 @@ import {
 import {
   ASSET_COLUMNS,
   CURRENT_SYNCED_SHAPE,
+  hasMeaningfulRows,
   isSyncTable,
-  MEANINGFUL_DATA_TABLES,
+  type LiveRows,
+  MEANINGFUL_ROWS,
   shapeAdditions,
   SYNC_TABLES,
   type SyncedShape,
@@ -67,6 +69,7 @@ import {
   personalRowsSql,
   recordedChannel,
   sharedLedgerIds,
+  unpushedKey,
 } from './ledgerChannels';
 import { listSharedLedgers } from './sharedLedgerStore';
 
@@ -127,6 +130,8 @@ export interface SyncOutcome {
   appliedRows: number;
   /** This phone's changes reached the cloud: other phones can be told to sync. */
   pushed: boolean;
+  /** A pulled row could not be written; it is retried on the next sync. */
+  applyError: Error | null;
 }
 
 let turso: TursoModule | null | undefined;
@@ -343,10 +348,10 @@ function writeRow(table: string, row: Row): boolean {
 
 /**
  * Writes one pulled row in its own savepoint, so a row this app version cannot
- * store (a constraint another version allows) is skipped and reported instead
- * of stopping every later sync.
+ * store (a constraint another version allows) does not stop the rows after it.
+ * Returns whether it was written, or the error that stopped it.
  */
-function writeRowSafely(table: string, row: Row): boolean {
+function writeRowSafely(table: string, row: Row): boolean | Error {
   const db = getSQLite();
   db.execSync('SAVEPOINT m2t_sync_row');
   try {
@@ -355,8 +360,7 @@ function writeRowSafely(table: string, row: Row): boolean {
     return written;
   } catch (error) {
     db.execSync('ROLLBACK TO m2t_sync_row; RELEASE m2t_sync_row');
-    reportError(error, { scope: 'cloud_sync', stage: 'apply_row', table });
-    return false;
+    return new Error(`Could not apply a pulled ${table} row`, { cause: error });
   }
 }
 
@@ -464,16 +468,18 @@ export function pendingChangeCount(): number {
 }
 
 /**
- * Changes waiting to go up in shared ledgers that sync now (active ones). The
- * shared-only schedule (a member without Pro, or Pro paused) asks this, not
- * `pendingChangeCount`: the user's own changes may be kept for when their
- * Pro is back, and must not make it sync every few seconds meanwhile.
+ * Changes waiting to go up in the given shared ledgers, by default those that
+ * sync now (active ones). The shared-only schedule (a member without Pro, or
+ * Pro paused) asks this, not `pendingChangeCount`: the user's own changes may
+ * be kept for when their Pro is back, and must not make it sync every few
+ * seconds meanwhile.
  */
-export function pendingSharedChangeCount(): number {
-  const active = listSharedLedgers()
+export function pendingSharedChangeCount(
+  ledgerIds: readonly string[] = listSharedLedgers()
     .filter((ledger) => ledger.active)
-    .map((ledger) => ledger.ledgerId);
-  if (!active.length) return 0;
+    .map((ledger) => ledger.ledgerId),
+): number {
+  if (!ledgerIds.length) return 0;
   const db = getSQLite();
   let count = 0;
   for (const table of SYNC_TABLES) {
@@ -481,7 +487,7 @@ export function pendingSharedChangeCount(): number {
     count +=
       db.getFirstSync<{ n: number }>(
         `SELECT COUNT(*) AS n FROM sync_outbox WHERE table_name = ?
-           AND row_id IN (SELECT id FROM "${table}" WHERE ${inLedgersSql(table, active)})`,
+           AND row_id IN (SELECT id FROM "${table}" WHERE ${inLedgersSql(table, ledgerIds)})`,
         [table],
       )?.n ?? 0;
   }
@@ -519,6 +525,14 @@ export function dropPersonalOutbox(): void {
   }
 }
 
+/**
+ * Whether a channel has changes flushed into its replica that no push has
+ * carried yet (a sync failed after its flush). They are out of the outbox.
+ */
+export function hasUnpushedChanges(channel: string): boolean {
+  return getState(unpushedKey(channel)) === '1';
+}
+
 /** Forgets everything this phone knew about the cloud copy (sign-out, account switch). */
 export function resetLocalSyncState(): void {
   disableCapture();
@@ -534,26 +548,31 @@ export function resetLocalSyncState(): void {
 // ---------------------------------------------------------------------------
 // Summaries for the "Keep which data?" choice
 
-const SUMMARY_TABLES = ['accounts', ...MEANINGFUL_DATA_TABLES] as const;
+const SUMMARY_TABLES = Object.keys(MEANINGFUL_ROWS) as SyncTable[];
 
-function summaryFromCounts(count: (table: string) => number): DataSummary {
+/** Counts and whether there is anything to keep, from a side's live rows. */
+function summaryOf(side: LiveRows): DataSummary {
   return {
-    transactions: count('transactions'),
-    accounts: count('accounts'),
-    hasMeaningfulData: MEANINGFUL_DATA_TABLES.some((t) => count(t) > 0),
+    transactions: side.count('transactions'),
+    accounts: side.count('accounts'),
+    hasMeaningfulData: hasMeaningfulRows(side),
   };
 }
 
 /** This phone's own data, without the shared ledgers (they sync on their own). */
 export function summarizeLocal(): DataSummary {
   const db = getSQLite();
-  return summaryFromCounts((table) =>
-    tableExists(table)
-      ? (db.getFirstSync<{ n: number }>(
-          `SELECT COUNT(*) AS n FROM "${table}" WHERE deleted_at IS NULL AND ${personalRowsSql(table)}`,
-        )?.n ?? 0)
-      : 0,
-  );
+  const live = (table: SyncTable) => `deleted_at IS NULL AND ${personalRowsSql(table)}`;
+  return summaryOf({
+    count: (table) =>
+      tableExists(table)
+        ? (db.getFirstSync<{ n: number }>(
+            `SELECT COUNT(*) AS n FROM "${table}" WHERE ${live(table)}`,
+          )?.n ?? 0)
+        : 0,
+    rows: (table) =>
+      tableExists(table) ? db.getAllSync<Row>(`SELECT * FROM "${table}" WHERE ${live(table)}`) : [],
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -602,8 +621,8 @@ export class SyncEngine {
   private running: Promise<SyncOutcome> | null = null;
   /** The last apply left ledger-row removals for later (see applyRemoteChanges). */
   private removalsDeferred = false;
-  /** Rows were flushed into the replica but no push has carried them yet. */
-  private unannounced = false;
+  /** The first pulled row this sync could not write. */
+  private applyFailure: Error | null = null;
 
   constructor(private readonly config: EngineConfig) {}
 
@@ -657,6 +676,20 @@ export class SyncEngine {
     });
   }
 
+  /**
+   * Takes the cloud's changes into the app without sending anything: a paused
+   * shared ledger's last download, with a read-only token, before it stops.
+   * Returns the first pulled row that could not be written, if any.
+   */
+  pullAndApply(): Promise<Error | null> {
+    return this.exclusive(async () => {
+      this.applyFailure = null;
+      await this.db().pull();
+      await this.applyRemoteChanges();
+      return this.applyFailure;
+    });
+  }
+
   /** Resolves once every operation started so far has finished (sign-out waits for it). */
   async waitIdle(): Promise<void> {
     await replicaQueue;
@@ -669,27 +702,33 @@ export class SyncEngine {
 
   async summarizeCloud(): Promise<DataSummary> {
     const replica = this.db();
-    const counts = new Map<string, number>();
+    const live = new Map<string, Row[]>();
     const rows = await replica.all(
       `SELECT table_name, data FROM sync_rows WHERE table_name IN (${SUMMARY_TABLES.map(() => '?').join(', ')})`,
       [...SUMMARY_TABLES],
     );
     for (const row of rows) {
+      let data: Row;
       try {
-        const data = JSON.parse(String(row.data)) as { deleted_at?: unknown };
-        if (data.deleted_at != null) continue;
+        data = JSON.parse(String(row.data)) as Row;
       } catch {
         continue;
       }
+      if (data.deleted_at != null) continue;
       const table = String(row.table_name);
-      counts.set(table, (counts.get(table) ?? 0) + 1);
+      const list = live.get(table) ?? [];
+      list.push(data);
+      live.set(table, list);
     }
     const info = await replica.all('SELECT key, value FROM sync_info');
     const infoMap = new Map(
       info.map((r) => [String(r.key), r.value == null ? null : String(r.value)]),
     );
     return {
-      ...summaryFromCounts((table) => counts.get(table) ?? 0),
+      ...summaryOf({
+        count: (table) => live.get(table)?.length ?? 0,
+        rows: (table) => live.get(table) ?? [],
+      }),
       lastSyncedAt: Number(infoMap.get('last_synced_at') ?? '') || null,
       lastDeviceName: infoMap.get('last_device_name') ?? null,
     };
@@ -765,7 +804,13 @@ export class SyncEngine {
           for (const stored of perTable.get(table) ?? []) {
             const row = decodeRow(table, stored.data, cols);
             if (!row || channelOfRow(table, row) !== PERSONAL_CHANNEL) continue;
-            if (writeRowSafely(table, row)) collectAssetRefs(table, row, assets);
+            const written = writeRowSafely(table, row);
+            if (written instanceof Error) {
+              // Unrecorded, so the next sync's apply tries it again.
+              setState('apply_pending', '1');
+              continue;
+            }
+            if (written) collectAssetRefs(table, row, assets);
             recordRev(table, stored.row_id, stored.rev, PERSONAL_CHANNEL);
           }
         }
@@ -790,6 +835,7 @@ export class SyncEngine {
     const replica = this.db();
     enableCapture();
     let appliedRows = 0;
+    this.applyFailure = null;
     // A ledger just shared, joined, or signed into again: take what the cloud
     // has (keeping this phone's newer edits), then send what only this phone
     // has. It counts as attached once that is pushed.
@@ -804,30 +850,38 @@ export class SyncEngine {
       appliedRows += await this.applyRemoteChanges({ attaching: true });
       enqueueLedgerRows(this.config.ledgerId ?? '', this.channel);
     }
-    const pushedRows = await this.flushOutbox();
-    // Kept until a push succeeds: a failed push leaves the rows in the
-    // replica, and the retry that sends them flushes nothing new.
-    if (pushedRows > 0) this.unannounced = true;
-    if (pushedRows > 0) await this.recordLastDevice();
+    // The cloud's latest before the flush, so it sees a row deleted elsewhere
+    // that this phone changed meanwhile (`deletedElsewhere`).
+    const pulledFirst = !attaching && (await replica.pull());
+    const { pushed: pushedRows, adopted } = await this.flushOutbox();
+    appliedRows += adopted;
+    // Kept until a push succeeds, across restarts: a failed push leaves the
+    // rows in the replica, out of the outbox, and the retry that sends them
+    // flushes nothing new.
+    if (pushedRows > 0) {
+      setState(unpushedKey(this.channel), '1');
+      await this.recordLastDevice();
+    }
     // Images first: a row must never reach another phone before its image can.
     await this.uploadPendingMedia();
     await replica.push();
-    const pushed = this.unannounced || attaching;
-    this.unannounced = false;
+    const pushed = hasUnpushedChanges(this.channel) || attaching;
+    setState(unpushedKey(this.channel), '0');
     if (attaching) setState(attachedKey(this.channel), '1');
-    const pulled = await replica.pull();
+    const pulled = (await replica.pull()) || pulledFirst;
     // Also re-applies after an apply that failed, which a later pull with no
     // new changes would otherwise never retry.
     const pendingKey = this.isPersonal ? 'apply_pending' : `apply_pending:${this.channel}`;
-    if (pulled || getState(pendingKey) !== '0') {
+    if (pulled || this.applyFailure || getState(pendingKey) !== '0') {
       setState(pendingKey, '1');
       this.removalsDeferred = false;
       appliedRows += await this.applyRemoteChanges();
-      // Deferred removals keep the apply pending, so the next sync retries.
-      if (!this.removalsDeferred) setState(pendingKey, '0');
+      // Deferred removals and rows that failed keep the apply pending, so
+      // the next sync retries.
+      if (!this.removalsDeferred && !this.applyFailure) setState(pendingKey, '0');
     }
     await this.downloadMedia(new Set());
-    return { appliedRows, pushed };
+    return { appliedRows, pushed, applyError: this.applyFailure };
   }
 
   /** When and from which phone the cloud copy last changed, for the choice screen. */
@@ -889,26 +943,40 @@ export class SyncEngine {
         ? channelOfRow(entry.table_name, local)
         : (recordedChannel(entry.table_name, entry.row_id) ?? PERSONAL_CHANNEL);
       memo.set(key, channel);
-      if (channel === this.channel) mine.push({ ...entry, local });
+      if (channel === NO_CHANNEL) {
+        // Goes nowhere (a ledger about to be deleted here): drop it.
+        db.runSync('DELETE FROM sync_outbox WHERE table_name = ? AND row_id = ? AND seq = ?', [
+          entry.table_name,
+          entry.row_id,
+          entry.seq,
+        ]);
+      } else if (channel === this.channel) mine.push({ ...entry, local });
     }
     return mine;
   }
 
-  /** Copies this channel's outbox rows into the replica. Returns how many rows changed there. */
-  private async flushOutbox(): Promise<number> {
+  /**
+   * Copies this channel's outbox rows into the replica. Returns how many rows
+   * changed there, and how many local rows took a delete from the cloud.
+   */
+  private async flushOutbox(): Promise<{ pushed: number; adopted: number }> {
     const db = getSQLite();
     const replica = this.db();
     const origin = deviceId();
     let changedRows = 0;
-    // Other channels' entries stay behind, so walk the outbox by seq.
-    let afterSeq = -1;
+    let adoptedRows = 0;
+    // Other channels' entries stay behind, so walk the outbox in order. A
+    // bulk queue gives many rows one seq, so the key is (seq, table, id).
+    let after: [number, string, string] = [-1, '', ''];
     for (;;) {
       const page = db.getAllSync<{ table_name: string; row_id: string; seq: number }>(
-        'SELECT table_name, row_id, seq FROM sync_outbox WHERE seq > ? ORDER BY seq LIMIT ?',
-        [afterSeq, FLUSH_BATCH],
+        `SELECT table_name, row_id, seq FROM sync_outbox WHERE (seq, table_name, row_id) > (?, ?, ?)
+         ORDER BY seq, table_name, row_id LIMIT ?`,
+        [...after, FLUSH_BATCH],
       );
       if (!page.length) break;
-      afterSeq = page[page.length - 1].seq;
+      const last = page[page.length - 1];
+      after = [last.seq, last.table_name, last.row_id];
       const batch = this.entriesForChannel(page);
       if (!batch.length) continue;
       const stored = new Map<string, StoredRow>();
@@ -925,6 +993,8 @@ export class SyncEngine {
       }
 
       const results: { table: string; id: string; seq: number; rev: string | null }[] = [];
+      // Local rows that take the cloud's delete instead (`deletedElsewhere`).
+      const adopted: { table: string; id: string; data: string }[] = [];
       const assets = new Set<string>();
       await replica.transaction(async () => {
         for (const entry of batch) {
@@ -947,7 +1017,16 @@ export class SyncEngine {
             results.push({ table, id, seq: entry.seq, rev: null });
             continue;
           }
-          const data = encodeRow(table, local, before?.data ?? null);
+          const seen = db.getFirstSync<{ rev: string }>(
+            'SELECT rev FROM sync_row_meta WHERE table_name = ? AND row_id = ? AND channel = ?',
+            [table, id, this.channel],
+          )?.rev;
+          if (before && deletedElsewhere(seen ?? null, before, local)) {
+            adopted.push({ table, id, data: before.data });
+            results.push({ table, id, seq: entry.seq, rev: before.rev });
+            continue;
+          }
+          const data = encodeRow(table, local, before?.data ?? null, !this.isPersonal);
           // Only device-local columns changed (a backup timestamp, say): the
           // cloud copy stays as it is.
           if (before && before.data === data) {
@@ -985,9 +1064,21 @@ export class SyncEngine {
           ]);
           recordRev(r.table, r.id, r.rev, this.channel);
         }
+        if (!adopted.length) return;
+        setState('applying', '1');
+        try {
+          for (const { table, id, data } of adopted) {
+            const row = decodeRow(table, data, localColumns(table), !this.isPersonal);
+            if (row && writeRowSafely(table, row) === true) adoptedRows += 1;
+            // Not written: forget the revision, so the next pull applies it.
+            else recordRev(table, id, null, this.channel);
+          }
+        } finally {
+          setState('applying', '0');
+        }
       });
     }
-    return changedRows;
+    return { pushed: changedRows, adopted: adoptedRows };
   }
 
   /** Rows other phones changed or removed, minus those this phone is still sending. */
@@ -1055,6 +1146,7 @@ export class SyncEngine {
     const db = getSQLite();
     const assets = new Set<string>();
     let applied = 0;
+    let failure: Error | null = null;
     applyQuietly(() => {
       // Re-read: the user may have edited a row while the data was fetched,
       // and their edit wins.
@@ -1072,7 +1164,7 @@ export class SyncEngine {
       }
       for (const item of fetched) {
         if (!tableExists(item.table) || pendingNow.has(rowKey(item.table, item.id))) continue;
-        const row = decodeRow(item.table, item.data, localColumns(item.table));
+        const row = decodeRow(item.table, item.data, localColumns(item.table), !this.isPersonal);
         if (!row || !this.accepts(item.table, row)) continue;
         if (opts.attaching && this.localIsNewer(item.table, row)) {
           // Edited here while signed out: this phone's copy goes up instead.
@@ -1080,13 +1172,20 @@ export class SyncEngine {
           recordRev(item.table, item.id, item.rev, this.channel);
           continue;
         }
-        if (writeRowSafely(item.table, row)) {
+        const written = writeRowSafely(item.table, row);
+        if (written instanceof Error) {
+          // Left unrecorded, so every later sync tries it again.
+          failure ??= written;
+          continue;
+        }
+        if (written) {
           applied += 1;
           collectAssetRefs(item.table, row, assets);
         }
         recordRev(item.table, item.id, item.rev, this.channel);
       }
     });
+    this.applyFailure ??= failure;
     await this.downloadMedia(assets);
     return applied;
   }
@@ -1228,21 +1327,29 @@ export class SyncEngine {
     } catch {
       return;
     }
+    let downloaded = 0;
     const next = async (): Promise<void> => {
       const path = missing.shift();
       if (!path) return;
       const file = assetFile(path);
+      // Downloaded beside the image and moved into place once complete: an
+      // interrupted download must not leave a partial file that looks done.
+      const partial = assetFile(`${path}.part`);
       try {
         if (!file.exists) {
           const parent = file.parentDirectory;
           if (!parent.exists) parent.create({ intermediates: true });
-          await downloadMedia(token, this.config.mediaPath, path, file);
+          if (partial.exists) partial.delete();
+          await downloadMedia(token, this.config.mediaPath, path, partial);
+          partial.moveSync(file);
+          downloaded += 1;
         }
         db.runSync('DELETE FROM sync_media_missing WHERE path = ? AND channel = ?', [
           path,
           channel,
         ]);
       } catch {
+        if (partial.exists) partial.delete();
         db.runSync(
           'UPDATE sync_media_missing SET attempts = attempts + 1 WHERE path = ? AND channel = ?',
           [path, channel],
@@ -1251,6 +1358,8 @@ export class SyncEngine {
       await next();
     };
     await Promise.all(Array.from({ length: DOWNLOAD_CONCURRENCY }, next));
+    // Icons drawn before their file arrived were remembered as missing.
+    if (downloaded > 0) invalidateCustomUriCache();
   }
 }
 

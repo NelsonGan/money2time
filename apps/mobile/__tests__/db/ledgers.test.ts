@@ -4,6 +4,18 @@ import { DatabaseSync } from 'node:sqlite';
 
 import type { SQLiteDatabase } from 'expo-sqlite';
 
+import {
+  channelOfRow,
+  deletePersonalLedgerRows,
+  unpushedKey,
+} from '~/features/cloudSync/services/ledgerChannels';
+import {
+  clearDeferredLedgerDeletes,
+  deferLedgerDelete,
+  removeSharedLedger,
+  saveSharedLedger,
+} from '~/features/cloudSync/services/sharedLedgerStore';
+import { sharedLedgerSync } from '~/features/cloudSync/services/sharedLedgerSync';
 import { getSQLite } from '~/lib/db/client';
 import { copyLedgerRows } from '~/lib/db/ledgerCopy';
 import {
@@ -16,7 +28,12 @@ import migration075LedgersAndCloudSync from '~/lib/db/migrations/075_ledgers_and
 import { applyMigrations } from '~/lib/db/migrations/runner';
 import type { DbMigration } from '~/lib/db/migrations/types';
 import { accountsRepository } from '~/lib/repositories/accountsRepository';
+import { writeBudgetLines } from '~/lib/repositories/budgetLines';
 import { ledgersRepository } from '~/lib/repositories/ledgersRepository';
+import {
+  assertInOpenLedger,
+  EntryLedgerGoneError,
+} from '~/lib/repositories/transactionsRepository';
 import { applyBackupData, buildBackupData } from '~/services/dataManagementService';
 
 // Real SQL against real SQLite: every app migration, then the ledger code's
@@ -277,6 +294,104 @@ describe('ledgersRepository on SQLite', () => {
     expect(ledgersRepository.entryCounts()).toEqual({ default: 1, work: 2, copy: 2 });
   });
 
+  it('resets every ledger of the user but keeps the shared ones', () => {
+    saveSharedLedger({
+      ledgerId: 'work',
+      shareId: 'share-1',
+      role: 'member',
+      name: 'Work',
+      ownerName: 'Sam',
+      memberCount: 2,
+      active: true,
+    });
+    try {
+      deletePersonalLedgerRows();
+    } finally {
+      removeSharedLedger('work');
+    }
+    expect(harness.all('SELECT id FROM transactions ORDER BY id')).toEqual([
+      { id: 'hotel' },
+      { id: 'taxi' },
+    ]);
+    expect(harness.all('SELECT id FROM transaction_splits')).toEqual([{ id: 'taxi-split' }]);
+    expect(harness.all('SELECT id FROM accounts')).toEqual([{ id: 'work-cash' }]);
+    expect(harness.all('SELECT id FROM monthly_budgets')).toEqual([]);
+    expect(harness.all('SELECT id FROM ledgers ORDER BY id')).toEqual([
+      { id: 'default' },
+      { id: 'work' },
+    ]);
+  });
+
+  it('resets every ledger but the default one when nothing is shared', () => {
+    deletePersonalLedgerRows();
+    expect(harness.all('SELECT id FROM transactions')).toEqual([]);
+    expect(harness.all('SELECT id FROM transaction_splits')).toEqual([]);
+    expect(harness.all('SELECT id FROM ledgers')).toEqual([{ id: 'default' }]);
+  });
+
+  it("routes a removed member's open ledger nowhere until it is deleted", () => {
+    const taxi = { id: 'taxi', ledger_id: 'work' };
+    const split = { id: 'taxi-split', transaction_id: 'taxi' };
+    expect(channelOfRow('transactions', taxi)).toBe('personal');
+    deferLedgerDelete('work');
+    try {
+      expect(channelOfRow('transactions', taxi)).toBe('none');
+      expect(channelOfRow('transaction_splits', split)).toBe('none');
+      expect(channelOfRow('transactions', { id: 'lunch', ledger_id: 'default' })).toBe('personal');
+    } finally {
+      clearDeferredLedgerDeletes(['work']);
+    }
+  });
+
+  it('refuses a draft naming accounts or categories the open ledger does not have', () => {
+    setActiveLedgerId(DEFAULT_LEDGER_ID);
+    const draft = { type: 'expense' as const, amount: 5, currency: 'MYR', date: '2026-10-28' };
+    expect(() =>
+      assertInOpenLedger({ ...draft, accountId: 'cash', categoryId: 'food' }),
+    ).not.toThrow();
+    expect(() => assertInOpenLedger(draft)).not.toThrow();
+    // Its ledger deleted on another phone: the rows remain, in another ledger.
+    expect(() => assertInOpenLedger({ ...draft, accountId: 'work-cash' })).toThrow(
+      EntryLedgerGoneError,
+    );
+    // Replaced by a reset or a cloud copy elsewhere: the rows are gone.
+    harness.connection.exec("DELETE FROM accounts WHERE id = 'work-cash'");
+    expect(() => assertInOpenLedger({ ...draft, accountId: 'work-cash' })).toThrow(
+      EntryLedgerGoneError,
+    );
+    expect(() => assertInOpenLedger({ ...draft, categoryId: 'removed-category' })).toThrow(
+      EntryLedgerGoneError,
+    );
+  });
+
+  it.each([true, false])(
+    'keeps a member from leaving with unsent entries after a restart (active: %s)',
+    async (active) => {
+      saveSharedLedger({
+        ledgerId: 'work',
+        shareId: 'share-1',
+        role: 'member',
+        name: 'Work',
+        ownerName: 'Sam',
+        memberCount: 2,
+        active,
+      });
+      try {
+        // A sync flushed them into the replica and its push failed: out of
+        // the outbox, and no engine open since the restart.
+        harness.connection.exec(
+          `INSERT INTO sync_state (key, value) VALUES ('${unpushedKey('share-1')}', '1')`,
+        );
+        await expect(sharedLedgerSync.leave('work')).rejects.toMatchObject({
+          code: 'unsent_changes',
+        });
+        expect(harness.all("SELECT id FROM ledgers WHERE id = 'work'")).toHaveLength(1);
+      } finally {
+        removeSharedLedger('work');
+      }
+    },
+  );
+
   it('never deletes the default ledger', () => {
     expect(() => ledgersRepository.softDelete(DEFAULT_LEDGER_ID)).toThrow();
     expect(harness.all('SELECT COUNT(*) AS n FROM transactions WHERE deleted_at IS NULL')).toEqual([
@@ -331,6 +446,14 @@ describe('backup and restore across ledgers', () => {
 
   it('gives the Web Dashboard the open ledger only, in its currency', async () => {
     addWorkLedger();
+    harness.connection.exec(`
+      UPDATE settings SET currency_code = 'MYR';
+      INSERT INTO exchange_rates (id, base_currency, quote_currency, rate, as_of_date, updated_at)
+        VALUES ('usd-myr', 'USD', 'MYR', 4, '2026-10-28', '${NOW}');
+      INSERT INTO monthly_wage_settings (id, month, wage_type, wage_amount, hours_worked_per_week,
+        workdays_per_week, commute_minutes_per_workday, base_hourly_rate, true_hourly_rate, created_at, updated_at)
+        VALUES ('oct', '2026-10', 'hourly', 40, 40, 5, 0, 40, 40, '${NOW}', '${NOW}');
+    `);
     setActiveLedgerId('work');
     const backup = await buildBackupData({ openLedgerOnly: true });
     expect(backup.version).toBe(3);
@@ -343,6 +466,11 @@ describe('backup and restore across ledgers', () => {
       default_payback_account_id: 'work-bank',
     });
     expect(backup.userAssets?.map((asset) => asset.path)).toEqual(['receipts/taxi.jpg']);
+    // RM40 an hour, as the app shows it in the USD ledger (RM4 to the dollar).
+    expect(backup.tables.monthly_wage_settings[0]).toMatchObject({
+      wage_amount: 10,
+      true_hourly_rate: 10,
+    });
   });
 
   it('restores every ledger and opens the default one', async () => {
@@ -364,6 +492,42 @@ describe('backup and restore across ledgers', () => {
     ]);
   });
 
+  it('leaves a shared ledger as it is: other people may have changed it since', async () => {
+    addWorkLedger();
+    const backup = await buildBackupData();
+    saveSharedLedger({
+      ledgerId: 'work',
+      shareId: 'share-1',
+      role: 'member',
+      name: 'Work',
+      ownerName: 'Sam',
+      memberCount: 2,
+      active: true,
+    });
+    try {
+      harness.connection.exec(`
+        UPDATE transactions SET amount = 35 WHERE id = 'taxi';
+        UPDATE transaction_splits SET amount = 20 WHERE id = 'taxi-split';
+        INSERT INTO transactions (id, ledger_id, type, amount, currency, date, created_at, updated_at)
+          VALUES ('dinner', 'work', 'expense', 50, 'USD', '2026-10-28', '${NOW}', '${NOW}');
+        DELETE FROM transactions WHERE id = 'lunch';
+      `);
+
+      expect(applyBackupData(backup).success).toBe(true);
+      expect(harness.all('SELECT id, ledger_id, amount FROM transactions ORDER BY id')).toEqual([
+        { id: 'dinner', ledger_id: 'work', amount: 50 },
+        { id: 'lunch', ledger_id: 'default', amount: 12 },
+        { id: 'taxi', ledger_id: 'work', amount: 35 },
+      ]);
+      expect(harness.all('SELECT id, amount FROM transaction_splits')).toEqual([
+        { id: 'taxi-split', amount: 20 },
+      ]);
+      expect(harness.all("SELECT name FROM ledgers WHERE id = 'work'")).toEqual([{ name: 'Work' }]);
+    } finally {
+      removeSharedLedger('work');
+    }
+  });
+
   it('restores a backup from before ledgers into the default ledger', async () => {
     const backup = await buildBackupData();
     delete backup.tables.ledgers;
@@ -378,5 +542,62 @@ describe('backup and restore across ledgers', () => {
     ]);
     // Restoring replaces everything, the other ledgers included.
     expect(harness.all('SELECT id FROM ledgers')).toEqual([{ id: 'default' }]);
+  });
+});
+
+describe('budget lines', () => {
+  let harness: ReturnType<typeof openDatabase>;
+
+  beforeEach(() => {
+    harness = openDatabase();
+    applyMigrations(harness.db, loadMigrations());
+    seedPreLedgerData(harness);
+    harness.connection.exec(`
+      INSERT INTO monthly_budget_categories (id, budget_id, category_id, amount, created_at, updated_at)
+        VALUES ('legacy', 'oct', 'food', 100, '${NOW}', '${NOW}');
+    `);
+    (getSQLite as jest.Mock).mockReturnValue(harness.db);
+  });
+  afterEach(() => harness.connection.close());
+
+  const live = () =>
+    harness.all(
+      'SELECT id, amount FROM monthly_budget_categories WHERE deleted_at IS NULL ORDER BY id',
+    );
+
+  it('keeps one line per category when two phones edit the same budget', () => {
+    // Each phone's edit, as it reaches the other: the same line ids.
+    writeBudgetLines(
+      'monthly_budget_categories',
+      'oct',
+      [{ categoryId: 'food', amount: 150 }],
+      NOW,
+    );
+    writeBudgetLines(
+      'monthly_budget_categories',
+      'oct',
+      [
+        { categoryId: 'food', amount: 200 },
+        { categoryId: 'rent', amount: 900 },
+      ],
+      NOW,
+    );
+    expect(live()).toEqual([
+      { id: 'oct:food', amount: 200 },
+      { id: 'oct:rent', amount: 900 },
+    ]);
+  });
+
+  it('retires lines left out, and brings one back when it returns', () => {
+    writeBudgetLines(
+      'monthly_budget_categories',
+      'oct',
+      [{ categoryId: 'food', amount: 150 }],
+      NOW,
+    );
+    writeBudgetLines('monthly_budget_categories', 'oct', [], NOW);
+    expect(live()).toEqual([]);
+    writeBudgetLines('monthly_budget_categories', 'oct', [{ categoryId: 'food', amount: 80 }], NOW);
+    expect(live()).toEqual([{ id: 'oct:food', amount: 80 }]);
   });
 });

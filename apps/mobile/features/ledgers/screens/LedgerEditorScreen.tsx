@@ -29,7 +29,7 @@ import { useApp } from '~/context/AppContext';
 import { useCloudSync, useCloudSyncEnabled } from '~/features/cloudSync/CloudSyncContext';
 import type { CategoryIconPickerSession } from '~/features/settings/lib/categoryIconPickerBridge';
 import { useSharedLedgers } from '~/features/sharedLedgers/hooks/useSharedLedgers';
-import { confirmLeaveLedger } from '~/features/sharedLedgers/lib/confirmLeave';
+import { confirmLeaveLedger, leaveAskingFirst } from '~/features/sharedLedgers/lib/confirmLeave';
 import {
   MAX_MEMBERS,
   MAX_SHARED_LEDGERS,
@@ -204,22 +204,18 @@ export function LedgerEditorScreen({
   };
 
   const leave = (id: string) => {
-    confirmLeaveLedger(
-      existing ? ledgerDisplayName(existing) : '',
-      sharing?.ownerName ?? '',
-      () => {
-        setLeaving(true);
-        sync
-          .leaveLedger(id)
-          // Left. An open ledger is only deleted once the app is back on its
-          // main screens (LedgerProGuard), so close the editor now.
-          .then(close)
-          .catch((error: unknown) => {
-            setLeaving(false);
-            Alert.alert(sharingErrorMessage(error));
-          });
-      },
-    );
+    const ledgerName = existing ? ledgerDisplayName(existing) : '';
+    confirmLeaveLedger(ledgerName, sharing?.ownerName ?? '', () => {
+      setLeaving(true);
+      leaveAskingFirst((opts) => sync.leaveLedger(id, opts), ledgerName)
+        // Left. An open ledger is only deleted once the app is back on its
+        // main screens (LedgerProGuard), so close the editor now.
+        .then((left) => (left ? close() : setLeaving(false)))
+        .catch((error: unknown) => {
+          setLeaving(false);
+          Alert.alert(sharingErrorMessage(error));
+        });
+    });
   };
 
   return (
