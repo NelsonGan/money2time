@@ -2620,6 +2620,10 @@ const vi = {
           q: 'Sổ được chia sẻ có cần Pro không?',
           a: 'Chỉ cần một người trong sổ có Pro, là chủ sổ hoặc bất kỳ thành viên nào. Nếu không ai trong sổ có Pro, sổ sẽ tạm dừng với mọi người cho đến khi có người có Pro. Không có gì bị xóa.',
         },
+        shared_free_limits: {
+          q: 'Tôi có thể thêm giao dịch vào sổ chung khi không có Pro không?',
+          a: 'Có, kể cả khi sổ có hơn 6 tài khoản. Các giới hạn khác của gói miễn phí vẫn áp dụng, như thêm tài khoản hoặc danh mục vượt giới hạn. Hãy nhờ chủ sổ thực hiện những thay đổi đó.',
+        },
         family_pro: {
           q: 'Gia đình tôi có dùng được Pro của tôi không?',
           a: 'Hãy chia sẻ một sổ với họ: người bạn mời không cần Pro. Đăng nhập tài khoản của bạn trên điện thoại của họ sẽ cho họ thấy toàn bộ dữ liệu tiền bạc của bạn.',

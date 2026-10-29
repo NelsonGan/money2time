@@ -27,7 +27,10 @@
  */
 
 import { PRO_LIMITS } from '~/constants/proLimits';
-import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accountEntryGate';
+import {
+  countAccountsTowardFreeLimit,
+  isNewTransactionBlockedByAccounts,
+} from '~/features/transactions/lib/accountEntryGate';
 import type { TransactionSplit, TransactionWithRelations } from '~/types';
 
 import type { EditModule, EditStep, ModuleOp, PlanTools, TxFields } from '../webDashboardEdits';
@@ -204,8 +207,11 @@ function planCreate(
   const { lookup } = tools;
   // A free plan over its account limit can no longer add entries, as in the app.
   if (
-    !lookup.isPro &&
-    countAccountsTowardFreeLimit(lookup.accounts) > PRO_LIMITS.FREE_MAX_ACCOUNTS
+    isNewTransactionBlockedByAccounts(
+      lookup.isPro,
+      countAccountsTowardFreeLimit(lookup.accounts),
+      lookup.inSharedLedger,
+    )
   ) {
     return tools.refuse('pro_required', 'accounts');
   }

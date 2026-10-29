@@ -2656,6 +2656,10 @@ const ms = {
           q: 'Adakah buku yang dikongsi memerlukan Pro?',
           a: 'Hanya seorang di dalamnya perlu ada Pro, pemilik atau mana-mana ahli. Jika tiada sesiapa di dalamnya ada Pro, ia dijeda untuk semua orang sehingga seseorang mendapatkannya. Tiada apa-apa yang dipadam.',
         },
+        shared_free_limits: {
+          q: 'Bolehkah saya menambah entri dalam lejar kongsi tanpa Pro?',
+          a: 'Boleh, walaupun lejar itu ada lebih daripada 6 akaun. Had pelan percuma yang lain masih terpakai, seperti menambah akaun atau kategori melebihi had. Minta pemilik lejar membuat perubahan itu.',
+        },
         family_pro: {
           q: 'Bolehkah keluarga saya menggunakan Pro saya?',
           a: 'Kongsi buku dengan mereka: orang yang anda jemput tidak perlukan Pro. Log masuk ke akaun anda pada telefon mereka akan menunjukkan semua data kewangan anda kepada mereka.',

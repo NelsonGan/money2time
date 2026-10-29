@@ -2667,6 +2667,10 @@ const nl = {
           q: 'Heeft een gedeeld boek Pro nodig?',
           a: 'Maar één persoon erin heeft Pro nodig, de eigenaar of een willekeurig lid. Heeft niemand erin Pro, dan pauzeert het voor iedereen tot iemand het heeft. Er wordt niets verwijderd.',
         },
+        shared_free_limits: {
+          q: 'Kan ik zonder Pro boekingen toevoegen aan een gedeeld kasboek?',
+          a: 'Ja, ook als het meer dan 6 rekeningen heeft. De andere limieten van het gratis plan blijven gelden, zoals rekeningen of categorieën toevoegen boven de limiet. Vraag de eigenaar van het kasboek om die wijzigingen te doen.',
+        },
         family_pro: {
           q: 'Kan mijn gezin mijn Pro gebruiken?',
           a: 'Deel een boek met ze: mensen die je uitnodigt, hebben geen Pro nodig. Als je op hun telefoon aanmeldt met je account, zien ze al je geldgegevens.',

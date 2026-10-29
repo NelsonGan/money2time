@@ -451,6 +451,27 @@ describe('transactions', () => {
       ),
     ).toEqual({ error: 'pro_required', feature: 'accounts' });
   });
+
+  it('lets a free member add entries in a shared ledger over the account limit, not accounts', () => {
+    const accounts = Array.from({ length: 7 }, (_, index) => account(`a${index}`));
+    const shared = { isPro: false, accounts, inSharedLedger: true };
+    expect(
+      steps(
+        [
+          {
+            entity: 'transaction',
+            op: 'create',
+            tx: { type: 'expense', amount: 1, accountId: 'a0', categoryId: 'food' },
+          },
+        ],
+        shared,
+      ),
+    ).toHaveLength(1);
+    expect(refusal([{ entity: 'account', op: 'create', account: { name: 'x' } }], shared)).toEqual({
+      error: 'pro_required',
+      feature: 'accounts',
+    });
+  });
 });
 
 describe('accounts and groups', () => {

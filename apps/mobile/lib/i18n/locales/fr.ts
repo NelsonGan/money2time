@@ -2673,6 +2673,10 @@ const fr = {
           q: 'Un carnet partagé nécessite-t-il Pro ?',
           a: 'Une seule personne du carnet doit avoir Pro, le propriétaire ou n’importe quel membre. Si personne n’a Pro, il est en pause pour tout le monde jusqu’à ce que quelqu’un l’ait. Rien n’est supprimé.',
         },
+        shared_free_limits: {
+          q: 'Puis-je ajouter des opérations à un registre partagé sans Pro ?',
+          a: "Oui, même s'il compte plus de 6 comptes. Les autres limites du forfait gratuit s'y appliquent toujours, par exemple pour ajouter des comptes ou des catégories au-delà de la limite. Demandez au propriétaire du registre de faire ces changements.",
+        },
         family_pro: {
           q: 'Ma famille peut-elle utiliser mon Pro ?',
           a: 'Partagez un carnet avec eux : les personnes que vous invitez n’ont pas besoin de Pro. Vous connecter à votre compte sur leur téléphone leur montrerait toutes vos données financières.',

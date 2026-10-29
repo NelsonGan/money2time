@@ -27,7 +27,10 @@
 
 import { getCardDesignTemplate } from '~/constants/cardDesigns';
 import { PRO_LIMITS } from '~/constants/proLimits';
-import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accountEntryGate';
+import {
+  countAccountsTowardFreeLimit,
+  isNewTransactionBlockedByAccounts,
+} from '~/features/transactions/lib/accountEntryGate';
 import type {
   Account,
   AccountGroup,
@@ -242,6 +245,8 @@ export type EditLookup = {
   /** Currencies the app lets an entry be in: the main one, added ones, account ones. */
   currencies: string[];
   isPro: boolean;
+  /** The open ledger is shared and active: a free member adds entries whatever its account count. */
+  inSharedLedger?: boolean;
   /** `amount` in `from` as `to` at the cached rate, or null without one. */
   convert: (amount: number, from: string, to: string) => number | null;
   /** Whether a bundled category icon id exists (the web offers the default pack). */
@@ -656,7 +661,13 @@ function planTransaction(
 ): Result<number> {
   if (op.op === 'create') {
     // A free plan over its account limit can no longer add entries, as in the app.
-    if (!ctx.isPro && countAccountsTowardFreeLimit(ctx.accounts) > PRO_LIMITS.FREE_MAX_ACCOUNTS) {
+    if (
+      isNewTransactionBlockedByAccounts(
+        ctx.isPro,
+        countAccountsTowardFreeLimit(ctx.accounts),
+        ctx.inSharedLedger,
+      )
+    ) {
       return refuse('pro_required', 'accounts');
     }
     const payload = transactionPayload(ctx, op.tx, null);

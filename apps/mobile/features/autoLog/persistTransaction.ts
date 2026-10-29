@@ -15,7 +15,12 @@ export class AutoLogLimitError extends Error {
 
 /** Synchronous commit shared by both drains; state changes only after it succeeds. */
 export function persistAutoLogTransaction(
-  options: { isPro: boolean; accounts: readonly Account[]; prefs: QuickEntryPrefs },
+  options: {
+    isPro: boolean;
+    accounts: readonly Account[];
+    prefs: QuickEntryPrefs;
+    inSharedLedger?: boolean;
+  },
   writes: {
     transaction: (write: () => void) => void;
     create: () => void;
@@ -28,6 +33,7 @@ export function persistAutoLogTransaction(
       isPro: options.isPro,
       accounts: options.accounts,
       usedAutoLogs: options.prefs.autoLogUsageCount,
+      inSharedLedger: options.inSharedLedger,
     }) === 0
   ) {
     throw new AutoLogLimitError();

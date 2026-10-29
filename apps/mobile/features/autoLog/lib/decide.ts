@@ -82,9 +82,17 @@ export function autoLogAllowance(input: {
   isPro: boolean;
   accounts: readonly Account[];
   usedAutoLogs: number;
+  /** The accounts are an active shared ledger's, where the account limit does not block. */
+  inSharedLedger?: boolean;
 }): number | null {
   if (input.isPro) return null;
-  if (isNewTransactionBlockedByAccounts(false, countAccountsTowardFreeLimit(input.accounts))) {
+  if (
+    isNewTransactionBlockedByAccounts(
+      false,
+      countAccountsTowardFreeLimit(input.accounts),
+      input.inSharedLedger,
+    )
+  ) {
     return 0;
   }
   return Math.max(0, PRO_LIMITS.FREE_MAX_AUTO_LOGS - input.usedAutoLogs);

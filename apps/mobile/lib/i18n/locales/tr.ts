@@ -2646,6 +2646,10 @@ const tr = {
           q: 'Paylaşılan bir defter için Pro gerekir mi?',
           a: "İçindeki tek bir kişinin Pro'su olması yeter: sahibi ya da herhangi bir üye. İçinde kimsenin Pro'su yoksa biri Pro alana kadar herkes için duraklar. Hiçbir şey silinmez.",
         },
+        shared_free_limits: {
+          q: 'Pro olmadan paylaşılan bir deftere kayıt ekleyebilir miyim?',
+          a: "Evet, 6'dan fazla hesabı olsa bile. Ücretsiz planın diğer sınırları orada da geçerli, örneğin sınırın üzerinde hesap veya kategori eklemek. Bu değişiklikleri defterin sahibinden isteyin.",
+        },
         family_pro: {
           q: "Ailem benim Pro'mu kullanabilir mi?",
           a: "Onlarla bir defter paylaş: davet ettiğin kişilerin Pro'ya ihtiyacı yok. Onların telefonunda kendi hesabına giriş yaparsan tüm para verilerini görürler.",

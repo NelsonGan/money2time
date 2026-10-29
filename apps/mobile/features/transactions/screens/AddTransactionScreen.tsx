@@ -1,13 +1,9 @@
 import React, { useCallback } from 'react';
 
 import { useApp } from '~/context/AppContext';
-import { useIsPro } from '~/context/ProContext';
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import { type SplitDraft, splitsHelpers } from '~/features/transactions/components/editor';
-import {
-  countAccountsTowardFreeLimit,
-  isNewTransactionBlockedByAccounts,
-} from '~/features/transactions/lib/accountEntryGate';
+import { useNewTransactionGate } from '~/features/transactions/hooks/useNewTransactionGate';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import type { AddTransactionInitialValues } from '~/navigation/rootStack';
 import { requestHighlightTransaction } from '~/services/transactionsNavigation';
@@ -30,8 +26,8 @@ export function AddTransactionScreen({
   initialValues,
   openSplitBillOnMount,
 }: AddTransactionScreenProps) {
-  const { accounts, createTransaction, createTransactionWithSplits, markSplitPaid } = useApp();
-  const isPro = useIsPro();
+  const { createTransaction, createTransactionWithSplits, markSplitPaid } = useApp();
+  const { blocked, activeAccountCount } = useNewTransactionGate();
 
   // Create the transaction and briefly flash its row so the user can spot the
   // one they just added once the list lands on its day.
@@ -81,8 +77,7 @@ export function AddTransactionScreen({
     [createTransactionWithSplits, markSplitPaid],
   );
 
-  const activeAccountCount = countAccountsTowardFreeLimit(accounts);
-  if (isNewTransactionBlockedByAccounts(isPro, activeAccountCount)) {
+  if (blocked) {
     return (
       <TransactionEntryBlockedScreen activeAccountCount={activeAccountCount} onClose={onClose} />
     );

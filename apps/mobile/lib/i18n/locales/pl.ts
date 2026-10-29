@@ -2646,6 +2646,10 @@ const pl = {
           q: 'Czy udostępniona księga wymaga Pro?',
           a: 'Pro potrzebuje tylko jedna osoba w niej, właściciel lub dowolny członek. Jeśli nikt w niej nie ma Pro, zostaje wstrzymana dla wszystkich, dopóki ktoś go nie będzie miał. Nic nie zostanie usunięte.',
         },
+        shared_free_limits: {
+          q: 'Czy mogę dodawać wpisy do wspólnej księgi bez Pro?',
+          a: 'Tak, nawet jeśli ma więcej niż 6 kont. Pozostałe limity darmowego planu nadal obowiązują, np. dodawanie kont lub kategorii ponad limit. Poproś właściciela księgi o wprowadzenie tych zmian.',
+        },
         family_pro: {
           q: 'Czy moja rodzina może korzystać z mojego Pro?',
           a: 'Udostępnij im księgę: osoby, które zaprosisz, nie potrzebują Pro. Zalogowanie się na Twoje konto na ich telefonie pokazałoby im wszystkie Twoje dane finansowe.',

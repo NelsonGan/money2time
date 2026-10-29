@@ -5,6 +5,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { getSQLite } from '~/lib/db/client';
+import { getActiveLedgerId } from '~/lib/db/ledgerScope';
 
 export interface SharedLedger {
   /** The app's id of the ledger. */
@@ -65,6 +66,14 @@ export function listSharedLedgers(): SharedLedger[] {
 
 export function sharedLedgerFor(ledgerId: string): SharedLedger | null {
   return listSharedLedgers().find((ledger) => ledger.ledgerId === ledgerId) ?? null;
+}
+
+/**
+ * Whether the open ledger is shared and active (anyone in it Pro). A free
+ * member then adds entries in it whatever its account count.
+ */
+export function openLedgerSharedAndActive(): boolean {
+  return sharedLedgerFor(getActiveLedgerId())?.active === true;
 }
 
 export function saveSharedLedger(ledger: SharedLedger): void {

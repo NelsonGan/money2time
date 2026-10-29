@@ -2632,6 +2632,10 @@ const en = {
           q: 'Does a shared ledger need Pro?',
           a: 'Only one person in it needs Pro, the owner or any member. If nobody in it has Pro, it pauses for everyone until someone does. Nothing is deleted.',
         },
+        shared_free_limits: {
+          q: 'Can I add entries to a shared ledger without Pro?',
+          a: "Yes, even when it has more than 6 accounts. Other free plan limits still apply in it, such as adding accounts or categories past the free limit. Ask the ledger's owner to make those changes.",
+        },
         family_pro: {
           q: 'Can my family use my Pro?',
           a: 'Share a ledger with them: people you invite do not need Pro. Signing in to your account on their phone would show them all your money data.',

@@ -85,6 +85,8 @@ export interface BuildAutoLogCatalogInput {
   accounts: Account[];
   categories: Category[];
   isPro: boolean;
+  /** The accounts are an active shared ledger's, where the account limit does not block. */
+  inSharedLedger?: boolean;
   autoLogUsageCount: number;
   defaultAccountId: string | null;
   defaultExpenseCategoryId: string | null;
@@ -141,6 +143,7 @@ export function buildAutoLogCatalog(input: BuildAutoLogCatalogInput): AutoLogCat
       isPro: input.isPro,
       accounts: input.accounts,
       usedAutoLogs: input.autoLogUsageCount,
+      inSharedLedger: input.inSharedLedger,
     }),
     defaultAccountId,
     defaultExpenseCategoryId,

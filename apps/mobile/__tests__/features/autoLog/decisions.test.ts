@@ -68,6 +68,15 @@ describe('decideCapture', () => {
         usedAutoLogs: 0,
       }),
     ).toBe(0);
+    // An active shared ledger is not held to the account limit, only to the allowance.
+    expect(
+      autoLogAllowance({
+        isPro: false,
+        accounts: accounts(PRO_LIMITS.FREE_MAX_ACCOUNTS + 1),
+        usedAutoLogs: 4,
+        inSharedLedger: true,
+      }),
+    ).toBe(PRO_LIMITS.FREE_MAX_AUTO_LOGS - 4);
     // Savings goals have their own limit and take no account slot.
     expect(
       autoLogAllowance({

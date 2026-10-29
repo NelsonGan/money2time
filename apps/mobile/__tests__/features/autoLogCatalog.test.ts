@@ -92,6 +92,16 @@ describe('buildAutoLogCatalog', () => {
       expect(buildAutoLogCatalog(input({ accounts, autoLogUsageCount: 0 })).remaining).toBe(0);
     });
 
+    it('counts down in an active shared ledger, whatever its account count', () => {
+      const accounts = Array.from({ length: PRO_LIMITS.FREE_MAX_ACCOUNTS + 1 }, (_, i) =>
+        account({ id: `a${i}`, name: `Account ${i}` }),
+      );
+      expect(
+        buildAutoLogCatalog(input({ accounts, autoLogUsageCount: 3, inSharedLedger: true }))
+          .remaining,
+      ).toBe(PRO_LIMITS.FREE_MAX_AUTO_LOGS - 3);
+    });
+
     it('is null (unlimited) for Pro', () => {
       expect(
         buildAutoLogCatalog(input({ isPro: true, autoLogUsageCount: 999 })).remaining,
