@@ -20,7 +20,6 @@ import {
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
-import { chartCategoryColor } from '~/constants/chartColors';
 import type { ColorPalette } from '~/constants/designSystem';
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
@@ -44,12 +43,15 @@ import {
   budgetPeriodRange,
 } from '~/features/budget/lib/budgetPeriods';
 import {
+  budgetLineColor,
   budgetPeriodLabel,
   budgetPeriodName,
+  lineFill,
+  lineHealthColor,
+  linePercentLabel,
   money,
   monthKeyLabel,
   monthNameLabel,
-  usageColor,
   usagePercentLabel,
 } from '~/features/budget/lib/format';
 import type { InsightsDrilldownPayload } from '~/features/insights/screens/InsightsDrilldownScreen';
@@ -78,12 +80,6 @@ function leftLabel(remaining: number, settings: UserSettings): string {
   return remaining < 0
     ? I18n.t('budget.over', { amount: money(Math.abs(remaining), settings) })
     : I18n.t('budget.left', { amount: money(remaining, settings) });
-}
-
-/** How full a line's bar is: its usage, or full once over (a zero-budget
- *  overspend has a usage ratio of 0). */
-function lineFill(line: BudgetCategoryProgress): number {
-  return line.isOver ? 1 : Math.max(0, Math.min(line.usageRatio, 1));
 }
 
 function ProgressBar({
@@ -139,7 +135,7 @@ function BudgetChildRow({
       <Pressable
         onPress={onPress}
         accessibilityRole="button"
-        accessibilityLabel={`${name}, ${leftLabel(line.remaining, settings)}`}
+        accessibilityLabel={`${name}, ${leftLabel(line.remaining, settings)}, ${linePercentLabel(line)}`}
         className="relative min-w-0 flex-1 overflow-hidden rounded-xl active:opacity-80"
         style={{ backgroundColor: withColorAlpha(fillColor, 0.08) }}
       >
@@ -166,13 +162,7 @@ function BudgetChildRow({
             numberOfLines={1}
             className="shrink-0 text-right"
             // Muted while healthy, amber from 80%, red when over.
-            style={{
-              color: line.isOver
-                ? themeColors.error
-                : line.usageRatio >= 0.8
-                  ? usageColor(line.usageRatio, themeColors)
-                  : themeColors.mutedForeground,
-            }}
+            style={{ color: lineHealthColor(line, themeColors, themeColors.mutedForeground) }}
           >
             {money(line.spent, settings)} / {money(line.budgeted, settings)}
           </Text>
@@ -207,8 +197,7 @@ function BudgetCategoryRow({
   const category = categoriesById.get(line.categoryId);
   const name = category?.name ?? I18n.t('common.uncategorized');
   const barColor = line.isOver ? themeColors.error : color;
-  // isOver wins so a zero-budget overspend (ratio 0) still reads red.
-  const healthColor = line.isOver ? themeColors.error : usageColor(line.usageRatio, themeColors);
+  const healthColor = lineHealthColor(line, themeColors, themeColors.success);
 
   return (
     // The child pills are siblings of the root Pressable, not descendants:
@@ -219,7 +208,7 @@ function BudgetCategoryRow({
       <Pressable
         onPress={onPress}
         accessibilityRole="button"
-        accessibilityLabel={`${name}, ${leftLabel(line.remaining, settings)}, ${usagePercentLabel(line.usageRatio)}`}
+        accessibilityLabel={`${name}, ${leftLabel(line.remaining, settings)}, ${linePercentLabel(line)}`}
         className={cn('px-4 py-3 active:bg-secondary/20', line.children.length > 0 && 'pb-2')}
       >
         {/* Emoji inline with the title, then a full-width depletion bar with
@@ -235,8 +224,7 @@ function BudgetCategoryRow({
               variant="caption"
               numberOfLines={1}
               className="shrink-0 text-[11px]"
-              tone={line.isOver ? undefined : 'muted'}
-              style={line.isOver ? { color: themeColors.error } : undefined}
+              tone={line.isOver ? 'error' : 'muted'}
             >
               {leftLabel(line.remaining, settings)}
             </Text>
@@ -257,7 +245,7 @@ function BudgetCategoryRow({
                 style={{ backgroundColor: withColorAlpha(healthColor, 0.12) }}
               >
                 <Text variant="label" className="text-[10px]" style={{ color: healthColor }}>
-                  {usagePercentLabel(line.usageRatio)}
+                  {linePercentLabel(line)}
                 </Text>
               </View>
             </View>
@@ -266,7 +254,7 @@ function BudgetCategoryRow({
       </Pressable>
 
       {line.children.length > 0 ? (
-        <View className="gap-1.5 px-4 pt-1.5 pb-3.5 pl-6">
+        <View className="gap-1.5 pt-1.5 pr-4 pb-3.5 pl-6">
           {line.children.map((child) => (
             <BudgetChildRow
               key={child.categoryId}
@@ -740,12 +728,12 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
         const orderedCategories = focusModel
           ? [...focusModel.summary.categories].sort((a, b) => Number(b.isOver) - Number(a.isOver))
           : [];
-        // Palette colours by the budget's own line order (before the over-first
+        // Bar colours by the budget's own line order (before the over-first
         // sort), so a category keeps its colour as it goes over.
         const colorByCategoryId = new Map(
           (focusModel?.summary.categories ?? []).map((line, index) => [
             line.categoryId,
-            chartCategoryColor(index),
+            budgetLineColor(index),
           ]),
         );
         const rings: BudgetRing[] = [
