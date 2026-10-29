@@ -46,6 +46,11 @@ import { AutoLogShowcase } from './AutoLogShowcase';
 import { BackupShowcase } from './BackupShowcase';
 import { BudgetShowcase } from './BudgetShowcase';
 import {
+  CloudSyncShowcase,
+  LedgersShowcase,
+  SharedLedgersShowcase,
+} from './CloudSyncLedgersShowcases';
+import {
   GoalCoversShowcase,
   HomeCardsShowcase,
   ItemIconsShowcase,
@@ -119,6 +124,10 @@ export interface FeatureAnnouncementCtaHandlers {
   onOpenProPaywall?: () => void;
   /** Invoked when a page links to the bottom bar editor. */
   onOpenBottomBar?: () => void;
+  /** Invoked when a page links to Settings > Cloud Sync. */
+  onOpenCloudSync?: () => void;
+  /** Invoked when a page links to Manage ledgers. */
+  onOpenLedgers?: () => void;
 }
 
 interface FeatureAnnouncementModalProps extends FeatureAnnouncementCtaHandlers {
@@ -190,6 +199,8 @@ export function FeatureAnnouncementModal({
   onOpenAppIcon,
   onOpenProPaywall,
   onOpenBottomBar,
+  onOpenCloudSync,
+  onOpenLedgers,
 }: FeatureAnnouncementModalProps) {
   const colors = useThemeColors();
   const { settings } = useApp();
@@ -249,6 +260,8 @@ export function FeatureAnnouncementModal({
     openAppIcon: onOpenAppIcon,
     openProPaywall: onOpenProPaywall,
     openBottomBar: onOpenBottomBar,
+    openCloudSync: onOpenCloudSync,
+    openLedgers: onOpenLedgers,
     openRiceCal: () => {
       void Linking.openURL(riceCalStoreUrl(Platform.OS)).catch(() => undefined);
     },
@@ -365,7 +378,13 @@ export function FeatureAnnouncementModal({
               </View>
             ) : null}
             <View style={styles.showcaseSlot}>
-              {page.visual === 'webDashboard' ? (
+              {page.visual === 'cloudSync' ? (
+                <CloudSyncShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'ledgers' ? (
+                <LedgersShowcase width={Math.round(showcaseWidth * 0.86)} />
+              ) : page.visual === 'sharedLedgers' ? (
+                <SharedLedgersShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'webDashboard' ? (
                 <WebDashboardShowcase width={Math.round(showcaseWidth * 0.92)} />
               ) : page.visual === 'notificationReview' ? (
                 <NotificationReviewShowcase width={Math.round(showcaseWidth * 0.92)} />

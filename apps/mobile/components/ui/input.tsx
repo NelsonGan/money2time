@@ -18,6 +18,8 @@ interface InputProps extends TextInputProps {
   labelAccessory?: React.ReactNode;
   required?: boolean;
   error?: string;
+  /** Draw the error state without the message under the field (shown elsewhere). */
+  invalid?: boolean;
   helperText?: string;
   variant?: 'standard' | 'numeric' | 'currency' | 'multiline';
   currencySymbol?: string;
@@ -36,6 +38,7 @@ const Input = React.forwardRef<TextInputInstance, InputProps>(
       labelAccessory,
       required = false,
       error,
+      invalid = false,
       helperText,
       variant = 'standard',
       currencySymbol = '$',
@@ -55,7 +58,7 @@ const Input = React.forwardRef<TextInputInstance, InputProps>(
     const resolvedKeyboardType =
       keyboardType ??
       (variant === 'numeric' ? 'decimal-pad' : variant === 'currency' ? 'decimal-pad' : 'default');
-    const hasError = !!error;
+    const hasError = !!error || invalid;
 
     const isFocused = useSharedValue(0);
 

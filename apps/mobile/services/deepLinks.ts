@@ -228,11 +228,23 @@ function runDeepLinkNavigation(
   runAfterInteractions(() => {
     const rootState = navigationRef.getRootState();
     const existingMain = rootState?.routes.find((route) => route.name === 'Main');
+    // Keep Main's own nested state (the Settings stack inside it). A reset
+    // without it leaves that navigator with routes it no longer knows: its
+    // pushes (Manage ledgers from the switcher) silently do nothing and the
+    // page looks frozen after the deep-linked screen closes.
     const mainRoute = existingMain
       ? { name: 'Main', key: existingMain.key, params: existingMain.params }
       : { name: 'Main' };
     const routes = modal ? [mainRoute, { name: modal.name, params: modal.params }] : [mainRoute];
-    navigationRef.reset({ index: routes.length - 1, routes });
+    navigationRef.reset({
+      index: routes.length - 1,
+      // Main's nested state rides along untyped: `reset` types a partial route.
+      routes: existingMain?.state
+        ? routes.map((route, index) =>
+            index === 0 ? { ...route, state: existingMain.state } : route,
+          )
+        : routes,
+    } as Parameters<typeof navigationRef.reset>[0]);
     afterReset?.();
   });
 }

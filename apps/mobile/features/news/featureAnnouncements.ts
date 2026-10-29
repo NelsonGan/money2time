@@ -61,7 +61,10 @@ export interface FeatureAnnouncementPage {
     | 'notificationReview'
     | 'fasterScans'
     | 'cardDesigns'
-    | 'bottomBar';
+    | 'bottomBar'
+    | 'cloudSync'
+    | 'ledgers'
+    | 'sharedLedgers';
   /**
    * Optional call-to-action for this page. On the last page it replaces the
    * primary button; on earlier pages it sits above the Back/Next row so the
@@ -86,7 +89,9 @@ export interface FeatureAnnouncementPage {
     | 'openRiceCal'
     | 'openProPaywall'
     | 'openWebDashboard'
-    | 'openBottomBar';
+    | 'openBottomBar'
+    | 'openCloudSync'
+    | 'openLedgers';
   /** Mark sponsored or promotional content clearly in the announcement panel. */
   badge?: 'ad';
   /**
@@ -211,6 +216,10 @@ export function announcementCtaLabel(cta: NonNullable<FeatureAnnouncementPage['c
       return I18n.t('web_dashboard.open_web');
     case 'openBottomBar':
       return I18n.t('news.cta.open_bottom_bar');
+    case 'openCloudSync':
+      return I18n.t('news.cta.open_cloud_sync');
+    case 'openLedgers':
+      return I18n.t('ledgers.manage');
     case 'openShareEarn':
     default:
       return I18n.t('news.cta.open_share_earn');

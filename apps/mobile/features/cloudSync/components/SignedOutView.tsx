@@ -1,8 +1,8 @@
 import { Mail } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Pressable, StyleSheet, View } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 
-import { Text } from '~/components/ui';
+import { LoadingDots, Text } from '~/components/ui';
 import { usePro } from '~/context/ProContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -181,7 +181,7 @@ function ProviderButton({
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={foreground} />
+        <LoadingDots color={foreground} size={6} />
       ) : apple ? (
         <AppleLogoIcon color={foreground} />
       ) : (

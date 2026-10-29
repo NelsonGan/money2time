@@ -1,11 +1,12 @@
 import { LogOut, UserMinus, UserPlus } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, Share, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Share, View } from 'react-native';
 
 import {
   Button,
   Card,
   CategoryEmoji,
+  LoadingDots,
   SETTINGS_HORIZONTAL_PADDING,
   SettingsHeader,
   SettingsPageLayout,
@@ -272,7 +273,7 @@ export function LedgerSharingScreen({
               disabled={busy !== null || (atLimit && isPro)}
             >
               {busy === 'share' ? (
-                <ActivityIndicator color="#fff" />
+                <LoadingDots color="#fff" size={7} />
               ) : (
                 <Text>{I18n.t('shared_ledgers.share_button', { name })}</Text>
               )}
@@ -299,11 +300,6 @@ export function LedgerSharingScreen({
           </View>
           <Text variant="subheading" className="text-center">
             {name}
-          </Text>
-          <Text variant="caption" tone="muted" className="text-center">
-            {isOwner
-              ? I18n.t('shared_ledgers.owner_note')
-              : I18n.t('shared_ledgers.member_note', { owner: shared.ownerName ?? '' })}
           </Text>
         </View>
 
@@ -384,7 +380,7 @@ export function LedgerSharingScreen({
                     </Text>
                   </Pressable>
                 ) : (
-                  <ActivityIndicator />
+                  <LoadingDots />
                 )}
               </View>
             )}
@@ -399,7 +395,7 @@ export function LedgerSharingScreen({
               disabled={busy !== null || !members || full || !shared.active || signedOut}
             >
               {busy === 'invite' ? (
-                <ActivityIndicator color="#fff" />
+                <LoadingDots color="#fff" size={7} />
               ) : (
                 <View className="flex-row items-center gap-2">
                   <UserPlus size={18} color="#fff" />
@@ -417,13 +413,13 @@ export function LedgerSharingScreen({
 
         <Button
           variant="secondary"
-          className="mt-2"
+          className="-mt-1"
           testID={isOwner ? 'ledger-stop-sharing' : 'ledger-leave'}
           disabled={busy !== null}
           onPress={isOwner ? confirmStop : confirmLeave}
         >
           {busy === 'stop' || busy === 'leave' ? (
-            <ActivityIndicator color={colors.error} />
+            <LoadingDots color={colors.error} size={7} />
           ) : (
             <View className="flex-row items-center gap-2">
               {isOwner ? null : <LogOut size={18} color={colors.error} />}
@@ -439,7 +435,18 @@ export function LedgerSharingScreen({
 
   return (
     <SettingsPageLayout>
-      <SettingsHeader title={I18n.t('shared_ledgers.title')} onBack={onBack} />
+      <SettingsHeader
+        title={I18n.t('shared_ledgers.title')}
+        // Who shares it and what everyone can do: on demand, not under the name.
+        infoTooltip={
+          shared
+            ? isOwner
+              ? I18n.t('shared_ledgers.owner_note')
+              : I18n.t('shared_ledgers.member_note', { owner: shared.ownerName ?? '' })
+            : undefined
+        }
+        onBack={onBack}
+      />
       <ScrollView
         contentContainerStyle={[
           { paddingHorizontal: SETTINGS_HORIZONTAL_PADDING, paddingTop: 4 },
@@ -531,7 +538,7 @@ function IconAction({
       hitSlop={6}
       className="h-10 w-10 items-center justify-center rounded-full active:bg-secondary/60"
     >
-      {busy ? <ActivityIndicator /> : icon}
+      {busy ? <LoadingDots size={5} /> : icon}
     </Pressable>
   );
 }

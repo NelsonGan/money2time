@@ -408,6 +408,8 @@ export function SettingsStack({
               onOpenAppIcon={() => props.navigation.navigate('AppIcon')}
               onOpenProPaywall={() => onOpenProPaywall('news_list')}
               onOpenBottomBar={() => props.navigation.navigate('BottomBar')}
+              onOpenCloudSync={() => props.navigation.navigate('CloudSync')}
+              onOpenLedgers={() => props.navigation.navigate('Ledgers')}
             />
           );
         }}
