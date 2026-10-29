@@ -3032,6 +3032,11 @@ const es = {
       'Este libro es compartido, así que esto lo cambia para todos los que están en él.',
     leave_unsent:
       'Tus últimos movimientos en este libro aún no se han enviado. Sal cuando tengas conexión para no perderlos.',
+    sign_out_unsent:
+      'Algunos movimientos de libros compartidos contigo aún no se han enviado. Al cerrar sesión, esos libros se quitan de este teléfono junto con esos movimientos.',
+    sign_out_anyway: 'Cerrar sesión igualmente',
+    sign_out_joined_note:
+      'Los libros compartidos contigo se quitan de este teléfono hasta que vuelvas a iniciar sesión.',
     removed_title: 'Libro compartido eliminado',
     removed_body: '{{names}} ya no se comparte contigo, así que se quitó de este teléfono.',
     paused_title: 'Compartir está en pausa',

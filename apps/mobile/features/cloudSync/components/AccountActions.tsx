@@ -10,12 +10,48 @@ import { I18n } from '~/lib/i18n';
 import { useSharedLedgers } from '../../sharedLedgers/hooks/useSharedLedgers';
 import { useCloudSync } from '../CloudSyncContext';
 import { errorMessage } from '../lib/messages';
+import { CloudSyncApiError } from '../services/cloudSyncApi';
+
+/**
+ * Signs out. While a ledger shared with the user still has entries that could
+ * not be sent, asks first: those ledgers leave the phone with the sign-out.
+ * Resolves false when the user stays signed in.
+ */
+export async function signOutAskingFirst(
+  signOut: ReturnType<typeof useCloudSync>['signOut'],
+): Promise<boolean> {
+  try {
+    await signOut();
+    return true;
+  } catch (error) {
+    if (!(error instanceof CloudSyncApiError && error.code === 'unsent_changes')) throw error;
+  }
+  const anyway = await new Promise<boolean>((resolve) =>
+    Alert.alert(
+      I18n.t('cloud_sync.sign_out_confirm_title'),
+      I18n.t('shared_ledgers.sign_out_unsent'),
+      [
+        { text: I18n.t('common.cancel'), style: 'cancel', onPress: () => resolve(false) },
+        {
+          text: I18n.t('shared_ledgers.sign_out_anyway'),
+          style: 'destructive',
+          onPress: () => resolve(true),
+        },
+      ],
+      { onDismiss: () => resolve(false) },
+    ),
+  );
+  if (anyway) await signOut({ force: true });
+  return anyway;
+}
 
 /** Sign out and Delete account, each behind a confirmation. Shown whenever signed in. */
 export function AccountActions() {
   const sync = useCloudSync();
   const colors = useThemeColors();
-  const ownsShared = useSharedLedgers().some((ledger) => ledger.role === 'owner');
+  const sharedLedgers = useSharedLedgers();
+  const ownsShared = sharedLedgers.some((ledger) => ledger.role === 'owner');
+  const joinedShared = sharedLedgers.some((ledger) => ledger.role === 'member');
   const [busy, setBusy] = useState<'sign_out' | 'delete' | null>(null);
 
   const run = (action: 'sign_out' | 'delete', work: () => Promise<void>) => {
@@ -28,10 +64,16 @@ export function AccountActions() {
   const confirmSignOut = () =>
     Alert.alert(
       I18n.t('cloud_sync.sign_out_confirm_title'),
-      I18n.t('cloud_sync.sign_out_confirm_body'),
+      joinedShared
+        ? `${I18n.t('cloud_sync.sign_out_confirm_body')}\n\n${I18n.t('shared_ledgers.sign_out_joined_note')}`
+        : I18n.t('cloud_sync.sign_out_confirm_body'),
       [
         { text: I18n.t('common.cancel'), style: 'cancel' },
-        { text: I18n.t('cloud_sync.sign_out'), onPress: () => run('sign_out', sync.signOut) },
+        {
+          text: I18n.t('cloud_sync.sign_out'),
+          onPress: () =>
+            run('sign_out', () => signOutAskingFirst(sync.signOut).then(() => undefined)),
+        },
       ],
     );
 

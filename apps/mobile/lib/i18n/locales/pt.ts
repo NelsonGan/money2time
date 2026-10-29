@@ -3027,6 +3027,11 @@ const pt = {
       'Este livro é compartilhado, então isso o altera para todos que fazem parte dele.',
     leave_unsent:
       'Seus lançamentos mais recentes neste livro ainda não foram enviados. Saia quando estiver online para não perdê-los.',
+    sign_out_unsent:
+      'Alguns lançamentos em livros compartilhados com você ainda não foram enviados. Sair remove esses livros deste celular, junto com os lançamentos.',
+    sign_out_anyway: 'Sair mesmo assim',
+    sign_out_joined_note:
+      'Os livros compartilhados com você saem deste celular até você entrar de novo.',
     removed_title: 'Livro compartilhado removido',
     removed_body: '{{names}} não é mais compartilhado com você, então foi removido deste celular.',
     paused_title: 'Compartilhamento pausado',

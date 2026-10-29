@@ -11,11 +11,12 @@ import {
   isLedgerScoped,
   LEDGER_CHILD_SYNC_TABLES,
   LEDGER_ROOT_SYNC_TABLES,
+  NO_CHANNEL,
   PERSONAL_CHANNEL,
 } from '../lib/ledgerRows';
 import type { Row } from '../lib/rowCodec';
 import { SYNC_TABLES, type SyncTable } from '../lib/syncTables';
-import { listSharedLedgers, sharedLedgerFor } from './sharedLedgerStore';
+import { getDeferredLedgerDeletes, listSharedLedgers, sharedLedgerFor } from './sharedLedgerStore';
 
 /** The ledger a row belongs to, or null for the user's own tables. */
 function ledgerOfRow(table: string, row: Row): string | null {
@@ -34,15 +35,20 @@ function ledgerOfRow(table: string, row: Row): string | null {
   return parentRow ? ledgerOfRow(parent, parentRow) : null;
 }
 
-/** The sync channel of a ledger: its share id while shared, else the user's own. */
+/**
+ * The sync channel of a ledger: its share id while shared, none while a
+ * joined ledger waits to be deleted, else the user's own.
+ */
 function channelOfLedger(ledgerId: string | null): string {
   if (!ledgerId) return PERSONAL_CHANNEL;
+  if (getDeferredLedgerDeletes().includes(ledgerId)) return NO_CHANNEL;
   return sharedLedgerFor(ledgerId)?.shareId ?? PERSONAL_CHANNEL;
 }
 
 export function channelOfRow(table: string, row: Row): string {
+  if (!isLedgerScoped(table)) return PERSONAL_CHANNEL;
   // Most users share nothing: no lookups then.
-  if (!isLedgerScoped(table) || !listSharedLedgers().length) return PERSONAL_CHANNEL;
+  if (!listSharedLedgers().length && !getDeferredLedgerDeletes().length) return PERSONAL_CHANNEL;
   return channelOfLedger(ledgerOfRow(table, row));
 }
 

@@ -4,8 +4,13 @@ import { DatabaseSync } from 'node:sqlite';
 
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import { deletePersonalLedgerRows } from '~/features/cloudSync/services/ledgerChannels';
 import {
+  channelOfRow,
+  deletePersonalLedgerRows,
+} from '~/features/cloudSync/services/ledgerChannels';
+import {
+  clearDeferredLedgerDeletes,
+  deferLedgerDelete,
   removeSharedLedger,
   saveSharedLedger,
 } from '~/features/cloudSync/services/sharedLedgerStore';
@@ -316,6 +321,20 @@ describe('ledgersRepository on SQLite', () => {
     expect(harness.all('SELECT id FROM transactions')).toEqual([]);
     expect(harness.all('SELECT id FROM transaction_splits')).toEqual([]);
     expect(harness.all('SELECT id FROM ledgers')).toEqual([{ id: 'default' }]);
+  });
+
+  it("routes a removed member's open ledger nowhere until it is deleted", () => {
+    const taxi = { id: 'taxi', ledger_id: 'work' };
+    const split = { id: 'taxi-split', transaction_id: 'taxi' };
+    expect(channelOfRow('transactions', taxi)).toBe('personal');
+    deferLedgerDelete('work');
+    try {
+      expect(channelOfRow('transactions', taxi)).toBe('none');
+      expect(channelOfRow('transaction_splits', split)).toBe('none');
+      expect(channelOfRow('transactions', { id: 'lunch', ledger_id: 'default' })).toBe('personal');
+    } finally {
+      clearDeferredLedgerDeletes(['work']);
+    }
   });
 
   it('never deletes the default ledger', () => {

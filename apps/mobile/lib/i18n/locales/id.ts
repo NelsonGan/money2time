@@ -3022,6 +3022,11 @@ const id = {
       'Buku ini dibagikan, jadi perubahan ini berlaku untuk semua orang di dalamnya.',
     leave_unsent:
       'Entri terbaru Anda di buku ini belum terkirim. Keluar setelah Anda online agar entri tersebut tidak hilang.',
+    sign_out_unsent:
+      'Beberapa entri di buku yang dibagikan kepada Anda belum terkirim. Keluar akan menghapus buku tersebut dari ponsel ini beserta entrinya.',
+    sign_out_anyway: 'Tetap keluar',
+    sign_out_joined_note:
+      'Buku yang dibagikan kepada Anda dihapus dari ponsel ini sampai Anda masuk lagi.',
     removed_title: 'Buku bersama dihapus',
     removed_body: '{{names}} tidak lagi dibagikan dengan Anda, jadi dihapus dari ponsel ini.',
     paused_title: 'Berbagi dijeda',

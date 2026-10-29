@@ -3049,6 +3049,11 @@ const fr = {
     changes_for_everyone: 'Ce carnet est partagé : cela le modifie pour tous ses membres.',
     leave_unsent:
       "Vos dernières entrées dans ce carnet n'ont pas encore été envoyées. Quittez-le une fois en ligne pour ne pas les perdre.",
+    sign_out_unsent:
+      "Certaines entrées de carnets partagés avec vous n'ont pas encore été envoyées. La déconnexion retire ces carnets de ce téléphone, avec ces entrées.",
+    sign_out_anyway: 'Se déconnecter quand même',
+    sign_out_joined_note:
+      "Les carnets partagés avec vous quittent ce téléphone jusqu'à votre prochaine connexion.",
     removed_title: 'Carnet partagé retiré',
     removed_body: "{{names}} n'est plus partagé avec vous, il a donc été retiré de ce téléphone.",
     paused_title: 'Le partage est en pause',

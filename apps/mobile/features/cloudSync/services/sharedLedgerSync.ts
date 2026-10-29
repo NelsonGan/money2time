@@ -99,6 +99,13 @@ function ledgerExists(ledgerId: string): boolean {
   return !!getSQLite().getFirstSync('SELECT 1 FROM ledgers WHERE id = ?', [ledgerId]);
 }
 
+function ledgerDeleted(ledgerId: string): boolean {
+  return !!getSQLite().getFirstSync(
+    'SELECT 1 FROM ledgers WHERE id = ? AND deleted_at IS NOT NULL',
+    [ledgerId],
+  );
+}
+
 function localLedgerName(ledger: SharedLedger): string {
   const row = getSQLite().getFirstSync<{ name: string | null }>(
     'SELECT name FROM ledgers WHERE id = ?',
@@ -226,6 +233,13 @@ class SharedLedgerSync {
         continue;
       }
       if (known && known.shareId !== item.id) continue;
+      if (item.role === 'owner' && !known && ledgerDeleted(item.ledgerId)) {
+        // Deleted on this phone while signed out, when it no longer knew the
+        // ledger was shared: sharing ends, rather than the deletion reaching
+        // the members as an empty ledger.
+        await this.finishPending(token, item.id, 'stop');
+        continue;
+      }
       seen.add(item.ledgerId);
       saveSharedLedger(fromRemote(item));
     }
@@ -460,16 +474,11 @@ class SharedLedgerSync {
     const ledger = sharedLedgerFor(ledgerId);
     if (!ledger || ledger.role !== 'owner') return;
     const local = opts.whenUnreachable === 'local';
-    // Members' latest entries first: the ledger's database is about to go.
-    // A paused ledger takes them with a read-only token (nothing can go up).
     if (this.session) {
       try {
-        if (ledger.active) await (await this.engineFor(ledger)).syncNow();
-        else await this.takeFinalCopy(ledger);
+        await this.takeLatest(ledger);
       } catch (error) {
-        // Gone on the Worker (or a Worker that refuses a paused ledger's last
-        // download): nothing more to fetch from it.
-        if (!local && !isCode(error, 'not_found', 'ledger_paused')) throw error;
+        if (!local) throw error;
       }
     }
     try {
@@ -488,12 +497,34 @@ class SharedLedgerSync {
     await this.letGo(ledger, { requeue: true });
   }
 
-  private async takeFinalCopy(ledger: SharedLedger): Promise<void> {
-    const engine = await this.openEngine(ledger, true);
+  /**
+   * Before an owned ledger's database goes (stop sharing, deleting the
+   * account): takes members' latest entries. A paused ledger takes them with
+   * a read-only token, as nothing can go up. A ledger already gone on the
+   * Worker, or a Worker that refuses a paused ledger's last download, has
+   * nothing more to give.
+   */
+  private async takeLatest(ledger: SharedLedger): Promise<void> {
     try {
-      await engine.pullAndApply();
-    } finally {
-      engine.close();
+      if (ledger.active) {
+        await (await this.engineFor(ledger)).syncNow();
+        return;
+      }
+      const engine = await this.openEngine(ledger, true);
+      try {
+        await engine.pullAndApply();
+      } finally {
+        engine.close();
+      }
+    } catch (error) {
+      if (!isCode(error, 'not_found', 'ledger_paused')) throw error;
+    }
+  }
+
+  /** Account deletion: every ledger the user shares takes members' latest entries first. */
+  async takeLatestOfOwned(): Promise<void> {
+    for (const ledger of listSharedLedgers()) {
+      if (ledger.role === 'owner') await this.takeLatest(ledger);
     }
   }
 

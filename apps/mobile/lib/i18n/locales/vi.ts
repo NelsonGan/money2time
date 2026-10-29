@@ -2985,6 +2985,11 @@ const vi = {
     changes_for_everyone: 'Sổ này được chia sẻ, nên thay đổi này áp dụng cho mọi người trong sổ.',
     leave_unsent:
       'Các mục mới nhất của bạn trong sổ này chưa được gửi. Hãy rời sổ khi bạn trực tuyến để không bị mất.',
+    sign_out_unsent:
+      'Một số mục trong sổ được chia sẻ với bạn chưa được gửi. Đăng xuất sẽ gỡ các sổ đó khỏi điện thoại này cùng các mục.',
+    sign_out_anyway: 'Vẫn đăng xuất',
+    sign_out_joined_note:
+      'Các sổ được chia sẻ với bạn sẽ bị gỡ khỏi điện thoại này cho đến khi bạn đăng nhập lại.',
     removed_title: 'Đã gỡ sổ chia sẻ',
     removed_body: '{{names}} không còn được chia sẻ với bạn nên đã bị gỡ khỏi điện thoại này.',
     paused_title: 'Chia sẻ đang tạm dừng',

@@ -65,8 +65,15 @@ export const DEVICE_LOCAL_SETTINGS_COLUMNS: ReadonlySet<string> = new Set([
   'created_at',
 ]);
 
-export function isDeviceLocalColumn(table: string, column: string): boolean {
-  return table === 'settings' && DEVICE_LOCAL_SETTINGS_COLUMNS.has(column);
+/**
+ * Whether a column stays on the phone. In a shared ledger (`shared`) the
+ * ledger's own preferences do too: payment-alert accounts, quick-entry picks,
+ * the payback account and Insights choices name one person's accounts and
+ * habits, so each member keeps theirs.
+ */
+export function isDeviceLocalColumn(table: string, column: string, shared = false): boolean {
+  if (table === 'settings') return DEVICE_LOCAL_SETTINGS_COLUMNS.has(column);
+  return shared && table === 'ledgers' && column === 'prefs_json';
 }
 
 /**

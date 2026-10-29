@@ -3048,6 +3048,11 @@ const de = {
     changes_for_everyone: 'Dieses Buch ist geteilt, daher ändert sich das für alle darin.',
     leave_unsent:
       'Deine neuesten Einträge in diesem Buch wurden noch nicht gesendet. Verlasse es, wenn du online bist, damit sie nicht verloren gehen.',
+    sign_out_unsent:
+      'Einige Einträge in Büchern, die mit dir geteilt wurden, sind noch nicht gesendet. Beim Abmelden werden diese Bücher samt den Einträgen von diesem Telefon entfernt.',
+    sign_out_anyway: 'Trotzdem abmelden',
+    sign_out_joined_note:
+      'Mit dir geteilte Bücher verschwinden von diesem Telefon, bis du dich wieder anmeldest.',
     removed_title: 'Geteiltes Buch entfernt',
     removed_body:
       '{{names}} wird nicht mehr mit dir geteilt und wurde daher von diesem Handy entfernt.',

@@ -3031,6 +3031,11 @@ const ms = {
       'Buku ini dikongsi, jadi perubahan ini berlaku untuk semua orang di dalamnya.',
     leave_unsent:
       'Catatan terkini anda dalam buku ini belum dihantar. Tinggalkannya apabila anda dalam talian supaya ia tidak hilang.',
+    sign_out_unsent:
+      'Beberapa catatan dalam buku yang dikongsi dengan anda belum dihantar. Log keluar akan membuang buku itu daripada telefon ini bersama catatannya.',
+    sign_out_anyway: 'Log keluar juga',
+    sign_out_joined_note:
+      'Buku yang dikongsi dengan anda dibuang daripada telefon ini sehingga anda log masuk semula.',
     removed_title: 'Buku dikongsi dibuang',
     removed_body:
       '{{names}} tidak lagi dikongsi dengan anda, jadi ia dibuang daripada telefon ini.',

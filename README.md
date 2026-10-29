@@ -595,6 +595,10 @@ app side lives in `features/ledgers/`.
     (`LEDGER_QUICK_ENTRY_KEYS`);
   - the account each payment-alert source logs into;
   - Insights preferences.
+
+  In a shared ledger, these preferences are each member's own (see
+  [Shared ledgers](#shared-ledgers)).
+
 - **Resets and imports:**
   - Reset all data removes every ledger but the shared ones, which are
     other people's books too (`deletePersonalLedgerRows`); restoring a backup
@@ -1203,8 +1207,14 @@ updated_at)`, with each row as JSON, plus `sync_info` (last device, last
   images, `push()`, `pull()`, then diff every replica revision against
   `sync_row_meta` and write the rows other phones changed. A row still
   waiting in the outbox wins over the pulled copy. Concurrent edits to the
-  same row, or two phones creating the same id: the last push wins, per row.
-  Deletions apply before changes. Each pulled row is written in its own
+  same row, or two phones creating the same id: the last push wins, per row,
+  except that a delete wins over a stale edit. A row the cloud deleted (its
+  tombstone) after this phone last saw it takes the delete instead of going
+  up (`deletedElsewhere`), so a phone that was offline cannot bring back a
+  recurring rule or entry deleted elsewhere by running or editing its old
+  copy. A row this phone saw deleted and revived itself goes up as usual, and
+  a row merely missing from the cloud copy is not a delete (sharing a ledger
+  moves its rows out of the user's own copy). Deletions apply before changes. Each pulled row is written in its own
   savepoint, so a row this version cannot store does not block the rows
   after it. Its revision is not recorded, so every later sync tries it again
   (even when the next pull brings nothing new), and until it is written the
@@ -1420,7 +1430,9 @@ The app side is `features/sharedLedgers/` (screens) and
   of an error. If the ledger is open at that moment it is not deleted under
   them (an editor may hold its accounts): it is deleted once the app is back
   on its main screens, after the default ledger opens (`LedgerProGuard`,
-  kept in AsyncStorage across a restart).
+  kept in AsyncStorage across a restart). Meanwhile its rows sync nowhere
+  (`NO_CHANNEL`), so an edit saved then reaches neither the share nor the
+  user's own cloud copy.
 - **The People page** re-reads the shared list when it opens, so its paused
   banner and count are never a minute stale. Who shares the ledger and that
   everyone can add and edit entries is in the info button next to the
@@ -1434,8 +1446,11 @@ The app side is `features/sharedLedgers/` (screens) and
   (pending actions in `sharedLedgerStore.ts`, kept per account), so the
   ledger never comes back from the cloud.
 - **Sign-out** deletes the ledgers the user joined from the phone (they are
-  someone else's data; signing in again brings them back). An owner keeps
-  theirs.
+  someone else's data; signing in again brings them back), and its
+  confirmation says so. An owner keeps theirs. It sends their unsent entries
+  first; while one still cannot go (offline), it asks before signing out
+  (Sign out anyway), as those entries would go with the ledger. Cancel on the
+  keep-which-data choice signs out the same way.
 
 **How it works**
 
@@ -1484,7 +1499,15 @@ The app side is `features/sharedLedgers/` (screens) and
   ledgers or settings.
 - **Signing in** first reads the list and lets go of ledgers the account no
   longer has (stopped on another phone, or shared by an account since
-  deleted), so an owner's ledger is linked as part of their own data.
+  deleted), so an owner's ledger is linked as part of their own data. A
+  ledger the owner deleted on this phone while signed out (when it no longer
+  knew the ledger was shared) stops being shared then, instead of reaching
+  the members as an emptied ledger.
+- **Each member's own preferences.** A shared ledger's `prefs_json`
+  (payment-alert accounts, quick-entry picks, payback account, Insights
+  choices) stays on each phone (`isDeviceLocalColumn` with `shared`): it
+  names one person's accounts. Unshared, it syncs between the owner's phones
+  as before.
 - **Signing in again** (after sign-out or an expired session) re-attaches each
   shared ledger: the cloud copy is taken, except rows this phone edited later
   (newer `updated_at`), which go up instead; then rows only this phone has go

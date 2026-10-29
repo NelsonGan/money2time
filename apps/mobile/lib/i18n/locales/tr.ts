@@ -3018,6 +3018,11 @@ const tr = {
       'Bu defter paylaşılıyor, bu yüzden bu değişiklik içindeki herkesi etkiler.',
     leave_unsent:
       'Bu defterdeki son kayıtlarınız henüz gönderilmedi. Kaybolmamaları için çevrimiçi olduğunuzda ayrılın.',
+    sign_out_unsent:
+      'Sizinle paylaşılan defterlerdeki bazı kayıtlar henüz gönderilmedi. Çıkış yapmak bu defterleri kayıtlarla birlikte bu telefondan kaldırır.',
+    sign_out_anyway: 'Yine de çıkış yap',
+    sign_out_joined_note:
+      'Sizinle paylaşılan defterler, yeniden giriş yapana kadar bu telefondan kaldırılır.',
     removed_title: 'Paylaşılan defter kaldırıldı',
     removed_body: '{{names}} artık seninle paylaşılmıyor, bu yüzden bu telefondan kaldırıldı.',
     paused_title: 'Paylaşım duraklatıldı',

@@ -3015,6 +3015,11 @@ const pl = {
       'Ta księga jest udostępniona, więc zmiana dotyczy wszystkich jej uczestników.',
     leave_unsent:
       'Twoje najnowsze wpisy w tej księdze nie zostały jeszcze wysłane. Opuść ją, gdy będziesz online, aby ich nie stracić.',
+    sign_out_unsent:
+      'Niektóre wpisy w udostępnionych Ci księgach nie zostały jeszcze wysłane. Wylogowanie usunie te księgi z telefonu razem z tymi wpisami.',
+    sign_out_anyway: 'Wyloguj mimo to',
+    sign_out_joined_note:
+      'Księgi udostępnione Ci znikają z tego telefonu do ponownego zalogowania.',
     removed_title: 'Usunięto udostępnioną księgę',
     removed_body: '{{names}} nie jest już Ci udostępniona, więc została usunięta z tego telefonu.',
     paused_title: 'Udostępnianie wstrzymane',

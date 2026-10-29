@@ -36,10 +36,11 @@ import {
   ENQUEUE_ROW_SQL,
   enqueueAllSql,
 } from '../lib/capture';
-import { inLedgersSql, isLedgerScoped, PERSONAL_CHANNEL } from '../lib/ledgerRows';
+import { inLedgersSql, isLedgerScoped, NO_CHANNEL, PERSONAL_CHANNEL } from '../lib/ledgerRows';
 import {
   buildWrite,
   decodeRow,
+  deletedElsewhere,
   diffRevs,
   encodeRow,
   makeRev,
@@ -831,7 +832,8 @@ export class SyncEngine {
       appliedRows += await this.applyRemoteChanges({ attaching: true });
       enqueueLedgerRows(this.config.ledgerId ?? '', this.channel);
     }
-    const pushedRows = await this.flushOutbox();
+    const { pushed: pushedRows, adopted } = await this.flushOutbox();
+    appliedRows += adopted;
     // Kept until a push succeeds: a failed push leaves the rows in the
     // replica, and the retry that sends them flushes nothing new.
     if (pushedRows > 0) this.unannounced = true;
@@ -917,17 +919,28 @@ export class SyncEngine {
         ? channelOfRow(entry.table_name, local)
         : (recordedChannel(entry.table_name, entry.row_id) ?? PERSONAL_CHANNEL);
       memo.set(key, channel);
-      if (channel === this.channel) mine.push({ ...entry, local });
+      if (channel === NO_CHANNEL) {
+        // Goes nowhere (a ledger about to be deleted here): drop it.
+        db.runSync('DELETE FROM sync_outbox WHERE table_name = ? AND row_id = ? AND seq = ?', [
+          entry.table_name,
+          entry.row_id,
+          entry.seq,
+        ]);
+      } else if (channel === this.channel) mine.push({ ...entry, local });
     }
     return mine;
   }
 
-  /** Copies this channel's outbox rows into the replica. Returns how many rows changed there. */
-  private async flushOutbox(): Promise<number> {
+  /**
+   * Copies this channel's outbox rows into the replica. Returns how many rows
+   * changed there, and how many local rows took a delete from the cloud.
+   */
+  private async flushOutbox(): Promise<{ pushed: number; adopted: number }> {
     const db = getSQLite();
     const replica = this.db();
     const origin = deviceId();
     let changedRows = 0;
+    let adoptedRows = 0;
     // Other channels' entries stay behind, so walk the outbox in order. A
     // bulk queue gives many rows one seq, so the key is (seq, table, id).
     let after: [number, string, string] = [-1, '', ''];
@@ -956,6 +969,8 @@ export class SyncEngine {
       }
 
       const results: { table: string; id: string; seq: number; rev: string | null }[] = [];
+      // Local rows that take the cloud's delete instead (`deletedElsewhere`).
+      const adopted: { table: string; id: string; data: string }[] = [];
       const assets = new Set<string>();
       await replica.transaction(async () => {
         for (const entry of batch) {
@@ -978,7 +993,16 @@ export class SyncEngine {
             results.push({ table, id, seq: entry.seq, rev: null });
             continue;
           }
-          const data = encodeRow(table, local, before?.data ?? null);
+          const seen = db.getFirstSync<{ rev: string }>(
+            'SELECT rev FROM sync_row_meta WHERE table_name = ? AND row_id = ? AND channel = ?',
+            [table, id, this.channel],
+          )?.rev;
+          if (before && deletedElsewhere(seen ?? null, before, local)) {
+            adopted.push({ table, id, data: before.data });
+            results.push({ table, id, seq: entry.seq, rev: before.rev });
+            continue;
+          }
+          const data = encodeRow(table, local, before?.data ?? null, !this.isPersonal);
           // Only device-local columns changed (a backup timestamp, say): the
           // cloud copy stays as it is.
           if (before && before.data === data) {
@@ -1016,9 +1040,21 @@ export class SyncEngine {
           ]);
           recordRev(r.table, r.id, r.rev, this.channel);
         }
+        if (!adopted.length) return;
+        setState('applying', '1');
+        try {
+          for (const { table, id, data } of adopted) {
+            const row = decodeRow(table, data, localColumns(table), !this.isPersonal);
+            if (row && writeRowSafely(table, row) === true) adoptedRows += 1;
+            // Not written: forget the revision, so the next pull applies it.
+            else recordRev(table, id, null, this.channel);
+          }
+        } finally {
+          setState('applying', '0');
+        }
       });
     }
-    return changedRows;
+    return { pushed: changedRows, adopted: adoptedRows };
   }
 
   /** Rows other phones changed or removed, minus those this phone is still sending. */
@@ -1104,7 +1140,7 @@ export class SyncEngine {
       }
       for (const item of fetched) {
         if (!tableExists(item.table) || pendingNow.has(rowKey(item.table, item.id))) continue;
-        const row = decodeRow(item.table, item.data, localColumns(item.table));
+        const row = decodeRow(item.table, item.data, localColumns(item.table), !this.isPersonal);
         if (!row || !this.accepts(item.table, row)) continue;
         if (opts.attaching && this.localIsNewer(item.table, row)) {
           // Edited here while signed out: this phone's copy goes up instead.

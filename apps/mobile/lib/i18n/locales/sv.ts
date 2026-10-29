@@ -3010,6 +3010,11 @@ const sv = {
     changes_for_everyone: 'Den här kassaboken är delad, så det här ändrar den för alla i den.',
     leave_unsent:
       'Dina senaste poster i den här kassaboken har inte skickats än. Lämna den när du är online så att de inte går förlorade.',
+    sign_out_unsent:
+      'Vissa poster i kassaböcker som delas med dig har inte skickats än. Om du loggar ut tas de kassaböckerna bort från telefonen, med posterna.',
+    sign_out_anyway: 'Logga ut ändå',
+    sign_out_joined_note:
+      'Kassaböcker som delas med dig tas bort från telefonen tills du loggar in igen.',
     removed_title: 'Delad kassabok borttagen',
     removed_body: '{{names}} delas inte längre med dig, så den togs bort från den här telefonen.',
     paused_title: 'Delningen är pausad',

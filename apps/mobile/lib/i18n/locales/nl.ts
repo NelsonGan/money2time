@@ -3039,6 +3039,11 @@ const nl = {
     changes_for_everyone: 'Dit boek is gedeeld, dus dit verandert het voor iedereen erin.',
     leave_unsent:
       'Je nieuwste boekingen in dit boek zijn nog niet verstuurd. Verlaat het als je online bent, zodat ze niet verloren gaan.',
+    sign_out_unsent:
+      'Sommige boekingen in boeken die met je gedeeld zijn, zijn nog niet verstuurd. Uitloggen verwijdert die boeken van deze telefoon, met die boekingen.',
+    sign_out_anyway: 'Toch uitloggen',
+    sign_out_joined_note:
+      'Boeken die met je gedeeld zijn, verdwijnen van deze telefoon tot je weer inlogt.',
     removed_title: 'Gedeeld boek verwijderd',
     removed_body:
       '{{names}} wordt niet meer met je gedeeld en is daarom van deze telefoon verwijderd.',

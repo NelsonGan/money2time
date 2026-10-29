@@ -61,7 +61,11 @@ import {
 import { LIVE_DEVICE_ID, startLiveSync } from './services/liveSync';
 import { NATIVE_PROVIDERS, type NativeProvider } from './services/nativeSignIn';
 import { finishPendingSignOut, unlinkAndEndSession } from './services/pendingSignOut';
-import { type SharedLedger, subscribeSharedLedgers } from './services/sharedLedgerStore';
+import {
+  listSharedLedgers,
+  type SharedLedger,
+  subscribeSharedLedgers,
+} from './services/sharedLedgerStore';
 import { sharedLedgerSync } from './services/sharedLedgerSync';
 import {
   type DataSummary,
@@ -127,7 +131,12 @@ interface CloudSyncContextValue {
   verifyEmailCode: (email: string, code: string) => Promise<void>;
   resolveChoice: (keep: 'cloud' | 'phone') => Promise<void>;
   syncNow: () => Promise<void>;
-  signOut: () => Promise<void>;
+  /**
+   * Signs out. Ledgers others shared leave the phone with it, so while one
+   * still has entries that could not be sent it throws `unsent_changes`,
+   * unless `force` (the user chose to sign out anyway).
+   */
+  signOut: (opts?: { force?: boolean }) => Promise<void>;
   deleteAccount: () => Promise<void>;
   /** Shares one of the user's ledgers (Pro, signed in). */
   shareLedger: (ledger: {
@@ -795,33 +804,43 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
     else await link();
   }, [link, refreshAccountPro, runSync, status]);
 
-  const signOut = useCallback(async () => {
-    const wasLinked = sessionRef.current?.linked ?? false;
-    // Let work in flight finish, then push what is waiting, before the
-    // replica is closed and deleted. No scheduled sync starts meanwhile.
-    closingRef.current = true;
-    await syncingRef.current?.catch(() => undefined);
-    const engine = engineRef.current;
-    if (engine) {
-      await engine.waitIdle();
-      // Only once linked: Cancel on the keep-which-data choice signs out too,
-      // and must leave the cloud copy as it is.
-      if (wasLinked && pendingChangeCount() > 0) await engine.syncNow().catch(() => undefined);
-    }
-    await sharedLedgerSync.waitIdle();
-    if (pendingChangeCount() > 0) await sharedLedgerSync.syncAll().catch(() => undefined);
-    const token = sessionRef.current?.token;
-    // This phone no longer makes the account Pro (before the session goes);
-    // offline, that is retried later and the user is signed out here anyway.
-    if (token) await unlinkAndEndSession(token, appUserIdRef.current);
-    try {
-      await forgetSession({ deleteReplica: true });
-    } finally {
-      closingRef.current = false;
-    }
-    markUsedHere(false);
-    if (wasLinked) void trackEvent(AnalyticsEvents.CLOUD_SYNC_SIGNED_OUT);
-  }, [forgetSession, markUsedHere]);
+  const signOut = useCallback(
+    async (opts: { force?: boolean } = {}) => {
+      const wasLinked = sessionRef.current?.linked ?? false;
+      // Let work in flight finish, then push what is waiting, before the
+      // replica is closed and deleted. No scheduled sync starts meanwhile.
+      closingRef.current = true;
+      await syncingRef.current?.catch(() => undefined);
+      const engine = engineRef.current;
+      if (engine) {
+        await engine.waitIdle();
+        // Only once linked: Cancel on the keep-which-data choice signs out too,
+        // and must leave the cloud copy as it is.
+        if (wasLinked && pendingChangeCount() > 0) await engine.syncNow().catch(() => undefined);
+      }
+      await sharedLedgerSync.waitIdle();
+      if (pendingChangeCount() > 0) await sharedLedgerSync.syncAll().catch(() => undefined);
+      const joined = listSharedLedgers()
+        .filter((ledger) => ledger.role === 'member' && ledger.active)
+        .map((ledger) => ledger.ledgerId);
+      if (!opts.force && pendingSharedChangeCount(joined) > 0) {
+        closingRef.current = false;
+        throw new CloudSyncApiError('unsent_changes', 0);
+      }
+      const token = sessionRef.current?.token;
+      // This phone no longer makes the account Pro (before the session goes);
+      // offline, that is retried later and the user is signed out here anyway.
+      if (token) await unlinkAndEndSession(token, appUserIdRef.current);
+      try {
+        await forgetSession({ deleteReplica: true });
+      } finally {
+        closingRef.current = false;
+      }
+      markUsedHere(false);
+      if (wasLinked) void trackEvent(AnalyticsEvents.CLOUD_SYNC_SIGNED_OUT);
+    },
+    [forgetSession, markUsedHere],
+  );
 
   const deleteAccount = useCallback(async () => {
     const token = await sessionToken();
@@ -832,6 +851,8 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       await syncingRef.current?.catch(() => undefined);
       await engineRef.current?.waitIdle();
       await sharedLedgerSync.waitIdle();
+      // Members' latest entries first: the shared databases go with the account.
+      await sharedLedgerSync.takeLatestOfOwned();
       await apiDeleteAccount(token);
     } catch (error) {
       closingRef.current = false;

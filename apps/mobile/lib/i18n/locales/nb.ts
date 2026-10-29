@@ -3008,6 +3008,11 @@ const nb = {
     changes_for_everyone: 'Dette regnskapet er delt, så dette endrer det for alle i det.',
     leave_unsent:
       'De nyeste postene dine i dette regnskapet er ikke sendt ennå. Forlat det når du er på nett, så de ikke går tapt.',
+    sign_out_unsent:
+      'Noen poster i regnskap som er delt med deg, er ikke sendt ennå. Når du logger ut, fjernes disse regnskapene fra telefonen sammen med postene.',
+    sign_out_anyway: 'Logg ut likevel',
+    sign_out_joined_note:
+      'Regnskap som er delt med deg, fjernes fra telefonen til du logger inn igjen.',
     removed_title: 'Delt regnskap fjernet',
     removed_body: '{{names}} er ikke lenger delt med deg, så det ble fjernet fra denne telefonen.',
     paused_title: 'Delingen er satt på pause',

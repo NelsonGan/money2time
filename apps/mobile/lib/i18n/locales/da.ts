@@ -3004,6 +3004,11 @@ const da = {
     changes_for_everyone: 'Dette regnskab er delt, så det ændres for alle i det.',
     leave_unsent:
       'Dine seneste poster i dette regnskab er ikke sendt endnu. Forlad det, når du er online, så de ikke går tabt.',
+    sign_out_unsent:
+      'Nogle poster i regnskaber, der er delt med dig, er ikke sendt endnu. Når du logger ud, fjernes de regnskaber fra telefonen sammen med posterne.',
+    sign_out_anyway: 'Log ud alligevel',
+    sign_out_joined_note:
+      'Regnskaber, der er delt med dig, forsvinder fra telefonen, indtil du logger ind igen.',
     removed_title: 'Delt regnskab fjernet',
     removed_body: '{{names}} er ikke længere delt med dig, så det blev fjernet fra denne telefon.',
     paused_title: 'Delingen er sat på pause',

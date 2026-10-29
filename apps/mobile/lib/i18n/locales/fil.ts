@@ -3051,6 +3051,11 @@ const fil = {
     changes_for_everyone: 'Shared ang ledger na ito, kaya mababago ito para sa lahat ng kasali.',
     leave_unsent:
       'Hindi pa naipapadala ang pinakabago mong entries sa ledger na ito. Umalis kapag online ka na para hindi sila mawala.',
+    sign_out_unsent:
+      'May ilang entry sa mga ledger na shinare sa iyo na hindi pa naipapadala. Kapag nag-sign out ka, aalisin ang mga ledger na iyon sa phone na ito, kasama ang mga entry.',
+    sign_out_anyway: 'Mag-sign out pa rin',
+    sign_out_joined_note:
+      'Aalisin sa phone na ito ang mga ledger na shinare sa iyo hanggang mag-sign in ka ulit.',
     removed_title: 'Inalis ang shared ledger',
     removed_body: 'Hindi na naka-share sa iyo ang {{names}}, kaya inalis ito sa teleponong ito.',
     paused_title: 'Naka-pause ang pag-share',
