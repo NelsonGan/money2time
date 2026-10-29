@@ -840,6 +840,9 @@ export class SyncEngine {
       appliedRows += await this.applyRemoteChanges({ attaching: true });
       enqueueLedgerRows(this.config.ledgerId ?? '', this.channel);
     }
+    // The cloud's latest before the flush, so it sees a row deleted elsewhere
+    // that this phone changed meanwhile (`deletedElsewhere`).
+    const pulledFirst = !attaching && (await replica.pull());
     const { pushed: pushedRows, adopted } = await this.flushOutbox();
     appliedRows += adopted;
     // Kept until a push succeeds: a failed push leaves the rows in the
@@ -852,7 +855,7 @@ export class SyncEngine {
     const pushed = this.unannounced || attaching;
     this.unannounced = false;
     if (attaching) setState(attachedKey(this.channel), '1');
-    const pulled = await replica.pull();
+    const pulled = (await replica.pull()) || pulledFirst;
     // Also re-applies after an apply that failed, which a later pull with no
     // new changes would otherwise never retry.
     const pendingKey = this.isPersonal ? 'apply_pending' : `apply_pending:${this.channel}`;

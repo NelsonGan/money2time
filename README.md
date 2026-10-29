@@ -1201,7 +1201,8 @@ updated_at)`, with each row as JSON, plus `sync_info` (last device, last
   sync). App migrations therefore need no cloud migration. A write merges over
   the stored JSON, so an older app version keeps fields it does not know; a
   read keeps only the columns the phone has.
-- **Sync run** (`SyncEngine.syncNow`): flush the outbox into the replica with a
+- **Sync run** (`SyncEngine.syncNow`): `pull()` (so the flush sees what other
+  phones deleted meanwhile), flush the outbox into the replica with a
   new revision per changed row (a row whose JSON did not change, such as one
   where only a device-local setting moved, keeps its revision), upload queued
   images, `push()`, `pull()`, then diff every replica revision against
