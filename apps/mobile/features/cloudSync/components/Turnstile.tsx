@@ -26,18 +26,29 @@ import { reportError } from '~/services/errorReporting';
  * or resized: a reload throws away the challenge in progress, and a 0x0
  * WebView is not reliably laid out on Android.
  *
- * It fails open: no site key, no WebView in the binary, a widget that will not
- * load, all end with `undefined` and the code is asked for without a token.
- * The control is on the Worker, so failing closed here adds no protection and
- * does add a way to lock someone out.
+ * It never blocks by itself: no WebView in the binary or a widget that will
+ * not load end with `undefined`, and the code is asked for without a token.
+ * The Worker decides; while it enforces Turnstile it refuses that request
+ * (`captcha_failed`), and the form says so.
  */
 
-const SITE_KEY = process.env.EXPO_PUBLIC_TURNSTILE_SITE_KEY ?? '';
+/**
+ * The "Money2Time Turnstile" widget's site key (public, like the PostHog
+ * token). Checked in so every build, local ones included, sends a token: the
+ * Worker enforces it. The env var points a build at another widget.
+ */
+const SITE_KEY = process.env.EXPO_PUBLIC_TURNSTILE_SITE_KEY?.trim() || '0x4AAAAAAFqdQg_MRfc4cWPB';
 /** The page's origin; the widget's hostname list must hold it. */
 const ORIGIN = process.env.EXPO_PUBLIC_TURNSTILE_ORIGIN || 'money2time.com';
 
-/** How long to wait for a token, unless a human is answering a challenge. */
-const TOKEN_TIMEOUT_MS = 20_000;
+/**
+ * How long to wait for a token, unless a human is answering a challenge.
+ * Generous: the Worker enforces Turnstile, so a request sent without a token
+ * only fails, and Cloudflare can take over 20 s before it asks for a click.
+ */
+const TOKEN_TIMEOUT_MS = 45_000;
+/** A token that arrived after its request gave up is kept this long for the next one (Cloudflare accepts it for 300 s, once). */
+const SPARE_TOKEN_MS = 240_000;
 
 /** Codes that never recover (bad configuration); anything else is worth one retry. */
 const FATAL_CODES = new Set([
@@ -138,6 +149,7 @@ export function useTurnstile(): {
   const ready = useRef(false);
   const queued = useRef<(() => void)[]>([]);
   const pending = useRef<Pending | null>(null);
+  const spare = useRef<{ token: string; at: number } | null>(null);
   const broken = useRef(false);
   const [challenging, setChallenging] = useState(false);
 
@@ -179,15 +191,20 @@ export function useTurnstile(): {
           for (const run of queued.current.splice(0)) run();
           return;
         case 'token':
+          // Late (its request already gave up): keep it for the next send.
+          if (!waiting && payload.token) {
+            spare.current = { token: payload.token, at: Date.now() };
+            return;
+          }
           settle(payload.token);
           return;
         case 'interactive':
+          // Nobody is waiting any more: do not ask for a click that goes nowhere.
+          if (!waiting) return;
           // A human is asked: stop the clock, show the widget.
-          if (waiting) {
-            if (waiting.timer) clearTimeout(waiting.timer);
-            waiting.timer = null;
-            waiting.interactive = true;
-          }
+          if (waiting.timer) clearTimeout(waiting.timer);
+          waiting.timer = null;
+          waiting.interactive = true;
           setChallenging(true);
           return;
         case 'answered':
@@ -215,6 +232,9 @@ export function useTurnstile(): {
 
   const requestToken = useCallback((): Promise<TurnstileAnswer> => {
     if (!WebViewImpl || broken.current) return Promise.resolve(undefined);
+    const kept = spare.current;
+    spare.current = null;
+    if (kept && Date.now() - kept.at < SPARE_TOKEN_MS) return Promise.resolve(kept.token);
     // One at a time: an earlier request still waiting is superseded, not sent.
     settle(null);
     return new Promise((resolve) => {

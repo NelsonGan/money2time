@@ -82,10 +82,10 @@ REVENUECAT_ENTITLEMENT_ID = "pro"
 REVENUECAT_PUBLIC_KEYS = "appl_ELByGHLlPQeZQeixSyXhATAqnGJ,goog_QiZPmlHUwoGpYQUqjtYMNjcnWsu"
 TURSO_ORG = "nelsongan"
 TURSO_GROUP = "m2t-sync"
-# Turnstile before sending a sign-in code (src/turnstile.ts). Off until the
-# secret is set; then a token the app sends must verify. "true" also refuses
-# requests with no token: set it once app builds that send one are what people run.
-TURNSTILE_ENFORCE = "false"
+# Turnstile before sending a sign-in code (src/turnstile.ts), with the secret
+# TURNSTILE_SECRET_KEY. "true" refuses a request with no token or one that does
+# not verify; anything else lets a missing token through (for older builds).
+TURNSTILE_ENFORCE = "true"
 # The page origin of the app's Turnstile WebView.
 TURNSTILE_HOSTNAMES = "money2time.com"
 

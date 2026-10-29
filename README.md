@@ -3334,7 +3334,7 @@ email codes, expired invite links and rate-limit rows older than a day.
   issued for); no client secrets are needed. Email codes are 6 digits, valid
   10 minutes, five attempts, stored hashed, and sent with Email Service from
   `EMAIL_FROM` (only a local `wrangler dev` without the binding prints them).
-  Asking for one needs a [Turnstile](#turnstile) token once that is enforced.
+  Asking for one needs a [Turnstile](#turnstile) token.
   One verified email address is one user across methods (account linking
   with no blindly trusted provider, so a Google account with an unverified
   address cannot join an existing user; Apple's private-relay addresses
@@ -3417,30 +3417,39 @@ someone's three codes a minute. A refusal is 403 `{error: 'captcha_failed'}`.
 | set                    | `true`              | refused  | refused       | refused         |
 
 A token must also come from a page on `TURNSTILE_HOSTNAMES`
-(`money2time.com`; empty skips that check). Turning it on, in this order,
-because builds already on phones send no token:
+(`money2time.com`; empty skips that check).
 
-1. Create the widget, Managed, listing the apex the WebView uses:
-   `npx wrangler turnstile widget create "Money2Time Turnstile" --mode managed --domain money2time.com`.
-   `npx wrangler turnstile widget list` prints its sitekey (the app's site
-   key) and `widget get <sitekey>` its secret.
-2. Store the secret, still not enforced:
-   `npx wrangler secret put TURNSTILE_SECRET_KEY`. From now on a token that is
-   sent must verify; requests with none still pass.
-3. Ship app builds that send the token: EAS env `EXPO_PUBLIC_TURNSTILE_SITE_KEY`
-   (the sitekey) and optionally `EXPO_PUBLIC_TURNSTILE_ORIGIN` (default
-   `money2time.com`). `react-native-webview` is native, so this needs a real
-   build. The app side is `features/cloudSync/components/Turnstile.tsx`
-   (`useTurnstile`, modelled on RiceCal's): the widget runs in execute mode,
-   `interaction-only`, and when Cloudflare wants a human the same WebView is
-   shown over the email form (never remounted or resized). It fails open: no
-   site key, no WebView in the binary, a widget that will not load or 20 s
-   without an answer all send the code request without a token, and the
-   Worker decides. Cancel on a challenge sends nothing. The hidden widget is
-   kept out of the screen reader until a challenge shows.
-4. Once those are what people run, set `TURNSTILE_ENFORCE = "true"` in
-   `wrangler.toml` and deploy. Back out by setting it to `"false"`, or by
-   deleting the secret (`npx wrangler secret delete TURNSTILE_SECRET_KEY`).
+**It is enforced** (`TURNSTILE_ENFORCE = "true"`, secret set, since
+2026-10-29, while Cloud Sync was still in development and no shipped build
+mailed codes). Only email codes go through it: Apple and Google sign-ins carry
+an ID token Apple or Google signed, and entering a code sends nothing and is
+limited per address and attempt, so neither can be used to spam an inbox.
+
+- **Widget:** "Money2Time Turnstile", Managed, domain `money2time.com`
+  (`npx wrangler turnstile widget list`; `widget get <sitekey>` shows its
+  secret). Managed, not Invisible: a person Cloudflare is unsure of gets a
+  checkbox instead of a dead end.
+- **Site key** `0x4AAAAAAFqdQg_MRfc4cWPB` is public and checked in
+  (`Turnstile.tsx`), so every build, local ones included, sends a token;
+  `EXPO_PUBLIC_TURNSTILE_SITE_KEY` points a build at another widget and
+  `EXPO_PUBLIC_TURNSTILE_ORIGIN` changes the page origin (default
+  `money2time.com`, which must be on the widget's domain list).
+- **App side:** `features/cloudSync/components/Turnstile.tsx` (`useTurnstile`,
+  modelled on RiceCal's) needs the native `react-native-webview`. The widget
+  runs in execute mode, `interaction-only`, and when Cloudflare wants a human
+  the same WebView is shown over the email form (never remounted or
+  resized). A widget that will not load or 45 s without an answer sends the
+  request without a token, which the Worker refuses (`captcha_failed`, "We
+  couldn't check this request"). 45 s, not 20: Cloudflare can take over 20 s
+  before it asks for a click. A token that arrives after its request gave up
+  is kept 4 minutes for the next send, and a challenge with nobody waiting is
+  not shown. Cancel on a challenge sends nothing. The
+  hidden widget is kept out of the screen reader until a challenge shows.
+- **Local `wrangler dev`:** put `TURNSTILE_SECRET_KEY` in `.dev.vars` to
+  check tokens locally; without it the check is skipped.
+- **Back out** by setting `TURNSTILE_ENFORCE` to `"false"` (a token that is
+  sent must still verify) or deleting the secret
+  (`npx wrangler secret delete TURNSTILE_SECRET_KEY`), then deploy.
 
 #### Config
 
@@ -3448,9 +3457,8 @@ because builds already on phones send no token:
 Service, `SYNC_HUB` Durable Object with its `v1` SQLite migration,
 `AUTH_LIMITER` and `OTP_LIMITER`), the cron and the public vars (among them
 `TURNSTILE_ENFORCE` and `TURNSTILE_HOSTNAMES`).
-Secrets: `BETTER_AUTH_SECRET`, `TURSO_API_TOKEN` and `APPLE_PRIVATE_KEY`
-(all set), optional `REVENUECAT_SECRET_KEY` and `TURNSTILE_SECRET_KEY` (not
-set yet). Apple's client secret is a
+Secrets: `BETTER_AUTH_SECRET`, `TURSO_API_TOKEN`, `APPLE_PRIVATE_KEY` and
+`TURNSTILE_SECRET_KEY` (all set), and an optional `REVENUECAT_SECRET_KEY`. Apple's client secret is a
 5-minute ES256 JWT signed with the Sign in with Apple key `F5629ZF4G6` (team
 `A9QF26PBRS`, vars `APPLE_TEAM_ID` and `APPLE_KEY_ID`).
 
