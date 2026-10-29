@@ -31,8 +31,8 @@ import { accountsRepository } from '~/lib/repositories/accountsRepository';
 import { writeBudgetLines } from '~/lib/repositories/budgetLines';
 import { ledgersRepository } from '~/lib/repositories/ledgersRepository';
 import {
+  assertInOpenLedger,
   EntryLedgerGoneError,
-  transactionsRepository,
 } from '~/lib/repositories/transactionsRepository';
 import { applyBackupData, buildBackupData } from '~/services/dataManagementService';
 
@@ -343,17 +343,25 @@ describe('ledgersRepository on SQLite', () => {
     }
   });
 
-  it('refuses to save a draft into another ledger (its own was deleted elsewhere)', () => {
+  it('refuses a draft naming accounts or categories the open ledger does not have', () => {
     setActiveLedgerId(DEFAULT_LEDGER_ID);
+    const draft = { type: 'expense' as const, amount: 5, currency: 'MYR', date: '2026-10-28' };
     expect(() =>
-      transactionsRepository.createWithId('draft', {
-        type: 'expense',
-        amount: 5,
-        currency: 'USD',
-        date: '2026-10-28',
-        accountId: 'work-cash',
-      }),
-    ).toThrow(EntryLedgerGoneError);
+      assertInOpenLedger({ ...draft, accountId: 'cash', categoryId: 'food' }),
+    ).not.toThrow();
+    expect(() => assertInOpenLedger(draft)).not.toThrow();
+    // Its ledger deleted on another phone: the rows remain, in another ledger.
+    expect(() => assertInOpenLedger({ ...draft, accountId: 'work-cash' })).toThrow(
+      EntryLedgerGoneError,
+    );
+    // Replaced by a reset or a cloud copy elsewhere: the rows are gone.
+    harness.connection.exec("DELETE FROM accounts WHERE id = 'work-cash'");
+    expect(() => assertInOpenLedger({ ...draft, accountId: 'work-cash' })).toThrow(
+      EntryLedgerGoneError,
+    );
+    expect(() => assertInOpenLedger({ ...draft, categoryId: 'removed-category' })).toThrow(
+      EntryLedgerGoneError,
+    );
   });
 
   it.each([true, false])(

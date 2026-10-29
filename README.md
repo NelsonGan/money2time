@@ -1254,8 +1254,9 @@ updated_at)`, with each row as JSON, plus `sync_info` (last device, last
   default ledger opens instead (`reloadAfterApply`), and taking a cloud copy
   makes the default ledger row again if the copy has none, as a restore does.
   An editor left open on the gone ledger cannot save into the default one: a
-  new entry naming another ledger's account or category is refused
-  (`EntryLedgerGoneError`) and the user is told it was not saved.
+  new entry the user saves that names an account or category the open ledger
+  does not have (another ledger's, or one a reset or cloud copy removed) is
+  refused (`assertInOpenLedger`) and the user is told it was not saved.
   The choice screen's counts cover every ledger. A pulled settings row only
   updates this phone's own row: an upsert would fail SQLite's NOT NULL check on
   the missing columns.

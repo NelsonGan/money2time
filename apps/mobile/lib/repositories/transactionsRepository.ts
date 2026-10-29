@@ -26,9 +26,10 @@ import {
 import { transactionSplitsRepository } from './transactionSplitsRepository';
 
 /**
- * A new entry naming another ledger's account or category: the ledger it was
- * drafted in is gone (deleted on another phone while its editor was open,
- * which opens the default ledger). Saving it here would mix the two.
+ * A new entry naming an account or category the open ledger does not have:
+ * the ledger it was drafted in is gone while its editor was open (deleted on
+ * another phone, or replaced by a reset or a cloud copy), and the default one
+ * opened. Saving it would mix the two or leave dangling references.
  */
 export class EntryLedgerGoneError extends Error {
   constructor() {
@@ -37,7 +38,8 @@ export class EntryLedgerGoneError extends Error {
   }
 }
 
-function assertInOpenLedger(input: CreateTransactionInput): void {
+/** Throws `EntryLedgerGoneError` unless every account and category `input` names is the open ledger's. */
+export function assertInOpenLedger(input: CreateTransactionInput): void {
   const refs: [string, string | null | undefined][] = [
     ['accounts', input.accountId],
     ['accounts', input.fromAccountId],
@@ -50,7 +52,7 @@ function assertInOpenLedger(input: CreateTransactionInput): void {
       `SELECT ledger_id FROM ${table} WHERE id = ?`,
       [refId],
     );
-    if (row && row.ledger_id !== getActiveLedgerId()) throw new EntryLedgerGoneError();
+    if (row?.ledger_id !== getActiveLedgerId()) throw new EntryLedgerGoneError();
   }
 }
 
@@ -626,9 +628,8 @@ class TransactionsRepository {
    * the reconcile after the write has nothing to change.
    */
   createWithId(id: string, input: CreateTransactionInput, now: string = nowIso()) {
-    const normalizedInput = normalizeTransactionInput(input);
-    assertInOpenLedger(normalizedInput);
     const db = getDb();
+    const normalizedInput = normalizeTransactionInput(input);
 
     db.insert(transactionsTable)
       .values({

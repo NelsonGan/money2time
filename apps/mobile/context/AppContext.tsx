@@ -103,6 +103,7 @@ import {
 import { settingsRepository } from '~/lib/repositories/settingsRepository';
 import { transactionSplitsRepository } from '~/lib/repositories/transactionSplitsRepository';
 import {
+  assertInOpenLedger,
   type CreateTransactionInput,
   EntryLedgerGoneError,
   summarizeSplits,
@@ -2487,8 +2488,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setTransactions((prev) => insertTransactionsByDateDesc(prev, [optimistic]));
       runDeferredWrite(() => {
         try {
-          if (meta?.source !== 'autolog' && meta?.source !== 'notification_review')
+          if (meta?.source !== 'autolog' && meta?.source !== 'notification_review') {
+            // The ledger this was drafted in may be gone since (see the error).
+            assertInOpenLedger(normalizedInput);
             transactionsRepository.createWithId(id, normalizedInput, now);
+          }
           // Auto-file into the active album, if one is set.
           const activeAlbumId = albumsRepository.getActiveId();
           if (activeAlbumId) {
