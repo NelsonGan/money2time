@@ -61,11 +61,7 @@ import {
 import { LIVE_DEVICE_ID, startLiveSync } from './services/liveSync';
 import { NATIVE_PROVIDERS, type NativeProvider } from './services/nativeSignIn';
 import { finishPendingSignOut, unlinkAndEndSession } from './services/pendingSignOut';
-import {
-  listSharedLedgers,
-  type SharedLedger,
-  subscribeSharedLedgers,
-} from './services/sharedLedgerStore';
+import { type SharedLedger, subscribeSharedLedgers } from './services/sharedLedgerStore';
 import { sharedLedgerSync } from './services/sharedLedgerSync';
 import {
   type DataSummary,
@@ -819,11 +815,9 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
         if (wasLinked && pendingChangeCount() > 0) await engine.syncNow().catch(() => undefined);
       }
       await sharedLedgerSync.waitIdle();
-      if (pendingChangeCount() > 0) await sharedLedgerSync.syncAll().catch(() => undefined);
-      const joined = listSharedLedgers()
-        .filter((ledger) => ledger.role === 'member' && ledger.active)
-        .map((ledger) => ledger.ledgerId);
-      if (!opts.force && pendingSharedChangeCount(joined) > 0) {
+      // A failed sync may have left changes in a replica, out of the outbox.
+      await sharedLedgerSync.syncAll().catch(() => undefined);
+      if (!opts.force && (await sharedLedgerSync.joinedHaveUnsent())) {
         closingRef.current = false;
         throw new CloudSyncApiError('unsent_changes', 0);
       }

@@ -538,16 +538,9 @@ class SharedLedgerSync {
   async leave(ledgerId: string): Promise<void> {
     const ledger = sharedLedgerFor(ledgerId);
     if (!ledger || ledger.role !== 'member') return;
-    if (ledger.active && pendingSharedChangeCount([ledgerId]) > 0) {
-      const sent =
-        !!this.session &&
-        (await this.engineFor(ledger)
-          .then((engine) => engine.syncNow())
-          .then(
-            () => true,
-            () => false,
-          ));
-      if (!sent) throw new CloudSyncApiError('unsent_changes', 0);
+    if (ledger.active && (await this.hasUnsent(ledger))) {
+      if (this.session) await this.syncNow(ledger).catch(() => undefined);
+      if (await this.hasUnsent(ledger)) throw new CloudSyncApiError('unsent_changes', 0);
     }
     try {
       await leaveLedger(await this.token(), ledger.shareId);
@@ -562,6 +555,28 @@ class SharedLedgerSync {
       }
     }
     await this.letGo(ledger, { requeue: false });
+  }
+
+  /**
+   * Whether entries made on this phone have not all reached a ledger's
+   * database: still queued, or flushed into its replica by a sync whose push
+   * failed. An engine not opened since launch has nothing flushed yet.
+   */
+  private async hasUnsent(ledger: SharedLedger): Promise<boolean> {
+    if (pendingSharedChangeCount([ledger.ledgerId]) > 0) return true;
+    return (await this.engines.get(ledger.shareId)?.hasUnpushedChanges()) ?? false;
+  }
+
+  /** Sign-out: whether a joined ledger, which leaves the phone with it, has unsent entries. */
+  async joinedHaveUnsent(): Promise<boolean> {
+    for (const ledger of listSharedLedgers()) {
+      if (ledger.role === 'member' && ledger.active && (await this.hasUnsent(ledger))) return true;
+    }
+    return false;
+  }
+
+  private async syncNow(ledger: SharedLedger): Promise<void> {
+    await (await this.engineFor(ledger)).syncNow();
   }
 
   /** Joins with an invite code and downloads the ledger. Returns its id. */

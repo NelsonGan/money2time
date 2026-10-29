@@ -675,6 +675,14 @@ export class SyncEngine {
     });
   }
 
+  /**
+   * Whether changes made here wait in the replica for a push: a sync that
+   * failed after its flush leaves them there, out of the outbox.
+   */
+  async hasUnpushedChanges(): Promise<boolean> {
+    return (await this.db().stats()).cdcOperations > 0;
+  }
+
   /** Resolves once every operation started so far has finished (sign-out waits for it). */
   async waitIdle(): Promise<void> {
     await replicaQueue;
