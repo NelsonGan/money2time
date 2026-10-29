@@ -2906,6 +2906,7 @@ const da = {
     },
   },
   ledgers: {
+    entry_ledger_gone: 'Posten blev ikke gemt: dens regnskab blev slettet på en anden telefon.',
     label: 'Regnskab',
     title: 'Regnskaber',
     switcher_label: 'Regnskab: {{name}}. Skift regnskab',
@@ -2999,6 +3000,17 @@ const da = {
     leave_title: 'Forlad {{name}}?',
     leave_message: 'Det fjernes fra denne telefon. {{owner}} kan invitere dig igen.',
     no_longer_shared: 'Dette regnskab er ikke længere delt.',
+    reset_keeps_shared:
+      'Delte regnskaber ændres ikke. Forlad et eller stop med at dele det for at fjerne det.',
+    changes_for_everyone: 'Dette regnskab er delt, så det ændres for alle i det.',
+    leave_unsent:
+      'Dine seneste poster i dette regnskab er ikke sendt endnu. Hvis du forlader det nu, går de tabt.',
+    leave_anyway: 'Forlad alligevel',
+    sign_out_unsent:
+      'Nogle poster i regnskaber, der er delt med dig, er ikke sendt endnu. Når du logger ud, fjernes de regnskaber fra telefonen sammen med posterne.',
+    sign_out_anyway: 'Log ud alligevel',
+    sign_out_joined_note:
+      'Regnskaber, der er delt med dig, forsvinder fra telefonen, indtil du logger ind igen.',
     removed_title: 'Delt regnskab fjernet',
     removed_body: '{{names}} er ikke længere delt med dig, så det blev fjernet fra denne telefon.',
     paused_title: 'Delingen er sat på pause',

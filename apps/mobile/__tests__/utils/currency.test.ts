@@ -1,5 +1,5 @@
 import { ALL_CURRENCIES, MAJOR_CURRENCIES } from '~/constants/appDefaults';
-import type { ExchangeRate } from '~/types';
+import type { ExchangeRate, MonthlyWageSettings } from '~/types';
 import {
   buildRateTable,
   convert,
@@ -14,7 +14,10 @@ import {
   reportingAmountFromRate,
   resolvePinnedCurrency,
   resolveRate,
+  storedWageConfig,
+  wageInCurrency,
 } from '~/utils/currency';
+import { amountToHoursByRate } from '~/utils/formatters';
 
 function rate(overrides: Partial<ExchangeRate>): ExchangeRate {
   return {
@@ -280,5 +283,40 @@ describe('resolvePinnedCurrency', () => {
     expect(resolvePinnedCurrency(null, ['MYR'])).toBeNull();
     expect(resolvePinnedCurrency(undefined, ['MYR'])).toBeNull();
     expect(resolvePinnedCurrency('', ['MYR', ''])).toBeNull();
+  });
+});
+
+describe('wages in another ledger currency', () => {
+  const wage = {
+    id: 'w',
+    month: '2026-10',
+    wageType: 'hourly',
+    wageAmount: 40,
+    hoursWorkedPerWeek: 40,
+    workdaysPerWeek: 5,
+    commuteMinutesPerWorkday: 0,
+    baseHourlyRate: 40,
+    trueHourlyRate: 40,
+    createdAt: '',
+    updatedAt: '',
+    deletedAt: null,
+  } as MonthlyWageSettings;
+  // RM4 to the US dollar, from a USD ledger's rate table.
+  const myrToUsd = resolveRate(
+    'MYR',
+    'USD',
+    buildRateTable('USD', [rate({ baseCurrency: 'USD', quoteCurrency: 'MYR', rate: 4 })]),
+  ) as number;
+
+  it('values a US$40 expense at four hours of a RM40 hourly wage', () => {
+    const inUsd = wageInCurrency(wage, myrToUsd);
+    expect(inUsd.trueHourlyRate).toBeCloseTo(10);
+    expect(amountToHoursByRate(40, inUsd.trueHourlyRate)).toBeCloseTo(4);
+  });
+
+  it('saves a wage entered in the ledger currency back in the stored one', () => {
+    const entered = { ...wage, wageAmount: 10 };
+    expect(storedWageConfig(entered, myrToUsd).wageAmount).toBeCloseTo(40);
+    expect(storedWageConfig(entered, 1)).toBe(entered);
   });
 });

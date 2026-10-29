@@ -9,6 +9,7 @@ import React, {
   useState,
 } from 'react';
 import {
+  Alert,
   AppState as RNAppState,
   type AppStateStatus,
   Pressable,
@@ -36,6 +37,7 @@ import {
   budgetWeekOverlaps,
   isBudgetPeriodKey,
 } from '~/features/budget/lib/budgetPeriods';
+import { deletePersonalLedgerRows } from '~/features/cloudSync/services/ledgerChannels';
 import { openLedgerSharedAndActive } from '~/features/cloudSync/services/sharedLedgerStore';
 import { computeItemStats } from '~/features/items/utils';
 import {
@@ -67,11 +69,9 @@ import {
   accountsTable,
   albumsTable,
   autoLogCapturesTable,
-  budgetTemplateCategoriesTable,
   budgetTemplatesTable,
   categoriesTable,
   itemsTable,
-  monthlyBudgetCategoriesTable,
   monthlyBudgetsTable,
   monthlyWageSettingsTable,
   recurringRulesTable,
@@ -103,7 +103,9 @@ import {
 import { settingsRepository } from '~/lib/repositories/settingsRepository';
 import { transactionSplitsRepository } from '~/lib/repositories/transactionSplitsRepository';
 import {
+  assertInOpenLedger,
   type CreateTransactionInput,
+  EntryLedgerGoneError,
   summarizeSplits,
   transactionsRepository,
 } from '~/lib/repositories/transactionsRepository';
@@ -190,6 +192,9 @@ import {
   emptyRateTable,
   isAutoRateSupported,
   resolveRate,
+  storedWageConfig,
+  wageInCurrency,
+  wageRate,
 } from '~/utils/currency';
 import { getErrorMessage, toError } from '~/utils/errorHandling';
 import {
@@ -1002,30 +1007,15 @@ function trackSplitBillCreated(splits: readonly { isSelf: boolean }[]): void {
   if (people > 0) void trackEvent(AnalyticsEvents.SPLIT_BILL_CREATED, { people });
 }
 
+/** Erases the user's own data. Shared ledgers stay (see `deletePersonalLedgerRows`). */
 function purgeAllData() {
-  const db = getDb();
-  db.delete(transactionsTable).run();
-  db.delete(categoriesTable).run();
-  db.delete(accountsTable).run();
-  db.delete(recurringRulesTable).run();
-  db.delete(accountGroupsTable).run();
-  db.delete(monthlyWageSettingsTable).run();
-  db.delete(itemsTable).run();
-  // Budgets must go too — a surviving default template would auto-recreate a
-  // ghost budget (pointing at deleted categories) on the very next load.
-  db.delete(budgetTemplateCategoriesTable).run();
-  db.delete(budgetTemplatesTable).run();
-  db.delete(monthlyBudgetCategoriesTable).run();
-  db.delete(monthlyBudgetsTable).run();
+  // Budgets go too: a surviving default template would recreate a ghost
+  // budget (pointing at deleted categories) on the very next load.
+  deletePersonalLedgerRows();
+  getDb().delete(monthlyWageSettingsTable).run();
   // Payment alerts point at transactions, accounts and categories that are gone.
-  db.delete(autoLogCapturesTable).run();
+  getDb().delete(autoLogCapturesTable).run();
   getSQLite().execSync('DELETE FROM merchant_categories');
-  // Every ledger goes with its data; the default ledger stays, unnamed.
-  getSQLite().runSync('DELETE FROM ledgers WHERE id <> ?', [DEFAULT_LEDGER_ID]);
-  getSQLite().runSync(
-    'UPDATE ledgers SET name = NULL, emoji = NULL, prefs_json = NULL WHERE id = ?',
-    [DEFAULT_LEDGER_ID],
-  );
   // Reset settings to defaults but preserve appUserId so the device identity
   // remains stable across in-app data resets. The ID only rotates on
   // uninstall/reinstall (when SQLite itself is wiped).
@@ -1252,8 +1242,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // reminder fires on.
   const weekStartsOnRef = useRef<WeekStartsOn>(1);
   weekStartsOnRef.current = settings?.weekStartsOn ?? 1;
-  const [currentMonthWage, setCurrentMonthWage] = useState<MonthlyWageSettings | null>(null);
-  const [monthlyWages, setMonthlyWages] = useState<MonthlyWageSettings[]>([]);
+  const [storedCurrentWage, setCurrentMonthWage] = useState<MonthlyWageSettings | null>(null);
+  const [storedWages, setMonthlyWages] = useState<MonthlyWageSettings[]>([]);
   const [accountGroups, setAccountGroups] = useState<AccountGroup[]>([]);
   const [recurringRules, setRecurringRules] = useState<RecurringTransactionRule[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -1321,6 +1311,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (settings?.currencyCode) reportingCurrencyRef.current = settings.currencyCode;
   }, [settings?.currencyCode]);
+
+  // One wage serves every ledger, kept in the default ledger's currency. A
+  // ledger in another currency reads and saves it in its own.
+  const wageCurrency = ledgers.find((ledger) => ledger.id === DEFAULT_LEDGER_ID)?.currencyCode;
+  const wageToLedgerRate = useMemo(
+    () => wageRate(wageCurrency, settings?.currencyCode, rateTable),
+    [rateTable, settings?.currencyCode, wageCurrency],
+  );
+  const wageRateRef = useRef(wageToLedgerRate);
+  wageRateRef.current = wageToLedgerRate;
+  const currentMonthWage = useMemo(
+    () => storedCurrentWage && wageInCurrency(storedCurrentWage, wageToLedgerRate),
+    [storedCurrentWage, wageToLedgerRate],
+  );
+  const monthlyWages = useMemo(
+    () =>
+      wageToLedgerRate === 1
+        ? storedWages
+        : storedWages.map((wage) => wageInCurrency(wage, wageToLedgerRate)),
+    [storedWages, wageToLedgerRate],
+  );
 
   const reloadRateTable = useCallback((reportingCurrency: string) => {
     const rows = exchangeRatesRepository.listByBase(reportingCurrency);
@@ -2480,8 +2491,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setTransactions((prev) => insertTransactionsByDateDesc(prev, [optimistic]));
       runDeferredWrite(() => {
         try {
-          if (meta?.source !== 'autolog' && meta?.source !== 'notification_review')
+          if (meta?.source !== 'autolog' && meta?.source !== 'notification_review') {
+            // The ledger this was drafted in may be gone since (see the error).
+            assertInOpenLedger(normalizedInput);
             transactionsRepository.createWithId(id, normalizedInput, now);
+          }
           // Auto-file into the active album, if one is set.
           const activeAlbumId = albumsRepository.getActiveId();
           if (activeAlbumId) {
@@ -2537,6 +2551,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             reportError(error, { scope: 'autolog_after_save' });
           } else {
             setTransactions((prev) => prev.filter((tx) => tx.id !== id));
+            if (error instanceof EntryLedgerGoneError) {
+              Alert.alert(I18n.t('ledgers.entry_ledger_gone'));
+            }
           }
         }
         refreshAccountBalances();
@@ -4073,7 +4090,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     (config: WageConfig) => {
       runMutation(
         () => {
-          monthlyWageRepository.saveForCurrentMonth(config);
+          monthlyWageRepository.saveForCurrentMonth(storedWageConfig(config, wageRateRef.current));
         },
         { refresh: refreshWages },
       );
@@ -4085,7 +4102,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     (month: string, config: WageConfig) => {
       runMutation(
         () => {
-          monthlyWageRepository.saveForMonth(month, config);
+          monthlyWageRepository.saveForMonth(month, storedWageConfig(config, wageRateRef.current));
         },
         { refresh: refreshWages },
       );

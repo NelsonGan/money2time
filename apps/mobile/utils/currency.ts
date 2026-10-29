@@ -1,5 +1,5 @@
 import { ALL_CURRENCIES } from '~/constants/appDefaults';
-import type { ExchangeRate, RateTable } from '~/types';
+import type { ExchangeRate, MonthlyWageSettings, RateTable, WageConfig } from '~/types';
 
 import { normalizeMoneyAmount } from './formatters';
 
@@ -100,6 +100,34 @@ export function convert(amount: number, from: string, to: string, table: RateTab
   const rate = resolveRate(from, to, table);
   if (rate === null) return { value: amount, rateUsed: null };
   return { value: normalizeMoneyAmount(amount * rate), rateUsed: rate };
+}
+
+/**
+ * Wages are kept in the default ledger's currency (`stored`): the rate that
+ * shows them in the open ledger's (`open`), or 1 (unconverted) without one.
+ */
+export function wageRate(
+  stored: string | null | undefined,
+  open: string | null | undefined,
+  table: RateTable,
+): number {
+  return stored && open ? (resolveRate(stored, open, table) ?? 1) : 1;
+}
+
+/** A wage month in another currency: `rate` of it per unit of the stored currency. */
+export function wageInCurrency(wage: MonthlyWageSettings, rate: number): MonthlyWageSettings {
+  if (rate === 1) return wage;
+  return {
+    ...wage,
+    wageAmount: wage.wageAmount * rate,
+    baseHourlyRate: wage.baseHourlyRate * rate,
+    trueHourlyRate: wage.trueHourlyRate * rate,
+  };
+}
+
+/** A wage entered in the open ledger's currency, as stored (see `wageInCurrency`). */
+export function storedWageConfig(config: WageConfig, rate: number): WageConfig {
+  return rate === 1 ? config : { ...config, wageAmount: config.wageAmount / rate };
 }
 
 const currencyByCode = new Map(ALL_CURRENCIES.map((c) => [c.code, c]));

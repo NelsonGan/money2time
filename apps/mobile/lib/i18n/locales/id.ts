@@ -2921,6 +2921,7 @@ const id = {
     },
   },
   ledgers: {
+    entry_ledger_gone: 'Entri ini tidak disimpan: bukunya dihapus di ponsel lain.',
     label: 'Buku',
     title: 'Buku',
     switcher_label: 'Buku: {{name}}. Ganti buku',
@@ -3016,6 +3017,18 @@ const id = {
     leave_title: 'Keluar dari {{name}}?',
     leave_message: 'Buku ini dihapus dari ponsel ini. {{owner}} bisa mengundang Anda lagi.',
     no_longer_shared: 'Buku ini tidak lagi dibagikan.',
+    reset_keeps_shared:
+      'Buku bersama tidak diubah. Untuk menghapusnya, keluar dari buku itu atau berhenti membagikannya.',
+    changes_for_everyone:
+      'Buku ini dibagikan, jadi perubahan ini berlaku untuk semua orang di dalamnya.',
+    leave_unsent:
+      'Entri terbaru Anda di buku ini belum terkirim. Jika keluar sekarang, entri tersebut akan hilang.',
+    leave_anyway: 'Tetap keluar',
+    sign_out_unsent:
+      'Beberapa entri di buku yang dibagikan kepada Anda belum terkirim. Keluar akan menghapus buku tersebut dari ponsel ini beserta entrinya.',
+    sign_out_anyway: 'Tetap keluar',
+    sign_out_joined_note:
+      'Buku yang dibagikan kepada Anda dihapus dari ponsel ini sampai Anda masuk lagi.',
     removed_title: 'Buku bersama dihapus',
     removed_body: '{{names}} tidak lagi dibagikan dengan Anda, jadi dihapus dari ponsel ini.',
     paused_title: 'Berbagi dijeda',

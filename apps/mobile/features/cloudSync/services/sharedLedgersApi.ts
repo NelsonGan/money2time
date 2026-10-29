@@ -63,8 +63,19 @@ export async function leaveLedger(token: string, shareId: string): Promise<void>
   await request(path(shareId, '/leave'), { body: {}, token });
 }
 
-export function getLedgerCredentials(token: string, shareId: string): Promise<SyncCredentials> {
-  return request<SyncCredentials>(path(shareId, '/credentials'), { body: {}, token });
+/**
+ * A token for the ledger's database. `final`: the owner's last download of a
+ * paused ledger before stopping it, read-only (the Worker refuses others).
+ */
+export function getLedgerCredentials(
+  token: string,
+  shareId: string,
+  opts: { final?: boolean } = {},
+): Promise<SyncCredentials> {
+  return request<SyncCredentials>(path(shareId, '/credentials'), {
+    body: opts.final ? { final: true } : {},
+    token,
+  });
 }
 
 export function getLedgerMembers(token: string, shareId: string): Promise<LedgerMembers> {

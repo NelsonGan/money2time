@@ -2946,6 +2946,8 @@ const fr = {
     },
   },
   ledgers: {
+    entry_ledger_gone:
+      "Cette entrée n'a pas été enregistrée : son carnet a été supprimé sur un autre téléphone.",
     label: 'Carnet',
     title: 'Carnets',
     switcher_label: 'Carnet : {{name}}. Changer de carnet',
@@ -3044,6 +3046,17 @@ const fr = {
     leave_title: 'Quitter {{name}} ?',
     leave_message: 'Il est retiré de ce téléphone. {{owner}} peut vous inviter à nouveau.',
     no_longer_shared: "Ce carnet n'est plus partagé.",
+    reset_keeps_shared:
+      'Les carnets partagés ne changent pas. Pour en retirer un, quittez-le ou arrêtez de le partager.',
+    changes_for_everyone: 'Ce carnet est partagé : cela le modifie pour tous ses membres.',
+    leave_unsent:
+      "Vos dernières entrées dans ce carnet n'ont pas encore été envoyées. Si vous le quittez maintenant, elles seront perdues.",
+    leave_anyway: 'Quitter quand même',
+    sign_out_unsent:
+      "Certaines entrées de carnets partagés avec vous n'ont pas encore été envoyées. La déconnexion retire ces carnets de ce téléphone, avec ces entrées.",
+    sign_out_anyway: 'Se déconnecter quand même',
+    sign_out_joined_note:
+      "Les carnets partagés avec vous quittent ce téléphone jusqu'à votre prochaine connexion.",
     removed_title: 'Carnet partagé retiré',
     removed_body: "{{names}} n'est plus partagé avec vous, il a donc été retiré de ce téléphone.",
     paused_title: 'Le partage est en pause',

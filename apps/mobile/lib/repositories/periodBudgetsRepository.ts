@@ -6,6 +6,7 @@ import { monthlyBudgetCategoriesTable, monthlyBudgetsTable } from '~/lib/db/sche
 import type { BudgetPeriod, BudgetTemplate, PeriodBudget, PeriodBudgetLine } from '~/types';
 import { newId, nowIso } from '~/utils/id';
 
+import { writeBudgetLines } from './budgetLines';
 import { toPeriodBudget, toPeriodBudgetLine } from './mappers';
 
 /**
@@ -166,20 +167,7 @@ class PeriodBudgetsRepository {
         })
         .run();
 
-      input.lines.forEach((line, index) => {
-        db.insert(monthlyBudgetCategoriesTable)
-          .values({
-            id: newId(),
-            budgetId: id,
-            categoryId: line.categoryId,
-            amount: line.amount,
-            sortOrder: index,
-            createdAt: now,
-            updatedAt: now,
-            deletedAt: null,
-          })
-          .run();
-      });
+      writeBudgetLines('monthly_budget_categories', id, input.lines, now);
 
       sqlite.execSync('COMMIT');
       return id;
@@ -217,30 +205,7 @@ class PeriodBudgetsRepository {
         .where(and(eq(monthlyBudgetsTable.id, id), isNull(monthlyBudgetsTable.deletedAt)))
         .run();
 
-      db.update(monthlyBudgetCategoriesTable)
-        .set({ deletedAt: now, updatedAt: now })
-        .where(
-          and(
-            eq(monthlyBudgetCategoriesTable.budgetId, id),
-            isNull(monthlyBudgetCategoriesTable.deletedAt),
-          ),
-        )
-        .run();
-
-      input.lines.forEach((line, index) => {
-        db.insert(monthlyBudgetCategoriesTable)
-          .values({
-            id: newId(),
-            budgetId: id,
-            categoryId: line.categoryId,
-            amount: line.amount,
-            sortOrder: index,
-            createdAt: now,
-            updatedAt: now,
-            deletedAt: null,
-          })
-          .run();
-      });
+      writeBudgetLines('monthly_budget_categories', id, input.lines, now);
 
       sqlite.execSync('COMMIT');
     } catch (error) {
@@ -335,20 +300,7 @@ class PeriodBudgetsRepository {
       })
       .run();
 
-    template.allocations.forEach((allocation, index) => {
-      db.insert(monthlyBudgetCategoriesTable)
-        .values({
-          id: newId(),
-          budgetId: id,
-          categoryId: allocation.categoryId,
-          amount: allocation.amount,
-          sortOrder: index,
-          createdAt: now,
-          updatedAt: now,
-          deletedAt: null,
-        })
-        .run();
-    });
+    writeBudgetLines('monthly_budget_categories', id, template.allocations, now);
 
     return id;
   }

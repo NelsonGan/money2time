@@ -16,6 +16,7 @@ import {
   useSettingsBottomNavInset,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import { useSharedLedger } from '~/features/sharedLedgers/hooks/useSharedLedgers';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -369,6 +370,8 @@ interface MainCurrencyResetModalProps {
 
 function MainCurrencyResetModal({ code, onClose, onConfirm }: MainCurrencyResetModalProps) {
   const themeColors = useThemeColors();
+  // Starting a shared ledger over empties it for everyone in it.
+  const shared = useSharedLedger(useApp().activeLedger.id) !== null;
   const [text, setText] = useState('');
   const confirmWord = I18n.t('exchange_rates.reset_confirm_word');
 
@@ -389,6 +392,11 @@ function MainCurrencyResetModal({ code, onClose, onConfirm }: MainCurrencyResetM
           <Text variant="body" tone="muted" className="mt-2">
             {I18n.t('exchange_rates.reset_message', { code: code ?? '' })}
           </Text>
+          {shared ? (
+            <Text variant="body" tone="warning" className="mt-2">
+              {I18n.t('shared_ledgers.changes_for_everyone')}
+            </Text>
+          ) : null}
           <Text variant="caption" tone="muted" className="mt-4 mb-1.5">
             {I18n.t('exchange_rates.reset_prompt', { word: confirmWord })}
           </Text>

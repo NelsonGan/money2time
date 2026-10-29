@@ -6,6 +6,7 @@ import { budgetTemplateCategoriesTable, budgetTemplatesTable } from '~/lib/db/sc
 import type { BudgetPeriod, BudgetTemplate, BudgetTemplateAllocation } from '~/types';
 import { newId, nowIso } from '~/utils/id';
 
+import { writeBudgetLines } from './budgetLines';
 import { toBudgetTemplate, toBudgetTemplateAllocation } from './mappers';
 
 export interface BudgetAllocationInput {
@@ -92,7 +93,7 @@ class BudgetTemplatesRepository {
         })
         .run();
 
-      this.insertAllocations(id, input.allocations, now);
+      writeBudgetLines('budget_template_categories', id, input.allocations, now);
       this.normalizeDefaults(now);
       sqlite.execSync('COMMIT');
     } catch (error) {
@@ -144,17 +145,7 @@ class BudgetTemplatesRepository {
         .where(and(eq(budgetTemplatesTable.id, id), isNull(budgetTemplatesTable.deletedAt)))
         .run();
 
-      db.update(budgetTemplateCategoriesTable)
-        .set({ deletedAt: now, updatedAt: now })
-        .where(
-          and(
-            eq(budgetTemplateCategoriesTable.templateId, id),
-            isNull(budgetTemplateCategoriesTable.deletedAt),
-          ),
-        )
-        .run();
-
-      this.insertAllocations(id, input.allocations, now);
+      writeBudgetLines('budget_template_categories', id, input.allocations, now);
       this.normalizeDefaults(now);
       sqlite.execSync('COMMIT');
     } catch (error) {
@@ -287,24 +278,6 @@ class BudgetTemplatesRepository {
           .run();
       }
     }
-  }
-
-  private insertAllocations(templateId: string, allocations: BudgetAllocationInput[], now: string) {
-    const db = getDb();
-    allocations.forEach((allocation, index) => {
-      db.insert(budgetTemplateCategoriesTable)
-        .values({
-          id: newId(),
-          templateId,
-          categoryId: allocation.categoryId,
-          amount: allocation.amount,
-          sortOrder: index,
-          createdAt: now,
-          updatedAt: now,
-          deletedAt: null,
-        })
-        .run();
-    });
   }
 }
 

@@ -11,11 +11,12 @@ import {
   isLedgerScoped,
   LEDGER_CHILD_SYNC_TABLES,
   LEDGER_ROOT_SYNC_TABLES,
+  NO_CHANNEL,
   PERSONAL_CHANNEL,
 } from '../lib/ledgerRows';
 import type { Row } from '../lib/rowCodec';
 import { SYNC_TABLES, type SyncTable } from '../lib/syncTables';
-import { listSharedLedgers, sharedLedgerFor } from './sharedLedgerStore';
+import { getDeferredLedgerDeletes, listSharedLedgers, sharedLedgerFor } from './sharedLedgerStore';
 
 /** The ledger a row belongs to, or null for the user's own tables. */
 function ledgerOfRow(table: string, row: Row): string | null {
@@ -34,15 +35,20 @@ function ledgerOfRow(table: string, row: Row): string | null {
   return parentRow ? ledgerOfRow(parent, parentRow) : null;
 }
 
-/** The sync channel of a ledger: its share id while shared, else the user's own. */
+/**
+ * The sync channel of a ledger: its share id while shared, none while a
+ * joined ledger waits to be deleted, else the user's own.
+ */
 function channelOfLedger(ledgerId: string | null): string {
   if (!ledgerId) return PERSONAL_CHANNEL;
+  if (getDeferredLedgerDeletes().includes(ledgerId)) return NO_CHANNEL;
   return sharedLedgerFor(ledgerId)?.shareId ?? PERSONAL_CHANNEL;
 }
 
 export function channelOfRow(table: string, row: Row): string {
+  if (!isLedgerScoped(table)) return PERSONAL_CHANNEL;
   // Most users share nothing: no lookups then.
-  if (!isLedgerScoped(table) || !listSharedLedgers().length) return PERSONAL_CHANNEL;
+  if (!listSharedLedgers().length && !getDeferredLedgerDeletes().length) return PERSONAL_CHANNEL;
   return channelOfLedger(ledgerOfRow(table, row));
 }
 
@@ -89,9 +95,10 @@ export function forgetChannel(channel: string): void {
   getSQLite().runSync('DELETE FROM sync_row_meta WHERE channel = ?', [channel]);
   getSQLite().runSync('DELETE FROM sync_media_pending WHERE channel = ?', [channel]);
   getSQLite().runSync('DELETE FROM sync_media_missing WHERE channel = ?', [channel]);
-  getSQLite().runSync('DELETE FROM sync_state WHERE key IN (?, ?, ?)', [
+  getSQLite().runSync('DELETE FROM sync_state WHERE key IN (?, ?, ?, ?)', [
     attachedKey(channel),
     detachedKey(channel),
+    unpushedKey(channel),
     `apply_pending:${channel}`,
   ]);
 }
@@ -101,9 +108,36 @@ export function attachedKey(channel: string): string {
   return `attached:${channel}`;
 }
 
+/** sync_state key: rows were flushed into the channel's replica and not pushed yet. */
+export function unpushedKey(channel: string): string {
+  return `unpushed:${channel}`;
+}
+
 /** sync_state key: the ledger's rows have left the user's own cloud copy. */
 export function detachedKey(channel: string): string {
   return `detached:${channel}`;
+}
+
+/**
+ * Deletes every ledger row that is the user's own (a reset): every ledger but
+ * the default one, which stays unnamed, and every row in them. Shared ledgers
+ * stay: they are other people's books too, and the deletions sync. Leaving or
+ * no longer sharing a ledger is what removes it. Children go first, while
+ * their parents still say which ledger they are in.
+ */
+export function deletePersonalLedgerRows(): void {
+  const db = getSQLite();
+  for (const table of [...SYNC_TABLES].filter(isLedgerScoped).reverse()) {
+    const where = personalRowsSql(table);
+    db.runSync(
+      table === 'ledgers'
+        ? `DELETE FROM ledgers WHERE id <> '${DEFAULT_LEDGER_ID}' AND ${where}`
+        : `DELETE FROM "${table}" WHERE ${where}`,
+    );
+  }
+  db.runSync('UPDATE ledgers SET name = NULL, emoji = NULL, prefs_json = NULL WHERE id = ?', [
+    DEFAULT_LEDGER_ID,
+  ]);
 }
 
 /**

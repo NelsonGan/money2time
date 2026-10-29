@@ -1,6 +1,7 @@
 import {
   buildWrite,
   decodeRow,
+  deletedElsewhere,
   diffRevs,
   encodeRow,
   makeRev,
@@ -115,5 +116,55 @@ describe('diffRevs', () => {
     );
     expect(diff.changed).toEqual([{ table: 'accounts', id: 'x', rev: '1' }]);
     expect(diff.removed).toEqual([{ table: 'categories', id: 'x' }]);
+  });
+});
+
+describe("a shared ledger's preferences", () => {
+  const ledger = {
+    id: 'home',
+    name: 'Home',
+    prefs_json: '{"paymentAlertAccounts":{"apple":"mine"}}',
+  };
+
+  it('never go up, and drop what another member left in the cloud copy', () => {
+    const stored = JSON.stringify({ id: 'home', name: 'Old', prefs_json: '{"theirs":1}' });
+    expect(JSON.parse(encodeRow('ledgers', ledger, stored, true))).toEqual({
+      id: 'home',
+      name: 'Home',
+    });
+  });
+
+  it('are never taken from the cloud copy', () => {
+    const cols = new Set(['id', 'name', 'prefs_json']);
+    expect(decodeRow('ledgers', JSON.stringify(ledger), cols, true)).toEqual({
+      id: 'home',
+      name: 'Home',
+    });
+  });
+
+  it("still sync between the owner's phones while not shared", () => {
+    expect(JSON.parse(encodeRow('ledgers', ledger, null))).toEqual(ledger);
+  });
+});
+
+describe('deletedElsewhere', () => {
+  const live = { id: 'r1', deleted_at: null };
+  const tombstone = { data: JSON.stringify({ id: 'r1', deleted_at: '2026-10-29' }), rev: 'b' };
+
+  it('lets the delete win over a stale edit', () => {
+    expect(deletedElsewhere('a', tombstone, live)).toBe(true);
+  });
+
+  it('keeps a row missing from the cloud copy (its ledger was shared meanwhile)', () => {
+    expect(deletedElsewhere('a', undefined, live)).toBe(false);
+  });
+
+  it('sends an edit made after this phone saw the delete (a row revived here)', () => {
+    expect(deletedElsewhere('b', tombstone, live)).toBe(false);
+  });
+
+  it('sends a row this channel never synced, and a live cloud copy as before', () => {
+    expect(deletedElsewhere(null, undefined, live)).toBe(false);
+    expect(deletedElsewhere('a', { data: JSON.stringify(live), rev: 'b' }, live)).toBe(false);
   });
 });

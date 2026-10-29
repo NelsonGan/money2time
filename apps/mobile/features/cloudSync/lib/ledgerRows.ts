@@ -11,6 +11,13 @@ import type { SyncTable } from './syncTables';
 
 export const PERSONAL_CHANNEL = 'personal';
 
+/**
+ * The route of a joined ledger whose sharing ended while it was open (it is
+ * deleted once the user is back on the main screens): no channel at all, so
+ * an edit made meanwhile reaches neither the share nor the user's own copy.
+ */
+export const NO_CHANNEL = 'none';
+
 /** Synced tables with a `ledger_id` column (`LEDGER_TABLES` minus the unsynced captures). */
 export const LEDGER_ROOT_SYNC_TABLES: ReadonlySet<SyncTable> = new Set<SyncTable>([
   'account_groups',

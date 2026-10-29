@@ -5,8 +5,9 @@
 // - Writing merges over the stored JSON, so a phone on an older app version
 //   keeps the fields it does not know about instead of erasing them.
 // - Reading keeps only the columns this phone's table has.
-// Device-local settings (syncTables.ts) never leave the phone and are never
-// overwritten by another phone's values.
+// Device-local columns (syncTables.ts: some settings, and a shared ledger's
+// preferences) never leave the phone and are never overwritten by another
+// phone's values. `shared`: the row syncs with a shared ledger's database.
 
 import { isDeviceLocalColumn } from './syncTables';
 
@@ -18,14 +19,19 @@ function isRowValue(value: unknown): value is RowValue {
 }
 
 /** The JSON to store for `localRow`, merged over the stored copy if any. */
-export function encodeRow(table: string, localRow: Row, storedJson: string | null): string {
+export function encodeRow(
+  table: string,
+  localRow: Row,
+  storedJson: string | null,
+  shared = false,
+): string {
   const merged: Row = {};
   const stored = parseStored(storedJson);
   for (const [column, value] of Object.entries(stored)) {
-    if (!isDeviceLocalColumn(table, column)) merged[column] = value;
+    if (!isDeviceLocalColumn(table, column, shared)) merged[column] = value;
   }
   for (const [column, value] of Object.entries(localRow)) {
-    if (isDeviceLocalColumn(table, column)) continue;
+    if (isDeviceLocalColumn(table, column, shared)) continue;
     // Blobs never occur in the app's tables; anything not JSON-safe is skipped.
     if (isRowValue(value)) merged[column] = value;
   }
@@ -41,12 +47,13 @@ export function decodeRow(
   table: string,
   storedJson: string,
   localColumns: ReadonlySet<string>,
+  shared = false,
 ): Row | null {
   const stored = parseStored(storedJson);
   if (typeof stored.id !== 'string' || !stored.id) return null;
   const row: Row = {};
   for (const [column, value] of Object.entries(stored)) {
-    if (!localColumns.has(column) || isDeviceLocalColumn(table, column)) continue;
+    if (!localColumns.has(column) || isDeviceLocalColumn(table, column, shared)) continue;
     row[column] = value;
   }
   return row;
@@ -65,6 +72,24 @@ function parseStored(json: string | null): Row {
   } catch {
     return {};
   }
+}
+
+/**
+ * Whether the cloud's copy is a tombstone made after this phone last saw the
+ * row (`seenRev`), while this phone changed its older, live copy: a phone that
+ * was offline running a recurring rule deleted elsewhere, say. The delete
+ * wins, since sending the stale copy would bring the row back on every phone.
+ * A row this phone saw deleted and then revived itself (a budget line added
+ * back) goes up as usual. A row merely missing from the cloud copy is not a
+ * delete: sharing a ledger moves its rows out of the user's own copy.
+ */
+export function deletedElsewhere(
+  seenRev: string | null,
+  stored: { data: string; rev: string } | undefined,
+  local: Row,
+): boolean {
+  if (!seenRev || !stored || stored.rev === seenRev || local.deleted_at != null) return false;
+  return parseStored(stored.data).deleted_at != null;
 }
 
 /**

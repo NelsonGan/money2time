@@ -2950,6 +2950,7 @@ const fil = {
     },
   },
   ledgers: {
+    entry_ledger_gone: 'Hindi na-save ang entry na ito: binura ang ledger nito sa ibang phone.',
     label: 'Ledger',
     title: 'Mga Ledger',
     switcher_label: 'Ledger: {{name}}. Lumipat ng ledger',
@@ -3046,6 +3047,17 @@ const fil = {
     leave_title: 'Umalis sa {{name}}?',
     leave_message: 'Aalisin ito sa teleponong ito. Puwede kang imbitahan ulit ni {{owner}}.',
     no_longer_shared: 'Hindi na naka-share ang ledger na ito.',
+    reset_keeps_shared:
+      'Hindi babaguhin ang mga shared ledger. Para alisin ang isa, umalis dito o itigil ang pag-share nito.',
+    changes_for_everyone: 'Shared ang ledger na ito, kaya mababago ito para sa lahat ng kasali.',
+    leave_unsent:
+      'Hindi pa naipapadala ang pinakabago mong entries sa ledger na ito. Kapag umalis ka ngayon, mawawala ang mga ito.',
+    leave_anyway: 'Umalis pa rin',
+    sign_out_unsent:
+      'May ilang entry sa mga ledger na shinare sa iyo na hindi pa naipapadala. Kapag nag-sign out ka, aalisin ang mga ledger na iyon sa phone na ito, kasama ang mga entry.',
+    sign_out_anyway: 'Mag-sign out pa rin',
+    sign_out_joined_note:
+      'Aalisin sa phone na ito ang mga ledger na shinare sa iyo hanggang mag-sign in ka ulit.',
     removed_title: 'Inalis ang shared ledger',
     removed_body: 'Hindi na naka-share sa iyo ang {{names}}, kaya inalis ito sa teleponong ito.',
     paused_title: 'Naka-pause ang pag-share',

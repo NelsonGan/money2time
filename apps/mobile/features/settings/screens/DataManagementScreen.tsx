@@ -17,6 +17,7 @@ import {
 import { EXCEL_LOGO, MONEY_MANAGER_LOGO, MONEY2TIME_LOGO } from '~/constants/brandLogos';
 import { useApp } from '~/context/AppContext';
 import { useCloudSync } from '~/features/cloudSync/CloudSyncContext';
+import { useSharedLedgers } from '~/features/sharedLedgers/hooks/useSharedLedgers';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { exportDatabase, pickAndImportDatabase } from '~/services/dataManagementService';
@@ -95,11 +96,17 @@ function DataRow({
 }
 
 export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagementScreenProps) {
-  const { importMoneyManagerBackup, refreshAll, resetAllData, settings } = useApp();
-  // A restore or reset while Cloud Sync is on reaches every phone: say so.
+  const { activeLedger, importMoneyManagerBackup, refreshAll, resetAllData, settings } = useApp();
+  // A restore or reset while Cloud Sync is on reaches every phone, and keeps
+  // the shared ledgers; an import into a shared open ledger reaches everyone
+  // in it. The confirmations say so.
   const cloudSyncOn = useCloudSync().status === 'ready';
-  const withSyncWarning = (message: string, warning: string) =>
-    cloudSyncOn ? `${message}\n\n${I18n.t(warning)}` : message;
+  const sharedLedgers = useSharedLedgers();
+  const hasShared = sharedLedgers.length > 0;
+  const openLedgerShared = sharedLedgers.some((ledger) => ledger.ledgerId === activeLedger.id);
+  /** A confirmation message followed by the notes that apply (`false` for none). */
+  const withNotes = (message: string, ...notes: (string | false)[]) =>
+    [message, ...notes.filter((note) => note !== false).map((note) => I18n.t(note))].join('\n\n');
   const bottomNavInset = useSettingsBottomNavInset();
   const themeColors = useThemeColors();
   const [exportingKind, setExportingKind] = useState<ExportKind | null>(null);
@@ -144,9 +151,10 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
   const handleImport = () => {
     Alert.alert(
       I18n.t('data_management.import_confirm_title'),
-      withSyncWarning(
+      withNotes(
         I18n.t('data_management.import_confirm_message'),
-        'cloud_sync.restore_warning',
+        cloudSyncOn && 'cloud_sync.restore_warning',
+        hasShared && 'shared_ledgers.reset_keeps_shared',
       ),
       [
         { text: I18n.t('common.cancel'), style: 'cancel' },
@@ -194,7 +202,10 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
   const handleMoneyManagerImport = () => {
     Alert.alert(
       I18n.t('data_management.import_money_manager_confirm_title'),
-      I18n.t('data_management.import_money_manager_confirm_message'),
+      withNotes(
+        I18n.t('data_management.import_money_manager_confirm_message'),
+        openLedgerShared && 'shared_ledgers.changes_for_everyone',
+      ),
       [
         { text: I18n.t('common.cancel'), style: 'cancel' },
         {
@@ -257,7 +268,11 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
     void triggerHaptic('warning');
     Alert.alert(
       I18n.t('settings.reset_data_title'),
-      withSyncWarning(I18n.t('settings.reset_data_message'), 'cloud_sync.reset_warning'),
+      withNotes(
+        I18n.t('settings.reset_data_message'),
+        cloudSyncOn && 'cloud_sync.reset_warning',
+        hasShared && 'shared_ledgers.reset_keeps_shared',
+      ),
       [
         { text: I18n.t('common.cancel'), style: 'cancel' },
         {
