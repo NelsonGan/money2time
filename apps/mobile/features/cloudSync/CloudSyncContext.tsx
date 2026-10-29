@@ -33,6 +33,7 @@ import { FEATURE_FLAGS, useFeatureFlag } from '~/services/featureFlags';
 import { runUserAssetGc } from '~/services/userAssetGc';
 
 import { useSyncScheduler } from './hooks/useSyncScheduler';
+import { cloudSyncAllowed } from './lib/allowList';
 import { PERSONAL_CHANNEL } from './lib/ledgerRows';
 import { decideLink } from './lib/linking';
 import {
@@ -153,16 +154,33 @@ interface CloudSyncContextValue {
 
 const CloudSyncContext = createContext<CloudSyncContextValue | null>(null);
 
+/** True while this phone holds a Cloud Sync sign-in. */
+function isSignedIn(status: CloudSyncStatus | undefined): boolean {
+  return (
+    status !== undefined &&
+    status !== 'unavailable' &&
+    status !== 'loading' &&
+    status !== 'signedOut'
+  );
+}
+
+/** The allow list's answer, or undefined while flags have not loaded. */
+export function useCloudSyncAllowed(): boolean | undefined {
+  const flag = useFeatureFlag(FEATURE_FLAGS.cloudSync, { sendEvent: false });
+  return cloudSyncAllowed(flag, __DEV__);
+}
+
 /**
  * Whether to show Cloud Sync and shared ledgers: the build can sync (it has
- * the native Turso module) and this user is on the `cloud_sync` allow list.
- * Only the UI is gated; a phone already signed in keeps syncing. Ledgers
- * themselves are never gated.
+ * the native Turso module), and this user is on the `cloud_sync` allow list
+ * or this phone is already signed in (so it can still sign out, delete the
+ * account or answer a link). Only the UI is gated; the engine runs whenever
+ * the build can sync. Ledgers themselves are never gated.
  */
 export function useCloudSyncEnabled(): boolean {
-  const flag = useFeatureFlag(FEATURE_FLAGS.cloudSync, { sendEvent: false });
-  // Flags never load in development builds, so the feature is on there.
-  return (__DEV__ || flag === true) && isCloudSyncAvailable();
+  const allowed = useCloudSyncAllowed();
+  const status = useContext(CloudSyncContext)?.status;
+  return isCloudSyncAvailable() && (allowed === true || isSignedIn(status));
 }
 
 /** The Worker refused this phone Pro: the account has none, or this phone is past its limit. */

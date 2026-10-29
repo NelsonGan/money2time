@@ -980,16 +980,21 @@ shown only to users on the PostHog allow-list flag `cloud_sync` (see
 ### Allow list
 
 `useCloudSyncEnabled()` (`features/cloudSync/CloudSyncContext.tsx`) is true when
-the build can sync and the flag `cloud_sync` is on for this user (always on in
-development builds, where flags never load). It gates only the UI: the Settings
+the build can sync and either the flag `cloud_sync` is on for this user or the
+phone is already signed in to Cloud Sync, so a signed-in phone off the list can
+still sign out, delete its account or finish linking. A development build
+counts as on the list until flags load (they load only with
+`EXPO_PUBLIC_POSTHOG_DEV=1`, which shows the real answer).
 
-> Data tile, the profile card's Cloud Sync pill, the post-purchase Cloud Sync
-> offer (`CloudSyncPromptHost`), the paywall's Cloud Sync and Shared ledgers rows,
-> Share and members on the ledger screens, and joining from an invite link (which
-> lands on _Shared ledgers aren't available in this version yet_). The engine
-> itself (`CloudSyncProvider`) runs whenever the build can sync, so a phone that
-> was already signed in keeps syncing when it is off the list. Until flags load
-> (the SDK keeps the last values between launches), the UI stays hidden.
+It gates only the UI: the Cloud Sync tile in Settings' Data section, the
+profile card's Cloud Sync pill, the post-purchase Cloud Sync offer
+(`CloudSyncPromptHost`), the paywall's Cloud Sync and Shared ledgers rows, Share
+and members on the ledger screens, and joining from an invite link (which lands
+on _Shared ledgers aren't available in this version yet_ without asking the
+Worker about the invite). The engine itself (`CloudSyncProvider`) runs whenever
+the build can sync, so a phone that was already signed in keeps syncing. Until
+flags load (the SDK keeps the last values between launches) the UI stays
+hidden, and the post-purchase offer waits for them rather than being dropped.
 
 The flag (PostHog id `1002314`) has one condition: person `distinct_id` is
 exactly one of a list of app user ids (`m2t_<uuid>`), at 100%. Users see only

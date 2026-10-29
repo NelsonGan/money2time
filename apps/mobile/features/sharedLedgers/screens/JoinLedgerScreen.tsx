@@ -63,6 +63,8 @@ export function JoinLedgerScreen({ code, onClose, onJoined }: JoinLedgerScreenPr
   const [joining, setJoining] = useState(false);
 
   useEffect(() => {
+    // Off the allow list the screen only says joining isn't available.
+    if (!enabled) return;
     let cancelled = false;
     previewInvite(code)
       .then((result) => {
@@ -74,7 +76,7 @@ export function JoinLedgerScreen({ code, onClose, onJoined }: JoinLedgerScreenPr
     return () => {
       cancelled = true;
     };
-  }, [code]);
+  }, [code, enabled]);
 
   const join = async () => {
     if (joining) return;

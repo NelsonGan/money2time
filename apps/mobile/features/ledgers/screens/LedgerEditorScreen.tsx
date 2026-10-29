@@ -188,7 +188,7 @@ export function LedgerEditorScreen({
       Alert.alert(getErrorMessage(error, I18n.t('errors.generic_operation_failed')));
       return;
     }
-    if (!shareOnCreate || !canShare) {
+    if (!shareOnCreate || !canShare || !sharingEnabled) {
       onCreated();
       return;
     }

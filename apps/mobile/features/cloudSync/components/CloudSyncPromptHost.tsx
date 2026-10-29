@@ -18,7 +18,7 @@ import {
 } from '~/services/globalPromptCoordinator';
 import { withColorAlpha } from '~/utils/color';
 
-import { useCloudSync, useCloudSyncEnabled } from '../CloudSyncContext';
+import { useCloudSync, useCloudSyncAllowed } from '../CloudSyncContext';
 import {
   hasPendingCloudSyncPrompt,
   subscribeCloudSyncPrompt,
@@ -39,7 +39,7 @@ export function CloudSyncPromptHost({
   onTurnOn: () => void;
 }) {
   const { status } = useCloudSync();
-  const enabled = useCloudSyncEnabled();
+  const onAllowList = useCloudSyncAllowed();
   const [visible, setVisible] = useState(false);
   const [tick, setTick] = useState(0);
   const showingRef = useRef(false);
@@ -50,8 +50,9 @@ export function CloudSyncPromptHost({
     if (!allowed || !hasPendingCloudSyncPrompt() || showingRef.current) return;
     // Nothing to offer when sync is unavailable or already on.
     if (status === 'unavailable' || status === 'loading') return;
-    // Not on the Cloud Sync allow list (flags load before any purchase ends).
-    if (status !== 'signedOut' || !enabled) {
+    // Waits for the allow list to load, and drops the offer when off it.
+    if (onAllowList === undefined) return;
+    if (status !== 'signedOut' || !onAllowList) {
       takePendingCloudSyncPrompt();
       return;
     }
@@ -69,7 +70,7 @@ export function CloudSyncPromptHost({
       })();
     }, AFTER_PAYWALL_MS);
     return () => clearTimeout(timer);
-  }, [allowed, enabled, status, tick]);
+  }, [allowed, onAllowList, status, tick]);
 
   const hide = useCallback(() => {
     setVisible(false);

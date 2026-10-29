@@ -32,7 +32,7 @@ export function CloudSyncProfilePill({ onPress }: { onPress: () => void }) {
   const title = I18n.t('cloud_sync.tile_label');
   const statusText = state.statusKey ? I18n.t(`cloud_sync.${state.statusKey}`) : null;
   // Same rule as the Data tile's Pro ribbon: syncing is Pro, signing in is
-  // not. Waits for the Pro status so a Pro user never sees it flash.
+  // not. Both wait for the Pro status so a Pro user never sees it flash.
   const showPro = isStatusKnown && !isPro && status === 'signedOut';
 
   const tint =

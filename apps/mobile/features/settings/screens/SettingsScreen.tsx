@@ -147,7 +147,7 @@ export function SettingsScreen({
   const { settings, updateSettings, getLedgerEntryCounts } = useApp();
   const monthCycle = monthCycleOf(settings);
   const { transactions } = useTransactions();
-  const { isPro, setDevProOverride } = usePro();
+  const { isPro, isStatusKnown: isProStatusKnown, setDevProOverride } = usePro();
   const [ledgerSheetVisible, setLedgerSheetVisible] = useState(false);
   // Read when the switcher opens, not on every render, and kept while it
   // fades out so its rows do not flash to zero.
@@ -649,7 +649,7 @@ export function SettingsScreen({
                 <SettingsGridTile
                   icon={<ClayIcon name="settings/cloud-sync" size={34} flatSize={20} />}
                   label={I18n.t('cloud_sync.tile_label')}
-                  pro={!isPro && cloudSyncStatus === 'signedOut'}
+                  pro={isProStatusKnown && !isPro && cloudSyncStatus === 'signedOut'}
                   badge={<CloudSyncTileBadge />}
                   onPress={onOpenCloudSync}
                 />
