@@ -25,7 +25,7 @@
     "@noble/ciphers": "^2.4.0",
     "@noble/curves": "^2.4.0",
     "@noble/hashes": "^2.4.0",
-    "@posthog/react-native-plugin": "^2.12.6",
+    "@posthog/react-native-plugin": "^2.12.7",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-firebase/analytics": "^26.4.0",
     "@react-native-firebase/app": "^26.4.0",
