@@ -147,18 +147,10 @@ const sv = {
   },
   news: {
     cloud_sync_ledgers: {
-      title: 'Cloud Sync och delade kassaböcker',
-      cloudSync: {
-        title: 'Cloud Sync är här',
-        body: 'Logga in med Apple, Google eller e-post så är dina data desamma på alla dina telefoner. Ändringar kommer fram på några sekunder. Synkronisering ingår i Pro. Du hittar det under Inställningar > Cloud Sync.',
-      },
+      title: 'Flera kassaböcker',
       ledgers: {
         title: 'Flera kassaböcker',
         body: 'Håll privata utgifter, jobb och en resa i separata kassaböcker, var och en med egna konton, kategorier och valuta. Börja tom, med en annan kassaboks konton och kategorier eller som en fullständig kopia. Ingår i Pro.',
-      },
-      sharedLedgers: {
-        title: 'Delade kassaböcker',
-        body: 'Dela en kassabok med upp till 5 personer och sköt hushållsbudgeten tillsammans. Alla lägger till poster och ser dem i sin egen telefon. Det är gratis att gå med; att dela kräver Pro.',
       },
     },
     web_dashboard: {
@@ -2595,6 +2587,11 @@ const sv = {
     needs_pro_body:
       'Du är inloggad. Skaffa Pro för att börja synka. Köpt Pro på en annan telefon? Logga in på Cloud Sync där också, så låses det upp här.',
     tile_on: 'På',
+    profile_off: 'Av',
+    profile_paused: 'Pausad',
+    profile_needs_pro: 'Kräver Pro',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'Öppnar Cloud Sync',
     errors: {
       offline: 'Du är offline',
       session_expired: 'Utloggad. Logga in igen.',

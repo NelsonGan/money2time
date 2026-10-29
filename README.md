@@ -320,7 +320,7 @@ Features live under `features/` in domain folders. Each has `screens/` and somet
 | `insights/`       | Analytics charts — expense trends, category breakdown, sentiment                                                                                                                                                       | `InsightsScreen`, `InsightsDrilldownScreen` (+ `insights/breakdownPieLayout.ts`)                                                                                                                                                                                                                                                                                                                                                   |
 | `budget/`         | Weekly, monthly and yearly expense budgets from reusable templates — per-category depletion, a month pager of nested rings, widgets (embedded in Insights)                                                             | `BudgetScreen`/`BudgetPagerView`, `BudgetTemplatesScreen`, `BudgetTemplateEditorScreen`, `PeriodBudgetEditorScreen`, `CategoryAllocationScreen` (+ `budget/lib/budgetMath.ts`, `budget/lib/budgetPeriods.ts`, `budget/lib/categoryAllocationBridge.ts`)                                                                                                                                                                            |
 | `settings/`       | All configuration, account/category management, data import/export, auto-backup, multi-currency, App Lock                                                                                                              | `SettingsScreen`, `DisplaySettingsScreen`, `HourlyValueScreen`, `AccountsScreen`, `ExchangeRatesScreen`, `CategoriesScreen`, `RecurringScreen`, `NotificationsScreen`, `DataManagementScreen`, `AutoBackupScreen`, `WebDashboardScreen`, `StatementImportScreen`, `QuickEntrySettingsScreen`, `AppLockScreen`, `WidgetPreviewsScreen`, `ProManagementScreen`, `ProPaywallScreen`, `WageCalculatorFlowScreen`, `ShareAndEarnScreen` |
-| `cloudSync/`      | Cloud Sync for Pro users: Apple / Google / email-code sign-in, the local-first sync engine (Turso Sync replica + change capture), R2 images, the choice between this phone and the cloud copy, the post-purchase offer | `CloudSyncScreen`, `CloudSyncPromptHost`, `CloudSyncTileBadge`, `CloudSyncContext` (`useCloudSync`, `useCloudSyncEnabled`) (+ `cloudSync/services/syncEngine.ts`, `cloudSyncApi.ts`, `cloudSync/lib/`)                                                                                                                                                                                                                             |
+| `cloudSync/`      | Cloud Sync for Pro users: Apple / Google / email-code sign-in, the local-first sync engine (Turso Sync replica + change capture), R2 images, the choice between this phone and the cloud copy, the post-purchase offer | `CloudSyncScreen`, `CloudSyncPromptHost`, `CloudSyncTileBadge`, `CloudSyncProfilePill`, `CloudSyncContext` (`useCloudSync`, `useCloudSyncEnabled`) (+ `cloudSync/services/syncEngine.ts`, `cloudSyncApi.ts`, `cloudSync/lib/`)                                                                                                                                                                                                     |
 | `news/`           | In-app feature announcements & showcases (changelog-style)                                                                                                                                                             | `NewsScreen`, `FeatureAnnouncementModal`, per-feature `*Showcase` components, `announcements/` (numbered entries), `featureAnnouncements.ts`                                                                                                                                                                                                                                                                                       |
 | `onboarding/`     | First-time setup flow: welcome, basics + tracking-mode choice, wage (time-mode only), backup, acquisition source, notifications, feature highlights. No skip escape hatch.                                             | `OnboardingFlow` + step screens (`OnboardingValuePropStep`, `OnboardingPreferencesStep`, `OnboardingWageStep`, `OnboardingBackupStep`, `OnboardingSourceStep`, `OnboardingNotificationsStep`, `OnboardingFeaturesStep`)                                                                                                                                                                                                            |
 | `reviewPrompt/`   | In-app App Store / Play review request prompt                                                                                                                                                                          | review prompt components (paired with `services/reviewPrompt.ts`)                                                                                                                                                                                                                                                                                                                                                                  |
@@ -973,8 +973,40 @@ Before enabling a production trial:
 Pro users keep their data in sync between phones; anyone can sign in. The app
 side lives in `features/cloudSync/` and the server in
 [`apps/cloudflare/workers/cloud-sync`](#cloud-sync-worker). It is on in every
-build that has the native Turso module (`isCloudSyncAvailable`); the PostHog
-flag `cloud_sync` that gated it before release was removed.
+build that has the native Turso module (`isCloudSyncAvailable`), but its UI is
+shown only to users on the PostHog allow-list flag `cloud_sync` (see
+[Allow list](#allow-list)). Ledgers are not gated: every Pro user has them.
+
+### Allow list
+
+`useCloudSyncEnabled()` (`features/cloudSync/CloudSyncContext.tsx`) is true when
+the build can sync and the flag `cloud_sync` is on for this user, or this phone
+has used Cloud Sync: it is signed in, or the app signed it out (expired session,
+failed link) and the user has not signed out themselves since
+(`m2t.cloudSync.usedHere`). A phone off the list can so still sign back in,
+sign out, delete its account or finish linking. A development build
+counts as on the list until flags load (they load only with
+`EXPO_PUBLIC_POSTHOG_DEV=1`, which shows the real answer).
+
+It gates only the UI: the Cloud Sync tile in Settings' Data section, the
+profile card's Cloud Sync pill, the post-purchase Cloud Sync offer
+(`CloudSyncPromptHost`), the paywall's Cloud Sync and Shared ledgers rows, Share
+and members on the ledger screens, and joining from an invite link (which lands
+on _Shared ledgers aren't available in this version yet_ without asking the
+Worker about the invite). The engine itself (`CloudSyncProvider`) runs whenever
+the build can sync, so a phone that was already signed in keeps syncing. Until
+flags load (the SDK keeps the last values between launches) the UI stays
+hidden, joining from an invite link shows nothing yet, and the post-purchase
+offer waits up to 10 seconds for them before it is dropped.
+
+The flag (PostHog id `1002314`) has one condition: person `distinct_id` is
+exactly one of a list of app user ids (`m2t_<uuid>`), at 100%. Users see only
+the last 8 characters of their id (Settings > Display > User ID); look the full
+id up in RevenueCat (it is the RevenueCat app user id) and add it to the list.
+The id belongs to the install, not the person: a second phone or a reinstall
+has its own, so add every phone a tester uses (signing in on one phone does not
+put the others on the list).
+The flag is read with `sendEvent: false`, so it sends no `$feature_flag_called`.
 
 ### What the user sees
 
@@ -997,6 +1029,18 @@ flag `cloud_sync` that gated it before release was removed.
   it shows the last sync, Sync now, Sign out (data stays on the phone) and
   Delete account (cloud copy, images and sign-in, required by App Store rule
   5.1.1(v)). A green tick on the tile means Cloud Sync is on.
+- **Profile card shortcut.** Under the name on the Settings profile card, a
+  pill opens the same Cloud Sync screen as the Data tile, so the feature is
+  seen without scrolling (`CloudSyncProfilePill`, state from
+  `lib/profileStatus.ts`). It reads _Cloud Sync · Synced_ (green, with a
+  tick), _Syncing…_ or _Setting up…_ (turning arrows), _Offline_, _Sync
+  failed_, _Paused_ (Pro ended), _Needs Pro_ (signed in, never synced) or
+  _Off_ (signed out), and only _Cloud Sync_ while the session loads. It
+  carries the same Pro tag as the tile (free and signed out) and does no
+  gating of its own: sign-in and Pro are handled on the screen. Hidden in
+  builds without the native module. It sends no event: opening Cloud Sync
+  was never tracked, and GA4's `screen_view` records the visit from either
+  entry point.
 - **Loading.** Nothing on these screens is a bare spinner: work in a button
   shows `LoadingDots` in place of its label (`FatButton`'s `loading`), and
   the screen's own loading and linking states show `SyncLoader` (the
@@ -1475,7 +1519,7 @@ The free tier is **1,000,000 product-analytics events a month** (identified even
 | Error tracking (`$exception`)       | 100,000 exceptions                  | Deduplicated and capped on the device at 25 distinct exceptions per 5 minutes.                                                                                                                                                                                                                                 |
 | Session replay                      | 2,500 mobile + 5,000 web recordings | App ~1,500 (15% of first-day launches, 0.4% of later ones) against the mobile allowance; the website's 10% sample against the web one. Recordings under 5 s are dropped.                                                                                                                                       |
 | AI observability (`$ai_generation`) | 100,000 events                      | One per OpenRouter call from the receipt scanner: ~60,000. Every app version scans through the Worker, so this already counts all users; screenshot scans (~1,700 a day) dominate. Without the screenshot empty-result retry it measured ~85,000. A scan Claude fails adds one generation for the Qwen backup. |
-| Feature flags                       | 1,000,000 requests                  | None while no flag is active (none is since `cloud_sync` was removed): requests are only billed while a flag exists.                                                                                                                                                                                           |
+| Feature flags                       | 1,000,000 requests                  | `cloud_sync` is active, so each launch and identify is one request: about one or two per active user per day.                                                                                                                                                                                                  |
 
 Rules that keep it inside the free tier:
 
@@ -1566,7 +1610,7 @@ Explicitly requested tracking measures engagement with the RiceCal promotion: on
 | `CLOUD_BACKUP_PROMPT_SHOWN`          | `Cloud Backup Prompt Shown`          | `m2t_cloud_backup_prompt_shown`          | Yes     | The eligible cloud-backup prompt is shown; each presentation after its eligibility checks.                                                                                                                                       | `transaction_count`                                         | [App.tsx](apps/mobile/App.tsx)                                                                                         |
 | `CLOUD_BACKUP_PROMPT_CTA_TAPPED`     | `Cloud Backup Prompt CTA Tapped`     | `m2t_cloud_backup_prompt_cta_tapped`     | Yes     | The cloud-backup prompt CTA opens backup settings; each tap.                                                                                                                                                                     | None                                                        | [App.tsx](apps/mobile/App.tsx)                                                                                         |
 | `CLOUD_BACKUP_PROMPT_DISMISSED`      | `Cloud Backup Prompt Dismissed`      | `m2t_cloud_backup_prompt_dismissed`      | Yes     | The cloud-backup prompt is dismissed; each dismissal.                                                                                                                                                                            | None                                                        | [App.tsx](apps/mobile/App.tsx)                                                                                         |
-| `CLOUD_SYNC_PROMPT_SHOWN`            | `Cloud Sync Prompt Shown`            | `m2t_cloud_sync_prompt_shown`            | Yes     | The post-purchase Cloud Sync offer is shown; at most once per install, only after a new purchase on a signed-out phone.                                                                                                          |                                                             | [CloudSyncPromptHost.tsx](apps/mobile/features/cloudSync/components/CloudSyncPromptHost.tsx)                           |
+| `CLOUD_SYNC_PROMPT_SHOWN`            | `Cloud Sync Prompt Shown`            | `m2t_cloud_sync_prompt_shown`            | Yes     | The post-purchase Cloud Sync offer is shown; at most once per install, only after a new purchase on a signed-out phone on the `cloud_sync` [allow list](#allow-list) (it waits up to 10 s for flags, then is dropped).           |                                                             | [CloudSyncPromptHost.tsx](apps/mobile/features/cloudSync/components/CloudSyncPromptHost.tsx)                           |
 | `CLOUD_SYNC_PROMPT_ACCEPTED`         | `Cloud Sync Prompt Accepted`         | `m2t_cloud_sync_prompt_accepted`         | Yes     | Turn on Cloud Sync is tapped on the offer; each tap.                                                                                                                                                                             |                                                             | [CloudSyncPromptHost.tsx](apps/mobile/features/cloudSync/components/CloudSyncPromptHost.tsx)                           |
 | `CLOUD_SYNC_PROMPT_DISMISSED`        | `Cloud Sync Prompt Dismissed`        | `m2t_cloud_sync_prompt_dismissed`        | Yes     | The offer is closed with Not now, the backdrop or back; each dismissal.                                                                                                                                                          |                                                             | [CloudSyncPromptHost.tsx](apps/mobile/features/cloudSync/components/CloudSyncPromptHost.tsx)                           |
 | `CLOUD_SYNC_SIGNED_IN`               | `Cloud Sync Signed In`               | `m2t_cloud_sync_signed_in`               | Yes     | A Cloud Sync sign-in succeeds (Apple, Google or email code); each sign-in.                                                                                                                                                       | `method`                                                    | [CloudSyncContext.tsx](apps/mobile/features/cloudSync/CloudSyncContext.tsx)                                            |
@@ -1887,9 +1931,9 @@ Replays answer "what did the user see and do" next to an exception or a funnel d
 
 Active flags:
 
-| Flag   | Gates                                                                                | Off means |
-| ------ | ------------------------------------------------------------------------------------ | --------- |
-| _none_ | `cloud_sync` gated [Cloud Sync](#cloud-sync) until it shipped; archive it in PostHog | —         |
+| Flag         | Gates                                                                                  | Off means                                       |
+| ------------ | -------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| `cloud_sync` | The [Cloud Sync and shared-ledger UI](#allow-list), for allow-listed app user ids only | Hidden; a phone already signed in keeps syncing |
 
 ### AI observability
 
@@ -3493,7 +3537,7 @@ Made for this feature on 2026-10-28, all new (nothing existing is shared):
 | D1 tables (shared)       | `shared_ledgers`, `ledger_members`, `ledger_links`, `ledger_media_usage` in `money2time-cloud-sync-auth`                | go with the D1 database                                                                     |
 | Durable Object class     | `SyncHub` (live updates, one per user, SQLite-backed, added 2026-10-28)                                                 | goes with the Worker                                                                        |
 | Turso Platform API token | the Worker secret `TURSO_API_TOKEN` (copy in `~/.config/money2time/turso-api-token`)                                    | revoke it in the Turso dashboard, Settings > API Tokens                                     |
-| PostHog feature flag     | `cloud_sync`, no longer read by the app (removed 2026-10-28)                                                            | archive or delete in PostHog                                                                |
+| PostHog feature flag     | `cloud_sync`, the [allow list](#allow-list) for the Cloud Sync UI                                                       | archive or delete in PostHog once the UI is ungated                                         |
 
 Teardown order: delete the Worker first (nothing can make new databases), then
 the Turso databases listed in D1 (`SELECT db_name FROM sync_databases` and

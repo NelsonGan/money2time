@@ -147,18 +147,10 @@ const es = {
   },
   news: {
     cloud_sync_ledgers: {
-      title: 'Cloud Sync y libros compartidos',
-      cloudSync: {
-        title: 'Llega Cloud Sync',
-        body: 'Inicia sesión con Apple, Google o correo y tus datos serán los mismos en todos tus teléfonos. Los cambios llegan en segundos. La sincronización es parte de Pro. Está en Ajustes > Cloud Sync.',
-      },
+      title: 'Varios libros',
       ledgers: {
         title: 'Varios libros',
         body: 'Lleva tus gastos personales, el trabajo y un viaje en libros separados, cada uno con sus cuentas, categorías y moneda. Empieza uno vacío, con las cuentas y categorías de otro libro o como copia completa. Parte de Pro.',
-      },
-      sharedLedgers: {
-        title: 'Libros compartidos',
-        body: 'Comparte un libro con hasta 5 personas y llevad juntos el presupuesto de casa. Todos añaden movimientos y los ven en su teléfono. Unirse es gratis; compartir requiere Pro.',
       },
     },
     web_dashboard: {
@@ -2610,6 +2602,11 @@ const es = {
     needs_pro_body:
       'Has iniciado sesión. Consigue Pro para empezar a sincronizar. ¿Compraste Pro en otro teléfono? Inicia sesión en Cloud Sync también allí y se desbloqueará aquí.',
     tile_on: 'Activado',
+    profile_off: 'Desactivado',
+    profile_paused: 'En pausa',
+    profile_needs_pro: 'Requiere Pro',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'Abre Cloud Sync',
     errors: {
       offline: 'Estás sin conexión',
       session_expired: 'Sesión cerrada. Vuelve a iniciar sesión.',

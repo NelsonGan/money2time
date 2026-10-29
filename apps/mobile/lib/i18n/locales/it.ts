@@ -147,18 +147,10 @@ const it = {
   },
   news: {
     cloud_sync_ledgers: {
-      title: 'Cloud Sync e registri condivisi',
-      cloudSync: {
-        title: 'Arriva Cloud Sync',
-        body: 'Accedi con Apple, Google o email e i tuoi dati sono uguali su tutti i tuoi telefoni. Le modifiche arrivano in pochi secondi. La sincronizzazione fa parte di Pro. La trovi in Impostazioni > Cloud Sync.',
-      },
+      title: 'Più registri',
       ledgers: {
         title: 'Più registri',
         body: 'Tieni spese personali, lavoro e un viaggio in registri separati, ciascuno con conti, categorie e valuta propri. Inizia da zero, dai conti e categorie di un altro registro o come copia completa. Parte di Pro.',
-      },
-      sharedLedgers: {
-        title: 'Registri condivisi',
-        body: 'Condividi un registro con fino a 5 persone e gestite insieme il budget di casa. Tutti aggiungono voci e le vedono sul proprio telefono. Unirsi è gratis; condividere richiede Pro.',
       },
     },
     web_dashboard: {
@@ -2608,6 +2600,11 @@ const it = {
     needs_pro_body:
       "Hai effettuato l'accesso. Passa a Pro per iniziare a sincronizzare. Hai acquistato Pro su un altro telefono? Accedi a Cloud Sync anche lì e verrà sbloccato qui.",
     tile_on: 'Attivo',
+    profile_off: 'Disattivo',
+    profile_paused: 'In pausa',
+    profile_needs_pro: 'Serve Pro',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'Apre Cloud Sync',
     errors: {
       offline: 'Sei offline',
       session_expired: 'Disconnesso. Accedi di nuovo.',

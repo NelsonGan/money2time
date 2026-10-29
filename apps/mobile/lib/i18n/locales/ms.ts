@@ -147,18 +147,10 @@ const ms = {
   },
   news: {
     cloud_sync_ledgers: {
-      title: 'Cloud Sync dan buku dikongsi',
-      cloudSync: {
-        title: 'Cloud Sync kini tersedia',
-        body: 'Log masuk dengan Apple, Google atau e-mel, dan data anda sama pada semua telefon anda. Perubahan tiba dalam beberapa saat. Penyegerakan ialah sebahagian daripada Pro. Cari di Tetapan > Cloud Sync.',
-      },
+      title: 'Berbilang buku',
       ledgers: {
         title: 'Berbilang buku',
         body: 'Asingkan perbelanjaan peribadi, kerja dan percutian dalam buku berasingan, masing-masing dengan akaun, kategori dan mata wang sendiri. Mula kosong, daripada akaun dan kategori buku lain, atau sebagai salinan penuh. Sebahagian daripada Pro.',
-      },
-      sharedLedgers: {
-        title: 'Buku dikongsi',
-        body: 'Kongsi buku dengan sehingga 5 orang dan urus belanjawan rumah bersama. Semua orang menambah catatan dan melihatnya pada telefon sendiri. Menyertai adalah percuma; berkongsi memerlukan Pro.',
       },
     },
     web_dashboard: {
@@ -2611,6 +2603,11 @@ const ms = {
     needs_pro_body:
       'Anda telah log masuk. Dapatkan Pro untuk mula menyegerak. Membeli Pro pada telefon lain? Log masuk ke Cloud Sync di sana juga, dan ia akan dibuka di sini.',
     tile_on: 'Hidup',
+    profile_off: 'Mati',
+    profile_paused: 'Dijeda',
+    profile_needs_pro: 'Perlu Pro',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'Membuka Cloud Sync',
     errors: {
       offline: 'Anda di luar talian',
       session_expired: 'Dilog keluar. Log masuk semula.',

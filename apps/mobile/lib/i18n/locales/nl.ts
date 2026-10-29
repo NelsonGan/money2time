@@ -147,18 +147,10 @@ const nl = {
   },
   news: {
     cloud_sync_ledgers: {
-      title: 'Cloud Sync en gedeelde boeken',
-      cloudSync: {
-        title: 'Cloud Sync is er',
-        body: 'Log in met Apple, Google of e-mail en je gegevens zijn op al je telefoons hetzelfde. Wijzigingen komen binnen seconden aan. Synchroniseren hoort bij Pro. Je vindt het bij Instellingen > Cloud Sync.',
-      },
+      title: 'Meerdere boeken',
       ledgers: {
         title: 'Meerdere boeken',
         body: 'Houd privé-uitgaven, werk en een reis bij in aparte boeken, elk met eigen rekeningen, categorieën en valuta. Begin leeg, met de rekeningen en categorieën van een ander boek of als volledige kopie. Onderdeel van Pro.',
-      },
-      sharedLedgers: {
-        title: 'Gedeelde boeken',
-        body: 'Deel een boek met maximaal 5 mensen en houd samen het huishoudbudget bij. Iedereen voegt posten toe en ziet ze op de eigen telefoon. Meedoen is gratis; delen vraagt Pro.',
       },
     },
     web_dashboard: {
@@ -2622,6 +2614,11 @@ const nl = {
     needs_pro_body:
       'Je bent aangemeld. Neem Pro om te beginnen met synchroniseren. Pro gekocht op een andere telefoon? Meld je daar ook aan bij Cloud Sync, dan wordt het hier ontgrendeld.',
     tile_on: 'Aan',
+    profile_off: 'Uit',
+    profile_paused: 'Gepauzeerd',
+    profile_needs_pro: 'Pro nodig',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'Opent Cloud Sync',
     errors: {
       offline: 'Je bent offline',
       session_expired: 'Afgemeld. Meld je opnieuw aan.',

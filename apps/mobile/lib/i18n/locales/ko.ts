@@ -146,18 +146,10 @@ const ko = {
   },
   news: {
     cloud_sync_ledgers: {
-      title: 'Cloud Sync와 공유 가계부',
-      cloudSync: {
-        title: 'Cloud Sync 출시',
-        body: 'Apple, Google 또는 이메일로 로그인하면 모든 휴대폰에서 같은 데이터를 쓸 수 있습니다. 변경 사항은 몇 초 만에 반영됩니다. 동기화는 Pro 기능입니다. 설정 > Cloud Sync에서 확인하세요.',
-      },
+      title: '여러 가계부',
       ledgers: {
         title: '여러 가계부',
         body: '개인 지출, 업무, 여행을 각각의 가계부로 나눠 관리하세요. 가계부마다 계좌, 카테고리, 통화가 따로 있습니다. 빈 상태로, 다른 가계부의 계좌와 카테고리로, 또는 전체 복사본으로 시작할 수 있습니다. Pro 기능입니다.',
-      },
-      sharedLedgers: {
-        title: '공유 가계부',
-        body: '최대 5명과 가계부를 공유해 집안 예산을 함께 관리하세요. 모두가 항목을 추가하고 각자의 휴대폰에서 확인합니다. 참여는 무료이며 공유하려면 Pro가 필요합니다.',
       },
     },
     web_dashboard: {
@@ -2559,6 +2551,11 @@ const ko = {
     needs_pro_body:
       '로그인되었습니다. 동기화를 시작하려면 Pro를 구매하세요. 다른 휴대폰에서 Pro를 구매했나요? 그 휴대폰에서도 Cloud Sync에 로그인하면 여기서 잠금 해제됩니다.',
     tile_on: '켜짐',
+    profile_off: '꺼짐',
+    profile_paused: '일시 중지됨',
+    profile_needs_pro: 'Pro 필요',
+    profile_a11y_label: 'Cloud Sync, %{status}',
+    profile_a11y_hint: 'Cloud Sync를 엽니다',
     errors: {
       offline: '오프라인 상태예요',
       session_expired: '로그아웃되었어요. 다시 로그인하세요.',
