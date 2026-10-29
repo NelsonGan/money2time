@@ -1249,9 +1249,7 @@ updated_at)`, with each row as JSON, plus `sync_info` (last device, last
   rows go up, not only the open one's, since `ledger_id` is just a column.
   Each phone keeps its own open ledger. If the open ledger is deleted on
   another phone, or is missing from a cloud copy this phone takes, the
-  default ledger opens instead once the app is back on its main screens
-  (`LedgerProGuard`): an open editor holds the gone ledger's accounts and
-  categories, so switching under it would mix the two. Taking a cloud copy
+  default ledger opens instead (`reloadAfterApply`), and taking a cloud copy
   makes the default ledger row again if the copy has none, as a restore does.
   The choice screen's counts cover every ledger. A pulled settings row only
   updates this phone's own row: an upsert would fail SQLite's NOT NULL check on

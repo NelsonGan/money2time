@@ -16,9 +16,8 @@ import {
 } from '~/features/cloudSync/services/sharedLedgerStore';
 import { sharedLedgerSync } from '~/features/cloudSync/services/sharedLedgerSync';
 import { useLedgerLock } from '~/features/sharedLedgers/hooks/useSharedLedgers';
-import { DEFAULT_LEDGER_ID, getActiveLedgerId } from '~/lib/db/ledgerScope';
+import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
 import { I18n } from '~/lib/i18n';
-import { ledgersRepository } from '~/lib/repositories/ledgersRepository';
 
 import { ledgerDisplayName, ledgerIcon } from '../lib/ledgerDisplay';
 
@@ -88,18 +87,6 @@ export function LedgerProGuard({ canSwitch, suppressed, onRenewPro }: LedgerProG
       })
       .catch(() => undefined);
   }, [canSwitch, closingRemoved, deferred, refreshAll, switchLedger]);
-
-  // The open ledger was deleted on another phone (or is missing from a cloud
-  // copy just taken). The app already shows the default one in its place, but
-  // the repositories still write to the gone one until it is switched.
-  // Checked on every reload of the ledgers.
-  useEffect(() => {
-    if (!canSwitch) return;
-    const open = getActiveLedgerId();
-    if (open !== DEFAULT_LEDGER_ID && !ledgersRepository.getById(open)) {
-      switchLedger(DEFAULT_LEDGER_ID);
-    }
-  }, [canSwitch, ledgers, switchLedger]);
 
   // A joined ledger that is paused closes whatever the user's own Pro.
   useEffect(() => {

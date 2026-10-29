@@ -23,6 +23,8 @@ import { AppState } from 'react-native';
 
 import { useApp } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
+import { DEFAULT_LEDGER_ID, getActiveLedgerId } from '~/lib/db/ledgerScope';
+import { ledgersRepository } from '~/lib/repositories/ledgersRepository';
 import { clearAccountPro, getAccountProAnswer, setAccountPro } from '~/services/accountPro';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { runAutoBackupIfDue } from '~/services/autoBackup';
@@ -228,7 +230,7 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   // The engine runs whenever the build can sync; the allow-list flag only
   // hides the UI (useCloudSyncEnabled).
   const enabled = isCloudSyncAvailable();
-  const { settings, refreshAll } = useApp();
+  const { settings, refreshAll, switchLedger } = useApp();
   const { isPro, isStorePro, isStatusKnown } = usePro();
   const appUserId = settings?.appUserId ?? null;
 
@@ -277,14 +279,22 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   appUserIdRef.current = appUserId;
   const refreshAllRef = useRef(refreshAll);
   refreshAllRef.current = refreshAll;
+  const switchLedgerRef = useRef(switchLedger);
+  switchLedgerRef.current = switchLedger;
 
   /**
    * Reloads the app after rows came from the cloud. If the ledger open on this
    * phone is gone (deleted on another phone, or not in a cloud copy just
-   * taken), LedgerProGuard opens the default ledger once no editor is open:
-   * an editor holds the gone ledger's accounts and categories.
+   * taken), the default ledger opens instead.
    */
-  const reloadAfterApply = useCallback(() => refreshAllRef.current(), []);
+  const reloadAfterApply = useCallback(() => {
+    const open = getActiveLedgerId();
+    if (open !== DEFAULT_LEDGER_ID && !ledgersRepository.getById(open)) {
+      switchLedgerRef.current(DEFAULT_LEDGER_ID);
+    } else {
+      refreshAllRef.current();
+    }
+  }, []);
 
   const sessionToken = useCallback(async () => {
     const token = sessionRef.current?.token;
