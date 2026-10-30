@@ -36,7 +36,7 @@ import {
   BottomNavMinimizeProvider,
   useBottomNavMinimize,
 } from '~/components/navigation/BottomNavMinimize';
-import { homeNavTab, parseNavTabs } from '~/components/navigation/navTabs';
+import { homeNavTab, parseNavTabs, showsTransactionFab } from '~/components/navigation/navTabs';
 import { SideNavRail } from '~/components/navigation/SideNavRail';
 import { TodayJumpFab } from '~/components/navigation/TodayJumpFab';
 import {
@@ -241,7 +241,7 @@ import { requestOpenSettingsScreen } from '~/services/settingsNavigation';
 import { isSpeechRecognitionAvailable } from '~/services/speechRecognition';
 import { requestOpenTab, subscribeOpenTabRequest } from '~/services/tabNavigation';
 import {
-  requestOpenTransactions,
+  requestOpenTransactionsAfterSave,
   subscribeEditTransaction,
   subscribeOpenTransactionsRequest,
 } from '~/services/transactionsNavigation';
@@ -261,7 +261,7 @@ import type {
 } from '~/types';
 import { readableColumn } from '~/utils/adaptiveLayout';
 import { financialMonthKeyForDate, monthCycleOf } from '~/utils/financialMonth';
-import { dayKeyFromIsoLocal, monthKeyFromIsoLocal } from '~/utils/formatters';
+import { dayKeyFromIsoLocal } from '~/utils/formatters';
 import { runAfterInteractions } from '~/utils/interactions';
 import { perfInteraction, perfMark, perfStartupDone } from '~/utils/perfTrace';
 import { markSplashHidden, whenSplashHidden } from '~/utils/splashState';
@@ -764,9 +764,12 @@ function MainShellScreen({
     return subscribeOpenScanReview((request) => {
       // A finished single-receipt scan: open the editor pre-filled with the
       // parsed values so the user reviews/edits before saving.
-      navigation.navigate('AddTransactionDetailed', { initialValues: request.initialValues });
+      navigation.navigate('AddTransactionDetailed', {
+        initialValues: request.initialValues,
+        keepCurrentTab: activeTab !== 'calendar',
+      });
     });
-  }, [navigation]);
+  }, [activeTab, navigation]);
 
   useEffect(() => {
     return subscribeEditTransaction((transactionId) => {
@@ -797,8 +800,8 @@ function MainShellScreen({
   const openAddTransaction = useCallback(() => {
     if (!checkCanStartNewTransaction()) return;
     perfInteraction('quick_add_open');
-    navigation.navigate('AddTransaction');
-  }, [checkCanStartNewTransaction, navigation]);
+    navigation.navigate('AddTransaction', { keepCurrentTab: activeTab !== 'calendar' });
+  }, [activeTab, checkCanStartNewTransaction, navigation]);
 
   // Open a fresh expense straight in the split-bill editor (manual split). No
   // amount is set, so the editor opens the split sheet in itemized mode.
@@ -807,8 +810,9 @@ function MainShellScreen({
     navigation.navigate('AddTransactionDetailed', {
       initialValues: { type: 'expense' },
       openSplitBill: true,
+      keepCurrentTab: activeTab !== 'calendar',
     });
-  }, [checkCanStartNewTransaction, navigation]);
+  }, [activeTab, checkCanStartNewTransaction, navigation]);
 
   // Runs an add action for the + button (tap primary or the options sheet).
   // Voice uses tap-to-stop mode here (no hold).
@@ -817,12 +821,14 @@ function MainShellScreen({
       if (!checkCanStartNewTransaction()) return;
       if (action === 'scan') startScan();
       else if (action === 'voice') void handleVoiceTap();
-      else if (action === 'full') navigation.navigate('AddTransactionDetailed');
+      else if (action === 'full')
+        navigation.navigate('AddTransactionDetailed', { keepCurrentTab: activeTab !== 'calendar' });
       else if (action === 'split') openSplitManual();
       else if (action === 'splitScan') void startScan('split');
       else openAddTransaction(); // 'quick'
     },
     [
+      activeTab,
       checkCanStartNewTransaction,
       startScan,
       openAddTransaction,
@@ -1027,7 +1033,10 @@ function MainShellScreen({
   const openItemEditorFromAssets = useCallback(() => openItemEditor(), [openItemEditor]);
   const openAddTransactionForAccount = useCallback(
     (accountId: string) =>
-      navigation.navigate('AddTransactionDetailed', { initialAccountId: accountId }),
+      navigation.navigate('AddTransactionDetailed', {
+        initialAccountId: accountId,
+        keepCurrentTab: true,
+      }),
     [navigation],
   );
   const monthCycle = monthCycleOf(settings);
@@ -1180,11 +1189,7 @@ function MainShellScreen({
     [navigation, startScan],
   );
 
-  // The + button lives on Calendar. With Calendar out of the bar it moves to
-  // the home page, so adding an entry is never more than a tab away.
-  const showAddFab =
-    activeTab === 'calendar' ||
-    (!navTabs.includes('calendar') && activeTab === homeNavTab(navTabs));
+  const showAddFab = showsTransactionFab(activeTab, navTabs);
 
   const shouldHideBottomNav =
     (activeTab === 'calendar' && isCalendarSelectionMode) ||
@@ -1482,15 +1487,13 @@ function AddTransactionRouteScreen({ route, navigation }: RootStackRouteProps<'A
     <QuickAddScreen
       onClose={() => navigation.goBack()}
       onSubmitReady={(input) => {
-        requestOpenTransactions({
-          monthKey: monthKeyFromIsoLocal(input.date),
-          dayKey: dayKeyFromIsoLocal(input.date),
-        });
+        requestOpenTransactionsAfterSave(input.date, route.params?.keepCurrentTab);
       }}
       onExpandToDetailed={(initialValues, initialAccountId) => {
         navigation.replace('AddTransactionDetailed', {
           initialAccountId,
           initialValues,
+          keepCurrentTab: route.params?.keepCurrentTab,
         });
       }}
       onOpenQuickEntrySettings={() => navigation.replace('SettingsQuickEntry')}
@@ -1508,13 +1511,7 @@ function AddTransactionDetailedRouteScreen({
     <AddTransactionScreen
       onClose={() => navigation.goBack()}
       onSubmitReady={(input) => {
-        // Callers that already show the saved row on their own screen opt out, so
-        // the tab underneath is not swapped for a calendar they never asked for.
-        if (route.params?.keepCurrentTab) return;
-        requestOpenTransactions({
-          monthKey: monthKeyFromIsoLocal(input.date),
-          dayKey: dayKeyFromIsoLocal(input.date),
-        });
+        requestOpenTransactionsAfterSave(input.date, route.params?.keepCurrentTab);
       }}
       initialAccountId={route.params?.initialAccountId}
       initialValues={route.params?.initialValues}
@@ -2068,7 +2065,10 @@ function AccountDetailRouteScreen({ route, navigation }: RootStackRouteProps<'Ac
       onOpenPayCreditCard={(accountId) => navigation.navigate('PayCreditCard', { accountId })}
       onOpenCreateGroup={() => navigation.navigate('AccountGroupEditor')}
       onOpenAddTransaction={(accountId) =>
-        navigation.push('AddTransactionDetailed', { initialAccountId: accountId })
+        navigation.push('AddTransactionDetailed', {
+          initialAccountId: accountId,
+          keepCurrentTab: true,
+        })
       }
       onOpenTransaction={(transaction) =>
         navigation.navigate('EditTransaction', {

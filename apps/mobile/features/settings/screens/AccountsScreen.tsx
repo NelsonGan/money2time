@@ -32,6 +32,7 @@ import { DatePickerModal, MonthYearWheelPicker } from '~/components/datePicker';
 import { monthsBetween, shiftYearMonth, yearMonthFromKey } from '~/components/datePicker/monthJump';
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
+import { ADD_FAB_SIZE, AddFabButton } from '~/components/navigation/AddFab';
 import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import {
@@ -3966,7 +3967,7 @@ export function AccountsScreen({
     SETTINGS_FORM_BOTTOM_PADDING +
     safeAreaInsets.bottom +
     spacing.sm +
-    FLOATING_ACTION_SIZE +
+    ADD_FAB_SIZE +
     (showsPayAction ? FLOATING_ACTION_SIZE + FLOATING_ACTION_GAP : 0);
   const selectedAccountIdForPager = selectedAccount?.id ?? '';
   const renderPagerPage = useCallback(
@@ -4291,17 +4292,10 @@ export function AccountsScreen({
                     </Text>
                   </Pressable>
                 ) : null}
-                <Pressable
-                  onPress={() => {
-                    void triggerHaptic('medium');
-                    handleAddTransactionForAccount(account.id);
-                  }}
-                  style={[styles.floatingAddButton, { backgroundColor: themeColors.primary }]}
-                  accessibilityRole="button"
+                <AddFabButton
+                  onPress={() => handleAddTransactionForAccount(account.id)}
                   accessibilityLabel={I18n.t('onboarding.bootstrap.add_transaction')}
-                >
-                  <Plus size={24} color="#fff" />
-                </Pressable>
+                />
               </View>
             </View>
           ) : null}
