@@ -284,8 +284,11 @@ export function AccountPickerSheet(props: AccountPickerSheetProps) {
   if (overlay && !visible) return null;
 
   const sheetContent = (
-    <Pressable style={styles.backdrop} onPress={onClose}>
-      <Pressable onPress={(e) => e.stopPropagation()} style={[styles.sheet, sheetColumnStyle]}>
+    <View style={styles.backdrop}>
+      {/* Keep dismissal outside the list's responder ancestry: a wrapping
+          Pressable can claim Android swipes that start between account tiles. */}
+      <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessible={false} />
+      <View style={[styles.sheet, sheetColumnStyle]}>
         {/* The bottom inset pads the list rather than the card, so rows run
             to the screen edge instead of stopping mid-tile above an empty
             band, and the last row still scrolls clear of the home indicator. */}
@@ -347,8 +350,8 @@ export function AccountPickerSheet(props: AccountPickerSheetProps) {
             onPressAccount={handleAccountPress}
           />
         </View>
-      </Pressable>
-    </Pressable>
+      </View>
+    </View>
   );
 
   if (overlay) {
