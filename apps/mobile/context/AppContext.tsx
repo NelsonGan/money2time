@@ -207,6 +207,7 @@ import { createFirstTransactionSignal } from '~/utils/firstTransactionSignal';
 import { FONT } from '~/utils/fonts';
 import {
   amountToHoursByRate,
+  dateForNewTransaction,
   dateKeepingTimeOfDay,
   dayKeyFromDateLocal,
   formatHours,
@@ -2416,9 +2417,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (input.currency === acctCurrency) return null;
         return convert(normalizedAmount, input.currency, acctCurrency, rateTableRef.current).value;
       })();
+      const id = newId();
+      const now = nowIso();
       const normalizedInput = {
         ...input,
         amount: normalizedAmount,
+        date: dateForNewTransaction(input.date, new Date(now)),
         reportingCurrency: input.reportingCurrency ?? snapshot.reportingCurrency,
         reportingAmount: input.reportingAmount ?? snapshot.reportingAmount,
         fxRate: input.fxRate ?? snapshot.fxRate,
@@ -2426,8 +2430,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         accountAmount: computedAccountAmount,
         receiptUri: input.receiptUri ?? null,
       };
-      const id = newId();
-      const now = nowIso();
       const optimistic: TransactionWithRelations = {
         id,
         type: normalizedInput.type,
@@ -3125,16 +3127,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         normalizeMoneyAmount(input.amount),
         input.currency,
       );
+      const txId = newId();
+      const now = nowIso();
       const normalizedInput = {
         ...input,
         amount: normalizeMoneyAmount(input.amount),
+        date: dateForNewTransaction(input.date, new Date(now)),
         reportingCurrency: input.reportingCurrency ?? parentSnapshot.reportingCurrency,
         reportingAmount: input.reportingAmount ?? parentSnapshot.reportingAmount,
         fxRate: input.fxRate ?? parentSnapshot.fxRate,
         accountAmount: input.accountAmount ?? null,
       };
-      const txId = newId();
-      const now = nowIso();
 
       // Pre-marked-paid splits (create-mode Mark Paid) need a transfer tx if
       // the payback account differs from the parent's account. We allocate
