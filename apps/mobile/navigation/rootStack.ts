@@ -32,7 +32,12 @@ export interface AddTransactionInitialValues {
 export type RootStackParamList = {
   Main: undefined;
   AddTransaction:
-    | { initialAccountId?: string; initialValues?: AddTransactionInitialValues }
+    | {
+        initialAccountId?: string;
+        initialValues?: AddTransactionInitialValues;
+        /** Return to the entry tab instead of switching to Calendar on save. */
+        keepCurrentTab?: boolean;
+      }
     | undefined;
   AddTransactionDetailed:
     | {
@@ -42,8 +47,8 @@ export type RootStackParamList = {
         openSplitBill?: boolean;
         /**
          * Skip the post-save jump to the calendar tab. Set by callers whose own
-         * screen already shows the result (a goal's deposit / withdraw returns to
-         * the goal), so backing out later lands where the user started instead of
+         * screen already shows the result (Accounts or a goal's deposit / withdraw),
+         * so backing out later lands where the user started instead of
          * on a calendar they never asked for.
          */
         keepCurrentTab?: boolean;
