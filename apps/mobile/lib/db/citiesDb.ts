@@ -144,20 +144,21 @@ function hasCitiesTable(db: SQLiteDatabase): boolean {
 }
 
 async function openCitiesDb(): Promise<SQLiteDatabase | null> {
+  let db: SQLiteDatabase | null = null;
   try {
     await copyAssetIfNeeded();
     const { openDatabaseSync } = await import('expo-sqlite');
-    let db = openDatabaseSync(CITIES_DB_NAME);
+    db = openDatabaseSync(CITIES_DB_NAME);
     if (!hasCitiesTable(db)) {
       // 1.6.1 and 1.6.2 opened the database before their un-awaited copy
       // landed: SQLite created an empty file, the copy then failed with
       // "Destination already exists", and the version marker still said the
       // copy was current. Replace such a file once.
       db.closeSync();
+      db = null;
       await copyAssetIfNeeded(true);
       db = openDatabaseSync(CITIES_DB_NAME);
       if (!hasCitiesTable(db)) {
-        db.closeSync();
         throw new Error('cities.db has no cities table');
       }
     }
@@ -165,6 +166,11 @@ async function openCitiesDb(): Promise<SQLiteDatabase | null> {
     cachedDb = db;
     return db;
   } catch (error) {
+    try {
+      db?.closeSync();
+    } catch {
+      // A native close failure must not prevent graceful degradation either.
+    }
     // Degrade gracefully: a missing/corrupt asset must never crash the picker.
     openFailed = true;
     console.warn('citiesDb: failed to open offline cities database', error);

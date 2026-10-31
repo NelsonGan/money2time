@@ -16,6 +16,9 @@ type Content = 'REAL' | 'EMPTY' | string;
 const files = new Map<string, Content>();
 const dirs = new Set<string>();
 const copies: string[] = [];
+const connections: { closeSync: jest.Mock }[] = [];
+let schemaReadError: Error | null = null;
+let closeError: Error | null = null;
 
 function joinPath(parts: unknown[]): string {
   return parts
@@ -91,10 +94,13 @@ jest.mock('expo-sqlite', () => ({
     // Like SQLite: opening a missing file creates an empty database.
     if (!files.has(path)) files.set(path, 'EMPTY');
     const hasCities = () => files.get(path) === 'REAL';
-    return {
+    const db = {
       execSync: () => undefined,
-      closeSync: () => undefined,
+      closeSync: jest.fn(() => {
+        if (closeError) throw closeError;
+      }),
       getFirstSync: (sql: string) => {
+        if (schemaReadError) throw schemaReadError;
         if (sql.includes('sqlite_master')) return { n: hasCities() ? 1 : 0 };
         throw new Error(`unexpected query: ${sql}`);
       },
@@ -103,6 +109,8 @@ jest.mock('expo-sqlite', () => ({
         return [ROW];
       },
     };
+    connections.push(db);
+    return db;
   },
 }));
 
@@ -118,6 +126,9 @@ beforeEach(() => {
   files.clear();
   dirs.clear();
   copies.length = 0;
+  connections.length = 0;
+  schemaReadError = null;
+  closeError = null;
   files.set(ASSET_URI, 'REAL');
   jest.spyOn(console, 'warn').mockImplementation(() => undefined);
 });
@@ -153,6 +164,33 @@ describe('offline cities database', () => {
     expect(results.map((city) => city.name)).toEqual(['Tokyo']);
     expect(copies).toEqual([DEST]);
     expect(files.get(DEST)).toBe('REAL');
+    expect(connections[0].closeSync).toHaveBeenCalledTimes(1);
+    expect(connections[1].closeSync).not.toHaveBeenCalled();
+  });
+
+  it('closes the connection if checking the schema fails and does not retry searches', async () => {
+    const { searchCities, CITIES_DB_VERSION } = loadCitiesDb();
+    files.set(DEST, 'REAL');
+    files.set(MARKER, String(CITIES_DB_VERSION));
+    schemaReadError = new Error('database disk image is malformed');
+    await expect(searchCities('tokyo')).resolves.toEqual([]);
+    await expect(searchCities('osaka')).resolves.toEqual([]);
+    expect(connections).toHaveLength(1);
+    expect(connections[0].closeSync).toHaveBeenCalledTimes(1);
+    expect(copies).toEqual([]);
+  });
+
+  it('gives up quietly without replacing a database that could not be closed', async () => {
+    const { searchCities, CITIES_DB_VERSION } = loadCitiesDb();
+    files.set(DEST, 'EMPTY');
+    files.set(MARKER, String(CITIES_DB_VERSION));
+    closeError = new Error('failed to close database');
+    await expect(searchCities('tokyo')).resolves.toEqual([]);
+    await expect(searchCities('osaka')).resolves.toEqual([]);
+    expect(connections).toHaveLength(1);
+    expect(connections[0].closeSync).toHaveBeenCalled();
+    expect(copies).toEqual([]);
+    expect(files.get(DEST)).toBe('EMPTY');
   });
 
   it('gives up quietly when the bundled asset itself has no cities', async () => {
@@ -161,6 +199,8 @@ describe('offline cities database', () => {
     await expect(searchCities('tokyo')).resolves.toEqual([]);
     // Not retried on every keystroke.
     await expect(searchCities('osaka')).resolves.toEqual([]);
-    expect(copies.length).toBeLessThanOrEqual(2);
+    expect(copies).toEqual([DEST, DEST]);
+    expect(connections).toHaveLength(2);
+    for (const db of connections) expect(db.closeSync).toHaveBeenCalledTimes(1);
   });
 });
