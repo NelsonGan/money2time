@@ -110,7 +110,7 @@ const ORDER_BY = `
     c.population DESC
 `;
 
-async function copyAssetIfNeeded(): Promise<void> {
+async function copyAssetIfNeeded(force = false): Promise<void> {
   const { Asset } = await import('expo-asset');
   const { Directory, File, Paths } = await import('expo-file-system/next');
 
@@ -122,7 +122,7 @@ async function copyAssetIfNeeded(): Promise<void> {
 
   const upToDate =
     dest.exists && marker.exists && marker.textSync().trim() === String(CITIES_DB_VERSION);
-  if (upToDate) return;
+  if (upToDate && !force) return;
 
   const asset = Asset.fromModule(require('../../assets/db/cities.db'));
   await asset.downloadAsync();
@@ -136,15 +136,41 @@ async function copyAssetIfNeeded(): Promise<void> {
   await marker.write(String(CITIES_DB_VERSION));
 }
 
+function hasCitiesTable(db: SQLiteDatabase): boolean {
+  const row = db.getFirstSync<{ n: number }>(
+    "SELECT count(*) AS n FROM sqlite_master WHERE type = 'table' AND name = 'cities'",
+  );
+  return (row?.n ?? 0) > 0;
+}
+
 async function openCitiesDb(): Promise<SQLiteDatabase | null> {
+  let db: SQLiteDatabase | null = null;
   try {
     await copyAssetIfNeeded();
     const { openDatabaseSync } = await import('expo-sqlite');
-    const db = openDatabaseSync(CITIES_DB_NAME);
+    db = openDatabaseSync(CITIES_DB_NAME);
+    if (!hasCitiesTable(db)) {
+      // 1.6.1 and 1.6.2 opened the database before their un-awaited copy
+      // landed: SQLite created an empty file, the copy then failed with
+      // "Destination already exists", and the version marker still said the
+      // copy was current. Replace such a file once.
+      db.closeSync();
+      db = null;
+      await copyAssetIfNeeded(true);
+      db = openDatabaseSync(CITIES_DB_NAME);
+      if (!hasCitiesTable(db)) {
+        throw new Error('cities.db has no cities table');
+      }
+    }
     db.execSync('PRAGMA query_only = ON; PRAGMA mmap_size = 67108864;');
     cachedDb = db;
     return db;
   } catch (error) {
+    try {
+      db?.closeSync();
+    } catch {
+      // A native close failure must not prevent graceful degradation either.
+    }
     // Degrade gracefully: a missing/corrupt asset must never crash the picker.
     openFailed = true;
     console.warn('citiesDb: failed to open offline cities database', error);
