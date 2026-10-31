@@ -70,6 +70,7 @@ jobs:
         run: |
           npm ci
           npm run typecheck
+          npm run test --if-present
           npx wrangler deploy --dry-run --outdir dist --tsconfig tsconfig.json
 
   deploy:

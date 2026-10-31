@@ -81,10 +81,10 @@ export async function notifyUsers(
 }
 
 export class SyncHub implements DurableObject {
-  constructor(
-    private readonly state: DurableObjectState,
-    _env: Env,
-  ) {
+  private readonly state: DurableObjectState;
+
+  constructor(state: DurableObjectState, _env: Env) {
+    this.state = state;
     // Answered without waking the hub, so a keep-alive costs nothing.
     state.setWebSocketAutoResponse(new WebSocketRequestResponsePair('ping', 'pong'));
   }
