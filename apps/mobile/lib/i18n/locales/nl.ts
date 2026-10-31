@@ -1,4 +1,21 @@
 const nl = {
+  backup_restore: {
+    title: 'Restore backup',
+    export_description: 'Personal data and shared ledgers you own.',
+    import_description: 'Choose what to restore from a backup.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces ledgers and settings on synced devices.',
+    personal_local_note: 'Replaces ledgers and settings.',
+    shared_ledgers: 'Shared ledgers',
+    owned: 'You own this ledger',
+    unavailable: 'Owner access required',
+    restore_action: 'Restore selected',
+    confirm_title: 'Restore for everyone?',
+    confirm_message:
+      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
+    sync_pending: 'Restored here. Stay signed in to finish syncing.',
+    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+  },
   common: {
     back: 'Terug',
     loading: 'Laden…',
@@ -1661,19 +1678,11 @@ const nl = {
     },
     title: 'Gegevensbeheer',
     export_title: 'Database exporteren',
-    export_description:
-      'Sla een volledige back-up op van al je rekeningen, categorieën, transacties en instellingen als JSON-bestand.',
     exporting: 'Exporteren...',
     export_error_title: 'Exporteren mislukt',
     export_error_message: 'Kon de database niet exporteren. Probeer het opnieuw.',
     import_title: 'Money2Time-back-up importeren',
-    import_description:
-      'Herstellen vanuit een eerder geëxporteerde Money2Time JSON-back-up. Dit vervangt al je huidige gegevens.',
     importing: 'Money2Time-back-up importeren',
-    import_confirm_title: 'Alle gegevens vervangen?',
-    import_confirm_message:
-      'Dit overschrijft al je huidige rekeningen, categorieën, transacties en instellingen met de gegevens uit het back-upbestand. Dit kan niet ongedaan worden gemaakt.',
-    import_confirm_action: 'Gegevens vervangen',
     import_success_title: 'Importeren voltooid',
     import_success_message: 'Je gegevens zijn succesvol hersteld vanuit de back-up.',
     import_error_title: 'Importeren mislukt',
@@ -2530,11 +2539,6 @@ const nl = {
     delete_confirm_title: 'Deze back-up verwijderen?',
     delete_confirm_message: 'Dit back-upbestand wordt permanent verwijderd.',
     delete_failed_title: 'Verwijderen mislukt',
-    restore_confirm_title: 'Alle gegevens vervangen door deze back-up?',
-    restore_confirm_summary: '{{accounts}} rekeningen · {{transactions}} transacties',
-    restore_confirm_warning:
-      'Dit vervangt alles op dit apparaat. Dit kan niet ongedaan worden gemaakt.',
-    restore_confirm_action: 'Gegevens vervangen',
     restoring: 'Herstellen...',
     restore_success_title: 'Hersteld',
     restore_success_message: 'Je gegevens zijn hersteld vanuit deze back-up.',

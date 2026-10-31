@@ -36,7 +36,14 @@ import {
   ENQUEUE_ROW_SQL,
   enqueueAllSql,
 } from '../lib/capture';
-import { inLedgersSql, isLedgerScoped, NO_CHANNEL, PERSONAL_CHANNEL } from '../lib/ledgerRows';
+import {
+  inLedgersSql,
+  isLedgerScoped,
+  LEDGER_CHILD_SYNC_TABLES,
+  LEDGER_ROOT_SYNC_TABLES,
+  NO_CHANNEL,
+  PERSONAL_CHANNEL,
+} from '../lib/ledgerRows';
 import {
   buildWrite,
   decodeRow,
@@ -132,6 +139,11 @@ export interface SyncOutcome {
   pushed: boolean;
   /** A pulled row could not be written; it is retried on the next sync. */
   applyError: Error | null;
+}
+
+export interface RestoreSnapshot {
+  channel: string;
+  rows: { table: SyncTable; id: string; rev: string }[];
 }
 
 let turso: TursoModule | null | undefined;
@@ -760,6 +772,65 @@ export class SyncEngine {
     });
   }
 
+  /** Read the full channel before recovery, including rows this phone never received. */
+  prepareSnapshotRestore(): Promise<RestoreSnapshot> {
+    return this.exclusive(async () => {
+      await this.db().pull();
+      const rows = await this.db().all('SELECT table_name, row_id, data, rev FROM sync_rows');
+      const decoded = rows.flatMap((stored) => {
+        const table = String(stored.table_name);
+        if (!isSyncTable(table) || !tableExists(table)) return [];
+        const row = decodeRow(table, String(stored.data), localColumns(table), !this.isPersonal);
+        return row ? [{ table, id: String(stored.row_id), rev: String(stored.rev), row }] : [];
+      });
+      const byKey = new Map(decoded.map((entry) => [rowKey(entry.table, entry.id), entry.row]));
+      const belongs = (table: SyncTable, row: Row): boolean => {
+        if (this.isPersonal) return this.accepts(table, row);
+        if (!this.ownsLocalRow(table, String(row.id))) return false;
+        if (table === 'ledgers') return row.id === this.config.ledgerId;
+        if (LEDGER_ROOT_SYNC_TABLES.has(table)) return row.ledger_id === this.config.ledgerId;
+        const child = LEDGER_CHILD_SYNC_TABLES[table];
+        if (!child) return false;
+        const parent = byKey.get(rowKey(child[1], String(row[child[0]])));
+        return parent ? belongs(child[1], parent) : channelOfRow(table, row) === this.channel;
+      };
+      return {
+        channel: this.channel,
+        rows: decoded
+          .filter((entry) => belongs(entry.table, entry.row))
+          .map(({ table, id, rev }) => ({ table, id, rev })),
+      };
+    });
+  }
+
+  /** Called inside the restore's SQLite transaction: a crash cannot lose the upload intent. */
+  stageSnapshotRestore(snapshot: RestoreSnapshot): void {
+    if (snapshot.channel !== this.channel) throw new Error('restore_channel_changed');
+    const db = getSQLite();
+    for (const row of snapshot.rows) {
+      recordRev(row.table, row.id, row.rev, this.channel);
+      db.runSync(ENQUEUE_ROW_SQL, [row.table, row.id]);
+    }
+    for (const table of SYNC_TABLES) {
+      if (!tableExists(table)) continue;
+      const where = this.isPersonal
+        ? personalRowsSql(table)
+        : isLedgerScoped(table)
+          ? inLedgersSql(table, [this.config.ledgerId ?? ''])
+          : '0';
+      for (const row of db.getAllSync<{ id: string }>(`SELECT id FROM "${table}" WHERE ${where}`))
+        db.runSync(ENQUEUE_ROW_SQL, [table, row.id]);
+    }
+    const intent = Object.fromEntries(
+      this.entriesForChannel(
+        db.getAllSync<{ table_name: string; row_id: string; seq: number }>(
+          'SELECT table_name, row_id, seq FROM sync_outbox',
+        ),
+      ).map((entry) => [rowKey(entry.table_name, entry.row_id), entry.seq]),
+    );
+    setState(`restore:${this.channel}`, JSON.stringify(intent));
+  }
+
   /** Replaces this phone's synced data with the cloud copy. */
   replaceLocalWithCloud(): Promise<void> {
     return this.exclusive(async () => {
@@ -965,6 +1036,8 @@ export class SyncEngine {
     const origin = deviceId();
     let changedRows = 0;
     let adoptedRows = 0;
+    const restoreKey = `restore:${this.channel}`;
+    const restoreIntent = JSON.parse(getState(restoreKey) ?? '{}') as Record<string, number>;
     // Other channels' entries stay behind, so walk the outbox in order. A
     // bulk queue gives many rows one seq, so the key is (seq, table, id).
     let after: [number, string, string] = [-1, '', ''];
@@ -1006,8 +1079,32 @@ export class SyncEngine {
           }
           const local = entry.local;
           const before = stored.get(rowKey(table, id));
+          const restoring = restoreIntent[rowKey(table, id)] === entry.seq;
           if (!local) {
             if (before) {
+              // A recovery delete must beat stale edits on other phones too.
+              if (restoring && localColumns(table).has('deleted_at')) {
+                const previous = JSON.parse(before.data) as Row;
+                let rev = before.rev;
+                if (previous.deleted_at == null) {
+                  const time = new Date().toISOString();
+                  rev = nextRev();
+                  await replica.run(
+                    'UPDATE sync_rows SET data = ?, rev = ?, origin = ?, updated_at = ? WHERE table_name = ? AND row_id = ?',
+                    [
+                      JSON.stringify({ ...previous, deleted_at: time, updated_at: time }),
+                      rev,
+                      origin,
+                      Date.now(),
+                      table,
+                      id,
+                    ],
+                  );
+                  changedRows += 1;
+                }
+                results.push({ table, id, seq: entry.seq, rev });
+                continue;
+              }
               await replica.run('DELETE FROM sync_rows WHERE table_name = ? AND row_id = ?', [
                 table,
                 id,
@@ -1021,7 +1118,7 @@ export class SyncEngine {
             'SELECT rev FROM sync_row_meta WHERE table_name = ? AND row_id = ? AND channel = ?',
             [table, id, this.channel],
           )?.rev;
-          if (before && deletedElsewhere(seen ?? null, before, local)) {
+          if (!restoring && before && deletedElsewhere(seen ?? null, before, local)) {
             adopted.push({ table, id, data: before.data });
             results.push({ table, id, seq: entry.seq, rev: before.rev });
             continue;
@@ -1063,7 +1160,14 @@ export class SyncEngine {
             r.seq,
           ]);
           recordRev(r.table, r.id, r.rev, this.channel);
+          // A later user edit supersedes this row's recovery operation too.
+          if ((restoreIntent[rowKey(r.table, r.id)] ?? Infinity) <= r.seq)
+            delete restoreIntent[rowKey(r.table, r.id)];
         }
+        setState(
+          restoreKey,
+          Object.keys(restoreIntent).length ? JSON.stringify(restoreIntent) : null,
+        );
         if (!adopted.length) return;
         setState('applying', '1');
         try {

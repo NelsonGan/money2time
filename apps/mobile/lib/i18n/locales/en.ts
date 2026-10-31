@@ -1,4 +1,21 @@
 const en = {
+  backup_restore: {
+    title: 'Restore backup',
+    export_description: 'Personal data and shared ledgers you own.',
+    import_description: 'Choose what to restore from a backup.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces ledgers and settings on synced devices.',
+    personal_local_note: 'Replaces ledgers and settings.',
+    shared_ledgers: 'Shared ledgers',
+    owned: 'You own this ledger',
+    unavailable: 'Owner access required',
+    restore_action: 'Restore selected',
+    confirm_title: 'Restore for everyone?',
+    confirm_message:
+      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
+    sync_pending: 'Restored here. Stay signed in to finish syncing.',
+    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+  },
   common: {
     back: 'Back',
     loading: 'Loading…',
@@ -1576,19 +1593,11 @@ const en = {
     section_import: 'Import',
     section_others: 'Others',
     export_title: 'Export Database',
-    export_description:
-      'Save a full backup of all your accounts, categories, transactions, and settings as a JSON file.',
     exporting: 'Exporting...',
     export_error_title: 'Export Failed',
     export_error_message: 'Could not export the database. Please try again.',
     import_title: 'Import Money2Time Backup',
-    import_description:
-      'Restore from a previously exported Money2Time JSON backup. This will replace all your current data.',
     importing: 'Importing Money2Time backup',
-    import_confirm_title: 'Replace All Data?',
-    import_confirm_message:
-      'This will overwrite all your current accounts, categories, transactions, and settings with the data from the backup file. This cannot be undone.',
-    import_confirm_action: 'Replace Data',
     import_success_title: 'Import Complete',
     import_success_message: 'Your data has been successfully restored from the backup.',
     import_error_title: 'Import Failed',
@@ -2498,10 +2507,6 @@ const en = {
     delete_confirm_title: 'Delete this backup?',
     delete_confirm_message: 'This backup file will be permanently removed.',
     delete_failed_title: 'Delete failed',
-    restore_confirm_title: 'Replace all data with this backup?',
-    restore_confirm_summary: '{{accounts}} accounts · {{transactions}} transactions',
-    restore_confirm_warning: 'This will replace everything on this device. It cannot be undone.',
-    restore_confirm_action: 'Replace data',
     restoring: 'Restoring...',
     restore_success_title: 'Restored',
     restore_success_message: 'Your data has been restored from this backup.',

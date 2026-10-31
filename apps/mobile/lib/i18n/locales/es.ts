@@ -1,4 +1,21 @@
 const es = {
+  backup_restore: {
+    title: 'Restore backup',
+    export_description: 'Personal data and shared ledgers you own.',
+    import_description: 'Choose what to restore from a backup.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces ledgers and settings on synced devices.',
+    personal_local_note: 'Replaces ledgers and settings.',
+    shared_ledgers: 'Shared ledgers',
+    owned: 'You own this ledger',
+    unavailable: 'Owner access required',
+    restore_action: 'Restore selected',
+    confirm_title: 'Restore for everyone?',
+    confirm_message:
+      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
+    sync_pending: 'Restored here. Stay signed in to finish syncing.',
+    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+  },
   common: {
     back: 'Volver',
     loading: 'Cargando…',
@@ -1653,19 +1670,11 @@ const es = {
     },
     title: 'Gestión de datos',
     export_title: 'Exportar base de datos',
-    export_description:
-      'Guarda un respaldo completo de todas tus cuentas, categorías, movimientos y ajustes como archivo JSON.',
     exporting: 'Exportando...',
     export_error_title: 'Error al exportar',
     export_error_message: 'No se pudo exportar la base de datos. Inténtalo de nuevo.',
     import_title: 'Importar respaldo Money2Time',
-    import_description:
-      'Restaura desde un respaldo JSON de Money2Time exportado anteriormente. Esto reemplazará todos tus datos actuales.',
     importing: 'Importando respaldo Money2Time',
-    import_confirm_title: '¿Reemplazar todos los datos?',
-    import_confirm_message:
-      'Esto sobreescribirá todas tus cuentas, categorías, movimientos y ajustes actuales con los datos del archivo de respaldo. Esta acción no se puede deshacer.',
-    import_confirm_action: 'Reemplazar datos',
     import_success_title: 'Importación completa',
     import_success_message: 'Tus datos han sido restaurados exitosamente desde el respaldo.',
     import_error_title: 'Error al importar',
@@ -2519,10 +2528,6 @@ const es = {
     delete_confirm_title: '¿Eliminar este respaldo?',
     delete_confirm_message: 'Este archivo de respaldo se eliminará permanentemente.',
     delete_failed_title: 'Error al eliminar',
-    restore_confirm_title: '¿Reemplazar todos los datos con este respaldo?',
-    restore_confirm_summary: '{{accounts}} cuentas · {{transactions}} movimientos',
-    restore_confirm_warning: 'Esto reemplazará todo en este dispositivo. No se puede deshacer.',
-    restore_confirm_action: 'Reemplazar datos',
     restoring: 'Restaurando...',
     restore_success_title: 'Restaurado',
     restore_success_message: 'Tus datos han sido restaurados desde este respaldo.',

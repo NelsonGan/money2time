@@ -1,4 +1,21 @@
 const sv = {
+  backup_restore: {
+    title: 'Restore backup',
+    export_description: 'Personal data and shared ledgers you own.',
+    import_description: 'Choose what to restore from a backup.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces ledgers and settings on synced devices.',
+    personal_local_note: 'Replaces ledgers and settings.',
+    shared_ledgers: 'Shared ledgers',
+    owned: 'You own this ledger',
+    unavailable: 'Owner access required',
+    restore_action: 'Restore selected',
+    confirm_title: 'Restore for everyone?',
+    confirm_message:
+      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
+    sync_pending: 'Restored here. Stay signed in to finish syncing.',
+    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+  },
   common: {
     back: 'Tillbaka',
     loading: 'Laddar…',
@@ -1645,19 +1662,11 @@ const sv = {
     },
     title: 'Datahantering',
     export_title: 'Exportera databas',
-    export_description:
-      'Spara en fullständig säkerhetskopia av alla dina konton, kategorier, transaktioner och inställningar som en JSON-fil.',
     exporting: 'Exporterar...',
     export_error_title: 'Exporten misslyckades',
     export_error_message: 'Det gick inte att exportera databasen. Försök igen.',
     import_title: 'Importera Money2Time-säkerhetskopia',
-    import_description:
-      'Återställ från en tidigare exporterad Money2Time JSON-säkerhetskopia. Det här ersätter all din nuvarande data.',
     importing: 'Importerar Money2Time-säkerhetskopia',
-    import_confirm_title: 'Ersätt all data?',
-    import_confirm_message:
-      'Det här skriver över alla dina nuvarande konton, kategorier, transaktioner och inställningar med data från säkerhetskopian. Det kan inte ångras.',
-    import_confirm_action: 'Ersätt data',
     import_success_title: 'Import klar',
     import_success_message: 'Din data har återställts från säkerhetskopian.',
     import_error_title: 'Importen misslyckades',
@@ -2504,10 +2513,6 @@ const sv = {
     delete_confirm_title: 'Ta bort den här säkerhetskopian?',
     delete_confirm_message: 'Den här säkerhetskopian tas bort permanent.',
     delete_failed_title: 'Borttagningen misslyckades',
-    restore_confirm_title: 'Ersätt all data med den här säkerhetskopian?',
-    restore_confirm_summary: '{{accounts}} konton · {{transactions}} transaktioner',
-    restore_confirm_warning: 'Det här ersätter allt på den här enheten. Det kan inte ångras.',
-    restore_confirm_action: 'Ersätt data',
     restoring: 'Återställer...',
     restore_success_title: 'Återställd',
     restore_success_message: 'Din data har återställts från den här säkerhetskopian.',

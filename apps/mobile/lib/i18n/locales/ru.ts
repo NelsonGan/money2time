@@ -1,4 +1,21 @@
 const ru = {
+  backup_restore: {
+    title: 'Restore backup',
+    export_description: 'Personal data and shared ledgers you own.',
+    import_description: 'Choose what to restore from a backup.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces ledgers and settings on synced devices.',
+    personal_local_note: 'Replaces ledgers and settings.',
+    shared_ledgers: 'Shared ledgers',
+    owned: 'You own this ledger',
+    unavailable: 'Owner access required',
+    restore_action: 'Restore selected',
+    confirm_title: 'Restore for everyone?',
+    confirm_message:
+      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
+    sync_pending: 'Restored here. Stay signed in to finish syncing.',
+    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+  },
   common: {
     back: 'Назад',
     loading: 'Загрузка…',
@@ -1651,19 +1668,11 @@ const ru = {
     },
     title: 'Управление данными',
     export_title: 'Экспорт базы данных',
-    export_description:
-      'Сохраните полную резервную копию всех счетов, категорий, транзакций и настроек в виде JSON-файла.',
     exporting: 'Экспортируется...',
     export_error_title: 'Ошибка экспорта',
     export_error_message: 'Не удалось экспортировать базу данных. Попробуйте ещё раз.',
     import_title: 'Импорт резервной копии Money2Time',
-    import_description:
-      'Восстановите из ранее экспортированной резервной копии Money2Time JSON. Это заменит все текущие данные.',
     importing: 'Импорт резервной копии Money2Time',
-    import_confirm_title: 'Заменить все данные?',
-    import_confirm_message:
-      'Все текущие счета, категории, транзакции и настройки будут заменены данными из файла резервной копии. Это нельзя отменить.',
-    import_confirm_action: 'Заменить данные',
     import_success_title: 'Импорт завершён',
     import_success_message: 'Ваши данные успешно восстановлены из резервной копии.',
     import_error_title: 'Ошибка импорта',
@@ -2508,10 +2517,6 @@ const ru = {
     delete_confirm_title: 'Удалить эту копию?',
     delete_confirm_message: 'Файл резервной копии будет удалён безвозвратно.',
     delete_failed_title: 'Ошибка удаления',
-    restore_confirm_title: 'Заменить все данные этой резервной копией?',
-    restore_confirm_summary: '{{accounts}} счетов · {{transactions}} транзакций',
-    restore_confirm_warning: 'Это заменит всё на устройстве. Нельзя отменить.',
-    restore_confirm_action: 'Заменить данные',
     restoring: 'Восстановление...',
     restore_success_title: 'Восстановлено',
     restore_success_message: 'Данные восстановлены из этой резервной копии.',

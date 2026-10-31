@@ -1,4 +1,21 @@
 const da = {
+  backup_restore: {
+    title: 'Restore backup',
+    export_description: 'Personal data and shared ledgers you own.',
+    import_description: 'Choose what to restore from a backup.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces ledgers and settings on synced devices.',
+    personal_local_note: 'Replaces ledgers and settings.',
+    shared_ledgers: 'Shared ledgers',
+    owned: 'You own this ledger',
+    unavailable: 'Owner access required',
+    restore_action: 'Restore selected',
+    confirm_title: 'Restore for everyone?',
+    confirm_message:
+      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
+    sync_pending: 'Restored here. Stay signed in to finish syncing.',
+    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+  },
   common: {
     back: 'Tilbage',
     loading: 'Indlæser…',
@@ -1647,19 +1664,11 @@ const da = {
     },
     title: 'Datastyring',
     export_title: 'Eksportér database',
-    export_description:
-      'Gem en fuld backup af alle dine konti, kategorier, transaktioner og indstillinger som en JSON-fil.',
     exporting: 'Eksporterer...',
     export_error_title: 'Eksport mislykkedes',
     export_error_message: 'Kunne ikke eksportere databasen. Prøv igen.',
     import_title: 'Importér Money2Time-backup',
-    import_description:
-      'Gendan fra en tidligere eksporteret Money2Time JSON-backup. Dette erstatter alle dine nuværende data.',
     importing: 'Importerer Money2Time-backup',
-    import_confirm_title: 'Erstat alle data?',
-    import_confirm_message:
-      'Dette overskriver alle dine nuværende konti, kategorier, transaktioner og indstillinger med data fra backup-filen. Dette kan ikke fortrydes.',
-    import_confirm_action: 'Erstat data',
     import_success_title: 'Import fuldført',
     import_success_message: 'Dine data er blevet gendannet fra backuppen.',
     import_error_title: 'Import mislykkedes',
@@ -2502,10 +2511,6 @@ const da = {
     delete_confirm_title: 'Slet denne backup?',
     delete_confirm_message: 'Denne backup-fil slettes permanent.',
     delete_failed_title: 'Sletning mislykkedes',
-    restore_confirm_title: 'Erstat alle data med denne backup?',
-    restore_confirm_summary: '{{accounts}} konti · {{transactions}} transaktioner',
-    restore_confirm_warning: 'Dette erstatter alt på denne enhed. Det kan ikke fortrydes.',
-    restore_confirm_action: 'Erstat data',
     restoring: 'Gendanner...',
     restore_success_title: 'Gendannet',
     restore_success_message: 'Dine data er gendannet fra denne backup.',

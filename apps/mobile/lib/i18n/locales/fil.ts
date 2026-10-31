@@ -1,4 +1,21 @@
 const fil = {
+  backup_restore: {
+    title: 'Restore backup',
+    export_description: 'Personal data and shared ledgers you own.',
+    import_description: 'Choose what to restore from a backup.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces ledgers and settings on synced devices.',
+    personal_local_note: 'Replaces ledgers and settings.',
+    shared_ledgers: 'Shared ledgers',
+    owned: 'You own this ledger',
+    unavailable: 'Owner access required',
+    restore_action: 'Restore selected',
+    confirm_title: 'Restore for everyone?',
+    confirm_message:
+      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
+    sync_pending: 'Restored here. Stay signed in to finish syncing.',
+    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+  },
   common: {
     back: 'Bumalik',
     loading: 'Naglo-load…',
@@ -1668,19 +1685,11 @@ const fil = {
     },
     title: 'Data Management',
     export_title: 'I-export ang Database',
-    export_description:
-      'Mag-save ng buong backup ng lahat ng iyong account, kategorya, transaksyon, at settings bilang JSON file.',
     exporting: 'Ine-export...',
     export_error_title: 'Nabigo ang Export',
     export_error_message: 'Hindi ma-export ang database. Subukan ulit.',
     import_title: 'Mag-import ng Money2Time Backup',
-    import_description:
-      'I-restore mula sa dating na-export na Money2Time JSON backup. Papalitan nito ang lahat ng iyong kasalukuyang data.',
     importing: 'Ina-import ang Money2Time backup',
-    import_confirm_title: 'Palitan ang Lahat ng Data?',
-    import_confirm_message:
-      'Papalitan nito ang lahat ng iyong kasalukuyang account, kategorya, transaksyon, at settings ng data mula sa backup file. Hindi ito maaaring ibalik.',
-    import_confirm_action: 'Palitan ang Data',
     import_success_title: 'Tapos na ang Import',
     import_success_message: 'Matagumpay na na-restore ang iyong data mula sa backup.',
     import_error_title: 'Nabigo ang Import',
@@ -2535,11 +2544,6 @@ const fil = {
     delete_confirm_title: 'Burahin ang backup na ito?',
     delete_confirm_message: 'Permanenteng aalisin ang backup file na ito.',
     delete_failed_title: 'Nabigo ang pagbura',
-    restore_confirm_title: 'Palitan ang lahat ng data ng backup na ito?',
-    restore_confirm_summary: '{{accounts}} account · {{transactions}} transaksyon',
-    restore_confirm_warning:
-      'Papalitan nito ang lahat ng nasa device na ito. Hindi ito maaaring ibalik.',
-    restore_confirm_action: 'Palitan ang data',
     restoring: 'Ire-restore...',
     restore_success_title: 'Na-restore',
     restore_success_message: 'Ang iyong data ay na-restore mula sa backup na ito.',

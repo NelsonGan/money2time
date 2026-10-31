@@ -1,4 +1,21 @@
 const it = {
+  backup_restore: {
+    title: 'Restore backup',
+    export_description: 'Personal data and shared ledgers you own.',
+    import_description: 'Choose what to restore from a backup.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces ledgers and settings on synced devices.',
+    personal_local_note: 'Replaces ledgers and settings.',
+    shared_ledgers: 'Shared ledgers',
+    owned: 'You own this ledger',
+    unavailable: 'Owner access required',
+    restore_action: 'Restore selected',
+    confirm_title: 'Restore for everyone?',
+    confirm_message:
+      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
+    sync_pending: 'Restored here. Stay signed in to finish syncing.',
+    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+  },
   common: {
     back: 'Indietro',
     loading: 'Caricamento…',
@@ -1651,19 +1668,11 @@ const it = {
     },
     title: 'Gestione dati',
     export_title: 'Esporta database',
-    export_description:
-      'Salva un backup completo di tutti i tuoi conti, categorie, transazioni e impostazioni come file JSON.',
     exporting: 'Esportazione...',
     export_error_title: 'Esportazione fallita',
     export_error_message: 'Impossibile esportare il database. Riprova.',
     import_title: 'Importa backup Money2Time',
-    import_description:
-      'Ripristina da un backup JSON Money2Time esportato in precedenza. Sostituirà tutti i dati attuali.',
     importing: 'Importazione backup Money2Time',
-    import_confirm_title: 'Sostituire tutti i dati?',
-    import_confirm_message:
-      'Verranno sovrascritti tutti i tuoi conti, categorie, transazioni e impostazioni attuali con i dati del file di backup. Non è possibile annullare.',
-    import_confirm_action: 'Sostituisci dati',
     import_success_title: 'Importazione completata',
     import_success_message: 'I tuoi dati sono stati ripristinati correttamente dal backup.',
     import_error_title: 'Importazione fallita',
@@ -2518,10 +2527,6 @@ const it = {
     delete_confirm_title: 'Eliminare questo backup?',
     delete_confirm_message: 'Il file di backup verrà rimosso definitivamente.',
     delete_failed_title: 'Eliminazione fallita',
-    restore_confirm_title: 'Sostituire tutti i dati con questo backup?',
-    restore_confirm_summary: '{{accounts}} conti · {{transactions}} transazioni',
-    restore_confirm_warning: 'Sostituirà tutto su questo dispositivo. Non è possibile annullare.',
-    restore_confirm_action: 'Sostituisci dati',
     restoring: 'Ripristino...',
     restore_success_title: 'Ripristinato',
     restore_success_message: 'I dati sono stati ripristinati da questo backup.',

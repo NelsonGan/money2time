@@ -45,3 +45,13 @@ export const MONEY2TIME_LOGO: ImageRequireSource = require('../assets/brands/mon
  * it. Rasterized from vscode-icons' `file_type_excel.svg` (MIT).
  */
 export const EXCEL_LOGO: ImageRequireSource = require('../assets/brands/microsoft-excel-logo.png');
+
+/**
+ * Backup-provider marks, displayed in their original colors.
+ * Drive: https://developers.google.com/workspace/drive/api/guides/branding
+ * iCloud reuses the existing subscription-logo artwork, bundled here for OTA updates.
+ */
+export const BACKUP_PROVIDER_LOGOS = {
+  icloud: require('../assets/brands/icloud-logo.png'),
+  googleDrive: require('../assets/brands/google-drive-logo.png'),
+} satisfies Record<string, ImageRequireSource>;

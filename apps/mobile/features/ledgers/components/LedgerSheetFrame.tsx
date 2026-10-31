@@ -20,8 +20,9 @@ export function LedgerSheetFrame({ visible, onClose, header, children }: LedgerS
   const insets = useSafeAreaInsets();
   return (
     <ThemeModal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={styles.backdrop} onPress={onClose}>
+      <Pressable accessible={false} style={styles.backdrop} onPress={onClose}>
         <Pressable
+          accessible={false}
           onPress={(event) => event.stopPropagation()}
           style={[styles.sheet, sheetColumnStyle]}
         >

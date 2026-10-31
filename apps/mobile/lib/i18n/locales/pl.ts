@@ -1,4 +1,21 @@
 const pl = {
+  backup_restore: {
+    title: 'Restore backup',
+    export_description: 'Personal data and shared ledgers you own.',
+    import_description: 'Choose what to restore from a backup.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces ledgers and settings on synced devices.',
+    personal_local_note: 'Replaces ledgers and settings.',
+    shared_ledgers: 'Shared ledgers',
+    owned: 'You own this ledger',
+    unavailable: 'Owner access required',
+    restore_action: 'Restore selected',
+    confirm_title: 'Restore for everyone?',
+    confirm_message:
+      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
+    sync_pending: 'Restored here. Stay signed in to finish syncing.',
+    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+  },
   common: {
     back: 'Wróć',
     loading: 'Ładowanie…',
@@ -1651,19 +1668,11 @@ const pl = {
     },
     title: 'Zarządzanie danymi',
     export_title: 'Eksportuj bazę danych',
-    export_description:
-      'Zapisz pełną kopię zapasową wszystkich kont, kategorii, transakcji i ustawień jako plik JSON.',
     exporting: 'Eksportowanie...',
     export_error_title: 'Eksport nie powiódł się',
     export_error_message: 'Nie można wyeksportować bazy danych. Spróbuj ponownie.',
     import_title: 'Importuj kopię zapasową Money2Time',
-    import_description:
-      'Przywróć z wcześniej wyeksportowanej kopii zapasowej Money2Time w formacie JSON. Zastąpi wszystkie bieżące dane.',
     importing: 'Importowanie kopii zapasowej Money2Time',
-    import_confirm_title: 'Zastąpić wszystkie dane?',
-    import_confirm_message:
-      'Spowoduje to nadpisanie wszystkich bieżących kont, kategorii, transakcji i ustawień danymi z pliku kopii zapasowej. Tej operacji nie można cofnąć.',
-    import_confirm_action: 'Zastąp dane',
     import_success_title: 'Import ukończony',
     import_success_message: 'Twoje dane zostały pomyślnie przywrócone z kopii zapasowej.',
     import_error_title: 'Import nie powiódł się',
@@ -2512,10 +2521,6 @@ const pl = {
     delete_confirm_title: 'Usunąć tę kopię zapasową?',
     delete_confirm_message: 'Ten plik kopii zapasowej zostanie trwale usunięty.',
     delete_failed_title: 'Usunięcie nie powiodło się',
-    restore_confirm_title: 'Zastąpić wszystkie dane tą kopią?',
-    restore_confirm_summary: '{{accounts}} kont · {{transactions}} transakcji',
-    restore_confirm_warning: 'Zastąpi to wszystko na tym urządzeniu. Nie można cofnąć.',
-    restore_confirm_action: 'Zastąp dane',
     restoring: 'Przywracanie...',
     restore_success_title: 'Przywrócono',
     restore_success_message: 'Twoje dane zostały przywrócone z tej kopii zapasowej.',

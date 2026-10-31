@@ -1,4 +1,21 @@
 const fr = {
+  backup_restore: {
+    title: 'Restore backup',
+    export_description: 'Personal data and shared ledgers you own.',
+    import_description: 'Choose what to restore from a backup.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces ledgers and settings on synced devices.',
+    personal_local_note: 'Replaces ledgers and settings.',
+    shared_ledgers: 'Shared ledgers',
+    owned: 'You own this ledger',
+    unavailable: 'Owner access required',
+    restore_action: 'Restore selected',
+    confirm_title: 'Restore for everyone?',
+    confirm_message:
+      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
+    sync_pending: 'Restored here. Stay signed in to finish syncing.',
+    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+  },
   common: {
     back: 'Retour',
     loading: 'Chargement…',
@@ -1662,19 +1679,11 @@ const fr = {
     },
     title: 'Gestion des données',
     export_title: 'Exporter la base de données',
-    export_description:
-      'Enregistrez une sauvegarde complète de tous vos comptes, catégories, transactions et réglages en fichier JSON.',
     exporting: 'Exportation...',
     export_error_title: "Échec de l'exportation",
     export_error_message: "Impossible d'exporter la base de données. Veuillez réessayer.",
     import_title: 'Importer une sauvegarde Money2Time',
-    import_description:
-      'Restaurez depuis une sauvegarde JSON Money2Time exportée précédemment. Ceci remplacera toutes vos données actuelles.',
     importing: 'Importation de la sauvegarde Money2Time',
-    import_confirm_title: 'Remplacer toutes les données ?',
-    import_confirm_message:
-      'Ceci écrasera tous vos comptes, catégories, transactions et réglages actuels avec les données du fichier de sauvegarde. Cette action est irréversible.',
-    import_confirm_action: 'Remplacer les données',
     import_success_title: 'Importation terminée',
     import_success_message: 'Vos données ont été restaurées avec succès depuis la sauvegarde.',
     import_error_title: "Échec de l'importation",
@@ -2536,11 +2545,6 @@ const fr = {
     delete_confirm_title: 'Supprimer cette sauvegarde ?',
     delete_confirm_message: 'Ce fichier de sauvegarde sera définitivement supprimé.',
     delete_failed_title: 'Échec de la suppression',
-    restore_confirm_title: 'Remplacer toutes les données par cette sauvegarde ?',
-    restore_confirm_summary: '{{accounts}} comptes · {{transactions}} transactions',
-    restore_confirm_warning:
-      'Ceci remplacera tout sur cet appareil. Cette action est irréversible.',
-    restore_confirm_action: 'Remplacer les données',
     restoring: 'Restauration...',
     restore_success_title: 'Restauré',
     restore_success_message: 'Vos données ont été restaurées depuis cette sauvegarde.',

@@ -1,4 +1,21 @@
 const vi = {
+  backup_restore: {
+    title: 'Restore backup',
+    export_description: 'Personal data and shared ledgers you own.',
+    import_description: 'Choose what to restore from a backup.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces ledgers and settings on synced devices.',
+    personal_local_note: 'Replaces ledgers and settings.',
+    shared_ledgers: 'Shared ledgers',
+    owned: 'You own this ledger',
+    unavailable: 'Owner access required',
+    restore_action: 'Restore selected',
+    confirm_title: 'Restore for everyone?',
+    confirm_message:
+      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
+    sync_pending: 'Restored here. Stay signed in to finish syncing.',
+    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+  },
   common: {
     back: 'Quay lại',
     loading: 'Đang tải…',
@@ -1632,19 +1649,11 @@ const vi = {
     },
     title: 'Quản lý dữ liệu',
     export_title: 'Xuất cơ sở dữ liệu',
-    export_description:
-      'Lưu bản sao lưu đầy đủ gồm tài khoản, danh mục, giao dịch và cài đặt dưới dạng tệp JSON.',
     exporting: 'Đang xuất...',
     export_error_title: 'Xuất thất bại',
     export_error_message: 'Không thể xuất cơ sở dữ liệu. Vui lòng thử lại.',
     import_title: 'Nhập bản sao lưu Money2Time',
-    import_description:
-      'Khôi phục từ bản sao lưu JSON Money2Time đã xuất trước. Thao tác này sẽ thay thế toàn bộ dữ liệu hiện tại.',
     importing: 'Đang nhập bản sao lưu Money2Time',
-    import_confirm_title: 'Thay thế tất cả dữ liệu?',
-    import_confirm_message:
-      'Thao tác này sẽ ghi đè toàn bộ tài khoản, danh mục, giao dịch và cài đặt hiện tại bằng dữ liệu từ tệp sao lưu. Không thể hoàn tác.',
-    import_confirm_action: 'Thay thế dữ liệu',
     import_success_title: 'Nhập hoàn tất',
     import_success_message: 'Dữ liệu của bạn đã được khôi phục thành công từ bản sao lưu.',
     import_error_title: 'Nhập thất bại',
@@ -2485,10 +2494,6 @@ const vi = {
     delete_confirm_title: 'Xóa bản sao lưu này?',
     delete_confirm_message: 'Tệp sao lưu này sẽ bị xóa vĩnh viễn.',
     delete_failed_title: 'Xóa thất bại',
-    restore_confirm_title: 'Thay thế tất cả dữ liệu bằng bản sao lưu này?',
-    restore_confirm_summary: '{{accounts}} tài khoản · {{transactions}} giao dịch',
-    restore_confirm_warning: 'Sẽ thay thế mọi thứ trên thiết bị này. Không thể hoàn tác.',
-    restore_confirm_action: 'Thay thế dữ liệu',
     restoring: 'Đang khôi phục...',
     restore_success_title: 'Đã khôi phục',
     restore_success_message: 'Dữ liệu đã được khôi phục từ bản sao lưu này.',

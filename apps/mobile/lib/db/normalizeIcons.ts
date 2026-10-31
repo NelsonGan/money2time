@@ -124,12 +124,15 @@ export function normalizeIconValue(value: string | null | undefined): string | n
  * Idempotent. Safe to run from a migration, after a backup restore, and after a
  * Money Manager import.
  */
-export function normalizeIconColumns(db: SQLiteDatabase): void {
+export function normalizeIconColumns(
+  db: SQLiteDatabase,
+  options: { where?: (table: string) => string } = {},
+): void {
   for (const { table, column } of ICON_COLUMNS) {
     let rows: { value: string | null }[];
     try {
       rows = db.getAllSync<{ value: string | null }>(
-        `SELECT DISTINCT ${column} AS value FROM ${table} WHERE ${column} IS NOT NULL AND TRIM(${column}) <> ''`,
+        `SELECT DISTINCT ${column} AS value FROM ${table} WHERE ${column} IS NOT NULL AND TRIM(${column}) <> ''${options.where ? ` AND (${options.where(table)})` : ''}`,
       );
     } catch {
       // Table added by a later migration, so absent when this runs as part of
@@ -141,7 +144,10 @@ export function normalizeIconColumns(db: SQLiteDatabase): void {
       if (current == null) continue;
       const next = normalizeIconValue(current);
       if (next != null && next !== current) {
-        db.runSync(`UPDATE ${table} SET ${column} = ? WHERE ${column} = ?`, [next, current]);
+        db.runSync(
+          `UPDATE ${table} SET ${column} = ? WHERE ${column} = ?${options.where ? ` AND (${options.where(table)})` : ''}`,
+          [next, current],
+        );
       }
     }
   }
