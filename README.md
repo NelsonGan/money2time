@@ -1500,11 +1500,23 @@ The app side is `features/sharedLedgers/` (screens) and
   taking the cloud copy and sending only its own newer edits.
 - **Access** is checked by the Worker on every credentials request: owner or
   member, and the ledger active (anyone in it Pro, `isLedgerActive`). A removed member's app is nudged and lets the
-  ledger go at once (else at its next list read, within a minute while open). Tokens are not revoked early,
-  because Turso's revocation is not per database (it can reach the whole
-  group); they last a day, so a paused ledger or a removed member holding one
-  is cut off within a day. A phone whose sync fails drops its cached token and
-  asks again.
+  ledger go at once (else at its next list read, within a minute while open).
+  Removing a member, leaving, or deleting a member's account first revokes
+  **that ledger database's tokens**, then ends the membership. A saved token
+  therefore stops working before removal succeeds; other databases in the
+  group keep their tokens. Remaining members are nudged and fetch fresh
+  credentials after their next sync rejects the old token. Previously
+  downloaded data cannot be remotely erased from a modified app.
+  Token issuance is fenced during revocation: unique `revoking:` / `revoked:`
+  markers in the existing `shared_ledgers.token` field prevent an in-flight
+  credentials request from returning or caching a token across the change.
+  The Worker checks membership again before returning credentials. A Turso
+  failure leaves membership and the invite intact, drops the cached token,
+  and returns an error so the action can be retried. An abandoned fence
+  expires after a minute and is recovered by a credentials or removal retry.
+  Tokens otherwise last a day, so a paused ledger's previously issued tokens
+  can still work until expiry. A phone whose sync fails drops its cached
+  token and asks again.
 - **Trust.** A member's token can write anything in the ledger's database,
   as the app can (deleting entries, say). The owner's phone only applies rows
   that belong to the ledger, so a member cannot reach the owner's other
@@ -3414,20 +3426,20 @@ with Better Auth, one Turso database per user, and the user's images.
 
 Shared ledgers ([Shared ledgers](#shared-ledgers)):
 
-| Route                                      | What it does                                                                                                                                                 |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `GET /v1/ledgers`                          | The user's shared ledgers, owned and joined, with role, owner name, member count and `active` (anyone in it Pro)                                             |
-| `POST /v1/ledgers`                         | `{ledgerId, name, emoji}` → shares a ledger: Pro, at most 2 per owner; makes its Turso database                                                              |
-| `DELETE /v1/ledgers/<id>`                  | Stop sharing (owner): deletes its database and images; members and the link cascade; everyone is nudged                                                      |
-| `POST /v1/ledgers/<id>/leave`              | A member leaves                                                                                                                                              |
-| `POST /v1/ledgers/<id>/credentials`        | Its Turso URL and a 1-day token, for the owner or a member, while anyone in it is Pro (403 `ledger_paused`)                                                  |
-| `GET /v1/ledgers/<id>/members`             | Owner and members (addresses for the owner only)                                                                                                             |
-| `DELETE /v1/ledgers/<id>/members/<userId>` | Owner removes a member (404 for anyone else), whose app is nudged; the link is retired                                                                       |
-| `POST /v1/ledgers/<id>/invites`            | Owner gets the ledger's link: the open one, or a new one valid a day; two phones asking at once get the same one                                             |
-| `/v1/ledgers/<id>/media/…`                 | Like `/v1/media`, under `l/<id>/` with its own quota; writing needs the ledger active                                                                        |
-| `GET /v1/invites/<code>`                   | No sign-in: the app's ledger id, name, owner, member count, `full` and `active`; rate limited per IP                                                         |
-| `POST /v1/invites/<code>/accept`           | Joins (any signed-in user, no Pro) while active, with a place and the link not retired, in one statement                                                     |
-| `GET /join/<code>`                         | The page an invite link opens: hands `money2time://join/<code>` to the app, or links the stores. Static: no names; a code that cannot be one gets a 404 page |
+| Route                                      | What it does                                                                                                                                                   |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /v1/ledgers`                          | The user's shared ledgers, owned and joined, with role, owner name, member count and `active` (anyone in it Pro)                                               |
+| `POST /v1/ledgers`                         | `{ledgerId, name, emoji}` → shares a ledger: Pro, at most 2 per owner; makes its Turso database                                                                |
+| `DELETE /v1/ledgers/<id>`                  | Stop sharing (owner): deletes its database and images; members and the link cascade; everyone is nudged                                                        |
+| `POST /v1/ledgers/<id>/leave`              | Revokes this ledger's tokens, then a member leaves                                                                                                             |
+| `POST /v1/ledgers/<id>/credentials`        | Its Turso URL and a 1-day token, for the owner or a member, while anyone in it is Pro (403 `ledger_paused`)                                                    |
+| `GET /v1/ledgers/<id>/members`             | Owner and members (addresses for the owner only)                                                                                                               |
+| `DELETE /v1/ledgers/<id>/members/<userId>` | Owner revokes this ledger's tokens, then removes the member and retires the invite; all affected users are nudged (403 for another member, 404 without access) |
+| `POST /v1/ledgers/<id>/invites`            | Owner gets the ledger's link: the open one, or a new one valid a day; two phones asking at once get the same one                                               |
+| `/v1/ledgers/<id>/media/…`                 | Like `/v1/media`, under `l/<id>/` with its own quota; writing needs the ledger active                                                                          |
+| `GET /v1/invites/<code>`                   | No sign-in: the app's ledger id, name, owner, member count, `full` and `active`; rate limited per IP                                                           |
+| `POST /v1/invites/<code>/accept`           | Joins (any signed-in user, no Pro) while active, with a place and the link not retired, in one statement                                                       |
+| `GET /join/<code>`                         | The page an invite link opens: hands `money2time://join/<code>` to the app, or links the stores. Static: no names; a code that cannot be one gets a 404 page   |
 
 Sharing a ledger checks the 2-ledger limit and inserts in one statement, and a
 second tap on the same ledger gets the first share back. Live sockets close
@@ -3445,7 +3457,9 @@ its one inline script (the redirect to the app) runs by a per-response nonce,
 and it loads only DM Sans from Google Fonts and the icon and mascot from
 `media.money2time.com`.
 Deleting an account also deletes the ledgers it shares (databases and images)
-and ends its memberships.
+and ends its memberships after revoking each joined ledger's tokens. Removal,
+Leave and account deletion return an error if a token revocation fails, so
+membership is not silently ended while an issued token still works.
 
 Every `/v1` route except the invite preview needs `Authorization: Bearer <session token>` (Better Auth's
 bearer plugin; the app never uses cookies). Internal error text stays in the
@@ -3528,8 +3542,12 @@ and no link to act on, so mail scanners that open links spend nothing. The
 icon is a remote image on `media.money2time.com` with an empty alt (Gmail
 blocks data URIs); a client that blocks images still shows the wordmark.
 
-`npm test` (Node's test runner, no dependencies) covers the email, the pages
-and the Turnstile check. CI runs only the typecheck.
+`npm test` (Node's test runner, no dependencies) covers the email, the pages,
+the Turnstile check, and shared-ledger token revocation. The revocation tests
+run the removal/leave/account-deletion routes against the real D1 schema in
+Node's in-memory SQLite, with Turso and live notifications mocked; they cover
+credential races, failed revocation, retry and recovery after an interrupted
+request. CI runs these tests alongside the typecheck and dry-run bundle.
 
 #### Turnstile
 
@@ -3755,7 +3773,7 @@ App CI/CD is [.github/workflows/deploy.yml](.github/workflows/deploy.yml), gated
 - **Plan** — manual dispatch, or push-to-main **when `app` is set**. A Worker-only or docs-only merge to `main` therefore never cuts a store build. Resolves the build matrix (push = both iOS+Android production; dispatch = the chosen single platform/profile).
 - **Deploy** — from `apps/mobile`, `eas build --local` on the matched runner (`xcode-27` for iOS, ubuntu-latest for Android), then `eas submit`. `fail-fast: false` so a single-platform failure doesn't kill the other build. **iOS is built with Xcode 27.1, pinned.** iOS decides what an app supports from the SDK it was linked against, so a binary built with an older Xcode runs in compatibility mode on newer hardware: on the open iPhone Duo, builds 484–486 (linked against the iOS 26 SDK by Xcode 26.3 on `macos-15`) showed as a phone-sized window in the middle of the screen, without the Duo layout. GitHub's `macos-*` images stop at Xcode 26; Xcode 27 is only on the `xcode-27` image. Keep the pinned Xcode at least as new as the newest hardware the app adapts to (27.1 for the Duo), never `latest-stable`.
 
-Cloudflare has its own workflow, [.github/workflows/cloudflare.yml](.github/workflows/cloudflare.yml) (typecheck and a `wrangler deploy --dry-run` bundle on PRs; on push to `main`, for each Worker whose own files or schema changed since the last successful production deploy, the D1 schema apply where it has a database, then `wrangler deploy`), path-filtered to non-markdown `apps/cloudflare/**` so an app-only change never redeploys the Worker and vice versa. Both directions of that split are deliberate: **gate jobs with `if:`, not workflow-level `paths:`** — a job skipped by `if:` reports success to branch protection, while a whole workflow skipped by a path filter leaves its required checks pending forever.
+Cloudflare has its own workflow, [.github/workflows/cloudflare.yml](.github/workflows/cloudflare.yml) (typecheck, available Worker tests and a `wrangler deploy --dry-run` bundle on PRs; on push to `main`, for each Worker whose own files or schema changed since the last successful production deploy, the D1 schema apply where it has a database, then `wrangler deploy`), path-filtered to non-markdown `apps/cloudflare/**` so an app-only change never redeploys the Worker and vice versa. Both directions of that split are deliberate: **gate jobs with `if:`, not workflow-level `paths:`** — a job skipped by `if:` reports success to branch protection, while a whole workflow skipped by a path filter leaves its required checks pending forever.
 
 **Over-the-air updates are internal-only.** `app.config.ts` sets `updates.enabled` from `APP_VARIANT`: on for `development` / `preview` (so the PR-preview `eas update` QR flow works), **off for store builds**. Nothing is ever published to the `production` channel — releases go out as store binaries. A store build therefore launches straight from its embedded bundle and skips the expo-updates launcher entirely; when that launcher failed to resolve an update's launch asset, React Native never received a bundle and the user was stuck on the native splash until their next store update changed the runtime version (hundreds of users across 1.3.3–1.4.3 in Sentry, `Expo Updates emergency launch`). If you ever want production OTA back, that failure mode comes back with it.
 
@@ -3775,7 +3793,7 @@ Two workflows, split so an app-only change never redeploys the Workers and vice 
 | `plan`                                             | push to `main` when `app` is set, or dispatch | Resolves the build matrix (push = both platforms production; dispatch = the chosen one)                     |
 | `deploy`                                           | after `plan`                                  | `eas build --local` on xcode-27, Xcode 27.1 (iOS) / ubuntu-latest (Android), then `eas submit`              |
 
-[.github/workflows/cloudflare.yml](.github/workflows/cloudflare.yml) — the Workers: typecheck and dry-run bundle on PRs; on push to `main`, only the Workers changed since the last successful deploy get their D1 schema applied (where they have one) and `wrangler deploy`, so a run cancelled while queued or failed is caught up by the next. A deploy that has started is never cancelled by a newer push.
+[.github/workflows/cloudflare.yml](.github/workflows/cloudflare.yml) — the Workers: typecheck, available tests and dry-run bundle on PRs; on push to `main`, only the Workers changed since the last successful deploy get their D1 schema applied (where they have one) and `wrangler deploy`, so a run cancelled while queued or failed is caught up by the next. A deploy that has started is never cancelled by a newer push.
 
 A failing test blocks everything downstream. Concurrency cancels in-flight runs when a newer commit lands on the same ref. Requires repo secret `EXPO_TOKEN`. Pushes to `main` auto-submit to TestFlight (iOS) and the Play **production** track (Android); the App Store release is promoted by hand.
 

@@ -6,9 +6,9 @@
 // one link per ledger, reused until it expires a day after it was made;
 // members need a sign-in but not Pro. A ledger syncs while anyone in it is
 // Pro (owner or member) and is paused for everyone while nobody is. Tokens
-// last a day and are not revoked early: Turso's revocation is not per
-// database (it can reach every database in the group), so a removed member
-// or a paused ledger is cut off when the token held expires, and the app
+// last a day. Removing or leaving revokes that database's tokens before the
+// membership ends. Remaining members fetch fresh tokens on their next sync.
+// A paused ledger's previously issued tokens expire within a day; the app
 // drops or pauses the ledger at its next list read (at once when its hub
 // tells it, src/live.ts).
 //
@@ -24,7 +24,13 @@ import { deleteAllMedia, ledgerSpace } from './media';
 import { isAccountPro } from './revenuecat';
 import { brokenInvitePageHtml, invitePageHtml } from './pages';
 import { open, seal } from './secretBox';
-import { applyCloudSchema, createDatabase, createToken, deleteDatabase } from './turso';
+import {
+  applyCloudSchema,
+  createDatabase,
+  createToken,
+  deleteDatabase,
+  invalidateDatabaseTokens,
+} from './turso';
 
 const MAX_OWNED = 2;
 const MAX_MEMBERS = 5;
@@ -36,6 +42,10 @@ const INVITE_REUSE_MARGIN_MS = 60 * 60 * 1000;
 /** Ledger tokens last a day (see above). */
 const TOKEN_TTL_DAYS = 1;
 const TOKEN_REUSE_MARGIN_MS = 6 * 60 * 60 * 1000;
+// Longer than the Turso revocation timeout. A retry can recover an abandoned
+// lock after a Worker was terminated, without a schema change.
+const REVOCATION_LOCK_MS = 60_000;
+const REVOKING_PREFIX = 'revoking:';
 const INVITE_CODE = /^[A-Za-z0-9_-]{20,64}$/;
 /** The app's ledger ids are UUIDs. */
 const LEDGER_ID = /^[A-Za-z0-9-]{8,64}$/;
@@ -140,6 +150,77 @@ async function access(
     .bind(id, userId)
     .first();
   return member ? { ledger, role: 'member' } : null;
+}
+
+/**
+ * Fence token issuance while rotating, then remove membership atomically with
+ * the cached token. The unique markers in `token` are not usable credentials:
+ * they stop an earlier mint from caching a token invalidated by this rotation.
+ * A failed rotation leaves membership intact so the same request can retry.
+ */
+async function removeMemberAccess(
+  env: Env,
+  id: string,
+  userId: string,
+  retireInvite: boolean,
+): Promise<boolean> {
+  const ledger = await getLedger(env, id);
+  if (!ledger) return false;
+  const member = await env.AUTH_DB.prepare(
+    'SELECT 1 FROM ledger_members WHERE ledger_id = ?1 AND user_id = ?2',
+  )
+    .bind(id, userId)
+    .first();
+  if (!member) return false;
+  if (ledger.token?.startsWith(REVOKING_PREFIX) && (ledger.token_expires_at ?? 0) > Date.now()) {
+    throw new Error('ledger_access_changing');
+  }
+  const lock = `${REVOKING_PREFIX}${crypto.randomUUID()}`;
+  const invalidated = `revoked:${crypto.randomUUID()}`;
+  const acquired = await env.AUTH_DB.prepare(
+    `UPDATE shared_ledgers SET token = ?2, token_expires_at = ?3
+     WHERE id = ?1 AND token IS ?4`,
+  )
+    .bind(id, lock, Date.now() + REVOCATION_LOCK_MS, ledger.token)
+    .run();
+  if (!acquired.meta.changes) throw new Error('ledger_access_changing');
+  let completed = false;
+  try {
+    await invalidateDatabaseTokens(env, ledger.db_name);
+    const statements = [
+      env.AUTH_DB.prepare(
+        `DELETE FROM ledger_members WHERE ledger_id = ?1 AND user_id = ?2
+         AND EXISTS (SELECT 1 FROM shared_ledgers WHERE id = ?1 AND token = ?3)`,
+      ).bind(id, userId, lock),
+    ];
+    if (retireInvite) {
+      statements.push(
+        env.AUTH_DB.prepare(
+          `DELETE FROM ledger_links WHERE ledger_id = ?1
+           AND EXISTS (SELECT 1 FROM shared_ledgers WHERE id = ?1 AND token = ?2)`,
+        ).bind(id, lock),
+      );
+    }
+    statements.push(
+      env.AUTH_DB.prepare(
+        'UPDATE shared_ledgers SET token = ?2, token_expires_at = NULL WHERE id = ?1 AND token = ?3',
+      ).bind(id, invalidated, lock),
+    );
+    const [removed] = await env.AUTH_DB.batch(statements);
+    if (!removed.meta.changes) throw new Error('ledger_access_changed');
+    completed = true;
+    return true;
+  } finally {
+    // Also after failure: a timed-out rotation may have reached Turso, so the
+    // previous cached token must never be restored. A retry can rotate again.
+    if (!completed) {
+      await env.AUTH_DB.prepare(
+        'UPDATE shared_ledgers SET token = ?2, token_expires_at = NULL WHERE id = ?1 AND token = ?3',
+      )
+        .bind(id, invalidated, lock)
+        .run();
+    }
+  }
 }
 
 async function memberCount(env: Env, id: string): Promise<number> {
@@ -255,9 +336,9 @@ export async function routeLedgers(
   }
   if (action === 'leave' && method === 'POST' && parts.length === 4) {
     if (role !== 'member') return json({ error: 'forbidden' }, 403);
-    await env.AUTH_DB.prepare('DELETE FROM ledger_members WHERE ledger_id = ?1 AND user_id = ?2')
-      .bind(ledger.id, user.id)
-      .run();
+    if (!(await removeMemberAccess(env, ledger.id, user.id, false))) {
+      return json({ error: 'not_found' }, 404);
+    }
     // The leaver's own other phones are told it was them (no "removed" notice).
     await notifyUsers(
       env,
@@ -271,27 +352,25 @@ export async function routeLedgers(
   }
   if (action === 'credentials' && method === 'POST' && parts.length === 4) {
     const body = await readJson<{ final: unknown }>(request);
-    return credentials(env, ledger, role === 'owner' && body?.final === true);
+    return credentials(env, ledger, user.id, role === 'owner' && body?.final === true);
   }
   if (action === 'members' && parts.length === 4 && method === 'GET') {
     return listMembers(env, ledger, role);
   }
   if (action === 'members' && parts.length === 5 && method === 'DELETE') {
     if (role !== 'owner') return json({ error: 'forbidden' }, 403);
-    const removed = await env.AUTH_DB.prepare(
-      'DELETE FROM ledger_members WHERE ledger_id = ?1 AND user_id = ?2',
-    )
-      .bind(ledger.id, parts[4])
-      .run();
-    // Not a member (the owner, a stale id): nothing to do, nobody to tell.
-    if (!removed.meta.changes) return json({ error: 'not_found' }, 404);
-    // The link they joined with stops working: a new one is made on the next
-    // Invite, so the person removed cannot simply join again.
-    await env.AUTH_DB.prepare('DELETE FROM ledger_links WHERE ledger_id = ?1')
-      .bind(ledger.id)
-      .run();
-    // Their app lets the ledger go now rather than at its next list read.
-    await notifyUsers(env, [parts[4]], ledger.id, null, 'access');
+    // Rotate before removing membership; a Turso failure leaves it retryable.
+    // The old invite is retired too, so the removed member cannot rejoin.
+    if (!(await removeMemberAccess(env, ledger.id, parts[4], true))) {
+      return json({ error: 'not_found' }, 404);
+    }
+    await notifyUsers(
+      env,
+      [parts[4], ...(await ledgerAudience(env, ledger))],
+      ledger.id,
+      null,
+      'access',
+    );
     return json({ ok: true });
   }
   if (action === 'invites' && parts.length === 4 && method === 'POST') {
@@ -425,31 +504,64 @@ async function freeLocalServer(env: Env): Promise<string | null> {
  * read-only token of a day (not stored), so a pause still keeps anyone from
  * syncing.
  */
-async function credentials(env: Env, ledger: SharedLedgerRow, final: boolean): Promise<Response> {
+async function credentials(
+  env: Env,
+  ledger: SharedLedgerRow,
+  userId: string,
+  final: boolean,
+): Promise<Response> {
+  if (ledger.token?.startsWith(REVOKING_PREFIX)) {
+    if ((ledger.token_expires_at ?? 0) > Date.now()) throw new Error('ledger_access_changing');
+    // Recover a terminated Worker's lock. Its guarded membership delete can
+    // no longer commit, and its old cached token is never reused.
+    const invalidated = `revoked:${crypto.randomUUID()}`;
+    const recovered = await env.AUTH_DB.prepare(
+      'UPDATE shared_ledgers SET token = ?2, token_expires_at = NULL WHERE id = ?1 AND token = ?3',
+    )
+      .bind(ledger.id, invalidated, ledger.token)
+      .run();
+    if (!recovered.meta.changes) throw new Error('ledger_access_changed');
+    ledger = { ...ledger, token: invalidated, token_expires_at: null };
+  }
+  // Check again after asynchronous token work: membership or the token
+  // generation may have changed since the route's initial access check.
+  const confirmAccess = async (expectedToken = ledger.token) => {
+    const current = await access(env, ledger.id, userId);
+    if (!current || current.ledger.token !== expectedToken) {
+      throw new Error('ledger_access_changed');
+    }
+  };
   const now = Date.now();
   if (!(await isLedgerActive(env, ledger))) {
     if (!final) return json({ error: 'ledger_paused' }, 403);
     const authToken = env.LOCAL_SYNC_URL
       ? 'local'
       : await createToken(env, ledger.db_name, 1, 'read-only');
+    await confirmAccess();
     return json({ url: ledger.db_url, authToken, expiresAt: now + DAY_MS });
   }
   if (env.LOCAL_SYNC_URL) {
+    await confirmAccess();
     return json({ url: ledger.db_url, authToken: 'local', expiresAt: now + DAY_MS });
   }
   if (ledger.token && (ledger.token_expires_at ?? 0) - now > TOKEN_REUSE_MARGIN_MS) {
     const token = await open(env, 'turso-token', ledger.token);
     if (token) {
+      await confirmAccess();
       return json({ url: ledger.db_url, authToken: token, expiresAt: ledger.token_expires_at });
     }
   }
   const token = await createToken(env, ledger.db_name, TOKEN_TTL_DAYS);
   const expiresAt = now + TOKEN_TTL_DAYS * DAY_MS;
-  await env.AUTH_DB.prepare(
-    'UPDATE shared_ledgers SET token = ?2, token_expires_at = ?3 WHERE id = ?1',
+  const sealed = await seal(env, 'turso-token', token);
+  const saved = await env.AUTH_DB.prepare(
+    `UPDATE shared_ledgers SET token = ?2, token_expires_at = ?3
+     WHERE id = ?1 AND token IS ?4`,
   )
-    .bind(ledger.id, await seal(env, 'turso-token', token), expiresAt)
+    .bind(ledger.id, sealed, expiresAt, ledger.token)
     .run();
+  if (!saved.meta.changes) throw new Error('ledger_access_changed');
+  await confirmAccess(sealed);
   return json({ url: ledger.db_url, authToken: token, expiresAt });
 }
 
@@ -619,7 +731,9 @@ export async function deleteLedgerAccess(env: Env, userId: string): Promise<void
   )
     .bind(userId)
     .all<SharedLedgerRow>();
-  await env.AUTH_DB.prepare('DELETE FROM ledger_members WHERE user_id = ?1').bind(userId).run();
+  // End each membership through the same revocation fence as Remove/Leave.
+  // Completed ones stay removed if another ledger's rotation needs a retry.
+  for (const row of joined.results) await removeMemberAccess(env, row.id, userId, false);
   await Promise.all([
     ...owned.results.map((row) => destroy(env, row)),
     ...joined.results.map(async (row) =>

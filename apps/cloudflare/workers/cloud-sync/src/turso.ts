@@ -174,6 +174,20 @@ export async function createToken(
   return body.jwt;
 }
 
+/** Revoke only this database's tokens; other databases in its group keep working. */
+export async function invalidateDatabaseTokens(env: Env, dbName: string): Promise<void> {
+  if (env.LOCAL_SYNC_URL) return;
+  const res = await platform(
+    env,
+    `/organizations/${env.TURSO_ORG}/databases/${dbName}/auth/rotate`,
+    {
+      method: 'POST',
+      signal: AbortSignal.timeout(15_000),
+    },
+  );
+  if (!res.ok) throw new Error(`turso_revoke_failed_${res.status}`);
+}
+
 /** Creates the sync tables over Turso's HTTP SQL API, before any phone connects. */
 export async function applyCloudSchema(url: string, token: string): Promise<void> {
   const httpUrl = url.replace(/^libsql:\/\//, 'https://');

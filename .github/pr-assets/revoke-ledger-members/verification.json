@@ -1,0 +1,72 @@
+{
+  "group": "m2t-audit-mvw198op",
+  "startedAt": "2026-10-31T06:41:30.937Z",
+  "scope": "Updated local Worker route and in-memory D1 adapter; real disposable Turso Cloud databases in an isolated group; no production account changes",
+  "checks": [
+    {
+      "name": "disposable_databases_ready",
+      "count": 2
+    },
+    {
+      "name": "current_worker_removal_route",
+      "status": 200,
+      "membershipDeleted": true,
+      "inviteRetired": true,
+      "memberNotified": true,
+      "newCredentials": 404,
+      "membersList": 404,
+      "mediaAccess": false,
+      "notifyAccess": false
+    },
+    {
+      "name": "saved_member_token_after_removal",
+      "read": {
+        "status": 401,
+        "ok": false,
+        "error": null
+      },
+      "write": {
+        "status": 401,
+        "ok": false,
+        "error": null
+      }
+    },
+    {
+      "name": "remaining_member_fresh_credentials",
+      "credentialsStatus": 200,
+      "read": {
+        "status": 200,
+        "ok": true,
+        "error": null
+      },
+      "write": {
+        "status": 200,
+        "ok": true,
+        "error": null
+      }
+    },
+    {
+      "name": "other_database_same_group_after_removal",
+      "originalToken": {
+        "status": 200,
+        "ok": true,
+        "error": null
+      }
+    }
+  ],
+  "cleanup": [
+    {
+      "database": "m2t-audit-mvw198op-a",
+      "deleted": true
+    },
+    {
+      "database": "m2t-audit-mvw198op-b",
+      "deleted": true
+    },
+    {
+      "group": "m2t-audit-mvw198op",
+      "deleted": true
+    }
+  ],
+  "finishedAt": "2026-10-31T06:41:39.611Z"
+}
