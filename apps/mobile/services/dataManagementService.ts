@@ -2,9 +2,14 @@ import * as DocumentPicker from 'expo-document-picker';
 import { File, Paths } from 'expo-file-system/next';
 import * as Sharing from 'expo-sharing';
 
-import { isLedgerScoped, LEDGER_CHILD_SYNC_TABLES } from '~/features/cloudSync/lib/ledgerRows';
-import type { SyncTable } from '~/features/cloudSync/lib/syncTables';
-import { personalRowsSql, sharedLedgerIds } from '~/features/cloudSync/services/ledgerChannels';
+import {
+  inLedgersSql,
+  isLedgerScoped,
+  LEDGER_CHILD_SYNC_TABLES,
+} from '~/features/cloudSync/lib/ledgerRows';
+import { SYNC_TABLES, type SyncTable } from '~/features/cloudSync/lib/syncTables';
+import { sharedLedgerIds } from '~/features/cloudSync/services/ledgerChannels';
+import { listSharedLedgers } from '~/features/cloudSync/services/sharedLedgerStore';
 import { getSQLite } from '~/lib/db/client';
 import { DEFAULT_LEDGER_ID, getActiveLedgerId } from '~/lib/db/ledgerScope';
 import { normalizeCurrencyColumns } from '~/lib/db/normalizeCurrencies';
@@ -25,6 +30,11 @@ import {
   type UserAssetReadCache,
 } from '~/services/userAssets';
 import type { ExchangeRate } from '~/types';
+import {
+  type BackupSharedLedger,
+  filterBackupLedgers,
+  restoreLedgerChoices,
+} from '~/utils/backupLedgerPolicy';
 import { buildRateTable, wageRate } from '~/utils/currency';
 import { getErrorMessage } from '~/utils/errorHandling';
 import { newAppUserId, nowIso } from '~/utils/id';
@@ -35,9 +45,9 @@ import { newAppUserId, nowIso } from '~/utils/id';
 // which every app version reads.
 const BACKUP_VERSION = 3;
 const MULTI_LEDGER_BACKUP_VERSION = 4;
-const SUPPORTED_BACKUP_VERSIONS = new Set([1, 2, 3, 4]);
+const SUPPORTED_BACKUP_VERSIONS = new Set([1, 2, 3, 4, 5]);
 
-interface BackupTables {
+interface BackupTables extends Record<string, Record<string, unknown>[] | undefined> {
   accounts: Record<string, unknown>[];
   account_groups: Record<string, unknown>[];
   categories: Record<string, unknown>[];
@@ -76,13 +86,8 @@ export interface BackupData {
   tables: BackupTables;
   /** User-uploaded assets (custom logos, …) embedded as base64. Added in v3. */
   userAssets?: UserAssetBackupEntry[];
-}
-
-export interface BackupSummary {
-  exportedAt: string;
-  accountCount: number;
-  transactionCount: number;
-  recurringRuleCount: number;
+  /** Owned shared snapshots. Descriptive only: live membership authorizes a restore. */
+  sharedLedgers?: BackupSharedLedger[];
 }
 
 function sanitizeSettingsRowsForExport(rows: Record<string, unknown>[]) {
@@ -119,6 +124,8 @@ export async function buildBackupData(opts?: {
   openLedgerOnly?: boolean;
 }): Promise<BackupData> {
   const sqlite = getSQLite();
+  const userAssets = await collectUserAssetsForBackup(opts?.includeAsset, opts?.assetCache);
+  // Keep ledger metadata and table rows in the same synchronous read after asset I/O.
   const now = nowIso();
   const ledgers = tryReadTable(sqlite, 'ledgers');
   const liveLedgerCount = ledgers.filter((row) => row.deleted_at == null).length;
@@ -126,7 +133,7 @@ export async function buildBackupData(opts?: {
   const data: BackupData = {
     version: liveLedgerCount > 1 ? MULTI_LEDGER_BACKUP_VERSION : BACKUP_VERSION,
     exportedAt: now,
-    userAssets: await collectUserAssetsForBackup(opts?.includeAsset, opts?.assetCache),
+    userAssets,
     tables: {
       accounts: sqlite.getAllSync('SELECT * FROM accounts') as Record<string, unknown>[],
       account_groups: sqlite.getAllSync('SELECT * FROM account_groups') as Record<
@@ -166,7 +173,44 @@ export async function buildBackupData(opts?: {
       ledgers,
     },
   };
-  return opts?.openLedgerOnly ? onlyOpenLedger(data) : data;
+  if (opts?.openLedgerOnly) return onlyOpenLedger(data);
+  const shared = listSharedLedgers();
+  const excluded = shared
+    .filter((ledger) => ledger.role === 'member')
+    .map((ledger) => ledger.ledgerId);
+  data.tables = filterBackupLedgers(data.tables, excluded);
+  const owned = shared.filter(
+    (ledger) =>
+      ledger.role === 'owner' && data.tables.ledgers?.some((row) => row.id === ledger.ledgerId),
+  );
+  if (owned.length) {
+    data.sharedLedgers = owned.map(({ ledgerId, shareId }) => ({ ledgerId, shareId }));
+    data.version = 5;
+  } else {
+    data.version =
+      (data.tables.ledgers ?? []).filter((row) => row.deleted_at == null).length > 1
+        ? MULTI_LEDGER_BACKUP_VERSION
+        : BACKUP_VERSION;
+  }
+  if (excluded.length) data.userAssets = referencedBackupAssets(data.tables, data.userAssets);
+  return data;
+}
+
+function backupAssetPaths(tables: Record<string, Record<string, unknown>[] | undefined>) {
+  const paths = new Set<string>();
+  for (const rows of Object.values(tables)) {
+    for (const row of rows ?? [])
+      for (const value of Object.values(row)) {
+        const path = typeof value === 'string' ? assetRelativePathFromRef(value) : null;
+        if (path) paths.add(path);
+      }
+  }
+  return paths;
+}
+
+function referencedBackupAssets(tables: BackupTables, assets?: UserAssetBackupEntry[]) {
+  const paths = backupAssetPaths(tables);
+  return assets?.filter((asset) => paths.has(asset.path));
 }
 
 /**
@@ -346,15 +390,6 @@ export function yieldToEventLoop(): Promise<void> {
   return new Promise<void>((resolve) => setTimeout(resolve, 0));
 }
 
-export function summarizeBackup(data: BackupData): BackupSummary {
-  return {
-    exportedAt: data.exportedAt,
-    accountCount: data.tables.accounts?.length ?? 0,
-    transactionCount: data.tables.transactions?.length ?? 0,
-    recurringRuleCount: data.tables.recurring_rules?.length ?? 0,
-  };
-}
-
 export function parseBackupJson(json: string): BackupData {
   const parsed = JSON.parse(json) as BackupData;
   if (!parsed || typeof parsed.version !== 'number' || !parsed.tables) {
@@ -362,6 +397,16 @@ export function parseBackupJson(json: string): BackupData {
   }
   if (!SUPPORTED_BACKUP_VERSIONS.has(parsed.version)) {
     throw new Error(`Unsupported backup version: ${parsed.version}`);
+  }
+  if (
+    parsed.version === 5 &&
+    (!Array.isArray(parsed.sharedLedgers) ||
+      parsed.sharedLedgers.some(
+        (ledger) =>
+          !ledger || typeof ledger.ledgerId !== 'string' || typeof ledger.shareId !== 'string',
+      ))
+  ) {
+    throw new Error('Invalid shared ledger backup');
   }
   return parsed;
 }
@@ -387,6 +432,7 @@ export interface ImportResult {
   canceled: boolean;
   success?: boolean;
   error?: string;
+  syncPending?: boolean;
 }
 
 function getTableColumnNames(
@@ -464,8 +510,41 @@ function sharedLedgerRowTest(
   };
 }
 
-export function applyBackupData(backup: BackupData): ImportResult {
+export interface BackupRestoreOptions {
+  restorePersonal?: boolean;
+  sharedLedgerIds?: readonly string[];
+  /** Sync intent is persisted in the same transaction as the restored rows. */
+  beforeCommit?: () => void;
+}
+
+export function applyBackupData(
+  backup: BackupData,
+  options: BackupRestoreOptions = {},
+): ImportResult {
   const sqlite = getSQLite();
+  const restorePersonal = options.restorePersonal !== false;
+  const selected = new Set(options.sharedLedgerIds ?? []);
+  const choices = restoreLedgerChoices(backup, listSharedLedgers());
+  if (
+    [...selected].some(
+      (id) => !choices.some((choice) => choice.ledgerId === id && choice.canRestore),
+    )
+  ) {
+    return { canceled: false, success: false, error: 'shared_restore_not_owner' };
+  }
+  if (!restorePersonal && !selected.size)
+    return { canceled: false, success: false, error: 'restore_nothing_selected' };
+  const preserved = new Set(
+    [...sharedLedgerIds(), ...(backup.sharedLedgers ?? []).map((ledger) => ledger.ledgerId)].filter(
+      (id) => !selected.has(id),
+    ),
+  );
+  if (!restorePersonal) {
+    for (const row of [...tryReadTable(sqlite, 'ledgers'), ...(backup.tables.ledgers ?? [])])
+      if (!selected.has(String(row.id))) preserved.add(String(row.id));
+    preserved.add(DEFAULT_LEDGER_ID);
+  }
+  backup = { ...backup, tables: filterBackupLedgers(backup.tables, [...preserved]) };
   const currentAppUserId =
     (
       sqlite.getAllSync('SELECT app_user_id FROM settings LIMIT 1') as {
@@ -474,11 +553,53 @@ export function applyBackupData(backup: BackupData): ImportResult {
     )[0]?.app_user_id ?? newAppUserId();
   const settingsRows = withPreservedAppUserId(backup.tables.settings, currentAppUserId);
 
-  // Shared ledgers are other people's books too: a restore leaves them as
-  // they are, like a reset. Leaving or no longer sharing one removes it.
-  const shared = sharedLedgerIds();
-  const keepShared = (table: string) =>
-    shared.length && isLedgerScoped(table) ? ` WHERE ${personalRowsSql(table)}` : '';
+  // Keep unselected shared ledgers and, for shared-only recovery, personal rows.
+  const shared = [...preserved];
+  const restoreWhere = (table: string) =>
+    !isLedgerScoped(table)
+      ? restorePersonal
+        ? '1'
+        : '0'
+      : !restorePersonal
+        ? inLedgersSql(table, [...selected])
+        : `NOT (${inLedgersSql(table, shared)})`;
+  const keepShared = (table: string) => ` WHERE ${restoreWhere(table)}`;
+  let assetsToRestore = backup.userAssets;
+  if (assetsToRestore?.length) {
+    const restoredTables = Object.fromEntries(
+      Object.entries(backup.tables).filter(([table]) => restorePersonal || isLedgerScoped(table)),
+    );
+    const preservedTables: Record<string, Record<string, unknown>[]> = {};
+    for (const table of SYNC_TABLES) {
+      const where = isLedgerScoped(table)
+        ? inLedgersSql(table, shared)
+        : restorePersonal
+          ? '0'
+          : '1';
+      if (where !== '0') {
+        try {
+          preservedTables[table] = sqlite.getAllSync<Record<string, unknown>>(
+            `SELECT * FROM "${table}" WHERE ${where}`,
+          );
+        } catch {
+          /* Tables absent from a legacy database carry no protected images. */
+        }
+      }
+    }
+    const restoredPaths = backupAssetPaths(restoredTables);
+    const preservedPaths = backupAssetPaths(preservedTables);
+    assetsToRestore = assetsToRestore.filter(
+      (asset) => restoredPaths.has(asset.path) && !preservedPaths.has(asset.path),
+    );
+  }
+  const prefs = [...selected]
+    .map((id) =>
+      sqlite.getFirstSync<{ id: string; prefs_json: string | null }>(
+        'SELECT id, prefs_json FROM ledgers WHERE id = ?',
+        [id],
+      ),
+    )
+    .filter((row) => row != null);
 
   try {
     sqlite.execSync('BEGIN TRANSACTION');
@@ -565,7 +686,11 @@ export function applyBackupData(backup: BackupData): ImportResult {
     insertRows(sqlite, 'receipt_splits', backup.tables.receipt_splits, skip);
     insertRows(sqlite, 'receipt_split_items', backup.tables.receipt_split_items, skip);
     insertRows(sqlite, 'receipt_split_item_shares', backup.tables.receipt_split_item_shares, skip);
-    if (backup.tables.exchange_rates && backup.tables.exchange_rates.length > 0) {
+    if (
+      restorePersonal &&
+      backup.tables.exchange_rates &&
+      backup.tables.exchange_rates.length > 0
+    ) {
       insertRows(sqlite, 'exchange_rates', backup.tables.exchange_rates);
     }
     insertRows(sqlite, 'recurring_rules', backup.tables.recurring_rules, skip);
@@ -585,8 +710,10 @@ export function applyBackupData(backup: BackupData): ImportResult {
     );
     insertRows(sqlite, 'monthly_budgets', backup.tables.monthly_budgets, skip);
     insertRows(sqlite, 'monthly_budget_categories', backup.tables.monthly_budget_categories, skip);
-    insertRows(sqlite, 'settings', settingsRows);
-    insertRows(sqlite, 'monthly_wage_settings', backup.tables.monthly_wage_settings);
+    if (restorePersonal) {
+      insertRows(sqlite, 'settings', settingsRows);
+      insertRows(sqlite, 'monthly_wage_settings', backup.tables.monthly_wage_settings);
+    }
     if (hasLedgers) {
       insertRows(sqlite, 'ledgers', backup.tables.ledgers, skip);
       // A backup from before ledgers has no ledger rows, and every ledger
@@ -597,36 +724,34 @@ export function applyBackupData(backup: BackupData): ImportResult {
          VALUES (?, 0, ?, ?)`,
         [DEFAULT_LEDGER_ID, nowIso(), nowIso()],
       );
-      sqlite.runSync('UPDATE ledgers SET deleted_at = NULL WHERE id = ?', [DEFAULT_LEDGER_ID]);
-      sqlite.execSync('UPDATE settings SET active_ledger_id = NULL');
+      if (restorePersonal) {
+        sqlite.runSync('UPDATE ledgers SET deleted_at = NULL WHERE id = ?', [DEFAULT_LEDGER_ID]);
+        sqlite.execSync('UPDATE settings SET active_ledger_id = NULL');
+      }
+      for (const row of prefs)
+        sqlite.runSync('UPDATE ledgers SET prefs_json = ? WHERE id = ?', [row.prefs_json, row.id]);
     }
 
     // Old backups can restore the retired flag after migration 63 has already
     // run. Convert within this transaction so a failure rolls back the restore.
-    retireSimpleMode(sqlite);
+    if (restorePersonal) retireSimpleMode(sqlite);
+    // Never normalize kept ledgers, including currencies in legacy restores.
+    try {
+      normalizeCurrencyColumns(sqlite, {
+        collapseAll: backup.tables.exchange_rates === undefined,
+        where: restoreWhere,
+      });
+      normalizeIconColumns(sqlite, { where: restoreWhere });
+    } catch {
+      // Legacy normalization remains best-effort, scoped to restored rows.
+    }
+    options.beforeCommit?.();
     sqlite.execSync('COMMIT');
     resetAutomationCaptureData(currentAppUserId);
 
-    // Older backups stored currency symbols (e.g. "RM") instead of ISO codes —
-    // normalize so multi-currency doesn't treat them as bogus sub-currencies.
-    // A backup written before multi-currency has no `exchange_rates` table; such
-    // data is single-currency, so collapse every value (even stray valid codes
-    // like a "USD" placeholder) to the main currency. Backups from a
-    // multi-currency build keep their genuine per-account codes.
-    const isPreMultiCurrencyBackup = backup.tables.exchange_rates === undefined;
-    try {
-      normalizeCurrencyColumns(sqlite, { collapseAll: isPreMultiCurrencyBackup });
-      // A backup written before the icon migration carries bare emoji glyphs in
-      // the icon columns; fold them into the tagged grammar so restored rows
-      // behave like freshly written ones.
-      normalizeIconColumns(sqlite);
-    } catch {
-      // Best-effort — a normalization failure shouldn't fail the restore.
-    }
-
     // Restore user-uploaded assets (custom logos, …) outside the DB transaction.
     try {
-      restoreUserAssetsFromBackup(backup.userAssets);
+      restoreUserAssetsFromBackup(assetsToRestore);
       // The restored DB replaced every reference, so any file left from the
       // device's prior state (not carried by this backup) is now an orphan.
       runUserAssetGc();
@@ -660,6 +785,7 @@ export function applyBackupJson(json: string): ImportResult {
 
 export async function pickAndImportDatabase(options?: {
   onFilePicked?: () => void;
+  restore?: (backup: BackupData) => Promise<ImportResult>;
 }): Promise<ImportResult> {
   const result = await DocumentPicker.getDocumentAsync({
     type: ['application/json', 'text/plain', 'public.json'],
@@ -691,5 +817,12 @@ export async function pickAndImportDatabase(options?: {
     return { canceled: false, success: false, error: 'Failed to read file' };
   }
 
+  if (options?.restore) {
+    try {
+      return await options.restore(parseBackupJson(json));
+    } catch (error) {
+      return { canceled: false, success: false, error: getErrorMessage(error, 'Invalid backup') };
+    }
+  }
   return applyBackupJson(json);
 }

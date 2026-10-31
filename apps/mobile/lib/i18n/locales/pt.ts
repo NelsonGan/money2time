@@ -1,4 +1,21 @@
 const pt = {
+  backup_restore: {
+    title: 'Restore backup',
+    export_description: 'Personal data and shared ledgers you own.',
+    import_description: 'Choose what to restore from a backup.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces ledgers and settings on synced devices.',
+    personal_local_note: 'Replaces ledgers and settings.',
+    shared_ledgers: 'Shared ledgers',
+    owned: 'You own this ledger',
+    unavailable: 'Owner access required',
+    restore_action: 'Restore selected',
+    confirm_title: 'Restore for everyone?',
+    confirm_message:
+      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
+    sync_pending: 'Restored here. Stay signed in to finish syncing.',
+    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+  },
   common: {
     back: 'Voltar',
     loading: 'Carregando…',
@@ -1654,19 +1671,11 @@ const pt = {
     },
     title: 'Gerenciamento de dados',
     export_title: 'Exportar banco de dados',
-    export_description:
-      'Salve um backup completo de todas as suas contas, categorias, transações e configurações como arquivo JSON.',
     exporting: 'Exportando...',
     export_error_title: 'Exportação falhou',
     export_error_message: 'Não foi possível exportar o banco de dados. Tente novamente.',
     import_title: 'Importar backup Money2Time',
-    import_description:
-      'Restaure a partir de um backup JSON do Money2Time exportado anteriormente. Isso substituirá todos os seus dados atuais.',
     importing: 'Importando backup Money2Time',
-    import_confirm_title: 'Substituir todos os dados?',
-    import_confirm_message:
-      'Isso substituirá todas as suas contas, categorias, transações e configurações atuais com os dados do arquivo de backup. Não é possível desfazer.',
-    import_confirm_action: 'Substituir dados',
     import_success_title: 'Importação concluída',
     import_success_message: 'Seus dados foram restaurados com sucesso a partir do backup.',
     import_error_title: 'Importação falhou',
@@ -2519,10 +2528,6 @@ const pt = {
     delete_confirm_title: 'Excluir este backup?',
     delete_confirm_message: 'Este arquivo de backup será removido permanentemente.',
     delete_failed_title: 'Exclusão falhou',
-    restore_confirm_title: 'Substituir todos os dados por este backup?',
-    restore_confirm_summary: '{{accounts}} contas · {{transactions}} transações',
-    restore_confirm_warning: 'Isso substituirá tudo neste dispositivo. Não é possível desfazer.',
-    restore_confirm_action: 'Substituir dados',
     restoring: 'Restaurando...',
     restore_success_title: 'Restaurado',
     restore_success_message: 'Seus dados foram restaurados a partir deste backup.',

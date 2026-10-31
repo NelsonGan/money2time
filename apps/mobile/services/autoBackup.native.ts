@@ -10,6 +10,7 @@ import {
   type BackupRecord,
   type BackupRunResult,
   buildAutoBackupName,
+  buildRecoveryBackupName,
   isBackupStale,
   isInFailureBackoff,
   MAX_AUTO_BACKUPS,
@@ -17,11 +18,11 @@ import {
   sortRecordsNewestFirst,
 } from '~/services/autoBackup.shared';
 import {
-  applyBackupJson,
+  applyBackupData,
+  type BackupData,
   buildBackupJson,
   type ImportResult,
   parseBackupJson,
-  summarizeBackup,
   yieldToEventLoop,
 } from '~/services/dataManagementService';
 import type { BackupTarget } from '~/types';
@@ -267,7 +268,10 @@ export async function listAllBackups(): Promise<BackupRecord[]> {
   return sortRecordsNewestFirst(groups.flat());
 }
 
-export async function restoreFromBackup(record: BackupRecord): Promise<ImportResult> {
+export async function restoreFromBackup(
+  record: BackupRecord,
+  restore?: (backup: BackupData) => Promise<ImportResult>,
+): Promise<ImportResult> {
   const provider = getProvider(record.target);
   let json: string;
   try {
@@ -275,18 +279,31 @@ export async function restoreFromBackup(record: BackupRecord): Promise<ImportRes
   } catch (e) {
     return { canceled: false, success: false, error: getErrorMessage(e, 'Failed to read backup') };
   }
-  const result = applyBackupJson(json);
+  let result: ImportResult;
+  try {
+    result = restore
+      ? await restore(parseBackupJson(json))
+      : applyBackupData(parseBackupJson(json));
+  } catch (error) {
+    return { canceled: false, success: false, error: getErrorMessage(error, 'Invalid backup') };
+  }
   if (result.success) {
     void trackEvent(AnalyticsEvents.AUTO_BACKUP_RESTORED, { target: record.target });
   }
   return result;
 }
 
-export async function previewBackup(record: BackupRecord) {
-  const provider = getProvider(record.target);
-  const json = await provider.download(record);
-  const data = parseBackupJson(json);
-  return summarizeBackup(data);
+/** Always local, never rotated here, and never overwrites the backup being restored. */
+export async function saveRestoreSafetyBackup(): Promise<BackupRecord> {
+  const { json } = await buildBackupJson();
+  const existing = new Set((await localProvider.list()).map((record) => record.id));
+  let time = Date.now();
+  let name = buildRecoveryBackupName(new Date(time));
+  while (existing.has(name)) {
+    time += 1000;
+    name = buildRecoveryBackupName(new Date(time));
+  }
+  return localProvider.upload(name, json);
 }
 
 export async function deleteBackup(record: BackupRecord): Promise<void> {

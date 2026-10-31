@@ -1,4 +1,21 @@
 const uk = {
+  backup_restore: {
+    title: 'Restore backup',
+    export_description: 'Personal data and shared ledgers you own.',
+    import_description: 'Choose what to restore from a backup.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces ledgers and settings on synced devices.',
+    personal_local_note: 'Replaces ledgers and settings.',
+    shared_ledgers: 'Shared ledgers',
+    owned: 'You own this ledger',
+    unavailable: 'Owner access required',
+    restore_action: 'Restore selected',
+    confirm_title: 'Restore for everyone?',
+    confirm_message:
+      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
+    sync_pending: 'Restored here. Stay signed in to finish syncing.',
+    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+  },
   common: {
     back: 'Назад',
     loading: 'Завантаження…',
@@ -1645,19 +1662,11 @@ const uk = {
     },
     title: 'Управління даними',
     export_title: 'Експортувати базу даних',
-    export_description:
-      'Збережіть повну резервну копію всіх рахунків, категорій, операцій та налаштувань у вигляді JSON-файлу.',
     exporting: 'Експортуємо...',
     export_error_title: 'Експорт не вдався',
     export_error_message: 'Не вдалося експортувати базу даних. Спробуйте ще раз.',
     import_title: 'Імпортувати резервну копію Money2Time',
-    import_description:
-      'Відновіть з попередньо експортованої резервної копії Money2Time у форматі JSON. Це замінить усі поточні дані.',
     importing: 'Імпортуємо резервну копію Money2Time',
-    import_confirm_title: 'Замінити всі дані?',
-    import_confirm_message:
-      'Це перезапише всі поточні рахунки, категорії, операції та налаштування даними з резервного файлу. Це незворотньо.',
-    import_confirm_action: 'Замінити дані',
     import_success_title: 'Імпорт завершено',
     import_success_message: 'Дані успішно відновлено з резервної копії.',
     import_error_title: 'Імпорт не вдався',
@@ -2502,10 +2511,6 @@ const uk = {
     delete_confirm_title: 'Видалити цю резервну копію?',
     delete_confirm_message: 'Цей файл резервної копії буде назавжди видалено.',
     delete_failed_title: 'Видалення не вдалося',
-    restore_confirm_title: 'Замінити всі дані цією резервною копією?',
-    restore_confirm_summary: '{{accounts}} рахунків · {{transactions}} операцій',
-    restore_confirm_warning: 'Це замінить усі дані на пристрої. Незворотньо.',
-    restore_confirm_action: 'Замінити дані',
     restoring: 'Відновлення...',
     restore_success_title: 'Відновлено',
     restore_success_message: 'Дані відновлено з цієї резервної копії.',

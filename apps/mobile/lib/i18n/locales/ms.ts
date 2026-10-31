@@ -1,4 +1,21 @@
 const ms = {
+  backup_restore: {
+    title: 'Restore backup',
+    export_description: 'Personal data and shared ledgers you own.',
+    import_description: 'Choose what to restore from a backup.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces ledgers and settings on synced devices.',
+    personal_local_note: 'Replaces ledgers and settings.',
+    shared_ledgers: 'Shared ledgers',
+    owned: 'You own this ledger',
+    unavailable: 'Owner access required',
+    restore_action: 'Restore selected',
+    confirm_title: 'Restore for everyone?',
+    confirm_message:
+      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
+    sync_pending: 'Restored here. Stay signed in to finish syncing.',
+    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+  },
   common: {
     back: 'Kembali',
     loading: 'Memuatkan…',
@@ -1657,19 +1674,11 @@ const ms = {
     },
     title: 'Pengurusan Data',
     export_title: 'Eksport Pangkalan Data',
-    export_description:
-      'Simpan sandaran penuh semua akaun, kategori, transaksi, dan tetapan sebagai fail JSON.',
     exporting: 'Mengeksport...',
     export_error_title: 'Eksport Gagal',
     export_error_message: 'Tidak dapat mengeksport pangkalan data. Sila cuba lagi.',
     import_title: 'Import Sandaran Money2Time',
-    import_description:
-      'Pulihkan dari sandaran JSON Money2Time yang telah dieksport sebelum ini. Ini akan menggantikan semua data semasa anda.',
     importing: 'Mengimport sandaran Money2Time',
-    import_confirm_title: 'Gantikan Semua Data?',
-    import_confirm_message:
-      'Ini akan menimpa semua akaun, kategori, transaksi, dan tetapan semasa anda dengan data dari fail sandaran. Tindakan ini tidak boleh dibuat semula.',
-    import_confirm_action: 'Gantikan Data',
     import_success_title: 'Import Selesai',
     import_success_message: 'Data anda telah berjaya dipulihkan dari sandaran.',
     import_error_title: 'Import Gagal',
@@ -2519,11 +2528,6 @@ const ms = {
     delete_confirm_title: 'Padam sandaran ini?',
     delete_confirm_message: 'Fail sandaran ini akan dipadam secara kekal.',
     delete_failed_title: 'Pemadaman gagal',
-    restore_confirm_title: 'Gantikan semua data dengan sandaran ini?',
-    restore_confirm_summary: '{{accounts}} akaun · {{transactions}} transaksi',
-    restore_confirm_warning:
-      'Ini akan menggantikan semua data pada peranti ini. Tidak boleh dibuat semula.',
-    restore_confirm_action: 'Gantikan data',
     restoring: 'Memulihkan...',
     restore_success_title: 'Dipulihkan',
     restore_success_message: 'Data anda telah dipulihkan dari sandaran ini.',

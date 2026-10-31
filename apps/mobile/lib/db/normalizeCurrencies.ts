@@ -3,6 +3,8 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import { ALL_CURRENCIES } from '~/constants/appDefaults';
 
 interface NormalizeOptions {
+  /** Trusted SQL scope; restores use this to leave preserved ledgers untouched. */
+  where?: (table: string) => string;
   /**
    * When true, every currency value is rewritten to the main currency code,
    * even values that happen to be valid ISO codes. Use this for data that is
@@ -50,7 +52,9 @@ export function normalizeCurrencyColumns(db: SQLiteDatabase, options: NormalizeO
   for (const table of ['accounts', 'transactions', 'recurring_rules', 'receipt_splits']) {
     let rows: { currency: string | null }[];
     try {
-      rows = db.getAllSync<{ currency: string | null }>(`SELECT DISTINCT currency FROM ${table}`);
+      rows = db.getAllSync<{ currency: string | null }>(
+        `SELECT DISTINCT currency FROM ${table}${options.where ? ` WHERE ${options.where(table)}` : ''}`,
+      );
     } catch {
       // Table added by a later migration — absent when this runs from an
       // older migration's backfill pass.
@@ -61,7 +65,10 @@ export function normalizeCurrencyColumns(db: SQLiteDatabase, options: NormalizeO
       if (current == null) continue;
       const next = resolve(current);
       if (next !== current) {
-        db.runSync(`UPDATE ${table} SET currency = ? WHERE currency = ?`, [next, current]);
+        db.runSync(
+          `UPDATE ${table} SET currency = ? WHERE currency = ?${options.where ? ` AND (${options.where(table)})` : ''}`,
+          [next, current],
+        );
       }
     }
   }

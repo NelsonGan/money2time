@@ -1,4 +1,21 @@
 const nb = {
+  backup_restore: {
+    title: 'Restore backup',
+    export_description: 'Personal data and shared ledgers you own.',
+    import_description: 'Choose what to restore from a backup.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces ledgers and settings on synced devices.',
+    personal_local_note: 'Replaces ledgers and settings.',
+    shared_ledgers: 'Shared ledgers',
+    owned: 'You own this ledger',
+    unavailable: 'Owner access required',
+    restore_action: 'Restore selected',
+    confirm_title: 'Restore for everyone?',
+    confirm_message:
+      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
+    sync_pending: 'Restored here. Stay signed in to finish syncing.',
+    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+  },
   common: {
     back: 'Tilbake',
     loading: 'Laster inn…',
@@ -1646,19 +1663,11 @@ const nb = {
     },
     title: 'Dataadministrasjon',
     export_title: 'Eksporter database',
-    export_description:
-      'Lagre en fullstendig sikkerhetskopi av alle kontoer, kategorier, transaksjoner og innstillinger som en JSON-fil.',
     exporting: 'Eksporterer...',
     export_error_title: 'Eksport mislyktes',
     export_error_message: 'Kunne ikke eksportere databasen. Prøv igjen.',
     import_title: 'Importer Money2Time-sikkerhetskopi',
-    import_description:
-      'Gjenopprett fra en tidligere eksportert Money2Time JSON-sikkerhetskopi. Dette erstatter alle gjeldende data.',
     importing: 'Importerer Money2Time-sikkerhetskopi',
-    import_confirm_title: 'Erstatt alle data?',
-    import_confirm_message:
-      'Dette overskriver alle gjeldende kontoer, kategorier, transaksjoner og innstillinger med data fra sikkerhetskopifilen. Dette kan ikke angres.',
-    import_confirm_action: 'Erstatt data',
     import_success_title: 'Import fullført',
     import_success_message: 'Dataene dine har blitt gjenopprettet fra sikkerhetskopien.',
     import_error_title: 'Import mislyktes',
@@ -2504,10 +2513,6 @@ const nb = {
     delete_confirm_title: 'Slett denne sikkerhetskopien?',
     delete_confirm_message: 'Denne sikkerhetskopifilen slettes permanent.',
     delete_failed_title: 'Sletting mislyktes',
-    restore_confirm_title: 'Erstatt alle data med denne sikkerhetskopien?',
-    restore_confirm_summary: '{{accounts}} kontoer · {{transactions}} transaksjoner',
-    restore_confirm_warning: 'Dette erstatter alt på denne enheten. Det kan ikke angres.',
-    restore_confirm_action: 'Erstatt data',
     restoring: 'Gjenoppretter...',
     restore_success_title: 'Gjenopprettet',
     restore_success_message: 'Dataene dine har blitt gjenopprettet fra denne sikkerhetskopien.',

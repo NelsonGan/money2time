@@ -504,7 +504,10 @@ describe('dataManagementService multi-currency backup/restore', () => {
     expect(fresh.tables.transactions).toEqual([foreignTx]);
     // A backup that carries an exchange_rates table is multi-currency, so the
     // currency normalizer must NOT collapse genuine ISO codes (e.g. EUR → USD).
-    expect(normalizeMock).toHaveBeenCalledWith(fresh, { collapseAll: false });
+    expect(normalizeMock).toHaveBeenCalledWith(fresh, {
+      collapseAll: false,
+      where: expect.any(Function),
+    });
   });
 
   it('collapses currencies only for a legacy backup with no exchange_rates key', () => {
@@ -528,7 +531,10 @@ describe('dataManagementService multi-currency backup/restore', () => {
 
     const result = applyBackupData(legacy as never);
     expect(result.success).toBe(true);
-    expect(normalizeMock).toHaveBeenCalledWith(fresh, { collapseAll: true });
+    expect(normalizeMock).toHaveBeenCalledWith(fresh, {
+      collapseAll: true,
+      where: expect.any(Function),
+    });
   });
 });
 

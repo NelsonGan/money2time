@@ -1,4 +1,21 @@
 const th = {
+  backup_restore: {
+    title: 'Restore backup',
+    export_description: 'Personal data and shared ledgers you own.',
+    import_description: 'Choose what to restore from a backup.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces ledgers and settings on synced devices.',
+    personal_local_note: 'Replaces ledgers and settings.',
+    shared_ledgers: 'Shared ledgers',
+    owned: 'You own this ledger',
+    unavailable: 'Owner access required',
+    restore_action: 'Restore selected',
+    confirm_title: 'Restore for everyone?',
+    confirm_message:
+      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
+    sync_pending: 'Restored here. Stay signed in to finish syncing.',
+    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+  },
   common: {
     back: 'กลับ',
     loading: 'กำลังโหลด…',
@@ -1618,19 +1635,11 @@ const th = {
     },
     title: 'การจัดการข้อมูล',
     export_title: 'ส่งออกฐานข้อมูล',
-    export_description:
-      'บันทึกไฟล์สำรองข้อมูลสมบูรณ์ของบัญชี หมวดหมู่ รายการ และการตั้งค่าทั้งหมดเป็นไฟล์ JSON',
     exporting: 'กำลังส่งออก...',
     export_error_title: 'ส่งออกไม่สำเร็จ',
     export_error_message: 'ไม่สามารถส่งออกฐานข้อมูลได้ กรุณาลองใหม่',
     import_title: 'นำเข้าไฟล์สำรอง Money2Time',
-    import_description:
-      'กู้คืนจากไฟล์สำรอง Money2Time JSON ที่ส่งออกไว้ก่อนหน้า การดำเนินการนี้จะแทนที่ข้อมูลปัจจุบันทั้งหมด',
     importing: 'กำลังนำเข้าไฟล์สำรอง Money2Time',
-    import_confirm_title: 'แทนที่ข้อมูลทั้งหมด?',
-    import_confirm_message:
-      'การดำเนินการนี้จะเขียนทับบัญชี หมวดหมู่ รายการ และการตั้งค่าปัจจุบันทั้งหมดด้วยข้อมูลจากไฟล์สำรอง การดำเนินการนี้ไม่สามารถเลิกทำได้',
-    import_confirm_action: 'แทนที่ข้อมูล',
     import_success_title: 'นำเข้าเสร็จแล้ว',
     import_success_message: 'กู้คืนข้อมูลของคุณจากไฟล์สำรองสำเร็จแล้ว',
     import_error_title: 'นำเข้าไม่สำเร็จ',
@@ -2455,10 +2464,6 @@ const th = {
     delete_confirm_title: 'ลบไฟล์สำรองนี้?',
     delete_confirm_message: 'ไฟล์สำรองนี้จะถูกลบอย่างถาวร',
     delete_failed_title: 'ลบไม่สำเร็จ',
-    restore_confirm_title: 'แทนที่ข้อมูลทั้งหมดด้วยไฟล์สำรองนี้?',
-    restore_confirm_summary: '{{accounts}} บัญชี · {{transactions}} รายการ',
-    restore_confirm_warning: 'การดำเนินการนี้จะแทนที่ทุกอย่างบนอุปกรณ์นี้ ไม่สามารถเลิกทำได้',
-    restore_confirm_action: 'แทนที่ข้อมูล',
     restoring: 'กำลังกู้คืน...',
     restore_success_title: 'กู้คืนแล้ว',
     restore_success_message: 'ข้อมูลของคุณถูกกู้คืนจากไฟล์สำรองนี้แล้ว',

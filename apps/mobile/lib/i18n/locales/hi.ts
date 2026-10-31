@@ -1,4 +1,21 @@
 const hi = {
+  backup_restore: {
+    title: 'Restore backup',
+    export_description: 'Personal data and shared ledgers you own.',
+    import_description: 'Choose what to restore from a backup.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces ledgers and settings on synced devices.',
+    personal_local_note: 'Replaces ledgers and settings.',
+    shared_ledgers: 'Shared ledgers',
+    owned: 'You own this ledger',
+    unavailable: 'Owner access required',
+    restore_action: 'Restore selected',
+    confirm_title: 'Restore for everyone?',
+    confirm_message:
+      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
+    sync_pending: 'Restored here. Stay signed in to finish syncing.',
+    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+  },
   common: {
     back: 'वापस',
     loading: 'लोड हो रहा है…',
@@ -1639,19 +1656,11 @@ const hi = {
     },
     title: 'डेटा प्रबंधन',
     export_title: 'डेटाबेस एक्सपोर्ट करें',
-    export_description:
-      'अपने सभी खाते, श्रेणियां, लेनदेन, और सेटिंग्स का पूरा बैकअप JSON फ़ाइल के रूप में सेव करें।',
     exporting: 'एक्सपोर्ट हो रहा है...',
     export_error_title: 'एक्सपोर्ट विफल',
     export_error_message: 'डेटाबेस एक्सपोर्ट नहीं हो सका। कृपया पुनः प्रयास करें।',
     import_title: 'Money2Time बैकअप आयात करें',
-    import_description:
-      'पहले एक्सपोर्ट किए गए Money2Time JSON बैकअप से पुनर्स्थापित करें। यह आपका सभी मौजूदा डेटा बदल देगा।',
     importing: 'Money2Time बैकअप आयात हो रहा है',
-    import_confirm_title: 'सभी डेटा बदलें?',
-    import_confirm_message:
-      'यह बैकअप फ़ाइल के डेटा से आपके सभी मौजूदा खाते, श्रेणियां, लेनदेन, और सेटिंग्स बदल देगा। यह पूर्ववत नहीं किया जा सकता।',
-    import_confirm_action: 'डेटा बदलें',
     import_success_title: 'आयात पूरा',
     import_success_message: 'आपका डेटा बैकअप से सफलतापूर्वक पुनर्स्थापित हो गया।',
     import_error_title: 'आयात विफल',
@@ -2493,10 +2502,6 @@ const hi = {
     delete_confirm_title: 'यह बैकअप हटाएं?',
     delete_confirm_message: 'यह बैकअप फ़ाइल स्थायी रूप से हट जाएगी।',
     delete_failed_title: 'हटाना विफल',
-    restore_confirm_title: 'इस बैकअप से सभी डेटा बदलें?',
-    restore_confirm_summary: '{{accounts}} खाते · {{transactions}} लेनदेन',
-    restore_confirm_warning: 'यह इस डिवाइस पर सब कुछ बदल देगा। इसे पूर्ववत नहीं किया जा सकता।',
-    restore_confirm_action: 'डेटा बदलें',
     restoring: 'पुनर्स्थापित हो रहा है...',
     restore_success_title: 'पुनर्स्थापित हो गया',
     restore_success_message: 'आपका डेटा इस बैकअप से पुनर्स्थापित हो गया।',

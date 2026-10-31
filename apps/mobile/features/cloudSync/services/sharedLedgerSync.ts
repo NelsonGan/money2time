@@ -7,6 +7,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { getSQLite } from '~/lib/db/client';
 import { getActiveLedgerId } from '~/lib/db/ledgerScope';
+import {
+  applyBackupData,
+  type BackupData,
+  type BackupRestoreOptions,
+  type ImportResult,
+} from '~/services/dataManagementService';
+import { restoreLedgerChoices } from '~/utils/backupLedgerPolicy';
 
 import { CloudSyncApiError, ledgerMediaPath, type SyncCredentials } from './cloudSyncApi';
 import {
@@ -44,6 +51,7 @@ import {
   dropPersonalOutbox,
   hasUnpushedChanges,
   pendingSharedChangeCount,
+  type RestoreSnapshot,
   runExclusive,
   SyncEngine,
 } from './syncEngine';
@@ -443,6 +451,68 @@ class SharedLedgerSync {
   async waitIdle(): Promise<void> {
     await this.running?.catch(() => undefined);
     for (const engine of this.engines.values()) await engine.waitIdle();
+  }
+
+  /** The provider pauses scheduling before this runs; ownership is checked online twice. */
+  async restoreBackup(
+    backup: BackupData,
+    options: BackupRestoreOptions,
+    saveSafetyBackup: () => Promise<unknown>,
+  ): Promise<ImportResult> {
+    const selected = [...new Set(options.sharedLedgerIds ?? [])];
+    const session = this.session;
+    const authorize = () => {
+      const choices = restoreLedgerChoices(backup, listSharedLedgers());
+      if (
+        this.session !== session ||
+        selected.some(
+          (id) => !choices.some((choice) => choice.ledgerId === id && choice.canRestore),
+        )
+      )
+        throw new Error('shared_restore_not_owner');
+    };
+    const engines: { engine: SyncEngine; snapshot: RestoreSnapshot }[] = [];
+    if (selected.length) {
+      if (!session) throw new Error('shared_restore_sign_in');
+      await this.refreshList(true);
+      authorize();
+      for (const id of selected) {
+        const ledger = sharedLedgerFor(id)!;
+        this.credentials.delete(ledger.shareId);
+        const engine = await this.engineFor(ledger);
+        const result = await engine.syncNow();
+        if (result.applyError) throw result.applyError;
+        engines.push({ engine, snapshot: await engine.prepareSnapshotRestore() });
+      }
+    }
+    await saveSafetyBackup();
+    if (selected.length) {
+      await this.refreshList(true);
+      authorize();
+      // Read again after the safety backup; include cloud-only rows in the replacement.
+      for (const entry of engines) entry.snapshot = await entry.engine.prepareSnapshotRestore();
+    }
+    const result = await runExclusive(() =>
+      applyBackupData(backup, {
+        ...options,
+        beforeCommit: () => {
+          for (const entry of engines) entry.engine.stageSnapshotRestore(entry.snapshot);
+        },
+      }),
+    );
+    if (!result.success) return result;
+    for (const entry of engines) {
+      try {
+        const synced = await entry.engine.syncNow();
+        if (synced.applyError) throw synced.applyError;
+        session?.announce?.(entry.snapshot.channel);
+      } catch {
+        // The intent/replica is durable: retry rather than losing a completed local restore.
+        this.retry = true;
+        return { ...result, syncPending: true };
+      }
+    }
+    return result;
   }
 
   // -------------------------------------------------------------------------

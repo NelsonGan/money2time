@@ -27,7 +27,12 @@ import { DEFAULT_LEDGER_ID, getActiveLedgerId } from '~/lib/db/ledgerScope';
 import { ledgersRepository } from '~/lib/repositories/ledgersRepository';
 import { clearAccountPro, getAccountProAnswer, setAccountPro } from '~/services/accountPro';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
-import { runAutoBackupIfDue } from '~/services/autoBackup';
+import { runAutoBackupIfDue, saveRestoreSafetyBackup } from '~/services/autoBackup';
+import type {
+  BackupData,
+  BackupRestoreOptions,
+  ImportResult,
+} from '~/services/dataManagementService';
 import { reportError } from '~/services/errorReporting';
 import { FEATURE_FLAGS, useFeatureFlag } from '~/services/featureFlags';
 import { runUserAssetGc } from '~/services/userAssetGc';
@@ -160,6 +165,7 @@ interface CloudSyncContextValue {
   getSessionToken: () => Promise<string>;
   /** Re-reads the shared-ledger list now; ledgers no longer shared leave the phone. */
   refreshSharedLedgers: () => Promise<void>;
+  restoreBackup: (backup: BackupData, options: BackupRestoreOptions) => Promise<ImportResult>;
 }
 
 const CloudSyncContext = createContext<CloudSyncContextValue | null>(null);
@@ -1093,6 +1099,23 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
     if (removed > 0) reloadAfterApply();
   }, [reloadAfterApply]);
 
+  const restoreBackup = useCallback(
+    async (backup: BackupData, options: BackupRestoreOptions): Promise<ImportResult> => {
+      if (closingRef.current) throw new Error('restore_busy');
+      closingRef.current = true;
+      try {
+        await syncingRef.current?.catch(() => undefined);
+        await sharedLedgerSync.waitIdle();
+        await engineRef.current?.waitIdle();
+        return await sharedLedgerSync.restoreBackup(backup, options, saveRestoreSafetyBackup);
+      } finally {
+        closingRef.current = false;
+        reloadAfterApply();
+      }
+    },
+    [reloadAfterApply],
+  );
+
   const value = useMemo<CloudSyncContextValue>(
     () => ({
       status,
@@ -1118,6 +1141,7 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       joinLedger,
       getSessionToken: sessionToken,
       refreshSharedLedgers,
+      restoreBackup,
     }),
     [
       status,
@@ -1143,6 +1167,7 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       joinLedger,
       sessionToken,
       refreshSharedLedgers,
+      restoreBackup,
     ],
   );
 

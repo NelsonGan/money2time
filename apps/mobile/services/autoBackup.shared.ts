@@ -2,6 +2,7 @@ import type { BackupTarget } from '~/types';
 
 export const AUTO_BACKUP_TASK_ID = 'money2time-auto-backup';
 export const AUTO_BACKUP_PREFIX = 'money2time_AUTO_';
+export const RECOVERY_BACKUP_PREFIX = 'money2time_RECOVERY_';
 export const AUTO_BACKUP_EXTENSION = '.json';
 export const MAX_AUTO_BACKUPS = 10;
 export const BACKUP_STALENESS_HOURS = 24;
@@ -40,9 +41,16 @@ export function buildAutoBackupName(now = new Date()): string {
   return `${AUTO_BACKUP_PREFIX}${iso}${AUTO_BACKUP_EXTENSION}`;
 }
 
+export function buildRecoveryBackupName(now = new Date()): string {
+  return buildAutoBackupName(now).replace(AUTO_BACKUP_PREFIX, RECOVERY_BACKUP_PREFIX);
+}
+
 export function parseTimestampFromName(name: string): string | null {
-  if (!name.startsWith(AUTO_BACKUP_PREFIX)) return null;
-  const stem = name.slice(AUTO_BACKUP_PREFIX.length).replace(AUTO_BACKUP_EXTENSION, '');
+  const prefix = [AUTO_BACKUP_PREFIX, RECOVERY_BACKUP_PREFIX].find((value) =>
+    name.startsWith(value),
+  );
+  if (!prefix) return null;
+  const stem = name.slice(prefix.length).replace(AUTO_BACKUP_EXTENSION, '');
   // Reverse of buildAutoBackupName: "2026-05-24T09-14-00" → "2026-05-24T09:14:00Z"
   const restored = stem.replace(/-(\d{2})-(\d{2})$/, ':$1:$2').replace('T', 'T') + 'Z';
   const t = Date.parse(restored);

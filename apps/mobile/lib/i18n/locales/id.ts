@@ -1,4 +1,21 @@
 const id = {
+  backup_restore: {
+    title: 'Restore backup',
+    export_description: 'Personal data and shared ledgers you own.',
+    import_description: 'Choose what to restore from a backup.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces ledgers and settings on synced devices.',
+    personal_local_note: 'Replaces ledgers and settings.',
+    shared_ledgers: 'Shared ledgers',
+    owned: 'You own this ledger',
+    unavailable: 'Owner access required',
+    restore_action: 'Restore selected',
+    confirm_title: 'Restore for everyone?',
+    confirm_message:
+      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
+    sync_pending: 'Restored here. Stay signed in to finish syncing.',
+    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+  },
   common: {
     back: 'Kembali',
     loading: 'Memuat…',
@@ -1653,19 +1670,11 @@ const id = {
     },
     title: 'Manajemen Data',
     export_title: 'Ekspor Database',
-    export_description:
-      'Simpan cadangan lengkap semua akun, kategori, transaksi, dan pengaturan sebagai file JSON.',
     exporting: 'Mengekspor...',
     export_error_title: 'Ekspor Gagal',
     export_error_message: 'Tidak dapat mengekspor database. Silakan coba lagi.',
     import_title: 'Impor Cadangan Money2Time',
-    import_description:
-      'Pulihkan dari cadangan JSON Money2Time yang pernah diekspor. Ini akan menggantikan semua data saat ini.',
     importing: 'Mengimpor cadangan Money2Time',
-    import_confirm_title: 'Ganti Semua Data?',
-    import_confirm_message:
-      'Ini akan menimpa semua akun, kategori, transaksi, dan pengaturanmu saat ini dengan data dari file cadangan. Tindakan ini tidak bisa dibatalkan.',
-    import_confirm_action: 'Ganti Data',
     import_success_title: 'Impor Selesai',
     import_success_message: 'Datamu telah berhasil dipulihkan dari cadangan.',
     import_error_title: 'Impor Gagal',
@@ -2512,11 +2521,6 @@ const id = {
     delete_confirm_title: 'Hapus cadangan ini?',
     delete_confirm_message: 'File cadangan ini akan dihapus permanen.',
     delete_failed_title: 'Hapus gagal',
-    restore_confirm_title: 'Ganti semua data dengan cadangan ini?',
-    restore_confirm_summary: '{{accounts}} akun · {{transactions}} transaksi',
-    restore_confirm_warning:
-      'Ini akan menggantikan semua data di perangkat ini. Tidak bisa dibatalkan.',
-    restore_confirm_action: 'Ganti data',
     restoring: 'Memulihkan...',
     restore_success_title: 'Dipulihkan',
     restore_success_message: 'Datamu telah dipulihkan dari cadangan ini.',

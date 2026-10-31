@@ -1,4 +1,21 @@
 const ja = {
+  backup_restore: {
+    title: 'Restore backup',
+    export_description: 'Personal data and shared ledgers you own.',
+    import_description: 'Choose what to restore from a backup.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces ledgers and settings on synced devices.',
+    personal_local_note: 'Replaces ledgers and settings.',
+    shared_ledgers: 'Shared ledgers',
+    owned: 'You own this ledger',
+    unavailable: 'Owner access required',
+    restore_action: 'Restore selected',
+    confirm_title: 'Restore for everyone?',
+    confirm_message:
+      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
+    sync_pending: 'Restored here. Stay signed in to finish syncing.',
+    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+  },
   common: {
     back: '戻る',
     loading: '読み込み中…',
@@ -1638,19 +1655,11 @@ const ja = {
     },
     title: 'データ管理',
     export_title: 'データベースをエクスポート',
-    export_description:
-      'すべての口座・カテゴリ・取引・設定のフルバックアップをJSONファイルとして保存します。',
     exporting: 'エクスポート中...',
     export_error_title: 'エクスポート失敗',
     export_error_message: 'データベースをエクスポートできませんでした。もう一度お試しください。',
     import_title: 'Money2Time バックアップをインポート',
-    import_description:
-      '以前にエクスポートした Money2Time JSONバックアップから復元します。現在のすべてのデータが置き換えられます。',
     importing: 'Money2Time バックアップをインポート中',
-    import_confirm_title: 'すべてのデータを置き換えますか？',
-    import_confirm_message:
-      'バックアップファイルのデータで、現在のすべての口座・カテゴリ・取引・設定が上書きされます。この操作は元に戻せません。',
-    import_confirm_action: 'データを置き換える',
     import_success_title: 'インポート完了',
     import_success_message: 'バックアップからデータが正常に復元されました。',
     import_error_title: 'インポート失敗',
@@ -2490,10 +2499,6 @@ const ja = {
     delete_confirm_title: 'このバックアップを削除しますか？',
     delete_confirm_message: 'このバックアップファイルは完全に削除されます。',
     delete_failed_title: '削除に失敗しました',
-    restore_confirm_title: 'このバックアップですべてのデータを置き換えますか？',
-    restore_confirm_summary: '{{accounts}} 口座 · {{transactions}} 件の取引',
-    restore_confirm_warning: 'このデバイスのすべてのデータが置き換えられます。元に戻せません。',
-    restore_confirm_action: 'データを置き換える',
     restoring: '復元中...',
     restore_success_title: '復元しました',
     restore_success_message: 'このバックアップからデータが復元されました。',

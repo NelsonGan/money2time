@@ -1,4 +1,21 @@
 const tr = {
+  backup_restore: {
+    title: 'Restore backup',
+    export_description: 'Personal data and shared ledgers you own.',
+    import_description: 'Choose what to restore from a backup.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces ledgers and settings on synced devices.',
+    personal_local_note: 'Replaces ledgers and settings.',
+    shared_ledgers: 'Shared ledgers',
+    owned: 'You own this ledger',
+    unavailable: 'Owner access required',
+    restore_action: 'Restore selected',
+    confirm_title: 'Restore for everyone?',
+    confirm_message:
+      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
+    sync_pending: 'Restored here. Stay signed in to finish syncing.',
+    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
+  },
   common: {
     back: 'Geri',
     loading: 'Yükleniyor…',
@@ -1656,19 +1673,11 @@ const tr = {
     },
     title: 'Veri Yönetimi',
     export_title: 'Veritabanını Dışa Aktar',
-    export_description:
-      'Tüm hesaplarınızın, kategorilerinizin, işlemlerinizin ve ayarlarınızın tam yedeğini JSON dosyası olarak kaydedin.',
     exporting: 'Dışa aktarılıyor...',
     export_error_title: 'Dışa Aktarma Başarısız',
     export_error_message: 'Veritabanı dışa aktarılamadı. Lütfen tekrar deneyin.',
     import_title: 'Money2Time Yedeği İçe Aktar',
-    import_description:
-      'Önceden dışa aktarılmış bir Money2Time JSON yedeğinden geri yükleyin. Bu işlem mevcut tüm verilerinizin yerini alır.',
     importing: 'Money2Time yedeği içe aktarılıyor',
-    import_confirm_title: 'Tüm Veriler Değiştirilsin mi?',
-    import_confirm_message:
-      'Bu işlem mevcut tüm hesaplarınızı, kategorilerinizi, işlemlerinizi ve ayarlarınızı yedek dosyasındaki verilerle değiştirecek. Bu geri alınamaz.',
-    import_confirm_action: 'Verileri Değiştir',
     import_success_title: 'İçe Aktarma Tamamlandı',
     import_success_message: 'Verileriniz yedekten başarıyla geri yüklendi.',
     import_error_title: 'İçe Aktarma Başarısız',
@@ -2512,10 +2521,6 @@ const tr = {
     delete_confirm_title: 'Bu yedek silinsin mi?',
     delete_confirm_message: 'Bu yedek dosyası kalıcı olarak kaldırılacak.',
     delete_failed_title: 'Silme başarısız',
-    restore_confirm_title: 'Tüm veriler bu yedekle değiştirilsin mi?',
-    restore_confirm_summary: '{{accounts}} hesap · {{transactions}} işlem',
-    restore_confirm_warning: 'Bu cihazdaki her şeyin yerini alacak. Geri alınamaz.',
-    restore_confirm_action: 'Verileri değiştir',
     restoring: 'Geri yükleniyor...',
     restore_success_title: 'Geri yüklendi',
     restore_success_message: 'Verileriniz bu yedekten geri yüklendi.',
