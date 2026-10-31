@@ -3028,10 +3028,14 @@ const fil = {
     people_signed_out: 'Mag-sign in sa Cloud Sync para makita kung sino ang nandito.',
     you: 'Ikaw',
     owner_badge: 'May-ari',
-    member_badge: 'Miyembro',
+    joined_today: 'Sumali ngayong araw',
+    joined_on: 'Sumali noong {{date}}',
     seats: '{{count}} sa {{max}} ang sumali',
-    invite: 'Mag-imbita ng tao',
-    invite_message: 'Sumali sa ledger kong "{{name}}" sa Money2Time: {{url}}',
+    invite_link: 'Invite link',
+    new_link: 'Bagong link',
+    new_link_title: 'Gumawa ng bagong link?',
+    new_link_message:
+      'Titigil agad gumana ang kasalukuyang link. Kailangan ng bagong link ng mga hindi pa nakakasali.',
     full: 'Puno na ang lahat ng {{max}} na puwesto. Mag-alis ng tao para makapag-imbita pa.',
     remove: 'Alisin',
     remove_title: 'Alisin si {{name}}?',
@@ -3080,7 +3084,8 @@ const fil = {
     open_ledger: 'Buksan ang {{name}}',
     join_note:
       'Magbubukas ito bilang hiwalay na ledger. Mananatiling private ang sarili mong mga ledger.',
-    join_invalid: 'Expired na ang invite link na ito. Humingi ng bago.',
+    join_invalid:
+      'Hindi na gumagana ang invite link na ito. Tumatagal ang link nang 24 oras, at maagang titigil kapag itinigil ng may-ari ang pag-share o may tinanggal siya. Humingi ng bagong link sa may-ari.',
     join_full: 'Puno na ang ledger na ito. Hilingin sa may-ari na magbakante ng puwesto.',
     join_paused: 'Naka-pause ang ledger na ito dahil walang may Pro dito sa ngayon.',
     join_own: 'Isa ito sa sarili mong mga ledger.',

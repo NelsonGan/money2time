@@ -89,13 +89,26 @@ export async function removeMember(token: string, shareId: string, userId: strin
   });
 }
 
-/** The ledger's invite link: the open one, or a new one that lasts a day. */
+export interface InviteLink {
+  url: string;
+  /** Epoch ms. The Worker hands out a link with at least an hour left. */
+  expiresAt: number;
+}
+
+/**
+ * The ledger's invite link: the open one, or a new one that lasts a day.
+ * `rotate` always makes a new one, and the old link stops working at once.
+ */
 export function getInviteLink(
   token: string,
   shareId: string,
   ledger: { name: string; emoji: string | null },
-): Promise<{ url: string; expiresAt: number }> {
-  return request(path(shareId, '/invites'), { body: ledger, token });
+  options: { rotate?: boolean } = {},
+): Promise<InviteLink> {
+  return request(path(shareId, '/invites'), {
+    body: options.rotate ? { ...ledger, rotate: true } : ledger,
+    token,
+  });
 }
 
 export function previewInvite(code: string): Promise<InvitePreview> {
