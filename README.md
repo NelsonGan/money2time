@@ -1514,6 +1514,9 @@ The app side is `features/sharedLedgers/` (screens) and
   failure leaves membership and the invite intact, drops the cached token,
   and returns an error so the action can be retried. An abandoned fence
   expires after a minute and is recovered by a credentials or removal retry.
+  If the earlier rotation finishes after that recovery, its cleanup also
+  discards any cached token it just revoked, while preserving a newer
+  removal's fence.
   Tokens otherwise last a day, so a paused ledger's previously issued tokens
   can still work until expiry. A phone whose sync fails drops its cached
   token and asks again.

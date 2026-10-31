@@ -185,8 +185,10 @@ async function removeMemberAccess(
     .run();
   if (!acquired.meta.changes) throw new Error('ledger_access_changing');
   let completed = false;
+  let rotated = false;
   try {
     await invalidateDatabaseTokens(env, ledger.db_name);
+    rotated = true;
     const statements = [
       env.AUTH_DB.prepare(
         `DELETE FROM ledger_members WHERE ledger_id = ?1 AND user_id = ?2
@@ -211,13 +213,16 @@ async function removeMemberAccess(
     completed = true;
     return true;
   } finally {
-    // Also after failure: a timed-out rotation may have reached Turso, so the
-    // previous cached token must never be restored. A retry can rotate again.
+    // A completed rotation can invalidate credentials minted after lease
+    // recovery. Clear those too, but preserve another removal's active lock.
+    // With an uncertain rotation, clear only our own lock and cached token.
     if (!completed) {
       await env.AUTH_DB.prepare(
-        'UPDATE shared_ledgers SET token = ?2, token_expires_at = NULL WHERE id = ?1 AND token = ?3',
+        `UPDATE shared_ledgers SET token = ?2, token_expires_at = NULL
+         WHERE id = ?1 AND (token = ?3
+           OR (?4 = 1 AND (token IS NULL OR token NOT LIKE 'revoking:%')))`,
       )
-        .bind(id, invalidated, lock)
+        .bind(id, invalidated, lock, rotated ? 1 : 0)
         .run();
     }
   }

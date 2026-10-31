@@ -255,6 +255,70 @@ test('a terminated removal does not block credentials or a removal retry after t
   assert.equal(f.memberExists(), false);
 });
 
+test('a rotation that finishes after lease recovery discards the credentials it revoked', async (t) => {
+  const f = await fixture(t);
+  const rotating = deferred();
+  const resume = deferred();
+  f.onRotate(async () => {
+    rotating.resolve();
+    await resume.promise;
+  });
+  const removal = f.remove();
+  const rejected = assert.rejects(removal, /ledger_access_changed/);
+  await rotating.promise;
+  try {
+    const now = Date.now();
+    t.mock.method(Date, 'now', () => now + 61_000);
+    const credentials = await f.call('remaining', '/credentials');
+    assert.equal(credentials?.status, 200);
+    assert.equal(await f.cachedToken(), 'token-0');
+  } finally {
+    resume.resolve();
+  }
+  await rejected;
+  assert(f.memberExists());
+  assert(f.db.prepare('SELECT 1 FROM ledger_links').get());
+  assert.equal(await f.cachedToken(), null);
+  const fresh = await f.call('remaining', '/credentials');
+  assert.equal((await fresh?.json()).authToken, 'token-1');
+});
+
+test('a late rotation preserves the lock held by another removal', async (t) => {
+  const f = await fixture(t);
+  const firstRotating = deferred();
+  const firstResume = deferred();
+  const secondRotating = deferred();
+  const secondResume = deferred();
+  let rotations = 0;
+  f.onRotate(async () => {
+    if (++rotations === 1) {
+      firstRotating.resolve();
+      await firstResume.promise;
+    } else {
+      secondRotating.resolve();
+      await secondResume.promise;
+    }
+  });
+  const first = f.remove();
+  const firstRejected = assert.rejects(first, /ledger_access_changed/);
+  await firstRotating.promise;
+  const now = Date.now();
+  t.mock.method(Date, 'now', () => now + 61_000);
+  const second = f.call('owner', '/members/remaining', 'DELETE');
+  try {
+    await secondRotating.promise;
+    firstResume.resolve();
+    await firstRejected;
+    await assert.rejects(() => f.call('remaining', '/credentials'), /ledger_access_changing/);
+  } finally {
+    firstResume.resolve();
+    secondResume.resolve();
+  }
+  assert.equal((await second)?.status, 200);
+  assert(f.memberExists());
+  assert.equal((await f.call('remaining', '/credentials'))?.status, 404);
+});
+
 test('a cached-token request rechecks access after removal', async (t) => {
   const f = await fixture(t);
   const decrypting = deferred();
