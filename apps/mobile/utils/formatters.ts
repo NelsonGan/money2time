@@ -183,6 +183,21 @@ export function timeOfDayOnDay(dateText: string, dayKey: string): number {
 }
 
 /**
+ * The date to store for a new transaction. Pickers only choose a day, so the
+ * editor and Quick Add hand over a bare `YYYY-MM-DD` or that day's local
+ * midnight. For today that becomes `now`, so the entry sorts by when it was
+ * added against rows that carry a real time (balance adjustments, auto-logged
+ * entries). Left at midnight, it sank below every one of them. Another day, or
+ * a value that already has a time of day, is stored as given.
+ */
+export function dateForNewTransaction(pickedDate: string, now: Date = new Date()): string {
+  const day = dayKeyFromIsoLocal(pickedDate);
+  if (day !== dayKeyFromDateLocal(now)) return pickedDate;
+  if (timeFromDateLocal(pickedDate) !== dateFromDayKeyLocal(day).getTime()) return pickedDate;
+  return now.toISOString();
+}
+
+/**
  * The date to store when the user picks a day for an existing transaction.
  * Pickers only choose a day, so the row keeps its own time: the stored value
  * is untouched when the day did not change, and moves with the same time of

@@ -1,0 +1,23 @@
+Device verification status: BLOCKED; no successful post-fix UI verification.
+
+Reported device: OPPO Find X9 Pro, Android 16, app 1.7.
+Local target: Money2Time_Pixel_10 (Android 16), emulator-5554.
+
+Earlier interaction attempts returned adb app launch/force-stop timeouts.
+A clean emulator restart did not produce a working Argent connection.
+Follow-up attempt: Argent list-devices returned:
+  Timed out waiting for tools server to become ready
+Argent server start --detach also returned:
+  Error: Timed out waiting for tools server to become ready
+Argent server status --json reported running: false.
+
+No final UI screenshots or recordings were captured.
+The user-provided recording contains account names/balances and is not published.
+
+Pending manual verification in both quick and full transaction entry:
+- With a long grouped account list, swipe from an empty half-row, between groups,
+  the column gutter and the side gutters; confirm list movement.
+- Confirm swiping on an account still scrolls without selecting it.
+- Confirm account selection, Close and outside-backdrop dismissal still work.
+- Confirm the balance-visibility toggle and disabled transfer account behavior.
+- Check the shared picker on iOS as a cross-platform regression check.

@@ -8,7 +8,32 @@ import {
   parseNavTabs,
   removeNavTab,
   serializeNavTabs,
+  showsTransactionFab,
 } from '~/components/navigation/navTabs';
+
+describe('transaction entry button', () => {
+  it('is available on Accounts with the default Calendar home', () => {
+    expect(showsTransactionFab('accounts', DEFAULT_NAV_TABS)).toBe(true);
+    expect(showsTransactionFab('calendar', DEFAULT_NAV_TABS)).toBe(true);
+  });
+
+  it('is available on Accounts when it is home and Calendar is still in the bar', () => {
+    expect(showsTransactionFab('accounts', ['accounts', 'calendar', 'settings'])).toBe(true);
+  });
+
+  it('keeps entry on the home page when Calendar is removed', () => {
+    const tabs = ['insights', 'accounts', 'settings'] as const;
+    expect(showsTransactionFab('insights', tabs)).toBe(true);
+    expect(showsTransactionFab('accounts', tabs)).toBe(true);
+    expect(showsTransactionFab('settings', tabs)).toBe(false);
+  });
+
+  it('does not add transaction buttons to other tabs while Calendar is in the bar', () => {
+    for (const tab of ['insights', 'albums', 'settings'] as const) {
+      expect(showsTransactionFab(tab, DEFAULT_NAV_TABS)).toBe(false);
+    }
+  });
+});
 
 describe('parseNavTabs', () => {
   it('falls back to the default bar when nothing is stored', () => {

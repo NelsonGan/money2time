@@ -1,3 +1,5 @@
+import { dayKeyFromIsoLocal, monthKeyFromIsoLocal } from '~/utils/formatters';
+
 type OpenTransactionsRequest = {
   monthKey: string | null;
   /** Day (YYYY-MM-DD) to scroll to within the focused month, if any. */
@@ -10,6 +12,15 @@ const listeners = new Set<Listener>();
 
 export function requestOpenTransactions(request: OpenTransactionsRequest) {
   listeners.forEach((listener) => listener(request));
+}
+
+/** Preserve in-app callers that opted out of switching to Calendar after entry. */
+export function requestOpenTransactionsAfterSave(date: string, keepCurrentTab = false) {
+  if (keepCurrentTab) return;
+  requestOpenTransactions({
+    monthKey: monthKeyFromIsoLocal(date),
+    dayKey: dayKeyFromIsoLocal(date),
+  });
 }
 
 export function subscribeOpenTransactionsRequest(listener: Listener) {

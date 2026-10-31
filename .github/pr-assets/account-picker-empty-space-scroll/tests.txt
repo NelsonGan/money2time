@@ -1,0 +1,10 @@
+
+> money2time@1.0.0 test
+> jest --runInBand
+
+
+Test Suites: 239 passed, 239 total
+Tests:       3169 passed, 3169 total
+Snapshots:   0 total
+Time:        62.106 s
+Ran all test suites.
