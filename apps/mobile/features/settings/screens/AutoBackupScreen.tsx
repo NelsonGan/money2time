@@ -1,13 +1,5 @@
-import {
-  AlertTriangle,
-  Check,
-  Cloud,
-  CloudOff,
-  HardDrive,
-  RefreshCw,
-  Smartphone,
-  Trash2,
-} from 'lucide-react-native';
+import { Image } from 'expo-image';
+import { AlertTriangle, Check, CloudOff, RefreshCw, Smartphone, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -33,6 +25,7 @@ import {
   Text,
   useSettingsBottomNavInset,
 } from '~/components/ui';
+import { BACKUP_PROVIDER_LOGOS } from '~/constants/brandLogos';
 import { useApp } from '~/context/AppContext';
 import { useBackupRestore } from '~/features/settings/hooks/useBackupRestore';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -74,14 +67,15 @@ function targetLabel(target: BackupTarget): string {
 }
 
 function targetIcon(target: BackupTarget, size = 16, color?: string) {
-  switch (target) {
-    case 'local':
-      return <Smartphone size={size} color={color} />;
-    case 'icloud':
-      return <Cloud size={size} color={color} />;
-    case 'googleDrive':
-      return <HardDrive size={size} color={color} />;
-  }
+  if (target === 'local') return <Smartphone size={size} color={color} />;
+  return (
+    <Image
+      source={BACKUP_PROVIDER_LOGOS[target]}
+      style={{ width: size, height: size }}
+      contentFit="contain"
+      accessible={false}
+    />
+  );
 }
 
 function formatRelative(iso: string): string {
