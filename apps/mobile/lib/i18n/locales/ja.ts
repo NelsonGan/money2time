@@ -1,25 +1,20 @@
 const ja = {
   backup_restore: {
-    title: 'Choose what to restore',
-    export_description:
-      'Save your personal ledgers, shared ledgers you own, and settings as a JSON backup. Ledgers shared with you are excluded.',
-    import_description:
-      'Choose personal ledgers or shared ledgers you own to restore from a Money2Time JSON backup.',
-    description:
-      'Choose the data to replace with this backup. Shared ledgers stay unchanged unless you select them.',
+    title: 'Restore backup',
+    export_description: 'Personal data and shared ledgers you own.',
+    import_description: 'Choose what to restore from a backup.',
     personal: 'Personal ledgers',
-    personal_note: 'Replaces your personal data. Linked phones receive these changes.',
-    owned: 'Shared · You own this',
-    unavailable: 'Sign in as the current owner of an active shared ledger to restore it.',
-    members_note: 'Ledgers shared with you are excluded from backups and are never restored.',
-    safety_note: 'A recovery backup is saved on this phone before restoring.',
-    confirm_title: 'Restore shared ledgers for everyone?',
+    personal_note: 'Replaces ledgers and settings on synced devices.',
+    personal_local_note: 'Replaces ledgers and settings.',
+    shared_ledgers: 'Shared ledgers',
+    owned: 'You own this ledger',
+    unavailable: 'Owner access required',
+    restore_action: 'Restore selected',
+    confirm_title: 'Restore for everyone?',
     confirm_message:
-      '{{names}}\n\nThis replaces these ledgers for everyone with the backup from {{date}}. Later entries and changes may be lost. Members and invitations stay the same.',
-    sync_pending:
-      'Restored on this phone. Shared changes are waiting to sync. Keep Cloud Sync signed in.',
-    failed:
-      'Could not restore. Shared recovery needs an internet connection and current ownership. A recovery backup must be saved before any data is replaced.',
+      '{{names}}\n\nReplace with the {{date}} backup. Later changes will be lost. Members and invites stay unchanged.',
+    sync_pending: 'Restored here. Stay signed in to finish syncing.',
+    failed: 'Couldn’t restore. Check your connection, owner access and free storage.',
   },
   common: {
     back: '戻る',
@@ -2504,7 +2499,6 @@ const ja = {
     delete_confirm_title: 'このバックアップを削除しますか？',
     delete_confirm_message: 'このバックアップファイルは完全に削除されます。',
     delete_failed_title: '削除に失敗しました',
-    restore_confirm_action: 'データを置き換える',
     restoring: '復元中...',
     restore_success_title: '復元しました',
     restore_success_message: 'このバックアップからデータが復元されました。',

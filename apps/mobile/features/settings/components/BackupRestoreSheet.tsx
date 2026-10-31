@@ -1,4 +1,4 @@
-import { Check, Users } from 'lucide-react-native';
+import { BookOpen, Check, Users } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, View } from 'react-native';
 
@@ -8,21 +8,32 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { BackupRestoreOptions } from '~/services/dataManagementService';
 import type { RestoreLedgerChoice } from '~/utils/backupLedgerPolicy';
+import { formatShortDate, formatTimeOfDay } from '~/utils/formatters';
 
 interface Props {
   busy: boolean;
+  personalCloudLinked: boolean;
   exportedAt: string;
   choices: RestoreLedgerChoice[];
   onRestore: (options: BackupRestoreOptions) => void;
   onCancel: () => void;
 }
 
-export function BackupRestoreSheet({ busy, exportedAt, choices, onRestore, onCancel }: Props) {
+export function BackupRestoreSheet({
+  busy,
+  personalCloudLinked,
+  exportedAt,
+  choices,
+  onRestore,
+  onCancel,
+}: Props) {
   const colors = useThemeColors();
   const [personal, setPersonal] = useState(true);
   const [selected, setSelected] = useState<string[]>([]);
   const parsed = new Date(exportedAt);
-  const date = Number.isNaN(parsed.getTime()) ? exportedAt : parsed.toLocaleString();
+  const date = Number.isNaN(parsed.getTime())
+    ? exportedAt
+    : `${formatShortDate(exportedAt)}, ${formatTimeOfDay(parsed.getHours(), parsed.getMinutes())}`;
   const confirm = () => {
     const options = { restorePersonal: personal, sharedLedgerIds: selected };
     if (!selected.length) {
@@ -41,7 +52,7 @@ export function BackupRestoreSheet({ busy, exportedAt, choices, onRestore, onCan
       [
         { text: I18n.t('common.cancel'), style: 'cancel' },
         {
-          text: I18n.t('auto_backup.restore_confirm_action'),
+          text: I18n.t('auto_backup.restore_action'),
           style: 'destructive',
           onPress: () => onRestore(options),
         },
@@ -63,9 +74,6 @@ export function BackupRestoreSheet({ busy, exportedAt, choices, onRestore, onCan
           <Text variant="caption" tone="muted">
             {date}
           </Text>
-          <Text variant="caption" tone="muted">
-            {I18n.t('backup_restore.description')}
-          </Text>
         </View>
       }
     >
@@ -84,14 +92,24 @@ export function BackupRestoreSheet({ busy, exportedAt, choices, onRestore, onCan
             onPress={() => setPersonal(!personal)}
             className="flex-row items-center gap-3 rounded-3xl border border-border/50 bg-background p-4"
           >
+            <BookOpen size={20} color={colors.primary} />
             <View className="flex-1 gap-1">
               <Text variant="bodyStrong">{I18n.t('backup_restore.personal')}</Text>
               <Text variant="caption" tone="muted">
-                {I18n.t('backup_restore.personal_note')}
+                {I18n.t(
+                  personalCloudLinked
+                    ? 'backup_restore.personal_note'
+                    : 'backup_restore.personal_local_note',
+                )}
               </Text>
             </View>
             {check(personal)}
           </Pressable>
+          {choices.length > 0 ? (
+            <Text variant="caption" tone="muted" className="mt-3 px-1">
+              {I18n.t('backup_restore.shared_ledgers')}
+            </Text>
+          ) : null}
           {choices.map((choice) => {
             const checked = selected.includes(choice.ledgerId);
             return (
@@ -124,16 +142,9 @@ export function BackupRestoreSheet({ busy, exportedAt, choices, onRestore, onCan
               </Pressable>
             );
           })}
-          <View className="gap-3 py-3">
-            <Text variant="caption" tone="muted">
-              {I18n.t('backup_restore.members_note')}
-            </Text>
-            <Text variant="caption" tone="muted">
-              {I18n.t('backup_restore.safety_note')}
-            </Text>
-          </View>
           <FatButton
-            label={I18n.t('auto_backup.restore_action')}
+            className="mt-3"
+            label={I18n.t('backup_restore.restore_action')}
             disabled={!personal && !selected.length}
             onPress={confirm}
             testID="restore-confirm"

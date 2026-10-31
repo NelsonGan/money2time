@@ -687,7 +687,9 @@ its own sync engine and replica.
     snapshots as personal data. Other multi-ledger backups use version 4;
     default-ledger-only backups stay version 3. Versions 1–4 remain readable.
   - Backup and JSON import use the same restore selector. Personal ledgers
-    start selected; shared ledgers start unselected. Only a currently owned,
+    start selected; shared ledgers start unselected. The personal-data hint
+    mentions synced devices only while personal Cloud Sync is linked.
+    Only a currently owned,
     active share matching the snapshot may be selected. A second confirmation
     names the selected shared ledgers and warns that everyone loses changes
     made after the backup. Members and invitations are never restored.

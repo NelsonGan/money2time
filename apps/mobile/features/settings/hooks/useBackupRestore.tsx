@@ -19,7 +19,7 @@ interface Pending {
 
 /** Both file import and cloud backup restore share one explicit selection flow. */
 export function useBackupRestore() {
-  const { user, refreshSharedLedgers, restoreBackup } = useCloudSync();
+  const { user, linked, refreshSharedLedgers, restoreBackup } = useCloudSync();
   const shared = useSharedLedgers();
   const [pending, setPending] = useState<Pending | null>(null);
   const [applying, setApplying] = useState(false);
@@ -84,6 +84,7 @@ export function useBackupRestore() {
       <BackupRestoreSheet
         exportedAt={pending.backup.exportedAt}
         busy={applying}
+        personalCloudLinked={linked}
         choices={restoreLedgerChoices(pending.backup, shared)}
         onCancel={cancel}
         onRestore={(options) => void restore(options)}
