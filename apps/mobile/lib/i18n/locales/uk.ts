@@ -1,4 +1,26 @@
 const uk = {
+  backup_restore: {
+    title: 'Choose what to restore',
+    export_description:
+      'Save your personal ledgers, shared ledgers you own, and settings as a JSON backup. Ledgers shared with you are excluded.',
+    import_description:
+      'Choose personal ledgers or shared ledgers you own to restore from a Money2Time JSON backup.',
+    description:
+      'Choose the data to replace with this backup. Shared ledgers stay unchanged unless you select them.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces your personal data. Linked phones receive these changes.',
+    owned: 'Shared · You own this',
+    unavailable: 'Sign in as the current owner of an active shared ledger to restore it.',
+    members_note: 'Ledgers shared with you are excluded from backups and are never restored.',
+    safety_note: 'A recovery backup is saved on this phone before restoring.',
+    confirm_title: 'Restore shared ledgers for everyone?',
+    confirm_message:
+      '{{names}}\n\nThis replaces these ledgers for everyone with the backup from {{date}}. Later entries and changes may be lost. Members and invitations stay the same.',
+    sync_pending:
+      'Restored on this phone. Shared changes are waiting to sync. Keep Cloud Sync signed in.',
+    failed:
+      'Could not restore. Shared recovery needs an internet connection and current ownership. A recovery backup must be saved before any data is replaced.',
+  },
   common: {
     back: 'Назад',
     loading: 'Завантаження…',
@@ -1645,19 +1667,11 @@ const uk = {
     },
     title: 'Управління даними',
     export_title: 'Експортувати базу даних',
-    export_description:
-      'Збережіть повну резервну копію всіх рахунків, категорій, операцій та налаштувань у вигляді JSON-файлу.',
     exporting: 'Експортуємо...',
     export_error_title: 'Експорт не вдався',
     export_error_message: 'Не вдалося експортувати базу даних. Спробуйте ще раз.',
     import_title: 'Імпортувати резервну копію Money2Time',
-    import_description:
-      'Відновіть з попередньо експортованої резервної копії Money2Time у форматі JSON. Це замінить усі поточні дані.',
     importing: 'Імпортуємо резервну копію Money2Time',
-    import_confirm_title: 'Замінити всі дані?',
-    import_confirm_message:
-      'Це перезапише всі поточні рахунки, категорії, операції та налаштування даними з резервного файлу. Це незворотньо.',
-    import_confirm_action: 'Замінити дані',
     import_success_title: 'Імпорт завершено',
     import_success_message: 'Дані успішно відновлено з резервної копії.',
     import_error_title: 'Імпорт не вдався',
@@ -2502,9 +2516,6 @@ const uk = {
     delete_confirm_title: 'Видалити цю резервну копію?',
     delete_confirm_message: 'Цей файл резервної копії буде назавжди видалено.',
     delete_failed_title: 'Видалення не вдалося',
-    restore_confirm_title: 'Замінити всі дані цією резервною копією?',
-    restore_confirm_summary: '{{accounts}} рахунків · {{transactions}} операцій',
-    restore_confirm_warning: 'Це замінить усі дані на пристрої. Незворотньо.',
     restore_confirm_action: 'Замінити дані',
     restoring: 'Відновлення...',
     restore_success_title: 'Відновлено',

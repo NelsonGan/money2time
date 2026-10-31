@@ -1,4 +1,26 @@
 const tr = {
+  backup_restore: {
+    title: 'Choose what to restore',
+    export_description:
+      'Save your personal ledgers, shared ledgers you own, and settings as a JSON backup. Ledgers shared with you are excluded.',
+    import_description:
+      'Choose personal ledgers or shared ledgers you own to restore from a Money2Time JSON backup.',
+    description:
+      'Choose the data to replace with this backup. Shared ledgers stay unchanged unless you select them.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces your personal data. Linked phones receive these changes.',
+    owned: 'Shared · You own this',
+    unavailable: 'Sign in as the current owner of an active shared ledger to restore it.',
+    members_note: 'Ledgers shared with you are excluded from backups and are never restored.',
+    safety_note: 'A recovery backup is saved on this phone before restoring.',
+    confirm_title: 'Restore shared ledgers for everyone?',
+    confirm_message:
+      '{{names}}\n\nThis replaces these ledgers for everyone with the backup from {{date}}. Later entries and changes may be lost. Members and invitations stay the same.',
+    sync_pending:
+      'Restored on this phone. Shared changes are waiting to sync. Keep Cloud Sync signed in.',
+    failed:
+      'Could not restore. Shared recovery needs an internet connection and current ownership. A recovery backup must be saved before any data is replaced.',
+  },
   common: {
     back: 'Geri',
     loading: 'Yükleniyor…',
@@ -1656,19 +1678,11 @@ const tr = {
     },
     title: 'Veri Yönetimi',
     export_title: 'Veritabanını Dışa Aktar',
-    export_description:
-      'Tüm hesaplarınızın, kategorilerinizin, işlemlerinizin ve ayarlarınızın tam yedeğini JSON dosyası olarak kaydedin.',
     exporting: 'Dışa aktarılıyor...',
     export_error_title: 'Dışa Aktarma Başarısız',
     export_error_message: 'Veritabanı dışa aktarılamadı. Lütfen tekrar deneyin.',
     import_title: 'Money2Time Yedeği İçe Aktar',
-    import_description:
-      'Önceden dışa aktarılmış bir Money2Time JSON yedeğinden geri yükleyin. Bu işlem mevcut tüm verilerinizin yerini alır.',
     importing: 'Money2Time yedeği içe aktarılıyor',
-    import_confirm_title: 'Tüm Veriler Değiştirilsin mi?',
-    import_confirm_message:
-      'Bu işlem mevcut tüm hesaplarınızı, kategorilerinizi, işlemlerinizi ve ayarlarınızı yedek dosyasındaki verilerle değiştirecek. Bu geri alınamaz.',
-    import_confirm_action: 'Verileri Değiştir',
     import_success_title: 'İçe Aktarma Tamamlandı',
     import_success_message: 'Verileriniz yedekten başarıyla geri yüklendi.',
     import_error_title: 'İçe Aktarma Başarısız',
@@ -2512,9 +2526,6 @@ const tr = {
     delete_confirm_title: 'Bu yedek silinsin mi?',
     delete_confirm_message: 'Bu yedek dosyası kalıcı olarak kaldırılacak.',
     delete_failed_title: 'Silme başarısız',
-    restore_confirm_title: 'Tüm veriler bu yedekle değiştirilsin mi?',
-    restore_confirm_summary: '{{accounts}} hesap · {{transactions}} işlem',
-    restore_confirm_warning: 'Bu cihazdaki her şeyin yerini alacak. Geri alınamaz.',
     restore_confirm_action: 'Verileri değiştir',
     restoring: 'Geri yükleniyor...',
     restore_success_title: 'Geri yüklendi',

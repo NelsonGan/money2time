@@ -17,6 +17,7 @@ import {
 import { EXCEL_LOGO, MONEY_MANAGER_LOGO, MONEY2TIME_LOGO } from '~/constants/brandLogos';
 import { useApp } from '~/context/AppContext';
 import { useCloudSync } from '~/features/cloudSync/CloudSyncContext';
+import { useBackupRestore } from '~/features/settings/hooks/useBackupRestore';
 import { useSharedLedgers } from '~/features/sharedLedgers/hooks/useSharedLedgers';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -97,10 +98,11 @@ function DataRow({
 
 export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagementScreenProps) {
   const { activeLedger, importMoneyManagerBackup, refreshAll, resetAllData, settings } = useApp();
-  // A restore or reset while Cloud Sync is on reaches every phone, and keeps
-  // the shared ledgers; an import into a shared open ledger reaches everyone
-  // in it. The confirmations say so.
-  const cloudSyncOn = useCloudSync().status === 'ready';
+  // Synced changes reach linked phones. Shared recovery requires an explicit
+  // owner selection; Money Manager import changes the open ledger for everyone.
+  const cloudSync = useCloudSync();
+  const cloudSyncOn = cloudSync.linked;
+  const { chooseAndRestore, restoreSheet } = useBackupRestore();
   const sharedLedgers = useSharedLedgers();
   const hasShared = sharedLedgers.length > 0;
   const openLedgerShared = sharedLedgers.some((ledger) => ledger.ledgerId === activeLedger.id);
@@ -148,31 +150,13 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
     }
   };
 
-  const handleImport = () => {
-    Alert.alert(
-      I18n.t('data_management.import_confirm_title'),
-      withNotes(
-        I18n.t('data_management.import_confirm_message'),
-        cloudSyncOn && 'cloud_sync.restore_warning',
-        hasShared && 'shared_ledgers.reset_keeps_shared',
-      ),
-      [
-        { text: I18n.t('common.cancel'), style: 'cancel' },
-        {
-          text: I18n.t('data_management.import_confirm_action'),
-          style: 'destructive',
-          onPress: () => void performImport(),
-        },
-      ],
-    );
-  };
-
   const performImport = async () => {
     if (activeFlow) return;
     setActiveFlow('money2time');
     try {
       const result = await pickAndImportDatabase({
         onFilePicked: () => setImportingSource('money2time'),
+        restore: chooseAndRestore,
       });
       if (result.canceled) return;
 
@@ -180,7 +164,11 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
         refreshAll();
         Alert.alert(
           I18n.t('data_management.import_success_title'),
-          I18n.t('data_management.import_success_message'),
+          I18n.t(
+            result.syncPending
+              ? 'backup_restore.sync_pending'
+              : 'data_management.import_success_message',
+          ),
         );
       } else {
         Alert.alert(
@@ -328,7 +316,7 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
             description={
               exportingKind === 'json'
                 ? I18n.t('data_management.exporting')
-                : I18n.t('data_management.export_description')
+                : I18n.t('backup_restore.export_description')
             }
             onPress={() => void handleExport()}
             disabled={isBusy}
@@ -360,8 +348,8 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
           <DataRow
             icon={<Image source={MONEY2TIME_LOGO} style={styles.brandLogo} accessible={false} />}
             title={I18n.t('data_management.import_title')}
-            description={I18n.t('data_management.import_description')}
-            onPress={handleImport}
+            description={I18n.t('backup_restore.import_description')}
+            onPress={() => void performImport()}
             disabled={isBusy}
             busy={importingSource === 'money2time'}
             trailingColor={themeColors.muted}
@@ -395,8 +383,9 @@ export function DataManagementScreen({ onBack, onOpenAutoBackup }: DataManagemen
         </SettingsSection>
       </ScrollView>
 
+      {restoreSheet}
       <ImportingOverlay
-        visible={importingSource !== null}
+        visible={importingSource === 'money_manager'}
         title={
           importingSource === 'money_manager'
             ? I18n.t('data_management.import_money_manager_importing')

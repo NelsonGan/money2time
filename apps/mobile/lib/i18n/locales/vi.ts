@@ -1,4 +1,26 @@
 const vi = {
+  backup_restore: {
+    title: 'Choose what to restore',
+    export_description:
+      'Save your personal ledgers, shared ledgers you own, and settings as a JSON backup. Ledgers shared with you are excluded.',
+    import_description:
+      'Choose personal ledgers or shared ledgers you own to restore from a Money2Time JSON backup.',
+    description:
+      'Choose the data to replace with this backup. Shared ledgers stay unchanged unless you select them.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces your personal data. Linked phones receive these changes.',
+    owned: 'Shared · You own this',
+    unavailable: 'Sign in as the current owner of an active shared ledger to restore it.',
+    members_note: 'Ledgers shared with you are excluded from backups and are never restored.',
+    safety_note: 'A recovery backup is saved on this phone before restoring.',
+    confirm_title: 'Restore shared ledgers for everyone?',
+    confirm_message:
+      '{{names}}\n\nThis replaces these ledgers for everyone with the backup from {{date}}. Later entries and changes may be lost. Members and invitations stay the same.',
+    sync_pending:
+      'Restored on this phone. Shared changes are waiting to sync. Keep Cloud Sync signed in.',
+    failed:
+      'Could not restore. Shared recovery needs an internet connection and current ownership. A recovery backup must be saved before any data is replaced.',
+  },
   common: {
     back: 'Quay lại',
     loading: 'Đang tải…',
@@ -1632,19 +1654,11 @@ const vi = {
     },
     title: 'Quản lý dữ liệu',
     export_title: 'Xuất cơ sở dữ liệu',
-    export_description:
-      'Lưu bản sao lưu đầy đủ gồm tài khoản, danh mục, giao dịch và cài đặt dưới dạng tệp JSON.',
     exporting: 'Đang xuất...',
     export_error_title: 'Xuất thất bại',
     export_error_message: 'Không thể xuất cơ sở dữ liệu. Vui lòng thử lại.',
     import_title: 'Nhập bản sao lưu Money2Time',
-    import_description:
-      'Khôi phục từ bản sao lưu JSON Money2Time đã xuất trước. Thao tác này sẽ thay thế toàn bộ dữ liệu hiện tại.',
     importing: 'Đang nhập bản sao lưu Money2Time',
-    import_confirm_title: 'Thay thế tất cả dữ liệu?',
-    import_confirm_message:
-      'Thao tác này sẽ ghi đè toàn bộ tài khoản, danh mục, giao dịch và cài đặt hiện tại bằng dữ liệu từ tệp sao lưu. Không thể hoàn tác.',
-    import_confirm_action: 'Thay thế dữ liệu',
     import_success_title: 'Nhập hoàn tất',
     import_success_message: 'Dữ liệu của bạn đã được khôi phục thành công từ bản sao lưu.',
     import_error_title: 'Nhập thất bại',
@@ -2485,9 +2499,6 @@ const vi = {
     delete_confirm_title: 'Xóa bản sao lưu này?',
     delete_confirm_message: 'Tệp sao lưu này sẽ bị xóa vĩnh viễn.',
     delete_failed_title: 'Xóa thất bại',
-    restore_confirm_title: 'Thay thế tất cả dữ liệu bằng bản sao lưu này?',
-    restore_confirm_summary: '{{accounts}} tài khoản · {{transactions}} giao dịch',
-    restore_confirm_warning: 'Sẽ thay thế mọi thứ trên thiết bị này. Không thể hoàn tác.',
     restore_confirm_action: 'Thay thế dữ liệu',
     restoring: 'Đang khôi phục...',
     restore_success_title: 'Đã khôi phục',

@@ -22,7 +22,6 @@ import {
   View,
 } from 'react-native';
 
-import { ImportingOverlay } from '~/components/feedback/ImportingOverlay';
 import {
   Button,
   Card,
@@ -35,7 +34,7 @@ import {
   useSettingsBottomNavInset,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
-import { useCloudSync } from '~/features/cloudSync/CloudSyncContext';
+import { useBackupRestore } from '~/features/settings/hooks/useBackupRestore';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
@@ -47,7 +46,6 @@ import {
   isGoogleDriveConfigured,
   isTargetAvailable,
   listAllBackups,
-  previewBackup,
   restoreFromBackup,
   runAutoBackupIfDue,
   signInWithGoogle,
@@ -108,14 +106,15 @@ function formatSize(bytes: number): string {
 
 export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
   const { settings, updateSettings, refreshAll, refreshSettings } = useApp();
-  const cloudSyncOn = useCloudSync().status === 'ready';
+  const { chooseAndRestore, restoreSheet } = useBackupRestore();
   const bottomNavInset = useSettingsBottomNavInset();
   const themeColors = useThemeColors();
 
   const [records, setRecords] = useState<BackupRecord[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [backingUp, setBackingUp] = useState(false);
-  const [restoring, setRestoring] = useState(false);
+  const [restoringKey, setRestoringKey] = useState<string | null>(null);
+  const restoring = restoringKey !== null;
   const [iCloudAvailable, setICloudAvailable] = useState(false);
   const [googleUser, setGoogleUser] = useState<string | null>(null);
   // Distinguishes "no Google account" from "haven't looked yet", so the
@@ -363,6 +362,7 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
   };
 
   const handleRowPress = (record: BackupRecord) => {
+    if (restoring || backingUp || deletingKey !== null) return;
     void triggerHaptic('selection');
     Alert.alert(
       formatRelative(record.createdAt),
@@ -377,7 +377,7 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
         {
           text: I18n.t('auto_backup.restore_action'),
           style: 'default',
-          onPress: () => confirmRestore(record),
+          onPress: () => performRestore(record),
         },
       ],
     );
@@ -417,46 +417,22 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
     }
   };
 
-  const confirmRestore = async (record: BackupRecord) => {
-    let summaryLine = '';
-    try {
-      const summary = await previewBackup(record);
-      if (summary) {
-        summaryLine = I18n.t('auto_backup.restore_confirm_summary', {
-          accounts: summary.accountCount,
-          transactions: summary.transactionCount,
-        });
-      }
-    } catch {
-      // Preview failed; fall back to plain confirmation.
-    }
-
-    Alert.alert(
-      I18n.t('auto_backup.restore_confirm_title'),
-      `${formatRelative(record.createdAt)}\n${summaryLine}\n\n${I18n.t('auto_backup.restore_confirm_warning')}${
-        cloudSyncOn ? `\n\n${I18n.t('cloud_sync.restore_warning')}` : ''
-      }`.trim(),
-      [
-        { text: I18n.t('common.cancel'), style: 'cancel' },
-        {
-          text: I18n.t('auto_backup.restore_confirm_action'),
-          style: 'destructive',
-          onPress: () => void performRestore(record),
-        },
-      ],
-    );
-  };
-
   const performRestore = async (record: BackupRecord) => {
-    setRestoring(true);
+    setRestoringKey(`${record.target}:${record.id}`);
     try {
-      const result = await restoreFromBackup(record);
+      const result = await restoreFromBackup(record, chooseAndRestore);
+      if (result.canceled) return;
       if (result.success) {
         refreshAll();
+        void reloadRecords();
         void triggerHaptic('success');
         Alert.alert(
           I18n.t('auto_backup.restore_success_title'),
-          I18n.t('auto_backup.restore_success_message'),
+          I18n.t(
+            result.syncPending
+              ? 'backup_restore.sync_pending'
+              : 'auto_backup.restore_success_message',
+          ),
         );
       } else {
         Alert.alert(
@@ -465,7 +441,7 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
         );
       }
     } finally {
-      setRestoring(false);
+      setRestoringKey(null);
     }
   };
 
@@ -683,11 +659,12 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
             {records.map((record) => {
               const key = `${record.target}:${record.id}`;
               const isDeleting = deletingKey === key;
+              const isRestoring = restoringKey === key;
               return (
                 <Pressable
                   key={key}
                   onPress={() => handleRowPress(record)}
-                  disabled={isDeleting}
+                  disabled={isDeleting || restoring || backingUp}
                   style={[
                     styles.recordRow,
                     {
@@ -712,8 +689,11 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
                       {targetLabel(record.target)} · {formatSize(record.sizeBytes)}
                     </Text>
                   </View>
-                  {isDeleting ? (
-                    <ActivityIndicator size="small" color={themeColors.coral} />
+                  {isDeleting || isRestoring ? (
+                    <ActivityIndicator
+                      size="small"
+                      color={isDeleting ? themeColors.coral : themeColors.primary}
+                    />
                   ) : (
                     <Trash2 size={15} color={themeColors.muted} />
                   )}
@@ -724,7 +704,7 @@ export function AutoBackupScreen({ onBack }: AutoBackupScreenProps) {
         )}
       </ScrollView>
 
-      <ImportingOverlay visible={restoring} title={I18n.t('auto_backup.restoring')} />
+      {restoreSheet}
     </SettingsPageLayout>
   );
 }

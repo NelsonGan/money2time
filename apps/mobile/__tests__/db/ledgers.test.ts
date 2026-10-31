@@ -543,6 +543,247 @@ describe('backup and restore across ledgers', () => {
     // Restoring replaces everything, the other ledgers included.
     expect(harness.all('SELECT id FROM ledgers')).toEqual([{ id: 'default' }]);
   });
+
+  function shareWork(role: 'owner' | 'member') {
+    addWorkLedger();
+    saveSharedLedger({
+      ledgerId: 'work',
+      shareId: 'share-1',
+      role,
+      name: 'Work',
+      ownerName: 'Sam',
+      memberCount: 2,
+      active: true,
+    });
+  }
+
+  it('omits member ledgers and their nested rows and exclusive images from backups', async () => {
+    shareWork('member');
+    try {
+      const backup = await buildBackupData();
+      expect(backup.tables.ledgers?.map((row) => row.id)).toEqual(['default']);
+      expect(backup.tables.transactions.map((row) => row.id)).toEqual(['lunch']);
+      expect(backup.tables.transaction_splits).toEqual([]);
+      expect(backup.userAssets?.map((asset) => asset.path)).toEqual(['receipts/lunch.jpg']);
+      expect(backup.version).toBe(3);
+    } finally {
+      removeSharedLedger('work');
+    }
+  });
+
+  it('retains member data in the open-ledger Web Dashboard snapshot', async () => {
+    shareWork('member');
+    setActiveLedgerId('work');
+    try {
+      expect(
+        (await buildBackupData({ openLedgerOnly: true })).tables.transactions.map((row) => row.id),
+      ).toEqual(['taxi']);
+    } finally {
+      removeSharedLedger('work');
+    }
+  });
+
+  it('backs up owned shared ledgers with provenance and a version older apps reject', async () => {
+    shareWork('owner');
+    try {
+      const backup = await buildBackupData();
+      expect(backup.version).toBe(5);
+      expect(backup.sharedLedgers).toEqual([{ ledgerId: 'work', shareId: 'share-1' }]);
+      expect(backup.tables.transactions).toHaveLength(2);
+    } finally {
+      removeSharedLedger('work');
+    }
+  });
+
+  it('does not restore an owned shared snapshot as personal data on a fresh phone', async () => {
+    shareWork('owner');
+    const backup = await buildBackupData();
+    removeSharedLedger('work');
+    harness.connection.exec(
+      "DELETE FROM transaction_splits; DELETE FROM transactions; DELETE FROM ledgers WHERE id = 'work';",
+    );
+    expect(applyBackupData(backup).success).toBe(true);
+    expect(harness.all('SELECT id FROM transactions')).toEqual([{ id: 'lunch' }]);
+    expect(harness.all("SELECT id FROM ledgers WHERE id = 'work'")).toEqual([]);
+  });
+
+  it('only restores a selected owned shared ledger and preserves its local preferences and membership', async () => {
+    shareWork('owner');
+    try {
+      const backup = await buildBackupData();
+      harness.connection.exec(
+        "UPDATE transactions SET amount = 35 WHERE id = 'taxi'; UPDATE transactions SET amount = 99 WHERE id = 'lunch'; UPDATE ledgers SET prefs_json = '{\"defaultPaybackAccountId\":\"keep\"}' WHERE id = 'work';",
+      );
+      expect(
+        applyBackupData(backup, { restorePersonal: false, sharedLedgerIds: ['work'] }).success,
+      ).toBe(true);
+      expect(harness.all('SELECT id, amount FROM transactions ORDER BY id')).toEqual([
+        { id: 'lunch', amount: 99 },
+        { id: 'taxi', amount: 30 },
+      ]);
+      expect(harness.all("SELECT prefs_json FROM ledgers WHERE id = 'work'")).toEqual([
+        { prefs_json: '{"defaultPaybackAccountId":"keep"}' },
+      ]);
+      expect(harness.all('SELECT share_id, role FROM shared_ledgers')).toEqual([
+        { share_id: 'share-1', role: 'owner' },
+      ]);
+    } finally {
+      removeSharedLedger('work');
+    }
+  });
+
+  it('keeps personal settings and the open ledger unchanged during shared-only restore', async () => {
+    shareWork('owner');
+    try {
+      const backup = await buildBackupData();
+      harness.connection.exec(
+        "UPDATE settings SET user_mode = 'simple', active_ledger_id = 'work';",
+      );
+      const settings = harness.all('SELECT * FROM settings');
+      expect(
+        applyBackupData(backup, { restorePersonal: false, sharedLedgerIds: ['work'] }).success,
+      ).toBe(true);
+      expect(harness.all('SELECT * FROM settings')).toEqual(settings);
+    } finally {
+      removeSharedLedger('work');
+    }
+  });
+
+  it('does not overwrite a restored shared image also used by preserved personal settings', async () => {
+    shareWork('owner');
+    try {
+      const backup = await buildBackupData();
+      harness.connection.exec("UPDATE settings SET profile_avatar_uri = 'receipts/taxi.jpg';");
+      const restoreAssets = require('~/services/userAssets')
+        .restoreUserAssetsFromBackup as jest.Mock;
+      restoreAssets.mockClear();
+      expect(
+        applyBackupData(backup, { restorePersonal: false, sharedLedgerIds: ['work'] }).success,
+      ).toBe(true);
+      expect(restoreAssets).toHaveBeenCalledWith([]);
+    } finally {
+      removeSharedLedger('work');
+    }
+  });
+
+  it.each(['member', 'paused', 'different-share', 'absent'] as const)(
+    'rejects unauthorized selection before writing: %s',
+    async (state) => {
+      shareWork('owner');
+      try {
+        const backup = await buildBackupData();
+        const before = harness.all('SELECT * FROM transactions');
+        if (state === 'absent') removeSharedLedger('work');
+        else
+          saveSharedLedger({
+            ledgerId: 'work',
+            shareId: state === 'different-share' ? 'new-share' : 'share-1',
+            role: state === 'member' ? 'member' : 'owner',
+            name: 'Work',
+            ownerName: 'Sam',
+            memberCount: 2,
+            active: state !== 'paused',
+          });
+        expect(applyBackupData(backup, { sharedLedgerIds: ['work'] }).success).toBe(false);
+        expect(harness.all('SELECT * FROM transactions')).toEqual(before);
+      } finally {
+        removeSharedLedger('work');
+      }
+    },
+  );
+
+  it('keeps shared currency and icons unchanged when restoring a legacy personal backup', async () => {
+    harness.connection.exec("UPDATE settings SET currency_code = 'MYR';");
+    const backup = await buildBackupData();
+    delete backup.tables.exchange_rates;
+    shareWork('owner');
+    harness.connection.exec(
+      `INSERT INTO accounts (id, ledger_id, name, type, currency, starting_balance, created_at, updated_at) VALUES ('shared-bank', 'work', 'Bank', 'debit', 'USD', 0, '${NOW}', '${NOW}'); INSERT INTO categories (id, ledger_id, name, type, icon, created_at, updated_at) VALUES ('shared-food', 'work', 'Food', 'expense', '🍔', '${NOW}', '${NOW}');`,
+    );
+    const currencies = require('~/lib/db/normalizeCurrencies')
+      .normalizeCurrencyColumns as jest.Mock;
+    const icons = require('~/lib/db/normalizeIcons').normalizeIconColumns as jest.Mock;
+    currencies.mockImplementationOnce(
+      jest.requireActual('~/lib/db/normalizeCurrencies').normalizeCurrencyColumns,
+    );
+    icons.mockImplementationOnce(
+      jest.requireActual('~/lib/db/normalizeIcons').normalizeIconColumns,
+    );
+    try {
+      expect(applyBackupData(backup).success).toBe(true);
+      expect(harness.all("SELECT currency FROM accounts WHERE id = 'shared-bank'")).toEqual([
+        { currency: 'USD' },
+      ]);
+      expect(harness.all("SELECT currency FROM transactions WHERE id = 'taxi'")).toEqual([
+        { currency: 'USD' },
+      ]);
+      expect(harness.all("SELECT icon FROM categories WHERE id = 'shared-food'")).toEqual([
+        { icon: '🍔' },
+      ]);
+    } finally {
+      removeSharedLedger('work');
+    }
+  });
+
+  it('rolls back every restored row when persisting the recovery intent fails', async () => {
+    const backup = await buildBackupData();
+    harness.connection.exec("UPDATE transactions SET amount = 99 WHERE id = 'lunch';");
+    expect(
+      applyBackupData(backup, {
+        beforeCommit: () => {
+          throw new Error('disk full');
+        },
+      }).success,
+    ).toBe(false);
+    expect(harness.all("SELECT amount FROM transactions WHERE id = 'lunch'")).toEqual([
+      { amount: 99 },
+    ]);
+  });
+
+  it('preserves an owned share by default, including new entries absent from the snapshot', async () => {
+    shareWork('owner');
+    try {
+      const backup = await buildBackupData();
+      harness.connection.exec(
+        `UPDATE transactions SET amount = 35 WHERE id = 'taxi'; INSERT INTO transactions (id, ledger_id, type, amount, currency, date, created_at, updated_at) VALUES ('new-shared', 'work', 'expense', 50, 'USD', '2026-10-31', '${NOW}', '${NOW}');`,
+      );
+      expect(applyBackupData(backup).success).toBe(true);
+      expect(
+        harness.all("SELECT id, amount FROM transactions WHERE ledger_id = 'work' ORDER BY id"),
+      ).toEqual([
+        { id: 'new-shared', amount: 50 },
+        { id: 'taxi', amount: 35 },
+      ]);
+    } finally {
+      removeSharedLedger('work');
+    }
+  });
+
+  it('rejects an empty selection without changing personal data', async () => {
+    const backup = await buildBackupData();
+    harness.connection.exec("UPDATE transactions SET amount = 99 WHERE id = 'lunch';");
+    expect(applyBackupData(backup, { restorePersonal: false }).success).toBe(false);
+    expect(harness.all("SELECT amount FROM transactions WHERE id = 'lunch'")).toEqual([
+      { amount: 99 },
+    ]);
+  });
+
+  it('does not overwrite an image still used by an unselected shared ledger', async () => {
+    shareWork('owner');
+    try {
+      harness.connection.exec(
+        "UPDATE transactions SET receipt_uri = 'receipts/taxi.jpg' WHERE id = 'lunch';",
+      );
+      const backup = await buildBackupData();
+      const restoreAssets = require('~/services/userAssets')
+        .restoreUserAssetsFromBackup as jest.Mock;
+      restoreAssets.mockClear();
+      expect(applyBackupData(backup).success).toBe(true);
+      expect(restoreAssets).toHaveBeenCalledWith([]);
+    } finally {
+      removeSharedLedger('work');
+    }
+  });
 });
 
 describe('budget lines', () => {

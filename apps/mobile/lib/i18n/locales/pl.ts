@@ -1,4 +1,26 @@
 const pl = {
+  backup_restore: {
+    title: 'Choose what to restore',
+    export_description:
+      'Save your personal ledgers, shared ledgers you own, and settings as a JSON backup. Ledgers shared with you are excluded.',
+    import_description:
+      'Choose personal ledgers or shared ledgers you own to restore from a Money2Time JSON backup.',
+    description:
+      'Choose the data to replace with this backup. Shared ledgers stay unchanged unless you select them.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces your personal data. Linked phones receive these changes.',
+    owned: 'Shared · You own this',
+    unavailable: 'Sign in as the current owner of an active shared ledger to restore it.',
+    members_note: 'Ledgers shared with you are excluded from backups and are never restored.',
+    safety_note: 'A recovery backup is saved on this phone before restoring.',
+    confirm_title: 'Restore shared ledgers for everyone?',
+    confirm_message:
+      '{{names}}\n\nThis replaces these ledgers for everyone with the backup from {{date}}. Later entries and changes may be lost. Members and invitations stay the same.',
+    sync_pending:
+      'Restored on this phone. Shared changes are waiting to sync. Keep Cloud Sync signed in.',
+    failed:
+      'Could not restore. Shared recovery needs an internet connection and current ownership. A recovery backup must be saved before any data is replaced.',
+  },
   common: {
     back: 'Wróć',
     loading: 'Ładowanie…',
@@ -1651,19 +1673,11 @@ const pl = {
     },
     title: 'Zarządzanie danymi',
     export_title: 'Eksportuj bazę danych',
-    export_description:
-      'Zapisz pełną kopię zapasową wszystkich kont, kategorii, transakcji i ustawień jako plik JSON.',
     exporting: 'Eksportowanie...',
     export_error_title: 'Eksport nie powiódł się',
     export_error_message: 'Nie można wyeksportować bazy danych. Spróbuj ponownie.',
     import_title: 'Importuj kopię zapasową Money2Time',
-    import_description:
-      'Przywróć z wcześniej wyeksportowanej kopii zapasowej Money2Time w formacie JSON. Zastąpi wszystkie bieżące dane.',
     importing: 'Importowanie kopii zapasowej Money2Time',
-    import_confirm_title: 'Zastąpić wszystkie dane?',
-    import_confirm_message:
-      'Spowoduje to nadpisanie wszystkich bieżących kont, kategorii, transakcji i ustawień danymi z pliku kopii zapasowej. Tej operacji nie można cofnąć.',
-    import_confirm_action: 'Zastąp dane',
     import_success_title: 'Import ukończony',
     import_success_message: 'Twoje dane zostały pomyślnie przywrócone z kopii zapasowej.',
     import_error_title: 'Import nie powiódł się',
@@ -2512,9 +2526,6 @@ const pl = {
     delete_confirm_title: 'Usunąć tę kopię zapasową?',
     delete_confirm_message: 'Ten plik kopii zapasowej zostanie trwale usunięty.',
     delete_failed_title: 'Usunięcie nie powiodło się',
-    restore_confirm_title: 'Zastąpić wszystkie dane tą kopią?',
-    restore_confirm_summary: '{{accounts}} kont · {{transactions}} transakcji',
-    restore_confirm_warning: 'Zastąpi to wszystko na tym urządzeniu. Nie można cofnąć.',
     restore_confirm_action: 'Zastąp dane',
     restoring: 'Przywracanie...',
     restore_success_title: 'Przywrócono',

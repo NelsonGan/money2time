@@ -1,4 +1,26 @@
 const fr = {
+  backup_restore: {
+    title: 'Choose what to restore',
+    export_description:
+      'Save your personal ledgers, shared ledgers you own, and settings as a JSON backup. Ledgers shared with you are excluded.',
+    import_description:
+      'Choose personal ledgers or shared ledgers you own to restore from a Money2Time JSON backup.',
+    description:
+      'Choose the data to replace with this backup. Shared ledgers stay unchanged unless you select them.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces your personal data. Linked phones receive these changes.',
+    owned: 'Shared · You own this',
+    unavailable: 'Sign in as the current owner of an active shared ledger to restore it.',
+    members_note: 'Ledgers shared with you are excluded from backups and are never restored.',
+    safety_note: 'A recovery backup is saved on this phone before restoring.',
+    confirm_title: 'Restore shared ledgers for everyone?',
+    confirm_message:
+      '{{names}}\n\nThis replaces these ledgers for everyone with the backup from {{date}}. Later entries and changes may be lost. Members and invitations stay the same.',
+    sync_pending:
+      'Restored on this phone. Shared changes are waiting to sync. Keep Cloud Sync signed in.',
+    failed:
+      'Could not restore. Shared recovery needs an internet connection and current ownership. A recovery backup must be saved before any data is replaced.',
+  },
   common: {
     back: 'Retour',
     loading: 'Chargement…',
@@ -1662,19 +1684,11 @@ const fr = {
     },
     title: 'Gestion des données',
     export_title: 'Exporter la base de données',
-    export_description:
-      'Enregistrez une sauvegarde complète de tous vos comptes, catégories, transactions et réglages en fichier JSON.',
     exporting: 'Exportation...',
     export_error_title: "Échec de l'exportation",
     export_error_message: "Impossible d'exporter la base de données. Veuillez réessayer.",
     import_title: 'Importer une sauvegarde Money2Time',
-    import_description:
-      'Restaurez depuis une sauvegarde JSON Money2Time exportée précédemment. Ceci remplacera toutes vos données actuelles.',
     importing: 'Importation de la sauvegarde Money2Time',
-    import_confirm_title: 'Remplacer toutes les données ?',
-    import_confirm_message:
-      'Ceci écrasera tous vos comptes, catégories, transactions et réglages actuels avec les données du fichier de sauvegarde. Cette action est irréversible.',
-    import_confirm_action: 'Remplacer les données',
     import_success_title: 'Importation terminée',
     import_success_message: 'Vos données ont été restaurées avec succès depuis la sauvegarde.',
     import_error_title: "Échec de l'importation",
@@ -2536,10 +2550,6 @@ const fr = {
     delete_confirm_title: 'Supprimer cette sauvegarde ?',
     delete_confirm_message: 'Ce fichier de sauvegarde sera définitivement supprimé.',
     delete_failed_title: 'Échec de la suppression',
-    restore_confirm_title: 'Remplacer toutes les données par cette sauvegarde ?',
-    restore_confirm_summary: '{{accounts}} comptes · {{transactions}} transactions',
-    restore_confirm_warning:
-      'Ceci remplacera tout sur cet appareil. Cette action est irréversible.',
     restore_confirm_action: 'Remplacer les données',
     restoring: 'Restauration...',
     restore_success_title: 'Restauré',

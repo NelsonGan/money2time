@@ -1,4 +1,26 @@
 const de = {
+  backup_restore: {
+    title: 'Choose what to restore',
+    export_description:
+      'Save your personal ledgers, shared ledgers you own, and settings as a JSON backup. Ledgers shared with you are excluded.',
+    import_description:
+      'Choose personal ledgers or shared ledgers you own to restore from a Money2Time JSON backup.',
+    description:
+      'Choose the data to replace with this backup. Shared ledgers stay unchanged unless you select them.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces your personal data. Linked phones receive these changes.',
+    owned: 'Shared · You own this',
+    unavailable: 'Sign in as the current owner of an active shared ledger to restore it.',
+    members_note: 'Ledgers shared with you are excluded from backups and are never restored.',
+    safety_note: 'A recovery backup is saved on this phone before restoring.',
+    confirm_title: 'Restore shared ledgers for everyone?',
+    confirm_message:
+      '{{names}}\n\nThis replaces these ledgers for everyone with the backup from {{date}}. Later entries and changes may be lost. Members and invitations stay the same.',
+    sync_pending:
+      'Restored on this phone. Shared changes are waiting to sync. Keep Cloud Sync signed in.',
+    failed:
+      'Could not restore. Shared recovery needs an internet connection and current ownership. A recovery backup must be saved before any data is replaced.',
+  },
   common: {
     back: 'Zurück',
     loading: 'Wird geladen…',
@@ -1665,19 +1687,11 @@ const de = {
     },
     title: 'Datenverwaltung',
     export_title: 'Datenbank exportieren',
-    export_description:
-      'Vollständiges Backup aller Konten, Kategorien, Transaktionen und Einstellungen als JSON-Datei speichern.',
     exporting: 'Exportiere…',
     export_error_title: 'Export fehlgeschlagen',
     export_error_message: 'Datenbank konnte nicht exportiert werden. Bitte erneut versuchen.',
     import_title: 'Money2Time-Backup importieren',
-    import_description:
-      'Aus einem zuvor exportierten Money2Time-JSON-Backup wiederherstellen. Alle aktuellen Daten werden ersetzt.',
     importing: 'Money2Time-Backup wird importiert',
-    import_confirm_title: 'Alle Daten ersetzen?',
-    import_confirm_message:
-      'Alle aktuellen Konten, Kategorien, Transaktionen und Einstellungen werden durch die Daten aus der Backup-Datei überschrieben. Dies kann nicht rückgängig gemacht werden.',
-    import_confirm_action: 'Daten ersetzen',
     import_success_title: 'Import abgeschlossen',
     import_success_message: 'Deine Daten wurden erfolgreich aus dem Backup wiederhergestellt.',
     import_error_title: 'Import fehlgeschlagen',
@@ -2538,10 +2552,6 @@ const de = {
     delete_confirm_title: 'Dieses Backup löschen?',
     delete_confirm_message: 'Diese Backup-Datei wird dauerhaft entfernt.',
     delete_failed_title: 'Löschen fehlgeschlagen',
-    restore_confirm_title: 'Alle Daten durch dieses Backup ersetzen?',
-    restore_confirm_summary: '{{accounts}} Konten · {{transactions}} Transaktionen',
-    restore_confirm_warning:
-      'Alle Daten auf diesem Gerät werden ersetzt. Dies kann nicht rückgängig gemacht werden.',
     restore_confirm_action: 'Daten ersetzen',
     restoring: 'Wird wiederhergestellt…',
     restore_success_title: 'Wiederhergestellt',

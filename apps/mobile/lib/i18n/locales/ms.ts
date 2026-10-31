@@ -1,4 +1,26 @@
 const ms = {
+  backup_restore: {
+    title: 'Choose what to restore',
+    export_description:
+      'Save your personal ledgers, shared ledgers you own, and settings as a JSON backup. Ledgers shared with you are excluded.',
+    import_description:
+      'Choose personal ledgers or shared ledgers you own to restore from a Money2Time JSON backup.',
+    description:
+      'Choose the data to replace with this backup. Shared ledgers stay unchanged unless you select them.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces your personal data. Linked phones receive these changes.',
+    owned: 'Shared · You own this',
+    unavailable: 'Sign in as the current owner of an active shared ledger to restore it.',
+    members_note: 'Ledgers shared with you are excluded from backups and are never restored.',
+    safety_note: 'A recovery backup is saved on this phone before restoring.',
+    confirm_title: 'Restore shared ledgers for everyone?',
+    confirm_message:
+      '{{names}}\n\nThis replaces these ledgers for everyone with the backup from {{date}}. Later entries and changes may be lost. Members and invitations stay the same.',
+    sync_pending:
+      'Restored on this phone. Shared changes are waiting to sync. Keep Cloud Sync signed in.',
+    failed:
+      'Could not restore. Shared recovery needs an internet connection and current ownership. A recovery backup must be saved before any data is replaced.',
+  },
   common: {
     back: 'Kembali',
     loading: 'Memuatkan…',
@@ -1657,19 +1679,11 @@ const ms = {
     },
     title: 'Pengurusan Data',
     export_title: 'Eksport Pangkalan Data',
-    export_description:
-      'Simpan sandaran penuh semua akaun, kategori, transaksi, dan tetapan sebagai fail JSON.',
     exporting: 'Mengeksport...',
     export_error_title: 'Eksport Gagal',
     export_error_message: 'Tidak dapat mengeksport pangkalan data. Sila cuba lagi.',
     import_title: 'Import Sandaran Money2Time',
-    import_description:
-      'Pulihkan dari sandaran JSON Money2Time yang telah dieksport sebelum ini. Ini akan menggantikan semua data semasa anda.',
     importing: 'Mengimport sandaran Money2Time',
-    import_confirm_title: 'Gantikan Semua Data?',
-    import_confirm_message:
-      'Ini akan menimpa semua akaun, kategori, transaksi, dan tetapan semasa anda dengan data dari fail sandaran. Tindakan ini tidak boleh dibuat semula.',
-    import_confirm_action: 'Gantikan Data',
     import_success_title: 'Import Selesai',
     import_success_message: 'Data anda telah berjaya dipulihkan dari sandaran.',
     import_error_title: 'Import Gagal',
@@ -2519,10 +2533,6 @@ const ms = {
     delete_confirm_title: 'Padam sandaran ini?',
     delete_confirm_message: 'Fail sandaran ini akan dipadam secara kekal.',
     delete_failed_title: 'Pemadaman gagal',
-    restore_confirm_title: 'Gantikan semua data dengan sandaran ini?',
-    restore_confirm_summary: '{{accounts}} akaun · {{transactions}} transaksi',
-    restore_confirm_warning:
-      'Ini akan menggantikan semua data pada peranti ini. Tidak boleh dibuat semula.',
     restore_confirm_action: 'Gantikan data',
     restoring: 'Memulihkan...',
     restore_success_title: 'Dipulihkan',

@@ -1,4 +1,26 @@
 const nl = {
+  backup_restore: {
+    title: 'Choose what to restore',
+    export_description:
+      'Save your personal ledgers, shared ledgers you own, and settings as a JSON backup. Ledgers shared with you are excluded.',
+    import_description:
+      'Choose personal ledgers or shared ledgers you own to restore from a Money2Time JSON backup.',
+    description:
+      'Choose the data to replace with this backup. Shared ledgers stay unchanged unless you select them.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces your personal data. Linked phones receive these changes.',
+    owned: 'Shared · You own this',
+    unavailable: 'Sign in as the current owner of an active shared ledger to restore it.',
+    members_note: 'Ledgers shared with you are excluded from backups and are never restored.',
+    safety_note: 'A recovery backup is saved on this phone before restoring.',
+    confirm_title: 'Restore shared ledgers for everyone?',
+    confirm_message:
+      '{{names}}\n\nThis replaces these ledgers for everyone with the backup from {{date}}. Later entries and changes may be lost. Members and invitations stay the same.',
+    sync_pending:
+      'Restored on this phone. Shared changes are waiting to sync. Keep Cloud Sync signed in.',
+    failed:
+      'Could not restore. Shared recovery needs an internet connection and current ownership. A recovery backup must be saved before any data is replaced.',
+  },
   common: {
     back: 'Terug',
     loading: 'Laden…',
@@ -1661,19 +1683,11 @@ const nl = {
     },
     title: 'Gegevensbeheer',
     export_title: 'Database exporteren',
-    export_description:
-      'Sla een volledige back-up op van al je rekeningen, categorieën, transacties en instellingen als JSON-bestand.',
     exporting: 'Exporteren...',
     export_error_title: 'Exporteren mislukt',
     export_error_message: 'Kon de database niet exporteren. Probeer het opnieuw.',
     import_title: 'Money2Time-back-up importeren',
-    import_description:
-      'Herstellen vanuit een eerder geëxporteerde Money2Time JSON-back-up. Dit vervangt al je huidige gegevens.',
     importing: 'Money2Time-back-up importeren',
-    import_confirm_title: 'Alle gegevens vervangen?',
-    import_confirm_message:
-      'Dit overschrijft al je huidige rekeningen, categorieën, transacties en instellingen met de gegevens uit het back-upbestand. Dit kan niet ongedaan worden gemaakt.',
-    import_confirm_action: 'Gegevens vervangen',
     import_success_title: 'Importeren voltooid',
     import_success_message: 'Je gegevens zijn succesvol hersteld vanuit de back-up.',
     import_error_title: 'Importeren mislukt',
@@ -2530,10 +2544,6 @@ const nl = {
     delete_confirm_title: 'Deze back-up verwijderen?',
     delete_confirm_message: 'Dit back-upbestand wordt permanent verwijderd.',
     delete_failed_title: 'Verwijderen mislukt',
-    restore_confirm_title: 'Alle gegevens vervangen door deze back-up?',
-    restore_confirm_summary: '{{accounts}} rekeningen · {{transactions}} transacties',
-    restore_confirm_warning:
-      'Dit vervangt alles op dit apparaat. Dit kan niet ongedaan worden gemaakt.',
     restore_confirm_action: 'Gegevens vervangen',
     restoring: 'Herstellen...',
     restore_success_title: 'Hersteld',

@@ -1,10 +1,6 @@
 import { Directory, File, Paths } from 'expo-file-system/next';
 
-import {
-  AUTO_BACKUP_PREFIX,
-  type BackupRecord,
-  parseTimestampFromName,
-} from '~/services/autoBackup.shared';
+import { type BackupRecord, parseTimestampFromName } from '~/services/autoBackup.shared';
 
 const BACKUPS_SUBDIR = 'backups';
 
@@ -47,7 +43,6 @@ export const localProvider = {
     for (const entry of entries) {
       if (!(entry instanceof File)) continue;
       const name = entry.name;
-      if (!name.startsWith(AUTO_BACKUP_PREFIX)) continue;
       const createdAt = parseTimestampFromName(name);
       if (!createdAt) continue;
       records.push({

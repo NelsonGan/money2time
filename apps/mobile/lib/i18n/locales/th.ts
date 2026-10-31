@@ -1,4 +1,26 @@
 const th = {
+  backup_restore: {
+    title: 'Choose what to restore',
+    export_description:
+      'Save your personal ledgers, shared ledgers you own, and settings as a JSON backup. Ledgers shared with you are excluded.',
+    import_description:
+      'Choose personal ledgers or shared ledgers you own to restore from a Money2Time JSON backup.',
+    description:
+      'Choose the data to replace with this backup. Shared ledgers stay unchanged unless you select them.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces your personal data. Linked phones receive these changes.',
+    owned: 'Shared · You own this',
+    unavailable: 'Sign in as the current owner of an active shared ledger to restore it.',
+    members_note: 'Ledgers shared with you are excluded from backups and are never restored.',
+    safety_note: 'A recovery backup is saved on this phone before restoring.',
+    confirm_title: 'Restore shared ledgers for everyone?',
+    confirm_message:
+      '{{names}}\n\nThis replaces these ledgers for everyone with the backup from {{date}}. Later entries and changes may be lost. Members and invitations stay the same.',
+    sync_pending:
+      'Restored on this phone. Shared changes are waiting to sync. Keep Cloud Sync signed in.',
+    failed:
+      'Could not restore. Shared recovery needs an internet connection and current ownership. A recovery backup must be saved before any data is replaced.',
+  },
   common: {
     back: 'กลับ',
     loading: 'กำลังโหลด…',
@@ -1618,19 +1640,11 @@ const th = {
     },
     title: 'การจัดการข้อมูล',
     export_title: 'ส่งออกฐานข้อมูล',
-    export_description:
-      'บันทึกไฟล์สำรองข้อมูลสมบูรณ์ของบัญชี หมวดหมู่ รายการ และการตั้งค่าทั้งหมดเป็นไฟล์ JSON',
     exporting: 'กำลังส่งออก...',
     export_error_title: 'ส่งออกไม่สำเร็จ',
     export_error_message: 'ไม่สามารถส่งออกฐานข้อมูลได้ กรุณาลองใหม่',
     import_title: 'นำเข้าไฟล์สำรอง Money2Time',
-    import_description:
-      'กู้คืนจากไฟล์สำรอง Money2Time JSON ที่ส่งออกไว้ก่อนหน้า การดำเนินการนี้จะแทนที่ข้อมูลปัจจุบันทั้งหมด',
     importing: 'กำลังนำเข้าไฟล์สำรอง Money2Time',
-    import_confirm_title: 'แทนที่ข้อมูลทั้งหมด?',
-    import_confirm_message:
-      'การดำเนินการนี้จะเขียนทับบัญชี หมวดหมู่ รายการ และการตั้งค่าปัจจุบันทั้งหมดด้วยข้อมูลจากไฟล์สำรอง การดำเนินการนี้ไม่สามารถเลิกทำได้',
-    import_confirm_action: 'แทนที่ข้อมูล',
     import_success_title: 'นำเข้าเสร็จแล้ว',
     import_success_message: 'กู้คืนข้อมูลของคุณจากไฟล์สำรองสำเร็จแล้ว',
     import_error_title: 'นำเข้าไม่สำเร็จ',
@@ -2455,9 +2469,6 @@ const th = {
     delete_confirm_title: 'ลบไฟล์สำรองนี้?',
     delete_confirm_message: 'ไฟล์สำรองนี้จะถูกลบอย่างถาวร',
     delete_failed_title: 'ลบไม่สำเร็จ',
-    restore_confirm_title: 'แทนที่ข้อมูลทั้งหมดด้วยไฟล์สำรองนี้?',
-    restore_confirm_summary: '{{accounts}} บัญชี · {{transactions}} รายการ',
-    restore_confirm_warning: 'การดำเนินการนี้จะแทนที่ทุกอย่างบนอุปกรณ์นี้ ไม่สามารถเลิกทำได้',
     restore_confirm_action: 'แทนที่ข้อมูล',
     restoring: 'กำลังกู้คืน...',
     restore_success_title: 'กู้คืนแล้ว',

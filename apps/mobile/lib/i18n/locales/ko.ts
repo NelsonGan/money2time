@@ -1,4 +1,26 @@
 const ko = {
+  backup_restore: {
+    title: 'Choose what to restore',
+    export_description:
+      'Save your personal ledgers, shared ledgers you own, and settings as a JSON backup. Ledgers shared with you are excluded.',
+    import_description:
+      'Choose personal ledgers or shared ledgers you own to restore from a Money2Time JSON backup.',
+    description:
+      'Choose the data to replace with this backup. Shared ledgers stay unchanged unless you select them.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces your personal data. Linked phones receive these changes.',
+    owned: 'Shared · You own this',
+    unavailable: 'Sign in as the current owner of an active shared ledger to restore it.',
+    members_note: 'Ledgers shared with you are excluded from backups and are never restored.',
+    safety_note: 'A recovery backup is saved on this phone before restoring.',
+    confirm_title: 'Restore shared ledgers for everyone?',
+    confirm_message:
+      '{{names}}\n\nThis replaces these ledgers for everyone with the backup from {{date}}. Later entries and changes may be lost. Members and invitations stay the same.',
+    sync_pending:
+      'Restored on this phone. Shared changes are waiting to sync. Keep Cloud Sync signed in.',
+    failed:
+      'Could not restore. Shared recovery needs an internet connection and current ownership. A recovery backup must be saved before any data is replaced.',
+  },
   common: {
     back: '뒤로',
     loading: '불러오는 중…',
@@ -1623,18 +1645,11 @@ const ko = {
     },
     title: '데이터 관리',
     export_title: '데이터베이스 내보내기',
-    export_description: '모든 계좌, 카테고리, 거래 및 설정을 JSON 파일로 전체 백업합니다.',
     exporting: '내보내는 중...',
     export_error_title: '내보내기 실패',
     export_error_message: '데이터베이스를 내보낼 수 없습니다. 다시 시도해 주세요.',
     import_title: 'Money2Time 백업 가져오기',
-    import_description:
-      '이전에 내보낸 Money2Time JSON 백업에서 복원합니다. 현재 데이터가 모두 교체됩니다.',
     importing: 'Money2Time 백업 가져오는 중',
-    import_confirm_title: '모든 데이터를 교체하시겠어요?',
-    import_confirm_message:
-      '백업 파일의 데이터로 현재 모든 계좌, 카테고리, 거래 및 설정이 덮어쓰여집니다. 이 작업은 취소할 수 없습니다.',
-    import_confirm_action: '데이터 교체',
     import_success_title: '가져오기 완료',
     import_success_message: '데이터가 백업에서 성공적으로 복원되었습니다.',
     import_error_title: '가져오기 실패',
@@ -2469,9 +2484,6 @@ const ko = {
     delete_confirm_title: '이 백업을 삭제하시겠어요?',
     delete_confirm_message: '이 백업 파일이 영구적으로 삭제됩니다.',
     delete_failed_title: '삭제 실패',
-    restore_confirm_title: '이 백업으로 모든 데이터를 교체하시겠어요?',
-    restore_confirm_summary: '계좌 {{accounts}}개 · 거래 {{transactions}}건',
-    restore_confirm_warning: '이 기기의 모든 데이터가 교체됩니다. 취소할 수 없습니다.',
     restore_confirm_action: '데이터 교체',
     restoring: '복원 중...',
     restore_success_title: '복원 완료',

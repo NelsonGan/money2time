@@ -10,7 +10,7 @@
 import type { BackupTarget } from '~/types';
 
 import type { BackupRecord, BackupRunResult } from './autoBackup.shared';
-import type { BackupSummary, ImportResult } from './dataManagementService';
+import type { BackupData, ImportResult } from './dataManagementService';
 
 export * from './autoBackup.shared';
 
@@ -22,12 +22,15 @@ export async function listAllBackups(): Promise<BackupRecord[]> {
   return [];
 }
 
-export async function restoreFromBackup(_record: BackupRecord): Promise<ImportResult> {
+export async function restoreFromBackup(
+  _record: BackupRecord,
+  _restore?: (backup: BackupData) => Promise<ImportResult>,
+): Promise<ImportResult> {
   return { canceled: false, success: false, error: 'Auto-backup not available on this platform' };
 }
 
-export async function previewBackup(_record: BackupRecord): Promise<BackupSummary | null> {
-  return null;
+export async function saveRestoreSafetyBackup(): Promise<BackupRecord> {
+  throw new Error('Auto-backup not available on this platform');
 }
 
 export async function deleteBackup(_record: BackupRecord): Promise<void> {}

@@ -1,4 +1,26 @@
 const zh = {
+  backup_restore: {
+    title: 'Choose what to restore',
+    export_description:
+      'Save your personal ledgers, shared ledgers you own, and settings as a JSON backup. Ledgers shared with you are excluded.',
+    import_description:
+      'Choose personal ledgers or shared ledgers you own to restore from a Money2Time JSON backup.',
+    description:
+      'Choose the data to replace with this backup. Shared ledgers stay unchanged unless you select them.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces your personal data. Linked phones receive these changes.',
+    owned: 'Shared · You own this',
+    unavailable: 'Sign in as the current owner of an active shared ledger to restore it.',
+    members_note: 'Ledgers shared with you are excluded from backups and are never restored.',
+    safety_note: 'A recovery backup is saved on this phone before restoring.',
+    confirm_title: 'Restore shared ledgers for everyone?',
+    confirm_message:
+      '{{names}}\n\nThis replaces these ledgers for everyone with the backup from {{date}}. Later entries and changes may be lost. Members and invitations stay the same.',
+    sync_pending:
+      'Restored on this phone. Shared changes are waiting to sync. Keep Cloud Sync signed in.',
+    failed:
+      'Could not restore. Shared recovery needs an internet connection and current ownership. A recovery backup must be saved before any data is replaced.',
+  },
   common: {
     back: '返回',
     loading: '加载中…',
@@ -1566,17 +1588,11 @@ const zh = {
     },
     title: '数据管理',
     export_title: '导出数据库',
-    export_description: '将所有账户、分类、交易和设置保存为 JSON 文件的完整备份。',
     exporting: '正在导出...',
     export_error_title: '导出失败',
     export_error_message: '无法导出数据库，请重试。',
     import_title: '导入 Money2Time 备份',
-    import_description: '从之前导出的 Money2Time JSON 备份中恢复。这将替换你当前的所有数据。',
     importing: '正在导入 Money2Time 备份',
-    import_confirm_title: '替换所有数据？',
-    import_confirm_message:
-      '这将用备份文件中的数据覆盖你当前的所有账户、分类、交易和设置。此操作不可撤销。',
-    import_confirm_action: '替换数据',
     import_success_title: '导入完成',
     import_success_message: '你的数据已成功从备份中恢复。',
     import_error_title: '导入失败',
@@ -2391,9 +2407,6 @@ const zh = {
     delete_confirm_title: '删除该备份？',
     delete_confirm_message: '该备份文件将被永久删除。',
     delete_failed_title: '删除失败',
-    restore_confirm_title: '使用该备份替换所有数据？',
-    restore_confirm_summary: '{{accounts}} 个账户 · {{transactions}} 笔交易',
-    restore_confirm_warning: '这将替换本设备上的所有数据，无法撤销。',
     restore_confirm_action: '替换数据',
     restoring: '恢复中…',
     restore_success_title: '已恢复',

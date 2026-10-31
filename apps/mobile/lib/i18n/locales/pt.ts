@@ -1,4 +1,26 @@
 const pt = {
+  backup_restore: {
+    title: 'Choose what to restore',
+    export_description:
+      'Save your personal ledgers, shared ledgers you own, and settings as a JSON backup. Ledgers shared with you are excluded.',
+    import_description:
+      'Choose personal ledgers or shared ledgers you own to restore from a Money2Time JSON backup.',
+    description:
+      'Choose the data to replace with this backup. Shared ledgers stay unchanged unless you select them.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces your personal data. Linked phones receive these changes.',
+    owned: 'Shared · You own this',
+    unavailable: 'Sign in as the current owner of an active shared ledger to restore it.',
+    members_note: 'Ledgers shared with you are excluded from backups and are never restored.',
+    safety_note: 'A recovery backup is saved on this phone before restoring.',
+    confirm_title: 'Restore shared ledgers for everyone?',
+    confirm_message:
+      '{{names}}\n\nThis replaces these ledgers for everyone with the backup from {{date}}. Later entries and changes may be lost. Members and invitations stay the same.',
+    sync_pending:
+      'Restored on this phone. Shared changes are waiting to sync. Keep Cloud Sync signed in.',
+    failed:
+      'Could not restore. Shared recovery needs an internet connection and current ownership. A recovery backup must be saved before any data is replaced.',
+  },
   common: {
     back: 'Voltar',
     loading: 'Carregando…',
@@ -1654,19 +1676,11 @@ const pt = {
     },
     title: 'Gerenciamento de dados',
     export_title: 'Exportar banco de dados',
-    export_description:
-      'Salve um backup completo de todas as suas contas, categorias, transações e configurações como arquivo JSON.',
     exporting: 'Exportando...',
     export_error_title: 'Exportação falhou',
     export_error_message: 'Não foi possível exportar o banco de dados. Tente novamente.',
     import_title: 'Importar backup Money2Time',
-    import_description:
-      'Restaure a partir de um backup JSON do Money2Time exportado anteriormente. Isso substituirá todos os seus dados atuais.',
     importing: 'Importando backup Money2Time',
-    import_confirm_title: 'Substituir todos os dados?',
-    import_confirm_message:
-      'Isso substituirá todas as suas contas, categorias, transações e configurações atuais com os dados do arquivo de backup. Não é possível desfazer.',
-    import_confirm_action: 'Substituir dados',
     import_success_title: 'Importação concluída',
     import_success_message: 'Seus dados foram restaurados com sucesso a partir do backup.',
     import_error_title: 'Importação falhou',
@@ -2519,9 +2533,6 @@ const pt = {
     delete_confirm_title: 'Excluir este backup?',
     delete_confirm_message: 'Este arquivo de backup será removido permanentemente.',
     delete_failed_title: 'Exclusão falhou',
-    restore_confirm_title: 'Substituir todos os dados por este backup?',
-    restore_confirm_summary: '{{accounts}} contas · {{transactions}} transações',
-    restore_confirm_warning: 'Isso substituirá tudo neste dispositivo. Não é possível desfazer.',
     restore_confirm_action: 'Substituir dados',
     restoring: 'Restaurando...',
     restore_success_title: 'Restaurado',

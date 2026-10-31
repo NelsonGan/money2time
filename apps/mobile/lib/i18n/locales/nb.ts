@@ -1,4 +1,26 @@
 const nb = {
+  backup_restore: {
+    title: 'Choose what to restore',
+    export_description:
+      'Save your personal ledgers, shared ledgers you own, and settings as a JSON backup. Ledgers shared with you are excluded.',
+    import_description:
+      'Choose personal ledgers or shared ledgers you own to restore from a Money2Time JSON backup.',
+    description:
+      'Choose the data to replace with this backup. Shared ledgers stay unchanged unless you select them.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces your personal data. Linked phones receive these changes.',
+    owned: 'Shared · You own this',
+    unavailable: 'Sign in as the current owner of an active shared ledger to restore it.',
+    members_note: 'Ledgers shared with you are excluded from backups and are never restored.',
+    safety_note: 'A recovery backup is saved on this phone before restoring.',
+    confirm_title: 'Restore shared ledgers for everyone?',
+    confirm_message:
+      '{{names}}\n\nThis replaces these ledgers for everyone with the backup from {{date}}. Later entries and changes may be lost. Members and invitations stay the same.',
+    sync_pending:
+      'Restored on this phone. Shared changes are waiting to sync. Keep Cloud Sync signed in.',
+    failed:
+      'Could not restore. Shared recovery needs an internet connection and current ownership. A recovery backup must be saved before any data is replaced.',
+  },
   common: {
     back: 'Tilbake',
     loading: 'Laster inn…',
@@ -1646,19 +1668,11 @@ const nb = {
     },
     title: 'Dataadministrasjon',
     export_title: 'Eksporter database',
-    export_description:
-      'Lagre en fullstendig sikkerhetskopi av alle kontoer, kategorier, transaksjoner og innstillinger som en JSON-fil.',
     exporting: 'Eksporterer...',
     export_error_title: 'Eksport mislyktes',
     export_error_message: 'Kunne ikke eksportere databasen. Prøv igjen.',
     import_title: 'Importer Money2Time-sikkerhetskopi',
-    import_description:
-      'Gjenopprett fra en tidligere eksportert Money2Time JSON-sikkerhetskopi. Dette erstatter alle gjeldende data.',
     importing: 'Importerer Money2Time-sikkerhetskopi',
-    import_confirm_title: 'Erstatt alle data?',
-    import_confirm_message:
-      'Dette overskriver alle gjeldende kontoer, kategorier, transaksjoner og innstillinger med data fra sikkerhetskopifilen. Dette kan ikke angres.',
-    import_confirm_action: 'Erstatt data',
     import_success_title: 'Import fullført',
     import_success_message: 'Dataene dine har blitt gjenopprettet fra sikkerhetskopien.',
     import_error_title: 'Import mislyktes',
@@ -2504,9 +2518,6 @@ const nb = {
     delete_confirm_title: 'Slett denne sikkerhetskopien?',
     delete_confirm_message: 'Denne sikkerhetskopifilen slettes permanent.',
     delete_failed_title: 'Sletting mislyktes',
-    restore_confirm_title: 'Erstatt alle data med denne sikkerhetskopien?',
-    restore_confirm_summary: '{{accounts}} kontoer · {{transactions}} transaksjoner',
-    restore_confirm_warning: 'Dette erstatter alt på denne enheten. Det kan ikke angres.',
     restore_confirm_action: 'Erstatt data',
     restoring: 'Gjenoppretter...',
     restore_success_title: 'Gjenopprettet',

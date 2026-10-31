@@ -348,7 +348,7 @@ Other shared components: `components/feedback/` (EmptyState, AppErrorBoundary, M
 | `haptics.ts`                                                                                                                                                                                           | `triggerHaptic('medium' \| 'selection' \| 'success' \| 'warning')`                                                                                                                                                                                                          |
 | `revenueCat.ts` (+ `.native.ts`, `.shared.ts`)                                                                                                                                                         | RevenueCat SDK: subscription state, purchase, restore                                                                                                                                                                                                                       |
 | `speechRecognition.ts` (+ `.native.ts`, `.shared.ts`)                                                                                                                                                  | On-device speech-to-text for voice quick-entry (`expo-speech-recognition`)                                                                                                                                                                                                  |
-| `autoBackup.ts` (+ `.native.ts`, `.shared.ts`) + `autoBackupProviders/`                                                                                                                                | Daily auto-backup: `runAutoBackupIfDue`, `listAllBackups`, `restoreFromBackup`, `previewBackup`, `deleteBackup`, `isTargetAvailable`, Google Sign-In helpers                                                                                                                |
+| `autoBackup.ts` (+ `.native.ts`, `.shared.ts`) + `autoBackupProviders/`                                                                                                                                | Daily auto-backup: `runAutoBackupIfDue`, `listAllBackups`, `restoreFromBackup`, `deleteBackup`, `isTargetAvailable`, Google Sign-In helpers                                                                                                                                 |
 | `webDashboard.ts` (+ `.native.ts`, `.shared.ts`), `webDashboardLink.ts`, `webDashboardCrypto.ts`, `webDashboardPatch.ts`, `webDashboardEdits.ts` + `webDashboardEditModules/`, `webDashboardNative.ts` | Web Dashboard: QR linking to a browser, live end-to-end encrypted transfer through a relay that stores nothing, patches, and checking and planning edits from a linked browser (see the Web-dashboard Worker)                                                               |
 | `autoBackupTaskRegistration.ts`                                                                                                                                                                        | Registers the `expo-background-task` task for periodic backup runs                                                                                                                                                                                                          |
 | `mmbakImportService.ts` + `mmbakImport/`                                                                                                                                                               | Money Manager `.mmbackup` file import                                                                                                                                                                                                                                       |
@@ -604,9 +604,10 @@ app side lives in `features/ledgers/`.
 
 - **Resets and imports:**
   - Reset all data removes every ledger but the shared ones, which are
-    other people's books too (`deletePersonalLedgerRows`); restoring a backup
-    keeps them the same way, skipping the backup's copies of their rows. Its
-    confirmations say so. Leaving or no longer sharing a ledger removes it.
+    other people's books too (`deletePersonalLedgerRows`). Backup restore also
+    preserves shared ledgers unless their current owner explicitly selects them;
+    restoring a selected shared ledger changes it for everyone. Leaving or no
+    longer sharing a ledger removes it.
   - A Money Manager import replaces the open ledger's data, in that ledger's
     currency. In a shared ledger it does so for everyone, and the
     confirmation says so; so does the currency start-over's.
@@ -614,8 +615,9 @@ app side lives in `features/ledgers/`.
     ledger and its own preferences.
 - **Recurring rules** run for the open ledger. Another ledger's rules catch up
   on missed dates when it is opened.
-- **Backups** hold every ledger, and a restore opens the default ledger. The
-  Web Dashboard shows the open ledger only.
+- **Backups** hold personal ledgers and shared ledgers the user owns, excluding
+  ledgers they joined as a member. Personal restore opens the default ledger.
+  The Web Dashboard shows the open ledger only, including joined ledgers.
 
 ### How it works
 
@@ -678,9 +680,41 @@ its own sync engine and replica.
   rates were last stored. The fetch timestamp on the settings row is shared by
   every ledger, so it cannot answer that.
 - **Backup.** Rows carry `ledger_id`, and the backup has a `ledgers` table.
-  - A backup holding more than one ledger is version 4. An app from before
-    ledgers refuses it, instead of restoring every ledger into one book.
-    Otherwise the backup stays version 3.
+  - Backups exclude ledgers the user joined as a member, including their
+    child rows and images used only by those ledgers. Owned shared ledgers
+    remain in the backup, with `sharedLedgers` recording each ledger/share id.
+    These backups use version 5 so older apps refuse to restore shared
+    snapshots as personal data. Other multi-ledger backups use version 4;
+    default-ledger-only backups stay version 3. Versions 1–4 remain readable.
+  - Backup and JSON import use the same restore selector. Personal ledgers
+    start selected; shared ledgers start unselected. Only a currently owned,
+    active share matching the snapshot may be selected. A second confirmation
+    names the selected shared ledgers and warns that everyone loses changes
+    made after the backup. Members and invitations are never restored.
+  - Unselected shared rows, including snapshots identified by version 5 on a
+    fresh phone, are skipped. Current shared rows and their local preferences
+    stay intact. Shared-only recovery also preserves personal settings, the open
+    ledger and images referenced by those settings. Historical ownership does
+    not authorize a live restore.
+    Legacy backups have no sharing provenance: existing memberships protect
+    their rows, but a signed-out fresh phone cannot distinguish an old shared
+    snapshot from personal data.
+  - Every restore first saves a local recovery backup; failure to save it
+    aborts replacement. Recovery files have their own filename prefix so an
+    automatic backup in the same second cannot overwrite them; they appear in
+    the same local backup list and follow its retention limit.
+    Selected shared restoration requires online ownership
+    checks before preparation and again before replacement. It waits for local
+    sync work, brings down the selected shares, preserves device preferences,
+    then queues a durable recovery intent with the local SQLite transaction.
+    It compares against the cloud replica and sends only changed rows; cloud-only
+    records are deleted (deletion markers where supported), and intentional
+    recovery can revive a previously deleted row. A failed push is retried and
+    shown as pending, rather than reporting that all phones have recovered.
+    Other devices still follow ordinary row conflict rules; this is not an
+    account-wide write lock or a new cloud generation.
+  - Currency and icon normalization only touches restored rows, so an old
+    personal backup cannot rewrite preserved shared-ledger currencies/icons.
   - A backup without ledgers restores into the default ledger through the
     column default.
   - The Web Dashboard gets the open ledger only (`openLedgerOnly`), as
@@ -1141,8 +1175,10 @@ The flag is read with `sendEvent: false`, so it sends no `$feature_flag_called`.
   on a signed-in phone or a second time.
 - **Restore and reset.** With Cloud Sync on, restoring a backup (Backup or
   Data Management import) replaces the cloud copy too, and Reset all data
-  erases it; both confirmations say so. Both leave the shared ledgers as
-  they are (see [Ledgers](#ledgers)), with or without Cloud Sync on.
+  erases it; both confirmations say so. Reset always keeps shared ledgers.
+  Restore keeps them unless their current owner explicitly selects them in
+  the restore sheet; see [Backup](#ledgers) for selection, ownership checks,
+  recovery copies and sync behavior.
 - **When Pro ends** (the Worker decides, per account: a subscription on any
   linked phone keeps it Pro):
   - Nothing is deleted. The phone keeps all its data and works as before;
@@ -1838,7 +1874,7 @@ Bank and wallet notifications (Android listener) and the Log Notification Shortc
 | `TUTORIAL_LIST_OPENED`        | `Tutorial List Opened`        | `m2t_tutorial_list_opened`        | No      | The tutorial list opens from settings or a deep link; every open.                                                                                                                                                                                                                                             | `source`                      | [App.tsx](apps/mobile/App.tsx), [services/deepLinks.ts](apps/mobile/services/deepLinks.ts)                   |
 | `DISPLAY_MODE_TOGGLED`        | `Display Mode Toggled`        | `m2t_display_mode_toggled`        | No      | Display switches between money and time; each toggle.                                                                                                                                                                                                                                                         | `mode`                        | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                                 |
 | `NAV_TABS_CHANGED`            | `Nav Tabs Changed`            | `m2t_nav_tabs_changed`            | No      | A page is added to, removed from or reordered in the bottom bar, or the bar is reset, in Settings > Display > Bottom bar; each change.                                                                                                                                                                        | `change`, `tabs`, `tab_count` | [features/settings/screens/BottomBarScreen.tsx](apps/mobile/features/settings/screens/BottomBarScreen.tsx)   |
-| `AUTO_BACKUP_RESTORED`        | `Auto Backup Restored`        | `m2t_auto_backup_restored`        | No      | An auto-backup is restored; each successful restore.                                                                                                                                                                                                                                                          | `target`                      | [services/autoBackup.native.ts](apps/mobile/services/autoBackup.native.ts)                                   |
+| `AUTO_BACKUP_RESTORED`        | `Auto Backup Restored`        | `m2t_auto_backup_restored`        | No      | An auto-backup is restored through the selection sheet; once per successful local restore, including a completed local restore whose shared upload is pending. Cancelled selections and failed restores send nothing. Recovery safety-backup creation sends no event.                                         | `target`                      | [services/autoBackup.native.ts](apps/mobile/services/autoBackup.native.ts)                                   |
 | `AUTO_BACKUP_DELETED`         | `Auto Backup Deleted`         | `m2t_auto_backup_deleted`         | No      | An auto-backup is deleted; each successful deletion.                                                                                                                                                                                                                                                          | `target`                      | [services/autoBackup.native.ts](apps/mobile/services/autoBackup.native.ts)                                   |
 | `AUTO_BACKUP_SETTING_TOGGLED` | `Auto Backup Setting Toggled` | `m2t_auto_backup_setting_toggled` | No      | Auto-backup is enabled or disabled in settings; each toggle.                                                                                                                                                                                                                                                  | `enabled`                     | [features/settings/screens/AutoBackupScreen.tsx](apps/mobile/features/settings/screens/AutoBackupScreen.tsx) |
 | `AUTO_BACKUP_TARGET_CHANGED`  | `Auto Backup Target Changed`  | `m2t_auto_backup_target_changed`  | No      | The auto-backup target is selected in settings; each change.                                                                                                                                                                                                                                                  | `target`                      | [features/settings/screens/AutoBackupScreen.tsx](apps/mobile/features/settings/screens/AutoBackupScreen.tsx) |

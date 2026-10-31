@@ -1,4 +1,26 @@
 const hi = {
+  backup_restore: {
+    title: 'Choose what to restore',
+    export_description:
+      'Save your personal ledgers, shared ledgers you own, and settings as a JSON backup. Ledgers shared with you are excluded.',
+    import_description:
+      'Choose personal ledgers or shared ledgers you own to restore from a Money2Time JSON backup.',
+    description:
+      'Choose the data to replace with this backup. Shared ledgers stay unchanged unless you select them.',
+    personal: 'Personal ledgers',
+    personal_note: 'Replaces your personal data. Linked phones receive these changes.',
+    owned: 'Shared · You own this',
+    unavailable: 'Sign in as the current owner of an active shared ledger to restore it.',
+    members_note: 'Ledgers shared with you are excluded from backups and are never restored.',
+    safety_note: 'A recovery backup is saved on this phone before restoring.',
+    confirm_title: 'Restore shared ledgers for everyone?',
+    confirm_message:
+      '{{names}}\n\nThis replaces these ledgers for everyone with the backup from {{date}}. Later entries and changes may be lost. Members and invitations stay the same.',
+    sync_pending:
+      'Restored on this phone. Shared changes are waiting to sync. Keep Cloud Sync signed in.',
+    failed:
+      'Could not restore. Shared recovery needs an internet connection and current ownership. A recovery backup must be saved before any data is replaced.',
+  },
   common: {
     back: 'वापस',
     loading: 'लोड हो रहा है…',
@@ -1639,19 +1661,11 @@ const hi = {
     },
     title: 'डेटा प्रबंधन',
     export_title: 'डेटाबेस एक्सपोर्ट करें',
-    export_description:
-      'अपने सभी खाते, श्रेणियां, लेनदेन, और सेटिंग्स का पूरा बैकअप JSON फ़ाइल के रूप में सेव करें।',
     exporting: 'एक्सपोर्ट हो रहा है...',
     export_error_title: 'एक्सपोर्ट विफल',
     export_error_message: 'डेटाबेस एक्सपोर्ट नहीं हो सका। कृपया पुनः प्रयास करें।',
     import_title: 'Money2Time बैकअप आयात करें',
-    import_description:
-      'पहले एक्सपोर्ट किए गए Money2Time JSON बैकअप से पुनर्स्थापित करें। यह आपका सभी मौजूदा डेटा बदल देगा।',
     importing: 'Money2Time बैकअप आयात हो रहा है',
-    import_confirm_title: 'सभी डेटा बदलें?',
-    import_confirm_message:
-      'यह बैकअप फ़ाइल के डेटा से आपके सभी मौजूदा खाते, श्रेणियां, लेनदेन, और सेटिंग्स बदल देगा। यह पूर्ववत नहीं किया जा सकता।',
-    import_confirm_action: 'डेटा बदलें',
     import_success_title: 'आयात पूरा',
     import_success_message: 'आपका डेटा बैकअप से सफलतापूर्वक पुनर्स्थापित हो गया।',
     import_error_title: 'आयात विफल',
@@ -2493,9 +2507,6 @@ const hi = {
     delete_confirm_title: 'यह बैकअप हटाएं?',
     delete_confirm_message: 'यह बैकअप फ़ाइल स्थायी रूप से हट जाएगी।',
     delete_failed_title: 'हटाना विफल',
-    restore_confirm_title: 'इस बैकअप से सभी डेटा बदलें?',
-    restore_confirm_summary: '{{accounts}} खाते · {{transactions}} लेनदेन',
-    restore_confirm_warning: 'यह इस डिवाइस पर सब कुछ बदल देगा। इसे पूर्ववत नहीं किया जा सकता।',
     restore_confirm_action: 'डेटा बदलें',
     restoring: 'पुनर्स्थापित हो रहा है...',
     restore_success_title: 'पुनर्स्थापित हो गया',
