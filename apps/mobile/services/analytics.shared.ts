@@ -120,7 +120,9 @@ export const POSTHOG_EVENTS = {
   CLOUD_BACKUP_PROMPT_CTA_TAPPED: 'Cloud Backup Prompt CTA Tapped',
   CLOUD_BACKUP_PROMPT_DISMISSED: 'Cloud Backup Prompt Dismissed',
 
-  // Cloud Sync: the post-purchase offer, sign-in and turning it on.
+  // Cloud Sync: first visit, the post-purchase offer, sign-in and turning it on.
+  /** Once per install; `status` is what the screen first shows. */
+  CLOUD_SYNC_SCREEN_VIEWED: 'Cloud Sync Screen Viewed',
   CLOUD_SYNC_PROMPT_SHOWN: 'Cloud Sync Prompt Shown',
   CLOUD_SYNC_PROMPT_ACCEPTED: 'Cloud Sync Prompt Accepted',
   CLOUD_SYNC_PROMPT_DISMISSED: 'Cloud Sync Prompt Dismissed',
