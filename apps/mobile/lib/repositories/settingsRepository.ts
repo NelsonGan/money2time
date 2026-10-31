@@ -39,6 +39,20 @@ function openNonDefaultLedgerId(): string | null {
   return id === DEFAULT_LEDGER_ID ? null : id;
 }
 
+/**
+ * Runs a two-row settings write atomically. When the caller already holds a
+ * transaction (auto-log saves its usage counter in the one that creates the
+ * transaction row), the write joins it: SQLite cannot BEGIN inside a BEGIN.
+ */
+function inTransaction(write: () => void): void {
+  const sqlite = getSQLite();
+  if (sqlite.isInTransactionSync()) {
+    write();
+    return;
+  }
+  sqlite.withTransactionSync(write);
+}
+
 /** Retries for the settings read below; see the comment inside `get`. */
 const MAX_READ_ATTEMPTS = 5;
 
@@ -334,7 +348,7 @@ class SettingsRepository {
     const split = splitQuickEntryForLedger(value, this.readAppJson().quickEntryPrefsJson);
     // One transaction: the usage counters on the settings row and the
     // ledger's own picks must never disagree.
-    getSQLite().withTransactionSync(() => {
+    inTransaction(() => {
       ledgersRepository.updatePrefs(ledgerId, { quickEntry: split.own });
       this.writeAppJson({ quickEntryPrefsJson: split.appJson });
     });
@@ -359,7 +373,7 @@ class SettingsRepository {
       return;
     }
     const split = splitPaymentAlertsForLedger(value, this.readAppJson().autoLogPrefsJson);
-    getSQLite().withTransactionSync(() => {
+    inTransaction(() => {
       ledgersRepository.updatePrefs(ledgerId, { paymentAlertAccounts: split.own });
       this.writeAppJson({ autoLogPrefsJson: split.appJson });
     });

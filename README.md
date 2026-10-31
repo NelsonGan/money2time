@@ -668,7 +668,10 @@ its own sync engine and replica.
   - `settingsRepository` merges the two, through the pure helpers in
     `lib/repositories/ledgerPrefs.ts`, so the rest of the app reads `settings`,
     `quickEntryPrefs` and the payment-alert prefs as before.
-  - A write that spans both rows runs in one transaction.
+  - A write that spans both rows runs in one transaction. When the caller
+    already holds one, it joins it, because SQLite cannot `BEGIN` inside a
+    `BEGIN`: the Apple Pay auto-log saves its usage counter inside the
+    transaction that creates the transaction row.
 - **Indexes.** The one-budget-per-period unique index is per ledger
   (`idx_monthly_budgets_ledger_period_key`).
   - There is deliberately no plain `ledger_id` index. With few ledgers it is

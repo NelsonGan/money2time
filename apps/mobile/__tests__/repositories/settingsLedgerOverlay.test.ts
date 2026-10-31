@@ -1,6 +1,9 @@
 jest.mock('~/lib/db/client', () => ({
   getDb: jest.fn(),
-  getSQLite: () => ({ withTransactionSync: (task: () => void) => task() }),
+  getSQLite: () => ({
+    isInTransactionSync: () => false,
+    withTransactionSync: (task: () => void) => task(),
+  }),
 }));
 jest.mock('~/lib/repositories/ledgersRepository', () => ({
   ledgersRepository: { update: jest.fn(), updatePrefs: jest.fn(), getPrefs: jest.fn() },
