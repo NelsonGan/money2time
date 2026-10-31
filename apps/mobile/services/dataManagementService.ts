@@ -124,6 +124,8 @@ export async function buildBackupData(opts?: {
   openLedgerOnly?: boolean;
 }): Promise<BackupData> {
   const sqlite = getSQLite();
+  const userAssets = await collectUserAssetsForBackup(opts?.includeAsset, opts?.assetCache);
+  // Keep ledger metadata and table rows in the same synchronous read after asset I/O.
   const now = nowIso();
   const ledgers = tryReadTable(sqlite, 'ledgers');
   const liveLedgerCount = ledgers.filter((row) => row.deleted_at == null).length;
@@ -131,7 +133,7 @@ export async function buildBackupData(opts?: {
   const data: BackupData = {
     version: liveLedgerCount > 1 ? MULTI_LEDGER_BACKUP_VERSION : BACKUP_VERSION,
     exportedAt: now,
-    userAssets: await collectUserAssetsForBackup(opts?.includeAsset, opts?.assetCache),
+    userAssets,
     tables: {
       accounts: sqlite.getAllSync('SELECT * FROM accounts') as Record<string, unknown>[],
       account_groups: sqlite.getAllSync('SELECT * FROM account_groups') as Record<

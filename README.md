@@ -681,6 +681,8 @@ its own sync engine and replica.
   rates were last stored. The fetch timestamp on the settings row is shared by
   every ledger, so it cannot answer that.
 - **Backup.** Rows carry `ledger_id`, and the backup has a `ledgers` table.
+  - Database rows and sharing metadata are read together after image collection,
+    so a ledger added during that asynchronous work retains its sharing provenance.
   - Backups exclude ledgers the user joined as a member, including their
     child rows and images used only by those ledgers. Owned shared ledgers
     remain in the backup, with `sharedLedgers` recording each ledger/share id.

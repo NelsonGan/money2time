@@ -595,6 +595,22 @@ describe('backup and restore across ledgers', () => {
     }
   });
 
+  it('captures sharing metadata for a ledger added while backup images are loading', async () => {
+    const collectAssets = require('~/services/userAssets').collectUserAssetsForBackup as jest.Mock;
+    collectAssets.mockImplementationOnce(async () => {
+      shareWork('owner');
+      return [];
+    });
+    try {
+      const backup = await buildBackupData();
+      expect(backup.tables.ledgers?.map((row) => row.id)).toEqual(['default', 'work']);
+      expect(backup.sharedLedgers).toEqual([{ ledgerId: 'work', shareId: 'share-1' }]);
+      expect(backup.version).toBe(5);
+    } finally {
+      removeSharedLedger('work');
+    }
+  });
+
   it('does not restore an owned shared snapshot as personal data on a fresh phone', async () => {
     shareWork('owner');
     const backup = await buildBackupData();
