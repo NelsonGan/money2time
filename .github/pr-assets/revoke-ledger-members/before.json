@@ -1,0 +1,99 @@
+{
+  "group": "m2t-audit-mvw0wu99",
+  "startedAt": "2026-10-31T06:31:52.365Z",
+  "checks": [
+    {
+      "name": "disposable_databases_ready",
+      "count": 2
+    },
+    {
+      "name": "current_worker_removal_route",
+      "status": 200,
+      "membershipDeleted": true,
+      "inviteRetired": true,
+      "memberNotified": true,
+      "newCredentials": 404,
+      "membersList": 404,
+      "mediaAccess": false,
+      "notifyAccess": false
+    },
+    {
+      "name": "saved_member_token_after_removal",
+      "read": {
+        "status": 200,
+        "ok": true,
+        "error": null
+      },
+      "write": {
+        "status": 200,
+        "ok": true,
+        "error": null
+      }
+    },
+    {
+      "name": "database_specific_rotation",
+      "status": 200
+    },
+    {
+      "name": "old_tokens_after_rotation",
+      "elapsedSeconds": 0,
+      "rotatedDatabase": {
+        "status": 401,
+        "ok": false,
+        "error": null
+      },
+      "otherDatabaseSameGroup": {
+        "status": 200,
+        "ok": true,
+        "error": null
+      }
+    },
+    {
+      "name": "old_tokens_after_rotation",
+      "elapsedSeconds": 3,
+      "rotatedDatabase": {
+        "status": 401,
+        "ok": false,
+        "error": null
+      },
+      "otherDatabaseSameGroup": {
+        "status": 200,
+        "ok": true,
+        "error": null
+      }
+    },
+    {
+      "name": "old_tokens_after_rotation",
+      "elapsedSeconds": 13,
+      "rotatedDatabase": {
+        "status": 401,
+        "ok": false,
+        "error": null
+      },
+      "otherDatabaseSameGroup": {
+        "status": 200,
+        "ok": true,
+        "error": null
+      }
+    },
+    {
+      "name": "fresh_token_after_rotation",
+      "works": true
+    }
+  ],
+  "cleanup": [
+    {
+      "database": "m2t-audit-mvw0wu99-a",
+      "deleted": true
+    },
+    {
+      "database": "m2t-audit-mvw0wu99-b",
+      "deleted": true
+    },
+    {
+      "group": "m2t-audit-mvw0wu99",
+      "deleted": true
+    }
+  ],
+  "finishedAt": "2026-10-31T06:32:14.035Z"
+}
