@@ -557,15 +557,19 @@ function StartWithRow({
           </Text>
         </View>
       </Pressable>
-      <Switch
-        accessibilityLabel={title}
-        accessibilityHint={subtitle}
-        style={dimmed ? { opacity: 0.4 } : undefined}
-        value={value}
-        disabled={disabled}
-        onValueChange={toggle}
-        trackColor={{ true: themeColors.primary }}
-      />
+      {/* Its own full-height box: iOS draws the switch at the top of a
+          stretched one, so it sat high beside two-line rows. */}
+      <View className="justify-center self-stretch">
+        <Switch
+          accessibilityLabel={title}
+          accessibilityHint={subtitle}
+          style={dimmed ? { opacity: 0.4 } : undefined}
+          value={value}
+          disabled={disabled}
+          onValueChange={toggle}
+          trackColor={{ true: themeColors.primary }}
+        />
+      </View>
     </View>
   );
 }

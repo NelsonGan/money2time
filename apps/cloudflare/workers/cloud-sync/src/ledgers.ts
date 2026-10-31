@@ -599,7 +599,9 @@ async function listMembers(env: Env, ledger: SharedLedgerRow, role: Role): Promi
 async function inviteLink(env: Env, ledger: SharedLedgerRow, request: Request): Promise<Response> {
   if (!(await isLedgerActive(env, ledger))) return json({ error: 'ledger_paused' }, 403);
   // The owner's phone sends the ledger's current name, shown on the join screen.
-  const body = await readJson<{ name: unknown; emoji: unknown }>(request);
+  const body = await readJson<{ name: unknown; emoji: unknown; rotate: unknown }>(request);
+  // The owner's New link: the old link stops working at once.
+  const rotate = body?.rotate === true;
   const name = cleanName(body?.name);
   if (name) {
     await env.AUTH_DB.prepare('UPDATE shared_ledgers SET name = ?2, emoji = ?3 WHERE id = ?1')
@@ -614,21 +616,22 @@ async function inviteLink(env: Env, ledger: SharedLedgerRow, request: Request): 
   )
     .bind(ledger.id)
     .first<{ code: string; expires_at: number }>();
-  if (current && current.expires_at - now > INVITE_REUSE_MARGIN_MS) {
+  if (!rotate && current && current.expires_at - now > INVITE_REUSE_MARGIN_MS) {
     const code = await open(env, 'invite-code', current.code);
     if (code) return json({ url: `${base}/join/${code}`, expiresAt: current.expires_at });
   }
   const code = randomToken(18);
   const expiresAt = now + INVITE_TTL_MS;
-  // One link per ledger: a new one replaces one about to expire (or gone).
-  // Only then: two of the owner's phones asking at once keep one link, the
-  // first one written, instead of the second silently killing the first.
+  // One link per ledger: a new one replaces one about to expire (or gone),
+  // or any one when the owner asks for a new link. Otherwise only then: two
+  // of the owner's phones asking at once keep one link, the first one
+  // written, instead of the second silently killing the first.
   await env.AUTH_DB.prepare(
     `INSERT INTO ledger_links (ledger_id, code_hash, code, created_at, expires_at)
      VALUES (?1, ?2, ?3, ?4, ?5)
      ON CONFLICT(ledger_id) DO UPDATE SET code_hash = excluded.code_hash, code = excluded.code,
        created_at = excluded.created_at, expires_at = excluded.expires_at
-     WHERE ledger_links.expires_at - ?4 <= ?6`,
+     WHERE ?7 = 1 OR ledger_links.expires_at - ?4 <= ?6`,
   )
     .bind(
       ledger.id,
@@ -637,6 +640,7 @@ async function inviteLink(env: Env, ledger: SharedLedgerRow, request: Request): 
       now,
       expiresAt,
       INVITE_REUSE_MARGIN_MS,
+      rotate ? 1 : 0,
     )
     .run();
   const stored = await env.AUTH_DB.prepare(

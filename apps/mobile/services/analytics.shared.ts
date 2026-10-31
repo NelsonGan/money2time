@@ -132,7 +132,10 @@ export const POSTHOG_EVENTS = {
 
   // Shared ledgers: a Pro user shares a ledger, invites people, they join.
   SHARED_LEDGER_CREATED: 'Shared Ledger Created',
+  /** The owner copies the ledger's invite link from the Sharing page. */
   SHARED_LEDGER_INVITE_CREATED: 'Shared Ledger Invite Created',
+  /** The owner makes a new invite link; the old one stops working. */
+  SHARED_LEDGER_INVITE_RESET: 'Shared Ledger Invite Reset',
   /** `is_pro`: whether the person joining is Pro (members need not be). */
   SHARED_LEDGER_JOINED: 'Shared Ledger Joined',
   SHARED_LEDGER_MEMBER_REMOVED: 'Shared Ledger Member Removed',
