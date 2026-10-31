@@ -1,6 +1,7 @@
-import { LogOut, UserMinus, UserPlus } from 'lucide-react-native';
+import * as Clipboard from 'expo-clipboard';
+import { Check, Copy, LogOut, RefreshCw, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Pressable, ScrollView, Share, View } from 'react-native';
+import { Alert, AppState, Pressable, ScrollView, View } from 'react-native';
 
 import { LoadingDots } from '~/components/feedback/LoadingDots';
 import {
@@ -20,6 +21,7 @@ import { CloudSyncApiError } from '~/features/cloudSync/services/cloudSyncApi';
 import {
   getInviteLink,
   getLedgerMembers,
+  type InviteLink,
   type LedgerMembers,
   removeMember,
 } from '~/features/cloudSync/services/sharedLedgersApi';
@@ -35,6 +37,12 @@ import { useSharedLedger, useSharedLedgers } from '../hooks/useSharedLedgers';
 import { confirmLeaveLedger, leaveAskingFirst } from '../lib/confirmLeave';
 import { MAX_MEMBERS, MAX_SHARED_LEDGERS, sharingErrorMessage } from '../lib/sharing';
 
+/**
+ * The Worker replaces a link with less than an hour left when asked again, so
+ * the page asks again by then: the link it shows always has time to run.
+ */
+const LINK_RENEW_MARGIN_MS = 60 * 60 * 1000;
+
 interface LedgerSharingScreenProps {
   ledgerId: string;
   onBack: () => void;
@@ -44,8 +52,8 @@ interface LedgerSharingScreenProps {
 
 /**
  * One ledger's sharing. The owner shares it, invites people with its link
- * (one per ledger, reused for a day), removes them, or stops sharing; a
- * member sees who is in it and can leave.
+ * (one per ledger, reused for a day, shown with Copy and New link), removes
+ * them, or stops sharing; a member sees who is in it and can leave.
  */
 export function LedgerSharingScreen({
   ledgerId,
@@ -69,6 +77,9 @@ export function LedgerSharingScreen({
   // the ledger is no longer shared. Each shows its own message, not an error.
   const [unreadable, setUnreadable] = useState<'signed_out' | 'gone' | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
+  const [link, setLink] = useState<InviteLink | null>(null);
+  const [linkError, setLinkError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   // Left the ledger, or it was deleted: nothing to show. Once.
   const leftRef = useRef(false);
@@ -159,22 +170,6 @@ export function LedgerSharingScreen({
     });
   };
 
-  const invite = () => {
-    if (!shareId || !ledger) return;
-    void triggerHaptic('selection');
-    void run('invite', async () => {
-      // The same link until it expires, so anyone it was sent to can use it.
-      const link = await getInviteLink(await sync.getSessionToken(), shareId, {
-        name,
-        emoji: ledger.emoji,
-      });
-      void trackEvent(AnalyticsEvents.SHARED_LEDGER_INVITE_CREATED);
-      await Share.share({
-        message: I18n.t('shared_ledgers.invite_message', { name, url: link.url }) ?? link.url,
-      });
-    });
-  };
-
   const confirmRemove = (member: { id: string; name: string }) => {
     void triggerHaptic('warning');
     Alert.alert(
@@ -189,6 +184,8 @@ export function LedgerSharingScreen({
             void run(`remove:${member.id}`, async () => {
               if (!shareId) return;
               await removeMember(await sync.getSessionToken(), shareId, member.id);
+              // The Worker retired the link: never show the dead one.
+              setLink(null);
               void trackEvent(AnalyticsEvents.SHARED_LEDGER_MEMBER_REMOVED);
               await load();
             }),
@@ -240,6 +237,98 @@ export function LedgerSharingScreen({
   const seatsTaken = members?.members.length ?? 0;
   const maxMembers = members?.maxMembers ?? MAX_MEMBERS;
   const full = seatsTaken >= maxMembers;
+
+  // The owner's link, shown on the page. Only while someone can use it: not
+  // when the ledger is full or paused, or the owner is signed out.
+  const canInvite = isOwner && !!shared?.active && !!members && !full && !signedOut;
+  const emoji = ledger?.emoji ?? null;
+  // Only the latest request may set the link: a plain read that started
+  // before New link would otherwise put the dead link back when it lands last.
+  const linkRequestRef = useRef(0);
+  const fetchLink = useCallback(
+    async (rotate = false) => {
+      if (!shareId) throw new Error('not shared');
+      const request = ++linkRequestRef.current;
+      const next = await getInviteLink(
+        await getSessionToken(),
+        shareId,
+        { name, emoji },
+        { rotate },
+      );
+      if (request === linkRequestRef.current) {
+        setLink(next);
+        setLinkError(null);
+      }
+      return next;
+    },
+    [emoji, getSessionToken, name, shareId],
+  );
+  const fetchLinkRef = useRef(fetchLink);
+  fetchLinkRef.current = fetchLink;
+
+  // Read on open, and again when the seats change: a removal retires the link.
+  useEffect(() => {
+    if (!canInvite) {
+      setLink(null);
+      return;
+    }
+    fetchLinkRef.current().catch((error: unknown) => setLinkError(sharingErrorMessage(error)));
+  }, [canInvite, seatsTaken]);
+
+  // The one working link, always: renewed before its last hour on a timer
+  // while the page is open, and read again on coming back to the app (timers
+  // do not run in the background, and the owner's other phone may have made
+  // a new link meanwhile).
+  const linkExpiresAt = link?.expiresAt ?? null;
+  useEffect(() => {
+    if (linkExpiresAt === null) return;
+    const renew = () => void fetchLinkRef.current().catch(() => undefined);
+    const renewAt = linkExpiresAt - LINK_RENEW_MARGIN_MS;
+    const timer = setTimeout(renew, Math.max(0, renewAt - Date.now()) + 1000);
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') renew();
+    });
+    return () => {
+      clearTimeout(timer);
+      sub.remove();
+    };
+  }, [linkExpiresAt]);
+
+  useEffect(() => {
+    if (!copied) return;
+    const timer = setTimeout(() => setCopied(false), 2000);
+    return () => clearTimeout(timer);
+  }, [copied]);
+
+  const copyLink = () => {
+    if (!link) return;
+    void Clipboard.setStringAsync(link.url);
+    void triggerHaptic('success');
+    void trackEvent(AnalyticsEvents.SHARED_LEDGER_INVITE_CREATED);
+    setCopied(true);
+  };
+
+  const confirmNewLink = () => {
+    void triggerHaptic('warning');
+    Alert.alert(
+      I18n.t('shared_ledgers.new_link_title'),
+      I18n.t('shared_ledgers.new_link_message'),
+      [
+        { text: I18n.t('common.cancel'), style: 'cancel' },
+        {
+          text: I18n.t('shared_ledgers.new_link'),
+          style: 'destructive',
+          onPress: () =>
+            void run('rotate', async () => {
+              setCopied(false);
+              await fetchLink(true);
+              void trackEvent(AnalyticsEvents.SHARED_LEDGER_INVITE_RESET);
+              void triggerHaptic('success');
+            }),
+        },
+      ],
+    );
+  };
 
   let body: React.ReactNode;
   if (!shared) {
@@ -325,34 +414,42 @@ export function LedgerSharingScreen({
               </Text>
             ) : null}
           </View>
-          <Card className="overflow-hidden">
+          <Card className="overflow-hidden p-0">
             {members ? (
               <>
                 <PersonRow
                   name={isOwner ? I18n.t('shared_ledgers.you') : members.owner.name}
                   initialOf={members.owner.name}
-                  detail={I18n.t('shared_ledgers.owner_badge')}
+                  badge={I18n.t('shared_ledgers.owner_badge')}
                   first
                 />
-                {members.members.map((member) => (
-                  <PersonRow
-                    key={member.id}
-                    name={member.id === sync.user?.id ? I18n.t('shared_ledgers.you') : member.name}
-                    initialOf={member.name}
-                    detail={member.email ?? I18n.t('shared_ledgers.member_badge')}
-                    action={
-                      isOwner ? (
-                        <IconAction
-                          label={I18n.t('shared_ledgers.remove_title', { name: member.name })}
-                          busy={busy === `remove:${member.id}`}
-                          onPress={() => confirmRemove(member)}
-                          icon={<UserMinus size={18} color={colors.error} />}
-                          testID={`ledger-member-remove-${member.id}`}
-                        />
-                      ) : null
-                    }
-                  />
-                ))}
+                {members.members.map((member) => {
+                  const isMe = member.id === sync.user?.id;
+                  return (
+                    <PersonRow
+                      key={member.id}
+                      name={isMe ? I18n.t('shared_ledgers.you') : member.name}
+                      initialOf={member.name}
+                      detail={member.email}
+                      joinedAt={member.joinedAt}
+                      action={
+                        isOwner ? (
+                          <IconAction
+                            label={I18n.t('shared_ledgers.remove_title', { name: member.name })}
+                            busy={busy === `remove:${member.id}`}
+                            onPress={() => confirmRemove(member)}
+                            icon={
+                              <View className="h-7 w-7 items-center justify-center rounded-full bg-secondary">
+                                <X size={14} strokeWidth={2.5} color={colors.textMuted} />
+                              </View>
+                            }
+                            testID={`ledger-member-remove-${member.id}`}
+                          />
+                        ) : null
+                      }
+                    />
+                  );
+                })}
               </>
             ) : (
               <View className="items-center px-4 py-6">
@@ -387,33 +484,75 @@ export function LedgerSharingScreen({
           </Card>
         </View>
 
-        {isOwner ? (
-          <View className="gap-2">
-            <Button
-              testID="ledger-invite"
-              onPress={invite}
-              disabled={busy !== null || !members || full || !shared.active || signedOut}
-            >
-              {busy === 'invite' ? (
-                <LoadingDots color="#fff" size="small" />
-              ) : (
-                <View className="flex-row items-center gap-2">
-                  <UserPlus size={18} color="#fff" />
-                  <Text>{I18n.t('shared_ledgers.invite')}</Text>
-                </View>
-              )}
-            </Button>
-            {full ? (
-              <Text variant="caption" tone="muted" className="text-center">
-                {I18n.t('shared_ledgers.full', { max: maxMembers })}
-              </Text>
-            ) : null}
+        {canInvite ? (
+          <View>
+            <Text variant="label" tone="muted" className="mb-2.5 px-1">
+              {I18n.t('shared_ledgers.invite_link')}
+            </Text>
+            <Card className="flex-row items-center gap-1 py-2 pl-4 pr-2">
+              <View className="min-w-0 flex-1 py-1.5">
+                {link ? (
+                  <Text
+                    variant="body"
+                    numberOfLines={1}
+                    ellipsizeMode="middle"
+                    selectable
+                    testID="ledger-invite-link"
+                  >
+                    {link.url.replace(/^https?:\/\//, '')}
+                  </Text>
+                ) : linkError ? (
+                  <Pressable
+                    onPress={() =>
+                      void fetchLink().catch((error: unknown) =>
+                        setLinkError(sharingErrorMessage(error)),
+                      )
+                    }
+                    accessibilityRole="button"
+                  >
+                    <Text variant="caption" tone="muted" numberOfLines={2}>
+                      {linkError}
+                    </Text>
+                  </Pressable>
+                ) : (
+                  <LoadingDots size="small" />
+                )}
+              </View>
+              <IconAction
+                label={copied ? I18n.t('common.copied') : I18n.t('common.copy')}
+                busy={false}
+                disabled={!link || busy === 'rotate'}
+                onPress={copyLink}
+                icon={
+                  copied ? (
+                    <Check size={18} color={colors.primary} />
+                  ) : (
+                    <Copy size={18} color={colors.primary} />
+                  )
+                }
+                testID="ledger-invite-copy"
+              />
+              <View className="mx-1 h-6 w-px bg-border/40" />
+              <IconAction
+                label={I18n.t('shared_ledgers.new_link')}
+                busy={busy === 'rotate'}
+                disabled={!link || busy !== null}
+                onPress={confirmNewLink}
+                icon={<RefreshCw size={18} color={colors.primary} />}
+                testID="ledger-invite-new-link"
+              />
+            </Card>
           </View>
+        ) : null}
+
+        {isOwner && full ? (
+          <Text variant="caption" tone="muted" className="text-center">
+            {I18n.t('shared_ledgers.full', { max: maxMembers })}
+          </Text>
         ) : null}
 
         <Button
           variant="secondary"
-          className="-mt-1"
           testID={isOwner ? 'ledger-stop-sharing' : 'ledger-leave'}
           disabled={busy !== null}
           onPress={isOwner ? confirmStop : confirmLeave}
@@ -472,43 +611,74 @@ function IntroPoint({ text }: { text: string }) {
   );
 }
 
+/** "Joined today", else "Joined Oct 28" (with the year when it is not this one). */
+function joinedLabel(joinedAt: number, now = Date.now()): string {
+  const date = new Date(joinedAt);
+  const today = new Date(now);
+  if (date.toDateString() === today.toDateString()) return I18n.t('shared_ledgers.joined_today');
+  const sameYear = date.getFullYear() === today.getFullYear();
+  return I18n.t('shared_ledgers.joined_on', {
+    date: date.toLocaleDateString(I18n.locale, {
+      month: 'short',
+      day: 'numeric',
+      ...(sameYear ? {} : { year: 'numeric' }),
+    }),
+  });
+}
+
 function PersonRow({
   name,
   initialOf,
+  badge,
   detail,
-  icon,
+  joinedAt,
   action,
   first,
-  muted,
 }: {
   name: string;
   /** The name the avatar letter comes from, when `name` says "You". */
   initialOf?: string;
-  detail: string;
-  icon?: React.ReactNode;
+  /** A small tag beside the name ("Owner"). */
+  badge?: string;
+  /** The address, shown to the owner only. */
+  detail?: string | null;
+  joinedAt?: number;
   action?: React.ReactNode;
   first?: boolean;
-  muted?: boolean;
 }) {
   const initial = (initialOf ?? name).trim().charAt(0).toUpperCase() || '?';
   return (
-    <View
-      className={`flex-row items-center gap-3 px-4 py-3 ${first ? '' : 'border-t border-border/30'}`}
-    >
+    <View className="flex-row items-center gap-3 px-4 py-3">
+      {/* Inset divider: starts at the text, not under the avatar. */}
+      {first ? null : <View className="absolute left-[68px] right-0 top-0 h-px bg-border/30" />}
       <View className="h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-        {icon ?? (
-          <Text variant="bodyStrong" tone="primary">
-            {initial}
-          </Text>
-        )}
+        <Text variant="bodyStrong" tone="primary">
+          {initial}
+        </Text>
       </View>
-      <View className="min-w-0 flex-1">
-        <Text variant="bodyStrong" tone={muted ? 'muted' : undefined} numberOfLines={1}>
-          {name}
-        </Text>
-        <Text variant="caption" tone="muted" numberOfLines={1}>
-          {detail}
-        </Text>
+      <View className="min-w-0 flex-1 gap-0.5">
+        <View className="flex-row items-center gap-2">
+          <Text variant="bodyStrong" numberOfLines={1} className="shrink">
+            {name}
+          </Text>
+          {badge ? (
+            <View className="rounded-full bg-secondary px-2 py-0.5">
+              <Text variant="caption" tone="muted">
+                {badge}
+              </Text>
+            </View>
+          ) : null}
+        </View>
+        {detail ? (
+          <Text variant="caption" tone="muted" numberOfLines={1}>
+            {detail}
+          </Text>
+        ) : null}
+        {joinedAt ? (
+          <Text variant="caption" tone="muted" numberOfLines={1} className="opacity-80">
+            {joinedLabel(joinedAt)}
+          </Text>
+        ) : null}
       </View>
       {action}
     </View>
@@ -519,12 +689,14 @@ function IconAction({
   label,
   icon,
   busy,
+  disabled,
   onPress,
   testID,
 }: {
   label: string;
   icon: React.ReactNode;
   busy: boolean;
+  disabled?: boolean;
   onPress: () => void;
   testID: string;
 }) {
@@ -534,7 +706,7 @@ function IconAction({
       accessibilityLabel={label}
       testID={testID}
       onPress={onPress}
-      disabled={busy}
+      disabled={busy || disabled}
       hitSlop={6}
       className="h-10 w-10 items-center justify-center rounded-full active:bg-secondary/60"
     >
