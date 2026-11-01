@@ -916,6 +916,8 @@ const hi = {
       daily: 'दैनिक',
       weekly: 'साप्ताहिक',
       monthly: 'मासिक',
+      quarterly: 'त्रैमासिक',
+      semiannually: 'अर्धवार्षिक',
       yearly: 'वार्षिक',
       every_interval: 'हर (अंतराल)',
       ends: 'समाप्ति',

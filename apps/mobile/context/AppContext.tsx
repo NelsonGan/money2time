@@ -217,6 +217,7 @@ import {
 import { newId, nowIso } from '~/utils/id';
 import { runAfterInteractions, runAfterInteractionsCapped } from '~/utils/interactions';
 import { perfMark } from '~/utils/perfTrace';
+import { recurrenceFrequencyOf } from '~/utils/recurringRules';
 import { countsAsExpenseRow } from '~/utils/spending';
 import {
   reconcileTransactionRow,
@@ -2036,7 +2037,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       });
       void trackEvent(AnalyticsEvents.RECURRING_RULE_CREATED, {
         type: input.type,
-        pattern: input.recurrencePattern,
+        // The frequency picked, so quarterly and semi-annual rules (saved as
+        // every 3 or 6 months) are told apart from monthly ones.
+        pattern: recurrenceFrequencyOf(input.recurrencePattern, input.recurrenceInterval ?? 1)
+          .frequency,
       });
     },
     [runMutation],

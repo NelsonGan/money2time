@@ -920,6 +920,8 @@ const it = {
       daily: 'Giornaliero',
       weekly: 'Settimanale',
       monthly: 'Mensile',
+      quarterly: 'Trimestrale',
+      semiannually: 'Semestrale',
       yearly: 'Annuale',
       every_interval: 'Ogni (intervallo)',
       ends: 'Termina',

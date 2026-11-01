@@ -3,9 +3,11 @@ import {
   addDaysToDayKey,
   nextRunAfter,
   projectRecurringOccurrences,
+  recurrenceFrequencyOf,
   recurringAmountPerMonth,
   recurringExpenseDueBetween,
   recurringMonthlyExpenseTotal,
+  storedRecurrenceOf,
 } from '~/utils/recurringRules';
 
 const AVERAGE_DAYS_PER_MONTH = 365.2425 / 12;
@@ -377,5 +379,55 @@ describe('recurringExpenseDueBetween', () => {
 
   it('returns 0 for an inverted window', () => {
     expect(recurringExpenseDueBetween([rule({})], '2026-07-01', '2026-06-01', identity)).toBe(0);
+  });
+});
+
+describe('quarterly and semi-annual frequencies', () => {
+  it('store as monthly rules every 3 and 6 months, scaled by the interval', () => {
+    expect(storedRecurrenceOf('quarterly', 1)).toEqual({ pattern: 'monthly', interval: 3 });
+    expect(storedRecurrenceOf('semiannually', 1)).toEqual({ pattern: 'monthly', interval: 6 });
+    expect(storedRecurrenceOf('quarterly', 2)).toEqual({ pattern: 'monthly', interval: 6 });
+    expect(storedRecurrenceOf('semiannually', 3)).toEqual({ pattern: 'monthly', interval: 18 });
+  });
+
+  it('leave the other frequencies as they are', () => {
+    expect(storedRecurrenceOf('daily', 2)).toEqual({ pattern: 'daily', interval: 2 });
+    expect(storedRecurrenceOf('weekly', 1)).toEqual({ pattern: 'weekly', interval: 1 });
+    expect(storedRecurrenceOf('monthly', 4)).toEqual({ pattern: 'monthly', interval: 4 });
+    expect(storedRecurrenceOf('yearly', 1)).toEqual({ pattern: 'yearly', interval: 1 });
+  });
+
+  it('guard the interval the same way the runner does', () => {
+    expect(storedRecurrenceOf('quarterly', 0)).toEqual({ pattern: 'monthly', interval: 3 });
+    expect(storedRecurrenceOf('monthly', Number.NaN)).toEqual({ pattern: 'monthly', interval: 1 });
+    expect(storedRecurrenceOf('semiannually', 1.7)).toEqual({ pattern: 'monthly', interval: 6 });
+  });
+
+  it('read every 3 and every 6 months back as quarterly and semi-annually', () => {
+    expect(recurrenceFrequencyOf('monthly', 3)).toEqual({ frequency: 'quarterly', interval: 1 });
+    expect(recurrenceFrequencyOf('monthly', 6)).toEqual({ frequency: 'semiannually', interval: 1 });
+  });
+
+  it('read any other rule back unchanged', () => {
+    expect(recurrenceFrequencyOf('monthly', 1)).toEqual({ frequency: 'monthly', interval: 1 });
+    expect(recurrenceFrequencyOf('monthly', 9)).toEqual({ frequency: 'monthly', interval: 9 });
+    expect(recurrenceFrequencyOf('monthly', 12)).toEqual({ frequency: 'monthly', interval: 12 });
+    expect(recurrenceFrequencyOf('weekly', 3)).toEqual({ frequency: 'weekly', interval: 3 });
+    expect(recurrenceFrequencyOf('yearly', 6)).toEqual({ frequency: 'yearly', interval: 6 });
+  });
+
+  it('cost a quarter and a sixth of the amount per month', () => {
+    const quarterly = storedRecurrenceOf('quarterly', 1);
+    const semiannual = storedRecurrenceOf('semiannually', 1);
+    expect(recurringAmountPerMonth(300, quarterly.pattern, quarterly.interval)).toBeCloseTo(100, 5);
+    expect(recurringAmountPerMonth(600, semiannual.pattern, semiannual.interval)).toBeCloseTo(
+      100,
+      5,
+    );
+  });
+
+  it('advance the run date by 3 and 6 months, clamping month ends', () => {
+    expect(nextRunAfter('2026-01-10T00:00:00.000Z', 'monthly', 3)).toBe('2026-04-10T00:00:00.000Z');
+    expect(nextRunAfter('2026-08-31T00:00:00.000Z', 'monthly', 6)).toBe('2027-02-28T00:00:00.000Z');
   });
 });

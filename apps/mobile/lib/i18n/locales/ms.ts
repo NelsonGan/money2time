@@ -922,6 +922,8 @@ const ms = {
       daily: 'Harian',
       weekly: 'Mingguan',
       monthly: 'Bulanan',
+      quarterly: 'Suku tahunan',
+      semiannually: 'Setengah tahunan',
       yearly: 'Tahunan',
       every_interval: 'Setiap (selang)',
       ends: 'Tamat',

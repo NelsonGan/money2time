@@ -911,6 +911,8 @@ const ko = {
       daily: '매일',
       weekly: '매주',
       monthly: '매월',
+      quarterly: '분기별',
+      semiannually: '반기별',
       yearly: '매년',
       every_interval: '간격',
       ends: '종료',

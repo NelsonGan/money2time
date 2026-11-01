@@ -917,6 +917,8 @@ const pl = {
       daily: 'Codziennie',
       weekly: 'Co tydzień',
       monthly: 'Co miesiąc',
+      quarterly: 'Co kwartał',
+      semiannually: 'Co pół roku',
       yearly: 'Co rok',
       every_interval: 'Co (interwał)',
       ends: 'Kończy się',

@@ -917,6 +917,8 @@ const es = {
       daily: 'Diario',
       weekly: 'Semanal',
       monthly: 'Mensual',
+      quarterly: 'Trimestral',
+      semiannually: 'Semestral',
       yearly: 'Anual',
       every_interval: 'Cada (intervalo)',
       ends: 'Termina',
