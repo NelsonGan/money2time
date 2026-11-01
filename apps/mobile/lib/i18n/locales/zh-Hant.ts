@@ -881,6 +881,8 @@ const zhHant = {
       daily: '每天',
       weekly: '每週',
       monthly: '每月',
+      quarterly: '每季',
+      semiannually: '每半年',
       yearly: '每年',
       every_interval: '間隔',
       ends: '結束',

@@ -881,6 +881,8 @@ const zh = {
       daily: '每天',
       weekly: '每周',
       monthly: '每月',
+      quarterly: '每季度',
+      semiannually: '每半年',
       yearly: '每年',
       every_interval: '间隔',
       ends: '结束',

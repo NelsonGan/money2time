@@ -127,6 +127,13 @@ import {
 import { newId } from '~/utils/id';
 import { runAfterInteractions, runAfterInteractionsCapped } from '~/utils/interactions';
 import { perfInteraction } from '~/utils/perfTrace';
+import {
+  RECURRENCE_FREQUENCIES,
+  type RecurrenceFrequency,
+  recurrenceFrequencyOf,
+  type RepeatingPattern,
+  storedRecurrenceOf,
+} from '~/utils/recurringRules';
 
 type ActiveField =
   | 'amount'
@@ -383,7 +390,7 @@ interface TransactionEditorScreenProps {
   initialAccountId?: string;
   recurringOptions?: {
     initialName?: string;
-    initialPattern?: 'daily' | 'weekly' | 'monthly' | 'yearly';
+    initialPattern?: RepeatingPattern;
     initialInterval?: number;
     initialEndDate?: string | null;
     initialIsActive?: boolean;
@@ -397,7 +404,7 @@ interface TransactionEditorScreenProps {
       transaction: CreateTransactionInput;
       recurring: {
         name: string;
-        pattern: 'daily' | 'weekly' | 'monthly' | 'yearly';
+        pattern: RepeatingPattern;
         interval: number;
         endDate: string | null;
         isActive: boolean;
@@ -954,12 +961,18 @@ export function TransactionEditorScreen({
   const [splitItemized, setSplitItemized] = useState(false);
 
   const [recurrenceName, setRecurrenceName] = useState(recurringOptions?.initialName ?? '');
-  const [recurrencePattern, setRecurrencePattern] = useState<
-    'daily' | 'weekly' | 'monthly' | 'yearly'
-  >(recurringOptions?.initialPattern ?? 'monthly');
-  const [recurrenceInterval, setRecurrenceInterval] = useState(
-    String(recurringOptions?.initialInterval ?? 1),
+  // Quarterly and semi-annually are saved as every 3 or 6 months, so a saved
+  // rule is read back into the frequency the user picks from.
+  const [initialRecurrence] = useState(() =>
+    recurrenceFrequencyOf(
+      recurringOptions?.initialPattern ?? 'monthly',
+      recurringOptions?.initialInterval ?? 1,
+    ),
   );
+  const [recurrenceFrequency, setRecurrenceFrequency] = useState<RecurrenceFrequency>(
+    initialRecurrence.frequency,
+  );
+  const [recurrenceInterval, setRecurrenceInterval] = useState(String(initialRecurrence.interval));
   const [recurrenceEndDate, setRecurrenceEndDate] = useState(
     recurringOptions?.initialEndDate ? dayKeyFromIsoLocal(recurringOptions.initialEndDate) : '',
   );
@@ -1077,10 +1090,12 @@ export function TransactionEditorScreen({
       categoryId: null,
     },
   });
-  const patternLabels: Record<string, string> = {
+  const patternLabels: Record<RecurrenceFrequency, string> = {
     daily: I18n.t('transactions.editor.daily'),
     weekly: I18n.t('transactions.editor.weekly'),
     monthly: I18n.t('transactions.editor.monthly'),
+    quarterly: I18n.t('transactions.editor.quarterly'),
+    semiannually: I18n.t('transactions.editor.semiannually'),
     yearly: I18n.t('transactions.editor.yearly'),
   };
   const blurNativeInputs = useCallback(() => {
@@ -2193,7 +2208,7 @@ export function TransactionEditorScreen({
           setFieldErrors({ rule_name: I18n.t('transactions.editor.error.required') });
           return;
         }
-        const interval = Math.max(1, Math.trunc(Number(recurrenceInterval) || 1));
+        const stored = storedRecurrenceOf(recurrenceFrequency, Number(recurrenceInterval));
         const endDateDraft = recurrenceEndDate.trim();
         const endDateIsoValue = toUtcIsoFromLocalDateInput(endDateDraft, 'end');
         const endDateIso = recurrenceEndMode === 'on_date' ? endDateIsoValue : null;
@@ -2209,8 +2224,8 @@ export function TransactionEditorScreen({
             transaction: capturedPayload,
             recurring: {
               name: normalizedName,
-              pattern: recurrencePattern,
-              interval,
+              pattern: stored.pattern,
+              interval: stored.interval,
               endDate: endDateIso,
               isActive: recurrenceIsActive,
               logoId: effectiveRecurrenceLogoId,
@@ -2979,23 +2994,23 @@ export function TransactionEditorScreen({
               {I18n.t('transactions.editor.repeat')}
             </Text>
             <View className="flex-row flex-wrap gap-2">
-              {(['daily', 'weekly', 'monthly', 'yearly'] as const).map((p) => (
+              {RECURRENCE_FREQUENCIES.map((p) => (
                 <Pressable
                   key={p}
                   onPress={() => {
                     void triggerHaptic('selection');
-                    setRecurrencePattern(p);
+                    setRecurrenceFrequency(p);
                     focusRecurrenceIntervalField();
                   }}
                   className={cn(
                     'w-[48%] rounded-2xl border px-3.5 py-3.5',
-                    recurrencePattern === p
+                    recurrenceFrequency === p
                       ? 'border-primary/50 bg-primary/10'
                       : 'border-border/40 bg-card',
                   )}
                 >
                   <Text
-                    className={cn(recurrencePattern === p ? 'text-primary' : 'text-foreground')}
+                    className={cn(recurrenceFrequency === p ? 'text-primary' : 'text-foreground')}
                   >
                     {patternLabels[p]}
                   </Text>
@@ -3704,7 +3719,7 @@ export function TransactionEditorScreen({
                             {I18n.t('transactions.editor.repeat')}
                           </Text>
                         </View>
-                        <Text variant="body">{patternLabels[recurrencePattern]}</Text>
+                        <Text variant="body">{patternLabels[recurrenceFrequency]}</Text>
                       </View>
                     </SummaryRow>
                   </View>

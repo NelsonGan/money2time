@@ -919,6 +919,8 @@ const nl = {
       daily: 'Dagelijks',
       weekly: 'Wekelijks',
       monthly: 'Maandelijks',
+      quarterly: 'Per kwartaal',
+      semiannually: 'Halfjaarlijks',
       yearly: 'Jaarlijks',
       every_interval: 'Elke (interval)',
       ends: 'Eindigt',

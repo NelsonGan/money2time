@@ -125,7 +125,7 @@ export const ORGANIZE_TUTORIALS: Tutorial[] = [
       {
         image: 'recurring-5',
         title: 'Set how often',
-        body: 'Daily, weekly, monthly, or yearly, with an interval. Every 3 months means quarterly. Ends can be a date or never.',
+        body: 'Daily, weekly, monthly, quarterly, semi-annually or yearly, with an interval. Ends can be a date or never.',
       },
       {
         image: 'recurring-6',

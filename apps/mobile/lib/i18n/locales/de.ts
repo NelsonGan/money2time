@@ -923,6 +923,8 @@ const de = {
       daily: 'Täglich',
       weekly: 'Wöchentlich',
       monthly: 'Monatlich',
+      quarterly: 'Vierteljährlich',
+      semiannually: 'Halbjährlich',
       yearly: 'Jährlich',
       every_interval: 'Intervall',
       ends: 'Endet',

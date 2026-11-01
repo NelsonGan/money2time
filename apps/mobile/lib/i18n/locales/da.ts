@@ -915,6 +915,8 @@ const da = {
       daily: 'Dagligt',
       weekly: 'Ugentligt',
       monthly: 'Månedligt',
+      quarterly: 'Kvartalsvis',
+      semiannually: 'Halvårligt',
       yearly: 'Årligt',
       every_interval: 'Hvert (interval)',
       ends: 'Slutter',
