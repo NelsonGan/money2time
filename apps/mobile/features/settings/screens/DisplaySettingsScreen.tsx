@@ -3,7 +3,7 @@ import { Check, ChevronRight, Copy } from 'lucide-react-native';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
-import { NAV_TAB_META } from '~/components/navigation/NavChrome';
+import { getNavTabMeta, NAV_TAB_META } from '~/components/navigation/NavChrome';
 import { parseNavTabs } from '~/components/navigation/navTabs';
 import {
   Card,
@@ -369,7 +369,7 @@ export function DisplaySettingsScreen({
                     {navTabs.map((tab) => (
                       <ClayIcon
                         key={tab}
-                        name={NAV_TAB_META[tab].icon}
+                        name={getNavTabMeta(tab, navTabs).icon}
                         size={26}
                         flatSize={18}
                         flatColor={themeColors.textMuted}

@@ -10,7 +10,7 @@ import {
   WalletIcon,
 } from '~/components/icons/NavIcons';
 import { getLiquidGlassNavView } from '~/components/navigation/liquidGlass';
-import type { TabName } from '~/components/navigation/navTabs';
+import { navTabIcon, type TabName } from '~/components/navigation/navTabs';
 import { ClayIcon, type ClayIconName } from '~/components/ui/ClayIcon';
 import { useIsFlatIcons, useResolvedTheme } from '~/context/ThemeContext';
 import { usePressScale } from '~/hooks/usePressScale';
@@ -54,8 +54,8 @@ interface NavTabMeta {
   icon: ClayIconName;
   activeIcon: ClayIconName;
   /**
-   * The pre-clay SVG for the original five tabs. Pages added later have none
-   * and fall back to the flat Lucide glyph ClayIcon maps their art to.
+   * Optional pre-clay SVG override. Other pages, including Calendar, use
+   * the flat Lucide glyph ClayIcon maps their art to.
    */
   flatIcon?: NavIconComponent;
   labelKey: string;
@@ -66,16 +66,15 @@ interface NavTabMeta {
  *
  * Clay artwork carries its own colour, so an active clay tab is a different
  * *file* rather than a tint — see components/ui/ClayIcon.tsx. Tabs with only
- * one pose (albums, and every page that can be added to the bar) reuse their
+ * one pose (Calendar, Albums and the extra pages) reuse their
  * resting art and lean on the size and opacity step instead. The flat set is
  * the pre-clay SVG pair, which does the opposite: one component, tinted and
  * filled when active.
  */
 export const NAV_TAB_META: Record<TabName, NavTabMeta> = {
   calendar: {
-    icon: 'nav/home',
-    activeIcon: 'nav/home-active',
-    flatIcon: HomeIcon,
+    icon: 'ui/calendar',
+    activeIcon: 'ui/calendar',
     labelKey: 'nav.tab_calendar',
   },
   accounts: {
@@ -129,6 +128,14 @@ export const NAV_TAB_META: Record<TabName, NavTabMeta> = {
   },
 };
 
+/** Keep page labels even when home replaces the page's glyph. */
+export function getNavTabMeta(tab: TabName, tabs: readonly TabName[]): NavTabMeta {
+  const meta = NAV_TAB_META[tab];
+  return navTabIcon(tab, tabs) === 'home'
+    ? { ...meta, icon: 'nav/home', activeIcon: 'nav/home-active', flatIcon: HomeIcon }
+    : meta;
+}
+
 /** One item's height, in a row or a column. */
 const NAV_ITEM_EXTENT = 58;
 const ICON_SIZE = 26;
@@ -158,16 +165,18 @@ function getBlurNavView(): BlurNavView | null {
 
 export const NavItem = memo(function NavItemImpl({
   tab,
+  tabs,
   isActive,
   axis,
   onPressTab,
 }: {
   tab: TabName;
+  tabs: readonly TabName[];
   isActive: boolean;
   axis: NavAxis;
   onPressTab: (tab: TabName) => void;
 }) {
-  const { icon, activeIcon, flatIcon: FlatIcon, labelKey } = NAV_TAB_META[tab];
+  const { icon, activeIcon, flatIcon: FlatIcon, labelKey } = getNavTabMeta(tab, tabs);
   const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.85 });
   const handlePress = useCallback(() => onPressTab(tab), [onPressTab, tab]);
   const isFlat = useIsFlatIcons();

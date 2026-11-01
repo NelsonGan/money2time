@@ -103,6 +103,11 @@ export function homeNavTab(tabs: readonly TabName[]): TabName {
   return tabs[0] ?? DEFAULT_NAV_TABS[0];
 }
 
+/** The home glyph follows the first page; other pages keep their own glyph. */
+export function navTabIcon(tab: TabName, tabs: readonly TabName[]): TabName | 'home' {
+  return tab === homeNavTab(tabs) ? 'home' : tab;
+}
+
 /** Transaction entry is available on Calendar, Accounts, and a replacement home. */
 export function showsTransactionFab(activeTab: TabName, tabs: readonly TabName[]): boolean {
   return (

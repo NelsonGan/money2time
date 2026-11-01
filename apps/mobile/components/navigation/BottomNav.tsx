@@ -62,6 +62,7 @@ export function BottomNav({ tabs, activeTab, onTabChange }: TabNavProps) {
             <NavItem
               key={tab}
               tab={tab}
+              tabs={tabs}
               axis="horizontal"
               isActive={activeTab === tab}
               onPressTab={handleTabPress}
