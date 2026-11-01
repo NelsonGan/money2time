@@ -916,6 +916,8 @@ const sv = {
       daily: 'Dagligen',
       weekly: 'Veckovis',
       monthly: 'Månadsvis',
+      quarterly: 'Kvartalsvis',
+      semiannually: 'Halvårsvis',
       yearly: 'Årsvis',
       every_interval: 'Varje (intervall)',
       ends: 'Slutar',

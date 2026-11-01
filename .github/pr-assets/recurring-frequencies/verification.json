@@ -1,0 +1,89 @@
+{
+  "reviewed_pr": 641,
+  "reviewed_commit": "323f937870f7acc7678d18118055c07ea37c51f1",
+  "device": {
+    "name": "Money2Time iPhone 18 Pro",
+    "os": "iOS 27.0",
+    "app": "development build loading PR source through local Metro",
+    "data": "synthetic local ledger; no cloud backend used"
+  },
+  "checks": [
+    {
+      "command": "npm run check",
+      "result": "pass (typecheck, lint, Prettier)"
+    },
+    {
+      "command": "npm test -- --runInBand",
+      "result": "pass",
+      "suites": 246,
+      "tests": 3240
+    },
+    {
+      "command": "node scripts/annotate-tutorials.mjs recurring-5",
+      "result": "pass; all six choices marked"
+    },
+    {
+      "command": "node scripts/generate-tutorial-images.mjs",
+      "result": "pass; 173 image entries, registry unchanged"
+    },
+    {
+      "command": "node scripts/sync-tutorials-web.mjs --web <temporary verification directory>",
+      "result": "pass; 38 tutorials and 173 images generated; website checkout and deployed media unchanged"
+    }
+  ],
+  "manual_checks": [
+    {
+      "action": "Open Repeat picker in English and Filipino",
+      "result": "pass; all six choices visible without clipping at default text size"
+    },
+    {
+      "action": "Create RM300 Quarterly expense rule, save, reopen",
+      "result": "pass; Quarterly label and interval 1 restored; monthly cost RM100; due-now occurrence logged and next due Feb 1, 2027"
+    },
+    {
+      "action": "Edit the same demo rule to Semi-annually, save, reopen",
+      "result": "pass; Semi-annually label and interval 1 restored; monthly cost RM50"
+    },
+    {
+      "action": "Inspect stored rule through runtime repository after quarterly save",
+      "observed": {
+        "pattern": "monthly",
+        "interval": 3,
+        "amount": 300,
+        "nextRunDate": "2027-01-31T16:00:00.000Z"
+      }
+    },
+    {
+      "action": "Inspect stored rule through runtime repository after semi-annual save",
+      "observed": {
+        "pattern": "monthly",
+        "interval": 6,
+        "amount": 300,
+        "monthlyCost": 50,
+        "nextRunDate": "2027-02-01"
+      }
+    },
+    {
+      "action": "Open recurring tutorial through JS deep-link handler, advance to step 5",
+      "result": "pass; refreshed image displays all six choices and marker covers all three rows"
+    }
+  ],
+  "fixes": [
+    "Replaced the stale four-option recurring tutorial frame and marker coordinates",
+    "Corrected analytics documentation/comments: pattern is inferred from the saved schedule, not necessarily the original picker selection"
+  ],
+  "analytics": {
+    "event_routing_changes": false,
+    "posthog_volume_change": 0,
+    "notes": "GA4 pattern uses normalized schedule cadence; quarterly x2 reports semiannually, quarterly x3 reports monthly."
+  },
+  "not_tested": [
+    "Android",
+    "tablet",
+    "all other locale layouts",
+    "shared-ledger sync and backup/restore on another device",
+    "live analytics delivery",
+    "website deployment"
+  ],
+  "release_note": "Tutorial art is a native-only asset; updated runtime asset revision requires a matching native build for OTA previews."
+}

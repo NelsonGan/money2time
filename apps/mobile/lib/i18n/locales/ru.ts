@@ -917,6 +917,8 @@ const ru = {
       daily: 'Ежедневно',
       weekly: 'Еженедельно',
       monthly: 'Ежемесячно',
+      quarterly: 'Ежеквартально',
+      semiannually: 'Раз в полгода',
       yearly: 'Ежегодно',
       every_interval: 'Каждые (интервал)',
       ends: 'Завершается',

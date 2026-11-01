@@ -915,6 +915,8 @@ const tr = {
       daily: 'Günlük',
       weekly: 'Haftalık',
       monthly: 'Aylık',
+      quarterly: 'Üç aylık',
+      semiannually: 'Altı aylık',
       yearly: 'Yıllık',
       every_interval: 'Her (aralık)',
       ends: 'Biter',

@@ -918,6 +918,8 @@ const id = {
       daily: 'Harian',
       weekly: 'Mingguan',
       monthly: 'Bulanan',
+      quarterly: 'Triwulanan',
+      semiannually: 'Semesteran',
       yearly: 'Tahunan',
       every_interval: 'Setiap (interval)',
       ends: 'Berakhir',

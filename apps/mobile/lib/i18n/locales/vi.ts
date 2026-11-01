@@ -915,6 +915,8 @@ const vi = {
       daily: 'Hàng ngày',
       weekly: 'Hàng tuần',
       monthly: 'Hàng tháng',
+      quarterly: 'Hàng quý',
+      semiannually: 'Nửa năm một lần',
       yearly: 'Hàng năm',
       every_interval: 'Mỗi (chu kỳ)',
       ends: 'Kết thúc',

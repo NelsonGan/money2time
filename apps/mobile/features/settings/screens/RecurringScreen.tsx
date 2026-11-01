@@ -41,6 +41,7 @@ import {
 } from '~/utils/formatters';
 import {
   addDaysToDayKey,
+  recurrenceFrequencyOf,
   recurringAmountPerMonth,
   recurringExpenseDueBetween,
   recurringMonthlyExpenseTotal,
@@ -62,8 +63,11 @@ function formatCadence(
   pattern: RecurringTransactionRule['recurrencePattern'],
   interval: number,
 ): string {
+  // Every 3 or 6 months reads as "Quarterly" / "Semi-annually", including
+  // schedules created through a different frequency and interval.
+  const cadence = recurrenceFrequencyOf(pattern, interval);
   // interval 1 reads as a plain adjective ("Monthly"); >1 as "Every N months".
-  if (interval <= 1) return I18n.t(`transactions.editor.${pattern}`);
+  if (cadence.interval <= 1) return I18n.t(`transactions.editor.${cadence.frequency}`);
   return I18n.t(EVERY_KEY_BY_PATTERN[pattern], { count: interval });
 }
 

@@ -217,6 +217,7 @@ import {
 import { newId, nowIso } from '~/utils/id';
 import { runAfterInteractions, runAfterInteractionsCapped } from '~/utils/interactions';
 import { perfMark } from '~/utils/perfTrace';
+import { recurrenceFrequencyOf } from '~/utils/recurringRules';
 import { countsAsExpenseRow } from '~/utils/spending';
 import {
   reconcileTransactionRow,
@@ -2036,7 +2037,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       });
       void trackEvent(AnalyticsEvents.RECURRING_RULE_CREATED, {
         type: input.type,
-        pattern: input.recurrencePattern,
+        // Report the same cadence as the list/editor infer from the saved schedule.
+        // The original picker choice is not persisted (quarterly x2 is semi-annual).
+        pattern: recurrenceFrequencyOf(input.recurrencePattern, input.recurrenceInterval ?? 1)
+          .frequency,
       });
     },
     [runMutation],

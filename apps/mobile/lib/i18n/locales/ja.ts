@@ -915,6 +915,8 @@ const ja = {
       daily: '毎日',
       weekly: '毎週',
       monthly: '毎月',
+      quarterly: '四半期ごと',
+      semiannually: '半年ごと',
       yearly: '毎年',
       every_interval: '間隔',
       ends: '終了',

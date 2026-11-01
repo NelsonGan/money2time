@@ -918,6 +918,8 @@ const pt = {
       daily: 'Diário',
       weekly: 'Semanal',
       monthly: 'Mensal',
+      quarterly: 'Trimestral',
+      semiannually: 'Semestral',
       yearly: 'Anual',
       every_interval: 'A cada (intervalo)',
       ends: 'Termina',

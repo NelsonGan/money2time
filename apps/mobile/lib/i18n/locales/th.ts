@@ -912,6 +912,8 @@ const th = {
       daily: 'ทุกวัน',
       weekly: 'ทุกสัปดาห์',
       monthly: 'ทุกเดือน',
+      quarterly: 'ทุกไตรมาส',
+      semiannually: 'ทุกครึ่งปี',
       yearly: 'ทุกปี',
       every_interval: 'ทุก (ช่วงเวลา)',
       ends: 'สิ้นสุด',

@@ -919,6 +919,8 @@ const fil = {
       daily: 'Araw-araw',
       weekly: 'Linggo-linggo',
       monthly: 'Buwan-buwan',
+      quarterly: 'Kada tatlong buwan',
+      semiannually: 'Kada anim na buwan',
       yearly: 'Taon-taon',
       every_interval: 'Bawat (interval)',
       ends: 'Magtatapos',

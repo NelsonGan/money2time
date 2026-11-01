@@ -71,6 +71,67 @@ export function recurringMonthlyExpenseTotal(
 }
 
 /* ------------------------------------------------------------------ *
+ * Frequencies the editor offers
+ *
+ * Quarterly and semi-annually are not patterns of their own: they are saved as
+ * a monthly rule every 3 or 6 months. Rules stay readable by every app version,
+ * backup, shared-ledger device and the web dashboard, which only know the
+ * stored patterns, and the runner and cost math need nothing new.
+ * ------------------------------------------------------------------ */
+
+export type RecurrenceFrequency =
+  | 'daily'
+  | 'weekly'
+  | 'monthly'
+  | 'quarterly'
+  | 'semiannually'
+  | 'yearly';
+
+export type RepeatingPattern = Exclude<RecurrencePattern, 'none'>;
+
+/** In the order the editor lists them. */
+export const RECURRENCE_FREQUENCIES: readonly RecurrenceFrequency[] = [
+  'daily',
+  'weekly',
+  'monthly',
+  'quarterly',
+  'semiannually',
+  'yearly',
+];
+
+const MONTHS_PER_FREQUENCY = { quarterly: 3, semiannually: 6 } as const;
+
+/** The pattern and interval saved for a frequency picked in the editor. */
+export function storedRecurrenceOf(
+  frequency: RecurrenceFrequency,
+  interval: number,
+): { pattern: RepeatingPattern; interval: number } {
+  const safeInterval = Math.max(1, Math.trunc(interval) || 1);
+  if (frequency === 'quarterly' || frequency === 'semiannually') {
+    return { pattern: 'monthly', interval: safeInterval * MONTHS_PER_FREQUENCY[frequency] };
+  }
+  return { pattern: frequency, interval: safeInterval };
+}
+
+/**
+ * The frequency a saved rule reads as. Only exactly every 3 or 6 months reads
+ * as quarterly or semi-annually; anything else keeps its own pattern, so
+ * "every 9 months" is not turned into "every 3 quarters".
+ */
+export function recurrenceFrequencyOf(
+  pattern: RepeatingPattern,
+  interval: number,
+): { frequency: RecurrenceFrequency; interval: number } {
+  if (pattern === 'monthly') {
+    if (interval === MONTHS_PER_FREQUENCY.quarterly) return { frequency: 'quarterly', interval: 1 };
+    if (interval === MONTHS_PER_FREQUENCY.semiannually) {
+      return { frequency: 'semiannually', interval: 1 };
+    }
+  }
+  return { frequency: pattern, interval };
+}
+
+/* ------------------------------------------------------------------ *
  * Occurrence projection
  *
  * A rule stores only its *next* run date; the runner walks it forward one

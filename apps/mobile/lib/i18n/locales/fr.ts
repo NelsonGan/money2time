@@ -919,6 +919,8 @@ const fr = {
       daily: 'Quotidien',
       weekly: 'Hebdomadaire',
       monthly: 'Mensuel',
+      quarterly: 'Trimestriel',
+      semiannually: 'Semestriel',
       yearly: 'Annuel',
       every_interval: 'Tous les (intervalle)',
       ends: 'Se termine',

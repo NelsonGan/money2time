@@ -916,6 +916,8 @@ const uk = {
       daily: 'Щодня',
       weekly: 'Щотижня',
       monthly: 'Щомісяця',
+      quarterly: 'Щокварталу',
+      semiannually: 'Раз на пів року',
       yearly: 'Щороку',
       every_interval: 'Кожні (інтервал)',
       ends: 'Завершення',

@@ -891,6 +891,8 @@ const en = {
       daily: 'Daily',
       weekly: 'Weekly',
       monthly: 'Monthly',
+      quarterly: 'Quarterly',
+      semiannually: 'Semi-annually',
       yearly: 'Yearly',
       every_interval: 'Every (interval)',
       ends: 'Ends',
