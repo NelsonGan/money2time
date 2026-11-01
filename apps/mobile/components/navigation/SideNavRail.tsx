@@ -44,6 +44,7 @@ export function SideNavRail({ tabs, activeTab, onTabChange }: TabNavProps) {
           <NavItem
             key={tab}
             tab={tab}
+            tabs={tabs}
             axis="vertical"
             isActive={activeTab === tab}
             onPressTab={handleTabPress}
