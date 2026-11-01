@@ -54,8 +54,8 @@ interface NavTabMeta {
   icon: ClayIconName;
   activeIcon: ClayIconName;
   /**
-   * The pre-clay SVG for the original five tabs. Pages added later have none
-   * and fall back to the flat Lucide glyph ClayIcon maps their art to.
+   * Optional pre-clay SVG override. Other pages, including Calendar, use
+   * the flat Lucide glyph ClayIcon maps their art to.
    */
   flatIcon?: NavIconComponent;
   labelKey: string;
@@ -66,7 +66,7 @@ interface NavTabMeta {
  *
  * Clay artwork carries its own colour, so an active clay tab is a different
  * *file* rather than a tint — see components/ui/ClayIcon.tsx. Tabs with only
- * one pose (albums, and every page that can be added to the bar) reuse their
+ * one pose (Calendar, Albums and the extra pages) reuse their
  * resting art and lean on the size and opacity step instead. The flat set is
  * the pre-clay SVG pair, which does the opposite: one component, tinted and
  * filled when active.

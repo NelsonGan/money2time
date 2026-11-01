@@ -161,7 +161,15 @@ describe('home page icon', () => {
   });
 
   it.each(ALL_NAV_TABS)('uses exactly one home icon when %s is first', (home) => {
-    const tabs = [home, ...ALL_NAV_TABS.filter((tab) => tab !== home)].slice(0, 5);
+    const tabs = [
+      home,
+      ...ALL_NAV_TABS.filter((tab) => tab !== home && tab !== 'settings').slice(
+        0,
+        MAX_NAV_TABS - 2,
+      ),
+      ...(home === 'settings' ? [] : (['settings'] as const)),
+    ];
+    expect(parseNavTabs(serializeNavTabs(tabs))).toEqual(tabs);
     expect(tabs.map((tab) => navTabIcon(tab, tabs)).filter((icon) => icon === 'home')).toHaveLength(
       1,
     );
