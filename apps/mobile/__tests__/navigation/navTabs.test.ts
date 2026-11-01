@@ -1,10 +1,12 @@
 import {
   addNavTab,
+  ALL_NAV_TABS,
   availableNavTabs,
   canRemoveNavTab,
   DEFAULT_NAV_TABS,
   homeNavTab,
   MAX_NAV_TABS,
+  navTabIcon,
   parseNavTabs,
   removeNavTab,
   serializeNavTabs,
@@ -147,5 +149,31 @@ describe('editing the bar', () => {
       'receipts',
       'settleUp',
     ]);
+  });
+});
+
+describe('home page icon', () => {
+  it('moves Home to Accounts and restores the Calendar icon', () => {
+    const tabs = ['accounts', 'calendar', 'settings'] as const;
+    expect(navTabIcon('accounts', tabs)).toBe('home');
+    expect(navTabIcon('calendar', tabs)).toBe('calendar');
+    expect(navTabIcon('settings', tabs)).toBe('settings');
+  });
+
+  it.each(ALL_NAV_TABS)('uses exactly one home icon when %s is first', (home) => {
+    const tabs = [home, ...ALL_NAV_TABS.filter((tab) => tab !== home)].slice(0, 5);
+    expect(tabs.map((tab) => navTabIcon(tab, tabs)).filter((icon) => icon === 'home')).toHaveLength(
+      1,
+    );
+    expect(navTabIcon(home, tabs)).toBe('home');
+    for (const tab of tabs.slice(1)) expect(navTabIcon(tab, tabs)).toBe(tab);
+  });
+
+  it('follows a saved reorder and the default bar after reset', () => {
+    const tabs = parseNavTabs(serializeNavTabs(['insights', 'accounts', 'calendar', 'settings']));
+    expect(navTabIcon('insights', tabs)).toBe('home');
+    expect(navTabIcon('calendar', tabs)).toBe('calendar');
+    expect(navTabIcon('calendar', parseNavTabs(null))).toBe('home');
+    expect(navTabIcon('insights', parseNavTabs(null))).toBe('insights');
   });
 });

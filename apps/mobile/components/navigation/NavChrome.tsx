@@ -10,7 +10,7 @@ import {
   WalletIcon,
 } from '~/components/icons/NavIcons';
 import { getLiquidGlassNavView } from '~/components/navigation/liquidGlass';
-import type { TabName } from '~/components/navigation/navTabs';
+import { navTabIcon, type TabName } from '~/components/navigation/navTabs';
 import { ClayIcon, type ClayIconName } from '~/components/ui/ClayIcon';
 import { useIsFlatIcons, useResolvedTheme } from '~/context/ThemeContext';
 import { usePressScale } from '~/hooks/usePressScale';
@@ -73,9 +73,8 @@ interface NavTabMeta {
  */
 export const NAV_TAB_META: Record<TabName, NavTabMeta> = {
   calendar: {
-    icon: 'nav/home',
-    activeIcon: 'nav/home-active',
-    flatIcon: HomeIcon,
+    icon: 'ui/calendar',
+    activeIcon: 'ui/calendar',
     labelKey: 'nav.tab_calendar',
   },
   accounts: {
@@ -129,6 +128,14 @@ export const NAV_TAB_META: Record<TabName, NavTabMeta> = {
   },
 };
 
+/** Keep page labels even when home replaces the page's glyph. */
+export function getNavTabMeta(tab: TabName, tabs: readonly TabName[]): NavTabMeta {
+  const meta = NAV_TAB_META[tab];
+  return navTabIcon(tab, tabs) === 'home'
+    ? { ...meta, icon: 'nav/home', activeIcon: 'nav/home-active', flatIcon: HomeIcon }
+    : meta;
+}
+
 /** One item's height, in a row or a column. */
 const NAV_ITEM_EXTENT = 58;
 const ICON_SIZE = 26;
@@ -158,16 +165,18 @@ function getBlurNavView(): BlurNavView | null {
 
 export const NavItem = memo(function NavItemImpl({
   tab,
+  tabs,
   isActive,
   axis,
   onPressTab,
 }: {
   tab: TabName;
+  tabs: readonly TabName[];
   isActive: boolean;
   axis: NavAxis;
   onPressTab: (tab: TabName) => void;
 }) {
-  const { icon, activeIcon, flatIcon: FlatIcon, labelKey } = NAV_TAB_META[tab];
+  const { icon, activeIcon, flatIcon: FlatIcon, labelKey } = getNavTabMeta(tab, tabs);
   const { animatedStyle, handlePressIn, handlePressOut } = usePressScale({ depth: 0.85 });
   const handlePress = useCallback(() => onPressTab(tab), [onPressTab, tab]);
   const isFlat = useIsFlatIcons();

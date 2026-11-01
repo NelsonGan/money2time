@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import Sortable from 'react-native-sortables';
 
-import { NAV_TAB_META } from '~/components/navigation/NavChrome';
+import { getNavTabMeta, NAV_TAB_META } from '~/components/navigation/NavChrome';
 import {
   addNavTab,
   availableNavTabs,
@@ -107,7 +107,7 @@ export function BottomBarScreen({ onBack }: BottomBarScreenProps) {
           width="fill"
         >
           {tabs.map((tab, index) => {
-            const meta = NAV_TAB_META[tab];
+            const meta = getNavTabMeta(tab, tabs);
             const label = I18n.t(meta.labelKey);
             const pinned = isPinnedNavTab(tab);
             const removable = canRemoveNavTab(tabs, tab);

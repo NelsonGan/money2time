@@ -11,7 +11,7 @@ import {
 import React from 'react';
 import { View } from 'react-native';
 
-import { NAV_TAB_META } from '~/components/navigation/NavChrome';
+import { getNavTabMeta, NAV_TAB_META } from '~/components/navigation/NavChrome';
 import type { TabName } from '~/components/navigation/navTabs';
 import { Text } from '~/components/ui';
 import { ClayIcon } from '~/components/ui/ClayIcon';
@@ -241,7 +241,11 @@ export function BottomBarShowcase({ width }: ShowcaseProps) {
             style={{ opacity: index === 0 ? 1 : 0.72 }}
           >
             <ClayIcon
-              name={index === 0 ? NAV_TAB_META[tab].activeIcon : NAV_TAB_META[tab].icon}
+              name={
+                index === 0
+                  ? getNavTabMeta(tab, SHOWCASE_BAR).activeIcon
+                  : getNavTabMeta(tab, SHOWCASE_BAR).icon
+              }
               size={index === 0 ? 30 : 26}
               flatSize={20}
               flatColor={index === 0 ? colors.primary : colors.textMuted}
