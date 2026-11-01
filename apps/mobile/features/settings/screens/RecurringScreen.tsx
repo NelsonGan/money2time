@@ -63,8 +63,8 @@ function formatCadence(
   pattern: RecurringTransactionRule['recurrencePattern'],
   interval: number,
 ): string {
-  // Every 3 or 6 months reads as "Quarterly" / "Semi-annually", the frequency
-  // the editor saved it from.
+  // Every 3 or 6 months reads as "Quarterly" / "Semi-annually", including
+  // schedules created through a different frequency and interval.
   const cadence = recurrenceFrequencyOf(pattern, interval);
   // interval 1 reads as a plain adjective ("Monthly"); >1 as "Every N months".
   if (cadence.interval <= 1) return I18n.t(`transactions.editor.${cadence.frequency}`);
