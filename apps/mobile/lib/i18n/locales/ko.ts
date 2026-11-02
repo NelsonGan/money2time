@@ -591,7 +591,6 @@ const ko = {
   calendar: {
     income: '수입',
     expense: '지출',
-    net: '순액',
     transactions: '거래',
   },
   onboarding: {
@@ -990,6 +989,31 @@ const ko = {
     },
   },
   insights: {
+    breakdown: '분석',
+    trends: '추이',
+    tabs: {
+      expense_breakdown: '지출',
+      income_breakdown: '수입',
+      expense_trend: '지출',
+      income_trend: '수입',
+      category_trend: '카테고리',
+      asset_history: '자산',
+    },
+    trend_stats: {
+      vs_average: '평균 대비 {{percent}}%',
+      at_average: '딱 평균',
+      average_line: '평균 {{value}}',
+      change_since: '{{period}} 이후 {{value}}',
+      flat_since: '{{period}} 이후 변화 없음',
+    },
+    compare: {
+      pick_hint: '카테고리 선택',
+      add: '비교',
+      remove: '비교 제거',
+      summary_more: '{{second}}보다 {{first}}에 {{percent}}% 더 썼어요',
+      summary_same: '{{first}}와 {{second}}에 비슷하게 썼어요',
+      summary_none: '이 기간에 {{name}} 지출이 없어요',
+    },
     budget: '예산',
     title: '나의 자금 이야기',
     loading: '분석 불러오는 중...',
@@ -1037,15 +1061,11 @@ const ko = {
     category_trend_description: '카테고리를 선택하고 지출 추세를 시간 흐름에 따라 확인하세요.',
     expense_sentiment: '지출 감정',
     expense_sentiment_description: '날별 지출 감정(기쁨, 보통, 후회)을 확인하세요.',
-    asset_history: '자산 내역',
+    asset_history: '자산 추이',
     asset_history_description: '연간 총 자산 변화를 추적하고 월별 잔액 추세를 확인하세요.',
     income_rate_history: '시급 내역',
     income_rate_history_description:
       '전체 거래 내역에 걸쳐 실제 시급이 어떻게 변화했는지 확인하세요.',
-    charts: {
-      expo_go_fallback:
-        'Expo Go에서는 이 차트를 사용할 수 없습니다. 개발 빌드에서 앱을 열어 인터랙티브 버전을 확인하세요.',
-    },
     total_expense: '총 지출',
     total_income: '총 수입',
     no_positive_slices: '이 기간에 양수 지출 항목이 없습니다.',
@@ -1110,27 +1130,27 @@ const ko = {
         no_data_message: '다른 카테고리나 기간을 선택하거나 지출을 추가하면 추세를 볼 수 있습니다.',
       },
       expense_sentiment: {
-        summary_title: '감정 분포',
+        count_one: '지출 {{count}}건',
+        count_other: '지출 {{count}}건',
         no_data_title: '감정 데이터 없음',
         no_data_message: '감정 차트를 보려면 감정이 설정된 지출 거래를 추가하세요.',
       },
       asset_history: {
         summary_title: '순자산 추세',
-        latest: '최신',
         empty_no_accounts: {
           title: '계좌가 선택되지 않음',
           message: '자산 내역 차트를 보려면 필터에서 최소 1개의 계좌를 포함하세요.',
         },
       },
       savings_rate: {
+        saved: '{{value}} 저축',
+        overspent: '{{value}} 초과 지출',
         no_income_title: '이 기간 수입 없음',
         no_income_short: '수입 없음',
+        of_income: '수입 {{value}} 중',
         saved_per_year: '올해 {{value}} 저축',
         exclusions_active: '{{count}}개 카테고리 제외 중.',
         goal_hint: '20% 이상이 건강한 저축률입니다.',
-        status_healthy: '건강함',
-        status_building: '순항 중',
-        status_overspent: '과소비',
       },
       income_rate_history: {
         rate_title: '수입 시급',

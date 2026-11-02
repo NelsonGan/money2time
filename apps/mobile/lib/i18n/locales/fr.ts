@@ -594,7 +594,6 @@ const fr = {
   calendar: {
     income: 'Revenus',
     expense: 'Dépenses',
-    net: 'Net',
     transactions: 'Transactions',
   },
   onboarding: {
@@ -998,6 +997,31 @@ const fr = {
     },
   },
   insights: {
+    breakdown: 'Répartition',
+    trends: 'Tendances',
+    tabs: {
+      expense_breakdown: 'Dépenses',
+      income_breakdown: 'Revenus',
+      expense_trend: 'Dépenses',
+      income_trend: 'Revenus',
+      category_trend: 'Catégorie',
+      asset_history: 'Patrimoine',
+    },
+    trend_stats: {
+      vs_average: '{{percent}} % vs moy.',
+      at_average: 'Pile dans la moyenne',
+      average_line: 'Moy. {{value}}',
+      change_since: '{{value}} depuis {{period}}',
+      flat_since: 'Aucun changement depuis {{period}}',
+    },
+    compare: {
+      pick_hint: 'Choisissez une catégorie',
+      add: 'Comparer',
+      remove: 'Retirer la comparaison',
+      summary_more: 'Vous avez dépensé {{percent}} % de plus en {{first}} qu’en {{second}}',
+      summary_same: 'Vous avez dépensé à peu près autant en {{first}} qu’en {{second}}',
+      summary_none: 'Aucune dépense en {{name}} sur cette période',
+    },
     budget: 'Budget',
     title: 'Votre histoire financière',
     loading: 'Chargement des analyses...',
@@ -1052,16 +1076,12 @@ const fr = {
     expense_sentiment: 'Sentiment des dépenses',
     expense_sentiment_description:
       "Visualisez l'humeur derrière vos dépenses — heureux, neutre ou regret — jour par jour.",
-    asset_history: 'Historique des actifs',
+    asset_history: 'Tendance du patrimoine',
     asset_history_description:
       "Suivez vos actifs totaux sur l'année et consultez l'évolution mensuelle du solde.",
     income_rate_history: 'Historique du taux horaire',
     income_rate_history_description:
       "Voyez comment votre vrai taux horaire a évolué dans l'ensemble de votre historique.",
-    charts: {
-      expo_go_fallback:
-        "Ce graphique n'est pas disponible dans Expo Go. Ouvrez l'application dans un build de développement pour voir la version interactive.",
-    },
     total_expense: 'Total dépenses',
     total_income: 'Total revenus',
     no_positive_slices: 'Aucune dépense positive pour cette période.',
@@ -1128,13 +1148,13 @@ const fr = {
           'Choisissez une autre catégorie ou période, ou ajoutez des dépenses pour voir la tendance.',
       },
       expense_sentiment: {
-        summary_title: "Répartition de l'humeur",
+        count_one: '{{count}} dépense',
+        count_other: '{{count}} dépenses',
         no_data_title: "Pas encore de données d'humeur",
         no_data_message: 'Ajoutez des transactions avec une humeur pour voir le graphique.',
       },
       asset_history: {
         summary_title: 'Tendance des actifs nets',
-        latest: 'Dernier',
         empty_no_accounts: {
           title: 'Aucun compte sélectionné',
           message:
@@ -1142,14 +1162,14 @@ const fr = {
         },
       },
       savings_rate: {
+        saved: '{{value}} épargnés',
+        overspent: '{{value}} de dépassement',
         no_income_title: 'Aucun revenu sur cette période',
         no_income_short: 'Aucun revenu',
+        of_income: 'sur {{value}} de revenus',
         saved_per_year: '{{value}} épargnés cette année',
         exclusions_active: '{{count}} catégories exclues du calcul.',
         goal_hint: '20 % ou plus est considéré comme sain.',
-        status_healthy: 'Sain',
-        status_building: 'En bonne voie',
-        status_overspent: 'Dépenses excessives',
       },
       income_rate_history: {
         rate_title: 'Taux horaire',

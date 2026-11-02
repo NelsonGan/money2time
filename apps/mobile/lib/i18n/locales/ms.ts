@@ -594,7 +594,6 @@ const ms = {
   calendar: {
     income: 'Pendapatan',
     expense: 'Perbelanjaan',
-    net: 'Bersih',
     transactions: 'Transaksi',
   },
   onboarding: {
@@ -1001,6 +1000,32 @@ const ms = {
     },
   },
   insights: {
+    breakdown: 'Pecahan',
+    trends: 'Trend',
+    tabs: {
+      expense_breakdown: 'Perbelanjaan',
+      income_breakdown: 'Pendapatan',
+      expense_trend: 'Perbelanjaan',
+      income_trend: 'Pendapatan',
+      category_trend: 'Kategori',
+      asset_history: 'Aset',
+    },
+    trend_stats: {
+      vs_average: '{{percent}}% vs purata',
+      at_average: 'Tepat pada purata',
+      average_line: 'Purata {{value}}',
+      change_since: '{{value}} sejak {{period}}',
+      flat_since: 'Tiada perubahan sejak {{period}}',
+    },
+    compare: {
+      pick_hint: 'Pilih kategori',
+      add: 'Banding',
+      remove: 'Buang perbandingan',
+      summary_more:
+        'Anda berbelanja {{percent}}% lebih banyak untuk {{first}} berbanding {{second}}',
+      summary_same: 'Perbelanjaan anda untuk {{first}} dan {{second}} lebih kurang sama',
+      summary_none: 'Tiada perbelanjaan untuk {{name}} dalam tempoh ini',
+    },
     budget: 'Bajet',
     title: 'Cerita wang anda',
     loading: 'Memuatkan analitik...',
@@ -1056,15 +1081,11 @@ const ms = {
     expense_sentiment: 'Sentimen perbelanjaan',
     expense_sentiment_description:
       'Lihat mood di sebalik perbelanjaan anda — gembira, neutral, atau menyesal — hari demi hari.',
-    asset_history: 'Sejarah aset',
+    asset_history: 'Trend Aset',
     asset_history_description: 'Jejak jumlah aset sepanjang tahun dan semak trend baki bulanan.',
     income_rate_history: 'Sejarah kadar pendapatan',
     income_rate_history_description:
       'Lihat bagaimana kadar jam sebenar anda berubah dari masa ke masa sepanjang sejarah transaksi.',
-    charts: {
-      expo_go_fallback:
-        'Carta ini tidak tersedia dalam Expo Go. Buka apl dalam development build untuk lihat versi interaktif.',
-    },
     total_expense: 'Jumlah perbelanjaan',
     total_income: 'Jumlah pendapatan',
     no_positive_slices: 'Tiada irisan perbelanjaan positif untuk tempoh ini.',
@@ -1130,27 +1151,27 @@ const ms = {
           'Pilih kategori atau tempoh lain, atau tambah perbelanjaan untuk melihat aliran.',
       },
       expense_sentiment: {
-        summary_title: 'Pecahan mood',
+        count_one: '{{count}} perbelanjaan',
+        count_other: '{{count}} perbelanjaan',
         no_data_title: 'Tiada data sentimen lagi',
         no_data_message: 'Tambah transaksi perbelanjaan dengan mood untuk lihat carta sentimen.',
       },
       asset_history: {
         summary_title: 'Trend aset bersih',
-        latest: 'Terkini',
         empty_no_accounts: {
           title: 'Tiada akaun dipilih',
           message: 'Sertakan sekurang-kurangnya satu akaun dalam penapis untuk carta sejarah aset.',
         },
       },
       savings_rate: {
+        saved: '{{value}} disimpan',
+        overspent: '{{value}} terlebih belanja',
         no_income_title: 'Tiada pendapatan dalam tempoh ini',
         no_income_short: 'Tiada pendapatan',
+        of_income: 'daripada pendapatan {{value}}',
         saved_per_year: '{{value}} disimpan tahun ini',
         exclusions_active: 'Mengecualikan {{count}} kategori daripada pengiraan.',
         goal_hint: '20%+ dianggap sihat.',
-        status_healthy: 'Sihat',
-        status_building: 'Hampir sampai',
-        status_overspent: 'Perbelanjaan berlebihan',
       },
       income_rate_history: {
         rate_title: 'Kadar pendapatan',

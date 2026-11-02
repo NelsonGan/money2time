@@ -40,12 +40,12 @@ export const INSIGHTS_TUTORIALS: Tutorial[] = [
       {
         image: 'insights-1',
         title: 'Open the Insights tab',
-        body: 'Expense Breakdown is the default: one slice per category for the month you are on.',
+        body: 'Breakdown is the default: one slice per category for the month you are on. Switch between Expense and Income with the tabs under the title.',
       },
       {
         image: 'insights-2',
         title: 'Switch the chart',
-        body: 'The icon in the top left lists everything on offer, from income breakdown and savings rate to trends and sentiment.',
+        body: 'The icon in the top left lists everything on offer, from savings rate and budgets to Trends, where expense, income, a category or your assets get a line chart you can scrub.',
       },
       {
         image: 'insights-3',

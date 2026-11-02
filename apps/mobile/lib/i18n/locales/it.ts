@@ -593,7 +593,6 @@ const it = {
   calendar: {
     income: 'Entrate',
     expense: 'Uscite',
-    net: 'Netto',
     transactions: 'Transazioni',
   },
   onboarding: {
@@ -999,6 +998,31 @@ const it = {
     },
   },
   insights: {
+    breakdown: 'Ripartizione',
+    trends: 'Andamenti',
+    tabs: {
+      expense_breakdown: 'Spese',
+      income_breakdown: 'Entrate',
+      expense_trend: 'Spese',
+      income_trend: 'Entrate',
+      category_trend: 'Categoria',
+      asset_history: 'Patrimonio',
+    },
+    trend_stats: {
+      vs_average: '{{percent}}% vs media',
+      at_average: 'Esattamente nella media',
+      average_line: 'Media {{value}}',
+      change_since: '{{value}} da {{period}}',
+      flat_since: 'Nessuna variazione da {{period}}',
+    },
+    compare: {
+      pick_hint: 'Scegli una categoria',
+      add: 'Confronta',
+      remove: 'Rimuovi confronto',
+      summary_more: 'Hai speso il {{percent}}% in più per {{first}} che per {{second}}',
+      summary_same: 'Hai speso più o meno lo stesso per {{first}} e {{second}}',
+      summary_none: 'Nessuna spesa per {{name}} in questo periodo',
+    },
     budget: 'Budget',
     title: 'La tua storia finanziaria',
     loading: 'Caricamento analisi...',
@@ -1051,16 +1075,12 @@ const it = {
     expense_sentiment: 'Umore delle spese',
     expense_sentiment_description:
       "Vedi l'umore dietro le tue spese — felice, neutro o rimpianto — giorno per giorno.",
-    asset_history: 'Storico patrimonio',
+    asset_history: 'Andamento patrimonio',
     asset_history_description:
       "Monitora il patrimonio totale nell'anno e il trend dei saldi mensili.",
     income_rate_history: 'Storico tariffa oraria',
     income_rate_history_description:
       'Vedi come è cambiata la tua tariffa oraria reale nel tempo su tutta la cronologia.',
-    charts: {
-      expo_go_fallback:
-        "Questo grafico non è disponibile in Expo Go. Apri l'app in una build di sviluppo per vedere la versione interattiva.",
-    },
     total_expense: 'Totale uscite',
     total_income: 'Totale entrate',
     no_positive_slices: 'Nessuna uscita positiva per questo periodo.',
@@ -1127,27 +1147,27 @@ const it = {
           "Scegli un'altra categoria o periodo, o aggiungi spese per vedere l'andamento.",
       },
       expense_sentiment: {
-        summary_title: 'Ripartizione umore',
+        count_one: '{{count}} spesa',
+        count_other: '{{count}} spese',
         no_data_title: 'Nessun dato umore',
         no_data_message: 'Aggiungi transazioni di uscita con umore per vedere il grafico.',
       },
       asset_history: {
         summary_title: 'Trend patrimonio netto',
-        latest: 'Più recente',
         empty_no_accounts: {
           title: 'Nessun conto selezionato',
           message: 'Includi almeno un conto nei filtri per visualizzare lo storico patrimonio.',
         },
       },
       savings_rate: {
+        saved: '{{value}} risparmiati',
+        overspent: '{{value}} spesi in più',
         no_income_title: 'Nessuna entrata nel periodo',
         no_income_short: 'Nessuna entrata',
+        of_income: 'su {{value}} di entrate',
         saved_per_year: "{{value}} risparmiati quest'anno",
         exclusions_active: 'Escludendo {{count}} categorie dal calcolo.',
         goal_hint: '20%+ è considerato sano.',
-        status_healthy: 'Sano',
-        status_building: 'Sulla buona strada',
-        status_overspent: 'Spese eccessive',
       },
       income_rate_history: {
         rate_title: 'Tariffa oraria',

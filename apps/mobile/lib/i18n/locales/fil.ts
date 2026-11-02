@@ -593,7 +593,6 @@ const fil = {
   calendar: {
     income: 'Kita',
     expense: 'Gastos',
-    net: 'Net',
     transactions: 'Mga transaksyon',
   },
   onboarding: {
@@ -998,6 +997,31 @@ const fil = {
     },
   },
   insights: {
+    breakdown: 'Breakdown',
+    trends: 'Mga Trend',
+    tabs: {
+      expense_breakdown: 'Gastos',
+      income_breakdown: 'Kita',
+      expense_trend: 'Gastos',
+      income_trend: 'Kita',
+      category_trend: 'Kategorya',
+      asset_history: 'Ari-arian',
+    },
+    trend_stats: {
+      vs_average: '{{percent}}% vs avg',
+      at_average: 'Saktong average',
+      average_line: 'Avg {{value}}',
+      change_since: '{{value}} mula {{period}}',
+      flat_since: 'Walang pagbabago mula {{period}}',
+    },
+    compare: {
+      pick_hint: 'Pumili ng kategorya',
+      add: 'Ihambing',
+      remove: 'Alisin ang paghahambing',
+      summary_more: 'Gumastos ka ng {{percent}}% mas malaki sa {{first}} kaysa sa {{second}}',
+      summary_same: 'Halos pareho ang ginastos mo sa {{first}} at {{second}}',
+      summary_none: 'Walang gastos sa {{name}} sa panahong ito',
+    },
     budget: 'Badyet',
     title: 'Ang iyong kwento sa pera',
     loading: 'Nilo-load ang mga insight...',
@@ -1053,16 +1077,12 @@ const fil = {
     expense_sentiment: 'Sentiment ng gastos',
     expense_sentiment_description:
       'Tingnan ang mood sa likod ng iyong gastos — masaya, neutral, o nagsisisi — araw-araw.',
-    asset_history: 'Kasaysayan ng asset',
+    asset_history: 'Trend ng Ari-arian',
     asset_history_description:
       'I-track ang iyong kabuuang assets sa buong taon at suriin ang buwanang balance trend.',
     income_rate_history: 'Kasaysayan ng income rate',
     income_rate_history_description:
       'Tingnan kung paano nagbago ang iyong true hourly rate sa paglipas ng panahon sa buong kasaysayan ng transaksyon.',
-    charts: {
-      expo_go_fallback:
-        'Hindi available ang chart na ito sa Expo Go. Buksan ang app sa development build para makita ang interactive na bersyon.',
-    },
     total_expense: 'Kabuuang gastos',
     total_income: 'Kabuuang kita',
     no_positive_slices: 'Walang positibong expense slice para sa panahong ito.',
@@ -1129,14 +1149,14 @@ const fil = {
           'Pumili ng ibang kategorya o panahon, o magdagdag ng gastos para makita ang trend.',
       },
       expense_sentiment: {
-        summary_title: 'Breakdown ng mood',
+        count_one: '{{count}} gastos',
+        count_other: '{{count}} gastos',
         no_data_title: 'Wala pang sentiment data',
         no_data_message:
           'Magdagdag ng expense transactions na may mood para makita ang sentiment chart.',
       },
       asset_history: {
         summary_title: 'Trend ng net asset',
-        latest: 'Pinakabago',
         empty_no_accounts: {
           title: 'Walang napiling account',
           message:
@@ -1144,14 +1164,14 @@ const fil = {
         },
       },
       savings_rate: {
+        saved: '{{value}} naipon',
+        overspent: '{{value}} sobra sa gastos',
         no_income_title: 'Walang kita sa panahong ito',
         no_income_short: 'Walang kita',
+        of_income: 'mula sa {{value}} na kita',
         saved_per_year: '{{value}} na nai-save ngayong taon',
         exclusions_active: 'Inalis ang {{count}} kategorya mula sa kalkulasyon.',
         goal_hint: 'Ang 20%+ ay itinuturing na malusog.',
-        status_healthy: 'Malusog',
-        status_building: 'Papalapit na',
-        status_overspent: 'Sobra ang gastos',
       },
       income_rate_history: {
         rate_title: 'Income rate',

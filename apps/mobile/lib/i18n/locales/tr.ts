@@ -592,7 +592,6 @@ const tr = {
   calendar: {
     income: 'Gelir',
     expense: 'Gider',
-    net: 'Net',
     transactions: 'İşlemler',
   },
   onboarding: {
@@ -994,6 +993,31 @@ const tr = {
     },
   },
   insights: {
+    breakdown: 'Dağılım',
+    trends: 'Trendler',
+    tabs: {
+      expense_breakdown: 'Gider',
+      income_breakdown: 'Gelir',
+      expense_trend: 'Gider',
+      income_trend: 'Gelir',
+      category_trend: 'Kategori',
+      asset_history: 'Varlıklar',
+    },
+    trend_stats: {
+      vs_average: 'Ortalamaya göre %{{percent}}',
+      at_average: 'Tam ortalamada',
+      average_line: 'Ort. {{value}}',
+      change_since: '{{period}} itibarıyla {{value}}',
+      flat_since: '{{period}} itibarıyla değişiklik yok',
+    },
+    compare: {
+      pick_hint: 'Kategori seç',
+      add: 'Karşılaştır',
+      remove: 'Karşılaştırmayı kaldır',
+      summary_more: '{{first}} için {{second}} kategorisinden %{{percent}} daha fazla harcadın',
+      summary_same: '{{first}} ve {{second}} için yaklaşık aynı harcadın',
+      summary_none: 'Bu dönemde {{name}} için harcama yok',
+    },
     budget: 'Bütçe',
     title: 'Para hikâyeniz',
     loading: 'Analizler yükleniyor...',
@@ -1049,16 +1073,12 @@ const tr = {
     expense_sentiment: 'Gider duygu analizi',
     expense_sentiment_description:
       'Harcamalarınızın arkasındaki duyguyu — mutlu, nötr veya pişman — gün gün görün.',
-    asset_history: 'Varlık geçmişi',
+    asset_history: 'Varlık Trendi',
     asset_history_description:
       'Yıl boyunca toplam varlıklarınızı takip edin ve aylık bakiye eğilimini inceleyin.',
     income_rate_history: 'Gelir oranı geçmişi',
     income_rate_history_description:
       'Gerçek saatlik ücretinizin tüm işlem geçmişiniz boyunca nasıl değiştiğini görün.',
-    charts: {
-      expo_go_fallback:
-        "Bu grafik Expo Go'da kullanılamaz. Etkileşimli sürümü görmek için uygulamayı bir geliştirme derlemesinde açın.",
-    },
     total_expense: 'Toplam gider',
     total_income: 'Toplam gelir',
     no_positive_slices: 'Bu dönem için pozitif gider dilimi yok.',
@@ -1125,13 +1145,13 @@ const tr = {
           'Başka bir kategori veya dönem seçin ya da eğilimi görmek için harcama ekleyin.',
       },
       expense_sentiment: {
-        summary_title: 'Duygu dağılımı',
+        count_one: '{{count}} harcama',
+        count_other: '{{count}} harcama',
         no_data_title: 'Henüz duygu verisi yok',
         no_data_message: 'Duygu grafiğini görmek için duygulu gider işlemleri ekleyin.',
       },
       asset_history: {
         summary_title: 'Net varlık eğilimi',
-        latest: 'En son',
         empty_no_accounts: {
           title: 'Hesap seçilmedi',
           message:
@@ -1139,14 +1159,14 @@ const tr = {
         },
       },
       savings_rate: {
+        saved: '{{value}} biriktirildi',
+        overspent: '{{value}} fazla harcandı',
         no_income_title: 'Bu dönemde gelir yok',
         no_income_short: 'Gelir yok',
+        of_income: '{{value}} gelirin',
         saved_per_year: 'Bu yıl {{value}} tasarruf edildi',
         exclusions_active: '{{count}} kategori hesaplamadan çıkarıldı.',
         goal_hint: '%20 ve üzeri sağlıklı kabul edilir.',
-        status_healthy: 'Sağlıklı',
-        status_building: 'Yolunda',
-        status_overspent: 'Aşırı harcama',
       },
       income_rate_history: {
         rate_title: 'Gelir oranı',

@@ -592,7 +592,6 @@ const vi = {
   calendar: {
     income: 'Thu nhập',
     expense: 'Chi tiêu',
-    net: 'Ròng',
     transactions: 'Giao dịch',
   },
   onboarding: {
@@ -994,6 +993,31 @@ const vi = {
     },
   },
   insights: {
+    breakdown: 'Phân tích',
+    trends: 'Xu hướng',
+    tabs: {
+      expense_breakdown: 'Chi tiêu',
+      income_breakdown: 'Thu nhập',
+      expense_trend: 'Chi tiêu',
+      income_trend: 'Thu nhập',
+      category_trend: 'Danh mục',
+      asset_history: 'Tài sản',
+    },
+    trend_stats: {
+      vs_average: '{{percent}}% so với TB',
+      at_average: 'Đúng mức trung bình',
+      average_line: 'TB {{value}}',
+      change_since: '{{value}} từ {{period}}',
+      flat_since: 'Không đổi từ {{period}}',
+    },
+    compare: {
+      pick_hint: 'Chọn danh mục',
+      add: 'So sánh',
+      remove: 'Bỏ so sánh',
+      summary_more: 'Bạn chi cho {{first}} nhiều hơn {{second}} {{percent}}%',
+      summary_same: 'Bạn chi cho {{first}} và {{second}} gần như nhau',
+      summary_none: 'Không có chi tiêu cho {{name}} trong kỳ này',
+    },
     budget: 'Ngân sách',
     title: 'Câu chuyện tài chính',
     loading: 'Đang tải phân tích...',
@@ -1044,15 +1068,11 @@ const vi = {
     expense_sentiment: 'Cảm xúc chi tiêu',
     expense_sentiment_description:
       'Xem cảm xúc đằng sau chi tiêu — vui, bình thường hay hối tiếc — theo từng ngày.',
-    asset_history: 'Lịch sử tài sản',
+    asset_history: 'Xu hướng tài sản',
     asset_history_description: 'Theo dõi tổng tài sản trong năm và xem xu hướng số dư hàng tháng.',
     income_rate_history: 'Lịch sử lương giờ',
     income_rate_history_description:
       'Xem lương thực tế của bạn thay đổi theo thời gian qua toàn bộ lịch sử giao dịch.',
-    charts: {
-      expo_go_fallback:
-        'Biểu đồ này không khả dụng trong Expo Go. Mở ứng dụng trong development build để xem phiên bản tương tác.',
-    },
     total_expense: 'Tổng chi tiêu',
     total_income: 'Tổng thu nhập',
     no_positive_slices: 'Không có dữ liệu chi tiêu dương trong kỳ này.',
@@ -1118,27 +1138,27 @@ const vi = {
           'Chọn danh mục hoặc khoảng thời gian khác, hoặc thêm chi tiêu để xem xu hướng.',
       },
       expense_sentiment: {
-        summary_title: 'Phân tích cảm xúc',
+        count_one: '{{count}} khoản chi',
+        count_other: '{{count}} khoản chi',
         no_data_title: 'Chưa có dữ liệu cảm xúc',
         no_data_message: 'Thêm giao dịch chi tiêu kèm cảm xúc để xem biểu đồ.',
       },
       asset_history: {
         summary_title: 'Xu hướng tài sản ròng',
-        latest: 'Mới nhất',
         empty_no_accounts: {
           title: 'Chưa chọn tài khoản',
           message: 'Bao gồm ít nhất một tài khoản trong bộ lọc để vẽ biểu đồ tài sản.',
         },
       },
       savings_rate: {
+        saved: 'Tiết kiệm {{value}}',
+        overspent: 'Chi vượt {{value}}',
         no_income_title: 'Không có thu nhập trong kỳ',
         no_income_short: 'Không có thu nhập',
+        of_income: 'trên thu nhập {{value}}',
         saved_per_year: '{{value}} tiết kiệm năm nay',
         exclusions_active: 'Đang loại trừ {{count}} danh mục khỏi tính toán.',
         goal_hint: 'Trên 20% được coi là lành mạnh.',
-        status_healthy: 'Lành mạnh',
-        status_building: 'Đang tiến bộ',
-        status_overspent: 'Chi tiêu quá mức',
       },
       income_rate_history: {
         rate_title: 'Lương giờ',

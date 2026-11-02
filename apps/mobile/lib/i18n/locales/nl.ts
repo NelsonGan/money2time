@@ -593,7 +593,6 @@ const nl = {
   calendar: {
     income: 'Inkomsten',
     expense: 'Uitgaven',
-    net: 'Netto',
     transactions: 'Transacties',
   },
   onboarding: {
@@ -998,6 +997,31 @@ const nl = {
     },
   },
   insights: {
+    breakdown: 'Verdeling',
+    trends: 'Trends',
+    tabs: {
+      expense_breakdown: 'Uitgaven',
+      income_breakdown: 'Inkomsten',
+      expense_trend: 'Uitgaven',
+      income_trend: 'Inkomsten',
+      category_trend: 'Categorie',
+      asset_history: 'Vermogen',
+    },
+    trend_stats: {
+      vs_average: '{{percent}}% vs gem.',
+      at_average: 'Precies gemiddeld',
+      average_line: 'Gem. {{value}}',
+      change_since: '{{value}} sinds {{period}}',
+      flat_since: 'Geen verandering sinds {{period}}',
+    },
+    compare: {
+      pick_hint: 'Kies een categorie',
+      add: 'Vergelijken',
+      remove: 'Vergelijking verwijderen',
+      summary_more: 'Je gaf {{percent}}% meer uit aan {{first}} dan aan {{second}}',
+      summary_same: 'Je gaf ongeveer evenveel uit aan {{first}} en {{second}}',
+      summary_none: 'Geen uitgaven aan {{name}} in deze periode',
+    },
     budget: 'Budget',
     title: 'Jouw geldverhaal',
     loading: 'Inzichten laden...',
@@ -1053,16 +1077,12 @@ const nl = {
     expense_sentiment: 'Uitgavengevoel',
     expense_sentiment_description:
       'Zie de stemming achter je uitgaven — blij, neutraal of spijt — dag voor dag.',
-    asset_history: 'Vermogensgeschiedenis',
+    asset_history: 'Vermogenstrend',
     asset_history_description:
       'Volg je totale vermogen over het jaar en bekijk de maandelijkse balansrend.',
     income_rate_history: 'Uurtarief-geschiedenis',
     income_rate_history_description:
       'Zie hoe je echte uurtarief in de loop van de tijd is veranderd over je volledige transactiegeschiedenis.',
-    charts: {
-      expo_go_fallback:
-        'Deze grafiek is niet beschikbaar in Expo Go. Open de app in een development build om de interactieve versie te zien.',
-    },
     total_expense: 'Totale uitgaven',
     total_income: 'Totale inkomsten',
     no_positive_slices: 'Geen positieve uitgavensegmenten voor deze periode.',
@@ -1129,14 +1149,14 @@ const nl = {
           'Kies een andere categorie of periode, of voeg uitgaven toe om de trend te zien.',
       },
       expense_sentiment: {
-        summary_title: 'Stemmingsverdeling',
+        count_one: '{{count}} uitgave',
+        count_other: '{{count}} uitgaven',
         no_data_title: 'Nog geen stemmingsdata',
         no_data_message:
           'Voeg uitgaventransacties met stemming toe om de stemmingsgrafiek te zien.',
       },
       asset_history: {
         summary_title: 'Nettovermogenstrend',
-        latest: 'Meest recent',
         empty_no_accounts: {
           title: 'Geen rekeningen geselecteerd',
           message:
@@ -1144,14 +1164,14 @@ const nl = {
         },
       },
       savings_rate: {
+        saved: '{{value}} gespaard',
+        overspent: '{{value}} te veel uitgegeven',
         no_income_title: 'Geen inkomsten in deze periode',
         no_income_short: 'Geen inkomsten',
+        of_income: 'van {{value}} inkomen',
         saved_per_year: '{{value}} gespaard dit jaar',
         exclusions_active: '{{count}} categorieën uitgesloten van berekening.',
         goal_hint: '20%+ wordt als gezond beschouwd.',
-        status_healthy: 'Gezond',
-        status_building: 'Op de goede weg',
-        status_overspent: 'Te veel uitgegeven',
       },
       income_rate_history: {
         rate_title: 'Inkomstenpercentage',

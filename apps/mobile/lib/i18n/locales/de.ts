@@ -594,7 +594,6 @@ const de = {
   calendar: {
     income: 'Einnahmen',
     expense: 'Ausgaben',
-    net: 'Saldo',
     transactions: 'Transaktionen',
   },
   onboarding: {
@@ -1003,6 +1002,31 @@ const de = {
     },
   },
   insights: {
+    breakdown: 'Aufschlüsselung',
+    trends: 'Trends',
+    tabs: {
+      expense_breakdown: 'Ausgaben',
+      income_breakdown: 'Einnahmen',
+      expense_trend: 'Ausgaben',
+      income_trend: 'Einnahmen',
+      category_trend: 'Kategorie',
+      asset_history: 'Vermögen',
+    },
+    trend_stats: {
+      vs_average: '{{percent}} % vs. Ø',
+      at_average: 'Genau im Durchschnitt',
+      average_line: 'Ø {{value}}',
+      change_since: '{{value}} seit {{period}}',
+      flat_since: 'Keine Veränderung seit {{period}}',
+    },
+    compare: {
+      pick_hint: 'Kategorie wählen',
+      add: 'Vergleichen',
+      remove: 'Vergleich entfernen',
+      summary_more: 'Du hast {{percent}} % mehr für {{first}} ausgegeben als für {{second}}',
+      summary_same: 'Du hast etwa gleich viel für {{first}} und {{second}} ausgegeben',
+      summary_none: 'Keine Ausgaben für {{name}} in diesem Zeitraum',
+    },
     budget: 'Budget',
     title: 'Deine Geldgeschichte',
     loading: 'Einblicke werden geladen…',
@@ -1058,16 +1082,12 @@ const de = {
     expense_sentiment: 'Ausgabenstimmung',
     expense_sentiment_description:
       'Sieh die Stimmung hinter deinen Ausgaben – glücklich, neutral oder bereut – Tag für Tag.',
-    asset_history: 'Vermögensverlauf',
+    asset_history: 'Vermögenstrend',
     asset_history_description:
       'Gesamtvermögen im Jahresverlauf verfolgen und monatlichen Saldo-Trend einsehen.',
     income_rate_history: 'Stundenlohn-Verlauf',
     income_rate_history_description:
       'Sieh, wie sich dein echter Stundenlohn über die gesamte Transaktionshistorie entwickelt hat.',
-    charts: {
-      expo_go_fallback:
-        'Dieses Diagramm ist in Expo Go nicht verfügbar. Öffne die App in einem Development-Build, um die interaktive Version zu sehen.',
-    },
     total_expense: 'Gesamtausgaben',
     total_income: 'Gesamteinnahmen',
     no_positive_slices: 'Keine positiven Ausgabenwerte für diesen Zeitraum.',
@@ -1135,13 +1155,13 @@ const de = {
           'Wähle eine andere Kategorie oder Periode oder füge Ausgaben hinzu, um den Trend zu sehen.',
       },
       expense_sentiment: {
-        summary_title: 'Stimmungsverteilung',
+        count_one: '{{count}} Ausgabe',
+        count_other: '{{count}} Ausgaben',
         no_data_title: 'Noch keine Stimmungsdaten',
         no_data_message: 'Füge Ausgaben mit Stimmung hinzu, um das Diagramm zu sehen.',
       },
       asset_history: {
         summary_title: 'Nettovermögenstrend',
-        latest: 'Aktuell',
         empty_no_accounts: {
           title: 'Keine Konten ausgewählt',
           message:
@@ -1149,14 +1169,14 @@ const de = {
         },
       },
       savings_rate: {
+        saved: '{{value}} gespart',
+        overspent: '{{value}} zu viel ausgegeben',
         no_income_title: 'Keine Einnahmen in diesem Zeitraum',
         no_income_short: 'Keine Einnahmen',
+        of_income: 'von {{value}} Einkommen',
         saved_per_year: '{{value}} dieses Jahr gespart',
         exclusions_active: '{{count}} Kategorien von der Berechnung ausgeschlossen.',
         goal_hint: '20 %+ gilt als gesund.',
-        status_healthy: 'Gesund',
-        status_building: 'Auf gutem Weg',
-        status_overspent: 'Zu viel ausgegeben',
       },
       income_rate_history: {
         rate_title: 'Einnahmenrate',

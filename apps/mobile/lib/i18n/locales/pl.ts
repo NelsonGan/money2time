@@ -593,7 +593,6 @@ const pl = {
   calendar: {
     income: 'Przychód',
     expense: 'Wydatek',
-    net: 'Saldo',
     transactions: 'Transakcje',
   },
   onboarding: {
@@ -996,6 +995,31 @@ const pl = {
     },
   },
   insights: {
+    breakdown: 'Podział',
+    trends: 'Trendy',
+    tabs: {
+      expense_breakdown: 'Wydatki',
+      income_breakdown: 'Przychody',
+      expense_trend: 'Wydatki',
+      income_trend: 'Przychody',
+      category_trend: 'Kategoria',
+      asset_history: 'Majątek',
+    },
+    trend_stats: {
+      vs_average: '{{percent}}% vs śr.',
+      at_average: 'Dokładnie średnia',
+      average_line: 'Śr. {{value}}',
+      change_since: '{{value}} od {{period}}',
+      flat_since: 'Bez zmian od {{period}}',
+    },
+    compare: {
+      pick_hint: 'Wybierz kategorię',
+      add: 'Porównaj',
+      remove: 'Usuń porównanie',
+      summary_more: 'Na {{first}} wydano {{percent}}% więcej niż na {{second}}',
+      summary_same: 'Na {{first}} i {{second}} wydano mniej więcej tyle samo',
+      summary_none: 'Brak wydatków na {{name}} w tym okresie',
+    },
     budget: 'Budżet',
     title: 'Twoja historia finansowa',
     loading: 'Ładowanie analiz...',
@@ -1050,16 +1074,12 @@ const pl = {
     expense_sentiment: 'Nastrój przy wydatkach',
     expense_sentiment_description:
       'Zobacz nastrój za wydatkami — radość, obojętność lub żal — dzień po dniu.',
-    asset_history: 'Historia aktywów',
+    asset_history: 'Trend majątku',
     asset_history_description:
       'Śledź łączne aktywa przez cały rok i przeglądaj miesięczny trend salda.',
     income_rate_history: 'Historia stawki godzinowej',
     income_rate_history_description:
       'Zobacz, jak zmieniała się twoja rzeczywista stawka godzinowa w całej historii transakcji.',
-    charts: {
-      expo_go_fallback:
-        'Ten wykres jest niedostępny w Expo Go. Otwórz aplikację w buildzie deweloperskim, aby zobaczyć interaktywną wersję.',
-    },
     total_expense: 'Łączne wydatki',
     total_income: 'Łączne przychody',
     no_positive_slices: 'Brak dodatnich wydatków w tym okresie.',
@@ -1125,27 +1145,27 @@ const pl = {
         no_data_message: 'Wybierz inną kategorię lub okres albo dodaj wydatki, aby zobaczyć trend.',
       },
       expense_sentiment: {
-        summary_title: 'Rozkład nastroju',
+        count_one: '{{count}} wydatek',
+        count_other: '{{count}} wydatków',
         no_data_title: 'Brak danych nastrojów',
         no_data_message: 'Dodaj transakcje wydatków z nastrojem, by zobaczyć wykres.',
       },
       asset_history: {
         summary_title: 'Trend aktywów netto',
-        latest: 'Ostatnie',
         empty_no_accounts: {
           title: 'Nie wybrano kont',
           message: 'Uwzględnij co najmniej jedno konto w filtrach, by zobaczyć historię aktywów.',
         },
       },
       savings_rate: {
+        saved: '{{value}} zaoszczędzone',
+        overspent: '{{value}} ponad stan',
         no_income_title: 'Brak przychodów w tym okresie',
         no_income_short: 'Brak przychodu',
+        of_income: 'z {{value}} przychodu',
         saved_per_year: '{{value}} oszczędzono w tym roku',
         exclusions_active: 'Wyłączono {{count}} kategorii z obliczeń.',
         goal_hint: '20%+ uważane jest za zdrowy poziom.',
-        status_healthy: 'Zdrowo',
-        status_building: 'Na dobrej drodze',
-        status_overspent: 'Nadmierne wydatki',
       },
       income_rate_history: {
         rate_title: 'Stawka przychodu',

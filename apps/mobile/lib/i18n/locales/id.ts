@@ -593,7 +593,6 @@ const id = {
   calendar: {
     income: 'Pemasukan',
     expense: 'Pengeluaran',
-    net: 'Neto',
     transactions: 'Transaksi',
   },
   onboarding: {
@@ -997,6 +996,32 @@ const id = {
     },
   },
   insights: {
+    breakdown: 'Rincian',
+    trends: 'Tren',
+    tabs: {
+      expense_breakdown: 'Pengeluaran',
+      income_breakdown: 'Pemasukan',
+      expense_trend: 'Pengeluaran',
+      income_trend: 'Pemasukan',
+      category_trend: 'Kategori',
+      asset_history: 'Aset',
+    },
+    trend_stats: {
+      vs_average: '{{percent}}% vs rata-rata',
+      at_average: 'Tepat di rata-rata',
+      average_line: 'Rata-rata {{value}}',
+      change_since: '{{value}} sejak {{period}}',
+      flat_since: 'Tidak berubah sejak {{period}}',
+    },
+    compare: {
+      pick_hint: 'Pilih kategori',
+      add: 'Bandingkan',
+      remove: 'Hapus perbandingan',
+      summary_more:
+        'Kamu menghabiskan {{percent}}% lebih banyak untuk {{first}} daripada {{second}}',
+      summary_same: 'Pengeluaranmu untuk {{first}} dan {{second}} hampir sama',
+      summary_none: 'Tidak ada pengeluaran untuk {{name}} di periode ini',
+    },
     budget: 'Anggaran',
     title: 'Kisah uangmu',
     loading: 'Memuat wawasan...',
@@ -1052,15 +1077,11 @@ const id = {
     expense_sentiment: 'Sentimen pengeluaran',
     expense_sentiment_description:
       'Lihat mood di balik pengeluaranmu — senang, biasa, atau menyesal — hari demi hari.',
-    asset_history: 'Riwayat aset',
+    asset_history: 'Tren Aset',
     asset_history_description: 'Lacak total asetmu sepanjang tahun dan tinjau tren saldo bulanan.',
     income_rate_history: 'Riwayat tarif pemasukan',
     income_rate_history_description:
       'Lihat bagaimana tarif per jam nyatamu berubah seiring waktu sepanjang riwayat transaksimu.',
-    charts: {
-      expo_go_fallback:
-        'Grafik ini tidak tersedia di Expo Go. Buka aplikasi dalam development build untuk melihat versi interaktifnya.',
-    },
     total_expense: 'Total pengeluaran',
     total_income: 'Total pemasukan',
     no_positive_slices: 'Tidak ada irisan pengeluaran positif untuk periode ini.',
@@ -1128,28 +1149,28 @@ const id = {
           'Pilih kategori atau periode lain, atau tambahkan pengeluaran untuk melihat trennya.',
       },
       expense_sentiment: {
-        summary_title: 'Rincian mood',
+        count_one: '{{count}} pengeluaran',
+        count_other: '{{count}} pengeluaran',
         no_data_title: 'Belum ada data sentimen',
         no_data_message:
           'Tambahkan transaksi pengeluaran dengan mood untuk melihat grafik sentimen.',
       },
       asset_history: {
         summary_title: 'Tren aset bersih',
-        latest: 'Terbaru',
         empty_no_accounts: {
           title: 'Tidak ada akun dipilih',
           message: 'Sertakan setidaknya satu akun dalam filter untuk membuat grafik riwayat aset.',
         },
       },
       savings_rate: {
+        saved: '{{value}} ditabung',
+        overspent: '{{value}} lebih belanja',
         no_income_title: 'Tidak ada pemasukan periode ini',
         no_income_short: 'Tidak ada pemasukan',
+        of_income: 'dari pemasukan {{value}}',
         saved_per_year: '{{value}} ditabung tahun ini',
         exclusions_active: 'Mengecualikan {{count}} kategori dari perhitungan.',
         goal_hint: '20%+ dianggap sehat.',
-        status_healthy: 'Sehat',
-        status_building: 'Hampir sampai',
-        status_overspent: 'Pengeluaran berlebih',
       },
       income_rate_history: {
         rate_title: 'Tarif pemasukan',
