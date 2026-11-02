@@ -1,15 +1,14 @@
-import { ArrowDown, ArrowUp, ChevronRight } from 'lucide-react-native';
+import { ArrowDown, ArrowUp } from 'lucide-react-native';
 import React from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
-import { CategoryEmoji, Text } from '~/components/ui';
-import { useThemeColors } from '~/hooks/useThemeColors';
+import { Text } from '~/components/ui';
 import { withColorAlpha } from '~/utils/color';
 
 /**
  * The read-outs around an Insights trend chart: the selected bucket's figure
- * with a quiet comparison pill, the bucket's top categories and, when two
- * categories are compared, both totals. Values arrive as nodes because the
+ * with a quiet comparison pill and, when two categories are compared, both
+ * totals. Values arrive as nodes because the
  * screen renders them in money or work time.
  */
 
@@ -59,71 +58,6 @@ export function TrendHeadline({
           </Text>
         </View>
       ) : null}
-    </View>
-  );
-}
-
-export type TrendCategoryRow = {
-  id: string;
-  label: string;
-  icon: string;
-  value: React.ReactNode;
-  /** Share of the bucket, 0..1. */
-  share: number;
-  color: string;
-};
-
-export function TrendTopCategories({
-  title,
-  rows,
-  onPressRow,
-}: {
-  title: string;
-  rows: readonly TrendCategoryRow[];
-  onPressRow: (row: TrendCategoryRow) => void;
-}) {
-  const themeColors = useThemeColors();
-  if (rows.length === 0) return null;
-  return (
-    <View className="gap-1.5">
-      <Text variant="bodyStrong" numberOfLines={1}>
-        {title}
-      </Text>
-      {rows.map((row) => (
-        <Pressable
-          key={row.id}
-          onPress={() => onPressRow(row)}
-          accessibilityRole="button"
-          accessibilityLabel={row.label}
-          className="flex-row items-center gap-2.5 rounded-2xl border border-border/40 bg-card px-3 py-2 active:opacity-80"
-        >
-          <CategoryEmoji icon={row.icon} size={22} />
-          <View className="flex-1 gap-1">
-            <Text variant="caption" numberOfLines={1}>
-              {row.label}
-            </Text>
-            <View
-              className="h-1.5 overflow-hidden rounded-full"
-              style={{ backgroundColor: withColorAlpha(themeColors.border, 0.5) }}
-            >
-              <View
-                className="h-1.5 rounded-full"
-                style={{
-                  width: `${Math.round(Math.max(0.02, Math.min(1, row.share)) * 100)}%`,
-                  backgroundColor: row.color,
-                }}
-              />
-            </View>
-          </View>
-          <View className="items-end">
-            {row.value}
-            <Text variant="caption" tone="muted" style={{ fontSize: 11 }}>
-              {`${Math.round(row.share * 100)}%`}
-            </Text>
-          </View>
-          <ChevronRight size={16} color={themeColors.textMuted} />
-        </Pressable>
-      ))}
     </View>
   );
 }

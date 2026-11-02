@@ -7,6 +7,7 @@ import {
   Landmark,
   PiggyBank,
   Smile,
+  Star,
   TrendingDown,
   TrendingUp,
   X,
@@ -102,17 +103,16 @@ import {
 import { InsightPeriodSwitcher } from '~/features/insights/components/InsightPeriodSwitcher';
 import { InsightSubTabs } from '~/features/insights/components/InsightSubTabs';
 import { ProTrendPreviewOverlay } from '~/features/insights/components/ProTrendPreviewOverlay';
+import { SavingsRateRing } from '~/features/insights/components/SavingsRateRing';
 import {
   TrendLineChart,
   type TrendLineChartBucket,
   type TrendLineChartSeries,
 } from '~/features/insights/components/TrendLineChart';
 import {
-  type TrendCategoryRow,
   TrendCompareSummary,
   TrendHeadline,
   type TrendHeadlineBadge,
-  TrendTopCategories,
 } from '~/features/insights/components/TrendSummary';
 import {
   INSIGHT_GROUP_MEMBERS,
@@ -368,7 +368,6 @@ const INSIGHTS_SCROLL_CONTENT_STYLE = {
 } as const;
 const TREND_CHART_HEIGHT = 236;
 const TREND_COMPARE_CHART_HEIGHT = 262;
-const TREND_TOP_CATEGORY_COUNT = 3;
 /** The charted category and the one it is compared with. */
 const CATEGORY_TREND_PRIMARY_COLOR = '#2F7BC4';
 const CATEGORY_TREND_COMPARE_COLOR = '#E8833A';
@@ -438,8 +437,19 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 999,
   },
-  savingsMonthLabel: {
-    width: 40,
+  savingsMonthTile: {
+    width: 44,
+    height: 36,
+  },
+  // Wide enough for "-100.0%", so every row's ring lines up.
+  savingsRatePill: {
+    minWidth: 64,
+  },
+  savingsBestBadge: {
+    top: -5,
+    right: -5,
+    width: 16,
+    height: 16,
   },
   savingsMonthDetail: {
     fontSize: 11,
@@ -735,9 +745,6 @@ type ExpenseTrendMonthRow = {
   label: string;
   totalExpense: number;
   transactionCount: number;
-  topCategoryLabel: string | null;
-  topCategoryEmoji: string | null;
-  topCategoryAmount: number;
   transactions: TransactionWithRelations[];
 };
 
@@ -767,9 +774,6 @@ type ExpenseTrendPageData = InsightBasePageData & {
   periodKey: string;
   granularity: TrendGranularity;
   monthRows: ExpenseTrendMonthRow[];
-  averageMonthExpense: number;
-  activeMonths: number;
-  peakMonthKey: string | null;
 };
 
 type CategoryTrendCategoryOption = {
@@ -798,9 +802,6 @@ type IncomeTrendMonthRow = {
   label: string;
   totalIncome: number;
   transactionCount: number;
-  topCategoryLabel: string | null;
-  topCategoryEmoji: string | null;
-  topCategoryAmount: number;
   transactions: TransactionWithRelations[];
 };
 
@@ -810,9 +811,6 @@ type IncomeTrendPageData = InsightBasePageData & {
   periodKey: string;
   granularity: TrendGranularity;
   monthRows: IncomeTrendMonthRow[];
-  averageMonthIncome: number;
-  activeMonths: number;
-  peakMonthKey: string | null;
 };
 
 type SentimentDayRow = {
@@ -842,16 +840,6 @@ type InsightPageData =
 type PeriodState = { anchorDate: Date; customStart: string; customEnd: string };
 
 type TrendKind = 'expense' | 'income' | 'category' | 'asset';
-/** One of a trend bucket's biggest categories, cached per bucket's transactions. */
-type TrendTopCategoryEntry = {
-  id: string;
-  label: string;
-  icon: string;
-  amount: number;
-  share: number;
-  color: string;
-  transactions: TransactionWithRelations[];
-};
 /** What a trend page's chart draws, built once per (cached) page. */
 type TrendChartModel = {
   buckets: TrendLineChartBucket[];
@@ -881,9 +869,6 @@ const LOCKED_TREND_PLACEHOLDERS: Record<ProTrendType, InsightPageData> = {
     periodKey: '',
     granularity: 'month',
     monthRows: [],
-    averageMonthExpense: 0,
-    activeMonths: 0,
-    peakMonthKey: null,
   },
   income_trend: {
     kind: 'income_trend',
@@ -893,9 +878,6 @@ const LOCKED_TREND_PLACEHOLDERS: Record<ProTrendType, InsightPageData> = {
     periodKey: '',
     granularity: 'month',
     monthRows: [],
-    averageMonthIncome: 0,
-    activeMonths: 0,
-    peakMonthKey: null,
   },
   category_trend: {
     kind: 'category_trend',
@@ -2706,7 +2688,7 @@ export function InsightsScreen({
   const categoryTrendScrubBucketByPeriodRef = useRef<Record<string, string>>(
     categoryTrendScrubBucketByPeriod,
   );
-  // Per-page chart inputs and per-bucket category rows, reused while scrubbing.
+  // Per-page chart inputs, reused while scrubbing.
   const trendChartModelCacheRef = useRef(
     new WeakMap<
       object,
@@ -2714,15 +2696,6 @@ export function InsightsScreen({
         signature: string;
         rateSource: (dateIso: string) => number;
         model: TrendChartModel;
-      }
-    >(),
-  );
-  const trendTopCategoriesCacheRef = useRef(
-    new WeakMap<
-      TransactionWithRelations[],
-      {
-        signature: string;
-        rows: TrendTopCategoryEntry[];
       }
     >(),
   );
@@ -3431,9 +3404,6 @@ export function InsightsScreen({
           label: yearKey,
           totalExpense: 0,
           transactionCount: 0,
-          topCategoryLabel: null,
-          topCategoryEmoji: null,
-          topCategoryAmount: 0,
           transactions: [],
         });
 
@@ -3449,9 +3419,6 @@ export function InsightsScreen({
             label: monthLabels[monthIndex] ?? '',
             totalExpense: 0,
             transactionCount: 0,
-            topCategoryLabel: null,
-            topCategoryEmoji: null,
-            topCategoryAmount: 0,
             transactions: [],
           }));
         } else {
@@ -3467,20 +3434,12 @@ export function InsightsScreen({
             label: dayLabelShort(dk, activeLocale),
             totalExpense: 0,
             transactionCount: 0,
-            topCategoryLabel: null,
-            topCategoryEmoji: null,
-            topCategoryAmount: 0,
             transactions: [],
           }));
         }
 
         const monthRowByKey = new Map(monthRowsSeed.map((row) => [row.monthKey, row]));
-        const categoryTotalsByMonthKey = new Map<
-          string,
-          Map<string, { id: string; label: string; emoji: string; amount: number }>
-        >();
         const filteredForRange: TransactionWithRelations[] = [];
-        let totalExpense = 0;
 
         const accountMode = filterModeOf(insightsFilterModes, 'expenseTrendAccounts');
         const categoryMode = filterModeOf(insightsFilterModes, 'expenseTrendExpenseCategories');
@@ -3522,68 +3481,17 @@ export function InsightsScreen({
           monthRow.totalExpense += value;
           monthRow.transactionCount += 1;
           monthRow.transactions.push(tx);
-          totalExpense += value;
-
-          const category = tx.categoryId ? categoryById.get(tx.categoryId) : null;
-          const root = category?.parentId ? categoryById.get(category.parentId) : category;
-          const fallbackRootLabel = tx.categoryParentName ?? tx.categoryName ?? null;
-          const fallbackRootKey = fallbackRootLabel
-            ? `legacy-root:${fallbackRootLabel.toLowerCase()}`
-            : null;
-          const categoryId = root?.id ?? fallbackRootKey ?? 'uncategorized';
-          const categoryLabel = String(
-            root?.name ?? fallbackRootLabel ?? I18n.t('common.uncategorized'),
-          );
-          const categoryEmoji = root?.icon ?? tx.categoryIcon ?? '•';
-          let monthCategoryTotals = categoryTotalsByMonthKey.get(rowKey);
-          if (!monthCategoryTotals) {
-            monthCategoryTotals = new Map();
-            categoryTotalsByMonthKey.set(rowKey, monthCategoryTotals);
-          }
-          const current = monthCategoryTotals.get(categoryId);
-          if (current) {
-            current.amount += value;
-          } else {
-            monthCategoryTotals.set(categoryId, {
-              id: categoryId,
-              label: categoryLabel,
-              emoji: categoryEmoji,
-              amount: value,
-            });
-          }
         });
 
         const orderedSeedRows = isLifetime
           ? fillLifetimeYearRows(monthRowByKey, makeEmptyExpenseYearRow)
           : monthRowsSeed;
 
-        let peakMonthKey: string | null = null;
-        let peakMonthExpense = 0;
-        const monthRows = orderedSeedRows.map((row) => {
-          const topCategory =
-            Array.from(categoryTotalsByMonthKey.get(row.monthKey)?.values() ?? []).sort(
-              (a, b) => b.amount - a.amount,
-            )[0] ?? null;
-          const transactions =
-            row.transactions.length < 2
-              ? row.transactions
-              : sortTransactionsNewestFirst(row.transactions);
-          const nextRow = {
-            ...row,
-            topCategoryLabel: topCategory?.label ?? null,
-            topCategoryEmoji: topCategory?.emoji ?? null,
-            topCategoryAmount: topCategory?.amount ?? 0,
-            transactions,
-          };
-          if (nextRow.totalExpense > 0) {
-            if (peakMonthKey === null || nextRow.totalExpense > peakMonthExpense) {
-              peakMonthKey = nextRow.monthKey;
-              peakMonthExpense = nextRow.totalExpense;
-            }
-          }
-          return nextRow;
-        });
-        const activeMonths = monthRows.filter((row) => row.totalExpense > 0).length;
+        const monthRows = orderedSeedRows.map((row) =>
+          row.transactions.length < 2
+            ? row
+            : { ...row, transactions: sortTransactionsNewestFirst(row.transactions) },
+        );
 
         return {
           kind: 'expense_trend',
@@ -3593,9 +3501,6 @@ export function InsightsScreen({
           range,
           filteredForRange,
           monthRows,
-          averageMonthExpense: activeMonths > 0 ? totalExpense / activeMonths : 0,
-          activeMonths,
-          peakMonthKey,
         };
       }
 
@@ -3617,9 +3522,6 @@ export function InsightsScreen({
           label: yearKey,
           totalIncome: 0,
           transactionCount: 0,
-          topCategoryLabel: null,
-          topCategoryEmoji: null,
-          topCategoryAmount: 0,
           transactions: [],
         });
 
@@ -3635,9 +3537,6 @@ export function InsightsScreen({
             label: monthLabels[monthIndex] ?? '',
             totalIncome: 0,
             transactionCount: 0,
-            topCategoryLabel: null,
-            topCategoryEmoji: null,
-            topCategoryAmount: 0,
             transactions: [],
           }));
         } else {
@@ -3653,20 +3552,12 @@ export function InsightsScreen({
             label: dayLabelShort(dk, activeLocale),
             totalIncome: 0,
             transactionCount: 0,
-            topCategoryLabel: null,
-            topCategoryEmoji: null,
-            topCategoryAmount: 0,
             transactions: [],
           }));
         }
 
         const monthRowByKey = new Map(monthRowsSeed.map((row) => [row.monthKey, row]));
-        const categoryTotalsByMonthKey = new Map<
-          string,
-          Map<string, { id: string; label: string; emoji: string; amount: number }>
-        >();
         const filteredForRange: TransactionWithRelations[] = [];
-        let totalIncome = 0;
 
         const accountMode = filterModeOf(insightsFilterModes, 'incomeTrendAccounts');
         const categoryMode = filterModeOf(insightsFilterModes, 'incomeTrendIncomeCategories');
@@ -3708,68 +3599,17 @@ export function InsightsScreen({
           monthRow.totalIncome += value;
           monthRow.transactionCount += 1;
           monthRow.transactions.push(tx);
-          totalIncome += value;
-
-          const category = tx.categoryId ? categoryById.get(tx.categoryId) : null;
-          const root = category?.parentId ? categoryById.get(category.parentId) : category;
-          const fallbackRootLabel = tx.categoryParentName ?? tx.categoryName ?? null;
-          const fallbackRootKey = fallbackRootLabel
-            ? `legacy-root:${fallbackRootLabel.toLowerCase()}`
-            : null;
-          const categoryId = root?.id ?? fallbackRootKey ?? 'uncategorized';
-          const categoryLabel = String(
-            root?.name ?? fallbackRootLabel ?? I18n.t('common.uncategorized'),
-          );
-          const categoryEmoji = root?.icon ?? tx.categoryIcon ?? '•';
-          let monthCategoryTotals = categoryTotalsByMonthKey.get(rowKey);
-          if (!monthCategoryTotals) {
-            monthCategoryTotals = new Map();
-            categoryTotalsByMonthKey.set(rowKey, monthCategoryTotals);
-          }
-          const current = monthCategoryTotals.get(categoryId);
-          if (current) {
-            current.amount += value;
-          } else {
-            monthCategoryTotals.set(categoryId, {
-              id: categoryId,
-              label: categoryLabel,
-              emoji: categoryEmoji,
-              amount: value,
-            });
-          }
         });
 
         const orderedSeedRows = isLifetime
           ? fillLifetimeYearRows(monthRowByKey, makeEmptyIncomeYearRow)
           : monthRowsSeed;
 
-        let peakMonthKey: string | null = null;
-        let peakMonthIncome = 0;
-        const monthRows = orderedSeedRows.map((row) => {
-          const topCategory =
-            Array.from(categoryTotalsByMonthKey.get(row.monthKey)?.values() ?? []).sort(
-              (a, b) => b.amount - a.amount,
-            )[0] ?? null;
-          const transactions =
-            row.transactions.length < 2
-              ? row.transactions
-              : sortTransactionsNewestFirst(row.transactions);
-          const nextRow = {
-            ...row,
-            topCategoryLabel: topCategory?.label ?? null,
-            topCategoryEmoji: topCategory?.emoji ?? null,
-            topCategoryAmount: topCategory?.amount ?? 0,
-            transactions,
-          };
-          if (nextRow.totalIncome > 0) {
-            if (peakMonthKey === null || nextRow.totalIncome > peakMonthIncome) {
-              peakMonthKey = nextRow.monthKey;
-              peakMonthIncome = nextRow.totalIncome;
-            }
-          }
-          return nextRow;
-        });
-        const activeMonths = monthRows.filter((row) => row.totalIncome > 0).length;
+        const monthRows = orderedSeedRows.map((row) =>
+          row.transactions.length < 2
+            ? row
+            : { ...row, transactions: sortTransactionsNewestFirst(row.transactions) },
+        );
 
         return {
           kind: 'income_trend',
@@ -3779,9 +3619,6 @@ export function InsightsScreen({
           range,
           filteredForRange,
           monthRows,
-          averageMonthIncome: activeMonths > 0 ? totalIncome / activeMonths : 0,
-          activeMonths,
-          peakMonthKey,
         };
       }
 
@@ -3804,9 +3641,6 @@ export function InsightsScreen({
           label: yearKey,
           totalExpense: 0,
           transactionCount: 0,
-          topCategoryLabel: null,
-          topCategoryEmoji: null,
-          topCategoryAmount: 0,
           transactions: [],
         });
 
@@ -3822,9 +3656,6 @@ export function InsightsScreen({
             label: monthLabels[monthIndex] ?? '',
             totalExpense: 0,
             transactionCount: 0,
-            topCategoryLabel: null,
-            topCategoryEmoji: null,
-            topCategoryAmount: 0,
             transactions: [],
           }));
         } else {
@@ -3836,9 +3667,6 @@ export function InsightsScreen({
             label: dayLabelShort(dk, activeLocale),
             totalExpense: 0,
             transactionCount: 0,
-            topCategoryLabel: null,
-            topCategoryEmoji: null,
-            topCategoryAmount: 0,
             transactions: [],
           }));
         }
@@ -5377,60 +5205,6 @@ export function InsightsScreen({
         {formatAmount(value, settings)}
       </Text>
     );
-  // The selected bucket's three biggest categories, from its transactions.
-  const buildTrendTopCategories = (
-    transactions: TransactionWithRelations[],
-  ): TrendTopCategoryEntry[] => {
-    const cached = trendTopCategoriesCacheRef.current.get(transactions);
-    if (cached && cached.signature === trendModelSignature) return cached.rows;
-    const byRoot = new Map<
-      string,
-      { label: string; icon: string; amount: number; transactions: TransactionWithRelations[] }
-    >();
-    let total = 0;
-    transactions.forEach((tx) => {
-      const value =
-        settings.displayMode === 'time'
-          ? getDisplayValueForTransaction(tx)
-          : (tx.reportingAmount ?? tx.amount);
-      if (!Number.isFinite(value) || value <= 0) return;
-      const id = resolveBreakdownRootId(tx, categoryById);
-      const category = tx.categoryId ? categoryById.get(tx.categoryId) : null;
-      const root = category?.parentId ? categoryById.get(category.parentId) : category;
-      const entry = byRoot.get(id);
-      total += value;
-      if (entry) {
-        entry.amount += value;
-        entry.transactions.push(tx);
-        return;
-      }
-      byRoot.set(id, {
-        label: String(
-          root?.name ?? tx.categoryParentName ?? tx.categoryName ?? I18n.t('common.uncategorized'),
-        ),
-        icon: root?.icon ?? tx.categoryIcon ?? '•',
-        amount: value,
-        transactions: [tx],
-      });
-    });
-    const rows = Array.from(byRoot.entries())
-      .sort((a, b) => b[1].amount - a[1].amount)
-      .slice(0, TREND_TOP_CATEGORY_COUNT)
-      .map(([id, entry], index) => ({
-        id,
-        label: entry.label,
-        icon: entry.icon,
-        amount: entry.amount,
-        share: total > 0 ? entry.amount / total : 0,
-        color: chartCategoryColor(index),
-        transactions: entry.transactions,
-      }));
-    trendTopCategoriesCacheRef.current.set(transactions, {
-      signature: trendModelSignature,
-      rows,
-    });
-    return rows;
-  };
 
   const renderTrendLinePane = (pageData: InsightPageData, kind: TrendKind) => {
     const model = getTrendChartModel(pageData);
@@ -5515,24 +5289,6 @@ export function InsightsScreen({
     const selectedTransactions = selectedKey
       ? (model.transactionsByKey.get(selectedKey) ?? EMPTY_TRANSACTIONS)
       : EMPTY_TRANSACTIONS;
-    const topCategoryEntries =
-      (kind === 'expense' || kind === 'income') && selectedBucket
-        ? buildTrendTopCategories(selectedTransactions)
-        : [];
-    // Values are rendered here, not cached, so they follow the current theme
-    // and currency.
-    const topCategories: TrendCategoryRow[] = topCategoryEntries.map((entry) => ({
-      id: entry.id,
-      label: entry.label,
-      icon: entry.icon,
-      share: entry.share,
-      color: entry.color,
-      value: renderValueNode(entry.amount, {
-        variant: 'caption',
-        textClassName: 'text-foreground',
-        iconColor: themeColors.text,
-      }),
-    }));
 
     let compareSummary: React.ReactNode = null;
     if (pageData.kind === 'category_trend' && model.compareValues && model.series[1]) {
@@ -5684,27 +5440,6 @@ export function InsightsScreen({
         secondary={
           <View className="gap-3">
             {compareSummary}
-            {topCategories.length > 0 && selectedBucket ? (
-              <TrendTopCategories
-                title={String(
-                  I18n.t('insights.trend_stats.top_categories', { period: selectedBucket.title }),
-                )}
-                rows={topCategories}
-                onPressRow={(row) => {
-                  const match = topCategoryEntries.find((candidate) => candidate.id === row.id);
-                  const rootCategory = categoryById.get(row.id) ?? null;
-                  openDrilldown({
-                    label: `${row.label} · ${selectedBucket.title}`,
-                    transactions: match?.transactions ?? [],
-                    categoryRootId: rootCategory?.id,
-                    categoryRootLabel: rootCategory?.name ?? row.label,
-                    categoryRootEmoji: rootCategory?.icon ?? row.icon,
-                    categoryRootColor: row.color,
-                    triggerSelectionHaptic: true,
-                  });
-                }}
-              />
-            ) : null}
             {isBalance ? null : (
               <TrendMonthTransactions
                 key={`${listKind}-${selectedKey ?? ''}`}
@@ -5940,7 +5675,16 @@ export function InsightsScreen({
         settings.displayMode === 'time'
           ? formatHours(value, settings)
           : formatCompactCurrency(value, settings.currencySymbol);
-      const savedTrackColor = withColorAlpha(themeColors.error, isDark ? 0.3 : 0.16);
+      const emptyTileColor = withColorAlpha(themeColors.textMuted, isDark ? 0.16 : 0.1);
+      // The month with the best rate gets a small star, once there are at
+      // least two months with income to compare.
+      const ratedRows = pageData.savingsRateRows.filter((row) => row.savingsRate !== null);
+      const bestSavingsMonthKey =
+        ratedRows.length < 2
+          ? null
+          : ratedRows.reduce((best, row) =>
+              (row.savingsRate ?? 0) > (best.savingsRate ?? 0) ? row : best,
+            ).monthKey;
 
       return (
         <InsightPaneSplit
@@ -5991,11 +5735,6 @@ export function InsightsScreen({
                   accessibilityLabel={String(I18n.t('insights.savings_rate'))}
                 />
               </View>
-              <Text variant="caption" tone="muted" className="text-center">
-                {`${I18n.t('calendar.income')} ${compact(pageData.totalIncome)}  ·  ${I18n.t(
-                  'calendar.expense',
-                )} ${compact(pageData.totalExpense)}`}
-              </Text>
             </>
           }
           secondary={
@@ -6007,12 +5746,17 @@ export function InsightsScreen({
                   return (
                     <View
                       key={row.monthKey}
-                      className="flex-row items-center justify-between rounded-2xl border border-dashed border-border/40 px-3.5 py-2.5 opacity-60"
+                      className="flex-row items-center gap-3 rounded-2xl border border-dashed border-border/50 px-3 py-2.5 opacity-70"
                     >
-                      <Text variant="caption" tone="muted">
-                        {row.label}
-                      </Text>
-                      <Text variant="caption" tone="muted">
+                      <View
+                        className="items-center justify-center rounded-xl"
+                        style={[styles.savingsMonthTile, { backgroundColor: emptyTileColor }]}
+                      >
+                        <Text variant="caption" tone="muted" numberOfLines={1}>
+                          {row.label}
+                        </Text>
+                      </View>
+                      <Text variant="caption" tone="muted" className="flex-1">
                         —
                       </Text>
                     </View>
@@ -6021,8 +5765,7 @@ export function InsightsScreen({
                 const monthlyPercent =
                   row.savingsRate === null ? null : Number((row.savingsRate * 100).toFixed(1));
                 const monthlyTone = savingsRateColor(monthlyPercent, themeColors);
-                const savedFraction =
-                  row.savingsRate === null ? 0 : Math.max(0, Math.min(1, row.savingsRate));
+                const isBestMonth = row.monthKey === bestSavingsMonthKey;
                 return (
                   <Pressable
                     key={row.monthKey}
@@ -6036,25 +5779,31 @@ export function InsightsScreen({
                     }}
                     accessibilityRole="button"
                     accessibilityLabel={row.label}
-                    className="flex-row items-center gap-3 rounded-2xl border border-border/40 bg-card px-3.5 py-2.5 active:opacity-85"
+                    className="flex-row items-center gap-3 rounded-2xl border border-border/40 bg-card px-3 py-2.5 active:opacity-85"
                   >
-                    <Text variant="caption" numberOfLines={1} style={styles.savingsMonthLabel}>
-                      {row.label}
-                    </Text>
-                    <View className="flex-1 gap-1">
+                    <View>
                       <View
-                        className="h-1.5 overflow-hidden rounded-full"
-                        style={{ backgroundColor: savedTrackColor }}
+                        className="items-center justify-center rounded-xl"
+                        style={[
+                          styles.savingsMonthTile,
+                          { backgroundColor: withColorAlpha(monthlyTone, isDark ? 0.22 : 0.12) },
+                        ]}
                       >
-                        <View
-                          style={[
-                            styles.progressFill,
-                            buildWidthStyle(`${Math.round(savedFraction * 100)}%`),
-                            { backgroundColor: themeColors.success },
-                          ]}
-                        />
+                        <Text variant="caption" numberOfLines={1}>
+                          {row.label}
+                        </Text>
                       </View>
-                      <Text variant="caption" tone="muted" style={styles.savingsMonthDetail}>
+                      {isBestMonth ? (
+                        <View
+                          className="absolute items-center justify-center rounded-full"
+                          style={[styles.savingsBestBadge, { backgroundColor: themeColors.card }]}
+                        >
+                          <Star size={11} color={themeColors.accent} fill={themeColors.accent} />
+                        </View>
+                      ) : null}
+                    </View>
+                    <View className="min-w-0 flex-1">
+                      <Text variant="bodyStrong" numberOfLines={1}>
                         {String(
                           I18n.t(
                             row.net >= 0
@@ -6064,12 +5813,42 @@ export function InsightsScreen({
                           ),
                         )}
                       </Text>
+                      <Text variant="caption" tone="muted" numberOfLines={1}>
+                        {row.income > 0
+                          ? String(
+                              I18n.t('insights.analytics.savings_rate.of_income', {
+                                value: compact(row.income),
+                              }),
+                            )
+                          : String(I18n.t('insights.analytics.savings_rate.no_income_short'))}
+                      </Text>
                     </View>
-                    <Text variant="bodyStrong" numberOfLines={1} style={{ color: monthlyTone }}>
-                      {monthlyPercent === null
-                        ? '—'
-                        : formatSavingsRatePercentLabel(monthlyPercent)}
-                    </Text>
+                    {row.savingsRate === null ? (
+                      <Text variant="bodyStrong" tone="muted">
+                        —
+                      </Text>
+                    ) : (
+                      <View className="shrink-0 flex-row items-center gap-2">
+                        <SavingsRateRing
+                          size={24}
+                          strokeWidth={3.5}
+                          progress={Math.abs(row.savingsRate)}
+                          color={monthlyTone}
+                          trackColor={withColorAlpha(monthlyTone, isDark ? 0.28 : 0.18)}
+                        />
+                        <View
+                          className="items-center rounded-full px-2.5 py-1"
+                          style={[
+                            styles.savingsRatePill,
+                            { backgroundColor: withColorAlpha(monthlyTone, isDark ? 0.22 : 0.12) },
+                          ]}
+                        >
+                          <Text variant="caption" style={{ color: monthlyTone }}>
+                            {formatSavingsRatePercentLabel(monthlyPercent ?? 0)}
+                          </Text>
+                        </View>
+                      </View>
+                    )}
                   </Pressable>
                 );
               })}
