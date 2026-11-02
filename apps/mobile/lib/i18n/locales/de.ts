@@ -164,14 +164,14 @@ const de = {
   },
   news: {
     auto_review_insights_instalments: {
-      title: 'Autoprüfung, neue Einblicke und Raten',
+      title: 'Autoprüfung und mehr',
       autoReview: {
         title: 'Mitteilungen, die sich selbst sortieren',
         body: 'Ist die Erfassung von Mitteilungen unter Einstellungen > Automatisierung aktiv, schalte die Autoprüfung ein. Zahlungen werden als Ausgaben erfasst, Codes und Werbung ignoriert, und alles Unklare wartet auf dich. Jedes Ergebnis lässt sich rückgängig machen. Der Gratisplan enthält %{count} Prüfungen.',
       },
       insights: {
         title: 'Einblicke, neu gestaltet',
-        body: 'Einblicke hat jetzt zwei Seiten: Aufschlüsselung zeigt, wohin dein Geld geflossen ist, und Trends, wie es sich von Monat zu Monat entwickelt. Fahre über ein Diagramm, um jeden Monat mit deinem Durchschnitt zu vergleichen, oder vergleiche zwei Kategorien. Trends sind Teil von Pro.',
+        body: 'Aufschlüsselung und Trends bündeln ihre Diagramme jetzt jeweils auf einer Seite mit Tabs: Aufschlüsselung zeigt, wohin dein Geld geflossen ist, und Trends, wie es sich von Monat zu Monat entwickelt. Fahre über ein Diagramm, um jeden Monat mit deinem Durchschnitt zu vergleichen, oder vergleiche zwei Kategorien. Trends sind Teil von Pro.',
       },
       instalments: {
         title: 'In Raten zahlen',

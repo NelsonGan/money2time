@@ -139,14 +139,14 @@ const en = {
   },
   news: {
     auto_review_insights_instalments: {
-      title: 'Auto-review, new Insights and instalments',
+      title: 'Auto-review and more',
       autoReview: {
         title: 'Notifications that sort themselves',
         body: 'Once notification logging is on in Settings > Automation, turn on Auto-review. Payments are logged as expenses, codes and promotions are ignored, and anything unclear waits for you. Undo any result. The free plan includes %{count} reviews.',
       },
       insights: {
         title: 'Insights, redesigned',
-        body: 'Insights now has two pages: Breakdown shows where your money went, and Trends shows how it moves month to month. Drag along a chart to see any month against your average, or compare two categories. Trends is part of Pro.',
+        body: 'Breakdown and Trends now each gather their charts on one page, with tabs: Breakdown shows where your money went, and Trends how it moves month to month. Drag along a chart to see any month against your average, or compare two categories. Trends is part of Pro.',
       },
       instalments: {
         title: 'Pay in instalments',

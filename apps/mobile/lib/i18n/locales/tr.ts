@@ -164,14 +164,14 @@ const tr = {
   },
   news: {
     auto_review_insights_instalments: {
-      title: 'Otomatik inceleme, yeni Analizler ve taksit',
+      title: 'Otomatik inceleme ve daha fazlası',
       autoReview: {
         title: 'Kendi kendini düzenleyen bildirimler',
         body: 'Ayarlar > Otomasyon bölümünde bildirim kaydı açıkken Otomatik incelemeyi açın. Ödemeler gider olarak kaydedilir, kodlar ve kampanyalar yok sayılır, net olmayanlar sizi bekler. Her sonucu geri alabilirsiniz. Ücretsiz plan %{count} inceleme içerir.',
       },
       insights: {
         title: 'Yenilenen Analizler',
-        body: 'Analizler artık iki sayfa: Dağılım paranızın nereye gittiğini, Trendler ise aydan aya nasıl değiştiğini gösterir. Herhangi bir ayı ortalamanızla karşılaştırmak için grafikte kaydırın ya da iki kategoriyi karşılaştırın. Trendler Pro’ya dahildir.',
+        body: 'Dağılım ve Trendler artık grafiklerini sekmelerle tek bir sayfada topluyor: Dağılım paranızın nereye gittiğini, Trendler ise aydan aya nasıl değiştiğini gösterir. Herhangi bir ayı ortalamanızla karşılaştırmak için grafikte kaydırın ya da iki kategoriyi karşılaştırın. Trendler Pro’ya dahildir.',
       },
       instalments: {
         title: 'Taksitle ödeyin',

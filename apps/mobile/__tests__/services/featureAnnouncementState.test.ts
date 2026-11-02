@@ -9,6 +9,8 @@ import {
   getFeatureAnnouncementsNewestFirst,
   getLatestFeatureAnnouncement,
   getLatestUnseenFeatureAnnouncement,
+  insightsCtaFocus,
+  notificationReviewCtaTarget,
 } from '~/features/news/featureAnnouncements';
 import { I18n } from '~/lib/i18n';
 import {
@@ -24,8 +26,7 @@ const SUPPORTED_LOCALE_FILES = fs
   .readdirSync(LOCALES_DIR)
   .filter((file) => file.endsWith('.ts'))
   .map((file) => file.replace(/\.ts$/, ''));
-const loadLocale = (locale: string) =>
-  Object.values(require(path.join(LOCALES_DIR, locale)))[0] as any;
+const loadLocale = (locale: string) => require(path.join(LOCALES_DIR, locale)).default as any;
 
 const storage = new Map<string, string>();
 
@@ -84,6 +85,40 @@ describe('feature announcement state', () => {
       const news = loadLocale(locale).news.auto_review_insights_instalments;
       expect(news.autoReview.body).toContain('%{count}');
       expect(news.instalments.body).toContain('%{count}');
+    }
+  });
+
+  it('opens Breakdown for a free user and Trends, which is Pro, for a Pro user', () => {
+    expect(insightsCtaFocus(false)).toBe('expense_breakdown');
+    expect(insightsCtaFocus(true)).toBe('expense_trend');
+  });
+
+  it('opens notification review only when logging works, and its setup otherwise', () => {
+    expect(notificationReviewCtaTarget({ reviewAvailable: true, loggingSetUp: true })).toBe(
+      'review',
+    );
+    expect(notificationReviewCtaTarget({ reviewAvailable: true, loggingSetUp: false })).toBe(
+      'setup',
+    );
+    // A build without the review service has no Auto-review card to land on.
+    expect(notificationReviewCtaTarget({ reviewAvailable: false, loggingSetUp: true })).toBe(
+      'setup',
+    );
+  });
+
+  it('never says AI in the new announcement, in any language', () => {
+    // UI copy calls the feature Auto-review; AI and its translations stay out.
+    const ai = /(^|[^\p{L}])(AI|KI|IA|ИИ|ШІ)([^\p{L}]|$)|人工智/u;
+    for (const locale of SUPPORTED_LOCALE_FILES) {
+      const news = loadLocale(locale).news;
+      const strings = [
+        JSON.stringify(news.auto_review_insights_instalments),
+        news.cta.open_notification_review,
+        news.cta.open_insights,
+        news.cta.open_instalments,
+      ];
+      for (const text of strings)
+        expect([locale, text]).toEqual([locale, expect.not.stringMatching(ai)]);
     }
   });
 

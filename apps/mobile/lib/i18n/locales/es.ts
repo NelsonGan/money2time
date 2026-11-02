@@ -164,14 +164,14 @@ const es = {
   },
   news: {
     auto_review_insights_instalments: {
-      title: 'Revisión automática, nuevo Análisis y cuotas',
+      title: 'Revisión automática y más',
       autoReview: {
         title: 'Notificaciones que se ordenan solas',
         body: 'Con el registro de notificaciones activo en Ajustes > Automatización, activa la Revisión automática. Los pagos se registran como gastos, los códigos y promociones se ignoran, y lo que no esté claro te espera. Puedes deshacer cualquier resultado. El plan gratuito incluye %{count} revisiones.',
       },
       insights: {
         title: 'Análisis, rediseñado',
-        body: 'Análisis ahora tiene dos páginas: Desglose muestra en qué se fue tu dinero, y Tendencias cómo cambia mes a mes. Desliza por un gráfico para ver cualquier mes frente a tu promedio, o compara dos categorías. Tendencias forma parte de Pro.',
+        body: 'Desglose y Tendencias ahora reúnen cada uno sus gráficos en una sola página, con pestañas: Desglose muestra en qué se fue tu dinero, y Tendencias cómo cambia mes a mes. Desliza por un gráfico para ver cualquier mes frente a tu promedio, o compara dos categorías. Tendencias forma parte de Pro.',
       },
       instalments: {
         title: 'Paga en cuotas',

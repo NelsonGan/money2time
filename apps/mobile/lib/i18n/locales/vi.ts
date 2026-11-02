@@ -164,14 +164,14 @@ const vi = {
   },
   news: {
     auto_review_insights_instalments: {
-      title: 'Tự động xem lại, Thống kê mới và trả góp',
+      title: 'Tự động xem lại và hơn thế nữa',
       autoReview: {
         title: 'Thông báo tự phân loại',
         body: 'Khi đã bật ghi thông báo trong Cài đặt > Tự động hóa, hãy bật Tự động xem lại. Khoản thanh toán được ghi thành chi tiêu, mã và khuyến mãi bị bỏ qua, còn mục chưa rõ sẽ chờ bạn. Bạn có thể hoàn tác mọi kết quả. Gói miễn phí có %{count} lượt xem lại.',
       },
       insights: {
         title: 'Thống kê, thiết kế mới',
-        body: 'Thống kê giờ có hai trang: Phân tích cho thấy tiền của bạn đã đi đâu, và Xu hướng cho thấy nó thay đổi qua từng tháng. Kéo dọc biểu đồ để so bất kỳ tháng nào với mức trung bình, hoặc so sánh hai danh mục. Xu hướng thuộc gói Pro.',
+        body: 'Phân tích và Xu hướng giờ gom biểu đồ của mình vào một trang có các thẻ: Phân tích cho thấy tiền của bạn đã đi đâu, và Xu hướng cho thấy nó thay đổi qua từng tháng. Kéo dọc biểu đồ để so bất kỳ tháng nào với mức trung bình, hoặc so sánh hai danh mục. Xu hướng thuộc gói Pro.',
       },
       instalments: {
         title: 'Trả góp',

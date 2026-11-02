@@ -164,14 +164,14 @@ const id = {
   },
   news: {
     auto_review_insights_instalments: {
-      title: 'Tinjauan otomatis, Wawasan baru, dan cicilan',
+      title: 'Tinjauan otomatis dan lainnya',
       autoReview: {
         title: 'Notifikasi yang memilah sendiri',
         body: 'Setelah pencatatan notifikasi aktif di Pengaturan > Otomatisasi, nyalakan Tinjauan otomatis. Pembayaran dicatat sebagai pengeluaran, kode dan promo diabaikan, dan yang belum jelas menunggu Anda. Setiap hasil bisa dibatalkan. Paket gratis mencakup %{count} tinjauan.',
       },
       insights: {
         title: 'Wawasan, desain baru',
-        body: 'Wawasan kini punya dua halaman: Rincian menunjukkan ke mana uang Anda pergi, dan Tren menunjukkan perubahannya dari bulan ke bulan. Geser di grafik untuk melihat bulan mana pun dibanding rata-rata, atau bandingkan dua kategori. Tren adalah bagian dari Pro.',
+        body: 'Rincian dan Tren kini masing-masing mengumpulkan grafiknya di satu halaman, dengan tab: Rincian menunjukkan ke mana uang Anda pergi, dan Tren perubahannya dari bulan ke bulan. Geser di grafik untuk melihat bulan mana pun dibanding rata-rata, atau bandingkan dua kategori. Tren adalah bagian dari Pro.',
       },
       instalments: {
         title: 'Bayar dengan cicilan',

@@ -192,6 +192,25 @@ export function announcementPagesForPlatform(
   return announcement.pages.filter((page) => !page.platform || page.platform === platformOS);
 }
 
+/** Where the Insights button lands: Trends is Pro, so a free user opens Breakdown. */
+export function insightsCtaFocus(isPro: boolean): 'expense_trend' | 'expense_breakdown' {
+  return isPro ? 'expense_trend' : 'expense_breakdown';
+}
+
+/**
+ * Where the Auto-review button goes: the review page, whose card holds the
+ * switch, once notification logging works; otherwise its setup in Automation,
+ * since switching Auto-review on with nothing captured does nothing.
+ */
+export function notificationReviewCtaTarget(state: {
+  /** This build has the review service (the card is hidden without it). */
+  reviewAvailable: boolean;
+  /** Android's switch is on, or notifications have been captured on either platform. */
+  loggingSetUp: boolean;
+}): 'review' | 'setup' {
+  return state.reviewAvailable && state.loggingSetUp ? 'review' : 'setup';
+}
+
 /** Localized label for a page call-to-action button. */
 export function announcementCtaLabel(cta: NonNullable<FeatureAnnouncementPage['cta']>): string {
   switch (cta) {

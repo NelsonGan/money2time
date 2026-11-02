@@ -164,14 +164,14 @@ const ms = {
   },
   news: {
     auto_review_insights_instalments: {
-      title: 'Semakan automatik, Wawasan baharu dan ansuran',
+      title: 'Semakan automatik dan banyak lagi',
       autoReview: {
         title: 'Pemberitahuan yang mengasingkan sendiri',
         body: 'Selepas pengelogan pemberitahuan dihidupkan dalam Tetapan > Automasi, hidupkan Semakan automatik. Pembayaran direkod sebagai perbelanjaan, kod dan promosi diabaikan, dan apa yang tidak jelas menunggu anda. Mana-mana keputusan boleh dibuat asal. Pelan percuma termasuk %{count} semakan.',
       },
       insights: {
         title: 'Wawasan, reka bentuk baharu',
-        body: 'Wawasan kini ada dua halaman: Pecahan menunjukkan ke mana wang anda pergi, dan Trend menunjukkan perubahannya dari bulan ke bulan. Leret pada carta untuk melihat mana-mana bulan berbanding purata anda, atau bandingkan dua kategori. Trend ialah sebahagian daripada Pro.',
+        body: 'Pecahan dan Trend kini masing-masing menghimpunkan cartanya dalam satu halaman, dengan tab: Pecahan menunjukkan ke mana wang anda pergi, dan Trend perubahannya dari bulan ke bulan. Leret pada carta untuk melihat mana-mana bulan berbanding purata anda, atau bandingkan dua kategori. Trend ialah sebahagian daripada Pro.',
       },
       instalments: {
         title: 'Bayar secara ansuran',

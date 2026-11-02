@@ -133,15 +133,17 @@ function SortedRow({
   );
 }
 
-/** "Jan", "Feb"... in the app's language, for the chart's axis. */
-function monthInitial(index: number): string {
-  return new Intl.DateTimeFormat(I18n.locale, { month: 'narrow' }).format(
-    new Date(TREND_YEAR, index, 1),
-  );
+/** One-letter month names ("J", "F"...) in the app's language, for the chart's axis. */
+function monthInitials(count: number): string[] {
+  const format = new Intl.DateTimeFormat(I18n.locale, { month: 'narrow' });
+  return Array.from({ length: count }, (_, index) => format.format(new Date(TREND_YEAR, index, 1)));
 }
 
+/** The Trends page's tabs, Expense first and selected. */
+const TREND_TABS = ['expense_trend', 'income_trend', 'category_trend', 'asset_history'] as const;
+
 /** Monthly spending for the sample Trends chart; the scrubbed month is the last. */
-const TREND_VALUES = [2980, 3220, 3410, 3190, 3200, 3560, 3480, 3500, 3146] as const;
+const TREND_VALUES = [2420, 3080, 3610, 2790, 2980, 3720, 3260, 3480, 2640] as const;
 const TREND_YEAR = 2026;
 const CHART_HEIGHT = 124;
 /** Room above the line for the scrub tooltip, so it never covers the line. */
@@ -152,8 +154,11 @@ export function InsightsRedesignShowcase({ width }: ShowcaseProps) {
   const colors = useThemeColors();
   const { settings } = useApp();
   const line = colors.error;
-  const average = TREND_VALUES.reduce((sum, value) => sum + value, 0) / TREND_VALUES.length;
   const scrubbed = TREND_VALUES[TREND_VALUES.length - 1];
+  // Like the real chart, the average leaves out the month being looked at.
+  const earlier = TREND_VALUES.slice(0, -1);
+  const average = earlier.reduce((sum, value) => sum + value, 0) / earlier.length;
+  const initials = monthInitials(TREND_VALUES.length);
   const percent = Math.round(((average - scrubbed) / average) * 100);
   const month = formatShortMonthYearLabel(
     new Date(TREND_YEAR, TREND_VALUES.length - 1, 1),
@@ -161,8 +166,9 @@ export function InsightsRedesignShowcase({ width }: ShowcaseProps) {
   );
 
   const chartWidth = width - 24;
-  const min = 2600;
-  const max = 3800;
+  // The real chart starts at zero, so swings look as calm as they are.
+  const min = 0;
+  const max = 4000;
   const x = (index: number) => 8 + (index / (TREND_VALUES.length - 1)) * (chartWidth - 16);
   const y = (value: number) =>
     TOOLTIP_SPACE + (1 - (value - min) / (max - min)) * (CHART_HEIGHT - TOOLTIP_SPACE - 8);
@@ -176,29 +182,36 @@ export function InsightsRedesignShowcase({ width }: ShowcaseProps) {
 
   return (
     <View className="gap-2.5" style={{ width }}>
-      <View className="flex-row self-center rounded-full bg-secondary p-1">
-        {(['breakdown', 'trends'] as const).map((tab) => (
-          <View
-            key={tab}
-            className="rounded-full px-4 py-1.5"
-            style={tab === 'trends' ? { backgroundColor: colors.card } : undefined}
-          >
+      {/* The Trends page header: title, year, and its four tabs. */}
+      <View className="items-center gap-0.5">
+        <Text variant="bodyStrong" numberOfLines={1}>
+          {I18n.t('insights.trends')}
+        </Text>
+        <Text variant="caption" tone="muted" numberOfLines={1}>
+          {`‹  ${TREND_YEAR}  ›`}
+        </Text>
+      </View>
+      <View className="flex-row">
+        {TREND_TABS.map((tab, index) => (
+          <View key={tab} className="flex-1 items-center gap-1">
             <Text
               variant="caption"
               numberOfLines={1}
-              className={
-                tab === 'trends' ? 'font-semibold text-foreground' : 'text-muted-foreground'
-              }
+              className={index === 0 ? 'font-semibold text-primary' : 'text-muted-foreground'}
             >
-              {I18n.t(`insights.${tab}`)}
+              {I18n.t(`insights.tabs.${tab}`)}
             </Text>
+            <View
+              className="h-0.5 w-6 rounded-full"
+              style={{ backgroundColor: index === 0 ? colors.primary : 'transparent' }}
+            />
           </View>
         ))}
       </View>
       <View className="rounded-[18px] border border-border/30 bg-card px-3 pb-2 pt-3">
         <View className="items-center gap-1">
           <Text variant="caption" tone="muted" numberOfLines={1}>
-            {`${I18n.t('insights.tabs.expense_trend')} · ${month}`}
+            {month}
           </Text>
           <Text variant="heading" numberOfLines={1} style={{ color: line }}>
             {formatAmount(scrubbed, settings, { showSign: false })}
@@ -275,7 +288,7 @@ export function InsightsRedesignShowcase({ width }: ShowcaseProps) {
               numberOfLines={1}
               className={`text-[10px] ${index === TREND_VALUES.length - 1 ? 'font-semibold text-primary' : 'text-muted-foreground'}`}
             >
-              {monthInitial(index)}
+              {initials[index]}
             </Text>
           ))}
         </View>

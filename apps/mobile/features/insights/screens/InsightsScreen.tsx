@@ -2854,6 +2854,8 @@ export function InsightsScreen({
     return () => cancelAnimationFrame(frame);
   }, [activityBreakdownInsightRequest, handledActivityBreakdownRequestToken, commitPageIndex]);
 
+  /** A focus request consumed on mount outranks the restored last page. */
+  const focusRequestedOnMountRef = useRef(false);
   // Focus a specific insight when requested externally (e.g. the savings-rate
   // widget deep link: money2time://insights?focus=savings_rate). Consumes any
   // request that fired before this tab mounted, then listens for live ones.
@@ -2864,7 +2866,11 @@ export function InsightsScreen({
       setSelectedInsightType(insightType);
     };
     const pending = consumePendingFocusInsight();
-    if (pending) focus(pending);
+    if (pending && isInsightType(pending)) {
+      // The saved preferences load after this and would put back the last page.
+      focusRequestedOnMountRef.current = true;
+      focus(pending);
+    }
     return subscribeFocusInsightRequest(({ insightType }) => focus(insightType));
   }, []);
 
@@ -2924,7 +2930,9 @@ export function InsightsScreen({
           [saved.selectedInsightType!]: saved.periodPreset,
         }));
       }
-      if (saved.selectedInsightType) setSelectedInsightType(saved.selectedInsightType);
+      if (saved.selectedInsightType && !focusRequestedOnMountRef.current) {
+        setSelectedInsightType(saved.selectedInsightType);
+      }
       if (saved.activeCustomDateField) setActiveCustomDateField(saved.activeCustomDateField);
       if (saved.selectedAccountIds) setSelectedAccountIds(saved.selectedAccountIds);
       if (saved.excludedExpenseTrendAccountIds) {

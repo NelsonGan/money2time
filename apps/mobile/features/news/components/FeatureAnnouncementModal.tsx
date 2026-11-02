@@ -17,8 +17,10 @@ import { useApp } from '~/context/AppContext';
 import { useIsPro } from '~/context/ProContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { paymentAlertCapturesRepository } from '~/lib/repositories/paymentAlertCapturesRepository';
 import { triggerHaptic } from '~/services/haptics';
 import { requestFocusInsight } from '~/services/insightsNavigation';
+import { isNotificationAiAvailable } from '~/services/notificationAi';
 import { requestOpenPaymentAlerts } from '~/services/paymentAlertsNavigation';
 import { WEB_DASHBOARD_URL } from '~/services/webDashboard.shared';
 import { withColorAlpha } from '~/utils/color';
@@ -31,6 +33,8 @@ import {
   announcementPageTitle,
   type FeatureAnnouncement,
   type FeatureAnnouncementPage,
+  insightsCtaFocus,
+  notificationReviewCtaTarget,
 } from '../featureAnnouncements';
 import { riceCalStoreUrl } from '../riceCalLinks';
 import { AccountLogoShowcase } from './AccountLogoShowcase';
@@ -136,7 +140,9 @@ export interface FeatureAnnouncementCtaHandlers {
   onOpenCloudSync?: () => void;
   /** Invoked when a page links to Manage ledgers. */
   onOpenLedgers?: () => void;
+  /** Switch to the Insights tab; the modal picks the page (Trends or Breakdown). */
   onOpenInsights?: () => void;
+  /** Open Settings › Instalments. */
   onOpenInstalments?: () => void;
 }
 
@@ -215,7 +221,7 @@ export function FeatureAnnouncementModal({
   onOpenInstalments,
 }: FeatureAnnouncementModalProps) {
   const colors = useThemeColors();
-  const { settings } = useApp();
+  const { settings, paymentAlertPrefs } = useApp();
   const isPro = useIsPro();
   const insets = useSafeAreaInsets();
   const { width: windowWidth } = useWindowDimensions();
@@ -278,13 +284,25 @@ export function FeatureAnnouncementModal({
     // Trends is Pro: a free user lands on Breakdown, not on its lock screen.
     openInsights: onOpenInsights
       ? () => {
-          requestFocusInsight(isPro ? 'expense_trend' : 'expense_breakdown');
+          requestFocusInsight(insightsCtaFocus(isPro));
           onOpenInsights();
         }
       : undefined,
     openInstalments: onOpenInstalments,
-    // The review page is a root route, reachable the same way from every caller.
-    openNotificationReview: () => requestOpenPaymentAlerts({ screen: 'NotificationHistory' }),
+    // The review page is a root route, reached through its bridge from every
+    // caller; without notification logging the button opens its setup instead.
+    openNotificationReview: () => {
+      const target = notificationReviewCtaTarget({
+        reviewAvailable: isNotificationAiAvailable(),
+        loggingSetUp:
+          paymentAlertPrefs.alertsEnabled ||
+          paymentAlertCapturesRepository
+            .listSince(new Date(0).toISOString())
+            .some((capture) => capture.channel !== 'apple_pay'),
+      });
+      if (target === 'setup' && onOpenAutoLog) onOpenAutoLog();
+      else requestOpenPaymentAlerts({ screen: 'NotificationHistory' });
+    },
     openRiceCal: () => {
       void Linking.openURL(riceCalStoreUrl(Platform.OS)).catch(() => undefined);
     },

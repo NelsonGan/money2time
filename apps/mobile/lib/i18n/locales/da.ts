@@ -164,14 +164,14 @@ const da = {
   },
   news: {
     auto_review_insights_instalments: {
-      title: 'Autogennemgang, ny Indsigt og afdrag',
+      title: 'Autogennemgang og mere',
       autoReview: {
         title: 'Notifikationer, der sorterer sig selv',
         body: 'Når notifikationsregistrering er slået til under Indstillinger > Automatisering, kan du slå Autogennemgang til. Betalinger registreres som udgifter, koder og tilbud ignoreres, og alt uklart venter på dig. Fortryd ethvert resultat. Gratisplanen indeholder %{count} gennemgange.',
       },
       insights: {
         title: 'Indsigt i nyt design',
-        body: 'Indsigt har nu to sider: Fordeling viser, hvor pengene gik hen, og Tendenser viser, hvordan de udvikler sig fra måned til måned. Træk langs en graf for at se en måned mod dit gennemsnit, eller sammenlign to kategorier. Tendenser er en del af Pro.',
+        body: 'Fordeling og Tendenser samler nu hver deres grafer på én side med faner: Fordeling viser, hvor pengene gik hen, og Tendenser, hvordan de udvikler sig fra måned til måned. Træk langs en graf for at se en måned mod dit gennemsnit, eller sammenlign to kategorier. Tendenser er en del af Pro.',
       },
       instalments: {
         title: 'Betal i afdrag',

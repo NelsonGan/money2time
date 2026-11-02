@@ -164,14 +164,14 @@ const fil = {
   },
   news: {
     auto_review_insights_instalments: {
-      title: 'Auto-review, bagong Insights at hulugan',
+      title: 'Auto-review at iba pa',
       autoReview: {
         title: 'Mga notification na kusang nag-aayos',
         body: 'Kapag naka-on ang notification logging sa Settings > Automation, i-on ang Auto-review. Itinatala ang mga bayad bilang gastos, binabalewala ang mga code at promo, at naghihintay sa iyo ang hindi malinaw. Puwedeng i-undo ang anumang resulta. May %{count} review ang libreng plan.',
       },
       insights: {
         title: 'Bagong disenyo ng Insights',
-        body: 'May dalawang pahina na ang Insights: ipinapakita ng Breakdown kung saan napunta ang pera mo, at ng Mga Trend kung paano ito nagbabago bawat buwan. I-drag sa chart para makita ang anumang buwan laban sa average mo, o paghambingin ang dalawang kategorya. Bahagi ng Pro ang Mga Trend.',
+        body: 'Pinagsasama na ng Breakdown at Mga Trend ang kani-kanilang chart sa iisang pahina, may mga tab: ipinapakita ng Breakdown kung saan napunta ang pera mo, at ng Mga Trend kung paano ito nagbabago bawat buwan. I-drag sa chart para makita ang anumang buwan laban sa average mo, o paghambingin ang dalawang kategorya. Bahagi ng Pro ang Mga Trend.',
       },
       instalments: {
         title: 'Magbayad nang hulugan',

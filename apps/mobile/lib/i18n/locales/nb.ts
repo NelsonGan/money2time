@@ -164,14 +164,14 @@ const nb = {
   },
   news: {
     auto_review_insights_instalments: {
-      title: 'Autogjennomgang, ny Innsikt og delbetaling',
+      title: 'Autogjennomgang og mer',
       autoReview: {
         title: 'Varsler som sorterer seg selv',
         body: 'Når føring av varsler er slått på under Innstillinger > Automatisering, slår du på Autogjennomgang. Betalinger føres som utgifter, koder og tilbud ignoreres, og alt som er uklart venter på deg. Du kan angre alle resultater. Gratisplanen inkluderer %{count} gjennomganger.',
       },
       insights: {
         title: 'Innsikt i ny drakt',
-        body: 'Innsikt har nå to sider: Fordeling viser hvor pengene gikk, og Trender viser hvordan de endrer seg fra måned til måned. Dra langs et diagram for å se en måned mot gjennomsnittet ditt, eller sammenlign to kategorier. Trender er en del av Pro.',
+        body: 'Fordeling og Trender samler nå hver sine diagrammer på én side med faner: Fordeling viser hvor pengene gikk, og Trender hvordan de endrer seg fra måned til måned. Dra langs et diagram for å se en måned mot gjennomsnittet ditt, eller sammenlign to kategorier. Trender er en del av Pro.',
       },
       instalments: {
         title: 'Betal i avdrag',

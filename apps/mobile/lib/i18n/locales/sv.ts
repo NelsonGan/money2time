@@ -164,18 +164,18 @@ const sv = {
   },
   news: {
     auto_review_insights_instalments: {
-      title: 'Autogranskning, nya Insikter och delbetalning',
+      title: 'Autogranskning och mer',
       autoReview: {
         title: 'Aviseringar som sorterar sig själva',
-        body: 'När bokföring av aviseringar är på under Inställningar > Automatisering slår du på Autogranskning. Betalningar bokförs som utgifter, koder och erbjudanden ignoreras, och allt som är oklart väntar på dig. Alla resultat kan ångras. Gratisplanen ingår %{count} granskningar.',
+        body: 'När bokföring av aviseringar är på under Inställningar > Automatisering slår du på Autogranskning. Betalningar bokförs som utgifter, koder och erbjudanden ignoreras, och allt som är oklart väntar på dig. Alla resultat kan ångras. I gratisplanen ingår %{count} granskningar.',
       },
       insights: {
         title: 'Insikter i ny design',
-        body: 'Insikter har nu två sidor: Fördelning visar vart pengarna tog vägen och Trender hur de förändras månad för månad. Dra längs ett diagram för att se valfri månad mot ditt snitt, eller jämför två kategorier. Trender ingår i Pro.',
+        body: 'Fördelning och Trender samlar nu sina diagram på en sida var, med flikar: Fördelning visar vart pengarna tog vägen och Trender hur de förändras månad för månad. Dra längs ett diagram för att se valfri månad mot ditt snitt, eller jämför två kategorier. Trender ingår i Pro.',
       },
       instalments: {
         title: 'Betala i delar',
-        body: 'Betalar du av något i delar? Lägg till det som en utgift och tryck på Delbetalning för att dela upp det i betalningar. Varje betalning bokförs på förfallodagen, och planen visar vad som återstår, med Betala nu och Betala av. Gratisplanen ingår %{count} planer åt gången.',
+        body: 'Betalar du av något i delar? Lägg till det som en utgift och tryck på Delbetalning för att dela upp det i betalningar. Varje betalning bokförs på förfallodagen, och planen visar vad som återstår, med Betala nu och Betala av. I gratisplanen ingår %{count} planer åt gången.',
       },
     },
     cloud_sync_ledgers: {

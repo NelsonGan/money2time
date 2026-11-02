@@ -164,14 +164,14 @@ const nl = {
   },
   news: {
     auto_review_insights_instalments: {
-      title: 'Autocontrole, nieuwe Inzichten en termijnen',
+      title: 'Autocontrole en meer',
       autoReview: {
         title: 'Meldingen die zichzelf sorteren',
         body: 'Staat het vastleggen van meldingen aan in Instellingen > Automatisering, zet dan Autocontrole aan. Betalingen worden als uitgaven vastgelegd, codes en promoties genegeerd, en alles wat onduidelijk is wacht op jou. Elk resultaat is ongedaan te maken. Het gratis abonnement bevat %{count} controles.',
       },
       insights: {
         title: 'Inzichten, vernieuwd',
-        body: 'Inzichten heeft nu twee pagina’s: Verdeling laat zien waar je geld naartoe ging, en Trends hoe het per maand verandert. Veeg over een grafiek om elke maand met je gemiddelde te vergelijken, of vergelijk twee categorieën. Trends hoort bij Pro.',
+        body: 'Verdeling en Trends bundelen hun grafieken nu elk op één pagina met tabbladen: Verdeling laat zien waar je geld naartoe ging, en Trends hoe het per maand verandert. Veeg over een grafiek om elke maand met je gemiddelde te vergelijken, of vergelijk twee categorieën. Trends hoort bij Pro.',
       },
       instalments: {
         title: 'Betalen in termijnen',

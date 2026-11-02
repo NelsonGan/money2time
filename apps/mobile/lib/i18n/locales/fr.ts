@@ -164,14 +164,14 @@ const fr = {
   },
   news: {
     auto_review_insights_instalments: {
-      title: 'Vérification auto, nouvelles Analyses et paiement en plusieurs fois',
+      title: 'Vérification auto et plus',
       autoReview: {
         title: 'Des notifications qui se trient seules',
         body: "Une fois l'enregistrement des notifications activé dans Réglages > Automatisation, activez la Vérification auto. Les paiements sont enregistrés comme dépenses, les codes et promotions ignorés, et ce qui n'est pas clair vous attend. Chaque résultat peut être annulé. Le forfait gratuit inclut %{count} vérifications.",
       },
       insights: {
         title: 'Analyses, repensées',
-        body: "Analyses compte désormais deux pages : Répartition montre où est passé votre argent, et Tendances son évolution mois après mois. Faites glisser le doigt sur un graphique pour comparer n'importe quel mois à votre moyenne, ou comparez deux catégories. Tendances fait partie de Pro.",
+        body: "Répartition et Tendances regroupent désormais chacune leurs graphiques sur une seule page, avec des onglets : Répartition montre où est passé votre argent, et Tendances son évolution mois après mois. Faites glisser le doigt sur un graphique pour comparer n'importe quel mois à votre moyenne, ou comparez deux catégories. Tendances fait partie de Pro.",
       },
       instalments: {
         title: 'Payer en plusieurs fois',
