@@ -1421,6 +1421,18 @@ export interface PaymentAlertPrefs {
   sources: Record<string, PaymentAlertSource>;
   /** Phrases that make any alert ignored. */
   ignorePhrases: string[];
+  /** AI auto-review of captured notifications (opt-in). */
+  aiReview: NotificationAiReviewPrefs;
+}
+
+/** Which transaction types AI auto-review may log; others stay for the user. */
+export type NotificationAiLogTypes = 'both' | 'expense' | 'income';
+
+export interface NotificationAiReviewPrefs {
+  enabled: boolean;
+  logTypes: NotificationAiLogTypes;
+  /** Accounts whose notifications AI reviews; null = every account. */
+  accountIds: string[] | null;
 }
 
 /**

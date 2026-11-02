@@ -274,8 +274,11 @@ export interface CreateTransactionMeta {
   source?: TransactionSource;
   /** For `autolog`: how the payment reached the app. Absent means the Apple Pay automation. */
   channel?: PaymentAlertChannel;
-  /** Notification review is confirmed explicitly; Apple Pay remains automatic. */
-  decision?: 'auto' | 'confirm';
+  /**
+   * Notification review is confirmed explicitly (`confirm`) or by AI auto-review
+   * (`ai`); Apple Pay remains automatic.
+   */
+  decision?: 'auto' | 'confirm' | 'ai';
   /** Apple Pay allowance checked at the durable automatic write. */
   autoLogIsPro?: boolean;
   /** Capture bookkeeping committed atomically with an auto-logged expense. */

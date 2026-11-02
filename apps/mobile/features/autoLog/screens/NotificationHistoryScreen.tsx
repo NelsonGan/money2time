@@ -1,24 +1,38 @@
 import { useNavigation, usePreventRemove } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { FlashList } from '@shopify/flash-list';
-import { ArrowDownLeft, ArrowUpRight, Bell, Pencil, X } from 'lucide-react-native';
+import { ListChecks, Pencil, Sparkles } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Pressable, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { LoadingDots } from '~/components/feedback/LoadingDots';
-import { Button, SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
+import {
+  Button,
+  HeaderIconButton,
+  PromptSheet,
+  SettingsHeader,
+  SettingsPageLayout,
+  Text,
+} from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { paymentAlertCapturesRepository } from '~/lib/repositories/paymentAlertCapturesRepository';
+import { transactionsRepository } from '~/lib/repositories/transactionsRepository';
 import type { RootStackParamList } from '~/navigation/rootStack';
+import { AnalyticsEvents, trackEvent } from '~/services/analytics';
+import { triggerHaptic } from '~/services/haptics';
 import {
   type NotificationReviewSelection,
   resolveNotificationReviews,
   suggestNotificationCategory,
+  undoNotificationAiReview,
 } from '~/services/notificationReview';
 import {
   getNotificationScanHistoryGeneration,
+  isUnseenAiResult,
+  markNotificationAiResultsSeen,
   type NotificationScanHistoryEntry,
   readNotificationScanHistory,
   subscribeNotificationScanHistory,
@@ -31,11 +45,13 @@ import {
 } from '~/utils/formatters';
 import { minorUnitDigits } from '~/utils/moneyText';
 
+import { NotificationAiCard } from '../components/NotificationAiCard';
 import { isPayableAccount } from '../lib/binding';
 
 export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
   const app = useApp();
   const { settings } = app;
+  const colors = useThemeColors();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const live = useRef(app);
   live.current = app;
@@ -125,6 +141,71 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
       setBusy(false);
     }
   };
+  const aiDone = history.filter(isUnseenAiResult);
+  // "Done by AI" moves to Recent once the user has been here and left.
+  const aiDoneIds = useRef<string[]>([]);
+  aiDoneIds.current = aiDone.map((entry) => entry.id);
+  useEffect(() => {
+    const user = settings.appUserId;
+    return () => {
+      void markNotificationAiResultsSeen(user, aiDoneIds.current).catch(() => undefined);
+    };
+  }, [settings.appUserId]);
+  // Undo needs the capture in the open ledger (and not yet pruned).
+  const canUndo = (entry: NotificationScanHistoryEntry) =>
+    !!entry.ai?.applied && !!paymentAlertCapturesRepository.getById(entry.id);
+  const confirmUndo = (entry: NotificationScanHistoryEntry) => {
+    const transaction = entry.transactionId
+      ? transactionsRepository.getById(entry.transactionId)
+      : null;
+    const edited =
+      !!transaction && Date.parse(transaction.updatedAt) - Date.parse(transaction.createdAt) > 2000;
+    if (!edited) {
+      void undo(entry);
+      return;
+    }
+    Alert.alert(
+      I18n.t('payment_alerts.ai_undo_edited_title'),
+      I18n.t('payment_alerts.ai_undo_edited_body'),
+      [
+        { text: I18n.t('common.cancel'), style: 'cancel' },
+        {
+          text: I18n.t('payment_alerts.ai_undo'),
+          style: 'destructive',
+          onPress: () => void undo(entry),
+        },
+      ],
+    );
+  };
+  const undo = async (entry: NotificationScanHistoryEntry) => {
+    if (busyRef.current) return;
+    busyRef.current = true;
+    setBusy(true);
+    void triggerHaptic('selection');
+    const snapshot = identity.current;
+    try {
+      const undone = await undoNotificationAiReview(entry.id, {
+        appUserId: snapshot.user,
+        generation: snapshot.generation,
+        getCurrent: () => ({ ...live.current, appUserId: live.current.settings.appUserId }),
+        deleteTransaction: (id) => live.current.deleteTransaction(id),
+      });
+      if (undone) {
+        void trackEvent(AnalyticsEvents.NOTIFICATION_AI_REVIEW_UNDONE, {
+          decision: entry.ai?.decision ?? 'unknown',
+        });
+      }
+    } catch {
+      Alert.alert(
+        I18n.t('payment_alerts.history_title'),
+        I18n.t('payment_alerts.review_save_error'),
+      );
+      reload();
+    } finally {
+      busyRef.current = false;
+      setBusy(false);
+    }
+  };
   // Root-stack route: covers back button, hardware back and iOS swipe-back.
   // No bottom tabs remain visible, so switching tabs cannot bypass the warning.
   usePreventRemove(loading || pending.length > 0 || busy, ({ data }) => {
@@ -156,10 +237,40 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
     minorUnitDigits(currency) === 3
       ? `${currency} ${amount.toLocaleString(settings.locale, { minimumFractionDigits: 3, maximumFractionDigits: 3 })}`
       : formatAmount(amount, { ...settings, displayMode: 'money' }, { currencyCode: currency });
-  const recent = history.filter((entry) => entry.result !== 'pending');
+  // Unseen AI results are in Done by AI; they join Recent once seen.
+  const recent = history.filter((entry) => entry.result !== 'pending' && !isUnseenAiResult(entry));
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const bulkLabel = I18n.t('payment_alerts.review_all', { count: pending.length });
   return (
     <SettingsPageLayout edges={['top', 'bottom']}>
-      <SettingsHeader onBack={onBack} title={I18n.t('payment_alerts.title')} />
+      <SettingsHeader
+        onBack={onBack}
+        title={I18n.t('payment_alerts.title')}
+        rightAccessory={
+          // One item has its own buttons; two or more can be decided at once.
+          tab === 'pending' && pending.length > 1 ? (
+            <HeaderIconButton
+              label={bulkLabel}
+              icon={<ListChecks size={18} color={colors.textMuted} />}
+              onPress={() => setBulkOpen(true)}
+            />
+          ) : null
+        }
+      />
+      <BulkReviewSheet
+        visible={bulkOpen}
+        title={bulkLabel}
+        disabled={busy}
+        onDismiss={() => setBulkOpen(false)}
+        onAction={(action) => {
+          setBulkOpen(false);
+          void run(
+            pending.map((entry) => entry.id),
+            action,
+          );
+        }}
+      />
+      <NotificationAiCard />
       <View className="mx-auto w-full max-w-[640px] px-5 pb-3">
         <View className="flex-row rounded-xl bg-secondary p-1">
           {(['pending', 'recent'] as const).map((item) => (
@@ -207,26 +318,21 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
           keyExtractor={(entry) => entry.id}
           contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 32 }}
           ListHeaderComponent={
-            tab === 'pending' && pending.length > 0 ? (
-              <View className="mx-auto mb-3 w-full max-w-[640px] flex-row border-b border-border/50 pb-2">
-                {(['income', 'expense', 'none'] as const).map((action) => (
-                  <ReviewAction
-                    key={action}
-                    action={action}
-                    all
-                    disabled={busy}
-                    onPress={() => {
-                      void run(
-                        pending.map((entry) => entry.id),
-                        action,
-                      );
-                    }}
-                  />
-                ))}
-              </View>
+            tab === 'pending' && aiDone.length > 0 ? (
+              <DoneByAiGroup
+                entries={aiDone}
+                busy={busy}
+                money={money}
+                canUndo={canUndo}
+                onUndo={confirmUndo}
+              />
             ) : null
           }
-          ListEmptyComponent={<EmptyState compact title={I18n.t('payment_alerts.history_empty')} />}
+          ListEmptyComponent={
+            tab === 'pending' && aiDone.length > 0 ? null : (
+              <EmptyState compact title={I18n.t('payment_alerts.history_empty')} />
+            )
+          }
           renderItem={({ item: entry }) => (
             <NotificationReviewCard
               key={entry.id}
@@ -269,6 +375,8 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
               onAction={(action) => {
                 void run([entry.id], action);
               }}
+              canUndo={canUndo(entry)}
+              onUndo={() => confirmUndo(entry)}
             />
           )}
         />
@@ -277,45 +385,76 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
   );
 }
 
-function ReviewAction({
-  action,
-  all = false,
+const CHOICE_STYLES = {
+  income: { box: 'bg-success/10', text: 'text-success', key: 'nav.income' },
+  expense: { box: 'bg-destructive/10', text: 'text-destructive', key: 'nav.expense' },
+  none: { box: 'bg-secondary', text: 'text-muted-foreground', key: 'payment_alerts.review_ignore' },
+} as const;
+
+/** Income / Expense / Ignore as soft pills: the card's (or the bulk sheet's) one decision. */
+function ReviewChoices({
   disabled,
-  onPress,
+  incomeExpenseDisabled = false,
+  all = false,
+  onAction,
 }: {
-  action: 'income' | 'expense' | 'none';
-  all?: boolean;
   disabled: boolean;
-  onPress: () => void;
+  incomeExpenseDisabled?: boolean;
+  all?: boolean;
+  onAction: (action: 'income' | 'expense' | 'none') => void;
 }) {
-  const colors = useThemeColors();
-  const Icon = action === 'income' ? ArrowDownLeft : action === 'expense' ? ArrowUpRight : X;
-  const tone = action === 'income' ? 'success' : action === 'expense' ? 'error' : 'muted';
-  const color =
-    action === 'income' ? colors.success : action === 'expense' ? colors.error : colors.textMuted;
-  const key = all
-    ? `payment_alerts.review_${action === 'none' ? 'ignore' : action}_all`
-    : action === 'none'
-      ? 'payment_alerts.review_ignore'
-      : `nav.${action}`;
   return (
-    <Button
-      variant="ghost"
-      bouncy={false}
-      size="sm"
-      className="h-auto min-h-11 flex-1 flex-wrap gap-1.5 px-1 py-2"
-      disabled={disabled}
-      onPress={onPress}
-    >
-      <Icon size={16} color={color} />
-      <Text
-        variant="caption"
-        tone={tone}
-        className={`text-[13px] font-semibold ${action === 'income' ? 'text-success' : action === 'expense' ? 'text-destructive' : 'text-muted-foreground'}`}
-      >
-        {I18n.t(key)}
-      </Text>
-    </Button>
+    <View className="flex-row gap-2">
+      {(['income', 'expense', 'none'] as const).map((action) => {
+        const style = CHOICE_STYLES[action];
+        const off = disabled || (action !== 'none' && incomeExpenseDisabled);
+        return (
+          <Button
+            key={action}
+            variant="ghost"
+            bouncy={false}
+            className={`h-11 flex-1 rounded-full px-2 ${style.box} ${off ? 'opacity-40' : ''}`}
+            disabled={off}
+            onPress={() => onAction(action)}
+          >
+            <Text variant="bodyStrong" numberOfLines={1} className={`text-[14px] ${style.text}`}>
+              {I18n.t(
+                all
+                  ? `payment_alerts.review_${action === 'none' ? 'ignore' : action}_all`
+                  : style.key,
+              )}
+            </Text>
+          </Button>
+        );
+      })}
+    </View>
+  );
+}
+
+/** Decide every item in To review at once, from the header button. */
+function BulkReviewSheet({
+  visible,
+  title,
+  disabled,
+  onDismiss,
+  onAction,
+}: {
+  visible: boolean;
+  title: string;
+  disabled: boolean;
+  onDismiss: () => void;
+  onAction: (action: 'income' | 'expense' | 'none') => void;
+}) {
+  return (
+    <PromptSheet visible={visible} onDismiss={onDismiss}>
+      <View className="gap-4 p-5">
+        <Text variant="subheading">{title}</Text>
+        <ReviewChoices all disabled={disabled} onAction={onAction} />
+        <Button variant="ghost" onPress={onDismiss}>
+          <Text className="text-muted-foreground">{I18n.t('common.cancel')}</Text>
+        </Button>
+      </View>
+    </PromptSheet>
   );
 }
 
@@ -327,6 +466,8 @@ function NotificationReviewCard({
   onSelect,
   onEdit,
   onAction,
+  canUndo,
+  onUndo,
 }: {
   entry: NotificationScanHistoryEntry;
   selection?: NotificationReviewSelection;
@@ -335,6 +476,8 @@ function NotificationReviewCard({
   onSelect: (selection: NotificationReviewSelection) => void;
   onEdit: () => void;
   onAction: (action: 'income' | 'expense' | 'none') => void;
+  canUndo: boolean;
+  onUndo: () => void;
 }) {
   const { accounts, settings } = useApp();
   const colors = useThemeColors();
@@ -356,12 +499,9 @@ function NotificationReviewCard({
   const tone =
     entry.result === 'income' ? 'success' : entry.result === 'expense' ? 'error' : 'muted';
   return (
-    <View className="mx-auto mb-3 w-full max-w-[640px] rounded-2xl border border-border/40 bg-card">
-      <View className="gap-2 p-4">
-        <View className="flex-row items-center gap-3">
-          <View className="h-9 w-9 items-center justify-center rounded-xl bg-secondary">
-            <Bell size={17} color={colors.textMuted} />
-          </View>
+    <View className="mx-auto mb-3 w-full max-w-[640px] gap-3 rounded-2xl bg-card p-4">
+      <View className="gap-2">
+        <View className="flex-row items-start gap-3">
           <View className="flex-1">
             <Text variant="bodyStrong" numberOfLines={1}>
               {entry.sourceLabel ?? I18n.t('payment_alerts.ios_notifications_title')}
@@ -374,38 +514,56 @@ function NotificationReviewCard({
               )}
             </Text>
           </View>
-          <View
-            className={
-              pending ? 'max-w-[55%] flex-row items-center gap-1' : 'max-w-[55%] items-end'
-            }
-          >
-            {selected.amount ? (
-              <Text
-                variant={pending ? 'bodyStrong' : 'caption'}
-                tone={pending ? 'default' : tone}
-                numberOfLines={1}
-                className="shrink"
-              >
-                {money(selected.amount.amount, selected.amount.currency)}
-              </Text>
-            ) : null}
-            {pending ? (
+          {pending ? (
+            <View className="max-w-[55%] flex-row items-center">
+              {selected.amount ? (
+                <Text variant="subheading" numberOfLines={1} className="shrink">
+                  {money(selected.amount.amount, selected.amount.currency)}
+                </Text>
+              ) : null}
               <Button
                 variant="ghost"
                 size="icon"
+                className="-mr-2 -mt-1"
                 disabled={busy}
                 accessibilityLabel={I18n.t('common.edit')}
                 onPress={onEdit}
               >
-                <Pencil size={16} color={colors.textMuted} />
+                <Pencil size={15} color={colors.textMuted} />
               </Button>
-            ) : (
-              <Text variant="caption" tone={tone}>
-                {label}
-              </Text>
-            )}
-          </View>
+            </View>
+          ) : (
+            <View className="max-w-[55%] items-end">
+              {/* An ignored notification moved no money; its figures may be a code or balance. */}
+              {selected.amount && (entry.result === 'expense' || entry.result === 'income') ? (
+                <Text variant="bodyStrong" tone={tone} numberOfLines={1}>
+                  {money(selected.amount.amount, selected.amount.currency)}
+                </Text>
+              ) : null}
+              <View className="flex-row items-center gap-1">
+                {entry.ai?.applied ? <Sparkles size={12} color={colors.textMuted} /> : null}
+                <Text variant="caption" tone={tone}>
+                  {label}
+                </Text>
+                {canUndo ? (
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={I18n.t('payment_alerts.ai_undo')}
+                    disabled={busy}
+                    hitSlop={12}
+                    onPress={onUndo}
+                    className="ml-2"
+                  >
+                    <Text variant="caption" className="font-semibold text-primary">
+                      {I18n.t('payment_alerts.ai_undo')}
+                    </Text>
+                  </Pressable>
+                ) : null}
+              </View>
+            </View>
+          )}
         </View>
+        {pending && entry.ai && !entry.ai.undone ? <AiHint entry={entry} /> : null}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={I18n.t(
@@ -441,20 +599,127 @@ function NotificationReviewCard({
         ) : null}
       </View>
       {pending ? (
-        <View className="flex-row border-t border-border/40 px-2">
-          <ReviewAction
-            action="income"
-            disabled={busy || !selected.amount || !account}
-            onPress={() => onAction('income')}
-          />
-          <ReviewAction
-            action="expense"
-            disabled={busy || !selected.amount || !account}
-            onPress={() => onAction('expense')}
-          />
-          <ReviewAction action="none" disabled={busy} onPress={() => onAction('none')} />
-        </View>
+        <ReviewChoices
+          disabled={busy}
+          incomeExpenseDisabled={!selected.amount || !account}
+          onAction={onAction}
+        />
       ) : null}
+    </View>
+  );
+}
+
+/** AI's opinion on a notification it left for the user. */
+function AiHint({ entry }: { entry: NotificationScanHistoryEntry }) {
+  const colors = useThemeColors();
+  const decision = entry.ai?.decision;
+  const key =
+    decision === 'expense' || decision === 'income'
+      ? `payment_alerts.ai_hint_${decision}`
+      : 'payment_alerts.ai_hint_unsure';
+  return (
+    <View className="flex-row items-center gap-1.5">
+      <Sparkles size={13} color={colors.textMuted} />
+      <Text variant="caption" tone="muted">
+        {I18n.t(key)}
+      </Text>
+    </View>
+  );
+}
+
+/** What AI just logged or ignored, each with Undo, until the user leaves the page. */
+function DoneByAiGroup({
+  entries,
+  busy,
+  money,
+  canUndo,
+  onUndo,
+}: {
+  entries: readonly NotificationScanHistoryEntry[];
+  busy: boolean;
+  money: (amount: number, currency: string) => string;
+  canUndo: (entry: NotificationScanHistoryEntry) => boolean;
+  onUndo: (entry: NotificationScanHistoryEntry) => void;
+}) {
+  const colors = useThemeColors();
+  const [expanded, setExpanded] = useState<string | null>(null);
+  return (
+    <View className="mx-auto mb-4 w-full max-w-[640px]">
+      <View className="mb-1 flex-row items-center gap-1.5">
+        <Sparkles size={13} color={colors.primary} />
+        <Text variant="caption" tone="muted" className="font-semibold">
+          {I18n.t('payment_alerts.ai_done_title')}
+        </Text>
+      </View>
+      {entries.map((entry, index) => {
+        const ignored = entry.result === 'none';
+        const reason = entry.ai?.reason;
+        return (
+          <View
+            key={entry.id}
+            testID={`notification-ai-done-${index}`}
+            className={index > 0 ? 'border-t border-border/40' : ''}
+          >
+            <View className="min-h-12 flex-row items-center gap-3">
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t(
+                  expanded === entry.id
+                    ? 'payment_alerts.review_show_less'
+                    : 'payment_alerts.review_show_more',
+                )}
+                onPress={() => setExpanded((value) => (value === entry.id ? null : entry.id))}
+                className="flex-1 flex-row items-center gap-3 py-2"
+              >
+                <Text variant="body" numberOfLines={1} className="flex-1">
+                  {entry.sourceLabel ?? I18n.t('payment_alerts.ios_notifications_title')}
+                </Text>
+                {ignored ? (
+                  <Text variant="caption" tone="muted" numberOfLines={1} className="shrink">
+                    {reason
+                      ? `${I18n.t('payment_alerts.history_none')} · ${I18n.t(`payment_alerts.ai_reason_${reason}`)}`
+                      : I18n.t('payment_alerts.history_none')}
+                  </Text>
+                ) : (
+                  <>
+                    {entry.selectedAmount ? (
+                      <Text variant="bodyStrong" numberOfLines={1}>
+                        {money(entry.selectedAmount.amount, entry.selectedAmount.currency)}
+                      </Text>
+                    ) : null}
+                    <Text
+                      variant="caption"
+                      tone={entry.result === 'income' ? 'success' : 'error'}
+                      numberOfLines={1}
+                    >
+                      {I18n.t(entry.result === 'income' ? 'nav.income' : 'nav.expense')}
+                    </Text>
+                  </>
+                )}
+              </Pressable>
+              {canUndo(entry) ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('payment_alerts.ai_undo')}
+                  disabled={busy}
+                  hitSlop={10}
+                  onPress={() => onUndo(entry)}
+                  className="py-2 pl-2"
+                >
+                  <Text variant="caption" className="text-[13px] font-semibold text-primary">
+                    {I18n.t('payment_alerts.ai_undo')}
+                  </Text>
+                </Pressable>
+              ) : null}
+            </View>
+            {expanded === entry.id ? (
+              <Text variant="caption" tone="muted" className="pb-3">
+                {entry.text}
+              </Text>
+            ) : null}
+          </View>
+        );
+      })}
     </View>
   );
 }

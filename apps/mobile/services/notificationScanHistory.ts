@@ -5,6 +5,35 @@ import type { PaymentAlertChannel } from '~/types';
 import { isValidNotificationAmount, type NotificationAmount } from '~/utils/notificationAmounts';
 
 export type NotificationScanResult = 'pending' | 'expense' | 'income' | 'none' | 'failed';
+export type NotificationAiDecision = 'expense' | 'income' | 'ignore' | 'unsure';
+export type NotificationAiIgnoreReason =
+  | 'otp'
+  | 'promotion'
+  | 'balance'
+  | 'not_completed'
+  | 'own_transfer'
+  | 'not_money';
+const AI_DECISIONS: readonly NotificationAiDecision[] = ['expense', 'income', 'ignore', 'unsure'];
+const AI_REASONS: readonly NotificationAiIgnoreReason[] = [
+  'otp',
+  'promotion',
+  'balance',
+  'not_completed',
+  'own_transfer',
+  'not_money',
+];
+/** What AI auto-review said about a notification. Its presence means it was sent once. */
+export interface NotificationAiReview {
+  decision: NotificationAiDecision;
+  reason?: NotificationAiIgnoreReason;
+  /** AI's decision was carried out (logged or ignored) rather than left for the user. */
+  applied: boolean;
+  /** The user has seen this result on the review page; until then it is "Done by AI". */
+  seen: boolean;
+  /** The user undid AI's result; it no longer offers an opinion. */
+  undone?: boolean;
+  reviewedAt: string;
+}
 export interface NotificationScanHistoryEntry {
   id: string;
   capturedAt: string;
@@ -17,8 +46,44 @@ export interface NotificationScanHistoryEntry {
   amounts?: NotificationAmount[];
   selectedAmount?: NotificationAmount | null;
   transactionId?: string | null;
+  ai?: NotificationAiReview;
 }
 const LIMIT = 10;
+/** Unseen AI results kept past LIMIT: the newest this many, for this long. */
+const UNSEEN_AI_LIMIT = 40;
+const UNSEEN_AI_MAX_AGE_MS = 3 * 24 * 60 * 60 * 1000;
+
+function parseAi(raw: unknown): NotificationAiReview | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const row = raw as Record<string, unknown>;
+  const decision = AI_DECISIONS.find((value) => value === row.decision);
+  if (!decision || typeof row.reviewedAt !== 'string') return null;
+  const reason = AI_REASONS.find((value) => value === row.reason);
+  return {
+    decision,
+    ...(reason ? { reason } : {}),
+    applied: row.applied === true,
+    seen: row.seen !== false,
+    ...(row.undone === true ? { undone: true } : {}),
+    reviewedAt: row.reviewedAt,
+  };
+}
+
+/**
+ * An AI result still waiting in "Done by AI": kept past the history cap until
+ * seen, or until it is three days old (a user who never opens the page).
+ */
+export function isUnseenAiResult(
+  entry: NotificationScanHistoryEntry,
+  now: number = Date.now(),
+): boolean {
+  return (
+    entry.result !== 'pending' &&
+    !!entry.ai?.applied &&
+    !entry.ai.seen &&
+    now - Date.parse(entry.ai.reviewedAt) < UNSEEN_AI_MAX_AGE_MS
+  );
+}
 const keyFor = (appUserId: string) => `notification-scan-history:${appUserId}`;
 const listeners = new Map<string, Set<() => void>>();
 const generations = new Map<string, number>();
@@ -49,11 +114,21 @@ function parse(raw: string | null): NotificationScanHistoryEntry[] {
         ['pending', 'expense', 'income', 'none', 'failed'].includes(row.result),
     );
     let completed = 0;
+    let unseen = 0;
+    const now = Date.now();
     return [...new Map(valid.map((row) => [row.id, row])).values()]
       .sort(
         (a, b) => Date.parse(b.capturedAt) - Date.parse(a.capturedAt) || b.id.localeCompare(a.id),
       )
-      .filter((row) => row.result === 'pending' || completed++ < LIMIT)
+      .filter((row) => {
+        if (row.result === 'pending') return true;
+        const ai = parseAi(row.ai);
+        if (ai && isUnseenAiResult({ ...row, ai }, now) && unseen < UNSEEN_AI_LIMIT) {
+          unseen++;
+          return true;
+        }
+        return completed++ < LIMIT;
+      })
       .map((row) => ({
         id: row.id,
         capturedAt: row.capturedAt,
@@ -78,6 +153,7 @@ function parse(raw: string | null): NotificationScanHistoryEntry[] {
         ...(row.transactionId === null || typeof row.transactionId === 'string'
           ? { transactionId: row.transactionId }
           : {}),
+        ...(parseAi(row.ai) ? { ai: parseAi(row.ai) as NotificationAiReview } : {}),
       }));
   } catch {
     return [];
@@ -92,6 +168,8 @@ export function recordNotificationScan(
   appUserId: string,
   entry: NotificationScanHistoryEntry,
   generation = getNotificationScanHistoryGeneration(appUserId),
+  /** Undo only: put a finished review back to pending on purpose. */
+  reopen = false,
 ): Promise<void> {
   return serialize(async () => {
     if (generation !== getNotificationScanHistoryGeneration(appUserId)) return;
@@ -99,6 +177,7 @@ export function recordNotificationScan(
     if (generation !== getNotificationScanHistoryGeneration(appUserId)) return;
     // A queue retry must never reopen a review that the user already finished.
     if (
+      !reopen &&
       entry.result === 'pending' &&
       previous.some(
         (row) => row.id === entry.id && ['income', 'expense', 'none'].includes(row.result),
@@ -111,6 +190,29 @@ export function recordNotificationScan(
     listeners.get(appUserId)?.forEach((listener) => listener());
   });
 }
+/** Move "Done by AI" results to Recent once the user has seen them. */
+export function markNotificationAiResultsSeen(
+  appUserId: string,
+  ids: readonly string[],
+  generation = getNotificationScanHistoryGeneration(appUserId),
+): Promise<void> {
+  if (ids.length === 0) return Promise.resolve();
+  return serialize(async () => {
+    if (generation !== getNotificationScanHistoryGeneration(appUserId)) return;
+    const previous = parse(await AsyncStorage.getItem(keyFor(appUserId)));
+    const wanted = new Set(ids);
+    let changed = false;
+    const next = previous.map((row) => {
+      if (!wanted.has(row.id) || !row.ai || row.ai.seen) return row;
+      changed = true;
+      return { ...row, ai: { ...row.ai, seen: true } };
+    });
+    if (!changed || generation !== getNotificationScanHistoryGeneration(appUserId)) return;
+    await AsyncStorage.setItem(keyFor(appUserId), JSON.stringify(parse(JSON.stringify(next))));
+    listeners.get(appUserId)?.forEach((listener) => listener());
+  });
+}
+
 export function clearNotificationScanHistory(appUserId: string): Promise<void> {
   // Cancel in-flight scans immediately, before the queued storage deletion.
   generations.set(appUserId, getNotificationScanHistoryGeneration(appUserId) + 1);

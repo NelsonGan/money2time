@@ -31,6 +31,12 @@ export const PRO_LIMITS = {
    * surfaces in the limit-reached alert if a Pro user actually hits it.
    */
   PRO_MAX_RECEIPT_SCANS: 500,
+  /**
+   * Free users can have AI auto-review this many notifications in total —
+   * lifetime (server-enforced, NOTIFICATION_FREE_LIMIT in the Worker). Pro is
+   * advertised as unlimited; the Worker keeps a monthly fair-use cap.
+   */
+  FREE_MAX_NOTIFICATION_AI_REVIEWS: 40,
   /** Free users can have this many unsettled split bills at once (counted per transaction). */
   FREE_MAX_UNSETTLED_SPLIT_BILLS: 3,
   /**

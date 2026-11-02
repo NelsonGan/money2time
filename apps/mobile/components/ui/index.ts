@@ -24,6 +24,7 @@ export { SelectField } from './select';
 export { SelectionFilterField } from './SelectionFilterField';
 export {
   FormSwitchRow,
+  HeaderIconButton,
   SETTINGS_FORM_BOTTOM_PADDING,
   SETTINGS_HORIZONTAL_PADDING,
   SETTINGS_LIST_BOTTOM_PADDING,
