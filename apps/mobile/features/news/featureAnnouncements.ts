@@ -64,7 +64,10 @@ export interface FeatureAnnouncementPage {
     | 'bottomBar'
     | 'cloudSync'
     | 'ledgers'
-    | 'sharedLedgers';
+    | 'sharedLedgers'
+    | 'autoReview'
+    | 'insightsRedesign'
+    | 'instalmentPlans';
   /**
    * Optional call-to-action for this page. On the last page it replaces the
    * primary button; on earlier pages it sits above the Back/Next row so the
@@ -91,7 +94,10 @@ export interface FeatureAnnouncementPage {
     | 'openWebDashboard'
     | 'openBottomBar'
     | 'openCloudSync'
-    | 'openLedgers';
+    | 'openLedgers'
+    | 'openNotificationReview'
+    | 'openInsights'
+    | 'openInstalments';
   /** Mark sponsored or promotional content clearly in the announcement panel. */
   badge?: 'ad';
   /**
@@ -152,6 +158,15 @@ export function announcementPageBody(
   if (announcement.i18nKey === 'pro_trial_accounts' && page.key === 'accounts') {
     return I18n.t(key, { count: PRO_LIMITS.FREE_MAX_ACCOUNTS });
   }
+  if (announcement.i18nKey === 'auto_review_insights_instalments') {
+    // Free-plan limits come from PRO_LIMITS, never from the copy.
+    if (page.key === 'autoReview') {
+      return I18n.t(key, { count: PRO_LIMITS.FREE_MAX_NOTIFICATION_AI_REVIEWS });
+    }
+    if (page.key === 'instalments') {
+      return I18n.t(key, { count: PRO_LIMITS.FREE_MAX_INSTALMENT_PLANS });
+    }
+  }
   return I18n.t(key);
 }
 
@@ -175,6 +190,25 @@ export function announcementPagesForPlatform(
   platformOS: string,
 ): FeatureAnnouncementPage[] {
   return announcement.pages.filter((page) => !page.platform || page.platform === platformOS);
+}
+
+/** Where the Insights button lands: Trends is Pro, so a free user opens Breakdown. */
+export function insightsCtaFocus(isPro: boolean): 'expense_trend' | 'expense_breakdown' {
+  return isPro ? 'expense_trend' : 'expense_breakdown';
+}
+
+/**
+ * Where the Auto-review button goes: the review page, whose card holds the
+ * switch, once notification logging works; otherwise its setup in Automation,
+ * since switching Auto-review on with nothing captured does nothing.
+ */
+export function notificationReviewCtaTarget(state: {
+  /** This build has the review service (the card is hidden without it). */
+  reviewAvailable: boolean;
+  /** Android's switch is on, or notifications have been captured on either platform. */
+  loggingSetUp: boolean;
+}): 'review' | 'setup' {
+  return state.reviewAvailable && state.loggingSetUp ? 'review' : 'setup';
 }
 
 /** Localized label for a page call-to-action button. */
@@ -220,6 +254,12 @@ export function announcementCtaLabel(cta: NonNullable<FeatureAnnouncementPage['c
       return I18n.t('news.cta.open_cloud_sync');
     case 'openLedgers':
       return I18n.t('ledgers.manage');
+    case 'openNotificationReview':
+      return I18n.t('news.cta.open_notification_review');
+    case 'openInsights':
+      return I18n.t('news.cta.open_insights');
+    case 'openInstalments':
+      return I18n.t('news.cta.open_instalments');
     case 'openShareEarn':
     default:
       return I18n.t('news.cta.open_share_earn');

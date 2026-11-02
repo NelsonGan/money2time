@@ -163,6 +163,21 @@ const fil = {
     reset_action: 'Burahin at palitan',
   },
   news: {
+    auto_review_insights_instalments: {
+      title: 'Auto-review at iba pa',
+      autoReview: {
+        title: 'Mga notification na kusang nag-aayos',
+        body: 'Kapag naka-on ang notification logging sa Settings > Automation, i-on ang Auto-review. Itinatala ang mga bayad bilang gastos, binabalewala ang mga code at promo, at naghihintay sa iyo ang hindi malinaw. Puwedeng i-undo ang anumang resulta. May %{count} review ang libreng plan.',
+      },
+      insights: {
+        title: 'Bagong disenyo ng Insights',
+        body: 'Pinagsasama na ng Breakdown at Mga Trend ang kani-kanilang chart sa iisang pahina, may mga tab: ipinapakita ng Breakdown kung saan napunta ang pera mo, at ng Mga Trend kung paano ito nagbabago bawat buwan. I-drag sa chart para makita ang anumang buwan laban sa average mo, o paghambingin ang dalawang kategorya. Bahagi ng Pro ang Mga Trend.',
+      },
+      instalments: {
+        title: 'Magbayad nang hulugan',
+        body: 'Hinuhulugan mo ba ang isang bagay? Idagdag ito bilang gastos at i-tap ang Hulugan para hatiin sa mga bayad. Itinatala ang bawat isa sa takdang petsa nito, at ipinapakita ng plan ang natitira, may Bayaran ngayon at Bayaran lahat. May %{count} plan nang sabay ang libreng plan.',
+      },
+    },
     cloud_sync_ledgers: {
       title: 'Maraming ledger',
       ledgers: {
@@ -422,6 +437,9 @@ const fil = {
       open_pro_paywall: 'Tingnan ang mga Pro plan',
       open_cloud_sync: 'I-on ang Cloud Sync',
       open_bottom_bar: 'I-edit ang bottom bar',
+      open_notification_review: 'I-on ang Auto-review',
+      open_insights: 'Buksan ang Insights',
+      open_instalments: 'Tingnan ang hulugan',
       open_share_earn: 'Kunin ang Pro nang libre',
       open_quick_entry_settings: 'Buksan ang Quick Entry settings',
       open_auto_log: 'I-set up ang mga automation',

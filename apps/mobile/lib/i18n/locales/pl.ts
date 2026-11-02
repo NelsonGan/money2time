@@ -163,6 +163,21 @@ const pl = {
     reset_action: 'Usuń i zmień',
   },
   news: {
+    auto_review_insights_instalments: {
+      title: 'Autosprawdzanie i nie tylko',
+      autoReview: {
+        title: 'Powiadomienia, które same się porządkują',
+        body: 'Gdy zapisywanie powiadomień jest włączone w Ustawienia > Automatyzacja, włącz Autosprawdzanie. Płatności są zapisywane jako wydatki, kody i promocje pomijane, a wszystko niejasne czeka na Ciebie. Każdy wynik można cofnąć. Plan darmowy obejmuje %{count} sprawdzeń.',
+      },
+      insights: {
+        title: 'Analizy w nowej odsłonie',
+        body: 'Podział i Trendy zbierają teraz swoje wykresy na jednej stronie z kartami: Podział pokazuje, na co poszły pieniądze, a Trendy, jak zmieniają się z miesiąca na miesiąc. Przesuń palcem po wykresie, by porównać dowolny miesiąc ze średnią, albo porównaj dwie kategorie. Trendy są częścią Pro.',
+      },
+      instalments: {
+        title: 'Płać w ratach',
+        body: 'Spłacasz coś w częściach? Dodaj to jako wydatek i stuknij Raty, by podzielić to na płatności. Każda rata zapisuje się w dniu płatności, a plan pokazuje, ile zostało, z opcjami Zapłać teraz i Spłać. Plan darmowy obejmuje %{count} plany naraz.',
+      },
+    },
     cloud_sync_ledgers: {
       title: 'Wiele ksiąg',
       ledgers: {
@@ -422,6 +437,9 @@ const pl = {
       open_pro_paywall: 'Zobacz plany Pro',
       open_cloud_sync: 'Włącz Cloud Sync',
       open_bottom_bar: 'Edytuj pasek',
+      open_notification_review: 'Włącz Autosprawdzanie',
+      open_insights: 'Otwórz Analizy',
+      open_instalments: 'Zobacz raty',
       open_share_earn: 'Zdobądź Pro za darmo',
       open_quick_entry_settings: 'Otwórz ustawienia Szybkiego dodawania',
       open_auto_log: 'Skonfiguruj automatyzacje',

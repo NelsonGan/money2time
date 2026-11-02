@@ -416,6 +416,8 @@ export function SettingsStack({
               onOpenBottomBar={() => props.navigation.navigate('BottomBar')}
               onOpenCloudSync={() => props.navigation.navigate('CloudSync')}
               onOpenLedgers={() => props.navigation.navigate('Ledgers')}
+              onOpenInsights={() => requestOpenTab('insights')}
+              onOpenInstalments={onOpenInstalments}
             />
           );
         }}

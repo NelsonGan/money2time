@@ -163,6 +163,21 @@ const pt = {
     reset_action: 'Excluir e trocar',
   },
   news: {
+    auto_review_insights_instalments: {
+      title: 'Revisão automática e mais',
+      autoReview: {
+        title: 'Notificações que se organizam sozinhas',
+        body: 'Com o registro de notificações ativo em Configurações > Automação, ative a Revisão automática. Os pagamentos são registrados como despesas, códigos e promoções são ignorados, e o que não estiver claro espera por você. Dá para desfazer qualquer resultado. O plano gratuito inclui %{count} revisões.',
+      },
+      insights: {
+        title: 'Análises, redesenhadas',
+        body: 'Detalhamento e Tendências agora reúnem cada um seus gráficos em uma só página, com abas: Detalhamento mostra para onde foi seu dinheiro, e Tendências como ele muda mês a mês. Deslize pelo gráfico para ver qualquer mês contra sua média, ou compare duas categorias. Tendências faz parte do Pro.',
+      },
+      instalments: {
+        title: 'Pague parcelado',
+        body: 'Pagando algo em partes? Adicione como despesa e toque em Parcelar para dividir em pagamentos. Cada parcela é registrada no vencimento, e o plano mostra o que falta, com Pagar agora e Quitar. O plano gratuito inclui %{count} planos ao mesmo tempo.',
+      },
+    },
     cloud_sync_ledgers: {
       title: 'Vários livros',
       ledgers: {
@@ -422,6 +437,9 @@ const pt = {
       open_pro_paywall: 'Ver planos Pro',
       open_cloud_sync: 'Ativar o Cloud Sync',
       open_bottom_bar: 'Editar a barra',
+      open_notification_review: 'Ativar Revisão automática',
+      open_insights: 'Abrir Análises',
+      open_instalments: 'Ver parcelamentos',
       open_share_earn: 'Ganhe o Pro grátis',
       open_quick_entry_settings: 'Abrir configurações de Lançamento rápido',
       open_auto_log: 'Configurar automações',

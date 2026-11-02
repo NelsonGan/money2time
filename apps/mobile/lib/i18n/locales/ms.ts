@@ -163,6 +163,21 @@ const ms = {
     reset_action: 'Padam & tukar',
   },
   news: {
+    auto_review_insights_instalments: {
+      title: 'Semakan automatik dan banyak lagi',
+      autoReview: {
+        title: 'Pemberitahuan yang mengasingkan sendiri',
+        body: 'Selepas pengelogan pemberitahuan dihidupkan dalam Tetapan > Automasi, hidupkan Semakan automatik. Pembayaran direkod sebagai perbelanjaan, kod dan promosi diabaikan, dan apa yang tidak jelas menunggu anda. Mana-mana keputusan boleh dibuat asal. Pelan percuma termasuk %{count} semakan.',
+      },
+      insights: {
+        title: 'Wawasan, reka bentuk baharu',
+        body: 'Pecahan dan Trend kini masing-masing menghimpunkan cartanya dalam satu halaman, dengan tab: Pecahan menunjukkan ke mana wang anda pergi, dan Trend perubahannya dari bulan ke bulan. Leret pada carta untuk melihat mana-mana bulan berbanding purata anda, atau bandingkan dua kategori. Trend ialah sebahagian daripada Pro.',
+      },
+      instalments: {
+        title: 'Bayar secara ansuran',
+        body: 'Membayar sesuatu secara berperingkat? Tambahkannya sebagai perbelanjaan dan ketik Ansuran untuk membahagikannya kepada beberapa bayaran. Setiap bayaran direkod pada tarikh matangnya, dan pelan menunjukkan baki, dengan Bayar sekarang dan Langsaikan. Pelan percuma termasuk %{count} pelan pada satu masa.',
+      },
+    },
     cloud_sync_ledgers: {
       title: 'Berbilang buku',
       ledgers: {
@@ -422,6 +437,9 @@ const ms = {
       open_pro_paywall: 'Lihat pelan Pro',
       open_cloud_sync: 'Hidupkan Cloud Sync',
       open_bottom_bar: 'Edit bar bawah',
+      open_notification_review: 'Hidupkan Semakan automatik',
+      open_insights: 'Buka Wawasan',
+      open_instalments: 'Lihat ansuran',
       open_share_earn: 'Dapatkan Pro percuma',
       open_quick_entry_settings: 'Buka tetapan Kemasukan Pantas',
       open_auto_log: 'Sediakan automasi',

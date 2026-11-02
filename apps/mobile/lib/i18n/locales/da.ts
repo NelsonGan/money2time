@@ -163,6 +163,21 @@ const da = {
     reset_action: 'Slet og skift',
   },
   news: {
+    auto_review_insights_instalments: {
+      title: 'Autogennemgang og mere',
+      autoReview: {
+        title: 'Notifikationer, der sorterer sig selv',
+        body: 'Når notifikationsregistrering er slået til under Indstillinger > Automatisering, kan du slå Autogennemgang til. Betalinger registreres som udgifter, koder og tilbud ignoreres, og alt uklart venter på dig. Fortryd ethvert resultat. Gratisplanen indeholder %{count} gennemgange.',
+      },
+      insights: {
+        title: 'Indsigt i nyt design',
+        body: 'Fordeling og Tendenser samler nu hver deres grafer på én side med faner: Fordeling viser, hvor pengene gik hen, og Tendenser, hvordan de udvikler sig fra måned til måned. Træk langs en graf for at se en måned mod dit gennemsnit, eller sammenlign to kategorier. Tendenser er en del af Pro.',
+      },
+      instalments: {
+        title: 'Betal i afdrag',
+        body: 'Betaler du noget af i dele? Tilføj det som en udgift, og tryk på Afdrag for at dele det op i betalinger. Hver betaling registreres på forfaldsdatoen, og planen viser, hvad der mangler, med Betal nu og Indfri. Gratisplanen indeholder %{count} planer ad gangen.',
+      },
+    },
     cloud_sync_ledgers: {
       title: 'Flere regnskaber',
       ledgers: {
@@ -422,6 +437,9 @@ const da = {
       open_pro_paywall: 'Se Pro-planer',
       open_cloud_sync: 'Slå Cloud Sync til',
       open_bottom_bar: 'Rediger bundbjælken',
+      open_notification_review: 'Slå Autogennemgang til',
+      open_insights: 'Åbn Indsigt',
+      open_instalments: 'Se afdrag',
       open_share_earn: 'Få Pro gratis',
       open_quick_entry_settings: 'Åbn indstillinger for Hurtig registrering',
       open_auto_log: 'Opsæt automatiseringer',

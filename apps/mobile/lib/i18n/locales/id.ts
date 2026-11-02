@@ -163,6 +163,21 @@ const id = {
     reset_action: 'Hapus & ganti',
   },
   news: {
+    auto_review_insights_instalments: {
+      title: 'Tinjauan otomatis dan lainnya',
+      autoReview: {
+        title: 'Notifikasi yang memilah sendiri',
+        body: 'Setelah pencatatan notifikasi aktif di Pengaturan > Otomatisasi, nyalakan Tinjauan otomatis. Pembayaran dicatat sebagai pengeluaran, kode dan promo diabaikan, dan yang belum jelas menunggu Anda. Setiap hasil bisa dibatalkan. Paket gratis mencakup %{count} tinjauan.',
+      },
+      insights: {
+        title: 'Wawasan, desain baru',
+        body: 'Rincian dan Tren kini masing-masing mengumpulkan grafiknya di satu halaman, dengan tab: Rincian menunjukkan ke mana uang Anda pergi, dan Tren perubahannya dari bulan ke bulan. Geser di grafik untuk melihat bulan mana pun dibanding rata-rata, atau bandingkan dua kategori. Tren adalah bagian dari Pro.',
+      },
+      instalments: {
+        title: 'Bayar dengan cicilan',
+        body: 'Membayar sesuatu secara bertahap? Tambahkan sebagai pengeluaran lalu ketuk Cicilan untuk membaginya menjadi beberapa pembayaran. Setiap cicilan dicatat pada tanggal jatuh temponya, dan rencana menunjukkan sisanya, dengan Bayar sekarang dan Lunasi. Paket gratis mencakup %{count} rencana sekaligus.',
+      },
+    },
     cloud_sync_ledgers: {
       title: 'Banyak buku',
       ledgers: {
@@ -422,6 +437,9 @@ const id = {
       open_pro_paywall: 'Lihat paket Pro',
       open_cloud_sync: 'Aktifkan Cloud Sync',
       open_bottom_bar: 'Ubah bilah bawah',
+      open_notification_review: 'Nyalakan Tinjauan otomatis',
+      open_insights: 'Buka Wawasan',
+      open_instalments: 'Lihat cicilan',
       open_share_earn: 'Dapatkan Pro gratis',
       open_quick_entry_settings: 'Buka pengaturan Entri Cepat',
       open_auto_log: 'Atur otomatisasi',

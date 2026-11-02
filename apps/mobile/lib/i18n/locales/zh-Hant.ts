@@ -136,6 +136,21 @@ const zhHant = {
     },
   },
   news: {
+    auto_review_insights_instalments: {
+      title: '自動確認等新功能',
+      autoReview: {
+        title: '會自己分類的通知',
+        body: '在「設定 > 自動化」開啟通知記帳後，再開啟自動確認。付款會記為支出，驗證碼和促銷會被略過，不確定的則留給你決定。任何結果都能復原。免費方案可確認 %{count} 則。',
+      },
+      insights: {
+        title: '洞察全新改版',
+        body: '明細與趨勢現在各自把圖表整合成一頁，用分頁切換：明細告訴你錢花到哪裡，趨勢顯示每月的變化。沿著圖表滑動，就能把任一個月和平均相比，或比較兩個類別。趨勢為 Pro 功能。',
+      },
+      instalments: {
+        title: '分期付款',
+        body: '正在分期付款嗎？把它新增為支出，再點分期拆成多筆付款。每期會在到期日記帳，方案頁會顯示剩餘金額，還能立即還款或還清。免費方案可同時使用 %{count} 個方案。',
+      },
+    },
     cloud_sync_ledgers: {
       title: '多個帳本',
       ledgers: {
@@ -395,6 +410,9 @@ const zhHant = {
       open_pro_paywall: '檢視 Pro 套餐',
       open_cloud_sync: '開啟 Cloud Sync',
       open_bottom_bar: '編輯底部列',
+      open_notification_review: '開啟自動確認',
+      open_insights: '開啟洞察',
+      open_instalments: '查看分期',
       open_share_earn: '免費獲取 Pro',
       open_quick_entry_settings: '開啟快速記帳設定',
       open_auto_log: '設定自動化',
