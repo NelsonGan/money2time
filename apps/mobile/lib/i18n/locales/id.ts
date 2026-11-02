@@ -3090,6 +3090,10 @@ const id = {
     renew_pro: 'Perpanjang Pro',
   },
   shared_ledgers: {
+    member_fallback: 'Anggota',
+    belongs_to_title: 'Milik',
+    belongs_to_you: '{{name}} (Anda)',
+    belongs_to_added_by: 'Ditambahkan oleh {{name}}',
     title: 'Berbagi',
     share_toggle: 'Bagikan buku ini',
     share_toggle_caption: 'Undang hingga {{max}} orang. Mereka tidak perlu Pro.',

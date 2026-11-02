@@ -5,10 +5,8 @@ import {
   ArrowRight,
   Calendar,
   Camera,
-  Check,
   ChevronDown,
   ChevronLeft,
-  ChevronRight,
   ChevronUp,
   Clock,
   Coins,
@@ -66,7 +64,6 @@ import {
   CategoryGrid,
   CategoryPickerSheet,
   CurrencyPickerSheet,
-  InfoTooltipButton,
   SegmentedToggle,
   SubscriptionLogo,
   Text,
@@ -88,6 +85,8 @@ import {
   canSplitInstalments,
   isRegularAmountValid,
 } from '~/features/instalments/lib/instalmentPlan';
+import { selfMemberIdFor } from '~/features/sharedLedgers/lib/entryStamp';
+import { useOpenLedgerPeople } from '~/features/sharedLedgers/lib/ledgerPeople';
 import {
   NumpadPanel,
   ReceiptViewerModal,
@@ -100,6 +99,7 @@ import {
   evaluateExpression,
   formatMoney,
 } from '~/features/transactions/components/editor/calculatorEngine';
+import { TransactionOptionsCard } from '~/features/transactions/components/editor/TransactionOptionsCard';
 import { resolveNoteChange } from '~/features/transactions/lib/noteSuggestionPick';
 import { resolveSplitSaveRoute } from '~/features/transactions/lib/splitSaveRoute';
 import { offscreenPageLimitFor, usePagerTabSync } from '~/hooks/usePagerTabSync';
@@ -107,6 +107,7 @@ import { usePressScale } from '~/hooks/usePressScale';
 import { useProGate } from '~/hooks/useProGate';
 import { useStableSafeAreaInsets } from '~/hooks/useStableSafeAreaInsets';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { getActiveLedgerId } from '~/lib/db/ledgerScope';
 import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import {
@@ -378,6 +379,10 @@ interface TransactionEditorInitialValues {
   reimbursedAt: string | null;
   /** Whether a transfer is counted as spending (a loan repayment, say). */
   countsAsExpense: boolean;
+  /** Shared ledgers: who added the entry (null = the ledger's owner). */
+  createdBy: string | null;
+  /** Shared ledgers: whose entry it is (null = the ledger's owner). */
+  memberId: string | null;
 }
 
 interface TransactionEditorScreenProps {
@@ -815,6 +820,28 @@ export function TransactionEditorScreen({
   // Swaps the numpad for the options panel, the same slot the receipt
   // viewfinder takes so the amount and note stay visible above it.
   const [optionsOpen, setOptionsOpen] = useState(false);
+  // The options panel scrolls when its rows outgrow the keypad's slot. The
+  // details box's measured position (the keyboard lift) assumes it is at the
+  // top, so editing details puts it back there.
+  const optionsScrollRef = useRef<ScrollViewInstance>(null);
+  // Shared ledgers: whose entry this is (README: Shared ledgers > Who added
+  // it). A new entry starts as the person adding it; Belongs to in the options
+  // panel gives it to someone else in the ledger.
+  const ledgerPeople = useOpenLedgerPeople();
+  // An entry that has a person keeps it; one that does not yet (a new entry,
+  // or a payment alert reviewed in the edit layout) is this phone's, worked
+  // out on every render and again at the insert, so a session that loads after
+  // the editor opened still counts. Only a pick is sent with the save.
+  const [pickedMemberId, setPickedMemberId] = useState<string | null | undefined>(undefined);
+  const defaultMemberId =
+    initialValues?.memberId !== undefined
+      ? initialValues.memberId
+      : selfMemberIdFor(getActiveLedgerId());
+  const memberId = pickedMemberId !== undefined ? pickedMemberId : defaultMemberId;
+  const handleSelectMember = useCallback((next: string | null) => {
+    void triggerHaptic('selection');
+    setPickedMemberId(next);
+  }, []);
   // The receipt that was persisted when the editor opened. Used so editing the
   // attachment cleans up orphaned files (the prior one on disk) without deleting
   // the originally-saved file until the change is actually committed via Save.
@@ -1437,6 +1464,9 @@ export function TransactionEditorScreen({
   useEffect(() => {
     if (!optionsOpen) setDetailsEditing(false);
   }, [optionsOpen]);
+  useEffect(() => {
+    if (detailsEditing) optionsScrollRef.current?.scrollTo({ y: 0, animated: false });
+  }, [detailsEditing]);
   // Focus once the expanded field has mounted. `autoFocus` on an input that
   // mounts conditionally does not always raise the Android keyboard.
   useEffect(() => {
@@ -2251,6 +2281,13 @@ export function TransactionEditorScreen({
         preparedSubmitPayload = submitPayload;
       }
 
+      // Whose entry it is goes with the save only when someone was picked;
+      // otherwise a new entry is stamped at the insert and an edit leaves it.
+      if (ledgerPeople && submitPayload && pickedMemberId !== undefined) {
+        submitPayload = { ...submitPayload, memberId: pickedMemberId };
+        preparedSubmitPayload = submitPayload;
+      }
+
       // Recurring mode applies to expense/income AND transfer rules. Balance
       // adjustments are never offered as a recurring type, so skip them. When a
       // rule is being saved we hand off to onSubmitRecurring and clear the
@@ -2385,6 +2422,9 @@ export function TransactionEditorScreen({
       perfInteraction(
         mode === 'edit' ? 'editor_update' : bulk ? 'editor_bulk_save' : 'editor_save',
       );
+      if (ledgerPeople && pickedMemberId !== undefined && pickedMemberId !== defaultMemberId) {
+        void trackEvent(AnalyticsEvents.SHARED_LEDGER_ENTRY_ASSIGNED, { mode });
+      }
       // Mark the current receipt as committed so the unmount cleanup keeps it.
       receiptCommittedRef.current = true;
 
@@ -4693,49 +4733,54 @@ export function TransactionEditorScreen({
                 <View style={{ height: numpadBodyHeight }}>
                   {optionsOpen ? (
                     /* Options take the keypad's place, not the whole drawer:
-                       Save stays put underneath, so ticking a box and saving is
-                       two taps rather than three. Plain rows in that space, no
-                       card and no heading, so more options can just be added
-                       below this one. The negative margin claws back the
-                       COLLAPSE_PEEK the drawer reserves above the keypad, which
-                       is more air than a list of ticks needs. */
-                    <View className="flex-1 px-5" style={{ marginTop: -OPTIONS_PANEL_PULL_UP }}>
-                      {/* The longer note first, as a soft note area previewing
-                          two lines of what was written. Tapping it expands the
-                          box in place for typing: the drawer then rides the
-                          keyboard so the box sits right on it, and the rest of
-                          the panel steps aside until Done. */}
-                      <View className="mb-1.5 flex-row items-center justify-between px-1">
-                        <Text variant="caption" tone="muted" className="uppercase">
-                          {I18n.t('transactions.editor.details.title')}
-                        </Text>
-                        {detailsEditing ? (
-                          <Pressable
-                            onPress={() => {
-                              void triggerHaptic('selection');
-                              detailsInputRef.current?.blur();
-                            }}
-                            accessibilityRole="button"
-                            hitSlop={8}
-                            className="active:opacity-70"
-                          >
-                            <Text variant="caption" tone="primary" className="font-semibold">
-                              {I18n.t('common.done')}
+                       Save stays put underneath, so switching an option on and
+                       saving is two taps rather than three. The negative margin
+                       claws back the COLLAPSE_PEEK the drawer reserves above
+                       the keypad, which is more air than the card needs. It
+                       scrolls only on a phone too short for every row. */
+                    <ScrollView
+                      ref={optionsScrollRef}
+                      className="flex-1"
+                      style={{ marginTop: -OPTIONS_PANEL_PULL_UP }}
+                      contentContainerClassName="px-5 pb-2"
+                      keyboardShouldPersistTaps="handled"
+                      scrollEnabled={!detailsEditing}
+                      showsVerticalScrollIndicator={false}
+                      alwaysBounceVertical={false}
+                    >
+                      {detailsEditing ? (
+                        <>
+                          {/* Typing the longer note: the box expands in place,
+                              the drawer rides the keyboard so the box sits right
+                              on it, and the other options step aside until Done. */}
+                          <View className="mb-1.5 flex-row items-center justify-between px-1">
+                            <Text variant="caption" tone="muted" className="uppercase">
+                              {I18n.t('transactions.editor.details.title')}
                             </Text>
-                          </Pressable>
-                        ) : null}
-                      </View>
-                      <View
-                        onLayout={(event) => {
-                          const { y, height } = event.nativeEvent.layout;
-                          const bottom = y + height;
-                          setDetailsBoxBottom((prev) =>
-                            Math.abs(prev - bottom) < 1 ? prev : bottom,
-                          );
-                        }}
-                      >
-                        {detailsEditing ? (
-                          <View className="rounded-2xl border border-primary/30 bg-secondary/40 px-4 py-3">
+                            <Pressable
+                              onPress={() => {
+                                void triggerHaptic('selection');
+                                detailsInputRef.current?.blur();
+                              }}
+                              accessibilityRole="button"
+                              hitSlop={8}
+                              className="active:opacity-70"
+                            >
+                              <Text variant="caption" tone="primary" className="font-semibold">
+                                {I18n.t('common.done')}
+                              </Text>
+                            </Pressable>
+                          </View>
+                          <View
+                            onLayout={(event) => {
+                              const { y, height } = event.nativeEvent.layout;
+                              const bottom = y + height;
+                              setDetailsBoxBottom((prev) =>
+                                Math.abs(prev - bottom) < 1 ? prev : bottom,
+                              );
+                            }}
+                            className="rounded-2xl border border-primary/30 bg-secondary/40 px-4 py-3"
+                          >
                             <TextInput
                               ref={detailsInputRef}
                               value={details}
@@ -4770,132 +4815,26 @@ export function TransactionEditorScreen({
                               </Text>
                             ) : null}
                           </View>
-                        ) : (
-                          <Pressable
-                            onPress={() => {
-                              void triggerHaptic('selection');
-                              setDetailsEditing(true);
-                            }}
-                            accessibilityRole="button"
-                            accessibilityLabel={I18n.t('transactions.editor.details.title')}
-                            accessibilityValue={hasDetails ? { text: details.trim() } : undefined}
-                            className="min-h-[68px] flex-row gap-3 rounded-2xl border border-transparent bg-secondary/40 px-4 py-3 active:opacity-70"
-                          >
-                            <Text
-                              variant="body"
-                              tone={hasDetails ? 'default' : 'muted'}
-                              numberOfLines={2}
-                              className="flex-1"
-                            >
-                              {hasDetails
-                                ? details.trim()
-                                : I18n.t('transactions.editor.details.empty')}
-                            </Text>
-                            <Pencil size={15} color={themeColors.textMuted} />
-                          </Pressable>
-                        )}
-                      </View>
-                      {!detailsEditing && (type === 'expense' || type === 'transfer') ? (
-                        <View className="my-3 h-[1px] bg-border/30" />
-                      ) : null}
-                      {!detailsEditing && type === 'expense' ? (
-                        <View
-                          className="flex-row items-center gap-2 pb-2.5"
-                          style={{ opacity: isReimbursed ? 0.6 : 1 }}
-                        >
-                          {/* The tooltip is its own Pressable beside the row, not
-                              inside it, so tapping ⓘ explains rather than ticks. */}
-                          <Pressable
-                            onPress={handleToggleReimbursable}
-                            disabled={isReimbursed}
-                            accessibilityRole="checkbox"
-                            accessibilityState={{ checked: reimbursable, disabled: isReimbursed }}
-                            accessibilityLabel={I18n.t('reimbursements.editor_label')}
-                            className="shrink flex-row items-center gap-3 active:opacity-70"
-                          >
-                            <View
-                              className={cn(
-                                'h-6 w-6 items-center justify-center rounded-md border-2',
-                                reimbursable ? 'border-primary bg-primary' : 'border-border',
-                              )}
-                            >
-                              {reimbursable ? <Check size={15} color="#fff" /> : null}
-                            </View>
-                            <Text variant="body" numberOfLines={1} className="shrink">
-                              {isReimbursed
-                                ? I18n.t('reimbursements.editor_reimbursed_label')
-                                : I18n.t('reimbursements.editor_label')}
-                            </Text>
-                          </Pressable>
-                          <InfoTooltipButton
-                            title={I18n.t('reimbursements.editor_label')}
-                            infoTooltip={I18n.t('reimbursements.editor_tooltip')}
-                          />
-                        </View>
-                      ) : null}
-                      {!detailsEditing && type === 'transfer' ? (
-                        <>
-                          <View className="flex-row items-center gap-2 pb-2.5">
-                            <Pressable
-                              onPress={handleToggleTransferExpense}
-                              accessibilityRole="checkbox"
-                              accessibilityState={{ checked: transferCountsAsExpense }}
-                              accessibilityLabel={I18n.t(
-                                'transactions.editor.transfer_expense_label',
-                              )}
-                              className="shrink flex-row items-center gap-3 active:opacity-70"
-                            >
-                              <View
-                                className={cn(
-                                  'h-6 w-6 items-center justify-center rounded-md border-2',
-                                  transferCountsAsExpense
-                                    ? 'border-primary bg-primary'
-                                    : 'border-border',
-                                )}
-                              >
-                                {transferCountsAsExpense ? <Check size={15} color="#fff" /> : null}
-                              </View>
-                              <Text variant="body" numberOfLines={1} className="shrink">
-                                {I18n.t('transactions.editor.transfer_expense_label')}
-                              </Text>
-                            </Pressable>
-                            <InfoTooltipButton
-                              title={I18n.t('transactions.editor.transfer_expense_label')}
-                              infoTooltip={I18n.t('transactions.editor.transfer_expense_tooltip')}
-                            />
-                          </View>
-                          {transferCountsAsExpense ? (
-                            /* The category the counted transfer is filed under.
-                               A row rather than the page's category grid, since
-                               a transfer's page has no category slot to give. */
-                            <Pressable
-                              onPress={() => {
-                                void triggerHaptic('selection');
-                                setTransferCategoryPickerVisible(true);
-                              }}
-                              accessibilityRole="button"
-                              accessibilityLabel={I18n.t('transactions.editor.category')}
-                              className="flex-row items-center justify-between rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 active:opacity-70"
-                            >
-                              <View className="flex-1 flex-row items-center gap-2 pr-2">
-                                {transferCategoryPreview ? (
-                                  <CategoryEmoji icon={transferCategoryPreview.icon} size={18} />
-                                ) : null}
-                                <Text
-                                  variant="body"
-                                  tone={transferCategoryPreview ? 'default' : 'muted'}
-                                  numberOfLines={1}
-                                >
-                                  {transferCategoryPreview?.name ??
-                                    I18n.t('transactions.editor.category')}
-                                </Text>
-                              </View>
-                              <ChevronRight size={16} color={themeColors.textMuted} />
-                            </Pressable>
-                          ) : null}
                         </>
-                      ) : null}
-                    </View>
+                      ) : (
+                        <TransactionOptionsCard
+                          type={type}
+                          details={details}
+                          onEditDetails={() => setDetailsEditing(true)}
+                          people={ledgerPeople}
+                          memberId={memberId}
+                          createdBy={initialValues?.createdBy}
+                          onSelectMember={handleSelectMember}
+                          reimbursable={reimbursable}
+                          isReimbursed={isReimbursed}
+                          onToggleReimbursable={handleToggleReimbursable}
+                          countsAsExpense={transferCountsAsExpense}
+                          onToggleCountsAsExpense={handleToggleTransferExpense}
+                          category={transferCategoryPreview}
+                          onPickCategory={() => setTransferCategoryPickerVisible(true)}
+                        />
+                      )}
+                    </ScrollView>
                   ) : (
                     <NumpadPanel
                       compact

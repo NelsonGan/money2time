@@ -106,7 +106,17 @@ describe('buildDuplicateInput', () => {
       sentiment: 'happy',
       reimbursable: true,
       countsAsExpense: false,
+      memberId: null,
     });
+  });
+
+  it('keeps whose entry it is in a shared ledger, but not who added it', () => {
+    const input = buildDuplicateInput(
+      { ...makeTransaction(), createdBy: 'user-ana', memberId: 'user-mei' },
+      '2026-04-01',
+    );
+    expect(input.memberId).toBe('user-mei');
+    expect(input.createdBy).toBeUndefined();
   });
 
   it('leaves the FX snapshot to be retaken at write time', () => {

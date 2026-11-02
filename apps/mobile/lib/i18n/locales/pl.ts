@@ -3082,6 +3082,10 @@ const pl = {
     renew_pro: 'Odnów Pro',
   },
   shared_ledgers: {
+    member_fallback: 'Członek',
+    belongs_to_title: 'Należy do',
+    belongs_to_you: '{{name}} (ty)',
+    belongs_to_added_by: 'Dodane przez: {{name}}',
     title: 'Udostępnianie',
     share_toggle: 'Udostępnij tę księgę',
     share_toggle_caption: 'Zaproś do {{max}} osób. Nie potrzebują Pro.',

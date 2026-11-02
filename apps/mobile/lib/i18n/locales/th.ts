@@ -3019,6 +3019,10 @@ const th = {
     renew_pro: 'ต่ออายุ Pro',
   },
   shared_ledgers: {
+    member_fallback: 'สมาชิก',
+    belongs_to_title: 'เป็นของ',
+    belongs_to_you: '{{name}} (คุณ)',
+    belongs_to_added_by: 'เพิ่มโดย {{name}}',
     title: 'การแชร์',
     share_toggle: 'แชร์สมุดบัญชีนี้',
     share_toggle_caption: 'เชิญได้สูงสุด {{max}} คน โดยไม่ต้องมี Pro',

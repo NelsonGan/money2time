@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 
 import type { CloudUser } from './cloudSyncApi';
+import { setCachedSessionUser } from './sessionUser';
 
 const KEY = 'm2t.cloudSync.session.v1';
 
@@ -26,11 +27,13 @@ export async function loadSession(): Promise<StoredSession | null> {
   } catch {
     cached = null;
   }
+  setCachedSessionUser(cached?.user ?? null);
   return cached;
 }
 
 export async function saveSession(session: StoredSession): Promise<void> {
   cached = session;
+  setCachedSessionUser(session.user);
   await SecureStore.setItemAsync(KEY, JSON.stringify(session), {
     keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY,
   });
@@ -38,6 +41,7 @@ export async function saveSession(session: StoredSession): Promise<void> {
 
 export async function clearSession(): Promise<void> {
   cached = null;
+  setCachedSessionUser(null);
   await SecureStore.deleteItemAsync(KEY).catch(() => undefined);
 }
 

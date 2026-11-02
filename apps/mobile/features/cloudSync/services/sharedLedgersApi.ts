@@ -11,6 +11,8 @@ export interface RemoteSharedLedger {
   name: string;
   emoji: string | null;
   role: 'owner' | 'member';
+  /** The owner's account id (absent from an older Worker). */
+  ownerId?: string;
   ownerName: string;
   memberCount: number;
   /** False while nobody in it (owner or member) is Pro. */

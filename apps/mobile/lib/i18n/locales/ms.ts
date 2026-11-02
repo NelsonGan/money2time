@@ -3098,6 +3098,10 @@ const ms = {
     renew_pro: 'Perbaharui Pro',
   },
   shared_ledgers: {
+    member_fallback: 'Ahli',
+    belongs_to_title: 'Milik',
+    belongs_to_you: '{{name}} (anda)',
+    belongs_to_added_by: 'Ditambah oleh {{name}}',
     title: 'Perkongsian',
     share_toggle: 'Kongsi buku ini',
     share_toggle_caption: 'Jemput sehingga {{max}} orang. Mereka tidak perlukan Pro.',

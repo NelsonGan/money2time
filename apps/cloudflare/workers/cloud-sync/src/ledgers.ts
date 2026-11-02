@@ -79,6 +79,13 @@ interface LedgerView {
   name: string;
   emoji: string | null;
   role: Role;
+  /**
+   * The owner's account id. Entries the owner adds carry no account, so the
+   * app tells the owner's profile apart from a member's by this, never by
+   * what a profile row in the shared database claims (anyone in it can write
+   * those). Only owners and members are told it; the invite preview is not.
+   */
+  ownerId: string;
   ownerName: string;
   memberCount: number;
   /** False while nobody in it (owner or member) is Pro: nobody syncs it. */
@@ -286,6 +293,7 @@ async function view(env: Env, ledger: SharedLedgerRow, role: Role): Promise<Ledg
     name: ledger.name,
     emoji: ledger.emoji,
     role,
+    ownerId: ledger.owner_user_id,
     ownerName: displayName(owner.name, owner.email),
     memberCount: count,
     active,

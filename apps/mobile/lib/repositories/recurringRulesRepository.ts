@@ -11,6 +11,7 @@ import {
   paymentRowsForPlan,
   scheduleOfPlan,
 } from '~/features/instalments/lib/instalmentPlan';
+import { selfMemberIdFor } from '~/features/sharedLedgers/lib/entryStamp';
 import { getDb, getSQLite } from '~/lib/db/client';
 import { getActiveLedgerId, inActiveLedger } from '~/lib/db/ledgerScope';
 import { accountsTable, recurringRulesTable, transactionsTable } from '~/lib/db/schema';
@@ -67,6 +68,12 @@ export interface CreateRecurringRuleInput {
    * only; see `utils/spending.ts`.
    */
   countsAsExpense?: boolean;
+  /**
+   * Shared ledgers: the account the rule's entries belong to (null = the
+   * ledger's owner). Left out, a new rule is this phone's account when it is
+   * a member of the open ledger.
+   */
+  memberId?: string | null;
   /** Instalment plans only (see `CreateInstalmentPlanInput`). */
   instalmentCount?: number | null;
   instalmentTotal?: number | null;
@@ -100,6 +107,11 @@ export interface CreateInstalmentPlanInput {
     sentiment?: TransactionSentiment;
     reimbursable?: boolean;
   };
+  /**
+   * Shared ledgers: whose plan it is (the editor's Belongs to). Left out, the
+   * plan is this phone's account when it is a member of the open ledger.
+   */
+  memberId?: string | null;
 }
 
 export interface CreatedInstalmentPlan {
@@ -159,6 +171,9 @@ function categorizedRunInput(
     accountId: rule.accountId,
     categoryId: rule.categoryId,
     note: rule.note,
+    // The rule's person, the same on every phone that runs it.
+    createdBy: rule.memberId,
+    memberId: rule.memberId,
   };
 }
 
@@ -234,10 +249,11 @@ class RecurringRulesRepository {
     const db = getDb();
     const now = nowIso();
     const id = newId();
+    const ledgerId = getActiveLedgerId();
     db.insert(recurringRulesTable)
       .values({
         id,
-        ledgerId: getActiveLedgerId(),
+        ledgerId,
         name: input.name.trim(),
         type: input.type,
         amount: input.amount,
@@ -258,6 +274,7 @@ class RecurringRulesRepository {
         instalmentCount: input.instalmentCount ?? null,
         instalmentTotal: input.instalmentTotal ?? null,
         instalmentStartDate: input.instalmentStartDate ?? null,
+        memberId: input.memberId !== undefined ? input.memberId : selfMemberIdFor(ledgerId),
         createdAt: now,
         updatedAt: now,
         deletedAt: null,
@@ -313,6 +330,7 @@ class RecurringRulesRepository {
     let created: CreatedInstalmentPlan | null = null;
     getSQLite().withTransactionSync(() => {
       const ruleId = this.create({
+        memberId: input.memberId,
         name: input.name,
         type: 'expense',
         amount: amounts[0] ?? 0,
@@ -656,7 +674,12 @@ class RecurringRulesRepository {
       // (Cloud Sync) make the same row instead of two, and a run that already
       // happened (even if since deleted) is never made again.
       const createRun = (input: CreateTransactionInput) => {
-        writeRunOnce(recurringRunTransactionId(rule.id, input.date), input);
+        // The rule's person, the same on every phone that runs it.
+        writeRunOnce(recurringRunTransactionId(rule.id, input.date), {
+          ...input,
+          createdBy: rule.memberId,
+          memberId: rule.memberId,
+        });
       };
       let cursor = rule.nextRunDate;
       // The day of the month this run keeps; a stored anchor the run date has

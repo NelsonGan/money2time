@@ -3094,6 +3094,10 @@ const pt = {
     renew_pro: 'Renovar Pro',
   },
   shared_ledgers: {
+    member_fallback: 'Membro',
+    belongs_to_title: 'Pertence a',
+    belongs_to_you: '{{name}} (você)',
+    belongs_to_added_by: 'Adicionado por {{name}}',
     title: 'Compartilhamento',
     share_toggle: 'Compartilhar este livro',
     share_toggle_caption: 'Convide até {{max}} pessoas. Elas não precisam do Pro.',

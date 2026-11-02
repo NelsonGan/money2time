@@ -1,5 +1,6 @@
 import { and, eq, gte, inArray, isNull, lte, or, sql } from 'drizzle-orm';
 
+import { withEntryStamp } from '~/features/sharedLedgers/lib/entryStamp';
 import { getDb, getSQLite } from '~/lib/db/client';
 import { getActiveLedgerId, inActiveLedger } from '~/lib/db/ledgerScope';
 import { transactionsTable } from '~/lib/db/schema';
@@ -112,6 +113,14 @@ export interface CreateTransactionInput {
   /** Instalment plan payments only: the plan and which payment (0 = payoff). */
   instalmentRuleId?: string | null;
   instalmentNumber?: number | null;
+  /**
+   * Shared ledgers: who added the entry and whose it is (Cloud Sync account
+   * ids, null = the ledger's owner). Left out, a new entry is stamped with
+   * this phone's account when it is a member of the open ledger
+   * (`withEntryStamp`). `createdBy` is never changed after the insert.
+   */
+  createdBy?: string | null;
+  memberId?: string | null;
 }
 
 const DEFAULT_TRANSACTION_QUERY: TransactionFilters = {
@@ -154,6 +163,14 @@ function normalizeTransactionInput<T extends Partial<CreateTransactionInput>>(in
     ...input,
     amount: normalizeMoneyAmount(input.amount),
   };
+}
+
+/** Who added an entry is fixed at its insert: an update never carries it. */
+function withoutCreator<T extends Partial<CreateTransactionInput>>(input: T): T {
+  if (!('createdBy' in input)) return input;
+  const copy = { ...input };
+  delete copy.createdBy;
+  return copy;
 }
 
 export function summarizeSplits(splits: TransactionSplit[]): TransactionSplitsSummary {
@@ -638,12 +655,13 @@ class TransactionsRepository {
    */
   createWithId(id: string, input: CreateTransactionInput, now: string = nowIso()) {
     const db = getDb();
-    const normalizedInput = normalizeTransactionInput(input);
+    const ledgerId = getActiveLedgerId();
+    const normalizedInput = withEntryStamp(normalizeTransactionInput(input), ledgerId);
 
     db.insert(transactionsTable)
       .values({
         id,
-        ledgerId: getActiveLedgerId(),
+        ledgerId,
         type: normalizedInput.type,
         amount: normalizedInput.amount,
         currency: normalizedInput.currency,
@@ -670,6 +688,8 @@ class TransactionsRepository {
         dayOrder: null,
         instalmentRuleId: normalizedInput.instalmentRuleId ?? null,
         instalmentNumber: normalizedInput.instalmentNumber ?? null,
+        createdBy: normalizedInput.createdBy,
+        memberId: normalizedInput.memberId,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -683,7 +703,7 @@ class TransactionsRepository {
 
   update(id: string, updates: Partial<CreateTransactionInput>) {
     const db = getDb();
-    const normalizedUpdates = normalizeTransactionInput(updates);
+    const normalizedUpdates = normalizeTransactionInput(withoutCreator(updates));
     db.update(transactionsTable)
       .set({
         ...normalizedUpdates,
@@ -705,7 +725,7 @@ class TransactionsRepository {
         const update = updates[index];
         if (!update) continue;
         const { id } = update;
-        const input = normalizeTransactionInput(update.input);
+        const input = normalizeTransactionInput(withoutCreator(update.input));
         db.update(transactionsTable)
           .set({
             ...input,
@@ -719,6 +739,23 @@ class TransactionsRepository {
       sqlite.execSync('ROLLBACK');
       throw error;
     }
+  }
+
+  /**
+   * Shared ledgers: gives the rows written from an entry (its reimbursement
+   * refund, its split payback transfers) to the same person as the entry,
+   * after `member_id` changed on it. Who added them stays as it was.
+   */
+  reassignLinked(id: string, memberId: string | null) {
+    getSQLite().runSync(
+      `UPDATE transactions SET member_id = ?, updated_at = ?
+       WHERE deleted_at IS NULL AND member_id IS NOT ? AND (
+         id = (SELECT reimbursement_transaction_id FROM transactions WHERE id = ?)
+         OR id IN (SELECT paid_transaction_id FROM transaction_splits
+                   WHERE transaction_id = ? AND deleted_at IS NULL
+                     AND paid_transaction_id IS NOT NULL))`,
+      [memberId, nowIso(), memberId, id, id],
+    );
   }
 
   softDelete(id: string) {

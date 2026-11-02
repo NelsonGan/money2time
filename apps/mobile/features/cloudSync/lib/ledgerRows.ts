@@ -29,6 +29,7 @@ export const LEDGER_ROOT_SYNC_TABLES: ReadonlySet<SyncTable> = new Set<SyncTable
   'items',
   'budget_templates',
   'monthly_budgets',
+  'ledger_profiles',
 ]);
 
 /** Child table → [its parent-id column, the parent table]. */

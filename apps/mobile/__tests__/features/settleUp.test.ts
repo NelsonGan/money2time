@@ -39,6 +39,8 @@ function makeTx(overrides: Partial<TransactionWithRelations>): TransactionWithRe
     dayOrder: null,
     instalmentRuleId: null,
     instalmentNumber: null,
+    createdBy: null,
+    memberId: null,
     reportingCurrency: 'USD',
     reportingAmount: 100,
     fxRate: 1,

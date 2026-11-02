@@ -3118,6 +3118,10 @@ const de = {
     renew_pro: 'Pro verlängern',
   },
   shared_ledgers: {
+    member_fallback: 'Mitglied',
+    belongs_to_title: 'Gehört zu',
+    belongs_to_you: '{{name}} (du)',
+    belongs_to_added_by: 'Hinzugefügt von {{name}}',
     title: 'Teilen',
     share_toggle: 'Dieses Buch teilen',
     share_toggle_caption: 'Lade bis zu {{max}} Personen ein. Sie brauchen kein Pro.',

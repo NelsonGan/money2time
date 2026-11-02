@@ -3071,6 +3071,10 @@ const en = {
     renew_pro: 'Renew Pro',
   },
   shared_ledgers: {
+    member_fallback: 'Member',
+    belongs_to_title: 'Belongs to',
+    belongs_to_you: '{{name}} (you)',
+    belongs_to_added_by: 'Added by {{name}}',
     title: 'Sharing',
     share_toggle: 'Share this ledger',
     share_toggle_caption: "Invite up to {{max}} people. They don't need Pro.",

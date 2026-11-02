@@ -3056,6 +3056,10 @@ const vi = {
     renew_pro: 'Gia hạn Pro',
   },
   shared_ledgers: {
+    member_fallback: 'Thành viên',
+    belongs_to_title: 'Thuộc về',
+    belongs_to_you: '{{name}} (bạn)',
+    belongs_to_added_by: '{{name}} đã thêm',
     title: 'Chia sẻ',
     share_toggle: 'Chia sẻ sổ này',
     share_toggle_caption: 'Mời tối đa {{max}} người. Họ không cần Pro.',

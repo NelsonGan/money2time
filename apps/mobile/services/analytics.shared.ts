@@ -141,6 +141,11 @@ export const POSTHOG_EVENTS = {
   SHARED_LEDGER_MEMBER_REMOVED: 'Shared Ledger Member Removed',
   SHARED_LEDGER_LEFT: 'Shared Ledger Left',
   SHARED_LEDGER_STOPPED: 'Shared Ledger Stopped',
+  /**
+   * An entry in a shared ledger is saved as someone else's than it would be
+   * by default (the editor's Belongs to). `mode`: `create` or `edit`.
+   */
+  SHARED_LEDGER_ENTRY_ASSIGNED: 'Shared Ledger Entry Assigned',
 
   // Satisfaction: the happy/unhappy pre-prompt is a continuous NPS-like signal.
   REVIEW_PREPROMPT_SHOWN: 'Review Preprompt Shown',

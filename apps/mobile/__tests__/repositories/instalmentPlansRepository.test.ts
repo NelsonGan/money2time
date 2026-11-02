@@ -197,6 +197,19 @@ describe('createInstalmentPlan', () => {
     });
   });
 
+  it('keeps the person picked in Belongs to on the plan and its payments', () => {
+    const state = useFakeDb();
+    recurringRulesRepository.createInstalmentPlan(
+      { ...PLAN_INPUT, startDate: noon('2026-11-02'), memberId: 'user-ana' },
+      noon('2026-11-02'),
+    );
+    expect(state.rule).toMatchObject({ memberId: 'user-ana' });
+    expect(transactionsRepository.createWithId).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ createdBy: 'user-ana', memberId: 'user-ana' }),
+    );
+  });
+
   it('leaves a later first payment to the runner', () => {
     const state = useFakeDb();
     const created = recurringRulesRepository.createInstalmentPlan(
