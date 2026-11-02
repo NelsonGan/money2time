@@ -11,7 +11,7 @@ import {
   paymentRowsForPlan,
   scheduleOfPlan,
 } from '~/features/instalments/lib/instalmentPlan';
-import { selfMemberIdFor } from '~/features/sharedLedgers/lib/ledgerPeople';
+import { selfMemberIdFor } from '~/features/sharedLedgers/lib/entryStamp';
 import { getDb, getSQLite } from '~/lib/db/client';
 import { getActiveLedgerId, inActiveLedger } from '~/lib/db/ledgerScope';
 import { accountsTable, recurringRulesTable, transactionsTable } from '~/lib/db/schema';

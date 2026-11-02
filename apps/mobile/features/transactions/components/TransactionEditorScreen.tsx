@@ -89,7 +89,8 @@ import {
   isRegularAmountValid,
 } from '~/features/instalments/lib/instalmentPlan';
 import { BelongsToPicker } from '~/features/sharedLedgers/components/BelongsToPicker';
-import { selfMemberIdFor, useOpenLedgerPeople } from '~/features/sharedLedgers/lib/ledgerPeople';
+import { selfMemberIdFor } from '~/features/sharedLedgers/lib/entryStamp';
+import { useOpenLedgerPeople } from '~/features/sharedLedgers/lib/ledgerPeople';
 import {
   NumpadPanel,
   ReceiptViewerModal,
@@ -4736,15 +4737,11 @@ export function TransactionEditorScreen({
                 <View style={{ height: numpadBodyHeight }}>
                   {optionsOpen ? (
                     /* Options take the keypad's place, not the whole drawer:
-                       Save stays put underneath, so ticking a box and saving is
-                       two taps rather than three. Plain rows in that space, no
-                       card and no heading, so more options can just be added
-                       below this one. The negative margin claws back the
-                       COLLAPSE_PEEK the drawer reserves above the keypad, which
-                       is more air than a list of ticks needs. */
-                    /* Scrolls only when the rows outgrow the keypad's slot
-                       (a transfer with its category in a shared ledger, a
-                       small phone). */
+                       Save stays put underneath, so switching an option on and
+                       saving is two taps rather than three. The negative margin
+                       claws back the COLLAPSE_PEEK the drawer reserves above
+                       the keypad, which is more air than the card needs. It
+                       scrolls only on a phone too short for every row. */
                     <ScrollView
                       ref={optionsScrollRef}
                       className="flex-1"

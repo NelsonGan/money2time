@@ -39,7 +39,6 @@ interface OptionLinkRowProps extends OptionRowBaseProps {
   onPress: () => void;
   accessibilityLabel?: string;
   accessibilityValue?: string;
-  switchValue?: never;
 }
 
 interface OptionSwitchRowProps extends OptionRowBaseProps {
@@ -55,9 +54,13 @@ export function OptionRow(props: OptionRowProps) {
   const isSwitch = 'onToggle' in props;
   const handlePress = () => {
     if (disabled) return;
+    // A switch's handler gives its own feedback (and may stop at a Pro gate).
+    if (isSwitch) {
+      props.onToggle();
+      return;
+    }
     void triggerHaptic('selection');
-    if (isSwitch) props.onToggle();
-    else props.onPress();
+    props.onPress();
   };
 
   return (

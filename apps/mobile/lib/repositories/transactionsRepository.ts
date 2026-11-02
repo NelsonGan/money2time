@@ -1,6 +1,6 @@
 import { and, eq, gte, inArray, isNull, lte, or, sql } from 'drizzle-orm';
 
-import { withEntryStamp } from '~/features/sharedLedgers/lib/ledgerPeople';
+import { withEntryStamp } from '~/features/sharedLedgers/lib/entryStamp';
 import { getDb, getSQLite } from '~/lib/db/client';
 import { getActiveLedgerId, inActiveLedger } from '~/lib/db/ledgerScope';
 import { transactionsTable } from '~/lib/db/schema';

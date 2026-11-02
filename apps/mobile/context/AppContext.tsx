@@ -54,7 +54,8 @@ import {
   filterSpendingTransactions,
   NO_REIMBURSEMENT,
 } from '~/features/reimbursements/lib/reimbursementMath';
-import { invalidateLedgerPeople, withEntryStamp } from '~/features/sharedLedgers/lib/ledgerPeople';
+import { withEntryStamp } from '~/features/sharedLedgers/lib/entryStamp';
+import { invalidateLedgerPeople } from '~/features/sharedLedgers/lib/ledgerPeople';
 import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accountEntryGate';
 import {
   buildPaybackTransferNote,
@@ -3959,6 +3960,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             // sync apply refreshAll used to do).
             setAppLocale(next.locale);
             setSettings(next);
+            // A shared ledger's rows show this phone's own name and photo
+            // from Settings, signed in or not.
+            if ('profileName' in nextUpdates || 'profileAvatarUri' in nextUpdates) {
+              invalidateLedgerPeople();
+            }
             // A reporting-currency change re-bases the FX rate table.
             if (nextUpdates.currencyCode) reloadRateTable(next.currencyCode);
           },

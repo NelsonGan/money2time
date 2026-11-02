@@ -1593,7 +1593,7 @@ for that chart; the chart itself is not built yet.
   was shared, and every entry the owner adds, is the owner's without a
   backfill. A member's phone stamps its own account (`shared_ledgers.user_id`,
   else the session read this launch) through `withEntryStamp` in
-  `features/sharedLedgers/lib/ledgerPeople.ts`, called by the repository's
+  `features/sharedLedgers/lib/entryStamp.ts`, called by the repository's
   insert and by `AppContext`'s optimistic rows, so the row on screen and the
   row stored agree. Entries made on the owner's phone, in a ledger that is not
   shared, or before sign-in on a member's phone, are null. Editing never
@@ -1621,10 +1621,18 @@ for that chart; the chart itself is not built yet.
   writes only its own account's row (`writeOwnLedgerProfiles`, from
   `CloudSyncProvider` when the list, the account or the Settings name or
   photo changes), with its role. The name is the Settings name, else the
-  sign-in name. A person who left keeps their row, so their entries keep
-  their name; one never seen (an older app, or a phone that joined after they
-  left) shows as "Member" with an initial. The phone's own person always
-  shows its current Settings name and photo.
+  sign-in name, else the address masked as the People page shows it
+  (`ne***@example.com`), so two people who never set a name still read
+  differently. Blank or spaces-only names count as none. A person who left
+  keeps their row, so their entries keep their name; one never seen (an older
+  app, or a phone that joined after they left) shows as "Member" with an
+  initial, an owner nobody has named as "Owner", and the phone's own person
+  as "You" until it has a name. The phone's own person always shows its
+  current Settings name and photo, signed in or not. A synced photo shows once
+  its file has downloaded; until then the initial does. The people are read
+  once per sync, ledger switch or profile edit (`ledgerPeople.ts`, photo files
+  resolved there too), and kept as the same object when nothing changed, so a
+  sync does not re-render every row.
 - **On the row.** In a shared ledger every transaction row shows the person's
   photo (or a coloured initial) on the lower right of its category icon, and
   their first name after the category ("Groceries · Mei"). Rows in a ledger
@@ -1632,8 +1640,9 @@ for that chart; the chart itself is not built yet.
 - **Belongs to.** The transaction editor's options panel (the More button) has
   a Belongs to row in a shared ledger, adding or editing: one of the panel's
   option rows, showing the person's photo and name. It opens a sheet of
-  everyone in the ledger, the owner first (then the members who have synced a
-  profile, and whoever the entry belongs to if they are not listed), with
+  everyone in the ledger, the owner first, then the user, then the members
+  who have synced a profile (and whoever the entry belongs to if they are not
+  listed), with
   "Added by …" under its title when that is someone else. Only a pick is
   saved: a new entry (and a payment alert reviewed in the editor) is
   otherwise stamped at the insert, and an edit leaves `member_id` alone.

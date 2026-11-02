@@ -1,11 +1,10 @@
 import { Image } from 'expo-image';
-import React, { memo, useMemo, useState } from 'react';
+import React, { memo, useState } from 'react';
 import { View } from 'react-native';
 
 import { Text } from '~/components/ui';
 import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { useThemeColors } from '~/hooks/useThemeColors';
-import { getProfileAvatarUri } from '~/services/userAssets';
 
 import type { LedgerPerson } from '../lib/ledgerPeople';
 
@@ -35,11 +34,13 @@ export const PersonAvatar = memo(function PersonAvatarImpl({
   ring,
 }: PersonAvatarProps) {
   const themeColors = useThemeColors();
-  const uri = useMemo(() => getProfileAvatarUri(person.avatarUri), [person.avatarUri]);
+  // Resolved once by the people store, not with a file check on every row.
+  const uri = person.avatarFileUri;
   const [brokenUri, setBrokenUri] = useState<string | null>(null);
   const ringWidth = ring ? Math.max(1.5, size / 9) : 0;
   const outer = size + ringWidth * 2;
-  const initial = person.name.trim().charAt(0).toUpperCase() || '?';
+  // By code point, so a name starting with an emoji keeps it whole.
+  const initial = Array.from(person.name.trim())[0]?.toUpperCase() ?? '?';
   return (
     <View
       style={{

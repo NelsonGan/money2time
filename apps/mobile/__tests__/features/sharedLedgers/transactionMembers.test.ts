@@ -13,14 +13,14 @@ import {
   saveSharedLedger,
   type SharedLedger,
 } from '~/features/cloudSync/services/sharedLedgerStore';
+import { selfMemberIdFor, withEntryStamp } from '~/features/sharedLedgers/lib/entryStamp';
 import {
   buildLedgerPeople,
   getLedgerPeople,
   invalidateLedgerPeople,
+  maskEmail,
   profileRowId,
-  selfMemberIdFor,
   shortName,
-  withEntryStamp,
   writeOwnLedgerProfiles,
 } from '~/features/sharedLedgers/lib/ledgerPeople';
 import { getSQLite } from '~/lib/db/client';
@@ -36,6 +36,11 @@ import { transactionsRepository } from '~/lib/repositories/transactionsRepositor
 // the index and the profile rows; the stamping and the people are pure.
 
 jest.mock('~/lib/db/client', () => ({ getSQLite: jest.fn() }));
+// A photo is on this phone once its file is: `avatars/missing.jpg` is not yet.
+jest.mock('~/services/userAssets', () => ({
+  getProfileAvatarUri: (path: string | null) =>
+    path && path !== 'avatars/missing.jpg' ? `file:///docs/user-assets/${path}` : null,
+}));
 
 const MIGRATIONS_DIR = join(__dirname, '../../../lib/db/migrations');
 
@@ -293,7 +298,8 @@ describe('buildLedgerPeople', () => {
       { name: 'Mei', avatarUri: null },
       'user-mei',
     );
-    expect(people.people.map((person) => person.name)).toEqual(['Nelson', 'Ana', 'Mei']);
+    // The owner, then this phone's own person, then the others by name.
+    expect(people.people.map((person) => person.name)).toEqual(['Nelson', 'Mei', 'Ana']);
     expect(people.personFor(undefined).role).toBe('owner');
   });
 
@@ -309,12 +315,127 @@ describe('buildLedgerPeople', () => {
 
   it('keeps an entry of someone never seen on this phone, as a member', () => {
     const people = buildLedgerPeople(HOME, [], own, 'user-mei');
-    expect(people.personFor('user-gone')).toMatchObject({
+    const stranger = people.personFor('user-gone');
+    expect(stranger).toMatchObject({
       memberId: 'user-gone',
       // The i18n key: tests run without the locale catalogue.
       name: 'shared_ledgers.member_fallback',
-      unknown: true,
+      role: 'member',
     });
+    // The same object every time, so the rows showing them do not re-render.
+    expect(people.personFor('user-gone')).toBe(stranger);
+  });
+});
+
+describe('people with nothing set', () => {
+  const nameless = { name: null, avatarUri: null };
+
+  it('calls this phone’s own nameless person "You"', () => {
+    const asMember = buildLedgerPeople(HOME, [], nameless, 'user-mei');
+    expect(asMember.personFor('user-mei')).toMatchObject({
+      name: 'shared_ledgers.you',
+      isSelf: true,
+    });
+    const asOwner = buildLedgerPeople(
+      { ...HOME, role: 'owner', ownerName: null },
+      [],
+      nameless,
+      'u',
+    );
+    expect(asOwner.personFor(null).name).toBe('shared_ledgers.you');
+  });
+
+  it('calls an owner nobody has named "Owner", not "Member"', () => {
+    const people = buildLedgerPeople({ ...HOME, ownerName: null }, [], nameless, 'user-mei');
+    expect(people.personFor(null).name).toBe('shared_ledgers.owner_badge');
+  });
+
+  it('treats a blank or spaces-only name as no name', () => {
+    const people = buildLedgerPeople(
+      HOME,
+      [{ user_id: 'user-ana', role: 'member', name: '   ', avatar_uri: null }],
+      nameless,
+      'user-mei',
+    );
+    expect(people.personFor('user-ana').name).toBe('shared_ledgers.member_fallback');
+  });
+
+  it('masks an address the way the People page does', () => {
+    expect(maskEmail('nelson@example.com')).toBe('ne***@example.com');
+    expect(maskEmail('a@b.co')).toBe('a***@b.co');
+    expect(maskEmail('not-an-address')).toBeNull();
+    expect(maskEmail(undefined)).toBeNull();
+  });
+
+  it('resolves photos that are on the phone, and not ones still downloading', () => {
+    const people = buildLedgerPeople(
+      HOME,
+      [
+        { user_id: 'user-ana', role: 'member', name: 'Ana', avatar_uri: 'avatars/ana.jpg' },
+        { user_id: 'user-kim', role: 'member', name: 'Kim', avatar_uri: 'avatars/missing.jpg' },
+      ],
+      nameless,
+      'user-mei',
+      (path) => (path === 'avatars/ana.jpg' ? 'file:///ana.jpg' : null),
+    );
+    expect(people.personFor('user-ana').avatarFileUri).toBe('file:///ana.jpg');
+    expect(people.personFor('user-kim').avatarFileUri).toBeNull();
+  });
+
+  it('cuts a name to its first word for the row, whatever the spacing', () => {
+    expect(shortName('Mei  Tan')).toBe('Mei');
+    expect(shortName('ne***@example.com')).toBe('ne***@example.com');
+    // A lone symbol keeps the next word; a one-letter name is still a name.
+    expect(shortName('🐼 Panda')).toBe('🐼 Panda');
+    expect(shortName('J Lim')).toBe('J');
+    expect(shortName('李 明')).toBe('李');
+  });
+});
+
+describe('the people store', () => {
+  let harness: ReturnType<typeof openDatabase>;
+  beforeEach(() => {
+    harness = openDatabase();
+    applyMigrations(harness.db, loadMigrations());
+    jest.mocked(getSQLite).mockReturnValue(harness.db);
+    setCachedSessionUser(null);
+    saveSharedLedger(HOME);
+    harness.connection.exec(`
+      INSERT INTO settings (id, app_user_id, created_at, updated_at) VALUES ('primary', 'i', '${NOW}', '${NOW}');
+      INSERT INTO ledger_profiles (id, ledger_id, user_id, role, name, avatar_uri, created_at, updated_at)
+        VALUES ('home:user-ana', 'home', 'user-ana', 'member', 'Ana', 'avatars/missing.jpg', '${NOW}', '${NOW}');
+    `);
+    invalidateLedgerPeople();
+  });
+  afterEach(() => {
+    removeSharedLedger('home');
+    harness.connection.close();
+  });
+
+  it('keeps the same object when a re-read changes nobody', () => {
+    const first = getLedgerPeople('home');
+    invalidateLedgerPeople();
+    expect(getLedgerPeople('home')).toBe(first);
+  });
+
+  it('gives a new object once a synced photo has arrived on the phone', () => {
+    const first = getLedgerPeople('home');
+    expect(first?.personFor('user-ana').avatarFileUri).toBeNull();
+    harness.connection.exec(
+      `UPDATE ledger_profiles SET avatar_uri = 'avatars/ana.jpg' WHERE id = 'home:user-ana'`,
+    );
+    invalidateLedgerPeople();
+    const next = getLedgerPeople('home');
+    expect(next).not.toBe(first);
+    expect(next?.personFor('user-ana').avatarFileUri).toBe(
+      'file:///docs/user-assets/avatars/ana.jpg',
+    );
+  });
+
+  it('names a member with no name anywhere by their masked address', () => {
+    setCachedSessionUser({ id: 'user-mei', email: 'meitan@example.com', name: '' });
+    invalidateLedgerPeople();
+    expect(getLedgerPeople('home')?.personFor('user-mei').name).toBe('me***@example.com');
   });
 });
 
