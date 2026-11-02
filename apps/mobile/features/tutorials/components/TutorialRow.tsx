@@ -27,6 +27,7 @@ const TUTORIAL_ICON: Record<string, ClayIconName> = {
   'scan-a-receipt': 'entry/scan-receipt',
   'find-a-transaction': 'ui/search',
   automations: 'settings/auto-log',
+  'log-from-bank-notifications': 'status/auto-review',
   accounts: 'settings/accounts',
   categories: 'settings/categories',
   recurring: 'settings/recurring',
