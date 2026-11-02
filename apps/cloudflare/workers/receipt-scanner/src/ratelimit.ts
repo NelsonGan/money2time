@@ -20,12 +20,36 @@ interface TierConfig {
   interval: Interval;
 }
 
+/**
+ * What is metered. Receipt scans and AI notification reviews have their own
+ * counters and limits; each meter's rows live in its own table.
+ */
+export type Meter = 'scan' | 'notification';
+
+const TABLES: Record<Meter, string> = {
+  scan: 'scan_usage',
+  notification: 'notification_review_usage',
+};
+
 // Free is a lifetime allowance (100-year window reuses the 'year' unit).
 const FREE_FALLBACK: Interval = { count: 100, unit: 'year' };
 // Pro monthly cap is a fair-use ceiling — the paywall advertises unlimited.
 const PRO_FALLBACK: Interval = { count: 1, unit: 'month' };
 
-function tierConfig(isPro: boolean, env: Env): TierConfig {
+function tierConfig(isPro: boolean, env: Env, meter: Meter): TierConfig {
+  if (meter === 'notification') {
+    // Free is a lifetime allowance of reviewed notifications; Pro's monthly cap
+    // is fair use only (the paywall advertises it as unlimited).
+    return isPro
+      ? {
+          limit: Number(env.NOTIFICATION_PRO_LIMIT) || 3000,
+          interval: toInterval(env.NOTIFICATION_PRO_INTERVAL, PRO_FALLBACK),
+        }
+      : {
+          limit: Number(env.NOTIFICATION_FREE_LIMIT) || 40,
+          interval: toInterval(env.NOTIFICATION_FREE_INTERVAL, FREE_FALLBACK),
+        };
+  }
   if (isPro) {
     return { limit: Number(env.PRO_LIMIT) || 500, interval: toInterval(env.PRO_INTERVAL, PRO_FALLBACK) };
   }
@@ -38,11 +62,12 @@ export async function checkQuota(
   isPro: boolean,
   env: Env,
   now: Date,
+  meter: Meter = 'scan',
 ): Promise<QuotaDecision> {
-  const { limit, interval } = tierConfig(isPro, env);
+  const { limit, interval } = tierConfig(isPro, env, meter);
   const row = await env.MONEY2TIME_D1_RECEIPT_SCANNER
     .prepare(
-      'SELECT count FROM scan_usage WHERE app_user_id = ?1 AND interval_unit = ?2 AND window_start = ?3',
+      `SELECT count FROM ${TABLES[meter]} WHERE app_user_id = ?1 AND interval_unit = ?2 AND window_start = ?3`,
     )
     .bind(appUserId, interval.unit, windowStart(interval, now))
     .first<{ count: number }>();
@@ -50,23 +75,25 @@ export async function checkQuota(
   return { allowed: used < limit, used, limit, interval: formatInterval(interval) };
 }
 
-// Atomic upsert of one scan into the current window; returns the new total.
+// Atomic upsert of `amount` uses into the current window; returns the new total.
 // Call only after a successful inference so failed scans don't burn quota.
 export async function consumeQuota(
   appUserId: string,
   isPro: boolean,
   env: Env,
   now: Date,
+  meter: Meter = 'scan',
+  amount = 1,
 ): Promise<number> {
-  const { interval } = tierConfig(isPro, env);
+  const { interval } = tierConfig(isPro, env, meter);
   const row = await env.MONEY2TIME_D1_RECEIPT_SCANNER
     .prepare(
-      `INSERT INTO scan_usage (app_user_id, interval_unit, window_start, count, expires_at)
-       VALUES (?1, ?2, ?3, 1, ?4)
-       ON CONFLICT(app_user_id, interval_unit, window_start) DO UPDATE SET count = count + 1
+      `INSERT INTO ${TABLES[meter]} (app_user_id, interval_unit, window_start, count, expires_at)
+       VALUES (?1, ?2, ?3, ?5, ?4)
+       ON CONFLICT(app_user_id, interval_unit, window_start) DO UPDATE SET count = count + ?5
        RETURNING count`,
     )
-    .bind(appUserId, interval.unit, windowStart(interval, now), windowEnd(interval, now))
+    .bind(appUserId, interval.unit, windowStart(interval, now), windowEnd(interval, now), amount)
     .first<{ count: number }>();
-  return row?.count ?? 1;
+  return row?.count ?? amount;
 }

@@ -57,6 +57,13 @@ FREE_LIMIT = "20"
 FREE_INTERVAL = "100year"
 PRO_LIMIT = "500"
 PRO_INTERVAL = "month"
+# AI notification review (POST /notifications), metered apart from scans and
+# counted per notification reviewed. Free is a lifetime 40; the Pro monthly cap
+# is fair use only (the paywall advertises it as unlimited).
+NOTIFICATION_FREE_LIMIT = "40"
+NOTIFICATION_FREE_INTERVAL = "100year"
+NOTIFICATION_PRO_LIMIT = "3000"
+NOTIFICATION_PRO_INTERVAL = "month"
 # PostHog AI observability: one `$ai_generation` per OpenRouter call (model,
 # tokens, cost, latency, errors; never the image, prompt or result). The project
 # token is a public, write-only ingestion key shipped in the app too, so it is a

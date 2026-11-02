@@ -7,6 +7,16 @@
 
 import { AiTrace, type OpenRouterUsage, type PostHogEnv, readSessionId } from './posthog';
 import type { PromptEnv, ResolvedPrompt } from './prompts';
+import {
+  buildNotificationInput,
+  NOTIFICATION_PROMPT,
+  NOTIFICATION_PROMPT_NAME,
+  isNotificationAnswer,
+  normalizeNotificationResults,
+  notificationMaxTokens,
+  parseNotificationRequest,
+  type NotificationReviewRequest,
+} from './notifications';
 import { checkQuota, consumeQuota } from './ratelimit';
 import { getEntitlement } from './revenuecat';
 import {
@@ -39,6 +49,11 @@ export interface Env extends PostHogEnv, PromptEnv {
   FREE_INTERVAL: string;
   PRO_LIMIT: string;
   PRO_INTERVAL: string;
+  // AI notification review allowance, metered apart from scans (ratelimit.ts).
+  NOTIFICATION_FREE_LIMIT?: string;
+  NOTIFICATION_FREE_INTERVAL?: string;
+  NOTIFICATION_PRO_LIMIT?: string;
+  NOTIFICATION_PRO_INTERVAL?: string;
   // Optional OpenAI-style image_url.detail hint ("low" | "high" | "auto").
   // "low" downsamples to cut input tokens at some OCR-accuracy risk; unset omits it.
   IMAGE_DETAIL?: string;
@@ -164,6 +179,12 @@ export default {
       return new Response(null, { status: 204, headers: CORS_HEADERS });
     }
     const url = new URL(request.url);
+    if (request.method === 'POST' && url.pathname === '/notifications') {
+      return handleNotifications(request, env, ctx, false);
+    }
+    if (request.method === 'POST' && url.pathname === '/notifications/quota') {
+      return handleNotifications(request, env, ctx, true);
+    }
     if (request.method !== 'POST' || url.pathname !== '/scan') {
       return json({ error: 'not_found' }, 404);
     }
@@ -315,6 +336,202 @@ export default {
   },
 };
 
+// Wall clock for one notification batch; the app's own timeout sits above it.
+const NOTIFICATION_BUDGET_MS = 50000;
+
+/**
+ * POST /notifications: AI review of a batch of notification texts, metered per
+ * notification on its own allowance. POST /notifications/quota returns that
+ * allowance without any inference, for the app's usage pill. A free user with
+ * fewer reviews left than notifications sent gets only the first ones
+ * reviewed; the rest come back as `skipped` for the app to keep.
+ */
+async function handleNotifications(
+  request: Request,
+  env: Env,
+  ctx: ExecutionContext,
+  quotaOnly: boolean,
+): Promise<Response> {
+  const reqId = crypto.randomUUID();
+  const startedAt = Date.now();
+  let raw: unknown;
+  try {
+    raw = await request.json();
+  } catch {
+    return json({ error: 'invalid_json' }, 400);
+  }
+  const parsed = parseNotificationRequest(
+    quotaOnly && raw && typeof raw === 'object' ? { notifications: [], ...raw } : raw,
+  );
+  if ('error' in parsed) {
+    logError('bad_request', { reqId, route: 'notifications', error: parsed.error });
+    return json({ error: parsed.error }, 400);
+  }
+  const body = parsed.request;
+  if (!(await verifySignature(request, { appUserId: body.appUserId } as ScanRequest, env))) {
+    logError('bad_signature', { reqId, appUserId: body.appUserId });
+    return json({ error: 'unauthorized' }, 401);
+  }
+  const now = new Date();
+  const { isPro } = await getEntitlement(body.appUserId, env);
+  const quota = await checkQuota(body.appUserId, isPro, env, now, 'notification');
+  const quotaOut = { used: quota.used, limit: quota.limit, isPro, interval: quota.interval };
+  if (quotaOnly) return json({ quota: quotaOut }, 200);
+  if (body.notifications.length === 0)
+    return json({ results: [], skipped: [], quota: quotaOut }, 200);
+
+  // A notification charged in the last day (a retry after the app lost the
+  // response, say) is reviewed again without being charged again.
+  const charged = await chargedNotificationIds(env, body, now);
+  const left = Math.max(0, quota.limit - quota.used);
+  let fresh = 0;
+  const batch: NotificationReviewRequest = { ...body, notifications: [] };
+  const skipped: string[] = [];
+  for (const item of body.notifications) {
+    const free = charged.has(item.id);
+    if (free || fresh < left) {
+      batch.notifications.push(item);
+      if (!free) fresh += 1;
+    } else {
+      skipped.push(item.id);
+    }
+  }
+  if (batch.notifications.length === 0) {
+    logError('quota_blocked', {
+      reqId,
+      route: 'notifications',
+      appUserId: body.appUserId,
+      used: quota.used,
+      limit: quota.limit,
+      isPro,
+    });
+    return json({ error: 'limit_reached', ...quotaOut }, 402);
+  }
+  log('notification_review_request', {
+    reqId,
+    appUserId: body.appUserId,
+    count: batch.notifications.length,
+    skipped: skipped.length,
+    isPro,
+  });
+
+  const trace = new AiTrace(
+    reqId,
+    body.appUserId,
+    { scan_mode: 'notification', is_pro: isPro, notification_count: batch.notifications.length },
+    readSessionId(request),
+  );
+  const input = buildNotificationInput(batch);
+  let content: string;
+  try {
+    content = await completeTextWithFailover(
+      env,
+      reqId,
+      {
+        prompt: {
+          text: `${NOTIFICATION_PROMPT}\n\n${input}`,
+          shared: NOTIFICATION_PROMPT,
+          personal: input,
+          prompt: {
+            name: NOTIFICATION_PROMPT_NAME as never,
+            template: NOTIFICATION_PROMPT,
+            version: null,
+            source: 'bundled',
+          },
+        },
+        maxTokens: notificationMaxTokens(batch.notifications.length),
+        temperature: 0,
+        deadline: startedAt + NOTIFICATION_BUDGET_MS,
+        attempt: 0,
+        spanName: 'notification_review',
+        trace,
+        promptRef: { name: NOTIFICATION_PROMPT_NAME, version: null, source: 'bundled' },
+        denyDataCollection: true,
+      },
+      '',
+      // An answer without a results array (prose, truncated JSON) moves on to
+      // the backup model; if every model fails, nothing is charged.
+      (answer) => {
+        if (!isNotificationAnswer(extractParsedObject(answer))) {
+          throw new Error('answer held no results');
+        }
+      },
+    );
+  } catch (err) {
+    ctx.waitUntil(trace.flush(env));
+    const message = err instanceof Error ? err.message : 'inference_failed';
+    const capacity = /429|overloaded|capacity|concurren/i.test(message);
+    logError('inference_failed', { reqId, route: 'notifications', capacity, error: message });
+    return json(
+      { error: capacity ? 'capacity' : 'inference_failed', detail: message },
+      capacity ? 429 : 502,
+    );
+  }
+  const results = normalizeNotificationResults(extractParsedObject(content), batch);
+  trace.annotateLatest({ parsed_transactions: results.length, parsed_items: 0 });
+  ctx.waitUntil(trace.flush(env));
+  // Each notification answered is one review, unless it was charged recently.
+  // Awaited, so a quick next batch reads the new count.
+  const newlyCharged = results.map((r) => r.id).filter((id) => !charged.has(id));
+  if (newlyCharged.length > 0) {
+    // Remembered first: if counting then fails, the client's retry is free
+    // rather than charged twice.
+    await rememberCharged(env, body.appUserId, newlyCharged, now);
+    await consumeQuota(body.appUserId, isPro, env, now, 'notification', newlyCharged.length);
+  }
+  const used = quota.used + newlyCharged.length;
+  log('notification_review_success', {
+    reqId,
+    appUserId: body.appUserId,
+    count: results.length,
+    unanswered: batch.notifications.length - results.length,
+    expense: results.filter((r) => r.decision === 'expense').length,
+    income: results.filter((r) => r.decision === 'income').length,
+    ignore: results.filter((r) => r.decision === 'ignore').length,
+    unsure: results.filter((r) => r.decision === 'unsure').length,
+    used,
+    limit: quota.limit,
+    isPro,
+    ms: Date.now() - startedAt,
+  });
+  return json({ results, skipped, quota: { ...quotaOut, used } }, 200);
+}
+
+// How long a charged notification id is remembered (D1 notification_review_charged).
+const CHARGED_TTL_MS = 24 * 60 * 60 * 1000;
+
+async function chargedNotificationIds(
+  env: Env,
+  body: NotificationReviewRequest,
+  now: Date,
+): Promise<Set<string>> {
+  const ids = body.notifications.map((item) => item.id);
+  const placeholders = ids.map((_, i) => `?${i + 3}`).join(', ');
+  const rows = await env.MONEY2TIME_D1_RECEIPT_SCANNER.prepare(
+    `SELECT capture_id FROM notification_review_charged
+     WHERE app_user_id = ?1 AND expires_at > ?2 AND capture_id IN (${placeholders})`,
+  )
+    .bind(body.appUserId, now.getTime(), ...ids)
+    .all<{ capture_id: string }>();
+  return new Set((rows.results ?? []).map((row) => row.capture_id));
+}
+
+async function rememberCharged(env: Env, appUserId: string, ids: string[], now: Date) {
+  const db = env.MONEY2TIME_D1_RECEIPT_SCANNER;
+  const expires = now.getTime() + CHARGED_TTL_MS;
+  await db.batch(
+    ids.map((id) =>
+      db
+        .prepare(
+          `INSERT INTO notification_review_charged (app_user_id, capture_id, expires_at)
+           VALUES (?1, ?2, ?3)
+           ON CONFLICT(app_user_id, capture_id) DO UPDATE SET expires_at = ?3`,
+        )
+        .bind(appUserId, id, expires),
+    ),
+  );
+}
+
 async function pruneExpired(env: Env): Promise<void> {
   const db = env.MONEY2TIME_D1_RECEIPT_SCANNER;
   const now = Date.now();
@@ -322,6 +539,8 @@ async function pruneExpired(env: Env): Promise<void> {
     await db.batch([
       db.prepare('DELETE FROM scan_usage WHERE expires_at <= ?1').bind(now),
       db.prepare('DELETE FROM entitlement_cache WHERE expires_at <= ?1').bind(now),
+      db.prepare('DELETE FROM notification_review_usage WHERE expires_at <= ?1').bind(now),
+      db.prepare('DELETE FROM notification_review_charged WHERE expires_at <= ?1').bind(now),
     ]);
     log('prune_expired', { now });
   } catch (err) {
@@ -430,7 +649,7 @@ function resolveModels(env: Env, imageType: string | null): ModelChoice[] {
 }
 
 // One attempt's inference settings, shared by the failover chain.
-interface AttemptOptions {
+export interface AttemptOptions {
   prompt: BuiltPrompt;
   maxTokens: number;
   temperature: number;
@@ -438,11 +657,20 @@ interface AttemptOptions {
   deadline: number;
   /** Empty-result attempt this belongs to (0 = first), for AI observability. */
   attempt: number;
-  mode: ScanMode;
+  /** `$ai_span_name`, e.g. `receipt_scan_quick`. */
+  spanName: string;
   trace: AiTrace;
   /** The hosted prompt this attempt used, linked on its generation. */
-  promptRef: ResolvedPrompt;
+  promptRef: Pick<ResolvedPrompt, 'version' | 'source'> & { name: string };
+  /**
+   * Personal text (notifications): non-Anthropic models may only run on
+   * providers that do not store or train on prompts.
+   */
+  denyDataCollection?: boolean;
 }
+
+/** What follows the prompt in the user message: the receipt image, or notification text. */
+export type ContentTail = Record<string, unknown>[];
 
 // The prompt as the text blocks ahead of the image. Claude gets the shared part
 // and the user's settings as two blocks, the first cached for everyone; a
@@ -459,24 +687,28 @@ function promptBlocks(prompt: BuiltPrompt, claude: boolean) {
   ];
 }
 
-// Sends the receipt image + prompt to OpenRouter and returns the raw output.
-async function completeScan(
-  body: ScanRequest,
-  env: Env,
-  reqId: string,
-  opts: AttemptOptions,
-  choice: ModelChoice,
-  mime: string,
-): Promise<string> {
-  const { model } = choice;
-  // Claude takes no temperature: the empty-result retry resamples it anyway.
-  const temperature = choice.byok ? undefined : opts.temperature;
+// The receipt image as the content block after the prompt.
+function imageTail(body: ScanRequest, env: Env, mime: string): ContentTail {
   const dataUrl = `data:${mime};base64,${body.image}`;
   // Resolution hint attached only when set (see Env.IMAGE_DETAIL).
   const detail = env.IMAGE_DETAIL?.trim();
   const imageUrl: { url: string; detail?: string } = detail
     ? { url: dataUrl, detail }
     : { url: dataUrl };
+  return [{ type: 'image_url', image_url: imageUrl }];
+}
+
+// Sends the prompt + content tail to OpenRouter and returns the raw output.
+async function completeScan(
+  env: Env,
+  reqId: string,
+  opts: AttemptOptions,
+  choice: ModelChoice,
+  tail: ContentTail,
+): Promise<string> {
+  const { model } = choice;
+  // Claude takes no temperature: the empty-result retry resamples it anyway.
+  const temperature = choice.byok ? undefined : opts.temperature;
 
   // Never outlive the shared budget: a late attempt gets whatever is left of it.
   const remaining = opts.deadline - Date.now();
@@ -513,7 +745,12 @@ async function completeScan(
         // No response_format/structured outputs: not every provider accepts it.
         // The prompt pins JSON-only output and the parsers tolerate fences/prose.
         model,
-        ...(choice.byok ? { provider: ANTHROPIC_ONLY } : { temperature }),
+        ...(choice.byok
+          ? { provider: ANTHROPIC_ONLY }
+          : {
+              temperature,
+              ...(opts.denyDataCollection ? { provider: { data_collection: 'deny' } } : {}),
+            }),
         max_tokens: opts.maxTokens,
         // Receipt parsing is a mechanical OCR/extraction task, so disable
         // reasoning: on reasoning-capable models the chain-of-thought would
@@ -523,10 +760,7 @@ async function completeScan(
         // Usage accounting adds the real USD cost to `usage`, which the
         // PostHog generation records instead of re-pricing from tokens.
         usage: { include: true },
-        messages: [{ role: 'user', content: [
-          ...promptBlocks(opts.prompt, choice.byok),
-          { type: 'image_url', image_url: imageUrl },
-        ] }],
+        messages: [{ role: 'user', content: [...promptBlocks(opts.prompt, choice.byok), ...tail] }],
       }),
     });
 
@@ -541,7 +775,13 @@ async function completeScan(
 
     if (!res.ok) {
       const text = await res.text().catch(() => '');
-      throw new Error(`openrouter ${res.status}: ${text.slice(0, 200)}`);
+      // A provider error body can echo the input (moderation errors quote it),
+      // so notification text never reaches the logs, PostHog or the client.
+      throw new Error(
+        opts.spanName === 'notification_review'
+          ? `openrouter ${res.status}`
+          : `openrouter ${res.status}: ${text.slice(0, 200)}`,
+      );
     }
 
     const completion = (await res.json()) as {
@@ -571,7 +811,7 @@ async function completeScan(
     clearTimeout(timer);
     opts.trace.recordGeneration({
       model,
-      spanName: `receipt_scan_${opts.mode}`,
+      spanName: opts.spanName,
       startedAt: calledAt,
       endedAt: Date.now(),
       httpStatus,
@@ -597,7 +837,43 @@ async function completeWithFailover(
 ): Promise<string> {
   const imageType = sniffImageMime(body.image ?? '');
   const mime = imageType ?? (body.mime?.trim().toLowerCase() || 'image/jpeg');
-  const models = resolveModels(env, imageType);
+  return completeTailWithFailover(
+    env,
+    reqId,
+    opts,
+    resolveModels(env, imageType),
+    imageTail(body, env, mime),
+    validateContent,
+  );
+}
+
+/** Text-only inference (notification review): every model in the chain reads text. */
+export function completeTextWithFailover(
+  env: Env,
+  reqId: string,
+  opts: AttemptOptions,
+  text: string,
+  validateContent?: (content: string) => void,
+): Promise<string> {
+  // An empty text block is refused by Anthropic, so the prompt alone is sent.
+  return completeTailWithFailover(
+    env,
+    reqId,
+    opts,
+    resolveModels(env, 'text/plain'),
+    text ? [{ type: 'text', text }] : [],
+    validateContent,
+  );
+}
+
+async function completeTailWithFailover(
+  env: Env,
+  reqId: string,
+  opts: AttemptOptions,
+  models: ModelChoice[],
+  tail: ContentTail,
+  validateContent?: (content: string) => void,
+): Promise<string> {
   let lastError: unknown;
   for (let i = 0; i < models.length; i += 1) {
     const choice = models[i];
@@ -610,7 +886,7 @@ async function completeWithFailover(
         ? opts.deadline - Math.min(BACKUP_RESERVE_MS, Math.max(0, remaining / 2))
         : opts.deadline;
     try {
-      const content = await completeScan(body, env, reqId, { ...opts, deadline }, choice, mime);
+      const content = await completeScan(env, reqId, { ...opts, deadline }, choice, tail);
       validateContent?.(content);
       return content;
     } catch (err) {
@@ -674,7 +950,7 @@ async function runInference(
         deadline,
         temperature: attempt === 0 ? 0 : RETRY_TEMPERATURE,
         attempt,
-        mode,
+        spanName: `receipt_scan_${mode}`,
         trace,
         promptRef: built.prompt,
       });

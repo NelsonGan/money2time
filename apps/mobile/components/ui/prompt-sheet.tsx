@@ -25,11 +25,14 @@ export function PromptSheet({ visible, onDismiss, children }: PromptSheetProps) 
       onRequestClose={onDismiss}
     >
       <Pressable
+        accessible={false}
         className="flex-1 justify-end bg-black/50 px-4"
         style={{ paddingTop: insets.top + spacing.md, paddingBottom: insets.bottom + spacing.md }}
         onPress={onDismiss}
       >
+        {/* Not one accessibility element: screen readers reach each control inside. */}
         <Pressable
+          accessible={false}
           onPress={(event) => event.stopPropagation()}
           className="overflow-hidden rounded-[30px] border border-border/30 bg-background shadow-float"
         >

@@ -1421,6 +1421,20 @@ export interface PaymentAlertPrefs {
   sources: Record<string, PaymentAlertSource>;
   /** Phrases that make any alert ignored. */
   ignorePhrases: string[];
+  /** AI auto-review of captured notifications (opt-in). */
+  aiReview: NotificationAiReviewPrefs;
+}
+
+/** Which transaction types AI auto-review may log; others stay for the user. */
+export type NotificationAiLogTypes = 'both' | 'expense' | 'income';
+
+/**
+ * There is no account choice: auto-review logs a notification to the account
+ * its app or shortcut is linked to, and never sends one without a linked account.
+ */
+export interface NotificationAiReviewPrefs {
+  enabled: boolean;
+  logTypes: NotificationAiLogTypes;
 }
 
 /**

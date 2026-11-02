@@ -3,7 +3,12 @@
 // __tests__/features/autoLog/pipeline.test.ts. A corrupt blob must never brick a
 // launch, so parsing validates every field and falls back field by field.
 
-import type { PaymentAlertChannel, PaymentAlertPrefs, PaymentAlertSource } from '~/types';
+import type {
+  NotificationAiReviewPrefs,
+  PaymentAlertChannel,
+  PaymentAlertPrefs,
+  PaymentAlertSource,
+} from '~/types';
 
 import { containsWords } from './text';
 
@@ -12,7 +17,18 @@ export const DEFAULT_PAYMENT_ALERT_PREFS: PaymentAlertPrefs = {
   alertsEnabled: false,
   sources: {},
   ignorePhrases: [],
+  aiReview: { enabled: false, logTypes: 'both' },
 };
+
+// An `accountIds` filter saved by an earlier build is dropped: auto-review
+// covers every linked account.
+function parseAiReview(raw: unknown): NotificationAiReviewPrefs {
+  const row = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
+  return {
+    enabled: row.enabled === true,
+    logTypes: row.logTypes === 'expense' || row.logTypes === 'income' ? row.logTypes : 'both',
+  };
+}
 
 const CHANNELS: readonly PaymentAlertChannel[] = ['android_notification', 'ios_alert', 'apple_pay'];
 
@@ -78,6 +94,7 @@ export function parsePaymentAlertPrefs(json: string | null | undefined): Payment
     alertsEnabled: row.alertsEnabled === true,
     sources,
     ignorePhrases: asStringList(row.ignorePhrases),
+    aiReview: parseAiReview(row.aiReview),
   };
 }
 

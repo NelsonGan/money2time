@@ -205,8 +205,9 @@ function ScanJobCard({
 }
 
 /** The scanning row: rotating (fading) placeholder text + animated dots, a live
- *  percentage, and a progress bar. */
-function ScanProgress() {
+ *  percentage, and a progress bar. Other AI work (notification review) passes
+ *  its own `label` and gets the same look. */
+export function ScanProgress({ label }: { label?: string } = {}) {
   const themeColors = useThemeColors();
   const progress = useSharedValue(0);
   const lastPct = useSharedValue(-1);
@@ -232,7 +233,7 @@ function ScanProgress() {
     }
   });
 
-  const message = stageMessageForPct(pct);
+  const message = label ? label.replace(/…\s*$/, '') : stageMessageForPct(pct);
 
   // Cross-fade the text each time the stage message changes.
   useEffect(() => {
