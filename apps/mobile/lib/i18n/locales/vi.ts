@@ -1756,6 +1756,7 @@ const vi = {
     delete_plan: 'Xóa khoản trả góp',
     delete_title: 'Xóa khoản trả góp này?',
     delete_message: 'Các kỳ sắp tới sẽ bị hủy. Bạn có muốn giữ các kỳ đã trả không?',
+    delete_message_none: 'Các kỳ thanh toán sẽ bị huỷ.',
     delete_keep_payments: 'Giữ các kỳ đã trả',
     delete_with_payments: 'Xóa luôn',
     edit_notice: 'Kỳ {{number}}/{{count}} · {{name}}',

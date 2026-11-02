@@ -1779,6 +1779,7 @@ const id = {
     delete_title: 'Hapus cicilan ini?',
     delete_message:
       'Pembayaran mendatang dibatalkan. Apakah Anda ingin menyimpan pembayaran yang sudah dilakukan?',
+    delete_message_none: 'Pembayarannya dibatalkan.',
     delete_keep_payments: 'Simpan yang sudah dibayar',
     delete_with_payments: 'Hapus juga',
     edit_notice: 'Pembayaran {{number}} dari {{count}} · {{name}}',

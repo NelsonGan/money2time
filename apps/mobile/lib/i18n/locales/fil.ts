@@ -1795,6 +1795,7 @@ const fil = {
     delete_title: 'Burahin ang hulugang ito?',
     delete_message:
       'Kakanselahin ang mga paparating na hulog. Gusto mo bang itago ang mga nabayaran na?',
+    delete_message_none: 'Kakanselahin ang mga hulog nito.',
     delete_keep_payments: 'Itago ang nabayaran',
     delete_with_payments: 'Burahin din',
     edit_notice: 'Hulog {{number}} sa {{count}} · {{name}}',

@@ -1741,6 +1741,7 @@ const en = {
     delete_title: 'Delete this plan?',
     delete_message:
       'Upcoming payments are cancelled. Do you want to keep the payments already made?',
+    delete_message_none: 'Its payments are cancelled.',
     delete_keep_payments: 'Keep payments made',
     delete_with_payments: 'Delete them too',
     edit_notice: 'Payment {{number}} of {{count}} · {{name}}',

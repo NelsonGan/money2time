@@ -1772,6 +1772,7 @@ const da = {
     delete_title: 'Slet denne plan?',
     delete_message:
       'Kommende afdrag annulleres. Vil du beholde de betalinger, der allerede er foretaget?',
+    delete_message_none: 'Dens afdrag annulleres.',
     delete_keep_payments: 'Behold betalte',
     delete_with_payments: 'Slet dem også',
     edit_notice: 'Afdrag {{number}} af {{count}} · {{name}}',

@@ -400,6 +400,21 @@ function InstalmentPlanEditSheet({
   };
 
   const confirmDelete = () => {
+    // Nothing paid yet: there are no payments to keep or remove, just the plan.
+    if (plan.paidCount === 0) {
+      Alert.alert(I18n.t('instalments.delete_title'), I18n.t('instalments.delete_message_none'), [
+        { text: I18n.t('common.cancel'), style: 'cancel' },
+        {
+          text: I18n.t('common.delete'),
+          style: 'destructive',
+          onPress: () => {
+            onClose();
+            deleteInstalmentPlan(rule.id, false);
+          },
+        },
+      ]);
+      return;
+    }
     Alert.alert(I18n.t('instalments.delete_title'), I18n.t('instalments.delete_message'), [
       { text: I18n.t('common.cancel'), style: 'cancel' },
       {

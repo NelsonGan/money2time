@@ -1685,6 +1685,7 @@ const zhHant = {
     delete_plan: '刪除分期',
     delete_title: '刪除此分期？',
     delete_message: '未到期的還款將被取消。是否保留已還的款項？',
+    delete_message_none: '其分期付款將被取消。',
     delete_keep_payments: '保留已還款項',
     delete_with_payments: '一併刪除',
     edit_notice: '第 {{number}}/{{count}} 期 · {{name}}',

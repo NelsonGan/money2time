@@ -1782,6 +1782,7 @@ const ms = {
     delete_title: 'Padam pelan ini?',
     delete_message:
       'Bayaran akan datang dibatalkan. Adakah anda mahu menyimpan bayaran yang sudah dibuat?',
+    delete_message_none: 'Bayarannya dibatalkan.',
     delete_keep_payments: 'Simpan bayaran dibuat',
     delete_with_payments: 'Padam juga',
     edit_notice: 'Bayaran {{number}} daripada {{count}} · {{name}}',

@@ -1787,6 +1787,7 @@ const fr = {
     delete_title: 'Supprimer ce plan ?',
     delete_message:
       'Les échéances à venir sont annulées. Voulez-vous garder les paiements déjà effectués ?',
+    delete_message_none: 'Ses échéances sont annulées.',
     delete_keep_payments: 'Garder les paiements',
     delete_with_payments: 'Les supprimer aussi',
     edit_notice: 'Échéance {{number}} sur {{count}} · {{name}}',

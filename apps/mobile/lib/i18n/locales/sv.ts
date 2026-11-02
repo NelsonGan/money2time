@@ -1769,6 +1769,7 @@ const sv = {
     delete_plan: 'Ta bort plan',
     delete_title: 'Ta bort planen?',
     delete_message: 'Kommande betalningar avbryts. Vill du behålla betalningarna som redan gjorts?',
+    delete_message_none: 'Betalningarna avbryts.',
     delete_keep_payments: 'Behåll gjorda betalningar',
     delete_with_payments: 'Ta bort dem också',
     edit_notice: 'Betalning {{number}} av {{count}} · {{name}}',

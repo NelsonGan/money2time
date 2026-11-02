@@ -1775,6 +1775,7 @@ const pl = {
     delete_plan: 'Usuń plan',
     delete_title: 'Usunąć ten plan?',
     delete_message: 'Nadchodzące raty zostaną anulowane. Czy zachować raty już zapłacone?',
+    delete_message_none: 'Jego raty zostaną anulowane.',
     delete_keep_payments: 'Zachowaj zapłacone',
     delete_with_payments: 'Usuń je też',
     edit_notice: 'Rata {{number}} z {{count}} · {{name}}',

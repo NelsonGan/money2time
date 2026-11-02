@@ -1746,6 +1746,7 @@ const ko = {
     delete_plan: '할부 삭제',
     delete_title: '이 할부를 삭제할까요?',
     delete_message: '예정된 회차는 취소됩니다. 이미 납부한 내역은 유지할까요?',
+    delete_message_none: '이 할부의 납부가 취소돼요.',
     delete_keep_payments: '납부 내역 유지',
     delete_with_payments: '함께 삭제',
     edit_notice: '{{count}}회 중 {{number}}회차 · {{name}}',

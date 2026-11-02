@@ -1780,6 +1780,7 @@ const tr = {
     delete_plan: 'Planı sil',
     delete_title: 'Bu plan silinsin mi?',
     delete_message: 'Yaklaşan taksitler iptal edilir. Ödenmiş taksitler kalsın mı?',
+    delete_message_none: 'Taksitleri iptal edilir.',
     delete_keep_payments: 'Ödenenleri tut',
     delete_with_payments: 'Onları da sil',
     edit_notice: 'Taksit {{number}}/{{count}} · {{name}}',

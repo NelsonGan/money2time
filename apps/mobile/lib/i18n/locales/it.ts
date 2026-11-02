@@ -1775,6 +1775,7 @@ const it = {
     delete_plan: 'Elimina piano',
     delete_title: 'Eliminare questo piano?',
     delete_message: 'Le rate future vengono annullate. Vuoi tenere i pagamenti già fatti?',
+    delete_message_none: 'Le sue rate vengono annullate.',
     delete_keep_payments: 'Tieni i pagamenti',
     delete_with_payments: 'Elimina anche quelli',
     edit_notice: 'Rata {{number}} di {{count}} · {{name}}',

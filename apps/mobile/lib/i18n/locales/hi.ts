@@ -1764,6 +1764,7 @@ const hi = {
     delete_title: 'यह प्लान हटाएँ?',
     delete_message:
       'आने वाली किस्तें रद्द हो जाएँगी। क्या आप चुकाई जा चुकी किस्तें रखना चाहते हैं?',
+    delete_message_none: 'इसकी किस्तें रद्द हो जाएँगी।',
     delete_keep_payments: 'चुकाई किस्तें रखें',
     delete_with_payments: 'उन्हें भी हटाएँ',
     edit_notice: 'किस्त {{number}}/{{count}} · {{name}}',

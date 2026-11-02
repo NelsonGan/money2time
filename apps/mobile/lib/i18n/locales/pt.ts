@@ -1778,6 +1778,7 @@ const pt = {
     delete_plan: 'Excluir parcelamento',
     delete_title: 'Excluir este parcelamento?',
     delete_message: 'As próximas parcelas são canceladas. Quer manter as parcelas já pagas?',
+    delete_message_none: 'As parcelas serão canceladas.',
     delete_keep_payments: 'Manter as pagas',
     delete_with_payments: 'Excluir também',
     edit_notice: 'Parcela {{number}} de {{count}} · {{name}}',

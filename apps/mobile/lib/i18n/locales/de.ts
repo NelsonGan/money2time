@@ -1790,6 +1790,7 @@ const de = {
     delete_title: 'Diesen Plan löschen?',
     delete_message:
       'Anstehende Raten werden gestrichen. Möchtest du die bereits gezahlten Raten behalten?',
+    delete_message_none: 'Die Raten werden storniert.',
     delete_keep_payments: 'Gezahlte behalten',
     delete_with_payments: 'Auch diese löschen',
     edit_notice: 'Rate {{number}} von {{count}} · {{name}}',

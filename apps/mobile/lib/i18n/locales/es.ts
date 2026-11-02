@@ -1777,6 +1777,7 @@ const es = {
     delete_plan: 'Eliminar plan',
     delete_title: '¿Eliminar este plan?',
     delete_message: 'Las próximas cuotas se cancelan. ¿Quieres conservar las cuotas ya pagadas?',
+    delete_message_none: 'Se cancelan sus cuotas.',
     delete_keep_payments: 'Conservar pagadas',
     delete_with_payments: 'Eliminarlas también',
     edit_notice: 'Cuota {{number}} de {{count}} · {{name}}',

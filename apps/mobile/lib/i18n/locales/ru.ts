@@ -1775,6 +1775,7 @@ const ru = {
     delete_plan: 'Удалить рассрочку',
     delete_title: 'Удалить эту рассрочку?',
     delete_message: 'Предстоящие платежи будут отменены. Сохранить уже сделанные платежи?',
+    delete_message_none: 'Его платежи будут отменены.',
     delete_keep_payments: 'Сохранить платежи',
     delete_with_payments: 'Удалить и их',
     edit_notice: 'Платёж {{number}} из {{count}} · {{name}}',

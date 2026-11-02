@@ -1740,6 +1740,7 @@ const th = {
     delete_plan: 'ลบแผน',
     delete_title: 'ลบแผนนี้ไหม?',
     delete_message: 'งวดที่กำลังจะถึงจะถูกยกเลิก ต้องการเก็บงวดที่จ่ายไปแล้วไว้ไหม?',
+    delete_message_none: 'งวดผ่อนของรายการนี้จะถูกยกเลิก',
     delete_keep_payments: 'เก็บงวดที่จ่ายแล้ว',
     delete_with_payments: 'ลบด้วย',
     edit_notice: 'งวดที่ {{number}} จาก {{count}} · {{name}}',

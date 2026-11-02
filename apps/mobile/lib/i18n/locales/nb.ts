@@ -1771,6 +1771,7 @@ const nb = {
     delete_title: 'Slette denne planen?',
     delete_message:
       'Kommende avdrag kanselleres. Vil du beholde betalingene som allerede er gjort?',
+    delete_message_none: 'Avdragene kanselleres.',
     delete_keep_payments: 'Behold betalte',
     delete_with_payments: 'Slett dem også',
     edit_notice: 'Avdrag {{number}} av {{count}} · {{name}}',

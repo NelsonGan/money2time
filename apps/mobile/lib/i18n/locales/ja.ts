@@ -1761,6 +1761,7 @@ const ja = {
     delete_plan: 'プランを削除',
     delete_title: 'このプランを削除しますか？',
     delete_message: '今後の支払いは取り消されます。支払済みの分は残しますか？',
+    delete_message_none: 'この分割払いの支払いは取り消されます。',
     delete_keep_payments: '支払済み分を残す',
     delete_with_payments: 'それも削除',
     edit_notice: '{{count}} 回中 {{number}} 回目 · {{name}}',

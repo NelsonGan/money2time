@@ -279,18 +279,17 @@ export function InstalmentSheet({
                     </View>
                   </View>
                   <View className="flex-row gap-2">
-                    {INSTALMENT_COUNT_PRESETS.map((count) => (
-                      <ChoiceChip
-                        key={count}
-                        label={String(count)}
-                        selected={choice.count === count}
-                        onPress={() => setCount(count)}
-                      />
-                    ))}
-                    {/* A count off the presets still shows which one is picked. */}
-                    {!(INSTALMENT_COUNT_PRESETS as readonly number[]).includes(choice.count) ? (
-                      <ChoiceChip label={String(choice.count)} selected onPress={() => undefined} />
-                    ) : null}
+                    {/* A count off the presets joins them in order, picked. */}
+                    {[...new Set([...INSTALMENT_COUNT_PRESETS, choice.count])]
+                      .sort((a, b) => a - b)
+                      .map((count) => (
+                        <ChoiceChip
+                          key={count}
+                          label={String(count)}
+                          selected={choice.count === count}
+                          onPress={() => setCount(count)}
+                        />
+                      ))}
                   </View>
                 </View>
 

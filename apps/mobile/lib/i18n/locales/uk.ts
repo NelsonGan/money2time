@@ -1769,6 +1769,7 @@ const uk = {
     delete_plan: 'Видалити розстрочку',
     delete_title: 'Видалити цю розстрочку?',
     delete_message: 'Майбутні платежі буде скасовано. Зберегти вже здійснені платежі?',
+    delete_message_none: 'Його платежі буде скасовано.',
     delete_keep_payments: 'Зберегти платежі',
     delete_with_payments: 'Видалити і їх',
     edit_notice: 'Платіж {{number}} з {{count}} · {{name}}',

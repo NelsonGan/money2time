@@ -1787,6 +1787,7 @@ const nl = {
     delete_title: 'Dit plan verwijderen?',
     delete_message:
       'Komende termijnen worden geannuleerd. Wil je de betalingen die al gedaan zijn bewaren?',
+    delete_message_none: 'De termijnen worden geannuleerd.',
     delete_keep_payments: 'Betalingen bewaren',
     delete_with_payments: 'Ook verwijderen',
     edit_notice: 'Termijn {{number}} van {{count}} · {{name}}',
