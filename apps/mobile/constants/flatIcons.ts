@@ -5,6 +5,8 @@ import {
   ArrowUpRight,
   BarChart3,
   Bell,
+  BellOff,
+  BellRing,
   Calendar,
   CalendarClock,
   CalendarRange,
@@ -29,6 +31,7 @@ import {
   Home,
   ImagePlus,
   Images,
+  Inbox,
   Landmark,
   LayoutGrid,
   LineChart,
@@ -192,8 +195,11 @@ export const FLAT_ICON_FOR_CLAY: Record<ClayIconName, FlatIconSpec> = {
   'settings/statement-import': { icon: FileText, tone: 'primary' },
 
   // status/ — empty-state and warning art
+  'status/auto-review': { icon: BellRing, tone: 'primary' },
   'status/cloud-upload': { icon: CloudUpload, tone: 'primary' },
   'status/goal-target': { icon: Target, tone: 'primary' },
+  'status/ignored': { icon: BellOff, tone: 'muted' },
+  'status/sorted': { icon: Inbox, tone: 'success' },
   'status/success': { icon: CircleCheck, tone: 'success' },
 
   // ui/ — generic interface chrome

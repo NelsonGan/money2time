@@ -1,7 +1,7 @@
 import { useNavigation, usePreventRemove } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { FlashList } from '@shopify/flash-list';
-import { BellOff, ChevronDown, ChevronUp, ListChecks, Pencil, Sparkles } from 'lucide-react-native';
+import { ChevronDown, ChevronUp, ListChecks, Pencil } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Pressable, View } from 'react-native';
 
@@ -10,6 +10,7 @@ import { LoadingDots } from '~/components/feedback/LoadingDots';
 import {
   Button,
   CategoryEmoji,
+  ClayIcon,
   HeaderIconButton,
   PromptSheet,
   SettingsHeader,
@@ -272,31 +273,50 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
         }}
       />
       <NotificationAiCard />
-      <View className="mx-auto w-full max-w-[640px] px-5 pb-2">
-        <View className="flex-row rounded-xl bg-secondary p-1">
-          {(['pending', 'recent'] as const).map((item) => (
-            <Button
-              key={item}
-              variant="ghost"
-              bouncy={false}
-              className={`h-10 flex-1 gap-1.5 rounded-lg border-0 ${tab === item ? 'bg-card' : ''}`}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: tab === item }}
-              onPress={() => setTab(item)}
-            >
-              <Text
-                variant="bodyStrong"
-                className={tab === item ? 'text-foreground' : 'text-muted-foreground'}
+      <View className="mx-auto mb-3 w-full max-w-[640px] px-5">
+        <View accessibilityRole="tablist" className="flex-row border-b border-border/60">
+          {(['pending', 'recent'] as const).map((item) => {
+            const selected = tab === item;
+            return (
+              <Pressable
+                key={item}
+                accessibilityRole="tab"
+                accessibilityState={{ selected }}
+                testID={`notification-tab-${item}`}
+                onPress={() => {
+                  if (!selected) void triggerHaptic('selection');
+                  setTab(item);
+                }}
+                className="h-11 flex-1 items-center justify-center"
               >
-                {I18n.t(`payment_alerts.review_${item}`)}
-              </Text>
-              {item === 'pending' && pending.length > 0 ? (
-                <Text variant="bodyStrong" className="text-destructive">
-                  {pending.length}
-                </Text>
-              ) : null}
-            </Button>
-          ))}
+                <View className="flex-row items-center gap-1.5">
+                  <Text
+                    variant="bodyStrong"
+                    className={selected ? 'text-foreground' : 'text-muted-foreground'}
+                  >
+                    {I18n.t(
+                      item === 'pending'
+                        ? 'payment_alerts.review_pending'
+                        : 'payment_alerts.history',
+                    )}
+                  </Text>
+                  {item === 'pending' && pending.length > 0 ? (
+                    <Text
+                      variant="bodyStrong"
+                      className={selected ? 'text-primary' : 'text-muted-foreground'}
+                    >
+                      {pending.length}
+                    </Text>
+                  ) : null}
+                </View>
+                <View
+                  className={`absolute -bottom-px left-6 right-6 h-0.5 rounded-full ${
+                    selected ? 'bg-primary' : 'bg-transparent'
+                  }`}
+                />
+              </Pressable>
+            );
+          })}
         </View>
       </View>
       {loading ? (
@@ -319,7 +339,7 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
           contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 32 }}
           ListHeaderComponent={
             tab === 'pending' && aiDone.length > 0 ? (
-              <DoneByAiGroup
+              <SortedGroup
                 entries={aiDone}
                 busy={busy}
                 money={money}
@@ -662,7 +682,6 @@ function NotificationReviewCard({
           />
         ) : (
           <View className="flex-row items-center gap-1">
-            {entry.ai?.applied ? <Sparkles size={12} color={colors.textMuted} /> : null}
             <Text variant="caption" tone={tone}>
               {label}
             </Text>
@@ -688,11 +707,11 @@ function NotificationReviewCard({
 }
 
 /**
- * What AI just logged or ignored, until the user leaves the page: one card,
- * folded to a summary ("1 logged · 1 ignored"), that opens into transaction
- * rows, each with Undo.
+ * What auto-review just logged or ignored, until the user leaves the page: one
+ * card, folded to "Sorted for you · 1 logged · 1 ignored", that opens into
+ * transaction rows, each with Undo.
  */
-function DoneByAiGroup({
+function SortedGroup({
   entries,
   busy,
   money,
@@ -710,40 +729,39 @@ function DoneByAiGroup({
   const logged = entries.filter((entry) => entry.result !== 'none').length;
   const ignored = entries.length - logged;
   const Chevron = open ? ChevronUp : ChevronDown;
+  const summary = [
+    logged > 0 ? I18n.t('payment_alerts.ai_logged_count', { count: logged }) : null,
+    ignored > 0 ? I18n.t('payment_alerts.ai_ignored_count', { count: ignored }) : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
   return (
     <View className="mx-auto mb-3 w-full max-w-[640px] overflow-hidden rounded-2xl bg-card">
       <Pressable
         accessibilityRole="button"
         accessibilityState={{ expanded: open }}
-        accessibilityLabel={I18n.t('payment_alerts.ai_done_title')}
+        accessibilityLabel={`${I18n.t('payment_alerts.ai_done_title')}, ${summary}`}
         testID="notification-ai-done-toggle"
         onPress={() => {
           void triggerHaptic('selection');
           setOpen((value) => !value);
         }}
-        className="min-h-12 flex-row items-center gap-2 px-4 py-2.5"
+        className="min-h-14 flex-row items-center gap-3 px-4 py-3"
       >
-        <Sparkles size={15} color={colors.primary} />
-        <Text variant="bodyStrong" className="flex-1">
-          {I18n.t('payment_alerts.ai_done_title')}
-        </Text>
-        {logged > 0 ? (
-          <CountChip
-            dot="bg-success"
-            label={I18n.t('payment_alerts.ai_logged_count', { count: logged })}
-          />
-        ) : null}
-        {ignored > 0 ? (
-          <CountChip
-            dot="bg-muted-foreground"
-            label={I18n.t('payment_alerts.ai_ignored_count', { count: ignored })}
-          />
-        ) : null}
-        <Chevron size={16} color={colors.textMuted} />
+        <ClayIcon name="status/sorted" size={36} flatSize={22} />
+        <View className="flex-1">
+          <Text variant="bodyStrong" numberOfLines={1}>
+            {I18n.t('payment_alerts.ai_done_title')}
+          </Text>
+          <Text variant="caption" tone="muted" numberOfLines={1}>
+            {summary}
+          </Text>
+        </View>
+        <Chevron size={18} color={colors.textMuted} />
       </Pressable>
       {open
         ? entries.map((entry, index) => (
-            <DoneByAiRow
+            <SortedRow
               key={entry.id}
               index={index}
               entry={entry}
@@ -758,19 +776,8 @@ function DoneByAiGroup({
   );
 }
 
-function CountChip({ dot, label }: { dot: string; label: string }) {
-  return (
-    <View className="flex-row items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1">
-      <View className={`h-1.5 w-1.5 rounded-full ${dot}`} />
-      <Text variant="caption" className="text-[12px]" numberOfLines={1}>
-        {label}
-      </Text>
-    </View>
-  );
-}
-
 /** A logged result reads like its transaction row; an ignored one says why. */
-function DoneByAiRow({
+function SortedRow({
   index,
   entry,
   busy,
@@ -786,7 +793,6 @@ function DoneByAiRow({
   onUndo: () => void;
 }) {
   const { accounts, categories } = useApp();
-  const colors = useThemeColors();
   const [expanded, setExpanded] = useState(false);
   const source = entry.sourceLabel ?? I18n.t('payment_alerts.ios_notifications_title');
   const ignored = entry.result === 'none';
@@ -815,7 +821,7 @@ function DoneByAiRow({
         >
           <View className="h-10 w-10 items-center justify-center rounded-full bg-secondary">
             {ignored ? (
-              <BellOff size={17} color={colors.textMuted} />
+              <ClayIcon name="status/ignored" size={24} flatSize={17} />
             ) : (
               <CategoryEmoji icon={category?.icon} size={22} />
             )}

@@ -1,10 +1,11 @@
-import { Check, Sparkles } from 'lucide-react-native';
+import { Check } from 'lucide-react-native';
 import React, { useEffect, useState, useSyncExternalStore } from 'react';
 import { Alert, Pressable, ScrollView, Switch, useWindowDimensions, View } from 'react-native';
 
 import {
   AccountLogo,
   Button,
+  ClayIcon,
   InfoTooltipButton,
   PromptSheet,
   SegmentedToggle,
@@ -115,8 +116,8 @@ export function NotificationAiCard() {
       : I18n.t('payment_alerts.ai_quota_left', { count: notificationAiRemaining(quota) });
 
   return (
-    <View className="mx-auto w-full max-w-[640px] px-5 pb-2">
-      <View className="min-h-12 flex-row items-center gap-3">
+    <View className="mx-auto w-full max-w-[640px] px-5 pb-1">
+      <View className="min-h-16 flex-row items-center gap-3 rounded-2xl bg-card py-3 pl-3 pr-4">
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={I18n.t('payment_alerts.ai_settings')}
@@ -127,20 +128,31 @@ export function NotificationAiCard() {
             void triggerHaptic('selection');
             setSettingsOpen(true);
           }}
-          className="flex-1 flex-row flex-wrap items-center gap-x-2"
+          className="flex-1 flex-row items-center gap-3"
         >
-          <Sparkles size={17} color={enabled ? colors.primary : colors.textMuted} />
-          <Text variant="bodyStrong">{I18n.t('payment_alerts.ai_title')}</Text>
-          <Text variant="caption" tone="muted">
-            {subtitle}
-          </Text>
-          <InfoTooltipButton
-            iconSize={14}
-            title={I18n.t('payment_alerts.ai_quota_info_title')}
-            infoTooltip={I18n.t('payment_alerts.ai_quota_info', {
-              limit: quota && !quota.isPro ? quota.limit : FREE_NOTIFICATION_AI_REVIEWS,
-            })}
+          <ClayIcon
+            name="status/auto-review"
+            size={40}
+            flatSize={22}
+            opacity={enabled || exhausted ? 1 : 0.85}
           />
+          <View className="flex-1">
+            <Text variant="bodyStrong" numberOfLines={1}>
+              {I18n.t('payment_alerts.ai_title')}
+            </Text>
+            <View className="flex-row items-center gap-1">
+              <Text variant="caption" tone="muted" numberOfLines={1} className="shrink">
+                {subtitle}
+              </Text>
+              <InfoTooltipButton
+                iconSize={13}
+                title={I18n.t('payment_alerts.ai_quota_info_title')}
+                infoTooltip={I18n.t('payment_alerts.ai_quota_info', {
+                  limit: quota && !quota.isPro ? quota.limit : FREE_NOTIFICATION_AI_REVIEWS,
+                })}
+              />
+            </View>
+          </View>
         </Pressable>
         {exhausted ? (
           <Button
