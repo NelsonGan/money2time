@@ -138,7 +138,7 @@ export function InstalmentSheet({
           >
             <View className="gap-6 px-5 pt-4">
               {/* The answer first: what each payment comes to. */}
-              <View className="items-center gap-1" accessibilityLiveRegion="polite">
+              <View className="items-center gap-4" accessibilityLiveRegion="polite">
                 {hasTotal ? (
                   <>
                     <View className="flex-row items-baseline gap-1.5">
@@ -147,16 +147,12 @@ export function InstalmentSheet({
                         {I18n.t(`instalments.per.${choice.frequency}`)}
                       </Text>
                     </View>
-                    <Text variant="caption" tone="muted" className="text-center">
-                      {I18n.t('instalments.sheet_meta', {
-                        count: choice.count,
-                        from: formatPlanDay(firstPaymentIso),
-                        to: formatPlanDay(plan.lastDate),
-                      })}
-                      {plan.last !== plan.regular
-                        ? ` · ${I18n.t('instalments.last_amount', { amount: money(plan.last) })}`
-                        : ''}
-                    </Text>
+                    <PaymentTimeline
+                      count={choice.count}
+                      from={formatPlanDay(firstPaymentIso)}
+                      to={formatPlanDay(plan.lastDate)}
+                      lastAmount={plan.last !== plan.regular ? money(plan.last) : null}
+                    />
                   </>
                 ) : (
                   <Text variant="body" tone="muted" className="py-4 text-center">
@@ -285,6 +281,68 @@ export function InstalmentSheet({
         </View>
       </View>
     </ThemeModal>
+  );
+}
+
+/** Past this many payments the dots would crowd: the track is drawn plain. */
+const MAX_TIMELINE_DOTS = 24;
+
+/**
+ * The plan at a glance: one dot per payment between the first and last dates,
+ * the count on the track, and the last payment's amount when it differs.
+ */
+function PaymentTimeline({
+  count,
+  from,
+  to,
+  lastAmount,
+}: {
+  count: number;
+  from: string;
+  to: string;
+  lastAmount: string | null;
+}) {
+  const dots = count <= MAX_TIMELINE_DOTS ? count : 2;
+  const label = I18n.t('instalments.payments_count', { count });
+  const lastLabel = lastAmount ? I18n.t('instalments.last_amount', { amount: lastAmount }) : null;
+  return (
+    <View
+      className="self-stretch gap-2"
+      accessible
+      accessibilityLabel={[label, `${from} – ${to}`, lastLabel].filter(Boolean).join(', ')}
+    >
+      <View className="flex-row items-end justify-between gap-2">
+        <Text variant="caption" tone="muted" numberOfLines={1}>
+          {from}
+        </Text>
+        <Text variant="caption" className="font-semibold" numberOfLines={1}>
+          {label}
+        </Text>
+        <Text variant="caption" tone="muted" numberOfLines={1}>
+          {to}
+        </Text>
+      </View>
+      <View className="h-2.5 flex-row items-center">
+        {Array.from({ length: dots }, (_, index) => {
+          const end = index === 0 || index === dots - 1;
+          return (
+            <React.Fragment key={index}>
+              {index > 0 ? <View className="h-[1.5px] flex-1 bg-border" /> : null}
+              <View
+                className={cn(
+                  'rounded-full',
+                  end ? 'h-2.5 w-2.5 bg-primary' : 'h-1.5 w-1.5 bg-muted-foreground/40',
+                )}
+              />
+            </React.Fragment>
+          );
+        })}
+      </View>
+      {/* Always laid out, so the chips below do not jump as the count changes. */}
+      <Text variant="caption" tone="muted" className="self-end" numberOfLines={1}>
+        {lastLabel ?? ' '}
+      </Text>
+    </View>
   );
 }
 

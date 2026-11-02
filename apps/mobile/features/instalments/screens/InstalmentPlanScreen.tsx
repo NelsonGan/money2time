@@ -115,7 +115,6 @@ export function InstalmentPlanScreen({
     );
   };
 
-  const payoffDate = plan.entries.find((entry) => entry.status === 'paid_off')?.paidDateIso;
   const upcomingCount = plan.entries.filter((entry) => entry.status === 'upcoming').length;
 
   const content = (
@@ -164,13 +163,9 @@ export function InstalmentPlanScreen({
               </Text>
               <Text variant="body" tone="muted">
                 {plan.complete
-                  ? plan.paidOff
-                    ? I18n.t('instalments.paid_off_on', {
-                        date: formatPlanDay(payoffDate ?? rule.updatedAt),
-                      })
-                    : plan.paidCount === plan.entries.length
-                      ? I18n.t('instalments.all_paid')
-                      : I18n.t('instalments.section_finished')
+                  ? plan.paidCount === plan.entries.length
+                    ? I18n.t('instalments.all_paid')
+                    : I18n.t('instalments.section_finished')
                   : I18n.t('instalments.left_label')}
               </Text>
             </View>
@@ -262,14 +257,11 @@ function ScheduleRow({
   const paid = entry.status === 'paid' || entry.status === 'paid_off';
   const done = paid || entry.status === 'skipped';
   // Read aloud in place of the marks, which carry no text of their own.
-  const statusLabel =
-    entry.status === 'paid'
-      ? I18n.t('instalments.status_paid')
-      : entry.status === 'paid_off'
-        ? I18n.t('instalments.status_paid_off')
-        : entry.status === 'skipped'
-          ? I18n.t('instalments.status_skipped')
-          : I18n.t('instalments.status_upcoming');
+  const statusLabel = paid
+    ? I18n.t('instalments.status_paid')
+    : entry.status === 'skipped'
+      ? I18n.t('instalments.status_skipped')
+      : I18n.t('instalments.status_upcoming');
   // Always with the year: a schedule often runs into the next one.
   const dateLabel = formatShortDate(entry.dateIso);
   return (

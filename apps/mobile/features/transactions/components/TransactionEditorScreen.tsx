@@ -4,7 +4,6 @@ import {
   ArrowLeftRight,
   ArrowRight,
   Calendar,
-  CalendarRange,
   Camera,
   Check,
   ChevronDown,
@@ -72,6 +71,7 @@ import {
   SubscriptionLogo,
   Text,
 } from '~/components/ui';
+import { ClayIcon } from '~/components/ui/ClayIcon';
 import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { hasSubscriptionLogoArt } from '~/components/ui/SubscriptionLogo';
 import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
@@ -4167,7 +4167,12 @@ export function TransactionEditorScreen({
                 accessibilityRole="button"
                 className="flex-row items-center gap-2 rounded-2xl border border-primary/25 bg-primary/10 px-3.5 py-2.5 active:opacity-70"
               >
-                <CalendarRange size={15} color={themeColors.primary} />
+                <ClayIcon
+                  name="settings/instalments"
+                  size={18}
+                  flatSize={15}
+                  flatColor={themeColors.primary}
+                />
                 <Text variant="caption" tone="primary" numberOfLines={1} className="flex-1">
                   {headerNotice.label}
                 </Text>
@@ -4353,9 +4358,11 @@ export function TransactionEditorScreen({
                   )}
                   style={{ opacity: hasFriendSplits ? 0.4 : 1 }}
                 >
-                  <CalendarRange
-                    size={15}
-                    color={instalmentActive ? themeColors.primary : themeColors.textMuted}
+                  <ClayIcon
+                    name="settings/instalments"
+                    size={18}
+                    flatSize={15}
+                    flatColor={instalmentActive ? themeColors.primary : themeColors.textMuted}
                   />
                   <Text
                     variant="caption"

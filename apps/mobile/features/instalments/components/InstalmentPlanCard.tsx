@@ -68,14 +68,12 @@ export function InstalmentPlanCard({
   const parent = category?.parentId ? getCategoryById(category.parentId) : undefined;
   const money = (amount: number) => formatAmount(amount, settings, { currencyCode: rule.currency });
 
-  // "All paid" only when every payment was made; a plan that ended with
-  // skipped (deleted) payments is just finished.
+  // "All paid" when every payment was made, paid off early included; a plan
+  // that ended with skipped (deleted) payments is just finished.
   const status = plan.complete
-    ? plan.paidOff
-      ? I18n.t('instalments.status_paid_off')
-      : plan.paidCount === plan.entries.length
-        ? I18n.t('instalments.status_complete')
-        : I18n.t('instalments.section_finished')
+    ? plan.paidCount === plan.entries.length
+      ? I18n.t('instalments.status_complete')
+      : I18n.t('instalments.section_finished')
     : plan.next
       ? I18n.t('instalments.next_payment_short', {
           date: formatPlanDay(plan.next.dateIso),

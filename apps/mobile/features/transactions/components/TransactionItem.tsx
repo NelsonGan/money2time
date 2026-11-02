@@ -160,14 +160,15 @@ interface TransactionItemBodyProps {
 }
 
 /**
- * "4/12" on a payment of an instalment plan, or "Paid off" on the payment that
- * settled the rest. Shown only while the plan exists.
+ * "4/12" on a payment of an instalment plan, and "12/12" on the payment that
+ * paid off the rest. Shown only while the plan exists.
  */
 function instalmentPillLabel(transaction: TransactionWithRelations): string | null {
   if (!transaction.instalmentRuleId || transaction.instalmentNumber == null) return null;
   if (!transaction.instalmentCount) return null;
-  if (transaction.instalmentNumber === 0) return I18n.t('instalments.pill_paid_off');
-  return `${transaction.instalmentNumber}/${transaction.instalmentCount}`;
+  const number =
+    transaction.instalmentNumber === 0 ? transaction.instalmentCount : transaction.instalmentNumber;
+  return `${number}/${transaction.instalmentCount}`;
 }
 
 function InstalmentPill({ label, compact }: { label: string; compact: boolean }) {
