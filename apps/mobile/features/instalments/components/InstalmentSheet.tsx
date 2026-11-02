@@ -16,6 +16,7 @@ import { dayKeyFromIsoLocal, formatAmount } from '~/utils/formatters';
 
 import { formatPlanDay } from '../lib/format';
 import {
+  canSplitInstalments,
   clampInstalmentCount,
   INSTALMENT_COUNT_PRESETS,
   INSTALMENT_FREQUENCIES,
@@ -38,6 +39,8 @@ interface InstalmentSheetProps {
   visible: boolean;
   /** What the plan is set to now, or null when the form has no plan yet. */
   value: InstalmentChoice | null;
+  /** A choice not applied yet, kept while the first payment's date is picked. */
+  draft?: InstalmentChoice | null;
   /** The amount typed in the form: the plan's total. */
   total: number;
   currency: string;
@@ -46,8 +49,11 @@ interface InstalmentSheetProps {
   onApply: (choice: InstalmentChoice) => void;
   onRemove: () => void;
   onClose: () => void;
-  /** Opens the form's own date picker to move the first payment. */
-  onPickFirstPayment: () => void;
+  /**
+   * Opens the form's own date picker to move the first payment, handing over
+   * the choice so far so the sheet can come back to it.
+   */
+  onPickFirstPayment: (choice: InstalmentChoice) => void;
 }
 
 /** The amounts and dates a choice gives, shared by the sheet and the form. */
@@ -63,7 +69,6 @@ export function describeInstalmentChoice(
     amounts,
     dates,
     regular: amounts[0] ?? 0,
-    last: amounts[amounts.length - 1] ?? 0,
     lastDate: dates[dates.length - 1] ?? firstPaymentIso,
   };
 }
@@ -75,6 +80,7 @@ export function describeInstalmentChoice(
 export function InstalmentSheet({
   visible,
   value,
+  draft = null,
   total,
   currency,
   firstPaymentIso,
@@ -87,12 +93,15 @@ export function InstalmentSheet({
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
   const sheetColumnStyle = useSheetColumnStyle();
-  const [choice, setChoice] = useState<InstalmentChoice>(value ?? DEFAULT_INSTALMENT_CHOICE);
+  const [choice, setChoice] = useState<InstalmentChoice>(
+    draft ?? value ?? DEFAULT_INSTALMENT_CHOICE,
+  );
 
-  // Each opening starts from what the form holds.
+  // Each opening starts from what the form holds, or the choice left off
+  // when the date picker opened.
   useEffect(() => {
-    if (visible) setChoice(value ?? DEFAULT_INSTALMENT_CHOICE);
-  }, [visible, value]);
+    if (visible) setChoice(draft ?? value ?? DEFAULT_INSTALMENT_CHOICE);
+  }, [visible, value, draft]);
 
   const money = (amount: number) => formatAmount(amount, settings, { currencyCode: currency });
   const plan = useMemo(
@@ -100,6 +109,8 @@ export function InstalmentSheet({
     [choice, total, firstPaymentIso],
   );
   const hasTotal = Number.isFinite(total) && total > 0;
+  // A total under a cent a payment would make payments of zero.
+  const canApply = canSplitInstalments(total, choice.count);
   const startsToday =
     dayKeyFromIsoLocal(firstPaymentIso) === dayKeyFromIsoLocal(new Date().toISOString());
 
@@ -139,7 +150,7 @@ export function InstalmentSheet({
             <View className="gap-6 px-5 pt-4">
               {/* The answer first: what each payment comes to. */}
               <View className="items-center gap-4" accessibilityLiveRegion="polite">
-                {hasTotal ? (
+                {canApply ? (
                   <>
                     <View className="flex-row items-baseline gap-1.5">
                       <Text variant="display">{money(plan.regular)}</Text>
@@ -151,12 +162,13 @@ export function InstalmentSheet({
                       count={choice.count}
                       from={formatPlanDay(firstPaymentIso)}
                       to={formatPlanDay(plan.lastDate)}
-                      lastAmount={plan.last !== plan.regular ? money(plan.last) : null}
                     />
                   </>
                 ) : (
                   <Text variant="body" tone="muted" className="py-4 text-center">
-                    {I18n.t('instalments.enter_total_first')}
+                    {hasTotal
+                      ? I18n.t('instalments.total_too_small', { count: choice.count })
+                      : I18n.t('instalments.enter_total_first')}
                   </Text>
                 )}
               </View>
@@ -242,7 +254,7 @@ export function InstalmentSheet({
               <Pressable
                 onPress={() => {
                   void triggerHaptic('selection');
-                  onPickFirstPayment();
+                  onPickFirstPayment(choice);
                 }}
                 accessibilityRole="button"
                 className="h-12 flex-row items-center gap-2 border-y border-border/30 active:opacity-70"
@@ -264,8 +276,8 @@ export function InstalmentSheet({
                     void triggerHaptic('success');
                     onApply(choice);
                   }}
-                  disabled={!hasTotal}
-                  style={{ opacity: hasTotal ? 1 : 0.5 }}
+                  disabled={!canApply}
+                  style={{ opacity: canApply ? 1 : 0.5 }}
                   accessibilityRole="button"
                 >
                   <Text>{I18n.t('common.done')}</Text>
@@ -287,36 +299,14 @@ export function InstalmentSheet({
 /** Past this many payments the dots would crowd: the track is drawn plain. */
 const MAX_TIMELINE_DOTS = 24;
 
-/**
- * The plan at a glance: one dot per payment between the first and last dates,
- * the count on the track, and the last payment's amount when it differs.
- */
-function PaymentTimeline({
-  count,
-  from,
-  to,
-  lastAmount,
-}: {
-  count: number;
-  from: string;
-  to: string;
-  lastAmount: string | null;
-}) {
+/** The plan at a glance: one dot per payment between the first and last dates. */
+function PaymentTimeline({ count, from, to }: { count: number; from: string; to: string }) {
   const dots = count <= MAX_TIMELINE_DOTS ? count : 2;
-  const label = I18n.t('instalments.payments_count', { count });
-  const lastLabel = lastAmount ? I18n.t('instalments.last_amount', { amount: lastAmount }) : null;
   return (
-    <View
-      className="self-stretch gap-2"
-      accessible
-      accessibilityLabel={[label, `${from} – ${to}`, lastLabel].filter(Boolean).join(', ')}
-    >
-      <View className="flex-row items-end justify-between gap-2">
+    <View className="gap-2 self-stretch" accessible accessibilityLabel={`${from} – ${to}`}>
+      <View className="flex-row justify-between gap-2">
         <Text variant="caption" tone="muted" numberOfLines={1}>
           {from}
-        </Text>
-        <Text variant="caption" className="font-semibold" numberOfLines={1}>
-          {label}
         </Text>
         <Text variant="caption" tone="muted" numberOfLines={1}>
           {to}
@@ -338,10 +328,6 @@ function PaymentTimeline({
           );
         })}
       </View>
-      {/* Always laid out, so the chips below do not jump as the count changes. */}
-      <Text variant="caption" tone="muted" className="self-end" numberOfLines={1}>
-        {lastLabel ?? ' '}
-      </Text>
     </View>
   );
 }

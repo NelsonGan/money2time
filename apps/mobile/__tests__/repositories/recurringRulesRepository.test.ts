@@ -1,4 +1,8 @@
-jest.mock('~/lib/db/client', () => ({ getDb: jest.fn() }));
+jest.mock('~/lib/db/client', () => ({
+  getDb: jest.fn(),
+  // The payment rows a plan already has: none unless a test says so.
+  getSQLite: jest.fn(() => ({ getAllSync: () => [] })),
+}));
 jest.mock('~/lib/repositories/transactionsRepository', () => ({
   transactionsRepository: { create: jest.fn(), createWithId: jest.fn() },
 }));
@@ -6,7 +10,7 @@ jest.mock('~/lib/repositories/exchangeRatesRepository', () => ({
   exchangeRatesRepository: { listByBase: () => [] },
 }));
 
-import { getDb } from '~/lib/db/client';
+import { getDb, getSQLite } from '~/lib/db/client';
 import { accountsTable, recurringRulesTable, transactionsTable } from '~/lib/db/schema';
 import {
   recurringRulesRepository,
@@ -208,7 +212,8 @@ describe('instalment plans', () => {
     expect(calls.every(([, input]) => input.instalmentRuleId === 'plan')).toBe(true);
     expect(calls.every(([, input]) => input.type === 'expense')).toBe(true);
     expect(rule.isActive).toBe(false);
-    expect(processed).toHaveLength(1);
+    // One notice, at the latest payment's own amount.
+    expect(processed.map((run) => run.amount)).toEqual([333.34]);
   });
 
   it('stops at today and moves the plan on to its next payment', () => {
@@ -227,6 +232,50 @@ describe('instalment plans', () => {
     expect(transactionsRepository.createWithId).not.toHaveBeenCalled();
     expect(rule.nextRunDate).toBe(noon('2027-03-31'));
     expect(rule.isActive).toBe(true);
+  });
+
+  it('does not make a payment again when it already has a row under another id', () => {
+    useRule(makePlanRule());
+    // Payment 2 made by an app version from before plans, on a day of its own.
+    jest.mocked(getSQLite).mockReturnValueOnce({
+      getAllSync: () => [
+        {
+          id: 'rr:plan:2027-02-27',
+          amount: 333.33,
+          date: noon('2027-02-27'),
+          instalment_rule_id: null,
+          instalment_number: null,
+          deleted_at: null,
+        },
+      ],
+    } as unknown as ReturnType<typeof getSQLite>);
+    recurringRulesRepository.runDueTransactions(endOfDay('2027-03-31'));
+
+    expect(
+      jest
+        .mocked(transactionsRepository.createWithId)
+        .mock.calls.map(([, input]) => input.instalmentNumber),
+    ).toEqual([1, 3]);
+  });
+
+  it('makes nothing more once the plan was paid off, and ends it', () => {
+    const rule = useRule(makePlanRule());
+    jest.mocked(getSQLite).mockReturnValueOnce({
+      getAllSync: () => [
+        {
+          id: 'rr:plan:payoff',
+          amount: 1000,
+          date: noon('2027-01-20'),
+          instalment_rule_id: 'plan',
+          instalment_number: 0,
+          deleted_at: null,
+        },
+      ],
+    } as unknown as ReturnType<typeof getSQLite>);
+    recurringRulesRepository.runDueTransactions(endOfDay('2027-03-31'));
+
+    expect(transactionsRepository.createWithId).not.toHaveBeenCalled();
+    expect(rule.isActive).toBe(false);
   });
 
   it('skips payments before the plan’s next run date', () => {

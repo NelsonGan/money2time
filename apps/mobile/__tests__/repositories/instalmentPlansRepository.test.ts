@@ -94,7 +94,10 @@ function useFakeDb({
     }),
   };
   (getDb as jest.Mock).mockReturnValue(db);
-  (getSQLite as jest.Mock).mockReturnValue({ getAllSync: () => payments });
+  (getSQLite as jest.Mock).mockReturnValue({
+    getAllSync: () => payments,
+    withTransactionSync: (write: () => void) => write(),
+  });
   return state;
 }
 

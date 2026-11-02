@@ -233,6 +233,50 @@ describe('buildInstalmentProgress', () => {
     expect(progress.entries.map((entry) => entry.amount)).toEqual([333.33, 333.33, 333.34]);
   });
 
+  it('finds the payment the plan is on by the nearest date, wherever it was stored', () => {
+    // Moved on by a phone in another time zone, which put the same payment
+    // most of a day earlier (the day before, locally).
+    const earlier = new Date(Date.parse(noon('2026-12-02')) - 20 * 3_600_000).toISOString();
+    const progress = buildInstalmentProgress(makePlan({ nextRunDate: earlier }), [
+      payment(1, noon('2026-11-02')),
+    ]);
+    expect(progress.entries[1]?.status).toBe('upcoming');
+    expect(progress.next?.number).toBe(2);
+  });
+
+  it('leaves a skipped payment skipped when the rest is paid off', () => {
+    const plan = makePlan({
+      instalmentCount: 6,
+      instalmentTotal: 600,
+      isActive: false,
+      nextRunDate: noon('2027-02-02'),
+    });
+    const progress = buildInstalmentProgress(plan, [
+      payment(1, noon('2026-11-02'), 100),
+      payment(2, noon('2026-12-02'), 100),
+      payment(INSTALMENT_PAYOFF_NUMBER, '2027-01-20T09:00:00.000Z', 300, { id: 'payoff' }),
+    ]);
+    expect(progress.entries.map((entry) => entry.status)).toEqual([
+      'paid',
+      'paid',
+      'skipped',
+      'paid_off',
+      'paid_off',
+      'paid_off',
+    ]);
+    expect(progress.paidCount).toBe(5);
+    expect(progress.paidAmount).toBe(500);
+  });
+
+  it('counts only rows that are a scheduled payment', () => {
+    const plan = makePlan({ instalmentCount: 3, instalmentTotal: 300 });
+    const progress = buildInstalmentProgress(plan, [
+      payment(1, noon('2026-11-02'), 100),
+      payment(9, noon('2026-11-03'), 50),
+    ]);
+    expect(progress.paidAmount).toBe(100);
+  });
+
   it('uses the amount actually paid when a payment was edited', () => {
     const plan = makePlan({ nextRunDate: noon('2026-12-02') });
     const progress = buildInstalmentProgress(plan, [payment(1, noon('2026-11-02'), 210)]);
@@ -315,6 +359,35 @@ describe('paymentRowsForPlan', () => {
         instalmentNumber: 2,
       }),
     ]);
+  });
+});
+
+describe('paymentRowsForPlan (older app versions)', () => {
+  const plan = makePlan();
+  const legacy = (day: string) => ({
+    id: `rr:plan1:${day}`,
+    amount: 200,
+    date: `${day}T12:00:00.000Z`,
+    deletedAt: null,
+    instalmentNumber: null,
+    instalmentRuleId: null,
+  });
+
+  it('numbers a run a few days off the schedule by the nearest payment', () => {
+    // That app walks months in UTC from its previous run, so its day drifts.
+    const rows = paymentRowsForPlan(plan, [legacy('2026-12-01'), legacy('2027-01-03')]);
+    expect(rows.map((row) => row.instalmentNumber)).toEqual([2, 3]);
+  });
+
+  it('never gives one payment two runs, nor takes a run half a period away', () => {
+    const rows = paymentRowsForPlan(plan, [
+      { ...legacy('2026-12-02'), instalmentRuleId: 'plan1', instalmentNumber: 2 },
+      legacy('2026-12-03'),
+      legacy('2027-01-17'),
+    ]);
+    // The second December run is a month from any free payment and the
+    // mid-January one half a month: neither is a payment of the plan.
+    expect(rows.map((row) => [row.id, row.instalmentNumber])).toEqual([['rr:plan1:2026-12-02', 2]]);
   });
 });
 

@@ -2,8 +2,10 @@ import { and, eq, isNull, lte } from 'drizzle-orm';
 
 import {
   buildInstalmentProgress,
+  canSplitInstalments,
   INSTALMENT_PAYOFF_NUMBER,
   isInstalmentPlan,
+  nextPaymentIndex,
   paymentRowsForPlan,
   scheduleOfPlan,
   splitInstalmentAmounts,
@@ -248,7 +250,7 @@ class RecurringRulesRepository {
   ): CreatedInstalmentPlan | null {
     const count = Math.trunc(input.count);
     if (!input.accountId || !input.categoryId || count < 2) return null;
-    if (!Number.isFinite(input.total) || input.total <= 0) return null;
+    if (!canSplitInstalments(input.total, count)) return null;
     const amounts = splitInstalmentAmounts(input.total, count);
     const schedule = {
       instalmentCount: count,
@@ -262,43 +264,50 @@ class RecurringRulesRepository {
     const lastDate = dates[dates.length - 1];
     if (!firstDate || !lastDate || dates.length !== count) return null;
 
-    const ruleId = this.create({
-      name: input.name,
-      type: 'expense',
-      amount: amounts[0] ?? 0,
-      currency: input.currency,
-      accountId: input.accountId,
-      categoryId: input.categoryId,
-      note: input.note ?? null,
-      recurrencePattern: input.recurrencePattern,
-      recurrenceInterval: schedule.recurrenceInterval,
-      nextRunDate: firstDate,
-      endDate: lastDate,
-      instalmentCount: count,
-      instalmentTotal: input.total,
-      instalmentStartDate: firstDate,
-    });
-    if (!ruleId) return null;
+    // The rule, its first payment and the move to the next one land
+    // together: a plan whose first payment failed would have the runner make
+    // it later without the receipt, which the asset sweep would then delete.
+    let created: CreatedInstalmentPlan | null = null;
+    getSQLite().withTransactionSync(() => {
+      const ruleId = this.create({
+        name: input.name,
+        type: 'expense',
+        amount: amounts[0] ?? 0,
+        currency: input.currency,
+        accountId: input.accountId,
+        categoryId: input.categoryId,
+        note: input.note ?? null,
+        recurrencePattern: input.recurrencePattern,
+        recurrenceInterval: schedule.recurrenceInterval,
+        nextRunDate: firstDate,
+        endDate: lastDate,
+        instalmentCount: count,
+        instalmentTotal: input.total,
+        instalmentStartDate: firstDate,
+      });
+      if (!ruleId) return;
 
-    let firstPaymentId: string | null = null;
-    if (firstDate <= todayIso) {
-      const rule = this.get(ruleId);
-      if (rule) {
-        const id = recurringRunTransactionId(ruleId, firstDate);
-        const wrote = writeRunOnce(id, {
-          ...categorizedRunInput(rule, buildRunContext(), firstDate, amounts[0] ?? 0),
-          details: input.firstPayment?.details ?? null,
-          receiptUri: input.firstPayment?.receiptUri ?? null,
-          sentiment: input.firstPayment?.sentiment,
-          reimbursable: input.firstPayment?.reimbursable ?? false,
-          instalmentRuleId: ruleId,
-          instalmentNumber: 1,
-        });
-        if (wrote) firstPaymentId = id;
-        this.advanceInstalmentPlan(ruleId, dates[1] ?? null);
+      let firstPaymentId: string | null = null;
+      if (firstDate <= todayIso) {
+        const rule = this.get(ruleId);
+        if (rule) {
+          const id = recurringRunTransactionId(ruleId, firstDate);
+          const wrote = writeRunOnce(id, {
+            ...categorizedRunInput(rule, buildRunContext(), firstDate, amounts[0] ?? 0),
+            details: input.firstPayment?.details ?? null,
+            receiptUri: input.firstPayment?.receiptUri ?? null,
+            sentiment: input.firstPayment?.sentiment,
+            reimbursable: input.firstPayment?.reimbursable ?? false,
+            instalmentRuleId: ruleId,
+            instalmentNumber: 1,
+          });
+          if (wrote) firstPaymentId = id;
+          this.advanceInstalmentPlan(ruleId, dates[1] ?? null);
+        }
       }
-    }
-    return { ruleId, firstPaymentId };
+      created = { ruleId, firstPaymentId };
+    });
+    return created;
   }
 
   /**
@@ -481,12 +490,16 @@ class RecurringRulesRepository {
 
     dueRules.forEach((rule) => {
       if (isInstalmentPlan(rule)) {
+        // One notice per plan, like an ordinary rule's catch-up, at the
+        // amount of the latest payment made (the last carries the leftover
+        // cents, so it can differ from the rule's).
         const made = this.runInstalmentPlan(rule, todayIso, context);
-        if (made > 0) {
+        const latest = made[made.length - 1];
+        if (latest !== undefined) {
           processed.push({
             name: rule.name,
             type: rule.type,
-            amount: rule.amount,
+            amount: latest,
             currency: rule.currency,
           });
         }
@@ -571,13 +584,13 @@ class RecurringRulesRepository {
    * Makes every payment of a plan that has fallen due since it last ran, on
    * the plan's own dates (counted from the first payment, so they never drift
    * after a short month), each with its own amount (the last one takes the
-   * leftover cents) and numbered. Returns how many it made.
+   * leftover cents) and numbered. Returns the amount of each payment it made.
    */
   private runInstalmentPlan(
     rule: RecurringTransactionRule & { instalmentCount: number },
     todayIso: string,
     context: RunContext,
-  ): number {
+  ): number[] {
     // Nowhere to post (its account or category is gone): move past what is
     // due without writing, as an ordinary rule does, so the plan is not
     // picked up again on every load.
@@ -587,21 +600,39 @@ class RecurringRulesRepository {
       rule.instalmentTotal ?? rule.amount * rule.instalmentCount,
       rule.instalmentCount,
     );
-    let made = 0;
+    const payments = this.instalmentPayments(rule);
+    // Paid off (on another phone, whose ending of the plan a later sync of
+    // the rule undid): nothing more to make.
+    if (
+      payments.some(
+        (payment) => !payment.deletedAt && payment.instalmentNumber === INSTALMENT_PAYOFF_NUMBER,
+      )
+    ) {
+      this.advanceInstalmentPlan(rule.id, null);
+      return [];
+    }
+    // A number with a row, live or deleted, was made already: by this phone,
+    // or by one in another time zone or on an older version whose run id for
+    // it differs, so the run id alone would not stop a second charge.
+    const madeNumbers = new Set(payments.map((payment) => payment.instalmentNumber));
+    // Which payment the plan is on, found the same way as its progress.
+    const nextIndex = nextPaymentIndex(rule.nextRunDate, dates);
+    const made: number[] = [];
     let next: string | null = null;
     dates.forEach((date, index) => {
-      if (next || date < rule.nextRunDate) return;
+      if (next || index < nextIndex) return;
       if (date > todayIso) {
         next = date;
         return;
       }
-      if (!canPost) return;
+      if (!canPost || madeNumbers.has(index + 1)) return;
+      const amount = amounts[index] ?? rule.amount;
       const wrote = writeRunOnce(recurringRunTransactionId(rule.id, date), {
-        ...categorizedRunInput(rule, context, date, amounts[index] ?? rule.amount),
+        ...categorizedRunInput(rule, context, date, amount),
         instalmentRuleId: rule.id,
         instalmentNumber: index + 1,
       });
-      if (wrote) made += 1;
+      if (wrote) made.push(amount);
     });
     this.advanceInstalmentPlan(rule.id, next);
     return made;

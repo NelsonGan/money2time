@@ -2430,6 +2430,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         categoryIcon: catInfo.icon,
         categoryParentId: catInfo.parentId,
         categoryParentName: catInfo.parentName,
+        // Joined from a plan on load; a row made here is never a plan's
+        // payment. Present so the stored row reconciles with this one.
+        instalmentCount: null,
       };
     },
     [accountNameById, categoryRelationInfoById],

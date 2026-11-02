@@ -2,7 +2,7 @@
 //
 // A plan is stored as a recurring rule with three extra columns
 // (`instalment_count`, `instalment_total`, `instalment_start_date`, migration
-// 076). The rule's own engine posts each payment on its due date, so this
+// 077). The rule's own engine posts each payment on its due date, so this
 // module only holds the arithmetic both the runner and the screens share: how
 // the total splits into payments, which dates they fall on, and how far along
 // a plan is given the payments that exist. It is pure so it is tested without
@@ -58,6 +58,11 @@ export function isInstalmentPlan(
   rule: Pick<RecurringTransactionRule, 'instalmentCount'>,
 ): rule is RecurringTransactionRule & { instalmentCount: number } {
   return typeof rule.instalmentCount === 'number' && rule.instalmentCount > 0;
+}
+
+/** Whether a total splits into `count` payments of at least one cent each. */
+export function canSplitInstalments(total: number, count: number): boolean {
+  return Number.isFinite(total) && total > 0 && Math.round(total * 100) >= Math.trunc(count);
 }
 
 /**
@@ -166,6 +171,26 @@ export function scheduleOfPlan(
   );
 }
 
+/**
+ * Which payment the plan is on: the scheduled one nearest its next run date.
+ * Every phone works the schedule out in its own time zone, so the date one
+ * stored can sit hours (and across midnight, a day) off the same payment on
+ * another; nearest, not equal, finds it anyway. Earlier ones are behind.
+ */
+export function nextPaymentIndex(nextRunDate: string, dates: readonly string[]): number {
+  const target = Date.parse(nextRunDate);
+  let best = 0;
+  let bestGap = Infinity;
+  dates.forEach((date, index) => {
+    const gap = Math.abs(Date.parse(date) - target);
+    if (gap < bestGap) {
+      best = index;
+      bestGap = gap;
+    }
+  });
+  return best;
+}
+
 export type InstalmentEntryStatus = 'paid' | 'paid_off' | 'skipped' | 'upcoming';
 
 export interface InstalmentEntry {
@@ -224,19 +249,28 @@ export function buildInstalmentProgress(
   live.forEach((payment) => {
     if (payment.instalmentNumber === INSTALMENT_PAYOFF_NUMBER) {
       payoff = payment;
-    } else if (payment.instalmentNumber != null && !byNumber.has(payment.instalmentNumber)) {
+    } else if (
+      payment.instalmentNumber != null &&
+      payment.instalmentNumber >= 1 &&
+      payment.instalmentNumber <= dates.length &&
+      !byNumber.has(payment.instalmentNumber)
+    ) {
       byNumber.set(payment.instalmentNumber, payment);
     }
   });
   const payoffRow = payoff as InstalmentPaymentRow | null;
 
+  const nextIndex = nextPaymentIndex(rule.nextRunDate, dates);
   const entries: InstalmentEntry[] = dates.map((dateIso, index) => {
     const number = index + 1;
     const payment = byNumber.get(number);
     let status: InstalmentEntryStatus;
+    // Behind the payment the plan is on (see `nextPaymentIndex`).
+    const due = index < nextIndex;
     if (payment) status = 'paid';
-    else if (payoffRow) status = 'paid_off';
-    else if (!rule.isActive || dateIso < rule.nextRunDate) status = 'skipped';
+    // A payoff covers the payments still to come, not ones already skipped.
+    else if (payoffRow && !due) status = 'paid_off';
+    else if (!rule.isActive || due) status = 'skipped';
     else status = 'upcoming';
     return {
       number,
@@ -275,12 +309,34 @@ export function buildInstalmentProgress(
 /** A transaction as far as finding a plan's payments goes. */
 export type InstalmentCandidateRow = InstalmentPaymentRow & Pick<Transaction, 'instalmentRuleId'>;
 
+/** Days between two `YYYY-MM-DD` keys, ignoring sign. */
+function daysApart(a: string, b: string): number {
+  return Math.abs(Date.parse(`${a}T00:00:00Z`) - Date.parse(`${b}T00:00:00Z`)) / 86_400_000;
+}
+
+/** Half a plan's period in days: how far an older app's run can sit from its payment. */
+function halfPeriodDays(pattern: RepeatingPattern, interval: number): number {
+  const days =
+    pattern === 'monthly'
+      ? 30
+      : pattern === 'weekly'
+        ? 7
+        : pattern === 'daily'
+          ? 1
+          : pattern === 'yearly'
+            ? 365
+            : 30;
+  return (days * Math.max(1, interval)) / 2;
+}
+
 /**
  * The rows that are payments of `rule`. A row names its plan and number, but
  * one written by an app version from before plans (a phone on Cloud Sync that
  * has not updated yet runs the plan as an ordinary rule) does not: it is
  * recognised by the run id the runner gives it, `rr:<plan>:<YYYY-MM-DD>`, and
- * numbered by that scheduled day.
+ * numbered by the nearest scheduled payment not already made. That app walks
+ * dates its own way (in UTC, from the previous run), so its day can sit a few
+ * days off the plan's, but never half a period.
  */
 export function paymentRowsForPlan(
   rule: Pick<
@@ -295,20 +351,36 @@ export function paymentRowsForPlan(
   rows: readonly InstalmentCandidateRow[],
 ): InstalmentPaymentRow[] {
   const prefix = `rr:${rule.id}:`;
-  let dayKeys: string[] | null = null;
   const result: InstalmentPaymentRow[] = [];
+  const legacy: InstalmentCandidateRow[] = [];
   rows.forEach((row) => {
-    if (row.instalmentRuleId === rule.id) {
-      result.push(row);
-      return;
-    }
-    if (row.instalmentRuleId || !row.id.startsWith(prefix)) return;
-    const suffix = row.id.slice(prefix.length, prefix.length + 10);
-    dayKeys ??= scheduleOfPlan(rule).map((date) => date.slice(0, 10));
-    const index = dayKeys.indexOf(suffix);
-    if (index < 0) return;
-    result.push({ ...row, instalmentNumber: index + 1 });
+    if (row.instalmentRuleId === rule.id) result.push(row);
+    else if (!row.instalmentRuleId && row.id.startsWith(prefix)) legacy.push(row);
   });
+  if (legacy.length === 0) return result;
+
+  const dayKeys = scheduleOfPlan(rule).map((date) => date.slice(0, 10));
+  const taken = new Set(result.map((row) => row.instalmentNumber));
+  const reach = halfPeriodDays(rule.recurrencePattern, rule.recurrenceInterval);
+  [...legacy]
+    .sort((a, b) => a.id.localeCompare(b.id))
+    .forEach((row) => {
+      const suffix = row.id.slice(prefix.length, prefix.length + 10);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(suffix)) return;
+      let best = -1;
+      let bestGap = Infinity;
+      dayKeys.forEach((dayKey, index) => {
+        if (taken.has(index + 1)) return;
+        const gap = daysApart(dayKey, suffix);
+        if (gap < bestGap) {
+          best = index;
+          bestGap = gap;
+        }
+      });
+      if (best < 0 || bestGap >= reach) return;
+      taken.add(best + 1);
+      result.push({ ...row, instalmentNumber: best + 1 });
+    });
   return result;
 }
 

@@ -84,6 +84,7 @@ import {
   InstalmentSheet,
 } from '~/features/instalments/components/InstalmentSheet';
 import { formatPlanDay } from '~/features/instalments/lib/format';
+import { canSplitInstalments } from '~/features/instalments/lib/instalmentPlan';
 import {
   NumpadPanel,
   ReceiptViewerModal,
@@ -344,6 +345,8 @@ const styles = StyleSheet.create({
   },
 });
 
+/** How long a sheet takes to fade out before the next modal can open over it. */
+const MODAL_HANDOFF_MS = 320;
 interface TransactionEditorInitialValues {
   type: TransactionType;
   amount: string;
@@ -420,13 +423,13 @@ interface TransactionEditorScreenProps {
       };
     }) => void;
   };
+  /** A line under the header that links somewhere (a payment's instalment plan). */
+  headerNotice?: { label: string; actionLabel: string; onPress: () => void };
   /**
    * Offers "pay in instalments" on a new expense: the amount becomes the
    * total, and saving hands the form and the chosen plan here instead of
    * creating one transaction.
    */
-  /** A line under the header that links somewhere (a payment's instalment plan). */
-  headerNotice?: { label: string; actionLabel: string; onPress: () => void };
   instalmentOptions?: {
     /** Start with this plan chosen (Settings › Instalments' add button). */
     initialChoice?: InstalmentChoice | null;
@@ -984,6 +987,9 @@ export function TransactionEditorScreen({
     instalmentOptions?.initialChoice ?? null,
   );
   const [instalmentSheetVisible, setInstalmentSheetVisible] = useState(false);
+  // The sheet's choice while its "First payment" row has the date picker
+  // open: the sheet comes back to it once a date is picked.
+  const [instalmentDraft, setInstalmentDraft] = useState<InstalmentChoice | null>(null);
   const [splits, setSplits] = useState<SplitDraft[]>(initialSplits ?? []);
   const [splitEvenly, setSplitEvenly] = useState(!hasInitialSplits);
   // Whether the pushed Split Bill route is open. Drives the live session
@@ -2292,16 +2298,27 @@ export function TransactionEditorScreen({
       ) {
         const capturedPayload = submitPayload;
         const capturedChoice = instalmentChoice;
-        if (!(capturedPayload.amount > 0)) {
-          setFieldErrors({ amount: I18n.t('instalments.enter_total_first') });
-          showToast(I18n.t('instalments.enter_total_first'));
+        if (!canSplitInstalments(capturedPayload.amount, capturedChoice.count)) {
+          const message =
+            capturedPayload.amount > 0
+              ? I18n.t('instalments.total_too_small', { count: capturedChoice.count })
+              : I18n.t('instalments.enter_total_first');
+          setFieldErrors({ amount: message });
+          showToast(message);
           activateField('amount');
           return;
         }
-        // A receipt and the reimbursement tick belong to one real payment: the
-        // first, made at once. A plan that starts later has nowhere to keep them.
+        // A receipt, the longer note and the reimbursement tick belong to one
+        // real payment: the first, made at once. A plan that starts later has
+        // nowhere to keep them. The mood is not kept either, but it starts as
+        // neutral and is not worth stopping the save for.
         const firstPaymentLater = new Date(capturedPayload.date).getTime() > Date.now();
-        if (firstPaymentLater && (capturedPayload.receiptUri || capturedPayload.reimbursable)) {
+        if (
+          firstPaymentLater &&
+          (capturedPayload.receiptUri ||
+            capturedPayload.reimbursable ||
+            capturedPayload.details?.trim())
+        ) {
           showToast(I18n.t('instalments.extras_need_today'));
           return;
         }
@@ -2488,6 +2505,11 @@ export function TransactionEditorScreen({
           });
         })()
       : null;
+  // Back to the sheet when its "First payment" row opened the date picker.
+  const reopenInstalmentSheet = () => {
+    if (!instalmentDraft) return;
+    setTimeout(() => setInstalmentSheetVisible(true), MODAL_HANDOFF_MS);
+  };
   const openInstalmentSheet = () => {
     if (!instalmentChoice && instalmentOptions?.canStart && !instalmentOptions.canStart()) return;
     void triggerHaptic('selection');
@@ -4349,7 +4371,13 @@ export function TransactionEditorScreen({
                   disabled={hasFriendSplits}
                   accessibilityRole="button"
                   accessibilityState={{ selected: instalmentActive, disabled: hasFriendSplits }}
-                  accessibilityLabel={I18n.t('instalments.chip_label')}
+                  accessibilityLabel={
+                    instalmentActive && instalmentChoice
+                      ? I18n.t(`instalments.chip_active.${instalmentChoice.frequency}`, {
+                          count: instalmentChoice.count,
+                        })
+                      : I18n.t('instalments.chip_label')
+                  }
                   className={cn(
                     'h-9 flex-row items-center gap-1.5 rounded-full border px-3 active:opacity-70',
                     instalmentActive
@@ -5047,27 +5075,42 @@ export function TransactionEditorScreen({
           total={Number.isFinite(instalmentTotal) ? instalmentTotal : 0}
           currency={entryCurrency}
           firstPaymentIso={instalmentFirstIso}
+          draft={instalmentDraft}
           onApply={(choice) => {
             setInstalmentChoice(choice);
+            setInstalmentDraft(null);
             setInstalmentSheetVisible(false);
           }}
           onRemove={() => {
             void triggerHaptic('selection');
             setInstalmentChoice(null);
+            setInstalmentDraft(null);
             setInstalmentSheetVisible(false);
           }}
-          onClose={() => setInstalmentSheetVisible(false)}
-          onPickFirstPayment={() => {
+          onClose={() => {
+            setInstalmentDraft(null);
             setInstalmentSheetVisible(false);
-            activateField('date');
+          }}
+          onPickFirstPayment={(choice) => {
+            setInstalmentDraft(choice);
+            setInstalmentSheetVisible(false);
+            // After the sheet has faded out: iOS will not present a second
+            // modal while the first is still dismissing.
+            setTimeout(() => activateField('date'), MODAL_HANDOFF_MS);
           }}
         />
       ) : null}
       <DatePickerModal
         visible={activeField === 'date'}
         value={date}
-        onSelect={handleDateSelect}
-        onClose={clearActiveField}
+        onSelect={(selected) => {
+          handleDateSelect(selected);
+          reopenInstalmentSheet();
+        }}
+        onClose={() => {
+          clearActiveField();
+          reopenInstalmentSheet();
+        }}
       />
       <DatePickerModal
         visible={activeField === 'endDate'}

@@ -52,7 +52,10 @@ export function EditTransactionScreen({
                 name: instalmentPlan.rule.name,
               }),
         actionLabel: I18n.t('instalments.view_plan'),
-        onPress: () => navigation.navigate('InstalmentPlan', { planId: instalmentPlan.rule.id }),
+        // Back to the plan page when it opened this payment, rather than a
+        // second copy of it on top.
+        onPress: () =>
+          navigation.navigate('InstalmentPlan', { planId: instalmentPlan.rule.id }, { pop: true }),
       }
     : undefined;
   const isLegacyBalanceAdjustmentTransfer =
@@ -62,9 +65,13 @@ export function EditTransactionScreen({
     !transaction.toAccountId;
   const isBalanceAdjustment =
     transaction.type === 'balance_adjustment' || isLegacyBalanceAdjustmentTransfer;
+  // A plan's payment stays an expense of its own: as income, a transfer or a
+  // split bill it would still count towards the plan.
+  const isInstalmentPayment = !!transaction.instalmentRuleId;
   const restrictedTypes = useMemo<TransactionType[] | undefined>(
-    () => (isBalanceAdjustment ? ['balance_adjustment'] : undefined),
-    [isBalanceAdjustment],
+    () =>
+      isBalanceAdjustment ? ['balance_adjustment'] : isInstalmentPayment ? ['expense'] : undefined,
+    [isBalanceAdjustment, isInstalmentPayment],
   );
 
   const handleDelete = useCallback(() => {
@@ -189,6 +196,7 @@ export function EditTransactionScreen({
       onSubmit={handleSubmit}
       onSubmitWithSplits={handleSubmitWithSplits}
       restrictTypeOptions={restrictedTypes}
+      hideSplitMode={isInstalmentPayment}
       initialSplits={initialSplits}
       openSplitBillOnMount={openSplitBillOnMount}
       headerNotice={headerNotice}
