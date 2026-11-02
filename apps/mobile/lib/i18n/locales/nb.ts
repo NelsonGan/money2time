@@ -163,6 +163,21 @@ const nb = {
     reset_action: 'Slett og bytt',
   },
   news: {
+    auto_review_insights_instalments: {
+      title: 'Autogjennomgang, ny Innsikt og delbetaling',
+      autoReview: {
+        title: 'Varsler som sorterer seg selv',
+        body: 'Når føring av varsler er slått på under Innstillinger > Automatisering, slår du på Autogjennomgang. Betalinger føres som utgifter, koder og tilbud ignoreres, og alt som er uklart venter på deg. Du kan angre alle resultater. Gratisplanen inkluderer %{count} gjennomganger.',
+      },
+      insights: {
+        title: 'Innsikt i ny drakt',
+        body: 'Innsikt har nå to sider: Fordeling viser hvor pengene gikk, og Trender viser hvordan de endrer seg fra måned til måned. Dra langs et diagram for å se en måned mot gjennomsnittet ditt, eller sammenlign to kategorier. Trender er en del av Pro.',
+      },
+      instalments: {
+        title: 'Betal i avdrag',
+        body: 'Betaler du noe ned i deler? Legg det til som en utgift og trykk på Delbetaling for å dele det opp i betalinger. Hver betaling føres på forfallsdatoen, og planen viser hva som gjenstår, med Betal nå og Innfri. Gratisplanen inkluderer %{count} planer om gangen.',
+      },
+    },
     cloud_sync_ledgers: {
       title: 'Flere regnskap',
       ledgers: {
@@ -422,6 +437,9 @@ const nb = {
       open_pro_paywall: 'Se Pro-planer',
       open_cloud_sync: 'Slå på Cloud Sync',
       open_bottom_bar: 'Endre bunnlinjen',
+      open_notification_review: 'Slå på Autogjennomgang',
+      open_insights: 'Åpne Innsikt',
+      open_instalments: 'Se delbetalinger',
       open_share_earn: 'Få Pro gratis',
       open_quick_entry_settings: 'Åpne innstillinger for Hurtigregistrering',
       open_auto_log: 'Sett opp automatiseringer',

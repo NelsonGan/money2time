@@ -64,7 +64,10 @@ export interface FeatureAnnouncementPage {
     | 'bottomBar'
     | 'cloudSync'
     | 'ledgers'
-    | 'sharedLedgers';
+    | 'sharedLedgers'
+    | 'autoReview'
+    | 'insightsRedesign'
+    | 'instalmentPlans';
   /**
    * Optional call-to-action for this page. On the last page it replaces the
    * primary button; on earlier pages it sits above the Back/Next row so the
@@ -91,7 +94,10 @@ export interface FeatureAnnouncementPage {
     | 'openWebDashboard'
     | 'openBottomBar'
     | 'openCloudSync'
-    | 'openLedgers';
+    | 'openLedgers'
+    | 'openNotificationReview'
+    | 'openInsights'
+    | 'openInstalments';
   /** Mark sponsored or promotional content clearly in the announcement panel. */
   badge?: 'ad';
   /**
@@ -151,6 +157,15 @@ export function announcementPageBody(
   const key = `news.${announcement.i18nKey}.${page.key}.body`;
   if (announcement.i18nKey === 'pro_trial_accounts' && page.key === 'accounts') {
     return I18n.t(key, { count: PRO_LIMITS.FREE_MAX_ACCOUNTS });
+  }
+  if (announcement.i18nKey === 'auto_review_insights_instalments') {
+    // Free-plan limits come from PRO_LIMITS, never from the copy.
+    if (page.key === 'autoReview') {
+      return I18n.t(key, { count: PRO_LIMITS.FREE_MAX_NOTIFICATION_AI_REVIEWS });
+    }
+    if (page.key === 'instalments') {
+      return I18n.t(key, { count: PRO_LIMITS.FREE_MAX_INSTALMENT_PLANS });
+    }
   }
   return I18n.t(key);
 }
@@ -220,6 +235,12 @@ export function announcementCtaLabel(cta: NonNullable<FeatureAnnouncementPage['c
       return I18n.t('news.cta.open_cloud_sync');
     case 'openLedgers':
       return I18n.t('ledgers.manage');
+    case 'openNotificationReview':
+      return I18n.t('news.cta.open_notification_review');
+    case 'openInsights':
+      return I18n.t('news.cta.open_insights');
+    case 'openInstalments':
+      return I18n.t('news.cta.open_instalments');
     case 'openShareEarn':
     default:
       return I18n.t('news.cta.open_share_earn');

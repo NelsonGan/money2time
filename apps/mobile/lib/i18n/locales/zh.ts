@@ -136,6 +136,21 @@ const zh = {
     },
   },
   news: {
+    auto_review_insights_instalments: {
+      title: '自动确认、全新洞察与分期',
+      autoReview: {
+        title: '会自己分类的通知',
+        body: '在“设置 > 自动化”中开启通知记账后，再开启自动确认。付款会记为支出，验证码和促销会被跳过，不确定的则留给你决定。任何结果都可撤销。免费版可确认 %{count} 条。',
+      },
+      insights: {
+        title: '洞察全新改版',
+        body: '洞察现在分为两页：明细告诉你钱花到了哪里，趋势展示每月的变化。沿着图表滑动，即可将任意月份与平均值对比，或比较两个类别。趋势为 Pro 功能。',
+      },
+      instalments: {
+        title: '分期付款',
+        body: '正在分期付款吗？把它添加为支出，再点分期拆成多笔付款。每期会在到期日记账，方案页会显示剩余金额，还能立即还款或还清。免费版可同时使用 %{count} 个方案。',
+      },
+    },
     cloud_sync_ledgers: {
       title: '多个账本',
       ledgers: {
@@ -395,6 +410,9 @@ const zh = {
       open_pro_paywall: '查看 Pro 套餐',
       open_cloud_sync: '开启 Cloud Sync',
       open_bottom_bar: '编辑底部栏',
+      open_notification_review: '开启自动确认',
+      open_insights: '打开洞察',
+      open_instalments: '查看分期',
       open_share_earn: '免费获取 Pro',
       open_quick_entry_settings: '打开快速记账设置',
       open_auto_log: '设置自动化',

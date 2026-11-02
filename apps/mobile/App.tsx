@@ -3297,6 +3297,8 @@ function AppContent() {
           requestOpenTab('settings');
           requestOpenSettingsScreen('Ledgers');
         }}
+        onOpenInsights={() => requestOpenTab('insights')}
+        onOpenInstalments={() => navigationRef.navigate('SettingsInstalments')}
       />
       <CloudBackupPromptModal
         visible={cloudBackupPromptVisible && !biometricLocked && rootPromptsAllowed}

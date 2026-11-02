@@ -163,6 +163,21 @@ const es = {
     reset_action: 'Eliminar y cambiar',
   },
   news: {
+    auto_review_insights_instalments: {
+      title: 'Revisión automática, nuevo Análisis y cuotas',
+      autoReview: {
+        title: 'Notificaciones que se ordenan solas',
+        body: 'Con el registro de notificaciones activo en Ajustes > Automatización, activa la Revisión automática. Los pagos se registran como gastos, los códigos y promociones se ignoran, y lo que no esté claro te espera. Puedes deshacer cualquier resultado. El plan gratuito incluye %{count} revisiones.',
+      },
+      insights: {
+        title: 'Análisis, rediseñado',
+        body: 'Análisis ahora tiene dos páginas: Desglose muestra en qué se fue tu dinero, y Tendencias cómo cambia mes a mes. Desliza por un gráfico para ver cualquier mes frente a tu promedio, o compara dos categorías. Tendencias forma parte de Pro.',
+      },
+      instalments: {
+        title: 'Paga en cuotas',
+        body: '¿Pagas algo en partes? Añádelo como gasto y toca Cuotas para dividirlo en pagos. Cada uno se registra en su fecha, y el plan muestra lo que queda, con Pagar ahora y Liquidar. El plan gratuito incluye %{count} planes a la vez.',
+      },
+    },
     cloud_sync_ledgers: {
       title: 'Varios libros',
       ledgers: {
@@ -422,6 +437,9 @@ const es = {
       open_pro_paywall: 'Ver planes Pro',
       open_cloud_sync: 'Activar Cloud Sync',
       open_bottom_bar: 'Editar la barra',
+      open_notification_review: 'Activar Revisión automática',
+      open_insights: 'Abrir Análisis',
+      open_instalments: 'Ver cuotas',
       open_share_earn: 'Consigue Pro gratis',
       open_quick_entry_settings: 'Abrir ajustes de Entrada rápida',
       open_auto_log: 'Configurar automatizaciones',

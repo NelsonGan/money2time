@@ -1,10 +1,16 @@
+import * as fs from 'fs';
+import * as path from 'path';
+
+import { PRO_LIMITS } from '~/constants/proLimits';
 import {
+  announcementPageBody,
   announcementPagesForPlatform,
   getFeatureAnnouncementById,
   getFeatureAnnouncementsNewestFirst,
   getLatestFeatureAnnouncement,
   getLatestUnseenFeatureAnnouncement,
 } from '~/features/news/featureAnnouncements';
+import { I18n } from '~/lib/i18n';
 import {
   featureAnnouncementStateTestUtils,
   getLatestUnseenAnnouncementForUser,
@@ -12,6 +18,14 @@ import {
   markCurrentFeatureAnnouncementsSeen,
   markFeatureAnnouncementSeen,
 } from '~/services/featureAnnouncementState';
+
+const LOCALES_DIR = path.join(__dirname, '../../lib/i18n/locales');
+const SUPPORTED_LOCALE_FILES = fs
+  .readdirSync(LOCALES_DIR)
+  .filter((file) => file.endsWith('.ts'))
+  .map((file) => file.replace(/\.ts$/, ''));
+const loadLocale = (locale: string) =>
+  Object.values(require(path.join(LOCALES_DIR, locale)))[0] as any;
 
 const storage = new Map<string, string>();
 
@@ -36,15 +50,51 @@ describe('feature announcement state', () => {
     );
   });
 
-  it('announces ledgers alone, leaving out the allow-listed Cloud Sync', () => {
+  it('announces auto-review, the Insights redesign and instalments on both platforms', () => {
     const latest = getLatestFeatureAnnouncement()!;
     expect(latest).toMatchObject({
-      id: 'cloud_sync_ledgers_2026_10',
+      id: 'auto_review_insights_instalments_2026_11',
+      announcementNumber: 23,
+      pages: [
+        { key: 'autoReview', visual: 'autoReview', cta: 'openNotificationReview' },
+        { key: 'insights', visual: 'insightsRedesign', cta: 'openInsights' },
+        { key: 'instalments', visual: 'instalmentPlans', cta: 'openInstalments' },
+      ],
+    });
+    expect(latest.requiresCapability).toBeUndefined();
+    expect(announcementPagesForPlatform(latest, 'ios')).toHaveLength(3);
+    expect(announcementPagesForPlatform(latest, 'android')).toHaveLength(3);
+  });
+
+  it('takes the free limits in the new announcement from the plan limits', () => {
+    const latest = getLatestFeatureAnnouncement()!;
+    const [autoReview, , instalments] = latest.pages;
+    const t = jest.spyOn(I18n, 't');
+    announcementPageBody(latest, autoReview);
+    announcementPageBody(latest, instalments);
+    expect(t).toHaveBeenCalledWith('news.auto_review_insights_instalments.autoReview.body', {
+      count: PRO_LIMITS.FREE_MAX_NOTIFICATION_AI_REVIEWS,
+    });
+    expect(t).toHaveBeenCalledWith('news.auto_review_insights_instalments.instalments.body', {
+      count: PRO_LIMITS.FREE_MAX_INSTALMENT_PLANS,
+    });
+    t.mockRestore();
+    // Every language takes the number as a placeholder, never as written text.
+    for (const locale of SUPPORTED_LOCALE_FILES) {
+      const news = loadLocale(locale).news.auto_review_insights_instalments;
+      expect(news.autoReview.body).toContain('%{count}');
+      expect(news.instalments.body).toContain('%{count}');
+    }
+  });
+
+  it('announces ledgers alone, leaving out the allow-listed Cloud Sync', () => {
+    const announcement = getFeatureAnnouncementById('cloud_sync_ledgers_2026_10')!;
+    expect(announcement).toMatchObject({
       announcementNumber: 22,
       pages: [{ key: 'ledgers', visual: 'ledgers', cta: 'openLedgers' }],
     });
-    expect(announcementPagesForPlatform(latest, 'ios')).toHaveLength(1);
-    expect(announcementPagesForPlatform(latest, 'android')).toHaveLength(1);
+    expect(announcementPagesForPlatform(announcement, 'ios')).toHaveLength(1);
+    expect(announcementPagesForPlatform(announcement, 'android')).toHaveLength(1);
   });
 
   it('keeps all five web dashboard pages on both platforms', () => {

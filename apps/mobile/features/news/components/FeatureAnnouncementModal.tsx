@@ -14,9 +14,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, FatButton, Text, ThemeModal } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
+import { useIsPro } from '~/context/ProContext';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import { requestFocusInsight } from '~/services/insightsNavigation';
+import { requestOpenPaymentAlerts } from '~/services/paymentAlertsNavigation';
 import { WEB_DASHBOARD_URL } from '~/services/webDashboard.shared';
 import { withColorAlpha } from '~/utils/color';
 
@@ -43,6 +46,11 @@ import {
   WebDashboardShowcase,
 } from './AppUpdatesShowcases';
 import { AutoLogShowcase } from './AutoLogShowcase';
+import {
+  AutoReviewShowcase,
+  InsightsRedesignShowcase,
+  InstalmentPlanShowcase,
+} from './AutoReviewInsightsInstalmentsShowcases';
 import { BackupShowcase } from './BackupShowcase';
 import { BudgetShowcase } from './BudgetShowcase';
 import {
@@ -128,6 +136,8 @@ export interface FeatureAnnouncementCtaHandlers {
   onOpenCloudSync?: () => void;
   /** Invoked when a page links to Manage ledgers. */
   onOpenLedgers?: () => void;
+  onOpenInsights?: () => void;
+  onOpenInstalments?: () => void;
 }
 
 interface FeatureAnnouncementModalProps extends FeatureAnnouncementCtaHandlers {
@@ -201,9 +211,12 @@ export function FeatureAnnouncementModal({
   onOpenBottomBar,
   onOpenCloudSync,
   onOpenLedgers,
+  onOpenInsights,
+  onOpenInstalments,
 }: FeatureAnnouncementModalProps) {
   const colors = useThemeColors();
   const { settings } = useApp();
+  const isPro = useIsPro();
   const insets = useSafeAreaInsets();
   const { width: windowWidth } = useWindowDimensions();
   const [pageIndex, setPageIndex] = useState(0);
@@ -262,6 +275,16 @@ export function FeatureAnnouncementModal({
     openBottomBar: onOpenBottomBar,
     openCloudSync: onOpenCloudSync,
     openLedgers: onOpenLedgers,
+    // Trends is Pro: a free user lands on Breakdown, not on its lock screen.
+    openInsights: onOpenInsights
+      ? () => {
+          requestFocusInsight(isPro ? 'expense_trend' : 'expense_breakdown');
+          onOpenInsights();
+        }
+      : undefined,
+    openInstalments: onOpenInstalments,
+    // The review page is a root route, reachable the same way from every caller.
+    openNotificationReview: () => requestOpenPaymentAlerts({ screen: 'NotificationHistory' }),
     openRiceCal: () => {
       void Linking.openURL(riceCalStoreUrl(Platform.OS)).catch(() => undefined);
     },
@@ -378,7 +401,13 @@ export function FeatureAnnouncementModal({
               </View>
             ) : null}
             <View style={styles.showcaseSlot}>
-              {page.visual === 'cloudSync' ? (
+              {page.visual === 'autoReview' ? (
+                <AutoReviewShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'insightsRedesign' ? (
+                <InsightsRedesignShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'instalmentPlans' ? (
+                <InstalmentPlanShowcase width={Math.round(showcaseWidth * 0.86)} />
+              ) : page.visual === 'cloudSync' ? (
                 <CloudSyncShowcase width={Math.round(showcaseWidth * 0.92)} />
               ) : page.visual === 'ledgers' ? (
                 <LedgersShowcase width={Math.round(showcaseWidth * 0.86)} />

@@ -163,6 +163,21 @@ const de = {
     reset_action: 'Löschen & wechseln',
   },
   news: {
+    auto_review_insights_instalments: {
+      title: 'Autoprüfung, neue Einblicke und Raten',
+      autoReview: {
+        title: 'Mitteilungen, die sich selbst sortieren',
+        body: 'Ist die Erfassung von Mitteilungen unter Einstellungen > Automatisierung aktiv, schalte die Autoprüfung ein. Zahlungen werden als Ausgaben erfasst, Codes und Werbung ignoriert, und alles Unklare wartet auf dich. Jedes Ergebnis lässt sich rückgängig machen. Der Gratisplan enthält %{count} Prüfungen.',
+      },
+      insights: {
+        title: 'Einblicke, neu gestaltet',
+        body: 'Einblicke hat jetzt zwei Seiten: Aufschlüsselung zeigt, wohin dein Geld geflossen ist, und Trends, wie es sich von Monat zu Monat entwickelt. Fahre über ein Diagramm, um jeden Monat mit deinem Durchschnitt zu vergleichen, oder vergleiche zwei Kategorien. Trends sind Teil von Pro.',
+      },
+      instalments: {
+        title: 'In Raten zahlen',
+        body: 'Zahlst du etwas in Teilen ab? Füge es als Ausgabe hinzu und tippe auf Raten, um es in Zahlungen aufzuteilen. Jede Rate wird an ihrem Fälligkeitstag erfasst, und der Plan zeigt, was noch offen ist, mit Jetzt zahlen und Abbezahlen. Der Gratisplan enthält %{count} Pläne gleichzeitig.',
+      },
+    },
     cloud_sync_ledgers: {
       title: 'Mehrere Bücher',
       ledgers: {
@@ -422,6 +437,9 @@ const de = {
       open_pro_paywall: 'Pro-Pläne ansehen',
       open_cloud_sync: 'Cloud Sync einschalten',
       open_bottom_bar: 'Leiste bearbeiten',
+      open_notification_review: 'Autoprüfung einschalten',
+      open_insights: 'Einblicke öffnen',
+      open_instalments: 'Raten ansehen',
       open_share_earn: 'Pro gratis sichern',
       open_quick_entry_settings: 'Schnelleingabe-Einstellungen öffnen',
       open_auto_log: 'Automatisierungen einrichten',

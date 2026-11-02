@@ -163,6 +163,21 @@ const sv = {
     reset_action: 'Radera och byt',
   },
   news: {
+    auto_review_insights_instalments: {
+      title: 'Autogranskning, nya Insikter och delbetalning',
+      autoReview: {
+        title: 'Aviseringar som sorterar sig själva',
+        body: 'När bokföring av aviseringar är på under Inställningar > Automatisering slår du på Autogranskning. Betalningar bokförs som utgifter, koder och erbjudanden ignoreras, och allt som är oklart väntar på dig. Alla resultat kan ångras. Gratisplanen ingår %{count} granskningar.',
+      },
+      insights: {
+        title: 'Insikter i ny design',
+        body: 'Insikter har nu två sidor: Fördelning visar vart pengarna tog vägen och Trender hur de förändras månad för månad. Dra längs ett diagram för att se valfri månad mot ditt snitt, eller jämför två kategorier. Trender ingår i Pro.',
+      },
+      instalments: {
+        title: 'Betala i delar',
+        body: 'Betalar du av något i delar? Lägg till det som en utgift och tryck på Delbetalning för att dela upp det i betalningar. Varje betalning bokförs på förfallodagen, och planen visar vad som återstår, med Betala nu och Betala av. Gratisplanen ingår %{count} planer åt gången.',
+      },
+    },
     cloud_sync_ledgers: {
       title: 'Flera kassaböcker',
       ledgers: {
@@ -422,6 +437,9 @@ const sv = {
       open_pro_paywall: 'Se Pro-planer',
       open_cloud_sync: 'Slå på Cloud Sync',
       open_bottom_bar: 'Ändra fältet',
+      open_notification_review: 'Slå på Autogranskning',
+      open_insights: 'Öppna Insikter',
+      open_instalments: 'Visa delbetalningar',
       open_share_earn: 'Få Pro gratis',
       open_quick_entry_settings: 'Öppna inställningar för Snabbregistrering',
       open_auto_log: 'Ställ in automatiseringar',

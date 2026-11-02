@@ -162,6 +162,21 @@ const ko = {
     reset_action: '삭제 후 전환',
   },
   news: {
+    auto_review_insights_instalments: {
+      title: '자동 검토, 새로워진 인사이트, 할부',
+      autoReview: {
+        title: '스스로 정리되는 알림',
+        body: '설정 > 자동화에서 알림 기록을 켰다면 자동 검토를 켜 보세요. 결제는 지출로 기록되고, 인증 코드와 프로모션은 무시되며, 애매한 건 확인을 기다려요. 모든 결과는 되돌릴 수 있어요. 무료 플랜은 %{count}건의 검토를 제공해요.',
+      },
+      insights: {
+        title: '새로워진 인사이트',
+        body: '인사이트가 두 페이지로 바뀌었어요. 분석에서는 돈이 어디에 쓰였는지, 추이에서는 매달 어떻게 변하는지 볼 수 있어요. 차트를 따라 밀어 각 달을 평균과 비교하거나 두 카테고리를 비교해 보세요. 추이는 Pro 기능이에요.',
+      },
+      instalments: {
+        title: '할부로 결제하기',
+        body: '나눠서 갚고 있는 게 있나요? 지출로 추가하고 할부를 눌러 여러 번으로 나누세요. 각 회차는 결제일에 기록되고, 플랜에서 남은 금액과 함께 지금 납부, 완납을 할 수 있어요. 무료 플랜은 동시에 %{count}개의 플랜을 제공해요.',
+      },
+    },
     cloud_sync_ledgers: {
       title: '여러 가계부',
       ledgers: {
@@ -421,6 +436,9 @@ const ko = {
       open_pro_paywall: 'Pro 플랜 보기',
       open_cloud_sync: 'Cloud Sync 켜기',
       open_bottom_bar: '하단 바 편집',
+      open_notification_review: '자동 검토 켜기',
+      open_insights: '인사이트 열기',
+      open_instalments: '할부 보기',
       open_share_earn: 'Pro 무료로 받기',
       open_quick_entry_settings: '빠른 입력 설정 열기',
       open_auto_log: '자동화 설정하기',

@@ -163,6 +163,21 @@ const fr = {
     reset_action: 'Supprimer et changer',
   },
   news: {
+    auto_review_insights_instalments: {
+      title: 'Vérification auto, nouvelles Analyses et paiement en plusieurs fois',
+      autoReview: {
+        title: 'Des notifications qui se trient seules',
+        body: "Une fois l'enregistrement des notifications activé dans Réglages > Automatisation, activez la Vérification auto. Les paiements sont enregistrés comme dépenses, les codes et promotions ignorés, et ce qui n'est pas clair vous attend. Chaque résultat peut être annulé. Le forfait gratuit inclut %{count} vérifications.",
+      },
+      insights: {
+        title: 'Analyses, repensées',
+        body: "Analyses compte désormais deux pages : Répartition montre où est passé votre argent, et Tendances son évolution mois après mois. Faites glisser le doigt sur un graphique pour comparer n'importe quel mois à votre moyenne, ou comparez deux catégories. Tendances fait partie de Pro.",
+      },
+      instalments: {
+        title: 'Payer en plusieurs fois',
+        body: "Vous payez un achat en plusieurs fois ? Ajoutez-le comme dépense et touchez En plusieurs fois pour le répartir en paiements. Chacun est enregistré à son échéance, et le plan montre ce qu'il reste, avec Payer maintenant et Solder. Le forfait gratuit inclut %{count} plans à la fois.",
+      },
+    },
     cloud_sync_ledgers: {
       title: 'Plusieurs carnets',
       ledgers: {
@@ -422,6 +437,9 @@ const fr = {
       open_pro_paywall: 'Voir les offres Pro',
       open_cloud_sync: 'Activer Cloud Sync',
       open_bottom_bar: 'Modifier la barre',
+      open_notification_review: 'Activer la Vérification auto',
+      open_insights: 'Ouvrir Analyses',
+      open_instalments: 'Voir les paiements',
       open_share_earn: 'Obtenir Pro gratuitement',
       open_quick_entry_settings: 'Ouvrir les réglages de la Saisie rapide',
       open_auto_log: 'Configurer les automatisations',

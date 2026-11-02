@@ -163,6 +163,21 @@ const nl = {
     reset_action: 'Verwijderen en wisselen',
   },
   news: {
+    auto_review_insights_instalments: {
+      title: 'Autocontrole, nieuwe Inzichten en termijnen',
+      autoReview: {
+        title: 'Meldingen die zichzelf sorteren',
+        body: 'Staat het vastleggen van meldingen aan in Instellingen > Automatisering, zet dan Autocontrole aan. Betalingen worden als uitgaven vastgelegd, codes en promoties genegeerd, en alles wat onduidelijk is wacht op jou. Elk resultaat is ongedaan te maken. Het gratis abonnement bevat %{count} controles.',
+      },
+      insights: {
+        title: 'Inzichten, vernieuwd',
+        body: 'Inzichten heeft nu twee pagina’s: Verdeling laat zien waar je geld naartoe ging, en Trends hoe het per maand verandert. Veeg over een grafiek om elke maand met je gemiddelde te vergelijken, of vergelijk twee categorieën. Trends hoort bij Pro.',
+      },
+      instalments: {
+        title: 'Betalen in termijnen',
+        body: 'Betaal je iets in delen af? Voeg het toe als uitgave en tik op Termijnen om het in betalingen te splitsen. Elke termijn wordt op de vervaldatum vastgelegd, en het plan toont wat er nog openstaat, met Nu betalen en Afbetalen. Het gratis abonnement bevat %{count} plannen tegelijk.',
+      },
+    },
     cloud_sync_ledgers: {
       title: 'Meerdere boeken',
       ledgers: {
@@ -422,6 +437,9 @@ const nl = {
       open_pro_paywall: 'Bekijk Pro-plannen',
       open_cloud_sync: 'Cloud Sync aanzetten',
       open_bottom_bar: 'Onderbalk wijzigen',
+      open_notification_review: 'Autocontrole aanzetten',
+      open_insights: 'Inzichten openen',
+      open_instalments: 'Termijnen bekijken',
       open_share_earn: 'Pro gratis krijgen',
       open_quick_entry_settings: 'Instellingen voor Snelle invoer openen',
       open_auto_log: 'Automatiseringen instellen',

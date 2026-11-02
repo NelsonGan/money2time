@@ -163,6 +163,21 @@ const it = {
     reset_action: 'Elimina e cambia',
   },
   news: {
+    auto_review_insights_instalments: {
+      title: 'Revisione automatica, nuove Analisi e pagamenti a rate',
+      autoReview: {
+        title: 'Notifiche che si smistano da sole',
+        body: 'Con la registrazione delle notifiche attiva in Impostazioni > Automazione, attiva la Revisione automatica. I pagamenti vengono registrati come spese, codici e promozioni ignorati, e ciò che non è chiaro ti aspetta. Puoi annullare qualsiasi risultato. Il piano gratuito include %{count} revisioni.',
+      },
+      insights: {
+        title: 'Analisi, ridisegnate',
+        body: 'Analisi ora ha due pagine: Ripartizione mostra dove sono finiti i tuoi soldi, e Andamenti come cambiano mese dopo mese. Scorri su un grafico per confrontare qualsiasi mese con la tua media, o confronta due categorie. Andamenti fa parte di Pro.',
+      },
+      instalments: {
+        title: 'Paga a rate',
+        body: 'Stai pagando qualcosa a rate? Aggiungilo come spesa e tocca A rate per dividerlo in pagamenti. Ognuno viene registrato alla sua scadenza, e il piano mostra quanto manca, con Paga ora e Salda. Il piano gratuito include %{count} piani alla volta.',
+      },
+    },
     cloud_sync_ledgers: {
       title: 'Più registri',
       ledgers: {
@@ -422,6 +437,9 @@ const it = {
       open_pro_paywall: 'Scopri i piani Pro',
       open_cloud_sync: 'Attiva Cloud Sync',
       open_bottom_bar: 'Modifica la barra',
+      open_notification_review: 'Attiva la Revisione automatica',
+      open_insights: 'Apri Analisi',
+      open_instalments: 'Vedi le rate',
       open_share_earn: 'Ottieni Pro gratis',
       open_quick_entry_settings: 'Apri le impostazioni di Inserimento rapido',
       open_auto_log: 'Configura le automazioni',

@@ -163,6 +163,21 @@ const vi = {
     reset_action: 'Xóa và chuyển',
   },
   news: {
+    auto_review_insights_instalments: {
+      title: 'Tự động xem lại, Thống kê mới và trả góp',
+      autoReview: {
+        title: 'Thông báo tự phân loại',
+        body: 'Khi đã bật ghi thông báo trong Cài đặt > Tự động hóa, hãy bật Tự động xem lại. Khoản thanh toán được ghi thành chi tiêu, mã và khuyến mãi bị bỏ qua, còn mục chưa rõ sẽ chờ bạn. Bạn có thể hoàn tác mọi kết quả. Gói miễn phí có %{count} lượt xem lại.',
+      },
+      insights: {
+        title: 'Thống kê, thiết kế mới',
+        body: 'Thống kê giờ có hai trang: Phân tích cho thấy tiền của bạn đã đi đâu, và Xu hướng cho thấy nó thay đổi qua từng tháng. Kéo dọc biểu đồ để so bất kỳ tháng nào với mức trung bình, hoặc so sánh hai danh mục. Xu hướng thuộc gói Pro.',
+      },
+      instalments: {
+        title: 'Trả góp',
+        body: 'Đang trả dần một món hàng? Thêm nó thành chi tiêu rồi chạm Trả góp để chia thành các kỳ. Mỗi kỳ được ghi vào ngày đến hạn, và kế hoạch cho thấy số còn lại, kèm Trả ngay và Tất toán. Gói miễn phí có %{count} kế hoạch cùng lúc.',
+      },
+    },
     cloud_sync_ledgers: {
       title: 'Nhiều sổ',
       ledgers: {
@@ -422,6 +437,9 @@ const vi = {
       open_pro_paywall: 'Xem các gói Pro',
       open_cloud_sync: 'Bật Cloud Sync',
       open_bottom_bar: 'Sửa thanh dưới',
+      open_notification_review: 'Bật Tự động xem lại',
+      open_insights: 'Mở Thống kê',
+      open_instalments: 'Xem trả góp',
       open_share_earn: 'Nhận Pro miễn phí',
       open_quick_entry_settings: 'Mở cài đặt Nhập nhanh',
       open_auto_log: 'Thiết lập tự động hóa',
