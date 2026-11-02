@@ -1467,6 +1467,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return merged;
       })();
       accountGroupsRepository.ensureFromActiveAccounts();
+      // Before the run, so rules saved before anchor days run on their own day.
+      try {
+        recurringRulesRepository.repairLegacySchedules();
+      } catch (error) {
+        // The rules still run, on the day their next run date shows.
+        reportError(error, { scope: 'recurring_repair' });
+      }
       const processedRules = recurringRulesRepository.runDueTransactions();
       perfMark('recurring_run');
       const trueHourlyRate = effectiveCurrentWage?.trueHourlyRate ?? 0;

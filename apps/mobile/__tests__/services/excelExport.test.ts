@@ -109,6 +109,7 @@ function rule(overrides: Partial<RecurringTransactionRule> = {}): RecurringTrans
     recurrencePattern: 'monthly',
     recurrenceInterval: 1,
     nextRunDate: '2024-06-01',
+    anchorDay: null,
     endDate: null,
     isActive: true,
     countsAsExpense: false,
