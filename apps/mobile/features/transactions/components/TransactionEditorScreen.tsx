@@ -78,8 +78,6 @@ import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
 import { getSubscriptionLogoMeta, suggestSubscriptionLogo } from '~/constants/subscriptionLogos';
 import { useApp } from '~/context/AppContext';
 import { useSetSplitBillSession } from '~/context/SplitBillSession';
-import { BelongsToPicker } from '~/features/sharedLedgers/components/BelongsToPicker';
-import { selfMemberIdFor, useOpenLedgerPeople } from '~/features/sharedLedgers/lib/ledgerPeople';
 import {
   describeInstalmentChoice,
   type InstalmentChoice,
@@ -90,6 +88,8 @@ import {
   canSplitInstalments,
   isRegularAmountValid,
 } from '~/features/instalments/lib/instalmentPlan';
+import { BelongsToPicker } from '~/features/sharedLedgers/components/BelongsToPicker';
+import { selfMemberIdFor, useOpenLedgerPeople } from '~/features/sharedLedgers/lib/ledgerPeople';
 import {
   NumpadPanel,
   ReceiptViewerModal,
