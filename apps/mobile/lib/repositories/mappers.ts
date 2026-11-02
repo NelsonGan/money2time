@@ -431,6 +431,8 @@ export function toTransaction(row: TransactionRow): Transaction {
     reimbursementOfId: row.reimbursementOfId ?? null,
     countsAsExpense: !!row.countsAsExpense,
     dayOrder: row.dayOrder ?? null,
+    instalmentRuleId: row.instalmentRuleId ?? null,
+    instalmentNumber: row.instalmentNumber ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,
@@ -453,14 +455,16 @@ export const TRANSACTION_RAW_COLUMNS_SQL = `
   t.recurrence_pattern, t.recurrence_interval, t.recurrence_end_date,
   t.recurrence_parent_id, t.sentiment, t.reimbursable, t.reimbursed_at,
   t.reimbursement_account_id, t.reimbursement_transaction_id, t.reimbursement_of_id,
-  t.counts_as_expense, t.day_order, t.created_at, t.updated_at, t.deleted_at, t.details`;
+  t.counts_as_expense, t.day_order, t.created_at, t.updated_at, t.deleted_at, t.details,
+  t.instalment_rule_id, t.instalment_number`;
 
 type RawValue = string | number | null;
 
 /**
- * Maps one raw row of {@link TRANSACTION_RAW_COLUMNS_SQL} followed by the seven
+ * Maps one raw row of {@link TRANSACTION_RAW_COLUMNS_SQL} followed by the eight
  * relation columns (account, from-account and to-account names, category
- * name, category icon, category parent id, parent name). Mirrors
+ * name, category icon, category parent id, parent name, and the instalment
+ * plan's number of payments). Mirrors
  * {@link toTransaction} field for field; the mapper test holds the two together.
  */
 export function toTransactionWithRelationsFromRaw(
@@ -499,13 +503,16 @@ export function toTransactionWithRelationsFromRaw(
     updatedAt: values[29] as string,
     deletedAt: values[30] as string | null,
     details: (values[31] as string | null) ?? null,
-    accountName: (values[32] as string | null) ?? null,
-    fromAccountName: (values[33] as string | null) ?? null,
-    toAccountName: (values[34] as string | null) ?? null,
-    categoryName: (values[35] as string | null) ?? null,
-    categoryParentId: (values[37] as string | null) ?? null,
-    categoryParentName: (values[38] as string | null) ?? null,
-    categoryIcon: (values[36] as string | null) ?? null,
+    instalmentRuleId: (values[32] as string | null) ?? null,
+    instalmentNumber: (values[33] as number | null) ?? null,
+    accountName: (values[34] as string | null) ?? null,
+    fromAccountName: (values[35] as string | null) ?? null,
+    toAccountName: (values[36] as string | null) ?? null,
+    categoryName: (values[37] as string | null) ?? null,
+    categoryParentId: (values[39] as string | null) ?? null,
+    categoryParentName: (values[40] as string | null) ?? null,
+    categoryIcon: (values[38] as string | null) ?? null,
+    instalmentCount: (values[41] as number | null) ?? null,
   };
 }
 
@@ -593,6 +600,13 @@ export function toRecurringRule(row: RecurringRuleRow): RecurringTransactionRule
     endDate: row.endDate,
     isActive: row.isActive,
     countsAsExpense: !!row.countsAsExpense,
+    // A count below 1 (never written by the app) reads as an ordinary rule.
+    instalmentCount:
+      row.instalmentCount != null && row.instalmentCount >= 1
+        ? Math.trunc(row.instalmentCount)
+        : null,
+    instalmentTotal: row.instalmentTotal ?? null,
+    instalmentStartDate: row.instalmentStartDate ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,

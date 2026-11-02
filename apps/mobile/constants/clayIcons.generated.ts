@@ -66,6 +66,7 @@ export const CLAY_ICON_SOURCES = {
   'settings/display': require('../assets/clay-icons/settings/display.png'),
   'settings/exchange-rates': require('../assets/clay-icons/settings/exchange-rates.png'),
   'settings/hourly-value': require('../assets/clay-icons/settings/hourly-value.png'),
+  'settings/instalments': require('../assets/clay-icons/settings/instalments.png'),
   'settings/items': require('../assets/clay-icons/settings/items.png'),
   'settings/news': require('../assets/clay-icons/settings/news.png'),
   'settings/notifications': require('../assets/clay-icons/settings/notifications.png'),

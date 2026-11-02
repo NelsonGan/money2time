@@ -1,4 +1,4 @@
-import { ArrowRight, GripVertical, Undo2 } from 'lucide-react-native';
+import { ArrowRight, CalendarRange, GripVertical, Undo2 } from 'lucide-react-native';
 import React, { memo, useEffect } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
@@ -159,6 +159,38 @@ interface TransactionItemBodyProps {
   getTrueHourlyRateForDate: (dateIso: string) => number;
 }
 
+/**
+ * "4/12" on a payment of an instalment plan, or "Paid off" on the payment that
+ * settled the rest. Shown only while the plan exists.
+ */
+function instalmentPillLabel(transaction: TransactionWithRelations): string | null {
+  if (!transaction.instalmentRuleId || transaction.instalmentNumber == null) return null;
+  if (!transaction.instalmentCount) return null;
+  if (transaction.instalmentNumber === 0) return I18n.t('instalments.pill_paid_off');
+  return `${transaction.instalmentNumber}/${transaction.instalmentCount}`;
+}
+
+function InstalmentPill({ label, compact }: { label: string; compact: boolean }) {
+  const themeColors = useThemeColors();
+  return (
+    <View
+      className="shrink-0 flex-row items-center gap-1 rounded-full border border-primary/15 bg-primary/10 px-1.5 py-px dark:border-primary/20 dark:bg-primary/15"
+      accessible
+      accessibilityLabel={I18n.t('instalments.pill_a11y', { label })}
+    >
+      <CalendarRange size={compact ? 10 : 11} color={themeColors.primary} />
+      <Text
+        variant="caption"
+        tone="primary"
+        className={compact ? 'text-[10px] leading-[12px]' : 'text-[11px] leading-[14px]'}
+        numberOfLines={1}
+      >
+        {label}
+      </Text>
+    </View>
+  );
+}
+
 function TransactionAccountBadge({
   account,
   label,
@@ -260,6 +292,7 @@ const TransactionItemBody = memo(
       ? String(transaction.toAccountName ?? I18n.t('common.unknown'))
       : '';
     const accountBadgeMarginClassName = compact ? 'mt-[2px]' : 'mt-[3px]';
+    const instalmentLabel = instalmentPillLabel(transaction);
 
     const joinSubtitleParts = (...parts: (string | null | undefined)[]) =>
       parts.filter((part): part is string => Boolean(part && part.trim().length > 0)).join(' · ');
@@ -457,6 +490,19 @@ const TransactionItemBody = memo(
                 className={compact ? 'min-w-[40px] shrink' : 'min-w-[44px] shrink'}
               />
             </View>
+          ) : accountSubtitleLabel && instalmentLabel ? (
+            <View
+              collapsable={false}
+              className={cn('min-w-0 flex-row items-center gap-1', accountBadgeMarginClassName)}
+            >
+              <TransactionAccountBadge
+                account={account}
+                label={accountSubtitleLabel}
+                compact={compact}
+                className={compact ? 'min-w-[40px] shrink' : 'min-w-[44px] shrink'}
+              />
+              <InstalmentPill label={instalmentLabel} compact={compact} />
+            </View>
           ) : accountSubtitleLabel ? (
             <TransactionAccountBadge
               account={account}
@@ -464,6 +510,10 @@ const TransactionItemBody = memo(
               compact={compact}
               className={accountBadgeMarginClassName}
             />
+          ) : instalmentLabel ? (
+            <View className={cn('flex-row', accountBadgeMarginClassName)}>
+              <InstalmentPill label={instalmentLabel} compact={compact} />
+            </View>
           ) : null}
         </View>
 
@@ -885,6 +935,9 @@ export const TransactionItem = memo(
     // with it; these are here for the same reason as the split fields above,
     // where a refresh can hand back an object with the old timestamp.
     prev.transaction.reimbursable === next.transaction.reimbursable &&
+    // A plan's payment count arrives by join, like the relation names below.
+    prev.transaction.instalmentNumber === next.transaction.instalmentNumber &&
+    prev.transaction.instalmentCount === next.transaction.instalmentCount &&
     prev.transaction.reimbursedAt === next.transaction.reimbursedAt &&
     prev.transaction.categoryIcon === next.transaction.categoryIcon &&
     prev.transaction.categoryName === next.transaction.categoryName &&

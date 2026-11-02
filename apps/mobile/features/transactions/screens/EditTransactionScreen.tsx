@@ -1,3 +1,5 @@
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useMemo } from 'react';
 import { Alert } from 'react-native';
 
@@ -6,6 +8,7 @@ import { TransactionEditorScreen } from '~/features/transactions/components';
 import { type SplitDraft, splitsHelpers } from '~/features/transactions/components/editor';
 import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
+import type { RootStackParamList } from '~/navigation/rootStack';
 import type { TransactionType, TransactionWithRelations } from '~/types';
 import { getErrorMessage } from '~/utils/errorHandling';
 import { dayKeyFromIsoLocal } from '~/utils/formatters';
@@ -23,13 +26,35 @@ export function EditTransactionScreen({
   onClose,
   openSplitBillOnMount,
 }: EditTransactionScreenProps) {
+  // Opened from the calendar's route or inside Accounts: either way the plan
+  // page is a root route, which navigate() reaches from a nested stack too.
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const {
     updateTransaction,
     updateTransactionSplits,
     deleteTransaction,
     markSplitPaid,
     markSplitUnpaid,
+    instalmentPlans,
   } = useApp();
+  // A payment of an instalment plan links back to it.
+  const instalmentPlan = transaction.instalmentRuleId
+    ? (instalmentPlans.find((plan) => plan.rule.id === transaction.instalmentRuleId) ?? null)
+    : null;
+  const headerNotice = instalmentPlan
+    ? {
+        label:
+          transaction.instalmentNumber === 0
+            ? I18n.t('instalments.edit_notice_payoff', { name: instalmentPlan.rule.name })
+            : I18n.t('instalments.edit_notice', {
+                number: transaction.instalmentNumber ?? 0,
+                count: instalmentPlan.entries.length,
+                name: instalmentPlan.rule.name,
+              }),
+        actionLabel: I18n.t('instalments.view_plan'),
+        onPress: () => navigation.navigate('InstalmentPlan', { planId: instalmentPlan.rule.id }),
+      }
+    : undefined;
   const isLegacyBalanceAdjustmentTransfer =
     transaction.type === 'transfer' &&
     !!transaction.accountId &&
@@ -166,6 +191,7 @@ export function EditTransactionScreen({
       restrictTypeOptions={restrictedTypes}
       initialSplits={initialSplits}
       openSplitBillOnMount={openSplitBillOnMount}
+      headerNotice={headerNotice}
       subtitleOverride={
         isBalanceAdjustment
           ? I18n.t('transactions.editor.subtitle_edit_balance_adjustment')

@@ -1,3 +1,4 @@
+import { isInstalmentPlan } from '~/features/instalments/lib/instalmentPlan';
 import {
   copiedRuleNextRun,
   copyPartOfAccountType,
@@ -46,6 +47,8 @@ export function readLedgerCopySource(ledgerId: string): LedgerCopySource {
 
     const recurringNeeds: LedgerCopyPart[][] = [];
     for (const rule of recurringRulesRepository.list()) {
+      // Instalment plans are not copied (see `ledgerPartsCopySpecs`).
+      if (isInstalmentPlan(rule)) continue;
       if (copiedRuleNextRun(rule, now) === null) continue;
       if (rule.categoryId && !categoryIds.has(rule.categoryId)) continue;
       const needs = new Set<LedgerCopyPart>(['accounts', 'categories']);

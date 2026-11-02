@@ -2,6 +2,7 @@ import { File, Paths } from 'expo-file-system/next';
 import * as Sharing from 'expo-sharing';
 
 import { categoryIconToEmoji } from '~/constants/categoryIcons';
+import { isInstalmentPlan } from '~/features/instalments/lib/instalmentPlan';
 import { accountsRepository } from '~/lib/repositories/accountsRepository';
 import { categoriesRepository } from '~/lib/repositories/categoriesRepository';
 import { recurringRulesRepository } from '~/lib/repositories/recurringRulesRepository';
@@ -168,7 +169,8 @@ export function collectExcelExportData(labels: ExcelExportLabels): ExcelExportDa
     transactions: transactionsRepository.list(),
     accounts: accountsRepository.list(),
     categories: categoriesRepository.list(),
-    recurringRules: recurringRulesRepository.list(),
+    // Instalment plans have their own screen and are not subscriptions.
+    recurringRules: recurringRulesRepository.list().filter((rule) => !isInstalmentPlan(rule)),
     labels,
   };
 }
