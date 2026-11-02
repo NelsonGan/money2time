@@ -163,6 +163,21 @@ const ja = {
     reset_action: '削除して切り替え',
   },
   news: {
+    auto_review_insights_instalments: {
+      title: '自動確認ほか',
+      autoReview: {
+        title: '通知が自動で整理されます',
+        body: '設定 > 自動化 で通知の記録をオンにしたら、自動確認をオンにしましょう。支払いは支出として記録され、認証コードやプロモーションは無視され、判断の難しいものはあなたの確認を待ちます。どの結果も取り消せます。無料プランでは %{count} 件まで確認できます。',
+      },
+      insights: {
+        title: 'インサイトを一新',
+        body: '内訳と推移は、それぞれのグラフをタブ付きの1ページにまとめました。内訳ではお金の行き先を、推移では月ごとの変化を確認できます。グラフをなぞると各月を平均と比べられ、2つのカテゴリを比較することもできます。推移は Pro の機能です。',
+      },
+      instalments: {
+        title: '分割払いに対応',
+        body: '分割で支払っているものはありますか？支出として追加し、分割払いをタップして支払いに分けましょう。各回は支払日に記録され、プランでは残額を確認でき、今すぐ支払う・完済するも選べます。無料プランでは同時に %{count} 件のプランを利用できます。',
+      },
+    },
     cloud_sync_ledgers: {
       title: '複数の帳簿',
       ledgers: {
@@ -422,6 +437,9 @@ const ja = {
       open_pro_paywall: 'Proプランを見る',
       open_cloud_sync: 'Cloud Syncをオンにする',
       open_bottom_bar: '下部バーを編集',
+      open_notification_review: '自動確認をオンにする',
+      open_insights: 'インサイトを開く',
+      open_instalments: '分割払いを見る',
       open_share_earn: 'Proを無料で手に入れる',
       open_quick_entry_settings: 'クイック入力の設定を開く',
       open_auto_log: '自動化を設定',

@@ -163,6 +163,21 @@ const tr = {
     reset_action: 'Sil ve değiştir',
   },
   news: {
+    auto_review_insights_instalments: {
+      title: 'Otomatik inceleme ve daha fazlası',
+      autoReview: {
+        title: 'Kendi kendini düzenleyen bildirimler',
+        body: 'Ayarlar > Otomasyon bölümünde bildirim kaydı açıkken Otomatik incelemeyi açın. Ödemeler gider olarak kaydedilir, kodlar ve kampanyalar yok sayılır, net olmayanlar sizi bekler. Her sonucu geri alabilirsiniz. Ücretsiz plan %{count} inceleme içerir.',
+      },
+      insights: {
+        title: 'Yenilenen Analizler',
+        body: 'Dağılım ve Trendler artık grafiklerini sekmelerle tek bir sayfada topluyor: Dağılım paranızın nereye gittiğini, Trendler ise aydan aya nasıl değiştiğini gösterir. Herhangi bir ayı ortalamanızla karşılaştırmak için grafikte kaydırın ya da iki kategoriyi karşılaştırın. Trendler Pro’ya dahildir.',
+      },
+      instalments: {
+        title: 'Taksitle ödeyin',
+        body: 'Bir şeyi parça parça mı ödüyorsunuz? Gider olarak ekleyin ve ödemelere bölmek için Taksit seçeneğine dokunun. Her taksit vadesinde kaydedilir, plan ise kalan tutarı Şimdi öde ve Kapat seçenekleriyle gösterir. Ücretsiz plan aynı anda %{count} plan içerir.',
+      },
+    },
     cloud_sync_ledgers: {
       title: 'Birden fazla defter',
       ledgers: {
@@ -422,6 +437,9 @@ const tr = {
       open_pro_paywall: 'Pro planlarını gör',
       open_cloud_sync: 'Cloud Sync’i aç',
       open_bottom_bar: 'Alt çubuğu düzenle',
+      open_notification_review: 'Otomatik incelemeyi aç',
+      open_insights: 'Analizleri aç',
+      open_instalments: 'Taksitleri gör',
       open_share_earn: 'Pro’yu ücretsiz al',
       open_quick_entry_settings: 'Hızlı Giriş ayarlarını aç',
       open_auto_log: 'Otomasyonları kur',

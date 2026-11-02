@@ -138,6 +138,21 @@ const en = {
     },
   },
   news: {
+    auto_review_insights_instalments: {
+      title: 'Auto-review and more',
+      autoReview: {
+        title: 'Notifications that sort themselves',
+        body: 'Once notification logging is on in Settings > Automation, turn on Auto-review. Payments are logged as expenses, codes and promotions are ignored, and anything unclear waits for you. Undo any result. The free plan includes %{count} reviews.',
+      },
+      insights: {
+        title: 'Insights, redesigned',
+        body: 'Breakdown and Trends now each gather their charts on one page, with tabs: Breakdown shows where your money went, and Trends how it moves month to month. Drag along a chart to see any month against your average, or compare two categories. Trends is part of Pro.',
+      },
+      instalments: {
+        title: 'Pay in instalments',
+        body: "Paying something off in parts? Add it as an expense and tap Instalments to split it into payments. Each one is logged on its due date, and the plan shows what's left, with Pay now and Pay off. The free plan includes %{count} plans at a time.",
+      },
+    },
     cloud_sync_ledgers: {
       title: 'Multiple ledgers',
       ledgers: {
@@ -407,6 +422,9 @@ const en = {
       open_pro_paywall: 'Explore Pro plans',
       open_cloud_sync: 'Turn on Cloud Sync',
       open_bottom_bar: 'Edit bottom bar',
+      open_notification_review: 'Turn on Auto-review',
+      open_insights: 'Open Insights',
+      open_instalments: 'See instalments',
     },
     showcase: {
       synced_devices: 'All your phones are up to date',

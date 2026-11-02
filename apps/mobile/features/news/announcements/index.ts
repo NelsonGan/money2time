@@ -20,6 +20,7 @@ import { everydayPersonalizationAnnouncement } from './019_everyday_personalizat
 import { transactionUpdatesAnnouncement } from './020_transaction_updates';
 import { webDashboardAnnouncement } from './021_web_dashboard';
 import { cloudSyncLedgersAnnouncement } from './022_cloud_sync_ledgers';
+import { autoReviewInsightsInstalmentsAnnouncement } from './023_auto_review_insights_instalments';
 
 export const FEATURE_ANNOUNCEMENTS = [
   homeWidgetsAnnouncement,
@@ -44,4 +45,5 @@ export const FEATURE_ANNOUNCEMENTS = [
   transactionUpdatesAnnouncement,
   webDashboardAnnouncement,
   cloudSyncLedgersAnnouncement,
+  autoReviewInsightsInstalmentsAnnouncement,
 ] as const;
