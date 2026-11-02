@@ -3207,7 +3207,10 @@ const ru = {
     review_banner_single: '1 уведомление к проверке',
     review_amount_hint: 'Выберите или введите сумму',
     review_missing: 'Для некоторых записей ещё нужно указать сумму или счёт.',
-    review_choose_account: 'Выбрать счёт',
+    review_no_account_ios:
+      'Счёт не выбран. Выберите его в быстрой команде Log Notification, чтобы они записывались автоматически.',
+    review_no_account_android:
+      'Счёт не выбран. Выберите его для этого приложения в настройках уведомлений, чтобы они записывались автоматически.',
     review_save_error: 'Не удалось сохранить. Незавершённые записи остались здесь.',
     review_leave_title: 'Пропустить незавершённые уведомления?',
     review_leave_body: 'Если уйти, все незавершённые уведомления (%{count}) будут пропущены.',
@@ -3236,6 +3239,9 @@ const ru = {
     ai_log_both: 'Оба',
     ai_log_expense: 'Расходы',
     ai_log_income: 'Доходы',
+    ai_scope_expense: 'Записывает только расходы',
+    ai_scope_income: 'Записывает только доходы',
+    ai_scope_both: 'Записывает расходы и доходы',
     ai_get_unlimited: 'Без ограничений с Pro',
     ai_done_title: 'Разобрано за вас',
     ai_logged_count: 'Записано: %{count}',

@@ -1,3 +1,4 @@
+import { Pencil } from 'lucide-react-native';
 import React, { useEffect, useState, useSyncExternalStore } from 'react';
 import { Alert, Platform, Pressable, Switch, View } from 'react-native';
 
@@ -63,9 +64,9 @@ function quotaLabel(quota: NotificationAiQuota | null, isPro: boolean): string {
 }
 
 /**
- * Top of the review page: the AI auto-review switch, what it covers, and the
- * allowance. Tapping the card opens its settings; out of free reviews, the
- * switch is off and disabled next to Upgrade.
+ * Top of the review page: the AI auto-review switch, the allowance, and what it
+ * logs on a pencil chip. Tapping the chip (or the card) opens its settings; out
+ * of free reviews, the switch is off and disabled next to Upgrade.
  */
 export function NotificationAiCard() {
   const { paymentAlertPrefs, updatePaymentAlertPrefs } = useApp();
@@ -103,7 +104,12 @@ export function NotificationAiCard() {
     );
   };
 
-  // A slim line: the switch and what is left. Scope lives in the settings sheet.
+  const openSettings = () => {
+    void triggerHaptic('selection');
+    setSettingsOpen(true);
+  };
+  // What it logs, on a chip with a pencil, so the setting reads as editable.
+  const scope = I18n.t(`payment_alerts.ai_scope_${prefs.logTypes}`);
   const subtitle = exhausted
     ? I18n.t('payment_alerts.ai_exhausted', { limit: quota?.limit ?? FREE_NOTIFICATION_AI_REVIEWS })
     : isPro || quota?.isPro
@@ -119,10 +125,7 @@ export function NotificationAiCard() {
           accessibilityHint={subtitle}
           testID="notification-ai-settings"
           disabled={exhausted}
-          onPress={() => {
-            void triggerHaptic('selection');
-            setSettingsOpen(true);
-          }}
+          onPress={openSettings}
           className="flex-1 flex-row items-center gap-3"
         >
           <ClayIcon
@@ -147,6 +150,25 @@ export function NotificationAiCard() {
                 })}
               />
             </View>
+            {exhausted ? null : (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`${I18n.t('payment_alerts.ai_settings')}, ${scope}`}
+                testID="notification-ai-edit"
+                hitSlop={6}
+                onPress={openSettings}
+                className="mt-1.5 h-7 flex-row items-center gap-1.5 self-start rounded-full bg-primary/10 px-2.5"
+              >
+                <Text
+                  variant="caption"
+                  numberOfLines={1}
+                  className="shrink font-semibold text-primary"
+                >
+                  {scope}
+                </Text>
+                <Pencil size={12} color={colors.primary} />
+              </Pressable>
+            )}
           </View>
         </Pressable>
         {exhausted ? (
@@ -224,7 +246,7 @@ function NotificationAiSettingsSheet({
           <SegmentedToggle<NotificationAiLogTypes>
             value={prefs.logTypes}
             onChange={(logTypes) => onChange({ ...prefs, logTypes })}
-            options={(['both', 'expense', 'income'] as const).map((value) => ({
+            options={(['expense', 'income', 'both'] as const).map((value) => ({
               value,
               label: I18n.t(`payment_alerts.ai_log_${value}`),
             }))}

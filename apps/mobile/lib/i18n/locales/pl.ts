@@ -3209,7 +3209,10 @@ const pl = {
     review_banner_single: '1 powiadomienie do sprawdzenia',
     review_amount_hint: 'Wybierz lub wpisz kwotę',
     review_missing: 'Niektóre pozycje nadal wymagają kwoty lub konta.',
-    review_choose_account: 'Wybierz konto',
+    review_no_account_ios:
+      'Brak konta. Wybierz je w skrócie Log Notification, aby zapisywały się automatycznie.',
+    review_no_account_android:
+      'Brak konta. Wybierz je dla tej aplikacji w ustawieniach powiadomień, aby zapisywały się automatycznie.',
     review_save_error: 'Nie udało się zapisać. Niedokończone pozycje nadal tu są.',
     review_leave_title: 'Pominąć niedokończone powiadomienia?',
     review_leave_body:
@@ -3239,6 +3242,9 @@ const pl = {
     ai_log_both: 'Oba',
     ai_log_expense: 'Wydatki',
     ai_log_income: 'Przychody',
+    ai_scope_expense: 'Zapisuje tylko wydatki',
+    ai_scope_income: 'Zapisuje tylko przychody',
+    ai_scope_both: 'Zapisuje wydatki i przychody',
     ai_get_unlimited: 'Bez limitu z Pro',
     ai_done_title: 'Posortowane za Ciebie',
     ai_logged_count: 'Zapisano: %{count}',

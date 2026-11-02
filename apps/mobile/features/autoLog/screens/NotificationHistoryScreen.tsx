@@ -1,7 +1,14 @@
 import { useNavigation, usePreventRemove } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { FlashList } from '@shopify/flash-list';
-import { ChevronDown, ChevronUp, ListChecks, Pencil, Undo2 } from 'lucide-react-native';
+import {
+  AlertTriangle,
+  ChevronDown,
+  ChevronUp,
+  ListChecks,
+  Pencil,
+  Undo2,
+} from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Pressable, View } from 'react-native';
 
@@ -694,27 +701,26 @@ function NotificationReviewCard({
           ))}
         </View>
       ) : null}
-      <View className="mt-1.5 flex-row flex-wrap items-center justify-between gap-x-3 gap-y-2">
-        <View className="flex-row items-center gap-1.5">
-          <Text variant="caption" tone="muted">
-            {timeOf(entry.capturedAt)}
+      {pending && !account ? (
+        // The fix belongs in setup, so every later notification gets an account.
+        <View
+          className="mt-1 flex-row items-start gap-2 rounded-xl bg-warning/10 px-3 py-2"
+          testID="notification-no-account"
+        >
+          <AlertTriangle size={14} color={colors.error} style={{ marginTop: 1 }} />
+          <Text variant="caption" tone="warning" className="flex-1">
+            {I18n.t(
+              entry.channel === 'android_notification'
+                ? 'payment_alerts.review_no_account_android'
+                : 'payment_alerts.review_no_account_ios',
+            )}
           </Text>
-          {pending && !account ? (
-            // Income and Expense stay off until it has one; the editor sets it.
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('payment_alerts.review_choose_account')}
-              disabled={busy}
-              hitSlop={8}
-              onPress={onEdit}
-              testID="notification-choose-account"
-            >
-              <Text variant="caption" className="font-semibold text-primary">
-                {`· ${I18n.t('payment_alerts.review_choose_account')}`}
-              </Text>
-            </Pressable>
-          ) : null}
         </View>
+      ) : null}
+      <View className="mt-1.5 flex-row flex-wrap items-center justify-between gap-x-3 gap-y-2">
+        <Text variant="caption" tone="muted">
+          {timeOf(entry.capturedAt)}
+        </Text>
         {pending ? (
           <ReviewChoices
             disabled={busy}

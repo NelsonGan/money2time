@@ -3193,7 +3193,10 @@ const en = {
     review_banner_single: '1 notification to review',
     review_amount_hint: 'Choose or enter the amount',
     review_missing: 'Some items still need an amount or account.',
-    review_choose_account: 'Choose an account',
+    review_no_account_ios:
+      'No account set. Choose one in your Log Notification shortcut so these are logged automatically.',
+    review_no_account_android:
+      'No account set. Choose one for this app in Notifications settings so these are logged automatically.',
     review_save_error: 'Could not save. Your unfinished items are still here.',
     review_leave_title: 'Ignore unfinished notifications?',
     review_leave_body: 'Leaving will ignore all %{count} unfinished notifications.',
@@ -3222,6 +3225,9 @@ const en = {
     ai_log_both: 'Both',
     ai_log_expense: 'Expenses',
     ai_log_income: 'Income',
+    ai_scope_expense: 'Logs expenses only',
+    ai_scope_income: 'Logs income only',
+    ai_scope_both: 'Logs expenses and income',
     ai_get_unlimited: 'Get unlimited with Pro',
     ai_done_title: 'Sorted for you',
     ai_logged_count: '%{count} logged',

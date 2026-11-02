@@ -3244,7 +3244,10 @@ const fr = {
     review_banner_single: '1 notification à vérifier',
     review_amount_hint: 'Choisissez ou saisissez le montant',
     review_missing: 'Il manque encore un montant ou un compte pour certains éléments.',
-    review_choose_account: 'Choisir un compte',
+    review_no_account_ios:
+      'Aucun compte. Choisissez-en un dans votre raccourci Log Notification pour les enregistrer automatiquement.',
+    review_no_account_android:
+      'Aucun compte. Choisissez-en un pour cette app dans les réglages des notifications pour les enregistrer automatiquement.',
     review_save_error: 'Enregistrement impossible. Vos éléments non terminés sont toujours là.',
     review_leave_title: 'Ignorer les notifications non terminées ?',
     review_leave_body: 'Si vous quittez, les %{count} notifications non terminées seront ignorées.',
@@ -3273,6 +3276,9 @@ const fr = {
     ai_log_both: 'Les deux',
     ai_log_expense: 'Dépenses',
     ai_log_income: 'Revenus',
+    ai_scope_expense: 'Enregistre les dépenses seulement',
+    ai_scope_income: 'Enregistre les revenus seulement',
+    ai_scope_both: 'Enregistre dépenses et revenus',
     ai_get_unlimited: 'Passez à l’illimité avec Pro',
     ai_done_title: 'Triées pour vous',
     ai_logged_count: '%{count} enregistrées',

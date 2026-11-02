@@ -3199,7 +3199,10 @@ const uk = {
     review_banner_single: '1 сповіщення до перевірки',
     review_amount_hint: 'Виберіть або введіть суму',
     review_missing: 'Для деяких записів ще потрібно вказати суму або рахунок.',
-    review_choose_account: 'Вибрати рахунок',
+    review_no_account_ios:
+      'Рахунок не вибрано. Виберіть його у швидкій команді Log Notification, щоб вони записувалися автоматично.',
+    review_no_account_android:
+      'Рахунок не вибрано. Виберіть його для цієї програми в налаштуваннях сповіщень, щоб вони записувалися автоматично.',
     review_save_error: 'Не вдалося зберегти. Незавершені записи залишилися тут.',
     review_leave_title: 'Пропустити незавершені сповіщення?',
     review_leave_body: 'Якщо вийти, усі незавершені сповіщення (%{count}) буде пропущено.',
@@ -3228,6 +3231,9 @@ const uk = {
     ai_log_both: 'Обидва',
     ai_log_expense: 'Витрати',
     ai_log_income: 'Доходи',
+    ai_scope_expense: 'Записує лише витрати',
+    ai_scope_income: 'Записує лише доходи',
+    ai_scope_both: 'Записує витрати й доходи',
     ai_get_unlimited: 'Без обмежень із Pro',
     ai_done_title: 'Розібрано за вас',
     ai_logged_count: 'Записано: %{count}',

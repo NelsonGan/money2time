@@ -3226,7 +3226,10 @@ const ms = {
     review_banner_single: '1 pemberitahuan untuk disemak',
     review_amount_hint: 'Pilih atau masukkan jumlah',
     review_missing: 'Sesetengah item masih memerlukan jumlah atau akaun.',
-    review_choose_account: 'Pilih akaun',
+    review_no_account_ios:
+      'Tiada akaun. Pilih dalam pintasan Log Notification anda supaya ia direkod secara automatik.',
+    review_no_account_android:
+      'Tiada akaun. Pilih untuk apl ini dalam tetapan Pemberitahuan supaya ia direkod secara automatik.',
     review_save_error: 'Tidak dapat menyimpan. Item yang belum selesai masih ada di sini.',
     review_leave_title: 'Abaikan pemberitahuan yang belum selesai?',
     review_leave_body:
@@ -3256,6 +3259,9 @@ const ms = {
     ai_log_both: 'Kedua-duanya',
     ai_log_expense: 'Perbelanjaan',
     ai_log_income: 'Pendapatan',
+    ai_scope_expense: 'Merekod perbelanjaan sahaja',
+    ai_scope_income: 'Merekod pendapatan sahaja',
+    ai_scope_both: 'Merekod perbelanjaan dan pendapatan',
     ai_get_unlimited: 'Dapatkan tanpa had dengan Pro',
     ai_done_title: 'Disusun untuk anda',
     ai_logged_count: '%{count} direkod',

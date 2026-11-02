@@ -3228,7 +3228,10 @@ const es = {
     review_banner_single: '1 notificación por revisar',
     review_amount_hint: 'Elige o introduce el importe',
     review_missing: 'A algunos elementos aún les falta el importe o la cuenta.',
-    review_choose_account: 'Elige una cuenta',
+    review_no_account_ios:
+      'No hay cuenta. Elige una en tu atajo Log Notification para que se registren automáticamente.',
+    review_no_account_android:
+      'No hay cuenta. Elige una para esta app en los ajustes de notificaciones para que se registren automáticamente.',
     review_save_error: 'No se pudo guardar. Tus elementos sin terminar siguen aquí.',
     review_leave_title: '¿Ignorar las notificaciones sin terminar?',
     review_leave_body: 'Si sales, se ignorarán las %{count} notificaciones sin terminar.',
@@ -3257,6 +3260,9 @@ const es = {
     ai_log_both: 'Ambos',
     ai_log_expense: 'Gastos',
     ai_log_income: 'Ingresos',
+    ai_scope_expense: 'Registra solo gastos',
+    ai_scope_income: 'Registra solo ingresos',
+    ai_scope_both: 'Registra gastos e ingresos',
     ai_get_unlimited: 'Consigue revisiones ilimitadas con Pro',
     ai_done_title: 'Ordenado para ti',
     ai_logged_count: '%{count} registradas',

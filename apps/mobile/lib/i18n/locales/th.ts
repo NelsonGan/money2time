@@ -3141,7 +3141,10 @@ const th = {
     review_banner_single: 'การแจ้งเตือนรอตรวจสอบ 1 รายการ',
     review_amount_hint: 'เลือกหรือใส่จำนวนเงิน',
     review_missing: 'บางรายการยังต้องใส่จำนวนเงินหรือบัญชี',
-    review_choose_account: 'เลือกบัญชี',
+    review_no_account_ios:
+      'ยังไม่ได้เลือกบัญชี เลือกในคำสั่งลัด Log Notification เพื่อให้บันทึกอัตโนมัติ',
+    review_no_account_android:
+      'ยังไม่ได้เลือกบัญชี เลือกสำหรับแอปนี้ในการตั้งค่าการแจ้งเตือนเพื่อให้บันทึกอัตโนมัติ',
     review_save_error: 'บันทึกไม่ได้ รายการที่ยังไม่เสร็จยังอยู่ที่นี่',
     review_leave_title: 'ข้ามการแจ้งเตือนที่ยังไม่เสร็จไหม',
     review_leave_body: 'หากออกจากหน้านี้ การแจ้งเตือนที่ยังไม่เสร็จทั้ง %{count} รายการจะถูกข้าม',
@@ -3170,6 +3173,9 @@ const th = {
     ai_log_both: 'ทั้งสอง',
     ai_log_expense: 'รายจ่าย',
     ai_log_income: 'รายรับ',
+    ai_scope_expense: 'บันทึกเฉพาะรายจ่าย',
+    ai_scope_income: 'บันทึกเฉพาะรายรับ',
+    ai_scope_both: 'บันทึกรายจ่ายและรายรับ',
     ai_get_unlimited: 'ใช้ได้ไม่จำกัดกับ Pro',
     ai_done_title: 'จัดการให้แล้ว',
     ai_logged_count: 'บันทึก %{count}',

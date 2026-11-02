@@ -3212,7 +3212,10 @@ const tr = {
     review_banner_single: 'İncelenecek 1 bildirim',
     review_amount_hint: 'Tutarı seçin veya girin',
     review_missing: 'Bazı öğelerde hâlâ tutar veya hesap eksik.',
-    review_choose_account: 'Hesap seçin',
+    review_no_account_ios:
+      'Hesap seçilmedi. Otomatik kaydedilmeleri için Log Notification kestirmenizde bir hesap seçin.',
+    review_no_account_android:
+      'Hesap seçilmedi. Otomatik kaydedilmeleri için Bildirim ayarlarında bu uygulamaya bir hesap seçin.',
     review_save_error: 'Kaydedilemedi. Tamamlanmamış öğeleriniz hâlâ burada.',
     review_leave_title: 'Tamamlanmamış bildirimler yok sayılsın mı?',
     review_leave_body: 'Çıkarsanız tamamlanmamış %{count} bildirimin tümü yok sayılır.',
@@ -3241,6 +3244,9 @@ const tr = {
     ai_log_both: 'İkisi de',
     ai_log_expense: 'Gider',
     ai_log_income: 'Gelir',
+    ai_scope_expense: 'Yalnızca giderleri kaydeder',
+    ai_scope_income: 'Yalnızca gelirleri kaydeder',
+    ai_scope_both: 'Gider ve gelirleri kaydeder',
     ai_get_unlimited: 'Pro ile sınırsız kullanın',
     ai_done_title: 'Sizin için ayrıldı',
     ai_logged_count: '%{count} kaydedildi',

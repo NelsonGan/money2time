@@ -3236,7 +3236,10 @@ const nl = {
     review_banner_single: '1 melding te bekijken',
     review_amount_hint: 'Kies of vul het bedrag in',
     review_missing: 'Bij sommige items ontbreekt nog een bedrag of rekening.',
-    review_choose_account: 'Kies een rekening',
+    review_no_account_ios:
+      'Geen rekening gekozen. Kies er een in je Log Notification-opdracht, dan worden ze automatisch vastgelegd.',
+    review_no_account_android:
+      'Geen rekening gekozen. Kies er een voor deze app in de meldingsinstellingen, dan worden ze automatisch vastgelegd.',
     review_save_error: 'Opslaan mislukt. Je onafgemaakte items staan er nog.',
     review_leave_title: 'Onafgemaakte meldingen negeren?',
     review_leave_body: 'Als je weggaat, worden alle %{count} onafgemaakte meldingen genegeerd.',
@@ -3265,6 +3268,9 @@ const nl = {
     ai_log_both: 'Beide',
     ai_log_expense: 'Uitgaven',
     ai_log_income: 'Inkomsten',
+    ai_scope_expense: 'Legt alleen uitgaven vast',
+    ai_scope_income: 'Legt alleen inkomsten vast',
+    ai_scope_both: 'Legt uitgaven en inkomsten vast',
     ai_get_unlimited: 'Onbeperkt met Pro',
     ai_done_title: 'Voor je gesorteerd',
     ai_logged_count: '%{count} vastgelegd',

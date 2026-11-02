@@ -3199,7 +3199,10 @@ const da = {
     review_banner_single: '1 notifikation til gennemgang',
     review_amount_hint: 'Vælg eller indtast beløbet',
     review_missing: 'Nogle elementer mangler stadig et beløb eller en konto.',
-    review_choose_account: 'Vælg en konto',
+    review_no_account_ios:
+      'Ingen konto valgt. Vælg en i din Log Notification-genvej, så de registreres automatisk.',
+    review_no_account_android:
+      'Ingen konto valgt. Vælg en for denne app i notifikationsindstillingerne, så de registreres automatisk.',
     review_save_error: 'Kunne ikke gemme. Dine ufærdige elementer er her stadig.',
     review_leave_title: 'Ignorer ufærdige notifikationer?',
     review_leave_body: 'Hvis du går, ignoreres alle %{count} ufærdige notifikationer.',
@@ -3228,6 +3231,9 @@ const da = {
     ai_log_both: 'Begge',
     ai_log_expense: 'Udgifter',
     ai_log_income: 'Indtægter',
+    ai_scope_expense: 'Registrerer kun udgifter',
+    ai_scope_income: 'Registrerer kun indtægter',
+    ai_scope_both: 'Registrerer udgifter og indtægter',
     ai_get_unlimited: 'Få ubegrænset med Pro',
     ai_done_title: 'Sorteret for dig',
     ai_logged_count: '%{count} registreret',

@@ -3189,7 +3189,10 @@ const hi = {
     review_banner_single: 'जांचने के लिए 1 सूचना',
     review_amount_hint: 'राशि चुनें या डालें',
     review_missing: 'कुछ आइटम में अभी भी राशि या खाता चाहिए।',
-    review_choose_account: 'खाता चुनें',
+    review_no_account_ios:
+      'कोई खाता नहीं चुना गया। अपने Log Notification शॉर्टकट में खाता चुनें, ताकि ये अपने-आप दर्ज हों।',
+    review_no_account_android:
+      'कोई खाता नहीं चुना गया। सूचना सेटिंग में इस ऐप के लिए खाता चुनें, ताकि ये अपने-आप दर्ज हों।',
     review_save_error: 'सेव नहीं हो सका। आपके अधूरे आइटम अभी भी यहीं हैं।',
     review_leave_title: 'अधूरी सूचनाओं को अनदेखा करें?',
     review_leave_body: 'बाहर जाने पर सभी %{count} अधूरी सूचनाएं अनदेखी कर दी जाएंगी।',
@@ -3218,6 +3221,9 @@ const hi = {
     ai_log_both: 'दोनों',
     ai_log_expense: 'खर्च',
     ai_log_income: 'आय',
+    ai_scope_expense: 'केवल खर्च दर्ज करता है',
+    ai_scope_income: 'केवल आय दर्ज करता है',
+    ai_scope_both: 'खर्च और आय दर्ज करता है',
     ai_get_unlimited: 'Pro के साथ असीमित पाएं',
     ai_done_title: 'आपके लिए छांटी गईं',
     ai_logged_count: '%{count} दर्ज',
