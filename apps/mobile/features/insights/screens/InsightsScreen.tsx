@@ -1,5 +1,6 @@
-import Constants, { ExecutionEnvironment } from 'expo-constants';
 import {
+  ArrowDown,
+  ArrowUp,
   CalendarDays,
   Check,
   ChevronDown,
@@ -7,6 +8,7 @@ import {
   ChevronRight,
   Landmark,
   PiggyBank,
+  Plus,
   Smile,
   Sparkles,
   TrendingDown,
@@ -31,10 +33,7 @@ import {
   View,
   type ViewInstance,
 } from 'react-native';
-import { AnimatedRollingNumber } from 'react-native-animated-rolling-numbers';
 import { PieChart } from 'react-native-gifted-charts';
-import { type GraphPoint, LineGraph } from 'react-native-graph';
-import { Easing } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, {
   ClipPath,
@@ -105,10 +104,34 @@ import {
   InsightPaneSplit,
   isSplitInsightPane,
 } from '~/features/insights/components/InsightPaneSplit';
+import { InsightSubTabs } from '~/features/insights/components/InsightSubTabs';
 import { ProTrendPreviewOverlay } from '~/features/insights/components/ProTrendPreviewOverlay';
 import { SavingsRateRing } from '~/features/insights/components/SavingsRateRing';
 import { SentimentStackedBarChart } from '~/features/insights/components/SentimentStackedBarChart';
-import { TrendBarChart } from '~/features/insights/components/TrendBarChart';
+import {
+  TrendLineChart,
+  type TrendLineChartBucket,
+  type TrendLineChartSeries,
+} from '~/features/insights/components/TrendLineChart';
+import {
+  type TrendCategoryRow,
+  TrendCompareSummary,
+  TrendHeadline,
+  type TrendStatCardItem,
+  TrendStatCards,
+  TrendTopCategories,
+} from '~/features/insights/components/TrendSummary';
+import {
+  INSIGHT_GROUP_MEMBERS,
+  INSIGHT_MENU_ENTRIES,
+  type InsightGroupId,
+  insightGroupOf,
+  insightMenuEntryOf,
+  insightTypeForGroup,
+  isInsightGroupId,
+  type LastInsightTypeByGroup,
+  parseLastInsightTypeByGroup,
+} from '~/features/insights/insightGroups';
 import {
   buildSavingsIncludePredicate,
   categoryFilterIds,
@@ -118,6 +141,11 @@ import {
   parseInsightsFilterModes,
 } from '~/features/insights/insightsFilterModes';
 import { getPeriodPagerCommitSteps } from '~/features/insights/lib/periodPager';
+import {
+  compareCategoryTotals,
+  percentChange,
+  summarizeTrend,
+} from '~/features/insights/lib/trendStats';
 import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
 import {
   EMPTY_REVIEW_FILTERS,
@@ -181,7 +209,6 @@ import {
   formatDateInput,
   formatHours,
   monthKeyFromDateLocal,
-  normalizeMonthKey,
   parseMonthKey,
   startOfMonthDate,
   toRange,
@@ -346,25 +373,24 @@ const INSIGHTS_SCROLL_CONTENT_STYLE = {
   paddingBottom: LIST_BOTTOM_PADDING,
   paddingTop: spacing.xxs,
 } as const;
-const ASSET_HISTORY_CHART_HEIGHT = 226;
-const ASSET_HISTORY_CHART_PADDING_RIGHT = 64;
-const EXPENSE_TREND_CHART_HEIGHT = 226;
-const EXPENSE_TREND_CHART_PADDING_RIGHT = 64;
-const CATEGORY_TREND_X_AXIS_HEIGHT = 20;
-const CATEGORY_TREND_LINE_HEIGHT = 206;
-const CATEGORY_TREND_CHART_HEIGHT = CATEGORY_TREND_LINE_HEIGHT + CATEGORY_TREND_X_AXIS_HEIGHT;
-const CATEGORY_TREND_CHART_PADDING_RIGHT = 64;
+const TREND_CHART_HEIGHT = 236;
+const TREND_COMPARE_CHART_HEIGHT = 262;
+const TREND_TOP_CATEGORY_COUNT = 3;
+/** The charted category and the one it is compared with. */
+const CATEGORY_TREND_PRIMARY_COLOR = '#2F7BC4';
+const CATEGORY_TREND_COMPARE_COLOR = '#E8833A';
+const TREND_INSIGHT_TYPE_BY_KIND = {
+  expense: 'expense_trend',
+  income: 'income_trend',
+  category: 'category_trend',
+  asset: 'asset_history',
+} as const;
+const EMPTY_TRANSACTIONS: TransactionWithRelations[] = [];
 const SENTIMENT_CHART_HEIGHT = 200;
 const SENTIMENT_CHART_PADDING_RIGHT = 16;
 const SENTIMENT_COLORS = { happy: '#4CAF50', neutral: '#FFB74D', sad: '#E57373' } as const;
 const INSIGHTS_LINE_CHART_SIDE_INSET = 8;
-const IS_EXPO_GO = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
 const INSIGHTS_LINE_CHART_SECTION_BLEED = 10;
-const GRAPH_HORIZONTAL_PADDING = 8;
-const GRAPH_VERTICAL_PADDING = 14;
-const Y_AXIS_LABEL_BASE_FONT_SIZE = 9.5;
-const Y_AXIS_LABEL_MIN_FONT_SIZE = 7.5;
-const CHART_SKELETON_READY_DELAY_MS = 180;
 const MONTHS_PER_YEAR = 12;
 const HEALTHY_SAVINGS_RATE_THRESHOLD = 0.2;
 const SAVINGS_RATE_RING_SIZE = 104;
@@ -382,16 +408,6 @@ const formatSavingsRatePercentLabel = (percent: number): string => {
   }
   return `${percent.toFixed(1)}%`;
 };
-const INSIGHTS_ROLLING_NUMBER_TEXT_STYLE = {
-  fontSize: 24,
-  lineHeight: 30,
-  fontFamily: FONT.bold,
-  fontWeight: '700' as const,
-};
-const INSIGHTS_ROLLING_NUMBER_SPIN_CONFIG = {
-  duration: 90,
-  easing: Easing.out(Easing.cubic),
-} as const;
 const INSIGHTS_FILTER_MODAL_CONTENT_STYLE = {
   padding: spacing.screenHorizontal,
   paddingBottom: LIST_BOTTOM_PADDING + spacing.xs,
@@ -405,6 +421,7 @@ const MONTH_LABEL_BY_KEY_CACHE = new Map<string, string>();
 const PERIOD_MONTH_YEAR_FORMATTER_CACHE = new Map<string, Intl.DateTimeFormat>();
 const PERIOD_YEAR_FORMATTER_CACHE = new Map<string, Intl.DateTimeFormat>();
 const PERIOD_MONTH_DAY_FORMATTER_CACHE = new Map<string, Intl.DateTimeFormat>();
+const MONTH_SHORT_YEAR_LABEL_CACHE = new Map<string, string>();
 const PERIOD_PICKER_SIDE_MARGIN = 12;
 const PERIOD_PICKER_CARD_WIDTH = 408;
 const BREAKDOWN_PIE_LABEL_MIN_WIDTH = 72;
@@ -429,40 +446,6 @@ const styles = StyleSheet.create({
   },
   chartSizeCenter: {
     alignSelf: 'center',
-  },
-  graphYAxisRow: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    height: 2,
-  },
-  graphYAxisDot: {
-    position: 'absolute',
-    top: 0,
-    width: 2,
-    height: 2,
-    borderRadius: 1,
-  },
-  graphYAxisLabelContainer: {
-    position: 'absolute',
-    right: 0,
-  },
-  graphYAxisLabel: {
-    textAlign: 'right',
-  },
-  chartSkeletonFill: {
-    position: 'absolute',
-    left: GRAPH_HORIZONTAL_PADDING,
-    top: GRAPH_VERTICAL_PADDING,
-    borderRadius: 14,
-    backgroundColor: 'rgba(148, 163, 184, 0.22)',
-  },
-  chartRuntimeFallback: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 16,
-    borderWidth: 1,
-    paddingHorizontal: spacing.lg,
   },
   breakdownPercentBadge: {
     borderRadius: 999,
@@ -741,6 +724,12 @@ type BreakdownPageData = InsightBasePageData & {
   categoryRows: InsightCategoryRow[];
   breakdownTransactionsById: Map<string, TransactionWithRelations[]>;
   transactionType: BreakdownTransactionType;
+  /**
+   * The same breakdown for the period before (week, month or year only), so
+   * the total and each category can show how they moved. Null when the period
+   * has no natural "previous" (custom ranges, lifetime).
+   */
+  previous: { total: number; amountById: Map<string, number> } | null;
 };
 
 type InsightAnalyticsDayRow = {
@@ -826,6 +815,9 @@ type CategoryTrendPageData = InsightBasePageData & {
   monthRows: ExpenseTrendMonthRow[];
   selectedCategoryId: string | null;
   selectableCategories: CategoryTrendCategoryOption[];
+  /** The second category's buckets, aligned with `monthRows`, when comparing. */
+  compareCategoryId: string | null;
+  compareMonthRows: ExpenseTrendMonthRow[] | null;
 };
 
 type IncomeTrendMonthRow = {
@@ -878,6 +870,28 @@ type InsightPageData =
   | AssetHistoryPageData;
 type PeriodState = { anchorDate: Date; customStart: string; customEnd: string };
 
+type TrendKind = 'expense' | 'income' | 'category' | 'asset';
+/** One of a trend bucket's biggest categories, cached per bucket's transactions. */
+type TrendTopCategoryEntry = {
+  id: string;
+  label: string;
+  icon: string;
+  amount: number;
+  share: number;
+  color: string;
+  transactions: TransactionWithRelations[];
+};
+/** What a trend page's chart draws, built once per (cached) page. */
+type TrendChartModel = {
+  buckets: TrendLineChartBucket[];
+  series: TrendLineChartSeries[];
+  /** Primary values, null for buckets that have not happened yet. */
+  values: (number | null)[];
+  compareValues: (number | null)[] | null;
+  /** Each bucket's transactions (both categories' when comparing), newest first. */
+  transactionsByKey: Map<string, TransactionWithRelations[]>;
+};
+
 // Empty page-data shells for the Pro-gated trends. A non-Pro user only ever
 // sees the ProTrendPreviewOverlay for these (renderInsightsPane short-circuits
 // on `pageData.kind`), so there is no reason to crunch the full trend series
@@ -922,6 +936,8 @@ const LOCKED_TREND_PLACEHOLDERS: Record<ProTrendType, InsightPageData> = {
     monthRows: [],
     selectedCategoryId: null,
     selectableCategories: [],
+    compareCategoryId: null,
+    compareMonthRows: null,
   },
   expense_sentiment: {
     kind: 'expense_sentiment',
@@ -1002,6 +1018,8 @@ type InsightsPreferencesSnapshot = {
   reviewIncomeCategoryMode: SelectionFilterMode;
   insightsFilterModes: InsightsFilterModes;
   categoryTrendSelectedCategoryId: string | null;
+  categoryTrendCompareCategoryId: string | null;
+  lastInsightTypeByGroup: LastInsightTypeByGroup;
 };
 
 const INSIGHTS_PREFERENCES_VERSION = 1;
@@ -1111,6 +1129,12 @@ function parseInsightsPreferencesPayload(
     } else if (parsed.categoryTrendSelectedCategoryId === null) {
       next.categoryTrendSelectedCategoryId = null;
     }
+    if (typeof parsed.categoryTrendCompareCategoryId === 'string') {
+      const trimmed = parsed.categoryTrendCompareCategoryId.trim();
+      next.categoryTrendCompareCategoryId = trimmed.length > 0 ? trimmed : null;
+    }
+    const lastInsightTypeByGroup = parseLastInsightTypeByGroup(parsed.lastInsightTypeByGroup);
+    if (lastInsightTypeByGroup) next.lastInsightTypeByGroup = lastInsightTypeByGroup;
 
     return next;
   } catch {
@@ -1307,6 +1331,32 @@ function monthLabelFromMonthKey(monthKey: string, locale: string) {
   });
   MONTH_LABEL_BY_KEY_CACHE.set(cacheKey, label);
   return label;
+}
+
+/** "Aug 2026" for a "2026-08" bucket, in the user's locale. */
+function monthShortYearLabel(monthKey: string, locale: string): string {
+  const cacheKey = `${locale}|${monthKey}`;
+  const cached = MONTH_SHORT_YEAR_LABEL_CACHE.get(cacheKey);
+  if (cached) return cached;
+  const monthStart = monthStartUtcDateFromMonthKey(monthKey);
+  if (!monthStart) return monthKey;
+  const label = monthStart.toLocaleDateString(locale, {
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+  MONTH_SHORT_YEAR_LABEL_CACHE.set(cacheKey, label);
+  return label;
+}
+
+function sortTransactionsNewestFirst(
+  transactions: TransactionWithRelations[],
+): TransactionWithRelations[] {
+  return transactions.sort((a, b) => {
+    const dateDelta = b.date.localeCompare(a.date);
+    if (dateDelta !== 0) return dateDelta;
+    return b.createdAt.localeCompare(a.createdAt);
+  });
 }
 
 function monthLabelsForYear(year: number, locale: string): string[] {
@@ -1585,259 +1635,6 @@ function layoutBreakdownPieLabels(
   ];
 }
 
-function monthDateFromMonthKey(monthKey: string): Date {
-  return parseMonthKey(monthKey) ?? new Date(1970, 0, 1);
-}
-
-type GraphAxisTick = {
-  value: number;
-  top: number;
-};
-
-type GraphLineRange = {
-  x?: { min: Date; max: Date };
-  y?: { min: number; max: number };
-};
-
-function resolveYAxisLabelFontSize(labels: string[], labelWidth: number) {
-  if (labels.length === 0 || labelWidth <= 0) return Y_AXIS_LABEL_BASE_FONT_SIZE;
-  const maxLength = labels.reduce((currentMax, label) => Math.max(currentMax, label.length), 1);
-  const usableWidth = Math.max(10, labelWidth - 2);
-  const estimatedFontSize = usableWidth / (maxLength * 0.58);
-  return Math.max(
-    Y_AXIS_LABEL_MIN_FONT_SIZE,
-    Math.min(Y_AXIS_LABEL_BASE_FONT_SIZE, Number(estimatedFontSize.toFixed(2))),
-  );
-}
-
-function buildGraphAxisTicks(values: number[], chartHeight: number, segments = 4): GraphAxisTick[] {
-  if (values.length === 0 || chartHeight <= 0 || segments <= 0) return [];
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const span = max - min;
-
-  return Array.from({ length: segments + 1 }, (_, index) => {
-    const ratio = index / segments;
-    const value = span === 0 ? max : max - span * ratio;
-    const top = ratio * Math.max(0, chartHeight - 1);
-    return { value, top };
-  });
-}
-
-function resolveFlatGraphRange(points: GraphPoint[]): GraphLineRange | undefined {
-  if (points.length === 0) return undefined;
-  const values = points.map((point) => point.value);
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  if (!Number.isFinite(min) || !Number.isFinite(max) || min !== max) return undefined;
-
-  const centerValue = max;
-  const offset = Math.max(1, Math.abs(centerValue) * 0.04);
-  return { y: { min: centerValue - offset, max: centerValue + offset } };
-}
-
-function buildGraphDatasetSignature(points: GraphPoint[]) {
-  if (points.length === 0) return 'empty';
-  return points.map((point) => `${point.date.getTime()}:${point.value.toFixed(4)}`).join('|');
-}
-
-function useDeferredChartVisibility(datasetSignature: string, chartWidth: number) {
-  const [isChartReady, setIsChartReady] = useState(false);
-
-  useEffect(() => {
-    setIsChartReady(false);
-    let readyTimeoutId: ReturnType<typeof setTimeout> | null = null;
-    const frameId = requestAnimationFrame(() => {
-      readyTimeoutId = setTimeout(() => {
-        setIsChartReady(true);
-      }, CHART_SKELETON_READY_DELAY_MS);
-    });
-    return () => {
-      cancelAnimationFrame(frameId);
-      if (readyTimeoutId) clearTimeout(readyTimeoutId);
-    };
-  }, [chartWidth, datasetSignature]);
-
-  return { isChartReady };
-}
-
-function ScrubRollingNumber({
-  value,
-  formattedText,
-  color,
-  resetKey,
-  containerClassName,
-}: {
-  value: number;
-  formattedText?: string;
-  color: string;
-  resetKey: string;
-  containerClassName?: string;
-}) {
-  return (
-    <View className={cn('flex-row items-center', containerClassName)}>
-      <AnimatedRollingNumber
-        key={resetKey}
-        value={value}
-        formattedText={formattedText}
-        textStyle={[INSIGHTS_ROLLING_NUMBER_TEXT_STYLE, { color }]}
-        numberStyle={{ color }}
-        commaStyle={{ color }}
-        dotStyle={{ color }}
-        signStyle={{ color }}
-        compactNotationStyle={{ color }}
-        spinningAnimationConfig={INSIGHTS_ROLLING_NUMBER_SPIN_CONFIG}
-      />
-    </View>
-  );
-}
-
-const GraphYAxisGrid = React.memo(function GraphYAxisGridImpl({
-  ticks,
-  chartWidth,
-  chartHeight,
-  labelWidth,
-  lineColor,
-  formatTick,
-}: {
-  ticks: GraphAxisTick[];
-  chartWidth: number;
-  chartHeight: number;
-  labelWidth: number;
-  lineColor: string;
-  formatTick: (value: number) => string;
-}) {
-  const tickLabels = useMemo(
-    () => ticks.map((tick) => formatTick(tick.value)),
-    [formatTick, ticks],
-  );
-  const yAxisLabelFontSize = useMemo(
-    () => resolveYAxisLabelFontSize(tickLabels, labelWidth),
-    [labelWidth, tickLabels],
-  );
-  const yAxisLabelLineHeight = Math.round(yAxisLabelFontSize * 1.25);
-  const resolvedTicks = useMemo(
-    () =>
-      ticks.map((tick) => {
-        const labelTop = Math.max(
-          0,
-          Math.min(chartHeight - yAxisLabelLineHeight, tick.top - yAxisLabelLineHeight / 2),
-        );
-        return {
-          labelTop,
-          lineTop: labelTop + yAxisLabelLineHeight / 2,
-        };
-      }),
-    [chartHeight, ticks, yAxisLabelLineHeight],
-  );
-  const gridDotCount = Math.max(2, Math.floor(chartWidth / 8));
-
-  return (
-    <>
-      <View
-        pointerEvents="none"
-        style={[styles.absoluteOverlay, buildSizeStyle(chartWidth, chartHeight)]}
-      >
-        {resolvedTicks.map(({ lineTop }, index) => (
-          <View key={`grid-${index}`} style={[styles.graphYAxisRow, { top: lineTop - 1 }]}>
-            {Array.from({ length: gridDotCount }, (_, dotIndex) => {
-              const left = (dotIndex * Math.max(0, chartWidth - 2)) / Math.max(1, gridDotCount - 1);
-              return (
-                <View
-                  key={`grid-${index}-dot-${dotIndex}`}
-                  style={[styles.graphYAxisDot, { left, backgroundColor: lineColor }]}
-                />
-              );
-            })}
-          </View>
-        ))}
-      </View>
-
-      <View
-        pointerEvents="none"
-        style={[
-          styles.absoluteOverlay,
-          { left: chartWidth, width: labelWidth, height: chartHeight },
-        ]}
-      >
-        {resolvedTicks.map(({ labelTop }, index) => {
-          return (
-            <View
-              key={`label-${index}`}
-              style={[styles.graphYAxisLabelContainer, { top: labelTop }]}
-            >
-              <Text
-                variant="label"
-                tone="muted"
-                numberOfLines={1}
-                style={[
-                  styles.graphYAxisLabel,
-                  { fontSize: yAxisLabelFontSize, lineHeight: yAxisLabelLineHeight },
-                ]}
-              >
-                {tickLabels[index]}
-              </Text>
-            </View>
-          );
-        })}
-      </View>
-    </>
-  );
-});
-
-const ChartLoadingSkeleton = React.memo(function ChartLoadingSkeletonImpl({
-  chartWidth,
-  chartHeight,
-}: {
-  chartWidth: number;
-  chartHeight: number;
-}) {
-  const pulseOpacity = useRef(new RNAnimated.Value(0.46)).current;
-  useEffect(() => {
-    const pulse = RNAnimated.loop(
-      RNAnimated.sequence([
-        RNAnimated.timing(pulseOpacity, {
-          toValue: 0.74,
-          duration: 660,
-          useNativeDriver: true,
-        }),
-        RNAnimated.timing(pulseOpacity, {
-          toValue: 0.46,
-          duration: 660,
-          useNativeDriver: true,
-        }),
-      ]),
-    );
-    pulse.start();
-    return () => {
-      pulse.stop();
-      pulseOpacity.stopAnimation();
-      pulseOpacity.setValue(0.46);
-    };
-  }, [pulseOpacity]);
-
-  return (
-    <RNAnimated.View
-      pointerEvents="none"
-      style={[
-        styles.absoluteOverlay,
-        buildSizeStyle(chartWidth, chartHeight),
-        { opacity: pulseOpacity },
-      ]}
-    >
-      <View
-        style={[
-          styles.chartSkeletonFill,
-          buildSizeStyle(
-            Math.max(0, chartWidth - GRAPH_HORIZONTAL_PADDING * 2),
-            Math.max(0, chartHeight - GRAPH_VERTICAL_PADDING * 2),
-          ),
-        ]}
-      />
-    </RNAnimated.View>
-  );
-});
-
 const TREND_TRANSACTIONS_INITIAL = 5;
 const TREND_TRANSACTIONS_INITIAL_EXPENSE_INCOME = 7;
 const TREND_TRANSACTIONS_PAGE = 10;
@@ -1880,12 +1677,7 @@ const TrendMonthTransactions = React.memo(function TrendMonthTransactionsImpl({
   // Sort only when the transaction set changes; slicing for the visible window is cheap
   // and must not re-sort on every infinite-scroll count bump.
   const sortedTransactions = useMemo(
-    () =>
-      [...transactions].sort((a, b) => {
-        const dateDelta = b.date.localeCompare(a.date);
-        if (dateDelta !== 0) return dateDelta;
-        return b.createdAt.localeCompare(a.createdAt);
-      }),
+    () => sortTransactionsNewestFirst([...transactions]),
     [transactions],
   );
   const visibleTransactions = sortedTransactions.slice(0, visibleCount);
@@ -1915,106 +1707,6 @@ const TrendMonthTransactions = React.memo(function TrendMonthTransactionsImpl({
     />
   );
 });
-
-const AssetHistoryLineChart = React.memo(function AssetHistoryLineChartImpl({
-  monthRows,
-  chartWidth,
-  primaryColor,
-  onSelectMonthKey,
-  onGestureStart,
-  onGestureEnd,
-}: {
-  monthRows: AssetHistoryMonthRow[];
-  chartWidth: number;
-  primaryColor: string;
-  onSelectMonthKey: (monthKey: string) => void;
-  onGestureStart: () => void;
-  onGestureEnd: () => void;
-}) {
-  const graphPoints = useMemo<GraphPoint[]>(
-    () =>
-      monthRows.map((row) => ({
-        value: row.totalAssets,
-        date: monthDateFromMonthKey(row.monthKey),
-      })),
-    [monthRows],
-  );
-  const graphRange = useMemo(() => resolveFlatGraphRange(graphPoints), [graphPoints]);
-  const graphDatasetSignature = useMemo(
-    () => buildGraphDatasetSignature(graphPoints),
-    [graphPoints],
-  );
-  const monthKeyByTime = useMemo(
-    () =>
-      new Map(
-        graphPoints.map((point, index) => [point.date.getTime(), monthRows[index]?.monthKey ?? '']),
-      ),
-    [graphPoints, monthRows],
-  );
-  const handlePointSelected = useCallback(
-    (point: GraphPoint) => {
-      const normalizedMonthKey =
-        monthKeyByTime.get(point.date.getTime()) ??
-        normalizeMonthKey(monthKeyFromDateLocal(point.date));
-      if (!normalizedMonthKey) return;
-      onSelectMonthKey(normalizedMonthKey);
-    },
-    [monthKeyByTime, onSelectMonthKey],
-  );
-  const { isChartReady } = useDeferredChartVisibility(graphDatasetSignature, chartWidth);
-
-  if (IS_EXPO_GO) {
-    return (
-      <View
-        style={[
-          buildSizeStyle(chartWidth, ASSET_HISTORY_CHART_HEIGHT),
-          styles.chartRuntimeFallback,
-          {
-            borderColor: withColorAlpha(primaryColor, 0.18),
-            backgroundColor: withColorAlpha(primaryColor, 0.06),
-          },
-        ]}
-      >
-        <Text variant="label" tone="muted" className="text-center">
-          {I18n.t('insights.charts.expo_go_fallback')}
-        </Text>
-      </View>
-    );
-  }
-
-  return (
-    <View {...REPLAY_PRIVATE} style={buildSizeStyle(chartWidth, ASSET_HISTORY_CHART_HEIGHT)}>
-      {isChartReady ? (
-        <>
-          <LineGraph
-            animated
-            points={graphPoints}
-            range={graphRange}
-            color={primaryColor}
-            lineThickness={2.8}
-            gradientFillColors={[
-              withColorAlpha(primaryColor, 0.2),
-              withColorAlpha(primaryColor, 0.03),
-            ]}
-            enablePanGesture
-            panGestureDelay={0}
-            horizontalPadding={GRAPH_HORIZONTAL_PADDING}
-            verticalPadding={GRAPH_VERTICAL_PADDING}
-            enableIndicator={false}
-            onPointSelected={handlePointSelected}
-            onGestureStart={onGestureStart}
-            onGestureEnd={onGestureEnd}
-            style={buildSizeStyle(chartWidth, ASSET_HISTORY_CHART_HEIGHT)}
-          />
-        </>
-      ) : (
-        <ChartLoadingSkeleton chartWidth={chartWidth} chartHeight={ASSET_HISTORY_CHART_HEIGHT} />
-      )}
-    </View>
-  );
-});
-
-// ExpenseTrendLineChart and IncomeTrendLineChart replaced by TrendBarChart
 
 function FilterPill({
   label,
@@ -2993,7 +2685,14 @@ export function InsightsScreen({
   const [categoryTrendSelectedCategoryId, setCategoryTrendSelectedCategoryId] = useState<
     string | null
   >(null);
-  const [isCategoryTrendPickerOpen, setIsCategoryTrendPickerOpen] = useState(false);
+  const [categoryTrendCompareCategoryId, setCategoryTrendCompareCategoryId] = useState<
+    string | null
+  >(null);
+  // Which category chip the picker is choosing for: the one charted, or the one compared.
+  const [categoryTrendPickerTarget, setCategoryTrendPickerTarget] = useState<
+    'primary' | 'compare' | null
+  >(null);
+  const [lastInsightTypeByGroup, setLastInsightTypeByGroup] = useState<LastInsightTypeByGroup>({});
   const [activeInsightsFilterPicker, setActiveInsightsFilterPicker] =
     useState<InsightsFilterKey | null>(null);
   const [insightsFilterModes, setInsightsFilterModes] = useState<InsightsFilterModes>({});
@@ -3043,10 +2742,28 @@ export function InsightsScreen({
   const categoryTrendScrubBucketByPeriodRef = useRef<Record<string, string>>(
     categoryTrendScrubBucketByPeriod,
   );
-  const lastScrubHapticAtRef = useRef(0);
+  // Per-page chart inputs and per-bucket category rows, reused while scrubbing.
+  const trendChartModelCacheRef = useRef(
+    new WeakMap<
+      object,
+      {
+        signature: string;
+        rateSource: (dateIso: string) => number;
+        model: TrendChartModel;
+      }
+    >(),
+  );
+  const trendTopCategoriesCacheRef = useRef(
+    new WeakMap<
+      TransactionWithRelations[],
+      {
+        signature: string;
+        rows: TrendTopCategoryEntry[];
+      }
+    >(),
+  );
 
   const { width, height } = useContentFrame();
-  const bottomNavInset = useBottomNavContentInset();
   const { isTablet, panes } = useDeviceLayout();
   const pageWidth = Math.max(1, width);
   const insightsPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
@@ -3068,20 +2785,23 @@ export function InsightsScreen({
     () => ({ marginHorizontal: -INSIGHTS_LINE_CHART_SECTION_BLEED }),
     [],
   );
-  const triggerScrubHaptic = useCallback(() => {
-    const now = Date.now();
-    if (now - lastScrubHapticAtRef.current < 72) return;
-    lastScrubHapticAtRef.current = now;
-    void triggerHaptic('selection');
-  }, []);
+  // One entry per page, with Breakdown and Trends each standing for their tabs.
   const insightTypeOptions = useMemo(
     () =>
-      INSIGHT_TYPES.map((type) => ({
-        value: type,
-        label: String(I18n.t(`insights.${type}`)),
-        icon: renderInsightTypeIcon(type),
-        badge: !isPro && proTrendTypeSet.has(type) ? String(I18n.t('pro.badge')) : undefined,
-      })),
+      INSIGHT_MENU_ENTRIES.map((entry) => {
+        const iconType: InsightType = isInsightGroupId(entry)
+          ? INSIGHT_GROUP_MEMBERS[entry][0]
+          : entry;
+        const isLocked = isInsightGroupId(entry)
+          ? INSIGHT_GROUP_MEMBERS[entry].every((member) => proTrendTypeSet.has(member))
+          : proTrendTypeSet.has(entry);
+        return {
+          value: entry,
+          label: String(I18n.t(`insights.${entry}`)),
+          icon: renderInsightTypeIcon(iconType),
+          badge: !isPro && isLocked ? String(I18n.t('pro.badge')) : undefined,
+        };
+      }),
     [isPro, proTrendTypeSet],
   );
   const horizontalListRef = useRef<FlatList<number> | null>(null);
@@ -3319,6 +3039,10 @@ export function InsightsScreen({
       if (Object.prototype.hasOwnProperty.call(saved, 'categoryTrendSelectedCategoryId')) {
         setCategoryTrendSelectedCategoryId(saved.categoryTrendSelectedCategoryId ?? null);
       }
+      if (Object.prototype.hasOwnProperty.call(saved, 'categoryTrendCompareCategoryId')) {
+        setCategoryTrendCompareCategoryId(saved.categoryTrendCompareCategoryId ?? null);
+      }
+      if (saved.lastInsightTypeByGroup) setLastInsightTypeByGroup(saved.lastInsightTypeByGroup);
       if (saved.anchorDate) {
         const parsedAnchorDate = parseDateInput(saved.anchorDate);
         if (parsedAnchorDate) {
@@ -3365,6 +3089,8 @@ export function InsightsScreen({
       reviewIncomeCategoryMode: reviewFilters.incomeCategoryMode,
       insightsFilterModes,
       categoryTrendSelectedCategoryId,
+      categoryTrendCompareCategoryId,
+      lastInsightTypeByGroup,
     }),
     [
       reviewFilters,
@@ -3372,6 +3098,8 @@ export function InsightsScreen({
       activeCustomDateField,
       anchorDate,
       categoryTrendSelectedCategoryId,
+      categoryTrendCompareCategoryId,
+      lastInsightTypeByGroup,
       customEnd,
       customStart,
       excludedExpenseTrendAccountIds,
@@ -3446,6 +3174,23 @@ export function InsightsScreen({
   ]);
   const effectiveCategoryTrendCategoryId =
     categoryTrendSelectedCategoryId ?? defaultCategoryTrendCategoryId;
+  // A comparison only stands while both categories exist and differ.
+  const effectiveCategoryTrendCompareId =
+    categoryTrendCompareCategoryId &&
+    categoryTrendCompareCategoryId !== effectiveCategoryTrendCategoryId &&
+    categoryTrendCategoryOptions.some((option) => option.id === categoryTrendCompareCategoryId)
+      ? categoryTrendCompareCategoryId
+      : null;
+  // The menu reopens a group (Breakdown, Trends) on the tab last used in it.
+  useEffect(() => {
+    const groupId = insightGroupOf(selectedInsightType);
+    if (!groupId) return;
+    setLastInsightTypeByGroup((previous) =>
+      previous[groupId] === selectedInsightType
+        ? previous
+        : { ...previous, [groupId]: selectedInsightType },
+    );
+  }, [selectedInsightType]);
   const activeInsightFilterConfig = useMemo(
     () => getInsightFilterConfig(selectedInsightType),
     [selectedInsightType],
@@ -3662,14 +3407,37 @@ export function InsightsScreen({
           filteredForRange: [],
           breakdownTransactionsById: new Map(),
           transactionType: 'expense',
+          previous: null,
         };
       }
       const rangeStartMs = Date.parse(range.start);
       const rangeEndMs = Date.parse(range.end);
+      // A breakdown also totals the period before (week, month or year) for its
+      // "vs last month" figures; it is collected in this same pass.
+      const previousRange =
+        (insightType === 'expense_breakdown' || insightType === 'income_breakdown') &&
+        (periodPresetOverride === 'week' ||
+          periodPresetOverride === 'month' ||
+          periodPresetOverride === 'year')
+          ? getPeriodRange(
+              periodPresetOverride,
+              addPeriodBySteps(state.anchorDate, periodPresetOverride, -1, monthCycle),
+              state.customStart,
+              state.customEnd,
+              weekStartsOn,
+              monthCycle,
+            )
+          : null;
+      const previousStartMs = previousRange ? Date.parse(previousRange.start) : 0;
+      const previousEndMs = previousRange ? Date.parse(previousRange.end) : -1;
       const inRangeTransactions: TransactionWithRelations[] = [];
+      const previousRangeTransactions: TransactionWithRelations[] = [];
       accountScopedNonTransferEntries.forEach((entry) => {
-        if (entry.timestamp < rangeStartMs || entry.timestamp > rangeEndMs) return;
-        inRangeTransactions.push(entry.transaction);
+        if (entry.timestamp >= rangeStartMs && entry.timestamp <= rangeEndMs) {
+          inRangeTransactions.push(entry.transaction);
+        } else if (entry.timestamp >= previousStartMs && entry.timestamp <= previousEndMs) {
+          previousRangeTransactions.push(entry.transaction);
+        }
       });
 
       if (insightType === 'expense_trend') {
@@ -3826,11 +3594,7 @@ export function InsightsScreen({
           const transactions =
             row.transactions.length < 2
               ? row.transactions
-              : row.transactions.sort((a, b) => {
-                  const dateDelta = b.date.localeCompare(a.date);
-                  if (dateDelta !== 0) return dateDelta;
-                  return b.createdAt.localeCompare(a.createdAt);
-                });
+              : sortTransactionsNewestFirst(row.transactions);
           const nextRow = {
             ...row,
             topCategoryLabel: topCategory?.label ?? null,
@@ -4016,11 +3780,7 @@ export function InsightsScreen({
           const transactions =
             row.transactions.length < 2
               ? row.transactions
-              : row.transactions.sort((a, b) => {
-                  const dateDelta = b.date.localeCompare(a.date);
-                  if (dateDelta !== 0) return dateDelta;
-                  return b.createdAt.localeCompare(a.createdAt);
-                });
+              : sortTransactionsNewestFirst(row.transactions);
           const nextRow = {
             ...row,
             topCategoryLabel: topCategory?.label ?? null,
@@ -4111,6 +3871,19 @@ export function InsightsScreen({
         }
 
         const monthRowByKey = new Map(monthRowsSeed.map((row) => [row.monthKey, row]));
+        const compareCategoryId =
+          effectiveCategoryTrendCompareId && effectiveCategoryTrendCompareId !== selectedCategoryId
+            ? effectiveCategoryTrendCompareId
+            : null;
+        // The compared category gets its own buckets with the same keys.
+        const compareRowByKey = compareCategoryId
+          ? new Map(
+              monthRowsSeed.map((row) => [
+                row.monthKey,
+                { ...row, transactions: [] as TransactionWithRelations[] },
+              ]),
+            )
+          : null;
         const filteredForRange: TransactionWithRelations[] = [];
 
         const accountMode = filterModeOf(insightsFilterModes, 'categoryTrendAccounts');
@@ -4123,7 +3896,9 @@ export function InsightsScreen({
           }
           const category = categoryById.get(tx.categoryId);
           const rootCategoryId = category?.parentId ?? tx.categoryId;
-          if (rootCategoryId !== selectedCategoryId) return;
+          const isCompare = compareRowByKey !== null && rootCategoryId === compareCategoryId;
+          if (rootCategoryId !== selectedCategoryId && !isCompare) return;
+          const rowByKey = isCompare && compareRowByKey ? compareRowByKey : monthRowByKey;
 
           const value =
             settings.displayMode === 'time'
@@ -4138,11 +3913,11 @@ export function InsightsScreen({
             : isYearPeriod
               ? (transactionMonthKeyById.get(tx.id) ?? financialMonthKeyForIso(tx.date, monthCycle))
               : (transactionDayKeyById.get(tx.id) ?? dayKeyFromIsoLocal(tx.date));
-          let monthRow = monthRowByKey.get(rowKey);
+          let monthRow = rowByKey.get(rowKey);
           if (!monthRow) {
             if (!isLifetime) return;
             monthRow = makeEmptyCategoryYearRow(rowKey);
-            monthRowByKey.set(rowKey, monthRow);
+            rowByKey.set(rowKey, monthRow);
           }
 
           filteredForRange.push(tx);
@@ -4151,9 +3926,24 @@ export function InsightsScreen({
           monthRow.transactions.push(tx);
         });
 
+        // Lifetime buckets are the years either category has data in, so both
+        // lines share one axis.
+        if (isLifetime && compareRowByKey) {
+          compareRowByKey.forEach((_, key) => {
+            if (!monthRowByKey.has(key)) monthRowByKey.set(key, makeEmptyCategoryYearRow(key));
+          });
+          monthRowByKey.forEach((_, key) => {
+            if (!compareRowByKey.has(key)) compareRowByKey.set(key, makeEmptyCategoryYearRow(key));
+          });
+        }
         const orderedSeedRows = isLifetime
           ? fillLifetimeYearRows(monthRowByKey, makeEmptyCategoryYearRow)
           : monthRowsSeed;
+        const compareMonthRows = compareRowByKey
+          ? orderedSeedRows.map(
+              (row) => compareRowByKey.get(row.monthKey) ?? makeEmptyCategoryYearRow(row.monthKey),
+            )
+          : null;
 
         // Sort each bucket's transactions newest-first so the selected-bucket
         // list renders without re-sorting on every render (page data is cached).
@@ -4161,22 +3951,14 @@ export function InsightsScreen({
           if (row.transactions.length < 2) return row;
           return {
             ...row,
-            transactions: row.transactions.sort((a, b) => {
-              const dateDelta = b.date.localeCompare(a.date);
-              if (dateDelta !== 0) return dateDelta;
-              return b.createdAt.localeCompare(a.createdAt);
-            }),
+            transactions: sortTransactionsNewestFirst(row.transactions),
           };
         });
 
         // Sort once here (page data is cached) so the pane can slice for the
         // infinite-scroll list without re-sorting on every render.
         if (filteredForRange.length > 1) {
-          filteredForRange.sort((a, b) => {
-            const dateDelta = b.date.localeCompare(a.date);
-            if (dateDelta !== 0) return dateDelta;
-            return b.createdAt.localeCompare(a.createdAt);
-          });
+          sortTransactionsNewestFirst(filteredForRange);
         }
 
         return {
@@ -4189,6 +3971,8 @@ export function InsightsScreen({
           monthRows,
           selectedCategoryId,
           selectableCategories: categoryTrendCategoryOptions,
+          compareCategoryId,
+          compareMonthRows,
         };
       }
 
@@ -4413,21 +4197,13 @@ export function InsightsScreen({
 
         dailyRows.forEach((row) => {
           if (row.transactions.length < 2) return;
-          row.transactions.sort((a, b) => {
-            const dateDelta = b.date.localeCompare(a.date);
-            if (dateDelta !== 0) return dateDelta;
-            return b.createdAt.localeCompare(a.createdAt);
-          });
+          sortTransactionsNewestFirst(row.transactions);
         });
         savingsRateRows.forEach((row) => {
           row.net = row.income - row.expense;
           row.savingsRate = row.income > 0 ? row.net / row.income : null;
           if (row.transactions.length < 2) return;
-          row.transactions.sort((a, b) => {
-            const dateDelta = b.date.localeCompare(a.date);
-            if (dateDelta !== 0) return dateDelta;
-            return b.createdAt.localeCompare(a.createdAt);
-          });
+          sortTransactionsNewestFirst(row.transactions);
         });
 
         return {
@@ -4453,6 +4229,17 @@ export function InsightsScreen({
         insightsFilterModes,
         transactionType === 'expense' ? 'expenseBreakdownCategories' : 'incomeBreakdownCategories',
       );
+      const passesBreakdownFilter = (tx: TransactionWithRelations) =>
+        tx.type === transactionType &&
+        passesSelectionFilter(
+          breakdownFilterMode,
+          breakdownExclusionSet,
+          categoryFilterIds(tx.categoryId, categoryById),
+        );
+      const breakdownValueOf = (tx: TransactionWithRelations) =>
+        settings.displayMode === 'time'
+          ? getDisplayValueForTransaction(tx)
+          : (tx.reportingAmount ?? tx.amount);
       const filteredForRange: TransactionWithRelations[] = [];
       const breakdownTotals = new Map<
         string,
@@ -4460,16 +4247,7 @@ export function InsightsScreen({
       >();
       const breakdownTransactionsById = new Map<string, TransactionWithRelations[]>();
       inRangeTransactions.forEach((tx) => {
-        if (tx.type !== transactionType) return;
-        if (
-          !passesSelectionFilter(
-            breakdownFilterMode,
-            breakdownExclusionSet,
-            categoryFilterIds(tx.categoryId, categoryById),
-          )
-        ) {
-          return;
-        }
+        if (!passesBreakdownFilter(tx)) return;
         filteredForRange.push(tx);
 
         const id = resolveBreakdownRootId(tx, categoryById);
@@ -4478,10 +4256,7 @@ export function InsightsScreen({
         const fallbackRootLabel = tx.categoryParentName ?? tx.categoryName ?? null;
         const label = String(root?.name ?? fallbackRootLabel ?? I18n.t('common.uncategorized'));
         const emoji = root?.icon ?? tx.categoryIcon ?? '•';
-        const value =
-          settings.displayMode === 'time'
-            ? getDisplayValueForTransaction(tx)
-            : (tx.reportingAmount ?? tx.amount);
+        const value = breakdownValueOf(tx);
 
         const current = breakdownTotals.get(id);
         if (current) {
@@ -4500,6 +4275,23 @@ export function InsightsScreen({
         }
       });
       const categoryRows = Array.from(breakdownTotals.values()).sort((a, b) => b.amount - a.amount);
+
+      // The period before, summed the same way, for "vs last month" and the
+      // per-category change.
+      let previous: BreakdownPageData['previous'] = null;
+      if (previousRange) {
+        const amountById = new Map<string, number>();
+        let total = 0;
+        previousRangeTransactions.forEach((tx) => {
+          if (!passesBreakdownFilter(tx)) return;
+          const value = breakdownValueOf(tx);
+          if (!Number.isFinite(value)) return;
+          const id = resolveBreakdownRootId(tx, categoryById);
+          amountById.set(id, (amountById.get(id) ?? 0) + value);
+          total += value;
+        });
+        previous = { total, amountById };
+      }
       return {
         kind: 'breakdown',
         range,
@@ -4507,6 +4299,7 @@ export function InsightsScreen({
         filteredForRange,
         breakdownTransactionsById,
         transactionType,
+        previous,
       };
     },
     [
@@ -4515,6 +4308,7 @@ export function InsightsScreen({
       categoryById,
       categoryTrendCategoryOptions,
       effectiveCategoryTrendCategoryId,
+      effectiveCategoryTrendCompareId,
       excludedExpenseTrendAccountSet,
       excludedExpenseTrendExpenseCategorySet,
       excludedIncomeTrendAccountSet,
@@ -4579,6 +4373,19 @@ export function InsightsScreen({
   );
   const displaySelectedInsightType =
     pendingActivityBreakdownTarget?.insightType ?? selectedInsightType;
+  const displayInsightGroup: InsightGroupId | null = insightGroupOf(displaySelectedInsightType);
+  const insightGroupTabOptions = useMemo(
+    () =>
+      displayInsightGroup
+        ? INSIGHT_GROUP_MEMBERS[displayInsightGroup].map((member) => ({
+            value: member,
+            label: String(I18n.t(`insights.tabs.${member}`)),
+          }))
+        : [],
+    // Rebuilt on a language change, since the labels are read through I18n.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [displayInsightGroup, activeLocale],
+  );
   // Budget is a first-class insight type that renders a full-page takeover:
   // it swaps the pager body and drives the header's month controls. Keyed on
   // the *display* type so the header and body stay consistent through an
@@ -4693,32 +4500,6 @@ export function InsightsScreen({
     },
     [settings],
   );
-  // Prominent total for the bar the user is scrubbing on a trend chart. Mirrors
-  // the breakdown "total on top" styling so the two insight families read alike.
-  const renderTrendBucketTotal = useCallback(
-    (totalValue: number, accentColor: string) => (
-      <View className="items-center gap-0.5 py-1">
-        {renderValueNode(totalValue, {
-          variant: 'heading',
-          textClassName: 'text-[24px] leading-[38px] font-black tracking-tight',
-          style: { color: accentColor },
-          containerClassName: 'justify-center',
-          iconColor: accentColor,
-          iconSize: 22,
-        })}
-        <View
-          style={{
-            width: 36,
-            height: 3,
-            borderRadius: 2,
-            backgroundColor: withColorAlpha(accentColor, isDark ? 0.38 : 0.28),
-            marginTop: 1,
-          }}
-        />
-      </View>
-    ),
-    [isDark, renderValueNode],
-  );
   const renderCompactValueNode = useCallback(
     (
       value: number,
@@ -4769,6 +4550,13 @@ export function InsightsScreen({
     (value: number) =>
       `${value < 0 ? '-' : ''}${formatCompactCurrency(Math.abs(value), settings.currencySymbol)}`,
     [settings.currencySymbol],
+  );
+  const formatTrendTooltipValue = useCallback(
+    (value: number) =>
+      settings.displayMode === 'time'
+        ? `${value < 0 ? '-' : ''}${formatHours(Math.abs(value), settings)}`
+        : formatAmount(value, settings),
+    [settings],
   );
   const formatAxisAssetValue = useCallback(
     (value: number) =>
@@ -5115,6 +4903,38 @@ export function InsightsScreen({
       stageHeight: pieStageHeight,
       totalAmount: pageTotalAmount,
     });
+    // "↑ 12% vs last month": more spending is bad news, more income good news.
+    const changeColor = (isUp: boolean) =>
+      isUp === isIncomeBreakdown ? themeColors.success : themeColors.error;
+    const previousPeriodKey =
+      displayPeriodPreset === 'week' ||
+      displayPeriodPreset === 'month' ||
+      displayPeriodPreset === 'year'
+        ? displayPeriodPreset
+        : null;
+    const totalChangePercent = pageData.previous
+      ? percentChange(pageTotalAmount, pageData.previous.total)
+      : null;
+    const breakdownTotalChange =
+      totalChangePercent !== null && previousPeriodKey && Math.round(totalChangePercent) !== 0
+        ? {
+            isUp: totalChangePercent > 0,
+            color: changeColor(totalChangePercent > 0),
+            text: String(
+              I18n.t(`insights.change.vs_last_${previousPeriodKey}`, {
+                percent: Math.round(Math.abs(totalChangePercent)),
+              }),
+            ),
+          }
+        : null;
+    const categoryChangeOf = (id: string, amount: number) => {
+      if (!pageData.previous) return null;
+      const previousAmount = pageData.previous.amountById.get(id) ?? 0;
+      if (previousAmount <= 0) return { kind: 'new' as const };
+      const percent = percentChange(amount, previousAmount);
+      if (percent === null || Math.round(percent) === 0) return null;
+      return { kind: 'change' as const, isUp: percent > 0, percent: Math.round(Math.abs(percent)) };
+    };
     if (pageData.filteredForRange.length === 0) {
       return (
         <EmptyState
@@ -5141,15 +4961,31 @@ export function InsightsScreen({
                   iconColor: totalRowAccentColor,
                   iconSize: 22,
                 })}
-                <View
-                  style={{
-                    width: 36,
-                    height: 3,
-                    borderRadius: 2,
-                    backgroundColor: withColorAlpha(totalRowAccentColor, isDark ? 0.38 : 0.28),
-                    marginTop: 1,
-                  }}
-                />
+                {breakdownTotalChange ? (
+                  <View
+                    className="flex-row items-center gap-1"
+                    accessibilityLabel={breakdownTotalChange.text}
+                  >
+                    {breakdownTotalChange.isUp ? (
+                      <ArrowUp size={14} color={breakdownTotalChange.color} strokeWidth={2.75} />
+                    ) : (
+                      <ArrowDown size={14} color={breakdownTotalChange.color} strokeWidth={2.75} />
+                    )}
+                    <Text variant="caption" style={{ color: breakdownTotalChange.color }}>
+                      {breakdownTotalChange.text}
+                    </Text>
+                  </View>
+                ) : (
+                  <View
+                    style={{
+                      width: 36,
+                      height: 3,
+                      borderRadius: 2,
+                      backgroundColor: withColorAlpha(totalRowAccentColor, isDark ? 0.38 : 0.28),
+                      marginTop: 1,
+                    }}
+                  />
+                )}
               </View>
 
               <View className="mt-2 w-full items-center overflow-visible">
@@ -5329,38 +5165,85 @@ export function InsightsScreen({
                   }}
                   accessibilityRole="button"
                   accessibilityLabel={`${categoryIconToEmoji(item.emoji)} ${item.name}`.trim()}
-                  className="rounded-xl px-2.5 py-1.5 active:opacity-85 border"
+                  className="rounded-2xl border px-3 py-2 active:opacity-85"
                   style={[
                     { backgroundColor: rowBackgroundColor, borderColor: rowBorderColor },
                     isSelected && { borderWidth: 2 },
                     hasSelection && !isSelected && { opacity: 0.5 },
                   ]}
                 >
-                  <View className="flex-row items-center justify-between gap-2">
-                    <View className="flex-1 flex-row items-center gap-1.5 pr-2">
-                      <CategoryEmoji icon={item.emoji} size={16} />
-                      <Text variant="caption" className="flex-1" numberOfLines={2}>
+                  <View className="flex-row items-center gap-2.5">
+                    <CategoryEmoji icon={item.emoji} size={22} />
+                    <View className="flex-1 gap-1">
+                      <Text variant="caption" numberOfLines={1}>
                         {item.name}
                       </Text>
+                      <View
+                        className="h-1.5 overflow-hidden rounded-full"
+                        style={{ backgroundColor: withColorAlpha(themeColors.border, 0.55) }}
+                      >
+                        <View
+                          className="h-1.5 rounded-full"
+                          style={{
+                            width: `${Math.max(2, Math.min(100, item.pct))}%`,
+                            backgroundColor: item.color,
+                          }}
+                        />
+                      </View>
                     </View>
-                    <View className="flex-row items-center gap-1.5">
+                    <View className="items-end">
                       {renderValueNode(item.amount, {
-                        variant: 'label',
+                        variant: 'caption',
                         textClassName: 'text-foreground',
                         iconColor: themeColors.text,
                       })}
                       <View
-                        className="rounded-full px-1.5 py-0.5"
+                        className="mt-0.5 rounded-full px-1.5"
                         style={[
                           styles.breakdownPercentBadge,
                           { backgroundColor: percentBadgeColor },
                         ]}
                       >
-                        <Text variant="label" className="text-foreground">
+                        <Text
+                          variant="caption"
+                          className="text-foreground"
+                          style={{ fontSize: 11 }}
+                        >
                           {item.pct.toFixed(1)}%
                         </Text>
                       </View>
                     </View>
+                    {pageData.previous ? (
+                      <View className="w-[60px] flex-row items-center justify-end gap-0.5">
+                        {(() => {
+                          const change = categoryChangeOf(item.id, item.amount);
+                          if (!change) {
+                            return (
+                              <Text variant="caption" tone="muted" style={{ fontSize: 11 }}>
+                                –
+                              </Text>
+                            );
+                          }
+                          if (change.kind === 'new') {
+                            return (
+                              <Text variant="caption" tone="primary" style={{ fontSize: 11 }}>
+                                {I18n.t('insights.change.new')}
+                              </Text>
+                            );
+                          }
+                          const color = changeColor(change.isUp);
+                          const Arrow = change.isUp ? ArrowUp : ArrowDown;
+                          return (
+                            <>
+                              <Arrow size={12} color={color} strokeWidth={2.75} />
+                              <Text variant="caption" style={{ fontSize: 11, color }}>
+                                {change.percent > 999 ? '999+%' : `${change.percent}%`}
+                              </Text>
+                            </>
+                          );
+                        })()}
+                      </View>
+                    ) : null}
                   </View>
                 </Pressable>
               );
@@ -5371,240 +5254,641 @@ export function InsightsScreen({
     );
   };
 
-  const renderExpenseTrendPane = (pageData: ExpenseTrendPageData) => {
-    if (pageData.filteredForRange.length === 0) {
-      return (
-        <EmptyState
-          title={I18n.t('insights.analytics.expense_trend.no_data_title')}
-          message={I18n.t('insights.analytics.expense_trend.no_data_message')}
-          mascotMood="curious"
-          animateIn={false}
+  // ---- Trends: one line-and-point chart page for expense, income, category and assets ----
+  const currentTrendMonthKey = financialMonthKeyForDate(new Date(), monthCycle);
+  const currentTrendDayKey = dayKeyFromDateLocal(new Date());
+  // A bucket after today has not happened: it gets no point, so the line ends
+  // at the current month instead of dropping to zero for the rest of the year.
+  const isFutureTrendBucket = (bucketKey: string) => {
+    if (bucketKey.length === 7) return bucketKey > currentTrendMonthKey;
+    if (bucketKey.length === 10) return bucketKey > currentTrendDayKey;
+    if (bucketKey.length === 4) return bucketKey > currentTrendMonthKey.slice(0, 4);
+    return false;
+  };
+  const isCurrentTrendBucket = (bucketKey: string) =>
+    bucketKey === currentTrendMonthKey ||
+    bucketKey === currentTrendDayKey ||
+    bucketKey === currentTrendMonthKey.slice(0, 4);
+  const trendBucketTitle = (bucketKey: string, fallback: string) => {
+    if (bucketKey.length === 7) return monthShortYearLabel(bucketKey, activeLocale);
+    return fallback;
+  };
+  const trendModelSignature = [
+    currentTrendMonthKey,
+    currentTrendDayKey,
+    activeLocale,
+    settings.displayMode,
+    themeColors.primary,
+  ].join('|');
+
+  // Chart inputs depend only on the (cached) page data, so they are built once
+  // per page and reused while the user scrubs: the chart then redraws only its
+  // selection, not every path.
+  const getTrendChartModel = (pageData: InsightPageData): TrendChartModel | null => {
+    const cached = trendChartModelCacheRef.current.get(pageData);
+    if (
+      cached &&
+      cached.signature === trendModelSignature &&
+      cached.rateSource === getTrueHourlyRateForDate
+    ) {
+      return cached.model;
+    }
+    let model: TrendChartModel | null = null;
+    const transactionsByKey = new Map<string, TransactionWithRelations[]>();
+    if (pageData.kind === 'expense_trend' || pageData.kind === 'income_trend') {
+      const isExpense = pageData.kind === 'expense_trend';
+      const rows: (ExpenseTrendMonthRow | IncomeTrendMonthRow)[] = pageData.monthRows;
+      const values = rows.map((row) =>
+        isFutureTrendBucket(row.monthKey)
+          ? null
+          : 'totalExpense' in row
+            ? row.totalExpense
+            : row.totalIncome,
+      );
+      rows.forEach((row) => transactionsByKey.set(row.monthKey, row.transactions));
+      model = {
+        buckets: rows.map((row) => ({
+          key: row.monthKey,
+          label: row.axisLabel,
+          title: trendBucketTitle(row.monthKey, row.label),
+        })),
+        series: [
+          {
+            key: pageData.kind,
+            label: String(I18n.t(`insights.tabs.${pageData.kind}`)),
+            color: isExpense
+              ? INSIGHT_TYPE_VISUALS.expense_trend.tint
+              : INSIGHT_TYPE_VISUALS.income_trend.tint,
+            values,
+          },
+        ],
+        values,
+        compareValues: null,
+        transactionsByKey,
+      };
+    } else if (pageData.kind === 'category_trend') {
+      const labelOf = (id: string | null) =>
+        pageData.selectableCategories.find((option) => option.id === id)?.label ?? '';
+      const values = pageData.monthRows.map((row) =>
+        isFutureTrendBucket(row.monthKey) ? null : row.totalExpense,
+      );
+      const compareRows = pageData.compareMonthRows;
+      const compareValues = compareRows
+        ? compareRows.map((row) => (isFutureTrendBucket(row.monthKey) ? null : row.totalExpense))
+        : null;
+      pageData.monthRows.forEach((row, index) => {
+        const compareTransactions = compareRows?.[index]?.transactions ?? [];
+        transactionsByKey.set(
+          row.monthKey,
+          compareTransactions.length === 0
+            ? row.transactions
+            : sortTransactionsNewestFirst([...row.transactions, ...compareTransactions]),
+        );
+      });
+      const series: TrendLineChartSeries[] = [
+        {
+          key: 'primary',
+          label: labelOf(pageData.selectedCategoryId),
+          color: CATEGORY_TREND_PRIMARY_COLOR,
+          values,
+        },
+      ];
+      if (compareValues) {
+        series.push({
+          key: 'compare',
+          label: labelOf(pageData.compareCategoryId),
+          color: CATEGORY_TREND_COMPARE_COLOR,
+          values: compareValues,
+        });
+      }
+      model = {
+        buckets: pageData.monthRows.map((row) => ({
+          key: row.monthKey,
+          label: row.axisLabel,
+          title: trendBucketTitle(row.monthKey, row.label),
+        })),
+        series,
+        values,
+        compareValues,
+        transactionsByKey,
+      };
+    } else if (pageData.kind === 'asset_history') {
+      const values = pageData.monthRows.map((row) => {
+        if (isFutureTrendBucket(row.monthKey)) return null;
+        if (settings.displayMode !== 'time') return row.totalAssets;
+        const rate = getTrueHourlyRateForDate(`${row.monthKey}-15T12:00:00`);
+        return amountToHoursByRate(row.totalAssets, rate);
+      });
+      model = {
+        buckets: pageData.monthRows.map((row) => ({
+          key: row.monthKey,
+          label: row.label,
+          title: trendBucketTitle(row.monthKey, row.label),
+        })),
+        series: [
+          {
+            key: 'asset_history',
+            label: String(I18n.t('insights.tabs.asset_history')),
+            color: themeColors.primary,
+            values,
+          },
+        ],
+        values,
+        compareValues: null,
+        transactionsByKey,
+      };
+    }
+    if (model) {
+      trendChartModelCacheRef.current.set(pageData, {
+        signature: trendModelSignature,
+        rateSource: getTrueHourlyRateForDate,
+        model,
+      });
+    }
+    return model;
+  };
+
+  const trendScrubSelection = (kind: TrendKind, periodKey: string): string | null => {
+    const record =
+      kind === 'expense'
+        ? expenseTrendScrubMonthByYear
+        : kind === 'income'
+          ? incomeTrendScrubMonthByYear
+          : kind === 'category'
+            ? categoryTrendScrubBucketByPeriod
+            : assetHistoryScrubMonthByYear;
+    return record[periodKey] ?? null;
+  };
+  const selectTrendBucket = (kind: TrendKind, periodKey: string, bucketKey: string) => {
+    const [ref, setRecord] =
+      kind === 'expense'
+        ? [expenseTrendScrubMonthByYearRef, setExpenseTrendScrubMonthByYear]
+        : kind === 'income'
+          ? [incomeTrendScrubMonthByYearRef, setIncomeTrendScrubMonthByYear]
+          : kind === 'category'
+            ? [categoryTrendScrubBucketByPeriodRef, setCategoryTrendScrubBucketByPeriod]
+            : [assetHistoryScrubMonthByYearRef, setAssetHistoryScrubMonthByYear];
+    if (ref.current[periodKey] === bucketKey) return;
+    ref.current = { ...ref.current, [periodKey]: bucketKey };
+    setRecord((previous) =>
+      previous[periodKey] === bucketKey ? previous : { ...previous, [periodKey]: bucketKey },
+    );
+  };
+
+  // The bucket a page opens on: the latest with activity (or, for a balance,
+  // the latest that has happened).
+  const defaultTrendBucketKey = (model: TrendChartModel, activeOnly: boolean) => {
+    for (let index = model.buckets.length - 1; index >= 0; index -= 1) {
+      const value = model.values[index];
+      const compareValue = model.compareValues?.[index] ?? null;
+      const isValued = (candidate: number | null) =>
+        candidate !== null && (!activeOnly || candidate > 0);
+      if (isValued(value) || isValued(compareValue)) return model.buckets[index]?.key ?? null;
+    }
+    return model.buckets[model.buckets.length - 1]?.key ?? null;
+  };
+
+  const renderTrendHeadlineValue = (value: number, color: string) =>
+    settings.displayMode === 'time' ? (
+      <TimeValueInline
+        value={`${value < 0 ? '-' : ''}${formatHours(Math.abs(value), settings)}`}
+        variant="heading"
+        textClassName="text-[28px] leading-[36px] font-black tracking-tight"
+        iconColor={color}
+        iconSize={22}
+        style={{ color }}
+      />
+    ) : (
+      <Text
+        variant="heading"
+        className="text-[28px] leading-[36px] font-black tracking-tight"
+        style={{ color }}
+      >
+        {formatAmount(value, settings)}
+      </Text>
+    );
+  const renderTrendStatValue = (value: number) =>
+    settings.displayMode === 'time' ? (
+      <TimeValueInline
+        value={`${value < 0 ? '-' : ''}${formatHours(Math.abs(value), settings)}`}
+        variant="bodyStrong"
+        textClassName="text-foreground"
+        iconColor={themeColors.text}
+        iconSize={14}
+      />
+    ) : (
+      <Text variant="bodyStrong" numberOfLines={1} adjustsFontSizeToFit className="text-foreground">
+        {`${value < 0 ? '-' : ''}${formatCompactCurrency(Math.abs(value), settings.currencySymbol)}`}
+      </Text>
+    );
+
+  // The selected bucket's three biggest categories, from its transactions.
+  const buildTrendTopCategories = (
+    transactions: TransactionWithRelations[],
+  ): TrendTopCategoryEntry[] => {
+    const cached = trendTopCategoriesCacheRef.current.get(transactions);
+    if (cached && cached.signature === trendModelSignature) return cached.rows;
+    const byRoot = new Map<
+      string,
+      { label: string; icon: string; amount: number; transactions: TransactionWithRelations[] }
+    >();
+    let total = 0;
+    transactions.forEach((tx) => {
+      const value =
+        settings.displayMode === 'time'
+          ? getDisplayValueForTransaction(tx)
+          : (tx.reportingAmount ?? tx.amount);
+      if (!Number.isFinite(value) || value <= 0) return;
+      const id = resolveBreakdownRootId(tx, categoryById);
+      const category = tx.categoryId ? categoryById.get(tx.categoryId) : null;
+      const root = category?.parentId ? categoryById.get(category.parentId) : category;
+      const entry = byRoot.get(id);
+      total += value;
+      if (entry) {
+        entry.amount += value;
+        entry.transactions.push(tx);
+        return;
+      }
+      byRoot.set(id, {
+        label: String(
+          root?.name ?? tx.categoryParentName ?? tx.categoryName ?? I18n.t('common.uncategorized'),
+        ),
+        icon: root?.icon ?? tx.categoryIcon ?? '•',
+        amount: value,
+        transactions: [tx],
+      });
+    });
+    const rows = Array.from(byRoot.entries())
+      .sort((a, b) => b[1].amount - a[1].amount)
+      .slice(0, TREND_TOP_CATEGORY_COUNT)
+      .map(([id, entry], index) => ({
+        id,
+        label: entry.label,
+        icon: entry.icon,
+        amount: entry.amount,
+        share: total > 0 ? entry.amount / total : 0,
+        color: chartCategoryColor(index),
+        transactions: entry.transactions,
+      }));
+    trendTopCategoriesCacheRef.current.set(transactions, {
+      signature: trendModelSignature,
+      rows,
+    });
+    return rows;
+  };
+
+  const renderCategoryCompareChips = (pageData: CategoryTrendPageData) => {
+    const primary = pageData.selectableCategories.find(
+      (option) => option.id === pageData.selectedCategoryId,
+    );
+    const compare = pageData.compareCategoryId
+      ? pageData.selectableCategories.find((option) => option.id === pageData.compareCategoryId)
+      : null;
+    const chip = (
+      option: CategoryTrendCategoryOption,
+      color: string,
+      target: 'primary' | 'compare',
+      onRemove?: () => void,
+    ) => (
+      <Pressable
+        onPress={() => {
+          void triggerHaptic('selection');
+          setCategoryTrendPickerTarget(target);
+        }}
+        accessibilityRole="button"
+        accessibilityLabel={option.label}
+        className="min-h-11 flex-1 flex-row items-center gap-1.5 rounded-2xl border border-border/50 bg-card px-2.5 active:opacity-80"
+      >
+        <View className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} />
+        <CategoryEmoji icon={option.emoji} size={18} />
+        <Text variant="caption" numberOfLines={1} className="flex-1">
+          {option.label}
+        </Text>
+        {onRemove ? (
+          <Pressable
+            onPress={() => {
+              void triggerHaptic('selection');
+              onRemove();
+            }}
+            hitSlop={10}
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('insights.compare.remove')}
+          >
+            <X size={15} color={themeColors.textMuted} />
+          </Pressable>
+        ) : (
+          <ChevronDown size={15} color={themeColors.textMuted} />
+        )}
+      </Pressable>
+    );
+    if (!primary) return null;
+    return (
+      <View className="flex-row items-center gap-2">
+        {chip(primary, CATEGORY_TREND_PRIMARY_COLOR, 'primary')}
+        {compare ? (
+          <>
+            <Text variant="caption" tone="muted">
+              {I18n.t('insights.compare.vs')}
+            </Text>
+            {chip(compare, CATEGORY_TREND_COMPARE_COLOR, 'compare', () =>
+              setCategoryTrendCompareCategoryId(null),
+            )}
+          </>
+        ) : (
+          <Pressable
+            onPress={() => {
+              void triggerHaptic('selection');
+              setCategoryTrendPickerTarget('compare');
+            }}
+            accessibilityRole="button"
+            accessibilityLabel={I18n.t('insights.compare.add')}
+            className="min-h-11 flex-row items-center gap-1 rounded-2xl border border-dashed border-primary/50 px-3 active:opacity-80"
+          >
+            <Plus size={15} color={themeColors.primary} />
+            <Text variant="caption" tone="primary">
+              {I18n.t('insights.compare.add')}
+            </Text>
+          </Pressable>
+        )}
+      </View>
+    );
+  };
+
+  const renderTrendLinePane = (pageData: InsightPageData, kind: TrendKind) => {
+    const model = getTrendChartModel(pageData);
+    if (!model) return null;
+    const periodKey =
+      pageData.kind === 'asset_history'
+        ? String(pageData.year)
+        : 'periodKey' in pageData
+          ? pageData.periodKey
+          : '';
+    const insightType = TREND_INSIGHT_TYPE_BY_KIND[kind];
+    const isBalance = kind === 'asset';
+    const isComparing = model.compareValues !== null;
+    const accentColor = model.series[0]?.color ?? themeColors.primary;
+    const selectedKey =
+      model.buckets.find((bucket) => bucket.key === trendScrubSelection(kind, periodKey))?.key ??
+      defaultTrendBucketKey(model, !isBalance);
+    const selectedIndex = model.buckets.findIndex((bucket) => bucket.key === selectedKey);
+    const selectedBucket = model.buckets[selectedIndex];
+    const selectedValue = selectedIndex >= 0 ? (model.values[selectedIndex] ?? 0) : 0;
+    const statBuckets = model.buckets.map((bucket, index) => ({
+      key: bucket.key,
+      value: model.values[index] ?? null,
+    }));
+    // The month still under way is not a full month: left out of a flow's
+    // average and extremes, it can no longer read as "lowest" a week in.
+    // It stays in when it is all there is.
+    const completedSummary = isBalance
+      ? null
+      : summarizeTrend(
+          statBuckets.map((bucket) =>
+            isCurrentTrendBucket(bucket.key) ? { ...bucket, value: null } : bucket,
+          ),
+          { activeOnly: true },
+        );
+    const summary =
+      completedSummary && completedSummary.counted > 0
+        ? completedSummary
+        : summarizeTrend(statBuckets, { activeOnly: !isBalance });
+    const titleOf = (key: string) =>
+      model.buckets.find((bucket) => bucket.key === key)?.title ?? key;
+    // "Higher" is bad news for spending and good news for income and assets.
+    const higherIsGood = kind === 'income' || kind === 'asset';
+    const goodColor = themeColors.success;
+    const badColor = themeColors.error;
+
+    let caption: string | null = null;
+    let captionColor: string | undefined;
+    if (isBalance) {
+      const firstIndex = model.values.findIndex((value) => value !== null);
+      const firstValue = firstIndex >= 0 ? model.values[firstIndex] : null;
+      if (firstValue !== null && firstValue !== undefined && selectedIndex > firstIndex) {
+        const delta = selectedValue - firstValue;
+        const since = model.buckets[firstIndex]?.title ?? '';
+        const deltaText =
+          settings.displayMode === 'time'
+            ? formatHours(Math.abs(delta), settings)
+            : formatAmount(Math.abs(delta), settings);
+        caption =
+          Math.abs(delta) < 0.005
+            ? String(I18n.t('insights.trend_stats.flat_since', { period: since }))
+            : String(
+                I18n.t(
+                  delta > 0 ? 'insights.trend_stats.up_since' : 'insights.trend_stats.down_since',
+                  {
+                    value: deltaText,
+                    period: since,
+                  },
+                ),
+              );
+        captionColor = delta > 0 ? goodColor : delta < 0 ? badColor : themeColors.textMuted;
+      }
+    } else if (!isComparing && selectedValue > 0) {
+      const change = percentChange(selectedValue, summary.average);
+      if (change !== null && summary.counted > 1) {
+        const percent = Math.round(Math.abs(change));
+        caption =
+          percent === 0
+            ? String(I18n.t('insights.trend_stats.at_average'))
+            : String(
+                I18n.t(
+                  change > 0
+                    ? 'insights.trend_stats.above_average'
+                    : 'insights.trend_stats.below_average',
+                  { percent },
+                ),
+              );
+        const isGood = percent === 0 ? null : change > 0 === higherIsGood;
+        captionColor = isGood === null ? themeColors.textMuted : isGood ? goodColor : badColor;
+      }
+    }
+
+    const statItems: TrendStatCardItem[] = [];
+    if (!isComparing) {
+      if (isBalance) {
+        const firstIndex = model.values.findIndex((value) => value !== null);
+        let lastIndex = -1;
+        model.values.forEach((value, index) => {
+          if (value !== null) lastIndex = index;
+        });
+        const firstValue = firstIndex >= 0 ? model.values[firstIndex] : null;
+        const lastValue = lastIndex >= 0 ? model.values[lastIndex] : null;
+        if (
+          firstValue !== null &&
+          firstValue !== undefined &&
+          lastValue !== null &&
+          lastValue !== undefined
+        ) {
+          statItems.push({
+            key: 'change',
+            kind: 'average',
+            label: String(I18n.t('insights.trend_stats.change')),
+            detail:
+              lastIndex > firstIndex
+                ? `${model.buckets[firstIndex]?.title ?? ''} – ${model.buckets[lastIndex]?.title ?? ''}`
+                : null,
+            value: renderTrendStatValue(lastValue - firstValue),
+          });
+        }
+      } else if (summary.average !== null) {
+        statItems.push({
+          key: 'average',
+          kind: 'average',
+          label: String(I18n.t('insights.trend_stats.average')),
+          detail: null,
+          value: renderTrendStatValue(summary.average),
+        });
+      }
+      if (summary.highest) {
+        statItems.push({
+          key: 'high',
+          kind: 'high',
+          label: String(I18n.t('insights.trend_stats.highest')),
+          detail: titleOf(summary.highest.key),
+          value: renderTrendStatValue(summary.highest.value),
+        });
+      }
+      if (
+        summary.lowest &&
+        summary.counted > 1 &&
+        summary.lowest.value !== summary.highest?.value
+      ) {
+        statItems.push({
+          key: 'low',
+          kind: 'low',
+          label: String(I18n.t('insights.trend_stats.lowest')),
+          detail: titleOf(summary.lowest.key),
+          value: renderTrendStatValue(summary.lowest.value),
+        });
+      }
+    }
+
+    const listKind = kind === 'expense' ? 'expense' : kind === 'income' ? 'income' : 'category';
+    const selectedTransactions = selectedKey
+      ? (model.transactionsByKey.get(selectedKey) ?? EMPTY_TRANSACTIONS)
+      : EMPTY_TRANSACTIONS;
+    const topCategoryEntries =
+      (kind === 'expense' || kind === 'income') && selectedBucket
+        ? buildTrendTopCategories(selectedTransactions)
+        : [];
+    // Values are rendered here, not cached, so they follow the current theme
+    // and currency.
+    const topCategories: TrendCategoryRow[] = topCategoryEntries.map((entry) => ({
+      id: entry.id,
+      label: entry.label,
+      icon: entry.icon,
+      share: entry.share,
+      color: entry.color,
+      value: renderValueNode(entry.amount, {
+        variant: 'caption',
+        textClassName: 'text-foreground',
+        iconColor: themeColors.text,
+      }),
+    }));
+
+    let compareSummary: React.ReactNode = null;
+    if (pageData.kind === 'category_trend' && model.compareValues && model.series[1]) {
+      const firstSummary = summary;
+      const secondSummary = summarizeTrend(
+        model.buckets.map((bucket, index) => ({
+          key: bucket.key,
+          value: model.compareValues?.[index] ?? null,
+        })),
+        { activeOnly: true },
+      );
+      const option = (id: string | null) =>
+        pageData.selectableCategories.find((candidate) => candidate.id === id);
+      const firstOption = option(pageData.selectedCategoryId);
+      const secondOption = option(pageData.compareCategoryId);
+      const comparison = compareCategoryTotals(firstSummary.total, secondSummary.total);
+      const first = model.series[0]?.label ?? '';
+      const second = model.series[1].label;
+      const sentence =
+        comparison.kind === 'more'
+          ? I18n.t('insights.compare.summary_more', { percent: comparison.percent, first, second })
+          : comparison.kind === 'less'
+            ? I18n.t('insights.compare.summary_more', {
+                percent: comparison.percent,
+                first: second,
+                second: first,
+              })
+            : comparison.kind === 'same'
+              ? I18n.t('insights.compare.summary_same', { first, second })
+              : comparison.kind === 'only_first'
+                ? I18n.t('insights.compare.summary_none', { name: second })
+                : comparison.kind === 'only_second'
+                  ? I18n.t('insights.compare.summary_none', { name: first })
+                  : null;
+      compareSummary = (
+        <TrendCompareSummary
+          title={String(
+            I18n.t('insights.compare.total_in', {
+              period: periodLabel(displayPeriodPreset, pageData.range, activeLocale),
+            }),
+          )}
+          averageLabel={String(I18n.t('insights.trend_stats.average'))}
+          sentence={sentence ? String(sentence) : null}
+          first={{
+            label: first,
+            icon: firstOption?.emoji ?? '•',
+            color: CATEGORY_TREND_PRIMARY_COLOR,
+            total: renderValueNode(firstSummary.total, {
+              variant: 'subheading',
+              textClassName: 'text-foreground',
+              iconColor: themeColors.text,
+            }),
+            average: renderTrendStatValue(firstSummary.average ?? 0),
+          }}
+          second={{
+            label: second,
+            icon: secondOption?.emoji ?? '•',
+            color: CATEGORY_TREND_COMPARE_COLOR,
+            total: renderValueNode(secondSummary.total, {
+              variant: 'subheading',
+              textClassName: 'text-foreground',
+              iconColor: themeColors.text,
+            }),
+            average: renderTrendStatValue(secondSummary.average ?? 0),
+          }}
         />
       );
     }
 
-    const trendAccentColor = INSIGHT_TYPE_VISUALS.expense_trend.tint;
-    const selectedYearKey = pageData.periodKey;
-    const selectedMonthKey = expenseTrendScrubMonthByYear[selectedYearKey] ?? null;
-    const fallbackSelectedMonthRow =
-      [...pageData.monthRows].reverse().find((row) => row.totalExpense > 0) ??
-      pageData.monthRows[pageData.monthRows.length - 1] ??
-      null;
-    const selectedMonthRow =
-      pageData.monthRows.find((row) => row.monthKey === selectedMonthKey) ??
-      fallbackSelectedMonthRow;
-    if (!selectedMonthRow) return null;
-
-    const monthValues = pageData.monthRows.map((row) => row.totalExpense);
-    const expenseGraphWidth = Math.max(140, lineChartWidth - EXPENSE_TREND_CHART_PADDING_RIGHT);
-    const expenseAxisTicks = buildGraphAxisTicks(monthValues, EXPENSE_TREND_CHART_HEIGHT);
-    const selectExpenseTrendMonth = (monthKey: string) => {
-      if (expenseTrendScrubMonthByYearRef.current[selectedYearKey] === monthKey) return;
-      triggerScrubHaptic();
-      expenseTrendScrubMonthByYearRef.current = {
-        ...expenseTrendScrubMonthByYearRef.current,
-        [selectedYearKey]: monthKey,
-      };
-      setExpenseTrendScrubMonthByYear((previous) => {
-        if (previous[selectedYearKey] === monthKey) return previous;
-        return { ...previous, [selectedYearKey]: monthKey };
-      });
-    };
-
-    return (
-      <InsightPaneSplit
-        className="gap-3"
-        primary={
-          <>
-            {renderTrendBucketTotal(selectedMonthRow.totalExpense, trendAccentColor)}
-            <View style={lineChartSectionStyle} className="py-1">
-              <View
-                style={[
-                  styles.chartSizeCenter,
-                  buildSizeStyle(lineChartWidth, EXPENSE_TREND_CHART_HEIGHT),
-                ]}
-                onTouchStart={lockChartScrub}
-                onTouchEnd={unlockChartScrub}
-                onTouchCancel={unlockChartScrub}
-              >
-                <GraphYAxisGrid
-                  ticks={expenseAxisTicks}
-                  chartWidth={expenseGraphWidth}
-                  chartHeight={EXPENSE_TREND_CHART_HEIGHT}
-                  labelWidth={EXPENSE_TREND_CHART_PADDING_RIGHT}
-                  lineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
-                  formatTick={formatAxisAssetValue}
-                />
-                <TrendBarChart
-                  data={pageData.monthRows.map((row) => ({
-                    monthKey: row.monthKey,
-                    value: row.totalExpense,
-                    label: row.axisLabel,
-                    subLabel: row.axisSubLabel ?? undefined,
-                  }))}
-                  chartWidth={expenseGraphWidth}
-                  chartHeight={EXPENSE_TREND_CHART_HEIGHT}
-                  primaryColor={trendAccentColor}
-                  averageValue={pageData.averageMonthExpense}
-                  referenceColor={themeColors.error}
-                  selectedMonthKey={selectedMonthRow.monthKey}
-                  onSelectMonthKey={selectExpenseTrendMonth}
-                  onGestureStart={lockChartScrub}
-                  onGestureEnd={unlockChartScrub}
-                  labelColor={themeColors.textMuted}
-                  gridLineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
-                />
-              </View>
-            </View>
-          </>
-        }
-        secondary={
-          <TrendMonthTransactions
-            key={`expense-${selectedMonthRow.monthKey}`}
-            transactions={selectedMonthRow.transactions}
-            visibleCount={
-              trendListVisibleCounts[
-                `expense|${pageData.periodKey}|${selectedMonthRow.monthKey}`
-              ] ?? TREND_TRANSACTIONS_INITIAL_EXPENSE_INCOME
+    const hasAnyData =
+      pageData.kind === 'asset_history'
+        ? pageData.includedAccountsCount > 0 && model.values.some((value) => value !== null)
+        : pageData.filteredForRange.length > 0;
+    const emptyKey = insightType;
+    const chips = pageData.kind === 'category_trend' ? renderCategoryCompareChips(pageData) : null;
+    if (!hasAnyData) {
+      if (pageData.kind === 'asset_history') {
+        // No accounts picked, or a year that has not started yet.
+        const noAccounts = pageData.includedAccountsCount === 0;
+        return (
+          <EmptyState
+            title={
+              noAccounts
+                ? I18n.t('insights.analytics.asset_history.empty_no_accounts.title')
+                : I18n.t('insights.empty.title')
             }
-            locale={activeLocale}
-            displaySettings={settings}
-            reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
-            getDisplayValueForTransaction={getDisplayValueForTransaction}
-            getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-            onOpenTransaction={handleTransactionPress}
-            onTransactionLongPress={handleTransactionLongPress}
-            selectedTransactionIds={selectedTransactionIds}
-            selectionMode={isSelectionMode}
-            emptyTitle={I18n.t('insights.analytics.expense_trend.no_data_title')}
-            emptyMessage={I18n.t('insights.analytics.expense_trend.no_data_message')}
-          />
-        }
-      />
-    );
-  };
-
-  const renderIncomeTrendPane = (pageData: IncomeTrendPageData) => {
-    if (pageData.filteredForRange.length === 0) {
-      return (
-        <EmptyState
-          title={I18n.t('insights.analytics.income_trend.no_data_title')}
-          message={I18n.t('insights.analytics.income_trend.no_data_message')}
-          mascotMood="curious"
-          animateIn={false}
-        />
-      );
-    }
-
-    const trendAccentColor = INSIGHT_TYPE_VISUALS.income_trend.tint;
-    const selectedYearKey = pageData.periodKey;
-    const selectedMonthKey = incomeTrendScrubMonthByYear[selectedYearKey] ?? null;
-    const fallbackSelectedMonthRow =
-      [...pageData.monthRows].reverse().find((row) => row.totalIncome > 0) ??
-      pageData.monthRows[pageData.monthRows.length - 1] ??
-      null;
-    const selectedMonthRow =
-      pageData.monthRows.find((row) => row.monthKey === selectedMonthKey) ??
-      fallbackSelectedMonthRow;
-    if (!selectedMonthRow) return null;
-
-    const monthValues = pageData.monthRows.map((row) => row.totalIncome);
-    const incomeGraphWidth = Math.max(140, lineChartWidth - EXPENSE_TREND_CHART_PADDING_RIGHT);
-    const incomeAxisTicks = buildGraphAxisTicks(monthValues, EXPENSE_TREND_CHART_HEIGHT);
-    const selectIncomeTrendMonth = (monthKey: string) => {
-      if (incomeTrendScrubMonthByYearRef.current[selectedYearKey] === monthKey) return;
-      triggerScrubHaptic();
-      incomeTrendScrubMonthByYearRef.current = {
-        ...incomeTrendScrubMonthByYearRef.current,
-        [selectedYearKey]: monthKey,
-      };
-      setIncomeTrendScrubMonthByYear((previous) => {
-        if (previous[selectedYearKey] === monthKey) return previous;
-        return { ...previous, [selectedYearKey]: monthKey };
-      });
-    };
-
-    return (
-      <InsightPaneSplit
-        className="gap-3"
-        primary={
-          <>
-            {renderTrendBucketTotal(selectedMonthRow.totalIncome, trendAccentColor)}
-            <View style={lineChartSectionStyle} className="py-1">
-              <View
-                style={[
-                  styles.chartSizeCenter,
-                  buildSizeStyle(lineChartWidth, EXPENSE_TREND_CHART_HEIGHT),
-                ]}
-                onTouchStart={lockChartScrub}
-                onTouchEnd={unlockChartScrub}
-                onTouchCancel={unlockChartScrub}
-              >
-                <GraphYAxisGrid
-                  ticks={incomeAxisTicks}
-                  chartWidth={incomeGraphWidth}
-                  chartHeight={EXPENSE_TREND_CHART_HEIGHT}
-                  labelWidth={EXPENSE_TREND_CHART_PADDING_RIGHT}
-                  lineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
-                  formatTick={formatAxisAssetValue}
-                />
-                <TrendBarChart
-                  data={pageData.monthRows.map((row) => ({
-                    monthKey: row.monthKey,
-                    value: row.totalIncome,
-                    label: row.axisLabel,
-                    subLabel: row.axisSubLabel ?? undefined,
-                  }))}
-                  chartWidth={incomeGraphWidth}
-                  chartHeight={EXPENSE_TREND_CHART_HEIGHT}
-                  primaryColor={trendAccentColor}
-                  averageValue={pageData.averageMonthIncome}
-                  referenceColor={themeColors.success}
-                  selectedMonthKey={selectedMonthRow.monthKey}
-                  onSelectMonthKey={selectIncomeTrendMonth}
-                  onGestureStart={lockChartScrub}
-                  onGestureEnd={unlockChartScrub}
-                  labelColor={themeColors.textMuted}
-                  gridLineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
-                />
-              </View>
-            </View>
-          </>
-        }
-        secondary={
-          <TrendMonthTransactions
-            key={`income-${selectedMonthRow.monthKey}`}
-            transactions={selectedMonthRow.transactions}
-            visibleCount={
-              trendListVisibleCounts[`income|${pageData.periodKey}|${selectedMonthRow.monthKey}`] ??
-              TREND_TRANSACTIONS_INITIAL_EXPENSE_INCOME
+            message={
+              noAccounts
+                ? I18n.t('insights.analytics.asset_history.empty_no_accounts.message')
+                : I18n.t('insights.empty.message')
             }
-            locale={activeLocale}
-            displaySettings={settings}
-            reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
-            getDisplayValueForTransaction={getDisplayValueForTransaction}
-            getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-            onOpenTransaction={handleTransactionPress}
-            onTransactionLongPress={handleTransactionLongPress}
-            selectedTransactionIds={selectedTransactionIds}
-            selectionMode={isSelectionMode}
-            emptyTitle={I18n.t('insights.analytics.income_trend.no_data_title')}
-            emptyMessage={I18n.t('insights.analytics.income_trend.no_data_message')}
+            mascotMood="curious"
+            animateIn={false}
           />
-        }
-      />
-    );
-  };
-
-  const renderCategoryTrendPane = (pageData: CategoryTrendPageData) => {
-    const trendAccentColor = INSIGHT_TYPE_VISUALS.category_trend.tint;
-
-    if (pageData.filteredForRange.length === 0) {
+        );
+      }
       return (
         <View className="mt-2 gap-3">
+          {chips}
           <EmptyState
-            title={I18n.t('insights.analytics.category_trend.no_data_title')}
-            message={I18n.t('insights.analytics.category_trend.no_data_message')}
+            title={I18n.t(`insights.analytics.${emptyKey}.no_data_title`)}
+            message={I18n.t(`insights.analytics.${emptyKey}.no_data_message`)}
             mascotMood="curious"
             animateIn={false}
           />
@@ -5612,103 +5896,130 @@ export function InsightsScreen({
       );
     }
 
-    const selectedPeriodKey = pageData.periodKey;
-    const selectedBucketKey = categoryTrendScrubBucketByPeriod[selectedPeriodKey] ?? null;
-    const fallbackSelectedRow =
-      [...pageData.monthRows].reverse().find((row) => row.totalExpense > 0) ??
-      pageData.monthRows[pageData.monthRows.length - 1] ??
-      null;
-    const selectedRow =
-      pageData.monthRows.find((row) => row.monthKey === selectedBucketKey) ?? fallbackSelectedRow;
-    if (!selectedRow) return null;
-
-    const monthValues = pageData.monthRows.map((row) => row.totalExpense);
-    const categoryGraphWidth = Math.max(140, lineChartWidth - CATEGORY_TREND_CHART_PADDING_RIGHT);
-    const categoryAxisTicks = buildGraphAxisTicks(monthValues, CATEGORY_TREND_CHART_HEIGHT);
-    const selectCategoryTrendBucket = (bucketKey: string) => {
-      if (categoryTrendScrubBucketByPeriodRef.current[selectedPeriodKey] === bucketKey) return;
-      triggerScrubHaptic();
-      categoryTrendScrubBucketByPeriodRef.current = {
-        ...categoryTrendScrubBucketByPeriodRef.current,
-        [selectedPeriodKey]: bucketKey,
-      };
-      setCategoryTrendScrubBucketByPeriod((previous) => {
-        if (previous[selectedPeriodKey] === bucketKey) return previous;
-        return { ...previous, [selectedPeriodKey]: bucketKey };
-      });
-    };
+    const listCountKey = `${listKind}|${periodKey}|${selectedKey ?? ''}`;
+    const initialListCount =
+      kind === 'category' ? TREND_TRANSACTIONS_INITIAL : TREND_TRANSACTIONS_INITIAL_EXPENSE_INCOME;
 
     return (
       <InsightPaneSplit
-        className="gap-3"
+        className="mt-1 gap-3"
         primary={
           <>
-            {renderTrendBucketTotal(selectedRow.totalExpense, trendAccentColor)}
-            <View style={lineChartSectionStyle} className="py-1">
-              <View
-                style={[
-                  styles.chartSizeCenter,
-                  buildSizeStyle(lineChartWidth, CATEGORY_TREND_CHART_HEIGHT),
-                ]}
-                onTouchStart={lockChartScrub}
-                onTouchEnd={unlockChartScrub}
-                onTouchCancel={unlockChartScrub}
-              >
-                <GraphYAxisGrid
-                  ticks={categoryAxisTicks}
-                  chartWidth={categoryGraphWidth}
-                  chartHeight={CATEGORY_TREND_CHART_HEIGHT}
-                  labelWidth={CATEGORY_TREND_CHART_PADDING_RIGHT}
-                  lineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
-                  formatTick={formatAxisAssetValue}
-                />
-                <TrendBarChart
-                  data={pageData.monthRows.map((row) => ({
-                    monthKey: row.monthKey,
-                    value: row.totalExpense,
-                    label: row.axisLabel,
-                    subLabel: row.axisSubLabel ?? undefined,
-                  }))}
-                  chartWidth={categoryGraphWidth}
-                  chartHeight={CATEGORY_TREND_CHART_HEIGHT}
-                  primaryColor={trendAccentColor}
-                  averageValue={0}
-                  referenceColor={trendAccentColor}
-                  selectedMonthKey={selectedRow.monthKey}
-                  onSelectMonthKey={selectCategoryTrendBucket}
-                  onGestureStart={lockChartScrub}
-                  onGestureEnd={unlockChartScrub}
-                  labelColor={themeColors.textMuted}
-                  gridLineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
-                />
-              </View>
+            {chips}
+            {isComparing ? null : (
+              <TrendHeadline
+                title={selectedBucket?.title ?? ''}
+                value={renderTrendHeadlineValue(
+                  selectedValue,
+                  isBalance && selectedValue < 0 ? badColor : accentColor,
+                )}
+                caption={caption}
+                captionColor={captionColor}
+              />
+            )}
+            <View
+              style={lineChartSectionStyle}
+              onTouchStart={lockChartScrub}
+              onTouchEnd={unlockChartScrub}
+              onTouchCancel={unlockChartScrub}
+            >
+              <TrendLineChart
+                // A new tab or comparison is a new chart: remounting fades it in
+                // instead of showing the previous tab's drawing for a frame.
+                key={`${pageData.kind}-${isComparing ? 'compare' : 'single'}`}
+                buckets={model.buckets}
+                series={model.series}
+                width={lineChartWidth}
+                height={isComparing ? TREND_COMPARE_CHART_HEIGHT : TREND_CHART_HEIGHT}
+                selectedKey={selectedKey}
+                onSelectKey={(key) => selectTrendBucket(kind, periodKey, key)}
+                onGestureStart={lockChartScrub}
+                onGestureEnd={unlockChartScrub}
+                formatValue={formatTrendTooltipValue}
+                formatAxisValue={formatAxisAssetValue}
+                averageValue={isBalance || isComparing ? null : summary.average}
+                averageLabel={
+                  summary.average !== null && !isBalance && !isComparing
+                    ? String(
+                        I18n.t('insights.trend_stats.average_line', {
+                          value: formatAxisAssetValue(summary.average),
+                        }),
+                      )
+                    : undefined
+                }
+                zeroBased={!isBalance}
+                gridColor={withColorAlpha(themeColors.border, isDark ? 0.7 : 0.9)}
+                labelColor={themeColors.textMuted}
+                surfaceColor={themeColors.background}
+                tooltipBackground={themeColors.text}
+                tooltipTextColor={themeColors.background}
+                accessibilityLabel={String(I18n.t(`insights.${insightType}`))}
+              />
             </View>
           </>
         }
         secondary={
-          <TrendMonthTransactions
-            key={`category-${selectedRow.monthKey}`}
-            transactions={selectedRow.transactions}
-            visibleCount={
-              trendListVisibleCounts[`category|${selectedPeriodKey}|${selectedRow.monthKey}`] ??
-              TREND_TRANSACTIONS_INITIAL
-            }
-            locale={activeLocale}
-            displaySettings={settings}
-            reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
-            getDisplayValueForTransaction={getDisplayValueForTransaction}
-            getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-            onOpenTransaction={handleTransactionPress}
-            onTransactionLongPress={handleTransactionLongPress}
-            selectedTransactionIds={selectedTransactionIds}
-            selectionMode={isSelectionMode}
-            emptyTitle={I18n.t('insights.analytics.category_trend.no_data_title')}
-            emptyMessage={I18n.t('insights.analytics.category_trend.no_data_message')}
-          />
+          <View className="gap-3">
+            {statItems.length > 0 ? (
+              <TrendStatCards
+                items={statItems}
+                highColor={higherIsGood ? goodColor : badColor}
+                lowColor={higherIsGood ? badColor : goodColor}
+              />
+            ) : null}
+            {compareSummary}
+            {topCategories.length > 0 && selectedBucket ? (
+              <TrendTopCategories
+                title={String(
+                  I18n.t('insights.trend_stats.top_categories', { period: selectedBucket.title }),
+                )}
+                rows={topCategories}
+                onPressRow={(row) => {
+                  const match = topCategoryEntries.find((candidate) => candidate.id === row.id);
+                  const rootCategory = categoryById.get(row.id) ?? null;
+                  openDrilldown({
+                    label: `${row.label} · ${selectedBucket.title}`,
+                    transactions: match?.transactions ?? [],
+                    categoryRootId: rootCategory?.id,
+                    categoryRootLabel: rootCategory?.name ?? row.label,
+                    categoryRootEmoji: rootCategory?.icon ?? row.icon,
+                    categoryRootColor: row.color,
+                    triggerSelectionHaptic: true,
+                  });
+                }}
+              />
+            ) : null}
+            {isBalance ? null : (
+              <TrendMonthTransactions
+                key={`${listKind}-${selectedKey ?? ''}`}
+                transactions={selectedTransactions}
+                visibleCount={trendListVisibleCounts[listCountKey] ?? initialListCount}
+                locale={activeLocale}
+                displaySettings={settings}
+                reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
+                getDisplayValueForTransaction={getDisplayValueForTransaction}
+                getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+                onOpenTransaction={handleTransactionPress}
+                onTransactionLongPress={handleTransactionLongPress}
+                selectedTransactionIds={selectedTransactionIds}
+                selectionMode={isSelectionMode}
+                emptyTitle={I18n.t(`insights.analytics.${emptyKey}.no_data_title`)}
+                emptyMessage={I18n.t(`insights.analytics.${emptyKey}.no_data_message`)}
+              />
+            )}
+          </View>
         }
       />
     );
   };
+  const renderExpenseTrendPane = (pageData: ExpenseTrendPageData) =>
+    renderTrendLinePane(pageData, 'expense');
+  const renderIncomeTrendPane = (pageData: IncomeTrendPageData) =>
+    renderTrendLinePane(pageData, 'income');
+  const renderCategoryTrendPane = (pageData: CategoryTrendPageData) =>
+    renderTrendLinePane(pageData, 'category');
+  const renderAssetHistoryPane = (pageData: AssetHistoryPageData) =>
+    renderTrendLinePane(pageData, 'asset');
 
   const renderExpenseSentimentPane = (pageData: ExpenseSentimentPageData) => {
     if (pageData.filteredForRange.length === 0) {
@@ -5789,150 +6100,6 @@ export function InsightsScreen({
                   </Text>
                 </View>
               </View>
-            </View>
-          </Card>
-        }
-      />
-    );
-  };
-
-  const renderAssetHistoryPane = (pageData: AssetHistoryPageData) => {
-    if (pageData.includedAccountsCount === 0) {
-      return (
-        <EmptyState
-          title={I18n.t('insights.analytics.asset_history.empty_no_accounts.title')}
-          message={I18n.t('insights.analytics.asset_history.empty_no_accounts.message')}
-          mascotMood="curious"
-          animateIn={false}
-        />
-      );
-    }
-
-    const assetDisplayRows =
-      settings.displayMode === 'time'
-        ? pageData.monthRows.map((row) => {
-            const rate = getTrueHourlyRateForDate(`${row.monthKey}-15T12:00:00`);
-            return {
-              ...row,
-              totalAssets: amountToHoursByRate(row.totalAssets, rate),
-            };
-          })
-        : pageData.monthRows;
-    const monthValues = assetDisplayRows.map((row) => row.totalAssets);
-    const selectedMonthKey = assetHistoryScrubMonthByYear[String(pageData.year)] ?? null;
-    const selectedMonthRow =
-      assetDisplayRows.find((row) => row.monthKey === selectedMonthKey) ??
-      assetDisplayRows[assetDisplayRows.length - 1] ??
-      null;
-    const assetGraphWidth = Math.max(140, lineChartWidth - ASSET_HISTORY_CHART_PADDING_RIGHT);
-    const assetAxisTicks = buildGraphAxisTicks(monthValues, ASSET_HISTORY_CHART_HEIGHT);
-    const selectedAssetValue = selectedMonthRow?.totalAssets ?? 0;
-    const selectedAssetAbsoluteValue = Math.abs(selectedAssetValue);
-    const selectedAssetDisplayValue = selectedAssetAbsoluteValue.toFixed(2);
-    const selectedAssetLabel =
-      selectedMonthRow?.label ?? I18n.t('insights.analytics.asset_history.latest');
-    const selectedYearKey = String(pageData.year);
-    const selectedAssetToneColor =
-      selectedAssetValue >= 0 ? themeColors.success : themeColors.error;
-    const selectedAssetToneStyle = { color: selectedAssetToneColor };
-    const selectedAssetSign = selectedAssetValue < 0 ? '-' : '';
-    const selectedAssetCurrencyPrefix = `${selectedAssetSign}${settings.currencySymbol}`;
-    const selectedAssetHoursLabel = `${selectedAssetSign}${formatHours(
-      selectedAssetAbsoluteValue,
-      settings,
-    )}`;
-    const selectAssetHistoryMonth = (monthKey: string) => {
-      if (assetHistoryScrubMonthByYearRef.current[selectedYearKey] === monthKey) return;
-      triggerScrubHaptic();
-      assetHistoryScrubMonthByYearRef.current = {
-        ...assetHistoryScrubMonthByYearRef.current,
-        [selectedYearKey]: monthKey,
-      };
-      setAssetHistoryScrubMonthByYear((previous) => {
-        if (previous[selectedYearKey] === monthKey) return previous;
-        return { ...previous, [selectedYearKey]: monthKey };
-      });
-    };
-
-    return (
-      <InsightPaneSplit
-        className="mt-2 gap-2.5"
-        primary={
-          <>
-            <View style={lineChartSectionStyle} className="py-1">
-              <View
-                style={[
-                  styles.chartSizeCenter,
-                  buildSizeStyle(lineChartWidth, ASSET_HISTORY_CHART_HEIGHT),
-                ]}
-                onTouchStart={lockChartScrub}
-                onTouchEnd={unlockChartScrub}
-                onTouchCancel={unlockChartScrub}
-              >
-                <GraphYAxisGrid
-                  ticks={assetAxisTicks}
-                  chartWidth={assetGraphWidth}
-                  chartHeight={ASSET_HISTORY_CHART_HEIGHT}
-                  labelWidth={ASSET_HISTORY_CHART_PADDING_RIGHT}
-                  lineColor={withColorAlpha(themeColors.border, isDark ? 0.5 : 0.42)}
-                  formatTick={formatAxisAssetValue}
-                />
-                <AssetHistoryLineChart
-                  monthRows={assetDisplayRows}
-                  chartWidth={assetGraphWidth}
-                  primaryColor={themeColors.primary}
-                  onSelectMonthKey={selectAssetHistoryMonth}
-                  onGestureStart={lockChartScrub}
-                  onGestureEnd={unlockChartScrub}
-                />
-              </View>
-            </View>
-          </>
-        }
-        secondary={
-          <Card className="p-4">
-            <View className="flex-row items-center gap-2">
-              <View
-                className="rounded-full px-2.5 py-1"
-                style={{
-                  backgroundColor: withColorAlpha(themeColors.primary, isDark ? 0.2 : 0.12),
-                }}
-              >
-                <Text
-                  variant="label"
-                  style={{
-                    color: themeColors.primary,
-                    fontFamily: FONT.semibold,
-                    fontWeight: '600',
-                  }}
-                >
-                  {selectedAssetLabel}
-                </Text>
-              </View>
-            </View>
-
-            <View className="mt-1.5 flex-row items-center">
-              {settings.displayMode === 'time' ? (
-                <TimeValueInline
-                  value={selectedAssetHoursLabel}
-                  variant="heading"
-                  iconColor={selectedAssetToneColor}
-                  style={selectedAssetToneStyle}
-                />
-              ) : (
-                <>
-                  <Text variant="heading" style={selectedAssetToneStyle}>
-                    {selectedAssetCurrencyPrefix}
-                  </Text>
-                  <ScrubRollingNumber
-                    value={selectedAssetAbsoluteValue}
-                    formattedText={selectedAssetDisplayValue}
-                    color={selectedAssetToneColor}
-                    resetKey={`asset-${selectedYearKey}`}
-                    containerClassName="ml-1"
-                  />
-                </>
-              )}
             </View>
           </Card>
         }
@@ -6489,50 +6656,35 @@ export function InsightsScreen({
   }, [onOpenProPaywall]);
 
   // Resolves the currently-shown trend transaction list (key + total) for a page, so
-  // scrolling near the bottom can grow its visible window (infinite scroll).
+  // scrolling near the bottom can grow its visible window (infinite scroll). Read
+  // through a ref so the scroll handler stays stable while it sees this render's
+  // selection and chart data.
+  const resolveTrendListContextRef = useRef<
+    (pageData: InsightPageData) => { key: string; total: number } | null
+  >(() => null);
+  resolveTrendListContextRef.current = (pageData) => {
+    const kind: TrendKind | null =
+      pageData.kind === 'expense_trend'
+        ? 'expense'
+        : pageData.kind === 'income_trend'
+          ? 'income'
+          : pageData.kind === 'category_trend'
+            ? 'category'
+            : null;
+    if (!kind || !('periodKey' in pageData)) return null;
+    const model = getTrendChartModel(pageData);
+    if (!model) return null;
+    const selectedKey =
+      model.buckets.find((bucket) => bucket.key === trendScrubSelection(kind, pageData.periodKey))
+        ?.key ?? defaultTrendBucketKey(model, true);
+    if (!selectedKey) return null;
+    return {
+      key: `${kind}|${pageData.periodKey}|${selectedKey}`,
+      total: model.transactionsByKey.get(selectedKey)?.length ?? 0,
+    };
+  };
   const resolveTrendListContext = useCallback(
-    (pageData: InsightPageData): { key: string; total: number } | null => {
-      if (pageData.kind === 'expense_trend') {
-        const scrubbed = expenseTrendScrubMonthByYearRef.current[pageData.periodKey] ?? null;
-        const row =
-          pageData.monthRows.find((monthRow) => monthRow.monthKey === scrubbed) ??
-          [...pageData.monthRows].reverse().find((monthRow) => monthRow.totalExpense > 0) ??
-          pageData.monthRows[pageData.monthRows.length - 1] ??
-          null;
-        if (!row) return null;
-        return {
-          key: `expense|${pageData.periodKey}|${row.monthKey}`,
-          total: row.transactions.length,
-        };
-      }
-      if (pageData.kind === 'income_trend') {
-        const scrubbed = incomeTrendScrubMonthByYearRef.current[pageData.periodKey] ?? null;
-        const row =
-          pageData.monthRows.find((monthRow) => monthRow.monthKey === scrubbed) ??
-          [...pageData.monthRows].reverse().find((monthRow) => monthRow.totalIncome > 0) ??
-          pageData.monthRows[pageData.monthRows.length - 1] ??
-          null;
-        if (!row) return null;
-        return {
-          key: `income|${pageData.periodKey}|${row.monthKey}`,
-          total: row.transactions.length,
-        };
-      }
-      if (pageData.kind === 'category_trend') {
-        const scrubbed = categoryTrendScrubBucketByPeriodRef.current[pageData.periodKey] ?? null;
-        const row =
-          pageData.monthRows.find((monthRow) => monthRow.monthKey === scrubbed) ??
-          [...pageData.monthRows].reverse().find((monthRow) => monthRow.totalExpense > 0) ??
-          pageData.monthRows[pageData.monthRows.length - 1] ??
-          null;
-        if (!row) return null;
-        return {
-          key: `category|${pageData.periodKey}|${row.monthKey}`,
-          total: row.transactions.length,
-        };
-      }
-      return null;
-    },
+    (pageData: InsightPageData) => resolveTrendListContextRef.current(pageData),
     [],
   );
   const handlePaneScrollNearEnd = useCallback(
@@ -6727,6 +6879,14 @@ export function InsightsScreen({
     () => buildInsightsCategoryPickerData(categories, 'expense'),
     [categories],
   );
+  // Comparing a category with itself says nothing, so it is left out.
+  const categoryTrendComparePickerParents = useMemo(
+    () =>
+      savingsExpenseCategoryPicker.parents.filter(
+        (parent) => parent.id !== effectiveCategoryTrendCategoryId,
+      ),
+    [effectiveCategoryTrendCategoryId, savingsExpenseCategoryPicker.parents],
+  );
   const displayActiveInsightFilterConfig = useMemo(
     () => getInsightFilterConfig(displaySelectedInsightType),
     [displaySelectedInsightType],
@@ -6845,6 +7005,7 @@ export function InsightsScreen({
     setExpenseTrendScrubMonthByYear({});
     setIncomeTrendScrubMonthByYear({});
     setCategoryTrendSelectedCategoryId(null);
+    setCategoryTrendCompareCategoryId(null);
     setAssetHistoryAccountOverrides({});
     setAssetHistoryScrubMonthByYear({});
     setInsightsFilterModes({});
@@ -6976,9 +7137,19 @@ export function InsightsScreen({
     (value: string) => {
       void triggerHaptic('selection');
       setIsInsightMenuOpen(false);
+      handleInsightTypeChange(
+        isInsightGroupId(value) ? insightTypeForGroup(value, lastInsightTypeByGroup) : value,
+      );
+    },
+    [handleInsightTypeChange, lastInsightTypeByGroup],
+  );
+  const handleInsightTabSelect = useCallback(
+    (value: string) => {
+      if (value === selectedInsightType) return;
+      void triggerHaptic('selection');
       handleInsightTypeChange(value);
     },
-    [handleInsightTypeChange],
+    [handleInsightTypeChange, selectedInsightType],
   );
   useEffect(() => {
     if (!isPeriodPickerOpen) return;
@@ -7034,7 +7205,9 @@ export function InsightsScreen({
                       accessibilityRole="button"
                       accessibilityLabel={I18n.t('insights.insight_type')}
                       accessibilityValue={{
-                        text: String(I18n.t(`insights.${displaySelectedInsightType}`)),
+                        text: String(
+                          I18n.t(`insights.${insightMenuEntryOf(displaySelectedInsightType)}`),
+                        ),
                       }}
                       accessibilityState={{ expanded: isInsightMenuOpen }}
                       className="h-10 w-10 items-center justify-center rounded-full border-2 border-primary/40 bg-primary/10 shadow-soft active:scale-90"
@@ -7051,7 +7224,7 @@ export function InsightsScreen({
                       numberOfLines={1}
                       className="text-center tracking-tight"
                     >
-                      {String(I18n.t(`insights.${displaySelectedInsightType}`))}
+                      {String(I18n.t(`insights.${insightMenuEntryOf(displaySelectedInsightType)}`))}
                     </Text>
                   </View>
                   {/* Every insight type puts a 40px control here, which is what keeps
@@ -7083,6 +7256,16 @@ export function InsightsScreen({
                     ) : null}
                   </View>
                 </View>
+              }
+              subNavigation={
+                displayInsightGroup ? (
+                  <InsightSubTabs
+                    options={insightGroupTabOptions}
+                    selectedValue={displaySelectedInsightType}
+                    onSelect={handleInsightTabSelect}
+                    accessibilityLabel={String(I18n.t(`insights.${displayInsightGroup}`))}
+                  />
+                ) : undefined
               }
               monthLabel={isBudgetView ? budgetMonthLabel : activePeriodLabel}
               onPrevMonth={
@@ -7207,50 +7390,6 @@ export function InsightsScreen({
             ) : null}
           </View>
 
-          {displaySelectedInsightType === 'category_trend' && !isSelectionMode
-            ? (() => {
-                const stickyOption =
-                  categoryTrendCategoryOptions.find(
-                    (category) => category.id === effectiveCategoryTrendCategoryId,
-                  ) ??
-                  categoryTrendCategoryOptions[0] ??
-                  null;
-                if (!stickyOption) return null;
-                return (
-                  <View
-                    className="bg-background px-5 pt-1.5"
-                    // Split: under the chart, in the left pane.
-                    style={{ paddingBottom: bottomNavInset, marginRight: splitPanes?.right ?? 0 }}
-                  >
-                    <TabletContentContainer>
-                      <Pressable
-                        onPress={() => {
-                          void triggerHaptic('selection');
-                          setIsCategoryTrendPickerOpen(true);
-                        }}
-                        className="flex-row items-center justify-between rounded-2xl border border-border/50 bg-card px-3.5 py-3 active:opacity-80"
-                      >
-                        <View className="flex-row items-center gap-2">
-                          <CategoryEmoji icon={stickyOption.emoji} size={20} />
-                          <Text
-                            variant="body"
-                            style={{
-                              color: themeColors.text,
-                              fontFamily: FONT.semibold,
-                              fontWeight: '600',
-                            }}
-                          >
-                            {stickyOption.label}
-                          </Text>
-                        </View>
-                        <ChevronDown size={18} color={themeColors.textMuted} />
-                      </Pressable>
-                    </TabletContentContainer>
-                  </View>
-                );
-              })()
-            : null}
-
           <BulkEditTransactionsSheet
             visible={showBulkUpdate}
             selectedCount={selectedTransactionCount}
@@ -7289,7 +7428,7 @@ export function InsightsScreen({
             screenWidth={width}
             screenHeight={height}
             options={insightTypeOptions}
-            selectedValue={displaySelectedInsightType}
+            selectedValue={insightMenuEntryOf(displaySelectedInsightType)}
             onSelect={handleInsightMenuSelect}
             onClose={() => setIsInsightMenuOpen(false)}
           />
@@ -7762,15 +7901,31 @@ export function InsightsScreen({
 
           <CategoryPickerSheet
             allowParentSelection
-            visible={isCategoryTrendPickerOpen}
-            onClose={() => setIsCategoryTrendPickerOpen(false)}
-            parents={savingsExpenseCategoryPicker.parents}
+            visible={categoryTrendPickerTarget !== null}
+            onClose={() => setCategoryTrendPickerTarget(null)}
+            parents={
+              categoryTrendPickerTarget === 'compare'
+                ? categoryTrendComparePickerParents
+                : savingsExpenseCategoryPicker.parents
+            }
             childByParent={EMPTY_CATEGORY_CHILD_MAP}
-            selectedCategoryId={effectiveCategoryTrendCategoryId}
+            selectedCategoryId={
+              categoryTrendPickerTarget === 'compare'
+                ? effectiveCategoryTrendCompareId
+                : effectiveCategoryTrendCategoryId
+            }
             onSelect={(categoryId) => {
               void triggerHaptic('selection');
-              setCategoryTrendSelectedCategoryId(categoryId);
-              setIsCategoryTrendPickerOpen(false);
+              if (categoryTrendPickerTarget === 'compare') {
+                setCategoryTrendCompareCategoryId(categoryId);
+              } else {
+                // Picking the compared category as the main one swaps them.
+                if (categoryId === effectiveCategoryTrendCompareId) {
+                  setCategoryTrendCompareCategoryId(effectiveCategoryTrendCategoryId);
+                }
+                setCategoryTrendSelectedCategoryId(categoryId);
+              }
+              setCategoryTrendPickerTarget(null);
             }}
           />
         </ContentFrameProvider>
