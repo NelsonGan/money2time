@@ -14,6 +14,8 @@ import Animated, {
 import { AccountLogo, CategoryEmoji, Text, TimeValueInline } from '~/components/ui';
 import { motionDurations } from '~/constants/motion';
 import { useApp } from '~/context/AppContext';
+import { PersonAvatar } from '~/features/sharedLedgers/components/PersonAvatar';
+import { shortName, useOpenLedgerPeople } from '~/features/sharedLedgers/lib/ledgerPeople';
 import {
   ReorderGrip,
   useReorderItemLayout,
@@ -54,6 +56,9 @@ const styles = StyleSheet.create({
   // Same trick for the account badge's label, run into the badge's own
   // right padding rather than past its edge.
   accountLabelOverlay: { position: 'absolute', top: 0, left: 0, right: -3 },
+  // Whose entry it is, on the icon's lower right corner (shared ledgers).
+  personBadge: { position: 'absolute', right: -5, bottom: -5 },
+  personBadgeCompact: { position: 'absolute', right: -4, bottom: -4 },
 });
 
 interface TransactionItemProps {
@@ -298,7 +303,12 @@ const TransactionItemBody = memo(
     const joinSubtitleParts = (...parts: (string | null | undefined)[]) =>
       parts.filter((part): part is string => Boolean(part && part.trim().length > 0)).join(' · ');
 
-    const subtitlePrimary = isTransfer
+    // In a shared ledger every row says whose it is (README: Shared ledgers >
+    // Who added it): a photo on the icon and the first name on this line.
+    const ledgerPeople = useOpenLedgerPeople();
+    const person = ledgerPeople ? ledgerPeople.personFor(transaction.memberId) : null;
+
+    const subtitleBase = isTransfer
       ? transaction.note
         ? showDateInSubtitle
           ? joinSubtitleParts(dateLabel, transferSubtitleLabel)
@@ -315,6 +325,9 @@ const TransactionItemBody = memo(
           : transaction.note
             ? categoryInline
             : null;
+    const subtitlePrimary = person
+      ? joinSubtitleParts(subtitleBase, shortName(person.name))
+      : subtitleBase;
     const rate =
       !isTransfer && !isBalanceAdjustment ? getTrueHourlyRateForDate(transaction.date) : 0;
     const hasCategoryRef = Boolean(transaction.categoryIcon || transaction.categoryName);
@@ -381,7 +394,7 @@ const TransactionItemBody = memo(
       <>
         <View
           className={cn(
-            'shrink-0 self-center items-center justify-center',
+            'relative shrink-0 self-center items-center justify-center',
             compact ? 'w-8 h-8' : 'w-10 h-10 rounded-2xl',
             !compact && !isTransfer && !isBalanceAdjustment ? 'bg-secondary/40' : null,
             isTransfer ? 'rounded-full bg-secondary/50' : null,
@@ -403,6 +416,15 @@ const TransactionItemBody = memo(
               {isIncome ? '⬆️' : '⬇️'}
             </Text>
           )}
+          {person ? (
+            <View
+              pointerEvents="none"
+              importantForAccessibility="no-hide-descendants"
+              style={compact ? styles.personBadgeCompact : styles.personBadge}
+            >
+              <PersonAvatar person={person} size={compact ? 13 : 16} ring />
+            </View>
+          ) : null}
         </View>
 
         <View className="flex-1 min-w-0 pr-1">

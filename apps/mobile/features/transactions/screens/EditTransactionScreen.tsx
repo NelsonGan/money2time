@@ -225,6 +225,8 @@ export function EditTransactionScreen({
         reimbursable: transaction.reimbursable,
         reimbursedAt: transaction.reimbursedAt,
         countsAsExpense: transaction.countsAsExpense,
+        createdBy: transaction.createdBy,
+        memberId: transaction.memberId,
       }}
     />
   );

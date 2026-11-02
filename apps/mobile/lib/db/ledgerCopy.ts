@@ -89,6 +89,9 @@ export const LEDGER_COPY_TABLES: readonly TableSpec[] = [
       // A payment follows its instalment plan into the copy.
       instalment_rule_id: 'recurring_rules',
     },
+    // A shared ledger's people are not the new ledger's: its entries become
+    // the user's own (null is the ledger's owner).
+    cleared: ['created_by', 'member_id'],
   },
   {
     table: 'recurring_rules',
@@ -99,6 +102,7 @@ export const LEDGER_COPY_TABLES: readonly TableSpec[] = [
       to_account_id: 'accounts',
       category_id: 'categories',
     },
+    cleared: ['member_id'],
   },
   {
     table: 'transaction_splits',

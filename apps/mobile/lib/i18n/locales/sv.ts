@@ -3079,6 +3079,10 @@ const sv = {
     renew_pro: 'Förnya Pro',
   },
   shared_ledgers: {
+    member_fallback: 'Medlem',
+    belongs_to_title: 'Tillhör',
+    belongs_to_you: '{{name}} (du)',
+    belongs_to_added_by: 'Tillagd av {{name}}',
     title: 'Delning',
     share_toggle: 'Dela den här kassaboken',
     share_toggle_caption: 'Bjud in upp till {{max}} personer. De behöver inte Pro.',

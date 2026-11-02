@@ -18,6 +18,12 @@ export interface SharedLedger {
   memberCount: number;
   /** False while nobody in it is Pro: nobody syncs it, members cannot open it. */
   active: boolean;
+  /**
+   * The Cloud Sync account this phone is in the ledger as (migration 079):
+   * what a member's new entries are stamped with. Null on a row saved before
+   * that, until the next list read fills it.
+   */
+  userId?: string | null;
 }
 
 interface Row {
@@ -28,6 +34,7 @@ interface Row {
   owner_name: string | null;
   member_count: number;
   active: number;
+  user_id?: string | null;
 }
 
 let cache: SharedLedger[] | null = null;
@@ -56,6 +63,7 @@ export function listSharedLedgers(): SharedLedger[] {
         ownerName: row.owner_name,
         memberCount: row.member_count,
         active: row.active === 1,
+        userId: row.user_id ?? null,
       }));
   } catch {
     // Before migration 075 has run.
@@ -86,11 +94,12 @@ export function saveSharedLedger(ledger: SharedLedger): void {
     return;
   }
   getSQLite().runSync(
-    `INSERT INTO shared_ledgers (ledger_id, share_id, role, name, owner_name, member_count, active, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `INSERT INTO shared_ledgers (ledger_id, share_id, role, name, owner_name, member_count, active, updated_at, user_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(ledger_id) DO UPDATE SET share_id = excluded.share_id, role = excluded.role,
        name = excluded.name, owner_name = excluded.owner_name,
-       member_count = excluded.member_count, active = excluded.active`,
+       member_count = excluded.member_count, active = excluded.active,
+       user_id = COALESCE(excluded.user_id, shared_ledgers.user_id)`,
     [
       ledger.ledgerId,
       ledger.shareId,
@@ -100,6 +109,7 @@ export function saveSharedLedger(ledger: SharedLedger): void {
       ledger.memberCount,
       ledger.active ? 1 : 0,
       Date.now(),
+      ledger.userId ?? null,
     ],
   );
   notify();

@@ -3086,6 +3086,10 @@ const tr = {
     renew_pro: "Pro'yu yenile",
   },
   shared_ledgers: {
+    member_fallback: 'Üye',
+    belongs_to_title: 'Kime ait',
+    belongs_to_you: '{{name}} (sen)',
+    belongs_to_added_by: 'Ekleyen: {{name}}',
     title: 'Paylaşım',
     share_toggle: 'Bu defteri paylaş',
     share_toggle_caption: "En fazla {{max}} kişiyi davet et. Pro'ya ihtiyaçları yok.",

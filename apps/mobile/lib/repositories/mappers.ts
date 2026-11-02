@@ -434,6 +434,8 @@ export function toTransaction(row: TransactionRow): Transaction {
     dayOrder: row.dayOrder ?? null,
     instalmentRuleId: row.instalmentRuleId ?? null,
     instalmentNumber: row.instalmentNumber ?? null,
+    createdBy: row.createdBy ?? null,
+    memberId: row.memberId ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,
@@ -457,7 +459,7 @@ export const TRANSACTION_RAW_COLUMNS_SQL = `
   t.recurrence_parent_id, t.sentiment, t.reimbursable, t.reimbursed_at,
   t.reimbursement_account_id, t.reimbursement_transaction_id, t.reimbursement_of_id,
   t.counts_as_expense, t.day_order, t.created_at, t.updated_at, t.deleted_at, t.details,
-  t.instalment_rule_id, t.instalment_number`;
+  t.instalment_rule_id, t.instalment_number, t.created_by, t.member_id`;
 
 type RawValue = string | number | null;
 
@@ -506,14 +508,16 @@ export function toTransactionWithRelationsFromRaw(
     details: (values[31] as string | null) ?? null,
     instalmentRuleId: (values[32] as string | null) ?? null,
     instalmentNumber: (values[33] as number | null) ?? null,
-    accountName: (values[34] as string | null) ?? null,
-    fromAccountName: (values[35] as string | null) ?? null,
-    toAccountName: (values[36] as string | null) ?? null,
-    categoryName: (values[37] as string | null) ?? null,
-    categoryParentId: (values[39] as string | null) ?? null,
-    categoryParentName: (values[40] as string | null) ?? null,
-    categoryIcon: (values[38] as string | null) ?? null,
-    instalmentCount: (values[41] as number | null) ?? null,
+    createdBy: (values[34] as string | null) ?? null,
+    memberId: (values[35] as string | null) ?? null,
+    accountName: (values[36] as string | null) ?? null,
+    fromAccountName: (values[37] as string | null) ?? null,
+    toAccountName: (values[38] as string | null) ?? null,
+    categoryName: (values[39] as string | null) ?? null,
+    categoryParentId: (values[41] as string | null) ?? null,
+    categoryParentName: (values[42] as string | null) ?? null,
+    categoryIcon: (values[40] as string | null) ?? null,
+    instalmentCount: (values[43] as number | null) ?? null,
   };
 }
 
@@ -609,6 +613,7 @@ export function toRecurringRule(row: RecurringRuleRow): RecurringTransactionRule
         : null,
     instalmentTotal: row.instalmentTotal ?? null,
     instalmentStartDate: row.instalmentStartDate ?? null,
+    memberId: row.memberId ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,

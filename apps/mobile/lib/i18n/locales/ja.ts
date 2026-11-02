@@ -3057,6 +3057,10 @@ const ja = {
     renew_pro: 'Proを更新',
   },
   shared_ledgers: {
+    member_fallback: 'メンバー',
+    belongs_to_title: '誰の記録か',
+    belongs_to_you: '{{name}}（自分）',
+    belongs_to_added_by: '{{name}}が追加',
     title: '共有',
     share_toggle: 'この帳簿を共有',
     share_toggle_caption: '最大{{max}}人まで招待できます。招待された人はProが不要です。',

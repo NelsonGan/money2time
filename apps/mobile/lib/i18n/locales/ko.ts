@@ -3038,6 +3038,10 @@ const ko = {
     renew_pro: 'Pro 갱신',
   },
   shared_ledgers: {
+    member_fallback: '멤버',
+    belongs_to_title: '누구의 기록',
+    belongs_to_you: '{{name}} (나)',
+    belongs_to_added_by: '{{name}} 님이 추가함',
     title: '공유',
     share_toggle: '이 가계부 공유',
     share_toggle_caption:

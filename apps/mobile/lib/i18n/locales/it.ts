@@ -3096,6 +3096,10 @@ const it = {
     renew_pro: 'Rinnova Pro',
   },
   shared_ledgers: {
+    member_fallback: 'Membro',
+    belongs_to_title: 'Appartiene a',
+    belongs_to_you: '{{name}} (tu)',
+    belongs_to_added_by: 'Aggiunto da {{name}}',
     title: 'Condivisione',
     share_toggle: 'Condividi questo registro',
     share_toggle_caption: 'Invita fino a {{max}} persone. Non serve Pro.',

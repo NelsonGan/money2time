@@ -3066,6 +3066,10 @@ const hi = {
     renew_pro: 'Pro रिन्यू करें',
   },
   shared_ledgers: {
+    member_fallback: 'सदस्य',
+    belongs_to_title: 'किसका है',
+    belongs_to_you: '{{name}} (आप)',
+    belongs_to_added_by: '{{name}} ने जोड़ा',
     title: 'शेयरिंग',
     share_toggle: 'यह बही शेयर करें',
     share_toggle_caption: '{{max}} लोगों तक को आमंत्रित करें। उन्हें Pro की ज़रूरत नहीं है।',

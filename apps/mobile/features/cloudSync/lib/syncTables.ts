@@ -30,6 +30,7 @@ export const SYNC_TABLES = [
   'receipt_splits',
   'receipt_split_items',
   'receipt_split_item_shares',
+  'ledger_profiles',
 ] as const;
 
 export type SyncTable = (typeof SYNC_TABLES)[number];
@@ -91,6 +92,7 @@ export const ASSET_COLUMNS: Readonly<Partial<Record<SyncTable, readonly string[]
   items: ['icon_id'],
   recurring_rules: ['logo_id'],
   settings: ['profile_avatar_uri', 'payment_qr_uri'],
+  ledger_profiles: ['avatar_uri'],
 };
 
 /**

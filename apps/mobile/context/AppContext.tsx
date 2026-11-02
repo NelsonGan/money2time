@@ -54,6 +54,7 @@ import {
   filterSpendingTransactions,
   NO_REIMBURSEMENT,
 } from '~/features/reimbursements/lib/reimbursementMath';
+import { invalidateLedgerPeople, withEntryStamp } from '~/features/sharedLedgers/lib/ledgerPeople';
 import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accountEntryGate';
 import {
   buildPaybackTransferNote,
@@ -1445,6 +1446,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       // initializeDatabase has opened the stored ledger; everything below
       // reads that ledger's rows.
+      invalidateLedgerPeople();
       const nextLedgers = ledgersRepository.list();
       const nextSettings = settingsRepository.get();
       if (databaseInit.isNewInstall) {
@@ -2491,17 +2493,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       })();
       const id = newId();
       const now = nowIso();
-      const normalizedInput = {
-        ...input,
-        amount: normalizedAmount,
-        date: dateForNewTransaction(input.date, new Date(now)),
-        reportingCurrency: input.reportingCurrency ?? snapshot.reportingCurrency,
-        reportingAmount: input.reportingAmount ?? snapshot.reportingAmount,
-        fxRate: input.fxRate ?? snapshot.fxRate,
-        toAmount: input.toAmount ?? null,
-        accountAmount: computedAccountAmount,
-        receiptUri: input.receiptUri ?? null,
-      };
+      // Stamped here, not only at the insert, so the optimistic row already
+      // shows who added it in a shared ledger.
+      const normalizedInput = withEntryStamp(
+        {
+          ...input,
+          amount: normalizedAmount,
+          date: dateForNewTransaction(input.date, new Date(now)),
+          reportingCurrency: input.reportingCurrency ?? snapshot.reportingCurrency,
+          reportingAmount: input.reportingAmount ?? snapshot.reportingAmount,
+          fxRate: input.fxRate ?? snapshot.fxRate,
+          toAmount: input.toAmount ?? null,
+          accountAmount: computedAccountAmount,
+          receiptUri: input.receiptUri ?? null,
+        },
+        getActiveLedgerId(),
+      );
       const optimistic: TransactionWithRelations = {
         id,
         instalmentRuleId: null,
@@ -2530,6 +2537,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         reimbursementOfId: normalizedInput.reimbursementOfId ?? null,
         countsAsExpense: normalizedInput.countsAsExpense ?? false,
         dayOrder: null,
+        createdBy: normalizedInput.createdBy,
+        memberId: normalizedInput.memberId,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -3117,23 +3126,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           : convert(amount, currency, accountCurrency, rateTableRef.current).value;
       const note = buildRefundNote(I18n.t('reimbursements.refund_note_prefix'), expense.note);
 
-      const refundInput: CreateTransactionInput = {
-        type: 'income',
-        amount,
-        currency,
-        reportingCurrency: snapshot.reportingCurrency,
-        reportingAmount: snapshot.reportingAmount,
-        fxRate: snapshot.fxRate,
-        accountAmount,
-        date,
-        accountId,
-        categoryId: null,
-        fromAccountId: null,
-        toAccountId: null,
-        note,
-        sentiment: 'neutral',
-        reimbursementOfId: id,
-      };
+      // The money comes back to whoever the expense belongs to.
+      const refundInput = withEntryStamp<CreateTransactionInput>(
+        {
+          type: 'income',
+          amount,
+          currency,
+          reportingCurrency: snapshot.reportingCurrency,
+          reportingAmount: snapshot.reportingAmount,
+          fxRate: snapshot.fxRate,
+          accountAmount,
+          date,
+          accountId,
+          categoryId: null,
+          fromAccountId: null,
+          toAccountId: null,
+          note,
+          sentiment: 'neutral',
+          reimbursementOfId: id,
+          memberId: expense.memberId,
+        },
+        getActiveLedgerId(),
+      );
 
       const optimisticRefund: TransactionWithRelations = {
         id: refundId,
@@ -3160,6 +3174,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         ...NO_REIMBURSEMENT,
         reimbursementOfId: id,
         countsAsExpense: false,
+        createdBy: refundInput.createdBy,
+        memberId: refundInput.memberId,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -3271,15 +3287,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       );
       const txId = newId();
       const now = nowIso();
-      const normalizedInput = {
-        ...input,
-        amount: normalizeMoneyAmount(input.amount),
-        date: dateForNewTransaction(input.date, new Date(now)),
-        reportingCurrency: input.reportingCurrency ?? parentSnapshot.reportingCurrency,
-        reportingAmount: input.reportingAmount ?? parentSnapshot.reportingAmount,
-        fxRate: input.fxRate ?? parentSnapshot.fxRate,
-        accountAmount: input.accountAmount ?? null,
-      };
+      const normalizedInput = withEntryStamp(
+        {
+          ...input,
+          amount: normalizeMoneyAmount(input.amount),
+          date: dateForNewTransaction(input.date, new Date(now)),
+          reportingCurrency: input.reportingCurrency ?? parentSnapshot.reportingCurrency,
+          reportingAmount: input.reportingAmount ?? parentSnapshot.reportingAmount,
+          fxRate: input.fxRate ?? parentSnapshot.fxRate,
+          accountAmount: input.accountAmount ?? null,
+        },
+        getActiveLedgerId(),
+      );
 
       // Pre-marked-paid splits (create-mode Mark Paid) need a transfer tx if
       // the payback account differs from the parent's account. We allocate
@@ -3344,6 +3363,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         sentiment: 'neutral',
         ...NO_REIMBURSEMENT,
         countsAsExpense: false,
+        createdBy: normalizedInput.createdBy,
+        memberId: normalizedInput.memberId,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -3382,6 +3403,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         ...NO_REIMBURSEMENT,
         reimbursable: normalizedInput.reimbursable ?? false,
         countsAsExpense: false,
+        createdBy: normalizedInput.createdBy,
+        memberId: normalizedInput.memberId,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,
@@ -3417,6 +3440,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               categoryId: null,
               note: t.note,
               sentiment: 'neutral',
+              createdBy: normalizedInput.createdBy,
+              memberId: normalizedInput.memberId,
             });
           }
           // Persist each split with the same id used in the optimistic state so
@@ -3636,6 +3661,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               sentiment: 'neutral',
               ...NO_REIMBURSEMENT,
               countsAsExpense: false,
+              // The repayment belongs to whoever the split expense does.
+              ...withEntryStamp({ memberId: parent.memberId }, getActiveLedgerId()),
               recurrencePattern: 'none',
               recurrenceInterval: 1,
               recurrenceEndDate: null,
@@ -3710,6 +3737,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               categoryId: null,
               note: explicitNote ?? buildPaybackTransferNote(split.personName, parent.note),
               sentiment: 'neutral',
+              memberId: parent.memberId,
             });
           }
           transactionSplitsRepository.update(splitId, {

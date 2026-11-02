@@ -3075,6 +3075,10 @@ const uk = {
     renew_pro: 'Поновити Pro',
   },
   shared_ledgers: {
+    member_fallback: 'Учасник',
+    belongs_to_title: 'Чий запис',
+    belongs_to_you: '{{name}} (ви)',
+    belongs_to_added_by: 'Додав(-ла): {{name}}',
     title: 'Спільний доступ',
     share_toggle: 'Поділитися цією книгою',
     share_toggle_caption: 'Запросіть до {{max}} людей. Їм не потрібен Pro.',

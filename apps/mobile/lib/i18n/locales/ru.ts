@@ -3081,6 +3081,10 @@ const ru = {
     renew_pro: 'Продлить Pro',
   },
   shared_ledgers: {
+    member_fallback: 'Участник',
+    belongs_to_title: 'Чья запись',
+    belongs_to_you: '{{name}} (вы)',
+    belongs_to_added_by: 'Добавил(а): {{name}}',
     title: 'Общий доступ',
     share_toggle: 'Поделиться этой книгой',
     share_toggle_caption: 'Пригласите до {{max}} человек. Им не нужен Pro.',

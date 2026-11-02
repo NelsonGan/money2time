@@ -23,6 +23,7 @@ import { AppState } from 'react-native';
 
 import { useApp } from '~/context/AppContext';
 import { usePro } from '~/context/ProContext';
+import { writeOwnLedgerProfiles } from '~/features/sharedLedgers/lib/ledgerPeople';
 import { DEFAULT_LEDGER_ID, getActiveLedgerId } from '~/lib/db/ledgerScope';
 import { ledgersRepository } from '~/lib/repositories/ledgersRepository';
 import { clearAccountPro, getAccountProAnswer, setAccountPro } from '~/services/accountPro';
@@ -68,7 +69,11 @@ import {
 import { LIVE_DEVICE_ID, startLiveSync } from './services/liveSync';
 import { NATIVE_PROVIDERS, type NativeProvider } from './services/nativeSignIn';
 import { finishPendingSignOut, unlinkAndEndSession } from './services/pendingSignOut';
-import { type SharedLedger, subscribeSharedLedgers } from './services/sharedLedgerStore';
+import {
+  listSharedLedgers,
+  type SharedLedger,
+  subscribeSharedLedgers,
+} from './services/sharedLedgerStore';
 import { sharedLedgerSync } from './services/sharedLedgerSync';
 import {
   type DataSummary,
@@ -302,6 +307,23 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       refreshAllRef.current();
     }
   }, []);
+
+  // This account's name and photo in each of its shared ledgers, so the
+  // others see who added an entry (README: Shared ledgers > Who added it).
+  // Written again when the list or the Settings profile changes; unchanged
+  // rows are left alone, so nothing syncs for nothing.
+  const sharedLedgerList = React.useSyncExternalStore(subscribeSharedLedgers, listSharedLedgers);
+  const profileName = settings?.profileName ?? null;
+  const profileAvatarUri = settings?.profileAvatarUri ?? null;
+  const signedInUserId = user?.id ?? null;
+  useEffect(() => {
+    if (!signedInUserId || !sharedLedgerList.length) return;
+    try {
+      writeOwnLedgerProfiles(sharedLedgerList, signedInUserId);
+    } catch (error) {
+      console.warn('[cloudSync] could not write ledger profiles', error);
+    }
+  }, [sharedLedgerList, signedInUserId, profileName, profileAvatarUri]);
 
   const sessionToken = useCallback(async () => {
     const token = sessionRef.current?.token;

@@ -3074,6 +3074,10 @@ const da = {
     renew_pro: 'Forny Pro',
   },
   shared_ledgers: {
+    member_fallback: 'Medlem',
+    belongs_to_title: 'Tilhører',
+    belongs_to_you: '{{name}} (dig)',
+    belongs_to_added_by: 'Tilføjet af {{name}}',
     title: 'Deling',
     share_toggle: 'Del dette regnskab',
     share_toggle_caption: 'Inviter op til {{max}} personer. De behøver ikke Pro.',

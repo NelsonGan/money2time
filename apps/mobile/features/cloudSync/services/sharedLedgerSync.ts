@@ -92,7 +92,7 @@ export interface SharedSyncOutcome {
   error: unknown;
 }
 
-function fromRemote(remote: RemoteSharedLedger): SharedLedger {
+function fromRemote(remote: RemoteSharedLedger, userId: string): SharedLedger {
   return {
     ledgerId: remote.ledgerId,
     shareId: remote.id,
@@ -101,6 +101,7 @@ function fromRemote(remote: RemoteSharedLedger): SharedLedger {
     ownerName: remote.ownerName,
     memberCount: remote.memberCount,
     active: remote.active,
+    userId,
   };
 }
 
@@ -250,7 +251,7 @@ class SharedLedgerSync {
         continue;
       }
       seen.add(item.ledgerId);
-      saveSharedLedger(fromRemote(item));
+      saveSharedLedger(fromRemote(item, session.userId));
     }
     // Pending actions the Worker no longer lists are done.
     // This account's actions the Worker no longer lists are done. One of
@@ -525,7 +526,7 @@ class SharedLedgerSync {
       name: ledger.name,
       emoji: ledger.emoji,
     });
-    const shared = fromRemote(remote);
+    const shared = fromRemote(remote, this.requireSession().userId);
     // Its rows route to the new channel now; its first sync uploads them.
     saveSharedLedger(shared);
     await this.syncAll().catch(() => undefined);
@@ -668,7 +669,7 @@ class SharedLedgerSync {
     this.assertJoinable(remote.ledgerId, remote.id);
     // Joined again after leaving offline: the queued leave no longer applies.
     await removePendingLedgerAction(remote.id);
-    const shared = fromRemote(remote);
+    const shared = fromRemote(remote, this.requireSession().userId);
     saveSharedLedger(shared);
     try {
       await (await this.engineFor(shared)).syncNow();

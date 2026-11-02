@@ -3110,6 +3110,10 @@ const nl = {
     renew_pro: 'Pro verlengen',
   },
   shared_ledgers: {
+    member_fallback: 'Lid',
+    belongs_to_title: 'Hoort bij',
+    belongs_to_you: '{{name}} (jij)',
+    belongs_to_added_by: 'Toegevoegd door {{name}}',
     title: 'Delen',
     share_toggle: 'Dit boek delen',
     share_toggle_caption: 'Nodig tot {{max}} mensen uit. Ze hebben geen Pro nodig.',

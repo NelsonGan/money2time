@@ -36,6 +36,7 @@ function makeRule(overrides: Partial<RecurringTransactionRule>): RecurringTransa
     instalmentCount: null,
     instalmentTotal: null,
     instalmentStartDate: null,
+    memberId: null,
     createdAt: '2026-05-13T00:00:00.000Z',
     updatedAt: '2026-05-13T00:00:00.000Z',
     deletedAt: null,

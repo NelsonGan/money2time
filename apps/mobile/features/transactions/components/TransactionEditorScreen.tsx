@@ -78,6 +78,8 @@ import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
 import { getSubscriptionLogoMeta, suggestSubscriptionLogo } from '~/constants/subscriptionLogos';
 import { useApp } from '~/context/AppContext';
 import { useSetSplitBillSession } from '~/context/SplitBillSession';
+import { BelongsToPicker } from '~/features/sharedLedgers/components/BelongsToPicker';
+import { selfMemberIdFor, useOpenLedgerPeople } from '~/features/sharedLedgers/lib/ledgerPeople';
 import {
   describeInstalmentChoice,
   type InstalmentChoice,
@@ -107,6 +109,7 @@ import { usePressScale } from '~/hooks/usePressScale';
 import { useProGate } from '~/hooks/useProGate';
 import { useStableSafeAreaInsets } from '~/hooks/useStableSafeAreaInsets';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { getActiveLedgerId } from '~/lib/db/ledgerScope';
 import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import {
@@ -378,6 +381,10 @@ interface TransactionEditorInitialValues {
   reimbursedAt: string | null;
   /** Whether a transfer is counted as spending (a loan repayment, say). */
   countsAsExpense: boolean;
+  /** Shared ledgers: who added the entry (null = the ledger's owner). */
+  createdBy: string | null;
+  /** Shared ledgers: whose entry it is (null = the ledger's owner). */
+  memberId: string | null;
 }
 
 interface TransactionEditorScreenProps {
@@ -815,6 +822,18 @@ export function TransactionEditorScreen({
   // Swaps the numpad for the options panel, the same slot the receipt
   // viewfinder takes so the amount and note stay visible above it.
   const [optionsOpen, setOptionsOpen] = useState(false);
+  // Shared ledgers: whose entry this is (README: Shared ledgers > Who added
+  // it). A new entry starts as the person adding it; Belongs to in the options
+  // panel gives it to someone else in the ledger.
+  const ledgerPeople = useOpenLedgerPeople();
+  const [defaultMemberId] = useState<string | null>(() =>
+    mode === 'edit' ? (initialValues?.memberId ?? null) : selfMemberIdFor(getActiveLedgerId()),
+  );
+  const [memberId, setMemberId] = useState<string | null>(defaultMemberId);
+  const handleSelectMember = useCallback((next: string | null) => {
+    void triggerHaptic('selection');
+    setMemberId(next);
+  }, []);
   // The receipt that was persisted when the editor opened. Used so editing the
   // attachment cleans up orphaned files (the prior one on disk) without deleting
   // the originally-saved file until the change is actually committed via Save.
@@ -2251,6 +2270,13 @@ export function TransactionEditorScreen({
         preparedSubmitPayload = submitPayload;
       }
 
+      // In a shared ledger the entry carries whose it is. Left out elsewhere,
+      // so an edit never touches it.
+      if (ledgerPeople && submitPayload) {
+        submitPayload = { ...submitPayload, memberId };
+        preparedSubmitPayload = submitPayload;
+      }
+
       // Recurring mode applies to expense/income AND transfer rules. Balance
       // adjustments are never offered as a recurring type, so skip them. When a
       // rule is being saved we hand off to onSubmitRecurring and clear the
@@ -2385,6 +2411,9 @@ export function TransactionEditorScreen({
       perfInteraction(
         mode === 'edit' ? 'editor_update' : bulk ? 'editor_bulk_save' : 'editor_save',
       );
+      if (ledgerPeople && memberId !== defaultMemberId) {
+        void trackEvent(AnalyticsEvents.SHARED_LEDGER_ENTRY_ASSIGNED, { mode });
+      }
       // Mark the current receipt as committed so the unmount cleanup keeps it.
       receiptCommittedRef.current = true;
 
@@ -4795,6 +4824,16 @@ export function TransactionEditorScreen({
                           </Pressable>
                         )}
                       </View>
+                      {!detailsEditing && ledgerPeople ? (
+                        <BelongsToPicker
+                          people={ledgerPeople}
+                          memberId={memberId}
+                          createdBy={
+                            mode === 'edit' ? (initialValues?.createdBy ?? null) : undefined
+                          }
+                          onSelect={handleSelectMember}
+                        />
+                      ) : null}
                       {!detailsEditing && (type === 'expense' || type === 'transfer') ? (
                         <View className="my-3 h-[1px] bg-border/30" />
                       ) : null}
