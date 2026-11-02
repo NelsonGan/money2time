@@ -96,9 +96,9 @@ describe('locale parity with en', () => {
   });
 
   it('shows the same paywall user-choice count in every locale', () => {
-    expect(enEntries['pro.social_downloads_value']).toBe('40k+');
+    expect(enEntries['pro.social_downloads_value']).toBe('60k+');
     for (const tree of Object.values(LOCALES)) {
-      expect(flattenEntries(tree)['pro.social_downloads_value']).toBe('40k+');
+      expect(flattenEntries(tree)['pro.social_downloads_value']).toBe('60k+');
     }
   });
 

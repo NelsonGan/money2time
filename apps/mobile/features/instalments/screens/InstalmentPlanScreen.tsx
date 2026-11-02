@@ -376,7 +376,12 @@ function InstalmentPlanEditSheet({
   const trimmed = name.trim();
   const money = (value: number) => formatAmount(value, settings, { currencyCode: rule.currency });
   const parsedAmount = Math.round(Number(amountText.replace(',', '.')) * 100) / 100;
-  const amountChanged = canEditAmount && parsedAmount !== rule.amount;
+  // A cleared or zero field is no change, not an amount that fails to fit.
+  const amountChanged =
+    canEditAmount &&
+    Number.isFinite(parsedAmount) &&
+    parsedAmount > 0 &&
+    parsedAmount !== rule.amount;
   // What is left to pay, as the upcoming payments at the new amount with the
   // last one taking the rest.
   const amountValid =

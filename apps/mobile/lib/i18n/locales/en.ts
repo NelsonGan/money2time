@@ -1720,7 +1720,6 @@ const en = {
       'Bought something you pay off in parts? Add it as an expense and tap Instalments to split it into payments.',
     empty_action: 'Add a plan',
     next_payment_short: 'Next {{date}} · {{amount}}',
-    status_complete: 'All paid',
     status_paid: 'Paid',
     status_upcoming: 'Upcoming',
     status_skipped: 'Skipped',
@@ -2175,6 +2174,7 @@ const en = {
     accounts_label: 'Accounts',
     categories_label: 'Categories',
     recurring_label: 'Recurring',
+    instalments_label: 'Instalment plans',
     hourly_income_label: 'Hourly Income',
     trends_label: 'Long-term Trends',
     voice_label: 'Voice entries',
@@ -2196,7 +2196,7 @@ const en = {
     hero_title: 'Take control of your money and your time',
     social_rating_value: '4.9',
     social_rating_label: 'App Store rating',
-    social_downloads_value: '40k+',
+    social_downloads_value: '60k+',
     social_downloads_label: "User's Choice",
     // Paywall feature showcase
     // Paywall plans + CTA

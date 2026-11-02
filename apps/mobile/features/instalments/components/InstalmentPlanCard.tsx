@@ -68,11 +68,11 @@ export function InstalmentPlanCard({
   const parent = category?.parentId ? getCategoryById(category.parentId) : undefined;
   const money = (amount: number) => formatAmount(amount, settings, { currencyCode: rule.currency });
 
-  // "All paid" when every payment was made, paid off early included; a plan
-  // that ended with skipped (deleted) payments is just finished.
+  // Fully paid needs no words (the green 12/12 and full bar say it); a plan
+  // that ended with skipped (deleted) payments says it finished.
   const status = plan.complete
     ? plan.paidCount === plan.entries.length
-      ? I18n.t('instalments.status_complete')
+      ? null
       : I18n.t('instalments.section_finished')
     : plan.next
       ? I18n.t('instalments.next_payment_short', {
@@ -106,9 +106,11 @@ export function InstalmentPlanCard({
               {I18n.t('instalments.paid_of', { paid: plan.paidCount, count: plan.entries.length })}
             </Text>
           </View>
-          <Text variant="caption" tone="muted" numberOfLines={1}>
-            {status}
-          </Text>
+          {status ? (
+            <Text variant="caption" tone="muted" numberOfLines={1}>
+              {status}
+            </Text>
+          ) : null}
         </View>
         <ChevronRight size={16} color={themeColors.textMuted} />
       </View>
