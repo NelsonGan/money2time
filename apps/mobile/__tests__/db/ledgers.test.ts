@@ -17,7 +17,7 @@ import {
 } from '~/features/cloudSync/services/sharedLedgerStore';
 import { sharedLedgerSync } from '~/features/cloudSync/services/sharedLedgerSync';
 import { getSQLite } from '~/lib/db/client';
-import { copyLedgerRows } from '~/lib/db/ledgerCopy';
+import { copyLedgerRows, ledgerPartsCopySpecs } from '~/lib/db/ledgerCopy';
 import {
   DEFAULT_LEDGER_ID,
   getActiveLedgerId,
@@ -25,6 +25,7 @@ import {
   withLedgerScope,
 } from '~/lib/db/ledgerScope';
 import migration075LedgersAndCloudSync from '~/lib/db/migrations/075_ledgers_and_cloud_sync';
+import migration076LedgerMonthCycles from '~/lib/db/migrations/076_ledger_month_cycles';
 import { applyMigrations } from '~/lib/db/migrations/runner';
 import type { DbMigration } from '~/lib/db/migrations/types';
 import { accountsRepository } from '~/lib/repositories/accountsRepository';
@@ -165,6 +166,49 @@ describe('migration 075 (ledgers)', () => {
   });
 });
 
+describe('migration 076 (month cycle per ledger)', () => {
+  let harness: ReturnType<typeof openDatabase>;
+  afterEach(() => harness.connection.close());
+
+  const prefsOf = (id: string) =>
+    harness.all('SELECT prefs_json FROM ledgers WHERE id = ?', id)[0]?.prefs_json;
+
+  it('gives every other ledger the cycle it read until now, keeping its preferences', () => {
+    harness = openDatabase();
+    applyMigrations(harness.db, loadMigrations(75));
+    seedPreLedgerData(harness);
+    harness.connection.exec(`
+      UPDATE settings SET first_day_of_month = 25, first_day_overrides_json = '{"2026-12":20}';
+      INSERT INTO ledgers (id, name, prefs_json, created_at, updated_at) VALUES
+        ('work', 'Work', '{"defaultPaybackAccountId":"w1"}', '${NOW}', '${NOW}'),
+        ('side', 'Side', NULL, '${NOW}', '${NOW}'),
+        ('broken', 'Broken', 'not json', '${NOW}', '${NOW}'),
+        ('own', 'Own', '{"firstDayOfMonth":3}', '${NOW}', '${NOW}');
+    `);
+
+    expect(applyMigrations(harness.db, [migration076LedgerMonthCycles]).appliedVersions).toEqual([
+      76,
+    ]);
+
+    expect(JSON.parse(String(prefsOf('work')))).toEqual({
+      defaultPaybackAccountId: 'w1',
+      firstDayOfMonth: 25,
+      firstDayOverridesJson: '{"2026-12":20}',
+    });
+    for (const id of ['side', 'broken']) {
+      expect(JSON.parse(String(prefsOf(id)))).toEqual({
+        firstDayOfMonth: 25,
+        firstDayOverridesJson: '{"2026-12":20}',
+      });
+    }
+    // Already its own, and the default ledger reads the settings row.
+    expect(prefsOf('own')).toBe('{"firstDayOfMonth":3}');
+    expect(prefsOf(DEFAULT_LEDGER_ID)).toBeNull();
+    expect(() => migration076LedgerMonthCycles.up(harness.db)).not.toThrow();
+    expect(JSON.parse(String(prefsOf('work'))).firstDayOfMonth).toBe(25);
+  });
+});
+
 describe('ledger scope', () => {
   afterEach(() => setActiveLedgerId(DEFAULT_LEDGER_ID));
 
@@ -292,6 +336,141 @@ describe('ledgersRepository on SQLite', () => {
     ).toEqual([{ transaction_id: 'c2', amount: 15 }]);
     // The source is untouched.
     expect(ledgersRepository.entryCounts()).toEqual({ default: 1, work: 2, copy: 2 });
+  });
+
+  it('gives a ledger without a cycle the old one before the settings row changes or goes', () => {
+    harness.connection.exec(`
+      UPDATE settings SET first_day_of_month = 25;
+      INSERT INTO ledgers (id, name, prefs_json, created_at, updated_at) VALUES
+        ('own', 'Own', '{"firstDayOfMonth":3,"firstDayOverridesJson":null}', '${NOW}', '${NOW}'),
+        ('joined', 'Joined', NULL, '${NOW}', '${NOW}'),
+        ('odd', 'Odd', 'null', '${NOW}', '${NOW}');
+    `);
+    const prefs = () =>
+      Object.fromEntries(
+        harness
+          .all(`SELECT id, prefs_json FROM ledgers WHERE id <> 'default' ORDER BY id`)
+          .map((row) => [row.id, row.prefs_json]),
+      );
+    const before = prefs();
+
+    // Another column changing leaves the ledgers alone.
+    harness.connection.exec(`UPDATE settings SET theme_mode = 'dark'`);
+    expect(prefs()).toEqual(before);
+
+    // The app, a Cloud Sync pull or Erase all data changing the cycle.
+    harness.connection.exec(`UPDATE settings SET first_day_of_month = 1`);
+    const stamped = '{"firstDayOfMonth":25,"firstDayOverridesJson":null}';
+    expect(prefs()).toEqual({
+      joined: stamped,
+      odd: stamped,
+      own: '{"firstDayOfMonth":3,"firstDayOverridesJson":null}',
+      // Made before the cycle first changed (1 to 25), so it kept day 1 then.
+      work: '{"firstDayOfMonth":1,"firstDayOverridesJson":null}',
+    });
+    // Left as it was: every phone stamps its own copy, and a newer updated_at
+    // would make Cloud Sync keep this copy over another phone's newer edit.
+    expect(harness.all(`SELECT updated_at FROM ledgers WHERE id = 'joined'`)[0].updated_at).toBe(
+      NOW,
+    );
+
+    // A restore deleting the settings row: a ledger that arrived since gets the cycle too.
+    harness.connection.exec(`
+      INSERT INTO ledgers (id, name, created_at, updated_at) VALUES ('late', 'Late', '${NOW}', '${NOW}');
+      DELETE FROM settings;
+    `);
+    expect(prefs().late).toBe('{"firstDayOfMonth":1,"firstDayOverridesJson":null}');
+    expect(prefs().joined).toBe(stamped);
+  });
+
+  it('copies chosen parts without history, on the real schema', () => {
+    harness.connection.exec(`
+      INSERT INTO ledgers (id, name, created_at, updated_at) VALUES ('copy', 'Copy', '${NOW}', '${NOW}');
+      INSERT INTO categories (id, ledger_id, name, type, icon, created_at, updated_at)
+        VALUES ('work-travel', 'work', 'Travel', 'expense', 'plane', '${NOW}', '${NOW}');
+      INSERT INTO accounts (id, ledger_id, name, type, currency, starting_balance, goal_target_amount, goal_achieved_at, created_at, updated_at)
+        VALUES ('work-goal', 'work', 'Laptop', 'goal', 'USD', 0, 2000, '${NOW}', '${NOW}', '${NOW}');
+      INSERT INTO accounts (id, ledger_id, name, type, currency, starting_balance, loan_original_principal, created_at, updated_at)
+        VALUES ('work-loan', 'work', 'Van', 'loan', 'USD', 8000, 10000, '${NOW}', '${NOW}');
+      INSERT INTO recurring_rules (id, ledger_id, name, type, amount, currency, account_id, category_id, recurrence_pattern, next_run_date, created_at, updated_at)
+        VALUES ('work-flight', 'work', 'Flight', 'expense', 300, 'USD', 'work-cash', 'work-travel', 'monthly', '2026-09-01T00:00:00.000Z', '${NOW}', '${NOW}');
+      INSERT INTO items (id, ledger_id, name, purchase_price, currency, purchase_date, created_at, updated_at)
+        VALUES ('work-phone', 'work', 'Phone', 999, 'USD', '2026-01-01', '${NOW}', '${NOW}');
+      INSERT INTO albums (id, ledger_id, name, is_active, created_at, updated_at)
+        VALUES ('work-trip', 'work', 'Trip', 1, '${NOW}', '${NOW}');
+      INSERT INTO album_transactions (id, album_id, transaction_id, created_at, updated_at)
+        VALUES ('trip-taxi', 'work-trip', 'taxi', '${NOW}', '${NOW}');
+    `);
+    let n = 0;
+    const copied = copyLedgerRows(
+      harness.db,
+      'work',
+      'copy',
+      () => `c${++n}`,
+      NOW,
+      ledgerPartsCopySpecs({
+        parts: new Set([
+          'accounts',
+          'categories',
+          'goals',
+          'loans',
+          'recurring',
+          'items',
+          'albums',
+        ]),
+        currency: { from: 'USD', to: 'EUR' },
+        loanBalances: new Map([['work-loan', 7500]]),
+        nowIso: NOW,
+        today: '2026-10-28',
+      }),
+    );
+
+    // Travel, Cash, the goal, the loan, the rule, the phone and the album.
+    expect(copied).toBe(7);
+    expect(
+      harness.all(
+        `SELECT name, type, currency, starting_balance, loan_ledger_anchor_date, goal_achieved_at
+         FROM accounts WHERE ledger_id = 'copy' ORDER BY name`,
+      ),
+    ).toEqual([
+      {
+        name: 'Cash',
+        type: 'debit',
+        currency: 'EUR',
+        starting_balance: 0,
+        loan_ledger_anchor_date: null,
+        goal_achieved_at: null,
+      },
+      {
+        name: 'Laptop',
+        type: 'goal',
+        currency: 'USD',
+        starting_balance: 0,
+        loan_ledger_anchor_date: null,
+        goal_achieved_at: null,
+      },
+      {
+        name: 'Van',
+        type: 'loan',
+        currency: 'USD',
+        starting_balance: 7500,
+        loan_ledger_anchor_date: '2026-10-28',
+        goal_achieved_at: null,
+      },
+    ]);
+    expect(
+      harness.all(
+        `SELECT account_id, category_id, next_run_date FROM recurring_rules WHERE ledger_id = 'copy'`,
+      ),
+    ).toEqual([{ account_id: 'c2', category_id: 'c1', next_run_date: '2026-11-01T00:00:00.000Z' }]);
+    expect(harness.all(`SELECT name, is_active FROM albums WHERE ledger_id = 'copy'`)).toEqual([
+      { name: 'Trip', is_active: 0 },
+    ]);
+    // No history: entries and album joins stay behind.
+    expect(ledgersRepository.entryCounts()).toEqual({ default: 1, work: 2 });
+    expect(
+      harness.all(`SELECT COUNT(*) AS n FROM album_transactions WHERE album_id LIKE 'c%'`),
+    ).toEqual([{ n: 0 }]);
   });
 
   it('resets every ledger of the user but keeps the shared ones', () => {

@@ -284,6 +284,23 @@ function addMonthsToDayKey(dayKey: string, months: number): string {
 }
 
 /**
+ * The loan's last monthly rest on or before `today`: its anchor day moved on
+ * by whole months. A loan copied into another ledger is anchored here with
+ * today's balance, so its rests keep falling on the same day of the month and
+ * its next one charges what the source's would. An anchor after today is kept.
+ */
+export function lastLoanRestOnOrBefore(anchorDayKey: string, today: string): string {
+  if (anchorDayKey >= today) return anchorDayKey;
+  let rest = anchorDayKey;
+  for (let months = 1; months <= 1200; months += 1) {
+    const next = addMonthsToDayKey(anchorDayKey, months);
+    if (next > today) break;
+    rest = next;
+  }
+  return rest;
+}
+
+/**
  * Highest monthly rate the inverse solver will consider (100% a month). Any
  * total repayable that needs more than this is a typo, not a loan.
  */

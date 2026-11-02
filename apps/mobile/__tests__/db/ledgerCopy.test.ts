@@ -1,4 +1,12 @@
-import { LEDGER_COPY_TABLES, planLedgerCopy } from '~/lib/db/ledgerCopy';
+import { lastLoanRestOnOrBefore } from '~/features/loans/lib/loanMath';
+import {
+  copiedRuleNextRun,
+  LEDGER_COPY_TABLES,
+  type LedgerCopyPart,
+  ledgerPartsCopySpecs,
+  planLedgerCopy,
+  withCopyNeeds,
+} from '~/lib/db/ledgerCopy';
 
 type Row = Record<string, unknown>;
 
@@ -115,5 +123,206 @@ describe('planLedgerCopy', () => {
     expect(byTable.album_transactions).toHaveLength(1);
     expect(byTable.album_transactions[0].transaction_id).toBe(idOf('transactions', 't1'));
     expect(byTable.accounts[0].auto_log_identifiers_json).toBeNull();
+  });
+});
+
+const NOW = '2026-11-02T09:00:00.000Z';
+
+/** A source with one of every kind of row a parts copy can bring. */
+function partsSource(): Record<string, Row[]> {
+  const account = (id: string, type: string, extra: Row = {}) => ({
+    id,
+    ledger_id: 'src',
+    type,
+    currency: 'MYR',
+    starting_balance: 500,
+    created_at: 'old',
+    ...extra,
+  });
+  return {
+    account_groups: [{ id: 'g1', ledger_id: 'src', name: 'Banks' }],
+    categories: [{ id: 'food', ledger_id: 'src', parent_id: null }],
+    accounts: [
+      account('cash', 'debit', { auto_log_identifiers_json: '["1234"]' }),
+      account('usd-card', 'credit', { currency: 'USD' }),
+      account('trip', 'goal', { goal_achieved_at: 'then' }),
+      account('old-goal', 'goal', { goal_archived_at: 'then' }),
+      account('car', 'loan', {
+        loan_paid_off_at: 'then',
+        loan_payment_category_id: 'food',
+        // Rests on the 15th: the copy keeps them there.
+        loan_ledger_anchor_date: '2026-06-15',
+      }),
+      account('settled', 'loan'),
+    ],
+    recurring_rules: [
+      {
+        id: 'rent',
+        ledger_id: 'src',
+        account_id: 'cash',
+        category_id: 'food',
+        recurrence_pattern: 'monthly',
+        recurrence_interval: 1,
+        // Behind: the source has not been opened since October.
+        next_run_date: '2026-10-01T00:00:00.000Z',
+        end_date: null,
+      },
+      {
+        id: 'save',
+        ledger_id: 'src',
+        from_account_id: 'cash',
+        to_account_id: 'trip',
+        recurrence_pattern: 'weekly',
+        recurrence_interval: 1,
+        next_run_date: '2026-11-09T00:00:00.000Z',
+        end_date: null,
+      },
+      {
+        id: 'ended',
+        ledger_id: 'src',
+        account_id: 'cash',
+        recurrence_pattern: 'monthly',
+        recurrence_interval: 1,
+        next_run_date: '2026-10-01T00:00:00.000Z',
+        end_date: '2026-10-15',
+      },
+    ],
+    budget_templates: [{ id: 'bt1', ledger_id: 'src', is_default: 1 }],
+    budget_template_categories: [{ id: 'btc1', template_id: 'bt1', category_id: 'food' }],
+    items: [{ id: 'phone', ledger_id: 'src', purchase_price: 999 }],
+    albums: [{ id: 'japan', ledger_id: 'src', is_active: 1 }],
+  };
+}
+
+function planParts(parts: LedgerCopyPart[]) {
+  const rows = partsSource();
+  let n = 0;
+  const result = planLedgerCopy(
+    (spec) => rows[spec.table] ?? [],
+    'dst',
+    () => `new${++n}`,
+    NOW,
+    ledgerPartsCopySpecs({
+      parts: new Set(parts),
+      currency: { from: 'MYR', to: 'SGD' },
+      loanBalances: new Map([
+        ['car', 12000],
+        ['settled', 0],
+      ]),
+      nowIso: NOW,
+      today: '2026-11-02',
+    }),
+  );
+  return Object.fromEntries(result.map(({ table, rows: r }) => [table, r]));
+}
+
+describe('ledgerPartsCopySpecs', () => {
+  it('brings what a part needs, whoever asks for it', () => {
+    expect([...withCopyNeeds(['recurring', 'items'])].sort()).toEqual([
+      'accounts',
+      'categories',
+      'items',
+      'recurring',
+    ]);
+    // Asked for alone, a budget still gets its category lines.
+    expect(Object.keys(planParts(['budgets']))).toEqual([
+      'categories',
+      'budget_templates',
+      'budget_template_categories',
+    ]);
+  });
+
+  it('copies only the chosen parts', () => {
+    expect(Object.keys(planParts(['items']))).toEqual(['items']);
+    expect(Object.keys(planParts(['budgets', 'categories']))).toEqual([
+      'categories',
+      'budget_templates',
+      'budget_template_categories',
+    ]);
+  });
+
+  it('starts everyday accounts at zero, in the new currency when they were in the old one', () => {
+    const { accounts, account_groups } = planParts(['accounts']);
+    expect(account_groups).toHaveLength(1);
+    expect(accounts.map((row) => [row.type, row.currency, row.starting_balance])).toEqual([
+      ['debit', 'SGD', 0],
+      ['credit', 'USD', 0],
+    ]);
+    expect(accounts[0]).toMatchObject({
+      ledger_id: 'dst',
+      created_at: NOW,
+      auto_log_identifiers_json: null,
+    });
+  });
+
+  it('copies live goals at zero and loans at what they still owe, from their last rest', () => {
+    const { accounts } = planParts(['goals', 'loans']);
+    expect(accounts.map((row) => row.type)).toEqual(['goal', 'loan']);
+    const [goal, loan] = accounts;
+    expect(goal).toMatchObject({ starting_balance: 0, goal_achieved_at: null, currency: 'MYR' });
+    expect(loan).toMatchObject({
+      starting_balance: 12000,
+      loan_ledger_anchor_date: '2026-10-15',
+      loan_paid_off_at: null,
+      // Its category stayed behind.
+      loan_payment_category_id: null,
+    });
+  });
+
+  it('brings a rule only with every account it names, from its next date after now', () => {
+    const withoutGoals = planParts(['recurring', 'accounts', 'categories']).recurring_rules;
+    expect(withoutGoals).toHaveLength(1);
+    expect(withoutGoals[0].next_run_date).toBe('2026-12-01T00:00:00.000Z');
+    const withGoals = planParts(['recurring', 'accounts', 'categories', 'goals']).recurring_rules;
+    expect(withGoals.map((rule) => rule.next_run_date)).toEqual([
+      '2026-12-01T00:00:00.000Z',
+      '2026-11-09T00:00:00.000Z',
+    ]);
+  });
+
+  it('copies budget templates with their lines, and albums empty and inactive', () => {
+    const copy = planParts(['budgets', 'categories', 'albums']);
+    expect(copy.budget_templates[0]).toMatchObject({ is_default: 1, ledger_id: 'dst' });
+    expect(copy.budget_template_categories[0]).toMatchObject({
+      template_id: copy.budget_templates[0].id,
+      category_id: copy.categories[0].id,
+    });
+    expect(copy.albums[0]).toMatchObject({ is_active: 0, ledger_id: 'dst' });
+    expect(copy).not.toHaveProperty('album_transactions');
+  });
+});
+
+describe('copiedRuleNextRun', () => {
+  const rule = {
+    nextRunDate: '2026-10-31T00:00:00.000Z',
+    recurrencePattern: 'monthly' as const,
+    recurrenceInterval: 1,
+    endDate: null,
+  };
+
+  it('keeps a future run date, and moves a past one to the first after now', () => {
+    expect(copiedRuleNextRun({ ...rule, nextRunDate: '2026-12-25T00:00:00.000Z' }, NOW)).toBe(
+      '2026-12-25T00:00:00.000Z',
+    );
+    expect(copiedRuleNextRun(rule, NOW)).toBe('2026-11-30T00:00:00.000Z');
+  });
+
+  it('has nothing to run for a past one-off or a rule past its end', () => {
+    expect(copiedRuleNextRun({ ...rule, recurrencePattern: 'none' }, NOW)).toBeNull();
+    expect(copiedRuleNextRun({ ...rule, endDate: '2026-11-15' }, NOW)).toBeNull();
+  });
+});
+
+describe('lastLoanRestOnOrBefore', () => {
+  it('moves the anchor on by whole months, up to today', () => {
+    expect(lastLoanRestOnOrBefore('2026-06-15', '2026-11-02')).toBe('2026-10-15');
+    expect(lastLoanRestOnOrBefore('2026-06-15', '2026-11-15')).toBe('2026-11-15');
+    // A 31st rests on the last day of a shorter month.
+    expect(lastLoanRestOnOrBefore('2026-01-31', '2026-03-01')).toBe('2026-02-28');
+  });
+
+  it('keeps an anchor that is today or later', () => {
+    expect(lastLoanRestOnOrBefore('2026-11-02', '2026-11-02')).toBe('2026-11-02');
+    expect(lastLoanRestOnOrBefore('2026-12-01', '2026-11-02')).toBe('2026-12-01');
   });
 });

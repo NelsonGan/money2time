@@ -304,7 +304,7 @@ SQLite via `expo-sqlite` + Drizzle ORM. Schema is in `lib/db/schema.ts`. The DB 
 | `monthlyBudgetsTable`           | id, month (YYYY-MM), templateId, templateName, templateEmoji, totalAmount, countUnbudgeted (frozen at creation; one live row per month via partial unique index, soft-deleted rows are tombstones)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | `monthlyBudgetCategoriesTable`  | id, budgetId, categoryId, amount, sortOrder (frozen budget line for a month)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `autoLogCapturesTable`          | id, channel (android_notification/ios_alert/paste/share_text/apple_pay), sourceKey, sourceLabel, capturedAt, nativeKey, title, body (raw text, nulled by the retention sweep), status (pending/logged/dismissed/ignored/duplicate/failed), reason, resolutionJson (what the pipeline read and bound), parserVersion, transactionId, duplicateOf, dedupeKey (internal payment-alert duplicate bookkeeping; `auto_log_captures`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `ledgersTable`                  | id, name, emoji, currencyCode, currencySymbol, prefsJson (the ledger's own settings), sortOrder (separate books; the `default` row holds pre-ledger data, see [Ledgers](#ledgers))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `ledgersTable`                  | id, name, emoji, currencyCode, currencySymbol, prefsJson (the ledger's own settings, month cycle included), sortOrder (separate books; the `default` row holds pre-ledger data, see [Ledgers](#ledgers))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 
 Data access goes through repositories in `lib/repositories/`: `accountsRepository`, `accountGroupsRepository`, `categoriesRepository`, `transactionsRepository`, `transactionSplitsRepository`, `receiptSplitsRepository`, `recurringRulesRepository`, `settingsRepository`, `monthlyWageRepository`, `albumsRepository`, `exchangeRatesRepository`, `budgetTemplatesRepository`, `monthlyBudgetsRepository`, `itemsRepository`, `paymentAlertCapturesRepository`, `ledgersRepository`, plus `mappers.ts` for DB row → domain type transformations.
 
@@ -434,7 +434,7 @@ Traditional Chinese is `zh-Hant`. Device tags for Taiwan, Hong Kong, and Macau s
 - **Backup provider marks**: Backup destinations and saved-backup rows use bundled iCloud and Google Drive brand images through `constants/brandLogos.ts`, with original colors in both themes. The Drive mark comes from [Google's branding download](https://developers.google.com/workspace/drive/api/guides/branding); iCloud reuses the existing subscription artwork. The copies in `assets/brands/` are included in OTA updates.
 - **Retired simple mode**: All users have accounts, transfers, and the full app. Migration `063_retire_simple_mode` converts legacy settings to power while preserving every financial row and the former wallet's ID. It keeps that wallet as the Quick Entry default. `retireSimpleMode` also runs inside backup-restore transactions because old JSON backups can restore settings after migration 063 already ran. The `user_mode` SQLite column remains for backup compatibility; it is absent from the domain model and cannot be selected in the UI.
 - **Date keys**: Use `dayKeyFromDateLocal()`, `monthKeyFromDateLocal()`, `monthKeyFromDateIso()` etc. from `~/utils/formatters` — do not roll custom date logic.
-- **Financial month (the month cycle)**: a "month" can start on a day other than the 1st (payday cycles), and **not necessarily the same day every month**. The shape is a `MonthCycle` (`types/index.ts`): a `defaultDay` (1..31) every month follows, plus `overrides` keyed `YYYY-MM` for the months the user pinned somewhere else. It is stored as two columns, `settings.first_day_of_month` (the default) and `settings.first_day_overrides_json` (migration `060`), and read as one object with **`monthCycleOf(settings)`** — never off the raw columns.
+- **Financial month (the month cycle)**: a "month" can start on a day other than the 1st (payday cycles), and **not necessarily the same day every month**. The shape is a `MonthCycle` (`types/index.ts`): a `defaultDay` (1..31) every month follows, plus `overrides` keyed `YYYY-MM` for the months the user pinned somewhere else. It is stored as two columns, `settings.first_day_of_month` (the default) and `settings.first_day_overrides_json` (migration `060`), for the default ledger; every other ledger keeps its own in `ledgers.prefs_json` (see [Ledgers](#ledgers)). `settingsRepository` hands out the open ledger's, and it is read as one object with **`monthCycleOf(settings)`** — never off the raw columns.
 
   For any **user-facing monthly** grouping/range/anchor, use the helpers in `~/utils/financialMonth` (`financialMonthKeyForIso`, `financialMonthRange`, `financialMonthAnchorForToday`, `addFinancialMonths`, `financialMonthDayKeys`, `financialMonthOffsetForDayKey`) passing that cycle — never re-derive month boundaries inline. Every helper also takes a bare `number` (that is the "same day every month" cycle, and what their defaults and the tests use), and reduces **exactly** to the calendar-month `~/utils/formatters` behaviour at a plain `1`, so default users are unaffected. Because a number is assignable to `MonthCycleInput`, the compiler will **not** catch a call site still passing `settings.firstDayOfMonth` — it silently ignores the per-month exceptions, so grep for that field rather than trusting `tsc`. The two places that legitimately still read the scalar are the monthly-review notification trigger and its copy: an OS monthly trigger repeats on a fixed day and cannot follow an overridden month.
 
@@ -526,30 +526,66 @@ app side lives in `features/ledgers/`.
 - **New ledger** (Pro, `LedgerEditorScreen`): icon, name, main currency, and
   what it starts with. One card names the ledger it copies from ("Copy from",
   the open ledger at first; a tap opens `LedgerPickerSheet` to pick any
-  ledger on the phone) and has a switch each for Everything (off by default),
-  accounts and categories (on by default). Each row's subtitle says what the
-  choice gives: the copied count, or the starter set when off. The counts are
-  read from the chosen ledger (`readLedgerCopySource`).
+  ledger on the phone) and has a switch for Everything (off by default), then
+  one for each part of a ledger that can be copied on its own: accounts and
+  categories (on by default), goals, loans, recurring, budgets, items and
+  albums (off), and the month cycle (on). Each row's subtitle says what the
+  choice gives: the copied count, the starter set (accounts and categories),
+  or "Starts with none". A part the chosen ledger has none of is greyed out.
+  The counts are read from the chosen ledger (`readLedgerCopySource`).
   - **Everything:** a full copy of the chosen ledger, history included
     (`lib/db/ledgerCopy.ts`): accounts with their balances, goals and loans,
     categories, transactions with their splits and itemized receipts,
-    recurring rules, albums, items and budgets. Every row gets a new id and
-    every reference between them follows the copy, so the two ledgers share
-    nothing; a reference to a row outside the source becomes null, and a
-    row that cannot exist without it (an album's join to a deleted entry) is
-    left out. Deleted rows are not copied, except deleted budget periods,
-    which stop auto-create bringing a period back. Payment-alert captures, the
-    card digits they match on and the ledger's own preferences are not copied
-    either. Image paths are shared (the asset sweep keeps a file while any
-    row names it). The button shows its loader while the copy runs. While it is on, the accounts and categories rows are greyed
-    out (they are part of it), and the currency is the source's, since the
+    recurring rules, albums, items, budgets and the month cycle. Every row
+    gets a new id and every reference between them follows the copy, so the
+    two ledgers share nothing; a reference to a row outside the source
+    becomes null, and a row that cannot exist without it (an album's join to
+    a deleted entry) is left out. Deleted rows are not copied, except deleted
+    budget periods, which stop auto-create bringing a period back.
+    Payment-alert captures, the card digits they match on and the ledger's
+    other preferences are not copied either. Image paths are shared (the
+    asset sweep keeps a file while any row names it). The button shows its
+    loader while the copy runs. While it is on, every other row is greyed out
+    (they are part of it), and the currency is the source's, since the
     entries keep their amounts.
-  - **Accounts:** copy the chosen ledger's debit and credit accounts and their
-    groups at a zero balance, or use the starter accounts. Copied accounts in
-    its main currency take the new ledger's currency. Goals and loans are not
-    copied.
-  - **Categories:** copy the chosen ledger's categories and subcategories, or
-    use the starter set.
+  - **The parts** copy without history (`ledgerPartsCopySpecs`, through the
+    same planner, so references follow the copy): no entries, and every row
+    is created now. What each switch shows and what is copied both come from
+    the pure rules in `features/ledgers/lib/ledgerCopyChoice.ts`, so a switch
+    never says one thing while another is copied; a chosen part the source
+    has none of is not copied. The parts a part needs (`LEDGER_COPY_NEEDS`)
+    are added by the copy itself (`withCopyNeeds`), whoever asks for it. A
+    new part is a `LEDGER_COPY_PARTS` entry, its specs, its count, a
+    `PART_ROWS` row and its strings; `Ledger Created` picks up its flag.
+    - Accounts: the debit and credit accounts and their groups, at a zero
+      balance. Copied accounts in the source's main currency take the new
+      ledger's currency. Off, or none in the source: the starter accounts.
+    - Categories: the categories and subcategories. Off, or none in the
+      source: the starter set.
+    - Goals: live goals at zero saved, not yet achieved. Archived goals stay
+      behind.
+    - Loans: live loans at what they still owe today (the balance, interest
+      included, becomes the starting balance), since a loan at zero reads as
+      paid off. The anchor day is the source's last monthly rest on or before
+      today (`lastLoanRestOnOrBefore`), so interest keeps its day of the month
+      and the next rest charges what the source's would. Archived and settled
+      loans stay behind.
+    - Recurring: the rules whose accounts and categories all come along, so
+      turning it on turns on accounts and categories (and turning either off
+      turns it off). A rule naming a goal or loan comes only with that part.
+      Each starts from its next run date after now, so the new ledger does
+      not replay runs the source already made; a past one-off or a rule past
+      its end stays behind. Rules keep their amount and currency: in a new
+      ledger with another currency, a rule in the source's currency posts to
+      a renamed account through the exchange rate, like any foreign-currency
+      rule.
+    - Budgets: the budget templates with their category lines, so it turns on
+      categories. No budget periods: auto-create makes the running ones from
+      the default templates when the ledger opens.
+    - Items: every item, as it is.
+    - Albums: the albums without their entries, not set to collect new ones.
+    - Month cycle: the source's start day and customized months. Off: every
+      month starts on day 1.
   - Only Everything copies entries, and creating a ledger opens it. That note
     sits behind the Start with info button.
 - **Manage ledgers** (`LedgersScreen`) is open to every user, so a free user
@@ -595,7 +631,9 @@ app side lives in `features/ledgers/`.
     itemized receipts;
   - recurring rules, albums, items, budgets;
   - payment-alert captures;
-  - main currency and default payback account;
+  - main currency, default payback account and month cycle (first day of
+    month and customized months; the Month cycle page says so when there is
+    more than one ledger);
   - the quick-entry picks that name its accounts and categories
     (`LEDGER_QUICK_ENTRY_KEYS`);
   - the account each payment-alert source logs into;
@@ -664,8 +702,19 @@ its own sync engine and replica.
 - **Ledger settings.** The settings row keeps the default ledger's own
   settings. A non-default ledger keeps its own on its `ledgers` row:
   `currency_code` and `currency_symbol`, plus the `LedgerPrefs` JSON in
-  `prefs_json` (payback account, quick-entry picks, payment-alert accounts and
-  Insights).
+  `prefs_json` (payback account, month cycle, quick-entry picks,
+  payment-alert accounts and Insights).
+  - The month cycle was app-wide until migration `076_ledger_month_cycles`,
+    which gave every existing ledger the settings row's cycle. A ledger
+    without one of its own (from an older backup, or joined from someone
+    else, whose preferences stay on their phone) reads the settings row's.
+    Two triggers from that migration give it that cycle before the settings
+    row's cycle changes or the row is deleted, whoever writes it (the app, a
+    Cloud Sync pull, Erase all data, a restore), so it never follows the
+    default ledger's. A ledger saves its start day and customized months
+    together, since it reads its own only once it has a start day.
+  - The hourly value's monthly wage is picked by the open ledger's month
+    cycle, like everything else that reads a financial month.
   - `settingsRepository` merges the two, through the pure helpers in
     `lib/repositories/ledgerPrefs.ts`, so the rest of the app reads `settings`,
     `quickEntryPrefs` and the payment-alert prefs as before.
@@ -1866,7 +1915,7 @@ Bank and wallet notifications (Android listener) and the Log Notification Shortc
 | `BUDGET_MONTH_UPDATED`    | `Budget Month Updated`    | `m2t_budget_month_updated`    | No      | A week's, month's or year's budget is updated; each successful update.                                                                                                     | `categories`, `period`                                                                                                                                                                                                                                                                                   | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
 | `BUDGET_MONTH_DELETED`    | `Budget Month Deleted`    | `m2t_budget_month_deleted`    | No      | A week's, month's or year's budget is deleted; each successful deletion.                                                                                                   | `period`                                                                                                                                                                                                                                                                                                 | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
 | `ITEM_CREATED`            | `Item Created`            | `m2t_item_created`            | No      | An owned item is created; each successful creation.                                                                                                                        | None                                                                                                                                                                                                                                                                                                     | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
-| `LEDGER_CREATED`          | `Ledger Created`          | `m2t_ledger_created`          | No      | A Pro user creates a ledger (which opens it); each successful creation.                                                                                                    | `copied_accounts`, `copied_categories`, `copied_everything`, `copied_from_open`, `ledger_count`                                                                                                                                                                                                          | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
+| `LEDGER_CREATED`          | `Ledger Created`          | `m2t_ledger_created`          | No      | A Pro user creates a ledger (which opens it); each successful creation.                                                                                                    | `copied_accounts`, `copied_categories`, `copied_goals`, `copied_loans`, `copied_recurring`, `copied_budgets`, `copied_items`, `copied_albums`, `copied_month_cycle`, `copied_everything`, `copied_from_open`, `ledger_count` (every `copied_*` is true with `copied_everything`)                         | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
 | `LEDGER_SWITCHED`         | `Ledger Switched`         | `m2t_ledger_switched`         | No      | Another ledger is opened: from the switcher, after creating one, or by the move back to the default ledger when Pro ends; each switch.                                     | `to_default`                                                                                                                                                                                                                                                                                             | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
 | `LEDGER_DELETED`          | `Ledger Deleted`          | `m2t_ledger_deleted`          | No      | A ledger is deleted from Manage ledgers (the open one after the default ledger opens); each successful deletion.                                                           | None                                                                                                                                                                                                                                                                                                     | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |
 | `RECURRING_RULE_CREATED`  | `Recurring Rule Created`  | `m2t_recurring_rule_created`  | No      | A recurring rule is created; each successful creation.                                                                                                                     | `type`, `pattern` (the frequency inferred from the saved schedule: `daily`, `weekly`, `monthly`, `quarterly`, `semiannually` or `yearly`; a monthly rule every 3 or 6 months reports `quarterly` or `semiannually`, so Quarterly every 2 reports `semiannually` and Quarterly every 3 reports `monthly`) | [context/AppContext.tsx](apps/mobile/context/AppContext.tsx)                                             |

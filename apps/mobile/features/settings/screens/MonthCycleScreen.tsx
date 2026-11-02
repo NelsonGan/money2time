@@ -14,6 +14,7 @@ import {
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
+import { ledgerDisplayName } from '~/features/ledgers/lib/ledgerDisplay';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -58,7 +59,7 @@ interface MonthCycleScreenProps {
  * is being decided, in the picker.
  */
 export function MonthCycleScreen({ onBack }: MonthCycleScreenProps) {
-  const { settings, updateSettings } = useApp();
+  const { settings, updateSettings, ledgers, activeLedger } = useApp();
   const bottomNavInset = useSettingsBottomNavInset();
   const themeColors = useThemeColors();
   const isDark = useResolvedTheme() === 'dark';
@@ -182,6 +183,16 @@ export function MonthCycleScreen({ onBack }: MonthCycleScreenProps) {
           bottomNavInset,
         ]}
       >
+        {ledgers.length > 1 ? (
+          <Text
+            variant="caption"
+            tone="muted"
+            className="mb-4 px-1"
+            testID="month-cycle-ledger-note"
+          >
+            {I18n.t('settings.month_cycle.ledger_note', { name: ledgerDisplayName(activeLedger) })}
+          </Text>
+        ) : null}
         <View className="flex-row items-center gap-1.5 px-1">
           <Text variant="label" tone="muted">
             {I18n.t('settings.month_cycle.default_title')}

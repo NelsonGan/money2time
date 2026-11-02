@@ -99,9 +99,10 @@ function schemaOf(harness: Harness) {
   };
 }
 
+/** A new install's schema as of 075, the migration these tests are about. */
 function freshSchema() {
   const fresh = openDatabase();
-  applyMigrations(fresh.db, loadMigrations());
+  applyMigrations(fresh.db, loadMigrations(75));
   const schema = schemaOf(fresh);
   fresh.connection.close();
   return schema;
@@ -141,7 +142,7 @@ describe('migration 075 (ledgers and Cloud Sync)', () => {
 
   it('upgrades a phone from before ledgers and Cloud Sync', () => {
     harness = phoneAt71();
-    expect(applyMigrations(harness.db, loadMigrations()).appliedVersions).toEqual([75]);
+    expect(applyMigrations(harness.db, loadMigrations(75)).appliedVersions).toEqual([75]);
     expect(schemaOf(harness)).toEqual(freshSchema());
   });
 
@@ -154,7 +155,7 @@ describe('migration 075 (ledgers and Cloud Sync)', () => {
       'no such table: sync_row_meta',
     );
 
-    expect(applyMigrations(harness.db, loadMigrations()).appliedVersions).toEqual([75]);
+    expect(applyMigrations(harness.db, loadMigrations(75)).appliedVersions).toEqual([75]);
     expect(schemaOf(harness)).toEqual(freshSchema());
   });
 
@@ -170,7 +171,7 @@ describe('migration 075 (ledgers and Cloud Sync)', () => {
       INSERT INTO sync_media_pending (path, channel) VALUES ('receipts/a.jpg', 'share-1');
     `);
 
-    expect(applyMigrations(harness.db, loadMigrations()).appliedVersions).toEqual([75]);
+    expect(applyMigrations(harness.db, loadMigrations(75)).appliedVersions).toEqual([75]);
     expect(schemaOf(harness)).toEqual(freshSchema());
     expect(harness.all('SELECT row_id, channel FROM sync_row_meta')).toEqual([
       { row_id: 't1', channel: 'share-1' },
@@ -189,7 +190,7 @@ describe('migration 075 (ledgers and Cloud Sync)', () => {
       INSERT INTO sync_media_missing (path, attempts) VALUES ('receipts/b.jpg', 2);
     `);
 
-    expect(applyMigrations(harness.db, loadMigrations()).appliedVersions).toEqual([75]);
+    expect(applyMigrations(harness.db, loadMigrations(75)).appliedVersions).toEqual([75]);
     expect(schemaOf(harness)).toEqual(freshSchema());
     expect(harness.all('SELECT row_id, channel FROM sync_row_meta')).toEqual([
       { row_id: 't1', channel: 'personal' },

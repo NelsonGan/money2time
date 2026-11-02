@@ -1412,10 +1412,19 @@ export const LEDGER_QUICK_ENTRY_KEYS = [
 
 /**
  * `ledgers.prefs_json`: a non-default ledger's own copy of the settings that
- * point at its data. The default ledger keeps these in the settings row.
+ * point at its data or shape its months. The default ledger keeps these in the
+ * settings row.
  */
 export interface LedgerPrefs {
   defaultPaybackAccountId?: string | null;
+  /**
+   * The ledger's month cycle (`settings.first_day_of_month` and
+   * `first_day_overrides_json` for the default ledger). Absent on a ledger
+   * from before cycles were per ledger: it reads the settings row's, and is
+   * given that value before the settings row's changes (migration 076).
+   */
+  firstDayOfMonth?: number;
+  firstDayOverridesJson?: string | null;
   quickEntry?: Partial<Pick<QuickEntryPrefs, (typeof LEDGER_QUICK_ENTRY_KEYS)[number]>>;
   /** The account each payment-alert source logs into, keyed like `PaymentAlertPrefs.sources`. */
   paymentAlertAccounts?: Record<string, string | null>;
