@@ -4,6 +4,9 @@ import { DatabaseSync } from 'node:sqlite';
 
 import type { SQLiteDatabase } from 'expo-sqlite';
 
+import { decodeRow, encodeRow } from '~/features/cloudSync/lib/rowCodec';
+import { ASSET_COLUMNS, SYNC_TABLES } from '~/features/cloudSync/lib/syncTables';
+import { channelOfRow } from '~/features/cloudSync/services/ledgerChannels';
 import { setCachedSessionUser } from '~/features/cloudSync/services/sessionUser';
 import {
   removeSharedLedger,
@@ -23,6 +26,8 @@ import {
 import { getSQLite } from '~/lib/db/client';
 import { copyLedgerRows } from '~/lib/db/ledgerCopy';
 import migration079 from '~/lib/db/migrations/079_transaction_members';
+import { ledgersRepository } from '~/lib/repositories/ledgersRepository';
+import { transactionsRepository } from '~/lib/repositories/transactionsRepository';
 import { applyMigrations } from '~/lib/db/migrations/runner';
 import type { DbMigration } from '~/lib/db/migrations/types';
 
@@ -212,6 +217,7 @@ describe('ledger profiles', () => {
     harness.connection.exec(`
       INSERT INTO settings (id, app_user_id, profile_name, profile_avatar_uri, created_at, updated_at)
         VALUES ('primary', 'install-1', 'Mei Tan', 'avatars/mei.jpg', '${NOW}', '${NOW}');
+      INSERT INTO ledgers (id, name, created_at, updated_at) VALUES ('home', 'Home', '${NOW}', '${NOW}');
     `);
     setCachedSessionUser(null);
     saveSharedLedger(HOME);
@@ -243,6 +249,12 @@ describe('ledger profiles', () => {
     expect(harness.all('SELECT name, updated_at FROM ledger_profiles')).toEqual([
       { name: 'Mei', updated_at: '2026-11-03T00:00:00.000Z' },
     ]);
+  });
+
+  it('writes nothing into a ledger deleted here before the list caught up', () => {
+    harness.connection.exec(`UPDATE ledgers SET deleted_at = '${NOW}' WHERE id = 'home'`);
+    expect(writeOwnLedgerProfiles([HOME], null, NOW)).toBe(0);
+    expect(harness.all('SELECT id FROM ledger_profiles')).toEqual([]);
   });
 
   it('uses the sign-in name when Settings has none', () => {
@@ -334,5 +346,104 @@ describe('shortName', () => {
   it('takes the first name for the row', () => {
     expect(shortName('Mei Tan')).toBe('Mei');
     expect(shortName('  Nelson ')).toBe('Nelson');
+  });
+});
+
+describe('syncing who added an entry', () => {
+  const OLD_PHONE_COLUMNS = new Set(['id', 'ledger_id', 'amount', 'note', 'updated_at']);
+
+  it('keeps both fields when a phone on an older app edits the entry', () => {
+    const fromNewPhone = encodeRow(
+      'transactions',
+      {
+        id: 't1',
+        ledger_id: 'home',
+        amount: 10,
+        note: 'Lunch',
+        created_by: 'user-mei',
+        member_id: 'user-ana',
+      },
+      null,
+      true,
+    );
+    // The older phone reads only the columns it has…
+    const onOldPhone = decodeRow('transactions', fromNewPhone, OLD_PHONE_COLUMNS, true);
+    expect(onOldPhone).not.toHaveProperty('member_id');
+    // …and its edit merges over the stored copy instead of erasing them.
+    const edited = JSON.parse(
+      encodeRow('transactions', { ...onOldPhone!, amount: 12 }, fromNewPhone, true),
+    );
+    expect(edited).toMatchObject({ amount: 12, created_by: 'user-mei', member_id: 'user-ana' });
+  });
+
+  it('syncs the people with their ledger, photo included', () => {
+    expect(SYNC_TABLES).toContain('ledger_profiles');
+    expect(ASSET_COLUMNS.ledger_profiles).toEqual(['avatar_uri']);
+  });
+
+  describe('routing', () => {
+    let harness: ReturnType<typeof openDatabase>;
+    beforeEach(() => {
+      harness = openDatabase();
+      applyMigrations(harness.db, loadMigrations());
+      jest.mocked(getSQLite).mockReturnValue(harness.db);
+      saveSharedLedger(HOME);
+    });
+    afterEach(() => {
+      removeSharedLedger('home');
+      harness.connection.close();
+    });
+
+    it('sends a profile to its shared ledger’s database, and others to the user’s own', () => {
+      expect(channelOfRow('ledger_profiles', { id: 'home:user-mei', ledger_id: 'home' })).toBe(
+        'share-home',
+      );
+      expect(channelOfRow('ledger_profiles', { id: 'x:user-mei', ledger_id: 'default' })).toBe(
+        'personal',
+      );
+    });
+
+    it('retires the people with a deleted ledger', () => {
+      harness.connection.exec(`
+        INSERT INTO ledgers (id, name, created_at, updated_at) VALUES ('home', 'Home', '${NOW}', '${NOW}');
+        INSERT INTO ledger_profiles (id, ledger_id, user_id, role, name, created_at, updated_at)
+          VALUES ('home:user-mei', 'home', 'user-mei', 'member', 'Mei', '${NOW}', '${NOW}');
+      `);
+      ledgersRepository.softDelete('home');
+      expect(harness.all('SELECT deleted_at IS NOT NULL AS gone FROM ledger_profiles')).toEqual([
+        { gone: 1 },
+      ]);
+    });
+  });
+});
+
+describe('giving an entry to someone else', () => {
+  it('moves its refund and split paybacks with it, and nothing else', () => {
+    const harness = openDatabase();
+    applyMigrations(harness.db, loadMigrations());
+    jest.mocked(getSQLite).mockReturnValue(harness.db);
+    const insert = (id: string, extra = '') =>
+      harness.connection.exec(`
+        INSERT INTO transactions (id, ledger_id, type, amount, currency, date, created_by, member_id,
+          reimbursement_transaction_id, created_at, updated_at)
+          VALUES ('${id}', 'home', 'expense', 10, 'MYR', '2026-11-01', 'user-mei', 'user-mei',
+          ${extra || 'NULL'}, '${NOW}', '${NOW}');`);
+    insert('dinner', "'refund'");
+    insert('refund');
+    insert('payback');
+    insert('other');
+    harness.connection.exec(`
+      INSERT INTO transaction_splits (id, transaction_id, person_name, amount, paid_transaction_id, created_at, updated_at)
+        VALUES ('s1', 'dinner', 'Sam', 5, 'payback', '${NOW}', '${NOW}');
+      UPDATE transactions SET member_id = 'user-ana' WHERE id = 'dinner';
+    `);
+    transactionsRepository.reassignLinked('dinner', 'user-ana');
+    expect(harness.all('SELECT id, created_by, member_id FROM transactions ORDER BY id')).toEqual([
+      { id: 'dinner', created_by: 'user-mei', member_id: 'user-ana' },
+      { id: 'other', created_by: 'user-mei', member_id: 'user-mei' },
+      { id: 'payback', created_by: 'user-mei', member_id: 'user-ana' },
+      { id: 'refund', created_by: 'user-mei', member_id: 'user-ana' },
+    ]);
+    harness.connection.close();
   });
 });

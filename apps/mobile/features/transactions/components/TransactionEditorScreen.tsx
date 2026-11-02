@@ -822,21 +822,27 @@ export function TransactionEditorScreen({
   // Swaps the numpad for the options panel, the same slot the receipt
   // viewfinder takes so the amount and note stay visible above it.
   const [optionsOpen, setOptionsOpen] = useState(false);
+  // The options panel scrolls when its rows outgrow the keypad's slot. The
+  // details box's measured position (the keyboard lift) assumes it is at the
+  // top, so editing details puts it back there.
+  const optionsScrollRef = useRef<ScrollViewInstance>(null);
   // Shared ledgers: whose entry this is (README: Shared ledgers > Who added
   // it). A new entry starts as the person adding it; Belongs to in the options
   // panel gives it to someone else in the ledger.
   const ledgerPeople = useOpenLedgerPeople();
   // An entry that has a person keeps it; one that does not yet (a new entry,
-  // or a payment alert reviewed in the edit layout) starts as this phone's.
-  const [defaultMemberId] = useState<string | null>(() =>
+  // or a payment alert reviewed in the edit layout) is this phone's, worked
+  // out on every render and again at the insert, so a session that loads after
+  // the editor opened still counts. Only a pick is sent with the save.
+  const [pickedMemberId, setPickedMemberId] = useState<string | null | undefined>(undefined);
+  const defaultMemberId =
     initialValues?.memberId !== undefined
       ? initialValues.memberId
-      : selfMemberIdFor(getActiveLedgerId()),
-  );
-  const [memberId, setMemberId] = useState<string | null>(defaultMemberId);
+      : selfMemberIdFor(getActiveLedgerId());
+  const memberId = pickedMemberId !== undefined ? pickedMemberId : defaultMemberId;
   const handleSelectMember = useCallback((next: string | null) => {
     void triggerHaptic('selection');
-    setMemberId(next);
+    setPickedMemberId(next);
   }, []);
   // The receipt that was persisted when the editor opened. Used so editing the
   // attachment cleans up orphaned files (the prior one on disk) without deleting
@@ -1460,6 +1466,9 @@ export function TransactionEditorScreen({
   useEffect(() => {
     if (!optionsOpen) setDetailsEditing(false);
   }, [optionsOpen]);
+  useEffect(() => {
+    if (detailsEditing) optionsScrollRef.current?.scrollTo({ y: 0, animated: false });
+  }, [detailsEditing]);
   // Focus once the expanded field has mounted. `autoFocus` on an input that
   // mounts conditionally does not always raise the Android keyboard.
   useEffect(() => {
@@ -2274,10 +2283,10 @@ export function TransactionEditorScreen({
         preparedSubmitPayload = submitPayload;
       }
 
-      // In a shared ledger the entry carries whose it is. Left out elsewhere,
-      // so an edit never touches it.
-      if (ledgerPeople && submitPayload) {
-        submitPayload = { ...submitPayload, memberId };
+      // Whose entry it is goes with the save only when someone was picked;
+      // otherwise a new entry is stamped at the insert and an edit leaves it.
+      if (ledgerPeople && submitPayload && pickedMemberId !== undefined) {
+        submitPayload = { ...submitPayload, memberId: pickedMemberId };
         preparedSubmitPayload = submitPayload;
       }
 
@@ -2415,7 +2424,7 @@ export function TransactionEditorScreen({
       perfInteraction(
         mode === 'edit' ? 'editor_update' : bulk ? 'editor_bulk_save' : 'editor_save',
       );
-      if (ledgerPeople && memberId !== defaultMemberId) {
+      if (ledgerPeople && pickedMemberId !== undefined && pickedMemberId !== defaultMemberId) {
         void trackEvent(AnalyticsEvents.SHARED_LEDGER_ENTRY_ASSIGNED, { mode });
       }
       // Mark the current receipt as committed so the unmount cleanup keeps it.
@@ -4736,6 +4745,7 @@ export function TransactionEditorScreen({
                        (a transfer with its category in a shared ledger, a
                        small phone). */
                     <ScrollView
+                      ref={optionsScrollRef}
                       className="flex-1"
                       style={{ marginTop: -OPTIONS_PANEL_PULL_UP }}
                       contentContainerClassName="px-5 pb-2"
@@ -4839,6 +4849,12 @@ export function TransactionEditorScreen({
                           </Pressable>
                         )}
                       </View>
+                      {!detailsEditing &&
+                      (ledgerPeople || type === 'expense' || type === 'transfer') ? (
+                        <View className="my-3 h-[1px] bg-border/30" />
+                      ) : null}
+                      {/* Shared ledgers: whose entry this is, one plain row
+                          above the ticks; the people are in its sheet. */}
                       {!detailsEditing && ledgerPeople ? (
                         <BelongsToPicker
                           people={ledgerPeople}
@@ -4846,9 +4862,6 @@ export function TransactionEditorScreen({
                           createdBy={initialValues?.createdBy}
                           onSelect={handleSelectMember}
                         />
-                      ) : null}
-                      {!detailsEditing && (type === 'expense' || type === 'transfer') ? (
-                        <View className="my-3 h-[1px] bg-border/30" />
                       ) : null}
                       {!detailsEditing && type === 'expense' ? (
                         <View

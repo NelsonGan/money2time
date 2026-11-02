@@ -1630,13 +1630,23 @@ for that chart; the chart itself is not built yet.
   their first name after the category ("Groceries · Mei"). Rows in a ledger
   that is not shared look as before.
 - **Belongs to.** The transaction editor's options panel (the More button) has
-  a Belongs to row in a shared ledger, adding or editing: one pill per person,
-  the owner first, then the members who have synced a profile. Picking one
-  saves `member_id`; when it differs from who added it, "Added by …" shows
-  beside the Belongs to heading. A new entry (and a payment alert reviewed in
-  the editor) starts as the person adding it; an existing one keeps its own. Anyone in the ledger can change it, as they can edit any
-  entry. Saving an entry as someone else's than the default tracks
-  `Shared Ledger Entry Assigned`.
+  a Belongs to row in a shared ledger, adding or editing: one plain row with
+  the person's photo and name, like the panel's ticks. It opens a sheet of
+  everyone in the ledger, the owner first (then the members who have synced a
+  profile, and whoever the entry belongs to if they are not listed), with
+  "Added by …" under its title when that is someone else. Only a pick is
+  saved: a new entry (and a payment alert reviewed in the editor) is
+  otherwise stamped at the insert, and an edit leaves `member_id` alone.
+  Giving an entry to someone else moves its reimbursement refund and split
+  payback transfers with it (`reassignLinked`). The pick also carries into an
+  instalment plan and its payments. Anyone in the ledger can change it, as
+  they can edit any entry. Saving an entry as someone else's than the default
+  tracks `Shared Ledger Entry Assigned`.
+- **When sharing stops** the owner keeps the people with the ledger, so the
+  entries of those who were in it keep their names and photos; they then
+  sync with the owner's own cloud copy like the rest of the ledger, and the
+  rows show no one again until the ledger is shared once more. A profile is
+  never written into a ledger deleted on the phone.
 - **Older app versions** keep both columns: a write merges over the stored
   JSON (`encodeRow`), and they skip `ledger_profiles` as a table they do not
   know. Their new entries carry no stamp and so count as the owner's.

@@ -254,6 +254,11 @@ export function writeOwnLedgerProfiles(
   for (const ledger of ledgers) {
     const userId = ledger.userId ?? fallbackUserId;
     if (!userId) continue;
+    // A ledger deleted here before the list caught up: nothing to write into.
+    const live = db.getFirstSync('SELECT 1 FROM ledgers WHERE id = ? AND deleted_at IS NULL', [
+      ledger.ledgerId,
+    ]);
+    if (!live) continue;
     const id = profileRowId(ledger.ledgerId, userId);
     const existing = db.getFirstSync<{
       role: string;

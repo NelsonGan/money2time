@@ -155,6 +155,43 @@ describe('loan recurring end dates', () => {
   });
 });
 
+describe('shared ledgers: whose runs they are', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it("writes every run of a member's rule as theirs, on any phone", () => {
+    useRule(makeLoanRule({ memberId: 'user-mei' }));
+    recurringRulesRepository.runDueTransactions('2026-08-31T23:59:59.999Z');
+    const inputs = jest.mocked(transactionsRepository.createWithId).mock.calls.map(([, i]) => i);
+    expect(inputs).toHaveLength(2);
+    expect(inputs.every((i) => i.createdBy === 'user-mei' && i.memberId === 'user-mei')).toBe(true);
+  });
+
+  it("keeps the owner's rule the owner's, rather than the phone that runs it", () => {
+    useRule(makeLoanRule({ memberId: null }));
+    recurringRulesRepository.runDueTransactions('2026-07-31T23:59:59.999Z');
+    const [[, input]] = jest.mocked(transactionsRepository.createWithId).mock.calls;
+    // Explicit nulls: left out, the insert would stamp this phone's account.
+    expect(input).toEqual(expect.objectContaining({ createdBy: null, memberId: null }));
+  });
+
+  it("writes an expense rule's runs (and instalment payments) as its person", () => {
+    useRule(
+      makeLoanRule({
+        id: 'netflix',
+        type: 'expense',
+        accountId: 'cash',
+        fromAccountId: null,
+        toAccountId: null,
+        categoryId: 'bills',
+        memberId: 'user-ana',
+      }),
+    );
+    recurringRulesRepository.runDueTransactions('2026-07-31T23:59:59.999Z');
+    const [[, input]] = jest.mocked(transactionsRepository.createWithId).mock.calls;
+    expect(input).toEqual(expect.objectContaining({ createdBy: 'user-ana', memberId: 'user-ana' }));
+  });
+});
+
 describe('recurringRunTransactionId', () => {
   it('uses the run day only', () => {
     expect(recurringRunTransactionId('r1', '2026-08-30T00:00:00.000Z')).toBe('rr:r1:2026-08-30');

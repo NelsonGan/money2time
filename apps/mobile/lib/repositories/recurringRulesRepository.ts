@@ -107,6 +107,11 @@ export interface CreateInstalmentPlanInput {
     sentiment?: TransactionSentiment;
     reimbursable?: boolean;
   };
+  /**
+   * Shared ledgers: whose plan it is (the editor's Belongs to). Left out, the
+   * plan is this phone's account when it is a member of the open ledger.
+   */
+  memberId?: string | null;
 }
 
 export interface CreatedInstalmentPlan {
@@ -325,6 +330,7 @@ class RecurringRulesRepository {
     let created: CreatedInstalmentPlan | null = null;
     getSQLite().withTransactionSync(() => {
       const ruleId = this.create({
+        memberId: input.memberId,
         name: input.name,
         type: 'expense',
         amount: amounts[0] ?? 0,

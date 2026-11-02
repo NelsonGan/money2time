@@ -741,6 +741,23 @@ class TransactionsRepository {
     }
   }
 
+  /**
+   * Shared ledgers: gives the rows written from an entry (its reimbursement
+   * refund, its split payback transfers) to the same person as the entry,
+   * after `member_id` changed on it. Who added them stays as it was.
+   */
+  reassignLinked(id: string, memberId: string | null) {
+    getSQLite().runSync(
+      `UPDATE transactions SET member_id = ?, updated_at = ?
+       WHERE deleted_at IS NULL AND member_id IS NOT ? AND (
+         id = (SELECT reimbursement_transaction_id FROM transactions WHERE id = ?)
+         OR id IN (SELECT paid_transaction_id FROM transaction_splits
+                   WHERE transaction_id = ? AND deleted_at IS NULL
+                     AND paid_transaction_id IS NOT NULL))`,
+      [memberId, nowIso(), memberId, id, id],
+    );
+  }
+
   softDelete(id: string) {
     const db = getDb();
     const now = nowIso();

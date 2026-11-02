@@ -2808,6 +2808,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       runDeferredWrite(() => {
         try {
           transactionsRepository.updateMany(normalizedUpdates);
+          // Shared ledgers: an entry given to someone else takes its refund
+          // and its split paybacks with it (those were stamped from it).
+          normalizedUpdates.forEach(({ id, input }) => {
+            if (input.memberId !== undefined) {
+              transactionsRepository.reassignLinked(id, input.memberId);
+            }
+          });
           // An expense and the income row written for its refund are a pair, so
           // an edit that breaks one has to settle the other. Clearing the flag
           // (which is also how the editor handles a re-type to transfer/income)

@@ -1,8 +1,14 @@
-import React, { useMemo } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Check, ChevronRight, X } from 'lucide-react-native';
+import React, { useMemo, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '~/components/ui';
+import { ThemeModal } from '~/components/ui/theme-modal';
+import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
+import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
+import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
 
 import type { LedgerPeople, LedgerPerson } from '../lib/ledgerPeople';
@@ -26,15 +32,26 @@ function personLabel(person: LedgerPerson): string {
     : person.name;
 }
 
+const styles = StyleSheet.create({
+  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
+  sheet: { maxHeight: '70%' },
+});
+
 /**
  * Belongs to, in the transaction editor's options panel for a shared ledger:
- * one pill per person, the owner first. Whose entry it is decides whose
- * spending it counts as. See README.md > Shared ledgers > Who added it.
+ * one plain row like the panel's ticks (the person's photo and name), which
+ * opens a sheet listing everyone in the ledger, the owner first. Whose entry
+ * it is decides whose spending it counts as. See README.md > Shared ledgers >
+ * Who added it.
  */
 export function BelongsToPicker({ people, memberId, createdBy, onSelect }: BelongsToPickerProps) {
+  const themeColors = useThemeColors();
+  const insets = useSafeAreaInsets();
+  const sheetColumnStyle = useSheetColumnStyle();
+  const [open, setOpen] = useState(false);
   const selected = people.personFor(memberId);
   // Someone the entry belongs to who is not listed (left the ledger, or on an
-  // older app) stays pickable, so opening the panel never moves the entry.
+  // older app) stays pickable, so opening the sheet never moves the entry.
   const choices = useMemo(
     () =>
       people.people.some((person) => person.memberId === selected.memberId)
@@ -43,52 +60,114 @@ export function BelongsToPicker({ people, memberId, createdBy, onSelect }: Belon
     [people, selected],
   );
   const adder = createdBy !== undefined ? people.personFor(createdBy) : null;
-  const showAdder = adder !== null && adder.memberId !== selected.memberId;
+  const addedBy =
+    adder && adder.memberId !== selected.memberId
+      ? I18n.t('shared_ledgers.belongs_to_added_by', { name: personLabel(adder) })
+      : null;
+  const title = I18n.t('shared_ledgers.belongs_to_title');
 
   return (
-    <View className="mt-2.5">
-      <View className="mb-1.5 flex-row items-center justify-between gap-3 px-1">
-        <Text variant="caption" tone="muted" className="uppercase">
-          {I18n.t('shared_ledgers.belongs_to_title')}
-        </Text>
-        {showAdder ? (
-          <Text variant="caption" tone="muted" className="shrink" numberOfLines={1}>
-            {I18n.t('shared_ledgers.belongs_to_added_by', { name: personLabel(adder) })}
-          </Text>
-        ) : null}
-      </View>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-        contentContainerClassName="gap-2"
+    <>
+      <Pressable
+        onPress={() => {
+          void triggerHaptic('selection');
+          setOpen(true);
+        }}
+        accessibilityRole="button"
+        accessibilityLabel={`${title}, ${personLabel(selected)}`}
+        accessibilityHint={addedBy ?? undefined}
+        className="flex-row items-center gap-3 pb-2.5 active:opacity-70"
       >
-        {choices.map((person) => {
-          const isSelected = person.memberId === selected.memberId;
-          return (
-            <Pressable
-              key={person.memberId ?? 'owner'}
-              onPress={() => onSelect(person.memberId)}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: isSelected }}
-              accessibilityLabel={personLabel(person)}
-              className={cn(
-                'h-10 flex-row items-center gap-2 rounded-2xl border pl-1.5 pr-3 active:opacity-70',
-                isSelected ? 'border-primary/60 bg-primary/10' : 'border-border/40 bg-secondary/30',
-              )}
-            >
-              <PersonAvatar person={person} size={26} />
-              <Text
-                variant="body"
-                numberOfLines={1}
-                className={cn('max-w-[140px]', isSelected ? 'font-semibold text-primary' : null)}
+        <PersonAvatar person={selected} size={24} />
+        <Text variant="body" numberOfLines={1} className="shrink">
+          {title}
+        </Text>
+        <View className="flex-1" />
+        <Text variant="body" tone="muted" numberOfLines={1} className="shrink">
+          {personLabel(selected)}
+        </Text>
+        <ChevronRight size={16} color={themeColors.textMuted} />
+      </Pressable>
+
+      <ThemeModal
+        visible={open}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setOpen(false)}
+      >
+        <Pressable style={styles.backdrop} onPress={() => setOpen(false)}>
+          <Pressable
+            onPress={(event) => event.stopPropagation()}
+            style={[styles.sheet, sheetColumnStyle]}
+          >
+            <View className="rounded-t-[28px] bg-card">
+              <View className="flex-row items-center gap-2 px-5 pb-3 pt-5">
+                <View className="shrink">
+                  <Text variant="subheading" numberOfLines={1}>
+                    {title}
+                  </Text>
+                  {addedBy ? (
+                    <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
+                      {addedBy}
+                    </Text>
+                  ) : null}
+                </View>
+                <View className="flex-1" />
+                <Pressable
+                  onPress={() => setOpen(false)}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('common.close')}
+                  hitSlop={8}
+                  className="h-9 w-9 items-center justify-center rounded-full bg-secondary/50 active:opacity-70"
+                >
+                  <X size={18} color={themeColors.textMuted} />
+                </Pressable>
+              </View>
+              <ScrollView
+                contentContainerClassName="px-3"
+                contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 16) + 8 }}
               >
-                {personLabel(person)}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
-    </View>
+                {choices.map((person) => {
+                  const isSelected = person.memberId === selected.memberId;
+                  return (
+                    <Pressable
+                      key={person.memberId ?? 'owner'}
+                      onPress={() => {
+                        onSelect(person.memberId);
+                        setOpen(false);
+                      }}
+                      accessibilityRole="radio"
+                      accessibilityState={{ selected: isSelected }}
+                      accessibilityLabel={personLabel(person)}
+                      className={cn(
+                        'flex-row items-center gap-3 rounded-2xl px-3 py-2.5 active:opacity-70',
+                        isSelected ? 'bg-primary/10' : null,
+                      )}
+                    >
+                      <PersonAvatar person={person} size={36} />
+                      <View className="flex-1">
+                        <Text
+                          variant="body"
+                          numberOfLines={1}
+                          className={isSelected ? 'font-semibold text-primary' : undefined}
+                        >
+                          {personLabel(person)}
+                        </Text>
+                        {person.role === 'owner' ? (
+                          <Text variant="caption" tone="muted">
+                            {I18n.t('shared_ledgers.owner_badge')}
+                          </Text>
+                        ) : null}
+                      </View>
+                      {isSelected ? <Check size={18} color={themeColors.primary} /> : null}
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+            </View>
+          </Pressable>
+        </Pressable>
+      </ThemeModal>
+    </>
   );
 }

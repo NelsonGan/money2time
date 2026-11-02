@@ -710,6 +710,38 @@ describe('backup and restore across ledgers', () => {
     }
   });
 
+  it('carries who added and whose each entry is, and the ledger’s people, through a restore', async () => {
+    addWorkLedger();
+    harness.connection.exec(`
+      UPDATE transactions SET created_by = 'user-mei', member_id = 'user-ana' WHERE id = 'taxi';
+      INSERT INTO ledger_profiles (id, ledger_id, user_id, role, name, avatar_uri, created_at, updated_at)
+        VALUES ('work:user-mei', 'work', 'user-mei', 'member', 'Mei', 'avatars/mei.jpg', '${NOW}', '${NOW}');
+    `);
+    const backup = await buildBackupData();
+    expect(backup.tables.ledger_profiles?.map((row) => row.id)).toEqual(['work:user-mei']);
+    harness.connection.exec('DELETE FROM transactions; DELETE FROM ledger_profiles;');
+
+    expect(applyBackupData(backup).success).toBe(true);
+    expect(harness.all(`SELECT created_by, member_id FROM transactions WHERE id = 'taxi'`)).toEqual(
+      [{ created_by: 'user-mei', member_id: 'user-ana' }],
+    );
+    expect(harness.all('SELECT id, name, avatar_uri FROM ledger_profiles')).toEqual([
+      { id: 'work:user-mei', name: 'Mei', avatar_uri: 'avatars/mei.jpg' },
+    ]);
+  });
+
+  it('gives the Web Dashboard only the open ledger’s people', async () => {
+    addWorkLedger();
+    harness.connection.exec(`
+      INSERT INTO ledger_profiles (id, ledger_id, user_id, role, name, created_at, updated_at)
+        VALUES ('work:u1', 'work', 'u1', 'owner', 'Sam', '${NOW}', '${NOW}'),
+               ('other:u2', 'other', 'u2', 'member', 'Kim', '${NOW}', '${NOW}');
+    `);
+    setActiveLedgerId('work');
+    const backup = await buildBackupData({ openLedgerOnly: true });
+    expect(backup.tables.ledger_profiles?.map((row) => row.id)).toEqual(['work:u1']);
+  });
+
   it('restores a backup from before ledgers into the default ledger', async () => {
     const backup = await buildBackupData();
     delete backup.tables.ledgers;
