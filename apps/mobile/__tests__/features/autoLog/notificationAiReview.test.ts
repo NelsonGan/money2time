@@ -5,7 +5,11 @@ import {
 import { getActiveLedgerId } from '~/lib/db/ledgerScope';
 import { paymentAlertCapturesRepository } from '~/lib/repositories/paymentAlertCapturesRepository';
 import { trackEvent } from '~/services/analytics';
-import { NotificationAiError, reviewNotificationsWithAi } from '~/services/notificationAi';
+import {
+  fetchNotificationAiQuota,
+  NotificationAiError,
+  reviewNotificationsWithAi,
+} from '~/services/notificationAi';
 import { applyNotificationAiResults } from '~/services/notificationReview';
 import {
   type NotificationScanHistoryEntry,
@@ -172,6 +176,7 @@ it('trims a free batch to what is left, then pauses until an upgrade', async () 
 
   // Used up: nothing more is sent on a free plan, but the switch is untouched.
   jest.mocked(reviewNotificationsWithAi).mockClear();
+  jest.mocked(fetchNotificationAiQuota).mockResolvedValue(quota(40));
   jest.mocked(readNotificationScanHistory).mockResolvedValue([row('4', 4)]);
   await runNotificationAiReview(run);
   expect(reviewNotificationsWithAi).not.toHaveBeenCalled();
@@ -188,6 +193,7 @@ it('resumes after an upgrade without the user turning it back on', async () => {
 it('does not call AI at all when a free allowance is already used up', async () => {
   const run = deps();
   storage.set(`notification-ai-quota:${run.appUserId}`, JSON.stringify(quota(40)));
+  jest.mocked(fetchNotificationAiQuota).mockResolvedValue(quota(40));
   jest.mocked(readNotificationScanHistory).mockResolvedValue([row('1', 1)]);
   await runNotificationAiReview(run);
   expect(reviewNotificationsWithAi).not.toHaveBeenCalled();
@@ -257,3 +263,12 @@ it('stops saving when the ledger changes mid-run', async () => {
 function resetCooldownOnly() {
   jest.spyOn(Date, 'now').mockReturnValue(Date.now() + 10 * 60 * 1000);
 }
+
+it('checks a saved used-up allowance with the Worker before pausing', async () => {
+  const run = deps();
+  storage.set(`notification-ai-quota:${run.appUserId}`, JSON.stringify(quota(40)));
+  jest.mocked(fetchNotificationAiQuota).mockResolvedValue(quota(10));
+  jest.mocked(readNotificationScanHistory).mockResolvedValue([row('1', 1)]);
+  await runNotificationAiReview(run);
+  expect(reviewNotificationsWithAi).toHaveBeenCalledTimes(1);
+});

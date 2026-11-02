@@ -216,7 +216,12 @@ async function reviewOnce(deps: NotificationAiReviewDeps) {
   // A used-up free allowance pauses auto-review without touching the user's
   // switch, so upgrading resumes it; the card shows Upgrade meanwhile.
   let quota = await loadNotificationAiQuota(appUserId);
-  if (isNotificationAiExhausted(quota, first.isPro)) return;
+  // The saved allowance can be stale (raised on another phone, or by support):
+  // ask the Worker once before pausing.
+  if (isNotificationAiExhausted(quota, first.isPro)) {
+    quota = await refreshNotificationAiQuota(appUserId);
+    if (isNotificationAiExhausted(quota, first.isPro)) return;
+  }
   // An unknown or Pro allowance lets the Worker decide; a known free one trims.
   const budget =
     quota && !quota.isPro && !first.isPro ? notificationAiRemaining(quota) : candidates.length;

@@ -54,26 +54,6 @@ export function useNotificationAiQuota(refresh: boolean): NotificationAiQuota | 
   return quota;
 }
 
-function scopeLabel(prefs: NotificationAiReviewPrefs, accounts: readonly Account[]): string {
-  // "Expenses & income", or the single type's short label.
-  const types = I18n.t(
-    prefs.logTypes === 'both'
-      ? 'payment_alerts.ai_types_both'
-      : `payment_alerts.ai_log_${prefs.logTypes}`,
-  );
-  const chosen =
-    prefs.accountIds === null
-      ? null
-      : accounts.filter((account) => prefs.accountIds?.includes(account.id));
-  const where =
-    chosen === null
-      ? I18n.t('payment_alerts.ai_all_accounts')
-      : chosen.length === 1
-        ? chosen[0].name
-        : I18n.t('payment_alerts.ai_account_count', { count: chosen.length });
-  return `${types} · ${where}`;
-}
-
 /** Usage line: "32 of 40 free left", or unlimited on Pro. */
 function quotaLabel(quota: NotificationAiQuota | null, isPro: boolean): string {
   if (isPro || quota?.isPro) return I18n.t('payment_alerts.ai_quota_pro');
@@ -127,47 +107,40 @@ export function NotificationAiCard() {
     );
   };
 
-  // One line: what it covers and what is left, or just the allowance while off.
+  // A slim line: the switch and what is left. Scope lives in the settings sheet.
   const subtitle = exhausted
     ? I18n.t('payment_alerts.ai_exhausted', { limit: quota?.limit ?? FREE_NOTIFICATION_AI_REVIEWS })
-    : enabled
-      ? `${scopeLabel(prefs, payable)} · ${
-          isPro || quota?.isPro
-            ? I18n.t('payment_alerts.ai_quota_unlimited')
-            : I18n.t('payment_alerts.ai_quota_left', { count: notificationAiRemaining(quota) })
-        }`
-      : quotaLabel(quota, isPro);
+    : isPro || quota?.isPro
+      ? I18n.t('payment_alerts.ai_quota_unlimited')
+      : I18n.t('payment_alerts.ai_quota_left', { count: notificationAiRemaining(quota) });
 
   return (
-    <View className="mx-auto mb-3 w-full max-w-[640px] px-5">
-      <View className="flex-row items-center gap-3 rounded-2xl bg-card py-3 pl-4 pr-3">
+    <View className="mx-auto w-full max-w-[640px] px-5 pb-2">
+      <View className="min-h-12 flex-row items-center gap-3">
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={I18n.t('payment_alerts.ai_settings')}
+          accessibilityHint={subtitle}
           testID="notification-ai-settings"
           disabled={exhausted}
           onPress={() => {
             void triggerHaptic('selection');
             setSettingsOpen(true);
           }}
-          className="flex-1 flex-row items-center gap-3"
+          className="flex-1 flex-row flex-wrap items-center gap-x-2"
         >
-          <Sparkles size={20} color={enabled ? colors.primary : colors.textMuted} />
-          <View className="flex-1">
-            <View className="flex-row items-center gap-1.5">
-              <Text variant="bodyStrong">{I18n.t('payment_alerts.ai_title')}</Text>
-              <InfoTooltipButton
-                iconSize={14}
-                title={I18n.t('payment_alerts.ai_quota_info_title')}
-                infoTooltip={I18n.t('payment_alerts.ai_quota_info', {
-                  limit: quota && !quota.isPro ? quota.limit : FREE_NOTIFICATION_AI_REVIEWS,
-                })}
-              />
-            </View>
-            <Text variant="caption" tone="muted" numberOfLines={2}>
-              {subtitle}
-            </Text>
-          </View>
+          <Sparkles size={17} color={enabled ? colors.primary : colors.textMuted} />
+          <Text variant="bodyStrong">{I18n.t('payment_alerts.ai_title')}</Text>
+          <Text variant="caption" tone="muted">
+            {subtitle}
+          </Text>
+          <InfoTooltipButton
+            iconSize={14}
+            title={I18n.t('payment_alerts.ai_quota_info_title')}
+            infoTooltip={I18n.t('payment_alerts.ai_quota_info', {
+              limit: quota && !quota.isPro ? quota.limit : FREE_NOTIFICATION_AI_REVIEWS,
+            })}
+          />
         </Pressable>
         {exhausted ? (
           <Button
