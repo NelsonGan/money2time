@@ -5,10 +5,8 @@ import {
   ArrowRight,
   Calendar,
   Camera,
-  Check,
   ChevronDown,
   ChevronLeft,
-  ChevronRight,
   ChevronUp,
   Clock,
   Coins,
@@ -20,9 +18,12 @@ import {
   Power,
   Repeat,
   Settings2,
+  Tag,
   Timer,
   Trash2,
   Type,
+  Undo2,
+  Wallet,
 } from 'lucide-react-native';
 import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -66,7 +67,6 @@ import {
   CategoryGrid,
   CategoryPickerSheet,
   CurrencyPickerSheet,
-  InfoTooltipButton,
   SegmentedToggle,
   SubscriptionLogo,
   Text,
@@ -102,6 +102,7 @@ import {
   evaluateExpression,
   formatMoney,
 } from '~/features/transactions/components/editor/calculatorEngine';
+import { OptionRow, OptionsCard } from '~/features/transactions/components/editor/OptionRow';
 import { resolveNoteChange } from '~/features/transactions/lib/noteSuggestionPick';
 import { resolveSplitSaveRoute } from '~/features/transactions/lib/splitSaveRoute';
 import { offscreenPageLimitFor, usePagerTabSync } from '~/hooks/usePagerTabSync';
@@ -4754,42 +4755,39 @@ export function TransactionEditorScreen({
                       showsVerticalScrollIndicator={false}
                       alwaysBounceVertical={false}
                     >
-                      {/* The longer note first, as a soft note area previewing
-                          two lines of what was written. Tapping it expands the
-                          box in place for typing: the drawer then rides the
-                          keyboard so the box sits right on it, and the rest of
-                          the panel steps aside until Done. */}
-                      <View className="mb-1.5 flex-row items-center justify-between px-1">
-                        <Text variant="caption" tone="muted" className="uppercase">
-                          {I18n.t('transactions.editor.details.title')}
-                        </Text>
-                        {detailsEditing ? (
-                          <Pressable
-                            onPress={() => {
-                              void triggerHaptic('selection');
-                              detailsInputRef.current?.blur();
-                            }}
-                            accessibilityRole="button"
-                            hitSlop={8}
-                            className="active:opacity-70"
-                          >
-                            <Text variant="caption" tone="primary" className="font-semibold">
-                              {I18n.t('common.done')}
+                      {detailsEditing ? (
+                        <>
+                          {/* Typing the longer note: the box expands in place,
+                              the drawer rides the keyboard so the box sits right
+                              on it, and the other options step aside until Done. */}
+                          <View className="mb-1.5 flex-row items-center justify-between px-1">
+                            <Text variant="caption" tone="muted" className="uppercase">
+                              {I18n.t('transactions.editor.details.title')}
                             </Text>
-                          </Pressable>
-                        ) : null}
-                      </View>
-                      <View
-                        onLayout={(event) => {
-                          const { y, height } = event.nativeEvent.layout;
-                          const bottom = y + height;
-                          setDetailsBoxBottom((prev) =>
-                            Math.abs(prev - bottom) < 1 ? prev : bottom,
-                          );
-                        }}
-                      >
-                        {detailsEditing ? (
-                          <View className="rounded-2xl border border-primary/30 bg-secondary/40 px-4 py-3">
+                            <Pressable
+                              onPress={() => {
+                                void triggerHaptic('selection');
+                                detailsInputRef.current?.blur();
+                              }}
+                              accessibilityRole="button"
+                              hitSlop={8}
+                              className="active:opacity-70"
+                            >
+                              <Text variant="caption" tone="primary" className="font-semibold">
+                                {I18n.t('common.done')}
+                              </Text>
+                            </Pressable>
+                          </View>
+                          <View
+                            onLayout={(event) => {
+                              const { y, height } = event.nativeEvent.layout;
+                              const bottom = y + height;
+                              setDetailsBoxBottom((prev) =>
+                                Math.abs(prev - bottom) < 1 ? prev : bottom,
+                              );
+                            }}
+                            className="rounded-2xl border border-primary/30 bg-secondary/40 px-4 py-3"
+                          >
                             <TextInput
                               ref={detailsInputRef}
                               value={details}
@@ -4824,142 +4822,102 @@ export function TransactionEditorScreen({
                               </Text>
                             ) : null}
                           </View>
-                        ) : (
-                          <Pressable
-                            onPress={() => {
-                              void triggerHaptic('selection');
-                              setDetailsEditing(true);
-                            }}
-                            accessibilityRole="button"
-                            accessibilityLabel={I18n.t('transactions.editor.details.title')}
-                            accessibilityValue={hasDetails ? { text: details.trim() } : undefined}
-                            className="min-h-[68px] flex-row gap-3 rounded-2xl border border-transparent bg-secondary/40 px-4 py-3 active:opacity-70"
-                          >
-                            <Text
-                              variant="body"
-                              tone={hasDetails ? 'default' : 'muted'}
-                              numberOfLines={2}
-                              className="flex-1"
-                            >
-                              {hasDetails
-                                ? details.trim()
-                                : I18n.t('transactions.editor.details.empty')}
-                            </Text>
-                            <Pencil size={15} color={themeColors.textMuted} />
-                          </Pressable>
-                        )}
-                      </View>
-                      {!detailsEditing &&
-                      (ledgerPeople || type === 'expense' || type === 'transfer') ? (
-                        <View className="my-3 h-[1px] bg-border/30" />
-                      ) : null}
-                      {/* Shared ledgers: whose entry this is, one plain row
-                          above the ticks; the people are in its sheet. */}
-                      {!detailsEditing && ledgerPeople ? (
-                        <BelongsToPicker
-                          people={ledgerPeople}
-                          memberId={memberId}
-                          createdBy={initialValues?.createdBy}
-                          onSelect={handleSelectMember}
-                        />
-                      ) : null}
-                      {!detailsEditing && type === 'expense' ? (
-                        <View
-                          className="flex-row items-center gap-2 pb-2.5"
-                          style={{ opacity: isReimbursed ? 0.6 : 1 }}
-                        >
-                          {/* The tooltip is its own Pressable beside the row, not
-                              inside it, so tapping ⓘ explains rather than ticks. */}
-                          <Pressable
-                            onPress={handleToggleReimbursable}
-                            disabled={isReimbursed}
-                            accessibilityRole="checkbox"
-                            accessibilityState={{ checked: reimbursable, disabled: isReimbursed }}
-                            accessibilityLabel={I18n.t('reimbursements.editor_label')}
-                            className="shrink flex-row items-center gap-3 active:opacity-70"
-                          >
-                            <View
-                              className={cn(
-                                'h-6 w-6 items-center justify-center rounded-md border-2',
-                                reimbursable ? 'border-primary bg-primary' : 'border-border',
-                              )}
-                            >
-                              {reimbursable ? <Check size={15} color="#fff" /> : null}
-                            </View>
-                            <Text variant="body" numberOfLines={1} className="shrink">
-                              {isReimbursed
-                                ? I18n.t('reimbursements.editor_reimbursed_label')
-                                : I18n.t('reimbursements.editor_label')}
-                            </Text>
-                          </Pressable>
-                          <InfoTooltipButton
-                            title={I18n.t('reimbursements.editor_label')}
-                            infoTooltip={I18n.t('reimbursements.editor_tooltip')}
-                          />
-                        </View>
-                      ) : null}
-                      {!detailsEditing && type === 'transfer' ? (
-                        <>
-                          <View className="flex-row items-center gap-2 pb-2.5">
-                            <Pressable
-                              onPress={handleToggleTransferExpense}
-                              accessibilityRole="checkbox"
-                              accessibilityState={{ checked: transferCountsAsExpense }}
-                              accessibilityLabel={I18n.t(
-                                'transactions.editor.transfer_expense_label',
-                              )}
-                              className="shrink flex-row items-center gap-3 active:opacity-70"
-                            >
-                              <View
-                                className={cn(
-                                  'h-6 w-6 items-center justify-center rounded-md border-2',
-                                  transferCountsAsExpense
-                                    ? 'border-primary bg-primary'
-                                    : 'border-border',
-                                )}
-                              >
-                                {transferCountsAsExpense ? <Check size={15} color="#fff" /> : null}
-                              </View>
-                              <Text variant="body" numberOfLines={1} className="shrink">
-                                {I18n.t('transactions.editor.transfer_expense_label')}
-                              </Text>
-                            </Pressable>
-                            <InfoTooltipButton
-                              title={I18n.t('transactions.editor.transfer_expense_label')}
-                              infoTooltip={I18n.t('transactions.editor.transfer_expense_tooltip')}
-                            />
-                          </View>
-                          {transferCountsAsExpense ? (
-                            /* The category the counted transfer is filed under.
-                               A row rather than the page's category grid, since
-                               a transfer's page has no category slot to give. */
-                            <Pressable
-                              onPress={() => {
-                                void triggerHaptic('selection');
-                                setTransferCategoryPickerVisible(true);
-                              }}
-                              accessibilityRole="button"
-                              accessibilityLabel={I18n.t('transactions.editor.category')}
-                              className="flex-row items-center justify-between rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3 active:opacity-70"
-                            >
-                              <View className="flex-1 flex-row items-center gap-2 pr-2">
-                                {transferCategoryPreview ? (
-                                  <CategoryEmoji icon={transferCategoryPreview.icon} size={18} />
-                                ) : null}
-                                <Text
-                                  variant="body"
-                                  tone={transferCategoryPreview ? 'default' : 'muted'}
-                                  numberOfLines={1}
-                                >
-                                  {transferCategoryPreview?.name ??
-                                    I18n.t('transactions.editor.category')}
-                                </Text>
-                              </View>
-                              <ChevronRight size={16} color={themeColors.textMuted} />
-                            </Pressable>
-                          ) : null}
                         </>
-                      ) : null}
+                      ) : (
+                        /* Every option is a row of one card, all alike: a value
+                           and a chevron to open something, a switch to turn
+                           something on. Rows show by type and by whether the
+                           ledger is shared. */
+                        <OptionsCard>
+                          <OptionRow
+                            icon={<FileText size={16} color={themeColors.primary} />}
+                            label={I18n.t('transactions.editor.details.title')}
+                            accessibilityValue={hasDetails ? details.trim() : undefined}
+                            value={
+                              <Text
+                                variant="body"
+                                tone="muted"
+                                numberOfLines={1}
+                                className="shrink"
+                              >
+                                {hasDetails
+                                  ? details.trim()
+                                  : I18n.t('transactions.editor.details.empty')}
+                              </Text>
+                            }
+                            onPress={() => setDetailsEditing(true)}
+                          />
+                          {/* Shared ledgers: whose entry this is; the people are
+                              in its sheet. */}
+                          {ledgerPeople ? (
+                            <BelongsToPicker
+                              divider
+                              people={ledgerPeople}
+                              memberId={memberId}
+                              createdBy={initialValues?.createdBy}
+                              onSelect={handleSelectMember}
+                            />
+                          ) : null}
+                          {type === 'expense' ? (
+                            <OptionRow
+                              divider
+                              icon={<Undo2 size={16} color={themeColors.primary} />}
+                              label={
+                                isReimbursed
+                                  ? I18n.t('reimbursements.editor_reimbursed_label')
+                                  : I18n.t('reimbursements.editor_label')
+                              }
+                              info={{
+                                title: I18n.t('reimbursements.editor_label'),
+                                tooltip: I18n.t('reimbursements.editor_tooltip'),
+                              }}
+                              disabled={isReimbursed}
+                              switchValue={reimbursable}
+                              onToggle={handleToggleReimbursable}
+                            />
+                          ) : null}
+                          {type === 'transfer' ? (
+                            <OptionRow
+                              divider
+                              icon={<Wallet size={16} color={themeColors.primary} />}
+                              label={I18n.t('transactions.editor.transfer_expense_label')}
+                              info={{
+                                title: I18n.t('transactions.editor.transfer_expense_label'),
+                                tooltip: I18n.t('transactions.editor.transfer_expense_tooltip'),
+                              }}
+                              switchValue={transferCountsAsExpense}
+                              onToggle={handleToggleTransferExpense}
+                            />
+                          ) : null}
+                          {type === 'transfer' && transferCountsAsExpense ? (
+                            /* The category the counted transfer is filed under:
+                               a row rather than the page's category grid, since
+                               a transfer's page has no category slot to give. */
+                            <OptionRow
+                              divider
+                              icon={<Tag size={16} color={themeColors.primary} />}
+                              label={I18n.t('transactions.editor.category')}
+                              accessibilityValue={transferCategoryPreview?.name}
+                              value={
+                                transferCategoryPreview ? (
+                                  <>
+                                    <CategoryEmoji icon={transferCategoryPreview.icon} size={18} />
+                                    <Text
+                                      variant="body"
+                                      tone="muted"
+                                      numberOfLines={1}
+                                      className="shrink"
+                                    >
+                                      {transferCategoryPreview.name}
+                                    </Text>
+                                  </>
+                                ) : null
+                              }
+                              onPress={() => setTransferCategoryPickerVisible(true)}
+                            />
+                          ) : null}
+                        </OptionsCard>
+                      )}
                     </ScrollView>
                   ) : (
                     <NumpadPanel

@@ -26,10 +26,10 @@ import {
 import { getSQLite } from '~/lib/db/client';
 import { copyLedgerRows } from '~/lib/db/ledgerCopy';
 import migration079 from '~/lib/db/migrations/079_transaction_members';
-import { ledgersRepository } from '~/lib/repositories/ledgersRepository';
-import { transactionsRepository } from '~/lib/repositories/transactionsRepository';
 import { applyMigrations } from '~/lib/db/migrations/runner';
 import type { DbMigration } from '~/lib/db/migrations/types';
+import { ledgersRepository } from '~/lib/repositories/ledgersRepository';
+import { transactionsRepository } from '~/lib/repositories/transactionsRepository';
 
 // Who added an entry and whose it is, in a shared ledger (README: Shared
 // ledgers > Who added it). Real SQL against real SQLite for the migration,

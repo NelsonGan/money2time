@@ -1,14 +1,14 @@
-import { Check, ChevronRight, X } from 'lucide-react-native';
+import { Check, UserRound, X } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '~/components/ui';
 import { ThemeModal } from '~/components/ui/theme-modal';
+import { OptionRow } from '~/features/transactions/components/editor/OptionRow';
 import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
-import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
 
 import type { LedgerPeople, LedgerPerson } from '../lib/ledgerPeople';
@@ -24,6 +24,8 @@ interface BelongsToPickerProps {
    */
   createdBy?: string | null;
   onSelect: (memberId: string | null) => void;
+  /** A hairline above the row, inside the options card. */
+  divider?: boolean;
 }
 
 function personLabel(person: LedgerPerson): string {
@@ -38,13 +40,18 @@ const styles = StyleSheet.create({
 });
 
 /**
- * Belongs to, in the transaction editor's options panel for a shared ledger:
- * one plain row like the panel's ticks (the person's photo and name), which
- * opens a sheet listing everyone in the ledger, the owner first. Whose entry
+ * Belongs to, in the transaction editor's options card for a shared ledger:
+ * one option row (the person's photo and name), which opens a sheet listing everyone in the ledger, the owner first. Whose entry
  * it is decides whose spending it counts as. See README.md > Shared ledgers >
  * Who added it.
  */
-export function BelongsToPicker({ people, memberId, createdBy, onSelect }: BelongsToPickerProps) {
+export function BelongsToPicker({
+  people,
+  memberId,
+  createdBy,
+  onSelect,
+  divider,
+}: BelongsToPickerProps) {
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
   const sheetColumnStyle = useSheetColumnStyle();
@@ -68,26 +75,23 @@ export function BelongsToPicker({ people, memberId, createdBy, onSelect }: Belon
 
   return (
     <>
-      <Pressable
-        onPress={() => {
-          void triggerHaptic('selection');
-          setOpen(true);
-        }}
-        accessibilityRole="button"
-        accessibilityLabel={`${title}, ${personLabel(selected)}`}
-        accessibilityHint={addedBy ?? undefined}
-        className="flex-row items-center gap-3 pb-2.5 active:opacity-70"
-      >
-        <PersonAvatar person={selected} size={24} />
-        <Text variant="body" numberOfLines={1} className="shrink">
-          {title}
-        </Text>
-        <View className="flex-1" />
-        <Text variant="body" tone="muted" numberOfLines={1} className="shrink">
-          {personLabel(selected)}
-        </Text>
-        <ChevronRight size={16} color={themeColors.textMuted} />
-      </Pressable>
+      <OptionRow
+        divider={divider}
+        icon={<UserRound size={16} color={themeColors.primary} />}
+        label={title}
+        accessibilityValue={
+          addedBy ? `${personLabel(selected)}, ${addedBy}` : personLabel(selected)
+        }
+        value={
+          <>
+            <PersonAvatar person={selected} size={20} />
+            <Text variant="body" tone="muted" numberOfLines={1} className="shrink">
+              {personLabel(selected)}
+            </Text>
+          </>
+        }
+        onPress={() => setOpen(true)}
+      />
 
       <ThemeModal
         visible={open}
