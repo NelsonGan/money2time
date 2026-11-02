@@ -550,11 +550,18 @@ app side lives in `features/ledgers/`.
     entries keep their amounts.
   - **The parts** copy without history (`ledgerPartsCopySpecs`, through the
     same planner, so references follow the copy): no entries, and every row
-    is created now.
+    is created now. What each switch shows and what is copied both come from
+    the pure rules in `features/ledgers/lib/ledgerCopyChoice.ts`, so a switch
+    never says one thing while another is copied; a chosen part the source
+    has none of is not copied. The parts a part needs (`LEDGER_COPY_NEEDS`)
+    are added by the copy itself (`withCopyNeeds`), whoever asks for it. A
+    new part is a `LEDGER_COPY_PARTS` entry, its specs, its count, a
+    `PART_ROWS` row and its strings; `Ledger Created` picks up its flag.
     - Accounts: the debit and credit accounts and their groups, at a zero
       balance. Copied accounts in the source's main currency take the new
-      ledger's currency. Off: the starter accounts.
-    - Categories: the categories and subcategories. Off: the starter set.
+      ledger's currency. Off, or none in the source: the starter accounts.
+    - Categories: the categories and subcategories. Off, or none in the
+      source: the starter set.
     - Goals: live goals at zero saved, not yet achieved. Archived goals stay
       behind.
     - Loans: live loans at what they still owe today (the balance, interest

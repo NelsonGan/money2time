@@ -32,16 +32,16 @@ const PREFS_OBJECT = `
 
 /**
  * Stamps the cycle `day`/`overrides` (SQL expressions) on every ledger without
- * one. `touch` bumps `updated_at`, so Cloud Sync carries a personal ledger's
- * new preferences like any other edit.
+ * one. `updated_at` is left alone: every phone runs these triggers itself, so
+ * the stamp needs no syncing, and a newer `updated_at` would make Cloud Sync
+ * keep this phone's copy of the ledger over a newer edit from another phone.
  */
-function stampLedgers(day: string, overrides: string, touch: boolean, also = '1'): string {
-  const updatedAt = touch ? `, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')` : '';
+function stampLedgers(day: string, overrides: string, also = '1'): string {
   return `
     UPDATE ledgers
     SET prefs_json = json_set(${PREFS_OBJECT},
           '$.firstDayOfMonth', ${day},
-          '$.firstDayOverridesJson', ${overrides})${updatedAt}
+          '$.firstDayOverridesJson', ${overrides})
     WHERE ${also} AND ${NEEDS_CYCLE};`;
 }
 
@@ -53,7 +53,6 @@ export const migration076LedgerMonthCycles: DbMigration = {
       ${stampLedgers(
         "(SELECT first_day_of_month FROM settings WHERE id = 'primary')",
         "(SELECT first_day_overrides_json FROM settings WHERE id = 'primary')",
-        false,
         "EXISTS (SELECT 1 FROM settings WHERE id = 'primary')",
       )}
 
@@ -62,13 +61,13 @@ export const migration076LedgerMonthCycles: DbMigration = {
       WHEN OLD.first_day_of_month IS NOT NEW.first_day_of_month
         OR OLD.first_day_overrides_json IS NOT NEW.first_day_overrides_json
       BEGIN
-        ${stampLedgers('OLD.first_day_of_month', 'OLD.first_day_overrides_json', true)}
+        ${stampLedgers('OLD.first_day_of_month', 'OLD.first_day_overrides_json')}
       END;
 
       CREATE TRIGGER IF NOT EXISTS ledgers_keep_month_cycle_on_settings_delete
       BEFORE DELETE ON settings
       BEGIN
-        ${stampLedgers('OLD.first_day_of_month', 'OLD.first_day_overrides_json', true)}
+        ${stampLedgers('OLD.first_day_of_month', 'OLD.first_day_overrides_json')}
       END;
     `);
   },

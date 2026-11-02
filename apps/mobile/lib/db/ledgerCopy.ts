@@ -323,6 +323,15 @@ export const LEDGER_COPY_NEEDS: Readonly<
   budgets: ['categories'],
 };
 
+/** `parts` with everything they need (`LEDGER_COPY_NEEDS`) added. */
+export function withCopyNeeds(parts: Iterable<LedgerCopyPart>): Set<LedgerCopyPart> {
+  const all = new Set(parts);
+  for (const part of [...all]) {
+    for (const need of LEDGER_COPY_NEEDS[part] ?? []) all.add(need);
+  }
+  return all;
+}
+
 /** The part an account of this type is copied with. */
 export function copyPartOfAccountType(type: unknown): LedgerCopyPart | null {
   if (type === 'debit' || type === 'credit') return 'accounts';
@@ -390,10 +399,13 @@ export interface LedgerPartsCopy {
  * zero would read as paid off), and albums empty. Parents come before
  * children, as in `LEDGER_COPY_TABLES`. Archived goals and loans, settled
  * loans and rules with nothing left to run stay behind; a recurring rule
- * comes along only when every account and category it names does.
+ * comes along only when every account and category it names does. Parts
+ * another needs are added (`withCopyNeeds`).
  */
 export function ledgerPartsCopySpecs(copy: LedgerPartsCopy): TableSpec[] {
-  const { parts } = copy;
+  // A rule without its accounts, or a budget without its categories, is not
+  // worth copying: the parts they need always come along.
+  const parts = withCopyNeeds(copy.parts);
   const base = (table: string): TableSpec => {
     const spec = LEDGER_COPY_TABLES.find((candidate) => candidate.table === table);
     if (!spec) throw new Error(`ledgerCopy: no spec for ${table}`);
@@ -482,6 +494,6 @@ function ruleOf(row: Row) {
     nextRunDate: String(row.next_run_date),
     recurrencePattern: row.recurrence_pattern as RecurrencePattern,
     recurrenceInterval: Number(row.recurrence_interval) || 1,
-    endDate: typeof row.end_date === 'string' ? row.end_date : null,
+    endDate: textOrNull(row.end_date),
   };
 }

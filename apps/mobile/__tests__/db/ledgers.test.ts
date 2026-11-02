@@ -368,9 +368,11 @@ describe('ledgersRepository on SQLite', () => {
       // Made before the cycle first changed (1 to 25), so it kept day 1 then.
       work: '{"firstDayOfMonth":1,"firstDayOverridesJson":null}',
     });
-    expect(
-      harness.all(`SELECT updated_at FROM ledgers WHERE id = 'joined'`)[0].updated_at,
-    ).not.toBe(NOW);
+    // Left as it was: every phone stamps its own copy, and a newer updated_at
+    // would make Cloud Sync keep this copy over another phone's newer edit.
+    expect(harness.all(`SELECT updated_at FROM ledgers WHERE id = 'joined'`)[0].updated_at).toBe(
+      NOW,
+    );
 
     // A restore deleting the settings row: a ledger that arrived since gets the cycle too.
     harness.connection.exec(`

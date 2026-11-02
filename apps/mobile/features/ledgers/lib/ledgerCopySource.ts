@@ -14,33 +14,10 @@ import { itemsRepository } from '~/lib/repositories/itemsRepository';
 import { ledgersRepository } from '~/lib/repositories/ledgersRepository';
 import { recurringRulesRepository } from '~/lib/repositories/recurringRulesRepository';
 import { settingsRepository } from '~/lib/repositories/settingsRepository';
-import type { MonthCycle } from '~/types';
 import { monthCycleOf } from '~/utils/financialMonth';
 import { nowIso } from '~/utils/id';
 
-/** What a new ledger would get from copying `ledgerId`, for the editor's captions. */
-export interface LedgerCopySource {
-  /**
-   * What each part would copy. Recurring is the most it can be: a rule comes
-   * along only with the accounts it names (`recurringCount`).
-   */
-  counts: Record<LedgerCopyPart, number>;
-  /** The parts each copyable recurring rule needs (accounts, goals, loans). */
-  recurringNeeds: readonly (readonly LedgerCopyPart[])[];
-  /** The source's month cycle: its start day and customized months. */
-  monthCycle: MonthCycle;
-  /** The source's currency: an "Everything" copy keeps it. */
-  currency: { code: string; symbol: string };
-}
-
-/** How many recurring rules come along with `parts`. */
-export function recurringCount(
-  source: LedgerCopySource,
-  parts: ReadonlySet<LedgerCopyPart>,
-): number {
-  if (!parts.has('recurring')) return 0;
-  return source.recurringNeeds.filter((needs) => needs.every((part) => parts.has(part))).length;
-}
+import type { LedgerCopySource } from './ledgerCopyChoice';
 
 /** Read any ledger's copyable counts, month cycle and currency, whichever ledger is open. */
 export function readLedgerCopySource(ledgerId: string): LedgerCopySource {

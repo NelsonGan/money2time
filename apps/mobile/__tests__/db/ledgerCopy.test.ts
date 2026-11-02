@@ -5,6 +5,7 @@ import {
   type LedgerCopyPart,
   ledgerPartsCopySpecs,
   planLedgerCopy,
+  withCopyNeeds,
 } from '~/lib/db/ledgerCopy';
 
 type Row = Record<string, unknown>;
@@ -216,6 +217,21 @@ function planParts(parts: LedgerCopyPart[]) {
 }
 
 describe('ledgerPartsCopySpecs', () => {
+  it('brings what a part needs, whoever asks for it', () => {
+    expect([...withCopyNeeds(['recurring', 'items'])].sort()).toEqual([
+      'accounts',
+      'categories',
+      'items',
+      'recurring',
+    ]);
+    // Asked for alone, a budget still gets its category lines.
+    expect(Object.keys(planParts(['budgets']))).toEqual([
+      'categories',
+      'budget_templates',
+      'budget_template_categories',
+    ]);
+  });
+
   it('copies only the chosen parts', () => {
     expect(Object.keys(planParts(['items']))).toEqual(['items']);
     expect(Object.keys(planParts(['budgets', 'categories']))).toEqual([

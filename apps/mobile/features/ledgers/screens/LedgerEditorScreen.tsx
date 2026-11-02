@@ -43,7 +43,7 @@ import {
   sharingErrorMessage,
 } from '~/features/sharedLedgers/lib/sharing';
 import { useThemeColors } from '~/hooks/useThemeColors';
-import { LEDGER_COPY_NEEDS, type LedgerCopyPart } from '~/lib/db/ledgerCopy';
+import type { LedgerCopyPart } from '~/lib/db/ledgerCopy';
 import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -53,22 +53,22 @@ import { getErrorMessage } from '~/utils/errorHandling';
 
 import { LedgerPickerSheet } from '../components/LedgerPickerSheet';
 import {
+  type CopyPartRow,
+  copyPartRow,
+  DEFAULT_COPY_PARTS,
   type LedgerCopySource,
-  readLedgerCopySource,
-  recurringCount,
-} from '../lib/ledgerCopySource';
+  partsToCopy,
+  toggleCopyPart,
+} from '../lib/ledgerCopyChoice';
+import { readLedgerCopySource } from '../lib/ledgerCopySource';
 import { ledgerDisplayName, ledgerIcon } from '../lib/ledgerDisplay';
 
 const SCROLL_CONTENT = { gap: 16, paddingHorizontal: 20, paddingTop: 8 };
 
-/** What a new ledger copies unless the user says otherwise: today's setup, no plans. */
-const DEFAULT_PARTS: readonly LedgerCopyPart[] = ['accounts', 'categories'];
-
-/** The parts with nothing but a count and an empty start, in the order they are listed. */
-const OPTIONAL_PARTS: readonly {
-  part: Exclude<LedgerCopyPart, 'accounts' | 'categories'>;
-  icon: LucideIcon;
-}[] = [
+/** The Start with rows, in order. Accounts and categories fall back to a starter set. */
+const PART_ROWS: readonly { part: LedgerCopyPart; icon: LucideIcon; starters?: string }[] = [
+  { part: 'accounts', icon: CreditCard, starters: 'ledgers.starter_accounts_caption' },
+  { part: 'categories', icon: Tag, starters: 'ledgers.starter_categories_caption' },
   { part: 'goals', icon: Target },
   { part: 'loans', icon: HandCoins },
   { part: 'recurring', icon: Repeat },
@@ -77,35 +77,26 @@ const OPTIONAL_PARTS: readonly {
   { part: 'albums', icon: Images },
 ];
 
-/** `parts` with `part` on (and what it needs) or off (and what needs it). */
-function withPart(
-  parts: ReadonlySet<LedgerCopyPart>,
-  part: LedgerCopyPart,
-  on: boolean,
-): ReadonlySet<LedgerCopyPart> {
-  const next = new Set(parts);
-  if (on) {
-    next.add(part);
-    for (const need of LEDGER_COPY_NEEDS[part] ?? []) next.add(need);
-  } else {
-    next.delete(part);
-    for (const [other, needs] of Object.entries(LEDGER_COPY_NEEDS)) {
-      if (needs.includes(part)) next.delete(other as LedgerCopyPart);
-    }
-  }
-  return next;
-}
-
-/** What an optional part's row says it copies, by the count it would copy. */
+/** A Start with row's caption: what turning it on gives, or what the ledger gets without it. */
 function partCaption(
-  part: (typeof OPTIONAL_PARTS)[number]['part'],
-  count: number,
+  { part, starters }: (typeof PART_ROWS)[number],
+  row: CopyPartRow,
   sourceName: string,
 ): string {
-  if (count === 0) return I18n.t('ledgers.none_to_copy', { name: sourceName });
-  return I18n.t(count === 1 ? `ledgers.copy_${part}_one` : `ledgers.copy_${part}_other`, {
-    count,
-  });
+  switch (row.caption) {
+    case 'copy':
+      return I18n.t(row.count === 1 ? `ledgers.copy_${part}_one` : `ledgers.copy_${part}_other`, {
+        count: row.count,
+      });
+    case 'noneCopied':
+      return I18n.t('ledgers.copy_recurring_none');
+    case 'noneInSource':
+      return I18n.t('ledgers.none_to_copy', { name: sourceName });
+    case 'starters':
+      return I18n.t(starters ?? 'ledgers.starts_empty');
+    case 'empty':
+      return I18n.t('ledgers.starts_empty');
+  }
 }
 
 /** The month cycle row's caption: the source's start day and customized months. */
@@ -187,11 +178,13 @@ export function LedgerEditorScreen({
   const [name, setName] = useState(() => existing?.name ?? '');
   const [currencyCode, setCurrencyCode] = useState(settings.currencyCode);
   const [currencyPickerVisible, setCurrencyPickerVisible] = useState(false);
-  // What the new ledger copies from the source. Accounts and categories off
-  // start with the starter set; the other parts off start empty.
-  const [parts, setParts] = useState<ReadonlySet<LedgerCopyPart>>(() => new Set(DEFAULT_PARTS));
+  // What the new ledger copies from the source (ledgerCopyChoice.ts). A part
+  // the source has none of stays chosen while hidden, for a source that has.
+  const [parts, setParts] = useState<ReadonlySet<LedgerCopyPart>>(
+    () => new Set(DEFAULT_COPY_PARTS),
+  );
   const togglePart = (part: LedgerCopyPart, on: boolean) =>
-    setParts((current) => withPart(current, part, on));
+    setParts((current) => toggleCopyPart(current, part, on));
   // On copies the source's start day and custom months; off starts on day 1.
   const [copyMonthCycle, setCopyMonthCycle] = useState(true);
   // The whole ledger, entries and all: covers every part and the month cycle.
@@ -254,15 +247,7 @@ export function LedgerEditorScreen({
         currencySymbol: currencySymbolForCode(effectiveCurrency),
         copyFromLedgerId: copySource.id,
         copyEverything,
-        // A part the source has none of stays selected while hidden (it comes
-        // back if another source has some): leave it out of what is copied.
-        copyParts: [...parts].filter((part) => {
-          if (part === 'accounts' || part === 'categories') return true;
-          if (!sourceInfo) return false;
-          return part === 'recurring'
-            ? recurringCount(sourceInfo, parts) > 0
-            : sourceInfo.counts[part] > 0;
-        }),
+        copyParts: partsToCopy(parts, sourceInfo),
         copyMonthCycle,
       });
     } catch (error) {
@@ -427,69 +412,19 @@ export function LedgerEditorScreen({
                 onChange={setCopyEverything}
                 testID="ledger-copy-everything"
               />
-              <StartWithRow
-                icon={CreditCard}
-                title={I18n.t('ledgers.accounts')}
-                subtitle={
-                  copyEverything || parts.has('accounts')
-                    ? I18n.t(
-                        sourceInfo?.counts.accounts === 1
-                          ? 'ledgers.copy_accounts_one'
-                          : 'ledgers.copy_accounts_other',
-                        { count: sourceInfo?.counts.accounts ?? 0 },
-                      )
-                    : I18n.t('ledgers.starter_accounts_caption')
-                }
-                value={copyEverything || parts.has('accounts')}
-                disabled={copyEverything}
-                dimmed={copyEverything}
-                onChange={(on) => togglePart('accounts', on)}
-                testID="ledger-copy-accounts"
-              />
-              <StartWithRow
-                icon={Tag}
-                title={I18n.t('ledgers.categories')}
-                subtitle={
-                  copyEverything || parts.has('categories')
-                    ? I18n.t(
-                        sourceInfo?.counts.categories === 1
-                          ? 'ledgers.copy_categories_one'
-                          : 'ledgers.copy_categories_other',
-                        { count: sourceInfo?.counts.categories ?? 0 },
-                      )
-                    : I18n.t('ledgers.starter_categories_caption')
-                }
-                value={copyEverything || parts.has('categories')}
-                disabled={copyEverything}
-                dimmed={copyEverything}
-                onChange={(on) => togglePart('categories', on)}
-                testID="ledger-copy-categories"
-              />
-              {OPTIONAL_PARTS.map(({ part, icon: partIcon }) => {
-                const available = sourceInfo?.counts[part] ?? 0;
-                const on = copyEverything || (parts.has(part) && available > 0);
-                // A rule comes along only with the accounts it names.
-                const count =
-                  part === 'recurring' && sourceInfo && !copyEverything && on
-                    ? recurringCount(sourceInfo, parts)
-                    : available;
+              {PART_ROWS.map((config) => {
+                const row = copyPartRow(config.part, sourceInfo, parts, copyEverything);
                 return (
                   <StartWithRow
-                    key={part}
-                    icon={partIcon}
-                    title={I18n.t(`ledgers.${part}`)}
-                    subtitle={
-                      part === 'recurring' && !copyEverything && on && count === 0
-                        ? I18n.t('ledgers.copy_recurring_none')
-                        : on || available === 0
-                          ? partCaption(part, count, ledgerDisplayName(copySource))
-                          : I18n.t('ledgers.starts_empty')
-                    }
-                    value={on}
-                    disabled={copyEverything || available === 0}
-                    dimmed={copyEverything || available === 0}
-                    onChange={(next) => togglePart(part, next)}
-                    testID={`ledger-copy-${part}`}
+                    key={config.part}
+                    icon={config.icon}
+                    title={I18n.t(`ledgers.${config.part}`)}
+                    subtitle={partCaption(config, row, ledgerDisplayName(copySource))}
+                    value={row.on}
+                    disabled={row.disabled}
+                    dimmed={row.disabled}
+                    onChange={(on) => togglePart(config.part, on)}
+                    testID={`ledger-copy-${config.part}`}
                   />
                 );
               })}
