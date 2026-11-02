@@ -826,8 +826,12 @@ export function TransactionEditorScreen({
   // it). A new entry starts as the person adding it; Belongs to in the options
   // panel gives it to someone else in the ledger.
   const ledgerPeople = useOpenLedgerPeople();
+  // An entry that has a person keeps it; one that does not yet (a new entry,
+  // or a payment alert reviewed in the edit layout) starts as this phone's.
   const [defaultMemberId] = useState<string | null>(() =>
-    mode === 'edit' ? (initialValues?.memberId ?? null) : selfMemberIdFor(getActiveLedgerId()),
+    initialValues?.memberId !== undefined
+      ? initialValues.memberId
+      : selfMemberIdFor(getActiveLedgerId()),
   );
   const [memberId, setMemberId] = useState<string | null>(defaultMemberId);
   const handleSelectMember = useCallback((next: string | null) => {
@@ -4839,9 +4843,7 @@ export function TransactionEditorScreen({
                         <BelongsToPicker
                           people={ledgerPeople}
                           memberId={memberId}
-                          createdBy={
-                            mode === 'edit' ? (initialValues?.createdBy ?? null) : undefined
-                          }
+                          createdBy={initialValues?.createdBy}
                           onSelect={handleSelectMember}
                         />
                       ) : null}

@@ -1611,8 +1611,9 @@ for that chart; the chart itself is not built yet.
 - **Other entries.** A recurring rule carries `member_id` (stamped like an
   entry when it is created) and every run takes it for both columns, so two
   phones running the same rule write the same person. A reimbursement's
-  refund and a split's payback transfer belong to whoever the expense does.
-  Copying a ledger clears both columns: the copy is the user's own.
+  refund and a split's payback transfer belong to whoever the expense does,
+  and a duplicated entry stays that person's (added by whoever duplicated
+  it). Copying a ledger clears both columns: the copy is the user's own.
 - **Names and photos.** `ledger_profiles` (migration 079) holds each person's
   name and Settings photo per shared ledger, one row per ledger and account
   (`<ledger id>:<user id>`), and syncs with the ledger like its other rows,
@@ -1632,7 +1633,8 @@ for that chart; the chart itself is not built yet.
   a Belongs to row in a shared ledger, adding or editing: one pill per person,
   the owner first, then the members who have synced a profile. Picking one
   saves `member_id`; when it differs from who added it, "Added by …" shows
-  under the pills. Anyone in the ledger can change it, as they can edit any
+  beside the Belongs to heading. A new entry (and a payment alert reviewed in
+  the editor) starts as the person adding it; an existing one keeps its own. Anyone in the ledger can change it, as they can edit any
   entry. Saving an entry as someone else's than the default tracks
   `Shared Ledger Entry Assigned`.
 - **Older app versions** keep both columns: a write merges over the stored
