@@ -1,104 +1,64 @@
-import { ArrowDownRight, ArrowUpRight, BarChart3, ChevronRight } from 'lucide-react-native';
+import { ArrowDown, ArrowUp, ChevronRight } from 'lucide-react-native';
 import React from 'react';
 import { Pressable, View } from 'react-native';
 
 import { CategoryEmoji, Text } from '~/components/ui';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { withColorAlpha } from '~/utils/color';
-import { FONT } from '~/utils/fonts';
 
 /**
- * The read-outs around an Insights trend chart: the selected bucket's figure,
- * three stat cards, the bucket's top categories and, when two categories are
- * compared, a side-by-side summary. Values arrive as nodes because the screen
- * renders them in money or work time.
+ * The read-outs around an Insights trend chart: the selected bucket's figure
+ * with a quiet comparison pill, the bucket's top categories and, when two
+ * categories are compared, both totals. Values arrive as nodes because the
+ * screen renders them in money or work time.
  */
+
+export type TrendHeadlineBadge = {
+  text: string;
+  /** Tint for the pill and its arrow: good, bad or neutral news. */
+  color: string;
+  direction: 'up' | 'down' | null;
+};
 
 export function TrendHeadline({
   title,
   value,
-  caption,
-  captionColor,
+  badge,
 }: {
-  /** The selected bucket, e.g. "Aug 2026". */
-  title: string;
+  /** The selected bucket, e.g. "Aug 2026"; left out when the header already says it. */
+  title?: string;
   value: React.ReactNode;
-  caption?: string | null;
-  captionColor?: string;
+  badge?: TrendHeadlineBadge | null;
 }) {
   return (
-    <View className="items-center gap-0.5 pt-1">
-      <Text variant="caption" tone="muted" numberOfLines={1}>
-        {title}
-      </Text>
-      {value}
-      {caption ? (
-        <Text
-          variant="caption"
-          numberOfLines={2}
-          className="text-center"
-          style={captionColor ? { color: captionColor } : undefined}
-        >
-          {caption}
+    <View className="items-center gap-1 pt-1">
+      {title ? (
+        <Text variant="caption" tone="muted" numberOfLines={1}>
+          {title}
         </Text>
       ) : null}
-    </View>
-  );
-}
-
-export type TrendStatCardItem = {
-  key: string;
-  label: string;
-  value: React.ReactNode;
-  /** Small text before the value, e.g. the month of the high. */
-  detail?: string | null;
-  kind: 'average' | 'high' | 'low';
-};
-
-export function TrendStatCards({
-  items,
-  highColor,
-  lowColor,
-}: {
-  items: readonly TrendStatCardItem[];
-  /** "Highest" reads as bad for spending and good for income, so the screen picks. */
-  highColor: string;
-  lowColor: string;
-}) {
-  const themeColors = useThemeColors();
-  if (items.length === 0) return null;
-  return (
-    <View className="flex-row gap-2">
-      {items.map((item) => {
-        const tint =
-          item.kind === 'high' ? highColor : item.kind === 'low' ? lowColor : themeColors.primary;
-        const Icon =
-          item.kind === 'high' ? ArrowUpRight : item.kind === 'low' ? ArrowDownRight : BarChart3;
-        return (
-          <View
-            key={item.key}
-            className="flex-1 gap-1 rounded-2xl border border-border/40 bg-card px-2.5 py-2.5"
+      {value}
+      {badge ? (
+        <View
+          className="flex-row items-center gap-1 rounded-full px-2.5 py-0.5"
+          style={{ backgroundColor: withColorAlpha(badge.color, 0.1) }}
+          accessible
+          accessibilityLabel={badge.text}
+        >
+          {badge.direction === 'up' ? (
+            <ArrowUp size={11} color={badge.color} strokeWidth={3} />
+          ) : badge.direction === 'down' ? (
+            <ArrowDown size={11} color={badge.color} strokeWidth={3} />
+          ) : null}
+          <Text
+            variant="caption"
+            numberOfLines={1}
+            style={{ color: badge.color, fontSize: 12, lineHeight: 16 }}
           >
-            <View className="flex-row items-center gap-1.5">
-              <View
-                className="h-6 w-6 items-center justify-center rounded-full"
-                style={{ backgroundColor: withColorAlpha(tint, 0.14) }}
-              >
-                <Icon size={14} color={tint} strokeWidth={2.5} />
-              </View>
-              <Text variant="caption" tone="muted" numberOfLines={1} className="flex-1">
-                {item.label}
-              </Text>
-            </View>
-            <View className="flex-row items-center">{item.value}</View>
-            {item.detail ? (
-              <Text variant="caption" tone="muted" numberOfLines={1} style={{ fontSize: 11 }}>
-                {item.detail}
-              </Text>
-            ) : null}
-          </View>
-        );
-      })}
+            {badge.text}
+          </Text>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -135,11 +95,7 @@ export function TrendTopCategories({
           onPress={() => onPressRow(row)}
           accessibilityRole="button"
           accessibilityLabel={row.label}
-          className="flex-row items-center gap-2.5 rounded-2xl border px-3 py-2 active:opacity-80"
-          style={{
-            backgroundColor: withColorAlpha(row.color, 0.08),
-            borderColor: withColorAlpha(row.color, 0.22),
-          }}
+          className="flex-row items-center gap-2.5 rounded-2xl border border-border/40 bg-card px-3 py-2 active:opacity-80"
         >
           <CategoryEmoji icon={row.icon} size={22} />
           <View className="flex-1 gap-1">
@@ -174,63 +130,39 @@ export function TrendTopCategories({
 
 export type TrendCompareSide = {
   label: string;
-  icon: string;
   color: string;
   total: React.ReactNode;
-  average: React.ReactNode;
 };
 
+/** Both categories' totals side by side, and one line saying how they compare. */
 export function TrendCompareSummary({
-  title,
   first,
   second,
   sentence,
-  averageLabel,
 }: {
-  title: string;
   first: TrendCompareSide;
   second: TrendCompareSide;
   sentence: string | null;
-  averageLabel: string;
 }) {
-  const themeColors = useThemeColors();
   const renderSide = (side: TrendCompareSide) => (
-    <View className="flex-1 gap-1">
+    <View className="flex-1 gap-0.5">
       <View className="flex-row items-center gap-1.5">
         <View className="h-2 w-2 rounded-full" style={{ backgroundColor: side.color }} />
-        <CategoryEmoji icon={side.icon} size={16} />
-        <Text variant="caption" numberOfLines={1} className="flex-1">
+        <Text variant="caption" tone="muted" numberOfLines={1} className="flex-1">
           {side.label}
         </Text>
       </View>
       {side.total}
-      <View className="flex-row flex-wrap items-center gap-1">
-        <Text variant="caption" tone="muted" style={{ fontSize: 11 }}>
-          {averageLabel}
-        </Text>
-        {side.average}
-      </View>
     </View>
   );
   return (
-    <View className="gap-2.5 rounded-3xl border border-border/40 bg-card p-4">
-      <Text variant="bodyStrong" numberOfLines={1}>
-        {title}
-      </Text>
-      <View className="flex-row items-stretch gap-3">
+    <View className="gap-2 rounded-3xl border border-border/40 bg-card px-4 py-3">
+      <View className="flex-row gap-3">
         {renderSide(first)}
-        <View
-          className="w-px self-stretch"
-          style={{ backgroundColor: withColorAlpha(themeColors.border, 0.8) }}
-        />
         {renderSide(second)}
       </View>
       {sentence ? (
-        <Text
-          variant="caption"
-          className="text-center"
-          style={{ fontFamily: FONT.semibold, color: themeColors.text }}
-        >
+        <Text variant="caption" tone="muted">
           {sentence}
         </Text>
       ) : null}

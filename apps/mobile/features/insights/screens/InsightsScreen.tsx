@@ -1,6 +1,4 @@
 import {
-  ArrowDown,
-  ArrowUp,
   CalendarDays,
   Check,
   ChevronDown,
@@ -8,9 +6,7 @@ import {
   ChevronRight,
   Landmark,
   PiggyBank,
-  Plus,
   Smile,
-  Sparkles,
   TrendingDown,
   TrendingUp,
   X,
@@ -57,11 +53,9 @@ import { FilterIconButton } from '~/components/navigation/FilterIconButton';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import {
   AccountPickerSheet,
-  Card,
   CategoryEmoji,
   CategoryPickerSheet,
   ClayIcon,
-  GradientPercent,
   SelectionFilterField,
   Text,
   ThemeModal,
@@ -99,14 +93,15 @@ import {
   toggleAssetHistoryAccount,
 } from '~/features/insights/assetHistory';
 import { buildInsightsCategoryPickerData } from '~/features/insights/categoryPickerData';
+import { CategoryTrendChips } from '~/features/insights/components/CategoryTrendChips';
 import {
   InsightPaneSlotProvider,
   InsightPaneSplit,
   isSplitInsightPane,
 } from '~/features/insights/components/InsightPaneSplit';
+import { InsightPeriodSwitcher } from '~/features/insights/components/InsightPeriodSwitcher';
 import { InsightSubTabs } from '~/features/insights/components/InsightSubTabs';
 import { ProTrendPreviewOverlay } from '~/features/insights/components/ProTrendPreviewOverlay';
-import { SavingsRateRing } from '~/features/insights/components/SavingsRateRing';
 import { SentimentStackedBarChart } from '~/features/insights/components/SentimentStackedBarChart';
 import {
   TrendLineChart,
@@ -117,8 +112,7 @@ import {
   type TrendCategoryRow,
   TrendCompareSummary,
   TrendHeadline,
-  type TrendStatCardItem,
-  TrendStatCards,
+  type TrendHeadlineBadge,
   TrendTopCategories,
 } from '~/features/insights/components/TrendSummary';
 import {
@@ -393,8 +387,6 @@ const INSIGHTS_LINE_CHART_SIDE_INSET = 8;
 const INSIGHTS_LINE_CHART_SECTION_BLEED = 10;
 const MONTHS_PER_YEAR = 12;
 const HEALTHY_SAVINGS_RATE_THRESHOLD = 0.2;
-const SAVINGS_RATE_RING_SIZE = 104;
-const SAVINGS_RATE_RING_STROKE_WIDTH = 11;
 const SAVINGS_RATE_ABBREVIATE_THRESHOLD = 1000;
 
 // Formats an already-computed savings-rate percentage (e.g. 20 → "20.0%"). When the
@@ -414,8 +406,6 @@ const INSIGHTS_FILTER_MODAL_CONTENT_STYLE = {
   gap: spacing.sm,
 } as const;
 const EMPTY_ASSET_HISTORY_LEDGER: AssetHistoryLedger = { accounts: [] };
-const EMPTY_CATEGORY_CHILD_MAP: Map<string, { id: string; name: string; icon: string }[]> =
-  new Map();
 const YEAR_MONTH_LABELS_CACHE = new Map<string, string[]>();
 const MONTH_LABEL_BY_KEY_CACHE = new Map<string, string>();
 const PERIOD_MONTH_YEAR_FORMATTER_CACHE = new Map<string, Intl.DateTimeFormat>();
@@ -454,15 +444,12 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 999,
   },
-  savingsRateHealthyMarker: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    width: 1,
+  savingsMonthLabel: {
+    width: 40,
   },
-  savingsRateRingIcon: {
-    width: 44,
-    height: 44,
+  savingsMonthDetail: {
+    fontSize: 11,
+    lineHeight: 14,
   },
   insightsFilterModalHeader: {
     paddingHorizontal: spacing.screenHorizontal,
@@ -503,10 +490,6 @@ function buildSizeStyle(width: number, height: number) {
 
 function buildWidthStyle(width: number | `${number}%`) {
   return { width };
-}
-
-function buildLeftStyle(left: number | `${number}%`) {
-  return { left };
 }
 
 function serializeRecordForSignature(record: Record<string, string>) {
@@ -724,12 +707,6 @@ type BreakdownPageData = InsightBasePageData & {
   categoryRows: InsightCategoryRow[];
   breakdownTransactionsById: Map<string, TransactionWithRelations[]>;
   transactionType: BreakdownTransactionType;
-  /**
-   * The same breakdown for the period before (week, month or year only), so
-   * the total and each category can show how they moved. Null when the period
-   * has no natural "previous" (custom ranges, lifetime).
-   */
-  previous: { total: number; amountById: Map<string, number> } | null;
 };
 
 type InsightAnalyticsDayRow = {
@@ -2674,6 +2651,10 @@ export function InsightsScreen({
   const [incomeTrendScrubMonthByYear, setIncomeTrendScrubMonthByYear] = useState<
     Record<string, string>
   >({});
+  // The month picked on the savings-rate chart, per year.
+  const [savingsScrubMonthByYear, setSavingsScrubMonthByYear] = useState<Record<string, string>>(
+    {},
+  );
   const [assetHistoryScrubMonthByYear, setAssetHistoryScrubMonthByYear] = useState<
     Record<string, string>
   >({});
@@ -2688,10 +2669,8 @@ export function InsightsScreen({
   const [categoryTrendCompareCategoryId, setCategoryTrendCompareCategoryId] = useState<
     string | null
   >(null);
-  // Which category chip the picker is choosing for: the one charted, or the one compared.
-  const [categoryTrendPickerTarget, setCategoryTrendPickerTarget] = useState<
-    'primary' | 'compare' | null
-  >(null);
+  // "Compare" arms the next category chip tap to add a second line.
+  const [isPickingCategoryCompare, setIsPickingCategoryCompare] = useState(false);
   const [lastInsightTypeByGroup, setLastInsightTypeByGroup] = useState<LastInsightTypeByGroup>({});
   const [activeInsightsFilterPicker, setActiveInsightsFilterPicker] =
     useState<InsightsFilterKey | null>(null);
@@ -3142,8 +3121,9 @@ export function InsightsScreen({
         })),
     [categories],
   );
-  const defaultCategoryTrendCategoryId = useMemo<string | null>(() => {
-    if (categoryTrendCategoryOptions.length === 0) return null;
+  // The category chips, biggest spend first; the first is the default chart.
+  const categoryTrendChipOptions = useMemo<CategoryTrendCategoryOption[]>(() => {
+    if (categoryTrendCategoryOptions.length === 0) return [];
     const totalsByRootId = new Map<string, number>();
     allTransactions.forEach((tx) => {
       if (!countsAsExpenseRow(tx) || !tx.categoryId) return;
@@ -3156,22 +3136,17 @@ export function InsightsScreen({
       const rootId = category?.parentId ?? tx.categoryId;
       totalsByRootId.set(rootId, (totalsByRootId.get(rootId) ?? 0) + value);
     });
-    let bestId: string | null = null;
-    let bestAmount = -1;
-    categoryTrendCategoryOptions.forEach((option) => {
-      const amount = totalsByRootId.get(option.id) ?? 0;
-      if (amount > bestAmount) {
-        bestAmount = amount;
-        bestId = option.id;
-      }
-    });
-    return bestId ?? categoryTrendCategoryOptions[0]?.id ?? null;
+    return categoryTrendCategoryOptions
+      .map((option, index) => ({ option, index, total: totalsByRootId.get(option.id) ?? 0 }))
+      .sort((a, b) => b.total - a.total || a.index - b.index)
+      .map((entry) => entry.option);
   }, [
     allTransactions,
     categoryById,
     categoryTrendCategoryOptions,
     settings.reimbursementsCountAsExpense,
   ]);
+  const defaultCategoryTrendCategoryId = categoryTrendChipOptions[0]?.id ?? null;
   const effectiveCategoryTrendCategoryId =
     categoryTrendSelectedCategoryId ?? defaultCategoryTrendCategoryId;
   // A comparison only stands while both categories exist and differ.
@@ -3181,6 +3156,34 @@ export function InsightsScreen({
     categoryTrendCategoryOptions.some((option) => option.id === categoryTrendCompareCategoryId)
       ? categoryTrendCompareCategoryId
       : null;
+  // A chip tap charts that category, or, while "Compare" is armed, adds it as
+  // the second line. Picking the compared category as the main one swaps them.
+  const handleCategoryChipSelect = useCallback(
+    (categoryId: string) => {
+      void triggerHaptic('selection');
+      if (isPickingCategoryCompare) {
+        setIsPickingCategoryCompare(false);
+        if (categoryId !== effectiveCategoryTrendCategoryId) {
+          setCategoryTrendCompareCategoryId(categoryId);
+        }
+        return;
+      }
+      if (categoryId === effectiveCategoryTrendCategoryId) return;
+      if (categoryId === effectiveCategoryTrendCompareId) {
+        setCategoryTrendCompareCategoryId(effectiveCategoryTrendCategoryId);
+      }
+      setCategoryTrendSelectedCategoryId(categoryId);
+    },
+    [effectiveCategoryTrendCategoryId, effectiveCategoryTrendCompareId, isPickingCategoryCompare],
+  );
+  const handleToggleCategoryCompare = useCallback(() => {
+    void triggerHaptic('selection');
+    setIsPickingCategoryCompare((previous) => !previous);
+  }, []);
+  const handleRemoveCategoryCompare = useCallback(() => {
+    void triggerHaptic('selection');
+    setCategoryTrendCompareCategoryId(null);
+  }, []);
   // The menu reopens a group (Breakdown, Trends) on the tab last used in it.
   useEffect(() => {
     const groupId = insightGroupOf(selectedInsightType);
@@ -3407,37 +3410,14 @@ export function InsightsScreen({
           filteredForRange: [],
           breakdownTransactionsById: new Map(),
           transactionType: 'expense',
-          previous: null,
         };
       }
       const rangeStartMs = Date.parse(range.start);
       const rangeEndMs = Date.parse(range.end);
-      // A breakdown also totals the period before (week, month or year) for its
-      // "vs last month" figures; it is collected in this same pass.
-      const previousRange =
-        (insightType === 'expense_breakdown' || insightType === 'income_breakdown') &&
-        (periodPresetOverride === 'week' ||
-          periodPresetOverride === 'month' ||
-          periodPresetOverride === 'year')
-          ? getPeriodRange(
-              periodPresetOverride,
-              addPeriodBySteps(state.anchorDate, periodPresetOverride, -1, monthCycle),
-              state.customStart,
-              state.customEnd,
-              weekStartsOn,
-              monthCycle,
-            )
-          : null;
-      const previousStartMs = previousRange ? Date.parse(previousRange.start) : 0;
-      const previousEndMs = previousRange ? Date.parse(previousRange.end) : -1;
       const inRangeTransactions: TransactionWithRelations[] = [];
-      const previousRangeTransactions: TransactionWithRelations[] = [];
       accountScopedNonTransferEntries.forEach((entry) => {
-        if (entry.timestamp >= rangeStartMs && entry.timestamp <= rangeEndMs) {
-          inRangeTransactions.push(entry.transaction);
-        } else if (entry.timestamp >= previousStartMs && entry.timestamp <= previousEndMs) {
-          previousRangeTransactions.push(entry.transaction);
-        }
+        if (entry.timestamp < rangeStartMs || entry.timestamp > rangeEndMs) return;
+        inRangeTransactions.push(entry.transaction);
       });
 
       if (insightType === 'expense_trend') {
@@ -4276,22 +4256,6 @@ export function InsightsScreen({
       });
       const categoryRows = Array.from(breakdownTotals.values()).sort((a, b) => b.amount - a.amount);
 
-      // The period before, summed the same way, for "vs last month" and the
-      // per-category change.
-      let previous: BreakdownPageData['previous'] = null;
-      if (previousRange) {
-        const amountById = new Map<string, number>();
-        let total = 0;
-        previousRangeTransactions.forEach((tx) => {
-          if (!passesBreakdownFilter(tx)) return;
-          const value = breakdownValueOf(tx);
-          if (!Number.isFinite(value)) return;
-          const id = resolveBreakdownRootId(tx, categoryById);
-          amountById.set(id, (amountById.get(id) ?? 0) + value);
-          total += value;
-        });
-        previous = { total, amountById };
-      }
       return {
         kind: 'breakdown',
         range,
@@ -4299,7 +4263,6 @@ export function InsightsScreen({
         filteredForRange,
         breakdownTransactionsById,
         transactionType,
-        previous,
       };
     },
     [
@@ -4380,6 +4343,12 @@ export function InsightsScreen({
         ? INSIGHT_GROUP_MEMBERS[displayInsightGroup].map((member) => ({
             value: member,
             label: String(I18n.t(`insights.tabs.${member}`)),
+            // Trends picks what to chart from an icon row; Breakdown's two
+            // tabs stay plain text.
+            icon:
+              displayInsightGroup === 'trends'
+                ? UTILITY_ICON_SOURCES[INSIGHT_TYPE_ICON_NAME[member]]
+                : undefined,
           }))
         : [],
     // Rebuilt on a language change, since the labels are read through I18n.
@@ -4500,57 +4469,16 @@ export function InsightsScreen({
     },
     [settings],
   );
-  const renderCompactValueNode = useCallback(
-    (
-      value: number,
-      options: {
-        variant?: React.ComponentProps<typeof Text>['variant'];
-        tone?: React.ComponentProps<typeof Text>['tone'];
-        textClassName?: string;
-        containerClassName?: string;
-        iconColor?: string;
-        iconSize?: number;
-        style?: React.ComponentProps<typeof Text>['style'];
-      } = {},
-    ) => {
-      const {
-        variant = 'label',
-        tone = 'default',
-        textClassName,
-        containerClassName,
-        iconColor,
-        iconSize,
-        style,
-      } = options;
-
-      if (settings.displayMode === 'time') {
-        return (
-          <TimeValueInline
-            value={formatHours(value, settings)}
-            variant={variant}
-            tone={tone}
-            textClassName={textClassName}
-            containerClassName={containerClassName}
-            iconColor={iconColor}
-            iconSize={iconSize}
-            style={style}
-          />
-        );
-      }
-
-      return (
-        <Text variant={variant} tone={tone} className={textClassName} style={style}>
-          {formatCompactCurrency(value, settings.currencySymbol)}
-        </Text>
-      );
-    },
-    [settings],
-  );
   const formatAxisCurrencyValue = useCallback(
     (value: number) =>
       `${value < 0 ? '-' : ''}${formatCompactCurrency(Math.abs(value), settings.currencySymbol)}`,
     [settings.currencySymbol],
   );
+  const formatPercentValue = useCallback(
+    (value: number) => formatSavingsRatePercentLabel(value),
+    [],
+  );
+  const formatPercentAxisValue = useCallback((value: number) => `${Math.round(value)}%`, []);
   const formatTrendTooltipValue = useCallback(
     (value: number) =>
       settings.displayMode === 'time'
@@ -4903,38 +4831,6 @@ export function InsightsScreen({
       stageHeight: pieStageHeight,
       totalAmount: pageTotalAmount,
     });
-    // "↑ 12% vs last month": more spending is bad news, more income good news.
-    const changeColor = (isUp: boolean) =>
-      isUp === isIncomeBreakdown ? themeColors.success : themeColors.error;
-    const previousPeriodKey =
-      displayPeriodPreset === 'week' ||
-      displayPeriodPreset === 'month' ||
-      displayPeriodPreset === 'year'
-        ? displayPeriodPreset
-        : null;
-    const totalChangePercent = pageData.previous
-      ? percentChange(pageTotalAmount, pageData.previous.total)
-      : null;
-    const breakdownTotalChange =
-      totalChangePercent !== null && previousPeriodKey && Math.round(totalChangePercent) !== 0
-        ? {
-            isUp: totalChangePercent > 0,
-            color: changeColor(totalChangePercent > 0),
-            text: String(
-              I18n.t(`insights.change.vs_last_${previousPeriodKey}`, {
-                percent: Math.round(Math.abs(totalChangePercent)),
-              }),
-            ),
-          }
-        : null;
-    const categoryChangeOf = (id: string, amount: number) => {
-      if (!pageData.previous) return null;
-      const previousAmount = pageData.previous.amountById.get(id) ?? 0;
-      if (previousAmount <= 0) return { kind: 'new' as const };
-      const percent = percentChange(amount, previousAmount);
-      if (percent === null || Math.round(percent) === 0) return null;
-      return { kind: 'change' as const, isUp: percent > 0, percent: Math.round(Math.abs(percent)) };
-    };
     if (pageData.filteredForRange.length === 0) {
       return (
         <EmptyState
@@ -4961,31 +4857,15 @@ export function InsightsScreen({
                   iconColor: totalRowAccentColor,
                   iconSize: 22,
                 })}
-                {breakdownTotalChange ? (
-                  <View
-                    className="flex-row items-center gap-1"
-                    accessibilityLabel={breakdownTotalChange.text}
-                  >
-                    {breakdownTotalChange.isUp ? (
-                      <ArrowUp size={14} color={breakdownTotalChange.color} strokeWidth={2.75} />
-                    ) : (
-                      <ArrowDown size={14} color={breakdownTotalChange.color} strokeWidth={2.75} />
-                    )}
-                    <Text variant="caption" style={{ color: breakdownTotalChange.color }}>
-                      {breakdownTotalChange.text}
-                    </Text>
-                  </View>
-                ) : (
-                  <View
-                    style={{
-                      width: 36,
-                      height: 3,
-                      borderRadius: 2,
-                      backgroundColor: withColorAlpha(totalRowAccentColor, isDark ? 0.38 : 0.28),
-                      marginTop: 1,
-                    }}
-                  />
-                )}
+                <View
+                  style={{
+                    width: 36,
+                    height: 3,
+                    borderRadius: 2,
+                    backgroundColor: withColorAlpha(totalRowAccentColor, isDark ? 0.38 : 0.28),
+                    marginTop: 1,
+                  }}
+                />
               </View>
 
               <View className="mt-2 w-full items-center overflow-visible">
@@ -5165,85 +5045,38 @@ export function InsightsScreen({
                   }}
                   accessibilityRole="button"
                   accessibilityLabel={`${categoryIconToEmoji(item.emoji)} ${item.name}`.trim()}
-                  className="rounded-2xl border px-3 py-2 active:opacity-85"
+                  className="rounded-xl px-2.5 py-1.5 active:opacity-85 border"
                   style={[
                     { backgroundColor: rowBackgroundColor, borderColor: rowBorderColor },
                     isSelected && { borderWidth: 2 },
                     hasSelection && !isSelected && { opacity: 0.5 },
                   ]}
                 >
-                  <View className="flex-row items-center gap-2.5">
-                    <CategoryEmoji icon={item.emoji} size={22} />
-                    <View className="flex-1 gap-1">
-                      <Text variant="caption" numberOfLines={1}>
+                  <View className="flex-row items-center justify-between gap-2">
+                    <View className="flex-1 flex-row items-center gap-1.5 pr-2">
+                      <CategoryEmoji icon={item.emoji} size={16} />
+                      <Text variant="caption" className="flex-1" numberOfLines={2}>
                         {item.name}
                       </Text>
-                      <View
-                        className="h-1.5 overflow-hidden rounded-full"
-                        style={{ backgroundColor: withColorAlpha(themeColors.border, 0.55) }}
-                      >
-                        <View
-                          className="h-1.5 rounded-full"
-                          style={{
-                            width: `${Math.max(2, Math.min(100, item.pct))}%`,
-                            backgroundColor: item.color,
-                          }}
-                        />
-                      </View>
                     </View>
-                    <View className="items-end">
+                    <View className="flex-row items-center gap-1.5">
                       {renderValueNode(item.amount, {
-                        variant: 'caption',
+                        variant: 'label',
                         textClassName: 'text-foreground',
                         iconColor: themeColors.text,
                       })}
                       <View
-                        className="mt-0.5 rounded-full px-1.5"
+                        className="rounded-full px-1.5 py-0.5"
                         style={[
                           styles.breakdownPercentBadge,
                           { backgroundColor: percentBadgeColor },
                         ]}
                       >
-                        <Text
-                          variant="caption"
-                          className="text-foreground"
-                          style={{ fontSize: 11 }}
-                        >
+                        <Text variant="label" className="text-foreground">
                           {item.pct.toFixed(1)}%
                         </Text>
                       </View>
                     </View>
-                    {pageData.previous ? (
-                      <View className="w-[60px] flex-row items-center justify-end gap-0.5">
-                        {(() => {
-                          const change = categoryChangeOf(item.id, item.amount);
-                          if (!change) {
-                            return (
-                              <Text variant="caption" tone="muted" style={{ fontSize: 11 }}>
-                                –
-                              </Text>
-                            );
-                          }
-                          if (change.kind === 'new') {
-                            return (
-                              <Text variant="caption" tone="primary" style={{ fontSize: 11 }}>
-                                {I18n.t('insights.change.new')}
-                              </Text>
-                            );
-                          }
-                          const color = changeColor(change.isUp);
-                          const Arrow = change.isUp ? ArrowUp : ArrowDown;
-                          return (
-                            <>
-                              <Arrow size={12} color={color} strokeWidth={2.75} />
-                              <Text variant="caption" style={{ fontSize: 11, color }}>
-                                {change.percent > 999 ? '999+%' : `${change.percent}%`}
-                              </Text>
-                            </>
-                          );
-                        })()}
-                      </View>
-                    ) : null}
                   </View>
                 </Pressable>
               );
@@ -5408,6 +5241,41 @@ export function InsightsScreen({
     return model;
   };
 
+  // The savings-rate page charts each month's rate with the trends' chart.
+  const getSavingsChartModel = (pageData: AnalyticsPageData): TrendChartModel => {
+    const cached = trendChartModelCacheRef.current.get(pageData);
+    if (cached && cached.signature === trendModelSignature) return cached.model;
+    const values = pageData.savingsRateRows.map((row) =>
+      isFutureTrendBucket(row.monthKey) || row.savingsRate === null
+        ? null
+        : Math.round(row.savingsRate * 1000) / 10,
+    );
+    const model: TrendChartModel = {
+      buckets: pageData.savingsRateRows.map((row) => ({
+        key: row.monthKey,
+        label: row.label,
+        title: trendBucketTitle(row.monthKey, row.label),
+      })),
+      series: [
+        {
+          key: 'savings_rate',
+          label: String(I18n.t('insights.savings_rate')),
+          color: themeColors.success,
+          values,
+        },
+      ],
+      values,
+      compareValues: null,
+      transactionsByKey: new Map(),
+    };
+    trendChartModelCacheRef.current.set(pageData, {
+      signature: trendModelSignature,
+      rateSource: getTrueHourlyRateForDate,
+      model,
+    });
+    return model;
+  };
+
   const trendScrubSelection = (kind: TrendKind, periodKey: string): string | null => {
     const record =
       kind === 'expense'
@@ -5467,21 +5335,6 @@ export function InsightsScreen({
         {formatAmount(value, settings)}
       </Text>
     );
-  const renderTrendStatValue = (value: number) =>
-    settings.displayMode === 'time' ? (
-      <TimeValueInline
-        value={`${value < 0 ? '-' : ''}${formatHours(Math.abs(value), settings)}`}
-        variant="bodyStrong"
-        textClassName="text-foreground"
-        iconColor={themeColors.text}
-        iconSize={14}
-      />
-    ) : (
-      <Text variant="bodyStrong" numberOfLines={1} adjustsFontSizeToFit className="text-foreground">
-        {`${value < 0 ? '-' : ''}${formatCompactCurrency(Math.abs(value), settings.currencySymbol)}`}
-      </Text>
-    );
-
   // The selected bucket's three biggest categories, from its transactions.
   const buildTrendTopCategories = (
     transactions: TransactionWithRelations[],
@@ -5537,83 +5390,6 @@ export function InsightsScreen({
     return rows;
   };
 
-  const renderCategoryCompareChips = (pageData: CategoryTrendPageData) => {
-    const primary = pageData.selectableCategories.find(
-      (option) => option.id === pageData.selectedCategoryId,
-    );
-    const compare = pageData.compareCategoryId
-      ? pageData.selectableCategories.find((option) => option.id === pageData.compareCategoryId)
-      : null;
-    const chip = (
-      option: CategoryTrendCategoryOption,
-      color: string,
-      target: 'primary' | 'compare',
-      onRemove?: () => void,
-    ) => (
-      <Pressable
-        onPress={() => {
-          void triggerHaptic('selection');
-          setCategoryTrendPickerTarget(target);
-        }}
-        accessibilityRole="button"
-        accessibilityLabel={option.label}
-        className="min-h-11 flex-1 flex-row items-center gap-1.5 rounded-2xl border border-border/50 bg-card px-2.5 active:opacity-80"
-      >
-        <View className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} />
-        <CategoryEmoji icon={option.emoji} size={18} />
-        <Text variant="caption" numberOfLines={1} className="flex-1">
-          {option.label}
-        </Text>
-        {onRemove ? (
-          <Pressable
-            onPress={() => {
-              void triggerHaptic('selection');
-              onRemove();
-            }}
-            hitSlop={10}
-            accessibilityRole="button"
-            accessibilityLabel={I18n.t('insights.compare.remove')}
-          >
-            <X size={15} color={themeColors.textMuted} />
-          </Pressable>
-        ) : (
-          <ChevronDown size={15} color={themeColors.textMuted} />
-        )}
-      </Pressable>
-    );
-    if (!primary) return null;
-    return (
-      <View className="flex-row items-center gap-2">
-        {chip(primary, CATEGORY_TREND_PRIMARY_COLOR, 'primary')}
-        {compare ? (
-          <>
-            <Text variant="caption" tone="muted">
-              {I18n.t('insights.compare.vs')}
-            </Text>
-            {chip(compare, CATEGORY_TREND_COMPARE_COLOR, 'compare', () =>
-              setCategoryTrendCompareCategoryId(null),
-            )}
-          </>
-        ) : (
-          <Pressable
-            onPress={() => {
-              void triggerHaptic('selection');
-              setCategoryTrendPickerTarget('compare');
-            }}
-            accessibilityRole="button"
-            accessibilityLabel={I18n.t('insights.compare.add')}
-            className="min-h-11 flex-row items-center gap-1 rounded-2xl border border-dashed border-primary/50 px-3 active:opacity-80"
-          >
-            <Plus size={15} color={themeColors.primary} />
-            <Text variant="caption" tone="primary">
-              {I18n.t('insights.compare.add')}
-            </Text>
-          </Pressable>
-        )}
-      </View>
-    );
-  };
-
   const renderTrendLinePane = (pageData: InsightPageData, kind: TrendKind) => {
     const model = getTrendChartModel(pageData);
     if (!model) return null;
@@ -5652,15 +5428,14 @@ export function InsightsScreen({
       completedSummary && completedSummary.counted > 0
         ? completedSummary
         : summarizeTrend(statBuckets, { activeOnly: !isBalance });
-    const titleOf = (key: string) =>
-      model.buckets.find((bucket) => bucket.key === key)?.title ?? key;
     // "Higher" is bad news for spending and good news for income and assets.
     const higherIsGood = kind === 'income' || kind === 'asset';
     const goodColor = themeColors.success;
     const badColor = themeColors.error;
 
-    let caption: string | null = null;
-    let captionColor: string | undefined;
+    // A quiet pill under the amount: how the selected month compares with
+    // the average (or, for assets, how far the balance moved since January).
+    let badge: TrendHeadlineBadge | null = null;
     if (isBalance) {
       const firstIndex = model.values.findIndex((value) => value !== null);
       const firstValue = firstIndex >= 0 ? model.values[firstIndex] : null;
@@ -5670,98 +5445,31 @@ export function InsightsScreen({
         const deltaText =
           settings.displayMode === 'time'
             ? formatHours(Math.abs(delta), settings)
-            : formatAmount(Math.abs(delta), settings);
-        caption =
-          Math.abs(delta) < 0.005
+            : formatCompactCurrency(Math.abs(delta), settings.currencySymbol);
+        const isFlat = Math.abs(delta) < 0.005;
+        badge = {
+          text: isFlat
             ? String(I18n.t('insights.trend_stats.flat_since', { period: since }))
             : String(
-                I18n.t(
-                  delta > 0 ? 'insights.trend_stats.up_since' : 'insights.trend_stats.down_since',
-                  {
-                    value: deltaText,
-                    period: since,
-                  },
-                ),
-              );
-        captionColor = delta > 0 ? goodColor : delta < 0 ? badColor : themeColors.textMuted;
+                I18n.t('insights.trend_stats.change_since', { value: deltaText, period: since }),
+              ),
+          color: isFlat ? themeColors.textMuted : delta > 0 ? goodColor : badColor,
+          direction: isFlat ? null : delta > 0 ? 'up' : 'down',
+        };
       }
     } else if (!isComparing && selectedValue > 0) {
       const change = percentChange(selectedValue, summary.average);
       if (change !== null && summary.counted > 1) {
         const percent = Math.round(Math.abs(change));
-        caption =
-          percent === 0
-            ? String(I18n.t('insights.trend_stats.at_average'))
-            : String(
-                I18n.t(
-                  change > 0
-                    ? 'insights.trend_stats.above_average'
-                    : 'insights.trend_stats.below_average',
-                  { percent },
-                ),
-              );
         const isGood = percent === 0 ? null : change > 0 === higherIsGood;
-        captionColor = isGood === null ? themeColors.textMuted : isGood ? goodColor : badColor;
-      }
-    }
-
-    const statItems: TrendStatCardItem[] = [];
-    if (!isComparing) {
-      if (isBalance) {
-        const firstIndex = model.values.findIndex((value) => value !== null);
-        let lastIndex = -1;
-        model.values.forEach((value, index) => {
-          if (value !== null) lastIndex = index;
-        });
-        const firstValue = firstIndex >= 0 ? model.values[firstIndex] : null;
-        const lastValue = lastIndex >= 0 ? model.values[lastIndex] : null;
-        if (
-          firstValue !== null &&
-          firstValue !== undefined &&
-          lastValue !== null &&
-          lastValue !== undefined
-        ) {
-          statItems.push({
-            key: 'change',
-            kind: 'average',
-            label: String(I18n.t('insights.trend_stats.change')),
-            detail:
-              lastIndex > firstIndex
-                ? `${model.buckets[firstIndex]?.title ?? ''} – ${model.buckets[lastIndex]?.title ?? ''}`
-                : null,
-            value: renderTrendStatValue(lastValue - firstValue),
-          });
-        }
-      } else if (summary.average !== null) {
-        statItems.push({
-          key: 'average',
-          kind: 'average',
-          label: String(I18n.t('insights.trend_stats.average')),
-          detail: null,
-          value: renderTrendStatValue(summary.average),
-        });
-      }
-      if (summary.highest) {
-        statItems.push({
-          key: 'high',
-          kind: 'high',
-          label: String(I18n.t('insights.trend_stats.highest')),
-          detail: titleOf(summary.highest.key),
-          value: renderTrendStatValue(summary.highest.value),
-        });
-      }
-      if (
-        summary.lowest &&
-        summary.counted > 1 &&
-        summary.lowest.value !== summary.highest?.value
-      ) {
-        statItems.push({
-          key: 'low',
-          kind: 'low',
-          label: String(I18n.t('insights.trend_stats.lowest')),
-          detail: titleOf(summary.lowest.key),
-          value: renderTrendStatValue(summary.lowest.value),
-        });
+        badge = {
+          text:
+            percent === 0
+              ? String(I18n.t('insights.trend_stats.at_average'))
+              : String(I18n.t('insights.trend_stats.vs_average', { percent })),
+          color: isGood === null ? themeColors.textMuted : isGood ? goodColor : badColor,
+          direction: percent === 0 ? null : change > 0 ? 'up' : 'down',
+        };
       }
     }
 
@@ -5798,10 +5506,6 @@ export function InsightsScreen({
         })),
         { activeOnly: true },
       );
-      const option = (id: string | null) =>
-        pageData.selectableCategories.find((candidate) => candidate.id === id);
-      const firstOption = option(pageData.selectedCategoryId);
-      const secondOption = option(pageData.compareCategoryId);
       const comparison = compareCategoryTotals(firstSummary.total, secondSummary.total);
       const first = model.series[0]?.label ?? '';
       const second = model.series[1].label;
@@ -5823,34 +5527,24 @@ export function InsightsScreen({
                   : null;
       compareSummary = (
         <TrendCompareSummary
-          title={String(
-            I18n.t('insights.compare.total_in', {
-              period: periodLabel(displayPeriodPreset, pageData.range, activeLocale),
-            }),
-          )}
-          averageLabel={String(I18n.t('insights.trend_stats.average'))}
           sentence={sentence ? String(sentence) : null}
           first={{
             label: first,
-            icon: firstOption?.emoji ?? '•',
             color: CATEGORY_TREND_PRIMARY_COLOR,
             total: renderValueNode(firstSummary.total, {
-              variant: 'subheading',
+              variant: 'bodyStrong',
               textClassName: 'text-foreground',
               iconColor: themeColors.text,
             }),
-            average: renderTrendStatValue(firstSummary.average ?? 0),
           }}
           second={{
             label: second,
-            icon: secondOption?.emoji ?? '•',
             color: CATEGORY_TREND_COMPARE_COLOR,
             total: renderValueNode(secondSummary.total, {
-              variant: 'subheading',
+              variant: 'bodyStrong',
               textClassName: 'text-foreground',
               iconColor: themeColors.text,
             }),
-            average: renderTrendStatValue(secondSummary.average ?? 0),
           }}
         />
       );
@@ -5861,7 +5555,6 @@ export function InsightsScreen({
         ? pageData.includedAccountsCount > 0 && model.values.some((value) => value !== null)
         : pageData.filteredForRange.length > 0;
     const emptyKey = insightType;
-    const chips = pageData.kind === 'category_trend' ? renderCategoryCompareChips(pageData) : null;
     if (!hasAnyData) {
       if (pageData.kind === 'asset_history') {
         // No accounts picked, or a year that has not started yet.
@@ -5885,7 +5578,6 @@ export function InsightsScreen({
       }
       return (
         <View className="mt-2 gap-3">
-          {chips}
           <EmptyState
             title={I18n.t(`insights.analytics.${emptyKey}.no_data_title`)}
             message={I18n.t(`insights.analytics.${emptyKey}.no_data_message`)}
@@ -5905,7 +5597,6 @@ export function InsightsScreen({
         className="mt-1 gap-3"
         primary={
           <>
-            {chips}
             {isComparing ? null : (
               <TrendHeadline
                 title={selectedBucket?.title ?? ''}
@@ -5913,8 +5604,7 @@ export function InsightsScreen({
                   selectedValue,
                   isBalance && selectedValue < 0 ? badColor : accentColor,
                 )}
-                caption={caption}
-                captionColor={captionColor}
+                badge={badge}
               />
             )}
             <View
@@ -5951,8 +5641,8 @@ export function InsightsScreen({
                 gridColor={withColorAlpha(themeColors.border, isDark ? 0.7 : 0.9)}
                 labelColor={themeColors.textMuted}
                 surfaceColor={themeColors.background}
-                tooltipBackground={themeColors.text}
-                tooltipTextColor={themeColors.background}
+                tooltipBackground={themeColors.card}
+                tooltipTextColor={themeColors.text}
                 accessibilityLabel={String(I18n.t(`insights.${insightType}`))}
               />
             </View>
@@ -5960,13 +5650,6 @@ export function InsightsScreen({
         }
         secondary={
           <View className="gap-3">
-            {statItems.length > 0 ? (
-              <TrendStatCards
-                items={statItems}
-                highColor={higherIsGood ? goodColor : badColor}
-                lowColor={higherIsGood ? badColor : goodColor}
-              />
-            ) : null}
             {compareSummary}
             {topCategories.length > 0 && selectedBucket ? (
               <TrendTopCategories
@@ -6033,14 +5716,63 @@ export function InsightsScreen({
       );
     }
 
+    // Same shape as the trends: how many expenses, the mood most of them had
+    // as a quiet pill, the day-by-day bars, then one plain row per mood.
     const sentimentChartWidth = Math.max(140, lineChartWidth - SENTIMENT_CHART_PADDING_RIGHT);
+    const moodTotal = pageData.totals.happy + pageData.totals.neutral + pageData.totals.sad;
+    const moods = [
+      {
+        key: 'happy' as const,
+        label: String(I18n.t('review.mood_happy')),
+        count: pageData.totals.happy,
+        color: SENTIMENT_COLORS.happy,
+      },
+      {
+        key: 'neutral' as const,
+        label: String(I18n.t('review.mood_neutral')),
+        count: pageData.totals.neutral,
+        color: SENTIMENT_COLORS.neutral,
+      },
+      {
+        key: 'sad' as const,
+        label: String(I18n.t('review.mood_regret')),
+        count: pageData.totals.sad,
+        color: SENTIMENT_COLORS.sad,
+      },
+    ];
+    const dominantMood = moods.reduce((best, mood) => (mood.count > best.count ? mood : best));
+    const shareOf = (count: number) => (moodTotal > 0 ? count / moodTotal : 0);
     return (
       <InsightPaneSplit
-        className="mt-2 gap-3"
+        className="mt-1 gap-3"
         primary={
           <>
+            <TrendHeadline
+              value={
+                <Text
+                  variant="heading"
+                  className="text-[28px] leading-[36px] font-black tracking-tight"
+                >
+                  {String(
+                    I18n.t('insights.analytics.expense_trend.transactions', { count: moodTotal }),
+                  )}
+                </Text>
+              }
+              badge={
+                moodTotal > 0
+                  ? {
+                      text: `${dominantMood.label} · ${Math.round(
+                        shareOf(dominantMood.count) * 100,
+                      )}%`,
+                      color: dominantMood.color,
+                      direction: null,
+                    }
+                  : null
+              }
+            />
             <View style={lineChartSectionStyle} className="py-1">
               <View
+                {...REPLAY_PRIVATE}
                 style={[
                   styles.chartSizeCenter,
                   buildSizeStyle(lineChartWidth, SENTIMENT_CHART_HEIGHT),
@@ -6060,48 +5792,40 @@ export function InsightsScreen({
           </>
         }
         secondary={
-          <Card className="gap-3 p-4">
-            <Text variant="label" tone="muted">
-              {I18n.t('insights.analytics.expense_sentiment.summary_title')}
-            </Text>
-            <View className="flex-row items-center pt-1">
-              <View className="flex-1 items-center justify-center py-1">
-                <View className="flex-row items-center justify-center gap-1.5">
-                  <SentimentIcon sentiment="sad" size={26} />
-                  <X size={12} color="#000000" strokeWidth={2.4} />
-                  <Text variant="subheading" style={{ color: SENTIMENT_COLORS.sad }}>
-                    {pageData.totals.sad}
-                  </Text>
-                </View>
-              </View>
+          <View className="gap-1.5">
+            <Text variant="bodyStrong">{I18n.t('review.mood')}</Text>
+            {moods.map((mood) => (
               <View
-                className="mx-3 w-px"
-                style={{ backgroundColor: withColorAlpha(themeColors.border, isDark ? 0.4 : 0.3) }}
-              />
-              <View className="flex-1 items-center justify-center py-1">
-                <View className="flex-row items-center justify-center gap-1.5">
-                  <SentimentIcon sentiment="neutral" size={26} />
-                  <X size={12} color="#000000" strokeWidth={2.4} />
-                  <Text variant="subheading" style={{ color: SENTIMENT_COLORS.neutral }}>
-                    {pageData.totals.neutral}
+                key={mood.key}
+                className="flex-row items-center gap-3 rounded-2xl border border-border/40 bg-card px-3.5 py-2.5"
+              >
+                <SentimentIcon sentiment={mood.key} size={26} />
+                <View className="flex-1 gap-1">
+                  <Text variant="caption" numberOfLines={1}>
+                    {mood.label}
+                  </Text>
+                  <View
+                    className="h-1.5 overflow-hidden rounded-full"
+                    style={{ backgroundColor: withColorAlpha(themeColors.border, 0.55) }}
+                  >
+                    <View
+                      style={[
+                        styles.progressFill,
+                        buildWidthStyle(`${Math.round(shareOf(mood.count) * 100)}%`),
+                        { backgroundColor: mood.color },
+                      ]}
+                    />
+                  </View>
+                </View>
+                <View className="items-end">
+                  <Text variant="bodyStrong">{mood.count}</Text>
+                  <Text variant="caption" tone="muted" style={styles.savingsMonthDetail}>
+                    {`${Math.round(shareOf(mood.count) * 100)}%`}
                   </Text>
                 </View>
               </View>
-              <View
-                className="mx-3 w-px"
-                style={{ backgroundColor: withColorAlpha(themeColors.border, isDark ? 0.4 : 0.3) }}
-              />
-              <View className="flex-1 items-center justify-center py-1">
-                <View className="flex-row items-center justify-center gap-1.5">
-                  <SentimentIcon sentiment="happy" size={26} />
-                  <X size={12} color="#000000" strokeWidth={2.4} />
-                  <Text variant="subheading" style={{ color: SENTIMENT_COLORS.happy }}>
-                    {pageData.totals.happy}
-                  </Text>
-                </View>
-              </View>
-            </View>
-          </Card>
+            ))}
+          </View>
         }
       />
     );
@@ -6109,197 +5833,109 @@ export function InsightsScreen({
 
   const renderAnalyticsPane = (pageData: AnalyticsPageData) => {
     if (pageData.insightType === 'savings_rate') {
+      // Same shape as the trends: the year's rate as the headline with a quiet
+      // pill, the month-by-month rate as a line, then one plain row per month.
       const savingsRate =
         pageData.totalIncome > 0 ? pageData.totalNet / pageData.totalIncome : null;
       const displayRatePercent =
         savingsRate === null ? null : Number((savingsRate * 100).toFixed(1));
-      const {
-        color: toneColor,
-        Icon: StatusIcon,
-        labelKey: statusLabelKey,
-      } = resolveSavingsRateStatus(displayRatePercent, themeColors);
-      const statusLabel = I18n.t(`insights.analytics.savings_rate.${statusLabelKey}`);
-      const statusChipColor = withColorAlpha(toneColor, isDark ? 0.24 : 0.14);
-      const formattedSavingsRate =
-        displayRatePercent === null ? null : formatSavingsRatePercentLabel(displayRatePercent);
-      const yearlySavedAmount = Math.abs(pageData.totalNet);
-      const yearlySavedAmountClass =
-        pageData.totalNet > 0
-          ? 'text-success'
-          : pageData.totalNet < 0
-            ? 'text-destructive'
-            : 'text-muted-foreground';
-      const yearlySavedBadgeClass =
-        pageData.totalNet > 0
-          ? 'border-success/30 bg-success/10'
-          : pageData.totalNet < 0
-            ? 'border-destructive/30 bg-destructive/10'
-            : 'border-border/35 bg-secondary/20';
-      const healthyMarkerLeft = `${Math.round(HEALTHY_SAVINGS_RATE_THRESHOLD * 100)}%` as const;
-      const healthyMarkerColor = withColorAlpha(themeColors.text, isDark ? 0.75 : 0.5);
-      const ringTrackColor = withColorAlpha(themeColors.textMuted, isDark ? 0.26 : 0.16);
-      const monthTrackSpentColor = withColorAlpha(themeColors.error, isDark ? 0.32 : 0.16);
-      const monthTrackIdleColor = withColorAlpha(themeColors.textMuted, isDark ? 0.24 : 0.14);
-      const piggyIconSource = UTILITY_ICON_SOURCES[INSIGHT_TYPE_ICON_NAME.savings_rate];
-      let bestMonthKey: string | null = null;
-      let bestMonthRate = 0;
-      pageData.savingsRateRows.forEach((row) => {
-        if (row.savingsRate !== null && row.savingsRate > bestMonthRate) {
-          bestMonthKey = row.monthKey;
-          bestMonthRate = row.savingsRate;
-        }
-      });
+      const toneColor = resolveSavingsRateStatus(displayRatePercent, themeColors).color;
+      const yearKey = pageData.range.start.slice(0, 4);
+      const chartModel = getSavingsChartModel(pageData);
+      const selectedKey =
+        chartModel.buckets.find((bucket) => bucket.key === savingsScrubMonthByYear[yearKey])?.key ??
+        defaultTrendBucketKey(chartModel, false);
+      const savedText =
+        settings.displayMode === 'time'
+          ? formatHours(Math.abs(pageData.totalNet), settings)
+          : formatCompactCurrency(Math.abs(pageData.totalNet), settings.currencySymbol);
+      const badge: TrendHeadlineBadge | null =
+        savingsRate === null || pageData.totalNet === 0
+          ? null
+          : {
+              text: String(
+                I18n.t(
+                  pageData.totalNet > 0
+                    ? 'insights.analytics.savings_rate.saved'
+                    : 'insights.analytics.savings_rate.overspent',
+                  { value: savedText },
+                ),
+              ),
+              color: pageData.totalNet > 0 ? themeColors.success : themeColors.error,
+              direction: null,
+            };
+      const compact = (value: number) =>
+        settings.displayMode === 'time'
+          ? formatHours(value, settings)
+          : formatCompactCurrency(value, settings.currencySymbol);
+      const savedTrackColor = withColorAlpha(themeColors.error, isDark ? 0.3 : 0.16);
 
       return (
         <InsightPaneSplit
-          className="mt-2 gap-3"
+          className="mt-1 gap-3"
           primary={
             <>
-              <Card className="gap-4 p-5">
-                <View className="flex-row items-center gap-4">
-                  <SavingsRateRing
-                    size={SAVINGS_RATE_RING_SIZE}
-                    strokeWidth={SAVINGS_RATE_RING_STROKE_WIDTH}
-                    progress={savingsRate ?? 0}
-                    color={toneColor}
-                    trackColor={ringTrackColor}
-                    goal={HEALTHY_SAVINGS_RATE_THRESHOLD}
-                    goalColor={themeColors.accent}
+              <TrendHeadline
+                value={
+                  <Text
+                    variant="heading"
+                    className="text-[30px] leading-[38px] font-black tracking-tight"
+                    style={{ color: savingsRate === null ? themeColors.textMuted : toneColor }}
                   >
-                    {piggyIconSource ? (
-                      <Image
-                        source={piggyIconSource}
-                        resizeMode="contain"
-                        style={styles.savingsRateRingIcon}
-                      />
-                    ) : (
-                      <PiggyBank size={36} color={toneColor} strokeWidth={1.8} />
-                    )}
-                  </SavingsRateRing>
-
-                  <View className="flex-1">
-                    <View className="mt-0.5">
-                      {formattedSavingsRate === null ? (
-                        <Text variant="monoLg" tone="muted">
-                          {I18n.t('insights.analytics.savings_rate.no_income_short')}
-                        </Text>
-                      ) : (
-                        // The gradient number is SVG glyphs, invisible to screen
-                        // readers — announce the figure on the wrapper instead.
-                        <View
-                          accessible
-                          accessibilityRole="text"
-                          accessibilityLabel={formattedSavingsRate}
-                        >
-                          <GradientPercent
-                            label={formattedSavingsRate}
-                            color={toneColor}
-                            gradientId="insightsSavingsRateHero"
-                          />
-                        </View>
-                      )}
-                    </View>
-                    {savingsRate !== null ? (
-                      <Text variant="caption" tone="muted">
-                        {I18n.t('widgets.of_income_saved')}
-                      </Text>
-                    ) : null}
-                    <View className="mt-2 flex-row flex-wrap items-center gap-1.5">
-                      <View
-                        className="flex-row items-center gap-1 rounded-full px-2 py-[3px]"
-                        style={{ backgroundColor: statusChipColor }}
-                      >
-                        <StatusIcon size={11} color={toneColor} strokeWidth={2.6} />
-                        <Text
-                          variant="label"
-                          style={{ color: toneColor, fontFamily: FONT.semibold, fontWeight: '600' }}
-                        >
-                          {statusLabel}
-                        </Text>
-                      </View>
-                      <View
-                        className={cn('rounded-full border px-2 py-[3px]', yearlySavedBadgeClass)}
-                      >
-                        {renderCompactValueNode(yearlySavedAmount, {
-                          variant: 'label',
-                          textClassName: cn(yearlySavedAmountClass),
-                          iconColor:
-                            pageData.totalNet > 0
-                              ? themeColors.success
-                              : pageData.totalNet < 0
-                                ? themeColors.error
-                                : themeColors.textMuted,
-                        })}
-                      </View>
-                    </View>
-                  </View>
-                </View>
-
-                <View className="flex-row items-stretch border-t border-border/40 pt-3">
-                  <View className="flex-1">
-                    <View className="flex-row items-center gap-1.5">
-                      <View className="h-1.5 w-1.5 rounded-full bg-success" />
-                      <Text variant="label" tone="muted">
-                        {I18n.t('calendar.income')}
-                      </Text>
-                    </View>
-                    {renderCompactValueNode(pageData.totalIncome, {
-                      variant: 'caption',
-                      textClassName: 'mt-0.5 text-success',
-                      iconColor: themeColors.success,
-                    })}
-                  </View>
-                  <View className="mx-3 w-px bg-border/40" />
-                  <View className="flex-1">
-                    <View className="flex-row items-center gap-1.5">
-                      <View className="h-1.5 w-1.5 rounded-full bg-destructive" />
-                      <Text variant="label" tone="muted">
-                        {I18n.t('calendar.expense')}
-                      </Text>
-                    </View>
-                    {renderCompactValueNode(pageData.totalExpense, {
-                      variant: 'caption',
-                      textClassName: 'mt-0.5 text-destructive',
-                      iconColor: themeColors.error,
-                    })}
-                  </View>
-                  <View className="mx-3 w-px bg-border/40" />
-                  <View className="flex-1">
-                    <View className="flex-row items-center gap-1.5">
-                      <View
-                        className={cn(
-                          'h-1.5 w-1.5 rounded-full',
-                          pageData.totalNet >= 0 ? 'bg-success' : 'bg-destructive',
-                        )}
-                      />
-                      <Text variant="label" tone="muted">
-                        {I18n.t('calendar.net')}
-                      </Text>
-                    </View>
-                    {renderCompactValueNode(Math.abs(pageData.totalNet), {
-                      variant: 'caption',
-                      textClassName: cn(
-                        'mt-0.5',
-                        pageData.totalNet >= 0 ? 'text-success' : 'text-destructive',
-                      ),
-                      iconColor: pageData.totalNet >= 0 ? themeColors.success : themeColors.error,
-                    })}
-                  </View>
-                </View>
-              </Card>
+                    {displayRatePercent === null
+                      ? I18n.t('insights.analytics.savings_rate.no_income_short')
+                      : formatSavingsRatePercentLabel(displayRatePercent)}
+                  </Text>
+                }
+                badge={badge}
+              />
+              <View
+                style={lineChartSectionStyle}
+                onTouchStart={lockChartScrub}
+                onTouchEnd={unlockChartScrub}
+                onTouchCancel={unlockChartScrub}
+              >
+                <TrendLineChart
+                  buckets={chartModel.buckets}
+                  series={chartModel.series}
+                  width={lineChartWidth}
+                  height={TREND_CHART_HEIGHT - 20}
+                  selectedKey={selectedKey}
+                  onSelectKey={(key) => {
+                    setSavingsScrubMonthByYear((previous) =>
+                      previous[yearKey] === key ? previous : { ...previous, [yearKey]: key },
+                    );
+                  }}
+                  onGestureStart={lockChartScrub}
+                  onGestureEnd={unlockChartScrub}
+                  formatValue={formatPercentValue}
+                  formatAxisValue={formatPercentAxisValue}
+                  zeroBased
+                  gridColor={withColorAlpha(themeColors.border, isDark ? 0.7 : 0.9)}
+                  labelColor={themeColors.textMuted}
+                  surfaceColor={themeColors.background}
+                  tooltipBackground={themeColors.card}
+                  tooltipTextColor={themeColors.text}
+                  accessibilityLabel={String(I18n.t('insights.savings_rate'))}
+                />
+              </View>
+              <Text variant="caption" tone="muted" className="text-center">
+                {`${I18n.t('calendar.income')} ${compact(pageData.totalIncome)}  ·  ${I18n.t(
+                  'calendar.expense',
+                )} ${compact(pageData.totalExpense)}`}
+              </Text>
             </>
           }
           secondary={
             <View className="gap-1.5">
               {pageData.savingsRateRows.map((row) => {
-                const monthlyRate = row.savingsRate;
                 const hasActivity =
                   row.transactions.length > 0 || row.income !== 0 || row.expense !== 0;
                 if (!hasActivity) {
                   return (
                     <View
                       key={row.monthKey}
-                      className="flex-row items-center justify-between rounded-2xl border border-dashed border-border/40 px-3 py-2 opacity-60"
+                      className="flex-row items-center justify-between rounded-2xl border border-dashed border-border/40 px-3.5 py-2.5 opacity-60"
                     >
                       <Text variant="caption" tone="muted">
                         {row.label}
@@ -6310,27 +5946,11 @@ export function InsightsScreen({
                     </View>
                   );
                 }
-
-                const monthlySavedAmount = Math.abs(row.net);
-                const monthlyDisplayPercent =
-                  monthlyRate === null ? null : Number((monthlyRate * 100).toFixed(1));
-                const monthlyRateLabel =
-                  monthlyDisplayPercent === null
-                    ? '—'
-                    : formatSavingsRatePercentLabel(monthlyDisplayPercent);
-                const monthlySavedAmountClass =
-                  row.net > 0
-                    ? 'text-success'
-                    : row.net < 0
-                      ? 'text-destructive'
-                      : 'text-muted-foreground';
-                const monthlyFillFraction =
-                  monthlyRate === null ? 0 : Math.max(0, Math.min(1, monthlyRate));
-                const monthlyToneColor = resolveSavingsRateStatus(
-                  monthlyDisplayPercent,
-                  themeColors,
-                ).color;
-                const isBestMonth = row.monthKey === bestMonthKey;
+                const monthlyPercent =
+                  row.savingsRate === null ? null : Number((row.savingsRate * 100).toFixed(1));
+                const monthlyTone = resolveSavingsRateStatus(monthlyPercent, themeColors).color;
+                const savedFraction =
+                  row.savingsRate === null ? 0 : Math.max(0, Math.min(1, row.savingsRate));
                 return (
                   <Pressable
                     key={row.monthKey}
@@ -6344,74 +5964,40 @@ export function InsightsScreen({
                     }}
                     accessibilityRole="button"
                     accessibilityLabel={row.label}
-                    className="rounded-2xl border border-border/30 bg-card px-3.5 py-3 active:opacity-85"
+                    className="flex-row items-center gap-3 rounded-2xl border border-border/40 bg-card px-3.5 py-2.5 active:opacity-85"
                   >
-                    <View className="flex-row items-center gap-3">
-                      <View className="w-11">
-                        <View className="flex-row items-center gap-1">
-                          <Text variant="caption" numberOfLines={1}>
-                            {row.label}
-                          </Text>
-                          {isBestMonth ? <Sparkles size={10} color={themeColors.accent} /> : null}
-                        </View>
-                      </View>
-                      <View className="flex-1 gap-2">
+                    <Text variant="caption" numberOfLines={1} style={styles.savingsMonthLabel}>
+                      {row.label}
+                    </Text>
+                    <View className="flex-1 gap-1">
+                      <View
+                        className="h-1.5 overflow-hidden rounded-full"
+                        style={{ backgroundColor: savedTrackColor }}
+                      >
                         <View
-                          className="h-2 overflow-hidden rounded-full"
-                          style={{
-                            backgroundColor:
-                              row.income > 0 || row.expense > 0
-                                ? monthTrackSpentColor
-                                : monthTrackIdleColor,
-                          }}
-                        >
-                          <View
-                            style={[
-                              styles.progressFill,
-                              buildWidthStyle(`${Math.round(monthlyFillFraction * 100)}%`),
-                              { backgroundColor: themeColors.success },
-                            ]}
-                          />
-                          {row.income > 0 ? (
-                            <View
-                              pointerEvents="none"
-                              style={[
-                                styles.savingsRateHealthyMarker,
-                                buildLeftStyle(healthyMarkerLeft),
-                                { backgroundColor: healthyMarkerColor },
-                              ]}
-                            />
-                          ) : null}
-                        </View>
-                        <View className="flex-row items-center justify-between gap-2">
-                          {renderCompactValueNode(row.income, {
-                            variant: 'label',
-                            textClassName: 'text-success/90',
-                            iconColor: themeColors.success,
-                          })}
-                          {renderCompactValueNode(row.expense, {
-                            variant: 'label',
-                            textClassName: 'text-destructive/90',
-                            iconColor: themeColors.error,
-                          })}
-                        </View>
+                          style={[
+                            styles.progressFill,
+                            buildWidthStyle(`${Math.round(savedFraction * 100)}%`),
+                            { backgroundColor: themeColors.success },
+                          ]}
+                        />
                       </View>
-                      <View className="w-20 items-end gap-0.5">
-                        <Text variant="mono" numberOfLines={1} style={{ color: monthlyToneColor }}>
-                          {monthlyRateLabel}
-                        </Text>
-                        {renderCompactValueNode(monthlySavedAmount, {
-                          variant: 'label',
-                          textClassName: cn(monthlySavedAmountClass),
-                          iconColor:
-                            row.net > 0
-                              ? themeColors.success
-                              : row.net < 0
-                                ? themeColors.error
-                                : themeColors.textMuted,
-                        })}
-                      </View>
+                      <Text variant="caption" tone="muted" style={styles.savingsMonthDetail}>
+                        {String(
+                          I18n.t(
+                            row.net >= 0
+                              ? 'insights.analytics.savings_rate.saved'
+                              : 'insights.analytics.savings_rate.overspent',
+                            { value: compact(Math.abs(row.net)) },
+                          ),
+                        )}
+                      </Text>
                     </View>
+                    <Text variant="bodyStrong" numberOfLines={1} style={{ color: monthlyTone }}>
+                      {monthlyPercent === null
+                        ? '—'
+                        : formatSavingsRatePercentLabel(monthlyPercent)}
+                    </Text>
                   </Pressable>
                 );
               })}
@@ -6628,6 +6214,7 @@ export function InsightsScreen({
         serializeRecordForSignature(expenseTrendScrubMonthByYear),
         serializeRecordForSignature(incomeTrendScrubMonthByYear),
         serializeRecordForSignature(assetHistoryScrubMonthByYear),
+        serializeRecordForSignature(savingsScrubMonthByYear),
         serializeRecordForSignature(categoryTrendScrubBucketByPeriod),
         serializeRecordForSignature(
           Object.fromEntries(
@@ -6639,6 +6226,7 @@ export function InsightsScreen({
       activeBreakdownSliceId,
       activeLocale,
       assetHistoryScrubMonthByYear,
+      savingsScrubMonthByYear,
       categoryTrendScrubBucketByPeriod,
       expenseTrendScrubMonthByYear,
       isPro,
@@ -6878,14 +6466,6 @@ export function InsightsScreen({
   const savingsExpenseCategoryPicker = useMemo(
     () => buildInsightsCategoryPickerData(categories, 'expense'),
     [categories],
-  );
-  // Comparing a category with itself says nothing, so it is left out.
-  const categoryTrendComparePickerParents = useMemo(
-    () =>
-      savingsExpenseCategoryPicker.parents.filter(
-        (parent) => parent.id !== effectiveCategoryTrendCategoryId,
-      ),
-    [effectiveCategoryTrendCategoryId, savingsExpenseCategoryPicker.parents],
   );
   const displayActiveInsightFilterConfig = useMemo(
     () => getInsightFilterConfig(displaySelectedInsightType),
@@ -7218,6 +6798,8 @@ export function InsightsScreen({
                       </View>
                     </Pressable>
                   </View>
+                  {/* The title with its period right under it: one header, not a
+                  title row plus a separate period bar. */}
                   <View className="flex-1 items-center px-1">
                     <Text
                       variant={width < 380 ? 'subheading' : 'headingSm'}
@@ -7226,6 +6808,31 @@ export function InsightsScreen({
                     >
                       {String(I18n.t(`insights.${insightMenuEntryOf(displaySelectedInsightType)}`))}
                     </Text>
+                    {isReviewView ? null : (
+                      <InsightPeriodSwitcher
+                        label={isBudgetView ? budgetMonthLabel : activePeriodLabel}
+                        onPrevious={
+                          isBudgetView
+                            ? () => budgetPagerRef.current?.scrollToRelative(-1)
+                            : handlePrevMonth
+                        }
+                        onNext={
+                          isBudgetView
+                            ? () => budgetPagerRef.current?.scrollToRelative(1)
+                            : handleNextMonth
+                        }
+                        onPressLabel={
+                          isBudgetView
+                            ? () => budgetPagerRef.current?.openMonthPicker()
+                            : isTakeoverView || displayPeriodPreset === 'lifetime'
+                              ? undefined
+                              : handleOpenPeriodPicker
+                        }
+                        disableArrows={!isTakeoverView && displayPeriodPreset === 'lifetime'}
+                        labelRef={periodPickerTriggerRef}
+                        onLabelLayout={handlePeriodPickerTriggerLayout}
+                      />
+                    )}
                   </View>
                   {/* Every insight type puts a 40px control here, which is what keeps
                 the title above centred between it and the type selector. */}
@@ -7259,34 +6866,37 @@ export function InsightsScreen({
               }
               subNavigation={
                 displayInsightGroup ? (
-                  <InsightSubTabs
-                    options={insightGroupTabOptions}
-                    selectedValue={displaySelectedInsightType}
-                    onSelect={handleInsightTabSelect}
-                    accessibilityLabel={String(I18n.t(`insights.${displayInsightGroup}`))}
-                  />
+                  <View className="gap-2">
+                    <InsightSubTabs
+                      options={insightGroupTabOptions}
+                      selectedValue={displaySelectedInsightType}
+                      onSelect={handleInsightTabSelect}
+                      accessibilityLabel={String(I18n.t(`insights.${displayInsightGroup}`))}
+                    />
+                    {displaySelectedInsightType === 'category_trend' &&
+                    isPro &&
+                    !isSelectionMode ? (
+                      <CategoryTrendChips
+                        options={categoryTrendChipOptions}
+                        primaryId={effectiveCategoryTrendCategoryId}
+                        compareId={effectiveCategoryTrendCompareId}
+                        primaryColor={CATEGORY_TREND_PRIMARY_COLOR}
+                        compareColor={CATEGORY_TREND_COMPARE_COLOR}
+                        isPickingCompare={isPickingCategoryCompare}
+                        onSelect={handleCategoryChipSelect}
+                        onToggleCompare={handleToggleCategoryCompare}
+                        onRemoveCompare={handleRemoveCategoryCompare}
+                      />
+                    ) : null}
+                  </View>
                 ) : undefined
               }
+              // The period sits under the title (InsightPeriodSwitcher), so the
+              // header's own month capsule is not drawn.
               monthLabel={isBudgetView ? budgetMonthLabel : activePeriodLabel}
-              onPrevMonth={
-                isBudgetView ? () => budgetPagerRef.current?.scrollToRelative(-1) : handlePrevMonth
-              }
-              onNextMonth={
-                isBudgetView ? () => budgetPagerRef.current?.scrollToRelative(1) : handleNextMonth
-              }
-              // Review picks its period from its own rail of pills, so the month
-              // capsule would be a second, redundant control.
-              hideNavigation={isReviewView}
-              disableNavArrows={!isTakeoverView && displayPeriodPreset === 'lifetime'}
-              onMonthPress={
-                isBudgetView
-                  ? () => budgetPagerRef.current?.openMonthPicker()
-                  : isTakeoverView || displayPeriodPreset === 'lifetime'
-                    ? undefined
-                    : handleOpenPeriodPicker
-              }
-              monthTriggerRef={periodPickerTriggerRef}
-              onMonthTriggerLayout={handlePeriodPickerTriggerLayout}
+              onPrevMonth={handlePrevMonth}
+              onNextMonth={handleNextMonth}
+              hideNavigation
             />
           </View>
 
@@ -7898,36 +7508,6 @@ export function InsightsScreen({
               />
             </SafeAreaView>
           </ThemeModal>
-
-          <CategoryPickerSheet
-            allowParentSelection
-            visible={categoryTrendPickerTarget !== null}
-            onClose={() => setCategoryTrendPickerTarget(null)}
-            parents={
-              categoryTrendPickerTarget === 'compare'
-                ? categoryTrendComparePickerParents
-                : savingsExpenseCategoryPicker.parents
-            }
-            childByParent={EMPTY_CATEGORY_CHILD_MAP}
-            selectedCategoryId={
-              categoryTrendPickerTarget === 'compare'
-                ? effectiveCategoryTrendCompareId
-                : effectiveCategoryTrendCategoryId
-            }
-            onSelect={(categoryId) => {
-              void triggerHaptic('selection');
-              if (categoryTrendPickerTarget === 'compare') {
-                setCategoryTrendCompareCategoryId(categoryId);
-              } else {
-                // Picking the compared category as the main one swaps them.
-                if (categoryId === effectiveCategoryTrendCompareId) {
-                  setCategoryTrendCompareCategoryId(effectiveCategoryTrendCategoryId);
-                }
-                setCategoryTrendSelectedCategoryId(categoryId);
-              }
-              setCategoryTrendPickerTarget(null);
-            }}
-          />
         </ContentFrameProvider>
       </View>
     </SafeAreaView>

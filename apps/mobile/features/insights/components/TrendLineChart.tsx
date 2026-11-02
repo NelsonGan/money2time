@@ -73,8 +73,9 @@ interface TrendLineChartProps {
 /** The gutter on the right that holds the value labels. */
 const AXIS_WIDTH = 50;
 const X_AXIS_HEIGHT = 20;
-const TOOLTIP_ROW_HEIGHT = 16;
-const TOOLTIP_VERTICAL_PADDING = 5;
+const TOOLTIP_ROW_HEIGHT = 17;
+const TOOLTIP_VERTICAL_PADDING = 6;
+const TOOLTIP_POINTER_SIZE = 8;
 const TOOLTIP_GAP = 8;
 const STROKE_WIDTH = 2.6;
 const DOT_RADIUS = 3.6;
@@ -133,8 +134,11 @@ export const TrendLineChart = React.memo(
     accessibilityLabel,
   }: TrendLineChartProps) {
     const isComparison = series.length > 1;
+    // The card (a title row and one row per line) plus half its pointer.
     const tooltipHeight =
-      TOOLTIP_VERTICAL_PADDING * 2 + TOOLTIP_ROW_HEIGHT * (isComparison ? series.length + 1 : 1);
+      TOOLTIP_VERTICAL_PADDING * 2 +
+      TOOLTIP_ROW_HEIGHT * (series.length + 1) +
+      TOOLTIP_POINTER_SIZE / 2;
     const plotWidth = Math.max(0, width - AXIS_WIDTH);
     const plotTop = tooltipHeight + TOOLTIP_GAP + SELECTED_RING_RADIUS;
     const plotBottom = height - X_AXIS_HEIGHT - SELECTED_RING_RADIUS;
@@ -242,22 +246,20 @@ export const TrendLineChart = React.memo(
       () => selectedPoints.map((entry) => (entry.point ? formatValue(entry.point.value) : '–')),
       [formatValue, selectedPoints],
     );
-    const tooltipText = isComparison
-      ? null
-      : `${selectedBucket?.title ?? ''} · ${tooltipValueTexts[0] ?? '–'}`;
     // The tooltip sizes itself to its text. It sits in a box centred on the
     // point, as wide as the room on the narrower side allows, so it is centred
     // over the point without being measured; when its estimated width will not
     // fit there it pins to that edge of the chart instead.
     const estimatedTooltipWidth = useMemo(() => {
-      const lines = isComparison
-        ? [
-            selectedBucket?.title ?? '',
-            ...series.map((entry, index) => `•  ${entry.label}  ${tooltipValueTexts[index] ?? ''}`),
-          ]
-        : [tooltipText ?? ''];
-      return Math.max(...lines.map(estimateTextWidth)) + TOOLTIP_PADDING * 2;
-    }, [isComparison, selectedBucket, series, tooltipText, tooltipValueTexts]);
+      const lines = [
+        selectedBucket?.title ?? '',
+        ...series.map(
+          (entry, index) =>
+            `${'    '}${isComparison ? `${entry.label}  ` : ''}${tooltipValueTexts[index] ?? ''}`,
+        ),
+      ];
+      return Math.max(...lines.map(estimateTextWidth)) + TOOLTIP_PADDING * 2 + 4;
+    }, [isComparison, selectedBucket, series, tooltipValueTexts]);
     let tooltipBox: { left: number; width: number; align: 'center' | 'flex-start' | 'flex-end' } = {
       left: 0,
       width,
@@ -431,59 +433,75 @@ export const TrendLineChart = React.memo(
             ) : null,
           )}
 
-          {selectedBucket ? (
-            <View
-              pointerEvents="none"
-              style={[
-                styles.tooltipBox,
-                { left: tooltipBox.left, width: tooltipBox.width, alignItems: tooltipBox.align },
-              ]}
-            >
+          {selectedBucket && selectedX !== null ? (
+            <>
               <View
+                pointerEvents="none"
                 style={[
-                  styles.tooltip,
-                  { minHeight: tooltipHeight, backgroundColor: tooltipBackground },
+                  styles.tooltipBox,
+                  { left: tooltipBox.left, width: tooltipBox.width, alignItems: tooltipBox.align },
                 ]}
               >
-                {isComparison ? (
-                  <>
-                    <RNText
-                      numberOfLines={1}
-                      style={[styles.tooltipTitle, { color: tooltipTextColor }]}
-                    >
-                      {selectedBucket.title}
-                    </RNText>
-                    {selectedPoints.map((entry, index) => (
-                      <View key={`legend-${entry.key}`} style={styles.legendRow}>
-                        <View style={[styles.legendDot, { backgroundColor: entry.color }]} />
-                        <RNText
-                          numberOfLines={1}
-                          style={[
-                            styles.legendLabel,
-                            { color: withColorAlpha(tooltipTextColor, 0.8) },
-                          ]}
-                        >
-                          {series[index]?.label}
-                        </RNText>
-                        <RNText
-                          numberOfLines={1}
-                          style={[styles.legendValue, { color: tooltipTextColor }]}
-                        >
-                          {tooltipValueTexts[index]}
-                        </RNText>
-                      </View>
-                    ))}
-                  </>
-                ) : (
+                <View
+                  style={[
+                    styles.tooltip,
+                    {
+                      minHeight: tooltipHeight - TOOLTIP_POINTER_SIZE / 2,
+                      backgroundColor: tooltipBackground,
+                      borderColor: gridColor,
+                    },
+                  ]}
+                >
                   <RNText
                     numberOfLines={1}
-                    style={[styles.tooltipTitle, { color: tooltipTextColor }]}
+                    style={[styles.tooltipTitle, { color: withColorAlpha(tooltipTextColor, 0.6) }]}
                   >
-                    {tooltipText}
+                    {selectedBucket.title}
                   </RNText>
-                )}
+                  {selectedPoints.map((entry, index) => (
+                    <View key={`legend-${entry.key}`} style={styles.legendRow}>
+                      <View style={styles.legendKey}>
+                        <View style={[styles.legendSwatchLine, { backgroundColor: entry.color }]}>
+                          <View
+                            style={[styles.legendSwatchDot, { backgroundColor: entry.color }]}
+                          />
+                        </View>
+                        {isComparison ? (
+                          <RNText
+                            numberOfLines={1}
+                            style={[
+                              styles.legendLabel,
+                              { color: withColorAlpha(tooltipTextColor, 0.75) },
+                            ]}
+                          >
+                            {series[index]?.label}
+                          </RNText>
+                        ) : null}
+                      </View>
+                      <RNText
+                        numberOfLines={1}
+                        style={[styles.legendValue, { color: tooltipTextColor }]}
+                      >
+                        {tooltipValueTexts[index]}
+                      </RNText>
+                    </View>
+                  ))}
+                </View>
               </View>
-            </View>
+              {/* A small pointer from the card down to the guide line. */}
+              <View
+                pointerEvents="none"
+                style={[
+                  styles.tooltipPointer,
+                  {
+                    left: selectedX - TOOLTIP_POINTER_SIZE / 2,
+                    top: tooltipHeight - TOOLTIP_POINTER_SIZE,
+                    backgroundColor: tooltipBackground,
+                    borderColor: gridColor,
+                  },
+                ]}
+              />
+            </>
           ) : null}
         </View>
       </Animated.View>
@@ -543,26 +561,56 @@ const styles = StyleSheet.create({
   },
   tooltip: {
     maxWidth: TOOLTIP_MAX_WIDTH,
-    borderRadius: 10,
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
     paddingHorizontal: TOOLTIP_PADDING,
     paddingVertical: TOOLTIP_VERTICAL_PADDING,
     justifyContent: 'center',
+    shadowColor: '#000000',
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 4,
+    zIndex: 1,
+  },
+  tooltipPointer: {
+    position: 'absolute',
+    width: TOOLTIP_POINTER_SIZE,
+    height: TOOLTIP_POINTER_SIZE,
+    borderRightWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    transform: [{ rotate: '45deg' }],
+    zIndex: 2,
   },
   tooltipTitle: {
-    fontSize: TOOLTIP_FONT_SIZE,
+    fontSize: TOOLTIP_FONT_SIZE - 1,
     lineHeight: TOOLTIP_ROW_HEIGHT,
-    fontFamily: FONT.bold,
+    fontFamily: FONT.medium,
   },
   legendRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     height: TOOLTIP_ROW_HEIGHT,
   },
-  legendDot: {
+  legendKey: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexShrink: 1,
+    marginRight: 12,
+  },
+  legendSwatchLine: {
+    width: 14,
+    height: 3,
+    borderRadius: 2,
+    marginRight: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  legendSwatchDot: {
     width: 7,
     height: 7,
     borderRadius: 4,
-    marginRight: 5,
   },
   legendLabel: {
     flexShrink: 1,
@@ -571,9 +619,9 @@ const styles = StyleSheet.create({
     fontFamily: FONT.medium,
   },
   legendValue: {
-    marginLeft: 8,
-    fontSize: TOOLTIP_FONT_SIZE,
+    fontSize: TOOLTIP_FONT_SIZE + 0.5,
     lineHeight: TOOLTIP_ROW_HEIGHT,
     fontFamily: FONT.bold,
+    fontWeight: '700',
   },
 });
