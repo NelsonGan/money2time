@@ -32,7 +32,9 @@ export function TrendHeadline({
   return (
     <View className="items-center gap-1 pt-1">
       {title ? (
-        <Text variant="caption" tone="muted" numberOfLines={1}>
+        // Stretched and centred rather than hugging its text: inside the
+        // long-range pager a hugging one-line text can be cut short (README).
+        <Text variant="caption" tone="muted" numberOfLines={1} className="self-stretch text-center">
           {title}
         </Text>
       ) : null}
@@ -49,11 +51,9 @@ export function TrendHeadline({
           ) : badge.direction === 'down' ? (
             <ArrowDown size={11} color={badge.color} strokeWidth={3} />
           ) : null}
-          <Text
-            variant="caption"
-            numberOfLines={1}
-            style={{ color: badge.color, fontSize: 12, lineHeight: 16 }}
-          >
+          {/* No numberOfLines: the pill hugs its text, and inside the
+              long-range pager a one-line limit can cut it short (README). */}
+          <Text variant="caption" style={{ color: badge.color, fontSize: 12, lineHeight: 16 }}>
             {badge.text}
           </Text>
         </View>

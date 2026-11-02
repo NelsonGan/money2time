@@ -62,6 +62,8 @@ interface TrendLineChartProps {
   averageLabel?: string;
   /** Amounts that never go negative read from zero; balances keep their own range. */
   zeroBased?: boolean;
+  /** Smallest gap between value ticks; set it when axis labels are rounded. */
+  minTickStep?: number;
   gridColor: string;
   labelColor: string;
   surfaceColor: string;
@@ -95,6 +97,16 @@ const X_LABEL_WIDTH = 40;
 const AVERAGE_PILL_HEIGHT = 16;
 const GRID_DASH = [2, 4];
 /** Wide (Thai, CJK) characters take about a full em, Latin ones about 0.62. */
+function isLonePoint(
+  point: TrendLinePlotPoint,
+  index: number,
+  points: readonly TrendLinePlotPoint[],
+): boolean {
+  return (
+    points[index - 1]?.index !== point.index - 1 && points[index + 1]?.index !== point.index + 1
+  );
+}
+
 function estimateTextWidth(text: string): number {
   let width = 0;
   for (const char of text) {
@@ -129,6 +141,7 @@ export const TrendLineChart = React.memo(
     averageValue,
     averageLabel,
     zeroBased = true,
+    minTickStep = 0,
     gridColor,
     labelColor,
     surfaceColor,
@@ -154,7 +167,7 @@ export const TrendLineChart = React.memo(
         averageValue !== null && averageValue !== undefined && Number.isFinite(averageValue)
           ? [...valueSets, [averageValue]]
           : valueSets;
-      const scale = buildTrendLineScale(withAverage, { zeroBased });
+      const scale = buildTrendLineScale(withAverage, { zeroBased, minStep: minTickStep });
       const lines = series.map((entry) => {
         const points = buildPlotPoints(entry.values, scale, plotWidth, plotTop, plotHeight);
         const line = Skia.Path.MakeFromSVGString(buildLinePath(points) || 'M 0 0');
@@ -185,12 +198,22 @@ export const TrendLineChart = React.memo(
         plotWidth,
       );
       return { scale, lines, area, ticks, grid, zeroLine, averageY, averageLine, labelStep };
-    }, [averageValue, buckets, isComparison, plotHeight, plotTop, plotWidth, series, zeroBased]);
+    }, [
+      averageValue,
+      buckets,
+      isComparison,
+      minTickStep,
+      plotHeight,
+      plotTop,
+      plotWidth,
+      series,
+      zeroBased,
+    ]);
 
-    const selectedIndex = useMemo(() => {
-      const index = buckets.findIndex((bucket) => bucket.key === selectedKey);
-      return index;
-    }, [buckets, selectedKey]);
+    const selectedIndex = useMemo(
+      () => buckets.findIndex((bucket) => bucket.key === selectedKey),
+      [buckets, selectedKey],
+    );
     const selectedPoints = useMemo(
       () =>
         geometry.lines.map((line) => ({
@@ -320,7 +343,9 @@ export const TrendLineChart = React.memo(
         accessibilityRole="image"
         accessibilityLabel={accessibilityLabel}
       >
-        <View style={{ width, height }} {...panResponder.panHandlers}>
+        {/* box-only: the axis labels never become the touch target, so
+            locationX is always measured from the chart's left edge. */}
+        <View style={{ width, height }} pointerEvents="box-only" {...panResponder.panHandlers}>
           <Canvas style={{ width: plotWidth, height }} pointerEvents="none">
             {geometry.grid ? (
               <Path path={geometry.grid} style="stroke" strokeWidth={1} color={gridColor}>
@@ -377,16 +402,20 @@ export const TrendLineChart = React.memo(
                 />
               ) : null,
             )}
-            {showAllDots
-              ? geometry.lines.map((line) =>
-                  line.points.map((point: TrendLinePlotPoint) => (
-                    <React.Fragment key={`${line.key}-${point.index}`}>
-                      <Circle cx={point.x} cy={point.y} r={DOT_RING_RADIUS} color={surfaceColor} />
-                      <Circle cx={point.x} cy={point.y} r={DOT_RADIUS} color={line.color} />
-                    </React.Fragment>
-                  )),
+            {geometry.lines.map((line) =>
+              line.points
+                // Past the dotted limit, only a point with no line on either
+                // side gets a dot, or it would not show at all.
+                .filter((point: TrendLinePlotPoint, index, points) =>
+                  showAllDots ? true : isLonePoint(point, index, points),
                 )
-              : null}
+                .map((point: TrendLinePlotPoint) => (
+                  <React.Fragment key={`${line.key}-${point.index}`}>
+                    <Circle cx={point.x} cy={point.y} r={DOT_RING_RADIUS} color={surfaceColor} />
+                    <Circle cx={point.x} cy={point.y} r={DOT_RADIUS} color={line.color} />
+                  </React.Fragment>
+                )),
+            )}
             {selectedPoints.map((entry) =>
               entry.point ? (
                 <React.Fragment key={`selected-${entry.key}`}>
@@ -549,6 +578,7 @@ export const TrendLineChart = React.memo(
     previous.averageValue === next.averageValue &&
     previous.averageLabel === next.averageLabel &&
     previous.zeroBased === next.zeroBased &&
+    previous.minTickStep === next.minTickStep &&
     previous.gridColor === next.gridColor &&
     previous.labelColor === next.labelColor &&
     previous.surfaceColor === next.surfaceColor &&

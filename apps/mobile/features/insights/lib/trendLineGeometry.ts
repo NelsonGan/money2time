@@ -22,16 +22,20 @@ export type TrendLinePlotPoint = {
 /**
  * Round tick values covering `low`..`high`: steps of 1, 2, 2.5 or 5 times a
  * power of ten, about `targetCount` of them, the way a hand-drawn axis is
- * labelled.
+ * labelled. `minStep` keeps steps at least that big, for axes whose labels are
+ * rounded (counts, whole percents), so no two ticks print the same label.
  */
-export function niceTicks(low: number, high: number, targetCount = 4): number[] {
+export function niceTicks(low: number, high: number, targetCount = 4, minStep = 0): number[] {
   if (!Number.isFinite(low) || !Number.isFinite(high)) return [];
-  if (high < low) return niceTicks(high, low, targetCount);
+  if (high < low) return niceTicks(high, low, targetCount, minStep);
   const segments = Math.max(1, targetCount - 1);
   const rough = (high - low) / segments;
   if (rough <= 0) return [low];
   const power = 10 ** Math.floor(Math.log10(rough));
-  const step = ([1, 2, 2.5, 5, 10].find((nice) => nice * power >= rough) ?? 10) * power;
+  const step = Math.max(
+    minStep,
+    ([1, 2, 2.5, 5, 10].find((nice) => nice * power >= rough) ?? 10) * power,
+  );
   const ticks: number[] = [];
   const first = Math.floor(low / step) * step;
   for (let tick = first; tick <= high + step * 1e-9; tick += step) {
@@ -40,7 +44,7 @@ export function niceTicks(low: number, high: number, targetCount = 4): number[] 
   if ((ticks[ticks.length - 1] ?? low) < high) {
     ticks.push(Math.round(((ticks[ticks.length - 1] ?? first) + step) * 1e6) / 1e6);
   }
-  return ticks;
+  return ticks.filter((tick, index) => index === 0 || tick !== ticks[index - 1]);
 }
 
 /**
@@ -51,7 +55,7 @@ export function niceTicks(low: number, high: number, targetCount = 4): number[] 
  */
 export function buildTrendLineScale(
   series: readonly TrendLineSeriesValues[],
-  { zeroBased }: { zeroBased: boolean },
+  { zeroBased, minStep = 0 }: { zeroBased: boolean; minStep?: number },
 ): TrendLineScale {
   let low = Number.POSITIVE_INFINITY;
   let high = Number.NEGATIVE_INFINITY;
@@ -69,7 +73,8 @@ export function buildTrendLineScale(
     low = Math.min(0, low);
     high = Math.max(0, high);
   }
-  if (high === low) {
+  // Float noise (1500 vs 1500.0000000000002) still counts as a flat line.
+  if (high - low <= 1e-9 * Math.max(1, Math.abs(high))) {
     // A flat line sits in the middle rather than hard against an edge.
     const pad = Math.max(1, Math.abs(high) * 0.1);
     low = zeroBased && low >= 0 ? 0 : low - pad;
@@ -79,7 +84,7 @@ export function buildTrendLineScale(
     low -= pad;
     high += pad;
   }
-  const ticks = niceTicks(low, high);
+  const ticks = niceTicks(low, high, 4, minStep);
   return {
     min: Math.min(low, ticks[0] ?? low),
     max: Math.max(high, ticks[ticks.length - 1] ?? high),

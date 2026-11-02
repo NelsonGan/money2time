@@ -93,6 +93,16 @@ export const CategoryTrendChips = React.memo(function CategoryTrendChipsImpl({
             accessibilityRole="button"
             accessibilityState={{ selected: ring !== null }}
             accessibilityLabel={option.label}
+            // The × inside is not reachable on its own with a screen reader,
+            // so the compared chip offers removal as an action too.
+            accessibilityActions={
+              option.id === compareId
+                ? [{ name: 'remove', label: String(I18n.t('insights.compare.remove')) }]
+                : undefined
+            }
+            onAccessibilityAction={(event) => {
+              if (event.nativeEvent.actionName === 'remove') onRemoveCompare();
+            }}
             className="flex-row items-center gap-1.5 rounded-full px-3 active:opacity-70"
             style={[
               styles.chip,

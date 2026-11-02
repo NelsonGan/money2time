@@ -201,6 +201,7 @@ import {
   formatCompactNumber,
   formatDateInput,
   formatHours,
+  formatHoursCompact,
   monthKeyFromDateLocal,
   parseMonthKey,
   startOfMonthDate,
@@ -451,7 +452,7 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
   },
-  savingsMonthDetail: {
+  secondaryDetail: {
     fontSize: 11,
     lineHeight: 14,
   },
@@ -741,7 +742,6 @@ type AssetHistoryMonthRow = {
 type ExpenseTrendMonthRow = {
   monthKey: string;
   axisLabel: string;
-  axisSubLabel: string | null;
   label: string;
   totalExpense: number;
   transactionCount: number;
@@ -798,7 +798,6 @@ type CategoryTrendPageData = InsightBasePageData & {
 type IncomeTrendMonthRow = {
   monthKey: string;
   axisLabel: string;
-  axisSubLabel: string | null;
   label: string;
   totalIncome: number;
   transactionCount: number;
@@ -2898,6 +2897,9 @@ export function InsightsScreen({
     setExpenseTrendScrubMonthByYear({});
     setIncomeTrendScrubMonthByYear({});
     setAssetHistoryScrubMonthByYear({});
+    setCategoryTrendScrubBucketByPeriod({});
+    setSavingsScrubMonthByYear({});
+    setSentimentScrubBucketByPeriod({});
     setIsFilterModalOpen(false);
     commitPageIndex(INSIGHTS_PAGER_CENTER_INDEX);
     headerPreviewPageIndexRef.current = INSIGHTS_PAGER_CENTER_INDEX;
@@ -3055,6 +3057,19 @@ export function InsightsScreen({
       selectedInsightType,
     ],
   );
+  // The menu reopens a group (Breakdown, Trends) on the tab last used in it.
+  // Declared before the preferences hook on purpose: on the first render this
+  // still sees the default page, and the restored map that hydration sets in
+  // the same pass must land after it, not be overwritten by it.
+  useEffect(() => {
+    const groupId = insightGroupOf(selectedInsightType);
+    if (!groupId) return;
+    setLastInsightTypeByGroup((previous) =>
+      previous[groupId] === selectedInsightType
+        ? previous
+        : { ...previous, [groupId]: selectedInsightType },
+    );
+  }, [selectedInsightType]);
   usePersistedJsonSnapshot<InsightsPreferencesSnapshot, Partial<InsightsPreferencesSnapshot>>({
     isLoading,
     storedJson: insightsPreferencesJson,
@@ -3144,21 +3159,12 @@ export function InsightsScreen({
   }, []);
   const handleRemoveCategoryCompare = useCallback(() => {
     void triggerHaptic('selection');
+    setIsPickingCategoryCompare(false);
     setCategoryTrendCompareCategoryId(null);
   }, []);
   // An armed "Compare" only lasts while the Category trend is on screen.
   useEffect(() => {
     if (selectedInsightType !== 'category_trend') setIsPickingCategoryCompare(false);
-  }, [selectedInsightType]);
-  // The menu reopens a group (Breakdown, Trends) on the tab last used in it.
-  useEffect(() => {
-    const groupId = insightGroupOf(selectedInsightType);
-    if (!groupId) return;
-    setLastInsightTypeByGroup((previous) =>
-      previous[groupId] === selectedInsightType
-        ? previous
-        : { ...previous, [groupId]: selectedInsightType },
-    );
   }, [selectedInsightType]);
   const activeInsightFilterConfig = useMemo(
     () => getInsightFilterConfig(selectedInsightType),
@@ -3400,7 +3406,6 @@ export function InsightsScreen({
         const makeEmptyExpenseYearRow = (yearKey: string): ExpenseTrendMonthRow => ({
           monthKey: yearKey,
           axisLabel: yearKey,
-          axisSubLabel: null,
           label: yearKey,
           totalExpense: 0,
           transactionCount: 0,
@@ -3415,7 +3420,6 @@ export function InsightsScreen({
           monthRowsSeed = Array.from({ length: 12 }, (_, monthIndex) => ({
             monthKey: `${year}-${String(monthIndex + 1).padStart(2, '0')}`,
             axisLabel: monthLabels[monthIndex] ?? '',
-            axisSubLabel: null,
             label: monthLabels[monthIndex] ?? '',
             totalExpense: 0,
             transactionCount: 0,
@@ -3429,8 +3433,6 @@ export function InsightsScreen({
               periodPresetOverride === 'week'
                 ? weekdayLabelShort(dk, activeLocale)
                 : dayLabelShort(dk, activeLocale),
-            axisSubLabel:
-              periodPresetOverride === 'week' ? numericDateLabelShort(dk, activeLocale) : null,
             label: dayLabelShort(dk, activeLocale),
             totalExpense: 0,
             transactionCount: 0,
@@ -3518,7 +3520,6 @@ export function InsightsScreen({
         const makeEmptyIncomeYearRow = (yearKey: string): IncomeTrendMonthRow => ({
           monthKey: yearKey,
           axisLabel: yearKey,
-          axisSubLabel: null,
           label: yearKey,
           totalIncome: 0,
           transactionCount: 0,
@@ -3533,7 +3534,6 @@ export function InsightsScreen({
           monthRowsSeed = Array.from({ length: 12 }, (_, monthIndex) => ({
             monthKey: `${year}-${String(monthIndex + 1).padStart(2, '0')}`,
             axisLabel: monthLabels[monthIndex] ?? '',
-            axisSubLabel: null,
             label: monthLabels[monthIndex] ?? '',
             totalIncome: 0,
             transactionCount: 0,
@@ -3547,8 +3547,6 @@ export function InsightsScreen({
               periodPresetOverride === 'week'
                 ? weekdayLabelShort(dk, activeLocale)
                 : dayLabelShort(dk, activeLocale),
-            axisSubLabel:
-              periodPresetOverride === 'week' ? numericDateLabelShort(dk, activeLocale) : null,
             label: dayLabelShort(dk, activeLocale),
             totalIncome: 0,
             transactionCount: 0,
@@ -3637,7 +3635,6 @@ export function InsightsScreen({
         const makeEmptyCategoryYearRow = (yearKey: string): ExpenseTrendMonthRow => ({
           monthKey: yearKey,
           axisLabel: yearKey,
-          axisSubLabel: null,
           label: yearKey,
           totalExpense: 0,
           transactionCount: 0,
@@ -3652,7 +3649,6 @@ export function InsightsScreen({
           monthRowsSeed = Array.from({ length: 12 }, (_, monthIndex) => ({
             monthKey: `${year}-${String(monthIndex + 1).padStart(2, '0')}`,
             axisLabel: monthLabels[monthIndex] ?? '',
-            axisSubLabel: null,
             label: monthLabels[monthIndex] ?? '',
             totalExpense: 0,
             transactionCount: 0,
@@ -3663,7 +3659,6 @@ export function InsightsScreen({
           monthRowsSeed = dayKeys.map((dk) => ({
             monthKey: dk,
             axisLabel: dayNumberLabel(dk),
-            axisSubLabel: null,
             label: dayLabelShort(dk, activeLocale),
             totalExpense: 0,
             transactionCount: 0,
@@ -3755,12 +3750,6 @@ export function InsightsScreen({
             transactions: sortTransactionsNewestFirst(row.transactions),
           };
         });
-
-        // Sort once here (page data is cached) so the pane can slice for the
-        // infinite-scroll list without re-sorting on every render.
-        if (filteredForRange.length > 1) {
-          sortTransactionsNewestFirst(filteredForRange);
-        }
 
         return {
           kind: 'category_trend',
@@ -5573,6 +5562,7 @@ export function InsightsScreen({
                 formatValue={formatCountValue}
                 formatAxisValue={formatCountValue}
                 zeroBased
+                minTickStep={1}
                 gridColor={withColorAlpha(themeColors.border, isDark ? 0.7 : 0.9)}
                 labelColor={themeColors.textMuted}
                 surfaceColor={themeColors.background}
@@ -5611,7 +5601,7 @@ export function InsightsScreen({
                 </View>
                 <View className="items-end">
                   <Text variant="bodyStrong">{mood.count}</Text>
-                  <Text variant="caption" tone="muted" style={styles.savingsMonthDetail}>
+                  <Text variant="caption" tone="muted" style={styles.secondaryDetail}>
                     {`${Math.round(shareOf(mood.count) * 100)}%`}
                   </Text>
                 </View>
@@ -5673,12 +5663,12 @@ export function InsightsScreen({
             };
       const compact = (value: number) =>
         settings.displayMode === 'time'
-          ? formatHours(value, settings)
+          ? formatHoursCompact(value, settings)
           : formatCompactCurrency(value, settings.currencySymbol);
       const emptyTileColor = withColorAlpha(themeColors.textMuted, isDark ? 0.16 : 0.1);
       // The month with the best rate gets a small star, once there are at
-      // least two months with income to compare.
-      const ratedRows = pageData.savingsRateRows.filter((row) => row.savingsRate !== null);
+      // least two months that saved something to compare.
+      const ratedRows = pageData.savingsRateRows.filter((row) => (row.savingsRate ?? 0) > 0);
       const bestSavingsMonthKey =
         ratedRows.length < 2
           ? null
@@ -5727,6 +5717,7 @@ export function InsightsScreen({
                   formatValue={formatPercentValue}
                   formatAxisValue={formatPercentAxisValue}
                   zeroBased
+                  minTickStep={1}
                   gridColor={withColorAlpha(themeColors.border, isDark ? 0.7 : 0.9)}
                   labelColor={themeColors.textMuted}
                   surfaceColor={themeColors.background}
@@ -5752,7 +5743,12 @@ export function InsightsScreen({
                         className="items-center justify-center rounded-xl"
                         style={[styles.savingsMonthTile, { backgroundColor: emptyTileColor }]}
                       >
-                        <Text variant="caption" tone="muted" numberOfLines={1}>
+                        <Text
+                          variant="caption"
+                          tone="muted"
+                          numberOfLines={1}
+                          className="self-stretch text-center"
+                        >
                           {row.label}
                         </Text>
                       </View>
@@ -5766,6 +5762,24 @@ export function InsightsScreen({
                   row.savingsRate === null ? null : Number((row.savingsRate * 100).toFixed(1));
                 const monthlyTone = savingsRateColor(monthlyPercent, themeColors);
                 const isBestMonth = row.monthKey === bestSavingsMonthKey;
+                const rowSavedText = String(
+                  I18n.t(
+                    row.net >= 0
+                      ? 'insights.analytics.savings_rate.saved'
+                      : 'insights.analytics.savings_rate.overspent',
+                    { value: compact(Math.abs(row.net)) },
+                  ),
+                );
+                const rowIncomeText =
+                  row.income > 0
+                    ? String(
+                        I18n.t('insights.analytics.savings_rate.of_income', {
+                          value: compact(row.income),
+                        }),
+                      )
+                    : String(I18n.t('insights.analytics.savings_rate.no_income_short'));
+                const rowRateText =
+                  monthlyPercent === null ? null : formatSavingsRatePercentLabel(monthlyPercent);
                 return (
                   <Pressable
                     key={row.monthKey}
@@ -5778,7 +5792,9 @@ export function InsightsScreen({
                       });
                     }}
                     accessibilityRole="button"
-                    accessibilityLabel={row.label}
+                    accessibilityLabel={[row.label, rowSavedText, rowIncomeText, rowRateText]
+                      .filter(Boolean)
+                      .join(', ')}
                     className="flex-row items-center gap-3 rounded-2xl border border-border/40 bg-card px-3 py-2.5 active:opacity-85"
                   >
                     <View>
@@ -5789,7 +5805,12 @@ export function InsightsScreen({
                           { backgroundColor: withColorAlpha(monthlyTone, isDark ? 0.22 : 0.12) },
                         ]}
                       >
-                        <Text variant="caption" numberOfLines={1}>
+                        {/* Stretched, not hugging: see the README's long-range pager trap. */}
+                        <Text
+                          variant="caption"
+                          numberOfLines={1}
+                          className="self-stretch text-center"
+                        >
                           {row.label}
                         </Text>
                       </View>
@@ -5804,38 +5825,29 @@ export function InsightsScreen({
                     </View>
                     <View className="min-w-0 flex-1">
                       <Text variant="bodyStrong" numberOfLines={1}>
-                        {String(
-                          I18n.t(
-                            row.net >= 0
-                              ? 'insights.analytics.savings_rate.saved'
-                              : 'insights.analytics.savings_rate.overspent',
-                            { value: compact(Math.abs(row.net)) },
-                          ),
-                        )}
+                        {rowSavedText}
                       </Text>
                       <Text variant="caption" tone="muted" numberOfLines={1}>
-                        {row.income > 0
-                          ? String(
-                              I18n.t('insights.analytics.savings_rate.of_income', {
-                                value: compact(row.income),
-                              }),
-                            )
-                          : String(I18n.t('insights.analytics.savings_rate.no_income_short'))}
+                        {rowIncomeText}
                       </Text>
                     </View>
-                    {row.savingsRate === null ? (
+                    {row.savingsRate === null || rowRateText === null ? (
                       <Text variant="bodyStrong" tone="muted">
                         —
                       </Text>
                     ) : (
                       <View className="shrink-0 flex-row items-center gap-2">
-                        <SavingsRateRing
-                          size={24}
-                          strokeWidth={3.5}
-                          progress={Math.abs(row.savingsRate)}
-                          color={monthlyTone}
-                          trackColor={withColorAlpha(monthlyTone, isDark ? 0.28 : 0.18)}
-                        />
+                        {/* The arc draws the month's rate, so replay masks it. */}
+                        <View {...REPLAY_PRIVATE}>
+                          <SavingsRateRing
+                            size={24}
+                            strokeWidth={3.5}
+                            // An overspent month shows an empty track, not a filled arc.
+                            progress={Math.max(0, row.savingsRate)}
+                            color={monthlyTone}
+                            trackColor={withColorAlpha(monthlyTone, isDark ? 0.28 : 0.18)}
+                          />
+                        </View>
                         <View
                           className="items-center rounded-full px-2.5 py-1"
                           style={[
@@ -5844,7 +5856,7 @@ export function InsightsScreen({
                           ]}
                         >
                           <Text variant="caption" style={{ color: monthlyTone }}>
-                            {formatSavingsRatePercentLabel(monthlyPercent ?? 0)}
+                            {rowRateText}
                           </Text>
                         </View>
                       </View>
@@ -5906,6 +5918,10 @@ export function InsightsScreen({
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
 
   const isSelectionMode = selectedTransactionIds.length > 0;
+  // The chips are hidden while selecting, so an armed "Compare" is dropped.
+  useEffect(() => {
+    if (isSelectionMode) setIsPickingCategoryCompare(false);
+  }, [isSelectionMode]);
   const selectedTransactionCount = selectedTransactionIds.length;
 
   const transactionById = useMemo(() => {
@@ -6058,6 +6074,10 @@ export function InsightsScreen({
         settings.displayMode,
         isPro ? 'pro' : 'free',
         isDark ? 'dark' : 'light',
+        // Line colours follow the theme colour, and which buckets count as
+        // future or still under way moves on at midnight.
+        themeColors.primary,
+        currentTrendDayKey,
         // Selection state must invalidate the memoized pages so the trend lists
         // re-render with the current selection highlight.
         isSelectionMode ? 'sel' : 'nosel',
@@ -6086,6 +6106,8 @@ export function InsightsScreen({
       incomeTrendScrubMonthByYear,
       isDark,
       isSelectionMode,
+      currentTrendDayKey,
+      themeColors.primary,
       selectedTransactionIds,
       settings.currencySymbol,
       settings.displayMode,
@@ -6439,6 +6461,10 @@ export function InsightsScreen({
     setCategoryTrendCompareCategoryId(null);
     setAssetHistoryAccountOverrides({});
     setAssetHistoryScrubMonthByYear({});
+    setCategoryTrendScrubBucketByPeriod({});
+    setSavingsScrubMonthByYear({});
+    setSentimentScrubBucketByPeriod({});
+    setIsPickingCategoryCompare(false);
     setInsightsFilterModes({});
   }, [selectedInsightType]);
 

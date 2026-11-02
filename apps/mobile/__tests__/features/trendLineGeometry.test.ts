@@ -45,6 +45,19 @@ describe('buildTrendLineScale', () => {
   });
 });
 
+describe('rounded and nearly flat axes', () => {
+  it('keeps steps whole when labels are rounded, so no label repeats', () => {
+    expect(buildTrendLineScale([[0, 1, 0]], { zeroBased: true, minStep: 1 }).ticks).toEqual([0, 1]);
+    expect(buildTrendLineScale([[0, 0]], { zeroBased: true, minStep: 1 }).ticks).toEqual([0, 1]);
+  });
+
+  it('treats float noise as a flat line', () => {
+    const scale = buildTrendLineScale([[1500, 1500.0000000000002]], { zeroBased: false });
+    expect(new Set(scale.ticks).size).toBe(scale.ticks.length);
+    expect(scale.max - scale.min).toBeGreaterThan(100);
+  });
+});
+
 describe('line paths', () => {
   const scale = { min: 0, max: 100 };
 
