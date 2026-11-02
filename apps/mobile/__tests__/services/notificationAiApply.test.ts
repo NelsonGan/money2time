@@ -188,6 +188,43 @@ describe('applyNotificationAiResults', () => {
     );
   });
 
+  it('never guesses an account: keeps a payment with none, with AI amount and category', async () => {
+    jest
+      .mocked(readNotificationScanHistory)
+      .mockResolvedValue([pending({ accountId: null, channel: 'ios_alert' })]);
+    const summary = await applyNotificationAiResults(
+      [{ id: 'one', decision: 'expense', amount: 14.5, currency: 'MYR', category: 'Coffee' }],
+      'both',
+      deps(),
+      () => NOW,
+    );
+    expect(summary).toEqual({ expense: 0, income: 0, ignored: 0, kept: 1 });
+    expect(create).not.toHaveBeenCalled();
+    expect(recordNotificationScan).toHaveBeenCalledWith(
+      'user',
+      expect.objectContaining({
+        result: 'pending',
+        accountId: null,
+        categoryId: 'coffee',
+        selectedAmount: { amount: 14.5, currency: 'MYR' },
+        ai: expect.objectContaining({ decision: 'expense', applied: false, seen: true }),
+      }),
+      0,
+    );
+  });
+
+  it('still ignores a clear non-payment that has no account', async () => {
+    jest.mocked(readNotificationScanHistory).mockResolvedValue([pending({ accountId: null })]);
+    const summary = await applyNotificationAiResults(
+      [{ id: 'one', decision: 'ignore', reason: 'promotion' }],
+      'both',
+      deps(),
+      () => NOW,
+    );
+    expect(summary.ignored).toBe(1);
+    expect(create).not.toHaveBeenCalled();
+  });
+
   it('never logs an amount that is not in the notification text', async () => {
     const summary = await applyNotificationAiResults(
       [{ id: 'one', decision: 'expense', amount: 15, currency: 'MYR' }],

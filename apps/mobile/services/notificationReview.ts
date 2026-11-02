@@ -234,13 +234,14 @@ export function applyNotificationAiResults(
       if (!entry || entry.ai) continue;
       const reviewedAt = now().toISOString();
       const stored = paymentAlertCapturesRepository.getById(entry.id);
-      const keep = async (amount: NotificationAmount | null) => {
+      const keep = async (amount: NotificationAmount | null, categoryId?: string) => {
         summary.kept++;
         await recordNotificationScan(
           deps.appUserId,
           {
             ...entry,
             ...(amount ? { selectedAmount: amount } : {}),
+            ...(categoryId && !entry.categoryId ? { categoryId } : {}),
             ai: { decision: result.decision, applied: false, seen: true, reviewedAt },
           },
           deps.generation,
@@ -305,15 +306,17 @@ export function applyNotificationAiResults(
       const account = live.accounts.find(
         (item) => item.id === entry.accountId && isPayableAccount(item),
       );
-      if (!amount || !account) {
-        await keep(amount);
-        continue;
-      }
       const named = result.category
         ? live.categories.find(
             (item) => item.name === result.category && item.type === type && !item.deletedAt,
           )
         : undefined;
+      if (!amount || !account) {
+        // No linked account (or no amount to trust): never guessed. The user
+        // finishes it, starting from AI's amount and category.
+        await keep(amount, named?.id);
+        continue;
+      }
       const categoryId =
         named?.id ??
         suggestNotificationCategory(entry, type, live.categories, live.quickEntryPrefs);

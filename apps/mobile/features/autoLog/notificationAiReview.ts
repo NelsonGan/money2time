@@ -1,8 +1,10 @@
 // AI auto-review of captured notifications. After each drain (launch,
 // foreground, live capture) and when the user turns it on, every pending
-// notification AI has not seen yet, from a linked account, goes to the Worker
-// in batches. Clear expenses and incomes are logged, clear non-payments
-// ignored, and the rest stay in To review with AI's opinion attached.
+// notification AI has not seen yet goes to the Worker in batches. Clear
+// expenses and incomes are logged to the account their app or shortcut is
+// linked to, clear non-payments ignored, and the rest (including payments with
+// no linked account, which are never guessed) stay in To review with AI's
+// opinion attached.
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import type { CreateTransactionMeta } from '~/context/AppContext';
@@ -211,9 +213,6 @@ async function reviewOnce(deps: NotificationAiReviewDeps) {
         row.result === 'pending' &&
         !row.ai &&
         row.text.trim().length > 0 &&
-        // Logged to the account its app or shortcut is linked to; never guessed.
-        !!row.accountId &&
-        accounts.has(row.accountId) &&
         // Only captures still pending in this ledger: one settled elsewhere is
         // repaired by manual review, never charged.
         paymentAlertCapturesRepository.getById(row.id)?.status === 'pending',
@@ -267,7 +266,10 @@ async function reviewOnce(deps: NotificationAiReviewDeps) {
         notifications: batch.map((row) => ({
           id: row.id,
           text: row.text.slice(0, MAX_TEXT_CHARS),
-          currency: requestCurrency(accounts.get(row.accountId as string)?.currency),
+          currency: requestCurrency(
+            (row.accountId ? accounts.get(row.accountId)?.currency : undefined) ??
+              row.amounts?.[0]?.currency,
+          ),
           source: row.sourceLabel,
         })),
         expenseCategories: categoryNames('expense'),

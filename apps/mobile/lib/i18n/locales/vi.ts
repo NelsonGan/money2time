@@ -3179,6 +3179,7 @@ const vi = {
     review_banner_single: '1 thông báo cần xem lại',
     review_amount_hint: 'Chọn hoặc nhập số tiền',
     review_missing: 'Một số mục vẫn cần số tiền hoặc tài khoản.',
+    review_choose_account: 'Chọn tài khoản',
     review_save_error: 'Không thể lưu. Các mục chưa xong vẫn còn ở đây.',
     review_leave_title: 'Bỏ qua các thông báo chưa xong?',
     review_leave_body: 'Nếu rời đi, cả %{count} thông báo chưa xong sẽ bị bỏ qua.',
@@ -3216,6 +3217,8 @@ const vi = {
     ai_undo_edited_body: 'Bạn đã sửa mục này sau khi được ghi lại. Hoàn tác sẽ xóa nó.',
     ai_hint_expense: 'Gợi ý: chi tiêu',
     ai_hint_income: 'Gợi ý: thu nhập',
+    ai_no_account_ios:
+      'Chọn tài khoản trong phím tắt Log Notification để tự động xem xét có thể ghi lại thông báo. Nếu không có, chúng sẽ chờ ở đây kèm gợi ý.',
     ai_reason_otp: 'Mã bảo mật',
     ai_reason_promotion: 'Khuyến mãi',
     ai_reason_balance: 'Số dư hoặc nhắc nhở',

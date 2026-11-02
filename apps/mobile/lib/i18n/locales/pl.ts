@@ -3209,6 +3209,7 @@ const pl = {
     review_banner_single: '1 powiadomienie do sprawdzenia',
     review_amount_hint: 'Wybierz lub wpisz kwotę',
     review_missing: 'Niektóre pozycje nadal wymagają kwoty lub konta.',
+    review_choose_account: 'Wybierz konto',
     review_save_error: 'Nie udało się zapisać. Niedokończone pozycje nadal tu są.',
     review_leave_title: 'Pominąć niedokończone powiadomienia?',
     review_leave_body:
@@ -3247,6 +3248,8 @@ const pl = {
     ai_undo_edited_body: 'Edytowano go po zapisaniu. Cofnięcie go usunie.',
     ai_hint_expense: 'Sugestia: wydatek',
     ai_hint_income: 'Sugestia: przychód',
+    ai_no_account_ios:
+      'Wybierz konto w skrócie Log Notification, aby automatyczny przegląd mógł zapisywać jego powiadomienia. Bez konta czekają tutaj z sugestią.',
     ai_reason_otp: 'Kod bezpieczeństwa',
     ai_reason_promotion: 'Promocja',
     ai_reason_balance: 'Saldo lub przypomnienie',

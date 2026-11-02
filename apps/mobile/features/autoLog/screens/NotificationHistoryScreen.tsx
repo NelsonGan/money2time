@@ -399,10 +399,18 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
                     ? selected.amount
                     : (entry.selectedAmount ??
                       (entry.amounts?.length === 1 ? entry.amounts[0] : null));
+                  // Auto-review's suggestion, when it left one, opens on that type.
+                  const aiType =
+                    entry.ai && !entry.ai.undone && entry.ai.decision !== 'ignore'
+                      ? entry.ai.decision
+                      : null;
                   const type =
-                    app.categories.find((item) => item.id === entry.categoryId)?.type === 'income'
-                      ? 'income'
-                      : 'expense';
+                    aiType === 'income' || aiType === 'expense'
+                      ? aiType
+                      : app.categories.find((item) => item.id === entry.categoryId)?.type ===
+                          'income'
+                        ? 'income'
+                        : 'expense';
                   navigation.navigate('NotificationReviewEditor', {
                     captureId: entry.id,
                     ...{
@@ -690,9 +698,26 @@ function NotificationReviewCard({
         </View>
       ) : null}
       <View className="mt-1.5 flex-row flex-wrap items-center justify-between gap-x-3 gap-y-2">
-        <Text variant="caption" tone="muted">
-          {timeOf(entry.capturedAt)}
-        </Text>
+        <View className="flex-row items-center gap-1.5">
+          <Text variant="caption" tone="muted">
+            {timeOf(entry.capturedAt)}
+          </Text>
+          {pending && !account ? (
+            // Income and Expense stay off until it has one; the editor sets it.
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('payment_alerts.review_choose_account')}
+              disabled={busy}
+              hitSlop={8}
+              onPress={onEdit}
+              testID="notification-choose-account"
+            >
+              <Text variant="caption" className="font-semibold text-primary">
+                {`· ${I18n.t('payment_alerts.review_choose_account')}`}
+              </Text>
+            </Pressable>
+          ) : null}
+        </View>
         {pending ? (
           <ReviewChoices
             disabled={busy}
