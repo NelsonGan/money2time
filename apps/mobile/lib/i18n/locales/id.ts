@@ -3217,6 +3217,7 @@ const id = {
     review_banner_single: '1 notifikasi perlu ditinjau',
     review_amount_hint: 'Pilih atau masukkan jumlahnya',
     review_missing: 'Beberapa item masih memerlukan jumlah atau akun.',
+    review_choose_account: 'Pilih akun',
     review_save_error: 'Tidak dapat menyimpan. Item yang belum selesai masih ada di sini.',
     review_leave_title: 'Abaikan notifikasi yang belum selesai?',
     review_leave_body: 'Jika keluar, semua %{count} notifikasi yang belum selesai akan diabaikan.',
@@ -3254,6 +3255,8 @@ const id = {
     ai_undo_edited_body: 'Anda sudah mengeditnya sejak dicatat. Membatalkan akan menghapusnya.',
     ai_hint_expense: 'Saran: pengeluaran',
     ai_hint_income: 'Saran: pemasukan',
+    ai_no_account_ios:
+      'Pilih akun di pintasan Log Notification Anda agar tinjauan otomatis dapat mencatat notifikasinya. Tanpa akun, notifikasi menunggu di sini dengan saran.',
     ai_reason_otp: 'Kode keamanan',
     ai_reason_promotion: 'Promosi',
     ai_reason_balance: 'Saldo atau pengingat',

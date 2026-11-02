@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { AppState } from 'react-native';
+import { AppState, Platform } from 'react-native';
 
 import { useApp } from '~/context/AppContext';
 import { useIsPro, usePro } from '~/context/ProContext';
@@ -31,11 +31,19 @@ import {
 } from '../processAlerts';
 
 /**
+ * iOS: how often the open app looks for alerts the Log Notification action
+ * queued. Shortcuts runs it in the background with nothing telling the app, so
+ * without this an alert waits for the next foreground. Reading the App Group
+ * queue is cheap, and nothing else runs while it is empty.
+ */
+const IOS_QUEUE_POLL_MS = 5000;
+
+/**
  * Queues notifications for explicit review with local amount candidates. Mounted once,
  * outside the tabs so capture runs regardless of the visible screen, next to
  * AutoLogSync. Runs on mount, on every foreground, whenever Android's listener
- * writes a capture while the app is open, and on an explicit request (a
- * setup screen's test alert).
+ * writes a capture while the app is open, when the iOS queue fills while the
+ * app is open, and on an explicit request (a setup screen's test alert).
  *
  * It also keeps the Android listener's config in step with the watched apps,
  * and asks Android to rebind the listener when it was dropped.
@@ -198,8 +206,34 @@ export function PaymentAlertSync() {
     if (!isPaymentAlertCaptureSupported()) return undefined;
     // Off the startup path: the first screen needs the JS thread more.
     const handle = runAfterInteractions(() => void drainRef.current());
+    // Android tells the open app about each capture; iOS cannot, so look.
+    let poll: ReturnType<typeof setInterval> | null = null;
+    const stopPolling = () => {
+      if (poll) clearInterval(poll);
+      poll = null;
+    };
+    // Only a changed queue drains: one alert that keeps failing to save must not
+    // retry (and report) every few seconds; the next foreground retries it.
+    let lastQueue = '';
+    const startPolling = () => {
+      if (Platform.OS !== 'ios' || poll) return;
+      poll = setInterval(() => {
+        void readQueuedCaptures()
+          .then((queued) => {
+            const ids = queued.map((capture) => capture.id).join(',');
+            if (ids && ids !== lastQueue) void drainRef.current();
+            lastQueue = ids;
+          })
+          .catch(() => undefined);
+      }, IOS_QUEUE_POLL_MS);
+    };
+    if (AppState.currentState === 'active') startPolling();
     const appState = AppState.addEventListener('change', (state) => {
-      if (state !== 'active') return;
+      if (state !== 'active') {
+        stopPolling();
+        return;
+      }
+      startPolling();
       void drainRef.current();
       void repairListener(alertsEnabledRef.current);
     });
@@ -207,6 +241,7 @@ export function PaymentAlertSync() {
     const unsubscribeRequests = subscribePaymentAlertDrain(() => void drainRef.current());
     return () => {
       handle.cancel();
+      stopPolling();
       appState.remove();
       unsubscribeQueued();
       unsubscribeRequests();

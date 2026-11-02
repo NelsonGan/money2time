@@ -108,15 +108,16 @@ it('does nothing while auto-review is off', async () => {
   expect(reviewNotificationsWithAi).not.toHaveBeenCalled();
 });
 
-it('sends only pending, unreviewed notifications from linked accounts, newest first', async () => {
+it('sends every pending, unreviewed notification, with or without an account, newest first', async () => {
   jest.mocked(readNotificationScanHistory).mockResolvedValue([
     row('new', 30),
     row('old', 1),
     row('done', 2, { result: 'expense' }),
     row('seen', 3, { ai: { decision: 'unsure', applied: false, seen: true, reviewedAt: '' } }),
-    // Every linked account is covered; no account is ever guessed.
+    // Every account is covered. One with no account (or a deleted one) is
+    // still sorted; applying it never guesses an account.
     row('other-account', 4, { accountId: 'a2' }),
-    row('no-account', 5, { accountId: null }),
+    row('no-account', 5, { accountId: null, amounts: [{ amount: 5, currency: 'SGD' }] }),
     row('deleted-account', 7, { accountId: 'gone' }),
     row('settled', 6),
   ]);
@@ -128,8 +129,22 @@ it('sends only pending, unreviewed notifications from linked accounts, newest fi
     );
   await runNotificationAiReview(deps());
   const request = jest.mocked(reviewNotificationsWithAi).mock.calls[0][0];
-  expect(request.notifications.map((item) => item.id)).toEqual(['new', 'other-account', 'old']);
-  expect(request.notifications[2]).toEqual({
+  expect(request.notifications.map((item) => item.id)).toEqual([
+    'new',
+    'deleted-account',
+    'no-account',
+    'other-account',
+    'old',
+  ]);
+  // With no account, the currency comes from the amount read from the text.
+  expect(request.notifications.map((item) => item.currency)).toEqual([
+    'MYR',
+    'XXX',
+    'SGD',
+    'MYR',
+    'MYR',
+  ]);
+  expect(request.notifications[4]).toEqual({
     id: 'old',
     text: 'RM1.00 paid',
     currency: 'MYR',
@@ -144,7 +159,7 @@ it('sends only pending, unreviewed notifications from linked accounts, newest fi
   );
   expect(trackEvent).toHaveBeenCalledWith(
     'Notification AI Review Completed',
-    expect.objectContaining({ reviewed: 3, expense: 1 }),
+    expect.objectContaining({ reviewed: 5, expense: 1 }),
   );
 });
 

@@ -3180,6 +3180,7 @@ const ja = {
     review_banner_single: '確認待ちの通知が 1 件あります',
     review_amount_hint: '金額を選ぶか入力してください',
     review_missing: '金額または口座が未入力の項目があります。',
+    review_choose_account: '口座を選択',
     review_save_error: '保存できませんでした。未完了の項目はそのまま残っています。',
     review_leave_title: '未完了の通知を無視しますか？',
     review_leave_body: 'この画面を離れると、未完了の通知 %{count} 件がすべて無視されます。',
@@ -3217,6 +3218,8 @@ const ja = {
     ai_undo_edited_body: '記録後に編集されています。取り消すと削除されます。',
     ai_hint_expense: '提案：支出',
     ai_hint_income: '提案：収入',
+    ai_no_account_ios:
+      'Log Notification ショートカットで口座を選ぶと、自動レビューがその通知を記録できます。口座がない場合は、提案付きでここに残ります。',
     ai_reason_otp: '認証コード',
     ai_reason_promotion: 'プロモーション',
     ai_reason_balance: '残高・リマインダー',
