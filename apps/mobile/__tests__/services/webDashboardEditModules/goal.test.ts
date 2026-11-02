@@ -297,6 +297,8 @@ describe('module:goal update', () => {
           recurrencePattern: 'monthly',
           recurrenceInterval: 1,
           nextRunDate: '2026-11-20',
+          // Today's day of the month, which the monthly auto-save returns to.
+          anchorDay: 20,
         },
       },
     ]);

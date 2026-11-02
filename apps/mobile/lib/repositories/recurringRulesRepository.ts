@@ -1,4 +1,4 @@
-import { and, eq, isNull, lte } from 'drizzle-orm';
+import { and, eq, gte, isNull, lt, lte } from 'drizzle-orm';
 
 import { getDb } from '~/lib/db/client';
 import { getActiveLedgerId, inActiveLedger } from '~/lib/db/ledgerScope';
@@ -8,7 +8,16 @@ import { buildRateTable, convert } from '~/utils/currency';
 import { newId, nowIso } from '~/utils/id';
 // Shared with the screen's forecast so the dates it projects are the dates this
 // runner will actually write.
-import { isAfterRecurringEndDate, nextRunAfter } from '~/utils/recurringRules';
+import {
+  effectiveAnchorDay,
+  isAfterRecurringEndDate,
+  isAnchorDay,
+  isSameRunDay,
+  nextRunAfter,
+  runDayKeyOf,
+  runDayOf,
+} from '~/utils/recurringRules';
+import { repairRecurringSchedule } from '~/utils/recurringScheduleRepair';
 
 import { exchangeRatesRepository } from './exchangeRatesRepository';
 import { ledgersRepository } from './ledgersRepository';
@@ -29,6 +38,12 @@ export interface CreateRecurringRuleInput {
   recurrencePattern: Exclude<RecurrencePattern, 'none'>;
   recurrenceInterval?: number;
   nextRunDate: string;
+  /**
+   * The day of the month a monthly or yearly rule is for, when `nextRunDate`
+   * is not on it: a loan paid on the 31st whose first instalment falls on
+   * November 30. Left out, it is `nextRunDate`'s own day.
+   */
+  anchorDay?: number | null;
   endDate?: string | null;
   isActive?: boolean;
   /**
@@ -42,6 +57,21 @@ function normalizeInterval(value: number | undefined) {
   const parsed = Number(value ?? 1);
   return Number.isFinite(parsed) ? Math.max(1, Math.trunc(parsed)) : 1;
 }
+
+/** The anchor day a rule starting on `nextRunDate` gets, unless one is given. */
+function anchorDayFor(nextRunDate: string, requested: number | null | undefined): number | null {
+  if (isAnchorDay(requested)) return requested;
+  return runDayOf(nextRunDate)?.day ?? null;
+}
+
+/** The day of the month `iso` falls on, in local time. */
+function localDayOfMonth(iso: string): number | null {
+  const date = new Date(iso);
+  return Number.isNaN(date.getTime()) ? null : date.getDate();
+}
+
+/** `rr:<ruleId>:<YYYY-MM-DD>`: the run date the id was named after. */
+const RUN_ID_DATE = /:(\d{4}-\d{2}-\d{2})$/;
 
 function validateRuleInput(input: CreateRecurringRuleInput) {
   if (input.type === 'transfer') {
@@ -85,6 +115,7 @@ class RecurringRulesRepository {
         recurrencePattern: input.recurrencePattern,
         recurrenceInterval: normalizeInterval(input.recurrenceInterval),
         nextRunDate: input.nextRunDate,
+        anchorDay: anchorDayFor(input.nextRunDate, input.anchorDay),
         endDate: input.endDate ?? null,
         isActive: input.isActive ?? true,
         countsAsExpense: input.countsAsExpense ?? false,
@@ -100,6 +131,7 @@ class RecurringRulesRepository {
     db.update(recurringRulesTable)
       .set({
         ...updates,
+        anchorDay: this.anchorDayForUpdate(id, updates),
         recurrenceInterval: updates.recurrenceInterval
           ? normalizeInterval(updates.recurrenceInterval)
           : undefined,
@@ -108,6 +140,101 @@ class RecurringRulesRepository {
       })
       .where(and(eq(recurringRulesTable.id, id), isNull(recurringRulesTable.deletedAt)))
       .run();
+  }
+
+  /**
+   * The anchor day an update writes, or undefined to keep the rule's. Every
+   * edit sends the date the editor showed, which is the rule's own next run
+   * date, so the anchor moves only when that date is changed to another day:
+   * otherwise saving a rule on the 31st while it waits on November 30 would
+   * re-anchor it to the 30th.
+   */
+  private anchorDayForUpdate(
+    id: string,
+    updates: Partial<CreateRecurringRuleInput>,
+  ): number | null | undefined {
+    if (isAnchorDay(updates.anchorDay)) return updates.anchorDay;
+    if (updates.nextRunDate === undefined) return undefined;
+    const current = getDb()
+      .select({ nextRunDate: recurringRulesTable.nextRunDate })
+      .from(recurringRulesTable)
+      .where(eq(recurringRulesTable.id, id))
+      .get();
+    if (current && isSameRunDay(current.nextRunDate, updates.nextRunDate)) return undefined;
+    return anchorDayFor(updates.nextRunDate, null);
+  }
+
+  /**
+   * Give every rule saved before anchor days (migration 077) its anchor, and
+   * move its next run date back onto it (see utils/recurringScheduleRepair.ts).
+   * AppContext runs it before every `runDueTransactions`, so rules that arrive without one
+   * later (a restored older backup, an older phone through Cloud Sync) are
+   * repaired too; once a rule has its anchor it is never read here again.
+   *
+   * `updated_at` is left alone, as migration 076 does: every phone repairs its
+   * own copy the same way, and a newer stamp would make Cloud Sync prefer this
+   * phone's copy over a newer edit from another.
+   */
+  repairLegacySchedules() {
+    const db = getDb();
+    const rules = db
+      .select({
+        id: recurringRulesTable.id,
+        type: recurringRulesTable.type,
+        toAccountId: recurringRulesTable.toAccountId,
+        recurrencePattern: recurringRulesTable.recurrencePattern,
+        recurrenceInterval: recurringRulesTable.recurrenceInterval,
+        nextRunDate: recurringRulesTable.nextRunDate,
+        createdAt: recurringRulesTable.createdAt,
+      })
+      .from(recurringRulesTable)
+      .where(and(isNull(recurringRulesTable.deletedAt), isNull(recurringRulesTable.anchorDay)))
+      .all();
+
+    rules.forEach((rule) => {
+      // Every run the rule made, deleted ones included, by the id range its
+      // runs are named in (the primary key, so no scan). A run whose date was
+      // edited afterwards no longer says where the schedule was.
+      const prefix = `rr:${rule.id}:`;
+      const runDates = db
+        .select({ id: transactionsTable.id, date: transactionsTable.date })
+        .from(transactionsTable)
+        .where(and(gte(transactionsTable.id, prefix), lt(transactionsTable.id, `rr:${rule.id};`)))
+        .all()
+        .filter((run) => {
+          // Named after the UTC date before migration 077, the run day since.
+          const named = RUN_ID_DATE.exec(run.id)?.[1];
+          return named === run.date.slice(0, 10) || named === runDayKeyOf(run.date);
+        })
+        .map((run) => run.date);
+
+      // What the rule's target records about the day it is for: a loan's
+      // payment day, or for a goal's auto-save the day it was set up (the
+      // goal editor starts it a month on, already shortened to that month).
+      let intendedDay: number | null = null;
+      if (rule.type === 'transfer' && rule.toAccountId) {
+        const target = db
+          .select({ type: accountsTable.type, loanPaymentDay: accountsTable.loanPaymentDay })
+          .from(accountsTable)
+          .where(eq(accountsTable.id, rule.toAccountId))
+          .get();
+        if (target?.type === 'loan') intendedDay = target.loanPaymentDay ?? null;
+        if (target?.type === 'goal') intendedDay = localDayOfMonth(rule.createdAt);
+      }
+
+      const repaired = repairRecurringSchedule({
+        nextRunDate: rule.nextRunDate,
+        recurrencePattern: rule.recurrencePattern as RecurrencePattern,
+        recurrenceInterval: rule.recurrenceInterval,
+        runDates,
+        intendedDay,
+      });
+      if (!repaired) return;
+      db.update(recurringRulesTable)
+        .set({ anchorDay: repaired.anchorDay, nextRunDate: repaired.nextRunDate })
+        .where(eq(recurringRulesTable.id, rule.id))
+        .run();
+    });
   }
 
   softDelete(id: string) {
@@ -192,6 +319,10 @@ class RecurringRulesRepository {
         if (!exists) transactionsRepository.createWithId(id, input);
       };
       let cursor = rule.nextRunDate;
+      // The day of the month this run keeps; a stored anchor the run date has
+      // moved off (an older phone moved it) gives way to the run date's day.
+      const start = runDayOf(cursor);
+      const anchorDay = start ? effectiveAnchorDay(start, rule.anchorDay) : rule.anchorDay;
       let guard = 0;
       while (cursor <= todayIso && guard < 500) {
         if (!isAfterRecurringEndDate(cursor, rule.endDate)) {
@@ -256,7 +387,12 @@ class RecurringRulesRepository {
             });
           }
         }
-        const next = nextRunAfter(cursor, rule.recurrencePattern, rule.recurrenceInterval);
+        const next = nextRunAfter(
+          cursor,
+          rule.recurrencePattern,
+          rule.recurrenceInterval,
+          anchorDay,
+        );
         if (!next) break;
         cursor = next;
         guard += 1;
@@ -266,6 +402,9 @@ class RecurringRulesRepository {
       db.update(recurringRulesTable)
         .set({
           nextRunDate: cursor,
+          // A rule still without one waits for `repairLegacySchedules`, which
+          // can only read its history while the anchor is missing.
+          ...(rule.anchorDay != null ? { anchorDay } : {}),
           isActive: shouldDeactivate ? false : rule.isActive,
           updatedAt: nowIso(),
         })
@@ -284,9 +423,16 @@ class RecurringRulesRepository {
   }
 }
 
-/** The transaction a recurring rule makes on one run date. */
+/**
+ * The transaction a recurring rule makes on one run date, named after the
+ * run's calendar day. Run dates are local midnight, a different instant in
+ * each time zone, so the day (not the stored instant's UTC date) is what two
+ * phones sharing a ledger in different zones agree on. Runs made before
+ * migration 077 were named after the UTC date, which is the same day for a
+ * bare day key and the day before for a local midnight east of UTC.
+ */
 export function recurringRunTransactionId(ruleId: string, date: string): string {
-  return `rr:${ruleId}:${date.slice(0, 10)}`;
+  return `rr:${ruleId}:${runDayKeyOf(date) ?? date.slice(0, 10)}`;
 }
 
 export const recurringRulesRepository = new RecurringRulesRepository();

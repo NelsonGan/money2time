@@ -168,15 +168,21 @@ function read(raw: Record<string, unknown>): ModuleOp | null {
 
 // ------------------------------------------------------------------ planning --
 
-/** When a new or re-timed auto-save first runs, as GoalEditorScreen's `nextRunDateFor`. */
-function goalNextRunDate(cadence: Cadence, now: Date): string {
+/**
+ * When a new or re-timed auto-save first runs, as GoalEditorScreen's
+ * `autoSaveSchedule`. A monthly one is anchored on today's day of the month,
+ * since its first run is already shortened to next month's length.
+ */
+function goalSchedule(cadence: Cadence, now: Date): { nextRunDate: string; anchorDay?: number } {
   if (cadence === 'weekly') {
-    return localDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7));
+    return {
+      nextRunDate: localDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7)),
+    };
   }
   const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
   const lastDay = new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate();
   next.setDate(Math.min(now.getDate(), lastDay));
-  return localDay(next);
+  return { nextRunDate: localDay(next), anchorDay: now.getDate() };
 }
 
 const liveRules = (tools: PlanTools): RecurringTransactionRule[] =>
@@ -229,7 +235,7 @@ function planCreate(tools: PlanTools, fields: GoalFields, steps: EditStep[]): Re
       fromAccountId: source.id,
       recurrencePattern: fields.autoSave.cadence,
       recurrenceInterval: 1,
-      nextRunDate: goalNextRunDate(fields.autoSave.cadence, tools.lookup.now),
+      ...goalSchedule(fields.autoSave.cadence, tools.lookup.now),
     };
   }
   const limit = goalLimit(tools);
@@ -354,7 +360,7 @@ function planUpdate(
         toAccountId: current.id,
         recurrencePattern: wanted.cadence,
         recurrenceInterval: 1,
-        nextRunDate: goalNextRunDate(wanted.cadence, lookup.now),
+        ...goalSchedule(wanted.cadence, lookup.now),
       };
       if (!inlineRule) {
         ruleOps.push({ op: 'create', input });
@@ -379,7 +385,7 @@ function planUpdate(
               fromAccountId: input.fromAccountId,
               recurrencePattern: input.recurrencePattern,
               ...(keepsGeneratedName ? { name: input.name } : {}),
-              ...(cadenceChanged ? { nextRunDate: input.nextRunDate } : {}),
+              ...(cadenceChanged ? goalSchedule(wanted.cadence, lookup.now) : {}),
             },
           });
         }

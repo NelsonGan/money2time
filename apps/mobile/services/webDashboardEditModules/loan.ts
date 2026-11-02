@@ -390,6 +390,9 @@ function repaymentRule(
       contract.firstInstalmentDate && contract.firstInstalmentDate > today
         ? contract.firstInstalmentDate
         : localDay(nextOccurrenceOfMonthDay(input.loanPaymentDay ?? 1, tools.lookup.now)),
+    // The day of the month the loan is paid on. The first instalment may sit
+    // on a shorter month's last day; the rule returns to this day after it.
+    anchorDay: input.loanPaymentDay ?? null,
     endDate: contract.finalInstalmentDate,
   };
 }

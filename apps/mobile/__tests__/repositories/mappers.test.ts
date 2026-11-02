@@ -606,6 +606,27 @@ describe('toRecurringRule', () => {
     );
   });
 
+  it('keeps a valid anchor day and drops anything else', () => {
+    const row: any = {
+      id: 'r',
+      name: 'Rent',
+      type: 'expense',
+      amount: 1,
+      currency: 'USD',
+      recurrencePattern: 'monthly',
+      recurrenceInterval: 1,
+      nextRunDate: '2026-06-30',
+      endDate: null,
+      isActive: true,
+      ...STAMPS,
+    };
+    expect(toRecurringRule({ ...row, anchorDay: 31 }).anchorDay).toBe(31);
+    expect(toRecurringRule({ ...row, anchorDay: null }).anchorDay).toBeNull();
+    expect(toRecurringRule(row).anchorDay).toBeNull();
+    expect(toRecurringRule({ ...row, anchorDay: 0 }).anchorDay).toBeNull();
+    expect(toRecurringRule({ ...row, anchorDay: 32 }).anchorDay).toBeNull();
+  });
+
   it('defaults unknown pattern to monthly', () => {
     const rule = toRecurringRule({
       id: 'r',

@@ -462,7 +462,10 @@ describe('ledgersRepository on SQLite', () => {
       harness.all(
         `SELECT account_id, category_id, next_run_date FROM recurring_rules WHERE ledger_id = 'copy'`,
       ),
-    ).toEqual([{ account_id: 'c2', category_id: 'c1', next_run_date: '2026-11-01T00:00:00.000Z' }]);
+    ).toEqual([
+      // Stepped past now, so written as local midnight.
+      { account_id: 'c2', category_id: 'c1', next_run_date: new Date(2026, 10, 1).toISOString() },
+    ]);
     expect(harness.all(`SELECT name, is_active FROM albums WHERE ledger_id = 'copy'`)).toEqual([
       { name: 'Trip', is_active: 0 },
     ]);
