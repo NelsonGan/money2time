@@ -3256,7 +3256,10 @@ const nl = {
     review_banner_single: '1 melding te bekijken',
     review_amount_hint: 'Kies of vul het bedrag in',
     review_missing: 'Bij sommige items ontbreekt nog een bedrag of rekening.',
-    review_choose_account: 'Kies een rekening',
+    review_no_account_ios:
+      'Geen rekening gekozen. Kies er een in je Log Notification-opdracht, dan worden ze automatisch vastgelegd.',
+    review_no_account_android:
+      'Geen rekening voor deze app. Kies er een in %{path}, dan worden ze automatisch vastgelegd.',
     review_save_error: 'Opslaan mislukt. Je onafgemaakte items staan er nog.',
     review_leave_title: 'Onafgemaakte meldingen negeren?',
     review_leave_body: 'Als je weggaat, worden alle %{count} onafgemaakte meldingen genegeerd.',
@@ -3285,6 +3288,9 @@ const nl = {
     ai_log_both: 'Beide',
     ai_log_expense: 'Uitgaven',
     ai_log_income: 'Inkomsten',
+    ai_scope_expense: 'Legt alleen uitgaven vast',
+    ai_scope_income: 'Legt alleen inkomsten vast',
+    ai_scope_both: 'Legt uitgaven en inkomsten vast',
     ai_get_unlimited: 'Onbeperkt met Pro',
     ai_done_title: 'Voor je gesorteerd',
     ai_logged_count: '%{count} vastgelegd',
@@ -3295,8 +3301,6 @@ const nl = {
       'Je hebt hem bewerkt nadat hij is vastgelegd. Ongedaan maken verwijdert hem.',
     ai_hint_expense: 'Voorstel: uitgave',
     ai_hint_income: 'Voorstel: inkomsten',
-    ai_no_account_ios:
-      'Kies een rekening in je Log Notification-opdracht, zodat automatisch beoordelen de meldingen kan vastleggen. Zonder rekening wachten ze hier met een voorstel.',
     ai_reason_otp: 'Beveiligingscode',
     ai_reason_promotion: 'Aanbieding',
     ai_reason_balance: 'Saldo of herinnering',

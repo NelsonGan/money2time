@@ -3209,7 +3209,10 @@ const hi = {
     review_banner_single: 'जांचने के लिए 1 सूचना',
     review_amount_hint: 'राशि चुनें या डालें',
     review_missing: 'कुछ आइटम में अभी भी राशि या खाता चाहिए।',
-    review_choose_account: 'खाता चुनें',
+    review_no_account_ios:
+      'कोई खाता नहीं चुना गया। अपने Log Notification शॉर्टकट में खाता चुनें, ताकि ये अपने-आप दर्ज हों।',
+    review_no_account_android:
+      'इस ऐप के लिए कोई खाता नहीं है। %{path} में खाता चुनें, ताकि ये अपने-आप दर्ज हों।',
     review_save_error: 'सेव नहीं हो सका। आपके अधूरे आइटम अभी भी यहीं हैं।',
     review_leave_title: 'अधूरी सूचनाओं को अनदेखा करें?',
     review_leave_body: 'बाहर जाने पर सभी %{count} अधूरी सूचनाएं अनदेखी कर दी जाएंगी।',
@@ -3238,6 +3241,9 @@ const hi = {
     ai_log_both: 'दोनों',
     ai_log_expense: 'खर्च',
     ai_log_income: 'आय',
+    ai_scope_expense: 'केवल खर्च दर्ज करता है',
+    ai_scope_income: 'केवल आय दर्ज करता है',
+    ai_scope_both: 'खर्च और आय दर्ज करता है',
     ai_get_unlimited: 'Pro के साथ असीमित पाएं',
     ai_done_title: 'आपके लिए छांटी गईं',
     ai_logged_count: '%{count} दर्ज',
@@ -3247,8 +3253,6 @@ const hi = {
     ai_undo_edited_body: 'दर्ज होने के बाद आपने इसे बदला है। वापस लेने पर यह मिट जाएगी।',
     ai_hint_expense: 'सुझाव: खर्च',
     ai_hint_income: 'सुझाव: आय',
-    ai_no_account_ios:
-      'अपने Log Notification शॉर्टकट में खाता चुनें, ताकि ऑटो-रिव्यू उसकी सूचनाएँ दर्ज कर सके। खाते के बिना वे सुझाव के साथ यहाँ रहती हैं।',
     ai_reason_otp: 'सुरक्षा कोड',
     ai_reason_promotion: 'प्रमोशन',
     ai_reason_balance: 'बैलेंस या रिमाइंडर',

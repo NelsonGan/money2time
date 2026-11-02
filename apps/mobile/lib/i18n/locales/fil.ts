@@ -3270,7 +3270,10 @@ const fil = {
     review_banner_single: '1 notification na ire-review',
     review_amount_hint: 'Pumili o ilagay ang halaga',
     review_missing: 'May mga item na kailangan pa ng halaga o account.',
-    review_choose_account: 'Pumili ng account',
+    review_no_account_ios:
+      'Walang account. Pumili sa iyong Log Notification shortcut para awtomatikong maitala ang mga ito.',
+    review_no_account_android:
+      'Walang account ang app na ito. Pumili sa %{path} para awtomatikong maitala ang mga ito.',
     review_save_error: 'Hindi ma-save. Nandito pa rin ang mga hindi pa tapos na item.',
     review_leave_title: 'Huwag pansinin ang mga hindi pa tapos na notification?',
     review_leave_body:
@@ -3301,6 +3304,9 @@ const fil = {
     ai_log_both: 'Pareho',
     ai_log_expense: 'Gastos',
     ai_log_income: 'Kita',
+    ai_scope_expense: 'Gastos lang ang itinatala',
+    ai_scope_income: 'Kita lang ang itinatala',
+    ai_scope_both: 'Itinatala ang gastos at kita',
     ai_get_unlimited: 'Walang limitasyon gamit ang Pro',
     ai_done_title: 'Naayos na para sa iyo',
     ai_logged_count: '%{count} na-log',
@@ -3310,8 +3316,6 @@ const fil = {
     ai_undo_edited_body: 'In-edit mo ito mula nang ma-log. Buburahin ito ng I-undo.',
     ai_hint_expense: 'Mungkahi: gastos',
     ai_hint_income: 'Mungkahi: kita',
-    ai_no_account_ios:
-      'Pumili ng account sa iyong Log Notification shortcut para maitala ng auto-review ang mga notification nito. Kung wala, maghihintay sila rito na may mungkahi.',
     ai_reason_otp: 'Security code',
     ai_reason_promotion: 'Promo',
     ai_reason_balance: 'Balance o paalala',

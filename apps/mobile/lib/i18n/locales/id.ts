@@ -3238,7 +3238,10 @@ const id = {
     review_banner_single: '1 notifikasi perlu ditinjau',
     review_amount_hint: 'Pilih atau masukkan jumlahnya',
     review_missing: 'Beberapa item masih memerlukan jumlah atau akun.',
-    review_choose_account: 'Pilih akun',
+    review_no_account_ios:
+      'Belum ada akun. Pilih di pintasan Log Notification agar dicatat otomatis.',
+    review_no_account_android:
+      'Aplikasi ini belum punya akun. Pilih di %{path} agar dicatat otomatis.',
     review_save_error: 'Tidak dapat menyimpan. Item yang belum selesai masih ada di sini.',
     review_leave_title: 'Abaikan notifikasi yang belum selesai?',
     review_leave_body: 'Jika keluar, semua %{count} notifikasi yang belum selesai akan diabaikan.',
@@ -3267,6 +3270,9 @@ const id = {
     ai_log_both: 'Keduanya',
     ai_log_expense: 'Pengeluaran',
     ai_log_income: 'Pemasukan',
+    ai_scope_expense: 'Hanya mencatat pengeluaran',
+    ai_scope_income: 'Hanya mencatat pemasukan',
+    ai_scope_both: 'Mencatat pengeluaran dan pemasukan',
     ai_get_unlimited: 'Dapatkan tanpa batas dengan Pro',
     ai_done_title: 'Sudah dipilah untuk Anda',
     ai_logged_count: '%{count} dicatat',
@@ -3276,8 +3282,6 @@ const id = {
     ai_undo_edited_body: 'Anda sudah mengeditnya sejak dicatat. Membatalkan akan menghapusnya.',
     ai_hint_expense: 'Saran: pengeluaran',
     ai_hint_income: 'Saran: pemasukan',
-    ai_no_account_ios:
-      'Pilih akun di pintasan Log Notification Anda agar tinjauan otomatis dapat mencatat notifikasinya. Tanpa akun, notifikasi menunggu di sini dengan saran.',
     ai_reason_otp: 'Kode keamanan',
     ai_reason_promotion: 'Promosi',
     ai_reason_balance: 'Saldo atau pengingat',

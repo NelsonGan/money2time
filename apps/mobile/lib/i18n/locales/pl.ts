@@ -3229,7 +3229,10 @@ const pl = {
     review_banner_single: '1 powiadomienie do sprawdzenia',
     review_amount_hint: 'Wybierz lub wpisz kwotę',
     review_missing: 'Niektóre pozycje nadal wymagają kwoty lub konta.',
-    review_choose_account: 'Wybierz konto',
+    review_no_account_ios:
+      'Brak konta. Wybierz je w skrócie Log Notification, aby zapisywały się automatycznie.',
+    review_no_account_android:
+      'Brak konta dla tej aplikacji. Wybierz je w %{path}, aby zapisywały się automatycznie.',
     review_save_error: 'Nie udało się zapisać. Niedokończone pozycje nadal tu są.',
     review_leave_title: 'Pominąć niedokończone powiadomienia?',
     review_leave_body:
@@ -3259,6 +3262,9 @@ const pl = {
     ai_log_both: 'Oba',
     ai_log_expense: 'Wydatki',
     ai_log_income: 'Przychody',
+    ai_scope_expense: 'Zapisuje tylko wydatki',
+    ai_scope_income: 'Zapisuje tylko przychody',
+    ai_scope_both: 'Zapisuje wydatki i przychody',
     ai_get_unlimited: 'Bez limitu z Pro',
     ai_done_title: 'Posortowane za Ciebie',
     ai_logged_count: 'Zapisano: %{count}',
@@ -3268,8 +3274,6 @@ const pl = {
     ai_undo_edited_body: 'Edytowano go po zapisaniu. Cofnięcie go usunie.',
     ai_hint_expense: 'Sugestia: wydatek',
     ai_hint_income: 'Sugestia: przychód',
-    ai_no_account_ios:
-      'Wybierz konto w skrócie Log Notification, aby automatyczny przegląd mógł zapisywać jego powiadomienia. Bez konta czekają tutaj z sugestią.',
     ai_reason_otp: 'Kod bezpieczeństwa',
     ai_reason_promotion: 'Promocja',
     ai_reason_balance: 'Saldo lub przypomnienie',

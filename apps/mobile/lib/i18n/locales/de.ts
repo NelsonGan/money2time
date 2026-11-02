@@ -3264,7 +3264,10 @@ const de = {
     review_banner_single: '1 Benachrichtigung zu prüfen',
     review_amount_hint: 'Wähle den Betrag oder gib ihn ein',
     review_missing: 'Bei einigen Einträgen fehlt noch ein Betrag oder Konto.',
-    review_choose_account: 'Konto auswählen',
+    review_no_account_ios:
+      'Kein Konto gewählt. Wähle eins in deinem Log Notification-Kurzbefehl, damit sie automatisch erfasst werden.',
+    review_no_account_android:
+      'Kein Konto für diese App. Wähle eins unter %{path}, damit sie automatisch erfasst werden.',
     review_save_error: 'Speichern fehlgeschlagen. Deine offenen Einträge sind noch da.',
     review_leave_title: 'Offene Benachrichtigungen ignorieren?',
     review_leave_body:
@@ -3295,6 +3298,9 @@ const de = {
     ai_log_both: 'Beides',
     ai_log_expense: 'Ausgaben',
     ai_log_income: 'Einnahmen',
+    ai_scope_expense: 'Erfasst nur Ausgaben',
+    ai_scope_income: 'Erfasst nur Einnahmen',
+    ai_scope_both: 'Erfasst Ausgaben und Einnahmen',
     ai_get_unlimited: 'Mit Pro unbegrenzt nutzen',
     ai_done_title: 'Für dich sortiert',
     ai_logged_count: '%{count} erfasst',
@@ -3304,8 +3310,6 @@ const de = {
     ai_undo_edited_body: 'Du hast ihn seit dem Erfassen bearbeitet. Rückgängig löscht ihn.',
     ai_hint_expense: 'Vorschlag: Ausgabe',
     ai_hint_income: 'Vorschlag: Einnahme',
-    ai_no_account_ios:
-      'Wähle in deinem Log Notification-Kurzbefehl ein Konto, damit die automatische Prüfung seine Mitteilungen erfassen kann. Ohne Konto warten sie hier mit einem Vorschlag.',
     ai_reason_otp: 'Sicherheitscode',
     ai_reason_promotion: 'Werbung',
     ai_reason_balance: 'Kontostand oder Erinnerung',

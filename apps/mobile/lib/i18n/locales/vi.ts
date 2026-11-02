@@ -3199,7 +3199,10 @@ const vi = {
     review_banner_single: '1 thông báo cần xem lại',
     review_amount_hint: 'Chọn hoặc nhập số tiền',
     review_missing: 'Một số mục vẫn cần số tiền hoặc tài khoản.',
-    review_choose_account: 'Chọn tài khoản',
+    review_no_account_ios:
+      'Chưa chọn tài khoản. Chọn trong phím tắt Log Notification để tự động ghi lại.',
+    review_no_account_android:
+      'Ứng dụng này chưa có tài khoản. Chọn trong %{path} để tự động ghi lại.',
     review_save_error: 'Không thể lưu. Các mục chưa xong vẫn còn ở đây.',
     review_leave_title: 'Bỏ qua các thông báo chưa xong?',
     review_leave_body: 'Nếu rời đi, cả %{count} thông báo chưa xong sẽ bị bỏ qua.',
@@ -3228,6 +3231,9 @@ const vi = {
     ai_log_both: 'Cả hai',
     ai_log_expense: 'Chi tiêu',
     ai_log_income: 'Thu nhập',
+    ai_scope_expense: 'Chỉ ghi chi tiêu',
+    ai_scope_income: 'Chỉ ghi thu nhập',
+    ai_scope_both: 'Ghi chi tiêu và thu nhập',
     ai_get_unlimited: 'Dùng không giới hạn với Pro',
     ai_done_title: 'Đã sắp xếp giúp bạn',
     ai_logged_count: 'Đã ghi %{count}',
@@ -3237,8 +3243,6 @@ const vi = {
     ai_undo_edited_body: 'Bạn đã sửa mục này sau khi được ghi lại. Hoàn tác sẽ xóa nó.',
     ai_hint_expense: 'Gợi ý: chi tiêu',
     ai_hint_income: 'Gợi ý: thu nhập',
-    ai_no_account_ios:
-      'Chọn tài khoản trong phím tắt Log Notification để tự động xem xét có thể ghi lại thông báo. Nếu không có, chúng sẽ chờ ở đây kèm gợi ý.',
     ai_reason_otp: 'Mã bảo mật',
     ai_reason_promotion: 'Khuyến mãi',
     ai_reason_balance: 'Số dư hoặc nhắc nhở',

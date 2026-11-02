@@ -3243,7 +3243,10 @@ const it = {
     review_banner_single: '1 notifica da controllare',
     review_amount_hint: 'Scegli o inserisci l’importo',
     review_missing: 'Ad alcuni elementi mancano ancora l’importo o il conto.',
-    review_choose_account: 'Scegli un conto',
+    review_no_account_ios:
+      "Nessun conto. Sceglilo nell'abbreviazione Log Notification per registrarle automaticamente.",
+    review_no_account_android:
+      'Nessun conto per questa app. Sceglilo in %{path} per registrarle automaticamente.',
     review_save_error: 'Impossibile salvare. Gli elementi non completati sono ancora qui.',
     review_leave_title: 'Ignorare le notifiche non completate?',
     review_leave_body: 'Uscendo, tutte le %{count} notifiche non completate verranno ignorate.',
@@ -3272,6 +3275,9 @@ const it = {
     ai_log_both: 'Entrambe',
     ai_log_expense: 'Uscite',
     ai_log_income: 'Entrate',
+    ai_scope_expense: 'Registra solo le spese',
+    ai_scope_income: 'Registra solo le entrate',
+    ai_scope_both: 'Registra spese ed entrate',
     ai_get_unlimited: 'Ottienile illimitate con Pro',
     ai_done_title: 'Smistate per te',
     ai_logged_count: '%{count} registrate',
@@ -3281,8 +3287,6 @@ const it = {
     ai_undo_edited_body: 'L’hai modificata dopo la registrazione. Annullando verrà eliminata.',
     ai_hint_expense: 'Suggerimento: spesa',
     ai_hint_income: 'Suggerimento: entrata',
-    ai_no_account_ios:
-      'Scegli un conto nella tua abbreviazione Log Notification, così la revisione automatica può registrarne le notifiche. Senza conto, restano qui con un suggerimento.',
     ai_reason_otp: 'Codice di sicurezza',
     ai_reason_promotion: 'Promozione',
     ai_reason_balance: 'Saldo o promemoria',
