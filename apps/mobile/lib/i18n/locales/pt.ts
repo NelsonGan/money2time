@@ -3224,7 +3224,7 @@ const pt = {
     review_no_account_ios:
       'Nenhuma conta. Escolha uma no seu atalho Log Notification para registrá-las automaticamente.',
     review_no_account_android:
-      'Nenhuma conta. Escolha uma para este app nas configurações de notificações para registrá-las automaticamente.',
+      'Este app não tem conta. Escolha uma em %{path} para registrá-las automaticamente.',
     review_save_error: 'Não foi possível salvar. Seus itens pendentes continuam aqui.',
     review_leave_title: 'Ignorar notificações pendentes?',
     review_leave_body: 'Ao sair, as %{count} notificações pendentes serão ignoradas.',
@@ -3265,8 +3265,6 @@ const pt = {
     ai_undo_edited_body: 'Você o editou depois do registro. Desfazer vai excluí-lo.',
     ai_hint_expense: 'Sugestão: despesa',
     ai_hint_income: 'Sugestão: receita',
-    ai_no_account_ios:
-      'Escolha uma conta no seu atalho Log Notification para que a revisão automática registre as notificações dele. Sem conta, elas aguardam aqui com uma sugestão.',
     ai_reason_otp: 'Código de segurança',
     ai_reason_promotion: 'Promoção',
     ai_reason_balance: 'Saldo ou lembrete',

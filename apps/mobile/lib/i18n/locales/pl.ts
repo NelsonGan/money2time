@@ -3212,7 +3212,7 @@ const pl = {
     review_no_account_ios:
       'Brak konta. Wybierz je w skrócie Log Notification, aby zapisywały się automatycznie.',
     review_no_account_android:
-      'Brak konta. Wybierz je dla tej aplikacji w ustawieniach powiadomień, aby zapisywały się automatycznie.',
+      'Brak konta dla tej aplikacji. Wybierz je w %{path}, aby zapisywały się automatycznie.',
     review_save_error: 'Nie udało się zapisać. Niedokończone pozycje nadal tu są.',
     review_leave_title: 'Pominąć niedokończone powiadomienia?',
     review_leave_body:
@@ -3254,8 +3254,6 @@ const pl = {
     ai_undo_edited_body: 'Edytowano go po zapisaniu. Cofnięcie go usunie.',
     ai_hint_expense: 'Sugestia: wydatek',
     ai_hint_income: 'Sugestia: przychód',
-    ai_no_account_ios:
-      'Wybierz konto w skrócie Log Notification, aby automatyczny przegląd mógł zapisywać jego powiadomienia. Bez konta czekają tutaj z sugestią.',
     ai_reason_otp: 'Kod bezpieczeństwa',
     ai_reason_promotion: 'Promocja',
     ai_reason_balance: 'Saldo lub przypomnienie',

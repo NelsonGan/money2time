@@ -3220,7 +3220,7 @@ const id = {
     review_no_account_ios:
       'Belum ada akun. Pilih di pintasan Log Notification agar dicatat otomatis.',
     review_no_account_android:
-      'Belum ada akun. Pilih untuk aplikasi ini di pengaturan Notifikasi agar dicatat otomatis.',
+      'Aplikasi ini belum punya akun. Pilih di %{path} agar dicatat otomatis.',
     review_save_error: 'Tidak dapat menyimpan. Item yang belum selesai masih ada di sini.',
     review_leave_title: 'Abaikan notifikasi yang belum selesai?',
     review_leave_body: 'Jika keluar, semua %{count} notifikasi yang belum selesai akan diabaikan.',
@@ -3261,8 +3261,6 @@ const id = {
     ai_undo_edited_body: 'Anda sudah mengeditnya sejak dicatat. Membatalkan akan menghapusnya.',
     ai_hint_expense: 'Saran: pengeluaran',
     ai_hint_income: 'Saran: pemasukan',
-    ai_no_account_ios:
-      'Pilih akun di pintasan Log Notification Anda agar tinjauan otomatis dapat mencatat notifikasinya. Tanpa akun, notifikasi menunggu di sini dengan saran.',
     ai_reason_otp: 'Kode keamanan',
     ai_reason_promotion: 'Promosi',
     ai_reason_balance: 'Saldo atau pengingat',

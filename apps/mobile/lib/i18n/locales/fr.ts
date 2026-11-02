@@ -3247,7 +3247,7 @@ const fr = {
     review_no_account_ios:
       'Aucun compte. Choisissez-en un dans votre raccourci Log Notification pour les enregistrer automatiquement.',
     review_no_account_android:
-      'Aucun compte. Choisissez-en un pour cette app dans les réglages des notifications pour les enregistrer automatiquement.',
+      'Aucun compte pour cette app. Choisissez-en un dans %{path} pour les enregistrer automatiquement.',
     review_save_error: 'Enregistrement impossible. Vos éléments non terminés sont toujours là.',
     review_leave_title: 'Ignorer les notifications non terminées ?',
     review_leave_body: 'Si vous quittez, les %{count} notifications non terminées seront ignorées.',
@@ -3289,8 +3289,6 @@ const fr = {
       'Vous l’avez modifiée depuis son enregistrement. L’annulation la supprimera.',
     ai_hint_expense: 'Suggestion : dépense',
     ai_hint_income: 'Suggestion : revenu',
-    ai_no_account_ios:
-      'Choisissez un compte dans votre raccourci Log Notification pour que la vérification automatique enregistre ses notifications. Sans compte, elles attendent ici avec une suggestion.',
     ai_reason_otp: 'Code de sécurité',
     ai_reason_promotion: 'Promotion',
     ai_reason_balance: 'Solde ou rappel',

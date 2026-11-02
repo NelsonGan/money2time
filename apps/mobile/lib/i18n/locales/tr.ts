@@ -3215,7 +3215,7 @@ const tr = {
     review_no_account_ios:
       'Hesap seçilmedi. Otomatik kaydedilmeleri için Log Notification kestirmenizde bir hesap seçin.',
     review_no_account_android:
-      'Hesap seçilmedi. Otomatik kaydedilmeleri için Bildirim ayarlarında bu uygulamaya bir hesap seçin.',
+      'Bu uygulamanın hesabı yok. Otomatik kaydedilmeleri için %{path} bölümünden bir hesap seçin.',
     review_save_error: 'Kaydedilemedi. Tamamlanmamış öğeleriniz hâlâ burada.',
     review_leave_title: 'Tamamlanmamış bildirimler yok sayılsın mı?',
     review_leave_body: 'Çıkarsanız tamamlanmamış %{count} bildirimin tümü yok sayılır.',
@@ -3256,8 +3256,6 @@ const tr = {
     ai_undo_edited_body: 'Kaydedildikten sonra düzenlediniz. Geri almak onu siler.',
     ai_hint_expense: 'Öneri: gider',
     ai_hint_income: 'Öneri: gelir',
-    ai_no_account_ios:
-      'Otomatik incelemenin bildirimleri kaydedebilmesi için Log Notification kestirmenizde bir hesap seçin. Hesap yoksa öneriyle birlikte burada beklerler.',
     ai_reason_otp: 'Güvenlik kodu',
     ai_reason_promotion: 'Promosyon',
     ai_reason_balance: 'Bakiye veya hatırlatma',

@@ -3239,7 +3239,7 @@ const nl = {
     review_no_account_ios:
       'Geen rekening gekozen. Kies er een in je Log Notification-opdracht, dan worden ze automatisch vastgelegd.',
     review_no_account_android:
-      'Geen rekening gekozen. Kies er een voor deze app in de meldingsinstellingen, dan worden ze automatisch vastgelegd.',
+      'Geen rekening voor deze app. Kies er een in %{path}, dan worden ze automatisch vastgelegd.',
     review_save_error: 'Opslaan mislukt. Je onafgemaakte items staan er nog.',
     review_leave_title: 'Onafgemaakte meldingen negeren?',
     review_leave_body: 'Als je weggaat, worden alle %{count} onafgemaakte meldingen genegeerd.',
@@ -3281,8 +3281,6 @@ const nl = {
       'Je hebt hem bewerkt nadat hij is vastgelegd. Ongedaan maken verwijdert hem.',
     ai_hint_expense: 'Voorstel: uitgave',
     ai_hint_income: 'Voorstel: inkomsten',
-    ai_no_account_ios:
-      'Kies een rekening in je Log Notification-opdracht, zodat automatisch beoordelen de meldingen kan vastleggen. Zonder rekening wachten ze hier met een voorstel.',
     ai_reason_otp: 'Beveiligingscode',
     ai_reason_promotion: 'Aanbieding',
     ai_reason_balance: 'Saldo of herinnering',

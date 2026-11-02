@@ -3206,7 +3206,7 @@ const sv = {
     review_no_account_ios:
       'Inget konto valt. Välj ett i din Log Notification-genväg så bokförs de automatiskt.',
     review_no_account_android:
-      'Inget konto valt. Välj ett för appen i notisinställningarna så bokförs de automatiskt.',
+      'Inget konto för appen. Välj ett under %{path} så bokförs de automatiskt.',
     review_save_error: 'Det gick inte att spara. Dina ofärdiga poster finns kvar här.',
     review_leave_title: 'Ignorera ofärdiga aviseringar?',
     review_leave_body: 'Om du lämnar ignoreras alla %{count} ofärdiga aviseringar.',
@@ -3247,8 +3247,6 @@ const sv = {
     ai_undo_edited_body: 'Du har redigerat den sedan den registrerades. Ångra raderar den.',
     ai_hint_expense: 'Förslag: utgift',
     ai_hint_income: 'Förslag: inkomst',
-    ai_no_account_ios:
-      'Välj ett konto i din Log Notification-genväg så att automatisk granskning kan bokföra dess notiser. Utan konto väntar de här med ett förslag.',
     ai_reason_otp: 'Säkerhetskod',
     ai_reason_promotion: 'Erbjudande',
     ai_reason_balance: 'Saldo eller påminnelse',

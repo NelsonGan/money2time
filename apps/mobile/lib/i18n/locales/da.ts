@@ -3202,7 +3202,7 @@ const da = {
     review_no_account_ios:
       'Ingen konto valgt. Vælg en i din Log Notification-genvej, så de registreres automatisk.',
     review_no_account_android:
-      'Ingen konto valgt. Vælg en for denne app i notifikationsindstillingerne, så de registreres automatisk.',
+      'Ingen konto for denne app. Vælg en under %{path}, så de registreres automatisk.',
     review_save_error: 'Kunne ikke gemme. Dine ufærdige elementer er her stadig.',
     review_leave_title: 'Ignorer ufærdige notifikationer?',
     review_leave_body: 'Hvis du går, ignoreres alle %{count} ufærdige notifikationer.',
@@ -3243,8 +3243,6 @@ const da = {
     ai_undo_edited_body: 'Du har redigeret den, siden den blev registreret. Fortryd sletter den.',
     ai_hint_expense: 'Forslag: udgift',
     ai_hint_income: 'Forslag: indtægt',
-    ai_no_account_ios:
-      'Vælg en konto i din Log Notification-genvej, så den automatiske gennemgang kan registrere dens notifikationer. Uden en konto venter de her med et forslag.',
     ai_reason_otp: 'Sikkerhedskode',
     ai_reason_promotion: 'Kampagne',
     ai_reason_balance: 'Saldo eller påmindelse',

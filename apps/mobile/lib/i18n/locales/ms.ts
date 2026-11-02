@@ -3229,7 +3229,7 @@ const ms = {
     review_no_account_ios:
       'Tiada akaun. Pilih dalam pintasan Log Notification anda supaya ia direkod secara automatik.',
     review_no_account_android:
-      'Tiada akaun. Pilih untuk apl ini dalam tetapan Pemberitahuan supaya ia direkod secara automatik.',
+      'Tiada akaun untuk apl ini. Pilih dalam %{path} supaya ia direkod secara automatik.',
     review_save_error: 'Tidak dapat menyimpan. Item yang belum selesai masih ada di sini.',
     review_leave_title: 'Abaikan pemberitahuan yang belum selesai?',
     review_leave_body:
@@ -3271,8 +3271,6 @@ const ms = {
     ai_undo_edited_body: 'Anda telah mengeditnya sejak ia direkod. Buat asal akan memadamnya.',
     ai_hint_expense: 'Cadangan: perbelanjaan',
     ai_hint_income: 'Cadangan: pendapatan',
-    ai_no_account_ios:
-      'Pilih akaun dalam pintasan Log Notification anda supaya semakan automatik boleh merekod pemberitahuannya. Tanpa akaun, ia menunggu di sini dengan cadangan.',
     ai_reason_otp: 'Kod keselamatan',
     ai_reason_promotion: 'Promosi',
     ai_reason_balance: 'Baki atau peringatan',

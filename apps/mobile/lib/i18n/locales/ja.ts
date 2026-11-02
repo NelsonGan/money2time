@@ -3182,8 +3182,7 @@ const ja = {
     review_missing: '金額または口座が未入力の項目があります。',
     review_no_account_ios:
       '口座が未設定です。Log Notification ショートカットで口座を選ぶと自動で記録されます。',
-    review_no_account_android:
-      '口座が未設定です。通知設定でこのアプリの口座を選ぶと自動で記録されます。',
+    review_no_account_android: 'このアプリの口座がありません。%{path} で選ぶと自動で記録されます。',
     review_save_error: '保存できませんでした。未完了の項目はそのまま残っています。',
     review_leave_title: '未完了の通知を無視しますか？',
     review_leave_body: 'この画面を離れると、未完了の通知 %{count} 件がすべて無視されます。',
@@ -3224,8 +3223,6 @@ const ja = {
     ai_undo_edited_body: '記録後に編集されています。取り消すと削除されます。',
     ai_hint_expense: '提案：支出',
     ai_hint_income: '提案：収入',
-    ai_no_account_ios:
-      'Log Notification ショートカットで口座を選ぶと、自動レビューがその通知を記録できます。口座がない場合は、提案付きでここに残ります。',
     ai_reason_otp: '認証コード',
     ai_reason_promotion: 'プロモーション',
     ai_reason_balance: '残高・リマインダー',

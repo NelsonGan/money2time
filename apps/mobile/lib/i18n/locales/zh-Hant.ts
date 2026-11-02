@@ -3071,7 +3071,7 @@ const zhHant = {
     review_amount_hint: '選擇或輸入金額',
     review_missing: '部分項目仍缺少金額或帳戶。',
     review_no_account_ios: '尚未設定帳戶。請在 Log Notification 捷徑中選擇帳戶，即可自動記錄。',
-    review_no_account_android: '尚未設定帳戶。請在通知設定中為此 App 選擇帳戶，即可自動記錄。',
+    review_no_account_android: '此 App 沒有帳戶。請在「%{path}」中選擇，即可自動記錄。',
     review_save_error: '無法儲存。未完成的項目仍保留在這裡。',
     review_leave_title: '要忽略未完成的通知嗎？',
     review_leave_body: '離開後，全部 %{count} 則未完成的通知都會被忽略。',
@@ -3110,8 +3110,6 @@ const zhHant = {
     ai_undo_edited_body: '記錄後你修改過它。撤銷會將其刪除。',
     ai_hint_expense: '建議：支出',
     ai_hint_income: '建議：收入',
-    ai_no_account_ios:
-      '在 Log Notification 捷徑中選擇帳戶，自動審閱即可記錄其通知。未選擇時，通知會附上建議留在這裡。',
     ai_reason_otp: '驗證碼',
     ai_reason_promotion: '促銷',
     ai_reason_balance: '餘額或提醒',

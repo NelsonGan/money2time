@@ -3253,7 +3253,7 @@ const fil = {
     review_no_account_ios:
       'Walang account. Pumili sa iyong Log Notification shortcut para awtomatikong maitala ang mga ito.',
     review_no_account_android:
-      'Walang account. Pumili para sa app na ito sa Notifications settings para awtomatikong maitala ang mga ito.',
+      'Walang account ang app na ito. Pumili sa %{path} para awtomatikong maitala ang mga ito.',
     review_save_error: 'Hindi ma-save. Nandito pa rin ang mga hindi pa tapos na item.',
     review_leave_title: 'Huwag pansinin ang mga hindi pa tapos na notification?',
     review_leave_body:
@@ -3296,8 +3296,6 @@ const fil = {
     ai_undo_edited_body: 'In-edit mo ito mula nang ma-log. Buburahin ito ng I-undo.',
     ai_hint_expense: 'Mungkahi: gastos',
     ai_hint_income: 'Mungkahi: kita',
-    ai_no_account_ios:
-      'Pumili ng account sa iyong Log Notification shortcut para maitala ng auto-review ang mga notification nito. Kung wala, maghihintay sila rito na may mungkahi.',
     ai_reason_otp: 'Security code',
     ai_reason_promotion: 'Promo',
     ai_reason_balance: 'Balance o paalala',

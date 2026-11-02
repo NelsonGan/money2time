@@ -3231,7 +3231,7 @@ const es = {
     review_no_account_ios:
       'No hay cuenta. Elige una en tu atajo Log Notification para que se registren automáticamente.',
     review_no_account_android:
-      'No hay cuenta. Elige una para esta app en los ajustes de notificaciones para que se registren automáticamente.',
+      'Esta app no tiene cuenta. Elige una en %{path} para que se registren automáticamente.',
     review_save_error: 'No se pudo guardar. Tus elementos sin terminar siguen aquí.',
     review_leave_title: '¿Ignorar las notificaciones sin terminar?',
     review_leave_body: 'Si sales, se ignorarán las %{count} notificaciones sin terminar.',
@@ -3272,8 +3272,6 @@ const es = {
     ai_undo_edited_body: 'La editaste después de registrarse. Deshacer la eliminará.',
     ai_hint_expense: 'Sugerencia: gasto',
     ai_hint_income: 'Sugerencia: ingreso',
-    ai_no_account_ios:
-      'Elige una cuenta en tu atajo Log Notification para que la revisión automática registre sus notificaciones. Sin una, esperan aquí con una sugerencia.',
     ai_reason_otp: 'Código de seguridad',
     ai_reason_promotion: 'Promoción',
     ai_reason_balance: 'Saldo o recordatorio',

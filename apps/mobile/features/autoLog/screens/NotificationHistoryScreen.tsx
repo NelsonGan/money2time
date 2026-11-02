@@ -451,6 +451,9 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
   );
 }
 
+/** `--warning` in global.css (the same in both themes), for icons that take a color. */
+const WARNING_COLOR = 'hsl(36, 90%, 55%)';
+
 type ListRow =
   | { kind: 'day'; key: string; label: string }
   | { kind: 'entry'; key: string; entry: NotificationScanHistoryEntry };
@@ -704,16 +707,25 @@ function NotificationReviewCard({
       {pending && !account ? (
         // The fix belongs in setup, so every later notification gets an account.
         <View
-          className="mt-1 flex-row items-start gap-2 rounded-xl bg-warning/10 px-3 py-2"
+          className="mt-1.5 flex-row items-start gap-2 rounded-xl bg-warning/10 px-3 py-2.5"
           testID="notification-no-account"
         >
-          <AlertTriangle size={14} color={colors.error} style={{ marginTop: 1 }} />
+          {/* Centred on the first line (caption is 18px tall), in the text's colour. */}
+          <View className="h-[18px] justify-center">
+            <AlertTriangle size={15} color={WARNING_COLOR} strokeWidth={2.25} />
+          </View>
           <Text variant="caption" tone="warning" className="flex-1">
-            {I18n.t(
-              entry.channel === 'android_notification'
-                ? 'payment_alerts.review_no_account_android'
-                : 'payment_alerts.review_no_account_ios',
-            )}
+            {entry.channel === 'android_notification'
+              ? // Setup requires an account per app, so this one was deleted
+                // or belongs to another ledger: point at where it is set.
+                I18n.t('payment_alerts.review_no_account_android', {
+                  path: [
+                    I18n.t('settings.title'),
+                    I18n.t('settings.auto_log.title'),
+                    I18n.t('settings.auto_log.payment_alerts_title'),
+                  ].join(' › '),
+                })
+              : I18n.t('payment_alerts.review_no_account_ios')}
           </Text>
         </View>
       ) : null}

@@ -3196,7 +3196,7 @@ const en = {
     review_no_account_ios:
       'No account set. Choose one in your Log Notification shortcut so these are logged automatically.',
     review_no_account_android:
-      'No account set. Choose one for this app in Notifications settings so these are logged automatically.',
+      'No account for this app. Choose one in %{path} so these are logged automatically.',
     review_save_error: 'Could not save. Your unfinished items are still here.',
     review_leave_title: 'Ignore unfinished notifications?',
     review_leave_body: 'Leaving will ignore all %{count} unfinished notifications.',
@@ -3237,8 +3237,6 @@ const en = {
     ai_undo_edited_body: "You've edited it since it was logged. Undo will delete it.",
     ai_hint_expense: 'Suggested: expense',
     ai_hint_income: 'Suggested: income',
-    ai_no_account_ios:
-      'Choose an account in your Log Notification shortcut so auto-review can log its notifications. Without one, they wait here with a suggestion.',
     ai_reason_otp: 'Security code',
     ai_reason_promotion: 'Promotion',
     ai_reason_balance: 'Balance or reminder',
