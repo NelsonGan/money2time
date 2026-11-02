@@ -20,8 +20,10 @@ import { getProfileAvatarUri } from '~/services/userAssets';
 export interface LedgerPerson {
   /** What an entry of theirs holds in `member_id`: null for the ledger's owner. */
   memberId: string | null;
-  /** Their full display name. */
+  /** Their full display name: their own, or a stand-in ("You", "Owner", "Member"). */
   name: string;
+  /** Whether `name` is one they set, not a stand-in. */
+  named: boolean;
   /** Their Settings photo (a user-asset path), if they set one. */
   avatarUri: string | null;
   /** That photo's file on this phone, once it is there (synced photos arrive later). */
@@ -135,6 +137,20 @@ function ownName(own: OwnProfile): string | null {
 
 type AvatarResolver = (path: string | null) => string | null;
 
+/** Longest name kept: a profile row comes from another phone, so it is bounded here. */
+export const MAX_PERSON_NAME = 80;
+
+/** A name trimmed and capped, or null when there is none. */
+function cleanName(name: string | null | undefined): string | null {
+  const trimmed = name?.trim();
+  return trimmed ? Array.from(trimmed).slice(0, MAX_PERSON_NAME).join('') : null;
+}
+
+/** Only a profile photo's own folder: a synced row cannot point the avatar at another image. */
+function cleanAvatar(path: string | null | undefined): string | null {
+  return path && path.startsWith('avatars/') && !path.includes('..') ? path : null;
+}
+
 /** Pure but for `resolveAvatar`: the people of one shared ledger. Exported for tests. */
 export function buildLedgerPeople(
   shared: SharedLedger,
@@ -147,15 +163,29 @@ export function buildLedgerPeople(
   // This phone's own person with no name anywhere: "You", not a stranger.
   const selfFallback = I18n.t('shared_ledgers.you');
   const person = (
-    fields: Omit<LedgerPerson, 'avatarFileUri' | 'name'> & { name: string | null | undefined },
+    fields: Omit<LedgerPerson, 'avatarFileUri' | 'name' | 'named'> & {
+      name: string | null | undefined;
+    },
     fallback: string,
-  ): LedgerPerson => ({
-    ...fields,
-    name: fields.name?.trim() || fallback,
-    avatarFileUri: resolveAvatar(fields.avatarUri),
-  });
-  const ownerRow = profiles.find((row) => row.role === 'owner');
+  ): LedgerPerson => {
+    const name = cleanName(fields.name);
+    const avatarUri = cleanAvatar(fields.avatarUri);
+    return {
+      ...fields,
+      name: name ?? fallback,
+      named: name !== null,
+      avatarUri,
+      avatarFileUri: resolveAvatar(avatarUri),
+    };
+  };
   const selfIsOwner = shared.role === 'owner';
+  // Who the owner is comes from the Worker (or, on the owner's phone, from
+  // being it), never from the role a profile row claims: anyone in a shared
+  // ledger can write those. Only an older Worker leaves the claim to go by.
+  const ownerUserId = shared.ownerUserId ?? (selfIsOwner ? selfId : null);
+  const ownerRow = ownerUserId
+    ? profiles.find((row) => row.user_id === ownerUserId)
+    : profiles.find((row) => row.role === 'owner');
   const owner = person(
     {
       memberId: null,
@@ -173,7 +203,10 @@ export function buildLedgerPeople(
   );
   const members = new Map<string, LedgerPerson>();
   for (const row of profiles) {
-    if (row.role === 'owner' || row.user_id === ownerRow?.user_id) continue;
+    if (row === ownerRow || row.user_id === ownerUserId) continue;
+    // Without the Worker's word, a row claiming to be the owner is left out
+    // rather than listed twice.
+    if (!ownerUserId && row.role === 'owner') continue;
     const isSelf = !selfIsOwner && row.user_id === selfId;
     members.set(
       row.user_id,
@@ -209,7 +242,7 @@ export function buildLedgerPeople(
   const sorted = [...members.values()].sort(
     (a, b) => Number(b.isSelf) - Number(a.isSelf) || a.name.localeCompare(b.name),
   );
-  const ownerUserId = ownerRow?.user_id ?? (selfIsOwner ? selfId : null);
+  const ownerId = ownerUserId ?? ownerRow?.user_id ?? null;
   // Someone only known from an entry (left before this phone saw them, or on
   // an older app): one object each, so rows showing them do not re-render.
   const unknown = new Map<string, LedgerPerson>();
@@ -217,7 +250,7 @@ export function buildLedgerPeople(
     ledgerId: shared.ledgerId,
     people: [owner, ...sorted],
     personFor(memberId) {
-      if (!memberId || memberId === ownerUserId) return owner;
+      if (!memberId || memberId === ownerId) return owner;
       const known = members.get(memberId) ?? unknown.get(memberId);
       if (known) return known;
       const stranger = person(
@@ -287,7 +320,7 @@ export function writeOwnLedgerProfiles(
   now: string = new Date().toISOString(),
 ): number {
   const own = readOwnProfile();
-  const name = ownName(own);
+  const name = cleanName(ownName(own));
   const db = getSQLite();
   let changed = 0;
   for (const ledger of ledgers) {

@@ -116,8 +116,8 @@ describe('migration 079 (transaction members)', () => {
     expect(harness.all('PRAGMA table_info(recurring_rules)').map((c) => c.name)).toContain(
       'member_id',
     );
-    expect(harness.all('PRAGMA table_info(shared_ledgers)').map((c) => c.name)).toContain(
-      'user_id',
+    expect(harness.all('PRAGMA table_info(shared_ledgers)').map((c) => c.name)).toEqual(
+      expect.arrayContaining(['user_id', 'owner_user_id']),
     );
     expect(harness.all('PRAGMA table_info(ledger_profiles)').map((c) => c.name)).toEqual([
       'id',
@@ -436,6 +436,98 @@ describe('the people store', () => {
     setCachedSessionUser({ id: 'user-mei', email: 'meitan@example.com', name: '' });
     invalidateLedgerPeople();
     expect(getLedgerPeople('home')?.personFor('user-mei').name).toBe('me***@example.com');
+  });
+});
+
+describe('trusting who the owner is', () => {
+  const nameless = { name: null, avatarUri: null };
+  const forged = [
+    { user_id: 'user-nelson', role: 'owner', name: 'Nelson', avatar_uri: null },
+    // A member's phone (or a modified app) claiming to be the owner.
+    { user_id: 'user-ana', role: 'owner', name: 'Ana', avatar_uri: null },
+  ];
+
+  it('takes the owner from the Worker, not from a profile row that says so', () => {
+    const people = buildLedgerPeople(
+      { ...HOME, ownerUserId: 'user-nelson' },
+      forged,
+      nameless,
+      'user-mei',
+    );
+    expect(people.personFor(null).name).toBe('Nelson');
+    expect(people.personFor('user-nelson').name).toBe('Nelson');
+    expect(people.personFor('user-ana')).toMatchObject({ name: 'Ana', role: 'member' });
+    expect(people.people.filter((person) => person.role === 'owner')).toHaveLength(1);
+  });
+
+  it('falls back to the claimed role only when the Worker has not said (an older one)', () => {
+    const people = buildLedgerPeople(HOME, forged.slice(0, 1), nameless, 'user-mei');
+    expect(people.personFor(null).name).toBe('Nelson');
+  });
+
+  it('caps a name another phone wrote, and ignores a photo outside the avatars folder', () => {
+    const people = buildLedgerPeople(
+      HOME,
+      [
+        {
+          user_id: 'user-ana',
+          role: 'member',
+          name: 'A'.repeat(500),
+          avatar_uri: 'receipts/x.jpg',
+        },
+        {
+          user_id: 'user-kim',
+          role: 'member',
+          name: 'Kim',
+          avatar_uri: 'avatars/../receipts/x.jpg',
+        },
+      ],
+      nameless,
+      'user-mei',
+      (path) => path,
+    );
+    expect(people.personFor('user-ana').name).toHaveLength(80);
+    expect(people.personFor('user-ana').avatarFileUri).toBeNull();
+    expect(people.personFor('user-kim').avatarFileUri).toBeNull();
+  });
+
+  it('marks stand-in names, so "You" and "Owner" are never read as names', () => {
+    const people = buildLedgerPeople({ ...HOME, ownerName: null }, [], nameless, 'user-mei');
+    expect(people.personFor(null).named).toBe(false);
+    expect(people.personFor('user-mei').named).toBe(false);
+    const named = buildLedgerPeople(HOME, [], { name: 'Mei', avatarUri: null }, 'user-mei');
+    expect(named.personFor('user-mei').named).toBe(true);
+  });
+});
+
+describe('one profile per person per ledger', () => {
+  it('refuses a second live profile for the same account, but not after one is deleted', () => {
+    const harness = openDatabase();
+    applyMigrations(harness.db, loadMigrations());
+    const insert = (id: string, deleted: string | null = null) =>
+      harness.connection
+        .prepare(
+          `INSERT INTO ledger_profiles (id, ledger_id, user_id, role, created_at, updated_at, deleted_at)
+           VALUES (?, 'home', 'user-mei', 'member', ?, ?, ?)`,
+        )
+        .run(id, NOW, NOW, deleted);
+    insert('home:user-mei');
+    expect(() => insert('other-id')).toThrow(/UNIQUE/);
+    insert('old-id', NOW);
+    harness.connection.close();
+  });
+
+  it('remembers the owner the Worker named, and keeps it when a later read leaves it out', () => {
+    const harness = openDatabase();
+    applyMigrations(harness.db, loadMigrations());
+    jest.mocked(getSQLite).mockReturnValue(harness.db);
+    saveSharedLedger({ ...HOME, ownerUserId: 'user-nelson' });
+    saveSharedLedger({ ...HOME, memberCount: 3, ownerUserId: undefined });
+    expect(harness.all('SELECT owner_user_id FROM shared_ledgers')).toEqual([
+      { owner_user_id: 'user-nelson' },
+    ]);
+    removeSharedLedger('home');
+    harness.connection.close();
   });
 });
 

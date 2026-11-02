@@ -29,8 +29,8 @@ interface BelongsToPickerProps {
 }
 
 function personLabel(person: LedgerPerson): string {
-  // Already "You" when this phone's person has no name anywhere.
-  return person.isSelf && person.name !== I18n.t('shared_ledgers.you')
+  // A nameless self is already "You".
+  return person.isSelf && person.named
     ? I18n.t('shared_ledgers.belongs_to_you', { name: person.name })
     : person.name;
 }
@@ -159,8 +159,7 @@ export function BelongsToPicker({
                           {personLabel(person)}
                         </Text>
                         {/* Not under an owner nobody has named, already called "Owner". */}
-                        {person.role === 'owner' &&
-                        person.name !== I18n.t('shared_ledgers.owner_badge') ? (
+                        {person.role === 'owner' && (person.named || person.isSelf) ? (
                           <Text variant="caption" tone="muted">
                             {I18n.t('shared_ledgers.owner_badge')}
                           </Text>

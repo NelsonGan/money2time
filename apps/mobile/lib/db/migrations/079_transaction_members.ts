@@ -15,8 +15,14 @@ import type { DbMigration } from './types';
 // - ledger_profiles: each person's name and photo in a shared ledger, synced
 //   with the ledger so the others can show them. One row per ledger and
 //   account, written by that account's own phones.
+//   At most one live row per ledger and account (a unique index, so two
+//   phones of one person that both wrote one keep the lower id, as sync
+//   resolves any unique clash).
 // - shared_ledgers.user_id: the account this phone is signed in to for the
 //   ledger, so an entry is stamped without waiting for the session to load.
+// - shared_ledgers.owner_user_id: the owner's account, as the Worker reports
+//   it. The people trust this, not the role a profile row claims: anyone in
+//   a shared ledger can write its rows.
 export const migration079TransactionMembers: DbMigration = {
   version: 79,
   name: '079_transaction_members',
@@ -25,6 +31,7 @@ export const migration079TransactionMembers: DbMigration = {
     addColumnIfMissing(db, 'transactions', 'member_id', 'TEXT');
     addColumnIfMissing(db, 'recurring_rules', 'member_id', 'TEXT');
     addColumnIfMissing(db, 'shared_ledgers', 'user_id', 'TEXT');
+    addColumnIfMissing(db, 'shared_ledgers', 'owner_user_id', 'TEXT');
     db.execSync(`
       CREATE INDEX IF NOT EXISTS idx_transactions_active_member_ledger_date
         ON transactions(member_id, ledger_id, date DESC)
@@ -40,7 +47,9 @@ export const migration079TransactionMembers: DbMigration = {
         updated_at TEXT NOT NULL,
         deleted_at TEXT
       );
-      CREATE INDEX IF NOT EXISTS idx_ledger_profiles_ledger ON ledger_profiles(ledger_id);
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_ledger_profiles_ledger_user
+        ON ledger_profiles(ledger_id, user_id)
+        WHERE deleted_at IS NULL;
     `);
   },
 };

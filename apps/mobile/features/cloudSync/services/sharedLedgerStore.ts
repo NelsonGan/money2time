@@ -24,6 +24,12 @@ export interface SharedLedger {
    * that, until the next list read fills it.
    */
   userId?: string | null;
+  /**
+   * The owner's account, as the Worker reports it (migration 079): who the
+   * owner's profile is, whatever a profile row in the shared database claims.
+   * Null from an older Worker.
+   */
+  ownerUserId?: string | null;
 }
 
 interface Row {
@@ -35,6 +41,7 @@ interface Row {
   member_count: number;
   active: number;
   user_id?: string | null;
+  owner_user_id?: string | null;
 }
 
 let cache: SharedLedger[] | null = null;
@@ -64,6 +71,7 @@ export function listSharedLedgers(): SharedLedger[] {
         memberCount: row.member_count,
         active: row.active === 1,
         userId: row.user_id ?? null,
+        ownerUserId: row.owner_user_id ?? null,
       }));
   } catch {
     // Before migration 075 has run.
@@ -94,12 +102,13 @@ export function saveSharedLedger(ledger: SharedLedger): void {
     return;
   }
   getSQLite().runSync(
-    `INSERT INTO shared_ledgers (ledger_id, share_id, role, name, owner_name, member_count, active, updated_at, user_id)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `INSERT INTO shared_ledgers (ledger_id, share_id, role, name, owner_name, member_count, active, updated_at, user_id, owner_user_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(ledger_id) DO UPDATE SET share_id = excluded.share_id, role = excluded.role,
        name = excluded.name, owner_name = excluded.owner_name,
        member_count = excluded.member_count, active = excluded.active,
-       user_id = COALESCE(excluded.user_id, shared_ledgers.user_id)`,
+       user_id = COALESCE(excluded.user_id, shared_ledgers.user_id),
+       owner_user_id = COALESCE(excluded.owner_user_id, shared_ledgers.owner_user_id)`,
     [
       ledger.ledgerId,
       ledger.shareId,
@@ -110,6 +119,7 @@ export function saveSharedLedger(ledger: SharedLedger): void {
       ledger.active ? 1 : 0,
       Date.now(),
       ledger.userId ?? null,
+      ledger.ownerUserId ?? null,
     ],
   );
   notify();

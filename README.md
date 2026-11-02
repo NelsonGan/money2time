@@ -1605,8 +1605,8 @@ for that chart; the chart itself is not built yet.
   and period" without competing with the date and account indexes the
   ledger's ordinary lists use (075's note on a plain `ledger_id` index).
   Per-person spending is `GROUP BY member_id` with null as the owner; the
-  owner's account id, when needed, is the `ledger_profiles` row with
-  `role = 'owner'`. In the cloud the row is JSON in the ledger's `sync_rows`
+  owner's account id, when needed, is `shared_ledgers.owner_user_id`. In the
+  cloud the row is JSON in the ledger's `sync_rows`
   (no column to index there); any server-side report reads it from there.
 - **Other entries.** A recurring rule carries `member_id` (stamped like an
   entry when it is created) and every run takes it for both columns, so two
@@ -1616,11 +1616,19 @@ for that chart; the chart itself is not built yet.
   it). Copying a ledger clears both columns: the copy is the user's own.
 - **Names and photos.** `ledger_profiles` (migration 079) holds each person's
   name and Settings photo per shared ledger, one row per ledger and account
-  (`<ledger id>:<user id>`), and syncs with the ledger like its other rows,
+  (`<ledger id>:<user id>`, and a unique index on ledger and account among
+  live rows, so two phones of one person keep one), and syncs with the
+  ledger like its other rows,
   the photo through the ledger's image space (`ASSET_COLUMNS`). Each phone
   writes only its own account's row (`writeOwnLedgerProfiles`, from
   `CloudSyncProvider` when the list, the account or the Settings name or
-  photo changes), with its role. The name is the Settings name, else the
+  photo changes), with its role. **Who the owner is never comes from a
+  profile row**, which anyone in the ledger can write: `GET /v1/ledgers` gives
+  the owner's account id (`ownerId`), kept in `shared_ledgers.owner_user_id`,
+  and a row whose `role` claims otherwise is shown as the member it is. (An
+  older Worker that sends no `ownerId` leaves the claimed role to go by.)
+  Rows from other phones are bounded on read: a name is cut to 80 characters,
+  and a photo must be a path in `avatars/`. The name is the Settings name, else the
   sign-in name, else the address masked as the People page shows it
   (`ne***@example.com`), so two people who never set a name still read
   differently. Blank or spaces-only names count as none. A person who left
@@ -3638,7 +3646,7 @@ Shared ledgers ([Shared ledgers](#shared-ledgers)):
 
 | Route                                      | What it does                                                                                                                                                       |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `GET /v1/ledgers`                          | The user's shared ledgers, owned and joined, with role, owner name, member count and `active` (anyone in it Pro)                                                   |
+| `GET /v1/ledgers`                          | The user's shared ledgers, owned and joined, with role, owner name and account id, member count and `active` (anyone in it Pro)                                    |
 | `POST /v1/ledgers`                         | `{ledgerId, name, emoji}` → shares a ledger: Pro, at most 2 per owner; makes its Turso database                                                                    |
 | `DELETE /v1/ledgers/<id>`                  | Stop sharing (owner): deletes its database and images; members and the link cascade; everyone is nudged                                                            |
 | `POST /v1/ledgers/<id>/leave`              | Revokes this ledger's tokens, then a member leaves                                                                                                                 |

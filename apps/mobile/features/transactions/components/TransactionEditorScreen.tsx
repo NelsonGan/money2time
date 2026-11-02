@@ -18,12 +18,9 @@ import {
   Power,
   Repeat,
   Settings2,
-  Tag,
   Timer,
   Trash2,
   Type,
-  Undo2,
-  Wallet,
 } from 'lucide-react-native';
 import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -88,7 +85,6 @@ import {
   canSplitInstalments,
   isRegularAmountValid,
 } from '~/features/instalments/lib/instalmentPlan';
-import { BelongsToPicker } from '~/features/sharedLedgers/components/BelongsToPicker';
 import { selfMemberIdFor } from '~/features/sharedLedgers/lib/entryStamp';
 import { useOpenLedgerPeople } from '~/features/sharedLedgers/lib/ledgerPeople';
 import {
@@ -103,7 +99,7 @@ import {
   evaluateExpression,
   formatMoney,
 } from '~/features/transactions/components/editor/calculatorEngine';
-import { OptionRow, OptionsCard } from '~/features/transactions/components/editor/OptionRow';
+import { TransactionOptionsCard } from '~/features/transactions/components/editor/TransactionOptionsCard';
 import { resolveNoteChange } from '~/features/transactions/lib/noteSuggestionPick';
 import { resolveSplitSaveRoute } from '~/features/transactions/lib/splitSaveRoute';
 import { offscreenPageLimitFor, usePagerTabSync } from '~/hooks/usePagerTabSync';
@@ -4821,99 +4817,22 @@ export function TransactionEditorScreen({
                           </View>
                         </>
                       ) : (
-                        /* Every option is a row of one card, all alike: a value
-                           and a chevron to open something, a switch to turn
-                           something on. Rows show by type and by whether the
-                           ledger is shared. */
-                        <OptionsCard>
-                          <OptionRow
-                            icon={<FileText size={16} color={themeColors.primary} />}
-                            label={I18n.t('transactions.editor.details.title')}
-                            accessibilityValue={hasDetails ? details.trim() : undefined}
-                            value={
-                              <Text
-                                variant="body"
-                                tone="muted"
-                                numberOfLines={1}
-                                className="shrink"
-                              >
-                                {hasDetails
-                                  ? details.trim()
-                                  : I18n.t('transactions.editor.details.empty')}
-                              </Text>
-                            }
-                            onPress={() => setDetailsEditing(true)}
-                          />
-                          {/* Shared ledgers: whose entry this is; the people are
-                              in its sheet. */}
-                          {ledgerPeople ? (
-                            <BelongsToPicker
-                              divider
-                              people={ledgerPeople}
-                              memberId={memberId}
-                              createdBy={initialValues?.createdBy}
-                              onSelect={handleSelectMember}
-                            />
-                          ) : null}
-                          {type === 'expense' ? (
-                            <OptionRow
-                              divider
-                              icon={<Undo2 size={16} color={themeColors.primary} />}
-                              label={
-                                isReimbursed
-                                  ? I18n.t('reimbursements.editor_reimbursed_label')
-                                  : I18n.t('reimbursements.editor_label')
-                              }
-                              info={{
-                                title: I18n.t('reimbursements.editor_label'),
-                                tooltip: I18n.t('reimbursements.editor_tooltip'),
-                              }}
-                              disabled={isReimbursed}
-                              switchValue={reimbursable}
-                              onToggle={handleToggleReimbursable}
-                            />
-                          ) : null}
-                          {type === 'transfer' ? (
-                            <OptionRow
-                              divider
-                              icon={<Wallet size={16} color={themeColors.primary} />}
-                              label={I18n.t('transactions.editor.transfer_expense_label')}
-                              info={{
-                                title: I18n.t('transactions.editor.transfer_expense_label'),
-                                tooltip: I18n.t('transactions.editor.transfer_expense_tooltip'),
-                              }}
-                              switchValue={transferCountsAsExpense}
-                              onToggle={handleToggleTransferExpense}
-                            />
-                          ) : null}
-                          {type === 'transfer' && transferCountsAsExpense ? (
-                            /* The category the counted transfer is filed under:
-                               a row rather than the page's category grid, since
-                               a transfer's page has no category slot to give. */
-                            <OptionRow
-                              divider
-                              icon={<Tag size={16} color={themeColors.primary} />}
-                              label={I18n.t('transactions.editor.category')}
-                              accessibilityValue={transferCategoryPreview?.name}
-                              value={
-                                transferCategoryPreview ? (
-                                  <>
-                                    <CategoryEmoji icon={transferCategoryPreview.icon} size={18} />
-                                    <Text
-                                      variant="body"
-                                      tone="muted"
-                                      numberOfLines={1}
-                                      className="shrink"
-                                    >
-                                      {transferCategoryPreview.name}
-                                    </Text>
-                                  </>
-                                ) : null
-                              }
-                              onPress={() => setTransferCategoryPickerVisible(true)}
-                            />
-                          ) : null}
-                        </OptionsCard>
+                        <TransactionOptionsCard
+                          type={type}
+                          details={details}
+                          onEditDetails={() => setDetailsEditing(true)}
+                          people={ledgerPeople}
+                          memberId={memberId}
+                          createdBy={initialValues?.createdBy}
+                          onSelectMember={handleSelectMember}
+                          reimbursable={reimbursable}
+                          isReimbursed={isReimbursed}
+                          onToggleReimbursable={handleToggleReimbursable}
+                          countsAsExpense={transferCountsAsExpense}
+                          onToggleCountsAsExpense={handleToggleTransferExpense}
+                          category={transferCategoryPreview}
+                          onPickCategory={() => setTransferCategoryPickerVisible(true)}
+                        />
                       )}
                     </ScrollView>
                   ) : (

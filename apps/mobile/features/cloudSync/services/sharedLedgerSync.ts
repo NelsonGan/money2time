@@ -102,6 +102,8 @@ function fromRemote(remote: RemoteSharedLedger, userId: string): SharedLedger {
     memberCount: remote.memberCount,
     active: remote.active,
     userId,
+    // An owner is its own owner even before the Worker says so.
+    ownerUserId: remote.ownerId ?? (remote.role === 'owner' ? userId : null),
   };
 }
 
