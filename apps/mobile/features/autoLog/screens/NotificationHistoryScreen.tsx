@@ -1,7 +1,7 @@
 import { useNavigation, usePreventRemove } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { FlashList } from '@shopify/flash-list';
-import { ChevronDown, ChevronUp, ListChecks, Pencil } from 'lucide-react-native';
+import { ChevronDown, ChevronUp, ListChecks, Pencil, Undo2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Pressable, View } from 'react-native';
 
@@ -681,24 +681,11 @@ function NotificationReviewCard({
             onAction={onAction}
           />
         ) : (
-          <View className="flex-row items-center gap-1">
+          <View className="flex-row items-center gap-2.5">
             <Text variant="caption" tone={tone}>
               {label}
             </Text>
-            {canUndo ? (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('payment_alerts.ai_undo')}
-                disabled={busy}
-                hitSlop={12}
-                onPress={onUndo}
-                className="ml-2"
-              >
-                <Text variant="caption" className="font-semibold text-primary">
-                  {I18n.t('payment_alerts.ai_undo')}
-                </Text>
-              </Pressable>
-            ) : null}
+            {canUndo ? <UndoButton disabled={busy} onPress={onUndo} /> : null}
           </View>
         )}
       </View>
@@ -776,6 +763,27 @@ function SortedGroup({
   );
 }
 
+/** Undo as a small round icon button; the label is for screen readers. */
+function UndoButton({ disabled, onPress }: { disabled: boolean; onPress: () => void }) {
+  const colors = useThemeColors();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={I18n.t('payment_alerts.ai_undo')}
+      accessibilityState={{ disabled }}
+      testID="notification-undo"
+      disabled={disabled}
+      hitSlop={8}
+      onPress={onPress}
+      className={`h-8 w-8 items-center justify-center rounded-full bg-secondary ${
+        disabled ? 'opacity-40' : ''
+      }`}
+    >
+      <Undo2 size={15} strokeWidth={2.25} color={colors.primary} />
+    </Pressable>
+  );
+}
+
 /** A logged result reads like its transaction row; an ignored one says why. */
 function SortedRow({
   index,
@@ -837,7 +845,7 @@ function SortedRow({
             ) : null}
           </View>
         </Pressable>
-        <View className="items-end gap-0.5">
+        <View className="flex-row items-center gap-2.5">
           {!ignored && entry.selectedAmount ? (
             <Text
               variant="bodyStrong"
@@ -847,19 +855,7 @@ function SortedRow({
               {money(entry.selectedAmount.amount, entry.selectedAmount.currency)}
             </Text>
           ) : null}
-          {canUndo ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('payment_alerts.ai_undo')}
-              disabled={busy}
-              hitSlop={10}
-              onPress={onUndo}
-            >
-              <Text variant="caption" className="font-semibold text-primary">
-                {I18n.t('payment_alerts.ai_undo')}
-              </Text>
-            </Pressable>
-          ) : null}
+          {canUndo ? <UndoButton disabled={busy} onPress={onUndo} /> : null}
         </View>
       </View>
       {expanded ? (

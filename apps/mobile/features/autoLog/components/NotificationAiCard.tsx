@@ -173,7 +173,8 @@ export function NotificationAiCard() {
               if (next) turnOn();
               else save({ ...prefs, enabled: false });
             }}
-            trackColor={{ true: colors.primary }}
+            trackColor={{ false: `${colors.border}80`, true: colors.primary }}
+            thumbColor="#FFFFFF"
           />
         )}
       </View>
