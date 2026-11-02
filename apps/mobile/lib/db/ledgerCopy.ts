@@ -1,8 +1,8 @@
 /**
- * "Everything": a new ledger made as a full copy of another one, history and
- * all. Every row gets a new id and every reference between the rows follows
- * it, so the copy shares nothing with its source and either can be edited or
- * deleted on its own.
+ * A new ledger copied from another one: "Everything" (history and all), or
+ * the parts the user picked (`ledgerPartsCopySpecs`). Every row gets a new id
+ * and every reference between the rows follows it, so the copy shares nothing
+ * with its source and either can be edited or deleted on its own.
  *
  * The plan is pure (rows in, rows out) so it is tested without a database;
  * `copyLedgerRows` runs it against SQLite inside the caller's transaction.
@@ -17,6 +17,10 @@
  * with defaults). Image paths are shared, which is safe: the asset sweep
  * keeps a file while any row still names it.
  */
+
+import { lastLoanRestOnOrBefore, loanLedgerAnchor } from '~/features/loans/lib/loanMath';
+import type { RecurrencePattern } from '~/types';
+import { isAfterRecurringEndDate, nextRunAfter } from '~/utils/recurringRules';
 
 type Row = Record<string, unknown>;
 
@@ -47,6 +51,15 @@ interface TableSpec {
   withDeleted?: boolean;
   /** Columns the copy starts empty (they belong to the source only). */
   cleared?: readonly string[];
+  /** Rows of the table worth copying; every row when absent. */
+  keep?: (row: Row) => boolean;
+  /**
+   * Every non-null reference must land on a copied row, or the row is left
+   * out: a recurring rule whose account stays behind would run into nothing.
+   */
+  allRefs?: boolean;
+  /** Last changes to a planned copy (`source` is the row it copies), after its references are mapped. */
+  adjust?: (copy: Row, source: Row) => void;
 }
 
 /** Parents before children, so a child's parent is already planned. */
@@ -169,6 +182,7 @@ export function planLedgerCopy(
   targetLedgerId: string,
   newId: () => string,
   now: string,
+  specs: readonly TableSpec[] = LEDGER_COPY_TABLES,
 ): { table: string; rows: Row[] }[] {
   const maps = new Map<Target, Map<string, string>>();
   const mapOf = (target: Target) => {
@@ -182,12 +196,16 @@ export function planLedgerCopy(
 
   // Every id first, so self-references (a transaction's reimbursement, a
   // subcategory's parent) resolve whatever order the rows come in.
-  const chosen = LEDGER_COPY_TABLES.map((spec) => {
+  const chosen = specs.map((spec) => {
     const owner = spec.owner;
+    const lands = (row: Row, column: string) => mapOf(spec.refs[column]).has(String(row[column]));
     const rows = read(spec).filter(
       (row) =>
         ('ledger' in owner || mapOf(owner.via).has(String(row[owner.parent]))) &&
-        (spec.required ?? []).every((column) => mapOf(spec.refs[column]).has(String(row[column]))),
+        (spec.required ?? []).every((column) => lands(row, column)) &&
+        (!spec.allRefs ||
+          Object.keys(spec.refs).every((column) => row[column] == null || lands(row, column))) &&
+        (spec.keep?.(row) ?? true),
     );
     const space = ID_SPACE[spec.table];
     const ids = new Map<string, string>();
@@ -210,6 +228,7 @@ export function planLedgerCopy(
         if (old == null) continue;
         copy[column] = mapOf(target).get(String(old)) ?? null;
       }
+      spec.adjust?.(copy, row);
       return copy;
     }),
   }));
@@ -240,8 +259,9 @@ interface SqliteLike {
 }
 
 /**
- * Copy every live row of `sourceLedgerId` into `targetLedgerId`. Run inside
- * the caller's transaction, after the target ledger row exists.
+ * Copy every live row of `sourceLedgerId` into `targetLedgerId`, or only the
+ * tables in `specs` (`ledgerPartsCopySpecs`). Run inside the caller's
+ * transaction, after the target ledger row exists.
  */
 export function copyLedgerRows(
   sqlite: SqliteLike,
@@ -249,6 +269,7 @@ export function copyLedgerRows(
   targetLedgerId: string,
   newId: () => string,
   now: string,
+  specs: readonly TableSpec[] = LEDGER_COPY_TABLES,
 ): number {
   const plan = planLedgerCopy(
     (spec) => {
@@ -262,6 +283,7 @@ export function copyLedgerRows(
     targetLedgerId,
     newId,
     now,
+    specs,
   );
   let copied = 0;
   for (const { table, rows } of plan) {
@@ -275,4 +297,191 @@ export function copyLedgerRows(
     }
   }
   return copied;
+}
+
+/** The parts of a ledger a new one can start with, short of "Everything". */
+export const LEDGER_COPY_PARTS = [
+  'accounts',
+  'categories',
+  'goals',
+  'loans',
+  'recurring',
+  'budgets',
+  'items',
+  'albums',
+] as const;
+export type LedgerCopyPart = (typeof LEDGER_COPY_PARTS)[number];
+
+/**
+ * Parts another part cannot be copied without: a recurring rule needs the
+ * accounts and categories it posts to, a budget its category lines.
+ */
+export const LEDGER_COPY_NEEDS: Readonly<
+  Partial<Record<LedgerCopyPart, readonly LedgerCopyPart[]>>
+> = {
+  recurring: ['accounts', 'categories'],
+  budgets: ['categories'],
+};
+
+/** The part an account of this type is copied with. */
+export function copyPartOfAccountType(type: unknown): LedgerCopyPart | null {
+  if (type === 'debit' || type === 'credit') return 'accounts';
+  if (type === 'goal') return 'goals';
+  if (type === 'loan') return 'loans';
+  return null;
+}
+
+/** Below this, a loan is settled: it is not worth copying. */
+const SETTLED_LOAN = 0.005;
+
+/**
+ * The run date a copied recurring rule starts from: the source's, moved past
+ * `nowIso` so the new ledger does not replay runs the source already made.
+ * Null when the rule has nothing left to run (a one-off in the past, or a
+ * rule past its end), so it is not copied.
+ */
+export function copiedRuleNextRun(
+  rule: {
+    nextRunDate: string;
+    recurrencePattern: RecurrencePattern;
+    recurrenceInterval: number;
+    endDate: string | null;
+  },
+  nowIso: string,
+): string | null {
+  let cursor: string | null = rule.nextRunDate;
+  for (let guard = 0; cursor && cursor <= nowIso && guard < 5000; guard += 1) {
+    cursor = nextRunAfter(cursor, rule.recurrencePattern, rule.recurrenceInterval);
+  }
+  if (!cursor || cursor <= nowIso || isAfterRecurringEndDate(cursor, rule.endDate)) return null;
+  return cursor;
+}
+
+/** Whether an account of the source is copied with `parts`, before its references are checked. */
+export function isCopiedAccount(
+  account: { id: string; type: unknown; goalArchivedAt?: unknown; loanArchivedAt?: unknown },
+  parts: ReadonlySet<LedgerCopyPart>,
+  loanBalances: ReadonlyMap<string, number>,
+): boolean {
+  const part = copyPartOfAccountType(account.type);
+  if (!part || !parts.has(part)) return false;
+  if (part === 'goals') return account.goalArchivedAt == null;
+  if (part === 'loans') {
+    return account.loanArchivedAt == null && (loanBalances.get(account.id) ?? 0) > SETTLED_LOAN;
+  }
+  return true;
+}
+
+export interface LedgerPartsCopy {
+  parts: ReadonlySet<LedgerCopyPart>;
+  /** Everyday accounts in the source's main currency (`from`) take the new ledger's (`to`). */
+  currency: { from: string; to: string };
+  /** What each of the source's loans still owes: a copied loan starts there. */
+  loanBalances: ReadonlyMap<string, number>;
+  /** Now, as an ISO instant: copied rows are created now, overdue rules move past it. */
+  nowIso: string;
+  /** Today's day key: a copied loan's balance is as of today, anchored on its last rest. */
+  today: string;
+}
+
+/**
+ * The tables a copy of `parts` writes, without any history: no entries, so
+ * accounts and goals start at zero, a loan at what it still owes (a loan at
+ * zero would read as paid off), and albums empty. Parents come before
+ * children, as in `LEDGER_COPY_TABLES`. Archived goals and loans, settled
+ * loans and rules with nothing left to run stay behind; a recurring rule
+ * comes along only when every account and category it names does.
+ */
+export function ledgerPartsCopySpecs(copy: LedgerPartsCopy): TableSpec[] {
+  const { parts } = copy;
+  const base = (table: string): TableSpec => {
+    const spec = LEDGER_COPY_TABLES.find((candidate) => candidate.table === table);
+    if (!spec) throw new Error(`ledgerCopy: no spec for ${table}`);
+    return spec;
+  };
+  // Rows made now: they are not the source's history.
+  const fresh =
+    (adjust?: (copied: Row, source: Row) => void) =>
+    (copied: Row, source: Row): void => {
+      copied.created_at = copy.nowIso;
+      adjust?.(copied, source);
+    };
+  const specs: TableSpec[] = [];
+  if (parts.has('accounts')) specs.push({ ...base('account_groups'), adjust: fresh() });
+  if (parts.has('categories')) specs.push({ ...base('categories'), adjust: fresh() });
+  if (parts.has('accounts') || parts.has('goals') || parts.has('loans')) {
+    specs.push({
+      ...base('accounts'),
+      keep: (row) =>
+        isCopiedAccount(
+          {
+            id: String(row.id),
+            type: row.type,
+            goalArchivedAt: row.goal_archived_at,
+            loanArchivedAt: row.loan_archived_at,
+          },
+          parts,
+          copy.loanBalances,
+        ),
+      adjust: fresh((account, source) => {
+        if (account.type === 'loan') {
+          // What is still owed today, anchored on the source's last monthly
+          // rest, so interest keeps its day of the month and none is skipped.
+          account.starting_balance = copy.loanBalances.get(String(source.id)) ?? 0;
+          account.loan_ledger_anchor_date = lastLoanRestOnOrBefore(
+            loanLedgerAnchor(
+              {
+                loanLedgerAnchorDate: textOrNull(source.loan_ledger_anchor_date),
+                createdAt: textOrNull(source.created_at),
+                loanStartDate: textOrNull(source.loan_start_date),
+              },
+              copy.today,
+            ),
+            copy.today,
+          );
+          account.loan_paid_off_at = null;
+          return;
+        }
+        account.starting_balance = 0;
+        if (account.type === 'goal') {
+          account.goal_achieved_at = null;
+        } else if (account.currency === copy.currency.from) {
+          account.currency = copy.currency.to;
+        }
+      }),
+    });
+  }
+  if (parts.has('recurring')) {
+    specs.push({
+      ...base('recurring_rules'),
+      allRefs: true,
+      keep: (row) => copiedRuleNextRun(ruleOf(row), copy.nowIso) !== null,
+      adjust: fresh((rule) => {
+        rule.next_run_date = copiedRuleNextRun(ruleOf(rule), copy.nowIso);
+      }),
+    });
+  }
+  if (parts.has('budgets')) {
+    specs.push({ ...base('budget_templates'), adjust: fresh() });
+    specs.push({ ...base('budget_template_categories'), adjust: fresh() });
+  }
+  if (parts.has('items')) specs.push({ ...base('items'), adjust: fresh() });
+  if (parts.has('albums')) {
+    // Without their entries, and not collecting new ones until picked again.
+    specs.push({ ...base('albums'), adjust: fresh((album) => (album.is_active = 0)) });
+  }
+  return specs;
+}
+
+function textOrNull(value: unknown): string | null {
+  return typeof value === 'string' ? value : null;
+}
+
+function ruleOf(row: Row) {
+  return {
+    nextRunDate: String(row.next_run_date),
+    recurrencePattern: row.recurrence_pattern as RecurrencePattern,
+    recurrenceInterval: Number(row.recurrence_interval) || 1,
+    endDate: typeof row.end_date === 'string' ? row.end_date : null,
+  };
 }

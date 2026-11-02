@@ -3,7 +3,11 @@ jest.mock('~/lib/db/client', () => ({
   getSQLite: () => ({ withTransactionSync: (task: () => void) => task() }),
 }));
 jest.mock('~/lib/repositories/ledgersRepository', () => ({
-  ledgersRepository: { update: jest.fn(), updatePrefs: jest.fn(), getPrefs: jest.fn() },
+  ledgersRepository: {
+    update: jest.fn(),
+    updatePrefs: jest.fn(),
+    getPrefs: jest.fn(),
+  },
 }));
 
 import { getDb } from '~/lib/db/client';
@@ -21,6 +25,8 @@ const SETTINGS_ROW = {
   currencyCode: 'MYR',
   currencySymbol: 'RM',
   defaultPaybackAccountId: 'main-bank',
+  firstDayOfMonth: 25,
+  firstDayOverridesJson: '{"2026-12":20}',
   quickEntryPrefsJson: JSON.stringify({
     defaultAccountId: 'main-cash',
     categoryMap: { food: 'main-food' },
@@ -199,5 +205,42 @@ describe('settings with a ledger open', () => {
     expect(ledgers.updatePrefs).toHaveBeenCalledWith('work', {
       insightsPrefsJson: '{"work":false}',
     });
+  });
+
+  it("reads another ledger's own month cycle, or the settings row's while it has none", () => {
+    setActiveLedgerId('work');
+    fakeDb([
+      SETTINGS_ROW,
+      { currencyCode: 'USD', prefsJson: '{"firstDayOfMonth":1,"firstDayOverridesJson":null}' },
+    ]);
+    expect(settingsRepository.get()).toMatchObject({
+      firstDayOfMonth: 1,
+      firstDayOverridesJson: null,
+    });
+    // A ledger from before cycles were per ledger reads the settings row's.
+    fakeDb([SETTINGS_ROW, { currencyCode: 'USD', prefsJson: '{"defaultPaybackAccountId":"w1"}' }]);
+    expect(settingsRepository.get()).toMatchObject({
+      firstDayOfMonth: 25,
+      firstDayOverridesJson: '{"2026-12":20}',
+    });
+  });
+
+  it("saves another ledger's month cycle to it, both halves together", () => {
+    setActiveLedgerId('work');
+    // `updateSettings` reads the cycle the ledger has now: the settings row's.
+    const writes = fakeDb([SETTINGS_ROW, { currencyCode: 'USD', prefsJson: null }]);
+    settingsRepository.updateSettings({ firstDayOverridesJson: '{"2027-01":15}' });
+    expect(ledgers.updatePrefs).toHaveBeenCalledWith('work', {
+      firstDayOfMonth: 25,
+      firstDayOverridesJson: '{"2027-01":15}',
+    });
+    expect(writes).toHaveLength(0);
+  });
+
+  it("writes the default ledger's month cycle to the settings row", () => {
+    const writes = fakeDb([]);
+    settingsRepository.updateSettings({ firstDayOfMonth: 1, firstDayOverridesJson: null });
+    expect(ledgers.updatePrefs).not.toHaveBeenCalled();
+    expect(writes[0]).toMatchObject({ firstDayOfMonth: 1, firstDayOverridesJson: null });
   });
 });

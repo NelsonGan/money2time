@@ -16,6 +16,7 @@ import { normalizeCurrencyColumns } from '~/lib/db/normalizeCurrencies';
 import { normalizeIconColumns } from '~/lib/db/normalizeIcons';
 import { retireSimpleMode } from '~/lib/db/retireSimpleMode';
 import {
+  monthCycleForLedger,
   parseLedgerPrefs,
   paymentAlertsJsonForLedger,
   quickEntryJsonForLedger,
@@ -29,7 +30,7 @@ import {
   type UserAssetBackupEntry,
   type UserAssetReadCache,
 } from '~/services/userAssets';
-import type { ExchangeRate } from '~/types';
+import type { ExchangeRate, LedgerPrefs } from '~/types';
 import {
   type BackupSharedLedger,
   filterBackupLedgers,
@@ -349,9 +350,27 @@ function withLedgerSettings(
       ? { currency_code: currency, currency_symbol: text(ledger.currency_symbol) ?? currency }
       : {}),
     default_payback_account_id: prefs.defaultPaybackAccountId ?? null,
+    ...monthCycleColumns(row, prefs),
     insights_prefs_json: prefs.insightsPrefsJson ?? null,
     quick_entry_prefs_json: quickEntryJsonForLedger(text(row.quick_entry_prefs_json), prefs),
     auto_log_prefs_json: paymentAlertsJsonForLedger(text(row.auto_log_prefs_json), prefs),
+  };
+}
+
+/** The settings row's month-cycle columns as the ledger reads them. */
+function monthCycleColumns(row: Record<string, unknown>, prefs: LedgerPrefs) {
+  const day = Number(row.first_day_of_month);
+  const cycle = monthCycleForLedger(
+    {
+      firstDayOfMonth: Number.isFinite(day) ? day : 1,
+      firstDayOverridesJson:
+        typeof row.first_day_overrides_json === 'string' ? row.first_day_overrides_json : null,
+    },
+    prefs,
+  );
+  return {
+    first_day_of_month: cycle.firstDayOfMonth,
+    first_day_overrides_json: cycle.firstDayOverridesJson,
   };
 }
 

@@ -6,11 +6,12 @@ import { getDb, getSQLite } from '~/lib/db/client';
 import { DEFAULT_LEDGER_ID, getActiveLedgerId } from '~/lib/db/ledgerScope';
 import { ledgersTable, settingsTable } from '~/lib/db/schema';
 import { getDeviceLocale } from '~/lib/i18n';
-import { LEDGER_QUICK_ENTRY_KEYS, type UserSettings } from '~/types';
+import { LEDGER_QUICK_ENTRY_KEYS, type LedgerPrefs, type UserSettings } from '~/types';
 import { getLocaleCurrencyCode, getLocaleCurrencySymbol } from '~/utils/formatters';
 import { nowIso } from '~/utils/id';
 
 import {
+  monthCycleForLedger,
   parseJsonObject,
   parseLedgerPrefs,
   paymentAlertsJsonForLedger,
@@ -25,12 +26,18 @@ const SETTINGS_ID = 'primary';
 
 /**
  * Settings a non-default ledger keeps for itself, because they name its own
- * accounts or define its money. The default ledger keeps them in the settings
- * row, so for it every read and write below is exactly what it always was.
- * Quick entry, payment-alert and Insights preferences are split the same
- * way; see lib/repositories/ledgerPrefs.ts.
+ * accounts or define its money and its months. The default ledger keeps them
+ * in the settings row, so for it every read and write below is exactly what it
+ * always was. Quick entry, payment-alert and Insights preferences are split the
+ * same way; see lib/repositories/ledgerPrefs.ts.
  */
-const LEDGER_SETTING_KEYS = ['currencyCode', 'currencySymbol', 'defaultPaybackAccountId'] as const;
+const LEDGER_SETTING_KEYS = [
+  'currencyCode',
+  'currencySymbol',
+  'defaultPaybackAccountId',
+  'firstDayOfMonth',
+  'firstDayOverridesJson',
+] as const;
 type LedgerSettingKey = (typeof LEDGER_SETTING_KEYS)[number];
 
 /** The open ledger when it is not the default one; null otherwise. */
@@ -106,11 +113,13 @@ class SettingsRepository {
       .where(and(eq(ledgersTable.id, ledgerId), isNull(ledgersTable.deletedAt)))
       .get();
     if (!ledger) return settings;
+    const prefs = parseLedgerPrefs(ledger.prefsJson);
     return {
       ...settings,
       currencyCode: ledger.currencyCode ?? settings.currencyCode,
       currencySymbol: ledger.currencySymbol ?? ledger.currencyCode ?? settings.currencySymbol,
-      defaultPaybackAccountId: parseLedgerPrefs(ledger.prefsJson).defaultPaybackAccountId ?? null,
+      defaultPaybackAccountId: prefs.defaultPaybackAccountId ?? null,
+      ...monthCycleForLedger(settings, prefs),
     };
   }
 
@@ -175,11 +184,21 @@ class SettingsRepository {
           ...(own.currencySymbol !== undefined ? { currencySymbol: own.currencySymbol } : {}),
         });
       }
+      const prefs: LedgerPrefs = {};
       if (own.defaultPaybackAccountId !== undefined) {
-        ledgersRepository.updatePrefs(ledgerId, {
-          defaultPaybackAccountId: own.defaultPaybackAccountId,
-        });
+        prefs.defaultPaybackAccountId = own.defaultPaybackAccountId;
       }
+      if (own.firstDayOfMonth !== undefined || own.firstDayOverridesJson !== undefined) {
+        // Both halves together: a ledger reads its own cycle only once it has a
+        // start day, so saving just its custom months must store the day too.
+        const cycle = this.get();
+        prefs.firstDayOfMonth = own.firstDayOfMonth ?? cycle.firstDayOfMonth;
+        prefs.firstDayOverridesJson =
+          own.firstDayOverridesJson !== undefined
+            ? own.firstDayOverridesJson
+            : cycle.firstDayOverridesJson;
+      }
+      if (Object.keys(prefs).length > 0) ledgersRepository.updatePrefs(ledgerId, prefs);
       if (Object.keys(normalizedInput).length === 0) return;
     }
     if (normalizedInput.workingHoursPerDay !== undefined) {

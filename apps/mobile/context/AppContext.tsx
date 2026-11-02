@@ -54,7 +54,7 @@ import {
 import { rescaleSplitAdjustedAmounts } from '~/features/transactions/lib/splitAmountSnapshot';
 import { normalizeLiveEarningsSchedule } from '~/features/widgets/lib/liveEarningsSchedule';
 import { getDb, getSQLite, initializeDatabase } from '~/lib/db/client';
-import { copyLedgerRows } from '~/lib/db/ledgerCopy';
+import { copyLedgerRows, type LedgerCopyPart, ledgerPartsCopySpecs } from '~/lib/db/ledgerCopy';
 import {
   DEFAULT_LEDGER_ID,
   getActiveLedgerId,
@@ -610,14 +610,18 @@ interface CreateLedgerInput extends LedgerInput {
   copyFromLedgerId?: string;
   /**
    * Copy the whole ledger, history included (lib/db/ledgerCopy.ts). The new
-   * ledger must then be in the source's currency; the two flags below are
-   * ignored.
+   * ledger must then be in the source's currency; `copyParts` and
+   * `copyMonthCycle` are ignored (it copies the cycle too).
    */
   copyEverything?: boolean;
-  /** Copy the source's regular accounts and groups (balances start at zero); else starters. */
-  copyAccounts: boolean;
-  /** Copy the source's categories and subcategories; else the starter set. */
-  copyCategories: boolean;
+  /**
+   * What else the new ledger starts with, without history
+   * (`ledgerPartsCopySpecs`). Without accounts or categories it gets the
+   * starter set of each.
+   */
+  copyParts: readonly LedgerCopyPart[];
+  /** Copy the source's month cycle (start day and custom months); else day 1. */
+  copyMonthCycle: boolean;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -798,77 +802,6 @@ function seedDefaultAccountsIfMissing(preferredCurrency: string) {
   });
 
   return createdAccounts;
-}
-
-/**
- * Copy the open ledger's categories (subcategories under their copied parents)
- * into `targetLedgerId`. Run inside the caller's transaction.
- */
-function copyCategoriesInto(targetLedgerId: string) {
-  const source = categoriesRepository.list();
-  withLedgerScope(targetLedgerId, () => {
-    const newIdByOldId = new Map<string, string>();
-    // Roots first, so every child has its new parent id to point at.
-    for (const category of source.filter((row) => !row.parentId)) {
-      newIdByOldId.set(
-        category.id,
-        categoriesRepository.create({
-          name: category.name,
-          sortOrder: category.sortOrder,
-          type: category.type,
-          parentId: null,
-          icon: category.icon,
-          isDefault: category.isDefault,
-        }),
-      );
-    }
-    for (const category of source.filter((row) => row.parentId)) {
-      const parentId = newIdByOldId.get(category.parentId as string);
-      if (!parentId) continue;
-      categoriesRepository.create({
-        name: category.name,
-        sortOrder: category.sortOrder,
-        type: category.type,
-        parentId,
-        icon: category.icon,
-        isDefault: category.isDefault,
-      });
-    }
-  });
-}
-
-/**
- * Copy the open ledger's account groups and everyday accounts (debit and
- * credit; not goals or loans, which describe this book's own history) into
- * `targetLedgerId`, each starting at a zero balance. Accounts in the open
- * ledger's main currency take the new ledger's; nothing needs converting at a
- * zero balance. Run inside the caller's transaction.
- */
-function copyAccountsInto(targetLedgerId: string, currencies: { from: string; to: string }) {
-  const groups = accountGroupsRepository.list();
-  const accounts = accountsRepository
-    .list()
-    .filter((account) => account.type === 'debit' || account.type === 'credit');
-  withLedgerScope(targetLedgerId, () => {
-    groups.forEach((group, index) => {
-      accountGroupsRepository.create(group.name, group.sortOrder ?? index);
-    });
-    for (const account of accounts) {
-      accountsRepository.create({
-        name: account.name,
-        sortOrder: account.sortOrder,
-        type: account.type,
-        accountGroup: account.accountGroup ?? null,
-        logoId: account.logoId ?? null,
-        cardDesign: account.cardDesign ?? null,
-        creditStatementDay: account.creditStatementDay ?? null,
-        creditDueDay: account.creditDueDay ?? null,
-        currency: account.currency === currencies.from ? currencies.to : account.currency,
-        startingBalance: 0,
-        includeInTotals: account.includeInTotals,
-      });
-    }
-  });
 }
 
 const fallbackStyles = StyleSheet.create({
@@ -4917,49 +4850,84 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const createLedger = useCallback(
     (input: CreateLedgerInput) => {
       const {
-        copyAccounts,
-        copyCategories,
+        copyParts,
+        copyMonthCycle,
         copyEverything = false,
         copyFromLedgerId,
         ...ledgerInput
       } = input;
       const sourceId = copyFromLedgerId ?? getActiveLedgerId();
+      const parts = new Set(copyEverything ? [] : copyParts);
       const sqlite = getSQLite();
       let ledgerId = '';
       try {
         sqlite.withTransactionSync(() => {
-          ledgerId = ledgersRepository.create(ledgerInput);
+          // The month cycle is the ledger's own from the start (migration 076).
+          const cycle =
+            copyEverything || copyMonthCycle
+              ? withLedgerScope(sourceId, () => {
+                  const source = settingsRepository.get();
+                  return {
+                    firstDayOfMonth: source.firstDayOfMonth,
+                    firstDayOverridesJson: source.firstDayOverridesJson,
+                  };
+                })
+              : { firstDayOfMonth: 1, firstDayOverridesJson: null };
+          ledgerId = ledgersRepository.create(ledgerInput, cycle);
           if (copyEverything) {
             copyLedgerRows(sqlite, sourceId, ledgerId, newId, nowIso());
             return;
           }
-          // Read the source with its scope open; the copies write to the new one.
-          withLedgerScope(sourceId, () => {
-            if (copyCategories) {
-              copyCategoriesInto(ledgerId);
-            } else {
-              withLedgerScope(ledgerId, () => seedMinimalCategoriesIfMissing());
-            }
-            if (copyAccounts) {
-              copyAccountsInto(ledgerId, {
-                from: ledgersRepository.activeReportingCurrency().code,
-                to: ledgerInput.currencyCode,
-              });
-            } else {
-              withLedgerScope(ledgerId, () =>
-                seedDefaultAccountsIfMissing(ledgerInput.currencyCode),
-              );
-            }
+          // Starters first, for what is not copied: copied goals and loans are
+          // not everyday accounts.
+          withLedgerScope(ledgerId, () => {
+            if (!parts.has('categories')) seedMinimalCategoriesIfMissing();
+            if (!parts.has('accounts')) seedDefaultAccountsIfMissing(ledgerInput.currencyCode);
           });
+          if (parts.size === 0) return;
+          // Read the source with its scope open: its currency and what its loans owe.
+          const copy = withLedgerScope(sourceId, () => ({
+            currency: {
+              from: ledgersRepository.activeReportingCurrency().code,
+              to: ledgerInput.currencyCode,
+            },
+            loanBalances: new Map(
+              parts.has('loans')
+                ? accountsRepository.getBalances().map((row) => [row.accountId, row.balance])
+                : [],
+            ),
+          }));
+          const now = nowIso();
+          copyLedgerRows(
+            sqlite,
+            sourceId,
+            ledgerId,
+            newId,
+            now,
+            ledgerPartsCopySpecs({
+              parts,
+              ...copy,
+              nowIso: now,
+              today: dayKeyFromDateLocal(new Date()),
+            }),
+          );
         });
       } catch (error) {
         // The transaction rolled back, so no half-made ledger is left behind.
         reportError(error, { scope: 'ledger_create' });
         throw toError(error, I18n.t('errors.generic_operation_failed'));
       }
+      const copied = (part: LedgerCopyPart) => copyEverything || parts.has(part);
       void trackEvent(AnalyticsEvents.LEDGER_CREATED, {
-        copied_accounts: copyEverything || copyAccounts,
-        copied_categories: copyEverything || copyCategories,
+        copied_accounts: copied('accounts'),
+        copied_categories: copied('categories'),
+        copied_goals: copied('goals'),
+        copied_loans: copied('loans'),
+        copied_recurring: copied('recurring'),
+        copied_budgets: copied('budgets'),
+        copied_items: copied('items'),
+        copied_albums: copied('albums'),
+        copied_month_cycle: copyEverything || copyMonthCycle,
         copied_everything: copyEverything,
         copied_from_open: sourceId === getActiveLedgerId(),
         ledger_count: ledgersRepository.list().length,
