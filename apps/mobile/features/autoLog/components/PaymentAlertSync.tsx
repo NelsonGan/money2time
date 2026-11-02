@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { AppState } from 'react-native';
 
 import { useApp } from '~/context/AppContext';
+import { useIsPro, usePro } from '~/context/ProContext';
 import { paymentAlertCapturesRepository } from '~/lib/repositories/paymentAlertCapturesRepository';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { reportError } from '~/services/errorReporting';
@@ -21,6 +22,7 @@ import { runAfterInteractions } from '~/utils/interactions';
 
 import type { CaptureInput } from '../lib/captureQueue';
 import { androidCapturePackages } from '../lib/prefs';
+import { runNotificationAiReview } from '../notificationAiReview';
 import {
   type AlertProcessingDeps,
   analyzeNotificationCapture,
@@ -39,8 +41,10 @@ import {
  * and asks Android to rebind the listener when it was dropped.
  */
 export function PaymentAlertSync() {
-  const { accounts, categories, settings, quickEntryPrefs } = useApp();
+  const { accounts, categories, settings, quickEntryPrefs, createTransaction } = useApp();
   const { paymentAlertPrefs: prefs } = useApp();
+  const isPro = useIsPro();
+  const { isStatusKnown } = usePro();
 
   const stateRef = useRef({
     accounts,
@@ -48,6 +52,8 @@ export function PaymentAlertSync() {
     settings,
     quickEntryPrefs,
     prefs,
+    isPro,
+    createTransaction,
   });
   stateRef.current = {
     accounts,
@@ -55,7 +61,30 @@ export function PaymentAlertSync() {
     settings,
     quickEntryPrefs,
     prefs,
+    isPro,
+    createTransaction,
   };
+
+  // AI auto-review of whatever is pending and unseen by AI. Safe to call often:
+  // it does nothing when off, and concurrent calls coalesce.
+  const reviewWithAi = useCallback(() => {
+    const appUserId = stateRef.current.settings.appUserId;
+    void runNotificationAiReview({
+      appUserId,
+      getCurrent: () => {
+        const current = stateRef.current;
+        return {
+          appUserId: current.settings.appUserId,
+          accounts: current.accounts,
+          categories: current.categories,
+          quickEntryPrefs: current.quickEntryPrefs,
+          prefs: current.prefs,
+          isPro: current.isPro,
+          createTransaction: current.createTransaction,
+        };
+      },
+    });
+  }, []);
   const drainingRef = useRef(false);
   const rerunRef = useRef(false);
 
@@ -147,7 +176,14 @@ export function PaymentAlertSync() {
     } finally {
       drainingRef.current = false;
     }
-  }, []);
+    reviewWithAi();
+  }, [reviewWithAi]);
+  // Turning auto-review on (or widening it) reviews what is already waiting.
+  // So does Pro status settling or changing: an upgrade resumes a paused review.
+  const aiReview = prefs.aiReview;
+  useEffect(() => {
+    if (aiReview.enabled && isStatusKnown) reviewWithAi();
+  }, [aiReview, isPro, isStatusKnown, reviewWithAi]);
   // Source/account changes can make previously queued captures processable.
   useEffect(() => {
     void drain();

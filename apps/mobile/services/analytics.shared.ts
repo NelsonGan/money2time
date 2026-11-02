@@ -98,6 +98,13 @@ export const POSTHOG_EVENTS = {
   RECEIPT_SCAN_FAILED: 'Receipt Scan Failed',
   RECEIPT_SPLIT_ABANDONED: 'Receipt Split Abandoned',
 
+  // AI notification auto-review: opt-in, batch outcomes and corrections, joined
+  // to the Worker's `notification_review` `$ai_generation` traces.
+  NOTIFICATION_AI_REVIEW_TOGGLED: 'Notification AI Review Toggled',
+  NOTIFICATION_AI_REVIEW_COMPLETED: 'Notification AI Review Completed',
+  NOTIFICATION_AI_REVIEW_FAILED: 'Notification AI Review Failed',
+  NOTIFICATION_AI_REVIEW_UNDONE: 'Notification AI Review Undone',
+
   // Sharing a settlement receipt puts the app in front of someone new.
   SETTLE_UP_RECEIPT_SHARED: 'Settle Up Receipt Shared',
 
@@ -336,6 +343,7 @@ export function daysSinceInstall(
  */
 const FEATURE_BY_EVENT = {
   [POSTHOG_EVENTS.RECEIPT_SCAN_COMPLETED]: 'receipt_scan',
+  [POSTHOG_EVENTS.NOTIFICATION_AI_REVIEW_COMPLETED]: 'notification_ai',
   [GA4_ONLY_EVENTS.VOICE_TRANSACTION_CREATED]: 'voice_entry',
   [GA4_ONLY_EVENTS.AUTOLOG_TRANSACTION_CREATED]: 'autolog',
   [GA4_ONLY_EVENTS.BACK_TAP_TRIGGERED]: 'back_tap',

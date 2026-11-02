@@ -64,6 +64,7 @@ export function prefs(overrides: Partial<PaymentAlertPrefs> = {}): PaymentAlertP
     alertsEnabled: true,
     sources: {},
     ignorePhrases: [],
+    aiReview: { enabled: false, logTypes: 'both' },
     ...overrides,
   };
 }

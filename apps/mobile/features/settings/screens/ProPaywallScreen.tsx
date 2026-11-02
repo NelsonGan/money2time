@@ -521,6 +521,12 @@ function useCompareRows(voiceSupported: boolean): CompareRow[] {
         free: I18n.t('pro.compare_limited'),
         pro: UNLIMITED,
       },
+      {
+        // AI auto-review of bank notifications: a lifetime free allowance.
+        label: I18n.t('pro.notification_ai_label'),
+        free: String(PRO_LIMITS.FREE_MAX_NOTIFICATION_AI_REVIEWS),
+        pro: UNLIMITED,
+      },
       // The auto-log automations run through iOS Shortcuts, so they only exist
       // on iOS — no point advertising them on Android.
       ...(Platform.OS === 'ios'

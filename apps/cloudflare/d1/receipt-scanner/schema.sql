@@ -55,3 +55,33 @@ CREATE TABLE IF NOT EXISTS entitlement_cache (
 );
 
 CREATE INDEX IF NOT EXISTS idx_entitlement_cache_expires ON entitlement_cache (expires_at);
+
+-- AI notification review usage: the same shape as scan_usage, metered apart so
+-- receipt scans and reviewed notifications have their own allowances
+-- (NOTIFICATION_FREE_LIMIT / NOTIFICATION_PRO_LIMIT). `count` is notifications
+-- the model returned a decision for, not requests.
+CREATE TABLE IF NOT EXISTS notification_review_usage (
+  app_user_id   TEXT    NOT NULL,
+  interval_unit TEXT    NOT NULL
+                CHECK (interval_unit IN ('day', 'week', 'month', 'year')),
+  window_start  INTEGER NOT NULL,
+  count         INTEGER NOT NULL DEFAULT 0,
+  expires_at    INTEGER NOT NULL,
+  PRIMARY KEY (app_user_id, interval_unit, window_start)
+);
+
+CREATE INDEX IF NOT EXISTS idx_notification_review_usage_expires
+  ON notification_review_usage (expires_at);
+
+-- Notification ids charged to an AI review allowance in the last day, so a
+-- batch the app re-sends (it lost the response when backgrounded) is not
+-- charged twice.
+CREATE TABLE IF NOT EXISTS notification_review_charged (
+  app_user_id TEXT    NOT NULL,
+  capture_id  TEXT    NOT NULL,
+  expires_at  INTEGER NOT NULL,
+  PRIMARY KEY (app_user_id, capture_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_notification_review_charged_expires
+  ON notification_review_charged (expires_at);

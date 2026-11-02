@@ -81,7 +81,7 @@ export function SettingsPageLayout({
   return content;
 }
 
-function HeaderIconButton({
+export function HeaderIconButton({
   onPress,
   icon,
   label,

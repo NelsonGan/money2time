@@ -3,6 +3,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   clearNotificationScanHistory,
   getNotificationScanHistoryGeneration,
+  isUnseenAiResult,
+  markNotificationAiResultsSeen,
   readNotificationScanHistory,
   recordNotificationScan,
   subscribeNotificationScanHistory,
@@ -131,4 +133,55 @@ it('notifies only the matching user after persistence and reset', async () => {
   expect(other).not.toHaveBeenCalled();
   stop();
   stopOther();
+});
+
+const ai = (seen: boolean) =>
+  ({ decision: 'expense', applied: true, seen, reviewedAt: '2026-11-02T09:00:00.000Z' }) as const;
+it('keeps unseen AI results beyond the 10-entry cap until they are marked seen', async () => {
+  await recordNotificationScan('a', { ...entry(0), ai: ai(false) });
+  for (let i = 1; i <= 11; i++) await recordNotificationScan('a', entry(i));
+  let history = await readNotificationScanHistory('a');
+  expect(history.find((row) => row.id === '0')?.ai).toEqual(ai(false));
+  expect(history.filter(isUnseenAiResult).map((row) => row.id)).toEqual(['0']);
+
+  await markNotificationAiResultsSeen('a', ['0']);
+  history = await readNotificationScanHistory('a');
+  expect(history.some((row) => row.id === '0')).toBe(false);
+  expect(history).toHaveLength(10);
+});
+it('only reopens a finished review when asked to (undo), never on a queue retry', async () => {
+  await recordNotificationScan('a', entry(1));
+  await recordNotificationScan('a', { ...entry(1), result: 'pending' });
+  expect((await readNotificationScanHistory('a'))[0].result).toBe('expense');
+  await recordNotificationScan('a', { ...entry(1), result: 'pending' }, undefined, true);
+  expect((await readNotificationScanHistory('a'))[0].result).toBe('pending');
+});
+it('drops a malformed AI field instead of the whole entry', async () => {
+  storage.set(
+    'notification-scan-history:a',
+    JSON.stringify([{ ...entry(1), ai: { decision: 'maybe' } }]),
+  );
+  const [row] = await readNotificationScanHistory('a');
+  expect(row.id).toBe('1');
+  expect(row.ai).toBeUndefined();
+});
+
+it('caps unseen AI results and lets them age out after three days', async () => {
+  const fresh = new Date().toISOString();
+  const stale = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString();
+  for (let i = 0; i < 60; i++) {
+    await recordNotificationScan('a', {
+      ...entry(i),
+      ai: { decision: 'ignore', applied: true, seen: false, reviewedAt: fresh },
+    });
+  }
+  await recordNotificationScan('a', {
+    ...entry(99),
+    ai: { decision: 'ignore', applied: true, seen: false, reviewedAt: stale },
+  });
+  const history = await readNotificationScanHistory('a');
+  // 40 unseen kept past the cap, then the normal 10 newest: bounded at 50.
+  expect(history).toHaveLength(50);
+  // Three days old, a result no longer waits in Done by AI.
+  expect(isUnseenAiResult(history.find((row) => row.id === '99')!)).toBe(false);
 });

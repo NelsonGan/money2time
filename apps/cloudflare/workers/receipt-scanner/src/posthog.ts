@@ -118,7 +118,14 @@ export class AiTrace {
       $ai_is_error: Boolean(record.error),
       // Content is deliberately withheld (see the header); the shapes stay so
       // PostHog's trace view still renders the call.
-      $ai_input: [{ role: 'user', content: '[receipt image and prompt withheld]' }],
+      $ai_input: [
+        {
+          role: 'user',
+          content: record.spanName.startsWith('receipt_')
+            ? '[receipt image and prompt withheld]'
+            : '[prompt and notification text withheld]',
+        },
+      ],
       $ai_output_choices: record.error
         ? []
         : [{ role: 'assistant', content: '[scan result withheld]' }],
