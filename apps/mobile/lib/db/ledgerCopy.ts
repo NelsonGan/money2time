@@ -358,13 +358,14 @@ export function copiedRuleNextRun(
     nextRunDate: string;
     recurrencePattern: RecurrencePattern;
     recurrenceInterval: number;
+    anchorDay?: number | null;
     endDate: string | null;
   },
   nowIso: string,
 ): string | null {
   let cursor: string | null = rule.nextRunDate;
   for (let guard = 0; cursor && cursor <= nowIso && guard < 5000; guard += 1) {
-    cursor = nextRunAfter(cursor, rule.recurrencePattern, rule.recurrenceInterval);
+    cursor = nextRunAfter(cursor, rule.recurrencePattern, rule.recurrenceInterval, rule.anchorDay);
   }
   if (!cursor || cursor <= nowIso || isAfterRecurringEndDate(cursor, rule.endDate)) return null;
   return cursor;
@@ -501,6 +502,7 @@ function ruleOf(row: Row) {
     nextRunDate: String(row.next_run_date),
     recurrencePattern: row.recurrence_pattern as RecurrencePattern,
     recurrenceInterval: Number(row.recurrence_interval) || 1,
+    anchorDay: typeof row.anchor_day === 'number' ? row.anchor_day : null,
     endDate: textOrNull(row.end_date),
   };
 }

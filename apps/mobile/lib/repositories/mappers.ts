@@ -60,6 +60,7 @@ import type {
   WeekStartsOn,
 } from '~/types';
 import { clampFirstDayOfMonth } from '~/utils/financialMonth';
+import { isAnchorDay } from '~/utils/recurringRules';
 
 function asAccountType(value: string): Account['type'] {
   switch (value) {
@@ -597,6 +598,7 @@ export function toRecurringRule(row: RecurringRuleRow): RecurringTransactionRule
             : 'monthly',
     recurrenceInterval: Math.max(1, Math.trunc(row.recurrenceInterval ?? 1)),
     nextRunDate: row.nextRunDate,
+    anchorDay: isAnchorDay(row.anchorDay) ? row.anchorDay : null,
     endDate: row.endDate,
     isActive: row.isActive,
     countsAsExpense: !!row.countsAsExpense,

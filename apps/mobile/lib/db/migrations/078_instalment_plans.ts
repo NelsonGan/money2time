@@ -1,4 +1,4 @@
-import { addColumnsIfMissing } from './helpers';
+import { addColumnIfMissing, addColumnsIfMissing } from './helpers';
 import type { DbMigration } from './types';
 
 // Instalment plans: a purchase paid off in parts (a phone on a 12-month card
@@ -11,9 +11,9 @@ import type { DbMigration } from './types';
 //   (0 for the one that paid off everything left). Kept explicit rather than
 //   read from the run id, because a ledger copy gives every row a new id.
 // All nullable, so every existing row reads as before.
-export const migration077InstalmentPlans: DbMigration = {
-  version: 77,
-  name: '077_instalment_plans',
+export const migration078InstalmentPlans: DbMigration = {
+  version: 78,
+  name: '078_instalment_plans',
   up(db) {
     addColumnsIfMissing(db, 'recurring_rules', [
       ['instalment_count', 'INTEGER'],
@@ -24,6 +24,10 @@ export const migration077InstalmentPlans: DbMigration = {
       ['instalment_rule_id', 'TEXT'],
       ['instalment_number', 'INTEGER'],
     ]);
+    // A phone that ran a preview build of this change, where it was numbered
+    // 077, recorded 077 as done and so never ran 077_recurring_anchor_day:
+    // add that column here too (a no-op everywhere else).
+    addColumnIfMissing(db, 'recurring_rules', 'anchor_day', 'INTEGER');
     db.execSync(`
       CREATE INDEX IF NOT EXISTS idx_transactions_instalment_rule
         ON transactions(instalment_rule_id)
@@ -32,4 +36,4 @@ export const migration077InstalmentPlans: DbMigration = {
   },
 };
 
-export default migration077InstalmentPlans;
+export default migration078InstalmentPlans;

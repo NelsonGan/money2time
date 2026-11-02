@@ -34,6 +34,7 @@ function rule(overrides: Partial<RecurringTransactionRule>): RecurringTransactio
     recurrencePattern: 'monthly',
     recurrenceInterval: 1,
     nextRunDate: '2026-08-01',
+    anchorDay: null,
     endDate: null,
     isActive: true,
     countsAsExpense: false,

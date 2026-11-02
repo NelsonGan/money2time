@@ -2,7 +2,7 @@
 //
 // A plan is stored as a recurring rule with three extra columns
 // (`instalment_count`, `instalment_total`, `instalment_start_date`, migration
-// 077). The rule's own engine posts each payment on its due date, so this
+// 078). The rule's own engine posts each payment on its due date, so this
 // module only holds the arithmetic both the runner and the screens share: how
 // the total splits into payments, which dates they fall on, and how far along
 // a plan is given the payments that exist. It is pure so it is tested without

@@ -11,6 +11,7 @@ export const gte = noop;
 export const inArray = noop;
 export const isNull = noop;
 export const isNotNull = noop;
+export const lt = noop;
 export const lte = noop;
 export const or = noop;
 export const sql = proxy;

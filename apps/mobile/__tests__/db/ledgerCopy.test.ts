@@ -300,10 +300,12 @@ describe('ledgerPartsCopySpecs', () => {
   it('brings a rule only with every account it names, from its next date after now', () => {
     const withoutGoals = planParts(['recurring', 'accounts', 'categories']).recurring_rules;
     expect(withoutGoals).toHaveLength(1);
-    expect(withoutGoals[0].next_run_date).toBe('2026-12-01T00:00:00.000Z');
+    // Stepped past now, so written as local midnight; a future date is kept.
+    const december = new Date(2026, 11, 1).toISOString();
+    expect(withoutGoals[0].next_run_date).toBe(december);
     const withGoals = planParts(['recurring', 'accounts', 'categories', 'goals']).recurring_rules;
     expect(withGoals.map((rule) => rule.next_run_date)).toEqual([
-      '2026-12-01T00:00:00.000Z',
+      december,
       '2026-11-09T00:00:00.000Z',
     ]);
   });
@@ -332,7 +334,19 @@ describe('copiedRuleNextRun', () => {
     expect(copiedRuleNextRun({ ...rule, nextRunDate: '2026-12-25T00:00:00.000Z' }, NOW)).toBe(
       '2026-12-25T00:00:00.000Z',
     );
-    expect(copiedRuleNextRun(rule, NOW)).toBe('2026-11-30T00:00:00.000Z');
+    // Stepped runs are written as local midnight.
+    expect(copiedRuleNextRun(rule, NOW)).toBe(new Date(2026, 10, 30).toISOString());
+  });
+
+  it("walks forward on the rule's anchor day", () => {
+    // Waiting on September 30 for the 31st: the copy's next run is October 31.
+    const local = new Date(2026, 9, 31).toISOString();
+    expect(
+      copiedRuleNextRun(
+        { ...rule, nextRunDate: '2026-09-30', anchorDay: 31 },
+        new Date(2026, 9, 1).toISOString(),
+      ),
+    ).toBe(local);
   });
 
   it('has nothing to run for a past one-off or a rule past its end', () => {

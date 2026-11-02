@@ -2003,6 +2003,9 @@ function buildLoanRepaymentRule({
       input.firstInstalmentDate && input.firstInstalmentDate > today
         ? input.firstInstalmentDate
         : dayKeyFromDateLocal(nextOccurrenceOfMonthDay(input.loanPaymentDay ?? 1, new Date())),
+    // The day of the month the loan is paid on. The first instalment may sit
+    // on a shorter month's last day; the rule returns to this day after it.
+    anchorDay: input.loanPaymentDay ?? null,
     // A loan ends. Without this the rule would keep transferring past
     // the final instalment, draining the funding account and pushing
     // the balance below zero. The engine's check is inclusive, so the

@@ -45,6 +45,7 @@ function makePlan(
     recurrencePattern: 'monthly',
     recurrenceInterval: 1,
     nextRunDate: noon('2026-12-02'),
+    anchorDay: null,
     endDate: noon('2027-10-02'),
     isActive: true,
     countsAsExpense: false,
