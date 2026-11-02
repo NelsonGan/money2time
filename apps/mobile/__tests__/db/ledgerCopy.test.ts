@@ -39,6 +39,8 @@ function source(): Record<string, Row[]> {
       { id: 't2', ledger_id: 'src', account_id: 'a2', reimbursement_of_id: 't1' },
       // Points outside the copy: must become null, never the source's id.
       { id: 't3', ledger_id: 'src', account_id: 'gone', category_id: null },
+      // A payment of instalment plan r1.
+      { id: 't4', ledger_id: 'src', account_id: 'a1', instalment_rule_id: 'r1' },
     ],
     recurring_rules: [{ id: 'r1', ledger_id: 'src', account_id: 'a1', category_id: 'c1' }],
     transaction_splits: [
@@ -81,6 +83,13 @@ function plan() {
 }
 
 describe('planLedgerCopy', () => {
+  it('points a copied instalment payment at the copied plan', () => {
+    const { byTable, idOf } = plan();
+    const payment = byTable.transactions.find((row) => row.id === idOf('transactions', 't4'));
+    expect(payment?.instalment_rule_id).toBe(idOf('recurring_rules', 'r1'));
+    expect(payment?.instalment_rule_id).not.toBe('r1');
+  });
+
   it('covers every table in order and gives every row a new id in the new ledger', () => {
     const { byTable } = plan();
     expect(Object.keys(byTable)).toEqual(LEDGER_COPY_TABLES.map((spec) => spec.table));
@@ -186,6 +195,20 @@ function partsSource(): Record<string, Row[]> {
         next_run_date: '2026-10-01T00:00:00.000Z',
         end_date: '2026-10-15',
       },
+      {
+        // An instalment plan: its payments are history, so it stays behind.
+        id: 'sofa',
+        ledger_id: 'src',
+        account_id: 'cash',
+        category_id: 'food',
+        recurrence_pattern: 'monthly',
+        recurrence_interval: 1,
+        next_run_date: '2026-12-02T00:00:00.000Z',
+        end_date: '2027-10-02T00:00:00.000Z',
+        instalment_count: 12,
+        instalment_total: 1000,
+        instalment_start_date: '2026-11-02T00:00:00.000Z',
+      },
     ],
     budget_templates: [{ id: 'bt1', ledger_id: 'src', is_default: 1 }],
     budget_template_categories: [{ id: 'btc1', template_id: 'bt1', category_id: 'food' }],
@@ -267,6 +290,11 @@ describe('ledgerPartsCopySpecs', () => {
       // Its category stayed behind.
       loan_payment_category_id: null,
     });
+  });
+
+  it('leaves instalment plans behind with the payments that belong to them', () => {
+    const rules = planParts(['recurring', 'accounts', 'categories', 'goals']).recurring_rules;
+    expect(rules.some((rule) => rule.instalment_count != null)).toBe(false);
   });
 
   it('brings a rule only with every account it names, from its next date after now', () => {

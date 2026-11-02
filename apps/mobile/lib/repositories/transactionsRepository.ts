@@ -69,6 +69,7 @@ type RelationRow = {
   categoryIcon: string | null;
   categoryParentId: string | null;
   parentCategoryName: string | null;
+  instalmentCount: number | null;
 };
 
 export interface CreateTransactionInput {
@@ -108,6 +109,9 @@ export interface CreateTransactionInput {
   countsAsExpense?: boolean;
   /** Written by a drag reorder only; a new row always starts unordered. */
   dayOrder?: number | null;
+  /** Instalment plan payments only: the plan and which payment (0 = payoff). */
+  instalmentRuleId?: string | null;
+  instalmentNumber?: number | null;
 }
 
 const DEFAULT_TRANSACTION_QUERY: TransactionFilters = {
@@ -199,7 +203,8 @@ const RELATION_JOINS_SQL = `
     LEFT JOIN accounts fa ON fa.id = t.from_account_id AND fa.deleted_at IS NULL
     LEFT JOIN accounts ta ON ta.id = t.to_account_id AND ta.deleted_at IS NULL
     LEFT JOIN categories c ON c.id = t.category_id
-    LEFT JOIN categories p ON p.id = c.parent_id`;
+    LEFT JOIN categories p ON p.id = c.parent_id
+    LEFT JOIN recurring_rules ir ON ir.id = t.instalment_rule_id AND ir.deleted_at IS NULL`;
 
 const CATEGORY_ICON_SQL = `COALESCE(NULLIF(TRIM(c.icon), ''), NULLIF(TRIM(p.icon), ''))`;
 
@@ -215,7 +220,8 @@ const CATEGORY_ICON_SQL = `COALESCE(NULLIF(TRIM(c.icon), ''), NULLIF(TRIM(p.icon
 function loadAllWithRelations(): TransactionWithRelations[] {
   const statement = getSQLite().prepareSync(`
     SELECT ${TRANSACTION_RAW_COLUMNS_SQL},
-      a.name, fa.name, ta.name, c.name, ${CATEGORY_ICON_SQL}, c.parent_id, p.name
+      a.name, fa.name, ta.name, c.name, ${CATEGORY_ICON_SQL}, c.parent_id, p.name,
+      ir.instalment_count
     FROM transactions t ${RELATION_JOINS_SQL}
     WHERE t.deleted_at IS NULL AND t.ledger_id = ?
     ORDER BY t.date DESC, t.created_at DESC, t.id DESC
@@ -264,6 +270,7 @@ function attachRelations(transactions: Transaction[]): TransactionWithRelations[
     categoryIcon: string | null;
     categoryParentId: string | null;
     parentCategoryName: string | null;
+    instalmentCount: number | null;
   }>(
     `
     SELECT
@@ -278,7 +285,8 @@ function attachRelations(transactions: Transaction[]): TransactionWithRelations[
       c.name as categoryName,
       ${CATEGORY_ICON_SQL} as categoryIcon,
       c.parent_id as categoryParentId,
-      p.name as parentCategoryName
+      p.name as parentCategoryName,
+      ir.instalment_count as instalmentCount
     FROM transactions t ${RELATION_JOINS_SQL}
     WHERE ${relationFilterSql}
   `,
@@ -306,6 +314,7 @@ function attachRelations(transactions: Transaction[]): TransactionWithRelations[
       categoryParentId: rel?.categoryParentId ?? null,
       categoryParentName: rel?.parentCategoryName ?? null,
       categoryIcon: rel?.categoryIcon ?? null,
+      instalmentCount: rel?.instalmentCount ?? null,
     });
   }
   return withRelations;
@@ -659,6 +668,8 @@ class TransactionsRepository {
         reimbursementOfId: normalizedInput.reimbursementOfId ?? null,
         countsAsExpense: normalizedInput.countsAsExpense ?? false,
         dayOrder: null,
+        instalmentRuleId: normalizedInput.instalmentRuleId ?? null,
+        instalmentNumber: normalizedInput.instalmentNumber ?? null,
         recurrencePattern: 'none',
         recurrenceInterval: 1,
         recurrenceEndDate: null,

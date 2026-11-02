@@ -15,6 +15,8 @@ function makeTx(overrides: Partial<TransactionWithRelations>): TransactionWithRe
     amount: overrides.amount ?? 0,
     currency: 'USD',
     dayOrder: null,
+    instalmentRuleId: null,
+    instalmentNumber: null,
     reportingCurrency: 'USD',
     reportingAmount: overrides.amount ?? 0,
     fxRate: 1,

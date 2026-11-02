@@ -146,6 +146,10 @@ export const transactionsTable = sqliteTable('transactions', {
   // Position among the day's rows set by a drag; null means "order by
   // created_at". See utils/transactionSorting.ts.
   dayOrder: real('day_order'),
+  // The instalment plan (a recurring rule) this row is a payment of, and which
+  // payment (0 = the payoff). Migration 078.
+  instalmentRuleId: text('instalment_rule_id'),
+  instalmentNumber: integer('instalment_number'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),
@@ -180,6 +184,11 @@ export const recurringRulesTable = sqliteTable('recurring_rules', {
   isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
   // Stamped onto every transfer this rule generates. Loan auto-repayment only.
   countsAsExpense: integer('counts_as_expense', { mode: 'boolean' }).notNull().default(false),
+  // Set on an instalment plan only (migration 078): the number of payments,
+  // their total and the first payment's date. Null on an ordinary rule.
+  instalmentCount: integer('instalment_count'),
+  instalmentTotal: real('instalment_total'),
+  instalmentStartDate: text('instalment_start_date'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),

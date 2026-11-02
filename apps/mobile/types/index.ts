@@ -936,12 +936,25 @@ export interface Transaction {
    * millisecond scale as `createdAt`, so rows added later still land on top.
    */
   dayOrder: number | null;
+  /**
+   * The instalment plan (a recurring rule with `instalmentCount`) this row is
+   * a payment of, or null. Set by the plan's runner and its early-payment and
+   * payoff actions only; the editor never writes it.
+   */
+  instalmentRuleId: string | null;
+  /**
+   * Which payment of that plan this is, 1-based. 0 marks the one payment that
+   * paid off everything left (`INSTALMENT_PAYOFF_NUMBER`).
+   */
+  instalmentNumber: number | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
 }
 
 export interface TransactionWithRelations extends Transaction {
+  /** The live plan's number of payments, for the row's "4/12" pill. */
+  instalmentCount?: number | null;
   accountName?: string | null;
   fromAccountName?: string | null;
   toAccountName?: string | null;
@@ -1153,6 +1166,15 @@ export interface RecurringTransactionRule {
    * counts as spending without the engine reading the account back.
    */
   countsAsExpense: boolean;
+  /**
+   * Set on an instalment plan only (null on every ordinary rule): how many
+   * payments the plan has, what they add up to, and when the first one falls.
+   * `amount` is then the regular payment; the last one takes the leftover
+   * cents. See `features/instalments/lib/instalmentPlan.ts`.
+   */
+  instalmentCount: number | null;
+  instalmentTotal: number | null;
+  instalmentStartDate: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;

@@ -19,7 +19,8 @@ type LimitType =
   | 'receipts'
   | 'split_bills'
   | 'goals'
-  | 'loans';
+  | 'loans'
+  | 'instalments';
 
 const LIMIT_MAP: Record<LimitType, number> = {
   accounts: PRO_LIMITS.FREE_MAX_ACCOUNTS,
@@ -36,6 +37,7 @@ const LIMIT_MAP: Record<LimitType, number> = {
   split_bills: PRO_LIMITS.FREE_MAX_UNSETTLED_SPLIT_BILLS,
   goals: PRO_LIMITS.FREE_MAX_SAVINGS_GOALS,
   loans: PRO_LIMITS.FREE_MAX_LOANS,
+  instalments: PRO_LIMITS.FREE_MAX_INSTALMENT_PLANS,
 };
 
 /**

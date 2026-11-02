@@ -33,7 +33,8 @@ type Target =
   | 'budget_templates'
   | 'monthly_budgets'
   | 'receipt_splits'
-  | 'receipt_split_items';
+  | 'receipt_split_items'
+  | 'recurring_rules';
 
 interface TableSpec {
   table: string;
@@ -85,6 +86,8 @@ export const LEDGER_COPY_TABLES: readonly TableSpec[] = [
       recurrence_parent_id: 'transactions',
       reimbursement_transaction_id: 'transactions',
       reimbursement_of_id: 'transactions',
+      // A payment follows its instalment plan into the copy.
+      instalment_rule_id: 'recurring_rules',
     },
   },
   {
@@ -165,6 +168,7 @@ const ID_SPACE: Record<string, Target | undefined> = {
   monthly_budgets: 'monthly_budgets',
   receipt_splits: 'receipt_splits',
   receipt_split_items: 'receipt_split_items',
+  recurring_rules: 'recurring_rules',
 };
 
 /** The rows of one table that a plan may copy (the plan filters further). */
@@ -399,7 +403,7 @@ export interface LedgerPartsCopy {
  * accounts and goals start at zero, a loan at what it still owes (a loan at
  * zero would read as paid off), and albums empty. Parents come before
  * children, as in `LEDGER_COPY_TABLES`. Archived goals and loans, settled
- * loans and rules with nothing left to run stay behind; a recurring rule
+ * loans, instalment plans and rules with nothing left to run stay behind; a recurring rule
  * comes along only when every account and category it names does. Parts
  * another needs are added (`withCopyNeeds`).
  */
@@ -468,7 +472,10 @@ export function ledgerPartsCopySpecs(copy: LedgerPartsCopy): TableSpec[] {
     specs.push({
       ...base('recurring_rules'),
       allRefs: true,
-      keep: (row) => copiedRuleNextRun(ruleOf(row), copy.nowIso) !== null,
+      // An instalment plan is one purchase being paid off, and its payments
+      // stay behind with the rest of the history: it is not copied.
+      keep: (row) =>
+        row.instalment_count == null && copiedRuleNextRun(ruleOf(row), copy.nowIso) !== null,
       adjust: fresh((rule) => {
         rule.next_run_date = copiedRuleNextRun(ruleOf(rule), copy.nowIso);
       }),

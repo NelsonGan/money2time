@@ -87,6 +87,7 @@ interface SettingsScreenProps {
   onOpenExchangeRates: () => void;
   onOpenCategories: () => void;
   onOpenRecurring: () => void;
+  onOpenInstalments: () => void;
   onOpenNotifications: () => void;
   onOpenDataManagement: () => void;
   onOpenWebDashboard: () => void;
@@ -122,6 +123,7 @@ export function SettingsScreen({
   onOpenExchangeRates,
   onOpenCategories,
   onOpenRecurring,
+  onOpenInstalments,
   onOpenNotifications,
   onOpenDataManagement,
   onOpenWebDashboard,
@@ -611,6 +613,11 @@ export function SettingsScreen({
                 icon={<ClayIcon name="settings/recurring" size={34} flatSize={20} />}
                 label={I18n.t('settings.recurring')}
                 onPress={onOpenRecurring}
+              />
+              <SettingsGridTile
+                icon={<ClayIcon name="settings/instalments" size={34} flatSize={20} />}
+                label={I18n.t('instalments.title')}
+                onPress={onOpenInstalments}
               />
               <SettingsGridTile
                 icon={<ClayIcon name="settings/quick-entry" size={34} flatSize={20} />}

@@ -1,9 +1,15 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { useApp } from '~/context/AppContext';
+import {
+  DEFAULT_INSTALMENT_CHOICE,
+  type InstalmentChoice,
+} from '~/features/instalments/components/InstalmentSheet';
+import { scheduleOfFrequency } from '~/features/instalments/lib/instalmentPlan';
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import { type SplitDraft, splitsHelpers } from '~/features/transactions/components/editor';
 import { useNewTransactionGate } from '~/features/transactions/hooks/useNewTransactionGate';
+import { useProGate } from '~/hooks/useProGate';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import type { AddTransactionInitialValues } from '~/navigation/rootStack';
 import { requestHighlightTransaction } from '~/services/transactionsNavigation';
@@ -17,6 +23,8 @@ interface AddTransactionScreenProps {
   initialValues?: AddTransactionInitialValues;
   /** Open the Split Bill sheet on mount (used for the manual-split add flow). */
   openSplitBillOnMount?: boolean;
+  /** Start with "pay in instalments" on. */
+  startInstalmentPlan?: boolean;
 }
 
 export function AddTransactionScreen({
@@ -25,9 +33,63 @@ export function AddTransactionScreen({
   initialAccountId,
   initialValues,
   openSplitBillOnMount,
+  startInstalmentPlan = false,
 }: AddTransactionScreenProps) {
-  const { createTransaction, createTransactionWithSplits, markSplitPaid } = useApp();
+  const {
+    createTransaction,
+    createTransactionWithSplits,
+    markSplitPaid,
+    instalmentPlans,
+    createInstalmentPlan,
+  } = useApp();
   const { blocked, activeAccountCount } = useNewTransactionGate();
+  const { checkLimit } = useProGate();
+  const activePlanCount = useMemo(
+    () => instalmentPlans.filter((plan) => !plan.complete).length,
+    [instalmentPlans],
+  );
+
+  // "Pay in instalments": the form's amount is the total and its date the
+  // first payment. The plan keeps the note as its name and hands the receipt,
+  // reimbursement tick, longer note and mood to the first payment (the editor
+  // only allows a receipt or the tick when that payment is made today).
+  const instalmentOptions = useMemo(
+    () => ({
+      initialChoice: startInstalmentPlan ? DEFAULT_INSTALMENT_CHOICE : null,
+      canStart: () => checkLimit('instalments', activePlanCount),
+      onSubmitPlan: ({
+        transaction,
+        choice,
+      }: {
+        transaction: CreateTransactionInput;
+        choice: InstalmentChoice;
+      }) => {
+        if (!transaction.accountId || !transaction.categoryId) return;
+        const { pattern, interval } = scheduleOfFrequency(choice.frequency);
+        const created = createInstalmentPlan({
+          name: transaction.note?.trim() || '',
+          total: transaction.amount,
+          count: choice.count,
+          currency: transaction.currency,
+          accountId: transaction.accountId,
+          categoryId: transaction.categoryId,
+          note: transaction.note ?? null,
+          recurrencePattern: pattern,
+          recurrenceInterval: interval,
+          startDate: transaction.date,
+          regularAmount: choice.amount ?? null,
+          firstPayment: {
+            details: transaction.details ?? null,
+            receiptUri: transaction.receiptUri ?? null,
+            sentiment: transaction.sentiment,
+            reimbursable: transaction.reimbursable ?? false,
+          },
+        });
+        if (created?.firstPaymentId) requestHighlightTransaction(created.firstPaymentId);
+      },
+    }),
+    [activePlanCount, checkLimit, createInstalmentPlan, startInstalmentPlan],
+  );
 
   // Create the transaction and briefly flash its row so the user can spot the
   // one they just added once the list lands on its day.
@@ -93,6 +155,7 @@ export function AddTransactionScreen({
       initialAccountId={initialAccountId}
       initialValues={initialValues}
       openSplitBillOnMount={openSplitBillOnMount}
+      instalmentOptions={instalmentOptions}
     />
   );
 }

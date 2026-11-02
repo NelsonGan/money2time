@@ -45,6 +45,8 @@ export type RootStackParamList = {
         initialValues?: AddTransactionInitialValues;
         /** Open the Split Bill sheet on mount (itemized when no amount is set). */
         openSplitBill?: boolean;
+        /** Start with "pay in instalments" on (Settings › Instalments' add button). */
+        startInstalmentPlan?: boolean;
         /**
          * Skip the post-save jump to the calendar tab. Set by callers whose own
          * screen already shows the result (Accounts or a goal's deposit / withdraw),
@@ -86,6 +88,8 @@ export type RootStackParamList = {
   InsightsDrilldown: InsightsDrilldownPayload;
   RecurringEditor: { ruleId?: string } | undefined;
   SettingsRecurring: undefined;
+  SettingsInstalments: undefined;
+  InstalmentPlan: { planId: string };
   SettingsAccounts: undefined;
   SettingsHourlyValue: undefined;
   /** Root-level alias so the auto-start reminder's deep link can reach it. */
