@@ -514,6 +514,26 @@ jobs:
         working-directory: apps/mobile
         run: npm ci
 
+      # The release build runs R8 in the 4 GB Gradle daemon (plus a Kotlin
+      # daemon) while CMake compiles the app's native code for four ABIs. On
+      # the 16 GB runner that peak exhausts RAM and the VM is shut down mid-
+      # Gradle ("The runner has received a shutdown signal"), so grow the
+      # image's 4 GB swap file and log peak memory for the next diagnosis.
+      - name: Add swap space
+        if: matrix.platform == 'android'
+        run: |
+          swapfile=/mnt/swapfile
+          [ -d /mnt ] || swapfile=/swapfile
+          sudo swapoff -a
+          sudo rm -f "$swapfile"
+          sudo fallocate -l 16G "$swapfile"
+          sudo chmod 600 "$swapfile"
+          sudo mkswap "$swapfile" > /dev/null
+          sudo swapon "$swapfile"
+          free -h
+          # Runs until the job ends; the runner reaps it with the other orphans.
+          (while sleep 15; do free -m | awk '/^Mem:/ {m = $3} /^Swap:/ {print m, $3}'; done) > "$RUNNER_TEMP/memory.log" 2>&1 &
+
       - name: Resolve output path
         id: output
         shell: bash
@@ -537,6 +557,12 @@ jobs:
             --local \
             --non-interactive \
             --output=${{ steps.output.outputs.file }}
+
+      - name: Report peak memory
+        if: always() && matrix.platform == 'android'
+        run: |
+          [ -s "$RUNNER_TEMP/memory.log" ] || exit 0
+          awk '{if ($1 > m) m = $1; if ($2 > s) s = $2} END {print "Peak RAM used: " m " MB, peak swap used: " s " MB"}' "$RUNNER_TEMP/memory.log"
 
       - name: Submit build
         working-directory: apps/mobile
