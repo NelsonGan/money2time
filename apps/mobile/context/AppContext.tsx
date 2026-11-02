@@ -39,6 +39,14 @@ import {
 } from '~/features/budget/lib/budgetPeriods';
 import { deletePersonalLedgerRows } from '~/features/cloudSync/services/ledgerChannels';
 import { openLedgerSharedAndActive } from '~/features/cloudSync/services/sharedLedgerStore';
+import {
+  buildInstalmentPlans,
+  frequencyOfSchedule,
+  instalmentPaymentCandidates,
+  instalmentPaymentsKey,
+  type InstalmentProgress,
+  isInstalmentPlan,
+} from '~/features/instalments/lib/instalmentPlan';
 import { computeItemStats } from '~/features/items/utils';
 import {
   buildRefundNote,
@@ -103,6 +111,8 @@ import {
   receiptSplitsRepository,
 } from '~/lib/repositories/receiptSplitsRepository';
 import {
+  type CreatedInstalmentPlan,
+  type CreateInstalmentPlanInput,
   type CreateRecurringRuleInput,
   recurringRulesRepository,
 } from '~/lib/repositories/recurringRulesRepository';
@@ -311,6 +321,15 @@ export interface TransactionsContextValue {
   activeAccountFilter: string | null;
 }
 
+export interface InstalmentPlanUpdate {
+  name?: string;
+  /** Each upcoming payment (the bank's figure); the last one balances. */
+  amount?: number;
+  note?: string | null;
+  accountId?: string;
+  categoryId?: string;
+}
+
 interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccountFilter'> {
   monthlyWages: MonthlyWageSettings[];
 
@@ -378,6 +397,18 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   createRecurringRule: (input: CreateRecurringRuleInput) => void;
   updateRecurringRule: (id: string, updates: Partial<CreateRecurringRuleInput>) => void;
   deleteRecurringRule: (id: string) => void;
+  /** Every instalment plan with its progress: active ones first, by next payment. */
+  instalmentPlans: InstalmentProgress[];
+  /** Saves a plan and makes its first payment when that is already due. */
+  createInstalmentPlan: (input: CreateInstalmentPlanInput) => CreatedInstalmentPlan | null;
+  /** Renames a plan or moves its upcoming payments to another account or category. */
+  updateInstalmentPlan: (id: string, updates: InstalmentPlanUpdate) => void;
+  /** Ends a plan; the payments already made stay unless `removePayments`. */
+  deleteInstalmentPlan: (id: string, removePayments: boolean) => void;
+  /** Makes the next payment today. Returns its id, or null when nothing is left. */
+  payNextInstalment: (id: string) => string | null;
+  /** Pays everything left in one payment today and ends the plan. */
+  payOffInstalmentPlan: (id: string) => string | null;
 
   createCategory: (input: Omit<Category, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>) => void;
   updateCategory: (
@@ -1247,10 +1278,37 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [storedCurrentWage, setCurrentMonthWage] = useState<MonthlyWageSettings | null>(null);
   const [storedWages, setMonthlyWages] = useState<MonthlyWageSettings[]>([]);
   const [accountGroups, setAccountGroups] = useState<AccountGroup[]>([]);
-  const [recurringRules, setRecurringRules] = useState<RecurringTransactionRule[]>([]);
+  // Every rule, plans included. Plans are handed out on their own
+  // (`instalmentPlans`), so `recurringRules` (the Recurring screen, goals,
+  // loans, exports, the web dashboard) only ever sees ordinary rules.
+  const [allRecurringRules, setRecurringRules] = useState<RecurringTransactionRule[]>([]);
+  const recurringRules = useMemo(
+    () => allRecurringRules.filter((rule) => !isInstalmentPlan(rule)),
+    [allRecurringRules],
+  );
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [transactions, setTransactions] = useState<TransactionWithRelations[]>([]);
+  // Plans read the transactions, but they belong on the useApp() value, which
+  // must not change on every transaction write (that would re-render every
+  // consumer and undo the two-context split). So the result is kept, same
+  // reference, until the rules or the payment rows themselves change.
+  const instalmentPlansCacheRef = useRef<{
+    rules: RecurringTransactionRule[];
+    paymentsKey: string;
+    plans: InstalmentProgress[];
+  } | null>(null);
+  const instalmentPlans = useMemo(() => {
+    const payments = instalmentPaymentCandidates(allRecurringRules, transactions);
+    const paymentsKey = instalmentPaymentsKey(payments);
+    const cached = instalmentPlansCacheRef.current;
+    if (cached && cached.rules === allRecurringRules && cached.paymentsKey === paymentsKey) {
+      return cached.plans;
+    }
+    const plans = buildInstalmentPlans(allRecurringRules, payments);
+    instalmentPlansCacheRef.current = { rules: allRecurringRules, paymentsKey, plans };
+    return plans;
+  }, [allRecurringRules, transactions]);
   // Render-synced mirror of `transactions`. Mutation callbacks read it instead
   // of closing over the state value so their identities stay stable across
   // transaction churn — otherwise every write rebuilds the useApp() value and
@@ -2381,6 +2439,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         categoryIcon: catInfo.icon,
         categoryParentId: catInfo.parentId,
         categoryParentName: catInfo.parentName,
+        // Joined from a plan on load; a row made here is never a plan's
+        // payment. Present so the stored row reconciles with this one.
+        instalmentCount: null,
       };
     },
     [accountNameById, categoryRelationInfoById],
@@ -2443,6 +2504,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       };
       const optimistic: TransactionWithRelations = {
         id,
+        instalmentRuleId: null,
+        instalmentNumber: null,
         type: normalizedInput.type,
         amount: normalizedInput.amount,
         currency: normalizedInput.currency,
@@ -2944,6 +3007,72 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [deleteTransactionsBulk],
   );
 
+  const createInstalmentPlan = useCallback(
+    (input: CreateInstalmentPlanInput) => {
+      const created = runMutation(() => recurringRulesRepository.createInstalmentPlan(input));
+      if (created) {
+        void trackEvent(AnalyticsEvents.INSTALMENT_PLAN_CREATED, {
+          payments: Math.trunc(input.count),
+          frequency: frequencyOfSchedule(input.recurrencePattern, input.recurrenceInterval),
+          first_payment_due: created.firstPaymentId !== null,
+          custom_amount: input.regularAmount != null,
+        });
+      }
+      return created;
+    },
+    [runMutation],
+  );
+
+  const updateInstalmentPlan = useCallback(
+    (id: string, updates: InstalmentPlanUpdate) => {
+      runMutation(() => {
+        recurringRulesRepository.update(id, {
+          ...(updates.name !== undefined ? { name: updates.name } : {}),
+          ...(updates.note !== undefined ? { note: updates.note } : {}),
+          ...(updates.accountId ? { accountId: updates.accountId } : {}),
+          ...(updates.categoryId ? { categoryId: updates.categoryId } : {}),
+          // The regular payment from now on; the last one keeps the plan
+          // balanced (`buildInstalmentProgress`).
+          ...(updates.amount !== undefined ? { amount: updates.amount } : {}),
+        });
+      });
+      void trackEvent(AnalyticsEvents.INSTALMENT_PLAN_UPDATED, {
+        amount_changed: updates.amount !== undefined,
+      });
+    },
+    [runMutation],
+  );
+
+  const deleteInstalmentPlan = useCallback(
+    (id: string, removePayments: boolean) => {
+      const paymentIds = runMutation(() => recurringRulesRepository.deleteInstalmentPlan(id));
+      // The payments made are ordinary rows: remove them the normal way.
+      if (removePayments && paymentIds.length > 0) deleteTransactionsBulk(paymentIds);
+      void trackEvent(AnalyticsEvents.INSTALMENT_PLAN_DELETED, {
+        payments_removed: removePayments,
+      });
+    },
+    [deleteTransactionsBulk, runMutation],
+  );
+
+  const payNextInstalment = useCallback(
+    (id: string) => {
+      const paymentId = runMutation(() => recurringRulesRepository.payNextInstalment(id));
+      if (paymentId) void trackEvent(AnalyticsEvents.INSTALMENT_PAYMENT_PAID_EARLY);
+      return paymentId;
+    },
+    [runMutation],
+  );
+
+  const payOffInstalmentPlan = useCallback(
+    (id: string) => {
+      const paymentId = runMutation(() => recurringRulesRepository.payOffInstalmentPlan(id));
+      if (paymentId) void trackEvent(AnalyticsEvents.INSTALMENT_PLAN_PAID_OFF);
+      return paymentId;
+    },
+    [runMutation],
+  );
+
   /**
    * Records that a reimbursement came back, into `accountId`.
    *
@@ -3008,6 +3137,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       const optimisticRefund: TransactionWithRelations = {
         id: refundId,
+        instalmentRuleId: null,
+        instalmentNumber: null,
         dayOrder: null,
         type: 'income',
         amount,
@@ -3191,6 +3322,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       const optimisticTransfers: TransactionWithRelations[] = transfersToCreate.map((t) => ({
         id: t.id,
+        instalmentRuleId: null,
+        instalmentNumber: null,
         dayOrder: null,
         type: 'transfer',
         amount: t.amount,
@@ -3226,6 +3359,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       const optimisticParent: TransactionWithRelations = {
         id: txId,
+        instalmentRuleId: null,
+        instalmentNumber: null,
         dayOrder: null,
         type: normalizedInput.type,
         amount: normalizedInput.amount,
@@ -3479,6 +3614,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           ? null
           : {
               id: transferTxId,
+              instalmentRuleId: null,
+              instalmentNumber: null,
               dayOrder: null,
               type: 'transfer',
               amount: splitAmount,
@@ -5273,6 +5410,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             createRecurringRule,
             updateRecurringRule,
             deleteRecurringRule,
+            instalmentPlans,
+            createInstalmentPlan,
+            updateInstalmentPlan,
+            deleteInstalmentPlan,
+            payNextInstalment,
+            payOffInstalmentPlan,
             createCategory,
             updateCategory,
             deleteCategory,
@@ -5407,6 +5550,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       createRecurringRule,
       updateRecurringRule,
       deleteRecurringRule,
+      instalmentPlans,
+      createInstalmentPlan,
+      updateInstalmentPlan,
+      deleteInstalmentPlan,
+      payNextInstalment,
+      payOffInstalmentPlan,
       createCategory,
       updateCategory,
       deleteCategory,

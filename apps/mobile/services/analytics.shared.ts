@@ -251,6 +251,13 @@ export const GA4_ONLY_EVENTS = {
   RECURRING_RULE_UPDATED: 'Recurring Rule Updated',
   RECURRING_RULE_DELETED: 'Recurring Rule Deleted',
 
+  // Instalment plans (a purchase paid off in parts)
+  INSTALMENT_PLAN_CREATED: 'Instalment Plan Created',
+  INSTALMENT_PLAN_UPDATED: 'Instalment Plan Updated',
+  INSTALMENT_PLAN_DELETED: 'Instalment Plan Deleted',
+  INSTALMENT_PAYMENT_PAID_EARLY: 'Instalment Payment Paid Early',
+  INSTALMENT_PLAN_PAID_OFF: 'Instalment Plan Paid Off',
+
   // Tutorials. `source` says whether a website link or the settings list
   // opened them, which the screen view alone cannot.
   TUTORIAL_LIST_OPENED: 'Tutorial List Opened',
@@ -335,6 +342,7 @@ const FEATURE_BY_EVENT = {
   [POSTHOG_EVENTS.SETTLE_UP_RECEIPT_SHARED]: 'settle_up_share',
   [GA4_ONLY_EVENTS.REIMBURSEMENT_FLAGGED]: 'reimbursements',
   [GA4_ONLY_EVENTS.RECURRING_RULE_CREATED]: 'recurring',
+  [GA4_ONLY_EVENTS.INSTALMENT_PLAN_CREATED]: 'instalments',
   [GA4_ONLY_EVENTS.GOAL_CREATED]: 'goals',
   [GA4_ONLY_EVENTS.LOAN_CREATED]: 'loans',
   [GA4_ONLY_EVENTS.BUDGET_TEMPLATE_CREATED]: 'budgets',

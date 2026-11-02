@@ -860,6 +860,7 @@ describe('toTransactionWithRelationsFromRaw', () => {
     categoryIcon: 'meal',
     categoryParentId: 'c-food',
     categoryParentName: 'Food',
+    instalmentCount: 12,
   };
   const relationValues = [
     RELATIONS.accountName,
@@ -869,6 +870,7 @@ describe('toTransactionWithRelationsFromRaw', () => {
     RELATIONS.categoryIcon,
     RELATIONS.categoryParentId,
     RELATIONS.categoryParentName,
+    RELATIONS.instalmentCount,
   ];
 
   function rawFor(row: Record<string, unknown>) {
@@ -910,6 +912,8 @@ describe('toTransactionWithRelationsFromRaw', () => {
       reimbursementOfId: null,
       countsAsExpense: 1,
       dayOrder: 1234,
+      instalmentRuleId: 'plan1',
+      instalmentNumber: 4,
       ...STAMPS,
     };
     expect(toTransactionWithRelationsFromRaw([...rawFor(row), ...relationValues])).toEqual({
@@ -949,6 +953,8 @@ describe('toTransactionWithRelationsFromRaw', () => {
       reimbursementOfId: null,
       countsAsExpense: 0,
       dayOrder: null,
+      instalmentRuleId: null,
+      instalmentNumber: null,
       ...STAMPS,
     };
     const nullRelations = relationValues.map(() => null);
@@ -961,6 +967,7 @@ describe('toTransactionWithRelationsFromRaw', () => {
       categoryIcon: null,
       categoryParentId: null,
       categoryParentName: null,
+      instalmentCount: null,
     });
   });
 });

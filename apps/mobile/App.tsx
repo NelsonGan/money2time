@@ -97,6 +97,8 @@ import {
   GoalsTabScreen,
 } from '~/features/goals/screens';
 import { InsightsDrilldownScreen, InsightsScreen } from '~/features/insights/screens';
+import { InstalmentPlanScreen } from '~/features/instalments/screens/InstalmentPlanScreen';
+import { InstalmentPlansScreen } from '~/features/instalments/screens/InstalmentPlansScreen';
 import { AssetsTab } from '~/features/items/components';
 import {
   consumePendingItemIconPicker,
@@ -1026,6 +1028,10 @@ function MainShellScreen({
     [openProPaywall],
   );
   const openSettleUp = useCallback(() => navigation.navigate('SettleUp'), [navigation]);
+  const openInstalments = useCallback(
+    () => navigation.navigate('SettingsInstalments'),
+    [navigation],
+  );
   const openTutorials = useCallback(() => {
     void trackEvent(AnalyticsEvents.TUTORIAL_LIST_OPENED, { source: 'settings' });
     navigation.navigate('Tutorials');
@@ -1355,6 +1361,7 @@ function MainShellScreen({
             onOpenWageCalculator={openWageCalculator}
             onOpenProPaywall={openProPaywall}
             onOpenSettleUp={openSettleUp}
+            onOpenInstalments={openInstalments}
             onOpenTutorials={openTutorials}
             onOpenEditTransaction={openTransactionEditor}
             onOpenAddTransaction={openAddTransactionDetailed}
@@ -1516,6 +1523,7 @@ function AddTransactionDetailedRouteScreen({
       initialAccountId={route.params?.initialAccountId}
       initialValues={route.params?.initialValues}
       openSplitBillOnMount={route.params?.openSplitBill}
+      startInstalmentPlan={route.params?.startInstalmentPlan}
     />
   );
 }
@@ -2406,6 +2414,42 @@ function SettingsAccountsRouteScreen({ navigation }: RootStackRouteProps<'Settin
   );
 }
 
+function SettingsInstalmentsRouteScreen({
+  navigation,
+}: RootStackRouteProps<'SettingsInstalments'>) {
+  const { instalmentPlans } = useApp();
+  const { checkLimit } = useProGate();
+  return (
+    <InstalmentPlansScreen
+      onBack={() => navigation.goBack()}
+      onOpenPlan={(planId) => navigation.navigate('InstalmentPlan', { planId })}
+      onAddPlan={() => {
+        const active = instalmentPlans.filter((plan) => !plan.complete).length;
+        if (!checkLimit('instalments', active)) return;
+        navigation.navigate('AddTransactionDetailed', {
+          startInstalmentPlan: true,
+          keepCurrentTab: true,
+        });
+      }}
+      useNativeBackGesture
+    />
+  );
+}
+
+function InstalmentPlanRouteScreen({ route, navigation }: RootStackRouteProps<'InstalmentPlan'>) {
+  const goBack = useCallback(() => {
+    if (navigation.canGoBack()) navigation.goBack();
+  }, [navigation]);
+  return (
+    <InstalmentPlanScreen
+      planId={route.params.planId}
+      onBack={goBack}
+      onOpenPayment={(transactionId) => navigation.navigate('EditTransaction', { transactionId })}
+      useNativeBackGesture
+    />
+  );
+}
+
 function SettingsRecurringRouteScreen({ navigation }: RootStackRouteProps<'SettingsRecurring'>) {
   return (
     <RecurringScreen
@@ -3104,6 +3148,11 @@ function AppContent() {
             <RootStack.Screen name="CategoryEditor" component={CategoryEditorRouteScreen} />
             <RootStack.Screen name="SettingsAccounts" component={SettingsAccountsRouteScreen} />
             <RootStack.Screen name="SettingsRecurring" component={SettingsRecurringRouteScreen} />
+            <RootStack.Screen
+              name="SettingsInstalments"
+              component={SettingsInstalmentsRouteScreen}
+            />
+            <RootStack.Screen name="InstalmentPlan" component={InstalmentPlanRouteScreen} />
             <RootStack.Screen
               name="SettingsHourlyValue"
               component={SettingsHourlyValueRouteScreen}

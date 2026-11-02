@@ -71,12 +71,23 @@ import {
   SubscriptionLogo,
   Text,
 } from '~/components/ui';
+import { ClayIcon } from '~/components/ui/ClayIcon';
 import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { hasSubscriptionLogoArt } from '~/components/ui/SubscriptionLogo';
 import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
 import { getSubscriptionLogoMeta, suggestSubscriptionLogo } from '~/constants/subscriptionLogos';
 import { useApp } from '~/context/AppContext';
 import { useSetSplitBillSession } from '~/context/SplitBillSession';
+import {
+  describeInstalmentChoice,
+  type InstalmentChoice,
+  InstalmentSheet,
+} from '~/features/instalments/components/InstalmentSheet';
+import { formatPlanDay } from '~/features/instalments/lib/format';
+import {
+  canSplitInstalments,
+  isRegularAmountValid,
+} from '~/features/instalments/lib/instalmentPlan';
 import {
   NumpadPanel,
   ReceiptViewerModal,
@@ -121,6 +132,7 @@ import { getErrorMessage } from '~/utils/errorHandling';
 import {
   amountToHoursByRate,
   dayKeyFromIsoLocal,
+  formatAmount,
   formatHours,
   normalizeMoneyAmount,
 } from '~/utils/formatters';
@@ -336,6 +348,8 @@ const styles = StyleSheet.create({
   },
 });
 
+/** How long a sheet takes to fade out before the next modal can open over it. */
+const MODAL_HANDOFF_MS = 320;
 interface TransactionEditorInitialValues {
   type: TransactionType;
   amount: string;
@@ -410,6 +424,23 @@ interface TransactionEditorScreenProps {
         isActive: boolean;
         logoId: string | null;
       };
+    }) => void;
+  };
+  /** A line under the header that links somewhere (a payment's instalment plan). */
+  headerNotice?: { label: string; actionLabel: string; onPress: () => void };
+  /**
+   * Offers "pay in instalments" on a new expense: the amount becomes the
+   * total, and saving hands the form and the chosen plan here instead of
+   * creating one transaction.
+   */
+  instalmentOptions?: {
+    /** Start with this plan chosen (Settings › Instalments' add button). */
+    initialChoice?: InstalmentChoice | null;
+    /** Asked before a new plan is started; false stops it (the free-plan limit). */
+    canStart?: () => boolean;
+    onSubmitPlan: (payload: {
+      transaction: CreateTransactionInput;
+      choice: InstalmentChoice;
     }) => void;
   };
 }
@@ -630,6 +661,8 @@ export function TransactionEditorScreen({
   openSplitBillOnMount = false,
   initialAccountId,
   recurringOptions,
+  instalmentOptions,
+  headerNotice,
 }: TransactionEditorScreenProps) {
   const {
     accounts,
@@ -951,6 +984,15 @@ export function TransactionEditorScreen({
   const startsAsUnsettledSplitBill =
     !!initialSplits && initialSplits.some((s) => !s.isSelf && !s.paid && Number(s.amount) > 0);
   const [splitMode, setSplitMode] = useState(hasInitialSplits);
+  // The instalment plan chosen for this new expense, or null for an ordinary
+  // one. Kept while the type changes so switching back restores it.
+  const [instalmentChoice, setInstalmentChoice] = useState<InstalmentChoice | null>(
+    instalmentOptions?.initialChoice ?? null,
+  );
+  const [instalmentSheetVisible, setInstalmentSheetVisible] = useState(false);
+  // The sheet's choice while its "First payment" row has the date picker
+  // open: the sheet comes back to it once a date is picked.
+  const [instalmentDraft, setInstalmentDraft] = useState<InstalmentChoice | null>(null);
   const [splits, setSplits] = useState<SplitDraft[]>(initialSplits ?? []);
   const [splitEvenly, setSplitEvenly] = useState(!hasInitialSplits);
   // Whether the pushed Split Bill route is open. Drives the live session
@@ -1640,7 +1682,18 @@ export function TransactionEditorScreen({
   // itemized mode and the amount is derived from the rows on Done. The
   // account/category can be filled in afterwards, and each split row carries
   // its own payback account.
-  const canOpenSplitBill = !hideSplitMode && type === 'expense' && !recurringOptions;
+  // "Pay in instalments" is offered on a new expense only, and never alongside
+  // a split bill: a plan's payments are the user's own.
+  const instalmentsOffered =
+    !!instalmentOptions &&
+    mode === 'create' &&
+    type === 'expense' &&
+    !recurringOptions &&
+    !onSubmitConfirmed;
+  const instalmentActive = instalmentsOffered && instalmentChoice !== null;
+  const hasFriendSplits = splitMode && splits.some((s) => !s.isSelf);
+  const canOpenSplitBill =
+    !hideSplitMode && type === 'expense' && !recurringOptions && !instalmentActive;
 
   // Snapshot taken when the modal opens so the user can discard everything
   // (edits + Mark Paid + new rows + split-evenly toggle) by tapping back.
@@ -2038,7 +2091,8 @@ export function TransactionEditorScreen({
     // Two explicit save actions drive this: "Add" (bulk = false, closes) and
     // "Add" + bulk icon (bulk = true, stays open). Falls back to the persisted
     // pref for the recurring editor's single Save button.
-    const bulk = bulkOverride ?? bulkCreateEnabled;
+    // A plan is one save: the form closes after it, whatever bulk mode says.
+    const bulk = !instalmentActive && (bulkOverride ?? bulkCreateEnabled);
     const numericAmount = onSubmitConfirmed ? Number(amount) : normalizeMoneyAmount(Number(amount));
     const amountDraft = amount.trim();
     const normalizedNote = note.trim();
@@ -2235,6 +2289,61 @@ export function TransactionEditorScreen({
         submitPayload = null; // handled by recurringSubmit
       }
 
+      // An expense paid in instalments is saved as a plan: the amount is its
+      // total and the date its first payment. Handed off the same way as a
+      // recurring rule.
+      if (
+        instalmentActive &&
+        instalmentChoice &&
+        instalmentOptions &&
+        submitPayload &&
+        submitPayload.type === 'expense'
+      ) {
+        const capturedPayload = submitPayload;
+        const capturedChoice = instalmentChoice;
+        // The bank's amount set in the sheet must still fit the total, which
+        // may have changed since.
+        if (
+          capturedChoice.amount != null &&
+          canSplitInstalments(capturedPayload.amount, capturedChoice.count) &&
+          !isRegularAmountValid(capturedPayload.amount, capturedChoice.count, capturedChoice.amount)
+        ) {
+          showToast(I18n.t('instalments.amount_too_large'));
+          setInstalmentSheetVisible(true);
+          return;
+        }
+        if (!canSplitInstalments(capturedPayload.amount, capturedChoice.count)) {
+          const message =
+            capturedPayload.amount > 0
+              ? I18n.t('instalments.total_too_small', { count: capturedChoice.count })
+              : I18n.t('instalments.enter_total_first');
+          setFieldErrors({ amount: message });
+          showToast(message);
+          activateField('amount');
+          return;
+        }
+        // A receipt, the longer note and the reimbursement tick belong to one
+        // real payment: the first, made at once. A plan that starts later has
+        // nowhere to keep them. The mood is not kept either, but it starts as
+        // neutral and is not worth stopping the save for.
+        const firstPaymentLater = new Date(capturedPayload.date).getTime() > Date.now();
+        if (
+          firstPaymentLater &&
+          (capturedPayload.receiptUri ||
+            capturedPayload.reimbursable ||
+            capturedPayload.details?.trim())
+        ) {
+          showToast(I18n.t('instalments.extras_need_today'));
+          return;
+        }
+        // Jump the list to the first payment only when it exists.
+        preparedSubmitPayload = firstPaymentLater ? null : capturedPayload;
+        recurringSubmit = () => {
+          instalmentOptions.onSubmitPlan({ transaction: capturedPayload, choice: capturedChoice });
+        };
+        submitPayload = null;
+      }
+
       if (preparedSubmitPayload) {
         onSubmitReady?.(preparedSubmitPayload);
       }
@@ -2388,9 +2497,39 @@ export function TransactionEditorScreen({
   // when editing (honours an explicit override either way).
   const saveLabel =
     submitLabelOverride ??
-    (mode === 'create'
-      ? I18n.t('transactions.editor.title_create')
-      : I18n.t('transactions.editor.title_edit'));
+    (instalmentActive && instalmentChoice
+      ? I18n.t('instalments.add_payments', { count: instalmentChoice.count })
+      : mode === 'create'
+        ? I18n.t('transactions.editor.title_create')
+        : I18n.t('transactions.editor.title_edit'));
+  // The plan in a line under the total: "RM200.00/mo · until Oct 2, 2027".
+  const instalmentTotal = Number(amount);
+  const instalmentFirstIso = toUtcIsoFromLocalDateInput(date) ?? new Date().toISOString();
+  const instalmentSummary =
+    instalmentActive && instalmentChoice && Number.isFinite(instalmentTotal) && instalmentTotal > 0
+      ? (() => {
+          const plan = describeInstalmentChoice(
+            instalmentChoice,
+            instalmentTotal,
+            instalmentFirstIso,
+          );
+          return I18n.t(`instalments.summary_line.${instalmentChoice.frequency}`, {
+            amount: formatAmount(plan.regular, settings, { currencyCode: entryCurrency }),
+            end: formatPlanDay(plan.lastDate),
+          });
+        })()
+      : null;
+  // Back to the sheet when its "First payment" row opened the date picker.
+  const reopenInstalmentSheet = () => {
+    if (!instalmentDraft) return;
+    setTimeout(() => setInstalmentSheetVisible(true), MODAL_HANDOFF_MS);
+  };
+  const openInstalmentSheet = () => {
+    if (!instalmentChoice && instalmentOptions?.canStart && !instalmentOptions.canStart()) return;
+    void triggerHaptic('selection');
+    Keyboard.dismiss();
+    setInstalmentSheetVisible(true);
+  };
   const summaryFlex = windowHeight < 650 ? 0.38 : windowHeight < 750 ? 0.42 : 0.46;
   const isRecurringEditor = Boolean(recurringOptions);
   const showSubtitle = Boolean(subtitle) && isRecurringEditor;
@@ -4054,6 +4193,32 @@ export function TransactionEditorScreen({
             </View>
           </View>
 
+          {headerNotice ? (
+            <View className="px-4 pb-2">
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  headerNotice.onPress();
+                }}
+                accessibilityRole="button"
+                className="flex-row items-center gap-2 rounded-2xl border border-primary/25 bg-primary/10 px-3.5 py-2.5 active:opacity-70"
+              >
+                <ClayIcon
+                  name="settings/instalments"
+                  size={18}
+                  flatSize={15}
+                  flatColor={themeColors.primary}
+                />
+                <Text variant="caption" tone="primary" numberOfLines={1} className="flex-1">
+                  {headerNotice.label}
+                </Text>
+                <Text variant="caption" tone="primary" className="font-bold">
+                  {headerNotice.actionLabel}
+                </Text>
+              </Pressable>
+            </View>
+          ) : null}
+
           {showTypeSelector && !useTypeTabs ? (
             <View
               className="px-4 pb-2"
@@ -4214,6 +4379,46 @@ export function TransactionEditorScreen({
                   <ChevronDown size={12} color={themeColors.textMuted} />
                 </Pressable>
               ) : null}
+              {instalmentsOffered ? (
+                <Pressable
+                  onPress={openInstalmentSheet}
+                  disabled={hasFriendSplits}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: instalmentActive, disabled: hasFriendSplits }}
+                  accessibilityLabel={
+                    instalmentActive && instalmentChoice
+                      ? I18n.t(`instalments.chip_active.${instalmentChoice.frequency}`, {
+                          count: instalmentChoice.count,
+                        })
+                      : I18n.t('instalments.chip_label')
+                  }
+                  className={cn(
+                    'h-9 flex-row items-center gap-1.5 rounded-full border px-3 active:opacity-70',
+                    instalmentActive
+                      ? 'border-primary/40 bg-primary/15'
+                      : 'border-border/30 bg-secondary/60',
+                  )}
+                  style={{ opacity: hasFriendSplits ? 0.4 : 1 }}
+                >
+                  <ClayIcon
+                    name="settings/instalments"
+                    size={18}
+                    flatSize={15}
+                    flatColor={instalmentActive ? themeColors.primary : themeColors.textMuted}
+                  />
+                  <Text
+                    variant="caption"
+                    numberOfLines={1}
+                    className={instalmentActive ? 'text-primary' : ''}
+                  >
+                    {instalmentActive && instalmentChoice
+                      ? I18n.t(`instalments.chip_active.${instalmentChoice.frequency}`, {
+                          count: instalmentChoice.count,
+                        })
+                      : I18n.t('instalments.chip_label')}
+                  </Text>
+                </Pressable>
+              ) : null}
               {showSplitButton ? (
                 <Pressable
                   onPress={() => handleOpenSplitBill()}
@@ -4346,6 +4551,18 @@ export function TransactionEditorScreen({
                       </Text>
                       {workTimeNudgeParts.after}
                     </Text>
+                  ) : null}
+                  {instalmentSummary ? (
+                    <Pressable
+                      onPress={openInstalmentSheet}
+                      hitSlop={6}
+                      accessibilityRole="button"
+                      className="active:opacity-70"
+                    >
+                      <Text variant="caption" tone="primary" numberOfLines={1}>
+                        {instalmentSummary}
+                      </Text>
+                    </Pressable>
                   ) : null}
                 </View>
                 {showCurrencyButton || transferReceivedLabel || reportingEquivLabel ? (
@@ -4697,7 +4914,7 @@ export function TransactionEditorScreen({
                   className="flex-row gap-2.5 px-4 pt-2"
                   style={{ paddingBottom: numpadFooterBottomPad }}
                 >
-                  {showBulkToggle ? (
+                  {showBulkToggle && !instalmentActive ? (
                     <Pressable
                       onPress={() => {
                         void handleSubmit(true);
@@ -4865,11 +5082,53 @@ export function TransactionEditorScreen({
         onCrop={handleCropReceipt}
         onRemove={handleRemoveReceipt}
       />
+      {instalmentsOffered ? (
+        <InstalmentSheet
+          visible={instalmentSheetVisible}
+          value={instalmentChoice}
+          total={Number.isFinite(instalmentTotal) ? instalmentTotal : 0}
+          currency={entryCurrency}
+          firstPaymentIso={instalmentFirstIso}
+          draft={instalmentDraft}
+          onApply={(choice) => {
+            setInstalmentChoice(choice);
+            setInstalmentDraft(null);
+            setInstalmentSheetVisible(false);
+          }}
+          onRemove={() => {
+            void triggerHaptic('selection');
+            setInstalmentChoice(null);
+            setInstalmentDraft(null);
+            setInstalmentSheetVisible(false);
+          }}
+          onClose={() => {
+            setInstalmentDraft(null);
+            setInstalmentSheetVisible(false);
+          }}
+          onSetTotal={(nextTotal) => {
+            setAmount(formatMoney(nextTotal));
+            setAmountExpression('');
+          }}
+          onPickFirstPayment={(choice) => {
+            setInstalmentDraft(choice);
+            setInstalmentSheetVisible(false);
+            // After the sheet has faded out: iOS will not present a second
+            // modal while the first is still dismissing.
+            setTimeout(() => activateField('date'), MODAL_HANDOFF_MS);
+          }}
+        />
+      ) : null}
       <DatePickerModal
         visible={activeField === 'date'}
         value={date}
-        onSelect={handleDateSelect}
-        onClose={clearActiveField}
+        onSelect={(selected) => {
+          handleDateSelect(selected);
+          reopenInstalmentSheet();
+        }}
+        onClose={() => {
+          clearActiveField();
+          reopenInstalmentSheet();
+        }}
       />
       <DatePickerModal
         visible={activeField === 'endDate'}

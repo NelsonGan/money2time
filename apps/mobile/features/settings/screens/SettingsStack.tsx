@@ -75,6 +75,7 @@ interface SettingsStackProps {
   /** `source` names the entry point, for the paywall funnel's attribution. */
   onOpenProPaywall: (source: string) => void;
   onOpenSettleUp: () => void;
+  onOpenInstalments: () => void;
   onOpenTutorials: () => void;
   onOpenEditTransaction: (transaction: TransactionWithRelations) => void;
   onOpenAddTransaction: () => void;
@@ -95,11 +96,13 @@ function SettingsHomeRoute({
   scrollToTopToken,
   onOpenProPaywall,
   onOpenSettleUp,
+  onOpenInstalments,
   onOpenTutorials,
 }: SettingsStackRouteProps<'SettingsHome'> & {
   scrollToTopToken: number;
   onOpenProPaywall: (source: string) => void;
   onOpenSettleUp: () => void;
+  onOpenInstalments: () => void;
   onOpenTutorials: () => void;
 }) {
   return (
@@ -114,6 +117,7 @@ function SettingsHomeRoute({
       onOpenExchangeRates={() => navigation.navigate('ExchangeRates')}
       onOpenCategories={() => navigation.navigate('Categories')}
       onOpenRecurring={() => navigation.navigate('Recurring')}
+      onOpenInstalments={onOpenInstalments}
       onOpenNotifications={() => navigation.navigate('Notifications')}
       onOpenDataManagement={() => navigation.navigate('DataManagement')}
       onOpenWebDashboard={() => navigation.navigate('WebDashboard')}
@@ -156,6 +160,7 @@ export function SettingsStack({
   onOpenWageCalculator,
   onOpenProPaywall,
   onOpenSettleUp,
+  onOpenInstalments,
   onOpenTutorials,
   onOpenEditTransaction,
   onOpenAddTransaction,
@@ -234,6 +239,7 @@ export function SettingsStack({
               scrollToTopToken={scrollToTopToken}
               onOpenProPaywall={onOpenProPaywall}
               onOpenSettleUp={onOpenSettleUp}
+              onOpenInstalments={onOpenInstalments}
               onOpenTutorials={onOpenTutorials}
             />
           );

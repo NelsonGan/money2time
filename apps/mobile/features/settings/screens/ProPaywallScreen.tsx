@@ -435,6 +435,11 @@ function useCompareRows(voiceSupported: boolean): CompareRow[] {
         pro: UNLIMITED,
       },
       {
+        label: I18n.t('pro.instalments_label'),
+        free: String(PRO_LIMITS.FREE_MAX_INSTALMENT_PLANS),
+        pro: UNLIMITED,
+      },
+      {
         label: I18n.t('pro.hourly_income_label'),
         free: String(PRO_LIMITS.FREE_MAX_WAGE_ENTRIES),
         pro: UNLIMITED,
