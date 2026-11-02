@@ -1771,7 +1771,6 @@ const nl = {
     status_skipped: 'Overgeslagen',
     paid_of: '{{paid}}/{{count}}',
     next_payment: 'Volgende termijn',
-    all_paid: 'Alles betaald',
     pay_early_title: '{{amount}} nu betalen?',
     pay_early_message:
       'Deze termijn wordt vandaag toegevoegd en het plan gaat door naar de volgende.',

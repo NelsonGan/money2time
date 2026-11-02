@@ -1761,7 +1761,6 @@ const ru = {
     status_skipped: 'Пропущено',
     paid_of: '{{paid}}/{{count}}',
     next_payment: 'Следующий платёж',
-    all_paid: 'Всё оплачено',
     pay_early_title: 'Оплатить {{amount}} сейчас?',
     pay_early_message: 'Платёж будет добавлен сегодня, и рассрочка перейдёт к следующему.',
     pay_now: 'Оплатить',

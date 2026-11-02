@@ -1775,7 +1775,6 @@ const de = {
     status_skipped: 'Übersprungen',
     paid_of: '{{paid}}/{{count}}',
     next_payment: 'Nächste Rate',
-    all_paid: 'Alles bezahlt',
     pay_early_title: '{{amount}} jetzt zahlen?',
     pay_early_message: 'Diese Rate wird heute eingetragen, und der Plan geht zur nächsten über.',
     pay_now: 'Jetzt zahlen',

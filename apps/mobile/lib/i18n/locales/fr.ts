@@ -1772,7 +1772,6 @@ const fr = {
     status_skipped: 'Ignorée',
     paid_of: '{{paid}}/{{count}}',
     next_payment: 'Prochaine échéance',
-    all_paid: 'Tout payé',
     pay_early_title: 'Payer {{amount}} maintenant ?',
     pay_early_message: "Cette échéance est ajoutée aujourd'hui, et le plan passe à la suivante.",
     pay_now: 'Payer maintenant',

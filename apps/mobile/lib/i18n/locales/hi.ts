@@ -1749,7 +1749,6 @@ const hi = {
     status_skipped: 'छोड़ी गई',
     paid_of: '{{paid}}/{{count}}',
     next_payment: 'अगली किस्त',
-    all_paid: 'सब चुकता',
     pay_early_title: 'अभी {{amount}} चुकाएँ?',
     pay_early_message: 'यह किस्त आज जोड़ी जाएगी, और प्लान अगली किस्त पर चला जाएगा।',
     pay_now: 'अभी चुकाएँ',

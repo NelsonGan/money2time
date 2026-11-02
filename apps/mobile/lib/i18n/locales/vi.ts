@@ -1742,7 +1742,6 @@ const vi = {
     status_skipped: 'Đã bỏ qua',
     paid_of: '{{paid}}/{{count}}',
     next_payment: 'Kỳ tiếp theo',
-    all_paid: 'Đã trả hết',
     pay_early_title: 'Trả {{amount}} ngay?',
     pay_early_message: 'Kỳ này được ghi hôm nay, và khoản trả góp chuyển sang kỳ tiếp theo.',
     pay_now: 'Trả ngay',

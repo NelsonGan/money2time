@@ -1766,7 +1766,6 @@ const tr = {
     status_skipped: 'Atlandı',
     paid_of: '{{paid}}/{{count}}',
     next_payment: 'Sonraki taksit',
-    all_paid: 'Tümü ödendi',
     pay_early_title: '{{amount}} şimdi ödensin mi?',
     pay_early_message: 'Bu taksit bugün eklenir ve plan bir sonrakine geçer.',
     pay_now: 'Şimdi öde',

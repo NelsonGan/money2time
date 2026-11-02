@@ -1756,7 +1756,6 @@ const nb = {
     status_skipped: 'Hoppet over',
     paid_of: '{{paid}}/{{count}}',
     next_payment: 'Neste avdrag',
-    all_paid: 'Alt betalt',
     pay_early_title: 'Betale {{amount}} nå?',
     pay_early_message: 'Dette avdraget legges til i dag, og planen går videre til det neste.',
     pay_now: 'Betal nå',

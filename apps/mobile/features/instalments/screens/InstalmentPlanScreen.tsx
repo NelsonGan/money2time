@@ -167,13 +167,15 @@ export function InstalmentPlanScreen({
               <Text variant="title" tone={plan.complete ? 'success' : 'default'}>
                 {plan.complete ? money(plan.paidAmount) : money(plan.leftAmount)}
               </Text>
-              <Text variant="body" tone="muted">
-                {plan.complete
-                  ? plan.paidCount === plan.entries.length
-                    ? I18n.t('instalments.all_paid')
-                    : I18n.t('instalments.section_finished')
-                  : I18n.t('instalments.left_label')}
-              </Text>
+              {/* Fully paid needs no words: the green total and full bar say it.
+                  A plan that ended with payments skipped says it finished. */}
+              {plan.complete && plan.paidCount === plan.entries.length ? null : (
+                <Text variant="body" tone="muted">
+                  {plan.complete
+                    ? I18n.t('instalments.section_finished')
+                    : I18n.t('instalments.left_label')}
+                </Text>
+              )}
             </View>
             <View className="self-stretch">
               <InstalmentProgressBar plan={plan} />
@@ -493,23 +495,23 @@ function InstalmentPlanEditSheet({
                     <Text variant="body" tone="muted">
                       {I18n.t('instalments.payment_amount')}
                     </Text>
-                    <TextInput
-                      value={amountText}
-                      onChangeText={setAmountText}
-                      keyboardType="decimal-pad"
-                      selectTextOnFocus
-                      style={[SINGLE_LINE_TEXT_INPUT_STYLE, { color: themeColors.text }]}
-                      className="h-12 flex-1 text-right text-[16px]"
-                      accessibilityLabel={I18n.t('instalments.payment_amount')}
-                    />
-                    {/* What the last payment becomes, right beside the amount. */}
-                    {amountValid && newLast != null ? (
-                      <View className="rounded-full bg-secondary/70 px-2 py-0.5">
-                        <Text variant="caption" tone="muted" numberOfLines={1}>
+                    {/* The amount, with what the last payment becomes under it. */}
+                    <View className="flex-1 items-end py-1.5">
+                      <TextInput
+                        value={amountText}
+                        onChangeText={setAmountText}
+                        keyboardType="decimal-pad"
+                        selectTextOnFocus
+                        style={[SINGLE_LINE_TEXT_INPUT_STYLE, { color: themeColors.text }]}
+                        className="h-9 self-stretch text-right text-[16px]"
+                        accessibilityLabel={I18n.t('instalments.payment_amount')}
+                      />
+                      {amountValid && newLast != null ? (
+                        <Text variant="caption" tone="primary" numberOfLines={1}>
                           {I18n.t('instalments.last_amount', { amount: money(newLast) })}
                         </Text>
-                      </View>
-                    ) : null}
+                      ) : null}
+                    </View>
                   </View>
                 ) : null}
               </View>

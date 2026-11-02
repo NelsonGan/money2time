@@ -1732,7 +1732,6 @@ const ko = {
     status_skipped: '건너뜀',
     paid_of: '{{paid}}/{{count}}',
     next_payment: '다음 납부',
-    all_paid: '모두 납부',
     pay_early_title: '지금 {{amount}} 납부할까요?',
     pay_early_message: '이 회차가 오늘 날짜로 추가되고 다음 회차로 넘어갑니다.',
     pay_now: '지금 납부',

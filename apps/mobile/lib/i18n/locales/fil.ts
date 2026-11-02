@@ -1778,7 +1778,6 @@ const fil = {
     status_skipped: 'Nilaktawan',
     paid_of: '{{paid}}/{{count}}',
     next_payment: 'Susunod na hulog',
-    all_paid: 'Bayad lahat',
     pay_early_title: 'Bayaran ang {{amount}} ngayon?',
     pay_early_message:
       'Idadagdag ang hulog na ito ngayong araw, at lilipat ang hulugan sa susunod.',

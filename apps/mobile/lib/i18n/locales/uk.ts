@@ -1755,7 +1755,6 @@ const uk = {
     status_skipped: 'Пропущено',
     paid_of: '{{paid}}/{{count}}',
     next_payment: 'Наступний платіж',
-    all_paid: 'Усе сплачено',
     pay_early_title: 'Сплатити {{amount}} зараз?',
     pay_early_message: 'Платіж буде додано сьогодні, і розстрочка перейде до наступного.',
     pay_now: 'Сплатити',

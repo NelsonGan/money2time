@@ -1726,7 +1726,6 @@ const th = {
     status_skipped: 'ข้ามแล้ว',
     paid_of: '{{paid}}/{{count}}',
     next_payment: 'งวดถัดไป',
-    all_paid: 'จ่ายครบแล้ว',
     pay_early_title: 'จ่าย {{amount}} ตอนนี้เลยไหม?',
     pay_early_message: 'งวดนี้จะถูกบันทึกวันนี้ และแผนจะไปต่อที่งวดถัดไป',
     pay_now: 'จ่ายเลย',

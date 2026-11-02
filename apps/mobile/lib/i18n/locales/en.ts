@@ -1726,7 +1726,6 @@ const en = {
     status_skipped: 'Skipped',
     paid_of: '{{paid}}/{{count}}',
     next_payment: 'Next payment',
-    all_paid: 'All paid',
     pay_early_title: 'Pay {{amount}} now?',
     pay_early_message: 'This payment is added today, and the plan moves on to the next one.',
     pay_now: 'Pay now',

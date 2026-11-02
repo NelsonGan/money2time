@@ -1763,7 +1763,6 @@ const id = {
     status_skipped: 'Dilewati',
     paid_of: '{{paid}}/{{count}}',
     next_payment: 'Pembayaran berikutnya',
-    all_paid: 'Lunas semua',
     pay_early_title: 'Bayar {{amount}} sekarang?',
     pay_early_message:
       'Pembayaran ini dicatat hari ini, dan cicilan lanjut ke pembayaran berikutnya.',

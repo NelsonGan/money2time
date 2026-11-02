@@ -1755,7 +1755,6 @@ const sv = {
     status_skipped: 'Hoppades över',
     paid_of: '{{paid}}/{{count}}',
     next_payment: 'Nästa betalning',
-    all_paid: 'Allt betalt',
     pay_early_title: 'Betala {{amount}} nu?',
     pay_early_message: 'Betalningen läggs till i dag och planen går vidare till nästa.',
     pay_now: 'Betala nu',

@@ -1761,7 +1761,6 @@ const it = {
     status_skipped: 'Saltata',
     paid_of: '{{paid}}/{{count}}',
     next_payment: 'Prossima rata',
-    all_paid: 'Tutto pagato',
     pay_early_title: 'Pagare {{amount}} ora?',
     pay_early_message: 'Questa rata viene aggiunta oggi e il piano passa alla successiva.',
     pay_now: 'Paga ora',

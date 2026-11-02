@@ -1671,7 +1671,6 @@ const zh = {
     status_skipped: '已跳过',
     paid_of: '{{paid}}/{{count}}',
     next_payment: '下期还款',
-    all_paid: '已全部还清',
     pay_early_title: '现在还 {{amount}}？',
     pay_early_message: '这期款项会记在今天，分期将转到下一期。',
     pay_now: '立即还款',

@@ -1747,7 +1747,6 @@ const ja = {
     status_skipped: 'スキップ',
     paid_of: '{{paid}}/{{count}}',
     next_payment: '次回の支払い',
-    all_paid: '支払い完了',
     pay_early_title: '{{amount}} を今支払いますか？',
     pay_early_message: 'この支払いは今日の日付で追加され、プランは次の回へ進みます。',
     pay_now: '今すぐ支払う',

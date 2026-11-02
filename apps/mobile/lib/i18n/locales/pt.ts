@@ -1764,7 +1764,6 @@ const pt = {
     status_skipped: 'Pulada',
     paid_of: '{{paid}}/{{count}}',
     next_payment: 'Próxima parcela',
-    all_paid: 'Tudo pago',
     pay_early_title: 'Pagar {{amount}} agora?',
     pay_early_message: 'Esta parcela é lançada hoje e o parcelamento passa para a próxima.',
     pay_now: 'Pagar agora',

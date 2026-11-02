@@ -1767,7 +1767,6 @@ const ms = {
     status_skipped: 'Dilangkau',
     paid_of: '{{paid}}/{{count}}',
     next_payment: 'Bayaran seterusnya',
-    all_paid: 'Semua dibayar',
     pay_early_title: 'Bayar {{amount}} sekarang?',
     pay_early_message: 'Bayaran ini ditambah hari ini, dan pelan beralih ke bayaran seterusnya.',
     pay_now: 'Bayar sekarang',

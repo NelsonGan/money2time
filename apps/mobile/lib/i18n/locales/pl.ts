@@ -1761,7 +1761,6 @@ const pl = {
     status_skipped: 'Pominięta',
     paid_of: '{{paid}}/{{count}}',
     next_payment: 'Następna rata',
-    all_paid: 'Wszystko spłacone',
     pay_early_title: 'Zapłacić {{amount}} teraz?',
     pay_early_message: 'Ta rata zostanie dodana dzisiaj, a plan przejdzie do następnej.',
     pay_now: 'Zapłać teraz',

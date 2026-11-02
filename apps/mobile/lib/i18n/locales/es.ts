@@ -1763,7 +1763,6 @@ const es = {
     status_skipped: 'Omitida',
     paid_of: '{{paid}}/{{count}}',
     next_payment: 'Próxima cuota',
-    all_paid: 'Todo pagado',
     pay_early_title: '¿Pagar {{amount}} ahora?',
     pay_early_message: 'Esta cuota se añade hoy y el plan pasa a la siguiente.',
     pay_now: 'Pagar ahora',

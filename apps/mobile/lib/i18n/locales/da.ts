@@ -1757,7 +1757,6 @@ const da = {
     status_skipped: 'Sprunget over',
     paid_of: '{{paid}}/{{count}}',
     next_payment: 'Næste afdrag',
-    all_paid: 'Alt betalt',
     pay_early_title: 'Betal {{amount}} nu?',
     pay_early_message: 'Dette afdrag tilføjes i dag, og planen går videre til det næste.',
     pay_now: 'Betal nu',
