@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useSyncExternalStore } from 'react';
-import { Alert, Pressable, Switch, View } from 'react-native';
+import { Alert, Platform, Pressable, Switch, View } from 'react-native';
 
 import {
   Button,
@@ -253,6 +253,11 @@ function NotificationAiSettingsSheet({
               </Text>
             </Pressable>
           </View>
+        ) : null}
+        {Platform.OS === 'ios' ? (
+          <Text variant="caption" tone="muted">
+            {I18n.t('payment_alerts.ai_no_account_ios')}
+          </Text>
         ) : null}
       </View>
       <View className="px-5 pb-5 pt-2">

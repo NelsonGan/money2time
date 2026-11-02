@@ -3228,6 +3228,7 @@ const es = {
     review_banner_single: '1 notificación por revisar',
     review_amount_hint: 'Elige o introduce el importe',
     review_missing: 'A algunos elementos aún les falta el importe o la cuenta.',
+    review_choose_account: 'Elige una cuenta',
     review_save_error: 'No se pudo guardar. Tus elementos sin terminar siguen aquí.',
     review_leave_title: '¿Ignorar las notificaciones sin terminar?',
     review_leave_body: 'Si sales, se ignorarán las %{count} notificaciones sin terminar.',
@@ -3265,6 +3266,8 @@ const es = {
     ai_undo_edited_body: 'La editaste después de registrarse. Deshacer la eliminará.',
     ai_hint_expense: 'Sugerencia: gasto',
     ai_hint_income: 'Sugerencia: ingreso',
+    ai_no_account_ios:
+      'Elige una cuenta en tu atajo Log Notification para que la revisión automática registre sus notificaciones. Sin una, esperan aquí con una sugerencia.',
     ai_reason_otp: 'Código de seguridad',
     ai_reason_promotion: 'Promoción',
     ai_reason_balance: 'Saldo o recordatorio',

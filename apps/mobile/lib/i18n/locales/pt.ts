@@ -3221,6 +3221,7 @@ const pt = {
     review_banner_single: '1 notificação para revisar',
     review_amount_hint: 'Escolha ou digite o valor',
     review_missing: 'Alguns itens ainda precisam de valor ou conta.',
+    review_choose_account: 'Escolher uma conta',
     review_save_error: 'Não foi possível salvar. Seus itens pendentes continuam aqui.',
     review_leave_title: 'Ignorar notificações pendentes?',
     review_leave_body: 'Ao sair, as %{count} notificações pendentes serão ignoradas.',
@@ -3258,6 +3259,8 @@ const pt = {
     ai_undo_edited_body: 'Você o editou depois do registro. Desfazer vai excluí-lo.',
     ai_hint_expense: 'Sugestão: despesa',
     ai_hint_income: 'Sugestão: receita',
+    ai_no_account_ios:
+      'Escolha uma conta no seu atalho Log Notification para que a revisão automática registre as notificações dele. Sem conta, elas aguardam aqui com uma sugestão.',
     ai_reason_otp: 'Código de segurança',
     ai_reason_promotion: 'Promoção',
     ai_reason_balance: 'Saldo ou lembrete',

@@ -3203,6 +3203,7 @@ const nb = {
     review_banner_single: '1 varsel til gjennomgang',
     review_amount_hint: 'Velg eller skriv inn beløpet',
     review_missing: 'Noen elementer mangler fortsatt beløp eller konto.',
+    review_choose_account: 'Velg en konto',
     review_save_error: 'Kunne ikke lagre. De uferdige elementene dine er fortsatt her.',
     review_leave_title: 'Ignorere uferdige varsler?',
     review_leave_body: 'Hvis du går ut, ignoreres alle %{count} uferdige varsler.',
@@ -3240,6 +3241,8 @@ const nb = {
     ai_undo_edited_body: 'Du har endret den etter at den ble registrert. Angre sletter den.',
     ai_hint_expense: 'Forslag: utgift',
     ai_hint_income: 'Forslag: inntekt',
+    ai_no_account_ios:
+      'Velg en konto i Log Notification-snarveien din, så automatisk gjennomgang kan føre varslene. Uten konto venter de her med et forslag.',
     ai_reason_otp: 'Sikkerhetskode',
     ai_reason_promotion: 'Kampanje',
     ai_reason_balance: 'Saldo eller påminnelse',

@@ -3070,6 +3070,7 @@ const zh = {
     review_banner_single: '1 条通知待确认',
     review_amount_hint: '选择或输入金额',
     review_missing: '部分项目仍缺少金额或账户。',
+    review_choose_account: '选择账户',
     review_save_error: '无法保存。未完成的项目仍保留在这里。',
     review_leave_title: '忽略未完成的通知？',
     review_leave_body: '离开后，全部 %{count} 条未完成的通知都会被忽略。',
@@ -3105,6 +3106,8 @@ const zh = {
     ai_undo_edited_body: '记录后你修改过它。撤销会将其删除。',
     ai_hint_expense: '建议：支出',
     ai_hint_income: '建议：收入',
+    ai_no_account_ios:
+      '在 Log Notification 快捷指令中选择账户，自动审核即可记录其通知。未选择时，通知会附上建议留在这里。',
     ai_reason_otp: '验证码',
     ai_reason_promotion: '促销',
     ai_reason_balance: '余额或提醒',

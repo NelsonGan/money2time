@@ -3161,6 +3161,7 @@ const ko = {
     review_banner_single: '검토할 알림 1개',
     review_amount_hint: '금액을 고르거나 입력하세요',
     review_missing: '일부 항목에 아직 금액이나 계좌가 없습니다.',
+    review_choose_account: '계좌 선택',
     review_save_error: '저장할 수 없습니다. 완료하지 않은 항목은 그대로 남아 있습니다.',
     review_leave_title: '완료하지 않은 알림을 무시할까요?',
     review_leave_body: '나가면 완료하지 않은 알림 %{count}개가 모두 무시됩니다.',
@@ -3198,6 +3199,8 @@ const ko = {
     ai_undo_edited_body: '기록된 뒤 수정한 항목입니다. 취소하면 삭제됩니다.',
     ai_hint_expense: '추천: 지출',
     ai_hint_income: '추천: 수입',
+    ai_no_account_ios:
+      'Log Notification 단축어에서 계좌를 선택하면 자동 검토가 알림을 기록할 수 있어요. 계좌가 없으면 추천과 함께 여기에서 기다려요.',
     ai_reason_otp: '보안 코드',
     ai_reason_promotion: '프로모션',
     ai_reason_balance: '잔액 또는 알림',
