@@ -29,7 +29,6 @@ import {
 import type { Account, Category, PaymentAlertPrefs, QuickEntryPrefs } from '~/types';
 
 import { isPayableAccount } from './lib/binding';
-import { aiReviewCoversAccount } from './lib/prefs';
 
 /** Characters of each notification sent; matches the Worker's own cap. */
 const MAX_TEXT_CHARS = 800;
@@ -203,8 +202,9 @@ async function reviewOnce(deps: NotificationAiReviewDeps) {
         row.result === 'pending' &&
         !row.ai &&
         row.text.trim().length > 0 &&
-        aiReviewCoversAccount(prefs, row.accountId) &&
-        accounts.has(row.accountId as string) &&
+        // Logged to the account its app or shortcut is linked to; never guessed.
+        !!row.accountId &&
+        accounts.has(row.accountId) &&
         // Only captures still pending in this ledger: one settled elsewhere is
         // repaired by manual review, never charged.
         paymentAlertCapturesRepository.getById(row.id)?.status === 'pending',

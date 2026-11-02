@@ -1428,11 +1428,13 @@ export interface PaymentAlertPrefs {
 /** Which transaction types AI auto-review may log; others stay for the user. */
 export type NotificationAiLogTypes = 'both' | 'expense' | 'income';
 
+/**
+ * There is no account choice: auto-review logs a notification to the account
+ * its app or shortcut is linked to, and never sends one without a linked account.
+ */
 export interface NotificationAiReviewPrefs {
   enabled: boolean;
   logTypes: NotificationAiLogTypes;
-  /** Accounts whose notifications AI reviews; null = every account. */
-  accountIds: string[] | null;
 }
 
 /**

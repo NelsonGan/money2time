@@ -17,24 +17,17 @@ export const DEFAULT_PAYMENT_ALERT_PREFS: PaymentAlertPrefs = {
   alertsEnabled: false,
   sources: {},
   ignorePhrases: [],
-  aiReview: { enabled: false, logTypes: 'both', accountIds: null },
+  aiReview: { enabled: false, logTypes: 'both' },
 };
 
+// An `accountIds` filter saved by an earlier build is dropped: auto-review
+// covers every linked account.
 function parseAiReview(raw: unknown): NotificationAiReviewPrefs {
   const row = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
   return {
     enabled: row.enabled === true,
     logTypes: row.logTypes === 'expense' || row.logTypes === 'income' ? row.logTypes : 'both',
-    accountIds: Array.isArray(row.accountIds) ? asStringList(row.accountIds) : null,
   };
-}
-
-/** Whether AI auto-review covers notifications logged into this account. */
-export function aiReviewCoversAccount(
-  prefs: NotificationAiReviewPrefs,
-  accountId: string | null | undefined,
-): boolean {
-  return !!accountId && (prefs.accountIds === null || prefs.accountIds.includes(accountId));
 }
 
 const CHANNELS: readonly PaymentAlertChannel[] = ['android_notification', 'ios_alert', 'apple_pay'];

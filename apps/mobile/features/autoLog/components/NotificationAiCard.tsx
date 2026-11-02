@@ -1,9 +1,7 @@
-import { Check } from 'lucide-react-native';
 import React, { useEffect, useState, useSyncExternalStore } from 'react';
-import { Alert, Pressable, ScrollView, Switch, useWindowDimensions, View } from 'react-native';
+import { Alert, Pressable, Switch, View } from 'react-native';
 
 import {
-  AccountLogo,
   Button,
   ClayIcon,
   InfoTooltipButton,
@@ -24,9 +22,8 @@ import {
   notificationAiRemaining,
 } from '~/services/notificationAi';
 import { requestOpenPaywall } from '~/services/paywallNavigation';
-import type { Account, NotificationAiLogTypes, NotificationAiReviewPrefs } from '~/types';
+import type { NotificationAiLogTypes, NotificationAiReviewPrefs } from '~/types';
 
-import { isPayableAccount } from '../lib/binding';
 import {
   getCachedNotificationAiQuota,
   isNotificationAiExhausted,
@@ -71,7 +68,7 @@ function quotaLabel(quota: NotificationAiQuota | null, isPro: boolean): string {
  * switch is off and disabled next to Upgrade.
  */
 export function NotificationAiCard() {
-  const { accounts, paymentAlertPrefs, updatePaymentAlertPrefs } = useApp();
+  const { paymentAlertPrefs, updatePaymentAlertPrefs } = useApp();
   const isPro = useIsPro();
   const colors = useThemeColors();
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -79,7 +76,6 @@ export function NotificationAiCard() {
   const quota = useNotificationAiQuota(prefs.enabled || settingsOpen);
   const exhausted = isNotificationAiExhausted(quota, isPro);
   const enabled = prefs.enabled && !exhausted;
-  const payable = accounts.filter(isPayableAccount);
   if (!isNotificationAiAvailable()) return null;
 
   const save = (next: NotificationAiReviewPrefs) => {
@@ -87,7 +83,6 @@ export function NotificationAiCard() {
     void trackEvent(AnalyticsEvents.NOTIFICATION_AI_REVIEW_TOGGLED, {
       enabled: next.enabled,
       log_types: next.logTypes,
-      account_scope: next.accountIds === null ? 'all' : 'some',
     });
   };
   const turnOn = () => {
@@ -181,7 +176,6 @@ export function NotificationAiCard() {
       <NotificationAiSettingsSheet
         visible={settingsOpen}
         prefs={prefs}
-        accounts={payable}
         quota={quota}
         onDismiss={() => setSettingsOpen(false)}
         onChange={(next) =>
@@ -192,43 +186,31 @@ export function NotificationAiCard() {
   );
 }
 
-/** What AI may log and from which accounts. Changes save as they are made. */
+/**
+ * Which types auto-review may log. Every linked account is covered: each
+ * notification goes to the account its app or shortcut is linked to. Changes
+ * save as they are made.
+ */
 function NotificationAiSettingsSheet({
   visible,
   prefs,
-  accounts,
   quota,
   onDismiss,
   onChange,
 }: {
   visible: boolean;
   prefs: NotificationAiReviewPrefs;
-  accounts: readonly Account[];
   quota: NotificationAiQuota | null;
   onDismiss: () => void;
   onChange: (next: NotificationAiReviewPrefs) => void;
 }) {
   const isPro = useIsPro();
-  const { height } = useWindowDimensions();
-  const all = prefs.accountIds === null;
-  const selected = new Set(prefs.accountIds ?? accounts.map((account) => account.id));
-  const toggleAccount = (id: string) => {
-    void triggerHaptic('selection');
-    const next = new Set(selected);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    // Keep at least one of this ledger's accounts. Only the All row means
-    // "every account" (other ledgers' and future ones too).
-    if (!accounts.some((account) => next.has(account.id))) return;
-    onChange({ ...prefs, accountIds: [...next] });
-  };
   const free = !isPro && !quota?.isPro;
   const limit = quota?.limit ?? FREE_NOTIFICATION_AI_REVIEWS;
   const left = notificationAiRemaining(quota);
   return (
     <PromptSheet visible={visible} onDismiss={onDismiss}>
-      {/* Long account lists scroll; Done stays in view below them. */}
-      <ScrollView style={{ maxHeight: height * 0.62 }} contentContainerClassName="gap-5 p-5 pb-3">
+      <View className="gap-5 p-5 pb-3">
         <View className="gap-1.5">
           <Text variant="subheading">{I18n.t('payment_alerts.ai_title')}</Text>
           <Text variant="body" tone="muted">
@@ -247,30 +229,6 @@ function NotificationAiSettingsSheet({
               label: I18n.t(`payment_alerts.ai_log_${value}`),
             }))}
           />
-        </View>
-        <View className="gap-2">
-          <Text variant="caption" tone="muted" className="font-semibold">
-            {I18n.t('payment_alerts.ai_accounts_label')}
-          </Text>
-          <View className="rounded-2xl border border-border/40 bg-card">
-            <AccountRow
-              label={I18n.t('payment_alerts.ai_all_accounts')}
-              checked={all}
-              onPress={() => {
-                void triggerHaptic('selection');
-                onChange({ ...prefs, accountIds: null });
-              }}
-            />
-            {accounts.map((account) => (
-              <AccountRow
-                key={account.id}
-                label={account.name}
-                account={account}
-                checked={selected.has(account.id)}
-                onPress={() => toggleAccount(account.id)}
-              />
-            ))}
-          </View>
         </View>
         {free ? (
           <View className="gap-2">
@@ -296,44 +254,12 @@ function NotificationAiSettingsSheet({
             </Pressable>
           </View>
         ) : null}
-      </ScrollView>
+      </View>
       <View className="px-5 pb-5 pt-2">
         <Button onPress={onDismiss} testID="notification-ai-settings-done">
           <Text>{I18n.t('common.done')}</Text>
         </Button>
       </View>
     </PromptSheet>
-  );
-}
-
-function AccountRow({
-  label,
-  account,
-  checked,
-  onPress,
-}: {
-  label: string;
-  account?: Account;
-  checked: boolean;
-  onPress: () => void;
-}) {
-  const colors = useThemeColors();
-  return (
-    <Pressable
-      accessibilityRole="checkbox"
-      accessibilityState={{ checked }}
-      onPress={onPress}
-      className="min-h-12 flex-row items-center gap-3 border-b border-border/30 px-4 py-2.5 last:border-b-0"
-    >
-      {account ? <AccountLogo logoId={account.logoId} type={account.type} size={26} /> : null}
-      <Text variant="body" numberOfLines={1} className="flex-1">
-        {label}
-      </Text>
-      <View
-        className={`h-6 w-6 items-center justify-center rounded-md border ${checked ? 'border-primary bg-primary' : 'border-border'}`}
-      >
-        {checked ? <Check size={15} color={colors.background} strokeWidth={3} /> : null}
-      </View>
-    </Pressable>
   );
 }

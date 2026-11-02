@@ -1,30 +1,29 @@
-import { aiReviewCoversAccount, parsePaymentAlertPrefs } from '~/features/autoLog/lib/prefs';
+import { parsePaymentAlertPrefs } from '~/features/autoLog/lib/prefs';
 
 describe('AI auto-review prefs', () => {
-  it('is off, both types and all accounts for prefs saved before the feature', () => {
+  it('is off and logs both types for prefs saved before the feature', () => {
     expect(parsePaymentAlertPrefs('{"version":1,"alertsEnabled":true}').aiReview).toEqual({
       enabled: false,
       logTypes: 'both',
-      accountIds: null,
     });
   });
 
   it('keeps valid settings and repairs invalid ones field by field', () => {
     expect(
-      parsePaymentAlertPrefs(
-        JSON.stringify({ aiReview: { enabled: true, logTypes: 'income', accountIds: ['a1', 7] } }),
-      ).aiReview,
-    ).toEqual({ enabled: true, logTypes: 'income', accountIds: ['a1'] });
+      parsePaymentAlertPrefs(JSON.stringify({ aiReview: { enabled: true, logTypes: 'income' } }))
+        .aiReview,
+    ).toEqual({ enabled: true, logTypes: 'income' });
     expect(
       parsePaymentAlertPrefs(JSON.stringify({ aiReview: { enabled: 'yes', logTypes: 'all' } }))
         .aiReview,
-    ).toEqual({ enabled: false, logTypes: 'both', accountIds: null });
+    ).toEqual({ enabled: false, logTypes: 'both' });
   });
 
-  it('covers an account only when one is bound and selected', () => {
-    const all = { enabled: true, logTypes: 'both' as const, accountIds: null };
-    expect(aiReviewCoversAccount(all, 'a1')).toBe(true);
-    expect(aiReviewCoversAccount(all, null)).toBe(false);
-    expect(aiReviewCoversAccount({ ...all, accountIds: ['a2'] }, 'a1')).toBe(false);
+  it('drops an account filter saved by an earlier build: every linked account is covered', () => {
+    expect(
+      parsePaymentAlertPrefs(
+        JSON.stringify({ aiReview: { enabled: true, logTypes: 'both', accountIds: ['a1'] } }),
+      ).aiReview,
+    ).toEqual({ enabled: true, logTypes: 'both' });
   });
 });
