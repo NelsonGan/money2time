@@ -102,7 +102,6 @@ import {
 import { InsightPeriodSwitcher } from '~/features/insights/components/InsightPeriodSwitcher';
 import { InsightSubTabs } from '~/features/insights/components/InsightSubTabs';
 import { ProTrendPreviewOverlay } from '~/features/insights/components/ProTrendPreviewOverlay';
-import { SentimentStackedBarChart } from '~/features/insights/components/SentimentStackedBarChart';
 import {
   TrendLineChart,
   type TrendLineChartBucket,
@@ -380,8 +379,7 @@ const TREND_INSIGHT_TYPE_BY_KIND = {
   asset: 'asset_history',
 } as const;
 const EMPTY_TRANSACTIONS: TransactionWithRelations[] = [];
-const SENTIMENT_CHART_HEIGHT = 200;
-const SENTIMENT_CHART_PADDING_RIGHT = 16;
+const SENTIMENT_CHART_HEIGHT = 280;
 const SENTIMENT_COLORS = { happy: '#4CAF50', neutral: '#FFB74D', sad: '#E57373' } as const;
 const INSIGHTS_LINE_CHART_SIDE_INSET = 8;
 const INSIGHTS_LINE_CHART_SECTION_BLEED = 10;
@@ -429,11 +427,7 @@ const SPLIT_HEADER_HEIGHT_ESTIMATE = 112;
 const styles = StyleSheet.create({
   flexOne: { flex: 1 },
   splitHeader: { position: 'absolute', top: 0, left: 0, zIndex: 2 },
-  absoluteOverlay: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-  },
+  stackedHeader: { zIndex: 2 },
   chartSizeCenter: {
     alignSelf: 'center',
   },
@@ -1442,17 +1436,12 @@ function generateDayKeysForRange(startIso: string, endIso: string): string[] {
 // Tone, icon, and status copy all derive from the same rounded percent the user
 // sees, so the label and colors can never disagree (e.g. a -0.04% year rounds to
 // '0.0%' and reads as the amber "getting there" state, not a red overspend).
-function resolveSavingsRateStatus(displayRatePercent: number | null, palette: ColorPalette) {
-  if (displayRatePercent === null) {
-    return { color: palette.textMuted, Icon: PiggyBank, labelKey: 'no_income_short' as const };
-  }
-  if (displayRatePercent >= HEALTHY_SAVINGS_RATE_THRESHOLD * 100) {
-    return { color: palette.success, Icon: PiggyBank, labelKey: 'status_healthy' as const };
-  }
-  if (displayRatePercent >= 0) {
-    return { color: palette.accent, Icon: TrendingUp, labelKey: 'status_building' as const };
-  }
-  return { color: palette.error, Icon: TrendingDown, labelKey: 'status_overspent' as const };
+/** Green once the rate is healthy, amber while it is building, red when overspent. */
+function savingsRateColor(displayRatePercent: number | null, palette: ColorPalette): string {
+  if (displayRatePercent === null) return palette.textMuted;
+  if (displayRatePercent >= HEALTHY_SAVINGS_RATE_THRESHOLD * 100) return palette.success;
+  if (displayRatePercent >= 0) return palette.accent;
+  return palette.error;
 }
 
 function resolveBreakdownRootId(
@@ -2385,7 +2374,6 @@ const InsightsWindowPage = React.memo(
     item,
     pageData,
     pageStyle,
-    isChartScrubbing,
     paneRenderVersion: _paneRenderVersion,
     getPageScrollRef,
     renderInsightsPane,
@@ -2397,7 +2385,6 @@ const InsightsWindowPage = React.memo(
     pageStyle: { width: number };
     /** Open iPhone Duo: pane widths and the header's height; else null. */
     split: InsightsSplit | null;
-    isChartScrubbing: boolean;
     paneRenderVersion: string;
     getPageScrollRef: (index: number) => { current: ScrollViewInstance | null };
     renderInsightsPane: (pageData: InsightPageData) => React.ReactNode;
@@ -2430,7 +2417,6 @@ const InsightsWindowPage = React.memo(
         getPageScrollRef(item).current = ref;
       },
       className: 'flex-1',
-      scrollEnabled: !isChartScrubbing,
       contentContainerStyle: contentStyle,
       onScroll: handleScroll,
       scrollEventThrottle: 32,
@@ -2465,11 +2451,7 @@ const InsightsWindowPage = React.memo(
       <View style={pageStyle} className="h-full shrink-0 flex-row bg-background">
         <View style={{ width: split.left, paddingTop: split.top }}>
           <ContentFrameProvider width={split.left} height={split.height}>
-            <ScrollView
-              className="flex-1"
-              scrollEnabled={!isChartScrubbing}
-              contentContainerStyle={contentStyle}
-            >
+            <ScrollView className="flex-1" contentContainerStyle={contentStyle}>
               <InsightPaneSlotProvider value="primary">{pane}</InsightPaneSlotProvider>
             </ScrollView>
           </ContentFrameProvider>
@@ -2488,7 +2470,6 @@ const InsightsWindowPage = React.memo(
     prev.item === next.item &&
     prev.pageData === next.pageData &&
     prev.pageStyle === next.pageStyle &&
-    prev.isChartScrubbing === next.isChartScrubbing &&
     prev.paneRenderVersion === next.paneRenderVersion &&
     prev.getPageScrollRef === next.getPageScrollRef &&
     prev.renderInsightsPane === next.renderInsightsPane &&
@@ -2649,6 +2630,10 @@ export function InsightsScreen({
     Record<string, string>
   >({});
   const [incomeTrendScrubMonthByYear, setIncomeTrendScrubMonthByYear] = useState<
+    Record<string, string>
+  >({});
+  // The day (or month) picked on the mood chart, per period.
+  const [sentimentScrubBucketByPeriod, setSentimentScrubBucketByPeriod] = useState<
     Record<string, string>
   >({});
   // The month picked on the savings-rate chart, per year.
@@ -3147,8 +3132,12 @@ export function InsightsScreen({
     settings.reimbursementsCountAsExpense,
   ]);
   const defaultCategoryTrendCategoryId = categoryTrendChipOptions[0]?.id ?? null;
+  // A saved category that has since been deleted falls back to the default.
   const effectiveCategoryTrendCategoryId =
-    categoryTrendSelectedCategoryId ?? defaultCategoryTrendCategoryId;
+    categoryTrendSelectedCategoryId &&
+    categoryTrendCategoryOptions.some((option) => option.id === categoryTrendSelectedCategoryId)
+      ? categoryTrendSelectedCategoryId
+      : defaultCategoryTrendCategoryId;
   // A comparison only stands while both categories exist and differ.
   const effectiveCategoryTrendCompareId =
     categoryTrendCompareCategoryId &&
@@ -3184,6 +3173,10 @@ export function InsightsScreen({
     void triggerHaptic('selection');
     setCategoryTrendCompareCategoryId(null);
   }, []);
+  // An armed "Compare" only lasts while the Category trend is on screen.
+  useEffect(() => {
+    if (selectedInsightType !== 'category_trend') setIsPickingCategoryCompare(false);
+  }, [selectedInsightType]);
   // The menu reopens a group (Breakdown, Trends) on the tab last used in it.
   useEffect(() => {
     const groupId = insightGroupOf(selectedInsightType);
@@ -4479,6 +4472,7 @@ export function InsightsScreen({
     [],
   );
   const formatPercentAxisValue = useCallback((value: number) => `${Math.round(value)}%`, []);
+  const formatCountValue = useCallback((value: number) => String(Math.round(value)), []);
   const formatTrendTooltipValue = useCallback(
     (value: number) =>
       settings.displayMode === 'time'
@@ -5276,6 +5270,54 @@ export function InsightsScreen({
     return model;
   };
 
+  // Expense Sentiment charts each mood's count per day (or month).
+  const getSentimentChartModel = (pageData: ExpenseSentimentPageData): TrendChartModel => {
+    const cached = trendChartModelCacheRef.current.get(pageData);
+    if (cached && cached.signature === trendModelSignature) return cached.model;
+    const valuesFor = (mood: 'happy' | 'neutral' | 'sad') =>
+      pageData.dayRows.map((row) => (isFutureTrendBucket(row.dayKey) ? null : row[mood]));
+    const happy = valuesFor('happy');
+    const model: TrendChartModel = {
+      buckets: pageData.dayRows.map((row) => ({
+        key: row.dayKey,
+        label: row.label,
+        title: trendBucketTitle(
+          row.dayKey,
+          row.subLabel ? `${row.label} ${row.subLabel}` : row.label,
+        ),
+      })),
+      series: [
+        {
+          key: 'happy',
+          label: String(I18n.t('review.mood_happy')),
+          color: SENTIMENT_COLORS.happy,
+          values: happy,
+        },
+        {
+          key: 'neutral',
+          label: String(I18n.t('review.mood_neutral')),
+          color: SENTIMENT_COLORS.neutral,
+          values: valuesFor('neutral'),
+        },
+        {
+          key: 'sad',
+          label: String(I18n.t('review.mood_regret')),
+          color: SENTIMENT_COLORS.sad,
+          values: valuesFor('sad'),
+        },
+      ],
+      values: happy,
+      compareValues: null,
+      transactionsByKey: new Map(),
+    };
+    trendChartModelCacheRef.current.set(pageData, {
+      signature: trendModelSignature,
+      rateSource: getTrueHourlyRateForDate,
+      model,
+    });
+    return model;
+  };
+
   const trendScrubSelection = (kind: TrendKind, periodKey: string): string | null => {
     const record =
       kind === 'expense'
@@ -5409,25 +5451,21 @@ export function InsightsScreen({
     const selectedIndex = model.buckets.findIndex((bucket) => bucket.key === selectedKey);
     const selectedBucket = model.buckets[selectedIndex];
     const selectedValue = selectedIndex >= 0 ? (model.values[selectedIndex] ?? 0) : 0;
-    const statBuckets = model.buckets.map((bucket, index) => ({
-      key: bucket.key,
-      value: model.values[index] ?? null,
-    }));
-    // The month still under way is not a full month: left out of a flow's
-    // average and extremes, it can no longer read as "lowest" a week in.
-    // It stays in when it is all there is.
+    // The month still under way is not a full month: it stays out of a flow's
+    // average (unless it is all there is), so a week in it never reads as
+    // far below average.
     const completedSummary = isBalance
       ? null
       : summarizeTrend(
-          statBuckets.map((bucket) =>
-            isCurrentTrendBucket(bucket.key) ? { ...bucket, value: null } : bucket,
+          model.values.map((value, index) =>
+            isCurrentTrendBucket(model.buckets[index]?.key ?? '') ? null : value,
           ),
           { activeOnly: true },
         );
     const summary =
       completedSummary && completedSummary.counted > 0
         ? completedSummary
-        : summarizeTrend(statBuckets, { activeOnly: !isBalance });
+        : summarizeTrend(model.values, { activeOnly: !isBalance });
     // "Higher" is bad news for spending and good news for income and assets.
     const higherIsGood = kind === 'income' || kind === 'asset';
     const goodColor = themeColors.success;
@@ -5498,14 +5536,9 @@ export function InsightsScreen({
 
     let compareSummary: React.ReactNode = null;
     if (pageData.kind === 'category_trend' && model.compareValues && model.series[1]) {
-      const firstSummary = summary;
-      const secondSummary = summarizeTrend(
-        model.buckets.map((bucket, index) => ({
-          key: bucket.key,
-          value: model.compareValues?.[index] ?? null,
-        })),
-        { activeOnly: true },
-      );
+      // Both totals cover the same months, the one under way included.
+      const firstSummary = summarizeTrend(model.values, { activeOnly: true });
+      const secondSummary = summarizeTrend(model.compareValues, { activeOnly: true });
       const comparison = compareCategoryTotals(firstSummary.total, secondSummary.total);
       const first = model.series[0]?.label ?? '';
       const second = model.series[1].label;
@@ -5718,7 +5751,6 @@ export function InsightsScreen({
 
     // Same shape as the trends: how many expenses, the mood most of them had
     // as a quiet pill, the day-by-day bars, then one plain row per mood.
-    const sentimentChartWidth = Math.max(140, lineChartWidth - SENTIMENT_CHART_PADDING_RIGHT);
     const moodTotal = pageData.totals.happy + pageData.totals.neutral + pageData.totals.sad;
     const moods = [
       {
@@ -5742,6 +5774,13 @@ export function InsightsScreen({
     ];
     const dominantMood = moods.reduce((best, mood) => (mood.count > best.count ? mood : best));
     const shareOf = (count: number) => (moodTotal > 0 ? count / moodTotal : 0);
+    // One line per mood across the days (or months) of the period.
+    const sentimentModel = getSentimentChartModel(pageData);
+    const sentimentPeriodKey = pageData.range.start;
+    const sentimentSelectedKey =
+      sentimentModel.buckets.find(
+        (bucket) => bucket.key === sentimentScrubBucketByPeriod[sentimentPeriodKey],
+      )?.key ?? defaultTrendBucketKey(sentimentModel, false);
     return (
       <InsightPaneSplit
         className="mt-1 gap-3"
@@ -5754,7 +5793,12 @@ export function InsightsScreen({
                   className="text-[28px] leading-[36px] font-black tracking-tight"
                 >
                   {String(
-                    I18n.t('insights.analytics.expense_trend.transactions', { count: moodTotal }),
+                    I18n.t(
+                      moodTotal === 1
+                        ? 'insights.analytics.expense_sentiment.count_one'
+                        : 'insights.analytics.expense_sentiment.count_other',
+                      { count: moodTotal },
+                    ),
                   )}
                 </Text>
               }
@@ -5770,24 +5814,37 @@ export function InsightsScreen({
                   : null
               }
             />
-            <View style={lineChartSectionStyle} className="py-1">
-              <View
-                {...REPLAY_PRIVATE}
-                style={[
-                  styles.chartSizeCenter,
-                  buildSizeStyle(lineChartWidth, SENTIMENT_CHART_HEIGHT),
-                ]}
-              >
-                <SentimentStackedBarChart
-                  data={pageData.dayRows}
-                  chartWidth={sentimentChartWidth}
-                  chartHeight={SENTIMENT_CHART_HEIGHT}
-                  labelColor={themeColors.textMuted}
-                  happyColor={SENTIMENT_COLORS.happy}
-                  neutralColor={SENTIMENT_COLORS.neutral}
-                  sadColor={SENTIMENT_COLORS.sad}
-                />
-              </View>
+            <View
+              style={lineChartSectionStyle}
+              onTouchStart={lockChartScrub}
+              onTouchEnd={unlockChartScrub}
+              onTouchCancel={unlockChartScrub}
+            >
+              <TrendLineChart
+                buckets={sentimentModel.buckets}
+                series={sentimentModel.series}
+                width={lineChartWidth}
+                height={SENTIMENT_CHART_HEIGHT}
+                selectedKey={sentimentSelectedKey}
+                onSelectKey={(key) => {
+                  setSentimentScrubBucketByPeriod((previous) =>
+                    previous[sentimentPeriodKey] === key
+                      ? previous
+                      : { ...previous, [sentimentPeriodKey]: key },
+                  );
+                }}
+                onGestureStart={lockChartScrub}
+                onGestureEnd={unlockChartScrub}
+                formatValue={formatCountValue}
+                formatAxisValue={formatCountValue}
+                zeroBased
+                gridColor={withColorAlpha(themeColors.border, isDark ? 0.7 : 0.9)}
+                labelColor={themeColors.textMuted}
+                surfaceColor={themeColors.background}
+                tooltipBackground={themeColors.card}
+                tooltipTextColor={themeColors.text}
+                accessibilityLabel={String(I18n.t('insights.expense_sentiment'))}
+              />
             </View>
           </>
         }
@@ -5839,9 +5896,24 @@ export function InsightsScreen({
         pageData.totalIncome > 0 ? pageData.totalNet / pageData.totalIncome : null;
       const displayRatePercent =
         savingsRate === null ? null : Number((savingsRate * 100).toFixed(1));
-      const toneColor = resolveSavingsRateStatus(displayRatePercent, themeColors).color;
+      const toneColor = savingsRateColor(displayRatePercent, themeColors);
       const yearKey = pageData.range.start.slice(0, 4);
       const chartModel = getSavingsChartModel(pageData);
+      // A year with nothing in it yet (one ahead of today) has nothing to chart.
+      if (
+        pageData.totalIncome === 0 &&
+        pageData.totalExpense === 0 &&
+        chartModel.values.every((value) => value === null)
+      ) {
+        return (
+          <EmptyState
+            title={I18n.t('insights.empty.title')}
+            message={I18n.t('insights.empty.message')}
+            mascotMood="curious"
+            animateIn={false}
+          />
+        );
+      }
       const selectedKey =
         chartModel.buckets.find((bucket) => bucket.key === savingsScrubMonthByYear[yearKey])?.key ??
         defaultTrendBucketKey(chartModel, false);
@@ -5948,7 +6020,7 @@ export function InsightsScreen({
                 }
                 const monthlyPercent =
                   row.savingsRate === null ? null : Number((row.savingsRate * 100).toFixed(1));
-                const monthlyTone = resolveSavingsRateStatus(monthlyPercent, themeColors).color;
+                const monthlyTone = savingsRateColor(monthlyPercent, themeColors);
                 const savedFraction =
                   row.savingsRate === null ? 0 : Math.max(0, Math.min(1, row.savingsRate));
                 return (
@@ -6215,6 +6287,7 @@ export function InsightsScreen({
         serializeRecordForSignature(incomeTrendScrubMonthByYear),
         serializeRecordForSignature(assetHistoryScrubMonthByYear),
         serializeRecordForSignature(savingsScrubMonthByYear),
+        serializeRecordForSignature(sentimentScrubBucketByPeriod),
         serializeRecordForSignature(categoryTrendScrubBucketByPeriod),
         serializeRecordForSignature(
           Object.fromEntries(
@@ -6227,6 +6300,7 @@ export function InsightsScreen({
       activeLocale,
       assetHistoryScrubMonthByYear,
       savingsScrubMonthByYear,
+      sentimentScrubBucketByPeriod,
       categoryTrendScrubBucketByPeriod,
       expenseTrendScrubMonthByYear,
       isPro,
@@ -6311,7 +6385,6 @@ export function InsightsScreen({
           item={item}
           pageData={pageData}
           pageStyle={insightsPageStyle}
-          isChartScrubbing={isChartScrubbing}
           paneRenderVersion={paneRenderVersion}
           getPageScrollRef={getPageScrollRef}
           renderInsightsPane={renderInsightsPaneStable}
@@ -6330,7 +6403,6 @@ export function InsightsScreen({
       getPageScrollRef,
       handlePaneScrollNearEnd,
       insightsPageStyle,
-      isChartScrubbing,
       paneRenderVersion,
       renderInsightsPaneStable,
       shiftPeriodStateBySteps,
@@ -6773,7 +6845,11 @@ export function InsightsScreen({
       <View style={[styles.flexOne, { paddingHorizontal: column.margin }]}>
         <ContentFrameProvider width={column.width} height={height}>
           <View
-            style={splitPanes ? [styles.splitHeader, { width: splitPanes.left }] : undefined}
+            // Above the pages: a Skia chart is not clipped by its scroll view, so
+            // a scrolled chart would otherwise draw over the header.
+            style={
+              splitPanes ? [styles.splitHeader, { width: splitPanes.left }] : styles.stackedHeader
+            }
             onLayout={splitPanes ? handleSplitHeaderLayout : undefined}
           >
             <MonthControlsHeader

@@ -76,6 +76,9 @@ const X_AXIS_HEIGHT = 20;
 const TOOLTIP_ROW_HEIGHT = 17;
 const TOOLTIP_VERTICAL_PADDING = 6;
 const TOOLTIP_POINTER_SIZE = 8;
+const TOOLTIP_WIDTH_SAFETY = 1.15;
+/** How far a finger moves sideways before a touch becomes a scrub. */
+const SCRUB_START_DISTANCE = 6;
 const TOOLTIP_GAP = 8;
 const STROKE_WIDTH = 2.6;
 const DOT_RADIUS = 3.6;
@@ -226,17 +229,41 @@ export const TrendLineChart = React.memo(
         void triggerHaptic('selection');
         current.onSelectKey(bucket.key);
       };
-      const end = () => gestureCallbacks.current.onGestureEnd?.();
+      // A touch only picks a month once it is a tap or a sideways drag, so a
+      // vertical scroll that starts on the chart moves the page and leaves the
+      // selection alone (the page's scroll view takes the touch over).
+      let isScrubbing = false;
+      const end = () => {
+        isScrubbing = false;
+        gestureCallbacks.current.onGestureEnd?.();
+      };
       return PanResponder.create({
         onStartShouldSetPanResponder: () => true,
         onMoveShouldSetPanResponder: () => true,
-        onPanResponderTerminationRequest: () => false,
-        onPanResponderGrant: (event) => {
+        onPanResponderTerminationRequest: () => !isScrubbing,
+        onPanResponderGrant: () => {
+          isScrubbing = false;
           gestureCallbacks.current.onGestureStart?.();
+        },
+        onPanResponderMove: (event, state) => {
+          if (!isScrubbing) {
+            if (Math.abs(state.dx) < SCRUB_START_DISTANCE) return;
+            if (Math.abs(state.dy) > Math.abs(state.dx)) return;
+            isScrubbing = true;
+          }
           selectAt(event.nativeEvent.locationX);
         },
-        onPanResponderMove: (event) => selectAt(event.nativeEvent.locationX),
-        onPanResponderRelease: end,
+        onPanResponderRelease: (event, state) => {
+          // A tap (no real movement) picks the month under the finger.
+          if (
+            !isScrubbing &&
+            Math.abs(state.dx) < SCRUB_START_DISTANCE &&
+            Math.abs(state.dy) < SCRUB_START_DISTANCE
+          ) {
+            selectAt(event.nativeEvent.locationX);
+          }
+          end();
+        },
         onPanResponderTerminate: end,
       });
     }, []);
@@ -268,7 +295,9 @@ export const TrendLineChart = React.memo(
     if (selectedX !== null) {
       const half = Math.min(selectedX, width - selectedX, TOOLTIP_MAX_WIDTH / 2);
       const edgeWidth = Math.min(width, TOOLTIP_MAX_WIDTH);
-      if (estimatedTooltipWidth <= half * 2) {
+      // A margin on the estimate, so a card slightly wider than guessed pins
+      // to the edge instead of spilling past it.
+      if (estimatedTooltipWidth * TOOLTIP_WIDTH_SAFETY <= half * 2) {
         tooltipBox = { left: selectedX - half, width: half * 2, align: 'center' };
       } else if (selectedX < width / 2) {
         tooltipBox = { left: 0, width: edgeWidth, align: 'flex-start' };

@@ -594,7 +594,6 @@ const ms = {
   calendar: {
     income: 'Pendapatan',
     expense: 'Perbelanjaan',
-    net: 'Bersih',
     transactions: 'Transaksi',
   },
   onboarding: {
@@ -1020,7 +1019,7 @@ const ms = {
       flat_since: 'Tiada perubahan sejak {{period}}',
     },
     compare: {
-      pick_hint: 'Ketik kategori untuk dibanding',
+      pick_hint: 'Pilih kategori',
       add: 'Banding',
       remove: 'Buang perbandingan',
       summary_more:
@@ -1088,10 +1087,6 @@ const ms = {
     income_rate_history: 'Sejarah kadar pendapatan',
     income_rate_history_description:
       'Lihat bagaimana kadar jam sebenar anda berubah dari masa ke masa sepanjang sejarah transaksi.',
-    charts: {
-      expo_go_fallback:
-        'Carta ini tidak tersedia dalam Expo Go. Buka apl dalam development build untuk lihat versi interaktif.',
-    },
     total_expense: 'Jumlah perbelanjaan',
     total_income: 'Jumlah pendapatan',
     no_positive_slices: 'Tiada irisan perbelanjaan positif untuk tempoh ini.',
@@ -1157,13 +1152,13 @@ const ms = {
           'Pilih kategori atau tempoh lain, atau tambah perbelanjaan untuk melihat aliran.',
       },
       expense_sentiment: {
-        summary_title: 'Pecahan mood',
+        count_one: '{{count}} perbelanjaan',
+        count_other: '{{count}} perbelanjaan',
         no_data_title: 'Tiada data sentimen lagi',
         no_data_message: 'Tambah transaksi perbelanjaan dengan mood untuk lihat carta sentimen.',
       },
       asset_history: {
         summary_title: 'Trend aset bersih',
-        latest: 'Terkini',
         empty_no_accounts: {
           title: 'Tiada akaun dipilih',
           message: 'Sertakan sekurang-kurangnya satu akaun dalam penapis untuk carta sejarah aset.',
@@ -1177,9 +1172,6 @@ const ms = {
         saved_per_year: '{{value}} disimpan tahun ini',
         exclusions_active: 'Mengecualikan {{count}} kategori daripada pengiraan.',
         goal_hint: '20%+ dianggap sihat.',
-        status_healthy: 'Sihat',
-        status_building: 'Hampir sampai',
-        status_overspent: 'Perbelanjaan berlebihan',
       },
       income_rate_history: {
         rate_title: 'Kadar pendapatan',

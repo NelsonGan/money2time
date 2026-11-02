@@ -593,7 +593,6 @@ const nb = {
   calendar: {
     income: 'Inntekt',
     expense: 'Utgift',
-    net: 'Netto',
     transactions: 'Transaksjoner',
   },
   onboarding: {
@@ -1014,7 +1013,7 @@ const nb = {
       flat_since: 'Ingen endring siden {{period}}',
     },
     compare: {
-      pick_hint: 'Trykk på en kategori for å sammenligne',
+      pick_hint: 'Velg en kategori',
       add: 'Sammenlign',
       remove: 'Fjern sammenligning',
       summary_more: 'Du brukte {{percent}} % mer på {{first}} enn på {{second}}',
@@ -1080,10 +1079,6 @@ const nb = {
     income_rate_history: 'Inntektssatshistorikk',
     income_rate_history_description:
       'Se hvordan den sanne timesatsen din har endret seg over tid i hele transaksjonshistorikken.',
-    charts: {
-      expo_go_fallback:
-        'Dette diagrammet er ikke tilgjengelig i Expo Go. Åpne appen i en utviklingsbygg for å se den interaktive versjonen.',
-    },
     total_expense: 'Totale utgifter',
     total_income: 'Total inntekt',
     no_positive_slices: 'Ingen positive utgiftssegmenter for denne perioden.',
@@ -1150,13 +1145,13 @@ const nb = {
           'Velg en annen kategori eller periode, eller legg til utgifter for å se trenden.',
       },
       expense_sentiment: {
-        summary_title: 'Stemningsfordeling',
+        count_one: '{{count}} utgift',
+        count_other: '{{count}} utgifter',
         no_data_title: 'Ingen stemningsdata ennå',
         no_data_message: 'Legg til utgiftstransaksjoner med stemning for å se stemningsdiagrammet.',
       },
       asset_history: {
         summary_title: 'Netto eiendelstrend',
-        latest: 'Siste',
         empty_no_accounts: {
           title: 'Ingen kontoer valgt',
           message: 'Inkluder minst én konto i filtre for å vise eiendelhistorikk.',
@@ -1170,9 +1165,6 @@ const nb = {
         saved_per_year: '{{value}} spart i år',
         exclusions_active: 'Ekskluderer {{count}} kategorier fra beregningen.',
         goal_hint: '20 %+ anses som sunt.',
-        status_healthy: 'Sunt',
-        status_building: 'På god vei',
-        status_overspent: 'Overforbruk',
       },
       income_rate_history: {
         rate_title: 'Inntektssats',

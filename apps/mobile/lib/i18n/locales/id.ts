@@ -593,7 +593,6 @@ const id = {
   calendar: {
     income: 'Pemasukan',
     expense: 'Pengeluaran',
-    net: 'Neto',
     transactions: 'Transaksi',
   },
   onboarding: {
@@ -1016,7 +1015,7 @@ const id = {
       flat_since: 'Tidak berubah sejak {{period}}',
     },
     compare: {
-      pick_hint: 'Ketuk kategori untuk dibandingkan',
+      pick_hint: 'Pilih kategori',
       add: 'Bandingkan',
       remove: 'Hapus perbandingan',
       summary_more:
@@ -1084,10 +1083,6 @@ const id = {
     income_rate_history: 'Riwayat tarif pemasukan',
     income_rate_history_description:
       'Lihat bagaimana tarif per jam nyatamu berubah seiring waktu sepanjang riwayat transaksimu.',
-    charts: {
-      expo_go_fallback:
-        'Grafik ini tidak tersedia di Expo Go. Buka aplikasi dalam development build untuk melihat versi interaktifnya.',
-    },
     total_expense: 'Total pengeluaran',
     total_income: 'Total pemasukan',
     no_positive_slices: 'Tidak ada irisan pengeluaran positif untuk periode ini.',
@@ -1155,14 +1150,14 @@ const id = {
           'Pilih kategori atau periode lain, atau tambahkan pengeluaran untuk melihat trennya.',
       },
       expense_sentiment: {
-        summary_title: 'Rincian mood',
+        count_one: '{{count}} pengeluaran',
+        count_other: '{{count}} pengeluaran',
         no_data_title: 'Belum ada data sentimen',
         no_data_message:
           'Tambahkan transaksi pengeluaran dengan mood untuk melihat grafik sentimen.',
       },
       asset_history: {
         summary_title: 'Tren aset bersih',
-        latest: 'Terbaru',
         empty_no_accounts: {
           title: 'Tidak ada akun dipilih',
           message: 'Sertakan setidaknya satu akun dalam filter untuk membuat grafik riwayat aset.',
@@ -1176,9 +1171,6 @@ const id = {
         saved_per_year: '{{value}} ditabung tahun ini',
         exclusions_active: 'Mengecualikan {{count}} kategori dari perhitungan.',
         goal_hint: '20%+ dianggap sehat.',
-        status_healthy: 'Sehat',
-        status_building: 'Hampir sampai',
-        status_overspent: 'Pengeluaran berlebih',
       },
       income_rate_history: {
         rate_title: 'Tarif pemasukan',

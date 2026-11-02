@@ -592,7 +592,6 @@ const da = {
   calendar: {
     income: 'Indtægt',
     expense: 'Udgift',
-    net: 'Netto',
     transactions: 'Transaktioner',
   },
   onboarding: {
@@ -1013,7 +1012,7 @@ const da = {
       flat_since: 'Ingen ændring siden {{period}}',
     },
     compare: {
-      pick_hint: 'Tryk på en kategori for at sammenligne',
+      pick_hint: 'Vælg en kategori',
       add: 'Sammenlign',
       remove: 'Fjern sammenligning',
       summary_more: 'Du brugte {{percent}}% mere på {{first}} end på {{second}}',
@@ -1081,10 +1080,6 @@ const da = {
     income_rate_history: 'Indkomstsatshistorik',
     income_rate_history_description:
       'Se, hvordan din reelle timesats har ændret sig over tid på tværs af din fulde transaktionshistorik.',
-    charts: {
-      expo_go_fallback:
-        'Dette diagram er ikke tilgængeligt i Expo Go. Åbn appen i et development build for at se den interaktive version.',
-    },
     total_expense: 'Samlet udgift',
     total_income: 'Samlet indtægt',
     no_positive_slices: 'Ingen positive udgiftssegmenter for denne periode.',
@@ -1151,13 +1146,13 @@ const da = {
           'Vælg en anden kategori eller periode, eller tilføj udgifter for at se tendensen.',
       },
       expense_sentiment: {
-        summary_title: 'Stemningsopdeling',
+        count_one: '{{count}} udgift',
+        count_other: '{{count}} udgifter',
         no_data_title: 'Ingen stemningsdata endnu',
         no_data_message: 'Tilføj udgiftstransaktioner med stemning for at se stemningsdiagrammet.',
       },
       asset_history: {
         summary_title: 'Nettoaktivtrend',
-        latest: 'Seneste',
         empty_no_accounts: {
           title: 'Ingen konti valgt',
           message: 'Inkludér mindst én konto i filtre for at vise aktivhistorik.',
@@ -1171,9 +1166,6 @@ const da = {
         saved_per_year: '{{value}} sparet i år',
         exclusions_active: 'Udelukker {{count}} kategorier fra beregningen.',
         goal_hint: '20%+ anses for sundt.',
-        status_healthy: 'Sundt',
-        status_building: 'Godt på vej',
-        status_overspent: 'Overforbrug',
       },
       income_rate_history: {
         rate_title: 'Indkomstsats',

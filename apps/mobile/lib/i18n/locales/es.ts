@@ -592,7 +592,6 @@ const es = {
   calendar: {
     income: 'Ingresos',
     expense: 'Gastos',
-    net: 'Neto',
     transactions: 'Movimientos',
   },
   onboarding: {
@@ -1015,7 +1014,7 @@ const es = {
       flat_since: 'Sin cambios desde {{period}}',
     },
     compare: {
-      pick_hint: 'Toca una categoría para comparar',
+      pick_hint: 'Elige una categoría',
       add: 'Comparar',
       remove: 'Quitar comparación',
       summary_more: 'Gastaste un {{percent}}% más en {{first}} que en {{second}}',
@@ -1083,10 +1082,6 @@ const es = {
     income_rate_history: 'Historial de tarifa por hora',
     income_rate_history_description:
       'Ve cómo ha cambiado tu tarifa real por hora a lo largo del tiempo en todo tu historial.',
-    charts: {
-      expo_go_fallback:
-        'Este gráfico no está disponible en Expo Go. Abre la app en un build de desarrollo para ver la versión interactiva.',
-    },
     total_expense: 'Gasto total',
     total_income: 'Ingreso total',
     no_positive_slices: 'No hay gastos positivos para este período.',
@@ -1153,13 +1148,13 @@ const es = {
         no_data_message: 'Elige otra categoría o período, o añade gastos para ver la tendencia.',
       },
       expense_sentiment: {
-        summary_title: 'Desglose de estado de ánimo',
+        count_one: '{{count}} gasto',
+        count_other: '{{count}} gastos',
         no_data_title: 'Sin datos de estado de ánimo aún',
         no_data_message: 'Añade movimientos de gasto con estado de ánimo para ver el gráfico.',
       },
       asset_history: {
         summary_title: 'Tendencia de activos netos',
-        latest: 'Más reciente',
         empty_no_accounts: {
           title: 'Sin cuentas seleccionadas',
           message:
@@ -1174,9 +1169,6 @@ const es = {
         saved_per_year: '{{value}} ahorrado este año',
         exclusions_active: 'Excluyendo {{count}} categorías del cálculo.',
         goal_hint: 'Un 20%+ se considera saludable.',
-        status_healthy: 'Saludable',
-        status_building: 'En camino',
-        status_overspent: 'Gastando de más',
       },
       income_rate_history: {
         rate_title: 'Tarifa por hora',

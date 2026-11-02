@@ -570,7 +570,6 @@ const en = {
   calendar: {
     income: 'Income',
     expense: 'Expense',
-    net: 'Net',
     transactions: 'Transactions',
   },
   onboarding: {
@@ -989,7 +988,7 @@ const en = {
       flat_since: 'No change since {{period}}',
     },
     compare: {
-      pick_hint: 'Tap a category to compare',
+      pick_hint: 'Pick a category',
       add: 'Compare',
       remove: 'Remove comparison',
       summary_more: 'You spent {{percent}}% more on {{first}} than {{second}}',
@@ -1057,10 +1056,6 @@ const en = {
     income_rate_history: 'Income rate history',
     income_rate_history_description:
       'See how your true hourly rate has changed over time across your full transaction history.',
-    charts: {
-      expo_go_fallback:
-        'This chart is unavailable in Expo Go. Open the app in a development build to see the interactive version.',
-    },
     total_expense: 'Total expense',
     total_income: 'Total income',
     no_positive_slices: 'No positive expense slices for this period.',
@@ -1125,13 +1120,13 @@ const en = {
         no_data_message: 'Pick another category or period, or add expenses to see the trend.',
       },
       expense_sentiment: {
-        summary_title: 'Mood breakdown',
+        count_one: '{{count}} expense',
+        count_other: '{{count}} expenses',
         no_data_title: 'No sentiment data yet',
         no_data_message: 'Add expense transactions with mood to see the sentiment chart.',
       },
       asset_history: {
         summary_title: 'Net asset trend',
-        latest: 'Latest',
         empty_no_accounts: {
           title: 'No accounts selected',
           message: 'Include at least one account in filters to chart asset history.',
@@ -1145,9 +1140,6 @@ const en = {
         saved_per_year: '{{value}} saved this year',
         exclusions_active: 'Excluding {{count}} categories from calculation.',
         goal_hint: '20%+ is considered healthy.',
-        status_healthy: 'Healthy',
-        status_building: 'Getting there',
-        status_overspent: 'Overspending',
       },
       income_rate_history: {
         rate_title: 'Income rate',

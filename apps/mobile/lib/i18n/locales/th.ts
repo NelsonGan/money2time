@@ -591,7 +591,6 @@ const th = {
   calendar: {
     income: 'รายรับ',
     expense: 'รายจ่าย',
-    net: 'สุทธิ',
     transactions: 'รายการ',
   },
   onboarding: {
@@ -1010,7 +1009,7 @@ const th = {
       flat_since: 'ไม่เปลี่ยนแปลงตั้งแต่ {{period}}',
     },
     compare: {
-      pick_hint: 'แตะหมวดหมู่เพื่อเปรียบเทียบ',
+      pick_hint: 'เลือกหมวดหมู่',
       add: 'เปรียบเทียบ',
       remove: 'ลบการเปรียบเทียบ',
       summary_more: 'คุณใช้จ่ายกับ {{first}} มากกว่า {{second}} {{percent}}%',
@@ -1069,10 +1068,6 @@ const th = {
     income_rate_history: 'ประวัติอัตรารายรับ',
     income_rate_history_description:
       'ดูว่าอัตรารายชั่วโมงจริงของคุณเปลี่ยนแปลงอย่างไรในประวัติรายการทั้งหมด',
-    charts: {
-      expo_go_fallback:
-        'กราฟนี้ไม่สามารถใช้งานใน Expo Go ได้ เปิดแอปใน development build เพื่อดูเวอร์ชันโต้ตอบ',
-    },
     total_expense: 'รายจ่ายรวม',
     total_income: 'รายรับรวม',
     no_positive_slices: 'ไม่มีรายจ่ายบวกสำหรับช่วงนี้',
@@ -1137,13 +1132,13 @@ const th = {
         no_data_message: 'เลือกหมวดหมู่หรือช่วงเวลาอื่น หรือเพิ่มค่าใช้จ่ายเพื่อดูแนวโน้ม',
       },
       expense_sentiment: {
-        summary_title: 'การแจกแจงอารมณ์',
+        count_one: '{{count}} รายจ่าย',
+        count_other: '{{count}} รายจ่าย',
         no_data_title: 'ยังไม่มีข้อมูลอารมณ์',
         no_data_message: 'เพิ่มรายการรายจ่ายพร้อมอารมณ์เพื่อดูกราฟ',
       },
       asset_history: {
         summary_title: 'แนวโน้มทรัพย์สินสุทธิ',
-        latest: 'ล่าสุด',
         empty_no_accounts: {
           title: 'ไม่ได้เลือกบัญชี',
           message: 'เลือกบัญชีอย่างน้อยหนึ่งบัญชีในตัวกรองเพื่อแสดงกราฟประวัติทรัพย์สิน',
@@ -1157,9 +1152,6 @@ const th = {
         saved_per_year: 'ออมได้ {{value}} ปีนี้',
         exclusions_active: 'ยกเว้น {{count}} หมวดหมู่จากการคำนวณ',
         goal_hint: '20% ขึ้นไปถือว่าดี',
-        status_healthy: 'สุขภาพดี',
-        status_building: 'กำลังไปได้ดี',
-        status_overspent: 'ใช้จ่ายเกิน',
       },
       income_rate_history: {
         rate_title: 'อัตรารายรับ',

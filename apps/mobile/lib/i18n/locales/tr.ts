@@ -592,7 +592,6 @@ const tr = {
   calendar: {
     income: 'Gelir',
     expense: 'Gider',
-    net: 'Net',
     transactions: 'İşlemler',
   },
   onboarding: {
@@ -1013,7 +1012,7 @@ const tr = {
       flat_since: '{{period}} itibarıyla değişiklik yok',
     },
     compare: {
-      pick_hint: 'Karşılaştırmak için bir kategoriye dokun',
+      pick_hint: 'Kategori seç',
       add: 'Karşılaştır',
       remove: 'Karşılaştırmayı kaldır',
       summary_more: '{{first}} için {{second}} kategorisinden %{{percent}} daha fazla harcadın',
@@ -1081,10 +1080,6 @@ const tr = {
     income_rate_history: 'Gelir oranı geçmişi',
     income_rate_history_description:
       'Gerçek saatlik ücretinizin tüm işlem geçmişiniz boyunca nasıl değiştiğini görün.',
-    charts: {
-      expo_go_fallback:
-        "Bu grafik Expo Go'da kullanılamaz. Etkileşimli sürümü görmek için uygulamayı bir geliştirme derlemesinde açın.",
-    },
     total_expense: 'Toplam gider',
     total_income: 'Toplam gelir',
     no_positive_slices: 'Bu dönem için pozitif gider dilimi yok.',
@@ -1151,13 +1146,13 @@ const tr = {
           'Başka bir kategori veya dönem seçin ya da eğilimi görmek için harcama ekleyin.',
       },
       expense_sentiment: {
-        summary_title: 'Duygu dağılımı',
+        count_one: '{{count}} harcama',
+        count_other: '{{count}} harcama',
         no_data_title: 'Henüz duygu verisi yok',
         no_data_message: 'Duygu grafiğini görmek için duygulu gider işlemleri ekleyin.',
       },
       asset_history: {
         summary_title: 'Net varlık eğilimi',
-        latest: 'En son',
         empty_no_accounts: {
           title: 'Hesap seçilmedi',
           message:
@@ -1172,9 +1167,6 @@ const tr = {
         saved_per_year: 'Bu yıl {{value}} tasarruf edildi',
         exclusions_active: '{{count}} kategori hesaplamadan çıkarıldı.',
         goal_hint: '%20 ve üzeri sağlıklı kabul edilir.',
-        status_healthy: 'Sağlıklı',
-        status_building: 'Yolunda',
-        status_overspent: 'Aşırı harcama',
       },
       income_rate_history: {
         rate_title: 'Gelir oranı',

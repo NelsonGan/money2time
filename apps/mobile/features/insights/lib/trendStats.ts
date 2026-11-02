@@ -1,57 +1,41 @@
 /**
- * Summary figures shown beside the Insights trend charts: the average, the
- * highest and lowest bucket, how the selected bucket compares, and how two
- * categories compare. Pure so the rules can be tested.
+ * Summary figures shown with the Insights trend charts: the total and average,
+ * how the selected bucket compares, and how two categories compare. Pure so
+ * the rules can be tested.
  */
-
-export type TrendStatBucket = {
-  key: string;
-  /** Null for a bucket that has not happened yet. */
-  value: number | null;
-};
-
-export type TrendExtreme = { key: string; value: number };
 
 export type TrendSummary = {
   /** Sum of every bucket with a value. */
   total: number;
   /** Mean over the counted buckets, or null when none count. */
   average: number | null;
-  highest: TrendExtreme | null;
-  lowest: TrendExtreme | null;
-  /** How many buckets the average and extremes were taken over. */
+  /** How many buckets the average was taken over. */
   counted: number;
 };
 
 /**
- * `activeOnly` counts only buckets above zero. Spending and income use it: a
- * month before the user started tracking is not a cheap month, and "lowest:
- * January, RM0" says nothing. Balances count every bucket they have.
+ * `activeOnly` averages only buckets above zero. Spending and income use it: a
+ * month before the user started tracking is not a cheap month. Balances count
+ * every bucket they have.
  */
 export function summarizeTrend(
-  buckets: readonly TrendStatBucket[],
+  /** One value per bucket; null for a bucket that has not happened yet. */
+  values: readonly (number | null)[],
   { activeOnly }: { activeOnly: boolean },
 ): TrendSummary {
   let total = 0;
   let sum = 0;
   let counted = 0;
-  let highest: TrendExtreme | null = null;
-  let lowest: TrendExtreme | null = null;
-  buckets.forEach((bucket) => {
-    const value = bucket.value;
+  values.forEach((value) => {
     if (value === null || !Number.isFinite(value)) return;
     total += value;
     if (activeOnly && value <= 0) return;
     sum += value;
     counted += 1;
-    if (!highest || value > highest.value) highest = { key: bucket.key, value };
-    if (!lowest || value < lowest.value) lowest = { key: bucket.key, value };
   });
   return {
     total,
     average: counted > 0 ? sum / counted : null,
-    highest,
-    lowest,
     counted,
   };
 }

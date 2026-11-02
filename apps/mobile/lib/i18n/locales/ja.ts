@@ -593,7 +593,6 @@ const ja = {
   calendar: {
     income: '収入',
     expense: '支出',
-    net: '収支',
     transactions: '取引',
   },
   onboarding: {
@@ -1013,7 +1012,7 @@ const ja = {
       flat_since: '{{period}}から変化なし',
     },
     compare: {
-      pick_hint: '比較するカテゴリをタップ',
+      pick_hint: 'カテゴリを選択',
       add: '比較',
       remove: '比較をやめる',
       summary_more: '{{first}}には{{second}}より{{percent}}%多く使いました',
@@ -1073,10 +1072,6 @@ const ja = {
     income_rate_history: '時給履歴',
     income_rate_history_description:
       '全取引履歴を通じて、真の時給がどのように変化してきたかを確認します。',
-    charts: {
-      expo_go_fallback:
-        'このチャートは Expo Go では表示できません。開発ビルドでアプリを開くとインタラクティブ版を確認できます。',
-    },
     total_expense: '支出合計',
     total_income: '収入合計',
     no_positive_slices: 'この期間の正の支出データがありません。',
@@ -1141,13 +1136,13 @@ const ja = {
         no_data_message: '別のカテゴリや期間を選ぶか、支出を追加して傾向を確認してください。',
       },
       expense_sentiment: {
-        summary_title: '気分の内訳',
+        count_one: '{{count}} 件の支出',
+        count_other: '{{count}} 件の支出',
         no_data_title: '気分データがありません',
         no_data_message: '気分を記録した支出を追加すると気分チャートが表示されます。',
       },
       asset_history: {
         summary_title: '純資産トレンド',
-        latest: '最新',
         empty_no_accounts: {
           title: '口座が選択されていません',
           message: '資産履歴を表示するには、フィルターで少なくとも1つの口座を選択してください。',
@@ -1161,9 +1156,6 @@ const ja = {
         saved_per_year: '今年 {{value}} 貯蓄',
         exclusions_active: '{{count}} 件のカテゴリを除外中。',
         goal_hint: '20%以上が健全とされています。',
-        status_healthy: '健全',
-        status_building: 'あと少し',
-        status_overspent: '使いすぎ',
       },
       income_rate_history: {
         rate_title: '時給',

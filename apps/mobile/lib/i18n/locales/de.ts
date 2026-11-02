@@ -594,7 +594,6 @@ const de = {
   calendar: {
     income: 'Einnahmen',
     expense: 'Ausgaben',
-    net: 'Saldo',
     transactions: 'Transaktionen',
   },
   onboarding: {
@@ -1022,7 +1021,7 @@ const de = {
       flat_since: 'Keine Veränderung seit {{period}}',
     },
     compare: {
-      pick_hint: 'Tippe auf eine Kategorie zum Vergleichen',
+      pick_hint: 'Kategorie wählen',
       add: 'Vergleichen',
       remove: 'Vergleich entfernen',
       summary_more: 'Du hast {{percent}} % mehr für {{first}} ausgegeben als für {{second}}',
@@ -1090,10 +1089,6 @@ const de = {
     income_rate_history: 'Stundenlohn-Verlauf',
     income_rate_history_description:
       'Sieh, wie sich dein echter Stundenlohn über die gesamte Transaktionshistorie entwickelt hat.',
-    charts: {
-      expo_go_fallback:
-        'Dieses Diagramm ist in Expo Go nicht verfügbar. Öffne die App in einem Development-Build, um die interaktive Version zu sehen.',
-    },
     total_expense: 'Gesamtausgaben',
     total_income: 'Gesamteinnahmen',
     no_positive_slices: 'Keine positiven Ausgabenwerte für diesen Zeitraum.',
@@ -1161,13 +1156,13 @@ const de = {
           'Wähle eine andere Kategorie oder Periode oder füge Ausgaben hinzu, um den Trend zu sehen.',
       },
       expense_sentiment: {
-        summary_title: 'Stimmungsverteilung',
+        count_one: '{{count}} Ausgabe',
+        count_other: '{{count}} Ausgaben',
         no_data_title: 'Noch keine Stimmungsdaten',
         no_data_message: 'Füge Ausgaben mit Stimmung hinzu, um das Diagramm zu sehen.',
       },
       asset_history: {
         summary_title: 'Nettovermögenstrend',
-        latest: 'Aktuell',
         empty_no_accounts: {
           title: 'Keine Konten ausgewählt',
           message:
@@ -1182,9 +1177,6 @@ const de = {
         saved_per_year: '{{value}} dieses Jahr gespart',
         exclusions_active: '{{count}} Kategorien von der Berechnung ausgeschlossen.',
         goal_hint: '20 %+ gilt als gesund.',
-        status_healthy: 'Gesund',
-        status_building: 'Auf gutem Weg',
-        status_overspent: 'Zu viel ausgegeben',
       },
       income_rate_history: {
         rate_title: 'Einnahmenrate',

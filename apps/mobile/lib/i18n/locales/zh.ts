@@ -565,7 +565,6 @@ const zh = {
   calendar: {
     income: '收入',
     expense: '支出',
-    net: '净额',
     transactions: '交易',
   },
   onboarding: {
@@ -979,7 +978,7 @@ const zh = {
       flat_since: '自 {{period}} 起没有变化',
     },
     compare: {
-      pick_hint: '点按一个分类进行对比',
+      pick_hint: '选择分类',
       add: '对比',
       remove: '取消对比',
       summary_more: '你在 {{first}} 上比 {{second}} 多花了 {{percent}}%',
@@ -1036,9 +1035,6 @@ const zh = {
     asset_history_description: '追踪全年总资产变化，查看月度余额趋势。',
     income_rate_history: '时薪历史',
     income_rate_history_description: '查看你的真实时薪在整个交易历史中的变化。',
-    charts: {
-      expo_go_fallback: '该图表在 Expo Go 中不可用。请使用 development build 查看可交互版本。',
-    },
     total_expense: '总支出',
     total_income: '总收入',
     no_positive_slices: '本期无正值支出数据。',
@@ -1103,13 +1099,13 @@ const zh = {
         no_data_message: '选择其他分类或时间段，或添加支出以查看趋势。',
       },
       expense_sentiment: {
-        summary_title: '情绪分布',
+        count_one: '{{count}} 笔支出',
+        count_other: '{{count}} 笔支出',
         no_data_title: '暂无情绪数据',
         no_data_message: '为支出添加情绪标签后，即可查看情绪图表。',
       },
       asset_history: {
         summary_title: '净资产趋势',
-        latest: '最新',
         empty_no_accounts: {
           title: '未选择账户',
           message: '在筛选中至少选择一个账户以绘制资产历史图表。',
@@ -1123,9 +1119,6 @@ const zh = {
         saved_per_year: '今年已节省 {{value}}',
         exclusions_active: '已排除 {{count}} 个分类。',
         goal_hint: '20% 以上为健康储蓄。',
-        status_healthy: '健康',
-        status_building: '渐入佳境',
-        status_overspent: '超支',
       },
       income_rate_history: {
         rate_title: '时薪',

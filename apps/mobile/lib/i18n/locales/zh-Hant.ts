@@ -565,7 +565,6 @@ const zhHant = {
   calendar: {
     income: '收入',
     expense: '支出',
-    net: '淨額',
     transactions: '交易',
   },
   onboarding: {
@@ -979,7 +978,7 @@ const zhHant = {
       flat_since: '自 {{period}} 起沒有變化',
     },
     compare: {
-      pick_hint: '點按一個分類進行比較',
+      pick_hint: '選擇分類',
       add: '比較',
       remove: '取消比較',
       summary_more: '你在 {{first}} 上比 {{second}} 多花了 {{percent}}%',
@@ -1036,9 +1035,6 @@ const zhHant = {
     asset_history_description: '追蹤全年總資產變化，檢視月度餘額趨勢。',
     income_rate_history: '時薪歷史',
     income_rate_history_description: '檢視你的真實時薪在整個交易歷史中的變化。',
-    charts: {
-      expo_go_fallback: '該圖表在 Expo Go 中不可用。請使用 development build 檢視可互動版本。',
-    },
     total_expense: '總支出',
     total_income: '總收入',
     no_positive_slices: '本期無正值支出資料。',
@@ -1103,13 +1099,13 @@ const zhHant = {
         no_data_message: '選擇其他分類或時間段，或新增支出以檢視趨勢。',
       },
       expense_sentiment: {
-        summary_title: '情緒分佈',
+        count_one: '{{count}} 筆支出',
+        count_other: '{{count}} 筆支出',
         no_data_title: '暫無情緒資料',
         no_data_message: '為支出新增情緒標籤後，即可檢視情緒圖表。',
       },
       asset_history: {
         summary_title: '淨資產趨勢',
-        latest: '最新',
         empty_no_accounts: {
           title: '未選擇帳戶',
           message: '在篩選中至少選擇一個帳戶以繪製資產歷史圖表。',
@@ -1123,9 +1119,6 @@ const zhHant = {
         saved_per_year: '今年已節省 {{value}}',
         exclusions_active: '已排除 {{count}} 個分類。',
         goal_hint: '20% 以上為健康儲蓄。',
-        status_healthy: '健康',
-        status_building: '漸入佳境',
-        status_overspent: '超支',
       },
       income_rate_history: {
         rate_title: '時薪',

@@ -14,7 +14,7 @@ export const INSIGHT_GROUP_MEMBERS = {
 export type InsightGroupId = keyof typeof INSIGHT_GROUP_MEMBERS;
 export type GroupedInsightType = (typeof INSIGHT_GROUP_MEMBERS)[InsightGroupId][number];
 
-export const INSIGHT_GROUP_IDS = Object.keys(INSIGHT_GROUP_MEMBERS) as InsightGroupId[];
+const INSIGHT_GROUP_IDS = Object.keys(INSIGHT_GROUP_MEMBERS) as InsightGroupId[];
 
 /** The insights menu, in order: single pages by type, grouped ones by group. */
 export const INSIGHT_MENU_ENTRIES = [
@@ -25,7 +25,6 @@ export const INSIGHT_MENU_ENTRIES = [
   'trends',
   'expense_sentiment',
 ] as const;
-export type InsightMenuEntry = (typeof INSIGHT_MENU_ENTRIES)[number];
 
 export function isInsightGroupId(value: string): value is InsightGroupId {
   return Object.prototype.hasOwnProperty.call(INSIGHT_GROUP_MEMBERS, value);

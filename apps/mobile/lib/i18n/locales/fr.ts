@@ -594,7 +594,6 @@ const fr = {
   calendar: {
     income: 'Revenus',
     expense: 'Dépenses',
-    net: 'Net',
     transactions: 'Transactions',
   },
   onboarding: {
@@ -1017,7 +1016,7 @@ const fr = {
       flat_since: 'Aucun changement depuis {{period}}',
     },
     compare: {
-      pick_hint: 'Touchez une catégorie pour comparer',
+      pick_hint: 'Choisissez une catégorie',
       add: 'Comparer',
       remove: 'Retirer la comparaison',
       summary_more: 'Vous avez dépensé {{percent}} % de plus en {{first}} qu’en {{second}}',
@@ -1084,10 +1083,6 @@ const fr = {
     income_rate_history: 'Historique du taux horaire',
     income_rate_history_description:
       "Voyez comment votre vrai taux horaire a évolué dans l'ensemble de votre historique.",
-    charts: {
-      expo_go_fallback:
-        "Ce graphique n'est pas disponible dans Expo Go. Ouvrez l'application dans un build de développement pour voir la version interactive.",
-    },
     total_expense: 'Total dépenses',
     total_income: 'Total revenus',
     no_positive_slices: 'Aucune dépense positive pour cette période.',
@@ -1154,13 +1149,13 @@ const fr = {
           'Choisissez une autre catégorie ou période, ou ajoutez des dépenses pour voir la tendance.',
       },
       expense_sentiment: {
-        summary_title: "Répartition de l'humeur",
+        count_one: '{{count}} dépense',
+        count_other: '{{count}} dépenses',
         no_data_title: "Pas encore de données d'humeur",
         no_data_message: 'Ajoutez des transactions avec une humeur pour voir le graphique.',
       },
       asset_history: {
         summary_title: 'Tendance des actifs nets',
-        latest: 'Dernier',
         empty_no_accounts: {
           title: 'Aucun compte sélectionné',
           message:
@@ -1175,9 +1170,6 @@ const fr = {
         saved_per_year: '{{value}} épargnés cette année',
         exclusions_active: '{{count}} catégories exclues du calcul.',
         goal_hint: '20 % ou plus est considéré comme sain.',
-        status_healthy: 'Sain',
-        status_building: 'En bonne voie',
-        status_overspent: 'Dépenses excessives',
       },
       income_rate_history: {
         rate_title: 'Taux horaire',

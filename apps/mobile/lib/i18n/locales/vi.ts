@@ -592,7 +592,6 @@ const vi = {
   calendar: {
     income: 'Thu nhập',
     expense: 'Chi tiêu',
-    net: 'Ròng',
     transactions: 'Giao dịch',
   },
   onboarding: {
@@ -1013,7 +1012,7 @@ const vi = {
       flat_since: 'Không đổi từ {{period}}',
     },
     compare: {
-      pick_hint: 'Chạm vào danh mục để so sánh',
+      pick_hint: 'Chọn danh mục',
       add: 'So sánh',
       remove: 'Bỏ so sánh',
       summary_more: 'Bạn chi cho {{first}} nhiều hơn {{second}} {{percent}}%',
@@ -1075,10 +1074,6 @@ const vi = {
     income_rate_history: 'Lịch sử lương giờ',
     income_rate_history_description:
       'Xem lương thực tế của bạn thay đổi theo thời gian qua toàn bộ lịch sử giao dịch.',
-    charts: {
-      expo_go_fallback:
-        'Biểu đồ này không khả dụng trong Expo Go. Mở ứng dụng trong development build để xem phiên bản tương tác.',
-    },
     total_expense: 'Tổng chi tiêu',
     total_income: 'Tổng thu nhập',
     no_positive_slices: 'Không có dữ liệu chi tiêu dương trong kỳ này.',
@@ -1144,13 +1139,13 @@ const vi = {
           'Chọn danh mục hoặc khoảng thời gian khác, hoặc thêm chi tiêu để xem xu hướng.',
       },
       expense_sentiment: {
-        summary_title: 'Phân tích cảm xúc',
+        count_one: '{{count}} khoản chi',
+        count_other: '{{count}} khoản chi',
         no_data_title: 'Chưa có dữ liệu cảm xúc',
         no_data_message: 'Thêm giao dịch chi tiêu kèm cảm xúc để xem biểu đồ.',
       },
       asset_history: {
         summary_title: 'Xu hướng tài sản ròng',
-        latest: 'Mới nhất',
         empty_no_accounts: {
           title: 'Chưa chọn tài khoản',
           message: 'Bao gồm ít nhất một tài khoản trong bộ lọc để vẽ biểu đồ tài sản.',
@@ -1164,9 +1159,6 @@ const vi = {
         saved_per_year: '{{value}} tiết kiệm năm nay',
         exclusions_active: 'Đang loại trừ {{count}} danh mục khỏi tính toán.',
         goal_hint: 'Trên 20% được coi là lành mạnh.',
-        status_healthy: 'Lành mạnh',
-        status_building: 'Đang tiến bộ',
-        status_overspent: 'Chi tiêu quá mức',
       },
       income_rate_history: {
         rate_title: 'Lương giờ',

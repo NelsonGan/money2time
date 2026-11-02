@@ -46,39 +46,23 @@ describe('insight groups', () => {
 });
 
 describe('summarizeTrend', () => {
-  const buckets = [
-    { key: '2026-01', value: 0 },
-    { key: '2026-02', value: 1120 },
-    { key: '2026-03', value: 2640 },
-    { key: '2026-04', value: 1790 },
-    { key: '2026-05', value: null },
-  ];
+  const buckets = [0, 1120, 2640, 1790, null];
 
   it('averages active months and ignores empty and future ones', () => {
     const summary = summarizeTrend(buckets, { activeOnly: true });
     expect(summary.total).toBe(5550);
     expect(summary.counted).toBe(3);
     expect(summary.average).toBeCloseTo(1850);
-    expect(summary.highest).toEqual({ key: '2026-03', value: 2640 });
-    expect(summary.lowest).toEqual({ key: '2026-02', value: 1120 });
   });
 
   it('counts every valued bucket for a balance, negatives included', () => {
-    const summary = summarizeTrend(
-      [
-        { key: 'a', value: -500 },
-        { key: 'b', value: 0 },
-        { key: 'c', value: null },
-      ],
-      { activeOnly: false },
-    );
+    const summary = summarizeTrend([-500, 0, null], { activeOnly: false });
     expect(summary.counted).toBe(2);
-    expect(summary.lowest).toEqual({ key: 'a', value: -500 });
-    expect(summary.highest).toEqual({ key: 'b', value: 0 });
+    expect(summary.average).toBe(-250);
   });
 
   it('has no average when nothing counts', () => {
-    expect(summarizeTrend([{ key: 'a', value: 0 }], { activeOnly: true }).average).toBeNull();
+    expect(summarizeTrend([0], { activeOnly: true }).average).toBeNull();
   });
 });
 

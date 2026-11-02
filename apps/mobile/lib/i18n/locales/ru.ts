@@ -592,7 +592,6 @@ const ru = {
   calendar: {
     income: 'Доход',
     expense: 'Расход',
-    net: 'Итого',
     transactions: 'Транзакции',
   },
   onboarding: {
@@ -1015,7 +1014,7 @@ const ru = {
       flat_since: 'Без изменений с {{period}}',
     },
     compare: {
-      pick_hint: 'Нажмите на категорию для сравнения',
+      pick_hint: 'Выберите категорию',
       add: 'Сравнить',
       remove: 'Убрать сравнение',
       summary_more: 'На {{first}} вы потратили на {{percent}}% больше, чем на {{second}}',
@@ -1082,10 +1081,6 @@ const ru = {
     income_rate_history: 'История ставки дохода',
     income_rate_history_description:
       'Смотрите, как изменялась ваша реальная ставка с течением времени за всю историю транзакций.',
-    charts: {
-      expo_go_fallback:
-        'Этот график недоступен в Expo Go. Откройте приложение в development build для интерактивной версии.',
-    },
     total_expense: 'Общие расходы',
     total_income: 'Общий доход',
     no_positive_slices: 'Нет положительных расходов за этот период.',
@@ -1151,13 +1146,13 @@ const ru = {
           'Выберите другую категорию или период либо добавьте расходы, чтобы увидеть тренд.',
       },
       expense_sentiment: {
-        summary_title: 'Распределение настроения',
+        count_one: '{{count}} расход',
+        count_other: '{{count}} расходов',
         no_data_title: 'Нет данных о настроении',
         no_data_message: 'Добавьте расходы с настроением для просмотра графика.',
       },
       asset_history: {
         summary_title: 'Тренд чистых активов',
-        latest: 'Последнее',
         empty_no_accounts: {
           title: 'Счета не выбраны',
           message: 'Включите хотя бы один счёт в фильтры для построения истории активов.',
@@ -1171,9 +1166,6 @@ const ru = {
         saved_per_year: '{{value}} сохранено в этом году',
         exclusions_active: 'Исключены {{count}} категории из расчёта.',
         goal_hint: '20%+ считается здоровым показателем.',
-        status_healthy: 'Здоровый уровень',
-        status_building: 'На верном пути',
-        status_overspent: 'Перерасход',
       },
       income_rate_history: {
         rate_title: 'Ставка дохода',

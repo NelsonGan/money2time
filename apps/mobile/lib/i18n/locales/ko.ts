@@ -591,7 +591,6 @@ const ko = {
   calendar: {
     income: '수입',
     expense: '지출',
-    net: '순액',
     transactions: '거래',
   },
   onboarding: {
@@ -1009,7 +1008,7 @@ const ko = {
       flat_since: '{{period}} 이후 변화 없음',
     },
     compare: {
-      pick_hint: '비교할 카테고리를 탭하세요',
+      pick_hint: '카테고리 선택',
       add: '비교',
       remove: '비교 제거',
       summary_more: '{{second}}보다 {{first}}에 {{percent}}% 더 썼어요',
@@ -1068,10 +1067,6 @@ const ko = {
     income_rate_history: '시급 내역',
     income_rate_history_description:
       '전체 거래 내역에 걸쳐 실제 시급이 어떻게 변화했는지 확인하세요.',
-    charts: {
-      expo_go_fallback:
-        'Expo Go에서는 이 차트를 사용할 수 없습니다. 개발 빌드에서 앱을 열어 인터랙티브 버전을 확인하세요.',
-    },
     total_expense: '총 지출',
     total_income: '총 수입',
     no_positive_slices: '이 기간에 양수 지출 항목이 없습니다.',
@@ -1136,13 +1131,13 @@ const ko = {
         no_data_message: '다른 카테고리나 기간을 선택하거나 지출을 추가하면 추세를 볼 수 있습니다.',
       },
       expense_sentiment: {
-        summary_title: '감정 분포',
+        count_one: '지출 {{count}}건',
+        count_other: '지출 {{count}}건',
         no_data_title: '감정 데이터 없음',
         no_data_message: '감정 차트를 보려면 감정이 설정된 지출 거래를 추가하세요.',
       },
       asset_history: {
         summary_title: '순자산 추세',
-        latest: '최신',
         empty_no_accounts: {
           title: '계좌가 선택되지 않음',
           message: '자산 내역 차트를 보려면 필터에서 최소 1개의 계좌를 포함하세요.',
@@ -1156,9 +1151,6 @@ const ko = {
         saved_per_year: '올해 {{value}} 저축',
         exclusions_active: '{{count}}개 카테고리 제외 중.',
         goal_hint: '20% 이상이 건강한 저축률입니다.',
-        status_healthy: '건강함',
-        status_building: '순항 중',
-        status_overspent: '과소비',
       },
       income_rate_history: {
         rate_title: '수입 시급',

@@ -593,7 +593,6 @@ const uk = {
   calendar: {
     income: 'Дохід',
     expense: 'Витрата',
-    net: 'Різниця',
     transactions: 'Операції',
   },
   onboarding: {
@@ -1014,7 +1013,7 @@ const uk = {
       flat_since: 'Без змін з {{period}}',
     },
     compare: {
-      pick_hint: 'Торкніться категорії для порівняння',
+      pick_hint: 'Оберіть категорію',
       add: 'Порівняти',
       remove: 'Прибрати порівняння',
       summary_more: 'На {{first}} ви витратили на {{percent}}% більше, ніж на {{second}}',
@@ -1078,10 +1077,6 @@ const uk = {
     income_rate_history: 'Історія погодинної ставки',
     income_rate_history_description:
       'Як змінювалася ваша реальна погодинна ставка з часом в усій історії операцій.',
-    charts: {
-      expo_go_fallback:
-        'Цей графік недоступний у Expo Go. Відкрийте додаток у development build, щоб побачити інтерактивну версію.',
-    },
     total_expense: 'Загальні витрати',
     total_income: 'Загальний дохід',
     no_positive_slices: 'Немає позитивних витрат за цей період.',
@@ -1147,13 +1142,13 @@ const uk = {
           'Виберіть іншу категорію чи період або додайте витрати, щоб побачити тренд.',
       },
       expense_sentiment: {
-        summary_title: 'Розподіл настрою',
+        count_one: '{{count}} витрата',
+        count_other: '{{count}} витрат',
         no_data_title: 'Даних про настрій ще немає',
         no_data_message: 'Додайте операції витрат з настроєм, щоб побачити графік.',
       },
       asset_history: {
         summary_title: 'Тренд чистих активів',
-        latest: 'Останнє',
         empty_no_accounts: {
           title: 'Рахунки не вибрані',
           message: 'Увімкніть хоча б один рахунок у фільтрах для побудови графіка активів.',
@@ -1167,9 +1162,6 @@ const uk = {
         saved_per_year: '{{value}} заощаджено цього року',
         exclusions_active: 'Виключено {{count}} категорій з розрахунку.',
         goal_hint: '20%+ вважається здоровим рівнем.',
-        status_healthy: 'Здоровий рівень',
-        status_building: 'На правильному шляху',
-        status_overspent: 'Перевитрата',
       },
       income_rate_history: {
         rate_title: 'Погодинна ставка',

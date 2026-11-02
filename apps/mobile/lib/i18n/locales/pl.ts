@@ -593,7 +593,6 @@ const pl = {
   calendar: {
     income: 'Przychód',
     expense: 'Wydatek',
-    net: 'Saldo',
     transactions: 'Transakcje',
   },
   onboarding: {
@@ -1015,7 +1014,7 @@ const pl = {
       flat_since: 'Bez zmian od {{period}}',
     },
     compare: {
-      pick_hint: 'Stuknij kategorię do porównania',
+      pick_hint: 'Wybierz kategorię',
       add: 'Porównaj',
       remove: 'Usuń porównanie',
       summary_more: 'Na {{first}} wydano {{percent}}% więcej niż na {{second}}',
@@ -1082,10 +1081,6 @@ const pl = {
     income_rate_history: 'Historia stawki godzinowej',
     income_rate_history_description:
       'Zobacz, jak zmieniała się twoja rzeczywista stawka godzinowa w całej historii transakcji.',
-    charts: {
-      expo_go_fallback:
-        'Ten wykres jest niedostępny w Expo Go. Otwórz aplikację w buildzie deweloperskim, aby zobaczyć interaktywną wersję.',
-    },
     total_expense: 'Łączne wydatki',
     total_income: 'Łączne przychody',
     no_positive_slices: 'Brak dodatnich wydatków w tym okresie.',
@@ -1151,13 +1146,13 @@ const pl = {
         no_data_message: 'Wybierz inną kategorię lub okres albo dodaj wydatki, aby zobaczyć trend.',
       },
       expense_sentiment: {
-        summary_title: 'Rozkład nastroju',
+        count_one: '{{count}} wydatek',
+        count_other: '{{count}} wydatków',
         no_data_title: 'Brak danych nastrojów',
         no_data_message: 'Dodaj transakcje wydatków z nastrojem, by zobaczyć wykres.',
       },
       asset_history: {
         summary_title: 'Trend aktywów netto',
-        latest: 'Ostatnie',
         empty_no_accounts: {
           title: 'Nie wybrano kont',
           message: 'Uwzględnij co najmniej jedno konto w filtrach, by zobaczyć historię aktywów.',
@@ -1171,9 +1166,6 @@ const pl = {
         saved_per_year: '{{value}} oszczędzono w tym roku',
         exclusions_active: 'Wyłączono {{count}} kategorii z obliczeń.',
         goal_hint: '20%+ uważane jest za zdrowy poziom.',
-        status_healthy: 'Zdrowo',
-        status_building: 'Na dobrej drodze',
-        status_overspent: 'Nadmierne wydatki',
       },
       income_rate_history: {
         rate_title: 'Stawka przychodu',

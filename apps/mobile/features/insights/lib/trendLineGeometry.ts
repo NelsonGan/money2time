@@ -4,12 +4,6 @@
  * is over. Kept free of React and Skia so it can be unit tested.
  */
 
-export type TrendLineBucket = {
-  key: string;
-  /** Text under the point on the x axis. */
-  label: string;
-};
-
 export type TrendLineSeriesValues = readonly (number | null)[];
 
 export type TrendLineScale = {

@@ -592,7 +592,6 @@ const pt = {
   calendar: {
     income: 'Receita',
     expense: 'Despesa',
-    net: 'Saldo',
     transactions: 'Transações',
   },
   onboarding: {
@@ -1016,7 +1015,7 @@ const pt = {
       flat_since: 'Sem mudança desde {{period}}',
     },
     compare: {
-      pick_hint: 'Toque numa categoria para comparar',
+      pick_hint: 'Escolha uma categoria',
       add: 'Comparar',
       remove: 'Remover comparação',
       summary_more: 'Você gastou {{percent}}% a mais com {{first}} do que com {{second}}',
@@ -1084,10 +1083,6 @@ const pt = {
     income_rate_history: 'Histórico do valor/hora',
     income_rate_history_description:
       'Veja como seu valor/hora real mudou ao longo do tempo em todo o histórico de transações.',
-    charts: {
-      expo_go_fallback:
-        'Este gráfico não está disponível no Expo Go. Abra o app em uma build de desenvolvimento para ver a versão interativa.',
-    },
     total_expense: 'Total de despesas',
     total_income: 'Total de receitas',
     no_positive_slices: 'Nenhuma fatia positiva de despesa neste período.',
@@ -1154,13 +1149,13 @@ const pt = {
           'Escolha outra categoria ou período, ou adicione despesas para ver a tendência.',
       },
       expense_sentiment: {
-        summary_title: 'Distribuição de humor',
+        count_one: '{{count}} despesa',
+        count_other: '{{count}} despesas',
         no_data_title: 'Sem dados de humor ainda',
         no_data_message: 'Adicione despesas com humor para ver o gráfico de sentimentos.',
       },
       asset_history: {
         summary_title: 'Tendência de ativos líquidos',
-        latest: 'Mais recente',
         empty_no_accounts: {
           title: 'Nenhuma conta selecionada',
           message: 'Inclua pelo menos uma conta nos filtros para ver o histórico de ativos.',
@@ -1174,9 +1169,6 @@ const pt = {
         saved_per_year: '{{value}} economizado este ano',
         exclusions_active: 'Excluindo {{count}} categorias do cálculo.',
         goal_hint: '20%+ é considerado saudável.',
-        status_healthy: 'Saudável',
-        status_building: 'No caminho certo',
-        status_overspent: 'Gastando demais',
       },
       income_rate_history: {
         rate_title: 'Taxa de receita',

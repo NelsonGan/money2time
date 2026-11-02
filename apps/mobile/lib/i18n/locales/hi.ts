@@ -592,7 +592,6 @@ const hi = {
   calendar: {
     income: 'आय',
     expense: 'खर्च',
-    net: 'नेट',
     transactions: 'लेनदेन',
   },
   onboarding: {
@@ -1014,7 +1013,7 @@ const hi = {
       flat_since: '{{period}} से कोई बदलाव नहीं',
     },
     compare: {
-      pick_hint: 'तुलना के लिए कोई श्रेणी टैप करें',
+      pick_hint: 'श्रेणी चुनें',
       add: 'तुलना करें',
       remove: 'तुलना हटाएँ',
       summary_more: 'आपने {{second}} की तुलना में {{first}} पर {{percent}}% अधिक खर्च किया',
@@ -1078,10 +1077,6 @@ const hi = {
     income_rate_history: 'आय दर इतिहास',
     income_rate_history_description:
       'देखें कि आपकी सच्ची प्रति घंटा दर पूरे लेनदेन इतिहास में कैसे बदली।',
-    charts: {
-      expo_go_fallback:
-        'यह चार्ट Expo Go में उपलब्ध नहीं है। इंटरेक्टिव संस्करण देखने के लिए development build में ऐप खोलें।',
-    },
     total_expense: 'कुल खर्च',
     total_income: 'कुल आय',
     no_positive_slices: 'इस अवधि के लिए कोई सकारात्मक खर्च स्लाइस नहीं।',
@@ -1146,13 +1141,13 @@ const hi = {
         no_data_message: 'दूसरी श्रेणी या अवधि चुनें, या रुझान देखने के लिए खर्च जोड़ें।',
       },
       expense_sentiment: {
-        summary_title: 'मूड ब्रेकडाउन',
+        count_one: '{{count}} खर्च',
+        count_other: '{{count}} खर्च',
         no_data_title: 'अभी कोई भावना डेटा नहीं',
         no_data_message: 'भावना चार्ट देखने के लिए मूड के साथ खर्च लेनदेन जोड़ें।',
       },
       asset_history: {
         summary_title: 'नेट संपत्ति ट्रेंड',
-        latest: 'नवीनतम',
         empty_no_accounts: {
           title: 'कोई खाता नहीं चुना',
           message: 'संपत्ति इतिहास चार्ट के लिए फ़िल्टर में कम से कम एक खाता शामिल करें।',
@@ -1166,9 +1161,6 @@ const hi = {
         saved_per_year: 'इस साल {{value}} बचाया',
         exclusions_active: '{{count}} श्रेणियां गणना से बाहर।',
         goal_hint: '20%+ स्वस्थ माना जाता है।',
-        status_healthy: 'स्वस्थ',
-        status_building: 'सही राह पर',
-        status_overspent: 'अधिक खर्च',
       },
       income_rate_history: {
         rate_title: 'आय दर',

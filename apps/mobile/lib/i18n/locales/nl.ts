@@ -593,7 +593,6 @@ const nl = {
   calendar: {
     income: 'Inkomsten',
     expense: 'Uitgaven',
-    net: 'Netto',
     transactions: 'Transacties',
   },
   onboarding: {
@@ -1017,7 +1016,7 @@ const nl = {
       flat_since: 'Geen verandering sinds {{period}}',
     },
     compare: {
-      pick_hint: 'Tik op een categorie om te vergelijken',
+      pick_hint: 'Kies een categorie',
       add: 'Vergelijken',
       remove: 'Vergelijking verwijderen',
       summary_more: 'Je gaf {{percent}}% meer uit aan {{first}} dan aan {{second}}',
@@ -1085,10 +1084,6 @@ const nl = {
     income_rate_history: 'Uurtarief-geschiedenis',
     income_rate_history_description:
       'Zie hoe je echte uurtarief in de loop van de tijd is veranderd over je volledige transactiegeschiedenis.',
-    charts: {
-      expo_go_fallback:
-        'Deze grafiek is niet beschikbaar in Expo Go. Open de app in een development build om de interactieve versie te zien.',
-    },
     total_expense: 'Totale uitgaven',
     total_income: 'Totale inkomsten',
     no_positive_slices: 'Geen positieve uitgavensegmenten voor deze periode.',
@@ -1155,14 +1150,14 @@ const nl = {
           'Kies een andere categorie of periode, of voeg uitgaven toe om de trend te zien.',
       },
       expense_sentiment: {
-        summary_title: 'Stemmingsverdeling',
+        count_one: '{{count}} uitgave',
+        count_other: '{{count}} uitgaven',
         no_data_title: 'Nog geen stemmingsdata',
         no_data_message:
           'Voeg uitgaventransacties met stemming toe om de stemmingsgrafiek te zien.',
       },
       asset_history: {
         summary_title: 'Nettovermogenstrend',
-        latest: 'Meest recent',
         empty_no_accounts: {
           title: 'Geen rekeningen geselecteerd',
           message:
@@ -1177,9 +1172,6 @@ const nl = {
         saved_per_year: '{{value}} gespaard dit jaar',
         exclusions_active: '{{count}} categorieën uitgesloten van berekening.',
         goal_hint: '20%+ wordt als gezond beschouwd.',
-        status_healthy: 'Gezond',
-        status_building: 'Op de goede weg',
-        status_overspent: 'Te veel uitgegeven',
       },
       income_rate_history: {
         rate_title: 'Inkomstenpercentage',
