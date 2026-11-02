@@ -1,4 +1,4 @@
-import { Check, ChevronRight, Minus, Pencil, Plus, X } from 'lucide-react-native';
+import { Check, ChevronRight, Info, Minus, Pencil, Plus, RotateCcw, X } from 'lucide-react-native';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Keyboard, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller';
@@ -192,31 +192,47 @@ export function InstalmentSheet({
                 <View className="items-center gap-4" accessibilityLiveRegion="polite">
                   {canSplit ? (
                     <>
-                      <PaymentAmount
-                        amount={plan.regular}
-                        evenAmount={splitInstalmentAmounts(total, choice.count)[0] ?? 0}
-                        currency={currency}
-                        perLabel={I18n.t(`instalments.per.${choice.frequency}`)}
-                        money={money}
-                        onChange={(amount) => setChoice((previous) => ({ ...previous, amount }))}
-                      />
+                      <View className="items-center gap-1">
+                        <PaymentAmount
+                          amount={plan.regular}
+                          evenAmount={splitInstalmentAmounts(total, choice.count)[0] ?? 0}
+                          currency={currency}
+                          perLabel={I18n.t(`instalments.per.${choice.frequency}`)}
+                          money={money}
+                          onChange={(amount) => setChoice((previous) => ({ ...previous, amount }))}
+                        />
+                        {/* Only once the bank's amount is typed: the way back. */}
+                        {plan.custom ? (
+                          <Pressable
+                            onPress={() => {
+                              void triggerHaptic('selection');
+                              setChoice((previous) => ({ ...previous, amount: null }));
+                            }}
+                            accessibilityRole="button"
+                            hitSlop={8}
+                            className="flex-row items-center gap-1.5 active:opacity-70"
+                          >
+                            <RotateCcw size={14} color={themeColors.primary} />
+                            <Text variant="caption" tone="primary" className="font-semibold">
+                              {I18n.t('instalments.split_evenly')}
+                            </Text>
+                          </Pressable>
+                        ) : null}
+                      </View>
                       <PaymentTimeline
                         count={choice.count}
                         from={formatPlanDay(firstPaymentIso)}
                         to={formatPlanDay(plan.lastDate)}
+                        lastAmount={plan.custom && plan.valid ? money(plan.last) : null}
                       />
-                      {plan.custom ? (
-                        <AmountBalance
-                          valid={plan.valid}
-                          last={plan.last}
-                          regular={plan.regular}
-                          count={choice.count}
-                          total={total}
+                      {plan.custom &&
+                      (!plan.valid ||
+                        regularAmountImpliesOtherTotal(total, choice.count, plan.regular)) ? (
+                        <InterestTotal
+                          sum={Math.round(plan.regular * 100 * choice.count) / 100}
+                          needed={!plan.valid}
                           money={money}
-                          onSplitEvenly={() =>
-                            setChoice((previous) => ({ ...previous, amount: null }))
-                          }
-                          onSetTotal={(sum) => {
+                          onUse={(sum) => {
                             // Amount × payments is the new total, so the even
                             // split is the bank's amount exactly.
                             onSetTotal(sum);
@@ -451,69 +467,47 @@ function PaymentAmount({
 }
 
 /**
- * How a set amount balances: the last payment takes what the others leave.
- * When the payments come to clearly more than the total (interest or a
- * fee), it offers that sum as the total instead.
+ * When the bank's amount × payments is clearly more than the total (interest
+ * or a fee), one quiet row offers that sum as the total. When the amount
+ * leaves nothing for the last payment it is the only way on, so it is red.
  */
-function AmountBalance({
-  valid,
-  last,
-  regular,
-  count,
-  total,
+function InterestTotal({
+  sum,
+  needed,
   money,
-  onSplitEvenly,
-  onSetTotal,
+  onUse,
 }: {
-  valid: boolean;
-  last: number;
-  regular: number;
-  count: number;
-  total: number;
+  sum: number;
+  needed: boolean;
   money: (amount: number) => string;
-  onSplitEvenly: () => void;
-  onSetTotal: (total: number) => void;
+  onUse: (sum: number) => void;
 }) {
-  const sum = Math.round(regular * 100 * count) / 100;
-  const offerTotal = !valid || regularAmountImpliesOtherTotal(total, count, regular);
+  const themeColors = useThemeColors();
+  const tint = needed ? themeColors.error : themeColors.textMuted;
   return (
-    <View className="gap-2 self-stretch">
-      <View className="flex-row items-center justify-between gap-3">
-        <Text
-          variant="caption"
-          tone={valid ? 'muted' : 'error'}
-          className="min-w-0 flex-1"
-          numberOfLines={2}
-        >
-          {valid
-            ? I18n.t('instalments.last_payment', { amount: money(last) })
-            : I18n.t('instalments.amount_over_total', {
-                amount: money(regular),
-                count,
-                sum: money(sum),
-              })}
+    <Pressable
+      onPress={() => {
+        void triggerHaptic('selection');
+        onUse(sum);
+      }}
+      accessibilityRole="button"
+      className="flex-row items-center gap-3 self-stretch border-y border-border/30 py-2.5 active:opacity-70"
+    >
+      <Info size={18} color={tint} />
+      <Text
+        variant="body"
+        tone={needed ? 'error' : 'muted'}
+        className="min-w-0 flex-1"
+        numberOfLines={1}
+      >
+        {I18n.t('instalments.total_with_interest', { amount: money(sum) })}
+      </Text>
+      <View className="rounded-full bg-primary/10 px-3 py-1">
+        <Text variant="caption" tone="primary" className="font-semibold">
+          {I18n.t('instalments.use_total')}
         </Text>
-        <Pressable onPress={onSplitEvenly} accessibilityRole="button" hitSlop={8}>
-          <Text variant="caption" tone="primary" className="font-semibold">
-            {I18n.t('instalments.split_evenly')}
-          </Text>
-        </Pressable>
       </View>
-      {offerTotal ? (
-        <Pressable
-          onPress={() => {
-            void triggerHaptic('selection');
-            onSetTotal(sum);
-          }}
-          accessibilityRole="button"
-          className="self-start rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 active:opacity-70"
-        >
-          <Text variant="caption" tone="primary" className="font-semibold">
-            {I18n.t('instalments.use_as_total', { amount: money(sum) })}
-          </Text>
-        </Pressable>
-      ) : null}
-    </View>
+    </Pressable>
   );
 }
 
@@ -521,10 +515,28 @@ function AmountBalance({
 const MAX_TIMELINE_DOTS = 24;
 
 /** The plan at a glance: one dot per payment between the first and last dates. */
-function PaymentTimeline({ count, from, to }: { count: number; from: string; to: string }) {
+function PaymentTimeline({
+  count,
+  from,
+  to,
+  lastAmount,
+}: {
+  count: number;
+  from: string;
+  to: string;
+  /** The last payment, under its dot, when it differs from the others. */
+  lastAmount: string | null;
+}) {
   const dots = count <= MAX_TIMELINE_DOTS ? count : 2;
+  const lastLabel = I18n.t('instalments.last_short');
   return (
-    <View className="gap-2 self-stretch" accessible accessibilityLabel={`${from} – ${to}`}>
+    <View
+      className="gap-2 self-stretch"
+      accessible
+      accessibilityLabel={[`${from} – ${to}`, lastAmount ? `${lastLabel} ${lastAmount}` : null]
+        .filter(Boolean)
+        .join(', ')}
+    >
       <View className="flex-row justify-between gap-2">
         <Text variant="caption" tone="muted" numberOfLines={1}>
           {from}
@@ -549,6 +561,14 @@ function PaymentTimeline({ count, from, to }: { count: number; from: string; to:
           );
         })}
       </View>
+      {lastAmount ? (
+        <Text variant="caption" tone="muted" className="self-end" numberOfLines={1}>
+          {`${lastLabel} · `}
+          <Text variant="caption" tone="primary" className="font-semibold">
+            {lastAmount}
+          </Text>
+        </Text>
+      ) : null}
     </View>
   );
 }
