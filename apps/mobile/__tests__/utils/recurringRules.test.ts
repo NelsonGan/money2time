@@ -29,6 +29,7 @@ function makeRule(overrides: Partial<RecurringTransactionRule>): RecurringTransa
     recurrencePattern: 'monthly',
     recurrenceInterval: 1,
     nextRunDate: '2026-06-01T00:00:00.000Z',
+    anchorDay: null,
     endDate: null,
     isActive: true,
     countsAsExpense: false,
@@ -172,16 +173,23 @@ describe('recurringMonthlyExpenseTotal', () => {
   });
 });
 
+/** Local midnight of a day key: what the runner writes (see recurringRunDates.test.ts). */
+const localMidnight = (dayKey: string) => new Date(`${dayKey}T00:00:00`).toISOString();
+
 describe('nextRunAfter', () => {
   it('advances by whole days, weeks, months and years', () => {
-    expect(nextRunAfter('2026-01-10T00:00:00.000Z', 'daily', 3)).toBe('2026-01-13T00:00:00.000Z');
-    expect(nextRunAfter('2026-01-10T00:00:00.000Z', 'weekly', 2)).toBe('2026-01-24T00:00:00.000Z');
-    expect(nextRunAfter('2026-01-10T00:00:00.000Z', 'monthly', 1)).toBe('2026-02-10T00:00:00.000Z');
-    expect(nextRunAfter('2026-01-10T00:00:00.000Z', 'yearly', 1)).toBe('2027-01-10T00:00:00.000Z');
+    expect(nextRunAfter('2026-01-10T00:00:00.000Z', 'daily', 3)).toBe(localMidnight('2026-01-13'));
+    expect(nextRunAfter('2026-01-10T00:00:00.000Z', 'weekly', 2)).toBe(localMidnight('2026-01-24'));
+    expect(nextRunAfter('2026-01-10T00:00:00.000Z', 'monthly', 1)).toBe(
+      localMidnight('2026-02-10'),
+    );
+    expect(nextRunAfter('2026-01-10T00:00:00.000Z', 'yearly', 1)).toBe(localMidnight('2027-01-10'));
   });
 
   it('clamps a month-end run date into a shorter month instead of overflowing', () => {
-    expect(nextRunAfter('2026-01-31T00:00:00.000Z', 'monthly', 1)).toBe('2026-02-28T00:00:00.000Z');
+    expect(nextRunAfter('2026-01-31T00:00:00.000Z', 'monthly', 1)).toBe(
+      localMidnight('2026-02-28'),
+    );
   });
 
   it('returns null for a pattern that does not repeat or an unparseable date', () => {
@@ -427,7 +435,11 @@ describe('quarterly and semi-annual frequencies', () => {
   });
 
   it('advance the run date by 3 and 6 months, clamping month ends', () => {
-    expect(nextRunAfter('2026-01-10T00:00:00.000Z', 'monthly', 3)).toBe('2026-04-10T00:00:00.000Z');
-    expect(nextRunAfter('2026-08-31T00:00:00.000Z', 'monthly', 6)).toBe('2027-02-28T00:00:00.000Z');
+    expect(nextRunAfter('2026-01-10T00:00:00.000Z', 'monthly', 3)).toBe(
+      localMidnight('2026-04-10'),
+    );
+    expect(nextRunAfter('2026-08-31T00:00:00.000Z', 'monthly', 6)).toBe(
+      localMidnight('2027-02-28'),
+    );
   });
 });

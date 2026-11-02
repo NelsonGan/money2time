@@ -1140,6 +1140,12 @@ export interface RecurringTransactionRule {
   recurrencePattern: Exclude<RecurrencePattern, 'none'>;
   recurrenceInterval: number;
   nextRunDate: string;
+  /**
+   * The day of the month (1 to 31) a monthly or yearly rule returns to after a
+   * shorter month, so the 31st runs on February 28 and then on March 31. Null
+   * means the next run date's own day. See `nextRunAfter` in utils/recurringRules.ts.
+   */
+  anchorDay: number | null;
   endDate: string | null;
   isActive: boolean;
   /**

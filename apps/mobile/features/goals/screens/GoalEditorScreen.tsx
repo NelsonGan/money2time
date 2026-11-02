@@ -53,17 +53,28 @@ function defaultTargetDate(): string {
   return dayKeyFromDateLocal(new Date(now.getFullYear(), now.getMonth() + 3, now.getDate()));
 }
 
-function nextRunDateFor(cadence: GoalAutoSaveCadence): string {
+/**
+ * When a new or re-timed auto-save first runs. A monthly one starts a month
+ * from today, shortened to that month's length (an unclamped Jan 31 would roll
+ * to Mar 3 and skip February), and is anchored on today's day of the month so
+ * it returns to the 31st after a shorter month.
+ */
+function autoSaveSchedule(cadence: GoalAutoSaveCadence): {
+  nextRunDate: string;
+  anchorDay?: number;
+} {
   const now = new Date();
   if (cadence === 'weekly') {
-    return dayKeyFromDateLocal(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7));
+    return {
+      nextRunDate: dayKeyFromDateLocal(
+        new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7),
+      ),
+    };
   }
-  // Clamp to the next month's last day (the recurring engine's addMonths does
-  // the same); an unclamped Jan 31 would roll to Mar 3 and skip February.
   const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
   const lastDay = new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate();
   next.setDate(Math.min(now.getDate(), lastDay));
-  return dayKeyFromDateLocal(next);
+  return { nextRunDate: dayKeyFromDateLocal(next), anchorDay: now.getDate() };
 }
 
 export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalEditorScreenProps) {
@@ -256,7 +267,7 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
       toAccountId: goalId,
       recurrencePattern: autoSaveCadence,
       recurrenceInterval: 1,
-      nextRunDate: nextRunDateFor(autoSaveCadence),
+      ...autoSaveSchedule(autoSaveCadence),
     });
     // canSave has already checked the amount and source of an enabled auto-save.
     const wantsAutoSave = showAutoSave && autoSaveEnabled;
@@ -326,7 +337,7 @@ export function GoalEditorScreen({ accountId, onClose, onOpenIconPicker }: GoalE
           fromAccountId: input.fromAccountId,
           recurrencePattern: input.recurrencePattern,
           ...(keepsGeneratedName ? { name: input.name } : {}),
-          ...(cadenceChanged ? { nextRunDate: input.nextRunDate } : {}),
+          ...(cadenceChanged ? autoSaveSchedule(autoSaveCadence) : {}),
         });
       };
 

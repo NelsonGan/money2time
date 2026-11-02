@@ -226,6 +226,7 @@ describe('module:loan create', () => {
         recurrencePattern: 'monthly',
         recurrenceInterval: 1,
         nextRunDate: '2026-11-15',
+        anchorDay: 15,
         endDate: '2027-06-15',
       },
       analytics: expect.any(Object),

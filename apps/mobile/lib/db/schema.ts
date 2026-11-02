@@ -173,6 +173,9 @@ export const recurringRulesTable = sqliteTable('recurring_rules', {
   recurrencePattern: text('recurrence_pattern').notNull(),
   recurrenceInterval: integer('recurrence_interval').notNull().default(1),
   nextRunDate: text('next_run_date').notNull(),
+  // The day of the month (1 to 31) a monthly or yearly rule keeps returning to
+  // (migration 077). Null until set; see utils/recurringRules.ts `nextRunAfter`.
+  anchorDay: integer('anchor_day'),
   endDate: text('end_date'),
   isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
   // Stamped onto every transfer this rule generates. Loan auto-repayment only.
