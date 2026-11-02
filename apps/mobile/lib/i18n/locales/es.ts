@@ -1737,6 +1737,7 @@ const es = {
     payment_amount: 'Importe de la cuota',
     edit_amount_hint: 'Escribe lo que tu banco cobra cada vez.',
     last_payment: 'Última cuota {{amount}}',
+    last_amount: 'última {{amount}}',
     split_evenly: 'Repartir por igual',
     amount_over_total: '{{amount}} × {{count}} = {{sum}}, más que el total.',
     use_as_total: 'Usar {{amount}} como total',

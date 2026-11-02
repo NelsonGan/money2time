@@ -1738,6 +1738,7 @@ const pt = {
     payment_amount: 'Valor da parcela',
     edit_amount_hint: 'Digite o valor que seu banco cobra a cada vez.',
     last_payment: 'Última parcela {{amount}}',
+    last_amount: 'última {{amount}}',
     split_evenly: 'Dividir igualmente',
     amount_over_total: '{{amount}} × {{count}} = {{sum}}, mais que o total.',
     use_as_total: 'Usar {{amount}} como total',

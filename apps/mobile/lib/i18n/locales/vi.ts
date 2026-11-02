@@ -1716,6 +1716,7 @@ const vi = {
     payment_amount: 'Số tiền mỗi kỳ',
     edit_amount_hint: 'Nhập số tiền ngân hàng trừ mỗi kỳ.',
     last_payment: 'Kỳ cuối {{amount}}',
+    last_amount: 'kỳ cuối {{amount}}',
     split_evenly: 'Chia đều',
     amount_over_total: '{{amount}} × {{count}} = {{sum}}, nhiều hơn tổng.',
     use_as_total: 'Dùng {{amount}} làm tổng',

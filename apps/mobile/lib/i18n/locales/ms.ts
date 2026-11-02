@@ -1741,6 +1741,7 @@ const ms = {
     payment_amount: 'Jumlah bayaran',
     edit_amount_hint: 'Taip jumlah yang dicaj bank anda setiap kali.',
     last_payment: 'Bayaran terakhir {{amount}}',
+    last_amount: 'terakhir {{amount}}',
     split_evenly: 'Bahagi sama rata',
     amount_over_total: '{{amount}} × {{count}} = {{sum}}, lebih daripada jumlah keseluruhan.',
     use_as_total: 'Guna {{amount}} sebagai jumlah keseluruhan',

@@ -1729,6 +1729,7 @@ const uk = {
     payment_amount: 'Сума платежу',
     edit_amount_hint: 'Введіть суму, яку банк списує щоразу.',
     last_payment: 'Останній платіж {{amount}}',
+    last_amount: 'останній {{amount}}',
     split_evenly: 'Розділити порівну',
     amount_over_total: '{{amount}} × {{count}} = {{sum}}, більше за загальну суму.',
     use_as_total: 'Зробити {{amount}} загальною сумою',

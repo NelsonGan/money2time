@@ -1749,6 +1749,7 @@ const de = {
     payment_amount: 'Ratenbetrag',
     edit_amount_hint: 'Gib den Betrag ein, den deine Bank jedes Mal abbucht.',
     last_payment: 'Letzte Rate {{amount}}',
+    last_amount: 'letzte {{amount}}',
     split_evenly: 'Gleichmäßig aufteilen',
     amount_over_total: '{{amount}} × {{count}} = {{sum}}, mehr als der Gesamtbetrag.',
     use_as_total: '{{amount}} als Gesamtbetrag nehmen',

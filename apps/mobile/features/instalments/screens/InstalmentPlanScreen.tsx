@@ -337,9 +337,13 @@ function InstalmentPlanEditSheet({
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
   const sheetColumnStyle = useSheetColumnStyle();
+  // The sheet grows by the keyboard's height (as padding, so its own
+  // background runs on behind the see-through keyboard) instead of sliding
+  // up and leaving the page showing through it.
+  const bottomPadding = Math.max(insets.bottom, 16) + 8;
   const keyboard = useReanimatedKeyboardAnimation();
-  const keyboardLift = useAnimatedStyle(() => ({
-    transform: [{ translateY: keyboard.height.value }],
+  const keyboardPad = useAnimatedStyle(() => ({
+    paddingBottom: Math.max(bottomPadding, -keyboard.height.value + 12),
   }));
   const [name, setName] = useState(rule.name);
   const [accountId, setAccountId] = useState(rule.accountId);
@@ -418,12 +422,15 @@ function InstalmentPlanEditSheet({
     <ThemeModal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.backdrop}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessible={false} />
-        {/* Lifted by the keyboard while the name or amount is typed. */}
-        <Animated.View style={keyboardLift}>
-          <View
-            style={[sheetColumnStyle, { paddingBottom: Math.max(insets.bottom, 16) + 8 }]}
-            className="gap-5 rounded-t-[28px] bg-card px-5 pt-5"
-          >
+        <Animated.View
+          style={[
+            sheetColumnStyle,
+            styles.sheetShell,
+            { backgroundColor: themeColors.card },
+            keyboardPad,
+          ]}
+        >
+          <View className="gap-5 px-5 pt-5">
             <View className="flex-row items-center">
               <Text variant="subheading" className="flex-1">
                 {I18n.t('instalments.edit_plan')}
@@ -495,15 +502,21 @@ function InstalmentPlanEditSheet({
                       className="h-12 flex-1 text-right text-[16px]"
                       accessibilityLabel={I18n.t('instalments.payment_amount')}
                     />
+                    {/* What the last payment becomes, right beside the amount. */}
+                    {amountValid && newLast != null ? (
+                      <View className="rounded-full bg-secondary/70 px-2 py-0.5">
+                        <Text variant="caption" tone="muted" numberOfLines={1}>
+                          {I18n.t('instalments.last_amount', { amount: money(newLast) })}
+                        </Text>
+                      </View>
+                    ) : null}
                   </View>
                 ) : null}
               </View>
               <Text variant="caption" tone={amountValid ? 'muted' : 'error'} className="px-1">
-                {!amountValid
-                  ? I18n.t('instalments.amount_too_large')
-                  : newLast != null
-                    ? I18n.t('instalments.last_payment', { amount: money(newLast) })
-                    : I18n.t('instalments.edit_hint')}
+                {amountValid
+                  ? I18n.t('instalments.edit_hint')
+                  : I18n.t('instalments.amount_too_large')}
               </Text>
             </View>
 
@@ -587,6 +600,11 @@ function EditRow({
 }
 
 const styles = StyleSheet.create({
+  sheetShell: {
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    overflow: 'hidden',
+  },
   headerWrap: {
     paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
   },

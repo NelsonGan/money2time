@@ -1700,6 +1700,7 @@ const en = {
     payment_amount: 'Payment amount',
     edit_amount_hint: 'Type the amount your bank charges each time.',
     last_payment: 'Last payment {{amount}}',
+    last_amount: 'last {{amount}}',
     split_evenly: 'Split evenly',
     amount_over_total: '{{amount}} × {{count}} = {{sum}}, more than the total.',
     use_as_total: 'Use {{amount}} as the total',

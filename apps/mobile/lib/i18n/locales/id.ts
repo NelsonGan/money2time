@@ -1737,6 +1737,7 @@ const id = {
     payment_amount: 'Jumlah cicilan',
     edit_amount_hint: 'Ketik jumlah yang ditagih bank setiap kali.',
     last_payment: 'Pembayaran terakhir {{amount}}',
+    last_amount: 'terakhir {{amount}}',
     split_evenly: 'Bagi rata',
     amount_over_total: '{{amount}} × {{count}} = {{sum}}, lebih dari total.',
     use_as_total: 'Jadikan {{amount}} sebagai total',

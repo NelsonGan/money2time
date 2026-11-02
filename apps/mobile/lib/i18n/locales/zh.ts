@@ -1647,6 +1647,7 @@ const zh = {
     payment_amount: '每期金额',
     edit_amount_hint: '输入银行每期扣款的金额。',
     last_payment: '末期 {{amount}}',
+    last_amount: '末期 {{amount}}',
     split_evenly: '平均分摊',
     amount_over_total: '{{amount}} × {{count}} = {{sum}}，超过总额。',
     use_as_total: '以 {{amount}} 作为总额',

@@ -1735,6 +1735,7 @@ const pl = {
     payment_amount: 'Kwota raty',
     edit_amount_hint: 'Wpisz kwotę, którą bank pobiera za każdym razem.',
     last_payment: 'Ostatnia rata {{amount}}',
+    last_amount: 'ostatnia {{amount}}',
     split_evenly: 'Podziel równo',
     amount_over_total: '{{amount}} × {{count}} = {{sum}}, więcej niż suma.',
     use_as_total: 'Ustaw {{amount}} jako sumę',

@@ -1752,6 +1752,7 @@ const fil = {
     payment_amount: 'Halaga ng hulog',
     edit_amount_hint: 'I-type ang halagang sinisingil ng bangko mo bawat hulog.',
     last_payment: 'Huling hulog {{amount}}',
+    last_amount: 'huling {{amount}}',
     split_evenly: 'Hatiin nang pantay',
     amount_over_total: '{{amount}} × {{count}} = {{sum}}, higit sa kabuuan.',
     use_as_total: 'Gawing kabuuan ang {{amount}}',

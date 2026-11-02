@@ -1707,6 +1707,7 @@ const ko = {
     payment_amount: '회차별 금액',
     edit_amount_hint: '은행이 매번 청구하는 금액을 입력하세요.',
     last_payment: '마지막 회차 {{amount}}',
+    last_amount: '마지막 {{amount}}',
     split_evenly: '균등하게 나누기',
     amount_over_total: '{{amount}} × {{count}} = {{sum}}, 총액보다 많아요.',
     use_as_total: '{{amount}}을(를) 총액으로 사용',

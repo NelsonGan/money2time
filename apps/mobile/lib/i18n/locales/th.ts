@@ -1701,6 +1701,7 @@ const th = {
     payment_amount: 'ยอดต่องวด',
     edit_amount_hint: 'กรอกยอดที่ธนาคารเรียกเก็บในแต่ละงวด',
     last_payment: 'งวดสุดท้าย {{amount}}',
+    last_amount: 'งวดสุดท้าย {{amount}}',
     split_evenly: 'แบ่งเท่ากัน',
     amount_over_total: '{{amount}} × {{count}} = {{sum}} มากกว่ายอดรวม',
     use_as_total: 'ใช้ {{amount}} เป็นยอดรวม',

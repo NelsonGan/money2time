@@ -1731,6 +1731,7 @@ const da = {
     payment_amount: 'Afdragsbeløb',
     edit_amount_hint: 'Skriv det beløb, din bank trækker hver gang.',
     last_payment: 'Sidste afdrag {{amount}}',
+    last_amount: 'sidste {{amount}}',
     split_evenly: 'Fordel ligeligt',
     amount_over_total: '{{amount}} × {{count}} = {{sum}}, mere end totalen.',
     use_as_total: 'Brug {{amount}} som total',

@@ -1722,6 +1722,7 @@ const ja = {
     payment_amount: '1回の支払額',
     edit_amount_hint: '銀行が毎回請求する金額を入力してください。',
     last_payment: '最終回 {{amount}}',
+    last_amount: '最終回 {{amount}}',
     split_evenly: '均等に分ける',
     amount_over_total: '{{amount}} × {{count}} = {{sum}}、合計を超えています。',
     use_as_total: '{{amount}} を合計にする',

@@ -1647,6 +1647,7 @@ const zhHant = {
     payment_amount: '每期金額',
     edit_amount_hint: '輸入銀行每期扣款的金額。',
     last_payment: '末期 {{amount}}',
+    last_amount: '末期 {{amount}}',
     split_evenly: '平均分攤',
     amount_over_total: '{{amount}} × {{count}} = {{sum}}，超過總額。',
     use_as_total: '以 {{amount}} 作為總額',

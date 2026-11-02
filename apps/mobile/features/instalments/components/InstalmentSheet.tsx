@@ -116,11 +116,12 @@ export function InstalmentSheet({
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
   const sheetColumnStyle = useSheetColumnStyle();
-  // The keyboard's height straight onto the sheet (as QuickAddSheet does):
-  // KeyboardAvoidingView races the first open on Android.
+  // The keyboard's height straight onto the sheet (as QuickAddSheet does;
+  // KeyboardAvoidingView races the first open on Android), as padding so the
+  // sheet's own background runs on behind the see-through keyboard.
   const keyboard = useReanimatedKeyboardAnimation();
-  const keyboardLift = useAnimatedStyle(() => ({
-    transform: [{ translateY: keyboard.height.value }],
+  const keyboardPad = useAnimatedStyle(() => ({
+    paddingBottom: -keyboard.height.value,
   }));
   const [choice, setChoice] = useState<InstalmentChoice>(
     draft ?? value ?? DEFAULT_INSTALMENT_CHOICE,
@@ -158,9 +159,15 @@ export function InstalmentSheet({
     <ThemeModal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.backdrop}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessible={false} />
-        {/* Lifted by the keyboard while the payment amount is typed. */}
-        <Animated.View style={keyboardLift}>
-          <View style={sheetColumnStyle} className="max-h-[92%] rounded-t-[28px] bg-card">
+        <Animated.View
+          style={[
+            sheetColumnStyle,
+            styles.sheetShell,
+            { backgroundColor: themeColors.card },
+            keyboardPad,
+          ]}
+        >
+          <View className="shrink">
             <View className="flex-row items-center px-5 pb-1 pt-5">
               <Text variant="subheading" className="flex-1">
                 {I18n.t('instalments.sheet_title')}
@@ -573,6 +580,12 @@ function ChoiceChip({
 }
 
 const styles = StyleSheet.create({
+  sheetShell: {
+    maxHeight: '92%',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    overflow: 'hidden',
+  },
   backdrop: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.4)',

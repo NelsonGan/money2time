@@ -1745,6 +1745,7 @@ const nl = {
     payment_amount: 'Termijnbedrag',
     edit_amount_hint: 'Vul het bedrag in dat je bank elke keer afschrijft.',
     last_payment: 'Laatste termijn {{amount}}',
+    last_amount: 'laatste {{amount}}',
     split_evenly: 'Gelijk verdelen',
     amount_over_total: '{{amount}} × {{count}} = {{sum}}, meer dan het totaal.',
     use_as_total: '{{amount}} als totaal gebruiken',

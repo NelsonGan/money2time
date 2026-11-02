@@ -1740,6 +1740,7 @@ const tr = {
     payment_amount: 'Taksit tutarı',
     edit_amount_hint: 'Bankanın her seferinde çektiği tutarı yazın.',
     last_payment: 'Son taksit {{amount}}',
+    last_amount: 'son {{amount}}',
     split_evenly: 'Eşit böl',
     amount_over_total: '{{amount}} × {{count}} = {{sum}}, toplamdan fazla.',
     use_as_total: 'Toplam olarak {{amount}} kullan',

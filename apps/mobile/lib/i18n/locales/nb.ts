@@ -1730,6 +1730,7 @@ const nb = {
     payment_amount: 'Avdragsbeløp',
     edit_amount_hint: 'Skriv inn beløpet banken trekker hver gang.',
     last_payment: 'Siste avdrag {{amount}}',
+    last_amount: 'siste {{amount}}',
     split_evenly: 'Fordel likt',
     amount_over_total: '{{amount}} × {{count}} = {{sum}}, mer enn totalen.',
     use_as_total: 'Bruk {{amount}} som total',

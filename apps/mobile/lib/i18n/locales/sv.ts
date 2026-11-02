@@ -1729,6 +1729,7 @@ const sv = {
     payment_amount: 'Belopp per betalning',
     edit_amount_hint: 'Skriv beloppet som banken drar varje gång.',
     last_payment: 'Sista betalningen {{amount}}',
+    last_amount: 'sista {{amount}}',
     split_evenly: 'Dela lika',
     amount_over_total: '{{amount}} × {{count}} = {{sum}}, mer än totalen.',
     use_as_total: 'Använd {{amount}} som total',

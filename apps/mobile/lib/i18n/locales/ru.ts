@@ -1735,6 +1735,7 @@ const ru = {
     payment_amount: 'Сумма платежа',
     edit_amount_hint: 'Введите сумму, которую банк списывает каждый раз.',
     last_payment: 'Последний платёж {{amount}}',
+    last_amount: 'последний {{amount}}',
     split_evenly: 'Разделить поровну',
     amount_over_total: '{{amount}} × {{count}} = {{sum}}, больше общей суммы.',
     use_as_total: 'Сделать {{amount}} общей суммой',

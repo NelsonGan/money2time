@@ -1723,6 +1723,7 @@ const hi = {
     payment_amount: 'किस्त की राशि',
     edit_amount_hint: 'हर बार बैंक जितनी राशि लेता है, वह डालें।',
     last_payment: 'आखिरी किस्त {{amount}}',
+    last_amount: 'आखिरी {{amount}}',
     split_evenly: 'बराबर बाँटें',
     amount_over_total: '{{amount}} × {{count}} = {{sum}}, कुल से ज़्यादा।',
     use_as_total: '{{amount}} को कुल राशि बनाएँ',

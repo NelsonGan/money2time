@@ -1746,6 +1746,7 @@ const fr = {
     payment_amount: 'Montant des échéances',
     edit_amount_hint: 'Saisissez le montant que votre banque prélève à chaque fois.',
     last_payment: 'Dernière échéance {{amount}}',
+    last_amount: 'dernière {{amount}}',
     split_evenly: 'Répartir également',
     amount_over_total: '{{amount}} × {{count}} = {{sum}}, plus que le total.',
     use_as_total: 'Utiliser {{amount}} comme total',
