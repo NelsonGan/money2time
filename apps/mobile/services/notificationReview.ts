@@ -298,19 +298,19 @@ export function applyNotificationAiResults(
       }
       const amount = result.decision === 'unsure' ? null : matchAiAmount(entry, result);
       const type = result.decision;
-      if (type === 'unsure' || (logTypes !== 'both' && logTypes !== type)) {
-        await keep(amount);
-        continue;
-      }
       const live = deps.getCurrent();
-      const account = live.accounts.find(
-        (item) => item.id === entry.accountId && isPayableAccount(item),
-      );
       const named = result.category
         ? live.categories.find(
             (item) => item.name === result.category && item.type === type && !item.deletedAt,
           )
         : undefined;
+      if (type === 'unsure' || (logTypes !== 'both' && logTypes !== type)) {
+        await keep(amount, named?.id);
+        continue;
+      }
+      const account = live.accounts.find(
+        (item) => item.id === entry.accountId && isPayableAccount(item),
+      );
       if (!amount || !account) {
         // No linked account (or no amount to trust): never guessed. The user
         // finishes it, starting from AI's amount and category.

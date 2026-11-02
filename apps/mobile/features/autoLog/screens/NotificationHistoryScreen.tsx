@@ -400,10 +400,7 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
                     : (entry.selectedAmount ??
                       (entry.amounts?.length === 1 ? entry.amounts[0] : null));
                   // Auto-review's suggestion, when it left one, opens on that type.
-                  const aiType =
-                    entry.ai && !entry.ai.undone && entry.ai.decision !== 'ignore'
-                      ? entry.ai.decision
-                      : null;
+                  const aiType = entry.ai && !entry.ai.undone ? entry.ai.decision : null;
                   const type =
                     aiType === 'income' || aiType === 'expense'
                       ? aiType
