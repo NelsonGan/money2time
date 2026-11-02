@@ -46,10 +46,17 @@ export function BelongsToPicker({ people, memberId, createdBy, onSelect }: Belon
   const showAdder = adder !== null && adder.memberId !== selected.memberId;
 
   return (
-    <View className="mt-3">
-      <Text variant="caption" tone="muted" className="mb-1.5 px-1 uppercase">
-        {I18n.t('shared_ledgers.belongs_to_title')}
-      </Text>
+    <View className="mt-2.5">
+      <View className="mb-1.5 flex-row items-center justify-between gap-3 px-1">
+        <Text variant="caption" tone="muted" className="uppercase">
+          {I18n.t('shared_ledgers.belongs_to_title')}
+        </Text>
+        {showAdder ? (
+          <Text variant="caption" tone="muted" className="shrink" numberOfLines={1}>
+            {I18n.t('shared_ledgers.belongs_to_added_by', { name: personLabel(adder) })}
+          </Text>
+        ) : null}
+      </View>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -66,11 +73,11 @@ export function BelongsToPicker({ people, memberId, createdBy, onSelect }: Belon
               accessibilityState={{ selected: isSelected }}
               accessibilityLabel={personLabel(person)}
               className={cn(
-                'h-11 flex-row items-center gap-2 rounded-2xl border pl-1.5 pr-3.5 active:opacity-70',
+                'h-10 flex-row items-center gap-2 rounded-2xl border pl-1.5 pr-3 active:opacity-70',
                 isSelected ? 'border-primary/60 bg-primary/10' : 'border-border/40 bg-secondary/30',
               )}
             >
-              <PersonAvatar person={person} size={28} />
+              <PersonAvatar person={person} size={26} />
               <Text
                 variant="body"
                 numberOfLines={1}
@@ -82,11 +89,6 @@ export function BelongsToPicker({ people, memberId, createdBy, onSelect }: Belon
           );
         })}
       </ScrollView>
-      {showAdder ? (
-        <Text variant="caption" tone="muted" className="mt-1.5 px-1" numberOfLines={1}>
-          {I18n.t('shared_ledgers.belongs_to_added_by', { name: adder.name })}
-        </Text>
-      ) : null}
     </View>
   );
 }

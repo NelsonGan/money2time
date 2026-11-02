@@ -4728,7 +4728,18 @@ export function TransactionEditorScreen({
                        below this one. The negative margin claws back the
                        COLLAPSE_PEEK the drawer reserves above the keypad, which
                        is more air than a list of ticks needs. */
-                    <View className="flex-1 px-5" style={{ marginTop: -OPTIONS_PANEL_PULL_UP }}>
+                    /* Scrolls only when the rows outgrow the keypad's slot
+                       (a transfer with its category in a shared ledger, a
+                       small phone). */
+                    <ScrollView
+                      className="flex-1"
+                      style={{ marginTop: -OPTIONS_PANEL_PULL_UP }}
+                      contentContainerClassName="px-5 pb-2"
+                      keyboardShouldPersistTaps="handled"
+                      scrollEnabled={!detailsEditing}
+                      showsVerticalScrollIndicator={false}
+                      alwaysBounceVertical={false}
+                    >
                       {/* The longer note first, as a soft note area previewing
                           two lines of what was written. Tapping it expands the
                           box in place for typing: the drawer then rides the
@@ -4934,7 +4945,7 @@ export function TransactionEditorScreen({
                           ) : null}
                         </>
                       ) : null}
-                    </View>
+                    </ScrollView>
                   ) : (
                     <NumpadPanel
                       compact

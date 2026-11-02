@@ -165,7 +165,7 @@ describe('stamping a new entry', () => {
   it('stamps a member’s own account in their shared ledger', () => {
     saveSharedLedger(HOME);
     expect(selfMemberIdFor('home')).toBe('user-mei');
-    expect(withEntryStamp({ amount: 5 }, 'home')).toEqual({
+    expect(withEntryStamp({ amount: 5, createdBy: undefined }, 'home')).toEqual({
       amount: 5,
       createdBy: 'user-mei',
       memberId: 'user-mei',

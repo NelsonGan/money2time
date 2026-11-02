@@ -419,6 +419,8 @@ const TransactionItemBody = memo(
           {person ? (
             <View
               pointerEvents="none"
+              // The name is already read from the category line.
+              accessibilityElementsHidden
               importantForAccessibility="no-hide-descendants"
               style={compact ? styles.personBadgeCompact : styles.personBadge}
             >
