@@ -3219,7 +3219,10 @@ const uk = {
     review_banner_single: '1 сповіщення до перевірки',
     review_amount_hint: 'Виберіть або введіть суму',
     review_missing: 'Для деяких записів ще потрібно вказати суму або рахунок.',
-    review_choose_account: 'Вибрати рахунок',
+    review_no_account_ios:
+      'Рахунок не вибрано. Виберіть його у швидкій команді Log Notification, щоб вони записувалися автоматично.',
+    review_no_account_android:
+      'Для цієї програми немає рахунку. Виберіть його в %{path}, щоб вони записувалися автоматично.',
     review_save_error: 'Не вдалося зберегти. Незавершені записи залишилися тут.',
     review_leave_title: 'Пропустити незавершені сповіщення?',
     review_leave_body: 'Якщо вийти, усі незавершені сповіщення (%{count}) буде пропущено.',
@@ -3248,6 +3251,9 @@ const uk = {
     ai_log_both: 'Обидва',
     ai_log_expense: 'Витрати',
     ai_log_income: 'Доходи',
+    ai_scope_expense: 'Записує лише витрати',
+    ai_scope_income: 'Записує лише доходи',
+    ai_scope_both: 'Записує витрати й доходи',
     ai_get_unlimited: 'Без обмежень із Pro',
     ai_done_title: 'Розібрано за вас',
     ai_logged_count: 'Записано: %{count}',
@@ -3257,8 +3263,6 @@ const uk = {
     ai_undo_edited_body: 'Ви змінили його після запису. Скасування його видалить.',
     ai_hint_expense: 'Пропозиція: витрата',
     ai_hint_income: 'Пропозиція: дохід',
-    ai_no_account_ios:
-      'Виберіть рахунок у швидкій команді Log Notification, щоб автоперевірка могла записувати її сповіщення. Без рахунку вони чекають тут із підказкою.',
     ai_reason_otp: 'Код безпеки',
     ai_reason_promotion: 'Акція',
     ai_reason_balance: 'Баланс або нагадування',

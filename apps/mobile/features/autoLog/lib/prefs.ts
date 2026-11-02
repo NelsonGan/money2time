@@ -17,16 +17,21 @@ export const DEFAULT_PAYMENT_ALERT_PREFS: PaymentAlertPrefs = {
   alertsEnabled: false,
   sources: {},
   ignorePhrases: [],
-  aiReview: { enabled: false, logTypes: 'both' },
+  // Expenses only by default: income notifications (salary, refunds, transfers
+  // in) are the ones most often mistaken, so logging them is opt-in.
+  aiReview: { enabled: false, logTypes: 'expense' },
 };
 
 // An `accountIds` filter saved by an earlier build is dropped: auto-review
-// covers every linked account.
+// covers every linked account. A saved choice, Both included, is kept.
 function parseAiReview(raw: unknown): NotificationAiReviewPrefs {
   const row = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
   return {
     enabled: row.enabled === true,
-    logTypes: row.logTypes === 'expense' || row.logTypes === 'income' ? row.logTypes : 'both',
+    logTypes:
+      row.logTypes === 'both' || row.logTypes === 'income' || row.logTypes === 'expense'
+        ? row.logTypes
+        : DEFAULT_PAYMENT_ALERT_PREFS.aiReview.logTypes,
   };
 }
 

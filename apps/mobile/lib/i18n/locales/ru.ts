@@ -3227,7 +3227,10 @@ const ru = {
     review_banner_single: '1 уведомление к проверке',
     review_amount_hint: 'Выберите или введите сумму',
     review_missing: 'Для некоторых записей ещё нужно указать сумму или счёт.',
-    review_choose_account: 'Выбрать счёт',
+    review_no_account_ios:
+      'Счёт не выбран. Выберите его в быстрой команде Log Notification, чтобы они записывались автоматически.',
+    review_no_account_android:
+      'Для этого приложения нет счёта. Выберите его в %{path}, чтобы они записывались автоматически.',
     review_save_error: 'Не удалось сохранить. Незавершённые записи остались здесь.',
     review_leave_title: 'Пропустить незавершённые уведомления?',
     review_leave_body: 'Если уйти, все незавершённые уведомления (%{count}) будут пропущены.',
@@ -3256,6 +3259,9 @@ const ru = {
     ai_log_both: 'Оба',
     ai_log_expense: 'Расходы',
     ai_log_income: 'Доходы',
+    ai_scope_expense: 'Записывает только расходы',
+    ai_scope_income: 'Записывает только доходы',
+    ai_scope_both: 'Записывает расходы и доходы',
     ai_get_unlimited: 'Без ограничений с Pro',
     ai_done_title: 'Разобрано за вас',
     ai_logged_count: 'Записано: %{count}',
@@ -3265,8 +3271,6 @@ const ru = {
     ai_undo_edited_body: 'Вы изменили её после записи. Отмена удалит её.',
     ai_hint_expense: 'Предложение: расход',
     ai_hint_income: 'Предложение: доход',
-    ai_no_account_ios:
-      'Выберите счёт в быстрой команде Log Notification, чтобы автопроверка могла записывать её уведомления. Без счёта они ждут здесь с подсказкой.',
     ai_reason_otp: 'Код подтверждения',
     ai_reason_promotion: 'Реклама',
     ai_reason_balance: 'Баланс или напоминание',

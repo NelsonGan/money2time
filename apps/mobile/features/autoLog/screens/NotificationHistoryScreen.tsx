@@ -1,7 +1,14 @@
 import { useNavigation, usePreventRemove } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { FlashList } from '@shopify/flash-list';
-import { ChevronDown, ChevronUp, ListChecks, Pencil, Undo2 } from 'lucide-react-native';
+import {
+  AlertTriangle,
+  ChevronDown,
+  ChevronUp,
+  ListChecks,
+  Pencil,
+  Undo2,
+} from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Pressable, View } from 'react-native';
 
@@ -444,6 +451,9 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
   );
 }
 
+/** `--warning` in global.css (the same in both themes), for icons that take a color. */
+const WARNING_COLOR = 'hsl(36, 90%, 55%)';
+
 type ListRow =
   | { kind: 'day'; key: string; label: string }
   | { kind: 'entry'; key: string; entry: NotificationScanHistoryEntry };
@@ -694,27 +704,35 @@ function NotificationReviewCard({
           ))}
         </View>
       ) : null}
-      <View className="mt-1.5 flex-row flex-wrap items-center justify-between gap-x-3 gap-y-2">
-        <View className="flex-row items-center gap-1.5">
-          <Text variant="caption" tone="muted">
-            {timeOf(entry.capturedAt)}
+      {pending && !account ? (
+        // The fix belongs in setup, so every later notification gets an account.
+        <View
+          className="mt-1.5 flex-row items-start gap-2 rounded-xl bg-warning/10 px-3 py-2.5"
+          testID="notification-no-account"
+        >
+          {/* Centred on the first line (caption is 18px tall), in the text's colour. */}
+          <View className="h-[18px] justify-center">
+            <AlertTriangle size={15} color={WARNING_COLOR} strokeWidth={2.25} />
+          </View>
+          <Text variant="caption" tone="warning" className="flex-1">
+            {entry.channel === 'android_notification'
+              ? // Setup requires an account per app, so this one was deleted
+                // or belongs to another ledger: point at where it is set.
+                I18n.t('payment_alerts.review_no_account_android', {
+                  path: [
+                    I18n.t('settings.title'),
+                    I18n.t('settings.auto_log.title'),
+                    I18n.t('settings.auto_log.payment_alerts_title'),
+                  ].join(' › '),
+                })
+              : I18n.t('payment_alerts.review_no_account_ios')}
           </Text>
-          {pending && !account ? (
-            // Income and Expense stay off until it has one; the editor sets it.
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('payment_alerts.review_choose_account')}
-              disabled={busy}
-              hitSlop={8}
-              onPress={onEdit}
-              testID="notification-choose-account"
-            >
-              <Text variant="caption" className="font-semibold text-primary">
-                {`· ${I18n.t('payment_alerts.review_choose_account')}`}
-              </Text>
-            </Pressable>
-          ) : null}
         </View>
+      ) : null}
+      <View className="mt-1.5 flex-row flex-wrap items-center justify-between gap-x-3 gap-y-2">
+        <Text variant="caption" tone="muted">
+          {timeOf(entry.capturedAt)}
+        </Text>
         {pending ? (
           <ReviewChoices
             disabled={busy}

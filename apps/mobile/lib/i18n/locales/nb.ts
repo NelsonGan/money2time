@@ -3223,7 +3223,10 @@ const nb = {
     review_banner_single: '1 varsel til gjennomgang',
     review_amount_hint: 'Velg eller skriv inn beløpet',
     review_missing: 'Noen elementer mangler fortsatt beløp eller konto.',
-    review_choose_account: 'Velg en konto',
+    review_no_account_ios:
+      'Ingen konto valgt. Velg en i Log Notification-snarveien din, så føres de automatisk.',
+    review_no_account_android:
+      'Ingen konto for denne appen. Velg en under %{path}, så føres de automatisk.',
     review_save_error: 'Kunne ikke lagre. De uferdige elementene dine er fortsatt her.',
     review_leave_title: 'Ignorere uferdige varsler?',
     review_leave_body: 'Hvis du går ut, ignoreres alle %{count} uferdige varsler.',
@@ -3252,6 +3255,9 @@ const nb = {
     ai_log_both: 'Begge',
     ai_log_expense: 'Utgifter',
     ai_log_income: 'Inntekter',
+    ai_scope_expense: 'Fører bare utgifter',
+    ai_scope_income: 'Fører bare inntekter',
+    ai_scope_both: 'Fører utgifter og inntekter',
     ai_get_unlimited: 'Få ubegrenset med Pro',
     ai_done_title: 'Sortert for deg',
     ai_logged_count: '%{count} registrert',
@@ -3261,8 +3267,6 @@ const nb = {
     ai_undo_edited_body: 'Du har endret den etter at den ble registrert. Angre sletter den.',
     ai_hint_expense: 'Forslag: utgift',
     ai_hint_income: 'Forslag: inntekt',
-    ai_no_account_ios:
-      'Velg en konto i Log Notification-snarveien din, så automatisk gjennomgang kan føre varslene. Uten konto venter de her med et forslag.',
     ai_reason_otp: 'Sikkerhetskode',
     ai_reason_promotion: 'Kampanje',
     ai_reason_balance: 'Saldo eller påminnelse',
