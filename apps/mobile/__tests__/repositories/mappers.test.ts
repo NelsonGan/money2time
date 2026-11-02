@@ -914,6 +914,8 @@ describe('toTransactionWithRelationsFromRaw', () => {
       dayOrder: 1234,
       instalmentRuleId: 'plan1',
       instalmentNumber: 4,
+      createdBy: 'user-mei',
+      memberId: 'user-nelson',
       ...STAMPS,
     };
     expect(toTransactionWithRelationsFromRaw([...rawFor(row), ...relationValues])).toEqual({
@@ -955,6 +957,8 @@ describe('toTransactionWithRelationsFromRaw', () => {
       dayOrder: null,
       instalmentRuleId: null,
       instalmentNumber: null,
+      createdBy: null,
+      memberId: null,
       ...STAMPS,
     };
     const nullRelations = relationValues.map(() => null);

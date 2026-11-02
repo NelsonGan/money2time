@@ -3122,6 +3122,10 @@ const fil = {
     renew_pro: 'I-renew ang Pro',
   },
   shared_ledgers: {
+    member_fallback: 'Miyembro',
+    belongs_to_title: 'Pag-aari ni',
+    belongs_to_you: '{{name}} (ikaw)',
+    belongs_to_added_by: 'Idinagdag ni {{name}}',
     title: 'Pag-share',
     share_toggle: 'I-share ang ledger na ito',
     share_toggle_caption: 'Mag-imbita ng hanggang {{max}} tao. Hindi nila kailangan ng Pro.',

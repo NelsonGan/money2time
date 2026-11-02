@@ -22,6 +22,8 @@ function makeTx(id: string, date: string): TransactionWithRelations {
     dayOrder: null,
     instalmentRuleId: null,
     instalmentNumber: null,
+    createdBy: null,
+    memberId: null,
     reportingCurrency: 'USD',
     reportingAmount: 0,
     fxRate: 1,

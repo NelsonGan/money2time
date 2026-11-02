@@ -947,6 +947,17 @@ export interface Transaction {
    * paid off everything left (`INSTALMENT_PAYOFF_NUMBER`).
    */
   instalmentNumber: number | null;
+  /**
+   * Shared ledgers: the Cloud Sync account that added the entry. Set once.
+   * Null means the ledger's owner, which covers every entry made before the
+   * ledger was shared. See README.md > Shared ledgers > Who added it.
+   */
+  createdBy: string | null;
+  /**
+   * Shared ledgers: the account the entry belongs to, for per-person spending.
+   * Starts as `createdBy` and can be changed. Null means the ledger's owner.
+   */
+  memberId: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -1175,6 +1186,8 @@ export interface RecurringTransactionRule {
   instalmentCount: number | null;
   instalmentTotal: number | null;
   instalmentStartDate: string | null;
+  /** Shared ledgers: the account the rule's entries belong to; null = the owner. */
+  memberId: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;

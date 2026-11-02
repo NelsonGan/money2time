@@ -64,6 +64,8 @@ function transaction(overrides: Partial<TransactionWithRelations>): TransactionW
     dayOrder: null,
     instalmentRuleId: null,
     instalmentNumber: null,
+    createdBy: null,
+    memberId: null,
     reportingCurrency: 'USD',
     reportingAmount: overrides.reportingAmount ?? overrides.amount ?? 0,
     fxRate: 1,

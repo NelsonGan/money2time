@@ -2954,6 +2954,10 @@ const zh = {
     renew_pro: '续订 Pro',
   },
   shared_ledgers: {
+    member_fallback: '成员',
+    belongs_to_title: '归属',
+    belongs_to_you: '{{name}}（你）',
+    belongs_to_added_by: '由 {{name}} 添加',
     title: '共享',
     share_toggle: '共享这个账本',
     share_toggle_caption: '最多可邀请 {{max}} 人。他们不需要 Pro。',

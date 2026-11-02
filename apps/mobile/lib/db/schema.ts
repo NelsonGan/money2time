@@ -150,6 +150,11 @@ export const transactionsTable = sqliteTable('transactions', {
   // payment (0 = the payoff). Migration 078.
   instalmentRuleId: text('instalment_rule_id'),
   instalmentNumber: integer('instalment_number'),
+  // Shared ledgers (migration 079): the Cloud Sync account that added the row
+  // and the one it belongs to. NULL means the ledger's owner. See
+  // README.md > Shared ledgers > Who added it.
+  createdBy: text('created_by'),
+  memberId: text('member_id'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),
@@ -189,6 +194,9 @@ export const recurringRulesTable = sqliteTable('recurring_rules', {
   instalmentCount: integer('instalment_count'),
   instalmentTotal: real('instalment_total'),
   instalmentStartDate: text('instalment_start_date'),
+  // The person the rule's entries belong to in a shared ledger (migration 079);
+  // NULL means the ledger's owner. Copied onto each run.
+  memberId: text('member_id'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),
@@ -554,3 +562,20 @@ export const ledgersTable = sqliteTable('ledgers', {
   deletedAt: text('deleted_at'),
 });
 export type LedgerRow = typeof ledgersTable.$inferSelect;
+
+// Each person's name and photo in a shared ledger (migration 079). Synced with
+// the ledger; each account writes only its own row, `<ledger id>:<user id>`.
+export const ledgerProfilesTable = sqliteTable('ledger_profiles', {
+  id: text('id').primaryKey(),
+  ledgerId: text('ledger_id').notNull(),
+  userId: text('user_id').notNull(),
+  // 'owner' or 'member', as that person's phone last knew it.
+  role: text('role').notNull().default('member'),
+  name: text('name'),
+  // The person's Settings photo, a user-asset path synced as the ledger's image.
+  avatarUri: text('avatar_uri'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+  deletedAt: text('deleted_at'),
+});
+export type LedgerProfileRow = typeof ledgerProfilesTable.$inferSelect;

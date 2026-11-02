@@ -24,6 +24,7 @@ const BACKFILL_DONE_KEY = 'userAssetGc.backfillDone.v1';
  *   - `items.icon_id`                     → `custom:item-icons/…`
  *   - `settings.profile_avatar_uri`       → `avatars/…`
  *   - `settings.payment_qr_uri`           → `payment-qr/…`
+ *   - `ledger_profiles.avatar_uri`        → `avatars/…` (shared ledgers' people)
  *
  * The four icon columns hold a tagged value (see constants/categoryIcons.ts):
  * a bundled id, an `emoji:` glyph, or a `custom:` upload. Only the last names a
@@ -80,6 +81,9 @@ export function collectReferencedAssetPaths(): Set<string> {
   );
   collect(
     `SELECT payment_qr_uri AS v FROM settings WHERE deleted_at IS NULL AND payment_qr_uri IS NOT NULL`,
+  );
+  collect(
+    `SELECT avatar_uri AS v FROM ledger_profiles WHERE deleted_at IS NULL AND avatar_uri IS NOT NULL`,
   );
   return paths;
 }

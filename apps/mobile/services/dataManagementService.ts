@@ -76,6 +76,8 @@ interface BackupTables extends Record<string, Record<string, unknown>[] | undefi
   receipt_splits?: Record<string, unknown>[];
   receipt_split_items?: Record<string, unknown>[];
   receipt_split_item_shares?: Record<string, unknown>[];
+  // Shared ledgers' people (migration 079). Optional: absent means none.
+  ledger_profiles?: Record<string, unknown>[];
   // Ledgers (migration 075). Optional: a backup without it holds only the
   // default ledger, whose rows restore there through the column default.
   ledgers?: Record<string, unknown>[];
@@ -171,6 +173,7 @@ export async function buildBackupData(opts?: {
       receipt_splits: tryReadTable(sqlite, 'receipt_splits'),
       receipt_split_items: tryReadTable(sqlite, 'receipt_split_items'),
       receipt_split_item_shares: tryReadTable(sqlite, 'receipt_split_item_shares'),
+      ledger_profiles: tryReadTable(sqlite, 'ledger_profiles'),
       ledgers,
     },
   };
@@ -279,6 +282,7 @@ function onlyOpenLedger(data: BackupData): BackupData {
         ? tables.settings.map((row) => withLedgerSettings(row, ledger))
         : tables.settings,
     monthly_wage_settings: wagesInLedgerCurrency(tables, ledger),
+    ledger_profiles: inLedger(tables.ledger_profiles),
     ledgers: ledger ? [ledger] : [],
   };
 
@@ -676,6 +680,11 @@ export function applyBackupData(
         // Older databases without the table — ignore.
       }
     }
+    try {
+      sqlite.execSync(`DELETE FROM ledger_profiles${keepShared('ledger_profiles')}`);
+    } catch {
+      // Older databases without the table — ignore.
+    }
     // Captures refer to replaced transactions. Also clear unused legacy category memory.
     for (const alertTable of ['auto_log_captures', 'merchant_categories']) {
       try {
@@ -729,6 +738,7 @@ export function applyBackupData(
     );
     insertRows(sqlite, 'monthly_budgets', backup.tables.monthly_budgets, skip);
     insertRows(sqlite, 'monthly_budget_categories', backup.tables.monthly_budget_categories, skip);
+    insertRows(sqlite, 'ledger_profiles', backup.tables.ledger_profiles, skip);
     if (restorePersonal) {
       insertRows(sqlite, 'settings', settingsRows);
       insertRows(sqlite, 'monthly_wage_settings', backup.tables.monthly_wage_settings);

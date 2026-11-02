@@ -3078,6 +3078,10 @@ const nb = {
     renew_pro: 'Forny Pro',
   },
   shared_ledgers: {
+    member_fallback: 'Medlem',
+    belongs_to_title: 'Tilhører',
+    belongs_to_you: '{{name}} (deg)',
+    belongs_to_added_by: 'Lagt til av {{name}}',
     title: 'Deling',
     share_toggle: 'Del dette regnskapet',
     share_toggle_caption: 'Inviter opptil {{max}} personer. De trenger ikke Pro.',

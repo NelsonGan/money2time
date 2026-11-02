@@ -2954,6 +2954,10 @@ const zhHant = {
     renew_pro: '續訂 Pro',
   },
   shared_ledgers: {
+    member_fallback: '成員',
+    belongs_to_title: '歸屬',
+    belongs_to_you: '{{name}}（你）',
+    belongs_to_added_by: '由 {{name}} 新增',
     title: '共享',
     share_toggle: '共享這個帳本',
     share_toggle_caption: '最多可邀請 {{max}} 人。他們不需要 Pro。',

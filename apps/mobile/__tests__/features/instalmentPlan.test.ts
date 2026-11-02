@@ -49,6 +49,7 @@ function makePlan(
     endDate: noon('2027-10-02'),
     isActive: true,
     countsAsExpense: false,
+    memberId: null,
     instalmentTotal: 2400,
     instalmentStartDate: noon('2026-11-02'),
     createdAt: noon('2026-11-02'),

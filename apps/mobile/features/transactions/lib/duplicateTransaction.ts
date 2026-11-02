@@ -64,5 +64,8 @@ export function buildDuplicateInput(
     sentiment: transaction.sentiment,
     reimbursable: transaction.reimbursable ?? false,
     countsAsExpense: transaction.countsAsExpense ?? false,
+    // Shared ledgers: the copy is still that person's entry; whoever made the
+    // copy is stamped as having added it.
+    memberId: transaction.memberId ?? null,
   };
 }

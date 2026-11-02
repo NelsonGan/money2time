@@ -3117,6 +3117,10 @@ const fr = {
     renew_pro: 'Renouveler Pro',
   },
   shared_ledgers: {
+    member_fallback: 'Membre',
+    belongs_to_title: 'Appartient à',
+    belongs_to_you: '{{name}} (vous)',
+    belongs_to_added_by: 'Ajouté par {{name}}',
     title: 'Partage',
     share_toggle: 'Partager ce carnet',
     share_toggle_caption: "Invitez jusqu'à {{max}} personnes. Elles n'ont pas besoin de Pro.",
