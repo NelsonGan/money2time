@@ -1,7 +1,7 @@
 // AI auto-review of captured notifications. After each drain (launch,
 // foreground, live capture) and when the user turns it on, every pending
-// notification AI has not seen yet, from an account it covers, goes to the
-// Worker in batches. Clear expenses and incomes are logged, clear non-payments
+// notification AI has not seen yet, from a linked account, goes to the Worker
+// in batches. Clear expenses and incomes are logged, clear non-payments
 // ignored, and the rest stay in To review with AI's opinion attached.
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -34,8 +34,17 @@ import { isPayableAccount } from './lib/binding';
 const MAX_TEXT_CHARS = 800;
 /** After a failed request, no run starts for this long (drains can be frequent). */
 const FAILURE_COOLDOWN_MS = 2 * 60 * 1000;
-/** A notification in this many failed requests is left for the user. */
+/**
+ * A notification in this many refused or failed requests is left for the user.
+ * Offline, timeouts and a busy service never count: those only wait.
+ */
 const MAX_ATTEMPTS = 3;
+const COUNTED_FAILURES: ReadonlySet<string> = new Set(['rejected', 'server']);
+
+/** The Worker takes a three-letter code; a custom one ("USDT") falls back to "no currency". */
+function requestCurrency(currency: string | undefined): string {
+  return currency && /^[A-Za-z]{3}$/.test(currency.trim()) ? currency.trim() : 'XXX';
+}
 
 // ---------------------------------------------------------------------------
 // Allowance, cached per install so the review page can show it offline.
@@ -258,7 +267,7 @@ async function reviewOnce(deps: NotificationAiReviewDeps) {
         notifications: batch.map((row) => ({
           id: row.id,
           text: row.text.slice(0, MAX_TEXT_CHARS),
-          currency: accounts.get(row.accountId as string)?.currency ?? 'USD',
+          currency: requestCurrency(accounts.get(row.accountId as string)?.currency),
           source: row.sourceLabel,
         })),
         expenseCategories: categoryNames('expense'),
@@ -276,7 +285,9 @@ async function reviewOnce(deps: NotificationAiReviewDeps) {
       });
       if (code !== 'limit_reached') {
         cooldownUntil = Date.now() + FAILURE_COOLDOWN_MS;
-        // One notification the service keeps refusing must not block the rest.
+      }
+      if (COUNTED_FAILURES.has(code)) {
+        // A batch the service keeps refusing must not block later notifications.
         const givenUp = batch
           .map((row) => row.id)
           .filter((id) => {

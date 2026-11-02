@@ -61,7 +61,10 @@ async function post(path: string, body: { appUserId: string }, timeoutMs: number
       if (response.status === 429 || error === 'capacity') {
         throw new NotificationAiError('capacity', 'AI review is busy.');
       }
-      throw new NotificationAiError('server', error ?? `AI review failed (${response.status}).`);
+      throw new NotificationAiError(
+        response.status >= 400 && response.status < 500 ? 'rejected' : 'server',
+        error ?? `AI review failed (${response.status}).`,
+      );
     }
     return payload;
   } catch (err) {

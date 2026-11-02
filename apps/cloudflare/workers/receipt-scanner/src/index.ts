@@ -9,7 +9,6 @@ import { AiTrace, type OpenRouterUsage, type PostHogEnv, readSessionId } from '.
 import type { PromptEnv, ResolvedPrompt } from './prompts';
 import {
   buildNotificationInput,
-  MAX_NOTIFICATIONS_PER_REQUEST,
   NOTIFICATION_PROMPT,
   NOTIFICATION_PROMPT_NAME,
   isNotificationAnswer,
@@ -475,8 +474,10 @@ async function handleNotifications(
   // Awaited, so a quick next batch reads the new count.
   const newlyCharged = results.map((r) => r.id).filter((id) => !charged.has(id));
   if (newlyCharged.length > 0) {
-    await consumeQuota(body.appUserId, isPro, env, now, 'notification', newlyCharged.length);
+    // Remembered first: if counting then fails, the client's retry is free
+    // rather than charged twice.
     await rememberCharged(env, body.appUserId, newlyCharged, now);
+    await consumeQuota(body.appUserId, isPro, env, now, 'notification', newlyCharged.length);
   }
   const used = quota.used + newlyCharged.length;
   log('notification_review_success', {
@@ -774,7 +775,13 @@ async function completeScan(
 
     if (!res.ok) {
       const text = await res.text().catch(() => '');
-      throw new Error(`openrouter ${res.status}: ${text.slice(0, 200)}`);
+      // A provider error body can echo the input (moderation errors quote it),
+      // so notification text never reaches the logs, PostHog or the client.
+      throw new Error(
+        opts.spanName === 'notification_review'
+          ? `openrouter ${res.status}`
+          : `openrouter ${res.status}: ${text.slice(0, 200)}`,
+      );
     }
 
     const completion = (await res.json()) as {

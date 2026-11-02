@@ -54,6 +54,8 @@ export type NotificationAiErrorCode =
   | 'limit_reached'
   | 'capacity'
   | 'network'
+  /** The service refused the request itself (a 4xx): retrying will not help. */
+  | 'rejected'
   | 'server';
 
 export class NotificationAiError extends Error {

@@ -143,7 +143,21 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
       setBusy(false);
     }
   };
-  const aiDone = history.filter(isUnseenAiResult);
+  // While Undo runs, its transaction is already gone but history still lists the
+  // result: hide that row until the notification is back in To review, so it
+  // never flashes as an empty, uncategorised entry.
+  const [undoingId, setUndoingId] = useState<string | null>(null);
+  useEffect(() => {
+    if (
+      undoingId &&
+      history.some((entry) => entry.id === undoingId && entry.result === 'pending')
+    ) {
+      setUndoingId(null);
+    }
+  }, [history, undoingId]);
+  const shown = (entry: NotificationScanHistoryEntry) =>
+    entry.id !== undoingId || entry.result === 'pending';
+  const aiDone = history.filter((entry) => isUnseenAiResult(entry) && shown(entry));
   // "Done by AI" moves to Recent once the user has been here and left.
   const aiDoneIds = useRef<string[]>([]);
   aiDoneIds.current = aiDone.map((entry) => entry.id);
@@ -185,6 +199,7 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
     setBusy(true);
     void triggerHaptic('selection');
     const snapshot = identity.current;
+    setUndoingId(entry.id);
     try {
       const undone = await undoNotificationAiReview(entry.id, {
         appUserId: snapshot.user,
@@ -196,8 +211,11 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
         void trackEvent(AnalyticsEvents.NOTIFICATION_AI_REVIEW_UNDONE, {
           decision: entry.ai?.decision ?? 'unknown',
         });
+      } else {
+        setUndoingId(null);
       }
     } catch {
+      setUndoingId(null);
       Alert.alert(
         I18n.t('payment_alerts.history_title'),
         I18n.t('payment_alerts.review_save_error'),
@@ -240,7 +258,9 @@ export function NotificationHistoryScreen({ onBack }: { onBack: () => void }) {
       ? `${currency} ${amount.toLocaleString(settings.locale, { minimumFractionDigits: 3, maximumFractionDigits: 3 })}`
       : formatAmount(amount, { ...settings, displayMode: 'money' }, { currencyCode: currency });
   // Unseen AI results are in Done by AI; they join Recent once seen.
-  const recent = history.filter((entry) => entry.result !== 'pending' && !isUnseenAiResult(entry));
+  const recent = history.filter(
+    (entry) => entry.result !== 'pending' && !isUnseenAiResult(entry) && shown(entry),
+  );
   const [bulkOpen, setBulkOpen] = useState(false);
   const bulkLabel = I18n.t('payment_alerts.review_all', { count: pending.length });
   return (

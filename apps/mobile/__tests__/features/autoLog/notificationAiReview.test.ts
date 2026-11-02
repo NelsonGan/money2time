@@ -214,19 +214,42 @@ it('records the failure and keeps the new allowance when the Worker says the lim
   });
 });
 
-it('leaves items for next time after a network failure', async () => {
+it('never gives up on a notification because of offline, timeouts or a busy service', async () => {
+  const run = deps();
   jest.mocked(readNotificationScanHistory).mockResolvedValue([row('1', 1)]);
-  jest
-    .mocked(reviewNotificationsWithAi)
-    .mockRejectedValue(new NotificationAiError('network', 'offline'));
-  await runNotificationAiReview(deps());
+  for (const code of ['network', 'capacity', 'network', 'network'] as const) {
+    jest
+      .mocked(reviewNotificationsWithAi)
+      .mockRejectedValueOnce(new NotificationAiError(code, 'x'));
+    resetCooldownOnly();
+    await runNotificationAiReview(run);
+  }
+  expect(reviewNotificationsWithAi).toHaveBeenCalledTimes(4);
   expect(applyNotificationAiResults).not.toHaveBeenCalled();
+  jest.spyOn(Date, 'now').mockRestore();
 });
 
-it('waits after a failure, and leaves a notification for the user after three', async () => {
+it('sends a three-letter currency, falling back for a custom one', async () => {
+  jest
+    .mocked(readNotificationScanHistory)
+    .mockResolvedValue([row('crypto', 2, { accountId: 'a3' }), row('ringgit', 1)]);
+  const run = deps();
+  const getCurrent = run.getCurrent;
+  run.getCurrent = () => {
+    const live = getCurrent();
+    return { ...live, accounts: [...live.accounts, account({ id: 'a3', currency: 'USDT' })] };
+  };
+  await runNotificationAiReview(run);
+  const request = jest.mocked(reviewNotificationsWithAi).mock.calls[0][0];
+  expect(request.notifications.map((item) => item.currency)).toEqual(['XXX', 'MYR']);
+});
+
+it('waits after a failure, and leaves a notification for the user after three refusals', async () => {
   const run = deps();
   jest.mocked(readNotificationScanHistory).mockResolvedValue([row('bad', 1)]);
-  jest.mocked(reviewNotificationsWithAi).mockRejectedValue(new NotificationAiError('server', 'x'));
+  jest
+    .mocked(reviewNotificationsWithAi)
+    .mockRejectedValue(new NotificationAiError('rejected', 'x'));
   await runNotificationAiReview(run);
   // Cooling down: the next drain sends nothing.
   await runNotificationAiReview(run);

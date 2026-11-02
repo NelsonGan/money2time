@@ -32,7 +32,7 @@ import {
   subscribeNotificationAiQuota,
 } from '../notificationAiReview';
 
-export const NOTIFICATION_AI_PAYWALL_SOURCE = 'notification_ai';
+const NOTIFICATION_AI_PAYWALL_SOURCE = 'notification_ai';
 
 /** The install's AI review allowance, refreshed from the Worker on mount and on upgrade. */
 export function useNotificationAiQuota(refresh: boolean): NotificationAiQuota | null {
