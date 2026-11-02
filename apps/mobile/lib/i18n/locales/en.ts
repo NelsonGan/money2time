@@ -1697,6 +1697,13 @@ const en = {
     pay_off_amount: 'Pay off {{amount}}',
     enter_total_first: 'Enter the total amount first.',
     total_too_small: 'Too small to split into {{count}} payments.',
+    payment_amount: 'Payment amount',
+    edit_amount_hint: 'Type the amount your bank charges each time.',
+    last_payment: 'Last payment {{amount}}',
+    split_evenly: 'Split evenly',
+    amount_over_total: '{{amount}} × {{count}} = {{sum}}, more than the total.',
+    use_as_total: 'Use {{amount}} as the total',
+    amount_too_large: 'Too large: the payments would add up to more than the total.',
     extras_need_today:
       'To keep a receipt, details or reimbursement, the first payment has to be today or earlier.',
     remove: 'Remove instalments',

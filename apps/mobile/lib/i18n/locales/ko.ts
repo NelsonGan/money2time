@@ -1704,6 +1704,13 @@ const ko = {
     pay_off_amount: '{{amount}} 완납',
     enter_total_first: '먼저 총액을 입력하세요.',
     total_too_small: '{{count}}회로 나누기에는 너무 적어요.',
+    payment_amount: '회차별 금액',
+    edit_amount_hint: '은행이 매번 청구하는 금액을 입력하세요.',
+    last_payment: '마지막 회차 {{amount}}',
+    split_evenly: '균등하게 나누기',
+    amount_over_total: '{{amount}} × {{count}} = {{sum}}, 총액보다 많아요.',
+    use_as_total: '{{amount}}을(를) 총액으로 사용',
+    amount_too_large: '너무 커요: 납부액 합계가 총액을 넘어요.',
     extras_need_today:
       '영수증, 세부 정보 또는 환급을 유지하려면 첫 납부일이 오늘 또는 그 이전이어야 합니다.',
     remove: '할부 해제',

@@ -1734,6 +1734,13 @@ const id = {
     pay_off_amount: 'Lunasi {{amount}}',
     enter_total_first: 'Masukkan jumlah total terlebih dahulu.',
     total_too_small: 'Terlalu kecil untuk dibagi menjadi {{count}} pembayaran.',
+    payment_amount: 'Jumlah cicilan',
+    edit_amount_hint: 'Ketik jumlah yang ditagih bank setiap kali.',
+    last_payment: 'Pembayaran terakhir {{amount}}',
+    split_evenly: 'Bagi rata',
+    amount_over_total: '{{amount}} × {{count}} = {{sum}}, lebih dari total.',
+    use_as_total: 'Jadikan {{amount}} sebagai total',
+    amount_too_large: 'Terlalu besar: total pembayaran akan melebihi total.',
     extras_need_today:
       'Agar struk, detail, atau penggantian tetap tersimpan, pembayaran pertama harus hari ini atau sebelumnya.',
     remove: 'Hapus cicilan',

@@ -77,6 +77,7 @@ export function AddTransactionScreen({
           recurrencePattern: pattern,
           recurrenceInterval: interval,
           startDate: transaction.date,
+          regularAmount: choice.amount ?? null,
           firstPayment: {
             details: transaction.details ?? null,
             receiptUri: transaction.receiptUri ?? null,

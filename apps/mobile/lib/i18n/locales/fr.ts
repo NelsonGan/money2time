@@ -1743,6 +1743,13 @@ const fr = {
     pay_off_amount: 'Solder {{amount}}',
     enter_total_first: "Saisissez d'abord le montant total.",
     total_too_small: 'Trop petit pour être réparti en {{count}} échéances.',
+    payment_amount: 'Montant des échéances',
+    edit_amount_hint: 'Saisissez le montant que votre banque prélève à chaque fois.',
+    last_payment: 'Dernière échéance {{amount}}',
+    split_evenly: 'Répartir également',
+    amount_over_total: '{{amount}} × {{count}} = {{sum}}, plus que le total.',
+    use_as_total: 'Utiliser {{amount}} comme total',
+    amount_too_large: 'Trop élevé : les échéances dépasseraient le total.',
     extras_need_today:
       "Pour garder un reçu, des détails ou un remboursement, la première échéance doit être aujourd'hui ou avant.",
     remove: 'Retirer les échéances',

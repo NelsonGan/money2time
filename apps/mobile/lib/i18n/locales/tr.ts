@@ -1737,6 +1737,13 @@ const tr = {
     pay_off_amount: '{{amount}} ödeyip kapat',
     enter_total_first: 'Önce toplam tutarı girin.',
     total_too_small: '{{count}} taksite bölmek için çok küçük.',
+    payment_amount: 'Taksit tutarı',
+    edit_amount_hint: 'Bankanın her seferinde çektiği tutarı yazın.',
+    last_payment: 'Son taksit {{amount}}',
+    split_evenly: 'Eşit böl',
+    amount_over_total: '{{amount}} × {{count}} = {{sum}}, toplamdan fazla.',
+    use_as_total: 'Toplam olarak {{amount}} kullan',
+    amount_too_large: 'Çok yüksek: taksitler toplamı aşar.',
     extras_need_today:
       'Fişi, ayrıntıları veya geri ödemeyi korumak için ilk taksit bugün ya da daha önce olmalı.',
     remove: 'Taksiti kaldır',

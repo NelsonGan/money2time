@@ -1738,6 +1738,13 @@ const ms = {
     pay_off_amount: 'Langsaikan {{amount}}',
     enter_total_first: 'Masukkan jumlah keseluruhan dahulu.',
     total_too_small: 'Terlalu kecil untuk dibahagi kepada {{count}} bayaran.',
+    payment_amount: 'Jumlah bayaran',
+    edit_amount_hint: 'Taip jumlah yang dicaj bank anda setiap kali.',
+    last_payment: 'Bayaran terakhir {{amount}}',
+    split_evenly: 'Bahagi sama rata',
+    amount_over_total: '{{amount}} × {{count}} = {{sum}}, lebih daripada jumlah keseluruhan.',
+    use_as_total: 'Guna {{amount}} sebagai jumlah keseluruhan',
+    amount_too_large: 'Terlalu besar: bayaran akan melebihi jumlah keseluruhan.',
     extras_need_today:
       'Untuk menyimpan resit, butiran atau bayaran balik, bayaran pertama mesti hari ini atau lebih awal.',
     remove: 'Buang ansuran',

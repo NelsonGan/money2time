@@ -1728,6 +1728,13 @@ const da = {
     pay_off_amount: 'Indfri {{amount}}',
     enter_total_first: 'Indtast det samlede beløb først.',
     total_too_small: 'For lille til at dele i {{count}} afdrag.',
+    payment_amount: 'Afdragsbeløb',
+    edit_amount_hint: 'Skriv det beløb, din bank trækker hver gang.',
+    last_payment: 'Sidste afdrag {{amount}}',
+    split_evenly: 'Fordel ligeligt',
+    amount_over_total: '{{amount}} × {{count}} = {{sum}}, mere end totalen.',
+    use_as_total: 'Brug {{amount}} som total',
+    amount_too_large: 'For stort: afdragene ville blive mere end totalen.',
     extras_need_today:
       'For at beholde en kvittering, detaljer eller refusion skal første afdrag være i dag eller tidligere.',
     remove: 'Fjern afdrag',

@@ -1734,6 +1734,13 @@ const es = {
     pay_off_amount: 'Liquidar {{amount}}',
     enter_total_first: 'Primero introduce el importe total.',
     total_too_small: 'Demasiado poco para dividir en {{count}} cuotas.',
+    payment_amount: 'Importe de la cuota',
+    edit_amount_hint: 'Escribe lo que tu banco cobra cada vez.',
+    last_payment: 'Última cuota {{amount}}',
+    split_evenly: 'Repartir por igual',
+    amount_over_total: '{{amount}} × {{count}} = {{sum}}, más que el total.',
+    use_as_total: 'Usar {{amount}} como total',
+    amount_too_large: 'Demasiado alto: las cuotas sumarían más que el total.',
     extras_need_today:
       'Para conservar un recibo, los detalles o un reembolso, la primera cuota tiene que ser hoy o antes.',
     remove: 'Quitar cuotas',

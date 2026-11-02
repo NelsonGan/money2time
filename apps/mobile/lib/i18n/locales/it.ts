@@ -1732,6 +1732,13 @@ const it = {
     pay_off_amount: 'Salda {{amount}}',
     enter_total_first: "Inserisci prima l'importo totale.",
     total_too_small: 'Troppo poco per dividerlo in {{count}} rate.',
+    payment_amount: 'Importo della rata',
+    edit_amount_hint: 'Scrivi l’importo che la banca addebita ogni volta.',
+    last_payment: 'Ultima rata {{amount}}',
+    split_evenly: 'Dividi in parti uguali',
+    amount_over_total: '{{amount}} × {{count}} = {{sum}}, più del totale.',
+    use_as_total: 'Usa {{amount}} come totale',
+    amount_too_large: 'Troppo alto: le rate supererebbero il totale.',
     extras_need_today:
       'Per tenere una ricevuta, i dettagli o un rimborso, la prima rata deve essere oggi o prima.',
     remove: 'Rimuovi rate',

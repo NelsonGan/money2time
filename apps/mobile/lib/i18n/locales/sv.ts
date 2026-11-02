@@ -1726,6 +1726,13 @@ const sv = {
     pay_off_amount: 'Betala av {{amount}}',
     enter_total_first: 'Ange totalbeloppet först.',
     total_too_small: 'För litet för att delas i {{count}} betalningar.',
+    payment_amount: 'Belopp per betalning',
+    edit_amount_hint: 'Skriv beloppet som banken drar varje gång.',
+    last_payment: 'Sista betalningen {{amount}}',
+    split_evenly: 'Dela lika',
+    amount_over_total: '{{amount}} × {{count}} = {{sum}}, mer än totalen.',
+    use_as_total: 'Använd {{amount}} som total',
+    amount_too_large: 'För stort: betalningarna skulle bli mer än totalen.',
     extras_need_today:
       'För att behålla ett kvitto, detaljer eller en ersättning måste första betalningen vara i dag eller tidigare.',
     remove: 'Ta bort delbetalning',

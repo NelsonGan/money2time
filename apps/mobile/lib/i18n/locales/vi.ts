@@ -1713,6 +1713,13 @@ const vi = {
     pay_off_amount: 'Tất toán {{amount}}',
     enter_total_first: 'Hãy nhập tổng số tiền trước.',
     total_too_small: 'Quá nhỏ để chia thành {{count}} kỳ.',
+    payment_amount: 'Số tiền mỗi kỳ',
+    edit_amount_hint: 'Nhập số tiền ngân hàng trừ mỗi kỳ.',
+    last_payment: 'Kỳ cuối {{amount}}',
+    split_evenly: 'Chia đều',
+    amount_over_total: '{{amount}} × {{count}} = {{sum}}, nhiều hơn tổng.',
+    use_as_total: 'Dùng {{amount}} làm tổng',
+    amount_too_large: 'Quá lớn: các kỳ cộng lại sẽ vượt tổng.',
     extras_need_today:
       'Để giữ biên lai, chi tiết hoặc hoàn tiền, kỳ đầu tiên phải là hôm nay hoặc trước đó.',
     remove: 'Bỏ trả góp',

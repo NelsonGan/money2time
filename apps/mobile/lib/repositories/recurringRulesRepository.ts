@@ -4,11 +4,12 @@ import {
   buildInstalmentProgress,
   canSplitInstalments,
   INSTALMENT_PAYOFF_NUMBER,
+  instalmentAmounts,
   isInstalmentPlan,
+  isRegularAmountValid,
   nextPaymentIndex,
   paymentRowsForPlan,
   scheduleOfPlan,
-  splitInstalmentAmounts,
 } from '~/features/instalments/lib/instalmentPlan';
 import { getDb, getSQLite } from '~/lib/db/client';
 import { getActiveLedgerId, inActiveLedger } from '~/lib/db/ledgerScope';
@@ -69,6 +70,11 @@ export interface CreateInstalmentPlanInput {
   recurrenceInterval: number;
   /** The first payment's date (ISO). Every later one is counted from it. */
   startDate: string;
+  /**
+   * Each payment as the bank set it, when it differs from the even split;
+   * the last payment takes what is left so the plan adds up to `total`.
+   */
+  regularAmount?: number | null;
   /**
    * What the add form held beyond the plan: kept on the first payment when it
    * is made right away (its date is today or earlier).
@@ -251,7 +257,13 @@ class RecurringRulesRepository {
     const count = Math.trunc(input.count);
     if (!input.accountId || !input.categoryId || count < 2) return null;
     if (!canSplitInstalments(input.total, count)) return null;
-    const amounts = splitInstalmentAmounts(input.total, count);
+    if (
+      input.regularAmount != null &&
+      !isRegularAmountValid(input.total, count, input.regularAmount)
+    ) {
+      return null;
+    }
+    const amounts = instalmentAmounts(input.total, count, input.regularAmount);
     const schedule = {
       instalmentCount: count,
       instalmentStartDate: input.startDate,
@@ -596,10 +608,6 @@ class RecurringRulesRepository {
     // picked up again on every load.
     const canPost = !!rule.accountId && !!rule.categoryId;
     const dates = scheduleOfPlan(rule);
-    const amounts = splitInstalmentAmounts(
-      rule.instalmentTotal ?? rule.amount * rule.instalmentCount,
-      rule.instalmentCount,
-    );
     const payments = this.instalmentPayments(rule);
     // Paid off (on another phone, whose ending of the plan a later sync of
     // the rule undid): nothing more to make.
@@ -615,6 +623,7 @@ class RecurringRulesRepository {
     // or by one in another time zone or on an older version whose run id for
     // it differs, so the run id alone would not stop a second charge.
     const madeNumbers = new Set(payments.map((payment) => payment.instalmentNumber));
+    const progress = buildInstalmentProgress(rule, payments);
     // Which payment the plan is on, found the same way as its progress.
     const nextIndex = nextPaymentIndex(rule.nextRunDate, dates);
     const made: number[] = [];
@@ -626,7 +635,9 @@ class RecurringRulesRepository {
         return;
       }
       if (!canPost || madeNumbers.has(index + 1)) return;
-      const amount = amounts[index] ?? rule.amount;
+      // As the plan's progress has it: the regular amount, the last one
+      // balancing the total against what was actually paid.
+      const amount = progress.entries[index]?.amount ?? rule.amount;
       const wrote = writeRunOnce(recurringRunTransactionId(rule.id, date), {
         ...categorizedRunInput(rule, context, date, amount),
         instalmentRuleId: rule.id,

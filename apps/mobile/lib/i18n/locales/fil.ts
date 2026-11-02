@@ -1749,6 +1749,13 @@ const fil = {
     pay_off_amount: 'Bayaran lahat: {{amount}}',
     enter_total_first: 'Ilagay muna ang kabuuang halaga.',
     total_too_small: 'Masyadong maliit para hatiin sa {{count}} na hulog.',
+    payment_amount: 'Halaga ng hulog',
+    edit_amount_hint: 'I-type ang halagang sinisingil ng bangko mo bawat hulog.',
+    last_payment: 'Huling hulog {{amount}}',
+    split_evenly: 'Hatiin nang pantay',
+    amount_over_total: '{{amount}} × {{count}} = {{sum}}, higit sa kabuuan.',
+    use_as_total: 'Gawing kabuuan ang {{amount}}',
+    amount_too_large: 'Masyadong malaki: lalampas sa kabuuan ang mga hulog.',
     extras_need_today:
       'Para mapanatili ang resibo, detalye o reimbursement, dapat ngayong araw o mas maaga ang unang hulog.',
     remove: 'Alisin ang hulugan',

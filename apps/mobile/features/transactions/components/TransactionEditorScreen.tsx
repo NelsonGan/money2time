@@ -84,7 +84,10 @@ import {
   InstalmentSheet,
 } from '~/features/instalments/components/InstalmentSheet';
 import { formatPlanDay } from '~/features/instalments/lib/format';
-import { canSplitInstalments } from '~/features/instalments/lib/instalmentPlan';
+import {
+  canSplitInstalments,
+  isRegularAmountValid,
+} from '~/features/instalments/lib/instalmentPlan';
 import {
   NumpadPanel,
   ReceiptViewerModal,
@@ -2298,6 +2301,17 @@ export function TransactionEditorScreen({
       ) {
         const capturedPayload = submitPayload;
         const capturedChoice = instalmentChoice;
+        // The bank's amount set in the sheet must still fit the total, which
+        // may have changed since.
+        if (
+          capturedChoice.amount != null &&
+          canSplitInstalments(capturedPayload.amount, capturedChoice.count) &&
+          !isRegularAmountValid(capturedPayload.amount, capturedChoice.count, capturedChoice.amount)
+        ) {
+          showToast(I18n.t('instalments.amount_too_large'));
+          setInstalmentSheetVisible(true);
+          return;
+        }
         if (!canSplitInstalments(capturedPayload.amount, capturedChoice.count)) {
           const message =
             capturedPayload.amount > 0
@@ -5090,6 +5104,10 @@ export function TransactionEditorScreen({
           onClose={() => {
             setInstalmentDraft(null);
             setInstalmentSheetVisible(false);
+          }}
+          onSetTotal={(nextTotal) => {
+            setAmount(formatMoney(nextTotal));
+            setAmountExpression('');
           }}
           onPickFirstPayment={(choice) => {
             setInstalmentDraft(choice);

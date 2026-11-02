@@ -323,6 +323,8 @@ export interface TransactionsContextValue {
 
 export interface InstalmentPlanUpdate {
   name?: string;
+  /** Each upcoming payment (the bank's figure); the last one balances. */
+  amount?: number;
   note?: string | null;
   accountId?: string;
   categoryId?: string;
@@ -3006,6 +3008,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           payments: Math.trunc(input.count),
           frequency: frequencyOfSchedule(input.recurrencePattern, input.recurrenceInterval),
           first_payment_due: created.firstPaymentId !== null,
+          custom_amount: input.regularAmount != null,
         });
       }
       return created;
@@ -3021,9 +3024,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           ...(updates.note !== undefined ? { note: updates.note } : {}),
           ...(updates.accountId ? { accountId: updates.accountId } : {}),
           ...(updates.categoryId ? { categoryId: updates.categoryId } : {}),
+          // The regular payment from now on; the last one keeps the plan
+          // balanced (`buildInstalmentProgress`).
+          ...(updates.amount !== undefined ? { amount: updates.amount } : {}),
         });
       });
-      void trackEvent(AnalyticsEvents.INSTALMENT_PLAN_UPDATED);
+      void trackEvent(AnalyticsEvents.INSTALMENT_PLAN_UPDATED, {
+        amount_changed: updates.amount !== undefined,
+      });
     },
     [runMutation],
   );

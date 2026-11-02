@@ -1720,6 +1720,13 @@ const hi = {
     pay_off_amount: '{{amount}} चुकता करें',
     enter_total_first: 'पहले कुल राशि डालें।',
     total_too_small: '{{count}} किस्तों में बाँटने के लिए बहुत कम है।',
+    payment_amount: 'किस्त की राशि',
+    edit_amount_hint: 'हर बार बैंक जितनी राशि लेता है, वह डालें।',
+    last_payment: 'आखिरी किस्त {{amount}}',
+    split_evenly: 'बराबर बाँटें',
+    amount_over_total: '{{amount}} × {{count}} = {{sum}}, कुल से ज़्यादा।',
+    use_as_total: '{{amount}} को कुल राशि बनाएँ',
+    amount_too_large: 'बहुत ज़्यादा: किस्तें कुल से ज़्यादा हो जाएँगी।',
     extras_need_today:
       'रसीद, विवरण या प्रतिपूर्ति रखने के लिए पहली किस्त आज या उससे पहले की होनी चाहिए।',
     remove: 'किस्तें हटाएँ',

@@ -1726,6 +1726,13 @@ const uk = {
     pay_off_amount: 'Погасити {{amount}}',
     enter_total_first: 'Спершу введіть загальну суму.',
     total_too_small: 'Замало, щоб розділити на платежі: {{count}}.',
+    payment_amount: 'Сума платежу',
+    edit_amount_hint: 'Введіть суму, яку банк списує щоразу.',
+    last_payment: 'Останній платіж {{amount}}',
+    split_evenly: 'Розділити порівну',
+    amount_over_total: '{{amount}} × {{count}} = {{sum}}, більше за загальну суму.',
+    use_as_total: 'Зробити {{amount}} загальною сумою',
+    amount_too_large: 'Забагато: платежі перевищать загальну суму.',
     extras_need_today:
       'Щоб зберегти чек, подробиці або відшкодування, перший платіж має бути сьогодні або раніше.',
     remove: 'Прибрати розстрочку',

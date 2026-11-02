@@ -1742,6 +1742,13 @@ const nl = {
     pay_off_amount: '{{amount}} afbetalen',
     enter_total_first: 'Vul eerst het totaalbedrag in.',
     total_too_small: 'Te klein om in {{count}} termijnen te verdelen.',
+    payment_amount: 'Termijnbedrag',
+    edit_amount_hint: 'Vul het bedrag in dat je bank elke keer afschrijft.',
+    last_payment: 'Laatste termijn {{amount}}',
+    split_evenly: 'Gelijk verdelen',
+    amount_over_total: '{{amount}} × {{count}} = {{sum}}, meer dan het totaal.',
+    use_as_total: '{{amount}} als totaal gebruiken',
+    amount_too_large: 'Te hoog: de termijnen zouden meer zijn dan het totaal.',
     extras_need_today:
       'Om een bon, details of vergoeding te houden, moet de eerste termijn vandaag of eerder zijn.',
     remove: 'Termijnen verwijderen',

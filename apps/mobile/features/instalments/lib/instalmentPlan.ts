@@ -85,6 +85,51 @@ export function splitInstalmentAmounts(total: number, count: number): number[] {
 }
 
 /**
+ * Splits a total into `count` payments of `regular` each, the last one
+ * taking whatever is left so the parts add back up to the total exactly:
+ * a bank's RM83.34 a month on RM1,000 is 11 × 83.34 and a last 83.26. With
+ * no regular amount, or one that leaves nothing for the last payment, the
+ * total splits evenly (`splitInstalmentAmounts`).
+ */
+export function instalmentAmounts(total: number, count: number, regular?: number | null): number[] {
+  if (!isRegularAmountValid(total, count, regular)) return splitInstalmentAmounts(total, count);
+  const safeCount = Math.max(1, Math.trunc(count) || 1);
+  const regularCents = Math.round((regular ?? 0) * 100);
+  const lastCents = Math.round(total * 100) - regularCents * (safeCount - 1);
+  return Array.from({ length: safeCount }, (_, index) =>
+    index === safeCount - 1 ? lastCents / 100 : regularCents / 100,
+  );
+}
+
+/**
+ * Whether `count` payments of `regular` can balance to `total`: at least a
+ * cent each, with the last one (what the others leave) above zero.
+ */
+export function isRegularAmountValid(
+  total: number,
+  count: number,
+  regular?: number | null,
+): boolean {
+  if (regular == null || !Number.isFinite(regular) || !Number.isFinite(total)) return false;
+  const regularCents = Math.round(regular * 100);
+  const totalCents = Math.round(total * 100);
+  return regularCents >= 1 && regularCents * (Math.max(1, Math.trunc(count)) - 1) < totalCents;
+}
+
+/**
+ * Whether `regular` × `count` is off the total by more than rounding: a
+ * plan with interest or a fee, whose real total is the payments' sum.
+ */
+export function regularAmountImpliesOtherTotal(
+  total: number,
+  count: number,
+  regular: number,
+): boolean {
+  const gapCents = Math.abs(Math.round(regular * 100) * count - Math.round(total * 100));
+  return gapCents >= Math.max(1, Math.trunc(count));
+}
+
+/**
  * `startIso` moved on by whole periods in the phone's own calendar: the same
  * time of day, `months` later with the day clamped to a short month, or
  * `days` later. Local arithmetic keeps every payment on the day the user
@@ -241,7 +286,9 @@ export function buildInstalmentProgress(
 ): InstalmentProgress {
   const total = rule.instalmentTotal ?? rule.amount * rule.instalmentCount;
   const dates = scheduleOfPlan(rule);
-  const amounts = splitInstalmentAmounts(total, rule.instalmentCount);
+  // The plan as agreed: `amount` is the regular payment (the bank's figure,
+  // or the even split), and the last one balances the total.
+  const amounts = instalmentAmounts(total, rule.instalmentCount, rule.amount);
 
   const live = payments.filter((payment) => !payment.deletedAt);
   const byNumber = new Map<number, InstalmentPaymentRow>();
@@ -275,7 +322,8 @@ export function buildInstalmentProgress(
     return {
       number,
       dateIso,
-      amount: amounts[index] ?? 0,
+      // A payment made shows what it actually came to.
+      amount: payment ? payment.amount : (amounts[index] ?? 0),
       status,
       transactionId: payment?.id ?? (status === 'paid_off' ? (payoffRow?.id ?? null) : null),
       paidDateIso: payment?.date ?? (status === 'paid_off' ? (payoffRow?.date ?? null) : null),
@@ -286,6 +334,25 @@ export function buildInstalmentProgress(
     [...byNumber.values()].reduce((sum, payment) => sum + payment.amount, 0) +
       (payoffRow?.amount ?? 0),
   );
+  // What is still to pay keeps the plan balanced: the total less what was
+  // paid (as paid, edits included) and what was skipped, at the regular
+  // amount with the last payment taking the rest. A plan whose amount was
+  // changed part way, or a payment edited to another amount, still adds
+  // up to its total.
+  const skippedAmount = entries
+    .filter((entry) => entry.status === 'skipped')
+    .reduce((sum, entry) => sum + entry.amount, 0);
+  const upcomingIndexes = entries.flatMap((entry, index) =>
+    entry.status === 'upcoming' ? [index] : [],
+  );
+  const remaining = normalizeMoneyAmount(total - paidAmount - skippedAmount);
+  if (upcomingIndexes.length > 0 && canSplitInstalments(remaining, upcomingIndexes.length)) {
+    const balanced = instalmentAmounts(remaining, upcomingIndexes.length, rule.amount);
+    upcomingIndexes.forEach((entryIndex, position) => {
+      const entry = entries[entryIndex];
+      if (entry) entry.amount = balanced[position] ?? entry.amount;
+    });
+  }
   const upcoming = entries.filter((entry) => entry.status === 'upcoming');
   const leftAmount = normalizeMoneyAmount(upcoming.reduce((sum, entry) => sum + entry.amount, 0));
   const paidCount = entries.filter(

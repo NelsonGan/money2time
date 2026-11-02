@@ -209,6 +209,27 @@ describe('createInstalmentPlan', () => {
     expect(state.rule).toMatchObject({ nextRunDate: noon('2026-12-15'), isActive: true });
   });
 
+  it('uses the bank’s payment amount, and refuses one that leaves nothing for the last', () => {
+    const state = useFakeDb();
+    recurringRulesRepository.createInstalmentPlan(
+      { ...PLAN_INPUT, regularAmount: 333.4, startDate: noon('2026-11-02') },
+      noon('2026-11-02'),
+    );
+    expect(transactionsRepository.createWithId).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ amount: 333.4, instalmentNumber: 1 }),
+    );
+    expect(state.rule).toMatchObject({ amount: 333.4, instalmentTotal: 1000 });
+
+    expect(
+      recurringRulesRepository.createInstalmentPlan({
+        ...PLAN_INPUT,
+        regularAmount: 500,
+        startDate: noon('2026-11-02'),
+      }),
+    ).toBeNull();
+  });
+
   it('refuses a plan with no total or fewer than two payments', () => {
     const state = useFakeDb();
     const today = noon('2026-11-02');

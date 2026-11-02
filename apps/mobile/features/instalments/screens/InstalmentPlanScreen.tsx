@@ -1,6 +1,8 @@
 import { Check, ChevronRight, X } from 'lucide-react-native';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller';
+import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
@@ -27,13 +29,17 @@ import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import type { RecurringTransactionRule } from '~/types';
 import { cn } from '~/utils';
 import { formatAmount, formatShortDate } from '~/utils/formatters';
 
 import { InstalmentProgressBar } from '../components/InstalmentPlanCard';
 import { formatPlanDay } from '../lib/format';
-import type { InstalmentEntry } from '../lib/instalmentPlan';
+import {
+  instalmentAmounts,
+  type InstalmentEntry,
+  type InstalmentProgress,
+  isRegularAmountValid,
+} from '../lib/instalmentPlan';
 
 interface InstalmentPlanScreenProps {
   planId: string;
@@ -232,7 +238,7 @@ export function InstalmentPlanScreen({
           ) : null}
         </View>
       </ScrollView>
-      <InstalmentPlanEditSheet visible={editing} rule={rule} onClose={() => setEditing(false)} />
+      <InstalmentPlanEditSheet visible={editing} plan={plan} onClose={() => setEditing(false)} />
     </SettingsPageLayout>
   );
 
@@ -310,14 +316,16 @@ function ScheduleRow({
  */
 function InstalmentPlanEditSheet({
   visible,
-  rule,
+  plan,
   onClose,
 }: {
   visible: boolean;
-  rule: RecurringTransactionRule;
+  plan: InstalmentProgress;
   onClose: () => void;
 }) {
+  const { rule } = plan;
   const {
+    settings,
     accounts,
     accountGroups,
     categories,
@@ -329,18 +337,28 @@ function InstalmentPlanEditSheet({
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
   const sheetColumnStyle = useSheetColumnStyle();
+  const keyboard = useReanimatedKeyboardAnimation();
+  const keyboardLift = useAnimatedStyle(() => ({
+    transform: [{ translateY: keyboard.height.value }],
+  }));
   const [name, setName] = useState(rule.name);
   const [accountId, setAccountId] = useState(rule.accountId);
   const [categoryId, setCategoryId] = useState(rule.categoryId);
   const [picker, setPicker] = useState<'account' | 'category' | null>(null);
+  // The payment amount, for the payments still to come. With one left it is
+  // whatever balances the plan, so there is nothing to set.
+  const upcomingCount = plan.entries.filter((entry) => entry.status === 'upcoming').length;
+  const canEditAmount = upcomingCount >= 2;
+  const [amountText, setAmountText] = useState(rule.amount.toFixed(2));
 
   useEffect(() => {
     if (!visible) return;
+    setAmountText(rule.amount.toFixed(2));
     setName(rule.name);
     setAccountId(rule.accountId);
     setCategoryId(rule.categoryId);
     setPicker(null);
-  }, [rule.accountId, rule.categoryId, rule.name, visible]);
+  }, [rule.accountId, rule.amount, rule.categoryId, rule.name, visible]);
 
   const categoryOptions = useMemo(
     () => buildCategoryPickerOptions(categories.filter((category) => category.type === 'expense')),
@@ -350,15 +368,27 @@ function InstalmentPlanEditSheet({
   const parent = category?.parentId ? getCategoryById(category.parentId) : undefined;
   const account = accountId ? getAccountById(accountId) : undefined;
   const trimmed = name.trim();
+  const money = (value: number) => formatAmount(value, settings, { currencyCode: rule.currency });
+  const parsedAmount = Math.round(Number(amountText.replace(',', '.')) * 100) / 100;
+  const amountChanged = canEditAmount && parsedAmount !== rule.amount;
+  // What is left to pay, as the upcoming payments at the new amount with the
+  // last one taking the rest.
+  const amountValid =
+    !amountChanged || isRegularAmountValid(plan.leftAmount, upcomingCount, parsedAmount);
+  const newLast = amountChanged
+    ? instalmentAmounts(plan.leftAmount, upcomingCount, parsedAmount)[upcomingCount - 1]
+    : null;
+  const canSave = !!trimmed && amountValid;
 
   const save = () => {
-    if (!trimmed) return;
+    if (!canSave) return;
     void triggerHaptic('success');
     updateInstalmentPlan(rule.id, {
       name: trimmed,
       ...(trimmed !== rule.name ? { note: trimmed } : {}),
       ...(accountId && accountId !== rule.accountId ? { accountId } : {}),
       ...(categoryId && categoryId !== rule.categoryId ? { categoryId } : {}),
+      ...(amountChanged ? { amount: parsedAmount } : {}),
     });
     onClose();
   };
@@ -388,81 +418,105 @@ function InstalmentPlanEditSheet({
     <ThemeModal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.backdrop}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessible={false} />
-        <View
-          style={[sheetColumnStyle, { paddingBottom: Math.max(insets.bottom, 16) + 8 }]}
-          className="gap-5 rounded-t-[28px] bg-card px-5 pt-5"
-        >
-          <View className="flex-row items-center">
-            <Text variant="subheading" className="flex-1">
-              {I18n.t('instalments.edit_plan')}
-            </Text>
-            <Pressable
-              onPress={onClose}
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('common.close')}
-              hitSlop={8}
-              className="h-9 w-9 items-center justify-center rounded-full bg-secondary/50 active:opacity-70"
-            >
-              <X size={18} color={themeColors.textMuted} />
-            </Pressable>
-          </View>
-
-          {/* One grouped list: name, category, account. */}
-          <View className="gap-2">
-            <View className="overflow-hidden rounded-[20px] border border-border/40 bg-background">
-              <View className="min-h-[52px] flex-row items-center gap-3 border-b border-border/30 px-4">
-                <Text variant="body" tone="muted">
-                  {I18n.t('instalments.name')}
-                </Text>
-                <TextInput
-                  value={name}
-                  onChangeText={setName}
-                  placeholder={I18n.t('instalments.name_placeholder')}
-                  placeholderTextColor={themeColors.textMuted}
-                  style={[SINGLE_LINE_TEXT_INPUT_STYLE, { color: themeColors.text }]}
-                  className="h-12 flex-1 text-right text-[16px]"
-                  returnKeyType="done"
-                  maxLength={80}
-                  accessibilityLabel={I18n.t('instalments.name')}
-                />
-              </View>
-              <EditRow
-                label={I18n.t('transactions.editor.category')}
-                value={category?.name ?? ''}
-                icon={<CategoryEmoji icon={category?.icon} parentIcon={parent?.icon} size={18} />}
-                onPress={() => setPicker('category')}
-                bordered
-              />
-              <EditRow
-                label={I18n.t('transactions.editor.account')}
-                value={account?.name ?? ''}
-                icon={
-                  account ? (
-                    <AccountLogo
-                      logoId={account.logoId}
-                      type={account.type}
-                      goalEmoji={account.goalEmoji}
-                      size={18}
-                    />
-                  ) : null
-                }
-                onPress={() => setPicker('account')}
-              />
+        {/* Lifted by the keyboard while the name or amount is typed. */}
+        <Animated.View style={keyboardLift}>
+          <View
+            style={[sheetColumnStyle, { paddingBottom: Math.max(insets.bottom, 16) + 8 }]}
+            className="gap-5 rounded-t-[28px] bg-card px-5 pt-5"
+          >
+            <View className="flex-row items-center">
+              <Text variant="subheading" className="flex-1">
+                {I18n.t('instalments.edit_plan')}
+              </Text>
+              <Pressable
+                onPress={onClose}
+                accessibilityRole="button"
+                accessibilityLabel={I18n.t('common.close')}
+                hitSlop={8}
+                className="h-9 w-9 items-center justify-center rounded-full bg-secondary/50 active:opacity-70"
+              >
+                <X size={18} color={themeColors.textMuted} />
+              </Pressable>
             </View>
-            <Text variant="caption" tone="muted" className="px-1">
-              {I18n.t('instalments.edit_hint')}
-            </Text>
-          </View>
 
-          <View className="gap-1">
-            <Button onPress={save} disabled={!trimmed} style={{ opacity: trimmed ? 1 : 0.5 }}>
-              <Text>{I18n.t('common.save')}</Text>
-            </Button>
-            <Button variant="ghost" size="sm" onPress={confirmDelete}>
-              <Text className="text-destructive">{I18n.t('instalments.delete_plan')}</Text>
-            </Button>
+            {/* One grouped list: name, category, account. */}
+            <View className="gap-2">
+              <View className="overflow-hidden rounded-[20px] border border-border/40 bg-background">
+                <View className="min-h-[52px] flex-row items-center gap-3 border-b border-border/30 px-4">
+                  <Text variant="body" tone="muted">
+                    {I18n.t('instalments.name')}
+                  </Text>
+                  <TextInput
+                    value={name}
+                    onChangeText={setName}
+                    placeholder={I18n.t('instalments.name_placeholder')}
+                    placeholderTextColor={themeColors.textMuted}
+                    style={[SINGLE_LINE_TEXT_INPUT_STYLE, { color: themeColors.text }]}
+                    className="h-12 flex-1 text-right text-[16px]"
+                    returnKeyType="done"
+                    maxLength={80}
+                    accessibilityLabel={I18n.t('instalments.name')}
+                  />
+                </View>
+                <EditRow
+                  label={I18n.t('transactions.editor.category')}
+                  value={category?.name ?? ''}
+                  icon={<CategoryEmoji icon={category?.icon} parentIcon={parent?.icon} size={18} />}
+                  onPress={() => setPicker('category')}
+                  bordered
+                />
+                <EditRow
+                  label={I18n.t('transactions.editor.account')}
+                  value={account?.name ?? ''}
+                  icon={
+                    account ? (
+                      <AccountLogo
+                        logoId={account.logoId}
+                        type={account.type}
+                        goalEmoji={account.goalEmoji}
+                        size={18}
+                      />
+                    ) : null
+                  }
+                  onPress={() => setPicker('account')}
+                  bordered={canEditAmount}
+                />
+                {canEditAmount ? (
+                  <View className="min-h-[52px] flex-row items-center gap-3 px-4">
+                    <Text variant="body" tone="muted">
+                      {I18n.t('instalments.payment_amount')}
+                    </Text>
+                    <TextInput
+                      value={amountText}
+                      onChangeText={setAmountText}
+                      keyboardType="decimal-pad"
+                      selectTextOnFocus
+                      style={[SINGLE_LINE_TEXT_INPUT_STYLE, { color: themeColors.text }]}
+                      className="h-12 flex-1 text-right text-[16px]"
+                      accessibilityLabel={I18n.t('instalments.payment_amount')}
+                    />
+                  </View>
+                ) : null}
+              </View>
+              <Text variant="caption" tone={amountValid ? 'muted' : 'error'} className="px-1">
+                {!amountValid
+                  ? I18n.t('instalments.amount_too_large')
+                  : newLast != null
+                    ? I18n.t('instalments.last_payment', { amount: money(newLast) })
+                    : I18n.t('instalments.edit_hint')}
+              </Text>
+            </View>
+
+            <View className="gap-1">
+              <Button onPress={save} disabled={!canSave} style={{ opacity: canSave ? 1 : 0.5 }}>
+                <Text>{I18n.t('common.save')}</Text>
+              </Button>
+              <Button variant="ghost" size="sm" onPress={confirmDelete}>
+                <Text className="text-destructive">{I18n.t('instalments.delete_plan')}</Text>
+              </Button>
+            </View>
           </View>
-        </View>
+        </Animated.View>
         <CategoryPickerSheet
           overlay
           allowParentSelection

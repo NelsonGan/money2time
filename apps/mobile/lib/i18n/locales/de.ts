@@ -1746,6 +1746,13 @@ const de = {
     pay_off_amount: '{{amount}} abbezahlen',
     enter_total_first: 'Gib zuerst den Gesamtbetrag ein.',
     total_too_small: 'Zu klein für {{count}} Raten.',
+    payment_amount: 'Ratenbetrag',
+    edit_amount_hint: 'Gib den Betrag ein, den deine Bank jedes Mal abbucht.',
+    last_payment: 'Letzte Rate {{amount}}',
+    split_evenly: 'Gleichmäßig aufteilen',
+    amount_over_total: '{{amount}} × {{count}} = {{sum}}, mehr als der Gesamtbetrag.',
+    use_as_total: '{{amount}} als Gesamtbetrag nehmen',
+    amount_too_large: 'Zu hoch: Die Raten ergäben mehr als den Gesamtbetrag.',
     extras_need_today:
       'Um einen Beleg, Details oder eine Erstattung zu behalten, muss die erste Rate heute oder früher sein.',
     remove: 'Raten entfernen',

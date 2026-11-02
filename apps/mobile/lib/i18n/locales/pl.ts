@@ -1732,6 +1732,13 @@ const pl = {
     pay_off_amount: 'Spłać {{amount}}',
     enter_total_first: 'Najpierw wpisz łączną kwotę.',
     total_too_small: 'Za mało, by podzielić na raty: {{count}}.',
+    payment_amount: 'Kwota raty',
+    edit_amount_hint: 'Wpisz kwotę, którą bank pobiera za każdym razem.',
+    last_payment: 'Ostatnia rata {{amount}}',
+    split_evenly: 'Podziel równo',
+    amount_over_total: '{{amount}} × {{count}} = {{sum}}, więcej niż suma.',
+    use_as_total: 'Ustaw {{amount}} jako sumę',
+    amount_too_large: 'Za dużo: raty przekroczyłyby sumę.',
     extras_need_today:
       'Aby zachować paragon, szczegóły lub zwrot kosztów, pierwsza rata musi przypadać na dziś lub wcześniej.',
     remove: 'Usuń raty',

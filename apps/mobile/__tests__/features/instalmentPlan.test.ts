@@ -4,13 +4,16 @@ import {
   clampInstalmentCount,
   frequencyOfSchedule,
   INSTALMENT_PAYOFF_NUMBER,
+  instalmentAmounts,
   instalmentDueBetween,
   instalmentPaymentCandidates,
   type InstalmentPaymentRow,
   instalmentPaymentsKey,
   instalmentScheduleDates,
   isInstalmentPlan,
+  isRegularAmountValid,
   paymentRowsForPlan,
+  regularAmountImpliesOtherTotal,
   scheduleOfFrequency,
   splitInstalmentAmounts,
 } from '~/features/instalments/lib/instalmentPlan';
@@ -281,7 +284,59 @@ describe('buildInstalmentProgress', () => {
     const plan = makePlan({ nextRunDate: noon('2026-12-02') });
     const progress = buildInstalmentProgress(plan, [payment(1, noon('2026-11-02'), 210)]);
     expect(progress.paidAmount).toBe(210);
-    expect(progress.leftAmount).toBe(2200);
+    // Still balances to the total: the last payment takes the difference.
+    expect(progress.leftAmount).toBe(2190);
+    expect(progress.entries[0]?.amount).toBe(210);
+    expect(progress.entries[11]?.amount).toBe(190);
+  });
+
+  it('pays the bank’s amount each time and balances the total on the last payment', () => {
+    const plan = makePlan({
+      instalmentTotal: 1000,
+      amount: 83.34,
+      nextRunDate: noon('2026-12-02'),
+    });
+    const progress = buildInstalmentProgress(plan, [payment(1, noon('2026-11-02'), 83.34)]);
+    expect(progress.entries.slice(1, 11).every((entry) => entry.amount === 83.34)).toBe(true);
+    expect(progress.entries[11]?.amount).toBe(83.26);
+    expect(progress.leftAmount).toBe(916.66);
+  });
+
+  it('balances a plan whose amount changed part way', () => {
+    // Two payments at the even split, then the amount set to 90.
+    const plan = makePlan({
+      instalmentCount: 4,
+      instalmentTotal: 400,
+      amount: 90,
+      nextRunDate: noon('2027-01-02'),
+    });
+    const progress = buildInstalmentProgress(plan, [
+      payment(1, noon('2026-11-02'), 100),
+      payment(2, noon('2026-12-02'), 100),
+    ]);
+    expect(progress.entries.map((entry) => entry.amount)).toEqual([100, 100, 90, 110]);
+    expect(progress.leftAmount).toBe(200);
+  });
+});
+
+describe('instalmentAmounts', () => {
+  it('uses the regular amount and gives the last payment the rest', () => {
+    expect(instalmentAmounts(1000, 12, 83.34)).toEqual([...Array(11).fill(83.34), 83.26]);
+    // Interest: the payments are more than the price, so the last is small.
+    expect(instalmentAmounts(1000, 12, 90)).toEqual([...Array(11).fill(90), 10]);
+  });
+
+  it('falls back to the even split when the amount leaves nothing for the last', () => {
+    expect(instalmentAmounts(1000, 12, 100)).toEqual(splitInstalmentAmounts(1000, 12));
+    expect(instalmentAmounts(1000, 12, null)).toEqual(splitInstalmentAmounts(1000, 12));
+    expect(isRegularAmountValid(1000, 12, 90.9)).toBe(true);
+    expect(isRegularAmountValid(1000, 12, 90.91)).toBe(false);
+    expect(isRegularAmountValid(1000, 12, 0)).toBe(false);
+  });
+
+  it('tells interest from rounding', () => {
+    expect(regularAmountImpliesOtherTotal(1000, 12, 83.34)).toBe(false);
+    expect(regularAmountImpliesOtherTotal(1000, 12, 90)).toBe(true);
   });
 });
 

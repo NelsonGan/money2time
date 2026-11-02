@@ -1698,6 +1698,13 @@ const th = {
     pay_off_amount: 'ปิดยอด {{amount}}',
     enter_total_first: 'กรอกยอดรวมก่อน',
     total_too_small: 'ยอดน้อยเกินกว่าจะแบ่งเป็น {{count}} งวด',
+    payment_amount: 'ยอดต่องวด',
+    edit_amount_hint: 'กรอกยอดที่ธนาคารเรียกเก็บในแต่ละงวด',
+    last_payment: 'งวดสุดท้าย {{amount}}',
+    split_evenly: 'แบ่งเท่ากัน',
+    amount_over_total: '{{amount}} × {{count}} = {{sum}} มากกว่ายอดรวม',
+    use_as_total: 'ใช้ {{amount}} เป็นยอดรวม',
+    amount_too_large: 'มากเกินไป: ยอดผ่อนรวมจะเกินยอดรวม',
     extras_need_today:
       'หากต้องการเก็บใบเสร็จ รายละเอียด หรือการเบิกคืนไว้ งวดแรกต้องเป็นวันนี้หรือก่อนหน้า',
     remove: 'ยกเลิกการผ่อนชำระ',

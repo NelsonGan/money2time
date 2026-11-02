@@ -1735,6 +1735,13 @@ const pt = {
     pay_off_amount: 'Quitar {{amount}}',
     enter_total_first: 'Digite o valor total primeiro.',
     total_too_small: 'Pequeno demais para dividir em {{count}} parcelas.',
+    payment_amount: 'Valor da parcela',
+    edit_amount_hint: 'Digite o valor que seu banco cobra a cada vez.',
+    last_payment: 'Última parcela {{amount}}',
+    split_evenly: 'Dividir igualmente',
+    amount_over_total: '{{amount}} × {{count}} = {{sum}}, mais que o total.',
+    use_as_total: 'Usar {{amount}} como total',
+    amount_too_large: 'Alto demais: as parcelas passariam do total.',
     extras_need_today:
       'Para manter um recibo, detalhes ou reembolso, a primeira parcela precisa ser hoje ou antes.',
     remove: 'Remover parcelamento',
