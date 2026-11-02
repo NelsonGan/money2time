@@ -1,3 +1,5 @@
+import { PRO_LIMITS } from '~/constants/proLimits';
+
 import type { Tutorial } from './types';
 
 export const LOGGING_TUTORIALS: Tutorial[] = [
@@ -197,6 +199,46 @@ export const LOGGING_TUTORIALS: Tutorial[] = [
         image: 'automations-3',
         title: 'Follow the walkthrough',
         body: 'Each one is a numbered guide with a picture of every screen in Shortcuts, plus a video if you would rather watch. The free plan includes 100 auto-logs.',
+      },
+    ],
+  },
+  {
+    id: 'log-from-bank-notifications',
+    category: 'logging',
+    title: 'Log from bank notifications',
+    summary: 'Turn bank and wallet notifications into entries, yourself or with Auto-review.',
+    keywords: [
+      'notification',
+      'bank',
+      'wallet',
+      'auto-review',
+      'auto review',
+      'alert',
+      'sms',
+      'duitnow',
+      'undo',
+      'sorted for you',
+    ],
+    steps: [
+      {
+        image: 'review-notifications-1',
+        title: 'Tap the banner',
+        body: 'Once notification logging is set up in Automation, new bank and wallet notifications wait in a banner above your Calendar entries.',
+      },
+      {
+        image: 'review-notifications-2',
+        title: 'Say what each one was',
+        body: 'Tap Income, Expense or Ignore. The amount and account come from the notification; tap the amount to change anything first.',
+      },
+      {
+        image: 'review-notifications-3',
+        title: 'Let Auto-review sort them',
+        body: `Turn on Auto-review and clear ones are logged or ignored for you when you open the app, each to the account its app is linked to. Unclear ones stay here with a suggestion. The free plan includes ${PRO_LIMITS.FREE_MAX_NOTIFICATION_AI_REVIEWS} reviews.`,
+      },
+      {
+        image: 'review-notifications-4',
+        title: 'Check what was sorted',
+        body: 'Sorted for you lists what Auto-review did. Tap the undo arrow to remove an entry and decide it yourself.',
       },
     ],
   },

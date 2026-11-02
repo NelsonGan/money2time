@@ -1630,6 +1630,57 @@
       }
     ]
   },
+  "review-notifications-1": {
+    "source": "RAW/review-notifications-1.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.044,
+        "y": 0.277,
+        "w": 0.913,
+        "h": 0.07,
+        "radius": 0.035
+      }
+    ]
+  },
+  "review-notifications-2": {
+    "source": "RAW/review-notifications-2.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.333,
+        "y": 0.471,
+        "w": 0.583,
+        "h": 0.036,
+        "radius": 0.03
+      }
+    ]
+  },
+  "review-notifications-3": {
+    "source": "RAW/review-notifications-3.png",
+    "marks": [
+      {
+        "type": "rect",
+        "x": 0.044,
+        "y": 0.137,
+        "w": 0.912,
+        "h": 0.073,
+        "radius": 0.035
+      }
+    ]
+  },
+  "review-notifications-4": {
+    "source": "RAW/review-notifications-4.png",
+    "marks": [
+      {
+        "type": "circle",
+        "x": 0.846,
+        "y": 0.355,
+        "w": 0.07,
+        "h": 0.032
+      }
+    ]
+  },
   "recurring-1": {
     "source": "RAW/recurring-1.png",
     "marks": [
