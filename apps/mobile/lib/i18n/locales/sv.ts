@@ -592,7 +592,6 @@ const sv = {
   calendar: {
     income: 'Inkomst',
     expense: 'Utgift',
-    net: 'Netto',
     transactions: 'Transaktioner',
   },
   onboarding: {
@@ -995,6 +994,31 @@ const sv = {
     },
   },
   insights: {
+    breakdown: 'Fördelning',
+    trends: 'Trender',
+    tabs: {
+      expense_breakdown: 'Utgifter',
+      income_breakdown: 'Inkomster',
+      expense_trend: 'Utgifter',
+      income_trend: 'Inkomster',
+      category_trend: 'Kategori',
+      asset_history: 'Tillgångar',
+    },
+    trend_stats: {
+      vs_average: '{{percent}} % vs snitt',
+      at_average: 'Precis på snittet',
+      average_line: 'Snitt {{value}}',
+      change_since: '{{value}} sedan {{period}}',
+      flat_since: 'Ingen förändring sedan {{period}}',
+    },
+    compare: {
+      pick_hint: 'Välj en kategori',
+      add: 'Jämför',
+      remove: 'Ta bort jämförelse',
+      summary_more: 'Du spenderade {{percent}} % mer på {{first}} än på {{second}}',
+      summary_same: 'Du spenderade ungefär lika mycket på {{first}} och {{second}}',
+      summary_none: 'Inga utgifter för {{name}} under perioden',
+    },
     budget: 'Budget',
     title: 'Din pengahistoria',
     loading: 'Laddar insikter...',
@@ -1048,16 +1072,12 @@ const sv = {
     expense_sentiment: 'Utgiftskänsla',
     expense_sentiment_description:
       'Se känslan bakom dina utgifter — nöjd, neutral eller ångerfull — dag för dag.',
-    asset_history: 'Tillgångshistorik',
+    asset_history: 'Tillgångstrend',
     asset_history_description:
       'Spåra dina totala tillgångar under året och se månatlig saldotrend.',
     income_rate_history: 'Timlönehistorik',
     income_rate_history_description:
       'Se hur din verkliga timlön har förändrats över tid i din hela transaktionshistorik.',
-    charts: {
-      expo_go_fallback:
-        'Det här diagrammet är inte tillgängligt i Expo Go. Öppna appen i en development build för att se den interaktiva versionen.',
-    },
     total_expense: 'Totala utgifter',
     total_income: 'Total inkomst',
     no_positive_slices: 'Inga positiva utgiftssegment för den här perioden.',
@@ -1123,27 +1143,27 @@ const sv = {
           'Välj en annan kategori eller period, eller lägg till utgifter för att se trenden.',
       },
       expense_sentiment: {
-        summary_title: 'Känslouppdelning',
+        count_one: '{{count}} utgift',
+        count_other: '{{count}} utgifter',
         no_data_title: 'Ingen känslodata ännu',
         no_data_message: 'Lägg till utgiftstransaktioner med känsla för att se känslodiagrammet.',
       },
       asset_history: {
         summary_title: 'Nettotillgångstrend',
-        latest: 'Senaste',
         empty_no_accounts: {
           title: 'Inga konton valda',
           message: 'Inkludera minst ett konto i filter för att rita tillgångshistorik.',
         },
       },
       savings_rate: {
+        saved: '{{value}} sparat',
+        overspent: '{{value}} överförbrukat',
         no_income_title: 'Ingen inkomst under perioden',
         no_income_short: 'Ingen inkomst',
+        of_income: 'av {{value}} i inkomst',
         saved_per_year: '{{value}} sparat i år',
         exclusions_active: 'Exkluderar {{count}} kategorier från beräkningen.',
         goal_hint: '20 %+ anses sunt.',
-        status_healthy: 'Sunt',
-        status_building: 'På god väg',
-        status_overspent: 'Överkonsumtion',
       },
       income_rate_history: {
         rate_title: 'Inkomstgrad',

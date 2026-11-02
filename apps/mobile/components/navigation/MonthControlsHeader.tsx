@@ -14,6 +14,7 @@ export function MonthControlsHeader({
   title,
   titleNode,
   subtitle,
+  subNavigation,
   monthLabel,
   onPrevMonth,
   onNextMonth,
@@ -32,6 +33,8 @@ export function MonthControlsHeader({
   title?: string;
   titleNode?: React.ReactNode;
   subtitle?: string;
+  /** Tabs between the title row and the month capsule (e.g. Insights' Expense / Income). */
+  subNavigation?: React.ReactNode;
   monthLabel: string;
   onPrevMonth: () => void;
   onNextMonth: () => void;
@@ -94,6 +97,8 @@ export function MonthControlsHeader({
               ) : null}
             </View>
           ) : null}
+
+          {subNavigation}
 
           {/* Month navigation — floating capsule style */}
           {!hideNavigation ? (

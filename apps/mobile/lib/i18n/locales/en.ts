@@ -570,7 +570,6 @@ const en = {
   calendar: {
     income: 'Income',
     expense: 'Expense',
-    net: 'Net',
     transactions: 'Transactions',
   },
   onboarding: {
@@ -970,6 +969,31 @@ const en = {
     },
   },
   insights: {
+    breakdown: 'Breakdown',
+    trends: 'Trends',
+    tabs: {
+      expense_breakdown: 'Expense',
+      income_breakdown: 'Income',
+      expense_trend: 'Expense',
+      income_trend: 'Income',
+      category_trend: 'Category',
+      asset_history: 'Assets',
+    },
+    trend_stats: {
+      vs_average: '{{percent}}% vs avg',
+      at_average: 'Right on average',
+      average_line: 'Avg {{value}}',
+      change_since: '{{value}} since {{period}}',
+      flat_since: 'No change since {{period}}',
+    },
+    compare: {
+      pick_hint: 'Pick a category',
+      add: 'Compare',
+      remove: 'Remove comparison',
+      summary_more: 'You spent {{percent}}% more on {{first}} than {{second}}',
+      summary_same: 'You spent about the same on {{first}} and {{second}}',
+      summary_none: 'No spending on {{name}} in this period',
+    },
     budget: 'Budgeting',
     title: 'Your money story',
     loading: 'Loading insights...',
@@ -1025,16 +1049,12 @@ const en = {
     expense_sentiment: 'Expense Sentiment',
     expense_sentiment_description:
       'See the mood behind your spending: happy, neutral, or regretful, day by day.',
-    asset_history: 'Asset History',
+    asset_history: 'Asset Trends',
     asset_history_description:
       'Track your total assets across the year and review monthly balance trend.',
     income_rate_history: 'Income rate history',
     income_rate_history_description:
       'See how your true hourly rate has changed over time across your full transaction history.',
-    charts: {
-      expo_go_fallback:
-        'This chart is unavailable in Expo Go. Open the app in a development build to see the interactive version.',
-    },
     total_expense: 'Total expense',
     total_income: 'Total income',
     no_positive_slices: 'No positive expense slices for this period.',
@@ -1099,27 +1119,27 @@ const en = {
         no_data_message: 'Pick another category or period, or add expenses to see the trend.',
       },
       expense_sentiment: {
-        summary_title: 'Mood breakdown',
+        count_one: '{{count}} expense',
+        count_other: '{{count}} expenses',
         no_data_title: 'No sentiment data yet',
         no_data_message: 'Add expense transactions with mood to see the sentiment chart.',
       },
       asset_history: {
         summary_title: 'Net asset trend',
-        latest: 'Latest',
         empty_no_accounts: {
           title: 'No accounts selected',
           message: 'Include at least one account in filters to chart asset history.',
         },
       },
       savings_rate: {
+        saved: '{{value}} saved',
+        overspent: '{{value}} overspent',
         no_income_title: 'No income in this period',
         no_income_short: 'No income',
+        of_income: 'of {{value}} income',
         saved_per_year: '{{value}} saved this year',
         exclusions_active: 'Excluding {{count}} categories from calculation.',
         goal_hint: '20%+ is considered healthy.',
-        status_healthy: 'Healthy',
-        status_building: 'Getting there',
-        status_overspent: 'Overspending',
       },
       income_rate_history: {
         rate_title: 'Income rate',

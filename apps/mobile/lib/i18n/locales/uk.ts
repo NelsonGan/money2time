@@ -593,7 +593,6 @@ const uk = {
   calendar: {
     income: 'Дохід',
     expense: 'Витрата',
-    net: 'Різниця',
     transactions: 'Операції',
   },
   onboarding: {
@@ -995,6 +994,31 @@ const uk = {
     },
   },
   insights: {
+    breakdown: 'Структура',
+    trends: 'Динаміка',
+    tabs: {
+      expense_breakdown: 'Витрати',
+      income_breakdown: 'Доходи',
+      expense_trend: 'Витрати',
+      income_trend: 'Доходи',
+      category_trend: 'Категорія',
+      asset_history: 'Активи',
+    },
+    trend_stats: {
+      vs_average: '{{percent}}% до середнього',
+      at_average: 'Рівно на середньому',
+      average_line: 'Сер. {{value}}',
+      change_since: '{{value}} з {{period}}',
+      flat_since: 'Без змін з {{period}}',
+    },
+    compare: {
+      pick_hint: 'Оберіть категорію',
+      add: 'Порівняти',
+      remove: 'Прибрати порівняння',
+      summary_more: 'На {{first}} ви витратили на {{percent}}% більше, ніж на {{second}}',
+      summary_same: 'На {{first}} і {{second}} ви витратили приблизно однаково',
+      summary_none: 'Немає витрат на {{name}} за цей період',
+    },
     budget: 'Бюджет',
     title: 'Ваша фінансова картина',
     loading: 'Завантажуємо аналіз...',
@@ -1046,16 +1070,12 @@ const uk = {
     expense_sentiment: 'Настрій витрат',
     expense_sentiment_description:
       'Емоції за кожною витратою — радість, нейтральність чи жаль — день за днем.',
-    asset_history: 'Історія активів',
+    asset_history: 'Динаміка активів',
     asset_history_description:
       'Відстежуйте загальні активи протягом року та місячний тренд балансу.',
     income_rate_history: 'Історія погодинної ставки',
     income_rate_history_description:
       'Як змінювалася ваша реальна погодинна ставка з часом в усій історії операцій.',
-    charts: {
-      expo_go_fallback:
-        'Цей графік недоступний у Expo Go. Відкрийте додаток у development build, щоб побачити інтерактивну версію.',
-    },
     total_expense: 'Загальні витрати',
     total_income: 'Загальний дохід',
     no_positive_slices: 'Немає позитивних витрат за цей період.',
@@ -1121,27 +1141,27 @@ const uk = {
           'Виберіть іншу категорію чи період або додайте витрати, щоб побачити тренд.',
       },
       expense_sentiment: {
-        summary_title: 'Розподіл настрою',
+        count_one: '{{count}} витрата',
+        count_other: '{{count}} витрат',
         no_data_title: 'Даних про настрій ще немає',
         no_data_message: 'Додайте операції витрат з настроєм, щоб побачити графік.',
       },
       asset_history: {
         summary_title: 'Тренд чистих активів',
-        latest: 'Останнє',
         empty_no_accounts: {
           title: 'Рахунки не вибрані',
           message: 'Увімкніть хоча б один рахунок у фільтрах для побудови графіка активів.',
         },
       },
       savings_rate: {
+        saved: 'Заощаджено {{value}}',
+        overspent: 'Перевитрата {{value}}',
         no_income_title: 'Немає доходів за цей період',
         no_income_short: 'Немає доходів',
+        of_income: 'з доходу {{value}}',
         saved_per_year: '{{value}} заощаджено цього року',
         exclusions_active: 'Виключено {{count}} категорій з розрахунку.',
         goal_hint: '20%+ вважається здоровим рівнем.',
-        status_healthy: 'Здоровий рівень',
-        status_building: 'На правильному шляху',
-        status_overspent: 'Перевитрата',
       },
       income_rate_history: {
         rate_title: 'Погодинна ставка',

@@ -592,7 +592,6 @@ const da = {
   calendar: {
     income: 'Indtægt',
     expense: 'Udgift',
-    net: 'Netto',
     transactions: 'Transaktioner',
   },
   onboarding: {
@@ -994,6 +993,31 @@ const da = {
     },
   },
   insights: {
+    breakdown: 'Fordeling',
+    trends: 'Tendenser',
+    tabs: {
+      expense_breakdown: 'Udgifter',
+      income_breakdown: 'Indtægter',
+      expense_trend: 'Udgifter',
+      income_trend: 'Indtægter',
+      category_trend: 'Kategori',
+      asset_history: 'Formue',
+    },
+    trend_stats: {
+      vs_average: '{{percent}}% vs gns.',
+      at_average: 'Lige på gennemsnittet',
+      average_line: 'Gns. {{value}}',
+      change_since: '{{value}} siden {{period}}',
+      flat_since: 'Ingen ændring siden {{period}}',
+    },
+    compare: {
+      pick_hint: 'Vælg en kategori',
+      add: 'Sammenlign',
+      remove: 'Fjern sammenligning',
+      summary_more: 'Du brugte {{percent}}% mere på {{first}} end på {{second}}',
+      summary_same: 'Du brugte omtrent det samme på {{first}} og {{second}}',
+      summary_none: 'Intet forbrug på {{name}} i denne periode',
+    },
     budget: 'Budget',
     title: 'Din pengehistorie',
     loading: 'Indlæser indsigt...',
@@ -1049,16 +1073,12 @@ const da = {
     expense_sentiment: 'Udgiftsstemning',
     expense_sentiment_description:
       'Se stemningen bag dine udgifter — glad, neutral eller fortrydende — dag for dag.',
-    asset_history: 'Aktivhistorik',
+    asset_history: 'Formuetendens',
     asset_history_description:
       'Følg dine samlede aktiver hen over året, og gennemgå månedlig saldotrend.',
     income_rate_history: 'Indkomstsatshistorik',
     income_rate_history_description:
       'Se, hvordan din reelle timesats har ændret sig over tid på tværs af din fulde transaktionshistorik.',
-    charts: {
-      expo_go_fallback:
-        'Dette diagram er ikke tilgængeligt i Expo Go. Åbn appen i et development build for at se den interaktive version.',
-    },
     total_expense: 'Samlet udgift',
     total_income: 'Samlet indtægt',
     no_positive_slices: 'Ingen positive udgiftssegmenter for denne periode.',
@@ -1125,27 +1145,27 @@ const da = {
           'Vælg en anden kategori eller periode, eller tilføj udgifter for at se tendensen.',
       },
       expense_sentiment: {
-        summary_title: 'Stemningsopdeling',
+        count_one: '{{count}} udgift',
+        count_other: '{{count}} udgifter',
         no_data_title: 'Ingen stemningsdata endnu',
         no_data_message: 'Tilføj udgiftstransaktioner med stemning for at se stemningsdiagrammet.',
       },
       asset_history: {
         summary_title: 'Nettoaktivtrend',
-        latest: 'Seneste',
         empty_no_accounts: {
           title: 'Ingen konti valgt',
           message: 'Inkludér mindst én konto i filtre for at vise aktivhistorik.',
         },
       },
       savings_rate: {
+        saved: '{{value}} sparet',
+        overspent: '{{value}} overforbrug',
         no_income_title: 'Ingen indtægt i denne periode',
         no_income_short: 'Ingen indtægt',
+        of_income: 'af {{value}} i indkomst',
         saved_per_year: '{{value}} sparet i år',
         exclusions_active: 'Udelukker {{count}} kategorier fra beregningen.',
         goal_hint: '20%+ anses for sundt.',
-        status_healthy: 'Sundt',
-        status_building: 'Godt på vej',
-        status_overspent: 'Overforbrug',
       },
       income_rate_history: {
         rate_title: 'Indkomstsats',

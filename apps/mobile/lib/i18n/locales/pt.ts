@@ -592,7 +592,6 @@ const pt = {
   calendar: {
     income: 'Receita',
     expense: 'Despesa',
-    net: 'Saldo',
     transactions: 'Transações',
   },
   onboarding: {
@@ -997,6 +996,31 @@ const pt = {
     },
   },
   insights: {
+    breakdown: 'Detalhamento',
+    trends: 'Tendências',
+    tabs: {
+      expense_breakdown: 'Despesas',
+      income_breakdown: 'Receitas',
+      expense_trend: 'Despesas',
+      income_trend: 'Receitas',
+      category_trend: 'Categoria',
+      asset_history: 'Patrimônio',
+    },
+    trend_stats: {
+      vs_average: '{{percent}}% vs média',
+      at_average: 'Bem na média',
+      average_line: 'Média {{value}}',
+      change_since: '{{value}} desde {{period}}',
+      flat_since: 'Sem mudança desde {{period}}',
+    },
+    compare: {
+      pick_hint: 'Escolha uma categoria',
+      add: 'Comparar',
+      remove: 'Remover comparação',
+      summary_more: 'Você gastou {{percent}}% a mais com {{first}} do que com {{second}}',
+      summary_same: 'Você gastou quase o mesmo com {{first}} e {{second}}',
+      summary_none: 'Nenhum gasto com {{name}} neste período',
+    },
     budget: 'Orçamento',
     title: 'Sua história financeira',
     loading: 'Carregando insights...',
@@ -1052,16 +1076,12 @@ const pt = {
     expense_sentiment: 'Humor nas despesas',
     expense_sentiment_description:
       'Veja o humor por trás dos seus gastos — feliz, neutro ou arrependido — dia a dia.',
-    asset_history: 'Histórico de ativos',
+    asset_history: 'Tendência do patrimônio',
     asset_history_description:
       'Acompanhe seu total de ativos ao longo do ano e revise a tendência mensal de saldo.',
     income_rate_history: 'Histórico do valor/hora',
     income_rate_history_description:
       'Veja como seu valor/hora real mudou ao longo do tempo em todo o histórico de transações.',
-    charts: {
-      expo_go_fallback:
-        'Este gráfico não está disponível no Expo Go. Abra o app em uma build de desenvolvimento para ver a versão interativa.',
-    },
     total_expense: 'Total de despesas',
     total_income: 'Total de receitas',
     no_positive_slices: 'Nenhuma fatia positiva de despesa neste período.',
@@ -1128,27 +1148,27 @@ const pt = {
           'Escolha outra categoria ou período, ou adicione despesas para ver a tendência.',
       },
       expense_sentiment: {
-        summary_title: 'Distribuição de humor',
+        count_one: '{{count}} despesa',
+        count_other: '{{count}} despesas',
         no_data_title: 'Sem dados de humor ainda',
         no_data_message: 'Adicione despesas com humor para ver o gráfico de sentimentos.',
       },
       asset_history: {
         summary_title: 'Tendência de ativos líquidos',
-        latest: 'Mais recente',
         empty_no_accounts: {
           title: 'Nenhuma conta selecionada',
           message: 'Inclua pelo menos uma conta nos filtros para ver o histórico de ativos.',
         },
       },
       savings_rate: {
+        saved: '{{value}} poupados',
+        overspent: '{{value}} gastos a mais',
         no_income_title: 'Sem receita neste período',
         no_income_short: 'Sem receita',
+        of_income: 'de {{value}} de receita',
         saved_per_year: '{{value}} economizado este ano',
         exclusions_active: 'Excluindo {{count}} categorias do cálculo.',
         goal_hint: '20%+ é considerado saudável.',
-        status_healthy: 'Saudável',
-        status_building: 'No caminho certo',
-        status_overspent: 'Gastando demais',
       },
       income_rate_history: {
         rate_title: 'Taxa de receita',

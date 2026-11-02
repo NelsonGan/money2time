@@ -37,7 +37,7 @@ When a UI or architecture change alters a tracked action, screen, paywall source
 - **Tablet**: wrap wide content in `TabletContentContainer` and branch on `useDeviceLayout()`. Don't let line lengths or cards stretch edge-to-edge on iPad.
 - **Lists**: use `@shopify/flash-list` (already the standard) for long transaction/activity lists, not `FlatList`.
 - **Sheets/modals**: follow the existing picker-sheet pattern and `theme-modal`; gestures via `react-native-gesture-handler` + keyboard handling via `react-native-keyboard-controller`.
-- **Charts**: Skia + `react-native-gifted-charts` / `react-native-graph`. Match the existing insights/calendar visual style; theme the series colors.
+- **Charts**: `react-native-gifted-charts` for pies, and the Skia `TrendLineChart` (`features/insights/components/`) for trends. Match the existing insights/calendar visual style; theme the series colors.
 
 ## Copy & i18n
 

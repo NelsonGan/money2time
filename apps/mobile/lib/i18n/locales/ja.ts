@@ -593,7 +593,6 @@ const ja = {
   calendar: {
     income: '収入',
     expense: '支出',
-    net: '収支',
     transactions: '取引',
   },
   onboarding: {
@@ -994,6 +993,31 @@ const ja = {
     },
   },
   insights: {
+    breakdown: '内訳',
+    trends: '推移',
+    tabs: {
+      expense_breakdown: '支出',
+      income_breakdown: '収入',
+      expense_trend: '支出',
+      income_trend: '収入',
+      category_trend: 'カテゴリ',
+      asset_history: '資産',
+    },
+    trend_stats: {
+      vs_average: '平均比 {{percent}}%',
+      at_average: 'ちょうど平均',
+      average_line: '平均 {{value}}',
+      change_since: '{{period}}から{{value}}',
+      flat_since: '{{period}}から変化なし',
+    },
+    compare: {
+      pick_hint: 'カテゴリを選択',
+      add: '比較',
+      remove: '比較をやめる',
+      summary_more: '{{first}}には{{second}}より{{percent}}%多く使いました',
+      summary_same: '{{first}}と{{second}}の支出はほぼ同じです',
+      summary_none: 'この期間は{{name}}の支出がありません',
+    },
     budget: '予算',
     title: 'あなたのお金の話',
     loading: '分析を読み込み中...',
@@ -1042,15 +1066,11 @@ const ja = {
     category_trend_description: 'カテゴリを選び、支出の推移を時系列で確認できます。',
     expense_sentiment: '支出の気分',
     expense_sentiment_description: '支出時の気分（ハッピー・普通・後悔）を日別に確認できます。',
-    asset_history: '資産履歴',
+    asset_history: '資産の推移',
     asset_history_description: '年間の総資産推移を追跡し、月別残高のトレンドを確認します。',
     income_rate_history: '時給履歴',
     income_rate_history_description:
       '全取引履歴を通じて、真の時給がどのように変化してきたかを確認します。',
-    charts: {
-      expo_go_fallback:
-        'このチャートは Expo Go では表示できません。開発ビルドでアプリを開くとインタラクティブ版を確認できます。',
-    },
     total_expense: '支出合計',
     total_income: '収入合計',
     no_positive_slices: 'この期間の正の支出データがありません。',
@@ -1115,27 +1135,27 @@ const ja = {
         no_data_message: '別のカテゴリや期間を選ぶか、支出を追加して傾向を確認してください。',
       },
       expense_sentiment: {
-        summary_title: '気分の内訳',
+        count_one: '{{count}} 件の支出',
+        count_other: '{{count}} 件の支出',
         no_data_title: '気分データがありません',
         no_data_message: '気分を記録した支出を追加すると気分チャートが表示されます。',
       },
       asset_history: {
         summary_title: '純資産トレンド',
-        latest: '最新',
         empty_no_accounts: {
           title: '口座が選択されていません',
           message: '資産履歴を表示するには、フィルターで少なくとも1つの口座を選択してください。',
         },
       },
       savings_rate: {
+        saved: '{{value}} 貯蓄',
+        overspent: '{{value}} 使いすぎ',
         no_income_title: 'この期間に収入がありません',
         no_income_short: '収入なし',
+        of_income: '収入 {{value}} のうち',
         saved_per_year: '今年 {{value}} 貯蓄',
         exclusions_active: '{{count}} 件のカテゴリを除外中。',
         goal_hint: '20%以上が健全とされています。',
-        status_healthy: '健全',
-        status_building: 'あと少し',
-        status_overspent: '使いすぎ',
       },
       income_rate_history: {
         rate_title: '時給',

@@ -591,7 +591,6 @@ const th = {
   calendar: {
     income: 'รายรับ',
     expense: 'รายจ่าย',
-    net: 'สุทธิ',
     transactions: 'รายการ',
   },
   onboarding: {
@@ -991,6 +990,31 @@ const th = {
     },
   },
   insights: {
+    breakdown: 'รายละเอียด',
+    trends: 'แนวโน้ม',
+    tabs: {
+      expense_breakdown: 'รายจ่าย',
+      income_breakdown: 'รายรับ',
+      expense_trend: 'รายจ่าย',
+      income_trend: 'รายรับ',
+      category_trend: 'หมวดหมู่',
+      asset_history: 'สินทรัพย์',
+    },
+    trend_stats: {
+      vs_average: '{{percent}}% เทียบค่าเฉลี่ย',
+      at_average: 'เท่ากับค่าเฉลี่ยพอดี',
+      average_line: 'เฉลี่ย {{value}}',
+      change_since: '{{value}} ตั้งแต่ {{period}}',
+      flat_since: 'ไม่เปลี่ยนแปลงตั้งแต่ {{period}}',
+    },
+    compare: {
+      pick_hint: 'เลือกหมวดหมู่',
+      add: 'เปรียบเทียบ',
+      remove: 'ลบการเปรียบเทียบ',
+      summary_more: 'คุณใช้จ่ายกับ {{first}} มากกว่า {{second}} {{percent}}%',
+      summary_same: 'คุณใช้จ่ายกับ {{first}} และ {{second}} ใกล้เคียงกัน',
+      summary_none: 'ไม่มีรายจ่ายสำหรับ {{name}} ในช่วงนี้',
+    },
     budget: 'งบประมาณ',
     title: 'เรื่องราวการเงินของคุณ',
     loading: 'กำลังโหลดการวิเคราะห์...',
@@ -1038,15 +1062,11 @@ const th = {
     category_trend_description: 'เลือกหมวดหมู่แล้วติดตามแนวโน้มการใช้จ่ายเมื่อเวลาผ่านไป',
     expense_sentiment: 'อารมณ์รายจ่าย',
     expense_sentiment_description: 'ดูอารมณ์เบื้องหลังการใช้จ่าย ดีใจ เฉย ๆ หรือเสียใจ ทีละวัน',
-    asset_history: 'ประวัติทรัพย์สิน',
+    asset_history: 'แนวโน้มสินทรัพย์',
     asset_history_description: 'ติดตามทรัพย์สินรวมตลอดปีและทบทวนแนวโน้มยอดคงเหลือรายเดือน',
     income_rate_history: 'ประวัติอัตรารายรับ',
     income_rate_history_description:
       'ดูว่าอัตรารายชั่วโมงจริงของคุณเปลี่ยนแปลงอย่างไรในประวัติรายการทั้งหมด',
-    charts: {
-      expo_go_fallback:
-        'กราฟนี้ไม่สามารถใช้งานใน Expo Go ได้ เปิดแอปใน development build เพื่อดูเวอร์ชันโต้ตอบ',
-    },
     total_expense: 'รายจ่ายรวม',
     total_income: 'รายรับรวม',
     no_positive_slices: 'ไม่มีรายจ่ายบวกสำหรับช่วงนี้',
@@ -1111,27 +1131,27 @@ const th = {
         no_data_message: 'เลือกหมวดหมู่หรือช่วงเวลาอื่น หรือเพิ่มค่าใช้จ่ายเพื่อดูแนวโน้ม',
       },
       expense_sentiment: {
-        summary_title: 'การแจกแจงอารมณ์',
+        count_one: '{{count}} รายจ่าย',
+        count_other: '{{count}} รายจ่าย',
         no_data_title: 'ยังไม่มีข้อมูลอารมณ์',
         no_data_message: 'เพิ่มรายการรายจ่ายพร้อมอารมณ์เพื่อดูกราฟ',
       },
       asset_history: {
         summary_title: 'แนวโน้มทรัพย์สินสุทธิ',
-        latest: 'ล่าสุด',
         empty_no_accounts: {
           title: 'ไม่ได้เลือกบัญชี',
           message: 'เลือกบัญชีอย่างน้อยหนึ่งบัญชีในตัวกรองเพื่อแสดงกราฟประวัติทรัพย์สิน',
         },
       },
       savings_rate: {
+        saved: 'ออม {{value}}',
+        overspent: 'ใช้เกิน {{value}}',
         no_income_title: 'ไม่มีรายรับในช่วงนี้',
         no_income_short: 'ไม่มีรายรับ',
+        of_income: 'จากรายรับ {{value}}',
         saved_per_year: 'ออมได้ {{value}} ปีนี้',
         exclusions_active: 'ยกเว้น {{count}} หมวดหมู่จากการคำนวณ',
         goal_hint: '20% ขึ้นไปถือว่าดี',
-        status_healthy: 'สุขภาพดี',
-        status_building: 'กำลังไปได้ดี',
-        status_overspent: 'ใช้จ่ายเกิน',
       },
       income_rate_history: {
         rate_title: 'อัตรารายรับ',
