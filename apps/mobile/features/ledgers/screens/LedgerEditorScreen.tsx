@@ -1,12 +1,19 @@
 import {
+  CalendarDays,
   ChevronDown,
   ChevronRight,
   Copy,
   CreditCard,
+  HandCoins,
+  Images,
   LogOut,
   type LucideIcon,
+  Package,
   Pencil,
+  PiggyBank,
+  Repeat,
   Tag,
+  Target,
   Users,
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -36,6 +43,7 @@ import {
   sharingErrorMessage,
 } from '~/features/sharedLedgers/lib/sharing';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import type { LedgerCopyPart } from '~/lib/db/ledgerCopy';
 import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -44,10 +52,64 @@ import { currencyNameForCode, currencySymbolForCode } from '~/utils/currency';
 import { getErrorMessage } from '~/utils/errorHandling';
 
 import { LedgerPickerSheet } from '../components/LedgerPickerSheet';
+import {
+  type CopyPartRow,
+  copyPartRow,
+  DEFAULT_COPY_PARTS,
+  type LedgerCopySource,
+  partsToCopy,
+  toggleCopyPart,
+} from '../lib/ledgerCopyChoice';
 import { readLedgerCopySource } from '../lib/ledgerCopySource';
 import { ledgerDisplayName, ledgerIcon } from '../lib/ledgerDisplay';
 
 const SCROLL_CONTENT = { gap: 16, paddingHorizontal: 20, paddingTop: 8 };
+
+/** The Start with rows, in order. Accounts and categories fall back to a starter set. */
+const PART_ROWS: readonly { part: LedgerCopyPart; icon: LucideIcon; starters?: string }[] = [
+  { part: 'accounts', icon: CreditCard, starters: 'ledgers.starter_accounts_caption' },
+  { part: 'categories', icon: Tag, starters: 'ledgers.starter_categories_caption' },
+  { part: 'goals', icon: Target },
+  { part: 'loans', icon: HandCoins },
+  { part: 'recurring', icon: Repeat },
+  { part: 'budgets', icon: PiggyBank },
+  { part: 'items', icon: Package },
+  { part: 'albums', icon: Images },
+];
+
+/** A Start with row's caption: what turning it on gives, or what the ledger gets without it. */
+function partCaption(
+  { part, starters }: (typeof PART_ROWS)[number],
+  row: CopyPartRow,
+  sourceName: string,
+): string {
+  switch (row.caption) {
+    case 'copy':
+      return I18n.t(row.count === 1 ? `ledgers.copy_${part}_one` : `ledgers.copy_${part}_other`, {
+        count: row.count,
+      });
+    case 'noneCopied':
+      return I18n.t('ledgers.copy_recurring_none');
+    case 'noneInSource':
+      return I18n.t('ledgers.none_to_copy', { name: sourceName });
+    case 'starters':
+      return I18n.t(starters ?? 'ledgers.starts_empty');
+    case 'empty':
+      return I18n.t('ledgers.starts_empty');
+  }
+}
+
+/** The month cycle row's caption: the source's start day and customized months. */
+function monthCycleCaption(source: LedgerCopySource | null, copy: boolean): string {
+  if (!copy || !source) return I18n.t('ledgers.month_cycle_day', { day: 1 });
+  const custom = Object.keys(source.monthCycle.overrides).length;
+  const day = source.monthCycle.defaultDay;
+  if (custom === 0) return I18n.t('ledgers.month_cycle_day', { day });
+  return I18n.t(
+    custom === 1 ? 'ledgers.month_cycle_custom_one' : 'ledgers.month_cycle_custom_other',
+    { day, count: custom },
+  );
+}
 
 interface LedgerEditorScreenProps {
   /** The ledger to edit; absent to create one. */
@@ -116,10 +178,16 @@ export function LedgerEditorScreen({
   const [name, setName] = useState(() => existing?.name ?? '');
   const [currencyCode, setCurrencyCode] = useState(settings.currencyCode);
   const [currencyPickerVisible, setCurrencyPickerVisible] = useState(false);
-  // On copies from the source ledger; off starts with the starter set.
-  const [copyAccounts, setCopyAccounts] = useState(true);
-  const [copyCategories, setCopyCategories] = useState(true);
-  // The whole ledger, entries and all: covers accounts and categories.
+  // What the new ledger copies from the source (ledgerCopyChoice.ts). A part
+  // the source has none of stays chosen while hidden, for a source that has.
+  const [parts, setParts] = useState<ReadonlySet<LedgerCopyPart>>(
+    () => new Set(DEFAULT_COPY_PARTS),
+  );
+  const togglePart = (part: LedgerCopyPart, on: boolean) =>
+    setParts((current) => toggleCopyPart(current, part, on));
+  // On copies the source's start day and custom months; off starts on day 1.
+  const [copyMonthCycle, setCopyMonthCycle] = useState(true);
+  // The whole ledger, entries and all: covers every part and the month cycle.
   const [copyEverything, setCopyEverything] = useState(false);
   const [sourcePickerVisible, setSourcePickerVisible] = useState(false);
   const [leaving, setLeaving] = useState(false);
@@ -179,8 +247,8 @@ export function LedgerEditorScreen({
         currencySymbol: currencySymbolForCode(effectiveCurrency),
         copyFromLedgerId: copySource.id,
         copyEverything,
-        copyAccounts,
-        copyCategories,
+        copyParts: partsToCopy(parts, sourceInfo),
+        copyMonthCycle,
       });
     } catch (error) {
       savedRef.current = false;
@@ -344,41 +412,31 @@ export function LedgerEditorScreen({
                 onChange={setCopyEverything}
                 testID="ledger-copy-everything"
               />
+              {PART_ROWS.map((config) => {
+                const row = copyPartRow(config.part, sourceInfo, parts, copyEverything);
+                return (
+                  <StartWithRow
+                    key={config.part}
+                    icon={config.icon}
+                    title={I18n.t(`ledgers.${config.part}`)}
+                    subtitle={partCaption(config, row, ledgerDisplayName(copySource))}
+                    value={row.on}
+                    disabled={row.disabled}
+                    dimmed={row.disabled}
+                    onChange={(on) => togglePart(config.part, on)}
+                    testID={`ledger-copy-${config.part}`}
+                  />
+                );
+              })}
               <StartWithRow
-                icon={CreditCard}
-                title={I18n.t('ledgers.accounts')}
-                subtitle={
-                  copyEverything || copyAccounts
-                    ? I18n.t(
-                        sourceInfo?.accounts === 1
-                          ? 'ledgers.copy_accounts_one'
-                          : 'ledgers.copy_accounts_other',
-                        { count: sourceInfo?.accounts ?? 0 },
-                      )
-                    : I18n.t('ledgers.starter_accounts_caption')
-                }
-                value={copyEverything || copyAccounts}
+                icon={CalendarDays}
+                title={I18n.t('ledgers.month_cycle')}
+                subtitle={monthCycleCaption(sourceInfo, copyEverything || copyMonthCycle)}
+                value={copyEverything || copyMonthCycle}
                 disabled={copyEverything}
                 dimmed={copyEverything}
-                onChange={setCopyAccounts}
-              />
-              <StartWithRow
-                icon={Tag}
-                title={I18n.t('ledgers.categories')}
-                subtitle={
-                  copyEverything || copyCategories
-                    ? I18n.t(
-                        sourceInfo?.categories === 1
-                          ? 'ledgers.copy_categories_one'
-                          : 'ledgers.copy_categories_other',
-                        { count: sourceInfo?.categories ?? 0 },
-                      )
-                    : I18n.t('ledgers.starter_categories_caption')
-                }
-                value={copyEverything || copyCategories}
-                disabled={copyEverything}
-                dimmed={copyEverything}
-                onChange={setCopyCategories}
+                onChange={setCopyMonthCycle}
+                testID="ledger-copy-month-cycle"
               />
             </View>
           </>
@@ -495,8 +553,8 @@ export function LedgerEditorScreen({
 }
 
 /**
- * One thing the new ledger can copy from the open one. The subtitle says what
- * the choice gives: the copied count, or the starter set when off.
+ * One thing the new ledger can copy from the source. The subtitle says what
+ * the choice gives: the copied count, or the starter set (or nothing) when off.
  */
 function StartWithRow({
   icon: Icon,

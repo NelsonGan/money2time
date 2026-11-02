@@ -30,6 +30,29 @@ export function parseLedgerPrefs(json: string | null | undefined): LedgerPrefs {
   return (parseJsonObject(json) as LedgerPrefs | null) ?? {};
 }
 
+/**
+ * A non-default ledger's month cycle: its own, or the settings row's while it
+ * has none (a ledger from before cycles were per ledger, or one joined from
+ * someone else, whose preferences stay on their phone).
+ */
+export function monthCycleForLedger(
+  settings: { firstDayOfMonth: number; firstDayOverridesJson?: string | null },
+  prefs: LedgerPrefs,
+): { firstDayOfMonth: number; firstDayOverridesJson: string | null } {
+  const ownDay = prefs.firstDayOfMonth;
+  if (typeof ownDay !== 'number' || !Number.isFinite(ownDay)) {
+    return {
+      firstDayOfMonth: settings.firstDayOfMonth,
+      firstDayOverridesJson: settings.firstDayOverridesJson ?? null,
+    };
+  }
+  const overrides = prefs.firstDayOverridesJson;
+  return {
+    firstDayOfMonth: ownDay,
+    firstDayOverridesJson: typeof overrides === 'string' ? overrides : null,
+  };
+}
+
 /** The quick-entry JSON a non-default ledger reads: app-wide fields, its own picks. */
 export function quickEntryJsonForLedger(appJson: string | null, prefs: LedgerPrefs): string {
   const merged = parseJsonObject(appJson) ?? {};

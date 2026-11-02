@@ -66,7 +66,8 @@ class LedgersRepository {
     return row ? toLedger(row) : null;
   }
 
-  create(input: LedgerInput): string {
+  /** A new ledger, with its own preferences from the start (`prefs`). */
+  create(input: LedgerInput, prefs?: LedgerPrefs): string {
     const db = getDb();
     const id = newId();
     const now = nowIso();
@@ -82,7 +83,7 @@ class LedgersRepository {
         emoji: input.emoji,
         currencyCode: input.currencyCode,
         currencySymbol: input.currencySymbol,
-        prefsJson: null,
+        prefsJson: prefs ? JSON.stringify(prefs) : null,
         sortOrder: (maxSort?.maxSort ?? 0) + 1,
         createdAt: now,
         updatedAt: now,
