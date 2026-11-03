@@ -163,6 +163,21 @@ const fr = {
     reset_action: 'Supprimer et changer',
   },
   news: {
+    cloud_sync_shared_ledgers: {
+      title: 'Cloud Sync et carnets partagés',
+      cloudSync: {
+        title: 'Cloud Sync est arrivé',
+        body: 'Connectez-vous avec Apple, Google ou un e-mail et vos données sont les mêmes sur tous vos téléphones. Les modifications arrivent en quelques secondes. La synchronisation fait partie de Pro. Rendez-vous dans Réglages > Cloud Sync.',
+      },
+      sharedLedgers: {
+        title: 'Carnets partagés',
+        body: 'Partagez un carnet avec jusqu’à 5 personnes et tenez le budget du foyer ensemble. Chacun ajoute des opérations et les voit sur son téléphone. Rejoindre est gratuit ; partager nécessite Pro.',
+      },
+      household: {
+        title: 'Analyses du foyer',
+        body: 'Ouvrez un carnet partagé, puis Analyses > Foyer pour voir ce que vous avez dépensé ensemble chaque mois, la part de chacun et qui couvre quelles catégories.',
+      },
+    },
     auto_review_insights_instalments: {
       title: 'Vérification auto et plus',
       autoReview: {

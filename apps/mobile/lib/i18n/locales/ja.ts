@@ -163,6 +163,21 @@ const ja = {
     reset_action: '削除して切り替え',
   },
   news: {
+    cloud_sync_shared_ledgers: {
+      title: 'Cloud Syncと共有帳簿',
+      cloudSync: {
+        title: 'Cloud Sync登場',
+        body: 'Apple、Google、メールでサインインすると、すべてのスマホで同じデータを使えます。変更は数秒で反映されます。同期はProの機能です。設定 > Cloud Syncから利用できます。',
+      },
+      sharedLedgers: {
+        title: '共有帳簿',
+        body: '最大5人と帳簿を共有して、家計を一緒に管理できます。全員が記録を追加し、自分のスマホで確認できます。参加は無料、共有にはProが必要です。',
+      },
+      household: {
+        title: '世帯のインサイト',
+        body: '共有帳簿を開き、インサイト > 世帯で、毎月一緒に使った金額、一人ひとりの分、誰がどのカテゴリを負担しているかを確認できます。',
+      },
+    },
     auto_review_insights_instalments: {
       title: '自動確認ほか',
       autoReview: {

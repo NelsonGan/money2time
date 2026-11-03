@@ -163,6 +163,21 @@ const pl = {
     reset_action: 'Usuń i zmień',
   },
   news: {
+    cloud_sync_shared_ledgers: {
+      title: 'Cloud Sync i wspólne księgi',
+      cloudSync: {
+        title: 'Cloud Sync już jest',
+        body: 'Zaloguj się przez Apple, Google lub e-mail, a Twoje dane będą takie same na wszystkich telefonach. Zmiany docierają w kilka sekund. Synchronizacja jest częścią Pro. Znajdziesz ją w Ustawieniach > Cloud Sync.',
+      },
+      sharedLedgers: {
+        title: 'Wspólne księgi',
+        body: 'Udostępnij księgę maksymalnie 5 osobom i prowadźcie razem domowy budżet. Każdy dodaje wpisy i widzi je na swoim telefonie. Dołączenie jest bezpłatne; udostępnianie wymaga Pro.',
+      },
+      household: {
+        title: 'Analizy gospodarstwa domowego',
+        body: 'Otwórz wspólną księgę, a potem Analizy > Gospodarstwo domowe, aby zobaczyć, ile razem wydaliście w każdym miesiącu, część każdej osoby i kto pokrywa które kategorie.',
+      },
+    },
     auto_review_insights_instalments: {
       title: 'Autosprawdzanie i nie tylko',
       autoReview: {

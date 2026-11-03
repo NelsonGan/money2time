@@ -163,6 +163,21 @@ const ms = {
     reset_action: 'Padam & tukar',
   },
   news: {
+    cloud_sync_shared_ledgers: {
+      title: 'Cloud Sync dan buku dikongsi',
+      cloudSync: {
+        title: 'Cloud Sync kini tersedia',
+        body: 'Log masuk dengan Apple, Google atau e-mel, dan data anda sama pada semua telefon anda. Perubahan tiba dalam beberapa saat. Penyegerakan ialah sebahagian daripada Pro. Cari di Tetapan > Cloud Sync.',
+      },
+      sharedLedgers: {
+        title: 'Buku dikongsi',
+        body: 'Kongsi buku dengan sehingga 5 orang dan urus belanjawan rumah bersama. Semua orang menambah catatan dan melihatnya pada telefon sendiri. Menyertai adalah percuma; berkongsi memerlukan Pro.',
+      },
+      household: {
+        title: 'Wawasan isi rumah',
+        body: 'Buka buku dikongsi, kemudian Wawasan > Isi rumah untuk melihat perbelanjaan bersama setiap bulan, bahagian setiap orang dan siapa menanggung kategori mana.',
+      },
+    },
     auto_review_insights_instalments: {
       title: 'Semakan automatik dan banyak lagi',
       autoReview: {

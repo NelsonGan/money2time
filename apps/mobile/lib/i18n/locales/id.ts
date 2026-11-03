@@ -163,6 +163,21 @@ const id = {
     reset_action: 'Hapus & ganti',
   },
   news: {
+    cloud_sync_shared_ledgers: {
+      title: 'Cloud Sync dan buku bersama',
+      cloudSync: {
+        title: 'Cloud Sync sudah hadir',
+        body: 'Masuk dengan Apple, Google, atau email, dan data Anda sama di semua ponsel Anda. Perubahan tiba dalam hitungan detik. Sinkronisasi termasuk dalam Pro. Temukan di Pengaturan > Cloud Sync.',
+      },
+      sharedLedgers: {
+        title: 'Buku bersama',
+        body: 'Bagikan buku dengan hingga 5 orang dan kelola anggaran rumah tangga bersama. Semua orang menambah catatan dan melihatnya di ponsel masing-masing. Bergabung gratis; berbagi perlu Pro.',
+      },
+      household: {
+        title: 'Wawasan rumah tangga',
+        body: 'Buka buku bersama, lalu Wawasan > Rumah tangga untuk melihat pengeluaran bersama tiap bulan, bagian tiap orang, dan siapa menanggung kategori apa.',
+      },
+    },
     auto_review_insights_instalments: {
       title: 'Tinjauan otomatis dan lainnya',
       autoReview: {

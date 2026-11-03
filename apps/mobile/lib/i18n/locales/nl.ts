@@ -163,6 +163,21 @@ const nl = {
     reset_action: 'Verwijderen en wisselen',
   },
   news: {
+    cloud_sync_shared_ledgers: {
+      title: 'Cloud Sync en gedeelde boeken',
+      cloudSync: {
+        title: 'Cloud Sync is er',
+        body: 'Log in met Apple, Google of e-mail en je gegevens zijn op al je telefoons hetzelfde. Wijzigingen komen binnen seconden aan. Synchroniseren hoort bij Pro. Je vindt het bij Instellingen > Cloud Sync.',
+      },
+      sharedLedgers: {
+        title: 'Gedeelde boeken',
+        body: 'Deel een boek met maximaal 5 mensen en houd samen het huishoudbudget bij. Iedereen voegt posten toe en ziet ze op de eigen telefoon. Meedoen is gratis; delen vraagt Pro.',
+      },
+      household: {
+        title: 'Inzichten voor het huishouden',
+        body: 'Open een gedeeld boek en daarna Inzichten > Huishouden om te zien wat jullie elke maand samen uitgaven, ieders deel en wie welke categorieën betaalt.',
+      },
+    },
     auto_review_insights_instalments: {
       title: 'Autocontrole en meer',
       autoReview: {

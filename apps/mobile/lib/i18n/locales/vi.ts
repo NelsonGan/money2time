@@ -163,6 +163,21 @@ const vi = {
     reset_action: 'Xóa và chuyển',
   },
   news: {
+    cloud_sync_shared_ledgers: {
+      title: 'Cloud Sync và sổ dùng chung',
+      cloudSync: {
+        title: 'Cloud Sync đã có mặt',
+        body: 'Đăng nhập bằng Apple, Google hoặc email và dữ liệu của bạn sẽ giống nhau trên mọi điện thoại. Thay đổi đến trong vài giây. Đồng bộ là một phần của Pro. Tìm trong Cài đặt > Cloud Sync.',
+      },
+      sharedLedgers: {
+        title: 'Sổ dùng chung',
+        body: 'Chia sẻ sổ với tối đa 5 người và cùng quản lý ngân sách gia đình. Mọi người thêm mục và xem trên điện thoại của mình. Tham gia miễn phí; chia sẻ cần Pro.',
+      },
+      household: {
+        title: 'Thống kê hộ gia đình',
+        body: 'Mở một sổ dùng chung, rồi vào Thống kê > Hộ gia đình để xem mỗi tháng cả nhà đã chi bao nhiêu, phần của từng người và ai chi cho danh mục nào.',
+      },
+    },
     auto_review_insights_instalments: {
       title: 'Tự động xem lại và hơn thế nữa',
       autoReview: {

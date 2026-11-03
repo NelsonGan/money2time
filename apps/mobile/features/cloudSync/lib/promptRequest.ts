@@ -6,11 +6,9 @@ type Listener = () => void;
 
 const listeners = new Set<Listener>();
 let pending = false;
-let requestedAt = 0;
 
 export function requestCloudSyncPrompt(): void {
   pending = true;
-  requestedAt = Date.now();
   listeners.forEach((listener) => listener());
 }
 
@@ -22,11 +20,6 @@ export function takePendingCloudSyncPrompt(): boolean {
 
 export function hasPendingCloudSyncPrompt(): boolean {
   return pending;
-}
-
-/** Milliseconds since the pending offer was asked for. */
-export function pendingCloudSyncPromptAge(): number {
-  return Date.now() - requestedAt;
 }
 
 export function subscribeCloudSyncPrompt(listener: Listener): () => void {

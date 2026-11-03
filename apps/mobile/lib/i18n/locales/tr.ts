@@ -163,6 +163,21 @@ const tr = {
     reset_action: 'Sil ve değiştir',
   },
   news: {
+    cloud_sync_shared_ledgers: {
+      title: 'Cloud Sync ve paylaşılan defterler',
+      cloudSync: {
+        title: 'Cloud Sync geldi',
+        body: 'Apple, Google veya e-postayla giriş yap; verilerin tüm telefonlarında aynı olsun. Değişiklikler saniyeler içinde ulaşır. Eşitleme Pro’nun bir parçası. Ayarlar > Cloud Sync’te bulabilirsin.',
+      },
+      sharedLedgers: {
+        title: 'Paylaşılan defterler',
+        body: 'Bir defteri en fazla 5 kişiyle paylaş ve ev bütçesini birlikte tutun. Herkes kayıt ekler ve kendi telefonunda görür. Katılmak ücretsiz; paylaşmak için Pro gerekir.',
+      },
+      household: {
+        title: 'Hane analizleri',
+        body: 'Paylaşılan bir defteri aç, sonra Analizler > Hane bölümünde her ay birlikte ne harcadığınızı, herkesin payını ve hangi kategoriyi kimin karşıladığını gör.',
+      },
+    },
     auto_review_insights_instalments: {
       title: 'Otomatik inceleme ve daha fazlası',
       autoReview: {

@@ -138,6 +138,21 @@ const en = {
     },
   },
   news: {
+    cloud_sync_shared_ledgers: {
+      title: 'Cloud Sync and shared ledgers',
+      cloudSync: {
+        title: 'Cloud Sync is here',
+        body: 'Sign in with Apple, Google or email, and your data stays the same on all your phones. Changes arrive in seconds. Syncing is part of Pro. Find it in Settings > Cloud Sync.',
+      },
+      sharedLedgers: {
+        title: 'Shared ledgers',
+        body: 'Share a ledger with up to 5 people and keep the household budget together. Everyone adds entries and sees them on their own phone. Joining is free; sharing needs Pro.',
+      },
+      household: {
+        title: 'Household insights',
+        body: "Open a shared ledger, then Insights > Household to see what you spent together each month, each person's part and who covers which categories.",
+      },
+    },
     auto_review_insights_instalments: {
       title: 'Auto-review and more',
       autoReview: {

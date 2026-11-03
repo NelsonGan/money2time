@@ -163,6 +163,21 @@ const es = {
     reset_action: 'Eliminar y cambiar',
   },
   news: {
+    cloud_sync_shared_ledgers: {
+      title: 'Cloud Sync y libros compartidos',
+      cloudSync: {
+        title: 'Llega Cloud Sync',
+        body: 'Inicia sesión con Apple, Google o correo y tus datos serán los mismos en todos tus teléfonos. Los cambios llegan en segundos. La sincronización es parte de Pro. Está en Ajustes > Cloud Sync.',
+      },
+      sharedLedgers: {
+        title: 'Libros compartidos',
+        body: 'Comparte un libro con hasta 5 personas y llevad juntos el presupuesto de casa. Todos añaden movimientos y los ven en su teléfono. Unirse es gratis; compartir requiere Pro.',
+      },
+      household: {
+        title: 'Análisis del hogar',
+        body: 'Abre un libro compartido y luego Análisis > Hogar para ver lo que gastasteis juntos cada mes, la parte de cada persona y quién cubre cada categoría.',
+      },
+    },
     auto_review_insights_instalments: {
       title: 'Revisión automática y más',
       autoReview: {

@@ -163,6 +163,21 @@ const it = {
     reset_action: 'Elimina e cambia',
   },
   news: {
+    cloud_sync_shared_ledgers: {
+      title: 'Cloud Sync e registri condivisi',
+      cloudSync: {
+        title: 'Arriva Cloud Sync',
+        body: 'Accedi con Apple, Google o email e i tuoi dati sono uguali su tutti i tuoi telefoni. Le modifiche arrivano in pochi secondi. La sincronizzazione fa parte di Pro. La trovi in Impostazioni > Cloud Sync.',
+      },
+      sharedLedgers: {
+        title: 'Registri condivisi',
+        body: 'Condividi un registro con fino a 5 persone e gestite insieme il budget di casa. Tutti aggiungono voci e le vedono sul proprio telefono. Unirsi è gratis; condividere richiede Pro.',
+      },
+      household: {
+        title: 'Analisi della famiglia',
+        body: 'Apri un registro condiviso, poi Analisi > Famiglia per vedere quanto avete speso insieme ogni mese, la parte di ognuno e chi copre quali categorie.',
+      },
+    },
     auto_review_insights_instalments: {
       title: 'Revisione automatica e altro',
       autoReview: {

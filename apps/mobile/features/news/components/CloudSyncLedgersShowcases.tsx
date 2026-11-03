@@ -2,12 +2,15 @@ import { Check, Cloud, Users } from 'lucide-react-native';
 import React from 'react';
 import { Image, View } from 'react-native';
 
-import { CategoryEmoji, Text } from '~/components/ui';
+import { CategoryEmoji, ClayIcon, Text } from '~/components/ui';
+import { useApp } from '~/context/AppContext';
 import { CLOUD_SYNC_ART } from '~/features/cloudSync/components/art';
 import { SHARED_LEDGER_ART } from '~/features/sharedLedgers/components/art';
+import { PERSON_COLORS } from '~/features/sharedLedgers/lib/personColors';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { withColorAlpha } from '~/utils/color';
+import { formatAmount } from '~/utils/formatters';
 
 interface ShowcaseProps {
   width: number;
@@ -130,6 +133,70 @@ export function SharedLedgersShowcase({ width }: ShowcaseProps) {
             >
               <Text variant="label" tone="primary">
                 {initial}
+              </Text>
+            </View>
+          ))}
+        </View>
+      </View>
+    </View>
+  );
+}
+
+// Sample people, the same in every language, in the colours their rows use.
+const HOUSEHOLD = [
+  { name: 'Aisha', amount: 3759.8, color: PERSON_COLORS[1] },
+  { name: 'Daniel', amount: 2722.6, color: PERSON_COLORS[0] },
+  { name: 'Mei', amount: 1180, color: PERSON_COLORS[3] },
+] as const;
+
+/** The Household page's Spent together card in miniature. */
+export function HouseholdInsightsShowcase({ width }: ShowcaseProps) {
+  const { settings } = useApp();
+  const money = (amount: number) => formatAmount(amount, settings, { showSign: false });
+  const total = HOUSEHOLD.reduce((sum, person) => sum + person.amount, 0);
+  return (
+    <View className="items-center gap-3" style={{ width }}>
+      {/* The Household page's own menu art, over its card, as the other pages
+          put their art over theirs. */}
+      <ClayIcon name="insights/household" size={Math.round(width * 0.24)} />
+      <View className="w-full gap-3 rounded-[22px] border border-border/30 bg-card px-4 py-4">
+        <View className="gap-0.5">
+          <Text variant="caption" tone="muted">
+            {I18n.t('household.spent_together')}
+          </Text>
+          <Text variant="heading" numberOfLines={1}>
+            {money(total)}
+          </Text>
+        </View>
+        <View className="h-2.5 flex-row overflow-hidden rounded-full">
+          {HOUSEHOLD.map((person, index) => (
+            <View
+              key={person.name}
+              style={{
+                flex: person.amount / total,
+                backgroundColor: person.color,
+                marginLeft: index === 0 ? 0 : 1.5,
+              }}
+            />
+          ))}
+        </View>
+        <View className="gap-2">
+          {HOUSEHOLD.map((person) => (
+            <View key={person.name} className="flex-row items-center gap-2.5">
+              <View
+                className="h-7 w-7 items-center justify-center rounded-full"
+                style={{ backgroundColor: person.color }}
+              >
+                <Text className="font-bold text-white" style={{ fontSize: 13 }}>
+                  {person.name[0]}
+                </Text>
+              </View>
+              <Text variant="body" numberOfLines={1} className="min-w-0 flex-1">
+                {person.name}
+              </Text>
+              <Text variant="bodyStrong">{money(person.amount)}</Text>
+              <Text variant="caption" tone="muted" className="min-w-[36px] text-right">
+                {`${Math.round((person.amount / total) * 100)}%`}
               </Text>
             </View>
           ))}

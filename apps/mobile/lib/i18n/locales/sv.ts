@@ -163,6 +163,21 @@ const sv = {
     reset_action: 'Radera och byt',
   },
   news: {
+    cloud_sync_shared_ledgers: {
+      title: 'Cloud Sync och delade kassaböcker',
+      cloudSync: {
+        title: 'Cloud Sync är här',
+        body: 'Logga in med Apple, Google eller e-post så är dina data desamma på alla dina telefoner. Ändringar kommer fram på några sekunder. Synkronisering ingår i Pro. Du hittar det under Inställningar > Cloud Sync.',
+      },
+      sharedLedgers: {
+        title: 'Delade kassaböcker',
+        body: 'Dela en kassabok med upp till 5 personer och sköt hushållsbudgeten tillsammans. Alla lägger till poster och ser dem i sin egen telefon. Det är gratis att gå med; att dela kräver Pro.',
+      },
+      household: {
+        title: 'Insikter för hushållet',
+        body: 'Öppna en delad kassabok och sedan Insikter > Hushåll för att se vad ni har spenderat tillsammans varje månad, varje persons del och vem som står för vilka kategorier.',
+      },
+    },
     auto_review_insights_instalments: {
       title: 'Autogranskning och mer',
       autoReview: {

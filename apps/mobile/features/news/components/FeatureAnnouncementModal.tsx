@@ -59,6 +59,7 @@ import { BackupShowcase } from './BackupShowcase';
 import { BudgetShowcase } from './BudgetShowcase';
 import {
   CloudSyncShowcase,
+  HouseholdInsightsShowcase,
   LedgersShowcase,
   SharedLedgersShowcase,
 } from './CloudSyncLedgersShowcases';
@@ -431,6 +432,8 @@ export function FeatureAnnouncementModal({
                 <LedgersShowcase width={Math.round(showcaseWidth * 0.86)} />
               ) : page.visual === 'sharedLedgers' ? (
                 <SharedLedgersShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'householdInsights' ? (
+                <HouseholdInsightsShowcase width={Math.round(showcaseWidth * 0.86)} />
               ) : page.visual === 'webDashboard' ? (
                 <WebDashboardShowcase width={Math.round(showcaseWidth * 0.92)} />
               ) : page.visual === 'notificationReview' ? (

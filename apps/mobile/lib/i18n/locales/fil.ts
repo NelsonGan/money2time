@@ -163,6 +163,21 @@ const fil = {
     reset_action: 'Burahin at palitan',
   },
   news: {
+    cloud_sync_shared_ledgers: {
+      title: 'Cloud Sync at mga shared ledger',
+      cloudSync: {
+        title: 'Narito na ang Cloud Sync',
+        body: 'Mag-sign in gamit ang Apple, Google o email, at pareho ang data mo sa lahat ng phone mo. Dumarating ang mga pagbabago sa loob ng ilang segundo. Bahagi ng Pro ang pag-sync. Hanapin ito sa Settings > Cloud Sync.',
+      },
+      sharedLedgers: {
+        title: 'Mga shared ledger',
+        body: 'Ibahagi ang ledger sa hanggang 5 tao at sabay na hawakan ang budget ng bahay. Lahat ay nagdadagdag ng entry at nakikita ito sa sarili nilang phone. Libre ang pagsali; kailangan ng Pro para magbahagi.',
+      },
+      household: {
+        title: 'Insights ng sambahayan',
+        body: 'Buksan ang isang shared ledger, saka pumunta sa Insights > Sambahayan para makita ang nagastos ninyo nang magkasama bawat buwan, ang bahagi ng bawat isa at kung sino ang sumasagot sa bawat kategorya.',
+      },
+    },
     auto_review_insights_instalments: {
       title: 'Auto-review at iba pa',
       autoReview: {
