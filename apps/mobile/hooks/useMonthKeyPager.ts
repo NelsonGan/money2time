@@ -5,6 +5,12 @@ import type { FlatList } from 'react-native';
 import { yearMonthFromKey, yearMonthToKey } from '~/components/datePicker/monthJump';
 import { useMonthPager } from '~/hooks/useMonthPager';
 
+/** Whether the pager is on its first or last month, for the header's arrows. */
+export interface MonthPagerEdges {
+  atStart: boolean;
+  atEnd: boolean;
+}
+
 /** What an Insights month page (Budget, Household) gives the header above it. */
 export interface MonthPagerHandle {
   scrollToRelative: (direction: 1 | -1) => void;
@@ -34,11 +40,14 @@ export function useMonthKeyPager({
   pageWidth,
   initialIndex,
   ref,
+  onEdgesChange,
 }: {
   months: readonly string[];
   pageWidth: number;
   initialIndex: number;
   ref: React.Ref<MonthPagerHandle>;
+  /** Told whenever the pager reaches or leaves its first or last month. */
+  onEdgesChange?: (edges: MonthPagerEdges) => void;
 }) {
   const monthsRef = useRef(nextMonths);
   const months = useMemo(() => {
@@ -86,6 +95,12 @@ export function useMonthKeyPager({
     () => ({ scrollToRelative, openMonthPicker: () => setIsMonthPickerOpen(true) }),
     [scrollToRelative],
   );
+
+  const atStart = pager.activeIndex <= 0;
+  const atEnd = pager.activeIndex >= months.length - 1;
+  useEffect(() => {
+    onEdgesChange?.({ atStart, atEnd });
+  }, [atEnd, atStart, onEdgesChange]);
 
   const activeMonth = months[pager.activeIndex] ?? months[months.length - 1]!;
   const activeYearMonth = yearMonthFromKey(activeMonth);

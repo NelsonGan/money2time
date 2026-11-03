@@ -160,7 +160,7 @@ import {
 } from '~/features/transactions/components';
 import { canDuplicateTransaction } from '~/features/transactions/lib/duplicateTransaction';
 import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
-import { type MonthPagerHandle } from '~/hooks/useMonthKeyPager';
+import { type MonthPagerEdges, type MonthPagerHandle } from '~/hooks/useMonthKeyPager';
 import { usePagerWidthResnap } from '~/hooks/usePagerWidthResnap';
 import { usePersistedJsonSnapshot } from '~/hooks/usePersistedJsonSnapshot';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -2683,6 +2683,11 @@ export function InsightsScreen({
   // Budget and Household are month pagers shown in place of the period pager,
   // one at a time, so the header drives whichever is open through one handle.
   const [monthPagerLabel, setMonthPagerLabel] = useState('');
+  // Dims the header's arrow at the pager's first or last month.
+  const [monthPagerEdges, setMonthPagerEdges] = useState<MonthPagerEdges>({
+    atStart: false,
+    atEnd: false,
+  });
   const monthPagerRef = useRef<MonthPagerHandle>(null);
   // Household is only for a shared ledger: off the menu otherwise.
   const isSharedLedger = useOpenLedgerPeople() !== null;
@@ -6751,6 +6756,8 @@ export function InsightsScreen({
                               : handleOpenPeriodPicker
                         }
                         disableArrows={!isTakeoverView && displayPeriodPreset === 'lifetime'}
+                        disablePrevious={isMonthPagerView && monthPagerEdges.atStart}
+                        disableNext={isMonthPagerView && monthPagerEdges.atEnd}
                         labelRef={periodPickerTriggerRef}
                         onLabelLayout={handlePeriodPickerTriggerLayout}
                       />
@@ -6845,6 +6852,7 @@ export function InsightsScreen({
                 onOpenDrilldown={onOpenDrilldown}
                 onOpenTransaction={onOpenTransaction}
                 onActiveMonthLabelChange={setMonthPagerLabel}
+                onEdgesChange={setMonthPagerEdges}
               />
             ) : isBudgetView ? (
               <BudgetPagerView
@@ -6854,6 +6862,7 @@ export function InsightsScreen({
                 onCreateCustomBudget={onCreateCustomBudget}
                 onOpenDrilldown={onOpenDrilldown}
                 onActiveMonthLabelChange={setMonthPagerLabel}
+                onEdgesChange={setMonthPagerEdges}
               />
             ) : !isPro && proTrendTypeSet.has(displaySelectedInsightType) ? (
               // Locked Pro trend: every pager page would just render the paywall

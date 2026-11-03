@@ -18,6 +18,8 @@ export function InsightPeriodSwitcher({
   onNext,
   onPressLabel,
   disableArrows = false,
+  disablePrevious = false,
+  disableNext = false,
   labelRef,
   onLabelLayout,
 }: {
@@ -26,11 +28,17 @@ export function InsightPeriodSwitcher({
   onNext: () => void;
   onPressLabel?: () => void;
   disableArrows?: boolean;
+  /** At the first period there is: the previous arrow is dimmed and does nothing. */
+  disablePrevious?: boolean;
+  /** At the last period there is. */
+  disableNext?: boolean;
   labelRef?: React.Ref<ViewInstance>;
   onLabelLayout?: () => void;
 }) {
   const themeColors = useThemeColors();
-  const arrowColor = disableArrows ? themeColors.border : themeColors.textMuted;
+  const previousOff = disableArrows || disablePrevious;
+  const nextOff = disableArrows || disableNext;
+  const arrowColor = (off: boolean) => (off ? themeColors.border : themeColors.textMuted);
   const step = (move: () => void) => () => {
     void triggerHaptic('selection');
     move();
@@ -39,13 +47,14 @@ export function InsightPeriodSwitcher({
     <View className="flex-row items-center justify-center">
       <Pressable
         onPress={step(onPrevious)}
-        disabled={disableArrows}
+        disabled={previousOff}
+        accessibilityState={{ disabled: previousOff }}
         hitSlop={10}
         accessibilityRole="button"
         accessibilityLabel={I18n.t('common.previous')}
         className="h-7 w-7 items-center justify-center rounded-full active:opacity-60"
       >
-        <ChevronLeft size={16} color={arrowColor} strokeWidth={2.5} />
+        <ChevronLeft size={16} color={arrowColor(previousOff)} strokeWidth={2.5} />
       </Pressable>
       <View ref={labelRef} onLayout={onLabelLayout}>
         <Pressable
@@ -64,13 +73,14 @@ export function InsightPeriodSwitcher({
       </View>
       <Pressable
         onPress={step(onNext)}
-        disabled={disableArrows}
+        disabled={nextOff}
+        accessibilityState={{ disabled: nextOff }}
         hitSlop={10}
         accessibilityRole="button"
         accessibilityLabel={I18n.t('common.next')}
         className="h-7 w-7 items-center justify-center rounded-full active:opacity-60"
       >
-        <ChevronRight size={16} color={arrowColor} strokeWidth={2.5} />
+        <ChevronRight size={16} color={arrowColor(nextOff)} strokeWidth={2.5} />
       </Pressable>
     </View>
   );
