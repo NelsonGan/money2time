@@ -48,7 +48,6 @@ export function InsightPeriodSwitcher({
       <Pressable
         onPress={step(onPrevious)}
         disabled={previousOff}
-        accessibilityState={{ disabled: previousOff }}
         hitSlop={10}
         accessibilityRole="button"
         accessibilityLabel={I18n.t('common.previous')}
@@ -74,7 +73,6 @@ export function InsightPeriodSwitcher({
       <Pressable
         onPress={step(onNext)}
         disabled={nextOff}
-        accessibilityState={{ disabled: nextOff }}
         hitSlop={10}
         accessibilityRole="button"
         accessibilityLabel={I18n.t('common.next')}

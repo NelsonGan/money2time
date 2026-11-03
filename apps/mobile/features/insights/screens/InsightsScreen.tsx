@@ -2688,6 +2688,15 @@ export function InsightsScreen({
     atStart: false,
     atEnd: false,
   });
+  // Keeps the same state when a remounted pager reports the edges it already
+  // had, so this screen does not re-render for nothing.
+  const handleMonthPagerEdgesChange = useCallback(
+    (edges: MonthPagerEdges) =>
+      setMonthPagerEdges((previous) =>
+        previous.atStart === edges.atStart && previous.atEnd === edges.atEnd ? previous : edges,
+      ),
+    [],
+  );
   const monthPagerRef = useRef<MonthPagerHandle>(null);
   // Household is only for a shared ledger: off the menu otherwise.
   const isSharedLedger = useOpenLedgerPeople() !== null;
@@ -6852,7 +6861,7 @@ export function InsightsScreen({
                 onOpenDrilldown={onOpenDrilldown}
                 onOpenTransaction={onOpenTransaction}
                 onActiveMonthLabelChange={setMonthPagerLabel}
-                onEdgesChange={setMonthPagerEdges}
+                onEdgesChange={handleMonthPagerEdgesChange}
               />
             ) : isBudgetView ? (
               <BudgetPagerView
@@ -6862,7 +6871,7 @@ export function InsightsScreen({
                 onCreateCustomBudget={onCreateCustomBudget}
                 onOpenDrilldown={onOpenDrilldown}
                 onActiveMonthLabelChange={setMonthPagerLabel}
-                onEdgesChange={setMonthPagerEdges}
+                onEdgesChange={handleMonthPagerEdgesChange}
               />
             ) : !isPro && proTrendTypeSet.has(displaySelectedInsightType) ? (
               // Locked Pro trend: every pager page would just render the paywall

@@ -141,6 +141,10 @@ export function householdPagerMonths(
   currentMonthKey: string,
 ): string[] {
   const current = yearMonthFromKey(currentMonthKey);
+  // A current key that is not `YYYY-MM` gives no months to step through.
+  if (!Number.isFinite(current.year) || !Number.isFinite(current.monthIndex)) {
+    return [currentMonthKey];
+  }
   const spending =
     firstMonthKey && firstMonthKey < currentMonthKey
       ? monthsBetween(yearMonthFromKey(firstMonthKey), current)
@@ -149,8 +153,6 @@ export function householdPagerMonths(
     Math.max(Number.isFinite(spending) ? spending : 0, HOUSEHOLD_PAGER_MIN_MONTHS - 1),
     MAX_PAGER_MONTHS - 1,
   );
-  // A current key that is not `YYYY-MM` gives no months to step through.
-  if (!Number.isFinite(current.year)) return [currentMonthKey];
   return Array.from({ length: span + 1 }, (_, step) =>
     yearMonthToKey(shiftYearMonth(current, step - span)),
   );

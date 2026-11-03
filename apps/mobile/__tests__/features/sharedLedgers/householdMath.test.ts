@@ -223,6 +223,11 @@ describe('householdPagerMonths', () => {
     expect(lastYear('2026-11')[0]).toBe('2025-12');
   });
 
+  it('falls back to just this month when it cannot read it', () => {
+    expect(householdPagerMonths('2026-02', '2026-xx')).toEqual(['2026-xx']);
+    expect(householdPagerMonths(null, '2026')).toEqual(['2026']);
+  });
+
   it('ignores a first month after this one (a future-dated entry)', () => {
     expect(householdPagerMonths('2027-01', '2026-11')).toEqual(lastYear('2026-11'));
   });
