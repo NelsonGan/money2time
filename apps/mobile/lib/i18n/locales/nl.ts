@@ -163,6 +163,21 @@ const nl = {
     reset_action: 'Verwijderen en wisselen',
   },
   news: {
+    cloud_sync_shared_ledgers: {
+      title: 'Cloud Sync en gedeelde boeken',
+      cloudSync: {
+        title: 'Cloud Sync is er',
+        body: 'Log in met Apple, Google of e-mail en je gegevens zijn op al je telefoons hetzelfde. Wijzigingen komen binnen seconden aan. Synchroniseren hoort bij Pro. Je vindt het bij Instellingen > Cloud Sync.',
+      },
+      sharedLedgers: {
+        title: 'Gedeelde boeken',
+        body: 'Deel een boek met maximaal 5 mensen en houd samen het huishoudbudget bij. Iedereen voegt posten toe en ziet ze op de eigen telefoon. Meedoen is gratis; delen vraagt Pro.',
+      },
+      household: {
+        title: 'Inzichten voor het huishouden',
+        body: 'Open een gedeeld boek en daarna Inzichten > Huishouden om te zien wat jullie elke maand samen uitgaven, ieders deel en wie welke categorieën betaalt.',
+      },
+    },
     auto_review_insights_instalments: {
       title: 'Autocontrole en meer',
       autoReview: {
@@ -1015,6 +1030,7 @@ const nl = {
     },
   },
   insights: {
+    household: 'Huishouden',
     breakdown: 'Verdeling',
     trends: 'Trends',
     tabs: {
@@ -3147,6 +3163,18 @@ const nl = {
     pro_ended_message:
       'Je Pro-abonnement is afgelopen, dus {{name}} en je andere extra boeken zijn voorlopig vergrendeld. Er is niets verwijderd: ze gaan weer open zoals ze waren zodra je verlengt.',
     renew_pro: 'Pro verlengen',
+  },
+  household: {
+    alone_hint:
+      'Voorlopig alleen jij. Zodra anderen meedoen en boekingen toevoegen, zie je hier ieders deel.',
+    spent_together: 'Samen uitgegeven',
+    who_covers: 'Wie betaalt wat',
+    trend: 'Laatste 6 maanden',
+    biggest: 'Grootste boekingen',
+    person_share: '{{name}}: {{amount}}, {{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: 'Nog niets uitgegeven',
+    empty_body: 'Hier zie je wat iedereen uitgeeft, per persoon.',
   },
   shared_ledgers: {
     member_fallback: 'Lid',

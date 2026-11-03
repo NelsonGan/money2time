@@ -16,6 +16,7 @@ export const CLAY_ICON_SOURCES = {
   'insights/calendar-clock': require('../assets/clay-icons/insights/calendar-clock.png'),
   'insights/growth-analysis': require('../assets/clay-icons/insights/growth-analysis.png'),
   'insights/home-savings': require('../assets/clay-icons/insights/home-savings.png'),
+  'insights/household': require('../assets/clay-icons/insights/household.png'),
   'insights/market-analysis': require('../assets/clay-icons/insights/market-analysis.png'),
   'insights/money-bags': require('../assets/clay-icons/insights/money-bags.png'),
   'insights/mood-faces': require('../assets/clay-icons/insights/mood-faces.png'),

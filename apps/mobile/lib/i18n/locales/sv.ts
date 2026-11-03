@@ -163,6 +163,21 @@ const sv = {
     reset_action: 'Radera och byt',
   },
   news: {
+    cloud_sync_shared_ledgers: {
+      title: 'Cloud Sync och delade kassaböcker',
+      cloudSync: {
+        title: 'Cloud Sync är här',
+        body: 'Logga in med Apple, Google eller e-post så är dina data desamma på alla dina telefoner. Ändringar kommer fram på några sekunder. Synkronisering ingår i Pro. Du hittar det under Inställningar > Cloud Sync.',
+      },
+      sharedLedgers: {
+        title: 'Delade kassaböcker',
+        body: 'Dela en kassabok med upp till 5 personer och sköt hushållsbudgeten tillsammans. Alla lägger till poster och ser dem i sin egen telefon. Det är gratis att gå med; att dela kräver Pro.',
+      },
+      household: {
+        title: 'Insikter för hushållet',
+        body: 'Öppna en delad kassabok och sedan Insikter > Hushåll för att se vad ni har spenderat tillsammans varje månad, varje persons del och vem som står för vilka kategorier.',
+      },
+    },
     auto_review_insights_instalments: {
       title: 'Autogranskning och mer',
       autoReview: {
@@ -1012,6 +1027,7 @@ const sv = {
     },
   },
   insights: {
+    household: 'Hushåll',
     breakdown: 'Fördelning',
     trends: 'Trender',
     tabs: {
@@ -3116,6 +3132,18 @@ const sv = {
     pro_ended_message:
       'Ditt Pro-abonnemang har upphört, så {{name}} och dina andra extra kassaböcker är låsta tills vidare. Inget har raderats: de öppnas igen som de var när du förnyar.',
     renew_pro: 'Förnya Pro',
+  },
+  household: {
+    alone_hint:
+      'Bara du hittills. När andra går med och lägger till poster visas varje persons del här.',
+    spent_together: 'Spenderat tillsammans',
+    who_covers: 'Vem står för vad',
+    trend: 'Senaste 6 månaderna',
+    biggest: 'Största posterna',
+    person_share: '{{name}}: {{amount}}, {{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: 'Inget spenderat än',
+    empty_body: 'Här visas vad var och en spenderar.',
   },
   shared_ledgers: {
     member_fallback: 'Medlem',

@@ -136,6 +136,21 @@ const zh = {
     },
   },
   news: {
+    cloud_sync_shared_ledgers: {
+      title: 'Cloud Sync 与共享账本',
+      cloudSync: {
+        title: 'Cloud Sync 来了',
+        body: '使用 Apple、Google 或邮箱登录，所有手机上的数据都会保持一致。更改几秒内就会同步。同步属于 Pro 功能。前往设置 > Cloud Sync。',
+      },
+      sharedLedgers: {
+        title: '共享账本',
+        body: '与最多 5 人共享账本，一起管理家庭预算。每个人都能添加记录，并在自己的手机上看到。加入免费，共享需要 Pro。',
+      },
+      household: {
+        title: '家庭洞察',
+        body: '打开共享账本，再进入 洞察 > 家庭，就能看到每月一起花了多少、每个人的部分，以及谁负担哪些类别。',
+      },
+    },
     auto_review_insights_instalments: {
       title: '自动确认等新功能',
       autoReview: {
@@ -977,6 +992,7 @@ const zh = {
     },
   },
   insights: {
+    household: '家庭',
     breakdown: '明细',
     trends: '趋势',
     tabs: {
@@ -2992,6 +3008,17 @@ const zh = {
     pro_ended_message:
       '你的 Pro 订阅已结束，因此{{name}}和你的其他额外账本暂时被锁定。没有删除任何内容：续订后它们会原样重新打开。',
     renew_pro: '续订 Pro',
+  },
+  household: {
+    alone_hint: '目前只有你。其他人加入并添加记录后，这里会显示每个人的部分。',
+    spent_together: '共同支出',
+    who_covers: '谁负担什么',
+    trend: '最近 6 个月',
+    biggest: '最大支出',
+    person_share: '{{name}}：{{amount}}，{{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: '还没有支出',
+    empty_body: '每个人的支出会显示在这里。',
   },
   shared_ledgers: {
     member_fallback: '成员',

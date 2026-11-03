@@ -21,6 +21,7 @@ import { transactionUpdatesAnnouncement } from './020_transaction_updates';
 import { webDashboardAnnouncement } from './021_web_dashboard';
 import { cloudSyncLedgersAnnouncement } from './022_cloud_sync_ledgers';
 import { autoReviewInsightsInstalmentsAnnouncement } from './023_auto_review_insights_instalments';
+import { cloudSyncSharedLedgersAnnouncement } from './024_cloud_sync_shared_ledgers';
 
 export const FEATURE_ANNOUNCEMENTS = [
   homeWidgetsAnnouncement,
@@ -46,4 +47,5 @@ export const FEATURE_ANNOUNCEMENTS = [
   webDashboardAnnouncement,
   cloudSyncLedgersAnnouncement,
   autoReviewInsightsInstalmentsAnnouncement,
+  cloudSyncSharedLedgersAnnouncement,
 ] as const;

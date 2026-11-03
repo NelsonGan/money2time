@@ -23,6 +23,7 @@ import {
   shortName,
   writeOwnLedgerProfiles,
 } from '~/features/sharedLedgers/lib/ledgerPeople';
+import { seedColor } from '~/features/sharedLedgers/lib/personColors';
 import { getSQLite } from '~/lib/db/client';
 import { copyLedgerRows } from '~/lib/db/ledgerCopy';
 import migration079 from '~/lib/db/migrations/079_transaction_members';
@@ -311,6 +312,94 @@ describe('buildLedgerPeople', () => {
       isSelf: true,
     });
     expect(people.personFor('user-nelson').isSelf).toBe(true);
+  });
+
+  it('gives everyone a colour of their own, the same on every phone', () => {
+    const profiles = [
+      { user_id: 'user-nelson', role: 'owner', name: 'Nelson', avatar_uri: null },
+      {
+        user_id: 'user-ana',
+        role: 'member',
+        name: 'Ana',
+        avatar_uri: null,
+        created_at: '2026-10-02T00:00:00Z',
+      },
+      {
+        user_id: 'user-mei',
+        role: 'member',
+        name: 'Mei',
+        avatar_uri: null,
+        created_at: '2026-10-01T00:00:00Z',
+      },
+    ];
+    const onMei = buildLedgerPeople(
+      { ...HOME, ownerUserId: 'user-nelson' },
+      profiles,
+      { name: 'Mei', avatarUri: null },
+      'user-mei',
+    );
+    const onNelson = buildLedgerPeople(
+      { ...HOME, role: 'owner', userId: 'user-nelson', ownerUserId: 'user-nelson' },
+      profiles,
+      { name: 'Nelson', avatarUri: null },
+      'user-nelson',
+    );
+    // An older Worker sends no owner id: the owner's colour does not depend on it.
+    const onMeiOldWorker = buildLedgerPeople(
+      HOME,
+      profiles.slice(1),
+      { name: 'Mei', avatarUri: null },
+      'user-mei',
+    );
+    const colorsOf = (people: typeof onMei) =>
+      Object.fromEntries(people.people.map((entry) => [entry.memberId ?? 'owner', entry.color]));
+    expect(colorsOf(onMei)).toEqual(colorsOf(onNelson));
+    expect(colorsOf(onMeiOldWorker)).toEqual(colorsOf(onMei));
+    expect(new Set(onMei.people.map((entry) => entry.color)).size).toBe(3);
+  });
+
+  it('gives someone only known from an entry a colour no one in the ledger has', () => {
+    const profiles = [
+      { user_id: 'user-ana', role: 'member', name: 'Ana', avatar_uri: null },
+      { user_id: 'user-mei', role: 'member', name: 'Mei', avatar_uri: null },
+    ];
+    const people = buildLedgerPeople(HOME, profiles, own, 'user-mei');
+    const known = new Set(people.people.map((entry) => entry.color));
+    // Whatever the id hashes to, it is moved off the colours already taken.
+    for (const id of ['user-gone', 'user-left', 'user-x1', 'user-x2']) {
+      expect(known.has(people.personFor(id).color)).toBe(false);
+    }
+  });
+
+  it('keeps everyone’s colour when someone joins', () => {
+    const before = [
+      {
+        user_id: 'user-zed',
+        role: 'member',
+        name: 'Zed',
+        avatar_uri: null,
+        created_at: '2026-10-01T00:00:00Z',
+      },
+    ];
+    const colorsBefore = buildLedgerPeople(HOME, before, own, 'user-zed').people.map(
+      (entry) => entry.color,
+    );
+    // Joined later, though their id sorts first and hashes to Zed's colour.
+    expect(seedColor('user-a2')).toBe(seedColor('user-zed'));
+    const after = [
+      ...before,
+      {
+        user_id: 'user-a2',
+        role: 'member',
+        name: 'Aaa',
+        avatar_uri: null,
+        created_at: '2026-10-20T00:00:00Z',
+      },
+    ];
+    const people = buildLedgerPeople(HOME, after, own, 'user-zed');
+    expect(people.personFor(null).color).toBe(colorsBefore[0]);
+    expect(people.personFor('user-zed').color).toBe(colorsBefore[1]);
+    expect(new Set(people.people.map((entry) => entry.color)).size).toBe(3);
   });
 
   it('keeps an entry of someone never seen on this phone, as a member', () => {

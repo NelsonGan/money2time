@@ -163,6 +163,21 @@ const es = {
     reset_action: 'Eliminar y cambiar',
   },
   news: {
+    cloud_sync_shared_ledgers: {
+      title: 'Cloud Sync y libros compartidos',
+      cloudSync: {
+        title: 'Llega Cloud Sync',
+        body: 'Inicia sesión con Apple, Google o correo y tus datos serán los mismos en todos tus teléfonos. Los cambios llegan en segundos. La sincronización es parte de Pro. Está en Ajustes > Cloud Sync.',
+      },
+      sharedLedgers: {
+        title: 'Libros compartidos',
+        body: 'Comparte un libro con hasta 5 personas y llevad juntos el presupuesto de casa. Todos añaden movimientos y los ven en su teléfono. Unirse es gratis; compartir requiere Pro.',
+      },
+      household: {
+        title: 'Análisis del hogar',
+        body: 'Abre un libro compartido y luego Análisis > Hogar para ver lo que gastasteis juntos cada mes, la parte de cada persona y quién cubre cada categoría.',
+      },
+    },
     auto_review_insights_instalments: {
       title: 'Revisión automática y más',
       autoReview: {
@@ -1013,6 +1028,7 @@ const es = {
     },
   },
   insights: {
+    household: 'Hogar',
     breakdown: 'Desglose',
     trends: 'Tendencias',
     tabs: {
@@ -3137,6 +3153,18 @@ const es = {
     pro_ended_message:
       'Tu suscripción Pro terminó, así que {{name}} y tus otros libros adicionales están bloqueados por ahora. No se eliminó nada: se abrirán tal como estaban cuando renueves.',
     renew_pro: 'Renovar Pro',
+  },
+  household: {
+    alone_hint:
+      'Por ahora solo tú. Cuando otros se unan y añadan movimientos, aquí verás la parte de cada persona.',
+    spent_together: 'Gastado en conjunto',
+    who_covers: 'Quién cubre qué',
+    trend: 'Últimos 6 meses',
+    biggest: 'Movimientos más grandes',
+    person_share: '{{name}}: {{amount}}, {{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: 'Aún no hay gastos',
+    empty_body: 'Aquí aparece lo que gasta cada persona.',
   },
   shared_ledgers: {
     member_fallback: 'Miembro',

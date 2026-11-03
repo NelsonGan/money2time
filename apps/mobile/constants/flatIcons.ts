@@ -64,6 +64,7 @@ import {
   Target,
   TrendingUp,
   UserRound,
+  UsersRound,
   Wallet,
   Zap,
 } from 'lucide-react-native';
@@ -118,6 +119,7 @@ export const FLAT_ICON_FOR_CLAY: Record<ClayIconName, FlatIconSpec> = {
   'insights/calendar-clock': { icon: CalendarClock, tone: 'primary' },
   'insights/growth-analysis': { icon: TrendingUp, tone: 'primary' },
   'insights/home-savings': { icon: PiggyBank, tone: 'primary' },
+  'insights/household': { icon: UsersRound, tone: 'primary' },
   'insights/market-analysis': { icon: LineChart, tone: 'primary' },
   'insights/money-bags': { icon: Wallet, tone: 'primary' },
   'insights/mood-faces': { icon: Smile, tone: 'primary' },

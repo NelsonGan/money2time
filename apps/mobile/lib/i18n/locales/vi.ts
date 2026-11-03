@@ -163,6 +163,21 @@ const vi = {
     reset_action: 'Xóa và chuyển',
   },
   news: {
+    cloud_sync_shared_ledgers: {
+      title: 'Cloud Sync và sổ dùng chung',
+      cloudSync: {
+        title: 'Cloud Sync đã có mặt',
+        body: 'Đăng nhập bằng Apple, Google hoặc email và dữ liệu của bạn sẽ giống nhau trên mọi điện thoại. Thay đổi đến trong vài giây. Đồng bộ là một phần của Pro. Tìm trong Cài đặt > Cloud Sync.',
+      },
+      sharedLedgers: {
+        title: 'Sổ dùng chung',
+        body: 'Chia sẻ sổ với tối đa 5 người và cùng quản lý ngân sách gia đình. Mọi người thêm mục và xem trên điện thoại của mình. Tham gia miễn phí; chia sẻ cần Pro.',
+      },
+      household: {
+        title: 'Thống kê hộ gia đình',
+        body: 'Mở một sổ dùng chung, rồi vào Thống kê > Hộ gia đình để xem mỗi tháng cả nhà đã chi bao nhiêu, phần của từng người và ai chi cho danh mục nào.',
+      },
+    },
     auto_review_insights_instalments: {
       title: 'Tự động xem lại và hơn thế nữa',
       autoReview: {
@@ -1011,6 +1026,7 @@ const vi = {
     },
   },
   insights: {
+    household: 'Hộ gia đình',
     breakdown: 'Phân tích',
     trends: 'Xu hướng',
     tabs: {
@@ -3093,6 +3109,18 @@ const vi = {
     pro_ended_message:
       'Gói Pro của bạn đã hết hạn, nên {{name}} và các sổ bổ sung khác tạm thời bị khóa. Không có gì bị xóa: chúng sẽ mở lại như cũ khi bạn gia hạn.',
     renew_pro: 'Gia hạn Pro',
+  },
+  household: {
+    alone_hint:
+      'Hiện mới chỉ có bạn. Khi người khác tham gia và thêm khoản chi, phần của từng người sẽ hiện ở đây.',
+    spent_together: 'Chi tiêu chung',
+    who_covers: 'Ai chi cho gì',
+    trend: '6 tháng gần nhất',
+    biggest: 'Khoản lớn nhất',
+    person_share: '{{name}}: {{amount}}, {{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: 'Chưa có chi tiêu',
+    empty_body: 'Chi tiêu của từng người sẽ hiện ở đây.',
   },
   shared_ledgers: {
     member_fallback: 'Thành viên',

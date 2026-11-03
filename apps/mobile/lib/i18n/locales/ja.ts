@@ -163,6 +163,21 @@ const ja = {
     reset_action: '削除して切り替え',
   },
   news: {
+    cloud_sync_shared_ledgers: {
+      title: 'Cloud Syncと共有帳簿',
+      cloudSync: {
+        title: 'Cloud Sync登場',
+        body: 'Apple、Google、メールでサインインすると、すべてのスマホで同じデータを使えます。変更は数秒で反映されます。同期はProの機能です。設定 > Cloud Syncから利用できます。',
+      },
+      sharedLedgers: {
+        title: '共有帳簿',
+        body: '最大5人と帳簿を共有して、家計を一緒に管理できます。全員が記録を追加し、自分のスマホで確認できます。参加は無料、共有にはProが必要です。',
+      },
+      household: {
+        title: '世帯のインサイト',
+        body: '共有帳簿を開き、インサイト > 世帯で、毎月一緒に使った金額、一人ひとりの分、誰がどのカテゴリを負担しているかを確認できます。',
+      },
+    },
     auto_review_insights_instalments: {
       title: '自動確認ほか',
       autoReview: {
@@ -1011,6 +1026,7 @@ const ja = {
     },
   },
   insights: {
+    household: '世帯',
     breakdown: '内訳',
     trends: '推移',
     tabs: {
@@ -3094,6 +3110,18 @@ const ja = {
     pro_ended_message:
       'Proの登録が終了したため、{{name}}とその他の追加帳簿は一時的にロックされています。何も削除されていません。更新すれば元のまま開けます。',
     renew_pro: 'Proを更新',
+  },
+  household: {
+    alone_hint:
+      '今はあなただけです。ほかの人が参加して記録を追加すると、ここに一人ひとりの分が表示されます。',
+    spent_together: '一緒に使った金額',
+    who_covers: '誰が何を負担しているか',
+    trend: '過去6か月',
+    biggest: '大きな支出',
+    person_share: '{{name}}: {{amount}}、{{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: 'まだ支出はありません',
+    empty_body: 'メンバーごとの支出がここに表示されます。',
   },
   shared_ledgers: {
     member_fallback: 'メンバー',

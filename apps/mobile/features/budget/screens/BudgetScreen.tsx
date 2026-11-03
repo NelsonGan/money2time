@@ -1,17 +1,8 @@
 import { CalendarDays, ChevronDown, ChevronUp, Pencil, Trash2 } from 'lucide-react-native';
-import React, {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, FlatList, Pressable, ScrollView, View } from 'react-native';
 
 import { MonthYearWheelPicker } from '~/components/datePicker';
-import { yearMonthFromKey, yearMonthToKey } from '~/components/datePicker/monthJump';
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { useContentFrame } from '~/components/layout/ContentFrame';
 import {
@@ -56,7 +47,7 @@ import {
 } from '~/features/budget/lib/format';
 import type { InsightsDrilldownPayload } from '~/features/insights/screens/InsightsDrilldownScreen';
 import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
-import { useMonthPager } from '~/hooks/useMonthPager';
+import { type MonthPagerHandle, useMonthKeyPager } from '~/hooks/useMonthKeyPager';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -342,12 +333,6 @@ function UnbudgetedGroup({
   );
 }
 
-export interface BudgetPagerViewHandle {
-  scrollToRelative: (direction: 1 | -1) => void;
-  /** Open the month wheel, for the host header's month label. */
-  openMonthPicker: () => void;
-}
-
 interface BudgetPagerViewProps {
   onOpenTemplateEditor: (params?: {
     templateId?: string;
@@ -384,7 +369,7 @@ interface PageView {
  * page, and tapping another ring focuses that one. Embedded as an insights
  * page.
  */
-export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerViewProps>(
+export const BudgetPagerView = forwardRef<MonthPagerHandle, BudgetPagerViewProps>(
   function BudgetPagerViewImpl(
     {
       onOpenTemplateEditor,
@@ -427,65 +412,23 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
     // apart so a picked week stays on the inner ring while another is focused.
     const [viewByMonth, setViewByMonth] = useState<Record<string, PageView>>({});
 
-    // Kept as the same array while its months are unchanged, so an edit that
-    // does not move the pager's ends doesn't rebuild every page.
-    const monthsRef = useRef<string[]>([]);
-    const months = useMemo(() => {
-      const next = computeBudgetPagerMonths({ budgets: periodBudgets, transactions, clock });
-      const previous = monthsRef.current;
-      if (next.length === previous.length && next.every((month, i) => month === previous[i])) {
-        return previous;
-      }
-      monthsRef.current = next;
-      return next;
-    }, [clock, periodBudgets, transactions]);
-
-    const currentMonthIndex = useMemo(() => {
-      const index = months.indexOf(budgetPeriodKeyForDate('month', new Date(), clock));
-      return index >= 0 ? index : Math.max(months.length - 2, 0);
-    }, [clock, months]);
-
-    const listRef = useRef<FlatList<number>>(null);
-    const pager = useMonthPager({
-      listRef,
-      pageWidth,
-      totalSlots: months.length,
-      initialIndex: currentMonthIndex,
-    });
-
-    const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
-    useImperativeHandle(
-      ref,
-      () => ({
-        scrollToRelative: pager.scrollToRelative,
-        openMonthPicker: () => setIsMonthPickerOpen(true),
-      }),
-      [pager.scrollToRelative],
+    // The months with a budget or spending (the pager keeps the same array
+    // while they are unchanged, and stays on the viewed month as they change).
+    const pagerMonths = useMemo(
+      () => computeBudgetPagerMonths({ budgets: periodBudgets, transactions, clock }),
+      [clock, periodBudgets, transactions],
     );
+    const currentMonthIndex = useMemo(() => {
+      const index = pagerMonths.indexOf(budgetPeriodKeyForDate('month', new Date(), clock));
+      return index >= 0 ? index : Math.max(pagerMonths.length - 2, 0);
+    }, [clock, pagerMonths]);
 
-    // The pager tracks a bare slot index, but `months` can gain/lose leading
-    // entries while mounted (a backdated expense, an import, a bulk delete).
-    // Re-anchor the index to the month the user was actually viewing so the
-    // page doesn't silently jump.
-    const previousMonthsRef = useRef(months);
-    useEffect(() => {
-      const previousMonths = previousMonthsRef.current;
-      if (previousMonths === months) return;
-      previousMonthsRef.current = months;
-      const previousActiveMonth = previousMonths[pager.activeIndexRef.current];
-      if (!previousActiveMonth) return;
-      // If the viewed month itself disappeared (its anchoring data was
-      // deleted), land on the nearest surviving month instead of letting the
-      // slot index silently point at a different month.
-      let nextIndex = months.indexOf(previousActiveMonth);
-      if (nextIndex < 0) {
-        const nearest = months.findIndex((month) => month >= previousActiveMonth);
-        nextIndex = nearest >= 0 ? nearest : months.length - 1;
-      }
-      if (nextIndex === pager.activeIndexRef.current) return;
-      pager.setActiveIndex(nextIndex);
-      listRef.current?.scrollToOffset({ offset: nextIndex * pageWidth, animated: false });
-    }, [months, pageWidth, pager]);
+    const { months, listRef, pager, activeMonth, monthWheel } = useMonthKeyPager({
+      months: pagerMonths,
+      pageWidth,
+      initialIndex: currentMonthIndex,
+      ref,
+    });
 
     // One O(N) pass bucketing expenses by day, so each budget below collects
     // only its own days instead of rescanning the full transaction list.
@@ -597,9 +540,7 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
       [categoriesById, expensesInRange, onOpenDrilldown],
     );
 
-    const activeMonth = months[pager.activeIndex] ?? months[months.length - 1];
     const monthLabel = monthKeyLabel(activeMonth, settings.locale);
-    const activeYearMonth = yearMonthFromKey(activeMonth);
 
     useEffect(() => {
       onActiveMonthLabelChange?.(monthLabel);
@@ -992,24 +933,9 @@ export const BudgetPagerView = forwardRef<BudgetPagerViewHandle, BudgetPagerView
           className="flex-1"
         />
 
-        <MonthYearWheelPicker
-          visible={isMonthPickerOpen}
-          year={activeYearMonth.year}
-          monthIndex={activeYearMonth.monthIndex}
-          // The pager only holds the months that have a budget or spending, so
-          // the wheel stops at the same ends.
-          min={yearMonthFromKey(months[0])}
-          max={yearMonthFromKey(months[months.length - 1])}
-          locale={settings.locale}
-          onSelect={(year, monthIndex) => {
-            setIsMonthPickerOpen(false);
-            const key = yearMonthToKey({ year, monthIndex });
-            const exact = months.indexOf(key);
-            const next = exact >= 0 ? exact : months.findIndex((month) => month >= key);
-            pager.jumpToIndex(next >= 0 ? next : months.length - 1);
-          }}
-          onClose={() => setIsMonthPickerOpen(false)}
-        />
+        {/* The pager only holds the months that have a budget or spending, so
+            the wheel stops at the same ends. */}
+        <MonthYearWheelPicker {...monthWheel} locale={settings.locale} />
 
         <BudgetTemplatePickerSheet
           visible={picker != null}

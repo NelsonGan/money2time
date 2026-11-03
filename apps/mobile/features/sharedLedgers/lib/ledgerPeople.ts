@@ -17,6 +17,11 @@ import { getActiveLedgerId } from '~/lib/db/ledgerScope';
 import { I18n } from '~/lib/i18n';
 import { getProfileAvatarUri } from '~/services/userAssets';
 
+import { distinctSeedColors, freeSeedColor, seedColor } from './personColors';
+import { shortName } from './personNames';
+
+export { shortName };
+
 export interface LedgerPerson {
   /** What an entry of theirs holds in `member_id`: null for the ledger's owner. */
   memberId: string | null;
@@ -31,6 +36,12 @@ export interface LedgerPerson {
   role: 'owner' | 'member';
   /** This phone's own account. */
   isSelf: boolean;
+  /**
+   * Their colour: the disc behind their initial, and their part of a chart.
+   * The same on every phone, and no one else in the ledger has it (up to six
+   * people; see `buildLedgerPeople`).
+   */
+  color: string;
 }
 
 export interface LedgerPeople {
@@ -39,19 +50,6 @@ export interface LedgerPeople {
   people: LedgerPerson[];
   /** The person behind `member_id` (or `created_by`) on one of the ledger's entries. */
   personFor(memberId: string | null | undefined): LedgerPerson;
-}
-
-/**
- * A person's first name, for the compact line on a transaction row. A first
- * word that is only a symbol (an emoji) keeps the word after it, so "🐼 Panda"
- * stays "🐼 Panda" rather than a lone glyph.
- */
-export function shortName(name: string): string {
-  const words = name.trim().split(/\s+/);
-  const first = words[0] ?? '';
-  if (!first) return name;
-  const symbolOnly = Array.from(first).length <= 2 && !/[\p{L}\p{N}]/u.test(first);
-  return symbolOnly && words[1] ? `${first} ${words[1]}` : first;
 }
 
 /**
@@ -72,6 +70,8 @@ interface ProfileRow {
   role: string;
   name: string | null;
   avatar_uri: string | null;
+  /** When the person's profile was first written: about when they joined. */
+  created_at?: string | null;
 }
 
 interface OwnProfile {
@@ -115,7 +115,7 @@ function readOwnProfile(): OwnProfile {
 function readProfiles(ledgerId: string): ProfileRow[] {
   try {
     return getSQLite().getAllSync<ProfileRow>(
-      `SELECT user_id, role, name, avatar_uri FROM ledger_profiles
+      `SELECT user_id, role, name, avatar_uri, created_at FROM ledger_profiles
        WHERE ledger_id = ? AND deleted_at IS NULL`,
       [ledgerId],
     );
@@ -163,7 +163,7 @@ export function buildLedgerPeople(
   // This phone's own person with no name anywhere: "You", not a stranger.
   const selfFallback = I18n.t('shared_ledgers.you');
   const person = (
-    fields: Omit<LedgerPerson, 'avatarFileUri' | 'name' | 'named'> & {
+    fields: Omit<LedgerPerson, 'avatarFileUri' | 'name' | 'named' | 'color'> & {
       name: string | null | undefined;
     },
     fallback: string,
@@ -176,6 +176,8 @@ export function buildLedgerPeople(
       named: name !== null,
       avatarUri,
       avatarFileUri: resolveAvatar(avatarUri),
+      // Set below for the ledger's people; a stranger keeps their own.
+      color: seedColor(fields.memberId ?? 'owner'),
     };
   };
   const selfIsOwner = shared.role === 'owner';
@@ -243,6 +245,28 @@ export function buildLedgerPeople(
     (a, b) => Number(b.isSelf) - Number(a.isSelf) || a.name.localeCompare(b.name),
   );
   const ownerId = ownerUserId ?? ownerRow?.user_id ?? null;
+  // Colours, in an order every phone agrees on: the owner (seeded by the
+  // share, which every phone knows, even before it knows the owner's account),
+  // then the members in the order they joined (their profile row's
+  // `created_at`, the same on every phone once synced), then by account id.
+  // Someone who joins later comes after everyone already there, so they never
+  // take an existing person's colour. Compared by code unit, not
+  // `localeCompare`, which follows the phone's language.
+  const joinedAt = new Map(profiles.map((row) => [row.user_id, row.created_at ?? null]));
+  const byCodeUnit = (left: string, right: string) => (left < right ? -1 : left > right ? 1 : 0);
+  const byJoin = [...members.values()].sort((a, b) => {
+    // A profile not synced yet (this phone's own, say) counts as the latest.
+    const left = joinedAt.get(a.memberId ?? '') ?? '\uffff';
+    const right = joinedAt.get(b.memberId ?? '') ?? '\uffff';
+    return byCodeUnit(left, right) || byCodeUnit(a.memberId ?? '', b.memberId ?? '');
+  });
+  const colorOrder = [owner, ...byJoin];
+  distinctSeedColors(
+    colorOrder.map((entry) => entry.memberId ?? `owner:${shared.shareId}`),
+  ).forEach((color, index) => {
+    colorOrder[index]!.color = color;
+  });
+  const knownColors = new Set(colorOrder.map((entry) => entry.color));
   // Someone only known from an entry (left before this phone saw them, or on
   // an older app): one object each, so rows showing them do not re-render.
   const unknown = new Map<string, LedgerPerson>();
@@ -257,6 +281,9 @@ export function buildLedgerPeople(
         { memberId, name: null, avatarUri: null, role: 'member', isSelf: false },
         memberFallback,
       );
+      // A colour none of the ledger's people has, the same on every phone
+      // that knows the same people.
+      stranger.color = freeSeedColor(memberId, knownColors);
       unknown.set(memberId, stranger);
       return stranger;
     },

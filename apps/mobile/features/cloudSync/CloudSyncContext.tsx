@@ -35,11 +35,9 @@ import type {
   ImportResult,
 } from '~/services/dataManagementService';
 import { reportError } from '~/services/errorReporting';
-import { FEATURE_FLAGS, useFeatureFlag } from '~/services/featureFlags';
 import { runUserAssetGc } from '~/services/userAssetGc';
 
 import { useSyncScheduler } from './hooks/useSyncScheduler';
-import { cloudSyncAllowed } from './lib/allowList';
 import { PERSONAL_CHANNEL } from './lib/ledgerRows';
 import { decideLink } from './lib/linking';
 import {
@@ -58,11 +56,9 @@ import {
 } from './services/cloudSyncApi';
 import {
   clearSession,
-  getCloudSyncUsedHere,
   getLastLinkedUser,
   loadSession,
   saveSession,
-  setCloudSyncUsedHere,
   setLastLinkedUser,
   type StoredSession,
 } from './services/cloudSyncSession';
@@ -132,8 +128,6 @@ interface CloudSyncContextValue {
   linked: boolean;
   /** The account is Pro, but this phone is past the 5 phones its Pro reaches. */
   phoneLimited: boolean;
-  /** This phone has signed in and the user has not signed out since. */
-  usedHere: boolean;
   signInWithNative: (provider: NativeProvider) => Promise<'ok' | 'cancelled'>;
   sendEmailCode: (email: string, captchaToken?: string) => Promise<void>;
   verifyEmailCode: (email: string, code: string) => Promise<void>;
@@ -175,34 +169,13 @@ interface CloudSyncContextValue {
 
 const CloudSyncContext = createContext<CloudSyncContextValue | null>(null);
 
-/** True while this phone holds a Cloud Sync sign-in. */
-function isSignedIn(status: CloudSyncStatus | undefined): boolean {
-  return (
-    status !== undefined &&
-    status !== 'unavailable' &&
-    status !== 'loading' &&
-    status !== 'signedOut'
-  );
-}
-
-/** The allow list's answer, or undefined while flags have not loaded. */
-export function useCloudSyncAllowed(): boolean | undefined {
-  const flag = useFeatureFlag(FEATURE_FLAGS.cloudSync, { sendEvent: false });
-  return cloudSyncAllowed(flag, __DEV__);
-}
-
 /**
  * Whether to show Cloud Sync and shared ledgers: the build can sync (it has
- * the native Turso module), and this user is on the `cloud_sync` allow list
- * or this phone is already signed in (so it can still sign out, delete the
- * account or answer a link). Only the UI is gated; the engine runs whenever
- * the build can sync. Ledgers themselves are never gated.
+ * the native Turso module). Open to everyone since the public launch; the
+ * engine runs on the same condition. Ledgers themselves are never gated.
  */
 export function useCloudSyncEnabled(): boolean {
-  const allowed = useCloudSyncAllowed();
-  const status = useContext(CloudSyncContext)?.status;
-  const usedHere = useContext(CloudSyncContext)?.usedHere ?? false;
-  return isCloudSyncAvailable() && (allowed === true || usedHere || isSignedIn(status));
+  return isCloudSyncAvailable();
 }
 
 /**
@@ -239,8 +212,7 @@ function errorKind(error: unknown): CloudSyncErrorKind {
 }
 
 export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
-  // The engine runs whenever the build can sync; the allow-list flag only
-  // hides the UI (useCloudSyncEnabled).
+  // The engine runs whenever the build can sync, as the UI shows (useCloudSyncEnabled).
   const enabled = isCloudSyncAvailable();
   const { settings, refreshAll, switchLedger } = useApp();
   const { isPro, isStorePro, isStatusKnown } = usePro();
@@ -259,11 +231,6 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   const [linked, setLinked] = useState(false);
   /** The account is Pro, but this phone is past the 5 phones its Pro reaches. */
   const [phoneLimited, setPhoneLimited] = useState(false);
-  const [usedHere, setUsedHere] = useState(false);
-  const markUsedHere = useCallback((used: boolean) => {
-    setUsedHere(used);
-    void setCloudSyncUsedHere(used);
-  }, []);
 
   const sessionRef = useRef<StoredSession | null>(null);
   const engineRef = useRef<SyncEngine | null>(null);
@@ -770,7 +737,6 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       sessionRef.current = session;
       bindShared(session);
       await saveSession(session);
-      markUsedHere(true);
       setUser(signedIn);
       setLastError(null);
       void trackEvent(AnalyticsEvents.CLOUD_SYNC_SIGNED_IN, { method });
@@ -791,7 +757,7 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       // Shared ledgers this account already belongs to come down too.
       void runSharedSync({ forceList: true });
     },
-    [bindShared, link, markUsedHere, refreshAccountPro, runSharedSync, runSync],
+    [bindShared, link, refreshAccountPro, runSharedSync, runSync],
   );
 
   const signInWithNative = useCallback(
@@ -869,10 +835,9 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       } finally {
         closingRef.current = false;
       }
-      markUsedHere(false);
       if (wasLinked) void trackEvent(AnalyticsEvents.CLOUD_SYNC_SIGNED_OUT);
     },
-    [forgetSession, markUsedHere],
+    [forgetSession],
   );
 
   const deleteAccount = useCallback(async () => {
@@ -896,9 +861,8 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
     } finally {
       closingRef.current = false;
     }
-    markUsedHere(false);
     void trackEvent(AnalyticsEvents.CLOUD_SYNC_ACCOUNT_DELETED);
-  }, [forgetSession, markUsedHere, sessionToken]);
+  }, [forgetSession, sessionToken]);
 
   // Restore the session at launch; stop capturing changes on a build that cannot sync.
   useEffect(() => {
@@ -912,11 +876,8 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
     let cancelled = false;
     void (async () => {
       void finishPendingSignOut();
-      const [session, used] = await Promise.all([loadSession(), getCloudSyncUsedHere()]);
+      const session = await loadSession();
       if (cancelled) return;
-      // A session from before this marker existed counts too.
-      if (session && !used) markUsedHere(true);
-      else setUsedHere(used);
       sessionRef.current = session;
       bindShared(session);
       if (!session) {
@@ -1149,7 +1110,6 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       choice,
       linked,
       phoneLimited,
-      usedHere,
       signInWithNative,
       sendEmailCode,
       verifyEmailCode,
@@ -1175,7 +1135,6 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       choice,
       linked,
       phoneLimited,
-      usedHere,
       signInWithNative,
       sendEmailCode,
       verifyEmailCode,

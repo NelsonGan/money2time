@@ -51,8 +51,33 @@ describe('feature announcement state', () => {
     );
   });
 
-  it('announces auto-review, the Insights redesign and instalments on both platforms', () => {
+  it('announces Cloud Sync, shared ledgers and Household insights on both platforms', () => {
     const latest = getLatestFeatureAnnouncement()!;
+    expect(latest).toMatchObject({
+      id: 'cloud_sync_shared_ledgers_2026_11',
+      announcementNumber: 24,
+      pages: [
+        { key: 'cloudSync', visual: 'cloudSync', cta: 'openCloudSync' },
+        { key: 'sharedLedgers', visual: 'sharedLedgers', cta: 'openLedgers' },
+        // No button: Household only shows in a shared ledger, so Done it is.
+        { key: 'household', visual: 'householdInsights' },
+      ],
+    });
+    expect(latest.pages[2]?.cta).toBeUndefined();
+    expect(latest.requiresCapability).toBeUndefined();
+    expect(announcementPagesForPlatform(latest, 'ios')).toHaveLength(3);
+    expect(announcementPagesForPlatform(latest, 'android')).toHaveLength(3);
+  });
+
+  it('writes the new announcement without dashes, in every language', () => {
+    for (const locale of SUPPORTED_LOCALE_FILES) {
+      const text = JSON.stringify(loadLocale(locale).news.cloud_sync_shared_ledgers);
+      expect([locale, text]).toEqual([locale, expect.not.stringMatching(/[–—]/)]);
+    }
+  });
+
+  it('announces auto-review, the Insights redesign and instalments on both platforms', () => {
+    const latest = getFeatureAnnouncementById('auto_review_insights_instalments_2026_11')!;
     expect(latest).toMatchObject({
       id: 'auto_review_insights_instalments_2026_11',
       announcementNumber: 23,
@@ -67,8 +92,8 @@ describe('feature announcement state', () => {
     expect(announcementPagesForPlatform(latest, 'android')).toHaveLength(3);
   });
 
-  it('takes the free limits in the new announcement from the plan limits', () => {
-    const latest = getLatestFeatureAnnouncement()!;
+  it('takes the free limits in the auto-review announcement from the plan limits', () => {
+    const latest = getFeatureAnnouncementById('auto_review_insights_instalments_2026_11')!;
     const [autoReview, , instalments] = latest.pages;
     const t = jest.spyOn(I18n, 't');
     announcementPageBody(latest, autoReview);
@@ -106,7 +131,7 @@ describe('feature announcement state', () => {
     );
   });
 
-  it('never says AI in the new announcement, in any language', () => {
+  it('never says AI in the auto-review announcement, in any language', () => {
     // UI copy calls the feature Auto-review; AI and its translations stay out.
     const ai = /(^|[^\p{L}])(AI|KI|IA|ИИ|ШІ)([^\p{L}]|$)|人工智/u;
     for (const locale of SUPPORTED_LOCALE_FILES) {
@@ -122,7 +147,7 @@ describe('feature announcement state', () => {
     }
   });
 
-  it('announces ledgers alone, leaving out the allow-listed Cloud Sync', () => {
+  it('kept announcement 22 to ledgers, from when Cloud Sync was allow-listed', () => {
     const announcement = getFeatureAnnouncementById('cloud_sync_ledgers_2026_10')!;
     expect(announcement).toMatchObject({
       announcementNumber: 22,

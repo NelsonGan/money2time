@@ -8,18 +8,6 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 
 import type { LedgerPerson } from '../lib/ledgerPeople';
 
-// Soft, mid-tone discs that keep a white initial readable in both themes.
-const INITIAL_COLORS = ['#4F8A8B', '#B0505F', '#7A6FB0', '#C07A3A', '#5C8A5A', '#4E78A8'];
-
-/** The same colour for the same person on every row and every phone. */
-function colorFor(seed: string): string {
-  let hash = 0;
-  for (let index = 0; index < seed.length; index += 1) {
-    hash = (hash * 31 + seed.charCodeAt(index)) | 0;
-  }
-  return INITIAL_COLORS[Math.abs(hash) % INITIAL_COLORS.length] ?? INITIAL_COLORS[0];
-}
-
 interface PersonAvatarProps {
   person: LedgerPerson;
   size: number;
@@ -66,7 +54,7 @@ export const PersonAvatar = memo(function PersonAvatarImpl({
             width: size,
             height: size,
             borderRadius: size / 2,
-            backgroundColor: colorFor(person.memberId ?? `owner:${person.name}`),
+            backgroundColor: person.color,
           }}
         >
           <Text

@@ -163,6 +163,21 @@ const da = {
     reset_action: 'Slet og skift',
   },
   news: {
+    cloud_sync_shared_ledgers: {
+      title: 'Cloud Sync og delte regnskaber',
+      cloudSync: {
+        title: 'Cloud Sync er her',
+        body: 'Log ind med Apple, Google eller e-mail, så er dine data de samme på alle dine telefoner. Ændringer kommer frem på få sekunder. Synkronisering er en del af Pro. Find det under Indstillinger > Cloud Sync.',
+      },
+      sharedLedgers: {
+        title: 'Delte regnskaber',
+        body: 'Del et regnskab med op til 5 personer og hold husholdningsbudgettet sammen. Alle tilføjer poster og ser dem på deres egen telefon. Det er gratis at deltage; deling kræver Pro.',
+      },
+      household: {
+        title: 'Husstandens indsigt',
+        body: 'Åbn et delt regnskab og gå til Indsigt > Husstand for at se, hvad I har brugt sammen hver måned, hver persons andel, og hvem der dækker hvilke kategorier.',
+      },
+    },
     auto_review_insights_instalments: {
       title: 'Autogennemgang og mere',
       autoReview: {
@@ -1011,6 +1026,7 @@ const da = {
     },
   },
   insights: {
+    household: 'Husstand',
     breakdown: 'Fordeling',
     trends: 'Tendenser',
     tabs: {
@@ -3111,6 +3127,18 @@ const da = {
     pro_ended_message:
       'Dit Pro-abonnement er udløbet, så {{name}} og dine andre ekstra regnskaber er låst indtil videre. Intet er slettet: de åbner igen, som de var, når du fornyer.',
     renew_pro: 'Forny Pro',
+  },
+  household: {
+    alone_hint:
+      'Kun dig indtil videre. Når andre er med og tilføjer poster, vises hver persons andel her.',
+    spent_together: 'Brugt sammen',
+    who_covers: 'Hvem dækker hvad',
+    trend: 'Seneste 6 måneder',
+    biggest: 'Største poster',
+    person_share: '{{name}}: {{amount}}, {{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: 'Intet brugt endnu',
+    empty_body: 'Her vises, hvad hver person bruger.',
   },
   shared_ledgers: {
     member_fallback: 'Medlem',

@@ -19,12 +19,26 @@ const INSIGHT_GROUP_IDS = Object.keys(INSIGHT_GROUP_MEMBERS) as InsightGroupId[]
 /** The insights menu, in order: single pages by type, grouped ones by group. */
 export const INSIGHT_MENU_ENTRIES = [
   'review',
+  // Only while the open ledger is shared: see `visibleInsightMenuEntries`.
+  'household',
   'breakdown',
   'savings_rate',
   'budget',
   'trends',
   'expense_sentiment',
 ] as const;
+
+/**
+ * The menu as shown: Household only while the open ledger is shared, since
+ * it is about the people in it.
+ */
+export function visibleInsightMenuEntries(
+  isSharedLedger: boolean,
+): readonly (typeof INSIGHT_MENU_ENTRIES)[number][] {
+  return isSharedLedger
+    ? INSIGHT_MENU_ENTRIES
+    : INSIGHT_MENU_ENTRIES.filter((entry) => entry !== 'household');
+}
 
 export function isInsightGroupId(value: string): value is InsightGroupId {
   return Object.prototype.hasOwnProperty.call(INSIGHT_GROUP_MEMBERS, value);

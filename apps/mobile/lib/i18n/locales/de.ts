@@ -163,6 +163,21 @@ const de = {
     reset_action: 'Löschen & wechseln',
   },
   news: {
+    cloud_sync_shared_ledgers: {
+      title: 'Cloud Sync und geteilte Bücher',
+      cloudSync: {
+        title: 'Cloud Sync ist da',
+        body: 'Melde dich mit Apple, Google oder E-Mail an, und deine Daten sind auf all deinen Handys gleich. Änderungen kommen in Sekunden an. Synchronisieren ist Teil von Pro. Du findest es unter Einstellungen > Cloud Sync.',
+      },
+      sharedLedgers: {
+        title: 'Geteilte Bücher',
+        body: 'Teile ein Buch mit bis zu 5 Personen und führt das Haushaltsbudget gemeinsam. Alle tragen ein und sehen die Einträge auf dem eigenen Handy. Beitreten ist kostenlos; Teilen braucht Pro.',
+      },
+      household: {
+        title: 'Einblicke für den Haushalt',
+        body: 'Öffne ein geteiltes Buch und dann Einblicke > Haushalt: Dort siehst du, was ihr jeden Monat gemeinsam ausgegeben habt, den Anteil jeder Person und wer welche Kategorien übernimmt.',
+      },
+    },
     auto_review_insights_instalments: {
       title: 'Autoprüfung und mehr',
       autoReview: {
@@ -1020,6 +1035,7 @@ const de = {
     },
   },
   insights: {
+    household: 'Haushalt',
     breakdown: 'Aufschlüsselung',
     trends: 'Trends',
     tabs: {
@@ -3155,6 +3171,18 @@ const de = {
     pro_ended_message:
       'Dein Pro-Abo ist abgelaufen, daher sind {{name}} und deine anderen zusätzlichen Bücher vorerst gesperrt. Es wurde nichts gelöscht: Sie öffnen sich wieder wie vorher, sobald du verlängerst.',
     renew_pro: 'Pro verlängern',
+  },
+  household: {
+    alone_hint:
+      'Bisher nur du. Sobald andere beitreten und Einträge hinzufügen, siehst du hier den Anteil jeder Person.',
+    spent_together: 'Gemeinsam ausgegeben',
+    who_covers: 'Wer zahlt was',
+    trend: 'Letzte 6 Monate',
+    biggest: 'Größte Einträge',
+    person_share: '{{name}}: {{amount}}, {{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: 'Noch nichts ausgegeben',
+    empty_body: 'Hier erscheinen die Ausgaben aller, Person für Person.',
   },
   shared_ledgers: {
     member_fallback: 'Mitglied',

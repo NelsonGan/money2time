@@ -163,6 +163,21 @@ const pl = {
     reset_action: 'Usuń i zmień',
   },
   news: {
+    cloud_sync_shared_ledgers: {
+      title: 'Cloud Sync i wspólne księgi',
+      cloudSync: {
+        title: 'Cloud Sync już jest',
+        body: 'Zaloguj się przez Apple, Google lub e-mail, a Twoje dane będą takie same na wszystkich telefonach. Zmiany docierają w kilka sekund. Synchronizacja jest częścią Pro. Znajdziesz ją w Ustawieniach > Cloud Sync.',
+      },
+      sharedLedgers: {
+        title: 'Wspólne księgi',
+        body: 'Udostępnij księgę maksymalnie 5 osobom i prowadźcie razem domowy budżet. Każdy dodaje wpisy i widzi je na swoim telefonie. Dołączenie jest bezpłatne; udostępnianie wymaga Pro.',
+      },
+      household: {
+        title: 'Analizy gospodarstwa domowego',
+        body: 'Otwórz wspólną księgę, a potem Analizy > Gospodarstwo domowe, aby zobaczyć, ile razem wydaliście w każdym miesiącu, część każdej osoby i kto pokrywa które kategorie.',
+      },
+    },
     auto_review_insights_instalments: {
       title: 'Autosprawdzanie i nie tylko',
       autoReview: {
@@ -1013,6 +1028,7 @@ const pl = {
     },
   },
   insights: {
+    household: 'Gospodarstwo domowe',
     breakdown: 'Podział',
     trends: 'Trendy',
     tabs: {
@@ -3119,6 +3135,18 @@ const pl = {
     pro_ended_message:
       'Twoja subskrypcja Pro wygasła, więc {{name}} i pozostałe dodatkowe księgi są na razie zablokowane. Nic nie zostało usunięte: po odnowieniu otworzą się w niezmienionej postaci.',
     renew_pro: 'Odnów Pro',
+  },
+  household: {
+    alone_hint:
+      'Na razie tylko Ty. Gdy inni dołączą i dodadzą wpisy, zobaczysz tu część każdej osoby.',
+    spent_together: 'Wydane razem',
+    who_covers: 'Kto pokrywa co',
+    trend: 'Ostatnie 6 miesięcy',
+    biggest: 'Największe wpisy',
+    person_share: '{{name}}: {{amount}}, {{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: 'Jeszcze nic nie wydano',
+    empty_body: 'Tutaj widać wydatki każdej osoby.',
   },
   shared_ledgers: {
     member_fallback: 'Członek',
