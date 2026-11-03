@@ -47,7 +47,11 @@ import {
 } from '~/features/budget/lib/format';
 import type { InsightsDrilldownPayload } from '~/features/insights/screens/InsightsDrilldownScreen';
 import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
-import { type MonthPagerHandle, useMonthKeyPager } from '~/hooks/useMonthKeyPager';
+import {
+  type MonthPagerEdges,
+  type MonthPagerHandle,
+  useMonthKeyPager,
+} from '~/hooks/useMonthKeyPager';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -346,6 +350,8 @@ interface BudgetPagerViewProps {
   /** Reports the active month's label so the embedding host (Insights) can
    *  drive the pager from its own header controls. */
   onActiveMonthLabelChange?: (label: string) => void;
+  /** Reports whether the pager is at its first or last month, for the header's arrows. */
+  onEdgesChange?: (edges: MonthPagerEdges) => void;
 }
 
 /** A budget the page can show in its card and category list. */
@@ -377,6 +383,7 @@ export const BudgetPagerView = forwardRef<MonthPagerHandle, BudgetPagerViewProps
       onCreateCustomBudget,
       onOpenDrilldown,
       onActiveMonthLabelChange,
+      onEdgesChange,
     },
     ref,
   ) {
@@ -428,6 +435,7 @@ export const BudgetPagerView = forwardRef<MonthPagerHandle, BudgetPagerViewProps
       pageWidth,
       initialIndex: currentMonthIndex,
       ref,
+      onEdgesChange,
     });
 
     // One O(N) pass bucketing expenses by day, so each budget below collects

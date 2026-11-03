@@ -3,6 +3,7 @@ import {
   buildHouseholdIndex,
   buildHouseholdMonth,
   buildPeopleStyles,
+  HOUSEHOLD_PAGER_MIN_MONTHS,
   householdPagerMonths,
   OWNER_KEY,
   personKey,
@@ -200,19 +201,35 @@ describe('buildHouseholdMonth', () => {
 });
 
 describe('householdPagerMonths', () => {
+  // The year up to this month, oldest first: what the pager holds at least.
+  const lastYear = (current: string) =>
+    Array.from({ length: HOUSEHOLD_PAGER_MIN_MONTHS }, (_, step) =>
+      shiftMonthKey(current, step - (HOUSEHOLD_PAGER_MIN_MONTHS - 1)),
+    );
+
   it('runs from the first month with spending to this one', () => {
-    expect(householdPagerMonths('2026-08', '2026-11')).toEqual([
-      '2026-08',
-      '2026-09',
-      '2026-10',
-      '2026-11',
-    ]);
-    expect(householdPagerMonths('2025-12', '2026-01')).toEqual(['2025-12', '2026-01']);
+    const months = householdPagerMonths('2024-08', '2026-11');
+    expect(months[0]).toBe('2024-08');
+    expect(months.at(-1)).toBe('2026-11');
+    expect(months).toHaveLength(28);
   });
 
-  it('is just this month with no spending, or only future spending', () => {
-    expect(householdPagerMonths(null, '2026-11')).toEqual(['2026-11']);
-    expect(householdPagerMonths('2027-01', '2026-11')).toEqual(['2026-11']);
+  it('always holds the year up to this month, so an empty month can be paged away from', () => {
+    // Spending only this month, or none: still a year to page back through.
+    expect(householdPagerMonths('2026-11', '2026-11')).toEqual(lastYear('2026-11'));
+    expect(householdPagerMonths(null, '2026-11')).toEqual(lastYear('2026-11'));
+    // Spending since August: still the whole year.
+    expect(householdPagerMonths('2026-08', '2026-11')).toEqual(lastYear('2026-11'));
+    expect(lastYear('2026-11')[0]).toBe('2025-12');
+  });
+
+  it('falls back to just this month when it cannot read it', () => {
+    expect(householdPagerMonths('2026-02', '2026-xx')).toEqual(['2026-xx']);
+    expect(householdPagerMonths(null, '2026')).toEqual(['2026']);
+  });
+
+  it('ignores a first month after this one (a future-dated entry)', () => {
+    expect(householdPagerMonths('2027-01', '2026-11')).toEqual(lastYear('2026-11'));
   });
 
   it('steps by month, across a year', () => {

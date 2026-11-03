@@ -1703,12 +1703,16 @@ how the household is spending, and who is covering what.
   being shared while the page is open (or a saved choice or
   `money2time://insights?focus=household` in a ledger that is not shared)
   opens Review instead. Anyone in the ledger sees it; it is not a Pro page.
-- **Pages.** One per financial month, like Budget: from the first month with
-  an expense to the running one (at most 100 years back), paged by swiping or
-  the header's arrows, and the month name opens the month wheel. Both pages
-  share their pager (`useMonthKeyPager`: it keeps the viewed month when months
-  are added at the front, and drives the header's arrows and month wheel). A month with nothing spent shows an
-  empty state.
+- **Pages.** One per financial month, like Budget, up to the running one:
+  always at least the last 12 months (`HOUSEHOLD_PAGER_MIN_MONTHS`), so a
+  ledger with no spending yet, or only this month's, can still be paged back
+  through, and from the first month with an expense when that is earlier (at
+  most 100 years back). Paged by swiping or the header's arrows, which dim at
+  either end; the month name opens the month wheel. Both pages share their
+  pager (`useMonthKeyPager`: it keeps the viewed month when months are added
+  at the front, drives the header's arrows and month wheel, and reports its
+  ends through `onEdgesChange`). A month with nothing spent shows an empty
+  state.
 - **What counts.** The ledger's expenses (counted loan repayments included,
   reimbursable expenses as the reimbursement setting says, as on Review),
   valued in the reporting currency, by whose each entry is (`member_id`, null
