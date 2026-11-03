@@ -1498,7 +1498,8 @@ The app side is `features/sharedLedgers/` (screens) and
   of its own. The main ledger cannot be shared: its id is the same on every
   phone.
 - **Inviting.** The owner's Sharing page shows the ledger's link
-  (`https://workers-cloud-sync.money2time.com/join/<code>`) while the ledger
+  (`https://shared-ledgers.money2time.com/join/<code>`; links made before
+  the move, on `workers-cloud-sync.money2time.com`, still open) while the ledger
   has room, is active and the owner is signed in, with a Copy icon and a
   separate New link icon; the owner pastes it wherever they like (there is no
   share sheet). There is only ever one working link per ledger: asking again
@@ -3680,9 +3681,12 @@ returns 200 for a payload the device then discards.
 
 ### Cloud-sync Worker
 
-`workers/cloud-sync` (`money2time-workers-cloud-sync`, custom domain
-`workers-cloud-sync.money2time.com`) serves [Cloud Sync](#cloud-sync): sign-in
-with Better Auth, one Turso database per user, and the user's images.
+`workers/cloud-sync` (`money2time-workers-cloud-sync`, custom domains
+`workers-cloud-sync.money2time.com` and `shared-ledgers.money2time.com`) serves
+[Cloud Sync](#cloud-sync): sign-in with Better Auth, one Turso database per
+user, and the user's images. Invite links are built on `INVITE_URL` (the
+shared-ledgers host), which answers only `GET /join/<code>`; sign-in and the
+API stay on `BETTER_AUTH_URL`.
 
 | File            | What it holds                                              |
 | --------------- | ---------------------------------------------------------- |
@@ -3923,7 +3927,7 @@ Made for this feature on 2026-10-28, all new (nothing existing is shared):
 
 | Resource                 | Name / id                                                                                                               | Remove with                                                                                 |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| Worker + custom domain   | `money2time-workers-cloud-sync`, `workers-cloud-sync.money2time.com`, daily cron `17 3 * * *`                           | `npx wrangler delete` in `workers/cloud-sync` (removes the domain route and cron too)       |
+| Worker + custom domains  | `money2time-workers-cloud-sync`, `workers-cloud-sync` + `shared-ledgers` .money2time.com, cron `17 3 * * *`             | `npx wrangler delete` in `workers/cloud-sync` (removes the domain route and cron too)       |
 | D1 database              | `money2time-cloud-sync-auth`, `2154e310-6fce-49eb-aa4b-565e343c9eb7`                                                    | `npx wrangler d1 delete money2time-cloud-sync-auth`                                         |
 | R2 bucket (private)      | `money2time-cloud-sync-media`                                                                                           | empty it, then `npx wrangler r2 bucket delete money2time-cloud-sync-media`                  |
 | Rate limit namespaces    | `2402` (`AUTH_LIMITER`), `2403` (`OTP_LIMITER`)                                                                         | go with the Worker                                                                          |

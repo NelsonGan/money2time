@@ -617,7 +617,7 @@ async function inviteLink(env: Env, ledger: SharedLedgerRow, request: Request): 
       .run();
   }
   if ((await memberCount(env, ledger.id)) >= MAX_MEMBERS) return json({ error: 'full' }, 409);
-  const base = env.BETTER_AUTH_URL.replace(/\/+$/, '');
+  const base = (env.INVITE_URL || env.BETTER_AUTH_URL).replace(/\/+$/, '');
   const now = Date.now();
   const current = await env.AUTH_DB.prepare(
     'SELECT code, expires_at FROM ledger_links WHERE ledger_id = ?1',
