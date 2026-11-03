@@ -138,6 +138,21 @@ const en = {
     },
   },
   news: {
+    cloud_sync_shared_ledgers: {
+      title: 'Cloud Sync and shared ledgers',
+      cloudSync: {
+        title: 'Cloud Sync is here',
+        body: 'Sign in with Apple, Google or email, and your data stays the same on all your phones. Changes arrive in seconds. Syncing is part of Pro. Find it in Settings > Cloud Sync.',
+      },
+      sharedLedgers: {
+        title: 'Shared ledgers',
+        body: 'Share a ledger with up to 5 people and keep the household budget together. Everyone adds entries and sees them on their own phone. Joining is free; sharing needs Pro.',
+      },
+      household: {
+        title: 'Household insights',
+        body: "Open a shared ledger, then Insights > Household to see what you spent together each month, each person's part and who covers which categories.",
+      },
+    },
     auto_review_insights_instalments: {
       title: 'Auto-review and more',
       autoReview: {
@@ -987,6 +1002,7 @@ const en = {
     },
   },
   insights: {
+    household: 'Household',
     breakdown: 'Breakdown',
     trends: 'Trends',
     tabs: {
@@ -3108,6 +3124,17 @@ const en = {
     pro_ended_message:
       'Your Pro subscription has ended, so {{name}} and your other extra ledgers are locked for now. Nothing was deleted: they open again as they were when you renew.',
     renew_pro: 'Renew Pro',
+  },
+  household: {
+    alone_hint: "Only you so far. Once others join and add entries, each person's part shows here.",
+    spent_together: 'Spent together',
+    who_covers: 'Who covers what',
+    trend: 'Last 6 months',
+    biggest: 'Biggest entries',
+    person_share: '{{name}}: {{amount}}, {{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: 'Nothing spent yet',
+    empty_body: "Everyone's spending shows up here, person by person.",
   },
   shared_ledgers: {
     member_fallback: 'Member',

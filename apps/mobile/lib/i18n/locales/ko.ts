@@ -162,6 +162,21 @@ const ko = {
     reset_action: '삭제 후 전환',
   },
   news: {
+    cloud_sync_shared_ledgers: {
+      title: 'Cloud Sync와 공유 가계부',
+      cloudSync: {
+        title: 'Cloud Sync 출시',
+        body: 'Apple, Google 또는 이메일로 로그인하면 모든 휴대폰에서 같은 데이터를 쓸 수 있습니다. 변경 사항은 몇 초 만에 반영됩니다. 동기화는 Pro 기능입니다. 설정 > Cloud Sync에서 확인하세요.',
+      },
+      sharedLedgers: {
+        title: '공유 가계부',
+        body: '최대 5명과 가계부를 공유해 집안 예산을 함께 관리하세요. 모두가 항목을 추가하고 각자의 휴대폰에서 확인합니다. 참여는 무료이며 공유하려면 Pro가 필요합니다.',
+      },
+      household: {
+        title: '가계 인사이트',
+        body: '공유 가계부를 연 다음 인사이트 > 가계에서 매달 함께 쓴 금액, 사람별 몫, 누가 어떤 카테고리를 부담하는지 확인하세요.',
+      },
+    },
     auto_review_insights_instalments: {
       title: '자동 검토 외 새 기능',
       autoReview: {
@@ -1007,6 +1022,7 @@ const ko = {
     },
   },
   insights: {
+    household: '가계',
     breakdown: '분석',
     trends: '추이',
     tabs: {
@@ -3075,6 +3091,18 @@ const ko = {
     pro_ended_message:
       'Pro 구독이 종료되어 {{name}}과(와) 다른 추가 가계부가 잠시 잠겼습니다. 삭제된 것은 없습니다. 갱신하면 그대로 다시 열립니다.',
     renew_pro: 'Pro 갱신',
+  },
+  household: {
+    alone_hint:
+      '아직은 나 혼자예요. 다른 사람이 참여해 내역을 추가하면 여기에서 사람별 몫을 볼 수 있어요.',
+    spent_together: '함께 쓴 금액',
+    who_covers: '누가 무엇을 부담하나요',
+    trend: '최근 6개월',
+    biggest: '큰 지출',
+    person_share: '{{name}}: {{amount}}, {{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: '아직 지출이 없어요',
+    empty_body: '구성원별 지출이 여기에 표시돼요.',
   },
   shared_ledgers: {
     member_fallback: '멤버',

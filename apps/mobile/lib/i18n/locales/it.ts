@@ -163,6 +163,21 @@ const it = {
     reset_action: 'Elimina e cambia',
   },
   news: {
+    cloud_sync_shared_ledgers: {
+      title: 'Cloud Sync e registri condivisi',
+      cloudSync: {
+        title: 'Arriva Cloud Sync',
+        body: 'Accedi con Apple, Google o email e i tuoi dati sono uguali su tutti i tuoi telefoni. Le modifiche arrivano in pochi secondi. La sincronizzazione fa parte di Pro. La trovi in Impostazioni > Cloud Sync.',
+      },
+      sharedLedgers: {
+        title: 'Registri condivisi',
+        body: 'Condividi un registro con fino a 5 persone e gestite insieme il budget di casa. Tutti aggiungono voci e le vedono sul proprio telefono. Unirsi è gratis; condividere richiede Pro.',
+      },
+      household: {
+        title: 'Analisi della famiglia',
+        body: 'Apri un registro condiviso, poi Analisi > Famiglia per vedere quanto avete speso insieme ogni mese, la parte di ognuno e chi copre quali categorie.',
+      },
+    },
     auto_review_insights_instalments: {
       title: 'Revisione automatica e altro',
       autoReview: {
@@ -1016,6 +1031,7 @@ const it = {
     },
   },
   insights: {
+    household: 'Famiglia',
     breakdown: 'Ripartizione',
     trends: 'Andamenti',
     tabs: {
@@ -3133,6 +3149,18 @@ const it = {
     pro_ended_message:
       "Il tuo abbonamento Pro è terminato, quindi {{name}} e gli altri registri aggiuntivi sono bloccati per ora. Non è stato eliminato nulla: si riapriranno com'erano quando rinnovi.",
     renew_pro: 'Rinnova Pro',
+  },
+  household: {
+    alone_hint:
+      'Per ora solo tu. Quando altri si uniranno e aggiungeranno voci, qui vedrai la parte di ognuno.',
+    spent_together: 'Speso insieme',
+    who_covers: 'Chi copre cosa',
+    trend: 'Ultimi 6 mesi',
+    biggest: 'Voci più grandi',
+    person_share: '{{name}}: {{amount}}, {{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: 'Ancora nessuna spesa',
+    empty_body: 'Qui compaiono le spese di ognuno, persona per persona.',
   },
   shared_ledgers: {
     member_fallback: 'Membro',

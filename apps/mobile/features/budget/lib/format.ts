@@ -36,13 +36,18 @@ export function monthKeyLabel(monthKey: string, locale?: string): string {
 
 const monthNameFormatterCache = new Map<string, Intl.DateTimeFormat>();
 
-/** 'YYYY-MM' → the month's name alone, e.g. "October". */
-export function monthNameLabel(monthKey: string, locale?: string): string {
+/** 'YYYY-MM' → the month's name alone, e.g. "October" (or "Oct" when `short`). */
+export function monthNameLabel(
+  monthKey: string,
+  locale?: string,
+  width: 'long' | 'short' = 'long',
+): string {
   const resolved = locale ?? I18n.locale ?? 'en';
-  let formatter = monthNameFormatterCache.get(resolved);
+  const cacheKey = `${resolved}|${width}`;
+  let formatter = monthNameFormatterCache.get(cacheKey);
   if (!formatter) {
-    formatter = new Intl.DateTimeFormat(resolved, { month: 'long' });
-    monthNameFormatterCache.set(resolved, formatter);
+    formatter = new Intl.DateTimeFormat(resolved, { month: width });
+    monthNameFormatterCache.set(cacheKey, formatter);
   }
   return formatter.format(parseMonthKey(monthKey) ?? new Date());
 }

@@ -163,6 +163,21 @@ const pt = {
     reset_action: 'Excluir e trocar',
   },
   news: {
+    cloud_sync_shared_ledgers: {
+      title: 'Cloud Sync e livros compartilhados',
+      cloudSync: {
+        title: 'Chegou o Cloud Sync',
+        body: 'Entre com Apple, Google ou e-mail e seus dados ficam iguais em todos os seus celulares. As mudanças chegam em segundos. A sincronização faz parte do Pro. Fica em Ajustes > Cloud Sync.',
+      },
+      sharedLedgers: {
+        title: 'Livros compartilhados',
+        body: 'Compartilhe um livro com até 5 pessoas e cuidem juntos do orçamento da casa. Todos adicionam lançamentos e veem no próprio celular. Entrar é grátis; compartilhar exige Pro.',
+      },
+      household: {
+        title: 'Análises da casa',
+        body: 'Abra um livro compartilhado e depois Análises > Casa para ver o que vocês gastaram juntos a cada mês, a parte de cada pessoa e quem cobre cada categoria.',
+      },
+    },
     auto_review_insights_instalments: {
       title: 'Revisão automática e mais',
       autoReview: {
@@ -1014,6 +1029,7 @@ const pt = {
     },
   },
   insights: {
+    household: 'Casa',
     breakdown: 'Detalhamento',
     trends: 'Tendências',
     tabs: {
@@ -3131,6 +3147,18 @@ const pt = {
     pro_ended_message:
       'Sua assinatura Pro terminou, então {{name}} e seus outros livros extras estão bloqueados por enquanto. Nada foi excluído: eles voltam a abrir como estavam quando você renovar.',
     renew_pro: 'Renovar Pro',
+  },
+  household: {
+    alone_hint:
+      'Por enquanto, só você. Quando outros entrarem e adicionarem lançamentos, a parte de cada pessoa aparece aqui.',
+    spent_together: 'Gasto em conjunto',
+    who_covers: 'Quem paga o quê',
+    trend: 'Últimos 6 meses',
+    biggest: 'Maiores lançamentos',
+    person_share: '{{name}}: {{amount}}, {{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: 'Nada gasto ainda',
+    empty_body: 'Aqui aparecem os gastos de cada pessoa.',
   },
   shared_ledgers: {
     member_fallback: 'Membro',

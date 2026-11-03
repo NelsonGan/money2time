@@ -163,6 +163,21 @@ const id = {
     reset_action: 'Hapus & ganti',
   },
   news: {
+    cloud_sync_shared_ledgers: {
+      title: 'Cloud Sync dan buku bersama',
+      cloudSync: {
+        title: 'Cloud Sync sudah hadir',
+        body: 'Masuk dengan Apple, Google, atau email, dan data Anda sama di semua ponsel Anda. Perubahan tiba dalam hitungan detik. Sinkronisasi termasuk dalam Pro. Temukan di Pengaturan > Cloud Sync.',
+      },
+      sharedLedgers: {
+        title: 'Buku bersama',
+        body: 'Bagikan buku dengan hingga 5 orang dan kelola anggaran rumah tangga bersama. Semua orang menambah catatan dan melihatnya di ponsel masing-masing. Bergabung gratis; berbagi perlu Pro.',
+      },
+      household: {
+        title: 'Wawasan rumah tangga',
+        body: 'Buka buku bersama, lalu Wawasan > Rumah tangga untuk melihat pengeluaran bersama tiap bulan, bagian tiap orang, dan siapa menanggung kategori apa.',
+      },
+    },
     auto_review_insights_instalments: {
       title: 'Tinjauan otomatis dan lainnya',
       autoReview: {
@@ -1014,6 +1029,7 @@ const id = {
     },
   },
   insights: {
+    household: 'Rumah tangga',
     breakdown: 'Rincian',
     trends: 'Tren',
     tabs: {
@@ -3128,6 +3144,18 @@ const id = {
     pro_ended_message:
       'Langganan Pro Anda telah berakhir, jadi {{name}} dan buku tambahan Anda lainnya dikunci untuk sementara. Tidak ada yang dihapus: semuanya terbuka lagi seperti semula saat Anda memperpanjang.',
     renew_pro: 'Perpanjang Pro',
+  },
+  household: {
+    alone_hint:
+      'Baru kamu sejauh ini. Setelah orang lain bergabung dan menambah catatan, bagian tiap orang muncul di sini.',
+    spent_together: 'Dibelanjakan bersama',
+    who_covers: 'Siapa menanggung apa',
+    trend: '6 bulan terakhir',
+    biggest: 'Catatan terbesar',
+    person_share: '{{name}}: {{amount}}, {{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: 'Belum ada pengeluaran',
+    empty_body: 'Pengeluaran setiap orang muncul di sini.',
   },
   shared_ledgers: {
     member_fallback: 'Anggota',

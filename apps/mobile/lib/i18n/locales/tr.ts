@@ -163,6 +163,21 @@ const tr = {
     reset_action: 'Sil ve değiştir',
   },
   news: {
+    cloud_sync_shared_ledgers: {
+      title: 'Cloud Sync ve paylaşılan defterler',
+      cloudSync: {
+        title: 'Cloud Sync geldi',
+        body: 'Apple, Google veya e-postayla giriş yap; verilerin tüm telefonlarında aynı olsun. Değişiklikler saniyeler içinde ulaşır. Eşitleme Pro’nun bir parçası. Ayarlar > Cloud Sync’te bulabilirsin.',
+      },
+      sharedLedgers: {
+        title: 'Paylaşılan defterler',
+        body: 'Bir defteri en fazla 5 kişiyle paylaş ve ev bütçesini birlikte tutun. Herkes kayıt ekler ve kendi telefonunda görür. Katılmak ücretsiz; paylaşmak için Pro gerekir.',
+      },
+      household: {
+        title: 'Hane analizleri',
+        body: 'Paylaşılan bir defteri aç, sonra Analizler > Hane bölümünde her ay birlikte ne harcadığınızı, herkesin payını ve hangi kategoriyi kimin karşıladığını gör.',
+      },
+    },
     auto_review_insights_instalments: {
       title: 'Otomatik inceleme ve daha fazlası',
       autoReview: {
@@ -1011,6 +1026,7 @@ const tr = {
     },
   },
   insights: {
+    household: 'Hane',
     breakdown: 'Dağılım',
     trends: 'Trendler',
     tabs: {
@@ -3123,6 +3139,18 @@ const tr = {
     pro_ended_message:
       'Pro aboneliğin sona erdi, bu yüzden {{name}} ve diğer ek defterlerin şimdilik kilitli. Hiçbir şey silinmedi: yenilediğinde eskisi gibi yeniden açılırlar.',
     renew_pro: "Pro'yu yenile",
+  },
+  household: {
+    alone_hint:
+      'Şimdilik yalnızca sen varsın. Başkaları katılıp kayıt ekledikçe herkesin payı burada görünür.',
+    spent_together: 'Birlikte harcanan',
+    who_covers: 'Kim neyi karşılıyor',
+    trend: 'Son 6 ay',
+    biggest: 'En büyük kayıtlar',
+    person_share: '{{name}}: {{amount}}, {{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: 'Henüz harcama yok',
+    empty_body: 'Herkesin harcaması burada kişi kişi görünür.',
   },
   shared_ledgers: {
     member_fallback: 'Üye',
