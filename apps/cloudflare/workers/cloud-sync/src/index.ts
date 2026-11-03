@@ -86,16 +86,28 @@ const AUTH_ROUTES: Readonly<Record<string, 'GET' | 'POST'>> = {
 };
 const RATE_LIMIT_ROW_TTL_MS = 24 * 60 * 60 * 1000;
 
+/** Whether the request came in on INVITE_URL's host, when that is not the API's host too. */
+function isInviteOnlyHost(env: Env, url: URL): boolean {
+  if (!env.INVITE_URL) return false;
+  const inviteHost = new URL(env.INVITE_URL).host;
+  return url.host === inviteHost && inviteHost !== new URL(env.BETTER_AUTH_URL).host;
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     try {
+      const join = /^\/join\/([^/]+)$/.exec(url.pathname);
+      // The invite host only opens invite links: sign-in and the API answer
+      // on BETTER_AUTH_URL alone.
+      if (isInviteOnlyHost(env, url) && !(join && request.method === 'GET')) {
+        return json({ error: 'not_found' }, 404);
+      }
       if (url.pathname.startsWith('/api/auth/')) {
         if (AUTH_ROUTES[url.pathname] !== request.method) return json({ error: 'not_found' }, 404);
         const refused = await authGate(request, url, env);
         return refused ?? (await getAuth(env).handler(request));
       }
-      const join = /^\/join\/([^/]+)$/.exec(url.pathname);
       if (join && request.method === 'GET') return invitePage(join[1]);
       if (!url.pathname.startsWith('/v1/')) return json({ error: 'not_found' }, 404);
 

@@ -3685,7 +3685,8 @@ returns 200 for a payload the device then discards.
 `workers-cloud-sync.money2time.com` and `shared-ledgers.money2time.com`) serves
 [Cloud Sync](#cloud-sync): sign-in with Better Auth, one Turso database per
 user, and the user's images. Invite links are built on `INVITE_URL` (the
-shared-ledgers host); sign-in and the API stay on `BETTER_AUTH_URL`.
+shared-ledgers host), which answers only `GET /join/<code>`; sign-in and the
+API stay on `BETTER_AUTH_URL`.
 
 | File            | What it holds                                              |
 | --------------- | ---------------------------------------------------------- |
