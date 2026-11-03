@@ -3122,6 +3122,8 @@ const pl = {
     renew_pro: 'Odnów Pro',
   },
   household: {
+    alone_hint:
+      'Na razie tylko Ty. Gdy inni dołączą i dodadzą wpisy, zobaczysz tu część każdej osoby.',
     spent_together: 'Wydane razem',
     even_split: 'Równy podział',
     each: 'Po {{amount}} na osobę',

@@ -3111,6 +3111,7 @@ const en = {
     renew_pro: 'Renew Pro',
   },
   household: {
+    alone_hint: "Only you so far. Once others join and add entries, each person's part shows here.",
     spent_together: 'Spent together',
     even_split: 'Even split',
     each: '{{amount}} each',

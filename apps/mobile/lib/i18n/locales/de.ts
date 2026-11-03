@@ -3158,6 +3158,8 @@ const de = {
     renew_pro: 'Pro verlängern',
   },
   household: {
+    alone_hint:
+      'Bisher nur du. Sobald andere beitreten und Einträge hinzufügen, siehst du hier den Anteil jeder Person.',
     spent_together: 'Gemeinsam ausgegeben',
     even_split: 'Gleiche Aufteilung',
     each: 'je {{amount}}',

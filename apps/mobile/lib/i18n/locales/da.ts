@@ -3114,6 +3114,8 @@ const da = {
     renew_pro: 'Forny Pro',
   },
   household: {
+    alone_hint:
+      'Kun dig indtil videre. Når andre er med og tilføjer poster, vises hver persons andel her.',
     spent_together: 'Brugt sammen',
     even_split: 'Lige deling',
     each: '{{amount}} hver',

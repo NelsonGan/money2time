@@ -3096,6 +3096,8 @@ const vi = {
     renew_pro: 'Gia hạn Pro',
   },
   household: {
+    alone_hint:
+      'Hiện mới chỉ có bạn. Khi người khác tham gia và thêm khoản chi, phần của từng người sẽ hiện ở đây.',
     spent_together: 'Chi tiêu chung',
     even_split: 'Chia đều',
     each: 'Mỗi người {{amount}}',

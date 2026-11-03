@@ -15,6 +15,7 @@ import {
   PERSON_COLORS,
   seedColor,
 } from '~/features/sharedLedgers/lib/personColors';
+import { distinctShortNames } from '~/features/sharedLedgers/lib/personNames';
 import type { TransactionType } from '~/types';
 
 // The numbers behind the Household insights page (README: Shared ledgers >
@@ -338,6 +339,7 @@ describe('buildPeopleStyles', () => {
     expect(peopleOrder).toEqual([OWNER_KEY, 'user-d']);
     expect([...styleByKey.keys()]).toEqual([OWNER_KEY, 'user-d', 'user-gone']);
     expect(styleByKey.get(OWNER_KEY)?.person.name).toBe('Aisha');
+    expect(styleByKey.get(OWNER_KEY)?.label).toBe('Aisha');
     expect(personKey(styleByKey.get('user-gone')!.person)).toBe('user-gone');
     // The ledger's people keep the colour their rows show; the stranger takes
     // the first one nobody has.
@@ -348,5 +350,20 @@ describe('buildPeopleStyles', () => {
 
   it('is empty outside a shared ledger', () => {
     expect(buildPeopleStyles(null, []).styleByKey.size).toBe(0);
+  });
+});
+
+describe('distinctShortNames', () => {
+  it('uses first names, and more only where two people share one', () => {
+    expect(
+      distinctShortNames(['Siti Nurhaliza binti Abdullah', 'Kumaresan Rajendran', 'Mei']),
+    ).toEqual(['Siti', 'Kumaresan', 'Mei']);
+    expect(distinctShortNames(['Alex Tan', 'Alex Lim', 'Mei'])).toEqual([
+      'Alex Tan',
+      'Alex Lim',
+      'Mei',
+    ]);
+    // Two people with the same full name (two unnamed members, say).
+    expect(distinctShortNames(['Member', 'Member', 'You'])).toEqual(['Member', 'Member 2', 'You']);
   });
 });

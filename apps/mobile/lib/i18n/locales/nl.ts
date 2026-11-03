@@ -3150,6 +3150,8 @@ const nl = {
     renew_pro: 'Pro verlengen',
   },
   household: {
+    alone_hint:
+      'Voorlopig alleen jij. Zodra anderen meedoen en boekingen toevoegen, zie je hier ieders deel.',
     spent_together: 'Samen uitgegeven',
     even_split: 'Gelijk verdeeld',
     each: '{{amount}} per persoon',

@@ -18,6 +18,9 @@ import { I18n } from '~/lib/i18n';
 import { getProfileAvatarUri } from '~/services/userAssets';
 
 import { distinctSeedColors, seedColor } from './personColors';
+import { shortName } from './personNames';
+
+export { shortName };
 
 export interface LedgerPerson {
   /** What an entry of theirs holds in `member_id`: null for the ledger's owner. */
@@ -47,19 +50,6 @@ export interface LedgerPeople {
   people: LedgerPerson[];
   /** The person behind `member_id` (or `created_by`) on one of the ledger's entries. */
   personFor(memberId: string | null | undefined): LedgerPerson;
-}
-
-/**
- * A person's first name, for the compact line on a transaction row. A first
- * word that is only a symbol (an emoji) keeps the word after it, so "🐼 Panda"
- * stays "🐼 Panda" rather than a lone glyph.
- */
-export function shortName(name: string): string {
-  const words = name.trim().split(/\s+/);
-  const first = words[0] ?? '';
-  if (!first) return name;
-  const symbolOnly = Array.from(first).length <= 2 && !/[\p{L}\p{N}]/u.test(first);
-  return symbolOnly && words[1] ? `${first} ${words[1]}` : first;
 }
 
 /**

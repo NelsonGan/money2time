@@ -3131,6 +3131,8 @@ const id = {
     renew_pro: 'Perpanjang Pro',
   },
   household: {
+    alone_hint:
+      'Baru kamu sejauh ini. Setelah orang lain bergabung dan menambah catatan, bagian tiap orang muncul di sini.',
     spent_together: 'Dibelanjakan bersama',
     even_split: 'Bagi rata',
     each: '{{amount}} per orang',

@@ -219,6 +219,20 @@ export const HouseholdPagerView = forwardRef<HouseholdPagerViewHandle, Household
       };
     }, [categories, index, monthCycle, peopleOrder, personKeyOf]);
 
+    // A tap on another month's bar in the trend opens that month's page.
+    const { jumpToIndex } = pager;
+    const selectMonth = useCallback(
+      (monthKey: string) => {
+        const target = months.indexOf(monthKey);
+        if (target < 0) return null;
+        return () => {
+          void triggerHaptic('selection');
+          jumpToIndex(target);
+        };
+      },
+      [jumpToIndex, months],
+    );
+
     const renderMonthPage = useCallback(
       ({ item: slot }: { item: number }) => {
         const monthKey = months[slot];
@@ -270,7 +284,12 @@ export const HouseholdPagerView = forwardRef<HouseholdPagerViewHandle, Household
                     settings={settings}
                     onOpenCategory={(category, name) => openIds(name, category.transactionIds)}
                   />
-                  <TrendCard month={month} styleByKey={styleByKey} settings={settings} />
+                  <TrendCard
+                    month={month}
+                    styleByKey={styleByKey}
+                    settings={settings}
+                    onSelectMonth={selectMonth}
+                  />
                   <BiggestCard
                     month={month}
                     transactionsById={transactionsById}
@@ -293,6 +312,7 @@ export const HouseholdPagerView = forwardRef<HouseholdPagerViewHandle, Household
         onOpenDrilldown,
         onOpenTransaction,
         pageWidth,
+        selectMonth,
         settings,
         styleByKey,
         transactionsById,
@@ -406,6 +426,9 @@ function TogetherCard({
   onOpenPerson: (style: PersonStyle) => void;
 }) {
   const themeColors = useThemeColors();
+  // Biggest part first; the page's order breaks ties, so nobody jumps about.
+  const rows = [...month.people].sort((a, b) => b.amount - a.amount);
+  const alone = month.people.length < 2;
   return (
     // The month is in the header above, so the card does not repeat it.
     <InsightCard title={I18n.t('household.spent_together')}>
@@ -414,47 +437,105 @@ function TogetherCard({
         {month.changeRatio !== null ? <SpendDeltaPill changeRatio={month.changeRatio} /> : null}
       </View>
 
-      <View className="mt-3">
-        <ShareBar parts={month.people} styleByKey={styleByKey} height={12} />
-      </View>
+      {alone ? (
+        // Nobody has joined yet: one person's "100%" says nothing.
+        <Text variant="caption" tone="muted" className="mt-2">
+          {I18n.t('household.alone_hint')}
+        </Text>
+      ) : (
+        <>
+          <View className="mt-3">
+            <ShareBar parts={month.people} styleByKey={styleByKey} height={12} />
+          </View>
 
-      <View className="mt-3.5 gap-1">
-        {month.people.map((part) => {
-          const style = styleFor(styleByKey, part.personKey);
-          if (!style) return null;
-          const share = month.total > 0 ? part.amount / month.total : 0;
-          const hasEntries = (month.transactionIdsByPerson.get(part.personKey)?.length ?? 0) > 0;
-          return (
-            <Pressable
-              key={part.personKey}
-              onPress={hasEntries ? () => onOpenPerson(style) : undefined}
-              disabled={!hasEntries}
-              accessibilityRole={hasEntries ? 'button' : undefined}
-              accessibilityLabel={I18n.t('household.person_share', {
-                name: style.person.name,
-                amount: money(part.amount, settings),
-                percent: percentLabel(share),
-              })}
-              className="flex-row items-center gap-3 rounded-2xl py-1.5 active:opacity-70"
-            >
-              <PersonAvatar person={style.person} size={30} color={style.color} />
-              {/* A photo hides the person's colour, so the bar's key moves beside it. */}
-              {style.person.avatarFileUri ? (
-                <View className="h-2 w-2 rounded-full" style={{ backgroundColor: style.color }} />
-              ) : null}
-              <Text variant="body" numberOfLines={1} className="min-w-0 flex-1">
-                {style.person.name}
-              </Text>
-              <Text variant="bodyStrong">{money(part.amount, settings)}</Text>
-              <Text variant="caption" tone="muted" className="w-10 text-right">
-                {percentLabel(share)}
-              </Text>
-              <ChevronRight size={14} color={hasEntries ? themeColors.textMuted : 'transparent'} />
-            </Pressable>
-          );
-        })}
-      </View>
+          <View className="mt-3 gap-0.5">
+            {rows.map((part) => {
+              const style = styleFor(styleByKey, part.personKey);
+              if (!style) return null;
+              const share = month.total > 0 ? part.amount / month.total : 0;
+              const hasEntries =
+                (month.transactionIdsByPerson.get(part.personKey)?.length ?? 0) > 0;
+              return (
+                <Pressable
+                  key={part.personKey}
+                  onPress={hasEntries ? () => onOpenPerson(style) : undefined}
+                  disabled={!hasEntries}
+                  accessibilityRole={hasEntries ? 'button' : undefined}
+                  accessibilityLabel={I18n.t('household.person_share', {
+                    name: style.person.name,
+                    amount: money(part.amount, settings),
+                    percent: percentLabel(share),
+                  })}
+                  className="flex-row items-center gap-3 rounded-2xl py-1.5 active:opacity-70"
+                  // Someone who spent nothing stays listed, quietly.
+                  style={hasEntries ? undefined : styles.quiet}
+                >
+                  <PersonAvatar person={style.person} size={30} color={style.color} />
+                  {/* A photo hides the person's colour, so the bar's key moves beside it. */}
+                  {style.person.avatarFileUri ? (
+                    <View
+                      className="h-2 w-2 rounded-full"
+                      style={{ backgroundColor: style.color }}
+                    />
+                  ) : null}
+                  <Text variant="body" numberOfLines={1} className="min-w-0 flex-1">
+                    {style.person.name}
+                  </Text>
+                  <Text variant="bodyStrong">{money(part.amount, settings)}</Text>
+                  <Text
+                    variant="caption"
+                    tone="muted"
+                    numberOfLines={1}
+                    className="min-w-[42px] text-right"
+                  >
+                    {percentLabel(share)}
+                  </Text>
+                  <ChevronRight
+                    size={14}
+                    color={hasEntries ? themeColors.textMuted : 'transparent'}
+                  />
+                </Pressable>
+              );
+            })}
+          </View>
+        </>
+      )}
     </InsightCard>
+  );
+}
+
+/**
+ * How far someone is from their even share: a bar growing right (over) or
+ * left (under) from a centre line, scaled to the furthest person.
+ */
+function BalanceBar({
+  difference,
+  furthest,
+  overColor,
+  underColor,
+  lineColor,
+}: {
+  difference: number;
+  furthest: number;
+  overColor: string;
+  underColor: string;
+  lineColor: string;
+}) {
+  const ratio = furthest > 0 ? Math.min(Math.abs(difference) / furthest, 1) : 0;
+  const width = `${Math.max(ratio * 50, Math.abs(difference) >= 0.005 ? 3 : 0)}%` as const;
+  const over = difference > 0;
+  return (
+    <View style={styles.balanceBar} {...REPLAY_PRIVATE}>
+      <View style={[styles.balanceTrack, { backgroundColor: withColorAlpha(lineColor, 0.35) }]} />
+      <View
+        style={[
+          styles.balanceFill,
+          over ? { left: '50%' } : { right: '50%' },
+          { width, backgroundColor: over ? overColor : underColor },
+        ]}
+      />
+      <View style={[styles.balanceCentre, { backgroundColor: lineColor }]} />
+    </View>
   );
 }
 
@@ -468,19 +549,19 @@ function FairShareCard({
   settings: UserSettings;
 }) {
   const themeColors = useThemeColors();
+  // Most over their share first, most under last.
+  const balances = [...fairShare.balances].sort((a, b) => b.difference - a.difference);
+  const furthest = balances.reduce((max, entry) => Math.max(max, Math.abs(entry.difference)), 0);
   return (
     <InsightCard
       title={I18n.t('household.even_split')}
       meta={I18n.t('household.each', { amount: money(fairShare.each, settings) })}
     >
-      <View className="gap-2.5">
-        {fairShare.balances.map((balance) => {
+      <View className="gap-3">
+        {balances.map((balance) => {
           const style = styleFor(styleByKey, balance.personKey);
           if (!style) return null;
           const cents = Math.round(balance.difference * 100);
-          const ahead = cents > 0;
-          const tint =
-            cents === 0 ? themeColors.textMuted : ahead ? themeColors.success : themeColors.accent;
           const amount = money(Math.abs(balance.difference), settings);
           return (
             <View
@@ -490,29 +571,38 @@ function FairShareCard({
               accessibilityLabel={
                 cents === 0
                   ? `${style.person.name}, ${I18n.t('household.all_square')}`
-                  : I18n.t(ahead ? 'household.paid_more' : 'household.paid_less', {
+                  : I18n.t(cents > 0 ? 'household.paid_more' : 'household.paid_less', {
                       name: style.person.name,
                       amount,
                     })
               }
             >
-              <PersonAvatar person={style.person} size={30} color={style.color} />
+              <PersonAvatar person={style.person} size={28} color={style.color} />
               <View className="min-w-0 flex-1">
                 <Text variant="body" numberOfLines={1}>
-                  {style.person.name}
+                  {style.label}
                 </Text>
                 <Text variant="caption" tone="muted" numberOfLines={1}>
                   {I18n.t('household.paid', { amount: money(balance.paid, settings) })}
                 </Text>
               </View>
-              <View
-                className="rounded-full px-2.5 py-1"
-                style={{ backgroundColor: withColorAlpha(tint, 0.13) }}
+              <BalanceBar
+                difference={balance.difference}
+                furthest={furthest}
+                overColor={themeColors.success}
+                underColor={themeColors.accent}
+                lineColor={themeColors.textMuted}
+              />
+              {/* Over in green; under in plain text, the bar carrying the amber,
+                  so no one's row reads as a warning. */}
+              <Text
+                variant="bodyStrong"
+                numberOfLines={1}
+                className="min-w-[76px] text-right"
+                style={{ color: cents > 0 ? themeColors.success : themeColors.text }}
               >
-                <Text variant="caption" style={{ color: tint }}>
-                  {cents === 0 ? '±0' : `${ahead ? '+' : '−'}${amount}`}
-                </Text>
-              </View>
+                {cents === 0 ? '±0' : `${cents > 0 ? '+' : '−'}${amount}`}
+              </Text>
             </View>
           );
         })}
@@ -533,7 +623,7 @@ function FairShareCard({
           </Text>
         </View>
       ) : (
-        <View className="gap-2">
+        <View className="gap-2.5">
           <Text variant="caption" tone="muted">
             {I18n.t('household.to_even_out')}
           </Text>
@@ -545,7 +635,7 @@ function FairShareCard({
             return (
               <View
                 key={`${transfer.fromKey}>${transfer.toKey}`}
-                className="flex-row items-center gap-2 rounded-2xl bg-primary/10 px-3 py-2.5"
+                className="flex-row items-center gap-2"
                 accessible
                 accessibilityLabel={I18n.t('household.transfer', {
                   from: from.person.name,
@@ -553,25 +643,23 @@ function FairShareCard({
                   amount,
                 })}
               >
-                <PersonAvatar person={from.person} size={24} color={from.color} />
-                <Text variant="caption" numberOfLines={1} className="max-w-[30%]">
-                  {from.person.name}
+                <PersonAvatar person={from.person} size={22} color={from.color} />
+                <Text variant="body" numberOfLines={1} className="max-w-[32%]">
+                  {from.label}
                 </Text>
-                <ArrowRight size={14} color={themeColors.primary} strokeWidth={2.5} />
-                <PersonAvatar person={to.person} size={24} color={to.color} />
-                <Text variant="caption" numberOfLines={1} className="min-w-0 flex-1">
-                  {to.person.name}
+                <ArrowRight size={15} color={themeColors.textMuted} strokeWidth={2.25} />
+                <PersonAvatar person={to.person} size={22} color={to.color} />
+                <Text variant="body" numberOfLines={1} className="min-w-0 flex-1">
+                  {to.label}
                 </Text>
-                <Text variant="bodyStrong" style={{ color: themeColors.primary }}>
-                  {amount}
-                </Text>
+                <Text variant="bodyStrong">{amount}</Text>
               </View>
             );
           })}
         </View>
       )}
 
-      <Text variant="caption" tone="muted" className="mt-3">
+      <Text variant="caption" tone="muted" className="mt-3.5">
         {I18n.t('household.split_note', { count: fairShare.balances.length })}
       </Text>
     </InsightCard>
@@ -660,16 +748,22 @@ function TrendCard({
   month,
   styleByKey,
   settings,
+  onSelectMonth,
 }: {
   month: HouseholdMonth;
   styleByKey: Map<string, PersonStyle>;
   settings: UserSettings;
+  /** Opens a month's page; null for a month the pager does not have. */
+  onSelectMonth: (monthKey: string) => (() => void) | null;
 }) {
   const themeColors = useThemeColors();
   const peak = month.trend.reduce((max, entry) => Math.max(max, entry.total), 0);
   if (peak <= 0) return null;
   // Headroom, so the tallest bar does not touch the card's edge.
   const ceiling = peak * 1.1;
+  // The other months in one quiet colour: six people's colours on every bar
+  // were a muddle, and the shown month already breaks its people down.
+  const pastColor = withColorAlpha(themeColors.textMuted, 0.28);
   return (
     <InsightCard title={I18n.t('household.trend')}>
       <View style={styles.trendBars} {...REPLAY_PRIVATE}>
@@ -678,27 +772,36 @@ function TrendCard({
           const barHeight =
             entry.total > 0 ? Math.max(4, (entry.total / ceiling) * TREND_HEIGHT) : 0;
           const label = shortMonthLabel(entry.monthKey, settings.locale);
+          const open = isShown ? null : onSelectMonth(entry.monthKey);
           return (
-            <View
+            <Pressable
               key={entry.monthKey}
               style={styles.trendColumn}
-              accessible
+              onPress={open ?? undefined}
+              disabled={!open}
+              accessibilityRole={open ? 'button' : undefined}
               accessibilityLabel={`${label}: ${money(entry.total, settings)}`}
+              accessibilityState={{ selected: isShown }}
             >
-              <View style={[styles.trendBar, { height: barHeight }]}>
-                {/* Stacked bottom-up in the page's order of people. */}
-                {[...entry.byPerson].reverse().map((part) => {
-                  const color = styleFor(styleByKey, part.personKey)?.color ?? '#94A3A0';
-                  return (
-                    <View
-                      key={part.personKey}
-                      style={{
-                        flex: part.amount / entry.total,
-                        backgroundColor: isShown ? color : withColorAlpha(color, 0.35),
-                      }}
-                    />
-                  );
-                })}
+              <View
+                style={[
+                  styles.trendBar,
+                  { height: barHeight, backgroundColor: isShown ? undefined : pastColor },
+                ]}
+              >
+                {/* The shown month stacked bottom-up in the page's order of people. */}
+                {isShown
+                  ? [...entry.byPerson].reverse().map((part) => (
+                      <View
+                        key={part.personKey}
+                        style={{
+                          flex: part.amount / entry.total,
+                          backgroundColor:
+                            styleFor(styleByKey, part.personKey)?.color ?? themeColors.textMuted,
+                        }}
+                      />
+                    ))
+                  : null}
               </View>
               <Text
                 variant="caption"
@@ -708,7 +811,7 @@ function TrendCard({
               >
                 {label}
               </Text>
-            </View>
+            </Pressable>
           );
         })}
       </View>
@@ -762,7 +865,7 @@ function BiggestCard({
                 </Text>
                 <Text variant="caption" tone="muted" numberOfLines={1}>
                   {style
-                    ? `${shortDayLabel(entry.dayKey, settings.locale)} · ${style.person.name}`
+                    ? `${shortDayLabel(entry.dayKey, settings.locale)} · ${style.label}`
                     : shortDayLabel(entry.dayKey, settings.locale)}
                 </Text>
               </View>
@@ -777,6 +880,32 @@ function BiggestCard({
 }
 
 const styles = StyleSheet.create({
+  quiet: {
+    opacity: 0.55,
+  },
+  balanceBar: {
+    // Fixed, so the name and what they paid keep the room.
+    width: 56,
+    height: 14,
+    justifyContent: 'center',
+  },
+  balanceTrack: {
+    height: 2,
+    borderRadius: 1,
+  },
+  balanceFill: {
+    position: 'absolute',
+    height: 8,
+    borderRadius: 4,
+  },
+  balanceCentre: {
+    position: 'absolute',
+    left: '50%',
+    width: 1.5,
+    height: 14,
+    marginLeft: -0.75,
+    borderRadius: 1,
+  },
   content: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.sm,

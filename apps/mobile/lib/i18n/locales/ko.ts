@@ -3078,6 +3078,8 @@ const ko = {
     renew_pro: 'Pro 갱신',
   },
   household: {
+    alone_hint:
+      '아직은 나 혼자예요. 다른 사람이 참여해 내역을 추가하면 여기에서 사람별 몫을 볼 수 있어요.',
     spent_together: '함께 쓴 금액',
     even_split: '똑같이 나누면',
     each: '1인당 {{amount}}',

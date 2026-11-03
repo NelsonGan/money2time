@@ -3134,6 +3134,8 @@ const pt = {
     renew_pro: 'Renovar Pro',
   },
   household: {
+    alone_hint:
+      'Por enquanto, só você. Quando outros entrarem e adicionarem lançamentos, a parte de cada pessoa aparece aqui.',
     spent_together: 'Gasto em conjunto',
     even_split: 'Divisão igual',
     each: '{{amount}} cada',

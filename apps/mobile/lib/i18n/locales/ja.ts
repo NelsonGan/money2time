@@ -3097,6 +3097,8 @@ const ja = {
     renew_pro: 'Proを更新',
   },
   household: {
+    alone_hint:
+      '今はあなただけです。ほかの人が参加して記録を追加すると、ここに一人ひとりの分が表示されます。',
     spent_together: '一緒に使った金額',
     even_split: '均等に割ると',
     each: '1人あたり{{amount}}',

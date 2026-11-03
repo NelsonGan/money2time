@@ -2995,6 +2995,7 @@ const zhHant = {
     renew_pro: '續訂 Pro',
   },
   household: {
+    alone_hint: '目前只有你。其他人加入並新增記錄後，這裡會顯示每個人的部分。',
     spent_together: '共同支出',
     even_split: '平均分攤',
     each: '每人 {{amount}}',

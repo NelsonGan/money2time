@@ -3118,6 +3118,8 @@ const nb = {
     renew_pro: 'Forny Pro',
   },
   household: {
+    alone_hint:
+      'Bare deg foreløpig. Når andre blir med og legger til poster, vises hver persons andel her.',
     spent_together: 'Brukt sammen',
     even_split: 'Lik fordeling',
     each: '{{amount}} hver',

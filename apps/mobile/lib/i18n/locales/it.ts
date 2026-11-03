@@ -3136,6 +3136,8 @@ const it = {
     renew_pro: 'Rinnova Pro',
   },
   household: {
+    alone_hint:
+      'Per ora solo tu. Quando altri si uniranno e aggiungeranno voci, qui vedrai la parte di ognuno.',
     spent_together: 'Speso insieme',
     even_split: 'Divisione equa',
     each: '{{amount}} a testa',

@@ -3162,6 +3162,8 @@ const fil = {
     renew_pro: 'I-renew ang Pro',
   },
   household: {
+    alone_hint:
+      'Ikaw pa lang sa ngayon. Kapag may sumali at nagdagdag ng entry, makikita rito ang bahagi ng bawat isa.',
     spent_together: 'Nagastos nang magkasama',
     even_split: 'Pantay na hatian',
     each: '{{amount}} bawat isa',

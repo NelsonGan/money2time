@@ -3139,6 +3139,8 @@ const ms = {
     renew_pro: 'Perbaharui Pro',
   },
   household: {
+    alone_hint:
+      'Hanya anda buat masa ini. Apabila orang lain menyertai dan menambah catatan, bahagian setiap orang dipaparkan di sini.',
     spent_together: 'Dibelanjakan bersama',
     even_split: 'Bahagi sama rata',
     each: '{{amount}} seorang',

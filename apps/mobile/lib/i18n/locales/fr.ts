@@ -3157,6 +3157,8 @@ const fr = {
     renew_pro: 'Renouveler Pro',
   },
   household: {
+    alone_hint:
+      "Vous seul pour l'instant. Quand d'autres rejoindront et ajouteront des opérations, la part de chacun s'affichera ici.",
     spent_together: 'Dépensé ensemble',
     even_split: 'Partage égal',
     each: '{{amount}} chacun',

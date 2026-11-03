@@ -16,6 +16,7 @@ import { dayKeyFromIsoLocal } from '~/utils/formatters';
 
 import type { LedgerPeople, LedgerPerson } from './ledgerPeople';
 import { PERSON_COLORS } from './personColors';
+import { distinctShortNames } from './personNames';
 
 /** The owner's key: their entries hold null in `member_id`. */
 export const OWNER_KEY = 'owner';
@@ -25,10 +26,12 @@ export function personKey(person: Pick<LedgerPerson, 'memberId'>): string {
   return person.memberId ?? OWNER_KEY;
 }
 
-/** Everything a card needs to draw a person: who they are and their chart colour. */
+/** Everything a card needs to draw a person: who they are, their colour and short name. */
 export interface PersonStyle {
   person: LedgerPerson;
   color: string;
+  /** Their first name, or more where someone else on the page shares it. */
+  label: string;
 }
 
 /** The category bucket of entries that have none. */
@@ -381,6 +384,7 @@ export function buildPeopleStyles(
   // The ledger's people keep their own colour, as on every row; anyone else
   // takes one nobody on the page has yet, while there is one.
   const used = new Set(people.people.map((person) => person.color));
+  const labels = distinctShortNames(all.map((person) => person.name));
   const styleByKey = new Map<string, PersonStyle>();
   all.forEach((person, position) => {
     let color = person.color;
@@ -388,7 +392,7 @@ export function buildPeopleStyles(
       color = PERSON_COLORS.find((candidate) => !used.has(candidate)) ?? person.color;
       used.add(color);
     }
-    styleByKey.set(personKey(person), { person, color });
+    styleByKey.set(personKey(person), { person, color, label: labels[position]! });
   });
   return { peopleOrder: people.people.map(personKey), styleByKey };
 }

@@ -3119,6 +3119,8 @@ const sv = {
     renew_pro: 'Förnya Pro',
   },
   household: {
+    alone_hint:
+      'Bara du hittills. När andra går med och lägger till poster visas varje persons del här.',
     spent_together: 'Spenderat tillsammans',
     even_split: 'Lika delning',
     each: '{{amount}} var',

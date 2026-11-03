@@ -3126,6 +3126,8 @@ const tr = {
     renew_pro: "Pro'yu yenile",
   },
   household: {
+    alone_hint:
+      'Şimdilik yalnızca sen varsın. Başkaları katılıp kayıt ekledikçe herkesin payı burada görünür.',
     spent_together: 'Birlikte harcanan',
     even_split: 'Eşit paylaşım',
     each: 'Kişi başı {{amount}}',
