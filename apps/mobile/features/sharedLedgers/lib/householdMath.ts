@@ -124,25 +124,35 @@ export function shiftMonthKey(monthKey: string, offset: number): string {
 
 /** The most months the pager holds, so a stray entry dated long ago cannot make it endless. */
 const MAX_PAGER_MONTHS = 1200;
+/**
+ * The fewest months the pager holds, this one included: a ledger with no
+ * spending yet (or only this month's) still pages back through the year.
+ */
+export const HOUSEHOLD_PAGER_MIN_MONTHS = 12;
 
 /**
- * The pager's months, oldest first: from the first month with an expense to
- * `currentMonthKey`, which is always there (an empty ledger has just it). A
- * first month after the current one (a future-dated entry) is ignored, and
- * past `MAX_PAGER_MONTHS` the oldest are left off, so the months never skip.
+ * The pager's months, oldest first, up to `currentMonthKey`: from the first
+ * month with an expense, or a year back when that is later (or there is none,
+ * or it is a future-dated entry's). Past `MAX_PAGER_MONTHS` the oldest are
+ * left off, so the months never skip.
  */
 export function householdPagerMonths(
   firstMonthKey: string | null,
   currentMonthKey: string,
 ): string[] {
-  if (!firstMonthKey || firstMonthKey >= currentMonthKey) return [currentMonthKey];
   const current = yearMonthFromKey(currentMonthKey);
+  // A current key that is not `YYYY-MM` gives no months to step through.
+  if (!Number.isFinite(current.year) || !Number.isFinite(current.monthIndex)) {
+    return [currentMonthKey];
+  }
+  const spending =
+    firstMonthKey && firstMonthKey < currentMonthKey
+      ? monthsBetween(yearMonthFromKey(firstMonthKey), current)
+      : 0;
   const span = Math.min(
-    monthsBetween(yearMonthFromKey(firstMonthKey), current),
+    Math.max(Number.isFinite(spending) ? spending : 0, HOUSEHOLD_PAGER_MIN_MONTHS - 1),
     MAX_PAGER_MONTHS - 1,
   );
-  // A key that is not `YYYY-MM` (an unreadable date) has no span.
-  if (!Number.isFinite(span) || span <= 0) return [currentMonthKey];
   return Array.from({ length: span + 1 }, (_, step) =>
     yearMonthToKey(shiftYearMonth(current, step - span)),
   );

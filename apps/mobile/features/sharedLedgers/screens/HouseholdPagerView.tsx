@@ -22,7 +22,11 @@ import type { InsightsDrilldownPayload } from '~/features/insights/screens/Insig
 import { filterSpendingTransactions } from '~/features/reimbursements/lib/reimbursementMath';
 import { money, shortDayLabel } from '~/features/review/lib/reviewFormat';
 import { UNCATEGORIZED_ID } from '~/features/review/lib/reviewMath';
-import { type MonthPagerHandle, useMonthKeyPager } from '~/hooks/useMonthKeyPager';
+import {
+  type MonthPagerEdges,
+  type MonthPagerHandle,
+  useMonthKeyPager,
+} from '~/hooks/useMonthKeyPager';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -52,6 +56,8 @@ interface HouseholdPagerViewProps {
   onOpenTransaction: (transaction: TransactionWithRelations) => void;
   /** Reports the shown month's label, so the host header can show it. */
   onActiveMonthLabelChange?: (label: string) => void;
+  /** Reports whether the pager is at its first or last month, for the header's arrows. */
+  onEdgesChange?: (edges: MonthPagerEdges) => void;
 }
 
 const TREND_HEIGHT = 108;
@@ -68,7 +74,7 @@ function percentLabel(share: number): string {
  */
 export const HouseholdPagerView = forwardRef<MonthPagerHandle, HouseholdPagerViewProps>(
   function HouseholdPagerViewImpl(
-    { onOpenDrilldown, onOpenTransaction, onActiveMonthLabelChange },
+    { onOpenDrilldown, onOpenTransaction, onActiveMonthLabelChange, onEdgesChange },
     ref,
   ) {
     const { settings, categories } = useApp();
@@ -113,6 +119,7 @@ export const HouseholdPagerView = forwardRef<MonthPagerHandle, HouseholdPagerVie
       pageWidth,
       initialIndex: pagerMonths.length - 1,
       ref,
+      onEdgesChange,
     });
 
     const monthLabel = monthKeyLabel(activeMonth, settings.locale);
