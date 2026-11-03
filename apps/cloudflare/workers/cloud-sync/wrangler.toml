@@ -5,8 +5,11 @@ compatibility_date = "2026-10-15"
 compatibility_flags = ["nodejs_compat"]
 
 # Custom domain — the money2time.com zone must be on this Cloudflare account.
+# shared-ledgers serves the invite links (INVITE_URL); the old host keeps
+# serving them too, so links shared before the move still open.
 routes = [
-  { pattern = "workers-cloud-sync.money2time.com", custom_domain = true }
+  { pattern = "workers-cloud-sync.money2time.com", custom_domain = true },
+  { pattern = "shared-ledgers.money2time.com", custom_domain = true }
 ]
 workers_dev = false
 preview_urls = false
@@ -66,6 +69,8 @@ crons = ["17 3 * * *"]
 
 [vars]
 BETTER_AUTH_URL = "https://workers-cloud-sync.money2time.com"
+# Origin of the invite links the owner shares (`<INVITE_URL>/join/<code>`).
+INVITE_URL = "https://shared-ledgers.money2time.com"
 # Google Sign-In ID-token audiences: the iOS client (iOS tokens) and the web
 # client (Android tokens, which are issued for the webClientId).
 GOOGLE_CLIENT_IDS = "229377044166-7hkgkf8se5duonne5tgbph71ld6to3pg.apps.googleusercontent.com,229377044166-862vte0l859hsifla83k0q1rhjtcs9h0.apps.googleusercontent.com"
