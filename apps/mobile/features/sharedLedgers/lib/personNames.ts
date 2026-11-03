@@ -17,16 +17,26 @@ export function shortName(name: string): string {
 /**
  * Short labels for people shown side by side: each one's first name, or
  * their full name where someone else here has the same first name, and a
- * number after any name still shared ("Alex", "Alex 2").
+ * number after any name still shared ("Alex", "Alex 2"), skipping a number
+ * someone's own name already reads as (a person named "Alex 2").
  */
 export function distinctShortNames(names: readonly string[]): string[] {
   const firsts = names.map(shortName);
   const count = (list: string[], value: string) => list.filter((entry) => entry === value).length;
   const labels = firsts.map((first, index) => (count(firsts, first) > 1 ? names[index]! : first));
+  // Labels nobody else has are kept as they are, so a number never lands on one.
+  const taken = new Set(labels.filter((label) => count(labels, label) === 1));
   const seen = new Map<string, number>();
   return labels.map((label) => {
-    const times = (seen.get(label) ?? 0) + 1;
+    if (count(labels, label) === 1) return label;
+    let times = seen.get(label) ?? 0;
+    let candidate: string;
+    do {
+      times += 1;
+      candidate = times === 1 ? label : `${label} ${times}`;
+    } while (taken.has(candidate));
     seen.set(label, times);
-    return count(labels, label) > 1 && times > 1 ? `${label} ${times}` : label;
+    taken.add(candidate);
+    return candidate;
   });
 }

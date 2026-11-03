@@ -1679,8 +1679,9 @@ page (below).
   account id, compared by code unit rather than the phone's language), each
   person keeping the colour their seed hashes to unless someone before them
   has it. Someone who joins later comes last, so they never take an existing
-  person's colour. Someone only known from an entry keeps their own hashed
-  colour on rows.
+  person's colour. Someone only known from an entry (who left before this
+  phone saw them) takes the first colour after their own that none of the
+  ledger's people has (`freeSeedColor`), on rows and charts alike.
 - **Belongs to.** The transaction editor's options panel (the More button) has
   a Belongs to row in a shared ledger, adding or editing: one of the panel's
   option rows, showing the person's photo and name. It opens a sheet of
@@ -1717,18 +1718,21 @@ how the household is spending, and who is covering what.
   `money2time://insights?focus=household` in a ledger that is not shared)
   opens Review instead. Anyone in the ledger sees it; it is not a Pro page.
 - **Pages.** One per financial month, like Budget: from the first month with
-  an expense to the running one, paged by swiping or the header's arrows, and
-  the month name opens the month wheel. A month with nothing spent shows an
+  an expense to the running one (at most 100 years back), paged by swiping or
+  the header's arrows, and the month name opens the month wheel. Both pages
+  share their pager (`useMonthKeyPager`: it keeps the viewed month when months
+  are added at the front, and drives the header's arrows and month wheel). A month with nothing spent shows an
   empty state.
 - **What counts.** The ledger's expenses (counted loan repayments included,
   reimbursable expenses as the reimbursement setting says, as on Review),
   valued in the reporting currency, by whose each entry is (`member_id`, null
   being the owner). Everyone in the ledger is on the page, those who spent
   nothing too; anyone else with an entry (someone who left) is added after
-  them, with a colour nobody else on the page has.
+  them.
 - **Cards.** The page only reads what people log; there is no splitting or
   settling up.
-  - _Spent together_: the month's total, the change from the month before,
+  - _Spent together_: the month's total, the change from the month before
+    (once the month is over: a few days against a whole month would mislead),
     a bar split by person, and a row per person with their amount and share,
     biggest first. Someone who spent nothing stays listed, faded. A row opens
     that person's entries for the month. While nobody else has joined, a line

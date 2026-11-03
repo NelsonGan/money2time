@@ -358,6 +358,19 @@ describe('buildLedgerPeople', () => {
     expect(new Set(onMei.people.map((entry) => entry.color)).size).toBe(3);
   });
 
+  it('gives someone only known from an entry a colour no one in the ledger has', () => {
+    const profiles = [
+      { user_id: 'user-ana', role: 'member', name: 'Ana', avatar_uri: null },
+      { user_id: 'user-mei', role: 'member', name: 'Mei', avatar_uri: null },
+    ];
+    const people = buildLedgerPeople(HOME, profiles, own, 'user-mei');
+    const known = new Set(people.people.map((entry) => entry.color));
+    // Whatever the id hashes to, it is moved off the colours already taken.
+    for (const id of ['user-gone', 'user-left', 'user-x1', 'user-x2']) {
+      expect(known.has(people.personFor(id).color)).toBe(false);
+    }
+  });
+
   it('keeps everyone’s colour when someone joins', () => {
     const before = [
       {

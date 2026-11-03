@@ -455,7 +455,7 @@ function PeriodRail({
   );
 }
 
-// Card shell — one shape for every section on the page
+// The cards, each in the shared `InsightCard` shell (insights/components)
 
 function SpentCard({ summary }: { summary: ReviewSummary }) {
   const { settings } = useApp();

@@ -4,17 +4,18 @@
 // categories each person covers, the last months' trend and the biggest
 // entries. Pure, so it is tested without the app.
 
-import type { Category, MonthCycleInput, TransactionWithRelations } from '~/types';
 import {
-  addFinancialMonths,
-  financialMonthKeyForDate,
-  financialMonthKeyForIso,
-  financialMonthStartDate,
-} from '~/utils/financialMonth';
+  monthsBetween,
+  shiftYearMonth,
+  yearMonthFromKey,
+  yearMonthToKey,
+} from '~/components/datePicker/monthJump';
+import { UNCATEGORIZED_ID } from '~/features/review/lib/reviewMath';
+import type { Category, MonthCycleInput, TransactionWithRelations } from '~/types';
+import { financialMonthKeyForIso } from '~/utils/financialMonth';
 import { dayKeyFromIsoLocal } from '~/utils/formatters';
 
 import type { LedgerPeople, LedgerPerson } from './ledgerPeople';
-import { PERSON_COLORS } from './personColors';
 import { distinctShortNames } from './personNames';
 
 /** The owner's key: their entries hold null in `member_id`. */
@@ -25,19 +26,16 @@ export function personKey(person: Pick<LedgerPerson, 'memberId'>): string {
   return person.memberId ?? OWNER_KEY;
 }
 
-/** Everything a card needs to draw a person: who they are, their colour and short name. */
+/** Everything a card needs to draw a person: who they are (their colour too) and a short name. */
 export interface PersonStyle {
   person: LedgerPerson;
-  color: string;
   /** Their first name, or more where someone else on the page shares it. */
   label: string;
 }
 
-/** The category bucket of entries that have none. */
-export const HOUSEHOLD_UNCATEGORIZED = '__uncategorized__';
 /** Categories listed in "Who covers what"; the rest are left out. */
 export const HOUSEHOLD_TOP_CATEGORIES = 5;
-/** Entries listed under "Biggest this month". */
+/** Entries listed under "Biggest entries". */
 export const HOUSEHOLD_BIGGEST = 3;
 /** Months in the trend, the shown month last. */
 export const HOUSEHOLD_TREND_MONTHS = 6;
@@ -56,10 +54,17 @@ export interface PersonAmount {
   amount: number;
 }
 
+/** An expense with whose it is and its value, worked out once. */
+interface IndexedRow {
+  row: HouseholdRow;
+  personKey: string;
+  value: number;
+}
+
 interface MonthBucket {
   total: number;
   byPerson: Map<string, number>;
-  rows: HouseholdRow[];
+  rows: IndexedRow[];
 }
 
 /** Every month's expenses, bucketed once per data change. */
@@ -99,51 +104,52 @@ export function buildHouseholdIndex(
       months.set(monthKey, bucket);
     }
     const value = valueOf(row);
+    const key = personKeyOf(row.memberId);
     bucket.total += value;
-    addTo(bucket.byPerson, personKeyOf(row.memberId), value);
-    bucket.rows.push(row);
+    addTo(bucket.byPerson, key, value);
+    bucket.rows.push({ row, personKey: key, value });
     if (firstMonthKey === null || monthKey < firstMonthKey) firstMonthKey = monthKey;
   }
   return { months, firstMonthKey };
 }
 
-/** The month `offset` financial months from `monthKey` (negative goes back). */
-export function shiftMonthKey(
-  monthKey: string,
-  offset: number,
-  monthCycle: MonthCycleInput,
-): string {
-  return financialMonthKeyForDate(
-    addFinancialMonths(financialMonthStartDate(monthKey, monthCycle), offset, monthCycle),
-    monthCycle,
-  );
+/**
+ * The month `offset` months from `monthKey` (negative goes back). A financial
+ * month's key names the calendar month it starts in, one key per calendar
+ * month whatever the cycle, so this is plain month arithmetic.
+ */
+export function shiftMonthKey(monthKey: string, offset: number): string {
+  return yearMonthToKey(shiftYearMonth(yearMonthFromKey(monthKey), offset));
 }
+
+/** The most months the pager holds, so a stray entry dated long ago cannot make it endless. */
+const MAX_PAGER_MONTHS = 1200;
 
 /**
  * The pager's months, oldest first: from the first month with an expense to
  * `currentMonthKey`, which is always there (an empty ledger has just it). A
- * first month after the current one (a future-dated entry) is ignored.
+ * first month after the current one (a future-dated entry) is ignored, and
+ * past `MAX_PAGER_MONTHS` the oldest are left off, so the months never skip.
  */
 export function householdPagerMonths(
   firstMonthKey: string | null,
   currentMonthKey: string,
-  monthCycle: MonthCycleInput,
 ): string[] {
   if (!firstMonthKey || firstMonthKey >= currentMonthKey) return [currentMonthKey];
-  const months: string[] = [];
-  for (
-    let key = firstMonthKey;
-    key < currentMonthKey && months.length < 1200;
-    key = shiftMonthKey(key, 1, monthCycle)
-  ) {
-    months.push(key);
-  }
-  months.push(currentMonthKey);
-  return months;
+  const current = yearMonthFromKey(currentMonthKey);
+  const span = Math.min(
+    monthsBetween(yearMonthFromKey(firstMonthKey), current),
+    MAX_PAGER_MONTHS - 1,
+  );
+  // A key that is not `YYYY-MM` (an unreadable date) has no span.
+  if (!Number.isFinite(span) || span <= 0) return [currentMonthKey];
+  return Array.from({ length: span + 1 }, (_, step) =>
+    yearMonthToKey(shiftYearMonth(current, step - span)),
+  );
 }
 
 export interface HouseholdCategory {
-  /** The root category's id, or `HOUSEHOLD_UNCATEGORIZED`. */
+  /** The root category's id, or Review's `UNCATEGORIZED_ID`. */
   id: string;
   amount: number;
   /** Each person's part, in the page's order of people, people with none left out. */
@@ -151,10 +157,10 @@ export interface HouseholdCategory {
   transactionIds: string[];
 }
 
+/** A month's total, for the trend (the shown month's people are in `people`). */
 export interface HouseholdTrendMonth {
   monthKey: string;
   total: number;
-  byPerson: PersonAmount[];
 }
 
 export interface HouseholdBiggest {
@@ -194,17 +200,16 @@ function ordered(byPerson: Map<string, number>, order: readonly string[]): Perso
 export function buildHouseholdMonth({
   index,
   monthKey,
-  monthCycle,
+  isRunning = false,
   peopleOrder,
-  categories,
-  personKeyOf,
+  categoriesById,
 }: {
   index: HouseholdIndex;
   monthKey: string;
-  monthCycle: MonthCycleInput;
+  /** The month under way: no change from the month before, as it is not over. */
+  isRunning?: boolean;
   peopleOrder: readonly string[];
-  categories: readonly Pick<Category, 'id' | 'parentId'>[];
-  personKeyOf: (memberId: string | null) => string;
+  categoriesById: ReadonlyMap<string, Pick<Category, 'parentId'>>;
 }): HouseholdMonth {
   const bucket = index.months.get(monthKey);
   const rows = bucket?.rows ?? [];
@@ -215,23 +220,22 @@ export function buildHouseholdMonth({
   for (const key of byPerson.keys()) if (!order.includes(key)) order.push(key);
   const people = order.map((key) => ({ personKey: key, amount: byPerson.get(key) ?? 0 }));
 
-  const previousTotal = index.months.get(shiftMonthKey(monthKey, -1, monthCycle))?.total ?? 0;
+  // A few days of the running month against all of the last would read as a
+  // big drop, so only a finished month is compared (as Review does).
+  const previousTotal = isRunning ? 0 : (index.months.get(shiftMonthKey(monthKey, -1))?.total ?? 0);
   const changeRatio = previousTotal > EPSILON ? (total - previousTotal) / previousTotal : null;
 
-  const parentById = new Map(categories.map((category) => [category.id, category.parentId]));
   const rootOf = (categoryId: string | null): string => {
-    if (!categoryId) return HOUSEHOLD_UNCATEGORIZED;
+    if (!categoryId) return UNCATEGORIZED_ID;
     // A category deleted since keeps its own id rather than vanishing.
-    return parentById.get(categoryId) ?? categoryId;
+    return categoriesById.get(categoryId)?.parentId ?? categoryId;
   };
   const categoryBuckets = new Map<
     string,
     { amount: number; byPerson: Map<string, number>; ids: string[] }
   >();
   const transactionIdsByPerson = new Map<string, string[]>();
-  for (const row of rows) {
-    const value = valueOf(row);
-    const key = personKeyOf(row.memberId);
+  for (const { row, personKey: key, value } of rows) {
     const rootId = rootOf(row.categoryId);
     let categoryBucket = categoryBuckets.get(rootId);
     if (!categoryBucket) {
@@ -257,29 +261,22 @@ export function buildHouseholdMonth({
     .slice(0, HOUSEHOLD_TOP_CATEGORIES);
 
   const trendKeys = Array.from({ length: HOUSEHOLD_TREND_MONTHS }, (_, step) =>
-    shiftMonthKey(monthKey, step - (HOUSEHOLD_TREND_MONTHS - 1), monthCycle),
+    shiftMonthKey(monthKey, step - (HOUSEHOLD_TREND_MONTHS - 1)),
   );
-  const trend = trendKeys.map((key) => {
-    const month = index.months.get(key);
-    if (!month) return { monthKey: key, total: 0, byPerson: [] };
-    // Someone with entries that month but not this one (someone who left)
-    // still has their part of its bar, or the stack would not reach its total.
-    const monthOrder = [...order];
-    for (const person of month.byPerson.keys()) {
-      if (!monthOrder.includes(person)) monthOrder.push(person);
-    }
-    return { monthKey: key, total: month.total, byPerson: ordered(month.byPerson, monthOrder) };
-  });
+  const trend = trendKeys.map((key) => ({
+    monthKey: key,
+    total: index.months.get(key)?.total ?? 0,
+  }));
 
   const biggest = [...rows]
-    .sort((a, b) => valueOf(b) - valueOf(a) || b.date.localeCompare(a.date))
+    .sort((a, b) => b.value - a.value || b.row.date.localeCompare(a.row.date))
     .slice(0, HOUSEHOLD_BIGGEST)
-    .map((row) => ({
+    .map(({ row, personKey: key, value }) => ({
       transactionId: row.id,
-      amount: valueOf(row),
+      amount: value,
       dayKey: dayKeyFromIsoLocal(row.date),
       categoryId: row.categoryId,
-      personKey: personKeyOf(row.memberId),
+      personKey: key,
     }));
 
   return {
@@ -297,7 +294,7 @@ export function buildHouseholdMonth({
 
 /**
  * The page's people in order (the ledger's own list, then anyone else found
- * on an entry) and each one's colour.
+ * on an entry), each with a short name no one else on the page has.
  */
 export function buildPeopleStyles(
   people: LedgerPeople | null,
@@ -313,18 +310,10 @@ export function buildPeopleStyles(
       all.push(people.personFor(key === OWNER_KEY ? null : key));
     }
   }
-  // The ledger's people keep their own colour, as on every row; anyone else
-  // takes one nobody on the page has yet, while there is one.
-  const used = new Set(people.people.map((person) => person.color));
   const labels = distinctShortNames(all.map((person) => person.name));
   const styleByKey = new Map<string, PersonStyle>();
   all.forEach((person, position) => {
-    let color = person.color;
-    if (position >= people.people.length) {
-      color = PERSON_COLORS.find((candidate) => !used.has(candidate)) ?? person.color;
-      used.add(color);
-    }
-    styleByKey.set(personKey(person), { person, color, label: labels[position]! });
+    styleByKey.set(personKey(person), { person, label: labels[position]! });
   });
   return { peopleOrder: people.people.map(personKey), styleByKey };
 }

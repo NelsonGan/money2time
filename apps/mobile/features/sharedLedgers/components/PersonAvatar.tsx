@@ -13,8 +13,6 @@ interface PersonAvatarProps {
   size: number;
   /** A ring in the card colour, for a badge laid over another icon. */
   ring?: boolean;
-  /** The initial's disc colour, when a chart gives someone another one. */
-  color?: string;
 }
 
 /** A person in a shared ledger: their Settings photo, else their initial. */
@@ -22,7 +20,6 @@ export const PersonAvatar = memo(function PersonAvatarImpl({
   person,
   size,
   ring,
-  color,
 }: PersonAvatarProps) {
   const themeColors = useThemeColors();
   // Resolved once by the people store, not with a file check on every row.
@@ -57,7 +54,7 @@ export const PersonAvatar = memo(function PersonAvatarImpl({
             width: size,
             height: size,
             borderRadius: size / 2,
-            backgroundColor: color ?? person.color,
+            backgroundColor: person.color,
           }}
         >
           <Text

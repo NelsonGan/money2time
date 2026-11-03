@@ -78,7 +78,7 @@ import { UTILITY_ICON_SOURCES } from '~/constants/utilityIcons';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { useIsPro } from '~/context/ProContext';
 import { useResolvedTheme } from '~/context/ThemeContext';
-import { BudgetPagerView, type BudgetPagerViewHandle } from '~/features/budget/screens';
+import { BudgetPagerView } from '~/features/budget/screens';
 import { dayKeyToUtcDate } from '~/features/calendar/lib/calendarBuild';
 import {
   type AssetHistoryAccountOverrides,
@@ -149,10 +149,7 @@ import {
 import type { ReviewZoom } from '~/features/review/lib/reviewPeriods';
 import { ReviewPagerView, type ReviewPagerViewHandle } from '~/features/review/screens';
 import { useOpenLedgerPeople } from '~/features/sharedLedgers/lib/ledgerPeople';
-import {
-  HouseholdPagerView,
-  type HouseholdPagerViewHandle,
-} from '~/features/sharedLedgers/screens/HouseholdPagerView';
+import { HouseholdPagerView } from '~/features/sharedLedgers/screens/HouseholdPagerView';
 import {
   ActivityTransactionList,
   buildBulkUpdateInputs,
@@ -163,6 +160,7 @@ import {
 } from '~/features/transactions/components';
 import { canDuplicateTransaction } from '~/features/transactions/lib/duplicateTransaction';
 import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
+import { type MonthPagerHandle } from '~/hooks/useMonthKeyPager';
 import { usePagerWidthResnap } from '~/hooks/usePagerWidthResnap';
 import { usePersistedJsonSnapshot } from '~/hooks/usePersistedJsonSnapshot';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -2685,7 +2683,7 @@ export function InsightsScreen({
   // Budget and Household are month pagers shown in place of the period pager,
   // one at a time, so the header drives whichever is open through one handle.
   const [monthPagerLabel, setMonthPagerLabel] = useState('');
-  const monthPagerRef = useRef<BudgetPagerViewHandle & HouseholdPagerViewHandle>(null);
+  const monthPagerRef = useRef<MonthPagerHandle>(null);
   // Household is only for a shared ledger: off the menu otherwise.
   const isSharedLedger = useOpenLedgerPeople() !== null;
   // The review page's zoom and exclusions live here so its filter button can

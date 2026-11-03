@@ -35,3 +35,16 @@ export function distinctSeedColors(seeds: readonly string[]): string[] {
     return PERSON_COLORS[index] ?? PERSON_COLORS[0];
   });
 }
+
+/**
+ * The colour `seed` hashes to, or the next one after it that is not in
+ * `taken` (all taken: its own).
+ */
+export function freeSeedColor(seed: string, taken: ReadonlySet<string>): string {
+  const start = colorIndexFor(seed);
+  for (let step = 0; step < PERSON_COLORS.length; step += 1) {
+    const color = PERSON_COLORS[(start + step) % PERSON_COLORS.length]!;
+    if (!taken.has(color)) return color;
+  }
+  return seedColor(seed);
+}

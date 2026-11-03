@@ -1,8 +1,8 @@
+import { UNCATEGORIZED_ID } from '~/features/review/lib/reviewMath';
 import {
   buildHouseholdIndex,
   buildHouseholdMonth,
   buildPeopleStyles,
-  HOUSEHOLD_UNCATEGORIZED,
   householdPagerMonths,
   OWNER_KEY,
   personKey,
@@ -47,16 +47,18 @@ function expense(
 }
 
 const keyOf = (memberId: string | null) => memberId ?? OWNER_KEY;
-const CATEGORIES = [
-  { id: 'food', parentId: null },
-  { id: 'groceries', parentId: 'food' },
-  { id: 'dining', parentId: 'food' },
-  { id: 'rent', parentId: null },
-  { id: 'transport', parentId: null },
-  { id: 'kids', parentId: null },
-  { id: 'health', parentId: null },
-  { id: 'fun', parentId: null },
-];
+const CATEGORIES_BY_ID = new Map(
+  [
+    { id: 'food', parentId: null },
+    { id: 'groceries', parentId: 'food' },
+    { id: 'dining', parentId: 'food' },
+    { id: 'rent', parentId: null },
+    { id: 'transport', parentId: null },
+    { id: 'kids', parentId: null },
+    { id: 'health', parentId: null },
+    { id: 'fun', parentId: null },
+  ].map((category) => [category.id, category]),
+);
 
 function person(memberId: string | null, name: string, color = '#4F8A8B'): LedgerPerson {
   return {
@@ -121,10 +123,8 @@ describe('buildHouseholdMonth', () => {
   const month = buildHouseholdMonth({
     index,
     monthKey: '2026-10',
-    monthCycle: 1,
     peopleOrder: [OWNER_KEY, 'user-d', 'user-kid'],
-    categories: CATEGORIES,
-    personKeyOf: keyOf,
+    categoriesById: CATEGORIES_BY_ID,
   });
 
   it('lists everyone in order, then anyone else with an entry that month', () => {
@@ -144,7 +144,7 @@ describe('buildHouseholdMonth', () => {
       'rent',
       'food',
       'transport',
-      HOUSEHOLD_UNCATEGORIZED,
+      UNCATEGORIZED_ID,
       'kids',
     ]);
     const food = month.categories[1]!;
@@ -165,31 +165,6 @@ describe('buildHouseholdMonth', () => {
     ]);
   });
 
-  it('keeps a trend month’s parts adding up to its total, someone not in the shown month too', () => {
-    const left = buildHouseholdIndex(
-      [
-        expense('2026-09-10T09:00:00', 60, null),
-        expense('2026-09-11T09:00:00', 40, 'user-left'),
-        expense('2026-10-10T09:00:00', 80, null),
-      ],
-      keyOf,
-      1,
-    );
-    const october = buildHouseholdMonth({
-      index: left,
-      monthKey: '2026-10',
-      monthCycle: 1,
-      peopleOrder: [OWNER_KEY],
-      categories: CATEGORIES,
-      personKeyOf: keyOf,
-    });
-    const september = october.trend.find((entry) => entry.monthKey === '2026-09')!;
-    expect(september.byPerson).toEqual([
-      { personKey: OWNER_KEY, amount: 60 },
-      { personKey: 'user-left', amount: 40 },
-    ]);
-  });
-
   it('picks the three biggest entries and keeps each person’s entries', () => {
     expect(month.biggest.map((entry) => entry.transactionId)).toEqual(['rent', 'aeon', 'car']);
     expect(month.biggest[0]).toMatchObject({ personKey: 'user-d', dayKey: '2026-10-01' });
@@ -200,44 +175,58 @@ describe('buildHouseholdMonth', () => {
     const empty = buildHouseholdMonth({
       index,
       monthKey: '2026-11',
-      monthCycle: 1,
       peopleOrder: [OWNER_KEY, 'user-d'],
-      categories: CATEGORIES,
-      personKeyOf: keyOf,
+      categoriesById: CATEGORIES_BY_ID,
     });
     expect(empty.isEmpty).toBe(true);
     expect(empty.total).toBe(0);
     const july = buildHouseholdMonth({
       index,
       monthKey: '2026-07',
-      monthCycle: 1,
       peopleOrder: [OWNER_KEY, 'user-d'],
-      categories: CATEGORIES,
-      personKeyOf: keyOf,
+      categoriesById: CATEGORIES_BY_ID,
     });
     expect(july.changeRatio).toBeNull();
+    // The month under way is not compared: it is not over.
+    const running = buildHouseholdMonth({
+      index,
+      monthKey: '2026-10',
+      isRunning: true,
+      peopleOrder: [OWNER_KEY, 'user-d'],
+      categoriesById: CATEGORIES_BY_ID,
+    });
+    expect(running.changeRatio).toBeNull();
   });
 });
 
 describe('householdPagerMonths', () => {
   it('runs from the first month with spending to this one', () => {
-    expect(householdPagerMonths('2026-08', '2026-11', 1)).toEqual([
+    expect(householdPagerMonths('2026-08', '2026-11')).toEqual([
       '2026-08',
       '2026-09',
       '2026-10',
       '2026-11',
     ]);
-    expect(householdPagerMonths('2025-12', '2026-01', 1)).toEqual(['2025-12', '2026-01']);
+    expect(householdPagerMonths('2025-12', '2026-01')).toEqual(['2025-12', '2026-01']);
   });
 
   it('is just this month with no spending, or only future spending', () => {
-    expect(householdPagerMonths(null, '2026-11', 1)).toEqual(['2026-11']);
-    expect(householdPagerMonths('2027-01', '2026-11', 1)).toEqual(['2026-11']);
+    expect(householdPagerMonths(null, '2026-11')).toEqual(['2026-11']);
+    expect(householdPagerMonths('2027-01', '2026-11')).toEqual(['2026-11']);
   });
 
-  it('steps by financial month', () => {
-    expect(shiftMonthKey('2026-01', -1, 25)).toBe('2025-12');
-    expect(shiftMonthKey('2026-12', 1, 25)).toBe('2027-01');
+  it('steps by month, across a year', () => {
+    expect(shiftMonthKey('2026-01', -1)).toBe('2025-12');
+    expect(shiftMonthKey('2026-12', 1)).toBe('2027-01');
+    expect(shiftMonthKey('2026-03', -15)).toBe('2024-12');
+  });
+
+  it('leaves off the oldest months past its cap, never skipping one', () => {
+    const months = householdPagerMonths('1900-01', '2026-11');
+    expect(months).toHaveLength(1200);
+    expect(months[months.length - 1]).toBe('2026-11');
+    expect(months[months.length - 2]).toBe('2026-10');
+    expect(months[0]).toBe(shiftMonthKey('2026-11', -1199));
   });
 });
 
@@ -275,11 +264,9 @@ describe('buildPeopleStyles', () => {
     expect(styleByKey.get(OWNER_KEY)?.person.name).toBe('Aisha');
     expect(styleByKey.get(OWNER_KEY)?.label).toBe('Aisha');
     expect(personKey(styleByKey.get('user-gone')!.person)).toBe('user-gone');
-    // The ledger's people keep the colour their rows show; the stranger takes
-    // the first one nobody has.
-    expect(styleByKey.get(OWNER_KEY)?.color).toBe(PERSON_COLORS[1]);
-    expect(styleByKey.get('user-d')?.color).toBe(PERSON_COLORS[2]);
-    expect(styleByKey.get('user-gone')?.color).toBe(PERSON_COLORS[0]);
+    // Everyone is drawn in the colour their rows show.
+    expect(styleByKey.get(OWNER_KEY)?.person.color).toBe(PERSON_COLORS[1]);
+    expect(styleByKey.get('user-d')?.person.color).toBe(PERSON_COLORS[2]);
   });
 
   it('is empty outside a shared ledger', () => {
@@ -299,5 +286,11 @@ describe('distinctShortNames', () => {
     ]);
     // Two people with the same full name (two unnamed members, say).
     expect(distinctShortNames(['Member', 'Member', 'You'])).toEqual(['Member', 'Member 2', 'You']);
+    // A number someone's own name already reads as is skipped.
+    expect(distinctShortNames(['Member', 'Member', 'Member 2'])).toEqual([
+      'Member',
+      'Member 3',
+      'Member 2',
+    ]);
   });
 });

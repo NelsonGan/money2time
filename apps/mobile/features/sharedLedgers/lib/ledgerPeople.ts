@@ -17,7 +17,7 @@ import { getActiveLedgerId } from '~/lib/db/ledgerScope';
 import { I18n } from '~/lib/i18n';
 import { getProfileAvatarUri } from '~/services/userAssets';
 
-import { distinctSeedColors, seedColor } from './personColors';
+import { distinctSeedColors, freeSeedColor, seedColor } from './personColors';
 import { shortName } from './personNames';
 
 export { shortName };
@@ -266,6 +266,7 @@ export function buildLedgerPeople(
   ).forEach((color, index) => {
     colorOrder[index]!.color = color;
   });
+  const knownColors = new Set(colorOrder.map((entry) => entry.color));
   // Someone only known from an entry (left before this phone saw them, or on
   // an older app): one object each, so rows showing them do not re-render.
   const unknown = new Map<string, LedgerPerson>();
@@ -280,6 +281,9 @@ export function buildLedgerPeople(
         { memberId, name: null, avatarUri: null, role: 'member', isSelf: false },
         memberFallback,
       );
+      // A colour none of the ledger's people has, the same on every phone
+      // that knows the same people.
+      stranger.color = freeSeedColor(memberId, knownColors);
       unknown.set(memberId, stranger);
       return stranger;
     },

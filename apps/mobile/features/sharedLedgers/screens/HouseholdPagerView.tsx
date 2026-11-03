@@ -1,20 +1,11 @@
 import { ChevronRight } from 'lucide-react-native';
-import React, {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { forwardRef, useCallback, useEffect, useMemo } from 'react';
 import { FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { MonthYearWheelPicker } from '~/components/datePicker';
-import { yearMonthFromKey, yearMonthToKey } from '~/components/datePicker/monthJump';
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { useContentFrame } from '~/components/layout/ContentFrame';
+import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import {
   CategoryEmoji,
   ClayIcon,
@@ -25,19 +16,19 @@ import {
 import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
-import { monthKeyLabel } from '~/features/budget/lib/format';
+import { monthKeyLabel, monthNameLabel } from '~/features/budget/lib/format';
 import { InsightCard, SpendDeltaPill } from '~/features/insights/components/InsightCard';
 import type { InsightsDrilldownPayload } from '~/features/insights/screens/InsightsDrilldownScreen';
 import { filterSpendingTransactions } from '~/features/reimbursements/lib/reimbursementMath';
 import { money, shortDayLabel } from '~/features/review/lib/reviewFormat';
-import { useMonthPager } from '~/hooks/useMonthPager';
+import { UNCATEGORIZED_ID } from '~/features/review/lib/reviewMath';
+import { type MonthPagerHandle, useMonthKeyPager } from '~/hooks/useMonthKeyPager';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { Category, TransactionWithRelations, UserSettings } from '~/types';
 import { withColorAlpha } from '~/utils/color';
 import { financialMonthKeyForDate, monthCycleOf } from '~/utils/financialMonth';
-import { parseMonthKey } from '~/utils/formatters';
 import { toSpendingRows } from '~/utils/spending';
 
 import { PersonAvatar } from '../components/PersonAvatar';
@@ -45,7 +36,6 @@ import {
   buildHouseholdIndex,
   buildHouseholdMonth,
   buildPeopleStyles,
-  HOUSEHOLD_UNCATEGORIZED,
   type HouseholdCategory,
   type HouseholdMonth,
   householdPagerMonths,
@@ -55,12 +45,6 @@ import {
   type PersonStyle,
 } from '../lib/householdMath';
 import { useOpenLedgerPeople } from '../lib/ledgerPeople';
-
-export interface HouseholdPagerViewHandle {
-  scrollToRelative: (direction: 1 | -1) => void;
-  /** Open the month wheel, for the host header's month label. */
-  openMonthPicker: () => void;
-}
 
 interface HouseholdPagerViewProps {
   /** Opens the transactions behind a person or a category. */
@@ -72,18 +56,6 @@ interface HouseholdPagerViewProps {
 
 const TREND_HEIGHT = 108;
 
-const shortMonthFormatters = new Map<string, Intl.DateTimeFormat>();
-
-/** 'YYYY-MM' → "Oct", for the trend's columns. */
-function shortMonthLabel(monthKey: string, locale: string): string {
-  let formatter = shortMonthFormatters.get(locale);
-  if (!formatter) {
-    formatter = new Intl.DateTimeFormat(locale, { month: 'short' });
-    shortMonthFormatters.set(locale, formatter);
-  }
-  return formatter.format(parseMonthKey(monthKey) ?? new Date());
-}
-
 function percentLabel(share: number): string {
   return `${Math.round(share * 100)}%`;
 }
@@ -94,7 +66,7 @@ function percentLabel(share: number): string {
  * Household insights). Embedded in Insights, which shows it only while the
  * open ledger is shared.
  */
-export const HouseholdPagerView = forwardRef<HouseholdPagerViewHandle, HouseholdPagerViewProps>(
+export const HouseholdPagerView = forwardRef<MonthPagerHandle, HouseholdPagerViewProps>(
   function HouseholdPagerViewImpl(
     { onOpenDrilldown, onOpenTransaction, onActiveMonthLabelChange },
     ref,
@@ -125,64 +97,24 @@ export const HouseholdPagerView = forwardRef<HouseholdPagerViewHandle, Household
     );
 
     // Everyone in the ledger, then anyone else found on an entry (someone who
-    // left), each with a colour no one else on the page has, kept the same on
-    // every month's page.
+    // left), each with a short name, the same on every month's page.
     const { peopleOrder, styleByKey } = useMemo(
       () => buildPeopleStyles(people, index.months.values()),
       [index, people],
     );
 
     const currentMonthKey = financialMonthKeyForDate(new Date(), monthCycle);
-    const monthsRef = useRef<string[]>([]);
-    const months = useMemo(() => {
-      const next = householdPagerMonths(index.firstMonthKey, currentMonthKey, monthCycle);
-      const previous = monthsRef.current;
-      if (next.length === previous.length && next.every((month, i) => month === previous[i])) {
-        return previous;
-      }
-      monthsRef.current = next;
-      return next;
-    }, [currentMonthKey, index.firstMonthKey, monthCycle]);
-
-    const listRef = useRef<FlatList<number>>(null);
-    const pager = useMonthPager({
-      listRef,
+    const pagerMonths = useMemo(
+      () => householdPagerMonths(index.firstMonthKey, currentMonthKey),
+      [currentMonthKey, index.firstMonthKey],
+    );
+    const { months, listRef, pager, activeMonth, jumpToMonth, monthWheel } = useMonthKeyPager({
+      months: pagerMonths,
       pageWidth,
-      totalSlots: months.length,
-      initialIndex: months.length - 1,
+      initialIndex: pagerMonths.length - 1,
+      ref,
     });
 
-    const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
-    useImperativeHandle(
-      ref,
-      () => ({
-        scrollToRelative: pager.scrollToRelative,
-        openMonthPicker: () => setIsMonthPickerOpen(true),
-      }),
-      [pager.scrollToRelative],
-    );
-
-    // `months` can gain leading entries while mounted (a backdated entry, a
-    // sync): stay on the month being viewed rather than the same slot. Before
-    // paint, so the slot's other month never flashes.
-    const previousMonthsRef = useRef(months);
-    useLayoutEffect(() => {
-      const previousMonths = previousMonthsRef.current;
-      if (previousMonths === months) return;
-      previousMonthsRef.current = months;
-      const viewed = previousMonths[pager.activeIndexRef.current];
-      if (!viewed) return;
-      let nextIndex = months.indexOf(viewed);
-      if (nextIndex < 0) {
-        const nearest = months.findIndex((month) => month >= viewed);
-        nextIndex = nearest >= 0 ? nearest : months.length - 1;
-      }
-      if (nextIndex === pager.activeIndexRef.current) return;
-      pager.setActiveIndex(nextIndex);
-      listRef.current?.scrollToOffset({ offset: nextIndex * pageWidth, animated: false });
-    }, [months, pageWidth, pager]);
-
-    const activeMonth = months[pager.activeIndex] ?? months[months.length - 1]!;
     const monthLabel = monthKeyLabel(activeMonth, settings.locale);
     useEffect(() => {
       onActiveMonthLabelChange?.(monthLabel);
@@ -207,29 +139,26 @@ export const HouseholdPagerView = forwardRef<HouseholdPagerViewHandle, Household
           month = buildHouseholdMonth({
             index,
             monthKey,
-            monthCycle,
+            isRunning: monthKey === currentMonthKey,
             peopleOrder,
-            categories,
-            personKeyOf,
+            categoriesById,
           });
           built.set(monthKey, month);
         }
         return month;
       };
-    }, [categories, index, monthCycle, peopleOrder, personKeyOf]);
+    }, [categoriesById, currentMonthKey, index, peopleOrder]);
 
     // A tap on another month's bar in the trend opens that month's page.
-    const { jumpToIndex } = pager;
     const selectMonth = useCallback(
       (monthKey: string) => {
-        const target = months.indexOf(monthKey);
-        if (target < 0) return null;
+        if (!months.includes(monthKey)) return null;
         return () => {
           void triggerHaptic('selection');
-          jumpToIndex(target);
+          jumpToMonth(monthKey);
         };
       },
-      [jumpToIndex, months],
+      [jumpToMonth, months],
     );
 
     const renderMonthPage = useCallback(
@@ -249,49 +178,62 @@ export const HouseholdPagerView = forwardRef<HouseholdPagerViewHandle, Household
               contentContainerStyle={[styles.content, listNavInset]}
               showsVerticalScrollIndicator={false}
             >
-              {month.isEmpty ? (
-                <EmptyState
-                  mascotName="sleeping"
-                  title={I18n.t('household.empty_title')}
-                  message={I18n.t('household.empty_body')}
-                  animateIn={false}
-                />
-              ) : (
-                <View style={styles.cardStack}>
-                  <TogetherCard
-                    month={month}
-                    styleByKey={styleByKey}
-                    settings={settings}
-                    onOpenPerson={(style) =>
-                      openIds(
-                        I18n.t('household.person_month', { name: style.person.name, month: label }),
-                        month.transactionIdsByPerson.get(personKey(style.person)) ?? [],
-                      )
-                    }
+              {/* A readable column on a tablet, as on Review. */}
+              <TabletContentContainer>
+                {month.isEmpty ? (
+                  <EmptyState
+                    mascotName="sleeping"
+                    title={I18n.t('household.empty_title')}
+                    message={I18n.t('household.empty_body')}
+                    animateIn={false}
                   />
-                  <CoversCard
-                    categories={month.categories}
-                    categoriesById={categoriesById}
-                    styleByKey={styleByKey}
-                    settings={settings}
-                    onOpenCategory={(category, name) => openIds(name, category.transactionIds)}
-                  />
-                  <TrendCard
-                    month={month}
-                    styleByKey={styleByKey}
-                    settings={settings}
-                    onSelectMonth={selectMonth}
-                  />
-                  <BiggestCard
-                    month={month}
-                    transactionsById={transactionsById}
-                    categoriesById={categoriesById}
-                    styleByKey={styleByKey}
-                    settings={settings}
-                    onOpenTransaction={onOpenTransaction}
-                  />
-                </View>
-              )}
+                ) : (
+                  <View style={styles.cardStack}>
+                    <TogetherCard
+                      month={month}
+                      styleByKey={styleByKey}
+                      settings={settings}
+                      onOpenPerson={(style) =>
+                        openIds(
+                          I18n.t('household.person_month', {
+                            name: style.person.name,
+                            month: label,
+                          }),
+                          month.transactionIdsByPerson.get(personKey(style.person)) ?? [],
+                        )
+                      }
+                    />
+                    <CoversCard
+                      categories={month.categories}
+                      categoriesById={categoriesById}
+                      transactionsById={transactionsById}
+                      styleByKey={styleByKey}
+                      settings={settings}
+                      onOpenCategory={(category, name) =>
+                        // The month too, as on a person's entries: the list holds only its entries.
+                        openIds(
+                          I18n.t('household.person_month', { name, month: label }),
+                          category.transactionIds,
+                        )
+                      }
+                    />
+                    <TrendCard
+                      month={month}
+                      styleByKey={styleByKey}
+                      settings={settings}
+                      onSelectMonth={selectMonth}
+                    />
+                    <BiggestCard
+                      month={month}
+                      transactionsById={transactionsById}
+                      categoriesById={categoriesById}
+                      styleByKey={styleByKey}
+                      settings={settings}
+                      onOpenTransaction={onOpenTransaction}
+                    />
+                  </View>
+                )}
+              </TabletContentContainer>
             </ScrollView>
           </View>
         );
@@ -311,7 +253,10 @@ export const HouseholdPagerView = forwardRef<HouseholdPagerViewHandle, Household
       ],
     );
 
-    const activeYearMonth = yearMonthFromKey(activeMonth);
+    // The ledger stopped being shared (or another was opened): the host opens
+    // Review on its next effect, so draw nothing rather than a page of nobody.
+    if (!people) return null;
+
     return (
       <>
         <FlatList
@@ -334,31 +279,12 @@ export const HouseholdPagerView = forwardRef<HouseholdPagerViewHandle, Household
           className="flex-1"
         />
 
-        <MonthYearWheelPicker
-          visible={isMonthPickerOpen}
-          year={activeYearMonth.year}
-          monthIndex={activeYearMonth.monthIndex}
-          // The pager runs from the first month with spending to this one.
-          min={yearMonthFromKey(months[0]!)}
-          max={yearMonthFromKey(months[months.length - 1]!)}
-          locale={settings.locale}
-          onSelect={(year, monthIndex) => {
-            setIsMonthPickerOpen(false);
-            const key = yearMonthToKey({ year, monthIndex });
-            const exact = months.indexOf(key);
-            const next = exact >= 0 ? exact : months.findIndex((month) => month >= key);
-            pager.jumpToIndex(next >= 0 ? next : months.length - 1);
-          }}
-          onClose={() => setIsMonthPickerOpen(false)}
-        />
+        {/* The pager runs from the first month with spending to this one. */}
+        <MonthYearWheelPicker {...monthWheel} locale={settings.locale} />
       </>
     );
   },
 );
-
-function styleFor(styleByKey: Map<string, PersonStyle>, key: string): PersonStyle | null {
-  return styleByKey.get(key) ?? null;
-}
 
 /** A full-width bar split into each person's part, in their colours. */
 function ShareBar({
@@ -366,13 +292,11 @@ function ShareBar({
   styleByKey,
   widthRatio = 1,
   height,
-  dimmed,
 }: {
   parts: PersonAmount[];
   styleByKey: Map<string, PersonStyle>;
   widthRatio?: number;
   height: number;
-  dimmed?: boolean;
 }) {
   // Someone with nothing would only leave a doubled hairline.
   const shown = parts.filter((part) => part.amount > 0);
@@ -388,13 +312,13 @@ function ShareBar({
     >
       {total > 0
         ? shown.map((part, position) => {
-            const color = styleFor(styleByKey, part.personKey)?.color ?? '#94A3A0';
+            const color = styleByKey.get(part.personKey)?.person.color ?? '#94A3A0';
             return (
               <View
                 key={part.personKey}
                 style={{
                   flex: part.amount / total,
-                  backgroundColor: dimmed ? withColorAlpha(color, 0.4) : color,
+                  backgroundColor: color,
                   // A hairline between two people, so equal colours never merge.
                   marginLeft: position === 0 ? 0 : 1.5,
                 }}
@@ -442,7 +366,7 @@ function TogetherCard({
 
           <View className="mt-3 gap-0.5">
             {rows.map((part) => {
-              const style = styleFor(styleByKey, part.personKey);
+              const style = styleByKey.get(part.personKey);
               if (!style) return null;
               const share = month.total > 0 ? part.amount / month.total : 0;
               const hasEntries =
@@ -462,12 +386,12 @@ function TogetherCard({
                   // Someone who spent nothing stays listed, quietly.
                   style={hasEntries ? undefined : styles.quiet}
                 >
-                  <PersonAvatar person={style.person} size={30} color={style.color} />
+                  <PersonAvatar person={style.person} size={30} />
                   {/* A photo hides the person's colour, so the bar's key moves beside it. */}
                   {style.person.avatarFileUri ? (
                     <View
                       className="h-2 w-2 rounded-full"
-                      style={{ backgroundColor: style.color }}
+                      style={{ backgroundColor: style.person.color }}
                     />
                   ) : null}
                   <Text variant="body" numberOfLines={1} className="min-w-0 flex-1">
@@ -508,15 +432,32 @@ function CategoryTile({ category }: { category: Category | undefined }) {
   );
 }
 
+/**
+ * A category's name from one of its entries, which still carry it after the
+ * category is deleted (the bucket keeps the deleted one's id).
+ */
+function nameFromEntries(
+  category: HouseholdCategory,
+  transactionsById: Map<string, TransactionWithRelations>,
+): string | null {
+  const sample = transactionsById.get(category.transactionIds[0] ?? '');
+  if (!sample) return null;
+  return (
+    (sample.categoryId === category.id ? sample.categoryName : sample.categoryParentName) ?? null
+  );
+}
+
 function CoversCard({
   categories,
   categoriesById,
+  transactionsById,
   styleByKey,
   settings,
   onOpenCategory,
 }: {
   categories: HouseholdCategory[];
   categoriesById: Map<string, Category>;
+  transactionsById: Map<string, TransactionWithRelations>;
   styleByKey: Map<string, PersonStyle>;
   settings: UserSettings;
   onOpenCategory: (category: HouseholdCategory, name: string) => void;
@@ -528,12 +469,15 @@ function CoversCard({
     <InsightCard title={I18n.t('household.who_covers')}>
       <View className="gap-3.5">
         {categories.map((category) => {
-          const record =
-            category.id === HOUSEHOLD_UNCATEGORIZED ? undefined : categoriesById.get(category.id);
-          const name = record?.name ?? String(I18n.t('common.uncategorized'));
+          const isUncategorized = category.id === UNCATEGORIZED_ID;
+          const record = isUncategorized ? undefined : categoriesById.get(category.id);
+          const name =
+            record?.name ??
+            (isUncategorized ? null : nameFromEntries(category, transactionsById)) ??
+            String(I18n.t('common.uncategorized'));
           const parts = category.byPerson
             .map((part) => {
-              const style = styleFor(styleByKey, part.personKey);
+              const style = styleByKey.get(part.personKey);
               return style
                 ? `${style.person.name} ${percentLabel(part.amount / category.amount)}`
                 : null;
@@ -601,7 +545,7 @@ function TrendCard({
           const isShown = entry.monthKey === month.monthKey;
           const barHeight =
             entry.total > 0 ? Math.max(4, (entry.total / ceiling) * TREND_HEIGHT) : 0;
-          const label = shortMonthLabel(entry.monthKey, settings.locale);
+          const label = monthNameLabel(entry.monthKey, settings.locale, 'short');
           const open = isShown ? null : onSelectMonth(entry.monthKey);
           return (
             <Pressable
@@ -621,16 +565,19 @@ function TrendCard({
               >
                 {/* The shown month stacked bottom-up in the page's order of people. */}
                 {isShown
-                  ? [...entry.byPerson].reverse().map((part) => (
-                      <View
-                        key={part.personKey}
-                        style={{
-                          flex: part.amount / entry.total,
-                          backgroundColor:
-                            styleFor(styleByKey, part.personKey)?.color ?? themeColors.textMuted,
-                        }}
-                      />
-                    ))
+                  ? month.people
+                      .filter((part) => part.amount > 0)
+                      .reverse()
+                      .map((part) => (
+                        <View
+                          key={part.personKey}
+                          style={{
+                            flex: part.amount / entry.total,
+                            backgroundColor:
+                              styleByKey.get(part.personKey)?.person.color ?? themeColors.textMuted,
+                          }}
+                        />
+                      ))
                   : null}
               </View>
               <Text
@@ -671,9 +618,13 @@ function BiggestCard({
         {month.biggest.map((entry) => {
           const transaction = transactionsById.get(entry.transactionId);
           const category = entry.categoryId ? categoriesById.get(entry.categoryId) : undefined;
+          // The entry's own category name too, as on Review: it outlives a deleted category.
           const title =
-            transaction?.note?.trim() || category?.name || I18n.t('common.uncategorized');
-          const style = styleFor(styleByKey, entry.personKey);
+            transaction?.note?.trim() ||
+            category?.name ||
+            transaction?.categoryName ||
+            I18n.t('common.uncategorized');
+          const style = styleByKey.get(entry.personKey);
           return (
             <Pressable
               key={entry.transactionId}
@@ -699,7 +650,7 @@ function BiggestCard({
                     : shortDayLabel(entry.dayKey, settings.locale)}
                 </Text>
               </View>
-              {style ? <PersonAvatar person={style.person} size={22} color={style.color} /> : null}
+              {style ? <PersonAvatar person={style.person} size={22} /> : null}
               <Text variant="bodyStrong">{money(entry.amount, settings)}</Text>
             </Pressable>
           );
