@@ -3117,16 +3117,6 @@ const da = {
     alone_hint:
       'Kun dig indtil videre. Når andre er med og tilføjer poster, vises hver persons andel her.',
     spent_together: 'Brugt sammen',
-    even_split: 'Lige deling',
-    each: '{{amount}} hver',
-    paid: 'Betalt {{amount}}',
-    to_even_out: 'For at gå lige op',
-    transfer: '{{from}} til {{to}}: {{amount}}',
-    all_square: 'Lige op',
-    split_note:
-      'Delt ligeligt mellem {{count}} personer efter, hvis hver post er. Skift det med Tilhører på en post.',
-    paid_more: '{{name}} betalte {{amount}} mere end en lige andel',
-    paid_less: '{{name}} betalte {{amount}} mindre end en lige andel',
     who_covers: 'Hvem dækker hvad',
     trend: 'Seneste 6 måneder',
     biggest: 'Største poster',

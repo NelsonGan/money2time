@@ -3134,16 +3134,6 @@ const id = {
     alone_hint:
       'Baru kamu sejauh ini. Setelah orang lain bergabung dan menambah catatan, bagian tiap orang muncul di sini.',
     spent_together: 'Dibelanjakan bersama',
-    even_split: 'Bagi rata',
-    each: '{{amount}} per orang',
-    paid: 'Membayar {{amount}}',
-    to_even_out: 'Agar impas',
-    transfer: '{{from}} ke {{to}}: {{amount}}',
-    all_square: 'Sudah impas',
-    split_note:
-      'Dibagi rata untuk {{count}} orang, menurut milik siapa tiap catatan. Ubah lewat Milik di catatan.',
-    paid_more: '{{name}} membayar {{amount}} lebih dari bagian rata',
-    paid_less: '{{name}} membayar {{amount}} kurang dari bagian rata',
     who_covers: 'Siapa menanggung apa',
     trend: '6 bulan terakhir',
     biggest: 'Catatan terbesar',

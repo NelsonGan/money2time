@@ -3153,16 +3153,6 @@ const nl = {
     alone_hint:
       'Voorlopig alleen jij. Zodra anderen meedoen en boekingen toevoegen, zie je hier ieders deel.',
     spent_together: 'Samen uitgegeven',
-    even_split: 'Gelijk verdeeld',
-    each: '{{amount}} per persoon',
-    paid: '{{amount}} betaald',
-    to_even_out: 'Om het gelijk te trekken',
-    transfer: '{{from}} aan {{to}}: {{amount}}',
-    all_square: 'Alles verrekend',
-    split_note:
-      'Gelijk verdeeld over {{count}} personen, op basis van wiens elke boeking is. Wijzig het met Hoort bij bij een boeking.',
-    paid_more: '{{name}} betaalde {{amount}} meer dan een gelijk deel',
-    paid_less: '{{name}} betaalde {{amount}} minder dan een gelijk deel',
     who_covers: 'Wie betaalt wat',
     trend: 'Laatste 6 maanden',
     biggest: 'Grootste boekingen',

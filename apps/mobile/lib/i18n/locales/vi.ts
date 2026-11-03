@@ -3099,16 +3099,6 @@ const vi = {
     alone_hint:
       'Hiện mới chỉ có bạn. Khi người khác tham gia và thêm khoản chi, phần của từng người sẽ hiện ở đây.',
     spent_together: 'Chi tiêu chung',
-    even_split: 'Chia đều',
-    each: 'Mỗi người {{amount}}',
-    paid: 'Đã trả {{amount}}',
-    to_even_out: 'Để cân bằng',
-    transfer: '{{from}} cho {{to}}: {{amount}}',
-    all_square: 'Đã cân bằng',
-    split_note:
-      'Chia đều cho {{count}} người, theo việc mỗi khoản thuộc về ai. Đổi ở mục Thuộc về của khoản đó.',
-    paid_more: '{{name}} đã trả nhiều hơn phần chia đều {{amount}}',
-    paid_less: '{{name}} đã trả ít hơn phần chia đều {{amount}}',
     who_covers: 'Ai chi cho gì',
     trend: '6 tháng gần nhất',
     biggest: 'Khoản lớn nhất',

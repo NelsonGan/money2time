@@ -3121,16 +3121,6 @@ const nb = {
     alone_hint:
       'Bare deg foreløpig. Når andre blir med og legger til poster, vises hver persons andel her.',
     spent_together: 'Brukt sammen',
-    even_split: 'Lik fordeling',
-    each: '{{amount}} hver',
-    paid: 'Betalt {{amount}}',
-    to_even_out: 'For å gå opp i opp',
-    transfer: '{{from}} til {{to}}: {{amount}}',
-    all_square: 'Alt i balanse',
-    split_note:
-      'Delt likt mellom {{count}} personer, etter hvem hver post tilhører. Endre det med Tilhører på en post.',
-    paid_more: '{{name}} betalte {{amount}} mer enn en lik andel',
-    paid_less: '{{name}} betalte {{amount}} mindre enn en lik andel',
     who_covers: 'Hvem dekker hva',
     trend: 'Siste 6 måneder',
     biggest: 'Største poster',

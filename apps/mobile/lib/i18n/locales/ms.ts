@@ -3142,16 +3142,6 @@ const ms = {
     alone_hint:
       'Hanya anda buat masa ini. Apabila orang lain menyertai dan menambah catatan, bahagian setiap orang dipaparkan di sini.',
     spent_together: 'Dibelanjakan bersama',
-    even_split: 'Bahagi sama rata',
-    each: '{{amount}} seorang',
-    paid: 'Membayar {{amount}}',
-    to_even_out: 'Untuk menyamakan',
-    transfer: '{{from}} kepada {{to}}: {{amount}}',
-    all_square: 'Sudah seimbang',
-    split_note:
-      'Dibahagi sama rata antara {{count}} orang, mengikut milik siapa setiap catatan. Tukar dengan Milik pada catatan.',
-    paid_more: '{{name}} membayar {{amount}} lebih daripada bahagian sama rata',
-    paid_less: '{{name}} membayar {{amount}} kurang daripada bahagian sama rata',
     who_covers: 'Siapa tanggung apa',
     trend: '6 bulan lepas',
     biggest: 'Catatan terbesar',

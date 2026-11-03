@@ -3165,16 +3165,6 @@ const fil = {
     alone_hint:
       'Ikaw pa lang sa ngayon. Kapag may sumali at nagdagdag ng entry, makikita rito ang bahagi ng bawat isa.',
     spent_together: 'Nagastos nang magkasama',
-    even_split: 'Pantay na hatian',
-    each: '{{amount}} bawat isa',
-    paid: 'Nagbayad ng {{amount}}',
-    to_even_out: 'Para magpantay',
-    transfer: '{{from}} kay {{to}}: {{amount}}',
-    all_square: 'Pantay na',
-    split_note:
-      'Hinati nang pantay sa {{count}} tao, ayon sa kung kanino ang bawat entry. Palitan ito sa Pag-aari ni ng isang entry.',
-    paid_more: 'Nagbayad si {{name}} ng {{amount}} na higit sa pantay na hati',
-    paid_less: 'Nagbayad si {{name}} ng {{amount}} na kulang sa pantay na hati',
     who_covers: 'Sino ang sumasagot sa ano',
     trend: 'Huling 6 na buwan',
     biggest: 'Pinakamalalaking entry',

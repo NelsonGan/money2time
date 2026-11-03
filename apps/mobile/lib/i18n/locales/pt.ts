@@ -3137,16 +3137,6 @@ const pt = {
     alone_hint:
       'Por enquanto, só você. Quando outros entrarem e adicionarem lançamentos, a parte de cada pessoa aparece aqui.',
     spent_together: 'Gasto em conjunto',
-    even_split: 'Divisão igual',
-    each: '{{amount}} cada',
-    paid: 'Pagou {{amount}}',
-    to_even_out: 'Para acertar as contas',
-    transfer: '{{from}} para {{to}}: {{amount}}',
-    all_square: 'Tudo acertado',
-    split_note:
-      'Dividido igualmente entre {{count}} pessoas, conforme de quem é cada lançamento. Altere em Pertence a num lançamento.',
-    paid_more: '{{name}} pagou {{amount}} a mais que uma parte igual',
-    paid_less: '{{name}} pagou {{amount}} a menos que uma parte igual',
     who_covers: 'Quem paga o quê',
     trend: 'Últimos 6 meses',
     biggest: 'Maiores lançamentos',

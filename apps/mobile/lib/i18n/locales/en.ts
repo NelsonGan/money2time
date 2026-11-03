@@ -3113,16 +3113,6 @@ const en = {
   household: {
     alone_hint: "Only you so far. Once others join and add entries, each person's part shows here.",
     spent_together: 'Spent together',
-    even_split: 'Even split',
-    each: '{{amount}} each',
-    paid: 'Paid {{amount}}',
-    to_even_out: 'To even it out',
-    transfer: '{{from}} to {{to}}: {{amount}}',
-    all_square: 'All square',
-    split_note:
-      'Split evenly between {{count}} people, by whose each entry is. Change it with Belongs to on an entry.',
-    paid_more: '{{name}} paid {{amount}} more than an even share',
-    paid_less: '{{name}} paid {{amount}} less than an even share',
     who_covers: 'Who covers what',
     trend: 'Last 6 months',
     biggest: 'Biggest entries',

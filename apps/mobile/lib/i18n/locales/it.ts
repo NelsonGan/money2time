@@ -3139,16 +3139,6 @@ const it = {
     alone_hint:
       'Per ora solo tu. Quando altri si uniranno e aggiungeranno voci, qui vedrai la parte di ognuno.',
     spent_together: 'Speso insieme',
-    even_split: 'Divisione equa',
-    each: '{{amount}} a testa',
-    paid: 'Pagato {{amount}}',
-    to_even_out: 'Per pareggiare',
-    transfer: '{{from}} a {{to}}: {{amount}}',
-    all_square: 'Tutto pari',
-    split_note:
-      'Diviso in parti uguali tra {{count}} persone, in base a chi appartiene ogni voce. Cambialo con Appartiene a in una voce.',
-    paid_more: '{{name}} ha pagato {{amount}} in più di una quota uguale',
-    paid_less: '{{name}} ha pagato {{amount}} in meno di una quota uguale',
     who_covers: 'Chi copre cosa',
     trend: 'Ultimi 6 mesi',
     biggest: 'Voci più grandi',

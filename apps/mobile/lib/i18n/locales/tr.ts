@@ -3129,16 +3129,6 @@ const tr = {
     alone_hint:
       'Şimdilik yalnızca sen varsın. Başkaları katılıp kayıt ekledikçe herkesin payı burada görünür.',
     spent_together: 'Birlikte harcanan',
-    even_split: 'Eşit paylaşım',
-    each: 'Kişi başı {{amount}}',
-    paid: '{{amount}} ödedi',
-    to_even_out: 'Eşitlemek için',
-    transfer: '{{from}} → {{to}}: {{amount}}',
-    all_square: 'Hesap denk',
-    split_note:
-      '{{count}} kişi arasında eşit bölündü; her kaydın kime ait olduğuna göre. Bir kayıttaki Kime ait ile değiştirin.',
-    paid_more: '{{name}} eşit paydan {{amount}} fazla ödedi',
-    paid_less: '{{name}} eşit paydan {{amount}} az ödedi',
     who_covers: 'Kim neyi karşılıyor',
     trend: 'Son 6 ay',
     biggest: 'En büyük kayıtlar',

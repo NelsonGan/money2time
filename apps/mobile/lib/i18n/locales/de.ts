@@ -3161,16 +3161,6 @@ const de = {
     alone_hint:
       'Bisher nur du. Sobald andere beitreten und Einträge hinzufügen, siehst du hier den Anteil jeder Person.',
     spent_together: 'Gemeinsam ausgegeben',
-    even_split: 'Gleiche Aufteilung',
-    each: 'je {{amount}}',
-    paid: 'Bezahlt {{amount}}',
-    to_even_out: 'Zum Ausgleich',
-    transfer: '{{from}} an {{to}}: {{amount}}',
-    all_square: 'Alles ausgeglichen',
-    split_note:
-      'Gleichmäßig auf {{count}} Personen aufgeteilt, danach, wem jeder Eintrag gehört. Ändern mit Gehört zu in einem Eintrag.',
-    paid_more: '{{name}} hat {{amount}} mehr als den gleichen Anteil bezahlt',
-    paid_less: '{{name}} hat {{amount}} weniger als den gleichen Anteil bezahlt',
     who_covers: 'Wer zahlt was',
     trend: 'Letzte 6 Monate',
     biggest: 'Größte Einträge',

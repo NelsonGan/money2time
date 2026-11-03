@@ -3143,16 +3143,6 @@ const es = {
     alone_hint:
       'Por ahora solo tú. Cuando otros se unan y añadan movimientos, aquí verás la parte de cada persona.',
     spent_together: 'Gastado en conjunto',
-    even_split: 'Reparto igual',
-    each: '{{amount}} cada uno',
-    paid: 'Pagó {{amount}}',
-    to_even_out: 'Para quedar a mano',
-    transfer: '{{from}} a {{to}}: {{amount}}',
-    all_square: 'Todo en paz',
-    split_note:
-      'Repartido a partes iguales entre {{count}} personas, según de quién es cada movimiento. Cámbialo con Pertenece a en un movimiento.',
-    paid_more: '{{name}} pagó {{amount}} más que una parte igual',
-    paid_less: '{{name}} pagó {{amount}} menos que una parte igual',
     who_covers: 'Quién cubre qué',
     trend: 'Últimos 6 meses',
     biggest: 'Movimientos más grandes',

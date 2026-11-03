@@ -1,5 +1,4 @@
 import {
-  buildFairShare,
   buildHouseholdIndex,
   buildHouseholdMonth,
   buildPeopleStyles,
@@ -82,69 +81,6 @@ function peopleOf(list: LedgerPerson[]): LedgerPeople {
   };
 }
 
-describe('buildFairShare', () => {
-  it('evens a couple out with one payment from the one behind', () => {
-    const share = buildFairShare([
-      { personKey: 'aisha', amount: 3759.8 },
-      { personKey: 'daniel', amount: 2722.6 },
-    ]);
-    expect(share?.each).toBeCloseTo(3241.2, 2);
-    expect(share?.balances.map((balance) => Math.round(balance.difference * 100))).toEqual([
-      51860, -51860,
-    ]);
-    expect(share?.transfers).toEqual([{ fromKey: 'daniel', toKey: 'aisha', amount: 518.6 }]);
-  });
-
-  it('settles three people in at most two payments that add up', () => {
-    const share = buildFairShare([
-      { personKey: 'a', amount: 90 },
-      { personKey: 'b', amount: 60 },
-      { personKey: 'c', amount: 0 },
-    ]);
-    // Each owes 50: C is 50 behind, A 40 ahead, B 10 ahead.
-    expect(share?.transfers).toEqual([
-      { fromKey: 'c', toKey: 'a', amount: 40 },
-      { fromKey: 'c', toKey: 'b', amount: 10 },
-    ]);
-  });
-
-  it('counts someone who spent nothing as owing their share', () => {
-    const share = buildFairShare([
-      { personKey: 'a', amount: 100 },
-      { personKey: 'b', amount: 0 },
-    ]);
-    expect(share?.transfers).toEqual([{ fromKey: 'b', toKey: 'a', amount: 50 }]);
-  });
-
-  it('has no payments when everyone is already even, and none for one person', () => {
-    expect(
-      buildFairShare([
-        { personKey: 'a', amount: 40 },
-        { personKey: 'b', amount: 40 },
-      ])?.transfers,
-    ).toEqual([]);
-    expect(buildFairShare([{ personKey: 'a', amount: 40 }])).toBeNull();
-    expect(
-      buildFairShare([
-        { personKey: 'a', amount: 0 },
-        { personKey: 'b', amount: 0 },
-      ]),
-    ).toBeNull();
-  });
-
-  it('pays in whole cents when a share does not divide evenly', () => {
-    const share = buildFairShare([
-      { personKey: 'a', amount: 100 },
-      { personKey: 'b', amount: 0 },
-      { personKey: 'c', amount: 0 },
-    ]);
-    expect(share?.transfers).toEqual([
-      { fromKey: 'b', toKey: 'a', amount: 33.33 },
-      { fromKey: 'c', toKey: 'a', amount: 33.33 },
-    ]);
-  });
-});
-
 describe('buildHouseholdIndex', () => {
   it('buckets live expenses by month and person, in the reporting currency', () => {
     const index = buildHouseholdIndex(
@@ -201,8 +137,6 @@ describe('buildHouseholdMonth', () => {
     expect(month.total).toBeCloseTo(3276.2, 5);
     // The change from September's 1000.
     expect(month.changeRatio).toBeCloseTo(2.2762, 4);
-    // Split between all four, the one with nothing included.
-    expect(month.fairShare?.balances).toHaveLength(4);
   });
 
   it('rolls categories up to their root and keeps the five biggest', () => {
@@ -272,7 +206,7 @@ describe('buildHouseholdMonth', () => {
       personKeyOf: keyOf,
     });
     expect(empty.isEmpty).toBe(true);
-    expect(empty.fairShare).toBeNull();
+    expect(empty.total).toBe(0);
     const july = buildHouseholdMonth({
       index,
       monthKey: '2026-07',

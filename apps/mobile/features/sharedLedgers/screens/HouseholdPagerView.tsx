@@ -1,4 +1,4 @@
-import { ArrowRight, Check, ChevronRight } from 'lucide-react-native';
+import { ChevronRight } from 'lucide-react-native';
 import React, {
   forwardRef,
   useCallback,
@@ -45,7 +45,6 @@ import {
   buildHouseholdIndex,
   buildHouseholdMonth,
   buildPeopleStyles,
-  type FairShare,
   HOUSEHOLD_UNCATEGORIZED,
   type HouseholdCategory,
   type HouseholdMonth,
@@ -270,13 +269,6 @@ export const HouseholdPagerView = forwardRef<HouseholdPagerViewHandle, Household
                       )
                     }
                   />
-                  {month.fairShare ? (
-                    <FairShareCard
-                      fairShare={month.fairShare}
-                      styleByKey={styleByKey}
-                      settings={settings}
-                    />
-                  ) : null}
                   <CoversCard
                     categories={month.categories}
                     categoriesById={categoriesById}
@@ -504,168 +496,6 @@ function TogetherCard({
   );
 }
 
-/**
- * How far someone is from their even share: a bar growing right (over) or
- * left (under) from a centre line, scaled to the furthest person.
- */
-function BalanceBar({
-  difference,
-  furthest,
-  overColor,
-  underColor,
-  lineColor,
-}: {
-  difference: number;
-  furthest: number;
-  overColor: string;
-  underColor: string;
-  lineColor: string;
-}) {
-  const ratio = furthest > 0 ? Math.min(Math.abs(difference) / furthest, 1) : 0;
-  const width = `${Math.max(ratio * 50, Math.abs(difference) >= 0.005 ? 3 : 0)}%` as const;
-  const over = difference > 0;
-  return (
-    <View style={styles.balanceBar} {...REPLAY_PRIVATE}>
-      <View style={[styles.balanceTrack, { backgroundColor: withColorAlpha(lineColor, 0.35) }]} />
-      <View
-        style={[
-          styles.balanceFill,
-          over ? { left: '50%' } : { right: '50%' },
-          { width, backgroundColor: over ? overColor : underColor },
-        ]}
-      />
-      <View style={[styles.balanceCentre, { backgroundColor: lineColor }]} />
-    </View>
-  );
-}
-
-function FairShareCard({
-  fairShare,
-  styleByKey,
-  settings,
-}: {
-  fairShare: FairShare;
-  styleByKey: Map<string, PersonStyle>;
-  settings: UserSettings;
-}) {
-  const themeColors = useThemeColors();
-  // Most over their share first, most under last.
-  const balances = [...fairShare.balances].sort((a, b) => b.difference - a.difference);
-  const furthest = balances.reduce((max, entry) => Math.max(max, Math.abs(entry.difference)), 0);
-  return (
-    <InsightCard
-      title={I18n.t('household.even_split')}
-      meta={I18n.t('household.each', { amount: money(fairShare.each, settings) })}
-    >
-      <View className="gap-3">
-        {balances.map((balance) => {
-          const style = styleFor(styleByKey, balance.personKey);
-          if (!style) return null;
-          const cents = Math.round(balance.difference * 100);
-          const amount = money(Math.abs(balance.difference), settings);
-          return (
-            <View
-              key={balance.personKey}
-              className="flex-row items-center gap-3"
-              accessible
-              accessibilityLabel={
-                cents === 0
-                  ? `${style.person.name}, ${I18n.t('household.all_square')}`
-                  : I18n.t(cents > 0 ? 'household.paid_more' : 'household.paid_less', {
-                      name: style.person.name,
-                      amount,
-                    })
-              }
-            >
-              <PersonAvatar person={style.person} size={28} color={style.color} />
-              <View className="min-w-0 flex-1">
-                <Text variant="body" numberOfLines={1}>
-                  {style.label}
-                </Text>
-                <Text variant="caption" tone="muted" numberOfLines={1}>
-                  {I18n.t('household.paid', { amount: money(balance.paid, settings) })}
-                </Text>
-              </View>
-              <BalanceBar
-                difference={balance.difference}
-                furthest={furthest}
-                overColor={themeColors.success}
-                underColor={themeColors.accent}
-                lineColor={themeColors.textMuted}
-              />
-              {/* Over in green; under in plain text, the bar carrying the amber,
-                  so no one's row reads as a warning. */}
-              <Text
-                variant="bodyStrong"
-                numberOfLines={1}
-                className="min-w-[76px] text-right"
-                style={{ color: cents > 0 ? themeColors.success : themeColors.text }}
-              >
-                {cents === 0 ? '±0' : `${cents > 0 ? '+' : '−'}${amount}`}
-              </Text>
-            </View>
-          );
-        })}
-      </View>
-
-      <View className="my-3.5 h-px bg-border/40" />
-
-      {fairShare.transfers.length === 0 ? (
-        <View className="flex-row items-center gap-2">
-          <View
-            className="h-6 w-6 items-center justify-center rounded-full"
-            style={{ backgroundColor: withColorAlpha(themeColors.success, 0.15) }}
-          >
-            <Check size={14} color={themeColors.success} strokeWidth={3} />
-          </View>
-          <Text variant="bodyStrong" style={{ color: themeColors.success }}>
-            {I18n.t('household.all_square')}
-          </Text>
-        </View>
-      ) : (
-        <View className="gap-2.5">
-          <Text variant="caption" tone="muted">
-            {I18n.t('household.to_even_out')}
-          </Text>
-          {fairShare.transfers.map((transfer) => {
-            const from = styleFor(styleByKey, transfer.fromKey);
-            const to = styleFor(styleByKey, transfer.toKey);
-            if (!from || !to) return null;
-            const amount = money(transfer.amount, settings);
-            return (
-              <View
-                key={`${transfer.fromKey}>${transfer.toKey}`}
-                className="flex-row items-center gap-2"
-                accessible
-                accessibilityLabel={I18n.t('household.transfer', {
-                  from: from.person.name,
-                  to: to.person.name,
-                  amount,
-                })}
-              >
-                <PersonAvatar person={from.person} size={22} color={from.color} />
-                <Text variant="body" numberOfLines={1} className="max-w-[32%]">
-                  {from.label}
-                </Text>
-                <ArrowRight size={15} color={themeColors.textMuted} strokeWidth={2.25} />
-                <PersonAvatar person={to.person} size={22} color={to.color} />
-                <Text variant="body" numberOfLines={1} className="min-w-0 flex-1">
-                  {to.label}
-                </Text>
-                <Text variant="bodyStrong">{amount}</Text>
-              </View>
-            );
-          })}
-        </View>
-      )}
-
-      <Text variant="caption" tone="muted" className="mt-3.5">
-        {I18n.t('household.split_note', { count: fairShare.balances.length })}
-      </Text>
-    </InsightCard>
-  );
-}
-
 function CategoryTile({ category }: { category: Category | undefined }) {
   return (
     <View className="h-9 w-9 items-center justify-center rounded-2xl bg-surface-muted/70">
@@ -882,29 +712,6 @@ function BiggestCard({
 const styles = StyleSheet.create({
   quiet: {
     opacity: 0.55,
-  },
-  balanceBar: {
-    // Fixed, so the name and what they paid keep the room.
-    width: 56,
-    height: 14,
-    justifyContent: 'center',
-  },
-  balanceTrack: {
-    height: 2,
-    borderRadius: 1,
-  },
-  balanceFill: {
-    position: 'absolute',
-    height: 8,
-    borderRadius: 4,
-  },
-  balanceCentre: {
-    position: 'absolute',
-    left: '50%',
-    width: 1.5,
-    height: 14,
-    marginLeft: -0.75,
-    borderRadius: 1,
   },
   content: {
     paddingHorizontal: spacing.md,

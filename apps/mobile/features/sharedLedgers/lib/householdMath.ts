@@ -1,7 +1,6 @@
 // The numbers behind the Household insights page of a shared ledger (README.md
 // > Shared ledgers > Household insights): what the household spent in a month,
-// each person's part of it (by whose each entry is, `member_id`), how far each
-// is from an even split and who would pay whom to even it out, which
+// each person's part of it (by whose each entry is, `member_id`), which
 // categories each person covers, the last months' trend and the biggest
 // entries. Pure, so it is tested without the app.
 
@@ -143,71 +142,6 @@ export function householdPagerMonths(
   return months;
 }
 
-/** One person against an even split of the month. */
-export interface FairShareBalance {
-  personKey: string;
-  paid: number;
-  /** Paid minus their even share: above zero they covered more, below less. */
-  difference: number;
-}
-
-/** One payment that evens the month out. */
-export interface SettleTransfer {
-  fromKey: string;
-  toKey: string;
-  amount: number;
-}
-
-export interface FairShare {
-  /** Each person's even share of the month. */
-  each: number;
-  balances: FairShareBalance[];
-  /** The fewest payments that make everyone even, largest first. Empty when they already are. */
-  transfers: SettleTransfer[];
-}
-
-/**
- * An even split of `total` between `people`, each one's balance against it,
- * and who pays whom to settle it. Null with fewer than two people or nothing
- * spent. The payments pair the one furthest behind with the one furthest
- * ahead, again and again, which settles n people in at most n - 1 payments.
- */
-export function buildFairShare(people: readonly PersonAmount[]): FairShare | null {
-  const total = people.reduce((sum, person) => sum + person.amount, 0);
-  if (people.length < 2 || total <= EPSILON) return null;
-  const each = total / people.length;
-  const balances = people.map((person) => ({
-    personKey: person.personKey,
-    paid: person.amount,
-    difference: person.amount - each,
-  }));
-  // Worked in whole cents, so the payments add up to what they settle.
-  const ahead = balances
-    .filter((balance) => balance.difference > EPSILON)
-    .map((balance) => ({ key: balance.personKey, cents: Math.round(balance.difference * 100) }));
-  const behind = balances
-    .filter((balance) => balance.difference < -EPSILON)
-    .map((balance) => ({ key: balance.personKey, cents: Math.round(-balance.difference * 100) }));
-  const transfers: SettleTransfer[] = [];
-  const byCentsDescending = (a: { cents: number }, b: { cents: number }) => b.cents - a.cents;
-  while (ahead.length > 0 && behind.length > 0) {
-    ahead.sort(byCentsDescending);
-    behind.sort(byCentsDescending);
-    const creditor = ahead[0]!;
-    const debtor = behind[0]!;
-    const cents = Math.min(creditor.cents, debtor.cents);
-    if (cents > 0) {
-      transfers.push({ fromKey: debtor.key, toKey: creditor.key, amount: cents / 100 });
-    }
-    creditor.cents -= cents;
-    debtor.cents -= cents;
-    if (creditor.cents <= 0) ahead.shift();
-    if (debtor.cents <= 0) behind.shift();
-  }
-  transfers.sort((a, b) => b.amount - a.amount);
-  return { each, balances, transfers };
-}
-
 export interface HouseholdCategory {
   /** The root category's id, or `HOUSEHOLD_UNCATEGORIZED`. */
   id: string;
@@ -238,7 +172,6 @@ export interface HouseholdMonth {
   changeRatio: number | null;
   /** Everyone on the page, in order, with what they spent (zero included). */
   people: PersonAmount[];
-  fairShare: FairShare | null;
   categories: HouseholdCategory[];
   trend: HouseholdTrendMonth[];
   biggest: HouseholdBiggest[];
@@ -354,7 +287,6 @@ export function buildHouseholdMonth({
     total,
     changeRatio,
     people,
-    fairShare: buildFairShare(people),
     categories: householdCategories,
     trend,
     biggest,

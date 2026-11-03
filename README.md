@@ -1726,24 +1726,13 @@ how the household is spending, and who is covering what.
   being the owner). Everyone in the ledger is on the page, those who spent
   nothing too; anyone else with an entry (someone who left) is added after
   them, with a colour nobody else on the page has.
-- **Cards.**
+- **Cards.** The page only reads what people log; there is no splitting or
+  settling up.
   - _Spent together_: the month's total, the change from the month before,
     a bar split by person, and a row per person with their amount and share,
     biggest first. Someone who spent nothing stays listed, faded. A row opens
     that person's entries for the month. While nobody else has joined, a line
     says so instead of a one-person breakdown.
-  - _Even split_ (two or more people): the month split evenly between
-    everyone in the ledger (and anyone who left but has an entry that month,
-    as they were part of it then). Each person's row, most over their share
-    first, has what they paid, a small bar from a centre line (right and green
-    when over, left and amber when under, scaled to whoever is furthest) and
-    the difference: green when over, plain text when under, so nobody's row
-    reads as a warning. Below, the fewest payments that even it out, one line
-    each (`buildFairShare`: the one furthest behind pays the one furthest
-    ahead, again and again, in whole cents, so n people settle in at most
-    n - 1 payments; "All square" when they already are). Nothing is recorded:
-    settling up is left to the household. A note says the split follows whose
-    each entry is, and that Belongs to changes it.
   - _Who covers what_: the five biggest top-level categories (subcategories
     roll up), each with a bar as long as its share of the biggest and split
     by person. A row opens the category's entries for the month.
@@ -1751,8 +1740,8 @@ how the household is spending, and who is covering what.
     others in one quiet colour; a tap on another month's bar opens its page.
   - _Biggest entries_: the month's three largest, each with whose it is; a
     row opens the entry.
-- **Names.** Where space is short (the even split, the payments, the biggest
-  entries) people go by first name (`distinctShortNames`), or their full name
+- **Names.** Where space is short (the biggest entries) people go by first
+  name (`distinctShortNames`), or their full name
   where two people share a first name, and a number where a whole name is
   shared ("Member", "Member 2").
 - **Speed.** The ledger's expenses are bucketed by month and person once per

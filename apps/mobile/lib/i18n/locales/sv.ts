@@ -3122,16 +3122,6 @@ const sv = {
     alone_hint:
       'Bara du hittills. När andra går med och lägger till poster visas varje persons del här.',
     spent_together: 'Spenderat tillsammans',
-    even_split: 'Lika delning',
-    each: '{{amount}} var',
-    paid: 'Betalade {{amount}}',
-    to_even_out: 'För att gå jämnt ut',
-    transfer: '{{from}} till {{to}}: {{amount}}',
-    all_square: 'Allt jämnt',
-    split_note:
-      'Delat lika mellan {{count}} personer, efter vems varje post är. Ändra det med Tillhör på en post.',
-    paid_more: '{{name}} betalade {{amount}} mer än en lika del',
-    paid_less: '{{name}} betalade {{amount}} mindre än en lika del',
     who_covers: 'Vem står för vad',
     trend: 'Senaste 6 månaderna',
     biggest: 'Största posterna',

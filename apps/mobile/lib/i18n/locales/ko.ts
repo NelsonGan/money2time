@@ -3081,16 +3081,6 @@ const ko = {
     alone_hint:
       '아직은 나 혼자예요. 다른 사람이 참여해 내역을 추가하면 여기에서 사람별 몫을 볼 수 있어요.',
     spent_together: '함께 쓴 금액',
-    even_split: '똑같이 나누면',
-    each: '1인당 {{amount}}',
-    paid: '{{amount}} 지불',
-    to_even_out: '정산하려면',
-    transfer: '{{from}}에서 {{to}}에게: {{amount}}',
-    all_square: '정산 완료',
-    split_note:
-      '{{count}}명이 똑같이 나눈 금액이며, 각 내역이 누구 것인지로 계산해요. 내역의 누구의 기록에서 바꿀 수 있어요.',
-    paid_more: '{{name}}님이 균등 분담보다 {{amount}} 더 냈어요',
-    paid_less: '{{name}}님이 균등 분담보다 {{amount}} 덜 냈어요',
     who_covers: '누가 무엇을 부담하나요',
     trend: '최근 6개월',
     biggest: '큰 지출',

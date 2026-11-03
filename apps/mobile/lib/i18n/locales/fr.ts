@@ -3160,16 +3160,6 @@ const fr = {
     alone_hint:
       "Vous seul pour l'instant. Quand d'autres rejoindront et ajouteront des opérations, la part de chacun s'affichera ici.",
     spent_together: 'Dépensé ensemble',
-    even_split: 'Partage égal',
-    each: '{{amount}} chacun',
-    paid: 'Payé {{amount}}',
-    to_even_out: 'Pour équilibrer',
-    transfer: '{{from}} à {{to}} : {{amount}}',
-    all_square: 'Tout est équilibré',
-    split_note:
-      'Partagé à parts égales entre {{count}} personnes, selon à qui appartient chaque opération. Modifiez-le avec Appartient à sur une opération.',
-    paid_more: "{{name}} a payé {{amount}} de plus qu'une part égale",
-    paid_less: "{{name}} a payé {{amount}} de moins qu'une part égale",
     who_covers: 'Qui paie quoi',
     trend: '6 derniers mois',
     biggest: 'Plus grosses dépenses',
