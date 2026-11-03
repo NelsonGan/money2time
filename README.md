@@ -1337,6 +1337,13 @@ updated_at)`, with each row as JSON, plus `sync_info` (last device, last
   The flush updates a row it already read, else inserts it, and `sync_info`
   is rewritten with delete then insert. Re-check before using an upsert after
   a Turso upgrade.
+- **The replica keeps temporary storage in memory.** The Turso engine writes
+  temporary indexes (an `IN (…)` list, as in the Cloud Sync summary, or a large
+  sort) to a directory under `$TMPDIR`, else `/data/local/tmp` on Android,
+  which apps cannot write. Android sets `$TMPDIR` to the app's cache dir only
+  when that directory is ready at start-up, so on some phones linking failed
+  with `I/O error (tempdir): permission denied`. `open()` sets
+  `PRAGMA temp_store = MEMORY` on the replica, as the app database does.
 - **Natural keys.** Some tables have a unique index besides the id (the
   week's auto-created budget, an exchange-rate pair, a wage month), so two
   phones can each make "the same" row under different ids. The lower id wins
