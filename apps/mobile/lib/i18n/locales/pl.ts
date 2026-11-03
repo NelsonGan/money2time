@@ -1013,6 +1013,7 @@ const pl = {
     },
   },
   insights: {
+    household: 'Gospodarstwo domowe',
     breakdown: 'Podział',
     trends: 'Trendy',
     tabs: {
@@ -3119,6 +3120,26 @@ const pl = {
     pro_ended_message:
       'Twoja subskrypcja Pro wygasła, więc {{name}} i pozostałe dodatkowe księgi są na razie zablokowane. Nic nie zostało usunięte: po odnowieniu otworzą się w niezmienionej postaci.',
     renew_pro: 'Odnów Pro',
+  },
+  household: {
+    spent_together: 'Wydane razem',
+    even_split: 'Równy podział',
+    each: 'Po {{amount}} na osobę',
+    paid: 'Zapłacono {{amount}}',
+    to_even_out: 'Aby się rozliczyć',
+    transfer: '{{from}} → {{to}}: {{amount}}',
+    all_square: 'Wszystko rozliczone',
+    split_note:
+      'Podzielone po równo między {{count}} os., według tego, czyj jest każdy wpis. Zmień to w polu „Należy do” we wpisie.',
+    paid_more: '{{name}}: zapłacono o {{amount}} więcej niż równa część',
+    paid_less: '{{name}}: zapłacono o {{amount}} mniej niż równa część',
+    who_covers: 'Kto pokrywa co',
+    trend: 'Ostatnie 6 miesięcy',
+    biggest: 'Największe wpisy',
+    person_share: '{{name}}: {{amount}}, {{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: 'Jeszcze nic nie wydano',
+    empty_body: 'Tutaj widać wydatki każdej osoby.',
   },
   shared_ledgers: {
     member_fallback: 'Członek',

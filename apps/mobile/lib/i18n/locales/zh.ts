@@ -977,6 +977,7 @@ const zh = {
     },
   },
   insights: {
+    household: '家庭',
     breakdown: '明细',
     trends: '趋势',
     tabs: {
@@ -2992,6 +2993,25 @@ const zh = {
     pro_ended_message:
       '你的 Pro 订阅已结束，因此{{name}}和你的其他额外账本暂时被锁定。没有删除任何内容：续订后它们会原样重新打开。',
     renew_pro: '续订 Pro',
+  },
+  household: {
+    spent_together: '共同支出',
+    even_split: '平均分摊',
+    each: '每人 {{amount}}',
+    paid: '已付 {{amount}}',
+    to_even_out: '要扯平',
+    transfer: '{{from}} 给 {{to}}：{{amount}}',
+    all_square: '已扯平',
+    split_note: '按每笔记录归属的人，在 {{count}} 人之间平均分摊。可在记录的「归属」中更改。',
+    paid_more: '{{name}} 比平均分摊多付了 {{amount}}',
+    paid_less: '{{name}} 比平均分摊少付了 {{amount}}',
+    who_covers: '谁负担什么',
+    trend: '最近 6 个月',
+    biggest: '最大支出',
+    person_share: '{{name}}：{{amount}}，{{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: '还没有支出',
+    empty_body: '每个人的支出会显示在这里。',
   },
   shared_ledgers: {
     member_fallback: '成员',

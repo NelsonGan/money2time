@@ -1012,6 +1012,7 @@ const uk = {
     },
   },
   insights: {
+    household: 'Родина',
     breakdown: 'Структура',
     trends: 'Динаміка',
     tabs: {
@@ -3112,6 +3113,26 @@ const uk = {
     pro_ended_message:
       'Ваша підписка Pro закінчилася, тому «{{name}}» та інші додаткові книги поки заблоковані. Нічого не видалено: після поновлення вони відкриються такими, як були.',
     renew_pro: 'Поновити Pro',
+  },
+  household: {
+    spent_together: 'Витрачено разом',
+    even_split: 'Порівну',
+    each: 'По {{amount}} на кожного',
+    paid: 'Сплачено {{amount}}',
+    to_even_out: 'Щоб розрахуватися',
+    transfer: '{{from}} → {{to}}: {{amount}}',
+    all_square: 'Усі в розрахунку',
+    split_note:
+      'Порівну на {{count}} ос., за тим, чий кожен запис. Змініть це в полі «Чий запис» запису.',
+    paid_more: '{{name}}: сплачено на {{amount}} більше рівної частки',
+    paid_less: '{{name}}: сплачено на {{amount}} менше рівної частки',
+    who_covers: 'Хто за що платить',
+    trend: 'Останні 6 місяців',
+    biggest: 'Найбільші записи',
+    person_share: '{{name}}: {{amount}}, {{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: 'Поки витрат немає',
+    empty_body: "Тут з'являться витрати кожного учасника.",
   },
   shared_ledgers: {
     member_fallback: 'Учасник',

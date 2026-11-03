@@ -1016,6 +1016,7 @@ const it = {
     },
   },
   insights: {
+    household: 'Famiglia',
     breakdown: 'Ripartizione',
     trends: 'Andamenti',
     tabs: {
@@ -3133,6 +3134,26 @@ const it = {
     pro_ended_message:
       "Il tuo abbonamento Pro è terminato, quindi {{name}} e gli altri registri aggiuntivi sono bloccati per ora. Non è stato eliminato nulla: si riapriranno com'erano quando rinnovi.",
     renew_pro: 'Rinnova Pro',
+  },
+  household: {
+    spent_together: 'Speso insieme',
+    even_split: 'Divisione equa',
+    each: '{{amount}} a testa',
+    paid: 'Pagato {{amount}}',
+    to_even_out: 'Per pareggiare',
+    transfer: '{{from}} a {{to}}: {{amount}}',
+    all_square: 'Tutto pari',
+    split_note:
+      'Diviso in parti uguali tra {{count}} persone, in base a chi appartiene ogni voce. Cambialo con Appartiene a in una voce.',
+    paid_more: '{{name}} ha pagato {{amount}} in più di una quota uguale',
+    paid_less: '{{name}} ha pagato {{amount}} in meno di una quota uguale',
+    who_covers: 'Chi copre cosa',
+    trend: 'Ultimi 6 mesi',
+    biggest: 'Voci più grandi',
+    person_share: '{{name}}: {{amount}}, {{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: 'Ancora nessuna spesa',
+    empty_body: 'Qui compaiono le spese di ognuno, persona per persona.',
   },
   shared_ledgers: {
     member_fallback: 'Membro',

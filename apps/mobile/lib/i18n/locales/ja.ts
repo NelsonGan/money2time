@@ -1011,6 +1011,7 @@ const ja = {
     },
   },
   insights: {
+    household: '世帯',
     breakdown: '内訳',
     trends: '推移',
     tabs: {
@@ -3094,6 +3095,26 @@ const ja = {
     pro_ended_message:
       'Proの登録が終了したため、{{name}}とその他の追加帳簿は一時的にロックされています。何も削除されていません。更新すれば元のまま開けます。',
     renew_pro: 'Proを更新',
+  },
+  household: {
+    spent_together: '一緒に使った金額',
+    even_split: '均等に割ると',
+    each: '1人あたり{{amount}}',
+    paid: '{{amount}}を支払い',
+    to_even_out: '精算するには',
+    transfer: '{{from}}から{{to}}へ: {{amount}}',
+    all_square: '精算済み',
+    split_note:
+      '{{count}}人で均等に割り、各記録が誰のものかで計算しています。記録の「誰の記録か」で変更できます。',
+    paid_more: '{{name}}は均等な負担より{{amount}}多く支払いました',
+    paid_less: '{{name}}は均等な負担より{{amount}}少なく支払いました',
+    who_covers: '誰が何を負担しているか',
+    trend: '過去6か月',
+    biggest: '大きな支出',
+    person_share: '{{name}}: {{amount}}、{{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: 'まだ支出はありません',
+    empty_body: 'メンバーごとの支出がここに表示されます。',
   },
   shared_ledgers: {
     member_fallback: 'メンバー',

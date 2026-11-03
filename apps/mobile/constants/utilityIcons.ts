@@ -15,6 +15,7 @@ export const UTILITY_ICON_SOURCES: Record<string, ImageSourcePropType> = {
   'calendar-clock': CLAY_ICON_SOURCES['insights/calendar-clock'],
   'growth-analysis': CLAY_ICON_SOURCES['insights/growth-analysis'],
   'home-savings': CLAY_ICON_SOURCES['insights/home-savings'],
+  household: CLAY_ICON_SOURCES['insights/household'],
   'market-analysis': CLAY_ICON_SOURCES['insights/market-analysis'],
   'money-bags': CLAY_ICON_SOURCES['insights/money-bags'],
   'mood-faces': CLAY_ICON_SOURCES['insights/mood-faces'],

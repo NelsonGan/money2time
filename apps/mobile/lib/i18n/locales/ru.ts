@@ -1013,6 +1013,7 @@ const ru = {
     },
   },
   insights: {
+    household: 'Семья',
     breakdown: 'Структура',
     trends: 'Динамика',
     tabs: {
@@ -3118,6 +3119,26 @@ const ru = {
     pro_ended_message:
       'Ваша подписка Pro закончилась, поэтому «{{name}}» и другие дополнительные книги пока заблокированы. Ничего не удалено: после продления они откроются в прежнем виде.',
     renew_pro: 'Продлить Pro',
+  },
+  household: {
+    spent_together: 'Потрачено вместе',
+    even_split: 'Поровну',
+    each: 'По {{amount}} на каждого',
+    paid: 'Оплачено {{amount}}',
+    to_even_out: 'Чтобы рассчитаться',
+    transfer: '{{from}} → {{to}}: {{amount}}',
+    all_square: 'Все в расчёте',
+    split_note:
+      'Поровну на {{count}} чел., по тому, чья каждая запись. Измените это в поле «Чья запись» записи.',
+    paid_more: '{{name}}: оплачено на {{amount}} больше равной доли',
+    paid_less: '{{name}}: оплачено на {{amount}} меньше равной доли',
+    who_covers: 'Кто за что платит',
+    trend: 'Последние 6 месяцев',
+    biggest: 'Крупнейшие записи',
+    person_share: '{{name}}: {{amount}}, {{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: 'Пока трат нет',
+    empty_body: 'Здесь появятся траты каждого участника.',
   },
   shared_ledgers: {
     member_fallback: 'Участник',

@@ -987,6 +987,7 @@ const en = {
     },
   },
   insights: {
+    household: 'Household',
     breakdown: 'Breakdown',
     trends: 'Trends',
     tabs: {
@@ -3108,6 +3109,26 @@ const en = {
     pro_ended_message:
       'Your Pro subscription has ended, so {{name}} and your other extra ledgers are locked for now. Nothing was deleted: they open again as they were when you renew.',
     renew_pro: 'Renew Pro',
+  },
+  household: {
+    spent_together: 'Spent together',
+    even_split: 'Even split',
+    each: '{{amount}} each',
+    paid: 'Paid {{amount}}',
+    to_even_out: 'To even it out',
+    transfer: '{{from}} to {{to}}: {{amount}}',
+    all_square: 'All square',
+    split_note:
+      'Split evenly between {{count}} people, by whose each entry is. Change it with Belongs to on an entry.',
+    paid_more: '{{name}} paid {{amount}} more than an even share',
+    paid_less: '{{name}} paid {{amount}} less than an even share',
+    who_covers: 'Who covers what',
+    trend: 'Last 6 months',
+    biggest: 'Biggest entries',
+    person_share: '{{name}}: {{amount}}, {{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: 'Nothing spent yet',
+    empty_body: "Everyone's spending shows up here, person by person.",
   },
   shared_ledgers: {
     member_fallback: 'Member',

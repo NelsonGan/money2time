@@ -1007,6 +1007,7 @@ const ko = {
     },
   },
   insights: {
+    household: '가계',
     breakdown: '분석',
     trends: '추이',
     tabs: {
@@ -3075,6 +3076,26 @@ const ko = {
     pro_ended_message:
       'Pro 구독이 종료되어 {{name}}과(와) 다른 추가 가계부가 잠시 잠겼습니다. 삭제된 것은 없습니다. 갱신하면 그대로 다시 열립니다.',
     renew_pro: 'Pro 갱신',
+  },
+  household: {
+    spent_together: '함께 쓴 금액',
+    even_split: '똑같이 나누면',
+    each: '1인당 {{amount}}',
+    paid: '{{amount}} 지불',
+    to_even_out: '정산하려면',
+    transfer: '{{from}}에서 {{to}}에게: {{amount}}',
+    all_square: '정산 완료',
+    split_note:
+      '{{count}}명이 똑같이 나눈 금액이며, 각 내역이 누구 것인지로 계산해요. 내역의 누구의 기록에서 바꿀 수 있어요.',
+    paid_more: '{{name}}님이 균등 분담보다 {{amount}} 더 냈어요',
+    paid_less: '{{name}}님이 균등 분담보다 {{amount}} 덜 냈어요',
+    who_covers: '누가 무엇을 부담하나요',
+    trend: '최근 6개월',
+    biggest: '큰 지출',
+    person_share: '{{name}}: {{amount}}, {{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: '아직 지출이 없어요',
+    empty_body: '구성원별 지출이 여기에 표시돼요.',
   },
   shared_ledgers: {
     member_fallback: '멤버',

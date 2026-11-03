@@ -313,6 +313,30 @@ describe('buildLedgerPeople', () => {
     expect(people.personFor('user-nelson').isSelf).toBe(true);
   });
 
+  it('gives everyone a colour of their own, the same on every phone', () => {
+    const profiles = [
+      { user_id: 'user-nelson', role: 'owner', name: 'Nelson', avatar_uri: null },
+      { user_id: 'user-ana', role: 'member', name: 'Ana', avatar_uri: null },
+      { user_id: 'user-mei', role: 'member', name: 'Mei', avatar_uri: null },
+    ];
+    const onMei = buildLedgerPeople(
+      { ...HOME, ownerUserId: 'user-nelson' },
+      profiles,
+      { name: 'Mei', avatarUri: null },
+      'user-mei',
+    );
+    const onNelson = buildLedgerPeople(
+      { ...HOME, role: 'owner', userId: 'user-nelson', ownerUserId: 'user-nelson' },
+      profiles,
+      { name: 'Nelson', avatarUri: null },
+      'user-nelson',
+    );
+    const colorsOf = (people: typeof onMei) =>
+      Object.fromEntries(people.people.map((entry) => [entry.memberId ?? 'owner', entry.color]));
+    expect(colorsOf(onMei)).toEqual(colorsOf(onNelson));
+    expect(new Set(onMei.people.map((entry) => entry.color)).size).toBe(3);
+  });
+
   it('keeps an entry of someone never seen on this phone, as a member', () => {
     const people = buildLedgerPeople(HOME, [], own, 'user-mei');
     const stranger = people.personFor('user-gone');

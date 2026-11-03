@@ -116,7 +116,6 @@ import {
 } from '~/features/insights/components/TrendSummary';
 import {
   INSIGHT_GROUP_MEMBERS,
-  INSIGHT_MENU_ENTRIES,
   type InsightGroupId,
   insightGroupOf,
   insightMenuEntryOf,
@@ -124,6 +123,7 @@ import {
   isInsightGroupId,
   type LastInsightTypeByGroup,
   parseLastInsightTypeByGroup,
+  visibleInsightMenuEntries,
 } from '~/features/insights/insightGroups';
 import {
   buildSavingsIncludePredicate,
@@ -148,6 +148,11 @@ import {
 } from '~/features/review/lib/reviewFilters';
 import type { ReviewZoom } from '~/features/review/lib/reviewPeriods';
 import { ReviewPagerView, type ReviewPagerViewHandle } from '~/features/review/screens';
+import { useOpenLedgerPeople } from '~/features/sharedLedgers/lib/ledgerPeople';
+import {
+  HouseholdPagerView,
+  type HouseholdPagerViewHandle,
+} from '~/features/sharedLedgers/screens/HouseholdPagerView';
 import {
   ActivityTransactionList,
   buildBulkUpdateInputs,
@@ -229,6 +234,9 @@ const INSIGHT_TYPES = [
   // Review is a full-page takeover like `budget`: it owns its own period rail
   // and only ever shows completed weeks/months/years.
   'review',
+  // Household is a full-page takeover too (its own month pager), listed only
+  // while the open ledger is shared.
+  'household',
   'expense_breakdown',
   'income_breakdown',
   'savings_rate',
@@ -257,6 +265,14 @@ const INSIGHT_TYPE_VISUALS = {
   // Review renders the `calendar-clock` image icon (see INSIGHT_TYPE_ICON_NAME),
   // so this Lucide fallback is never drawn; it exists only to satisfy the map.
   review: {
+    Icon: PiggyBank,
+    tint: '#B1525F',
+    background: '#FCE7EA',
+    border: '#F0C3CB',
+  },
+  // Household renders the `household` image icon (see INSIGHT_TYPE_ICON_NAME),
+  // so this Lucide fallback is never drawn; it exists only to satisfy the map.
+  household: {
     Icon: PiggyBank,
     tint: '#B1525F',
     background: '#FCE7EA',
@@ -330,6 +346,7 @@ const INSIGHT_TYPE_VISUALS = {
 
 const INSIGHT_TYPE_ICON_NAME: Record<InsightType, string> = {
   review: 'calendar-clock',
+  household: 'household',
   expense_breakdown: 'wallet-cash',
   income_breakdown: 'wallet-cash-blue',
   savings_rate: 'piggy-bank-coins',
@@ -582,6 +599,11 @@ const INSIGHT_FILTER_CONFIG: Partial<Record<InsightType, InsightFilterConfig>> =
   // fixedPeriodPreset hides the header's period picker. The value is unused.
   review: {
     fixedPeriodPreset: 'week',
+    allowAccountFilter: false,
+  },
+  // Like budget: its own month pager drives the header, so no filters.
+  household: {
+    fixedPeriodPreset: 'month',
     allowAccountFilter: false,
   },
   expense_breakdown: {
@@ -2662,6 +2684,10 @@ export function InsightsScreen({
   const [isInsightMenuOpen, setIsInsightMenuOpen] = useState(false);
   const [budgetMonthLabel, setBudgetMonthLabel] = useState('');
   const budgetPagerRef = useRef<BudgetPagerViewHandle>(null);
+  const [householdMonthLabel, setHouseholdMonthLabel] = useState('');
+  const householdPagerRef = useRef<HouseholdPagerViewHandle>(null);
+  // Household is only for a shared ledger: off the menu otherwise.
+  const isSharedLedger = useOpenLedgerPeople() !== null;
   // The review page's zoom and exclusions live here so its filter button can
   // sit in the header and its choices ride along in the insights preferences;
   // the page itself still owns which period is selected.
@@ -2724,7 +2750,7 @@ export function InsightsScreen({
   // One entry per page, with Breakdown and Trends each standing for their tabs.
   const insightTypeOptions = useMemo(
     () =>
-      INSIGHT_MENU_ENTRIES.map((entry) => {
+      visibleInsightMenuEntries(isSharedLedger).map((entry) => {
         const iconType: InsightType = isInsightGroupId(entry)
           ? INSIGHT_GROUP_MEMBERS[entry][0]
           : entry;
@@ -2738,7 +2764,7 @@ export function InsightsScreen({
           badge: !isPro && isLocked ? String(I18n.t('pro.badge')) : undefined,
         };
       }),
-    [isPro, proTrendTypeSet],
+    [isPro, isSharedLedger, proTrendTypeSet],
   );
   const horizontalListRef = useRef<FlatList<number> | null>(null);
   const isChartScrubLockedRef = useRef(false);
@@ -3379,10 +3405,10 @@ export function InsightsScreen({
         weekStartsOn,
         monthCycle,
       );
-      // Budget and review render their own full-page takeover, never the period
+      // Budget, review and household render their own full-page takeover, never the period
       // pager, so this cached page is never displayed — return an empty
       // breakdown to keep it cheap (no transaction scan) and well-typed.
-      if (insightType === 'budget' || insightType === 'review') {
+      if (insightType === 'budget' || insightType === 'review' || insightType === 'household') {
         return {
           kind: 'breakdown',
           range,
@@ -4180,8 +4206,9 @@ export function InsightsScreen({
   // still-selected budget for one render).
   const isBudgetView = displaySelectedInsightType === 'budget';
   const isReviewView = displaySelectedInsightType === 'review';
-  // Both takeovers replace the pager body and drive the header's controls.
-  const isTakeoverView = isBudgetView || isReviewView;
+  const isHouseholdView = displaySelectedInsightType === 'household';
+  // The takeovers replace the pager body and drive the header's controls.
+  const isTakeoverView = isBudgetView || isReviewView || isHouseholdView;
   // Open iPhone Duo. The paged insights split across the panes, with the
   // header over the left one; Budget, Review and the locked Pro preview are
   // single pages, so they sit in a readable column instead.
@@ -6571,6 +6598,13 @@ export function InsightsScreen({
     },
     [effectivePeriodPreset, periodPresetByInsight, selectedInsightType, setActiveBreakdownSlice],
   );
+  // Household has nothing to show once the ledger is no longer shared (or a
+  // deep link asked for it in a ledger that never was): open Review instead.
+  useEffect(() => {
+    if (selectedInsightType === 'household' && !isSharedLedger) {
+      handleInsightTypeChange('review');
+    }
+  }, [handleInsightTypeChange, isSharedLedger, selectedInsightType]);
   const handleOpenFiltersModal = useCallback(() => {
     setIsPeriodPickerOpen(false);
     setIsFilterModalOpen(true);
@@ -6699,23 +6733,35 @@ export function InsightsScreen({
                     </Text>
                     {isReviewView ? null : (
                       <InsightPeriodSwitcher
-                        label={isBudgetView ? budgetMonthLabel : activePeriodLabel}
+                        label={
+                          isBudgetView
+                            ? budgetMonthLabel
+                            : isHouseholdView
+                              ? householdMonthLabel
+                              : activePeriodLabel
+                        }
                         onPrevious={
                           isBudgetView
                             ? () => budgetPagerRef.current?.scrollToRelative(-1)
-                            : handlePrevMonth
+                            : isHouseholdView
+                              ? () => householdPagerRef.current?.scrollToRelative(-1)
+                              : handlePrevMonth
                         }
                         onNext={
                           isBudgetView
                             ? () => budgetPagerRef.current?.scrollToRelative(1)
-                            : handleNextMonth
+                            : isHouseholdView
+                              ? () => householdPagerRef.current?.scrollToRelative(1)
+                              : handleNextMonth
                         }
                         onPressLabel={
                           isBudgetView
                             ? () => budgetPagerRef.current?.openMonthPicker()
-                            : isTakeoverView || displayPeriodPreset === 'lifetime'
-                              ? undefined
-                              : handleOpenPeriodPicker
+                            : isHouseholdView
+                              ? () => householdPagerRef.current?.openMonthPicker()
+                              : isTakeoverView || displayPeriodPreset === 'lifetime'
+                                ? undefined
+                                : handleOpenPeriodPicker
                         }
                         disableArrows={!isTakeoverView && displayPeriodPreset === 'lifetime'}
                         labelRef={periodPickerTriggerRef}
@@ -6782,7 +6828,13 @@ export function InsightsScreen({
               }
               // The period sits under the title (InsightPeriodSwitcher), so the
               // header's own month capsule is not drawn.
-              monthLabel={isBudgetView ? budgetMonthLabel : activePeriodLabel}
+              monthLabel={
+                isBudgetView
+                  ? budgetMonthLabel
+                  : isHouseholdView
+                    ? householdMonthLabel
+                    : activePeriodLabel
+              }
               onPrevMonth={handlePrevMonth}
               onNextMonth={handleNextMonth}
               hideNavigation
@@ -6805,6 +6857,13 @@ export function InsightsScreen({
                 filters={reviewFilters}
                 onFiltersChange={setReviewFilters}
                 onOpenTransaction={onOpenTransaction}
+              />
+            ) : isHouseholdView ? (
+              <HouseholdPagerView
+                ref={householdPagerRef}
+                onOpenDrilldown={onOpenDrilldown}
+                onOpenTransaction={onOpenTransaction}
+                onActiveMonthLabelChange={setHouseholdMonthLabel}
               />
             ) : isBudgetView ? (
               <BudgetPagerView

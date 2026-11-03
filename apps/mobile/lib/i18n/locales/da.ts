@@ -1011,6 +1011,7 @@ const da = {
     },
   },
   insights: {
+    household: 'Husstand',
     breakdown: 'Fordeling',
     trends: 'Tendenser',
     tabs: {
@@ -3111,6 +3112,26 @@ const da = {
     pro_ended_message:
       'Dit Pro-abonnement er udløbet, så {{name}} og dine andre ekstra regnskaber er låst indtil videre. Intet er slettet: de åbner igen, som de var, når du fornyer.',
     renew_pro: 'Forny Pro',
+  },
+  household: {
+    spent_together: 'Brugt sammen',
+    even_split: 'Lige deling',
+    each: '{{amount}} hver',
+    paid: 'Betalt {{amount}}',
+    to_even_out: 'For at gå lige op',
+    transfer: '{{from}} til {{to}}: {{amount}}',
+    all_square: 'Lige op',
+    split_note:
+      'Delt ligeligt mellem {{count}} personer efter, hvis hver post er. Skift det med Tilhører på en post.',
+    paid_more: '{{name}} betalte {{amount}} mere end en lige andel',
+    paid_less: '{{name}} betalte {{amount}} mindre end en lige andel',
+    who_covers: 'Hvem dækker hvad',
+    trend: 'Seneste 6 måneder',
+    biggest: 'Største poster',
+    person_share: '{{name}}: {{amount}}, {{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: 'Intet brugt endnu',
+    empty_body: 'Her vises, hvad hver person bruger.',
   },
   shared_ledgers: {
     member_fallback: 'Medlem',

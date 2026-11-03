@@ -1008,6 +1008,7 @@ const th = {
     },
   },
   insights: {
+    household: 'ครัวเรือน',
     breakdown: 'รายละเอียด',
     trends: 'แนวโน้ม',
     tabs: {
@@ -3056,6 +3057,26 @@ const th = {
     pro_ended_message:
       'การสมัคร Pro ของคุณสิ้นสุดแล้ว {{name}} และสมุดบัญชีเพิ่มเติมอื่นๆ จึงถูกล็อกไว้ชั่วคราว ไม่มีอะไรถูกลบ เมื่อคุณต่ออายุ ทุกอย่างจะเปิดได้เหมือนเดิม',
     renew_pro: 'ต่ออายุ Pro',
+  },
+  household: {
+    spent_together: 'ใช้จ่ายร่วมกัน',
+    even_split: 'แบ่งเท่ากัน',
+    each: 'คนละ {{amount}}',
+    paid: 'จ่าย {{amount}}',
+    to_even_out: 'เพื่อให้เท่ากัน',
+    transfer: '{{from}} ให้ {{to}}: {{amount}}',
+    all_square: 'เท่ากันแล้ว',
+    split_note:
+      'แบ่งเท่ากัน {{count}} คน ตามว่าแต่ละรายการเป็นของใคร เปลี่ยนได้ที่ เป็นของ ในรายการ',
+    paid_more: '{{name}} จ่ายมากกว่าส่วนที่เท่ากัน {{amount}}',
+    paid_less: '{{name}} จ่ายน้อยกว่าส่วนที่เท่ากัน {{amount}}',
+    who_covers: 'ใครจ่ายอะไร',
+    trend: '6 เดือนล่าสุด',
+    biggest: 'รายการที่ใหญ่ที่สุด',
+    person_share: '{{name}}: {{amount}}, {{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: 'ยังไม่มีการใช้จ่าย',
+    empty_body: 'ค่าใช้จ่ายของแต่ละคนจะแสดงที่นี่',
   },
   shared_ledgers: {
     member_fallback: 'สมาชิก',

@@ -1012,6 +1012,7 @@ const sv = {
     },
   },
   insights: {
+    household: 'Hushåll',
     breakdown: 'Fördelning',
     trends: 'Trender',
     tabs: {
@@ -3116,6 +3117,26 @@ const sv = {
     pro_ended_message:
       'Ditt Pro-abonnemang har upphört, så {{name}} och dina andra extra kassaböcker är låsta tills vidare. Inget har raderats: de öppnas igen som de var när du förnyar.',
     renew_pro: 'Förnya Pro',
+  },
+  household: {
+    spent_together: 'Spenderat tillsammans',
+    even_split: 'Lika delning',
+    each: '{{amount}} var',
+    paid: 'Betalade {{amount}}',
+    to_even_out: 'För att gå jämnt ut',
+    transfer: '{{from}} till {{to}}: {{amount}}',
+    all_square: 'Allt jämnt',
+    split_note:
+      'Delat lika mellan {{count}} personer, efter vems varje post är. Ändra det med Tillhör på en post.',
+    paid_more: '{{name}} betalade {{amount}} mer än en lika del',
+    paid_less: '{{name}} betalade {{amount}} mindre än en lika del',
+    who_covers: 'Vem står för vad',
+    trend: 'Senaste 6 månaderna',
+    biggest: 'Största posterna',
+    person_share: '{{name}}: {{amount}}, {{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: 'Inget spenderat än',
+    empty_body: 'Här visas vad var och en spenderar.',
   },
   shared_ledgers: {
     member_fallback: 'Medlem',

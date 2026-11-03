@@ -1020,6 +1020,7 @@ const de = {
     },
   },
   insights: {
+    household: 'Haushalt',
     breakdown: 'Aufschlüsselung',
     trends: 'Trends',
     tabs: {
@@ -3155,6 +3156,26 @@ const de = {
     pro_ended_message:
       'Dein Pro-Abo ist abgelaufen, daher sind {{name}} und deine anderen zusätzlichen Bücher vorerst gesperrt. Es wurde nichts gelöscht: Sie öffnen sich wieder wie vorher, sobald du verlängerst.',
     renew_pro: 'Pro verlängern',
+  },
+  household: {
+    spent_together: 'Gemeinsam ausgegeben',
+    even_split: 'Gleiche Aufteilung',
+    each: 'je {{amount}}',
+    paid: 'Bezahlt {{amount}}',
+    to_even_out: 'Zum Ausgleich',
+    transfer: '{{from}} an {{to}}: {{amount}}',
+    all_square: 'Alles ausgeglichen',
+    split_note:
+      'Gleichmäßig auf {{count}} Personen aufgeteilt, danach, wem jeder Eintrag gehört. Ändern mit Gehört zu in einem Eintrag.',
+    paid_more: '{{name}} hat {{amount}} mehr als den gleichen Anteil bezahlt',
+    paid_less: '{{name}} hat {{amount}} weniger als den gleichen Anteil bezahlt',
+    who_covers: 'Wer zahlt was',
+    trend: 'Letzte 6 Monate',
+    biggest: 'Größte Einträge',
+    person_share: '{{name}}: {{amount}}, {{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: 'Noch nichts ausgegeben',
+    empty_body: 'Hier erscheinen die Ausgaben aller, Person für Person.',
   },
   shared_ledgers: {
     member_fallback: 'Mitglied',

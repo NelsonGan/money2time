@@ -1015,6 +1015,7 @@ const fr = {
     },
   },
   insights: {
+    household: 'Foyer',
     breakdown: 'Répartition',
     trends: 'Tendances',
     tabs: {
@@ -3154,6 +3155,26 @@ const fr = {
     pro_ended_message:
       "Votre abonnement Pro a pris fin, donc {{name}} et vos autres carnets supplémentaires sont verrouillés pour le moment. Rien n'a été supprimé : ils se rouvriront tels quels quand vous renouvellerez.",
     renew_pro: 'Renouveler Pro',
+  },
+  household: {
+    spent_together: 'Dépensé ensemble',
+    even_split: 'Partage égal',
+    each: '{{amount}} chacun',
+    paid: 'Payé {{amount}}',
+    to_even_out: 'Pour équilibrer',
+    transfer: '{{from}} à {{to}} : {{amount}}',
+    all_square: 'Tout est équilibré',
+    split_note:
+      'Partagé à parts égales entre {{count}} personnes, selon à qui appartient chaque opération. Modifiez-le avec Appartient à sur une opération.',
+    paid_more: "{{name}} a payé {{amount}} de plus qu'une part égale",
+    paid_less: "{{name}} a payé {{amount}} de moins qu'une part égale",
+    who_covers: 'Qui paie quoi',
+    trend: '6 derniers mois',
+    biggest: 'Plus grosses dépenses',
+    person_share: '{{name}} : {{amount}}, {{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: "Rien de dépensé pour l'instant",
+    empty_body: 'Les dépenses de chacun apparaissent ici, personne par personne.',
   },
   shared_ledgers: {
     member_fallback: 'Membre',

@@ -27,6 +27,7 @@ import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { budgetCoveringDay } from '~/features/budget/lib/budgetPeriods';
 import { useGoals } from '~/features/goals/useGoals';
+import { InsightCard } from '~/features/insights/components/InsightCard';
 import { filterSpendingTransactions } from '~/features/reimbursements/lib/reimbursementMath';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -457,43 +458,6 @@ function PeriodRail({
 
 // Card shell — one shape for every section on the page
 
-/**
- * One shell for every section: a real title in the foreground, optional meta on
- * the right, then content. The titles used to be muted uppercase micro-labels,
- * which at caption weight read as washed-out placeholder text rather than
- * headings, and gave seven cards no hierarchy between them.
- */
-function Card({
-  title,
-  meta,
-  metaNode,
-  children,
-}: {
-  title: string;
-  meta?: string;
-  metaNode?: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <View className="rounded-3xl border border-border/25 bg-card p-4 shadow-soft">
-      <View className="flex-row items-center justify-between gap-3">
-        <Text variant="bodyStrong" className="shrink-0 text-foreground">
-          {title}
-        </Text>
-        {/* The meta takes the slack and truncates, so a long period label
-            ("27 Jul to 2 Aug") can never squeeze the card's title. */}
-        {metaNode ??
-          (meta ? (
-            <Text variant="caption" tone="muted" numberOfLines={1} className="flex-1 text-right">
-              {meta}
-            </Text>
-          ) : null)}
-      </View>
-      <View className="mt-3">{children}</View>
-    </View>
-  );
-}
-
 function SpentCard({ summary }: { summary: ReviewSummary }) {
   const { settings } = useApp();
   const themeColors = useThemeColors();
@@ -505,7 +469,7 @@ function SpentCard({ summary }: { summary: ReviewSummary }) {
   return (
     // The period lives here rather than on its own line above the cards: it is
     // context for the number, not a heading in its own right.
-    <Card title={I18n.t('review.spent')} meta={periodTitle(summary.period, settings.locale)}>
+    <InsightCard title={I18n.t('review.spent')} meta={periodTitle(summary.period, settings.locale)}>
       <View className="flex-row flex-wrap items-center gap-2.5">
         <Text variant="display">{money(summary.expense, settings)}</Text>
         {delta ? (
@@ -516,7 +480,7 @@ function SpentCard({ summary }: { summary: ReviewSummary }) {
           </View>
         ) : null}
       </View>
-    </Card>
+    </InsightCard>
   );
 }
 
@@ -529,7 +493,7 @@ function FlowCard({ summary }: { summary: ReviewSummary }) {
   const arc = ratio === null ? 0 : Math.max(0, Math.min(1, ratio));
 
   return (
-    <Card title={I18n.t('review.in_and_out')}>
+    <InsightCard title={I18n.t('review.in_and_out')}>
       <View className="flex-row items-center gap-4">
         <View style={styles.ring}>
           <Svg width={RING_SIZE} height={RING_SIZE}>
@@ -599,7 +563,7 @@ function FlowCard({ summary }: { summary: ReviewSummary }) {
           </View>
         </View>
       </View>
-    </Card>
+    </InsightCard>
   );
 }
 
@@ -635,7 +599,7 @@ function TrendCard({ summary }: { summary: ReviewSummary }) {
   const ceiling = peak * 1.1;
 
   return (
-    <Card title={I18n.t('review.trend')}>
+    <InsightCard title={I18n.t('review.trend')}>
       <View style={styles.trend}>
         {ceiling > 0 ? (
           <View
@@ -682,7 +646,7 @@ function TrendCard({ summary }: { summary: ReviewSummary }) {
           ))}
         </View>
       </View>
-    </Card>
+    </InsightCard>
   );
 }
 
@@ -700,7 +664,7 @@ function PaceCard({ summary }: { summary: ReviewSummary }) {
         : themeColors.success;
 
   return (
-    <Card
+    <InsightCard
       title={I18n.t('review.pace')}
       metaNode={
         <View className="rounded-full px-2.5 py-0.5" style={{ backgroundColor: `${tint}22` }}>
@@ -730,7 +694,7 @@ function PaceCard({ summary }: { summary: ReviewSummary }) {
           style={{ width: `${Math.min(pace.ratio, 1) * 100}%`, backgroundColor: tint }}
         />
       </View>
-    </Card>
+    </InsightCard>
   );
 }
 
@@ -748,7 +712,7 @@ function CategoriesCard({
   if (summary.categories.length === 0) return null;
 
   return (
-    <Card title={I18n.t('review.categories')}>
+    <InsightCard title={I18n.t('review.categories')}>
       <View className="gap-3">
         {summary.categories.map((category) => (
           <CategoryRow
@@ -763,7 +727,7 @@ function CategoriesCard({
           />
         ))}
       </View>
-    </Card>
+    </InsightCard>
   );
 }
 
@@ -885,7 +849,7 @@ function MoodCard({ summary }: { summary: ReviewSummary }) {
   if (!summary.sentiment.some((slice) => slice.amount > 0)) return null;
 
   return (
-    <Card title={I18n.t('review.mood')}>
+    <InsightCard title={I18n.t('review.mood')}>
       <View className="h-2.5 flex-row gap-0.5 overflow-hidden rounded-full">
         {summary.sentiment.map((slice) => (
           <View
@@ -909,7 +873,7 @@ function MoodCard({ summary }: { summary: ReviewSummary }) {
           </View>
         ))}
       </View>
-    </Card>
+    </InsightCard>
   );
 }
 
@@ -970,7 +934,7 @@ function StandoutsCard({ summary }: { summary: ReviewSummary }) {
   }[];
 
   return (
-    <Card title={I18n.t('review.standouts')}>
+    <InsightCard title={I18n.t('review.standouts')}>
       {/* Explicit rows of two rather than `flex-wrap`: a wrapped row stretches
           its lines to share the container's cross size, which blew each tile up
           to a quarter of the screen. Two plain rows size to their content and
@@ -1005,7 +969,7 @@ function StandoutsCard({ summary }: { summary: ReviewSummary }) {
             </View>
           ))}
       </View>
-    </Card>
+    </InsightCard>
   );
 }
 
@@ -1025,7 +989,7 @@ function GoalsCard({
   const themeColors = useThemeColors();
 
   return (
-    <Card title={I18n.t('review.goals')}>
+    <InsightCard title={I18n.t('review.goals')}>
       <View className="gap-3.5">
         {goals.map(({ account, progress }) => {
           const added = contributions.get(account.id) ?? 0;
@@ -1082,7 +1046,7 @@ function GoalsCard({
           );
         })}
       </View>
-    </Card>
+    </InsightCard>
   );
 }
 

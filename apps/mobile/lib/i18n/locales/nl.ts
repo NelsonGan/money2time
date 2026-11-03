@@ -1015,6 +1015,7 @@ const nl = {
     },
   },
   insights: {
+    household: 'Huishouden',
     breakdown: 'Verdeling',
     trends: 'Trends',
     tabs: {
@@ -3147,6 +3148,26 @@ const nl = {
     pro_ended_message:
       'Je Pro-abonnement is afgelopen, dus {{name}} en je andere extra boeken zijn voorlopig vergrendeld. Er is niets verwijderd: ze gaan weer open zoals ze waren zodra je verlengt.',
     renew_pro: 'Pro verlengen',
+  },
+  household: {
+    spent_together: 'Samen uitgegeven',
+    even_split: 'Gelijk verdeeld',
+    each: '{{amount}} per persoon',
+    paid: '{{amount}} betaald',
+    to_even_out: 'Om het gelijk te trekken',
+    transfer: '{{from}} aan {{to}}: {{amount}}',
+    all_square: 'Alles verrekend',
+    split_note:
+      'Gelijk verdeeld over {{count}} personen, op basis van wiens elke boeking is. Wijzig het met Hoort bij bij een boeking.',
+    paid_more: '{{name}} betaalde {{amount}} meer dan een gelijk deel',
+    paid_less: '{{name}} betaalde {{amount}} minder dan een gelijk deel',
+    who_covers: 'Wie betaalt wat',
+    trend: 'Laatste 6 maanden',
+    biggest: 'Grootste boekingen',
+    person_share: '{{name}}: {{amount}}, {{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: 'Nog niets uitgegeven',
+    empty_body: 'Hier zie je wat iedereen uitgeeft, per persoon.',
   },
   shared_ledgers: {
     member_fallback: 'Lid',

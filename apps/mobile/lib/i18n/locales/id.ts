@@ -1014,6 +1014,7 @@ const id = {
     },
   },
   insights: {
+    household: 'Rumah tangga',
     breakdown: 'Rincian',
     trends: 'Tren',
     tabs: {
@@ -3128,6 +3129,26 @@ const id = {
     pro_ended_message:
       'Langganan Pro Anda telah berakhir, jadi {{name}} dan buku tambahan Anda lainnya dikunci untuk sementara. Tidak ada yang dihapus: semuanya terbuka lagi seperti semula saat Anda memperpanjang.',
     renew_pro: 'Perpanjang Pro',
+  },
+  household: {
+    spent_together: 'Dibelanjakan bersama',
+    even_split: 'Bagi rata',
+    each: '{{amount}} per orang',
+    paid: 'Membayar {{amount}}',
+    to_even_out: 'Agar impas',
+    transfer: '{{from}} ke {{to}}: {{amount}}',
+    all_square: 'Sudah impas',
+    split_note:
+      'Dibagi rata untuk {{count}} orang, menurut milik siapa tiap catatan. Ubah lewat Milik di catatan.',
+    paid_more: '{{name}} membayar {{amount}} lebih dari bagian rata',
+    paid_less: '{{name}} membayar {{amount}} kurang dari bagian rata',
+    who_covers: 'Siapa menanggung apa',
+    trend: '6 bulan terakhir',
+    biggest: 'Catatan terbesar',
+    person_share: '{{name}}: {{amount}}, {{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: 'Belum ada pengeluaran',
+    empty_body: 'Pengeluaran setiap orang muncul di sini.',
   },
   shared_ledgers: {
     member_fallback: 'Anggota',

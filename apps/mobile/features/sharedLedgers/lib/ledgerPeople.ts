@@ -17,6 +17,8 @@ import { getActiveLedgerId } from '~/lib/db/ledgerScope';
 import { I18n } from '~/lib/i18n';
 import { getProfileAvatarUri } from '~/services/userAssets';
 
+import { distinctSeedColors, seedColor } from './personColors';
+
 export interface LedgerPerson {
   /** What an entry of theirs holds in `member_id`: null for the ledger's owner. */
   memberId: string | null;
@@ -31,6 +33,12 @@ export interface LedgerPerson {
   role: 'owner' | 'member';
   /** This phone's own account. */
   isSelf: boolean;
+  /**
+   * Their colour: the disc behind their initial, and their part of a chart.
+   * The same on every phone, and no one else in the ledger has it (up to six
+   * people; see `buildLedgerPeople`).
+   */
+  color: string;
 }
 
 export interface LedgerPeople {
@@ -163,7 +171,7 @@ export function buildLedgerPeople(
   // This phone's own person with no name anywhere: "You", not a stranger.
   const selfFallback = I18n.t('shared_ledgers.you');
   const person = (
-    fields: Omit<LedgerPerson, 'avatarFileUri' | 'name' | 'named'> & {
+    fields: Omit<LedgerPerson, 'avatarFileUri' | 'name' | 'named' | 'color'> & {
       name: string | null | undefined;
     },
     fallback: string,
@@ -176,6 +184,8 @@ export function buildLedgerPeople(
       named: name !== null,
       avatarUri,
       avatarFileUri: resolveAvatar(avatarUri),
+      // Set below for the ledger's people; a stranger keeps their own.
+      color: seedColor(fields.memberId ?? 'owner'),
     };
   };
   const selfIsOwner = shared.role === 'owner';
@@ -243,6 +253,18 @@ export function buildLedgerPeople(
     (a, b) => Number(b.isSelf) - Number(a.isSelf) || a.name.localeCompare(b.name),
   );
   const ownerId = ownerUserId ?? ownerRow?.user_id ?? null;
+  // Colours by account id, in an order every phone agrees on (the owner,
+  // then the members by id), so a person looks the same on each of them and
+  // no two people share one.
+  const byAccount = [...members.values()].sort((a, b) =>
+    (a.memberId ?? '').localeCompare(b.memberId ?? ''),
+  );
+  const colorOrder = [owner, ...byAccount];
+  distinctSeedColors(colorOrder.map((entry) => entry.memberId ?? ownerId ?? 'owner')).forEach(
+    (color, index) => {
+      colorOrder[index]!.color = color;
+    },
+  );
   // Someone only known from an entry (left before this phone saw them, or on
   // an older app): one object each, so rows showing them do not re-render.
   const unknown = new Map<string, LedgerPerson>();

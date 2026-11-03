@@ -1012,6 +1012,7 @@ const hi = {
     },
   },
   insights: {
+    household: 'घर-परिवार',
     breakdown: 'विवरण',
     trends: 'रुझान',
     tabs: {
@@ -3103,6 +3104,26 @@ const hi = {
     pro_ended_message:
       'आपकी Pro सदस्यता खत्म हो गई है, इसलिए {{name}} और आपकी बाकी अतिरिक्त बहियां अभी लॉक हैं। कुछ भी हटाया नहीं गया: रिन्यू करते ही वे पहले जैसी खुल जाएंगी।',
     renew_pro: 'Pro रिन्यू करें',
+  },
+  household: {
+    spent_together: 'साथ में खर्च',
+    even_split: 'बराबर बँटवारा',
+    each: 'हर एक {{amount}}',
+    paid: '{{amount}} चुकाए',
+    to_even_out: 'बराबर करने के लिए',
+    transfer: '{{from}} से {{to}}: {{amount}}',
+    all_square: 'सब बराबर',
+    split_note:
+      '{{count}} लोगों में बराबर बाँटा गया, इस आधार पर कि हर एंट्री किसकी है। किसी एंट्री में किसका है से बदलें।',
+    paid_more: '{{name}} ने बराबर हिस्से से {{amount}} ज़्यादा चुकाए',
+    paid_less: '{{name}} ने बराबर हिस्से से {{amount}} कम चुकाए',
+    who_covers: 'कौन क्या संभालता है',
+    trend: 'पिछले 6 महीने',
+    biggest: 'सबसे बड़ी एंट्री',
+    person_share: '{{name}}: {{amount}}, {{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: 'अभी कोई खर्च नहीं',
+    empty_body: 'यहाँ हर व्यक्ति का खर्च दिखता है।',
   },
   shared_ledgers: {
     member_fallback: 'सदस्य',

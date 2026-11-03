@@ -8,23 +8,13 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 
 import type { LedgerPerson } from '../lib/ledgerPeople';
 
-// Soft, mid-tone discs that keep a white initial readable in both themes.
-const INITIAL_COLORS = ['#4F8A8B', '#B0505F', '#7A6FB0', '#C07A3A', '#5C8A5A', '#4E78A8'];
-
-/** The same colour for the same person on every row and every phone. */
-function colorFor(seed: string): string {
-  let hash = 0;
-  for (let index = 0; index < seed.length; index += 1) {
-    hash = (hash * 31 + seed.charCodeAt(index)) | 0;
-  }
-  return INITIAL_COLORS[Math.abs(hash) % INITIAL_COLORS.length] ?? INITIAL_COLORS[0];
-}
-
 interface PersonAvatarProps {
   person: LedgerPerson;
   size: number;
   /** A ring in the card colour, for a badge laid over another icon. */
   ring?: boolean;
+  /** The initial's disc colour, when a chart gives someone another one. */
+  color?: string;
 }
 
 /** A person in a shared ledger: their Settings photo, else their initial. */
@@ -32,6 +22,7 @@ export const PersonAvatar = memo(function PersonAvatarImpl({
   person,
   size,
   ring,
+  color,
 }: PersonAvatarProps) {
   const themeColors = useThemeColors();
   // Resolved once by the people store, not with a file check on every row.
@@ -66,7 +57,7 @@ export const PersonAvatar = memo(function PersonAvatarImpl({
             width: size,
             height: size,
             borderRadius: size / 2,
-            backgroundColor: colorFor(person.memberId ?? `owner:${person.name}`),
+            backgroundColor: color ?? person.color,
           }}
         >
           <Text

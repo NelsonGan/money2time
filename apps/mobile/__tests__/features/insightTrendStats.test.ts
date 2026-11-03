@@ -4,6 +4,7 @@ import {
   insightMenuEntryOf,
   insightTypeForGroup,
   parseLastInsightTypeByGroup,
+  visibleInsightMenuEntries,
 } from '~/features/insights/insightGroups';
 import {
   compareCategoryTotals,
@@ -21,12 +22,19 @@ describe('insight groups', () => {
     expect(insightMenuEntryOf('budget')).toBe('budget');
     expect(INSIGHT_MENU_ENTRIES).toEqual([
       'review',
+      'household',
       'breakdown',
       'savings_rate',
       'budget',
       'trends',
       'expense_sentiment',
     ]);
+  });
+
+  it('lists Household only while the open ledger is shared', () => {
+    expect(visibleInsightMenuEntries(true)).toContain('household');
+    expect(visibleInsightMenuEntries(false)).not.toContain('household');
+    expect(visibleInsightMenuEntries(false)).toHaveLength(INSIGHT_MENU_ENTRIES.length - 1);
   });
 
   it('opens a group on its last tab, or its first', () => {

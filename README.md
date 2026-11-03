@@ -465,7 +465,7 @@ Traditional Chinese is `zh-Hant`. Device tags for Taiwan, Hong Kong, and Macau s
   - Not yet adapted: the reserved-region and hinge APIs (iOS 27.1) need a native module, so the book pose is not detected (it is laid out like flat). Test on the `Money2Time iPhone Duo` simulator (iOS 27.1): Argent `fold` (`closed` / `half-open` / `open`); on the inner panel Argent's `rotate` names are offset, so landscape is `PortraitUpsideDown` (rotate from the Home Screen, then launch the app) and screenshots need `rotation: LandscapeLeft`.
 - **Single-line text inside long-range pagers**: the month/period pagers (`LONG_RANGE_PAGER_TOTAL_SLOTS` in `constants/pager.ts`: calendar, accounts, insights, album month picker) render their pages ~2400 page widths from the origin, about a million points out. Yoga snaps node edges to the pixel grid and stores them in float32, which that far out only resolves 1/16 to 1/8pt. Where the pixel grid is not a power-of-two fraction of a point (3x iPhones, most Android densities; 2x screens such as the iPhone SE and iPads are unaffected), a `numberOfLines={1}` text whose box hugs its content can come out a sliver narrower than its own measurement and get ellipsized although it fits: the calendar grid drew `300` as `3…`. Give such text a box wider than the text (stretch it across its cell and center it with `textAlign`) instead of sizing the box to the text. When something must sit right after the text (the reimbursable badge on `TransactionItem`'s title), size the slot from an invisible copy of the text and draw the visible one absolutely over it, a few points wider; label the slot (`collapsable={false}`) or the row's VoiceOver summary reads the title twice. The tell on device is a paragraph view whose width sits on a 1/16 or 1/8pt step rather than the pixel grid (e.g. `16.3125` on a 3x screen, where the grid is 1/3pt). Reproduce on a 3x simulator; a 2x one never shows it.
 - **Swipeable pagers (`react-native-pager-view`)**: Since 8.0, pager-view renders iOS pages in a SwiftUI page-style `TabView` (a `UICollectionView` whose page controllers SwiftUI owns) instead of a `UIPageViewController`. The 6.x crash from unmounting a pager mid-swipe (closing `AddActionSheet` from a tile, leaving the transaction editor: "No view controller managing visible view", Sentry MONEY2TIME-S, MONEY2TIME-2F, MONEY2TIME-1A) therefore cannot happen on 9.x, and its patch was dropped in the Expo SDK 58 upgrade. The SwiftUI pager has its own teardown hazard: React unmounts pages one at a time, `.id(children.count)` rebuilds the `TabView` on every change in page count, and the pager's scroll delegate could adopt itself as its own forwarding target and overflow the stack (upstream #1146). Some callbacks also dereference a missing Fabric event emitter (#1113). `patches/react-native-pager-view+9.0.7.patch` ports upstream PR #1147 and adds the emitter nil checks; drop the delegate part once #1147 ships. `__tests__/patches/pagerViewSwiftUITeardown.test.ts` fails if an upgrade drops the patch or brings back a `UIPageViewController`. `usePagerTabSync`'s settle guards stay for Android (MONEY2TIME-1Y). On iOS `settleNow` no longer cancels a fling, which is harmless now that the crash class is gone.
-- **Insights pages and trend charts**: The Insights menu has six entries. **Breakdown** and **Trends** each hold several insight types behind tabs (`features/insights/insightGroups.ts`, `InsightSubTabs`): Breakdown is Expense and Income (plain text tabs), Trends is Expense, Income, Category and Assets (the old Asset History, now Asset Trends; an icon row). Each tab is still its own insight type, so its period, filters, saved preferences and `money2time://insights?focus=<type>` deep links are unchanged; the menu reopens a group on the tab last used in it (`lastInsightTypeByGroup` in the Insights preferences). Every page shares one header: the menu button, the page title with a quiet `‹ period ›` under it (`InsightPeriodSwitcher`; the header's own month capsule is hidden), the filter button, then the tabs. Chart pages share one body: a headline (`TrendHeadline`: an optional small label, the big figure, one quiet tinted pill such as "↓ 32% vs avg"), the chart, then plain white rows. Each Savings Rate month row has a month tile tinted by its rate (a star on the best month once two months have income), the amount saved or overspent over "of RM… income", and the rate as a small ring and a tinted pill; months with nothing in them are faint dashed rows. Every trend, Savings Rate's monthly rate and Expense Sentiment's mood counts (one line per mood) is a line-and-point chart, `TrendLineChart` (Skia, geometry in `features/insights/lib/trendLineGeometry.ts`): a dot per bucket, a dashed guide and a white legend card with a pointer on the selected one, a haptic tick per bucket while scrubbing, and months that have not happened yet left off rather than drawn at zero. Spending and income read from zero with a dashed average line (the month still under way is left out of the average); assets keep their own range so a balance below zero still shows its direction. Category picks from chips in the header (`CategoryTrendChips`, biggest spend first): a tap charts a category, and the leading "Compare" chip arms the next tap to add a second line (`categoryTrendCompareCategoryId`), with both totals and a one-line verdict under the chart. A touch on a chart picks a month only on a tap or a sideways drag, so a vertical drag that starts on it still scrolls the page; while a finger is down only the period pager is locked. Skia canvases are not clipped by their scroll view, so the header is stacked above the pages (`stackedHeader`) to cover a scrolled chart. Expense Sentiment uses Review's mood names. Chart inputs are cached per page (`trendChartModelCacheRef`), so scrubbing redraws only the selection. Any Skia path code must build paths from SVG strings or `Skia.PathBuilder`: Skia 2.14 made `SkPath` immutable.
+- **Insights pages and trend charts**: The Insights menu has six entries, and a seventh, **Household**, while the open ledger is shared (see [Shared ledgers](#shared-ledgers) > Household insights). **Breakdown** and **Trends** each hold several insight types behind tabs (`features/insights/insightGroups.ts`, `InsightSubTabs`): Breakdown is Expense and Income (plain text tabs), Trends is Expense, Income, Category and Assets (the old Asset History, now Asset Trends; an icon row). Each tab is still its own insight type, so its period, filters, saved preferences and `money2time://insights?focus=<type>` deep links are unchanged; the menu reopens a group on the tab last used in it (`lastInsightTypeByGroup` in the Insights preferences). Every page shares one header: the menu button, the page title with a quiet `‹ period ›` under it (`InsightPeriodSwitcher`; the header's own month capsule is hidden), the filter button, then the tabs. Chart pages share one body: a headline (`TrendHeadline`: an optional small label, the big figure, one quiet tinted pill such as "↓ 32% vs avg"), the chart, then plain white rows. Each Savings Rate month row has a month tile tinted by its rate (a star on the best month once two months have income), the amount saved or overspent over "of RM… income", and the rate as a small ring and a tinted pill; months with nothing in them are faint dashed rows. Every trend, Savings Rate's monthly rate and Expense Sentiment's mood counts (one line per mood) is a line-and-point chart, `TrendLineChart` (Skia, geometry in `features/insights/lib/trendLineGeometry.ts`): a dot per bucket, a dashed guide and a white legend card with a pointer on the selected one, a haptic tick per bucket while scrubbing, and months that have not happened yet left off rather than drawn at zero. Spending and income read from zero with a dashed average line (the month still under way is left out of the average); assets keep their own range so a balance below zero still shows its direction. Category picks from chips in the header (`CategoryTrendChips`, biggest spend first): a tap charts a category, and the leading "Compare" chip arms the next tap to add a second line (`categoryTrendCompareCategoryId`), with both totals and a one-line verdict under the chart. A touch on a chart picks a month only on a tap or a sideways drag, so a vertical drag that starts on it still scrolls the page; while a finger is down only the period pager is locked. Skia canvases are not clipped by their scroll view, so the header is stacked above the pages (`stackedHeader`) to cover a scrolled chart. Expense Sentiment uses Review's mood names. Chart inputs are cached per page (`trendChartModelCacheRef`), so scrubbing redraws only the selection. Any Skia path code must build paths from SVG strings or `Skia.PathBuilder`: Skia 2.14 made `SkPath` immutable.
 - **Multi-currency**: Each transaction stores its entered `currency` plus a frozen reporting-currency snapshot (`reportingCurrency`/`reportingAmount`/`fxRate`) taken at write time so historical aggregates never drift when FX rates move. Use `convert`/`buildRateTable` from `~/utils/currency`; never recompute historical totals from live rates. FX rates come from `services/exchangeRates.ts`.
 - **Albums**: Trip albums are a Pro-limited feature (`FREE_MAX_ALBUMS`). One album can be "active" (`activeAlbumId`) so new transactions auto-add. Manage via `useApp()` album ops.
 - **Icons (categories, goals, budget templates)**: The four icon columns (`categories.icon`, `accounts.goal_emoji`, `budget_templates.emoji`, `monthly_budgets.template_emoji`) store one tagged string, documented in `constants/categoryIcons.ts`: a bare kebab id (`meal`) is a bundled clay PNG, `emoji:X` is a Unicode emoji the user picked, `custom:category-icons/<uuid>.png` is an uploaded image, and `''`/null is none. Classify with `classifyCategoryIcon`; render with `CategoryEmoji`, which handles all three forms. **Never re-derive an icon from an emoji at render time** — that indirection is gone. Older rows stored a bare glyph that was mapped through a table at render; migration `048_normalize_icon_values` backfilled them, and the frozen `LEGACY_EMOJI_TO_ICON` in `lib/db/normalizeIcons.ts` survives **only** at data ingress (the migration, backup restore, `.mmbak` import) because old backups can be restored at any time. `normalizeIconValue` is a fixpoint, which is what makes a replayed migration safe. **The free `default` pack IS the Clay artwork** — the separate `clay` pack was folded into it, so its 110 ids are bare (`meal`, not `clay/meal`) and every pre-existing row keeps rendering without a rewrite. Rows that had explicitly picked a Clay icon are remapped `clay/x` → `x` by `RETIRED_ICON_PACK_PREFIXES` in `lib/db/normalizeIcons.ts`, run by migration `050_retire_clay_icon_pack` and, like the legacy-emoji table, frozen there for the backups and `.mmbak` files that still carry qualified ids. The pack keeps the folder name `default` on purpose (renaming it would re-qualify every id and break every row); the label users see comes from `category_icon.pack_default`, which reads "Clay". Surfaces that can only render a string (native widgets via `widgetSnapshot.shared.ts`, the Shortcuts catalog via `autoLogCatalog.ts`, the Excel export) go through `categoryIconToEmoji`. The bundled set is generated by `scripts/generate-category-icons.mjs` and grouped/searchable via the hand-maintained `constants/categoryIconGroups.ts` (a test fails if a PNG has no grouping). One shared `CategoryIconPickerSheet` (root route `CategoryIconPicker`, handed its session by `categoryIconPickerBridge`) serves all three editors, with Icons / Emoji / My uploads tabs; the emoji tab lazy-imports the ~1,900-entry `constants/emojiCatalog.generated.ts`. Uploads are **Pro-only** (`useProGate().requirePro`), stored under the `category-icons` user-asset kind. **Any new column holding one of these values must be added to `collectReferencedAssetPaths` in `services/userAssetGc.ts`, or the orphan sweep will delete live images.** Non-default packs are **Pro-only**: a free user can browse them (with a banner, and a PRO badge in the pack list) but selecting an icon calls `useProGate().requirePro('icon_packs')` and opens the paywall instead. **EAS Update caps an update at 1000 assets and Metro resolves ~1380 here, so `expo.updates.assetPatternsToBeBundled` in `app.json` keeps `assets/account-logos` (528 files) out of updates, riding in the native binary instead; that leaves 949 of the 1000 in the current export (measured 2026-10-19; 74 of them are the card designs in `assets/card-designs`). (This governs the internal-only OTA builds — store builds ship with updates disabled, see CI / Deploy.) The list is an allow-list, not a deny-list, so it must also carry `node_modules/**/\*`— without it a JS-only update that bumps a dependency shipping assets (the Work Sans faces,`@react-navigation/elements`' chrome PNGs) references asset hashes that are in neither the update nor the installed binary. Adding artwork anywhere else eats that headroom, so re-check with `npx expo export --dump-assetmap` afterwards.\*\*
@@ -1607,9 +1607,9 @@ The app side is `features/sharedLedgers/` (screens) and
 
 **Who added it**
 
-Every entry in a shared ledger says whose it is, so a household can later see
-each person's spending (one person's against another's). The data is in place
-for that chart; the chart itself is not built yet.
+Every entry in a shared ledger says whose it is, so a household can see each
+person's spending, one person's against another's, on the Household insights
+page (below).
 
 - **What is stored.** `transactions.created_by` (who added the entry, set at
   the insert and never changed) and `transactions.member_id` (whose entry it
@@ -1670,6 +1670,14 @@ for that chart; the chart itself is not built yet.
   photo (or a coloured initial) on the lower right of its category icon, and
   their first name after the category ("Groceries · Mei"). Rows in a ledger
   that is not shared look as before.
+- **Colours.** Each person has a colour (`LedgerPerson.color`, from
+  `personColors.ts`): the disc behind their initial on every row, and their
+  part of the Household charts. It comes from their account id, not their
+  name, and is handed out in an order every phone agrees on (the owner, then
+  the members by account id), each keeping the colour their id hashes to
+  unless someone before them has it. So a person looks the same on every
+  phone, and no two of up to six people share one. Someone only known from an
+  entry keeps their own hashed colour on rows.
 - **Belongs to.** The transaction editor's options panel (the More button) has
   a Belongs to row in a shared ledger, adding or editing: one of the panel's
   option rows, showing the person's photo and name. It opens a sheet of
@@ -1692,6 +1700,53 @@ for that chart; the chart itself is not built yet.
 - **Older app versions** keep both columns: a write merges over the stored
   JSON (`encodeRow`), and they skip `ledger_profiles` as a table they do not
   know. Their new entries carry no stamp and so count as the owner's.
+
+**Household insights**
+
+A shared ledger adds a **Household** page to the Insights menu, right after
+Review Spending (`HouseholdPagerView` in `features/sharedLedgers/screens/`,
+the numbers in `features/sharedLedgers/lib/householdMath.ts`). It answers
+how the household is spending, and who is covering what.
+
+- **Where it shows.** Only while the open ledger is shared
+  (`useOpenLedgerPeople`, `visibleInsightMenuEntries`). A ledger that stops
+  being shared while the page is open (or a saved choice or
+  `money2time://insights?focus=household` in a ledger that is not shared)
+  opens Review instead. Anyone in the ledger sees it; it is not a Pro page.
+- **Pages.** One per financial month, like Budget: from the first month with
+  an expense to the running one, paged by swiping or the header's arrows, and
+  the month name opens the month wheel. A month with nothing spent shows an
+  empty state.
+- **What counts.** The ledger's expenses (counted loan repayments included,
+  reimbursable expenses as the reimbursement setting says, as on Review),
+  valued in the reporting currency, by whose each entry is (`member_id`, null
+  being the owner). Everyone in the ledger is on the page, those who spent
+  nothing too; anyone else with an entry (someone who left) is added after
+  them, with a colour nobody else on the page has.
+- **Cards.**
+  - _Spent together_: the month's total, the change from the month before,
+    a bar split by person, and a row per person with their amount and share.
+    A row opens that person's entries for the month.
+  - _Even split_ (two or more people): the month split evenly between
+    everyone in the ledger, each person's payments against their share
+    (green over it, amber under), and the fewest payments that even it out
+    (`buildFairShare`: the one furthest behind pays the one furthest ahead,
+    again and again, in whole cents, so n people settle in at most n - 1
+    payments; "All square" when they already are). Nothing is recorded:
+    settling up is left to the household. A note says the split follows
+    whose each entry is, and that Belongs to changes it.
+  - _Who covers what_: the five biggest top-level categories (subcategories
+    roll up), each with a bar as long as its share of the biggest and split
+    by person. A row opens the category's entries for the month.
+  - _Last 6 months_: a stacked bar per month by person, the shown month at
+    full colour.
+  - _Biggest entries_: the month's three largest, each with whose it is; a
+    row opens the entry.
+- **Speed.** The ledger's expenses are bucketed by month and person once per
+  data change (`buildHouseholdIndex`); each page only reads its month and the
+  five before it.
+- **Privacy.** The bars and the trend carry `REPLAY_PRIVATE`, as the other
+  insights charts do.
 
 **How it works**
 

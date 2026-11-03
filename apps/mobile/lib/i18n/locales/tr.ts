@@ -1011,6 +1011,7 @@ const tr = {
     },
   },
   insights: {
+    household: 'Hane',
     breakdown: 'Dağılım',
     trends: 'Trendler',
     tabs: {
@@ -3123,6 +3124,26 @@ const tr = {
     pro_ended_message:
       'Pro aboneliğin sona erdi, bu yüzden {{name}} ve diğer ek defterlerin şimdilik kilitli. Hiçbir şey silinmedi: yenilediğinde eskisi gibi yeniden açılırlar.',
     renew_pro: "Pro'yu yenile",
+  },
+  household: {
+    spent_together: 'Birlikte harcanan',
+    even_split: 'Eşit paylaşım',
+    each: 'Kişi başı {{amount}}',
+    paid: '{{amount}} ödedi',
+    to_even_out: 'Eşitlemek için',
+    transfer: '{{from}} → {{to}}: {{amount}}',
+    all_square: 'Hesap denk',
+    split_note:
+      '{{count}} kişi arasında eşit bölündü; her kaydın kime ait olduğuna göre. Bir kayıttaki Kime ait ile değiştirin.',
+    paid_more: '{{name}} eşit paydan {{amount}} fazla ödedi',
+    paid_less: '{{name}} eşit paydan {{amount}} az ödedi',
+    who_covers: 'Kim neyi karşılıyor',
+    trend: 'Son 6 ay',
+    biggest: 'En büyük kayıtlar',
+    person_share: '{{name}}: {{amount}}, {{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: 'Henüz harcama yok',
+    empty_body: 'Herkesin harcaması burada kişi kişi görünür.',
   },
   shared_ledgers: {
     member_fallback: 'Üye',

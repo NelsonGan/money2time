@@ -1011,6 +1011,7 @@ const vi = {
     },
   },
   insights: {
+    household: 'Hộ gia đình',
     breakdown: 'Phân tích',
     trends: 'Xu hướng',
     tabs: {
@@ -3093,6 +3094,26 @@ const vi = {
     pro_ended_message:
       'Gói Pro của bạn đã hết hạn, nên {{name}} và các sổ bổ sung khác tạm thời bị khóa. Không có gì bị xóa: chúng sẽ mở lại như cũ khi bạn gia hạn.',
     renew_pro: 'Gia hạn Pro',
+  },
+  household: {
+    spent_together: 'Chi tiêu chung',
+    even_split: 'Chia đều',
+    each: 'Mỗi người {{amount}}',
+    paid: 'Đã trả {{amount}}',
+    to_even_out: 'Để cân bằng',
+    transfer: '{{from}} cho {{to}}: {{amount}}',
+    all_square: 'Đã cân bằng',
+    split_note:
+      'Chia đều cho {{count}} người, theo việc mỗi khoản thuộc về ai. Đổi ở mục Thuộc về của khoản đó.',
+    paid_more: '{{name}} đã trả nhiều hơn phần chia đều {{amount}}',
+    paid_less: '{{name}} đã trả ít hơn phần chia đều {{amount}}',
+    who_covers: 'Ai chi cho gì',
+    trend: '6 tháng gần nhất',
+    biggest: 'Khoản lớn nhất',
+    person_share: '{{name}}: {{amount}}, {{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: 'Chưa có chi tiêu',
+    empty_body: 'Chi tiêu của từng người sẽ hiện ở đây.',
   },
   shared_ledgers: {
     member_fallback: 'Thành viên',

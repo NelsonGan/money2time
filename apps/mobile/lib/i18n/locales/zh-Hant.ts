@@ -977,6 +977,7 @@ const zhHant = {
     },
   },
   insights: {
+    household: '家庭',
     breakdown: '明細',
     trends: '趨勢',
     tabs: {
@@ -2992,6 +2993,25 @@ const zhHant = {
     pro_ended_message:
       '你的 Pro 訂閱已結束，因此{{name}}和你的其他額外帳本暫時被鎖定。沒有刪除任何內容：續訂後它們會原樣重新開啟。',
     renew_pro: '續訂 Pro',
+  },
+  household: {
+    spent_together: '共同支出',
+    even_split: '平均分攤',
+    each: '每人 {{amount}}',
+    paid: '已付 {{amount}}',
+    to_even_out: '要扯平',
+    transfer: '{{from}} 給 {{to}}：{{amount}}',
+    all_square: '已扯平',
+    split_note: '按每筆記錄歸屬的人，在 {{count}} 人之間平均分攤。可在記錄的「歸屬」中更改。',
+    paid_more: '{{name}} 比平均分攤多付了 {{amount}}',
+    paid_less: '{{name}} 比平均分攤少付了 {{amount}}',
+    who_covers: '誰負擔什麼',
+    trend: '最近 6 個月',
+    biggest: '最大支出',
+    person_share: '{{name}}：{{amount}}，{{percent}}',
+    person_month: '{{name}} · {{month}}',
+    empty_title: '還沒有支出',
+    empty_body: '每個人的支出會顯示在這裡。',
   },
   shared_ledgers: {
     member_fallback: '成員',
