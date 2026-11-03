@@ -27,7 +27,7 @@ import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { budgetCoveringDay } from '~/features/budget/lib/budgetPeriods';
 import { useGoals } from '~/features/goals/useGoals';
-import { InsightCard } from '~/features/insights/components/InsightCard';
+import { InsightCard, SpendDeltaPill } from '~/features/insights/components/InsightCard';
 import { filterSpendingTransactions } from '~/features/reimbursements/lib/reimbursementMath';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -44,7 +44,6 @@ import { ReviewFilterSheet } from '../components/ReviewFilterSheet';
 import { applyReviewFilters, type ReviewFilters } from '../lib/reviewFilters';
 import {
   barLabel,
-  deltaLabel,
   inProgressLabel,
   money,
   paceBadgeLabel,
@@ -460,11 +459,7 @@ function PeriodRail({
 
 function SpentCard({ summary }: { summary: ReviewSummary }) {
   const { settings } = useApp();
-  const themeColors = useThemeColors();
   const { delta } = summary;
-  const percent = delta ? Math.round(delta.changeRatio * 100) : 0;
-  const deltaTint =
-    percent === 0 ? themeColors.textMuted : percent < 0 ? themeColors.success : themeColors.error;
 
   return (
     // The period lives here rather than on its own line above the cards: it is
@@ -472,13 +467,7 @@ function SpentCard({ summary }: { summary: ReviewSummary }) {
     <InsightCard title={I18n.t('review.spent')} meta={periodTitle(summary.period, settings.locale)}>
       <View className="flex-row flex-wrap items-center gap-2.5">
         <Text variant="display">{money(summary.expense, settings)}</Text>
-        {delta ? (
-          <View className="rounded-full px-2.5 py-1" style={{ backgroundColor: `${deltaTint}22` }}>
-            <Text variant="caption" style={{ color: deltaTint }}>
-              {deltaLabel(delta.changeRatio)}
-            </Text>
-          </View>
-        ) : null}
+        {delta ? <SpendDeltaPill changeRatio={delta.changeRatio} /> : null}
       </View>
     </InsightCard>
   );

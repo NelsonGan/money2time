@@ -4,6 +4,7 @@ import React, {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -25,10 +26,10 @@ import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { monthKeyLabel } from '~/features/budget/lib/format';
-import { InsightCard } from '~/features/insights/components/InsightCard';
+import { InsightCard, SpendDeltaPill } from '~/features/insights/components/InsightCard';
 import type { InsightsDrilldownPayload } from '~/features/insights/screens/InsightsDrilldownScreen';
 import { filterSpendingTransactions } from '~/features/reimbursements/lib/reimbursementMath';
-import { deltaLabel, money, shortDayLabel } from '~/features/review/lib/reviewFormat';
+import { money, shortDayLabel } from '~/features/review/lib/reviewFormat';
 import { useMonthPager } from '~/hooks/useMonthPager';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -163,9 +164,10 @@ export const HouseholdPagerView = forwardRef<HouseholdPagerViewHandle, Household
     );
 
     // `months` can gain leading entries while mounted (a backdated entry, a
-    // sync): stay on the month being viewed rather than the same slot.
+    // sync): stay on the month being viewed rather than the same slot. Before
+    // paint, so the slot's other month never flashes.
     const previousMonthsRef = useRef(months);
-    useEffect(() => {
+    useLayoutEffect(() => {
       const previousMonths = previousMonthsRef.current;
       if (previousMonths === months) return;
       previousMonthsRef.current = months;
@@ -196,18 +198,32 @@ export const HouseholdPagerView = forwardRef<HouseholdPagerViewHandle, Household
       [transactions],
     );
 
+    // Each month's numbers, built once per data change rather than on every
+    // render of its page.
+    const monthFor = useMemo(() => {
+      const built = new Map<string, HouseholdMonth>();
+      return (monthKey: string): HouseholdMonth => {
+        let month = built.get(monthKey);
+        if (!month) {
+          month = buildHouseholdMonth({
+            index,
+            monthKey,
+            monthCycle,
+            peopleOrder,
+            categories,
+            personKeyOf,
+          });
+          built.set(monthKey, month);
+        }
+        return month;
+      };
+    }, [categories, index, monthCycle, peopleOrder, personKeyOf]);
+
     const renderMonthPage = useCallback(
       ({ item: slot }: { item: number }) => {
         const monthKey = months[slot];
         if (!monthKey) return <View style={{ width: pageWidth }} />;
-        const month = buildHouseholdMonth({
-          index,
-          monthKey,
-          monthCycle,
-          peopleOrder,
-          categories,
-          personKeyOf,
-        });
+        const month = monthFor(monthKey);
         const label = monthKeyLabel(monthKey, settings.locale);
         const openIds = (drilldownLabel: string, transactionIds: string[]) => {
           if (transactionIds.length === 0) return;
@@ -270,17 +286,13 @@ export const HouseholdPagerView = forwardRef<HouseholdPagerViewHandle, Household
         );
       },
       [
-        categories,
         categoriesById,
-        index,
         listNavInset,
-        monthCycle,
+        monthFor,
         months,
         onOpenDrilldown,
         onOpenTransaction,
         pageWidth,
-        peopleOrder,
-        personKeyOf,
         settings,
         styleByKey,
         transactionsById,
@@ -394,28 +406,12 @@ function TogetherCard({
   onOpenPerson: (style: PersonStyle) => void;
 }) {
   const themeColors = useThemeColors();
-  const percent = month.changeRatio === null ? null : Math.round(month.changeRatio * 100);
-  const deltaTint =
-    percent === null || percent === 0
-      ? themeColors.textMuted
-      : percent < 0
-        ? themeColors.success
-        : themeColors.error;
   return (
     // The month is in the header above, so the card does not repeat it.
     <InsightCard title={I18n.t('household.spent_together')}>
       <View className="flex-row flex-wrap items-center gap-2.5">
         <Text variant="display">{money(month.total, settings)}</Text>
-        {month.changeRatio !== null ? (
-          <View
-            className="rounded-full px-2.5 py-1"
-            style={{ backgroundColor: withColorAlpha(deltaTint, 0.13) }}
-          >
-            <Text variant="caption" style={{ color: deltaTint }}>
-              {deltaLabel(month.changeRatio)}
-            </Text>
-          </View>
-        ) : null}
+        {month.changeRatio !== null ? <SpendDeltaPill changeRatio={month.changeRatio} /> : null}
       </View>
 
       <View className="mt-3">

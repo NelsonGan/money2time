@@ -1672,12 +1672,15 @@ page (below).
   that is not shared look as before.
 - **Colours.** Each person has a colour (`LedgerPerson.color`, from
   `personColors.ts`): the disc behind their initial on every row, and their
-  part of the Household charts. It comes from their account id, not their
-  name, and is handed out in an order every phone agrees on (the owner, then
-  the members by account id), each keeping the colour their id hashes to
-  unless someone before them has it. So a person looks the same on every
-  phone, and no two of up to six people share one. Someone only known from an
-  entry keeps their own hashed colour on rows.
+  part of the Household charts. It is the same on every phone, and no two of
+  up to six people share one: the colours are handed out in an order every
+  phone agrees on (the owner, seeded by the share id; then the members in the
+  order they joined, by their `ledger_profiles` row's `created_at`, then by
+  account id, compared by code unit rather than the phone's language), each
+  person keeping the colour their seed hashes to unless someone before them
+  has it. Someone who joins later comes last, so they never take an existing
+  person's colour. Someone only known from an entry keeps their own hashed
+  colour on rows.
 - **Belongs to.** The transaction editor's options panel (the More button) has
   a Belongs to row in a shared ledger, adding or editing: one of the panel's
   option rows, showing the person's photo and name. It opens a sheet of
@@ -1728,7 +1731,8 @@ how the household is spending, and who is covering what.
     a bar split by person, and a row per person with their amount and share.
     A row opens that person's entries for the month.
   - _Even split_ (two or more people): the month split evenly between
-    everyone in the ledger, each person's payments against their share
+    everyone in the ledger (and anyone who left but has an entry that month,
+    as they were part of it then), each person's payments against their share
     (green over it, amber under), and the fewest payments that even it out
     (`buildFairShare`: the one furthest behind pays the one furthest ahead,
     again and again, in whole cents, so n people settle in at most n - 1

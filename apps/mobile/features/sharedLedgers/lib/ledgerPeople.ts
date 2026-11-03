@@ -80,6 +80,8 @@ interface ProfileRow {
   role: string;
   name: string | null;
   avatar_uri: string | null;
+  /** When the person's profile was first written: about when they joined. */
+  created_at?: string | null;
 }
 
 interface OwnProfile {
@@ -123,7 +125,7 @@ function readOwnProfile(): OwnProfile {
 function readProfiles(ledgerId: string): ProfileRow[] {
   try {
     return getSQLite().getAllSync<ProfileRow>(
-      `SELECT user_id, role, name, avatar_uri FROM ledger_profiles
+      `SELECT user_id, role, name, avatar_uri, created_at FROM ledger_profiles
        WHERE ledger_id = ? AND deleted_at IS NULL`,
       [ledgerId],
     );
@@ -253,18 +255,27 @@ export function buildLedgerPeople(
     (a, b) => Number(b.isSelf) - Number(a.isSelf) || a.name.localeCompare(b.name),
   );
   const ownerId = ownerUserId ?? ownerRow?.user_id ?? null;
-  // Colours by account id, in an order every phone agrees on (the owner,
-  // then the members by id), so a person looks the same on each of them and
-  // no two people share one.
-  const byAccount = [...members.values()].sort((a, b) =>
-    (a.memberId ?? '').localeCompare(b.memberId ?? ''),
-  );
-  const colorOrder = [owner, ...byAccount];
-  distinctSeedColors(colorOrder.map((entry) => entry.memberId ?? ownerId ?? 'owner')).forEach(
-    (color, index) => {
-      colorOrder[index]!.color = color;
-    },
-  );
+  // Colours, in an order every phone agrees on: the owner (seeded by the
+  // share, which every phone knows, even before it knows the owner's account),
+  // then the members in the order they joined (their profile row's
+  // `created_at`, the same on every phone once synced), then by account id.
+  // Someone who joins later comes after everyone already there, so they never
+  // take an existing person's colour. Compared by code unit, not
+  // `localeCompare`, which follows the phone's language.
+  const joinedAt = new Map(profiles.map((row) => [row.user_id, row.created_at ?? null]));
+  const byCodeUnit = (left: string, right: string) => (left < right ? -1 : left > right ? 1 : 0);
+  const byJoin = [...members.values()].sort((a, b) => {
+    // A profile not synced yet (this phone's own, say) counts as the latest.
+    const left = joinedAt.get(a.memberId ?? '') ?? '\uffff';
+    const right = joinedAt.get(b.memberId ?? '') ?? '\uffff';
+    return byCodeUnit(left, right) || byCodeUnit(a.memberId ?? '', b.memberId ?? '');
+  });
+  const colorOrder = [owner, ...byJoin];
+  distinctSeedColors(
+    colorOrder.map((entry) => entry.memberId ?? `owner:${shared.shareId}`),
+  ).forEach((color, index) => {
+    colorOrder[index]!.color = color;
+  });
   // Someone only known from an entry (left before this phone saw them, or on
   // an older app): one object each, so rows showing them do not re-render.
   const unknown = new Map<string, LedgerPerson>();

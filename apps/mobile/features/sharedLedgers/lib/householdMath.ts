@@ -325,11 +325,14 @@ export function buildHouseholdMonth({
   );
   const trend = trendKeys.map((key) => {
     const month = index.months.get(key);
-    return {
-      monthKey: key,
-      total: month?.total ?? 0,
-      byPerson: month ? ordered(month.byPerson, order) : [],
-    };
+    if (!month) return { monthKey: key, total: 0, byPerson: [] };
+    // Someone with entries that month but not this one (someone who left)
+    // still has their part of its bar, or the stack would not reach its total.
+    const monthOrder = [...order];
+    for (const person of month.byPerson.keys()) {
+      if (!monthOrder.includes(person)) monthOrder.push(person);
+    }
+    return { monthKey: key, total: month.total, byPerson: ordered(month.byPerson, monthOrder) };
   });
 
   const biggest = [...rows]

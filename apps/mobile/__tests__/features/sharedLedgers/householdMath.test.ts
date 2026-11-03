@@ -230,6 +230,31 @@ describe('buildHouseholdMonth', () => {
     ]);
   });
 
+  it('keeps a trend month’s parts adding up to its total, someone not in the shown month too', () => {
+    const left = buildHouseholdIndex(
+      [
+        expense('2026-09-10T09:00:00', 60, null),
+        expense('2026-09-11T09:00:00', 40, 'user-left'),
+        expense('2026-10-10T09:00:00', 80, null),
+      ],
+      keyOf,
+      1,
+    );
+    const october = buildHouseholdMonth({
+      index: left,
+      monthKey: '2026-10',
+      monthCycle: 1,
+      peopleOrder: [OWNER_KEY],
+      categories: CATEGORIES,
+      personKeyOf: keyOf,
+    });
+    const september = october.trend.find((entry) => entry.monthKey === '2026-09')!;
+    expect(september.byPerson).toEqual([
+      { personKey: OWNER_KEY, amount: 60 },
+      { personKey: 'user-left', amount: 40 },
+    ]);
+  });
+
   it('picks the three biggest entries and keeps each person’s entries', () => {
     expect(month.biggest.map((entry) => entry.transactionId)).toEqual(['rent', 'aeon', 'car']);
     expect(month.biggest[0]).toMatchObject({ personKey: 'user-d', dayKey: '2026-10-01' });

@@ -2682,10 +2682,10 @@ export function InsightsScreen({
   const [periodPickerAnchorRect, setPeriodPickerAnchorRect] =
     useState<PeriodPickerAnchorRect | null>(null);
   const [isInsightMenuOpen, setIsInsightMenuOpen] = useState(false);
-  const [budgetMonthLabel, setBudgetMonthLabel] = useState('');
-  const budgetPagerRef = useRef<BudgetPagerViewHandle>(null);
-  const [householdMonthLabel, setHouseholdMonthLabel] = useState('');
-  const householdPagerRef = useRef<HouseholdPagerViewHandle>(null);
+  // Budget and Household are month pagers shown in place of the period pager,
+  // one at a time, so the header drives whichever is open through one handle.
+  const [monthPagerLabel, setMonthPagerLabel] = useState('');
+  const monthPagerRef = useRef<BudgetPagerViewHandle & HouseholdPagerViewHandle>(null);
   // Household is only for a shared ledger: off the menu otherwise.
   const isSharedLedger = useOpenLedgerPeople() !== null;
   // The review page's zoom and exclusions live here so its filter button can
@@ -4209,6 +4209,7 @@ export function InsightsScreen({
   const isHouseholdView = displaySelectedInsightType === 'household';
   // The takeovers replace the pager body and drive the header's controls.
   const isTakeoverView = isBudgetView || isReviewView || isHouseholdView;
+  const isMonthPagerView = isBudgetView || isHouseholdView;
   // Open iPhone Duo. The paged insights split across the panes, with the
   // header over the left one; Budget, Review and the locked Pro preview are
   // single pages, so they sit in a readable column instead.
@@ -6733,35 +6734,23 @@ export function InsightsScreen({
                     </Text>
                     {isReviewView ? null : (
                       <InsightPeriodSwitcher
-                        label={
-                          isBudgetView
-                            ? budgetMonthLabel
-                            : isHouseholdView
-                              ? householdMonthLabel
-                              : activePeriodLabel
-                        }
+                        label={isMonthPagerView ? monthPagerLabel : activePeriodLabel}
                         onPrevious={
-                          isBudgetView
-                            ? () => budgetPagerRef.current?.scrollToRelative(-1)
-                            : isHouseholdView
-                              ? () => householdPagerRef.current?.scrollToRelative(-1)
-                              : handlePrevMonth
+                          isMonthPagerView
+                            ? () => monthPagerRef.current?.scrollToRelative(-1)
+                            : handlePrevMonth
                         }
                         onNext={
-                          isBudgetView
-                            ? () => budgetPagerRef.current?.scrollToRelative(1)
-                            : isHouseholdView
-                              ? () => householdPagerRef.current?.scrollToRelative(1)
-                              : handleNextMonth
+                          isMonthPagerView
+                            ? () => monthPagerRef.current?.scrollToRelative(1)
+                            : handleNextMonth
                         }
                         onPressLabel={
-                          isBudgetView
-                            ? () => budgetPagerRef.current?.openMonthPicker()
-                            : isHouseholdView
-                              ? () => householdPagerRef.current?.openMonthPicker()
-                              : isTakeoverView || displayPeriodPreset === 'lifetime'
-                                ? undefined
-                                : handleOpenPeriodPicker
+                          isMonthPagerView
+                            ? () => monthPagerRef.current?.openMonthPicker()
+                            : isTakeoverView || displayPeriodPreset === 'lifetime'
+                              ? undefined
+                              : handleOpenPeriodPicker
                         }
                         disableArrows={!isTakeoverView && displayPeriodPreset === 'lifetime'}
                         labelRef={periodPickerTriggerRef}
@@ -6828,13 +6817,7 @@ export function InsightsScreen({
               }
               // The period sits under the title (InsightPeriodSwitcher), so the
               // header's own month capsule is not drawn.
-              monthLabel={
-                isBudgetView
-                  ? budgetMonthLabel
-                  : isHouseholdView
-                    ? householdMonthLabel
-                    : activePeriodLabel
-              }
+              monthLabel={isMonthPagerView ? monthPagerLabel : activePeriodLabel}
               onPrevMonth={handlePrevMonth}
               onNextMonth={handleNextMonth}
               hideNavigation
@@ -6860,19 +6843,19 @@ export function InsightsScreen({
               />
             ) : isHouseholdView ? (
               <HouseholdPagerView
-                ref={householdPagerRef}
+                ref={monthPagerRef}
                 onOpenDrilldown={onOpenDrilldown}
                 onOpenTransaction={onOpenTransaction}
-                onActiveMonthLabelChange={setHouseholdMonthLabel}
+                onActiveMonthLabelChange={setMonthPagerLabel}
               />
             ) : isBudgetView ? (
               <BudgetPagerView
-                ref={budgetPagerRef}
+                ref={monthPagerRef}
                 onOpenTemplateEditor={onOpenBudgetTemplateEditor}
                 onOpenBudgetEditor={onOpenPeriodBudgetEditor}
                 onCreateCustomBudget={onCreateCustomBudget}
                 onOpenDrilldown={onOpenDrilldown}
-                onActiveMonthLabelChange={setBudgetMonthLabel}
+                onActiveMonthLabelChange={setMonthPagerLabel}
               />
             ) : !isPro && proTrendTypeSet.has(displaySelectedInsightType) ? (
               // Locked Pro trend: every pager page would just render the paywall
