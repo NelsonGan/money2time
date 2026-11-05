@@ -135,8 +135,10 @@ it('notifies only the matching user after persistence and reset', async () => {
   stopOther();
 });
 
-const ai = (seen: boolean) =>
-  ({ decision: 'expense', applied: true, seen, reviewedAt: '2026-11-02T09:00:00.000Z' }) as const;
+// Reviewed just now: unseen results are kept for three days after review, so
+// a fixed date would expire and the test with it.
+const reviewedAt = new Date().toISOString();
+const ai = (seen: boolean) => ({ decision: 'expense', applied: true, seen, reviewedAt }) as const;
 it('keeps unseen AI results beyond the 10-entry cap until they are marked seen', async () => {
   await recordNotificationScan('a', { ...entry(0), ai: ai(false) });
   for (let i = 1; i <= 11; i++) await recordNotificationScan('a', entry(i));
