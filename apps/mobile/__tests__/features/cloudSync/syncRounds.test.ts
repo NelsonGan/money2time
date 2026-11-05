@@ -584,3 +584,125 @@ describe('images', () => {
     expect(paths).toEqual(['receipts/new.jpg']);
   });
 });
+
+describe("the choice screen's last change", () => {
+  const info = () =>
+    Object.fromEntries(
+      cloud
+        .prepare('SELECT key, value FROM sync_info')
+        .all()
+        .map((row) => [String(row.key), row.value]),
+    );
+  const infoWrites = () => calls.filter((call) => call.endsWith('SYNC_INFO'));
+  const thisPhone = () =>
+    String(cloud.prepare("SELECT origin FROM sync_rows WHERE row_id = 'lunch'").get()?.origin);
+  const otherPhoneRow = (id: string, updatedAt: number, origin = 'other-phone') => {
+    const { rev: _rev, ...row } = cloudRow('lunch')!;
+    cloud
+      .prepare('INSERT INTO sync_rows VALUES (?, ?, ?, ?, ?, ?)')
+      .run('transactions', id, JSON.stringify({ ...row, id }), `rev-${id}`, origin, updatedAt);
+  };
+
+  afterEach(() => jest.restoreAllMocks());
+
+  it('names this phone once, so later edits do not rewrite sync_info', async () => {
+    addTransaction('lunch', 12);
+    await engine.syncNow();
+    expect(info()).toMatchObject({
+      [`device_name:${thisPhone()}`]: 'Test',
+      last_device_name: 'Test',
+    });
+    calls = [];
+    addTransaction('dinner', 30);
+    await engine.syncNow();
+    expect(rounds()).toEqual(['pull', 'push']);
+    expect(infoWrites()).toEqual([]);
+  });
+
+  it("writes this phone's name again when it changes", async () => {
+    addTransaction('lunch', 12);
+    await engine.syncNow();
+    const renamed = new SyncEngine({
+      userId: 'test-user',
+      channel: 'personal',
+      url: 'local-test',
+      getTursoToken: async () => 'local-test',
+      getSessionToken: async () => 'local-test',
+      mediaPath: '/v1/media',
+      deviceName: 'Renamed',
+    });
+    Object.assign(renamed, { replica: (engine as unknown as { replica: unknown }).replica });
+    calls = [];
+    addTransaction('dinner', 30);
+    await renamed.syncNow();
+    expect(info()[`device_name:${thisPhone()}`]).toBe('Renamed');
+    // Only the name: the old keys are less than a day old.
+    expect(infoWrites()).toEqual(['DELETE FROM SYNC_INFO', 'INSERT INTO SYNC_INFO']);
+  });
+
+  it("leaves a shared ledger's database without names", async () => {
+    const { ledgerEngine, ledgerCloud } = shareFamily({ attached: true, detached: true });
+    addFamilyTransaction('groceries', 30);
+    await ledgerEngine.syncNow();
+    expect(ledgerCloud.prepare('SELECT COUNT(*) AS n FROM sync_rows').get()?.n).toBeGreaterThan(0);
+    expect(ledgerCloud.prepare('SELECT COUNT(*) AS n FROM sync_info').get()?.n).toBe(0);
+    ledgerCloud.close();
+  });
+
+  it('refreshes the keys older versions read at most once a day', async () => {
+    const start = Date.now();
+    addTransaction('lunch', 12);
+    await engine.syncNow();
+    const first = info().last_synced_at;
+    const spy = jest.spyOn(Date, 'now').mockReturnValue(start + 23 * 3_600_000);
+    addTransaction('dinner', 30);
+    await engine.syncNow();
+    expect(info().last_synced_at).toBe(first);
+    calls = [];
+    spy.mockReturnValue(start + 25 * 3_600_000);
+    addTransaction('snack', 4);
+    await engine.syncNow();
+    expect(info().last_synced_at).toBe(String(start + 25 * 3_600_000));
+    // The phone's name was already there: only the old keys are rewritten.
+    expect(infoWrites()).toEqual(['DELETE FROM SYNC_INFO', 'INSERT INTO SYNC_INFO']);
+  });
+
+  it("shows the newest row's time and phone", async () => {
+    addTransaction('lunch', 12);
+    await engine.syncNow();
+    const later = Date.now() + 60_000;
+    otherPhoneRow('from-pixel', later);
+    cloud.prepare("INSERT INTO sync_info VALUES ('device_name:other-phone', 'Pixel 10')").run();
+    await expect(engine.summarizeCloud()).resolves.toMatchObject({
+      lastSyncedAt: later,
+      lastDeviceName: 'Pixel 10',
+    });
+  });
+
+  it('uses the keys an older version wrote when they are newer', async () => {
+    addTransaction('lunch', 12);
+    await engine.syncNow();
+    // An older version names itself only in these keys, on every push.
+    const later = Date.now() + 60_000;
+    otherPhoneRow('from-old-app', later - 5, 'old-phone');
+    cloud.exec(
+      `DELETE FROM sync_info WHERE key IN ('last_synced_at', 'last_device_name');
+       INSERT INTO sync_info VALUES ('last_synced_at', '${later}'), ('last_device_name', 'Old iPhone');`,
+    );
+    await expect(engine.summarizeCloud()).resolves.toMatchObject({
+      lastSyncedAt: later,
+      lastDeviceName: 'Old iPhone',
+    });
+  });
+
+  it('names no phone when the newest row is from one it cannot name', async () => {
+    addTransaction('lunch', 12);
+    await engine.syncNow();
+    const later = Date.now() + 60_000;
+    otherPhoneRow('from-unknown', later, 'unknown-phone');
+    await expect(engine.summarizeCloud()).resolves.toMatchObject({
+      lastSyncedAt: later,
+      lastDeviceName: null,
+    });
+  });
+});
