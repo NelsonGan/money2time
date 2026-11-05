@@ -70,10 +70,7 @@
     "rowsA": 30,
     "rowsB": 30,
     "killed": "Error: sync engine operation failed: database sync engine error: fetch error: TypeError: fetch failed (killed)",
-    "seen6": [
-      "e6A /pull-updates",
-      "e6A /v2/pipeline"
-    ],
+    "seen6": ["e6A /pull-updates", "e6A /v2/pipeline"],
     "cloudRows": 30,
     "B_has_b_only": false,
     "t10_on_B": "Lunch with the team at the usual place #10",
@@ -287,17 +284,8 @@
   },
   {
     "case": "E13 choice screen",
-    "first": [
-      "e13A",
-      1793894570450
-    ],
-    "second": [
-      "e13B",
-      1793894571114
-    ],
-    "third": [
-      "e13A",
-      1793894571314
-    ]
+    "first": ["e13A", 1793894570450],
+    "second": ["e13B", 1793894571114],
+    "third": ["e13A", 1793894571314]
   }
 ]
