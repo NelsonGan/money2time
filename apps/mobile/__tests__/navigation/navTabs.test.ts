@@ -14,24 +14,25 @@ import {
 } from '~/components/navigation/navTabs';
 
 describe('transaction entry button', () => {
-  it('is available on Accounts with the default Calendar home', () => {
-    expect(showsTransactionFab('accounts', DEFAULT_NAV_TABS)).toBe(true);
+  it('is on Calendar but not Accounts in the default bar', () => {
     expect(showsTransactionFab('calendar', DEFAULT_NAV_TABS)).toBe(true);
+    expect(showsTransactionFab('accounts', DEFAULT_NAV_TABS)).toBe(false);
   });
 
-  it('is available on Accounts when it is home and Calendar is still in the bar', () => {
-    expect(showsTransactionFab('accounts', ['accounts', 'calendar', 'settings'])).toBe(true);
+  it('stays off Accounts when Accounts is home', () => {
+    expect(showsTransactionFab('accounts', ['accounts', 'calendar', 'settings'])).toBe(false);
+    expect(showsTransactionFab('accounts', ['accounts', 'insights', 'settings'])).toBe(false);
   });
 
   it('keeps entry on the home page when Calendar is removed', () => {
     const tabs = ['insights', 'accounts', 'settings'] as const;
     expect(showsTransactionFab('insights', tabs)).toBe(true);
-    expect(showsTransactionFab('accounts', tabs)).toBe(true);
+    expect(showsTransactionFab('accounts', tabs)).toBe(false);
     expect(showsTransactionFab('settings', tabs)).toBe(false);
   });
 
   it('does not add transaction buttons to other tabs while Calendar is in the bar', () => {
-    for (const tab of ['insights', 'albums', 'settings'] as const) {
+    for (const tab of ['accounts', 'insights', 'albums', 'settings'] as const) {
       expect(showsTransactionFab(tab, DEFAULT_NAV_TABS)).toBe(false);
     }
   });
