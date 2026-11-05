@@ -101,7 +101,7 @@ const FLUSH_BATCH = 250;
 const FETCH_BATCH = 200;
 const MEDIA_BATCH = 100;
 const DOWNLOAD_CONCURRENCY = 4;
-/** A missing image is retried on this many syncs, then left to its fallback. */
+/** A missing image is tried this many times, then left to its fallback. */
 const MAX_DOWNLOAD_ATTEMPTS = 10;
 const SHAPE_STATE_KEY = 'synced_shape';
 /** This phone's data replaces the cloud copy on the next personal sync. */
@@ -1509,6 +1509,7 @@ export class SyncEngine {
       }
     }
     const retryAll = Date.now() >= this.missingRetryAt;
+    if (!retryAll && !paths.size) return;
     const missing = db
       .getAllSync<{
         path: string;

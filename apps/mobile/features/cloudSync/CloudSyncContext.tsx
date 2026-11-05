@@ -650,12 +650,9 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
     setStatus('linking');
     // A retry after going offline is setting up again, not offline.
     setLastError(null);
-    // Asked beside the credentials, not before them: the Worker answers both
-    // from the same records, and linking waits on each round trip.
-    const accountPro = refreshAccountPro(true);
     try {
+      await refreshAccountPro(true);
       const engine = await openEngine();
-      await accountPro;
       await engine.pullLatest();
       const cloud = await engine.summarizeCloud();
       const local = summarizeLocal();
@@ -674,9 +671,6 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       if (generation !== generationRef.current) return;
       if (isNotPro(error)) {
         closeEngine();
-        // After the status answer, which for a phone not linked yet cannot
-        // tell that it is past the phone limit and would clear the flag.
-        await accountPro;
         setPhoneLimited(isPhoneLimit(error));
         setStatus('notPro');
         return;

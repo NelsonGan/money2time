@@ -394,22 +394,25 @@ class SharedLedgerSync {
     }
     const session = this.session;
     this.running = (async () => {
-      const outcome = await this.runAll(opts.forceList ?? false);
-      while (this.again && this.session === session) {
-        const forceList = this.againForceList;
+      try {
+        const outcome = await this.runAll(opts.forceList ?? false);
+        while (this.again && this.session === session) {
+          const forceList = this.againForceList;
+          this.again = false;
+          this.againForceList = false;
+          const next = await this.runAll(forceList);
+          outcome.appliedRows += next.appliedRows;
+          outcome.removedLedgers += next.removedLedgers;
+          outcome.error = next.error;
+        }
+        return outcome;
+      } finally {
+        // In the same tick as the last check, so no call falls between.
+        this.running = null;
         this.again = false;
         this.againForceList = false;
-        const next = await this.runAll(forceList);
-        outcome.appliedRows += next.appliedRows;
-        outcome.removedLedgers += next.removedLedgers;
-        outcome.error = next.error;
       }
-      return outcome;
-    })().finally(() => {
-      this.running = null;
-      this.again = false;
-      this.againForceList = false;
-    });
+    })();
     return this.running;
   }
 

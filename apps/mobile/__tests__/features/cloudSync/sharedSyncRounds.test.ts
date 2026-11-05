@@ -102,3 +102,21 @@ it('does not run the extra round for a session that has signed out', async () =>
   await first;
   expect(rounds).toHaveLength(1);
 });
+
+it('never drops a call made just as the last round ends', async () => {
+  // However many microtasks after the round's end the call lands, it either
+  // joins one more round or starts its own: it never resolves with a round
+  // that began before it.
+  for (let ticks = 0; ticks < 6; ticks++) {
+    rounds = [];
+    const first = sharedLedgerSync.syncAll();
+    rounds[0].finish({});
+    for (let i = 0; i < ticks; i++) await Promise.resolve();
+    const late = sharedLedgerSync.syncAll();
+    await flush();
+    expect(rounds).toHaveLength(2);
+    rounds[1].finish({ appliedRows: 1 });
+    await expect(late).resolves.toMatchObject({ appliedRows: 1 });
+    await first;
+  }
+});
