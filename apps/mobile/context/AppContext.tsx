@@ -1944,7 +1944,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 : {}),
             }
           : {};
-      const balanceAfter = runMutation(
+      runMutation(
         () => {
           accountsRepository.update(accountId, {
             ...otherUpdates,
@@ -1954,7 +1954,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             startingBalance: normalizeMoneyAmount(acct.startingBalance * rate),
           });
           transactionsRepository.redenominateAccount(accountId, toCurrency, rate);
-          return balanceNow();
         },
         {
           refresh: () => {
@@ -1975,7 +1974,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if ('cardDesign' in otherUpdates) {
         sweepIfCustomAssetDropped(acct.cardDesign, otherUpdates.cardDesign);
       }
-      return balanceAfter;
+      // Read once the write has committed and refreshed, so a failure here
+      // cannot report a saved change as failed.
+      return balanceNow();
     },
     [accounts, refreshAccountsAndGroups, refreshTransactions, runMutation, updateAccount],
   );

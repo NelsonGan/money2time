@@ -83,10 +83,13 @@ import {
   type LoanCardSummary,
 } from '~/features/settings/components/AccountCardStack';
 import { CardDesignField } from '~/features/settings/components/CardDesignField';
+import {
+  balanceChangeEntry,
+  balanceChangeWithCurrencySwitch,
+} from '~/features/settings/lib/accountBalanceChange';
 import type { AccountLogoPickerSession } from '~/features/settings/lib/accountLogoPickerBridge';
 import type { CardDesignPickerSession } from '~/features/settings/lib/cardDesignPickerBridge';
 import { stackPaletteIndex } from '~/features/settings/lib/cardStackIndex';
-import { balanceChangeWithCurrencySwitch } from '~/features/settings/lib/currencySwitchBalance';
 import {
   ActivityTransactionList,
   buildBulkUpdateInputs,
@@ -2253,16 +2256,20 @@ export function AccountEditorScreen({
       // re-denominated, while `estimatedDelta` is what the prompt shows.
       const promptBalanceAdjustment = (estimatedDelta: number, apply: () => number) => {
         const flowType = flowTypeForBalanceDelta(account.type, estimatedDelta);
-        const record = (type: 'balance_adjustment' | 'income' | 'expense') => {
-          const delta = apply();
-          if (Math.abs(delta) > 0.000001) {
+        const record = (recordAs: 'difference' | 'flow') => {
+          const entry = balanceChangeEntry(account.type, recordAs, apply());
+          if (entry) {
             createTransaction({
-              type,
-              amount: type === 'balance_adjustment' ? delta : Math.abs(delta),
+              ...entry,
               currency: input.currency || account.currency,
+              // Always in the account's own currency, so there is nothing to
+              // convert. Said explicitly because right after a currency switch
+              // createTransaction still sees the account in its old currency
+              // and would convert the amount into it.
+              accountAmount: null,
               date: new Date().toISOString(),
               accountId: account.id,
-              ...(type === 'balance_adjustment'
+              ...(entry.type === 'balance_adjustment'
                 ? { fromAccountId: null, toAccountId: null, categoryId: null }
                 : {}),
               note: String(I18n.t('accounts.balance_adjustment_transaction_note')),
@@ -2283,14 +2290,14 @@ export function AccountEditorScreen({
             { text: I18n.t('common.cancel'), style: 'cancel' },
             {
               text: I18n.t('accounts.record_as_difference'),
-              onPress: () => record('balance_adjustment'),
+              onPress: () => record('difference'),
             },
             {
               text:
                 flowType === 'income'
                   ? I18n.t('accounts.record_as_income')
                   : I18n.t('accounts.record_as_expense'),
-              onPress: () => record(flowType),
+              onPress: () => record('flow'),
             },
           ],
         );
@@ -2358,7 +2365,10 @@ export function AccountEditorScreen({
         return;
       }
 
-      const delta = input.startingBalance - currentBalance;
+      // An untouched field is not a balance change: it shows the balance
+      // rounded to cents, which can differ from the stored one by a fraction
+      // (a re-denominated history is not rounded).
+      const delta = input.balanceEdited ? input.startingBalance - currentBalance : 0;
       if (Math.abs(delta) <= 0.000001) {
         applyAccountUpdates();
         onClose();

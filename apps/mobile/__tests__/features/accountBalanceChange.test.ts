@@ -1,4 +1,7 @@
-import { balanceChangeWithCurrencySwitch } from '~/features/settings/lib/currencySwitchBalance';
+import {
+  balanceChangeEntry,
+  balanceChangeWithCurrencySwitch,
+} from '~/features/settings/lib/accountBalanceChange';
 import type { RateTable } from '~/types';
 
 // 1 USD = 4.5 MYR = 36 THB, so 1 MYR = 8 THB.
@@ -69,5 +72,28 @@ describe('balanceChangeWithCurrencySwitch', () => {
     expect(
       balanceChangeWithCurrencySwitch({ ...base, balanceEdited: true, typedBalance: Number.NaN }),
     ).toBeNull();
+  });
+});
+
+describe('balanceChangeEntry', () => {
+  it('records an account difference with its sign', () => {
+    expect(balanceChangeEntry('debit', 'difference', -727.48)).toEqual({
+      type: 'balance_adjustment',
+      amount: -727.48,
+    });
+  });
+
+  it('takes the direction of income/expense from the delta being recorded', () => {
+    expect(balanceChangeEntry('debit', 'flow', 50)).toEqual({ type: 'income', amount: 50 });
+    // The prompt may have been worded from an estimate with the other sign (a
+    // stale rate table); what is recorded must still land on the typed balance.
+    expect(balanceChangeEntry('debit', 'flow', -100)).toEqual({ type: 'expense', amount: 100 });
+    // A debt that grows is spending.
+    expect(balanceChangeEntry('loan', 'flow', 20)).toEqual({ type: 'expense', amount: 20 });
+  });
+
+  it('records nothing when the balance already matches', () => {
+    expect(balanceChangeEntry('debit', 'difference', 0)).toBeNull();
+    expect(balanceChangeEntry('debit', 'flow', 0.0000001)).toBeNull();
   });
 });
