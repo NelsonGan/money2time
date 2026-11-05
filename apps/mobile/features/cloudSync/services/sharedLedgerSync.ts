@@ -151,6 +151,9 @@ class SharedLedgerSync {
   private opening = new Map<string, Promise<SyncEngine>>();
   private listedAt = 0;
   private running: Promise<SharedSyncOutcome> | null = null;
+  /** Asked again while a round ran: run one more (see syncAll). */
+  private again = false;
+  private againForceList = false;
   /** The last sync of some ledger failed: retry soon. */
   retry = false;
 
@@ -376,12 +379,40 @@ class SharedLedgerSync {
     return engine;
   }
 
-  /** Syncs every shared ledger that is active. Concurrent calls share one run. */
+  /**
+   * Syncs every shared ledger that is active. A call while a round runs (a
+   * live nudge, an edit) is not dropped: that round may have pulled before
+   * the change it is about, so one more round follows, and the call resolves
+   * with it. The outcome adds up the rows of every round and reports the last
+   * round's error.
+   */
   syncAll(opts: { forceList?: boolean } = {}): Promise<SharedSyncOutcome> {
-    if (this.running) return this.running;
-    this.running = this.runAll(opts.forceList ?? false).finally(() => {
-      this.running = null;
-    });
+    if (this.running) {
+      this.again = true;
+      this.againForceList ||= opts.forceList ?? false;
+      return this.running;
+    }
+    const session = this.session;
+    this.running = (async () => {
+      try {
+        const outcome = await this.runAll(opts.forceList ?? false);
+        while (this.again && this.session === session) {
+          const forceList = this.againForceList;
+          this.again = false;
+          this.againForceList = false;
+          const next = await this.runAll(forceList);
+          outcome.appliedRows += next.appliedRows;
+          outcome.removedLedgers += next.removedLedgers;
+          outcome.error = next.error;
+        }
+        return outcome;
+      } finally {
+        // In the same tick as the last check, so no call falls between.
+        this.running = null;
+        this.again = false;
+        this.againForceList = false;
+      }
+    })();
     return this.running;
   }
 

@@ -1,0 +1,82 @@
+[
+  {
+    "case": "U1 update after failed push",
+    "pushFailedOnMain": true,
+    "unpushedFlag": {
+      "value": "1"
+    },
+    "pushedAfterUpdate": true,
+    "B_t000001": {
+      "amount": 1001,
+      "note": "Lunch with the team at the usual place #1",
+      "deleted_at": null
+    },
+    "consistent": true
+  },
+  {
+    "case": "U2 big WAL from main, trimmed on update",
+    "walBefore": 19825464,
+    "walAfter": 0,
+    "B_t000004": {
+      "amount": 4.5,
+      "note": "after update",
+      "deleted_at": null
+    },
+    "consistent": true
+  },
+  {
+    "case": "U3 mixed versions",
+    "crossOk": true,
+    "sameRow_A": {
+      "amount": 7.5,
+      "note": "B wrote",
+      "deleted_at": null
+    },
+    "sameRow_B": {
+      "amount": 7.5,
+      "note": "B wrote",
+      "deleted_at": null
+    },
+    "consistent": true
+  },
+  {
+    "case": "U3 main relinks, branch receives",
+    "appliedOnB": 1503,
+    "consistent": true
+  },
+  {
+    "case": "U3 branch keeps phone, main receives",
+    "appliedOnA": 1,
+    "A_bNew": {
+      "amount": 5,
+      "note": null,
+      "deleted_at": null
+    },
+    "consistent": true
+  },
+  {
+    "case": "U4 delete beats a stale edit",
+    "A": {
+      "amount": 8.5,
+      "note": "Lunch with the team at the usual place #8",
+      "deleted_at": "2026-11-06T00:00:07.000Z"
+    },
+    "B": {
+      "amount": 8.5,
+      "note": "Lunch with the team at the usual place #8",
+      "deleted_at": "2026-11-06T00:00:07.000Z"
+    },
+    "consistent": true
+  },
+  {
+    "case": "U5 offline then online",
+    "offlineFailures": 5,
+    "pushedWhenBack": true,
+    "A_t000104": {
+      "amount": 104.5,
+      "note": "offline 4",
+      "deleted_at": null
+    },
+    "consistent": true
+  }
+]
