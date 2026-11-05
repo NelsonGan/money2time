@@ -369,12 +369,17 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
     id: string,
     input: Partial<Omit<Account, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>>,
   ) => void;
-  /** Change an existing account's currency, re-denominating its history in a lump. */
+  /**
+   * Change an existing account's currency, re-denominating its history in a
+   * lump. Returns the account's balance in the new currency afterwards (null
+   * when the account is gone), so a balance edit made in the same save can be
+   * recorded against the exact converted figure.
+   */
   changeAccountCurrency: (
     accountId: string,
     toCurrency: string,
     otherUpdates?: Partial<Omit<Account, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>>,
-  ) => void;
+  ) => number | null;
   deleteAccount: (id: string) => void;
   reorderAccounts: (ids: string[]) => void;
   /**
@@ -1897,12 +1902,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       accountId: string,
       toCurrency: string,
       otherUpdates: Partial<Omit<Account, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>> = {},
-    ) => {
+    ): number | null => {
       const acct = accounts.find((a) => a.id === accountId);
-      if (!acct) return;
+      if (!acct) return null;
+      const balanceNow = () =>
+        accountsRepository.getBalances().find((b) => b.accountId === accountId)?.balance ?? null;
       if (acct.currency === toCurrency) {
         updateAccount(accountId, { ...otherUpdates, currency: toCurrency });
-        return;
+        return balanceNow();
       }
       // Resolve the rate from a freshly-built table (the in-memory one can be
       // stale right after a restore/import) so the lump conversion actually
@@ -1967,6 +1974,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if ('cardDesign' in otherUpdates) {
         sweepIfCustomAssetDropped(acct.cardDesign, otherUpdates.cardDesign);
       }
+      // Read once the write has committed and refreshed, so a failure here
+      // cannot report a saved change as failed.
+      return balanceNow();
     },
     [accounts, refreshAccountsAndGroups, refreshTransactions, runMutation, updateAccount],
   );
