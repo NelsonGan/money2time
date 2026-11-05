@@ -41,3 +41,17 @@
 --- android receive
 {"at":"2026-11-05T11:34:49.371Z","method":"POST","path":"/pull-updates","status":200,"up":55,"down":20577,"ms":158}
 {"at":"2026-11-05T11:35:01.569Z","method":"POST","path":"/pull-updates","status":200,"up":0,"down":422669,"ms":142}
+--- final smoke
+{"at":"2026-11-05T11:47:35.265Z","method":"POST","path":"/pull-updates","status":200,"up":0,"down":422669,"ms":356}
+{"at":"2026-11-05T11:47:35.403Z","method":"POST","path":"/pull-updates","status":200,"up":55,"down":62,"ms":97}
+--- final: use this phone
+{"at":"2026-11-05T11:48:02.557Z","method":"POST","path":"/pull-updates","status":200,"up":55,"down":62,"ms":107}
+{"at":"2026-11-05T11:48:02.738Z","method":"POST","path":"/v2/pipeline","status":200,"up":358,"down":392,"ms":17}
+{"at":"2026-11-05T11:48:02.938Z","method":"POST","path":"/v2/pipeline","status":200,"up":904600,"down":164071,"ms":182}
+--- final: edit
+{"at":"2026-11-05T11:48:03.938Z","method":"POST","path":"/pull-updates","status":200,"up":55,"down":422669,"ms":198}
+{"at":"2026-11-05T11:48:04.290Z","method":"POST","path":"/pull-updates","status":200,"up":55,"down":62,"ms":114}
+{"at":"2026-11-05T11:48:04.338Z","method":"POST","path":"/v2/pipeline","status":200,"up":358,"down":458,"ms":17}
+{"at":"2026-11-05T11:48:04.374Z","method":"POST","path":"/v2/pipeline","status":200,"up":4067,"down":1563,"ms":32}
+--- final: receive
+{"at":"2026-11-05T11:48:22.298Z","method":"POST","path":"/pull-updates","status":200,"up":55,"down":20577,"ms":115}
