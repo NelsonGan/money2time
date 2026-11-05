@@ -1327,10 +1327,31 @@ app tables ◀──apply──── diff of revisions ◀──── replica.
   dropped on sign-out and when the flag is off, and stay quiet while pulled
   rows are written (`sync_state.applying = '1'`).
 - **Cloud shape.** One table, `sync_rows(table_name, row_id, data, rev, origin,
-updated_at)`, with each row as JSON, plus `sync_info` (last device, last
-  sync). App migrations therefore need no cloud migration. A write merges over
+updated_at)`, with each row as JSON, plus `sync_info` (the choice screen's
+  phone names, and the last device and time older versions read).
+  App migrations therefore need no cloud migration. A write merges over
   the stored JSON, so an older app version keeps fields it does not know; a
   read keeps only the columns the phone has.
+- **The choice screen's last device and time** come from the newest row in
+  `sync_rows` (its `updated_at`, and its `origin` named by that phone's
+  `device_name:<origin>` key in `sync_info`). A phone writes its name once,
+  and again only if it changes. Versions up to 1.7.3 read
+  `last_synced_at` and `last_device_name` instead, and rewrote them on every
+  push; a phone now refreshes them at most once a day, and when they are
+  newer than the newest row (an older version pushed last) they are shown.
+  Times are each phone's own clock, as before, so a phone whose clock runs
+  ahead can be named after another edited later. A push of deletions alone
+  does not move the time. A shared ledger's database has no choice screen,
+  so phones write nothing to its `sync_info`.
+- **What Turso counts is pulled pages.** Turso bills `bytes_synced`, the
+  bytes phones download (the Developer plan, which the org was on in
+  November 2026, allows 10 GB a month without overages), and a pull brings
+  whole 4 KB pages, including the ones this phone just pushed. Any write to `sync_info` touches two more pages on top
+  of a one-row edit's two, which is why it is no longer written on every
+  push: against Turso Cloud (3,000 rows), a one-row edit went from 16.5 KB
+  to 8.3 KB pulled by each phone (the one that made it included), and five
+  quick edits each synced on their own from 82 KB to 41 KB. A write to
+  another table, or a busier sync, costs pages the same way.
 - **Sync run** (`SyncEngine.syncNow`): `pull()` (so the flush sees what other
   phones deleted meanwhile), flush the outbox into the replica with a
   new revision per changed row (a row whose JSON did not change, such as one
