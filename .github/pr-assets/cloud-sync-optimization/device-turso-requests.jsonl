@@ -1,0 +1,43 @@
+{"at":"2026-11-05T11:22:25.845Z","method":"POST","path":"/pull-updates","status":200,"up":0,"down":4163,"ms":484}
+{"at":"2026-11-05T11:22:25.954Z","method":"POST","path":"/pull-updates","status":200,"up":55,"down":62,"ms":55}
+{"at":"2026-11-05T11:22:26.043Z","method":"POST","path":"/pull-updates","status":200,"up":55,"down":62,"ms":56}
+{"at":"2026-11-05T11:22:26.266Z","method":"POST","path":"/v2/pipeline","status":200,"up":358,"down":251,"ms":15}
+{"at":"2026-11-05T11:22:26.532Z","method":"POST","path":"/v2/pipeline","status":200,"up":761263,"down":96725,"ms":253}
+{"at":"2026-11-05T11:22:27.541Z","method":"POST","path":"/pull-updates","status":200,"up":55,"down":422669,"ms":154}
+{"at":"2026-11-05T11:22:51.095Z","method":"POST","path":"/pull-updates","status":200,"up":55,"down":62,"ms":139}
+{"at":"2026-11-05T11:22:53.351Z","method":"POST","path":"/pull-updates","status":200,"up":55,"down":62,"ms":68}
+{"at":"2026-11-05T11:23:09.256Z","method":"POST","path":"/pull-updates","status":200,"up":55,"down":62,"ms":108}
+{"at":"2026-11-05T11:23:09.365Z","method":"POST","path":"/v2/pipeline","status":200,"up":358,"down":457,"ms":91}
+{"at":"2026-11-05T11:23:09.398Z","method":"POST","path":"/v2/pipeline","status":200,"up":4070,"down":1564,"ms":31}
+{"at":"2026-11-05T11:23:47.280Z","method":"POST","path":"/pull-updates","status":200,"up":55,"down":20577,"ms":110}
+{"at":"2026-11-05T11:25:21.997Z","method":"POST","path":"/pull-updates","status":200,"up":55,"down":62,"ms":177}
+--- relink
+{"at":"2026-11-05T11:25:57.410Z","method":"POST","path":"/pull-updates","status":200,"up":0,"down":422669,"ms":161}
+{"at":"2026-11-05T11:25:57.485Z","method":"POST","path":"/pull-updates","status":200,"up":55,"down":62,"ms":57}
+--- use this phone tapped 11:27:23
+{"at":"2026-11-05T11:27:24.269Z","method":"POST","path":"/pull-updates","status":200,"up":55,"down":62,"ms":155}
+{"at":"2026-11-05T11:27:25.258Z","method":"POST","path":"/pull-updates","status":200,"up":55,"down":62,"ms":101}
+{"at":"2026-11-05T11:28:10.654Z","method":"POST","path":"/pull-updates","status":200,"up":55,"down":62,"ms":104}
+{"at":"2026-11-05T11:29:28.176Z","method":"POST","path":"/pull-updates","status":200,"up":0,"down":422669,"ms":188}
+{"at":"2026-11-05T11:29:28.294Z","method":"POST","path":"/pull-updates","status":200,"up":55,"down":62,"ms":68}
+{"at":"2026-11-05T11:29:55.904Z","method":"POST","path":"/pull-updates","status":200,"up":55,"down":62,"ms":97}
+{"at":"2026-11-05T11:29:56.810Z","method":"POST","path":"/pull-updates","status":200,"up":55,"down":62,"ms":50}
+{"at":"2026-11-05T11:30:09.496Z","method":"POST","path":"/pull-updates","status":200,"up":0,"down":422669,"ms":152}
+--- android relink
+{"at":"2026-11-05T11:32:16.521Z","method":"POST","path":"/pull-updates","status":200,"up":0,"down":422669,"ms":174}
+{"at":"2026-11-05T11:32:16.600Z","method":"POST","path":"/pull-updates","status":200,"up":55,"down":62,"ms":51}
+--- android use this phone
+{"at":"2026-11-05T11:34:11.923Z","method":"POST","path":"/pull-updates","status":200,"up":55,"down":62,"ms":115}
+{"at":"2026-11-05T11:34:12.588Z","method":"POST","path":"/v2/pipeline","status":200,"up":358,"down":392,"ms":24}
+{"at":"2026-11-05T11:34:12.874Z","method":"POST","path":"/v2/pipeline","status":200,"up":719148,"down":163900,"ms":180}
+{"at":"2026-11-05T11:34:14.421Z","method":"POST","path":"/pull-updates","status":200,"up":55,"down":315991,"ms":109}
+--- android idle (home+open)
+{"at":"2026-11-05T11:34:23.063Z","method":"POST","path":"/pull-updates","status":200,"up":55,"down":62,"ms":157}
+{"at":"2026-11-05T11:34:26.267Z","method":"POST","path":"/pull-updates","status":200,"up":55,"down":62,"ms":48}
+--- android edit
+{"at":"2026-11-05T11:34:32.346Z","method":"POST","path":"/pull-updates","status":200,"up":55,"down":62,"ms":96}
+{"at":"2026-11-05T11:34:32.587Z","method":"POST","path":"/v2/pipeline","status":200,"up":358,"down":458,"ms":14}
+{"at":"2026-11-05T11:34:32.636Z","method":"POST","path":"/v2/pipeline","status":200,"up":4048,"down":1564,"ms":30}
+--- android receive
+{"at":"2026-11-05T11:34:49.371Z","method":"POST","path":"/pull-updates","status":200,"up":55,"down":20577,"ms":158}
+{"at":"2026-11-05T11:35:01.569Z","method":"POST","path":"/pull-updates","status":200,"up":0,"down":422669,"ms":142}

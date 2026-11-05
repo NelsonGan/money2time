@@ -40,6 +40,7 @@ import { runUserAssetGc } from '~/services/userAssetGc';
 import { useSyncScheduler } from './hooks/useSyncScheduler';
 import { PERSONAL_CHANNEL } from './lib/ledgerRows';
 import { decideLink } from './lib/linking';
+import { shouldAskForCredentials } from './lib/pausedCheck';
 import {
   CloudSyncApiError,
   type CloudUser,
@@ -256,6 +257,8 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
   const accountAskRef = useRef(0);
   const appUserIdRef = useRef(appUserId);
   appUserIdRef.current = appUserId;
+  const isStoreProRef = useRef(isStorePro);
+  isStoreProRef.current = isStorePro;
   const refreshAllRef = useRef(refreshAll);
   refreshAllRef.current = refreshAll;
   const switchLedgerRef = useRef(switchLedger);
@@ -315,30 +318,36 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
    * Sharing a sign-in to share Pro would mean sharing one's money data.
    * A failed read keeps the last answer (offline keeps Pro for a while), and
    * is asked again at the next sync after 5 minutes or on the next event.
+   * Returns the Worker's answer when this call got one.
    */
-  const refreshAccountPro = useCallback(async (force = false) => {
-    const session = sessionRef.current;
-    if (!session) return;
-    if (!force && Date.now() - accountCheckedAtRef.current < ACCOUNT_PRO_EVERY_MS) return;
-    accountCheckedAtRef.current = Date.now();
-    const asked = ++accountAskRef.current;
-    try {
-      // The install is linked to the account only once its data is: a Pro
-      // phone signing in to someone else's account and backing out lends it
-      // nothing.
-      const { isPro: accountIsPro, limited } = await getAccountStatus(
-        session.token,
-        session.linked ? appUserIdRef.current : null,
-      );
-      const current = sessionRef.current;
-      // Signed out meanwhile, or a newer answer is on its way.
-      if (current?.user.id !== session.user.id || asked !== accountAskRef.current) return;
-      setAccountPro(session.user.id, accountIsPro && current.linked);
-      setPhoneLimited(limited);
-    } catch {
-      // Offline, or a Worker without the route: the last answer stands.
-    }
-  }, []);
+  const refreshAccountPro = useCallback(
+    async (force = false): Promise<{ isPro: boolean; limited: boolean } | null> => {
+      const session = sessionRef.current;
+      if (!session) return null;
+      if (!force && Date.now() - accountCheckedAtRef.current < ACCOUNT_PRO_EVERY_MS) return null;
+      accountCheckedAtRef.current = Date.now();
+      const asked = ++accountAskRef.current;
+      try {
+        // The install is linked to the account only once its data is: a Pro
+        // phone signing in to someone else's account and backing out lends it
+        // nothing.
+        const answer = await getAccountStatus(
+          session.token,
+          session.linked ? appUserIdRef.current : null,
+        );
+        const current = sessionRef.current;
+        // Signed out meanwhile, or a newer answer is on its way.
+        if (current?.user.id !== session.user.id || asked !== accountAskRef.current) return null;
+        setAccountPro(session.user.id, answer.isPro && current.linked);
+        setPhoneLimited(answer.limited);
+        return answer;
+      } catch {
+        // Offline, or a Worker without the route: the last answer stands.
+        return null;
+      }
+    },
+    [],
+  );
 
   const refreshAccountProRef = useRef(refreshAccountPro);
   refreshAccountProRef.current = refreshAccountPro;
@@ -641,9 +650,12 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
     setStatus('linking');
     // A retry after going offline is setting up again, not offline.
     setLastError(null);
+    // Asked beside the credentials, not before them: the Worker answers both
+    // from the same records, and linking waits on each round trip.
+    const accountPro = refreshAccountPro(true);
     try {
-      await refreshAccountPro(true);
       const engine = await openEngine();
+      await accountPro;
       await engine.pullLatest();
       const cloud = await engine.summarizeCloud();
       const local = summarizeLocal();
@@ -662,6 +674,9 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
       if (generation !== generationRef.current) return;
       if (isNotPro(error)) {
         closeEngine();
+        // After the status answer, which for a phone not linked yet cannot
+        // tell that it is past the phone limit and would clear the flag.
+        await accountPro;
         setPhoneLimited(isPhoneLimit(error));
         setStatus('notPro');
         return;
@@ -799,7 +814,10 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
     // Pro may have been restored since the last answer, here or on another phone.
     if (status === 'notPro') {
       credentialsRef.current = null;
-      await refreshAccountPro(true);
+      const answer = await refreshAccountPro(true);
+      // Stay paused until the next check when the answer already says the
+      // credentials would be refused.
+      if (!shouldAskForCredentials(answer, session.linked, isStoreProRef.current)) return;
     }
     if (session.linked) await runSync();
     else await link();
@@ -961,10 +979,10 @@ export function CloudSyncProvider({ children }: { children: React.ReactNode }) {
 
   const scheduledSync = useCallback(() => void runSync(), [runSync]);
   const syncWanted = useCallback(() => retryRef.current || pendingChangeCount() > 0, []);
-  // An edit goes up within about 2 s, unless a sync is running (it follows
+  // An edit goes up within about a second, unless a sync is running (it follows
   // that one) or the last failed (the 15 s retry has it).
   // A shared ledger whose sync keeps failing leaves rows in the outbox too:
-  // then this waits for the 15 s retry rather than syncing every 2 s.
+  // then this waits for the 15 s retry rather than syncing every second.
   const pushSoon = useCallback(
     () =>
       !syncingRef.current &&

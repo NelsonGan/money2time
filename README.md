@@ -1174,6 +1174,21 @@ longer reads it; the flag can be archived in PostHog. A phone may still hold the
     phone_ replaces the cloud copy, and every other phone follows.
     _Cancel_ signs out and changes nothing.
 
+  Replacing the cloud copy (the first case, and _Use this phone_) is a
+  diff, not a wipe (`uploadAllReplacingCloud`): the next sync pulls, deletes
+  the cloud's rows this phone does not have (`dropCloudRowsNotHere`), and
+  the flush sends the rest, leaving alone every row whose JSON is already the
+  same. A second link of the same data, or keeping a phone that mostly
+  matches, costs only what differs, on this phone and on every other one.
+  It used to empty `sync_rows` and insert everything again: in the
+  week after launch, the two largest cloud copies (about 7,000 and 9,800
+  rows) were rewritten in full two and three times, one of them syncing
+  11 times its size, and each other phone downloaded and rewrote every row.
+  With 7,000 rows, a relink went from 14.3 MB up and 7.4 MB down on the other
+  phone to 55 bytes and 20 KB. The intent (`replace_cloud` in `sync_state`)
+  is written with the queued rows, so an app killed before the sync still
+  replaces the copy on its next one.
+
   "Recorded" (`MEANINGFUL_ROWS`) means any transaction, recurring rule,
   album, item or budget template, an account with a starting balance, a
   savings goal or a loan, or a ledger besides the default one; onboarding's
@@ -1261,7 +1276,13 @@ longer reads it; the flag can be archived in PostHog. A phone may still hold the
     Delete account.
   - Sync resumes by itself when this phone's Pro comes back (purchase or
     restore), and the app checks again on return to the app and every 3
-    minutes, which covers a renewal on another phone.
+    minutes, which covers a renewal on another phone. Each check asks the
+    account status first and asks for sync credentials only when it says Pro
+    (the Worker answers both from `phoneProStatus`): before, a paused phone's
+    credentials request was refused every 3 minutes, 68% of all credentials
+    requests in the first week after launch. A phone not linked yet whose own
+    purchase is active still asks, since the status call does not send its
+    install's id.
   - When the account's Pro ends, phones that were Pro only through it are
     free again (Pro features lock as for any lapse); a phone with its own
     purchase stays Pro.
@@ -1314,8 +1335,17 @@ updated_at)`, with each row as JSON, plus `sync_info` (last device, last
   phones deleted meanwhile), flush the outbox into the replica with a
   new revision per changed row (a row whose JSON did not change, such as one
   where only a device-local setting moved, keeps its revision), upload queued
-  images, `push()`, `pull()`, then diff every replica revision against
-  `sync_row_meta` and write the rows other phones changed. A row still
+  images, `push()`, then diff every replica revision against
+  `sync_row_meta` and write the rows other phones changed. The one pull is
+  the only round trip of a sync with nothing to send: a push costs two
+  round trips even when empty, so it runs only when the replica holds
+  changes the cloud has not had (the engine's `stats().cdcOperations`, or a
+  push that failed earlier). There is no second pull after the push: a
+  change another phone pushes meanwhile arrives with its live nudge (a nudge
+  during a sync, personal or shared, runs one more after it) or the next
+  scheduled sync. Against a Turso Cloud database in Singapore (7,000 rows), an idle
+  sync went from 4 requests (about 140 to 380 ms) to 1 (about 55 ms), an edit
+  from 4 to 3, and receiving one from 4 to 1. A row still
   waiting in the outbox wins over the pulled copy. Concurrent edits to the
   same row, or two phones creating the same id: the last push wins, per row,
   except that a delete wins over a stale edit. A row the cloud deleted (its
@@ -1337,6 +1367,20 @@ updated_at)`, with each row as JSON, plus `sync_info` (last device, last
   The flush updates a row it already read, else inserts it, and `sync_info`
   is rewritten with delete then insert. Re-check before using an upsert after
   a Turso upgrade.
+- **The replica's WAL is checkpointed.** The Turso engine turns off automatic
+  checkpoints on a sync database (its WAL is how it finds local changes and
+  rebases them on a pull) and never truncates the WAL by itself, so it grew
+  with every write and pull: 72 MB beside a 22 MB file for a 7 MB copy after
+  a first upload and a relink. After a sync, a full upload or a download, a
+  WAL past 4 MB is checkpointed (`checkpointIfLarge`), which folds it into
+  the file and truncates it (2.5 MB WAL, 7.5 MB file in the same test).
+- **A push is one server transaction.** Turso can split a large push into
+  parts (`pushOperationsThreshold`), so a dropped connection loses one part,
+  not the whole upload (checked: the retry sent only the rest). It is left
+  off: other phones would then pull a partial copy until the rest arrives,
+  child rows before their parents (a bulk queue flushes tables in name
+  order, `album_items` before `albums`) or a replacement's deletions without
+  its rows, which shows as a failed sync on them meanwhile.
 - **The replica keeps temporary storage in memory.** The Turso engine writes
   temporary indexes (an `IN (…)` list, as in the Cloud Sync summary, or a large
   sort) to a directory under `$TMPDIR`, else `/data/local/tmp` on Android,
@@ -1382,10 +1426,15 @@ updated_at)`, with each row as JSON, plus `sync_info` (last device, last
   path the rows store (`receipts/x.jpg`, `custom:account-logos/x.png`), so a
   synced row finds its image under the same name. Images to upload are queued
   in `sync_media_pending` with the outbox flush and uploaded before the push,
-  so a row never reaches another phone before its image can. A download goes
+  four at a time, so a row never reaches another phone before its image can.
+  A download goes
   to `<path>.part` and becomes the image only once complete, so an
   interrupted one is never taken for done. One that fails is kept in
-  `sync_media_missing` and retried on later syncs (ten tries); a download
+  `sync_media_missing` and retried at most every 10 minutes (ten tries), not
+  on every sync: nearly all of them are images the cloud never had (gone from
+  the phone that added them; 90% of image downloads in the first week after
+  launch were 404s), and each sync waited for them. A row that arrives
+  naming an image downloads it at once. A download
   redraws custom icons drawn while their file was missing.
   The orphan sweep runs only after linking, never after a routine sync: a
   photo just picked in an editor is not in a row yet. `ASSET_COLUMNS` must
@@ -1393,8 +1442,9 @@ updated_at)`, with each row as JSON, plus `sync_info` (last device, last
   orphan sweep deletes a downloaded image. Images the app stops using are not
   deleted from R2 (see [Cloud-sync Worker > Images](#cloud-sync-worker)).
 - **When it runs** (`useSyncScheduler`): at launch, on return to the app, on
-  going to the background, within about 2 s of a local edit (the outbox is
-  checked every 2 s while no sync is running and the last one did not fail),
+  going to the background, within about a second of a local edit (the outbox
+  is checked every second while no sync is running and the last one did not
+  fail),
   every 15 s while the last sync failed (a failed sync has usually moved the
   outbox into the replica already), and every 3 minutes otherwise. Only one
   personal sync runs at a time; a request during one runs one more after it.
