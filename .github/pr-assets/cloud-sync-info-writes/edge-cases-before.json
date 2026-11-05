@@ -1,0 +1,170 @@
+[
+  {
+    "case": "E12 as shipped",
+    "rows": [
+      {
+        "label": "A pushes 1 edit",
+        "requests": 3,
+        "paths": "/pull-updates,pipeline,pipeline",
+        "up": 4292,
+        "down": 2085,
+        "netMs": 172
+      },
+      {
+        "label": "B pulls it",
+        "requests": 1,
+        "paths": "/pull-updates",
+        "up": 55,
+        "down": 16476,
+        "netMs": 59
+      },
+      {
+        "label": "A pulls own push back",
+        "requests": 1,
+        "paths": "/pull-updates",
+        "up": 55,
+        "down": 16476,
+        "netMs": 56
+      },
+      {
+        "label": "A pushes 1 edit",
+        "requests": 3,
+        "paths": "/pull-updates,pipeline,pipeline",
+        "up": 4294,
+        "down": 2081,
+        "netMs": 157
+      },
+      {
+        "label": "B pulls it",
+        "requests": 1,
+        "paths": "/pull-updates",
+        "up": 55,
+        "down": 16476,
+        "netMs": 99
+      },
+      {
+        "label": "A pulls own push back",
+        "requests": 1,
+        "paths": "/pull-updates",
+        "up": 55,
+        "down": 16476,
+        "netMs": 55
+      },
+      {
+        "label": "A pushes 1 edit",
+        "requests": 3,
+        "paths": "/pull-updates,pipeline,pipeline",
+        "up": 4294,
+        "down": 2080,
+        "netMs": 194
+      },
+      {
+        "label": "B pulls it",
+        "requests": 1,
+        "paths": "/pull-updates",
+        "up": 55,
+        "down": 16476,
+        "netMs": 81
+      },
+      {
+        "label": "A pulls own push back",
+        "requests": 1,
+        "paths": "/pull-updates",
+        "up": 55,
+        "down": 16476,
+        "netMs": 105
+      }
+    ],
+    "pull5": {
+      "separate": 82379,
+      "together": 32891
+    }
+  },
+  {
+    "case": "E12 no sync_info rewrite",
+    "rows": [
+      {
+        "label": "A pushes 1 edit",
+        "requests": 3,
+        "paths": "/pull-updates,pipeline,pipeline",
+        "up": 3019,
+        "down": 1460,
+        "netMs": 172
+      },
+      {
+        "label": "B pulls it",
+        "requests": 1,
+        "paths": "/pull-updates",
+        "up": 55,
+        "down": 8270,
+        "netMs": 54
+      },
+      {
+        "label": "A pulls own push back",
+        "requests": 1,
+        "paths": "/pull-updates",
+        "up": 55,
+        "down": 8270,
+        "netMs": 93
+      },
+      {
+        "label": "A pushes 1 edit",
+        "requests": 3,
+        "paths": "/pull-updates,pipeline,pipeline",
+        "up": 3021,
+        "down": 1456,
+        "netMs": 98
+      },
+      {
+        "label": "B pulls it",
+        "requests": 1,
+        "paths": "/pull-updates",
+        "up": 55,
+        "down": 8270,
+        "netMs": 54
+      },
+      {
+        "label": "A pulls own push back",
+        "requests": 1,
+        "paths": "/pull-updates",
+        "up": 55,
+        "down": 8270,
+        "netMs": 91
+      },
+      {
+        "label": "A pushes 1 edit",
+        "requests": 3,
+        "paths": "/pull-updates,pipeline,pipeline",
+        "up": 3021,
+        "down": 1454,
+        "netMs": 180
+      },
+      {
+        "label": "B pulls it",
+        "requests": 1,
+        "paths": "/pull-updates",
+        "up": 55,
+        "down": 8270,
+        "netMs": 58
+      },
+      {
+        "label": "A pulls own push back",
+        "requests": 1,
+        "paths": "/pull-updates",
+        "up": 55,
+        "down": 8270,
+        "netMs": 100
+      }
+    ],
+    "pull5": {
+      "separate": 41350,
+      "together": 24686
+    }
+  },
+  {
+    "case": "E13 choice screen",
+    "first": ["e13A", 1793894609263],
+    "second": ["e13B", 1793894610074],
+    "third": ["e13A", 1793894610291]
+  }
+]

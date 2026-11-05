@@ -1,0 +1,291 @@
+[
+  {
+    "case": "E1 concurrent inserts",
+    "converged": true,
+    "rowsA": 56,
+    "rowsB": 56,
+    "cloudRows": 56
+  },
+  {
+    "case": "E2 same-row edits",
+    "converged": true,
+    "rowsA": 20,
+    "rowsB": 20,
+    "final": {
+      "id": "t000005",
+      "amount": 999,
+      "note": "Lunch with the team at the usual place #5",
+      "deleted_at": null
+    }
+  },
+  {
+    "case": "E3 delete vs stale edit",
+    "converged": true,
+    "rowsA": 20,
+    "rowsB": 20,
+    "A": {
+      "id": "t000007",
+      "amount": 7.5,
+      "note": "Lunch with the team at the usual place #7",
+      "deleted_at": "2026-11-05T02:00:00.000Z"
+    },
+    "B": {
+      "id": "t000007",
+      "amount": 7.5,
+      "note": "Lunch with the team at the usual place #7",
+      "deleted_at": "2026-11-05T02:00:00.000Z"
+    }
+  },
+  {
+    "case": "E4 push after a concurrent push",
+    "aFirstSyncError": null,
+    "AhasX": "Lunch with the team at the usual place #1"
+  },
+  {
+    "case": "E4 after the nudges",
+    "converged": true,
+    "rowsA": 20,
+    "rowsB": 20,
+    "X": "X from B",
+    "Y": "Y from A",
+    "Z": "Z from A"
+  },
+  {
+    "case": "E5 lost push reply",
+    "converged": true,
+    "rowsA": 21,
+    "rowsB": 21,
+    "firstError": "Error: sync engine operation failed: database sync engine error: fetch error: TypeError: fetch failed (response lost after the server committed)",
+    "retryError": null,
+    "retry": {
+      "appliedRows": 0,
+      "pushed": true,
+      "applyError": null
+    },
+    "cloudRows": 21
+  },
+  {
+    "case": "E6 killed replace, then relaunch",
+    "converged": true,
+    "rowsA": 30,
+    "rowsB": 30,
+    "killed": "Error: sync engine operation failed: database sync engine error: fetch error: TypeError: fetch failed (killed)",
+    "seen6": ["e6A /pull-updates", "e6A /v2/pipeline"],
+    "cloudRows": 30,
+    "B_has_b_only": false,
+    "t10_on_B": "Lunch with the team at the usual place #10",
+    "t11_on_B": "A keeps this"
+  },
+  {
+    "case": "E7 awkward values",
+    "converged": true,
+    "rowsA": 8,
+    "rowsB": 8,
+    "errors": []
+  },
+  {
+    "case": "E8 device-local change",
+    "requests": 1,
+    "paths": "/pull-updates",
+    "up": 55,
+    "down": 62,
+    "netMs": 49,
+    "out": {
+      "appliedRows": 0,
+      "pushed": false,
+      "applyError": null
+    }
+  },
+  {
+    "case": "E9 simultaneous first links",
+    "converged": true,
+    "rowsA": 20,
+    "rowsB": 20,
+    "cloudRows": 20
+  },
+  {
+    "case": "E10 offline edit vs replace",
+    "converged": true,
+    "rowsA": 19,
+    "rowsB": 19,
+    "t2_A": "B offline edit",
+    "t3_A": false,
+    "t3_B": false
+  },
+  {
+    "case": "E11 -changes file sizes on B (bytes)",
+    "start": 0,
+    "afterBulkPull": 3098240,
+    "afterIdlePull": 0,
+    "afterOneRowPull": 8240,
+    "after10SmallPulls": 8240
+  },
+  {
+    "case": "E12 as shipped",
+    "rows": [
+      {
+        "label": "A pushes 1 edit",
+        "requests": 3,
+        "paths": "/pull-updates,pipeline,pipeline",
+        "up": 3019,
+        "down": 1459,
+        "netMs": 101
+      },
+      {
+        "label": "B pulls it",
+        "requests": 1,
+        "paths": "/pull-updates",
+        "up": 55,
+        "down": 8270,
+        "netMs": 54
+      },
+      {
+        "label": "A pulls own push back",
+        "requests": 1,
+        "paths": "/pull-updates",
+        "up": 55,
+        "down": 8270,
+        "netMs": 109
+      },
+      {
+        "label": "A pushes 1 edit",
+        "requests": 3,
+        "paths": "/pull-updates,pipeline,pipeline",
+        "up": 3021,
+        "down": 1455,
+        "netMs": 89
+      },
+      {
+        "label": "B pulls it",
+        "requests": 1,
+        "paths": "/pull-updates",
+        "up": 55,
+        "down": 8270,
+        "netMs": 51
+      },
+      {
+        "label": "A pulls own push back",
+        "requests": 1,
+        "paths": "/pull-updates",
+        "up": 55,
+        "down": 8270,
+        "netMs": 54
+      },
+      {
+        "label": "A pushes 1 edit",
+        "requests": 3,
+        "paths": "/pull-updates,pipeline,pipeline",
+        "up": 3021,
+        "down": 1457,
+        "netMs": 96
+      },
+      {
+        "label": "B pulls it",
+        "requests": 1,
+        "paths": "/pull-updates",
+        "up": 55,
+        "down": 8270,
+        "netMs": 49
+      },
+      {
+        "label": "A pulls own push back",
+        "requests": 1,
+        "paths": "/pull-updates",
+        "up": 55,
+        "down": 8270,
+        "netMs": 140
+      }
+    ],
+    "pull5": {
+      "separate": 41349,
+      "together": 24685
+    }
+  },
+  {
+    "case": "E12 no sync_info rewrite",
+    "rows": [
+      {
+        "label": "A pushes 1 edit",
+        "requests": 3,
+        "paths": "/pull-updates,pipeline,pipeline",
+        "up": 3019,
+        "down": 1459,
+        "netMs": 95
+      },
+      {
+        "label": "B pulls it",
+        "requests": 1,
+        "paths": "/pull-updates",
+        "up": 55,
+        "down": 8270,
+        "netMs": 53
+      },
+      {
+        "label": "A pulls own push back",
+        "requests": 1,
+        "paths": "/pull-updates",
+        "up": 55,
+        "down": 8270,
+        "netMs": 52
+      },
+      {
+        "label": "A pushes 1 edit",
+        "requests": 3,
+        "paths": "/pull-updates,pipeline,pipeline",
+        "up": 3021,
+        "down": 1457,
+        "netMs": 179
+      },
+      {
+        "label": "B pulls it",
+        "requests": 1,
+        "paths": "/pull-updates",
+        "up": 55,
+        "down": 8270,
+        "netMs": 51
+      },
+      {
+        "label": "A pulls own push back",
+        "requests": 1,
+        "paths": "/pull-updates",
+        "up": 55,
+        "down": 8270,
+        "netMs": 52
+      },
+      {
+        "label": "A pushes 1 edit",
+        "requests": 3,
+        "paths": "/pull-updates,pipeline,pipeline",
+        "up": 3021,
+        "down": 1457,
+        "netMs": 94
+      },
+      {
+        "label": "B pulls it",
+        "requests": 1,
+        "paths": "/pull-updates",
+        "up": 55,
+        "down": 8270,
+        "netMs": 48
+      },
+      {
+        "label": "A pulls own push back",
+        "requests": 1,
+        "paths": "/pull-updates",
+        "up": 55,
+        "down": 8270,
+        "netMs": 132
+      }
+    ],
+    "pull5": {
+      "separate": 41350,
+      "together": 24686
+    }
+  },
+  {
+    "case": "E13 choice screen",
+    "first": ["e13A", 1793894570450],
+    "second": ["e13B", 1793894571114],
+    "third": ["e13A", 1793894571314]
+  }
+]

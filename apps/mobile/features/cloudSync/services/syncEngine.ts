@@ -111,6 +111,14 @@ const CHECKPOINT_WAL_BYTES = 4 * 1024 * 1024;
 /** Images that failed to download are tried again at most this often. */
 const MISSING_MEDIA_RETRY_MS = 10 * 60_000;
 const UPLOAD_CONCURRENCY = 4;
+/** The `sync_info` key that names one phone (`origin` in `sync_rows`). */
+const deviceNameKey = (origin: string) => `device_name:${origin}`;
+/**
+ * How often a phone rewrites `last_synced_at` and `last_device_name`, the
+ * keys older app versions read for the choice screen (they rewrote them on
+ * every push).
+ */
+const LEGACY_LAST_DEVICE_REFRESH_MS = 24 * 60 * 60_000;
 
 export interface DataSummary {
   transactions: number;
@@ -746,17 +754,38 @@ export class SyncEngine {
       list.push(data);
       live.set(table, list);
     }
-    const info = await replica.all('SELECT key, value FROM sync_info');
-    const infoMap = new Map(
-      info.map((r) => [String(r.key), r.value == null ? null : String(r.value)]),
-    );
     return {
       ...summaryOf({
         count: (table) => live.get(table)?.length ?? 0,
         rows: (table) => live.get(table) ?? [],
       }),
-      lastSyncedAt: Number(infoMap.get('last_synced_at') ?? '') || null,
-      lastDeviceName: infoMap.get('last_device_name') ?? null,
+      ...(await this.lastChange()),
+    };
+  }
+
+  /**
+   * When the cloud copy last changed and from which phone: the newest row,
+   * named by its phone's `device_name:` key. Older app versions write
+   * `last_synced_at` and `last_device_name` on every push instead, so those
+   * win when they are newer. Times are each phone's own clock, as before.
+   */
+  private async lastChange(): Promise<{
+    lastSyncedAt: number | null;
+    lastDeviceName: string | null;
+  }> {
+    const replica = this.db();
+    const info = await this.readInfo();
+    const [newest] = await replica.all(
+      'SELECT origin, updated_at FROM sync_rows ORDER BY updated_at DESC LIMIT 1',
+    );
+    const rowAt = Number(newest?.updated_at ?? '') || null;
+    const legacyAt = Number(info.get('last_synced_at') ?? '') || null;
+    if (legacyAt && (!rowAt || legacyAt >= rowAt)) {
+      return { lastSyncedAt: legacyAt, lastDeviceName: info.get('last_device_name') ?? null };
+    }
+    return {
+      lastSyncedAt: rowAt,
+      lastDeviceName: rowAt ? (info.get(deviceNameKey(String(newest.origin))) ?? null) : null,
     };
   }
 
@@ -952,7 +981,8 @@ export class SyncEngine {
     // flushes nothing new.
     if (pushedRows + droppedRows > 0) {
       setState(unpushedKey(this.channel), '1');
-      await this.recordLastDevice();
+      // Only the user's own copy has a choice screen to name phones on.
+      if (this.isPersonal) await this.recordLastDevice();
     }
     // Images first: a row must never reach another phone before its image can.
     await this.uploadPendingMedia();
@@ -1045,19 +1075,49 @@ export class SyncEngine {
     return count;
   }
 
-  /** When and from which phone the cloud copy last changed, for the choice screen. */
+  /** `sync_info` as a map, all of it or only `keys`. */
+  private async readInfo(keys?: string[]): Promise<Map<string, string | null>> {
+    const rows = keys
+      ? await this.db().all(
+          `SELECT key, value FROM sync_info WHERE key IN (${keys.map(() => '?').join(', ')})`,
+          keys,
+        )
+      : await this.db().all('SELECT key, value FROM sync_info');
+    return new Map(rows.map((r) => [String(r.key), r.value == null ? null : String(r.value)]));
+  }
+
+  /**
+   * Names this phone in the cloud copy, for the choice screen (`lastChange`).
+   * Any write to `sync_info` costs every phone two more pages on its next
+   * pull, twice what a one-row edit costs, so it is written only when this
+   * phone's name is missing or changed, plus the keys older versions read at
+   * most daily.
+   */
   private async recordLastDevice(): Promise<void> {
     const replica = this.db();
+    const nameKey = deviceNameKey(deviceId());
+    const name = this.config.deviceName;
+    const info = await this.readInfo([nameKey, 'last_synced_at']);
+    const nameStale = info.get(nameKey) !== name;
+    const legacyStale =
+      Date.now() - (Number(info.get('last_synced_at') ?? '') || 0) >= LEGACY_LAST_DEVICE_REFRESH_MS;
+    if (!nameStale && !legacyStale) return;
     await replica.transaction(async () => {
-      await replica.run(
-        "DELETE FROM sync_info WHERE key IN ('last_synced_at', 'last_device_name')",
-      );
-      await replica.run('INSERT INTO sync_info (key, value) VALUES (?, ?), (?, ?)', [
-        'last_synced_at',
-        String(Date.now()),
-        'last_device_name',
-        this.config.deviceName,
-      ]);
+      if (nameStale) {
+        await replica.run('DELETE FROM sync_info WHERE key = ?', [nameKey]);
+        await replica.run('INSERT INTO sync_info (key, value) VALUES (?, ?)', [nameKey, name]);
+      }
+      if (legacyStale) {
+        await replica.run(
+          "DELETE FROM sync_info WHERE key IN ('last_synced_at', 'last_device_name')",
+        );
+        await replica.run('INSERT INTO sync_info (key, value) VALUES (?, ?), (?, ?)', [
+          'last_synced_at',
+          String(Date.now()),
+          'last_device_name',
+          name,
+        ]);
+      }
     });
   }
 
