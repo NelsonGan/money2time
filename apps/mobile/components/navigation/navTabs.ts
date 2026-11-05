@@ -5,8 +5,10 @@
  *
  * Settings is where the bar is edited, so it is pinned: it can move but never
  * leave. Everything else is the user's choice, from two to five pages. The
- * first page is the home page: the app opens on it. Transaction entry lives on
- * Calendar and Accounts, and also on home when Calendar is not in the bar.
+ * first page is the home page: the app opens on it. The + button lives on
+ * Calendar, and on home when Calendar is not in the bar. Never on Accounts:
+ * there it covered the last expanded card's buttons (an account opened from it
+ * has its own + for that account).
  */
 export type TabName =
   | 'calendar'
@@ -108,13 +110,10 @@ export function navTabIcon(tab: TabName, tabs: readonly TabName[]): TabName | 'h
   return tab === homeNavTab(tabs) ? 'home' : tab;
 }
 
-/** Transaction entry is available on Calendar, Accounts, and a replacement home. */
+/** The + button shows on Calendar, or on home when Calendar is out of the bar, never on Accounts. */
 export function showsTransactionFab(activeTab: TabName, tabs: readonly TabName[]): boolean {
-  return (
-    activeTab === 'calendar' ||
-    activeTab === 'accounts' ||
-    (!tabs.includes('calendar') && activeTab === homeNavTab(tabs))
-  );
+  if (activeTab === 'accounts') return false;
+  return activeTab === 'calendar' || (!tabs.includes('calendar') && activeTab === homeNavTab(tabs));
 }
 
 /** Whether a page can leave the bar: never Settings, and never below two. */
