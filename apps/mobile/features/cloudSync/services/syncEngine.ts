@@ -663,6 +663,11 @@ export class SyncEngine {
       bootstrapIfEmpty: true,
     });
     await replica.connect();
+    // The engine writes temporary indexes (an `IN (…)` list, a large sort) to
+    // $TMPDIR, or to /data/local/tmp on Android, which apps cannot write.
+    // Android sets $TMPDIR only when the app's cache dir is ready at start-up,
+    // so keep them in memory, as the app database does.
+    await replica.exec('PRAGMA temp_store = MEMORY');
     for (const sql of CLOUD_SCHEMA_SQL) await replica.exec(sql);
     this.replica = replica;
   }
