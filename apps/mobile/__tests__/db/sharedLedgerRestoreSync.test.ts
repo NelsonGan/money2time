@@ -113,10 +113,15 @@ beforeEach(() => {
   cloud.exec(
     'CREATE TABLE sync_rows (table_name TEXT, row_id TEXT, data TEXT, rev TEXT, origin TEXT, updated_at INTEGER, PRIMARY KEY(table_name,row_id)); CREATE TABLE sync_info (key TEXT PRIMARY KEY, value TEXT);',
   );
-  push = jest.fn(async () => undefined);
-  writes = jest.fn(async (sql: string, args: (string | number | null)[] = []) =>
-    cloud.prepare(sql).run(...args),
-  );
+  // Like the engine's change log: writes since the last successful push.
+  let unpushed = 0;
+  push = jest.fn(async () => {
+    unpushed = 0;
+  });
+  writes = jest.fn(async (sql: string, args: (string | number | null)[] = []) => {
+    unpushed += 1;
+    return cloud.prepare(sql).run(...args);
+  });
   const replica = {
     all: async (sql: string, args: (string | number | null)[] = []) =>
       cloud.prepare(sql).all(...args),
@@ -134,6 +139,8 @@ beforeEach(() => {
     },
     pull: async () => false,
     push,
+    stats: async () => ({ cdcOperations: unpushed, mainWalSize: 0 }),
+    checkpoint: async () => undefined,
   };
   engine = new SyncEngine({
     userId: 'test-user',

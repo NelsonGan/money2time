@@ -101,9 +101,16 @@ const FLUSH_BATCH = 250;
 const FETCH_BATCH = 200;
 const MEDIA_BATCH = 100;
 const DOWNLOAD_CONCURRENCY = 4;
-/** A missing image is retried on this many syncs, then left to its fallback. */
+/** A missing image is tried this many times, then left to its fallback. */
 const MAX_DOWNLOAD_ATTEMPTS = 10;
 const SHAPE_STATE_KEY = 'synced_shape';
+/** This phone's data replaces the cloud copy on the next personal sync. */
+const REPLACE_STATE_KEY = 'replace_cloud';
+/** A replica WAL past this is checkpointed after a sync. */
+const CHECKPOINT_WAL_BYTES = 4 * 1024 * 1024;
+/** Images that failed to download are tried again at most this often. */
+const MISSING_MEDIA_RETRY_MS = 10 * 60_000;
+const UPLOAD_CONCURRENCY = 4;
 
 export interface DataSummary {
   transactions: number;
@@ -635,6 +642,8 @@ export class SyncEngine {
   private removalsDeferred = false;
   /** The first pulled row this sync could not write. */
   private applyFailure: Error | null = null;
+  /** When images that failed to download are next tried (see downloadMedia). */
+  private missingRetryAt = 0;
 
   constructor(private readonly config: EngineConfig) {}
 
@@ -754,12 +763,11 @@ export class SyncEngine {
   /** Makes this phone's data the cloud copy: other phones follow it. */
   uploadAllReplacingCloud(): Promise<void> {
     return this.exclusive(async () => {
-      const replica = this.db();
       const db = getSQLite();
-      // Every row the cloud has must be known here to be deleted.
-      await replica.pull();
-      // The whole phone is queued before the cloud copy is cleared, so an app
-      // killed in between still uploads everything on its next sync.
+      // The whole phone is queued with the intent to replace, so an app killed
+      // before the sync below finishes still replaces the copy on its next
+      // sync. That sync pulls first: every row the cloud has is known when the
+      // ones this phone lacks are deleted (`dropCloudRowsNotHere`).
       db.withTransactionSync(() => {
         // Shared ledgers' rows are queued too: their channels find them
         // unchanged and leave them be (a paused ledger's wait until it resumes).
@@ -770,9 +778,9 @@ export class SyncEngine {
         }
         queueMedia(collectReferencedAssetPaths(), PERSONAL_CHANNEL);
         saveSyncedShape();
+        setState(REPLACE_STATE_KEY, '1');
       });
       enableCapture();
-      await replica.exec('DELETE FROM sync_rows');
       await this.runSync();
     });
   }
@@ -892,9 +900,11 @@ export class SyncEngine {
         }
         ensureDefaultLedger();
         saveSyncedShape();
+        setState(REPLACE_STATE_KEY, null);
       });
       enableCapture();
       await this.downloadMedia(assets);
+      await this.checkpointIfLarge();
     });
   }
 
@@ -927,24 +937,32 @@ export class SyncEngine {
       enqueueLedgerRows(this.config.ledgerId ?? '', this.channel);
     }
     // The cloud's latest before the flush, so it sees a row deleted elsewhere
-    // that this phone changed meanwhile (`deletedElsewhere`).
-    const pulledFirst = !attaching && (await replica.pull());
+    // that this phone changed meanwhile (`deletedElsewhere`). It is the only
+    // pull: a change pushed by another phone after it comes with that phone's
+    // live nudge, or the next scheduled sync.
+    const pulled = !attaching && (await replica.pull());
+    const droppedRows =
+      this.isPersonal && getState(REPLACE_STATE_KEY) === '1'
+        ? await this.dropCloudRowsNotHere()
+        : 0;
     const { pushed: pushedRows, adopted } = await this.flushOutbox();
     appliedRows += adopted;
     // Kept until a push succeeds, across restarts: a failed push leaves the
     // rows in the replica, out of the outbox, and the retry that sends them
     // flushes nothing new.
-    if (pushedRows > 0) {
+    if (pushedRows + droppedRows > 0) {
       setState(unpushedKey(this.channel), '1');
       await this.recordLastDevice();
     }
     // Images first: a row must never reach another phone before its image can.
     await this.uploadPendingMedia();
-    await replica.push();
     const pushed = hasUnpushedChanges(this.channel) || attaching;
+    // A push costs two round trips even with nothing to send, so it runs only
+    // when the replica holds changes the cloud has not had (any write, also
+    // a ledger's detach, counts in the engine's change log).
+    if (pushed || (await replica.stats()).cdcOperations > 0) await replica.push();
     setState(unpushedKey(this.channel), '0');
     if (attaching) setState(attachedKey(this.channel), '1');
-    const pulled = (await replica.pull()) || pulledFirst;
     // Also re-applies after an apply that failed, which a later pull with no
     // new changes would otherwise never retry.
     const pendingKey = this.isPersonal ? 'apply_pending' : `apply_pending:${this.channel}`;
@@ -957,7 +975,74 @@ export class SyncEngine {
       if (!this.removalsDeferred && !this.applyFailure) setState(pendingKey, '0');
     }
     await this.downloadMedia(new Set());
+    await this.checkpointIfLarge();
     return { appliedRows, pushed, applyError: this.applyFailure };
+  }
+
+  /**
+   * The engine never checkpoints its replica by itself (its WAL is how it
+   * finds local changes and rebases them on a pull), so the WAL grows with
+   * every write and pull: 72 MB beside a 7 MB copy after one large upload.
+   * A checkpoint folds it into the database file and truncates it.
+   */
+  private async checkpointIfLarge(): Promise<void> {
+    const replica = this.db();
+    try {
+      if ((await replica.stats()).mainWalSize < CHECKPOINT_WAL_BYTES) return;
+      await replica.checkpoint();
+    } catch (error) {
+      // Housekeeping only: the data is already synced, and the next sync
+      // tries again.
+      console.warn('[cloudSync] replica checkpoint failed', error);
+    }
+  }
+
+  /**
+   * Replacing the cloud copy with this phone's data: the rows the cloud has
+   * that this phone does not are deleted. The rest is sent by the flush,
+   * which leaves alone a row whose JSON is already the same, so a copy that
+   * mostly matches (a second link, "Use this phone") costs only what
+   * differs, here and on every other phone, rather than the whole copy.
+   * Returns how many rows were deleted.
+   */
+  private async dropCloudRowsNotHere(): Promise<number> {
+    const replica = this.db();
+    const db = getSQLite();
+    const here = new Set<string>();
+    for (const table of SYNC_TABLES) {
+      if (!tableExists(table)) continue;
+      for (const row of db.getAllSync<{ id: string }>(
+        `SELECT id FROM "${table}" WHERE ${personalRowsSql(table)}`,
+      ))
+        here.add(rowKey(table, row.id));
+    }
+    const gone = new Map<string, string[]>();
+    let count = 0;
+    for (const row of await replica.all('SELECT table_name, row_id FROM sync_rows')) {
+      const table = String(row.table_name);
+      const id = String(row.row_id);
+      if (here.has(rowKey(table, id))) continue;
+      const ids = gone.get(table) ?? [];
+      ids.push(id);
+      gone.set(table, ids);
+      count += 1;
+    }
+    if (count) {
+      await replica.transaction(async () => {
+        for (const [table, ids] of gone) {
+          for (let i = 0; i < ids.length; i += FETCH_BATCH) {
+            const slice = ids.slice(i, i + FETCH_BATCH);
+            await replica.run(
+              `DELETE FROM sync_rows WHERE table_name = ? AND row_id IN (${slice.map(() => '?').join(',')})`,
+              [table, ...slice],
+            );
+          }
+        }
+      });
+      setState(unpushedKey(this.channel), '1');
+    }
+    setState(REPLACE_STATE_KEY, null);
+    return count;
   }
 
   /** When and from which phone the cloud copy last changed, for the choice screen. */
@@ -1398,17 +1483,19 @@ export class SyncEngine {
     for (let i = 0; i < onDisk.length; i += MEDIA_BATCH) {
       const slice = onDisk.slice(i, i + MEDIA_BATCH);
       const existing = await existingMedia(token, mediaPath, slice);
-      for (const path of slice) {
+      await inParallel(slice, UPLOAD_CONCURRENCY, async (path) => {
         if (!existing.has(path)) await uploadMedia(token, mediaPath, path, assetFile(path));
         done(path);
-      }
+      });
     }
   }
 
   /**
-   * Downloads `paths` that are not on disk, plus any earlier download that
-   * failed. Never throws: a missing image must not stop the data (the row shows
-   * its fallback), and it is retried on later syncs.
+   * Downloads `paths` that are not on disk, plus (at most every 10 minutes)
+   * any earlier download that failed. Never throws: a missing image must not
+   * stop the data (the row shows its fallback), and it is retried later. Most
+   * failures are images the cloud never had (gone from the phone that added
+   * them), so trying them on every sync only held each sync up.
    */
   private async downloadMedia(paths: Set<string>): Promise<void> {
     const db = getSQLite();
@@ -1421,6 +1508,8 @@ export class SyncEngine {
         ]);
       }
     }
+    const retryAll = Date.now() >= this.missingRetryAt;
+    if (!retryAll && !paths.size) return;
     const missing = db
       .getAllSync<{
         path: string;
@@ -1428,7 +1517,9 @@ export class SyncEngine {
         channel,
         MAX_DOWNLOAD_ATTEMPTS,
       ])
-      .map((r) => r.path);
+      .map((r) => r.path)
+      .filter((path) => retryAll || paths.has(path));
+    if (retryAll) this.missingRetryAt = Date.now() + MISSING_MEDIA_RETRY_MS;
     if (!missing.length) return;
     let token: string;
     try {
@@ -1470,6 +1561,31 @@ export class SyncEngine {
     // Icons drawn before their file arrived were remembered as missing.
     if (downloaded > 0) invalidateCustomUriCache();
   }
+}
+
+/**
+ * Runs `fn` over `items`, `concurrency` at a time. The first failure stops
+ * new work; it is thrown once the work in flight has settled.
+ */
+async function inParallel<T>(
+  items: readonly T[],
+  concurrency: number,
+  fn: (item: T) => Promise<void>,
+): Promise<void> {
+  let next = 0;
+  let failure: { error: unknown } | null = null;
+  const worker = async () => {
+    while (!failure && next < items.length) {
+      const item = items[next++];
+      try {
+        await fn(item);
+      } catch (error) {
+        failure ??= { error };
+      }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, worker));
+  if (failure) throw (failure as { error: unknown }).error;
 }
 
 function assetFile(relativePath: string): File {

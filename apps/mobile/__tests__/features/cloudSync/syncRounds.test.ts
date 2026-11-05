@@ -1,0 +1,586 @@
+import { readdirSync } from 'node:fs';
+import { join } from 'node:path';
+import { DatabaseSync } from 'node:sqlite';
+
+import type { SQLiteDatabase } from 'expo-sqlite';
+
+import {
+  downloadMedia as apiDownloadMedia,
+  uploadMedia as apiUploadMedia,
+} from '~/features/cloudSync/services/cloudSyncApi';
+import {
+  removeSharedLedger,
+  saveSharedLedger,
+} from '~/features/cloudSync/services/sharedLedgerStore';
+import { enableCapture, SyncEngine } from '~/features/cloudSync/services/syncEngine';
+import { getSQLite } from '~/lib/db/client';
+import { applyMigrations } from '~/lib/db/migrations/runner';
+
+// What one sync round costs on the wire (README: Cloud Sync > How it works,
+// Sync run): one pull, a push only with something to send, a replacement of
+// the cloud copy that writes only what differs, and the replica's WAL kept
+// small. The fake replica is a SQLite database with the cloud's tables and
+// counts what the engine asks of Turso.
+
+jest.mock('~/lib/db/client', () => ({ getSQLite: jest.fn() }));
+const files = new Set<string>();
+jest.mock('expo-file-system', () => ({
+  Paths: { document: {} },
+  File: class {
+    path: string;
+    constructor(...parts: unknown[]) {
+      this.path = parts.filter((part) => typeof part === 'string').join('/');
+    }
+    get exists() {
+      return files.has(this.path);
+    }
+    get parentDirectory() {
+      return { exists: true, create: () => undefined };
+    }
+    delete() {
+      files.delete(this.path);
+    }
+    moveSync(to: { path: string }) {
+      files.delete(this.path);
+      files.add(to.path);
+    }
+  },
+  Directory: class {},
+}));
+jest.mock('~/services/userAssets', () => ({
+  assetRelativePathFromRef: (value: string) => value,
+  invalidateCustomUriCache: jest.fn(),
+}));
+jest.mock('~/services/userAssetGc', () => ({ collectReferencedAssetPaths: () => new Set() }));
+jest.mock('~/features/cloudSync/services/cloudSyncApi', () => ({
+  existingMedia: jest.fn(async () => new Set()),
+  uploadMedia: jest.fn(async () => undefined),
+  downloadMedia: jest.fn(async () => undefined),
+}));
+
+const now = '2026-11-05T00:00:00.000Z';
+let app: DatabaseSync;
+let cloud: DatabaseSync;
+let engine: SyncEngine;
+let calls: string[];
+let unpushed: number;
+let walSize: number;
+let pushError: Error | null;
+/** The cloud as the last successful push left it (`cloud` also holds unpushed writes). */
+let pushedRows: Map<string, Record<string, unknown>>;
+/** The next pull brings a change (another phone wrote to `cloud`). */
+let remoteChanged: boolean;
+
+function addTransaction(id: string, amount: number, extra: Record<string, string> = {}) {
+  const columns = [
+    'id',
+    'ledger_id',
+    'type',
+    'amount',
+    'currency',
+    'date',
+    'created_at',
+    'updated_at',
+    ...Object.keys(extra),
+  ];
+  app
+    .prepare(
+      `INSERT INTO transactions (${columns.join(', ')}) VALUES (${columns.map(() => '?').join(', ')})`,
+    )
+    .run(id, 'default', 'expense', amount, 'USD', '2026-11-05', now, now, ...Object.values(extra));
+}
+
+function cloudSnapshot(): Map<string, Record<string, unknown>> {
+  return new Map(
+    cloud
+      .prepare('SELECT row_id, data FROM sync_rows')
+      .all()
+      .map((row) => [String(row.row_id), JSON.parse(String(row.data))]),
+  );
+}
+
+function pushedRow(id: string): Record<string, unknown> | null {
+  return pushedRows.get(id) ?? null;
+}
+
+function cloudRow(id: string): Record<string, unknown> | null {
+  const row = cloud.prepare('SELECT data, rev FROM sync_rows WHERE row_id = ?').get(id);
+  return row ? { ...JSON.parse(String(row.data)), rev: row.rev } : null;
+}
+
+beforeEach(() => {
+  files.clear();
+  jest.clearAllMocks();
+  app = new DatabaseSync(':memory:');
+  cloud = new DatabaseSync(':memory:');
+  const flat = (args: unknown[]) => args.flat() as (string | number | null)[];
+  const db = {
+    execSync: (sql: string) => app.exec(sql),
+    getAllSync: (sql: string, ...args: unknown[]) => app.prepare(sql).all(...flat(args)),
+    getFirstSync: (sql: string, ...args: unknown[]) => app.prepare(sql).get(...flat(args)) ?? null,
+    runSync: (sql: string, ...args: unknown[]) => app.prepare(sql).run(...flat(args)),
+    withTransactionSync: (fn: () => void) => {
+      app.exec('BEGIN');
+      try {
+        fn();
+        app.exec('COMMIT');
+      } catch (error) {
+        app.exec('ROLLBACK');
+        throw error;
+      }
+    },
+  } as unknown as SQLiteDatabase;
+  (getSQLite as jest.Mock).mockReturnValue(db);
+  const dir = join(__dirname, '../../../lib/db/migrations');
+  applyMigrations(
+    db,
+    readdirSync(dir)
+      .filter((file) => /^\d{3}_.+\.ts$/.test(file))
+      .sort()
+      .map((file) => require(join(dir, file)).default),
+  );
+  app.exec(
+    `INSERT INTO settings (id, app_user_id, created_at, updated_at) VALUES ('primary', 'rc-test', '${now}', '${now}');
+     INSERT OR IGNORE INTO ledgers (id, sort_order, created_at, updated_at) VALUES ('default', 0, '${now}', '${now}');`,
+  );
+  // Signed in: edits are recorded from the start.
+  enableCapture();
+  cloud.exec(
+    'CREATE TABLE sync_rows (table_name TEXT, row_id TEXT, data TEXT, rev TEXT, origin TEXT, updated_at INTEGER, PRIMARY KEY(table_name,row_id)); CREATE TABLE sync_info (key TEXT PRIMARY KEY, value TEXT);',
+  );
+  calls = [];
+  unpushed = 0;
+  walSize = 0;
+  pushError = null;
+  remoteChanged = false;
+  pushedRows = new Map();
+  const write = (sql: string, args: (string | number | null)[] = []) => {
+    calls.push(sql.trim().split(/\s+/).slice(0, 3).join(' ').toUpperCase());
+    unpushed += 1;
+    return cloud.prepare(sql).run(...args);
+  };
+  const replica = {
+    all: async (sql: string, args: (string | number | null)[] = []) =>
+      cloud.prepare(sql).all(...args),
+    run: async (sql: string, args: (string | number | null)[] = []) => write(sql, args),
+    exec: async (sql: string) => {
+      if (/^\s*(DELETE|INSERT|UPDATE)/i.test(sql)) unpushed += 1;
+      cloud.exec(sql);
+    },
+    transaction: async (fn: () => Promise<void>) => {
+      cloud.exec('BEGIN');
+      try {
+        await fn();
+        cloud.exec('COMMIT');
+      } catch (error) {
+        cloud.exec('ROLLBACK');
+        throw error;
+      }
+    },
+    pull: async () => {
+      calls.push('pull');
+      const changed = remoteChanged;
+      remoteChanged = false;
+      return changed;
+    },
+    push: async () => {
+      calls.push('push');
+      if (pushError) throw pushError;
+      unpushed = 0;
+      pushedRows = cloudSnapshot();
+    },
+    stats: async () => ({ cdcOperations: unpushed, mainWalSize: walSize }),
+    checkpoint: async () => {
+      calls.push('checkpoint');
+      walSize = 0;
+    },
+  };
+  engine = new SyncEngine({
+    userId: 'test-user',
+    channel: 'personal',
+    url: 'local-test',
+    getTursoToken: async () => 'local-test',
+    getSessionToken: async () => 'local-test',
+    mediaPath: '/v1/media',
+    deviceName: 'Test',
+  });
+  Object.assign(engine, { replica });
+});
+
+afterEach(() => {
+  removeSharedLedger('family');
+  app.close();
+  cloud.close();
+});
+
+const rounds = () => calls.filter((call) => call === 'pull' || call === 'push');
+
+it('pulls once and pushes nothing when there is nothing to send', async () => {
+  await engine.syncNow();
+  calls = [];
+  await engine.syncNow();
+  expect(rounds()).toEqual(['pull']);
+});
+
+it('pulls once, then pushes, for an edit', async () => {
+  await engine.syncNow();
+  calls = [];
+  addTransaction('lunch', 12);
+  const outcome = await engine.syncNow();
+  expect(rounds()).toEqual(['pull', 'push']);
+  expect(outcome.pushed).toBe(true);
+  expect(cloudRow('lunch')?.amount).toBe(12);
+});
+
+it('pushes a change already in the replica that an earlier push did not carry', async () => {
+  addTransaction('lunch', 12);
+  pushError = new Error('offline');
+  await expect(engine.syncNow()).rejects.toThrow('offline');
+  pushError = null;
+  calls = [];
+  const outcome = await engine.syncNow();
+  expect(rounds()).toEqual(['pull', 'push']);
+  expect(outcome.pushed).toBe(true);
+});
+
+describe('replacing the cloud copy with this phone', () => {
+  beforeEach(async () => {
+    addTransaction('same', 10);
+    addTransaction('changed', 20);
+    await engine.uploadAllReplacingCloud();
+    // Another phone's rows: one this phone never had, one it changed since.
+    cloud
+      .prepare('INSERT INTO sync_rows VALUES (?, ?, ?, ?, ?, ?)')
+      .run(
+        'transactions',
+        'elsewhere',
+        JSON.stringify({ ...cloudRow('same'), id: 'elsewhere' }),
+        'rev-x',
+        'other',
+        1,
+      );
+    // Pushed by that phone.
+    pushedRows = cloudSnapshot();
+    app.exec("UPDATE transactions SET amount = 25 WHERE id = 'changed'");
+    app.exec('DELETE FROM sync_outbox');
+    calls = [];
+  });
+
+  it('writes only what differs and deletes what this phone does not have', async () => {
+    const sameRev = cloudRow('same')?.rev;
+    await engine.uploadAllReplacingCloud();
+    expect(cloudRow('same')?.rev).toBe(sameRev);
+    expect(cloudRow('changed')?.amount).toBe(25);
+    expect(cloudRow('elsewhere')).toBeNull();
+    expect(calls.filter((call) => call === 'INSERT INTO SYNC_ROWS')).toHaveLength(0);
+    expect(rounds()).toEqual(['pull', 'push']);
+  });
+
+  it('still replaces the copy on the next sync after a failed push', async () => {
+    pushError = new Error('offline');
+    await expect(engine.uploadAllReplacingCloud()).rejects.toThrow('offline');
+    // Nothing of the replacement reached the cloud yet.
+    expect(pushedRow('elsewhere')).not.toBeNull();
+    pushError = null;
+    calls = [];
+    const outcome = await engine.syncNow();
+    expect(outcome.pushed).toBe(true);
+    expect(rounds()).toEqual(['pull', 'push']);
+    expect(pushedRow('elsewhere')).toBeNull();
+    expect(pushedRow('changed')?.amount).toBe(25);
+  });
+
+  it('replaces the copy after an app killed before the sync', async () => {
+    // The intent and the queue are written together, before any network.
+    const sync = jest.spyOn(engine as unknown as { runSync: () => Promise<unknown> }, 'runSync');
+    sync.mockRejectedValueOnce(new Error('killed'));
+    await expect(engine.uploadAllReplacingCloud()).rejects.toThrow('killed');
+    sync.mockRestore();
+    await engine.syncNow();
+    expect(cloudRow('elsewhere')).toBeNull();
+    expect(cloudRow('changed')?.amount).toBe(25);
+  });
+});
+
+it('checkpoints the replica once its WAL is large, and only then', async () => {
+  await engine.syncNow();
+  expect(calls).not.toContain('checkpoint');
+  walSize = 8 * 1024 * 1024;
+  await engine.syncNow();
+  expect(calls).toContain('checkpoint');
+});
+
+it('does not fail a sync whose checkpoint fails', async () => {
+  walSize = 8 * 1024 * 1024;
+  const replica = (engine as unknown as { replica: { checkpoint: () => Promise<void> } }).replica;
+  replica.checkpoint = async () => {
+    throw new Error('busy');
+  };
+  const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+  addTransaction('lunch', 12);
+  await expect(engine.syncNow()).resolves.toMatchObject({ pushed: true });
+  expect(warn).toHaveBeenCalled();
+  warn.mockRestore();
+});
+
+it('uploads images four at a time', async () => {
+  let inFlight = 0;
+  let most = 0;
+  (apiUploadMedia as jest.Mock).mockImplementation(async () => {
+    inFlight += 1;
+    most = Math.max(most, inFlight);
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    inFlight -= 1;
+  });
+  for (let i = 0; i < 10; i++) {
+    files.add(`user-assets/receipts/r${i}.jpg`);
+    addTransaction(`t${i}`, i, { receipt_uri: `receipts/r${i}.jpg` });
+  }
+  await engine.syncNow();
+  expect(apiUploadMedia).toHaveBeenCalledTimes(10);
+  expect(most).toBe(4);
+});
+
+it('tries a missing image again on a later sync only after a while', async () => {
+  (apiDownloadMedia as jest.Mock).mockRejectedValue(new Error('404'));
+  app.exec(
+    "INSERT INTO sync_media_missing (path, channel) VALUES ('receipts/gone.jpg', 'personal')",
+  );
+  await engine.syncNow();
+  expect(apiDownloadMedia).toHaveBeenCalledTimes(1);
+  await engine.syncNow();
+  await engine.syncNow();
+  expect(apiDownloadMedia).toHaveBeenCalledTimes(1);
+  const later = Date.now() + 11 * 60_000;
+  jest.spyOn(Date, 'now').mockReturnValue(later);
+  await engine.syncNow();
+  expect(apiDownloadMedia).toHaveBeenCalledTimes(2);
+  jest.restoreAllMocks();
+});
+
+// ---------------------------------------------------------------------------
+// Edge cases around the fewer round trips
+
+function cloudTables(db: DatabaseSync) {
+  db.exec(
+    'CREATE TABLE sync_rows (table_name TEXT, row_id TEXT, data TEXT, rev TEXT, origin TEXT, updated_at INTEGER, PRIMARY KEY(table_name,row_id)); CREATE TABLE sync_info (key TEXT PRIMARY KEY, value TEXT);',
+  );
+}
+
+function putRow(db: DatabaseSync, id: string, row: Record<string, unknown>, rev: string) {
+  db.prepare('INSERT OR REPLACE INTO sync_rows VALUES (?, ?, ?, ?, ?, ?)').run(
+    'transactions',
+    id,
+    JSON.stringify(row),
+    rev,
+    'another-phone',
+    1,
+  );
+}
+
+function localRow(id: string): Record<string, unknown> | undefined {
+  return app.prepare('SELECT * FROM transactions WHERE id = ?').get(id) as
+    | Record<string, unknown>
+    | undefined;
+}
+
+/** A shared ledger "family" and an engine on its own (fake) cloud database. */
+function shareFamily(state: { attached?: boolean; detached?: boolean } = {}) {
+  app.exec(
+    `INSERT INTO ledgers (id, name, sort_order, created_at, updated_at) VALUES ('family', 'Family', 1, '${now}', '${now}')`,
+  );
+  saveSharedLedger({
+    ledgerId: 'family',
+    shareId: 'family-share',
+    role: 'owner',
+    name: 'Family',
+    ownerName: 'Owner',
+    memberCount: 2,
+    active: true,
+  });
+  if (state.attached) app.exec("INSERT INTO sync_state VALUES ('attached:family-share', '1')");
+  if (state.detached) app.exec("INSERT INTO sync_state VALUES ('detached:family-share', '1')");
+  const ledgerCloud = new DatabaseSync(':memory:');
+  cloudTables(ledgerCloud);
+  const log = { calls: [] as string[], unpushed: 0 };
+  const replica = {
+    all: async (sql: string, args: (string | number | null)[] = []) =>
+      ledgerCloud.prepare(sql).all(...args),
+    run: async (sql: string, args: (string | number | null)[] = []) => {
+      log.unpushed += 1;
+      return ledgerCloud.prepare(sql).run(...args);
+    },
+    exec: async (sql: string) => void ledgerCloud.exec(sql),
+    transaction: async (fn: () => Promise<void>) => {
+      ledgerCloud.exec('BEGIN');
+      try {
+        await fn();
+        ledgerCloud.exec('COMMIT');
+      } catch (error) {
+        ledgerCloud.exec('ROLLBACK');
+        throw error;
+      }
+    },
+    pull: async () => {
+      log.calls.push('pull');
+      return false;
+    },
+    push: async () => {
+      log.calls.push('push');
+      log.unpushed = 0;
+    },
+    stats: async () => ({ cdcOperations: log.unpushed, mainWalSize: 0 }),
+    checkpoint: async () => undefined,
+  };
+  const ledgerEngine = new SyncEngine({
+    userId: 'test-user',
+    channel: 'family-share',
+    ledgerId: 'family',
+    url: 'local-test',
+    getTursoToken: async () => 'local-test',
+    getSessionToken: async () => 'local-test',
+    mediaPath: '/v1/ledgers/family-share/media',
+    deviceName: 'Test',
+  });
+  Object.assign(ledgerEngine, { replica });
+  return { ledgerEngine, ledgerCloud, log };
+}
+
+function addFamilyTransaction(id: string, amount: number) {
+  app
+    .prepare(
+      'INSERT INTO transactions (id, ledger_id, type, amount, currency, date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    )
+    .run(id, 'family', 'expense', amount, 'USD', '2026-11-05', now, now);
+}
+
+describe('shared ledgers', () => {
+  it('sync with one pull when idle and push only for an edit', async () => {
+    const { ledgerEngine, ledgerCloud, log } = shareFamily({ attached: true, detached: true });
+    await ledgerEngine.syncNow();
+    log.calls = [];
+    await ledgerEngine.syncNow();
+    expect(log.calls).toEqual(['pull']);
+    addFamilyTransaction('groceries', 30);
+    const outcome = await ledgerEngine.syncNow();
+    expect(log.calls).toEqual(['pull', 'pull', 'push']);
+    expect(outcome.pushed).toBe(true);
+    expect(ledgerCloud.prepare('SELECT COUNT(*) AS n FROM sync_rows').get()?.n).toBeGreaterThan(0);
+    ledgerCloud.close();
+  });
+
+  it('push while a ledger is being attached, even with nothing new to send', async () => {
+    const { ledgerEngine, ledgerCloud, log } = shareFamily();
+    const outcome = await ledgerEngine.syncNow();
+    expect(log.calls).toContain('push');
+    expect(outcome.pushed).toBe(true);
+    ledgerCloud.close();
+  });
+
+  it("push the user's own copy when only a ledger's detach changed it", async () => {
+    // The ledger's rows went to its own database; this phone's copy still has one.
+    const { ledgerCloud } = shareFamily({ attached: true });
+    addFamilyTransaction('groceries', 30);
+    app.exec('DELETE FROM sync_outbox');
+    putRow(cloud, 'groceries', { ...localRow('groceries') }, 'rev-1');
+    await engine.syncNow();
+    expect(rounds()).toEqual(['pull', 'push']);
+    expect(cloudRow('groceries')).toBeNull();
+    ledgerCloud.close();
+  });
+
+  it("leave a shared ledger's rows out of a replaced copy of the user's own data", async () => {
+    const { ledgerCloud } = shareFamily({ attached: true, detached: true });
+    addFamilyTransaction('groceries', 30);
+    addTransaction('lunch', 12);
+    // A stray row of the shared ledger in the user's own copy.
+    putRow(cloud, 'groceries', { ...localRow('groceries') }, 'rev-1');
+    await engine.uploadAllReplacingCloud();
+    expect(cloudRow('groceries')).toBeNull();
+    expect(cloudRow('lunch')?.amount).toBe(12);
+    ledgerCloud.close();
+  });
+});
+
+describe('with one pull per sync', () => {
+  beforeEach(async () => {
+    addTransaction('lunch', 12);
+    addTransaction('dinner', 20);
+    await engine.syncNow();
+    calls = [];
+  });
+
+  it("takes another phone's delete over an edit made here meanwhile", async () => {
+    const stored = cloudRow('lunch')!;
+    const { rev: _rev, ...row } = stored;
+    putRow(cloud, 'lunch', { ...row, deleted_at: now }, 'rev-other');
+    remoteChanged = true;
+    app.exec("UPDATE transactions SET amount = 99 WHERE id = 'lunch'");
+    await engine.syncNow();
+    expect(cloudRow('lunch')?.deleted_at).toBe(now);
+    expect(localRow('lunch')?.deleted_at).toBe(now);
+  });
+
+  it("applies another phone's change in the same sync that sends this phone's", async () => {
+    const { rev: _rev, ...row } = cloudRow('dinner')!;
+    putRow(cloud, 'dinner', { ...row, amount: 50 }, 'rev-other');
+    remoteChanged = true;
+    app.exec("UPDATE transactions SET amount = 13 WHERE id = 'lunch'");
+    const outcome = await engine.syncNow();
+    expect(rounds()).toEqual(['pull', 'push']);
+    expect(localRow('dinner')?.amount).toBe(50);
+    expect(cloudRow('lunch')?.amount).toBe(13);
+    expect(outcome.appliedRows).toBe(1);
+  });
+
+  it('keeps an edit made here over a stale copy of the same row from the pull', async () => {
+    const { rev: _rev, ...row } = cloudRow('lunch')!;
+    putRow(cloud, 'lunch', { ...row, amount: 77 }, 'rev-other');
+    remoteChanged = true;
+    app.exec("UPDATE transactions SET amount = 14 WHERE id = 'lunch'");
+    await engine.syncNow();
+    expect(localRow('lunch')?.amount).toBe(14);
+    expect(cloudRow('lunch')?.amount).toBe(14);
+  });
+});
+
+describe('images', () => {
+  it('stop the push when one fails to upload, and the retry sends only the rest', async () => {
+    let uploads = 0;
+    (apiUploadMedia as jest.Mock).mockImplementation(async () => {
+      uploads += 1;
+      if (uploads === 3) throw new Error('upload failed');
+    });
+    for (let i = 0; i < 6; i++) {
+      files.add(`user-assets/receipts/r${i}.jpg`);
+      addTransaction(`t${i}`, i, { receipt_uri: `receipts/r${i}.jpg` });
+    }
+    await expect(engine.syncNow()).rejects.toThrow('upload failed');
+    // No row may reach another phone before its image can.
+    expect(calls).not.toContain('push');
+    await engine.syncNow();
+    expect(calls).toContain('push');
+    // Six images, each sent once, plus the one that failed sent again: the
+    // ones done before the failure are not uploaded twice.
+    expect(uploads).toBe(7);
+    expect(app.prepare('SELECT COUNT(*) AS n FROM sync_media_pending').get()?.n).toBe(0);
+  });
+
+  it('download one a pulled row names at once, while failed ones wait', async () => {
+    (apiDownloadMedia as jest.Mock).mockRejectedValue(new Error('404'));
+    app.exec(
+      "INSERT INTO sync_media_missing (path, channel) VALUES ('receipts/gone.jpg', 'personal')",
+    );
+    await engine.syncNow();
+    (apiDownloadMedia as jest.Mock).mockClear();
+    (apiDownloadMedia as jest.Mock).mockResolvedValue(undefined);
+    addTransaction('lunch', 12);
+    await engine.syncNow();
+    const { rev: _rev, ...row } = cloudRow('lunch')!;
+    putRow(cloud, 'photo', { ...row, id: 'photo', receipt_uri: 'receipts/new.jpg' }, 'rev-other');
+    remoteChanged = true;
+    await engine.syncNow();
+    const paths = (apiDownloadMedia as jest.Mock).mock.calls.map((call) => call[2]);
+    expect(paths).toEqual(['receipts/new.jpg']);
+  });
+});
