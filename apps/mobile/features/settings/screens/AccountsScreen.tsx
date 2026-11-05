@@ -86,6 +86,7 @@ import { CardDesignField } from '~/features/settings/components/CardDesignField'
 import type { AccountLogoPickerSession } from '~/features/settings/lib/accountLogoPickerBridge';
 import type { CardDesignPickerSession } from '~/features/settings/lib/cardDesignPickerBridge';
 import { stackPaletteIndex } from '~/features/settings/lib/cardStackIndex';
+import { balanceChangeWithCurrencySwitch } from '~/features/settings/lib/currencySwitchBalance';
 import {
   ActivityTransactionList,
   buildBulkUpdateInputs,
@@ -212,6 +213,12 @@ interface AccountEditorInput {
   firstInstalmentDate: string | null;
   /** The contract's final instalment, which ends the recurring rule. */
   finalInstalmentDate: string | null;
+  /**
+   * Whether the balance field was typed in, as opposed to only showing the
+   * balance (or its conversion after a currency switch). Form state, not a
+   * column.
+   */
+  balanceEdited: boolean;
 }
 
 const ACCOUNT_EDITOR_SCROLL_CONTENT_STYLE = {
@@ -555,6 +562,7 @@ function AccountEditorSheet({
   const [cardDesign, setCardDesign] = useState<string | null>(null);
   const [includeInTotals, setIncludeInTotals] = useState(true);
   const [balanceInput, setBalanceInput] = useState('0');
+  const [balanceEdited, setBalanceEdited] = useState(false);
   const [creditStatementDay, setCreditStatementDay] = useState('25');
   const [creditDueDay, setCreditDueDay] = useState('1');
   // The loan contract. Given the amount and the term, the rate, the total
@@ -698,6 +706,7 @@ function AccountEditorSheet({
       setAccountGroupId(matchedGroupId);
       setIncludeInTotals(account.includeInTotals);
       setBalanceInput(toBalanceInputValue(currentBalance));
+      setBalanceEdited(false);
       setCreditStatementDay(String(account.creditStatementDay ?? '25'));
       setCreditDueDay(String(account.creditDueDay ?? '1'));
       setAutoRepaySourceOverride(undefined);
@@ -769,6 +778,7 @@ function AccountEditorSheet({
       );
       setIncludeInTotals(true);
       setBalanceInput('0');
+      setBalanceEdited(false);
       setCreditStatementDay('25');
       setCreditDueDay('1');
       setAutoRepaySourceOverride(undefined);
@@ -1216,6 +1226,7 @@ function AccountEditorSheet({
           : autoRepaySourceId,
       firstInstalmentDate: isLoan && loanQuote ? loanQuote.firstInstalmentDate : null,
       finalInstalmentDate: isLoan && loanQuote ? loanQuote.payoffDate : null,
+      balanceEdited,
     };
 
     // A new rate on a variable (reducing balance) loan is ambiguous. A bank
@@ -1838,7 +1849,10 @@ function AccountEditorSheet({
                 variant="currency"
                 currencySymbol={currencySymbolForCode(currency)}
                 value={balanceInput}
-                onChangeText={setBalanceInput}
+                onChangeText={(next) => {
+                  setBalanceInput(next);
+                  setBalanceEdited(true);
+                }}
                 helperText={editedType === 'loan' ? loanBalanceHint : undefined}
               />
             )}
@@ -2045,6 +2059,7 @@ export function AccountEditorScreen({
     deleteRecurringRule,
     recurringRules,
     setLoanArchived,
+    rateTable,
   } = useApp();
   const { accountBalances } = useTransactions();
   const { checkLimit } = useProGate();
@@ -2073,6 +2088,7 @@ export function AccountEditorScreen({
           collectFromAccountId,
           firstInstalmentDate: _firstInstalmentDate,
           finalInstalmentDate: _finalInstalmentDate,
+          balanceEdited: _balanceEdited,
           ...accountInput
         } = input;
         const newAccountId = createAccount({
@@ -2230,6 +2246,56 @@ export function AccountEditorScreen({
         resyncCollectAccount();
       };
 
+      // Asks how a balance change is recorded (a plain adjustment, or real
+      // income/spending), then applies the edit and records the change.
+      // `apply` runs the account edit and returns the exact change to record:
+      // after a currency switch that is only known once the history has been
+      // re-denominated, while `estimatedDelta` is what the prompt shows.
+      const promptBalanceAdjustment = (estimatedDelta: number, apply: () => number) => {
+        const flowType = flowTypeForBalanceDelta(account.type, estimatedDelta);
+        const record = (type: 'balance_adjustment' | 'income' | 'expense') => {
+          const delta = apply();
+          if (Math.abs(delta) > 0.000001) {
+            createTransaction({
+              type,
+              amount: type === 'balance_adjustment' ? delta : Math.abs(delta),
+              currency: input.currency || account.currency,
+              date: new Date().toISOString(),
+              accountId: account.id,
+              ...(type === 'balance_adjustment'
+                ? { fromAccountId: null, toAccountId: null, categoryId: null }
+                : {}),
+              note: String(I18n.t('accounts.balance_adjustment_transaction_note')),
+            });
+          }
+          onClose();
+        };
+        Alert.alert(
+          I18n.t('accounts.balance_adjustment_prompt_title'),
+          I18n.t('accounts.balance_adjustment_prompt_message', {
+            amount: formatAmount(Math.abs(estimatedDelta), settings, {
+              showSign: false,
+              currencyCode: input.currency || account.currency,
+              trueHourlyRate: currentMonthWage?.trueHourlyRate ?? 0,
+            }),
+          }),
+          [
+            { text: I18n.t('common.cancel'), style: 'cancel' },
+            {
+              text: I18n.t('accounts.record_as_difference'),
+              onPress: () => record('balance_adjustment'),
+            },
+            {
+              text:
+                flowType === 'income'
+                  ? I18n.t('accounts.record_as_income')
+                  : I18n.t('accounts.record_as_expense'),
+              onPress: () => record(flowType),
+            },
+          ],
+        );
+      };
+
       // Currency change on an existing account re-denominates prior entries at
       // the latest rate in a lump — warn, then run it as its own operation.
       // The rule re-sync deliberately sits this path out: a rule's amount is
@@ -2238,11 +2304,35 @@ export function AccountEditorScreen({
       // the old currency. Re-pointing autopay after a redenomination belongs
       // in the recurring editor.
       if (input.currency && input.currency !== account.currency) {
+        const toCurrency = input.currency;
+        const changeCurrency = () =>
+          changeAccountCurrency(account.id, toCurrency, {
+            name: input.name,
+            accountGroup: input.accountGroup,
+            logoId: input.logoId,
+            cardDesign: input.cardDesign,
+            creditStatementDay: input.creditStatementDay,
+            creditDueDay: input.creditDueDay,
+            includeInTotals: input.includeInTotals,
+            // Already converted in the editor, so they are saved in the
+            // new currency alongside the re-denominated history.
+            ...loanUpdates,
+          });
+        // A balance typed in the same save is recorded on top of the
+        // conversion, in the new currency, so the account lands on it.
+        const balanceChange = balanceChangeWithCurrencySwitch({
+          balanceEdited: input.balanceEdited,
+          typedBalance: input.startingBalance,
+          currentBalance,
+          fromCurrency: account.currency,
+          toCurrency,
+          rateTable,
+        });
         Alert.alert(
           I18n.t('accounts.currency_change_title'),
           I18n.t('accounts.currency_change_message', {
             from: account.currency,
-            to: input.currency,
+            to: toCurrency,
           }),
           [
             { text: I18n.t('common.cancel'), style: 'cancel' },
@@ -2250,19 +2340,17 @@ export function AccountEditorScreen({
               text: I18n.t('accounts.currency_change_action'),
               style: 'destructive',
               onPress: () => {
-                changeAccountCurrency(account.id, input.currency, {
-                  name: input.name,
-                  accountGroup: input.accountGroup,
-                  logoId: input.logoId,
-                  cardDesign: input.cardDesign,
-                  creditStatementDay: input.creditStatementDay,
-                  creditDueDay: input.creditDueDay,
-                  includeInTotals: input.includeInTotals,
-                  // Already converted in the editor, so they are saved in the
-                  // new currency alongside the re-denominated history.
-                  ...loanUpdates,
+                if (balanceChange == null) {
+                  changeCurrency();
+                  onClose();
+                  return;
+                }
+                // Nothing is saved until this second answer, so cancelling it
+                // leaves the account as it was, like cancelling the first.
+                promptBalanceAdjustment(balanceChange, () => {
+                  const converted = changeCurrency();
+                  return converted == null ? balanceChange : input.startingBalance - converted;
                 });
-                onClose();
               },
             },
           ],
@@ -2271,64 +2359,16 @@ export function AccountEditorScreen({
       }
 
       const delta = input.startingBalance - currentBalance;
-      const adjustmentAmount = Math.abs(delta);
-      const hasBalanceChange = adjustmentAmount > 0.000001;
-
-      if (!hasBalanceChange) {
+      if (Math.abs(delta) <= 0.000001) {
         applyAccountUpdates();
         onClose();
         return;
       }
 
-      const flowType = flowTypeForBalanceDelta(account.type, delta);
-      Alert.alert(
-        I18n.t('accounts.balance_adjustment_prompt_title'),
-        I18n.t('accounts.balance_adjustment_prompt_message', {
-          amount: formatAmount(adjustmentAmount, settings, {
-            showSign: false,
-            trueHourlyRate: currentMonthWage?.trueHourlyRate ?? 0,
-          }),
-        }),
-        [
-          { text: I18n.t('common.cancel'), style: 'cancel' },
-          {
-            text: I18n.t('accounts.record_as_difference'),
-            onPress: () => {
-              applyAccountUpdates();
-              createTransaction({
-                type: 'balance_adjustment',
-                amount: delta,
-                currency: input.currency || account.currency,
-                date: new Date().toISOString(),
-                accountId: account.id,
-                fromAccountId: null,
-                toAccountId: null,
-                categoryId: null,
-                note: String(I18n.t('accounts.balance_adjustment_transaction_note')),
-              });
-              onClose();
-            },
-          },
-          {
-            text:
-              flowType === 'income'
-                ? I18n.t('accounts.record_as_income')
-                : I18n.t('accounts.record_as_expense'),
-            onPress: () => {
-              applyAccountUpdates();
-              createTransaction({
-                type: flowType,
-                amount: adjustmentAmount,
-                currency: input.currency || account.currency,
-                date: new Date().toISOString(),
-                accountId: account.id,
-                note: String(I18n.t('accounts.balance_adjustment_transaction_note')),
-              });
-              onClose();
-            },
-          },
-        ],
-      );
+      promptBalanceAdjustment(delta, () => {
+        applyAccountUpdates();
+        return delta;
+      });
     },
     [
       account,
@@ -2344,6 +2384,7 @@ export function AccountEditorScreen({
       currentBalance,
       currentMonthWage?.trueHourlyRate,
       onClose,
+      rateTable,
       settings,
       updateAccount,
     ],
