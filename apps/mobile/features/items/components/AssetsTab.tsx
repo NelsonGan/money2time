@@ -11,6 +11,7 @@ import {
   AssetsTabBar,
 } from '~/features/items/components/AssetsTabBar';
 import { useStableSafeAreaInsets } from '~/hooks/useStableSafeAreaInsets';
+import { useWideTabColumns } from '~/hooks/useWideTabColumns';
 import { I18n } from '~/lib/i18n';
 
 interface AccountsRenderOptions {
@@ -101,6 +102,8 @@ export function AssetsTab({
   }, [handleTabChange, resetToAccountsToken]);
 
   const topInset = insets.top;
+  // iPad: the header spans the same wide column as the page under it.
+  const { maxWidth: wideMaxWidth } = useWideTabColumns();
 
   // Shared by the Accounts and Goals sub-tabs, which share the visibility state.
   const balancesToggle = (
@@ -120,7 +123,7 @@ export function AssetsTab({
 
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: topInset }}>
-      <TabletContentContainer>
+      <TabletContentContainer maxWidth={wideMaxWidth}>
         <View className="flex-row items-center justify-between pr-5 pt-2">
           <AssetsTabBar
             active={tab}

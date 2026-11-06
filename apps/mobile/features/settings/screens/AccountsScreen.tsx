@@ -106,6 +106,7 @@ import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accoun
 import { selectDuplicableTransactions } from '~/features/transactions/lib/duplicateTransaction';
 import { AddTransactionScreen, EditTransactionScreen } from '~/features/transactions/screens';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
+import { useWideTabColumns } from '~/hooks/useWideTabColumns';
 import { useIndexedScrollToTopRefs } from '~/hooks/useIndexedScrollToTopRefs';
 import { useMonthPager } from '~/hooks/useMonthPager';
 import { useProGate } from '~/hooks/useProGate';
@@ -268,6 +269,7 @@ function AccountsSummaryBlock({
   themeColors,
   renderValue,
   onPressNetAssets,
+  inline = false,
 }: {
   assets: number;
   debt: number;
@@ -275,6 +277,8 @@ function AccountsSummaryBlock({
   themeColors: AccountsSummaryThemeColors;
   renderValue: AccountsSummaryRenderValue;
   onPressNetAssets?: () => void;
+  /** iPad: net assets, assets and debt in one row across the wide page. */
+  inline?: boolean;
 }) {
   const netIsNegative = net < 0;
   // Positive/zero net uses the neutral foreground tone instead of the user's
@@ -286,7 +290,12 @@ function AccountsSummaryBlock({
   const netValueClass = netIsNegative ? 'text-destructive' : 'text-foreground';
 
   return (
-    <View className="w-full overflow-hidden rounded-2xl border border-border/45 bg-card">
+    <View
+      className={cn(
+        'w-full overflow-hidden rounded-2xl border border-border/45 bg-card',
+        inline && 'flex-row',
+      )}
+    >
       {/* Hero: Net Assets */}
       <Pressable
         onPress={
@@ -298,7 +307,7 @@ function AccountsSummaryBlock({
             : undefined
         }
         disabled={!onPressNetAssets}
-        className="px-4 pt-3.5 pb-3 active:opacity-85"
+        className={cn('px-4 pt-3.5 pb-3 active:opacity-85', inline && 'flex-1 justify-center')}
         accessibilityRole={onPressNetAssets ? 'button' : undefined}
         accessibilityLabel={I18n.t('accounts.net_assets')}
       >
@@ -319,11 +328,11 @@ function AccountsSummaryBlock({
       </Pressable>
 
       {/* Divider */}
-      <View className="h-px bg-border/40" />
+      <View className={inline ? 'w-px bg-border/40' : 'h-px bg-border/40'} />
 
       {/* Footer: Assets / Debt side-by-side */}
-      <View className="flex-row">
-        <View className="flex-1 px-4 py-2.5">
+      <View className={cn('flex-row', inline && 'flex-[2]')}>
+        <View className={cn('flex-1 px-4 py-2.5', inline && 'justify-center')}>
           <View className="flex-row items-center gap-1.5">
             <ArrowUpRight size={12} color={themeColors.success} strokeWidth={2.4} />
             <Text variant="label" className="text-[10px] text-success">
@@ -332,14 +341,14 @@ function AccountsSummaryBlock({
           </View>
           <View className="mt-1">
             {renderValue(assets, {
-              variant: 'mono',
+              variant: inline ? 'monoLg' : 'mono',
               textClassName: 'text-success',
               iconColor: themeColors.success,
             })}
           </View>
         </View>
         <View className="w-px bg-border/40" />
-        <View className="flex-1 px-4 py-2.5">
+        <View className={cn('flex-1 px-4 py-2.5', inline && 'justify-center')}>
           <View className="flex-row items-center gap-1.5">
             <ArrowDownRight size={12} color={themeColors.error} strokeWidth={2.4} />
             <Text variant="label" className="text-[10px] text-destructive">
@@ -348,7 +357,7 @@ function AccountsSummaryBlock({
           </View>
           <View className="mt-1">
             {renderValue(debt, {
-              variant: 'mono',
+              variant: inline ? 'monoLg' : 'mono',
               textClassName: 'text-destructive',
               iconColor: themeColors.error,
             })}
@@ -3135,6 +3144,8 @@ export function AccountsScreen({
   const themeColors = useThemeColors();
   const listNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
   const { contentWidth: windowWidth } = useDeviceLayout();
+  // iPad: the overview lays its groups out in two columns.
+  const overviewColumns = useWideTabColumns();
   const accountRowThemeColors = useMemo(
     () => ({
       accent: themeColors.accent,
@@ -4398,7 +4409,10 @@ export function AccountsScreen({
   );
 
   return withBackGesture(
-    <SettingsPageLayout edges={safeAreaEdges}>
+    <SettingsPageLayout
+      edges={safeAreaEdges}
+      contentMaxWidth={managementOnly ? undefined : overviewColumns.maxWidth}
+    >
       {managementOnly ? (
         <View style={styles.headerContainer}>
           <SettingsHeader
@@ -4469,6 +4483,7 @@ export function AccountsScreen({
             hideNavigation
             hideTitleRow={hideOverviewHeader}
             showAccent={false}
+            contentMaxWidth={overviewColumns.maxWidth}
             actions={
               hideOverviewHeader ? undefined : (
                 <>
@@ -4495,6 +4510,7 @@ export function AccountsScreen({
               themeColors={themeColors}
               renderValue={renderVisibleBalanceNode}
               onPressNetAssets={onOpenNetAssetsInsight}
+              inline={overviewColumns.columns === 2}
             />
           </MonthControlsHeader>
           <AccountCardStack
@@ -4526,6 +4542,8 @@ export function AccountsScreen({
               onOpenPayCreditCard?.(id);
             }}
             onRenderBalanceNode={renderVisibleBalanceNode}
+            columns={overviewColumns.columns}
+            contentMaxWidth={overviewColumns.maxWidth}
           />
         </>
       )}

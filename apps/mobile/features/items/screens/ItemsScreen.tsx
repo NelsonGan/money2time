@@ -13,6 +13,7 @@ import type { Edge } from 'react-native-safe-area-context';
 import Sortable from 'react-native-sortables';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
+import { useContentFrame } from '~/components/layout/ContentFrame';
 import { useBottomNavScrollReporter } from '~/components/navigation/BottomNavMinimize';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import {
@@ -28,6 +29,7 @@ import {
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
+import { useWideTabColumns } from '~/hooks/useWideTabColumns';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -54,6 +56,7 @@ interface ItemsScreenProps {
 }
 
 const NOOP = () => {};
+const ITEM_CARD_GAP = 10;
 
 // Lets the drag handle fill the card's full height (it's a flex child of the
 // row), giving a tall, easy-to-grab target.
@@ -308,8 +311,16 @@ export function ItemsScreen({
   const reportBottomNavScroll = useBottomNavScrollReporter();
   const listScrollRef = useAnimatedRef<Animated.ScrollView>();
   const { contentWidth } = useDeviceLayout();
-  // The list pads `spacing.lg` on each side; cards span the remaining width.
-  const cardWidth = Math.max(contentWidth - spacing.lg * 2, 0);
+  const { width: frameWidth } = useContentFrame();
+  // iPad: two columns of cards under the wide Accounts tab header.
+  const wideColumns = useWideTabColumns();
+  const pageWidth =
+    wideColumns.maxWidth != null ? Math.min(frameWidth, wideColumns.maxWidth) : contentWidth;
+  // The list pads `spacing.lg` on each side; cards share the remaining width.
+  const cardWidth = Math.max(
+    (pageWidth - spacing.lg * 2 - ITEM_CARD_GAP * (wideColumns.columns - 1)) / wideColumns.columns,
+    0,
+  );
 
   const handleAdd = useCallback(() => {
     if (!checkLimit('items', items.length)) return;
@@ -343,7 +354,7 @@ export function ItemsScreen({
   );
 
   return (
-    <SettingsPageLayout edges={safeAreaEdges}>
+    <SettingsPageLayout edges={safeAreaEdges} contentMaxWidth={wideColumns.maxWidth}>
       {!embedded ? (
         <View className="px-5">
           <SettingsHeader
@@ -376,6 +387,7 @@ export function ItemsScreen({
             hideTitleRow
             hideNavigation
             showAccent={false}
+            contentMaxWidth={wideColumns.maxWidth}
           >
             <ItemsSummaryBlock
               totalValue={formatMoney(summary.totalValue, settings.currencyCode, settings)}
@@ -400,9 +412,9 @@ export function ItemsScreen({
               activeItemShadowOpacity={0.08}
               customHandle
               dragActivationDelay={0}
-              flexDirection="column"
-              flexWrap="nowrap"
-              gap={10}
+              flexDirection={wideColumns.columns > 1 ? 'row' : 'column'}
+              flexWrap={wideColumns.columns > 1 ? 'wrap' : 'nowrap'}
+              gap={ITEM_CARD_GAP}
               inactiveItemOpacity={1}
               onDragEnd={({ fromIndex, order, toIndex }) => {
                 if (fromIndex === toIndex) return;

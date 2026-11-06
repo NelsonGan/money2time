@@ -435,6 +435,8 @@ const BREAKDOWN_PIE_LABEL_TAIL_LENGTH = 10;
 const BREAKDOWN_PIE_LABEL_MARGIN = 4;
 const BREAKDOWN_PIE_MIN_RADIUS = 48;
 const BREAKDOWN_PIE_MAX_RADIUS = 108;
+/** iPad draws the pie larger: its pane has the room. */
+const BREAKDOWN_PIE_MAX_RADIUS_WIDE = 150;
 
 /** Header height assumed for the first frame of a split page, before it is measured. */
 const SPLIT_HEADER_HEIGHT_ESTIMATE = 112;
@@ -2738,7 +2740,7 @@ export function InsightsScreen({
   );
 
   const { width, height } = useContentFrame();
-  const { isTablet, panes } = useDeviceLayout();
+  const { isTablet, panes, wideTabs } = useDeviceLayout();
   const pageWidth = Math.max(1, width);
   const insightsPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
   // Open iPhone Duo: charts are drawn in the left pane.
@@ -4624,7 +4626,10 @@ export function InsightsScreen({
       pieLabelWidth + BREAKDOWN_PIE_LABEL_LINE_LENGTH + BREAKDOWN_PIE_LABEL_MARGIN + 6;
     const pieRadius = Math.max(
       BREAKDOWN_PIE_MIN_RADIUS,
-      Math.min(BREAKDOWN_PIE_MAX_RADIUS, Math.floor((pieLayoutWidth - pieExtraRadius * 2) / 2)),
+      Math.min(
+        wideTabs ? BREAKDOWN_PIE_MAX_RADIUS_WIDE : BREAKDOWN_PIE_MAX_RADIUS,
+        Math.floor((pieLayoutWidth - pieExtraRadius * 2) / 2),
+      ),
     );
     const pieStageWidth = (pieRadius + pieExtraRadius) * 2;
     // Crop top/bottom: labels sit in left/right columns, so the full square isn't needed.
@@ -4866,7 +4871,7 @@ export function InsightsScreen({
           </>
         }
         secondary={
-          <View className="gap-1.5">
+          <View className={wideTabs ? 'gap-2' : 'gap-1.5'}>
             {pagePieData.map((item) => {
               const isSelected = activeBreakdownSliceId === item.id;
               const hasSelection = activeBreakdownSliceId !== null;
@@ -4904,7 +4909,11 @@ export function InsightsScreen({
                   }}
                   accessibilityRole="button"
                   accessibilityLabel={`${categoryIconToEmoji(item.emoji)} ${item.name}`.trim()}
-                  className="rounded-xl px-2.5 py-1.5 active:opacity-85 border"
+                  // iPad: roomier rows, to fill the pane beside the pie.
+                  className={cn(
+                    'rounded-xl active:opacity-85 border',
+                    wideTabs ? 'px-3.5 py-3' : 'px-2.5 py-1.5',
+                  )}
                   style={[
                     { backgroundColor: rowBackgroundColor, borderColor: rowBorderColor },
                     isSelected && { borderWidth: 2 },
@@ -4913,14 +4922,18 @@ export function InsightsScreen({
                 >
                   <View className="flex-row items-center justify-between gap-2">
                     <View className="flex-1 flex-row items-center gap-1.5 pr-2">
-                      <CategoryEmoji icon={item.emoji} size={16} />
-                      <Text variant="caption" className="flex-1" numberOfLines={2}>
+                      <CategoryEmoji icon={item.emoji} size={wideTabs ? 22 : 16} />
+                      <Text
+                        variant={wideTabs ? 'body' : 'caption'}
+                        className="flex-1"
+                        numberOfLines={2}
+                      >
                         {item.name}
                       </Text>
                     </View>
                     <View className="flex-row items-center gap-1.5">
                       {renderValueNode(item.amount, {
-                        variant: 'label',
+                        variant: wideTabs ? 'bodyStrong' : 'label',
                         textClassName: 'text-foreground',
                         iconColor: themeColors.text,
                       })}

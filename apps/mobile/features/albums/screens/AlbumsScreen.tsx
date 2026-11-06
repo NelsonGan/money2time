@@ -24,6 +24,7 @@ import { useApp, useTransactions } from '~/context/AppContext';
 import { useProGate } from '~/hooks/useProGate';
 import { useStableSafeAreaInsets } from '~/hooks/useStableSafeAreaInsets';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { useWideTabColumns } from '~/hooks/useWideTabColumns';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
@@ -78,7 +79,11 @@ export function AlbumsScreen({
     scrollRef.current?.scrollTo({ y: 0, animated: false });
   }, [scrollRef, scrollToTopToken]);
 
+  // iPad: album cards in two columns, and the page (and its map) as wide as
+  // the tab header above it.
+  const wideColumns = useWideTabColumns();
   const contentWidth = pageWidth - SCREEN_PADDING * 2;
+  const cardWidth = (contentWidth - GRID_GAP * (wideColumns.columns - 1)) / wideColumns.columns;
 
   const activeOptions = useMemo(
     () => [
@@ -176,7 +181,7 @@ export function AlbumsScreen({
 
   return (
     <View className="flex-1 bg-background">
-      <TabletContentContainer style={{ flex: 1 }}>
+      <TabletContentContainer style={{ flex: 1 }} maxWidth={wideColumns.maxWidth}>
         <View
           className="flex-1"
           onLayout={(e) => {
@@ -229,8 +234,8 @@ export function AlbumsScreen({
                         activeItemShadowOpacity={0.12}
                         customHandle
                         dragActivationDelay={0}
-                        flexDirection="column"
-                        flexWrap="nowrap"
+                        flexDirection={wideColumns.columns > 1 ? 'row' : 'column'}
+                        flexWrap={wideColumns.columns > 1 ? 'wrap' : 'nowrap'}
                         gap={GRID_GAP}
                         inactiveItemOpacity={1}
                         onDragEnd={({ fromIndex, order, toIndex }) => {
@@ -245,7 +250,7 @@ export function AlbumsScreen({
                           <AlbumCard
                             key={album.id}
                             album={album}
-                            width={contentWidth}
+                            width={cardWidth}
                             isActive={album.id === activeAlbumId}
                             onPress={onOpenAlbumDetail}
                             statsVersion={statsVersion}
@@ -306,7 +311,7 @@ export function AlbumsScreen({
         className={cn('absolute left-0 right-0 top-0', tab === 'map' ? '' : 'bg-background')}
         style={{ paddingTop: topInset }}
       >
-        <TabletContentContainer>{tabsBar}</TabletContentContainer>
+        <TabletContentContainer maxWidth={wideColumns.maxWidth}>{tabsBar}</TabletContentContainer>
       </View>
     </View>
   );

@@ -3,6 +3,8 @@ import {
   readableColumnPadding,
   resolveAdaptiveLayout,
   SIDE_RAIL_WIDTH,
+  WIDE_TAB_CONTENT_MAX_WIDTH,
+  wideTabColumns,
 } from '~/utils/adaptiveLayout';
 
 const NO_INSETS = { top: 0, right: 0, bottom: 0, left: 0 };
@@ -20,21 +22,12 @@ describe('resolveAdaptiveLayout', () => {
       navPlacement: 'bottom',
       navEdge: 'right',
       navRailInset: 0,
+      navRailAlign: 'bottom',
       isTwoPane: false,
+      isWide: false,
+      wideTabs: false,
       panes: null,
     });
-  });
-
-  it('keeps the bottom bar on iPad, whatever its size', () => {
-    const layout = resolveAdaptiveLayout({
-      platform: 'ios',
-      isPad: true,
-      width: 1194,
-      height: 834,
-      insets: { top: 24, right: 0, bottom: 20, left: 0 },
-    });
-    expect(layout.navPlacement).toBe('bottom');
-    expect(layout.isTwoPane).toBe(false);
   });
 
   it('keeps the bottom bar on Android, including a wide unfolded window', () => {
@@ -61,7 +54,10 @@ describe('resolveAdaptiveLayout', () => {
       navPlacement: 'side',
       navEdge: 'right',
       navRailInset: 84,
+      navRailAlign: 'bottom',
       isTwoPane: false,
+      isWide: false,
+      wideTabs: false,
       panes: null,
     });
   });
@@ -78,7 +74,10 @@ describe('resolveAdaptiveLayout', () => {
       navPlacement: 'side',
       navEdge: 'right',
       navRailInset: 84,
+      navRailAlign: 'bottom',
       isTwoPane: true,
+      isWide: true,
+      wideTabs: false,
       // Split on the fold at 475.5 pt; the rail comes out of the right pane.
       panes: { left: 475.5, right: 391.5 },
     });
@@ -134,6 +133,71 @@ describe('resolveAdaptiveLayout', () => {
   });
 });
 
+describe('resolveAdaptiveLayout on iPad', () => {
+  const IPAD_INSETS = { top: 24, right: 0, bottom: 20, left: 0 };
+  const ipad = (width: number, height: number) =>
+    resolveAdaptiveLayout({ platform: 'ios', isPad: true, width, height, insets: IPAD_INSETS });
+
+  it('puts a top-aligned rail on the leading edge and two panes on a 13-inch in landscape', () => {
+    expect(ipad(1376, 1032)).toEqual({
+      navPlacement: 'side',
+      navEdge: 'left',
+      navRailInset: SIDE_RAIL_WIDTH,
+      navRailAlign: 'top',
+      isTwoPane: true,
+      isWide: true,
+      wideTabs: true,
+      // The content beside the rail, split evenly: no hinge to avoid.
+      panes: { left: 646, right: 646 },
+    });
+  });
+
+  it('splits a 13-inch in portrait too', () => {
+    const layout = ipad(1032, 1376);
+    expect(layout.isTwoPane).toBe(true);
+    expect(layout.panes).toEqual({ left: 474, right: 474 });
+  });
+
+  it('keeps one pane beside the rail on an 11-inch in portrait', () => {
+    const layout = ipad(834, 1210);
+    expect(layout.navPlacement).toBe('side');
+    expect(layout.isTwoPane).toBe(false);
+    expect(layout.panes).toBeNull();
+    expect(layout.isWide).toBe(true);
+    expect(layout.wideTabs).toBe(true);
+  });
+
+  it('splits an iPad mini in landscape, not in portrait', () => {
+    expect(ipad(1133, 744).isTwoPane).toBe(true);
+    expect(ipad(744, 1133).isTwoPane).toBe(false);
+  });
+
+  it('panes always add up to the content beside the rail', () => {
+    const layout = ipad(1195, 900);
+    expect(layout.panes).not.toBeNull();
+    expect(layout.panes!.left + layout.panes!.right).toBe(1195 - SIDE_RAIL_WIDTH);
+  });
+
+  it('falls back to the phone layout in a narrow window (Slide Over, a third of Split View)', () => {
+    expect(ipad(375, 1032)).toEqual(
+      resolveAdaptiveLayout({
+        platform: 'ios',
+        isPad: false,
+        width: 375,
+        height: 1032,
+        insets: IPAD_INSETS,
+      }),
+    );
+    expect(ipad(507, 1032).navPlacement).toBe('bottom');
+  });
+
+  it('keeps the rail from half of a 13-inch in Split View', () => {
+    const layout = ipad(688, 1032);
+    expect(layout.navPlacement).toBe('side');
+    expect(layout.isTwoPane).toBe(false);
+  });
+});
+
 describe('readableColumn', () => {
   it('centres a 600 pt column on the open Duo', () => {
     expect(readableColumn(867, true)).toEqual({ width: 600, margin: 133.5 });
@@ -158,5 +222,23 @@ describe('readableColumnPadding', () => {
   it('never goes below the list’s own padding', () => {
     expect(readableColumnPadding(640, 20)).toBe(20);
     expect(readableColumnPadding(390, 18)).toBe(18);
+  });
+});
+
+describe('wideTabColumns', () => {
+  it('leaves phones, the Duo and other tablets to the page', () => {
+    expect(wideTabColumns(1292, false)).toEqual({ columns: 1, maxWidth: null });
+  });
+
+  it('lays out two columns beside the rail on a 13-inch iPad, both ways round', () => {
+    expect(wideTabColumns(1292, true)).toEqual({
+      columns: 2,
+      maxWidth: WIDE_TAB_CONTENT_MAX_WIDTH,
+    });
+    expect(wideTabColumns(948, true).columns).toBe(2);
+  });
+
+  it('keeps one readable column on an 11-inch iPad in portrait', () => {
+    expect(wideTabColumns(750, true)).toEqual({ columns: 1, maxWidth: 600 });
   });
 });

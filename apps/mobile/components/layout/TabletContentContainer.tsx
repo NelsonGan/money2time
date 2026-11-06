@@ -5,9 +5,19 @@ import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayo
 
 interface TabletContentContainerProps extends ViewProps {
   children: React.ReactNode;
+  /**
+   * Column width on a tablet, for a page with a wide layout of its own
+   * (`useWideTabColumns`). Defaults to the readable column.
+   */
+  maxWidth?: number | null;
 }
 
-export function TabletContentContainer({ children, style, ...props }: TabletContentContainerProps) {
+export function TabletContentContainer({
+  children,
+  style,
+  maxWidth,
+  ...props
+}: TabletContentContainerProps) {
   const { isTablet } = useDeviceLayout();
 
   if (!isTablet) {
@@ -16,7 +26,10 @@ export function TabletContentContainer({ children, style, ...props }: TabletCont
 
   return (
     <View
-      style={[{ maxWidth: TABLET_CONTENT_MAX_WIDTH, width: '100%', alignSelf: 'center' }, style]}
+      style={[
+        { maxWidth: maxWidth ?? TABLET_CONTENT_MAX_WIDTH, width: '100%', alignSelf: 'center' },
+        style,
+      ]}
       {...props}
     >
       {children}

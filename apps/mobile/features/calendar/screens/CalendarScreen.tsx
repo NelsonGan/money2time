@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import type { TextInputInstance } from 'react-native';
+import type { LayoutChangeEvent, TextInputInstance } from 'react-native';
 import { Alert, FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Reanimated, {
   Easing as REasing,
@@ -121,6 +121,8 @@ const CALENDAR_HORIZONTAL_PADDING = spacing.screenHorizontal;
 const CALENDAR_GRID_HORIZONTAL_PADDING = spacing.xs;
 /** Side padding of the month grid in the open iPhone Duo's left pane. */
 const MONTH_OVERVIEW_HORIZONTAL_PADDING = spacing.lg;
+/** Room kept under the iPad month grid for the Today button. */
+const MONTH_OVERVIEW_BOTTOM_RESERVE = 88;
 const ZOOM_TIMING = { duration: 350, easing: REasing.out(REasing.cubic) } as const;
 const MONTH_HEADER_CHROME_HEIGHT = 114;
 const HEADER_CONTENT_GAP = 10;
@@ -200,7 +202,7 @@ export function CalendarScreen({
   } = useApp();
   const monthCycle = monthCycleOf(settings);
   const themeColors = useThemeColors();
-  const { contentWidth: frameContentWidth, panes: twoPane } = useDeviceLayout();
+  const { contentWidth: frameContentWidth, panes: twoPane, wideTabs } = useDeviceLayout();
   const safeAreaInsets = useSafeAreaInsets();
   const { width: frameWidth } = useContentFrame();
   // Open iPhone Duo: the header and a live month grid fill the left pane and
@@ -208,6 +210,16 @@ export function CalendarScreen({
   // that pane. Everywhere else they span the screen.
   const screenWidth = twoPane ? twoPane.right : frameWidth;
   const contentWidth = twoPane ? twoPane.right : frameContentWidth;
+  // iPad: the month grid grows into the height of its pane instead of
+  // leaving the lower half of it empty. The Duo keeps its phone-sized cells.
+  const [monthOverviewHeight, setMonthOverviewHeight] = useState(0);
+  const handleMonthOverviewLayout = useCallback((event: LayoutChangeEvent) => {
+    setMonthOverviewHeight(event.nativeEvent.layout.height);
+  }, []);
+  const monthOverviewFillHeight =
+    wideTabs && monthOverviewHeight > 0
+      ? monthOverviewHeight - spacing.sm - MONTH_OVERVIEW_BOTTOM_RESERVE
+      : undefined;
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
   const isTimeMode = settings.displayMode === 'time';
 
@@ -1734,7 +1746,7 @@ export function CalendarScreen({
       {/* --- Two panes: the month at a glance under the header, in step with
           the list beside it. Tapping a day scrolls the list to it. --- */}
       {twoPane ? (
-        <View style={styles.monthOverviewPane}>
+        <View style={styles.monthOverviewPane} onLayout={handleMonthOverviewLayout}>
           <CalendarMonthGrid
             monthData={activeListMonthData}
             weekdayLabels={weekdayLabels}
@@ -1743,6 +1755,7 @@ export function CalendarScreen({
             locale={activeLocale}
             onSelectDay={handleSelectDayFromMonth}
             chartWidth={twoPane.left - MONTH_OVERVIEW_HORIZONTAL_PADDING * 2}
+            fillHeight={monthOverviewFillHeight}
           />
         </View>
       ) : null}

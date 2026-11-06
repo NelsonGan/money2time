@@ -22,6 +22,13 @@ interface CalendarMonthGridProps {
   locale: string;
   onSelectDay: (dayKey: string) => void;
   chartWidth: number;
+  /**
+   * Height the grid may grow into (iPad's month pane). Cells grow to fill
+   * it, up to half again as tall as wide (iPad Calendar's month view in
+   * portrait), keeping six rows' room so the grid does not change size from
+   * month to month. Without it the cells keep their phone height.
+   */
+  fillHeight?: number;
 }
 
 function formatCellCompact(value: number, isTimeMode: boolean): string {
@@ -47,6 +54,20 @@ const DAY_CELL_GAP = 5;
  */
 const MAX_UNSHRUNK_ROWS = 6;
 const MIN_DAY_CELL_HEIGHT = 34;
+const PHONE_DAY_CELL_MAX_HEIGHT = 62;
+/** Weekday labels row plus its margin, kept out of `fillHeight`. */
+const WEEKDAY_ROW_HEIGHT = 24;
+/** Cells at least this wide (iPad) get larger value text. */
+const LARGE_DAY_CELL_MIN_WIDTH = 72;
+
+function resolveCellMaxHeight(dayCellSize: number, fillHeight: number | undefined) {
+  const phoneHeight = Math.min(dayCellSize + 14, PHONE_DAY_CELL_MAX_HEIGHT);
+  if (!fillHeight) return phoneHeight;
+  const rowRoom = Math.floor(
+    (fillHeight - WEEKDAY_ROW_HEIGHT - DAY_CELL_GAP * (MAX_UNSHRUNK_ROWS - 1)) / MAX_UNSHRUNK_ROWS,
+  );
+  return Math.max(phoneHeight, Math.min(rowRoom, Math.round(dayCellSize * 1.5)));
+}
 
 export const CalendarMonthGrid = memo(function CalendarMonthGridImpl({
   monthData,
@@ -56,12 +77,15 @@ export const CalendarMonthGrid = memo(function CalendarMonthGridImpl({
   locale,
   onSelectDay,
   chartWidth,
+  fillHeight,
 }: CalendarMonthGridProps) {
   const themeColors = useThemeColors();
   const dayCellSize = Math.max(40, Math.floor((chartWidth - DAY_CELL_GAP * 6) / 7));
   const gridWidth = dayCellSize * 7 + DAY_CELL_GAP * 6;
   const rowCount = Math.max(1, Math.ceil(monthData.cells.length / 7));
-  const unshrunkCellHeight = Math.min(dayCellSize + 14, 62);
+  const unshrunkCellHeight = resolveCellMaxHeight(dayCellSize, fillHeight);
+  const valueTextStyle =
+    dayCellSize >= LARGE_DAY_CELL_MIN_WIDTH ? styles.cellValueTextLarge : styles.cellValueText;
   const dayCellHeight =
     rowCount <= MAX_UNSHRUNK_ROWS
       ? unshrunkCellHeight
@@ -156,7 +180,7 @@ export const CalendarMonthGrid = memo(function CalendarMonthGridImpl({
                 allowFontScaling={false}
                 numberOfLines={1}
                 style={[
-                  styles.cellValueText,
+                  valueTextStyle,
                   {
                     color: cell.income > 0 ? themeColors.success : themeColors.textMuted,
                     opacity: cell.income > 0 ? 1 : 0.55,
@@ -169,7 +193,7 @@ export const CalendarMonthGrid = memo(function CalendarMonthGridImpl({
                 allowFontScaling={false}
                 numberOfLines={1}
                 style={[
-                  styles.cellValueText,
+                  valueTextStyle,
                   {
                     color: cell.expense > 0 ? themeColors.error : themeColors.textMuted,
                     opacity: cell.expense > 0 ? 1 : 0.55,
@@ -182,7 +206,7 @@ export const CalendarMonthGrid = memo(function CalendarMonthGridImpl({
           ) : (
             <RNText
               allowFontScaling={false}
-              style={[styles.cellValueText, { color: themeColors.textMuted, opacity: 0.4 }]}
+              style={[valueTextStyle, { color: themeColors.textMuted, opacity: 0.4 }]}
             >
               —
             </RNText>
@@ -241,6 +265,13 @@ const styles = StyleSheet.create({
   cellValueText: {
     fontSize: 9,
     lineHeight: 11,
+    fontWeight: '600',
+    textAlign: 'center',
+    paddingHorizontal: 2,
+  },
+  cellValueTextLarge: {
+    fontSize: 11,
+    lineHeight: 14,
     fontWeight: '600',
     textAlign: 'center',
     paddingHorizontal: 2,

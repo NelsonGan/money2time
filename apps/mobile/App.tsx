@@ -360,8 +360,13 @@ const styles = StyleSheet.create({
   tabHidden: { opacity: 0 },
 });
 
-/** Tabs with a two-pane layout of their own on the open iPhone Duo. */
+/** Tabs with a two-pane layout of their own (open iPhone Duo, wide iPad). */
 const TWO_PANE_TABS: ReadonlySet<MainTab> = new Set<MainTab>(['calendar', 'insights']);
+/**
+ * Tabs with a wide layout of their own (grids, cards side by side), given the
+ * whole content width where `wideTabs` allows it (iPad).
+ */
+const WIDE_TABS: ReadonlySet<MainTab> = new Set<MainTab>(['accounts', 'albums', 'settings']);
 
 function MountedTab({
   name,
@@ -412,13 +417,15 @@ function MountedTab({
     if (shouldMount) perfMark(`tab_${name}_mounted`);
   }, [name, shouldMount]);
 
-  // Open iPhone Duo: Home and Insights lay out their own two panes; every
-  // other page sits in a readable column. Only the slot's insets change when
-  // the device folds, so a page keeps its state. The frame is the window
-  // elsewhere.
-  const { isTwoPane } = useDeviceLayout();
+  // Wide windows (open iPhone Duo, iPad): Home and Insights lay out their own
+  // two panes, and on iPad the pages with a wide layout of their own take the
+  // whole width; every other page sits in a readable column. Only the slot's
+  // insets change when the device folds or the window resizes, so a page
+  // keeps its state. The frame is the window elsewhere.
+  const { isWide, isTwoPane, wideTabs } = useDeviceLayout();
   const frame = useContentFrame();
-  const column = readableColumn(frame.width, isTwoPane && !TWO_PANE_TABS.has(name));
+  const ownsWidth = (isTwoPane && TWO_PANE_TABS.has(name)) || (wideTabs && WIDE_TABS.has(name));
+  const column = readableColumn(frame.width, isWide && !ownsWidth);
 
   return (
     <View
@@ -523,6 +530,8 @@ function MainShellScreen({
   // iPhone Duo: tabs in a rail down the side strip, pages beside it.
   const { navPlacement, navEdge, navRailInset } = useDeviceLayout();
   const TabNav = navPlacement === 'side' ? SideNavRail : BottomNav;
+  // iPad: where the top-aligned rail's pill ends, so the + sits under it.
+  const [railPillEnd, setRailPillEnd] = useState<number | null>(null);
   const [addSheetVisible, setAddSheetVisible] = useState(false);
   const voiceHandleRef = useRef<VoiceQuickAddHandle | null>(null);
   const [voiceSupported, setVoiceSupported] = useState(false);
@@ -1430,9 +1439,16 @@ function MainShellScreen({
 
       {!shouldHideBottomNav ? (
         <>
-          <TabNav tabs={navTabs} activeTab={activeTab} onTabChange={handleTabChange} />
+          <TabNav
+            tabs={navTabs}
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+            onRailPillEnd={setRailPillEnd}
+          />
           {showAddFab ? (
             <AddFab
+              railTabCount={navTabs.length}
+              railPillEnd={railPillEnd}
               onPress={handleFabPress}
               onLongPress={holdAction === 'none' ? undefined : handleFabLongPress}
               onLongPressEnd={holdIsVoice ? () => voiceHandleRef.current?.stop() : undefined}
