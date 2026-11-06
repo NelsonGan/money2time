@@ -112,6 +112,7 @@ const fil = {
     tab_reimbursements: 'Mga reimbursement',
     tab_receipts: 'Mga Resibo',
     tab_settle_up: 'Sino ang may utang sa iyo',
+    tab_instalments: 'Hulugan',
     tab_calendar: 'Kalendaryo',
     tab_accounts: 'Mga account',
     tab_insights: 'Insights',

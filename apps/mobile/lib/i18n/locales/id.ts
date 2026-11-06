@@ -112,6 +112,7 @@ const id = {
     tab_reimbursements: 'Penggantian',
     tab_receipts: 'Struk',
     tab_settle_up: 'Siapa yang berutang padamu',
+    tab_instalments: 'Cicilan',
     tab_calendar: 'Kalender',
     tab_accounts: 'Akun',
     tab_insights: 'Wawasan',

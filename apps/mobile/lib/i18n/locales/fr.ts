@@ -112,6 +112,7 @@ const fr = {
     tab_reimbursements: 'Remboursements',
     tab_receipts: 'Reçus',
     tab_settle_up: "Qui vous doit de l'argent",
+    tab_instalments: 'Paiements en plusieurs fois',
     tab_calendar: 'Calendrier',
     tab_accounts: 'Comptes',
     tab_insights: 'Analyses',

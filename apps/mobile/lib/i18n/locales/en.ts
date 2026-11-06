@@ -112,6 +112,7 @@ const en = {
     tab_reimbursements: 'Reimbursements',
     tab_receipts: 'Receipts',
     tab_settle_up: 'Who owes you',
+    tab_instalments: 'Instalments',
     tab_calendar: 'Calendar',
     tab_accounts: 'Accounts',
     tab_insights: 'Insights',

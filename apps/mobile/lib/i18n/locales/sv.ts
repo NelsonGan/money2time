@@ -112,6 +112,7 @@ const sv = {
     tab_reimbursements: 'Ersättningar',
     tab_receipts: 'Kvitton',
     tab_settle_up: 'Vem är skyldig dig',
+    tab_instalments: 'Delbetalning',
     tab_calendar: 'Kalender',
     tab_accounts: 'Konton',
     tab_insights: 'Insikter',

@@ -291,6 +291,7 @@ const TAB_PRELOAD_ORDER: MainTab[] = [
   'albums',
   'goals',
   'recurring',
+  'instalments',
   'reimbursements',
   'receipts',
   'settleUp',
@@ -353,6 +354,7 @@ const MemoAssetsTab = React.memo(AssetsTab);
 const MemoGoalsTabScreen = React.memo(GoalsTabScreen);
 const MemoRecurringScreen = React.memo(RecurringScreen);
 const MemoReimbursementsScreen = React.memo(ReimbursementsScreen);
+const MemoInstalmentPlansScreen = React.memo(InstalmentPlansScreen);
 const MemoReceiptsScreen = React.memo(ReceiptsScreen);
 const MemoSettleUpScreen = React.memo(SettleUpScreen);
 
@@ -1198,8 +1200,9 @@ function MainShellScreen({
   );
 
   // The pages that can be added to the bottom bar. Each normally lives behind
-  // a push (Settings, or the root stack for Who owes you), so as a tab it has
-  // no back button and reaches its own settings through the Settings tab.
+  // a push (Settings, or the root stack for Who owes you and Instalments), so
+  // as a tab it has no back button and reaches its own settings through the
+  // Settings tab.
   const openReimbursementSettings = useCallback(() => {
     requestOpenTab('settings');
     requestOpenSettingsScreen('ReimbursementSettings');
@@ -1224,6 +1227,11 @@ function MainShellScreen({
     () => promptSettleUpSplitReceipt(navigation, startScan),
     [navigation, startScan],
   );
+  const openInstalmentPlan = useCallback(
+    (planId: string) => navigation.navigate('InstalmentPlan', { planId }),
+    [navigation],
+  );
+  const addInstalmentPlan = useAddInstalmentPlan(navigation);
 
   const showAddFab = showsTransactionFab(activeTab, navTabs);
 
@@ -1416,6 +1424,19 @@ function MainShellScreen({
             shouldPreload={preloadedTabs.has('recurring')}
           >
             <MemoRecurringScreen onOpenEditor={openRecurringEditor} />
+          </MountedTab>
+        ) : null}
+        {hostsTab('instalments') ? (
+          <MountedTab
+            name="instalments"
+            resetKey={settings.activeLedgerId}
+            active={activeTab === 'instalments'}
+            shouldPreload={preloadedTabs.has('instalments')}
+          >
+            <MemoInstalmentPlansScreen
+              onOpenPlan={openInstalmentPlan}
+              onAddPlan={addInstalmentPlan}
+            />
           </MountedTab>
         ) : null}
         {hostsTab('reimbursements') ? (
@@ -2450,23 +2471,33 @@ function SettingsAccountsRouteScreen({ navigation }: RootStackRouteProps<'Settin
   );
 }
 
+/**
+ * The instalment plans page's add button, in Settings and in the bottom bar:
+ * the add form with Instalments already on, once the free plan has room for
+ * another plan still being paid.
+ */
+function useAddInstalmentPlan(navigation: Pick<RootMainNavigationProp, 'navigate'>) {
+  const { instalmentPlans } = useApp();
+  const { checkLimit } = useProGate();
+  return useCallback(() => {
+    const active = instalmentPlans.filter((plan) => !plan.complete).length;
+    if (!checkLimit('instalments', active)) return;
+    navigation.navigate('AddTransactionDetailed', {
+      startInstalmentPlan: true,
+      keepCurrentTab: true,
+    });
+  }, [checkLimit, instalmentPlans, navigation]);
+}
+
 function SettingsInstalmentsRouteScreen({
   navigation,
 }: RootStackRouteProps<'SettingsInstalments'>) {
-  const { instalmentPlans } = useApp();
-  const { checkLimit } = useProGate();
+  const addPlan = useAddInstalmentPlan(navigation);
   return (
     <InstalmentPlansScreen
       onBack={() => navigation.goBack()}
       onOpenPlan={(planId) => navigation.navigate('InstalmentPlan', { planId })}
-      onAddPlan={() => {
-        const active = instalmentPlans.filter((plan) => !plan.complete).length;
-        if (!checkLimit('instalments', active)) return;
-        navigation.navigate('AddTransactionDetailed', {
-          startInstalmentPlan: true,
-          keepCurrentTab: true,
-        });
-      }}
+      onAddPlan={addPlan}
       useNativeBackGesture
     />
   );

@@ -112,6 +112,7 @@ const ms = {
     tab_reimbursements: 'Bayaran balik',
     tab_receipts: 'Resit',
     tab_settle_up: 'Siapa berhutang dengan anda',
+    tab_instalments: 'Ansuran',
     tab_calendar: 'Kalendar',
     tab_accounts: 'Akaun',
     tab_insights: 'Wawasan',

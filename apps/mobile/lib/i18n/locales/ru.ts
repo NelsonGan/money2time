@@ -112,6 +112,7 @@ const ru = {
     tab_reimbursements: 'Возмещения',
     tab_receipts: 'Чеки',
     tab_settle_up: 'Кто вам должен',
+    tab_instalments: 'Рассрочки',
     tab_calendar: 'Календарь',
     tab_accounts: 'Счета',
     tab_insights: 'Аналитика',

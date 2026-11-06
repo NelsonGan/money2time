@@ -111,6 +111,7 @@ const ko = {
     tab_reimbursements: '환급',
     tab_receipts: '영수증',
     tab_settle_up: '받을 돈',
+    tab_instalments: '할부',
     tab_calendar: '캘린더',
     tab_accounts: '계좌',
     tab_insights: '인사이트',

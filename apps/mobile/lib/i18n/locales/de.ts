@@ -112,6 +112,7 @@ const de = {
     tab_reimbursements: 'Erstattungen',
     tab_receipts: 'Belege',
     tab_settle_up: 'Wer dir Geld schuldet',
+    tab_instalments: 'Ratenzahlungen',
     tab_calendar: 'Kalender',
     tab_accounts: 'Konten',
     tab_insights: 'Einblicke',

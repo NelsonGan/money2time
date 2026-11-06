@@ -18,6 +18,7 @@ export type TabName =
   | 'settings'
   | 'goals'
   | 'recurring'
+  | 'instalments'
   | 'reimbursements'
   | 'receipts'
   | 'settleUp';
@@ -31,6 +32,7 @@ export const ALL_NAV_TABS: readonly TabName[] = [
   'settings',
   'goals',
   'recurring',
+  'instalments',
   'reimbursements',
   'receipts',
   'settleUp',

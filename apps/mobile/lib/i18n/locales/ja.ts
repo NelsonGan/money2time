@@ -112,6 +112,7 @@ const ja = {
     tab_reimbursements: '立て替え',
     tab_receipts: 'レシート',
     tab_settle_up: '未精算の相手',
+    tab_instalments: '分割払い',
     tab_calendar: 'カレンダー',
     tab_accounts: '口座',
     tab_insights: 'インサイト',

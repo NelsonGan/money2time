@@ -146,6 +146,7 @@ describe('editing the bar', () => {
     expect(availableNavTabs(DEFAULT_NAV_TABS)).toEqual([
       'goals',
       'recurring',
+      'instalments',
       'reimbursements',
       'receipts',
       'settleUp',

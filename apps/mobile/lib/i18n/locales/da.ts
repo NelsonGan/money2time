@@ -112,6 +112,7 @@ const da = {
     tab_reimbursements: 'Refusioner',
     tab_receipts: 'Kvitteringer',
     tab_settle_up: 'Hvem skylder dig',
+    tab_instalments: 'Afbetalinger',
     tab_calendar: 'Kalender',
     tab_accounts: 'Konti',
     tab_insights: 'Indsigt',

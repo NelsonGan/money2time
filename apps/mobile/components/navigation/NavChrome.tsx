@@ -116,6 +116,11 @@ export const NAV_TAB_META: Record<TabName, NavTabMeta> = {
     activeIcon: 'settings/recurring',
     labelKey: 'nav.tab_recurring',
   },
+  instalments: {
+    icon: 'settings/instalments',
+    activeIcon: 'settings/instalments',
+    labelKey: 'nav.tab_instalments',
+  },
   reimbursements: {
     icon: 'money-time/wallet-in',
     activeIcon: 'money-time/wallet-in',
