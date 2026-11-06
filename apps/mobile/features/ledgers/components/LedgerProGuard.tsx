@@ -16,6 +16,7 @@ import {
 } from '~/features/cloudSync/services/sharedLedgerStore';
 import { sharedLedgerSync } from '~/features/cloudSync/services/sharedLedgerSync';
 import { useLedgerLock } from '~/features/sharedLedgers/hooks/useSharedLedgers';
+import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { DEFAULT_LEDGER_ID } from '~/lib/db/ledgerScope';
 import { I18n } from '~/lib/i18n';
 
@@ -55,6 +56,8 @@ export function LedgerProGuard({ canSwitch, suppressed, onRenewPro }: LedgerProG
   // A real answer from RevenueCat, not the placeholder a failed read leaves.
   const hasAnswer = isStatusKnown && customerState !== null;
   const insets = useSafeAreaInsets();
+  // A readable column on a wide screen (iPad, the open iPhone Duo).
+  const sheetColumnStyle = useSheetColumnStyle();
   const lockOf = useLedgerLock();
   // The name of the ledger that was closed, while the notice is due.
   const [closedLedgerName, setClosedLedgerName] = useState<string | null>(null);
@@ -149,6 +152,7 @@ export function LedgerProGuard({ canSwitch, suppressed, onRenewPro }: LedgerProG
           <Pressable
             onPress={(event) => event.stopPropagation()}
             className="items-center gap-3 rounded-[30px] border border-border/30 bg-background p-6 shadow-float"
+            style={sheetColumnStyle}
             testID="shared-ledger-removed"
           >
             <Text variant="subheading" className="text-center">
@@ -182,6 +186,7 @@ export function LedgerProGuard({ canSwitch, suppressed, onRenewPro }: LedgerProG
         <Pressable
           onPress={(event) => event.stopPropagation()}
           className="items-center gap-3 rounded-[30px] border border-border/30 bg-background p-6 shadow-float"
+          style={sheetColumnStyle}
           testID="ledger-pro-ended"
         >
           <View className="h-16 w-16 items-center justify-center rounded-full bg-secondary/60">

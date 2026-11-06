@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Platform, useWindowDimensions } from 'react-native';
+import { Dimensions, Platform, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useContentFrame } from '~/components/layout/ContentFrame';
@@ -34,8 +34,17 @@ export function useDeviceLayout() {
       height,
       insets,
     });
+    // iPadOS draws its window buttons over the top-leading corner of an app
+    // running in a window smaller than the screen (Stage Manager, windowed
+    // apps, Split View), where the side rail starts.
+    const screen = Dimensions.get('screen');
+    const isFloatingWindow =
+      isPad &&
+      (Math.round(width) < Math.round(screen.width) ||
+        Math.round(height) < Math.round(screen.height));
     return {
       isTablet,
+      isFloatingWindow,
       screenWidth: width,
       screenHeight: height,
       contentWidth,

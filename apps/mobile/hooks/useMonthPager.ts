@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FlatList, NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
 
 import { usePagerWidthResnap } from '~/hooks/usePagerWidthResnap';
+import { pageIndexFromOffset } from '~/utils/pagerOffset';
 
 interface UseMonthPagerParams {
   listRef: React.RefObject<FlatList<number> | null>;
@@ -78,17 +79,20 @@ export function useMonthPager({
   }, [listRef, pageWidth]);
   usePagerWidthResnap(listRef, pageWidth, activeIndexRef);
 
+  // Programmatic settles (mount, re-snaps after a resize) also end in a
+  // momentum event; one measured mid-resize is not a page turn.
   const commitOffsetToIndex = useCallback(
-    (offsetX: number) => {
-      const rawIndex = Math.round(offsetX / pageWidth);
-      setActiveIndex(rawIndex);
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const { contentOffset, layoutMeasurement } = event.nativeEvent;
+      const index = pageIndexFromOffset(contentOffset.x, layoutMeasurement?.width, pageWidth);
+      if (index !== null) setActiveIndex(index);
     },
     [pageWidth, setActiveIndex],
   );
 
   const handleMomentumEnd = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      commitOffsetToIndex(event.nativeEvent.contentOffset.x);
+      commitOffsetToIndex(event);
     },
     [commitOffsetToIndex],
   );
@@ -97,7 +101,7 @@ export function useMonthPager({
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       const velocityX = event.nativeEvent.velocity?.x ?? 0;
       if (Math.abs(velocityX) <= 0.05) {
-        commitOffsetToIndex(event.nativeEvent.contentOffset.x);
+        commitOffsetToIndex(event);
       }
     },
     [commitOffsetToIndex],

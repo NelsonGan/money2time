@@ -15,6 +15,7 @@ import { Button, FatButton, Text, ThemeModal } from '~/components/ui';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { useIsPro } from '~/context/ProContext';
+import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { paymentAlertCapturesRepository } from '~/lib/repositories/paymentAlertCapturesRepository';
@@ -225,6 +226,8 @@ export function FeatureAnnouncementModal({
   const { settings, paymentAlertPrefs } = useApp();
   const isPro = useIsPro();
   const insets = useSafeAreaInsets();
+  // A readable column on a wide screen (iPad, the open iPhone Duo).
+  const sheetColumnStyle = useSheetColumnStyle();
   const { width: windowWidth } = useWindowDimensions();
   const [pageIndex, setPageIndex] = useState(0);
 
@@ -398,7 +401,10 @@ export function FeatureAnnouncementModal({
         className="flex-1 justify-end bg-black/50 px-4"
         style={{ paddingTop: insets.top + spacing.md, paddingBottom: insets.bottom + spacing.md }}
       >
-        <View className="overflow-hidden rounded-[30px] border border-border/30 bg-background shadow-float">
+        <View
+          className="overflow-hidden rounded-[30px] border border-border/30 bg-background shadow-float"
+          style={sheetColumnStyle}
+        >
           {/* Hero panel — progress dots and the real widget preview sit on the
               tinted panel so there is no white bar at the top. */}
           <View style={[styles.panel, { backgroundColor: withColorAlpha(accentColor, 0.1) }]}>

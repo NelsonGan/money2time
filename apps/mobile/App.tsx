@@ -27,7 +27,11 @@ import { initialWindowMetrics, SafeAreaProvider } from 'react-native-safe-area-c
 
 import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
 import { MascotWarmup } from '~/components/feedback/Mascot';
-import { ShellContentFrame, SideStripSafeArea } from '~/components/layout/AdaptiveFrames';
+import {
+  ShellContentFrame,
+  SideStripSafeArea,
+  WindowControlsSafeArea,
+} from '~/components/layout/AdaptiveFrames';
 import { ContentFrameProvider, useContentFrame } from '~/components/layout/ContentFrame';
 import { AddActionSheet } from '~/components/navigation/AddActionSheet';
 import { AddFab } from '~/components/navigation/AddFab';
@@ -3373,19 +3377,21 @@ export default function App() {
           (MONEY2TIME-9). Let the first real input open the keyboard. */}
       <KeyboardProvider preload={Platform.OS !== 'ios'}>
         <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-          <AppErrorBoundary>
-            <AppProvider>
-              <ProProvider>
-                <CloudSyncProvider>
-                  <ReceiptScanProvider>
-                    <ThemeGate>
-                      <AppContent />
-                    </ThemeGate>
-                  </ReceiptScanProvider>
-                </CloudSyncProvider>
-              </ProProvider>
-            </AppProvider>
-          </AppErrorBoundary>
+          <WindowControlsSafeArea>
+            <AppErrorBoundary>
+              <AppProvider>
+                <ProProvider>
+                  <CloudSyncProvider>
+                    <ReceiptScanProvider>
+                      <ThemeGate>
+                        <AppContent />
+                      </ThemeGate>
+                    </ReceiptScanProvider>
+                  </CloudSyncProvider>
+                </ProProvider>
+              </AppProvider>
+            </AppErrorBoundary>
+          </WindowControlsSafeArea>
           <MascotWarmup />
         </SafeAreaProvider>
       </KeyboardProvider>

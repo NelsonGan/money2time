@@ -181,6 +181,7 @@ import type {
   WeekStartsOn,
 } from '~/types';
 import { cn } from '~/utils';
+import { pageIndexFromOffset } from '~/utils/pagerOffset';
 import { readableColumn } from '~/utils/adaptiveLayout';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { withColorAlpha } from '~/utils/color';
@@ -4451,17 +4452,21 @@ export function InsightsScreen({
     });
   }, [commitPageIndex]);
 
+  // A settle measured mid-resize (an iPad window) is not a page turn.
   const finalizeHorizontalShift = useCallback(
-    (offsetX: number) => {
-      const rawIndex = Math.round(offsetX / pageWidth);
-      commitInsightsPageByIndex(rawIndex);
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const { contentOffset, layoutMeasurement } = event.nativeEvent;
+      const index = pageIndexFromOffset(contentOffset.x, layoutMeasurement?.width, pageWidth);
+      if (index !== null) commitInsightsPageByIndex(index);
     },
     [commitInsightsPageByIndex, pageWidth],
   );
 
   const handleHorizontalScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const rawIndex = Math.round(event.nativeEvent.contentOffset.x / pageWidth);
+      const { contentOffset, layoutMeasurement } = event.nativeEvent;
+      const rawIndex = pageIndexFromOffset(contentOffset.x, layoutMeasurement?.width, pageWidth);
+      if (rawIndex === null) return;
       const clampedIndex = clampInsightsPageIndex(rawIndex);
       if (clampedIndex === headerPreviewPageIndexRef.current) return;
       headerPreviewPageIndexRef.current = clampedIndex;
@@ -4478,14 +4483,14 @@ export function InsightsScreen({
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       const velocityX = event.nativeEvent.velocity?.x ?? 0;
       if (Math.abs(velocityX) > 0.05) return;
-      finalizeHorizontalShift(event.nativeEvent.contentOffset.x);
+      finalizeHorizontalShift(event);
     },
     [finalizeHorizontalShift],
   );
 
   const handleHorizontalMomentumEnd = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      finalizeHorizontalShift(event.nativeEvent.contentOffset.x);
+      finalizeHorizontalShift(event);
     },
     [finalizeHorizontalShift],
   );

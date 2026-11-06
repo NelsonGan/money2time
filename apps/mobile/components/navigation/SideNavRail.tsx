@@ -27,7 +27,7 @@ import { useDeviceLayout } from '~/hooks/useDeviceLayout';
  */
 export function SideNavRail({ tabs, activeTab, onTabChange, onRailPillEnd }: TabNavProps) {
   const { top: safeTop, bottom: safeBottom } = useSafeAreaInsets();
-  const { navEdge, navRailInset, navRailAlign } = useDeviceLayout();
+  const { navEdge, navRailInset, navRailAlign, isFloatingWindow } = useDeviceLayout();
   const handleTabPress = useTabPressHandler(onTabChange);
   const atTop = navRailAlign === 'top';
 
@@ -39,7 +39,7 @@ export function SideNavRail({ tabs, activeTab, onTabChange, onRailPillEnd }: Tab
         [navEdge]: 0,
         width: navRailInset,
         ...(atTop
-          ? { paddingTop: getSideRailTopGap(safeTop) }
+          ? { paddingTop: getSideRailTopGap(safeTop, isFloatingWindow) }
           : { paddingBottom: getSideRailFootGap(safeBottom) + SIDE_RAIL_FAB_SLOT }),
         zIndex: NAV_OVERLAY_Z_INDEX,
       }}

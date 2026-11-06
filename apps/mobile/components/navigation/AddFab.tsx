@@ -193,7 +193,8 @@ const RAIL_FAB_GAP = 8;
 
 export function AddFab({ railTabCount, railPillEnd, ...props }: AddFabProps) {
   const { top: safeTop, bottom: safeBottom } = useSafeAreaInsets();
-  const { isTablet, navPlacement, navEdge, navRailInset, navRailAlign } = useDeviceLayout();
+  const { isTablet, navPlacement, navEdge, navRailInset, navRailAlign, isFloatingWindow } =
+    useDeviceLayout();
   // Side rail: centred in the slot kept at the rail's foot (iPhone Duo) or
   // under its pill (iPad). Otherwise: above the bottom bar, at the content's
   // trailing edge.

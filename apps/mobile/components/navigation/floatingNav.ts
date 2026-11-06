@@ -38,6 +38,8 @@ export const NAV_ITEM_EXTENT = 58;
 const NAV_PILL_END_PADDING = 8;
 /** Gap between the top safe area and a top-aligned rail (iPad). */
 const SIDE_RAIL_TOP_GAP = 12;
+/** Room under iPadOS's window buttons, which sit over a floating window's corner. */
+export const WINDOW_CONTROLS_CLEARANCE = 30;
 
 /** Width of the rail's tab pill, centred in the side strip. */
 export const SIDE_RAIL_PILL_WIDTH = 64;
@@ -49,9 +51,12 @@ export function getSideRailFootGap(safeBottom: number) {
   return Math.max(safeBottom - 12, 12);
 }
 
-/** Distance from the top of the window to a top-aligned rail's pill (iPad). */
-export function getSideRailTopGap(safeTop: number) {
-  return safeTop + SIDE_RAIL_TOP_GAP;
+/**
+ * Distance from the top of the window to a top-aligned rail's pill (iPad),
+ * clear of the window buttons when the app runs in a floating window.
+ */
+export function getSideRailTopGap(safeTop: number, isFloatingWindow = false) {
+  return safeTop + SIDE_RAIL_TOP_GAP + (isFloatingWindow ? WINDOW_CONTROLS_CLEARANCE : 0);
 }
 
 /** Length of the vertical tab pill holding `tabCount` tabs. */

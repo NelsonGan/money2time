@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaInsetsContext, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ContentFrameProvider } from '~/components/layout/ContentFrame';
+import { WINDOW_CONTROLS_CLEARANCE } from '~/components/navigation/floatingNav';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { readableColumn } from '~/utils/adaptiveLayout';
 
@@ -50,4 +51,23 @@ export function SideStripSafeArea({ children }: { children: React.ReactNode }) {
       </ContentFrameProvider>
     </View>
   );
+}
+
+/**
+ * iPadOS draws its window buttons over the top-leading corner of an app in a
+ * floating window (Stage Manager, windowed apps, Split View), and does not
+ * count them in the safe area. With the bottom bar, headers start in that
+ * corner, so the top inset gets room for the buttons; beside the side rail
+ * the rail itself clears them (`getSideRailTopGap`). Always rendered, so the
+ * app is not remounted when the window changes.
+ */
+export function WindowControlsSafeArea({ children }: { children: React.ReactNode }) {
+  const insets = useSafeAreaInsets();
+  const { isFloatingWindow, navPlacement } = useDeviceLayout();
+  const clearControls = isFloatingWindow && navPlacement === 'bottom';
+  const value = useMemo(
+    () => (clearControls ? { ...insets, top: insets.top + WINDOW_CONTROLS_CLEARANCE } : insets),
+    [clearControls, insets],
+  );
+  return <SafeAreaInsetsContext.Provider value={value}>{children}</SafeAreaInsetsContext.Provider>;
 }
