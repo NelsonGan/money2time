@@ -1200,8 +1200,9 @@ function MainShellScreen({
   );
 
   // The pages that can be added to the bottom bar. Each normally lives behind
-  // a push (Settings, or the root stack for Who owes you and Instalments), so as a tab it has
-  // no back button and reaches its own settings through the Settings tab.
+  // a push (Settings, or the root stack for Who owes you and Instalments), so
+  // as a tab it has no back button and reaches its own settings through the
+  // Settings tab.
   const openReimbursementSettings = useCallback(() => {
     requestOpenTab('settings');
     requestOpenSettingsScreen('ReimbursementSettings');
