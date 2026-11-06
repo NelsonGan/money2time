@@ -4,17 +4,18 @@ import { DatabaseSync } from 'node:sqlite';
 import { test, type TestContext } from 'node:test';
 
 import type { Env } from '../src/env.ts';
-import { existingMedia, putMedia, userSpace } from '../src/media.ts';
+import { deleteAllMedia, existingMedia, getMedia, putMedia, userSpace } from '../src/media.ts';
 
 // The error R2 threw in production on 2026-11-06 (PostHog 01a1ae5f, 01a1ae9d).
 const R2_INTERNAL = 'We encountered an internal error. Please try again. (10001)';
 
-type Op = 'head' | 'put';
+type Op = 'head' | 'put' | 'get' | 'list' | 'delete';
 
 /** An in-memory R2 bucket whose next `fail[op]` calls of `op` throw `error`. */
 function fakeBucket(fail: Partial<Record<Op, number>>, error = R2_INTERNAL) {
   const objects = new Map<string, Uint8Array>();
-  const calls: Record<Op, number> = { head: 0, put: 0 };
+  const calls: Record<Op, number> = { head: 0, put: 0, get: 0, list: 0, delete: 0 };
+  const putBodies: string[] = [];
   const failing = (op: Op) => {
     calls[op] += 1;
     if ((fail[op] ?? 0) > 0) {
@@ -28,6 +29,7 @@ function fakeBucket(fail: Partial<Record<Op, number>>, error = R2_INTERNAL) {
       return objects.has(key) ? { key } : null;
     },
     async put(key: string, value: ReadableStream | ArrayBuffer | Uint8Array) {
+      putBodies.push(value instanceof ReadableStream ? 'stream' : 'buffer');
       failing('put');
       const bytes =
         value instanceof ReadableStream
@@ -36,8 +38,22 @@ function fakeBucket(fail: Partial<Record<Op, number>>, error = R2_INTERNAL) {
       objects.set(key, bytes);
       return { key };
     },
+    async get(key: string) {
+      failing('get');
+      const bytes = objects.get(key);
+      return bytes ? { body: bytes, httpMetadata: { contentType: 'image/jpeg' } } : null;
+    },
+    async list({ prefix }: { prefix: string }) {
+      failing('list');
+      const keys = [...objects.keys()].filter((k) => k.startsWith(prefix));
+      return { objects: keys.map((key) => ({ key })), truncated: false };
+    },
+    async delete(keys: string[]) {
+      failing('delete');
+      for (const key of keys) objects.delete(key);
+    },
   };
-  return { bucket, objects, calls };
+  return { bucket, objects, calls, putBodies };
 }
 
 /** Real SQL against the D1 schema, with only the Cloudflare binding adapted. */
@@ -128,8 +144,8 @@ test('an error that is not R2 asking for a retry is not retried', async (t) => {
   assert.equal(r2.calls.head, 1);
 });
 
-test('a body shorter than its Content-Length is refused before R2 is written', async (t) => {
-  const { env, r2 } = fixture(t, {});
+test('a body shorter than its Content-Length is refused and left uncounted', async (t) => {
+  const { env, r2, count } = fixture(t, {});
   const res = await putMedia(
     env,
     space,
@@ -142,4 +158,64 @@ test('a body shorter than its Content-Length is refused before R2 is written', a
   );
   assert.equal(res.status, 400);
   assert.equal(r2.calls.put, 0);
+  assert.equal(count(), 0);
+});
+
+test('an upload the phone abandons midway is a 400, not a server error', async (t) => {
+  const { env, r2, count } = fixture(t, {});
+  const body = new ReadableStream({
+    start(controller) {
+      controller.enqueue(image.slice(0, 4));
+      controller.error(new Error('client disconnected'));
+    },
+  });
+  const res = await putMedia(
+    env,
+    space,
+    'receipts/a.jpg',
+    new Request('https://sync.test/v1/media/receipts/a.jpg', {
+      method: 'PUT',
+      body,
+      duplex: 'half',
+      headers: { 'content-length': String(image.byteLength) },
+    } as RequestInit),
+  );
+  assert.equal(res.status, 400);
+  assert.equal(r2.calls.put, 0);
+  assert.equal(count(), 0);
+});
+
+test('R2 being briefly unavailable (10043) is retried too', async (t) => {
+  const { env, r2 } = fixture(t, { put: 1 }, 'Service is temporarily unavailable. (10043)');
+  const res = await putMedia(env, space, 'receipts/a.jpg', upload());
+  assert.equal(res.status, 200);
+  assert.equal(r2.calls.put, 2);
+});
+
+test('an image over 4 MB still streams to R2 once, without a retry', async (t) => {
+  const { env, r2, count } = fixture(t, { put: 1 });
+  const big = new Uint8Array(4 * 1024 * 1024 + 1);
+  await assert.rejects(putMedia(env, space, 'receipts/big.jpg', upload(big)), /10001/);
+  assert.deepEqual(r2.putBodies, ['stream']);
+  assert.equal(count(), 0);
+  const res = await putMedia(env, space, 'receipts/big.jpg', upload(big));
+  assert.equal(res.status, 200);
+  assert.equal(r2.objects.get('u/u1/receipts/big.jpg')?.byteLength, big.byteLength);
+});
+
+test('reading an image survives R2 failing once', async (t) => {
+  const { env } = fixture(t, { get: 1 });
+  await putMedia(env, space, 'receipts/a.jpg', upload());
+  const res = await getMedia(env, space, 'receipts/a.jpg');
+  assert.equal(res.status, 200);
+  assert.deepEqual(new Uint8Array(await res.arrayBuffer()), image);
+});
+
+test('deleting every image survives R2 failing the list and the delete once', async (t) => {
+  const { env, r2 } = fixture(t, { list: 1, delete: 1 });
+  await putMedia(env, space, 'receipts/a.jpg', upload());
+  await deleteAllMedia(env, space);
+  assert.equal(r2.objects.size, 0);
+  assert.equal(r2.calls.list, 2);
+  assert.equal(r2.calls.delete, 2);
 });

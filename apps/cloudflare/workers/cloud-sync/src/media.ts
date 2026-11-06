@@ -60,16 +60,24 @@ export function contentTypeFor(path: string): string | null {
  * R2 sometimes fails a call with "We encountered an internal error. Please try
  * again. (10001)" and succeeds when asked again. On 2026-11-06 a burst of these
  * failed image uploads and checks for several phones within seconds, each one
- * a 500 the app reported as a sync error. Only that code is retried: anything
- * else (a missing object, a bad request) would fail the same way again.
+ * a 500 the app reported as a sync error. R2 ends every error message with its
+ * code; these are the ones its docs say to retry (internal error, service
+ * unavailable, too many requests). Anything else (a missing object, a bad
+ * request) would fail the same way again.
  */
+const RETRYABLE_R2_CODES = new Set(['10001', '10043', '10058']);
 const R2_RETRY_DELAYS_MS = [100, 400];
 
 function isRetryableR2Error(error: unknown): boolean {
-  return error instanceof Error && error.message.includes('(10001)');
+  const code = error instanceof Error ? /\((\d+)\)\s*$/.exec(error.message)?.[1] : undefined;
+  return code !== undefined && RETRYABLE_R2_CODES.has(code);
 }
 
-/** Runs one R2 call, again after a short wait while R2 says to try again. */
+/**
+ * Runs one R2 call, again after a short wait while R2 says to try again. The
+ * wait is jittered so the parallel calls of one request (and of other phones
+ * hit by the same blip) do not all come back at the same moment.
+ */
 export async function withR2Retry<T>(call: () => Promise<T>): Promise<T> {
   for (let attempt = 0; ; attempt++) {
     try {
@@ -77,10 +85,18 @@ export async function withR2Retry<T>(call: () => Promise<T>): Promise<T> {
     } catch (error) {
       const delay = R2_RETRY_DELAYS_MS[attempt];
       if (delay === undefined || !isRetryableR2Error(error)) throw error;
-      await new Promise((resolve) => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay * (0.5 + Math.random())));
     }
   }
 }
+
+/**
+ * Images up to this size are read whole before the write, so the write can be
+ * sent again when R2 asks; the app's compressed photos are well under it.
+ * Larger ones stream once, as before, so a few big uploads cannot fill the
+ * Worker's memory.
+ */
+const RETRYABLE_UPLOAD_BYTES = 4 * 1024 * 1024;
 
 export function mediaKey(space: MediaSpace, path: string): string {
   return `${space.prefix}${path}`;
@@ -103,23 +119,32 @@ export async function putMedia(
 ): Promise<Response> {
   const contentType = contentTypeFor(path);
   if (!isValidAssetPath(path) || !contentType) return json({ error: 'bad_path' }, 400);
-  // A declared length is required, so an oversized upload is refused before
-  // it is read. The body is then read whole (at most MAX_BYTES), because a
-  // stream R2 has started reading cannot be sent again when it asks for a retry.
+  // A declared length is required, so an oversized upload or a full quota is
+  // refused before the body is read.
   const length = Number(request.headers.get('content-length') ?? '');
   if (!Number.isFinite(length) || length <= 0 || !request.body) {
     return json({ error: 'length_required' }, 411);
   }
   if (length > MAX_BYTES) return json({ error: 'too_large' }, 413);
-  const body = await request.arrayBuffer();
-  if (body.byteLength !== length) return json({ error: 'length_mismatch' }, 400);
   const key = mediaKey(space, path);
   const counted = await countNewImage(env, space, key);
   if (counted === 'full') return json({ error: 'quota' }, 507);
+  const uncount = () => (counted === 'counted' ? adjustCount(env, space, -1) : undefined);
+  let body: ArrayBuffer | ReadableStream = request.body;
+  if (length <= RETRYABLE_UPLOAD_BYTES) {
+    // A phone that drops mid-upload fails this read: its client error, not ours.
+    const read = await request.arrayBuffer().catch(() => null);
+    if (!read || read.byteLength !== length) {
+      await uncount();
+      return json({ error: 'incomplete_body' }, 400);
+    }
+    body = read;
+  }
+  const write = () => env.MEDIA.put(key, body, { httpMetadata: { contentType } });
   try {
-    await withR2Retry(() => env.MEDIA.put(key, body, { httpMetadata: { contentType } }));
+    await (body instanceof ArrayBuffer ? withR2Retry(write) : write());
   } catch (error) {
-    if (counted === 'counted') await adjustCount(env, space, -1);
+    await uncount();
     throw error;
   }
   return json({ ok: true });
