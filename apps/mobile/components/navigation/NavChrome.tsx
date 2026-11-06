@@ -9,7 +9,6 @@ import {
   SettingsIcon,
   WalletIcon,
 } from '~/components/icons/NavIcons';
-import { NAV_ITEM_EXTENT } from '~/components/navigation/floatingNav';
 import { getLiquidGlassNavView } from '~/components/navigation/liquidGlass';
 import { navTabIcon, type TabName } from '~/components/navigation/navTabs';
 import { ClayIcon, type ClayIconName } from '~/components/ui/ClayIcon';
@@ -142,6 +141,8 @@ export function getNavTabMeta(tab: TabName, tabs: readonly TabName[]): NavTabMet
     : meta;
 }
 
+/** One item's height, in a row or a column. */
+const NAV_ITEM_EXTENT = 58;
 const ICON_SIZE = 26;
 const ICON_SIZE_ACTIVE = 30;
 const ICON_OPACITY_RESTING = 0.72;

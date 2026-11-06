@@ -72,9 +72,9 @@ interface AccountCardStackProps {
   onOpenAccount: (accountId: string) => void;
   onEditAccount: (accountId: string) => void;
   onPayAccount: (accountId: string) => void;
-  /** iPad: groups laid out in two balanced columns. */
+  /** iPad and the open Duo: groups laid out in two balanced columns. */
   columns?: 1 | 2;
-  /** Tablet column width for the page (`useWideTabColumns`). */
+  /** Column width for a wide page (`useWideTabColumns`). */
   contentMaxWidth?: number | null;
   onRenderBalanceNode: (
     amount: number,
@@ -1247,10 +1247,11 @@ export function AccountCardStack({
     );
   };
 
-  // iPad: each group goes into the shorter column, in order, so the two
-  // columns end near the same height. Screen readers read the left column
-  // first, then the right.
+  // Two columns (iPad, the open Duo): each group goes into the shorter
+  // column, in order, so the two columns end near the same height. Screen
+  // readers read the left column first, then the right.
   const sectionColumns = useMemo(() => {
+    if (columns !== 2) return null;
     const result: GroupSection[][] = [[], []];
     const heights = [0, 0];
     for (const section of sections) {
@@ -1259,7 +1260,7 @@ export function AccountCardStack({
       heights[target] += SECTION_HEADER_WEIGHT + section.accounts.length;
     }
     return result;
-  }, [sections]);
+  }, [columns, sections]);
 
   return (
     <ScrollView
@@ -1277,7 +1278,7 @@ export function AccountCardStack({
       onScroll={reportBottomNavScroll}
       scrollEventThrottle={32}
     >
-      {columns === 2 ? (
+      {sectionColumns ? (
         <View style={styles.columns}>
           {sectionColumns.map((column, columnIndex) => (
             <View key={columnIndex} style={styles.column}>

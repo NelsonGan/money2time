@@ -405,7 +405,7 @@ export const BudgetPagerView = forwardRef<MonthPagerHandle, BudgetPagerViewProps
     const themeColors = useThemeColors();
     const listNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
     const { width: pageWidth } = useContentFrame();
-    // iPad: the budget and its category rows side by side.
+    // iPad and the open Duo: the budget and its category rows side by side.
     const wideColumns = useWideTabColumns();
     const isWide = wideColumns.columns > 1;
 
@@ -911,8 +911,9 @@ export const BudgetPagerView = forwardRef<MonthPagerHandle, BudgetPagerViewProps
               ]}
               showsVerticalScrollIndicator={false}
             >
-              {/* iPad: the budget and its rings on the left, where it went on
-                  the right. One column elsewhere. */}
+              {/* Two columns (iPad, the open Duo): the budget and its rings
+                  on the left, where it went on the right. One column
+                  elsewhere. */}
               {isWide ? (
                 <View style={styles.wideColumns}>
                   <View style={styles.wideColumn}>{leftBlock}</View>

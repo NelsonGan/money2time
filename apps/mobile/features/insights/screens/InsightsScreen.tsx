@@ -4237,15 +4237,16 @@ export function InsightsScreen({
   // and on the open Duo the frame centred on the fold, a column each side.
   const isWidePageView = isReviewView || isBudgetView;
   const ownsWidePage = wideTabs && isWidePageView;
-  const widePageMaxWidth = ownsWidePage ? wideTabColumns(width, wideTabs).maxWidth : undefined;
   const foldPage =
     !wideTabs && panes && !isLoading && isWidePageView ? foldSpan(width, panes.left) : null;
-  const readable = readableColumn(width, panes !== null && splitPanes === null && !ownsWidePage);
-  const column = foldPage ?? {
-    width: readable.width,
-    left: readable.margin,
-    right: readable.margin,
-  };
+  // The header spans the same width as the page under it.
+  const widePageMaxWidth = ownsWidePage
+    ? wideTabColumns(width, wideTabs).maxWidth
+    : foldPage
+      ? foldPage.width
+      : undefined;
+  const column =
+    foldPage ?? readableColumn(width, panes !== null && splitPanes === null && !ownsWidePage);
   // Split (iPad, the open Duo): the line charts grow into the pane's height
   // instead of keeping their phone height over an empty half pane.
   const lineChartHeight = useCallback(

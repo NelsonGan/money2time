@@ -444,8 +444,7 @@ function MountedTab({
   const frame = useContentFrame();
   const fold = !wideTabs && panes && WIDE_TABS.has(name) ? foldSpan(frame.width, panes.left) : null;
   const ownsWidth = (isTwoPane && TWO_PANE_TABS.has(name)) || (wideTabs && WIDE_TABS.has(name));
-  const column = readableColumn(frame.width, isWide && !ownsWidth);
-  const slot = fold ?? { width: column.width, left: column.margin, right: column.margin };
+  const slot = fold ?? readableColumn(frame.width, isWide && !ownsWidth);
 
   return (
     <View

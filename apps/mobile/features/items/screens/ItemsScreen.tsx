@@ -312,7 +312,8 @@ export function ItemsScreen({
   const listScrollRef = useAnimatedRef<Animated.ScrollView>();
   const { contentWidth } = useDeviceLayout();
   const { width: frameWidth } = useContentFrame();
-  // iPad: two columns of cards under the wide Accounts tab header.
+  // iPad and the open Duo: two columns of cards under the wide Accounts tab
+  // header.
   const wideColumns = useWideTabColumns();
   const pageWidth =
     wideColumns.maxWidth != null ? Math.min(frameWidth, wideColumns.maxWidth) : contentWidth;

@@ -120,7 +120,7 @@ export function GoalsScreen({ hideBalances, onOpenGoal, onOpenGoalEditor }: Goal
     [active],
   );
 
-  // iPad: goals in two columns, under the wide tab header.
+  // iPad and the open Duo: goals in two columns, under the wide tab header.
   const wideColumns = useWideTabColumns();
 
   const handleAdd = () => {

@@ -32,8 +32,6 @@ export function getFloatingNavReservedInset(
  * + right under it.
  */
 
-/** One tab's extent along the bar, in a row or a column. */
-export const NAV_ITEM_EXTENT = 58;
 /** Gap between the top safe area and a top-aligned rail (iPad). */
 const SIDE_RAIL_TOP_GAP = 12;
 /** Room under iPadOS's window buttons, which sit over a floating window's corner. */

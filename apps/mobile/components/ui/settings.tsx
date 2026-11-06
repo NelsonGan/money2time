@@ -44,8 +44,9 @@ interface SettingsPageLayoutProps extends ViewProps {
   actionBar?: React.ReactNode;
   edges?: Edge[];
   /**
-   * Column width on a tablet, for a page with a wide layout of its own
-   * (`useWideTabColumns`). Defaults to the readable column.
+   * Column width for a page with a wide layout of its own
+   * (`useWideTabColumns`) on a tablet or the open Duo. Defaults to the
+   * readable column.
    */
   contentMaxWidth?: number | null;
 }

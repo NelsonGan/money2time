@@ -64,8 +64,8 @@ export function AlbumsScreen({
 
   const [tab, setTab] = useState<AlbumsTab>('albums');
   const pagerRef = useRef<ScrollViewInstance | null>(null);
-  // iPad: album cards in two columns, and the page (and its map) as wide as
-  // the tab header above it.
+  // iPad and the open Duo: album cards in two columns, and the page (and its
+  // map) as wide as the tab header above it.
   const wideColumns = useWideTabColumns();
   // The first frame's estimate, until the page measures itself.
   const [pageWidth, setPageWidth] = useState(Math.min(windowWidth, wideColumns.maxWidth ?? 640));
@@ -236,8 +236,8 @@ export function AlbumsScreen({
                         activeItemShadowOpacity={0.12}
                         customHandle
                         dragActivationDelay={0}
-                        flexDirection={wideColumns.columns > 1 ? 'row' : 'column'}
-                        flexWrap={wideColumns.columns > 1 ? 'wrap' : 'nowrap'}
+                        flexDirection={isTwoColumn ? 'row' : 'column'}
+                        flexWrap={isTwoColumn ? 'wrap' : 'nowrap'}
                         gap={GRID_GAP}
                         inactiveItemOpacity={1}
                         onDragEnd={({ fromIndex, order, toIndex }) => {

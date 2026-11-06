@@ -201,15 +201,15 @@ describe('resolveAdaptiveLayout on iPad', () => {
 
 describe('readableColumn', () => {
   it('centres a 600 pt column on the open Duo', () => {
-    expect(readableColumn(867, true)).toEqual({ width: 600, margin: 133.5 });
+    expect(readableColumn(867, true)).toEqual({ width: 600, left: 133.5, right: 133.5 });
   });
 
   it('never widens a narrower area', () => {
-    expect(readableColumn(520, true)).toEqual({ width: 520, margin: 0 });
+    expect(readableColumn(520, true)).toEqual({ width: 520, left: 0, right: 0 });
   });
 
   it('uses the whole width with one pane', () => {
-    expect(readableColumn(382, false)).toEqual({ width: 382, margin: 0 });
+    expect(readableColumn(382, false)).toEqual({ width: 382, left: 0, right: 0 });
   });
 });
 

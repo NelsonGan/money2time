@@ -285,8 +285,9 @@ export function SettingsScreen({
           entering={FadeIn.delay(200).duration(400)}
           style={[styles.contentBody, isWide && styles.wideBody]}
         >
-          {/* iPad: the profile and its cards in a column of their own, the
-              tile sections beside it. Stacked everywhere else. */}
+          {/* Two columns (iPad, the open Duo): the profile and its cards in a
+              column of their own, the tile sections beside it. Stacked
+              everywhere else. */}
           <View style={isWide ? (onFold ? styles.foldAside : styles.wideAside) : undefined}>
             <View className="mt-3 rounded-[28px] border border-border/40 bg-card p-5 shadow-soft">
               <View className="flex-row items-center gap-4">

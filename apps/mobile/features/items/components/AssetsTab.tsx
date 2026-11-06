@@ -102,7 +102,7 @@ export function AssetsTab({
   }, [handleTabChange, resetToAccountsToken]);
 
   const topInset = insets.top;
-  // iPad: the header spans the same wide column as the page under it.
+  // The header spans the same wide column as the page under it.
   const { maxWidth: wideMaxWidth } = useWideTabColumns();
 
   // Shared by the Accounts and Goals sub-tabs, which share the visibility state.

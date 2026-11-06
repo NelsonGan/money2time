@@ -153,16 +153,23 @@ export function resolveAdaptiveLayout({
  */
 export const READABLE_COLUMN_MAX_WIDTH = 600;
 
+/** A frame within `available`: its width and the margins on each side. */
+export interface ColumnFrame {
+  width: number;
+  left: number;
+  right: number;
+}
+
 /**
  * In a wide window (the open iPhone Duo, iPad), a page that has no wide
  * layout of its own is centred in a readable column, the way iOS centres
  * sheets there, instead of stretching a phone layout across the screen.
- * Returns the column's width and the margin on each side of it within
- * `available`.
+ * Returns the column within `available`.
  */
-export function readableColumn(available: number, isWide: boolean) {
+export function readableColumn(available: number, isWide: boolean): ColumnFrame {
   const width = isWide ? Math.min(available, READABLE_COLUMN_MAX_WIDTH) : available;
-  return { width, margin: (available - width) / 2 };
+  const margin = (available - width) / 2;
+  return { width, left: margin, right: margin };
 }
 
 /**
@@ -209,10 +216,7 @@ export function wideTabColumns(
  * `foldAt` is where the fold falls within `available`. Returns the frame's
  * width and the margins left on each side of it.
  */
-export function foldSpan(
-  available: number,
-  foldAt: number,
-): { width: number; left: number; right: number } {
+export function foldSpan(available: number, foldAt: number): ColumnFrame {
   const half = Math.max(0, Math.min(foldAt, available - foldAt));
   return { width: half * 2, left: foldAt - half, right: available - foldAt - half };
 }

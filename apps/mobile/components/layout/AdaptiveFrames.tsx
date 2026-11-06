@@ -57,8 +57,7 @@ export function SideStripSafeArea({
   // The Duo folds down the window's centre.
   const fold =
     ownsWidth && isTwoPane && !wideTabs ? foldSpan(available, screenWidth / 2 - left) : null;
-  const column = readableColumn(available, isWide && !(ownsWidth && wideTabs));
-  const frame = fold ?? { width: column.width, left: column.margin, right: column.margin };
+  const frame = fold ?? readableColumn(available, isWide && !(ownsWidth && wideTabs));
   return (
     <View
       className="flex-1 bg-background"

@@ -111,7 +111,7 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
     ref,
   ) {
     const { settings, categories, periodBudgets, getTrueHourlyRateForDate } = useApp();
-    // iPad: two columns of cards across the wide page.
+    // iPad and the open Duo: two columns of cards across the wide page.
     const wideColumns = useWideTabColumns();
     const isWide = wideColumns.columns > 1;
     const monthCycle = monthCycleOf(settings);
@@ -304,7 +304,7 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
       );
     }
 
-    const periodCards = summary.isEmpty ? null : (
+    const periodCards = (
       <>
         <SpentCard summary={summary} />
         <FlowCard summary={summary} />
@@ -312,7 +312,7 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
         <PaceCard summary={summary} />
       </>
     );
-    const detailCards = summary.isEmpty ? null : (
+    const detailCards = (
       <>
         <CategoriesCard
           summary={summary}
@@ -357,8 +357,9 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
                 entering={FadeIn.duration(220)}
                 style={isWide ? styles.wideColumns : styles.cardStack}
               >
-                {/* iPad: the period's numbers on the left, where the money
-                    went and how it felt on the right. One stack elsewhere. */}
+                {/* Two columns (iPad, the open Duo): the period's numbers on
+                    the left, where the money went and how it felt on the
+                    right. One stack elsewhere. */}
                 {isWide ? (
                   <>
                     <View style={styles.wideColumn}>{periodCards}</View>

@@ -51,7 +51,7 @@ export function MonthControlsHeader({
   disableNavArrows?: boolean;
   hideTitleRow?: boolean;
   showAccent?: boolean;
-  /** Column width on a tablet, for a page with a wide layout of its own. */
+  /** Column width for a page with a wide layout of its own (tablet, open Duo). */
   contentMaxWidth?: number | null;
 }) {
   const themeColors = useThemeColors();

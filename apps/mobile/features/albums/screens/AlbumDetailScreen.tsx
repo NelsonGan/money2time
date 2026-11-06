@@ -93,7 +93,8 @@ export function AlbumDetailScreen({
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
   const { width: windowWidth, height: windowHeight } = useContentFrame();
-  // Wide iPad: two panes in place of the Breakdown / Transactions tabs.
+  // iPad and the open Duo: two panes in place of the Breakdown / Transactions
+  // tabs.
   const wideColumns = useWideTabColumns();
   const isSplit = wideColumns.columns > 1;
   const splitPaneWidth =
@@ -433,8 +434,8 @@ export function AlbumDetailScreen({
     return <View className="flex-1 bg-background" />;
   }
 
-  // The cover photo, title and dates. `rounded` for the card it sits in on a
-  // wide iPad.
+  // The cover photo, title and dates. `rounded` for the card it sits in with
+  // two panes.
   const coverHero = (height: number, rounded = false) => (
     <View
       style={[{ height }, rounded && { borderRadius: 20, overflow: 'hidden' }]}
@@ -662,7 +663,7 @@ export function AlbumDetailScreen({
         </View>
 
         {isSplit ? (
-          // Wide iPad: the cover and breakdown on the left, the transactions
+          // Two panes: the cover and breakdown on the left, the transactions
           // on the right, both always showing instead of behind tabs.
           <View style={styles.splitRow}>
             <View style={styles.splitPane}>
@@ -767,7 +768,7 @@ export function AlbumDetailScreen({
   );
 }
 
-/** Wide iPad layout: page padding, the gap between panes, the cover's height. */
+/** Two-pane layout: page padding, the gap between panes, the cover's height. */
 const SPLIT_PADDING = 12;
 const SPLIT_GAP = 20;
 const SPLIT_COVER_HEIGHT = 240;
