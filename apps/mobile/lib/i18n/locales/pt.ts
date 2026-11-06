@@ -112,6 +112,7 @@ const pt = {
     tab_reimbursements: 'Reembolsos',
     tab_receipts: 'Recibos',
     tab_settle_up: 'Quem te deve',
+    tab_instalments: 'Parcelamentos',
     tab_calendar: 'Calendário',
     tab_accounts: 'Contas',
     tab_insights: 'Análises',

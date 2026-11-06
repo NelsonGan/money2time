@@ -112,6 +112,7 @@ const vi = {
     tab_reimbursements: 'Hoàn tiền',
     tab_receipts: 'Biên lai',
     tab_settle_up: 'Ai nợ bạn',
+    tab_instalments: 'Trả góp',
     tab_calendar: 'Lịch',
     tab_accounts: 'Tài khoản',
     tab_insights: 'Thống kê',

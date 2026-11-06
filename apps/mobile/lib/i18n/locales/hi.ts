@@ -112,6 +112,7 @@ const hi = {
     tab_reimbursements: 'प्रतिपूर्ति',
     tab_receipts: 'रसीदें',
     tab_settle_up: 'किस पर आपका बकाया है',
+    tab_instalments: 'किस्तें',
     tab_calendar: 'कैलेंडर',
     tab_accounts: 'खाते',
     tab_insights: 'जानकारी',

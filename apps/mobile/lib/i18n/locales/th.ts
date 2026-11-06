@@ -111,6 +111,7 @@ const th = {
     tab_reimbursements: 'การเบิกคืน',
     tab_receipts: 'ใบเสร็จ',
     tab_settle_up: 'ใครติดเงินคุณ',
+    tab_instalments: 'ผ่อนชำระ',
     tab_calendar: 'ปฏิทิน',
     tab_accounts: 'บัญชี',
     tab_insights: 'ข้อมูลเชิงลึก',

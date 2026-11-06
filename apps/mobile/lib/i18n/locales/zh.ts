@@ -110,6 +110,7 @@ const zh = {
     tab_reimbursements: '报销',
     tab_receipts: '收据',
     tab_settle_up: '谁欠你钱',
+    tab_instalments: '分期付款',
     tab_calendar: '日历',
     tab_accounts: '账户',
     tab_insights: '洞察',

@@ -112,6 +112,7 @@ const uk = {
     tab_reimbursements: 'Відшкодування',
     tab_receipts: 'Чеки',
     tab_settle_up: 'Хто вам винен',
+    tab_instalments: 'Розстрочки',
     tab_calendar: 'Календар',
     tab_accounts: 'Рахунки',
     tab_insights: 'Аналітика',
