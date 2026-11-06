@@ -3,6 +3,7 @@ import { Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { spacing } from '~/constants/designSystem';
+import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 
 import { ThemeModal } from './theme-modal';
 
@@ -16,6 +17,8 @@ interface PromptSheetProps {
 /** A one-time offer: a rounded card at the bottom over a dimmed screen. */
 export function PromptSheet({ visible, onDismiss, children }: PromptSheetProps) {
   const insets = useSafeAreaInsets();
+  // A readable column on a wide screen (iPad, the open iPhone Duo).
+  const sheetColumnStyle = useSheetColumnStyle();
   return (
     <ThemeModal
       visible={visible}
@@ -35,6 +38,7 @@ export function PromptSheet({ visible, onDismiss, children }: PromptSheetProps) 
           accessible={false}
           onPress={(event) => event.stopPropagation()}
           className="overflow-hidden rounded-[30px] border border-border/30 bg-background shadow-float"
+          style={sheetColumnStyle}
         >
           {children}
         </Pressable>

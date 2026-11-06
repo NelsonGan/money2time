@@ -1,15 +1,18 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaInsetsContext, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ColumnGutterProvider } from '~/components/layout/ColumnGutter';
 import { ContentFrameProvider } from '~/components/layout/ContentFrame';
+import { WINDOW_CONTROLS_CLEARANCE } from '~/components/navigation/floatingNav';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
-import { readableColumn } from '~/utils/adaptiveLayout';
+import { foldSpan, readableColumn } from '~/utils/adaptiveLayout';
 
 /*
- * The areas screens are laid out in on iPhone Duo. Each declares its size
- * through ContentFrameProvider, so widths read with `useContentFrame()` stay
- * right. On phones, tablets and Android the frame is the window.
+ * The areas screens are laid out in beside the side rail (iPhone Duo, iPad).
+ * Each declares its size through ContentFrameProvider, so widths read with
+ * `useContentFrame()` stay right. On phones and Android the frame is the
+ * window.
  */
 
 /**
@@ -29,24 +32,63 @@ export function ShellContentFrame({ children }: { children: React.ReactNode }) {
  * A full-screen route, kept out of the strip the Duo reserves on one side
  * for its clock, camera and bars. The screens were laid out for a phone,
  * where that strip does not exist, so without this their headers and buttons
- * run under it. On the open display the route is also centred in a readable
- * column. Folding only changes padding, so the screen keeps its state. A
- * pass-through everywhere but the Duo.
+ * run under it. In a wide window (the open Duo, iPad) the route is also
+ * centred in a readable column. Folding or resizing only changes padding, so
+ * the screen keeps its state. A pass-through wherever the bottom bar shows.
  */
-export function SideStripSafeArea({ children }: { children: React.ReactNode }) {
-  const { navPlacement, isTwoPane, screenWidth, screenHeight } = useDeviceLayout();
+export function SideStripSafeArea({
+  children,
+  ownsWidth = false,
+}: {
+  children: React.ReactNode;
+  /**
+   * The route has a wide layout of its own (`useWideTabColumns`), so on iPad
+   * it gets the whole window instead of the readable column, and on the open
+   * Duo the frame centred on the fold (`foldSpan`).
+   */
+  ownsWidth?: boolean;
+}) {
+  const { navPlacement, isWide, isTwoPane, wideTabs, screenWidth, screenHeight } =
+    useDeviceLayout();
   const { left, right } = useSafeAreaInsets();
   if (navPlacement !== 'side') return <>{children}</>;
 
-  const column = readableColumn(screenWidth - left - right, isTwoPane);
+  const available = screenWidth - left - right;
+  // The Duo folds down the window's centre.
+  const fold =
+    ownsWidth && isTwoPane && !wideTabs ? foldSpan(available, screenWidth / 2 - left) : null;
+  const frame = fold ?? readableColumn(available, isWide && !(ownsWidth && wideTabs));
   return (
     <View
       className="flex-1 bg-background"
-      style={{ paddingLeft: left + column.margin, paddingRight: right + column.margin }}
+      style={{ paddingLeft: left + frame.left, paddingRight: right + frame.right }}
     >
-      <ContentFrameProvider width={column.width} height={screenHeight}>
-        {children}
-      </ContentFrameProvider>
+      {/* Floating buttons go to the window's corner, or on the Duo the
+          corner beside its side strip. */}
+      <ColumnGutterProvider gutter={wideTabs ? frame.right + right : isWide ? frame.right : 0}>
+        <ContentFrameProvider width={frame.width} height={screenHeight} onFold={fold !== null}>
+          {children}
+        </ContentFrameProvider>
+      </ColumnGutterProvider>
     </View>
   );
+}
+
+/**
+ * iPadOS draws its window buttons over the top-leading corner of an app in a
+ * floating window (Stage Manager, windowed apps, Split View), and does not
+ * count them in the safe area. With the bottom bar, headers start in that
+ * corner, so the top inset gets room for the buttons; beside the side rail
+ * the rail itself clears them (`getSideRailTopGap`). Always rendered, so the
+ * app is not remounted when the window changes.
+ */
+export function WindowControlsSafeArea({ children }: { children: React.ReactNode }) {
+  const insets = useSafeAreaInsets();
+  const { isFloatingWindow, navPlacement } = useDeviceLayout();
+  const clearControls = isFloatingWindow && navPlacement === 'bottom';
+  const value = useMemo(
+    () => (clearControls ? { ...insets, top: insets.top + WINDOW_CONTROLS_CLEARANCE } : insets),
+    [clearControls, insets],
+  );
+  return <SafeAreaInsetsContext.Provider value={value}>{children}</SafeAreaInsetsContext.Provider>;
 }

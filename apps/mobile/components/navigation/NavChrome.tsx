@@ -33,6 +33,11 @@ export interface TabNavProps {
   tabs: readonly TabName[];
   activeTab: TabName;
   onTabChange: (tab: TabName) => void;
+  /**
+   * Side rail aligned to the top (iPad): reports where the tab pill ends,
+   * measured from the top of the window, so the + can sit right under it.
+   */
+  onRailPillEnd?: (y: number) => void;
 }
 
 // Calendar zoom layers use positive z-indices and extend beneath the tab bar.

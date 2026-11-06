@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import type { TextInputInstance } from 'react-native';
+import type { LayoutChangeEvent, TextInputInstance } from 'react-native';
 import { Alert, FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Reanimated, {
   Easing as REasing,
@@ -121,6 +121,8 @@ const CALENDAR_HORIZONTAL_PADDING = spacing.screenHorizontal;
 const CALENDAR_GRID_HORIZONTAL_PADDING = spacing.xs;
 /** Side padding of the month grid in the open iPhone Duo's left pane. */
 const MONTH_OVERVIEW_HORIZONTAL_PADDING = spacing.lg;
+/** Room kept under the iPad month grid for the Today button. */
+const MONTH_OVERVIEW_BOTTOM_RESERVE = 88;
 const ZOOM_TIMING = { duration: 350, easing: REasing.out(REasing.cubic) } as const;
 const MONTH_HEADER_CHROME_HEIGHT = 114;
 const HEADER_CONTENT_GAP = 10;
@@ -200,7 +202,7 @@ export function CalendarScreen({
   } = useApp();
   const monthCycle = monthCycleOf(settings);
   const themeColors = useThemeColors();
-  const { contentWidth: frameContentWidth, panes: twoPane } = useDeviceLayout();
+  const { contentWidth: frameContentWidth, panes: twoPane, wideTabs } = useDeviceLayout();
   const safeAreaInsets = useSafeAreaInsets();
   const { width: frameWidth } = useContentFrame();
   // Open iPhone Duo: the header and a live month grid fill the left pane and
@@ -208,6 +210,16 @@ export function CalendarScreen({
   // that pane. Everywhere else they span the screen.
   const screenWidth = twoPane ? twoPane.right : frameWidth;
   const contentWidth = twoPane ? twoPane.right : frameContentWidth;
+  // iPad: the month grid grows into the height of its pane instead of
+  // leaving the lower half of it empty. The Duo keeps its phone-sized cells.
+  const [monthOverviewHeight, setMonthOverviewHeight] = useState(0);
+  const handleMonthOverviewLayout = useCallback((event: LayoutChangeEvent) => {
+    setMonthOverviewHeight(event.nativeEvent.layout.height);
+  }, []);
+  const monthOverviewFillHeight =
+    wideTabs && monthOverviewHeight > 0
+      ? monthOverviewHeight - spacing.sm - MONTH_OVERVIEW_BOTTOM_RESERVE
+      : undefined;
   const activeLocale = settings.locale ?? I18n.locale ?? 'en';
   const isTimeMode = settings.displayMode === 'time';
 
@@ -756,7 +768,11 @@ export function CalendarScreen({
     [activeListMonthDate, activeLocale],
   );
 
-  const displayedMonthLabel = viewMode === 'day' ? activeListMonthLabel : activeMonthLabel;
+  // With two panes the header always describes the month grid in the left
+  // pane, which follows the list's month, even while the year shows on the
+  // right. On one pane it follows whichever pager is showing.
+  const headerFollowsList = viewMode === 'day' || twoPane !== null;
+  const displayedMonthLabel = headerFollowsList ? activeListMonthLabel : activeMonthLabel;
 
   // Build month data (header summary + month grid). `activeMonthData` is the
   // grid month; `activeListMonthData` feeds the list-view summary. Each month's
@@ -828,7 +844,7 @@ export function CalendarScreen({
     [buildMonthData, activeListMonthDate],
   );
 
-  const summaryMonthData = viewMode === 'day' ? activeListMonthData : activeMonthData;
+  const summaryMonthData = headerFollowsList ? activeListMonthData : activeMonthData;
 
   const transactionDisplaySettings = useMemo(
     () => ({
@@ -1058,10 +1074,11 @@ export function CalendarScreen({
   );
 
   // The header's prev/next arrows drive whichever pager is showing: the
-  // monthly list in the day view, the month grid otherwise.
+  // monthly list in the day view (and always with two panes, where the left
+  // grid follows it), the month grid otherwise.
   const stepVisibleMonth = (delta: number) => {
     void triggerHaptic('selection');
-    const onList = viewMode === 'day';
+    const onList = headerFollowsList;
     const nextIdx = clampMonthIndex((onList ? activeListMonthIndex : activeMonthIndex) + delta);
     (onList ? setActiveListMonthIndex : setActiveMonthIndex)(nextIdx);
     (onList ? listPagerRef : horizontalListRef).current?.scrollToIndex({
@@ -1078,11 +1095,11 @@ export function CalendarScreen({
   );
   const visibleMonth = shiftYearMonth(
     pagerAnchorMonth,
-    (viewMode === 'day' ? activeListMonthIndex : activeMonthIndex) - MONTH_PAGER_CENTER_INDEX,
+    (headerFollowsList ? activeListMonthIndex : activeMonthIndex) - MONTH_PAGER_CENTER_INDEX,
   );
   const handleMonthPicked = (year: number, monthIndex: number) => {
     setIsMonthPickerOpen(false);
-    const onList = viewMode === 'day';
+    const onList = headerFollowsList;
     const nextIdx = clampMonthIndex(
       MONTH_PAGER_CENTER_INDEX + monthsBetween(pagerAnchorMonth, { year, monthIndex }),
     );
@@ -1652,8 +1669,8 @@ export function CalendarScreen({
 
             {!isSearchOpen ? (
               <Reanimated.View
-                style={[styles.monthHeaderChrome, monthHeaderChromeStyle]}
-                pointerEvents={viewMode === 'year' ? 'none' : 'auto'}
+                style={[styles.monthHeaderChrome, !twoPane && monthHeaderChromeStyle]}
+                pointerEvents={viewMode === 'year' && !twoPane ? 'none' : 'auto'}
               >
                 <View style={styles.monthHeaderChromeContent}>
                   {/* Month nav capsule — shown in both the monthly list and the month
@@ -1734,7 +1751,7 @@ export function CalendarScreen({
       {/* --- Two panes: the month at a glance under the header, in step with
           the list beside it. Tapping a day scrolls the list to it. --- */}
       {twoPane ? (
-        <View style={styles.monthOverviewPane}>
+        <View style={styles.monthOverviewPane} onLayout={handleMonthOverviewLayout}>
           <CalendarMonthGrid
             monthData={activeListMonthData}
             weekdayLabels={weekdayLabels}
@@ -1743,6 +1760,7 @@ export function CalendarScreen({
             locale={activeLocale}
             onSelectDay={handleSelectDayFromMonth}
             chartWidth={twoPane.left - MONTH_OVERVIEW_HORIZONTAL_PADDING * 2}
+            fillHeight={monthOverviewFillHeight}
           />
         </View>
       ) : null}

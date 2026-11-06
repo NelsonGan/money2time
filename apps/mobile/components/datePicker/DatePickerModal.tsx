@@ -4,6 +4,7 @@ import { Modal, Pressable, StyleSheet, useWindowDimensions, View } from 'react-n
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '~/components/ui';
+import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 
@@ -58,6 +59,8 @@ export function DatePickerModal({
   const insets = useSafeAreaInsets();
   const themeColors = useThemeColors();
   const { height: screenHeight } = useWindowDimensions();
+  // A readable column on a wide screen (iPad, the open iPhone Duo).
+  const sheetColumnStyle = useSheetColumnStyle();
   const cardHeight = Math.min(
     CARD_MAX_HEIGHT,
     Math.max(CARD_MIN_HEIGHT, screenHeight * CARD_HEIGHT_RATIO),
@@ -73,7 +76,11 @@ export function DatePickerModal({
     <Pressable style={styles.backdrop} onPress={onClose}>
       <Pressable
         onPress={(event) => event.stopPropagation()}
-        style={[styles.card, { height: cardHeight, paddingBottom: Math.max(insets.bottom, 16) }]}
+        style={[
+          styles.card,
+          { height: cardHeight, paddingBottom: Math.max(insets.bottom, 16) },
+          sheetColumnStyle,
+        ]}
         className="bg-card"
       >
         <View className="px-5 pt-5 pb-2 flex-row items-center justify-between">

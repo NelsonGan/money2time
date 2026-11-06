@@ -28,6 +28,7 @@ import {
   CurrencyPickerSheet,
   Text,
 } from '~/components/ui';
+import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import {
@@ -361,6 +362,8 @@ export function QuickAddSheet({
   onExpandToDetailed,
   onOpenQuickEntrySettings,
 }: QuickAddSheetProps) {
+  // A readable column on a wide screen (iPad, the open iPhone Duo).
+  const sheetColumnStyle = useSheetColumnStyle();
   const themeColors = useThemeColors();
   const inputRef = useRef<TextInputInstance | null>(null);
 
@@ -878,7 +881,12 @@ export function QuickAddSheet({
 
       <Animated.View style={[styles.kav, keyboardAvoidStyle]} pointerEvents="box-none">
         <Animated.View
-          style={[styles.cardWrap, { paddingBottom: cardBottomMargin }, sheetAnimatedStyle]}
+          style={[
+            styles.cardWrap,
+            { paddingBottom: cardBottomMargin },
+            sheetColumnStyle,
+            sheetAnimatedStyle,
+          ]}
         >
           <View style={styles.headerRow}>
             <View style={styles.headerLeft}>

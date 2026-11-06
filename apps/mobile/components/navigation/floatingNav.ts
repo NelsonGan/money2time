@@ -26,9 +26,16 @@ export function getFloatingNavReservedInset(
 }
 
 /*
- * The side rail (iPhone Duo): the tab pill runs down the system's side strip
- * with the + button at its foot, where iOS puts its own vertical tab bar.
+ * The side rail. On iPhone Duo the tab pill runs down the system's side strip
+ * with the + button at its foot, where iOS puts its own vertical tab bar. On
+ * iPad it sits at the top of the leading edge, where a sidebar sits, with the
+ * + right under it.
  */
+
+/** Gap between the top safe area and a top-aligned rail (iPad). */
+const SIDE_RAIL_TOP_GAP = 12;
+/** Room under iPadOS's window buttons, which sit over a floating window's corner. */
+export const WINDOW_CONTROLS_CLEARANCE = 30;
 
 /** Width of the rail's tab pill, centred in the side strip. */
 export const SIDE_RAIL_PILL_WIDTH = 64;
@@ -38,4 +45,12 @@ export const SIDE_RAIL_FAB_SLOT = 76;
 /** Gap between the bottom of the window and the rail's lowest item. */
 export function getSideRailFootGap(safeBottom: number) {
   return Math.max(safeBottom - 12, 12);
+}
+
+/**
+ * Distance from the top of the window to a top-aligned rail's pill (iPad),
+ * clear of the window buttons when the app runs in a floating window.
+ */
+export function getSideRailTopGap(safeTop: number, isFloatingWindow = false) {
+  return safeTop + SIDE_RAIL_TOP_GAP + (isFloatingWindow ? WINDOW_CONTROLS_CLEARANCE : 0);
 }

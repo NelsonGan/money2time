@@ -27,6 +27,7 @@ import {
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { DiscordIcon } from '~/components/icons/SocialIcons';
+import { useContentFrame } from '~/components/layout/ContentFrame';
 import { useBottomNavScrollReporter } from '~/components/navigation/BottomNavMinimize';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import {
@@ -57,6 +58,7 @@ import { ReimbursementTileBadge } from '~/features/reimbursements/components/Rei
 import { DisplayModeToggle } from '~/features/transactions/components';
 import { SettleUpTileBadge } from '~/features/transactions/components/SettleUpTileBadge';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { useWideTabColumns } from '~/hooks/useWideTabColumns';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { resetCloudBackupPromptState } from '~/services/cloudBackupPrompt';
@@ -161,6 +163,11 @@ export function SettingsScreen({
   const bottomNavInset = useSettingsBottomNavInset();
   const reportBottomNavScroll = useBottomNavScrollReporter();
   const scrollViewRef = useRef<ScrollViewInstance | null>(null);
+  // iPad: the profile column beside the tile sections. On the open Duo the
+  // two columns are equal, so they meet on the fold.
+  const wideColumns = useWideTabColumns();
+  const isWide = wideColumns.columns > 1;
+  const { onFold = false } = useContentFrame();
 
   const profileStats = useMemo(() => {
     // Anchor "days tracking" on the earliest transaction, falling back to the
@@ -255,7 +262,7 @@ export function SettingsScreen({
   );
 
   return (
-    <SettingsPageLayout>
+    <SettingsPageLayout contentMaxWidth={wideColumns.maxWidth}>
       <MonthControlsHeader
         title={I18n.t('settings.title')}
         monthLabel=""
@@ -264,6 +271,7 @@ export function SettingsScreen({
         hideNavigation
         showAccent={false}
         actions={<DisplayModeToggle />}
+        contentMaxWidth={wideColumns.maxWidth}
       />
 
       <ScrollView
@@ -273,502 +281,522 @@ export function SettingsScreen({
         onScroll={handleScroll}
         scrollEventThrottle={16}
       >
-        <Animated.View entering={FadeIn.delay(200).duration(400)} style={styles.contentBody}>
-          <View className="mt-3 rounded-[28px] border border-border/40 bg-card p-5 shadow-soft">
-            <View className="flex-row items-center gap-4">
-              <Pressable
-                onPress={() => void handlePickAvatar()}
-                accessibilityRole="button"
-                accessibilityLabel={I18n.t('settings.profile_edit_photo')}
-                className={cn(
-                  'h-16 w-16 items-center justify-center rounded-full active:opacity-80',
-                  // The clay bust is the visual on its own; a tinted disc behind
-                  // it would read as a second container. Only the uploaded photo
-                  // needs the plate to clip against, and the flat bust needs it
-                  // as its own container.
-                  avatarUri || isFlatIcons ? 'border border-primary/15 bg-primary/10' : null,
-                )}
-                style={avatarUri || isFlatIcons ? styles.ctaShadow : undefined}
-              >
-                {avatarUri ? (
-                  <Image
-                    {...REPLAY_PRIVATE}
-                    source={{ uri: avatarUri }}
-                    style={{ height: 64, width: 64, borderRadius: 32 }}
-                    contentFit="cover"
-                    onError={() => setBrokenAvatarUri(avatarUri)}
-                  />
-                ) : (
-                  <ClayIcon name="settings/profile" size={64} flatSize={30} />
-                )}
-                <View
-                  className="absolute -bottom-0.5 -right-0.5 h-6 w-6 items-center justify-center rounded-full border-2 border-card"
-                  style={{ backgroundColor: themeColors.primary }}
+        <Animated.View
+          entering={FadeIn.delay(200).duration(400)}
+          style={[styles.contentBody, isWide && styles.wideBody]}
+        >
+          {/* Two columns (iPad, the open Duo): the profile and its cards in a
+              column of their own, the tile sections beside it. Stacked
+              everywhere else. */}
+          <View style={isWide ? (onFold ? styles.foldAside : styles.wideAside) : undefined}>
+            <View className="mt-3 rounded-[28px] border border-border/40 bg-card p-5 shadow-soft">
+              <View className="flex-row items-center gap-4">
+                <Pressable
+                  onPress={() => void handlePickAvatar()}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('settings.profile_edit_photo')}
+                  className={cn(
+                    'h-16 w-16 items-center justify-center rounded-full active:opacity-80',
+                    // The clay bust is the visual on its own; a tinted disc behind
+                    // it would read as a second container. Only the uploaded photo
+                    // needs the plate to clip against, and the flat bust needs it
+                    // as its own container.
+                    avatarUri || isFlatIcons ? 'border border-primary/15 bg-primary/10' : null,
+                  )}
+                  style={avatarUri || isFlatIcons ? styles.ctaShadow : undefined}
                 >
-                  <Camera size={12} color="#fff" />
-                </View>
-              </Pressable>
-              <View className="flex-1">
-                <View className="flex-row items-center gap-2">
-                  {editingName ? (
-                    <TextInput
-                      autoFocus
-                      value={nameDraft}
-                      onChangeText={setNameDraft}
-                      onBlur={handleCommitName}
-                      onSubmitEditing={handleCommitName}
-                      returnKeyType="done"
-                      maxLength={40}
-                      placeholder={I18n.t('settings.profile_name_add')}
-                      placeholderTextColor={themeColors.textMuted}
-                      selectionColor={themeColors.primary}
-                      style={{
-                        flex: 1,
-                        paddingVertical: 0,
-                        color: themeColors.text,
-                        fontFamily: FONT.bold,
-                        fontSize: 19,
-                      }}
+                  {avatarUri ? (
+                    <Image
+                      {...REPLAY_PRIVATE}
+                      source={{ uri: avatarUri }}
+                      style={{ height: 64, width: 64, borderRadius: 32 }}
+                      contentFit="cover"
+                      onError={() => setBrokenAvatarUri(avatarUri)}
                     />
                   ) : (
-                    <Pressable
-                      onPress={handleEditName}
-                      accessibilityRole="button"
-                      accessibilityLabel={I18n.t('settings.profile_edit_name')}
-                      className="flex-1 flex-row items-center gap-1.5 active:opacity-70"
-                    >
-                      {settings.profileName ? (
-                        <Text
-                          variant="heading"
-                          numberOfLines={1}
-                          className="text-[19px] tracking-tight"
-                        >
-                          {settings.profileName}
-                        </Text>
-                      ) : (
-                        <>
+                    <ClayIcon name="settings/profile" size={64} flatSize={30} />
+                  )}
+                  <View
+                    className="absolute -bottom-0.5 -right-0.5 h-6 w-6 items-center justify-center rounded-full border-2 border-card"
+                    style={{ backgroundColor: themeColors.primary }}
+                  >
+                    <Camera size={12} color="#fff" />
+                  </View>
+                </Pressable>
+                <View className="flex-1">
+                  <View className="flex-row items-center gap-2">
+                    {editingName ? (
+                      <TextInput
+                        autoFocus
+                        value={nameDraft}
+                        onChangeText={setNameDraft}
+                        onBlur={handleCommitName}
+                        onSubmitEditing={handleCommitName}
+                        returnKeyType="done"
+                        maxLength={40}
+                        placeholder={I18n.t('settings.profile_name_add')}
+                        placeholderTextColor={themeColors.textMuted}
+                        selectionColor={themeColors.primary}
+                        style={{
+                          flex: 1,
+                          paddingVertical: 0,
+                          color: themeColors.text,
+                          fontFamily: FONT.bold,
+                          fontSize: 19,
+                        }}
+                      />
+                    ) : (
+                      <Pressable
+                        onPress={handleEditName}
+                        accessibilityRole="button"
+                        accessibilityLabel={I18n.t('settings.profile_edit_name')}
+                        className="flex-1 flex-row items-center gap-1.5 active:opacity-70"
+                      >
+                        {settings.profileName ? (
                           <Text
                             variant="heading"
-                            tone="muted"
                             numberOfLines={1}
                             className="text-[19px] tracking-tight"
                           >
-                            {I18n.t('settings.profile_name_add')}
+                            {settings.profileName}
                           </Text>
-                          <Pencil size={14} color={themeColors.textMuted} />
-                        </>
-                      )}
-                    </Pressable>
-                  )}
-                  {!editingName ? (
-                    isPro ? (
-                      <View
-                        className="rounded-full px-2 py-[3px]"
-                        style={{ backgroundColor: themeColors.primary }}
-                      >
-                        <Text
-                          className="text-[10px] tracking-[1.5px]"
-                          style={{ color: '#fff', fontFamily: FONT.extrabold, fontWeight: '800' }}
+                        ) : (
+                          <>
+                            <Text
+                              variant="heading"
+                              tone="muted"
+                              numberOfLines={1}
+                              className="text-[19px] tracking-tight"
+                            >
+                              {I18n.t('settings.profile_name_add')}
+                            </Text>
+                            <Pencil size={14} color={themeColors.textMuted} />
+                          </>
+                        )}
+                      </Pressable>
+                    )}
+                    {!editingName ? (
+                      isPro ? (
+                        <View
+                          className="rounded-full px-2 py-[3px]"
+                          style={{ backgroundColor: themeColors.primary }}
                         >
-                          PRO
-                        </Text>
-                      </View>
-                    ) : (
-                      <View
-                        className="rounded-full border px-2 py-[3px]"
-                        style={{ borderColor: themeColors.border, backgroundColor: 'transparent' }}
-                      >
-                        <Text
-                          className="text-[10px] tracking-[1.5px]"
+                          <Text
+                            className="text-[10px] tracking-[1.5px]"
+                            style={{ color: '#fff', fontFamily: FONT.extrabold, fontWeight: '800' }}
+                          >
+                            PRO
+                          </Text>
+                        </View>
+                      ) : (
+                        <View
+                          className="rounded-full border px-2 py-[3px]"
                           style={{
-                            color: themeColors.textMuted,
-                            fontFamily: FONT.semibold,
-                            fontWeight: '600',
+                            borderColor: themeColors.border,
+                            backgroundColor: 'transparent',
                           }}
                         >
-                          FREE
-                        </Text>
-                      </View>
-                    )
-                  ) : null}
-                </View>
-                <Text variant="friendly" tone="muted" className="mt-0.5 text-xs">
-                  {profileStats.memberSince
-                    ? I18n.t('settings.profile_member_since', { date: profileStats.memberSince })
-                    : I18n.t('settings.profile_member_new')}
-                </Text>
-                <CloudSyncProfilePill onPress={onOpenCloudSync} />
-              </View>
-            </View>
-
-            <View className="my-4 h-px bg-border/40" />
-
-            <View className="flex-row items-center">
-              <SettingsStatTile
-                icon={<CalendarDays size={16} color={themeColors.textMuted} />}
-                value={String(profileStats.daysTracking)}
-                label={I18n.t('settings.stat_days')}
-              />
-              <View className="h-9 w-px bg-border/40" />
-              <SettingsStatTile
-                icon={<ReceiptText size={16} color={themeColors.textMuted} />}
-                value={String(profileStats.totalCount)}
-                label={I18n.t('settings.stat_transactions')}
-              />
-              <View className="h-9 w-px bg-border/40" />
-              <SettingsStatTile
-                icon={<TrendingUp size={16} color={themeColors.textMuted} />}
-                value={String(profileStats.thisMonthCount)}
-                label={I18n.t('settings.stat_this_month')}
-              />
-            </View>
-          </View>
-
-          <View className="mt-3">
-            <LedgerSwitcherCard
-              onPress={() => {
-                setLedgerEntryCounts(getLedgerEntryCounts());
-                setLedgerSheetVisible(true);
-              }}
-            />
-          </View>
-
-          {!isPro ? (
-            <Pressable
-              onPress={() => {
-                void triggerHaptic('selection');
-                onOpenProPaywall('settings_banner');
-              }}
-              className="mt-3 flex-row items-center gap-3 rounded-3xl px-4 py-4 active:scale-[0.98] active:opacity-95"
-              style={[
-                { backgroundColor: themeColors.primary },
-                coloredCtaShadow(themeColors.primary),
-              ]}
-            >
-              {/* On the coloured CTA the flat crown needs its translucent disc
-                  to separate from the fill; clay sits straight on it. */}
-              {isFlatIcons ? (
-                <View className="h-10 w-10 items-center justify-center rounded-full bg-white/20">
-                  <Crown size={20} color="#fff" fill="#fff" />
-                </View>
-              ) : (
-                <ClayIcon name="settings/pro" size={44} />
-              )}
-              <View className="flex-1">
-                <Text
-                  className="text-[15px]"
-                  style={{ color: '#fff', fontFamily: FONT.extrabold, fontWeight: '800' }}
-                >
-                  {I18n.t('pro.upgrade')}
-                </Text>
-                <Text className="text-xs" style={{ color: 'rgba(255,255,255,0.85)' }}>
-                  {I18n.t('pro.upgrade_subtitle')}
-                </Text>
-              </View>
-            </Pressable>
-          ) : null}
-
-          {!isPro ? (
-            <View className="mt-2 flex-row gap-2">
-              <Pressable
-                accessibilityRole="button"
-                testID="settings-share-earn-card"
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  onOpenShareAndEarn();
-                }}
-                className="min-w-0 flex-1 rounded-3xl border border-accent/25 bg-accent/15 p-3.5 active:scale-[0.98] active:opacity-90"
-              >
-                <View className="flex-row items-center justify-between">
-                  <ClayIcon name="settings/share-earn" size={36} flatSize={22} />
-                </View>
-                <Text
-                  variant="bodyStrong"
-                  numberOfLines={2}
-                  className="mt-2 text-sm leading-[18px]"
-                >
-                  {I18n.t('shareEarn.row_label')}
-                </Text>
-                <Text variant="caption" tone="muted" numberOfLines={2} className="mt-0.5">
-                  {I18n.t('shareEarn.row_subtitle')}
-                </Text>
-              </Pressable>
-              <Pressable
-                accessibilityRole="button"
-                testID="settings-ricecal-card"
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  void trackEvent(AnalyticsEvents.RICECAL_AD_CLICKED, { source: 'settings' });
-                  setRiceCalVisible(true);
-                }}
-                className="min-w-0 flex-1 rounded-3xl border border-success/20 bg-success/10 p-3.5 active:scale-[0.98] active:opacity-90"
-              >
-                <View className="flex-row items-center justify-between gap-1">
-                  <NativeImage
-                    accessible={false}
-                    source={require('~/assets/brands/ricecal-app-icon.png')}
-                    className="h-9 w-9 rounded-xl"
-                    resizeMode="cover"
-                  />
-                  <View className="min-w-0 flex-1 items-end">
-                    <Text variant="label" tone="muted" numberOfLines={1}>
-                      {I18n.t('news.badge.ad')}
-                    </Text>
+                          <Text
+                            className="text-[10px] tracking-[1.5px]"
+                            style={{
+                              color: themeColors.textMuted,
+                              fontFamily: FONT.semibold,
+                              fontWeight: '600',
+                            }}
+                          >
+                            FREE
+                          </Text>
+                        </View>
+                      )
+                    ) : null}
                   </View>
+                  <Text variant="friendly" tone="muted" className="mt-0.5 text-xs">
+                    {profileStats.memberSince
+                      ? I18n.t('settings.profile_member_since', { date: profileStats.memberSince })
+                      : I18n.t('settings.profile_member_new')}
+                  </Text>
+                  <CloudSyncProfilePill onPress={onOpenCloudSync} />
                 </View>
-                <Text
-                  variant="bodyStrong"
-                  numberOfLines={2}
-                  className="mt-2 text-sm leading-[18px]"
-                >
-                  {I18n.t('news.ricecal.title')}
-                </Text>
-                <Text variant="caption" tone="muted" numberOfLines={2} className="mt-0.5">
-                  {I18n.t('news.ricecal.card_subtitle')}
-                </Text>
-              </Pressable>
+              </View>
+
+              <View className="my-4 h-px bg-border/40" />
+
+              <View className="flex-row items-center">
+                <SettingsStatTile
+                  icon={<CalendarDays size={16} color={themeColors.textMuted} />}
+                  value={String(profileStats.daysTracking)}
+                  label={I18n.t('settings.stat_days')}
+                />
+                <View className="h-9 w-px bg-border/40" />
+                <SettingsStatTile
+                  icon={<ReceiptText size={16} color={themeColors.textMuted} />}
+                  value={String(profileStats.totalCount)}
+                  label={I18n.t('settings.stat_transactions')}
+                />
+                <View className="h-9 w-px bg-border/40" />
+                <SettingsStatTile
+                  icon={<TrendingUp size={16} color={themeColors.textMuted} />}
+                  value={String(profileStats.thisMonthCount)}
+                  label={I18n.t('settings.stat_this_month')}
+                />
+              </View>
             </View>
-          ) : null}
 
-          <SettingsSection
-            className="mt-6 gap-2"
-            title={I18n.t('settings.section_personal')}
-            showAccent={false}
-          >
-            <SettingsGrid>
-              <SettingsGridTile
-                icon={<ClayIcon name="settings/display" size={34} flatSize={20} />}
-                label={I18n.t('settings.display')}
-                onPress={onOpenDisplay}
-              />
-              <SettingsGridTile
-                icon={<ClayIcon name="settings/hourly-value" size={34} flatSize={20} />}
-                label={I18n.t('settings.hourly_value')}
-                onPress={onOpenHourlyValue}
-              />
-              <SettingsGridTile
-                icon={<ClayIcon name="settings/notifications" size={34} flatSize={20} />}
-                label={I18n.t('settings.notifications')}
-                onPress={onOpenNotifications}
-              />
-              {/* The hub holds nothing but the Live Activity today, so on
-                  Android it would open an empty page. */}
-              {isLiveActivityAvailable ? (
-                <SettingsGridTile
-                  icon={<ClayIcon name="nav/grid" size={34} flatSize={20} />}
-                  label={I18n.t('widgets.settings_title')}
-                  onPress={onOpenWidgets}
-                />
-              ) : null}
-            </SettingsGrid>
-          </SettingsSection>
-
-          <SettingsSection
-            className="mt-6 gap-2"
-            title={I18n.t('settings.section_money')}
-            showAccent={false}
-          >
-            <SettingsGrid>
-              <SettingsGridTile
-                icon={<ClayIcon name="settings/account-settings" size={34} flatSize={20} />}
-                label={I18n.t('settings.account_settings')}
-                onPress={onOpenAccountSettings}
-              />
-              <SettingsGridTile
-                icon={<ClayIcon name="settings/accounts" size={34} flatSize={20} />}
-                label={I18n.t('settings.accounts')}
-                onPress={onOpenAccounts}
-              />
-              <SettingsGridTile
-                icon={<ClayIcon name="settings/items" size={34} flatSize={20} />}
-                label={I18n.t('items.title')}
-                onPress={onOpenItems}
-              />
-              <SettingsGridTile
-                icon={<ClayIcon name="settings/albums" size={34} flatSize={20} />}
-                label={I18n.t('albums.title')}
-                onPress={onOpenAlbums}
-              />
-              <SettingsGridTile
-                icon={<ClayIcon name="settings/receipts" size={34} flatSize={20} />}
-                label={I18n.t('receipts.title')}
-                onPress={onOpenReceipts}
-              />
-              <SettingsGridTile
-                icon={<ClayIcon name="settings/budget" size={34} flatSize={20} />}
-                label={I18n.t('budget.title')}
-                onPress={onOpenBudget}
-              />
-              <SettingsGridTile
-                icon={<ClayIcon name="settings/exchange-rates" size={34} flatSize={20} />}
-                label={I18n.t('exchange_rates.title')}
-                onPress={onOpenExchangeRates}
-              />
-              <SettingsGridTile
-                icon={<ClayIcon name="settings/categories" size={34} flatSize={20} />}
-                label={I18n.t('settings.categories')}
-                onPress={onOpenCategories}
-              />
-              <SettingsGridTile
-                icon={<ClayIcon name="settings/recurring" size={34} flatSize={20} />}
-                label={I18n.t('settings.recurring')}
-                onPress={onOpenRecurring}
-              />
-              <SettingsGridTile
-                icon={<ClayIcon name="settings/instalments" size={34} flatSize={20} />}
-                label={I18n.t('instalments.title')}
-                onPress={onOpenInstalments}
-              />
-              <SettingsGridTile
-                icon={<ClayIcon name="settings/quick-entry" size={34} flatSize={20} />}
-                label={I18n.t('settings.quick_entry.title')}
-                onPress={onOpenQuickEntry}
-              />
-              {/* iOS: the Shortcuts actions and Back Tap. Android: sharing a
-                  screenshot to the app from the system share sheet. */}
-              <SettingsGridTile
-                icon={<ClayIcon name="settings/auto-log" size={34} flatSize={20} />}
-                label={I18n.t('settings.auto_log.title')}
-                onPress={onOpenAutoLog}
-              />
-              <SettingsGridTile
-                icon={<ClayIcon name="settings/settle-up" size={34} flatSize={20} />}
-                label={I18n.t('transactions.settleUp.title')}
-                onPress={onOpenSettleUp}
-                badge={<SettleUpTileBadge />}
-              />
-              <SettingsGridTile
-                icon={<ClayIcon name="money-time/wallet-in" size={34} flatSize={20} />}
-                label={I18n.t('reimbursements.tile_label')}
-                onPress={onOpenReimbursements}
-                badge={<ReimbursementTileBadge />}
-              />
-            </SettingsGrid>
-          </SettingsSection>
-
-          <SettingsSection
-            className="mt-6 gap-2"
-            title={I18n.t('settings.section_data')}
-            showAccent={false}
-          >
-            <SettingsGrid>
-              {cloudSyncEnabled ? (
-                <SettingsGridTile
-                  icon={<ClayIcon name="settings/cloud-sync" size={34} flatSize={20} />}
-                  label={I18n.t('cloud_sync.tile_label')}
-                  pro={cloudSyncProTag}
-                  badge={<CloudSyncTileBadge />}
-                  onPress={onOpenCloudSync}
-                />
-              ) : null}
-              <SettingsGridTile
-                icon={<ClayIcon name="settings/statement-import" size={34} flatSize={20} />}
-                label={I18n.t('settings.statement_import')}
-                onPress={onOpenStatementImport}
-              />
-              <SettingsGridTile
-                icon={<ClayIcon name="settings/data-management" size={34} flatSize={20} />}
-                label={I18n.t('settings.data_management')}
-                onPress={onOpenDataManagement}
-              />
-              <SettingsGridTile
-                icon={<ClayIcon name="insights/growth-analysis" size={34} flatSize={20} />}
-                label={I18n.t('settings.web_dashboard')}
-                onPress={onOpenWebDashboard}
-              />
-              <SettingsGridTile
-                icon={<ClayIcon name="settings/app-lock" size={34} flatSize={20} />}
-                label={I18n.t('settings.app_lock.title')}
-                pro={!isPro}
-                onPress={isPro ? onOpenAppLock : () => onOpenProPaywall('app_lock')}
-              />
-            </SettingsGrid>
-          </SettingsSection>
-
-          <SettingsSection
-            className="mt-6 gap-2"
-            title={I18n.t('settings.section_support')}
-            showAccent={false}
-          >
-            <SettingsGrid>
-              <SettingsGridTile
-                icon={<ClayIcon name="ui/checklist" size={34} flatSize={20} />}
-                label={I18n.t('tutorials.title')}
-                onPress={onOpenTutorials}
-              />
-              <SettingsGridTile
-                icon={<ClayIcon name="settings/pro" size={34} flatSize={20} />}
-                label={I18n.t('pro.manage_subscription')}
-                onPress={
-                  isPro ? onOpenProManagement : () => onOpenProPaywall('settings_subscription')
-                }
-              />
-              <SettingsGridTile
-                icon={<ClayIcon name="settings/replay" size={34} flatSize={20} />}
-                label={I18n.t('settings.replay_onboarding')}
+            <View className="mt-3">
+              <LedgerSwitcherCard
                 onPress={() => {
-                  Alert.alert(I18n.t('settings.replay_title'), I18n.t('settings.replay_message'), [
-                    { text: I18n.t('common.cancel'), style: 'cancel' },
-                    {
-                      text: I18n.t('settings.replay_action'),
-                      onPress: () => {
-                        updateSettings({ onboardingCompleted: false });
-                      },
-                    },
-                  ]);
+                  setLedgerEntryCounts(getLedgerEntryCounts());
+                  setLedgerSheetVisible(true);
                 }}
               />
-              <SettingsGridTile
-                icon={<ClayIcon name="settings/news" size={34} flatSize={20} />}
-                label={I18n.t('settings.news')}
-                onPress={onOpenNews}
-              />
-              <SettingsGridTile
-                icon={<ClayIcon name="settings/rate" size={34} flatSize={20} />}
-                label={I18n.t('settings.rate_app')}
-                onPress={() => {
-                  void openStoreReviewManually();
-                }}
-              />
-              <SettingsGridTile
-                icon={<ClayIcon name="settings/contact" size={34} flatSize={20} />}
-                label={I18n.t('settings.contact.tile')}
+            </View>
+
+            {!isPro ? (
+              <Pressable
                 onPress={() => {
                   void triggerHaptic('selection');
-                  setContactVisible(true);
+                  onOpenProPaywall('settings_banner');
                 }}
-              />
-            </SettingsGrid>
-          </SettingsSection>
+                className="mt-3 flex-row items-center gap-3 rounded-3xl px-4 py-4 active:scale-[0.98] active:opacity-95"
+                style={[
+                  { backgroundColor: themeColors.primary },
+                  coloredCtaShadow(themeColors.primary),
+                ]}
+              >
+                {/* On the coloured CTA the flat crown needs its translucent disc
+                  to separate from the fill; clay sits straight on it. */}
+                {isFlatIcons ? (
+                  <View className="h-10 w-10 items-center justify-center rounded-full bg-white/20">
+                    <Crown size={20} color="#fff" fill="#fff" />
+                  </View>
+                ) : (
+                  <ClayIcon name="settings/pro" size={44} />
+                )}
+                <View className="flex-1">
+                  <Text
+                    className="text-[15px]"
+                    style={{ color: '#fff', fontFamily: FONT.extrabold, fontWeight: '800' }}
+                  >
+                    {I18n.t('pro.upgrade')}
+                  </Text>
+                  <Text className="text-xs" style={{ color: 'rgba(255,255,255,0.85)' }}>
+                    {I18n.t('pro.upgrade_subtitle')}
+                  </Text>
+                </View>
+              </Pressable>
+            ) : null}
 
-          {__DEV__ ? (
-            <SettingsSection className="mt-6 gap-2" title="Developer" showAccent={false}>
+            {!isPro ? (
+              <View className="mt-2 flex-row gap-2">
+                <Pressable
+                  accessibilityRole="button"
+                  testID="settings-share-earn-card"
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    onOpenShareAndEarn();
+                  }}
+                  className="min-w-0 flex-1 rounded-3xl border border-accent/25 bg-accent/15 p-3.5 active:scale-[0.98] active:opacity-90"
+                >
+                  <View className="flex-row items-center justify-between">
+                    <ClayIcon name="settings/share-earn" size={36} flatSize={22} />
+                  </View>
+                  <Text
+                    variant="bodyStrong"
+                    numberOfLines={2}
+                    className="mt-2 text-sm leading-[18px]"
+                  >
+                    {I18n.t('shareEarn.row_label')}
+                  </Text>
+                  <Text variant="caption" tone="muted" numberOfLines={2} className="mt-0.5">
+                    {I18n.t('shareEarn.row_subtitle')}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  accessibilityRole="button"
+                  testID="settings-ricecal-card"
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    void trackEvent(AnalyticsEvents.RICECAL_AD_CLICKED, { source: 'settings' });
+                    setRiceCalVisible(true);
+                  }}
+                  className="min-w-0 flex-1 rounded-3xl border border-success/20 bg-success/10 p-3.5 active:scale-[0.98] active:opacity-90"
+                >
+                  <View className="flex-row items-center justify-between gap-1">
+                    <NativeImage
+                      accessible={false}
+                      source={require('~/assets/brands/ricecal-app-icon.png')}
+                      className="h-9 w-9 rounded-xl"
+                      resizeMode="cover"
+                    />
+                    <View className="min-w-0 flex-1 items-end">
+                      <Text variant="label" tone="muted" numberOfLines={1}>
+                        {I18n.t('news.badge.ad')}
+                      </Text>
+                    </View>
+                  </View>
+                  <Text
+                    variant="bodyStrong"
+                    numberOfLines={2}
+                    className="mt-2 text-sm leading-[18px]"
+                  >
+                    {I18n.t('news.ricecal.title')}
+                  </Text>
+                  <Text variant="caption" tone="muted" numberOfLines={2} className="mt-0.5">
+                    {I18n.t('news.ricecal.card_subtitle')}
+                  </Text>
+                </Pressable>
+              </View>
+            ) : null}
+          </View>
+
+          <View style={isWide ? styles.wideMain : undefined}>
+            <SettingsSection
+              className="mt-6 gap-2"
+              title={I18n.t('settings.section_personal')}
+              showAccent={false}
+            >
               <SettingsGrid>
                 <SettingsGridTile
-                  icon={
-                    <Crown size={20} color={isPro ? themeColors.primary : themeColors.textMuted} />
-                  }
-                  label={isPro ? 'Pro: ON' : 'Pro: OFF'}
-                  onPress={() => setDevProOverride(!isPro)}
+                  icon={<ClayIcon name="settings/display" size={34} flatSize={20} />}
+                  label={I18n.t('settings.display')}
+                  onPress={onOpenDisplay}
                 />
-                {onOpenWidgetPreviews ? (
+                <SettingsGridTile
+                  icon={<ClayIcon name="settings/hourly-value" size={34} flatSize={20} />}
+                  label={I18n.t('settings.hourly_value')}
+                  onPress={onOpenHourlyValue}
+                />
+                <SettingsGridTile
+                  icon={<ClayIcon name="settings/notifications" size={34} flatSize={20} />}
+                  label={I18n.t('settings.notifications')}
+                  onPress={onOpenNotifications}
+                />
+                {/* The hub holds nothing but the Live Activity today, so on
+                  Android it would open an empty page. */}
+                {isLiveActivityAvailable ? (
                   <SettingsGridTile
-                    icon={<Code2 size={20} color={themeColors.primary} />}
-                    label="Widget previews"
-                    onPress={onOpenWidgetPreviews}
+                    icon={<ClayIcon name="nav/grid" size={34} flatSize={20} />}
+                    label={I18n.t('widgets.settings_title')}
+                    onPress={onOpenWidgets}
+                  />
+                ) : null}
+              </SettingsGrid>
+            </SettingsSection>
+
+            <SettingsSection
+              className="mt-6 gap-2"
+              title={I18n.t('settings.section_money')}
+              showAccent={false}
+            >
+              <SettingsGrid>
+                <SettingsGridTile
+                  icon={<ClayIcon name="settings/account-settings" size={34} flatSize={20} />}
+                  label={I18n.t('settings.account_settings')}
+                  onPress={onOpenAccountSettings}
+                />
+                <SettingsGridTile
+                  icon={<ClayIcon name="settings/accounts" size={34} flatSize={20} />}
+                  label={I18n.t('settings.accounts')}
+                  onPress={onOpenAccounts}
+                />
+                <SettingsGridTile
+                  icon={<ClayIcon name="settings/items" size={34} flatSize={20} />}
+                  label={I18n.t('items.title')}
+                  onPress={onOpenItems}
+                />
+                <SettingsGridTile
+                  icon={<ClayIcon name="settings/albums" size={34} flatSize={20} />}
+                  label={I18n.t('albums.title')}
+                  onPress={onOpenAlbums}
+                />
+                <SettingsGridTile
+                  icon={<ClayIcon name="settings/receipts" size={34} flatSize={20} />}
+                  label={I18n.t('receipts.title')}
+                  onPress={onOpenReceipts}
+                />
+                <SettingsGridTile
+                  icon={<ClayIcon name="settings/budget" size={34} flatSize={20} />}
+                  label={I18n.t('budget.title')}
+                  onPress={onOpenBudget}
+                />
+                <SettingsGridTile
+                  icon={<ClayIcon name="settings/exchange-rates" size={34} flatSize={20} />}
+                  label={I18n.t('exchange_rates.title')}
+                  onPress={onOpenExchangeRates}
+                />
+                <SettingsGridTile
+                  icon={<ClayIcon name="settings/categories" size={34} flatSize={20} />}
+                  label={I18n.t('settings.categories')}
+                  onPress={onOpenCategories}
+                />
+                <SettingsGridTile
+                  icon={<ClayIcon name="settings/recurring" size={34} flatSize={20} />}
+                  label={I18n.t('settings.recurring')}
+                  onPress={onOpenRecurring}
+                />
+                <SettingsGridTile
+                  icon={<ClayIcon name="settings/instalments" size={34} flatSize={20} />}
+                  label={I18n.t('instalments.title')}
+                  onPress={onOpenInstalments}
+                />
+                <SettingsGridTile
+                  icon={<ClayIcon name="settings/quick-entry" size={34} flatSize={20} />}
+                  label={I18n.t('settings.quick_entry.title')}
+                  onPress={onOpenQuickEntry}
+                />
+                {/* iOS: the Shortcuts actions and Back Tap. Android: sharing a
+                  screenshot to the app from the system share sheet. */}
+                <SettingsGridTile
+                  icon={<ClayIcon name="settings/auto-log" size={34} flatSize={20} />}
+                  label={I18n.t('settings.auto_log.title')}
+                  onPress={onOpenAutoLog}
+                />
+                <SettingsGridTile
+                  icon={<ClayIcon name="settings/settle-up" size={34} flatSize={20} />}
+                  label={I18n.t('transactions.settleUp.title')}
+                  onPress={onOpenSettleUp}
+                  badge={<SettleUpTileBadge />}
+                />
+                <SettingsGridTile
+                  icon={<ClayIcon name="money-time/wallet-in" size={34} flatSize={20} />}
+                  label={I18n.t('reimbursements.tile_label')}
+                  onPress={onOpenReimbursements}
+                  badge={<ReimbursementTileBadge />}
+                />
+              </SettingsGrid>
+            </SettingsSection>
+
+            <SettingsSection
+              className="mt-6 gap-2"
+              title={I18n.t('settings.section_data')}
+              showAccent={false}
+            >
+              <SettingsGrid>
+                {cloudSyncEnabled ? (
+                  <SettingsGridTile
+                    icon={<ClayIcon name="settings/cloud-sync" size={34} flatSize={20} />}
+                    label={I18n.t('cloud_sync.tile_label')}
+                    pro={cloudSyncProTag}
+                    badge={<CloudSyncTileBadge />}
+                    onPress={onOpenCloudSync}
                   />
                 ) : null}
                 <SettingsGridTile
-                  icon={<RefreshCcw size={20} color={themeColors.primary} />}
-                  label="Reset cloud prompt"
+                  icon={<ClayIcon name="settings/statement-import" size={34} flatSize={20} />}
+                  label={I18n.t('settings.statement_import')}
+                  onPress={onOpenStatementImport}
+                />
+                <SettingsGridTile
+                  icon={<ClayIcon name="settings/data-management" size={34} flatSize={20} />}
+                  label={I18n.t('settings.data_management')}
+                  onPress={onOpenDataManagement}
+                />
+                <SettingsGridTile
+                  icon={<ClayIcon name="insights/growth-analysis" size={34} flatSize={20} />}
+                  label={I18n.t('settings.web_dashboard')}
+                  onPress={onOpenWebDashboard}
+                />
+                <SettingsGridTile
+                  icon={<ClayIcon name="settings/app-lock" size={34} flatSize={20} />}
+                  label={I18n.t('settings.app_lock.title')}
+                  pro={!isPro}
+                  onPress={isPro ? onOpenAppLock : () => onOpenProPaywall('app_lock')}
+                />
+              </SettingsGrid>
+            </SettingsSection>
+
+            <SettingsSection
+              className="mt-6 gap-2"
+              title={I18n.t('settings.section_support')}
+              showAccent={false}
+            >
+              <SettingsGrid>
+                <SettingsGridTile
+                  icon={<ClayIcon name="ui/checklist" size={34} flatSize={20} />}
+                  label={I18n.t('tutorials.title')}
+                  onPress={onOpenTutorials}
+                />
+                <SettingsGridTile
+                  icon={<ClayIcon name="settings/pro" size={34} flatSize={20} />}
+                  label={I18n.t('pro.manage_subscription')}
+                  onPress={
+                    isPro ? onOpenProManagement : () => onOpenProPaywall('settings_subscription')
+                  }
+                />
+                <SettingsGridTile
+                  icon={<ClayIcon name="settings/replay" size={34} flatSize={20} />}
+                  label={I18n.t('settings.replay_onboarding')}
                   onPress={() => {
-                    void triggerHaptic('success');
-                    void resetCloudBackupPromptState();
+                    Alert.alert(
+                      I18n.t('settings.replay_title'),
+                      I18n.t('settings.replay_message'),
+                      [
+                        { text: I18n.t('common.cancel'), style: 'cancel' },
+                        {
+                          text: I18n.t('settings.replay_action'),
+                          onPress: () => {
+                            updateSettings({ onboardingCompleted: false });
+                          },
+                        },
+                      ],
+                    );
+                  }}
+                />
+                <SettingsGridTile
+                  icon={<ClayIcon name="settings/news" size={34} flatSize={20} />}
+                  label={I18n.t('settings.news')}
+                  onPress={onOpenNews}
+                />
+                <SettingsGridTile
+                  icon={<ClayIcon name="settings/rate" size={34} flatSize={20} />}
+                  label={I18n.t('settings.rate_app')}
+                  onPress={() => {
+                    void openStoreReviewManually();
+                  }}
+                />
+                <SettingsGridTile
+                  icon={<ClayIcon name="settings/contact" size={34} flatSize={20} />}
+                  label={I18n.t('settings.contact.tile')}
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    setContactVisible(true);
                   }}
                 />
               </SettingsGrid>
             </SettingsSection>
-          ) : null}
+
+            {__DEV__ ? (
+              <SettingsSection className="mt-6 gap-2" title="Developer" showAccent={false}>
+                <SettingsGrid>
+                  <SettingsGridTile
+                    icon={
+                      <Crown
+                        size={20}
+                        color={isPro ? themeColors.primary : themeColors.textMuted}
+                      />
+                    }
+                    label={isPro ? 'Pro: ON' : 'Pro: OFF'}
+                    onPress={() => setDevProOverride(!isPro)}
+                  />
+                  {onOpenWidgetPreviews ? (
+                    <SettingsGridTile
+                      icon={<Code2 size={20} color={themeColors.primary} />}
+                      label="Widget previews"
+                      onPress={onOpenWidgetPreviews}
+                    />
+                  ) : null}
+                  <SettingsGridTile
+                    icon={<RefreshCcw size={20} color={themeColors.primary} />}
+                    label="Reset cloud prompt"
+                    onPress={() => {
+                      void triggerHaptic('success');
+                      void resetCloudBackupPromptState();
+                    }}
+                  />
+                </SettingsGrid>
+              </SettingsSection>
+            ) : null}
+          </View>
         </Animated.View>
       </ScrollView>
 
@@ -860,12 +888,33 @@ function coloredCtaShadow(color: string) {
     : { elevation: 5 };
 }
 
+/** Width of the profile column beside the tile sections on iPad. */
+const WIDE_ASIDE_WIDTH = 380;
+const WIDE_COLUMN_GAP = 24;
+
 const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: SETTINGS_FORM_BOTTOM_PADDING,
   },
   contentBody: {
     paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
+  },
+  wideBody: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: WIDE_COLUMN_GAP,
+  },
+  wideAside: {
+    width: WIDE_ASIDE_WIDTH,
+  },
+  foldAside: {
+    flex: 1,
+  },
+  wideMain: {
+    flex: 1,
+    // The first section's mt-6 less the profile card's mt-3, so the section
+    // title lines up with the top of the card beside it.
+    marginTop: -12,
   },
   modalBackdrop: {
     backgroundColor: 'rgba(15, 23, 42, 0.55)',

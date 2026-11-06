@@ -43,6 +43,12 @@ interface SettingsPageLayoutProps extends ViewProps {
   swipeBackGesture?: GestureType;
   actionBar?: React.ReactNode;
   edges?: Edge[];
+  /**
+   * Column width for a page with a wide layout of its own
+   * (`useWideTabColumns`) on a tablet or the open Duo. Defaults to the
+   * readable column.
+   */
+  contentMaxWidth?: number | null;
 }
 
 export function SettingsPageLayout({
@@ -50,6 +56,7 @@ export function SettingsPageLayout({
   swipeBackGesture,
   actionBar,
   edges = ['top'],
+  contentMaxWidth,
   className,
   ...props
 }: SettingsPageLayoutProps) {
@@ -66,7 +73,7 @@ export function SettingsPageLayout({
   };
   const content = (
     <View className="flex-1 bg-background" style={insetStyle}>
-      <TabletContentContainer style={{ flex: 1 }}>
+      <TabletContentContainer style={{ flex: 1 }} maxWidth={contentMaxWidth}>
         <View className={cn('flex-1', className)} {...props}>
           {children}
           {actionBar}
@@ -337,19 +344,30 @@ export function FormSwitchRow({ label, info, value, onValueChange }: FormSwitchR
 
 interface SettingsGridProps {
   children: React.ReactNode;
+  /** Fixed column count. Without it the grid fits its width (see below). */
   columns?: number;
   gap?: number;
 }
 
+/** A grid at least this wide (iPad) fits a fourth tile per row. */
+const SETTINGS_GRID_FOUR_COLUMN_MIN_WIDTH = 640;
+
 /**
  * Lays out compact tiles in an evenly sized N-column grid. Measures its own
  * width once so tiles share an exact pixel width regardless of label length.
+ * Three columns, or four where the grid is wider than any phone or readable
+ * column (an iPad page), unless `columns` fixes the count.
  */
-export function SettingsGrid({ children, columns = 3, gap = spacing.sm }: SettingsGridProps) {
+export function SettingsGrid({
+  children,
+  columns: fixedColumns,
+  gap = spacing.sm,
+}: SettingsGridProps) {
   const [width, setWidth] = React.useState(0);
   const handleLayout = React.useCallback((event: LayoutChangeEvent) => {
     setWidth(event.nativeEvent.layout.width);
   }, []);
+  const columns = fixedColumns ?? (width >= SETTINGS_GRID_FOUR_COLUMN_MIN_WIDTH ? 4 : 3);
 
   // Floor the per-tile width so N tiles + gaps never exceed the measured
   // container width. Android rounds fractional layout widths up, which pushed

@@ -30,6 +30,7 @@ import { useGoals } from '~/features/goals/useGoals';
 import { InsightCard, SpendDeltaPill } from '~/features/insights/components/InsightCard';
 import { filterSpendingTransactions } from '~/features/reimbursements/lib/reimbursementMath';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { useWideTabColumns } from '~/hooks/useWideTabColumns';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { consumePendingReviewZoom, subscribeReviewZoomRequest } from '~/services/reviewNavigation';
@@ -110,6 +111,9 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
     ref,
   ) {
     const { settings, categories, periodBudgets, getTrueHourlyRateForDate } = useApp();
+    // iPad and the open Duo: two columns of cards across the wide page.
+    const wideColumns = useWideTabColumns();
+    const isWide = wideColumns.columns > 1;
     const monthCycle = monthCycleOf(settings);
     const { transactions } = useTransactions();
 
@@ -300,6 +304,30 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
       );
     }
 
+    const periodCards = (
+      <>
+        <SpentCard summary={summary} />
+        <FlowCard summary={summary} />
+        <TrendCard summary={summary} />
+        <PaceCard summary={summary} />
+      </>
+    );
+    const detailCards = (
+      <>
+        <CategoriesCard
+          summary={summary}
+          expandedCategoryId={expandedCategoryId}
+          onToggleCategory={setExpandedCategoryId}
+          onOpenTransaction={onOpenTransaction ? openTransactionById : undefined}
+        />
+        {activeGoals.length > 0 ? (
+          <GoalsCard goals={activeGoals} contributions={goalContributions} />
+        ) : null}
+        <MoodCard summary={summary} />
+        <StandoutsCard summary={summary} />
+      </>
+    );
+
     return (
       <>
         <ScrollView
@@ -307,7 +335,7 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          <TabletContentContainer>
+          <TabletContentContainer maxWidth={wideColumns.maxWidth}>
             <PeriodRail
               periods={periods}
               runningPeriod={runningPeriod}
@@ -325,22 +353,24 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
                 />
               </View>
             ) : (
-              <Animated.View entering={FadeIn.duration(220)} style={styles.cardStack}>
-                <SpentCard summary={summary} />
-                <FlowCard summary={summary} />
-                <TrendCard summary={summary} />
-                <PaceCard summary={summary} />
-                <CategoriesCard
-                  summary={summary}
-                  expandedCategoryId={expandedCategoryId}
-                  onToggleCategory={setExpandedCategoryId}
-                  onOpenTransaction={onOpenTransaction ? openTransactionById : undefined}
-                />
-                {activeGoals.length > 0 ? (
-                  <GoalsCard goals={activeGoals} contributions={goalContributions} />
-                ) : null}
-                <MoodCard summary={summary} />
-                <StandoutsCard summary={summary} />
+              <Animated.View
+                entering={FadeIn.duration(220)}
+                style={isWide ? styles.wideColumns : styles.cardStack}
+              >
+                {/* Two columns (iPad, the open Duo): the period's numbers on
+                    the left, where the money went and how it felt on the
+                    right. One stack elsewhere. */}
+                {isWide ? (
+                  <>
+                    <View style={styles.wideColumn}>{periodCards}</View>
+                    <View style={styles.wideColumn}>{detailCards}</View>
+                  </>
+                ) : (
+                  <>
+                    {periodCards}
+                    {detailCards}
+                  </>
+                )}
               </Animated.View>
             )}
           </TabletContentContainer>
@@ -1056,6 +1086,17 @@ const styles = StyleSheet.create({
   cardStack: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.sm,
+    gap: spacing.sm,
+  },
+  wideColumns: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.sm,
+    gap: spacing.md,
+  },
+  wideColumn: {
+    flex: 1,
     gap: spacing.sm,
   },
   ring: {

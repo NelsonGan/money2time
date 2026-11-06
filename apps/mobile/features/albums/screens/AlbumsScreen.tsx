@@ -24,6 +24,7 @@ import { useApp, useTransactions } from '~/context/AppContext';
 import { useProGate } from '~/hooks/useProGate';
 import { useStableSafeAreaInsets } from '~/hooks/useStableSafeAreaInsets';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { useWideTabColumns } from '~/hooks/useWideTabColumns';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { cn } from '~/utils';
@@ -63,7 +64,11 @@ export function AlbumsScreen({
 
   const [tab, setTab] = useState<AlbumsTab>('albums');
   const pagerRef = useRef<ScrollViewInstance | null>(null);
-  const [pageWidth, setPageWidth] = useState(Math.min(windowWidth, 640));
+  // iPad and the open Duo: album cards in two columns, and the page (and its
+  // map) as wide as the tab header above it.
+  const wideColumns = useWideTabColumns();
+  // The first frame's estimate, until the page measures itself.
+  const [pageWidth, setPageWidth] = useState(Math.min(windowWidth, wideColumns.maxWidth ?? 640));
   const [pageHeight, setPageHeight] = useState(0);
   // Defer mounting the (native, GL-backed) map until the user first swipes
   // toward or taps the Map tab, then keep it mounted. Avoids paying MapLibre's
@@ -79,6 +84,8 @@ export function AlbumsScreen({
   }, [scrollRef, scrollToTopToken]);
 
   const contentWidth = pageWidth - SCREEN_PADDING * 2;
+  const isTwoColumn = wideColumns.columns > 1;
+  const cardWidth = (contentWidth - GRID_GAP * (wideColumns.columns - 1)) / wideColumns.columns;
 
   const activeOptions = useMemo(
     () => [
@@ -176,7 +183,7 @@ export function AlbumsScreen({
 
   return (
     <View className="flex-1 bg-background">
-      <TabletContentContainer style={{ flex: 1 }}>
+      <TabletContentContainer style={{ flex: 1 }} maxWidth={wideColumns.maxWidth}>
         <View
           className="flex-1"
           onLayout={(e) => {
@@ -229,8 +236,8 @@ export function AlbumsScreen({
                         activeItemShadowOpacity={0.12}
                         customHandle
                         dragActivationDelay={0}
-                        flexDirection="column"
-                        flexWrap="nowrap"
+                        flexDirection={isTwoColumn ? 'row' : 'column'}
+                        flexWrap={isTwoColumn ? 'wrap' : 'nowrap'}
                         gap={GRID_GAP}
                         inactiveItemOpacity={1}
                         onDragEnd={({ fromIndex, order, toIndex }) => {
@@ -245,7 +252,7 @@ export function AlbumsScreen({
                           <AlbumCard
                             key={album.id}
                             album={album}
-                            width={contentWidth}
+                            width={cardWidth}
                             isActive={album.id === activeAlbumId}
                             onPress={onOpenAlbumDetail}
                             statsVersion={statsVersion}
@@ -254,11 +261,20 @@ export function AlbumsScreen({
                       </Sortable.Flex>
                     </Animated.ScrollView>
 
+                    {/* Two columns: the label over the left column and the
+                        picker over the right, so the open Duo's fold falls
+                        between them. */}
                     <View
                       className="flex-row items-center gap-3 border-t border-border/40 bg-background px-5 pt-2"
-                      style={{ paddingBottom: bottomNavInset }}
+                      style={[
+                        { paddingBottom: bottomNavInset },
+                        isTwoColumn && { paddingHorizontal: SCREEN_PADDING, gap: GRID_GAP },
+                      ]}
                     >
-                      <View className="flex-row items-center gap-2" style={{ maxWidth: '46%' }}>
+                      <View
+                        className="flex-row items-center gap-2"
+                        style={isTwoColumn ? { flex: 1 } : { maxWidth: '46%' }}
+                      >
                         <Sparkles size={15} color={themeColors.textMuted} />
                         <Text variant="label" tone="muted" numberOfLines={2}>
                           {I18n.t('albums.active_label')}
@@ -306,7 +322,7 @@ export function AlbumsScreen({
         className={cn('absolute left-0 right-0 top-0', tab === 'map' ? '' : 'bg-background')}
         style={{ paddingTop: topInset }}
       >
-        <TabletContentContainer>{tabsBar}</TabletContentContainer>
+        <TabletContentContainer maxWidth={wideColumns.maxWidth}>{tabsBar}</TabletContentContainer>
       </View>
     </View>
   );

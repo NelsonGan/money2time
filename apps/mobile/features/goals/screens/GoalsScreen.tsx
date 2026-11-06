@@ -3,6 +3,7 @@ import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
+import { ColumnGrid } from '~/components/layout/ColumnGrid';
 import { useBottomNavScrollReporter } from '~/components/navigation/BottomNavMinimize';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import {
@@ -17,11 +18,13 @@ import { GoalCard } from '~/features/goals/components/GoalCard';
 import { useGoals } from '~/features/goals/useGoals';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { useWideTabColumns } from '~/hooks/useWideTabColumns';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { formatAmount } from '~/utils/formatters';
 
 const NOOP = () => {};
+const GOAL_CARD_GAP = 10;
 const MASKED_VALUE = '••••';
 
 interface GoalsScreenProps {
@@ -117,6 +120,9 @@ export function GoalsScreen({ hideBalances, onOpenGoal, onOpenGoalEditor }: Goal
     [active],
   );
 
+  // iPad and the open Duo: goals in two columns, under the wide tab header.
+  const wideColumns = useWideTabColumns();
+
   const handleAdd = () => {
     if (!checkLimit('goals', active.length)) return;
     void triggerHaptic('selection');
@@ -144,7 +150,7 @@ export function GoalsScreen({ hideBalances, onOpenGoal, onOpenGoalEditor }: Goal
       });
 
   return (
-    <SettingsPageLayout edges={[]}>
+    <SettingsPageLayout edges={[]} contentMaxWidth={wideColumns.maxWidth}>
       {/* Same pinned-overview structure as the accounts and items panes so
           the content lines up when switching sub-tabs. */}
       <MonthControlsHeader
@@ -155,6 +161,7 @@ export function GoalsScreen({ hideBalances, onOpenGoal, onOpenGoalEditor }: Goal
         hideTitleRow
         hideNavigation
         showAccent={false}
+        contentMaxWidth={wideColumns.maxWidth}
       >
         <GoalsSummaryBlock
           totalSavedLabel={totalSavedLabel}
@@ -174,7 +181,7 @@ export function GoalsScreen({ hideBalances, onOpenGoal, onOpenGoalEditor }: Goal
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <View className="gap-2.5">
+        <ColumnGrid columns={wideColumns.columns} gap={GOAL_CARD_GAP}>
           {active.map((goal) => (
             <GoalCard
               key={goal.account.id}
@@ -183,7 +190,7 @@ export function GoalsScreen({ hideBalances, onOpenGoal, onOpenGoalEditor }: Goal
               onPress={onOpenGoal}
             />
           ))}
-        </View>
+        </ColumnGrid>
 
         {archived.length > 0 ? (
           <View className="mt-2.5">
@@ -202,15 +209,17 @@ export function GoalsScreen({ hideBalances, onOpenGoal, onOpenGoalEditor }: Goal
               </Text>
             </Pressable>
             {showArchived ? (
-              <View className="mt-1 gap-2.5 opacity-70">
-                {archived.map((goal) => (
-                  <GoalCard
-                    key={goal.account.id}
-                    goal={goal}
-                    hideBalances={hideBalances}
-                    onPress={onOpenGoal}
-                  />
-                ))}
+              <View className="mt-1 opacity-70">
+                <ColumnGrid columns={wideColumns.columns} gap={GOAL_CARD_GAP}>
+                  {archived.map((goal) => (
+                    <GoalCard
+                      key={goal.account.id}
+                      goal={goal}
+                      hideBalances={hideBalances}
+                      onPress={onOpenGoal}
+                    />
+                  ))}
+                </ColumnGrid>
               </View>
             ) : null}
           </View>
