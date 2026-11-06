@@ -5,6 +5,7 @@ import {
   LinearGradient,
   Path,
   Skia,
+  type SkPath,
   vec,
 } from '@shopify/react-native-skia';
 import React, { useMemo, useRef } from 'react';
@@ -17,6 +18,7 @@ import {
   bucketCenterX,
   bucketIndexAtX,
   buildAreaPath,
+  buildClipMarkerPath,
   buildLinePath,
   buildPlotPoints,
   buildTrendLineScale,
@@ -64,6 +66,13 @@ interface TrendLineChartProps {
   zeroBased?: boolean;
   /** Smallest gap between value ticks; set it when axis labels are rounded. */
   minTickStep?: number;
+  /**
+   * Caps on the drawn range, for values that can run far from the rest (a
+   * savings rate can drop to -500% in one bad month). A value past a cap sits
+   * on that edge as an arrowhead; its tooltip still shows the real value.
+   */
+  valueFloor?: number;
+  valueCeiling?: number;
   gridColor: string;
   labelColor: string;
   surfaceColor: string;
@@ -114,6 +123,33 @@ function estimateTextWidth(text: string): number {
   }
   return Math.ceil(width);
 }
+
+/** Arrowheads for points pinned to an edge, outlined in the surface colour. */
+function ClipMarker({
+  path,
+  color,
+  surfaceColor,
+  outlineWidth,
+}: {
+  path: SkPath;
+  color: string;
+  surfaceColor: string;
+  outlineWidth: number;
+}) {
+  return (
+    <>
+      <Path
+        path={path}
+        style="stroke"
+        strokeWidth={outlineWidth}
+        strokeJoin="round"
+        color={surfaceColor}
+      />
+      <Path path={path} style="fill" color={color} />
+    </>
+  );
+}
+
 const AVERAGE_DASH = [6, 4];
 const GUIDE_DASH = [3, 3];
 
@@ -142,6 +178,8 @@ export const TrendLineChart = React.memo(
     averageLabel,
     zeroBased = true,
     minTickStep = 0,
+    valueFloor,
+    valueCeiling,
     gridColor,
     labelColor,
     surfaceColor,
@@ -167,11 +205,21 @@ export const TrendLineChart = React.memo(
         averageValue !== null && averageValue !== undefined && Number.isFinite(averageValue)
           ? [...valueSets, [averageValue]]
           : valueSets;
-      const scale = buildTrendLineScale(withAverage, { zeroBased, minStep: minTickStep });
+      const scale = buildTrendLineScale(withAverage, {
+        zeroBased,
+        minStep: minTickStep,
+        floor: valueFloor,
+        ceiling: valueCeiling,
+      });
       const lines = series.map((entry) => {
         const points = buildPlotPoints(entry.values, scale, plotWidth, plotTop, plotHeight);
         const line = Skia.Path.MakeFromSVGString(buildLinePath(points) || 'M 0 0');
-        return { key: entry.key, color: entry.color, points, line };
+        const clipSvg = points
+          .map((point) => buildClipMarkerPath(point, DOT_RING_RADIUS))
+          .filter(Boolean)
+          .join(' ');
+        const clipMarkers = clipSvg ? Skia.Path.MakeFromSVGString(clipSvg) : null;
+        return { key: entry.key, color: entry.color, points, line, clipMarkers };
       });
       const primary = lines[0];
       const areaSvg =
@@ -185,9 +233,15 @@ export const TrendLineChart = React.memo(
       const zeroY = scale.min < 0 && scale.max > 0 ? valueToY(0, scale, plotTop, plotHeight) : null;
       const zeroLine =
         zeroY === null ? null : Skia.Path.MakeFromSVGString(`M 0 ${zeroY} L ${plotWidth} ${zeroY}`);
+      // An average past a cap sits on that edge, like a capped point.
       const averageY =
         averageValue !== null && averageValue !== undefined && Number.isFinite(averageValue)
-          ? valueToY(averageValue, scale, plotTop, plotHeight)
+          ? valueToY(
+              Math.min(scale.max, Math.max(scale.min, averageValue)),
+              scale,
+              plotTop,
+              plotHeight,
+            )
           : null;
       const averageLine =
         averageY === null
@@ -207,6 +261,8 @@ export const TrendLineChart = React.memo(
       plotTop,
       plotWidth,
       series,
+      valueCeiling,
+      valueFloor,
       zeroBased,
     ]);
 
@@ -216,11 +272,17 @@ export const TrendLineChart = React.memo(
     );
     const selectedPoints = useMemo(
       () =>
-        geometry.lines.map((line) => ({
-          key: line.key,
-          color: line.color,
-          point: line.points.find((point) => point.index === selectedIndex) ?? null,
-        })),
+        geometry.lines.map((line) => {
+          const point = line.points.find((candidate) => candidate.index === selectedIndex) ?? null;
+          return {
+            key: line.key,
+            color: line.color,
+            point,
+            clipMarker: point?.clipped
+              ? Skia.Path.MakeFromSVGString(buildClipMarkerPath(point, SELECTED_RING_RADIUS))
+              : null,
+          };
+        }),
       [geometry.lines, selectedIndex],
     );
     const selectedX =
@@ -406,8 +468,9 @@ export const TrendLineChart = React.memo(
               line.points
                 // Past the dotted limit, only a point with no line on either
                 // side gets a dot, or it would not show at all.
-                .filter((point: TrendLinePlotPoint, index, points) =>
-                  showAllDots ? true : isLonePoint(point, index, points),
+                .filter(
+                  (point: TrendLinePlotPoint, index, points) =>
+                    !point.clipped && (showAllDots || isLonePoint(point, index, points)),
                 )
                 .map((point: TrendLinePlotPoint) => (
                   <React.Fragment key={`${line.key}-${point.index}`}>
@@ -416,8 +479,30 @@ export const TrendLineChart = React.memo(
                   </React.Fragment>
                 )),
             )}
+            {/* A point past a cap always shows, as an arrowhead off the chart. */}
+            {geometry.lines.map((line) =>
+              line.clipMarkers ? (
+                <ClipMarker
+                  key={`${line.key}-clipped`}
+                  path={line.clipMarkers}
+                  color={line.color}
+                  surfaceColor={surfaceColor}
+                  outlineWidth={3}
+                />
+              ) : null,
+            )}
             {selectedPoints.map((entry) =>
-              entry.point ? (
+              entry.point?.clipped ? (
+                entry.clipMarker ? (
+                  <ClipMarker
+                    key={`selected-${entry.key}`}
+                    path={entry.clipMarker}
+                    color={entry.color}
+                    surfaceColor={surfaceColor}
+                    outlineWidth={3.5}
+                  />
+                ) : null
+              ) : entry.point ? (
                 <React.Fragment key={`selected-${entry.key}`}>
                   <Circle
                     cx={entry.point.x}
@@ -579,6 +664,8 @@ export const TrendLineChart = React.memo(
     previous.averageLabel === next.averageLabel &&
     previous.zeroBased === next.zeroBased &&
     previous.minTickStep === next.minTickStep &&
+    previous.valueFloor === next.valueFloor &&
+    previous.valueCeiling === next.valueCeiling &&
     previous.gridColor === next.gridColor &&
     previous.labelColor === next.labelColor &&
     previous.surfaceColor === next.surfaceColor &&
