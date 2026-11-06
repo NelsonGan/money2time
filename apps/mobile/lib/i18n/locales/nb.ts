@@ -112,6 +112,7 @@ const nb = {
     tab_reimbursements: 'Refusjoner',
     tab_receipts: 'Kvitteringer',
     tab_settle_up: 'Hvem skylder deg',
+    tab_instalments: 'Delbetalinger',
     tab_calendar: 'Kalender',
     tab_accounts: 'Kontoer',
     tab_insights: 'Innsikt',

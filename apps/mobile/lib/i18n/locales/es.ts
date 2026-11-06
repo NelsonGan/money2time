@@ -112,6 +112,7 @@ const es = {
     tab_reimbursements: 'Reembolsos',
     tab_receipts: 'Recibos',
     tab_settle_up: 'Quién te debe',
+    tab_instalments: 'Pagos a plazos',
     tab_calendar: 'Calendario',
     tab_accounts: 'Cuentas',
     tab_insights: 'Análisis',

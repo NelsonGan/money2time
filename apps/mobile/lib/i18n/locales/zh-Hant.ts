@@ -110,6 +110,7 @@ const zhHant = {
     tab_reimbursements: '報銷',
     tab_receipts: '收據',
     tab_settle_up: '誰欠你錢',
+    tab_instalments: '分期付款',
     tab_calendar: '日曆',
     tab_accounts: '帳戶',
     tab_insights: '洞察',

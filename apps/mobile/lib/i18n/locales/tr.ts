@@ -112,6 +112,7 @@ const tr = {
     tab_reimbursements: 'Geri ödemeler',
     tab_receipts: 'Fişler',
     tab_settle_up: 'Size kim borçlu',
+    tab_instalments: 'Taksitler',
     tab_calendar: 'Takvim',
     tab_accounts: 'Hesaplar',
     tab_insights: 'Analizler',

@@ -112,6 +112,7 @@ const pl = {
     tab_reimbursements: 'Zwroty kosztów',
     tab_receipts: 'Paragony',
     tab_settle_up: 'Kto jest ci winien',
+    tab_instalments: 'Raty',
     tab_calendar: 'Kalendarz',
     tab_accounts: 'Konta',
     tab_insights: 'Analizy',

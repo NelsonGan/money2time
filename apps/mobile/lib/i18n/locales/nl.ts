@@ -112,6 +112,7 @@ const nl = {
     tab_reimbursements: 'Vergoedingen',
     tab_receipts: 'Bonnen',
     tab_settle_up: 'Wie jou nog moet betalen',
+    tab_instalments: 'Termijnbetalingen',
     tab_calendar: 'Agenda',
     tab_accounts: 'Rekeningen',
     tab_insights: 'Inzichten',
