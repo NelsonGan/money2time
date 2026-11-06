@@ -17,6 +17,8 @@ export type TrendLinePlotPoint = {
   x: number;
   y: number;
   value: number;
+  /** Past the scale's floor or ceiling: drawn pinned to that edge. */
+  clipped: 'low' | 'high' | null;
 };
 
 /**
@@ -52,18 +54,29 @@ export function niceTicks(low: number, high: number, targetCount = 4, minStep = 
  * at zero (`zeroBased`), so a line's height reads as an amount; a balance that
  * can dip below zero or barely moves keeps its own range, with headroom, so its
  * direction is visible. The range is snapped to round ticks.
+ *
+ * `floor` and `ceiling` cap the range for a value that can run away from the
+ * rest, like a savings rate in a month that spent several times its income:
+ * one -350% month would otherwise squash every other month into a flat line.
+ * Values past a cap are drawn pinned to that edge (see `buildPlotPoints`).
  */
 export function buildTrendLineScale(
   series: readonly TrendLineSeriesValues[],
-  { zeroBased, minStep = 0 }: { zeroBased: boolean; minStep?: number },
+  {
+    zeroBased,
+    minStep = 0,
+    floor = Number.NEGATIVE_INFINITY,
+    ceiling = Number.POSITIVE_INFINITY,
+  }: { zeroBased: boolean; minStep?: number; floor?: number; ceiling?: number },
 ): TrendLineScale {
   let low = Number.POSITIVE_INFINITY;
   let high = Number.NEGATIVE_INFINITY;
   series.forEach((values) =>
     values.forEach((value) => {
       if (value === null || !Number.isFinite(value)) return;
-      if (value < low) low = value;
-      if (value > high) high = value;
+      const capped = Math.min(ceiling, Math.max(floor, value));
+      if (capped < low) low = capped;
+      if (capped > high) high = capped;
     }),
   );
   if (low === Number.POSITIVE_INFINITY) {
@@ -84,11 +97,18 @@ export function buildTrendLineScale(
     low -= pad;
     high += pad;
   }
+  // Headroom never reaches past a cap, so the edge stays the cap.
+  low = Math.max(floor, low);
+  high = Math.min(ceiling, high);
   const ticks = niceTicks(low, high, 4, minStep);
+  // Snapping to round ticks never reaches past a cap either (a -150 floor
+  // with 100-wide steps would otherwise stretch the range to -200).
+  const min = Math.max(floor, Math.min(low, ticks[0] ?? low));
+  const max = Math.min(ceiling, Math.max(high, ticks[ticks.length - 1] ?? high));
   return {
-    min: Math.min(low, ticks[0] ?? low),
-    max: Math.max(high, ticks[ticks.length - 1] ?? high),
-    ticks,
+    min,
+    max,
+    ticks: ticks.filter((tick) => tick >= min - 1e-9 && tick <= max + 1e-9),
   };
 }
 
@@ -108,7 +128,10 @@ export function valueToY(
   return top + (1 - (value - scale.min) / span) * plotHeight;
 }
 
-/** Every bucket that has a value, placed in the plot. Null buckets are skipped. */
+/**
+ * Every bucket that has a value, placed in the plot. Null buckets are skipped.
+ * A value outside the scale sits on its edge, marked `clipped`.
+ */
 export function buildPlotPoints(
   values: TrendLineSeriesValues,
   scale: Pick<TrendLineScale, 'min' | 'max'>,
@@ -119,14 +142,34 @@ export function buildPlotPoints(
   const points: TrendLinePlotPoint[] = [];
   values.forEach((value, index) => {
     if (value === null || !Number.isFinite(value)) return;
+    const clipped = value < scale.min ? 'low' : value > scale.max ? 'high' : null;
+    const drawn = Math.min(scale.max, Math.max(scale.min, value));
     points.push({
       index,
       x: bucketCenterX(index, values.length, plotWidth),
-      y: valueToY(value, scale, top, plotHeight),
+      y: valueToY(drawn, scale, top, plotHeight),
       value,
+      clipped,
     });
   });
   return points;
+}
+
+/**
+ * The marker for a point pinned to an edge: a triangle centred on it that
+ * points off the chart, the way the line would carry on if it had room.
+ */
+export function buildClipMarkerPath(point: TrendLinePlotPoint, radius: number): string {
+  if (!point.clipped) return '';
+  const tip = point.clipped === 'low' ? 1 : -1;
+  const x = point.x;
+  const y = point.y;
+  const half = radius * 1.05;
+  return (
+    `M ${round(x - half)} ${round(y - tip * radius * 0.7)} ` +
+    `L ${round(x + half)} ${round(y - tip * radius * 0.7)} ` +
+    `L ${round(x)} ${round(y + tip * radius * 1.1)} Z`
+  );
 }
 
 /**

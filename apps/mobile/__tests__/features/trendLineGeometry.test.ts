@@ -2,6 +2,7 @@ import {
   axisLabelStep,
   bucketIndexAtX,
   buildAreaPath,
+  buildClipMarkerPath,
   buildLinePath,
   buildPlotPoints,
   buildTrendLineScale,
@@ -55,6 +56,68 @@ describe('rounded and nearly flat axes', () => {
     const scale = buildTrendLineScale([[1500, 1500.0000000000002]], { zeroBased: false });
     expect(new Set(scale.ticks).size).toBe(scale.ticks.length);
     expect(scale.max - scale.min).toBeGreaterThan(100);
+  });
+});
+
+describe('capped ranges', () => {
+  // A year of savings rates with one month that spent ~4x its income.
+  const rates = [46.4, 92.8, 45.7, 69.1, 63.6, 55.6, -357.3, 69.9, 45, 55, 4, 9];
+
+  it('keeps one runaway month from flattening the rest', () => {
+    const scale = buildTrendLineScale([rates], {
+      zeroBased: true,
+      minStep: 1,
+      floor: -100,
+      ceiling: 100,
+    });
+    expect(scale.min).toBe(-100);
+    expect(scale.max).toBeGreaterThanOrEqual(92.8);
+    expect(scale.max).toBeLessThanOrEqual(100);
+    expect(scale.ticks).toContain(0);
+  });
+
+  it('pins a value past the cap to the edge and marks it', () => {
+    const scale = buildTrendLineScale([rates], { zeroBased: true, floor: -100, ceiling: 100 });
+    const points = buildPlotPoints(rates, scale, 1200, 0, 100);
+    const july = points[6]!;
+    expect(july.value).toBe(-357.3);
+    expect(july.clipped).toBe('low');
+    expect(july.y).toBe(100);
+    expect(points.filter((point) => point.clipped)).toHaveLength(1);
+  });
+
+  it('leaves the range alone when nothing reaches a cap', () => {
+    const capped = buildTrendLineScale([[20, 45, -30]], {
+      zeroBased: true,
+      floor: -100,
+      ceiling: 100,
+    });
+    const uncapped = buildTrendLineScale([[20, 45, -30]], { zeroBased: true });
+    expect(capped).toEqual(uncapped);
+  });
+
+  it('still draws a range when every value is past a cap', () => {
+    const scale = buildTrendLineScale([[-250, -400]], { zeroBased: true, floor: -100 });
+    expect(scale.min).toBe(-100);
+    expect(scale.max).toBe(0);
+  });
+
+  it('does not let round ticks stretch the range past a cap', () => {
+    const scale = buildTrendLineScale([[-400, -180, 20]], { zeroBased: true, floor: -150 });
+    expect(scale.min).toBe(-150);
+    expect(scale.ticks.every((tick) => tick >= -150)).toBe(true);
+    const points = buildPlotPoints([-400, -180, 20], scale, 300, 0, 100);
+    expect(points.map((point) => point.clipped)).toEqual(['low', 'low', null]);
+  });
+
+  it('points the marker off the chart', () => {
+    const base = { index: 0, x: 50, y: 100, value: -357 };
+    const low = buildClipMarkerPath({ ...base, clipped: 'low' }, 5);
+    const high = buildClipMarkerPath({ ...base, y: 0, value: 400, clipped: 'high' }, 5);
+    // The tip is the last vertex: below the point for low, above for high.
+    expect(low).toMatch(/L 50 105\.5 Z$/);
+    expect(high).toMatch(/L 50 -5\.5 Z$/);
+    expect(buildClipMarkerPath({ ...base, clipped: null }, 5)).toBe('');
   });
 });
 
