@@ -3928,16 +3928,16 @@ email codes, expired invite links and rate-limit rows older than a day.
 - **Images.** Uploads need a `Content-Length` (at most 15 MB); a full quota
   is refused before the body is read, and a failed or abandoned write is
   uncounted (an upload the phone drops midway is a 400). Every R2 call (head,
-  get, put, list, delete) is retried twice, after about 100 and 400 ms with
+  get, put, list, delete) is retried twice, after about 200 ms and 1 s with
   jitter, when R2 answers one of the codes its docs say to retry: internal
-  error `10001`, unavailable `10043`, too many requests `10058`. A burst of
-  `10001` on 2026-11-06 failed image uploads and checks for several phones at
-  once (PostHog `01a1ae5f`, `01a1ae9d`). Other R2 errors are not retried. A
-  write can only be sent again from memory, so images up to 4 MB (all of the
-  app's compressed photos) are read whole first; larger ones stream once, so
-  a few big uploads cannot fill the Worker's memory. `media_usage` caps an
-  account at
-  20,000 images; when the counter says full, the real count is read from R2
+  error `10001`, unavailable `10043`, too many requests `10058` (R2 allows
+  about one write per second to the same object). A burst of `10001` on
+  2026-11-06 failed image uploads and checks for several phones at once
+  (PostHog `01a1ae5f`, `01a1ae9d`). Other R2 errors are not retried. A write
+  can only be sent again from memory, so images up to 4 MB (all of the app's
+  compressed photos) are read whole first; larger ones stream once, so a few
+  big uploads cannot fill the Worker's memory. `media_usage` caps an account
+  at 20,000 images; when the counter says full, the real count is read from R2
   first, so drift never refuses an upload. Images the app stops using stay in
   R2 until the account is deleted (there is no per-image delete yet).
 - **Turso.** A database `m2t-sync-<24 hex of sha256(userId)>` in

@@ -63,10 +63,12 @@ export function contentTypeFor(path: string): string | null {
  * a 500 the app reported as a sync error. R2 ends every error message with its
  * code; these are the ones its docs say to retry (internal error, service
  * unavailable, too many requests). Anything else (a missing object, a bad
- * request) would fail the same way again.
+ * request) would fail the same way again. The last wait is about a second
+ * because R2 allows about one write per second to the same object, the usual
+ * cause of a too-many-requests answer.
  */
 const RETRYABLE_R2_CODES = new Set(['10001', '10043', '10058']);
-const R2_RETRY_DELAYS_MS = [100, 400];
+const R2_RETRY_DELAYS_MS = [200, 1000];
 
 function isRetryableR2Error(error: unknown): boolean {
   const code = error instanceof Error ? /\((\d+)\)\s*$/.exec(error.message)?.[1] : undefined;
