@@ -6,8 +6,8 @@ const ColumnGutterContext = createContext(0);
 /**
  * Declares how far the readable column its children are laid out in sits
  * from the window's right edge, on top of any column it is already inside.
- * Only set on iPad (`wideTabs`); 0 everywhere else, so nothing moves on a
- * phone or the iPhone Duo.
+ * Only set in a wide window (iPad, the open iPhone Duo); 0 everywhere else,
+ * so nothing moves on a phone or the closed Duo.
  */
 export function ColumnGutterProvider({
   gutter,
@@ -29,7 +29,7 @@ export function ColumnGutterProvider({
  * Space between this component's readable column and the window's right
  * edge. A floating button positioned against the column's right edge
  * subtracts it from `right` to sit in the window's corner instead of over the
- * column's content (iPad); 0 elsewhere.
+ * column's content (iPad, the open Duo); 0 elsewhere.
  */
 export function useColumnGutter(): number {
   return useContext(ColumnGutterContext);
@@ -37,8 +37,8 @@ export function useColumnGutter(): number {
 
 /**
  * An absolutely positioned view `right` points from its column's right edge,
- * moved out to the window's corner on iPad (`useColumnGutter`). For floating
- * buttons rendered inside a readable column.
+ * moved out to the window's corner on iPad and the open Duo
+ * (`useColumnGutter`). For floating buttons rendered inside a readable column.
  */
 export function ColumnCornerView({ right, style, ...props }: ViewProps & { right: number }) {
   const gutter = useColumnGutter();

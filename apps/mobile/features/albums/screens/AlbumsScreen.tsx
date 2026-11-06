@@ -84,6 +84,7 @@ export function AlbumsScreen({
   }, [scrollRef, scrollToTopToken]);
 
   const contentWidth = pageWidth - SCREEN_PADDING * 2;
+  const isTwoColumn = wideColumns.columns > 1;
   const cardWidth = (contentWidth - GRID_GAP * (wideColumns.columns - 1)) / wideColumns.columns;
 
   const activeOptions = useMemo(
@@ -260,11 +261,20 @@ export function AlbumsScreen({
                       </Sortable.Flex>
                     </Animated.ScrollView>
 
+                    {/* Two columns: the label over the left column and the
+                        picker over the right, so the open Duo's fold falls
+                        between them. */}
                     <View
                       className="flex-row items-center gap-3 border-t border-border/40 bg-background px-5 pt-2"
-                      style={{ paddingBottom: bottomNavInset }}
+                      style={[
+                        { paddingBottom: bottomNavInset },
+                        isTwoColumn && { paddingHorizontal: SCREEN_PADDING, gap: GRID_GAP },
+                      ]}
                     >
-                      <View className="flex-row items-center gap-2" style={{ maxWidth: '46%' }}>
+                      <View
+                        className="flex-row items-center gap-2"
+                        style={isTwoColumn ? { flex: 1 } : { maxWidth: '46%' }}
+                      >
                         <Sparkles size={15} color={themeColors.textMuted} />
                         <Text variant="label" tone="muted" numberOfLines={2}>
                           {I18n.t('albums.active_label')}

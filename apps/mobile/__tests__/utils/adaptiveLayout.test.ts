@@ -1,4 +1,5 @@
 import {
+  foldSpan,
   readableColumn,
   readableColumnPadding,
   resolveAdaptiveLayout,
@@ -230,6 +231,14 @@ describe('wideTabColumns', () => {
     expect(wideTabColumns(1292, false)).toEqual({ columns: 1, maxWidth: null });
   });
 
+  it('splits a page in the open Duo’s fold frame into two columns across it', () => {
+    expect(wideTabColumns(783, false, true)).toEqual({ columns: 2, maxWidth: 783 });
+  });
+
+  it('keeps the iPad rules on iPad whatever the frame says', () => {
+    expect(wideTabColumns(750, true, true)).toEqual({ columns: 1, maxWidth: 600 });
+  });
+
   it('lays out two columns beside the rail on a 13-inch iPad, both ways round', () => {
     expect(wideTabColumns(1292, true)).toEqual({
       columns: 2,
@@ -240,5 +249,20 @@ describe('wideTabColumns', () => {
 
   it('keeps one readable column on an 11-inch iPad in portrait', () => {
     expect(wideTabColumns(750, true)).toEqual({ columns: 1, maxWidth: 600 });
+  });
+});
+
+describe('foldSpan', () => {
+  it('centres the frame on the fold beside a right-hand rail on the open Duo', () => {
+    // 951 pt window less the 84 pt rail; the fold is at 475.5 pt.
+    expect(foldSpan(867, 475.5)).toEqual({ width: 783, left: 84, right: 0 });
+  });
+
+  it('mirrors it when the rail is on the left', () => {
+    expect(foldSpan(867, 391.5)).toEqual({ width: 783, left: 0, right: 84 });
+  });
+
+  it('uses the whole width when the fold is in the middle', () => {
+    expect(foldSpan(800, 400)).toEqual({ width: 800, left: 0, right: 0 });
   });
 });

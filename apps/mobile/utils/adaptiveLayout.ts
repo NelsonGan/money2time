@@ -55,8 +55,8 @@ interface AdaptiveLayout {
   isWide: boolean;
   /**
    * Tab pages with a wide layout of their own (grids, side-by-side cards) may
-   * use the whole content width. iPad only: on the open Duo it would straddle
-   * the fold.
+   * use the whole content width. iPad only: on the open Duo they get a frame
+   * centred on the fold instead (`foldSpan`), so nothing straddles the hinge.
    */
   wideTabs: boolean;
   /**
@@ -183,16 +183,36 @@ const WIDE_TAB_TWO_COLUMN_MIN_WIDTH = 880;
  * How a tab page with a wide layout of its own (Accounts, Albums, Settings)
  * uses `available` width. On iPad (`wideTabs`) it gets two columns once there
  * is room for them, in a column of at most `WIDE_TAB_CONTENT_MAX_WIDTH`;
- * narrower, a single readable column. Elsewhere one column, with the width
- * left to the page as before (`maxWidth` null).
+ * narrower, a single readable column. On the open iPhone Duo, in a frame
+ * centred on the fold (`onFold`, see `foldSpan`), two columns across the
+ * whole frame, so they meet on the hinge. Elsewhere one column, with the
+ * width left to the page as before (`maxWidth` null).
  */
 export function wideTabColumns(
   available: number,
   wideTabs: boolean,
+  onFold = false,
 ): { columns: 1 | 2; maxWidth: number | null } {
+  if (onFold && !wideTabs) return { columns: 2, maxWidth: available };
   if (!wideTabs) return { columns: 1, maxWidth: null };
   if (available >= WIDE_TAB_TWO_COLUMN_MIN_WIDTH) {
     return { columns: 2, maxWidth: WIDE_TAB_CONTENT_MAX_WIDTH };
   }
   return { columns: 1, maxWidth: READABLE_COLUMN_MAX_WIDTH };
+}
+
+/**
+ * The open iPhone Duo's frame for a page with two equal columns of its own
+ * (`wideTabColumns`): centred on the fold and twice as wide as the narrower
+ * side, so the columns meet on the hinge, one on each half of the display,
+ * and the side rail is balanced by an equal margin on the other side.
+ * `foldAt` is where the fold falls within `available`. Returns the frame's
+ * width and the margins left on each side of it.
+ */
+export function foldSpan(
+  available: number,
+  foldAt: number,
+): { width: number; left: number; right: number } {
+  const half = Math.max(0, Math.min(foldAt, available - foldAt));
+  return { width: half * 2, left: foldAt - half, right: available - foldAt - half };
 }

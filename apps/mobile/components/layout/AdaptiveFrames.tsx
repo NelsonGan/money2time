@@ -6,7 +6,7 @@ import { ColumnGutterProvider } from '~/components/layout/ColumnGutter';
 import { ContentFrameProvider } from '~/components/layout/ContentFrame';
 import { WINDOW_CONTROLS_CLEARANCE } from '~/components/navigation/floatingNav';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
-import { readableColumn } from '~/utils/adaptiveLayout';
+import { foldSpan, readableColumn } from '~/utils/adaptiveLayout';
 
 /*
  * The areas screens are laid out in beside the side rail (iPhone Duo, iPad).
@@ -42,24 +42,32 @@ export function SideStripSafeArea({
 }: {
   children: React.ReactNode;
   /**
-   * The route has a wide iPad layout of its own (`useWideTabColumns`), so on
-   * iPad it gets the whole window instead of the readable column. The Duo
-   * still centres it.
+   * The route has a wide layout of its own (`useWideTabColumns`), so on iPad
+   * it gets the whole window instead of the readable column, and on the open
+   * Duo the frame centred on the fold (`foldSpan`).
    */
   ownsWidth?: boolean;
 }) {
-  const { navPlacement, isWide, wideTabs, screenWidth, screenHeight } = useDeviceLayout();
+  const { navPlacement, isWide, isTwoPane, wideTabs, screenWidth, screenHeight } =
+    useDeviceLayout();
   const { left, right } = useSafeAreaInsets();
   if (navPlacement !== 'side') return <>{children}</>;
 
-  const column = readableColumn(screenWidth - left - right, isWide && !(ownsWidth && wideTabs));
+  const available = screenWidth - left - right;
+  // The Duo folds down the window's centre.
+  const fold =
+    ownsWidth && isTwoPane && !wideTabs ? foldSpan(available, screenWidth / 2 - left) : null;
+  const column = readableColumn(available, isWide && !(ownsWidth && wideTabs));
+  const frame = fold ?? { width: column.width, left: column.margin, right: column.margin };
   return (
     <View
       className="flex-1 bg-background"
-      style={{ paddingLeft: left + column.margin, paddingRight: right + column.margin }}
+      style={{ paddingLeft: left + frame.left, paddingRight: right + frame.right }}
     >
-      <ColumnGutterProvider gutter={wideTabs ? column.margin + right : 0}>
-        <ContentFrameProvider width={column.width} height={screenHeight}>
+      {/* Floating buttons go to the window's corner, or on the Duo the
+          corner beside its side strip. */}
+      <ColumnGutterProvider gutter={wideTabs ? frame.right + right : isWide ? frame.right : 0}>
+        <ContentFrameProvider width={frame.width} height={screenHeight} onFold={fold !== null}>
           {children}
         </ContentFrameProvider>
       </ColumnGutterProvider>

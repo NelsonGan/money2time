@@ -181,7 +181,7 @@ import type {
   WeekStartsOn,
 } from '~/types';
 import { cn } from '~/utils';
-import { readableColumn, wideTabColumns } from '~/utils/adaptiveLayout';
+import { foldSpan, readableColumn, wideTabColumns } from '~/utils/adaptiveLayout';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { withColorAlpha } from '~/utils/color';
 import { convert } from '~/utils/currency';
@@ -396,7 +396,7 @@ const TREND_INSIGHT_TYPE_BY_KIND = {
 } as const;
 const EMPTY_TRANSACTIONS: TransactionWithRelations[] = [];
 const SENTIMENT_CHART_HEIGHT = 280;
-/** iPad's left pane has the height for taller line charts. */
+/** A split pane (iPad, the open Duo) has the height for taller line charts. */
 const WIDE_LINE_CHART_SCALE = 1.6;
 const SENTIMENT_COLORS = { happy: '#4CAF50', neutral: '#FFB74D', sad: '#E57373' } as const;
 const INSIGHTS_LINE_CHART_SIDE_INSET = 8;
@@ -4232,16 +4232,25 @@ export function InsightsScreen({
   // single pages, so they sit in a readable column instead.
   const isLockedProTrend = !isPro && proTrendTypeSet.has(displaySelectedInsightType);
   const splitPanes = panes && !isLoading && !isTakeoverView && !isLockedProTrend ? panes : null;
-  // iPad (`wideTabs`): Review and Budget lay out two columns of their own,
-  // so they get the whole width rather than the readable column.
-  const ownsWidePage = wideTabs && (isReviewView || isBudgetView);
+  // Review and Budget lay out two columns of their own, so on iPad
+  // (`wideTabs`) they get the whole width rather than the readable column,
+  // and on the open Duo the frame centred on the fold, a column each side.
+  const isWidePageView = isReviewView || isBudgetView;
+  const ownsWidePage = wideTabs && isWidePageView;
   const widePageMaxWidth = ownsWidePage ? wideTabColumns(width, wideTabs).maxWidth : undefined;
-  const column = readableColumn(width, panes !== null && splitPanes === null && !ownsWidePage);
-  // iPad, split: the line charts grow into the pane's height instead of
-  // keeping their phone height over an empty half pane.
+  const foldPage =
+    !wideTabs && panes && !isLoading && isWidePageView ? foldSpan(width, panes.left) : null;
+  const readable = readableColumn(width, panes !== null && splitPanes === null && !ownsWidePage);
+  const column = foldPage ?? {
+    width: readable.width,
+    left: readable.margin,
+    right: readable.margin,
+  };
+  // Split (iPad, the open Duo): the line charts grow into the pane's height
+  // instead of keeping their phone height over an empty half pane.
   const lineChartHeight = useCallback(
-    (base: number) => (wideTabs && splitPanes ? Math.round(base * WIDE_LINE_CHART_SCALE) : base),
-    [wideTabs, splitPanes],
+    (base: number) => (splitPanes ? Math.round(base * WIDE_LINE_CHART_SCALE) : base),
+    [splitPanes],
   );
   const insightsSplit = useMemo<InsightsSplit | null>(
     () =>
@@ -6734,8 +6743,8 @@ export function InsightsScreen({
   );
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      <View style={[styles.flexOne, { paddingHorizontal: column.margin }]}>
-        <ContentFrameProvider width={column.width} height={height}>
+      <View style={[styles.flexOne, { paddingLeft: column.left, paddingRight: column.right }]}>
+        <ContentFrameProvider width={column.width} height={height} onFold={foldPage !== null}>
           <View
             // Above the pages: a Skia chart is not clipped by its scroll view, so
             // a scrolled chart would otherwise draw over the header.

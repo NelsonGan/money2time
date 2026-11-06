@@ -266,7 +266,7 @@ import type {
   TransactionWithRelations,
   WageConfig,
 } from '~/types';
-import { readableColumn } from '~/utils/adaptiveLayout';
+import { foldSpan, readableColumn } from '~/utils/adaptiveLayout';
 import { financialMonthKeyForDate, monthCycleOf } from '~/utils/financialMonth';
 import { dayKeyFromIsoLocal } from '~/utils/formatters';
 import { runAfterInteractions } from '~/utils/interactions';
@@ -369,7 +369,8 @@ const styles = StyleSheet.create({
 const TWO_PANE_TABS: ReadonlySet<MainTab> = new Set<MainTab>(['calendar', 'insights']);
 /**
  * Tabs with a wide layout of their own (grids, cards side by side), given the
- * whole content width where `wideTabs` allows it (iPad).
+ * whole content width where `wideTabs` allows it (iPad), and on the open
+ * iPhone Duo a frame centred on the fold, so their two columns meet on it.
  */
 const WIDE_TABS: ReadonlySet<MainTab> = new Set<MainTab>([
   'accounts',
@@ -379,8 +380,8 @@ const WIDE_TABS: ReadonlySet<MainTab> = new Set<MainTab>([
   'settings',
 ]);
 /**
- * Root routes with a wide iPad layout of their own, given the whole window
- * there instead of the readable column.
+ * Root routes with a wide layout of their own, given the whole window on iPad
+ * instead of the readable column, and the fold frame on the open Duo.
  */
 const WIDE_ROUTES: ReadonlySet<string> = new Set(['AlbumDetail']);
 
@@ -434,27 +435,30 @@ function MountedTab({
   }, [name, shouldMount]);
 
   // Wide windows (open iPhone Duo, iPad): Home and Insights lay out their own
-  // two panes, and on iPad the pages with a wide layout of their own take the
-  // whole width; every other page sits in a readable column. Only the slot's
-  // insets change when the device folds or the window resizes, so a page
-  // keeps its state. The frame is the window elsewhere.
-  const { isWide, isTwoPane, wideTabs } = useDeviceLayout();
+  // two panes, and the pages with a wide layout of their own take the whole
+  // width on iPad and the frame centred on the fold on the Duo; every other
+  // page sits in a readable column. Only the slot's insets change when the
+  // device folds or the window resizes, so a page keeps its state. The frame
+  // is the window elsewhere.
+  const { isWide, isTwoPane, wideTabs, panes } = useDeviceLayout();
   const frame = useContentFrame();
+  const fold = !wideTabs && panes && WIDE_TABS.has(name) ? foldSpan(frame.width, panes.left) : null;
   const ownsWidth = (isTwoPane && TWO_PANE_TABS.has(name)) || (wideTabs && WIDE_TABS.has(name));
   const column = readableColumn(frame.width, isWide && !ownsWidth);
+  const slot = fold ?? { width: column.width, left: column.margin, right: column.margin };
 
   return (
     <View
       pointerEvents={active ? 'auto' : 'none'}
       style={[
         styles.tabSlot,
-        column.margin > 0 && { left: column.margin, right: column.margin },
+        (slot.left > 0 || slot.right > 0) && { left: slot.left, right: slot.right },
         active ? styles.tabVisible : styles.tabHidden,
       ]}
     >
       {shouldMount ? (
-        <ColumnGutterProvider gutter={wideTabs ? column.margin : 0}>
-          <ContentFrameProvider width={column.width} height={frame.height}>
+        <ColumnGutterProvider gutter={isWide ? slot.right : 0}>
+          <ContentFrameProvider width={slot.width} height={frame.height} onFold={fold !== null}>
             <TransactionsWhileVisible key={resetKey} visible={active}>
               {children}
             </TransactionsWhileVisible>

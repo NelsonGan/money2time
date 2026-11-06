@@ -32,6 +32,7 @@ import { DatePickerModal, MonthYearWheelPicker } from '~/components/datePicker';
 import { monthsBetween, shiftYearMonth, yearMonthFromKey } from '~/components/datePicker/monthJump';
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { ColumnCornerView } from '~/components/layout/ColumnGutter';
+import { useContentFrame } from '~/components/layout/ContentFrame';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { ADD_FAB_SIZE, AddFabButton } from '~/components/navigation/AddFab';
 import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
@@ -278,8 +279,12 @@ function AccountsSummaryBlock({
   themeColors: AccountsSummaryThemeColors;
   renderValue: AccountsSummaryRenderValue;
   onPressNetAssets?: () => void;
-  /** iPad: net assets, assets and debt in one row across the wide page. */
-  inline?: boolean;
+  /**
+   * Net assets, assets and debt in one row across the wide page: net assets
+   * a third of it on iPad, half on the open Duo (`'halves'`), so the divider
+   * falls on the fold instead of a figure.
+   */
+  inline?: boolean | 'halves';
 }) {
   const netIsNegative = net < 0;
   // Positive/zero net uses the neutral foreground tone instead of the user's
@@ -308,7 +313,12 @@ function AccountsSummaryBlock({
             : undefined
         }
         disabled={!onPressNetAssets}
-        className={cn('px-4 pt-3.5 pb-3 active:opacity-85', inline && 'flex-1 justify-center')}
+        className={cn(
+          'px-4 pt-3.5 pb-3 active:opacity-85',
+          // Halves: an exact half, since flex would share out the space after
+          // this cell's padding and leave it wider than the other half.
+          inline && (inline === 'halves' ? 'w-1/2 justify-center' : 'flex-1 justify-center'),
+        )}
         accessibilityRole={onPressNetAssets ? 'button' : undefined}
         accessibilityLabel={I18n.t('accounts.net_assets')}
       >
@@ -332,7 +342,7 @@ function AccountsSummaryBlock({
       <View className={inline ? 'w-px bg-border/40' : 'h-px bg-border/40'} />
 
       {/* Footer: Assets / Debt side-by-side */}
-      <View className={cn('flex-row', inline && 'flex-[2]')}>
+      <View className={cn('flex-row', inline && (inline === 'halves' ? 'flex-1' : 'flex-[2]'))}>
         <View className={cn('flex-1 px-4 py-2.5', inline && 'justify-center')}>
           <View className="flex-row items-center gap-1.5">
             <ArrowUpRight size={12} color={themeColors.success} strokeWidth={2.4} />
@@ -3145,8 +3155,9 @@ export function AccountsScreen({
   const themeColors = useThemeColors();
   const listNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
   const { contentWidth: windowWidth } = useDeviceLayout();
-  // iPad: the overview lays its groups out in two columns.
+  // iPad and the open Duo: the overview lays its groups out in two columns.
   const overviewColumns = useWideTabColumns();
+  const { onFold = false } = useContentFrame();
   const accountRowThemeColors = useMemo(
     () => ({
       accent: themeColors.accent,
@@ -4513,7 +4524,7 @@ export function AccountsScreen({
               themeColors={themeColors}
               renderValue={renderVisibleBalanceNode}
               onPressNetAssets={onOpenNetAssetsInsight}
-              inline={overviewColumns.columns === 2}
+              inline={overviewColumns.columns === 2 && (onFold ? 'halves' : true)}
             />
           </MonthControlsHeader>
           <AccountCardStack

@@ -20,12 +20,15 @@ export function useDeviceLayout() {
   const { width, height } = useWindowDimensions();
   // The area this screen is laid out in: the window, except beside iPhone
   // Duo's side rail or in a column on its open display.
-  const { width: frameWidth } = useContentFrame();
+  const { width: frameWidth, onFold = false } = useContentFrame();
   const insets = useSafeAreaInsets();
   const isPad = Platform.OS === 'ios' && Platform.isPad;
   return useMemo(() => {
     const isTablet = isTabletSize(width, height);
-    const contentWidth = isTablet ? Math.min(frameWidth, TABLET_CONTENT_MAX_WIDTH) : frameWidth;
+    // A tablet, or a page in the open Duo's fold frame, centres phone-shaped
+    // content in a readable column (`TabletContentContainer`).
+    const contentWidth =
+      isTablet || onFold ? Math.min(frameWidth, TABLET_CONTENT_MAX_WIDTH) : frameWidth;
     // iPhone Duo only: side rail and two panes. Bottom bar everywhere else.
     const adaptive = resolveAdaptiveLayout({
       platform: Platform.OS,
@@ -50,7 +53,7 @@ export function useDeviceLayout() {
       contentWidth,
       ...adaptive,
     };
-  }, [width, height, frameWidth, insets, isPad]);
+  }, [width, height, frameWidth, onFold, insets, isPad]);
 }
 
 export { TABLET_CONTENT_MAX_WIDTH };

@@ -27,6 +27,7 @@ import {
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { DiscordIcon } from '~/components/icons/SocialIcons';
+import { useContentFrame } from '~/components/layout/ContentFrame';
 import { useBottomNavScrollReporter } from '~/components/navigation/BottomNavMinimize';
 import { MonthControlsHeader } from '~/components/navigation/MonthControlsHeader';
 import {
@@ -162,9 +163,11 @@ export function SettingsScreen({
   const bottomNavInset = useSettingsBottomNavInset();
   const reportBottomNavScroll = useBottomNavScrollReporter();
   const scrollViewRef = useRef<ScrollViewInstance | null>(null);
-  // iPad: the profile column beside the tile sections.
+  // iPad: the profile column beside the tile sections. On the open Duo the
+  // two columns are equal, so they meet on the fold.
   const wideColumns = useWideTabColumns();
   const isWide = wideColumns.columns > 1;
+  const { onFold = false } = useContentFrame();
 
   const profileStats = useMemo(() => {
     // Anchor "days tracking" on the earliest transaction, falling back to the
@@ -284,7 +287,7 @@ export function SettingsScreen({
         >
           {/* iPad: the profile and its cards in a column of their own, the
               tile sections beside it. Stacked everywhere else. */}
-          <View style={isWide ? styles.wideAside : undefined}>
+          <View style={isWide ? (onFold ? styles.foldAside : styles.wideAside) : undefined}>
             <View className="mt-3 rounded-[28px] border border-border/40 bg-card p-5 shadow-soft">
               <View className="flex-row items-center gap-4">
                 <Pressable
@@ -902,6 +905,9 @@ const styles = StyleSheet.create({
   },
   wideAside: {
     width: WIDE_ASIDE_WIDTH,
+  },
+  foldAside: {
+    flex: 1,
   },
   wideMain: {
     flex: 1,
