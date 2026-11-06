@@ -11,12 +11,12 @@ import {
 } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { NativeScrollEvent, NativeSyntheticEvent, ScrollViewInstance } from 'react-native';
-import { Alert, Pressable, ScrollView, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
 import { LoadingDots } from '~/components/feedback/LoadingDots';
-import { useContentFrame } from '~/components/layout/ContentFrame';
+import { ContentFrameProvider, useContentFrame } from '~/components/layout/ContentFrame';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { Text } from '~/components/ui';
 import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
@@ -35,6 +35,7 @@ import {
 import { ActivityTransactionList } from '~/features/transactions/components/ActivityTransactionList';
 import { selectDuplicableTransactions } from '~/features/transactions/lib/duplicateTransaction';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { useWideTabColumns } from '~/hooks/useWideTabColumns';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { pickLibraryImage } from '~/services/libraryImagePicker';
@@ -92,6 +93,12 @@ export function AlbumDetailScreen({
   const themeColors = useThemeColors();
   const insets = useSafeAreaInsets();
   const { width: windowWidth, height: windowHeight } = useContentFrame();
+  // Wide iPad: two panes in place of the Breakdown / Transactions tabs.
+  const wideColumns = useWideTabColumns();
+  const isSplit = wideColumns.columns > 1;
+  const splitPaneWidth =
+    (Math.min(windowWidth, wideColumns.maxWidth ?? windowWidth) - SPLIT_PADDING * 2 - SPLIT_GAP) /
+    2;
   const [tab, setTab] = useState<DetailTab>('breakdown');
   const [selectedTransactionIds, setSelectedTransactionIds] = useState<string[]>([]);
   const [showDuplicatePicker, setShowDuplicatePicker] = useState(false);
@@ -426,6 +433,132 @@ export function AlbumDetailScreen({
     return <View className="flex-1 bg-background" />;
   }
 
+  // The cover photo, title and dates. `rounded` for the card it sits in on a
+  // wide iPad.
+  const coverHero = (height: number, rounded = false) => (
+    <View
+      style={[{ height }, rounded && { borderRadius: 20, overflow: 'hidden' }]}
+      className="bg-secondary/40"
+    >
+      {effectiveCoverUri ? (
+        <Image
+          {...REPLAY_PRIVATE}
+          source={{ uri: effectiveCoverUri }}
+          style={{ width: '100%', height: '100%' }}
+          contentFit="cover"
+          transition={120}
+          onError={() => setBrokenCoverUri(effectiveCoverUri)}
+        />
+      ) : (
+        <View className="flex-1 items-center justify-center bg-primary/15">
+          <Text variant="display" tone="muted">
+            {album.name.slice(0, 1).toUpperCase()}
+          </Text>
+        </View>
+      )}
+
+      {/* Change cover photo — top right */}
+      <Pressable
+        onPress={changeCover}
+        accessibilityRole="button"
+        accessibilityLabel={I18n.t('albums.change_cover')}
+        className="absolute right-4 top-4 flex-row items-center gap-1.5 rounded-full bg-black/45 px-3 py-1.5"
+      >
+        <Camera size={14} color="#ffffff" />
+        <Text variant="label" className="text-white">
+          {I18n.t('albums.change_cover')}
+        </Text>
+      </Pressable>
+
+      {/* Title + date — bottom left */}
+      <LinearGradient
+        colors={['transparent', 'rgba(0,0,0,0.55)']}
+        locations={[0, 1]}
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          paddingTop: 44,
+          paddingBottom: 12,
+          paddingHorizontal: 20,
+          alignItems: 'flex-start',
+        }}
+      >
+        <Text variant="bodyStrong" numberOfLines={1} className="text-white">
+          {album.name}
+        </Text>
+        {dateRange ? (
+          <Text variant="caption" numberOfLines={1} className="mt-0.5 text-white/75">
+            {dateRange}
+          </Text>
+        ) : null}
+      </LinearGradient>
+    </View>
+  );
+
+  const breakdownContent =
+    breakdownRows.length === 0 ? (
+      <EmptyState
+        title={I18n.t('albums.no_transactions_title')}
+        message={I18n.t('albums.no_transactions_message')}
+        mascotMood="curious"
+        animateIn={false}
+      />
+    ) : (
+      <ScrollView
+        nestedScrollEnabled
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingTop: 20, paddingBottom: insets.bottom + 32 }}
+      >
+        <CategoryBreakdownChart
+          rows={breakdownRows}
+          formatValue={formatValue}
+          onSelectRow={handleOpenBreakdownRow}
+        />
+      </ScrollView>
+    );
+
+  const transactionsContent = (
+    <>
+      <ActivityTransactionList
+        transactions={albumTransactions}
+        displaySettings={settings}
+        getDisplayValueForTransaction={getDisplayValueForTransaction}
+        getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+        reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
+        onTransactionPress={handleTransactionPress}
+        onTransactionLongPress={handleTransactionLongPress}
+        onToggleDaySelection={toggleDaySelection}
+        selectedTransactionIds={selectedTransactionIds}
+        selectionMode={isSelectionMode}
+        emptyTitle={I18n.t('albums.no_transactions_title')}
+        emptyMessage={I18n.t('albums.no_transactions_message')}
+        contentPaddingBottom={insets.bottom + 32}
+        disableItemAnimations
+        compactItems
+      />
+      {isSelectionMode ? (
+        <TransactionSelectionToolbar
+          selectedCount={selectedTransactionCount}
+          totalNode={
+            <Text variant="label" className="text-foreground">
+              {formatValue(selectedTotal)}
+            </Text>
+          }
+          onCancel={clearSelection}
+          onDuplicate={
+            duplicableSelectedTransactions.length > 0
+              ? () => setShowDuplicatePicker(true)
+              : undefined
+          }
+          onEdit={() => setShowBulkUpdate(true)}
+          onDelete={handleRemoveSelected}
+        />
+      ) : null}
+    </>
+  );
+
   const tabsBar = (
     <View
       className="flex-row items-center justify-between border-b border-border/30 bg-background px-5"
@@ -481,7 +614,7 @@ export function AlbumDetailScreen({
 
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
-      <TabletContentContainer style={{ flex: 1 }}>
+      <TabletContentContainer style={{ flex: 1 }} maxWidth={wideColumns.maxWidth}>
         {/* Fixed top bar */}
         <View style={{ height: TOP_BAR_HEIGHT }} className="justify-center">
           <View className="flex-row items-center justify-between px-3">
@@ -528,168 +661,90 @@ export function AlbumDetailScreen({
           </View>
         </View>
 
-        <ScrollView
-          ref={outerScrollRef}
-          showsVerticalScrollIndicator={false}
-          stickyHeaderIndices={[1]}
-          snapToOffsets={[coverHeight]}
-          decelerationRate="fast"
-          nestedScrollEnabled
-          onScroll={handleOuterScroll}
-          scrollEventThrottle={16}
-        >
-          {/* Cover hero */}
-          <View style={{ height: coverHeight }} className="bg-secondary/40">
-            {effectiveCoverUri ? (
-              <Image
-                {...REPLAY_PRIVATE}
-                source={{ uri: effectiveCoverUri }}
-                style={{ width: '100%', height: '100%' }}
-                contentFit="cover"
-                transition={120}
-                onError={() => setBrokenCoverUri(effectiveCoverUri)}
-              />
-            ) : (
-              <View className="flex-1 items-center justify-center bg-primary/15">
-                <Text variant="display" tone="muted">
-                  {album.name.slice(0, 1).toUpperCase()}
+        {isSplit ? (
+          // Wide iPad: the cover and breakdown on the left, the transactions
+          // on the right, both always showing instead of behind tabs.
+          <View style={styles.splitRow}>
+            <View style={styles.splitPane}>
+              <ContentFrameProvider width={splitPaneWidth} height={windowHeight}>
+                <ScrollView
+                  showsVerticalScrollIndicator={false}
+                  contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}
+                >
+                  {coverHero(SPLIT_COVER_HEIGHT, true)}
+                  <Text variant="label" tone="muted" style={styles.splitHeading}>
+                    {I18n.t('albums.tab_breakdown')}
+                  </Text>
+                  {contentReady ? breakdownContent : <LoadingDots />}
+                </ScrollView>
+              </ContentFrameProvider>
+            </View>
+            <View style={styles.splitPane}>
+              <ContentFrameProvider width={splitPaneWidth} height={windowHeight}>
+                <Text variant="label" tone="muted" style={styles.splitHeading}>
+                  {I18n.t('albums.tab_transactions')}
                 </Text>
-              </View>
-            )}
+                <View style={styles.flexOne}>
+                  {contentReady ? transactionsContent : <LoadingDots />}
+                </View>
+              </ContentFrameProvider>
+            </View>
+          </View>
+        ) : (
+          <ScrollView
+            ref={outerScrollRef}
+            showsVerticalScrollIndicator={false}
+            stickyHeaderIndices={[1]}
+            snapToOffsets={[coverHeight]}
+            decelerationRate="fast"
+            nestedScrollEnabled
+            onScroll={handleOuterScroll}
+            scrollEventThrottle={16}
+          >
+            {coverHero(coverHeight)}
 
-            {/* Change cover photo — top right */}
-            <Pressable
-              onPress={changeCover}
-              accessibilityRole="button"
-              accessibilityLabel={I18n.t('albums.change_cover')}
-              className="absolute right-4 top-4 flex-row items-center gap-1.5 rounded-full bg-black/45 px-3 py-1.5"
-            >
-              <Camera size={14} color="#ffffff" />
-              <Text variant="label" className="text-white">
-                {I18n.t('albums.change_cover')}
-              </Text>
-            </Pressable>
+            {/* Sticky tab bar */}
+            {tabsBar}
 
-            {/* Title + date — bottom left */}
-            <LinearGradient
-              colors={['transparent', 'rgba(0,0,0,0.55)']}
-              locations={[0, 1]}
-              style={{
-                position: 'absolute',
-                left: 0,
-                right: 0,
-                bottom: 0,
-                paddingTop: 44,
-                paddingBottom: 12,
-                paddingHorizontal: 20,
-                alignItems: 'flex-start',
+            {/* Full-screen content — horizontal pager: swipe left/right to switch
+                tabs, in sync with the sticky tab bar above. */}
+            <View
+              style={{ height: contentHeight }}
+              onLayout={(e) => {
+                const width = e.nativeEvent.layout.width;
+                if (width > 0 && width !== pageWidth) setPageWidth(width);
               }}
             >
-              <Text variant="bodyStrong" numberOfLines={1} className="text-white">
-                {album.name}
-              </Text>
-              {dateRange ? (
-                <Text variant="caption" numberOfLines={1} className="mt-0.5 text-white/75">
-                  {dateRange}
-                </Text>
-              ) : null}
-            </LinearGradient>
-          </View>
-
-          {/* Sticky tab bar */}
-          {tabsBar}
-
-          {/* Full-screen content — horizontal pager: swipe left/right to switch
-              tabs, in sync with the sticky tab bar above. */}
-          <View
-            style={{ height: contentHeight }}
-            onLayout={(e) => {
-              const width = e.nativeEvent.layout.width;
-              if (width > 0 && width !== pageWidth) setPageWidth(width);
-            }}
-          >
-            {!contentReady ? (
-              <View className="flex-1 items-center justify-center">
-                <LoadingDots />
-              </View>
-            ) : (
-              <ScrollView
-                ref={pagerRef}
-                horizontal
-                pagingEnabled
-                directionalLockEnabled
-                showsHorizontalScrollIndicator={false}
-                nestedScrollEnabled
-                keyboardShouldPersistTaps="handled"
-                scrollEventThrottle={32}
-                onMomentumScrollEnd={handlePagerMomentumEnd}
-              >
-                {/* Breakdown page */}
-                <View style={{ width: pageWidth, height: contentHeight }}>
-                  {breakdownRows.length === 0 ? (
-                    <EmptyState
-                      title={I18n.t('albums.no_transactions_title')}
-                      message={I18n.t('albums.no_transactions_message')}
-                      mascotMood="curious"
-                      animateIn={false}
-                    />
-                  ) : (
-                    <ScrollView
-                      nestedScrollEnabled
-                      showsVerticalScrollIndicator={false}
-                      contentContainerStyle={{ paddingTop: 20, paddingBottom: insets.bottom + 32 }}
-                    >
-                      <CategoryBreakdownChart
-                        rows={breakdownRows}
-                        formatValue={formatValue}
-                        onSelectRow={handleOpenBreakdownRow}
-                      />
-                    </ScrollView>
-                  )}
+              {!contentReady ? (
+                <View className="flex-1 items-center justify-center">
+                  <LoadingDots />
                 </View>
+              ) : (
+                <ScrollView
+                  ref={pagerRef}
+                  horizontal
+                  pagingEnabled
+                  directionalLockEnabled
+                  showsHorizontalScrollIndicator={false}
+                  nestedScrollEnabled
+                  keyboardShouldPersistTaps="handled"
+                  scrollEventThrottle={32}
+                  onMomentumScrollEnd={handlePagerMomentumEnd}
+                >
+                  {/* Breakdown page */}
+                  <View style={{ width: pageWidth, height: contentHeight }}>
+                    {breakdownContent}
+                  </View>
 
-                {/* Transactions page */}
-                <View style={{ width: pageWidth, height: contentHeight }}>
-                  <ActivityTransactionList
-                    transactions={albumTransactions}
-                    displaySettings={settings}
-                    getDisplayValueForTransaction={getDisplayValueForTransaction}
-                    getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-                    reimbursementsCountAsExpense={settings.reimbursementsCountAsExpense}
-                    onTransactionPress={handleTransactionPress}
-                    onTransactionLongPress={handleTransactionLongPress}
-                    onToggleDaySelection={toggleDaySelection}
-                    selectedTransactionIds={selectedTransactionIds}
-                    selectionMode={isSelectionMode}
-                    emptyTitle={I18n.t('albums.no_transactions_title')}
-                    emptyMessage={I18n.t('albums.no_transactions_message')}
-                    contentPaddingBottom={insets.bottom + 32}
-                    disableItemAnimations
-                    compactItems
-                  />
-                  {isSelectionMode ? (
-                    <TransactionSelectionToolbar
-                      selectedCount={selectedTransactionCount}
-                      totalNode={
-                        <Text variant="label" className="text-foreground">
-                          {formatValue(selectedTotal)}
-                        </Text>
-                      }
-                      onCancel={clearSelection}
-                      onDuplicate={
-                        duplicableSelectedTransactions.length > 0
-                          ? () => setShowDuplicatePicker(true)
-                          : undefined
-                      }
-                      onEdit={() => setShowBulkUpdate(true)}
-                      onDelete={handleRemoveSelected}
-                    />
-                  ) : null}
-                </View>
-              </ScrollView>
-            )}
-          </View>
-        </ScrollView>
+                  {/* Transactions page */}
+                  <View style={{ width: pageWidth, height: contentHeight }}>
+                    {transactionsContent}
+                  </View>
+                </ScrollView>
+              )}
+            </View>
+          </ScrollView>
+        )}
         <BulkEditTransactionsSheet
           visible={showBulkUpdate}
           selectedCount={selectedTransactionCount}
@@ -707,3 +762,25 @@ export function AlbumDetailScreen({
     </View>
   );
 }
+
+/** Wide iPad layout: page padding, the gap between panes, the cover's height. */
+const SPLIT_PADDING = 12;
+const SPLIT_GAP = 20;
+const SPLIT_COVER_HEIGHT = 240;
+
+const styles = StyleSheet.create({
+  flexOne: { flex: 1 },
+  splitRow: {
+    flex: 1,
+    flexDirection: 'row',
+    gap: SPLIT_GAP,
+    paddingHorizontal: SPLIT_PADDING,
+  },
+  splitPane: { flex: 1 },
+  splitHeading: {
+    paddingHorizontal: 8,
+    paddingTop: 16,
+    paddingBottom: 4,
+    textTransform: 'uppercase',
+  },
+});

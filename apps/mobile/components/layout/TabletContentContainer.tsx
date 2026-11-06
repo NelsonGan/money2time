@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, type ViewProps } from 'react-native';
 
+import { ColumnGutterProvider } from '~/components/layout/ColumnGutter';
+import { useContentFrame } from '~/components/layout/ContentFrame';
 import { TABLET_CONTENT_MAX_WIDTH, useDeviceLayout } from '~/hooks/useDeviceLayout';
 
 interface TabletContentContainerProps extends ViewProps {
@@ -18,21 +20,22 @@ export function TabletContentContainer({
   maxWidth,
   ...props
 }: TabletContentContainerProps) {
-  const { isTablet } = useDeviceLayout();
+  const { isTablet, wideTabs } = useDeviceLayout();
+  const { width: frameWidth } = useContentFrame();
 
   if (!isTablet) {
     return <>{children}</>;
   }
 
+  const columnWidth = maxWidth ?? TABLET_CONTENT_MAX_WIDTH;
   return (
-    <View
-      style={[
-        { maxWidth: maxWidth ?? TABLET_CONTENT_MAX_WIDTH, width: '100%', alignSelf: 'center' },
-        style,
-      ]}
-      {...props}
-    >
-      {children}
-    </View>
+    <ColumnGutterProvider gutter={wideTabs ? Math.max(0, (frameWidth - columnWidth) / 2) : 0}>
+      <View
+        style={[{ maxWidth: columnWidth, width: '100%', alignSelf: 'center' }, style]}
+        {...props}
+      >
+        {children}
+      </View>
+    </ColumnGutterProvider>
   );
 }

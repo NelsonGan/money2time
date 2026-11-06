@@ -31,6 +31,7 @@ import Sortable from 'react-native-sortables';
 import { DatePickerModal, MonthYearWheelPicker } from '~/components/datePicker';
 import { monthsBetween, shiftYearMonth, yearMonthFromKey } from '~/components/datePicker/monthJump';
 import { EmptyState } from '~/components/feedback/EmptyState';
+import { ColumnCornerView } from '~/components/layout/ColumnGutter';
 import { TabletContentContainer } from '~/components/layout/TabletContentContainer';
 import { ADD_FAB_SIZE, AddFabButton } from '~/components/navigation/AddFab';
 import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
@@ -4332,7 +4333,9 @@ export function AccountsScreen({
             onClose={() => setIsMonthPickerOpen(false)}
           />
           {!isSelectionMode ? (
-            <View
+            <ColumnCornerView
+              // iPad: in the window's corner, not over the column's rows.
+              right={SETTINGS_HORIZONTAL_PADDING}
               pointerEvents="box-none"
               style={[
                 styles.floatingAddButtonContainer,
@@ -4362,7 +4365,7 @@ export function AccountsScreen({
                   accessibilityLabel={I18n.t('onboarding.bootstrap.add_transaction')}
                 />
               </View>
-            </View>
+            </ColumnCornerView>
           ) : null}
         </View>
         <DuplicateTransactionsDatePicker

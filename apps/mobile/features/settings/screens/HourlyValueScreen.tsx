@@ -3,6 +3,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ColumnCornerView } from '~/components/layout/ColumnGutter';
 import { useBottomNavContentInset } from '~/components/navigation/BottomNavMinimize';
 import {
   AddIconButton,
@@ -330,7 +331,9 @@ export function HourlyValueScreen({
         )}
       </ScrollView>
 
-      <View
+      <ColumnCornerView
+        // iPad: in the window's corner, not over the column's rows.
+        right={SETTINGS_HORIZONTAL_PADDING}
         pointerEvents="box-none"
         style={[
           styles.floatingAddButtonContainer,
@@ -343,7 +346,7 @@ export function HourlyValueScreen({
           accessibilityLabel={I18n.t('settings.hourly_add_title')}
           onPress={handleAddWageMonth}
         />
-      </View>
+      </ColumnCornerView>
     </SettingsPageLayout>
   );
 }

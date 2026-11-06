@@ -32,6 +32,7 @@ import {
   SideStripSafeArea,
   WindowControlsSafeArea,
 } from '~/components/layout/AdaptiveFrames';
+import { ColumnGutterProvider } from '~/components/layout/ColumnGutter';
 import { ContentFrameProvider, useContentFrame } from '~/components/layout/ContentFrame';
 import { AddActionSheet } from '~/components/navigation/AddActionSheet';
 import { AddFab } from '~/components/navigation/AddFab';
@@ -370,7 +371,18 @@ const TWO_PANE_TABS: ReadonlySet<MainTab> = new Set<MainTab>(['calendar', 'insig
  * Tabs with a wide layout of their own (grids, cards side by side), given the
  * whole content width where `wideTabs` allows it (iPad).
  */
-const WIDE_TABS: ReadonlySet<MainTab> = new Set<MainTab>(['accounts', 'albums', 'settings']);
+const WIDE_TABS: ReadonlySet<MainTab> = new Set<MainTab>([
+  'accounts',
+  'albums',
+  'goals',
+  'receipts',
+  'settings',
+]);
+/**
+ * Root routes with a wide iPad layout of their own, given the whole window
+ * there instead of the readable column.
+ */
+const WIDE_ROUTES: ReadonlySet<string> = new Set(['AlbumDetail']);
 
 function MountedTab({
   name,
@@ -441,11 +453,13 @@ function MountedTab({
       ]}
     >
       {shouldMount ? (
-        <ContentFrameProvider width={column.width} height={frame.height}>
-          <TransactionsWhileVisible key={resetKey} visible={active}>
-            {children}
-          </TransactionsWhileVisible>
-        </ContentFrameProvider>
+        <ColumnGutterProvider gutter={wideTabs ? column.margin : 0}>
+          <ContentFrameProvider width={column.width} height={frame.height}>
+            <TransactionsWhileVisible key={resetKey} visible={active}>
+              {children}
+            </TransactionsWhileVisible>
+          </ContentFrameProvider>
+        </ColumnGutterProvider>
       ) : null}
     </View>
   );
@@ -467,7 +481,7 @@ function rootScreenLayout({
   children: React.ReactElement;
 }) {
   if (route.name === 'Main' || options.presentation === 'transparentModal') return children;
-  return <SideStripSafeArea>{children}</SideStripSafeArea>;
+  return <SideStripSafeArea ownsWidth={WIDE_ROUTES.has(route.name)}>{children}</SideStripSafeArea>;
 }
 
 function ThemeGate({ children }: { children: React.ReactNode }) {

@@ -768,7 +768,11 @@ export function CalendarScreen({
     [activeListMonthDate, activeLocale],
   );
 
-  const displayedMonthLabel = viewMode === 'day' ? activeListMonthLabel : activeMonthLabel;
+  // With two panes the header always describes the month grid in the left
+  // pane, which follows the list's month, even while the year shows on the
+  // right. On one pane it follows whichever pager is showing.
+  const headerFollowsList = viewMode === 'day' || twoPane !== null;
+  const displayedMonthLabel = headerFollowsList ? activeListMonthLabel : activeMonthLabel;
 
   // Build month data (header summary + month grid). `activeMonthData` is the
   // grid month; `activeListMonthData` feeds the list-view summary. Each month's
@@ -840,7 +844,7 @@ export function CalendarScreen({
     [buildMonthData, activeListMonthDate],
   );
 
-  const summaryMonthData = viewMode === 'day' ? activeListMonthData : activeMonthData;
+  const summaryMonthData = headerFollowsList ? activeListMonthData : activeMonthData;
 
   const transactionDisplaySettings = useMemo(
     () => ({
@@ -1070,10 +1074,11 @@ export function CalendarScreen({
   );
 
   // The header's prev/next arrows drive whichever pager is showing: the
-  // monthly list in the day view, the month grid otherwise.
+  // monthly list in the day view (and always with two panes, where the left
+  // grid follows it), the month grid otherwise.
   const stepVisibleMonth = (delta: number) => {
     void triggerHaptic('selection');
-    const onList = viewMode === 'day';
+    const onList = headerFollowsList;
     const nextIdx = clampMonthIndex((onList ? activeListMonthIndex : activeMonthIndex) + delta);
     (onList ? setActiveListMonthIndex : setActiveMonthIndex)(nextIdx);
     (onList ? listPagerRef : horizontalListRef).current?.scrollToIndex({
@@ -1090,11 +1095,11 @@ export function CalendarScreen({
   );
   const visibleMonth = shiftYearMonth(
     pagerAnchorMonth,
-    (viewMode === 'day' ? activeListMonthIndex : activeMonthIndex) - MONTH_PAGER_CENTER_INDEX,
+    (headerFollowsList ? activeListMonthIndex : activeMonthIndex) - MONTH_PAGER_CENTER_INDEX,
   );
   const handleMonthPicked = (year: number, monthIndex: number) => {
     setIsMonthPickerOpen(false);
-    const onList = viewMode === 'day';
+    const onList = headerFollowsList;
     const nextIdx = clampMonthIndex(
       MONTH_PAGER_CENTER_INDEX + monthsBetween(pagerAnchorMonth, { year, monthIndex }),
     );
@@ -1664,8 +1669,8 @@ export function CalendarScreen({
 
             {!isSearchOpen ? (
               <Reanimated.View
-                style={[styles.monthHeaderChrome, monthHeaderChromeStyle]}
-                pointerEvents={viewMode === 'year' ? 'none' : 'auto'}
+                style={[styles.monthHeaderChrome, !twoPane && monthHeaderChromeStyle]}
+                pointerEvents={viewMode === 'year' && !twoPane ? 'none' : 'auto'}
               >
                 <View style={styles.monthHeaderChromeContent}>
                   {/* Month nav capsule — shown in both the monthly list and the month

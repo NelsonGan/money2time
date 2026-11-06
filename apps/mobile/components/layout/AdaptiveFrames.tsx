@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { SafeAreaInsetsContext, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ColumnGutterProvider } from '~/components/layout/ColumnGutter';
 import { ContentFrameProvider } from '~/components/layout/ContentFrame';
 import { WINDOW_CONTROLS_CLEARANCE } from '~/components/navigation/floatingNav';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
@@ -35,20 +36,33 @@ export function ShellContentFrame({ children }: { children: React.ReactNode }) {
  * centred in a readable column. Folding or resizing only changes padding, so
  * the screen keeps its state. A pass-through wherever the bottom bar shows.
  */
-export function SideStripSafeArea({ children }: { children: React.ReactNode }) {
-  const { navPlacement, isWide, screenWidth, screenHeight } = useDeviceLayout();
+export function SideStripSafeArea({
+  children,
+  ownsWidth = false,
+}: {
+  children: React.ReactNode;
+  /**
+   * The route has a wide iPad layout of its own (`useWideTabColumns`), so on
+   * iPad it gets the whole window instead of the readable column. The Duo
+   * still centres it.
+   */
+  ownsWidth?: boolean;
+}) {
+  const { navPlacement, isWide, wideTabs, screenWidth, screenHeight } = useDeviceLayout();
   const { left, right } = useSafeAreaInsets();
   if (navPlacement !== 'side') return <>{children}</>;
 
-  const column = readableColumn(screenWidth - left - right, isWide);
+  const column = readableColumn(screenWidth - left - right, isWide && !(ownsWidth && wideTabs));
   return (
     <View
       className="flex-1 bg-background"
       style={{ paddingLeft: left + column.margin, paddingRight: right + column.margin }}
     >
-      <ContentFrameProvider width={column.width} height={screenHeight}>
-        {children}
-      </ContentFrameProvider>
+      <ColumnGutterProvider gutter={wideTabs ? column.margin + right : 0}>
+        <ContentFrameProvider width={column.width} height={screenHeight}>
+          {children}
+        </ContentFrameProvider>
+      </ColumnGutterProvider>
     </View>
   );
 }
