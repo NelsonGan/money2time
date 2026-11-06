@@ -404,6 +404,13 @@ const INSIGHTS_LINE_CHART_SECTION_BLEED = 10;
 const MONTHS_PER_YEAR = 12;
 const HEALTHY_SAVINGS_RATE_THRESHOLD = 0.2;
 const SAVINGS_RATE_ABBREVIATE_THRESHOLD = 1000;
+// The savings-rate chart draws -100%..100%. Spending more than twice the
+// income takes a month below -100%, and a bad month can reach -350% or lower,
+// which would squash every other month into a flat line; such a month sits on
+// the bottom edge as an arrow instead, and its tooltip and row still show the
+// real rate.
+const SAVINGS_RATE_CHART_FLOOR = -100;
+const SAVINGS_RATE_CHART_CEILING = 100;
 
 // Formats an already-computed savings-rate percentage (e.g. 20 → "20.0%"). When the
 // magnitude reaches 1000% (income tiny relative to net) it abbreviates via the shared
@@ -5808,6 +5815,8 @@ export function InsightsScreen({
                   formatAxisValue={formatPercentAxisValue}
                   zeroBased
                   minTickStep={1}
+                  valueFloor={SAVINGS_RATE_CHART_FLOOR}
+                  valueCeiling={SAVINGS_RATE_CHART_CEILING}
                   gridColor={withColorAlpha(themeColors.border, isDark ? 0.7 : 0.9)}
                   labelColor={themeColors.textMuted}
                   surfaceColor={themeColors.background}
