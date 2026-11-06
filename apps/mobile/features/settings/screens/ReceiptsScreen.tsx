@@ -15,6 +15,7 @@ import { AlbumDateRangeFields } from '~/features/albums/components/AlbumDateRang
 import { ActivitySearchRow } from '~/features/transactions/components/ActivitySearchRow';
 import { ReceiptViewerModal } from '~/features/transactions/components/editor';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { useWideTabColumns } from '~/hooks/useWideTabColumns';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { pickAndSaveReceiptImage } from '~/services/receiptPicker';
@@ -49,8 +50,12 @@ interface ReceiptTile {
 
 type ReceiptRow =
   | { kind: 'header'; id: string; monthLabel: string }
-  // Up to two tiles rendered side by side; headers span the full width.
+  // Up to `tilesPerRow` tiles side by side; headers span the full width.
   | { kind: 'row'; id: string; tiles: ReceiptTile[] };
+
+/** Receipts per row: two on a phone, four across a wide iPad page. */
+const TILES_PER_ROW = 2;
+const WIDE_TILES_PER_ROW = 4;
 
 export function ReceiptsScreen({
   onBack,
@@ -63,6 +68,8 @@ export function ReceiptsScreen({
   const themeColors = useThemeColors();
   const bottomNavInset = useSettingsBottomNavInset();
   const locale = I18n.locale ?? 'en';
+  const wideColumns = useWideTabColumns();
+  const tilesPerRow = wideColumns.columns > 1 ? WIDE_TILES_PER_ROW : TILES_PER_ROW;
 
   const searchInputRef = useRef<TextInputInstance | null>(null);
   const [searchInput, setSearchInput] = useState('');
@@ -194,7 +201,7 @@ export function ReceiptsScreen({
   const hasMore = visibleCount < filteredReceipts.length;
 
   // Windowed slice → month-grouped rows: a full-width header per month change,
-  // then rows of up to two tiles each (the 2-column grid).
+  // then rows of up to `tilesPerRow` tiles each.
   const rows = useMemo(() => {
     const visible = filteredReceipts.slice(0, visibleCount);
     const built: ReceiptRow[] = [];
@@ -221,11 +228,11 @@ export function ReceiptsScreen({
         });
       }
       pending.push({ transaction, receiptFileUri: getReceiptUri(transaction.receiptUri) });
-      if (pending.length === 2) flushRow();
+      if (pending.length === tilesPerRow) flushRow();
     }
     flushRow();
     return built;
-  }, [filteredReceipts, visibleCount, locale, monthCycle]);
+  }, [filteredReceipts, visibleCount, locale, monthCycle, tilesPerRow]);
 
   const handleEndReached = useCallback(() => {
     setVisibleCount((count) => (count < filteredReceipts.length ? count + PAGE_SIZE : count));
@@ -270,18 +277,27 @@ export function ReceiptsScreen({
               </View>
             );
           })}
-          {/* Keep a lone trailing tile at half width. */}
-          {item.tiles.length === 1 ? <View className="flex-1" /> : null}
+          {/* Pad a short last row so its tiles keep the grid's column width. */}
+          {Array.from({ length: tilesPerRow - item.tiles.length }, (_, padIndex) => (
+            <View key={`pad-${padIndex}`} className="flex-1" />
+          ))}
         </View>
       );
     },
-    [getDisplayValueForTransaction, isTimeMode, settings, openReceiptViewer, onOpenEditTransaction],
+    [
+      getDisplayValueForTransaction,
+      isTimeMode,
+      settings,
+      openReceiptViewer,
+      onOpenEditTransaction,
+      tilesPerRow,
+    ],
   );
 
   const isFiltering = search.trim().length > 0 || startDate !== null || endDate !== null;
 
   return (
-    <SettingsPageLayout>
+    <SettingsPageLayout contentMaxWidth={wideColumns.maxWidth}>
       <SettingsHeader
         className="px-5 pt-5 pb-3"
         onBack={onBack}

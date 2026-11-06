@@ -181,7 +181,7 @@ import type {
   WeekStartsOn,
 } from '~/types';
 import { cn } from '~/utils';
-import { readableColumn } from '~/utils/adaptiveLayout';
+import { foldSpan, readableColumn, wideTabColumns } from '~/utils/adaptiveLayout';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { withColorAlpha } from '~/utils/color';
 import { convert } from '~/utils/currency';
@@ -210,6 +210,7 @@ import {
   startOfMonthDate,
   toRange,
 } from '~/utils/formatters';
+import { pageIndexFromOffset } from '~/utils/pagerOffset';
 import {
   DEFAULT_SELECTION_FILTER_MODE,
   isSelectionFilterMode,
@@ -395,6 +396,8 @@ const TREND_INSIGHT_TYPE_BY_KIND = {
 } as const;
 const EMPTY_TRANSACTIONS: TransactionWithRelations[] = [];
 const SENTIMENT_CHART_HEIGHT = 280;
+/** A split pane (iPad, the open Duo) has the height for taller line charts. */
+const WIDE_LINE_CHART_SCALE = 1.6;
 const SENTIMENT_COLORS = { happy: '#4CAF50', neutral: '#FFB74D', sad: '#E57373' } as const;
 const INSIGHTS_LINE_CHART_SIDE_INSET = 8;
 const INSIGHTS_LINE_CHART_SECTION_BLEED = 10;
@@ -435,6 +438,8 @@ const BREAKDOWN_PIE_LABEL_TAIL_LENGTH = 10;
 const BREAKDOWN_PIE_LABEL_MARGIN = 4;
 const BREAKDOWN_PIE_MIN_RADIUS = 48;
 const BREAKDOWN_PIE_MAX_RADIUS = 108;
+/** iPad draws the pie larger: its pane has the room. */
+const BREAKDOWN_PIE_MAX_RADIUS_WIDE = 150;
 
 /** Header height assumed for the first frame of a split page, before it is measured. */
 const SPLIT_HEADER_HEIGHT_ESTIMATE = 112;
@@ -2738,7 +2743,7 @@ export function InsightsScreen({
   );
 
   const { width, height } = useContentFrame();
-  const { isTablet, panes } = useDeviceLayout();
+  const { isTablet, panes, wideTabs } = useDeviceLayout();
   const pageWidth = Math.max(1, width);
   const insightsPageStyle = useMemo(() => ({ width: pageWidth }), [pageWidth]);
   // Open iPhone Duo: charts are drawn in the left pane.
@@ -4227,7 +4232,27 @@ export function InsightsScreen({
   // single pages, so they sit in a readable column instead.
   const isLockedProTrend = !isPro && proTrendTypeSet.has(displaySelectedInsightType);
   const splitPanes = panes && !isLoading && !isTakeoverView && !isLockedProTrend ? panes : null;
-  const column = readableColumn(width, panes !== null && splitPanes === null);
+  // Review and Budget lay out two columns of their own, so on iPad
+  // (`wideTabs`) they get the whole width rather than the readable column,
+  // and on the open Duo the frame centred on the fold, a column each side.
+  const isWidePageView = isReviewView || isBudgetView;
+  const ownsWidePage = wideTabs && isWidePageView;
+  const foldPage =
+    !wideTabs && panes && !isLoading && isWidePageView ? foldSpan(width, panes.left) : null;
+  // The header spans the same width as the page under it.
+  const widePageMaxWidth = ownsWidePage
+    ? wideTabColumns(width, wideTabs).maxWidth
+    : foldPage
+      ? foldPage.width
+      : undefined;
+  const column =
+    foldPage ?? readableColumn(width, panes !== null && splitPanes === null && !ownsWidePage);
+  // Split (iPad, the open Duo): the line charts grow into the pane's height
+  // instead of keeping their phone height over an empty half pane.
+  const lineChartHeight = useCallback(
+    (base: number) => (splitPanes ? Math.round(base * WIDE_LINE_CHART_SCALE) : base),
+    [splitPanes],
+  );
   const insightsSplit = useMemo<InsightsSplit | null>(
     () =>
       splitPanes
@@ -4449,17 +4474,21 @@ export function InsightsScreen({
     });
   }, [commitPageIndex]);
 
+  // A settle measured mid-resize (an iPad window) is not a page turn.
   const finalizeHorizontalShift = useCallback(
-    (offsetX: number) => {
-      const rawIndex = Math.round(offsetX / pageWidth);
-      commitInsightsPageByIndex(rawIndex);
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const { contentOffset, layoutMeasurement } = event.nativeEvent;
+      const index = pageIndexFromOffset(contentOffset.x, layoutMeasurement?.width, pageWidth);
+      if (index !== null) commitInsightsPageByIndex(index);
     },
     [commitInsightsPageByIndex, pageWidth],
   );
 
   const handleHorizontalScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const rawIndex = Math.round(event.nativeEvent.contentOffset.x / pageWidth);
+      const { contentOffset, layoutMeasurement } = event.nativeEvent;
+      const rawIndex = pageIndexFromOffset(contentOffset.x, layoutMeasurement?.width, pageWidth);
+      if (rawIndex === null) return;
       const clampedIndex = clampInsightsPageIndex(rawIndex);
       if (clampedIndex === headerPreviewPageIndexRef.current) return;
       headerPreviewPageIndexRef.current = clampedIndex;
@@ -4476,14 +4505,14 @@ export function InsightsScreen({
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       const velocityX = event.nativeEvent.velocity?.x ?? 0;
       if (Math.abs(velocityX) > 0.05) return;
-      finalizeHorizontalShift(event.nativeEvent.contentOffset.x);
+      finalizeHorizontalShift(event);
     },
     [finalizeHorizontalShift],
   );
 
   const handleHorizontalMomentumEnd = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      finalizeHorizontalShift(event.nativeEvent.contentOffset.x);
+      finalizeHorizontalShift(event);
     },
     [finalizeHorizontalShift],
   );
@@ -4624,7 +4653,10 @@ export function InsightsScreen({
       pieLabelWidth + BREAKDOWN_PIE_LABEL_LINE_LENGTH + BREAKDOWN_PIE_LABEL_MARGIN + 6;
     const pieRadius = Math.max(
       BREAKDOWN_PIE_MIN_RADIUS,
-      Math.min(BREAKDOWN_PIE_MAX_RADIUS, Math.floor((pieLayoutWidth - pieExtraRadius * 2) / 2)),
+      Math.min(
+        wideTabs ? BREAKDOWN_PIE_MAX_RADIUS_WIDE : BREAKDOWN_PIE_MAX_RADIUS,
+        Math.floor((pieLayoutWidth - pieExtraRadius * 2) / 2),
+      ),
     );
     const pieStageWidth = (pieRadius + pieExtraRadius) * 2;
     // Crop top/bottom: labels sit in left/right columns, so the full square isn't needed.
@@ -4866,7 +4898,7 @@ export function InsightsScreen({
           </>
         }
         secondary={
-          <View className="gap-1.5">
+          <View className={wideTabs ? 'gap-2' : 'gap-1.5'}>
             {pagePieData.map((item) => {
               const isSelected = activeBreakdownSliceId === item.id;
               const hasSelection = activeBreakdownSliceId !== null;
@@ -4904,7 +4936,11 @@ export function InsightsScreen({
                   }}
                   accessibilityRole="button"
                   accessibilityLabel={`${categoryIconToEmoji(item.emoji)} ${item.name}`.trim()}
-                  className="rounded-xl px-2.5 py-1.5 active:opacity-85 border"
+                  // iPad: roomier rows, to fill the pane beside the pie.
+                  className={cn(
+                    'rounded-xl active:opacity-85 border',
+                    wideTabs ? 'px-3.5 py-3' : 'px-2.5 py-1.5',
+                  )}
                   style={[
                     { backgroundColor: rowBackgroundColor, borderColor: rowBorderColor },
                     isSelected && { borderWidth: 2 },
@@ -4913,14 +4949,18 @@ export function InsightsScreen({
                 >
                   <View className="flex-row items-center justify-between gap-2">
                     <View className="flex-1 flex-row items-center gap-1.5 pr-2">
-                      <CategoryEmoji icon={item.emoji} size={16} />
-                      <Text variant="caption" className="flex-1" numberOfLines={2}>
+                      <CategoryEmoji icon={item.emoji} size={wideTabs ? 22 : 16} />
+                      <Text
+                        variant={wideTabs ? 'body' : 'caption'}
+                        className="flex-1"
+                        numberOfLines={2}
+                      >
                         {item.name}
                       </Text>
                     </View>
                     <View className="flex-row items-center gap-1.5">
                       {renderValueNode(item.amount, {
-                        variant: 'label',
+                        variant: wideTabs ? 'bodyStrong' : 'label',
                         textClassName: 'text-foreground',
                         iconColor: themeColors.text,
                       })}
@@ -5446,7 +5486,9 @@ export function InsightsScreen({
                 buckets={model.buckets}
                 series={model.series}
                 width={lineChartWidth}
-                height={isComparing ? TREND_COMPARE_CHART_HEIGHT : TREND_CHART_HEIGHT}
+                height={lineChartHeight(
+                  isComparing ? TREND_COMPARE_CHART_HEIGHT : TREND_CHART_HEIGHT,
+                )}
                 selectedKey={selectedKey}
                 onSelectKey={(key) => selectTrendBucket(kind, periodKey, key)}
                 onGestureStart={lockChartScrub}
@@ -5596,7 +5638,7 @@ export function InsightsScreen({
                 buckets={sentimentModel.buckets}
                 series={sentimentModel.series}
                 width={lineChartWidth}
-                height={SENTIMENT_CHART_HEIGHT}
+                height={lineChartHeight(SENTIMENT_CHART_HEIGHT)}
                 selectedKey={sentimentSelectedKey}
                 onSelectKey={(key) => {
                   setSentimentScrubBucketByPeriod((previous) =>
@@ -5753,7 +5795,7 @@ export function InsightsScreen({
                   buckets={chartModel.buckets}
                   series={chartModel.series}
                   width={lineChartWidth}
-                  height={TREND_CHART_HEIGHT - 20}
+                  height={lineChartHeight(TREND_CHART_HEIGHT - 20)}
                   selectedKey={selectedKey}
                   onSelectKey={(key) => {
                     setSavingsScrubMonthByYear((previous) =>
@@ -6702,8 +6744,8 @@ export function InsightsScreen({
   );
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      <View style={[styles.flexOne, { paddingHorizontal: column.margin }]}>
-        <ContentFrameProvider width={column.width} height={height}>
+      <View style={[styles.flexOne, { paddingLeft: column.left, paddingRight: column.right }]}>
+        <ContentFrameProvider width={column.width} height={height} onFold={foldPage !== null}>
           <View
             // Above the pages: a Skia chart is not clipped by its scroll view, so
             // a scrolled chart would otherwise draw over the header.
@@ -6713,6 +6755,7 @@ export function InsightsScreen({
             onLayout={splitPanes ? handleSplitHeaderLayout : undefined}
           >
             <MonthControlsHeader
+              contentMaxWidth={widePageMaxWidth}
               titleNode={
                 <View className="flex-row items-center gap-2">
                   <View ref={insightsTypeSelectorRef}>

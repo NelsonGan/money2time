@@ -19,11 +19,13 @@ import Animated, {
 
 import { Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { WeekStartsOn } from '~/types';
 import { cn } from '~/utils';
+import { READABLE_COLUMN_MAX_WIDTH } from '~/utils/adaptiveLayout';
 import { dayKeyFromDateLocal } from '~/utils/formatters';
 
 import { buildMonthLabels } from './monthJump';
@@ -171,7 +173,13 @@ function quickCenterOffset(rowWidth: number, quickDays: { iso: string }[], value
 export function InlineDatePicker({ value, onSelect, showQuickDays = true }: InlineDatePickerProps) {
   const themeColors = useThemeColors();
   const { settings } = useApp();
-  const { width: windowWidth } = useWindowDimensions();
+  const { width: fullWindowWidth } = useWindowDimensions();
+  // In a wide window (iPad, the open iPhone Duo) the picker sits in a readable
+  // column or a sheet centred in one, so estimate from that width.
+  const { isWide } = useDeviceLayout();
+  const windowWidth = isWide
+    ? Math.min(fullWindowWidth, READABLE_COLUMN_MAX_WIDTH)
+    : fullWindowWidth;
   const weekStartsOn = settings.weekStartsOn;
   const locale = I18n.locale ?? 'en';
   const parsed = parseDateKey(value);

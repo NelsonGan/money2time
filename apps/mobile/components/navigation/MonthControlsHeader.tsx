@@ -29,6 +29,7 @@ export function MonthControlsHeader({
   disableNavArrows = false,
   hideTitleRow = false,
   showAccent = true,
+  contentMaxWidth,
 }: {
   title?: string;
   titleNode?: React.ReactNode;
@@ -50,6 +51,8 @@ export function MonthControlsHeader({
   disableNavArrows?: boolean;
   hideTitleRow?: boolean;
   showAccent?: boolean;
+  /** Column width for a page with a wide layout of its own (tablet, open Duo). */
+  contentMaxWidth?: number | null;
 }) {
   const themeColors = useThemeColors();
   const { width: screenWidth } = useContentFrame();
@@ -57,7 +60,7 @@ export function MonthControlsHeader({
 
   return (
     <View className="bg-background pb-1.5 pt-1">
-      <TabletContentContainer>
+      <TabletContentContainer maxWidth={contentMaxWidth}>
         <View className="px-5 pt-1.5 gap-2.5">
           {/* Title row with decorative accent */}
           {!hideTitleRow ? (

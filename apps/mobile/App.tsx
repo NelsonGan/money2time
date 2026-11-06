@@ -27,7 +27,12 @@ import { initialWindowMetrics, SafeAreaProvider } from 'react-native-safe-area-c
 
 import { AppErrorBoundary } from '~/components/feedback/AppErrorBoundary';
 import { MascotWarmup } from '~/components/feedback/Mascot';
-import { ShellContentFrame, SideStripSafeArea } from '~/components/layout/AdaptiveFrames';
+import {
+  ShellContentFrame,
+  SideStripSafeArea,
+  WindowControlsSafeArea,
+} from '~/components/layout/AdaptiveFrames';
+import { ColumnGutterProvider } from '~/components/layout/ColumnGutter';
 import { ContentFrameProvider, useContentFrame } from '~/components/layout/ContentFrame';
 import { AddActionSheet } from '~/components/navigation/AddActionSheet';
 import { AddFab } from '~/components/navigation/AddFab';
@@ -261,7 +266,7 @@ import type {
   TransactionWithRelations,
   WageConfig,
 } from '~/types';
-import { readableColumn } from '~/utils/adaptiveLayout';
+import { foldSpan, readableColumn } from '~/utils/adaptiveLayout';
 import { financialMonthKeyForDate, monthCycleOf } from '~/utils/financialMonth';
 import { dayKeyFromIsoLocal } from '~/utils/formatters';
 import { runAfterInteractions } from '~/utils/interactions';
@@ -360,8 +365,25 @@ const styles = StyleSheet.create({
   tabHidden: { opacity: 0 },
 });
 
-/** Tabs with a two-pane layout of their own on the open iPhone Duo. */
+/** Tabs with a two-pane layout of their own (open iPhone Duo, wide iPad). */
 const TWO_PANE_TABS: ReadonlySet<MainTab> = new Set<MainTab>(['calendar', 'insights']);
+/**
+ * Tabs with a wide layout of their own (grids, cards side by side), given the
+ * whole content width where `wideTabs` allows it (iPad), and on the open
+ * iPhone Duo a frame centred on the fold, so their two columns meet on it.
+ */
+const WIDE_TABS: ReadonlySet<MainTab> = new Set<MainTab>([
+  'accounts',
+  'albums',
+  'goals',
+  'receipts',
+  'settings',
+]);
+/**
+ * Root routes with a wide layout of their own, given the whole window on iPad
+ * instead of the readable column, and the fold frame on the open Duo.
+ */
+const WIDE_ROUTES: ReadonlySet<string> = new Set(['AlbumDetail']);
 
 function MountedTab({
   name,
@@ -412,29 +434,35 @@ function MountedTab({
     if (shouldMount) perfMark(`tab_${name}_mounted`);
   }, [name, shouldMount]);
 
-  // Open iPhone Duo: Home and Insights lay out their own two panes; every
-  // other page sits in a readable column. Only the slot's insets change when
-  // the device folds, so a page keeps its state. The frame is the window
-  // elsewhere.
-  const { isTwoPane } = useDeviceLayout();
+  // Wide windows (open iPhone Duo, iPad): Home and Insights lay out their own
+  // two panes, and the pages with a wide layout of their own take the whole
+  // width on iPad and the frame centred on the fold on the Duo; every other
+  // page sits in a readable column. Only the slot's insets change when the
+  // device folds or the window resizes, so a page keeps its state. The frame
+  // is the window elsewhere.
+  const { isWide, isTwoPane, wideTabs, panes } = useDeviceLayout();
   const frame = useContentFrame();
-  const column = readableColumn(frame.width, isTwoPane && !TWO_PANE_TABS.has(name));
+  const fold = !wideTabs && panes && WIDE_TABS.has(name) ? foldSpan(frame.width, panes.left) : null;
+  const ownsWidth = (isTwoPane && TWO_PANE_TABS.has(name)) || (wideTabs && WIDE_TABS.has(name));
+  const slot = fold ?? readableColumn(frame.width, isWide && !ownsWidth);
 
   return (
     <View
       pointerEvents={active ? 'auto' : 'none'}
       style={[
         styles.tabSlot,
-        column.margin > 0 && { left: column.margin, right: column.margin },
+        (slot.left > 0 || slot.right > 0) && { left: slot.left, right: slot.right },
         active ? styles.tabVisible : styles.tabHidden,
       ]}
     >
       {shouldMount ? (
-        <ContentFrameProvider width={column.width} height={frame.height}>
-          <TransactionsWhileVisible key={resetKey} visible={active}>
-            {children}
-          </TransactionsWhileVisible>
-        </ContentFrameProvider>
+        <ColumnGutterProvider gutter={isWide ? slot.right : 0}>
+          <ContentFrameProvider width={slot.width} height={frame.height} onFold={fold !== null}>
+            <TransactionsWhileVisible key={resetKey} visible={active}>
+              {children}
+            </TransactionsWhileVisible>
+          </ContentFrameProvider>
+        </ColumnGutterProvider>
       ) : null}
     </View>
   );
@@ -456,7 +484,7 @@ function rootScreenLayout({
   children: React.ReactElement;
 }) {
   if (route.name === 'Main' || options.presentation === 'transparentModal') return children;
-  return <SideStripSafeArea>{children}</SideStripSafeArea>;
+  return <SideStripSafeArea ownsWidth={WIDE_ROUTES.has(route.name)}>{children}</SideStripSafeArea>;
 }
 
 function ThemeGate({ children }: { children: React.ReactNode }) {
@@ -523,6 +551,8 @@ function MainShellScreen({
   // iPhone Duo: tabs in a rail down the side strip, pages beside it.
   const { navPlacement, navEdge, navRailInset } = useDeviceLayout();
   const TabNav = navPlacement === 'side' ? SideNavRail : BottomNav;
+  // iPad: where the top-aligned rail's pill ends, so the + sits under it.
+  const [railPillEnd, setRailPillEnd] = useState<number | null>(null);
   const [addSheetVisible, setAddSheetVisible] = useState(false);
   const voiceHandleRef = useRef<VoiceQuickAddHandle | null>(null);
   const [voiceSupported, setVoiceSupported] = useState(false);
@@ -1430,9 +1460,15 @@ function MainShellScreen({
 
       {!shouldHideBottomNav ? (
         <>
-          <TabNav tabs={navTabs} activeTab={activeTab} onTabChange={handleTabChange} />
+          <TabNav
+            tabs={navTabs}
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+            onRailPillEnd={setRailPillEnd}
+          />
           {showAddFab ? (
             <AddFab
+              railPillEnd={railPillEnd}
               onPress={handleFabPress}
               onLongPress={holdAction === 'none' ? undefined : handleFabLongPress}
               onLongPressEnd={holdIsVoice ? () => voiceHandleRef.current?.stop() : undefined}
@@ -3357,19 +3393,21 @@ export default function App() {
           (MONEY2TIME-9). Let the first real input open the keyboard. */}
       <KeyboardProvider preload={Platform.OS !== 'ios'}>
         <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-          <AppErrorBoundary>
-            <AppProvider>
-              <ProProvider>
-                <CloudSyncProvider>
-                  <ReceiptScanProvider>
-                    <ThemeGate>
-                      <AppContent />
-                    </ThemeGate>
-                  </ReceiptScanProvider>
-                </CloudSyncProvider>
-              </ProProvider>
-            </AppProvider>
-          </AppErrorBoundary>
+          <WindowControlsSafeArea>
+            <AppErrorBoundary>
+              <AppProvider>
+                <ProProvider>
+                  <CloudSyncProvider>
+                    <ReceiptScanProvider>
+                      <ThemeGate>
+                        <AppContent />
+                      </ThemeGate>
+                    </ReceiptScanProvider>
+                  </CloudSyncProvider>
+                </ProProvider>
+              </AppProvider>
+            </AppErrorBoundary>
+          </WindowControlsSafeArea>
           <MascotWarmup />
         </SafeAreaProvider>
       </KeyboardProvider>

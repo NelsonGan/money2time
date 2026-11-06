@@ -72,6 +72,10 @@ interface AccountCardStackProps {
   onOpenAccount: (accountId: string) => void;
   onEditAccount: (accountId: string) => void;
   onPayAccount: (accountId: string) => void;
+  /** iPad and the open Duo: groups laid out in two balanced columns. */
+  columns?: 1 | 2;
+  /** Column width for a wide page (`useWideTabColumns`). */
+  contentMaxWidth?: number | null;
   onRenderBalanceNode: (
     amount: number,
     options?: {
@@ -1123,6 +1127,8 @@ export function AccountCardStack({
   onEditAccount,
   onPayAccount,
   onRenderBalanceNode,
+  columns = 1,
+  contentMaxWidth,
 }: AccountCardStackProps) {
   const resolvedTheme = useResolvedTheme();
   const isDark = resolvedTheme === 'dark';
@@ -1188,68 +1194,101 @@ export function AccountCardStack({
     return result;
   }, [accounts, accountGroups, archivedAccounts, showArchived]);
 
+  const renderSection = (section: GroupSection, indexInColumn: number) => {
+    const sectionTotal = normalizeMoneyAmount(
+      section.accounts.reduce((sum, a) => {
+        if (!a.includeInTotals) return sum;
+        // Convert each account to the reporting currency before summing so
+        // a group mixing currencies totals correctly.
+        const bal = convertedBalanceMap.get(a.id) ?? balanceMap.get(a.id) ?? a.startingBalance;
+        return sum + getNetAssetContribution(a.type, bal);
+      }, 0),
+    );
+    const sectionTotalLabel = hideBalances
+      ? MASKED_BALANCE_VALUE
+      : formatAmount(sectionTotal, settings, { showSign: false, trueHourlyRate });
+
+    return (
+      <View key={section.id} style={indexInColumn > 0 ? styles.sectionGap : undefined}>
+        <View style={styles.sectionHeader}>
+          <Text variant="label" tone="muted" style={styles.sectionLabel}>
+            {section.label}
+          </Text>
+          <Text
+            variant="label"
+            tone="muted"
+            style={[
+              styles.sectionLabel,
+              {
+                color: isNegativeForDisplay(sectionTotal) ? themeColors.error : themeColors.success,
+              },
+            ]}
+          >
+            {sectionTotalLabel}
+          </Text>
+        </View>
+        <SectionStack
+          section={section}
+          expandedAccountId={expandedAccountId}
+          onToggleAccount={handleToggle}
+          onOpenAccount={onOpenAccount}
+          onEditAccount={onEditAccount}
+          onPayAccount={onPayAccount}
+          onRenderBalanceNode={onRenderBalanceNode}
+          balanceMap={balanceMap}
+          creditSummaryByAccountId={creditSummaryByAccountId}
+          loanSummaryByAccountId={loanSummaryByAccountId}
+          hideBalances={hideBalances}
+          settings={settings}
+          trueHourlyRate={trueHourlyRate}
+          isDark={isDark}
+        />
+      </View>
+    );
+  };
+
+  // Two columns (iPad, the open Duo): each group goes into the shorter
+  // column, in order, so the two columns end near the same height. Screen
+  // readers read the left column first, then the right.
+  const sectionColumns = useMemo(() => {
+    if (columns !== 2) return null;
+    const result: GroupSection[][] = [[], []];
+    const heights = [0, 0];
+    for (const section of sections) {
+      const target = heights[0] <= heights[1] ? 0 : 1;
+      result[target].push(section);
+      heights[target] += SECTION_HEADER_WEIGHT + section.accounts.length;
+    }
+    return result;
+  }, [columns, sections]);
+
   return (
     <ScrollView
       ref={scrollViewRef}
-      contentContainerStyle={[styles.scrollContent, bottomNavInset]}
+      contentContainerStyle={[
+        styles.scrollContent,
+        contentMaxWidth != null && {
+          maxWidth: contentMaxWidth,
+          width: '100%',
+          alignSelf: 'center',
+        },
+        bottomNavInset,
+      ]}
       showsVerticalScrollIndicator={false}
       onScroll={reportBottomNavScroll}
       scrollEventThrottle={32}
     >
-      {sections.map((section, sectionIndex) => {
-        const sectionTotal = normalizeMoneyAmount(
-          section.accounts.reduce((sum, a) => {
-            if (!a.includeInTotals) return sum;
-            // Convert each account to the reporting currency before summing so
-            // a group mixing currencies totals correctly.
-            const bal = convertedBalanceMap.get(a.id) ?? balanceMap.get(a.id) ?? a.startingBalance;
-            return sum + getNetAssetContribution(a.type, bal);
-          }, 0),
-        );
-        const sectionTotalLabel = hideBalances
-          ? MASKED_BALANCE_VALUE
-          : formatAmount(sectionTotal, settings, { showSign: false, trueHourlyRate });
-
-        return (
-          <View key={section.id} style={sectionIndex > 0 ? styles.sectionGap : undefined}>
-            <View style={styles.sectionHeader}>
-              <Text variant="label" tone="muted" style={styles.sectionLabel}>
-                {section.label}
-              </Text>
-              <Text
-                variant="label"
-                tone="muted"
-                style={[
-                  styles.sectionLabel,
-                  {
-                    color: isNegativeForDisplay(sectionTotal)
-                      ? themeColors.error
-                      : themeColors.success,
-                  },
-                ]}
-              >
-                {sectionTotalLabel}
-              </Text>
+      {sectionColumns ? (
+        <View style={styles.columns}>
+          {sectionColumns.map((column, columnIndex) => (
+            <View key={columnIndex} style={styles.column}>
+              {column.map(renderSection)}
             </View>
-            <SectionStack
-              section={section}
-              expandedAccountId={expandedAccountId}
-              onToggleAccount={handleToggle}
-              onOpenAccount={onOpenAccount}
-              onEditAccount={onEditAccount}
-              onPayAccount={onPayAccount}
-              onRenderBalanceNode={onRenderBalanceNode}
-              balanceMap={balanceMap}
-              creditSummaryByAccountId={creditSummaryByAccountId}
-              loanSummaryByAccountId={loanSummaryByAccountId}
-              hideBalances={hideBalances}
-              settings={settings}
-              trueHourlyRate={trueHourlyRate}
-              isDark={isDark}
-            />
-          </View>
-        );
-      })}
+          ))}
+        </View>
+      ) : (
+        sections.map(renderSection)
+      )}
 
       {archivedCount > 0 ? (
         <Pressable
@@ -1294,6 +1333,8 @@ function AnimatedContainer({
 }
 
 const SCROLL_CONTENT_BOTTOM_PADDING = 100;
+/** A group's header and front card, in account rows, for balancing columns. */
+const SECTION_HEADER_WEIGHT = 3;
 
 const LOAN_TRACK_HEIGHT = 6;
 
@@ -1332,6 +1373,14 @@ const styles = StyleSheet.create({
   },
   sectionGap: {
     marginTop: spacing.lg,
+  },
+  columns: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.lg,
+  },
+  column: {
+    flex: 1,
   },
   sectionHeader: {
     flexDirection: 'row',

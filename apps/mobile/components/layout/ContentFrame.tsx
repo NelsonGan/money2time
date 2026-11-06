@@ -4,6 +4,12 @@ import { useWindowDimensions } from 'react-native';
 export interface ContentFrame {
   width: number;
   height: number;
+  /**
+   * The frame is centred on the open iPhone Duo's fold (`foldSpan`), for a
+   * page that splits into two columns there. Not inherited: a nested frame
+   * (a pane, a pager page) is a single column again.
+   */
+  onFold?: boolean;
 }
 
 const ContentFrameContext = createContext<ContentFrame | null>(null);
@@ -17,9 +23,10 @@ const ContentFrameContext = createContext<ContentFrame | null>(null);
 export function ContentFrameProvider({
   width,
   height,
+  onFold = false,
   children,
 }: ContentFrame & { children: React.ReactNode }) {
-  const value = useMemo(() => ({ width, height }), [width, height]);
+  const value = useMemo(() => ({ width, height, onFold }), [width, height, onFold]);
   return <ContentFrameContext.Provider value={value}>{children}</ContentFrameContext.Provider>;
 }
 
