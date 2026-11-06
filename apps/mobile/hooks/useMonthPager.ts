@@ -7,6 +7,11 @@ import { pageIndexFromOffset } from '~/utils/pagerOffset';
 
 interface UseMonthPagerParams {
   listRef: React.RefObject<FlatList<number> | null>;
+  /**
+   * Width of one page. The list must be exactly this wide, as paging needs:
+   * a settle measured at any other width is taken for a resize in flight and
+   * ignored (`pageIndexFromOffset`).
+   */
   pageWidth: number;
   totalSlots: number;
   initialIndex: number;

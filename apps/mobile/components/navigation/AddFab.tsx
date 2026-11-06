@@ -8,8 +8,6 @@ import { PlusIcon } from '~/components/icons/NavIcons';
 import {
   getFloatingNavReservedInset,
   getSideRailFootGap,
-  getSideRailPillLength,
-  getSideRailTopGap,
   SIDE_RAIL_FAB_SLOT,
 } from '~/components/navigation/floatingNav';
 import { ClayIcon } from '~/components/ui/ClayIcon';
@@ -182,34 +180,33 @@ export function AddFabButton({
 }
 
 interface AddFabProps extends AddFabButtonProps {
-  /** Tabs in the side rail, to place the + under a top-aligned one before it is measured. */
-  railTabCount: number;
-  /** Where a top-aligned rail's pill ends, once measured. */
+  /**
+   * Where a top-aligned rail's pill ends (iPad), measured by the rail. The +
+   * waits for it rather than guessing: Liquid Glass draws the pill longer
+   * than its items add up to.
+   */
   railPillEnd?: number | null;
 }
 
 /** Gap between a top-aligned rail's pill and the + slot under it. */
 const RAIL_FAB_GAP = 8;
 
-export function AddFab({ railTabCount, railPillEnd, ...props }: AddFabProps) {
-  const { top: safeTop, bottom: safeBottom } = useSafeAreaInsets();
-  const { isTablet, navPlacement, navEdge, navRailInset, navRailAlign, isFloatingWindow } =
-    useDeviceLayout();
+export function AddFab({ railPillEnd, ...props }: AddFabProps) {
+  const { bottom: safeBottom } = useSafeAreaInsets();
+  const { isTablet, navPlacement, navEdge, navRailInset, navRailAlign } = useDeviceLayout();
   // Side rail: centred in the slot kept at the rail's foot (iPhone Duo) or
   // under its pill (iPad). Otherwise: above the bottom bar, at the content's
   // trailing edge.
   const isRail = navPlacement === 'side';
+  const atRailTop = isRail && navRailAlign === 'top';
+  if (atRailTop && railPillEnd == null) return null;
   const anchorStyle = isRail
     ? {
         [navEdge]: 0,
         width: navRailInset,
         height: SIDE_RAIL_FAB_SLOT,
-        ...(navRailAlign === 'top'
-          ? {
-              top:
-                (railPillEnd ?? getSideRailTopGap(safeTop) + getSideRailPillLength(railTabCount)) +
-                RAIL_FAB_GAP,
-            }
+        ...(atRailTop
+          ? { top: (railPillEnd ?? 0) + RAIL_FAB_GAP }
           : { bottom: getSideRailFootGap(safeBottom) }),
         alignItems: 'center' as const,
         justifyContent: 'center' as const,

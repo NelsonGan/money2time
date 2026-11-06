@@ -29,9 +29,9 @@ import {
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
-import { useWideTabColumns } from '~/hooks/useWideTabColumns';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { useWideTabColumns } from '~/hooks/useWideTabColumns';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { ItemWithStats, UserSettings } from '~/types';

@@ -181,7 +181,6 @@ import type {
   WeekStartsOn,
 } from '~/types';
 import { cn } from '~/utils';
-import { pageIndexFromOffset } from '~/utils/pagerOffset';
 import { readableColumn } from '~/utils/adaptiveLayout';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { withColorAlpha } from '~/utils/color';
@@ -211,6 +210,7 @@ import {
   startOfMonthDate,
   toRange,
 } from '~/utils/formatters';
+import { pageIndexFromOffset } from '~/utils/pagerOffset';
 import {
   DEFAULT_SELECTION_FILTER_MODE,
   isSelectionFilterMode,

@@ -106,11 +106,11 @@ import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accoun
 import { selectDuplicableTransactions } from '~/features/transactions/lib/duplicateTransaction';
 import { AddTransactionScreen, EditTransactionScreen } from '~/features/transactions/screens';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
-import { useWideTabColumns } from '~/hooks/useWideTabColumns';
 import { useIndexedScrollToTopRefs } from '~/hooks/useIndexedScrollToTopRefs';
 import { useMonthPager } from '~/hooks/useMonthPager';
 import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { useWideTabColumns } from '~/hooks/useWideTabColumns';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';

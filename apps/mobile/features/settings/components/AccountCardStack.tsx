@@ -1248,7 +1248,8 @@ export function AccountCardStack({
   };
 
   // iPad: each group goes into the shorter column, in order, so the two
-  // columns end near the same height and still read left to right.
+  // columns end near the same height. Screen readers read the left column
+  // first, then the right.
   const sectionColumns = useMemo(() => {
     const result: GroupSection[][] = [[], []];
     const heights = [0, 0];

@@ -1451,7 +1451,6 @@ function MainShellScreen({
           />
           {showAddFab ? (
             <AddFab
-              railTabCount={navTabs.length}
               railPillEnd={railPillEnd}
               onPress={handleFabPress}
               onLongPress={holdAction === 'none' ? undefined : handleFabLongPress}

@@ -34,8 +34,6 @@ export function getFloatingNavReservedInset(
 
 /** One tab's extent along the bar, in a row or a column. */
 export const NAV_ITEM_EXTENT = 58;
-/** The pill's padding at each end, along its length. */
-const NAV_PILL_END_PADDING = 8;
 /** Gap between the top safe area and a top-aligned rail (iPad). */
 const SIDE_RAIL_TOP_GAP = 12;
 /** Room under iPadOS's window buttons, which sit over a floating window's corner. */
@@ -57,9 +55,4 @@ export function getSideRailFootGap(safeBottom: number) {
  */
 export function getSideRailTopGap(safeTop: number, isFloatingWindow = false) {
   return safeTop + SIDE_RAIL_TOP_GAP + (isFloatingWindow ? WINDOW_CONTROLS_CLEARANCE : 0);
-}
-
-/** Length of the vertical tab pill holding `tabCount` tabs. */
-export function getSideRailPillLength(tabCount: number) {
-  return tabCount * NAV_ITEM_EXTENT + NAV_PILL_END_PADDING * 2;
 }

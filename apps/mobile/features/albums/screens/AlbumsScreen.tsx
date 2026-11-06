@@ -64,7 +64,11 @@ export function AlbumsScreen({
 
   const [tab, setTab] = useState<AlbumsTab>('albums');
   const pagerRef = useRef<ScrollViewInstance | null>(null);
-  const [pageWidth, setPageWidth] = useState(Math.min(windowWidth, 640));
+  // iPad: album cards in two columns, and the page (and its map) as wide as
+  // the tab header above it.
+  const wideColumns = useWideTabColumns();
+  // The first frame's estimate, until the page measures itself.
+  const [pageWidth, setPageWidth] = useState(Math.min(windowWidth, wideColumns.maxWidth ?? 640));
   const [pageHeight, setPageHeight] = useState(0);
   // Defer mounting the (native, GL-backed) map until the user first swipes
   // toward or taps the Map tab, then keep it mounted. Avoids paying MapLibre's
@@ -79,9 +83,6 @@ export function AlbumsScreen({
     scrollRef.current?.scrollTo({ y: 0, animated: false });
   }, [scrollRef, scrollToTopToken]);
 
-  // iPad: album cards in two columns, and the page (and its map) as wide as
-  // the tab header above it.
-  const wideColumns = useWideTabColumns();
   const contentWidth = pageWidth - SCREEN_PADDING * 2;
   const cardWidth = (contentWidth - GRID_GAP * (wideColumns.columns - 1)) / wideColumns.columns;
 
