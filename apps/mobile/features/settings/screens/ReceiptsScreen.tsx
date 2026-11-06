@@ -277,7 +277,7 @@ export function ReceiptsScreen({
               </View>
             );
           })}
-          {/* Keep a short trailing row's tiles at full-row width. */}
+          {/* Pad a short last row so its tiles keep the grid's column width. */}
           {Array.from({ length: tilesPerRow - item.tiles.length }, (_, padIndex) => (
             <View key={`pad-${padIndex}`} className="flex-1" />
           ))}

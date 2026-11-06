@@ -733,12 +733,16 @@ export function AlbumDetailScreen({
                 >
                   {/* Breakdown page */}
                   <View style={{ width: pageWidth, height: contentHeight }}>
-                    {breakdownContent}
+                    <ContentFrameProvider width={pageWidth} height={windowHeight}>
+                      {breakdownContent}
+                    </ContentFrameProvider>
                   </View>
 
                   {/* Transactions page */}
                   <View style={{ width: pageWidth, height: contentHeight }}>
-                    {transactionsContent}
+                    <ContentFrameProvider width={pageWidth} height={windowHeight}>
+                      {transactionsContent}
+                    </ContentFrameProvider>
                   </View>
                 </ScrollView>
               )}

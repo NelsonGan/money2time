@@ -181,7 +181,7 @@ import type {
   WeekStartsOn,
 } from '~/types';
 import { cn } from '~/utils';
-import { readableColumn } from '~/utils/adaptiveLayout';
+import { readableColumn, wideTabColumns } from '~/utils/adaptiveLayout';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { withColorAlpha } from '~/utils/color';
 import { convert } from '~/utils/currency';
@@ -396,6 +396,8 @@ const TREND_INSIGHT_TYPE_BY_KIND = {
 } as const;
 const EMPTY_TRANSACTIONS: TransactionWithRelations[] = [];
 const SENTIMENT_CHART_HEIGHT = 280;
+/** iPad's left pane has the height for taller line charts. */
+const WIDE_LINE_CHART_SCALE = 1.6;
 const SENTIMENT_COLORS = { happy: '#4CAF50', neutral: '#FFB74D', sad: '#E57373' } as const;
 const INSIGHTS_LINE_CHART_SIDE_INSET = 8;
 const INSIGHTS_LINE_CHART_SECTION_BLEED = 10;
@@ -4230,7 +4232,17 @@ export function InsightsScreen({
   // single pages, so they sit in a readable column instead.
   const isLockedProTrend = !isPro && proTrendTypeSet.has(displaySelectedInsightType);
   const splitPanes = panes && !isLoading && !isTakeoverView && !isLockedProTrend ? panes : null;
-  const column = readableColumn(width, panes !== null && splitPanes === null);
+  // iPad (`wideTabs`): Review and Budget lay out two columns of their own,
+  // so they get the whole width rather than the readable column.
+  const ownsWidePage = wideTabs && (isReviewView || isBudgetView);
+  const widePageMaxWidth = ownsWidePage ? wideTabColumns(width, wideTabs).maxWidth : undefined;
+  const column = readableColumn(width, panes !== null && splitPanes === null && !ownsWidePage);
+  // iPad, split: the line charts grow into the pane's height instead of
+  // keeping their phone height over an empty half pane.
+  const lineChartHeight = useCallback(
+    (base: number) => (wideTabs && splitPanes ? Math.round(base * WIDE_LINE_CHART_SCALE) : base),
+    [wideTabs, splitPanes],
+  );
   const insightsSplit = useMemo<InsightsSplit | null>(
     () =>
       splitPanes
@@ -5464,7 +5476,9 @@ export function InsightsScreen({
                 buckets={model.buckets}
                 series={model.series}
                 width={lineChartWidth}
-                height={isComparing ? TREND_COMPARE_CHART_HEIGHT : TREND_CHART_HEIGHT}
+                height={lineChartHeight(
+                  isComparing ? TREND_COMPARE_CHART_HEIGHT : TREND_CHART_HEIGHT,
+                )}
                 selectedKey={selectedKey}
                 onSelectKey={(key) => selectTrendBucket(kind, periodKey, key)}
                 onGestureStart={lockChartScrub}
@@ -5614,7 +5628,7 @@ export function InsightsScreen({
                 buckets={sentimentModel.buckets}
                 series={sentimentModel.series}
                 width={lineChartWidth}
-                height={SENTIMENT_CHART_HEIGHT}
+                height={lineChartHeight(SENTIMENT_CHART_HEIGHT)}
                 selectedKey={sentimentSelectedKey}
                 onSelectKey={(key) => {
                   setSentimentScrubBucketByPeriod((previous) =>
@@ -5771,7 +5785,7 @@ export function InsightsScreen({
                   buckets={chartModel.buckets}
                   series={chartModel.series}
                   width={lineChartWidth}
-                  height={TREND_CHART_HEIGHT - 20}
+                  height={lineChartHeight(TREND_CHART_HEIGHT - 20)}
                   selectedKey={selectedKey}
                   onSelectKey={(key) => {
                     setSavingsScrubMonthByYear((previous) =>
@@ -6731,6 +6745,7 @@ export function InsightsScreen({
             onLayout={splitPanes ? handleSplitHeaderLayout : undefined}
           >
             <MonthControlsHeader
+              contentMaxWidth={widePageMaxWidth}
               titleNode={
                 <View className="flex-row items-center gap-2">
                   <View ref={insightsTypeSelectorRef}>

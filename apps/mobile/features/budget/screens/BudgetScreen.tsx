@@ -1,6 +1,6 @@
 import { CalendarDays, ChevronDown, ChevronUp, Pencil, Trash2 } from 'lucide-react-native';
 import React, { forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, FlatList, Pressable, ScrollView, View } from 'react-native';
+import { Alert, FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { MonthYearWheelPicker } from '~/components/datePicker';
 import { EmptyState } from '~/components/feedback/EmptyState';
@@ -53,6 +53,7 @@ import {
   useMonthKeyPager,
 } from '~/hooks/useMonthKeyPager';
 import { useThemeColors } from '~/hooks/useThemeColors';
+import { useWideTabColumns } from '~/hooks/useWideTabColumns';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type {
@@ -404,6 +405,9 @@ export const BudgetPagerView = forwardRef<MonthPagerHandle, BudgetPagerViewProps
     const themeColors = useThemeColors();
     const listNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
     const { width: pageWidth } = useContentFrame();
+    // iPad: the budget and its category rows side by side.
+    const wideColumns = useWideTabColumns();
+    const isWide = wideColumns.columns > 1;
 
     // A day key, so it only changes (and re-renders pages) when the day does.
     const todayKey = dayKeyFromDateLocal(new Date());
@@ -709,195 +713,225 @@ export const BudgetPagerView = forwardRef<MonthPagerHandle, BudgetPagerViewProps
         const focusColor = focus ? budgetRingColor(focus.period, themeColors) : themeColors.primary;
         const remaining = focusModel?.summary.remaining ?? 0;
 
+        const leftBlock = (
+          <>
+            {showMonthCreate ? (
+              <CreateBudgetRow
+                label={monthKeyLabel(month, settings.locale)}
+                className="mb-3"
+                themeColors={themeColors}
+                onPress={() => handleCreate({ period: 'month', key: month })}
+              />
+            ) : null}
+
+            {focus && focusBudget && focusModel ? (
+              <View className="rounded-3xl border border-border/45 bg-card px-4 pb-4 pt-3">
+                {/* Which budget is in focus, and its edit and delete. */}
+                <View className="flex-row items-center gap-1.5">
+                  {/* The budget's icon on its ring's colour, its name, and a
+                      pill naming the period it covers. */}
+                  <View
+                    className="h-10 w-10 items-center justify-center rounded-2xl"
+                    style={{
+                      backgroundColor: withColorAlpha(focusColor, 0.14),
+                    }}
+                  >
+                    {focusBudget.templateEmoji ? (
+                      <CategoryEmoji icon={focusBudget.templateEmoji} size={22} />
+                    ) : (
+                      <CalendarDays size={18} color={focusColor} />
+                    )}
+                  </View>
+                  <View className="ml-1.5 min-w-0 flex-1">
+                    <Text variant="bodyStrong" numberOfLines={1}>
+                      {focusBudget.templateName ?? budgetPeriodName(focus.period)}
+                    </Text>
+                    {/* The period, and how long it still runs, beside it. */}
+                    <View className="mt-1 flex-row items-center gap-1.5">
+                      <View
+                        className="rounded-full px-2 py-0.5"
+                        style={{
+                          backgroundColor: withColorAlpha(focusColor, 0.12),
+                        }}
+                      >
+                        <Text
+                          variant="caption"
+                          numberOfLines={1}
+                          className="text-[11px]"
+                          style={{ color: focusColor }}
+                        >
+                          {focusLabel}
+                        </Text>
+                      </View>
+                      {daysLeft != null && daysLeft > 0 ? (
+                        <Text
+                          variant="caption"
+                          tone="muted"
+                          numberOfLines={1}
+                          className="shrink text-[11px]"
+                        >
+                          {I18n.t(
+                            daysLeft === 1 ? 'budget.days_left_one' : 'budget.days_left_other',
+                            { count: daysLeft },
+                          )}
+                        </Text>
+                      ) : null}
+                    </View>
+                  </View>
+                  <Pressable
+                    onPress={() => onOpenBudgetEditor(focusBudget.id)}
+                    hitSlop={10}
+                    accessibilityRole="button"
+                    accessibilityLabel={I18n.t('budget.edit_budget')}
+                    className="h-7 w-7 items-center justify-center rounded-full active:opacity-70"
+                  >
+                    <Pencil size={14} color={themeColors.textMuted} />
+                  </Pressable>
+                  <Pressable
+                    onPress={() => handleDeleteBudget(focusBudget)}
+                    hitSlop={10}
+                    accessibilityRole="button"
+                    accessibilityLabel={I18n.t('budget.delete_budget')}
+                    className="h-7 w-7 items-center justify-center rounded-full active:opacity-70"
+                  >
+                    <Trash2 size={14} color={themeColors.textMuted} />
+                  </Pressable>
+                </View>
+
+                <View className="mt-3">
+                  <BudgetRings
+                    rings={rings}
+                    focused={focus.period}
+                    size={150}
+                    themeColors={themeColors}
+                    onFocus={(period) => updateView(month, { period })}
+                  >
+                    {/* Just the amount: green while some is left, red with a
+                        minus sign once over. */}
+                    <Text
+                      variant="monoLg"
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      accessibilityLabel={leftLabel(remaining, settings)}
+                      className="text-[26px] leading-[32px] self-start"
+                      style={{
+                        color: remaining < 0 ? themeColors.error : themeColors.success,
+                      }}
+                    >
+                      {remaining < 0
+                        ? `-${money(-remaining, settings)}`
+                        : money(remaining, settings)}
+                    </Text>
+                  </BudgetRings>
+                </View>
+
+                {/* With the week in focus, its siblings in the month to pick from. */}
+                {focus.period === 'week' && weekChoices.length > 1 ? (
+                  <WeekChips
+                    weeks={weekChoices.map((week) => week.key)}
+                    selectedKey={focus.key}
+                    todayKey={todayKey}
+                    settings={settings}
+                    onSelect={(key) => updateView(month, { week: key })}
+                  />
+                ) : null}
+              </View>
+            ) : null}
+
+            {showWeekCreate && createWeekKey ? (
+              <CreateBudgetRow
+                label={budgetPeriodLabel('week', createWeekKey, settings.locale, monthCycle)}
+                className="mt-3"
+                themeColors={themeColors}
+                onPress={() => handleCreate({ period: 'week', key: createWeekKey })}
+              />
+            ) : null}
+            {showYearCreate ? (
+              <CreateBudgetRow
+                label={model.yearKey}
+                className="mt-3"
+                themeColors={themeColors}
+                onPress={() => handleCreate({ period: 'year', key: model.yearKey })}
+              />
+            ) : null}
+          </>
+        );
+        const rightBlock = (
+          <>
+            {/* A budget can lose all its lines (category-delete cascade);
+                don't render an empty bordered shell. */}
+            {focusModel && orderedCategories.length > 0 ? (
+              <View
+                className={cn(
+                  'overflow-hidden rounded-2xl border border-border/45 bg-card',
+                  !isWide && 'mt-4',
+                )}
+              >
+                {orderedCategories.map((line, index) => (
+                  <BudgetCategoryRow
+                    key={line.categoryId}
+                    line={line}
+                    color={colorByCategoryId.get(line.categoryId) ?? themeColors.primary}
+                    first={index === 0}
+                    categoriesById={categoriesById}
+                    settings={settings}
+                    themeColors={themeColors}
+                    onPress={() => openCategoryDrilldown(focusModel.range, line.categoryId, true)}
+                    onPressChild={(childId) =>
+                      openCategoryDrilldown(focusModel.range, childId, false)
+                    }
+                  />
+                ))}
+              </View>
+            ) : null}
+
+            {focusModel?.summary.countUnbudgeted && focusModel.summary.unbudgeted.length > 0 ? (
+              <UnbudgetedGroup
+                entries={focusModel.summary.unbudgeted}
+                total={focusModel.summary.unbudgetedSpent}
+                categoriesById={categoriesById}
+                settings={settings}
+                themeColors={themeColors}
+                onPressCategory={(categoryId) =>
+                  openCategoryDrilldown(focusModel.range, categoryId, true)
+                }
+              />
+            ) : null}
+          </>
+        );
+
         return (
           <View style={{ width: pageWidth }} className="flex-1">
             <ScrollView
               contentContainerStyle={[
                 { paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
+                wideColumns.maxWidth != null && styles.wideContent,
+                wideColumns.maxWidth != null && { maxWidth: wideColumns.maxWidth },
                 listNavInset,
               ]}
               showsVerticalScrollIndicator={false}
             >
-              {showMonthCreate ? (
-                <CreateBudgetRow
-                  label={monthKeyLabel(month, settings.locale)}
-                  className="mb-3"
-                  themeColors={themeColors}
-                  onPress={() => handleCreate({ period: 'month', key: month })}
-                />
-              ) : null}
-
-              {focus && focusBudget && focusModel ? (
-                <View className="rounded-3xl border border-border/45 bg-card px-4 pb-4 pt-3">
-                  {/* Which budget is in focus, and its edit and delete. */}
-                  <View className="flex-row items-center gap-1.5">
-                    {/* The budget's icon on its ring's colour, its name, and a
-                        pill naming the period it covers. */}
-                    <View
-                      className="h-10 w-10 items-center justify-center rounded-2xl"
-                      style={{
-                        backgroundColor: withColorAlpha(focusColor, 0.14),
-                      }}
-                    >
-                      {focusBudget.templateEmoji ? (
-                        <CategoryEmoji icon={focusBudget.templateEmoji} size={22} />
-                      ) : (
-                        <CalendarDays size={18} color={focusColor} />
-                      )}
-                    </View>
-                    <View className="ml-1.5 min-w-0 flex-1">
-                      <Text variant="bodyStrong" numberOfLines={1}>
-                        {focusBudget.templateName ?? budgetPeriodName(focus.period)}
-                      </Text>
-                      {/* The period, and how long it still runs, beside it. */}
-                      <View className="mt-1 flex-row items-center gap-1.5">
-                        <View
-                          className="rounded-full px-2 py-0.5"
-                          style={{
-                            backgroundColor: withColorAlpha(focusColor, 0.12),
-                          }}
-                        >
-                          <Text
-                            variant="caption"
-                            numberOfLines={1}
-                            className="text-[11px]"
-                            style={{ color: focusColor }}
-                          >
-                            {focusLabel}
-                          </Text>
-                        </View>
-                        {daysLeft != null && daysLeft > 0 ? (
-                          <Text
-                            variant="caption"
-                            tone="muted"
-                            numberOfLines={1}
-                            className="shrink text-[11px]"
-                          >
-                            {I18n.t(
-                              daysLeft === 1 ? 'budget.days_left_one' : 'budget.days_left_other',
-                              { count: daysLeft },
-                            )}
-                          </Text>
-                        ) : null}
-                      </View>
-                    </View>
-                    <Pressable
-                      onPress={() => onOpenBudgetEditor(focusBudget.id)}
-                      hitSlop={10}
-                      accessibilityRole="button"
-                      accessibilityLabel={I18n.t('budget.edit_budget')}
-                      className="h-7 w-7 items-center justify-center rounded-full active:opacity-70"
-                    >
-                      <Pencil size={14} color={themeColors.textMuted} />
-                    </Pressable>
-                    <Pressable
-                      onPress={() => handleDeleteBudget(focusBudget)}
-                      hitSlop={10}
-                      accessibilityRole="button"
-                      accessibilityLabel={I18n.t('budget.delete_budget')}
-                      className="h-7 w-7 items-center justify-center rounded-full active:opacity-70"
-                    >
-                      <Trash2 size={14} color={themeColors.textMuted} />
-                    </Pressable>
-                  </View>
-
-                  <View className="mt-3">
-                    <BudgetRings
-                      rings={rings}
-                      focused={focus.period}
-                      size={150}
-                      themeColors={themeColors}
-                      onFocus={(period) => updateView(month, { period })}
-                    >
-                      {/* Just the amount: green while some is left, red with a
-                          minus sign once over. */}
-                      <Text
-                        variant="monoLg"
-                        numberOfLines={1}
-                        adjustsFontSizeToFit
-                        accessibilityLabel={leftLabel(remaining, settings)}
-                        className="text-[26px] leading-[32px] self-start"
-                        style={{
-                          color: remaining < 0 ? themeColors.error : themeColors.success,
-                        }}
-                      >
-                        {remaining < 0
-                          ? `-${money(-remaining, settings)}`
-                          : money(remaining, settings)}
-                      </Text>
-                    </BudgetRings>
-                  </View>
-
-                  {/* With the week in focus, its siblings in the month to pick from. */}
-                  {focus.period === 'week' && weekChoices.length > 1 ? (
-                    <WeekChips
-                      weeks={weekChoices.map((week) => week.key)}
-                      selectedKey={focus.key}
-                      todayKey={todayKey}
-                      settings={settings}
-                      onSelect={(key) => updateView(month, { week: key })}
-                    />
-                  ) : null}
+              {/* iPad: the budget and its rings on the left, where it went on
+                  the right. One column elsewhere. */}
+              {isWide ? (
+                <View style={styles.wideColumns}>
+                  <View style={styles.wideColumn}>{leftBlock}</View>
+                  <View style={styles.wideColumn}>{rightBlock}</View>
                 </View>
-              ) : null}
-
-              {showWeekCreate && createWeekKey ? (
-                <CreateBudgetRow
-                  label={budgetPeriodLabel('week', createWeekKey, settings.locale, monthCycle)}
-                  className="mt-3"
-                  themeColors={themeColors}
-                  onPress={() => handleCreate({ period: 'week', key: createWeekKey })}
-                />
-              ) : null}
-              {showYearCreate ? (
-                <CreateBudgetRow
-                  label={model.yearKey}
-                  className="mt-3"
-                  themeColors={themeColors}
-                  onPress={() => handleCreate({ period: 'year', key: model.yearKey })}
-                />
-              ) : null}
-
-              {/* A budget can lose all its lines (category-delete cascade);
-                  don't render an empty bordered shell. */}
-              {focusModel && orderedCategories.length > 0 ? (
-                <View className="mt-4 overflow-hidden rounded-2xl border border-border/45 bg-card">
-                  {orderedCategories.map((line, index) => (
-                    <BudgetCategoryRow
-                      key={line.categoryId}
-                      line={line}
-                      color={colorByCategoryId.get(line.categoryId) ?? themeColors.primary}
-                      first={index === 0}
-                      categoriesById={categoriesById}
-                      settings={settings}
-                      themeColors={themeColors}
-                      onPress={() => openCategoryDrilldown(focusModel.range, line.categoryId, true)}
-                      onPressChild={(childId) =>
-                        openCategoryDrilldown(focusModel.range, childId, false)
-                      }
-                    />
-                  ))}
-                </View>
-              ) : null}
-
-              {focusModel?.summary.countUnbudgeted && focusModel.summary.unbudgeted.length > 0 ? (
-                <UnbudgetedGroup
-                  entries={focusModel.summary.unbudgeted}
-                  total={focusModel.summary.unbudgetedSpent}
-                  categoriesById={categoriesById}
-                  settings={settings}
-                  themeColors={themeColors}
-                  onPressCategory={(categoryId) =>
-                    openCategoryDrilldown(focusModel.range, categoryId, true)
-                  }
-                />
-              ) : null}
+              ) : (
+                <>
+                  {leftBlock}
+                  {rightBlock}
+                </>
+              )}
             </ScrollView>
           </View>
         );
       },
       [
         budgetTemplates.length,
+        isWide,
+        wideColumns.maxWidth,
         categoriesById,
         handleCreate,
         handleDeleteBudget,
@@ -968,3 +1002,18 @@ export const BudgetPagerView = forwardRef<MonthPagerHandle, BudgetPagerViewProps
     );
   },
 );
+
+const styles = StyleSheet.create({
+  wideContent: {
+    width: '100%',
+    alignSelf: 'center',
+  },
+  wideColumns: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.lg,
+  },
+  wideColumn: {
+    flex: 1,
+  },
+});
