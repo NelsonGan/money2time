@@ -56,6 +56,32 @@ export function contentTypeFor(path: string): string | null {
   return CONTENT_TYPES[ext] ?? null;
 }
 
+/**
+ * R2 sometimes fails a call with "We encountered an internal error. Please try
+ * again. (10001)" and succeeds when asked again. On 2026-11-06 a burst of these
+ * failed image uploads and checks for several phones within seconds, each one
+ * a 500 the app reported as a sync error. Only that code is retried: anything
+ * else (a missing object, a bad request) would fail the same way again.
+ */
+const R2_RETRY_DELAYS_MS = [100, 400];
+
+function isRetryableR2Error(error: unknown): boolean {
+  return error instanceof Error && error.message.includes('(10001)');
+}
+
+/** Runs one R2 call, again after a short wait while R2 says to try again. */
+export async function withR2Retry<T>(call: () => Promise<T>): Promise<T> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await call();
+    } catch (error) {
+      const delay = R2_RETRY_DELAYS_MS[attempt];
+      if (delay === undefined || !isRetryableR2Error(error)) throw error;
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+}
+
 export function mediaKey(space: MediaSpace, path: string): string {
   return `${space.prefix}${path}`;
 }
@@ -77,18 +103,21 @@ export async function putMedia(
 ): Promise<Response> {
   const contentType = contentTypeFor(path);
   if (!isValidAssetPath(path) || !contentType) return json({ error: 'bad_path' }, 400);
-  // A declared length is required, so the body streams to R2 without being
-  // buffered and an oversized upload is refused before it is read.
+  // A declared length is required, so an oversized upload is refused before
+  // it is read. The body is then read whole (at most MAX_BYTES), because a
+  // stream R2 has started reading cannot be sent again when it asks for a retry.
   const length = Number(request.headers.get('content-length') ?? '');
   if (!Number.isFinite(length) || length <= 0 || !request.body) {
     return json({ error: 'length_required' }, 411);
   }
   if (length > MAX_BYTES) return json({ error: 'too_large' }, 413);
+  const body = await request.arrayBuffer();
+  if (body.byteLength !== length) return json({ error: 'length_mismatch' }, 400);
   const key = mediaKey(space, path);
   const counted = await countNewImage(env, space, key);
   if (counted === 'full') return json({ error: 'quota' }, 507);
   try {
-    await env.MEDIA.put(key, request.body, { httpMetadata: { contentType } });
+    await withR2Retry(() => env.MEDIA.put(key, body, { httpMetadata: { contentType } }));
   } catch (error) {
     if (counted === 'counted') await adjustCount(env, space, -1);
     throw error;
@@ -110,7 +139,7 @@ async function countNewImage(
   space: MediaSpace,
   key: string,
 ): Promise<'replaced' | 'counted' | 'full'> {
-  if (await env.MEDIA.head(key)) return 'replaced';
+  if (await withR2Retry(() => env.MEDIA.head(key))) return 'replaced';
   if (await incrementBelowCap(env, space)) return 'counted';
   const actual = await countObjects(env, space);
   await env.AUTH_DB.prepare(
@@ -149,7 +178,9 @@ async function forEachPage(
 ): Promise<void> {
   let cursor: string | undefined;
   do {
-    const listed = await env.MEDIA.list({ prefix: space.prefix, cursor, limit: 1000 });
+    const listed = await withR2Retry(() =>
+      env.MEDIA.list({ prefix: space.prefix, cursor, limit: 1000 }),
+    );
     if (listed.objects.length) await visit(listed.objects.map((o) => o.key));
     cursor = listed.truncated ? listed.cursor : undefined;
   } while (cursor);
@@ -165,7 +196,7 @@ async function countObjects(env: Env, space: MediaSpace): Promise<number> {
 
 export async function getMedia(env: Env, space: MediaSpace, path: string): Promise<Response> {
   if (!isValidAssetPath(path)) return json({ error: 'bad_path' }, 400);
-  const object = await env.MEDIA.get(mediaKey(space, path));
+  const object = await withR2Retry(() => env.MEDIA.get(mediaKey(space, path)));
   if (!object) return json({ error: 'not_found' }, 404);
   return new Response(object.body, {
     headers: {
@@ -185,11 +216,13 @@ export async function existingMedia(
     return json({ error: 'bad_paths' }, 400);
   }
   const valid = paths.filter((p): p is string => typeof p === 'string' && isValidAssetPath(p));
-  const heads = await Promise.all(valid.map((p) => env.MEDIA.head(mediaKey(space, p))));
+  const heads = await Promise.all(
+    valid.map((p) => withR2Retry(() => env.MEDIA.head(mediaKey(space, p)))),
+  );
   return json({ existing: valid.filter((_, index) => heads[index] !== null) });
 }
 
 /** Deletes every image of the space (account deletion, a ledger no longer shared). */
 export async function deleteAllMedia(env: Env, space: MediaSpace): Promise<void> {
-  await forEachPage(env, space, (keys) => env.MEDIA.delete(keys));
+  await forEachPage(env, space, (keys) => withR2Retry(() => env.MEDIA.delete(keys)));
 }

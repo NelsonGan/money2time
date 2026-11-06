@@ -1,0 +1,6 @@
+✔ an upload survives R2 failing the existence check once (113.597ms)
+✔ an upload survives R2 failing the write once, and is counted once (102.065667ms)
+✔ the exists check survives R2 failing a head once (103.340167ms)
+✔ R2 still failing after the retries throws, and the image stays uncounted (503.654042ms)
+✔ an error that is not R2 asking for a retry is not retried (2.260709ms)
+✔ a body shorter than its Content-Length is refused before R2 is written (1.050375ms)
