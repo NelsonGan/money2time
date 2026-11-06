@@ -61,7 +61,7 @@ apps/mobile/
 │   ├── ui/                     # Button, Card, Input, Text, Toggle, Select, pickers…
 │   ├── feedback/               # EmptyState, AppErrorBoundary, Mascot
 │   ├── icons/                  # Lucide NavIcons, social/cloud-provider icons
-│   ├── layout/                 # TabletContentContainer, ContentFrame, AdaptiveFrames (iPhone Duo)
+│   ├── layout/                 # TabletContentContainer, ContentFrame, AdaptiveFrames, ColumnGrid (iPad, iPhone Duo)
 │   ├── datePicker/             # Date/month pickers
 │   ├── widget-preview/         # Home-screen widget previews
 │   └── navigation/             # BottomNav, SideNavRail, NavChrome, AddFab, MonthControlsHeader, InOutHeader
@@ -220,7 +220,7 @@ node scripts/sync-tutorials-web.mjs        # catalog -> ../money2time-web
 
 ### Navigation
 
-`App.tsx` is the root. It contains a single `RootStack` (NativeStack) with `MainShellScreen` as the base screen. `MainShellScreen` renders a `BottomNav` overlaying a tab-based content area (on iPhone Duo, a `SideNavRail` beside it; see [iPhone Duo](#key-patterns) under Key patterns). The app is **calendar-first**: the default tabs are **calendar, accounts, insights, albums, settings**. The `calendar` tab is the home/base view and renders `CalendarScreen` (which surfaces the month grid, day pager, and transaction list). All tabs are available to every user.
+`App.tsx` is the root. It contains a single `RootStack` (NativeStack) with `MainShellScreen` as the base screen. `MainShellScreen` renders a `BottomNav` overlaying a tab-based content area (on iPad and iPhone Duo, a `SideNavRail` beside it; see [iPad](#key-patterns) and [iPhone Duo](#key-patterns) under Key patterns). The app is **calendar-first**: the default tabs are **calendar, accounts, insights, albums, settings**. The `calendar` tab is the home/base view and renders `CalendarScreen` (which surfaces the month grid, day pager, and transaction list). All tabs are available to every user.
 
 **The bottom bar is the user's to arrange** (Settings > Display > Bottom bar, `BottomBarScreen`, settings route `BottomBar`). `TabName` and the rules live in `components/navigation/navTabs.ts`: two to five pages, with `settings` (where the bar is edited) pinned but movable and the rest chosen from calendar, accounts, insights, albums, goals, recurring, reimbursements, receipts and Who owes you (`settleUp`). **The first page is the home page** (`homeNavTab`, tagged Home on the editor): the app opens on it, and its icon is Home in both clay and flat styles, in the bottom bar, side rail and settings previews. Other pages keep their own icons, including a calendar glyph when Calendar is not home. Page labels remain their page names for accessibility. When Calendar is not in the bar the + button also appears on it, so adding an entry is always on the first screen, unless that page is Accounts. The + button never shows on the Accounts tab (`showsTransactionFab`): floating over the card stack, it covered the buttons of the last expanded card. Account detail uses the same `AddFabButton` as Home: the bare 60-point clay +, or the primary disc in flat-icon mode, with shared press feedback and rapid-tap protection. Its account-specific entry action and bottom-safe-area placement stay intact, alongside Pay on credit and loan accounts. Quick entry and full entry opened from a home page other than Calendar return to that page after saving; expanding quick entry into full entry preserves that return. Adding from an account detail returns to that account, and backing out returns to the tab that opened it. Calendar entry still focuses the saved transaction’s day. The bar is stored as a JSON array in `settings.nav_tabs_json` (migration `069`); null means the default five, so defaults can change later without overwriting anyone's choice, and an unknown or invalid stored bar falls back to the default rather than breaking navigation. `BottomNav` renders whatever `parseNavTabs` returns, and `NAV_TAB_META` (in `components/navigation/NavChrome.tsx`, shared with the iPhone Duo side rail) holds each page's clay icon and label. Every page has a `MountedTab` slot in `App.tsx`, rendered only while the page is in the bar or on screen (`hostsTab`), so a removed page unmounts; only pages in the bar are preloaded. A page outside the bar still opens when something asks for it (Settings > Albums, the over-account-limit prompt, `requestOpenTab`), with no bar item highlighted; tapping any tab leaves it. The added pages are screens that normally sit behind a push, so in the bar they take no `onBack` (the settings header then shows no back button) and reach their own settings through `requestOpenTab('settings')` + `requestOpenSettingsScreen`. Goals is wrapped in `GoalsTabScreen` for a header of its own, since the goals pane usually lives under the Accounts tab's header. Modal/push screens (editors, drilldowns, flows) are registered at the root stack level.
 
@@ -381,22 +381,23 @@ Platform-split services (`.native.ts` / `.shared.ts`) use the `.native.ts` imple
 
 ### Custom hooks
 
-| Hook                        | Purpose                                         |
-| --------------------------- | ----------------------------------------------- |
-| `useMonthPager`             | Month paging with scroll callbacks              |
-| `useIndexedScrollToTopRefs` | Track multiple scrollable refs                  |
-| `useThemeVars`              | Access theme color scheme CSS variables         |
-| `useThemeColors`            | Get theme-specific color values                 |
-| `useEdgeSwipeBack`          | Handle edge-swipe back gestures                 |
-| `useProGate`                | Gate features behind Pro subscription           |
-| `useDeviceLayout`           | Tablet vs phone, iPhone Duo rail and panes      |
-| `usePersistedJsonSnapshot`  | Persist/restore JSON state via AsyncStorage     |
-| `usePressScale`             | Animated press scaling effect                   |
-| `useKeyboardHeight`         | Track the live keyboard inset                   |
-| `usePagerTabSync`           | Keep a pager and its tab bar in step            |
-| `useStableSafeAreaInsets`   | Safe-area insets correct on the first frame     |
-| `useSheetColumnStyle`       | Centre a bottom sheet on the open iPhone Duo    |
-| `usePagerWidthResnap`       | Keep a pager on its page when its width changes |
+| Hook                        | Purpose                                                 |
+| --------------------------- | ------------------------------------------------------- |
+| `useMonthPager`             | Month paging with scroll callbacks                      |
+| `useIndexedScrollToTopRefs` | Track multiple scrollable refs                          |
+| `useThemeVars`              | Access theme color scheme CSS variables                 |
+| `useThemeColors`            | Get theme-specific color values                         |
+| `useEdgeSwipeBack`          | Handle edge-swipe back gestures                         |
+| `useProGate`                | Gate features behind Pro subscription                   |
+| `useDeviceLayout`           | Tablet vs phone, side rail and panes (iPad, Duo)        |
+| `useWideTabColumns`         | Columns and width of a wide iPad tab page               |
+| `usePersistedJsonSnapshot`  | Persist/restore JSON state via AsyncStorage             |
+| `usePressScale`             | Animated press scaling effect                           |
+| `useKeyboardHeight`         | Track the live keyboard inset                           |
+| `usePagerTabSync`           | Keep a pager and its tab bar in step                    |
+| `useStableSafeAreaInsets`   | Safe-area insets correct on the first frame             |
+| `useSheetColumnStyle`       | Centre a bottom sheet in a wide window (iPad, open Duo) |
+| `usePagerWidthResnap`       | Keep a pager on its page when its width changes         |
 
 ### Styling
 
@@ -454,7 +455,15 @@ Traditional Chinese is `zh-Hant`. Device tags for Taiwan, Hong Kong, and Macau s
 - **IDs**: Use `newId()` from `~/utils/id` for generating unique identifiers (UUID-based).
 - **Error handling**: Use `getErrorMessage()` from `~/utils/errorHandling` to safely extract error messages.
 - **Tablet layout**: Use `useDeviceLayout()` hook and `TabletContentContainer` for responsive layouts.
-- **iPhone Duo (foldable)**: the closed outer display (466x678 pt) reserves an 84 pt strip on its right for the clock, camera and system bars, and the open inner display (951x669 pt, landscape; it rotates the app whatever the portrait lock says) folds down the middle. `resolveAdaptiveLayout` in `utils/adaptiveLayout.ts` (tested) turns window size and safe-area insets into the layout, exposed on `useDeviceLayout()` as `navPlacement`, `navEdge`, `navRailInset`, `isTwoPane` and `panes`. It recognises the Duo by the space it gives the app, never by model: only an iPhone (not iPad, not Android) with a horizontal safe-area strip, or an iPhone window wider than 800 pt and wider than tall, gets the side layout, so every other device keeps the bottom bar and an identical layout. On the Duo:
+- **iPad**: `resolveAdaptiveLayout` (`utils/adaptiveLayout.ts`, tested) lays iPad out by the window it is given, never by model, so Split View, Slide Over, Stage Manager and resizable windows get the layout that fits them:
+  - **Narrower than 600 pt**: the phone layout, bottom bar and all.
+  - **600 pt and wider**: the tabs move into the `SideNavRail` on the leading (left) edge, at the top where a sidebar sits (`navRailAlign: 'top'`), with the + right under its pill (`AddFab` reads where the pill ends through `onRailPillEnd`). Tab pages get the window less the 84 pt rail (`ShellContentFrame`).
+  - **Two panes** once the content beside the rail is at least 800 pt (a 13-inch iPad both ways round, an 11-inch or iPad mini in landscape): Home and Insights split it evenly, using the same pane code as the open Duo. On iPad the month grid also grows into the height of its pane (`CalendarMonthGrid`'s `fillHeight`, cells up to half again as tall as wide, as in iPad Calendar), the breakdown pie draws up to a 150 pt radius and its rows get roomier.
+  - **Wide tab pages** (`WIDE_TABS` in `App.tsx`: Accounts, Albums, Settings) take the whole content width where `wideTabs` is set (iPad only: on the open Duo it would straddle the fold). They read `useWideTabColumns()` (`wideTabColumns` in `utils/adaptiveLayout.ts`): two columns in a column of at most 1180 pt once there is 880 pt, otherwise one readable 600 pt column. Accounts lays its groups out in two balanced columns under a one-row net assets summary; Goals (`ColumnGrid`), Items and Albums (`Sortable.Flex` wrapping, so drag-to-reorder still works) lay their cards out in two columns; Settings puts the profile and its cards in a 380 pt column beside the tile sections, whose `SettingsGrid` fits a fourth tile per row once it is 640 pt wide. `TabletContentContainer`, `SettingsPageLayout` and `MonthControlsHeader` take a `maxWidth`/`contentMaxWidth` so a page's header and content share that width. Every other tab page, pushed route and settings sub-page stays in the readable 600 pt column (`isWide`), and bottom sheets centre themselves in it (`useSheetColumnStyle`, now also on `PromptSheet`, `FeatureAnnouncementModal`, `DatePickerModal` and `LedgerProGuard`).
+  - **Floating windows**: iPadOS draws its window buttons over the top-leading corner of a window smaller than the screen and leaves them out of the safe area. `useDeviceLayout().isFloatingWindow` detects that window; the rail then starts 30 pt lower (`getSideRailTopGap`), and with the bottom bar `WindowControlsSafeArea` (`components/layout/AdaptiveFrames.tsx`) adds the same room to the top inset so headers clear the buttons. Native `SafeAreaView`s measure their own insets and do not get it.
+  - **Month pagers while a window resizes**: the resize animation reports frames at in-between widths, and programmatic re-snaps also end in `onMomentumScrollEnd`. `pageIndexFromOffset` (`utils/pagerOffset.ts`, tested) skips a settle measured at a width other than the page (a paging scroll view is always one page wide) instead of dividing its offset into a month decades away; `usePagerWidthResnap` puts the pager back on its page at the new width. `useMonthPager` and Insights use it.
+  - Test on the `Money2Time iPad Pro 13-inch` simulator (iOS 27.0) in both orientations, and resize its window from the grabber at the bottom-right corner (the simulator runs apps in windows) to check the compact, single-pane and two-pane layouts. The iPhone and the Duo must look exactly as before.
+- **iPhone Duo (foldable)**: the closed outer display (466x678 pt) reserves an 84 pt strip on its right for the clock, camera and system bars, and the open inner display (951x669 pt, landscape; it rotates the app whatever the portrait lock says) folds down the middle. `resolveAdaptiveLayout` in `utils/adaptiveLayout.ts` (tested) turns window size and safe-area insets into the layout, exposed on `useDeviceLayout()` as `navPlacement`, `navEdge`, `navRailInset`, `isTwoPane` and `panes`. It recognises the Duo by the space it gives the app, never by model: only an iPhone (not Android) with a horizontal safe-area strip, or an iPhone window wider than 800 pt and wider than tall, gets the Duo's side layout, so every other iPhone keeps the bottom bar and an identical layout (iPad has its own rules, above). On the Duo:
   - **Tabs** run down the side strip in a vertical pill (`SideNavRail`) with the + at its foot (`AddFab` positions itself into `SIDE_RAIL_FAB_SLOT`), where iOS puts its own vertical tab bar. `components/navigation/NavChrome.tsx` holds the items and the glass surface both bars use. Tab pages get only the home indicator as bottom clearance (`getFloatingNavReservedInset(safeBottom, 'side')`).
   - **Widths come from the content frame, not the window.** `ContentFrameProvider` / `useContentFrame()` (`components/layout/ContentFrame.tsx`) give the area a screen is laid out in: the shell less the rail (`ShellContentFrame`), a tab slot, or a pane. Anything sized to the screen (pager pages, charts, grids) reads `useContentFrame()`, and `useDeviceLayout().contentWidth` follows it. A window-level `Modal` or popover keeps the window size. Without a provider the frame is the window.
   - **Full-screen routes** (root stack via `screenLayout`, onboarding and the intro paywall) are wrapped in `SideStripSafeArea` (`components/layout/AdaptiveFrames.tsx`), which keeps them out of the side strip; transparent modals draw their own sheet and are left alone.
