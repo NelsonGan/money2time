@@ -45,6 +45,7 @@ import {
   deleteFile,
   downloadFileText,
   DriveError,
+  driveFailureDetails,
   escapeDriveQueryValue,
   findFolderId,
   findFolderIds,
@@ -138,6 +139,68 @@ describe('error classification', () => {
   it('surfaces a dropped connection as offline', async () => {
     fetchMock.mockRejectedValue(new TypeError('Network request failed'));
     await expect(findFolderId('Money2Time')).rejects.toMatchObject({ kind: 'offline' });
+  });
+});
+
+describe('failure details for analytics', () => {
+  // Most failed Google Drive backups are a `client` failure that repeats every
+  // day for the same user, and `client` covers every 4xx Drive does not single
+  // out. The status and Drive's reason code are what tell those apart.
+  it('keeps the status and reason of a refused request', async () => {
+    fetchMock.mockResolvedValue(
+      jsonResponse(
+        {
+          error: {
+            message: 'Request had insufficient authentication scopes.',
+            errors: [{ reason: 'insufficientPermissions' }],
+          },
+        },
+        { status: 403 },
+      ),
+    );
+
+    const error = await findFolderId('Money2Time').catch((e: unknown) => e);
+    expect(error).toMatchObject({ kind: 'client', status: 403 });
+    expect(driveFailureDetails(error)).toEqual({
+      httpStatus: 403,
+      driveReason: 'insufficientPermissions',
+    });
+  });
+
+  it('drops a reason that is not a plain code', async () => {
+    fetchMock.mockResolvedValue(
+      jsonResponse(
+        { error: { message: 'nope', errors: [{ reason: 'file "Budget 2026.json" not found' }] } },
+        { status: 404 },
+      ),
+    );
+
+    const error = await findFolderId('Money2Time').catch((e: unknown) => e);
+    expect(driveFailureDetails(error)).toEqual({ httpStatus: 404, driveReason: null });
+  });
+
+  it('marks an upload that broke on our side with the JS error name', async () => {
+    const sessionUri = 'https://www.googleapis.com/upload/drive/v3/files?upload_id=abc';
+    const unreadable = {
+      ...jsonResponse({}),
+      json: async () => {
+        throw new SyntaxError('JSON Parse error: Unexpected end of input');
+      },
+    } as unknown as Response;
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse({}, { headers: { Location: sessionUri } }))
+      .mockResolvedValueOnce(unreadable);
+
+    const error = await uploadJsonFile('folder-1', 'backup.json', '{}').catch((e: unknown) => e);
+    expect(error).toMatchObject({ kind: 'client', status: null });
+    expect(driveFailureDetails(error)).toEqual({ httpStatus: null, driveReason: 'js_SyntaxError' });
+  });
+
+  it('has nothing to report for an error that is not from Drive', () => {
+    expect(driveFailureDetails(new Error('iCloud unavailable'))).toEqual({
+      httpStatus: null,
+      driveReason: null,
+    });
   });
 });
 
