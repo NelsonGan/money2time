@@ -2984,6 +2984,16 @@ const pl = {
     allocated_summary: 'Rozdzielono {{allocated}} z {{total}}',
     allocated_done: 'W pełni rozdzielono',
     fill_remainder: 'Uzupełnij',
+    currency_label: 'Waluta',
+    currency_hint_template:
+      'Każdy budżet zachowuje kurs z dnia, w którym został utworzony, i po tym kursie przelicza wydatki w innych walutach. Dziś: 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_budget:
+      'Wydatki w innych walutach są przeliczane po kursie 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_no_rate:
+      'Nie ma jeszcze kursu {{currency}}. Dodaj go w sekcji Wiele walut, aby wydatki w innych walutach też się liczyły.',
+    unconverted_one: '1 wydatek nie jest jeszcze liczony: brak kursu {{currency}}.',
+    unconverted_other: 'Wydatki, które nie są jeszcze liczone: {{count}}. Brak kursu {{currency}}.',
+    approx_main: '≈ {{amount}}',
     back_populate_title_week: 'Uzupełnij poprzednie tygodnie',
     back_populate_title_month: 'Uzupełnij poprzednie miesiące',
     back_populate_title_year: 'Uzupełnij poprzednie lata',

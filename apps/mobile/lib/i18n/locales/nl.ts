@@ -3007,6 +3007,17 @@ const nl = {
     allocated_summary: '{{allocated}} van {{total}} verdeeld',
     allocated_done: 'Volledig verdeeld',
     fill_remainder: 'Aanvullen',
+    currency_label: 'Valuta',
+    currency_hint_template:
+      "Elk budget houdt de koers van de dag waarop het is aangemaakt, en rekent uitgaven in andere valuta's daartegen om. Vandaag: 1 {{currency}} = {{rate}} {{main}}.",
+    currency_hint_budget:
+      "Uitgaven in andere valuta's worden omgerekend tegen 1 {{currency}} = {{rate}} {{main}}.",
+    currency_hint_no_rate:
+      "Nog geen wisselkoers voor {{currency}}. Voeg er een toe bij Meerdere valuta's, zodat uitgaven in andere valuta's meetellen.",
+    unconverted_one: '1 uitgave telt nog niet mee: er is geen wisselkoers voor {{currency}}.',
+    unconverted_other:
+      '{{count}} uitgaven tellen nog niet mee: er is geen wisselkoers voor {{currency}}.',
+    approx_main: '≈ {{amount}}',
     back_populate_title_week: 'Vorige weken invullen',
     back_populate_title_month: 'Vorige maanden invullen',
     back_populate_title_year: 'Vorige jaren invullen',

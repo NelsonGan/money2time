@@ -2961,6 +2961,16 @@ const ja = {
     allocated_summary: '{{total}}中{{allocated}}を割り当て済み',
     allocated_done: 'すべて割り当て済み',
     fill_remainder: '埋める',
+    currency_label: '通貨',
+    currency_hint_template:
+      '各予算は作成した日のレートを保ち、他の通貨での支出をそのレートで換算します。今日：1 {{currency}} = {{rate}} {{main}}。',
+    currency_hint_budget: '他の通貨での支出は 1 {{currency}} = {{rate}} {{main}} で換算されます。',
+    currency_hint_no_rate:
+      '{{currency}} の為替レートがまだありません。他の通貨での支出も集計されるよう、多通貨で追加してください。',
+    unconverted_one: '1件の支出がまだ集計されていません：{{currency}} の為替レートがありません。',
+    unconverted_other:
+      '{{count}}件の支出がまだ集計されていません：{{currency}} の為替レートがありません。',
+    approx_main: '≈ {{amount}}',
     back_populate_title_week: '過去の週にも作成',
     back_populate_title_month: '過去の月にも作成',
     back_populate_title_year: '過去の年にも作成',

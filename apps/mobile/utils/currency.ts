@@ -43,6 +43,13 @@ export interface ConvertResult {
   rateUsed: number | null;
 }
 
+/** An exchange rate for display: 2 decimals from 100, 4 from 1, else 4 significant digits. */
+export function formatFxRate(rate: number): string {
+  if (rate >= 100) return rate.toFixed(2);
+  if (rate >= 1) return rate.toFixed(4);
+  return rate.toPrecision(4);
+}
+
 /** Keep editable FX values precise without filling the field with trailing zeros. */
 export function formatEditableFxValue(value: number, maximumDecimals = 8): string {
   if (!Number.isFinite(value) || value <= 0) return '';

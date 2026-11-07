@@ -333,6 +333,7 @@ export function toBudgetTemplate(
     name: row.name,
     emoji: row.emoji ?? null,
     period: toBudgetPeriod(row.period),
+    currency: row.currency ?? null,
     totalAmount: row.totalAmount ?? 0,
     isDefault: row.isDefault ?? false,
     countUnbudgeted: row.countUnbudgeted ?? true,
@@ -358,6 +359,10 @@ export function toPeriodBudgetLine(row: MonthlyBudgetCategoryRow): PeriodBudgetL
   };
 }
 
+function positiveOrNull(value: number | null | undefined): number | null {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : null;
+}
+
 export function toPeriodBudget(row: MonthlyBudgetRow, lines: PeriodBudgetLine[]): PeriodBudget {
   return {
     id: row.id,
@@ -368,6 +373,8 @@ export function toPeriodBudget(row: MonthlyBudgetRow, lines: PeriodBudgetLine[])
     templateEmoji: row.templateEmoji ?? null,
     totalAmount: row.totalAmount ?? 0,
     countUnbudgeted: row.countUnbudgeted ?? true,
+    currency: row.currency ?? null,
+    fxRate: positiveOrNull(row.fxRate),
     lines,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,

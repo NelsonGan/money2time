@@ -2996,6 +2996,16 @@ const ms = {
     allocated_summary: '{{allocated}} daripada {{total}} diagihkan',
     allocated_done: 'Diagihkan sepenuhnya',
     fill_remainder: 'Isi',
+    currency_label: 'Mata wang',
+    currency_hint_template:
+      'Setiap bajet mengekalkan kadar pada hari ia dicipta, dan perbelanjaan dalam mata wang lain ditukar pada kadar itu. Hari ini: 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_budget:
+      'Perbelanjaan dalam mata wang lain ditukar pada kadar 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_no_rate:
+      'Belum ada kadar pertukaran {{currency}}. Tambah satu dalam Berbilang mata wang supaya perbelanjaan dalam mata wang lain turut dikira.',
+    unconverted_one: '1 perbelanjaan belum dikira: tiada kadar pertukaran {{currency}}.',
+    unconverted_other: '{{count}} perbelanjaan belum dikira: tiada kadar pertukaran {{currency}}.',
+    approx_main: '≈ {{amount}}',
     back_populate_title_week: 'Isi minggu-minggu lepas',
     back_populate_title_month: 'Isi bulan-bulan lepas',
     back_populate_title_year: 'Isi tahun-tahun lepas',

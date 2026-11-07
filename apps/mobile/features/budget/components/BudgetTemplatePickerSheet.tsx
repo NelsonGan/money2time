@@ -4,6 +4,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CategoryEmoji, Text, ThemeModal } from '~/components/ui';
+import { withBudgetCurrency } from '~/features/budget/lib/budgetCurrency';
 import { countRootAllocations } from '~/features/budget/lib/budgetMath';
 import { categoriesCountLabel, money } from '~/features/budget/lib/format';
 import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
@@ -103,7 +104,11 @@ export function BudgetTemplatePickerSheet({
                         ) : null}
                       </View>
                       <Text variant="caption" tone="muted" className="mt-0.5">
-                        {money(template.totalAmount, settings)} ·{' '}
+                        {money(
+                          template.totalAmount,
+                          withBudgetCurrency(settings, template.currency),
+                        )}{' '}
+                        ·{' '}
                         {categoriesCountLabel(
                           countRootAllocations(template.allocations, categories),
                         )}

@@ -25,6 +25,7 @@ import { CategoryEmoji, ClayIcon, Text } from '~/components/ui';
 import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { spacing } from '~/constants/designSystem';
 import { useApp, useTransactions } from '~/context/AppContext';
+import { budgetTotalInMainCurrency } from '~/features/budget/lib/budgetCurrency';
 import { budgetCoveringDay } from '~/features/budget/lib/budgetPeriods';
 import { useGoals } from '~/features/goals/useGoals';
 import { InsightCard, SpendDeltaPill } from '~/features/insights/components/InsightCard';
@@ -110,7 +111,7 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
     { zoom, onZoomChange, filters, onFiltersChange, onOpenTransaction },
     ref,
   ) {
-    const { settings, categories, periodBudgets, getTrueHourlyRateForDate } = useApp();
+    const { settings, categories, periodBudgets, rateTable, getTrueHourlyRateForDate } = useApp();
     // iPad and the open Duo: two columns of cards across the wide page.
     const wideColumns = useWideTabColumns();
     const isWide = wideColumns.columns > 1;
@@ -239,7 +240,9 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
         // Value the period's spend at the rate that applied when it ended, so a
         // later raise does not rewrite what an old week cost in hours.
         hourlyRate: getTrueHourlyRateForDate(period.end),
-        budgetTotal: budget?.totalAmount ?? null,
+        // The period's spend is in the main currency, so a budget in another
+        // currency is compared through its frozen rate.
+        budgetTotal: budget ? budgetTotalInMainCurrency(budget, rateTable) : null,
         previousExpenses,
       });
     }, [
@@ -249,6 +252,7 @@ export const ReviewPagerView = forwardRef<ReviewPagerViewHandle, ReviewPagerView
       periodBudgets,
       monthCycle,
       previousExpenses,
+      rateTable,
       spendingTransactions,
     ]);
 

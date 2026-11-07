@@ -19,13 +19,22 @@ type MonthInput = { totalAmount: number; countUnbudgeted: boolean; lines: Budget
  * with the calls BudgetTemplateEditorScreen, BudgetTemplatesScreen,
  * PeriodBudgetEditorScreen and BudgetScreen make.
  *
- * The Web Dashboard knows monthly budgets only, so it is shown and may change
- * only monthly templates and month budgets (see `webDashboardBudgetsOnly`).
+ * The Web Dashboard knows monthly budgets in the main currency only, so it is
+ * shown and may change only those templates and month budgets (see
+ * `webDashboardBudgetsOnly`). Its edits name no currency, so a template or
+ * budget keeps its own.
  */
 export const budgetApply: ApplyModule = {
   select: (app) => ({
-    templates: app.budgetTemplates.filter((template) => template.period === 'month'),
-    budgets: app.periodBudgets.filter((budget) => budget.period === 'month'),
+    templates: app.budgetTemplates.filter(
+      (template) => template.period === 'month' && template.currency == null,
+    ),
+    budgets: app.periodBudgets.filter(
+      (budget) => budget.period === 'month' && budget.currency == null,
+    ),
+    takenMonths: app.periodBudgets
+      .filter((budget) => budget.period === 'month' && !budget.deletedAt)
+      .map((budget) => budget.periodKey),
     templateCount: app.budgetTemplates.length,
     // The months the budget pager offers, so a month is only made where the app makes one.
     months: computeBudgetPagerMonths({

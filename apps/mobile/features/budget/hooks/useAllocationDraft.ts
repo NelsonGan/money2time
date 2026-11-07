@@ -14,6 +14,8 @@ export interface OpenCategoryAllocationParams {
   categoryId: string;
   initialAmounts: Record<string, string>;
   remainingExcludingThis: number;
+  /** The budget's currency, which the editor's amounts are in. */
+  currency: string;
   onDone: (amounts: Record<string, string>) => void;
 }
 
@@ -28,9 +30,12 @@ export function useAllocationDraft({
   initialTotal,
   initialAmounts,
   initialOrder,
+  currency,
   onOpenCategoryAllocation,
 }: {
   categories: Category[];
+  /** The budget's currency code, handed on to the per-category editor. */
+  currency: string;
   initialTotal: string;
   /** Lazy so the seed lines are only flattened once, on first render. */
   initialAmounts: () => Record<string, string>;
@@ -166,10 +171,11 @@ export function useAllocationDraft({
         remainingExcludingThis: normalizeMoneyAmount(
           remaining + parseAllocationAmount(amounts[categoryId] ?? ''),
         ),
+        currency,
         onDone: (next) => setAmounts((previous) => ({ ...previous, ...next })),
       });
     },
-    [amounts, childrenByParent, onOpenCategoryAllocation, remaining],
+    [amounts, childrenByParent, currency, onOpenCategoryAllocation, remaining],
   );
 
   /** Root allocations plus any child breakdowns (already validated not to exceed their parents). */

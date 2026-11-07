@@ -210,7 +210,11 @@ function partsSource(): Record<string, Row[]> {
         instalment_start_date: '2026-11-02T00:00:00.000Z',
       },
     ],
-    budget_templates: [{ id: 'bt1', ledger_id: 'src', is_default: 1 }],
+    budget_templates: [
+      { id: 'bt1', ledger_id: 'src', is_default: 1 },
+      { id: 'trip', ledger_id: 'src', is_default: 0, currency: 'JPY' },
+      { id: 'sg', ledger_id: 'src', is_default: 0, currency: 'SGD' },
+    ],
     budget_template_categories: [{ id: 'btc1', template_id: 'bt1', category_id: 'food' }],
     items: [{ id: 'phone', ledger_id: 'src', purchase_price: 999 }],
     albums: [{ id: 'japan', ledger_id: 'src', is_active: 1 }],
@@ -319,6 +323,17 @@ describe('ledgerPartsCopySpecs', () => {
     });
     expect(copy.albums[0]).toMatchObject({ is_active: 0, ledger_id: 'dst' });
     expect(copy).not.toHaveProperty('album_transactions');
+  });
+
+  it('keeps a template in another currency, and drops it once it is the new main one', () => {
+    // MYR to SGD: the main-currency template follows the new ledger (null),
+    // the JPY one stays JPY, and the SGD one now is the main currency.
+    const copy = planParts(['budgets', 'categories']);
+    expect(copy.budget_templates.map((template) => template.currency ?? null)).toEqual([
+      null,
+      'JPY',
+      null,
+    ]);
   });
 });
 

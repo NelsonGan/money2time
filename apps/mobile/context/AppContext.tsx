@@ -29,6 +29,7 @@ import {
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { parsePaymentAlertPrefs, serializePaymentAlertPrefs } from '~/features/autoLog/lib/prefs';
 import { persistAutoLogTransaction } from '~/features/autoLog/persistTransaction';
+import { budgetRateToFreeze, storedBudgetCurrency } from '~/features/budget/lib/budgetCurrency';
 import { computeBackPopulateRange, pickAutoCreateTemplate } from '~/features/budget/lib/budgetMath';
 import {
   BUDGET_PERIODS,
@@ -298,12 +299,29 @@ export interface CreateItemInput {
   note?: string | null;
 }
 
+/** A week's, month's or year's budget as its editor saves it. */
+export interface PeriodBudgetInput {
+  totalAmount: number;
+  countUnbudgeted: boolean;
+  lines: BudgetAllocationInput[];
+  /**
+   * The budget's currency; null (or the main currency) = the ledger's main
+   * currency. Left out of an update (a Web Dashboard edit), it keeps its own.
+   */
+  currency?: string | null;
+}
+
 export interface CreateBudgetTemplateInput {
   name: string;
   /** Optional emoji shown next to the template name. */
   emoji?: string | null;
   /** How often budgets made from it repeat. */
   period: BudgetPeriod;
+  /**
+   * The currency its amounts are in; null (or the main currency) = the
+   * ledger's main currency. Left out of an update, the template keeps its own.
+   */
+  currency?: string | null;
   totalAmount: number;
   /** Whether unbudgeted spend counts toward the period total (default true). */
   countUnbudgeted?: boolean;
@@ -486,19 +504,13 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
    *  if the period has one. */
   createPeriodBudget: (key: string, templateId: string) => void;
   /** Creates a one-off custom budget for one period (no template involved). */
-  createCustomPeriodBudget: (
-    period: BudgetPeriod,
-    key: string,
-    input: { totalAmount: number; countUnbudgeted: boolean; lines: BudgetAllocationInput[] },
-  ) => void;
+  createCustomPeriodBudget: (period: BudgetPeriod, key: string, input: PeriodBudgetInput) => void;
   /**
-   * Edits one period's frozen budget in place (total, options, lines). A local
-   * override for that period only; the source template is untouched.
+   * Edits one period's frozen budget in place (total, options, lines, and
+   * currency when given). A local override for that period only; the source
+   * template is untouched.
    */
-  updatePeriodBudget: (
-    id: string,
-    input: { totalAmount: number; countUnbudgeted: boolean; lines: BudgetAllocationInput[] },
-  ) => void;
+  updatePeriodBudget: (id: string, input: PeriodBudgetInput) => void;
   deletePeriodBudget: (id: string) => void;
 
   /** Returns the id of the newly created (optimistically inserted) transaction. */
@@ -958,16 +970,26 @@ const fallbackStyles = StyleSheet.create({
   },
 });
 
+/** Analytics: whether a budget is in the main currency or another one. */
+function budgetCurrencyMode(
+  currency: string | null | undefined,
+  mainCurrency: string,
+): 'main' | 'other' {
+  return storedBudgetCurrency(currency, mainCurrency) ? 'other' : 'main';
+}
+
 /**
  * Creates the running week's, month's and year's budget (or only `only`'s)
  * from each period's default template when that period has never had one, so
  * a deleted budget stays deleted. A week budget made under another first day
- * of the week counts while it shares a day with this week. Must run inside a
+ * of the week counts while it shares a day with this week. A budget in another
+ * currency freezes that currency's rate from `rateTable`. Must run inside a
  * mutation. Returns how many budgets were made.
  */
 function autoCreateCurrentBudgets(
   templates: BudgetTemplate[],
   clock: BudgetPeriodClock,
+  rateTable: RateTable,
   only?: BudgetPeriod,
 ): number {
   let created = 0;
@@ -986,7 +1008,13 @@ function autoCreateCurrentBudgets(
       templates,
     });
     if (!template) continue;
-    if (periodBudgetsRepository.createFromTemplate(key, template)) {
+    if (
+      periodBudgetsRepository.createFromTemplate(
+        key,
+        template,
+        budgetRateToFreeze(template.currency, rateTable),
+      )
+    ) {
       created += 1;
       void trackEvent(AnalyticsEvents.BUDGET_MONTH_CREATED, { source: 'auto', period });
     }
@@ -1575,11 +1603,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // and year's budget from each period's default template. Runs on every
       // load — idempotent (one indexed lookup per period) and tombstone-aware,
       // so a user-deleted period never resurrects.
+      const nextRateTable = buildRateTable(
+        nextSettings.currencyCode,
+        exchangeRatesRepository.listByBase(nextSettings.currencyCode),
+      );
       const nextBudgetTemplates = budgetTemplatesRepository.list();
-      autoCreateCurrentBudgets(nextBudgetTemplates, {
-        weekStartsOn: nextSettings.weekStartsOn,
-        monthCycle: monthCycleOf(nextSettings),
-      });
+      autoCreateCurrentBudgets(
+        nextBudgetTemplates,
+        { weekStartsOn: nextSettings.weekStartsOn, monthCycle: monthCycleOf(nextSettings) },
+        nextRateTable,
+      );
       const nextPeriodBudgets = periodBudgetsRepository.list();
 
       const nextRawAccountBalances = accountsRepository.getBalances();
@@ -1597,11 +1630,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }).catch((error) => {
         reportError(error, { scope: 'notifications' });
       });
-
-      const nextRateTable = buildRateTable(
-        nextSettings.currencyCode,
-        exchangeRatesRepository.listByBase(nextSettings.currencyCode),
-      );
 
       setCurrentMonthWage(effectiveCurrentWage);
       setMonthlyWages(allWages);
@@ -4849,6 +4877,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             name: input.name,
             emoji: input.emoji ?? null,
             period: input.period,
+            currency: storedBudgetCurrency(input.currency, reportingCurrencyRef.current),
             totalAmount: input.totalAmount,
             countUnbudgeted: input.countUnbudgeted ?? true,
             allocations: input.allocations,
@@ -4868,6 +4897,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               backfilled = periodBudgetsRepository.createManyFromTemplate(
                 range.keys,
                 template,
+                budgetRateToFreeze(template.currency, rateTableRef.current),
               ).length;
             }
           }
@@ -4875,7 +4905,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           // Saving a template (especially the first of its period) materializes
           // the current period's budget right away — rollover isn't deferred to
           // the next launch.
-          autoCreateCurrentBudgets(templates, clock, input.period);
+          autoCreateCurrentBudgets(templates, clock, rateTableRef.current, input.period);
 
           return { id, backfilled };
         },
@@ -4893,6 +4923,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         categories: input.allocations.length,
         backPopulate: Boolean(input.backPopulate),
         period: input.period,
+        // A Web Dashboard template names no currency.
+        ...(input.currency !== undefined
+          ? { currency: budgetCurrencyMode(input.currency, reportingCurrencyRef.current) }
+          : {}),
       });
       return result.id;
     },
@@ -4908,6 +4942,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             name: input.name,
             emoji: input.emoji ?? null,
             period: input.period,
+            ...(input.currency !== undefined
+              ? { currency: storedBudgetCurrency(input.currency, reportingCurrencyRef.current) }
+              : {}),
             totalAmount: input.totalAmount,
             countUnbudgeted: input.countUnbudgeted ?? true,
             allocations: input.allocations,
@@ -4917,6 +4954,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             autoCreateCurrentBudgets(
               budgetTemplatesRepository.list(),
               { weekStartsOn: weekStartsOnRef.current, monthCycle: monthCycleRef.current },
+              rateTableRef.current,
               input.period,
             );
           }
@@ -4927,6 +4965,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       void trackEvent(AnalyticsEvents.BUDGET_TEMPLATE_UPDATED, {
         categories: input.allocations.length,
         period: input.period,
+        ...(input.currency !== undefined
+          ? { currency: budgetCurrencyMode(input.currency, reportingCurrencyRef.current) }
+          : {}),
       });
     },
     [refreshBudgets, runMutation],
@@ -4977,7 +5018,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           if (!template || !isBudgetPeriodKey(template.period, key)) return null;
           // null = the period already had a live budget (double-tap, or the
           // auto-create raced us) — nothing was written, so don't report one.
-          return periodBudgetsRepository.createFromTemplate(key, template) != null
+          return periodBudgetsRepository.createFromTemplate(
+            key,
+            template,
+            budgetRateToFreeze(template.currency, rateTableRef.current),
+          ) != null
             ? template.period
             : null;
         },
@@ -4994,15 +5039,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   const createCustomPeriodBudget = useCallback(
-    (
-      period: BudgetPeriod,
-      key: string,
-      input: { totalAmount: number; countUnbudgeted: boolean; lines: BudgetAllocationInput[] },
-    ) => {
+    (period: BudgetPeriod, key: string, input: PeriodBudgetInput) => {
       if (!isBudgetPeriodKey(period, key)) return;
-      const id = runMutation(() => periodBudgetsRepository.createCustom(period, key, input), {
-        refresh: refreshBudgets,
-      });
+      const currency = storedBudgetCurrency(input.currency, reportingCurrencyRef.current);
+      const id = runMutation(
+        () =>
+          periodBudgetsRepository.createCustom(period, key, {
+            totalAmount: input.totalAmount,
+            countUnbudgeted: input.countUnbudgeted,
+            lines: input.lines,
+            currency,
+            fxRate: budgetRateToFreeze(currency, rateTableRef.current),
+          }),
+        { refresh: refreshBudgets },
+      );
       if (id) {
         void trackEvent(AnalyticsEvents.BUDGET_MONTH_CREATED, { source: 'custom', period });
       }
@@ -5011,20 +5061,31 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   const updatePeriodBudget = useCallback(
-    (
-      id: string,
-      input: { totalAmount: number; countUnbudgeted: boolean; lines: BudgetAllocationInput[] },
-    ) => {
+    (id: string, input: PeriodBudgetInput) => {
       const period = periodBudgetsRef.current.find((budget) => budget.id === id)?.period;
+      const currency =
+        input.currency !== undefined
+          ? storedBudgetCurrency(input.currency, reportingCurrencyRef.current)
+          : undefined;
       runMutation(
         () => {
-          periodBudgetsRepository.update(id, input);
+          periodBudgetsRepository.update(id, {
+            totalAmount: input.totalAmount,
+            countUnbudgeted: input.countUnbudgeted,
+            lines: input.lines,
+            ...(currency !== undefined
+              ? { currency, fxRate: budgetRateToFreeze(currency, rateTableRef.current) }
+              : {}),
+          });
         },
         { refresh: refreshBudgets },
       );
       void trackEvent(AnalyticsEvents.BUDGET_MONTH_UPDATED, {
         categories: input.lines.length,
         ...(period ? { period } : {}),
+        ...(currency !== undefined
+          ? { currency: budgetCurrencyMode(currency, reportingCurrencyRef.current) }
+          : {}),
       });
     },
     [refreshBudgets, runMutation],

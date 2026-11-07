@@ -1,4 +1,5 @@
 import { categoryIconToEmoji } from '~/constants/categoryIcons';
+import { withBudgetCurrency } from '~/features/budget/lib/budgetCurrency';
 import { buildBudgetSummary } from '~/features/budget/lib/budgetMath';
 import {
   budgetCoveringDay,
@@ -19,6 +20,7 @@ import { I18n } from '~/lib/i18n';
 import type {
   Category,
   PeriodBudget,
+  RateTable,
   TransactionWithRelations,
   UserSettings,
   WeekStartsOn,
@@ -719,6 +721,7 @@ function buildBudgetWidgetSnapshots(
   periodBudgets: PeriodBudget[],
   categories: Pick<Category, 'id' | 'parentId' | 'name' | 'icon'>[],
   now: Date,
+  rateTable: RateTable | null,
 ): { budgetRing: BudgetRingSnapshot; budgetBreakdown: BudgetBreakdownSnapshot } {
   const monthCycle = monthCycleOf(settings);
   let budget: PeriodBudget | null = null;
@@ -737,7 +740,9 @@ function buildBudgetWidgetSnapshots(
     period === 'month'
       ? getMonthLabelFormatter(settings.locale).format(periodStart)
       : budgetPeriodLabel(period, monthKey, settings.locale, monthCycle);
-  const summary = buildBudgetSummary({ budget, transactions, categories, monthCycle });
+  const summary = buildBudgetSummary({ budget, transactions, categories, monthCycle, rateTable });
+  // A budget in another currency reads in its own.
+  const currencySymbol = withBudgetCurrency(settings, budget?.currency).currencySymbol;
 
   const DAY_MS = 24 * 60 * 60 * 1000;
   const daysInMonth = budgetRangeLength(range);
@@ -754,7 +759,7 @@ function buildBudgetWidgetSnapshots(
   const hasBudget = summary != null;
   const isOver = (summary?.remaining ?? 0) < 0;
   const remainingAmount = isOver ? (summary?.exceededBy ?? 0) : (summary?.remaining ?? 0);
-  const remainingCompact = formatCompactCurrency(remainingAmount, settings.currencySymbol);
+  const remainingCompact = formatCompactCurrency(remainingAmount, currencySymbol);
 
   const budgetRing: BudgetRingSnapshot = {
     widgetId: WIDGET_IDS.budgetRing,
@@ -775,7 +780,7 @@ function buildBudgetWidgetSnapshots(
     captionLabel: isOver
       ? I18n.t('widgets.budget_over')
       : I18n.t('widgets.budget_left_of', {
-          total: formatCompactCurrency(summary?.totalBudget ?? 0, settings.currencySymbol),
+          total: formatCompactCurrency(summary?.totalBudget ?? 0, currencySymbol),
         }),
     paceRatio,
     daysLeftLabel: I18n.t(
@@ -799,8 +804,8 @@ function buildBudgetWidgetSnapshots(
     monthKey,
     monthLabel,
     hasBudget,
-    totalSpentLabel: formatCompactCurrency(summary?.totalSpent ?? 0, settings.currencySymbol),
-    totalBudgetLabel: formatCompactCurrency(summary?.totalBudget ?? 0, settings.currencySymbol),
+    totalSpentLabel: formatCompactCurrency(summary?.totalSpent ?? 0, currencySymbol),
+    totalBudgetLabel: formatCompactCurrency(summary?.totalBudget ?? 0, currencySymbol),
     usageRatio: summary?.usageRatio ?? 0,
     isOver,
     remainingLabel: isOver
@@ -815,8 +820,8 @@ function buildBudgetWidgetSnapshots(
         emoji: categoryEmojiForWidget(category?.icon),
         usageRatio: line.usageRatio,
         isOver: line.isOver,
-        spentLabel: formatCompactCurrency(line.spent, settings.currencySymbol),
-        budgetedLabel: formatCompactCurrency(line.budgeted, settings.currencySymbol),
+        spentLabel: formatCompactCurrency(line.spent, currencySymbol),
+        budgetedLabel: formatCompactCurrency(line.budgeted, currencySymbol),
       };
     }),
     moreLabel:
@@ -831,7 +836,7 @@ function buildBudgetWidgetSnapshots(
     unbudgetedLabel:
       (summary?.unbudgetedSpent ?? 0) > 0
         ? I18n.t('widgets.budget_unbudgeted', {
-            amount: formatCompactCurrency(summary?.unbudgetedSpent ?? 0, settings.currencySymbol),
+            amount: formatCompactCurrency(summary?.unbudgetedSpent ?? 0, currencySymbol),
           })
         : '',
     setupLabel,
@@ -852,6 +857,7 @@ export function buildMoney2TimeWidgetSnapshot({
   excludedSavingsExpenseCategoryIds = [],
   savingsIncomeMode = DEFAULT_SELECTION_FILTER_MODE,
   savingsExpenseMode = DEFAULT_SELECTION_FILTER_MODE,
+  rateTable = null,
 }: {
   transactions: TransactionWithRelations[];
   settings: UserSettings;
@@ -868,6 +874,8 @@ export function buildMoney2TimeWidgetSnapshot({
   /** How each of those lists is read (the Savings rate row's Exclude | Include). */
   savingsIncomeMode?: SelectionFilterMode;
   savingsExpenseMode?: SelectionFilterMode;
+  /** The latest rates, for a budget in another currency made with no rate. */
+  rateTable?: RateTable | null;
 }): Money2TimeWidgetSnapshot {
   // Every widget below is a spending readout, so the reimbursement rows come
   // out here once rather than in each builder.
@@ -903,6 +911,7 @@ export function buildMoney2TimeWidgetSnapshot({
     periodBudgets,
     categories,
     now,
+    rateTable,
   );
 
   return {
@@ -1080,6 +1089,8 @@ export function buildSampleWidgetSnapshot(settings: UserSettings): Money2TimeWid
     templateEmoji: null,
     totalAmount: 1200,
     countUnbudgeted: true,
+    currency: null,
+    fxRate: null,
     lines: [
       { id: 'sb-food', categoryId: 'sample-cat-food', amount: 450, sortOrder: 0 },
       { id: 'sb-transport', categoryId: 'sample-cat-transport', amount: 250, sortOrder: 1 },

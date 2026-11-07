@@ -3016,6 +3016,17 @@ const fil = {
     allocated_summary: '{{allocated}} sa {{total}} ang nailaan',
     allocated_done: 'Ganap nang nailaan',
     fill_remainder: 'Punan',
+    currency_label: 'Pera',
+    currency_hint_template:
+      'Ginagamit ng bawat badyet ang palitan sa araw na ginawa ito, at dito kino-convert ang gastos sa ibang pera. Ngayon: 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_budget:
+      'Kino-convert ang gastos sa ibang pera sa 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_no_rate:
+      'Wala pang palitan para sa {{currency}}. Magdagdag sa Multi-currency para mabilang ang gastos sa ibang pera.',
+    unconverted_one: '1 gastos ang hindi pa nabibilang: walang palitan para sa {{currency}}.',
+    unconverted_other:
+      '{{count}} gastos ang hindi pa nabibilang: walang palitan para sa {{currency}}.',
+    approx_main: '≈ {{amount}}',
     back_populate_title_week: 'Punan ang mga nakaraang linggo',
     back_populate_title_month: 'Punan ang mga nakaraang buwan',
     back_populate_title_year: 'Punan ang mga nakaraang taon',

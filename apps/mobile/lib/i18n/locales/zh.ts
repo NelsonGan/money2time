@@ -2862,6 +2862,15 @@ const zh = {
     allocated_summary: '已分配 {{allocated}} / {{total}}',
     allocated_done: '已全部分配',
     fill_remainder: '补齐',
+    currency_label: '货币',
+    currency_hint_template:
+      '每个预算沿用创建当天的汇率，其他货币的支出按此汇率换算。今天：1 {{currency}} = {{rate}} {{main}}。',
+    currency_hint_budget: '其他货币的支出按 1 {{currency}} = {{rate}} {{main}} 换算。',
+    currency_hint_no_rate:
+      '还没有 {{currency}} 的汇率。在多币种中添加一个，其他货币的支出才会计入。',
+    unconverted_one: '有 1 笔支出尚未计入：没有 {{currency}} 的汇率。',
+    unconverted_other: '有 {{count}} 笔支出尚未计入：没有 {{currency}} 的汇率。',
+    approx_main: '≈ {{amount}}',
     back_populate_title_week: '回填过去的周',
     back_populate_title_month: '回填过去的月份',
     back_populate_title_year: '回填过去的年份',

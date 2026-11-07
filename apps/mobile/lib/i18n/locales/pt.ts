@@ -2992,6 +2992,18 @@ const pt = {
     allocated_summary: '{{allocated}} de {{total}} distribuído',
     allocated_done: 'Totalmente distribuído',
     fill_remainder: 'Preencher',
+    currency_label: 'Moeda',
+    currency_hint_template:
+      'Cada orçamento mantém a taxa do dia em que é criado e converte por ela os gastos em outras moedas. Hoje: 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_budget:
+      'Os gastos em outras moedas são convertidos a 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_no_rate:
+      'Ainda não há taxa de câmbio para {{currency}}. Adicione uma em Multimoeda para que os gastos em outras moedas sejam contados.',
+    unconverted_one:
+      '1 gasto ainda não está sendo contado: não há taxa de câmbio para {{currency}}.',
+    unconverted_other:
+      '{{count}} gastos ainda não estão sendo contados: não há taxa de câmbio para {{currency}}.',
+    approx_main: '≈ {{amount}}',
     back_populate_title_week: 'Preencher semanas anteriores',
     back_populate_title_month: 'Preencher meses anteriores',
     back_populate_title_year: 'Preencher anos anteriores',

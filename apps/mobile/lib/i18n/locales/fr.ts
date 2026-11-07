@@ -3012,6 +3012,18 @@ const fr = {
     allocated_summary: '{{allocated}} sur {{total}} répartis',
     allocated_done: 'Entièrement réparti',
     fill_remainder: 'Compléter',
+    currency_label: 'Devise',
+    currency_hint_template:
+      "Chaque budget garde le taux du jour de sa création et convertit à ce taux les dépenses dans d'autres devises. Aujourd'hui : 1 {{currency}} = {{rate}} {{main}}.",
+    currency_hint_budget:
+      "Les dépenses dans d'autres devises sont converties à 1 {{currency}} = {{rate}} {{main}}.",
+    currency_hint_no_rate:
+      "Pas encore de taux de change pour {{currency}}. Ajoutez-en un dans Multidevise pour que les dépenses dans d'autres devises comptent.",
+    unconverted_one:
+      "1 dépense n'est pas encore comptée : il n'y a pas de taux de change pour {{currency}}.",
+    unconverted_other:
+      "{{count}} dépenses ne sont pas encore comptées : il n'y a pas de taux de change pour {{currency}}.",
+    approx_main: '≈ {{amount}}',
     back_populate_title_week: 'Remplir les semaines passées',
     back_populate_title_month: 'Remplir les mois passés',
     back_populate_title_year: 'Remplir les années passées',

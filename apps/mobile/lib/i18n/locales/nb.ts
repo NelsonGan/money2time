@@ -2978,6 +2978,17 @@ const nb = {
     allocated_summary: '{{allocated}} av {{total}} fordelt',
     allocated_done: 'Helt fordelt',
     fill_remainder: 'Fyll',
+    currency_label: 'Valuta',
+    currency_hint_template:
+      'Hvert budsjett beholder kursen fra dagen det opprettes, og regner om utgifter i andre valutaer etter den. I dag: 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_budget:
+      'Utgifter i andre valutaer regnes om til 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_no_rate:
+      'Ingen kurs for {{currency}} ennå. Legg til en under Flere valutaer, så telles utgifter i andre valutaer med.',
+    unconverted_one: '1 utgift telles ikke med ennå: det finnes ingen kurs for {{currency}}.',
+    unconverted_other:
+      '{{count}} utgifter telles ikke med ennå: det finnes ingen kurs for {{currency}}.',
+    approx_main: '≈ {{amount}}',
     back_populate_title_week: 'Fyll ut tidligere uker',
     back_populate_title_month: 'Fyll ut tidligere måneder',
     back_populate_title_year: 'Fyll ut tidligere år',

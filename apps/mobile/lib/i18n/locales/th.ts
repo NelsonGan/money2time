@@ -2925,6 +2925,15 @@ const th = {
     allocated_summary: 'จัดสรรแล้ว {{allocated}} จาก {{total}}',
     allocated_done: 'จัดสรรครบแล้ว',
     fill_remainder: 'เติม',
+    currency_label: 'สกุลเงิน',
+    currency_hint_template:
+      'งบประมาณแต่ละรอบใช้อัตราของวันที่สร้าง และแปลงรายจ่ายในสกุลเงินอื่นตามอัตรานั้น วันนี้: 1 {{currency}} = {{rate}} {{main}}',
+    currency_hint_budget: 'รายจ่ายในสกุลเงินอื่นจะแปลงที่อัตรา 1 {{currency}} = {{rate}} {{main}}',
+    currency_hint_no_rate:
+      'ยังไม่มีอัตราแลกเปลี่ยน {{currency}} เพิ่มได้ในหลายสกุลเงิน เพื่อให้นับรายจ่ายในสกุลเงินอื่นด้วย',
+    unconverted_one: 'ยังไม่นับรายจ่าย 1 รายการ: ไม่มีอัตราแลกเปลี่ยน {{currency}}',
+    unconverted_other: 'ยังไม่นับรายจ่าย {{count}} รายการ: ไม่มีอัตราแลกเปลี่ยน {{currency}}',
+    approx_main: '≈ {{amount}}',
     back_populate_title_week: 'เติมสัปดาห์ก่อนหน้า',
     back_populate_title_month: 'เติมเดือนก่อนหน้า',
     back_populate_title_year: 'เติมปีก่อนหน้า',

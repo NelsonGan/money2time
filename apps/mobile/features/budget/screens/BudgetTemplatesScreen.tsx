@@ -15,6 +15,7 @@ import {
 import type { ColorPalette } from '~/constants/designSystem';
 import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
+import { withBudgetCurrency } from '~/features/budget/lib/budgetCurrency';
 import { countRootAllocations } from '~/features/budget/lib/budgetMath';
 import { BUDGET_PERIODS } from '~/features/budget/lib/budgetPeriods';
 import { budgetPeriodName, categoriesCountLabel, money } from '~/features/budget/lib/format';
@@ -110,7 +111,7 @@ function TemplateCard({
               ) : null}
             </View>
             <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
-              {money(template.totalAmount, settings)} ·{' '}
+              {money(template.totalAmount, withBudgetCurrency(settings, template.currency))} ·{' '}
               {categoriesCountLabel(countRootAllocations(template.allocations, categories))}
             </Text>
           </View>

@@ -2965,6 +2965,16 @@ const hi = {
     allocated_summary: '{{total}} में से {{allocated}} बाँटा गया',
     allocated_done: 'पूरी तरह बाँटा गया',
     fill_remainder: 'भरें',
+    currency_label: 'मुद्रा',
+    currency_hint_template:
+      'हर बजट उसी दिन की दर रखता है जिस दिन वह बनाया जाता है, और दूसरी मुद्राओं में हुआ खर्च उसी दर से बदलता है। आज: 1 {{currency}} = {{rate}} {{main}}।',
+    currency_hint_budget:
+      'दूसरी मुद्राओं में हुआ खर्च 1 {{currency}} = {{rate}} {{main}} की दर से बदला जाता है।',
+    currency_hint_no_rate:
+      '{{currency}} की विनिमय दर अभी नहीं है। मल्टी-करेंसी में एक जोड़ें ताकि दूसरी मुद्राओं का खर्च भी गिना जाए।',
+    unconverted_one: '1 खर्च अभी गिना नहीं गया: {{currency}} की विनिमय दर नहीं है।',
+    unconverted_other: '{{count}} खर्च अभी गिने नहीं गए: {{currency}} की विनिमय दर नहीं है।',
+    approx_main: '≈ {{amount}}',
     back_populate_title_week: 'पिछले हफ़्ते भरें',
     back_populate_title_month: 'पिछले महीने भरें',
     back_populate_title_year: 'पिछले साल भरें',

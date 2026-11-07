@@ -26,6 +26,7 @@ const template = (id: string, patch: Partial<BudgetTemplate> = {}): BudgetTempla
   name: 'Monthly',
   emoji: null,
   period: 'month',
+  currency: null,
   totalAmount: 100,
   isDefault: true,
   countUnbudgeted: true,
@@ -46,6 +47,8 @@ const budget = (id: string, month: string, patch: Partial<PeriodBudget> = {}): P
   templateEmoji: null,
   totalAmount: 100,
   countUnbudgeted: true,
+  currency: null,
+  fxRate: null,
   lines: [],
   createdAt: AT,
   updatedAt: AT,
@@ -54,7 +57,12 @@ const budget = (id: string, month: string, patch: Partial<PeriodBudget> = {}): P
 });
 
 function lookup(
-  extra: { templates?: BudgetTemplate[]; budgets?: PeriodBudget[]; templateCount?: number } = {},
+  extra: {
+    templates?: BudgetTemplate[];
+    budgets?: PeriodBudget[];
+    takenMonths?: string[];
+    templateCount?: number;
+  } = {},
   patch: Partial<EditLookup> = {},
 ): EditLookup {
   return {
@@ -82,6 +90,7 @@ function lookup(
       [ENTITY]: {
         templates: extra.templates ?? [template('t1')],
         budgets: extra.budgets ?? [budget('b1', '2026-10')],
+        takenMonths: extra.takenMonths ?? [],
         templateCount: extra.templateCount ?? (extra.templates ?? [template('t1')]).length,
         months: ['2026-09', '2026-10', '2026-11', '2026-12', '2027-01'],
       },
@@ -414,6 +423,12 @@ describe('budget module: monthly budgets', () => {
   it('refuses a month that already has a budget, or a template gone', () => {
     expect(
       refusal([{ entity: ENTITY, op: 'month_custom', month: '2026-10', budget: body() }]),
+    ).toEqual({ error: 'conflict' });
+    // The web is not shown a month budget in another currency, but it still holds the month.
+    expect(
+      refusal([{ entity: ENTITY, op: 'month_custom', month: '2026-11', budget: body() }], {
+        takenMonths: ['2026-11'],
+      }),
     ).toEqual({ error: 'conflict' });
     expect(
       refusal([{ entity: ENTITY, op: 'month_create', month: '2026-11', templateId: 'tx' }]),

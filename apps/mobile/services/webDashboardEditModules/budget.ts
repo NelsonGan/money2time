@@ -1,7 +1,9 @@
 /**
  * Web Dashboard edits: Budget templates and monthly budgets (BudgetTemplateEditorScreen, PeriodBudgetEditorScreen).
- * The web knows monthly budgets only: weekly and yearly ones are never sent to it
- * (`webDashboardBudgetsOnly`) and every op here is about a monthly template or budget.
+ * The web knows monthly budgets in the main currency only: weekly and yearly
+ * ones, and ones in another currency, are never sent to it
+ * (`webDashboardBudgetsOnly`), and every op here is about a monthly template or
+ * budget in the main currency (its edits name no currency, so one keeps its own).
  * Planned on the phone like the app's own editor; applied by
  * features/settings/lib/webDashboardApply/budget.ts.
  *
@@ -43,10 +45,15 @@ type TemplateFields = {
 
 /** What the planner reads from the app: see webDashboardApply/budget.ts `select`. */
 export type BudgetExtra = {
-  /** Monthly templates only. */
+  /** Monthly templates in the main currency only. */
   templates: BudgetTemplate[];
-  /** Month budgets only. */
+  /** Month budgets in the main currency only. */
   budgets: PeriodBudget[];
+  /**
+   * The months with a live month budget in any currency. A month whose budget
+   * is in another currency looks empty on the web, yet cannot have another.
+   */
+  takenMonths: string[];
   /** Live templates of every period, which the free plan's limit counts. */
   templateCount: number;
   /** The budget pager's months (`computeBudgetPagerMonths`), weekly and yearly budgets included: first budget or expense month to a year ahead. */
@@ -163,6 +170,7 @@ function extraOf(tools: PlanTools): BudgetExtra {
   return {
     templates: extra.templates.filter((template) => !template.deletedAt),
     budgets: extra.budgets.filter((budget) => !budget.deletedAt),
+    takenMonths: extra.takenMonths,
     templateCount: extra.templateCount,
     months: extra.months,
   };
@@ -232,7 +240,7 @@ const step = (action: string, payload: Record<string, unknown>): EditStep => ({
 });
 
 function plan(tools: PlanTools, op: ModuleOp, steps: EditStep[]): Result<number> {
-  const { templates, budgets, months, templateCount } = extraOf(tools);
+  const { templates, budgets, takenMonths, months, templateCount } = extraOf(tools);
 
   if (op.op === 'template_create' || op.op === 'template_update') {
     const fields = op.template as TemplateFields;
@@ -289,8 +297,11 @@ function plan(tools: PlanTools, op: ModuleOp, steps: EditStep[]): Result<number>
       return tools.refuse('invalid');
     }
     if (!tools.claim(`budget-month:${month}`)) return tools.refuse('invalid');
-    // One live budget a month: one made since the browser's copy wins.
-    if (budgets.some((budget) => budget.periodKey === month)) return tools.refuse('conflict');
+    // One live budget a month: one made since the browser's copy wins, and
+    // so does one in another currency the browser is not shown.
+    if (budgets.some((budget) => budget.periodKey === month) || takenMonths.includes(month)) {
+      return tools.refuse('conflict');
+    }
     if (op.op === 'month_create') {
       // The template is read as it is now: the same batch must not also change
       // it, though more months may still be made from it.

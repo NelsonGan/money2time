@@ -2992,6 +2992,17 @@ const it = {
     allocated_summary: '{{allocated}} di {{total}} assegnati',
     allocated_done: 'Completamente assegnato',
     fill_remainder: 'Riempi',
+    currency_label: 'Valuta',
+    currency_hint_template:
+      'Ogni budget mantiene il tasso del giorno in cui viene creato e converte a quel tasso le spese in altre valute. Oggi: 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_budget:
+      'Le spese in altre valute vengono convertite a 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_no_rate:
+      'Ancora nessun tasso di cambio per {{currency}}. Aggiungine uno in Multivaluta così contano anche le spese in altre valute.',
+    unconverted_one: '1 spesa non è ancora conteggiata: manca il tasso di cambio per {{currency}}.',
+    unconverted_other:
+      '{{count}} spese non sono ancora conteggiate: manca il tasso di cambio per {{currency}}.',
+    approx_main: '≈ {{amount}}',
     back_populate_title_week: 'Compila le settimane passate',
     back_populate_title_month: 'Compila i mesi passati',
     back_populate_title_year: 'Compila gli anni passati',

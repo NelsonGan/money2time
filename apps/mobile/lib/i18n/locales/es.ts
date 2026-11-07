@@ -2994,6 +2994,17 @@ const es = {
     allocated_summary: '{{allocated}} de {{total}} asignado',
     allocated_done: 'Totalmente asignado',
     fill_remainder: 'Rellenar',
+    currency_label: 'Moneda',
+    currency_hint_template:
+      'Cada presupuesto conserva el tipo de cambio del día en que se crea y convierte con él los gastos en otras monedas. Hoy: 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_budget:
+      'Los gastos en otras monedas se convierten a 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_no_rate:
+      'Aún no hay tipo de cambio para {{currency}}. Añade uno en Multidivisa para que cuenten los gastos en otras monedas.',
+    unconverted_one: '1 gasto aún no se cuenta: no hay tipo de cambio para {{currency}}.',
+    unconverted_other:
+      '{{count}} gastos aún no se cuentan: no hay tipo de cambio para {{currency}}.',
+    approx_main: '≈ {{amount}}',
     back_populate_title_week: 'Rellenar semanas anteriores',
     back_populate_title_month: 'Rellenar meses anteriores',
     back_populate_title_year: 'Rellenar años anteriores',

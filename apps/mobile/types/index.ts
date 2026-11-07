@@ -777,6 +777,11 @@ export interface BudgetTemplate {
   emoji: string | null;
   /** How often a budget made from this template repeats. */
   period: BudgetPeriod;
+  /**
+   * The currency the amounts are in. Null = the ledger's main currency (read
+   * it through `budgetCurrencyOf`).
+   */
+  currency: string | null;
   totalAmount: number;
   /** Exactly one live template of each period is the default while that period has any. */
   isDefault: boolean;
@@ -813,6 +818,14 @@ export interface PeriodBudget {
   totalAmount: number;
   /** Frozen from the template: whether unbudgeted spend counts toward the total. */
   countUnbudgeted: boolean;
+  /** Frozen from the template. Null = the ledger's main currency. */
+  currency: string | null;
+  /**
+   * 1 unit of `currency` in the main currency, frozen when the budget was made
+   * (or its currency changed). Spending in other currencies is valued through
+   * it. Null for a main-currency budget, or when no rate was known then.
+   */
+  fxRate: number | null;
   lines: PeriodBudgetLine[];
   createdAt: string;
   updatedAt: string;
@@ -862,6 +875,11 @@ export interface BudgetSummary {
   usageRatio: number;
   categories: BudgetCategoryProgress[];
   unbudgeted: UnbudgetedCategorySpend[];
+  /**
+   * Expenses left out because they are in another currency than the budget's
+   * and no exchange rate was known to convert them. 0 for a main-currency budget.
+   */
+  unconvertedCount: number;
 }
 
 export interface Transaction {

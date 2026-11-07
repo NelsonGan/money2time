@@ -55,4 +55,31 @@ describe('webDashboardBudgetsOnly', () => {
     // The source data (also the backup) is not changed.
     expect(data.tables.monthly_budgets).toHaveLength(3);
   });
+
+  it('drops budgets in another currency, which the web would read as the main one', () => {
+    const data = backup({
+      ...base,
+      budget_templates: [
+        { id: 'tm', period: 'month', currency: null },
+        { id: 'tj', period: 'month', currency: 'JPY' },
+      ],
+      budget_template_categories: [
+        { id: 'a', template_id: 'tm' },
+        { id: 'b', template_id: 'tj' },
+      ],
+      monthly_budgets: [
+        { id: 'bm', period: 'month', month: '2026-10' },
+        { id: 'bj', period: 'month', month: '2026-11', currency: 'JPY' },
+      ],
+      monthly_budget_categories: [
+        { id: 'c', budget_id: 'bm' },
+        { id: 'd', budget_id: 'bj' },
+      ],
+    });
+    const { tables } = webDashboardBudgetsOnly(data);
+    expect(tables.budget_templates?.map((row) => row.id)).toEqual(['tm']);
+    expect(tables.budget_template_categories?.map((row) => row.id)).toEqual(['a']);
+    expect(tables.monthly_budgets?.map((row) => row.id)).toEqual(['bm']);
+    expect(tables.monthly_budget_categories?.map((row) => row.id)).toEqual(['c']);
+  });
 });

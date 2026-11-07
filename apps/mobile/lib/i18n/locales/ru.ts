@@ -2980,6 +2980,16 @@ const ru = {
     allocated_summary: 'Распределено {{allocated}} из {{total}}',
     allocated_done: 'Полностью распределено',
     fill_remainder: 'Добить',
+    currency_label: 'Валюта',
+    currency_hint_template:
+      'Каждый бюджет сохраняет курс на день своего создания и пересчитывает по нему расходы в других валютах. Сегодня: 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_budget:
+      'Расходы в других валютах пересчитываются по курсу 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_no_rate:
+      'Курса {{currency}} пока нет. Добавьте его в разделе «Мультивалютность», чтобы учитывались расходы в других валютах.',
+    unconverted_one: '1 расход пока не учтён: нет курса {{currency}}.',
+    unconverted_other: 'Пока не учтено расходов: {{count}}. Нет курса {{currency}}.',
+    approx_main: '≈ {{amount}}',
     back_populate_title_week: 'Заполнить прошлые недели',
     back_populate_title_month: 'Заполнить прошлые месяцы',
     back_populate_title_year: 'Заполнить прошлые годы',

@@ -1,9 +1,11 @@
 import {
   toAccount,
   toAccountGroup,
+  toBudgetTemplate,
   toCategory,
   toItem,
   toMonthlyWageSettings,
+  toPeriodBudget,
   toReceiptSplit,
   toReceiptSplitItem,
   toReceiptSplitItemShare,
@@ -270,6 +272,36 @@ describe('toAccountGroup', () => {
   it('defaults sortOrder when null', () => {
     const row: any = { id: 'g1', name: 'Personal', sortOrder: null, ...STAMPS };
     expect(toAccountGroup(row).sortOrder).toBe(0);
+  });
+});
+
+describe('budget currencies', () => {
+  const budgetRow: any = {
+    id: 'b1',
+    period: 'month',
+    month: '2026-07',
+    templateId: null,
+    templateName: null,
+    templateEmoji: null,
+    totalAmount: 100000,
+    countUnbudgeted: true,
+    ...STAMPS,
+  };
+
+  it('reads a budget from before currencies as the main currency', () => {
+    expect(toPeriodBudget(budgetRow, [])).toMatchObject({ currency: null, fxRate: null });
+    expect(
+      toBudgetTemplate({ id: 't1', name: 'Monthly', totalAmount: 1, ...STAMPS } as any, []),
+    ).toMatchObject({ currency: null });
+  });
+
+  it('maps a budget in another currency with its frozen rate', () => {
+    expect(toPeriodBudget({ ...budgetRow, currency: 'JPY', fxRate: 0.03 }, [])).toMatchObject({
+      currency: 'JPY',
+      fxRate: 0.03,
+    });
+    // A rate that is no rate reads as none, so the latest one is used.
+    expect(toPeriodBudget({ ...budgetRow, currency: 'JPY', fxRate: 0 }, []).fxRate).toBeNull();
   });
 });
 
