@@ -31,12 +31,17 @@ Run `npm run check` and `npm test` before you say you are done. A Worker
 change also needs `npm run typecheck` in its own directory under
 `apps/cloudflare/workers/`.
 
-**Simulator and emulator control goes through the Argent MCP tools**
-(`mcp__argent__*`: `boot-device`, `launch-app`, `describe`, `gesture-tap`,
-`screenshot`, `debugger-*`, `profile-*`). Prefer them over raw `xcrun simctl`
-or `adb`. Argent may
-offer to start Metro itself; always start the dev server with
-`npx expo start --localhost` instead.
+**Simulator and emulator control goes through the T3 Code device tools**, so
+the user can watch the device in T3 Code's Device panel. `device_list` gives a
+device's `hostId` and `id`; `device_open` boots it, shows it in the panel and
+returns an `agent-device` command pinned to it. Use that command for every app
+launch, deep link, tap, text entry, alert, screenshot and recording
+(`agent-device help` lists the commands, `agent-device help foldable` covers
+the iPhone Duo), `device_screenshot` to look at the screen, and `device_close`
+when you are done. Do not drive a device with `xcrun simctl`, `adb` or scripts
+that wrap them; those stay fine for builds, installs, port forwards
+(`adb reverse`), logs and what `agent-device` cannot do. Always start the dev
+server yourself with `npx expo start --localhost`.
 
 ## Rules for changes
 
@@ -58,30 +63,18 @@ review those against the diff yourself, and add the expected PostHog event
 volume to the README's event budget when adding an event or increasing its
 frequency.
 
-**Show the device in Expo Device Hub while testing.** `expo-device-hub` is a
-dev dependency, so every `npx expo start` serves a live, interactive view of
-the running simulators and emulators. Open
-<http://localhost:8081/_expo/plugins/expo-device-hub> (not the `127.0.0.1`
-link Metro prints: `--localhost` binds Metro to IPv6 only) in the browser
-pane, select the device you are testing, and leave it on the tested screen so
-the user can follow along. The Hub only starts listing devices once a page is
-open, and a page opened right after Metro starts can stay on "Connecting to the
-Expo dev server": reload it. Use these devices and no others:
+**Show the device in T3 Code's Device panel while testing.** Open it with
+`device_open` and leave it on the tested screen so the user can follow along.
+Use these devices and no others:
 
-| Platform | Device                                                                     | Boot with Argent             |
-| -------- | -------------------------------------------------------------------------- | ---------------------------- |
-| iOS      | Money2Time iPhone 18 Pro simulator, `D33ACD74-8FC1-4F53-B7B8-690086AC1223` | `boot-device` with `udid`    |
-| Android  | `Money2Time_Pixel_10` emulator (Pixel 10, Android 16)                      | `boot-device` with `avdName` |
+| Platform | Device                                                                     | `device_open` id                       |
+| -------- | -------------------------------------------------------------------------- | -------------------------------------- |
+| iOS      | Money2Time iPhone 18 Pro simulator, `D33ACD74-8FC1-4F53-B7B8-690086AC1223` | `D33ACD74-8FC1-4F53-B7B8-690086AC1223` |
+| Android  | `Money2Time_Pixel_10` emulator (Pixel 10, Android 16)                      | `Money2Time_Pixel_10`                  |
 
-The Hub and `expo run:android` need the Android SDK and a JDK: start Metro
-with `ANDROID_HOME` and `JAVA_HOME` set (see Getting set up in the README).
-
-On Android the Hub and Argent both drive the emulator through its single UI
-automation service. While both are attached, an occasional Argent gesture is
-not acknowledged, the Hub logs `could not read emulator display size`, and
-logcat's crash buffer shows `uiautomator` with `UiAutomationService ...
-already registered`. That is the tools colliding, not the app: confirm with
-`adb shell pidof com.nelsongan.money2time` and retry the action once.
+The emulator, T3 Code's Android device list and `expo run:android` need the
+Android SDK and a JDK: run them with `ANDROID_HOME` and `JAVA_HOME` set (see
+Getting set up in the README).
 
 **Always include screenshots in PR descriptions after UI testing.** Capture the
 final UI and save it, with any recording or other evidence, in

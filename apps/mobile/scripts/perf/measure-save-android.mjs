@@ -6,8 +6,8 @@
  * Per run: restore the snapshot at /data/local/tmp/golden.tar, cold launch,
  * wait for the post-launch report, tap +, tap Quick entry, type an entry, tap
  * save, and collect the fab_press / quick_add_open / quick_add_save reports.
- * Coordinates are screen pixels (find them with `uiautomator dump` or argent's
- * `describe`); the save button's is with the keyboard up.
+ * Coordinates are screen pixels (find them with `uiautomator dump`); the save
+ * button's is with the keyboard up.
  *
  *   node scripts/perf/measure-save-android.mjs --runs 8 --out save.json \
  *     --fab 949,2016 --quick 282,1794 --save 963,1195 [--text "14.5%slunch"] [--device emulator-5554]

@@ -5,10 +5,10 @@
 //
 // The marker spec is `scripts/data/tutorial-shots.json`: one entry per image,
 // naming the raw capture and the red marks to draw on it. Marks are stored in
-// NORMALISED coordinates (0..1 of the capture's width/height) because that is
-// what `argent`'s `describe` reports for an element's frame, so a mark can be
-// taken straight from the accessibility tree instead of eyeballed off a
-// screenshot, and it survives a recapture on a different device size.
+// NORMALISED coordinates (0..1 of the capture's width/height), taken from an
+// element's frame in the accessibility tree (`agent-device snapshot -i --json`)
+// instead of eyeballed off a screenshot, so a mark survives a recapture on a
+// different device size.
 //
 // Raw captures are deliberately NOT committed: at full device resolution they
 // are ~1MB each and there are well over a hundred. The committed artefact is
