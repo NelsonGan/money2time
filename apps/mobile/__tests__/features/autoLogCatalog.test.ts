@@ -57,9 +57,9 @@ function input(overrides: Partial<BuildAutoLogCatalogInput> = {}): BuildAutoLogC
     failureNotificationTitle: "Couldn't auto-log a payment",
     failureNotificationBody: 'Open Money2Time to add it manually.',
     testNotificationTitle: 'Automation is working',
-    testCardPaymentBody: 'Your next Apple Pay payment will be logged automatically.',
+    testCardPaymentBody: 'No payment came with this run, which is normal for a test.',
     testNotificationAlertBody:
-      'Your bank notifications will show up in Money2Time for you to review.',
+      'No notification text came with this run, which is normal for a test.',
     reportingCurrency: 'USD',
     generatedAt: '2026-07-15T10:30:00.000Z',
     ...overrides,

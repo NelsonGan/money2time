@@ -2513,8 +2513,10 @@ const hi = {
       autolog_failure_title: 'भुगतान स्वतः दर्ज नहीं हो सका',
       autolog_failure_body: 'इसे मैन्युअल रूप से जोड़ने के लिए टैप करें।',
       autolog_test_title: 'ऑटोमेशन काम कर रहा है',
-      autolog_test_card_body: 'आपका अगला Apple Pay भुगतान अपने आप दर्ज हो जाएगा।',
-      autolog_test_alert_body: 'आपकी बैंक सूचनाएँ समीक्षा के लिए Money2Time में दिखेंगी।',
+      autolog_test_card_body:
+        'इस रन के साथ कोई भुगतान नहीं आया, जो टेस्ट में सामान्य है। अगर आपने अभी भुगतान किया है, तो उसे जोड़ने के लिए Money2Time खोलें।',
+      autolog_test_alert_body:
+        'इस रन के साथ कोई सूचना टेक्स्ट नहीं आया, जो टेस्ट में सामान्य है। बैंक सूचनाएँ समीक्षा के लिए Money2Time में दिखेंगी।',
       daily_title: 'आज का दिन कैसा रहा?',
       daily_body: 'आज का खर्च ताज़ा रहते हुए दर्ज करने के लिए 30 सेकंड निकालें।',
       recurring_title: '{{name}} · {{amount}}',

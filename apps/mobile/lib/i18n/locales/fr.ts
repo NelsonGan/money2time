@@ -2549,9 +2549,10 @@ const fr = {
       autolog_failure_title: "Impossible d'enregistrer un paiement",
       autolog_failure_body: "Appuyez pour l'ajouter manuellement.",
       autolog_test_title: "L'automatisation fonctionne",
-      autolog_test_card_body: 'Votre prochain paiement Apple Pay sera enregistré automatiquement.',
+      autolog_test_card_body:
+        "Aucun paiement n'accompagnait cette exécution, ce qui est normal pour un test. Si vous venez de payer, ouvrez Money2Time pour l'ajouter.",
       autolog_test_alert_body:
-        'Les notifications de votre banque apparaîtront dans Money2Time pour que vous les vérifiiez.',
+        "Aucun texte de notification n'accompagnait cette exécution, ce qui est normal pour un test. Les notifications bancaires apparaîtront dans Money2Time pour vérification.",
       daily_title: "Comment s'est passée votre journée ?",
       daily_body:
         "Prenez 30 secondes pour noter les dépenses du jour pendant qu'elles sont fraîches.",

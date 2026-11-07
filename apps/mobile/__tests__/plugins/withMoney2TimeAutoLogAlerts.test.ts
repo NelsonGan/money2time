@@ -132,10 +132,17 @@ describe('Log Card Payment test run (withMoney2TimeAutoLog)', () => {
     }
   });
 
-  it('only counts a run as a test when every value is blank', () => {
-    expect(store).toContain('static func isTestRun(_ values: String?...) -> Bool {');
-    expect(store).toContain(
-      'values.allSatisfy { ($0?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "").isEmpty }',
-    );
+  it('falls back to English when the catalog copy is missing or empty', () => {
+    const notify = store.slice(store.indexOf('static func notifyTestRun('));
+    expect(notify).toContain('copy(catalog.testNotificationTitle, or: "Automation is working")');
+    expect(notify).toContain('body: copy(body, or: fallbackBody)');
+    const copy = store.slice(store.indexOf('private static func copy('));
+    expect(copy).toContain('!value.isEmpty');
+  });
+
+  it('keeps the English fallback true for a real tap that arrives this empty', () => {
+    // A Play run and a real tap with no amount or merchant look the same, so
+    // the copy must still tell someone who just paid to add the payment.
+    expect(branch).toContain('If you just paid, open Money2Time to add it.');
   });
 });

@@ -2530,8 +2530,10 @@ const pl = {
       autolog_failure_title: 'Nie udało się automatycznie zapisać płatności',
       autolog_failure_body: 'Dotknij, aby dodać ją ręcznie.',
       autolog_test_title: 'Automatyzacja działa',
-      autolog_test_card_body: 'Twoja następna płatność Apple Pay zostanie zapisana automatycznie.',
-      autolog_test_alert_body: 'Powiadomienia z banku pojawią się w Money2Time do przejrzenia.',
+      autolog_test_card_body:
+        'To uruchomienie nie zawierało płatności, co jest normalne podczas testu. Jeśli właśnie zapłacono, otwórz Money2Time i dodaj ją.',
+      autolog_test_alert_body:
+        'To uruchomienie nie zawierało tekstu powiadomienia, co jest normalne podczas testu. Powiadomienia z banku pojawią się w Money2Time do przejrzenia.',
       daily_title: 'Jak minął dzień?',
       daily_body: 'Poświęć 30 sekund, by zapisać dzisiejsze wydatki, póki są świeże.',
       recurring_title: '{{name}} · {{amount}}',

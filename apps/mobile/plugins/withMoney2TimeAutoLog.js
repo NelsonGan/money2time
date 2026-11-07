@@ -514,8 +514,10 @@ enum AutoLogStore {
   /// Whether this run carries no trigger data at all: what an automation gets
   /// when the user taps Play in the Shortcuts editor to try it, since there is
   /// no payment or notification behind a manual run and every variable bound
-  /// to the trigger arrives empty. A real Wallet payment or app notification
-  /// always fills at least one of them (merchant, card, or the text itself).
+  /// to the trigger arrives empty. A real run can be just as empty (a Wallet
+  /// tap iOS sends without amount or merchant, a notification with no body),
+  /// and nothing tells the two apart, so what \`notifyTestRun\` says must hold
+  /// for both.
   static func isTestRun(_ values: String?...) -> Bool {
     values.allSatisfy { ($0?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "").isEmpty }
   }
@@ -622,6 +624,37 @@ enum AutoLogStore {
     savePending(loadPending().filter { !removing.contains($0.id) })
   }
 
+  /// Post one local notification right away. Never asks for permission: the
+  /// app owns that prompt, and if it was not granted iOS simply drops this.
+  /// Deliberately fire-and-forget: a failed notification must never fail the
+  /// run that posted it.
+  private static func post(title: String, body: String, idPrefix: String) {
+    let content = UNMutableNotificationContent()
+    content.title = title
+    content.body = body
+    let request = UNNotificationRequest(
+      identifier: "\\(idPrefix)-\\(UUID().uuidString)",
+      content: content,
+      trigger: nil
+    )
+    UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+  }
+
+  /// The catalog's copy, or the English fallback when the catalog predates
+  /// that string or carries an empty one.
+  private static func copy(_ value: String?, or fallback: String) -> String {
+    guard let value = value, !value.isEmpty else { return fallback }
+    return value
+  }
+
+  /// "Merchant · text", or just the text when there is no merchant.
+  private static func withMerchant(_ merchant: String?, _ text: String) -> String {
+    guard let merchant = merchant?.trimmingCharacters(in: .whitespacesAndNewlines),
+      !merchant.isEmpty
+    else { return text }
+    return "\\(merchant) · \\(text)"
+  }
+
   /// Confirm a captured tap.
   ///
   /// The automation runs with \`openAppWhenRun = false\` and the tutorial has the
@@ -632,27 +665,10 @@ enum AutoLogStore {
   ///
   /// Title comes from the catalog because this runs backgrounded with no access
   /// to the app's i18n; the body is merchant + amount, which needs no
-  /// translation. Deliberately fire-and-forget — a failed notification must
-  /// never fail the tap that was already queued.
+  /// translation.
   static func notifyLogged(catalog: Catalog, amountRaw: String, merchant: String?) {
     guard let title = catalog.notificationTitle, !title.isEmpty else { return }
-
-    let content = UNMutableNotificationContent()
-    content.title = title
-    if let merchant = merchant?.trimmingCharacters(in: .whitespacesAndNewlines), !merchant.isEmpty {
-      content.body = "\\(merchant) · \\(amountRaw)"
-    } else {
-      content.body = amountRaw
-    }
-
-    // Never asks for permission: the app owns that prompt. If it was not
-    // granted, iOS simply drops this.
-    let request = UNNotificationRequest(
-      identifier: "m2t-autolog-\\(UUID().uuidString)",
-      content: content,
-      trigger: nil
-    )
-    UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+    post(title: title, body: withMerchant(merchant, amountRaw), idPrefix: "m2t-autolog")
   }
 
   /// Tell the user a tap could not be auto-logged, so a payment that produced no
@@ -661,40 +677,25 @@ enum AutoLogStore {
   /// Falls back to an English literal so a catalog written before these strings
   /// existed still says something rather than nothing.
   static func notifyUnreadable(catalog: Catalog, merchant: String?) {
-    let title = catalog.failureNotificationTitle ?? "Couldn't auto-log a payment"
-    let hint = catalog.failureNotificationBody ?? "Tap to add it manually."
-
-    let content = UNMutableNotificationContent()
-    content.title = title
-    if let merchant = merchant?.trimmingCharacters(in: .whitespacesAndNewlines), !merchant.isEmpty {
-      content.body = "\\(merchant) · \\(hint)"
-    } else {
-      content.body = hint
-    }
-
-    let request = UNNotificationRequest(
-      identifier: "m2t-autolog-fail-\\(UUID().uuidString)",
-      content: content,
-      trigger: nil
+    post(
+      title: copy(catalog.failureNotificationTitle, or: "Couldn't auto-log a payment"),
+      body: withMerchant(merchant, copy(catalog.failureNotificationBody, or: "Tap to add it manually.")),
+      idPrefix: "m2t-autolog-fail"
     )
-    UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
   }
 
-  /// Confirm a manual test run (see \`isTestRun\`) reached the app, so the user
-  /// knows the automation is set up right. Without it, Log Card Payment posted
-  /// the "couldn't auto-log" failure and Log Notification posted nothing, and
-  /// both read as broken setups. Nothing is queued for a test run.
+  /// Answer a run that carried nothing at all (see \`isTestRun\`), which is what
+  /// Play in the Shortcuts editor sends. Without it, Log Card Payment posted the
+  /// "couldn't auto-log" failure and Log Notification posted nothing, and both
+  /// read as broken setups. The copy has to stay true if a real payment or
+  /// notification ever arrives this empty: the automation did run, nothing came
+  /// with it, and a payer is told to add the payment by hand. Nothing is queued.
   static func notifyTestRun(catalog: Catalog, body: String?, fallbackBody: String) {
-    let content = UNMutableNotificationContent()
-    content.title = catalog.testNotificationTitle ?? "Automation is working"
-    content.body = body ?? fallbackBody
-
-    let request = UNNotificationRequest(
-      identifier: "m2t-autolog-test-\\(UUID().uuidString)",
-      content: content,
-      trigger: nil
+    post(
+      title: copy(catalog.testNotificationTitle, or: "Automation is working"),
+      body: copy(body, or: fallbackBody),
+      idPrefix: "m2t-autolog-test"
     )
-    UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
   }
 }
 
@@ -857,9 +858,11 @@ struct LogCardPaymentIntent: AppIntent {
     // gate so an unusable tap never burns a free auto-log either.
     guard AutoLogStore.hasLoggableAmount(amount) else {
       // Play in the Shortcuts editor runs this with every trigger variable
-      // empty. Say the setup works instead of reporting a failed payment, but
-      // only if the next real tap would log: with no free auto-logs left, the
-      // honest answer is the limit error a real tap would get.
+      // empty (the setup links Amount and Merchant; Card is optional). Say the
+      // setup works instead of reporting a failed payment, but only if the next
+      // real tap would log: with no free auto-logs left, the honest answer is
+      // the limit error a real tap would get. A tap that still names a merchant
+      // or card is a real payment and keeps the failure alert below.
       if AutoLogStore.isTestRun(merchant, card) {
         if AutoLogStore.remaining(catalog: catalog) <= 0 {
           throw AutoLogError.limitReached
@@ -867,7 +870,7 @@ struct LogCardPaymentIntent: AppIntent {
         AutoLogStore.notifyTestRun(
           catalog: catalog,
           body: catalog.testCardPaymentBody,
-          fallbackBody: "Your next Apple Pay payment will be logged automatically."
+          fallbackBody: "No payment came with this run, which is normal for a test. If you just paid, open Money2Time to add it."
         )
         return .result()
       }
@@ -1125,14 +1128,16 @@ struct LogPaymentAlertIntent: AppIntent {
     guard let catalog = AutoLogStore.loadCatalog() else {
       throw AutoLogError.notReady
     }
-    // Play in the Shortcuts editor runs this with every trigger variable empty.
-    // Confirm the setup works rather than finishing silently, which reads as
-    // broken. A real notification always has some text, and posts nothing here.
+    // Play in the Shortcuts editor runs this with every trigger variable empty
+    // (the setup links only Message, to the notification Body). Confirm the
+    // setup works rather than finishing silently, which reads as broken. A
+    // notification that arrives with no text at all gets the same answer, which
+    // stays true for it: there was nothing to log.
     if AutoLogStore.isTestRun(message, alertTitle, subtitle) {
       AutoLogStore.notifyTestRun(
         catalog: catalog,
         body: catalog.testNotificationAlertBody,
-        fallbackBody: "Your bank notifications will show up in Money2Time for you to review."
+        fallbackBody: "No notification text came with this run, which is normal for a test. Bank notifications will show up in Money2Time for review."
       )
       return .result()
     }

@@ -2553,9 +2553,10 @@ const de = {
       autolog_failure_title: 'Eine Zahlung konnte nicht automatisch erfasst werden',
       autolog_failure_body: 'Tippe, um sie manuell hinzuzufügen.',
       autolog_test_title: 'Automation funktioniert',
-      autolog_test_card_body: 'Deine nächste Apple Pay-Zahlung wird automatisch erfasst.',
+      autolog_test_card_body:
+        'Bei diesem Durchlauf kam keine Zahlung mit, das ist bei einem Test normal. Hast du gerade bezahlt, öffne Money2Time und füge sie hinzu.',
       autolog_test_alert_body:
-        'Deine Bankmitteilungen erscheinen in Money2Time, damit du sie prüfen kannst.',
+        'Bei diesem Durchlauf kam kein Mitteilungstext mit, das ist bei einem Test normal. Bankmitteilungen erscheinen zur Prüfung in Money2Time.',
       daily_title: 'Wie war dein Tag?',
       daily_body: 'Nimm dir 30 Sekunden, um die Ausgaben von heute festzuhalten.',
       recurring_title: '{{name}} · {{amount}}',

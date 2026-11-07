@@ -2534,8 +2534,10 @@ const id = {
       autolog_failure_title: 'Tidak dapat mencatat pembayaran otomatis',
       autolog_failure_body: 'Ketuk untuk menambahkannya secara manual.',
       autolog_test_title: 'Otomatisasi berfungsi',
-      autolog_test_card_body: 'Pembayaran Apple Pay berikutnya akan dicatat secara otomatis.',
-      autolog_test_alert_body: 'Notifikasi bank Anda akan muncul di Money2Time untuk Anda tinjau.',
+      autolog_test_card_body:
+        'Tidak ada pembayaran dalam proses ini, hal yang wajar saat pengujian. Jika Anda baru saja membayar, buka Money2Time untuk menambahkannya.',
+      autolog_test_alert_body:
+        'Tidak ada teks notifikasi dalam proses ini, hal yang wajar saat pengujian. Notifikasi bank akan muncul di Money2Time untuk ditinjau.',
       daily_title: 'Bagaimana harimu?',
       daily_body: 'Luangkan 30 detik untuk mencatat pengeluaran hari ini selagi masih ingat.',
       recurring_title: '{{name}} · {{amount}}',

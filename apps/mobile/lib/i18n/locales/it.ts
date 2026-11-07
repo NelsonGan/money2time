@@ -2534,9 +2534,9 @@ const it = {
       autolog_failure_body: 'Tocca per aggiungerlo manualmente.',
       autolog_test_title: "L'automazione funziona",
       autolog_test_card_body:
-        'Il tuo prossimo pagamento Apple Pay verrà registrato automaticamente.',
+        'Questa esecuzione non conteneva alcun pagamento, è normale in un test. Se hai appena pagato, apri Money2Time per aggiungerlo.',
       autolog_test_alert_body:
-        'Le notifiche della tua banca compariranno in Money2Time da controllare.',
+        'Questa esecuzione non conteneva testo di notifica, è normale in un test. Le notifiche bancarie compariranno in Money2Time da controllare.',
       daily_title: "Com'è andata oggi?",
       daily_body: 'Dedica 30 secondi a registrare le spese di oggi finché sono fresche.',
       recurring_title: '{{name}} · {{amount}}',

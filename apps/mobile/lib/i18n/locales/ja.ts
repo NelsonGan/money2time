@@ -2507,8 +2507,10 @@ const ja = {
       autolog_failure_title: '支払いを自動記録できませんでした',
       autolog_failure_body: 'タップして手動で追加してください。',
       autolog_test_title: 'オートメーションは正常に動作しています',
-      autolog_test_card_body: '次回の Apple Pay の支払いは自動で記録されます。',
-      autolog_test_alert_body: '銀行の通知は Money2Time に表示され、確認できます。',
+      autolog_test_card_body:
+        '今回の実行には支払い情報がありませんでした。テストでは正常な動作です。支払ったばかりの場合は、Money2Time を開いて追加してください。',
+      autolog_test_alert_body:
+        '今回の実行には通知の本文がありませんでした。テストでは正常な動作です。銀行の通知は Money2Time に表示され、確認できます。',
       daily_title: '今日はどんな一日でしたか？',
       daily_body: '記憶が新しいうちに、30秒だけ今日の支出を記録しましょう。',
       recurring_title: '{{name}} · {{amount}}',

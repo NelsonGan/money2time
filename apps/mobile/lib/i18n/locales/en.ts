@@ -2494,9 +2494,10 @@ const en = {
       autolog_failure_title: "Couldn't auto-log a payment",
       autolog_failure_body: 'Tap to add it manually.',
       autolog_test_title: 'Automation is working',
-      autolog_test_card_body: 'Your next Apple Pay payment will be logged automatically.',
+      autolog_test_card_body:
+        'No payment came with this run, which is normal for a test. If you just paid, open Money2Time to add it.',
       autolog_test_alert_body:
-        'Your bank notifications will show up in Money2Time for you to review.',
+        'No notification text came with this run, which is normal for a test. Bank notifications will show up in Money2Time for review.',
       daily_title: 'How did today go?',
       daily_body: "Take 30 seconds to log today's spending while it's still fresh.",
       recurring_title: '{{name}} · {{amount}}',

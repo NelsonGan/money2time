@@ -2523,9 +2523,10 @@ const da = {
       autolog_failure_title: 'Kunne ikke autoregistrere en betaling',
       autolog_failure_body: 'Tryk for at tilføje den manuelt.',
       autolog_test_title: 'Automatiseringen virker',
-      autolog_test_card_body: 'Din næste Apple Pay-betaling bliver registreret automatisk.',
+      autolog_test_card_body:
+        'Der fulgte ingen betaling med denne kørsel, hvilket er normalt ved en test. Har du lige betalt, så åbn Money2Time og tilføj den.',
       autolog_test_alert_body:
-        'Dine banknotifikationer vises i Money2Time, så du kan gennemgå dem.',
+        'Der fulgte ingen notifikationstekst med denne kørsel, hvilket er normalt ved en test. Banknotifikationer vises i Money2Time til gennemgang.',
       daily_title: 'Hvordan gik dagen?',
       daily_body: 'Brug 30 sekunder på at registrere dagens forbrug, mens du husker det.',
       recurring_title: '{{name}} · {{amount}}',
