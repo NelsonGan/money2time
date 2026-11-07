@@ -78,6 +78,43 @@ export function isDeviceLocalColumn(table: string, column: string, shared = fals
 }
 
 /**
+ * Tables where only some rows sync; the others stay on the phone. Exchange
+ * rates downloaded from the feed (`source` `api`) are refreshed by each phone
+ * from the same daily feed, so sending them only rewrote about 160 rows a day
+ * per account in the cloud copy, for every phone to download. Rates the user
+ * typed (`manual`) sync. A phone never overwrites or deletes its own
+ * downloaded rates for a pulled row, except to make way for a typed one.
+ */
+const SYNCED_ROWS: Readonly<
+  Partial<
+    Record<
+      SyncTable,
+      { sql: (col: (name: string) => string) => string; test: (row: Row) => boolean }
+    >
+  >
+> = {
+  exchange_rates: {
+    sql: (col) => `${col('source')} IS 'manual'`,
+    test: (row) => row.source === 'manual',
+  },
+};
+
+/**
+ * SQL that is true for the rows of `table` that sync (`alias`: a trigger's
+ * `NEW` or `OLD`). `1` for a table whose rows all sync.
+ */
+export function syncedRowSql(table: string, alias?: string): string {
+  const rule = SYNCED_ROWS[table as SyncTable];
+  if (!rule) return '1';
+  return `(${rule.sql((name) => (alias ? `${alias}."${name}"` : `"${name}"`))})`;
+}
+
+/** Whether a row of `table` syncs, or stays on the phone (`SYNCED_ROWS`). */
+export function isSyncedRow(table: string, row: Row): boolean {
+  return SYNCED_ROWS[table as SyncTable]?.test(row) ?? true;
+}
+
+/**
  * Columns holding a user image (`receipts/x.jpg`, `custom:account-logos/x.png`).
  * Keep in step with `collectReferencedAssetPaths` in services/userAssetGc.ts.
  */

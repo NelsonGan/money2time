@@ -18,6 +18,22 @@ function isRowValue(value: unknown): value is RowValue {
   return value === null || typeof value === 'string' || typeof value === 'number';
 }
 
+/**
+ * Whether two stored copies of a row hold the same data apart from
+ * `updated_at`. Saving a device-local setting (a backup time, the open
+ * ledger, the last rate fetch) still stamps the settings row's `updated_at`,
+ * and a stamp alone is nothing for another phone to download.
+ */
+export function sameExceptUpdatedAt(a: string, b: string): boolean {
+  if (a === b) return true;
+  const left = parseStored(a);
+  const right = parseStored(b);
+  if (!('updated_at' in left) || !('updated_at' in right)) return false;
+  delete left.updated_at;
+  delete right.updated_at;
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
 /** The JSON to store for `localRow`, merged over the stored copy if any. */
 export function encodeRow(
   table: string,

@@ -232,6 +232,42 @@ it('pulls once, then pushes, for an edit', async () => {
   expect(cloudRow('lunch')?.amount).toBe(12);
 });
 
+it('pushes nothing when only a device-local setting and the row stamp changed', async () => {
+  await engine.uploadAllReplacingCloud();
+  expect(cloudRow('primary')).not.toBeNull();
+  calls = [];
+  // What a rate refresh saves: the fetch time, and the row's updated_at.
+  app.exec(
+    "UPDATE settings SET last_rate_fetch_at = '2026-11-07T06:00:00Z', updated_at = '2026-11-07T06:00:00Z'",
+  );
+  await engine.syncNow();
+  expect(rounds()).toEqual(['pull']);
+  app.exec("UPDATE settings SET locale = 'fr', updated_at = '2026-11-07T07:00:00Z'");
+  await engine.syncNow();
+  expect(rounds()).toEqual(['pull', 'pull', 'push']);
+});
+
+it("keeps another phone's settings edit when only a device-local setting changed here", async () => {
+  await engine.uploadAllReplacingCloud();
+  // Another phone renamed the profile; this phone has not pulled it yet.
+  const { rev: _rev, ...settings } = cloudRow('primary')!;
+  cloud
+    .prepare("UPDATE sync_rows SET data = ?, rev = 'rev-other' WHERE row_id = 'primary'")
+    .run(JSON.stringify({ ...settings, profile_name: 'Sam', updated_at: '2026-11-07T21:00:00Z' }));
+  remoteChanged = true;
+  // Meanwhile this phone refreshes its rates (a device-local setting).
+  app.exec(
+    "UPDATE settings SET last_rate_fetch_at = '2026-11-08T08:00:00Z', updated_at = '2026-11-08T08:00:00Z'",
+  );
+  expect(app.prepare('SELECT COUNT(*) AS n FROM sync_outbox').get()?.n).toBe(0);
+  await engine.syncNow();
+  expect(cloudRow('primary')?.profile_name).toBe('Sam');
+  expect(app.prepare('SELECT profile_name FROM settings').get()?.profile_name).toBe('Sam');
+  expect(app.prepare('SELECT last_rate_fetch_at FROM settings').get()?.last_rate_fetch_at).toBe(
+    '2026-11-08T08:00:00Z',
+  );
+});
+
 it('pushes a change already in the replica that an earlier push did not carry', async () => {
   addTransaction('lunch', 12);
   pushError = new Error('offline');
@@ -608,10 +644,7 @@ describe("the choice screen's last change", () => {
   it('names this phone once, so later edits do not rewrite sync_info', async () => {
     addTransaction('lunch', 12);
     await engine.syncNow();
-    expect(info()).toMatchObject({
-      [`device_name:${thisPhone()}`]: 'Test',
-      last_device_name: 'Test',
-    });
+    expect(info()).toEqual({ [`device_name:${thisPhone()}`]: 'Test' });
     calls = [];
     addTransaction('dinner', 30);
     await engine.syncNow();
@@ -636,7 +669,6 @@ describe("the choice screen's last change", () => {
     addTransaction('dinner', 30);
     await renamed.syncNow();
     expect(info()[`device_name:${thisPhone()}`]).toBe('Renamed');
-    // Only the name: the old keys are less than a day old.
     expect(infoWrites()).toEqual(['DELETE FROM SYNC_INFO', 'INSERT INTO SYNC_INFO']);
   });
 
@@ -649,22 +681,16 @@ describe("the choice screen's last change", () => {
     ledgerCloud.close();
   });
 
-  it('refreshes the keys older versions read at most once a day', async () => {
+  it('never writes the keys older versions read', async () => {
     const start = Date.now();
     addTransaction('lunch', 12);
     await engine.syncNow();
-    const first = info().last_synced_at;
-    const spy = jest.spyOn(Date, 'now').mockReturnValue(start + 23 * 3_600_000);
+    calls = [];
+    jest.spyOn(Date, 'now').mockReturnValue(start + 25 * 3_600_000);
     addTransaction('dinner', 30);
     await engine.syncNow();
-    expect(info().last_synced_at).toBe(first);
-    calls = [];
-    spy.mockReturnValue(start + 25 * 3_600_000);
-    addTransaction('snack', 4);
-    await engine.syncNow();
-    expect(info().last_synced_at).toBe(String(start + 25 * 3_600_000));
-    // The phone's name was already there: only the old keys are rewritten.
-    expect(infoWrites()).toEqual(['DELETE FROM SYNC_INFO', 'INSERT INTO SYNC_INFO']);
+    expect(infoWrites()).toEqual([]);
+    expect(info()).not.toHaveProperty('last_synced_at');
   });
 
   it("shows the newest row's time and phone", async () => {
@@ -704,5 +730,145 @@ describe("the choice screen's last change", () => {
       lastSyncedAt: later,
       lastDeviceName: null,
     });
+  });
+});
+
+describe('exchange rates', () => {
+  const addRate = (id: string, quote: string, source: 'api' | 'manual', rate = 1.5) =>
+    app
+      .prepare(
+        `INSERT INTO exchange_rates (id, base_currency, quote_currency, rate, as_of_date, source, updated_at)
+         VALUES (?, 'USD', ?, ?, '2026-11-05', ?, ?)`,
+      )
+      .run(id, quote, rate, source, now);
+  const rateRow = (id: string) =>
+    app.prepare('SELECT * FROM exchange_rates WHERE id = ?').get(id) as
+      | Record<string, unknown>
+      | undefined;
+  const cloudRate = (id: string) => {
+    const row = cloud
+      .prepare("SELECT data FROM sync_rows WHERE table_name = 'exchange_rates' AND row_id = ?")
+      .get(id);
+    return row ? (JSON.parse(String(row.data)) as Record<string, unknown>) : null;
+  };
+  /** A rate in the cloud copy, as another phone (or an older version) sent it. */
+  const putCloudRate = (id: string, quote: string, source: string, rate: number, rev: string) =>
+    cloud.prepare('INSERT OR REPLACE INTO sync_rows VALUES (?, ?, ?, ?, ?, ?)').run(
+      'exchange_rates',
+      id,
+      JSON.stringify({
+        id,
+        base_currency: 'USD',
+        quote_currency: quote,
+        rate,
+        as_of_date: '2026-11-06',
+        source,
+        updated_at: '2026-11-06T00:00:00.000Z',
+      }),
+      rev,
+      'another-phone',
+      1,
+    );
+  const outboxCount = () =>
+    Number(app.prepare('SELECT COUNT(*) AS n FROM sync_outbox').get()?.n ?? 0);
+
+  beforeEach(async () => {
+    await engine.syncNow();
+    calls = [];
+  });
+
+  it('stay on the phone when downloaded, so the daily refresh sends nothing', async () => {
+    addRate('eur', 'EUR', 'api');
+    addRate('gbp', 'GBP', 'api');
+    app.exec("UPDATE exchange_rates SET rate = 2, updated_at = 'later' WHERE source = 'api'");
+    expect(outboxCount()).toBe(0);
+    await engine.syncNow();
+    expect(rounds()).toEqual(['pull']);
+    expect(cloudRate('eur')).toBeNull();
+  });
+
+  it('sync when typed, including a downloaded rate the user overrides', async () => {
+    addRate('jpy', 'JPY', 'manual', 150);
+    addRate('eur', 'EUR', 'api');
+    await engine.syncNow();
+    expect(cloudRate('jpy')).toMatchObject({ rate: 150, source: 'manual' });
+    expect(cloudRate('eur')).toBeNull();
+    app.exec("UPDATE exchange_rates SET rate = 0.9, source = 'manual' WHERE id = 'eur'");
+    await engine.syncNow();
+    expect(cloudRate('eur')).toMatchObject({ rate: 0.9, source: 'manual' });
+    app.exec("DELETE FROM exchange_rates WHERE id = 'jpy'");
+    await engine.syncNow();
+    expect(cloudRate('jpy')).toBeNull();
+  });
+
+  it("keep this phone's downloaded rates over an older version's", async () => {
+    addRate('eur', 'EUR', 'api', 0.8);
+    putCloudRate('eur', 'EUR', 'api', 0.5, 'rev-old');
+    remoteChanged = true;
+    await engine.syncNow();
+    expect(rateRow('eur')?.rate).toBe(0.8);
+    // Its delete leaves this phone's rate too.
+    cloud.exec("DELETE FROM sync_rows WHERE row_id = 'eur'");
+    remoteChanged = true;
+    await engine.syncNow();
+    expect(rateRow('eur')?.rate).toBe(0.8);
+    expect(outboxCount()).toBe(0);
+  });
+
+  it("take a typed rate from another phone over this phone's downloaded one", async () => {
+    // The pulled row's id sorts after the local one, which would win a clash
+    // between two synced rows.
+    addRate('a-local', 'EUR', 'api', 0.8);
+    putCloudRate('z-typed', 'EUR', 'manual', 0.95, 'rev-typed');
+    remoteChanged = true;
+    await engine.syncNow();
+    expect(rateRow('a-local')).toBeUndefined();
+    expect(rateRow('z-typed')).toMatchObject({ rate: 0.95, source: 'manual' });
+    expect(outboxCount()).toBe(0);
+    expect(cloudRate('z-typed')).toMatchObject({ rate: 0.95 });
+  });
+
+  it("leave an older version's downloaded rates out of a copy this phone replaces", async () => {
+    addRate('eur', 'EUR', 'api', 0.8);
+    addRate('jpy', 'JPY', 'manual', 150);
+    putCloudRate('old-gbp', 'GBP', 'api', 0.7, 'rev-old');
+    putCloudRate('eur', 'EUR', 'api', 0.5, 'rev-old-eur');
+    await engine.uploadAllReplacingCloud();
+    expect(cloudRate('old-gbp')).toBeNull();
+    expect(cloudRate('eur')).toBeNull();
+    expect(cloudRate('jpy')).toMatchObject({ rate: 150 });
+    expect(rateRow('eur')?.rate).toBe(0.8);
+  });
+
+  it("keep this phone's downloaded rates when it takes the cloud copy", async () => {
+    addRate('eur', 'EUR', 'api', 0.8);
+    addRate('jpy', 'JPY', 'manual', 150);
+    putCloudRate('cad', 'CAD', 'manual', 1.4, 'rev-cad');
+    putCloudRate('old-gbp', 'GBP', 'api', 0.7, 'rev-old');
+    await engine.replaceLocalWithCloud();
+    expect(rateRow('eur')?.rate).toBe(0.8);
+    expect(rateRow('jpy')).toBeUndefined();
+    expect(rateRow('cad')).toMatchObject({ rate: 1.4, source: 'manual' });
+    expect(rateRow('old-gbp')).toBeUndefined();
+  });
+
+  it('replace triggers an earlier version made, which queued downloaded rates', async () => {
+    app.exec(`
+      DROP TRIGGER m2t_sync_exchange_rates_ins;
+      CREATE TRIGGER m2t_sync_exchange_rates_ins AFTER INSERT ON exchange_rates BEGIN
+        INSERT INTO sync_outbox (table_name, row_id, seq) VALUES ('exchange_rates', NEW.id, 1);
+      END;
+      DELETE FROM sync_state WHERE key = 'capture_version';
+    `);
+    addRate('queued', 'CHF', 'api');
+    expect(outboxCount()).toBe(1);
+    putCloudRate('queued', 'CHF', 'api', 0.9, 'rev-old');
+    remoteChanged = true;
+    await engine.syncNow();
+    // The old entry goes up as a delete; the phone keeps its rate.
+    expect(cloudRate('queued')).toBeNull();
+    expect(rateRow('queued')).toBeDefined();
+    addRate('later', 'SEK', 'api');
+    expect(outboxCount()).toBe(0);
   });
 });

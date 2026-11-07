@@ -34,4 +34,12 @@ describe('@tursodatabase/sync-react-native on bridgeless React Native', () => {
     expect(bridge).not.toContain('getCatalystInstance');
     expect(bridge).toContain('context.getJSCallInvokerHolder()');
   });
+
+  it('names a connection lost mid-response a network error', () => {
+    // iOS rejects the body read with its own localized words ("网络连接已中断。"),
+    // which Cloud Sync could not tell from a real failure (CloudSyncContext
+    // `errorKind` looks for "network").
+    const io = read('src/internal/ioProcessor.ts');
+    expect(io).toContain('HTTP response failed (network error)');
+  });
 });

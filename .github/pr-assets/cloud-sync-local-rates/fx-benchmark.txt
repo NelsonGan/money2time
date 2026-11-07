@@ -1,0 +1,43 @@
+Exchange-rate refresh, two phones (A and B) on one Turso Cloud database, 500 transactions.
+Same scenario run with main's sync engine and with this branch's (apps/mobile real SyncEngine + Turso's Node sync engine 0.8.3).
+Bytes are what each request sent (up) and received (down) on the wire.
+
+== main ==
+step                                          requests         up       down
+A open                                               1          0     615533
+A link (upload)                                      3    1038370     106816
+B open                                               1          0     615533
+B link (take cloud copy)                             1         55         63
+A idle                                               1         55     615533
+B idle                                               1         55         63
+A daily refresh day 2 + sync                         3     121452      26890
+B sync after A's refresh day 2                       1         55      53411
+B daily refresh day 2 + sync                         3     121873      26979
+A sync after B's refresh day 2                       1         55      65720
+A daily refresh day 3 + sync                         3     121712      26891
+B sync after A's refresh day 3                       1         55      65720
+B daily refresh day 3 + sync                         3     122233      26887
+A sync after B's refresh day 3                       1         55      53411
+A types a rate + sync                                3       2295       1456
+B sync after typed rate                              1         55      53411
+summary: {"label": "main", "aRates": 163, "bRates": 163, "bQ05": {"rate": 9.99, "source": "manual"}, "cloudRateRows": 163, "bManual": 1}
+
+== branch ==
+step                                          requests         up       down
+A open                                               1          0      28781
+A link (upload)                                      3     877348      80750
+B open                                               1          0     562181
+B link (take cloud copy)                             1         55         63
+A idle                                               1         55     562181
+B idle                                               1         55         63
+A daily refresh day 2 + sync                         1         55         63
+B sync after A's refresh day 2                       1         55         63
+B daily refresh day 2 + sync                         1         55         63
+A sync after B's refresh day 2                       1         55         63
+A daily refresh day 3 + sync                         1         55         63
+B sync after A's refresh day 3                       1         55         63
+B daily refresh day 3 + sync                         1         55         63
+A sync after B's refresh day 3                       1         55         63
+A types a rate + sync                                3       2541       1461
+B sync after typed rate                              1         55      12373
+summary: {"label": "branch", "aRates": 163, "bRates": 163, "bQ05": {"rate": 9.99, "source": "manual"}, "cloudRateRows": 1, "bManual": 1}

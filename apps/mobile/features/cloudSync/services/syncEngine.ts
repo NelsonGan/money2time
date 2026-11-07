@@ -31,6 +31,7 @@ import { assetRelativePathFromRef, invalidateCustomUriCache } from '~/services/u
 import { newId } from '~/utils/id';
 
 import {
+  captureSignature,
   captureTriggersSql,
   dropCaptureTriggersSql,
   ENQUEUE_ROW_SQL,
@@ -54,16 +55,19 @@ import {
   type RevEntry,
   type Row,
   rowKey,
+  sameExceptUpdatedAt,
 } from '../lib/rowCodec';
 import {
   ASSET_COLUMNS,
   CURRENT_SYNCED_SHAPE,
   hasMeaningfulRows,
+  isSyncedRow,
   isSyncTable,
   type LiveRows,
   MEANINGFUL_ROWS,
   shapeAdditions,
   SYNC_TABLES,
+  syncedRowSql,
   type SyncedShape,
   type SyncTable,
 } from '../lib/syncTables';
@@ -113,12 +117,6 @@ const MISSING_MEDIA_RETRY_MS = 10 * 60_000;
 const UPLOAD_CONCURRENCY = 4;
 /** The `sync_info` key that names one phone (`origin` in `sync_rows`). */
 const deviceNameKey = (origin: string) => `device_name:${origin}`;
-/**
- * How often a phone rewrites `last_synced_at` and `last_device_name`, the
- * keys older app versions read for the choice screen (they rewrote them on
- * every push).
- */
-const LEGACY_LAST_DEVICE_REFRESH_MS = 24 * 60 * 60_000;
 
 export interface DataSummary {
   transactions: number;
@@ -338,11 +336,17 @@ function resolveUniqueClashes(table: string, row: Row): boolean {
       index.columns.map((c) => `"${c}" IS ?`).join(' AND ') +
       (live ? ' AND deleted_at IS NULL' : '') +
       ' AND id <> ?';
-    const clashes = db.getAllSync<{ id: string }>(`SELECT id FROM "${table}" WHERE ${where}`, [
-      ...index.columns.map((c) => row[c] ?? null),
-      row.id ?? null,
-    ]);
+    const clashes = db.getAllSync<{ id: string; synced: number }>(
+      `SELECT id, ${syncedRowSql(table)} AS synced FROM "${table}" WHERE ${where}`,
+      [...index.columns.map((c) => row[c] ?? null), row.id ?? null],
+    );
     for (const clash of clashes) {
+      // A row that stays on the phone (a downloaded rate) makes way for a
+      // synced one, and the cloud never had it.
+      if (!clash.synced) {
+        db.runSync(`DELETE FROM "${table}" WHERE id = ?`, [clash.id]);
+        continue;
+      }
       if (String(row.id) > clash.id) return false;
       if (live) {
         const now = new Date().toISOString();
@@ -461,9 +465,22 @@ function ensureDefaultLedger(): void {
 
 export function enableCapture(): void {
   const db = getSQLite();
-  for (const table of SYNC_TABLES) {
-    if (tableExists(table)) db.execSync(captureTriggersSql(table));
+  const create = () => {
+    for (const table of SYNC_TABLES) {
+      if (tableExists(table)) db.execSync(captureTriggersSql(table, localColumns(table)));
+    }
+  };
+  const signature = captureSignature(localColumns('settings'));
+  if (getState('capture_version') === signature) {
+    create();
+    return;
   }
+  // Triggers an earlier app version (or schema) made are replaced, once.
+  db.withTransactionSync(() => {
+    for (const table of SYNC_TABLES) db.execSync(dropCaptureTriggersSql(table));
+    create();
+    setState('capture_version', signature);
+  });
 }
 
 export function disableCapture(): void {
@@ -860,7 +877,9 @@ export class SyncEngine {
         : isLedgerScoped(table)
           ? inLedgersSql(table, [this.config.ledgerId ?? ''])
           : '0';
-      for (const row of db.getAllSync<{ id: string }>(`SELECT id FROM "${table}" WHERE ${where}`))
+      for (const row of db.getAllSync<{ id: string }>(
+        `SELECT id FROM "${table}" WHERE (${where}) AND ${syncedRowSql(table)}`,
+      ))
         db.runSync(ENQUEUE_ROW_SQL, [table, row.id]);
     }
     const intent = Object.fromEntries(
@@ -899,7 +918,8 @@ export class SyncEngine {
           `DELETE FROM sync_row_meta WHERE channel = '${PERSONAL_CHANNEL}';
            DELETE FROM sync_media_pending WHERE channel = '${PERSONAL_CHANNEL}';`,
         );
-        // Shared ledgers stay as they are: they sync with their own databases.
+        // Shared ledgers stay as they are: they sync with their own databases,
+        // and so do rows that never sync (downloaded rates).
         // Children go first, while their parents still say which ledger they are in.
         for (const table of [...SYNC_TABLES].reverse()) {
           // The settings row is updated in place so this phone keeps its own
@@ -907,8 +927,8 @@ export class SyncEngine {
           if (!tableExists(table) || table === 'settings') continue;
           db.execSync(
             isLedgerScoped(table)
-              ? `DELETE FROM "${table}" WHERE NOT (${inLedgersSql(table, shared)})`
-              : `DELETE FROM "${table}"`,
+              ? `DELETE FROM "${table}" WHERE NOT (${inLedgersSql(table, shared)}) AND ${syncedRowSql(table)}`
+              : `DELETE FROM "${table}" WHERE ${syncedRowSql(table)}`,
           );
         }
         for (const table of SYNC_TABLES) {
@@ -917,6 +937,11 @@ export class SyncEngine {
           for (const stored of perTable.get(table) ?? []) {
             const row = decodeRow(table, stored.data, cols);
             if (!row || channelOfRow(table, row) !== PERSONAL_CHANNEL) continue;
+            if (!isSyncedRow(table, row)) {
+              // An older version's downloaded rate: this phone keeps its own.
+              recordRev(table, stored.row_id, stored.rev, PERSONAL_CHANNEL);
+              continue;
+            }
             const written = writeRowSafely(table, row);
             if (written instanceof Error) {
               // Unrecorded, so the next sync's apply tries it again.
@@ -1041,8 +1066,10 @@ export class SyncEngine {
     const here = new Set<string>();
     for (const table of SYNC_TABLES) {
       if (!tableExists(table)) continue;
+      // A row that stays on the phone is not here: an older version's copy
+      // of it leaves the cloud.
       for (const row of db.getAllSync<{ id: string }>(
-        `SELECT id FROM "${table}" WHERE ${personalRowsSql(table)}`,
+        `SELECT id FROM "${table}" WHERE ${personalRowsSql(table)} AND ${syncedRowSql(table)}`,
       ))
         here.add(rowKey(table, row.id));
     }
@@ -1090,34 +1117,18 @@ export class SyncEngine {
    * Names this phone in the cloud copy, for the choice screen (`lastChange`).
    * Any write to `sync_info` costs every phone two more pages on its next
    * pull, twice what a one-row edit costs, so it is written only when this
-   * phone's name is missing or changed, plus the keys older versions read at
-   * most daily.
+   * phone's name is missing or changed. The keys older versions read
+   * (`last_synced_at`, `last_device_name`) are no longer written.
    */
   private async recordLastDevice(): Promise<void> {
     const replica = this.db();
     const nameKey = deviceNameKey(deviceId());
     const name = this.config.deviceName;
-    const info = await this.readInfo([nameKey, 'last_synced_at']);
-    const nameStale = info.get(nameKey) !== name;
-    const legacyStale =
-      Date.now() - (Number(info.get('last_synced_at') ?? '') || 0) >= LEGACY_LAST_DEVICE_REFRESH_MS;
-    if (!nameStale && !legacyStale) return;
+    const info = await this.readInfo([nameKey]);
+    if (info.get(nameKey) === name) return;
     await replica.transaction(async () => {
-      if (nameStale) {
-        await replica.run('DELETE FROM sync_info WHERE key = ?', [nameKey]);
-        await replica.run('INSERT INTO sync_info (key, value) VALUES (?, ?)', [nameKey, name]);
-      }
-      if (legacyStale) {
-        await replica.run(
-          "DELETE FROM sync_info WHERE key IN ('last_synced_at', 'last_device_name')",
-        );
-        await replica.run('INSERT INTO sync_info (key, value) VALUES (?, ?), (?, ?)', [
-          'last_synced_at',
-          String(Date.now()),
-          'last_device_name',
-          name,
-        ]);
-      }
+      await replica.run('DELETE FROM sync_info WHERE key = ?', [nameKey]);
+      await replica.run('INSERT INTO sync_info (key, value) VALUES (?, ?)', [nameKey, name]);
     });
   }
 
@@ -1157,9 +1168,12 @@ export class SyncEngine {
       const memo = routeMemoFresh();
       const known = memo.get(key);
       if (known !== undefined && known !== this.channel) continue;
-      const local = db.getFirstSync<Row>(`SELECT * FROM "${entry.table_name}" WHERE id = ?`, [
+      const found = db.getFirstSync<Row>(`SELECT * FROM "${entry.table_name}" WHERE id = ?`, [
         entry.row_id,
       ]);
+      // A row that stays on the phone goes up as a delete: the cloud copy
+      // must not keep it (it synced before, or an older version sent it).
+      const local = found && isSyncedRow(entry.table_name, found) ? found : null;
       const channel = local
         ? channelOfRow(entry.table_name, local)
         : (recordedChannel(entry.table_name, entry.row_id) ?? PERSONAL_CHANNEL);
@@ -1274,9 +1288,10 @@ export class SyncEngine {
             continue;
           }
           const data = encodeRow(table, local, before?.data ?? null, !this.isPersonal);
-          // Only device-local columns changed (a backup timestamp, say): the
-          // cloud copy stays as it is.
-          if (before && before.data === data) {
+          // Only device-local columns changed (a backup timestamp, say), with
+          // at most the `updated_at` that saving them stamps: the cloud copy
+          // stays as it is.
+          if (before && sameExceptUpdatedAt(before.data, data)) {
             results.push({ table, id, seq: entry.seq, rev: before.rev });
             continue;
           }
@@ -1410,8 +1425,9 @@ export class SyncEngine {
       for (const item of removed) {
         if (pendingNow.has(rowKey(item.table, item.id))) continue;
         if (deferLedgerRemovals && isLedgerScoped(item.table)) continue;
-        // A row that moved to another channel (its ledger was shared) stays.
-        if (tableExists(item.table) && this.ownsLocalRow(item.table, item.id)) {
+        // A row that moved to another channel (its ledger was shared) stays,
+        // and so does one that never syncs (`isSyncedRow`).
+        if (tableExists(item.table) && this.removableHere(item.table, item.id)) {
           applied += db.runSync(`DELETE FROM "${item.table}" WHERE id = ?`, [item.id]).changes;
         }
         recordRev(item.table, item.id, null, this.channel);
@@ -1420,6 +1436,12 @@ export class SyncEngine {
         if (!tableExists(item.table) || pendingNow.has(rowKey(item.table, item.id))) continue;
         const row = decodeRow(item.table, item.data, localColumns(item.table), !this.isPersonal);
         if (!row || !this.accepts(item.table, row)) continue;
+        if (!isSyncedRow(item.table, row)) {
+          // Sent by an older version (a downloaded rate): this phone keeps
+          // its own.
+          recordRev(item.table, item.id, item.rev, this.channel);
+          continue;
+        }
         if (opts.attaching && this.localIsNewer(item.table, row)) {
           // Edited here while signed out: this phone's copy goes up instead.
           db.runSync(ENQUEUE_ROW_SQL, [item.table, item.id]);
@@ -1452,6 +1474,19 @@ export class SyncEngine {
       [String(row.id ?? '')],
     );
     return typeof local?.updated_at === 'string' && local.updated_at > row.updated_at;
+  }
+
+  /**
+   * Whether a delete pulled from this channel may remove this phone's copy of
+   * a row: it belongs to this channel (`ownsLocalRow`) and is one that syncs.
+   */
+  private removableHere(table: string, id: string): boolean {
+    const shared = listSharedLedgers().length > 0;
+    if (!shared && syncedRowSql(table) === '1') return this.isPersonal;
+    const local = getSQLite().getFirstSync<Row>(`SELECT * FROM "${table}" WHERE id = ?`, [id]);
+    if (!local) return shared || this.isPersonal;
+    if (!isSyncedRow(table, local)) return false;
+    return shared ? channelOfRow(table, local) === this.channel : this.isPersonal;
   }
 
   /** Whether this phone's copy of a row (if any) belongs to this channel. */
