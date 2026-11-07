@@ -47,6 +47,7 @@ import type {
   TransactionType,
   UserSettings,
 } from '~/types';
+import { isAccountArchived } from '~/utils/accountArchive';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { convert, currencySymbolForCode, resolvePinnedCurrency } from '~/utils/currency';
 import { FONT } from '~/utils/fonts';
@@ -612,7 +613,8 @@ export function QuickAddSheet({
 
   const inferredAccountId = useMemo(() => {
     if (!historyInference?.accountId) return null;
-    return accounts.some((a) => a.id === historyInference.accountId)
+    // A deleted or archived account is not offered again from history.
+    return accounts.some((a) => a.id === historyInference.accountId && !isAccountArchived(a))
       ? historyInference.accountId
       : null;
   }, [accounts, historyInference]);

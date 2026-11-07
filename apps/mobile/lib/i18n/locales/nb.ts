@@ -2087,9 +2087,6 @@ const nb = {
       payment_note: 'Nedbetaling av lån',
       due_amount: 'Beløp til betaling',
       archive_action: 'Arkiver lån',
-      unarchive_action: 'Hent ut av arkivet',
-      archive_hint:
-        'Skjuler det fra kontolisten din. Historikk og totaler beholdes, og "Vis arkiverte" henter det tilbake.',
       celebration_title: 'Lånet er nedbetalt',
       celebration_message: '{{name}} er fullt innfridd. Den gjelden er bak deg.',
       celebration_message_with_amount: '{{name}} er fullt innfridd, alle {{amount}}.',
@@ -2109,6 +2106,9 @@ const nb = {
     archived_section: 'Arkiverte',
     show_archived_action: 'Vis arkiverte ({{count}})',
     hide_archived_action: 'Skjul arkiverte',
+    archive_action: 'Arkiver konto',
+    archive_hint:
+      'Skjuler den fra kontoene og kontovelgerne. Transaksjonene beholdes, og de faste postene settes på pause.',
     show_balances: 'Vis saldoer',
     type: 'Type',
     statement_day: 'Utskriftsdag',

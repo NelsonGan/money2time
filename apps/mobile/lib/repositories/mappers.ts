@@ -268,6 +268,7 @@ export function toAccount(row: AccountRow): Account {
     loanArchivedAt: row.loanArchivedAt,
     loanCountAsExpense: row.loanCountAsExpense ?? null,
     loanPaymentCategoryId: row.loanPaymentCategoryId ?? null,
+    archivedAt: row.archivedAt ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,

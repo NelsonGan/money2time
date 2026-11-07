@@ -134,6 +134,7 @@ import {
   type TransactionWithRelations,
 } from '~/types';
 import { cn } from '~/utils';
+import { isAccountArchived } from '~/utils/accountArchive';
 import { flowTypeForBalanceDelta, isLiabilityAccountType } from '~/utils/accountBalances';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { withColorAlpha } from '~/utils/color';
@@ -208,6 +209,8 @@ interface AccountEditorInput {
   loanRateChanges?: LoanRateChange[] | null;
   loanCountAsExpense: boolean | null;
   loanPaymentCategoryId: string | null;
+  /** Whether the account should end up archived. Edit only; undefined on create. */
+  archived?: boolean;
   /**
    * The account repayments are collected from. Null means the borrower will
    * record each repayment by hand, and on an existing loan means whatever rule
@@ -558,7 +561,6 @@ function AccountEditorSheet({
   onClose,
   onSave,
   onDelete,
-  onArchiveLoan,
   onOpenMultiCurrency,
   onOpenLogoPicker,
   onOpenCardDesignPicker,
@@ -571,7 +573,6 @@ function AccountEditorSheet({
   onClose: () => void;
   onSave: (input: AccountEditorInput) => void;
   onDelete?: () => void;
-  onArchiveLoan?: (archived: boolean) => void;
   onOpenMultiCurrency?: () => void;
   onOpenLogoPicker: (session: AccountLogoPickerSession) => void;
   onOpenCardDesignPicker: (session: CardDesignPickerSession) => void;
@@ -586,6 +587,7 @@ function AccountEditorSheet({
   const [logoId, setLogoId] = useState<string | null>(null);
   const [cardDesign, setCardDesign] = useState<string | null>(null);
   const [includeInTotals, setIncludeInTotals] = useState(true);
+  const [archived, setArchived] = useState(false);
   const [balanceInput, setBalanceInput] = useState('0');
   const [balanceEdited, setBalanceEdited] = useState(false);
   const [creditStatementDay, setCreditStatementDay] = useState('25');
@@ -730,6 +732,7 @@ function AccountEditorSheet({
         : 'none';
       setAccountGroupId(matchedGroupId);
       setIncludeInTotals(account.includeInTotals);
+      setArchived(isAccountArchived(account));
       setBalanceInput(toBalanceInputValue(currentBalance));
       setBalanceEdited(false);
       setCreditStatementDay(String(account.creditStatementDay ?? '25'));
@@ -1084,12 +1087,15 @@ function AccountEditorSheet({
   );
 
   const logoMeta = getAccountLogoMeta(logoId);
+  const archiveLabel = String(
+    I18n.t(account?.type === 'loan' ? 'accounts.loan.archive_action' : 'accounts.archive_action'),
+  );
   const normalizedName = name.trim();
   const cardStackIndex = stackPaletteIndex(
     account?.id ?? null,
     accountGroupId === 'none' ? null : (accountGroupNameById.get(accountGroupId) ?? null),
     appAccounts,
-    account?.type === 'loan' && account.loanArchivedAt != null,
+    account != null && isAccountArchived(account),
   );
 
   /**
@@ -1212,6 +1218,7 @@ function AccountEditorSheet({
       creditStatementDay: resolvedType === 'credit' ? normalizedStatementDay : null,
       creditDueDay: resolvedType === 'credit' ? normalizedDueDay : null,
       includeInTotals,
+      archived: isEdit ? archived : undefined,
       // A new loan opens at what the contract says is still owed after the
       // instalments already paid; an existing one keeps its edited balance.
       startingBalance: isNewLoan && loanQuote ? loanQuote.openingBalance : parsedBalance,
@@ -1897,26 +1904,27 @@ function AccountEditorSheet({
               />
             </View>
 
-            {isEdit && account.type === 'loan' && onArchiveLoan ? (
-              <Pressable
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  onArchiveLoan(account.loanArchivedAt == null);
-                }}
-                accessibilityRole="button"
-                className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3.5"
-              >
-                <Text variant="body">
-                  {I18n.t(
-                    account.loanArchivedAt == null
-                      ? 'accounts.loan.archive_action'
-                      : 'accounts.loan.unarchive_action',
-                  )}
-                </Text>
-                <Text variant="caption" tone="muted" className="mt-0.5">
-                  {I18n.t('accounts.loan.archive_hint')}
-                </Text>
-              </Pressable>
+            {isEdit && account.type !== 'goal' ? (
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center">
+                  <Text variant="label" tone="muted">
+                    {archiveLabel}
+                  </Text>
+                  <View className="ml-1.5">
+                    <InfoTooltipButton
+                      title={archiveLabel}
+                      infoTooltip={String(I18n.t('accounts.archive_hint'))}
+                      iconSize={14}
+                    />
+                  </View>
+                </View>
+                <Switch
+                  value={archived}
+                  onValueChange={setArchived}
+                  trackColor={{ false: `${themeColors.border}80`, true: themeColors.primary }}
+                  thumbColor="#FFFFFF"
+                />
+              </View>
             ) : null}
           </View>
         </FormScrollView>
@@ -2083,6 +2091,7 @@ export function AccountEditorScreen({
     deleteRecurringRule,
     recurringRules,
     setLoanArchived,
+    setAccountArchived,
     rateTable,
   } = useApp();
   const { accountBalances } = useTransactions();
@@ -2246,6 +2255,16 @@ export function AccountEditorScreen({
         );
       };
 
+      // Applied with the rest of the edit and after the rule resyncs, so
+      // archiving a loan also pauses a repayment rule they have just made. A
+      // loan keeps its own stamp, which older app versions and the Web
+      // Dashboard read.
+      const applyArchive = () => {
+        if (input.archived === undefined || input.archived === isAccountArchived(account)) return;
+        if (account.type === 'loan') setLoanArchived(account.id, input.archived);
+        else setAccountArchived(account.id, input.archived);
+      };
+
       const accountUpdates = {
         name: input.name,
         accountGroup: input.accountGroup,
@@ -2269,6 +2288,7 @@ export function AccountEditorScreen({
         // reporting, so it must not be walked by the two resyncs above (which
         // read the render-time `recurringRules` anyway).
         resyncCollectAccount();
+        applyArchive();
       };
 
       // Asks how a balance change is recorded (a plain adjustment, or real
@@ -2334,8 +2354,9 @@ export function AccountEditorScreen({
       // in the recurring editor.
       if (input.currency && input.currency !== account.currency) {
         const toCurrency = input.currency;
-        const changeCurrency = () =>
-          changeAccountCurrency(account.id, toCurrency, {
+        const changeCurrency = () => {
+          applyArchive();
+          return changeAccountCurrency(account.id, toCurrency, {
             name: input.name,
             accountGroup: input.accountGroup,
             logoId: input.logoId,
@@ -2347,6 +2368,7 @@ export function AccountEditorScreen({
             // new currency alongside the re-denominated history.
             ...loanUpdates,
           });
+        };
         // A balance typed in the same save is recorded on top of the
         // conversion, in the new currency, so the account lands on it.
         const balanceChange = balanceChangeWithCurrencySwitch({
@@ -2407,6 +2429,8 @@ export function AccountEditorScreen({
       accounts,
       changeAccountCurrency,
       checkLimit,
+      setAccountArchived,
+      setLoanArchived,
       createAccount,
       createRecurringRule,
       createTransaction,
@@ -2428,15 +2452,6 @@ export function AccountEditorScreen({
     onClose();
   }, [account, deleteAccount, onClose]);
 
-  const handleArchiveLoan = useCallback(
-    (archived: boolean) => {
-      if (!account) return;
-      setLoanArchived(account.id, archived);
-      onClose();
-    },
-    [account, onClose, setLoanArchived],
-  );
-
   return (
     <AccountEditorSheet
       account={account}
@@ -2447,7 +2462,6 @@ export function AccountEditorScreen({
       onClose={onClose}
       onSave={handleSave}
       onDelete={account ? handleDelete : undefined}
-      onArchiveLoan={account?.type === 'loan' ? handleArchiveLoan : undefined}
       onOpenMultiCurrency={onOpenMultiCurrency}
       onOpenLogoPicker={onOpenLogoPicker}
       onOpenCardDesignPicker={onOpenCardDesignPicker}
@@ -3775,15 +3789,15 @@ export function AccountsScreen({
     // getTransactionsByAccount is identity-stable; `transactions` signals the data changed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accounts, balanceMap, getTransactionsByAccount, managementOnly, transactions]);
-  // The stack shows live accounts; archived loans sit behind its own
-  // "show archived" toggle so a settled loan stops taking up room without
-  // becoming unreachable.
+  // The stack shows live accounts; archived ones (a closed card, a settled
+  // loan) sit behind its own "show archived" toggle so they stop taking up
+  // room without becoming unreachable.
   const { stackAccounts, archivedAccounts } = useMemo(() => {
     const live: Account[] = [];
     const archived: Account[] = [];
     for (const account of accounts) {
       if (account.type === 'goal') continue;
-      if (account.type === 'loan' && account.loanArchivedAt != null) archived.push(account);
+      if (isAccountArchived(account)) archived.push(account);
       else live.push(account);
     }
     return { stackAccounts: live, archivedAccounts: archived };
@@ -3797,8 +3811,8 @@ export function AccountsScreen({
 
     const buckets = new Map<string, Account[]>();
     // Savings goals live on their own rail, never inside the bank-card groups.
-    // Archived loans DO belong here: this list feeds the management screen,
-    // which is where a loan is brought back out of the archive.
+    // Archived accounts DO belong here: this list feeds the management
+    // screen, which lists every account so all of them can be reordered.
     accounts.forEach((account) => {
       if (account.type === 'goal') return;
       const groupName = account.accountGroup?.trim() ?? '';

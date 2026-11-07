@@ -2095,9 +2095,6 @@ const es = {
       payment_note: 'Pago de préstamo',
       due_amount: 'Importe a pagar',
       archive_action: 'Archivar préstamo',
-      unarchive_action: 'Desarchivar préstamo',
-      archive_hint:
-        'Lo oculta de tu lista de cuentas. Se conservan el historial y los totales, y "Ver archivados" lo recupera.',
       celebration_title: 'Préstamo liquidado',
       celebration_message: '{{name}} está totalmente pagado. Esa deuda ya es historia.',
       celebration_message_with_amount: '{{name}} está totalmente pagado, los {{amount}} completos.',
@@ -2117,6 +2114,9 @@ const es = {
     archived_section: 'Archivados',
     show_archived_action: 'Ver archivados ({{count}})',
     hide_archived_action: 'Ocultar archivados',
+    archive_action: 'Archivar cuenta',
+    archive_hint:
+      'La oculta de tus cuentas y de los selectores de cuenta. Sus transacciones se conservan y sus movimientos recurrentes se pausan.',
     show_balances: 'Mostrar saldos',
     type: 'Tipo',
     statement_day: 'Día de corte',

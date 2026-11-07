@@ -5,6 +5,7 @@ import type {
   LoanRateChange,
   TransactionType,
 } from '~/types';
+import { isAccountArchived } from '~/utils/accountArchive';
 import { dayKeyFromDateLocal, normalizeMoneyAmount } from '~/utils/formatters';
 import { clampStatementDate, DAY_IN_MS, nextOccurrenceOfMonthDay } from '~/utils/statementPeriods';
 
@@ -489,18 +490,19 @@ export function canPayLoanFrom(account: { type: AccountType }): boolean {
  * Whether the Pay sheet of a card or loan offers `source` to pay it by hand.
  * A loan takes what can fund its repayment (see {@link canPayLoanFrom}); a
  * card takes a bank account, never another card or a loan. Either can also be
- * paid once from savings, so a live goal is offered too. An archived goal or
- * loan never is.
+ * paid once from savings, so a live goal is offered too. An archived account
+ * never is.
  */
 export function canPayLiabilityByHandFrom(
   liabilityType: AccountType,
   source: {
     type: AccountType;
+    archivedAt?: string | null;
     goalArchivedAt?: string | null;
     loanArchivedAt?: string | null;
   },
 ): boolean {
-  if (source.goalArchivedAt != null || source.loanArchivedAt != null) return false;
+  if (isAccountArchived(source)) return false;
   if (source.type === 'goal') return true;
   return liabilityType === 'loan' ? canPayLoanFrom(source) : source.type === 'debit';
 }

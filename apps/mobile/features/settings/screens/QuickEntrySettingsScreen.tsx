@@ -15,6 +15,7 @@ import {
   useSettingsBottomNavInset,
 } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import { pickDefaultAccountId } from '~/features/transactions/lib/entryDefaults';
 import {
   type KeywordCategoryKey,
   resolveBucketCategoryIds,
@@ -259,22 +260,13 @@ export function QuickEntrySettingsScreen({ onBack }: QuickEntrySettingsScreenPro
 
   const pinnedCurrency = resolvePinnedCurrency(quickEntryPrefs.defaultCurrency, enabledCurrencies);
 
-  // When no explicit default account has been chosen, surface the same fallback
-  // the entry flows use at runtime — the user's first account — so the row
-  // displays the actual account that will be charged.
-  const firstAccountByOrder = useMemo(() => {
-    if (accounts.length === 0) return null;
-    return [...accounts].sort(
-      (a, b) => (a.sortOrder ?? Number.MAX_SAFE_INTEGER) - (b.sortOrder ?? Number.MAX_SAFE_INTEGER),
-    )[0];
-  }, [accounts]);
+  // The same account the entry flows resolve at runtime (the saved default
+  // unless it was archived, else the first live account), so the row displays
+  // the account that will actually be charged.
   const defaultAccount = useMemo(() => {
-    if (quickEntryPrefs.defaultAccountId) {
-      const explicit = accounts.find((a) => a.id === quickEntryPrefs.defaultAccountId);
-      if (explicit) return explicit;
-    }
-    return firstAccountByOrder;
-  }, [accounts, firstAccountByOrder, quickEntryPrefs.defaultAccountId]);
+    const id = pickDefaultAccountId(accounts, quickEntryPrefs.defaultAccountId);
+    return id ? (accounts.find((a) => a.id === id) ?? null) : null;
+  }, [accounts, quickEntryPrefs.defaultAccountId]);
 
   const defaultExpenseCategory = quickEntryPrefs.defaultExpenseCategoryId
     ? (categoryById.get(quickEntryPrefs.defaultExpenseCategoryId) ?? null)

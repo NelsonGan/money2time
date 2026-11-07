@@ -13,6 +13,7 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { Account, AccountGroup } from '~/types';
 import { cn } from '~/utils';
+import { isAccountArchived } from '~/utils/accountArchive';
 import { getNetAssetContribution } from '~/utils/accountBalances';
 import { formatAmount } from '~/utils/formatters';
 
@@ -230,6 +231,7 @@ export function AccountPickerSheet(props: AccountPickerSheetProps) {
     const groupNames = new Set(accountGroups.map((g) => g.name));
     const buckets = new Map<string, Account[]>();
     const goals: Account[] = [];
+    const archived: Account[] = [];
     for (const account of accounts) {
       const isSelected = account.id === singleSelectedId || selectedIdSet.has(account.id);
       if (account.type === 'goal') {
@@ -239,9 +241,18 @@ export function AccountPickerSheet(props: AccountPickerSheetProps) {
         goals.push(account);
         continue;
       }
-      // A settled, archived loan is history; it should not clutter the picker
-      // (a currently selected one stays visible, as with goals).
-      if (account.type === 'loan' && account.loanArchivedAt != null && !isSelected) continue;
+      // An archived account (a closed card, a settled loan) is history: it
+      // is not offered as somewhere to put an entry (a currently selected one
+      // stays visible, as with goals). A filter (multi-select) still lists it,
+      // always in its own section last so ticking it does not move it,
+      // because its transactions still count in the views being filtered.
+      if (isAccountArchived(account)) {
+        if (isMultiSelect) {
+          archived.push(account);
+          continue;
+        }
+        if (!isSelected) continue;
+      }
       const key = account.accountGroup?.trim() || '__ungrouped__';
       const list = buckets.get(key) ?? [];
       list.push(account);
@@ -274,8 +285,15 @@ export function AccountPickerSheet(props: AccountPickerSheetProps) {
         accounts: goals,
       });
     }
+    if (archived.length > 0) {
+      out.push({
+        key: '__archived__',
+        label: String(I18n.t('accounts.archived_section')),
+        accounts: archived,
+      });
+    }
     return out;
-  }, [accounts, accountGroups, selectedIdSet, singleSelectedId]);
+  }, [accounts, accountGroups, isMultiSelect, selectedIdSet, singleSelectedId]);
 
   // A hidden overlay renders nothing, so don't build its rows either. Hosts keep
   // the picker mounted and re-render it with their own state (the quick-add

@@ -47,6 +47,7 @@ import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepo
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import type { Account, Category, TransactionType } from '~/types';
+import { isAccountArchived } from '~/utils/accountArchive';
 import { formatAmount } from '~/utils/formatters';
 
 interface StatementImportScreenProps {
@@ -143,9 +144,11 @@ function getParseErrorMessage(error: unknown): string {
 export function StatementImportScreen({ onBack, onOpenList }: StatementImportScreenProps) {
   const { accounts: allAccounts, categories, settings, createTransaction } = useApp();
   // Bank statements never import into savings goals or loans; money moves into
-  // both by transfer, not by an imported statement line.
+  // both by transfer, not by an imported statement line. Archived accounts are
+  // put away, so they are not offered either.
   const accounts = useMemo(
-    () => allAccounts.filter((a) => a.type !== 'goal' && a.type !== 'loan'),
+    () =>
+      allAccounts.filter((a) => a.type !== 'goal' && a.type !== 'loan' && !isAccountArchived(a)),
     [allAccounts],
   );
   const themeColors = useThemeColors();

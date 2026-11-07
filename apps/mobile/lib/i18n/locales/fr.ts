@@ -2105,9 +2105,6 @@ const fr = {
       payment_note: 'Remboursement de prêt',
       due_amount: 'Montant dû',
       archive_action: 'Archiver le prêt',
-      unarchive_action: 'Désarchiver le prêt',
-      archive_hint:
-        'Le masque de votre liste de comptes. L\'historique et les totaux sont conservés, et "Afficher les archivés" le ramène.',
       celebration_title: 'Prêt soldé',
       celebration_message: '{{name}} est entièrement remboursé. Cette dette est derrière vous.',
       celebration_message_with_amount:
@@ -2128,6 +2125,9 @@ const fr = {
     archived_section: 'Archivés',
     show_archived_action: 'Afficher les archivés ({{count}})',
     hide_archived_action: 'Masquer les archivés',
+    archive_action: 'Archiver le compte',
+    archive_hint:
+      'Le masque de vos comptes et des sélecteurs de compte. Ses transactions sont conservées et ses opérations récurrentes sont mises en pause.',
     show_balances: 'Afficher les soldes',
     type: 'Type',
     statement_day: 'Jour de relevé',

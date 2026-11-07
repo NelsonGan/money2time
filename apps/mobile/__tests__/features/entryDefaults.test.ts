@@ -40,3 +40,28 @@ describe('entry account defaults after mode conversion', () => {
     expect(reversed.map((account) => account.id)).toEqual(['wallet', 'cash']);
   });
 });
+
+describe('entry account defaults with archived accounts', () => {
+  const withArchived = [
+    { id: 'old-card', name: 'Old card', type: 'credit', sortOrder: 0, archivedAt: '2026-11-07' },
+    { id: 'cash', name: 'Cash', type: 'debit', sortOrder: 1 },
+    { id: 'old-loan', name: 'Car', type: 'loan', sortOrder: 2, loanArchivedAt: '2026-11-07' },
+  ] as Account[];
+
+  it('never falls back to an archived account, even the first by sort order', () => {
+    expect(pickDefaultAccountId(withArchived)).toBe('cash');
+  });
+
+  it('passes over a saved default the user has since archived', () => {
+    expect(pickDefaultAccountId(withArchived, 'old-card')).toBe('cash');
+    expect(pickDefaultAccountId(withArchived, 'old-loan')).toBe('cash');
+  });
+
+  it('still honours an archived account chosen explicitly for this entry', () => {
+    expect(pickDefaultAccountId(withArchived, 'cash', 'old-card')).toBe('old-card');
+  });
+
+  it('leaves entry unavailable when every account is archived', () => {
+    expect(pickDefaultAccountId(withArchived.slice(0, 1))).toBeNull();
+  });
+});

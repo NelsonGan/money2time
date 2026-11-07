@@ -23,6 +23,7 @@ describe('stackPaletteIndex', () => {
     account('wallet', { accountGroup: 'Cash' }),
     account('bank', { accountGroup: 'Banks' }),
     account('old-loan', { type: 'loan', accountGroup: 'Cash', loanArchivedAt: '2026-01-01' }),
+    account('old-card', { type: 'credit', accountGroup: 'Banks', archivedAt: '2026-02-01' }),
     account('loose'),
   ];
 
@@ -39,7 +40,10 @@ describe('stackPaletteIndex', () => {
     expect(stackPaletteIndex(null, 'New group', accounts)).toBe(0);
   });
 
-  it('counts archived loans in their own section', () => {
+  it('counts archived accounts and loans together in their own section', () => {
     expect(stackPaletteIndex('old-loan', 'Cash', accounts, true)).toBe(0);
+    expect(stackPaletteIndex('old-card', 'Banks', accounts, true)).toBe(1);
+    // The archived card no longer takes a colour in its old group.
+    expect(stackPaletteIndex(null, 'Banks', accounts)).toBe(1);
   });
 });

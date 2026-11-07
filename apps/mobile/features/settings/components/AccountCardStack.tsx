@@ -10,7 +10,11 @@ import {
 } from 'react-native';
 import Animated, {
   cancelAnimation,
+  Easing,
   FadeIn,
+  FadeInDown,
+  LinearTransition,
+  ReduceMotion,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
@@ -18,6 +22,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
 
 import { useBottomNavScrollReporter } from '~/components/navigation/BottomNavMinimize';
 import { AccountLogo, Text, useSettingsBottomNavInset } from '~/components/ui';
@@ -1111,6 +1116,85 @@ function SectionStack({
   );
 }
 
+// Show archived: the section fades up into place and the toggle under it
+// glides down. Hide archived: the section folds its height away while fading,
+// and only then unmounts. Pulling it out of the layout at once (a plain
+// exiting animation) made the scroll view snap up a whole section in one frame
+// while a fading copy and the sliding toggle moved over the snapped content.
+// Folding the height lets the scroll position and the toggle follow it frame
+// by frame. Both follow the system Reduce Motion setting.
+const ARCHIVED_SECTION_ID = 'group-archived';
+const EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
+const EASE_IN_OUT = Easing.bezier(0.77, 0, 0.175, 1);
+const ARCHIVED_SECTION_ENTER = FadeInDown.duration(260).easing(EASE_OUT);
+const ARCHIVED_SECTION_COLLAPSE = {
+  duration: 280,
+  easing: EASE_OUT,
+  reduceMotion: ReduceMotion.System,
+};
+const ARCHIVED_SECTION_GAP = spacing.lg;
+const ARCHIVED_TOGGLE_LAYOUT = LinearTransition.duration(260).easing(EASE_IN_OUT);
+
+/**
+ * The archived section's wrapper. It lays out naturally until `collapsing`,
+ * then animates its own height (measured while open) and opacity to zero and
+ * calls `onCollapsed`, which unmounts it. The gap above it is padding rather
+ * than margin so it folds away with the rest.
+ */
+function ArchivedSectionReveal({
+  collapsing,
+  onCollapsed,
+  gap,
+  children,
+}: {
+  collapsing: boolean;
+  onCollapsed: () => void;
+  gap: boolean;
+  children: React.ReactNode;
+}) {
+  const progress = useSharedValue(1);
+  const openHeight = useSharedValue(0);
+
+  useEffect(() => {
+    if (!collapsing) return;
+    progress.set(
+      withTiming(0, ARCHIVED_SECTION_COLLAPSE, (finished) => {
+        if (finished) scheduleOnRN(onCollapsed);
+      }),
+    );
+  }, [collapsing, onCollapsed, progress]);
+
+  // A section replaced mid-fold (Show tapped again) must not report its fold
+  // as done: that would unmount the fresh section that replaced it.
+  useEffect(() => () => cancelAnimation(progress), [progress]);
+
+  // Untouched while open, so the section still grows when a card in it opens.
+  const collapseStyle = useAnimatedStyle(() => {
+    const value = progress.get();
+    if (value >= 1) return {};
+    // The gap folds too: a view never gets shorter than its own padding, so a
+    // fixed gap would stop the fold short and then vanish in a single frame.
+    return {
+      height: openHeight.get() * value,
+      paddingTop: gap ? ARCHIVED_SECTION_GAP * value : 0,
+      opacity: value,
+      overflow: 'hidden',
+    };
+  });
+
+  return (
+    <Animated.View
+      entering={ARCHIVED_SECTION_ENTER}
+      style={[gap ? styles.archivedSectionGap : undefined, collapseStyle]}
+      onLayout={(event) => {
+        if (!collapsing) openHeight.set(event.nativeEvent.layout.height);
+      }}
+    >
+      {children}
+    </Animated.View>
+  );
+}
+
 export function AccountCardStack({
   accounts,
   archivedAccounts,
@@ -1143,8 +1227,32 @@ export function AccountCardStack({
     setExpandedAccountId((current) => (current === accountId ? null : accountId));
   }, []);
 
+  // `showArchived` is what the toggle asks for; `archivedMounted` keeps the
+  // section on screen while it folds away after a hide. `revealKey` gives a
+  // show tapped mid-fold a fresh section rather than one stuck half folded.
   const [showArchived, setShowArchived] = useState(false);
+  const [archivedMounted, setArchivedMounted] = useState(false);
+  const [revealKey, setRevealKey] = useState(0);
   const archivedCount = archivedAccounts?.length ?? 0;
+  const collapsingArchived = archivedMounted && !showArchived;
+  // With nothing archived the section and its toggle are gone, possibly
+  // mid-fold; start over closed so the next archived account is not shown
+  // folding, or already open.
+  useEffect(() => {
+    if (archivedCount > 0) return;
+    setShowArchived(false);
+    setArchivedMounted(false);
+  }, [archivedCount]);
+  const handleArchivedCollapsed = useCallback(() => setArchivedMounted(false), []);
+  const toggleArchived = useCallback(() => {
+    if (showArchived) {
+      setShowArchived(false);
+      return;
+    }
+    if (archivedMounted) setRevealKey((key) => key + 1);
+    setShowArchived(true);
+    setArchivedMounted(true);
+  }, [archivedMounted, showArchived]);
 
   const sections = useMemo(() => {
     const groupNames = new Set(accountGroups.map((g) => g.name));
@@ -1183,16 +1291,16 @@ export function AccountCardStack({
       });
     }
 
-    if (showArchived && archivedAccounts && archivedAccounts.length > 0) {
+    if (archivedMounted && archivedAccounts && archivedAccounts.length > 0) {
       result.push({
-        id: 'group-archived',
+        id: ARCHIVED_SECTION_ID,
         label: String(I18n.t('accounts.archived_section')),
         accounts: archivedAccounts,
       });
     }
 
     return result;
-  }, [accounts, accountGroups, archivedAccounts, showArchived]);
+  }, [accounts, accountGroups, archivedAccounts, archivedMounted]);
 
   const renderSection = (section: GroupSection, indexInColumn: number) => {
     const sectionTotal = normalizeMoneyAmount(
@@ -1208,8 +1316,8 @@ export function AccountCardStack({
       ? MASKED_BALANCE_VALUE
       : formatAmount(sectionTotal, settings, { showSign: false, trueHourlyRate });
 
-    return (
-      <View key={section.id} style={indexInColumn > 0 ? styles.sectionGap : undefined}>
+    const content = (
+      <>
         <View style={styles.sectionHeader}>
           <Text variant="label" tone="muted" style={styles.sectionLabel}>
             {section.label}
@@ -1243,6 +1351,24 @@ export function AccountCardStack({
           trueHourlyRate={trueHourlyRate}
           isDark={isDark}
         />
+      </>
+    );
+
+    if (section.id === ARCHIVED_SECTION_ID) {
+      return (
+        <ArchivedSectionReveal
+          key={`${section.id}-${revealKey}`}
+          collapsing={collapsingArchived}
+          onCollapsed={handleArchivedCollapsed}
+          gap={indexInColumn > 0}
+        >
+          {content}
+        </ArchivedSectionReveal>
+      );
+    }
+    return (
+      <View key={section.id} style={indexInColumn > 0 ? styles.sectionGap : undefined}>
+        {content}
       </View>
     );
   };
@@ -1291,22 +1417,30 @@ export function AccountCardStack({
       )}
 
       {archivedCount > 0 ? (
-        <Pressable
-          onPress={() => {
-            void triggerHaptic('selection');
-            setShowArchived((previous) => !previous);
-          }}
-          accessibilityRole="button"
-          accessibilityState={{ expanded: showArchived }}
-          className="mt-5 self-center rounded-full border border-border/40 bg-card px-4 py-2.5"
+        // No layout transition while the section folds: the toggle follows the
+        // shrinking layout frame by frame, and a transition would restart on
+        // every one of them.
+        <Animated.View
+          layout={collapsingArchived ? undefined : ARCHIVED_TOGGLE_LAYOUT}
+          style={styles.archivedToggle}
         >
-          <Text variant="caption" tone="muted">
-            {I18n.t(
-              showArchived ? 'accounts.hide_archived_action' : 'accounts.show_archived_action',
-              { count: archivedCount },
-            )}
-          </Text>
-        </Pressable>
+          <Pressable
+            onPress={() => {
+              void triggerHaptic('selection');
+              toggleArchived();
+            }}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: showArchived }}
+            className="self-center rounded-full border border-border/40 bg-card px-4 py-2.5"
+          >
+            <Text variant="caption" tone="muted">
+              {I18n.t(
+                showArchived ? 'accounts.hide_archived_action' : 'accounts.show_archived_action',
+                { count: archivedCount },
+              )}
+            </Text>
+          </Pressable>
+        </Animated.View>
       ) : null}
     </ScrollView>
   );
@@ -1373,6 +1507,12 @@ const styles = StyleSheet.create({
   },
   sectionGap: {
     marginTop: spacing.lg,
+  },
+  archivedToggle: {
+    marginTop: 20,
+  },
+  archivedSectionGap: {
+    paddingTop: ARCHIVED_SECTION_GAP,
   },
   columns: {
     flexDirection: 'row',

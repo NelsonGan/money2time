@@ -4,6 +4,7 @@ import {
 } from '~/features/transactions/lib/entryDefaults';
 import { matchCategoryByKeywords } from '~/features/transactions/utils/categoryKeywords';
 import type { Account, Category, TransactionSentiment } from '~/types';
+import { isAccountArchived } from '~/utils/accountArchive';
 import { enabledEntryCurrencies, resolvePinnedCurrency } from '~/utils/currency';
 import { dayKeyFromDateLocal } from '~/utils/formatters';
 
@@ -190,7 +191,11 @@ function resolveCategoryId(scanned: ScannedTransaction, ctx: ResolveContext): st
 function resolveAccountId(ctx: ResolveContext, detectedAccount?: string): string | null {
   const wanted = detectedAccount?.trim().toLowerCase();
   if (wanted) {
-    const match = ctx.accounts.find((a) => a.name.trim().toLowerCase() === wanted);
+    // Only live accounts: an archived card sharing a name with its
+    // replacement must not catch the entry.
+    const match = ctx.accounts.find(
+      (a) => !isAccountArchived(a) && a.name.trim().toLowerCase() === wanted,
+    );
     if (match) return match.id;
   }
   return pickDefaultAccountId(ctx.accounts, ctx.defaultAccountId);

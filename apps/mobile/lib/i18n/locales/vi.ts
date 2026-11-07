@@ -2072,9 +2072,6 @@ const vi = {
       payment_note: 'Trả nợ vay',
       due_amount: 'Số tiền phải trả',
       archive_action: 'Lưu trữ khoản vay',
-      unarchive_action: 'Bỏ lưu trữ',
-      archive_hint:
-        'Ẩn khỏi danh sách tài khoản. Lịch sử và tổng số vẫn được giữ, và "Xem mục đã lưu trữ" sẽ đưa nó trở lại.',
       celebration_title: 'Đã trả xong khoản vay',
       celebration_message: '{{name}} đã trả xong. Khoản nợ đó đã ở lại phía sau.',
       celebration_message_with_amount: '{{name}} đã trả xong, trọn vẹn {{amount}}.',
@@ -2094,6 +2091,9 @@ const vi = {
     archived_section: 'Đã lưu trữ',
     show_archived_action: 'Xem mục đã lưu trữ ({{count}})',
     hide_archived_action: 'Ẩn mục đã lưu trữ',
+    archive_action: 'Lưu trữ tài khoản',
+    archive_hint:
+      'Ẩn khỏi tài khoản và mục chọn tài khoản. Giao dịch vẫn được giữ, và các giao dịch định kỳ bị tạm dừng.',
     show_balances: 'Hiện số dư',
     type: 'Loại',
     statement_day: 'Ngày sao kê',

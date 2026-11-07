@@ -2092,9 +2092,6 @@ const it = {
       payment_note: 'Rimborso prestito',
       due_amount: 'Importo dovuto',
       archive_action: 'Archivia prestito',
-      unarchive_action: 'Ripristina prestito',
-      archive_hint:
-        'Lo nasconde dall\'elenco dei conti. Cronologia e totali restano, e "Mostra archiviati" lo riporta.',
       celebration_title: 'Prestito estinto',
       celebration_message: '{{name}} è completamente rimborsato. Quel debito è alle spalle.',
       celebration_message_with_amount: '{{name}} è completamente rimborsato, tutti i {{amount}}.',
@@ -2114,6 +2111,9 @@ const it = {
     archived_section: 'Archiviati',
     show_archived_action: 'Mostra archiviati ({{count}})',
     hide_archived_action: 'Nascondi archiviati',
+    archive_action: 'Archivia conto',
+    archive_hint:
+      'Lo nasconde dai tuoi conti e dalla scelta del conto. Le sue transazioni restano e le sue voci ricorrenti vengono sospese.',
     show_balances: 'Mostra saldi',
     type: 'Tipo',
     statement_day: 'Giorno estratto',

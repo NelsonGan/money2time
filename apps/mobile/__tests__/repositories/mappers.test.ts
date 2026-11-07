@@ -152,6 +152,22 @@ describe('toAccount', () => {
     ]);
     expect(account.loanPaidOffAt).toBeNull();
     expect(account.loanArchivedAt).toBeNull();
+    // A row from before migration 080 has no archive stamp: a live account.
+    expect(account.archivedAt).toBeNull();
+  });
+
+  it('maps the archive stamp of an everyday account', () => {
+    const row: any = {
+      id: 'card',
+      name: 'Old card',
+      type: 'credit',
+      currency: 'MYR',
+      startingBalance: 0,
+      includeInTotals: true,
+      archivedAt: '2026-11-07T00:00:00.000Z',
+      ...STAMPS,
+    };
+    expect(toAccount(row).archivedAt).toBe('2026-11-07T00:00:00.000Z');
   });
 
   it('reads an absent or unrecognized interest model as null', () => {

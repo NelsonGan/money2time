@@ -24,6 +24,7 @@ import {
   requestHighlightTransaction,
 } from '~/services/transactionsNavigation';
 import { copyReceiptImage, deleteReceiptImage } from '~/services/userAssets';
+import { isAccountArchived } from '~/utils/accountArchive';
 import { newId } from '~/utils/id';
 
 /**
@@ -283,7 +284,9 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
               ? ('screenshot' as const)
               : ('quick' as const);
         const accountNames =
-          mode === 'screenshot' ? scanEnv.accounts.map((a) => a.name) : undefined;
+          mode === 'screenshot'
+            ? scanEnv.accounts.filter((a) => !isAccountArchived(a)).map((a) => a.name)
+            : undefined;
         const response = await scanReceipt({
           receiptRelPath: rel,
           appUserId,

@@ -528,6 +528,14 @@ export interface Account {
   loanCountAsExpense?: boolean | null;
   /** The category a counted repayment is filed under. */
   loanPaymentCategoryId?: string | null;
+  /**
+   * Null = live. Set when an everyday (debit or credit) account is archived:
+   * it leaves the accounts stack and the account pickers, and keeps its
+   * transactions and balance. Loans and goals use `loanArchivedAt` and
+   * `goalArchivedAt`; ask `isAccountArchived` rather than reading any of the
+   * three directly.
+   */
+  archivedAt?: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
