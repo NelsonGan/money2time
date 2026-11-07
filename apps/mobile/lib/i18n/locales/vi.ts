@@ -824,6 +824,7 @@ const vi = {
       paid_on: 'Đã trả {{date}}',
       paid_in_payments: '{{count}} lần · gần nhất {{date}}',
       payback_group: '{{count}} khoản trả lại',
+      remove_rest_message: 'Thao tác này xoá {{owed}} còn nợ. Phần đã trả lại vẫn được ghi nhận.',
       share_of_total: 'trên {{total}}',
       share_paid: 'Đã trả lại {{paid}}',
       bill_paid_progress: 'Đã trả lại {{paid}} trên {{total}}',

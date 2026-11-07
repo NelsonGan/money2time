@@ -824,6 +824,8 @@ const nb = {
       paid_on: 'Betalt {{date}}',
       paid_in_payments: '{{count}} betalinger · sist {{date}}',
       payback_group: '{{count}} tilbakebetalinger',
+      remove_rest_message:
+        'Dette sletter de {{owed}} som fortsatt skyldes. Det som allerede er betalt tilbake, blir stående.',
       share_of_total: 'av {{total}}',
       share_paid: '{{paid}} betalt tilbake',
       bill_paid_progress: '{{paid}} av {{total}} betalt tilbake',

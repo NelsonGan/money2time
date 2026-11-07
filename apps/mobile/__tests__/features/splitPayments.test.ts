@@ -1,7 +1,9 @@
 import {
+  applyShareHandover,
   applyUnpaidMerge,
   cutPartPayment,
   evenOwedAmounts,
+  planShareHandover,
   planSplitPayment,
   planUnpaidMerge,
   splitShareKey,
@@ -196,5 +198,33 @@ describe('evenOwedAmounts', () => {
   it('handles no rows and nothing owed', () => {
     expect(evenOwedAmounts(50, [])).toEqual([]);
     expect(evenOwedAmounts(0, [0, 0])).toEqual([0, 0]);
+  });
+});
+
+describe('planShareHandover', () => {
+  const splits = [
+    split({ id: 'a', amount: 700 }),
+    split({ id: 'p2', amount: 200, paidAt: PAID, partOfSplitId: 'a', createdAt: '2026-11-03' }),
+    split({ id: 'p1', amount: 100, paidAt: PAID, partOfSplitId: 'a', createdAt: '2026-11-01' }),
+    split({ id: 'b', personName: 'Ben' }),
+  ];
+
+  it('makes the oldest part the first row when the first row goes', () => {
+    const handover = planShareHandover(splits, 'a');
+    expect(handover).toEqual({ newRootId: 'p1', repointIds: ['p2'] });
+    const next = applyShareHandover(
+      splits.filter((s) => s.id !== 'a'),
+      handover!,
+    );
+    expect(next.map((s) => [s.id, s.partOfSplitId])).toEqual([
+      ['p2', 'p1'],
+      ['p1', null],
+      ['b', null],
+    ]);
+  });
+
+  it('does nothing for a part, or a first row without parts', () => {
+    expect(planShareHandover(splits, 'p1')).toBeNull();
+    expect(planShareHandover(splits, 'b')).toBeNull();
   });
 });

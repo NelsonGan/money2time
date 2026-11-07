@@ -823,6 +823,7 @@ const uk = {
       paid_on: 'Сплачено {{date}}',
       paid_in_payments: 'Платежів: {{count}} · останній {{date}}',
       payback_group: 'Повернень: {{count}}',
+      remove_rest_message: 'Залишок боргу {{owed}} буде знято. Уже повернене залишиться в записах.',
       share_of_total: 'з {{total}}',
       share_paid: 'Повернуто {{paid}}',
       bill_paid_progress: 'Повернуто {{paid}} з {{total}}',

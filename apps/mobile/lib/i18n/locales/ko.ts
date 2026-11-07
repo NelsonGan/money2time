@@ -820,6 +820,7 @@ const ko = {
       paid_on: '{{date}} 받음',
       paid_in_payments: '{{count}}번 · 마지막 {{date}}',
       payback_group: '받은 돈 {{count}}건',
+      remove_rest_message: '남은 {{owed}}를 지웁니다. 이미 받은 금액은 기록에 남아요.',
       share_of_total: '/ {{total}}',
       share_paid: '{{paid}} 받음',
       bill_paid_progress: '{{total}} 중 {{paid}} 받음',

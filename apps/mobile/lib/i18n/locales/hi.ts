@@ -824,6 +824,7 @@ const hi = {
       paid_on: '{{date}} को चुकाया',
       paid_in_payments: '{{count}} भुगतान · आख़िरी {{date}}',
       payback_group: '{{count}} वापसी भुगतान',
+      remove_rest_message: 'इससे बाकी {{owed}} हट जाएगा। जो पहले लौटाया जा चुका है, वह दर्ज रहेगा।',
       share_of_total: '{{total}} में से',
       share_paid: '{{paid}} लौटाए गए',
       bill_paid_progress: '{{total}} में से {{paid}} लौटाए गए',

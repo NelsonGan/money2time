@@ -825,6 +825,8 @@ const pl = {
       paid_on: 'Zapłacono {{date}}',
       paid_in_payments: 'Płatności: {{count}} · ostatnia {{date}}',
       payback_group: 'Zwroty: {{count}}',
+      remove_rest_message:
+        'To usunie pozostałe {{owed}} do oddania. To, co już oddano, zostaje zapisane.',
       share_of_total: 'z {{total}}',
       share_paid: 'Oddano {{paid}}',
       bill_paid_progress: 'Oddano {{paid}} z {{total}}',

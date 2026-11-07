@@ -826,6 +826,8 @@ const fil = {
       paid_on: 'Binayaran {{date}}',
       paid_in_payments: '{{count}} bayad · huli {{date}}',
       payback_group: '{{count}} bayad pabalik',
+      remove_rest_message:
+        'Buburahin nito ang {{owed}} na utang pa. Mananatiling nakatala ang naibalik na.',
       share_of_total: 'sa {{total}}',
       share_paid: '{{paid}} naibalik na',
       bill_paid_progress: '{{paid}} sa {{total}} naibalik na',

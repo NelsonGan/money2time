@@ -6,7 +6,7 @@ import { Alert } from 'react-native';
 import { useApp } from '~/context/AppContext';
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import { type SplitDraft, splitsHelpers } from '~/features/transactions/components/editor';
-import { splitShareKey, summarizeSplitShares } from '~/features/transactions/lib/splitPayments';
+import { splitShareKey } from '~/features/transactions/lib/splitPayments';
 import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import type { RootStackParamList } from '~/navigation/rootStack';
@@ -179,7 +179,6 @@ export function EditTransactionScreen({
   const initialSplits = useMemo<SplitDraft[] | undefined>(() => {
     const persisted = transaction.splits;
     if (!persisted || persisted.length === 0) return undefined;
-    const shares = summarizeSplitShares(persisted);
     return persisted.map((s) => ({
       id: s.id,
       personName: s.personName ?? '',
@@ -187,7 +186,7 @@ export function EditTransactionScreen({
       isSelf: s.isSelf,
       paybackAccountId: s.paybackAccountId,
       paid: s.paidAt ? { paidAt: s.paidAt, paidTransactionId: s.paidTransactionId } : undefined,
-      paidBack: s.paidAt || s.isSelf ? undefined : shares.get(splitShareKey(s))?.paid || undefined,
+      shareKey: s.isSelf ? undefined : splitShareKey(s),
     }));
   }, [transaction.splits]);
 

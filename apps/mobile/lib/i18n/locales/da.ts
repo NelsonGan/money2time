@@ -823,6 +823,8 @@ const da = {
       paid_on: 'Betalt {{date}}',
       paid_in_payments: '{{count}} betalinger · sidst {{date}}',
       payback_group: '{{count}} tilbagebetalinger',
+      remove_rest_message:
+        'Det sletter de {{owed}}, de stadig skylder. Det, de allerede har betalt tilbage, bliver stående.',
       share_of_total: 'af {{total}}',
       share_paid: '{{paid}} betalt tilbage',
       bill_paid_progress: '{{paid}} af {{total}} betalt tilbage',

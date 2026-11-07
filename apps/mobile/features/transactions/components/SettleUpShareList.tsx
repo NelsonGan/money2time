@@ -104,11 +104,14 @@ export function SettleUpShareList<T extends SettleUpShare>({
   );
 
   const handleDelete = useCallback(
-    (splitId: string) => {
+    (splitId: string, owedLeft: string | null) => {
       void triggerHaptic('warning');
       Alert.alert(
         I18n.t('transactions.settleUp.remove_bill_title'),
-        I18n.t('transactions.settleUp.remove_bill_message'),
+        // Remove clears only what is still owed; part payments stay recorded.
+        owedLeft
+          ? I18n.t('transactions.settleUp.remove_rest_message', { owed: owedLeft })
+          : I18n.t('transactions.settleUp.remove_bill_message'),
         [
           { text: I18n.t('common.cancel'), style: 'cancel' },
           {
@@ -239,7 +242,12 @@ export function SettleUpShareList<T extends SettleUpShare>({
           }
         >
           <Pressable
-            onPress={() => handleDelete(share.splitId)}
+            onPress={() =>
+              handleDelete(
+                share.splitId,
+                payments.length > 0 ? formatCurrency(share.amount, symbol) : null,
+              )
+            }
             hitSlop={8}
             accessibilityRole="button"
             className="flex-row items-center gap-1.5 py-1.5 pr-2 active:opacity-60"

@@ -827,6 +827,8 @@ const fr = {
       paid_on: 'Payé le {{date}}',
       paid_in_payments: '{{count}} paiements · dernier le {{date}}',
       payback_group: '{{count}} remboursements',
+      remove_rest_message:
+        'Cela efface les {{owed}} encore dus. Ce qui a déjà été remboursé reste enregistré.',
       share_of_total: 'sur {{total}}',
       share_paid: '{{paid}} remboursés',
       bill_paid_progress: '{{paid}} sur {{total}} remboursés',

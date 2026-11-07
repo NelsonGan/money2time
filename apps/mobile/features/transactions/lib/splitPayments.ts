@@ -187,3 +187,48 @@ export function evenOwedAmounts(owed: number, paidBack: readonly number[]): numb
     active = active.filter((index) => !covered.includes(index));
   }
 }
+
+export interface ShareHandover {
+  /** The part payment that becomes the share's first row. */
+  newRootId: string;
+  /** The other part payments, now pointing at the new first row. */
+  repointIds: string[];
+}
+
+/**
+ * When a share's first row goes (Remove on what is still owed, or an edit that
+ * drops it), its part payments would point at a deleted row: still grouped by
+ * that id here, but a ledger copy drops a reference to a row it does not copy
+ * and would split them into separate shares. The oldest part takes over as the
+ * first row instead. Null when the row is not a share's first row or has no
+ * parts.
+ */
+export function planShareHandover(
+  splits: readonly TransactionSplit[],
+  removedId: string,
+): ShareHandover | null {
+  const removed = splits.find((split) => split.id === removedId);
+  if (!removed || removed.partOfSplitId) return null;
+  const parts = splits
+    .filter((split) => split.id !== removedId && split.partOfSplitId === removedId)
+    .sort((a, b) =>
+      a.createdAt === b.createdAt ? a.id.localeCompare(b.id) : a.createdAt < b.createdAt ? -1 : 1,
+    );
+  const [first, ...rest] = parts;
+  if (!first) return null;
+  return { newRootId: first.id, repointIds: rest.map((split) => split.id) };
+}
+
+/** Splits with `handover` applied. */
+export function applyShareHandover(
+  splits: readonly TransactionSplit[],
+  handover: ShareHandover,
+): TransactionSplit[] {
+  return splits.map((split) =>
+    split.id === handover.newRootId
+      ? { ...split, partOfSplitId: null }
+      : handover.repointIds.includes(split.id)
+        ? { ...split, partOfSplitId: handover.newRootId }
+        : split,
+  );
+}

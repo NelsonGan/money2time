@@ -19,7 +19,7 @@ import {
 } from '~/components/navigation/BottomNavMinimize';
 import { Text, TimeValueInline } from '~/components/ui';
 import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
-import { useApp } from '~/context/AppContext';
+import { useApp, usePaybackIndex } from '~/context/AppContext';
 import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
 import { PaybackGroupRow } from '~/features/transactions/components/PaybackGroupRow';
 import { TransactionItem } from '~/features/transactions/components/TransactionItem';
@@ -37,7 +37,6 @@ import {
   type ReorderUpdate,
   reorderUpdatesForDrag,
 } from '~/features/transactions/lib/reorderTransactionDate';
-import { usePaybackIndex } from '~/features/transactions/lib/usePaybackIndex';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -703,17 +702,8 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
     [baseBottomPadding, contentPaddingHorizontal, contentPaddingTop, hasTrailingSpacer],
   );
 
-  // Paybacks fold per bill and day (see PaybackGroupRow); these are the open ones.
+  // Paybacks are tinted, and fold per bill and day (see PaybackGroupRow).
   const paybackIndex = usePaybackIndex();
-  const [openPaybackGroups, setOpenPaybackGroups] = useState<ReadonlySet<string>>(() => new Set());
-  const togglePaybackGroup = useCallback((key: string) => {
-    setOpenPaybackGroups((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
-  }, []);
 
   const keyExtractor = useCallback((item: ActivityRow) => item.id, []);
   const getItemType = useCallback(
@@ -797,15 +787,16 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
                   String(disableItemAnimations ? entryIndex : entry.transaction.id),
                 );
               }
-              const groupKey = `${item.dayKey}:${entry.billId}`;
               return (
                 <PaybackGroupRow
-                  key={`paybacks:${groupKey}`}
+                  key={`paybacks:${item.dayKey}:${entry.billId}`}
                   billTitle={entry.billTitle}
                   personNames={entry.personNames}
                   transactions={entry.transactions}
-                  expanded={openPaybackGroups.has(groupKey)}
-                  onToggle={() => togglePaybackGroup(groupKey)}
+                  forceOpen={
+                    highlightedId != null &&
+                    entry.transactions.some((tx) => tx.id === highlightedId)
+                  }
                   compact={compactItems}
                   settings={displaySettings}
                 >
@@ -845,9 +836,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
       isTimeMode,
       measureDayCell,
       onToggleDaySelection,
-      openPaybackGroups,
       paybackIndex,
-      togglePaybackGroup,
       onTransactionLongPress,
       onTransactionPress,
       onTransactionSplitBadgePress,

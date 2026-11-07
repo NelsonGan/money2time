@@ -800,6 +800,8 @@ const en = {
       paid_on: 'Paid {{date}}',
       paid_in_payments: '{{count}} payments · last {{date}}',
       payback_group: '{{count}} paybacks',
+      remove_rest_message:
+        'This clears the {{owed}} they still owe. What they already paid back stays recorded.',
       share_of_total: 'of {{total}}',
       share_paid: '{{paid}} paid back',
       bill_paid_progress: '{{paid}} of {{total}} paid back',

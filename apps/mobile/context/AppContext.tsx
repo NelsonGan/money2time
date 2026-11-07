@@ -59,13 +59,20 @@ import { withEntryStamp } from '~/features/sharedLedgers/lib/entryStamp';
 import { invalidateLedgerPeople } from '~/features/sharedLedgers/lib/ledgerPeople';
 import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accountEntryGate';
 import {
+  indexPaybacks,
+  type PaybackLink,
+  samePaybackIndex,
+} from '~/features/transactions/lib/paybackGroups';
+import {
   buildPaybackTransferNote,
   countUnpaidSplitBills,
 } from '~/features/transactions/lib/settleUp';
 import { rescaleSplitAdjustedAmounts } from '~/features/transactions/lib/splitAmountSnapshot';
 import {
+  applyShareHandover,
   applyUnpaidMerge,
   cutPartPayment,
+  planShareHandover,
   planSplitPayment,
   planUnpaidMerge,
   splitShareKey,
@@ -711,6 +718,17 @@ interface CreateLedgerInput extends LedgerInput {
 
 const AppContext = createContext<AppContextValue | null>(null);
 const TransactionsContext = createContext<TransactionsContextValue | null>(null);
+const EMPTY_PAYBACK_INDEX: ReadonlyMap<string, PaybackLink> = new Map();
+const PaybackIndexContext = createContext<ReadonlyMap<string, PaybackLink>>(EMPTY_PAYBACK_INDEX);
+
+/**
+ * Every payback transfer (a split's Mark paid or part payment into another
+ * account) by id, with its bill. From all transactions, since a payback's bill
+ * can be in another month; its identity holds while the paybacks stay the same.
+ */
+export function usePaybackIndex(): ReadonlyMap<string, PaybackLink> {
+  return useContext(PaybackIndexContext);
+}
 const EMPTY_ACCOUNT_TRANSACTIONS: TransactionWithRelations[] = [];
 const EMPTY_ALBUM_STATS: AlbumStats = {
   totalSpent: 0,
@@ -835,6 +853,67 @@ function optimisticPaybackTransfer(input: {
   };
 }
 
+/** The transfer a cross-account payback writes (see optimisticPaybackTransfer). */
+function createPaybackTransferInDb(
+  id: string,
+  input: {
+    amount: number;
+    currency: string;
+    date: string;
+    fromAccountId: string | null;
+    toAccountId: string;
+    note: string | null;
+    memberId: string | null;
+    createdBy?: string | null;
+  },
+): void {
+  transactionsRepository.createWithId(id, {
+    type: 'transfer',
+    amount: input.amount,
+    currency: input.currency,
+    date: input.date,
+    fromAccountId: input.fromAccountId,
+    toAccountId: input.toAccountId,
+    accountId: null,
+    categoryId: null,
+    note: input.note,
+    sentiment: 'neutral',
+    ...(input.createdBy !== undefined ? { createdBy: input.createdBy } : null),
+    memberId: input.memberId,
+  });
+}
+
+/**
+ * A friend's payback of `amount` on the bill `parent`: the expense drops by it
+ * (Mark paid and part payments alike), and a payback into another account
+ * than the bill's (`transferTxId` set) writes its transfer.
+ */
+function writePaybackInDb(
+  parent: TransactionWithRelations,
+  input: {
+    amount: number;
+    toAccountId: string;
+    transferTxId: string | null;
+    date: string;
+    note: string | null;
+  },
+): void {
+  transactionsRepository.update(
+    parent.id,
+    rescaleSplitAdjustedAmounts(parent, parent.amount - input.amount),
+  );
+  if (!input.transferTxId) return;
+  createPaybackTransferInDb(input.transferTxId, {
+    amount: input.amount,
+    currency: parent.currency,
+    date: input.date,
+    fromAccountId: parent.accountId,
+    toAccountId: input.toAccountId,
+    note: input.note,
+    memberId: parent.memberId,
+  });
+}
+
 /**
  * Optimistic splits after the rows `reopenedIds` turned unpaid: each is folded
  * into an unpaid row of the same share, so a share paid in parts keeps one
@@ -849,6 +928,37 @@ function foldReopenedSplits(
   for (const id of reopenedIds) {
     const merge = planUnpaidMerge(next, id);
     if (merge) next = applyUnpaidMerge(next, merge, at);
+  }
+  return next;
+}
+
+/**
+ * Soft-deletes a split row; when it was a share's first row, its part payments
+ * get a new first row (`planShareHandover`) so they stay one share.
+ */
+function softDeleteSplitInDb(split: TransactionSplit): void {
+  const handover = planShareHandover(
+    transactionSplitsRepository.listByTransactionId(split.transactionId),
+    split.id,
+  );
+  transactionSplitsRepository.softDelete(split.id);
+  if (!handover) return;
+  transactionSplitsRepository.update(handover.newRootId, { partOfSplitId: null });
+  for (const id of handover.repointIds) {
+    transactionSplitsRepository.update(id, { partOfSplitId: handover.newRootId });
+  }
+}
+
+/** Optimistic splits without the rows `removedIds`, handing over their shares. */
+function removeSplitsKeepingShares(
+  splits: TransactionSplit[],
+  removedIds: readonly string[],
+): TransactionSplit[] {
+  let next = splits;
+  for (const id of removedIds) {
+    const handover = planShareHandover(next, id);
+    next = next.filter((split) => split.id !== id);
+    if (handover) next = applyShareHandover(next, handover);
   }
   return next;
 }
@@ -3530,45 +3640,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         };
       });
 
-      const optimisticTransfers: TransactionWithRelations[] = transfersToCreate.map((t) => ({
-        id: t.id,
-        instalmentRuleId: null,
-        instalmentNumber: null,
-        dayOrder: null,
-        type: 'transfer',
-        amount: t.amount,
-        currency: normalizedInput.currency,
-        reportingCurrency: null,
-        reportingAmount: null,
-        fxRate: null,
-        toAmount: null,
-        accountAmount: null,
-        date: normalizedInput.date,
-        accountId: null,
-        fromAccountId: normalizedInput.accountId ?? null,
-        toAccountId: t.toAccountId,
-        categoryId: null,
-        note: t.note,
-        details: null,
-        receiptUri: null,
-        sentiment: 'neutral',
-        ...NO_REIMBURSEMENT,
-        countsAsExpense: false,
-        createdBy: normalizedInput.createdBy,
-        memberId: normalizedInput.memberId,
-        recurrencePattern: 'none',
-        recurrenceInterval: 1,
-        recurrenceEndDate: null,
-        recurrenceParentId: null,
-        createdAt: now,
-        updatedAt: now,
-        deletedAt: null,
-        ...resolveRelationNames({
-          fromAccountId: normalizedInput.accountId,
-          toAccountId: t.toAccountId,
-        }),
-      }));
-
       const optimisticParent: TransactionWithRelations = {
         id: txId,
         instalmentRuleId: null,
@@ -3607,6 +3678,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         splits: optimisticSplits,
         splitsSummary: summarizeSplits(optimisticSplits),
       };
+      const optimisticTransfers = transfersToCreate.map((t) =>
+        optimisticPaybackTransfer({
+          id: t.id,
+          amount: t.amount,
+          parent: optimisticParent,
+          toAccountId: t.toAccountId,
+          date: normalizedInput.date,
+          note: t.note,
+          at: now,
+          names: resolveRelationNames({
+            fromAccountId: normalizedInput.accountId,
+            toAccountId: t.toAccountId,
+          }),
+        }),
+      );
       setTransactions((prev) =>
         insertTransactionsByDateDesc(prev, [optimisticParent, ...optimisticTransfers]),
       );
@@ -3620,19 +3706,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             setAlbums(albumsRepository.list());
           }
           for (const t of transfersToCreate) {
-            transactionsRepository.createWithId(t.id, {
-              type: 'transfer',
+            createPaybackTransferInDb(t.id, {
               amount: t.amount,
               currency: normalizedInput.currency,
               date: normalizedInput.date,
               fromAccountId: normalizedInput.accountId ?? null,
               toAccountId: t.toAccountId,
-              accountId: null,
-              categoryId: null,
               note: t.note,
-              sentiment: 'neutral',
               createdBy: normalizedInput.createdBy,
-              memberId: normalizedInput.memberId,
+              memberId: normalizedInput.memberId ?? null,
             });
           }
           // Persist each split with the same id used in the optimistic state so
@@ -3717,16 +3799,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             }
             return next;
           });
-          // A share's part payments carry the name its first row has now.
+          // A share's paid part payments carry the name its first row has now.
           const nameByShare = new Map(
             merged.filter((s) => !s.partOfSplitId).map((s) => [s.id, s.personName]),
           );
           const named = merged.map((s) =>
-            s.partOfSplitId && nameByShare.has(s.partOfSplitId)
+            s.partOfSplitId && s.paidAt && nameByShare.has(s.partOfSplitId)
               ? { ...s, personName: nameByShare.get(s.partOfSplitId) ?? null }
               : s,
           );
-          return { ...tx, splits: named, splitsSummary: summarizeSplits(named) };
+          // A dropped first row hands its share to its oldest part payment.
+          const removedIds = (tx.splits ?? [])
+            .filter((s) => !optimisticSplits.some((next) => next.id === s.id))
+            .map((s) => s.id);
+          const kept = removedIds.length
+            ? removeSplitsKeepingShares(
+                [...named, ...(tx.splits ?? []).filter((s) => removedIds.includes(s.id))],
+                removedIds,
+              )
+            : named;
+          return { ...tx, splits: kept, splitsSummary: summarizeSplits(kept) };
         }),
       );
       runDeferredWrite(() => {
@@ -3737,7 +3829,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           // Soft-delete removed splits.
           existingPersisted
             .filter((s) => !nextIds.has(s.id))
-            .forEach((s) => transactionSplitsRepository.softDelete(s.id));
+            .forEach((s) => softDeleteSplitInDb(s));
           // Upsert the rest.
           const existingMap = new Map(existingPersisted.map((s) => [s.id, s]));
           optimisticSplits.forEach((next) => {
@@ -3908,25 +4000,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           if (!paybackAccountId) return;
           const sameAccount = paybackAccountId === parent.accountId;
           const usedTransferTxId = sameAccount ? null : transferTxId;
-          transactionsRepository.update(
-            parent.id,
-            rescaleSplitAdjustedAmounts(parent, parent.amount - split.amount),
-          );
-          if (!sameAccount && usedTransferTxId) {
-            transactionsRepository.createWithId(usedTransferTxId, {
-              type: 'transfer',
-              amount: split.amount,
-              currency: parent.currency,
-              date,
-              fromAccountId: parent.accountId,
-              toAccountId: paybackAccountId,
-              accountId: null,
-              categoryId: null,
-              note: explicitNote ?? buildPaybackTransferNote(split.personName, parent.note),
-              sentiment: 'neutral',
-              memberId: parent.memberId,
-            });
-          }
+          writePaybackInDb(parent, {
+            amount: split.amount,
+            toAccountId: paybackAccountId,
+            transferTxId: usedTransferTxId,
+            date,
+            note: explicitNote ?? buildPaybackTransferNote(split.personName, parent.note),
+          });
           transactionSplitsRepository.update(splitId, {
             paybackAccountId,
             paidAt: paidAtIso,
@@ -4047,25 +4127,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           if (!paybackAccountId) return;
           const sameAccount = paybackAccountId === parent.accountId;
           getSQLite().withTransactionSync(() => {
-            transactionsRepository.update(
-              parent.id,
-              rescaleSplitAdjustedAmounts(parent, parent.amount - rowPlan.amount),
-            );
-            if (!sameAccount) {
-              transactionsRepository.createWithId(transferTxId, {
-                type: 'transfer',
-                amount: rowPlan.amount,
-                currency: parent.currency,
-                date,
-                fromAccountId: parent.accountId,
-                toAccountId: paybackAccountId,
-                accountId: null,
-                categoryId: null,
-                note: buildPaybackTransferNote(split.personName, parent.note),
-                sentiment: 'neutral',
-                memberId: parent.memberId,
-              });
-            }
+            writePaybackInDb(parent, {
+              amount: rowPlan.amount,
+              toAccountId: paybackAccountId,
+              transferTxId: sameAccount ? null : transferTxId,
+              date,
+              note: buildPaybackTransferNote(split.personName, parent.note),
+            });
             transactionSplitsRepository.update(splitId, {
               amount: rowPlan.remaining,
               paybackAccountId,
@@ -4130,18 +4198,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         try {
           const split = transactionSplitsRepository.findById(splitId);
           if (!split || !split.paidAt) return;
-          const parent = transactionsRepository.getById(split.transactionId);
-          if (parent) {
-            transactionsRepository.update(
-              parent.id,
-              rescaleSplitAdjustedAmounts(parent, parent.amount + split.amount),
-            );
-          }
-          if (split.paidTransactionId) {
-            transactionsRepository.softDelete(split.paidTransactionId);
-          }
-          transactionSplitsRepository.markUnpaid(splitId);
-          foldReopenedSplitInDb(splitId);
+          // One transaction: undoing a part payment also folds it back into
+          // what is owed, and a half-done undo would leave the share owing on
+          // two rows.
+          getSQLite().withTransactionSync(() => {
+            const parent = transactionsRepository.getById(split.transactionId);
+            if (parent) {
+              transactionsRepository.update(
+                parent.id,
+                rescaleSplitAdjustedAmounts(parent, parent.amount + split.amount),
+              );
+            }
+            if (split.paidTransactionId) {
+              transactionsRepository.softDelete(split.paidTransactionId);
+            }
+            transactionSplitsRepository.markUnpaid(splitId);
+            foldReopenedSplitInDb(splitId);
+          });
           void trackEvent(AnalyticsEvents.SPLIT_MARKED_UNPAID, {});
         } catch {
           // ignore
@@ -4193,7 +4266,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const filtered = transferTxId ? prev.filter((tx) => tx.id !== transferTxId) : prev;
         return filtered.map((tx) => {
           if (tx.id !== parent.id) return tx;
-          const updatedSplits = (tx.splits ?? []).filter((s) => s.id !== splitId);
+          const updatedSplits = removeSplitsKeepingShares(tx.splits ?? [], [splitId]);
           return {
             ...tx,
             ...rescaleSplitAdjustedAmounts(tx, tx.amount + restoreAmount),
@@ -4207,19 +4280,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         try {
           const split = transactionSplitsRepository.findById(splitId);
           if (!split) return;
-          if (split.paidAt) {
-            const parent = transactionsRepository.getById(split.transactionId);
-            if (parent) {
-              transactionsRepository.update(
-                parent.id,
-                rescaleSplitAdjustedAmounts(parent, parent.amount + split.amount),
-              );
+          getSQLite().withTransactionSync(() => {
+            if (split.paidAt) {
+              const parent = transactionsRepository.getById(split.transactionId);
+              if (parent) {
+                transactionsRepository.update(
+                  parent.id,
+                  rescaleSplitAdjustedAmounts(parent, parent.amount + split.amount),
+                );
+              }
+              if (split.paidTransactionId) {
+                transactionsRepository.softDelete(split.paidTransactionId);
+              }
             }
-            if (split.paidTransactionId) {
-              transactionsRepository.softDelete(split.paidTransactionId);
-            }
-          }
-          transactionSplitsRepository.softDelete(splitId);
+            softDeleteSplitInDb(split);
+          });
         } catch {
           // ignore
         }
@@ -6070,6 +6145,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [transactions, filteredTransactions, accountBalances, transactionFilters, activeAccountFilter],
   );
 
+  // Every payback transfer by id, for the activity list's tint and folding.
+  // Built once here (not per list) and kept in its own context, whose value
+  // only changes when the paybacks do, so lists do not redraw on every write.
+  const paybackIndexRef = useRef<ReadonlyMap<string, PaybackLink>>(EMPTY_PAYBACK_INDEX);
+  const paybackIndex = useMemo(() => {
+    const next = indexPaybacks(transactions);
+    if (samePaybackIndex(paybackIndexRef.current, next)) return paybackIndexRef.current;
+    paybackIndexRef.current = next;
+    return next;
+  }, [transactions]);
+
   if (!settings) {
     if (isLoading) {
       return null;
@@ -6106,7 +6192,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   return (
     <AppContext.Provider value={value}>
       <TransactionsContext.Provider value={transactionsValue}>
-        {children}
+        <PaybackIndexContext.Provider value={paybackIndex}>{children}</PaybackIndexContext.Provider>
       </TransactionsContext.Provider>
     </AppContext.Provider>
   );

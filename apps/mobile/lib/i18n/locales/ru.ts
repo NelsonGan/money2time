@@ -824,6 +824,8 @@ const ru = {
       paid_on: 'Оплачено {{date}}',
       paid_in_payments: 'Платежей: {{count}} · последний {{date}}',
       payback_group: 'Возвратов: {{count}}',
+      remove_rest_message:
+        'Оставшийся долг {{owed}} будет снят. Уже возвращённое останется в записях.',
       share_of_total: 'из {{total}}',
       share_paid: 'Возвращено {{paid}}',
       bill_paid_progress: 'Возвращено {{paid}} из {{total}}',

@@ -1,5 +1,5 @@
 import { ChevronDown, ChevronUp } from 'lucide-react-native';
-import React, { type ReactNode } from 'react';
+import React, { type ReactNode, useState } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { Text } from '~/components/ui';
@@ -15,8 +15,8 @@ interface PaybackGroupRowProps {
   billTitle: string | null;
   personNames: string[];
   transactions: TransactionWithRelations[];
-  expanded: boolean;
-  onToggle: () => void;
+  /** Open regardless of the toggle (it holds the row the list is flashing). */
+  forceOpen: boolean;
   compact: boolean;
   settings: TransactionDisplaySettings;
   /** The paybacks themselves, shown under the row while it is open. */
@@ -33,13 +33,16 @@ export function PaybackGroupRow({
   billTitle,
   personNames,
   transactions,
-  expanded,
-  onToggle,
+  forceOpen,
   compact,
   settings,
   children,
 }: PaybackGroupRowProps) {
   const themeColors = useThemeColors();
+  // Its own state, so opening one group redraws only this row. The list keys
+  // the row by day and bill, so a recycled cell starts closed.
+  const [open, setOpen] = useState(false);
+  const expanded = open || forceOpen;
   const total = normalizeMoneyAmount(transactions.reduce((sum, tx) => sum + tx.amount, 0));
   const title = billTitle ?? I18n.t('transactions.settleUp.untitled_bill');
   const subtitle = [
@@ -55,7 +58,7 @@ export function PaybackGroupRow({
       <Pressable
         onPress={() => {
           void triggerHaptic('selection');
-          onToggle();
+          setOpen(!expanded);
         }}
         accessibilityRole="button"
         accessibilityState={{ expanded }}

@@ -39,9 +39,9 @@ import { recentSplitPersonNames } from '~/features/transactions/lib/settleUp';
 import {
   applyPercent,
   nextEditableAmountIndex,
+  spreadOverShares,
   sumUnpaidRows,
 } from '~/features/transactions/lib/splitMath';
-import { evenOwedAmounts } from '~/features/transactions/lib/splitPayments';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -59,9 +59,9 @@ export interface SplitDraft {
   /** Set once a friend marks paid. paidTransactionId is null for same-account paybacks
    * (no transfer tx is created — the parent expense is just reduced). */
   paid?: { paidAt: string; paidTransactionId: string | null };
-  /** An unpaid row of a share paid in part: what the share has paid so far.
-   *  Split evenly counts it, so the share still comes out even. */
-  paidBack?: number;
+  /** The share this row belongs to (`splitShareKey`); a share paid in parts
+   *  has paid rows beside its unpaid one. Absent on a row added here. */
+  shareKey?: string;
 }
 
 interface SplitBillModalProps {
@@ -151,20 +151,7 @@ function autoBalanceSelf(rows: SplitDraft[], total: number, changedIndex?: numbe
  *  in part owes its even portion less what it paid. */
 function distributeEvenlyAcrossUnpaid(rows: SplitDraft[], total: number): SplitDraft[] {
   if (rows.length === 0) return rows;
-  const unpaidIndices: number[] = [];
-  rows.forEach((r, i) => {
-    if (!r.paid) unpaidIndices.push(i);
-  });
-  if (unpaidIndices.length === 0) return rows;
-  const portions = evenOwedAmounts(
-    total,
-    unpaidIndices.map((i) => rows[i]?.paidBack ?? 0),
-  );
-  return rows.map((row, idx) => {
-    const slot = unpaidIndices.indexOf(idx);
-    if (slot < 0) return row;
-    return { ...row, amount: (portions[slot] ?? 0).toFixed(2) };
-  });
+  return spreadOverShares(rows, total, () => true);
 }
 
 /** Mirror of autoBalanceSelf: when the user edits Me, redistribute the
@@ -175,24 +162,8 @@ function autoBalanceFriends(rows: SplitDraft[], total: number): SplitDraft[] {
   if (selfIndex < 0) return rows;
   const selfAmount = Number(rows[selfIndex]?.amount);
   const safeSelf = Number.isFinite(selfAmount) ? Math.max(0, selfAmount) : 0;
-
-  const unpaidFriendIndices: number[] = [];
-  rows.forEach((r, i) => {
-    if (i === selfIndex || r.paid) return;
-    unpaidFriendIndices.push(i);
-  });
-  if (unpaidFriendIndices.length === 0) return rows;
-
   const remaining = Math.max(0, Math.round((total - safeSelf) * 100) / 100);
-  const portions = evenOwedAmounts(
-    remaining,
-    unpaidFriendIndices.map((i) => rows[i]?.paidBack ?? 0),
-  );
-  return rows.map((row, i) => {
-    const slot = unpaidFriendIndices.indexOf(i);
-    if (slot < 0) return row;
-    return { ...row, amount: (portions[slot] ?? 0).toFixed(2) };
-  });
+  return spreadOverShares(rows, remaining, (_row, index) => index !== selfIndex);
 }
 
 /** Convert the modal's `SplitDraft[]` into the `SplitDraftInput[]` shape that

@@ -3,6 +3,7 @@ import {
   applyPercent,
   nextEditableAmountIndex,
   scaleToTarget,
+  spreadOverShares,
   sumUnpaidRows,
 } from '~/features/transactions/lib/splitMath';
 
@@ -178,5 +179,47 @@ describe('applyPercent rounding', () => {
     const result = applyPercent(rows, 5)!;
     expect(sumUnpaidRows(result)).toBe(1.04);
     expect(result.map((r) => r.amount)).toEqual(['0.35', '0.35', '0.34']);
+  });
+});
+
+describe('spreadOverShares', () => {
+  const shareRow = (
+    amount: string,
+    extra: Partial<{ isSelf: boolean; paid: object; shareKey: string }>,
+  ) => ({
+    amount,
+    isSelf: false,
+    ...extra,
+  });
+
+  it('keeps shares even when one is part paid', () => {
+    // RM3,000 between three; Aisha paid RM300 of hers, so RM2,700 is owed.
+    const rows = [
+      shareRow('1000', { isSelf: true }),
+      shareRow('700', { shareKey: 'a' }),
+      shareRow('300', { shareKey: 'a', paid: {} }),
+      shareRow('1000', { shareKey: 'b' }),
+    ];
+    expect(spreadOverShares(rows, 2700, () => true).map((r) => r.amount)).toEqual([
+      '1000.00',
+      '700.00',
+      '300',
+      '1000.00',
+    ]);
+  });
+
+  it('puts a share owing on two rows on its first row only', () => {
+    const rows = [
+      shareRow('0', { isSelf: true }),
+      shareRow('700', { shareKey: 'a' }),
+      shareRow('300', { shareKey: 'a' }),
+      shareRow('1000', { shareKey: 'b' }),
+    ];
+    expect(spreadOverShares(rows, 2000, () => true).map((r) => r.amount)).toEqual([
+      '666.67',
+      '666.67',
+      '0.00',
+      '666.66',
+    ]);
   });
 });

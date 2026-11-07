@@ -823,6 +823,7 @@ const tr = {
       paid_on: '{{date}} tarihinde ödendi',
       paid_in_payments: '{{count}} ödeme · son {{date}}',
       payback_group: '{{count}} geri ödeme',
+      remove_rest_message: 'Kalan {{owed}} borç silinir. Geri ödenmiş kısım kayıtlı kalır.',
       share_of_total: '/ {{total}}',
       share_paid: '{{paid}} geri ödendi',
       bill_paid_progress: '{{total}} tutarın {{paid}} kadarı geri ödendi',

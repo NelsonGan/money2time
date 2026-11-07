@@ -824,6 +824,8 @@ const pt = {
       paid_on: 'Pago em {{date}}',
       paid_in_payments: '{{count}} pagamentos · último {{date}}',
       payback_group: '{{count}} devoluções',
+      remove_rest_message:
+        'Isso apaga os {{owed}} ainda devidos. O que já foi devolvido continua registrado.',
       share_of_total: 'de {{total}}',
       share_paid: '{{paid}} devolvido',
       bill_paid_progress: '{{paid}} de {{total}} devolvido',

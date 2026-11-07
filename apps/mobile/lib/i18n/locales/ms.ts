@@ -829,6 +829,8 @@ const ms = {
       paid_on: 'Dibayar {{date}}',
       paid_in_payments: '{{count}} bayaran · terakhir {{date}}',
       payback_group: '{{count}} bayaran balik',
+      remove_rest_message:
+        'Ini mengosongkan {{owed}} yang masih terhutang. Yang sudah dibayar balik kekal direkodkan.',
       share_of_total: 'daripada {{total}}',
       share_paid: '{{paid}} sudah dibayar balik',
       bill_paid_progress: '{{paid}} daripada {{total}} sudah dibayar balik',

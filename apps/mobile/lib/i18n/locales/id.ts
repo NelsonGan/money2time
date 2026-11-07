@@ -826,6 +826,8 @@ const id = {
       paid_on: 'Dibayar {{date}}',
       paid_in_payments: '{{count}} pembayaran · terakhir {{date}}',
       payback_group: '{{count}} pembayaran kembali',
+      remove_rest_message:
+        'Ini menghapus {{owed}} yang masih terutang. Yang sudah dibayar tetap tercatat.',
       share_of_total: 'dari {{total}}',
       share_paid: '{{paid}} sudah dibayar',
       bill_paid_progress: '{{paid}} dari {{total}} sudah dibayar',

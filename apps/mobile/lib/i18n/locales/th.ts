@@ -821,6 +821,7 @@ const th = {
       paid_on: 'จ่ายเมื่อ {{date}}',
       paid_in_payments: '{{count}} ครั้ง · ล่าสุด {{date}}',
       payback_group: 'คืนเงิน {{count}} ครั้ง',
+      remove_rest_message: 'จะล้างยอดค้าง {{owed}} ส่วนที่คืนมาแล้วยังบันทึกอยู่',
       share_of_total: 'จาก {{total}}',
       share_paid: 'คืนแล้ว {{paid}}',
       bill_paid_progress: 'คืนแล้ว {{paid}} จาก {{total}}',

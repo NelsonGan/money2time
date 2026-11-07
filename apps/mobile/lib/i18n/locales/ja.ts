@@ -823,6 +823,7 @@ const ja = {
       paid_on: '{{date}} に支払い',
       paid_in_payments: '{{count}} 回 · 最終 {{date}}',
       payback_group: '返済 {{count}} 件',
+      remove_rest_message: '未払いの {{owed}} を取り消します。すでに返済された分は記録に残ります。',
       share_of_total: '{{total}} 中',
       share_paid: '{{paid}} 返済済み',
       bill_paid_progress: '{{total}} 中 {{paid}} 返済済み',

@@ -829,6 +829,8 @@ const de = {
       paid_on: 'Bezahlt am {{date}}',
       paid_in_payments: '{{count}} Zahlungen · zuletzt {{date}}',
       payback_group: '{{count}} Rückzahlungen',
+      remove_rest_message:
+        'Damit entfallen die noch offenen {{owed}}. Was bereits zurückgezahlt wurde, bleibt erfasst.',
       share_of_total: 'von {{total}}',
       share_paid: '{{paid}} zurückgezahlt',
       bill_paid_progress: '{{paid}} von {{total}} zurückgezahlt',

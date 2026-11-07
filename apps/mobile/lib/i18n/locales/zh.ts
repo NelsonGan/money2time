@@ -790,6 +790,7 @@ const zh = {
       paid_on: '{{date}} 已还',
       paid_in_payments: '{{count}} 次 · 最近 {{date}}',
       payback_group: '{{count}} 笔还款',
+      remove_rest_message: '这会清除尚欠的 {{owed}}，已还的部分仍会保留记录。',
       share_of_total: '共 {{total}}',
       share_paid: '已还 {{paid}}',
       bill_paid_progress: '已还 {{paid}} / {{total}}',

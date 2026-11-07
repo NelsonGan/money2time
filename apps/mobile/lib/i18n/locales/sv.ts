@@ -824,6 +824,8 @@ const sv = {
       paid_on: 'Betalt {{date}}',
       paid_in_payments: '{{count}} betalningar · senast {{date}}',
       payback_group: '{{count}} återbetalningar',
+      remove_rest_message:
+        'Det tar bort de {{owed}} som fortfarande är skyldiga. Det som redan betalats tillbaka finns kvar.',
       share_of_total: 'av {{total}}',
       share_paid: '{{paid}} återbetalt',
       bill_paid_progress: '{{paid}} av {{total}} återbetalt',

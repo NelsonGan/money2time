@@ -826,6 +826,8 @@ const nl = {
       paid_on: 'Betaald op {{date}}',
       paid_in_payments: '{{count}} betalingen · laatst {{date}}',
       payback_group: '{{count}} terugbetalingen',
+      remove_rest_message:
+        'Hiermee vervalt de {{owed}} die nog open staat. Wat al is terugbetaald, blijft vastgelegd.',
       share_of_total: 'van {{total}}',
       share_paid: '{{paid}} terugbetaald',
       bill_paid_progress: '{{paid}} van {{total}} terugbetaald',

@@ -828,6 +828,8 @@ const it = {
       paid_on: 'Pagato il {{date}}',
       paid_in_payments: '{{count}} pagamenti · ultimo {{date}}',
       payback_group: '{{count}} rimborsi',
+      remove_rest_message:
+        'Così si cancellano i {{owed}} ancora dovuti. Quanto già restituito resta registrato.',
       share_of_total: 'di {{total}}',
       share_paid: '{{paid}} restituiti',
       bill_paid_progress: '{{paid}} di {{total}} restituiti',
