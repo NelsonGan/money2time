@@ -53,20 +53,21 @@ List the affected image ids. That list drives everything below.
 
 Captures go into the committed binary, so they have to look deliberate.
 
-1. `device_list`, then `device_open` the Money2Time iPhone 18 Pro so it shows in T3 Code's
-   Device panel, and use the `agent-device` command it returns for everything below (the
+1. `device_list`, then `device_open` `simlock:ios:iPhone 18 Pro` from the Simlock pool so it
+   shows in T3 Code's Device panel, and use the `agent-device` command it returns for everything below (the
    shipped frames are iPhone 17 Pro, 1179x2556). Recapturing a subset on a different device is
    fine — marks are normalised — but the frames will not match each other visually, so prefer
    the same device.
 2. Start Metro yourself with `npx expo start --localhost` (see AGENTS.md; tunnel/LAN do not
    work on this machine).
-3. **Demo data, not empty state.** A tutorial of an empty app teaches nothing. The seeded
-   simulator already has accounts, a month of transactions, albums and goals.
+3. **Demo data, not empty state.** A tutorial of an empty app teaches nothing, and a leased
+   device starts empty and signed out. Seed accounts, a month of transactions, albums and
+   goals first: the `nlsn-mock-data` branch's `services/previewData`, copied in temporarily
+   and exposed through a dev-only global (do not commit it).
 4. **Dismiss dev noise first.** The RevenueCat "Invalid API Key" LogBox reopens itself; tap
    Dismiss and re-check before every capture. A red error banner in a shipped frame is a bug report.
 5. **Never capture the photo library, a contact picker, or anything else holding real user
-   data.** The simulator's albums contain the owner's personal photos. Use only synthetic
-   imagery. If a step needs a photo, generate one.
+   data.** Use only synthetic imagery. If a step needs a photo, generate one.
 
 ## 3. Capture
 
