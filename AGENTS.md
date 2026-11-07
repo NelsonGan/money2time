@@ -80,7 +80,7 @@ close yours when you are done. Use these models:
 | Android  | `simlock:android:Pixel 10`          | Android testing (Android 16)              |
 
 **A leased device already has the Money2Time dev client**, built from
-`origin/main` (the normal `com.nelsongan.money2time` app, never M2T Dev),
+`origin/main` (the normal `com.nelsongan.money2time` app),
 signed out and with no data (T3 Code's own note that a pool device starts with
 no apps is generic; `agent-device apps` lists them). It is ready to test: the
 Expo dev menu's intro and floating Tools button are off, photo, camera,
@@ -97,7 +97,7 @@ Money2Time?" prompt. A JS change needs no build after that; a Metro reload picks
 it up. By hand: plain `npx expo start --port <port>` (it works on both
 platforms; `--localhost` binds `::1` only, which Android cannot reach), then
 `money2time://expo-development-client/?url=http%3A%2F%2F127.0.0.1%3A<port>&disableOnboarding=1`
-(`money2time://` works on both platforms in the pool, which has no M2T Dev; the
+(`money2time://` works on both platforms; the
 `com.nelsongan.money2time://` scheme exists on iOS only). A dev client refuses
 a bundle with another runtime version (an empty red box), so a branch that bumps
 the version or changes native code needs its own build: from the worktree, run
