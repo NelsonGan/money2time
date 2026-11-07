@@ -920,6 +920,10 @@ const id = {
       subtitle_edit_balance_adjustment: 'Perbarui jumlah dan akun yang terpengaruh',
       delete_transaction: 'Hapus transaksi',
       delete_confirm: 'Tindakan ini tidak bisa dibatalkan. Lanjutkan?',
+      delete_payback_confirm:
+        'Pembayaran {{name}} kembali ditambahkan ke utangnya untuk tagihan ini. Lanjutkan?',
+      delete_payback_confirm_unnamed:
+        'Pembayaran ini kembali ditambahkan ke sisa utang tagihan ini. Lanjutkan?',
       receipt: {
         label: 'Struk',
         add: 'Tambah',

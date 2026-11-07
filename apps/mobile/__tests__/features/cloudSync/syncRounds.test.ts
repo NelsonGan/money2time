@@ -828,6 +828,20 @@ describe('exchange rates', () => {
     expect(cloudRate('z-typed')).toMatchObject({ rate: 0.95 });
   });
 
+  it("keep a typed rate over an older version's downloaded one with a lower id", async () => {
+    // An older version still sends its downloaded rates. Its row's id sorts
+    // first, which would win a clash between two synced rows and retire the
+    // rate the user typed here.
+    addRate('z-typed', 'EUR', 'manual', 0.95);
+    await engine.syncNow();
+    putCloudRate('a-old-download', 'EUR', 'api', 0.5, 'rev-old');
+    remoteChanged = true;
+    await engine.syncNow();
+    expect(rateRow('z-typed')).toMatchObject({ rate: 0.95, source: 'manual' });
+    expect(rateRow('a-old-download')).toBeUndefined();
+    expect(cloudRate('z-typed')).toMatchObject({ rate: 0.95 });
+  });
+
   it("leave an older version's downloaded rates out of a copy this phone replaces", async () => {
     addRate('eur', 'EUR', 'api', 0.8);
     addRate('jpy', 'JPY', 'manual', 150);

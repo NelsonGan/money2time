@@ -11,7 +11,8 @@
  * The rows of one share are grouped by {@link splitShareKey}.
  */
 
-import type { TransactionSplit } from '~/types';
+import type { RateTable, TransactionSplit } from '~/types';
+import { convert } from '~/utils/currency';
 import { normalizeMoneyAmount } from '~/utils/formatters';
 
 /** Half a cent: amounts closer than this are the same amount. */
@@ -243,7 +244,12 @@ export function applyShareHandover(
 export function consolidateOwedRows(
   splits: readonly TransactionSplit[],
   updatedAt: string,
+  keepSeparateIds: readonly string[] = [],
 ): { splits: TransactionSplit[]; merges: UnpaidMerge[] } {
+  // Rows the same save is about to mark paid stay as they are: merging one away
+  // (or growing it to the whole share) before Mark paid runs would pay the
+  // wrong amount, or nothing at all.
+  const keepSeparate = new Set(keepSeparateIds);
   let next = [...splits];
   const merges: UnpaidMerge[] = [];
   for (const split of splits) {
@@ -251,8 +257,61 @@ export function consolidateOwedRows(
     if (!next.some((row) => row.id === split.id)) continue;
     const merge = planUnpaidMerge(next, split.id);
     if (!merge) continue;
+    if (keepSeparate.has(merge.keepId) || keepSeparate.has(merge.dropId)) continue;
     merges.push(merge);
     next = applyUnpaidMerge(next, merge, updatedAt);
   }
   return { splits: next, merges };
+}
+
+/** The amounts of the transfer a payback into another account writes. */
+export interface PaybackTransferAmounts {
+  /** What leaves the bill's account, in that account's currency. */
+  amount: number;
+  /** The bill account's currency, which `amount` is in. */
+  currency: string;
+  /** What reaches the payback account in its own currency; null when it is the same currency. */
+  toAmount: number | null;
+}
+
+/**
+ * The transfer for a friend's payback of `share` (in the bill's currency).
+ *
+ * A transfer's `amount` is in the account it leaves and `toAmount` in the one
+ * it reaches, the way every cross-currency transfer is stored. The bill's
+ * account gives back exactly what the expense stopped costing it: the share
+ * at the bill's own frozen account rate (`billAccountAmount / billAmount`, or
+ * the share itself for a bill without an account snapshot, which balances
+ * count at face value), so that account nets to zero for the payback. The payback account receives the
+ * share itself when it holds the bill's currency, else the amount converted at
+ * today's rate.
+ */
+export function paybackTransferAmounts(input: {
+  share: number;
+  billCurrency: string;
+  billAmount: number;
+  billAccountAmount: number | null;
+  fromCurrency: string;
+  toCurrency: string;
+  rateTable: RateTable;
+}): PaybackTransferAmounts {
+  const { share, billCurrency, fromCurrency, toCurrency, rateTable } = input;
+  let amount: number;
+  if (billCurrency === fromCurrency || input.billAccountAmount == null) {
+    // The account's balance counts the bill at its own amount when it has no
+    // account snapshot, so the payback leaves at that amount too.
+    amount = normalizeMoneyAmount(share);
+  } else if (input.billAmount > 0) {
+    amount = normalizeMoneyAmount((share * input.billAccountAmount) / input.billAmount);
+  } else {
+    amount = convert(share, billCurrency, fromCurrency, rateTable).value;
+  }
+  let toAmount: number | null = null;
+  if (toCurrency !== fromCurrency) {
+    toAmount =
+      toCurrency === billCurrency
+        ? normalizeMoneyAmount(share)
+        : convert(amount, fromCurrency, toCurrency, rateTable).value;
+  }
+  return { amount, currency: fromCurrency, toAmount };
 }

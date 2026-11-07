@@ -100,7 +100,10 @@ import {
   formatMoney,
 } from '~/features/transactions/components/editor/calculatorEngine';
 import { TransactionOptionsCard } from '~/features/transactions/components/editor/TransactionOptionsCard';
-import { pickDefaultAccountId } from '~/features/transactions/lib/entryDefaults';
+import {
+  pickDefaultAccountId,
+  pickPaybackAccountId,
+} from '~/features/transactions/lib/entryDefaults';
 import { resolveNoteChange } from '~/features/transactions/lib/noteSuggestionPick';
 import { resolveSplitSaveRoute } from '~/features/transactions/lib/splitSaveRoute';
 import { offscreenPageLimitFor, usePagerTabSync } from '~/hooks/usePagerTabSync';
@@ -1676,9 +1679,9 @@ export function TransactionEditorScreen({
   >(() => {});
 
   // New split payback rows default to the user's chosen "paid to" account (set
-  // on the Settle Up screen), falling back to the first account so the value is
-  // never empty on a brand-new setup.
-  const defaultPaybackAccountId = settings.defaultPaybackAccountId ?? accounts[0]?.id ?? null;
+  // on the Settle Up screen), falling back to the first live account so the
+  // value is never empty on a brand-new setup or after that account is archived.
+  const defaultPaybackAccountId = pickPaybackAccountId(accounts, settings.defaultPaybackAccountId);
 
   const buildInitialSplitRows = useCallback((): SplitDraft[] => {
     const numericAmount = Number(amount);

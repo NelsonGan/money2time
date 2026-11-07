@@ -918,6 +918,10 @@ const es = {
       subtitle_edit_balance_adjustment: 'Actualizar monto y cuenta afectada',
       delete_transaction: 'Eliminar movimiento',
       delete_confirm: 'Esta acción no se puede deshacer. ¿Continuar?',
+      delete_payback_confirm:
+        'El pago de {{name}} vuelve a sumarse a lo que debe por esta cuenta. ¿Continuar?',
+      delete_payback_confirm_unnamed:
+        'Este pago vuelve a sumarse a lo que aún se debe por esta cuenta. ¿Continuar?',
       receipt: {
         label: 'Recibo',
         add: 'Añadir',

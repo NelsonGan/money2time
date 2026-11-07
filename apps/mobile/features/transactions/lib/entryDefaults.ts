@@ -24,7 +24,7 @@ export function findFallbackCategory(
 /**
  * The account an entry flow posts to: an explicit selection, then the
  * preferred/saved account when it still exists and is not archived, else the
- * first live account by sort order.
+ * first live everyday (debit or credit) account by sort order, else none.
  */
 export function pickDefaultAccountId(
   accounts: Account[],
@@ -41,8 +41,25 @@ export function pickDefaultAccountId(
   if (preferredId && live.some((account) => account.id === preferredId)) {
     return preferredId;
   }
-  if (live.length === 0) return null;
-  return [...live].sort(
+  // Only an everyday account is a fallback. A goal or a loan is only ever
+  // where an entry goes because the user picked it; once every debit and
+  // credit account is archived, an entry has no account until one is picked.
+  const everyday = live.filter((account) => account.type !== 'goal' && account.type !== 'loan');
+  if (everyday.length === 0) return null;
+  return [...everyday].sort(
     (a, b) => (a.sortOrder ?? Number.MAX_SAFE_INTEGER) - (b.sortOrder ?? Number.MAX_SAFE_INTEGER),
   )[0].id;
+}
+
+/**
+ * Where a friend's payback lands by default: the Settle Up "paid to" account
+ * while it is live, else the same fallback new entries use. Never an archived
+ * account, so archiving the "paid to" account does not keep booking money
+ * into an account the user can no longer see.
+ */
+export function pickPaybackAccountId(
+  accounts: Account[],
+  preferredId?: string | null,
+): string | null {
+  return pickDefaultAccountId(accounts, preferredId);
 }

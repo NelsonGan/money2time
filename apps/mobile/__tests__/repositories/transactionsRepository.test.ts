@@ -21,6 +21,26 @@ function makeSplit(overrides: Partial<TransactionSplit>): TransactionSplit {
 }
 
 describe('summarizeSplits', () => {
+  it('counts a row that owes nothing as settled, as Settle Up does', () => {
+    // Split evenly after a friend paid back more than an even part leaves
+    // them an unpaid 0 row: the list must not show them as still owing.
+    const splits = [
+      makeSplit({ id: 'owed0', amount: 0 }),
+      makeSplit({
+        id: 'part',
+        amount: 40,
+        paidAt: '2026-05-14T00:00:00.000Z',
+        partOfSplitId: 'owed0',
+      }),
+    ];
+    expect(summarizeSplits(splits)).toEqual({
+      count: 2,
+      paidCount: 2,
+      unpaidAmount: 0,
+      totalOwed: 40,
+    });
+  });
+
   it('returns zeros when there are no splits', () => {
     expect(summarizeSplits([])).toEqual({
       count: 0,

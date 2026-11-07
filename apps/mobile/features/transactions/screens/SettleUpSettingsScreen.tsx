@@ -12,6 +12,7 @@ import {
 } from '~/components/ui';
 import { REPLAY_PRIVATE } from '~/components/ui/replayPrivacy';
 import { useApp } from '~/context/AppContext';
+import { pickPaybackAccountId } from '~/features/transactions/lib/entryDefaults';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
@@ -41,10 +42,11 @@ export function SettleUpSettingsScreen({ onBack }: SettleUpSettingsScreenProps) 
   const [brokenQrUri, setBrokenQrUri] = useState<string | null>(null);
   const effectiveQrUri = qrUri !== brokenQrUri ? qrUri : null;
 
-  // The effective default is never empty: fall back to the first account so a
-  // brand-new user still gets a sensible "paid to" on their first split.
+  // The effective default is never empty: fall back to the first live account
+  // so a brand-new user still gets a sensible "paid to" on their first split,
+  // and an archived "paid to" account shows what new splits will really use.
   const defaultPaybackAccountId = useMemo(
-    () => settings.defaultPaybackAccountId ?? accounts[0]?.id ?? null,
+    () => pickPaybackAccountId(accounts, settings.defaultPaybackAccountId),
     [settings.defaultPaybackAccountId, accounts],
   );
   const defaultPaybackAccount = defaultPaybackAccountId

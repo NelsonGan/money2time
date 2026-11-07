@@ -917,6 +917,8 @@ const hi = {
       subtitle_edit_balance_adjustment: 'राशि और प्रभावित खाता अपडेट करें',
       delete_transaction: 'लेनदेन हटाएं',
       delete_confirm: 'यह पूर्ववत नहीं किया जा सकता। जारी रखें?',
+      delete_payback_confirm: '{{name}} का भुगतान इस बिल के बकाया में वापस जुड़ जाएगा। जारी रखें?',
+      delete_payback_confirm_unnamed: 'यह भुगतान इस बिल के बकाया में वापस जुड़ जाएगा। जारी रखें?',
       receipt: {
         label: 'रसीद',
         add: 'जोड़ें',

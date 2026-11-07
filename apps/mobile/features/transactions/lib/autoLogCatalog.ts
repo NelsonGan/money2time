@@ -9,6 +9,7 @@
 import { categoryIconToEmoji } from '~/constants/categoryIcons';
 import { autoLogAllowance } from '~/features/autoLog/lib/decide';
 import type { Account, AddButtonAction, Category } from '~/types';
+import { isAccountArchived } from '~/utils/accountArchive';
 
 import { pickDefaultAccountId } from './entryDefaults';
 
@@ -18,6 +19,12 @@ export interface AutoLogCatalogAccount {
   id: string;
   name: string;
   currency: string;
+  /**
+   * Archived accounts stay in the catalog so an id already saved in a shortcut
+   * still resolves to a name, but the picker leaves them out. Optional on the
+   * Swift side, so an older catalog (without it) decodes as not archived.
+   */
+  archived: boolean;
 }
 
 export interface AutoLogCatalogCategory {
@@ -173,6 +180,7 @@ export function buildAutoLogCatalog(input: BuildAutoLogCatalogInput): AutoLogCat
       id: account.id,
       name: account.name,
       currency: account.currency,
+      archived: isAccountArchived(account),
     })),
     categories: expenseCategories.map((category) => ({
       id: category.id,

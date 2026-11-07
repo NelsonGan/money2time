@@ -924,6 +924,9 @@ const ms = {
       subtitle_edit_balance_adjustment: 'Kemaskini jumlah dan akaun berkaitan',
       delete_transaction: 'Padam transaksi',
       delete_confirm: 'Tindakan ini tidak boleh dibuat semula. Teruskan?',
+      delete_payback_confirm: 'Bayaran {{name}} kembali kepada hutangnya untuk bil ini. Teruskan?',
+      delete_payback_confirm_unnamed:
+        'Bayaran ini kembali kepada baki hutang untuk bil ini. Teruskan?',
       receipt: {
         label: 'Resit',
         add: 'Tambah',

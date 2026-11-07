@@ -919,6 +919,9 @@ const ru = {
       subtitle_edit_balance_adjustment: 'Обновить сумму и счёт',
       delete_transaction: 'Удалить транзакцию',
       delete_confirm: 'Это действие нельзя отменить. Продолжить?',
+      delete_payback_confirm: 'Платёж от {{name}} вернётся в долг по этому счёту. Продолжить?',
+      delete_payback_confirm_unnamed:
+        'Этот платёж вернётся в оставшийся долг по этому счёту. Продолжить?',
       receipt: {
         label: 'Чек',
         add: 'Добавить',

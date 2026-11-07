@@ -924,6 +924,10 @@ const de = {
       subtitle_edit_balance_adjustment: 'Betrag und betroffenes Konto aktualisieren',
       delete_transaction: 'Transaktion löschen',
       delete_confirm: 'Dies kann nicht rückgängig gemacht werden. Fortfahren?',
+      delete_payback_confirm:
+        'Die Zahlung von {{name}} wird wieder zu dem, was für diese Rechnung offen ist. Fortfahren?',
+      delete_payback_confirm_unnamed:
+        'Diese Zahlung wird wieder zu dem, was für diese Rechnung noch offen ist. Fortfahren?',
       receipt: {
         label: 'Beleg',
         add: 'Hinzufügen',

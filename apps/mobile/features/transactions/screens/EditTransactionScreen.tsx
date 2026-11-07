@@ -3,7 +3,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useMemo } from 'react';
 import { Alert } from 'react-native';
 
-import { useApp } from '~/context/AppContext';
+import { useApp, usePaybackIndex } from '~/context/AppContext';
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import { type SplitDraft, splitsHelpers } from '~/features/transactions/components/editor';
 import { splitShareKey } from '~/features/transactions/lib/splitPayments';
@@ -75,10 +75,18 @@ export function EditTransactionScreen({
     [isBalanceAdjustment, isInstalmentPayment],
   );
 
+  // A friend's payback transfer: deleting it undoes the payment, which goes
+  // back on what they owe for the bill, so the confirmation says so.
+  const paybackLink = usePaybackIndex().get(transaction.id) ?? null;
+
   const handleDelete = useCallback(() => {
     Alert.alert(
       I18n.t('transactions.editor.delete_transaction'),
-      I18n.t('transactions.editor.delete_confirm'),
+      paybackLink
+        ? paybackLink.personName
+          ? I18n.t('transactions.editor.delete_payback_confirm', { name: paybackLink.personName })
+          : I18n.t('transactions.editor.delete_payback_confirm_unnamed')
+        : I18n.t('transactions.editor.delete_confirm'),
       [
         { text: I18n.t('common.cancel'), style: 'cancel' },
         {
@@ -95,7 +103,7 @@ export function EditTransactionScreen({
         },
       ],
     );
-  }, [deleteTransaction, onClose, transaction.id]);
+  }, [deleteTransaction, onClose, paybackLink, transaction.id]);
 
   const handleSubmit = useCallback(
     (input: Parameters<typeof updateTransaction>[1]) => {
@@ -147,6 +155,7 @@ export function EditTransactionScreen({
       updateTransactionSplits(
         transaction.id,
         splitsHelpers.toSplitDraftInputs(splits, input.accountId),
+        { markingPaidIds: pendingMarkPaid.map((paid) => paid.id) },
       );
 
       // Then flip paid/unpaid — these adjust parent amount and create or

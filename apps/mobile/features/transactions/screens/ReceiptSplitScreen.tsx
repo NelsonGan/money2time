@@ -56,7 +56,7 @@ import {
   type ReceiptSplitDraft,
   toAmountNumber,
 } from '../components/receiptSplit/receiptSplitDraft';
-import { pickDefaultAccountId } from '../lib/entryDefaults';
+import { pickDefaultAccountId, pickPaybackAccountId } from '../lib/entryDefaults';
 import { consumeReceiptSplitLaunch, type ReceiptSplitLaunch } from '../lib/receiptSplitBridge';
 import { friendLetter, splitQuantityLine } from '../lib/receiptSplitMath';
 import { recentSplitPersonNames } from '../lib/settleUp';
@@ -495,10 +495,10 @@ export function ReceiptSplitScreen() {
       return;
     }
     // New payback rows default to the Settle Up "paid to" account, falling back
-    // to the first account — the same effective default the Settle Up settings
+    // to the first live account — the same effective default the Settle Up settings
     // screen advertises and the split-bill editor uses (never the expense's
     // own account).
-    const fallbackPayback = settings.defaultPaybackAccountId ?? accounts[0]?.id ?? null;
+    const fallbackPayback = pickPaybackAccountId(accounts, settings.defaultPaybackAccountId);
     const splits = draftToSplitInputs(draft, computation, fallbackPayback, nameById, priorSplits);
     const repositoryDraft = draftToRepositoryInput(
       draft,

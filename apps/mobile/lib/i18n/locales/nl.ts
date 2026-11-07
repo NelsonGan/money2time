@@ -920,6 +920,10 @@ const nl = {
       subtitle_edit_balance_adjustment: 'Bedrag en betrokken rekening bijwerken',
       delete_transaction: 'Transactie verwijderen',
       delete_confirm: 'Dit kan niet ongedaan worden gemaakt. Doorgaan?',
+      delete_payback_confirm:
+        'De betaling van {{name}} gaat terug naar wat diegene nog schuldig is voor deze rekening. Doorgaan?',
+      delete_payback_confirm_unnamed:
+        'Deze betaling gaat terug naar wat nog openstaat voor deze rekening. Doorgaan?',
       receipt: {
         label: 'Bon',
         add: 'Toevoegen',

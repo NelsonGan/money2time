@@ -917,6 +917,10 @@ const vi = {
       subtitle_edit_balance_adjustment: 'Cập nhật số tiền và tài khoản liên quan',
       delete_transaction: 'Xóa giao dịch',
       delete_confirm: 'Không thể hoàn tác. Tiếp tục?',
+      delete_payback_confirm:
+        'Khoản {{name}} đã trả sẽ quay lại số còn nợ của hóa đơn này. Tiếp tục?',
+      delete_payback_confirm_unnamed:
+        'Khoản đã trả này sẽ quay lại số còn nợ của hóa đơn này. Tiếp tục?',
       receipt: {
         label: 'Biên lai',
         add: 'Thêm',

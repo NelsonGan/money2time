@@ -4,13 +4,14 @@ import {
   consolidateOwedRows,
   cutPartPayment,
   evenOwedAmounts,
+  paybackTransferAmounts,
   planShareHandover,
   planSplitPayment,
   planUnpaidMerge,
   splitShareKey,
   summarizeSplitShares,
 } from '~/features/transactions/lib/splitPayments';
-import type { TransactionSplit } from '~/types';
+import type { RateTable, TransactionSplit } from '~/types';
 
 function split(overrides: Partial<TransactionSplit>): TransactionSplit {
   return {
@@ -231,6 +232,23 @@ describe('planShareHandover', () => {
 });
 
 describe('consolidateOwedRows', () => {
+  it('leaves a share alone when the same save marks one of its rows paid', () => {
+    // An older version's Undo left the share owing on R (700) and P (300).
+    // Saving the bill with P marked paid must pay P, not merge it into R first.
+    const rows = [
+      split({ id: 'r', amount: 700 }),
+      split({ id: 'p', amount: 300, partOfSplitId: 'r' }),
+      split({ id: 'b', personName: 'Ben', amount: 10 }),
+      split({ id: 'b2', personName: 'Ben', amount: 5, partOfSplitId: 'b' }),
+    ];
+    for (const marking of ['p', 'r']) {
+      const { splits, merges } = consolidateOwedRows(rows, PAID, [marking]);
+      expect(merges).toEqual([{ keepId: 'b', dropId: 'b2', amount: 15 }]);
+      expect(splits.find((s) => s.id === 'r')?.amount).toBe(700);
+      expect(splits.find((s) => s.id === 'p')?.amount).toBe(300);
+    }
+  });
+
   it('folds a share owing on two rows into its first row, and leaves the rest', () => {
     const { splits, merges } = consolidateOwedRows(
       [
@@ -254,5 +272,65 @@ describe('consolidateOwedRows', () => {
   it('changes nothing when every share owes on one row', () => {
     const rows = [split({ id: 'a' }), split({ id: 'b', personName: 'Ben' })];
     expect(consolidateOwedRows(rows, PAID)).toEqual({ splits: rows, merges: [] });
+  });
+});
+
+describe('paybackTransferAmounts', () => {
+  // 1 USD = 4 MYR, 1 SGD = 3 MYR.
+  const table: RateTable = {
+    base: 'MYR',
+    rates: { MYR: 1, USD: 0.25, SGD: 1 / 3 },
+    asOfDate: null,
+  };
+  const base = {
+    billCurrency: 'MYR',
+    billAmount: 100,
+    billAccountAmount: null,
+    fromCurrency: 'MYR',
+    toCurrency: 'MYR',
+    rateTable: table,
+  };
+
+  it('moves the share as is between two accounts in the bill currency', () => {
+    expect(paybackTransferAmounts({ ...base, share: 30 })).toEqual({
+      amount: 30,
+      currency: 'MYR',
+      toAmount: null,
+    });
+  });
+
+  it('gives the bill account back the share at the bill’s own frozen rate', () => {
+    // A USD 100 bill on a MYR card, frozen at RM410 (not today's RM400).
+    expect(
+      paybackTransferAmounts({
+        ...base,
+        share: 25,
+        billCurrency: 'USD',
+        billAccountAmount: 410,
+        toCurrency: 'USD',
+      }),
+    ).toEqual({ amount: 102.5, currency: 'MYR', toAmount: 25 });
+  });
+
+  it('takes the share at face value from a bill with no account snapshot', () => {
+    // Balances count such a bill at its own amount, so the payback leaves at it
+    // too and the account still nets to zero.
+    expect(
+      paybackTransferAmounts({
+        ...base,
+        share: 30,
+        billCurrency: 'USD',
+        billAccountAmount: null,
+        toCurrency: 'MYR',
+      }),
+    ).toEqual({ amount: 30, currency: 'MYR', toAmount: null });
+  });
+
+  it('converts into a payback account in a third currency at today’s rate', () => {
+    expect(paybackTransferAmounts({ ...base, share: 30, toCurrency: 'SGD' })).toEqual({
+      amount: 30,
+      currency: 'MYR',
+      toAmount: 10,
+    });
   });
 });

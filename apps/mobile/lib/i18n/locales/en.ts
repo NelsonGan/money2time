@@ -886,6 +886,10 @@ const en = {
       subtitle_edit_balance_adjustment: 'Update amount and affected account',
       delete_transaction: 'Delete transaction',
       delete_confirm: 'This cannot be undone. Continue?',
+      delete_payback_confirm:
+        "{{name}}'s payment goes back on what they owe for this bill. Continue?",
+      delete_payback_confirm_unnamed:
+        'This payment goes back on what is still owed for this bill. Continue?',
       receipt: {
         label: 'Receipt',
         add: 'Add',

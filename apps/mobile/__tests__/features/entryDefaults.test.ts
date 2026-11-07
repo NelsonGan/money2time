@@ -1,4 +1,7 @@
-import { pickDefaultAccountId } from '~/features/transactions/lib/entryDefaults';
+import {
+  pickDefaultAccountId,
+  pickPaybackAccountId,
+} from '~/features/transactions/lib/entryDefaults';
 import type { Account } from '~/types';
 
 const accounts = [
@@ -63,5 +66,43 @@ describe('entry account defaults with archived accounts', () => {
 
   it('leaves entry unavailable when every account is archived', () => {
     expect(pickDefaultAccountId(withArchived.slice(0, 1))).toBeNull();
+  });
+});
+
+describe('fallbacks skip what the user did not pick', () => {
+  const archivedAt = '2026-11-07T00:00:00.000Z';
+  const everyday = [
+    { id: 'checking', name: 'Checking', type: 'debit', sortOrder: 1 },
+    { id: 'cash', name: 'Cash', type: 'debit', sortOrder: 2 },
+  ] as Account[];
+  const goal = { id: 'trip', name: 'Trip', type: 'goal', sortOrder: 0 } as Account;
+  const loan = { id: 'car', name: 'Car', type: 'loan', sortOrder: 0 } as Account;
+
+  it('never falls back to a goal or a loan', () => {
+    expect(pickDefaultAccountId([goal, loan, ...everyday])).toBe('checking');
+  });
+
+  it('still uses a goal or loan the user saved as the default', () => {
+    expect(pickDefaultAccountId([goal, ...everyday], 'trip')).toBe('trip');
+  });
+
+  it('leaves the account empty once every everyday account is archived', () => {
+    const archived = everyday.map((account) => ({ ...account, archivedAt }));
+    expect(pickDefaultAccountId([goal, loan, ...archived])).toBeNull();
+  });
+
+  it('pays a friend back into the "paid to" account while it is live', () => {
+    expect(pickPaybackAccountId(everyday, 'cash')).toBe('cash');
+  });
+
+  it('pays a friend back into the first live account once "paid to" is archived', () => {
+    const cashArchived = everyday.map((account) =>
+      account.id === 'cash' ? { ...account, archivedAt } : account,
+    );
+    expect(pickPaybackAccountId(cashArchived, 'cash')).toBe('checking');
+    const firstArchived = everyday.map((account) =>
+      account.id === 'checking' ? { ...account, archivedAt } : account,
+    );
+    expect(pickPaybackAccountId(firstArchived, null)).toBe('cash');
   });
 });
