@@ -6,6 +6,7 @@ import { Alert } from 'react-native';
 import { useApp } from '~/context/AppContext';
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import { type SplitDraft, splitsHelpers } from '~/features/transactions/components/editor';
+import { splitShareKey } from '~/features/transactions/lib/splitPayments';
 import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import type { RootStackParamList } from '~/navigation/rootStack';
@@ -185,6 +186,7 @@ export function EditTransactionScreen({
       isSelf: s.isSelf,
       paybackAccountId: s.paybackAccountId,
       paid: s.paidAt ? { paidAt: s.paidAt, paidTransactionId: s.paidTransactionId } : undefined,
+      shareKey: s.isSelf ? undefined : splitShareKey(s),
     }));
   }, [transaction.splits]);
 

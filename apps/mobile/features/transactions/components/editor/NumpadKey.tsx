@@ -34,6 +34,7 @@ export const NumpadKey = React.memo(function NumpadKeyImpl({
   variant = 'default',
   icon,
   className,
+  fireOnRelease = false,
 }: {
   value: KeyValue;
   onPress: (key: KeyValue) => void;
@@ -41,6 +42,12 @@ export const NumpadKey = React.memo(function NumpadKeyImpl({
   variant?: 'default' | 'operator' | 'utility' | 'confirm';
   icon?: React.ReactNode;
   className?: string;
+  /**
+   * Fire when the finger lifts instead of on touch-down. For a key that closes
+   * a Modal: closing it under a finger still down leaves iOS swallowing the
+   * next tap on the screen behind.
+   */
+  fireOnRelease?: boolean;
 }) {
   const pressProgress = useSharedValue(0);
   const pressAnimatedStyle = useAnimatedStyle(() => ({
@@ -75,8 +82,10 @@ export const NumpadKey = React.memo(function NumpadKeyImpl({
       }),
     );
     void triggerHaptic('light');
-    onPress(value);
-  }, [onPress, pressProgress, tapFlash, value]);
+    if (!fireOnRelease) onPress(value);
+  }, [fireOnRelease, onPress, pressProgress, tapFlash, value]);
+
+  const handleRelease = useCallback(() => onPress(value), [onPress, value]);
 
   const handlePressOut = useCallback(() => {
     pressProgress.value = withTiming(0, {
@@ -90,6 +99,7 @@ export const NumpadKey = React.memo(function NumpadKeyImpl({
       <Animated.View style={[pressAnimatedStyle, { flex: 1 }]}>
         <Pressable
           onPressIn={handlePressIn}
+          onPress={fireOnRelease ? handleRelease : undefined}
           onLongPress={onLongPress}
           onPressOut={handlePressOut}
           unstable_pressDelay={0}

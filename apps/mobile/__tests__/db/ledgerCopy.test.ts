@@ -385,3 +385,42 @@ describe('lastLoanRestOnOrBefore', () => {
     expect(lastLoanRestOnOrBefore('2026-12-01', '2026-11-02')).toBe('2026-12-01');
   });
 });
+
+describe('planLedgerCopy part payments', () => {
+  function copySplits(splits: Row[]) {
+    let n = 0;
+    const tables: Record<string, Row[]> = {
+      transactions: [{ id: 't1', ledger_id: 'src' }],
+      transaction_splits: splits,
+    };
+    const result = planLedgerCopy(
+      (spec) => tables[spec.table] ?? [],
+      'dst',
+      () => `new${++n}`,
+      'now',
+    );
+    const copies = result.find((r) => r.table === 'transaction_splits')!.rows;
+    return new Map(splits.map((row, index) => [row.id, copies[index]!]));
+  }
+
+  it("follows a part payment to its share's copied first row", () => {
+    const copies = copySplits([
+      { id: 'root', transaction_id: 't1', part_of_split_id: null },
+      { id: 'part', transaction_id: 't1', part_of_split_id: 'root' },
+    ]);
+    expect(copies.get('part')!.part_of_split_id).toBe(copies.get('root')!.id);
+  });
+
+  it('keeps parts together when their first row was removed', () => {
+    // The removed first row is not copied (an older app removed it without
+    // handing the share over): the oldest part becomes the first row.
+    const copies = copySplits([
+      { id: 'p2', transaction_id: 't1', part_of_split_id: 'gone', created_at: '2026-11-03' },
+      { id: 'p1', transaction_id: 't1', part_of_split_id: 'gone', created_at: '2026-11-01' },
+      { id: 'q1', transaction_id: 't1', part_of_split_id: 'other-gone', created_at: '2026-11-02' },
+    ]);
+    expect(copies.get('p1')!.part_of_split_id).toBeNull();
+    expect(copies.get('p2')!.part_of_split_id).toBe(copies.get('p1')!.id);
+    expect(copies.get('q1')!.part_of_split_id).toBeNull();
+  });
+});

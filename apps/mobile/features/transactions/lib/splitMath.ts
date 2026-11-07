@@ -6,6 +6,8 @@
  * depending on the editor's SplitDraft type. `paid` truthy = settled row,
  * frozen by every operation here.
  */
+import { evenOwedAmounts } from './splitPayments';
+
 export interface SplitRowLike {
   amount: string;
   isSelf: boolean;
@@ -122,4 +124,47 @@ export function applyPercent<T extends SplitRowLike>(rows: T[], percent: number)
   if (subtotal <= 0) return null;
   const unpaidTarget = Math.round(subtotal * (1 + percent / 100) * 100) / 100;
   return rescaleUnpaidRows(rows, unpaidTarget);
+}
+
+/**
+ * Spread `owed` evenly over the unpaid rows `include` picks, one portion per
+ * share: a share paid in part owes its portion less what its paid rows hold
+ * (`evenOwedAmounts`), and a share owing on two rows (an undone payment not
+ * yet folded back) gets its portion on the first and nothing on the other,
+ * which the fold after saving adds together.
+ */
+export function spreadOverShares<T extends SplitRowLike & { shareKey?: string }>(
+  rows: T[],
+  owed: number,
+  include: (row: T, index: number) => boolean,
+): T[] {
+  const shareOf = (row: T, index: number) => row.shareKey ?? `row:${index}`;
+  const paidByShare = new Map<string, number>();
+  rows.forEach((row, index) => {
+    if (!row.paid) return;
+    const key = shareOf(row, index);
+    paidByShare.set(key, (paidByShare.get(key) ?? 0) + (Number(row.amount) || 0));
+  });
+  const slots: number[] = [];
+  const extra: number[] = [];
+  const seen = new Set<string>();
+  rows.forEach((row, index) => {
+    if (row.paid || !include(row, index)) return;
+    const key = shareOf(row, index);
+    if (seen.has(key)) extra.push(index);
+    else {
+      seen.add(key);
+      slots.push(index);
+    }
+  });
+  if (slots.length === 0) return rows;
+  const portions = evenOwedAmounts(
+    owed,
+    slots.map((index) => paidByShare.get(shareOf(rows[index]!, index)) ?? 0),
+  );
+  return rows.map((row, index) => {
+    const slot = slots.indexOf(index);
+    if (slot >= 0) return { ...row, amount: (portions[slot] ?? 0).toFixed(2) };
+    return extra.includes(index) ? { ...row, amount: (0).toFixed(2) } : row;
+  });
 }

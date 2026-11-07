@@ -201,6 +201,8 @@ export const GA4_ONLY_EVENTS = {
   /** A transaction gained a share owed by someone else, on create or on edit. */
   SPLIT_BILL_CREATED: 'Split Bill Created',
   SPLIT_MARKED_PAID: 'Split Marked Paid',
+  /** Part of a share was paid back; the rest is still owed. */
+  SPLIT_PART_PAID: 'Split Part Paid',
   SPLIT_MARKED_UNPAID: 'Split Marked Unpaid',
   SETTLE_UP_QR_SET: 'Settle Up Payment QR Set',
 

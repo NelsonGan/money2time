@@ -29,6 +29,7 @@ type Target =
   | 'accounts'
   | 'categories'
   | 'transactions'
+  | 'transaction_splits'
   | 'albums'
   | 'budget_templates'
   | 'monthly_budgets'
@@ -61,6 +62,39 @@ interface TableSpec {
   allRefs?: boolean;
   /** Last changes to a planned copy (`source` is the row it copies), after its references are mapped. */
   adjust?: (copy: Row, source: Row) => void;
+  /** Last changes across all of a table's copies (`sources[i]` is what `copies[i]` copies). */
+  finish?: (copies: Row[], sources: Row[]) => void;
+}
+
+/**
+ * Part payments point at their share's first row (`part_of_split_id`). When
+ * that row is not copied (it was removed, here or by an older app version that
+ * hands nothing over), the reference would map to null and split the share
+ * into separate paid shares. Instead the oldest copied part becomes the share's
+ * first row and the others point at it, as `planShareHandover` does in the app.
+ */
+function keepPartPaymentsTogether(copies: Row[], sources: Row[]): void {
+  const orphansByShare = new Map<string, number[]>();
+  copies.forEach((copy, index) => {
+    const sourceShare = sources[index]?.part_of_split_id;
+    if (sourceShare == null || copy.part_of_split_id != null) return;
+    const key = String(sourceShare);
+    orphansByShare.set(key, [...(orphansByShare.get(key) ?? []), index]);
+  });
+  for (const indexes of orphansByShare.values()) {
+    const ordered = [...indexes].sort((a, b) => {
+      const aAt = String(sources[a]?.created_at ?? '');
+      const bAt = String(sources[b]?.created_at ?? '');
+      return aAt === bAt
+        ? String(copies[a]?.id).localeCompare(String(copies[b]?.id))
+        : aAt < bAt
+          ? -1
+          : 1;
+    });
+    const [first, ...rest] = ordered;
+    if (first === undefined) continue;
+    for (const index of rest) copies[index]!.part_of_split_id = copies[first]!.id;
+  }
 }
 
 /** Parents before children, so a child's parent is already planned. */
@@ -111,8 +145,10 @@ export const LEDGER_COPY_TABLES: readonly TableSpec[] = [
       transaction_id: 'transactions',
       payback_account_id: 'accounts',
       paid_transaction_id: 'transactions',
+      part_of_split_id: 'transaction_splits',
     },
     required: ['transaction_id'],
+    finish: keepPartPaymentsTogether,
   },
   { table: 'albums', owner: { ledger: true }, refs: {} },
   {
@@ -167,6 +203,7 @@ const ID_SPACE: Record<string, Target | undefined> = {
   accounts: 'accounts',
   categories: 'categories',
   transactions: 'transactions',
+  transaction_splits: 'transaction_splits',
   albums: 'albums',
   budget_templates: 'budget_templates',
   monthly_budgets: 'monthly_budgets',
@@ -225,9 +262,8 @@ export function planLedgerCopy(
     return { spec, rows, ids };
   });
 
-  return chosen.map(({ spec, rows, ids }) => ({
-    table: spec.table,
-    rows: rows.map((row) => {
+  return chosen.map(({ spec, rows, ids }) => {
+    const copies = rows.map((row) => {
       const copy: Row = { ...row, id: ids.get(String(row.id)), updated_at: now };
       if ('ledger' in spec.owner) copy.ledger_id = targetLedgerId;
       for (const column of spec.cleared ?? []) if (column in copy) copy[column] = null;
@@ -238,8 +274,10 @@ export function planLedgerCopy(
       }
       spec.adjust?.(copy, row);
       return copy;
-    }),
-  }));
+    });
+    spec.finish?.(copies, rows);
+    return { table: spec.table, rows: copies };
+  });
 }
 
 type BindValue = string | number | null | boolean | Uint8Array;

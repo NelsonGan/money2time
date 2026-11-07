@@ -45,7 +45,7 @@ type TransactionDisplaySettings = Pick<
 const HIGHLIGHT_PEAK_OPACITY = 0.28;
 
 // How long a row must be held before it opens selection mode.
-const LONG_PRESS_DELAY_MS = 300;
+export const LONG_PRESS_DELAY_MS = 300;
 
 const styles = StyleSheet.create({
   // Over the card's right padding, full height so the whole strip is the grip.
@@ -84,6 +84,8 @@ interface TransactionItemProps {
   reorderHandle?: boolean;
   /** Briefly flash the row (e.g. right after it was created) to draw the eye. */
   highlighted?: boolean;
+  /** A friend's payback (a split's transfer): tinted so it reads as money back. */
+  payback?: boolean;
   settings: TransactionDisplaySettings;
   getTrueHourlyRateForDate: (dateIso: string) => number;
 }
@@ -102,6 +104,7 @@ interface TransactionItemViewProps {
   selectionMode: boolean;
   reorderHandle: boolean;
   highlighted: boolean;
+  payback: boolean;
   settings: TransactionDisplaySettings;
   getTrueHourlyRateForDate: (dateIso: string) => number;
 }
@@ -197,7 +200,8 @@ function InstalmentPill({ label, compact }: { label: string; compact: boolean })
   );
 }
 
-function TransactionAccountBadge({
+/** An account pill on a row's third line (also the folded paybacks row's). */
+export function TransactionAccountBadge({
   account,
   label,
   compact,
@@ -618,6 +622,7 @@ function TransactionItemView({
   selectionMode,
   reorderHandle,
   highlighted,
+  payback,
   settings,
   getTrueHourlyRateForDate,
 }: TransactionItemViewProps) {
@@ -650,13 +655,15 @@ function TransactionItemView({
     ? Math.max(0, splitsSummary.count - splitsSummary.paidCount)
     : 0;
   const hasUnpaidSplits = unpaidSplitsCount > 0;
-  const accentColor = isTransfer
-    ? themeColors.textMuted
-    : isBalanceAdjustment
-      ? themeColors.primary
-      : isIncome
-        ? themeColors.success
-        : themeColors.error;
+  const accentColor = payback
+    ? themeColors.success
+    : isTransfer
+      ? themeColors.textMuted
+      : isBalanceAdjustment
+        ? themeColors.primary
+        : isIncome
+          ? themeColors.success
+          : themeColors.error;
 
   const reorderGrip = reorderHandle ? (
     <View
@@ -697,7 +704,11 @@ function TransactionItemView({
         // by NativeWind, which is exactly the frame the long-press menu opens in.
         className={cn(
           'flex-row items-center border shadow-soft overflow-hidden',
-          hasUnpaidSplits ? 'bg-warning/10 border-warning/25' : 'bg-card border-border/30',
+          hasUnpaidSplits
+            ? 'bg-warning/10 border-warning/25'
+            : payback
+              ? 'bg-success/5 border-success/20'
+              : 'bg-card border-border/30',
           selectionMode && selected ? 'border-primary/50 bg-primary/15' : null,
           compact
             ? cn('gap-2 py-2 pl-2.5 rounded-[18px]', reorderHandle ? 'pr-7' : 'pr-2.5')
@@ -768,6 +779,7 @@ function AnimatedTransactionItem({
   selectionMode,
   reorderHandle,
   highlighted,
+  payback,
   settings,
   getTrueHourlyRateForDate,
 }: TransactionItemViewProps) {
@@ -797,6 +809,7 @@ function AnimatedTransactionItem({
         selectionMode={selectionMode}
         reorderHandle={reorderHandle}
         highlighted={highlighted}
+        payback={payback}
         settings={settings}
         getTrueHourlyRateForDate={getTrueHourlyRateForDate}
       />
@@ -816,6 +829,7 @@ function StaticTransactionItem({
   selectionMode,
   reorderHandle,
   highlighted,
+  payback,
   settings,
   getTrueHourlyRateForDate,
 }: TransactionItemViewProps) {
@@ -844,6 +858,7 @@ function StaticTransactionItem({
         selectionMode={selectionMode}
         reorderHandle={reorderHandle}
         highlighted={highlighted}
+        payback={payback}
         settings={settings}
         getTrueHourlyRateForDate={getTrueHourlyRateForDate}
       />
@@ -866,6 +881,7 @@ function TransactionItemComponent({
   selectionMode = false,
   reorderHandle = false,
   highlighted = false,
+  payback = false,
   settings,
   getTrueHourlyRateForDate,
 }: TransactionItemProps) {
@@ -912,6 +928,7 @@ function TransactionItemComponent({
         selectionMode={selectionMode}
         reorderHandle={reorderHandle}
         highlighted={highlighted}
+        payback={payback}
         settings={settings}
         getTrueHourlyRateForDate={getTrueHourlyRateForDate}
       />
@@ -931,6 +948,7 @@ function TransactionItemComponent({
       selectionMode={selectionMode}
       reorderHandle={reorderHandle}
       highlighted={highlighted}
+      payback={payback}
       settings={settings}
       getTrueHourlyRateForDate={getTrueHourlyRateForDate}
     />
@@ -983,6 +1001,7 @@ export const TransactionItem = memo(
     prev.selectionMode === next.selectionMode &&
     prev.reorderHandle === next.reorderHandle &&
     prev.highlighted === next.highlighted &&
+    prev.payback === next.payback &&
     prev.settings.currencySymbol === next.settings.currencySymbol &&
     prev.settings.displayMode === next.settings.displayMode &&
     prev.settings.workdayDisplayEnabled === next.settings.workdayDisplayEnabled &&

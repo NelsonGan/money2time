@@ -25,7 +25,12 @@ import type { RootStackParamList } from '~/navigation/rootStack';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import { deleteReceiptImage } from '~/services/userAssets';
-import { dayKeyFromDateLocal, formatAmount, formatShortDate } from '~/utils/formatters';
+import {
+  dayKeyFromDateLocal,
+  formatAmount,
+  formatShortDate,
+  normalizeMoneyAmount,
+} from '~/utils/formatters';
 
 import {
   evaluateExpression,
@@ -503,9 +508,16 @@ export function ReceiptSplitScreen() {
     // Match the regular transaction editor: an empty note falls back to the
     // selected category's name rather than saving a blank note.
     const categoryName = categories.find((c) => c.id === draft.categoryId)?.name?.trim() ?? '';
+    // Paid-back shares already came off the expense (Mark paid lowers it by
+    // what was paid), so an edit keeps them off: the expense is the receipt
+    // total less what friends have paid back.
+    const paidBack = splits.reduce(
+      (sum, split) => (split.paid && !split.isSelf ? sum + split.amount : sum),
+      0,
+    );
     const parentInput = {
       type: 'expense' as const,
-      amount: grandTotal,
+      amount: normalizeMoneyAmount(grandTotal - paidBack),
       currency: draft.currency,
       date: draft.date,
       accountId: draft.accountId,

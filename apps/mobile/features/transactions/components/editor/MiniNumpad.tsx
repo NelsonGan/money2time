@@ -16,6 +16,10 @@ interface MiniNumpadProps {
   onValueChange: (expression: string) => void;
   /** Done: commit the current value and move on (parent advances or closes). */
   onConfirm: () => void;
+  /** The confirm key's label; Done when absent. */
+  confirmLabel?: string;
+  /** Confirm when the finger lifts (the pad sits in a Modal that confirm closes). */
+  confirmOnRelease?: boolean;
 }
 
 /**
@@ -25,7 +29,13 @@ interface MiniNumpadProps {
  * date/currency pickers, and the two Add buttons replaced by a single Done key
  * in the bottom-right of the grid. Used for per-row amount entry in Split Bill.
  */
-export function MiniNumpad({ initialExpression, onValueChange, onConfirm }: MiniNumpadProps) {
+export function MiniNumpad({
+  initialExpression,
+  onValueChange,
+  onConfirm,
+  confirmLabel,
+  confirmOnRelease = false,
+}: MiniNumpadProps) {
   // Tap positions on these keys would spell out the amount.
   usePauseSessionReplay();
   const { bottom: bottomInset } = useSafeAreaInsets();
@@ -70,11 +80,11 @@ export function MiniNumpad({ initialExpression, onValueChange, onConfirm }: Mini
 
   const doneIcon = useMemo(
     () => (
-      <Text variant="bodyStrong" className="text-primary-foreground">
-        {I18n.t('common.done')}
+      <Text variant="bodyStrong" className="text-primary-foreground" numberOfLines={1}>
+        {confirmLabel ?? I18n.t('common.done')}
       </Text>
     ),
-    [],
+    [confirmLabel],
   );
 
   return (
@@ -115,7 +125,13 @@ export function MiniNumpad({ initialExpression, onValueChange, onConfirm }: Mini
           <NumpadKey value="." onPress={handleKeyPress} />
           <NumpadKey value="0" onPress={handleKeyPress} />
           <NumpadKey value="=" variant="utility" onPress={handleKeyPress} />
-          <NumpadKey value="done" variant="confirm" onPress={onConfirm} icon={doneIcon} />
+          <NumpadKey
+            value="done"
+            variant="confirm"
+            onPress={onConfirm}
+            icon={doneIcon}
+            fireOnRelease={confirmOnRelease}
+          />
         </View>
       </View>
     </View>
