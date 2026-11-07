@@ -976,21 +976,9 @@ const zhHant = {
   },
   transaction_detail: {
     title: '交易詳情',
-    hours_perspective: '時間視角',
     category: '分類',
     account: '帳戶',
     note: '備註',
-    hero: {
-      transfer: '你的帳戶之間轉帳',
-      income_positive: '你賺回了約 {{hours}} 的工作價值',
-      income_negative: '收入調整：減少了約 {{hours}} 的價值',
-      expense_positive: '這花費了你約 {{hours}}',
-      expense_negative: '支出衝正：約 {{hours}} 已返還',
-    },
-    nudge: {
-      long: '想一想：這是你一週中不小的一段時間，值得嗎？',
-      short: '雖是小額支出，但也是你真實的時間。',
-    },
   },
   insights: {
     household: '家庭',
@@ -3140,7 +3128,6 @@ const zhHant = {
     review_all: '全部處理（%{count}）',
     review_banner: '%{count} 則通知待確認',
     review_banner_single: '1 則通知待確認',
-    review_amount_hint: '選擇或輸入金額',
     review_missing: '部分項目仍缺少金額或帳戶。',
     review_no_account_ios: '尚未設定帳戶。請在 Log Notification 捷徑中選擇帳戶，即可自動記錄。',
     review_no_account_android: '此 App 沒有帳戶。請在「%{path}」中選擇，即可自動記錄。',
@@ -3197,7 +3184,6 @@ const zhHant = {
     history: '記錄',
     history_title: '通知記錄',
     history_empty: '尚無通知',
-    history_hint: '選擇收入、支出或忽略。最近完成的 10 則通知會保留在這裡。',
     history_none: '已忽略',
     history_failed: '未記帳',
     history_error: '無法載入通知記錄。',

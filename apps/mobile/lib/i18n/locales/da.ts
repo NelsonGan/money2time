@@ -1010,21 +1010,9 @@ const da = {
   },
   transaction_detail: {
     title: 'Transaktionsdetaljer',
-    hours_perspective: 'Tidsperspektiv',
     category: 'Kategori',
     account: 'Konto',
     note: 'Note',
-    hero: {
-      transfer: 'Overførsel mellem dine konti',
-      income_positive: 'Du tjente ca. {{hours}} arbejdsværdi tilbage',
-      income_negative: 'Indtægtsjustering: ca. {{hours}} i værdi blev reduceret',
-      expense_positive: 'Dette kostede dig ca. {{hours}}',
-      expense_negative: 'Udgiftstilbageførsel: ca. {{hours}} blev returneret',
-    },
-    nudge: {
-      long: 'Et øjeblik: dette er en betydelig del af din uge. Er det det værd?',
-      short: 'Lille udgift, men stadig et reelt stykke af din tid.',
-    },
   },
   insights: {
     household: 'Husstand',
@@ -3269,7 +3257,6 @@ const da = {
     review_all: 'Gennemgå alle %{count}',
     review_banner: '%{count} notifikationer til gennemgang',
     review_banner_single: '1 notifikation til gennemgang',
-    review_amount_hint: 'Vælg eller indtast beløbet',
     review_missing: 'Nogle elementer mangler stadig et beløb eller en konto.',
     review_no_account_ios:
       'Ingen konto valgt. Vælg en i din Log Notification-genvej, så de registreres automatisk.',
@@ -3330,8 +3317,6 @@ const da = {
     history: 'Historik',
     history_title: 'Notifikationshistorik',
     history_empty: 'Ingen notifikationer endnu',
-    history_hint:
-      'Vælg Indtægt, Udgift eller Ignorer. Dine 10 senest behandlede notifikationer bliver her.',
     history_none: 'Ignoreret',
     history_failed: 'Ikke registreret',
     history_error: 'Notifikationshistorikken kunne ikke indlæses.',

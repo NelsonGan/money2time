@@ -1007,21 +1007,9 @@ const th = {
   },
   transaction_detail: {
     title: 'รายละเอียดรายการ',
-    hours_perspective: 'มุมมองเวลา',
     category: 'หมวดหมู่',
     account: 'บัญชี',
     note: 'หมายเหตุ',
-    hero: {
-      transfer: 'โอนเงินระหว่างบัญชีของคุณ',
-      income_positive: 'คุณได้รับคืนประมาณ {{hours}} ของมูลค่างาน',
-      income_negative: 'ปรับรายรับ: มูลค่าลดลงประมาณ {{hours}}',
-      expense_positive: 'นี่ทำให้คุณเสียเวลาประมาณ {{hours}}',
-      expense_negative: 'ยกเลิกรายจ่าย: คืนมาประมาณ {{hours}}',
-    },
-    nudge: {
-      long: 'คิดสักครู่: นี่คือส่วนสำคัญของสัปดาห์คุณ คุ้มค่าไหม?',
-      short: 'ใช้จ่ายน้อย แต่ก็ยังเป็นเวลาจริง ๆ ของคุณ',
-    },
   },
   insights: {
     household: 'ครัวเรือน',
@@ -3209,7 +3197,6 @@ const th = {
     review_all: 'ตรวจทั้งหมด %{count} รายการ',
     review_banner: 'การแจ้งเตือนรอตรวจสอบ %{count} รายการ',
     review_banner_single: 'การแจ้งเตือนรอตรวจสอบ 1 รายการ',
-    review_amount_hint: 'เลือกหรือใส่จำนวนเงิน',
     review_missing: 'บางรายการยังต้องใส่จำนวนเงินหรือบัญชี',
     review_no_account_ios:
       'ยังไม่ได้เลือกบัญชี เลือกในคำสั่งลัด Log Notification เพื่อให้บันทึกอัตโนมัติ',
@@ -3269,8 +3256,6 @@ const th = {
     history: 'ประวัติ',
     history_title: 'ประวัติการแจ้งเตือน',
     history_empty: 'ยังไม่มีการแจ้งเตือน',
-    history_hint:
-      'เลือก “รายรับ” “รายจ่าย” หรือ “ข้าม” การแจ้งเตือนที่เสร็จแล้ว 10 รายการล่าสุดจะอยู่ที่นี่',
     history_none: 'ข้ามแล้ว',
     history_failed: 'ไม่ได้บันทึก',
     history_error: 'โหลดประวัติการแจ้งเตือนไม่ได้',
