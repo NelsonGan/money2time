@@ -1,4 +1,10 @@
-import type { LoanInterestModel, LoanProgress, LoanRateChange, TransactionType } from '~/types';
+import type {
+  AccountType,
+  LoanInterestModel,
+  LoanProgress,
+  LoanRateChange,
+  TransactionType,
+} from '~/types';
 import { dayKeyFromDateLocal, normalizeMoneyAmount } from '~/utils/formatters';
 import { clampStatementDate, DAY_IN_MS, nextOccurrenceOfMonthDay } from '~/utils/statementPeriods';
 
@@ -475,7 +481,7 @@ interface ContractRule {
  * the card's balance while taking it off the loan. Another loan is never what
  * the borrower means, and a goal is savings, not a spending account.
  */
-export function canPayLoanFrom(account: { type: string }): boolean {
+export function canPayLoanFrom(account: { type: AccountType }): boolean {
   return account.type === 'debit' || account.type === 'credit';
 }
 
