@@ -14,9 +14,11 @@ import type { DbMigration } from './types';
 //   budget's figures never move with the exchange rate, like a transaction's
 //   frozen `fx_rate`. NULL for a main-currency budget, or when no rate was
 //   known then (the budget falls back to the latest rate).
-export const migration080BudgetCurrencies: DbMigration = {
-  version: 80,
-  name: '080_budget_currencies',
+export const migration081BudgetCurrencies: DbMigration = {
+  // 81, not 80: it first shipped as a second version 80 beside
+  // 080_account_archived_at, which the migration runner refuses at startup.
+  version: 81,
+  name: '081_budget_currencies',
   up(db) {
     addColumnIfMissing(db, 'budget_templates', 'currency', 'TEXT');
     addColumnIfMissing(db, 'monthly_budgets', 'currency', 'TEXT');
@@ -24,4 +26,4 @@ export const migration080BudgetCurrencies: DbMigration = {
   },
 };
 
-export default migration080BudgetCurrencies;
+export default migration081BudgetCurrencies;
