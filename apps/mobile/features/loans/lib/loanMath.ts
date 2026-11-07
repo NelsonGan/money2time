@@ -1,4 +1,10 @@
-import type { LoanInterestModel, LoanProgress, LoanRateChange, TransactionType } from '~/types';
+import type {
+  AccountType,
+  LoanInterestModel,
+  LoanProgress,
+  LoanRateChange,
+  TransactionType,
+} from '~/types';
 import { dayKeyFromDateLocal, normalizeMoneyAmount } from '~/utils/formatters';
 import { clampStatementDate, DAY_IN_MS, nextOccurrenceOfMonthDay } from '~/utils/statementPeriods';
 
@@ -466,6 +472,37 @@ interface ContractRule {
   toAccountId?: string | null;
   toAmount?: number | null;
   amount: number;
+}
+
+/**
+ * Whether an account can pay a loan's recurring repayment (the editor's Collect
+ * from): a bank account or a credit card. Card instalment plans are often
+ * charged to a card, and the transfer then adds the instalment to the card's
+ * balance while taking it off the loan. Another loan is never what the
+ * borrower means, and a goal is savings, not an account to draw on every month.
+ */
+export function canPayLoanFrom(account: { type: AccountType }): boolean {
+  return account.type === 'debit' || account.type === 'credit';
+}
+
+/**
+ * Whether the Pay sheet of a card or loan offers `source` to pay it by hand.
+ * A loan takes what can fund its repayment (see {@link canPayLoanFrom}); a
+ * card takes a bank account, never another card or a loan. Either can also be
+ * paid once from savings, so a live goal is offered too. An archived goal or
+ * loan never is.
+ */
+export function canPayLiabilityByHandFrom(
+  liabilityType: AccountType,
+  source: {
+    type: AccountType;
+    goalArchivedAt?: string | null;
+    loanArchivedAt?: string | null;
+  },
+): boolean {
+  if (source.goalArchivedAt != null || source.loanArchivedAt != null) return false;
+  if (source.type === 'goal') return true;
+  return liabilityType === 'loan' ? canPayLoanFrom(source) : source.type === 'debit';
 }
 
 /**

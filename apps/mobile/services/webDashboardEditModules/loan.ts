@@ -20,6 +20,7 @@
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { resolveLoanContractFields } from '~/features/loans/lib/loanContractFields';
 import {
+  canPayLoanFrom,
   computeLoanProgress,
   computeLoanQuote,
   isContractTrackingRule,
@@ -98,6 +99,8 @@ export type LoanCreatePayload = {
     interestModel: string;
     hasRate: boolean;
     hasCollectAccount: boolean;
+    /** The collect account's type (`debit` or `credit`), or `none`. */
+    collectAccountType: string;
     countsAsExpense: boolean;
     currency: string;
   };
@@ -202,10 +205,10 @@ function read(raw: Record<string, unknown>): ModuleOp | null {
 
 // ------------------------------------------------------------------ planning --
 
-/** A collect account as the editor's picker offers it: a debit account in the loan's currency. */
+/** A collect account as the editor's picker offers it: a bank account or card in the loan's currency. */
 function collectSource(tools: PlanTools, id: string | null | undefined, currency: string) {
   const source = tools.findAccount(id);
-  return source && source.type === 'debit' && source.currency === currency ? source : null;
+  return source && canPayLoanFrom(source) && source.currency === currency ? source : null;
 }
 
 /**
@@ -416,10 +419,12 @@ function planCreate(tools: PlanTools, form: LoanForm, steps: EditStep[]): Result
   const contract = contractOf(tools, form, null, 0);
   if (!contract.ok) return contract;
   let collect: string | null = null;
+  let collectAccountType = 'none';
   if (form.collectFromAccountId) {
     const source = collectSource(tools, form.collectFromAccountId, form.currency);
     if (!source) return tools.refuse('invalid');
     collect = source.id;
+    collectAccountType = source.type;
   }
   // As the editor's Save: the accounts limit for any account, then the loans one.
   if (!lookup.isPro) {
@@ -443,6 +448,7 @@ function planCreate(tools: PlanTools, form: LoanForm, steps: EditStep[]): Result
       interestModel: contract.value.input.loanInterestModel ?? 'flat',
       hasRate: contract.value.input.loanInterestRate != null,
       hasCollectAccount: collect != null,
+      collectAccountType,
       countsAsExpense: contract.value.input.loanCountAsExpense ?? false,
       currency: contract.value.input.currency,
     },

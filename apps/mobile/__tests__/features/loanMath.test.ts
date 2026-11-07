@@ -1,4 +1,6 @@
 import {
+  canPayLiabilityByHandFrom,
+  canPayLoanFrom,
   computeLoanProgress,
   computeLoanQuote,
   instalmentForContract,
@@ -520,6 +522,40 @@ describe('computeLoanQuote: a typed instalment', () => {
     });
     expect(q!.instalment).toBe(833.33);
     expect(q!.totalInterest).toBe(0);
+  });
+});
+
+describe('canPayLoanFrom', () => {
+  it('takes a bank account or a credit card', () => {
+    expect(canPayLoanFrom({ type: 'debit' })).toBe(true);
+    expect(canPayLoanFrom({ type: 'credit' })).toBe(true);
+  });
+
+  it('refuses another loan and a savings goal', () => {
+    expect(canPayLoanFrom({ type: 'loan' })).toBe(false);
+    expect(canPayLoanFrom({ type: 'goal' })).toBe(false);
+  });
+});
+
+describe('canPayLiabilityByHandFrom', () => {
+  it('pays a loan from a bank account, a card or savings', () => {
+    expect(canPayLiabilityByHandFrom('loan', { type: 'debit' })).toBe(true);
+    expect(canPayLiabilityByHandFrom('loan', { type: 'credit' })).toBe(true);
+    expect(canPayLiabilityByHandFrom('loan', { type: 'goal' })).toBe(true);
+    expect(canPayLiabilityByHandFrom('loan', { type: 'loan' })).toBe(false);
+  });
+
+  it('pays a card from a bank account or savings, never another card or a loan', () => {
+    expect(canPayLiabilityByHandFrom('credit', { type: 'debit' })).toBe(true);
+    expect(canPayLiabilityByHandFrom('credit', { type: 'goal' })).toBe(true);
+    expect(canPayLiabilityByHandFrom('credit', { type: 'credit' })).toBe(false);
+    expect(canPayLiabilityByHandFrom('credit', { type: 'loan' })).toBe(false);
+  });
+
+  it('never offers an archived goal', () => {
+    expect(canPayLiabilityByHandFrom('loan', { type: 'goal', goalArchivedAt: '2026-01-01' })).toBe(
+      false,
+    );
   });
 });
 
