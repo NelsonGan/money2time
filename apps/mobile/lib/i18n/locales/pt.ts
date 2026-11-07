@@ -919,6 +919,10 @@ const pt = {
       subtitle_edit_balance_adjustment: 'Atualizar valor e conta afetada',
       delete_transaction: 'Excluir transação',
       delete_confirm: 'Não é possível desfazer. Continuar?',
+      delete_payback_confirm:
+        'O pagamento de {{name}} volta para o que ainda deve desta conta. Continuar?',
+      delete_payback_confirm_unnamed:
+        'Este pagamento volta para o que ainda é devido desta conta. Continuar?',
       receipt: {
         label: 'Recibo',
         add: 'Adicionar',

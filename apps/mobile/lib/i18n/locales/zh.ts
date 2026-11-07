@@ -875,6 +875,8 @@ const zh = {
       subtitle_edit_balance_adjustment: '更新金额和关联账户',
       delete_transaction: '删除交易',
       delete_confirm: '此操作不可撤销，确定继续？',
+      delete_payback_confirm: '{{name}} 的还款会退回此账单的欠款，确定继续？',
+      delete_payback_confirm_unnamed: '这笔还款会退回此账单的欠款，确定继续？',
       receipt: {
         label: '收据',
         add: '添加',

@@ -8,6 +8,7 @@
 
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import type { Account, Category } from '~/types';
+import { isAccountArchived } from '~/utils/accountArchive';
 import { dayKeyFromIsoLocal } from '~/utils/formatters';
 import { detectCurrency, parseNumber } from '~/utils/moneyText';
 
@@ -258,8 +259,13 @@ export function resolveAutoLogEntry(
   const parsed = parseAutoLogAmount(entry.amountRaw);
   if (!parsed) return null;
 
+  // The account a shortcut was saved with, while it still exists and is not
+  // archived. Shortcuts keeps an account id forever, so a card the user
+  // archived would otherwise keep collecting taps they can no longer see; such
+  // a tap lands in the default account instead, where it shows up.
   const explicitAccountId =
-    entry.accountId && ctx.accounts.some((account) => account.id === entry.accountId)
+    entry.accountId &&
+    ctx.accounts.some((account) => account.id === entry.accountId && !isAccountArchived(account))
       ? entry.accountId
       : null;
   const accountId = explicitAccountId ?? pickDefaultAccountId(ctx.accounts, ctx.defaultAccountId);

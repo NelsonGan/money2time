@@ -919,6 +919,10 @@ const pl = {
       subtitle_edit_balance_adjustment: 'Zaktualizuj kwotę i powiązane konto',
       delete_transaction: 'Usuń transakcję',
       delete_confirm: 'Tej operacji nie można cofnąć. Kontynuować?',
+      delete_payback_confirm:
+        'Płatność od {{name}} wróci do kwoty, którą ta osoba jest winna za ten rachunek. Kontynuować?',
+      delete_payback_confirm_unnamed:
+        'Ta płatność wróci do kwoty, która jest jeszcze do oddania za ten rachunek. Kontynuować?',
       receipt: {
         label: 'Paragon',
         add: 'Dodaj',

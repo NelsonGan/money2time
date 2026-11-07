@@ -14,6 +14,7 @@ import {
 import { useSettingsBottomNavInset } from '~/components/ui/settings';
 import { useApp, useTransactions } from '~/context/AppContext';
 import { bucketReimbursements } from '~/features/reimbursements/lib/reimbursementMath';
+import { pickPaybackAccountId } from '~/features/transactions/lib/entryDefaults';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -304,7 +305,8 @@ export function ReimbursementsScreen({ onBack, onOpenSettings }: ReimbursementsS
         accountGroups={accountGroups}
         selectedAccountId={
           pickerTransaction
-            ? (destinationAccountId(pickerTransaction) ?? settings.defaultPaybackAccountId)
+            ? (destinationAccountId(pickerTransaction) ??
+              pickPaybackAccountId(accounts, settings.defaultPaybackAccountId))
             : null
         }
         onSelect={handlePickAccount}

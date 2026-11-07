@@ -289,3 +289,33 @@ describe('buildAutoLogCatalog', () => {
     });
   });
 });
+
+describe('archived accounts', () => {
+  it('stay in the catalog, marked, so a saved shortcut still resolves them', () => {
+    const catalog = buildAutoLogCatalog(
+      input({
+        accounts: [
+          account({ id: 'live', name: 'Live' }),
+          account({ id: 'old', name: 'Old Visa', archivedAt: '2026-11-07T00:00:00.000Z' }),
+        ],
+      }),
+    );
+    expect(catalog.accounts).toEqual([
+      expect.objectContaining({ id: 'live', archived: false }),
+      expect.objectContaining({ id: 'old', archived: true }),
+    ]);
+  });
+
+  it('are never the default account', () => {
+    const catalog = buildAutoLogCatalog(
+      input({
+        accounts: [
+          account({ id: 'old', sortOrder: 0, archivedAt: '2026-11-07T00:00:00.000Z' }),
+          account({ id: 'live', sortOrder: 1 }),
+        ],
+        defaultAccountId: 'old',
+      }),
+    );
+    expect(catalog.defaultAccountId).toBe('live');
+  });
+});

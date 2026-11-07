@@ -1,17 +1,22 @@
 import { ChevronRight } from 'lucide-react-native';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { AccountLogo, AccountPickerSheet, Text } from '~/components/ui';
 import { ThemeModal } from '~/components/ui/theme-modal';
 import { useApp } from '~/context/AppContext';
-import { evaluateExpression } from '~/features/transactions/components/editor/calculatorEngine';
+import {
+  evaluateExpression,
+  sanitizeInitialAmount,
+} from '~/features/transactions/components/editor/calculatorEngine';
 import { MiniNumpad } from '~/features/transactions/components/editor/MiniNumpad';
+import { pickPaybackAccountId } from '~/features/transactions/lib/entryDefaults';
 import { planSplitPayment } from '~/features/transactions/lib/splitPayments';
 import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import { isAccountArchived } from '~/utils/accountArchive';
 import { currencySymbolForCode } from '~/utils/currency';
 import { formatCurrency, normalizeMoneyAmount } from '~/utils/formatters';
 
@@ -26,6 +31,8 @@ export interface SplitPaymentTarget {
   shareTotal: number;
   currency: string;
   paybackAccountId: string | null;
+  /** False for a bill paid from no account: the payback lands nowhere, so no Paid to. */
+  billHasAccount?: boolean;
 }
 
 interface SplitPaymentSheetProps {
@@ -42,7 +49,7 @@ interface SplitPaymentSheetProps {
 export function SplitPaymentSheet({ target, onClose, onRecord }: SplitPaymentSheetProps) {
   const themeColors = useThemeColors();
   const sheetColumnStyle = useSheetColumnStyle();
-  const { accounts, accountGroups, getAccountById } = useApp();
+  const { accounts, accountGroups, getAccountById, settings } = useApp();
 
   const [expression, setExpression] = useState('');
   // Remounts the pad each time the sheet opens, so it starts on what is owed.
@@ -50,11 +57,26 @@ export function SplitPaymentSheet({ target, onClose, onRecord }: SplitPaymentShe
   const [paybackAccountId, setPaybackAccountId] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
 
+  // Where the sheet opens paid to: the share's own account, unless the user has
+  // archived it since, then where money is paid to now, so a payback never
+  // lands in an account they put away. A ref, so the sheet re-seeds only when
+  // it opens, not on every account change while it is open.
+  const openingPaybackAccountId = useRef<(saved: string | null) => string | null>(() => null);
+  openingPaybackAccountId.current = (saved) => {
+    const account = saved ? getAccountById(saved) : null;
+    return account && isAccountArchived(account)
+      ? pickPaybackAccountId(accounts, settings.defaultPaybackAccountId)
+      : saved;
+  };
+
   useEffect(() => {
     if (!target) return;
-    setExpression(String(normalizeMoneyAmount(target.owed)));
+    // Seeded exactly as the pad seeds itself ("30.00"), so the amount shown is
+    // the one Delete edits; showing "30" over a pad holding "30.00" made the
+    // first two Deletes look like they did nothing.
+    setExpression(sanitizeInitialAmount(String(normalizeMoneyAmount(target.owed))));
     setPadKey((key) => key + 1);
-    setPaybackAccountId(target.paybackAccountId);
+    setPaybackAccountId(openingPaybackAccountId.current(target.paybackAccountId));
     setPickerOpen(false);
   }, [target]);
 
@@ -73,7 +95,7 @@ export function SplitPaymentSheet({ target, onClose, onRecord }: SplitPaymentShe
       return;
     }
     void triggerHaptic('success');
-    onRecord(plan.amount, paybackAccountId);
+    onRecord(plan.amount, target.billHasAccount === false ? null : paybackAccountId);
   }, [onRecord, paybackAccountId, plan, target]);
 
   const account = paybackAccountId ? getAccountById(paybackAccountId) : null;
@@ -125,37 +147,40 @@ export function SplitPaymentSheet({ target, onClose, onRecord }: SplitPaymentShe
                 </Text>
               </View>
 
-              <Pressable
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  setPickerOpen(true);
-                }}
-                accessibilityRole="button"
-                className="mx-4 mt-4 mb-3 flex-row items-center gap-2 rounded-2xl border border-border/25 bg-card/60 px-4 py-3 active:opacity-70"
-              >
-                <Text variant="body" tone="muted" className="flex-1">
-                  {I18n.t('transactions.settleUp.payment_paid_to')}
-                </Text>
-                {account ? (
-                  <AccountLogo
-                    logoId={account.logoId}
-                    type={account.type}
-                    goalEmoji={account.goalEmoji}
-                    size={18}
-                  />
-                ) : null}
-                <Text variant="bodyStrong" numberOfLines={1} className="max-w-[55%]">
-                  {account?.name ?? I18n.t('common.no_account')}
-                </Text>
-                <ChevronRight size={16} color={themeColors.textMuted} />
-              </Pressable>
+              {target.billHasAccount === false ? (
+                <View className="mb-3" />
+              ) : (
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    setPickerOpen(true);
+                  }}
+                  accessibilityRole="button"
+                  className="mx-4 mt-4 mb-3 flex-row items-center gap-2 rounded-2xl border border-border/25 bg-card/60 px-4 py-3 active:opacity-70"
+                >
+                  <Text variant="body" tone="muted" className="flex-1">
+                    {I18n.t('transactions.settleUp.payment_paid_to')}
+                  </Text>
+                  {account ? (
+                    <AccountLogo
+                      logoId={account.logoId}
+                      type={account.type}
+                      goalEmoji={account.goalEmoji}
+                      size={18}
+                    />
+                  ) : null}
+                  <Text variant="bodyStrong" numberOfLines={1} className="max-w-[55%]">
+                    {account?.name ?? I18n.t('common.no_account')}
+                  </Text>
+                  <ChevronRight size={16} color={themeColors.textMuted} />
+                </Pressable>
+              )}
 
               <MiniNumpad
                 key={padKey}
                 initialExpression={expression}
                 onValueChange={setExpression}
                 onConfirm={handleRecord}
-                confirmOnRelease
                 confirmLabel={
                   plan?.kind === 'partial'
                     ? I18n.t('transactions.settleUp.part_paid')

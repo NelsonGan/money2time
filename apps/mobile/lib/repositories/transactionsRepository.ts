@@ -182,7 +182,11 @@ export function summarizeSplits(splits: TransactionSplit[]): TransactionSplitsSu
     if (split.isSelf) continue;
     count += 1;
     totalOwed += split.amount;
-    if (split.paidAt) {
+    // A row that owes nothing is settled, the same rule as Settle Up and
+    // countUnpaidSplitBills (amount > 0): Split evenly can leave a friend who
+    // already paid back their part on an unpaid 0 row, and the list's "still
+    // owes" badge must not count it.
+    if (split.paidAt || !(split.amount > 0)) {
       paidCount += 1;
     } else {
       unpaidAmount += split.amount;

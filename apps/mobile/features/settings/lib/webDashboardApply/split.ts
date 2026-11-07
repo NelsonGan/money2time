@@ -56,8 +56,11 @@ export const splitApply: ApplyModule = {
         // EditTransactionScreen.handleSubmitWithSplits: the split rows first, then
         // the staged Mark paid / Undo, then the transaction's own fields.
         const id = payload.id as string;
-        app.updateTransactionSplits(id, toInputs(payload.splits as SplitDraftPayload[]));
-        for (const paid of payload.markPaid as { id: string; paybackAccountId: string | null }[]) {
+        const markPaid = payload.markPaid as { id: string; paybackAccountId: string | null }[];
+        app.updateTransactionSplits(id, toInputs(payload.splits as SplitDraftPayload[]), {
+          markingPaidIds: markPaid.map((paid) => paid.id),
+        });
+        for (const paid of markPaid) {
           app.markSplitPaid(paid.id, { paybackAccountId: paid.paybackAccountId });
         }
         for (const splitId of payload.markUnpaid as string[]) app.markSplitUnpaid(splitId);

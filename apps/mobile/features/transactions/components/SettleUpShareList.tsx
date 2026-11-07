@@ -21,6 +21,7 @@ interface SettleUpShare {
   splitId: string;
   paidAt: string | null;
   paybackAccountId: string | null;
+  billHasAccount?: boolean;
   amount: number;
   currency: string;
   /** The whole share and what is paid of it (a share paid in parts). */
@@ -186,27 +187,30 @@ export function SettleUpShareList<T extends SettleUpShare>({
             <Text variant="bodyStrong" numberOfLines={1}>
               {label(share)}
             </Text>
-            <Pressable
-              onPress={() => {
-                void triggerHaptic('selection');
-                setPickerShare(share);
-              }}
-              accessibilityRole="button"
-              className="mt-1 max-w-full flex-row items-center gap-1.5 self-start rounded-full bg-secondary/50 py-1 pl-2 pr-2.5 active:opacity-70"
-            >
-              {account ? (
-                <AccountLogo
-                  logoId={account.logoId}
-                  type={account.type}
-                  goalEmoji={account.goalEmoji}
-                  size={16}
-                />
-              ) : null}
-              <Text variant="caption" tone="muted" numberOfLines={1} className="flex-shrink">
-                {account?.name ?? I18n.t('common.no_account')}
-              </Text>
-              <ChevronDown size={12} color={themeColors.textMuted} />
-            </Pressable>
+            {/* A bill paid from no account moves no money on payback: no account to pick. */}
+            {share.billHasAccount === false ? null : (
+              <Pressable
+                onPress={() => {
+                  void triggerHaptic('selection');
+                  setPickerShare(share);
+                }}
+                accessibilityRole="button"
+                className="mt-1 max-w-full flex-row items-center gap-1.5 self-start rounded-full bg-secondary/50 py-1 pl-2 pr-2.5 active:opacity-70"
+              >
+                {account ? (
+                  <AccountLogo
+                    logoId={account.logoId}
+                    type={account.type}
+                    goalEmoji={account.goalEmoji}
+                    size={16}
+                  />
+                ) : null}
+                <Text variant="caption" tone="muted" numberOfLines={1} className="flex-shrink">
+                  {account?.name ?? I18n.t('common.no_account')}
+                </Text>
+                <ChevronDown size={12} color={themeColors.textMuted} />
+              </Pressable>
+            )}
           </View>
           <View className="items-end">
             <Text variant="bodyStrong">{formatCurrency(share.amount, symbol)}</Text>
@@ -271,6 +275,7 @@ export function SettleUpShareList<T extends SettleUpShare>({
                 shareTotal: share.shareTotal,
                 currency: share.currency,
                 paybackAccountId: share.paybackAccountId,
+                billHasAccount: share.billHasAccount !== false,
               });
             }}
             hitSlop={8}

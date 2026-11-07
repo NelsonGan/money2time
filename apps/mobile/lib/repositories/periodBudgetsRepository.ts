@@ -252,6 +252,74 @@ class PeriodBudgetsRepository {
     }
   }
 
+  /**
+   * Gives back the currency an older app version dropped. A version from
+   * before budget currencies (another phone through Cloud Sync, or a shared
+   * ledger's member) auto-creates a period from a ¥30,000 template as a
+   * 30,000 budget with no currency, so it reads as RM30,000. Such a row is the
+   * only one that is still exactly the template's copy (same total, never
+   * edited, made after the template's last change) with no currency while
+   * its template has one: this version always copies the currency, and an
+   * edit or a template change since rules it out. Those rows get the
+   * template's currency and today's rate (`rateFor`, which may be null until
+   * a rate is known). Returns how many it repaired.
+   */
+  repairDroppedCurrencies(rateFor: (currency: string) => number | null): number {
+    const sqlite = getSQLite();
+    const rows = sqlite.getAllSync<{ id: string; currency: string }>(
+      `SELECT b.id AS id, t.currency AS currency
+         FROM monthly_budgets b
+         JOIN budget_templates t ON t.id = b.template_id
+        WHERE b.deleted_at IS NULL
+          AND b.ledger_id = ?
+          AND b.currency IS NULL
+          AND b.updated_at = b.created_at
+          AND t.deleted_at IS NULL
+          AND t.currency IS NOT NULL
+          AND t.updated_at <= b.created_at
+          AND b.total_amount = t.total_amount`,
+      [getActiveLedgerId()],
+    );
+    const now = nowIso();
+    for (const row of rows) {
+      sqlite.runSync(
+        'UPDATE monthly_budgets SET currency = ?, fx_rate = ?, updated_at = ? WHERE id = ? AND currency IS NULL',
+        [row.currency, rateFor(row.currency), now, row.id],
+      );
+    }
+    return rows.length;
+  }
+
+  /**
+   * Freezes a rate on live budgets in another currency that were made while no
+   * rate for it was known (auto-create on a phone that had not downloaded any
+   * rates yet). Until then such a budget follows each phone's latest rate, so
+   * two phones could show it differently; once frozen it reads the same
+   * everywhere and never moves again. `rateFor` returns 1 unit of a currency
+   * in the main one, or null while there is still none. Returns how many
+   * budgets it froze.
+   */
+  freezeMissingRates(rateFor: (currency: string) => number | null): number {
+    const sqlite = getSQLite();
+    const rows = sqlite.getAllSync<{ id: string; currency: string }>(
+      `SELECT id, currency FROM monthly_budgets
+        WHERE deleted_at IS NULL AND ledger_id = ? AND currency IS NOT NULL AND fx_rate IS NULL`,
+      [getActiveLedgerId()],
+    );
+    const now = nowIso();
+    let frozen = 0;
+    for (const row of rows) {
+      const rate = rateFor(row.currency);
+      if (rate == null) continue;
+      sqlite.runSync(
+        'UPDATE monthly_budgets SET fx_rate = ?, updated_at = ? WHERE id = ? AND fx_rate IS NULL',
+        [rate, now, row.id],
+      );
+      frozen += 1;
+    }
+    return frozen;
+  }
+
   softDelete(id: string) {
     const db = getDb();
     const sqlite = getSQLite();

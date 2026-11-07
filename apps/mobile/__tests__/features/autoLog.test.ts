@@ -358,6 +358,21 @@ describe('resolveAutoLogEntry', () => {
       expect(result?.accountId).toBe('a2');
     });
 
+    it('falls back to the saved default when the tied account was archived', () => {
+      // Shortcuts keeps the id forever: a card the user put away must not keep
+      // collecting taps they can no longer see.
+      const result = resolveAutoLogEntry(
+        entry({ accountId: 'a3' }),
+        ctx({
+          accounts: accounts.map((item) =>
+            item.id === 'a3' ? { ...item, archivedAt: '2026-11-07T00:00:00.000Z' } : item,
+          ),
+          defaultAccountId: 'a2',
+        }),
+      );
+      expect(result?.accountId).toBe('a2');
+    });
+
     it('falls back to the saved default when the tied account no longer exists', () => {
       const result = resolveAutoLogEntry(
         entry({ accountId: 'deleted' }),

@@ -18,7 +18,11 @@ interface MiniNumpadProps {
   onConfirm: () => void;
   /** The confirm key's label; Done when absent. */
   confirmLabel?: string;
-  /** Confirm when the finger lifts (the pad sits in a Modal that confirm closes). */
+  /**
+   * Confirm when the finger lifts (the default). Every pad closes or moves on
+   * confirm, and one that unmounts under a finger still down leaves iOS
+   * swallowing the next tap: Split Bill's Done needed two taps after the pad's.
+   */
   confirmOnRelease?: boolean;
 }
 
@@ -34,7 +38,7 @@ export function MiniNumpad({
   onValueChange,
   onConfirm,
   confirmLabel,
-  confirmOnRelease = false,
+  confirmOnRelease = true,
 }: MiniNumpadProps) {
   // Tap positions on these keys would spell out the amount.
   usePauseSessionReplay();

@@ -916,6 +916,10 @@ const tr = {
       subtitle_edit_balance_adjustment: 'Tutarı ve etkilenen hesabı güncelle',
       delete_transaction: 'İşlemi sil',
       delete_confirm: 'Bu geri alınamaz. Devam edilsin mi?',
+      delete_payback_confirm:
+        '{{name}} kişisinin ödemesi bu hesap için borcuna geri eklenir. Devam edilsin mi?',
+      delete_payback_confirm_unnamed:
+        'Bu ödeme, bu hesap için kalan borca geri eklenir. Devam edilsin mi?',
       receipt: {
         label: 'Fiş',
         add: 'Ekle',

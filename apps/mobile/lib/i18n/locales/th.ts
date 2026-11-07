@@ -914,6 +914,10 @@ const th = {
       subtitle_edit_balance_adjustment: 'แก้ไขยอดเงินและบัญชีที่เกี่ยวข้อง',
       delete_transaction: 'ลบรายการ',
       delete_confirm: 'การดำเนินการนี้ไม่สามารถเลิกทำได้ ต้องการดำเนินการต่อ?',
+      delete_payback_confirm:
+        'ยอดที่ {{name}} จ่ายจะกลับไปเป็นยอดค้างของบิลนี้ ต้องการดำเนินการต่อ?',
+      delete_payback_confirm_unnamed:
+        'ยอดที่จ่ายนี้จะกลับไปเป็นยอดค้างของบิลนี้ ต้องการดำเนินการต่อ?',
       receipt: {
         label: 'ใบเสร็จ',
         add: 'เพิ่ม',
