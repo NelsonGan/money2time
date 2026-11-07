@@ -1014,21 +1014,9 @@ const nl = {
   },
   transaction_detail: {
     title: 'Transactiedetails',
-    hours_perspective: 'Tijdperspectief',
     category: 'Categorie',
     account: 'Rekening',
     note: 'Notitie',
-    hero: {
-      transfer: 'Overboeking tussen je rekeningen',
-      income_positive: 'Je verdiende ongeveer {{hours}} aan werkwaarde terug',
-      income_negative: 'Inkomstenaaanpassing: ongeveer {{hours}} aan waarde werd verminderd',
-      expense_positive: 'Dit kostte je ongeveer {{hours}}',
-      expense_negative: 'Uitgaveterugboeking: ongeveer {{hours}} werd teruggestort',
-    },
-    nudge: {
-      long: 'Even nadenken: dit is een flink deel van je week. Is het de moeite waard?',
-      short: 'Kleine uitgave, maar toch een stukje van je echte tijd.',
-    },
   },
   insights: {
     household: 'Huishouden',
@@ -3306,7 +3294,6 @@ const nl = {
     review_all: 'Alle %{count} beoordelen',
     review_banner: '%{count} meldingen te bekijken',
     review_banner_single: '1 melding te bekijken',
-    review_amount_hint: 'Kies of vul het bedrag in',
     review_missing: 'Bij sommige items ontbreekt nog een bedrag of rekening.',
     review_no_account_ios:
       'Geen rekening gekozen. Kies er een in je Log Notification-opdracht, dan worden ze automatisch vastgelegd.',
@@ -3368,8 +3355,6 @@ const nl = {
     history: 'Geschiedenis',
     history_title: 'Meldingsgeschiedenis',
     history_empty: 'Nog geen meldingen',
-    history_hint:
-      'Kies Inkomsten, Uitgaven of Negeren. Je laatste 10 afgehandelde meldingen blijven hier staan.',
     history_none: 'Genegeerd',
     history_failed: 'Niet vastgelegd',
     history_error: 'Kan de meldingsgeschiedenis niet laden.',

@@ -1010,21 +1010,9 @@ const ja = {
   },
   transaction_detail: {
     title: '取引詳細',
-    hours_perspective: '時間換算',
     category: 'カテゴリ',
     account: '口座',
     note: 'メモ',
-    hero: {
-      transfer: '口座間の振替',
-      income_positive: '約 {{hours}} 分の労働価値を稼ぎました',
-      income_negative: '収入調整：約 {{hours}} 分の価値が減少しました',
-      expense_positive: 'これは約 {{hours}} の労働時間です',
-      expense_negative: '支出の取り消し：約 {{hours}} 分が返還されました',
-    },
-    nudge: {
-      long: '少し考えてみてください。今週のかなりの時間です。本当に必要ですか？',
-      short: '少額でも、あなたのリアルな時間の一部です。',
-    },
   },
   insights: {
     household: '世帯',
@@ -3250,7 +3238,6 @@ const ja = {
     review_all: '%{count}件をまとめて確認',
     review_banner: '確認待ちの通知が %{count} 件あります',
     review_banner_single: '確認待ちの通知が 1 件あります',
-    review_amount_hint: '金額を選ぶか入力してください',
     review_missing: '金額または口座が未入力の項目があります。',
     review_no_account_ios:
       '口座が未設定です。Log Notification ショートカットで口座を選ぶと自動で記録されます。',
@@ -3310,8 +3297,6 @@ const ja = {
     history: '履歴',
     history_title: '通知の履歴',
     history_empty: 'まだ通知はありません',
-    history_hint:
-      '収入・支出・無視を選んでください。完了した通知のうち、最新の10件がここに残ります。',
     history_none: '無視済み',
     history_failed: '未記録',
     history_error: '通知の履歴を読み込めませんでした。',

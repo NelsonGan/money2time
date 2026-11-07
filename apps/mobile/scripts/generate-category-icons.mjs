@@ -30,9 +30,11 @@ import { fileURLToPath } from 'node:url';
 import pngjs from 'pngjs';
 import prettier from 'prettier';
 
+import losslessWebp from './lib/losslessWebp.cjs';
 import pngOptimizer from './lib/optimizePng.cjs';
 
 const { PNG } = pngjs;
+const { encodeLosslessWebp } = losslessWebp;
 const { optimizePng } = pngOptimizer;
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -45,7 +47,7 @@ const ICON_SIZE = 128;
 const ATLAS_COLUMNS = 10;
 // Generated artwork contains fine, nearly imperceptible color noise. Keeping
 // five significant bits per RGB channel preserves the rendered appearance at
-// the picker's largest 52-point size while making the PNG atlases substantially
+// the picker's largest 52-point size while making the atlases substantially
 // smaller. Alpha stays untouched so silhouette edges remain crisp.
 const ATLAS_COLOR_BITS = 5;
 
@@ -71,15 +73,6 @@ function slugify(name) {
     .replace(/^-|-$/g, '');
 }
 
-/** `grocery-basket` → `Grocery Basket`. */
-function titleCase(slug) {
-  return slug
-    .split('-')
-    .filter(Boolean)
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-}
-
 function tsString(value) {
   return `'${value.replaceAll('\\', '\\\\').replaceAll("'", "\\'")}'`;
 }
@@ -97,12 +90,11 @@ async function main() {
   if (packNames.length === 0) throw new Error(`No icon packs found under ${PACKS_DIR}`);
 
   const packs = [];
-  const icons = [];
   const atlases = [];
   const seenIds = new Map();
 
   // Atlases are derived assets. Rebuilding the directory prevents renamed or
-  // removed groups from leaving stale PNGs in native and OTA bundles.
+  // removed groups from leaving stale images in native and OTA bundles.
   await fs.rm(ATLAS_DIR, { recursive: true, force: true });
 
   for (const packName of packNames) {
@@ -120,15 +112,22 @@ async function main() {
 
       if (files.length === 0) continue;
 
-      const atlasId = `${packId}/${groupId}`;
       const columns = Math.min(ATLAS_COLUMNS, files.length);
       const rows = Math.ceil(files.length / columns);
       const atlasWidth = columns * ICON_SIZE;
       const atlasHeight = rows * ICON_SIZE;
       const atlas = new PNG({ width: atlasWidth, height: atlasHeight });
+      const concepts = [];
 
       for (const [index, file] of files.entries()) {
         const concept = file.slice(0, file.length - '.png'.length);
+        // The registry lists concepts space-separated and title-cases them at
+        // load, so a name has to be a plain kebab-case slug.
+        if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(concept)) {
+          throw new Error(
+            `${packName}/${groupName}/${file}: icon filenames must be kebab-case (a-z, 0-9, -).`,
+          );
+        }
         const id = packId === DEFAULT_PACK ? concept : `${packId}/${concept}`;
         const previous = seenIds.get(id);
         if (previous) {
@@ -150,33 +149,30 @@ async function main() {
         const column = index % columns;
         const row = Math.floor(index / columns);
         PNG.bitblt(iconPng, atlas, 0, 0, ICON_SIZE, ICON_SIZE, column * ICON_SIZE, row * ICON_SIZE);
-        icons.push({
-          id,
-          concept,
-          pack: packId,
-          group: groupId,
-          fallbackName: titleCase(concept),
-          atlasId,
-          column,
-          row,
-        });
+        concepts.push(concept);
         count += 1;
       }
 
       const atlasDir = path.join(ATLAS_DIR, packName);
-      const atlasFile = `${groupId}.png`;
+      const atlasFile = `${groupId}.webp`;
       await fs.mkdir(atlasDir, { recursive: true });
       quantizeAtlasColors(atlas);
       const optimized = await optimizePng(
         PNG.sync.write(atlas, { deflateLevel: 9, deflateStrategy: 3 }),
         { quantize: true, cellSize: ICON_SIZE, displaySize: 52 },
       );
-      await fs.writeFile(path.join(atlasDir, atlasFile), optimized.buffer);
+      // The quality gate above runs on PNG. Lossless WebP then stores the same
+      // pixels in about 27% fewer bytes (checked pixel for pixel), and both
+      // platforms' image loaders decode it.
+      await fs.writeFile(
+        path.join(atlasDir, atlasFile),
+        await encodeLosslessWebp(optimized.buffer),
+      );
       atlases.push({
-        id: atlasId,
+        pack: packId,
+        group: groupId,
         require: `../assets/icon-atlases/${packName}/${atlasFile}`,
-        width: atlasWidth,
-        height: atlasHeight,
+        concepts,
       });
     }
 
@@ -188,22 +184,7 @@ async function main() {
   const atlasLines = atlases
     .map(
       (atlas) =>
-        `  '${atlas.id}': { source: require('${atlas.require}'), width: ${atlas.width}, height: ${atlas.height} },`,
-    )
-    .join('\n');
-
-  const sourceLines = icons
-    .map(
-      (icon) =>
-        `  '${icon.id}': { atlas: CATEGORY_ICON_ATLASES['${icon.atlasId}'], column: ${icon.column}, row: ${icon.row} },`,
-    )
-    .join('\n');
-
-  const metaLines = icons
-    .map(
-      (icon) =>
-        `  { id: '${icon.id}', concept: '${icon.concept}', pack: '${icon.pack}', ` +
-        `group: '${icon.group}', fallbackName: ${tsString(icon.fallbackName)} },`,
+        `  ['${atlas.pack}', '${atlas.group}', require('${atlas.require}'), '${atlas.concepts.join(' ')}'],`,
     )
     .join('\n');
 
@@ -259,17 +240,58 @@ ${packLines}
 
 export const CATEGORY_ICON_CELL_SIZE = ${ICON_SIZE};
 
-const CATEGORY_ICON_ATLASES: Record<string, GeneratedCategoryIconAtlas> = {
+const ATLAS_COLUMNS = ${ATLAS_COLUMNS};
+const DEFAULT_PACK_ID = '${DEFAULT_PACK}';
+
+/**
+ * One row per section atlas: pack, group, image, and its icons' concepts in
+ * cell order (left to right, then top to bottom). The rest of each icon's
+ * record is derived below, which keeps this file small in the JS bundle.
+ */
+const ATLASES: [pack: string, group: string, source: ImageSourcePropType, concepts: string][] = [
 ${atlasLines}
-};
-
-export const CATEGORY_ICON_SOURCES: Record<string, GeneratedCategoryIconSource> = {
-${sourceLines}
-};
-
-export const GENERATED_CATEGORY_ICONS: GeneratedCategoryIcon[] = [
-${metaLines}
 ];
+
+/** \`grocery-basket\` → \`Grocery Basket\`. */
+function titleCase(slug: string): string {
+  return slug
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+// Most concepts appear in every pack, so each is title-cased once at load.
+const FALLBACK_NAMES = new Map<string, string>();
+function fallbackNameFor(concept: string): string {
+  let name = FALLBACK_NAMES.get(concept);
+  if (name === undefined) {
+    name = titleCase(concept);
+    FALLBACK_NAMES.set(concept, name);
+  }
+  return name;
+}
+
+export const CATEGORY_ICON_SOURCES: Record<string, GeneratedCategoryIconSource> = {};
+export const GENERATED_CATEGORY_ICONS: GeneratedCategoryIcon[] = [];
+
+for (const [pack, group, source, list] of ATLASES) {
+  const concepts = list.split(' ');
+  const columns = Math.min(ATLAS_COLUMNS, concepts.length);
+  const atlas: GeneratedCategoryIconAtlas = {
+    source,
+    width: columns * CATEGORY_ICON_CELL_SIZE,
+    height: Math.ceil(concepts.length / columns) * CATEGORY_ICON_CELL_SIZE,
+  };
+  concepts.forEach((concept, index) => {
+    const id = pack === DEFAULT_PACK_ID ? concept : \`\${pack}/\${concept}\`;
+    CATEGORY_ICON_SOURCES[id] = {
+      atlas,
+      column: index % columns,
+      row: Math.floor(index / columns),
+    };
+    GENERATED_CATEGORY_ICONS.push({ id, concept, pack, group, fallbackName: fallbackNameFor(concept) });
+  });
+}
 `;
 
   await fs.mkdir(path.dirname(GENERATED_FILE), { recursive: true });
@@ -282,7 +304,7 @@ ${metaLines}
 
   const summary = packs.map((pack) => `${pack.name}=${pack.count}`).join(' ');
   console.log(
-    `Generated ${icons.length} icons across ${packs.length} pack(s) → ` +
+    `Generated ${seenIds.size} icons across ${packs.length} pack(s) → ` +
       `${path.relative(REPO_ROOT, GENERATED_FILE)}\n  ${summary}`,
   );
 }

@@ -1010,21 +1010,9 @@ const vi = {
   },
   transaction_detail: {
     title: 'Chi tiết giao dịch',
-    hours_perspective: 'Góc nhìn thời gian',
     category: 'Danh mục',
     account: 'Tài khoản',
     note: 'Ghi chú',
-    hero: {
-      transfer: 'Chuyển khoản giữa các tài khoản của bạn',
-      income_positive: 'Bạn kiếm lại khoảng {{hours}} giá trị làm việc',
-      income_negative: 'Điều chỉnh thu nhập: giảm khoảng {{hours}} giá trị',
-      expense_positive: 'Khoản này tốn khoảng {{hours}} của bạn',
-      expense_negative: 'Hoàn chi tiêu: khoảng {{hours}} đã được hoàn lại',
-    },
-    nudge: {
-      long: 'Suy nghĩ thêm: đây là một phần đáng kể trong tuần của bạn. Có xứng đáng không?',
-      short: 'Chi nhỏ, nhưng vẫn là thời gian thực của bạn.',
-    },
   },
   insights: {
     household: 'Hộ gia đình',
@@ -3249,7 +3237,6 @@ const vi = {
     review_all: 'Xem xét cả %{count}',
     review_banner: '%{count} thông báo cần xem lại',
     review_banner_single: '1 thông báo cần xem lại',
-    review_amount_hint: 'Chọn hoặc nhập số tiền',
     review_missing: 'Một số mục vẫn cần số tiền hoặc tài khoản.',
     review_no_account_ios:
       'Chưa chọn tài khoản. Chọn trong phím tắt Log Notification để tự động ghi lại.',
@@ -3310,8 +3297,6 @@ const vi = {
     history: 'Lịch sử',
     history_title: 'Lịch sử thông báo',
     history_empty: 'Chưa có thông báo nào',
-    history_hint:
-      'Chọn Thu nhập, Chi tiêu hoặc Bỏ qua. 10 thông báo đã xử lý gần nhất được giữ lại ở đây.',
     history_none: 'Đã bỏ qua',
     history_failed: 'Chưa ghi',
     history_error: 'Không thể tải lịch sử thông báo.',

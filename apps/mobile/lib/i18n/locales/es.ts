@@ -1012,21 +1012,9 @@ const es = {
   },
   transaction_detail: {
     title: 'Detalle del movimiento',
-    hours_perspective: 'Perspectiva en horas',
     category: 'Categoría',
     account: 'Cuenta',
     note: 'Nota',
-    hero: {
-      transfer: 'Transferencia entre tus cuentas',
-      income_positive: 'Recuperaste aproximadamente {{hours}} de valor de trabajo',
-      income_negative: 'Ajuste de ingreso: se redujo aproximadamente {{hours}} de valor',
-      expense_positive: 'Esto te costó aproximadamente {{hours}}',
-      expense_negative: 'Reversión de gasto: se devolvieron aproximadamente {{hours}}',
-    },
-    nudge: {
-      long: 'Un momento: esto es una parte significativa de tu semana. ¿Vale la pena?',
-      short: 'Gasto pequeño, pero es una porción real de tu tiempo.',
-    },
   },
   insights: {
     household: 'Hogar',
@@ -3298,7 +3286,6 @@ const es = {
     review_all: 'Revisar las %{count}',
     review_banner: '%{count} notificaciones por revisar',
     review_banner_single: '1 notificación por revisar',
-    review_amount_hint: 'Elige o introduce el importe',
     review_missing: 'A algunos elementos aún les falta el importe o la cuenta.',
     review_no_account_ios:
       'No hay cuenta. Elige una en tu atajo Log Notification para que se registren automáticamente.',
@@ -3359,8 +3346,6 @@ const es = {
     history: 'Historial',
     history_title: 'Historial de notificaciones',
     history_empty: 'Aún no hay notificaciones',
-    history_hint:
-      'Elige Ingresos, Gastos o Ignorar. Tus últimas 10 notificaciones completadas se quedan aquí.',
     history_none: 'Ignorada',
     history_failed: 'No registrada',
     history_error: 'No se pudo cargar el historial de notificaciones.',

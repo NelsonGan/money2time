@@ -976,21 +976,9 @@ const zh = {
   },
   transaction_detail: {
     title: '交易详情',
-    hours_perspective: '时间视角',
     category: '分类',
     account: '账户',
     note: '备注',
-    hero: {
-      transfer: '你的账户之间转账',
-      income_positive: '你赚回了约 {{hours}} 的工作价值',
-      income_negative: '收入调整：减少了约 {{hours}} 的价值',
-      expense_positive: '这花费了你约 {{hours}}',
-      expense_negative: '支出冲正：约 {{hours}} 已返还',
-    },
-    nudge: {
-      long: '想一想：这是你一周中不小的一段时间，值得吗？',
-      short: '虽是小额支出，但也是你真实的时间。',
-    },
   },
   insights: {
     household: '家庭',
@@ -3140,7 +3128,6 @@ const zh = {
     review_all: '全部处理（%{count}）',
     review_banner: '%{count} 条通知待确认',
     review_banner_single: '1 条通知待确认',
-    review_amount_hint: '选择或输入金额',
     review_missing: '部分项目仍缺少金额或账户。',
     review_no_account_ios: '尚未设置账户。请在 Log Notification 快捷指令中选择账户，即可自动记录。',
     review_no_account_android: '此应用没有账户。请在“%{path}”中选择，即可自动记录。',
@@ -3197,7 +3184,6 @@ const zh = {
     history: '历史记录',
     history_title: '通知历史记录',
     history_empty: '暂无通知',
-    history_hint: '选择收入、支出或忽略。最近完成的 10 条通知会保留在这里。',
     history_none: '已忽略',
     history_failed: '未记账',
     history_error: '无法加载通知历史记录。',
