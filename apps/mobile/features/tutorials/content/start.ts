@@ -5,7 +5,7 @@ export const START_TUTORIALS: Tutorial[] = [
     id: 'getting-started',
     category: 'start',
     title: 'Set up Money2Time',
-    summary: 'Seven short steps from opening the app to logging your first expense.',
+    summary: 'A quick walk through setup, from opening the app to logging your first expense.',
     keywords: ['onboarding', 'first time', 'new user', 'setup', 'welcome', 'install'],
     steps: [
       {

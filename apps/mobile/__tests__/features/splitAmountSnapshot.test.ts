@@ -70,3 +70,30 @@ describe('rescaleSplitAdjustedAmounts', () => {
     expect(result).toEqual({ amount: 40, reportingAmount: 0, accountAmount: null });
   });
 });
+
+describe('rescaleSplitAdjustedAmounts from a bill at 0', () => {
+  // A USD bill on a MYR card: every friend paid back and the user's own share
+  // was 0, so the bill and its snapshots sit at 0.
+  const zero = { amount: 0, reportingAmount: 0, accountAmount: 0 };
+
+  it('rebuilds the snapshots from the rates when a payment is undone', () => {
+    expect(
+      rescaleSplitAdjustedAmounts(zero, 25, () => ({ reportingRate: 4.1, accountRate: 4.1 })),
+    ).toEqual({ amount: 25, reportingAmount: 102.5, accountAmount: 102.5 });
+  });
+
+  it('keeps a snapshot it has no rate for, and one the bill never had', () => {
+    expect(
+      rescaleSplitAdjustedAmounts({ ...zero, accountAmount: null }, 25, () => ({
+        reportingRate: null,
+        accountRate: 4,
+      })),
+    ).toEqual({ amount: 25, reportingAmount: 0, accountAmount: null });
+  });
+
+  it('asks for no rate while the amount stays at 0', () => {
+    const rates = jest.fn(() => ({ reportingRate: 4, accountRate: 4 }));
+    expect(rescaleSplitAdjustedAmounts(zero, 0, rates)).toEqual(zero);
+    expect(rates).not.toHaveBeenCalled();
+  });
+});

@@ -921,6 +921,10 @@ const fr = {
       subtitle_edit_balance_adjustment: 'Modifier le montant et le compte concerné',
       delete_transaction: 'Supprimer la transaction',
       delete_confirm: 'Cette action est irréversible. Continuer ?',
+      delete_payback_confirm:
+        "Le paiement de {{name}} revient sur ce qu'il doit pour cette note. Continuer ?",
+      delete_payback_confirm_unnamed:
+        'Ce paiement revient sur ce qui reste dû pour cette note. Continuer ?',
       receipt: {
         label: 'Reçu',
         add: 'Ajouter',

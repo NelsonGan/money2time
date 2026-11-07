@@ -921,6 +921,10 @@ const fil = {
       subtitle_edit_balance_adjustment: 'I-update ang halaga at apektadong account',
       delete_transaction: 'Burahin ang transaksyon',
       delete_confirm: 'Hindi ito maaaring ibalik. Ituloy?',
+      delete_payback_confirm:
+        'Babalik ang bayad ni {{name}} sa utang niya para sa bill na ito. Ituloy?',
+      delete_payback_confirm_unnamed:
+        'Babalik ang bayad na ito sa natitirang utang para sa bill na ito. Ituloy?',
       receipt: {
         label: 'Resibo',
         add: 'Magdagdag',

@@ -916,6 +916,8 @@ const ja = {
       subtitle_edit_balance_adjustment: '金額と対象口座を更新',
       delete_transaction: '取引を削除',
       delete_confirm: 'この操作は元に戻せません。続けますか？',
+      delete_payback_confirm: '{{name}}さんの支払いは、この会計の未払い分に戻ります。続けますか？',
+      delete_payback_confirm_unnamed: 'この支払いは、この会計の未払い分に戻ります。続けますか？',
       receipt: {
         label: 'レシート',
         add: '追加',

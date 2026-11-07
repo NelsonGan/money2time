@@ -922,6 +922,10 @@ const it = {
       subtitle_edit_balance_adjustment: 'Aggiorna importo e conto interessato',
       delete_transaction: 'Elimina transazione',
       delete_confirm: 'Non è possibile annullare. Continuare?',
+      delete_payback_confirm:
+        'Il pagamento di {{name}} torna su quanto deve per questo conto. Continuare?',
+      delete_payback_confirm_unnamed:
+        'Questo pagamento torna su quanto resta da pagare per questo conto. Continuare?',
       receipt: {
         label: 'Ricevuta',
         add: 'Aggiungi',

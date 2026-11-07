@@ -917,6 +917,10 @@ const da = {
       subtitle_edit_balance_adjustment: 'Opdater beløb og berørt konto',
       delete_transaction: 'Slet transaktion',
       delete_confirm: 'Dette kan ikke fortrydes. Fortsæt?',
+      delete_payback_confirm:
+        '{{name}}s betaling lægges tilbage på det, de skylder for denne regning. Fortsæt?',
+      delete_payback_confirm_unnamed:
+        'Denne betaling lægges tilbage på det, der stadig skyldes for denne regning. Fortsæt?',
       receipt: {
         label: 'Kvittering',
         add: 'Tilføj',

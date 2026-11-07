@@ -913,6 +913,10 @@ const ko = {
       subtitle_edit_balance_adjustment: '금액 및 관련 계좌 수정',
       delete_transaction: '거래 삭제',
       delete_confirm: '이 작업은 취소할 수 없습니다. 계속하시겠어요?',
+      delete_payback_confirm:
+        '{{name}}님의 결제가 이 계산서의 남은 금액으로 되돌아갑니다. 계속하시겠어요?',
+      delete_payback_confirm_unnamed:
+        '이 결제가 이 계산서의 남은 금액으로 되돌아갑니다. 계속하시겠어요?',
       receipt: {
         label: '영수증',
         add: '추가',

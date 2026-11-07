@@ -180,6 +180,8 @@ enum AutoLogStore {
     let id: String
     let name: String
     let currency: String
+    /// Optional so a catalog written before archiving existed still decodes.
+    let archived: Bool?
   }
 
   struct CatalogCategory: Codable {
@@ -738,16 +740,22 @@ struct AutoLogAccountEntity: AppEntity {
 }
 
 struct AutoLogAccountQuery: EntityQuery {
+  /// Every account, archived ones included, so a shortcut saved with an account
+  /// the user later archived still shows its name. The app logs such a tap to
+  /// the default account instead (resolveAutoLogEntry in autoLog.ts).
   func entities(for identifiers: [String]) async throws -> [AutoLogAccountEntity] {
-    let all = try await suggestedEntities()
-    return all.filter { identifiers.contains($0.id) }
+    guard let catalog = AutoLogStore.loadCatalog() else { return [] }
+    return catalog.accounts
+      .filter { identifiers.contains($0.id) }
+      .map { AutoLogAccountEntity(id: $0.id, name: $0.name, currency: $0.currency) }
   }
 
+  /// What the picker offers: the accounts the user has not archived.
   func suggestedEntities() async throws -> [AutoLogAccountEntity] {
     guard let catalog = AutoLogStore.loadCatalog() else { return [] }
-    return catalog.accounts.map {
-      AutoLogAccountEntity(id: $0.id, name: $0.name, currency: $0.currency)
-    }
+    return catalog.accounts
+      .filter { $0.archived != true }
+      .map { AutoLogAccountEntity(id: $0.id, name: $0.name, currency: $0.currency) }
   }
 }
 
@@ -1514,3 +1522,4 @@ module.exports.PENDING_ALERTS_KEY = PENDING_ALERTS_KEY;
 module.exports.LOG_PAYMENT_ALERT_INTENT_SWIFT = LOG_PAYMENT_ALERT_INTENT_SWIFT;
 module.exports.AUTO_LOG_STORE_SWIFT = AUTO_LOG_STORE_SWIFT;
 module.exports.LOG_CARD_PAYMENT_INTENT_SWIFT = LOG_CARD_PAYMENT_INTENT_SWIFT;
+module.exports.AUTO_LOG_ENTITIES_SWIFT = AUTO_LOG_ENTITIES_SWIFT;

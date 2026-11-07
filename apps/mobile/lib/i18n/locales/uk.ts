@@ -917,6 +917,10 @@ const uk = {
       subtitle_edit_balance_adjustment: 'Оновити суму та рахунок',
       delete_transaction: 'Видалити операцію',
       delete_confirm: 'Це незворотньо. Продовжити?',
+      delete_payback_confirm:
+        'Платіж від {{name}} повернеться до боргу за цей рахунок. Продовжити?',
+      delete_payback_confirm_unnamed:
+        'Цей платіж повернеться до залишку боргу за цей рахунок. Продовжити?',
       receipt: {
         label: 'Чек',
         add: 'Додати',

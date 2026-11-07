@@ -11,6 +11,16 @@ export interface SplitAdjustableAmounts {
 }
 
 /**
+ * Rates for one unit of a bill's currency, used only when its amount is 0 and
+ * the snapshots cannot be rescaled: `reportingRate` into the reporting
+ * currency (the bill's frozen `fxRate`) and `accountRate` into its account's.
+ */
+export interface SplitSnapshotRates {
+  reportingRate: number | null;
+  accountRate: number | null;
+}
+
+/**
  * Re-scale a parent transaction's frozen currency snapshots when marking a
  * split paid (or unpaid) changes its `amount`.
  *
@@ -30,12 +40,30 @@ export interface SplitAdjustableAmounts {
 export function rescaleSplitAdjustedAmounts(
   current: SplitAdjustableAmounts,
   nextAmount: number,
+  rates?: () => SplitSnapshotRates,
 ): SplitAdjustableAmounts {
   const amount = normalizeMoneyAmount(nextAmount);
   const previousAmount = current.amount;
-  // A zero-amount parent offers no ratio to scale by. Leave the snapshots as
-  // they are rather than invent a rate.
-  if (previousAmount === 0) return { ...current, amount };
+  if (previousAmount === 0) {
+    // A zero-amount parent offers no ratio to scale by: a bill whose friends
+    // paid back every share (the user's own being 0) sits at 0 with its
+    // snapshots at 0 too. Undoing a payment then has to rebuild them from a
+    // rate, or totals and the account balance would count the bill as 0.
+    // Without a rate, leave them as they are rather than invent one.
+    if (amount === 0 || !rates) return { ...current, amount };
+    const { reportingRate, accountRate } = rates();
+    return {
+      amount,
+      reportingAmount:
+        current.reportingAmount === null || reportingRate == null
+          ? current.reportingAmount
+          : normalizeMoneyAmount(amount * reportingRate),
+      accountAmount:
+        current.accountAmount === null || accountRate == null
+          ? current.accountAmount
+          : normalizeMoneyAmount(amount * accountRate),
+    };
+  }
   const ratio = amount / previousAmount;
   return {
     amount,

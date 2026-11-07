@@ -918,6 +918,10 @@ const sv = {
       subtitle_edit_balance_adjustment: 'Uppdatera belopp och berört konto',
       delete_transaction: 'Ta bort transaktion',
       delete_confirm: 'Det här kan inte ångras. Fortsätta?',
+      delete_payback_confirm:
+        'Betalningen från {{name}} läggs tillbaka på det hen är skyldig för den här notan. Fortsätta?',
+      delete_payback_confirm_unnamed:
+        'Den här betalningen läggs tillbaka på det som fortfarande är skyldigt för den här notan. Fortsätta?',
       receipt: {
         label: 'Kvitto',
         add: 'Lägg till',

@@ -8,6 +8,7 @@ const plugin = require('../../plugins/withMoney2TimeAutoLog.js') as {
   LOG_PAYMENT_ALERT_INTENT_SWIFT: string;
   LOG_CARD_PAYMENT_INTENT_SWIFT: string;
   AUTO_LOG_STORE_SWIFT: string;
+  AUTO_LOG_ENTITIES_SWIFT: string;
   PENDING_ALERTS_KEY: string;
 };
 
@@ -144,5 +145,28 @@ describe('Log Card Payment test run (withMoney2TimeAutoLog)', () => {
     // A Play run and a real tap with no amount or merchant look the same, so
     // the copy must still tell someone who just paid to add the payment.
     expect(branch).toContain('If you just paid, open Money2Time to add it.');
+  });
+});
+
+describe('Shortcuts account picker (withMoney2TimeAutoLog)', () => {
+  const swift = plugin.AUTO_LOG_ENTITIES_SWIFT;
+
+  it('offers only accounts the user has not archived', () => {
+    expect(swift).toMatch(
+      /func suggestedEntities\(\)[\s\S]*?\.filter \{ \$0\.archived != true \}[\s\S]*?\n {2}\}/,
+    );
+  });
+
+  it('still resolves an archived account a shortcut was saved with', () => {
+    const resolve = swift.slice(
+      swift.indexOf('func entities(for identifiers'),
+      swift.indexOf('func suggestedEntities'),
+    );
+    expect(resolve).toContain('catalog.accounts');
+    expect(resolve).not.toContain('$0.archived');
+  });
+
+  it('decodes a catalog written before archiving existed', () => {
+    expect(plugin.AUTO_LOG_STORE_SWIFT).toContain('let archived: Bool?');
   });
 });

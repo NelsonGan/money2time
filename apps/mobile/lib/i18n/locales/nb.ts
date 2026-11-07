@@ -918,6 +918,10 @@ const nb = {
       subtitle_edit_balance_adjustment: 'Oppdater beløp og berørt konto',
       delete_transaction: 'Slett transaksjon',
       delete_confirm: 'Dette kan ikke angres. Fortsette?',
+      delete_payback_confirm:
+        'Betalingen fra {{name}} legges tilbake på det de skylder for denne regningen. Fortsette?',
+      delete_payback_confirm_unnamed:
+        'Denne betalingen legges tilbake på det som fortsatt skyldes for denne regningen. Fortsette?',
       receipt: {
         label: 'Kvittering',
         add: 'Legg til',
