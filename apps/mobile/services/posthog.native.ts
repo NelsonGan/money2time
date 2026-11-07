@@ -56,7 +56,7 @@ type CaptureEvent = Parameters<
  * `X-POSTHOG-DISTINCT-ID`): only the receipt-scanner Worker, which copies the
  * session onto its `$ai_generation` events so an AI trace links to the replay
  * and events of the session that sent it. Read from the same env var the scan
- * client uses, so a PR build pointing at its preview Worker links too.
+ * client uses, so a build pointed at a preview Worker version links too.
  */
 function tracingHeaderHosts(): string[] {
   const url = process.env.EXPO_PUBLIC_MONEY2TIME_WORKERS_RECEIPT_SCANNER?.trim();

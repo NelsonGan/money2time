@@ -3,16 +3,16 @@ name: CI / CD
 # Path-aware pipeline. The `changes` job classifies the diff once and every
 # downstream job keys off it, so a change only pays for the pipeline it can
 # actually affect: a Worker-only or docs-only merge to main no longer kicks off
-# an iOS + Android store build, and an app-only PR no longer uploads a Worker
-# preview. Production Cloudflare deploys are path-filtered the same way in
+# an iOS + Android store build, and a Worker-only PR skips the app test job.
+# Production Cloudflare deploys are path-filtered the same way in
 # cloudflare.yml. Skipped jobs still report as successful to branch protection,
 # which is why this gates jobs with `if:` instead of workflow-level `paths:`
 # (a workflow skipped by a path filter leaves required checks pending forever).
 
-# Give each run a clear title in the Actions list so production, PR-preview,
-# manual, and branch runs are easy to tell apart at a glance.
+# Give each run a clear title in the Actions list so production, PR, manual,
+# and branch runs are easy to tell apart at a glance.
 run-name: >-
-  ${{ github.event_name == 'pull_request' && format('PR Preview · #{0}', github.event.number)
+  ${{ github.event_name == 'pull_request' && format('PR · #{0}', github.event.number)
    || github.event_name == 'workflow_dispatch' && format('Manual · {0}/{1}', github.event.inputs.platform, github.event.inputs.profile)
    || github.ref == 'refs/heads/main' && 'Production Release'
    || format('Branch · {0}', github.ref_name) }}
@@ -45,10 +45,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Classifies the diff into the three things this repo can ship:
-  #   app     — anything that can reach the mobile binary (gates the EAS
-  #             preview + the production store build)
-  #   worker  — apps/cloudflare/** (gates the per-PR Worker preview upload)
+  # Classifies the diff into the two flags the jobs below gate on:
+  #   app     — anything that can reach the mobile binary (gates the
+  #             production store build)
   #   checks  — anything the app's `npm run check` / `npm test` can even see,
   #             i.e. everything outside apps/cloudflare/ (eslint and tsconfig
   #             only see apps/mobile, prettier sees it plus the root docs and
@@ -63,7 +62,6 @@ jobs:
       contents: read
     outputs:
       app: ${{ steps.classify.outputs.app }}
-      worker: ${{ steps.classify.outputs.worker }}
       checks: ${{ steps.classify.outputs.checks }}
     steps:
       - name: Check out repository
@@ -104,7 +102,7 @@ jobs:
           if [ "$resolved" != true ]; then
             # workflow_dispatch, or a diff we couldn't resolve: build everything.
             echo "Changed paths not resolvable for '$EVENT' — treating all as changed."
-            printf 'app=true\nworker=true\nchecks=true\n' >> "$GITHUB_OUTPUT"
+            printf 'app=true\nchecks=true\n' >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -113,7 +111,6 @@ jobs:
           sed 's/^/  /' changed.txt
 
           app=false
-          worker=false
           checks=false
           # These classifications write each grep's matches to a file and test
           # that file, rather than piping one grep into a `grep -q` that exits on
@@ -123,19 +120,14 @@ jobs:
           # `if`, so a genuine app change classifies as `app=false` and the push
           # never cuts a store build. It is size-dependent, so it passed on every
           # normal diff and first bit on a 2,265-file one. Keep these unpiped.
-          # Markdown under apps/cloudflare/ is documentation only, and
-          # cloudflare.yml ignores it too, so it never earns a Worker preview upload.
-          grep -E '^apps/cloudflare/' changed.txt > worker_paths.txt || true
-          grep -vE '\.md$' worker_paths.txt > worker_code.txt || true
-          [ -s worker_code.txt ] && worker=true
           grep -qvE '^apps/cloudflare/' changed.txt && checks=true
           # Paths that cannot change the shipped binary. Anything else counts as
           # an app change, so an unrecognised path always builds the app.
           grep -vE '^(apps/cloudflare/|\.github/|\.claude/|\.agents/|\.codex/|\.vscode/)|(^|/)[^/]*\.md$|^LICENSE$' changed.txt > app_paths.txt || true
           [ -s app_paths.txt ] && app=true
 
-          echo "app=$app | worker=$worker | checks=$checks"
-          printf 'app=%s\nworker=%s\nchecks=%s\n' "$app" "$worker" "$checks" >> "$GITHUB_OUTPUT"
+          echo "app=$app | checks=$checks"
+          printf 'app=%s\nchecks=%s\n' "$app" "$checks" >> "$GITHUB_OUTPUT"
 
   test:
     name: Test
@@ -172,236 +164,13 @@ jobs:
       - name: Run tests
         run: npm test
 
-  preview-pending:
-    name: PR Preview · Pending comment
-    needs: changes
-    # Only PRs that get a preview published below announce one as pending.
-    if: >-
-      github.event_name == 'pull_request'
-      && (needs.changes.outputs.app == 'true' || needs.changes.outputs.worker == 'true')
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    permissions:
-      contents: read
-      pull-requests: write
-    steps:
-      - name: Flag preview comment as pending
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const commit = context.payload.pull_request.head.sha.slice(0, 7);
-            const marker = '<!-- eas-update-preview -->';
-            const { owner, repo } = context.repo;
-            const issue_number = context.issue.number;
-            const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number });
-            const existing = comments.find((c) => c.body && c.body.includes(marker));
-            // Keep the previously published QR/link in place and only flip the
-            // status row, so the user can still scan the old build meanwhile but
-            // knows it isn't the latest commit yet.
-            const pendingStatus = `| **Status** | ⏳ Building \`${commit}\`… — the QR below is still the previous build |`;
-            const statusRe = /\| \*\*Status\*\* \|[^\n]*\|/;
-            if (existing && statusRe.test(existing.body)) {
-              const body = existing.body.replace(statusRe, pendingStatus);
-              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
-            } else {
-              // No preview published yet — post a lightweight placeholder.
-              const body = [
-                marker,
-                '## 📱 Preview this update',
-                '',
-                `⏳ **Building the first preview** for commit \`${commit}\`… This comment updates automatically with a QR code and link the moment it is ready.`,
-              ].join('\n');
-              if (existing) {
-                await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
-              } else {
-                await github.rest.issues.createComment({ owner, repo, issue_number, body });
-              }
-            }
-
-  worker-preview:
-    name: PR Preview · Worker
-    needs: [changes, test]
-    # Only PRs that touch the Worker need a preview upload. Skipping the rest
-    # keeps app-only and fork PRs (whose runs don't get the Cloudflare secrets)
-    # off this path entirely; pr-update falls back to the production Worker URL
-    # when this job is skipped, so their preview still scans against a live
-    # backend. `always()` because test is itself skipped on Worker-only PRs.
-    if: >-
-      always()
-      && github.event_name == 'pull_request'
-      && needs.changes.outputs.worker == 'true'
-      && (needs.test.result == 'success' || needs.test.result == 'skipped')
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: read
-    outputs:
-      url: ${{ steps.worker.outputs.url }}
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      # wrangler v4 requires Node >= 22 (the rest of the app CI stays on 20).
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Deploy branch Worker (preview)
-        id: worker
-        working-directory: apps/cloudflare/workers/receipt-scanner
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          npm ci
-          npm run typecheck
-          # Upload a preview version of this branch's Worker under a stable
-          # per-PR alias, so the URL is predictable across commits. `versions
-          # upload` publishes at 0% traffic — it never affects the production
-          # Worker on workers-receipt-scanner.money2time.com. Preview versions
-          # keep the bindings from wrangler.toml, so they share the production
-          # D1 (throwaway rate-limit/cache rows — acceptable).
-          alias="pr-${{ github.event.number }}"
-          set -o pipefail
-          out=$(npx wrangler versions upload --preview-alias "$alias" --tsconfig tsconfig.json 2>&1 | tee /dev/stderr)
-          # `grep -m1` rather than `grep | head -n1`: head exits after the first
-          # line, which SIGPIPEs grep, and the `set -o pipefail` above would turn
-          # that into a failed assignment. Same trap as the path classifier.
-          url=$(printf '%s\n' "$out" | grep -m1 -oE "https://${alias}-[a-z0-9.-]+\.workers\.dev")
-          if [ -z "$url" ]; then
-            echo "::error::Could not parse the aliased Worker preview URL from wrangler output"
-            exit 1
-          fi
-          echo "url=$url" >> "$GITHUB_OUTPUT"
-
-  pr-update:
-    name: PR Preview · EAS Update
-    needs: [changes, test, worker-preview]
-    # Publish a preview for anything a reviewer can actually open on a device:
-    # an app change (new JS bundle) or a Worker change (same bundle, pointed at
-    # the branch's Worker). Docs-only PRs skip it. `always()` because either
-    # upstream job can legitimately be skipped by the gates above.
-    if: >-
-      always()
-      && github.event_name == 'pull_request'
-      && (needs.changes.outputs.app == 'true' || needs.changes.outputs.worker == 'true')
-      && (needs.test.result == 'success' || needs.test.result == 'skipped')
-      && (needs.worker-preview.result == 'success' || needs.worker-preview.result == 'skipped')
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      contents: read
-      pull-requests: write
-    env:
-      # App-only PRs skip the Worker preview upload and fall back to production,
-      # so their preview still scans against a live backend.
-      WORKER_URL: ${{ needs.worker-preview.outputs.url || 'https://workers-receipt-scanner.money2time.com' }}
-    defaults:
-      run:
-        working-directory: apps/mobile
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: apps/mobile/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Set up EAS CLI
-        uses: expo/expo-github-action@v8
-        with:
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
-
-      - name: Build update message
-        id: message
-        env:
-          # Read the title through an env var (never inline it into the script)
-          # so an arbitrary title can't inject shell commands.
-          PR_TITLE: ${{ github.event.pull_request.title }}
-        run: |
-          # The EAS update message is cosmetic. Strip double quotes and
-          # backticks so a title like Add "X" step doesn't break the preview
-          # action's argv parsing (it splits the command string on quotes).
-          clean="${PR_TITLE//\"/}"
-          clean="${clean//\`/}"
-          echo "text=${clean}" >> "$GITHUB_OUTPUT"
-
-      - name: Publish PR update
-        id: preview
-        uses: expo/expo-github-action/preview@v8
-        env:
-          # Point this branch's JS bundle at the branch's Worker preview so the
-          # PR build talks to its own Worker. main leaves this unset and pulls
-          # the fixed production URL from the Expo cloud env var instead.
-          EXPO_PUBLIC_MONEY2TIME_WORKERS_RECEIPT_SCANNER: ${{ env.WORKER_URL }}
-          # app.config.ts only enables expo-updates for internal variants (store
-          # builds launch from their embedded bundle — see the note there). This
-          # publish step has to evaluate the config with updates on.
-          APP_VARIANT: preview
-        with:
-          command: eas update --branch pr-${{ github.event.number }} --message "${{ steps.message.outputs.text }}"
-          working-directory: apps/mobile
-          comment: false
-
-      - name: Comment QR code and link
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const link = `${{ steps.preview.outputs.link }}`;
-            const qr = `${{ steps.preview.outputs.qr }}`;
-            const branch = `${{ steps.preview.outputs.branchName }}`;
-            const runtime = `${{ steps.preview.outputs.runtimeVersion }}`;
-            const workerUrl = process.env.WORKER_URL;
-            const commit = context.payload.pull_request.head.sha.slice(0, 7);
-            // This step runs right after the update is published, so "now" is
-            // effectively when the EAS update finished.
-            const publishedAt = new Date().toLocaleString('en-US', {
-              timeZone: 'Asia/Singapore',
-              dateStyle: 'medium',
-              timeStyle: 'short',
-            }) + ' GMT+8';
-            const marker = '<!-- eas-update-preview -->';
-            const body = [
-              marker,
-              '## 📱 Preview this update',
-              '',
-              'Your changes are published to a preview branch — open them on your device in one tap.',
-              '',
-              '<table>',
-              '<tr>',
-              `<td width="260" align="center"><a href="${link}"><img src="${qr}" width="220" alt="EAS Update QR code" /></a><br/><sub>Scan or tap to open with your dev build</sub></td>`,
-              '<td valign="middle">',
-              '',
-              '| | |',
-              '| --- | --- |',
-              '| **Status** | ✅ Up to date |',
-              `| **Branch** | \`${branch}\` |`,
-              `| **Runtime** | \`${runtime}\` |`,
-              `| **Worker** | ${workerUrl ? `[Open ↗](${workerUrl})` : '—'} |`,
-              `| **Commit** | \`${commit}\` |`,
-              `| **Published** | ${publishedAt} |`,
-              '',
-              '</td>',
-              '</tr>',
-              '</table>',
-            ].join('\n');
-            const { owner, repo } = context.repo;
-            const issue_number = context.issue.number;
-            const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number });
-            const existing = comments.find((c) => c.body && c.body.includes(marker));
-            if (existing) {
-              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
-            } else {
-              await github.rest.issues.createComment({ owner, repo, issue_number, body });
-            }
+      # Typecheck and jest never run Metro, so without this a PR that breaks
+      # the bundle (an import or asset only Metro resolves) would first fail in
+      # the store build after merge. PRs only: on main the store build bundles
+      # right after this anyway.
+      - name: Bundle app
+        if: github.event_name == 'pull_request'
+        run: npx expo export --platform ios --platform android --output-dir "$RUNNER_TEMP/expo-export"
 
   # Production Worker deploys live in the dedicated cloudflare.yml workflow (runs on
   # push to main when apps/cloudflare/** changes), so there is no worker-deploy job here —
