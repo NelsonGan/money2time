@@ -37,3 +37,21 @@ describe('update compatibility for bundled assets', () => {
     },
   );
 });
+
+describe('build variants', () => {
+  it.each(['development', 'preview', 'production', undefined])(
+    '%s builds the store app, widgets included',
+    (variant) => {
+      const config = configure(variant);
+      expect(config.ios.bundleIdentifier).toBe('com.nelsongan.money2time');
+      expect(config.ios.googleServicesFile).toBe('./GoogleService-Info.plist');
+      expect(config.name).toBe(require('../../app.json').expo.name);
+      const pluginNames = config.plugins.map((plugin: unknown) =>
+        Array.isArray(plugin) ? plugin[0] : plugin,
+      );
+      expect(
+        pluginNames.some((name: unknown) => String(name).includes('withMoney2TimeWidgets')),
+      ).toBe(true);
+    },
+  );
+});

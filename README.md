@@ -170,8 +170,7 @@ provider secrets (OpenRouter, APNs) live only in the Workers — never in the
 app; the relay has none.
 
 Native GA4 uses the Firebase client configs committed at the app root (`apps/mobile`):
-`google-services.json`, `GoogleService-Info.plist`, and
-`GoogleService-Info.dev.plist`. They contain Firebase project identifiers, not
+`google-services.json` and `GoogleService-Info.plist`. They contain Firebase project identifiers, not
 service-account credentials. GA4 is enabled for the complete population without
 an in-app prompt and receives every event. PostHog also receives every user,
 but only the curated install, activation, daily engagement, adoption and Pro
@@ -1545,7 +1544,7 @@ updated_at)`, with each row as JSON, plus `sync_info` (the choice screen's
   last 7 days and are fetched from the Worker as needed.
 
 Native sign-in: Apple via `expo-apple-authentication` with a SHA-256 nonce
-(the entitlement is off in the M2T Dev variant, which then hides the button);
+(a build without the entitlement hides the button);
 Google via the Google Sign-In SDK shared with Drive backup: it reuses a Drive
 session when there is one (and stops with an error, rather than signing Drive
 out, when that session cannot be restored); otherwise it signs in once without
@@ -2382,7 +2381,7 @@ Sources: [native analytics](apps/mobile/services/analytics.native.ts), [shared P
 | Pro profile sync             | Deduplicate unchanged state per user ID in memory (ProContext) and on disk (person-property diff); failed, interrupted or stale syncs clear the signature so a later refresh can retry. Writes name their expected user and stop after customer/state changes. Revenue attribute uploads run independently of profile writes.                                                                                                                                                                                                                                                               | [Pro context](apps/mobile/context/ProContext.tsx), [native analytics](apps/mobile/services/analytics.native.ts)                                                                                                                                        |
 | Event allowlist              | A `before_send` hook drops every event that is neither in `POSTHOG_EVENTS` nor `$identify`, `$set`, `$exception` or `$feature_flag_called`, so an SDK default cannot spend the budget unnoticed.                                                                                                                                                                                                                                                                                                                                                                                            | [PostHog client](apps/mobile/services/posthog.native.ts)                                                                                                                                                                                               |
 | PostHog project settings     | `Money2Time` (658608), timezone `Asia/Kuala_Lumpur`, IPs discarded after GeoIP, web autocapture off, exception autocapture on, console-log and performance capture off, session recording on (web sample 10%, minimum 5 s, inputs masked, no network payloads), surveys and heatmaps off. Authorized URLs (`app_urls`): `https://www.money2time.com`, `https://money2time.com`; recording domains are left unrestricted because mobile replays have no domain. Test-account filter (default on): the internal cohort, `app_variant` not `development`/`preview`, and `$host` not localhost. | PostHog project settings                                                                                                                                                                                                                               |
-| Firebase app selection       | Android and production/preview iOS use `com.nelsongan.money2time`; development iOS uses `com.nelsongan.money2time.dev`. Expo selects the matching Firebase client configuration.                                                                                                                                                                                                                                                                                                                                                                                                            | [Expo config](apps/mobile/app.config.ts), [base config](apps/mobile/app.json)                                                                                                                                                                          |
+| Firebase app selection       | Every build (development, preview and production, Android and iOS) uses `com.nelsongan.money2time`, with one Firebase client configuration per platform.                                                                                                                                                                                                                                                                                                                                                                                                                                    | [Expo config](apps/mobile/app.config.ts), [base config](apps/mobile/app.json)                                                                                                                                                                          |
 | Firebase iOS crash hardening | Require GoogleUtilities `~> 8.1.4` in every iOS build. Its dictionary guards ignore nil keys from malformed analytics configuration instead of crashing on a background queue, as in MONEY2TIME-5P during the September 29, 2026 incident.                                                                                                                                                                                                                                                                                                                                                  | [Base config](apps/mobile/app.json), [GoogleUtilities 8.1.4](https://github.com/google/GoogleUtilities/releases/tag/8.1.4), [Firebase incident report](https://firebase.blog/posts/2026/10/firebase-analytics-outage)                                  |
 | Firebase startup collection  | Auto-collection is disabled until JavaScript sets consent and the app user ID, then enables product analytics. Serialize customer configuration, reopen readiness for customer switches and retry failed configuration on the next event or identification for the same user. Manual screen reporting replaces automatic native screen reporting.                                                                                                                                                                                                                                           | [Firebase config](apps/mobile/firebase.json), [native analytics](apps/mobile/services/analytics.native.ts)                                                                                                                                             |
 | Advertising collection       | Deny ad storage, ad user data and ad personalization; disable Android advertising-ID collection/permissions and iOS Analytics advertising-ID support. PostHog collects no advertising identifiers.                                                                                                                                                                                                                                                                                                                                                                                          | [Firebase config](apps/mobile/firebase.json), [base config](apps/mobile/app.json), [native analytics](apps/mobile/services/analytics.native.ts)                                                                                                        |
@@ -2618,8 +2617,7 @@ existing build model.
 Native configuration:
 
 - Android app id: `com.nelsongan.money2time`
-- production/preview iOS bundle id: `com.nelsongan.money2time`
-- development iOS bundle id: `com.nelsongan.money2time.dev`
+- iOS bundle id: `com.nelsongan.money2time` (every build variant)
 - native Analytics auto-collection disabled until the JavaScript layer has the
   pseudonymous app-user identity, explicitly grants analytics storage, denies
   all advertising consent, and then enables collection for every user;
@@ -2705,11 +2703,10 @@ The Firebase project must be linked to a GA4 property. The repository then
 needs the Firebase client configuration files for each registered app:
 
 - `google-services.json` for Android;
-- `GoogleService-Info.plist` for production/preview iOS;
-- `GoogleService-Info.dev.plist` for the development iOS bundle.
+- `GoogleService-Info.plist` for iOS.
 
 These files contain client/project identifiers, not service-account private
-keys. The Expo config chooses the appropriate iOS file from `APP_VARIANT`.
+keys.
 
 PostHog needs no app environment variable: the public project token is checked
 into `constants/posthog.ts` (override with `EXPO_PUBLIC_POSTHOG_PROJECT_TOKEN`).

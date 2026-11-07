@@ -12,11 +12,7 @@ const {
  * automation (Mode A) and Back Tap (Mode B).
  *
  * Everything lives in the HOST app target rather than an App Intents
- * extension: it needs no new bundle id or provisioning profile, and it keeps
- * `app.config.ts`'s dev-variant plugin filter (which is name-specific to
- * withMoney2TimeWidgets) from having to know about a second target whose
- * hardcoded bundle id would not be a child of `com.nelsongan.money2time.dev`.
- * The cost is that iOS background-launches the app to run the intent; the
+ * extension: it needs no new bundle id or provisioning profile. The cost is that iOS background-launches the app to run the intent; the
  * intent itself touches no React Native and returns as soon as it has written
  * to the App Group, so the Swift here ports to an extension unchanged if that
  * ever needs to happen.
@@ -1396,9 +1392,8 @@ function addIosAutoLogFiles(config) {
 }
 
 /**
- * The widget plugin already adds this group, but `app.config.ts` strips that
- * plugin from the dev variant — so auto-log has to add it itself or dev builds
- * lose the App Group entirely. Idempotent, so the two can overlap safely.
+ * The widget plugin already adds this group too; auto-log adds it itself so it
+ * does not depend on that plugin. Idempotent, so the two can overlap safely.
  */
 function addIosAutoLogEntitlements(config) {
   return withEntitlementsPlist(config, (cfg) => {
