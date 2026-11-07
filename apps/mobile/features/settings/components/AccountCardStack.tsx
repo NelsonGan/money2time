@@ -1164,6 +1164,10 @@ function ArchivedSectionReveal({
     );
   }, [collapsing, onCollapsed, progress]);
 
+  // A section replaced mid-fold (Show tapped again) must not report its fold
+  // as done: that would unmount the fresh section that replaced it.
+  useEffect(() => () => cancelAnimation(progress), [progress]);
+
   // Untouched while open, so the section still grows when a card in it opens.
   const collapseStyle = useAnimatedStyle(() => {
     const value = progress.get();
@@ -1231,6 +1235,14 @@ export function AccountCardStack({
   const [revealKey, setRevealKey] = useState(0);
   const archivedCount = archivedAccounts?.length ?? 0;
   const collapsingArchived = archivedMounted && !showArchived;
+  // With nothing archived the section and its toggle are gone, possibly
+  // mid-fold; start over closed so the next archived account is not shown
+  // folding, or already open.
+  useEffect(() => {
+    if (archivedCount > 0) return;
+    setShowArchived(false);
+    setArchivedMounted(false);
+  }, [archivedCount]);
   const handleArchivedCollapsed = useCallback(() => setArchivedMounted(false), []);
   const toggleArchived = useCallback(() => {
     if (showArchived) {
