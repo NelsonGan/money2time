@@ -31,6 +31,8 @@ export interface SplitPaymentTarget {
   shareTotal: number;
   currency: string;
   paybackAccountId: string | null;
+  /** False for a bill paid from no account: the payback lands nowhere, so no Paid to. */
+  billHasAccount?: boolean;
 }
 
 interface SplitPaymentSheetProps {
@@ -93,7 +95,7 @@ export function SplitPaymentSheet({ target, onClose, onRecord }: SplitPaymentShe
       return;
     }
     void triggerHaptic('success');
-    onRecord(plan.amount, paybackAccountId);
+    onRecord(plan.amount, target.billHasAccount === false ? null : paybackAccountId);
   }, [onRecord, paybackAccountId, plan, target]);
 
   const account = paybackAccountId ? getAccountById(paybackAccountId) : null;
@@ -145,37 +147,40 @@ export function SplitPaymentSheet({ target, onClose, onRecord }: SplitPaymentShe
                 </Text>
               </View>
 
-              <Pressable
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  setPickerOpen(true);
-                }}
-                accessibilityRole="button"
-                className="mx-4 mt-4 mb-3 flex-row items-center gap-2 rounded-2xl border border-border/25 bg-card/60 px-4 py-3 active:opacity-70"
-              >
-                <Text variant="body" tone="muted" className="flex-1">
-                  {I18n.t('transactions.settleUp.payment_paid_to')}
-                </Text>
-                {account ? (
-                  <AccountLogo
-                    logoId={account.logoId}
-                    type={account.type}
-                    goalEmoji={account.goalEmoji}
-                    size={18}
-                  />
-                ) : null}
-                <Text variant="bodyStrong" numberOfLines={1} className="max-w-[55%]">
-                  {account?.name ?? I18n.t('common.no_account')}
-                </Text>
-                <ChevronRight size={16} color={themeColors.textMuted} />
-              </Pressable>
+              {target.billHasAccount === false ? (
+                <View className="mb-3" />
+              ) : (
+                <Pressable
+                  onPress={() => {
+                    void triggerHaptic('selection');
+                    setPickerOpen(true);
+                  }}
+                  accessibilityRole="button"
+                  className="mx-4 mt-4 mb-3 flex-row items-center gap-2 rounded-2xl border border-border/25 bg-card/60 px-4 py-3 active:opacity-70"
+                >
+                  <Text variant="body" tone="muted" className="flex-1">
+                    {I18n.t('transactions.settleUp.payment_paid_to')}
+                  </Text>
+                  {account ? (
+                    <AccountLogo
+                      logoId={account.logoId}
+                      type={account.type}
+                      goalEmoji={account.goalEmoji}
+                      size={18}
+                    />
+                  ) : null}
+                  <Text variant="bodyStrong" numberOfLines={1} className="max-w-[55%]">
+                    {account?.name ?? I18n.t('common.no_account')}
+                  </Text>
+                  <ChevronRight size={16} color={themeColors.textMuted} />
+                </Pressable>
+              )}
 
               <MiniNumpad
                 key={padKey}
                 initialExpression={expression}
                 onValueChange={setExpression}
                 onConfirm={handleRecord}
-                confirmOnRelease
                 confirmLabel={
                   plan?.kind === 'partial'
                     ? I18n.t('transactions.settleUp.part_paid')

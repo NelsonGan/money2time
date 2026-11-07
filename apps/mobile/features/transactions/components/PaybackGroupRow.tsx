@@ -52,7 +52,13 @@ export function PaybackGroupRow({
   // the row by day and bill, so a recycled cell starts closed.
   const [open, setOpen] = useState(false);
   const expanded = open || forceOpen;
-  const total = normalizeMoneyAmount(transactions.reduce((sum, tx) => sum + tx.amount, 0));
+  // Totalled per currency: a payback is in the currency of the account it
+  // leaves, while older ones were in the bill's, so one bill's paybacks can mix
+  // two currencies, which must not be added together.
+  const totals = new Map<string, number>();
+  for (const tx of transactions) {
+    totals.set(tx.currency, (totals.get(tx.currency) ?? 0) + tx.amount);
+  }
   const title = billTitle ?? I18n.t('transactions.settleUp.untitled_bill');
   const subtitle = [
     I18n.t('transactions.settleUp.payback_group', { count: transactions.length }),
@@ -167,11 +173,15 @@ export function PaybackGroupRow({
             compact ? 'text-[13px] leading-[16px]' : 'text-[15px] leading-[20px]',
           )}
         >
-          {formatAmount(total, settings, {
-            neutralSign: true,
-            trueHourlyRate: 0,
-            currencyCode: transactions[0]?.currency,
-          })}
+          {[...totals]
+            .map(([currency, total]) =>
+              formatAmount(normalizeMoneyAmount(total), settings, {
+                neutralSign: true,
+                trueHourlyRate: 0,
+                currencyCode: currency,
+              }),
+            )
+            .join(' + ')}
         </Text>
         <Chevron size={16} color={themeColors.textMuted} />
       </Pressable>

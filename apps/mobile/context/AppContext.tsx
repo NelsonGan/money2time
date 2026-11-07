@@ -58,6 +58,7 @@ import {
 import { withEntryStamp } from '~/features/sharedLedgers/lib/entryStamp';
 import { invalidateLedgerPeople } from '~/features/sharedLedgers/lib/ledgerPeople';
 import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accountEntryGate';
+import { pickPaybackAccountId } from '~/features/transactions/lib/entryDefaults';
 import {
   indexPaybacks,
   type PaybackLink,
@@ -222,6 +223,7 @@ import {
   type WageConfig,
   type WeekStartsOn,
 } from '~/types';
+import { isAccountArchived } from '~/utils/accountArchive';
 import { aggregateBreakdown } from '~/utils/breakdown';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import {
@@ -901,6 +903,9 @@ function createPaybackTransferInDb(
   });
 }
 
+/** An account's currency by id, read from the accounts already in memory. */
+type AccountCurrencyOf = (accountId: string) => string | undefined;
+
 /**
  * The payback transfer's amounts for a share of `share` paid into
  * `toAccountId`, in each account's own currency (`paybackTransferAmounts`).
@@ -911,11 +916,10 @@ function paybackAmountsFor(
   share: number,
   toAccountId: string,
   rateTable: RateTable,
+  currencyOf: AccountCurrencyOf,
 ): PaybackTransferAmounts {
-  const fromCurrency =
-    (parent.accountId ? accountsRepository.getById(parent.accountId)?.currency : null) ||
-    parent.currency;
-  const toCurrency = accountsRepository.getById(toAccountId)?.currency || fromCurrency;
+  const fromCurrency = (parent.accountId ? currencyOf(parent.accountId) : null) || parent.currency;
+  const toCurrency = currencyOf(toAccountId) || fromCurrency;
   return paybackTransferAmounts({
     share,
     billCurrency: parent.currency,
@@ -929,9 +933,11 @@ function paybackAmountsFor(
 
 /**
  * Rates to rebuild a bill's frozen snapshots when undoing a payback on a bill
- * whose amount had reached 0 (see `rescaleSplitAdjustedAmounts`): its frozen
- * `fxRate` for the reporting snapshot, and for the account snapshot the same
- * rate when the account is in the reporting currency, else today's rate.
+ * whose amount had reached 0 (see `rescaleSplitAdjustedAmounts`). Reporting:
+ * the bill's frozen `fxRate`, else today's. Account: the rate the undone
+ * payback's transfer left the account at (`undone`, so the account gets back
+ * exactly what the deleted transfer took), else the frozen `fxRate` when the
+ * account is in the reporting currency, else today's.
  */
 function splitRestoreRates(
   tx: Pick<
@@ -939,18 +945,31 @@ function splitRestoreRates(
     'currency' | 'fxRate' | 'reportingCurrency' | 'accountId' | 'accountAmount'
   >,
   rateTable: RateTable,
+  currencyOf: AccountCurrencyOf,
+  undone?: {
+    share: number;
+    transfer: Pick<TransactionWithRelations, 'amount' | 'fromAccountId'> | null | undefined;
+  },
 ): SplitSnapshotRates {
   let accountRate: number | null = null;
   if (tx.accountAmount != null && tx.accountId) {
-    const accountCurrency = accountsRepository.getById(tx.accountId)?.currency;
-    if (accountCurrency) {
+    const accountCurrency = currencyOf(tx.accountId);
+    const transfer = undone?.transfer;
+    if (transfer && transfer.fromAccountId === tx.accountId && undone.share > 0) {
+      accountRate = transfer.amount / undone.share;
+    } else if (accountCurrency) {
       accountRate =
         accountCurrency === tx.reportingCurrency && tx.fxRate != null
           ? tx.fxRate
           : convert(1, tx.currency, accountCurrency, rateTable).rateUsed;
     }
   }
-  return { reportingRate: tx.fxRate ?? null, accountRate };
+  const reportingRate =
+    tx.fxRate ??
+    (tx.reportingCurrency
+      ? convert(1, tx.currency, tx.reportingCurrency, rateTable).rateUsed
+      : null);
+  return { reportingRate, accountRate };
 }
 
 /**
@@ -967,6 +986,7 @@ function writePaybackInDb(
     date: string;
     note: string | null;
     rateTable: RateTable;
+    currencyOf: AccountCurrencyOf;
   },
 ): void {
   transactionsRepository.update(
@@ -974,7 +994,13 @@ function writePaybackInDb(
     rescaleSplitAdjustedAmounts(parent, parent.amount - input.amount),
   );
   if (!input.transferTxId || !input.toAccountId) return;
-  const transfer = paybackAmountsFor(parent, input.amount, input.toAccountId, input.rateTable);
+  const transfer = paybackAmountsFor(
+    parent,
+    input.amount,
+    input.toAccountId,
+    input.rateTable,
+    input.currencyOf,
+  );
   createPaybackTransferInDb(input.transferTxId, {
     amount: transfer.amount,
     currency: transfer.currency,
@@ -1710,6 +1736,54 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // refresh.
   const rateTableRef = useRef<RateTable>(rateTable);
   const reportingCurrencyRef = useRef<string>('USD');
+  // The open ledger's accounts and settings for callbacks that run inside
+  // setState updaters and deferred writes (split paybacks), read from memory
+  // rather than SQLite and never from a stale closure.
+  const accountsRef = useRef<Account[]>(accounts);
+  accountsRef.current = accounts;
+  const settingsRef = useRef<UserSettings | null>(settings);
+  settingsRef.current = settings;
+  const accountCurrencyOf = useCallback<AccountCurrencyOf>(
+    (accountId) => accountsRef.current.find((account) => account.id === accountId)?.currency,
+    [],
+  );
+  // Where a friend's payback lands when nothing else says: the share's own
+  // account (or the bill's), unless the user has archived it since, then
+  // where money is paid to now (`pickPaybackAccountId`).
+  const livePaybackAccountId = useCallback((accountId: string | null): string | null => {
+    if (!accountId) return null;
+    const account = accountsRef.current.find((item) => item.id === accountId);
+    if (!account || !isAccountArchived(account)) return accountId;
+    return pickPaybackAccountId(accountsRef.current, settingsRef.current?.defaultPaybackAccountId);
+  }, []);
+  // Where a payback lands: the account the caller picked, else the share's
+  // own (or the bill's) while it is live (`livePaybackAccountId`). A bill paid
+  // from no account moves no money, so its payback names no account either.
+  const resolvePaybackAccountId = useCallback(
+    (
+      parent: Pick<TransactionWithRelations, 'accountId'>,
+      split: Pick<TransactionSplit, 'paybackAccountId'>,
+      picked: string | null | undefined,
+    ): string | null => {
+      if (!parent.accountId) return null;
+      return picked !== undefined
+        ? picked
+        : livePaybackAccountId(split.paybackAccountId ?? parent.accountId);
+    },
+    [livePaybackAccountId],
+  );
+  // The payback a Mark paid undo reverses: its share and transfer, read
+  // before the undo removes them, so a bill at 0 is restored at the rate that
+  // transfer used (`splitRestoreRates`).
+  const undonePaybackOf = useCallback((splitId: string) => {
+    const parent = transactionsRef.current.find((tx) => tx.splits?.some((s) => s.id === splitId));
+    const split = parent?.splits?.find((s) => s.id === splitId);
+    if (!split) return undefined;
+    const transfer = split.paidTransactionId
+      ? transactionsRef.current.find((tx) => tx.id === split.paidTransactionId)
+      : null;
+    return { share: split.amount, transfer };
+  }, []);
   useEffect(() => {
     rateTableRef.current = rateTable;
   }, [rateTable]);
@@ -1933,9 +2007,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // A budget an older app version made without its template's currency
       // gets it back, and one made in another currency before any rate was
       // known gets a rate as soon as there is one.
-      const rateFor = (currency: string) => budgetRateToFreeze(currency, nextRateTable);
-      periodBudgetsRepository.repairDroppedCurrencies(rateFor);
-      periodBudgetsRepository.freezeMissingRates(rateFor);
+      // Best effort: a failed repair must never stop the app from loading.
+      try {
+        const rateFor = (currency: string) => budgetRateToFreeze(currency, nextRateTable);
+        periodBudgetsRepository.repairDroppedCurrencies(rateFor);
+        periodBudgetsRepository.freezeMissingRates(rateFor);
+      } catch (error) {
+        reportError(error, { scope: 'budget_currency_repair' });
+      }
       const nextPeriodBudgets = periodBudgetsRepository.list();
 
       const nextRawAccountBalances = accountsRepository.getBalances();
@@ -3291,6 +3370,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const parentTxIdsWithSplits = new Set<string>();
       const restoreByParentId = new Map<string, number>(); // parentId → cumulative restore amount
       const reverseSplitMap = new Map<string, string>(); // transferTxId → splitId
+      // parentId → one undone payback, for the rate a bill at 0 is restored at
+      const undoneByParentId = new Map<string, ReturnType<typeof undonePaybackOf>>();
       transactionsRef.current.forEach((tx) => {
         if (idSet.has(tx.id) && tx.splits && tx.splits.length > 0) {
           parentTxIdsWithSplits.add(tx.id);
@@ -3299,6 +3380,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           if (s.paidTransactionId && idSet.has(s.paidTransactionId)) {
             reverseSplitMap.set(s.paidTransactionId, s.id);
             restoreByParentId.set(tx.id, (restoreByParentId.get(tx.id) ?? 0) + s.amount);
+            if (!undoneByParentId.has(tx.id)) {
+              const transferId = s.paidTransactionId;
+              undoneByParentId.set(tx.id, {
+                share: s.amount,
+                transfer: transactionsRef.current.find((other) => other.id === transferId),
+              });
+            }
           }
         });
       });
@@ -3339,7 +3427,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               ...reopened,
               ...(restore > 0
                 ? rescaleSplitAdjustedAmounts(tx, tx.amount + restore, () =>
-                    splitRestoreRates(tx, rateTableRef.current),
+                    splitRestoreRates(
+                      tx,
+                      rateTableRef.current,
+                      accountCurrencyOf,
+                      undoneByParentId.get(tx.id),
+                    ),
                   )
                 : null),
               splits: updatedSplits,
@@ -3380,7 +3473,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               transactionsRepository.update(
                 parentId,
                 rescaleSplitAdjustedAmounts(currentParent, currentParent.amount + restore, () =>
-                  splitRestoreRates(currentParent, rateTableRef.current),
+                  splitRestoreRates(
+                    currentParent,
+                    rateTableRef.current,
+                    accountCurrencyOf,
+                    undoneByParentId.get(parentId),
+                  ),
                 ),
               );
             });
@@ -3411,7 +3509,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         scheduleRefreshTransactions();
       });
     },
-    [scheduleRefreshTransactions],
+    [accountCurrencyOf, scheduleRefreshTransactions],
   );
 
   const updateTransaction = useCallback(
@@ -3791,7 +3889,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         splitsSummary: summarizeSplits(optimisticSplits),
       };
       const transferAmounts = transfersToCreate.map((t) =>
-        paybackAmountsFor(optimisticParent, t.amount, t.toAccountId, rateTableRef.current),
+        paybackAmountsFor(
+          optimisticParent,
+          t.amount,
+          t.toAccountId,
+          rateTableRef.current,
+          accountCurrencyOf,
+        ),
       );
       const optimisticTransfers = transfersToCreate.map((t, index) =>
         optimisticPaybackTransfer({
@@ -3871,7 +3975,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       });
       return txId;
     },
-    [buildSnapshot, prepareFirstEntry, scheduleRefreshTransactions, resolveRelationNames],
+    [
+      accountCurrencyOf,
+      buildSnapshot,
+      prepareFirstEntry,
+      scheduleRefreshTransactions,
+      resolveRelationNames,
+    ],
   );
 
   const updateTransactionSplits = useCallback(
@@ -4046,10 +4156,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const split = parent?.splits?.find((s) => s.id === splitId);
         if (!parent || !split || split.isSelf) return prev;
         if (split.paidAt) return prev;
-        const paybackAccountId =
-          optionPaybackAccountId !== undefined
-            ? optionPaybackAccountId
-            : (split.paybackAccountId ?? parent.accountId ?? null);
+        const paybackAccountId = resolvePaybackAccountId(parent, split, optionPaybackAccountId);
         // No transfer when the money stays in the bill's account, or when the
         // bill has no account to move it out of (the expense still drops).
         const transferToAccountId =
@@ -4068,7 +4175,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const optimisticTransfer: TransactionWithRelations | null = transferToAccountId
           ? optimisticPaybackTransfer({
               id: transferTxId,
-              ...paybackAmountsFor(parent, splitAmount, transferToAccountId, rateTableRef.current),
+              ...paybackAmountsFor(
+                parent,
+                splitAmount,
+                transferToAccountId,
+                rateTableRef.current,
+                accountCurrencyOf,
+              ),
               parent,
               toAccountId: transferToAccountId,
               date,
@@ -4119,10 +4232,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           if (!split || split.isSelf || split.paidAt) return;
           const parent = transactionsRepository.getById(split.transactionId);
           if (!parent) return;
-          const paybackAccountId =
-            optionPaybackAccountId !== undefined
-              ? optionPaybackAccountId
-              : (split.paybackAccountId ?? parent.accountId ?? null);
+          const paybackAccountId = resolvePaybackAccountId(parent, split, optionPaybackAccountId);
           const sameAccount =
             !parent.accountId || !paybackAccountId || paybackAccountId === parent.accountId;
           const usedTransferTxId = sameAccount ? null : transferTxId;
@@ -4133,6 +4243,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             date,
             note: explicitNote ?? buildPaybackTransferNote(split.personName, parent.note),
             rateTable: rateTableRef.current,
+            currencyOf: accountCurrencyOf,
           });
           transactionSplitsRepository.update(splitId, {
             paybackAccountId,
@@ -4149,7 +4260,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         scheduleRefreshTransactions();
       });
     },
-    [resolveRelationNames, scheduleRefreshTransactions],
+    [accountCurrencyOf, resolvePaybackAccountId, resolveRelationNames, scheduleRefreshTransactions],
   );
 
   // A friend pays back part of their share. The paid part becomes its own paid
@@ -4186,10 +4297,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (!parent || !split || split.isSelf || split.paidAt) return prev;
         const rowPlan = planSplitPayment(split.amount, plan.amount);
         if (rowPlan?.kind !== 'partial') return prev;
-        const paybackAccountId =
-          optionPaybackAccountId !== undefined
-            ? optionPaybackAccountId
-            : (split.paybackAccountId ?? parent.accountId ?? null);
+        const paybackAccountId = resolvePaybackAccountId(parent, split, optionPaybackAccountId);
         // As Mark paid: no transfer within one account or from a bill with
         // no account.
         const transferToAccountId =
@@ -4217,6 +4325,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 rowPlan.amount,
                 transferToAccountId,
                 rateTableRef.current,
+                accountCurrencyOf,
               ),
               parent,
               toAccountId: transferToAccountId,
@@ -4257,10 +4366,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           if (rowPlan?.kind !== 'partial') return;
           const parent = transactionsRepository.getById(split.transactionId);
           if (!parent) return;
-          const paybackAccountId =
-            optionPaybackAccountId !== undefined
-              ? optionPaybackAccountId
-              : (split.paybackAccountId ?? parent.accountId ?? null);
+          const paybackAccountId = resolvePaybackAccountId(parent, split, optionPaybackAccountId);
           const sameAccount =
             !parent.accountId || !paybackAccountId || paybackAccountId === parent.accountId;
           getSQLite().withTransactionSync(() => {
@@ -4271,6 +4377,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               date,
               note: buildPaybackTransferNote(split.personName, parent.note),
               rateTable: rateTableRef.current,
+              currencyOf: accountCurrencyOf,
             });
             transactionSplitsRepository.update(splitId, {
               amount: rowPlan.remaining,
@@ -4295,12 +4402,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         scheduleRefreshTransactions();
       });
     },
-    [markSplitPaid, resolveRelationNames, scheduleRefreshTransactions],
+    [
+      accountCurrencyOf,
+      markSplitPaid,
+      resolvePaybackAccountId,
+      resolveRelationNames,
+      scheduleRefreshTransactions,
+    ],
   );
 
   const markSplitUnpaid = useCallback(
     (splitId: string) => {
       const now = nowIso();
+      const undone = undonePaybackOf(splitId);
 
       // Optimistic state update.
       setTransactions((prev) => {
@@ -4313,7 +4427,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return filtered.map((tx) => {
           if (tx.id !== parent.id) return tx;
           const restored = rescaleSplitAdjustedAmounts(tx, tx.amount + splitAmount, () =>
-            splitRestoreRates(tx, rateTableRef.current),
+            splitRestoreRates(tx, rateTableRef.current, accountCurrencyOf, undone),
           );
           const updatedSplits = foldReopenedSplits(
             (tx.splits ?? []).map((s) =>
@@ -4347,7 +4461,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               transactionsRepository.update(
                 parent.id,
                 rescaleSplitAdjustedAmounts(parent, parent.amount + split.amount, () =>
-                  splitRestoreRates(parent, rateTableRef.current),
+                  splitRestoreRates(parent, rateTableRef.current, accountCurrencyOf, undone),
                 ),
               );
             }
@@ -4364,7 +4478,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         scheduleRefreshTransactions();
       });
     },
-    [scheduleRefreshTransactions],
+    [accountCurrencyOf, scheduleRefreshTransactions, undonePaybackOf],
   );
 
   // Re-point an unpaid split's payback account (no amount/transfer change). Only
@@ -4399,6 +4513,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const deleteSplit = useCallback(
     (splitId: string) => {
       const now = nowIso();
+      const undone = undonePaybackOf(splitId);
       setTransactions((prev) => {
         const parent = prev.find((tx) => tx.splits?.some((s) => s.id === splitId));
         const split = parent?.splits?.find((s) => s.id === splitId);
@@ -4412,7 +4527,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           return {
             ...tx,
             ...rescaleSplitAdjustedAmounts(tx, tx.amount + restoreAmount, () =>
-              splitRestoreRates(tx, rateTableRef.current),
+              splitRestoreRates(tx, rateTableRef.current, accountCurrencyOf, undone),
             ),
             updatedAt: now,
             splits: updatedSplits,
@@ -4431,7 +4546,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 transactionsRepository.update(
                   parent.id,
                   rescaleSplitAdjustedAmounts(parent, parent.amount + split.amount, () =>
-                    splitRestoreRates(parent, rateTableRef.current),
+                    splitRestoreRates(parent, rateTableRef.current, accountCurrencyOf, undone),
                   ),
                 );
               }
@@ -4447,7 +4562,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         scheduleRefreshTransactions();
       });
     },
-    [scheduleRefreshTransactions],
+    [accountCurrencyOf, scheduleRefreshTransactions, undonePaybackOf],
   );
 
   const canUseTimeDisplayMode = useMemo(

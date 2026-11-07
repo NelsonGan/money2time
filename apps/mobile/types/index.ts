@@ -1092,6 +1092,11 @@ export interface PersonDebtBill {
   categoryIcon: string | null;
   /** Account the payback lands in (split's own, falling back to the parent's). */
   paybackAccountId: string | null;
+  /**
+   * Whether the bill was paid from an account. Without one a payback moves no
+   * money between accounts, so the Mark paid sheet asks for none.
+   */
+  billHasAccount?: boolean;
   paidAt: string | null;
   /**
    * The whole share this row belongs to, paid in parts or not (native
@@ -1150,6 +1155,11 @@ export interface TransactionDebtSplit {
   reportingAmount: number;
   /** Account the payback lands in (split's own, falling back to the parent's). */
   paybackAccountId: string | null;
+  /**
+   * Whether the bill was paid from an account. Without one a payback moves no
+   * money between accounts, so the Mark paid sheet asks for none.
+   */
+  billHasAccount?: boolean;
   paidAt: string | null;
   /**
    * The whole share this row belongs to, paid in parts or not (native

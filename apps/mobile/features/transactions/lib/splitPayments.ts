@@ -280,8 +280,9 @@ export interface PaybackTransferAmounts {
  * A transfer's `amount` is in the account it leaves and `toAmount` in the one
  * it reaches, the way every cross-currency transfer is stored. The bill's
  * account gives back exactly what the expense stopped costing it: the share
- * at the bill's own frozen account rate (`billAccountAmount / billAmount`), so
- * that account nets to zero for the payback. The payback account receives the
+ * at the bill's own frozen account rate (`billAccountAmount / billAmount`, or
+ * the share itself for a bill without an account snapshot, which balances
+ * count at face value), so that account nets to zero for the payback. The payback account receives the
  * share itself when it holds the bill's currency, else the amount converted at
  * today's rate.
  */
@@ -296,9 +297,11 @@ export function paybackTransferAmounts(input: {
 }): PaybackTransferAmounts {
   const { share, billCurrency, fromCurrency, toCurrency, rateTable } = input;
   let amount: number;
-  if (billCurrency === fromCurrency) {
+  if (billCurrency === fromCurrency || input.billAccountAmount == null) {
+    // The account's balance counts the bill at its own amount when it has no
+    // account snapshot, so the payback leaves at that amount too.
     amount = normalizeMoneyAmount(share);
-  } else if (input.billAccountAmount != null && input.billAmount > 0) {
+  } else if (input.billAmount > 0) {
     amount = normalizeMoneyAmount((share * input.billAccountAmount) / input.billAmount);
   } else {
     amount = convert(share, billCurrency, fromCurrency, rateTable).value;

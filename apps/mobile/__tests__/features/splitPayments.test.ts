@@ -312,6 +312,20 @@ describe('paybackTransferAmounts', () => {
     ).toEqual({ amount: 102.5, currency: 'MYR', toAmount: 25 });
   });
 
+  it('takes the share at face value from a bill with no account snapshot', () => {
+    // Balances count such a bill at its own amount, so the payback leaves at it
+    // too and the account still nets to zero.
+    expect(
+      paybackTransferAmounts({
+        ...base,
+        share: 30,
+        billCurrency: 'USD',
+        billAccountAmount: null,
+        toCurrency: 'MYR',
+      }),
+    ).toEqual({ amount: 30, currency: 'MYR', toAmount: null });
+  });
+
   it('converts into a payback account in a third currency at today’s rate', () => {
     expect(paybackTransferAmounts({ ...base, share: 30, toCurrency: 'SGD' })).toEqual({
       amount: 30,
