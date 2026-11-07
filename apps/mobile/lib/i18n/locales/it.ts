@@ -1015,21 +1015,9 @@ const it = {
   },
   transaction_detail: {
     title: 'Dettaglio transazione',
-    hours_perspective: 'Prospettiva temporale',
     category: 'Categoria',
     account: 'Conto',
     note: 'Nota',
-    hero: {
-      transfer: 'Trasferimento tra i tuoi conti',
-      income_positive: 'Hai guadagnato circa {{hours}} di valore lavorativo',
-      income_negative: 'Rettifica entrate: circa {{hours}} di valore ridotti',
-      expense_positive: 'Ti è costato circa {{hours}}',
-      expense_negative: 'Storno uscita: circa {{hours}} restituiti',
-    },
-    nudge: {
-      long: 'Un attimo: questa è una fetta significativa della tua settimana. Ne vale la pena?',
-      short: 'Piccola spesa, ma sempre una fetta reale del tuo tempo.',
-    },
   },
   insights: {
     household: 'Famiglia',
@@ -3288,7 +3276,6 @@ const it = {
     review_all: 'Rivedi tutte (%{count})',
     review_banner: '%{count} notifiche da controllare',
     review_banner_single: '1 notifica da controllare',
-    review_amount_hint: 'Scegli o inserisci l’importo',
     review_missing: 'Ad alcuni elementi mancano ancora l’importo o il conto.',
     review_no_account_ios:
       "Nessun conto. Sceglilo nell'abbreviazione Log Notification per registrarle automaticamente.",
@@ -3349,7 +3336,6 @@ const it = {
     history: 'Cronologia',
     history_title: 'Cronologia notifiche',
     history_empty: 'Ancora nessuna notifica',
-    history_hint: 'Scegli Entrate, Uscite o Ignora. Qui restano le ultime 10 notifiche completate.',
     history_none: 'Ignorata',
     history_failed: 'Non registrata',
     history_error: 'Impossibile caricare la cronologia delle notifiche.',

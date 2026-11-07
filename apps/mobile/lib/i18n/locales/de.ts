@@ -1019,21 +1019,9 @@ const de = {
   },
   transaction_detail: {
     title: 'Transaktionsdetail',
-    hours_perspective: 'Zeitperspektive',
     category: 'Kategorie',
     account: 'Konto',
     note: 'Notiz',
-    hero: {
-      transfer: 'Umbuchung zwischen deinen Konten',
-      income_positive: 'Du hast ca. {{hours}} Arbeitswert zurückgewonnen',
-      income_negative: 'Einkommensanpassung: ca. {{hours}} Wert wurde reduziert',
-      expense_positive: 'Das hat dich ca. {{hours}} gekostet',
-      expense_negative: 'Ausgabenrückbuchung: ca. {{hours}} wurde zurückerstattet',
-    },
-    nudge: {
-      long: 'Kurz innehalten: Das ist ein bedeutender Teil deiner Woche. Lohnt es sich?',
-      short: 'Kleiner Betrag – aber ein echter Teil deiner Zeit.',
-    },
   },
   insights: {
     household: 'Haushalt',
@@ -3309,7 +3297,6 @@ const de = {
     review_all: 'Alle %{count} prüfen',
     review_banner: '%{count} Benachrichtigungen zu prüfen',
     review_banner_single: '1 Benachrichtigung zu prüfen',
-    review_amount_hint: 'Wähle den Betrag oder gib ihn ein',
     review_missing: 'Bei einigen Einträgen fehlt noch ein Betrag oder Konto.',
     review_no_account_ios:
       'Kein Konto gewählt. Wähle eins in deinem Log Notification-Kurzbefehl, damit sie automatisch erfasst werden.',
@@ -3372,8 +3359,6 @@ const de = {
     history: 'Verlauf',
     history_title: 'Benachrichtigungsverlauf',
     history_empty: 'Noch keine Benachrichtigungen',
-    history_hint:
-      'Wähle Einnahmen, Ausgaben oder Ignorieren. Deine letzten 10 erledigten Benachrichtigungen bleiben hier.',
     history_none: 'Ignoriert',
     history_failed: 'Nicht erfasst',
     history_error: 'Benachrichtigungsverlauf konnte nicht geladen werden.',

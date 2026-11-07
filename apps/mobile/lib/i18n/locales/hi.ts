@@ -1011,21 +1011,9 @@ const hi = {
   },
   transaction_detail: {
     title: 'लेनदेन विवरण',
-    hours_perspective: 'घंटों का नजरिया',
     category: 'श्रेणी',
     account: 'खाता',
     note: 'नोट',
-    hero: {
-      transfer: 'आपके खातों के बीच ट्रांसफर',
-      income_positive: 'आपने लगभग {{hours}} काम के मूल्य वापस कमाए',
-      income_negative: 'आय समायोजन: लगभग {{hours}} का मूल्य कम हुआ',
-      expense_positive: 'इसने आपके लगभग {{hours}} खर्च किए',
-      expense_negative: 'खर्च रिवर्सल: लगभग {{hours}} वापस आए',
-    },
-    nudge: {
-      long: 'एक पल रुकें: यह आपके सप्ताह का एक बड़ा हिस्सा है। क्या यह सही है?',
-      short: 'छोटा खर्च, फिर भी आपके असली समय का एक टुकड़ा।',
-    },
   },
   insights: {
     household: 'घर-परिवार',
@@ -3254,7 +3242,6 @@ const hi = {
     review_all: 'सभी %{count} जांचें',
     review_banner: 'जांचने के लिए %{count} सूचनाएं',
     review_banner_single: 'जांचने के लिए 1 सूचना',
-    review_amount_hint: 'राशि चुनें या डालें',
     review_missing: 'कुछ आइटम में अभी भी राशि या खाता चाहिए।',
     review_no_account_ios:
       'कोई खाता नहीं चुना गया। अपने Log Notification शॉर्टकट में खाता चुनें, ताकि ये अपने-आप दर्ज हों।',
@@ -3315,8 +3302,6 @@ const hi = {
     history: 'इतिहास',
     history_title: 'सूचना इतिहास',
     history_empty: 'अभी कोई सूचना नहीं',
-    history_hint:
-      '“आय”, “खर्च” या “अनदेखा करें” चुनें। आपकी पिछली 10 पूरी की गई सूचनाएं यहां रहती हैं।',
     history_none: 'अनदेखा किया',
     history_failed: 'दर्ज नहीं हुआ',
     history_error: 'सूचना इतिहास लोड नहीं हो सका।',

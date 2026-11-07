@@ -1011,21 +1011,9 @@ const sv = {
   },
   transaction_detail: {
     title: 'Transaktionsdetaljer',
-    hours_perspective: 'Tidsperspektiv',
     category: 'Kategori',
     account: 'Konto',
     note: 'Anteckning',
-    hero: {
-      transfer: 'Överföring mellan dina konton',
-      income_positive: 'Du tjänade tillbaka ungefär {{hours}} i arbetsvärde',
-      income_negative: 'Inkomstjustering: ungefär {{hours}} i värde minskades',
-      expense_positive: 'Det kostade dig ungefär {{hours}}',
-      expense_negative: 'Utgiftsåterföring: ungefär {{hours}} återlämnades',
-    },
-    nudge: {
-      long: 'Tänk efter: det här är en stor del av din vecka. Är det värt det?',
-      short: 'Liten utgift, men ändå en verklig del av din tid.',
-    },
   },
   insights: {
     household: 'Hushåll',
@@ -3268,7 +3256,6 @@ const sv = {
     review_all: 'Granska alla %{count}',
     review_banner: '%{count} aviseringar att granska',
     review_banner_single: '1 avisering att granska',
-    review_amount_hint: 'Välj eller ange beloppet',
     review_missing: 'Vissa poster saknar fortfarande belopp eller konto.',
     review_no_account_ios:
       'Inget konto valt. Välj ett i din Log Notification-genväg så bokförs de automatiskt.',
@@ -3329,8 +3316,6 @@ const sv = {
     history: 'Historik',
     history_title: 'Aviseringshistorik',
     history_empty: 'Inga aviseringar än',
-    history_hint:
-      'Välj Inkomst, Utgift eller Ignorera. Dina 10 senast hanterade aviseringar finns kvar här.',
     history_none: 'Ignorerad',
     history_failed: 'Inte registrerad',
     history_error: 'Det gick inte att läsa in aviseringshistoriken.',

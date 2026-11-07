@@ -3,6 +3,8 @@ const path = require('path');
 const { withNativeWind } = require('nativewind/metro');
 const { getPostHogExpoConfig } = require('posthog-react-native/metro');
 
+const { nativeStubFor } = require('./scripts/metro/nativeStubs.cjs');
+
 // Injects debug IDs into each bundle so PostHog can match an exception's
 // minified Hermes frames to the source map the build uploaded.
 const config = getPostHogExpoConfig(__dirname);
@@ -23,9 +25,17 @@ const workerDirEscaped = path
   .replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const blockWorker = new RegExp(`^${workerDirEscaped}[\\\\/]`);
 const existingBlockList = config.resolver.blockList;
+const existingResolveRequest = config.resolver.resolveRequest;
 
 config.resolver = {
   ...config.resolver,
+  // iOS and Android bundle a stub for packages they never call; see
+  // scripts/metro/nativeStubs.cjs.
+  resolveRequest(context, moduleName, platform) {
+    const stub = nativeStubFor(moduleName, platform);
+    if (stub) return { type: 'sourceFile', filePath: stub };
+    return (existingResolveRequest ?? context.resolveRequest)(context, moduleName, platform);
+  },
   // Drop svg from assets (handled by the transformer); add db so the bundled
   // read-only cities database (assets/db/cities.db) ships as an asset.
   assetExts: [...config.resolver.assetExts.filter((ext) => ext !== 'svg'), 'db'],

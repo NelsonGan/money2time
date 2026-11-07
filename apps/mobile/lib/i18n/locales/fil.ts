@@ -1014,21 +1014,9 @@ const fil = {
   },
   transaction_detail: {
     title: 'Detalye ng transaksyon',
-    hours_perspective: 'Perspektibo sa oras',
     category: 'Kategorya',
     account: 'Account',
     note: 'Note',
-    hero: {
-      transfer: 'Transfer sa pagitan ng iyong mga account',
-      income_positive: 'Nakakuha ka ng mga {{hours}} ng halaga ng trabaho',
-      income_negative: 'Income adjustment: humigit-kumulang {{hours}} ng halaga ang nabawasan',
-      expense_positive: 'Nagastos mo ng mga {{hours}} para dito',
-      expense_negative: 'Expense reversal: mga {{hours}} ang naibigay pabalik',
-    },
-    nudge: {
-      long: 'Sandali lang: ito ay malaking bahagi ng iyong linggo. Sulit ba?',
-      short: 'Maliit na gastos, pero tunay na bahagi ng iyong oras.',
-    },
   },
   insights: {
     household: 'Sambahayan',
@@ -3315,7 +3303,6 @@ const fil = {
     review_all: 'Suriin lahat ng %{count}',
     review_banner: '%{count} notification na ire-review',
     review_banner_single: '1 notification na ire-review',
-    review_amount_hint: 'Pumili o ilagay ang halaga',
     review_missing: 'May mga item na kailangan pa ng halaga o account.',
     review_no_account_ios:
       'Walang account. Pumili sa iyong Log Notification shortcut para awtomatikong maitala ang mga ito.',
@@ -3378,8 +3365,6 @@ const fil = {
     history: 'History',
     history_title: 'History ng notification',
     history_empty: 'Wala pang notification',
-    history_hint:
-      'Piliin ang Kita, Gastos o Huwag pansinin. Nananatili rito ang huling 10 notification na natapos mo.',
     history_none: 'Hindi pinansin',
     history_failed: 'Hindi naitala',
     history_error: 'Hindi ma-load ang history ng notification.',

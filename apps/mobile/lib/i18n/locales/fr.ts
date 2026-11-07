@@ -1014,21 +1014,9 @@ const fr = {
   },
   transaction_detail: {
     title: 'Détail de la transaction',
-    hours_perspective: 'Perspective temporelle',
     category: 'Catégorie',
     account: 'Compte',
     note: 'Note',
-    hero: {
-      transfer: 'Virement entre vos comptes',
-      income_positive: 'Vous avez récupéré environ {{hours}} de valeur travail',
-      income_negative: 'Ajustement de revenu : environ {{hours}} de valeur réduite',
-      expense_positive: 'Cela vous a coûté environ {{hours}}',
-      expense_negative: 'Annulation de dépense : environ {{hours}} remboursés',
-    },
-    nudge: {
-      long: "Un instant : c'est une part significative de votre semaine. Ça vaut le coup ?",
-      short: 'Petite dépense, mais une vraie tranche de votre temps.',
-    },
   },
   insights: {
     household: 'Foyer',
@@ -3309,7 +3297,6 @@ const fr = {
     review_all: 'Tout traiter (%{count})',
     review_banner: '%{count} notifications à vérifier',
     review_banner_single: '1 notification à vérifier',
-    review_amount_hint: 'Choisissez ou saisissez le montant',
     review_missing: 'Il manque encore un montant ou un compte pour certains éléments.',
     review_no_account_ios:
       'Aucun compte. Choisissez-en un dans votre raccourci Log Notification pour les enregistrer automatiquement.',
@@ -3371,8 +3358,6 @@ const fr = {
     history: 'Historique',
     history_title: 'Historique des notifications',
     history_empty: 'Aucune notification pour l’instant',
-    history_hint:
-      'Choisissez Revenus, Dépenses ou Ignorer. Vos 10 dernières notifications traitées restent ici.',
     history_none: 'Ignorée',
     history_failed: 'Non enregistrée',
     history_error: 'Impossible de charger l’historique des notifications.',

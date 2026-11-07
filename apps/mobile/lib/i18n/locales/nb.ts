@@ -1011,21 +1011,9 @@ const nb = {
   },
   transaction_detail: {
     title: 'Transaksjonsdetaljer',
-    hours_perspective: 'Tidsperspektiv',
     category: 'Kategori',
     account: 'Konto',
     note: 'Notat',
-    hero: {
-      transfer: 'Overføring mellom kontoene dine',
-      income_positive: 'Du tjente tilbake ca. {{hours}} i arbeidsverdi',
-      income_negative: 'Inntektsjustering: ca. {{hours}} i verdi ble redusert',
-      expense_positive: 'Dette kostet deg ca. {{hours}}',
-      expense_negative: 'Utgiftsreversering: ca. {{hours}} ble returnert',
-    },
-    nudge: {
-      long: 'Et øyeblikk: dette er en betydelig del av uken din. Er det verdt det?',
-      short: 'Lite beløp, men likevel en reell del av tiden din.',
-    },
   },
   insights: {
     household: 'Husholdning',
@@ -3268,7 +3256,6 @@ const nb = {
     review_all: 'Gå gjennom alle %{count}',
     review_banner: '%{count} varsler til gjennomgang',
     review_banner_single: '1 varsel til gjennomgang',
-    review_amount_hint: 'Velg eller skriv inn beløpet',
     review_missing: 'Noen elementer mangler fortsatt beløp eller konto.',
     review_no_account_ios:
       'Ingen konto valgt. Velg en i Log Notification-snarveien din, så føres de automatisk.',
@@ -3329,8 +3316,6 @@ const nb = {
     history: 'Historikk',
     history_title: 'Varselhistorikk',
     history_empty: 'Ingen varsler ennå',
-    history_hint:
-      'Velg Inntekt, Utgift eller Ignorer. De 10 siste ferdigbehandlede varslene dine blir liggende her.',
     history_none: 'Ignorert',
     history_failed: 'Ikke registrert',
     history_error: 'Kunne ikke laste inn varselhistorikken.',

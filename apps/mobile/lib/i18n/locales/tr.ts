@@ -1010,21 +1010,9 @@ const tr = {
   },
   transaction_detail: {
     title: 'İşlem detayı',
-    hours_perspective: 'Saat perspektifi',
     category: 'Kategori',
     account: 'Hesap',
     note: 'Not',
-    hero: {
-      transfer: 'Hesaplarınız arasında transfer',
-      income_positive: 'Yaklaşık {{hours}} çalışma değeri kazandınız',
-      income_negative: 'Gelir düzeltmesi: yaklaşık {{hours}} değer azaltıldı',
-      expense_positive: 'Bu size yaklaşık {{hours}} maliyet oldu',
-      expense_negative: 'Gider iptali: yaklaşık {{hours}} iade edildi',
-    },
-    nudge: {
-      long: 'Bir an için düşünün: haftanızın önemli bir dilimi. Değer mi?',
-      short: 'Küçük bir harcama, ama gerçek zamanınızdan bir parça.',
-    },
   },
   insights: {
     household: 'Hane',
@@ -3277,7 +3265,6 @@ const tr = {
     review_all: 'Tümünü incele (%{count})',
     review_banner: 'İncelenecek %{count} bildirim',
     review_banner_single: 'İncelenecek 1 bildirim',
-    review_amount_hint: 'Tutarı seçin veya girin',
     review_missing: 'Bazı öğelerde hâlâ tutar veya hesap eksik.',
     review_no_account_ios:
       'Hesap seçilmedi. Otomatik kaydedilmeleri için Log Notification kestirmenizde bir hesap seçin.',
@@ -3338,7 +3325,6 @@ const tr = {
     history: 'Geçmiş',
     history_title: 'Bildirim geçmişi',
     history_empty: 'Henüz bildirim yok',
-    history_hint: 'Gelir, Gider veya Yok say seçin. Tamamlanan son 10 bildiriminiz burada kalır.',
     history_none: 'Yok sayıldı',
     history_failed: 'Kaydedilmedi',
     history_error: 'Bildirim geçmişi yüklenemedi.',

@@ -986,21 +986,9 @@ const en = {
   },
   transaction_detail: {
     title: 'Transaction detail',
-    hours_perspective: 'Hours perspective',
     category: 'Category',
     account: 'Account',
     note: 'Note',
-    hero: {
-      transfer: 'Transfer between your accounts',
-      income_positive: 'You earned back about {{hours}} of work value',
-      income_negative: 'Income adjustment: about {{hours}} of value was reduced',
-      expense_positive: 'This cost you about {{hours}}',
-      expense_negative: 'Expense reversal: about {{hours}} was returned',
-    },
-    nudge: {
-      long: 'Just a moment: this is a meaningful chunk of your week. Worth it?',
-      short: 'Small spend, still a real slice of your time.',
-    },
   },
   insights: {
     household: 'Household',
@@ -3257,7 +3245,6 @@ const en = {
     review_all: 'Review all %{count}',
     review_banner: '%{count} notifications to review',
     review_banner_single: '1 notification to review',
-    review_amount_hint: 'Choose or enter the amount',
     review_missing: 'Some items still need an amount or account.',
     review_no_account_ios:
       'No account set. Choose one in your Log Notification shortcut so these are logged automatically.',
@@ -3318,8 +3305,6 @@ const en = {
     history: 'History',
     history_title: 'Notification history',
     history_empty: 'No notifications yet',
-    history_hint:
-      'Choose Income, Expense or Ignore. Your last 10 completed notifications stay here.',
     history_none: 'Ignored',
     history_failed: 'Not logged',
     history_error: 'Could not load notification history.',

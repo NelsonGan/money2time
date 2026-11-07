@@ -1012,21 +1012,9 @@ const pl = {
   },
   transaction_detail: {
     title: 'Szczegóły transakcji',
-    hours_perspective: 'Perspektywa godzin',
     category: 'Kategoria',
     account: 'Konto',
     note: 'Notatka',
-    hero: {
-      transfer: 'Przelew między twoimi kontami',
-      income_positive: 'Zarobiłeś z powrotem ok. {{hours}} wartości pracy',
-      income_negative: 'Korekta przychodu: zmniejszono wartość o ok. {{hours}}',
-      expense_positive: 'To kosztowało cię ok. {{hours}}',
-      expense_negative: 'Cofnięcie wydatku: zwrócono ok. {{hours}}',
-    },
-    nudge: {
-      long: 'Chwila refleksji: to znaczący kawałek twojego tygodnia. Warto?',
-      short: 'Mały wydatek, ale wciąż realny fragment twojego czasu.',
-    },
   },
   insights: {
     household: 'Gospodarstwo domowe',
@@ -3274,7 +3262,6 @@ const pl = {
     review_all: 'Przejrzyj wszystkie (%{count})',
     review_banner: 'Powiadomienia do sprawdzenia: %{count}',
     review_banner_single: '1 powiadomienie do sprawdzenia',
-    review_amount_hint: 'Wybierz lub wpisz kwotę',
     review_missing: 'Niektóre pozycje nadal wymagają kwoty lub konta.',
     review_no_account_ios:
       'Brak konta. Wybierz je w skrócie Log Notification, aby zapisywały się automatycznie.',
@@ -3336,8 +3323,6 @@ const pl = {
     history: 'Historia',
     history_title: 'Historia powiadomień',
     history_empty: 'Brak powiadomień',
-    history_hint:
-      'Wybierz Przychód, Wydatek lub Pomiń. Tutaj zostaje 10 ostatnio ukończonych powiadomień.',
     history_none: 'Pominięto',
     history_failed: 'Nie zapisano',
     history_error: 'Nie udało się wczytać historii powiadomień.',

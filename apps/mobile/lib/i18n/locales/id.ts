@@ -1013,21 +1013,9 @@ const id = {
   },
   transaction_detail: {
     title: 'Detail transaksi',
-    hours_perspective: 'Perspektif jam',
     category: 'Kategori',
     account: 'Akun',
     note: 'Catatan',
-    hero: {
-      transfer: 'Transfer antar akunmu',
-      income_positive: 'Kamu mendapatkan kembali sekitar {{hours}} nilai kerja',
-      income_negative: 'Penyesuaian pemasukan: sekitar {{hours}} nilai berkurang',
-      expense_positive: 'Ini menghabiskan sekitar {{hours}} waktumu',
-      expense_negative: 'Pembalikan pengeluaran: sekitar {{hours}} dikembalikan',
-    },
-    nudge: {
-      long: 'Sebentar: ini adalah potongan waktu yang cukup besar dari minggumu. Sepadan?',
-      short: 'Pengeluaran kecil, tapi tetap nyata dari waktumu.',
-    },
   },
   insights: {
     household: 'Rumah tangga',
@@ -3283,7 +3271,6 @@ const id = {
     review_all: 'Tinjau semua %{count}',
     review_banner: '%{count} notifikasi perlu ditinjau',
     review_banner_single: '1 notifikasi perlu ditinjau',
-    review_amount_hint: 'Pilih atau masukkan jumlahnya',
     review_missing: 'Beberapa item masih memerlukan jumlah atau akun.',
     review_no_account_ios:
       'Belum ada akun. Pilih di pintasan Log Notification agar dicatat otomatis.',
@@ -3344,8 +3331,6 @@ const id = {
     history: 'Riwayat',
     history_title: 'Riwayat notifikasi',
     history_empty: 'Belum ada notifikasi',
-    history_hint:
-      'Pilih Pemasukan, Pengeluaran, atau Abaikan. 10 notifikasi terakhir yang sudah selesai tetap ada di sini.',
     history_none: 'Diabaikan',
     history_failed: 'Tidak dicatat',
     history_error: 'Tidak dapat memuat riwayat notifikasi.',

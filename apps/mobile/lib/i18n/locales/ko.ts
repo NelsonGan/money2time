@@ -1006,21 +1006,9 @@ const ko = {
   },
   transaction_detail: {
     title: '거래 상세',
-    hours_perspective: '시간 관점',
     category: '카테고리',
     account: '계좌',
     note: '메모',
-    hero: {
-      transfer: '내 계좌 간 이체',
-      income_positive: '약 {{hours}} 분량의 근무 가치를 벌었습니다',
-      income_negative: '수입 조정: 약 {{hours}} 분량의 가치가 줄었습니다',
-      expense_positive: '약 {{hours}}의 시간이 들었습니다',
-      expense_negative: '지출 취소: 약 {{hours}}이 환원되었습니다',
-    },
-    nudge: {
-      long: '잠깐: 이번 주의 상당한 시간에 해당해요. 값어치가 있나요?',
-      short: '소액이지만, 실제 소중한 시간입니다.',
-    },
   },
   insights: {
     household: '가계',
@@ -3226,7 +3214,6 @@ const ko = {
     review_all: '%{count}개 모두 확인',
     review_banner: '검토할 알림 %{count}개',
     review_banner_single: '검토할 알림 1개',
-    review_amount_hint: '금액을 고르거나 입력하세요',
     review_missing: '일부 항목에 아직 금액이나 계좌가 없습니다.',
     review_no_account_ios:
       '계좌가 없어요. Log Notification 단축어에서 계좌를 선택하면 자동으로 기록돼요.',
@@ -3286,7 +3273,6 @@ const ko = {
     history: '기록',
     history_title: '알림 기록',
     history_empty: '아직 알림이 없습니다',
-    history_hint: '수입, 지출, 무시 중에서 고르세요. 최근 완료한 알림 10개가 여기에 남습니다.',
     history_none: '무시됨',
     history_failed: '기록 안 됨',
     history_error: '알림 기록을 불러올 수 없습니다.',

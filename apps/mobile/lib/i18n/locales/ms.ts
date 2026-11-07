@@ -1017,21 +1017,9 @@ const ms = {
   },
   transaction_detail: {
     title: 'Butiran transaksi',
-    hours_perspective: 'Perspektif jam',
     category: 'Kategori',
     account: 'Akaun',
     note: 'Nota',
-    hero: {
-      transfer: 'Pindahan antara akaun anda',
-      income_positive: 'Anda mendapat balik kira-kira {{hours}} nilai kerja',
-      income_negative: 'Pelarasan pendapatan: kira-kira {{hours}} nilai dikurangkan',
-      expense_positive: 'Ini menelan kira-kira {{hours}} masa anda',
-      expense_negative: 'Pembalikan perbelanjaan: kira-kira {{hours}} dikembalikan',
-    },
-    nudge: {
-      long: 'Fikir sekejap: ini bahagian bermakna dalam minggu anda. Berbaloi?',
-      short: 'Perbelanjaan kecil, tapi tetap sebahagian masa sebenar anda.',
-    },
   },
   insights: {
     household: 'Isi rumah',
@@ -3292,7 +3280,6 @@ const ms = {
     review_all: 'Semak kesemua %{count}',
     review_banner: '%{count} pemberitahuan untuk disemak',
     review_banner_single: '1 pemberitahuan untuk disemak',
-    review_amount_hint: 'Pilih atau masukkan jumlah',
     review_missing: 'Sesetengah item masih memerlukan jumlah atau akaun.',
     review_no_account_ios:
       'Tiada akaun. Pilih dalam pintasan Log Notification anda supaya ia direkod secara automatik.',
@@ -3354,8 +3341,6 @@ const ms = {
     history: 'Sejarah',
     history_title: 'Sejarah pemberitahuan',
     history_empty: 'Belum ada pemberitahuan',
-    history_hint:
-      'Pilih Pendapatan, Perbelanjaan atau Abaikan. 10 pemberitahuan terakhir yang selesai kekal di sini.',
     history_none: 'Diabaikan',
     history_failed: 'Tidak direkodkan',
     history_error: 'Tidak dapat memuatkan sejarah pemberitahuan.',

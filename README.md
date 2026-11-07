@@ -2995,7 +2995,7 @@ the sparkle are both still there.
 
 ## App size and native-only assets
 
-An October 2026 pass cut the Android release APK by about 10% (316.67 MB to 283.34 MB) and the Hermes bundle by about 9%. The measurements are in [.github/pr-assets/app-size/](.github/pr-assets/app-size/measurements.json). What follows is what still applies.
+An October 2026 pass cut the Android release APK by about 10% (316.67 MB to 283.34 MB) and the Hermes bundle by about 9%. The measurements are in [.github/pr-assets/app-size/](.github/pr-assets/app-size/measurements.json). A November 2026 pass cut the Hermes bundle by another 9.4% (16.65 MB to 15.11 MB on iOS, 16.66 MB to 15.09 MB on Android) and the bundled images by 4.45 MB, measured in [.github/pr-assets/bundle-size/](.github/pr-assets/bundle-size/measurements.json). What follows is what still applies.
 
 ### What contributes to size
 
@@ -3074,6 +3074,41 @@ artwork are generator inputs and were retained.
   rebuilt development/preview app. Production configuration is unchanged.
 - Pin image tooling as development dependencies and integrate the same quality
   gate into category-atlas generation so regeneration preserves the savings.
+- **iOS and Android bundles stub RevenueCat's web SDK.**
+  `@revenuecat/purchases-js-hybrid-mappings` (1.1 MB of minified JS) is what
+  react-native-purchases runs in its browser mode, which it picks only when the
+  `RNPurchases` native module is missing (Expo Go, the Rork sandbox, web).
+  Every native build links that module, so `metro.config.js` resolves the
+  package to `scripts/metro/purchasesJsHybridMappingsStub.js` on iOS and
+  Android (the list lives in `scripts/metro/nativeStubs.cjs`); a web bundle
+  keeps the real package. If browser mode ever ran in a native build, each call
+  would fail with a clear error instead of running the web SDK.
+  `__tests__/build/nativeStubs.test.ts` fails if a react-native-purchases
+  upgrade reaches the web SDK from anywhere but its browser-mode module, so
+  re-check the stub when that test fails.
+- **Category icon atlases are lossless WebP** (16.26 MB to 11.81 MB).
+  `scripts/generate-category-icons.mjs` still builds and quality-gates each
+  atlas as PNG, then `scripts/lib/losslessWebp.cjs` re-encodes it and refuses
+  to write a file whose decoded alpha, or colour under any visible pixel,
+  differs. Only the colour under fully transparent pixels may change, which
+  both platforms' premultiplied decoders discard. React Native `Image`
+  (`CategoryEmoji`) and react-native-svg `Image` (the Insights pie labels)
+  both decode WebP, as the card designs already relied on.
+- **`constants/categoryIcons.generated.ts` is one row per atlas** (pack,
+  group, image, and its icons' names in cell order) and builds
+  `CATEGORY_ICON_SOURCES` and `GENERATED_CATEGORY_ICONS` when it loads, which
+  took it from 298 KB to 22 KB of minified JS. Icon filenames must therefore be
+  kebab-case; the generator stops on any other name.
+- **Some artwork and registries are read by the Web Dashboard repo, so their
+  formats are not free to change.** money2time-web's
+  `scripts/sync-dashboard-assets.mjs` converts the PNGs in
+  `assets/account-logos`, `assets/subscription-logos`, `assets/items` and
+  `assets/icon-packs/default`, and parses `constants/accountLogos.generated.ts`,
+  `constants/subscriptionLogos.generated.ts`, `constants/itemIcons.generated.ts`
+  and `constants/emojiCatalog.generated.ts` with regular expressions, and
+  `scripts/sync-tutorials-web.mjs` copies `assets/tutorials/*.png` to the
+  website. Converting those to WebP or compacting those registries needs the
+  matching change there.
 
 ### Internal preview rebuild
 
@@ -3121,9 +3156,10 @@ npm run optimize:assets
 node scripts/generate-category-icons.mjs
 ```
 
-The optimizer reports per-file bytes, mode and quality error. A repeat pass on
-already-optimized assets reports zero savings, and regenerating the category
-atlases produces byte-identical images.
+The optimizer reports per-file bytes, mode and quality error. It only reads
+PNGs, so it skips the WebP category atlases, which the generator gates as it
+writes them. A repeat pass on already-optimized assets reports zero savings,
+and regenerating the category atlases produces byte-identical images.
 
 ## Cloudflare
 
