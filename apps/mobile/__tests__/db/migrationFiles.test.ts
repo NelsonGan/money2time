@@ -21,7 +21,6 @@ describe('migration files', () => {
 
   it('declare the version their file name says', () => {
     for (const file of files) {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const migration = require(join(dir, file)).default as { version: number; name: string };
       expect([file, migration.version]).toEqual([file, Number(file.slice(0, 3))]);
       expect(migration.name).toBe(file.replace(/\.(ts|js)$/, ''));
