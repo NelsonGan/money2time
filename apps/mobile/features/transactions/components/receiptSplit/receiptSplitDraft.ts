@@ -316,11 +316,6 @@ export function draftToSplitInputs(
         isSelf: person.isSelf,
         paybackAccountId,
         sortOrder: inputs.length,
-        // A share already paid in part owes the rest on a row of its own.
-        partOfSplitId:
-          !prior?.owed && prior?.paid[0]
-            ? (prior.paid[0].partOfSplitId ?? prior.paid[0].id)
-            : undefined,
       });
     }
     for (const paid of prior?.paid ?? []) {

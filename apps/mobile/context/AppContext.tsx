@@ -71,6 +71,7 @@ import { rescaleSplitAdjustedAmounts } from '~/features/transactions/lib/splitAm
 import {
   applyShareHandover,
   applyUnpaidMerge,
+  consolidateOwedRows,
   cutPartPayment,
   planShareHandover,
   planSplitPayment,
@@ -961,6 +962,18 @@ function removeSplitsKeepingShares(
     if (handover) next = applyShareHandover(next, handover);
   }
   return next;
+}
+
+/** The database side of `consolidateOwedRows`, for one bill's splits. */
+function foldOwedRowsInDb(transactionId: string): void {
+  const { merges } = consolidateOwedRows(
+    transactionSplitsRepository.listByTransactionId(transactionId),
+    nowIso(),
+  );
+  for (const merge of merges) {
+    transactionSplitsRepository.update(merge.keepId, { amount: merge.amount });
+    transactionSplitsRepository.softDelete(merge.dropId);
+  }
 }
 
 /** The database side of {@link foldReopenedSplits}, for one reopened row. */
@@ -3265,19 +3278,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           }
           // Restore parent amounts in one update per parent (re-read from DB so
           // multiple restored splits per parent accumulate correctly).
-          restoreByParentId.forEach((restore, parentId) => {
-            const currentParent = transactionsRepository.getById(parentId);
-            if (!currentParent) return;
-            transactionsRepository.update(
-              parentId,
-              rescaleSplitAdjustedAmounts(currentParent, currentParent.amount + restore),
-            );
+          // One transaction, as markSplitUnpaid: restoring the expense,
+          // reopening the shares and folding part payments back belong together.
+          getSQLite().withTransactionSync(() => {
+            restoreByParentId.forEach((restore, parentId) => {
+              const currentParent = transactionsRepository.getById(parentId);
+              if (!currentParent) return;
+              transactionsRepository.update(
+                parentId,
+                rescaleSplitAdjustedAmounts(currentParent, currentParent.amount + restore),
+              );
+            });
+            reverseSplitMap.forEach((splitId) => {
+              transactionSplitsRepository.markUnpaid(splitId);
+            });
+            // A part payment whose transfer went folds back into what is owed.
+            reverseSplitMap.forEach((splitId) => foldReopenedSplitInDb(splitId));
           });
-          reverseSplitMap.forEach((splitId) => {
-            transactionSplitsRepository.markUnpaid(splitId);
-          });
-          // A part payment whose transfer went folds back into what is owed.
-          reverseSplitMap.forEach((splitId) => foldReopenedSplitInDb(splitId));
           reopenExpenseIds.forEach((expenseId) => {
             transactionsRepository.update(expenseId, {
               reimbursedAt: null,
@@ -3818,7 +3835,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 removedIds,
               )
             : named;
-          return { ...tx, splits: kept, splitsSummary: summarizeSplits(kept) };
+          // A share an older app left owing on two rows is one row again.
+          const consolidated = consolidateOwedRows(kept, now).splits;
+          return { ...tx, splits: consolidated, splitsSummary: summarizeSplits(consolidated) };
         }),
       );
       runDeferredWrite(() => {
@@ -3861,6 +3880,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               transactionSplitsRepository.renameShareParts(next.id, next.personName);
             }
           });
+          foldOwedRowsInDb(transactionId);
           if (!wasSplitBill) trackSplitBillCreated(optimisticSplits);
         } catch {
           // ignore; refresh below restores truth

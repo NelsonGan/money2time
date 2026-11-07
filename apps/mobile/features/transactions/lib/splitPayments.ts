@@ -232,3 +232,27 @@ export function applyShareHandover(
         : split,
   );
 }
+
+/**
+ * A share should owe on one row. An older app version undoing a part payment
+ * (or deleting its transfer) does not fold it back, and leaves the share owing
+ * on two rows. Saving the bill folds every such share back into one row
+ * (`planUnpaidMerge`, keeping the share's first row when it is owed). Returns
+ * the splits and the merges to write.
+ */
+export function consolidateOwedRows(
+  splits: readonly TransactionSplit[],
+  updatedAt: string,
+): { splits: TransactionSplit[]; merges: UnpaidMerge[] } {
+  let next = [...splits];
+  const merges: UnpaidMerge[] = [];
+  for (const split of splits) {
+    if (split.isSelf || split.paidAt) continue;
+    if (!next.some((row) => row.id === split.id)) continue;
+    const merge = planUnpaidMerge(next, split.id);
+    if (!merge) continue;
+    merges.push(merge);
+    next = applyUnpaidMerge(next, merge, updatedAt);
+  }
+  return { splits: next, merges };
+}

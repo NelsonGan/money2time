@@ -1,6 +1,7 @@
 import {
   applyShareHandover,
   applyUnpaidMerge,
+  consolidateOwedRows,
   cutPartPayment,
   evenOwedAmounts,
   planShareHandover,
@@ -226,5 +227,32 @@ describe('planShareHandover', () => {
   it('does nothing for a part, or a first row without parts', () => {
     expect(planShareHandover(splits, 'p1')).toBeNull();
     expect(planShareHandover(splits, 'b')).toBeNull();
+  });
+});
+
+describe('consolidateOwedRows', () => {
+  it('folds a share owing on two rows into its first row, and leaves the rest', () => {
+    const { splits, merges } = consolidateOwedRows(
+      [
+        split({ id: 'a', amount: 700 }),
+        split({ id: 'p1', amount: 300, partOfSplitId: 'a' }),
+        split({ id: 'p2', amount: 200, paidAt: PAID, partOfSplitId: 'a' }),
+        split({ id: 'b', personName: 'Ben' }),
+        split({ id: 'me', isSelf: true, amount: 0 }),
+      ],
+      PAID,
+    );
+    expect(merges).toEqual([{ keepId: 'a', dropId: 'p1', amount: 1000 }]);
+    expect(splits.map((s) => [s.id, s.amount])).toEqual([
+      ['a', 1000],
+      ['p2', 200],
+      ['b', 1000],
+      ['me', 0],
+    ]);
+  });
+
+  it('changes nothing when every share owes on one row', () => {
+    const rows = [split({ id: 'a' }), split({ id: 'b', personName: 'Ben' })];
+    expect(consolidateOwedRows(rows, PAID)).toEqual({ splits: rows, merges: [] });
   });
 });

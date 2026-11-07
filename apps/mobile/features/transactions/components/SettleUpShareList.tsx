@@ -14,7 +14,7 @@ import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { currencySymbolForCode } from '~/utils/currency';
 import { formatDayHeaderParts } from '~/utils/dayHeader';
-import { dayKeyFromIsoLocal, formatCurrency } from '~/utils/formatters';
+import { dayKeyFromIsoLocal, formatCurrency, normalizeMoneyAmount } from '~/utils/formatters';
 
 /** One person's share of one bill, as both settle-up detail screens list it. */
 interface SettleUpShare {
@@ -166,8 +166,11 @@ export function SettleUpShareList<T extends SettleUpShare>({
   const renderOwedCard = ({ share, payments }: SettleUpShareCard<T>) => {
     const account = share.paybackAccountId ? getAccountById(share.paybackAccountId) : null;
     const symbol = currencySymbolForCode(share.currency);
+    // Progress only on the card that lists the share's payments: a second
+    // card for the same share (an older app left it owing on two rows), or a
+    // row renamed apart from its payments, shows just what it owes.
     const paidRatio =
-      share.sharePaid > 0 && share.shareTotal > 0
+      payments.length > 0 && share.sharePaid > 0 && share.shareTotal > 0
         ? Math.min(1, share.sharePaid / share.shareTotal)
         : null;
     return (
@@ -286,6 +289,9 @@ export function SettleUpShareList<T extends SettleUpShare>({
 
   const renderSettledCard = ({ share, payments }: SettleUpShareCard<T>) => {
     const inParts = payments.length > 1;
+    // What these payments add up to, not the share's total: rows of one share
+    // under another name (renamed on an older app) are counted on their page.
+    const paidTotal = normalizeMoneyAmount(payments.reduce((sum, p) => sum + p.amount, 0));
     const open = inParts && expanded.has(share.shareKey);
     const lastPaid = share.paidAt ? dayLabel(share.paidAt) : '';
     const Chevron = open ? ChevronUp : ChevronDown;
@@ -319,7 +325,7 @@ export function SettleUpShareList<T extends SettleUpShare>({
             </Text>
           </View>
           <Text variant="bodyStrong" tone="muted">
-            {formatCurrency(share.shareTotal, currencySymbolForCode(share.currency))}
+            {formatCurrency(paidTotal, currencySymbolForCode(share.currency))}
           </Text>
           {inParts ? <Chevron size={14} color={themeColors.textMuted} /> : null}
         </View>
