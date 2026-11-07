@@ -53,11 +53,13 @@ List the affected image ids. That list drives everything below.
 
 Captures go into the committed binary, so they have to look deliberate.
 
-1. `list-devices`, then use the booted iPhone (the shipped frames are iPhone 17 Pro, 1179x2556).
-   Recapturing a subset on a different device is fine — marks are normalised — but the frames
-   will not match each other visually, so prefer the same device.
-2. Start Metro yourself with `npx expo start --localhost` (see CLAUDE.md; tunnel/LAN do not work
-   on this machine). Let Argent connect to it, never let it start its own.
+1. `device_list`, then `device_open` the Money2Time iPhone 18 Pro so it shows in T3 Code's
+   Device panel, and use the `agent-device` command it returns for everything below (the
+   shipped frames are iPhone 17 Pro, 1179x2556). Recapturing a subset on a different device is
+   fine — marks are normalised — but the frames will not match each other visually, so prefer
+   the same device.
+2. Start Metro yourself with `npx expo start --localhost` (see AGENTS.md; tunnel/LAN do not
+   work on this machine).
 3. **Demo data, not empty state.** A tutorial of an empty app teaches nothing. The seeded
    simulator already has accounts, a month of transactions, albums and goals.
 4. **Dismiss dev noise first.** The RevenueCat "Invalid API Key" LogBox reopens itself; tap
@@ -68,52 +70,40 @@ Captures go into the committed binary, so they have to look deliberate.
 
 ## 3. Capture
 
-For each frame:
+For each frame, from `apps/mobile` (the annotate script reads `apps/mobile/.tutorial-raw/`):
 
 ```
-describe(udid)                          # ALWAYS. Never eyeball a coordinate.
-gesture-tap / run-sequence              # navigate to the screen
-screenshot(scale: 1, includeImageInContext: false)
-```
-
-Then copy the file Argent just wrote into `.tutorial-raw/<name>.png`. A helper worth
-recreating:
-
-```bash
-cat > /tmp/cap.sh <<'SH'
-#!/bin/zsh
-d=$(ls -td /var/folders/*/*/T/simserver-*/media | head -1)
-cp "$(ls -t "$d"/*.png | head -1)" "$(git rev-parse --show-toplevel)/.tutorial-raw/$1.png"
-SH
-chmod +x /tmp/cap.sh
+agent-device snapshot -i                # ALWAYS. Never eyeball a coordinate.
+agent-device press @e12 --settle        # navigate to the screen by ref or selector
+agent-device screenshot "$PWD/.tutorial-raw/<name>.png" --pixel-density 3
 ```
 
 Things that bite, all of them learned the hard way:
 
-- **`scale: 1` and `includeImageInContext: false`.** The auto-screenshot attached to every
-  gesture result is downscaled to ~360px and useless as source art. Take an explicit one.
-- **Typing races.** `keyboard` without a delay drops and reorders characters ("Japan trip" came
-  out "Hpan tripa"). Always pass `delayMs: 150-180`.
+- **Full resolution.** iOS simulator screenshots default to 1x logical points, far too small
+  for source art. Pass `--pixel-density 3` to get the device's native pixels.
+- **Typing races.** Typing without a delay drops and reorders characters ("Japan trip" came
+  out "Hpan tripa"). Pass `--delay-ms 150-180` to `agent-device type`.
 - **Transient UI.** A "Listening…" overlay or a toast will not survive a separate screenshot
-  call. Chain it: `run-sequence` with the tap, then a short `delayMs`, then capture immediately.
-- **Long-press.** A bare Down/Up will not trigger it. Use `gesture-custom` with several tiny
-  `Move` events during the hold.
+  call. Chain it: `agent-device batch` with the press and the screenshot in one request.
+- **Long-press.** Use `agent-device longpress <target> [durationMs]`, not a bare press.
 - **Permission resets kill the app** (expected iOS behaviour). Relaunch after.
 - **Features that need a network or hardware** (receipt scan Worker, the microphone) fail in the
   simulator. Capture the state *before* the failure, or reach the same screen another way.
 
 ## 4. Write the marks
 
-Take them from `describe`, not from the picture. `describe` reports an element's frame as
-normalised `[0,1]` fractions — exactly the space the spec stores — so a mark lifted from the
-accessibility tree lands on the control and survives a recapture at a different size.
+Take them from the accessibility tree, not from the picture. `agent-device snapshot -i --json`
+reports each element's frame; divide `x`/`width` by the screen width and `y`/`height` by the
+screen height to get the normalised `[0,1]` fractions the spec stores, so a mark lifted from
+the tree lands on the control and survives a recapture at a different size.
 
 ```jsonc
 "accounts-4": {
   "source": "RAW/accounts-4.png",       // resolves against .tutorial-raw/
   "marks": [
     { "type": "rect", "x": 0.04, "y": 0.152, "w": 0.92, "h": 0.115,
-      "radius": 0.03, "pad": 0.005 }   // x/y/w/h straight off `describe`
+      "radius": 0.03, "pad": 0.005 }   // x/y/w/h from the snapshot frame, normalised
   ]
 }
 ```

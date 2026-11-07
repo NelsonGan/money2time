@@ -53,7 +53,7 @@ Every new screen or list needs all three: use `EmptyState`, `LoadingDots` / `Imp
 1. **Locate the pattern.** Find the closest existing screen/component and mirror its structure, spacing, and tokens. Consistency beats novelty.
 2. **Compose from primitives.** Build with `components/ui/*` and feature components; only drop to raw RN when nothing fits.
 3. **Wire data via `useApp()`** — never read the DB or repositories directly from a component.
-4. **Verify visually.** Run the app and inspect with the **Argent MCP tools** (see `.claude/rules/argent.md` and the `argent-*` skills). Always start Metro with `npx expo start --localhost`. Use `argent-test-ui-flow` for flows and `argent-screenshot-diff` for before/after on visible changes. Check **both light and dark**, and **both phone and tablet** if layout changed.
+4. **Verify visually.** Run the app and inspect it with the **T3 Code device tools** (`device_open`, then the `agent-device` command it returns; see AGENTS.md), with the device left in the Device panel. Always start Metro with `npx expo start --localhost`. Use `agent-device screenshot` for before/after captures of visible changes. Check **both light and dark**, and **both phone and tablet** if layout changed.
 5. **Self-review checklist** before finishing:
    - [ ] No hardcoded colors/hex; theming works across all 8 palettes
    - [ ] Dark mode correct
