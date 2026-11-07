@@ -5,7 +5,7 @@ const plugin = require('../../plugins/withXcode27Compat') as {
   addPodfilePostInstall: (contents: string) => string;
 };
 
-const PODFILE = `target 'Money2TimeDev' do
+const PODFILE = `target 'Money2Time' do
   post_install do |installer|
     react_native_post_install(
       installer,
