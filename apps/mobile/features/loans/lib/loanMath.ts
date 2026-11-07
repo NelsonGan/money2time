@@ -469,6 +469,17 @@ interface ContractRule {
 }
 
 /**
+ * Whether an account can pay a loan's instalments, by hand or as its
+ * recurring repayment: a bank account or a credit card. Card instalment plans
+ * are often charged to a card, and the transfer then adds the instalment to
+ * the card's balance while taking it off the loan. Another loan is never what
+ * the borrower means, and a goal is savings, not a spending account.
+ */
+export function canPayLoanFrom(account: { type: string }): boolean {
+  return account.type === 'debit' || account.type === 'credit';
+}
+
+/**
  * Whether a recurring rule pays into this loan at all.
  *
  * Looser than {@link isContractTrackingRule} on purpose. That one guards

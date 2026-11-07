@@ -68,6 +68,7 @@ import { useApp, useTransactions } from '~/context/AppContext';
 import { LoanQuoteDisclosure } from '~/features/loans/components';
 import { resolveLoanContractFields } from '~/features/loans/lib/loanContractFields';
 import {
+  canPayLoanFrom,
   computeLoanProgress,
   computeLoanQuote,
   isContractTrackingRule,
@@ -829,9 +830,8 @@ function AccountEditorSheet({
   // currency can feed it, matching the goal editor's auto-save picker.
   // Cross-currency rules stay possible through the full recurring editor.
   const autoRepaySourceAccounts = useMemo(
-    // Debit only: paying a loan from a credit card or another loan is never
-    // what the user means, and a goal is not a spending account.
-    () => appAccounts.filter((a) => a.type === 'debit' && a.currency === currency),
+    // A bank account or a card (see canPayLoanFrom).
+    () => appAccounts.filter((a) => canPayLoanFrom(a) && a.currency === currency),
     [appAccounts, currency],
   );
   // The rule that currently pays into this loan, if any. Derived rather than
@@ -2666,17 +2666,18 @@ export function PayCreditCardScreen({
 
   const isLoan = account?.type === 'loan';
   const fromAccounts = useMemo(
-    // Paying a liability from another liability is never what the user means,
-    // and an archived goal/loan should not appear as a funding source.
+    // A card is paid from a bank account, never from another card. A loan can
+    // also be paid from a card (see canPayLoanFrom). An archived goal/loan
+    // should not appear as a funding source.
     () =>
       accounts.filter(
         (a) =>
           a.id !== accountId &&
-          !isLiabilityAccountType(a.type) &&
+          (isLoan ? a.type !== 'loan' : !isLiabilityAccountType(a.type)) &&
           a.goalArchivedAt == null &&
           a.loanArchivedAt == null,
       ),
-    [accounts, accountId],
+    [accounts, accountId, isLoan],
   );
 
   // In the liability's own currency, like every other balance on its card.

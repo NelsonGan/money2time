@@ -1,4 +1,5 @@
 import {
+  canPayLoanFrom,
   computeLoanProgress,
   computeLoanQuote,
   instalmentForContract,
@@ -520,6 +521,18 @@ describe('computeLoanQuote: a typed instalment', () => {
     });
     expect(q!.instalment).toBe(833.33);
     expect(q!.totalInterest).toBe(0);
+  });
+});
+
+describe('canPayLoanFrom', () => {
+  it('takes a bank account or a credit card', () => {
+    expect(canPayLoanFrom({ type: 'debit' })).toBe(true);
+    expect(canPayLoanFrom({ type: 'credit' })).toBe(true);
+  });
+
+  it('refuses another loan and a savings goal', () => {
+    expect(canPayLoanFrom({ type: 'loan' })).toBe(false);
+    expect(canPayLoanFrom({ type: 'goal' })).toBe(false);
   });
 });
 

@@ -248,11 +248,16 @@ describe('module:loan create', () => {
     ['every instalment already paid', { paidPeriods: 12 }],
     ['a total that never repays the amount', { driver: 'total', total: 100 }],
     ['a collect account in another currency', { collectFromAccountId: 'usd' }],
-    ['a credit card to collect from', { collectFromAccountId: 'card' }],
+    ['another loan to collect from', { collectFromAccountId: 'car' }],
     ['a group that is gone', { group: 'Old' }],
     ['a currency the app does not offer', { currency: 'EUR' }],
   ])('refuses %s', (_name, patch) => {
-    expect(refusal([create(patch)])).toEqual({ error: 'invalid' });
+    expect(refusal([create(patch)], withCar())).toEqual({ error: 'invalid' });
+  });
+
+  it('collects from a credit card, as the editor offers', () => {
+    const [step] = steps([create({ collectFromAccountId: 'card' })]);
+    expect(payloadOf(step).rule).toMatchObject({ fromAccountId: 'card', amount: 1100 });
   });
 
   it('holds a free plan to one active loan and its account limit', () => {

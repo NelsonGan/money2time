@@ -20,6 +20,7 @@
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { resolveLoanContractFields } from '~/features/loans/lib/loanContractFields';
 import {
+  canPayLoanFrom,
   computeLoanProgress,
   computeLoanQuote,
   isContractTrackingRule,
@@ -202,10 +203,10 @@ function read(raw: Record<string, unknown>): ModuleOp | null {
 
 // ------------------------------------------------------------------ planning --
 
-/** A collect account as the editor's picker offers it: a debit account in the loan's currency. */
+/** A collect account as the editor's picker offers it: a bank account or card in the loan's currency. */
 function collectSource(tools: PlanTools, id: string | null | undefined, currency: string) {
   const source = tools.findAccount(id);
-  return source && source.type === 'debit' && source.currency === currency ? source : null;
+  return source && canPayLoanFrom(source) && source.currency === currency ? source : null;
 }
 
 /**
