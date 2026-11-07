@@ -750,7 +750,8 @@ its own sync engine and replica.
     primary-key `EXISTS` probe per split.
 - **Exchange rates** are shared and keyed by base currency.
   `runRateRefreshIfDue` judges staleness per base, from when that base's feed
-  rates were last stored. The fetch timestamp on the settings row is shared by
+  rates were last stored (on this phone: downloaded rates never sync, see
+  Cloud Sync). The fetch timestamp on the settings row is shared by
   every ledger, so it cannot answer that.
 - **Backup.** Rows carry `ledger_id`, and the backup has a `ledgers` table.
   - Database rows and sharing metadata are read together after image collection,
@@ -1323,7 +1324,8 @@ app tables ◀──apply──── diff of revisions ◀──── replica.
 | `services/cloudSyncApi.ts`          | The Worker's HTTP API                                                                             |
 | `services/nativeSignIn.ts`          | `NATIVE_PROVIDERS`: Apple and Google sign-in (a new provider is one entry)                        |
 | `services/cloudSyncSession.ts`      | The session token in the keychain                                                                 |
-| `lib/syncTables.ts`                 | What syncs: tables, image columns, device-local settings                                          |
+| `lib/syncTables.ts`                 | What syncs: tables, image columns, device-local settings and rows                                 |
+| `lib/offlineError.ts`               | Whether a Turso engine error means the phone is offline                                           |
 | `lib/capture.ts`, `rowCodec.ts`     | Trigger SQL; rows to and from JSON, revisions                                                     |
 | `lib/linking.ts`, `lib/messages.ts` | The first-sign-in decision; error and time text                                                   |
 | `screens/CloudSyncScreen.tsx`       | Picks one view per status from `components/` (signed out, email, linking, choice, synced, paused) |
@@ -1339,7 +1341,15 @@ app tables ◀──apply──── diff of revisions ◀──── replica.
   `075_ledgers_and_cloud_sync`, which also holds `sync_row_meta`, `sync_media_pending`,
   `sync_media_missing` and `sync_state`). The triggers are created at runtime,
   dropped on sign-out and when the flag is off, and stay quiet while pulled
-  rows are written (`sync_state.applying = '1'`).
+  rows are written (`sync_state.applying = '1'`). They skip rows that stay on
+  the phone, and a settings update that changed only device-local settings
+  (and `updated_at`): a queued row overrides the pulled copy, so the daily
+  rate refresh, a backup or a ledger switch would otherwise send this phone's
+  older values of every other setting back over another phone's newer edit.
+  `captureSignature` (`CAPTURE_VERSION` plus the settings columns, saved as
+  `sync_state.capture_version`) makes the triggers again when it changes:
+  bump `CAPTURE_VERSION` whenever the trigger SQL changes; a migration that
+  adds a settings column changes it by itself.
 - **Cloud shape.** One table, `sync_rows(table_name, row_id, data, rev, origin,
 updated_at)`, with each row as JSON, plus `sync_info` (the choice screen's
   phone names, and the last device and time older versions read).
@@ -1351,8 +1361,9 @@ updated_at)`, with each row as JSON, plus `sync_info` (the choice screen's
   `device_name:<origin>` key in `sync_info`). A phone writes its name once,
   and again only if it changes. Versions up to 1.7.3 read
   `last_synced_at` and `last_device_name` instead, and rewrote them on every
-  push; a phone now refreshes them at most once a day, and when they are
-  newer than the newest row (an older version pushed last) they are shown.
+  push; 1.7.4 no longer writes them (an older version's choice screen shows
+  the last time one of those wrote), and when they are newer than the
+  newest row (an older version pushed last) they are shown.
   Times are each phone's own clock, as before, so a phone whose clock runs
   ahead can be named after another edited later. A push of deletions alone
   does not move the time. A shared ledger's database has no choice screen,
@@ -1368,9 +1379,11 @@ updated_at)`, with each row as JSON, plus `sync_info` (the choice screen's
   another table, or a busier sync, costs pages the same way.
 - **Sync run** (`SyncEngine.syncNow`): `pull()` (so the flush sees what other
   phones deleted meanwhile), flush the outbox into the replica with a
-  new revision per changed row (a row whose JSON did not change, such as one
-  where only a device-local setting moved, keeps its revision), upload queued
-  images, `push()`, then diff every replica revision against
+  new revision per changed row (a row whose JSON did not change apart from
+  `updated_at`, such as the settings row when only a device-local setting
+  moved, keeps its revision: saving one stamps `updated_at`, so before 1.7.4
+  every rate refresh, backup or ledger switch sent the whole settings row),
+  upload queued images, `push()`, then diff every replica revision against
   `sync_row_meta` and write the rows other phones changed. The one pull is
   the only round trip of a sync with nothing to send: a push costs two
   round trips even when empty, so it runs only when the replica holds
@@ -1428,7 +1441,8 @@ updated_at)`, with each row as JSON, plus `sync_info` (the choice screen's
   phones can each make "the same" row under different ids. The lower id wins
   on every phone: the losing local row is retired (soft-deleted where the
   index only covers live rows, else deleted) and the change queued, and a
-  losing incoming row is skipped. Recurring rules avoid the problem by naming
+  losing incoming row is skipped. A local row that never syncs (a downloaded
+  rate) always makes way, and nothing is queued for it. Recurring rules avoid the problem by naming
   each run `rr:<ruleId>:<day>` (`recurringRunTransactionId`), so two phones
   that both run a due rule make one transaction. `<day>` is the run's
   calendar day, not the UTC date of the stored instant: run dates are local
@@ -1443,6 +1457,17 @@ updated_at)`, with each row as JSON, plus `sync_info` (the choice screen's
   lock, app icon, notification and payment-alert setup, backup target and
   status, onboarding, first open and FX fetch status
   (`DEVICE_LOCAL_SETTINGS_COLUMNS`).
+- **Downloaded exchange rates stay on the phone** (`syncedRowSql`,
+  `isSyncedRow` in `lib/syncTables.ts`). Every phone refreshes them from the
+  same daily feed, and sending them rewrote about 160 rows a day per account
+  in the cloud copy (in production, November 2026: about 8% of all bytes
+  synced, in about half the accounts). Rates the user typed (`source`
+  `manual`) sync. A phone never overwrites or deletes its own downloaded
+  rates for a pulled row, except to make way for a typed rate of the same
+  pair (whatever the ids, since the downloaded one never reached the cloud).
+  Rows older versions sent are left as they are, and leave the cloud copy
+  when a phone replaces it. With automatic rates off, Update rates refreshes
+  only the phone it is tapped on.
 - **[Ledgers](#ledgers)** sync like any other data: the `ledgers` table is
   synced (names, icons, currencies, per-ledger preferences), and every ledger's
   rows go up, not only the open one's, since `ledger_id` is just a column.
@@ -1538,8 +1563,12 @@ installs its JSI bindings through `RCTCxxBridge`, which React Native 0.88 no
 longer has. `patches/@tursodatabase+sync-react-native+0.8.3.patch` makes it a
 TurboModule that installs in `installJSIBindingsWithRuntime` on iOS, and reads
 the runtime and call invoker from the `ReactContext` on Android.
+It also names a connection lost while a response is read a network error
+(`HTTP response failed (network error)`): iOS rejects that read with its own
+localized words, so a phone set to Chinese showed Sync failed, and reported
+it, where it was offline.
 `__tests__/patches/tursoBridgeless.test.ts` fails if an upgrade drops it. The
-module is native, so Cloud Sync needs a store build, not an update.
+native part needs a store build, not an update.
 
 ### Testing
 

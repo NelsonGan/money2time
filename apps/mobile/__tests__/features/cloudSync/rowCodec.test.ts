@@ -5,6 +5,7 @@ import {
   diffRevs,
   encodeRow,
   makeRev,
+  sameExceptUpdatedAt,
 } from '~/features/cloudSync/lib/rowCodec';
 
 describe('encodeRow', () => {
@@ -166,5 +167,25 @@ describe('deletedElsewhere', () => {
   it('sends a row this channel never synced, and a live cloud copy as before', () => {
     expect(deletedElsewhere(null, undefined, live)).toBe(false);
     expect(deletedElsewhere('a', { data: JSON.stringify(live), rev: 'b' }, live)).toBe(false);
+  });
+});
+
+describe('sameExceptUpdatedAt', () => {
+  const row = (extra: Record<string, unknown>) =>
+    JSON.stringify({ id: 'primary', locale: 'en', updated_at: '2026-11-07T00:00:00Z', ...extra });
+
+  it('ignores a new updated_at alone', () => {
+    expect(sameExceptUpdatedAt(row({}), row({ updated_at: '2026-11-08T00:00:00Z' }))).toBe(true);
+  });
+
+  it('sees any other change', () => {
+    expect(
+      sameExceptUpdatedAt(row({}), row({ locale: 'fr', updated_at: '2026-11-08T00:00:00Z' })),
+    ).toBe(false);
+  });
+
+  it('treats a row without updated_at, or unreadable JSON, as changed', () => {
+    expect(sameExceptUpdatedAt('{"id":"a","n":1}', '{"id":"a","n":2}')).toBe(false);
+    expect(sameExceptUpdatedAt('not json', 'not json either')).toBe(false);
   });
 });

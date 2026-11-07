@@ -132,3 +132,24 @@ index b8219b8..3e603ff 100644
  }
  
  @end
+diff --git a/node_modules/@tursodatabase/sync-react-native/src/internal/ioProcessor.ts b/node_modules/@tursodatabase/sync-react-native/src/internal/ioProcessor.ts
+index d0dce26..ccfe980 100644
+--- a/node_modules/@tursodatabase/sync-react-native/src/internal/ioProcessor.ts
++++ b/node_modules/@tursodatabase/sync-react-native/src/internal/ioProcessor.ts
+@@ -221,8 +221,14 @@ async function processHttpRequest(item: NativeSyncIoItem, context: IoContext): P
+   // Set status code
+   item.setStatus(response.status);
+ 
+-  // Read response body and push to item
+-  const responseData = await response.arrayBuffer();
++  // Read response body and push to item. A connection lost mid-body rejects
++  // with the OS's own words (localized on iOS), so name it a network error.
++  let responseData: ArrayBuffer;
++  try {
++    responseData = await response.arrayBuffer();
++  } catch (e) {
++    throw new Error(`HTTP response failed (network error): ${e instanceof Error ? e.message : String(e)}. URL: ${fullUrl}, Method: ${request.method}`);
++  }
+   if (responseData.byteLength > 0) {
+     item.pushBuffer(responseData);
+   }
