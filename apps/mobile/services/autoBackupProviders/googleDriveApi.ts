@@ -55,13 +55,50 @@ export type DriveErrorKind =
 export class DriveError extends Error {
   readonly kind: DriveErrorKind;
   readonly status: number | null;
+  /**
+   * A short machine-readable cause: Drive's own `errors[0].reason` for an HTTP
+   * failure (`insufficientPermissions`, `notFound`, …), or a code of ours for a
+   * failure Drive did not explain. Safe to send to analytics; the message is
+   * not, since it can carry a file name.
+   */
+  readonly reason: string | null;
 
-  constructor(kind: DriveErrorKind, message: string, status: number | null = null) {
+  constructor(
+    kind: DriveErrorKind,
+    message: string,
+    status: number | null = null,
+    reason: string | null = null,
+  ) {
     super(message);
     this.name = 'DriveError';
     this.kind = kind;
     this.status = status;
+    this.reason = toReasonCode(reason);
   }
+}
+
+/**
+ * Keeps a reason only if it is a plain code, so no free text leaks out. A
+ * reason that was given but is not one becomes `unparsed`, which tells "Drive
+ * explained it, we dropped it" apart from "no reason at all".
+ */
+function toReasonCode(value: string | null | undefined): string | null {
+  if (!value) return null;
+  return /^[A-Za-z][A-Za-z0-9_.-]{0,63}$/.test(value) ? value : 'unparsed';
+}
+
+/**
+ * What analytics may know about a failed Drive call: the HTTP status and the
+ * reason code. A `client` failure covers every 4xx Drive does not single out,
+ * so without these two a persistent failure cannot be told apart from a
+ * malformed request.
+ */
+export function driveFailureDetails(error: unknown): {
+  httpStatus: number | null;
+  driveReason: string | null;
+} {
+  if (!(error instanceof DriveError)) return { httpStatus: null, driveReason: null };
+  return { httpStatus: error.status, driveReason: error.reason };
 }
 
 /** Transient conditions worth a second look; everything else fails fast. */
@@ -121,6 +158,10 @@ interface DriveApiErrorBody {
   error?: {
     message?: string;
     errors?: { reason?: string }[];
+    /** Newer Google APIs put the cause here (`ACCESS_TOKEN_SCOPE_INSUFFICIENT`). */
+    details?: { reason?: string }[];
+    /** The canonical status, e.g. `PERMISSION_DENIED`. */
+    status?: string;
   };
 }
 
@@ -139,14 +180,27 @@ function classifyStatus(status: number, reason: string): DriveErrorKind {
 async function driveErrorFromResponse(response: Response): Promise<DriveError> {
   let message = `Drive request failed with status ${response.status}`;
   let reason = '';
+  // Analytics only: the legacy reason, else the newer detail or status, so a
+  // body without an `errors` list still says why.
+  let reportedReason = '';
   try {
     const body = (await response.json()) as DriveApiErrorBody;
     if (body?.error?.message) message = body.error.message;
     reason = body?.error?.errors?.[0]?.reason ?? '';
+    reportedReason =
+      reason ||
+      body?.error?.details?.find((detail) => detail?.reason)?.reason ||
+      body?.error?.status ||
+      '';
   } catch {
     // Non-JSON error body (an HTML error page from a captive portal, say).
   }
-  return new DriveError(classifyStatus(response.status, reason), message, response.status);
+  return new DriveError(
+    classifyStatus(response.status, reason),
+    message,
+    response.status,
+    reportedReason,
+  );
 }
 
 interface DriveRequestOptions {
@@ -307,7 +361,8 @@ export async function createFolder(name: string): Promise<string> {
     attempts: 1,
   });
   const body = (await response.json()) as DriveFileResource;
-  if (!body.id) throw new DriveError('client', 'Drive did not return a folder id');
+  if (!body.id)
+    throw new DriveError('client', 'Drive did not return a folder id', null, 'missing_id');
   return body.id;
 }
 
@@ -368,7 +423,13 @@ export async function uploadJsonFile(
       const driveError =
         error instanceof DriveError
           ? error
-          : new DriveError('client', getErrorMessage(error, 'Drive upload failed'));
+          : new DriveError(
+              'client',
+              getErrorMessage(error, 'Drive upload failed'),
+              null,
+              // A bug of ours (a JSON parse, say) rather than Drive refusing.
+              `js_${error instanceof Error ? error.name : 'unknown'}`,
+            );
       lastError = driveError;
 
       const retryForAuth = driveError.kind === 'auth' && !authRetried;
@@ -416,7 +477,8 @@ async function uploadJsonFileOnce(folderId: string, name: string, json: string):
   });
 
   const body = (await uploadResponse.json()) as DriveFileResource;
-  if (!body.id) throw new DriveError('client', 'Drive did not return a file id');
+  if (!body.id)
+    throw new DriveError('client', 'Drive did not return a file id', null, 'missing_id');
   return body.id;
 }
 
@@ -453,7 +515,8 @@ async function uploadJsonFileMultipart(
   });
 
   const parsed = (await response.json()) as DriveFileResource;
-  if (!parsed.id) throw new DriveError('client', 'Drive did not return a file id');
+  if (!parsed.id)
+    throw new DriveError('client', 'Drive did not return a file id', null, 'missing_id');
   return parsed.id;
 }
 

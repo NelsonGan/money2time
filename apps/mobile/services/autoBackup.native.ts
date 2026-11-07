@@ -32,7 +32,7 @@ import {
   googleDriveProvider,
   resetGoogleDriveFolderCache,
 } from './autoBackupProviders/googleDrive';
-import { DriveError } from './autoBackupProviders/googleDriveApi';
+import { DriveError, driveFailureDetails } from './autoBackupProviders/googleDriveApi';
 import {
   signInWithGoogle as signInWithGoogleAuth,
   signOutFromGoogle as signOutFromGoogleAuth,
@@ -124,6 +124,11 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
     const errors: string[] = [];
     // Machine-readable reason for each entry in `errors`, for analytics.
     const errorKinds: string[] = [];
+    // HTTP status and Drive reason of the last provider failure, for analytics.
+    let lastFailure: ReturnType<typeof driveFailureDetails> = {
+      httpStatus: null,
+      driveReason: null,
+    };
 
     if (fellBackToLocalFrom) {
       errors.push(
@@ -141,6 +146,7 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
       } catch (e) {
         errors.push(describeBackupError(target, e));
         errorKinds.push(backupErrorKind(e));
+        lastFailure = driveFailureDetails(e);
       }
     }
 
@@ -161,6 +167,8 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
         error_count: errors.length,
         error_kind: errorKinds[errorKinds.length - 1] ?? 'unknown',
         fell_back_to_local: Boolean(fellBackToLocalFrom),
+        http_status: lastFailure.httpStatus,
+        drive_reason: lastFailure.driveReason,
       });
     }
 
