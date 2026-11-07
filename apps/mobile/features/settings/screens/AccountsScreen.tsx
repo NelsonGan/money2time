@@ -68,6 +68,7 @@ import { useApp, useTransactions } from '~/context/AppContext';
 import { LoanQuoteDisclosure } from '~/features/loans/components';
 import { resolveLoanContractFields } from '~/features/loans/lib/loanContractFields';
 import {
+  canPayLiabilityByHandFrom,
   canPayLoanFrom,
   computeLoanProgress,
   computeLoanQuote,
@@ -2140,6 +2141,7 @@ export function AccountEditorScreen({
             interestModel: input.loanInterestModel ?? 'flat',
             hasRate: input.loanInterestRate != null,
             hasCollectAccount: collectFromAccountId != null,
+            collectAccountType: accounts.find((a) => a.id === collectFromAccountId)?.type ?? 'none',
             countsAsExpense: input.loanCountAsExpense ?? false,
             currency: input.currency || DEFAULT_CURRENCY,
           });
@@ -2630,6 +2632,7 @@ export function PayCreditCardScreen({
     accountGroups,
     settings,
     rateTable,
+    recurringRules,
     getTransactionsByAccount,
     createTransaction,
   } = useApp();
@@ -2666,19 +2669,22 @@ export function PayCreditCardScreen({
 
   const isLoan = account?.type === 'loan';
   const fromAccounts = useMemo(
-    // A card is paid from a bank account, never from another card. A loan can
-    // also be paid from a card (see canPayLoanFrom). An archived goal/loan
-    // should not appear as a funding source.
     () =>
-      accounts.filter(
-        (a) =>
-          a.id !== accountId &&
-          (isLoan ? a.type !== 'loan' : !isLiabilityAccountType(a.type)) &&
-          a.goalArchivedAt == null &&
-          a.loanArchivedAt == null,
-      ),
-    [accounts, accountId, isLoan],
+      account
+        ? accounts.filter((a) => a.id !== accountId && canPayLiabilityByHandFrom(account.type, a))
+        : [],
+    [account, accounts, accountId],
   );
+  // With no payment to remember yet, a loan opens on the account its recurring
+  // repayment uses, else on the first account that is not a card: a card is
+  // offered for a loan, but charging it should be picked, never a default.
+  const fallbackFromAccountId = useMemo(() => {
+    const ruleSource = isLoan
+      ? recurringRules.find((rule) => isRepaymentRule(rule, accountId))?.fromAccountId
+      : null;
+    if (ruleSource && fromAccounts.some((a) => a.id === ruleSource)) return ruleSource;
+    return (fromAccounts.find((a) => a.type !== 'credit') ?? fromAccounts[0])?.id ?? null;
+  }, [accountId, fromAccounts, isLoan, recurringRules]);
 
   // In the liability's own currency, like every other balance on its card.
   const payableAmount = useMemo(() => {
@@ -2740,7 +2746,10 @@ export function PayCreditCardScreen({
         note: note != null && note.trim() !== defaultNote.trim() ? note : null,
       });
       if (isLoan) {
-        void trackEvent(AnalyticsEvents.LOAN_PAYMENT_RECORDED, { source: 'manual' });
+        void trackEvent(AnalyticsEvents.LOAN_PAYMENT_RECORDED, {
+          source: 'manual',
+          fromAccountType: accounts.find((a) => a.id === fromAccountId)?.type ?? 'unknown',
+        });
       }
       onClose();
     },
@@ -2765,7 +2774,7 @@ export function PayCreditCardScreen({
   const rememberedFrom =
     remembered?.fromAccountId && fromAccounts.some((a) => a.id === remembered.fromAccountId)
       ? remembered.fromAccountId
-      : null;
+      : fallbackFromAccountId;
 
   return (
     <PayCreditCardSheet

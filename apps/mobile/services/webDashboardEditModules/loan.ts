@@ -99,6 +99,8 @@ export type LoanCreatePayload = {
     interestModel: string;
     hasRate: boolean;
     hasCollectAccount: boolean;
+    /** The collect account's type (`debit` or `credit`), or `none`. */
+    collectAccountType: string;
     countsAsExpense: boolean;
     currency: string;
   };
@@ -417,10 +419,12 @@ function planCreate(tools: PlanTools, form: LoanForm, steps: EditStep[]): Result
   const contract = contractOf(tools, form, null, 0);
   if (!contract.ok) return contract;
   let collect: string | null = null;
+  let collectAccountType = 'none';
   if (form.collectFromAccountId) {
     const source = collectSource(tools, form.collectFromAccountId, form.currency);
     if (!source) return tools.refuse('invalid');
     collect = source.id;
+    collectAccountType = source.type;
   }
   // As the editor's Save: the accounts limit for any account, then the loans one.
   if (!lookup.isPro) {
@@ -444,6 +448,7 @@ function planCreate(tools: PlanTools, form: LoanForm, steps: EditStep[]): Result
       interestModel: contract.value.input.loanInterestModel ?? 'flat',
       hasRate: contract.value.input.loanInterestRate != null,
       hasCollectAccount: collect != null,
+      collectAccountType,
       countsAsExpense: contract.value.input.loanCountAsExpense ?? false,
       currency: contract.value.input.currency,
     },
