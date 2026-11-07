@@ -502,6 +502,17 @@ function titleCase(slug: string): string {
     .join(' ');
 }
 
+// Most concepts appear in every pack, so each is title-cased once at load.
+const FALLBACK_NAMES = new Map<string, string>();
+function fallbackNameFor(concept: string): string {
+  let name = FALLBACK_NAMES.get(concept);
+  if (name === undefined) {
+    name = titleCase(concept);
+    FALLBACK_NAMES.set(concept, name);
+  }
+  return name;
+}
+
 export const CATEGORY_ICON_SOURCES: Record<string, GeneratedCategoryIconSource> = {};
 export const GENERATED_CATEGORY_ICONS: GeneratedCategoryIcon[] = [];
 
@@ -520,6 +531,12 @@ for (const [pack, group, source, list] of ATLASES) {
       column: index % columns,
       row: Math.floor(index / columns),
     };
-    GENERATED_CATEGORY_ICONS.push({ id, concept, pack, group, fallbackName: titleCase(concept) });
+    GENERATED_CATEGORY_ICONS.push({
+      id,
+      concept,
+      pack,
+      group,
+      fallbackName: fallbackNameFor(concept),
+    });
   });
 }

@@ -117,6 +117,7 @@ async function main() {
       const atlasWidth = columns * ICON_SIZE;
       const atlasHeight = rows * ICON_SIZE;
       const atlas = new PNG({ width: atlasWidth, height: atlasHeight });
+      const concepts = [];
 
       for (const [index, file] of files.entries()) {
         const concept = file.slice(0, file.length - '.png'.length);
@@ -148,6 +149,7 @@ async function main() {
         const column = index % columns;
         const row = Math.floor(index / columns);
         PNG.bitblt(iconPng, atlas, 0, 0, ICON_SIZE, ICON_SIZE, column * ICON_SIZE, row * ICON_SIZE);
+        concepts.push(concept);
         count += 1;
       }
 
@@ -170,7 +172,7 @@ async function main() {
         pack: packId,
         group: groupId,
         require: `../assets/icon-atlases/${packName}/${atlasFile}`,
-        concepts: files.map((file) => file.slice(0, file.length - '.png'.length)),
+        concepts,
       });
     }
 
@@ -258,6 +260,17 @@ function titleCase(slug: string): string {
     .join(' ');
 }
 
+// Most concepts appear in every pack, so each is title-cased once at load.
+const FALLBACK_NAMES = new Map<string, string>();
+function fallbackNameFor(concept: string): string {
+  let name = FALLBACK_NAMES.get(concept);
+  if (name === undefined) {
+    name = titleCase(concept);
+    FALLBACK_NAMES.set(concept, name);
+  }
+  return name;
+}
+
 export const CATEGORY_ICON_SOURCES: Record<string, GeneratedCategoryIconSource> = {};
 export const GENERATED_CATEGORY_ICONS: GeneratedCategoryIcon[] = [];
 
@@ -276,7 +289,7 @@ for (const [pack, group, source, list] of ATLASES) {
       column: index % columns,
       row: Math.floor(index / columns),
     };
-    GENERATED_CATEGORY_ICONS.push({ id, concept, pack, group, fallbackName: titleCase(concept) });
+    GENERATED_CATEGORY_ICONS.push({ id, concept, pack, group, fallbackName: fallbackNameFor(concept) });
   });
 }
 `;

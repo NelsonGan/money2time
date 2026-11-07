@@ -24,7 +24,8 @@ describe('category icon atlases', () => {
     expect(rows.length).toBeGreaterThan(0);
     const onDisk = fs
       .readdirSync(ATLAS_DIR, { recursive: true, withFileTypes: true })
-      .filter((entry) => entry.isFile())
+      // Finder's .DS_Store and other dotfiles are not shipped artwork.
+      .filter((entry) => entry.isFile() && !entry.name.startsWith('.'))
       .map((entry) => path.join(entry.parentPath, entry.name))
       .sort();
     expect(onDisk).toEqual(rows.map((row) => row.file).sort());

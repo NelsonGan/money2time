@@ -18,7 +18,9 @@ describe('native bundle stubs', () => {
   it('stubs RevenueCat web SDK on iOS and Android and keeps the real package on web', () => {
     expect(nativeStubFor(MAPPINGS, 'ios')).toBe(NATIVE_STUBS[MAPPINGS]);
     expect(nativeStubFor(MAPPINGS, 'android')).toBe(NATIVE_STUBS[MAPPINGS]);
+    expect(nativeStubFor(`${MAPPINGS}/dist/index.umd.js`, 'android')).toBe(NATIVE_STUBS[MAPPINGS]);
     expect(nativeStubFor(MAPPINGS, 'web')).toBeNull();
+    expect(nativeStubFor(`${MAPPINGS}-other`, 'ios')).toBeNull();
     expect(nativeStubFor('react-native-purchases', 'ios')).toBeNull();
     expect(nativeStubFor('constructor', 'ios')).toBeNull();
     for (const file of Object.values(NATIVE_STUBS) as string[]) {
@@ -29,8 +31,11 @@ describe('native bundle stubs', () => {
   it('fails each browser-mode call with a clear error', () => {
     const { PurchasesCommon } = require(NATIVE_STUBS[MAPPINGS]);
     expect(PurchasesCommon.isConfigured()).toBe(false);
-    expect(() => PurchasesCommon.configure({})).toThrow('not bundled in native builds');
-    expect(() => PurchasesCommon.getInstance()).toThrow('not bundled in native builds');
+    expect(() => PurchasesCommon.configure({})).toThrow('not bundled in iOS and Android builds');
+    expect(() => PurchasesCommon.getInstance()).toThrow('not bundled in iOS and Android builds');
+    // Logging, serializing or awaiting it must not throw.
+    expect(() => JSON.stringify(PurchasesCommon)).not.toThrow();
+    expect(PurchasesCommon.then).toBeUndefined();
   });
 
   // The stub is only safe while react-native-purchases reaches the web SDK
@@ -50,6 +55,18 @@ describe('native bundle stubs', () => {
       );
       expect([...used]).toEqual(['PurchasesCommon']);
     }
+    // Every PurchasesCommon method the browser code calls exists on the stub,
+    // so an upgrade that calls a new one is reviewed here.
+    const { PurchasesCommon } = require(NATIVE_STUBS[MAPPINGS]);
+    const methods = new Set(
+      users.flatMap((file) =>
+        [...fs.readFileSync(file, 'utf8').matchAll(/\.PurchasesCommon\.(\w+)/g)].map(
+          (match) => match[1],
+        ),
+      ),
+    );
+    expect(methods.size).toBeGreaterThan(0);
+    for (const method of methods) expect(typeof PurchasesCommon[method]).toBe('function');
     const purchases = fs.readFileSync(path.join(PURCHASES_DIST, 'purchases.js'), 'utf8');
     expect(purchases).toContain(
       'var nativeModule = usingBrowserMode ? nativeModule_1.browserNativeModuleRNPurchases : react_native_1.NativeModules.RNPurchases;',
