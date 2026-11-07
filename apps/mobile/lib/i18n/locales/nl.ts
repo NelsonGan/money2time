@@ -2105,9 +2105,6 @@ const nl = {
       payment_note: 'Aflossing lening',
       due_amount: 'Te betalen bedrag',
       archive_action: 'Lening archiveren',
-      unarchive_action: 'Lening terughalen',
-      archive_hint:
-        'Verbergt hem uit je rekeningenlijst. Geschiedenis en totalen blijven, en "Gearchiveerde tonen" haalt hem terug.',
       celebration_title: 'Lening afgelost',
       celebration_message: '{{name}} is volledig afgelost. Die schuld ligt achter je.',
       celebration_message_with_amount: '{{name}} is volledig afgelost, alle {{amount}}.',
@@ -2128,9 +2125,8 @@ const nl = {
     show_archived_action: 'Gearchiveerde tonen ({{count}})',
     hide_archived_action: 'Gearchiveerde verbergen',
     archive_action: 'Rekening archiveren',
-    unarchive_action: 'Rekening terughalen',
     archive_hint:
-      'Verbergt hem uit je rekeningenlijst en de rekeningkeuze. Transacties en totalen blijven, en terugkerende boekingen erop worden gepauzeerd. Je vindt hem onder "Gearchiveerde tonen" om hem te openen of terug te halen.',
+      'Verbergt hem uit je rekeningen en de rekeningkeuze. Zijn transacties blijven, en zijn terugkerende boekingen worden gepauzeerd.',
     show_balances: 'Saldi tonen',
     type: 'Type',
     statement_day: 'Afschriftdag',

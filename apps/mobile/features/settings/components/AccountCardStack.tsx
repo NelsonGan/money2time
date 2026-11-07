@@ -10,7 +10,11 @@ import {
 } from 'react-native';
 import Animated, {
   cancelAnimation,
+  Easing,
   FadeIn,
+  FadeInDown,
+  FadeOut,
+  LinearTransition,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
@@ -1111,6 +1115,16 @@ function SectionStack({
   );
 }
 
+// Show / Hide archived: the archived section fades up into place and the
+// toggle under it glides to its new spot, instead of both jumping. Layout
+// animations follow the system Reduce Motion setting by default.
+const ARCHIVED_SECTION_ID = 'group-archived';
+const EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
+const EASE_IN_OUT = Easing.bezier(0.77, 0, 0.175, 1);
+const ARCHIVED_SECTION_ENTER = FadeInDown.duration(260).easing(EASE_OUT);
+const ARCHIVED_SECTION_EXIT = FadeOut.duration(160).easing(EASE_OUT);
+const ARCHIVED_TOGGLE_LAYOUT = LinearTransition.duration(260).easing(EASE_IN_OUT);
+
 export function AccountCardStack({
   accounts,
   archivedAccounts,
@@ -1185,7 +1199,7 @@ export function AccountCardStack({
 
     if (showArchived && archivedAccounts && archivedAccounts.length > 0) {
       result.push({
-        id: 'group-archived',
+        id: ARCHIVED_SECTION_ID,
         label: String(I18n.t('accounts.archived_section')),
         accounts: archivedAccounts,
       });
@@ -1208,8 +1222,14 @@ export function AccountCardStack({
       ? MASKED_BALANCE_VALUE
       : formatAmount(sectionTotal, settings, { showSign: false, trueHourlyRate });
 
+    const isArchivedSection = section.id === ARCHIVED_SECTION_ID;
     return (
-      <View key={section.id} style={indexInColumn > 0 ? styles.sectionGap : undefined}>
+      <Animated.View
+        key={section.id}
+        style={indexInColumn > 0 ? styles.sectionGap : undefined}
+        entering={isArchivedSection ? ARCHIVED_SECTION_ENTER : undefined}
+        exiting={isArchivedSection ? ARCHIVED_SECTION_EXIT : undefined}
+      >
         <View style={styles.sectionHeader}>
           <Text variant="label" tone="muted" style={styles.sectionLabel}>
             {section.label}
@@ -1243,7 +1263,7 @@ export function AccountCardStack({
           trueHourlyRate={trueHourlyRate}
           isDark={isDark}
         />
-      </View>
+      </Animated.View>
     );
   };
 
@@ -1291,22 +1311,24 @@ export function AccountCardStack({
       )}
 
       {archivedCount > 0 ? (
-        <Pressable
-          onPress={() => {
-            void triggerHaptic('selection');
-            setShowArchived((previous) => !previous);
-          }}
-          accessibilityRole="button"
-          accessibilityState={{ expanded: showArchived }}
-          className="mt-5 self-center rounded-full border border-border/40 bg-card px-4 py-2.5"
-        >
-          <Text variant="caption" tone="muted">
-            {I18n.t(
-              showArchived ? 'accounts.hide_archived_action' : 'accounts.show_archived_action',
-              { count: archivedCount },
-            )}
-          </Text>
-        </Pressable>
+        <Animated.View layout={ARCHIVED_TOGGLE_LAYOUT} style={styles.archivedToggle}>
+          <Pressable
+            onPress={() => {
+              void triggerHaptic('selection');
+              setShowArchived((previous) => !previous);
+            }}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: showArchived }}
+            className="self-center rounded-full border border-border/40 bg-card px-4 py-2.5"
+          >
+            <Text variant="caption" tone="muted">
+              {I18n.t(
+                showArchived ? 'accounts.hide_archived_action' : 'accounts.show_archived_action',
+                { count: archivedCount },
+              )}
+            </Text>
+          </Pressable>
+        </Animated.View>
       ) : null}
     </ScrollView>
   );
@@ -1373,6 +1395,9 @@ const styles = StyleSheet.create({
   },
   sectionGap: {
     marginTop: spacing.lg,
+  },
+  archivedToggle: {
+    marginTop: 20,
   },
   columns: {
     flexDirection: 'row',

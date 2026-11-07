@@ -209,6 +209,8 @@ interface AccountEditorInput {
   loanRateChanges?: LoanRateChange[] | null;
   loanCountAsExpense: boolean | null;
   loanPaymentCategoryId: string | null;
+  /** Whether the account should end up archived. Edit only; undefined on create. */
+  archived?: boolean;
   /**
    * The account repayments are collected from. Null means the borrower will
    * record each repayment by hand, and on an existing loan means whatever rule
@@ -559,7 +561,6 @@ function AccountEditorSheet({
   onClose,
   onSave,
   onDelete,
-  onArchive,
   onOpenMultiCurrency,
   onOpenLogoPicker,
   onOpenCardDesignPicker,
@@ -572,8 +573,6 @@ function AccountEditorSheet({
   onClose: () => void;
   onSave: (input: AccountEditorInput) => void;
   onDelete?: () => void;
-  /** Archive or bring back the account being edited (any type but a goal). */
-  onArchive?: (archived: boolean) => void;
   onOpenMultiCurrency?: () => void;
   onOpenLogoPicker: (session: AccountLogoPickerSession) => void;
   onOpenCardDesignPicker: (session: CardDesignPickerSession) => void;
@@ -588,6 +587,7 @@ function AccountEditorSheet({
   const [logoId, setLogoId] = useState<string | null>(null);
   const [cardDesign, setCardDesign] = useState<string | null>(null);
   const [includeInTotals, setIncludeInTotals] = useState(true);
+  const [archived, setArchived] = useState(false);
   const [balanceInput, setBalanceInput] = useState('0');
   const [balanceEdited, setBalanceEdited] = useState(false);
   const [creditStatementDay, setCreditStatementDay] = useState('25');
@@ -732,6 +732,7 @@ function AccountEditorSheet({
         : 'none';
       setAccountGroupId(matchedGroupId);
       setIncludeInTotals(account.includeInTotals);
+      setArchived(isAccountArchived(account));
       setBalanceInput(toBalanceInputValue(currentBalance));
       setBalanceEdited(false);
       setCreditStatementDay(String(account.creditStatementDay ?? '25'));
@@ -1086,6 +1087,9 @@ function AccountEditorSheet({
   );
 
   const logoMeta = getAccountLogoMeta(logoId);
+  const archiveLabel = String(
+    I18n.t(account?.type === 'loan' ? 'accounts.loan.archive_action' : 'accounts.archive_action'),
+  );
   const normalizedName = name.trim();
   const cardStackIndex = stackPaletteIndex(
     account?.id ?? null,
@@ -1214,6 +1218,7 @@ function AccountEditorSheet({
       creditStatementDay: resolvedType === 'credit' ? normalizedStatementDay : null,
       creditDueDay: resolvedType === 'credit' ? normalizedDueDay : null,
       includeInTotals,
+      archived: isEdit ? archived : undefined,
       // A new loan opens at what the contract says is still owed after the
       // instalments already paid; an existing one keeps its edited balance.
       startingBalance: isNewLoan && loanQuote ? loanQuote.openingBalance : parsedBalance,
@@ -1899,27 +1904,27 @@ function AccountEditorSheet({
               />
             </View>
 
-            {isEdit && account.type !== 'goal' && onArchive ? (
-              <Pressable
-                onPress={() => {
-                  void triggerHaptic('selection');
-                  onArchive(!isAccountArchived(account));
-                }}
-                accessibilityRole="button"
-                className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3.5"
-              >
-                <Text variant="body">
-                  {I18n.t(
-                    archiveCopyKey(
-                      account.type,
-                      isAccountArchived(account) ? 'unarchive' : 'archive',
-                    ),
-                  )}
-                </Text>
-                <Text variant="caption" tone="muted" className="mt-0.5">
-                  {I18n.t(archiveCopyKey(account.type, 'hint'))}
-                </Text>
-              </Pressable>
+            {isEdit && account.type !== 'goal' ? (
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center">
+                  <Text variant="label" tone="muted">
+                    {archiveLabel}
+                  </Text>
+                  <View className="ml-1.5">
+                    <InfoTooltipButton
+                      title={archiveLabel}
+                      infoTooltip={String(I18n.t('accounts.archive_hint'))}
+                      iconSize={14}
+                    />
+                  </View>
+                </View>
+                <Switch
+                  value={archived}
+                  onValueChange={setArchived}
+                  trackColor={{ false: `${themeColors.border}80`, true: themeColors.primary }}
+                  thumbColor="#FFFFFF"
+                />
+              </View>
             ) : null}
           </View>
         </FormScrollView>
@@ -2250,6 +2255,16 @@ export function AccountEditorScreen({
         );
       };
 
+      // Applied with the rest of the edit and after the rule resyncs, so
+      // archiving a loan also pauses a repayment rule they have just made. A
+      // loan keeps its own stamp, which older app versions and the Web
+      // Dashboard read.
+      const applyArchive = () => {
+        if (input.archived === undefined || input.archived === isAccountArchived(account)) return;
+        if (account.type === 'loan') setLoanArchived(account.id, input.archived);
+        else setAccountArchived(account.id, input.archived);
+      };
+
       const accountUpdates = {
         name: input.name,
         accountGroup: input.accountGroup,
@@ -2273,6 +2288,7 @@ export function AccountEditorScreen({
         // reporting, so it must not be walked by the two resyncs above (which
         // read the render-time `recurringRules` anyway).
         resyncCollectAccount();
+        applyArchive();
       };
 
       // Asks how a balance change is recorded (a plain adjustment, or real
@@ -2338,8 +2354,9 @@ export function AccountEditorScreen({
       // in the recurring editor.
       if (input.currency && input.currency !== account.currency) {
         const toCurrency = input.currency;
-        const changeCurrency = () =>
-          changeAccountCurrency(account.id, toCurrency, {
+        const changeCurrency = () => {
+          applyArchive();
+          return changeAccountCurrency(account.id, toCurrency, {
             name: input.name,
             accountGroup: input.accountGroup,
             logoId: input.logoId,
@@ -2351,6 +2368,7 @@ export function AccountEditorScreen({
             // new currency alongside the re-denominated history.
             ...loanUpdates,
           });
+        };
         // A balance typed in the same save is recorded on top of the
         // conversion, in the new currency, so the account lands on it.
         const balanceChange = balanceChangeWithCurrencySwitch({
@@ -2411,6 +2429,8 @@ export function AccountEditorScreen({
       accounts,
       changeAccountCurrency,
       checkLimit,
+      setAccountArchived,
+      setLoanArchived,
       createAccount,
       createRecurringRule,
       createTransaction,
@@ -2432,18 +2452,6 @@ export function AccountEditorScreen({
     onClose();
   }, [account, deleteAccount, onClose]);
 
-  const handleArchive = useCallback(
-    (archived: boolean) => {
-      if (!account) return;
-      // A loan keeps archiving through its own stamp, which older app
-      // versions and the Web Dashboard read; everyday accounts use the new one.
-      if (account.type === 'loan') setLoanArchived(account.id, archived);
-      else setAccountArchived(account.id, archived);
-      onClose();
-    },
-    [account, onClose, setAccountArchived, setLoanArchived],
-  );
-
   return (
     <AccountEditorSheet
       account={account}
@@ -2454,29 +2462,11 @@ export function AccountEditorScreen({
       onClose={onClose}
       onSave={handleSave}
       onDelete={account ? handleDelete : undefined}
-      onArchive={account && account.type !== 'goal' ? handleArchive : undefined}
       onOpenMultiCurrency={onOpenMultiCurrency}
       onOpenLogoPicker={onOpenLogoPicker}
       onOpenCardDesignPicker={onOpenCardDesignPicker}
     />
   );
-}
-
-/** The archive action's label or hint: loans keep their own wording. */
-function archiveCopyKey(type: AccountType, part: 'archive' | 'unarchive' | 'hint'): string {
-  const keys =
-    type === 'loan'
-      ? {
-          archive: 'accounts.loan.archive_action',
-          unarchive: 'accounts.loan.unarchive_action',
-          hint: 'accounts.loan.archive_hint',
-        }
-      : {
-          archive: 'accounts.archive_action',
-          unarchive: 'accounts.unarchive_action',
-          hint: 'accounts.archive_hint',
-        };
-  return keys[part];
 }
 
 /** Icon shown on the account-type chips and the logo fallback. */

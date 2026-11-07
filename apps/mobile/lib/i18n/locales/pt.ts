@@ -2095,9 +2095,6 @@ const pt = {
       payment_note: 'Pagamento de empréstimo',
       due_amount: 'Valor a pagar',
       archive_action: 'Arquivar empréstimo',
-      unarchive_action: 'Desarquivar empréstimo',
-      archive_hint:
-        'Oculta-o da lista de contas. O histórico e os totais são mantidos, e "Ver arquivados" traz de volta.',
       celebration_title: 'Empréstimo quitado',
       celebration_message: '{{name}} está totalmente pago. Essa dívida ficou para trás.',
       celebration_message_with_amount: '{{name}} está totalmente pago, os {{amount}} todos.',
@@ -2118,9 +2115,8 @@ const pt = {
     show_archived_action: 'Ver arquivados ({{count}})',
     hide_archived_action: 'Ocultar arquivados',
     archive_action: 'Arquivar conta',
-    unarchive_action: 'Desarquivar conta',
     archive_hint:
-      'Oculta-a da lista de contas e dos seletores de conta. As transações e os totais são mantidos, e os lançamentos recorrentes nela são pausados. Encontre-a em "Ver arquivados" para abrir ou desarquivar.',
+      'Oculta-a das suas contas e dos seletores de conta. As transações são mantidas e os lançamentos recorrentes são pausados.',
     show_balances: 'Mostrar saldos',
     type: 'Tipo',
     statement_day: 'Dia do fechamento',

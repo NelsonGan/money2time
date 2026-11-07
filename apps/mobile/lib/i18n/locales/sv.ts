@@ -2087,9 +2087,6 @@ const sv = {
       payment_note: 'Låneåterbetalning',
       due_amount: 'Belopp att betala',
       archive_action: 'Arkivera lån',
-      unarchive_action: 'Ta fram ur arkivet',
-      archive_hint:
-        'Döljer det från din kontolista. Historik och summor behålls, och "Visa arkiverade" tar fram det igen.',
       celebration_title: 'Lånet är slutbetalt',
       celebration_message: '{{name}} är helt återbetalat. Den skulden är avklarad.',
       celebration_message_with_amount: '{{name}} är helt återbetalat, alla {{amount}}.',
@@ -2110,9 +2107,8 @@ const sv = {
     show_archived_action: 'Visa arkiverade ({{count}})',
     hide_archived_action: 'Dölj arkiverade',
     archive_action: 'Arkivera konto',
-    unarchive_action: 'Ta fram ur arkivet',
     archive_hint:
-      'Döljer det från din kontolista och kontoväljarna. Transaktioner och summor behålls, och återkommande poster på det pausas. Du hittar det under "Visa arkiverade" för att öppna det eller ta fram det ur arkivet.',
+      'Döljer det från dina konton och kontoväljarna. Transaktionerna behålls, och återkommande poster pausas.',
     show_balances: 'Visa saldon',
     type: 'Typ',
     statement_day: 'Utdragsdag',

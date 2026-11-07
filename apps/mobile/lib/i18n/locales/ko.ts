@@ -2060,9 +2060,6 @@ const ko = {
       payment_note: '대출 상환',
       due_amount: '납부 금액',
       archive_action: '대출 보관',
-      unarchive_action: '보관 해제',
-      archive_hint:
-        '계좌 목록에서 숨깁니다. 내역과 합계는 유지되며 "보관함 보기"로 다시 꺼낼 수 있습니다.',
       celebration_title: '대출 완납',
       celebration_message: '{{name}} 상환을 마쳤습니다. 그 빚은 이제 끝입니다.',
       celebration_message_with_amount: '{{name}} 상환을 마쳤습니다. {{amount}} 전부입니다.',
@@ -2083,9 +2080,8 @@ const ko = {
     show_archived_action: '보관함 보기 ({{count}})',
     hide_archived_action: '보관함 숨기기',
     archive_action: '계좌 보관',
-    unarchive_action: '보관 해제',
     archive_hint:
-      '계좌 목록과 계좌 선택에서 숨깁니다. 거래와 합계는 유지되고 이 계좌의 반복 거래는 일시 중지됩니다. "보관함 보기"에서 열거나 보관을 해제할 수 있습니다.',
+      '계좌 목록과 계좌 선택에서 숨깁니다. 거래는 유지되고 반복 거래는 일시 중지됩니다.',
     show_balances: '잔액 표시',
     type: '유형',
     statement_day: '결제일',

@@ -2088,9 +2088,6 @@ const da = {
       payment_note: 'Afdrag på lån',
       due_amount: 'Beløb til betaling',
       archive_action: 'Arkivér lån',
-      unarchive_action: 'Fjern fra arkiv',
-      archive_hint:
-        'Skjuler det fra din kontoliste. Historik og totaler bevares, og "Vis arkiverede" henter det frem igen.',
       celebration_title: 'Lån betalt ud',
       celebration_message: '{{name}} er fuldt indfriet. Den gæld er bag dig.',
       celebration_message_with_amount: '{{name}} er fuldt indfriet, alle {{amount}}.',
@@ -2111,9 +2108,8 @@ const da = {
     show_archived_action: 'Vis arkiverede ({{count}})',
     hide_archived_action: 'Skjul arkiverede',
     archive_action: 'Arkivér konto',
-    unarchive_action: 'Fjern fra arkiv',
     archive_hint:
-      'Skjuler den fra din kontoliste og kontovælgere. Transaktioner og totaler bevares, og faste poster på den sættes på pause. Find den under "Vis arkiverede" for at åbne den eller fjerne den fra arkivet.',
+      'Skjuler den fra dine konti og kontovælgere. Dens transaktioner bevares, og dens faste poster sættes på pause.',
     show_balances: 'Vis saldoer',
     type: 'Type',
     statement_day: 'Kontoudtogsdag',

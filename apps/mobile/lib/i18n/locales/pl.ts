@@ -2092,9 +2092,6 @@ const pl = {
       payment_note: 'Spłata kredytu',
       due_amount: 'Kwota do zapłaty',
       archive_action: 'Archiwizuj kredyt',
-      unarchive_action: 'Przywróć z archiwum',
-      archive_hint:
-        'Ukrywa go na liście kont. Historia i sumy zostają, a "Pokaż zarchiwizowane" przywraca go.',
       celebration_title: 'Kredyt spłacony',
       celebration_message: '{{name}} jest w pełni spłacony. Ten dług masz już za sobą.',
       celebration_message_with_amount: '{{name}} jest w pełni spłacony, całe {{amount}}.',
@@ -2115,9 +2112,8 @@ const pl = {
     show_archived_action: 'Pokaż zarchiwizowane ({{count}})',
     hide_archived_action: 'Ukryj zarchiwizowane',
     archive_action: 'Archiwizuj konto',
-    unarchive_action: 'Przywróć z archiwum',
     archive_hint:
-      'Ukrywa je na liście kont i w wyborze konta. Transakcje i sumy zostają, a cykliczne wpisy na nim są wstrzymane. Znajdziesz je w "Pokaż zarchiwizowane", aby je otworzyć lub przywrócić.',
+      'Ukrywa je na liście kont i w wyborze konta. Jego transakcje zostają, a cykliczne wpisy są wstrzymane.',
     show_balances: 'Pokaż salda',
     type: 'Typ',
     statement_day: 'Dzień wyciągu',

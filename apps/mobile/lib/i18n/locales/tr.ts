@@ -2096,9 +2096,6 @@ const tr = {
       payment_note: 'Kredi ödemesi',
       due_amount: 'Ödenecek tutar',
       archive_action: 'Krediyi arşivle',
-      unarchive_action: 'Arşivden çıkar',
-      archive_hint:
-        'Hesap listenizden gizler. Geçmiş ve toplamlar korunur, "Arşivi göster" ile geri gelir.',
       celebration_title: 'Kredi kapandı',
       celebration_message: '{{name}} tamamen ödendi. O borç artık geride kaldı.',
       celebration_message_with_amount: '{{name}} tamamen ödendi, {{amount}} tutarının hepsi.',
@@ -2119,9 +2116,8 @@ const tr = {
     show_archived_action: 'Arşivi göster ({{count}})',
     hide_archived_action: 'Arşivi gizle',
     archive_action: 'Hesabı arşivle',
-    unarchive_action: 'Arşivden çıkar',
     archive_hint:
-      'Hesap listenizden ve hesap seçiminden gizler. İşlemler ve toplamlar korunur, üzerindeki tekrarlayan kayıtlar duraklatılır. Açmak veya arşivden çıkarmak için "Arşivi göster" altında bulabilirsiniz.',
+      'Hesaplarınızdan ve hesap seçiminden gizler. İşlemleri korunur, tekrarlayan kayıtları duraklatılır.',
     show_balances: 'Bakiyeleri göster',
     type: 'Tür',
     statement_day: 'Ekstre günü',
