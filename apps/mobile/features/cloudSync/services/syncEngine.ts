@@ -31,7 +31,7 @@ import { assetRelativePathFromRef, invalidateCustomUriCache } from '~/services/u
 import { newId } from '~/utils/id';
 
 import {
-  CAPTURE_VERSION,
+  captureSignature,
   captureTriggersSql,
   dropCaptureTriggersSql,
   ENQUEUE_ROW_SQL,
@@ -467,18 +467,19 @@ export function enableCapture(): void {
   const db = getSQLite();
   const create = () => {
     for (const table of SYNC_TABLES) {
-      if (tableExists(table)) db.execSync(captureTriggersSql(table));
+      if (tableExists(table)) db.execSync(captureTriggersSql(table, localColumns(table)));
     }
   };
-  if (getState('capture_version') === CAPTURE_VERSION) {
+  const signature = captureSignature(localColumns('settings'));
+  if (getState('capture_version') === signature) {
     create();
     return;
   }
-  // Triggers an earlier app version made are replaced, once.
+  // Triggers an earlier app version (or schema) made are replaced, once.
   db.withTransactionSync(() => {
     for (const table of SYNC_TABLES) db.execSync(dropCaptureTriggersSql(table));
     create();
-    setState('capture_version', CAPTURE_VERSION);
+    setState('capture_version', signature);
   });
 }
 

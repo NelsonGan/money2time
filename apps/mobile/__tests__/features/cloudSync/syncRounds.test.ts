@@ -247,6 +247,27 @@ it('pushes nothing when only a device-local setting and the row stamp changed', 
   expect(rounds()).toEqual(['pull', 'pull', 'push']);
 });
 
+it("keeps another phone's settings edit when only a device-local setting changed here", async () => {
+  await engine.uploadAllReplacingCloud();
+  // Another phone renamed the profile; this phone has not pulled it yet.
+  const { rev: _rev, ...settings } = cloudRow('primary')!;
+  cloud
+    .prepare("UPDATE sync_rows SET data = ?, rev = 'rev-other' WHERE row_id = 'primary'")
+    .run(JSON.stringify({ ...settings, profile_name: 'Sam', updated_at: '2026-11-07T21:00:00Z' }));
+  remoteChanged = true;
+  // Meanwhile this phone refreshes its rates (a device-local setting).
+  app.exec(
+    "UPDATE settings SET last_rate_fetch_at = '2026-11-08T08:00:00Z', updated_at = '2026-11-08T08:00:00Z'",
+  );
+  expect(app.prepare('SELECT COUNT(*) AS n FROM sync_outbox').get()?.n).toBe(0);
+  await engine.syncNow();
+  expect(cloudRow('primary')?.profile_name).toBe('Sam');
+  expect(app.prepare('SELECT profile_name FROM settings').get()?.profile_name).toBe('Sam');
+  expect(app.prepare('SELECT last_rate_fetch_at FROM settings').get()?.last_rate_fetch_at).toBe(
+    '2026-11-08T08:00:00Z',
+  );
+});
+
 it('pushes a change already in the replica that an earlier push did not carry', async () => {
   addTransaction('lunch', 12);
   pushError = new Error('offline');

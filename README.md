@@ -1342,9 +1342,14 @@ app tables ◀──apply──── diff of revisions ◀──── replica.
   `sync_media_missing` and `sync_state`). The triggers are created at runtime,
   dropped on sign-out and when the flag is off, and stay quiet while pulled
   rows are written (`sync_state.applying = '1'`). They skip rows that stay on
-  the phone. `CAPTURE_VERSION` (in `lib/capture.ts`, saved as
-  `sync_state.capture_version`) replaces the triggers an earlier version made
-  once; bump it whenever the trigger SQL changes.
+  the phone, and a settings update that changed only device-local settings
+  (and `updated_at`): a queued row overrides the pulled copy, so the daily
+  rate refresh, a backup or a ledger switch would otherwise send this phone's
+  older values of every other setting back over another phone's newer edit.
+  `captureSignature` (`CAPTURE_VERSION` plus the settings columns, saved as
+  `sync_state.capture_version`) makes the triggers again when it changes:
+  bump `CAPTURE_VERSION` whenever the trigger SQL changes; a migration that
+  adds a settings column changes it by itself.
 - **Cloud shape.** One table, `sync_rows(table_name, row_id, data, rev, origin,
 updated_at)`, with each row as JSON, plus `sync_info` (the choice screen's
   phone names, and the last device and time older versions read).
