@@ -1,19 +1,21 @@
 /**
  * Web Dashboard edits: Budget templates and monthly budgets (BudgetTemplateEditorScreen, PeriodBudgetEditorScreen).
- * The web knows monthly budgets in the main currency only: weekly and yearly
- * ones, and ones in another currency, are never sent to it
- * (`webDashboardBudgetsOnly`), and every op here is about a monthly template or
- * budget in the main currency (its edits name no currency, so one keeps its own).
+ * The web knows monthly budgets only: weekly and yearly ones are never sent to
+ * it (`webDashboardBudgetsOnly`) and every op here is about a monthly template
+ * or budget. A page that can show budget currencies (its `budget-currencies`
+ * want feature) may name one (`currency`: a code the entry flows offer, or
+ * null for the main currency); one that cannot never sees a budget in another
+ * currency, and its edits, naming none, leave a template's or budget's own.
  * Planned on the phone like the app's own editor; applied by
  * features/settings/lib/webDashboardApply/budget.ts.
  *
- *   template_create  { template: { name, emoji, totalAmount, countUnbudgeted, allocations, backPopulate } }
- *   template_update  { id, at, template: { name, emoji, totalAmount, countUnbudgeted, allocations } }
+ *   template_create  { template: { name, emoji, totalAmount, countUnbudgeted, allocations, backPopulate, currency? } }
+ *   template_update  { id, at, template: { name, emoji, totalAmount, countUnbudgeted, allocations, currency? } }
  *   template_delete  { id, at }
  *   template_default { id, at }
  *   month_create     { month, templateId }        a month's budget from a template
- *   month_custom     { month, budget: { totalAmount, countUnbudgeted, lines } }
- *   month_update     { id, at, budget: { totalAmount, countUnbudgeted, lines } }
+ *   month_custom     { month, budget: { totalAmount, countUnbudgeted, lines, currency? } }
+ *   month_update     { id, at, budget: { totalAmount, countUnbudgeted, lines, currency? } }
  *   month_delete     { id, at }
  *
  * Allocations (and a month's lines) are `{ categoryId, amount }`, as the app's
@@ -33,8 +35,14 @@ const MAX_NAME = 80;
 const MAX_LINES = 300;
 
 type Allocation = { categoryId: string; amount: number };
-type BudgetFields = { totalAmount: number; countUnbudgeted: boolean; lines: Allocation[] };
-type TemplateFields = {
+/** A budget's currency as an op names it: a code, null for the main one, or absent to keep its own. */
+type CurrencyField = { currency?: string | null };
+type BudgetFields = CurrencyField & {
+  totalAmount: number;
+  countUnbudgeted: boolean;
+  lines: Allocation[];
+};
+type TemplateFields = CurrencyField & {
   name: string;
   emoji: string | null;
   totalAmount: number;
@@ -45,15 +53,10 @@ type TemplateFields = {
 
 /** What the planner reads from the app: see webDashboardApply/budget.ts `select`. */
 export type BudgetExtra = {
-  /** Monthly templates in the main currency only. */
+  /** Monthly templates only. */
   templates: BudgetTemplate[];
-  /** Month budgets in the main currency only. */
+  /** Month budgets only. */
   budgets: PeriodBudget[];
-  /**
-   * The months with a live month budget in any currency. A month whose budget
-   * is in another currency looks empty on the web, yet cannot have another.
-   */
-  takenMonths: string[];
   /** Live templates of every period, which the free plan's limit counts. */
   templateCount: number;
   /** The budget pager's months (`computeBudgetPagerMonths`), weekly and yearly budgets included: first budget or expense month to a year ahead. */
@@ -86,23 +89,48 @@ function readLines(value: unknown): Allocation[] | null {
   return lines;
 }
 
+/** A currency code or null when the op names one; `undefined` when it names none. */
+function readCurrency(value: Record<string, unknown>): CurrencyField | null {
+  if (!('currency' in value)) return {};
+  const { currency } = value;
+  if (currency === null) return { currency: null };
+  return typeof currency === 'string' && /^[A-Z]{3}$/.test(currency) ? { currency } : null;
+}
+
 function readBudget(value: unknown): BudgetFields | null {
-  if (!isRecord(value) || !onlyKeys(value, ['totalAmount', 'countUnbudgeted', 'lines'])) {
+  if (
+    !isRecord(value) ||
+    !onlyKeys(value, ['totalAmount', 'countUnbudgeted', 'lines'], ['currency'])
+  ) {
     return null;
   }
   const lines = readLines(value.lines);
-  if (!lines || !isMoney(value.totalAmount) || typeof value.countUnbudgeted !== 'boolean') {
+  const currency = readCurrency(value);
+  if (
+    !lines ||
+    !currency ||
+    !isMoney(value.totalAmount) ||
+    typeof value.countUnbudgeted !== 'boolean'
+  ) {
     return null;
   }
-  return { totalAmount: value.totalAmount, countUnbudgeted: value.countUnbudgeted, lines };
+  return {
+    totalAmount: value.totalAmount,
+    countUnbudgeted: value.countUnbudgeted,
+    lines,
+    ...currency,
+  };
 }
 
 function readTemplate(value: unknown, create: boolean): TemplateFields | null {
   const required = ['name', 'emoji', 'totalAmount', 'countUnbudgeted', 'allocations'];
-  if (!isRecord(value) || !onlyKeys(value, required, create ? ['backPopulate'] : [])) return null;
+  const optional = create ? ['backPopulate', 'currency'] : ['currency'];
+  if (!isRecord(value) || !onlyKeys(value, required, optional)) return null;
   const allocations = readLines(value.allocations);
+  const currency = readCurrency(value);
   if (
     !allocations ||
+    !currency ||
     typeof value.name !== 'string' ||
     value.name.length > MAX_NAME ||
     !(value.emoji === null || (typeof value.emoji === 'string' && value.emoji.length <= 64)) ||
@@ -118,6 +146,7 @@ function readTemplate(value: unknown, create: boolean): TemplateFields | null {
     totalAmount: value.totalAmount,
     countUnbudgeted: value.countUnbudgeted,
     allocations,
+    ...currency,
     ...(create ? { backPopulate: value.backPopulate === true } : {}),
   };
 }
@@ -170,7 +199,6 @@ function extraOf(tools: PlanTools): BudgetExtra {
   return {
     templates: extra.templates.filter((template) => !template.deletedAt),
     budgets: extra.budgets.filter((budget) => !budget.deletedAt),
-    takenMonths: extra.takenMonths,
     templateCount: extra.templateCount,
     months: extra.months,
   };
@@ -232,6 +260,24 @@ function validEmoji(tools: PlanTools, emoji: string | null, current?: string | n
   return emoji !== '' && validIcon(emoji, tools.lookup.isCategoryIcon);
 }
 
+/**
+ * The currency an op names, as the save takes it: nothing when it names none
+ * (the template or budget keeps its own), else a code the entry flows offer
+ * (the main currency included) or null for the main one. Undefined when it
+ * names one the phone does not offer.
+ */
+function currencyInput(
+  tools: PlanTools,
+  fields: CurrencyField,
+): { currency?: string | null } | undefined {
+  if (!('currency' in fields) || fields.currency === undefined) return {};
+  const { currency } = fields;
+  if (currency === null) return { currency: null };
+  return currency === tools.lookup.reportingCurrency || tools.lookup.currencies.includes(currency)
+    ? { currency }
+    : undefined;
+}
+
 const step = (action: string, payload: Record<string, unknown>): EditStep => ({
   kind: 'module',
   entity: ENTITY,
@@ -240,7 +286,7 @@ const step = (action: string, payload: Record<string, unknown>): EditStep => ({
 });
 
 function plan(tools: PlanTools, op: ModuleOp, steps: EditStep[]): Result<number> {
-  const { templates, budgets, takenMonths, months, templateCount } = extraOf(tools);
+  const { templates, budgets, months, templateCount } = extraOf(tools);
 
   if (op.op === 'template_create' || op.op === 'template_update') {
     const fields = op.template as TemplateFields;
@@ -259,13 +305,15 @@ function plan(tools: PlanTools, op: ModuleOp, steps: EditStep[]): Result<number>
     const name = fields.name.trim();
     if (!name || !validEmoji(tools, fields.emoji, current?.emoji)) return tools.refuse('invalid');
     const allocations = allocationsFor(tools, fields.totalAmount, fields.allocations);
-    if (!allocations) return tools.refuse('invalid');
+    const currency = currencyInput(tools, fields);
+    if (!allocations || !currency) return tools.refuse('invalid');
     const input = {
       name,
       emoji: fields.emoji,
       totalAmount: fields.totalAmount,
       countUnbudgeted: fields.countUnbudgeted,
       allocations,
+      ...currency,
     };
     if (current) {
       steps.push(step('template_update', { id: current.id, input }));
@@ -298,10 +346,8 @@ function plan(tools: PlanTools, op: ModuleOp, steps: EditStep[]): Result<number>
     }
     if (!tools.claim(`budget-month:${month}`)) return tools.refuse('invalid');
     // One live budget a month: one made since the browser's copy wins, and
-    // so does one in another currency the browser is not shown.
-    if (budgets.some((budget) => budget.periodKey === month) || takenMonths.includes(month)) {
-      return tools.refuse('conflict');
-    }
+    // so does one in another currency an older page is not shown.
+    if (budgets.some((budget) => budget.periodKey === month)) return tools.refuse('conflict');
     if (op.op === 'month_create') {
       // The template is read as it is now: the same batch must not also change
       // it, though more months may still be made from it.
@@ -319,11 +365,17 @@ function plan(tools: PlanTools, op: ModuleOp, steps: EditStep[]): Result<number>
     }
     const fields = op.budget as BudgetFields;
     const lines = allocationsFor(tools, fields.totalAmount, fields.lines);
-    if (!lines) return tools.refuse('invalid');
+    const currency = currencyInput(tools, fields);
+    if (!lines || !currency) return tools.refuse('invalid');
     steps.push(
       step('month_custom', {
         month,
-        input: { totalAmount: fields.totalAmount, countUnbudgeted: fields.countUnbudgeted, lines },
+        input: {
+          totalAmount: fields.totalAmount,
+          countUnbudgeted: fields.countUnbudgeted,
+          lines,
+          ...currency,
+        },
       }),
     );
     return tools.ok(1);
@@ -340,11 +392,17 @@ function plan(tools: PlanTools, op: ModuleOp, steps: EditStep[]): Result<number>
     }
     const fields = op.budget as BudgetFields;
     const lines = allocationsFor(tools, fields.totalAmount, fields.lines);
-    if (!lines) return tools.refuse('invalid');
+    const currency = currencyInput(tools, fields);
+    if (!lines || !currency) return tools.refuse('invalid');
     steps.push(
       step('month_update', {
         id: current.id,
-        input: { totalAmount: fields.totalAmount, countUnbudgeted: fields.countUnbudgeted, lines },
+        input: {
+          totalAmount: fields.totalAmount,
+          countUnbudgeted: fields.countUnbudgeted,
+          lines,
+          ...currency,
+        },
       }),
     );
     return tools.ok(1);

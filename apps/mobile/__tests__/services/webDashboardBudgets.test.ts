@@ -56,6 +56,21 @@ describe('webDashboardBudgetsOnly', () => {
     expect(data.tables.monthly_budgets).toHaveLength(3);
   });
 
+  it('keeps budgets in another currency for a page that can show them', () => {
+    const data = backup({
+      ...base,
+      budget_templates: [
+        { id: 'tm', period: 'month', currency: null },
+        { id: 'tj', period: 'month', currency: 'JPY' },
+        { id: 'tw', period: 'week', currency: 'JPY' },
+      ],
+      monthly_budgets: [{ id: 'bj', period: 'month', month: '2026-11', currency: 'JPY' }],
+    });
+    const { tables } = webDashboardBudgetsOnly(data, { currencies: true });
+    expect(tables.budget_templates?.map((row) => row.id)).toEqual(['tm', 'tj']);
+    expect(tables.monthly_budgets?.map((row) => row.id)).toEqual(['bj']);
+  });
+
   it('drops budgets in another currency, which the web would read as the main one', () => {
     const data = backup({
       ...base,
