@@ -31,7 +31,7 @@ Never write the implementation before its test exists. If you're tempted to, wri
 
 - React components / screens / hooks rendering (no RN renderer; `testEnvironment: node`).
 - Anything requiring a real SQLite database, real device APIs, or Expo native modules at runtime.
-- For UI behavior, verify with the **Argent MCP tools** instead (see `argent-test-ui-flow`), not Jest.
+- For UI behavior, verify on the simulator with the **T3 Code device tools** instead (see AGENTS.md), not Jest.
 
 ## Mocks and module mapping (already wired)
 
@@ -81,7 +81,7 @@ For changes to tracking or tracked product flows, follow [maintain-analytics-tra
 ## Anti-patterns
 
 - Writing the implementation first and back-filling a test that just mirrors it.
-- Trying to render a screen/hook in Jest (won't work — use Argent).
+- Trying to render a screen/hook in Jest (won't work — check it on the simulator).
 - Leaving logic embedded in a component because "it can't be tested" — extract the pure part instead.
 - Asserting on incidental output (exact whitespace, full object dumps) instead of the behavior that matters.
 - Adding an `en.ts` key without updating the other locales (breaks the parity suite).
