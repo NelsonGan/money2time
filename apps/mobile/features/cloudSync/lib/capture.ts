@@ -2,6 +2,9 @@
 // updated or deleted row of a synced table in sync_outbox. They exist only
 // while Cloud Sync is on, and stay quiet while pulled rows are being applied
 // (sync_state.applying = '1'). SQL builders are pure; the engine runs them.
+// Rows that stay on the phone (`syncedRowSql`) are never queued.
+
+import { syncedRowSql } from './syncTables';
 
 const QUIET = `(SELECT value FROM sync_state WHERE key = 'applying') IS NOT '1'`;
 const NEXT_SEQ = `(SELECT COALESCE(MAX(seq), 0) + 1 FROM sync_outbox)`;
@@ -15,15 +18,32 @@ function enqueue(table: string, idExpr: string): string {
     ON CONFLICT(table_name, row_id) DO UPDATE SET seq = excluded.seq;`;
 }
 
+/**
+ * Bumped whenever `captureTriggersSql` changes, so phones replace the
+ * triggers they made with an earlier version (`CREATE TRIGGER IF NOT EXISTS`
+ * would keep them). 2: rows that stay on the phone are not queued.
+ */
+export const CAPTURE_VERSION = '2';
+
 /** CREATE TRIGGER statements for one table. */
 export function captureTriggersSql(table: string): string {
+  const synced = (alias: 'NEW' | 'OLD') => {
+    const sql = syncedRowSql(table, alias);
+    return sql === '1' ? '' : ` AND ${sql}`;
+  };
+  // An update that turns a synced row into a local one is queued: the flush
+  // then removes it from the cloud copy.
+  const updated =
+    syncedRowSql(table) === '1'
+      ? ''
+      : ` AND (${syncedRowSql(table, 'NEW')} OR ${syncedRowSql(table, 'OLD')})`;
   return `
     CREATE TRIGGER IF NOT EXISTS ${triggerName(table, 'ins')} AFTER INSERT ON "${table}"
-      WHEN ${QUIET} BEGIN ${enqueue(table, 'NEW.id')} END;
+      WHEN ${QUIET}${synced('NEW')} BEGIN ${enqueue(table, 'NEW.id')} END;
     CREATE TRIGGER IF NOT EXISTS ${triggerName(table, 'upd')} AFTER UPDATE ON "${table}"
-      WHEN ${QUIET} BEGIN ${enqueue(table, 'NEW.id')} END;
+      WHEN ${QUIET}${updated} BEGIN ${enqueue(table, 'NEW.id')} END;
     CREATE TRIGGER IF NOT EXISTS ${triggerName(table, 'del')} AFTER DELETE ON "${table}"
-      WHEN ${QUIET} BEGIN ${enqueue(table, 'OLD.id')} END;
+      WHEN ${QUIET}${synced('OLD')} BEGIN ${enqueue(table, 'OLD.id')} END;
   `;
 }
 
@@ -33,10 +53,10 @@ export function dropCaptureTriggersSql(table: string): string {
     .join('\n');
 }
 
-/** Puts every row of `table` in the outbox, for a full upload. */
+/** Puts every row of `table` that syncs in the outbox, for a full upload. */
 export function enqueueAllSql(table: string): string {
   return `INSERT INTO sync_outbox (table_name, row_id, seq)
-    SELECT '${table}', id, ${NEXT_SEQ} FROM "${table}" WHERE true
+    SELECT '${table}', id, ${NEXT_SEQ} FROM "${table}" WHERE ${syncedRowSql(table)}
     ON CONFLICT(table_name, row_id) DO UPDATE SET seq = excluded.seq;`;
 }
 
