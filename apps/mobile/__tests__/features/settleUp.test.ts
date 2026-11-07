@@ -22,6 +22,7 @@ function makeSplit(overrides: Partial<TransactionSplit>): TransactionSplit {
     paybackAccountId: null,
     paidAt: null,
     paidTransactionId: null,
+    partOfSplitId: null,
     sortOrder: 0,
     createdAt: '2026-05-13T00:00:00.000Z',
     updatedAt: '2026-05-13T00:00:00.000Z',
@@ -335,6 +336,72 @@ describe('buildReceiptText', () => {
 });
 
 describe('aggregateSettleUpByTransaction', () => {
+  it('rolls a share paid in parts up, and keeps its place among equal shares', () => {
+    const summary = aggregateSettleUpByTransaction(
+      [
+        makeTx({
+          id: 'flight',
+          amount: 2700,
+          splits: [
+            makeSplit({ id: 'aisha', personName: 'Aisha', amount: 700 }),
+            makeSplit({
+              id: 'aisha-part',
+              personName: 'Aisha',
+              amount: 300,
+              paidAt: '2026-11-02',
+              partOfSplitId: 'aisha',
+            }),
+            makeSplit({ id: 'ben', personName: 'Ben', amount: 1000 }),
+            makeSplit({ id: 'chloe', personName: 'Chloe', amount: 1000 }),
+          ],
+        }),
+      ],
+      { reportingCurrency: 'USD' },
+    );
+    const bill = summary.transactions[0]!;
+    expect(bill.totalNative).toBe(2700);
+    expect(bill.paidNative).toBe(300);
+    expect(bill.unpaidSplitCount).toBe(3);
+    expect(bill.splits.map((s) => [s.splitId, s.shareTotal, s.sharePaid, s.isPartPayment])).toEqual(
+      [
+        ['aisha', 1000, 300, false],
+        ['ben', 1000, 0, false],
+        ['chloe', 1000, 0, false],
+        ['aisha-part', 1000, 300, true],
+      ],
+    );
+  });
+
+  it('gives each person their share paid in parts', () => {
+    const summary = aggregateSettleUpByPerson(
+      [
+        makeTx({
+          splits: [
+            makeSplit({ id: 'a', personName: 'Aisha', amount: 700 }),
+            makeSplit({
+              id: 'p',
+              personName: 'Aisha',
+              amount: 300,
+              paidAt: '2026-11-02',
+              partOfSplitId: 'a',
+            }),
+          ],
+        }),
+      ],
+      { reportingCurrency: 'USD' },
+    );
+    const aisha = summary.people[0]!;
+    expect(aisha.totalReporting).toBe(700);
+    expect(aisha.paidReporting).toBe(300);
+    expect(aisha.unpaidBillCount).toBe(1);
+    expect(aisha.bills.map((b) => [b.splitId, b.shareTotal, b.sharePaid, b.isPartPayment])).toEqual(
+      [
+        ['a', 1000, 300, false],
+        ['p', 1000, 300, true],
+      ],
+    );
+  });
+
   it('shows mixed and fully paid bills while keeping outstanding totals unpaid only', () => {
     const summary = aggregateSettleUpByTransaction(
       [

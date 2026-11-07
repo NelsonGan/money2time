@@ -18,6 +18,8 @@ export interface CreateTransactionSplitInput {
   sortOrder?: number;
   paidAt?: string | null;
   paidTransactionId?: string | null;
+  /** A part payment: the share's first row it was paid out of. */
+  partOfSplitId?: string | null;
 }
 
 export interface UpdateTransactionSplitInput {
@@ -155,6 +157,7 @@ class TransactionSplitsRepository {
       paybackAccountId: input.paybackAccountId ?? null,
       paidAt: input.paidAt ?? null,
       paidTransactionId: input.paidTransactionId ?? null,
+      partOfSplitId: input.partOfSplitId ?? null,
       sortOrder: input.sortOrder ?? 0,
       createdAt: now,
       updatedAt: now,
@@ -190,6 +193,21 @@ class TransactionSplitsRepository {
     db.update(transactionSplitsTable)
       .set(set)
       .where(and(eq(transactionSplitsTable.id, id), isNull(transactionSplitsTable.deletedAt)))
+      .run();
+  }
+
+  /** Gives a share's part payments the name its first row now has. */
+  renameShareParts(splitId: string, personName: string | null): void {
+    const db = getDb();
+    db.update(transactionSplitsTable)
+      .set({ personName, updatedAt: nowIso() })
+      .where(
+        and(
+          eq(transactionSplitsTable.partOfSplitId, splitId),
+          isNull(transactionSplitsTable.deletedAt),
+          sql`${transactionSplitsTable.personName} IS NOT ${personName}`,
+        ),
+      )
       .run();
   }
 

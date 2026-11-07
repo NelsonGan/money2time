@@ -4,11 +4,14 @@ import { Pressable, ScrollView, View } from 'react-native';
 
 import { Button, CategoryEmoji, SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
-import { SettleUpShareList } from '~/features/transactions/components/SettleUpShareList';
+import {
+  partPaidBullet,
+  SettleUpShareList,
+} from '~/features/transactions/components/SettleUpShareList';
 import type { ReceiptContent } from '~/features/transactions/components/SplitReceiptCard';
 import { SplitReceiptShareModal } from '~/features/transactions/components/SplitReceiptShareModal';
 import { personItemNames } from '~/features/transactions/lib/receiptSplitShare';
-import { groupSettleUpItemsByDate } from '~/features/transactions/lib/settleUpDateGroups';
+import { groupSettleUpSharesOwedFirst } from '~/features/transactions/lib/settleUpDateGroups';
 import { useSettleUpByTransaction } from '~/features/transactions/lib/useSettleUpSummary';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -50,7 +53,7 @@ export function SettleUpTransactionScreen({
     [summary.transactions, transactionId],
   );
   const dateGroups = useMemo(
-    () => (bill ? groupSettleUpItemsByDate(bill.splits, (split) => split.paidAt ?? bill.date) : []),
+    () => (bill ? groupSettleUpSharesOwedFirst(bill.splits, () => bill.date) : []),
     [bill],
   );
   const locale = settings.locale ?? I18n.locale ?? 'en';
@@ -105,8 +108,12 @@ export function SettleUpTransactionScreen({
           key: split.splitId,
           initial: personInitial(split.personName),
           label: split.personName ?? I18n.t('transactions.settleUp.someone'),
-          // Itemized bills list what each person had as bullet points.
-          bullets: receiptRecord ? (personItemNames(receiptRecord, split.personName) ?? []) : [],
+          // Itemized bills list what each person had as bullet points; a
+          // share paid in parts says how much of it is paid.
+          bullets: [
+            ...(receiptRecord ? (personItemNames(receiptRecord, split.personName) ?? []) : []),
+            ...partPaidBullet(split, formatNative),
+          ],
           amount: formatNative(split.amount, split.currency),
         })),
     };
@@ -155,7 +162,26 @@ export function SettleUpTransactionScreen({
                   bill.currency,
                 )}
               </Text>
-              <View className="mt-2 h-[3px] w-8 rounded-full bg-primary/30" />
+              {bill.unpaidSplitCount > 0 && bill.paidNative > 0 ? (
+                <View className="mt-3 w-full items-center px-6">
+                  <View className="h-1.5 w-full max-w-[240px] overflow-hidden rounded-full bg-secondary/60">
+                    <View
+                      className="h-full rounded-full bg-success"
+                      style={{
+                        width: `${(bill.paidNative / (bill.paidNative + bill.totalNative)) * 100}%`,
+                      }}
+                    />
+                  </View>
+                  <Text variant="caption" tone="muted" className="mt-1.5 text-center">
+                    {I18n.t('transactions.settleUp.bill_paid_progress', {
+                      paid: formatNative(bill.paidNative, bill.currency),
+                      total: formatNative(bill.paidNative + bill.totalNative, bill.currency),
+                    })}
+                  </Text>
+                </View>
+              ) : (
+                <View className="mt-2 h-[3px] w-8 rounded-full bg-primary/30" />
+              )}
             </View>
 
             {hasItemizedDetail ? (

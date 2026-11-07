@@ -2,6 +2,7 @@ import {
   groupSettleUpItemsByDate,
   groupSettleUpPeopleByDate,
   groupSettleUpSearchResultsByDate,
+  groupSettleUpSharesOwedFirst,
   groupSettleUpTransactionsByDate,
 } from '~/features/transactions/lib/settleUpDateGroups';
 import type { PersonDebt, TransactionDebt } from '~/types';
@@ -29,6 +30,9 @@ function person(
       categoryIcon: null,
       paybackAccountId: null,
       paidAt: bill.paidAt,
+      shareTotal: 10,
+      sharePaid: 0,
+      isPartPayment: false,
     })),
     oldestDate: bills[bills.length - 1]?.date ?? '',
     billCount: bills.length,
@@ -143,6 +147,24 @@ describe('Who owes you date groups', () => {
     expect(groups[0].items).toEqual([
       { kind: 'person', person: expect.objectContaining({ key: 'ezra' }) },
       { kind: 'transaction', transaction: expect.objectContaining({ transactionId: 'brunch' }) },
+    ]);
+  });
+});
+
+describe('groupSettleUpSharesOwedFirst', () => {
+  it('puts what is still owed above the paid history, each by its own date', () => {
+    const shares = [
+      { id: 'owed-old', date: '2026-10-12', paidAt: null },
+      { id: 'paid-new', date: '2026-10-12', paidAt: '2026-11-07T10:00:00' },
+      { id: 'owed-new', date: '2026-10-20', paidAt: null },
+      { id: 'paid-old', date: '2026-10-12', paidAt: '2026-11-01T10:00:00' },
+    ];
+    const groups = groupSettleUpSharesOwedFirst(shares, (share) => share.date);
+    expect(groups.map((group) => [group.dayKey, group.items.map((s) => s.id)])).toEqual([
+      ['2026-10-20', ['owed-new']],
+      ['2026-10-12', ['owed-old']],
+      ['2026-11-07', ['paid-new']],
+      ['2026-11-01', ['paid-old']],
     ]);
   });
 });

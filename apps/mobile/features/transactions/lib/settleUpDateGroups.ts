@@ -27,6 +27,28 @@ export function groupSettleUpItemsByDate<T>(
   );
 }
 
+/**
+ * A person's or a bill's shares by date, still owed first: the owed shares
+ * by the bill's date, then the paid history by the day it was paid. Part
+ * payments make that history long, and it would otherwise push what is still
+ * owed below it whenever a payment is newer than the bill.
+ */
+export function groupSettleUpSharesOwedFirst<T extends { paidAt: string | null }>(
+  items: T[],
+  billDateOf: (item: T) => string,
+): SettleUpDateGroup<T>[] {
+  return [
+    ...groupSettleUpItemsByDate(
+      items.filter((item) => !item.paidAt),
+      billDateOf,
+    ),
+    ...groupSettleUpItemsByDate(
+      items.filter((item) => item.paidAt),
+      (item) => item.paidAt ?? billDateOf(item),
+    ),
+  ];
+}
+
 export function groupSettleUpPeopleByDate(people: PersonDebt[]): SettleUpDateGroup<PersonDebt>[] {
   return groupSettleUpItemsByDate(people, (person) => {
     let latestUnpaidDate = '';

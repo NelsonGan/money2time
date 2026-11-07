@@ -29,6 +29,7 @@ type Target =
   | 'accounts'
   | 'categories'
   | 'transactions'
+  | 'transaction_splits'
   | 'albums'
   | 'budget_templates'
   | 'monthly_budgets'
@@ -111,6 +112,7 @@ export const LEDGER_COPY_TABLES: readonly TableSpec[] = [
       transaction_id: 'transactions',
       payback_account_id: 'accounts',
       paid_transaction_id: 'transactions',
+      part_of_split_id: 'transaction_splits',
     },
     required: ['transaction_id'],
   },
@@ -167,6 +169,7 @@ const ID_SPACE: Record<string, Target | undefined> = {
   accounts: 'accounts',
   categories: 'categories',
   transactions: 'transactions',
+  transaction_splits: 'transaction_splits',
   albums: 'albums',
   budget_templates: 'budget_templates',
   monthly_budgets: 'monthly_budgets',

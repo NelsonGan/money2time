@@ -314,6 +314,8 @@ export const transactionSplitsTable = sqliteTable('transaction_splits', {
   paybackAccountId: text('payback_account_id'),
   paidAt: text('paid_at'),
   paidTransactionId: text('paid_transaction_id'),
+  // A part payment's row points at the share it was paid out of (migration 081).
+  partOfSplitId: text('part_of_split_id'),
   sortOrder: integer('sort_order').notNull().default(0),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),

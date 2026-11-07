@@ -41,6 +41,7 @@ import {
   nextEditableAmountIndex,
   sumUnpaidRows,
 } from '~/features/transactions/lib/splitMath';
+import { evenOwedAmounts } from '~/features/transactions/lib/splitPayments';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -58,6 +59,9 @@ export interface SplitDraft {
   /** Set once a friend marks paid. paidTransactionId is null for same-account paybacks
    * (no transfer tx is created — the parent expense is just reduced). */
   paid?: { paidAt: string; paidTransactionId: string | null };
+  /** An unpaid row of a share paid in part: what the share has paid so far.
+   *  Split evenly counts it, so the share still comes out even. */
+  paidBack?: number;
 }
 
 interface SplitBillModalProps {
@@ -143,7 +147,8 @@ function autoBalanceSelf(rows: SplitDraft[], total: number, changedIndex?: numbe
 }
 
 /** Even-split: divide `total` across all unpaid rows (Me + unpaid friends).
- *  Paid rows keep their amount — they're already settled. */
+ *  Paid rows keep their amount — they're already settled — and a share paid
+ *  in part owes its even portion less what it paid. */
 function distributeEvenlyAcrossUnpaid(rows: SplitDraft[], total: number): SplitDraft[] {
   if (rows.length === 0) return rows;
   const unpaidIndices: number[] = [];
@@ -151,7 +156,10 @@ function distributeEvenlyAcrossUnpaid(rows: SplitDraft[], total: number): SplitD
     if (!r.paid) unpaidIndices.push(i);
   });
   if (unpaidIndices.length === 0) return rows;
-  const portions = distributeEvenly(total, unpaidIndices.length);
+  const portions = evenOwedAmounts(
+    total,
+    unpaidIndices.map((i) => rows[i]?.paidBack ?? 0),
+  );
   return rows.map((row, idx) => {
     const slot = unpaidIndices.indexOf(idx);
     if (slot < 0) return row;
@@ -176,7 +184,10 @@ function autoBalanceFriends(rows: SplitDraft[], total: number): SplitDraft[] {
   if (unpaidFriendIndices.length === 0) return rows;
 
   const remaining = Math.max(0, Math.round((total - safeSelf) * 100) / 100);
-  const portions = distributeEvenly(remaining, unpaidFriendIndices.length);
+  const portions = evenOwedAmounts(
+    remaining,
+    unpaidFriendIndices.map((i) => rows[i]?.paidBack ?? 0),
+  );
   return rows.map((row, i) => {
     const slot = unpaidFriendIndices.indexOf(i);
     if (slot < 0) return row;

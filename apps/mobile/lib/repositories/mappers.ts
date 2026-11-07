@@ -539,6 +539,7 @@ export function toTransactionSplit(row: TransactionSplitRow): TransactionSplit {
     paybackAccountId: row.paybackAccountId,
     paidAt: row.paidAt,
     paidTransactionId: row.paidTransactionId,
+    partOfSplitId: row.partOfSplitId ?? null,
     sortOrder: row.sortOrder ?? 0,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,

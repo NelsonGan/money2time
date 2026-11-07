@@ -4,14 +4,17 @@ import { ScrollView, View } from 'react-native';
 
 import { Button, CategoryEmoji, SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
-import { SettleUpShareList } from '~/features/transactions/components/SettleUpShareList';
+import {
+  partPaidBullet,
+  SettleUpShareList,
+} from '~/features/transactions/components/SettleUpShareList';
 import type {
   ReceiptContent,
   ReceiptLine,
 } from '~/features/transactions/components/SplitReceiptCard';
 import { SplitReceiptShareModal } from '~/features/transactions/components/SplitReceiptShareModal';
 import { personItemNames } from '~/features/transactions/lib/receiptSplitShare';
-import { groupSettleUpItemsByDate } from '~/features/transactions/lib/settleUpDateGroups';
+import { groupSettleUpSharesOwedFirst } from '~/features/transactions/lib/settleUpDateGroups';
 import { useSettleUpSummary } from '~/features/transactions/lib/useSettleUpSummary';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -40,8 +43,7 @@ export function SettleUpPersonScreen({
     [summary.people, personKey],
   );
   const dateGroups = useMemo(
-    () =>
-      person ? groupSettleUpItemsByDate(person.bills, (bill) => bill.paidAt ?? bill.date) : [],
+    () => (person ? groupSettleUpSharesOwedFirst(person.bills, (bill) => bill.date) : []),
     [person],
   );
   const locale = settings.locale ?? I18n.locale ?? 'en';
@@ -90,7 +92,10 @@ export function SettleUpPersonScreen({
               bill.categoryName ||
               I18n.t('transactions.settleUp.untitled_bill'),
             sublabel: formatShortDate(bill.date),
-            bullets: record ? (personItemNames(record, person.name) ?? []) : [],
+            bullets: [
+              ...(record ? (personItemNames(record, person.name) ?? []) : []),
+              ...partPaidBullet(bill, formatNative),
+            ],
             amount: formatNative(bill.amount, bill.currency),
           };
         }),

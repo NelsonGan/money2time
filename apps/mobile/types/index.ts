@@ -1012,6 +1012,12 @@ export interface TransactionSplit {
   paybackAccountId: string | null;
   paidAt: string | null;
   paidTransactionId: string | null;
+  /**
+   * Set on a part payment: the id of the share's first row, the one the
+   * payment was paid out of. Null on every other row. A share is every row
+   * sharing `partOfSplitId ?? id` (`splitShareKey`).
+   */
+  partOfSplitId: string | null;
   sortOrder: number;
   createdAt: string;
   updatedAt: string;
@@ -1087,6 +1093,15 @@ export interface PersonDebtBill {
   /** Account the payback lands in (split's own, falling back to the parent's). */
   paybackAccountId: string | null;
   paidAt: string | null;
+  /**
+   * The whole share this row belongs to, paid in parts or not (native
+   * currency): `shareTotal` is everything the person owed on the bill,
+   * `sharePaid` what they have paid back so far.
+   */
+  shareTotal: number;
+  sharePaid: number;
+  /** A paid row of a share paid in parts. */
+  isPartPayment: boolean;
 }
 
 /** Everything one person owes the user, rolled up across every transaction. */
@@ -1135,6 +1150,15 @@ export interface TransactionDebtSplit {
   /** Account the payback lands in (split's own, falling back to the parent's). */
   paybackAccountId: string | null;
   paidAt: string | null;
+  /**
+   * The whole share this row belongs to, paid in parts or not (native
+   * currency): `shareTotal` is everything the person owed on the bill,
+   * `sharePaid` what they have paid back so far.
+   */
+  shareTotal: number;
+  sharePaid: number;
+  /** A paid row of a share paid in parts. */
+  isPartPayment: boolean;
 }
 
 /** A transaction with paid or unpaid non-self splits owed to the user. */

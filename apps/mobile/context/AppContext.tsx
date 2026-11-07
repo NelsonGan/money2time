@@ -63,6 +63,13 @@ import {
   countUnpaidSplitBills,
 } from '~/features/transactions/lib/settleUp';
 import { rescaleSplitAdjustedAmounts } from '~/features/transactions/lib/splitAmountSnapshot';
+import {
+  applyUnpaidMerge,
+  cutPartPayment,
+  planSplitPayment,
+  planUnpaidMerge,
+  splitShareKey,
+} from '~/features/transactions/lib/splitPayments';
 import { normalizeLiveEarningsSchedule } from '~/features/widgets/lib/liveEarningsSchedule';
 import { getDb, getSQLite, initializeDatabase } from '~/lib/db/client';
 import {
@@ -256,6 +263,8 @@ export interface SplitDraftInput {
    *  paidTransactionId is null for same-account paybacks; for cross-account
    *  the AppContext create flow allocates a transfer tx id and links it. */
   paid?: { paidAt: string; paidTransactionId: string | null };
+  /** A part payment: the share's first row it was paid out of. */
+  partOfSplitId?: string | null;
 }
 
 /** How a transaction was entered. Drives which analytics event fires on
@@ -553,6 +562,15 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
     splitId: string,
     options?: { paybackAccountId?: string | null; date?: string; note?: string | null },
   ) => void;
+  /**
+   * A friend paid back `amount` of the unpaid row `splitId`. Less than it owes
+   * records a part payment; all of it is Mark paid.
+   */
+  recordSplitPayment: (
+    splitId: string,
+    amount: number,
+    options?: { paybackAccountId?: string | null; date?: string },
+  ) => void;
   markSplitUnpaid: (splitId: string) => void;
   updateSplitPaybackAccount: (splitId: string, paybackAccountId: string | null) => void;
   deleteSplit: (splitId: string) => void;
@@ -761,6 +779,91 @@ function computeAlbumStats(
 const DEFERRED_WRITE_MAX_DELAY_MS = 300;
 function runDeferredWrite(task: () => void) {
   runAfterInteractionsCapped(task, DEFERRED_WRITE_MAX_DELAY_MS);
+}
+
+/**
+ * The transfer a friend's payback makes when it lands in another account than
+ * the one that paid the bill: from the bill's account to the payback account,
+ * dated `date`, owned by whoever the bill is (optimistic copy of the row the
+ * deferred write creates).
+ */
+function optimisticPaybackTransfer(input: {
+  id: string;
+  amount: number;
+  parent: TransactionWithRelations;
+  toAccountId: string;
+  date: string;
+  note: string | null;
+  at: string;
+  names: Partial<TransactionWithRelations>;
+}): TransactionWithRelations {
+  const { parent } = input;
+  return {
+    id: input.id,
+    instalmentRuleId: null,
+    instalmentNumber: null,
+    dayOrder: null,
+    type: 'transfer',
+    amount: input.amount,
+    currency: parent.currency,
+    reportingCurrency: null,
+    reportingAmount: null,
+    fxRate: null,
+    toAmount: null,
+    accountAmount: null,
+    date: input.date,
+    accountId: null,
+    fromAccountId: parent.accountId,
+    toAccountId: input.toAccountId,
+    categoryId: null,
+    note: input.note,
+    details: null,
+    receiptUri: null,
+    sentiment: 'neutral',
+    ...NO_REIMBURSEMENT,
+    countsAsExpense: false,
+    // The repayment belongs to whoever the split expense does.
+    ...withEntryStamp({ memberId: parent.memberId }, getActiveLedgerId()),
+    recurrencePattern: 'none',
+    recurrenceInterval: 1,
+    recurrenceEndDate: null,
+    recurrenceParentId: null,
+    createdAt: input.at,
+    updatedAt: input.at,
+    deletedAt: null,
+    ...input.names,
+  };
+}
+
+/**
+ * Optimistic splits after the rows `reopenedIds` turned unpaid: each is folded
+ * into an unpaid row of the same share, so a share paid in parts keeps one
+ * amount owed (`planUnpaidMerge`).
+ */
+function foldReopenedSplits(
+  splits: TransactionSplit[],
+  reopenedIds: readonly string[],
+  at: string,
+): TransactionSplit[] {
+  let next = splits;
+  for (const id of reopenedIds) {
+    const merge = planUnpaidMerge(next, id);
+    if (merge) next = applyUnpaidMerge(next, merge, at);
+  }
+  return next;
+}
+
+/** The database side of {@link foldReopenedSplits}, for one reopened row. */
+function foldReopenedSplitInDb(splitId: string): void {
+  const split = transactionSplitsRepository.findById(splitId);
+  if (!split || split.paidAt) return;
+  const merge = planUnpaidMerge(
+    transactionSplitsRepository.listByTransactionId(split.transactionId),
+    splitId,
+  );
+  if (!merge) return;
+  transactionSplitsRepository.update(merge.keepId, { amount: merge.amount });
+  transactionSplitsRepository.softDelete(merge.dropId);
 }
 
 /**
@@ -3007,12 +3110,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               return reopened ? { ...tx, ...reopened } : tx;
             }
             const restore = restoreByParentId.get(tx.id) ?? 0;
-            const updatedSplits = tx.splits.map((s) => {
-              if (s.paidTransactionId && idSet.has(s.paidTransactionId)) {
-                return { ...s, paidAt: null, paidTransactionId: null };
-              }
-              return s;
-            });
+            const reopenedSplitIds: string[] = [];
+            const updatedSplits = foldReopenedSplits(
+              tx.splits.map((s) => {
+                if (s.paidTransactionId && idSet.has(s.paidTransactionId)) {
+                  reopenedSplitIds.push(s.id);
+                  return { ...s, paidAt: null, paidTransactionId: null };
+                }
+                return s;
+              }),
+              reopenedSplitIds,
+              nowIso(),
+            );
             return {
               ...tx,
               ...reopened,
@@ -3057,6 +3166,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           reverseSplitMap.forEach((splitId) => {
             transactionSplitsRepository.markUnpaid(splitId);
           });
+          // A part payment whose transfer went folds back into what is owed.
+          reverseSplitMap.forEach((splitId) => foldReopenedSplitInDb(splitId));
           reopenExpenseIds.forEach((expenseId) => {
             transactionsRepository.update(expenseId, {
               reimbursedAt: null,
@@ -3411,6 +3522,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           paybackAccountId: draft.paybackAccountId,
           paidAt: draft.paid?.paidAt ?? null,
           paidTransactionId,
+          partOfSplitId: draft.partOfSplitId ?? null,
           sortOrder: draft.sortOrder ?? index,
           createdAt: now,
           updatedAt: now,
@@ -3535,6 +3647,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               sortOrder: s.sortOrder,
               paidAt: s.paidAt,
               paidTransactionId: s.paidTransactionId,
+              partOfSplitId: s.partOfSplitId,
             });
           });
           if (receiptSplit) {
@@ -3579,6 +3692,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           paybackAccountId: draft.paybackAccountId,
           paidAt: null,
           paidTransactionId: null,
+          partOfSplitId: draft.partOfSplitId ?? null,
           sortOrder: draft.sortOrder ?? index,
           createdAt: now,
           updatedAt: now,
@@ -3597,12 +3711,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 ...next,
                 paidAt: prior.paidAt,
                 paidTransactionId: prior.paidTransactionId,
+                partOfSplitId: prior.partOfSplitId,
                 createdAt: prior.createdAt,
               };
             }
             return next;
           });
-          return { ...tx, splits: merged, splitsSummary: summarizeSplits(merged) };
+          // A share's part payments carry the name its first row has now.
+          const nameByShare = new Map(
+            merged.filter((s) => !s.partOfSplitId).map((s) => [s.id, s.personName]),
+          );
+          const named = merged.map((s) =>
+            s.partOfSplitId && nameByShare.has(s.partOfSplitId)
+              ? { ...s, personName: nameByShare.get(s.partOfSplitId) ?? null }
+              : s,
+          );
+          return { ...tx, splits: named, splitsSummary: summarizeSplits(named) };
         }),
       );
       runDeferredWrite(() => {
@@ -3633,7 +3757,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 isSelf: next.isSelf,
                 paybackAccountId: next.paybackAccountId,
                 sortOrder: next.sortOrder,
+                partOfSplitId: next.partOfSplitId,
               });
+            }
+          });
+          // A renamed share renames its part payments too (after the loop,
+          // so a part's own row in the list cannot put the old name back).
+          optimisticSplits.forEach((next) => {
+            const prior = existingMap.get(next.id);
+            if (prior && !prior.partOfSplitId && !next.isSelf) {
+              transactionSplitsRepository.renameShareParts(next.id, next.personName);
             }
           });
           if (!wasSplitBill) trackSplitBillCreated(optimisticSplits);
@@ -3716,44 +3849,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         // reflects only the user's net outlay.
         const optimisticTransfer: TransactionWithRelations | null = sameAccount
           ? null
-          : {
+          : optimisticPaybackTransfer({
               id: transferTxId,
-              instalmentRuleId: null,
-              instalmentNumber: null,
-              dayOrder: null,
-              type: 'transfer',
               amount: splitAmount,
-              currency: parent.currency,
-              reportingCurrency: null,
-              reportingAmount: null,
-              fxRate: null,
-              toAmount: null,
-              accountAmount: null,
-              date,
-              accountId: null,
-              fromAccountId: parent.accountId,
+              parent,
               toAccountId: paybackAccountId,
-              categoryId: null,
+              date,
               note,
-              details: null,
-              receiptUri: null,
-              sentiment: 'neutral',
-              ...NO_REIMBURSEMENT,
-              countsAsExpense: false,
-              // The repayment belongs to whoever the split expense does.
-              ...withEntryStamp({ memberId: parent.memberId }, getActiveLedgerId()),
-              recurrencePattern: 'none',
-              recurrenceInterval: 1,
-              recurrenceEndDate: null,
-              recurrenceParentId: null,
-              createdAt: paidAtIso,
-              updatedAt: paidAtIso,
-              deletedAt: null,
-              ...resolveRelationNames({
+              at: paidAtIso,
+              names: resolveRelationNames({
                 fromAccountId: parent.accountId,
                 toAccountId: paybackAccountId,
               }),
-            };
+            });
 
         const next = prev.map((tx) => {
           if (tx.id !== parent.id) return tx;
@@ -3837,6 +3945,153 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [resolveRelationNames, scheduleRefreshTransactions],
   );
 
+  // A friend pays back part of their share. The paid part becomes its own paid
+  // row (see features/transactions/lib/splitPayments.ts): the expense drops by
+  // the payment, a cross-account payback gets its own transfer, and the share's
+  // unpaid row keeps what is still owed. Paying everything that is left is
+  // Mark paid.
+  const recordSplitPayment = useCallback(
+    (
+      splitId: string,
+      amount: number,
+      options?: { paybackAccountId?: string | null; date?: string },
+    ) => {
+      const current = transactionsRef.current
+        .find((tx) => tx.splits?.some((s) => s.id === splitId))
+        ?.splits?.find((s) => s.id === splitId);
+      if (!current || current.isSelf || current.paidAt) return;
+      const plan = planSplitPayment(current.amount, amount);
+      if (!plan) return;
+      if (plan.kind === 'full') {
+        markSplitPaid(splitId, options);
+        return;
+      }
+
+      const partId = newId();
+      const transferTxId = newId();
+      const paidAtIso = nowIso();
+      const date = options?.date ?? dayKeyFromDateLocal(new Date());
+      const optionPaybackAccountId = options?.paybackAccountId;
+
+      setTransactions((prev) => {
+        const parent = prev.find((tx) => tx.splits?.some((s) => s.id === splitId));
+        const split = parent?.splits?.find((s) => s.id === splitId);
+        if (!parent || !split || split.isSelf || split.paidAt) return prev;
+        const rowPlan = planSplitPayment(split.amount, plan.amount);
+        if (rowPlan?.kind !== 'partial') return prev;
+        const paybackAccountId =
+          optionPaybackAccountId !== undefined
+            ? optionPaybackAccountId
+            : (split.paybackAccountId ?? parent.accountId ?? null);
+        if (!parent.accountId || !paybackAccountId) return prev;
+        const sameAccount = paybackAccountId === parent.accountId;
+
+        const part: TransactionSplit = {
+          ...split,
+          id: partId,
+          amount: rowPlan.amount,
+          paybackAccountId,
+          paidAt: paidAtIso,
+          paidTransactionId: sameAccount ? null : transferTxId,
+          partOfSplitId: splitShareKey(split),
+          createdAt: paidAtIso,
+          updatedAt: paidAtIso,
+        };
+        const optimisticTransfer = sameAccount
+          ? null
+          : optimisticPaybackTransfer({
+              id: transferTxId,
+              amount: rowPlan.amount,
+              parent,
+              toAccountId: paybackAccountId,
+              date,
+              note: buildPaybackTransferNote(split.personName, parent.note),
+              at: paidAtIso,
+              names: resolveRelationNames({
+                fromAccountId: parent.accountId,
+                toAccountId: paybackAccountId,
+              }),
+            });
+
+        const next = prev.map((tx) => {
+          if (tx.id !== parent.id) return tx;
+          const updatedSplits = cutPartPayment(tx.splits ?? [], splitId, part).map((s) =>
+            s.id === splitId ? { ...s, paybackAccountId } : s,
+          );
+          return {
+            ...tx,
+            ...rescaleSplitAdjustedAmounts(tx, tx.amount - rowPlan.amount),
+            updatedAt: paidAtIso,
+            splits: updatedSplits,
+            splitsSummary: summarizeSplits(updatedSplits),
+          };
+        });
+        return optimisticTransfer ? insertTransactionsByDateDesc(next, [optimisticTransfer]) : next;
+      });
+
+      // Re-read from the database, as markSplitPaid does; a row that changed
+      // meanwhile (paid elsewhere, or now owing less than this payment) is left
+      // for the refresh to show as it is.
+      runDeferredWrite(() => {
+        try {
+          const split = transactionSplitsRepository.findById(splitId);
+          if (!split || split.isSelf || split.paidAt) return;
+          const rowPlan = planSplitPayment(split.amount, plan.amount);
+          if (rowPlan?.kind !== 'partial') return;
+          const parent = transactionsRepository.getById(split.transactionId);
+          if (!parent || !parent.accountId) return;
+          const paybackAccountId =
+            optionPaybackAccountId !== undefined
+              ? optionPaybackAccountId
+              : (split.paybackAccountId ?? parent.accountId ?? null);
+          if (!paybackAccountId) return;
+          const sameAccount = paybackAccountId === parent.accountId;
+          getSQLite().withTransactionSync(() => {
+            transactionsRepository.update(
+              parent.id,
+              rescaleSplitAdjustedAmounts(parent, parent.amount - rowPlan.amount),
+            );
+            if (!sameAccount) {
+              transactionsRepository.createWithId(transferTxId, {
+                type: 'transfer',
+                amount: rowPlan.amount,
+                currency: parent.currency,
+                date,
+                fromAccountId: parent.accountId,
+                toAccountId: paybackAccountId,
+                accountId: null,
+                categoryId: null,
+                note: buildPaybackTransferNote(split.personName, parent.note),
+                sentiment: 'neutral',
+                memberId: parent.memberId,
+              });
+            }
+            transactionSplitsRepository.update(splitId, {
+              amount: rowPlan.remaining,
+              paybackAccountId,
+            });
+            transactionSplitsRepository.createWithId(partId, {
+              transactionId: split.transactionId,
+              personName: split.personName,
+              amount: rowPlan.amount,
+              isSelf: false,
+              paybackAccountId,
+              sortOrder: split.sortOrder,
+              paidAt: paidAtIso,
+              paidTransactionId: sameAccount ? null : transferTxId,
+              partOfSplitId: splitShareKey(split),
+            });
+          });
+          void trackEvent(AnalyticsEvents.SPLIT_PART_PAID, { same_account: sameAccount });
+        } catch {
+          // ignore; refresh below restores truth
+        }
+        scheduleRefreshTransactions();
+      });
+    },
+    [markSplitPaid, resolveRelationNames, scheduleRefreshTransactions],
+  );
+
   const markSplitUnpaid = useCallback(
     (splitId: string) => {
       const now = nowIso();
@@ -3852,8 +4107,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return filtered.map((tx) => {
           if (tx.id !== parent.id) return tx;
           const restored = rescaleSplitAdjustedAmounts(tx, tx.amount + splitAmount);
-          const updatedSplits = (tx.splits ?? []).map((s) =>
-            s.id === splitId ? { ...s, paidAt: null, paidTransactionId: null } : s,
+          const updatedSplits = foldReopenedSplits(
+            (tx.splits ?? []).map((s) =>
+              s.id === splitId ? { ...s, paidAt: null, paidTransactionId: null } : s,
+            ),
+            [splitId],
+            now,
           );
           return {
             ...tx,
@@ -3882,6 +4141,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             transactionsRepository.softDelete(split.paidTransactionId);
           }
           transactionSplitsRepository.markUnpaid(splitId);
+          foldReopenedSplitInDb(splitId);
           void trackEvent(AnalyticsEvents.SPLIT_MARKED_UNPAID, {});
         } catch {
           // ignore
@@ -5606,6 +5866,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             updateTransactionReceiptSplit,
             getReceiptSplitForTransaction,
             markSplitPaid,
+            recordSplitPayment,
             markSplitUnpaid,
             updateSplitPaybackAccount,
             deleteSplit,
@@ -5746,6 +6007,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updateTransactionReceiptSplit,
       getReceiptSplitForTransaction,
       markSplitPaid,
+      recordSplitPayment,
       markSplitUnpaid,
       updateSplitPaybackAccount,
       deleteSplit,
