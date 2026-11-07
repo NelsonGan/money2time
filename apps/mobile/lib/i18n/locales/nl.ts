@@ -833,7 +833,6 @@ const nl = {
       bill_paid_progress: '{{paid}} van {{total}} terugbetaald',
       receipt_paid_so_far: '{{paid}} van {{total}} betaald',
       payment_amount: 'Betaald bedrag',
-      payment_hint: 'Maar deels betaald? Vul het betaalde bedrag in.',
       payment_left_of: 'Nog {{left}} van {{total}}',
       payment_too_much: 'Meer dan de {{owed}} die nog open staat',
       payment_paid_to: 'Betaald naar',

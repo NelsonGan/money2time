@@ -836,7 +836,6 @@ const de = {
       bill_paid_progress: '{{paid}} von {{total}} zurückgezahlt',
       receipt_paid_so_far: '{{paid}} von {{total}} bezahlt',
       payment_amount: 'Gezahlter Betrag',
-      payment_hint: 'Nur einen Teil bezahlt? Gib den Betrag ein.',
       payment_left_of: '{{left}} offen von {{total}}',
       payment_too_much: 'Mehr als die noch offenen {{owed}}',
       payment_paid_to: 'Bezahlt an',

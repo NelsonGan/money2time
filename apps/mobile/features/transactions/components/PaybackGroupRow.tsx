@@ -5,7 +5,10 @@ import { Pressable, View } from 'react-native';
 import { Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import type { TransactionDisplaySettings } from '~/features/transactions/components/ActivityTransactionList';
-import { TransactionAccountBadge } from '~/features/transactions/components/TransactionItem';
+import {
+  LONG_PRESS_DELAY_MS,
+  TransactionAccountBadge,
+} from '~/features/transactions/components/TransactionItem';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -19,6 +22,8 @@ interface PaybackGroupRowProps {
   transactions: TransactionWithRelations[];
   /** Open regardless of the toggle (it holds the row the list is flashing). */
   forceOpen: boolean;
+  /** Long press: start selecting, as on a transaction (the list selects the paybacks). */
+  onLongPress?: () => void;
   compact: boolean;
   settings: TransactionDisplaySettings;
   /** The paybacks themselves, shown under the row while it is open. */
@@ -36,6 +41,7 @@ export function PaybackGroupRow({
   personNames,
   transactions,
   forceOpen,
+  onLongPress,
   compact,
   settings,
   children,
@@ -75,6 +81,15 @@ export function PaybackGroupRow({
           void triggerHaptic('selection');
           setOpen(!expanded);
         }}
+        onLongPress={
+          onLongPress
+            ? () => {
+                void triggerHaptic('medium');
+                onLongPress();
+              }
+            : undefined
+        }
+        delayLongPress={LONG_PRESS_DELAY_MS}
         accessibilityRole="button"
         accessibilityState={{ expanded }}
         accessibilityLabel={`${title}, ${subtitle}`}

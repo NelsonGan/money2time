@@ -830,7 +830,6 @@ const vi = {
       bill_paid_progress: 'Đã trả lại {{paid}} trên {{total}}',
       receipt_paid_so_far: 'Đã trả {{paid}} trên {{total}}',
       payment_amount: 'Số tiền đã trả',
-      payment_hint: 'Chỉ trả một phần? Nhập số tiền đã trả.',
       payment_left_of: 'Còn {{left}} trên {{total}}',
       payment_too_much: 'Nhiều hơn {{owed}} còn nợ',
       payment_paid_to: 'Trả vào',

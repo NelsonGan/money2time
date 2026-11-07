@@ -831,7 +831,6 @@ const sv = {
       bill_paid_progress: '{{paid}} av {{total}} återbetalt',
       receipt_paid_so_far: 'Betalat {{paid}} av {{total}}',
       payment_amount: 'Betalt belopp',
-      payment_hint: 'Bara betalt en del? Ange beloppet.',
       payment_left_of: '{{left}} kvar av {{total}}',
       payment_too_much: 'Mer än de {{owed}} som fortfarande är skyldiga',
       payment_paid_to: 'Betalt till',

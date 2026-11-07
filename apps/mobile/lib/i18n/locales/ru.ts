@@ -831,7 +831,6 @@ const ru = {
       bill_paid_progress: 'Возвращено {{paid}} из {{total}}',
       receipt_paid_so_far: 'Оплачено {{paid}} из {{total}}',
       payment_amount: 'Сумма платежа',
-      payment_hint: 'Оплачено частично? Введите полученную сумму.',
       payment_left_of: 'Осталось {{left}} из {{total}}',
       payment_too_much: 'Больше оставшегося долга {{owed}}',
       payment_paid_to: 'Зачислено на',

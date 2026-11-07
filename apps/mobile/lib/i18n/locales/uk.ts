@@ -829,7 +829,6 @@ const uk = {
       bill_paid_progress: 'Повернуто {{paid}} з {{total}}',
       receipt_paid_so_far: 'Сплачено {{paid}} з {{total}}',
       payment_amount: 'Сума платежу',
-      payment_hint: 'Сплачено частково? Введіть отриману суму.',
       payment_left_of: 'Залишилось {{left}} з {{total}}',
       payment_too_much: 'Більше за залишок боргу {{owed}}',
       payment_paid_to: 'Зараховано на',

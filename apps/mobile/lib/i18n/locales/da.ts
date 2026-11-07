@@ -830,7 +830,6 @@ const da = {
       bill_paid_progress: '{{paid}} af {{total}} betalt tilbage',
       receipt_paid_so_far: 'Betalt {{paid}} af {{total}}',
       payment_amount: 'Betalt beløb',
-      payment_hint: 'Kun betalt en del? Indtast beløbet.',
       payment_left_of: '{{left}} tilbage af {{total}}',
       payment_too_much: 'Mere end de {{owed}}, der stadig skyldes',
       payment_paid_to: 'Betalt til',

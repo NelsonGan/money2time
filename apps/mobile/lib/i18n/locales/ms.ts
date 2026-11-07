@@ -836,7 +836,6 @@ const ms = {
       bill_paid_progress: '{{paid}} daripada {{total}} sudah dibayar balik',
       receipt_paid_so_far: 'Dibayar {{paid}} daripada {{total}}',
       payment_amount: 'Jumlah dibayar',
-      payment_hint: 'Bayar sebahagian sahaja? Masukkan jumlah yang dibayar.',
       payment_left_of: 'Baki {{left}} daripada {{total}}',
       payment_too_much: 'Lebih daripada {{owed}} yang masih terhutang',
       payment_paid_to: 'Dibayar ke',

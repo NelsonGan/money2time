@@ -833,7 +833,6 @@ const id = {
       bill_paid_progress: '{{paid}} dari {{total}} sudah dibayar',
       receipt_paid_so_far: 'Dibayar {{paid}} dari {{total}}',
       payment_amount: 'Jumlah dibayar',
-      payment_hint: 'Baru bayar sebagian? Masukkan jumlah yang dibayar.',
       payment_left_of: 'Sisa {{left}} dari {{total}}',
       payment_too_much: 'Lebih dari {{owed}} yang masih terutang',
       payment_paid_to: 'Dibayar ke',

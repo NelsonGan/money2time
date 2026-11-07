@@ -833,7 +833,6 @@ const fil = {
       bill_paid_progress: '{{paid}} sa {{total}} naibalik na',
       receipt_paid_so_far: 'Nagbayad ng {{paid}} sa {{total}}',
       payment_amount: 'Halagang ibinayad',
-      payment_hint: 'Bahagi lang ang binayaran? Ilagay ang ibinayad.',
       payment_left_of: '{{left}} pa sa {{total}}',
       payment_too_much: 'Higit sa {{owed}} na utang pa',
       payment_paid_to: 'Ibinayad sa',

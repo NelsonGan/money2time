@@ -831,7 +831,6 @@ const nb = {
       bill_paid_progress: '{{paid}} av {{total}} betalt tilbake',
       receipt_paid_so_far: 'Betalt {{paid}} av {{total}}',
       payment_amount: 'Betalt beløp',
-      payment_hint: 'Bare betalt en del? Skriv inn beløpet.',
       payment_left_of: '{{left}} igjen av {{total}}',
       payment_too_much: 'Mer enn de {{owed}} som fortsatt skyldes',
       payment_paid_to: 'Betalt til',

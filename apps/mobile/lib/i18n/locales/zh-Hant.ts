@@ -796,7 +796,6 @@ const zhHant = {
       bill_paid_progress: '已還 {{paid}} / {{total}}',
       receipt_paid_so_far: '已付 {{paid}} / {{total}}',
       payment_amount: '還款金額',
-      payment_hint: '只還了一部分？輸入還款金額。',
       payment_left_of: '剩餘 {{left}} / {{total}}',
       payment_too_much: '超過尚欠的 {{owed}}',
       payment_paid_to: '收款帳戶',

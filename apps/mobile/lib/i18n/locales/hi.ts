@@ -830,7 +830,6 @@ const hi = {
       bill_paid_progress: '{{total}} में से {{paid}} लौटाए गए',
       receipt_paid_so_far: '{{total}} में से {{paid}} चुकाए',
       payment_amount: 'चुकाई गई राशि',
-      payment_hint: 'सिर्फ़ कुछ चुकाया? चुकाई गई राशि डालें।',
       payment_left_of: '{{total}} में से {{left}} बाकी',
       payment_too_much: 'बकाया {{owed}} से ज़्यादा',
       payment_paid_to: 'किसमें मिला',

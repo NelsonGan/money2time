@@ -834,7 +834,6 @@ const fr = {
       bill_paid_progress: '{{paid}} sur {{total}} remboursés',
       receipt_paid_so_far: 'Payé {{paid}} sur {{total}}',
       payment_amount: 'Montant payé',
-      payment_hint: 'Payé en partie ? Saisissez le montant reçu.',
       payment_left_of: 'Reste {{left}} sur {{total}}',
       payment_too_much: 'Plus que les {{owed}} encore dus',
       payment_paid_to: 'Payé sur',

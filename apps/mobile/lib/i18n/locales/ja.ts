@@ -829,7 +829,6 @@ const ja = {
       bill_paid_progress: '{{total}} 中 {{paid}} 返済済み',
       receipt_paid_so_far: '{{total}} 中 {{paid}} 支払い済み',
       payment_amount: '支払額',
-      payment_hint: '一部だけの支払い？支払われた額を入力してください。',
       payment_left_of: '{{total}} 中 残り {{left}}',
       payment_too_much: '未払いの {{owed}} を超えています',
       payment_paid_to: '入金先',

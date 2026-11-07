@@ -827,7 +827,6 @@ const th = {
       bill_paid_progress: 'คืนแล้ว {{paid}} จาก {{total}}',
       receipt_paid_so_far: 'จ่ายแล้ว {{paid}} จาก {{total}}',
       payment_amount: 'ยอดที่จ่าย',
-      payment_hint: 'จ่ายมาแค่บางส่วน? ใส่ยอดที่จ่ายมา',
       payment_left_of: 'เหลือ {{left}} จาก {{total}}',
       payment_too_much: 'มากกว่ายอดค้าง {{owed}}',
       payment_paid_to: 'รับเข้าบัญชี',

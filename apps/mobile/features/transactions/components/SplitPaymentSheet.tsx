@@ -118,12 +118,10 @@ export function SplitPaymentSheet({ target, onClose, onRecord }: SplitPaymentShe
                     ? I18n.t('transactions.settleUp.payment_too_much', {
                         owed: format(target.owed),
                       })
-                    : plan?.kind === 'full'
-                      ? I18n.t('transactions.settleUp.payment_hint')
-                      : I18n.t('transactions.settleUp.payment_left_of', {
-                          left: format(Math.max(0, normalizeMoneyAmount(target.owed - amount))),
-                          total: format(target.shareTotal),
-                        })}
+                    : I18n.t('transactions.settleUp.payment_left_of', {
+                        left: format(Math.max(0, normalizeMoneyAmount(target.owed - amount))),
+                        total: format(target.shareTotal),
+                      })}
                 </Text>
               </View>
 

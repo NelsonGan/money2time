@@ -797,6 +797,14 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
                     highlightedId != null &&
                     entry.transactions.some((tx) => tx.id === highlightedId)
                   }
+                  // Long press selects the bill's paybacks, which unfolds them.
+                  onLongPress={
+                    onToggleDaySelection
+                      ? () => onToggleDaySelection(entry.transactions.map((tx) => tx.id))
+                      : onTransactionLongPress && entry.transactions[0]
+                        ? () => onTransactionLongPress(entry.transactions[0]!)
+                        : undefined
+                  }
                   compact={compactItems}
                   settings={displaySettings}
                 >

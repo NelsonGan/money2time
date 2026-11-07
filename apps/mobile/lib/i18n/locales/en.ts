@@ -807,7 +807,6 @@ const en = {
       bill_paid_progress: '{{paid}} of {{total}} paid back',
       receipt_paid_so_far: 'Paid {{paid}} of {{total}}',
       payment_amount: 'Amount paid',
-      payment_hint: 'Paid only part? Enter what they paid.',
       payment_left_of: '{{left}} left of {{total}}',
       payment_too_much: 'More than the {{owed}} still owed',
       payment_paid_to: 'Paid to',

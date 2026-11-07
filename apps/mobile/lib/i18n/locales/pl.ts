@@ -832,7 +832,6 @@ const pl = {
       bill_paid_progress: 'Oddano {{paid}} z {{total}}',
       receipt_paid_so_far: 'Zapłacono {{paid}} z {{total}}',
       payment_amount: 'Zapłacona kwota',
-      payment_hint: 'Zapłacono tylko część? Wpisz zapłaconą kwotę.',
       payment_left_of: 'Zostało {{left}} z {{total}}',
       payment_too_much: 'Więcej niż pozostałe {{owed}}',
       payment_paid_to: 'Wpłacono na',

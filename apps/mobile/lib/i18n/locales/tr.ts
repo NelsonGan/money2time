@@ -829,7 +829,6 @@ const tr = {
       bill_paid_progress: '{{total}} tutarın {{paid}} kadarı geri ödendi',
       receipt_paid_so_far: '{{total}} tutarın {{paid}} kadarı ödendi',
       payment_amount: 'Ödenen tutar',
-      payment_hint: 'Sadece bir kısmı mı ödendi? Ödenen tutarı girin.',
       payment_left_of: '{{total}} tutarından {{left}} kaldı',
       payment_too_much: 'Kalan {{owed}} borçtan fazla',
       payment_paid_to: 'Ödendiği hesap',

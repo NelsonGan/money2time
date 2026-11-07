@@ -45,7 +45,7 @@ type TransactionDisplaySettings = Pick<
 const HIGHLIGHT_PEAK_OPACITY = 0.28;
 
 // How long a row must be held before it opens selection mode.
-const LONG_PRESS_DELAY_MS = 300;
+export const LONG_PRESS_DELAY_MS = 300;
 
 const styles = StyleSheet.create({
   // Over the card's right padding, full height so the whole strip is the grip.
