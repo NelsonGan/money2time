@@ -2096,6 +2096,10 @@ const ja = {
     archived_section: 'アーカイブ済み',
     show_archived_action: 'アーカイブを表示（{{count}}）',
     hide_archived_action: 'アーカイブを隠す',
+    archive_action: '口座をアーカイブ',
+    unarchive_action: 'アーカイブから戻す',
+    archive_hint:
+      '口座一覧と口座の選択から隠します。取引と合計は残り、この口座の定期取引は一時停止されます。「アーカイブを表示」から開いたり、アーカイブから戻したりできます。',
     show_balances: '残高を表示',
     type: '種類',
     statement_day: '締め日',

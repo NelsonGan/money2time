@@ -63,6 +63,10 @@ export const accountsTable = sqliteTable('accounts', {
   // The category a counted repayment is filed under, so it lands in the
   // breakdown and depletes a budget line like any other expense.
   loanPaymentCategoryId: text('loan_payment_category_id'),
+  // Null = live. Set to archive an everyday (debit/credit) account: hidden
+  // from the accounts stack and pickers, transactions kept. Loans and goals
+  // archive through their own stamps above; read via `isAccountArchived`.
+  archivedAt: text('archived_at'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),

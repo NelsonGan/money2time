@@ -51,6 +51,7 @@ interface CreateAccountInput {
   loanArchivedAt?: string | null;
   loanCountAsExpense?: boolean | null;
   loanPaymentCategoryId?: string | null;
+  archivedAt?: string | null;
   deletedAt?: string | null;
 }
 
@@ -125,6 +126,7 @@ class AccountsRepository {
         loanArchivedAt: input.loanArchivedAt ?? null,
         loanCountAsExpense: input.loanCountAsExpense ?? null,
         loanPaymentCategoryId: input.loanPaymentCategoryId ?? null,
+        archivedAt: input.archivedAt ?? null,
         createdAt: now,
         updatedAt: now,
         deletedAt: input.deletedAt ?? null,

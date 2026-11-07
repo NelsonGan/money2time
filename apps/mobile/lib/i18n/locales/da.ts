@@ -2110,6 +2110,10 @@ const da = {
     archived_section: 'Arkiverede',
     show_archived_action: 'Vis arkiverede ({{count}})',
     hide_archived_action: 'Skjul arkiverede',
+    archive_action: 'Arkivér konto',
+    unarchive_action: 'Fjern fra arkiv',
+    archive_hint:
+      'Skjuler den fra din kontoliste og kontovælgere. Transaktioner og totaler bevares, og faste poster på den sættes på pause. Find den under "Vis arkiverede" for at åbne den eller fjerne den fra arkivet.',
     show_balances: 'Vis saldoer',
     type: 'Type',
     statement_day: 'Kontoudtogsdag',

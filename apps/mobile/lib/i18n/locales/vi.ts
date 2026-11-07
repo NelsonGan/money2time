@@ -2094,6 +2094,10 @@ const vi = {
     archived_section: 'Đã lưu trữ',
     show_archived_action: 'Xem mục đã lưu trữ ({{count}})',
     hide_archived_action: 'Ẩn mục đã lưu trữ',
+    archive_action: 'Lưu trữ tài khoản',
+    unarchive_action: 'Bỏ lưu trữ',
+    archive_hint:
+      'Ẩn khỏi danh sách tài khoản và mục chọn tài khoản. Giao dịch và tổng số vẫn được giữ, và các giao dịch định kỳ của nó bị tạm dừng. Tìm trong "Xem mục đã lưu trữ" để mở hoặc bỏ lưu trữ.',
     show_balances: 'Hiện số dư',
     type: 'Loại',
     statement_day: 'Ngày sao kê',

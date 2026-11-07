@@ -2133,6 +2133,10 @@ const de = {
     archived_section: 'Archiviert',
     show_archived_action: 'Archivierte anzeigen ({{count}})',
     hide_archived_action: 'Archivierte ausblenden',
+    archive_action: 'Konto archivieren',
+    unarchive_action: 'Archivierung aufheben',
+    archive_hint:
+      'Blendet es aus deiner Kontenliste und der Kontoauswahl aus. Buchungen und Summen bleiben, und wiederkehrende Buchungen darauf werden pausiert. Unter "Archivierte anzeigen" kannst du es öffnen oder die Archivierung aufheben.',
     show_balances: 'Salden anzeigen',
     type: 'Typ',
     statement_day: 'Abrechnungstag',

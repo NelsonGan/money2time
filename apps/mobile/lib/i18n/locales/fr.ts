@@ -2128,6 +2128,10 @@ const fr = {
     archived_section: 'Archivés',
     show_archived_action: 'Afficher les archivés ({{count}})',
     hide_archived_action: 'Masquer les archivés',
+    archive_action: 'Archiver le compte',
+    unarchive_action: 'Désarchiver le compte',
+    archive_hint:
+      'Le masque de votre liste de comptes et des sélecteurs de compte. Les transactions et les totaux sont conservés, et ses opérations récurrentes sont mises en pause. Retrouvez-le dans "Afficher les archivés" pour l\'ouvrir ou le désarchiver.',
     show_balances: 'Afficher les soldes',
     type: 'Type',
     statement_day: 'Jour de relevé',

@@ -2117,6 +2117,10 @@ const es = {
     archived_section: 'Archivados',
     show_archived_action: 'Ver archivados ({{count}})',
     hide_archived_action: 'Ocultar archivados',
+    archive_action: 'Archivar cuenta',
+    unarchive_action: 'Desarchivar cuenta',
+    archive_hint:
+      'La oculta de tu lista de cuentas y de los selectores de cuenta. Se conservan las transacciones y los totales, y sus movimientos recurrentes se pausan. Búscala en "Ver archivados" para abrirla o desarchivarla.',
     show_balances: 'Mostrar saldos',
     type: 'Tipo',
     statement_day: 'Día de corte',

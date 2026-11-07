@@ -2114,6 +2114,10 @@ const it = {
     archived_section: 'Archiviati',
     show_archived_action: 'Mostra archiviati ({{count}})',
     hide_archived_action: 'Nascondi archiviati',
+    archive_action: 'Archivia conto',
+    unarchive_action: 'Ripristina conto',
+    archive_hint:
+      'Lo nasconde dall\'elenco dei conti e dalla scelta del conto. Transazioni e totali restano, e le voci ricorrenti su di esso vengono sospese. Lo trovi in "Mostra archiviati" per aprirlo o ripristinarlo.',
     show_balances: 'Mostra saldi',
     type: 'Tipo',
     statement_day: 'Giorno estratto',

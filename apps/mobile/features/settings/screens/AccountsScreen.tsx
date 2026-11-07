@@ -134,6 +134,7 @@ import {
   type TransactionWithRelations,
 } from '~/types';
 import { cn } from '~/utils';
+import { isAccountArchived } from '~/utils/accountArchive';
 import { flowTypeForBalanceDelta, isLiabilityAccountType } from '~/utils/accountBalances';
 import { resolveCategoryIcon } from '~/utils/categoryIcons';
 import { withColorAlpha } from '~/utils/color';
@@ -558,7 +559,7 @@ function AccountEditorSheet({
   onClose,
   onSave,
   onDelete,
-  onArchiveLoan,
+  onArchive,
   onOpenMultiCurrency,
   onOpenLogoPicker,
   onOpenCardDesignPicker,
@@ -571,7 +572,8 @@ function AccountEditorSheet({
   onClose: () => void;
   onSave: (input: AccountEditorInput) => void;
   onDelete?: () => void;
-  onArchiveLoan?: (archived: boolean) => void;
+  /** Archive or bring back the account being edited (any type but a goal). */
+  onArchive?: (archived: boolean) => void;
   onOpenMultiCurrency?: () => void;
   onOpenLogoPicker: (session: AccountLogoPickerSession) => void;
   onOpenCardDesignPicker: (session: CardDesignPickerSession) => void;
@@ -1089,7 +1091,7 @@ function AccountEditorSheet({
     account?.id ?? null,
     accountGroupId === 'none' ? null : (accountGroupNameById.get(accountGroupId) ?? null),
     appAccounts,
-    account?.type === 'loan' && account.loanArchivedAt != null,
+    account != null && isAccountArchived(account),
   );
 
   /**
@@ -1897,24 +1899,25 @@ function AccountEditorSheet({
               />
             </View>
 
-            {isEdit && account.type === 'loan' && onArchiveLoan ? (
+            {isEdit && account.type !== 'goal' && onArchive ? (
               <Pressable
                 onPress={() => {
                   void triggerHaptic('selection');
-                  onArchiveLoan(account.loanArchivedAt == null);
+                  onArchive(!isAccountArchived(account));
                 }}
                 accessibilityRole="button"
                 className="rounded-2xl border border-border/30 bg-secondary/30 px-4 py-3.5"
               >
                 <Text variant="body">
                   {I18n.t(
-                    account.loanArchivedAt == null
-                      ? 'accounts.loan.archive_action'
-                      : 'accounts.loan.unarchive_action',
+                    archiveCopyKey(
+                      account.type,
+                      isAccountArchived(account) ? 'unarchive' : 'archive',
+                    ),
                   )}
                 </Text>
                 <Text variant="caption" tone="muted" className="mt-0.5">
-                  {I18n.t('accounts.loan.archive_hint')}
+                  {I18n.t(archiveCopyKey(account.type, 'hint'))}
                 </Text>
               </Pressable>
             ) : null}
@@ -2083,6 +2086,7 @@ export function AccountEditorScreen({
     deleteRecurringRule,
     recurringRules,
     setLoanArchived,
+    setAccountArchived,
     rateTable,
   } = useApp();
   const { accountBalances } = useTransactions();
@@ -2428,13 +2432,16 @@ export function AccountEditorScreen({
     onClose();
   }, [account, deleteAccount, onClose]);
 
-  const handleArchiveLoan = useCallback(
+  const handleArchive = useCallback(
     (archived: boolean) => {
       if (!account) return;
-      setLoanArchived(account.id, archived);
+      // A loan keeps archiving through its own stamp, which older app
+      // versions and the Web Dashboard read; everyday accounts use the new one.
+      if (account.type === 'loan') setLoanArchived(account.id, archived);
+      else setAccountArchived(account.id, archived);
       onClose();
     },
-    [account, onClose, setLoanArchived],
+    [account, onClose, setAccountArchived, setLoanArchived],
   );
 
   return (
@@ -2447,12 +2454,29 @@ export function AccountEditorScreen({
       onClose={onClose}
       onSave={handleSave}
       onDelete={account ? handleDelete : undefined}
-      onArchiveLoan={account?.type === 'loan' ? handleArchiveLoan : undefined}
+      onArchive={account && account.type !== 'goal' ? handleArchive : undefined}
       onOpenMultiCurrency={onOpenMultiCurrency}
       onOpenLogoPicker={onOpenLogoPicker}
       onOpenCardDesignPicker={onOpenCardDesignPicker}
     />
   );
+}
+
+/** The archive action's label or hint: loans keep their own wording. */
+function archiveCopyKey(type: AccountType, part: 'archive' | 'unarchive' | 'hint'): string {
+  const keys =
+    type === 'loan'
+      ? {
+          archive: 'accounts.loan.archive_action',
+          unarchive: 'accounts.loan.unarchive_action',
+          hint: 'accounts.loan.archive_hint',
+        }
+      : {
+          archive: 'accounts.archive_action',
+          unarchive: 'accounts.unarchive_action',
+          hint: 'accounts.archive_hint',
+        };
+  return keys[part];
 }
 
 /** Icon shown on the account-type chips and the logo fallback. */
@@ -3775,15 +3799,15 @@ export function AccountsScreen({
     // getTransactionsByAccount is identity-stable; `transactions` signals the data changed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accounts, balanceMap, getTransactionsByAccount, managementOnly, transactions]);
-  // The stack shows live accounts; archived loans sit behind its own
-  // "show archived" toggle so a settled loan stops taking up room without
-  // becoming unreachable.
+  // The stack shows live accounts; archived ones (a closed card, a settled
+  // loan) sit behind its own "show archived" toggle so they stop taking up
+  // room without becoming unreachable.
   const { stackAccounts, archivedAccounts } = useMemo(() => {
     const live: Account[] = [];
     const archived: Account[] = [];
     for (const account of accounts) {
       if (account.type === 'goal') continue;
-      if (account.type === 'loan' && account.loanArchivedAt != null) archived.push(account);
+      if (isAccountArchived(account)) archived.push(account);
       else live.push(account);
     }
     return { stackAccounts: live, archivedAccounts: archived };
@@ -3797,8 +3821,8 @@ export function AccountsScreen({
 
     const buckets = new Map<string, Account[]>();
     // Savings goals live on their own rail, never inside the bank-card groups.
-    // Archived loans DO belong here: this list feeds the management screen,
-    // which is where a loan is brought back out of the archive.
+    // Archived accounts DO belong here: this list feeds the management
+    // screen, which lists every account so all of them can be reordered.
     accounts.forEach((account) => {
       if (account.type === 'goal') return;
       const groupName = account.accountGroup?.trim() ?? '';

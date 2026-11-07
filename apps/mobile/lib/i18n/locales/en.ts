@@ -2075,6 +2075,10 @@ const en = {
     archived_section: 'Archived',
     show_archived_action: 'Show archived ({{count}})',
     hide_archived_action: 'Hide archived',
+    archive_action: 'Archive account',
+    unarchive_action: 'Unarchive account',
+    archive_hint:
+      'Hides it from your accounts list and account pickers. Transactions and totals are kept, and recurring entries on it are paused. Find it under "Show archived" to open or unarchive it.',
     show_balances: 'Show balances',
     type: 'Type',
     statement_day: 'Statement day',

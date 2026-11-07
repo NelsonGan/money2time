@@ -2114,6 +2114,10 @@ const pl = {
     archived_section: 'Zarchiwizowane',
     show_archived_action: 'Pokaż zarchiwizowane ({{count}})',
     hide_archived_action: 'Ukryj zarchiwizowane',
+    archive_action: 'Archiwizuj konto',
+    unarchive_action: 'Przywróć z archiwum',
+    archive_hint:
+      'Ukrywa je na liście kont i w wyborze konta. Transakcje i sumy zostają, a cykliczne wpisy na nim są wstrzymane. Znajdziesz je w "Pokaż zarchiwizowane", aby je otworzyć lub przywrócić.',
     show_balances: 'Pokaż salda',
     type: 'Typ',
     statement_day: 'Dzień wyciągu',

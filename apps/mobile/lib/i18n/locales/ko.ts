@@ -2082,6 +2082,10 @@ const ko = {
     archived_section: '보관됨',
     show_archived_action: '보관함 보기 ({{count}})',
     hide_archived_action: '보관함 숨기기',
+    archive_action: '계좌 보관',
+    unarchive_action: '보관 해제',
+    archive_hint:
+      '계좌 목록과 계좌 선택에서 숨깁니다. 거래와 합계는 유지되고 이 계좌의 반복 거래는 일시 중지됩니다. "보관함 보기"에서 열거나 보관을 해제할 수 있습니다.',
     show_balances: '잔액 표시',
     type: '유형',
     statement_day: '결제일',

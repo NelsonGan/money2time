@@ -557,6 +557,15 @@ describe('canPayLiabilityByHandFrom', () => {
       false,
     );
   });
+
+  it('never offers an archived bank account or card', () => {
+    expect(canPayLiabilityByHandFrom('loan', { type: 'debit', archivedAt: '2026-01-01' })).toBe(
+      false,
+    );
+    expect(canPayLiabilityByHandFrom('loan', { type: 'credit', archivedAt: '2026-01-01' })).toBe(
+      false,
+    );
+  });
 });
 
 describe('isRepaymentRule', () => {

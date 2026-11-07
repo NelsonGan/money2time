@@ -2109,6 +2109,10 @@ const sv = {
     archived_section: 'Arkiverade',
     show_archived_action: 'Visa arkiverade ({{count}})',
     hide_archived_action: 'Dölj arkiverade',
+    archive_action: 'Arkivera konto',
+    unarchive_action: 'Ta fram ur arkivet',
+    archive_hint:
+      'Döljer det från din kontolista och kontoväljarna. Transaktioner och summor behålls, och återkommande poster på det pausas. Du hittar det under "Visa arkiverade" för att öppna det eller ta fram det ur arkivet.',
     show_balances: 'Visa saldon',
     type: 'Typ',
     statement_day: 'Utdragsdag',

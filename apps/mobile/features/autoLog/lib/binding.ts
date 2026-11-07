@@ -4,6 +4,7 @@ import type {
   AccountBindingReason,
   PaymentAlertSource,
 } from '~/types';
+import { isAccountArchived } from '~/utils/accountArchive';
 
 export interface AccountBinding {
   accountId: string | null;
@@ -19,8 +20,18 @@ export interface BindingInput {
   accounts: readonly Account[];
 }
 
+/**
+ * Whether a payment alert may post to an account. An archived card is not:
+ * a source still bound to it falls back to asking, rather than filing new
+ * entries where the user can no longer see them.
+ */
 export function isPayableAccount(account: Account): boolean {
-  return !account.deletedAt && account.type !== 'goal' && account.type !== 'loan';
+  return (
+    !account.deletedAt &&
+    account.type !== 'goal' &&
+    account.type !== 'loan' &&
+    !isAccountArchived(account)
+  );
 }
 
 /** Only an account explicitly selected for this app or automation may be used. */

@@ -2127,6 +2127,10 @@ const nl = {
     archived_section: 'Gearchiveerd',
     show_archived_action: 'Gearchiveerde tonen ({{count}})',
     hide_archived_action: 'Gearchiveerde verbergen',
+    archive_action: 'Rekening archiveren',
+    unarchive_action: 'Rekening terughalen',
+    archive_hint:
+      'Verbergt hem uit je rekeningenlijst en de rekeningkeuze. Transacties en totalen blijven, en terugkerende boekingen erop worden gepauzeerd. Je vindt hem onder "Gearchiveerde tonen" om hem te openen of terug te halen.',
     show_balances: 'Saldi tonen',
     type: 'Type',
     statement_day: 'Afschriftdag',

@@ -2117,6 +2117,10 @@ const pt = {
     archived_section: 'Arquivados',
     show_archived_action: 'Ver arquivados ({{count}})',
     hide_archived_action: 'Ocultar arquivados',
+    archive_action: 'Arquivar conta',
+    unarchive_action: 'Desarquivar conta',
+    archive_hint:
+      'Oculta-a da lista de contas e dos seletores de conta. As transações e os totais são mantidos, e os lançamentos recorrentes nela são pausados. Encontre-a em "Ver arquivados" para abrir ou desarquivar.',
     show_balances: 'Mostrar saldos',
     type: 'Tipo',
     statement_day: 'Dia do fechamento',

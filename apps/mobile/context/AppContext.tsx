@@ -397,6 +397,14 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
    * loan cannot keep drawing money invisibly.
    */
   setLoanArchived: (accountId: string, archived: boolean) => void;
+  /**
+   * Archive or un-archive an everyday (debit or credit) account. It leaves the
+   * accounts stack and the account pickers and keeps every transaction.
+   * Archiving also pauses the recurring rules that post to or from it, so a
+   * hidden account cannot keep filling up. Loans use `setLoanArchived` and
+   * goals `setGoalArchived`.
+   */
+  setAccountArchived: (accountId: string, archived: boolean) => void;
   /** Loan account whose payoff celebration is waiting to be shown, or null. */
   pendingLoanCelebration: Account | null;
   clearLoanCelebration: () => void;
@@ -2055,10 +2063,32 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // of visibility, so a hidden loan would keep pulling money out. Rule
       // writes ride the default refreshAll (the recurring-rule pattern).
       runMutation(() => {
-        accountsRepository.update(accountId, { loanArchivedAt: archived ? nowIso() : null });
+        // Unarchiving clears the generic stamp too, so a loan that carries one
+        // (say, from a restored or synced row) cannot stay hidden for good.
+        accountsRepository.update(
+          accountId,
+          archived ? { loanArchivedAt: nowIso() } : { loanArchivedAt: null, archivedAt: null },
+        );
         if (archived) recurringRulesRepository.deactivateTransfersInto(accountId);
       });
       void trackEvent(archived ? AnalyticsEvents.LOAN_ARCHIVED : AnalyticsEvents.LOAN_UNARCHIVED);
+    },
+    [runMutation],
+  );
+
+  const setAccountArchived = useCallback(
+    (accountId: string, archived: boolean) => {
+      // Rules keep firing regardless of visibility, so archiving pauses the
+      // ones touching the account; un-archiving leaves them paused for the
+      // user to turn back on, as with goals and loans. Rule writes ride the
+      // default refreshAll (the recurring-rule pattern).
+      runMutation(() => {
+        accountsRepository.update(accountId, { archivedAt: archived ? nowIso() : null });
+        if (archived) recurringRulesRepository.deactivateRulesForAccount(accountId);
+      });
+      void trackEvent(
+        archived ? AnalyticsEvents.ACCOUNT_ARCHIVED : AnalyticsEvents.ACCOUNT_UNARCHIVED,
+      );
     },
     [runMutation],
   );
@@ -5455,6 +5485,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             pendingGoalCelebration,
             clearGoalCelebration,
             setLoanArchived,
+            setAccountArchived,
             pendingLoanCelebration,
             clearLoanCelebration,
             createAccountGroup,
@@ -5595,6 +5626,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       pendingGoalCelebration,
       clearGoalCelebration,
       setLoanArchived,
+      setAccountArchived,
       pendingLoanCelebration,
       clearLoanCelebration,
       createAccountGroup,

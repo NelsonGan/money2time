@@ -2109,6 +2109,10 @@ const nb = {
     archived_section: 'Arkiverte',
     show_archived_action: 'Vis arkiverte ({{count}})',
     hide_archived_action: 'Skjul arkiverte',
+    archive_action: 'Arkiver konto',
+    unarchive_action: 'Hent ut av arkivet',
+    archive_hint:
+      'Skjuler den fra kontolisten og kontovelgerne. Transaksjoner og totaler beholdes, og faste poster på den settes på pause. Finn den under "Vis arkiverte" for å åpne den eller hente den ut av arkivet.',
     show_balances: 'Vis saldoer',
     type: 'Type',
     statement_day: 'Utskriftsdag',

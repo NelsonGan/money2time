@@ -154,6 +154,7 @@ function partsSource(): Record<string, Row[]> {
     accounts: [
       account('cash', 'debit', { auto_log_identifiers_json: '["1234"]' }),
       account('usd-card', 'credit', { currency: 'USD' }),
+      account('closed-card', 'credit', { archived_at: 'then' }),
       account('trip', 'goal', { goal_achieved_at: 'then' }),
       account('old-goal', 'goal', { goal_archived_at: 'then' }),
       account('car', 'loan', {
@@ -267,6 +268,7 @@ describe('ledgerPartsCopySpecs', () => {
   it('starts everyday accounts at zero, in the new currency when they were in the old one', () => {
     const { accounts, account_groups } = planParts(['accounts']);
     expect(account_groups).toHaveLength(1);
+    // The archived card stays behind.
     expect(accounts.map((row) => [row.type, row.currency, row.starting_balance])).toEqual([
       ['debit', 'SGD', 0],
       ['credit', 'USD', 0],

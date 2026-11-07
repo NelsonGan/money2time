@@ -2123,6 +2123,10 @@ const ms = {
     archived_section: 'Diarkibkan',
     show_archived_action: 'Tunjuk arkib ({{count}})',
     hide_archived_action: 'Sembunyi arkib',
+    archive_action: 'Arkibkan akaun',
+    unarchive_action: 'Keluarkan dari arkib',
+    archive_hint:
+      'Menyembunyikannya daripada senarai akaun dan pemilih akaun. Transaksi dan jumlah kekal, dan catatan berulangnya dijeda. Cari di "Tunjuk arkib" untuk membuka atau mengeluarkannya dari arkib.',
     show_balances: 'Tunjukkan baki',
     type: 'Jenis',
     statement_day: 'Hari penyata',

@@ -2120,6 +2120,10 @@ const id = {
     archived_section: 'Diarsipkan',
     show_archived_action: 'Tampilkan arsip ({{count}})',
     hide_archived_action: 'Sembunyikan arsip',
+    archive_action: 'Arsipkan akun',
+    unarchive_action: 'Keluarkan dari arsip',
+    archive_hint:
+      'Menyembunyikannya dari daftar akun dan pemilih akun. Transaksi dan total tetap tersimpan, dan transaksi berulangnya dijeda. Temukan di "Tampilkan arsip" untuk membuka atau mengeluarkannya dari arsip.',
     show_balances: 'Tampilkan saldo',
     type: 'Jenis',
     statement_day: 'Tanggal rekening koran',

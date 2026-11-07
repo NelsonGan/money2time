@@ -2134,6 +2134,10 @@ const fil = {
     archived_section: 'Naka-archive',
     show_archived_action: 'Ipakita ang archived ({{count}})',
     hide_archived_action: 'Itago ang archived',
+    archive_action: 'I-archive ang account',
+    unarchive_action: 'Alisin sa archive',
+    archive_hint:
+      'Itinatago ito sa listahan ng account at sa mga pagpili ng account. Nananatili ang mga transaksyon at kabuuan, at naka-pause ang mga paulit-ulit na entry nito. Hanapin ito sa "Ipakita ang archived" para buksan o alisin sa archive.',
     show_balances: 'Ipakita ang mga balance',
     type: 'Uri',
     statement_day: 'Araw ng statement',

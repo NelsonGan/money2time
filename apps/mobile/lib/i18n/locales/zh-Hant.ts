@@ -2010,6 +2010,10 @@ const zhHant = {
     archived_section: '已歸檔',
     show_archived_action: '顯示已歸檔（{{count}}）',
     hide_archived_action: '隱藏已歸檔',
+    archive_action: '歸檔帳戶',
+    unarchive_action: '取消歸檔',
+    archive_hint:
+      '將它從帳戶列表和帳戶選擇中隱藏。交易和總額都會保留，它的定期記錄會暫停。可在“顯示已歸檔”中打開或取消歸檔。',
     show_balances: '顯示餘額',
     type: '型別',
     statement_day: '帳單日',

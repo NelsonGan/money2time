@@ -2010,6 +2010,10 @@ const zh = {
     archived_section: '已归档',
     show_archived_action: '显示已归档（{{count}}）',
     hide_archived_action: '隐藏已归档',
+    archive_action: '归档账户',
+    unarchive_action: '取消归档',
+    archive_hint:
+      '将它从账户列表和账户选择中隐藏。交易和总额都会保留，它的定期记录会暂停。可在“显示已归档”中打开或取消归档。',
     show_balances: '显示余额',
     type: '类型',
     statement_day: '账单日',

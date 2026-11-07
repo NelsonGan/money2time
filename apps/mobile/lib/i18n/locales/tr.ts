@@ -2118,6 +2118,10 @@ const tr = {
     archived_section: 'Arşivlenenler',
     show_archived_action: 'Arşivi göster ({{count}})',
     hide_archived_action: 'Arşivi gizle',
+    archive_action: 'Hesabı arşivle',
+    unarchive_action: 'Arşivden çıkar',
+    archive_hint:
+      'Hesap listenizden ve hesap seçiminden gizler. İşlemler ve toplamlar korunur, üzerindeki tekrarlayan kayıtlar duraklatılır. Açmak veya arşivden çıkarmak için "Arşivi göster" altında bulabilirsiniz.',
     show_balances: 'Bakiyeleri göster',
     type: 'Tür',
     statement_day: 'Ekstre günü',
