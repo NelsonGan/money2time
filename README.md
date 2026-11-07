@@ -168,8 +168,6 @@ The three Worker URLs point at the receipt-scan
 ([web-dashboard](#web-dashboard-worker)) Cloudflare Workers. Their
 provider secrets (OpenRouter, APNs) live only in the Workers — never in the
 app; the relay has none.
-In CI, PR builds override the receipt-scan URL with the branch's Worker
-**preview URL** so each branch talks to its own Worker.
 
 Native GA4 uses the Firebase client configs committed at the app root (`apps/mobile`):
 `google-services.json`, `GoogleService-Info.plist`, and
@@ -3083,8 +3081,9 @@ Internal development and preview builds have a runtime version that includes the
 subscription logos, tutorials, and news images. These directories are excluded
 from OTA uploads, so their filenames and bytes must match the native build.
 Both internal variants use the same revision so a development client can still
-load PR previews. Later changes to those images also invalidate old internal
-builds; images eligible for OTA retain the existing update flow.
+load an `eas update` published for the preview variant. Later changes to those
+images also invalidate old internal builds; images eligible for OTA retain the
+existing update flow.
 
 Store builds disable OTA and keep the plain app-version runtime. See [Expo asset selection](https://docs.expo.dev/eas-update/asset-selection/).
 
@@ -3318,11 +3317,12 @@ UTC start — so a new window starts a fresh row and the counter increment is a
 single atomic upsert on that key. A user's counter is shared across a tier change
 within the same window (an upgrade keeps the count and raises the ceiling).
 
-**PR previews share this database.** Preview versions keep the bindings from
-`wrangler.toml`, so branch previews read/write the production D1. That's
-acceptable: the rows are throwaway rate-limit counters and a 60s cache. A PR
-that changes the schema is only applied on merge to `main` (the deploy job), so
-test destructive schema changes locally first.
+**Preview versions share this database.** A version uploaded with
+`wrangler versions upload` keeps the bindings from `wrangler.toml`, so it
+reads/writes the production D1. That's acceptable: the rows are throwaway
+rate-limit counters and a 60s cache. A PR that changes the schema is only
+applied on merge to `main` (the deploy job), so test destructive schema changes
+locally first.
 
 #### Deploy
 
@@ -3335,7 +3335,7 @@ plus the optional `POSTHOG_PROMPTS_API_KEY` (a PostHog personal API key scoped t
 `llm_prompt:read` only; unset serves the bundled prompts).
 Dashboard secrets survive every deploy, so they only need to be set once.
 (Equivalent CLI, if you prefer: `npx wrangler secret put <NAME>`. When the
-latest Worker version is an undeployed PR preview, `secret put` refuses; use
+latest Worker version is an undeployed preview version, `secret put` refuses; use
 `npx wrangler versions secret put <NAME>`, which takes effect on the next deploy.)
 
 ```bash
@@ -4241,15 +4241,14 @@ table above. No Worker deployment or app native rebuild is required.
 
 App CI/CD is [.github/workflows/deploy.yml](.github/workflows/deploy.yml), gated `changes → test → plan → deploy`:
 
-- **Changes** — runs first on every event and classifies the diff (`git diff` of the PR merge commit's base parent, or the push's `before..after`) into three flags every other job keys off: `app` (anything that can reach the mobile binary, i.e. everything except `apps/cloudflare/**`, `.github/**`, `.claude/**`, `.agents/**`, `.codex/**`, `.vscode/**`, any `*.md`, `LICENSE`), `worker` (non-markdown `apps/cloudflare/**`), and `checks` (anything outside `apps/cloudflare/**`). **Fail open:** an unresolvable diff or an unrecognized path sets every flag true, so a new directory builds the app rather than silently skipping the release.
+- **Changes** — runs first on every event and classifies the diff (`git diff` of the PR merge commit's base parent, or the push's `before..after`) into two flags every other job keys off: `app` (anything that can reach the mobile binary, i.e. everything except `apps/cloudflare/**`, `.github/**`, `.claude/**`, `.agents/**`, `.codex/**`, `.vscode/**`, any `*.md`, `LICENSE`) and `checks` (anything outside `apps/cloudflare/**`). **Fail open:** an unresolvable diff or an unrecognized path sets every flag true, so a new directory builds the app rather than silently skipping the release.
 - **Test** — `npm ci`, `npm run check` (typecheck + lint + format), `npm test`. Runs in `apps/mobile`. Skipped when `checks` is false, because eslint and tsconfig only see the app, prettier sees the app plus the root `*.md` and `.github/`, and jest only reads `__tests__/` — there is literally nothing for it to check on a Worker-only change. A failure blocks everything downstream.
-- **PR preview** (`preview-pending` → `worker-preview` → `pr-update`) — pull requests only, and only when `app` or `worker` is set (docs-only PRs publish nothing). `worker-preview` uploads a per-PR aliased receipt-scanner Worker version **only** when `worker` is set; when it is skipped, `pr-update` points the EAS update at the production Worker URL instead.
 - **Plan** — manual dispatch, or push-to-main **when `app` is set**. A Worker-only or docs-only merge to `main` therefore never cuts a store build. Resolves the build matrix (push = both iOS+Android production; dispatch = the chosen single platform/profile).
 - **Deploy** — from `apps/mobile`, `eas build --local` on the matched runner (`xcode-27` for iOS, ubuntu-latest for Android), then `eas submit`. `fail-fast: false` so a single-platform failure doesn't kill the other build. **iOS is built with Xcode 27.1, pinned.** iOS decides what an app supports from the SDK it was linked against, so a binary built with an older Xcode runs in compatibility mode on newer hardware: on the open iPhone Duo, builds 484–486 (linked against the iOS 26 SDK by Xcode 26.3 on `macos-15`) showed as a phone-sized window in the middle of the screen, without the Duo layout. GitHub's `macos-*` images stop at Xcode 26; Xcode 27 is only on the `xcode-27` image. Keep the pinned Xcode at least as new as the newest hardware the app adapts to (27.1 for the Duo), never `latest-stable`. **The Android job grows the runner's swap to 16 GB before building.** R8 runs in the 4 GB Gradle daemon (`plugins/withGradleMemory.js`) while CMake compiles the app's native code for four ABIs, and when those overlap the 16 GB runner runs out of RAM: GitHub kills the VM mid-Gradle with "The runner has received a shutdown signal", about a minute after `:app:minifyReleaseWithR8` starts. From 2026-10-26 to 2026-11-02, most Android release jobs died this way. The job prints peak RAM and swap use after the build; if a job still dies at that step, read those numbers before you blame the code. **It also frees disk space first.** The Gradle cache (~5 GB), the NDK (downloaded on every build), `node_modules` and EAS's working copy fill the runner's disk, and on 2026-11-03 and 2026-11-04 two Android release jobs died of it: one with "No space left on device" while restoring the Gradle cache (only shown in the job's annotations; its log was empty), one with a truncated NDK download ("Error reading Zip content", then `InstallFailedException`). The first step deletes preinstalled toolchains the build never uses (.NET, Swift, Haskell, Boost, PowerShell, Julia, Azure CLI, CodeQL, Docker images); the job prints free space then and again after the build.
 
 Cloudflare has its own workflow, [.github/workflows/cloudflare.yml](.github/workflows/cloudflare.yml) (typecheck, available Worker tests and a `wrangler deploy --dry-run` bundle on PRs; on push to `main`, for each Worker whose own files or schema changed since the last successful production deploy, the D1 schema apply where it has a database, then `wrangler deploy`), path-filtered to non-markdown `apps/cloudflare/**` so an app-only change never redeploys the Worker and vice versa. Both directions of that split are deliberate: **gate jobs with `if:`, not workflow-level `paths:`** — a job skipped by `if:` reports success to branch protection, while a whole workflow skipped by a path filter leaves its required checks pending forever.
 
-**Over-the-air updates are internal-only.** `app.config.ts` sets `updates.enabled` from `APP_VARIANT`: on for `development` / `preview` (so the PR-preview `eas update` QR flow works), **off for store builds**. Nothing is ever published to the `production` channel — releases go out as store binaries. A store build therefore launches straight from its embedded bundle and skips the expo-updates launcher entirely; when that launcher failed to resolve an update's launch asset, React Native never received a bundle and the user was stuck on the native splash until their next store update changed the runtime version (hundreds of users across 1.3.3–1.4.3 in Sentry, `Expo Updates emergency launch`). If you ever want production OTA back, that failure mode comes back with it.
+**Over-the-air updates are internal-only.** `app.config.ts` sets `updates.enabled` from `APP_VARIANT`: on for the internal `development` / `preview` builds, **off for store builds**. Nothing is ever published to the `production` channel — releases go out as store binaries. A store build therefore launches straight from its embedded bundle and skips the expo-updates launcher entirely; when that launcher failed to resolve an update's launch asset, React Native never received a bundle and the user was stuck on the native splash until their next store update changed the runtime version (hundreds of users across 1.3.3–1.4.3 in Sentry, `Expo Updates emergency launch`). If you ever want production OTA back, that failure mode comes back with it.
 
 Concurrency group `${{ github.workflow }}-${{ github.ref }}` with `cancel-in-progress: true` — a new push to `main` cancels the in-flight run; new commits to a PR cancel previous test runs. Requires repo secret `EXPO_TOKEN`. Push to `main` auto-submits to TestFlight (iOS) + Play **production** (`production` track, Android); promote to App Store manually.
 
@@ -4259,19 +4258,18 @@ Two workflows, split so an app-only change never redeploys the Workers and vice 
 
 [.github/workflows/deploy.yml](.github/workflows/deploy.yml) — the app:
 
-| Job                                                | Runs on                                       | What it does                                                                                                |
-| -------------------------------------------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `changes`                                          | every event                                   | Classifies the diff into `app` / `worker` / `checks` flags. Fails open: an unresolvable diff sets all three |
-| `test`                                             | when `checks` is set                          | `npm ci` → `npm run check` (typecheck + lint + format) → `npm test`                                         |
-| `preview-pending` → `worker-preview` → `pr-update` | pull requests, when `app` or `worker` is set  | Publishes an `eas update` preview, pointed at a per-PR Worker version when one was built                    |
-| `plan`                                             | push to `main` when `app` is set, or dispatch | Resolves the build matrix (push = both platforms production; dispatch = the chosen one)                     |
-| `deploy`                                           | after `plan`                                  | `eas build --local` on xcode-27, Xcode 27.1 (iOS) / ubuntu-latest (Android), then `eas submit`              |
+| Job       | Runs on                                       | What it does                                                                                   |
+| --------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `changes` | every event                                   | Classifies the diff into `app` / `checks` flags. Fails open: an unresolvable diff sets both    |
+| `test`    | when `checks` is set                          | `npm ci` → `npm run check` (typecheck + lint + format) → `npm test`                            |
+| `plan`    | push to `main` when `app` is set, or dispatch | Resolves the build matrix (push = both platforms production; dispatch = the chosen one)        |
+| `deploy`  | after `plan`                                  | `eas build --local` on xcode-27, Xcode 27.1 (iOS) / ubuntu-latest (Android), then `eas submit` |
 
 [.github/workflows/cloudflare.yml](.github/workflows/cloudflare.yml) — the Workers: typecheck, available tests and dry-run bundle on PRs; on push to `main`, only the Workers changed since the last successful deploy get their D1 schema applied (where they have one) and `wrangler deploy`, so a run cancelled while queued or failed is caught up by the next. A deploy that has started is never cancelled by a newer push.
 
 A failing test blocks everything downstream. Concurrency cancels in-flight runs when a newer commit lands on the same ref. Requires repo secret `EXPO_TOKEN`. Pushes to `main` auto-submit to TestFlight (iOS) and the Play **production** track (Android); the App Store release is promoted by hand.
 
-Over-the-air updates are **internal-only** — `updates.enabled` is on for the development and preview profiles (so the PR preview flow works) and off for store builds, which launch straight from their embedded bundle.
+Over-the-air updates are **internal-only** — `updates.enabled` is on for the development and preview profiles and off for store builds, which launch straight from their embedded bundle.
 
 ## Testing
 

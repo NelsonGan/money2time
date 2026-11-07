@@ -10,10 +10,10 @@ routes = [
 
 # Production is reached only through the custom domain above, so we don't expose a
 # public *.workers.dev route (workers_dev = false). But keep versioned Preview URLs
-# on: the PR branch-preview CI runs `wrangler versions upload --preview-alias pr-<n>`
-# and needs a resolvable pr-<n>-money2time-workers-receipt-scanner.<subdomain>.workers.dev
-# URL to hand to the app's EAS build via EXPO_PUBLIC_MONEY2TIME_WORKERS_RECEIPT_SCANNER.
-# Without these two lines both default to disabled, which silently breaks branch previews.
+# on, so a version uploaded by hand with `wrangler versions upload --preview-alias <name>`
+# gets a resolvable <name>-money2time-workers-receipt-scanner.<subdomain>.workers.dev
+# URL to test against. CI uploads no preview versions.
+# Without these two lines both default to disabled, which silently breaks preview URLs.
 workers_dev = false
 preview_urls = true
 
@@ -30,7 +30,7 @@ database_id = "1409fa69-bbe8-4251-94b0-c96f653849e8"
 crons = ["0 3 * * *"]
 
 # Workers Logs. Declared here so EVERY version wrangler creates gets it — both
-# `wrangler deploy` (production) and `wrangler versions upload` (branch preview)
+# `wrangler deploy` (production) and `wrangler versions upload` (preview version)
 # — otherwise preview versions log nothing while production still does.
 [observability]
 enabled = true

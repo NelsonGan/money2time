@@ -13,11 +13,11 @@ const baseConfig = appJson.expo;
 const IS_DEV_VARIANT = process.env.APP_VARIANT === 'development';
 
 // Over-the-air updates are for internal builds only. Production ships store
-// binaries and never publishes to the `production` channel — the only thing
-// `eas update` targets is a per-PR preview branch (see deploy.yml) — so on a
-// store build the whole expo-updates launch path was pure downside: every cold
-// start went through the updater's cache/launcher before React Native got a
-// bundle, and when that resolution failed the app never received one at all.
+// binaries and never publishes to the `production` channel (CI publishes no
+// `eas update` at all), so on a store build the whole expo-updates launch path
+// was pure downside: every cold start went through the updater's
+// cache/launcher before React Native got a bundle, and when that resolution
+// failed the app never received one at all.
 // The user sat on the native splash forever, with nothing behind it to report
 // the failure, until their next store update changed the runtime version and
 // invalidated the poisoned cache. Sentry showed hundreds of users reaching
@@ -27,10 +27,10 @@ const IS_DEV_VARIANT = process.env.APP_VARIANT === 'development';
 //
 // Disabling updates makes a store build launch straight from its embedded
 // bundle, removing that failure mode entirely. Only the two internal variants
-// keep OTA, and for different reasons: `preview` is what the per-PR QR flow
-// publishes to, and `development` lets a dev client pull a new bundle without a
-// native rebuild. Every other value, `production` and an unset APP_VARIANT
-// included, falls through to `enabled: false`.
+// keep OTA: `development` lets a dev client pull a new bundle without a native
+// rebuild, and a `preview` build can likewise load an `eas update` published to
+// it. Every other value, `production` and an unset APP_VARIANT included, falls
+// through to `enabled: false`.
 const OTA_VARIANTS = ['development', 'preview'];
 const IS_OTA_VARIANT = OTA_VARIANTS.includes(process.env.APP_VARIANT ?? '');
 
@@ -125,7 +125,7 @@ function applyUpdatesPolicy(cfg: ExpoConfig): ExpoConfig {
 // crashes unless the build uploads source maps and debug symbols. The upload
 // needs a personal API key, which only exists as an EAS secret, so the config
 // plugin that adds the upload steps is applied only when that key is present:
-// local, CI and PR preview builds without it keep building exactly as before
+// local and CI builds without it keep building exactly as before
 // (`eas-build-post-install` in package.json installs posthog-cli for the same
 // condition).
 const POSTHOG_SYMBOL_UPLOAD = Boolean(process.env.POSTHOG_CLI_API_KEY?.trim());
@@ -148,8 +148,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     extra: {
       ...baseConfig.extra,
       ...config.extra,
-      // Tags every PostHog event (`app_variant`), so development and per-PR
-      // preview traffic can be filtered out of production reports.
+      // Tags every PostHog event (`app_variant`), so development and preview
+      // traffic can be filtered out of production reports.
       appVariant: process.env.APP_VARIANT || 'production',
     },
   };
