@@ -6,6 +6,7 @@
 import type { SplitDraftInput } from '~/context/AppContext';
 import type { ReceiptSplitDraftInput } from '~/lib/repositories/receiptSplitsRepository';
 import type { ReceiptSplit, TransactionSplit } from '~/types';
+import { normalizeMoneyAmount } from '~/utils/formatters';
 import { newId } from '~/utils/id';
 
 import type { ReceiptSplitLaunchSeed } from '../../lib/receiptSplitBridge';
@@ -251,11 +252,41 @@ export function draftToRepositoryInput(
   };
 }
 
+/** One person's prior bridge rows: the paid ones and the one still owed. */
+interface PriorShare {
+  paid: TransactionSplit[];
+  paidTotal: number;
+  owed: TransactionSplit | null;
+}
+
+/**
+ * Prior bridge rows grouped by person. A share paid in parts has several rows
+ * (`features/transactions/lib/splitPayments.ts`): its paid parts, and at most
+ * one row still owed.
+ */
+function priorSharesByPerson(priorSplits: TransactionSplit[]): Map<string, PriorShare> {
+  const shares = new Map<string, PriorShare>();
+  for (const split of priorSplits) {
+    const key = receiptPersonKey(split.personName ?? '', split.isSelf);
+    const share = shares.get(key) ?? { paid: [], paidTotal: 0, owed: null };
+    if (split.paidAt && !split.isSelf) {
+      share.paid.push(split);
+      share.paidTotal = normalizeMoneyAmount(share.paidTotal + split.amount);
+    } else {
+      share.owed = split;
+    }
+    shares.set(key, share);
+  }
+  return shares;
+}
+
 /**
  * Bridge rows from the computed per-person totals. Friends owing 0 are
  * skipped (Settle Up ignores them anyway); the Me share is the isSelf row.
  * When editing, prior rows are matched by materialized name so ids (and paid
- * state) carry over. Payback account defaults to `fallbackPaybackAccountId`.
+ * state) carry over: paid rows stay as they are, and the row still owed takes
+ * what the new total leaves after them. Payback account defaults to
+ * `fallbackPaybackAccountId`.
  */
 export function draftToSplitInputs(
   draft: ReceiptSplitDraft,
@@ -264,38 +295,49 @@ export function draftToSplitInputs(
   nameById: Map<string, string>,
   priorSplits: TransactionSplit[] = [],
 ): SplitDraftInput[] {
-  const priorByKey = new Map<string, TransactionSplit>();
-  for (const split of priorSplits) {
-    priorByKey.set(receiptPersonKey(split.personName ?? '', split.isSelf), split);
-  }
+  const priorByKey = priorSharesByPerson(priorSplits);
 
   const inputs: SplitDraftInput[] = [];
   for (const person of computation.perPerson) {
     if (!person.isSelf && person.total <= 0) continue;
     const name = person.isSelf ? null : (nameById.get(person.personKey) ?? '');
-    const nameKey = receiptPersonKey(name ?? '', person.isSelf);
-    const prior = priorByKey.get(nameKey);
-    inputs.push({
-      id: prior?.id,
-      personName: name,
-      amount: person.total,
-      isSelf: person.isSelf,
-      paybackAccountId: person.isSelf
-        ? null
-        : (prior?.paybackAccountId ?? fallbackPaybackAccountId),
-      sortOrder: inputs.length,
-      paid: prior?.paidAt
-        ? { paidAt: prior.paidAt, paidTransactionId: prior.paidTransactionId }
-        : undefined,
-    });
+    const prior = priorByKey.get(receiptPersonKey(name ?? '', person.isSelf));
+    const owed = normalizeMoneyAmount(person.total - (prior?.paidTotal ?? 0));
+    const paybackAccountId = person.isSelf
+      ? null
+      : (prior?.owed?.paybackAccountId ??
+        prior?.paid[0]?.paybackAccountId ??
+        fallbackPaybackAccountId);
+    if (person.isSelf || owed > 0.004 || !prior?.paid.length) {
+      inputs.push({
+        id: prior?.owed?.id,
+        personName: name,
+        amount: owed,
+        isSelf: person.isSelf,
+        paybackAccountId,
+        sortOrder: inputs.length,
+      });
+    }
+    for (const paid of prior?.paid ?? []) {
+      inputs.push({
+        id: paid.id,
+        personName: name,
+        amount: paid.amount,
+        isSelf: false,
+        paybackAccountId: paid.paybackAccountId,
+        sortOrder: inputs.length,
+        paid: { paidAt: paid.paidAt ?? '', paidTransactionId: paid.paidTransactionId },
+      });
+    }
   }
   return inputs;
 }
 
 /**
- * People whose settled (paid) bridge row would change amount under the new
- * computation — saving must be blocked until they're marked unpaid. Returns
- * the materialized names.
+ * People whose paid-back money no longer fits the new computation, so saving
+ * must be blocked until they're marked unpaid: a fully paid share whose total
+ * changes, or a share paid in part whose new total is below what was already
+ * paid. Returns the materialized names.
  */
 export function paidConflicts(
   computation: ReceiptSplitComputation,
@@ -309,13 +351,12 @@ export function paidConflicts(
   }
 
   const names: string[] = [];
-  for (const split of priorSplits) {
-    if (!split.paidAt || split.isSelf) continue;
-    const key = receiptPersonKey(split.personName ?? '', split.isSelf);
-    const nextTotal = totalsByNameKey.get(key) ?? 0;
-    if (Math.round(nextTotal * 100) !== Math.round(split.amount * 100)) {
-      names.push(split.personName ?? '');
-    }
+  for (const [key, share] of priorSharesByPerson(priorSplits)) {
+    if (share.paid.length === 0) continue;
+    const nextCents = Math.round((totalsByNameKey.get(key) ?? 0) * 100);
+    const paidCents = Math.round(share.paidTotal * 100);
+    const conflict = share.owed ? nextCents < paidCents : nextCents !== paidCents;
+    if (conflict) names.push(share.paid[0]!.personName ?? '');
   }
   return names;
 }

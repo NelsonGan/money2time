@@ -8,6 +8,8 @@ import type {
   TransactionWithRelations,
 } from '~/types';
 
+import { splitShareKey, summarizeSplitShares } from './splitPayments';
+
 /** Grouping key for splits that were never given a person name. */
 export const UNNAMED_PERSON_KEY = '__unnamed__';
 
@@ -77,12 +79,14 @@ export function aggregateSettleUpByPerson(
   for (const tx of transactions) {
     const splits = tx.splits;
     if (!splits || splits.length === 0) continue;
+    const shares = summarizeSplitShares(splits);
     for (const split of splits) {
       if (split.isSelf) continue;
       if (!(split.amount > 0)) continue;
 
       const trimmed = split.personName?.trim() ?? '';
       const name = trimmed.length > 0 ? trimmed : null;
+      const share = shares.get(splitShareKey(split));
       const key = name ? name.toLowerCase() : UNNAMED_PERSON_KEY;
 
       const reportingAmount = roundCents(
@@ -100,6 +104,9 @@ export function aggregateSettleUpByPerson(
         categoryIcon: tx.categoryIcon ?? null,
         paybackAccountId: split.paybackAccountId ?? tx.accountId ?? null,
         paidAt: split.paidAt,
+        shareTotal: share?.total ?? split.amount,
+        sharePaid: share?.paid ?? 0,
+        shareKey: splitShareKey(split),
       };
 
       let person = people.get(key);
@@ -256,11 +263,13 @@ export function aggregateSettleUpByTransaction(
     let paidNative = 0;
     let latestPaidAt: string | null = null;
     let unpaidSplitCount = 0;
+    const shares = summarizeSplitShares(splits);
     for (const split of splits) {
       if (split.isSelf) continue;
       if (!(split.amount > 0)) continue;
 
       const trimmed = split.personName?.trim() ?? '';
+      const share = shares.get(splitShareKey(split));
       const reportingAmount = roundCents(
         splitReportingAmount(split.amount, tx, reportingCurrency, rateToReporting),
       );
@@ -272,6 +281,9 @@ export function aggregateSettleUpByTransaction(
         reportingAmount,
         paybackAccountId: split.paybackAccountId ?? tx.accountId ?? null,
         paidAt: split.paidAt,
+        shareTotal: share?.total ?? split.amount,
+        sharePaid: share?.paid ?? 0,
+        shareKey: splitShareKey(split),
       });
       if (split.paidAt) {
         paidNative = roundCents(paidNative + split.amount);
@@ -290,7 +302,11 @@ export function aggregateSettleUpByTransaction(
       if (a.paidAt && b.paidAt && a.paidAt !== b.paidAt) {
         return a.paidAt < b.paidAt ? 1 : -1;
       }
-      return b.reportingAmount - a.reportingAmount;
+      // Biggest share first, by the whole share, so a friend who paid part of
+      // theirs keeps their place among equal shares.
+      // (A single-row share's total is its amount, so other bills order as before;
+      // equal shares keep the bill's own order.)
+      return b.shareTotal - a.shareTotal;
     });
     result.push({
       transactionId: tx.id,

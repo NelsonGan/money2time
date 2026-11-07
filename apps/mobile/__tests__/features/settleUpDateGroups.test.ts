@@ -2,6 +2,7 @@ import {
   groupSettleUpItemsByDate,
   groupSettleUpPeopleByDate,
   groupSettleUpSearchResultsByDate,
+  groupSettleUpShareCards,
   groupSettleUpTransactionsByDate,
 } from '~/features/transactions/lib/settleUpDateGroups';
 import type { PersonDebt, TransactionDebt } from '~/types';
@@ -29,6 +30,9 @@ function person(
       categoryIcon: null,
       paybackAccountId: null,
       paidAt: bill.paidAt,
+      shareTotal: 10,
+      sharePaid: 0,
+      shareKey: 'share',
     })),
     oldestDate: bills[bills.length - 1]?.date ?? '',
     billCount: bills.length,
@@ -144,5 +148,48 @@ describe('Who owes you date groups', () => {
       { kind: 'person', person: expect.objectContaining({ key: 'ezra' }) },
       { kind: 'transaction', transaction: expect.objectContaining({ transactionId: 'brunch' }) },
     ]);
+  });
+});
+
+describe('groupSettleUpShareCards', () => {
+  const row = (id: string, shareKey: string, date: string, paidAt: string | null) => ({
+    id,
+    shareKey,
+    date,
+    paidAt,
+  });
+
+  it('puts each share on one card with its payments, still owed first', () => {
+    const groups = groupSettleUpShareCards(
+      [
+        row('ben', 'ben', '2026-10-12', null),
+        row('chloe', 'chloe', '2026-10-20', null),
+        row('ben-1', 'ben', '2026-10-12', '2026-11-01T10:00:00'),
+        row('ben-2', 'ben', '2026-10-12', '2026-11-07T10:00:00'),
+        row('aisha', 'aisha', '2026-10-12', '2026-11-05T10:00:00'),
+        row('aisha-1', 'aisha', '2026-10-12', '2026-11-02T10:00:00'),
+        row('daniel', 'daniel', '2026-10-12', '2026-11-07T09:00:00'),
+      ],
+      (item) => item.date,
+    );
+    expect(
+      groups.map((group) => [
+        group.dayKey,
+        group.items.map((card) => [card.share.id, card.payments.map((p) => p.id)]),
+      ]),
+    ).toEqual([
+      ['2026-10-20', [['chloe', []]]],
+      ['2026-10-12', [['ben', ['ben-2', 'ben-1']]]],
+      ['2026-11-07', [['daniel', ['daniel']]]],
+      ['2026-11-05', [['aisha', ['aisha', 'aisha-1']]]],
+    ]);
+  });
+
+  it('keeps a second unpaid row of a share on its own card', () => {
+    const groups = groupSettleUpShareCards(
+      [row('a', 'a', '2026-10-12', null), row('b', 'a', '2026-10-12', null)],
+      (item) => item.date,
+    );
+    expect(groups[0]!.items.map((card) => card.share.id)).toEqual(['a', 'b']);
   });
 });

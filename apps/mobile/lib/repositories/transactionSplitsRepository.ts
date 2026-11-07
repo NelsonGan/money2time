@@ -1,4 +1,4 @@
-import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm';
 
 import { getDb, getSQLite } from '~/lib/db/client';
 import { getActiveLedgerId } from '~/lib/db/ledgerScope';
@@ -18,6 +18,8 @@ export interface CreateTransactionSplitInput {
   sortOrder?: number;
   paidAt?: string | null;
   paidTransactionId?: string | null;
+  /** A part payment: the share's first row it was paid out of. */
+  partOfSplitId?: string | null;
 }
 
 export interface UpdateTransactionSplitInput {
@@ -27,6 +29,7 @@ export interface UpdateTransactionSplitInput {
   sortOrder?: number;
   paidAt?: string | null;
   paidTransactionId?: string | null;
+  partOfSplitId?: string | null;
 }
 
 class TransactionSplitsRepository {
@@ -155,6 +158,7 @@ class TransactionSplitsRepository {
       paybackAccountId: input.paybackAccountId ?? null,
       paidAt: input.paidAt ?? null,
       paidTransactionId: input.paidTransactionId ?? null,
+      partOfSplitId: input.partOfSplitId ?? null,
       sortOrder: input.sortOrder ?? 0,
       createdAt: now,
       updatedAt: now,
@@ -187,9 +191,30 @@ class TransactionSplitsRepository {
     if (updates.sortOrder !== undefined) set.sortOrder = updates.sortOrder;
     if (updates.paidAt !== undefined) set.paidAt = updates.paidAt;
     if (updates.paidTransactionId !== undefined) set.paidTransactionId = updates.paidTransactionId;
+    if (updates.partOfSplitId !== undefined) set.partOfSplitId = updates.partOfSplitId;
     db.update(transactionSplitsTable)
       .set(set)
       .where(and(eq(transactionSplitsTable.id, id), isNull(transactionSplitsTable.deletedAt)))
+      .run();
+  }
+
+  /**
+   * Gives a share's paid part payments the name its first row now has. A part
+   * that is owed again (its payment undone while the first row is paid) is
+   * the share's editable row, so it keeps the name it was given.
+   */
+  renameShareParts(splitId: string, personName: string | null): void {
+    const db = getDb();
+    db.update(transactionSplitsTable)
+      .set({ personName, updatedAt: nowIso() })
+      .where(
+        and(
+          eq(transactionSplitsTable.partOfSplitId, splitId),
+          isNull(transactionSplitsTable.deletedAt),
+          isNotNull(transactionSplitsTable.paidAt),
+          sql`${transactionSplitsTable.personName} IS NOT ${personName}`,
+        ),
+      )
       .run();
   }
 
