@@ -32,16 +32,21 @@ change also needs `npm run typecheck` in its own directory under
 `apps/cloudflare/workers/`.
 
 **Simulator and emulator control goes through the T3 Code device tools**, so
-the user can watch the device in T3 Code's Device panel. `device_list` gives a
-device's `hostId` and `id`; `device_open` boots it, shows it in the panel and
-returns an `agent-device` command pinned to it. Use that command for every app
-launch, deep link, tap, text entry, alert, screenshot and recording
-(`agent-device help` lists the commands, `agent-device help foldable` covers
-the iPhone Duo), `device_screenshot` to look at the screen, and `device_close`
-when you are done. Do not drive a device with `xcrun simctl`, `adb` or scripts
-that wrap them; those stay fine for builds, installs, port forwards
-(`adb reverse`), logs and what `agent-device` cannot do. Always start the dev
-server yourself with `npx expo start --localhost`.
+the user can watch the device in T3 Code's Device panel. Devices come from the
+Simlock pool on this machine, which T3 Code leases from: each worktree gets its
+own fresh device, and the pool deletes it when you close it. Never create,
+clone, erase or boot a simulator or emulator yourself. `device_list` lists the
+pool's models (host `simlock-mac-mini`); `device_open` leases one (it waits
+while the pool is full), shows it in the panel and returns an `agent-device`
+command pinned to it. Use that command for every app launch, deep link, tap,
+text entry, alert, screenshot and recording (`agent-device help` lists the
+commands, `agent-device help foldable` covers the iPhone Duo),
+`device_screenshot` to look at the screen, and `device_close` with
+`shutdown: true` when you are done, which gives the device back. Do not drive a
+device with `xcrun simctl`, `adb` or scripts that wrap them; those stay fine for
+builds, installs, port forwards (`adb reverse`), logs and what `agent-device`
+cannot do. Always start the dev server yourself: `npx expo start --localhost`
+for iOS (Android needs plain `npx expo start`, below).
 
 ## Rules for changes
 
@@ -64,17 +69,43 @@ volume to the README's event budget when adding an event or increasing its
 frequency.
 
 **Show the device in T3 Code's Device panel while testing.** Open it with
-`device_open` and leave it on the tested screen so the user can follow along.
-Use these devices and no others:
+`device_open` and leave it on the tested screen while the user should still look
+at it. The pool runs two devices at once and at most one Android emulator, so
+close yours when you are done. Use these models:
 
-| Platform | Device                                                                     | `device_open` id                       |
-| -------- | -------------------------------------------------------------------------- | -------------------------------------- |
-| iOS      | Money2Time iPhone 18 Pro simulator, `D33ACD74-8FC1-4F53-B7B8-690086AC1223` | `D33ACD74-8FC1-4F53-B7B8-690086AC1223` |
-| Android  | `Money2Time_Pixel_10` emulator (Pixel 10, Android 16)                      | `Money2Time_Pixel_10`                  |
+| Platform | `device_open` id                    | Use                                       |
+| -------- | ----------------------------------- | ----------------------------------------- |
+| iOS      | `simlock:ios:iPhone 18 Pro`         | everyday testing (iOS 27.0)               |
+| iOS      | `simlock:ios:iPhone Duo`            | iPhone Duo (foldable) work only, iOS 27.1 |
+| iOS      | `simlock:ios:iPad Pro 13-inch (M5)` | iPad layouts                              |
+| Android  | `simlock:android:Pixel 10`          | Android testing (Android 16)              |
 
-The emulator, T3 Code's Android device list and `expo run:android` need the
-Android SDK and a JDK: run them with `ANDROID_HOME` and `JAVA_HOME` set (see
-Getting set up in the README).
+**A leased device already has the Money2Time dev client**, built from
+`origin/main` (the normal `com.nelsongan.money2time` app, never M2T Dev),
+signed out and with no data (T3 Code's own note that a pool device starts with
+no apps is generic; `agent-device apps` lists them). It runs whatever is in your
+working tree through Metro, so a JS change needs no build. A dev client refuses
+a bundle with another runtime version (an empty red box), so a branch that bumps
+the version or changes native code needs its own build: from the worktree, run
+`simlock-build ios <device id>` (or `android`), which builds this checkout's dev
+client and installs it on the device `device_open` leased. Do not use
+`npm run ios`, `npm run android` or `expo run:*` for that: they look for devices
+outside the pool. The shared builds are in `~/MobileBuilds/money2time/`, with
+the commit they came from beside them. On a fresh device the first deep link
+asks "Open in Money2Time?" and the screen ignores taps until you answer
+(`agent-device alert accept`), and the first launch shows the Expo dev-menu
+intro sheet (tap Continue).
+
+**Every `adb` command for a leased emulator needs
+`ANDROID_ADB_SERVER_PORT=5038`**, including the README's: Simlock runs its
+emulators on its own adb server, and the default one on 5037 cannot see them.
+Forward Metro's port with `ANDROID_ADB_SERVER_PORT=5038 adb reverse tcp:<port>
+tcp:<port>`; the pool runs one emulator, so no `-s` is needed. `adb reverse`
+reaches the Mac over IPv4, and `--localhost` binds Metro to `::1` only, so for
+Android start Metro with plain `npx expo start --port <port>`.
+`simlock-udid <device id>` prints the simulator UDID or emulator serial behind a
+lease, for what `agent-device` cannot do. Gradle needs `ANDROID_HOME` and
+`JAVA_HOME` set (see Getting set up in the README).
 
 **Always include screenshots in PR descriptions after UI testing.** Capture the
 final UI and save it, with any recording or other evidence, in
