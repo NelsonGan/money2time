@@ -59,6 +59,7 @@ import {
   type PreparedTransfer,
   prepareTransfer,
   startLink,
+  WANT_FEATURES,
   type WantFeature,
   type WantRequest,
 } from './webDashboardLink';
@@ -464,6 +465,7 @@ async function buildTransfer(
       pro: isPro,
       ...(analyticsId ? { analyticsId } : {}),
       version,
+      features: [...WANT_FEATURES],
       ...(from ? { base: from.id } : {}),
     },
     randomBytes,

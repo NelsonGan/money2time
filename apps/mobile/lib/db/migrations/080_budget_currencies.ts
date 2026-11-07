@@ -5,9 +5,9 @@ import type { DbMigration } from './types';
 // trip budget in a MYR ledger, an SGD monthly budget for someone paid in SGD).
 // - budget_templates.currency / monthly_budgets.currency: the budget's
 //   currency. NULL means the ledger's main currency, so every budget made
-//   before this, and every one an older app version writes, reads as before
-//   without a backfill (the main currency cannot change without wiping the
-//   ledger's data).
+//   before this reads as before without a backfill (the main currency cannot
+//   change without wiping the ledger's data). An older app version, which
+//   does not know the column, writes budgets in the main currency.
 // - monthly_budgets.fx_rate: how much one unit of the budget's currency was
 //   worth in the main currency when the budget was made (or its currency was
 //   changed). Spending in another currency is valued through it, so a past

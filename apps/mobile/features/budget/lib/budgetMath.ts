@@ -86,17 +86,18 @@ export function buildBudgetSummary({
     if (transaction.deletedAt) continue;
     if (transaction.type !== 'expense') continue;
     if (!isIsoInBudgetRange(transaction.date, range)) continue;
+    const categoryId = transaction.categoryId;
+    const rootId = categoryId ? (rootById.get(categoryId) ?? categoryId) : null;
     const value = budgetSpendValue(transaction, budget.currency, rate);
     if (value == null) {
-      unconvertedCount += 1;
+      // Only spending that would count toward this budget is worth a mention.
+      if ((rootId && rootLineIds.has(rootId)) || budget.countUnbudgeted) unconvertedCount += 1;
       continue;
     }
-    const categoryId = transaction.categoryId;
-    if (!categoryId) {
+    if (!categoryId || !rootId) {
       uncategorizedSpent += value;
       continue;
     }
-    const rootId = rootById.get(categoryId) ?? categoryId;
     spentByRoot.set(rootId, (spentByRoot.get(rootId) ?? 0) + value);
     spentByCategory.set(categoryId, (spentByCategory.get(categoryId) ?? 0) + value);
   }

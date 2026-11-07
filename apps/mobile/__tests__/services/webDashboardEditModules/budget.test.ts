@@ -514,6 +514,22 @@ describe('budget module: monthly budgets', () => {
     expect(
       planned([{ entity: ENTITY, op: 'template_update', id: 't1', at: AT, template: fields() }])[0],
     ).not.toHaveProperty('currency');
+    // The budget's own currency, though no longer offered (JPY removed since).
+    expect(
+      plan(
+        [
+          {
+            entity: ENTITY,
+            op: 'month_update',
+            id: 'b1',
+            at: AT,
+            budget: body({ currency: 'JPY' }),
+          },
+        ],
+        { budgets: [budget('b1', '2026-10', { currency: 'JPY' })] },
+        { reportingCurrency: 'MYR', currencies: ['MYR'] },
+      ).ok,
+    ).toBe(true);
     // A currency the phone does not offer, or not a code at all.
     expect(
       refusal(

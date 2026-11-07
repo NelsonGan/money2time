@@ -4,10 +4,11 @@ import { Pressable, View } from 'react-native';
 
 import { CurrencyPickerSheet, Input, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import { withBudgetCurrency } from '~/features/budget/lib/budgetCurrency';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import { currencySymbolForCode, enabledEntryCurrencies, formatFxRate } from '~/utils/currency';
+import { enabledEntryCurrencies, formatFxRate } from '~/utils/currency';
 
 /**
  * A budget editor's total and the currency its amounts are in, side by side
@@ -68,7 +69,7 @@ export function BudgetTotalField({
           <Input
             label={label}
             variant="currency"
-            currencySymbol={currencySymbolForCode(currency)}
+            currencySymbol={withBudgetCurrency(settings, currency).currencySymbol}
             value={total}
             onChangeText={onChangeTotal}
             placeholder="0.00"

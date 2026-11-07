@@ -116,6 +116,12 @@ type TransferMeta = {
   /** The phone's data version this copy was made at; a saved change raises it. */
   version?: number;
   /**
+   * What this phone handles beyond the first version (`WANT_FEATURES`), so a
+   * page offers only what the phone can save: `budget-currencies`, that a web
+   * edit may name a budget's currency. Absent from an older app.
+   */
+  features?: WantFeature[];
+  /**
    * Set when this transfer is a patch: the id of the transfer whose data it
    * changes. The browser applies it to that copy, or asks for everything.
    */

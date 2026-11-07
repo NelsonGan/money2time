@@ -168,6 +168,20 @@ describe('buildBudgetSummary in another currency', () => {
     expect(summary?.unconvertedCount).toBe(2);
   });
 
+  it('mentions only uncounted spending that would count toward the budget', () => {
+    const summary = buildBudgetSummary({
+      budget: budget({ currency: 'EUR', fxRate: null, totalAmount: 500, countUnbudgeted: false }),
+      transactions: [
+        expense({ id: 'a', amount: 30, reportingAmount: 30 }),
+        // Outside the budget's lines, which do not count here anyway.
+        expense({ id: 'b', categoryId: 'fun', amount: 5, reportingAmount: 5 }),
+      ],
+      categories,
+      rateTable: table,
+    });
+    expect(summary?.unconvertedCount).toBe(1);
+  });
+
   it('keeps a main-currency budget exactly as it was', () => {
     const summary = buildBudgetSummary({
       budget: budget({ currency: null, fxRate: null, totalAmount: 1000 }),

@@ -3,8 +3,8 @@ import { currencySymbolForCode, resolveRate } from '~/utils/currency';
 
 /**
  * A budget's currency. Templates and budgets store null for the ledger's main
- * currency (so a budget made before budgets had currencies, or by an older app
- * version, reads as it always did), and a code for any other.
+ * currency (so a budget made before budgets had currencies reads as it always
+ * did), and a code for any other.
  */
 export function budgetCurrencyOf(
   budget: { currency: string | null } | null | undefined,

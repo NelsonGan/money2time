@@ -263,17 +263,21 @@ function validEmoji(tools: PlanTools, emoji: string | null, current?: string | n
 /**
  * The currency an op names, as the save takes it: nothing when it names none
  * (the template or budget keeps its own), else a code the entry flows offer
- * (the main currency included) or null for the main one. Undefined when it
- * names one the phone does not offer.
+ * (the main currency included), the one it already has (even if no longer
+ * offered, as the app's editor keeps it), or null for the main one. Undefined
+ * when it names one the phone does not offer.
  */
 function currencyInput(
   tools: PlanTools,
   fields: CurrencyField,
+  own: string | null = null,
 ): { currency?: string | null } | undefined {
   if (!('currency' in fields) || fields.currency === undefined) return {};
   const { currency } = fields;
   if (currency === null) return { currency: null };
-  return currency === tools.lookup.reportingCurrency || tools.lookup.currencies.includes(currency)
+  return currency === own ||
+    currency === tools.lookup.reportingCurrency ||
+    tools.lookup.currencies.includes(currency)
     ? { currency }
     : undefined;
 }
@@ -305,7 +309,7 @@ function plan(tools: PlanTools, op: ModuleOp, steps: EditStep[]): Result<number>
     const name = fields.name.trim();
     if (!name || !validEmoji(tools, fields.emoji, current?.emoji)) return tools.refuse('invalid');
     const allocations = allocationsFor(tools, fields.totalAmount, fields.allocations);
-    const currency = currencyInput(tools, fields);
+    const currency = currencyInput(tools, fields, current?.currency ?? null);
     if (!allocations || !currency) return tools.refuse('invalid');
     const input = {
       name,
@@ -392,7 +396,7 @@ function plan(tools: PlanTools, op: ModuleOp, steps: EditStep[]): Result<number>
     }
     const fields = op.budget as BudgetFields;
     const lines = allocationsFor(tools, fields.totalAmount, fields.lines);
-    const currency = currencyInput(tools, fields);
+    const currency = currencyInput(tools, fields, current.currency);
     if (!lines || !currency) return tools.refuse('invalid');
     steps.push(
       step('month_update', {
