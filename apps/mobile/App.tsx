@@ -1700,6 +1700,9 @@ function AutoLogSync() {
   const notificationTitle = I18n.t('notifications.content.autolog_title');
   const failureNotificationTitle = I18n.t('notifications.content.autolog_failure_title');
   const failureNotificationBody = I18n.t('notifications.content.autolog_failure_body');
+  const testNotificationTitle = I18n.t('notifications.content.autolog_test_title');
+  const testCardPaymentBody = I18n.t('notifications.content.autolog_test_card_body');
+  const testNotificationAlertBody = I18n.t('notifications.content.autolog_test_alert_body');
 
   // Guards against overlapping drains; see `drain` below.
   const stateRef = useRef({
@@ -1747,6 +1750,9 @@ function AutoLogSync() {
           notificationTitle,
           failureNotificationTitle,
           failureNotificationBody,
+          testNotificationTitle,
+          testCardPaymentBody,
+          testNotificationAlertBody,
           reportingCurrency: settings.currencyCode,
           generatedAt: new Date().toISOString(),
         }),
@@ -1772,6 +1778,9 @@ function AutoLogSync() {
     quickEntryPrefs.defaultAccountId,
     quickEntryPrefs.defaultExpenseCategoryId,
     settings.currencyCode,
+    testCardPaymentBody,
+    testNotificationAlertBody,
+    testNotificationTitle,
   ]);
 
   const drain = useCallback(async () => {

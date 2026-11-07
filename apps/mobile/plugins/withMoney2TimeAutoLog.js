@@ -215,6 +215,12 @@ enum AutoLogStore {
     /// an English literal so a stale catalog still tells the user something.
     let failureNotificationTitle: String?
     let failureNotificationBody: String?
+    /// Localized copy for the notification posted when the user runs an
+    /// automation by hand to test it (see \`isTestRun\`). One title, and a body
+    /// per action. Optional for the same reason, with English fallbacks.
+    let testNotificationTitle: String?
+    let testCardPaymentBody: String?
+    let testNotificationAlertBody: String?
     /// Whether the Category picker offers subcategories. Optional for the same
     /// reason; nil means "no preference recorded", which shows everything.
     let includeSubcategories: Bool?
@@ -505,6 +511,15 @@ enum AutoLogStore {
     raw.contains { $0 >= "1" && $0 <= "9" }
   }
 
+  /// Whether this run carries no trigger data at all: what an automation gets
+  /// when the user taps Play in the Shortcuts editor to try it, since there is
+  /// no payment or notification behind a manual run and every variable bound
+  /// to the trigger arrives empty. A real Wallet payment or app notification
+  /// always fills at least one of them (merchant, card, or the text itself).
+  static func isTestRun(_ values: String?...) -> Bool {
+    values.allSatisfy { ($0?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "").isEmpty }
+  }
+
   /// Auto-logs still allowed before the free cap bites.
   ///
   /// Queued rows have not reached the app's lifetime counter yet, so they are
@@ -659,6 +674,23 @@ enum AutoLogStore {
 
     let request = UNNotificationRequest(
       identifier: "m2t-autolog-fail-\\(UUID().uuidString)",
+      content: content,
+      trigger: nil
+    )
+    UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+  }
+
+  /// Confirm a manual test run (see \`isTestRun\`) reached the app, so the user
+  /// knows the automation is set up right. Without it, Log Card Payment posted
+  /// the "couldn't auto-log" failure and Log Notification posted nothing, and
+  /// both read as broken setups. Nothing is queued for a test run.
+  static func notifyTestRun(catalog: Catalog, body: String?, fallbackBody: String) {
+    let content = UNMutableNotificationContent()
+    content.title = catalog.testNotificationTitle ?? "Automation is working"
+    content.body = body ?? fallbackBody
+
+    let request = UNNotificationRequest(
+      identifier: "m2t-autolog-test-\\(UUID().uuidString)",
       content: content,
       trigger: nil
     )
@@ -824,6 +856,21 @@ struct LogCardPaymentIntent: AppIntent {
     // this intent has already claimed it logged. Checked before the free-limit
     // gate so an unusable tap never burns a free auto-log either.
     guard AutoLogStore.hasLoggableAmount(amount) else {
+      // Play in the Shortcuts editor runs this with every trigger variable
+      // empty. Say the setup works instead of reporting a failed payment, but
+      // only if the next real tap would log: with no free auto-logs left, the
+      // honest answer is the limit error a real tap would get.
+      if AutoLogStore.isTestRun(merchant, card) {
+        if AutoLogStore.remaining(catalog: catalog) <= 0 {
+          throw AutoLogError.limitReached
+        }
+        AutoLogStore.notifyTestRun(
+          catalog: catalog,
+          body: catalog.testCardPaymentBody,
+          fallbackBody: "Your next Apple Pay payment will be logged automatically."
+        )
+        return .result()
+      }
       AutoLogStore.notifyUnreadable(catalog: catalog, merchant: merchant)
       return .result()
     }
@@ -1026,6 +1073,8 @@ import Foundation
 /// It only queues the raw text into the App Group and returns, without
 /// opening the app or posting anything: the source app's notification is the
 /// draft. The app extracts monetary amounts locally the next time it runs.
+/// The one exception is a manual test run from the Shortcuts editor, which
+/// queues nothing and posts a short "Automation is working" confirmation.
 /// The user reviews each notification as Income, Expense or Ignore before
 /// any transaction is saved. Notification review uses no automatic-log allowance.
 ///
@@ -1073,8 +1122,19 @@ struct LogPaymentAlertIntent: AppIntent {
   func perform() async throws -> some IntentResult {
     // Same guard as the other actions: an app never opened has no accounts or
     // categories to log into.
-    guard AutoLogStore.loadCatalog() != nil else {
+    guard let catalog = AutoLogStore.loadCatalog() else {
       throw AutoLogError.notReady
+    }
+    // Play in the Shortcuts editor runs this with every trigger variable empty.
+    // Confirm the setup works rather than finishing silently, which reads as
+    // broken. A real notification always has some text, and posts nothing here.
+    if AutoLogStore.isTestRun(message, alertTitle, subtitle) {
+      AutoLogStore.notifyTestRun(
+        catalog: catalog,
+        body: catalog.testNotificationAlertBody,
+        fallbackBody: "Your bank notifications will show up in Money2Time for you to review."
+      )
+      return .result()
     }
     // An empty message (a notification with no body) is nothing to log; say
     // nothing rather than fail the user's automation.
@@ -1453,3 +1513,4 @@ module.exports = function withMoney2TimeAutoLog(config) {
 module.exports.PENDING_ALERTS_KEY = PENDING_ALERTS_KEY;
 module.exports.LOG_PAYMENT_ALERT_INTENT_SWIFT = LOG_PAYMENT_ALERT_INTENT_SWIFT;
 module.exports.AUTO_LOG_STORE_SWIFT = AUTO_LOG_STORE_SWIFT;
+module.exports.LOG_CARD_PAYMENT_INTENT_SWIFT = LOG_CARD_PAYMENT_INTENT_SWIFT;

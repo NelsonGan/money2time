@@ -2534,6 +2534,10 @@ const es = {
       autolog_title: 'Registrado automáticamente',
       autolog_failure_title: 'No se pudo registrar un pago',
       autolog_failure_body: 'Toca para añadirlo manualmente.',
+      autolog_test_title: 'La automatización funciona',
+      autolog_test_card_body: 'Tu próximo pago con Apple Pay se registrará automáticamente.',
+      autolog_test_alert_body:
+        'Las notificaciones de tu banco aparecerán en Money2Time para que las revises.',
       daily_title: '¿Qué tal fue el día?',
       daily_body: 'Dedica 30 segundos a registrar los gastos de hoy antes de que se olviden.',
       recurring_title: '{{name}} · {{amount}}',

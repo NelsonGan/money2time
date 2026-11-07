@@ -2539,6 +2539,11 @@ const ms = {
       autolog_title: 'Direkodkan secara automatik',
       autolog_failure_title: 'Tidak dapat merekod pembayaran secara automatik',
       autolog_failure_body: 'Ketik untuk menambahnya secara manual.',
+      autolog_test_title: 'Automasi berfungsi',
+      autolog_test_card_body:
+        'Pembayaran Apple Pay anda yang seterusnya akan direkod secara automatik.',
+      autolog_test_alert_body:
+        'Pemberitahuan bank anda akan muncul dalam Money2Time untuk anda semak.',
       daily_title: 'Bagaimana hari anda?',
       daily_body: 'Luangkan 30 saat untuk rekod perbelanjaan hari ini selagi masih segar.',
       recurring_title: '{{name}} · {{amount}}',

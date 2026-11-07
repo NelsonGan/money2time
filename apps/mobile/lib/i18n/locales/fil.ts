@@ -2550,6 +2550,10 @@ const fil = {
       autolog_title: 'Awtomatikong na-log',
       autolog_failure_title: 'Hindi awtomatikong na-log ang isang bayad',
       autolog_failure_body: 'Pindutin para idagdag ito nang manu-mano.',
+      autolog_test_title: 'Gumagana ang automation',
+      autolog_test_card_body: 'Awtomatikong mai-log ang susunod mong bayad sa Apple Pay.',
+      autolog_test_alert_body:
+        'Lalabas sa Money2Time ang mga notification ng bangko mo para masuri mo.',
       daily_title: 'Kumusta ang araw mo?',
       daily_body: 'Maglaan ng 30 segundo para i-log ang gastos mo ngayon habang sariwa pa.',
       recurring_title: '{{name}} · {{amount}}',

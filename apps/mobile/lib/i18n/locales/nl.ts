@@ -2547,6 +2547,10 @@ const nl = {
       autolog_title: 'Automatisch vastgelegd',
       autolog_failure_title: 'Kan een betaling niet automatisch vastleggen',
       autolog_failure_body: 'Tik om deze handmatig toe te voegen.',
+      autolog_test_title: 'Automatisering werkt',
+      autolog_test_card_body: 'Je volgende Apple Pay-betaling wordt automatisch vastgelegd.',
+      autolog_test_alert_body:
+        'Je bankmeldingen verschijnen in Money2Time zodat je ze kunt nakijken.',
       daily_title: 'Hoe was je dag?',
       daily_body: 'Neem 30 seconden om de uitgaven van vandaag vast te leggen nu ze nog vers zijn.',
       recurring_title: '{{name}} · {{amount}}',

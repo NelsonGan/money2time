@@ -2520,6 +2520,10 @@ const nb = {
       autolog_title: 'Registrert automatisk',
       autolog_failure_title: 'Kunne ikke autoregistrere en betaling',
       autolog_failure_body: 'Trykk for å legge den til manuelt.',
+      autolog_test_title: 'Automatiseringen fungerer',
+      autolog_test_card_body: 'Din neste Apple Pay-betaling blir registrert automatisk.',
+      autolog_test_alert_body:
+        'Bankvarslene dine vises i Money2Time slik at du kan gå gjennom dem.',
       daily_title: 'Hvordan gikk dagen?',
       daily_body: 'Bruk 30 sekunder på å logge dagens forbruk mens du husker det.',
       recurring_title: '{{name}} · {{amount}}',

@@ -2519,6 +2519,10 @@ const uk = {
       autolog_title: 'Записано автоматично',
       autolog_failure_title: 'Не вдалося автоматично записати платіж',
       autolog_failure_body: 'Натисніть, щоб додати його вручну.',
+      autolog_test_title: 'Автоматизація працює',
+      autolog_test_card_body: 'Ваш наступний платіж Apple Pay буде записано автоматично.',
+      autolog_test_alert_body:
+        "Сповіщення банку з'являться в Money2Time, щоб ви могли їх переглянути.",
       daily_title: 'Як минув день?',
       daily_body: 'Приділіть 30 секунд, щоб записати сьогоднішні витрати, поки вони свіжі.',
       recurring_title: '{{name}} · {{amount}}',

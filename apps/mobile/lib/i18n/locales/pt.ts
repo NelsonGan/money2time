@@ -2534,6 +2534,11 @@ const pt = {
       autolog_title: 'Registrado automaticamente',
       autolog_failure_title: 'Não foi possível registrar um pagamento',
       autolog_failure_body: 'Toque para adicioná-lo manualmente.',
+      autolog_test_title: 'A automação está funcionando',
+      autolog_test_card_body:
+        'Seu próximo pagamento com Apple Pay será registrado automaticamente.',
+      autolog_test_alert_body:
+        'As notificações do seu banco aparecerão no Money2Time para você revisar.',
       daily_title: 'Como foi o seu dia?',
       daily_body: 'Reserve 30 segundos para registrar os gastos de hoje enquanto estão frescos.',
       recurring_title: '{{name}} · {{amount}}',
