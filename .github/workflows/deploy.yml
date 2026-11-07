@@ -164,6 +164,14 @@ jobs:
       - name: Run tests
         run: npm test
 
+      # Typecheck and jest never run Metro, so without this a PR that breaks
+      # the bundle (an import or asset only Metro resolves) would first fail in
+      # the store build after merge. PRs only: on main the store build bundles
+      # right after this anyway.
+      - name: Bundle app
+        if: github.event_name == 'pull_request'
+        run: npx expo export --platform ios --platform android --output-dir "$RUNNER_TEMP/expo-export"
+
   # Production Worker deploys live in the dedicated cloudflare.yml workflow (runs on
   # push to main when apps/cloudflare/** changes), so there is no worker-deploy job here —
   # that would double-deploy the Worker on every push to main.

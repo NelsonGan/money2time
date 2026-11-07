@@ -3081,9 +3081,12 @@ Internal development and preview builds have a runtime version that includes the
 subscription logos, tutorials, and news images. These directories are excluded
 from OTA uploads, so their filenames and bytes must match the native build.
 Both internal variants use the same revision so a development client can still
-load an `eas update` published for the preview variant. Later changes to those
-images also invalidate old internal builds; images eligible for OTA retain the
-existing update flow.
+load an `eas update` published for the preview variant. Such an update has to
+be published with `APP_VARIANT=preview` set: without it `app.config.ts`
+evaluates the store config, with updates off and the plain app-version runtime,
+so the update matches no internal build. Later changes to those images also
+invalidate old internal builds; images eligible for OTA retain the existing
+update flow.
 
 Store builds disable OTA and keep the plain app-version runtime. See [Expo asset selection](https://docs.expo.dev/eas-update/asset-selection/).
 

@@ -106,8 +106,9 @@ function applyUpdatesPolicy(cfg: ExpoConfig): ExpoConfig {
     // Logo/tutorial/news assets are omitted from OTA uploads and must exist in
     // the matching native build. A version-only runtime lets an old dev client
     // load a bundle whose renamed/recompressed assets it cannot resolve.
-    // Both internal variants share the revision so dev clients can open PR
-    // previews despite their different bundle IDs and widget configuration.
+    // Both internal variants share the revision so a dev client can load an
+    // update published for `preview` despite their different bundle IDs and
+    // widget configuration.
     // The Expo SDK major is in it too: an SDK upgrade replaces the native code
     // without necessarily bumping the app version, and a dev client built on
     // the old SDK must not load a bundle written for the new one.
