@@ -1,9 +1,9 @@
 import { addColumnIfMissing } from './helpers';
 import type { DbMigration } from './types';
 
-export const migration081SplitPartPayments: DbMigration = {
-  version: 81,
-  name: '081_split_part_payments',
+export const migration082SplitPartPayments: DbMigration = {
+  version: 82,
+  name: '082_split_part_payments',
   up(db) {
     // A part payment on a friend's share is its own paid split row, cut out of
     // the share's unpaid row: paying RM300 of RM1,000 leaves a paid RM300 row
@@ -15,4 +15,4 @@ export const migration081SplitPartPayments: DbMigration = {
   },
 };
 
-export default migration081SplitPartPayments;
+export default migration082SplitPartPayments;
