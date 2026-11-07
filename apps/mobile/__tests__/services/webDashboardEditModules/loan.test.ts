@@ -248,11 +248,21 @@ describe('module:loan create', () => {
     ['every instalment already paid', { paidPeriods: 12 }],
     ['a total that never repays the amount', { driver: 'total', total: 100 }],
     ['a collect account in another currency', { collectFromAccountId: 'usd' }],
-    ['a credit card to collect from', { collectFromAccountId: 'card' }],
+    ['another loan to collect from', { collectFromAccountId: 'car' }],
     ['a group that is gone', { group: 'Old' }],
     ['a currency the app does not offer', { currency: 'EUR' }],
   ])('refuses %s', (_name, patch) => {
-    expect(refusal([create(patch)])).toEqual({ error: 'invalid' });
+    expect(refusal([create(patch)], withCar())).toEqual({ error: 'invalid' });
+  });
+
+  it('collects from a credit card, as the editor offers', () => {
+    const payload = payloadOf(steps([create({ collectFromAccountId: 'card' })])[0]);
+    expect(payload.rule).toMatchObject({ fromAccountId: 'card', amount: 1100 });
+    expect(payload.analytics).toMatchObject({
+      hasCollectAccount: true,
+      collectAccountType: 'credit',
+    });
+    expect(payloadOf(steps([create()])[0]).analytics).toMatchObject({ collectAccountType: 'none' });
   });
 
   it('holds a free plan to one active loan and its account limit', () => {
@@ -338,6 +348,31 @@ describe('module:loan update', () => {
         }),
       },
     ]);
+  });
+
+  it('treats a rule paying from a card like any other', () => {
+    const cardRule = {
+      accounts: [...withCar().accounts, account('card', { type: 'credit' })],
+      balances: withCar().balances,
+      recurringRules: [repayment({ fromAccountId: 'card' })],
+    };
+    // Left as it is when the edit does not name a source.
+    expect(payloadOf(steps([update({ countAsExpense: true })], cardRule)[0]).rules).toEqual([]);
+    // Re-pointed to a bank account, or cleared, as the editor allows.
+    expect(payloadOf(steps([update({ collectFromAccountId: 'myr' })], cardRule)[0]).rules).toEqual([
+      { op: 'update', id: 'r1', input: { fromAccountId: 'myr' } },
+    ]);
+    expect(payloadOf(steps([update({ collectFromAccountId: null })], cardRule)[0]).rules).toEqual([
+      { op: 'delete', id: 'r1' },
+    ]);
+  });
+
+  it('refuses a savings goal as the source', () => {
+    const data = {
+      ...withCar(),
+      accounts: [...withCar().accounts, account('trip', { type: 'goal' })],
+    };
+    expect(refusal([update({ collectFromAccountId: 'trip' })], data)).toEqual({ error: 'invalid' });
   });
 
   it('leaves alone a rule the editor cannot show', () => {
@@ -440,6 +475,7 @@ describe('module:loan names, logos and groups', () => {
       interestModel: 'flat',
       hasRate: true,
       hasCollectAccount: true,
+      collectAccountType: 'debit',
       countsAsExpense: true,
       currency: 'MYR',
     });
