@@ -2534,6 +2534,11 @@ const pt = {
       autolog_title: 'Registrado automaticamente',
       autolog_failure_title: 'Não foi possível registrar um pagamento',
       autolog_failure_body: 'Toque para adicioná-lo manualmente.',
+      autolog_test_title: 'A automação está funcionando',
+      autolog_test_card_body:
+        'Esta execução não trouxe nenhum pagamento, o que é normal em um teste. Se você acabou de pagar, abra o Money2Time para adicioná-lo.',
+      autolog_test_alert_body:
+        'Esta execução não trouxe texto de notificação, o que é normal em um teste. As notificações do banco aparecerão no Money2Time para revisão.',
       daily_title: 'Como foi o seu dia?',
       daily_body: 'Reserve 30 segundos para registrar os gastos de hoje enquanto estão frescos.',
       recurring_title: '{{name}} · {{amount}}',

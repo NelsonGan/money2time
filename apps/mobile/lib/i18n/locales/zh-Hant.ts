@@ -2393,6 +2393,11 @@ const zhHant = {
       autolog_title: '已自動記錄',
       autolog_failure_title: '無法自動記錄一筆付款',
       autolog_failure_body: '點按即可手動新增。',
+      autolog_test_title: '自動化運作正常',
+      autolog_test_card_body:
+        '這次執行沒有收到付款資料，測試時屬於正常。如果你剛付款，請開啟 Money2Time 手動新增。',
+      autolog_test_alert_body:
+        '這次執行沒有收到通知內容，測試時屬於正常。銀行通知會顯示在 Money2Time 中供你檢視。',
       daily_title: '今天過得怎麼樣？',
       daily_body: '趁記憶還新鮮，花 30 秒記錄一下今天的支出吧。',
       recurring_title: '{{name}} · {{amount}}',

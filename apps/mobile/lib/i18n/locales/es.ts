@@ -2534,6 +2534,11 @@ const es = {
       autolog_title: 'Registrado automáticamente',
       autolog_failure_title: 'No se pudo registrar un pago',
       autolog_failure_body: 'Toca para añadirlo manualmente.',
+      autolog_test_title: 'La automatización funciona',
+      autolog_test_card_body:
+        'Esta ejecución no incluyó ningún pago, algo normal en una prueba. Si acabas de pagar, abre Money2Time para añadirlo.',
+      autolog_test_alert_body:
+        'Esta ejecución no incluyó texto de notificación, algo normal en una prueba. Las notificaciones del banco aparecerán en Money2Time para revisarlas.',
       daily_title: '¿Qué tal fue el día?',
       daily_body: 'Dedica 30 segundos a registrar los gastos de hoy antes de que se olviden.',
       recurring_title: '{{name}} · {{amount}}',

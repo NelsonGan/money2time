@@ -2393,6 +2393,11 @@ const zh = {
       autolog_title: '已自动记录',
       autolog_failure_title: '无法自动记录一笔付款',
       autolog_failure_body: '点按即可手动添加。',
+      autolog_test_title: '自动化运行正常',
+      autolog_test_card_body:
+        '这次运行没有收到付款信息，测试时属于正常。如果你刚付款，请打开 Money2Time 手动添加。',
+      autolog_test_alert_body:
+        '这次运行没有收到通知内容，测试时属于正常。银行通知会显示在 Money2Time 中供你查看。',
       daily_title: '今天过得怎么样？',
       daily_body: '趁记忆还新鲜，花 30 秒记录一下今天的支出吧。',
       recurring_title: '{{name}} · {{amount}}',

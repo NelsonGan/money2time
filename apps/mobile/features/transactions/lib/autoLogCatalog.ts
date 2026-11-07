@@ -63,6 +63,16 @@ export interface AutoLogCatalog {
    */
   failureNotificationTitle: string;
   failureNotificationBody: string;
+  /**
+   * Title, and a body per action, for the notification an action posts when the
+   * user taps Play in the Shortcuts editor to test an automation. That manual
+   * run carries no trigger data, so without it Log Card Payment reported a
+   * failed payment and Log Notification showed nothing. Localized here for the
+   * same reason as {@link notificationTitle}.
+   */
+  testNotificationTitle: string;
+  testCardPaymentBody: string;
+  testNotificationAlertBody: string;
   /** Whether the Category picker should offer subcategories as well as roots. */
   includeSubcategories: boolean;
   /**
@@ -98,6 +108,9 @@ export interface BuildAutoLogCatalogInput {
   notificationTitle: string;
   failureNotificationTitle: string;
   failureNotificationBody: string;
+  testNotificationTitle: string;
+  testCardPaymentBody: string;
+  testNotificationAlertBody: string;
   reportingCurrency: string;
   generatedAt: string;
 }
@@ -151,6 +164,9 @@ export function buildAutoLogCatalog(input: BuildAutoLogCatalogInput): AutoLogCat
     notificationTitle: input.notificationTitle,
     failureNotificationTitle: input.failureNotificationTitle,
     failureNotificationBody: input.failureNotificationBody,
+    testNotificationTitle: input.testNotificationTitle,
+    testCardPaymentBody: input.testCardPaymentBody,
+    testNotificationAlertBody: input.testNotificationAlertBody,
     includeSubcategories: input.includeSubcategories,
     autoCategorizeByMerchant: input.autoCategorizeByMerchant,
     accounts: visibleAccounts.map((account) => ({

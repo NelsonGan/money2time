@@ -6,6 +6,7 @@ import { parseIosPendingAlertsJson } from '~/features/autoLog/lib/captureQueue';
 // queue is decoded by field name, so both are pinned here.
 const plugin = require('../../plugins/withMoney2TimeAutoLog.js') as {
   LOG_PAYMENT_ALERT_INTENT_SWIFT: string;
+  LOG_CARD_PAYMENT_INTENT_SWIFT: string;
   AUTO_LOG_STORE_SWIFT: string;
   PENDING_ALERTS_KEY: string;
 };
@@ -25,9 +26,22 @@ describe('Log Notification (withMoney2TimeAutoLog)', () => {
     expect(swift).toContain('struct LogPaymentAlertIntent: AppIntent {');
   });
 
-  it('never opens the app or posts anything', () => {
+  it('never opens the app, and posts only to confirm a test run', () => {
     expect(swift).toContain('static var openAppWhenRun: Bool = false');
+    // A real notification is the draft: the action posts nothing of its own.
     expect(swift).not.toContain('UNUserNotificationCenter');
+    expect(swift.match(/notifyTestRun\(/g)).toHaveLength(1);
+  });
+
+  it('confirms a Play test run instead of finishing silently', () => {
+    // Play in the Shortcuts editor sends every trigger variable empty. The
+    // check must come before anything is queued, and return without queueing.
+    const testRun = swift.indexOf('AutoLogStore.isTestRun(message, alertTitle, subtitle)');
+    expect(testRun).toBeGreaterThan(swift.indexOf('throw AutoLogError.notReady'));
+    expect(testRun).toBeLessThan(swift.indexOf('AutoLogStore.enqueueAlert('));
+    const branch = swift.slice(testRun, swift.indexOf('AutoLogStore.enqueueAlert('));
+    expect(branch).toContain('body: catalog.testNotificationAlertBody');
+    expect(branch).toContain('return .result()');
   });
 
   it('does not request an app name when logging a notification', () => {
@@ -74,5 +88,61 @@ describe('Log Notification (withMoney2TimeAutoLog)', () => {
       expect(pendingAlert).toContain(`var ${field}`);
     }
     expect(store).toContain(`static let pendingAlertsKey = "${plugin.PENDING_ALERTS_KEY}"`);
+  });
+});
+
+describe('Log Card Payment test run (withMoney2TimeAutoLog)', () => {
+  const swift = plugin.LOG_CARD_PAYMENT_INTENT_SWIFT;
+  const store = plugin.AUTO_LOG_STORE_SWIFT;
+  const amountGuard = swift.indexOf('guard AutoLogStore.hasLoggableAmount(amount) else {');
+  const unreadable = swift.indexOf('AutoLogStore.notifyUnreadable(');
+  const branch = swift.slice(amountGuard, unreadable);
+
+  it('treats a run with no amount, merchant or card as a Play test', () => {
+    // A real Wallet payment with a missing amount still names a merchant or
+    // card, so it keeps the "couldn't auto-log" failure.
+    expect(amountGuard).toBeGreaterThan(-1);
+    expect(branch).toContain('if AutoLogStore.isTestRun(merchant, card) {');
+    expect(unreadable).toBeGreaterThan(amountGuard);
+  });
+
+  it('reports the free limit a real tap would hit, else confirms the setup', () => {
+    const limit = branch.indexOf('throw AutoLogError.limitReached');
+    const confirm = branch.indexOf('AutoLogStore.notifyTestRun(');
+    expect(limit).toBeGreaterThan(-1);
+    expect(confirm).toBeGreaterThan(limit);
+    expect(branch).toContain('body: catalog.testCardPaymentBody');
+    expect(branch.slice(confirm)).toContain('return .result()');
+  });
+
+  it('queues and announces nothing for a test run', () => {
+    // The test branch returns inside the amount guard, before the first
+    // upsert and the "logged" notification.
+    expect(swift.indexOf('AutoLogStore.upsertProvisional(')).toBeGreaterThan(unreadable);
+    expect(swift.indexOf('AutoLogStore.notifyLogged(')).toBeGreaterThan(unreadable);
+  });
+
+  it('decodes the test copy from the catalog the app writes', () => {
+    for (const field of [
+      'testNotificationTitle: String?',
+      'testCardPaymentBody: String?',
+      'testNotificationAlertBody: String?',
+    ]) {
+      expect(store).toContain(`let ${field}`);
+    }
+  });
+
+  it('falls back to English when the catalog copy is missing or empty', () => {
+    const notify = store.slice(store.indexOf('static func notifyTestRun('));
+    expect(notify).toContain('copy(catalog.testNotificationTitle, or: "Automation is working")');
+    expect(notify).toContain('body: copy(body, or: fallbackBody)');
+    const copy = store.slice(store.indexOf('private static func copy('));
+    expect(copy).toContain('!value.isEmpty');
+  });
+
+  it('keeps the English fallback true for a real tap that arrives this empty', () => {
+    // A Play run and a real tap with no amount or merchant look the same, so
+    // the copy must still tell someone who just paid to add the payment.
+    expect(branch).toContain('If you just paid, open Money2Time to add it.');
   });
 });

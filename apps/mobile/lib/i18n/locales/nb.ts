@@ -2520,6 +2520,11 @@ const nb = {
       autolog_title: 'Registrert automatisk',
       autolog_failure_title: 'Kunne ikke autoregistrere en betaling',
       autolog_failure_body: 'Trykk for å legge den til manuelt.',
+      autolog_test_title: 'Automatiseringen fungerer',
+      autolog_test_card_body:
+        'Ingen betaling fulgte med denne kjøringen, noe som er normalt for en test. Har du nettopp betalt, åpner du Money2Time og legger den til.',
+      autolog_test_alert_body:
+        'Ingen varseltekst fulgte med denne kjøringen, noe som er normalt for en test. Bankvarsler vises i Money2Time for gjennomgang.',
       daily_title: 'Hvordan gikk dagen?',
       daily_body: 'Bruk 30 sekunder på å logge dagens forbruk mens du husker det.',
       recurring_title: '{{name}} · {{amount}}',

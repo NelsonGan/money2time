@@ -2529,6 +2529,11 @@ const tr = {
       autolog_title: 'Otomatik kaydedildi',
       autolog_failure_title: 'Bir ödeme otomatik kaydedilemedi',
       autolog_failure_body: 'Elle eklemek için dokunun.',
+      autolog_test_title: 'Otomasyon çalışıyor',
+      autolog_test_card_body:
+        "Bu çalıştırmayla bir ödeme gelmedi, bu bir test için normaldir. Az önce ödeme yaptıysanız eklemek için Money2Time'ı açın.",
+      autolog_test_alert_body:
+        "Bu çalıştırmayla bildirim metni gelmedi, bu bir test için normaldir. Banka bildirimleri incelemeniz için Money2Time'da görünecek.",
       daily_title: 'Bugün nasıl geçti?',
       daily_body: 'Hazır tazeyken bugünün harcamalarını kaydetmek için 30 saniye ayırın.',
       recurring_title: '{{name}} · {{amount}}',
