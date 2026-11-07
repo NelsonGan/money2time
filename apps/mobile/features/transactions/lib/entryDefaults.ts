@@ -1,4 +1,5 @@
 import type { Account, Category, TransactionType } from '~/types';
+import { isAccountArchived } from '~/utils/accountArchive';
 
 /**
  * Shared fallbacks for every entry flow (quick add, voice, receipt scan, and
@@ -22,7 +23,8 @@ export function findFallbackCategory(
 
 /**
  * The account an entry flow posts to: an explicit selection, then the
- * preferred/saved account when it still exists, else the first by sort order.
+ * preferred/saved account when it still exists and is not archived, else the
+ * first live account by sort order.
  */
 export function pickDefaultAccountId(
   accounts: Account[],
@@ -32,11 +34,15 @@ export function pickDefaultAccountId(
   if (initialId && accounts.some((account) => account.id === initialId)) {
     return initialId;
   }
-  if (preferredId && accounts.some((account) => account.id === preferredId)) {
+  // An archived account is never a fallback: the user put it away, so a new
+  // entry must not land somewhere they can no longer see. An explicit
+  // `initialId` (opening add from that account) still wins above.
+  const live = accounts.filter((account) => !isAccountArchived(account));
+  if (preferredId && live.some((account) => account.id === preferredId)) {
     return preferredId;
   }
-  if (accounts.length === 0) return null;
-  return [...accounts].sort(
+  if (live.length === 0) return null;
+  return [...live].sort(
     (a, b) => (a.sortOrder ?? Number.MAX_SAFE_INTEGER) - (b.sortOrder ?? Number.MAX_SAFE_INTEGER),
   )[0].id;
 }

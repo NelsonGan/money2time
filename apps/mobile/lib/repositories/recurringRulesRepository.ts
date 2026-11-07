@@ -1,4 +1,4 @@
-import { and, eq, gte, isNull, lt, lte } from 'drizzle-orm';
+import { and, eq, gte, isNull, lt, lte, or, type SQL } from 'drizzle-orm';
 
 import {
   buildInstalmentProgress,
@@ -230,6 +230,17 @@ function validateRuleInput(input: CreateRecurringRuleInput) {
     );
   }
   return !!input.accountId && !!input.categoryId;
+}
+
+/** Turn off the live, active rules matching `condition`. */
+function deactivateLiveRules(condition: SQL | undefined) {
+  getDb()
+    .update(recurringRulesTable)
+    .set({ isActive: false, updatedAt: nowIso() })
+    .where(
+      and(isNull(recurringRulesTable.deletedAt), eq(recurringRulesTable.isActive, true), condition),
+    )
+    .run();
 }
 
 class RecurringRulesRepository {
@@ -608,18 +619,30 @@ class RecurringRulesRepository {
    * into a hidden goal.
    */
   deactivateTransfersInto(accountId: string) {
-    const db = getDb();
-    db.update(recurringRulesTable)
-      .set({ isActive: false, updatedAt: nowIso() })
-      .where(
-        and(
-          isNull(recurringRulesTable.deletedAt),
-          eq(recurringRulesTable.isActive, true),
-          eq(recurringRulesTable.type, 'transfer'),
+    deactivateLiveRules(
+      and(eq(recurringRulesTable.type, 'transfer'), eq(recurringRulesTable.toAccountId, accountId)),
+    );
+  }
+
+  /**
+   * Deactivate every live rule that posts to or from an account: expenses and
+   * income on it, and transfers either way. Used when an everyday account is
+   * archived, so a subscription or standing transfer stops instead of piling
+   * entries into an account the user can no longer see. Instalment plans keep
+   * running: their payments are for a purchase already made, and a paused
+   * plan reads as payments skipped.
+   */
+  deactivateRulesForAccount(accountId: string) {
+    deactivateLiveRules(
+      and(
+        isNull(recurringRulesTable.instalmentCount),
+        or(
+          eq(recurringRulesTable.accountId, accountId),
+          eq(recurringRulesTable.fromAccountId, accountId),
           eq(recurringRulesTable.toAccountId, accountId),
         ),
-      )
-      .run();
+      ),
+    );
   }
 
   runDueTransactions(todayIso: string = nowIso(), maxRules: number = 10): ProcessedRecurringRule[] {

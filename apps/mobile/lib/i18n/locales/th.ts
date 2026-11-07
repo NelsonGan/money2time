@@ -2053,9 +2053,6 @@ const th = {
       payment_note: 'ชำระค่างวดสินเชื่อ',
       due_amount: 'ยอดที่ต้องชำระ',
       archive_action: 'เก็บสินเชื่อเข้าคลัง',
-      unarchive_action: 'นำออกจากคลัง',
-      archive_hint:
-        'ซ่อนจากรายการบัญชี ประวัติและยอดรวมยังอยู่ครบ และกด "แสดงรายการในคลัง" เพื่อเรียกกลับ',
       celebration_title: 'ปิดสินเชื่อแล้ว',
       celebration_message: '{{name}} ชำระครบแล้ว หนี้ก้อนนี้จบลงแล้ว',
       celebration_message_with_amount: '{{name}} ชำระครบแล้ว ทั้ง {{amount}}',
@@ -2075,6 +2072,8 @@ const th = {
     archived_section: 'เก็บเข้าคลังแล้ว',
     show_archived_action: 'แสดงรายการในคลัง ({{count}})',
     hide_archived_action: 'ซ่อนรายการในคลัง',
+    archive_action: 'เก็บบัญชีเข้าคลัง',
+    archive_hint: 'ซ่อนจากบัญชีและตัวเลือกบัญชี ธุรกรรมยังอยู่ครบ และรายการประจำจะถูกหยุดชั่วคราว',
     show_balances: 'แสดงยอดคงเหลือ',
     type: 'ประเภท',
     statement_day: 'วันตัดรอบ',

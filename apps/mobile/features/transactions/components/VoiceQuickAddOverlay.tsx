@@ -23,6 +23,7 @@ import {
   subscribeInlineVoiceHost,
 } from '~/services/voiceCaptureBridge';
 import type { Account, Category, TransactionType } from '~/types';
+import { isAccountArchived } from '~/utils/accountArchive';
 import { dayKeyFromDateLocal } from '~/utils/formatters';
 
 import { findFallbackCategory, pickDefaultAccountId } from '../lib/entryDefaults';
@@ -124,18 +125,14 @@ export function VoiceQuickAddOverlay({ onEditDetailed, handleRef }: VoiceQuickAd
       // Account priority: 1) history match, 2) user-picked default,
       // 3) first account.
       // We validate each candidate against the live accounts list — history
-      // can hand back a soft-deleted account id, in which case we must fall
+      // can hand back a soft-deleted or archived account id, in which case we must fall
       // through to the user's chosen default rather than persisting null.
       let accountId: string | null = historyMatch?.accountId ?? null;
-      if (accountId && !accounts.some((a) => a.id === accountId)) {
+      if (accountId && !accounts.some((a) => a.id === accountId && !isAccountArchived(a))) {
         accountId = null;
       }
-      if (!accountId && quickEntryPrefs.defaultAccountId) {
-        const defaultExists = accounts.some((a) => a.id === quickEntryPrefs.defaultAccountId);
-        if (defaultExists) accountId = quickEntryPrefs.defaultAccountId;
-      }
       if (!accountId) {
-        accountId = pickDefaultAccountId(accounts);
+        accountId = pickDefaultAccountId(accounts, quickEntryPrefs.defaultAccountId);
       }
 
       const account = accounts.find((a) => a.id === accountId) ?? null;

@@ -2084,9 +2084,6 @@ const uk = {
       payment_note: 'Платіж за кредитом',
       due_amount: 'Сума до сплати',
       archive_action: 'Архівувати кредит',
-      unarchive_action: 'Повернути з архіву',
-      archive_hint:
-        'Приховує його зі списку рахунків. Історія та підсумки зберігаються, а "Показати архів" поверне його.',
       celebration_title: 'Кредит погашено',
       celebration_message: '{{name}} повністю виплачено. Цей борг позаду.',
       celebration_message_with_amount: '{{name}} повністю виплачено, усі {{amount}}.',
@@ -2106,6 +2103,9 @@ const uk = {
     archived_section: 'Архів',
     show_archived_action: 'Показати архів ({{count}})',
     hide_archived_action: 'Сховати архів',
+    archive_action: 'Архівувати рахунок',
+    archive_hint:
+      'Приховує його зі списку рахунків і вибору рахунку. Операції зберігаються, а регулярні операції призупиняються.',
     show_balances: 'Показати баланси',
     type: 'Тип',
     statement_day: 'День виписки',

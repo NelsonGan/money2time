@@ -2101,9 +2101,6 @@ const ms = {
       payment_note: 'Bayaran balik pinjaman',
       due_amount: 'Jumlah perlu dibayar',
       archive_action: 'Arkibkan pinjaman',
-      unarchive_action: 'Keluarkan dari arkib',
-      archive_hint:
-        'Menyembunyikannya daripada senarai akaun. Sejarah dan jumlah kekal, dan "Tunjuk arkib" membawanya kembali.',
       celebration_title: 'Pinjaman selesai',
       celebration_message: '{{name}} telah dijelaskan sepenuhnya. Hutang itu sudah berlalu.',
       celebration_message_with_amount: '{{name}} telah dijelaskan sepenuhnya, kesemua {{amount}}.',
@@ -2123,6 +2120,9 @@ const ms = {
     archived_section: 'Diarkibkan',
     show_archived_action: 'Tunjuk arkib ({{count}})',
     hide_archived_action: 'Sembunyi arkib',
+    archive_action: 'Arkibkan akaun',
+    archive_hint:
+      'Menyembunyikannya daripada akaun dan pemilih akaun. Transaksinya kekal, dan catatan berulangnya dijeda.',
     show_balances: 'Tunjukkan baki',
     type: 'Jenis',
     statement_day: 'Hari penyata',

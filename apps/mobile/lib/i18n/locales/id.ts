@@ -2098,9 +2098,6 @@ const id = {
       payment_note: 'Pembayaran pinjaman',
       due_amount: 'Jumlah tagihan',
       archive_action: 'Arsipkan pinjaman',
-      unarchive_action: 'Keluarkan dari arsip',
-      archive_hint:
-        'Menyembunyikannya dari daftar akun. Riwayat dan total tetap tersimpan, dan "Tampilkan arsip" mengembalikannya.',
       celebration_title: 'Pinjaman lunas',
       celebration_message: '{{name}} sudah lunas. Utang itu kini di belakangmu.',
       celebration_message_with_amount: '{{name}} sudah lunas, seluruh {{amount}}.',
@@ -2120,6 +2117,9 @@ const id = {
     archived_section: 'Diarsipkan',
     show_archived_action: 'Tampilkan arsip ({{count}})',
     hide_archived_action: 'Sembunyikan arsip',
+    archive_action: 'Arsipkan akun',
+    archive_hint:
+      'Menyembunyikannya dari akun dan pemilih akun. Transaksinya tetap tersimpan, dan transaksi berulangnya dijeda.',
     show_balances: 'Tampilkan saldo',
     type: 'Jenis',
     statement_day: 'Tanggal rekening koran',

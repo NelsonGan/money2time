@@ -2052,9 +2052,6 @@ const en = {
       payment_note: 'Loan repayment',
       due_amount: 'Amount due',
       archive_action: 'Archive loan',
-      unarchive_action: 'Unarchive loan',
-      archive_hint:
-        'Hides it from your accounts list. History and totals are kept, and "Show archived" brings it back.',
       celebration_title: 'Loan paid off',
       celebration_message: '{{name}} is fully repaid. That debt is behind you.',
       celebration_message_with_amount: '{{name}} is fully repaid, all {{amount}} of it.',
@@ -2075,6 +2072,9 @@ const en = {
     archived_section: 'Archived',
     show_archived_action: 'Show archived ({{count}})',
     hide_archived_action: 'Hide archived',
+    archive_action: 'Archive account',
+    archive_hint:
+      'Hides it from your accounts and account pickers. Its transactions are kept, and its recurring entries are paused.',
     show_balances: 'Show balances',
     type: 'Type',
     statement_day: 'Statement day',

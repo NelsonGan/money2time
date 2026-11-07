@@ -377,12 +377,20 @@ export function copiedRuleNextRun(
 
 /** Whether an account of the source is copied with `parts`, before its references are checked. */
 export function isCopiedAccount(
-  account: { id: string; type: unknown; goalArchivedAt?: unknown; loanArchivedAt?: unknown },
+  account: {
+    id: string;
+    type: unknown;
+    archivedAt?: unknown;
+    goalArchivedAt?: unknown;
+    loanArchivedAt?: unknown;
+  },
   parts: ReadonlySet<LedgerCopyPart>,
   loanBalances: ReadonlyMap<string, number>,
 ): boolean {
   const part = copyPartOfAccountType(account.type);
   if (!part || !parts.has(part)) return false;
+  // An archived everyday account is history, like an archived goal or loan.
+  if (account.archivedAt != null) return false;
   if (part === 'goals') return account.goalArchivedAt == null;
   if (part === 'loans') {
     return account.loanArchivedAt == null && (loanBalances.get(account.id) ?? 0) > SETTLED_LOAN;
@@ -406,7 +414,7 @@ export interface LedgerPartsCopy {
  * The tables a copy of `parts` writes, without any history: no entries, so
  * accounts and goals start at zero, a loan at what it still owes (a loan at
  * zero would read as paid off), and albums empty. Parents come before
- * children, as in `LEDGER_COPY_TABLES`. Archived goals and loans, settled
+ * children, as in `LEDGER_COPY_TABLES`. Archived accounts, goals and loans, settled
  * loans, instalment plans and rules with nothing left to run stay behind; a recurring rule
  * comes along only when every account and category it names does. Parts
  * another needs are added (`withCopyNeeds`).
@@ -438,6 +446,7 @@ export function ledgerPartsCopySpecs(copy: LedgerPartsCopy): TableSpec[] {
           {
             id: String(row.id),
             type: row.type,
+            archivedAt: row.archived_at,
             goalArchivedAt: row.goal_archived_at,
             loanArchivedAt: row.loan_archived_at,
           },

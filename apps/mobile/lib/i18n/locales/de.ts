@@ -2111,9 +2111,6 @@ const de = {
       payment_note: 'Kreditrückzahlung',
       due_amount: 'Fälliger Betrag',
       archive_action: 'Kredit archivieren',
-      unarchive_action: 'Archivierung aufheben',
-      archive_hint:
-        'Blendet ihn aus deiner Kontenliste aus. Verlauf und Summen bleiben, und "Archivierte anzeigen" holt ihn zurück.',
       celebration_title: 'Kredit abbezahlt',
       celebration_message: '{{name}} ist vollständig getilgt. Diese Schuld liegt hinter dir.',
       celebration_message_with_amount: '{{name}} ist vollständig getilgt, alle {{amount}}.',
@@ -2133,6 +2130,9 @@ const de = {
     archived_section: 'Archiviert',
     show_archived_action: 'Archivierte anzeigen ({{count}})',
     hide_archived_action: 'Archivierte ausblenden',
+    archive_action: 'Konto archivieren',
+    archive_hint:
+      'Blendet es in deinen Konten und der Kontoauswahl aus. Seine Buchungen bleiben, und seine wiederkehrenden Buchungen werden pausiert.',
     show_balances: 'Salden anzeigen',
     type: 'Typ',
     statement_day: 'Abrechnungstag',

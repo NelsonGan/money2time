@@ -100,6 +100,7 @@ import {
   formatMoney,
 } from '~/features/transactions/components/editor/calculatorEngine';
 import { TransactionOptionsCard } from '~/features/transactions/components/editor/TransactionOptionsCard';
+import { pickDefaultAccountId } from '~/features/transactions/lib/entryDefaults';
 import { resolveNoteChange } from '~/features/transactions/lib/noteSuggestionPick';
 import { resolveSplitSaveRoute } from '~/features/transactions/lib/splitSaveRoute';
 import { offscreenPageLimitFor, usePagerTabSync } from '~/hooks/usePagerTabSync';
@@ -732,12 +733,8 @@ export function TransactionEditorScreen({
   const initialType = initialValues?.type ?? 'expense';
   // In create mode start on a real account — the one configured in Quick Entry
   // (honoured even when Quick Entry itself is disabled), falling back to the
-  // first account so the full editor never opens with no account selected.
-  const quickDefaultAccountId =
-    quickEntryPrefs.defaultAccountId &&
-    accounts.some((a) => a.id === quickEntryPrefs.defaultAccountId)
-      ? quickEntryPrefs.defaultAccountId
-      : (accounts[0]?.id ?? null);
+  // first live account so the full editor never opens with no account selected.
+  const quickDefaultAccountId = pickDefaultAccountId(accounts, quickEntryPrefs.defaultAccountId);
   const initialSingleAccountId =
     initialValues?.accountId ??
     initialAccountId ??
