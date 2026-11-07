@@ -833,8 +833,6 @@ const vi = {
       payment_hint: 'Chỉ trả một phần? Nhập số tiền đã trả.',
       payment_left_of: 'Còn {{left}} trên {{total}}',
       payment_too_much: 'Nhiều hơn {{owed}} còn nợ',
-      payment_half: 'Một nửa',
-      payment_all: 'Tất cả {{amount}}',
       payment_paid_to: 'Trả vào',
     },
     title: 'Giao dịch',

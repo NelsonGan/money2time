@@ -836,8 +836,6 @@ const fil = {
       payment_hint: 'Bahagi lang ang binayaran? Ilagay ang ibinayad.',
       payment_left_of: '{{left}} pa sa {{total}}',
       payment_too_much: 'Higit sa {{owed}} na utang pa',
-      payment_half: 'Kalahati',
-      payment_all: 'Lahat {{amount}}',
       payment_paid_to: 'Ibinayad sa',
     },
     title: 'Mga Transaksyon',

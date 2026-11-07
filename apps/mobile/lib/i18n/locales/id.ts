@@ -836,8 +836,6 @@ const id = {
       payment_hint: 'Baru bayar sebagian? Masukkan jumlah yang dibayar.',
       payment_left_of: 'Sisa {{left}} dari {{total}}',
       payment_too_much: 'Lebih dari {{owed}} yang masih terutang',
-      payment_half: 'Setengah',
-      payment_all: 'Semua {{amount}}',
       payment_paid_to: 'Dibayar ke',
     },
     title: 'Transaksi',

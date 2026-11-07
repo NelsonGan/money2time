@@ -834,8 +834,6 @@ const sv = {
       payment_hint: 'Bara betalt en del? Ange beloppet.',
       payment_left_of: '{{left}} kvar av {{total}}',
       payment_too_much: 'Mer än de {{owed}} som fortfarande är skyldiga',
-      payment_half: 'Hälften',
-      payment_all: 'Allt {{amount}}',
       payment_paid_to: 'Betalt till',
     },
     title: 'Transaktioner',

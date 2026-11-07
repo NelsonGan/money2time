@@ -200,7 +200,8 @@ function InstalmentPill({ label, compact }: { label: string; compact: boolean })
   );
 }
 
-function TransactionAccountBadge({
+/** An account pill on a row's third line (also the folded paybacks row's). */
+export function TransactionAccountBadge({
   account,
   label,
   compact,

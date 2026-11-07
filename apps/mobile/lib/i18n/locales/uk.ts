@@ -832,8 +832,6 @@ const uk = {
       payment_hint: 'Сплачено частково? Введіть отриману суму.',
       payment_left_of: 'Залишилось {{left}} з {{total}}',
       payment_too_much: 'Більше за залишок боргу {{owed}}',
-      payment_half: 'Половина',
-      payment_all: 'Усе {{amount}}',
       payment_paid_to: 'Зараховано на',
     },
     title: 'Операції',

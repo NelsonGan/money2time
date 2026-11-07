@@ -830,8 +830,6 @@ const th = {
       payment_hint: 'จ่ายมาแค่บางส่วน? ใส่ยอดที่จ่ายมา',
       payment_left_of: 'เหลือ {{left}} จาก {{total}}',
       payment_too_much: 'มากกว่ายอดค้าง {{owed}}',
-      payment_half: 'ครึ่งหนึ่ง',
-      payment_all: 'ทั้งหมด {{amount}}',
       payment_paid_to: 'รับเข้าบัญชี',
     },
     title: 'รายการ',

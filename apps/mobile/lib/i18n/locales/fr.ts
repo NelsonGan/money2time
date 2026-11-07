@@ -837,8 +837,6 @@ const fr = {
       payment_hint: 'Payé en partie ? Saisissez le montant reçu.',
       payment_left_of: 'Reste {{left}} sur {{total}}',
       payment_too_much: 'Plus que les {{owed}} encore dus',
-      payment_half: 'Moitié',
-      payment_all: 'Tout {{amount}}',
       payment_paid_to: 'Payé sur',
     },
     title: 'Transactions',

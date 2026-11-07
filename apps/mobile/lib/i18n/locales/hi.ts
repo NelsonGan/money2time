@@ -833,8 +833,6 @@ const hi = {
       payment_hint: 'सिर्फ़ कुछ चुकाया? चुकाई गई राशि डालें।',
       payment_left_of: '{{total}} में से {{left}} बाकी',
       payment_too_much: 'बकाया {{owed}} से ज़्यादा',
-      payment_half: 'आधा',
-      payment_all: 'पूरा {{amount}}',
       payment_paid_to: 'किसमें मिला',
     },
     title: 'लेनदेन',

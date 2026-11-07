@@ -834,8 +834,6 @@ const nb = {
       payment_hint: 'Bare betalt en del? Skriv inn beløpet.',
       payment_left_of: '{{left}} igjen av {{total}}',
       payment_too_much: 'Mer enn de {{owed}} som fortsatt skyldes',
-      payment_half: 'Halvparten',
-      payment_all: 'Alt {{amount}}',
       payment_paid_to: 'Betalt til',
     },
     title: 'Transaksjoner',

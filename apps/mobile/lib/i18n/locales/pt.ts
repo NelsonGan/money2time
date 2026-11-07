@@ -834,8 +834,6 @@ const pt = {
       payment_hint: 'Pagou só uma parte? Digite o valor pago.',
       payment_left_of: 'Faltam {{left}} de {{total}}',
       payment_too_much: 'Mais do que os {{owed}} ainda devidos',
-      payment_half: 'Metade',
-      payment_all: 'Tudo {{amount}}',
       payment_paid_to: 'Pago em',
     },
     title: 'Transações',

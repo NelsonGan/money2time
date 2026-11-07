@@ -799,8 +799,6 @@ const zh = {
       payment_hint: '只还了一部分？输入还款金额。',
       payment_left_of: '剩余 {{left}} / {{total}}',
       payment_too_much: '超过尚欠的 {{owed}}',
-      payment_half: '一半',
-      payment_all: '全部 {{amount}}',
       payment_paid_to: '收款账户',
     },
     title: '交易',

@@ -833,8 +833,6 @@ const da = {
       payment_hint: 'Kun betalt en del? Indtast beløbet.',
       payment_left_of: '{{left}} tilbage af {{total}}',
       payment_too_much: 'Mere end de {{owed}}, der stadig skyldes',
-      payment_half: 'Halvdelen',
-      payment_all: 'Alt {{amount}}',
       payment_paid_to: 'Betalt til',
     },
     title: 'Transaktioner',

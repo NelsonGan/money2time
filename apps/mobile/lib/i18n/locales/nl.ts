@@ -836,8 +836,6 @@ const nl = {
       payment_hint: 'Maar deels betaald? Vul het betaalde bedrag in.',
       payment_left_of: 'Nog {{left}} van {{total}}',
       payment_too_much: 'Meer dan de {{owed}} die nog open staat',
-      payment_half: 'Helft',
-      payment_all: 'Alles {{amount}}',
       payment_paid_to: 'Betaald naar',
     },
     title: 'Transacties',

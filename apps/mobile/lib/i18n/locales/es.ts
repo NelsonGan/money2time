@@ -834,8 +834,6 @@ const es = {
       payment_hint: '¿Pagó solo una parte? Escribe lo que pagó.',
       payment_left_of: 'Quedan {{left}} de {{total}}',
       payment_too_much: 'Más de los {{owed}} que aún se deben',
-      payment_half: 'Mitad',
-      payment_all: 'Todo {{amount}}',
       payment_paid_to: 'Pagado a',
     },
     title: 'Movimientos',

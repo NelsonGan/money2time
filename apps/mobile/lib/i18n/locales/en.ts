@@ -810,8 +810,6 @@ const en = {
       payment_hint: 'Paid only part? Enter what they paid.',
       payment_left_of: '{{left}} left of {{total}}',
       payment_too_much: 'More than the {{owed}} still owed',
-      payment_half: 'Half',
-      payment_all: 'All {{amount}}',
       payment_paid_to: 'Paid to',
     },
     title: 'Transactions',

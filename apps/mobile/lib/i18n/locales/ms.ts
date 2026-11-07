@@ -839,8 +839,6 @@ const ms = {
       payment_hint: 'Bayar sebahagian sahaja? Masukkan jumlah yang dibayar.',
       payment_left_of: 'Baki {{left}} daripada {{total}}',
       payment_too_much: 'Lebih daripada {{owed}} yang masih terhutang',
-      payment_half: 'Separuh',
-      payment_all: 'Semua {{amount}}',
       payment_paid_to: 'Dibayar ke',
     },
     title: 'Transaksi',

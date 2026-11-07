@@ -834,8 +834,6 @@ const ru = {
       payment_hint: 'Оплачено частично? Введите полученную сумму.',
       payment_left_of: 'Осталось {{left}} из {{total}}',
       payment_too_much: 'Больше оставшегося долга {{owed}}',
-      payment_half: 'Половина',
-      payment_all: 'Всё {{amount}}',
       payment_paid_to: 'Зачислено на',
     },
     title: 'Транзакции',

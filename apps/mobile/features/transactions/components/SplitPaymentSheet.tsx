@@ -45,7 +45,7 @@ export function SplitPaymentSheet({ target, onClose, onRecord }: SplitPaymentShe
   const { accounts, accountGroups, getAccountById } = useApp();
 
   const [expression, setExpression] = useState('');
-  // Remounts the pad when a chip sets the amount, so its own state follows.
+  // Remounts the pad each time the sheet opens, so it starts on what is owed.
   const [padKey, setPadKey] = useState(0);
   const [paybackAccountId, setPaybackAccountId] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -67,12 +67,6 @@ export function SplitPaymentSheet({ target, onClose, onRecord }: SplitPaymentShe
     [target?.currency],
   );
 
-  const setAmount = useCallback((value: number) => {
-    void triggerHaptic('selection');
-    setExpression(String(normalizeMoneyAmount(value)));
-    setPadKey((key) => key + 1);
-  }, []);
-
   const handleRecord = useCallback(() => {
     if (!target || !plan) {
       void triggerHaptic('warning');
@@ -83,7 +77,6 @@ export function SplitPaymentSheet({ target, onClose, onRecord }: SplitPaymentShe
   }, [onRecord, paybackAccountId, plan, target]);
 
   const account = paybackAccountId ? getAccountById(paybackAccountId) : null;
-  const half = target ? Math.floor((target.owed / 2) * 100) / 100 : 0;
 
   return (
     <ThemeModal
@@ -132,27 +125,6 @@ export function SplitPaymentSheet({ target, onClose, onRecord }: SplitPaymentShe
                           total: format(target.shareTotal),
                         })}
                 </Text>
-
-                <View className="mt-4 flex-row gap-2">
-                  {half > 0 ? (
-                    <Pressable
-                      onPress={() => setAmount(half)}
-                      className="rounded-full bg-secondary/60 px-4 py-2 active:opacity-70"
-                    >
-                      <Text variant="caption" className="font-medium">
-                        {I18n.t('transactions.settleUp.payment_half')}
-                      </Text>
-                    </Pressable>
-                  ) : null}
-                  <Pressable
-                    onPress={() => setAmount(target.owed)}
-                    className="rounded-full bg-success/15 px-4 py-2 active:opacity-70"
-                  >
-                    <Text variant="caption" className="font-medium text-success">
-                      {I18n.t('transactions.settleUp.payment_all', { amount: format(target.owed) })}
-                    </Text>
-                  </Pressable>
-                </View>
               </View>
 
               <Pressable

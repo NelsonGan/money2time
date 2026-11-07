@@ -832,8 +832,6 @@ const ja = {
       payment_hint: '一部だけの支払い？支払われた額を入力してください。',
       payment_left_of: '{{total}} 中 残り {{left}}',
       payment_too_much: '未払いの {{owed}} を超えています',
-      payment_half: '半額',
-      payment_all: '全額 {{amount}}',
       payment_paid_to: '入金先',
     },
     title: '取引',

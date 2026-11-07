@@ -832,8 +832,6 @@ const tr = {
       payment_hint: 'Sadece bir kısmı mı ödendi? Ödenen tutarı girin.',
       payment_left_of: '{{total}} tutarından {{left}} kaldı',
       payment_too_much: 'Kalan {{owed}} borçtan fazla',
-      payment_half: 'Yarısı',
-      payment_all: 'Tümü {{amount}}',
       payment_paid_to: 'Ödendiği hesap',
     },
     title: 'İşlemler',

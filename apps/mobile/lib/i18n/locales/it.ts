@@ -838,8 +838,6 @@ const it = {
       payment_hint: 'Ha pagato solo una parte? Inserisci quanto ha pagato.',
       payment_left_of: 'Restano {{left}} di {{total}}',
       payment_too_much: 'Più dei {{owed}} ancora dovuti',
-      payment_half: 'Metà',
-      payment_all: 'Tutto {{amount}}',
       payment_paid_to: 'Pagato su',
     },
     title: 'Transazioni',

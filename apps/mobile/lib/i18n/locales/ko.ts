@@ -829,8 +829,6 @@ const ko = {
       payment_hint: '일부만 받았나요? 받은 금액을 입력하세요.',
       payment_left_of: '{{total}} 중 {{left}} 남음',
       payment_too_much: '남은 {{owed}}보다 많아요',
-      payment_half: '절반',
-      payment_all: '전액 {{amount}}',
       payment_paid_to: '입금 계좌',
     },
     title: '거래',

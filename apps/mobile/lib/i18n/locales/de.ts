@@ -839,8 +839,6 @@ const de = {
       payment_hint: 'Nur einen Teil bezahlt? Gib den Betrag ein.',
       payment_left_of: '{{left}} offen von {{total}}',
       payment_too_much: 'Mehr als die noch offenen {{owed}}',
-      payment_half: 'Hälfte',
-      payment_all: 'Alles {{amount}}',
       payment_paid_to: 'Bezahlt an',
     },
     title: 'Transaktionen',

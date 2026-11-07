@@ -835,8 +835,6 @@ const pl = {
       payment_hint: 'Zapłacono tylko część? Wpisz zapłaconą kwotę.',
       payment_left_of: 'Zostało {{left}} z {{total}}',
       payment_too_much: 'Więcej niż pozostałe {{owed}}',
-      payment_half: 'Połowa',
-      payment_all: 'Całość {{amount}}',
       payment_paid_to: 'Wpłacono na',
     },
     title: 'Transakcje',
