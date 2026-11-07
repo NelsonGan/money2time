@@ -1374,9 +1374,11 @@ updated_at)`, with each row as JSON, plus `sync_info` (the choice screen's
   another table, or a busier sync, costs pages the same way.
 - **Sync run** (`SyncEngine.syncNow`): `pull()` (so the flush sees what other
   phones deleted meanwhile), flush the outbox into the replica with a
-  new revision per changed row (a row whose JSON did not change, such as one
-  where only a device-local setting moved, keeps its revision), upload queued
-  images, `push()`, then diff every replica revision against
+  new revision per changed row (a row whose JSON did not change apart from
+  `updated_at`, such as the settings row when only a device-local setting
+  moved, keeps its revision: saving one stamps `updated_at`, so before 1.7.4
+  every rate refresh, backup or ledger switch sent the whole settings row),
+  upload queued images, `push()`, then diff every replica revision against
   `sync_row_meta` and write the rows other phones changed. The one pull is
   the only round trip of a sync with nothing to send: a push costs two
   round trips even when empty, so it runs only when the replica holds

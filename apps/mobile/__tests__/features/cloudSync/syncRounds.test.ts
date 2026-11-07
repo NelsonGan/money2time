@@ -232,6 +232,21 @@ it('pulls once, then pushes, for an edit', async () => {
   expect(cloudRow('lunch')?.amount).toBe(12);
 });
 
+it('pushes nothing when only a device-local setting and the row stamp changed', async () => {
+  await engine.uploadAllReplacingCloud();
+  expect(cloudRow('primary')).not.toBeNull();
+  calls = [];
+  // What a rate refresh saves: the fetch time, and the row's updated_at.
+  app.exec(
+    "UPDATE settings SET last_rate_fetch_at = '2026-11-07T06:00:00Z', updated_at = '2026-11-07T06:00:00Z'",
+  );
+  await engine.syncNow();
+  expect(rounds()).toEqual(['pull']);
+  app.exec("UPDATE settings SET locale = 'fr', updated_at = '2026-11-07T07:00:00Z'");
+  await engine.syncNow();
+  expect(rounds()).toEqual(['pull', 'pull', 'push']);
+});
+
 it('pushes a change already in the replica that an earlier push did not carry', async () => {
   addTransaction('lunch', 12);
   pushError = new Error('offline');

@@ -55,6 +55,7 @@ import {
   type RevEntry,
   type Row,
   rowKey,
+  sameExceptUpdatedAt,
 } from '../lib/rowCodec';
 import {
   ASSET_COLUMNS,
@@ -1286,9 +1287,10 @@ export class SyncEngine {
             continue;
           }
           const data = encodeRow(table, local, before?.data ?? null, !this.isPersonal);
-          // Only device-local columns changed (a backup timestamp, say): the
-          // cloud copy stays as it is.
-          if (before && before.data === data) {
+          // Only device-local columns changed (a backup timestamp, say), with
+          // at most the `updated_at` that saving them stamps: the cloud copy
+          // stays as it is.
+          if (before && sameExceptUpdatedAt(before.data, data)) {
             results.push({ table, id, seq: entry.seq, rev: before.rev });
             continue;
           }
