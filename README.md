@@ -1324,7 +1324,8 @@ app tables ◀──apply──── diff of revisions ◀──── replica.
 | `services/cloudSyncApi.ts`          | The Worker's HTTP API                                                                             |
 | `services/nativeSignIn.ts`          | `NATIVE_PROVIDERS`: Apple and Google sign-in (a new provider is one entry)                        |
 | `services/cloudSyncSession.ts`      | The session token in the keychain                                                                 |
-| `lib/syncTables.ts`                 | What syncs: tables, image columns, device-local settings                                          |
+| `lib/syncTables.ts`                 | What syncs: tables, image columns, device-local settings and rows                                 |
+| `lib/offlineError.ts`               | Whether a Turso engine error means the phone is offline                                           |
 | `lib/capture.ts`, `rowCodec.ts`     | Trigger SQL; rows to and from JSON, revisions                                                     |
 | `lib/linking.ts`, `lib/messages.ts` | The first-sign-in decision; error and time text                                                   |
 | `screens/CloudSyncScreen.tsx`       | Picks one view per status from `components/` (signed out, email, linking, choice, synced, paused) |

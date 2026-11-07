@@ -40,6 +40,7 @@ import { runUserAssetGc } from '~/services/userAssetGc';
 import { useSyncScheduler } from './hooks/useSyncScheduler';
 import { PERSONAL_CHANNEL } from './lib/ledgerRows';
 import { decideLink } from './lib/linking';
+import { isOfflineMessage } from './lib/offlineError';
 import { shouldAskForCredentials } from './lib/pausedCheck';
 import {
   CloudSyncApiError,
@@ -208,7 +209,7 @@ function errorKind(error: unknown): CloudSyncErrorKind {
   }
   const message = error instanceof Error ? error.message : String(error);
   // Turso's IO errors when the network is down.
-  if (/network|fetch|offline|timed out|abort/i.test(message)) return 'offline';
+  if (isOfflineMessage(message)) return 'offline';
   return 'unknown';
 }
 

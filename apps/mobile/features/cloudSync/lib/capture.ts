@@ -27,23 +27,21 @@ export const CAPTURE_VERSION = '2';
 
 /** CREATE TRIGGER statements for one table. */
 export function captureTriggersSql(table: string): string {
-  const synced = (alias: 'NEW' | 'OLD') => {
-    const sql = syncedRowSql(table, alias);
-    return sql === '1' ? '' : ` AND ${sql}`;
-  };
-  // An update that turns a synced row into a local one is queued: the flush
-  // then removes it from the cloud copy.
-  const updated =
-    syncedRowSql(table) === '1'
-      ? ''
-      : ` AND (${syncedRowSql(table, 'NEW')} OR ${syncedRowSql(table, 'OLD')})`;
+  const newSyncs = syncedRowSql(table, 'NEW');
+  const oldSyncs = syncedRowSql(table, 'OLD');
+  const all = newSyncs === '1';
+  // An update that turns a synced row into a local one is queued too: the
+  // flush then removes it from the cloud copy.
+  const inserted = all ? '' : ` AND ${newSyncs}`;
+  const updated = all ? '' : ` AND (${newSyncs} OR ${oldSyncs})`;
+  const deleted = all ? '' : ` AND ${oldSyncs}`;
   return `
     CREATE TRIGGER IF NOT EXISTS ${triggerName(table, 'ins')} AFTER INSERT ON "${table}"
-      WHEN ${QUIET}${synced('NEW')} BEGIN ${enqueue(table, 'NEW.id')} END;
+      WHEN ${QUIET}${inserted} BEGIN ${enqueue(table, 'NEW.id')} END;
     CREATE TRIGGER IF NOT EXISTS ${triggerName(table, 'upd')} AFTER UPDATE ON "${table}"
       WHEN ${QUIET}${updated} BEGIN ${enqueue(table, 'NEW.id')} END;
     CREATE TRIGGER IF NOT EXISTS ${triggerName(table, 'del')} AFTER DELETE ON "${table}"
-      WHEN ${QUIET}${synced('OLD')} BEGIN ${enqueue(table, 'OLD.id')} END;
+      WHEN ${QUIET}${deleted} BEGIN ${enqueue(table, 'OLD.id')} END;
   `;
 }
 

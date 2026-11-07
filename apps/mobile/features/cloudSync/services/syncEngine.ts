@@ -464,14 +464,20 @@ function ensureDefaultLedger(): void {
 
 export function enableCapture(): void {
   const db = getSQLite();
-  // Triggers an earlier app version made are replaced once.
-  const replace = getState('capture_version') !== CAPTURE_VERSION;
-  db.withTransactionSync(() => {
+  const create = () => {
     for (const table of SYNC_TABLES) {
-      if (replace) db.execSync(dropCaptureTriggersSql(table));
       if (tableExists(table)) db.execSync(captureTriggersSql(table));
     }
-    if (replace) setState('capture_version', CAPTURE_VERSION);
+  };
+  if (getState('capture_version') === CAPTURE_VERSION) {
+    create();
+    return;
+  }
+  // Triggers an earlier app version made are replaced, once.
+  db.withTransactionSync(() => {
+    for (const table of SYNC_TABLES) db.execSync(dropCaptureTriggersSql(table));
+    create();
+    setState('capture_version', CAPTURE_VERSION);
   });
 }
 
@@ -1418,11 +1424,7 @@ export class SyncEngine {
         if (deferLedgerRemovals && isLedgerScoped(item.table)) continue;
         // A row that moved to another channel (its ledger was shared) stays,
         // and so does one that never syncs (`isSyncedRow`).
-        if (
-          tableExists(item.table) &&
-          this.ownsLocalRow(item.table, item.id) &&
-          this.localRowSyncs(item.table, item.id)
-        ) {
+        if (tableExists(item.table) && this.removableHere(item.table, item.id)) {
           applied += db.runSync(`DELETE FROM "${item.table}" WHERE id = ?`, [item.id]).changes;
         }
         recordRev(item.table, item.id, null, this.channel);
@@ -1471,11 +1473,17 @@ export class SyncEngine {
     return typeof local?.updated_at === 'string' && local.updated_at > row.updated_at;
   }
 
-  /** Whether this phone's copy of a row, if it has one, is one that syncs. */
-  private localRowSyncs(table: string, id: string): boolean {
-    if (syncedRowSql(table) === '1') return true;
+  /**
+   * Whether a delete pulled from this channel may remove this phone's copy of
+   * a row: it belongs to this channel (`ownsLocalRow`) and is one that syncs.
+   */
+  private removableHere(table: string, id: string): boolean {
+    const shared = listSharedLedgers().length > 0;
+    if (!shared && syncedRowSql(table) === '1') return this.isPersonal;
     const local = getSQLite().getFirstSync<Row>(`SELECT * FROM "${table}" WHERE id = ?`, [id]);
-    return !local || isSyncedRow(table, local);
+    if (!local) return shared || this.isPersonal;
+    if (!isSyncedRow(table, local)) return false;
+    return shared ? channelOfRow(table, local) === this.channel : this.isPersonal;
   }
 
   /** Whether this phone's copy of a row (if any) belongs to this channel. */
