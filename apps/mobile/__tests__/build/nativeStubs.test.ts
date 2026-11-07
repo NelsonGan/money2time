@@ -57,4 +57,40 @@ describe('native bundle stubs', () => {
     const environment = fs.readFileSync(path.join(PURCHASES_DIST, 'utils/environment.js'), 'utf8');
     expect(environment).toContain('if (!!react_native_1.NativeModules.RNPurchases) {');
   });
+
+  // A call made while the library loads (say, at the top of its browser-mode
+  // module, which it always imports) would throw at app start on iOS and
+  // Android. Load it as a native build does and check it never asks the stub.
+  it('loads react-native-purchases on native without touching the stub', () => {
+    const touched: PropertyKey[] = [];
+    jest.isolateModules(() => {
+      jest.doMock(
+        'react-native',
+        () => ({
+          NativeModules: { RNPurchases: { addListener: jest.fn(), removeListeners: jest.fn() } },
+          NativeEventEmitter: class {
+            addListener() {
+              return { remove: jest.fn() };
+            }
+          },
+          Platform: { OS: 'ios', select: (options: Record<string, unknown>) => options.ios },
+        }),
+        { virtual: true },
+      );
+      jest.doMock(MAPPINGS, () => {
+        const { PurchasesCommon } = jest.requireActual(NATIVE_STUBS[MAPPINGS]);
+        return {
+          PurchasesCommon: new Proxy(PurchasesCommon, {
+            get(target, key) {
+              touched.push(key);
+              return Reflect.get(target, key);
+            },
+          }),
+        };
+      });
+      const Purchases = require('react-native-purchases').default;
+      expect(typeof Purchases.configure).toBe('function');
+    });
+    expect(touched).toEqual([]);
+  });
 });

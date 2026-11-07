@@ -2995,7 +2995,7 @@ the sparkle are both still there.
 
 ## App size and native-only assets
 
-An October 2026 pass cut the Android release APK by about 10% (316.67 MB to 283.34 MB) and the Hermes bundle by about 9%. The measurements are in [.github/pr-assets/app-size/](.github/pr-assets/app-size/measurements.json). A November 2026 pass cut the Hermes bundle by another 9.4% (16.65 MB to 15.11 MB on iOS, 16.66 MB to 15.09 MB on Android) and the bundled images by 4.45 MB, measured in [.github/pr-assets/bundle-size/](.github/pr-assets/bundle-size/measurements.json). What follows is what still applies.
+An October 2026 pass cut the Android release APK by about 10% (316.67 MB to 283.34 MB) and the Hermes bundle by about 9%. The measurements are in [.github/pr-assets/app-size/](.github/pr-assets/app-size/measurements.json). A November 2026 pass cut the Hermes bundle by another 9% (16.65 MB to 15.11 MB on iOS, 16.66 MB to 15.09 MB on Android) and the bundled images by 4.45 MB, measured in [.github/pr-assets/bundle-size/](.github/pr-assets/bundle-size/measurements.json). What follows is what still applies.
 
 ### What contributes to size
 
@@ -3091,23 +3091,26 @@ artwork are generator inputs and were retained.
   atlas as PNG, then `scripts/lib/losslessWebp.cjs` re-encodes it and refuses
   to write a file whose decoded alpha, or colour under any visible pixel,
   differs. Only the colour under fully transparent pixels may change, which
-  both platforms' premultiplied decoders discard. React Native `Image`
-  (`CategoryEmoji`) and react-native-svg `Image` (the Insights pie labels)
-  both decode WebP, as the card designs already relied on.
+  both platforms' premultiplied decoders discard. Both renderers, React
+  Native `Image` (`CategoryEmoji`) and react-native-svg `Image` (the Insights
+  pie labels), were checked on iOS and Android with the WebP atlases.
 - **`constants/categoryIcons.generated.ts` is one row per atlas** (pack,
   group, image, and its icons' names in cell order) and builds
   `CATEGORY_ICON_SOURCES` and `GENERATED_CATEGORY_ICONS` when it loads, which
   took it from 298 KB to 22 KB of minified JS. Icon filenames must therefore be
   kebab-case; the generator stops on any other name.
-- **Some artwork and registries are read by the Web Dashboard repo, so their
+- **Some artwork and source files are read by the Web Dashboard repo, so their
   formats are not free to change.** money2time-web's
   `scripts/sync-dashboard-assets.mjs` converts the PNGs in
   `assets/account-logos`, `assets/subscription-logos`, `assets/items` and
-  `assets/icon-packs/default`, and parses `constants/accountLogos.generated.ts`,
-  `constants/subscriptionLogos.generated.ts`, `constants/itemIcons.generated.ts`
-  and `constants/emojiCatalog.generated.ts` with regular expressions, and
+  `assets/icon-packs/default`, copies `assets/mascots` and
+  `assets/card-designs`, and parses `constants/accountLogos.generated.ts`,
+  `constants/subscriptionLogos.generated.ts`, `constants/itemIcons.generated.ts`,
+  `constants/emojiCatalog.generated.ts`, `constants/categoryIconGroups.ts`,
+  `utils/categoryIconMatcher.ts`, `constants/cardDesigns.ts` and
+  `constants/cardDesigns.generated.ts` with regular expressions.
   `scripts/sync-tutorials-web.mjs` copies `assets/tutorials/*.png` to the
-  website. Converting those to WebP or compacting those registries needs the
+  website. Converting those images to WebP or reshaping those files needs the
   matching change there.
 
 ### Internal preview rebuild
