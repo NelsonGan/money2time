@@ -2488,6 +2488,11 @@ const ko = {
       autolog_title: '자동으로 기록했어요',
       autolog_failure_title: '결제를 자동 기록하지 못했어요',
       autolog_failure_body: '탭해서 직접 추가하세요.',
+      autolog_test_title: '자동화가 작동하고 있어요',
+      autolog_test_card_body:
+        '이번 실행에는 결제 정보가 없었어요. 테스트에서는 정상이에요. 방금 결제했다면 Money2Time을 열어 직접 추가하세요.',
+      autolog_test_alert_body:
+        '이번 실행에는 알림 내용이 없었어요. 테스트에서는 정상이에요. 은행 알림은 Money2Time에 표시되어 검토할 수 있어요.',
       daily_title: '오늘 하루 어떠셨나요?',
       daily_body: '기억이 생생할 때 30초만 들여 오늘 지출을 기록해 보세요.',
       recurring_title: '{{name}} · {{amount}}',

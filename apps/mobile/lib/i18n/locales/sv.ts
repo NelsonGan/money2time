@@ -2521,6 +2521,11 @@ const sv = {
       autolog_title: 'Loggad automatiskt',
       autolog_failure_title: 'Kunde inte autologga en betalning',
       autolog_failure_body: 'Tryck för att lägga till den manuellt.',
+      autolog_test_title: 'Automatiseringen fungerar',
+      autolog_test_card_body:
+        'Ingen betalning följde med den här körningen, vilket är normalt vid ett test. Har du precis betalat öppnar du Money2Time och lägger till den.',
+      autolog_test_alert_body:
+        'Ingen aviseringstext följde med den här körningen, vilket är normalt vid ett test. Bankaviseringar visas i Money2Time för granskning.',
       daily_title: 'Hur gick dagen?',
       daily_body: 'Ta 30 sekunder och logga dagens utgifter medan du minns dem.',
       recurring_title: '{{name}} · {{amount}}',

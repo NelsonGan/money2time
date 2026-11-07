@@ -2539,6 +2539,11 @@ const ms = {
       autolog_title: 'Direkodkan secara automatik',
       autolog_failure_title: 'Tidak dapat merekod pembayaran secara automatik',
       autolog_failure_body: 'Ketik untuk menambahnya secara manual.',
+      autolog_test_title: 'Automasi berfungsi',
+      autolog_test_card_body:
+        'Tiada pembayaran disertakan dalam larian ini, perkara biasa untuk ujian. Jika anda baru membayar, buka Money2Time untuk menambahnya.',
+      autolog_test_alert_body:
+        'Tiada teks pemberitahuan disertakan dalam larian ini, perkara biasa untuk ujian. Pemberitahuan bank akan muncul dalam Money2Time untuk disemak.',
       daily_title: 'Bagaimana hari anda?',
       daily_body: 'Luangkan 30 saat untuk rekod perbelanjaan hari ini selagi masih segar.',
       recurring_title: '{{name}} · {{amount}}',

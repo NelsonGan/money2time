@@ -2504,6 +2504,11 @@ const vi = {
       autolog_title: 'Đã tự động ghi lại',
       autolog_failure_title: 'Không thể tự động ghi một khoản thanh toán',
       autolog_failure_body: 'Nhấn để thêm thủ công.',
+      autolog_test_title: 'Tự động hóa đang hoạt động',
+      autolog_test_card_body:
+        'Lần chạy này không kèm khoản thanh toán nào, điều này bình thường khi thử nghiệm. Nếu bạn vừa thanh toán, hãy mở Money2Time để thêm.',
+      autolog_test_alert_body:
+        'Lần chạy này không kèm nội dung thông báo, điều này bình thường khi thử nghiệm. Thông báo ngân hàng sẽ hiện trong Money2Time để bạn xem lại.',
       daily_title: 'Hôm nay của bạn thế nào?',
       daily_body: 'Dành 30 giây ghi lại chi tiêu hôm nay khi còn nhớ rõ.',
       recurring_title: '{{name}} · {{amount}}',

@@ -56,6 +56,10 @@ function input(overrides: Partial<BuildAutoLogCatalogInput> = {}): BuildAutoLogC
     notificationTitle: 'Transaction logged',
     failureNotificationTitle: "Couldn't auto-log a payment",
     failureNotificationBody: 'Open Money2Time to add it manually.',
+    testNotificationTitle: 'Automation is working',
+    testCardPaymentBody: 'No payment came with this run, which is normal for a test.',
+    testNotificationAlertBody:
+      'No notification text came with this run, which is normal for a test.',
     reportingCurrency: 'USD',
     generatedAt: '2026-07-15T10:30:00.000Z',
     ...overrides,
@@ -135,6 +139,21 @@ describe('buildAutoLogCatalog', () => {
     expect(catalog.notificationTitle).toBe('Logged it');
     expect(catalog.failureNotificationTitle).toBe('No amount');
     expect(catalog.failureNotificationBody).toBe('Add it yourself');
+  });
+
+  it('carries the copy the actions post when a Play test run reaches them', () => {
+    // Play in the Shortcuts editor runs an action with no trigger data. The
+    // intent confirms the setup with this copy, which it can only get from here.
+    const catalog = buildAutoLogCatalog(
+      input({
+        testNotificationTitle: 'Working',
+        testCardPaymentBody: 'Next tap logs',
+        testNotificationAlertBody: 'Alerts land for review',
+      }),
+    );
+    expect(catalog.testNotificationTitle).toBe('Working');
+    expect(catalog.testCardPaymentBody).toBe('Next tap logs');
+    expect(catalog.testNotificationAlertBody).toBe('Alerts land for review');
   });
 
   describe('accounts', () => {
