@@ -106,7 +106,7 @@ export function aggregateSettleUpByPerson(
         paidAt: split.paidAt,
         shareTotal: share?.total ?? split.amount,
         sharePaid: share?.paid ?? 0,
-        isPartPayment: !!split.paidAt && !!share?.inParts,
+        shareKey: splitShareKey(split),
       };
 
       let person = people.get(key);
@@ -283,7 +283,7 @@ export function aggregateSettleUpByTransaction(
         paidAt: split.paidAt,
         shareTotal: share?.total ?? split.amount,
         sharePaid: share?.paid ?? 0,
-        isPartPayment: !!split.paidAt && !!share?.inParts,
+        shareKey: splitShareKey(split),
       });
       if (split.paidAt) {
         paidNative = roundCents(paidNative + split.amount);

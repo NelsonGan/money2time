@@ -4,9 +4,11 @@ import { ScrollView, View } from 'react-native';
 
 import { Button, CategoryEmoji, SettingsHeader, SettingsPageLayout, Text } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
+import { SettleUpDateHeader } from '~/features/transactions/components/SettleUpDateHeader';
 import {
   partPaidBullet,
   SettleUpShareList,
+  type SettleUpShareSection,
 } from '~/features/transactions/components/SettleUpShareList';
 import type {
   ReceiptContent,
@@ -14,10 +16,11 @@ import type {
 } from '~/features/transactions/components/SplitReceiptCard';
 import { SplitReceiptShareModal } from '~/features/transactions/components/SplitReceiptShareModal';
 import { personItemNames } from '~/features/transactions/lib/receiptSplitShare';
-import { groupSettleUpSharesOwedFirst } from '~/features/transactions/lib/settleUpDateGroups';
+import { groupSettleUpShareCards } from '~/features/transactions/lib/settleUpDateGroups';
 import { useSettleUpSummary } from '~/features/transactions/lib/useSettleUpSummary';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import type { PersonDebtBill } from '~/types';
 import { currencySymbolForCode } from '~/utils/currency';
 import { formatCurrency, formatShortDate } from '~/utils/formatters';
 
@@ -42,11 +45,19 @@ export function SettleUpPersonScreen({
     () => summary.people.find((p) => p.key === personKey) ?? null,
     [summary.people, personKey],
   );
-  const dateGroups = useMemo(
-    () => (person ? groupSettleUpSharesOwedFirst(person.bills, (bill) => bill.date) : []),
-    [person],
-  );
   const locale = settings.locale ?? I18n.locale ?? 'en';
+  const sections = useMemo<SettleUpShareSection<PersonDebtBill>[]>(
+    () =>
+      person
+        ? groupSettleUpShareCards(person.bills, (bill) => bill.date).map((group, index) => ({
+            // A day can head both what is owed and the paid history.
+            key: `${index}-${group.dayKey}`,
+            header: <SettleUpDateHeader dayKey={group.dayKey} locale={locale} />,
+            cards: group.items,
+          }))
+        : [],
+    [person, locale],
+  );
 
   // A paid-only person remains in the summary; leave only after all shares are removed.
   useEffect(() => {
@@ -126,7 +137,7 @@ export function SettleUpPersonScreen({
             </View>
 
             <SettleUpShareList
-              groups={dateGroups}
+              sections={sections}
               locale={locale}
               renderLeading={(bill) => (
                 <CategoryEmoji icon={bill.categoryIcon} size={22} className="text-[19px]" />

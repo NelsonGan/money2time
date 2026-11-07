@@ -21,6 +21,7 @@ import { Text, TimeValueInline } from '~/components/ui';
 import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
+import { PaybackGroupRow } from '~/features/transactions/components/PaybackGroupRow';
 import { TransactionItem } from '~/features/transactions/components/TransactionItem';
 import {
   GHOST_SHADOW_OPACITY,
@@ -29,12 +30,14 @@ import {
   TransactionReorderProvider,
   useTransactionReorder,
 } from '~/features/transactions/components/transactionReorder';
+import { foldPaybackRows, type PaybackDayEntry } from '~/features/transactions/lib/paybackGroups';
 import {
   applyReorderUpdates,
   type ReorderRow,
   type ReorderUpdate,
   reorderUpdatesForDrag,
 } from '~/features/transactions/lib/reorderTransactionDate';
+import { usePaybackIndex } from '~/features/transactions/lib/usePaybackIndex';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
@@ -700,6 +703,18 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
     [baseBottomPadding, contentPaddingHorizontal, contentPaddingTop, hasTrailingSpacer],
   );
 
+  // Paybacks fold per bill and day (see PaybackGroupRow); these are the open ones.
+  const paybackIndex = usePaybackIndex();
+  const [openPaybackGroups, setOpenPaybackGroups] = useState<ReadonlySet<string>>(() => new Set());
+  const togglePaybackGroup = useCallback((key: string) => {
+    setOpenPaybackGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }, []);
+
   const keyExtractor = useCallback((item: ActivityRow) => item.id, []);
   const getItemType = useCallback(
     (item: ActivityRow) =>
@@ -743,27 +758,61 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
                 onToggleSelectAll={onToggleDaySelection}
               />
             </ReorderShiftView>
-            {item.transactions.map((tx, txIndex) => (
-              <TransactionItem
+            {/* A bill's paybacks on this day fold into one row, except while
+                selecting or reordering, where every row must be reachable. */}
+            {(selectionMode || reorderRequested
+              ? item.transactions.map(
+                  (transaction): PaybackDayEntry<TransactionWithRelations> => ({
+                    kind: 'row',
+                    transaction,
+                  }),
+                )
+              : foldPaybackRows(item.transactions, paybackIndex)
+            ).map((entry, entryIndex) => {
+              const renderTx = (tx: TransactionWithRelations, key: string) => (
+                <TransactionItem
+                  key={`${key}:${remountKey(tx.id)}`}
+                  transaction={tx}
+                  onPressTransaction={onTransactionPress}
+                  onLongPressTransaction={onTransactionLongPress}
+                  onPressSplitBadge={onTransactionSplitBadgePress}
+                  selected={selectedTransactionIdSet.has(tx.id)}
+                  selectionMode={selectionMode}
+                  reorderHandle={reorderRequested}
+                  highlighted={highlightedId === tx.id}
+                  payback={paybackIndex.has(tx.id)}
+                  disableAnimations={disableItemAnimations}
+                  compact={compactItems}
+                  showDateInSubtitle={false}
+                  settings={displaySettings}
+                  getTrueHourlyRateForDate={getTrueHourlyRateForDate}
+                />
+              );
+              if (entry.kind === 'row') {
                 // Positional keys keep recycled cells cheap (a reused cell
                 // updates row props in place instead of remounting each row);
                 // stable ids are only needed when exit/layout animations run.
-                key={`${disableItemAnimations ? txIndex : tx.id}:${remountKey(tx.id)}`}
-                transaction={tx}
-                onPressTransaction={onTransactionPress}
-                onLongPressTransaction={onTransactionLongPress}
-                onPressSplitBadge={onTransactionSplitBadgePress}
-                selected={selectedTransactionIdSet.has(tx.id)}
-                selectionMode={selectionMode}
-                reorderHandle={reorderRequested}
-                highlighted={highlightedId === tx.id}
-                disableAnimations={disableItemAnimations}
-                compact={compactItems}
-                showDateInSubtitle={false}
-                settings={displaySettings}
-                getTrueHourlyRateForDate={getTrueHourlyRateForDate}
-              />
-            ))}
+                return renderTx(
+                  entry.transaction,
+                  String(disableItemAnimations ? entryIndex : entry.transaction.id),
+                );
+              }
+              const groupKey = `${item.dayKey}:${entry.billId}`;
+              return (
+                <PaybackGroupRow
+                  key={`paybacks:${groupKey}`}
+                  billTitle={entry.billTitle}
+                  personNames={entry.personNames}
+                  transactions={entry.transactions}
+                  expanded={openPaybackGroups.has(groupKey)}
+                  onToggle={() => togglePaybackGroup(groupKey)}
+                  compact={compactItems}
+                  settings={displaySettings}
+                >
+                  {entry.transactions.map((tx) => renderTx(tx, tx.id))}
+                </PaybackGroupRow>
+              );
+            })}
           </View>
         );
       }
@@ -771,6 +820,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
         <TransactionItem
           key={remountKey(item.transaction.id)}
           transaction={item.transaction}
+          payback={paybackIndex.has(item.transaction.id)}
           onPressTransaction={onTransactionPress}
           onLongPressTransaction={onTransactionLongPress}
           onPressSplitBadge={onTransactionSplitBadgePress}
@@ -795,6 +845,9 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
       isTimeMode,
       measureDayCell,
       onToggleDaySelection,
+      openPaybackGroups,
+      paybackIndex,
+      togglePaybackGroup,
       onTransactionLongPress,
       onTransactionPress,
       onTransactionSplitBadgePress,

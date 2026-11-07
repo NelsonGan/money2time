@@ -27,25 +27,59 @@ export function groupSettleUpItemsByDate<T>(
   );
 }
 
+/** One share's card on the person and bill pages, with its payments in it. */
+export interface SettleUpShareCard<T> {
+  /** The row the card acts on: what is still owed, or for a share paid back in
+   *  full its newest payment. */
+  share: T;
+  /** The share's paid rows, newest first (several for a share paid in parts). */
+  payments: T[];
+}
+
 /**
- * A person's or a bill's shares by date, still owed first: the owed shares
- * by the bill's date, then the paid history by the day it was paid. Part
- * payments make that history long, and it would otherwise push what is still
- * owed below it whenever a payment is newer than the bill.
+ * A person's or a bill's shares as cards: one card per share with its
+ * payments in it, so part payments do not each take a card. `owed` keeps the
+ * order `items` gives the shares; `settled` (paid back in full) is newest
+ * payment first.
  */
-export function groupSettleUpSharesOwedFirst<T extends { paidAt: string | null }>(
+export function buildSettleUpShareCards<T extends { shareKey: string; paidAt: string | null }>(
+  items: T[],
+): { owed: SettleUpShareCard<T>[]; settled: SettleUpShareCard<T>[] } {
+  const byShare = new Map<string, T[]>();
+  for (const item of items) {
+    const rows = byShare.get(item.shareKey);
+    if (rows) rows.push(item);
+    else byShare.set(item.shareKey, [item]);
+  }
+  const owed: SettleUpShareCard<T>[] = [];
+  const settled: SettleUpShareCard<T>[] = [];
+  for (const rows of byShare.values()) {
+    const payments = rows
+      .filter((row) => row.paidAt)
+      .sort((a, b) => ((a.paidAt ?? '') < (b.paidAt ?? '') ? 1 : -1));
+    const unpaid = rows.filter((row) => !row.paidAt);
+    // A share owes on one row; any other (an undone payment the fold missed)
+    // still gets a card of its own rather than disappear.
+    unpaid.forEach((share, index) => owed.push({ share, payments: index === 0 ? payments : [] }));
+    if (unpaid.length === 0 && payments[0]) settled.push({ share: payments[0], payments });
+  }
+  settled.sort((a, b) => ((a.share.paidAt ?? '') < (b.share.paidAt ?? '') ? 1 : -1));
+  return { owed, settled };
+}
+
+/**
+ * {@link buildSettleUpShareCards} by date, still owed first: what is owed by
+ * the bill's date, then the shares paid back in full by the day the last
+ * payment came in.
+ */
+export function groupSettleUpShareCards<T extends { shareKey: string; paidAt: string | null }>(
   items: T[],
   billDateOf: (item: T) => string,
-): SettleUpDateGroup<T>[] {
+): SettleUpDateGroup<SettleUpShareCard<T>>[] {
+  const { owed, settled } = buildSettleUpShareCards(items);
   return [
-    ...groupSettleUpItemsByDate(
-      items.filter((item) => !item.paidAt),
-      billDateOf,
-    ),
-    ...groupSettleUpItemsByDate(
-      items.filter((item) => item.paidAt),
-      (item) => item.paidAt ?? billDateOf(item),
-    ),
+    ...groupSettleUpItemsByDate(owed, (card) => billDateOf(card.share)),
+    ...groupSettleUpItemsByDate(settled, (card) => card.share.paidAt ?? billDateOf(card.share)),
   ];
 }
 

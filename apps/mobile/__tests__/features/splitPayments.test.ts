@@ -51,14 +51,12 @@ describe('summarizeSplitShares', () => {
       paid: 500,
       owed: 500,
       paymentCount: 2,
-      inParts: true,
     });
     expect(shares.get('b')).toEqual({
       total: 1000,
       paid: 0,
       owed: 1000,
       paymentCount: 0,
-      inParts: false,
     });
     expect(shares.has('me')).toBe(false);
   });

@@ -6,16 +6,19 @@ import { Button, CategoryEmoji, SettingsHeader, SettingsPageLayout, Text } from 
 import { useApp } from '~/context/AppContext';
 import {
   partPaidBullet,
+  SettleUpSectionHeader,
   SettleUpShareList,
+  type SettleUpShareSection,
 } from '~/features/transactions/components/SettleUpShareList';
 import type { ReceiptContent } from '~/features/transactions/components/SplitReceiptCard';
 import { SplitReceiptShareModal } from '~/features/transactions/components/SplitReceiptShareModal';
 import { personItemNames } from '~/features/transactions/lib/receiptSplitShare';
-import { groupSettleUpSharesOwedFirst } from '~/features/transactions/lib/settleUpDateGroups';
+import { buildSettleUpShareCards } from '~/features/transactions/lib/settleUpDateGroups';
 import { useSettleUpByTransaction } from '~/features/transactions/lib/useSettleUpSummary';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import type { TransactionDebtSplit } from '~/types';
 import { currencySymbolForCode } from '~/utils/currency';
 import { formatCurrency, formatShortDate } from '~/utils/formatters';
 
@@ -52,10 +55,28 @@ export function SettleUpTransactionScreen({
     () => summary.transactions.find((t) => t.transactionId === transactionId) ?? null,
     [summary.transactions, transactionId],
   );
-  const dateGroups = useMemo(
-    () => (bill ? groupSettleUpSharesOwedFirst(bill.splits, () => bill.date) : []),
-    [bill],
-  );
+  // Every share here is from the one bill, so the page heads its cards by
+  // what is still owed and what is paid back rather than by date.
+  const sections = useMemo<SettleUpShareSection<TransactionDebtSplit>[]>(() => {
+    if (!bill) return [];
+    const { owed, settled } = buildSettleUpShareCards(bill.splits);
+    const result: SettleUpShareSection<TransactionDebtSplit>[] = [];
+    if (owed.length > 0) {
+      result.push({
+        key: 'owed',
+        header: <SettleUpSectionHeader title={I18n.t('transactions.settleUp.section_owed')} />,
+        cards: owed,
+      });
+    }
+    if (settled.length > 0) {
+      result.push({
+        key: 'paid',
+        header: <SettleUpSectionHeader title={I18n.t('transactions.settleUp.section_paid')} />,
+        cards: settled,
+      });
+    }
+    return result;
+  }, [bill]);
   const locale = settings.locale ?? I18n.locale ?? 'en';
 
   // Paid-only bills remain in the summary; leave only after all shares are removed.
@@ -156,7 +177,12 @@ export function SettleUpTransactionScreen({
                   {formatShortDate(bill.date)}
                 </Text>
               </View>
-              <Text variant="title" className="mt-1 text-center">
+              {bill.unpaidSplitCount > 0 ? (
+                <Text variant="caption" tone="muted" className="mt-2">
+                  {I18n.t('transactions.settleUp.section_owed')}
+                </Text>
+              ) : null}
+              <Text variant="title" className="text-center">
                 {formatNative(
                   bill.unpaidSplitCount === 0 ? bill.paidNative : bill.totalNative,
                   bill.currency,
@@ -207,7 +233,7 @@ export function SettleUpTransactionScreen({
             ) : null}
 
             <SettleUpShareList
-              groups={dateGroups}
+              sections={sections}
               locale={locale}
               renderLeading={(split) => (
                 <Text variant="bodyStrong">{personInitial(split.personName)}</Text>

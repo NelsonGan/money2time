@@ -362,14 +362,12 @@ describe('aggregateSettleUpByTransaction', () => {
     expect(bill.totalNative).toBe(2700);
     expect(bill.paidNative).toBe(300);
     expect(bill.unpaidSplitCount).toBe(3);
-    expect(bill.splits.map((s) => [s.splitId, s.shareTotal, s.sharePaid, s.isPartPayment])).toEqual(
-      [
-        ['aisha', 1000, 300, false],
-        ['ben', 1000, 0, false],
-        ['chloe', 1000, 0, false],
-        ['aisha-part', 1000, 300, true],
-      ],
-    );
+    expect(bill.splits.map((s) => [s.splitId, s.shareTotal, s.sharePaid, s.shareKey])).toEqual([
+      ['aisha', 1000, 300, 'aisha'],
+      ['ben', 1000, 0, 'ben'],
+      ['chloe', 1000, 0, 'chloe'],
+      ['aisha-part', 1000, 300, 'aisha'],
+    ]);
   });
 
   it('gives each person their share paid in parts', () => {
@@ -394,12 +392,10 @@ describe('aggregateSettleUpByTransaction', () => {
     expect(aisha.totalReporting).toBe(700);
     expect(aisha.paidReporting).toBe(300);
     expect(aisha.unpaidBillCount).toBe(1);
-    expect(aisha.bills.map((b) => [b.splitId, b.shareTotal, b.sharePaid, b.isPartPayment])).toEqual(
-      [
-        ['a', 1000, 300, false],
-        ['p', 1000, 300, true],
-      ],
-    );
+    expect(aisha.bills.map((b) => [b.splitId, b.shareTotal, b.sharePaid, b.shareKey])).toEqual([
+      ['a', 1000, 300, 'a'],
+      ['p', 1000, 300, 'a'],
+    ]);
   });
 
   it('shows mixed and fully paid bills while keeping outstanding totals unpaid only', () => {

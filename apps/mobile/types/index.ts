@@ -1100,8 +1100,9 @@ export interface PersonDebtBill {
    */
   shareTotal: number;
   sharePaid: number;
-  /** A paid row of a share paid in parts. */
-  isPartPayment: boolean;
+  /** The share this row belongs to (`splitShareKey`): a share paid in parts
+   *  has several rows, its payments and at most one still owed. */
+  shareKey: string;
 }
 
 /** Everything one person owes the user, rolled up across every transaction. */
@@ -1157,8 +1158,9 @@ export interface TransactionDebtSplit {
    */
   shareTotal: number;
   sharePaid: number;
-  /** A paid row of a share paid in parts. */
-  isPartPayment: boolean;
+  /** The share this row belongs to (`splitShareKey`): a share paid in parts
+   *  has several rows, its payments and at most one still owed. */
+  shareKey: string;
 }
 
 /** A transaction with paid or unpaid non-self splits owed to the user. */

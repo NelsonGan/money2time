@@ -33,15 +33,13 @@ export interface SplitShareProgress {
   owed: number;
   /** Paid rows of the share. */
   paymentCount: number;
-  /** The share was paid in parts (it has more than one row). */
-  inParts: boolean;
 }
 
 /** Each share's totals, keyed by {@link splitShareKey}. Self rows are skipped. */
 export function summarizeSplitShares(
   splits: readonly TransactionSplit[],
 ): Map<string, SplitShareProgress> {
-  const shares = new Map<string, SplitShareProgress & { rows: number }>();
+  const shares = new Map<string, SplitShareProgress>();
   for (const split of splits) {
     if (split.isSelf) continue;
     const key = splitShareKey(split);
@@ -50,10 +48,7 @@ export function summarizeSplitShares(
       paid: 0,
       owed: 0,
       paymentCount: 0,
-      inParts: false,
-      rows: 0,
     };
-    share.rows += 1;
     share.total = normalizeMoneyAmount(share.total + split.amount);
     if (split.paidAt) {
       share.paid = normalizeMoneyAmount(share.paid + split.amount);
@@ -61,12 +56,9 @@ export function summarizeSplitShares(
     } else {
       share.owed = normalizeMoneyAmount(share.owed + split.amount);
     }
-    share.inParts = share.rows > 1;
     shares.set(key, share);
   }
-  const result = new Map<string, SplitShareProgress>();
-  for (const [key, { rows: _rows, ...share }] of shares) result.set(key, share);
-  return result;
+  return shares;
 }
 
 export type SplitPaymentPlan =
