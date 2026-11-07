@@ -2972,6 +2972,16 @@ const tr = {
     allocated_summary: '{{total}} içinden {{allocated}} dağıtıldı',
     allocated_done: 'Tamamı dağıtıldı',
     fill_remainder: 'Doldur',
+    currency_label: 'Para birimi',
+    currency_hint_template:
+      'Her bütçe oluşturulduğu günün kurunu korur ve diğer para birimlerindeki harcamaları bu kurla çevirir. Bugün: 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_budget:
+      'Diğer para birimlerindeki harcamalar 1 {{currency}} = {{rate}} {{main}} kuruyla çevrilir.',
+    currency_hint_no_rate:
+      'Henüz {{currency}} kuru yok. Diğer para birimlerindeki harcamaların da sayılması için Çoklu para birimi bölümünden bir kur ekleyin.',
+    unconverted_one: '1 harcama henüz sayılmıyor: {{currency}} kuru yok.',
+    unconverted_other: '{{count}} harcama henüz sayılmıyor: {{currency}} kuru yok.',
+    approx_main: '≈ {{amount}}',
     back_populate_title_week: 'Geçmiş haftaları doldur',
     back_populate_title_month: 'Geçmiş ayları doldur',
     back_populate_title_year: 'Geçmiş yılları doldur',

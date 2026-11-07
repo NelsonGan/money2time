@@ -59,6 +59,8 @@ import {
   type PreparedTransfer,
   prepareTransfer,
   startLink,
+  WANT_FEATURES,
+  type WantFeature,
   type WantRequest,
 } from './webDashboardLink';
 import {
@@ -398,14 +400,16 @@ type Built = { prepared: PreparedTransfer; snapshot: Snapshot };
 
 /**
  * One transfer's data, gzipped and encrypted, and shared by every browser
- * that asks within a few seconds: the JSON without the photos the dashboard
- * does not show, or, with a `base` copy, only what changed since it.
+ * that asks within a few seconds and can show the same (`features`): the JSON
+ * without the photos the dashboard does not show, or, with a `base` copy,
+ * only what changed since it.
  */
 async function buildTransfer(
   isPro: boolean,
   analyticsId: string | null,
   assetCache: UserAssetReadCache,
   base: { id: string; snapshot: Snapshot } | null,
+  features: readonly WantFeature[],
 ): Promise<Built> {
   // The version the data is read at: a change saved while this export is
   // built is not in it, so the copy must not claim that change's version.
@@ -417,6 +421,7 @@ async function buildTransfer(
       assetCache,
       openLedgerOnly: true,
     }),
+    { currencies: features.includes('budget-currencies') },
   );
   await yieldToEventLoop();
   // A copy from before an app update that changed the backup's format is
@@ -460,6 +465,7 @@ async function buildTransfer(
       pro: isPro,
       ...(analyticsId ? { analyticsId } : {}),
       version,
+      features: [...WANT_FEATURES],
       ...(from ? { base: from.id } : {}),
     },
     randomBytes,
@@ -512,7 +518,7 @@ export class WebDashboardConnections {
   private lastForced = new Map<string, number>();
   /** Each browser's sends, one after another: two quick requests must not share a send. */
   private sends = new Map<string, Promise<void>>();
-  /** Builds shared within a refresh, by the copy they patch ('' for a whole export). */
+  /** Builds shared within a refresh, by the copy they patch ('' for a whole export) and the page's features. */
   private prepared = new Map<string, { at: number; version: number; promise: Promise<Built> }>();
   /** The data each recent transfer carried, by transfer id, to patch against. */
   private snapshots = new Map<string, Snapshot>();
@@ -780,8 +786,10 @@ export class WebDashboardConnections {
   private transfer(
     fresh: boolean,
     base: { id: string; snapshot: Snapshot } | null,
+    features: readonly WantFeature[],
   ): Promise<Built> {
-    const key = base?.id ?? '';
+    // Browsers share a build only when they hold the same copy and can show the same.
+    const key = `${base?.id ?? ''}|${[...features].sort().join(',')}`;
     const cached = this.prepared.get(key);
     // An export from before a saved change is never reused.
     if (!fresh && cached && cached.version === dataVersion && Date.now() - cached.at < 30_000) {
@@ -792,6 +800,7 @@ export class WebDashboardConnections {
       this.analyticsId()?.trim() || null,
       this.assetCache,
       base,
+      features,
     ).then((built) => {
       if (!this.closed) this.keepSnapshot(built.prepared.meta.id, built.snapshot);
       return built;
@@ -872,7 +881,7 @@ export class WebDashboardConnections {
     try {
       await session.send(
         async () => {
-          built = await this.transfer(trigger === 'refresh', base);
+          built = await this.transfer(trigger === 'refresh', base, request.features);
           return built.prepared;
         },
         { editToken },

@@ -2945,6 +2945,16 @@ const vi = {
     allocated_summary: 'Đã phân bổ {{allocated}} / {{total}}',
     allocated_done: 'Đã phân bổ đủ',
     fill_remainder: 'Điền',
+    currency_label: 'Tiền tệ',
+    currency_hint_template:
+      'Mỗi ngân sách giữ tỷ giá của ngày được tạo và quy đổi chi tiêu bằng tiền tệ khác theo tỷ giá đó. Hôm nay: 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_budget:
+      'Chi tiêu bằng tiền tệ khác được quy đổi theo tỷ giá 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_no_rate:
+      'Chưa có tỷ giá {{currency}}. Hãy thêm trong Đa tiền tệ để chi tiêu bằng tiền tệ khác cũng được tính.',
+    unconverted_one: '1 khoản chi chưa được tính: chưa có tỷ giá {{currency}}.',
+    unconverted_other: '{{count}} khoản chi chưa được tính: chưa có tỷ giá {{currency}}.',
+    approx_main: '≈ {{amount}}',
     back_populate_title_week: 'Điền các tuần trước',
     back_populate_title_month: 'Điền các tháng trước',
     back_populate_title_year: 'Điền các năm trước',

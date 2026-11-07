@@ -3,23 +3,29 @@ import { View } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Input, SettingsHeader } from '~/components/ui';
+import { SettingsHeader } from '~/components/ui';
 import { useApp } from '~/context/AppContext';
 import {
   AllocationCategoryList,
   AllocationFooter,
   AllocationOptionRow,
 } from '~/features/budget/components/AllocationEditor';
+import { BudgetTotalField } from '~/features/budget/components/BudgetTotalField';
 import {
   type OpenCategoryAllocationParams,
   useAllocationDraft,
 } from '~/features/budget/hooks/useAllocationDraft';
+import {
+  budgetCurrencyOf,
+  budgetRateToFreeze,
+  storedBudgetCurrency,
+  withBudgetCurrency,
+} from '~/features/budget/lib/budgetCurrency';
 import { budgetPeriodLabel } from '~/features/budget/lib/format';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { BudgetPeriod } from '~/types';
-import { currencySymbolForCode } from '~/utils/currency';
 import { monthCycleOf } from '~/utils/financialMonth';
 
 interface PeriodBudgetEditorScreenProps {
@@ -35,7 +41,7 @@ interface PeriodBudgetEditorScreenProps {
 const SCROLL_CONTENT = { paddingBottom: 40 } as const;
 
 /**
- * Edits one week's, month's or year's frozen budget in place (total,
+ * Edits one week's, month's or year's frozen budget in place (total, currency,
  * allocations including subcategory breakdowns, count-unbudgeted) — or, with
  * `createFor`, creates a custom budget for that period only. Neither mode
  * touches any template.
@@ -46,8 +52,14 @@ export function PeriodBudgetEditorScreen({
   onOpenCategoryAllocation,
   onClose,
 }: PeriodBudgetEditorScreenProps) {
-  const { settings, categories, periodBudgets, updatePeriodBudget, createCustomPeriodBudget } =
-    useApp();
+  const {
+    settings,
+    categories,
+    rateTable,
+    periodBudgets,
+    updatePeriodBudget,
+    createCustomPeriodBudget,
+  } = useApp();
   const themeColors = useThemeColors();
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
 
@@ -58,6 +70,19 @@ export function PeriodBudgetEditorScreen({
   );
 
   const [countUnbudgeted, setCountUnbudgeted] = useState(budget?.countUnbudgeted ?? true);
+  // The budget's currency, as a code (the main currency when it has none).
+  const [currency, setCurrency] = useState(() => budgetCurrencyOf(budget, settings.currencyCode));
+  const budgetSettings = useMemo(
+    () => withBudgetCurrency(settings, currency),
+    [currency, settings],
+  );
+  // Kept in its own currency, the budget keeps its frozen rate; a new one
+  // freezes today's on save.
+  const storedCurrency = storedBudgetCurrency(currency, settings.currencyCode);
+  const rate =
+    budget?.fxRate != null && storedCurrency === budget.currency
+      ? budget.fxRate
+      : budgetRateToFreeze(storedCurrency, rateTable);
 
   const draft = useAllocationDraft({
     categories,
@@ -77,10 +102,10 @@ export function PeriodBudgetEditorScreen({
         .filter((line) => !parentById.get(line.categoryId))
         .map((line) => line.categoryId);
     },
+    currency,
     onOpenCategoryAllocation,
   });
 
-  const currencySymbol = currencySymbolForCode(settings.currencyCode);
   const target = budget
     ? { period: budget.period, periodKey: budget.periodKey }
     : (createFor ?? null);
@@ -92,6 +117,7 @@ export function PeriodBudgetEditorScreen({
     const input = {
       totalAmount: draft.parsedTotal,
       countUnbudgeted,
+      currency,
       lines: draft.buildAllocations(),
     };
     if (budget) {
@@ -106,6 +132,7 @@ export function PeriodBudgetEditorScreen({
     countUnbudgeted,
     createCustomPeriodBudget,
     createFor,
+    currency,
     draft,
     onClose,
     updatePeriodBudget,
@@ -133,13 +160,14 @@ export function PeriodBudgetEditorScreen({
         showsVerticalScrollIndicator={false}
       >
         <View className="gap-4 px-5 pt-1">
-          <Input
+          <BudgetTotalField
             label={I18n.t(`budget.total_label_${target.period}`)}
-            variant="currency"
-            currencySymbol={currencySymbol}
-            value={draft.total}
-            onChangeText={draft.setTotal}
-            placeholder="0.00"
+            total={draft.total}
+            onChangeTotal={draft.setTotal}
+            currency={currency}
+            onChangeCurrency={setCurrency}
+            rate={rate}
+            hint="budget"
           />
 
           <AllocationCategoryList
@@ -149,7 +177,7 @@ export function PeriodBudgetEditorScreen({
             onPressCategory={draft.openCategoryAllocation}
             onReorder={draft.reorderRootCategories}
             scrollableRef={scrollRef}
-            settings={settings}
+            settings={budgetSettings}
             themeColors={themeColors}
           />
 
@@ -170,7 +198,7 @@ export function PeriodBudgetEditorScreen({
         showBar={draft.parsedTotal > 0}
         total={draft.parsedTotal}
         remaining={draft.remaining}
-        settings={settings}
+        settings={budgetSettings}
         themeColors={themeColors}
         onCancel={onClose}
         onSave={handleSave}

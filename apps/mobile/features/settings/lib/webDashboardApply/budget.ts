@@ -11,8 +11,16 @@ type TemplateInput = {
   totalAmount: number;
   countUnbudgeted: boolean;
   allocations: BudgetAllocationInput[];
+  /** Absent when the page named none: the template keeps its own. */
+  currency?: string | null;
 };
-type MonthInput = { totalAmount: number; countUnbudgeted: boolean; lines: BudgetAllocationInput[] };
+type MonthInput = {
+  totalAmount: number;
+  countUnbudgeted: boolean;
+  lines: BudgetAllocationInput[];
+  /** Absent when the page named none: the budget keeps its own. */
+  currency?: string | null;
+};
 
 /**
  * Saves the `module:budget` steps planned in services/webDashboardEditModules/budget.ts,
@@ -20,7 +28,8 @@ type MonthInput = { totalAmount: number; countUnbudgeted: boolean; lines: Budget
  * PeriodBudgetEditorScreen and BudgetScreen make.
  *
  * The Web Dashboard knows monthly budgets only, so it is shown and may change
- * only monthly templates and month budgets (see `webDashboardBudgetsOnly`).
+ * only monthly templates and month budgets (see `webDashboardBudgetsOnly`). An
+ * edit that names no currency (an older page) leaves a template's or budget's own.
  */
 export const budgetApply: ApplyModule = {
   select: (app) => ({

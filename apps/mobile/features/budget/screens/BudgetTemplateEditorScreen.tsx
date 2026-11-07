@@ -11,10 +11,17 @@ import {
   AllocationFooter,
   AllocationOptionRow,
 } from '~/features/budget/components/AllocationEditor';
+import { BudgetTotalField } from '~/features/budget/components/BudgetTotalField';
 import {
   type OpenCategoryAllocationParams,
   useAllocationDraft,
 } from '~/features/budget/hooks/useAllocationDraft';
+import {
+  budgetCurrencyOf,
+  budgetRateToFreeze,
+  storedBudgetCurrency,
+  withBudgetCurrency,
+} from '~/features/budget/lib/budgetCurrency';
 import { computeBackPopulateRange } from '~/features/budget/lib/budgetMath';
 import { BUDGET_PERIODS } from '~/features/budget/lib/budgetPeriods';
 import {
@@ -27,7 +34,6 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { BudgetPeriod } from '~/types';
-import { currencySymbolForCode } from '~/utils/currency';
 import { monthCycleOf } from '~/utils/financialMonth';
 
 interface BudgetTemplateEditorScreenProps {
@@ -55,6 +61,7 @@ export function BudgetTemplateEditorScreen({
   const {
     settings,
     categories,
+    rateTable,
     budgetTemplates,
     getBudgetKeysEverExisted,
     createBudgetTemplate,
@@ -82,6 +89,17 @@ export function BudgetTemplateEditorScreen({
   const [emoji, setEmoji] = useState<string | null>(seed?.emoji ?? null);
   const [period, setPeriod] = useState<BudgetPeriod>(seed?.period ?? initialPeriod ?? 'month');
   const [countUnbudgeted, setCountUnbudgeted] = useState(seed?.countUnbudgeted ?? true);
+  // The budget's currency, as a code (the main currency when it has none).
+  const [currency, setCurrency] = useState(() => budgetCurrencyOf(seed, settings.currencyCode));
+  const budgetSettings = useMemo(
+    () => withBudgetCurrency(settings, currency),
+    [currency, settings],
+  );
+  // The rate a budget starting today would freeze, for the hint under the total.
+  const rateToday = budgetRateToFreeze(
+    storedBudgetCurrency(currency, settings.currencyCode),
+    rateTable,
+  );
   const [backPopulate, setBackPopulate] = useState(false);
 
   const draft = useAllocationDraft({
@@ -102,10 +120,10 @@ export function BudgetTemplateEditorScreen({
         .filter((allocation) => !parentById.get(allocation.categoryId))
         .map((allocation) => allocation.categoryId);
     },
+    currency,
     onOpenCategoryAllocation,
   });
 
-  const currencySymbol = currencySymbolForCode(settings.currencyCode);
   const canSave = name.trim().length > 0 && draft.allocationsValid;
 
   const monthCycle = monthCycleOf(settings);
@@ -136,6 +154,7 @@ export function BudgetTemplateEditorScreen({
       name: name.trim(),
       emoji,
       period,
+      currency,
       totalAmount: draft.parsedTotal,
       countUnbudgeted,
       allocations: draft.buildAllocations(),
@@ -152,6 +171,7 @@ export function BudgetTemplateEditorScreen({
     canSave,
     countUnbudgeted,
     createBudgetTemplate,
+    currency,
     draft,
     emoji,
     existing,
@@ -236,13 +256,14 @@ export function BudgetTemplateEditorScreen({
             </Text>
           </View>
 
-          <Input
+          <BudgetTotalField
             label={I18n.t(`budget.total_label_${period}`)}
-            variant="currency"
-            currencySymbol={currencySymbol}
-            value={draft.total}
-            onChangeText={draft.setTotal}
-            placeholder="0.00"
+            total={draft.total}
+            onChangeTotal={draft.setTotal}
+            currency={currency}
+            onChangeCurrency={setCurrency}
+            rate={rateToday}
+            hint="template"
           />
 
           <AllocationCategoryList
@@ -252,7 +273,7 @@ export function BudgetTemplateEditorScreen({
             onPressCategory={draft.openCategoryAllocation}
             onReorder={draft.reorderRootCategories}
             scrollableRef={scrollRef}
-            settings={settings}
+            settings={budgetSettings}
             themeColors={themeColors}
           />
 
@@ -297,7 +318,7 @@ export function BudgetTemplateEditorScreen({
         showBar={draft.parsedTotal > 0}
         total={draft.parsedTotal}
         remaining={draft.remaining}
-        settings={settings}
+        settings={budgetSettings}
         themeColors={themeColors}
         onCancel={onClose}
         onSave={handleSave}

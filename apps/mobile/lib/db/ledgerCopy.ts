@@ -400,7 +400,10 @@ export function isCopiedAccount(
 
 export interface LedgerPartsCopy {
   parts: ReadonlySet<LedgerCopyPart>;
-  /** Everyday accounts in the source's main currency (`from`) take the new ledger's (`to`). */
+  /**
+   * Everyday accounts and budget templates in the source's main currency
+   * (`from`) take the new ledger's (`to`).
+   */
   currency: { from: string; to: string };
   /** What each of the source's loans still owes: a copied loan starts there. */
   loanBalances: ReadonlyMap<string, number>;
@@ -495,7 +498,15 @@ export function ledgerPartsCopySpecs(copy: LedgerPartsCopy): TableSpec[] {
     });
   }
   if (parts.has('budgets')) {
-    specs.push({ ...base('budget_templates'), adjust: fresh() });
+    specs.push({
+      ...base('budget_templates'),
+      // A template in the source's main currency (null) takes the new
+      // ledger's, like an everyday account; one in another currency keeps it,
+      // and reads as the main currency again when that is the new ledger's.
+      adjust: fresh((template) => {
+        if (template.currency === copy.currency.to) template.currency = null;
+      }),
+    });
     specs.push({ ...base('budget_template_categories'), adjust: fresh() });
   }
   if (parts.has('items')) specs.push({ ...base('items'), adjust: fresh() });

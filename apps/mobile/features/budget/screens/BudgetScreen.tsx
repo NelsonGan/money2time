@@ -1,4 +1,11 @@
-import { CalendarDays, ChevronDown, ChevronUp, Pencil, Trash2 } from 'lucide-react-native';
+import {
+  AlertCircle,
+  CalendarDays,
+  ChevronDown,
+  ChevronUp,
+  Pencil,
+  Trash2,
+} from 'lucide-react-native';
 import React, { forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
@@ -21,6 +28,7 @@ import {
   BudgetRings,
 } from '~/features/budget/components/BudgetRings';
 import { BudgetTemplatePickerSheet } from '~/features/budget/components/BudgetTemplatePickerSheet';
+import { budgetRate, withBudgetCurrency } from '~/features/budget/lib/budgetCurrency';
 import {
   type BudgetMonthPage,
   buildBudgetMonthPage,
@@ -391,6 +399,7 @@ export const BudgetPagerView = forwardRef<MonthPagerHandle, BudgetPagerViewProps
     const {
       settings,
       categories,
+      rateTable,
       budgetTemplates,
       periodBudgets,
       createPeriodBudget,
@@ -491,11 +500,12 @@ export const BudgetPagerView = forwardRef<MonthPagerHandle, BudgetPagerViewProps
           transactions: expensesInRange(range),
           categories,
           monthCycle,
+          rateTable,
         });
         if (summary) map.set(budget.id, { summary, range });
       }
       return map;
-    }, [categories, expensesInRange, monthCycle, periodBudgets]);
+    }, [categories, expensesInRange, monthCycle, periodBudgets, rateTable]);
 
     const pageByMonth = useMemo(
       () =>
@@ -712,6 +722,12 @@ export const BudgetPagerView = forwardRef<MonthPagerHandle, BudgetPagerViewProps
         const weekChoices = model.weeks.filter((week) => week.budget);
         const focusColor = focus ? budgetRingColor(focus.period, themeColors) : themeColors.primary;
         const remaining = focusModel?.summary.remaining ?? 0;
+        // A budget in another currency reads in its own, with what is left
+        // in the main currency beside it.
+        const focusSettings = withBudgetCurrency(settings, focusBudget?.currency);
+        const focusRate = focusBudget?.currency ? budgetRate(focusBudget, rateTable) : null;
+        const remainingInMain = focusRate != null ? remaining * focusRate : null;
+        const unconvertedCount = focusModel?.summary.unconvertedCount ?? 0;
 
         const leftBlock = (
           <>
@@ -763,6 +779,13 @@ export const BudgetPagerView = forwardRef<MonthPagerHandle, BudgetPagerViewProps
                           {focusLabel}
                         </Text>
                       </View>
+                      {focusBudget.currency ? (
+                        <View className="rounded-full bg-secondary/60 px-2 py-0.5">
+                          <Text variant="caption" tone="muted" className="text-[11px]">
+                            {focusBudget.currency}
+                          </Text>
+                        </View>
+                      ) : null}
                       {daysLeft != null && daysLeft > 0 ? (
                         <Text
                           variant="caption"
@@ -812,18 +835,46 @@ export const BudgetPagerView = forwardRef<MonthPagerHandle, BudgetPagerViewProps
                       variant="monoLg"
                       numberOfLines={1}
                       adjustsFontSizeToFit
-                      accessibilityLabel={leftLabel(remaining, settings)}
+                      accessibilityLabel={leftLabel(remaining, focusSettings)}
                       className="text-[26px] leading-[32px] self-start"
                       style={{
                         color: remaining < 0 ? themeColors.error : themeColors.success,
                       }}
                     >
                       {remaining < 0
-                        ? `-${money(-remaining, settings)}`
-                        : money(remaining, settings)}
+                        ? `-${money(-remaining, focusSettings)}`
+                        : money(remaining, focusSettings)}
                     </Text>
+                    {remainingInMain != null ? (
+                      <Text variant="caption" tone="muted" numberOfLines={1}>
+                        {I18n.t('budget.approx_main', {
+                          amount:
+                            remainingInMain < 0
+                              ? `-${money(-remainingInMain, settings)}`
+                              : money(remainingInMain, settings),
+                        })}
+                      </Text>
+                    ) : null}
                   </BudgetRings>
                 </View>
+
+                {/* Spending in other currencies a budget without a rate
+                    cannot count, so its figures are not trusted silently. */}
+                {unconvertedCount > 0 && focusBudget.currency ? (
+                  <View className="mt-3 flex-row items-start gap-2 rounded-2xl bg-secondary/40 px-3 py-2.5">
+                    <View className="pt-px">
+                      <AlertCircle size={14} color={themeColors.accent} />
+                    </View>
+                    <Text variant="caption" tone="muted" className="min-w-0 flex-1">
+                      {I18n.t(
+                        unconvertedCount === 1
+                          ? 'budget.unconverted_one'
+                          : 'budget.unconverted_other',
+                        { count: unconvertedCount, currency: focusBudget.currency },
+                      )}
+                    </Text>
+                  </View>
+                ) : null}
 
                 {/* With the week in focus, its siblings in the month to pick from. */}
                 {focus.period === 'week' && weekChoices.length > 1 ? (
@@ -874,7 +925,7 @@ export const BudgetPagerView = forwardRef<MonthPagerHandle, BudgetPagerViewProps
                     color={colorByCategoryId.get(line.categoryId) ?? themeColors.primary}
                     first={index === 0}
                     categoriesById={categoriesById}
-                    settings={settings}
+                    settings={focusSettings}
                     themeColors={themeColors}
                     onPress={() => openCategoryDrilldown(focusModel.range, line.categoryId, true)}
                     onPressChild={(childId) =>
@@ -890,7 +941,7 @@ export const BudgetPagerView = forwardRef<MonthPagerHandle, BudgetPagerViewProps
                 entries={focusModel.summary.unbudgeted}
                 total={focusModel.summary.unbudgetedSpent}
                 categoriesById={categoriesById}
-                settings={settings}
+                settings={focusSettings}
                 themeColors={themeColors}
                 onPressCategory={(categoryId) =>
                   openCategoryDrilldown(focusModel.range, categoryId, true)
@@ -943,6 +994,7 @@ export const BudgetPagerView = forwardRef<MonthPagerHandle, BudgetPagerViewProps
         openCategoryDrilldown,
         pageByMonth,
         pageWidth,
+        rateTable,
         updateView,
         viewByMonth,
         settings,

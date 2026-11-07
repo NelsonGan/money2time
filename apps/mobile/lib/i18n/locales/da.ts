@@ -2963,6 +2963,17 @@ const da = {
     allocated_summary: '{{allocated}} af {{total}} fordelt',
     allocated_done: 'Fuldt fordelt',
     fill_remainder: 'Udfyld',
+    currency_label: 'Valuta',
+    currency_hint_template:
+      'Hvert budget bruger kursen fra den dag, det oprettes, og omregner udgifter i andre valutaer til den. I dag: 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_budget:
+      'Udgifter i andre valutaer omregnes til 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_no_rate:
+      'Der er endnu ingen kurs for {{currency}}. Tilføj en under Flere valutaer, så udgifter i andre valutaer tæller med.',
+    unconverted_one: '1 udgift tæller ikke med endnu: der er ingen kurs for {{currency}}.',
+    unconverted_other:
+      '{{count}} udgifter tæller ikke med endnu: der er ingen kurs for {{currency}}.',
+    approx_main: '≈ {{amount}}',
     back_populate_title_week: 'Udfyld tidligere uger',
     back_populate_title_month: 'Udfyld tidligere måneder',
     back_populate_title_year: 'Udfyld tidligere år',

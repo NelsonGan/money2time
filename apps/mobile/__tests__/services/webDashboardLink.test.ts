@@ -195,13 +195,26 @@ describe('PhoneSession requests', () => {
     return { session, wants, want, replies };
   }
 
-  it('passes on which copy the browser holds, and a repair', () => {
+  it('passes on which copy the browser holds, a repair, and what the page can show', () => {
     const { session, wants, want } = open();
-    want({ nonce: 'a'.repeat(16), force: true, have: 'h'.repeat(16), repair: true });
-    want({ nonce: 'b'.repeat(16), have: 'not an id' });
+    want({
+      nonce: 'a'.repeat(16),
+      force: true,
+      have: 'h'.repeat(16),
+      repair: true,
+      features: ['budget-currencies', 'from-the-future'],
+    });
+    want({ nonce: 'b'.repeat(16), have: 'not an id', features: 'budget-currencies' });
     expect(wants).toEqual([
-      { nonce: 'a'.repeat(16), force: true, have: 'h'.repeat(16), repair: true },
-      { nonce: 'b'.repeat(16), force: false, have: null, repair: false },
+      {
+        nonce: 'a'.repeat(16),
+        force: true,
+        have: 'h'.repeat(16),
+        repair: true,
+        // Only the features this phone knows.
+        features: ['budget-currencies'],
+      },
+      { nonce: 'b'.repeat(16), force: false, have: null, repair: false, features: [] },
     ]);
     session.close();
   });
