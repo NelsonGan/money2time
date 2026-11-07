@@ -124,9 +124,9 @@ apps/mobile/
 
 - Node.js 22+ and npm 10+ (CI runs Node 22; Wrangler 4 needs it)
 - Xcode (iOS) / Android Studio or the Android command-line tools (Android) for simulator and emulator builds
-- `ANDROID_HOME` (the Android SDK, e.g. `$HOME/Library/Android/sdk`) and `JAVA_HOME` (JDK 17) exported in the shell that runs `npx expo start`, `expo run:android` or a local EAS build, and in the environment T3 Code runs in when it lists emulators on this machine (pool devices need neither).
+- `ANDROID_HOME` (the Android SDK, e.g. `$HOME/Library/Android/sdk`) and `JAVA_HOME` (JDK 17) exported in the shell that runs `npx expo start`, `expo run:android` or a local EAS build.
 
-**T3 Code's Device panel** streams the simulator or emulator being tested, and its device tools (`device_list`, `device_open`, `device_screenshot`, `device_close`, plus the `agent-device` CLI that `device_open` returns) boot and drive it. Nothing in the repo needs installing for it. The devices come from the [Simlock](https://incubator.callstack.com/simlock/) pool on the development Mac, which T3 Code leases from: each worktree gets its own fresh iPhone 18 Pro (iOS 27.0), iPhone Duo (iOS 27.1), iPad Pro 13-inch or Pixel 10 (Android 16), with the Money2Time dev client from `origin/main` already installed, and the pool deletes it when the lease ends.
+**T3 Code's Device panel** streams the simulator or emulator being tested, and its device tools (`device_list`, `device_open`, `device_screenshot`, `device_close`, plus the `agent-device` CLI that `device_open` returns) boot and drive it. Nothing in the repo needs installing for it. The devices come from the [Simlock](https://incubator.callstack.com/simlock/) pool on the development Mac, which T3 Code leases from: each worktree gets its own fresh iPhone 18 Pro (iOS 27.0), iPhone Duo (iOS 27.1), iPad Pro 13-inch or Pixel 10 (Android 16), with the Money2Time dev client from `origin/main` already installed, and the pool deletes it when the lease ends. A native change is built and installed on a leased device with `simlock-build` (a script on the development Mac), not `npm run ios`, which looks for simulators outside the pool.
 
 ### Setup
 
