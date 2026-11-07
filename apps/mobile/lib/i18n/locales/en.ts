@@ -2958,6 +2958,17 @@ const en = {
     allocated_summary: '{{allocated}} of {{total}} allocated',
     allocated_done: 'Fully allocated',
     fill_remainder: 'Fill',
+    currency_label: 'Currency',
+    currency_hint_template:
+      'Each budget keeps the rate of the day it is created, and converts spending in other currencies at it. Today: 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_budget:
+      'Spending in other currencies is converted at 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_no_rate:
+      'No {{currency}} exchange rate yet. Add one in Multi currency so spending in other currencies counts.',
+    unconverted_one: "1 expense isn't counted yet: there's no {{currency}} exchange rate.",
+    unconverted_other:
+      "{{count}} expenses aren't counted yet: there's no {{currency}} exchange rate.",
+    approx_main: '≈ {{amount}}',
     back_populate_title_week: 'Back-fill past weeks',
     back_populate_title_month: 'Back-fill past months',
     back_populate_title_year: 'Back-fill past years',

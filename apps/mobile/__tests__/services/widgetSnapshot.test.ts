@@ -509,6 +509,8 @@ function periodBudget(overrides: Partial<PeriodBudget>): PeriodBudget {
     templateEmoji: null,
     totalAmount: 100,
     countUnbudgeted: true,
+    currency: null,
+    fxRate: null,
     lines: [],
     createdAt: '2026-10-01T00:00:00.000Z',
     updatedAt: '2026-10-01T00:00:00.000Z',

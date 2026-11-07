@@ -18,6 +18,8 @@ interface CreateBudgetTemplateInput {
   name: string;
   emoji: string | null;
   period: BudgetPeriod;
+  /** Null = the ledger's main currency (`storedBudgetCurrency`). */
+  currency: string | null;
   totalAmount: number;
   countUnbudgeted: boolean;
   allocations: BudgetAllocationInput[];
@@ -83,6 +85,7 @@ class BudgetTemplatesRepository {
           name: input.name,
           emoji: input.emoji,
           period: input.period,
+          currency: input.currency,
           totalAmount: input.totalAmount,
           isDefault: false,
           countUnbudgeted: input.countUnbudgeted,
@@ -110,9 +113,13 @@ class BudgetTemplatesRepository {
    * Budgets already made from it keep their own period. No-ops when the
    * template is gone (soft-deleted from another path while an editor was
    * open) — inserting fresh allocation rows for a dead template would leave
-   * live orphans behind.
+   * live orphans behind. Without a `currency` (a Web Dashboard edit, which
+   * knows no currencies) the template keeps its own.
    */
-  update(id: string, input: CreateBudgetTemplateInput) {
+  update(
+    id: string,
+    input: Omit<CreateBudgetTemplateInput, 'currency'> & { currency?: string | null },
+  ) {
     const db = getDb();
     const sqlite = getSQLite();
     const now = nowIso();
@@ -138,6 +145,7 @@ class BudgetTemplatesRepository {
           // behind: that period's own default stays (normalizeDefaults makes
           // it the default only when the period had none).
           ...(existing.period !== input.period ? { isDefault: false } : {}),
+          ...(input.currency !== undefined ? { currency: input.currency } : {}),
           totalAmount: input.totalAmount,
           countUnbudgeted: input.countUnbudgeted,
           updatedAt: now,

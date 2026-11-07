@@ -2976,6 +2976,16 @@ const id = {
     allocated_summary: '{{allocated}} dari {{total}} teralokasi',
     allocated_done: 'Teralokasi penuh',
     fill_remainder: 'Isi',
+    currency_label: 'Mata uang',
+    currency_hint_template:
+      'Setiap anggaran memakai kurs pada hari anggaran itu dibuat, dan pengeluaran dalam mata uang lain dikonversi dengan kurs tersebut. Hari ini: 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_budget:
+      'Pengeluaran dalam mata uang lain dikonversi dengan kurs 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_no_rate:
+      'Belum ada kurs {{currency}}. Tambahkan di Multi-mata uang agar pengeluaran dalam mata uang lain ikut dihitung.',
+    unconverted_one: '1 pengeluaran belum dihitung: belum ada kurs {{currency}}.',
+    unconverted_other: '{{count}} pengeluaran belum dihitung: belum ada kurs {{currency}}.',
+    approx_main: '≈ {{amount}}',
     back_populate_title_week: 'Isi minggu-minggu sebelumnya',
     back_populate_title_month: 'Isi bulan-bulan sebelumnya',
     back_populate_title_year: 'Isi tahun-tahun sebelumnya',

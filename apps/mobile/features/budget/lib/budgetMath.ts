@@ -6,11 +6,13 @@ import type {
   Category,
   MonthCycleInput,
   PeriodBudget,
+  RateTable,
   TransactionWithRelations,
   UnbudgetedCategorySpend,
 } from '~/types';
 import { dateFromDayKeyLocal, dayKeyFromIsoLocal, normalizeMoneyAmount } from '~/utils/formatters';
 
+import { budgetRate, budgetSpendValue } from './budgetCurrency';
 import {
   addBudgetPeriods,
   type BudgetPeriodClock,
@@ -24,7 +26,11 @@ import {
 /**
  * Aggregates one period's expense spend against its budget. Spend is valued
  * at the frozen reporting-currency amount so budget numbers always agree with
- * Insights, and only transactions inside the budget's own period count.
+ * Insights, and only transactions inside the budget's own period count. A
+ * budget in another currency counts spending in that currency at face value
+ * and converts the rest through its frozen rate (`budgetSpendValue`), else the
+ * latest one in `rateTable`; spending it cannot convert is left out and
+ * counted in `unconvertedCount`.
  *
  * Lines on root categories are the primary rows; their spend rolls all
  * subcategory activity up. Lines on subcategories render as children of their
@@ -37,14 +43,18 @@ export function buildBudgetSummary({
   transactions,
   categories,
   monthCycle = 1,
+  rateTable,
 }: {
   budget: PeriodBudget | null;
   transactions: TransactionWithRelations[];
   categories: Pick<Category, 'id' | 'parentId'>[];
   monthCycle?: MonthCycleInput;
+  /** The latest rates, for a budget in another currency made with no rate. */
+  rateTable?: RateTable | null;
 }): BudgetSummary | null {
   if (!budget) return null;
   const range = budgetPeriodRange(budget.period, budget.periodKey, monthCycle);
+  const rate = budgetRate(budget, rateTable);
 
   const parentById = new Map(categories.map((category) => [category.id, category.parentId]));
   const rootById = new Map(
@@ -71,17 +81,23 @@ export function buildBudgetSummary({
   const spentByRoot = new Map<string, number>();
   const spentByCategory = new Map<string, number>();
   let uncategorizedSpent = 0;
+  let unconvertedCount = 0;
   for (const transaction of transactions) {
     if (transaction.deletedAt) continue;
     if (transaction.type !== 'expense') continue;
     if (!isIsoInBudgetRange(transaction.date, range)) continue;
-    const value = transaction.reportingAmount ?? transaction.amount;
     const categoryId = transaction.categoryId;
-    if (!categoryId) {
+    const rootId = categoryId ? (rootById.get(categoryId) ?? categoryId) : null;
+    const value = budgetSpendValue(transaction, budget.currency, rate);
+    if (value == null) {
+      // Only spending that would count toward this budget is worth a mention.
+      if ((rootId && rootLineIds.has(rootId)) || budget.countUnbudgeted) unconvertedCount += 1;
+      continue;
+    }
+    if (!categoryId || !rootId) {
       uncategorizedSpent += value;
       continue;
     }
-    const rootId = rootById.get(categoryId) ?? categoryId;
     spentByRoot.set(rootId, (spentByRoot.get(rootId) ?? 0) + value);
     spentByCategory.set(categoryId, (spentByCategory.get(categoryId) ?? 0) + value);
   }
@@ -151,6 +167,7 @@ export function buildBudgetSummary({
     usageRatio: totalBudget > 0 ? totalSpent / totalBudget : 0,
     categories: progress,
     unbudgeted,
+    unconvertedCount,
   };
 }
 

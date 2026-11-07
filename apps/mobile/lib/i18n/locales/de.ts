@@ -3001,6 +3001,17 @@ const de = {
     allocated_summary: '{{allocated}} von {{total}} verteilt',
     allocated_done: 'Vollständig verteilt',
     fill_remainder: 'Auffüllen',
+    currency_label: 'Währung',
+    currency_hint_template:
+      'Jedes Budget behält den Kurs vom Tag seiner Erstellung und rechnet Ausgaben in anderen Währungen damit um. Heute: 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_budget:
+      'Ausgaben in anderen Währungen werden zu 1 {{currency}} = {{rate}} {{main}} umgerechnet.',
+    currency_hint_no_rate:
+      'Noch kein Wechselkurs für {{currency}}. Füge unter „Mehrere Währungen“ einen hinzu, damit Ausgaben in anderen Währungen mitzählen.',
+    unconverted_one: '1 Ausgabe zählt noch nicht mit: Es gibt keinen Wechselkurs für {{currency}}.',
+    unconverted_other:
+      '{{count}} Ausgaben zählen noch nicht mit: Es gibt keinen Wechselkurs für {{currency}}.',
+    approx_main: '≈ {{amount}}',
     back_populate_title_week: 'Vergangene Wochen auffüllen',
     back_populate_title_month: 'Vergangene Monate auffüllen',
     back_populate_title_year: 'Vergangene Jahre auffüllen',

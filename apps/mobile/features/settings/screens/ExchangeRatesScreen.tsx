@@ -22,16 +22,10 @@ import { useProGate } from '~/hooks/useProGate';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import { currencyNameForCode } from '~/utils/currency';
+import { currencyNameForCode, formatFxRate } from '~/utils/currency';
 
 interface ExchangeRatesScreenProps {
   onBack: () => void;
-}
-
-function formatRate(rate: number): string {
-  if (rate >= 100) return rate.toFixed(2);
-  if (rate >= 1) return rate.toFixed(4);
-  return rate.toPrecision(4);
 }
 
 export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
@@ -312,7 +306,7 @@ export function ExchangeRatesScreen({ onBack }: ExchangeRatesScreenProps) {
                         </Text>
                         <View style={styles.rateValue}>
                           {isManual ? <View style={styles.manualDot} /> : null}
-                          <Text variant="body">{row ? formatRate(row.rate) : '—'}</Text>
+                          <Text variant="body">{row ? formatFxRate(row.rate) : '—'}</Text>
                           <ChevronRight size={16} color={themeColors.textMuted} />
                         </View>
                       </View>
@@ -470,7 +464,7 @@ function RateEditModal({
   const [draft, setDraft] = useState('');
 
   useEffect(() => {
-    if (code) setDraft(currentRate != null ? formatRate(currentRate) : '');
+    if (code) setDraft(currentRate != null ? formatFxRate(currentRate) : '');
   }, [code, currentRate]);
 
   const handleSave = () => {

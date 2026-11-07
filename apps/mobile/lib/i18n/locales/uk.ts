@@ -2961,6 +2961,16 @@ const uk = {
     allocated_summary: 'Розподілено {{allocated}} із {{total}}',
     allocated_done: 'Повністю розподілено',
     fill_remainder: 'Заповнити',
+    currency_label: 'Валюта',
+    currency_hint_template:
+      'Кожен бюджет зберігає курс на день свого створення й перераховує за ним витрати в інших валютах. Сьогодні: 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_budget:
+      'Витрати в інших валютах перераховуються за курсом 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_no_rate:
+      'Курсу {{currency}} ще немає. Додайте його в розділі «Мультивалютність», щоб витрати в інших валютах враховувалися.',
+    unconverted_one: '1 витрату ще не враховано: немає курсу {{currency}}.',
+    unconverted_other: 'Ще не враховано витрат: {{count}}. Немає курсу {{currency}}.',
+    approx_main: '≈ {{amount}}',
     back_populate_title_week: 'Заповнити минулі тижні',
     back_populate_title_month: 'Заповнити минулі місяці',
     back_populate_title_year: 'Заповнити минулі роки',

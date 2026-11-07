@@ -8,12 +8,12 @@ import {
   AllocationFooter,
   parseAllocationAmount,
 } from '~/features/budget/components/AllocationEditor';
+import { withBudgetCurrency } from '~/features/budget/lib/budgetCurrency';
 import { childAllocationExceedsParent } from '~/features/budget/lib/budgetMath';
 import { money } from '~/features/budget/lib/format';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
-import { currencySymbolForCode } from '~/utils/currency';
 import { normalizeMoneyAmount } from '~/utils/formatters';
 
 interface CategoryAllocationScreenProps {
@@ -22,6 +22,8 @@ interface CategoryAllocationScreenProps {
   initialAmounts: Record<string, string>;
   /** Unallocated remainder across root categories, excluding this category. */
   remainingExcludingThis: number;
+  /** The budget's currency, which the amounts are in. */
+  currency: string;
   /** Commits the edited draft slice back into the hosting editor. */
   onDone: (amounts: Record<string, string>) => void;
   onClose: () => void;
@@ -39,10 +41,12 @@ export function CategoryAllocationScreen({
   categoryId,
   initialAmounts,
   remainingExcludingThis,
+  currency,
   onDone,
   onClose,
 }: CategoryAllocationScreenProps) {
-  const { settings, categories } = useApp();
+  const { settings: appSettings, categories } = useApp();
+  const settings = withBudgetCurrency(appSettings, currency);
   const themeColors = useThemeColors();
 
   const category = categories.find((candidate) => candidate.id === categoryId) ?? null;
@@ -50,7 +54,7 @@ export function CategoryAllocationScreen({
 
   const [amounts, setAmounts] = useState<Record<string, string>>(initialAmounts);
 
-  const currencySymbol = currencySymbolForCode(settings.currencyCode);
+  const currencySymbol = settings.currencySymbol;
   const parentAmount = parseAllocationAmount(amounts[categoryId] ?? '');
   const childAllocations = childCategories.map((child) => ({
     amount: parseAllocationAmount(amounts[child.id] ?? ''),

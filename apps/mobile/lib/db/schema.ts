@@ -394,6 +394,8 @@ export const budgetTemplatesTable = sqliteTable('budget_templates', {
   countUnbudgeted: integer('count_unbudgeted', { mode: 'boolean' }).notNull().default(true),
   // How often a budget made from the template repeats: 'week', 'month' or 'year'.
   period: text('period').notNull().default('month'),
+  // The budget's currency; null = the ledger's main currency (migration 080).
+  currency: text('currency'),
   sortOrder: integer('sort_order').notNull().default(0),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
@@ -432,6 +434,11 @@ export const monthlyBudgetsTable = sqliteTable('monthly_budgets', {
   // Frozen at creation; never rewritten when the template changes.
   totalAmount: real('total_amount').notNull().default(0),
   countUnbudgeted: integer('count_unbudgeted', { mode: 'boolean' }).notNull().default(true),
+  // Frozen from the template; null = the ledger's main currency (migration 080).
+  currency: text('currency'),
+  // 1 unit of `currency` in the main currency when the budget was made; null
+  // for a main-currency budget or when no rate was known.
+  fxRate: real('fx_rate'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),

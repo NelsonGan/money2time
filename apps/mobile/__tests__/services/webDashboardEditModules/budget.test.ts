@@ -26,6 +26,7 @@ const template = (id: string, patch: Partial<BudgetTemplate> = {}): BudgetTempla
   name: 'Monthly',
   emoji: null,
   period: 'month',
+  currency: null,
   totalAmount: 100,
   isDefault: true,
   countUnbudgeted: true,
@@ -46,6 +47,8 @@ const budget = (id: string, month: string, patch: Partial<PeriodBudget> = {}): P
   templateEmoji: null,
   totalAmount: 100,
   countUnbudgeted: true,
+  currency: null,
+  fxRate: null,
   lines: [],
   createdAt: AT,
   updatedAt: AT,
@@ -54,7 +57,11 @@ const budget = (id: string, month: string, patch: Partial<PeriodBudget> = {}): P
 });
 
 function lookup(
-  extra: { templates?: BudgetTemplate[]; budgets?: PeriodBudget[]; templateCount?: number } = {},
+  extra: {
+    templates?: BudgetTemplate[];
+    budgets?: PeriodBudget[];
+    templateCount?: number;
+  } = {},
   patch: Partial<EditLookup> = {},
 ): EditLookup {
   return {
@@ -415,6 +422,12 @@ describe('budget module: monthly budgets', () => {
     expect(
       refusal([{ entity: ENTITY, op: 'month_custom', month: '2026-10', budget: body() }]),
     ).toEqual({ error: 'conflict' });
+    // An older page is not shown a month budget in another currency, but it still holds the month.
+    expect(
+      refusal([{ entity: ENTITY, op: 'month_custom', month: '2026-11', budget: body() }], {
+        budgets: [budget('b1', '2026-10'), budget('bj', '2026-11', { currency: 'JPY' })],
+      }),
+    ).toEqual({ error: 'conflict' });
     expect(
       refusal([{ entity: ENTITY, op: 'month_create', month: '2026-11', templateId: 'tx' }]),
     ).toEqual({ error: 'conflict' });
@@ -474,6 +487,70 @@ describe('budget module: monthly budgets', () => {
     expect(steps([{ entity: ENTITY, op: 'month_delete', id: 'b1', at: AT }])).toEqual([
       { kind: 'module', entity: ENTITY, action: 'month_delete', payload: { id: 'b1' } },
     ]);
+  });
+
+  it('takes a currency the entry flows offer, and keeps the own one when none is named', () => {
+    const lookupPatch = { reportingCurrency: 'MYR', currencies: ['MYR', 'JPY'] };
+    const planned = (ops: unknown[]) => {
+      const result = plan(ops, undefined, lookupPatch);
+      if (!result.ok) throw new Error(`refused: ${result.error}`);
+      return result.plan.steps.map((item) => (item.kind === 'module' ? item.payload.input : null));
+    };
+    expect(
+      planned([
+        { entity: ENTITY, op: 'month_update', id: 'b1', at: AT, budget: body({ currency: 'JPY' }) },
+      ]),
+    ).toEqual([{ ...body(), currency: 'JPY' }]);
+    expect(
+      planned([
+        {
+          entity: ENTITY,
+          op: 'template_create',
+          template: { ...fields({ currency: null }), backPopulate: false },
+        },
+      ]),
+    ).toEqual([expect.objectContaining({ currency: null })]);
+    // No currency named: nothing is said about it, so the save keeps the own one.
+    expect(
+      planned([{ entity: ENTITY, op: 'template_update', id: 't1', at: AT, template: fields() }])[0],
+    ).not.toHaveProperty('currency');
+    // The budget's own currency, though no longer offered (JPY removed since).
+    expect(
+      plan(
+        [
+          {
+            entity: ENTITY,
+            op: 'month_update',
+            id: 'b1',
+            at: AT,
+            budget: body({ currency: 'JPY' }),
+          },
+        ],
+        { budgets: [budget('b1', '2026-10', { currency: 'JPY' })] },
+        { reportingCurrency: 'MYR', currencies: ['MYR'] },
+      ).ok,
+    ).toBe(true);
+    // A currency the phone does not offer, or not a code at all.
+    expect(
+      refusal(
+        [
+          {
+            entity: ENTITY,
+            op: 'month_update',
+            id: 'b1',
+            at: AT,
+            budget: body({ currency: 'EUR' }),
+          },
+        ],
+        undefined,
+        lookupPatch,
+      ),
+    ).toEqual({ error: 'invalid' });
+    expect(() =>
+      plan([
+        { entity: ENTITY, op: 'month_update', id: 'b1', at: AT, budget: body({ currency: 'yen' }) },
+      ]),
+    ).toThrow('unreadable');
   });
 
   it('checks a month like the template editor', () => {

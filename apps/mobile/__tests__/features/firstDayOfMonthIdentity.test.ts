@@ -71,6 +71,8 @@ function makeBudget(overrides: Partial<PeriodBudget>): PeriodBudget {
     templateEmoji: null,
     totalAmount: 1000,
     countUnbudgeted: true,
+    currency: null,
+    fxRate: null,
     lines: [{ id: 'l1', categoryId: 'food', amount: 600, sortOrder: 0 }],
     createdAt: '2026-07-01T00:00:00.000Z',
     updatedAt: '2026-07-01T00:00:00.000Z',

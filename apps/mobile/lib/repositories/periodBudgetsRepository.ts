@@ -10,6 +10,22 @@ import { writeBudgetLines } from './budgetLines';
 import { toPeriodBudget, toPeriodBudgetLine } from './mappers';
 
 /**
+ * The currency columns a period edit writes: none without a `currency` (or
+ * for a budget that is gone); a main-currency budget needs no rate; a new
+ * currency freezes the given rate; the same one keeps its frozen rate, or
+ * takes the given one when it was made without.
+ */
+function periodCurrencyChange(
+  existing: { currency: string | null; fxRate: number | null } | undefined,
+  input: { currency?: string | null; fxRate?: number | null },
+): { currency?: string | null; fxRate?: number | null } {
+  if (!existing || input.currency === undefined) return {};
+  if (input.currency === null) return { currency: null, fxRate: null };
+  if (existing.currency === input.currency && existing.fxRate != null) return {};
+  return { currency: input.currency, fxRate: input.fxRate ?? null };
+}
+
+/**
  * Week, month and year budgets (the `monthly_budgets` table, whose `month`
  * column holds the period key: see `features/budget/lib/budgetPeriods.ts`).
  */
@@ -88,13 +104,14 @@ class PeriodBudgetsRepository {
   /**
    * Freezes the template into a budget row for the period `key` of the
    * template's own period. No-ops (returning null) when that period already
-   * has a live budget, so a double-tap can't create duplicates.
+   * has a live budget, so a double-tap can't create duplicates. `fxRate` is
+   * the template currency's rate to freeze (`budgetRateToFreeze`).
    */
-  createFromTemplate(key: string, template: BudgetTemplate): string | null {
+  createFromTemplate(key: string, template: BudgetTemplate, fxRate: number | null): string | null {
     const sqlite = getSQLite();
     sqlite.execSync('BEGIN');
     try {
-      const id = this.insertFromTemplate(key, template);
+      const id = this.insertFromTemplate(key, template, fxRate);
       sqlite.execSync('COMMIT');
       return id;
     } catch (error) {
@@ -104,7 +121,11 @@ class PeriodBudgetsRepository {
   }
 
   /** Bulk back-populate: one transaction, skipping periods with a live budget. */
-  createManyFromTemplate(keys: string[], template: BudgetTemplate): string[] {
+  createManyFromTemplate(
+    keys: string[],
+    template: BudgetTemplate,
+    fxRate: number | null,
+  ): string[] {
     if (keys.length === 0) return [];
 
     const sqlite = getSQLite();
@@ -112,7 +133,7 @@ class PeriodBudgetsRepository {
     sqlite.execSync('BEGIN');
     try {
       for (const key of keys) {
-        const id = this.insertFromTemplate(key, template);
+        const id = this.insertFromTemplate(key, template, fxRate);
         if (id) created.push(id);
       }
       sqlite.execSync('COMMIT');
@@ -134,6 +155,9 @@ class PeriodBudgetsRepository {
     input: {
       totalAmount: number;
       countUnbudgeted: boolean;
+      /** Null = the ledger's main currency. */
+      currency: string | null;
+      fxRate: number | null;
       lines: { categoryId: string; amount: number }[];
     },
   ): string | null {
@@ -161,6 +185,8 @@ class PeriodBudgetsRepository {
           templateEmoji: null,
           totalAmount: input.totalAmount,
           countUnbudgeted: input.countUnbudgeted,
+          currency: input.currency,
+          fxRate: input.currency ? input.fxRate : null,
           createdAt: now,
           updatedAt: now,
           deletedAt: null,
@@ -180,13 +206,18 @@ class PeriodBudgetsRepository {
   /**
    * Edits one period's frozen budget in place (total, options, and line rows).
    * Deliberately does not touch the source template: a period edit is a local
-   * override, not a template change.
+   * override, not a template change. A new `currency` freezes `fxRate` with
+   * it; the same one keeps the frozen rate (or takes `fxRate` if the budget
+   * was made without one). Without a `currency` (a Web Dashboard edit) both
+   * stay as they are.
    */
   update(
     id: string,
     input: {
       totalAmount: number;
       countUnbudgeted: boolean;
+      currency?: string | null;
+      fxRate?: number | null;
       lines: { categoryId: string; amount: number }[];
     },
   ) {
@@ -196,10 +227,17 @@ class PeriodBudgetsRepository {
 
     sqlite.execSync('BEGIN');
     try {
+      const existing = db
+        .select({ currency: monthlyBudgetsTable.currency, fxRate: monthlyBudgetsTable.fxRate })
+        .from(monthlyBudgetsTable)
+        .where(and(eq(monthlyBudgetsTable.id, id), isNull(monthlyBudgetsTable.deletedAt)))
+        .get();
+      const currencyChange = periodCurrencyChange(existing, input);
       db.update(monthlyBudgetsTable)
         .set({
           totalAmount: input.totalAmount,
           countUnbudgeted: input.countUnbudgeted,
+          ...currencyChange,
           updatedAt: now,
         })
         .where(and(eq(monthlyBudgetsTable.id, id), isNull(monthlyBudgetsTable.deletedAt)))
@@ -276,7 +314,11 @@ class PeriodBudgetsRepository {
   }
 
   /** Must run inside a transaction. Returns null when the period is taken. */
-  private insertFromTemplate(key: string, template: BudgetTemplate): string | null {
+  private insertFromTemplate(
+    key: string,
+    template: BudgetTemplate,
+    fxRate: number | null,
+  ): string | null {
     const db = getDb();
     if (this.liveIdFor(template.period, key)) return null;
 
@@ -294,6 +336,8 @@ class PeriodBudgetsRepository {
         templateEmoji: template.emoji,
         totalAmount: template.totalAmount,
         countUnbudgeted: template.countUnbudgeted,
+        currency: template.currency,
+        fxRate: template.currency ? fxRate : null,
         createdAt: now,
         updatedAt: now,
         deletedAt: null,

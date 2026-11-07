@@ -14,8 +14,10 @@
  *             browser → sealed {type:'hello', name}; both screens show the code
  *             phone → sealed {type:'paired', name}   (the person confirmed on the phone)
  *             browser → sealed {type:'linked'}       (…and on the computer)
- *   refresh:  browser → sealed {type:'want', nonce, force, have?, repair?}   (when the
- *             phone arrives, on Refresh, or answering the phone's sealed {type:'offer'})
+ *   refresh:  browser → sealed {type:'want', nonce, force, have?, repair?, features?}
+ *             (when the phone arrives, on Refresh, or answering the phone's sealed
+ *             {type:'offer'}); `features` lists what this page can show beyond the
+ *             first version (`WANT_FEATURES`)
  *             phone → sealed {type:'begin', nonce, meta, key, iv}, then binary
  *                     chunks [u32 index][AES-GCM under the transfer key],
  *                     at most WINDOW ahead of
@@ -113,6 +115,12 @@ type TransferMeta = {
   editToken?: string | null;
   /** The phone's data version this copy was made at; a saved change raises it. */
   version?: number;
+  /**
+   * What this phone handles beyond the first version (`WANT_FEATURES`), so a
+   * page offers only what the phone can save: `budget-currencies`, that a web
+   * edit may name a budget's currency. Absent from an older app.
+   */
+  features?: WantFeature[];
   /**
    * Set when this transfer is a patch: the id of the transfer whose data it
    * changes. The browser applies it to that copy, or asks for everything.
@@ -378,6 +386,21 @@ type SessionEvents = {
   onEdit?: (message: Record<string, unknown>) => Promise<Record<string, unknown>>;
 };
 
+/**
+ * What a browser's page can show beyond the first version, named in its
+ * `want`. A page that names none is sent only what every page can show.
+ * - `budget-currencies`: monthly budgets in a currency other than the main one
+ *   (an older page would read their amounts as the main currency's).
+ */
+export const WANT_FEATURES = ['budget-currencies'] as const;
+export type WantFeature = (typeof WANT_FEATURES)[number];
+
+/** The known features a `want` names, ignoring anything else. */
+export function readWantFeatures(value: unknown): WantFeature[] {
+  if (!Array.isArray(value)) return [];
+  return WANT_FEATURES.filter((feature) => value.includes(feature));
+}
+
 /** A browser's request for data, as `onWant` passes it on. */
 export type WantRequest = {
   /** The request's nonce: a send or a decline answers this request only. */
@@ -385,6 +408,8 @@ export type WantRequest = {
   force: boolean;
   have: string | null;
   repair: boolean;
+  /** What the page can show beyond the first version. */
+  features: WantFeature[];
 };
 
 type Transfer = {
@@ -549,6 +574,7 @@ export class PhoneSession {
       id?: string;
       have?: unknown;
       repair?: unknown;
+      features?: unknown;
     }>(this.key, message as Sealed, 'b2p');
     if (!inner) return;
     if (inner.type === 'unlink') {
@@ -576,6 +602,7 @@ export class PhoneSession {
         force: Boolean(inner.force),
         have: typeof inner.have === 'string' && /^[\w-]{16}$/.test(inner.have) ? inner.have : null,
         repair: inner.repair === true,
+        features: readWantFeatures(inner.features),
       });
     } else if (inner.type === 'done' && this.transfer && inner.id === this.transfer.id) {
       this.transfer.done?.(inner.ok === true);

@@ -1612,8 +1612,14 @@ function PaymentAlertsSetupRouteScreen({
 }
 
 function WidgetSnapshotSync() {
-  const { settings, categories, periodBudgets, insightsPreferencesJson, getTrueHourlyRateForDate } =
-    useApp();
+  const {
+    settings,
+    categories,
+    periodBudgets,
+    rateTable,
+    insightsPreferencesJson,
+    getTrueHourlyRateForDate,
+  } = useApp();
   const { transactions } = useTransactions();
   const isPro = useIsPro();
 
@@ -1639,6 +1645,7 @@ function WidgetSnapshotSync() {
         getTrueHourlyRateForDate,
         categories,
         periodBudgets,
+        rateTable,
         excludedSavingsIncomeCategoryIds: savingsExclusions.income,
         excludedSavingsExpenseCategoryIds: savingsExclusions.expense,
         savingsIncomeMode: savingsExclusions.incomeMode,
@@ -1661,6 +1668,7 @@ function WidgetSnapshotSync() {
     insightsPreferencesJson,
     isPro,
     periodBudgets,
+    rateTable,
     settings,
     transactions,
   ]);
@@ -2250,6 +2258,7 @@ function BudgetCategoryAllocationRouteScreen({
       categoryId={session.categoryId}
       initialAmounts={session.initialAmounts}
       remainingExcludingThis={session.remainingExcludingThis}
+      currency={session.currency}
       onDone={session.onDone}
       onClose={() => navigation.goBack()}
     />

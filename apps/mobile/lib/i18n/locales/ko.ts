@@ -2929,6 +2929,16 @@ const ko = {
     allocated_summary: '{{total}} 중 {{allocated}} 배분됨',
     allocated_done: '모두 배분됨',
     fill_remainder: '채우기',
+    currency_label: '통화',
+    currency_hint_template:
+      '각 예산은 만든 날의 환율을 유지하고, 다른 통화로 쓴 지출을 그 환율로 환산합니다. 오늘: 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_budget:
+      '다른 통화로 쓴 지출은 1 {{currency}} = {{rate}} {{main}} 환율로 환산됩니다.',
+    currency_hint_no_rate:
+      '아직 {{currency}} 환율이 없습니다. 다른 통화로 쓴 지출도 반영되도록 다중 통화에서 추가하세요.',
+    unconverted_one: '지출 1건이 아직 반영되지 않았습니다: {{currency}} 환율이 없습니다.',
+    unconverted_other: '지출 {{count}}건이 아직 반영되지 않았습니다: {{currency}} 환율이 없습니다.',
+    approx_main: '≈ {{amount}}',
     back_populate_title_week: '지난 주 채우기',
     back_populate_title_month: '지난달 채우기',
     back_populate_title_year: '지난 해 채우기',

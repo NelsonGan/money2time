@@ -2965,6 +2965,17 @@ const sv = {
     allocated_summary: '{{allocated}} av {{total}} fördelat',
     allocated_done: 'Helt fördelad',
     fill_remainder: 'Fyll',
+    currency_label: 'Valuta',
+    currency_hint_template:
+      'Varje budget behåller kursen från dagen den skapas och räknar om utgifter i andra valutor till den. I dag: 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_budget:
+      'Utgifter i andra valutor räknas om till 1 {{currency}} = {{rate}} {{main}}.',
+    currency_hint_no_rate:
+      'Ingen växelkurs för {{currency}} än. Lägg till en under Flera valutor så att utgifter i andra valutor räknas med.',
+    unconverted_one: '1 utgift räknas inte med än: det finns ingen växelkurs för {{currency}}.',
+    unconverted_other:
+      '{{count}} utgifter räknas inte med än: det finns ingen växelkurs för {{currency}}.',
+    approx_main: '≈ {{amount}}',
     back_populate_title_week: 'Fyll i tidigare veckor',
     back_populate_title_month: 'Fyll i tidigare månader',
     back_populate_title_year: 'Fyll i tidigare år',
