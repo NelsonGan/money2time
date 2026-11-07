@@ -167,7 +167,40 @@ describe('failure details for analytics', () => {
     });
   });
 
-  it('drops a reason that is not a plain code', async () => {
+  it('falls back to the newer error detail, then the status, when there is no errors list', async () => {
+    fetchMock
+      .mockResolvedValueOnce(
+        jsonResponse(
+          {
+            error: {
+              message: 'Request had insufficient authentication scopes.',
+              status: 'PERMISSION_DENIED',
+              details: [{ '@type': 'ErrorInfo', reason: 'ACCESS_TOKEN_SCOPE_INSUFFICIENT' }],
+            },
+          },
+          { status: 403 },
+        ),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse(
+          { error: { message: 'denied', status: 'PERMISSION_DENIED' } },
+          { status: 403 },
+        ),
+      );
+
+    const first = await findFolderId('Money2Time').catch((e: unknown) => e);
+    expect(driveFailureDetails(first)).toEqual({
+      httpStatus: 403,
+      driveReason: 'ACCESS_TOKEN_SCOPE_INSUFFICIENT',
+    });
+    const second = await findFolderId('Money2Time').catch((e: unknown) => e);
+    expect(driveFailureDetails(second)).toEqual({
+      httpStatus: 403,
+      driveReason: 'PERMISSION_DENIED',
+    });
+  });
+
+  it('marks a reason that is not a plain code as unparsed', async () => {
     fetchMock.mockResolvedValue(
       jsonResponse(
         { error: { message: 'nope', errors: [{ reason: 'file "Budget 2026.json" not found' }] } },
@@ -176,7 +209,7 @@ describe('failure details for analytics', () => {
     );
 
     const error = await findFolderId('Money2Time').catch((e: unknown) => e);
-    expect(driveFailureDetails(error)).toEqual({ httpStatus: 404, driveReason: null });
+    expect(driveFailureDetails(error)).toEqual({ httpStatus: 404, driveReason: 'unparsed' });
   });
 
   it('marks an upload that broke on our side with the JS error name', async () => {

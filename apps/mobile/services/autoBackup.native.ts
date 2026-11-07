@@ -125,7 +125,10 @@ export async function runAutoBackupIfDue(opts?: { force?: boolean }): Promise<Ba
     // Machine-readable reason for each entry in `errors`, for analytics.
     const errorKinds: string[] = [];
     // HTTP status and Drive reason of the last provider failure, for analytics.
-    let lastFailure = driveFailureDetails(null);
+    let lastFailure: ReturnType<typeof driveFailureDetails> = {
+      httpStatus: null,
+      driveReason: null,
+    };
 
     if (fellBackToLocalFrom) {
       errors.push(

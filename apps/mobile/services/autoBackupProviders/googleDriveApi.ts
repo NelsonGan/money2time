@@ -77,10 +77,14 @@ export class DriveError extends Error {
   }
 }
 
-/** Keeps a reason only if it is a plain identifier, so no free text leaks out. */
+/**
+ * Keeps a reason only if it is a plain code, so no free text leaks out. A
+ * reason that was given but is not one becomes `unparsed`, which tells "Drive
+ * explained it, we dropped it" apart from "no reason at all".
+ */
 function toReasonCode(value: string | null | undefined): string | null {
   if (!value) return null;
-  return /^[A-Za-z][A-Za-z0-9_]{0,63}$/.test(value) ? value : null;
+  return /^[A-Za-z][A-Za-z0-9_.-]{0,63}$/.test(value) ? value : 'unparsed';
 }
 
 /**
@@ -154,6 +158,10 @@ interface DriveApiErrorBody {
   error?: {
     message?: string;
     errors?: { reason?: string }[];
+    /** Newer Google APIs put the cause here (`ACCESS_TOKEN_SCOPE_INSUFFICIENT`). */
+    details?: { reason?: string }[];
+    /** The canonical status, e.g. `PERMISSION_DENIED`. */
+    status?: string;
   };
 }
 
@@ -172,14 +180,27 @@ function classifyStatus(status: number, reason: string): DriveErrorKind {
 async function driveErrorFromResponse(response: Response): Promise<DriveError> {
   let message = `Drive request failed with status ${response.status}`;
   let reason = '';
+  // Analytics only: the legacy reason, else the newer detail or status, so a
+  // body without an `errors` list still says why.
+  let reportedReason = '';
   try {
     const body = (await response.json()) as DriveApiErrorBody;
     if (body?.error?.message) message = body.error.message;
     reason = body?.error?.errors?.[0]?.reason ?? '';
+    reportedReason =
+      reason ||
+      body?.error?.details?.find((detail) => detail?.reason)?.reason ||
+      body?.error?.status ||
+      '';
   } catch {
     // Non-JSON error body (an HTML error page from a captive portal, say).
   }
-  return new DriveError(classifyStatus(response.status, reason), message, response.status, reason);
+  return new DriveError(
+    classifyStatus(response.status, reason),
+    message,
+    response.status,
+    reportedReason,
+  );
 }
 
 interface DriveRequestOptions {
