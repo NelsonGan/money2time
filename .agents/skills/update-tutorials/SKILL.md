@@ -58,8 +58,8 @@ Captures go into the committed binary, so they have to look deliberate.
    shipped frames are iPhone 17 Pro, 1179x2556). Recapturing a subset on a different device is
    fine — marks are normalised — but the frames will not match each other visually, so prefer
    the same device.
-2. Start Metro yourself with `npx expo start --localhost` (see AGENTS.md; tunnel/LAN do not
-   work on this machine).
+2. Start Metro and open the app with `simlock-metro <device id> <agent-device command>`
+   from the worktree (see AGENTS.md).
 3. **Demo data, not empty state.** A tutorial of an empty app teaches nothing, and a leased
    device starts empty and signed out. Seed accounts, a month of transactions, albums and
    goals first: the `nlsn-mock-data` branch's `services/previewData`, copied in temporarily
