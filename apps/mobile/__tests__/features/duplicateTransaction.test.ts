@@ -2,8 +2,10 @@ import {
   buildDuplicateInput,
   canDuplicateTransaction,
   dayKeyToTransactionDate,
+  planDuplicates,
   selectDuplicableTransactions,
 } from '~/features/transactions/lib/duplicateTransaction';
+import { buildTransferFeeIndex } from '~/features/transactions/lib/transferFee';
 import type { TransactionWithRelations } from '~/types';
 
 function makeTransaction(
@@ -152,5 +154,45 @@ describe('buildDuplicateInput', () => {
     expect(input.toAccountId).toBe('acc-2');
     expect(input.toAmount).toBe(190);
     expect(input.countsAsExpense).toBe(true);
+  });
+});
+
+describe('planDuplicates', () => {
+  const transfer = makeTransaction({
+    id: 'tr',
+    type: 'transfer',
+    accountId: null,
+    fromAccountId: 'card',
+    toAccountId: 'wallet',
+    categoryId: null,
+  });
+  const fee = makeTransaction({
+    id: 'fee',
+    type: 'expense',
+    amount: 2,
+    currency: 'MYR',
+    accountId: 'wallet',
+    categoryId: 'bank-fees',
+    feeOfId: 'tr',
+  });
+  const plain = makeTransaction({ id: 'plain' });
+  const index = buildTransferFeeIndex([transfer, fee, plain]);
+
+  it("copies a transfer's fee with it", () => {
+    expect(planDuplicates([transfer, plain], index)).toEqual([
+      { transaction: transfer, transferFee: { amount: 2, side: 'to', categoryId: 'bank-fees' } },
+      { transaction: plain, transferFee: null },
+    ]);
+  });
+
+  it('does not copy a fee twice when its transfer is copied too', () => {
+    expect(planDuplicates([fee, transfer], index).map((plan) => plan.transaction.id)).toEqual([
+      'tr',
+    ]);
+  });
+
+  it('copies a fee picked alone as a plain expense', () => {
+    expect(planDuplicates([fee], index)).toEqual([{ transaction: fee, transferFee: null }]);
+    expect(buildDuplicateInput(fee, '2026-03-15')).not.toHaveProperty('feeOfId');
   });
 });

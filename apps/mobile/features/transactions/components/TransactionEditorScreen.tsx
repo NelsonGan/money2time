@@ -16,6 +16,7 @@ import {
   Layers,
   Pencil,
   Power,
+  Receipt,
   Repeat,
   Settings2,
   Timer,
@@ -73,7 +74,7 @@ import { SentimentIcon } from '~/components/ui/SentimentIcons';
 import { hasSubscriptionLogoArt } from '~/components/ui/SubscriptionLogo';
 import { SINGLE_LINE_TEXT_INPUT_STYLE } from '~/components/ui/textInputStyles';
 import { getSubscriptionLogoMeta, suggestSubscriptionLogo } from '~/constants/subscriptionLogos';
-import { useApp } from '~/context/AppContext';
+import { useApp, useTransferFeeIndex } from '~/context/AppContext';
 import { useSetSplitBillSession } from '~/context/SplitBillSession';
 import {
   describeInstalmentChoice,
@@ -100,12 +101,19 @@ import {
   formatMoney,
 } from '~/features/transactions/components/editor/calculatorEngine';
 import { TransactionOptionsCard } from '~/features/transactions/components/editor/TransactionOptionsCard';
+import { TransferFeeSheet } from '~/features/transactions/components/editor/TransferFeeSheet';
 import {
   pickDefaultAccountId,
   pickPaybackAccountId,
 } from '~/features/transactions/lib/entryDefaults';
 import { resolveNoteChange } from '~/features/transactions/lib/noteSuggestionPick';
 import { resolveSplitSaveRoute } from '~/features/transactions/lib/splitSaveRoute';
+import {
+  defaultTransferFeeCategoryId,
+  type TransferFeeDraft,
+  transferFeeTotals,
+} from '~/features/transactions/lib/transferFee';
+import { resolveBucketCategoryIds } from '~/features/transactions/utils/categoryKeywords';
 import { offscreenPageLimitFor, usePagerTabSync } from '~/hooks/usePagerTabSync';
 import { usePressScale } from '~/hooks/usePressScale';
 import { useProGate } from '~/hooks/useProGate';
@@ -389,10 +397,16 @@ interface TransactionEditorInitialValues {
   memberId: string | null;
 }
 
+/** What a save carries beside the transaction itself. */
+export interface TransactionEditorSubmitExtras {
+  /** A transfer's fee; null on a transfer without one and on every other type. */
+  transferFee: TransferFeeDraft | null;
+}
+
 interface TransactionEditorScreenProps {
   mode: 'create' | 'edit';
   onClose: () => void;
-  onSubmit: (input: CreateTransactionInput) => void;
+  onSubmit: (input: CreateTransactionInput, extras?: TransactionEditorSubmitExtras) => void;
   /** Capture-linked review waits for persistence before closing; ordinary editors keep deferred saves. */
   onSubmitConfirmed?: (input: CreateTransactionInput) => Promise<void>;
   onSubmitWithSplits?: (input: CreateTransactionInput, splits: SplitDraft[]) => void;
@@ -437,6 +451,8 @@ interface TransactionEditorScreenProps {
   };
   /** A line under the header that links somewhere (a payment's instalment plan). */
   headerNotice?: { label: string; actionLabel: string; onPress: () => void };
+  /** The fee a transfer being edited already has. */
+  initialTransferFee?: TransferFeeDraft | null;
   /**
    * Offers "pay in instalments" on a new expense: the amount becomes the
    * total, and saving hands the form and the chosen plan here instead of
@@ -672,6 +688,7 @@ export function TransactionEditorScreen({
   recurringOptions,
   instalmentOptions,
   headerNotice,
+  initialTransferFee = null,
 }: TransactionEditorScreenProps) {
   const {
     accounts,
@@ -817,6 +834,14 @@ export function TransactionEditorScreen({
     initialValues?.type === 'transfer' ? (initialValues?.categoryId ?? null) : null,
   );
   const [transferCategoryPickerVisible, setTransferCategoryPickerVisible] = useState(false);
+  // A fee charged on the transfer (a card top-up's 1%, say). Saved as its own
+  // expense row on the account that paid it; edited here with the transfer.
+  // See features/transactions/lib/transferFee.ts.
+  const [transferFee, setTransferFee] = useState<TransferFeeDraft | null>(
+    initialValues?.type === 'transfer' ? initialTransferFee : null,
+  );
+  const [transferFeeSheetVisible, setTransferFeeSheetVisible] = useState(false);
+  const transferFeeIndex = useTransferFeeIndex();
   // Swaps the numpad for the options panel, the same slot the receipt
   // viewfinder takes so the amount and note stay visible above it.
   const [optionsOpen, setOptionsOpen] = useState(false);
@@ -2046,6 +2071,40 @@ export function TransactionEditorScreen({
     return `→ ${currencySymbolForCode(toCur)}${Number.isFinite(received) ? received.toFixed(2) : '0.00'}`;
   }, [amount, isTransferType, rateTable, selectedFromAccount, selectedToAccount, transferToAmount]);
 
+  // What the transfer credits the to account, in its currency: the received
+  // amount across currencies, else the amount itself. The fee sheet's
+  // percentages and totals read it.
+  const transferReceivedValue = useMemo(() => {
+    const fromAmount = Number(amount) || 0;
+    if (
+      !selectedFromAccount ||
+      !selectedToAccount ||
+      selectedFromAccount.currency === selectedToAccount.currency
+    ) {
+      return fromAmount;
+    }
+    const received = transferToAmount.trim()
+      ? Number(transferToAmount)
+      : convert(fromAmount, selectedFromAccount.currency, selectedToAccount.currency, rateTable)
+          .value;
+    return Number.isFinite(received) ? received : 0;
+  }, [amount, rateTable, selectedFromAccount, selectedToAccount, transferToAmount]);
+  // Where a new fee is filed: the last fee's category, else one named for
+  // fees, else the user's Bills category.
+  const transferFeeDefaultCategoryId = useMemo(
+    () =>
+      defaultTransferFeeCategoryId({
+        categories,
+        latestCategoryId: transferFeeIndex.latestCategoryId,
+        fallbackCategoryId:
+          resolveBucketCategoryIds(
+            categories.filter((category) => category.type === 'expense'),
+            quickEntryPrefs.categoryMap,
+          ).get('bills') ?? null,
+      }),
+    [categories, quickEntryPrefs.categoryMap, transferFeeIndex.latestCategoryId],
+  );
+
   // The main-currency snapshot for this entry. A transaction-specific override
   // wins over the cached rate without mutating the user's global FX settings.
   const reportingConversion = useMemo(() => {
@@ -2452,7 +2511,10 @@ export function TransactionEditorScreen({
         deferredSubmit = () => onSubmitWithSplits(capturedPayload, capturedSplits);
       } else if (submitPayload) {
         const capturedPayload = submitPayload;
-        deferredSubmit = () => onSubmit(capturedPayload);
+        const capturedExtras: TransactionEditorSubmitExtras = {
+          transferFee: capturedPayload.type === 'transfer' ? transferFee : null,
+        };
+        deferredSubmit = () => onSubmit(capturedPayload, capturedExtras);
       } else {
         deferredSubmit = recurringSubmit;
       }
@@ -2489,6 +2551,8 @@ export function TransactionEditorScreen({
         // transfer's spending tick stays: someone logging several repayments in
         // a row wants each one counted the same way.
         setReimbursable(false);
+        // A fee is charged on one transfer; the next one starts without.
+        setTransferFee(null);
         resetCustomFx();
         setOptionsOpen(false);
         setBulkEntryNonce((n) => n + 1);
@@ -2559,6 +2623,46 @@ export function TransactionEditorScreen({
           });
         })()
       : null;
+  // The fee in a line under the amount, with what it does to the account that
+  // paid it: "RM2.00 fee · RM202.00 leaves Maybank Visa".
+  const transferFeePayingAccount =
+    isTransferType && transferFee
+      ? transferFee.side === 'to'
+        ? selectedToAccount
+        : selectedFromAccount
+      : null;
+  const transferFeeLabel =
+    transferFee && transferFeePayingAccount
+      ? formatAmount(transferFee.amount, settings, {
+          currencyCode: transferFeePayingAccount.currency,
+        })
+      : null;
+  const transferFeeSummary =
+    transferFee && transferFeePayingAccount && transferFeeLabel
+      ? (() => {
+          const totals = transferFeeTotals({
+            amount: Number(amount) || 0,
+            received: transferReceivedValue,
+            fee: transferFee.amount,
+            side: transferFee.side,
+          });
+          const total = formatAmount(
+            transferFee.side === 'to' ? totals.arrives : totals.leaves,
+            settings,
+            { currencyCode: transferFeePayingAccount.currency },
+          );
+          return I18n.t(
+            transferFee.side === 'to'
+              ? 'transactions.editor.transfer_fee.summary_to'
+              : 'transactions.editor.transfer_fee.summary_from',
+            { fee: transferFeeLabel, amount: total, account: transferFeePayingAccount.name },
+          );
+        })()
+      : null;
+  const openTransferFeeSheet = () => {
+    void triggerHaptic('selection');
+    setTransferFeeSheetVisible(true);
+  };
   // Back to the sheet when its "First payment" row opened the date picker.
   const reopenInstalmentSheet = () => {
     if (!instalmentDraft) return;
@@ -2690,6 +2794,8 @@ export function TransactionEditorScreen({
     (type === 'transfer' ? transferCountsAsExpense : type === 'expense' && reimbursable);
   // Receipt attach rides at the right end of the action row (money-in/out).
   const showReceiptButton = useStickyNumpad && (type === 'expense' || type === 'income');
+  // A transfer's fee (a recurring rule has its own editor and no fee).
+  const showTransferFeeButton = useStickyNumpad && isTransferType;
   // Currency now lives on the amount card, not the action row.
   const showActionRow =
     useStickyNumpad &&
@@ -2697,6 +2803,7 @@ export function TransactionEditorScreen({
       showSplitButton ||
       showSentimentButton ||
       showReceiptButton ||
+      showTransferFeeButton ||
       showOptionsButton);
   // Compact 4-row pad with flat, short keys; save row owns the bottom inset.
   const numpadBodyHeight = numpadBodyHeightFor(windowHeight);
@@ -4526,6 +4633,36 @@ export function TransactionEditorScreen({
                   )}
                 </Pressable>
               ) : null}
+              {showTransferFeeButton ? (
+                <Pressable
+                  onPress={openTransferFeeSheet}
+                  accessibilityRole="button"
+                  accessibilityLabel={I18n.t('transactions.editor.transfer_fee.title')}
+                  accessibilityValue={transferFeeLabel ? { text: transferFeeLabel } : undefined}
+                  className={cn(
+                    'h-9 flex-row items-center gap-1.5 rounded-full border px-3 active:opacity-70',
+                    transferFeeLabel
+                      ? 'border-primary/40 bg-primary/15'
+                      : 'border-border/30 bg-secondary/60',
+                  )}
+                >
+                  <Receipt
+                    size={15}
+                    color={transferFeeLabel ? themeColors.primary : themeColors.textMuted}
+                  />
+                  <Text
+                    variant="caption"
+                    numberOfLines={1}
+                    className={transferFeeLabel ? 'text-primary' : ''}
+                  >
+                    {transferFeeLabel
+                      ? I18n.t('transactions.editor.transfer_fee.chip_active', {
+                          amount: transferFeeLabel,
+                        })
+                      : I18n.t('transactions.editor.transfer_fee.chip_label')}
+                  </Text>
+                </Pressable>
+              ) : null}
               {showOptionsButton ? (
                 <Pressable
                   onPress={toggleOptionsPanel}
@@ -4601,6 +4738,18 @@ export function TransactionEditorScreen({
                     >
                       <Text variant="caption" tone="primary" numberOfLines={1}>
                         {instalmentSummary}
+                      </Text>
+                    </Pressable>
+                  ) : null}
+                  {transferFeeSummary ? (
+                    <Pressable
+                      onPress={openTransferFeeSheet}
+                      hitSlop={6}
+                      accessibilityRole="button"
+                      className="active:opacity-70"
+                    >
+                      <Text variant="caption" tone="primary" numberOfLines={1}>
+                        {transferFeeSummary}
                       </Text>
                     </Pressable>
                   ) : null}
@@ -4985,6 +5134,25 @@ export function TransactionEditorScreen({
         selectedCategoryId={categoryId}
         onSelect={handleCategorySelect}
       />
+      {isTransferType ? (
+        <TransferFeeSheet
+          visible={transferFeeSheetVisible}
+          amount={Number(amount) || 0}
+          received={transferReceivedValue}
+          fromAccount={selectedFromAccount}
+          toAccount={selectedToAccount}
+          fee={transferFee}
+          defaultCategoryId={transferFeeDefaultCategoryId}
+          categoryParents={categoryDataByType.expense.parents}
+          categoryChildByParent={categoryDataByType.expense.childByParent}
+          categoryPreviewById={allCategoryPreviewById}
+          onClose={() => setTransferFeeSheetVisible(false)}
+          onApply={(next) => {
+            setTransferFee(next);
+            setTransferFeeSheetVisible(false);
+          }}
+        />
+      ) : null}
       {/* Expense categories for a transfer counted as spending; the page's own
           category grid is empty on a transfer. */}
       <CategoryPickerSheet

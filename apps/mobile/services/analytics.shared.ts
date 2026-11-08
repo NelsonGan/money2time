@@ -182,6 +182,7 @@ export const GA4_ONLY_EVENTS = {
   VOICE_TRANSACTION_CREATED: 'Voice Transaction Created',
   AUTOLOG_TRANSACTION_CREATED: 'Autolog Transaction Created',
   BACK_TAP_TRIGGERED: 'Back Tap Triggered',
+  TRANSFER_FEE_ADDED: 'Transfer Fee Added',
 
   // Automatic payment alerts (bank and wallet notifications, Log Notification)
   AUTOLOG_ALERTS_DRAINED: 'Autolog Alerts Drained',

@@ -43,6 +43,7 @@ function makeTx(id: string, date: string): TransactionWithRelations {
     recurrenceParentId: null,
     sentiment: 'neutral',
     countsAsExpense: false,
+    feeOfId: null,
     ...NO_REIMBURSEMENT,
     createdAt: date,
     updatedAt: date,

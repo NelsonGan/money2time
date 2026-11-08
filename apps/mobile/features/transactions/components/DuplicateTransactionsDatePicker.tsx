@@ -1,13 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { DatePickerModal } from '~/components/datePicker';
-import { useApp } from '~/context/AppContext';
+import { useApp, useTransferFeeIndex } from '~/context/AppContext';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import type { TransactionWithRelations } from '~/types';
 import { dayKeyFromIsoLocal, formatDateInput } from '~/utils/formatters';
 
-import { buildDuplicateInput } from '../lib/duplicateTransaction';
+import { buildDuplicateInput, planDuplicates } from '../lib/duplicateTransaction';
 
 interface DuplicateTransactionsDatePickerProps {
   visible: boolean;
@@ -30,6 +30,7 @@ export function DuplicateTransactionsDatePicker({
   onDuplicated,
 }: DuplicateTransactionsDatePickerProps) {
   const { createTransaction } = useApp();
+  const transferFees = useTransferFeeIndex();
   // The modal fades out rather than vanishing, so a second day tap can still
   // land after the first one wrote its copies. One open, one set of copies.
   const wroteRef = useRef(false);
@@ -51,14 +52,18 @@ export function DuplicateTransactionsDatePicker({
         return;
       }
       wroteRef.current = true;
-      const ids = transactions.map((transaction) =>
-        createTransaction(buildDuplicateInput(transaction, dayKey)),
+      // A transfer's copy carries a copy of its fee (`planDuplicates`).
+      const ids = planDuplicates(transactions, transferFees).map(({ transaction, transferFee }) =>
+        createTransaction(
+          buildDuplicateInput(transaction, dayKey),
+          transferFee ? { transferFee } : undefined,
+        ),
       );
       void triggerHaptic('success');
       onClose();
       onDuplicated?.(ids);
     },
-    [createTransaction, onClose, onDuplicated, transactions],
+    [createTransaction, onClose, onDuplicated, transactions, transferFees],
   );
 
   return (

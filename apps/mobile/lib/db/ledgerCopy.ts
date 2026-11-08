@@ -120,6 +120,8 @@ export const LEDGER_COPY_TABLES: readonly TableSpec[] = [
       recurrence_parent_id: 'transactions',
       reimbursement_transaction_id: 'transactions',
       reimbursement_of_id: 'transactions',
+      // A transfer's fee follows the transfer into the copy.
+      fee_of_id: 'transactions',
       // A payment follows its instalment plan into the copy.
       instalment_rule_id: 'recurring_rules',
     },
