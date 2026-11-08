@@ -916,6 +916,17 @@ const vi = {
       fx_received: 'Số tiền nhận',
       fx_converted: 'Số tiền quy đổi',
       fx_edit: 'Chỉnh sửa quy đổi',
+      transfer_fee: {
+        chip_label: 'Phí',
+        chip_active: 'Phí {{amount}}',
+        title: 'Phí chuyển khoản',
+        amount_label: 'Số tiền phí',
+        charged_to: 'Tính vào',
+        remove: 'Xóa phí',
+        row_note: 'Phí chuyển khoản',
+        delete_confirm:
+          'Phí {{fee}} của giao dịch này cũng sẽ bị xóa. Không thể hoàn tác. Tiếp tục?',
+      },
       title_create: 'Thêm',
       title_edit: 'Cập nhật',
       bulk_mode: 'Hàng loạt',

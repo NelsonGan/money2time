@@ -108,6 +108,8 @@ export interface CreateTransactionInput {
    * repayment). Analytics only; see `utils/spending.ts`.
    */
   countsAsExpense?: boolean;
+  /** Set on a transfer fee's expense row; points at the transfer it was charged on. */
+  feeOfId?: string | null;
   /** Written by a drag reorder only; a new row always starts unordered. */
   dayOrder?: number | null;
   /** Instalment plan payments only: the plan and which payment (0 = payoff). */
@@ -655,9 +657,16 @@ class TransactionsRepository {
   /**
    * `now` stamps createdAt/updatedAt. A caller that already rendered the row
    * optimistically passes the stamp it used, so the stored row matches it and
-   * the reconcile after the write has nothing to change.
+   * the reconcile after the write has nothing to change. `createdAt` places
+   * the row among its day's rows when it differs (a transfer's fee sits a
+   * millisecond under its transfer); `updatedAt` is always `now`.
    */
-  createWithId(id: string, input: CreateTransactionInput, now: string = nowIso()) {
+  createWithId(
+    id: string,
+    input: CreateTransactionInput,
+    now: string = nowIso(),
+    createdAt: string = now,
+  ) {
     const db = getDb();
     const ledgerId = getActiveLedgerId();
     const normalizedInput = withEntryStamp(normalizeTransactionInput(input), ledgerId);
@@ -689,6 +698,7 @@ class TransactionsRepository {
         reimbursementTransactionId: normalizedInput.reimbursementTransactionId ?? null,
         reimbursementOfId: normalizedInput.reimbursementOfId ?? null,
         countsAsExpense: normalizedInput.countsAsExpense ?? false,
+        feeOfId: normalizedInput.feeOfId ?? null,
         dayOrder: null,
         instalmentRuleId: normalizedInput.instalmentRuleId ?? null,
         instalmentNumber: normalizedInput.instalmentNumber ?? null,
@@ -698,7 +708,7 @@ class TransactionsRepository {
         recurrenceInterval: 1,
         recurrenceEndDate: null,
         recurrenceParentId: null,
-        createdAt: now,
+        createdAt,
         updatedAt: now,
         deletedAt: null,
       })
@@ -747,7 +757,7 @@ class TransactionsRepository {
 
   /**
    * Shared ledgers: gives the rows written from an entry (its reimbursement
-   * refund, its split payback transfers) to the same person as the entry,
+   * refund, its split payback transfers, a transfer's fee) to the same person as the entry,
    * after `member_id` changed on it. Who added them stays as it was.
    */
   reassignLinked(id: string, memberId: string | null) {
@@ -757,8 +767,9 @@ class TransactionsRepository {
          id = (SELECT reimbursement_transaction_id FROM transactions WHERE id = ?)
          OR id IN (SELECT paid_transaction_id FROM transaction_splits
                    WHERE transaction_id = ? AND deleted_at IS NULL
-                     AND paid_transaction_id IS NOT NULL))`,
-      [memberId, nowIso(), memberId, id, id],
+                     AND paid_transaction_id IS NOT NULL)
+         OR fee_of_id = ?)`,
+      [memberId, nowIso(), memberId, id, id, id],
     );
   }
 

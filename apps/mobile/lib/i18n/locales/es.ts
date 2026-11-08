@@ -917,6 +917,17 @@ const es = {
       fx_received: 'Importe recibido',
       fx_converted: 'Importe convertido',
       fx_edit: 'Editar conversión',
+      transfer_fee: {
+        chip_label: 'Comisión',
+        chip_active: 'Comisión {{amount}}',
+        title: 'Comisión de transferencia',
+        amount_label: 'Importe de la comisión',
+        charged_to: 'Cobrada a',
+        remove: 'Quitar comisión',
+        row_note: 'Comisión de transferencia',
+        delete_confirm:
+          'También se eliminará su comisión de {{fee}}. No se puede deshacer. ¿Continuar?',
+      },
       title_create: 'Añadir',
       title_edit: 'Actualizar',
       bulk_mode: 'Múltiple',

@@ -885,6 +885,16 @@ const en = {
       transfer_expense_label: 'Count as expense',
       transfer_expense_tooltip:
         'Counts this transfer as spending in your totals, budgets and charts, filed under the category you pick. The money still moves between the two accounts as usual.',
+      transfer_fee: {
+        chip_label: 'Fee',
+        chip_active: 'Fee {{amount}}',
+        title: 'Transfer fee',
+        amount_label: 'Fee amount',
+        charged_to: 'Charged to',
+        remove: 'Remove fee',
+        row_note: 'Transfer fee',
+        delete_confirm: 'Its {{fee}} fee is deleted with it. This cannot be undone. Continue?',
+      },
       title_create: 'Add',
       title_edit: 'Update',
       bulk_mode: 'Bulk',

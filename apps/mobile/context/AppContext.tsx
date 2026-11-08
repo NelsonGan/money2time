@@ -87,6 +87,21 @@ import {
   planUnpaidMerge,
   splitShareKey,
 } from '~/features/transactions/lib/splitPayments';
+import {
+  buildTransferFeeIndex,
+  canChargeTransferFee,
+  EMPTY_TRANSFER_FEE_INDEX,
+  indexTransferFees,
+  isTransferFee,
+  planTransferFeeWrite,
+  sameTransferFeeIndex,
+  transferFeeCreatedAt,
+  transferFeeDayOrder,
+  type TransferFeeDraft,
+  type TransferFeeIndex,
+  transferFeeSideOf,
+  type TransferForFee,
+} from '~/features/transactions/lib/transferFee';
 import { normalizeLiveEarningsSchedule } from '~/features/widgets/lib/liveEarningsSchedule';
 import { getDb, getSQLite, initializeDatabase } from '~/lib/db/client';
 import {
@@ -313,6 +328,8 @@ export interface CreateTransactionMeta {
   onAutoLogPersisted?: (transactionId: string) => void;
   /** Capture link committed atomically with a manually reviewed notification. */
   onNotificationReviewPersisted?: (transactionId: string) => void;
+  /** A transfer's fee, written as its own expense row beside it (`transferFee.ts`). */
+  transferFee?: TransferFeeDraft | null;
 }
 
 export interface CreateItemInput {
@@ -551,6 +568,14 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   /** Returns the id of the newly created (optimistically inserted) transaction. */
   createTransaction: (input: CreateTransactionInput, meta?: CreateTransactionMeta) => string;
   updateTransaction: (id: string, input: Partial<CreateTransactionInput>) => void;
+  /**
+   * Adds, changes or removes a transfer's fee (null or 0 removes it). Pass the
+   * transfer as it stands after the save. See `features/transactions/lib/transferFee.ts`.
+   */
+  saveTransferFee: (
+    transfer: TransferForFee & { createdAt: string; dayOrder: number | null },
+    draft: TransferFeeDraft | null,
+  ) => void;
   deleteTransaction: (id: string) => void;
   updateTransactionsBulk: (
     updates: { id: string; input: Partial<CreateTransactionInput> }[],
@@ -750,6 +775,15 @@ const PaybackIndexContext = createContext<ReadonlyMap<string, PaybackLink>>(EMPT
 export function usePaybackIndex(): ReadonlyMap<string, PaybackLink> {
   return useContext(PaybackIndexContext);
 }
+const TransferFeeIndexContext = createContext<TransferFeeIndex>(EMPTY_TRANSFER_FEE_INDEX);
+
+/**
+ * Every transfer's fee (the expense row written for it), by transfer and by
+ * fee. Its identity holds while the fees stay the same.
+ */
+export function useTransferFeeIndex(): TransferFeeIndex {
+  return useContext(TransferFeeIndexContext);
+}
 const EMPTY_PAYBACK_ROWS: TransactionWithRelations[] = [];
 const PaybackRowsContext = createContext<TransactionWithRelations[]>(EMPTY_PAYBACK_ROWS);
 
@@ -875,6 +909,7 @@ function optimisticPaybackTransfer(input: {
     sentiment: 'neutral',
     ...NO_REIMBURSEMENT,
     countsAsExpense: false,
+    feeOfId: null,
     // The repayment belongs to whoever the split expense does.
     ...withEntryStamp({ memberId: parent.memberId }, getActiveLedgerId()),
     recurrencePattern: 'none',
@@ -2957,6 +2992,115 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return firstEntrySignalRef.current.prepare(type, transactionsRef.current);
   }, []);
 
+  /** Whether a transfer moves money between accounts of different currencies. */
+  const transferIsCrossCurrency = useCallback(
+    (transfer: { fromAccountId?: string | null; toAccountId?: string | null }) =>
+      !!transfer.fromAccountId &&
+      !!transfer.toAccountId &&
+      accountCurrencyOf(transfer.fromAccountId) !== accountCurrencyOf(transfer.toAccountId),
+    [accountCurrencyOf],
+  );
+
+  /**
+   * Writes a transfer fee's new expense row (`planTransferFeeWrite`'s create)
+   * right under its transfer: a millisecond older (`createdAt`), or a step
+   * below a dragged transfer (`dayOrder`). Shown at once; the write waits for
+   * the transfer's own, and is dropped if the transfer never landed.
+   */
+  const insertTransferFeeRow = useCallback(
+    (input: CreateTransactionInput, createdAt: string, dayOrder: number | null) => {
+      const transferId = input.feeOfId;
+      if (!transferId) return;
+      const amount = normalizeMoneyAmount(input.amount);
+      const snapshot = buildSnapshot('expense', amount, input.currency, false);
+      const id = newId();
+      const now = nowIso();
+      const normalizedInput = withEntryStamp(
+        {
+          ...input,
+          amount,
+          reportingCurrency: snapshot.reportingCurrency,
+          reportingAmount: snapshot.reportingAmount,
+          fxRate: snapshot.fxRate,
+          toAmount: null,
+          // Always in the paying account's own currency.
+          accountAmount: null,
+          receiptUri: null,
+        },
+        getActiveLedgerId(),
+      );
+      const optimistic: TransactionWithRelations = {
+        id,
+        instalmentRuleId: null,
+        instalmentNumber: null,
+        type: 'expense',
+        amount,
+        currency: normalizedInput.currency,
+        reportingCurrency: normalizedInput.reportingCurrency ?? null,
+        reportingAmount: normalizedInput.reportingAmount ?? null,
+        fxRate: normalizedInput.fxRate ?? null,
+        toAmount: null,
+        accountAmount: null,
+        date: normalizedInput.date,
+        accountId: normalizedInput.accountId ?? null,
+        fromAccountId: null,
+        toAccountId: null,
+        categoryId: normalizedInput.categoryId ?? null,
+        note: normalizedInput.note ?? null,
+        details: null,
+        receiptUri: null,
+        sentiment: 'neutral',
+        reimbursable: false,
+        reimbursedAt: null,
+        reimbursementAccountId: null,
+        reimbursementTransactionId: null,
+        reimbursementOfId: null,
+        countsAsExpense: false,
+        feeOfId: transferId,
+        dayOrder,
+        createdBy: normalizedInput.createdBy,
+        memberId: normalizedInput.memberId,
+        recurrencePattern: 'none',
+        recurrenceInterval: 1,
+        recurrenceEndDate: null,
+        recurrenceParentId: null,
+        createdAt,
+        updatedAt: now,
+        deletedAt: null,
+        ...resolveRelationNames(normalizedInput),
+      };
+      setTransactions((prev) => insertTransactionsByDateDesc(prev, [optimistic]));
+      runDeferredWrite(() => {
+        try {
+          // The transfer's write ran first; without it the fee has no transfer.
+          if (!transactionsRepository.getById(transferId)) {
+            setTransactions((prev) => prev.filter((tx) => tx.id !== id));
+            return;
+          }
+          transactionsRepository.createWithId(id, normalizedInput, now, createdAt);
+          if (dayOrder != null) transactionsRepository.update(id, { dayOrder });
+          // A fee follows its transfer into the active album, as a trip's
+          // costs should.
+          const activeAlbumId = albumsRepository.getActiveId();
+          if (
+            activeAlbumId &&
+            albumsRepository.getTransactionIds(activeAlbumId).includes(transferId)
+          ) {
+            albumsRepository.addTransactions(activeAlbumId, [id]);
+            setAlbums(albumsRepository.list());
+          }
+          const persisted = transactionsRepository.getById(id);
+          setTransactions((prev) => reconcileTransactionRow(prev, id, persisted));
+        } catch (error) {
+          setTransactions((prev) => prev.filter((tx) => tx.id !== id));
+          reportError(error, { scope: 'transfer_fee_create' });
+        }
+        refreshAccountBalances();
+      });
+    },
+    [buildSnapshot, refreshAccountBalances, resolveRelationNames],
+  );
+
   const createTransaction = useCallback(
     (input: CreateTransactionInput, meta?: CreateTransactionMeta) => {
       const claimFirstEntry = prepareFirstEntry(input.type);
@@ -3028,6 +3172,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         reimbursementTransactionId: normalizedInput.reimbursementTransactionId ?? null,
         reimbursementOfId: normalizedInput.reimbursementOfId ?? null,
         countsAsExpense: normalizedInput.countsAsExpense ?? false,
+        feeOfId: normalizedInput.feeOfId ?? null,
         dayOrder: null,
         createdBy: normalizedInput.createdBy,
         memberId: normalizedInput.memberId,
@@ -3066,6 +3211,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         });
       }
       setTransactions((prev) => insertTransactionsByDateDesc(prev, [optimistic]));
+      const feeWrite =
+        meta?.transferFee && normalizedInput.type === 'transfer'
+          ? planTransferFeeWrite({
+              transfer: {
+                id,
+                date: normalizedInput.date,
+                fromAccountId: normalizedInput.fromAccountId ?? null,
+                toAccountId: normalizedInput.toAccountId ?? null,
+                memberId: normalizedInput.memberId,
+              },
+              draft: meta.transferFee,
+              existing: null,
+              currencyOf: (accountId) =>
+                accountCurrencyOf(accountId) ?? reportingCurrencyRef.current,
+              note: I18n.t('transactions.editor.transfer_fee.row_note'),
+            })
+          : null;
       runDeferredWrite(() => {
         try {
           if (meta?.source !== 'autolog' && meta?.source !== 'notification_review') {
@@ -3135,20 +3297,80 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
         refreshAccountBalances();
       });
+      if (feeWrite?.kind === 'create') {
+        insertTransferFeeRow(feeWrite.input, transferFeeCreatedAt(now), null);
+        void trackEvent(AnalyticsEvents.TRANSFER_FEE_ADDED, {
+          side: meta?.transferFee?.side ?? 'from',
+          cross_currency: transferIsCrossCurrency(normalizedInput),
+        });
+      }
       return id;
     },
-    [accounts, buildSnapshot, prepareFirstEntry, refreshAccountBalances, resolveRelationNames],
+    [
+      accountCurrencyOf,
+      accounts,
+      buildSnapshot,
+      insertTransferFeeRow,
+      prepareFirstEntry,
+      refreshAccountBalances,
+      resolveRelationNames,
+      transferIsCrossCurrency,
+    ],
   );
 
   const updateTransactionsBulk = useCallback(
-    (updates: { id: string; input: Partial<CreateTransactionInput> }[]) => {
-      if (updates.length === 0) return;
-      const normalizedUpdates: { id: string; input: Partial<CreateTransactionInput> }[] = [];
-      const relationById = new Map<string, ReturnType<typeof resolveRelationNames>>();
-      const inputById = new Map<string, Partial<CreateTransactionInput>>();
+    (requested: { id: string; input: Partial<CreateTransactionInput> }[]) => {
+      if (requested.length === 0) return;
       const transactionById = new Map(
         transactionsRef.current.map((transaction) => [transaction.id, transaction]),
       );
+      // A transfer's fee keeps its day, its place under the transfer and the
+      // side that paid it: a new date (the editor, bulk edit, the Web
+      // Dashboard), a drag or a new account on the fee's side moves the fee
+      // with it, unless the same call moves the fee itself.
+      const feeByTransferId = indexTransferFees(transactionsRef.current);
+      const updates = [...requested];
+      if (feeByTransferId.size > 0) {
+        const requestedIds = new Set(requested.map((update) => update.id));
+        requested.forEach(({ id, input }) => {
+          const fee = feeByTransferId.get(id);
+          if (!fee || requestedIds.has(fee.id)) return;
+          const follow: Partial<CreateTransactionInput> = {};
+          if (typeof input.date === 'string') follow.date = input.date;
+          if ('dayOrder' in input) follow.dayOrder = transferFeeDayOrder(input.dayOrder ?? null);
+          if (input.type !== undefined && input.type !== 'transfer') {
+            // Re-typed as an expense or income, the row has no fee any more:
+            // the fee stays, as the plain expense it always was.
+            follow.feeOfId = null;
+          } else {
+            const transfer = transactionById.get(id);
+            const sideKey =
+              transfer && transferFeeSideOf(transfer, fee) === 'to'
+                ? 'toAccountId'
+                : 'fromAccountId';
+            const nextAccountId = input[sideKey];
+            const nextAccount = nextAccountId
+              ? accounts.find((account) => account.id === nextAccountId)
+              : null;
+            // A loan cannot pay one; the fee then stays where it was.
+            if (
+              transfer &&
+              nextAccountId &&
+              nextAccountId !== fee.accountId &&
+              canChargeTransferFee(nextAccount)
+            ) {
+              follow.accountId = nextAccountId;
+              if (nextAccount && nextAccount.currency !== fee.currency) {
+                follow.currency = nextAccount.currency;
+              }
+            }
+          }
+          if (Object.keys(follow).length > 0) updates.push({ id: fee.id, input: follow });
+        });
+      }
+      const normalizedUpdates: { id: string; input: Partial<CreateTransactionInput> }[] = [];
+      const relationById = new Map<string, ReturnType<typeof resolveRelationNames>>();
+      const inputById = new Map<string, Partial<CreateTransactionInput>>();
       updates.forEach(({ id, input }) => {
         let normalizedInput =
           input.amount === undefined
@@ -3351,7 +3573,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   const deleteTransactionsBulk = useCallback(
-    (ids: string[]) => {
+    // `track: false` for a row removed as part of another edit (a transfer's
+    // fee taken off in the editor), which is not a deletion the user asked for.
+    (ids: string[], options?: { track?: boolean }) => {
       if (ids.length === 0) return;
       const seenIds = new Set<string>();
       const uniqueIds: string[] = [];
@@ -3373,6 +3597,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // it took a linked refund row with it.
       const requestedDeleteCount = uniqueIds.length;
       const reimbursementIdSet = new Set(uniqueIds);
+      // A transfer's fee goes with it: the fee was charged on that transfer.
+      // Deleting only the fee leaves the transfer as it was.
+      transactionsRef.current.forEach((tx) => {
+        if (
+          isTransferFee(tx) &&
+          reimbursementIdSet.has(tx.feeOfId as string) &&
+          !reimbursementIdSet.has(tx.id)
+        ) {
+          uniqueIds.push(tx.id);
+        }
+      });
       const reopenExpenseIds: string[] = [];
       transactionsRef.current.forEach((tx) => {
         if (reimbursementIdSet.has(tx.id) && tx.reimbursementTransactionId) {
@@ -3523,12 +3758,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           });
           // Reclaim the now-orphaned receipt file(s) once the rows are gone.
           if (deletedHadReceipt) runUserAssetGc();
-          void trackEvent(
-            requestedDeleteCount === 1
-              ? AnalyticsEvents.TRANSACTION_DELETED
-              : AnalyticsEvents.TRANSACTIONS_BULK_DELETED,
-            { count: requestedDeleteCount },
-          );
+          if (options?.track !== false) {
+            void trackEvent(
+              requestedDeleteCount === 1
+                ? AnalyticsEvents.TRANSACTION_DELETED
+                : AnalyticsEvents.TRANSACTIONS_BULK_DELETED,
+              { count: requestedDeleteCount },
+            );
+          }
         } catch {
           // rollback on failure
         }
@@ -3543,6 +3780,46 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updateTransactionsBulk([{ id, input }]);
     },
     [updateTransactionsBulk],
+  );
+
+  const saveTransferFee = useCallback(
+    (
+      transfer: TransferForFee & { createdAt: string; dayOrder: number | null },
+      draft: TransferFeeDraft | null,
+    ) => {
+      const existing =
+        transactionsRef.current.find((tx) => isTransferFee(tx) && tx.feeOfId === transfer.id) ??
+        null;
+      const write = planTransferFeeWrite({
+        transfer,
+        draft,
+        existing,
+        currencyOf: (accountId) => accountCurrencyOf(accountId) ?? reportingCurrencyRef.current,
+        note: I18n.t('transactions.editor.transfer_fee.row_note'),
+      });
+      if (write.kind === 'create') {
+        insertTransferFeeRow(
+          write.input,
+          transferFeeCreatedAt(transfer.createdAt),
+          transferFeeDayOrder(transfer.dayOrder),
+        );
+        void trackEvent(AnalyticsEvents.TRANSFER_FEE_ADDED, {
+          side: draft?.side ?? 'from',
+          cross_currency: transferIsCrossCurrency(transfer),
+        });
+      } else if (write.kind === 'update') {
+        updateTransactionsBulk([{ id: write.feeId, input: write.input }]);
+      } else if (write.kind === 'delete') {
+        deleteTransactionsBulk([write.feeId], { track: false });
+      }
+    },
+    [
+      accountCurrencyOf,
+      deleteTransactionsBulk,
+      insertTransferFeeRow,
+      transferIsCrossCurrency,
+      updateTransactionsBulk,
+    ],
   );
 
   const deleteTransaction = useCallback(
@@ -3710,6 +3987,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         ...NO_REIMBURSEMENT,
         reimbursementOfId: id,
         countsAsExpense: false,
+        feeOfId: null,
         createdBy: refundInput.createdBy,
         memberId: refundInput.memberId,
         recurrencePattern: 'none',
@@ -3901,6 +4179,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         ...NO_REIMBURSEMENT,
         reimbursable: normalizedInput.reimbursable ?? false,
         countsAsExpense: false,
+        feeOfId: null,
         createdBy: normalizedInput.createdBy,
         memberId: normalizedInput.memberId,
         recurrencePattern: 'none',
@@ -6239,6 +6518,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             deletePeriodBudget,
             createTransaction,
             updateTransaction,
+            saveTransferFee,
             deleteTransaction,
             updateTransactionsBulk,
             deleteTransactionsBulk,
@@ -6381,6 +6661,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       deletePeriodBudget,
       createTransaction,
       updateTransaction,
+      saveTransferFee,
       deleteTransaction,
       updateTransactionsBulk,
       deleteTransactionsBulk,
@@ -6463,6 +6744,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     paybackIndexRef.current = next;
     return next;
   }, [transactions]);
+  // Each transfer's fee, for the editor and the lists; the same object back
+  // while the fees do not change.
+  const transferFeeIndexRef = useRef<TransferFeeIndex>(EMPTY_TRANSFER_FEE_INDEX);
+  const transferFeeIndex = useMemo(() => {
+    const next = buildTransferFeeIndex(transactions);
+    if (sameTransferFeeIndex(transferFeeIndexRef.current, next)) {
+      return transferFeeIndexRef.current;
+    }
+    transferFeeIndexRef.current = next;
+    return next;
+  }, [transactions]);
   // Paybacks with no transfer get a row of their own in the activity lists,
   // built from their split; the same array back while they do not change.
   const paybackRowsRef = useRef<TransactionWithRelations[]>(EMPTY_PAYBACK_ROWS);
@@ -6513,7 +6805,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     <AppContext.Provider value={value}>
       <TransactionsContext.Provider value={transactionsValue}>
         <PaybackIndexContext.Provider value={paybackIndex}>
-          <PaybackRowsContext.Provider value={paybackRows}>{children}</PaybackRowsContext.Provider>
+          <TransferFeeIndexContext.Provider value={transferFeeIndex}>
+            <PaybackRowsContext.Provider value={paybackRows}>
+              {children}
+            </PaybackRowsContext.Provider>
+          </TransferFeeIndexContext.Provider>
         </PaybackIndexContext.Provider>
       </TransactionsContext.Provider>
     </AppContext.Provider>

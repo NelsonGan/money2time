@@ -153,6 +153,7 @@ export function buildPaybackRows(
         reimbursementTransactionId: null,
         reimbursementOfId: null,
         countsAsExpense: false,
+        feeOfId: null,
         createdBy: bill.createdBy,
         memberId: bill.memberId,
         recurrencePattern: 'none',

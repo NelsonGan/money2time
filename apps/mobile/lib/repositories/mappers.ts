@@ -440,6 +440,7 @@ export function toTransaction(row: TransactionRow): Transaction {
     reimbursementTransactionId: row.reimbursementTransactionId ?? null,
     reimbursementOfId: row.reimbursementOfId ?? null,
     countsAsExpense: !!row.countsAsExpense,
+    feeOfId: row.feeOfId ?? null,
     dayOrder: row.dayOrder ?? null,
     instalmentRuleId: row.instalmentRuleId ?? null,
     instalmentNumber: row.instalmentNumber ?? null,
@@ -468,7 +469,7 @@ export const TRANSACTION_RAW_COLUMNS_SQL = `
   t.recurrence_parent_id, t.sentiment, t.reimbursable, t.reimbursed_at,
   t.reimbursement_account_id, t.reimbursement_transaction_id, t.reimbursement_of_id,
   t.counts_as_expense, t.day_order, t.created_at, t.updated_at, t.deleted_at, t.details,
-  t.instalment_rule_id, t.instalment_number, t.created_by, t.member_id`;
+  t.instalment_rule_id, t.instalment_number, t.created_by, t.member_id, t.fee_of_id`;
 
 type RawValue = string | number | null;
 
@@ -519,14 +520,15 @@ export function toTransactionWithRelationsFromRaw(
     instalmentNumber: (values[33] as number | null) ?? null,
     createdBy: (values[34] as string | null) ?? null,
     memberId: (values[35] as string | null) ?? null,
-    accountName: (values[36] as string | null) ?? null,
-    fromAccountName: (values[37] as string | null) ?? null,
-    toAccountName: (values[38] as string | null) ?? null,
-    categoryName: (values[39] as string | null) ?? null,
-    categoryParentId: (values[41] as string | null) ?? null,
-    categoryParentName: (values[42] as string | null) ?? null,
-    categoryIcon: (values[40] as string | null) ?? null,
-    instalmentCount: (values[43] as number | null) ?? null,
+    feeOfId: (values[36] as string | null) ?? null,
+    accountName: (values[37] as string | null) ?? null,
+    fromAccountName: (values[38] as string | null) ?? null,
+    toAccountName: (values[39] as string | null) ?? null,
+    categoryName: (values[40] as string | null) ?? null,
+    categoryParentId: (values[42] as string | null) ?? null,
+    categoryParentName: (values[43] as string | null) ?? null,
+    categoryIcon: (values[41] as string | null) ?? null,
+    instalmentCount: (values[44] as number | null) ?? null,
   };
 }
 

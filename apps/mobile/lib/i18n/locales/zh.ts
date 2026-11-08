@@ -874,6 +874,16 @@ const zh = {
       transfer_expense_label: '计为支出',
       transfer_expense_tooltip:
         '将此转账计为支出，按你选择的分类计入总额、预算和图表。资金仍照常在两个账户之间转移。',
+      transfer_fee: {
+        chip_label: '手续费',
+        chip_active: '手续费 {{amount}}',
+        title: '转账手续费',
+        amount_label: '手续费金额',
+        charged_to: '扣费账户',
+        remove: '移除手续费',
+        row_note: '转账手续费',
+        delete_confirm: '其 {{fee}} 手续费也会一并删除。此操作无法撤销。是否继续？',
+      },
       title_create: '添加',
       title_edit: '更新',
       bulk_mode: '批量',

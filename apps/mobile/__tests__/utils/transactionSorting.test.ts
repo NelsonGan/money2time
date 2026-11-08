@@ -39,6 +39,7 @@ function makeTx(overrides: Partial<TransactionWithRelations>): TransactionWithRe
     recurrenceParentId: null,
     sentiment: 'neutral',
     countsAsExpense: false,
+    feeOfId: null,
     ...NO_REIMBURSEMENT,
     createdAt: overrides.createdAt ?? '2026-05-13T00:00:00.000Z',
     updatedAt: overrides.updatedAt ?? overrides.createdAt ?? '2026-05-13T00:00:00.000Z',

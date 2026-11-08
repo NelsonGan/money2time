@@ -21,7 +21,7 @@ import {
 } from '~/components/navigation/BottomNavMinimize';
 import { Text, TimeValueInline } from '~/components/ui';
 import { LIST_BOTTOM_PADDING } from '~/constants/designSystem';
-import { useApp, usePaybackIndex } from '~/context/AppContext';
+import { useApp, usePaybackIndex, useTransferFeeIndex } from '~/context/AppContext';
 import { countsTowardSpending } from '~/features/reimbursements/lib/reimbursementMath';
 import { PaybackGroupRow } from '~/features/transactions/components/PaybackGroupRow';
 import { TransactionItem } from '~/features/transactions/components/TransactionItem';
@@ -41,7 +41,7 @@ import {
   applyReorderUpdates,
   type ReorderRow,
   type ReorderUpdate,
-  reorderUpdatesForDrag,
+  reorderUpdatesKeepingFee,
 } from '~/features/transactions/lib/reorderTransactionDate';
 import { useDeviceLayout } from '~/hooks/useDeviceLayout';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -524,10 +524,19 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
         : [],
     );
   }, [reorderRequested, rows]);
+  // Read at drop time, so the drop handler stays the same across writes.
+  const transferFees = useTransferFeeIndex();
+  const transferFeesRef = useRef(transferFees);
+  transferFeesRef.current = transferFees;
   const handleReorderDrop = useCallback(
     (reordered: ReorderRow[], movedId: string) => {
       // Dropped where its day and neighbours already put it: nothing to save.
-      const updates = reorderUpdatesForDrag(reordered, movedId);
+      // A transfer's fee comes along, right under it.
+      const updates = reorderUpdatesKeepingFee(
+        reordered,
+        movedId,
+        (transferId) => transferFeesRef.current.byTransferId.get(transferId)?.feeId,
+      );
       if (updates.length === 0) return false;
       // A save still queued from the drop before goes first, so saves land in
       // the order they were made.

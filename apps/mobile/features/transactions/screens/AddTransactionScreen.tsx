@@ -8,6 +8,7 @@ import {
 import { scheduleOfFrequency } from '~/features/instalments/lib/instalmentPlan';
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import { type SplitDraft, splitsHelpers } from '~/features/transactions/components/editor';
+import type { TransactionEditorSubmitExtras } from '~/features/transactions/components/TransactionEditorScreen';
 import { useNewTransactionGate } from '~/features/transactions/hooks/useNewTransactionGate';
 import { useProGate } from '~/hooks/useProGate';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
@@ -95,8 +96,11 @@ export function AddTransactionScreen({
   // Create the transaction and briefly flash its row so the user can spot the
   // one they just added once the list lands on its day.
   const handleCreate = useCallback(
-    (input: CreateTransactionInput) => {
-      const id = createTransaction(input);
+    (input: CreateTransactionInput, extras?: TransactionEditorSubmitExtras) => {
+      const id = createTransaction(
+        input,
+        extras?.transferFee ? { transferFee: extras.transferFee } : undefined,
+      );
       requestHighlightTransaction(id);
     },
     [createTransaction],

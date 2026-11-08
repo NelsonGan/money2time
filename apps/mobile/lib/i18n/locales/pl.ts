@@ -918,6 +918,17 @@ const pl = {
       fx_received: 'Otrzymana kwota',
       fx_converted: 'Kwota po przeliczeniu',
       fx_edit: 'Edytuj przeliczenie',
+      transfer_fee: {
+        chip_label: 'Opłata',
+        chip_active: 'Opłata {{amount}}',
+        title: 'Opłata za przelew',
+        amount_label: 'Kwota opłaty',
+        charged_to: 'Pobierana z',
+        remove: 'Usuń opłatę',
+        row_note: 'Opłata za przelew',
+        delete_confirm:
+          'Jego opłata {{fee}} też zostanie usunięta. Tego nie można cofnąć. Kontynuować?',
+      },
       title_create: 'Dodaj',
       title_edit: 'Zaktualizuj',
       bulk_mode: 'Wiele',

@@ -1,6 +1,8 @@
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import type { Transaction, TransactionWithRelations } from '~/types';
 
+import { type TransferFeeDraft, transferFeeDraftOf, type TransferFeeIndex } from './transferFee';
+
 /**
  * A balance adjustment is a reconciliation of one account at one moment, so a
  * copy of it on another date is not a transaction the user could have made.
@@ -68,4 +70,28 @@ export function buildDuplicateInput(
     // copy is stamped as having added it.
     memberId: transaction.memberId ?? null,
   };
+}
+
+/**
+ * The copies to write for `transactions`, each with the fee its copy carries.
+ * A transfer's copy carries a copy of its fee. A fee picked with its own
+ * transfer comes with that copy, so it is not copied a second time; one picked
+ * alone is copied as the plain expense it is (`buildDuplicateInput` drops the
+ * link).
+ */
+export function planDuplicates<T extends Transaction>(
+  transactions: readonly T[],
+  transferFees: TransferFeeIndex,
+): { transaction: T; transferFee: TransferFeeDraft | null }[] {
+  const copiedIds = new Set(transactions.map((transaction) => transaction.id));
+  return transactions
+    .filter((transaction) => {
+      const transferId = transferFees.byFeeId.get(transaction.id)?.transferId;
+      return !transferId || !copiedIds.has(transferId);
+    })
+    .map((transaction) => {
+      const fee =
+        transaction.type === 'transfer' ? transferFees.byTransferId.get(transaction.id) : null;
+      return { transaction, transferFee: fee ? transferFeeDraftOf(transaction, fee) : null };
+    });
 }
