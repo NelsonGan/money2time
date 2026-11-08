@@ -1,3 +1,5 @@
+import { requestOpenTab } from '~/services/tabNavigation';
+
 type FocusInsightRequest = {
   insightType: string;
 };
@@ -27,4 +29,10 @@ export function subscribeFocusInsightRequest(listener: Listener) {
   return () => {
     listeners.delete(listener);
   };
+}
+
+/** Open the Budget page: an Insights page, so the Insights tab focused on it. */
+export function requestOpenBudget() {
+  requestOpenTab('insights');
+  requestFocusInsight('budget');
 }

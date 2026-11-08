@@ -171,6 +171,25 @@ const de = {
     reset_action: 'Löschen & wechseln',
   },
   news: {
+    budgets_splits_scans_archive: {
+      title: 'Budgets, Rückzahlungen und mehr',
+      budgets: {
+        title: 'Wöchentliche und jährliche Budgets',
+        body: 'Budgets können sich jetzt wöchentlich oder jährlich wiederholen, nicht nur monatlich. Wähle das unter Wiederholung, wenn du eine Budget-Vorlage anlegst. Jeder Zeitraum bekommt auf der Seite Budget einen eigenen Ring: Tippe auf einen Ring, um zu sehen, was noch übrig ist. Mehrere Zeiträume gleichzeitig sind Teil von Pro.',
+      },
+      partPayments: {
+        title: 'Rückzahlungen in Teilen',
+        body: 'Freunde können dir Geld jetzt nach und nach zurückzahlen. Tippe unter Wer dir Geld schuldet auf Als bezahlt markieren und gib ein, was gezahlt wurde. Der Rest bleibt offen, mit Fortschrittsbalken und allen Zahlungen in einer Liste, und jede Zahlung zählt in deinen Konten, sobald sie eingeht.',
+      },
+      batchScan: {
+        title: 'Viele Belege auf einmal scannen',
+        body: 'Tippe auf Beleg scannen, öffne dein Album und wähle bis zu %{count} Belege aus. Aus jedem wird eine eigene Ausgabe mit eigenem Händler, Betrag, Datum und eigener Kategorie, während du die App weiter nutzt. Eine Karte auf Start zeigt, wie weit es ist.',
+      },
+      archive: {
+        title: 'Konten archivieren',
+        body: 'Karte gekündigt oder ein Konto nicht mehr in Gebrauch? Bearbeite es und schalte Konto archivieren ein. Es verschwindet aus deinen Kontolisten und Auswahlfeldern, behält aber alle Transaktionen, und seine wiederkehrenden Einträge werden pausiert. Du findest es wieder unter Archivierte anzeigen auf der Seite Konten.',
+      },
+    },
     cloud_sync_shared_ledgers: {
       title: 'Cloud Sync und geteilte Bücher',
       cloudSync: {
@@ -463,6 +482,9 @@ const de = {
       open_notification_review: 'Autoprüfung einschalten',
       open_insights: 'Einblicke öffnen',
       open_instalments: 'Raten ansehen',
+      open_budget: 'Budget öffnen',
+      open_settle_up: 'Wer dir Geld schuldet öffnen',
+      open_scan_receipt: 'Belege scannen',
       open_share_earn: 'Pro gratis sichern',
       open_quick_entry_settings: 'Schnelleingabe-Einstellungen öffnen',
       open_auto_log: 'Automatisierungen einrichten',

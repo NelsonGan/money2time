@@ -171,6 +171,25 @@ const fil = {
     reset_action: 'Burahin at palitan',
   },
   news: {
+    budgets_splits_scans_archive: {
+      title: 'Mga badyet, bayad-utang at iba pa',
+      budgets: {
+        title: 'Lingguhan at taunang badyet',
+        body: 'Puwede nang umulit ang badyet bawat linggo o bawat taon, bukod sa bawat buwan. Piliin ito sa Umuulit kapag gumagawa ng template ng badyet. May sariling ring ang bawat panahon sa pahina ng Badyet: i-tap ang ring para makita ang natitira. Bahagi ng Pro ang sabay-sabay na maraming panahon.',
+      },
+      partPayments: {
+        title: 'Bayad-utang nang paunti-unti',
+        body: 'Puwede ka nang bayaran ng mga kaibigan nang paunti-unti. Sa Sino ang may utang sa iyo, i-tap ang Markahang bayad at i-type kung magkano ang ibinayad nila. Mananatiling utang ang natitira, may progress bar at listahan ng bawat bayad, at binibilang ang bawat bayad sa mga account mo pagdating nito.',
+      },
+      batchScan: {
+        title: 'Mag-scan ng maraming resibo nang sabay',
+        body: 'I-tap ang I-scan ang resibo, buksan ang album mo at pumili ng hanggang %{count} resibo. Nagiging sariling gastos ang bawat isa, may sariling merchant, halaga, petsa at kategorya, habang patuloy mong ginagamit ang app. Isang card sa Home ang nagpapakita kung gaano na kalayo.',
+      },
+      archive: {
+        title: 'I-archive ang mga account',
+        body: 'Nagsara ng card o hindi na gumagamit ng account? I-edit ito at i-on ang I-archive ang account. Mawawala ito sa mga listahan at picker ng account pero mananatili ang bawat transaksyon, at ihihinto muna ang mga paulit-ulit na entry nito. Makikita mo ulit ito sa Ipakita ang archived sa pahina ng Mga Account.',
+      },
+    },
     cloud_sync_shared_ledgers: {
       title: 'Cloud Sync at mga shared ledger',
       cloudSync: {
@@ -463,6 +482,9 @@ const fil = {
       open_notification_review: 'I-on ang Auto-review',
       open_insights: 'Buksan ang Insights',
       open_instalments: 'Tingnan ang hulugan',
+      open_budget: 'Buksan ang Badyet',
+      open_settle_up: 'Buksan ang Sino ang may utang sa iyo',
+      open_scan_receipt: 'Mag-scan ng mga resibo',
       open_share_earn: 'Kunin ang Pro nang libre',
       open_quick_entry_settings: 'Buksan ang Quick Entry settings',
       open_auto_log: 'I-set up ang mga automation',

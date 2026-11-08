@@ -22,7 +22,7 @@ import {
 } from '~/navigation/settingsStack';
 import { SHARED_NATIVE_STACK_OPTIONS } from '~/navigation/stackOptions';
 import { createNativeStackSwipeHapticListeners } from '~/navigation/swipeBackHaptics';
-import { requestFocusInsight } from '~/services/insightsNavigation';
+import { requestFocusInsight, requestOpenBudget } from '~/services/insightsNavigation';
 import { requestOpenPaymentAlerts } from '~/services/paymentAlertsNavigation';
 import { subscribeOpenSettingsScreenRequest } from '~/services/settingsNavigation';
 import { requestOpenTab } from '~/services/tabNavigation';
@@ -130,10 +130,7 @@ function SettingsHomeRoute({
       onOpenAppLock={() => navigation.navigate('AppLock')}
       onOpenReceipts={() => navigation.navigate('Receipts')}
       onOpenReimbursements={() => navigation.navigate('Reimbursements')}
-      onOpenBudget={() => {
-        requestOpenTab('insights');
-        requestFocusInsight('budget');
-      }}
+      onOpenBudget={requestOpenBudget}
       onOpenWidgets={() => navigation.navigate('Widgets')}
       onOpenWidgetPreviews={__DEV__ ? () => navigation.navigate('WidgetPreviews') : undefined}
       onOpenProPaywall={onOpenProPaywall}
@@ -426,6 +423,7 @@ export function SettingsStack({
               onOpenLedgers={() => props.navigation.navigate('Ledgers')}
               onOpenInsights={() => requestOpenTab('insights')}
               onOpenInstalments={onOpenInstalments}
+              onOpenSettleUp={onOpenSettleUp}
             />
           );
         }}

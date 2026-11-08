@@ -171,6 +171,25 @@ const tr = {
     reset_action: 'Sil ve değiştir',
   },
   news: {
+    budgets_splits_scans_archive: {
+      title: 'Bütçeler, geri ödemeler ve daha fazlası',
+      budgets: {
+        title: 'Haftalık ve yıllık bütçeler',
+        body: 'Bütçeler artık her ay olduğu gibi her hafta veya her yıl da tekrarlanabilir. Bütçe şablonu oluştururken Tekrar altından seçin. Her dönemin Bütçe sayfasında kendi halkası olur: kalan tutarı görmek için bir halkaya dokunun. Birden fazla dönemi aynı anda kullanmak Pro’ya dahildir.',
+      },
+      partPayments: {
+        title: 'Parça parça geri ödeme',
+        body: 'Arkadaşlarınız artık borçlarını size azar azar ödeyebilir. Size kim borçlu bölümünde Ödendi olarak işaretle seçeneğine dokunun ve ödenen tutarı yazın. Kalan tutar ilerleme çubuğu ve tüm ödemelerin listesiyle birlikte borç olarak kalır; her ödeme geldiği anda hesaplarınıza yansır.',
+      },
+      batchScan: {
+        title: 'Birçok fişi aynı anda tarayın',
+        body: 'Fiş tara seçeneğine dokunun, albümünüzü açın ve en fazla %{count} fiş seçin. Her biri kendi satıcısı, tutarı, tarihi ve kategorisiyle ayrı bir gider olur; bu sırada uygulamayı kullanmaya devam edebilirsiniz. Ana sayfadaki tek bir kart ne kadar ilerlediğini gösterir.',
+      },
+      archive: {
+        title: 'Hesapları arşivleyin',
+        body: 'Bir kartı kapattınız ya da bir hesabı artık kullanmıyor musunuz? Hesabı düzenleyin ve Hesabı arşivle seçeneğini açın. Hesap, hesap listelerinizden ve seçicilerden kalkar ama tüm işlemlerini korur; tekrarlayan kayıtları da duraklatılır. Hesaplar sayfasında Arşivi göster altında yeniden bulabilirsiniz.',
+      },
+    },
     cloud_sync_shared_ledgers: {
       title: 'Cloud Sync ve paylaşılan defterler',
       cloudSync: {
@@ -463,6 +482,9 @@ const tr = {
       open_notification_review: 'Otomatik incelemeyi aç',
       open_insights: 'Analizleri aç',
       open_instalments: 'Taksitleri gör',
+      open_budget: 'Bütçeyi aç',
+      open_settle_up: 'Size kim borçlu sayfasını aç',
+      open_scan_receipt: 'Fişleri tara',
       open_share_earn: 'Pro’yu ücretsiz al',
       open_quick_entry_settings: 'Hızlı Giriş ayarlarını aç',
       open_auto_log: 'Otomasyonları kur',

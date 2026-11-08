@@ -171,6 +171,25 @@ const nl = {
     reset_action: 'Verwijderen en wisselen',
   },
   news: {
+    budgets_splits_scans_archive: {
+      title: 'Budgetten, terugbetalingen en meer',
+      budgets: {
+        title: 'Wekelijkse en jaarlijkse budgetten',
+        body: 'Budgetten kunnen nu elke week of elk jaar terugkomen, naast elke maand. Kies het bij Herhaalt wanneer je een budgetsjabloon maakt. Elke periode krijgt een eigen ring op de pagina Budget: tik op een ring om te zien wat er over is. Meerdere periodes tegelijk hoort bij Pro.',
+      },
+      partPayments: {
+        title: 'Terugbetalen in delen',
+        body: 'Vrienden kunnen je nu beetje bij beetje terugbetalen. Tik in Wie jou nog moet betalen op Markeer als betaald en typ wat ze betaald hebben. De rest blijft openstaan, met een voortgangsbalk en elke betaling in een lijst, en elke betaling telt mee in je rekeningen zodra die binnenkomt.',
+      },
+      batchScan: {
+        title: 'Veel bonnen tegelijk scannen',
+        body: 'Tik op Bon scannen, open je album en kies tot %{count} bonnen. Elke bon wordt een eigen uitgave, met eigen winkel, bedrag, datum en categorie, terwijl je de app gewoon blijft gebruiken. Eén kaart op Start laat zien hoe ver het is.',
+      },
+      archive: {
+        title: 'Rekeningen archiveren',
+        body: 'Een kaart opgezegd of gebruik je een rekening niet meer? Bewerk hem en zet Rekening archiveren aan. Hij verdwijnt uit je rekeninglijsten en keuzelijsten maar houdt alle transacties, en zijn terugkerende posten worden gepauzeerd. Je vindt hem terug onder Gearchiveerde tonen op de pagina Rekeningen.',
+      },
+    },
     cloud_sync_shared_ledgers: {
       title: 'Cloud Sync en gedeelde boeken',
       cloudSync: {
@@ -463,6 +482,9 @@ const nl = {
       open_notification_review: 'Autocontrole aanzetten',
       open_insights: 'Inzichten openen',
       open_instalments: 'Termijnen bekijken',
+      open_budget: 'Budget openen',
+      open_settle_up: 'Wie jou nog moet betalen openen',
+      open_scan_receipt: 'Bonnen scannen',
       open_share_earn: 'Pro gratis krijgen',
       open_quick_entry_settings: 'Instellingen voor Snelle invoer openen',
       open_auto_log: 'Automatiseringen instellen',
