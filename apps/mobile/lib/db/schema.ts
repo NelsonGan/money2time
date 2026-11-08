@@ -151,7 +151,7 @@ export const transactionsTable = sqliteTable('transactions', {
   // transfer it is. See utils/spending.ts.
   countsAsExpense: integer('counts_as_expense', { mode: 'boolean' }).notNull().default(false),
   // On the expense row of a fee charged on a transfer: the transfer it was
-  // charged on (migration 084). The fee is an ordinary expense otherwise.
+  // charged on (migration 085). The fee is an ordinary expense otherwise.
   feeOfId: text('fee_of_id'),
   // Position among the day's rows set by a drag; null means "order by
   // created_at". See utils/transactionSorting.ts.

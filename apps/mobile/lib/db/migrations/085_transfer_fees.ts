@@ -1,9 +1,9 @@
 import { addColumnIfMissing } from './helpers';
 import type { DbMigration } from './types';
 
-export const migration084TransferFees: DbMigration = {
-  version: 84,
-  name: '084_transfer_fees',
+export const migration085TransferFees: DbMigration = {
+  version: 85,
+  name: '085_transfer_fees',
   up(db) {
     // A fee charged on a transfer (a card top-up to an e-wallet, say) is its
     // own expense row on the account that paid it. This links that expense to
@@ -15,4 +15,4 @@ export const migration084TransferFees: DbMigration = {
   },
 };
 
-export default migration084TransferFees;
+export default migration085TransferFees;
