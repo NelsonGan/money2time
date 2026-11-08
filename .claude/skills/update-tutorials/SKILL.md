@@ -14,14 +14,14 @@ This skill is the loop that fixes that. Work through it in order.
 
 ## What lives where
 
-| Thing | Path | Committed? |
-| --- | --- | --- |
-| Copy (English prose, both platforms) | `features/tutorials/content/*.ts` | yes |
-| Marker spec (source + red marks) | `scripts/data/tutorial-shots.json` | yes |
-| Annotated frames | `assets/tutorials/<image>.webp` | yes |
-| Metro `require()` registry | `features/tutorials/content/images.generated.ts` | yes, generated |
-| Raw simulator captures | `.tutorial-raw/<name>.png` | **no**, gitignored |
-| Website copy of both | `money2time-web` `src/lib/tutorials.generated.ts`, `media/tutorials/` | yes, generated |
+| Thing                                | Path                                                                  | Committed?         |
+| ------------------------------------ | --------------------------------------------------------------------- | ------------------ |
+| Copy (English prose, both platforms) | `features/tutorials/content/*.ts`                                     | yes                |
+| Marker spec (source + red marks)     | `scripts/data/tutorial-shots.json`                                    | yes                |
+| Annotated frames                     | `assets/tutorials/<image>.webp`                                       | yes                |
+| Metro `require()` registry           | `features/tutorials/content/images.generated.ts`                      | yes, generated     |
+| Raw simulator captures               | `.tutorial-raw/<name>.png`                                            | **no**, gitignored |
+| Website copy of both                 | `money2time-web` `src/lib/tutorials.generated.ts`, `media/tutorials/` | yes, generated     |
 
 `image` names and tutorial `id`s are independent. Renumbering a tutorial's steps renames the
 **output**, not the raw capture: the spec entry keeps pointing at whatever the file on disk is
@@ -90,7 +90,7 @@ Things that bite, all of them learned the hard way:
 - **Long-press.** Use `agent-device longpress <target> [durationMs]`, not a bare press.
 - **Permission resets kill the app** (expected iOS behaviour). Relaunch after.
 - **Features that need a network or hardware** (receipt scan Worker, the microphone) fail in the
-  simulator. Capture the state *before* the failure, or reach the same screen another way.
+  simulator. Capture the state _before_ the failure, or reach the same screen another way.
 
 ## 4. Write the marks
 
@@ -196,8 +196,8 @@ Check the frame matches the app you are looking at right now. That is the whole 
   `expo.updates.assetPatternsToBeBundled` in `app.json`, so the frames ride the native binary
   instead of eating the 1000-asset OTA cap. Do not "fix" that by adding it. Frames are written
   as quality-85 lossy WebP for the same reason (~7.6MB, against ~12.9MB as 256-colour PNG and
-  ~40MB as true-colour PNG). `scripts/sync-tutorials-web.mjs` decodes them back to PNG for the
-  website.
+  ~40MB as true-colour PNG). The website serves the same WebP files,
+  which `scripts/sync-tutorials-web.mjs` copies across.
 - **Orphans cost real bytes.** Deleting a step without deleting its WebP leaves it in the binary;
   the test catches this, so do not silence it.
 - **Do not recapture what did not change.** Every recapture is bytes in the diff and a chance to

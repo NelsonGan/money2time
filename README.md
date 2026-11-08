@@ -3129,7 +3129,7 @@ artwork are generator inputs and were retained.
 - **Tutorial and Automation screenshots are quality-85 lossy WebP**
   (`scripts/lib/screenshotWebp.mjs`; tutorials 12.9 MB to 7.6 MB, Automation
   5.8 MB to 2.5 MB). `scripts/annotate-tutorials.mjs` writes WebP, and the
-  website sync decodes it back to PNG.
+  website serves the same files.
 - **The offline cities database ships gzipped** (5.3 MB to 2.3 MB) and is
   unpacked once on first run (see Offline places DB).
 - **`constants/categoryIcons.generated.ts` is one row per atlas** (pack,
@@ -3147,10 +3147,10 @@ artwork are generator inputs and were retained.
   `constants/emojiCatalog.generated.ts`, `constants/categoryIconGroups.ts`,
   `utils/categoryIconMatcher.ts`, `constants/cardDesigns.ts` and
   `constants/cardDesigns.generated.ts` with regular expressions.
-  `scripts/sync-tutorials-web.mjs` decodes `assets/tutorials/*.webp` back to
-  256-colour PNGs for the website, whose social preview images (`og.tsx`)
-  cannot read WebP. Converting the other images to WebP or reshaping those files
-  needs the matching change there.
+  `scripts/sync-tutorials-web.mjs` copies `assets/tutorials/*.webp` to the
+  website as they are (its social preview cards, which cannot read WebP, ask
+  Cloudflare for a JPEG copy). Converting the other images to WebP or reshaping
+  those files needs the matching change there.
 
 ### Internal preview rebuild
 
