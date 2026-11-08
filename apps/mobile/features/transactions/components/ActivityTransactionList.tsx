@@ -764,12 +764,6 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
       if (billId) navigation?.navigate('SettleUpTransaction', { transactionId: billId });
     };
   }, [navigation, onTransactionPress, paybackIndex]);
-  const handleTransactionLongPress = useMemo(() => {
-    if (!onTransactionLongPress) return undefined;
-    return (transaction: TransactionWithRelations) => {
-      if (!isPaybackRow(transaction)) onTransactionLongPress(transaction);
-    };
-  }, [onTransactionLongPress]);
 
   const keyExtractor = useCallback((item: ActivityRow) => item.id, []);
   const getItemType = useCallback(
@@ -841,7 +835,11 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
                   key={`${key}:${remountKey(tx.id)}`}
                   transaction={tx}
                   onPressTransaction={handleTransactionPress}
-                  onLongPressTransaction={handleTransactionLongPress}
+                  onLongPressTransaction={
+                    // A payback row is not stored, so it cannot be selected: no long
+                    // press at all (not even the haptic).
+                    isPaybackRow(tx) ? undefined : onTransactionLongPress
+                  }
                   onPressSplitBadge={onTransactionSplitBadgePress}
                   selected={selectedTransactionIdSet.has(tx.id)}
                   selectionMode={selectionMode}
@@ -896,7 +894,9 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
           payback={paybackIndex.has(item.transaction.id)}
           recurring={isRecurringRow(item.transaction)}
           onPressTransaction={handleTransactionPress}
-          onLongPressTransaction={handleTransactionLongPress}
+          onLongPressTransaction={
+            isPaybackRow(item.transaction) ? undefined : onTransactionLongPress
+          }
           onPressSplitBadge={onTransactionSplitBadgePress}
           selected={selectedTransactionIdSet.has(item.transaction.id)}
           selectionMode={selectionMode}
@@ -918,7 +918,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
       highlightedId,
       isTimeMode,
       measureDayCell,
-      handleTransactionLongPress,
+      onTransactionLongPress,
       handleTransactionPress,
       isRecurringRow,
       onToggleDaySelection,

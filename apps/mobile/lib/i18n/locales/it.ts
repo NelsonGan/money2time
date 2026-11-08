@@ -2175,6 +2175,7 @@ const it = {
     due_rule_days_after: 'Giorni dopo l’estratto',
     due_next_date: 'Prossima scadenza: {{date}}',
     due_days_after_error: 'Inserisci da 1 a {{max}} giorni',
+    due_days_after_needs_statement: 'Aggiungi un giorno di estratto conto da cui contare',
     current_balance: 'Saldo attuale',
     balance_adjustment_prompt_title: 'Come registrare questa variazione di saldo?',
     balance_adjustment_prompt_message:

@@ -2180,6 +2180,7 @@ const id = {
     due_rule_days_after: 'Hari setelah tagihan',
     due_next_date: 'Jatuh tempo berikutnya: {{date}}',
     due_days_after_error: 'Masukkan 1 sampai {{max}} hari',
+    due_days_after_needs_statement: 'Tambahkan tanggal tagihan untuk mulai menghitung',
     current_balance: 'Saldo saat ini',
     balance_adjustment_prompt_title: 'Bagaimana perubahan saldo ini dicatat?',
     balance_adjustment_prompt_message:

@@ -80,6 +80,7 @@ import {
   applyUnpaidMerge,
   consolidateOwedRows,
   cutPartPayment,
+  frozenAccountRate,
   type PaybackTransferAmounts,
   paybackTransferAmounts,
   planShareHandover,
@@ -95,6 +96,7 @@ import {
   isTransferFee,
   planTransferFeeWrite,
   sameTransferFeeIndex,
+  transferFeeAccountAmount,
   transferFeeCreatedAt,
   transferFeeDayOrder,
   type TransferFeeDraft,
@@ -1012,9 +1014,8 @@ function splitRestoreRates(
       accountRate = transfer.amount / undone.share;
     } else if (accountCurrency) {
       accountRate =
-        accountCurrency === tx.reportingCurrency && tx.fxRate != null
-          ? tx.fxRate
-          : convert(1, tx.currency, accountCurrency, rateTable).rateUsed;
+        frozenAccountRate(tx, accountCurrency) ??
+        convert(1, tx.currency, accountCurrency, rateTable).rateUsed;
     }
   }
   const reportingRate =
@@ -3361,8 +3362,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               canChargeTransferFee(nextAccount)
             ) {
               follow.accountId = nextAccountId;
-              if (nextAccount && nextAccount.currency !== fee.currency) {
+              // The fee's charge is in its current account's currency, which
+              // differs from the currency it was entered in once that account
+              // changed currency (`transferFeeAccountAmount`).
+              const feeCurrency =
+                (fee.accountId ? accountCurrencyOf(fee.accountId) : null) ?? fee.currency;
+              if (nextAccount && nextAccount.currency === fee.currency) {
+                // Back in the currency it was entered in: its own amount, exact.
+                if (fee.accountAmount != null) follow.accountAmount = null;
+              } else if (nextAccount && nextAccount.currency !== feeCurrency) {
+                // The same charge in the new account's currency, not the same
+                // number in another currency.
                 follow.currency = nextAccount.currency;
+                follow.amount = convert(
+                  transferFeeAccountAmount(fee),
+                  feeCurrency,
+                  nextAccount.currency,
+                  rateTableRef.current,
+                ).value;
               }
             }
           }
@@ -3565,6 +3582,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       });
     },
     [
+      accountCurrencyOf,
       accounts,
       buildSnapshot,
       scheduleRefreshTransactions,
@@ -4729,7 +4747,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (!parent || !split || !split.paidAt) return prev;
         const transferTxId = split.paidTransactionId;
         const splitAmount = split.amount;
-        const filtered = transferTxId ? prev.filter((tx) => tx.id !== transferTxId) : prev;
+        // The payback's transfer goes, and the fee charged on it with it.
+        const filtered = transferTxId
+          ? prev.filter((tx) => tx.id !== transferTxId && tx.feeOfId !== transferTxId)
+          : prev;
         return filtered.map((tx) => {
           if (tx.id !== parent.id) return tx;
           const restored = rescaleSplitAdjustedAmounts(tx, tx.amount + splitAmount, () =>
@@ -4826,7 +4847,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (!parent || !split) return prev;
         const transferTxId = split.paidAt ? split.paidTransactionId : null;
         const restoreAmount = split.paidAt ? split.amount : 0;
-        const filtered = transferTxId ? prev.filter((tx) => tx.id !== transferTxId) : prev;
+        // The payback's transfer goes, and the fee charged on it with it.
+        const filtered = transferTxId
+          ? prev.filter((tx) => tx.id !== transferTxId && tx.feeOfId !== transferTxId)
+          : prev;
         return filtered.map((tx) => {
           if (tx.id !== parent.id) return tx;
           const updatedSplits = removeSplitsKeepingShares(tx.splits ?? [], [splitId]);

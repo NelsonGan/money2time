@@ -2175,6 +2175,7 @@ const pl = {
     due_rule_days_after: 'Dni po wyciągu',
     due_next_date: 'Następny termin: {{date}}',
     due_days_after_error: 'Wpisz od 1 do {{max}} dni',
+    due_days_after_needs_statement: 'Dodaj dzień wyciągu, od którego liczyć',
     current_balance: 'Bieżące saldo',
     balance_adjustment_prompt_title: 'Jak zarejestrować tę zmianę salda?',
     balance_adjustment_prompt_message:

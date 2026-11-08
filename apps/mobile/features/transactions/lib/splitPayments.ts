@@ -275,6 +275,19 @@ export interface PaybackTransferAmounts {
 }
 
 /**
+ * The rate into its account's currency that a bill's frozen snapshot still
+ * gives once every share is paid back and its amount is 0 (no ratio left to
+ * read): its `fxRate`, when the account is in the reporting currency it was
+ * frozen in. Null otherwise; callers then fall back to today's rate.
+ */
+export function frozenAccountRate(
+  bill: { fxRate: number | null; reportingCurrency: string | null },
+  accountCurrency: string,
+): number | null {
+  return accountCurrency === bill.reportingCurrency && bill.fxRate != null ? bill.fxRate : null;
+}
+
+/**
  * The transfer for a friend's payback of `share` (in the bill's currency).
  *
  * A transfer's `amount` is in the account it leaves and `toAmount` in the one

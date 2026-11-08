@@ -8,6 +8,7 @@ import {
   isTransferFee,
   planTransferFeeWrite,
   sameTransferFeeIndex,
+  transferFeeAccountAmount,
   transferFeeAccountId,
   transferFeeCreatedAt,
   transferFeeDayOrder,
@@ -32,6 +33,7 @@ function feeRow(overrides: Record<string, unknown> = {}) {
     type: 'expense' as const,
     amount: 2,
     currency: 'MYR',
+    accountAmount: null as number | null,
     accountId: 'card',
     categoryId: 'bank-fees',
     date: transfer.date,
@@ -80,6 +82,13 @@ describe('fee side', () => {
       side: 'to',
       categoryId: 'bank-fees',
     });
+  });
+
+  it('drafts a fee in its account currency after the account changed currency', () => {
+    // The card went from MYR to SGD: the RM2 fee now charges it S$0.60.
+    const fee = feeRow({ amount: 2, currency: 'MYR', accountAmount: 0.6 });
+    expect(transferFeeAccountAmount(fee)).toBe(0.6);
+    expect(transferFeeDraftOf(transfer, fee).amount).toBe(0.6);
   });
 });
 
@@ -279,6 +288,7 @@ describe('buildTransferFeeIndex', () => {
       transferId: 'tr1',
       amount: 2,
       currency: 'MYR',
+      accountAmount: null,
       accountId: 'card',
       categoryId: 'bank-fees',
     });
@@ -287,6 +297,13 @@ describe('buildTransferFeeIndex', () => {
     expect(sameTransferFeeIndex(index, buildTransferFeeIndex(rows))).toBe(true);
     expect(
       sameTransferFeeIndex(index, buildTransferFeeIndex([feeRow({ amount: 3 }), rows[1]!])),
+    ).toBe(false);
+    // Re-denominated when its account changed currency.
+    expect(
+      sameTransferFeeIndex(
+        index,
+        buildTransferFeeIndex([feeRow({ accountAmount: 0.6 }), rows[1]!]),
+      ),
     ).toBe(false);
     expect(buildTransferFeeIndex([])).toBe(EMPTY_TRANSFER_FEE_INDEX);
   });

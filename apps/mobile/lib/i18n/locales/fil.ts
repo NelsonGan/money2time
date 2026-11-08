@@ -2194,6 +2194,7 @@ const fil = {
     due_rule_days_after: 'Araw pagkatapos ng statement',
     due_next_date: 'Susunod na due date: {{date}}',
     due_days_after_error: 'Maglagay ng 1 hanggang {{max}} araw',
+    due_days_after_needs_statement: 'Maglagay ng statement day na pagbibilangan',
     current_balance: 'Kasalukuyang balance',
     balance_adjustment_prompt_title: 'Paano dapat itala ang pagbabago ng balance?',
     balance_adjustment_prompt_message:

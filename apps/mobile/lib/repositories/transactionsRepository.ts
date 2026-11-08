@@ -125,6 +125,9 @@ export interface CreateTransactionInput {
   memberId?: string | null;
 }
 
+/** Ids per soft-delete statement (each bound twice, well under SQLite's limit). */
+const SOFT_DELETE_CHUNK = 5000;
+
 const DEFAULT_TRANSACTION_QUERY: TransactionFilters = {
   search: '',
   dateRange: null,
@@ -773,23 +776,30 @@ class TransactionsRepository {
     );
   }
 
+  /** Deletes a row, and the fee charged on it when it is a transfer. */
   softDelete(id: string) {
-    const db = getDb();
-    const now = nowIso();
-    db.update(transactionsTable)
-      .set({ deletedAt: now, updatedAt: now })
-      .where(and(eq(transactionsTable.id, id), isNull(transactionsTable.deletedAt)))
-      .run();
+    this.softDeleteMany([id]);
   }
 
+  /** Deletes the rows, and the fees charged on any of them that are transfers. */
   softDeleteMany(ids: string[]) {
     if (ids.length === 0) return;
     const db = getDb();
     const now = nowIso();
-    db.update(transactionsTable)
-      .set({ deletedAt: now, updatedAt: now })
-      .where(and(isNull(transactionsTable.deletedAt), inArray(transactionsTable.id, ids)))
-      .run();
+    // Each id is bound twice; chunks keep a large bulk delete under SQLite's
+    // bound-parameter limit.
+    for (let start = 0; start < ids.length; start += SOFT_DELETE_CHUNK) {
+      const chunk = ids.slice(start, start + SOFT_DELETE_CHUNK);
+      db.update(transactionsTable)
+        .set({ deletedAt: now, updatedAt: now })
+        .where(
+          and(
+            isNull(transactionsTable.deletedAt),
+            or(inArray(transactionsTable.id, chunk), inArray(transactionsTable.feeOfId, chunk)),
+          ),
+        )
+        .run();
+    }
   }
 
   /** Moves every non-deleted transaction in `fromCategoryIds` to `toCategoryId`. */

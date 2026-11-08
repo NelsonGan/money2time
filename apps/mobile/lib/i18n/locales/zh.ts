@@ -2067,6 +2067,7 @@ const zh = {
     due_rule_days_after: '账单日后天数',
     due_next_date: '下次还款日：{{date}}',
     due_days_after_error: '请输入 1 至 {{max}} 天',
+    due_days_after_needs_statement: '请填写结单日以便计算',
     current_balance: '当前余额',
     currency_change_title: '更改账户货币？',
     currency_change_message:

@@ -171,6 +171,8 @@ describe('planDuplicates', () => {
     type: 'expense',
     amount: 2,
     currency: 'MYR',
+    // A fee is written in its account's currency, so it has no account amount.
+    accountAmount: null,
     accountId: 'wallet',
     categoryId: 'bank-fees',
     feeOfId: 'tr',

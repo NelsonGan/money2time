@@ -186,6 +186,21 @@ class AccountsRepository {
       .where(and(eq(accountsTable.id, id), isNull(accountsTable.deletedAt)))
       .run();
 
+    // A live transfer to or from this account takes its fee with it, even
+    // when the fee was charged to the transfer's other account
+    // (`features/transactions/lib/transferFee.ts`). Done first, while those
+    // transfers are still live: a fee whose transfer went earlier stays the
+    // plain expense it became.
+    db.update(transactionsTable)
+      .set({ deletedAt: now, updatedAt: now })
+      .where(
+        and(
+          isNull(transactionsTable.deletedAt),
+          sql`${transactionsTable.feeOfId} IN (SELECT ${transactionsTable.id} FROM ${transactionsTable} WHERE ${transactionsTable.deletedAt} IS NULL AND (${transactionsTable.fromAccountId} = ${id} OR ${transactionsTable.toAccountId} = ${id}))`,
+        ),
+      )
+      .run();
+
     db.update(transactionsTable)
       .set({ deletedAt: now, updatedAt: now })
       .where(
