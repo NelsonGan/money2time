@@ -3219,7 +3219,7 @@ export function AccountsScreen({
     reorderAccounts,
     reorderAccountGroups,
     renameAccountGroup,
-    updateSettings,
+    toggleHideAccountBalances,
     updateTransactionsBulk,
   } = useApp();
   const monthCycle = monthCycleOf(settings);
@@ -3227,8 +3227,6 @@ export function AccountsScreen({
   const { checkLimit } = useProGate();
 
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(accountId);
-  // Saved, and shared with the eye on the assets page, so it survives a restart.
-  const hideAccountBalances = settings.hideAccountBalances;
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [editingGroupName, setEditingGroupName] = useState('');
   // Track collapsed (not expanded) groups so cards stay expanded by default,
@@ -3271,6 +3269,9 @@ export function AccountsScreen({
   }, [accountId, onBack]);
 
   const selectedAccount = activeAccountId ? (accountById.get(activeAccountId) ?? null) : null;
+  // The overview follows the saved eye, shared with the assets page. An
+  // account's detail has no eye and always shows its numbers.
+  const hideAccountBalances = settings.hideAccountBalances && !selectedAccount;
   const edgeSwipeBackHandler = useCallback(() => {
     if (addTransactionAccountId) {
       setAddTransactionAccountId(null);
@@ -3456,10 +3457,6 @@ export function AccountsScreen({
     ? I18n.t('accounts.show_balances')
     : I18n.t('accounts.hide_balances');
 
-  const handleToggleAccountBalances = useCallback(() => {
-    updateSettings({ hideAccountBalances: !hideAccountBalances });
-  }, [hideAccountBalances, updateSettings]);
-
   const formatVisibleBalance = useCallback(
     (amount: number, currencyCode?: string) => {
       if (hideAccountBalances) return MASKED_BALANCE_VALUE;
@@ -3522,7 +3519,7 @@ export function AccountsScreen({
         variant="secondary"
         className="h-10 w-10 rounded-full"
         accessibilityLabel={balanceToggleLabel}
-        onPress={handleToggleAccountBalances}
+        onPress={toggleHideAccountBalances}
       >
         {hideAccountBalances ? (
           <ClayIcon name="ui/eye-off" size={24} flatSize={18} />
@@ -3531,7 +3528,7 @@ export function AccountsScreen({
         )}
       </Button>
     ),
-    [balanceToggleLabel, handleToggleAccountBalances, hideAccountBalances],
+    [balanceToggleLabel, hideAccountBalances, toggleHideAccountBalances],
   );
 
   const handleToggleGroup = useCallback((cardId: string) => {

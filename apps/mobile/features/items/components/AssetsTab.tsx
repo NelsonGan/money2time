@@ -23,7 +23,7 @@ interface AssetsTabProps {
   onToggleBalances: () => void;
   renderAccounts: () => React.ReactNode;
   /** Savings-goals pane; shares the balance-visibility toggle with Accounts. */
-  renderGoals: (options: { hideBalances: boolean }) => React.ReactNode;
+  renderGoals: () => React.ReactNode;
   renderItems: () => React.ReactNode;
   onAddItem: () => void;
   /**
@@ -166,7 +166,7 @@ export function AssetsTab({
 
       <View className="flex-1">
         <MountedPane active={tab === 'accounts'}>{renderAccounts()}</MountedPane>
-        <MountedPane active={tab === 'goals'}>{renderGoals({ hideBalances })}</MountedPane>
+        <MountedPane active={tab === 'goals'}>{renderGoals()}</MountedPane>
         <MountedPane active={tab === 'items'}>{renderItems()}</MountedPane>
       </View>
     </View>

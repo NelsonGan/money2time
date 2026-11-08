@@ -639,7 +639,6 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
         | 'reimbursementsCountAsExpense'
         | 'showTransactionAccount'
         | 'showAccountPickerBalances'
-        | 'hideAccountBalances'
         | 'navTabsJson'
       >
     >,
@@ -648,6 +647,8 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
   updateWageConfigForMonth: (month: string, config: WageConfig) => void;
   deleteWageConfigForMonth: (month: string) => void;
   toggleDisplayMode: () => void;
+  /** Flip the assets-page eye (settings.hideAccountBalances), from the stored value. */
+  toggleHideAccountBalances: () => void;
   canUseTimeDisplayMode: boolean;
 
   getAccountById: (id: string) => Account | undefined;
@@ -4608,7 +4609,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           | 'reimbursementsCountAsExpense'
           | 'showTransactionAccount'
           | 'showAccountPickerBalances'
-          | 'hideAccountBalances'
           | 'navTabsJson'
         >
       >,
@@ -4983,6 +4983,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     },
     [refreshWages, runMutation],
   );
+
+  // Reads the stored value, not the rendered one, so two quick taps on the eye
+  // flip it twice instead of writing the same value twice.
+  const toggleHideAccountBalances = useCallback(() => {
+    const next = !settingsRepository.get().hideAccountBalances;
+    runMutation(
+      () => {
+        settingsRepository.updateSettings({ hideAccountBalances: next });
+      },
+      { refresh: refreshSettings },
+    );
+  }, [refreshSettings, runMutation]);
 
   const toggleDisplayMode = useCallback(() => {
     const current = settingsRepository.get();
@@ -6222,6 +6234,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             updateWageConfigForMonth,
             deleteWageConfigForMonth,
             toggleDisplayMode,
+            toggleHideAccountBalances,
             canUseTimeDisplayMode,
             getAccountById,
             getCategoryById,
@@ -6363,6 +6376,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updateWageConfigForMonth,
       deleteWageConfigForMonth,
       toggleDisplayMode,
+      toggleHideAccountBalances,
       canUseTimeDisplayMode,
       getAccountById,
       getCategoryById,

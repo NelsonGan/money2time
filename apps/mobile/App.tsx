@@ -544,7 +544,7 @@ function MainShellScreen({
     accounts,
     accountGroups,
     updateQuickEntryPrefs,
-    updateSettings,
+    toggleHideAccountBalances,
     settings,
   } = useApp();
   const { checkLimit } = useProGate();
@@ -1093,18 +1093,15 @@ function MainShellScreen({
   );
   // The Accounts and Goals eye. Saved as a setting so it survives a restart.
   const hideAccountBalances = settings.hideAccountBalances;
-  const toggleAccountBalances = useCallback(() => {
-    updateSettings({ hideAccountBalances: !hideAccountBalances });
-  }, [hideAccountBalances, updateSettings]);
   const renderAssetsGoals = useCallback(
-    ({ hideBalances }: { hideBalances: boolean }) => (
+    () => (
       <GoalsScreen
-        hideBalances={hideBalances}
+        hideBalances={hideAccountBalances}
         onOpenGoal={openGoalDetail}
         onOpenGoalEditor={openGoalEditor}
       />
     ),
-    [openGoalDetail, openGoalEditor],
+    [hideAccountBalances, openGoalDetail, openGoalEditor],
   );
   const assetsGoalsActions = useMemo(
     () => <AddGoalButton onOpenGoalEditor={openGoalEditor} />,
@@ -1317,7 +1314,7 @@ function MainShellScreen({
           >
             <MemoAssetsTab
               hideBalances={hideAccountBalances}
-              onToggleBalances={toggleAccountBalances}
+              onToggleBalances={toggleHideAccountBalances}
               resetToAccountsToken={accountsResetToken}
               onAddItem={openItemEditorFromAssets}
               onOpenAccountSettings={openAccountSettings}
