@@ -18,7 +18,7 @@ This skill is the loop that fixes that. Work through it in order.
 | --- | --- | --- |
 | Copy (English prose, both platforms) | `features/tutorials/content/*.ts` | yes |
 | Marker spec (source + red marks) | `scripts/data/tutorial-shots.json` | yes |
-| Annotated frames | `assets/tutorials/<image>.png` | yes |
+| Annotated frames | `assets/tutorials/<image>.webp` | yes |
 | Metro `require()` registry | `features/tutorials/content/images.generated.ts` | yes, generated |
 | Raw simulator captures | `.tutorial-raw/<name>.png` | **no**, gitignored |
 | Website copy of both | `money2time-web` `src/lib/tutorials.generated.ts`, `media/tutorials/` | yes, generated |
@@ -131,7 +131,7 @@ names = sys.argv[1:]
 TW, TH, LAB = 260, 565, 26
 sheet = Image.new('RGB', (TW*len(names), TH+LAB), 'white'); d = ImageDraw.Draw(sheet)
 for i, n in enumerate(names):
-    im = Image.open(f'assets/tutorials/{n}.png').convert('RGB'); im.thumbnail((TW-8, TH-8))
+    im = Image.open(f'assets/tutorials/{n}.webp').convert('RGB'); im.thumbnail((TW-8, TH-8))
     sheet.paste(im, (i*TW+4, LAB+4)); d.text((i*TW+6, 7), n, fill='black')
 sheet.save('/tmp/sheet.png')
 PY
@@ -195,8 +195,10 @@ Check the frame matches the app you are looking at right now. That is the whole 
 - **Asset budget.** `assets/tutorials` is deliberately absent from
   `expo.updates.assetPatternsToBeBundled` in `app.json`, so the frames ride the native binary
   instead of eating the 1000-asset OTA cap. Do not "fix" that by adding it. Frames are written
-  as 256-colour indexed PNGs for the same reason (~10MB, not ~40MB).
-- **Orphans cost real bytes.** Deleting a step without deleting its PNG leaves it in the binary;
+  as quality-85 lossy WebP for the same reason (~7.6MB, against ~12.9MB as 256-colour PNG and
+  ~40MB as true-colour PNG). `scripts/sync-tutorials-web.mjs` decodes them back to PNG for the
+  website.
+- **Orphans cost real bytes.** Deleting a step without deleting its WebP leaves it in the binary;
   the test catches this, so do not silence it.
 - **Do not recapture what did not change.** Every recapture is bytes in the diff and a chance to
   introduce dev-build noise into a shipped frame.

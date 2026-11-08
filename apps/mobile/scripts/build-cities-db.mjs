@@ -1,7 +1,8 @@
 // Builds the bundled, read-only offline place database from GeoNames data.
-// Produces assets/db/cities.db with cities + country/admin1 name lookups and an
-// FTS5 index for diacritic-insensitive typeahead, then VACUUMs to one compact
-// file. The generated .db is committed as a build asset.
+// Produces assets/db/cities.db.gz: cities + country/admin1 name lookups and an
+// FTS5 index for diacritic-insensitive typeahead, VACUUMed to one compact file
+// and gzipped, because the app bytes are download size and lib/db/citiesDb.ts
+// unpacks it on first run. The .gz is committed as a build asset.
 //
 // Re-run when refreshing GeoNames data:
 //   node scripts/build-cities-db.mjs              # download + populate
@@ -15,11 +16,13 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
+import { gzipSync } from 'node:zlib';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..');
 const OUT_DIR = path.join(REPO_ROOT, 'assets/db');
 const OUT_FILE = path.join(OUT_DIR, 'cities.db');
+const OUT_GZ = `${OUT_FILE}.gz`;
 
 const GEONAMES_BASE = 'https://download.geonames.org/export/dump';
 const CITIES_FILE = 'cities15000';
@@ -202,8 +205,12 @@ async function main() {
   db.exec('VACUUM;');
   db.close();
 
-  const { size } = await fs.stat(OUT_FILE);
-  process.stdout.write(`Wrote ${OUT_FILE} (${(size / 1024 / 1024).toFixed(2)} MB)\n`);
+  const raw = await fs.readFile(OUT_FILE);
+  const gz = gzipSync(raw, { level: 9 });
+  await fs.writeFile(OUT_GZ, gz);
+  await fs.rm(OUT_FILE);
+  const mb = (bytes) => (bytes / 1024 / 1024).toFixed(2);
+  process.stdout.write(`Wrote ${OUT_GZ} (${mb(gz.length)} MB, ${mb(raw.length)} MB unpacked)\n`);
 }
 
 main().catch((err) => {

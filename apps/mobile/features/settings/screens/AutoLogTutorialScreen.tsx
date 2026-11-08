@@ -62,28 +62,28 @@ const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
   // Log Card Payment action, bind its Amount/Merchant variables, and set the
   // account. Frames are annotated captures from the walkthrough video.
   logPayment: [
-    { key: 'log_payment_step_1', image: require('~/assets/autolog/lp_1.png') },
-    { key: 'log_payment_step_2', image: require('~/assets/autolog/lp_2.png') },
-    { key: 'log_payment_step_3', image: require('~/assets/autolog/lp_3.png') },
-    { key: 'log_payment_step_4', image: require('~/assets/autolog/lp_4.png') },
-    { key: 'log_payment_step_create_shortcut', image: require('~/assets/autolog/lp_4b.png') },
-    { key: 'log_payment_step_5', image: require('~/assets/autolog/lp_5.png') },
-    { key: 'log_payment_step_6', image: require('~/assets/autolog/lp_amount.png') },
-    { key: 'log_payment_step_merchant', image: require('~/assets/autolog/lp_merchant.png') },
-    { key: 'log_payment_step_7', image: require('~/assets/autolog/lp_7.png') },
-    { key: 'log_payment_step_8', image: require('~/assets/autolog/lp_8.png') },
+    { key: 'log_payment_step_1', image: require('~/assets/autolog/lp_1.webp') },
+    { key: 'log_payment_step_2', image: require('~/assets/autolog/lp_2.webp') },
+    { key: 'log_payment_step_3', image: require('~/assets/autolog/lp_3.webp') },
+    { key: 'log_payment_step_4', image: require('~/assets/autolog/lp_4.webp') },
+    { key: 'log_payment_step_create_shortcut', image: require('~/assets/autolog/lp_4b.webp') },
+    { key: 'log_payment_step_5', image: require('~/assets/autolog/lp_5.webp') },
+    { key: 'log_payment_step_6', image: require('~/assets/autolog/lp_amount.webp') },
+    { key: 'log_payment_step_merchant', image: require('~/assets/autolog/lp_merchant.webp') },
+    { key: 'log_payment_step_7', image: require('~/assets/autolog/lp_7.webp') },
+    { key: 'log_payment_step_8', image: require('~/assets/autolog/lp_8.webp') },
   ],
   // Step 1 installs the ready-made shortcut from iCloud, then a Back Tap is wired
   // to run it. Frames are annotated captures from the walkthrough video.
   newTransaction: [
     {
       key: 'new_transaction_step_1',
-      image: require('~/assets/autolog/nt_1.png'),
+      image: require('~/assets/autolog/nt_1.webp'),
       download: 'shortcut',
     },
-    { key: 'new_transaction_step_2', image: require('~/assets/autolog/nt_2.png') },
-    { key: 'new_transaction_step_3', image: require('~/assets/autolog/nt_3.png') },
-    { key: 'new_transaction_step_4', image: require('~/assets/autolog/nt_4.png') },
+    { key: 'new_transaction_step_2', image: require('~/assets/autolog/nt_2.webp') },
+    { key: 'new_transaction_step_3', image: require('~/assets/autolog/nt_3.webp') },
+    { key: 'new_transaction_step_4', image: require('~/assets/autolog/nt_4.webp') },
   ],
   // Step 1 installs the ready-made shortcut from iCloud; the rest wire a Back Tap
   // to run it, then show the screenshot → Always Allow → auto-log flow. Frames
@@ -91,58 +91,58 @@ const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
   logScreenshot: [
     {
       key: 'log_screenshot_step_1',
-      image: require('~/assets/autolog/ls_1.png'),
+      image: require('~/assets/autolog/ls_1.webp'),
       download: 'shortcut',
     },
-    { key: 'log_screenshot_step_2', image: require('~/assets/autolog/ls_2.png') },
-    { key: 'log_screenshot_step_3', image: require('~/assets/autolog/ls_3.png') },
-    { key: 'log_screenshot_step_4', image: require('~/assets/autolog/ls_4.png') },
-    { key: 'log_screenshot_step_5', image: require('~/assets/autolog/ls_5.png') },
-    { key: 'log_screenshot_step_6', image: require('~/assets/autolog/ls_6.png') },
+    { key: 'log_screenshot_step_2', image: require('~/assets/autolog/ls_2.webp') },
+    { key: 'log_screenshot_step_3', image: require('~/assets/autolog/ls_3.webp') },
+    { key: 'log_screenshot_step_4', image: require('~/assets/autolog/ls_4.webp') },
+    { key: 'log_screenshot_step_5', image: require('~/assets/autolog/ls_5.webp') },
+    { key: 'log_screenshot_step_6', image: require('~/assets/autolog/ls_6.webp') },
   ],
   // Android: share a screenshot (or any saved receipt photo) to the app from the
   // system share sheet. Frames are annotated emulator captures, see
   // scripts/data/autolog-shots.json.
   shareScreenshot: [
-    { key: 'share_screenshot_step_1', image: require('~/assets/autolog/ss_1.png') },
-    { key: 'share_screenshot_step_2', image: require('~/assets/autolog/ss_2.png') },
-    { key: 'share_screenshot_step_3', image: require('~/assets/autolog/ss_3.png') },
-    { key: 'share_screenshot_step_4', image: require('~/assets/autolog/ss_4.png') },
+    { key: 'share_screenshot_step_1', image: require('~/assets/autolog/ss_1.webp') },
+    { key: 'share_screenshot_step_2', image: require('~/assets/autolog/ss_2.webp') },
+    { key: 'share_screenshot_step_3', image: require('~/assets/autolog/ss_3.webp') },
+    { key: 'share_screenshot_step_4', image: require('~/assets/autolog/ss_4.webp') },
   ],
   // Android: turn on notification access, pick the banking and wallet apps,
   // say which account each pays from, and send a test alert.
   paymentAlertsAndroid: [
     {
       key: 'payment_alerts_android_step_1',
-      image: require('~/assets/autolog/pa_android_toggle.png'),
+      image: require('~/assets/autolog/pa_android_toggle.webp'),
     },
     {
       key: 'payment_alerts_android_disclosure',
-      image: require('~/assets/autolog/pa_android_disclosure.png'),
+      image: require('~/assets/autolog/pa_android_disclosure.webp'),
     },
     {
       key: 'payment_alerts_android_step_2',
-      image: require('~/assets/autolog/pa_android_access.png'),
+      image: require('~/assets/autolog/pa_android_access.webp'),
     },
     {
       key: 'payment_alerts_android_step_3',
-      image: require('~/assets/autolog/pa_android_allow.png'),
+      image: require('~/assets/autolog/pa_android_allow.webp'),
     },
     {
       key: 'payment_alerts_android_step_4',
-      image: require('~/assets/autolog/pa_android_apps.png'),
+      image: require('~/assets/autolog/pa_android_apps.webp'),
     },
     {
       key: 'payment_alerts_android_step_5',
-      image: require('~/assets/autolog/pa_android_account.png'),
+      image: require('~/assets/autolog/pa_android_account.webp'),
     },
     {
       key: 'payment_alerts_android_step_6',
-      image: require('~/assets/autolog/pa_android_test.png'),
+      image: require('~/assets/autolog/pa_android_test.webp'),
     },
     {
       key: 'payment_alerts_android_step_7',
-      image: require('~/assets/autolog/pa_android_success.png'),
+      image: require('~/assets/autolog/pa_android_success.webp'),
     },
   ],
   // iOS 27+ (the Notification trigger is new in 27): one shortcut per banking
@@ -151,31 +151,31 @@ const STEPS: Record<AutoLogTutorialTopic, TutorialStep[]> = {
   // Automation tab, so the trigger is added from the editor's Automation list.
   // Checked against the iOS 27 simulator.
   paymentAlertsIos: [
-    { key: 'payment_alerts_ios_step_1', image: require('~/assets/autolog/pa_ios_editor.png') },
+    { key: 'payment_alerts_ios_step_1', image: require('~/assets/autolog/pa_ios_editor.webp') },
     {
       key: 'payment_alerts_ios_step_2',
-      image: require('~/assets/autolog/pa_ios_notification.png'),
+      image: require('~/assets/autolog/pa_ios_notification.webp'),
     },
-    { key: 'payment_alerts_ios_app', image: require('~/assets/autolog/pa_ios_trigger.png') },
-    { key: 'payment_alerts_ios_run', image: require('~/assets/autolog/pa_ios_auto.png') },
-    { key: 'payment_alerts_ios_step_3', image: require('~/assets/autolog/pa_ios_action.png') },
-    { key: 'payment_alerts_ios_step_4', image: require('~/assets/autolog/pa_ios_variable.png') },
-    { key: 'payment_alerts_ios_input', image: require('~/assets/autolog/pa_ios_input.png') },
-    { key: 'payment_alerts_ios_body', image: require('~/assets/autolog/pa_ios_body.png') },
+    { key: 'payment_alerts_ios_app', image: require('~/assets/autolog/pa_ios_trigger.webp') },
+    { key: 'payment_alerts_ios_run', image: require('~/assets/autolog/pa_ios_auto.webp') },
+    { key: 'payment_alerts_ios_step_3', image: require('~/assets/autolog/pa_ios_action.webp') },
+    { key: 'payment_alerts_ios_step_4', image: require('~/assets/autolog/pa_ios_variable.webp') },
+    { key: 'payment_alerts_ios_input', image: require('~/assets/autolog/pa_ios_input.webp') },
+    { key: 'payment_alerts_ios_body', image: require('~/assets/autolog/pa_ios_body.webp') },
     {
       key: 'payment_alerts_ios_step_6',
-      image: require('~/assets/autolog/pa_ios_pick_account.png'),
+      image: require('~/assets/autolog/pa_ios_pick_account.webp'),
     },
-    { key: 'payment_alerts_ios_step_7', image: require('~/assets/autolog/pa_ios_done.png') },
+    { key: 'payment_alerts_ios_step_7', image: require('~/assets/autolog/pa_ios_done.webp') },
   ],
 };
 
 /** Settings → Accessibility → Touch → Back Tap → Double Tap → Shortcuts, on iOS 27. */
 const BACK_TAP_IOS27: TutorialStep[] = [
-  { key: 'bt27_touch', image: require('~/assets/autolog/bt27_01_touch.png') },
-  { key: 'bt27_backtap', image: require('~/assets/autolog/bt27_02_backtap.png') },
-  { key: 'bt27_double', image: require('~/assets/autolog/bt27_03_double.png') },
-  { key: 'bt27_shortcuts', image: require('~/assets/autolog/bt27_04_shortcuts.png') },
+  { key: 'bt27_touch', image: require('~/assets/autolog/bt27_01_touch.webp') },
+  { key: 'bt27_backtap', image: require('~/assets/autolog/bt27_02_backtap.webp') },
+  { key: 'bt27_double', image: require('~/assets/autolog/bt27_03_double.webp') },
+  { key: 'bt27_shortcuts', image: require('~/assets/autolog/bt27_04_shortcuts.webp') },
 ];
 
 /**
@@ -190,50 +190,50 @@ const STEPS_IOS27: Partial<Record<AutoLogTutorialTopic, TutorialStep[]>> = {
   logPayment: [
     {
       key: 'lp27_get',
-      image: require('~/assets/autolog/lp27q_01_setup.png'),
+      image: require('~/assets/autolog/lp27q_01_setup.webp'),
       download: 'automation',
     },
-    { key: 'lp27_card', image: require('~/assets/autolog/lp27q_02_card.png') },
-    { key: 'lp27_finish', image: require('~/assets/autolog/lp27m_12_account.png') },
+    { key: 'lp27_card', image: require('~/assets/autolog/lp27q_02_card.webp') },
+    { key: 'lp27_finish', image: require('~/assets/autolog/lp27m_12_account.webp') },
     {
       key: 'payment_alerts_ios_step_1',
-      image: require('~/assets/autolog/lp27m_02_automation.png'),
+      image: require('~/assets/autolog/lp27m_02_automation.webp'),
     },
-    { key: 'log_payment_step_2', image: require('~/assets/autolog/lp27m_03_wallet.png') },
-    { key: 'log_payment_step_3', image: require('~/assets/autolog/lp27m_04_card.png') },
-    { key: 'lp27_m_options', image: require('~/assets/autolog/lp27m_05_options.png') },
-    { key: 'log_payment_step_5', image: require('~/assets/autolog/lp27m_06_action.png') },
+    { key: 'log_payment_step_2', image: require('~/assets/autolog/lp27m_03_wallet.webp') },
+    { key: 'log_payment_step_3', image: require('~/assets/autolog/lp27m_04_card.webp') },
+    { key: 'lp27_m_options', image: require('~/assets/autolog/lp27m_05_options.webp') },
+    { key: 'log_payment_step_5', image: require('~/assets/autolog/lp27m_06_action.webp') },
     {
       key: 'lp27_m_select_variable',
-      image: require('~/assets/autolog/lp27m_08_select_variable.png'),
+      image: require('~/assets/autolog/lp27m_08_select_variable.webp'),
     },
-    { key: 'lp27_m_transaction', image: require('~/assets/autolog/lp27m_09_transaction.png') },
-    { key: 'lp27_m_amount', image: require('~/assets/autolog/lp27m_10_pick_amount.png') },
-    { key: 'lp27_m_merchant', image: require('~/assets/autolog/lp27m_11_pick_merchant.png') },
-    { key: 'log_payment_step_7', image: require('~/assets/autolog/lp27m_12_account.png') },
-    { key: 'log_payment_step_8', image: require('~/assets/autolog/lp27m_13_done.png') },
+    { key: 'lp27_m_transaction', image: require('~/assets/autolog/lp27m_09_transaction.webp') },
+    { key: 'lp27_m_amount', image: require('~/assets/autolog/lp27m_10_pick_amount.webp') },
+    { key: 'lp27_m_merchant', image: require('~/assets/autolog/lp27m_11_pick_merchant.webp') },
+    { key: 'log_payment_step_7', image: require('~/assets/autolog/lp27m_12_account.webp') },
+    { key: 'log_payment_step_8', image: require('~/assets/autolog/lp27m_13_done.webp') },
   ],
   newTransaction: [
     {
       key: 'new_transaction_step_1',
-      image: require('~/assets/autolog/nt27_01_add.png'),
+      image: require('~/assets/autolog/nt27_01_add.webp'),
       download: 'shortcut',
     },
     ...BACK_TAP_IOS27,
-    { key: 'new_transaction_step_3', image: require('~/assets/autolog/bt27_05_list_nt.png') },
-    { key: 'new_transaction_step_4', image: require('~/assets/autolog/nt_4.png') },
+    { key: 'new_transaction_step_3', image: require('~/assets/autolog/bt27_05_list_nt.webp') },
+    { key: 'new_transaction_step_4', image: require('~/assets/autolog/nt_4.webp') },
   ],
   logScreenshot: [
     {
       key: 'log_screenshot_step_1',
-      image: require('~/assets/autolog/ls27_01_add.png'),
+      image: require('~/assets/autolog/ls27_01_add.webp'),
       download: 'shortcut',
     },
     ...BACK_TAP_IOS27,
-    { key: 'log_screenshot_step_3', image: require('~/assets/autolog/bt27_05_list_ls.png') },
-    { key: 'log_screenshot_step_4', image: require('~/assets/autolog/ls_4.png') },
-    { key: 'log_screenshot_step_5', image: require('~/assets/autolog/ls_5.png') },
-    { key: 'log_screenshot_step_6', image: require('~/assets/autolog/ls_6.png') },
+    { key: 'log_screenshot_step_3', image: require('~/assets/autolog/bt27_05_list_ls.webp') },
+    { key: 'log_screenshot_step_4', image: require('~/assets/autolog/ls_4.webp') },
+    { key: 'log_screenshot_step_5', image: require('~/assets/autolog/ls_5.webp') },
+    { key: 'log_screenshot_step_6', image: require('~/assets/autolog/ls_6.webp') },
   ],
 };
 

@@ -8,13 +8,14 @@
  * as current, so the album city picker found nothing, even after an update.
  */
 
-const ASSET_URI = 'bundle/cities.db';
+const ASSET_URI = 'bundle/cities.db.gz';
 const DEST = 'doc/SQLite/cities.db';
 const MARKER = 'doc/SQLite/cities.db.version';
 
 type Content = 'REAL' | 'EMPTY' | string;
 const files = new Map<string, Content>();
 const dirs = new Set<string>();
+// Every path the bundled database was unpacked to, in order.
 const copies: string[] = [];
 const connections: { closeSync: jest.Mock }[] = [];
 let schemaReadError: Error | null = null;
@@ -56,13 +57,12 @@ jest.mock('expo-file-system/next', () => {
     create() {
       files.set(this.path, '');
     }
-    async write(text: string) {
-      files.set(this.path, text);
+    async bytes() {
+      return Buffer.from(files.get(this.path) ?? '');
     }
-    async copy(dest: { path: string }) {
-      if (files.has(dest.path)) throw new Error('Destination already exists');
-      copies.push(dest.path);
-      files.set(dest.path, files.get(this.path) ?? '');
+    async write(content: string | Uint8Array) {
+      if (typeof content !== 'string') copies.push(this.path);
+      files.set(this.path, Buffer.from(content).toString());
     }
   }
   return { Directory, File, Paths: { document: 'doc' } };
@@ -74,7 +74,10 @@ jest.mock('expo-asset', () => ({
   },
 }));
 
-jest.mock('../../assets/db/cities.db', () => 1);
+jest.mock('../../assets/db/cities.db.gz', () => 1);
+
+// The asset's content stands in for its unpacked bytes.
+jest.mock('fflate', () => ({ gunzipSync: (bytes: Uint8Array) => bytes }));
 
 const ROW = {
   id: '1850147',

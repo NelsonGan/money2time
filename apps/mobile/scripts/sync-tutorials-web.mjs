@@ -3,7 +3,7 @@
  * repository, so money2time.com and the app never drift.
  *
  *   features/tutorials/content/*  ->  src/lib/tutorials.generated.ts
- *   assets/tutorials/*.png        ->  media/tutorials/*.png
+ *   assets/tutorials/*.webp       ->  media/tutorials/*.png
  *
  * `media/` is the source the website publishes to its R2 bucket, so the new
  * screenshots appear on the site only after `node scripts/upload-media.mjs`
@@ -26,6 +26,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import ts from 'typescript';
+
+import { decodeScreenshotToPng } from './lib/screenshotWebp.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const ASSET_DIR = path.join(ROOT, 'assets/tutorials');
@@ -145,9 +147,13 @@ async function copyImages(webDir, tutorials) {
   const names = tutorials.flatMap((tutorial) =>
     tutorial.steps.map((step) => step.image).filter(Boolean),
   );
-  for (const name of names) {
-    await fs.copyFile(path.join(ASSET_DIR, `${name}.png`), path.join(outDir, `${name}.png`));
-  }
+  // The app ships WebP; the website still serves the 256-colour PNG.
+  await Promise.all(
+    [...new Set(names)].map(async (name) => {
+      const png = await decodeScreenshotToPng(path.join(ASSET_DIR, `${name}.webp`));
+      await fs.writeFile(path.join(outDir, `${name}.png`), png);
+    }),
+  );
   return names.length;
 }
 

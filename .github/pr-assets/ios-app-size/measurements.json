@@ -1,0 +1,82 @@
+{
+  "baselineCommit": "6df85f53",
+  "build": "xcodebuild archive, Release, generic/platform=iOS, unsigned (CODE_SIGNING_ALLOWED=NO), Xcode 27.2, APP_VARIANT unset (same config as the store build)",
+  "measure": "bytes of Products/Applications/Money2Time.app; thinned = Assets.car run through assetutil --idiom phone --scale 3; ipa = zip -9 of Payload/",
+  "bytes": {
+    "total": {
+      "before": 227805207,
+      "after": 181069411,
+      "saved": 46735796
+    },
+    "executable": {
+      "before": 32162664,
+      "after": 32162664,
+      "saved": 0
+    },
+    "frameworks": {
+      "before": 61153827,
+      "after": 41535299,
+      "saved": 19618528
+    },
+    "assets_car": {
+      "before": 43341624,
+      "after": 27841112,
+      "saved": 15500512
+    },
+    "jsbundle": {
+      "before": 17596191,
+      "after": 17596281,
+      "saved": -90
+    },
+    "js_assets": {
+      "before": 71089990,
+      "after": 59472861,
+      "saved": 11617129
+    },
+    "assets/tutorials": {
+      "before": 12876110,
+      "after": 7563684,
+      "saved": 5312426
+    },
+    "assets/autolog": {
+      "before": 5764379,
+      "after": 2509126,
+      "saved": 3255253
+    },
+    "assets/db": {
+      "before": 5259264,
+      "after": 2302175,
+      "saved": 2957089
+    },
+    "assets/app-icons": {
+      "before": 1428902,
+      "after": 1413841,
+      "saved": 15061
+    },
+    "other": {
+      "before": 2460911,
+      "after": 2461194,
+      "saved": -283
+    },
+    "disk_du_kb": {
+      "before": 232040,
+      "after": 186348,
+      "saved": 45692
+    },
+    "assets_car_thinned_iphone": {
+      "before": 21665384,
+      "after": 13915128,
+      "saved": 7750256
+    },
+    "ipa_zip9": {
+      "before": 151596356,
+      "after": 124529495,
+      "saved": 27066861
+    },
+    "total_thinned_iphone_estimate": {
+      "before": 206128967,
+      "after": 167143427,
+      "saved": 38985540
+    }
+  }
+}

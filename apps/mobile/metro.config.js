@@ -36,9 +36,9 @@ config.resolver = {
     if (stub) return { type: 'sourceFile', filePath: stub };
     return (existingResolveRequest ?? context.resolveRequest)(context, moduleName, platform);
   },
-  // Drop svg from assets (handled by the transformer); add db so the bundled
-  // read-only cities database (assets/db/cities.db) ships as an asset.
-  assetExts: [...config.resolver.assetExts.filter((ext) => ext !== 'svg'), 'db'],
+  // Drop svg from assets (handled by the transformer); add gz so the bundled
+  // read-only cities database (assets/db/cities.db.gz) ships as an asset.
+  assetExts: [...config.resolver.assetExts.filter((ext) => ext !== 'svg'), 'gz'],
   sourceExts: [...config.resolver.sourceExts, 'svg'],
   blockList: existingBlockList ? [].concat(existingBlockList, blockWorker) : blockWorker,
 };
