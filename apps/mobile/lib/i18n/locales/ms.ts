@@ -1900,6 +1900,10 @@ const ms = {
     week_strip_label: '7 hari akan datang',
     this_month: 'Bulan ini',
     paused_section: 'Dijeda',
+    settings_title: 'Tetapan berulang',
+    highlight_label: 'Warnakan entri berulang',
+    highlight_hint:
+      'Entri yang ditambah oleh peraturan berulang anda mendapat latar lavender lembut dalam senarai transaksi, supaya anda boleh bezakan daripada entri yang anda taip sendiri.',
     overdue: 'Tertunggak',
     show_all_days: 'Semua hari',
     day_due_count: '{{count}} perlu dibayar',

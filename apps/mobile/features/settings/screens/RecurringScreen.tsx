@@ -1,17 +1,21 @@
+import { Settings2 } from 'lucide-react-native';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Alert, FlatList, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '~/components/feedback/EmptyState';
+import { ADD_FAB_SIZE, AddFabButton } from '~/components/navigation/AddFab';
+import { useBottomNavContentInset } from '~/components/navigation/BottomNavMinimize';
 import { EdgeSwipeBackContainer } from '~/components/navigation/EdgeSwipeBackContainer';
 import {
-  AddIconButton,
+  HeaderIconButton,
   SETTINGS_HORIZONTAL_PADDING,
   SETTINGS_LIST_BOTTOM_PADDING,
   SettingsHeader,
   SettingsPageLayout,
   Text,
-  useSettingsBottomNavInset,
 } from '~/components/ui';
+import { spacing } from '~/constants/designSystem';
 import { useApp } from '~/context/AppContext';
 import {
   RecurringCommitmentCard,
@@ -24,6 +28,7 @@ import {
   type WeekStripDay,
 } from '~/features/settings/components/RecurringWeekStrip';
 import { useProGate } from '~/hooks/useProGate';
+import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import type { RecurringTransactionRule } from '~/types';
 import { convert } from '~/utils/currency';
@@ -49,6 +54,8 @@ import {
 import { countsAsExpenseRow } from '~/utils/spending';
 
 const MS_PER_DAY = 86_400_000;
+/** Space between the + and what it sits above (the bar, or the home indicator). */
+const FAB_BOTTOM_GAP = 12;
 /** Days in the pill strip above the timeline. */
 const WEEK_LENGTH = 7;
 
@@ -104,15 +111,25 @@ interface RecurringScreenProps {
   /** Omitted when the page sits in the bottom bar, which hides the back button. */
   onBack?: () => void;
   onOpenEditor: (ruleId?: string) => void;
+  /** The gear in the header: Recurring settings. */
+  onOpenSettings: () => void;
   useNativeBackGesture?: boolean;
 }
 
 export function RecurringScreen({
   onBack,
   onOpenEditor,
+  onOpenSettings,
   useNativeBackGesture = false,
 }: RecurringScreenProps) {
-  const bottomNavInset = useSettingsBottomNavInset(SETTINGS_LIST_BOTTOM_PADDING);
+  const themeColors = useThemeColors();
+  // The + sits bottom right like Home's: above the floating bar in the tab
+  // shell, above the home indicator on the root-stack page (no bar there).
+  const navInset = useBottomNavContentInset();
+  const { bottom: safeBottom } = useSafeAreaInsets();
+  const fabBottom = (navInset > 0 ? navInset : safeBottom) + FAB_BOTTOM_GAP;
+  // The last card can scroll clear of the +.
+  const listBottomPadding = fabBottom + ADD_FAB_SIZE + SETTINGS_LIST_BOTTOM_PADDING;
   const {
     settings,
     recurringRules,
@@ -473,14 +490,18 @@ export function RecurringScreen({
           onBack={onBack}
           title={I18n.t('recurring.title')}
           rightAccessory={
-            <AddIconButton onPress={openCreate} accessibilityLabel={I18n.t('recurring.new_rule')} />
+            <HeaderIconButton
+              onPress={onOpenSettings}
+              icon={<Settings2 size={18} color={themeColors.textMuted} />}
+              label={I18n.t('recurring.settings_title')}
+            />
           }
         />
       </View>
       <FlatList
         data={rows}
         keyExtractor={keyExtractor}
-        contentContainerStyle={[styles.listContent, bottomNavInset]}
+        contentContainerStyle={[styles.listContent, { paddingBottom: listBottomPadding }]}
         ListHeaderComponent={listHeader}
         ListEmptyComponent={listEmpty}
         renderItem={renderRow}
@@ -489,6 +510,9 @@ export function RecurringScreen({
         windowSize={9}
         removeClippedSubviews
       />
+      <View pointerEvents="box-none" style={[styles.fab, { bottom: fabBottom }]}>
+        <AddFabButton onPress={openCreate} accessibilityLabel={I18n.t('recurring.new_rule')} />
+      </View>
     </SettingsPageLayout>
   );
 
@@ -502,6 +526,11 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: SETTINGS_HORIZONTAL_PADDING,
-    paddingBottom: SETTINGS_LIST_BOTTOM_PADDING,
+  },
+  // Home's + corner (`AddFab`): the trailing edge, at its margin.
+  fab: {
+    position: 'absolute',
+    right: spacing.lg,
+    zIndex: 10,
   },
 });

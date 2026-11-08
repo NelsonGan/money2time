@@ -267,6 +267,8 @@ export const GA4_ONLY_EVENTS = {
   RECURRING_RULE_CREATED: 'Recurring Rule Created',
   RECURRING_RULE_UPDATED: 'Recurring Rule Updated',
   RECURRING_RULE_DELETED: 'Recurring Rule Deleted',
+  /** The tint on entries a recurring rule made was switched on or off. */
+  RECURRING_HIGHLIGHT_TOGGLED: 'Recurring Highlight Toggled',
 
   // Instalment plans (a purchase paid off in parts)
   INSTALMENT_PLAN_CREATED: 'Instalment Plan Created',

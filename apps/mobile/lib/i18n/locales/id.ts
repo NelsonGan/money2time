@@ -1897,6 +1897,10 @@ const id = {
     week_strip_label: '7 hari ke depan',
     this_month: 'Bulan ini',
     paused_section: 'Dijeda',
+    settings_title: 'Pengaturan berulang',
+    highlight_label: 'Warnai entri berulang',
+    highlight_hint:
+      'Entri yang ditambahkan aturan berulang Anda mendapat latar lavender lembut di daftar transaksi, sehingga mudah dibedakan dari yang Anda ketik sendiri.',
     overdue: 'Terlambat',
     show_all_days: 'Semua hari',
     day_due_count: '{{count}} jatuh tempo',

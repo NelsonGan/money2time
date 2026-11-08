@@ -1887,6 +1887,10 @@ const nb = {
     week_strip_label: 'Neste 7 dager',
     this_month: 'Denne måneden',
     paused_section: 'Pauset',
+    settings_title: 'Innstillinger for faste poster',
+    highlight_label: 'Fargelegg faste poster',
+    highlight_hint:
+      'Poster som de faste reglene dine legger til, får en myk lavendelbakgrunn i transaksjonslistene, så du kan skille dem fra dem du har skrevet inn selv.',
     overdue: 'Forfalt',
     show_all_days: 'Alle dager',
     day_due_count: '{{count}} forfaller',

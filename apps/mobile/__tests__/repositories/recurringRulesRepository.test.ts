@@ -19,6 +19,7 @@ import {
 import { transactionsRepository } from '~/lib/repositories/transactionsRepository';
 import type { RecurringTransactionRule } from '~/types';
 import { dayKeyFromIsoLocal } from '~/utils/formatters';
+import { isRecurringRunTransaction } from '~/utils/recurringRules';
 
 /** Local midnight of a day key, as the runner writes run dates. */
 const midnight = (dayKey: string) => {
@@ -196,6 +197,12 @@ describe('recurringRunTransactionId', () => {
   it('uses the run day only', () => {
     expect(recurringRunTransactionId('r1', '2026-08-30T00:00:00.000Z')).toBe('rr:r1:2026-08-30');
     expect(recurringRunTransactionId('r1', '2026-08-30')).toBe('rr:r1:2026-08-30');
+  });
+
+  it('is what the lists read as made by a rule', () => {
+    expect(isRecurringRunTransaction({ id: recurringRunTransactionId('r1', '2026-08-30') })).toBe(
+      true,
+    );
   });
 });
 

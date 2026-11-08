@@ -1799,6 +1799,10 @@ const zh = {
     week_strip_label: '未来7天',
     this_month: '本月',
     paused_section: '已暂停',
+    settings_title: '固定交易设置',
+    highlight_label: '为固定交易着色',
+    highlight_hint:
+      '固定交易规则添加的记录会在交易列表中显示淡紫色背景，方便与你手动输入的记录区分。',
     overdue: '已逾期',
     show_all_days: '所有日期',
     day_due_count: '{{count}} 项到期',

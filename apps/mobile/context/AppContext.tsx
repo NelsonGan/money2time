@@ -667,6 +667,7 @@ interface AppContextValue extends Omit<AppState, 'transactions' | 'activeAccount
         | 'reimbursementsCountAsExpense'
         | 'showTransactionAccount'
         | 'showAccountPickerBalances'
+        | 'highlightRecurringTransactions'
         | 'navTabsJson'
       >
     >,
@@ -4912,6 +4913,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           | 'reimbursementsCountAsExpense'
           | 'showTransactionAccount'
           | 'showAccountPickerBalances'
+          | 'highlightRecurringTransactions'
           | 'navTabsJson'
         >
       >,

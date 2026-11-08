@@ -54,6 +54,7 @@ import { readableColumnPadding } from '~/utils/adaptiveLayout';
 import { currencySymbolForCode } from '~/utils/currency';
 import { formatDayHeaderParts } from '~/utils/dayHeader';
 import { dayKeyFromIsoLocal, formatAmount, formatHours } from '~/utils/formatters';
+import { isRecurringRunTransaction } from '~/utils/recurringRules';
 import { countsAsExpenseRow, isCountedTransfer } from '~/utils/spending';
 import { sortTransactions } from '~/utils/transactionSorting';
 
@@ -342,7 +343,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
   const scrollViewRef = useRef<ScrollViewInstance | null>(null);
   // The same list, for Reanimated: a drag scrolls it from the UI thread.
   const listScrollRef = useAnimatedRef<any>();
-  const { updateTransactionsBulk } = useApp();
+  const { updateTransactionsBulk, settings: appSettings, instalmentPlans } = useApp();
   const bottomNavInset = useBottomNavContentInset();
   const reportBottomNavScroll = useBottomNavScrollReporter();
   const isTimeMode = displaySettings.displayMode === 'time';
@@ -733,6 +734,19 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
   // Paybacks are tinted, and fold per bill and day (see PaybackGroupRow).
   const paybackIndex = usePaybackIndex();
 
+  // Entries a recurring rule made get a lavender card while Recurring settings
+  // says so. Worked out here, once per list, so the rows read no context.
+  const highlightRecurring = appSettings.highlightRecurringTransactions;
+  const planRuleIds = useMemo(
+    () => new Set(instalmentPlans.map((plan) => plan.rule.id)),
+    [instalmentPlans],
+  );
+  const isRecurringRow = useCallback(
+    (transaction: TransactionWithRelations) =>
+      highlightRecurring && isRecurringRunTransaction(transaction, planRuleIds),
+    [highlightRecurring, planRuleIds],
+  );
+
   // A payback row has no transaction of its own to open, so it opens its
   // bill's page in Settle Up, which lists the payment and can undo it. Read
   // from context, not useNavigation, so a list outside a navigator still renders.
@@ -834,6 +848,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
                   reorderHandle={reorderRequested}
                   highlighted={highlightedId === tx.id}
                   payback={paybackIndex.has(tx.id)}
+                  recurring={isRecurringRow(tx)}
                   disableAnimations={disableItemAnimations}
                   compact={compactItems}
                   showDateInSubtitle={false}
@@ -879,6 +894,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
           key={remountKey(item.transaction.id)}
           transaction={item.transaction}
           payback={paybackIndex.has(item.transaction.id)}
+          recurring={isRecurringRow(item.transaction)}
           onPressTransaction={handleTransactionPress}
           onLongPressTransaction={handleTransactionLongPress}
           onPressSplitBadge={onTransactionSplitBadgePress}
@@ -904,6 +920,7 @@ export const ActivityTransactionList = memo(function ActivityTransactionListImpl
       measureDayCell,
       handleTransactionLongPress,
       handleTransactionPress,
+      isRecurringRow,
       onToggleDaySelection,
       paybackIndex,
       onTransactionSplitBadgePress,
