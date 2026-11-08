@@ -2170,6 +2170,7 @@ const da = {
     due_rule_days_after: 'Dage efter opgørelse',
     due_next_date: 'Næste forfaldsdato: {{date}}',
     due_days_after_error: 'Angiv 1 til {{max}} dage',
+    due_days_after_needs_statement: 'Angiv en opgørelsesdag at tælle fra',
     current_balance: 'Nuværende saldo',
     balance_adjustment_prompt_title: 'Hvordan skal denne saldoændring registreres?',
     balance_adjustment_prompt_message:

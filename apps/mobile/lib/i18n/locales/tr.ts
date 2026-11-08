@@ -2178,6 +2178,7 @@ const tr = {
     due_rule_days_after: 'Ekstreden sonraki gün',
     due_next_date: 'Sonraki son ödeme: {{date}}',
     due_days_after_error: '1 ile {{max}} gün arası girin',
+    due_days_after_needs_statement: 'Saymaya başlamak için bir hesap kesim günü ekleyin',
     current_balance: 'Mevcut bakiye',
     balance_adjustment_prompt_title: 'Bu bakiye değişikliği nasıl kaydedilsin?',
     balance_adjustment_prompt_message:

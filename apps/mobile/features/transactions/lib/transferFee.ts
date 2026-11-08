@@ -93,13 +93,25 @@ export function defaultTransferFeeSide(
   return !canChargeTransferFee(from) && canChargeTransferFee(to) ? 'to' : 'from';
 }
 
+/**
+ * A saved fee's amount in its account's currency. A fee is written in that
+ * currency, but changing the account's currency later re-denominates it the
+ * way it does every expense: the entered amount stays, and `accountAmount`
+ * carries what the account is charged.
+ */
+export function transferFeeAccountAmount(
+  fee: Pick<Transaction, 'amount' | 'accountAmount'>,
+): number {
+  return fee.accountAmount ?? fee.amount;
+}
+
 /** The editor's draft for a saved fee. */
 export function transferFeeDraftOf(
   transfer: TransferAccounts,
-  fee: Pick<Transaction, 'accountId' | 'amount' | 'categoryId'>,
+  fee: Pick<Transaction, 'accountId' | 'amount' | 'accountAmount' | 'categoryId'>,
 ): TransferFeeDraft {
   return {
-    amount: fee.amount,
+    amount: transferFeeAccountAmount(fee),
     side: transferFeeSideOf(transfer, fee),
     categoryId: fee.categoryId ?? null,
   };
@@ -228,6 +240,8 @@ export interface TransferFeeLink {
   transferId: string;
   amount: number;
   currency: string;
+  /** What the account is charged, when its currency changed after the fee was written. */
+  accountAmount: number | null;
   accountId: string | null;
   categoryId: string | null;
 }
@@ -249,7 +263,7 @@ export const EMPTY_TRANSFER_FEE_INDEX: TransferFeeIndex = {
 /** Every transfer fee, both ways (see `indexTransferFees`). Newest first in. */
 export function buildTransferFeeIndex(
   transactions: readonly (FeeRow &
-    Pick<Transaction, 'amount' | 'currency' | 'accountId' | 'categoryId'>)[],
+    Pick<Transaction, 'amount' | 'currency' | 'accountAmount' | 'accountId' | 'categoryId'>)[],
 ): TransferFeeIndex {
   const fees = indexTransferFees(transactions);
   if (fees.size === 0) return EMPTY_TRANSFER_FEE_INDEX;
@@ -263,6 +277,7 @@ export function buildTransferFeeIndex(
       transferId,
       amount: fee.amount,
       currency: fee.currency,
+      accountAmount: fee.accountAmount ?? null,
       accountId: fee.accountId ?? null,
       categoryId: fee.categoryId ?? null,
     };
@@ -284,6 +299,7 @@ export function sameTransferFeeIndex(a: TransferFeeIndex, b: TransferFeeIndex): 
       other.feeId !== link.feeId ||
       other.amount !== link.amount ||
       other.currency !== link.currency ||
+      other.accountAmount !== link.accountAmount ||
       other.accountId !== link.accountId ||
       other.categoryId !== link.categoryId
     ) {

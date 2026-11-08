@@ -503,6 +503,10 @@ function StackCard({
   // paid, so the billing chips turn urgent (red, pulsing). Normalized so a
   // sub-cent residue that displays as zero never triggers the pulse.
   const hasUnpaidStatement = isCredit && normalizeMoneyAmount(creditSummary?.payable ?? 0) > 0;
+  // Still owing on the statement before the latest, which a long grace period
+  // can leave due first.
+  const hasUnpaidEarlierStatement =
+    isCredit && normalizeMoneyAmount(creditSummary?.earlierPayable ?? 0) > 0;
   // A loan whose payment day has passed unpaid is the loan-shaped equivalent
   // of an unpaid statement, and gets the same urgent treatment.
   const overdueDayKey = isLoan ? (loanSummary?.overdueSince ?? null) : null;
@@ -610,6 +614,7 @@ function StackCard({
       new Date(),
       hasUnpaidStatement,
       account.creditDueDaysAfterStatement ?? null,
+      hasUnpaidEarlierStatement,
     );
     const chips: string[] = [];
     if (statementDate) {
@@ -625,6 +630,7 @@ function StackCard({
     account.creditDueDay,
     account.creditDueDaysAfterStatement,
     account.creditStatementDay,
+    hasUnpaidEarlierStatement,
     hasUnpaidStatement,
     isCredit,
     settings.locale,

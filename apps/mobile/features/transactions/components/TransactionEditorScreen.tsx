@@ -409,7 +409,11 @@ interface TransactionEditorScreenProps {
   onSubmit: (input: CreateTransactionInput, extras?: TransactionEditorSubmitExtras) => void;
   /** Capture-linked review waits for persistence before closing; ordinary editors keep deferred saves. */
   onSubmitConfirmed?: (input: CreateTransactionInput) => Promise<void>;
-  onSubmitWithSplits?: (input: CreateTransactionInput, splits: SplitDraft[]) => void;
+  onSubmitWithSplits?: (
+    input: CreateTransactionInput,
+    splits: SplitDraft[],
+    extras?: TransactionEditorSubmitExtras,
+  ) => void;
   onSubmitReady?: (input: CreateTransactionInput) => void;
   onDelete?: () => void;
   initialValues?: Partial<TransactionEditorInitialValues>;
@@ -2498,15 +2502,17 @@ export function TransactionEditorScreen({
       }
 
       let deferredSubmit: (() => void) | null = null;
+      // An expense re-typed as a transfer clears its splits through the split
+      // path, and still saves the fee it was given.
+      const capturedExtras: TransactionEditorSubmitExtras = {
+        transferFee: submitPayload?.type === 'transfer' ? transferFee : null,
+      };
       if (splitSaveRoute !== 'plain' && submitPayload && onSubmitWithSplits) {
         const capturedPayload = submitPayload;
         const capturedSplits = useSplitsPath ? splits : [];
-        deferredSubmit = () => onSubmitWithSplits(capturedPayload, capturedSplits);
+        deferredSubmit = () => onSubmitWithSplits(capturedPayload, capturedSplits, capturedExtras);
       } else if (submitPayload) {
         const capturedPayload = submitPayload;
-        const capturedExtras: TransactionEditorSubmitExtras = {
-          transferFee: capturedPayload.type === 'transfer' ? transferFee : null,
-        };
         deferredSubmit = () => onSubmit(capturedPayload, capturedExtras);
       } else {
         deferredSubmit = recurringSubmit;

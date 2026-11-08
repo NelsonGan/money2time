@@ -2157,6 +2157,7 @@ const hi = {
     due_rule_days_after: 'स्टेटमेंट के बाद दिन',
     due_next_date: 'अगली देय तिथि: {{date}}',
     due_days_after_error: '1 से {{max}} दिन दर्ज करें',
+    due_days_after_needs_statement: 'गिनती के लिए स्टेटमेंट का दिन जोड़ें',
     current_balance: 'वर्तमान बैलेंस',
     balance_adjustment_prompt_title: 'यह बैलेंस परिवर्तन कैसे दर्ज करें?',
     balance_adjustment_prompt_message:

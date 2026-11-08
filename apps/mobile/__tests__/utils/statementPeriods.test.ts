@@ -253,6 +253,31 @@ describe('getCreditCycleDates with a due date some days after the statement', ()
     );
   });
 
+  it('shows the earlier statement while a long grace period leaves its bill owed and ahead', () => {
+    // Statement day 25, 45 days: on Nov 9 the Sep 25 bill is due today, before
+    // the Oct 25 one (Dec 9).
+    expect(getCreditCycleDates(25, null, new Date(2026, 10, 9), true, 45, true)).toEqual({
+      statementDate: new Date(2026, 8, 25),
+      dueDate: new Date(2026, 10, 9),
+    });
+    // Sep's bill already paid: only the Oct one is owed.
+    expect(getCreditCycleDates(25, null, new Date(2026, 10, 9), true, 45, false)).toEqual({
+      statementDate: new Date(2026, 9, 25),
+      dueDate: new Date(2026, 11, 9),
+    });
+    // A day later, still unpaid, the Sep bill is late: it stays on the card.
+    expect(getCreditCycleDates(25, null, new Date(2026, 10, 10), true, 45, true)).toEqual({
+      statementDate: new Date(2026, 8, 25),
+      dueDate: new Date(2026, 10, 9),
+    });
+    // A grace period inside one cycle never shows the earlier statement: the
+    // latest one carries what is still owed.
+    expect(getCreditCycleDates(25, null, new Date(2026, 10, 9), true, 20, true)).toEqual({
+      statementDate: new Date(2026, 9, 25),
+      dueDate: new Date(2026, 10, 14),
+    });
+  });
+
   it('falls back to the fixed due day when there is no statement day', () => {
     const { statementDate, dueDate } = getCreditCycleDates(
       null,
@@ -287,10 +312,24 @@ describe('creditDueColumns', () => {
     });
   });
 
-  it('keeps the fixed day for older readers when there is no statement day', () => {
+  it('saves the next statement day when the grace period reaches past it', () => {
+    // Statement day 25, 45 days, on Nov 9: latest statement Oct 25, due Dec 9.
+    // An older reader places day 9 on Nov 9, a month early; day 25 reads as
+    // Nov 25, the latest date it can show.
+    expect(creditDueColumns(25, 15, 45, new Date(2026, 10, 9))).toEqual({
+      creditDueDay: 25,
+      creditDueDaysAfterStatement: 45,
+    });
+    // Statement day 31 clamps to Nov 30 as the next statement.
+    expect(creditDueColumns(31, 15, 40, new Date(2026, 10, 9)).creditDueDay).toBe(30);
+  });
+
+  it('drops the rule and keeps the fixed day when there is no statement day', () => {
+    // Nothing to count from: a Web Dashboard page that clears the statement
+    // day leaves a card due on its fixed day, not a rule that cannot work.
     expect(creditDueColumns(null, 3, 20, new Date(2026, 6, 20))).toEqual({
       creditDueDay: 3,
-      creditDueDaysAfterStatement: 20,
+      creditDueDaysAfterStatement: null,
     });
   });
 });
@@ -306,6 +345,21 @@ describe('nextDueDateAfterStatement', () => {
   it('includes a bill due today', () => {
     expect(nextDueDateAfterStatement(25, 20, new Date(2026, 11, 15, 18, 30))).toEqual(
       new Date(2026, 11, 15),
+    );
+  });
+
+  it("is the earlier statement's due date while that bill is owed and ahead", () => {
+    // Statement day 25, 45 days, on Nov 9: Sep 25 + 45 = Nov 9 comes before
+    // Oct 25 + 45 = Dec 9.
+    expect(nextDueDateAfterStatement(25, 45, new Date(2026, 10, 9, 12), true)).toEqual(
+      new Date(2026, 10, 9),
+    );
+    // Nothing owed on it (paid, or a card opened since): the Oct bill.
+    expect(nextDueDateAfterStatement(25, 45, new Date(2026, 10, 9, 12))).toEqual(
+      new Date(2026, 11, 9),
+    );
+    expect(nextDueDateAfterStatement(25, 45, new Date(2026, 10, 10), true)).toEqual(
+      new Date(2026, 11, 9),
     );
   });
 
@@ -444,6 +498,7 @@ describe('computeCreditCycleSummary', () => {
     ).toEqual({
       outstanding: 250,
       payable: 0,
+      earlierPayable: 0,
     });
   });
 
@@ -465,6 +520,7 @@ describe('computeCreditCycleSummary', () => {
     expect(computeCreditCycleSummary(account, txns, 110, now)).toEqual({
       outstanding: 30,
       payable: 80,
+      earlierPayable: 0,
     });
   });
 
@@ -484,6 +540,8 @@ describe('computeCreditCycleSummary', () => {
     expect(computeCreditCycleSummary(account, txns, 67.36, now)).toEqual({
       outstanding: 29,
       payable: 38.36,
+      // No charge in the latest statement's cycle explains it, so it is older.
+      earlierPayable: 38.36,
     });
   });
 
@@ -509,6 +567,7 @@ describe('computeCreditCycleSummary', () => {
     expect(computeCreditCycleSummary(account, txns, 30, now)).toEqual({
       outstanding: 30,
       payable: 0,
+      earlierPayable: 0,
     });
   });
 
@@ -516,6 +575,33 @@ describe('computeCreditCycleSummary', () => {
     expect(computeCreditCycleSummary(account, [], -20, now)).toEqual({
       outstanding: 0,
       payable: 0,
+      earlierPayable: 0,
     });
+  });
+
+  it('tells what is still owed on a statement before the latest one', () => {
+    const txns = [
+      // Billed on the Apr 14 statement.
+      makeCardTx({
+        date: new Date(2026, 3, 10).toISOString(),
+        type: 'expense',
+        amount: 50,
+        accountId: CARD_ID,
+      }),
+      // Billed on the May 14 statement.
+      makeCardTx({
+        date: new Date(2026, 4, 10).toISOString(),
+        type: 'expense',
+        amount: 80,
+        accountId: CARD_ID,
+      }),
+    ];
+    expect(computeCreditCycleSummary(account, txns, 130, now)).toEqual({
+      outstanding: 0,
+      payable: 130,
+      earlierPayable: 50,
+    });
+    // A payment of 60 settled the Apr bill first: only the May one is owed.
+    expect(computeCreditCycleSummary(account, txns, 70, now).earlierPayable).toBe(0);
   });
 });

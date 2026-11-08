@@ -2135,6 +2135,7 @@ const en = {
     due_rule_days_after: 'Days after statement',
     due_next_date: 'Next due date: {{date}}',
     due_days_after_error: 'Enter 1 to {{max}} days',
+    due_days_after_needs_statement: 'Add a statement day to count from',
     current_balance: 'Current balance',
     currency_change_title: 'Change account currency?',
     currency_change_message:

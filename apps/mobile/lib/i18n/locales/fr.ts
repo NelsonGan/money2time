@@ -2189,6 +2189,7 @@ const fr = {
     due_rule_days_after: 'Jours après le relevé',
     due_next_date: 'Prochaine échéance : {{date}}',
     due_days_after_error: 'Saisissez de 1 à {{max}} jours',
+    due_days_after_needs_statement: 'Ajoutez un jour de relevé à partir duquel compter',
     current_balance: 'Solde actuel',
     balance_adjustment_prompt_title: 'Comment enregistrer ce changement de solde ?',
     balance_adjustment_prompt_message:

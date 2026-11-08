@@ -2169,6 +2169,7 @@ const sv = {
     due_rule_days_after: 'Dagar efter faktura',
     due_next_date: 'Nästa förfallodag: {{date}}',
     due_days_after_error: 'Ange 1 till {{max}} dagar',
+    due_days_after_needs_statement: 'Ange en fakturadag att räkna från',
     current_balance: 'Aktuellt saldo',
     balance_adjustment_prompt_title: 'Hur ska den här saldoändringen registreras?',
     balance_adjustment_prompt_message:

@@ -2183,6 +2183,7 @@ const ms = {
     due_rule_days_after: 'Hari selepas penyata',
     due_next_date: 'Tarikh akhir seterusnya: {{date}}',
     due_days_after_error: 'Masukkan 1 hingga {{max}} hari',
+    due_days_after_needs_statement: 'Tambah hari penyata untuk dikira dari',
     current_balance: 'Baki semasa',
     balance_adjustment_prompt_title: 'Bagaimana perubahan baki ini perlu direkodkan?',
     balance_adjustment_prompt_message:

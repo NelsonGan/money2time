@@ -718,7 +718,9 @@ function AccountEditorSheet({
     fxCurrencies,
     rateTable,
     recurringRules,
+    getTransactionsByAccount,
   } = useApp();
+  const { accountBalances, transactions } = useTransactions();
   // Account currency choices = the main currency + the user's subcurrencies
   // (added ones plus any already used by an account).
   const accountCurrencyCodes = useMemo(() => {
@@ -1261,10 +1263,43 @@ function AccountEditorSheet({
   const usesDueDaysAfter = editedType === 'credit' && creditDueRule === 'days_after';
   const parsedDueDaysAfter = Number(creditDueDaysAfter);
   const hasValidDueDaysAfter = !usesDueDaysAfter || isDueDaysAfterStatement(parsedDueDaysAfter);
+  // Days after a statement need a statement day to count from.
+  const dueDaysAfterNeedsStatement =
+    usesDueDaysAfter && hasValidDueDaysAfter && normalizedStatementDay == null;
+  // Whether this card still owes on the statement before the latest one, read
+  // with the statement day as typed, so the preview matches the card's chips.
+  const hasUnpaidEarlierStatement = useMemo(() => {
+    if (!usesDueDaysAfter || !account || account.type !== 'credit') return false;
+    if (normalizedStatementDay == null) return false;
+    const balance =
+      accountBalances.find((b) => b.accountId === account.id)?.balance ?? account.startingBalance;
+    const summary = computeCreditCycleSummary(
+      { id: account.id, creditStatementDay: normalizedStatementDay },
+      getTransactionsByAccount(account.id),
+      balance,
+      new Date(),
+    );
+    return normalizeMoneyAmount(summary.earlierPayable) > 0;
+    // getTransactionsByAccount keeps its identity; `transactions` says the
+    // card's entries changed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    account,
+    accountBalances,
+    getTransactionsByAccount,
+    normalizedStatementDay,
+    transactions,
+    usesDueDaysAfter,
+  ]);
   const nextDueDatePreview =
     usesDueDaysAfter && hasValidDueDaysAfter && normalizedStatementDay != null
       ? formatStatementDateLabel(
-          nextDueDateAfterStatement(normalizedStatementDay, parsedDueDaysAfter, new Date()),
+          nextDueDateAfterStatement(
+            normalizedStatementDay,
+            parsedDueDaysAfter,
+            new Date(),
+            hasUnpaidEarlierStatement,
+          ),
           appSettings.locale ?? I18n.locale ?? 'en',
         )
       : null;
@@ -1272,7 +1307,8 @@ function AccountEditorSheet({
     normalizedName.length > 0 &&
     (isNewLoan || hasValidBalance) &&
     hasValidLoanFields &&
-    hasValidDueDaysAfter;
+    hasValidDueDaysAfter &&
+    !dueDaysAfterNeedsStatement;
 
   const handleSave = () => {
     if (!canSave) return;
@@ -1588,6 +1624,7 @@ function AccountEditorSheet({
                       value={creditStatementDay}
                       onChangeText={setCreditStatementDay}
                       placeholder="25"
+                      invalid={dueDaysAfterNeedsStatement}
                     />
                   </View>
                   <View className="flex-1">
@@ -1616,6 +1653,10 @@ function AccountEditorSheet({
                 {!hasValidDueDaysAfter ? (
                   <Text variant="caption" tone="error" className="px-1">
                     {I18n.t('accounts.due_days_after_error', { max: MAX_DUE_DAYS_AFTER_STATEMENT })}
+                  </Text>
+                ) : dueDaysAfterNeedsStatement ? (
+                  <Text variant="caption" tone="error" className="px-1">
+                    {I18n.t('accounts.due_days_after_needs_statement')}
                   </Text>
                 ) : nextDueDatePreview ? (
                   <Text variant="caption" tone="muted" className="px-1">

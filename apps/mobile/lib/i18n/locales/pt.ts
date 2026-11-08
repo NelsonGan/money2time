@@ -2178,6 +2178,7 @@ const pt = {
     due_rule_days_after: 'Dias após o fechamento',
     due_next_date: 'Próximo vencimento: {{date}}',
     due_days_after_error: 'Insira de 1 a {{max}} dias',
+    due_days_after_needs_statement: 'Adicione um dia de fechamento para contar a partir dele',
     current_balance: 'Saldo atual',
     balance_adjustment_prompt_title: 'Como registrar esta mudança de saldo?',
     balance_adjustment_prompt_message:
