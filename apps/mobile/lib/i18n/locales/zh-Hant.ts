@@ -874,6 +874,16 @@ const zhHant = {
       transfer_expense_label: '計為支出',
       transfer_expense_tooltip:
         '將此轉帳計為支出，按你選擇的分類計入總額、預算和圖表。資金仍照常在兩個帳戶之間轉移。',
+      transfer_fee: {
+        chip_label: '手續費',
+        chip_active: '手續費 {{amount}}',
+        title: '轉帳手續費',
+        amount_label: '手續費金額',
+        charged_to: '扣費帳戶',
+        remove: '移除手續費',
+        row_note: '轉帳手續費',
+        delete_confirm: '其 {{fee}} 手續費也會一併刪除。此操作無法復原。要繼續嗎？',
+      },
       title_create: '新增',
       title_edit: '更新',
       bulk_mode: '批次',

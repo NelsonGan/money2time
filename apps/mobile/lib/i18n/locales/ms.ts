@@ -923,6 +923,17 @@ const ms = {
       fx_received: 'Jumlah diterima',
       fx_converted: 'Amaun ditukar',
       fx_edit: 'Edit penukaran',
+      transfer_fee: {
+        chip_label: 'Caj',
+        chip_active: 'Caj {{amount}}',
+        title: 'Caj pindahan',
+        amount_label: 'Jumlah caj',
+        charged_to: 'Dicaj kepada',
+        remove: 'Buang caj',
+        row_note: 'Caj pindahan',
+        delete_confirm:
+          'Caj {{fee}} juga akan dipadam. Tindakan ini tidak boleh dibatalkan. Teruskan?',
+      },
       title_create: 'Tambah',
       title_edit: 'Kemaskini',
       bulk_mode: 'Pukal',

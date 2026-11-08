@@ -918,6 +918,17 @@ const pt = {
       fx_received: 'Valor recebido',
       fx_converted: 'Montante convertido',
       fx_edit: 'Editar conversão',
+      transfer_fee: {
+        chip_label: 'Taxa',
+        chip_active: 'Taxa {{amount}}',
+        title: 'Taxa de transferência',
+        amount_label: 'Valor da taxa',
+        charged_to: 'Cobrada em',
+        remove: 'Remover taxa',
+        row_note: 'Taxa de transferência',
+        delete_confirm:
+          'A taxa de {{fee}} também será excluída. Isso não pode ser desfeito. Continuar?',
+      },
       title_create: 'Adicionar',
       title_edit: 'Atualizar',
       bulk_mode: 'Múltiplo',

@@ -176,3 +176,50 @@ export function applyReorderUpdates<T extends TransactionWithRelations>(
   }
   return transactions.map((transaction) => byId.get(transaction.id) ?? transaction);
 }
+
+/**
+ * A drop of a transfer that has a fee (`features/transactions/lib/transferFee.ts`):
+ * the fee comes along, right under its transfer. The fee's row is taken from
+ * wherever it was and put back under the transfer, the transfer's drop is
+ * saved as any other, then the fee's as if it had been dropped there too, so
+ * each gets a time and key of its own without crossing a neighbour. One update
+ * per row; a later one for the same row (a renumbering) wins field by field.
+ */
+export function reorderUpdatesKeepingFee(
+  reorderedRows: readonly ReorderRow[],
+  movedId: string,
+  feeIdOf: (transferId: string) => string | undefined,
+  now: number = Date.now(),
+): ReorderUpdate[] {
+  const feeId = feeIdOf(movedId);
+  const feeRow = feeId
+    ? reorderedRows.find((row) => row.kind === 'transaction' && row.id === feeId)
+    : undefined;
+  if (!feeId || !feeRow) return reorderUpdatesForDrag(reorderedRows, movedId, now);
+
+  const without = reorderedRows.filter((row) => row !== feeRow);
+  const at = without.findIndex((row) => row.kind === 'transaction' && row.id === movedId);
+  if (at < 0) return reorderUpdatesForDrag(reorderedRows, movedId, now);
+  const rows = [...without.slice(0, at + 1), feeRow, ...without.slice(at + 1)];
+
+  const transferUpdates = reorderUpdatesForDrag(rows, movedId, now);
+  const moved = applyReorderUpdates(
+    rows
+      .map((row) => (row.kind === 'transaction' ? row.transaction : null))
+      .filter((transaction): transaction is TransactionWithRelations => transaction !== null),
+    transferUpdates,
+  );
+  const movedById = new Map(moved.map((transaction) => [transaction.id, transaction]));
+  const afterTransfer = rows.map((row) =>
+    row.kind === 'transaction'
+      ? { ...row, transaction: movedById.get(row.id) ?? row.transaction }
+      : row,
+  );
+  const feeUpdates = reorderUpdatesForDrag(afterTransfer, feeId, now);
+
+  const merged = new Map<string, ReorderUpdate>();
+  for (const update of [...transferUpdates, ...feeUpdates]) {
+    merged.set(update.id, { ...merged.get(update.id), ...update });
+  }
+  return [...merged.values()];
+}

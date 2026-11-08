@@ -923,6 +923,17 @@ const de = {
       fx_received: 'Erhaltener Betrag',
       fx_converted: 'Umgerechneter Betrag',
       fx_edit: 'Umrechnung bearbeiten',
+      transfer_fee: {
+        chip_label: 'Gebühr',
+        chip_active: 'Gebühr {{amount}}',
+        title: 'Überweisungsgebühr',
+        amount_label: 'Gebührenbetrag',
+        charged_to: 'Belastet auf',
+        remove: 'Gebühr entfernen',
+        row_note: 'Überweisungsgebühr',
+        delete_confirm:
+          'Die Gebühr von {{fee}} wird mitgelöscht. Das kann nicht rückgängig gemacht werden. Fortfahren?',
+      },
       title_create: 'Hinzufügen',
       title_edit: 'Aktualisieren',
       bulk_mode: 'Mehrfach',

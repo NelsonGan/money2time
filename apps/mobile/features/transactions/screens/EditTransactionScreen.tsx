@@ -3,16 +3,23 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useMemo } from 'react';
 import { Alert } from 'react-native';
 
-import { useApp, usePaybackIndex } from '~/context/AppContext';
+import {
+  useApp,
+  usePaybackIndex,
+  useTransactions,
+  useTransferFeeIndex,
+} from '~/context/AppContext';
 import { TransactionEditorScreen } from '~/features/transactions/components';
 import { type SplitDraft, splitsHelpers } from '~/features/transactions/components/editor';
+import type { TransactionEditorSubmitExtras } from '~/features/transactions/components/TransactionEditorScreen';
 import { splitShareKey } from '~/features/transactions/lib/splitPayments';
+import { type TransferFeeDraft, transferFeeDraftOf } from '~/features/transactions/lib/transferFee';
 import { I18n } from '~/lib/i18n';
 import type { CreateTransactionInput } from '~/lib/repositories/transactionsRepository';
 import type { RootStackParamList } from '~/navigation/rootStack';
 import type { TransactionType, TransactionWithRelations } from '~/types';
 import { getErrorMessage } from '~/utils/errorHandling';
-import { dayKeyFromIsoLocal } from '~/utils/formatters';
+import { dateKeepingTimeOfDay, dayKeyFromIsoLocal, formatAmount } from '~/utils/formatters';
 
 interface EditTransactionScreenProps {
   transaction: TransactionWithRelations;
@@ -22,7 +29,27 @@ interface EditTransactionScreenProps {
   openSplitBillOnMount?: boolean;
 }
 
-export function EditTransactionScreen({
+/**
+ * A transfer's fee is edited with its transfer, so opening the fee's own row
+ * (from a category's list, say) opens the transfer it was charged on.
+ */
+export function EditTransactionScreen(props: EditTransactionScreenProps) {
+  const transferId = useTransferFeeIndex().byFeeId.get(props.transaction.id)?.transferId;
+  const { transactions } = useTransactions();
+  const transfer = useMemo(
+    () => (transferId ? (transactions.find((tx) => tx.id === transferId) ?? null) : null),
+    [transactions, transferId],
+  );
+  return (
+    <TransactionEditor
+      key={transfer?.id ?? props.transaction.id}
+      {...props}
+      transaction={transfer ?? props.transaction}
+    />
+  );
+}
+
+function TransactionEditor({
   transaction,
   onClose,
   openSplitBillOnMount,
@@ -37,7 +64,45 @@ export function EditTransactionScreen({
     markSplitPaid,
     markSplitUnpaid,
     instalmentPlans,
+    saveTransferFee,
+    settings,
+    getAccountById,
   } = useApp();
+  // The fee this transfer was charged, edited with it.
+  const feeLink = useTransferFeeIndex().byTransferId.get(transaction.id) ?? null;
+  const initialTransferFee = useMemo<TransferFeeDraft | null>(
+    () =>
+      transaction.type === 'transfer' && feeLink ? transferFeeDraftOf(transaction, feeLink) : null,
+    // Read once: the editor keeps its own draft after it opens.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+  // Saves the transfer's fee as the editor left it. A transfer re-typed as
+  // something else keeps its fee as a plain expense (`updateTransactionsBulk`
+  // drops the link), so only a transfer saves one here.
+  const saveFeeFor = useCallback(
+    (input: Partial<CreateTransactionInput>, fee: TransferFeeDraft | null) => {
+      if ((input.type ?? transaction.type) !== 'transfer') return;
+      saveTransferFee(
+        {
+          id: transaction.id,
+          date:
+            typeof input.date === 'string'
+              ? dateKeepingTimeOfDay(input.date, transaction.date)
+              : transaction.date,
+          fromAccountId:
+            input.fromAccountId !== undefined ? input.fromAccountId : transaction.fromAccountId,
+          toAccountId:
+            input.toAccountId !== undefined ? input.toAccountId : transaction.toAccountId,
+          memberId: input.memberId !== undefined ? input.memberId : transaction.memberId,
+          createdAt: transaction.createdAt,
+          dayOrder: transaction.dayOrder,
+        },
+        fee,
+      );
+    },
+    [saveTransferFee, transaction],
+  );
   // A payment of an instalment plan links back to it.
   const instalmentPlan = transaction.instalmentRuleId
     ? (instalmentPlans.find((plan) => plan.rule.id === transaction.instalmentRuleId) ?? null)
@@ -86,7 +151,15 @@ export function EditTransactionScreen({
         ? paybackLink.personName
           ? I18n.t('transactions.editor.delete_payback_confirm', { name: paybackLink.personName })
           : I18n.t('transactions.editor.delete_payback_confirm_unnamed')
-        : I18n.t('transactions.editor.delete_confirm'),
+        : feeLink
+          ? I18n.t('transactions.editor.transfer_fee.delete_confirm', {
+              fee: formatAmount(feeLink.amount, settings, {
+                currencyCode:
+                  (feeLink.accountId ? getAccountById(feeLink.accountId)?.currency : null) ??
+                  feeLink.currency,
+              }),
+            })
+          : I18n.t('transactions.editor.delete_confirm'),
       [
         { text: I18n.t('common.cancel'), style: 'cancel' },
         {
@@ -103,10 +176,10 @@ export function EditTransactionScreen({
         },
       ],
     );
-  }, [deleteTransaction, onClose, paybackLink, transaction.id]);
+  }, [deleteTransaction, feeLink, getAccountById, onClose, paybackLink, settings, transaction.id]);
 
   const handleSubmit = useCallback(
-    (input: Parameters<typeof updateTransaction>[1]) => {
+    (input: Parameters<typeof updateTransaction>[1], extras?: TransactionEditorSubmitExtras) => {
       if (isLegacyBalanceAdjustmentTransfer) {
         updateTransaction(transaction.id, {
           ...input,
@@ -118,8 +191,9 @@ export function EditTransactionScreen({
         return;
       }
       updateTransaction(transaction.id, input);
+      saveFeeFor(input, extras?.transferFee ?? null);
     },
-    [isLegacyBalanceAdjustmentTransfer, transaction.id, updateTransaction],
+    [isLegacyBalanceAdjustmentTransfer, saveFeeFor, transaction.id, updateTransaction],
   );
 
   const handleSubmitWithSplits = useCallback(
@@ -209,6 +283,7 @@ export function EditTransactionScreen({
       restrictTypeOptions={restrictedTypes}
       hideSplitMode={isInstalmentPayment}
       initialSplits={initialSplits}
+      initialTransferFee={initialTransferFee}
       openSplitBillOnMount={openSplitBillOnMount}
       headerNotice={headerNotice}
       subtitleOverride={

@@ -920,6 +920,17 @@ const fr = {
       fx_received: 'Montant reçu',
       fx_converted: 'Montant converti',
       fx_edit: 'Modifier la conversion',
+      transfer_fee: {
+        chip_label: 'Frais',
+        chip_active: 'Frais {{amount}}',
+        title: 'Frais de virement',
+        amount_label: 'Montant des frais',
+        charged_to: 'Débités sur',
+        remove: 'Retirer les frais',
+        row_note: 'Frais de virement',
+        delete_confirm:
+          'Ses frais de {{fee}} seront aussi supprimés. Action irréversible. Continuer ?',
+      },
       title_create: 'Ajouter',
       title_edit: 'Modifier',
       bulk_mode: 'Multiple',

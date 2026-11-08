@@ -86,6 +86,7 @@ function transaction(overrides: Partial<TransactionWithRelations>): TransactionW
     recurrenceParentId: null,
     sentiment: 'neutral',
     countsAsExpense: false,
+    feeOfId: null,
     ...NO_REIMBURSEMENT,
     createdAt: '2026-06-03T12:00:00.000Z',
     updatedAt: '2026-06-03T12:00:00.000Z',

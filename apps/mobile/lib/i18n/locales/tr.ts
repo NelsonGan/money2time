@@ -915,6 +915,17 @@ const tr = {
       fx_received: 'Alınan tutar',
       fx_converted: 'Dönüştürülen tutar',
       fx_edit: 'Dönüşümü düzenle',
+      transfer_fee: {
+        chip_label: 'Ücret',
+        chip_active: 'Ücret {{amount}}',
+        title: 'Transfer ücreti',
+        amount_label: 'Ücret tutarı',
+        charged_to: 'Ödeyen hesap',
+        remove: 'Ücreti kaldır',
+        row_note: 'Transfer ücreti',
+        delete_confirm:
+          '{{fee}} tutarındaki ücreti de silinir. Bu işlem geri alınamaz. Devam edilsin mi?',
+      },
       title_create: 'Ekle',
       title_edit: 'Güncelle',
       bulk_mode: 'Toplu',

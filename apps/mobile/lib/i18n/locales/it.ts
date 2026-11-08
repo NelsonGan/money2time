@@ -921,6 +921,17 @@ const it = {
       fx_received: 'Importo ricevuto',
       fx_converted: 'Importo convertito',
       fx_edit: 'Modifica conversione',
+      transfer_fee: {
+        chip_label: 'Commissione',
+        chip_active: 'Commissione {{amount}}',
+        title: 'Commissione di trasferimento',
+        amount_label: 'Importo della commissione',
+        charged_to: 'Addebitata su',
+        remove: 'Rimuovi commissione',
+        row_note: 'Commissione di trasferimento',
+        delete_confirm:
+          'Verrà eliminata anche la sua commissione di {{fee}}. L’operazione è irreversibile. Continuare?',
+      },
       title_create: 'Aggiungi',
       title_edit: 'Aggiorna',
       bulk_mode: 'Multiplo',

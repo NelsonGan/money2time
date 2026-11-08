@@ -919,6 +919,17 @@ const nl = {
       fx_received: 'Ontvangen bedrag',
       fx_converted: 'Omgerekend bedrag',
       fx_edit: 'Omrekening bewerken',
+      transfer_fee: {
+        chip_label: 'Kosten',
+        chip_active: 'Kosten {{amount}}',
+        title: 'Overboekingskosten',
+        amount_label: 'Bedrag van de kosten',
+        charged_to: 'Betaald door',
+        remove: 'Kosten verwijderen',
+        row_note: 'Overboekingskosten',
+        delete_confirm:
+          'De kosten van {{fee}} worden ook verwijderd. Dit kan niet ongedaan worden gemaakt. Doorgaan?',
+      },
       title_create: 'Toevoegen',
       title_edit: 'Bijwerken',
       bulk_mode: 'Bulk',

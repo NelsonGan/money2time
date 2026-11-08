@@ -970,6 +970,12 @@ export interface Transaction {
    */
   countsAsExpense: boolean;
   /**
+   * On a transfer fee's expense row, the transfer it was charged on. The fee
+   * is an ordinary expense on the account that paid it, so balances and
+   * totals count it without knowing about fees. See `features/transactions/lib/transferFee.ts`.
+   */
+  feeOfId: string | null;
+  /**
    * Order among rows that share a date, written when the user drags a row.
    * Null means the default: most recently created first. Compared on the same
    * millisecond scale as `createdAt`, so rows added later still land on top.
