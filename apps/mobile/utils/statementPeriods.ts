@@ -68,6 +68,24 @@ export function nextOccurrenceOfMonthDay(day: number, after: Date): Date {
   return clampStatementDate(after.getFullYear(), after.getMonth() + 1, day);
 }
 
+/** Grace period a "days after statement" due date starts at (most Malaysian banks give ~20). */
+export const DEFAULT_DUE_DAYS_AFTER_STATEMENT = 20;
+export const MAX_DUE_DAYS_AFTER_STATEMENT = 45;
+
+export function isDueDaysAfterStatement(value: unknown): value is number {
+  return (
+    typeof value === 'number' &&
+    Number.isInteger(value) &&
+    value >= 1 &&
+    value <= MAX_DUE_DAYS_AFTER_STATEMENT
+  );
+}
+
+/** `date` moved by whole calendar days, at local midnight (safe across DST). */
+export function addCalendarDays(date: Date, days: number): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
+}
+
 export interface CreditCycleDates {
   statementDate: Date | null;
   dueDate: Date | null;
@@ -77,12 +95,18 @@ export interface CreditCycleDates {
  * Statement/due dates to surface for a credit card. With an unpaid statement
  * the last issued statement date (and its due date) is returned so the user
  * sees the bill they still owe; otherwise the upcoming cycle's dates.
+ *
+ * The bill is due on `dueDay` of the month after the statement, or, when
+ * `dueDaysAfterStatement` is set, that many days after the statement date (so
+ * months of different lengths do not move it). Without a statement day there
+ * is nothing to count from, and the fixed `dueDay` is used.
  */
 export function getCreditCycleDates(
   statementDay: number | null,
   dueDay: number | null,
   now: Date,
   hasUnpaidStatement: boolean,
+  dueDaysAfterStatement: number | null = null,
 ): CreditCycleDates {
   if (statementDay == null) {
     return {
@@ -94,10 +118,62 @@ export function getCreditCycleDates(
   const statementDate = hasUnpaidStatement
     ? lastStatement
     : statementPeriodFromAnchor(lastStatement, statementDay, 0).end;
-  return {
-    statementDate,
-    dueDate: dueDay == null ? null : nextOccurrenceOfMonthDay(dueDay, statementDate),
-  };
+  let dueDate: Date | null = null;
+  if (dueDaysAfterStatement != null)
+    dueDate = addCalendarDays(statementDate, dueDaysAfterStatement);
+  else if (dueDay != null) dueDate = nextOccurrenceOfMonthDay(dueDay, statementDate);
+  return { statementDate, dueDate };
+}
+
+/**
+ * The first bill due on or after today under a days-after rule: the latest
+ * statement's, or the next statement's once that one's due date has passed.
+ * The account editor previews it under the field.
+ */
+export function nextDueDateAfterStatement(
+  statementDay: number,
+  dueDaysAfterStatement: number,
+  now: Date,
+): Date {
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const lastStatement = getCurrentStatementCycleStart(statementDay, now);
+  const lastDue = addCalendarDays(lastStatement, dueDaysAfterStatement);
+  if (lastDue.getTime() >= today.getTime()) return lastDue;
+  const nextStatement = statementPeriodFromAnchor(lastStatement, statementDay, 0).end;
+  return addCalendarDays(nextStatement, dueDaysAfterStatement);
+}
+
+/** The two columns that say when a credit card's bill is due. */
+export interface CreditDueColumns {
+  creditDueDay: number | null;
+  creditDueDaysAfterStatement: number | null;
+}
+
+/**
+ * What a credit card saves for its due date. A fixed day is saved as it is.
+ * A days-after rule also saves, as `creditDueDay`, the day of the month it
+ * lands on for the latest statement, so readers that predate the rule (older
+ * app versions, older backups and Web Dashboard pages) still show a due day
+ * within a day or two of the real one. Without a statement day the rule has
+ * nothing to count from, so the fixed day is kept for them as it was.
+ */
+export function creditDueColumns(
+  statementDay: number | null,
+  dueDay: number | null,
+  dueDaysAfterStatement: number | null,
+  now: Date,
+): CreditDueColumns {
+  if (dueDaysAfterStatement == null) {
+    return { creditDueDay: dueDay, creditDueDaysAfterStatement: null };
+  }
+  const creditDueDay =
+    statementDay == null
+      ? dueDay
+      : addCalendarDays(
+          getCurrentStatementCycleStart(statementDay, now),
+          dueDaysAfterStatement,
+        ).getDate();
+  return { creditDueDay, creditDueDaysAfterStatement: dueDaysAfterStatement };
 }
 
 export function statementPeriodKeyForTransactionDate(

@@ -2128,6 +2128,11 @@ const nb = {
     type: 'Type',
     statement_day: 'Utskriftsdag',
     due_day: 'Forfallsdag',
+    due_rule: 'Forfallsdato',
+    due_rule_day_of_month: 'Dag i måneden',
+    due_rule_days_after: 'Dager etter faktura',
+    due_next_date: 'Neste forfallsdato: {{date}}',
+    due_days_after_error: 'Skriv inn 1 til {{max}} dager',
     current_balance: 'Gjeldende saldo',
     balance_adjustment_prompt_title: 'Hvordan skal denne saldoberegningen registreres?',
     balance_adjustment_prompt_message:

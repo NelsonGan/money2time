@@ -2094,6 +2094,11 @@ const en = {
     type: 'Type',
     statement_day: 'Statement day',
     due_day: 'Due day',
+    due_rule: 'Due date',
+    due_rule_day_of_month: 'Day of month',
+    due_rule_days_after: 'Days after statement',
+    due_next_date: 'Next due date: {{date}}',
+    due_days_after_error: 'Enter 1 to {{max}} days',
     current_balance: 'Current balance',
     currency_change_title: 'Change account currency?',
     currency_change_message:

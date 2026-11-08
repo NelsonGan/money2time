@@ -2130,6 +2130,11 @@ const ru = {
     type: 'Тип',
     statement_day: 'День выписки',
     due_day: 'День оплаты',
+    due_rule: 'Срок оплаты',
+    due_rule_day_of_month: 'День месяца',
+    due_rule_days_after: 'Дней после выписки',
+    due_next_date: 'Следующий срок: {{date}}',
+    due_days_after_error: 'Введите от 1 до {{max}} дней',
     current_balance: 'Текущий баланс',
     balance_adjustment_prompt_title: 'Как записать это изменение баланса?',
     balance_adjustment_prompt_message:

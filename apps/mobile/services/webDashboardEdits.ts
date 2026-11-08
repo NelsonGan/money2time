@@ -41,6 +41,7 @@ import type {
 } from '~/types';
 import { flowTypeForBalanceDelta } from '~/utils/accountBalances';
 import { dateFromDayKeyLocal, dayKeyFromDateLocal } from '~/utils/formatters';
+import { creditDueColumns, isDueDaysAfterStatement } from '~/utils/statementPeriods';
 
 import { EDIT_MODULES } from './webDashboardEditModules';
 import {
@@ -110,6 +111,12 @@ export type AccountFields = {
   includeInTotals?: boolean;
   creditStatementDay?: number | null;
   creditDueDay?: number | null;
+  /**
+   * Days after each statement the bill is due, or null for the fixed
+   * `creditDueDay`. Sent only to a phone naming `credit-due-days-after` in
+   * `meta.features`; a fixed due day sent without it switches the card back.
+   */
+  creditDueDaysAfterStatement?: number | null;
 };
 
 export type CategoryFields = {
@@ -330,6 +337,7 @@ const ACCOUNT_KEYS: Checks = {
   includeInTotals: (v) => typeof v === 'boolean',
   creditStatementDay: (v) => v === null || isDay(v),
   creditDueDay: (v) => v === null || isDay(v),
+  creditDueDaysAfterStatement: (v) => v === null || isDueDaysAfterStatement(v),
 };
 
 const CATEGORY_KEYS: Checks = {
@@ -778,6 +786,13 @@ function planAccount(
       return refuse('invalid');
     }
     ctx.created.accounts++;
+    const statementDay = type === 'credit' ? (fields.creditStatementDay ?? 25) : null;
+    const due = creditDueColumns(
+      statementDay,
+      fields.creditDueDay ?? 1,
+      fields.creditDueDaysAfterStatement ?? null,
+      ctx.now,
+    );
     steps.push({
       kind: 'account.create',
       input: {
@@ -789,8 +804,9 @@ function planAccount(
         currency,
         startingBalance: fields.balance ?? 0,
         includeInTotals: fields.includeInTotals ?? true,
-        creditStatementDay: type === 'credit' ? (fields.creditStatementDay ?? 25) : null,
-        creditDueDay: type === 'credit' ? (fields.creditDueDay ?? 1) : null,
+        creditStatementDay: statementDay,
+        creditDueDay: type === 'credit' ? due.creditDueDay : null,
+        creditDueDaysAfterStatement: type === 'credit' ? due.creditDueDaysAfterStatement : null,
       },
     });
     return ok(1);
@@ -810,7 +826,8 @@ function planAccount(
   const special = current.type === 'loan' || current.type === 'goal';
   const money = 'balance' in set || 'currency' in set;
   if (special && money) return refuse('invalid');
-  const credit = 'creditStatementDay' in set || 'creditDueDay' in set;
+  const credit =
+    'creditStatementDay' in set || 'creditDueDay' in set || 'creditDueDaysAfterStatement' in set;
   if (credit && current.type !== 'credit') return refuse('invalid');
   const input: Record<string, unknown> = {};
   if (set.name !== undefined) {
@@ -834,8 +851,27 @@ function planAccount(
     input.cardDesign = design;
   }
   if (set.includeInTotals !== undefined) input.includeInTotals = set.includeInTotals;
-  if ('creditStatementDay' in set) input.creditStatementDay = set.creditStatementDay ?? null;
-  if ('creditDueDay' in set) input.creditDueDay = set.creditDueDay ?? null;
+  if (credit) {
+    const statementDay =
+      'creditStatementDay' in set ? (set.creditStatementDay ?? null) : current.creditStatementDay;
+    // A page that sets a fixed due day without naming the days-after rule
+    // (one from before it) means the fixed day, so the card goes back to it.
+    const daysAfter =
+      'creditDueDaysAfterStatement' in set
+        ? (set.creditDueDaysAfterStatement ?? null)
+        : 'creditDueDay' in set
+          ? null
+          : (current.creditDueDaysAfterStatement ?? null);
+    const due = creditDueColumns(
+      statementDay,
+      'creditDueDay' in set ? (set.creditDueDay ?? null) : current.creditDueDay,
+      daysAfter,
+      ctx.now,
+    );
+    if ('creditStatementDay' in set) input.creditStatementDay = statementDay;
+    input.creditDueDay = due.creditDueDay;
+    input.creditDueDaysAfterStatement = due.creditDueDaysAfterStatement;
+  }
   const step: Extract<EditStep, { kind: 'account.update' }> = {
     kind: 'account.update',
     id: current.id,

@@ -177,6 +177,10 @@ describe('readEditRequest', () => {
     ['a made-up feeling', [update('a', { sentiment: 'angry' })]],
     ['a lowercase currency', [{ entity: 'account', op: 'create', account: { currency: 'myr' } }]],
     ['a day 32', [{ entity: 'account', op: 'create', account: { creditDueDay: 32 } }]],
+    [
+      'a due date 46 days after the statement',
+      [{ entity: 'account', op: 'create', account: { creditDueDaysAfterStatement: 46 } }],
+    ],
     ['a made-up repeat', [{ entity: 'recurring', op: 'create', rule: { pattern: 'hourly' } }]],
     ['no ops', []],
   ])('refuses %s', (_name, ops) => {
@@ -499,6 +503,66 @@ describe('accounts and groups', () => {
         }),
       },
     ]);
+  });
+
+  it('creates a credit account due some days after its statement', () => {
+    // NOW is Oct 20: the latest statement is Sep 25, and 20 days on is Oct 15,
+    // the day older readers are given.
+    expect(
+      steps([
+        {
+          entity: 'account',
+          op: 'create',
+          account: { name: 'Visa', type: 'credit', creditDueDaysAfterStatement: 20 },
+        },
+      ])[0],
+    ).toMatchObject({
+      input: { creditStatementDay: 25, creditDueDay: 15, creditDueDaysAfterStatement: 20 },
+    });
+  });
+
+  it('keeps a card’s due rule in step with what the page sets', () => {
+    const data = {
+      accounts: [
+        account('card', {
+          type: 'credit',
+          creditStatementDay: 25,
+          creditDueDay: 15,
+          creditDueDaysAfterStatement: 20,
+        }),
+      ],
+    };
+    const editCard = (set: Record<string, unknown>) => [
+      { entity: 'account', op: 'update', id: 'card', at: AT, set },
+    ];
+    // A new statement day moves the day older readers see; the rule stays.
+    expect(steps(editCard({ creditStatementDay: 10 }), data)[0]).toMatchObject({
+      input: { creditStatementDay: 10, creditDueDay: 30, creditDueDaysAfterStatement: 20 },
+    });
+    // A page from before the rule sets a fixed day: the card goes back to it.
+    expect(steps(editCard({ creditDueDay: 3 }), data)[0]).toMatchObject({
+      input: { creditDueDay: 3, creditDueDaysAfterStatement: null },
+    });
+    expect(steps(editCard({ creditDueDaysAfterStatement: 25 }), data)[0]).toMatchObject({
+      input: { creditDueDay: 20, creditDueDaysAfterStatement: 25 },
+    });
+    // Other edits leave the due date alone.
+    expect(steps(editCard({ name: 'Visa' }), data)[0]).toEqual({
+      kind: 'account.update',
+      id: 'card',
+      input: { name: 'Visa' },
+    });
+    expect(
+      refusal([
+        {
+          entity: 'account',
+          op: 'update',
+          id: 'myr',
+          at: AT,
+          set: { creditDueDaysAfterStatement: 20 },
+        },
+      ]),
+    ).toEqual({ error: 'invalid' });
   });
 
   it('holds a free plan to six accounts', () => {

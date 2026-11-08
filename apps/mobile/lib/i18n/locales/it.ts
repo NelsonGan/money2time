@@ -2133,6 +2133,11 @@ const it = {
     type: 'Tipo',
     statement_day: 'Giorno estratto',
     due_day: 'Giorno scadenza',
+    due_rule: 'Scadenza',
+    due_rule_day_of_month: 'Giorno del mese',
+    due_rule_days_after: 'Giorni dopo l’estratto',
+    due_next_date: 'Prossima scadenza: {{date}}',
+    due_days_after_error: 'Inserisci da 1 a {{max}} giorni',
     current_balance: 'Saldo attuale',
     balance_adjustment_prompt_title: 'Come registrare questa variazione di saldo?',
     balance_adjustment_prompt_message:

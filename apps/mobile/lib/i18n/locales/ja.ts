@@ -2112,6 +2112,11 @@ const ja = {
     type: '種類',
     statement_day: '締め日',
     due_day: '支払日',
+    due_rule: '支払期日',
+    due_rule_day_of_month: '毎月の日付',
+    due_rule_days_after: '締め日から何日後',
+    due_next_date: '次の支払期日：{{date}}',
+    due_days_after_error: '1〜{{max}}日で入力してください',
     current_balance: '現在残高',
     balance_adjustment_prompt_title: 'この残高変動をどう記録しますか？',
     balance_adjustment_prompt_message:
