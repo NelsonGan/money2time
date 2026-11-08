@@ -171,6 +171,25 @@ const sv = {
     reset_action: 'Radera och byt',
   },
   news: {
+    budgets_splits_scans_archive: {
+      title: 'Budgetar, återbetalningar och mer',
+      budgets: {
+        title: 'Vecko- och årsbudgetar',
+        body: 'Budgetar kan nu upprepas varje vecka eller varje år, inte bara varje månad. Välj under Upprepas när du skapar en budgetmall. Varje period får en egen ring på sidan Budget: tryck på en ring för att se vad som är kvar. Flera perioder samtidigt ingår i Pro.',
+      },
+      partPayments: {
+        title: 'Återbetalning i delar',
+        body: 'Vänner kan nu betala tillbaka lite i taget. Under Vem är skyldig dig trycker du på Markera som betald och skriver vad de betalade. Resten står kvar som skuld, med en förloppsindikator och varje betalning i en lista, och varje betalning räknas i dina konton när den kommer in.',
+      },
+      batchScan: {
+        title: 'Skanna många kvitton på en gång',
+        body: 'Tryck på Skanna kvitto, öppna ditt album och välj upp till %{count} kvitton. Varje kvitto blir en egen utgift, med egen handlare, belopp, datum och kategori, medan du fortsätter använda appen. Ett kort på Hem visar hur långt det har kommit.',
+      },
+      archive: {
+        title: 'Arkivera konton',
+        body: 'Har du sagt upp ett kort eller slutat använda ett konto? Redigera det och slå på Arkivera konto. Det försvinner från dina kontolistor och väljare men behåller alla transaktioner, och dess återkommande poster pausas. Hitta det igen under Visa arkiverade på sidan Konton.',
+      },
+    },
     cloud_sync_shared_ledgers: {
       title: 'Cloud Sync och delade kassaböcker',
       cloudSync: {
@@ -463,6 +482,9 @@ const sv = {
       open_notification_review: 'Slå på Autogranskning',
       open_insights: 'Öppna Insikter',
       open_instalments: 'Visa delbetalningar',
+      open_budget: 'Öppna Budget',
+      open_settle_up: 'Öppna Vem är skyldig dig',
+      open_scan_receipt: 'Skanna kvitton',
       open_share_earn: 'Få Pro gratis',
       open_quick_entry_settings: 'Öppna inställningar för Snabbregistrering',
       open_auto_log: 'Ställ in automatiseringar',

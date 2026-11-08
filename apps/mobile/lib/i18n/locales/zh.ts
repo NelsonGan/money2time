@@ -144,6 +144,25 @@ const zh = {
     },
   },
   news: {
+    budgets_splits_scans_archive: {
+      title: '预算、分次还款等新功能',
+      budgets: {
+        title: '每周和每年预算',
+        body: '预算现在除了每月，还可以每周或每年重复。创建预算模板时在重复中选择。每个周期在预算页都有自己的圆环：点一下圆环即可查看剩余金额。同时使用多个周期为 Pro 功能。',
+      },
+      partPayments: {
+        title: '分次还款',
+        body: '朋友现在可以一点一点还你钱了。在谁欠你钱中点标记已还，输入对方还了多少。剩余部分仍记为欠款，并显示进度条和每笔还款记录，每笔还款到账时都会计入你的账户。',
+      },
+      batchScan: {
+        title: '一次扫描多张收据',
+        body: '点扫描收据，打开相册，最多选择 %{count} 张收据。每张都会成为一笔单独的支出，带有各自的商家、金额、日期和类别，期间你可以继续使用应用。首页上的一张卡片会显示处理进度。',
+      },
+      archive: {
+        title: '归档账户',
+        body: '注销了卡片或不再使用某个账户？编辑它并开启归档账户。它会从账户列表和选择器中消失，但保留所有交易，其定期记录也会暂停。在账户页的显示已归档中可以再次找到它。',
+      },
+    },
     cloud_sync_shared_ledgers: {
       title: 'Cloud Sync 与共享账本',
       cloudSync: {
@@ -436,6 +455,9 @@ const zh = {
       open_notification_review: '开启自动确认',
       open_insights: '打开洞察',
       open_instalments: '查看分期',
+      open_budget: '打开预算',
+      open_settle_up: '打开谁欠你钱',
+      open_scan_receipt: '扫描收据',
       open_share_earn: '免费获取 Pro',
       open_quick_entry_settings: '打开快速记账设置',
       open_auto_log: '设置自动化',

@@ -171,6 +171,25 @@ const fr = {
     reset_action: 'Supprimer et changer',
   },
   news: {
+    budgets_splits_scans_archive: {
+      title: 'Budgets, remboursements et plus',
+      budgets: {
+        title: 'Budgets hebdomadaires et annuels',
+        body: "Les budgets peuvent désormais se répéter chaque semaine ou chaque année, en plus de chaque mois. Choisissez sous Répétition en créant un modèle de budget. Chaque période a son propre anneau sur la page Budget : touchez un anneau pour voir ce qu'il reste. Suivre plusieurs périodes à la fois fait partie de Pro.",
+      },
+      partPayments: {
+        title: 'Remboursements en plusieurs fois',
+        body: "Vos amis peuvent désormais vous rembourser petit à petit. Dans Qui vous doit de l'argent, touchez Marquer comme payé et saisissez ce qu'ils ont payé. Le solde reste dû, avec une barre de progression et la liste de chaque paiement, et chaque paiement compte dans vos comptes dès son arrivée.",
+      },
+      batchScan: {
+        title: 'Scannez plusieurs reçus à la fois',
+        body: "Touchez Scanner le reçu, ouvrez votre album et choisissez jusqu'à %{count} reçus. Chacun devient une dépense à part, avec son marchand, son montant, sa date et sa catégorie, pendant que vous continuez à utiliser l'app. Une carte sur Accueil indique où en est le traitement.",
+      },
+      archive: {
+        title: 'Archivez des comptes',
+        body: 'Carte résiliée ou compte inutilisé ? Modifiez-le et activez Archiver le compte. Il disparaît de vos listes de comptes et sélecteurs mais garde toutes ses transactions, et ses opérations récurrentes sont mises en pause. Retrouvez-le sous Afficher les archivés sur la page Comptes.',
+      },
+    },
     cloud_sync_shared_ledgers: {
       title: 'Cloud Sync et carnets partagés',
       cloudSync: {
@@ -463,6 +482,9 @@ const fr = {
       open_notification_review: 'Activer la Vérification auto',
       open_insights: 'Ouvrir Analyses',
       open_instalments: 'Voir les paiements',
+      open_budget: 'Ouvrir Budget',
+      open_settle_up: "Ouvrir Qui vous doit de l'argent",
+      open_scan_receipt: 'Scanner des reçus',
       open_share_earn: 'Obtenir Pro gratuitement',
       open_quick_entry_settings: 'Ouvrir les réglages de la Saisie rapide',
       open_auto_log: 'Configurer les automatisations',

@@ -171,6 +171,25 @@ const vi = {
     reset_action: 'Xóa và chuyển',
   },
   news: {
+    budgets_splits_scans_archive: {
+      title: 'Ngân sách, trả nợ từng phần và hơn thế nữa',
+      budgets: {
+        title: 'Ngân sách theo tuần và theo năm',
+        body: 'Giờ ngân sách có thể lặp lại mỗi tuần hoặc mỗi năm, ngoài mỗi tháng. Chọn ở mục Lặp lại khi tạo mẫu ngân sách. Mỗi kỳ có vòng riêng trên trang Ngân sách: chạm vào một vòng để xem còn lại bao nhiêu. Dùng nhiều kỳ cùng lúc thuộc gói Pro.',
+      },
+      partPayments: {
+        title: 'Trả lại từng phần',
+        body: 'Giờ bạn bè có thể trả lại bạn từng chút một. Trong Ai nợ bạn, chạm Đánh dấu đã trả và nhập số họ đã trả. Phần còn lại vẫn được ghi nợ, kèm thanh tiến độ và danh sách từng khoản đã trả, và mỗi khoản được tính vào tài khoản của bạn ngay khi nhận được.',
+      },
+      batchScan: {
+        title: 'Quét nhiều hóa đơn cùng lúc',
+        body: 'Chạm Quét hóa đơn, mở album và chọn tối đa %{count} hóa đơn. Mỗi hóa đơn thành một khoản chi tiêu riêng, với cửa hàng, số tiền, ngày và danh mục riêng, trong khi bạn vẫn dùng ứng dụng bình thường. Một thẻ trên Trang chủ cho biết đã xử lý đến đâu.',
+      },
+      archive: {
+        title: 'Lưu trữ tài khoản',
+        body: 'Đã đóng thẻ hay không dùng một tài khoản nữa? Hãy sửa nó và bật Lưu trữ tài khoản. Tài khoản sẽ rời khỏi danh sách và bộ chọn tài khoản nhưng vẫn giữ mọi giao dịch, và các mục định kỳ của nó được tạm dừng. Tìm lại trong Xem mục đã lưu trữ trên trang Tài khoản.',
+      },
+    },
     cloud_sync_shared_ledgers: {
       title: 'Cloud Sync và sổ dùng chung',
       cloudSync: {
@@ -463,6 +482,9 @@ const vi = {
       open_notification_review: 'Bật Tự động xem lại',
       open_insights: 'Mở Thống kê',
       open_instalments: 'Xem trả góp',
+      open_budget: 'Mở Ngân sách',
+      open_settle_up: 'Mở Ai nợ bạn',
+      open_scan_receipt: 'Quét hóa đơn',
       open_share_earn: 'Nhận Pro miễn phí',
       open_quick_entry_settings: 'Mở cài đặt Nhập nhanh',
       open_auto_log: 'Thiết lập tự động hóa',

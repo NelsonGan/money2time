@@ -171,6 +171,25 @@ const pt = {
     reset_action: 'Excluir e trocar',
   },
   news: {
+    budgets_splits_scans_archive: {
+      title: 'Orçamentos, devoluções e mais',
+      budgets: {
+        title: 'Orçamentos semanais e anuais',
+        body: 'Os orçamentos agora podem se repetir toda semana ou todo ano, além de todo mês. Escolha em Repete ao criar um modelo de orçamento. Cada período ganha seu próprio anel na página Orçamento: toque em um anel para ver o que resta. Usar vários períodos ao mesmo tempo faz parte do Pro.',
+      },
+      partPayments: {
+        title: 'Devoluções em partes',
+        body: 'Agora os amigos podem te pagar de volta aos poucos. Em Quem te deve, toque em Marcar como pago e digite quanto pagaram. O restante continua em aberto, com uma barra de progresso e cada pagamento listado, e cada pagamento entra nas suas contas assim que chega.',
+      },
+      batchScan: {
+        title: 'Digitalize vários recibos de uma vez',
+        body: 'Toque em Digitalizar recibo, abra seu álbum e escolha até %{count} recibos. Cada um vira uma despesa própria, com estabelecimento, valor, data e categoria, enquanto você continua usando o app. Um cartão no Início mostra o andamento.',
+      },
+      archive: {
+        title: 'Arquive contas',
+        body: 'Encerrou um cartão ou parou de usar uma conta? Edite-a e ative Arquivar conta. Ela sai das listas e seletores de contas, mas mantém todas as transações, e seus lançamentos recorrentes ficam pausados. Encontre-a de novo em Ver arquivados, na página Contas.',
+      },
+    },
     cloud_sync_shared_ledgers: {
       title: 'Cloud Sync e livros compartilhados',
       cloudSync: {
@@ -463,6 +482,9 @@ const pt = {
       open_notification_review: 'Ativar Revisão automática',
       open_insights: 'Abrir Análises',
       open_instalments: 'Ver parcelamentos',
+      open_budget: 'Abrir Orçamento',
+      open_settle_up: 'Abrir Quem te deve',
+      open_scan_receipt: 'Digitalizar recibos',
       open_share_earn: 'Ganhe o Pro grátis',
       open_quick_entry_settings: 'Abrir configurações de Lançamento rápido',
       open_auto_log: 'Configurar automações',

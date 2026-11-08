@@ -171,6 +171,25 @@ const nb = {
     reset_action: 'Slett og bytt',
   },
   news: {
+    budgets_splits_scans_archive: {
+      title: 'Budsjetter, tilbakebetalinger og mer',
+      budgets: {
+        title: 'Ukentlige og årlige budsjetter',
+        body: 'Budsjetter kan nå gjentas hver uke eller hvert år, i tillegg til hver måned. Velg under Gjentas når du lager en budsjettmal. Hver periode får sin egen ring på Budsjett-siden: trykk på en ring for å se hva som er igjen. Flere perioder samtidig er en del av Pro.',
+      },
+      partPayments: {
+        title: 'Tilbakebetaling i deler',
+        body: 'Venner kan nå betale deg tilbake litt om gangen. Under Hvem skylder deg trykker du på Merk som betalt og skriver inn hva de betalte. Resten står fortsatt som skyldig, med en fremdriftslinje og hver betaling i en liste, og hver betaling teller på kontoene dine når den kommer inn.',
+      },
+      batchScan: {
+        title: 'Skann mange kvitteringer samtidig',
+        body: 'Trykk på Skann kvittering, åpne albumet ditt og velg opptil %{count} kvitteringer. Hver blir sin egen utgift, med egen butikk, beløp, dato og kategori, mens du fortsetter å bruke appen. Ett kort på Hjem viser hvor langt den har kommet.',
+      },
+      archive: {
+        title: 'Arkiver kontoer',
+        body: 'Har du sagt opp et kort eller sluttet å bruke en konto? Rediger den og slå på Arkiver konto. Den forsvinner fra kontolistene og velgerne, men beholder alle transaksjoner, og de faste oppføringene settes på pause. Finn den igjen under Vis arkiverte på Kontoer-siden.',
+      },
+    },
     cloud_sync_shared_ledgers: {
       title: 'Cloud Sync og delte regnskap',
       cloudSync: {
@@ -463,6 +482,9 @@ const nb = {
       open_notification_review: 'Slå på Autogjennomgang',
       open_insights: 'Åpne Innsikt',
       open_instalments: 'Se delbetalinger',
+      open_budget: 'Åpne Budsjett',
+      open_settle_up: 'Åpne Hvem skylder deg',
+      open_scan_receipt: 'Skann kvitteringer',
       open_share_earn: 'Få Pro gratis',
       open_quick_entry_settings: 'Åpne innstillinger for Hurtigregistrering',
       open_auto_log: 'Sett opp automatiseringer',

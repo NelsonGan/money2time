@@ -146,6 +146,25 @@ const en = {
     },
   },
   news: {
+    budgets_splits_scans_archive: {
+      title: 'Budgets, paybacks and more',
+      budgets: {
+        title: 'Weekly and yearly budgets',
+        body: "Budgets can now repeat every week or every year, as well as every month. Choose under Repeats when you make a budget template. Each period gets its own ring on the Budget page: tap a ring to see what's left. Running several periods at once is part of Pro.",
+      },
+      partPayments: {
+        title: 'Paybacks in parts',
+        body: 'Friends can now pay you back a bit at a time. In Who owes you, tap Mark paid and type what they paid. The rest stays owed, with a progress bar and every payment listed, and each payment counts in your accounts as it arrives.',
+      },
+      batchScan: {
+        title: 'Scan many receipts at once',
+        body: 'Tap Scan receipt, open your album and pick up to %{count} receipts. Each one becomes its own expense, with its own merchant, amount, date and category, while you keep using the app. One card on Home shows how far it has got.',
+      },
+      archive: {
+        title: 'Archive accounts',
+        body: 'Closed a card or stopped using an account? Edit it and turn on Archive account. It leaves your account lists and pickers but keeps every transaction, and its recurring entries are paused. Find it again under Show archived on the Accounts page.',
+      },
+    },
     cloud_sync_shared_ledgers: {
       title: 'Cloud Sync and shared ledgers',
       cloudSync: {
@@ -448,6 +467,9 @@ const en = {
       open_notification_review: 'Turn on Auto-review',
       open_insights: 'Open Insights',
       open_instalments: 'See instalments',
+      open_budget: 'Open Budget',
+      open_settle_up: 'Open Who owes you',
+      open_scan_receipt: 'Scan receipts',
     },
     showcase: {
       synced_devices: 'All your phones are up to date',

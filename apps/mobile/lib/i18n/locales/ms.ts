@@ -171,6 +171,25 @@ const ms = {
     reset_action: 'Padam & tukar',
   },
   news: {
+    budgets_splits_scans_archive: {
+      title: 'Bajet, bayaran balik dan banyak lagi',
+      budgets: {
+        title: 'Bajet mingguan dan tahunan',
+        body: 'Bajet kini boleh berulang setiap minggu atau setiap tahun, selain setiap bulan. Pilih di bawah Berulang semasa membuat templat bajet. Setiap tempoh mendapat cincinnya sendiri di halaman Bajet: ketik cincin untuk melihat bakinya. Menjalankan beberapa tempoh serentak ialah sebahagian daripada Pro.',
+      },
+      partPayments: {
+        title: 'Bayaran balik berperingkat',
+        body: 'Rakan kini boleh membayar balik anda sedikit demi sedikit. Dalam Siapa berhutang dengan anda, ketik Tandai dibayar dan taip jumlah yang mereka bayar. Bakinya kekal terhutang, dengan bar kemajuan dan senarai setiap bayaran, dan setiap bayaran dikira dalam akaun anda sebaik sahaja diterima.',
+      },
+      batchScan: {
+        title: 'Imbas banyak resit serentak',
+        body: 'Ketik Imbas resit, buka album anda dan pilih sehingga %{count} resit. Setiap satu menjadi perbelanjaan tersendiri, dengan peniaga, jumlah, tarikh dan kategorinya sendiri, sementara anda terus menggunakan aplikasi. Satu kad di Utama menunjukkan kemajuannya.',
+      },
+      archive: {
+        title: 'Arkibkan akaun',
+        body: 'Sudah menutup kad atau tidak lagi menggunakan sesuatu akaun? Edit akaun itu dan hidupkan Arkibkan akaun. Ia hilang daripada senarai dan pemilih akaun tetapi menyimpan setiap transaksi, dan entri berulangnya dijeda. Temuinya semula di bawah Tunjuk arkib pada halaman Akaun.',
+      },
+    },
     cloud_sync_shared_ledgers: {
       title: 'Cloud Sync dan buku dikongsi',
       cloudSync: {
@@ -463,6 +482,9 @@ const ms = {
       open_notification_review: 'Hidupkan Semakan automatik',
       open_insights: 'Buka Wawasan',
       open_instalments: 'Lihat ansuran',
+      open_budget: 'Buka Bajet',
+      open_settle_up: 'Buka Siapa berhutang dengan anda',
+      open_scan_receipt: 'Imbas resit',
       open_share_earn: 'Dapatkan Pro percuma',
       open_quick_entry_settings: 'Buka tetapan Kemasukan Pantas',
       open_auto_log: 'Sediakan automasi',

@@ -171,6 +171,25 @@ const it = {
     reset_action: 'Elimina e cambia',
   },
   news: {
+    budgets_splits_scans_archive: {
+      title: 'Budget, rimborsi e altro',
+      budgets: {
+        title: 'Budget settimanali e annuali',
+        body: 'Ora i budget possono ripetersi ogni settimana o ogni anno, oltre che ogni mese. Scegli in Si ripete quando crei un modello di budget. Ogni periodo ha il suo anello nella pagina Budget: tocca un anello per vedere quanto resta. Usare più periodi insieme fa parte di Pro.',
+      },
+      partPayments: {
+        title: 'Rimborsi in più volte',
+        body: "Ora gli amici possono restituirti i soldi un po' alla volta. In Chi ti deve dei soldi, tocca Segna pagato e scrivi quanto hanno pagato. Il resto rimane da saldare, con una barra di avanzamento e l'elenco di ogni pagamento, e ogni pagamento conta nei tuoi conti appena arriva.",
+      },
+      batchScan: {
+        title: 'Scansiona tante ricevute insieme',
+        body: "Tocca Scansiona ricevuta, apri il tuo album e scegli fino a %{count} ricevute. Ognuna diventa una spesa a sé, con esercente, importo, data e categoria propri, mentre continui a usare l'app. Una scheda nella Home mostra a che punto è.",
+      },
+      archive: {
+        title: 'Archivia i conti',
+        body: 'Hai chiuso una carta o non usi più un conto? Modificalo e attiva Archivia conto. Sparisce dagli elenchi e dai selettori dei conti ma conserva tutte le transazioni, e le sue voci ricorrenti vengono sospese. Lo ritrovi in Mostra archiviati nella pagina Conti.',
+      },
+    },
     cloud_sync_shared_ledgers: {
       title: 'Cloud Sync e registri condivisi',
       cloudSync: {
@@ -463,6 +482,9 @@ const it = {
       open_notification_review: 'Attiva la Revisione automatica',
       open_insights: 'Apri Analisi',
       open_instalments: 'Vedi le rate',
+      open_budget: 'Apri Budget',
+      open_settle_up: 'Apri Chi ti deve dei soldi',
+      open_scan_receipt: 'Scansiona ricevute',
       open_share_earn: 'Ottieni Pro gratis',
       open_quick_entry_settings: 'Apri le impostazioni di Inserimento rapido',
       open_auto_log: 'Configura le automazioni',

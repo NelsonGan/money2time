@@ -1,4 +1,5 @@
 import { PRO_LIMITS } from '~/constants/proLimits';
+import { MAX_RECEIPT_BATCH } from '~/features/transactions/lib/receiptScanBatch';
 import { I18n } from '~/lib/i18n';
 
 import { FEATURE_ANNOUNCEMENTS } from './announcements';
@@ -68,7 +69,11 @@ export interface FeatureAnnouncementPage {
     | 'autoReview'
     | 'insightsRedesign'
     | 'instalmentPlans'
-    | 'householdInsights';
+    | 'householdInsights'
+    | 'periodBudgets'
+    | 'splitPartPayments'
+    | 'batchScan'
+    | 'archiveAccounts';
   /**
    * Optional call-to-action for this page. On the last page it replaces the
    * primary button; on earlier pages it sits above the Back/Next row so the
@@ -98,7 +103,10 @@ export interface FeatureAnnouncementPage {
     | 'openLedgers'
     | 'openNotificationReview'
     | 'openInsights'
-    | 'openInstalments';
+    | 'openInstalments'
+    | 'openBudget'
+    | 'openSettleUp'
+    | 'openScanReceipt';
   /** Mark sponsored or promotional content clearly in the announcement panel. */
   badge?: 'ad';
   /**
@@ -167,6 +175,10 @@ export function announcementPageBody(
     if (page.key === 'instalments') {
       return I18n.t(key, { count: PRO_LIMITS.FREE_MAX_INSTALMENT_PLANS });
     }
+  }
+  if (announcement.i18nKey === 'budgets_splits_scans_archive' && page.key === 'batchScan') {
+    // The album pick limit comes from the scan code, never from the copy.
+    return I18n.t(key, { count: MAX_RECEIPT_BATCH });
   }
   return I18n.t(key);
 }
@@ -261,6 +273,12 @@ export function announcementCtaLabel(cta: NonNullable<FeatureAnnouncementPage['c
       return I18n.t('news.cta.open_insights');
     case 'openInstalments':
       return I18n.t('news.cta.open_instalments');
+    case 'openBudget':
+      return I18n.t('news.cta.open_budget');
+    case 'openSettleUp':
+      return I18n.t('news.cta.open_settle_up');
+    case 'openScanReceipt':
+      return I18n.t('news.cta.open_scan_receipt');
     case 'openShareEarn':
     default:
       return I18n.t('news.cta.open_share_earn');

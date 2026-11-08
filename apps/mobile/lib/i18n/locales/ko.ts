@@ -170,6 +170,25 @@ const ko = {
     reset_action: '삭제 후 전환',
   },
   news: {
+    budgets_splits_scans_archive: {
+      title: '예산, 나눠 받기 외 새 기능',
+      budgets: {
+        title: '주간·연간 예산',
+        body: '이제 예산을 매달뿐 아니라 매주나 매년 반복할 수 있어요. 예산 템플릿을 만들 때 반복에서 선택하세요. 예산 페이지에서 기간마다 링이 따로 표시되고, 링을 누르면 남은 금액을 볼 수 있어요. 여러 기간을 동시에 쓰는 건 Pro 기능이에요.',
+      },
+      partPayments: {
+        title: '나눠서 돌려받기',
+        body: '이제 친구가 조금씩 나눠서 갚을 수 있어요. 받을 돈에서 정산 완료를 누르고 받은 금액을 입력하세요. 나머지는 계속 받을 돈으로 남고, 진행 막대와 모든 결제 내역이 표시되며, 각 결제는 들어온 시점에 계좌에 반영돼요.',
+      },
+      batchScan: {
+        title: '영수증 여러 장 한 번에 스캔',
+        body: '영수증 스캔을 누르고 앨범을 열어 최대 %{count}장의 영수증을 고르세요. 영수증마다 가맹점, 금액, 날짜, 카테고리가 담긴 지출이 각각 만들어지고, 그동안 앱을 계속 쓸 수 있어요. 홈의 카드 하나로 진행 상황을 볼 수 있어요.',
+      },
+      archive: {
+        title: '계좌 보관',
+        body: '카드를 해지했거나 더 이상 쓰지 않는 계좌가 있나요? 계좌를 편집해 계좌 보관을 켜세요. 계좌 목록과 선택 화면에서는 사라지지만 모든 거래는 그대로 남고, 반복 항목은 일시 중지돼요. 계좌 페이지의 보관함 보기에서 다시 찾을 수 있어요.',
+      },
+    },
     cloud_sync_shared_ledgers: {
       title: 'Cloud Sync와 공유 가계부',
       cloudSync: {
@@ -462,6 +481,9 @@ const ko = {
       open_notification_review: '자동 검토 켜기',
       open_insights: '인사이트 열기',
       open_instalments: '할부 보기',
+      open_budget: '예산 열기',
+      open_settle_up: '받을 돈 열기',
+      open_scan_receipt: '영수증 스캔',
       open_share_earn: 'Pro 무료로 받기',
       open_quick_entry_settings: '빠른 입력 설정 열기',
       open_auto_log: '자동화 설정하기',

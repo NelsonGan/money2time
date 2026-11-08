@@ -171,6 +171,25 @@ const pl = {
     reset_action: 'Usuń i zmień',
   },
   news: {
+    budgets_splits_scans_archive: {
+      title: 'Budżety, zwroty i nie tylko',
+      budgets: {
+        title: 'Budżety tygodniowe i roczne',
+        body: 'Budżety mogą się teraz powtarzać co tydzień lub co rok, a nie tylko co miesiąc. Wybierz to w polu Powtarzanie, gdy tworzysz szablon budżetu. Każdy okres ma własny pierścień na stronie Budżet: stuknij pierścień, by zobaczyć, ile zostało. Kilka okresów naraz to część Pro.',
+      },
+      partPayments: {
+        title: 'Zwroty w częściach',
+        body: 'Znajomi mogą teraz oddawać ci pieniądze po trochu. W Kto jest ci winien stuknij Oznacz jako zapłacone i wpisz, ile zapłacili. Reszta pozostaje do oddania, z paskiem postępu i listą wszystkich wpłat, a każda wpłata trafia do twoich kont, gdy tylko wpłynie.',
+      },
+      batchScan: {
+        title: 'Skanuj wiele paragonów naraz',
+        body: 'Stuknij Skanuj paragon, otwórz album i wybierz do %{count} paragonów. Każdy staje się osobnym wydatkiem, z własnym sprzedawcą, kwotą, datą i kategorią, a ty w tym czasie dalej korzystasz z aplikacji. Jedna karta na ekranie Start pokazuje postęp.',
+      },
+      archive: {
+        title: 'Archiwizuj konta',
+        body: 'Zamknięta karta albo konto, którego już nie używasz? Edytuj je i włącz Archiwizuj konto. Znika z list kont i wyboru konta, ale zachowuje wszystkie transakcje, a jego cykliczne wpisy zostają wstrzymane. Znajdziesz je w Pokaż zarchiwizowane na stronie Konta.',
+      },
+    },
     cloud_sync_shared_ledgers: {
       title: 'Cloud Sync i wspólne księgi',
       cloudSync: {
@@ -463,6 +482,9 @@ const pl = {
       open_notification_review: 'Włącz Autosprawdzanie',
       open_insights: 'Otwórz Analizy',
       open_instalments: 'Zobacz raty',
+      open_budget: 'Otwórz Budżet',
+      open_settle_up: 'Otwórz Kto jest ci winien',
+      open_scan_receipt: 'Skanuj paragony',
       open_share_earn: 'Zdobądź Pro za darmo',
       open_quick_entry_settings: 'Otwórz ustawienia Szybkiego dodawania',
       open_auto_log: 'Skonfiguruj automatyzacje',

@@ -171,6 +171,25 @@ const es = {
     reset_action: 'Eliminar y cambiar',
   },
   news: {
+    budgets_splits_scans_archive: {
+      title: 'Presupuestos, devoluciones y más',
+      budgets: {
+        title: 'Presupuestos semanales y anuales',
+        body: 'Los presupuestos ahora pueden repetirse cada semana o cada año, además de cada mes. Elígelo en Se repite al crear una plantilla de presupuesto. Cada periodo tiene su propio anillo en la página Presupuesto: toca un anillo para ver lo que queda. Usar varios periodos a la vez forma parte de Pro.',
+      },
+      partPayments: {
+        title: 'Devoluciones por partes',
+        body: 'Ahora tus amigos pueden devolverte el dinero poco a poco. En Quién te debe, toca Marcar como pagado y escribe lo que te pagaron. El resto sigue pendiente, con una barra de progreso y cada pago en la lista, y cada pago cuenta en tus cuentas cuando llega.',
+      },
+      batchScan: {
+        title: 'Escanea muchos recibos a la vez',
+        body: 'Toca Escanear recibo, abre tu álbum y elige hasta %{count} recibos. Cada uno se convierte en su propio gasto, con su comercio, importe, fecha y categoría, mientras sigues usando la app. Una tarjeta en Inicio muestra cuánto lleva.',
+      },
+      archive: {
+        title: 'Archivar cuentas',
+        body: '¿Cerraste una tarjeta o ya no usas una cuenta? Edítala y activa Archivar cuenta. Desaparece de tus listas de cuentas y selectores, pero conserva todas sus transacciones, y sus movimientos recurrentes se pausan. Vuelve a encontrarla en Ver archivados, en la página Cuentas.',
+      },
+    },
     cloud_sync_shared_ledgers: {
       title: 'Cloud Sync y libros compartidos',
       cloudSync: {
@@ -463,6 +482,9 @@ const es = {
       open_notification_review: 'Activar Revisión automática',
       open_insights: 'Abrir Análisis',
       open_instalments: 'Ver cuotas',
+      open_budget: 'Abrir Presupuesto',
+      open_settle_up: 'Abrir Quién te debe',
+      open_scan_receipt: 'Escanear recibos',
       open_share_earn: 'Consigue Pro gratis',
       open_quick_entry_settings: 'Abrir ajustes de Entrada rápida',
       open_auto_log: 'Configurar automatizaciones',

@@ -418,6 +418,7 @@ export function SettingsStack({
               onOpenLedgers={() => props.navigation.navigate('Ledgers')}
               onOpenInsights={() => requestOpenTab('insights')}
               onOpenInstalments={onOpenInstalments}
+              onOpenSettleUp={onOpenSettleUp}
             />
           );
         }}

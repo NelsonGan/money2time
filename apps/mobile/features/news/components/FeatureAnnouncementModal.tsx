@@ -19,10 +19,12 @@ import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { paymentAlertCapturesRepository } from '~/lib/repositories/paymentAlertCapturesRepository';
+import { requestRunAddAction } from '~/services/addActionNavigation';
 import { triggerHaptic } from '~/services/haptics';
 import { requestFocusInsight } from '~/services/insightsNavigation';
 import { isNotificationAiAvailable } from '~/services/notificationAi';
 import { requestOpenPaymentAlerts } from '~/services/paymentAlertsNavigation';
+import { requestOpenTab } from '~/services/tabNavigation';
 import { WEB_DASHBOARD_URL } from '~/services/webDashboard.shared';
 import { withColorAlpha } from '~/utils/color';
 
@@ -58,6 +60,12 @@ import {
 } from './AutoReviewInsightsInstalmentsShowcases';
 import { BackupShowcase } from './BackupShowcase';
 import { BudgetShowcase } from './BudgetShowcase';
+import {
+  ArchiveAccountsShowcase,
+  BatchScanShowcase,
+  PeriodBudgetsShowcase,
+  SplitPartPaymentsShowcase,
+} from './BudgetsSplitsScansArchiveShowcases';
 import {
   CloudSyncShowcase,
   HouseholdInsightsShowcase,
@@ -146,6 +154,8 @@ export interface FeatureAnnouncementCtaHandlers {
   onOpenInsights?: () => void;
   /** Open Settings › Instalments. */
   onOpenInstalments?: () => void;
+  /** Open Who owes you (Settle Up). */
+  onOpenSettleUp?: () => void;
 }
 
 interface FeatureAnnouncementModalProps extends FeatureAnnouncementCtaHandlers {
@@ -221,6 +231,7 @@ export function FeatureAnnouncementModal({
   onOpenLedgers,
   onOpenInsights,
   onOpenInstalments,
+  onOpenSettleUp,
 }: FeatureAnnouncementModalProps) {
   const colors = useThemeColors();
   const { settings, paymentAlertPrefs } = useApp();
@@ -293,6 +304,14 @@ export function FeatureAnnouncementModal({
         }
       : undefined,
     openInstalments: onOpenInstalments,
+    openSettleUp: onOpenSettleUp,
+    // Budget is an Insights page, and Scan receipt one of the + button's flows:
+    // both are reached through their bridges, the same from every caller.
+    openBudget: () => {
+      requestOpenTab('insights');
+      requestFocusInsight('budget');
+    },
+    openScanReceipt: () => requestRunAddAction('scan'),
     // The review page is a root route, reached through its bridge from every
     // caller; without notification logging the button opens its setup instead.
     openNotificationReview: () => {
@@ -426,7 +445,15 @@ export function FeatureAnnouncementModal({
               </View>
             ) : null}
             <View style={styles.showcaseSlot}>
-              {page.visual === 'autoReview' ? (
+              {page.visual === 'periodBudgets' ? (
+                <PeriodBudgetsShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'splitPartPayments' ? (
+                <SplitPartPaymentsShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'batchScan' ? (
+                <BatchScanShowcase width={Math.round(showcaseWidth * 0.92)} />
+              ) : page.visual === 'archiveAccounts' ? (
+                <ArchiveAccountsShowcase width={Math.round(showcaseWidth * 0.86)} />
+              ) : page.visual === 'autoReview' ? (
                 <AutoReviewShowcase width={Math.round(showcaseWidth * 0.92)} />
               ) : page.visual === 'insightsRedesign' ? (
                 <InsightsRedesignShowcase width={Math.round(showcaseWidth * 0.92)} />

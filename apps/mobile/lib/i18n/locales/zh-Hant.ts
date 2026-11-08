@@ -144,6 +144,25 @@ const zhHant = {
     },
   },
   news: {
+    budgets_splits_scans_archive: {
+      title: '預算、分次還款等新功能',
+      budgets: {
+        title: '每週和每年預算',
+        body: '預算現在除了每月，還可以每週或每年重複。建立預算模板時在重複中選擇。每個週期在預算頁都有自己的圓環：點一下圓環就能查看剩餘金額。同時使用多個週期為 Pro 功能。',
+      },
+      partPayments: {
+        title: '分次還款',
+        body: '朋友現在可以一點一點還你錢了。在誰欠你錢中點標記已還，輸入對方還了多少。剩餘部分仍記為欠款，並顯示進度條和每筆還款紀錄，每筆還款到帳時都會計入你的帳戶。',
+      },
+      batchScan: {
+        title: '一次掃描多張收據',
+        body: '點掃描收據，打開相簿，最多選擇 %{count} 張收據。每張都會成為一筆獨立的支出，帶有各自的商家、金額、日期和類別，期間你可以繼續使用 App。首頁上的一張卡片會顯示處理進度。',
+      },
+      archive: {
+        title: '歸檔帳戶',
+        body: '停用了卡片或不再使用某個帳戶？編輯它並開啟歸檔帳戶。它會從帳戶列表和選擇器中消失，但保留所有交易，其定期紀錄也會暫停。在帳戶頁的顯示已歸檔中可以再次找到它。',
+      },
+    },
     cloud_sync_shared_ledgers: {
       title: 'Cloud Sync 與共享帳本',
       cloudSync: {
@@ -436,6 +455,9 @@ const zhHant = {
       open_notification_review: '開啟自動確認',
       open_insights: '開啟洞察',
       open_instalments: '查看分期',
+      open_budget: '開啟預算',
+      open_settle_up: '開啟誰欠你錢',
+      open_scan_receipt: '掃描收據',
       open_share_earn: '免費獲取 Pro',
       open_quick_entry_settings: '開啟快速記帳設定',
       open_auto_log: '設定自動化',
