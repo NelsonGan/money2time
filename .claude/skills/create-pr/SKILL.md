@@ -11,6 +11,7 @@ Write for a reviewer who has not seen the conversation. Describe the final chang
 
 - Read the repository instructions and any PR template. Inspect the branch, working tree, full diff against the target branch, and existing PR before writing.
 - Assess analytics impact for every change. If tracking or a tracked flow changes, follow [maintain-analytics-tracking](../maintain-analytics-tracking/SKILL.md), update the [Analytics](../../../README.md#analytics) tables in `README.md` in the same change, run the tracking-table check, and explain any PostHog volume change (against the README event budget) in the PR.
+- Assess Web Dashboard impact for every change with [sync-web-dashboard](../sync-web-dashboard/SKILL.md). Link the money2time-web PR it produced, or say "Web Dashboard: no impact" and why, under Verification.
 - Review the actual changes and available verification results. Run the checks required by the repository for code changes; when only rewriting a description, reuse verified results for the same code and identify any gaps.
 - When creating a PR, commit only the intended changes, follow the repository's branch and commit conventions, and push the branch. Preserve unrelated work. When rewriting a PR, update that PR instead of opening a duplicate or making unrelated code changes.
 
