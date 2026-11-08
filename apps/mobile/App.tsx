@@ -544,6 +544,7 @@ function MainShellScreen({
     accounts,
     accountGroups,
     updateQuickEntryPrefs,
+    toggleHideAccountBalances,
     settings,
   } = useApp();
   const { checkLimit } = useProGate();
@@ -1090,15 +1091,17 @@ function MainShellScreen({
     () => <ItemsScreen embedded safeAreaEdges={[]} onOpenItem={openItemEditor} />,
     [openItemEditor],
   );
+  // The Accounts and Goals eye. Saved as a setting so it survives a restart.
+  const hideAccountBalances = settings.hideAccountBalances;
   const renderAssetsGoals = useCallback(
-    ({ hideBalances }: { hideBalances: boolean; onToggleBalances: () => void }) => (
+    () => (
       <GoalsScreen
-        hideBalances={hideBalances}
+        hideBalances={hideAccountBalances}
         onOpenGoal={openGoalDetail}
         onOpenGoalEditor={openGoalEditor}
       />
     ),
-    [openGoalDetail, openGoalEditor],
+    [hideAccountBalances, openGoalDetail, openGoalEditor],
   );
   const assetsGoalsActions = useMemo(
     () => <AddGoalButton onOpenGoalEditor={openGoalEditor} />,
@@ -1130,18 +1133,10 @@ function MainShellScreen({
   // Declared here so its deps on openAccountEditor/openPayCreditCard/
   // openAccountGroupEditor are already initialized.
   const renderAssetsAccounts = useCallback(
-    ({
-      hideBalances,
-      onToggleBalances,
-    }: {
-      hideBalances: boolean;
-      onToggleBalances: () => void;
-    }) => (
+    () => (
       <MemoAccountsScreen
         safeAreaEdges={[]}
         hideOverviewHeader
-        hideBalances={hideBalances}
-        onToggleBalances={onToggleBalances}
         resetToRootToken={accountsResetToken}
         scrollToTopToken={accountsScrollTopToken}
         onOpenAccount={openAccountDetail}
@@ -1318,6 +1313,8 @@ function MainShellScreen({
             shouldPreload={preloadedTabs.has('accounts')}
           >
             <MemoAssetsTab
+              hideBalances={hideAccountBalances}
+              onToggleBalances={toggleHideAccountBalances}
               resetToAccountsToken={accountsResetToken}
               onAddItem={openItemEditorFromAssets}
               onOpenAccountSettings={openAccountSettings}

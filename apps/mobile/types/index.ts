@@ -324,6 +324,8 @@ export interface UserSettings {
   showTransactionAccount: boolean;
   /** Whether account pickers show each account's balance under its name. */
   showAccountPickerBalances: boolean;
+  /** Whether the assets page's Accounts and Goals sub-tabs mask balances (their eye). */
+  hideAccountBalances: boolean;
   /** The bottom bar's tabs as stored. Null means the default set; read with parseNavTabs. */
   navTabsJson: string | null;
   /**

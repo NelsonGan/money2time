@@ -47,6 +47,7 @@ const VALID_ROW = {
   reimbursementsCountAsExpense: true,
   showTransactionAccount: true,
   showAccountPickerBalances: true,
+  hideAccountBalances: false,
   navTabsJson: null,
   createdAt: '2026-01-01T00:00:00.000Z',
   updatedAt: '2026-01-01T00:00:00.000Z',
