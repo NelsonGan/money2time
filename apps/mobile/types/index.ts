@@ -466,7 +466,18 @@ export interface Account {
    */
   cardDesign?: string | null;
   creditStatementDay: number | null;
+  /**
+   * Day of the month a credit card's bill is due. When
+   * `creditDueDaysAfterStatement` is set it is only that rule's day for
+   * readers that predate it (older app versions, backups, Web Dashboard pages).
+   */
   creditDueDay: number | null;
+  /**
+   * Days after each statement date the bill is due, for cards whose bank
+   * counts the grace period in days. Null (the default) means the bill is due
+   * on `creditDueDay` each month. Read through `getCreditCycleDates`.
+   */
+  creditDueDaysAfterStatement?: number | null;
   currency: string;
   startingBalance: number;
   includeInTotals: boolean;

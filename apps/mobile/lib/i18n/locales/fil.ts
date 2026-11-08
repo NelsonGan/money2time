@@ -102,6 +102,13 @@ const fil = {
     camera_permission_body:
       'Payagan ang access sa camera para kumuha ng litrato ng resibo, o pumili ng isa mula sa iyong album.',
     camera_permission_grant: 'Payagan ang access sa camera',
+    batch_scanning: 'Ini-scan ang mga resibo',
+    batch_logged_one: '{{count}} gastos ang naitala',
+    batch_logged_other: '{{count}} gastos ang naitala',
+    batch_none_logged: 'Walang naitalang gastos',
+    batch_failed_one: '{{count}} resibo ang hindi nabasa',
+    batch_failed_other: '{{count}} resibo ang hindi nabasa',
+    batch_hint: 'I-tap para makita ang bawat resibo',
   },
   app: {
     name: 'Money2Time',
@@ -2156,6 +2163,11 @@ const fil = {
     type: 'Uri',
     statement_day: 'Araw ng statement',
     due_day: 'Due date',
+    due_rule: 'Petsa ng due',
+    due_rule_day_of_month: 'Araw ng buwan',
+    due_rule_days_after: 'Araw pagkatapos ng statement',
+    due_next_date: 'Susunod na due date: {{date}}',
+    due_days_after_error: 'Maglagay ng 1 hanggang {{max}} araw',
     current_balance: 'Kasalukuyang balance',
     balance_adjustment_prompt_title: 'Paano dapat itala ang pagbabago ng balance?',
     balance_adjustment_prompt_message:

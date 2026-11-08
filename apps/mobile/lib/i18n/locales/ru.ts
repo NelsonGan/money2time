@@ -102,6 +102,13 @@ const ru = {
     camera_permission_body:
       'Разрешите доступ к камере, чтобы сфотографировать чек, или выберите его из альбома.',
     camera_permission_grant: 'Разрешить доступ к камере',
+    batch_scanning: 'Сканирование чеков',
+    batch_logged_one: 'Записан расход: {{count}}',
+    batch_logged_other: 'Записано расходов: {{count}}',
+    batch_none_logged: 'Расходы не записаны',
+    batch_failed_one: 'Не удалось прочитать чек: {{count}}',
+    batch_failed_other: 'Не удалось прочитать чеков: {{count}}',
+    batch_hint: 'Нажмите, чтобы увидеть каждый чек',
   },
   app: {
     name: 'Money2Time',
@@ -2133,6 +2140,11 @@ const ru = {
     type: 'Тип',
     statement_day: 'День выписки',
     due_day: 'День оплаты',
+    due_rule: 'Срок оплаты',
+    due_rule_day_of_month: 'День месяца',
+    due_rule_days_after: 'Дней после выписки',
+    due_next_date: 'Следующий срок: {{date}}',
+    due_days_after_error: 'Введите от 1 до {{max}} дней',
     current_balance: 'Текущий баланс',
     balance_adjustment_prompt_title: 'Как записать это изменение баланса?',
     balance_adjustment_prompt_message:

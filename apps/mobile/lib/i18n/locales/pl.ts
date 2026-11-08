@@ -102,6 +102,13 @@ const pl = {
     camera_permission_body:
       'Zezwól na dostęp do aparatu, aby zrobić zdjęcie paragonu, lub wybierz je z albumu.',
     camera_permission_grant: 'Zezwól na dostęp do aparatu',
+    batch_scanning: 'Skanowanie paragonów',
+    batch_logged_one: 'Zapisano {{count}} wydatek',
+    batch_logged_other: 'Zapisano wydatki: {{count}}',
+    batch_none_logged: 'Nie zapisano żadnych wydatków',
+    batch_failed_one: 'Nie udało się odczytać {{count}} paragonu',
+    batch_failed_other: 'Nie udało się odczytać paragonów: {{count}}',
+    batch_hint: 'Dotknij, aby zobaczyć każdy paragon',
   },
   app: {
     name: 'Money2Time',
@@ -2137,6 +2144,11 @@ const pl = {
     type: 'Typ',
     statement_day: 'Dzień wyciągu',
     due_day: 'Dzień płatności',
+    due_rule: 'Termin płatności',
+    due_rule_day_of_month: 'Dzień miesiąca',
+    due_rule_days_after: 'Dni po wyciągu',
+    due_next_date: 'Następny termin: {{date}}',
+    due_days_after_error: 'Wpisz od 1 do {{max}} dni',
     current_balance: 'Bieżące saldo',
     balance_adjustment_prompt_title: 'Jak zarejestrować tę zmianę salda?',
     balance_adjustment_prompt_message:

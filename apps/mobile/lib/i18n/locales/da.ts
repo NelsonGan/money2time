@@ -102,6 +102,13 @@ const da = {
     camera_permission_body:
       'Tillad kameraadgang for at tage et billede af en kvittering, eller vælg en fra dit album.',
     camera_permission_grant: 'Tillad kameraadgang',
+    batch_scanning: 'Scanner kvitteringer',
+    batch_logged_one: '{{count}} udgift registreret',
+    batch_logged_other: '{{count}} udgifter registreret',
+    batch_none_logged: 'Ingen udgifter registreret',
+    batch_failed_one: '{{count}} kvittering kunne ikke læses',
+    batch_failed_other: '{{count}} kvitteringer kunne ikke læses',
+    batch_hint: 'Tryk for at se hver kvittering',
   },
   app: {
     name: 'Money2Time',
@@ -2132,6 +2139,11 @@ const da = {
     type: 'Type',
     statement_day: 'Kontoudtogsdag',
     due_day: 'Forfaldsdato',
+    due_rule: 'Forfaldsdato',
+    due_rule_day_of_month: 'Dag i måneden',
+    due_rule_days_after: 'Dage efter opgørelse',
+    due_next_date: 'Næste forfaldsdato: {{date}}',
+    due_days_after_error: 'Angiv 1 til {{max}} dage',
     current_balance: 'Nuværende saldo',
     balance_adjustment_prompt_title: 'Hvordan skal denne saldoændring registreres?',
     balance_adjustment_prompt_message:

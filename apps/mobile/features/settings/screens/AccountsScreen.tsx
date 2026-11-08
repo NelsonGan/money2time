@@ -157,10 +157,16 @@ import {
   bucketTransactionsByAccountPeriod,
   computeCreditCycleSummary,
   creditDeltaForAccountTransaction,
+  creditDueColumns,
   type CreditSummary,
   DAY_IN_MS,
+  DEFAULT_DUE_DAYS_AFTER_STATEMENT,
+  formatStatementDateLabel,
   formatStatementRangeSublabel,
   getCurrentStatementCycleStart,
+  isDueDaysAfterStatement,
+  MAX_DUE_DAYS_AFTER_STATEMENT,
+  nextDueDateAfterStatement,
   nextOccurrenceOfMonthDay,
   statementPeriodFromAnchor,
 } from '~/utils/statementPeriods';
@@ -186,6 +192,7 @@ interface AccountEditorInput {
   cardDesign: string | null;
   creditStatementDay: number | null;
   creditDueDay: number | null;
+  creditDueDaysAfterStatement: number | null;
   includeInTotals: boolean;
   startingBalance: number;
   currency: string;
@@ -248,6 +255,9 @@ const FLOATING_ACTION_GAP = 12;
 const MASKED_BALANCE_VALUE = '••••';
 const EMPTY_PERIOD_TRANSACTIONS: TransactionWithRelations[] = [];
 const DEFAULT_CREDIT_STATEMENT_DAY = 25;
+/** How a credit card's due date is set, in the order the chips show them. */
+type CreditDueRule = 'day_of_month' | 'days_after';
+const CREDIT_DUE_RULE_OPTIONS: readonly CreditDueRule[] = ['day_of_month', 'days_after'];
 /** The interest models a loan can run on, in the order the chips show them. */
 const LOAN_INTEREST_MODEL_OPTIONS: readonly LoanInterestModel[] = ['reducing', 'flat'];
 /** The seeded expense category a loan repayment is filed under by default. */
@@ -553,6 +563,46 @@ const styles = StyleSheet.create({
   },
 });
 
+/** A row of pill chips choosing one of a few options, as the account editor's do. */
+function ChoiceChips<T extends string>({
+  options,
+  value,
+  onChange,
+  labelOf,
+}: {
+  options: readonly T[];
+  value: T;
+  onChange: (option: T) => void;
+  labelOf: (option: T) => string;
+}) {
+  return (
+    <View className="flex-row flex-wrap gap-2">
+      {options.map((option) => {
+        const selected = value === option;
+        return (
+          <Pressable
+            key={option}
+            onPress={() => {
+              if (selected) return;
+              void triggerHaptic('selection');
+              onChange(option);
+            }}
+            accessibilityRole="button"
+            accessibilityState={{ selected }}
+            className={`px-4 py-2.5 rounded-full border ${
+              selected ? 'bg-primary/15 border-primary/50' : 'bg-secondary/30 border-border/40'
+            }`}
+          >
+            <Text variant="caption" className={selected ? 'text-primary' : 'text-muted-foreground'}>
+              {labelOf(option)}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
 function AccountEditorSheet({
   account,
   presetGroupName = null,
@@ -593,6 +643,12 @@ function AccountEditorSheet({
   const [balanceEdited, setBalanceEdited] = useState(false);
   const [creditStatementDay, setCreditStatementDay] = useState('25');
   const [creditDueDay, setCreditDueDay] = useState('1');
+  // How the bill's due date is set: a fixed day of the month (the default), or
+  // a number of days after each statement for banks that count it that way.
+  const [creditDueRule, setCreditDueRule] = useState<CreditDueRule>('day_of_month');
+  const [creditDueDaysAfter, setCreditDueDaysAfter] = useState(
+    String(DEFAULT_DUE_DAYS_AFTER_STATEMENT),
+  );
   // The loan contract. Given the amount and the term, the rate, the total
   // repayable and the monthly instalment are three views of one number, so any
   // of them can be typed and the other two follow.
@@ -738,6 +794,10 @@ function AccountEditorSheet({
       setBalanceEdited(false);
       setCreditStatementDay(String(account.creditStatementDay ?? '25'));
       setCreditDueDay(String(account.creditDueDay ?? '1'));
+      setCreditDueRule(account.creditDueDaysAfterStatement != null ? 'days_after' : 'day_of_month');
+      setCreditDueDaysAfter(
+        String(account.creditDueDaysAfterStatement ?? DEFAULT_DUE_DAYS_AFTER_STATEMENT),
+      );
       setAutoRepaySourceOverride(undefined);
       setLoanPrincipal(
         account.loanOriginalPrincipal != null
@@ -810,6 +870,8 @@ function AccountEditorSheet({
       setBalanceEdited(false);
       setCreditStatementDay('25');
       setCreditDueDay('1');
+      setCreditDueRule('day_of_month');
+      setCreditDueDaysAfter(String(DEFAULT_DUE_DAYS_AFTER_STATEMENT));
       setAutoRepaySourceOverride(undefined);
       setLoanPrincipal('');
       setLoanRate('');
@@ -1191,23 +1253,44 @@ function AccountEditorSheet({
           ),
         )
       : undefined;
-  const canSave = normalizedName.length > 0 && (isNewLoan || hasValidBalance) && hasValidLoanFields;
+  const parsedStatementDay = Number(creditStatementDay);
+  const normalizedStatementDay =
+    Number.isInteger(parsedStatementDay) && parsedStatementDay >= 1 && parsedStatementDay <= 31
+      ? parsedStatementDay
+      : null;
+  const usesDueDaysAfter = editedType === 'credit' && creditDueRule === 'days_after';
+  const parsedDueDaysAfter = Number(creditDueDaysAfter);
+  const hasValidDueDaysAfter = !usesDueDaysAfter || isDueDaysAfterStatement(parsedDueDaysAfter);
+  const nextDueDatePreview =
+    usesDueDaysAfter && hasValidDueDaysAfter && normalizedStatementDay != null
+      ? formatStatementDateLabel(
+          nextDueDateAfterStatement(normalizedStatementDay, parsedDueDaysAfter, new Date()),
+          appSettings.locale ?? I18n.locale ?? 'en',
+        )
+      : null;
+  const canSave =
+    normalizedName.length > 0 &&
+    (isNewLoan || hasValidBalance) &&
+    hasValidLoanFields &&
+    hasValidDueDaysAfter;
 
   const handleSave = () => {
     if (!canSave) return;
     if (!isNewLoan && !Number.isFinite(parsedBalance)) return;
-    const parsedStatementDay = Number(creditStatementDay);
     const parsedDueDay = Number(creditDueDay);
     const resolvedType = isEdit ? account.type : type;
     const isLoan = resolvedType === 'loan';
-    const normalizedStatementDay =
-      Number.isInteger(parsedStatementDay) && parsedStatementDay >= 1 && parsedStatementDay <= 31
-        ? parsedStatementDay
-        : null;
+    const isCredit = resolvedType === 'credit';
     const normalizedDueDay =
       Number.isInteger(parsedDueDay) && parsedDueDay >= 1 && parsedDueDay <= 31
         ? parsedDueDay
         : null;
+    const dueColumns = creditDueColumns(
+      normalizedStatementDay,
+      normalizedDueDay,
+      usesDueDaysAfter ? parsedDueDaysAfter : null,
+      new Date(),
+    );
 
     const input: AccountEditorInput = {
       name: normalizedName,
@@ -1216,8 +1299,9 @@ function AccountEditorSheet({
       cardDesign,
       accountGroup:
         accountGroupId === 'none' ? null : (accountGroupNameById.get(accountGroupId) ?? null),
-      creditStatementDay: resolvedType === 'credit' ? normalizedStatementDay : null,
-      creditDueDay: resolvedType === 'credit' ? normalizedDueDay : null,
+      creditStatementDay: isCredit ? normalizedStatementDay : null,
+      creditDueDay: isCredit ? dueColumns.creditDueDay : null,
+      creditDueDaysAfterStatement: isCredit ? dueColumns.creditDueDaysAfterStatement : null,
       includeInTotals,
       archived: isEdit ? archived : undefined,
       // A new loan opens at what the contract says is still owed after the
@@ -1480,25 +1564,64 @@ function AccountEditorSheet({
               </Pressable>
             </View>
             {editedType === 'credit' ? (
-              <View className="flex-row gap-2">
-                <View className="flex-1">
-                  <Input
-                    label={I18n.t('accounts.statement_day')}
-                    variant="numeric"
-                    value={creditStatementDay}
-                    onChangeText={setCreditStatementDay}
-                    placeholder="25"
-                  />
+              <View className="gap-2">
+                <Text variant="label" tone="muted">
+                  {I18n.t('accounts.due_rule')}
+                </Text>
+                <ChoiceChips
+                  options={CREDIT_DUE_RULE_OPTIONS}
+                  value={creditDueRule}
+                  onChange={setCreditDueRule}
+                  labelOf={(option) =>
+                    I18n.t(
+                      option === 'days_after'
+                        ? 'accounts.due_rule_days_after'
+                        : 'accounts.due_rule_day_of_month',
+                    )
+                  }
+                />
+                <View className="mt-2 flex-row gap-2">
+                  <View className="flex-1">
+                    <Input
+                      label={I18n.t('accounts.statement_day')}
+                      variant="numeric"
+                      value={creditStatementDay}
+                      onChangeText={setCreditStatementDay}
+                      placeholder="25"
+                    />
+                  </View>
+                  <View className="flex-1">
+                    {usesDueDaysAfter ? (
+                      <Input
+                        label={I18n.t('accounts.due_rule_days_after')}
+                        variant="numeric"
+                        value={creditDueDaysAfter}
+                        onChangeText={setCreditDueDaysAfter}
+                        placeholder={String(DEFAULT_DUE_DAYS_AFTER_STATEMENT)}
+                        invalid={!hasValidDueDaysAfter}
+                      />
+                    ) : (
+                      <Input
+                        label={I18n.t('accounts.due_day')}
+                        variant="numeric"
+                        value={creditDueDay}
+                        onChangeText={setCreditDueDay}
+                        placeholder="1"
+                      />
+                    )}
+                  </View>
                 </View>
-                <View className="flex-1">
-                  <Input
-                    label={I18n.t('accounts.due_day')}
-                    variant="numeric"
-                    value={creditDueDay}
-                    onChangeText={setCreditDueDay}
-                    placeholder="1"
-                  />
-                </View>
+                {/* Under the row rather than under a field, so the two
+                    fields stay level whichever one has something to say. */}
+                {!hasValidDueDaysAfter ? (
+                  <Text variant="caption" tone="error" className="px-1">
+                    {I18n.t('accounts.due_days_after_error', { max: MAX_DUE_DAYS_AFTER_STATEMENT })}
+                  </Text>
+                ) : nextDueDatePreview ? (
+                  <Text variant="caption" tone="muted" className="px-1">
+                    {I18n.t('accounts.due_next_date', { date: nextDueDatePreview })}
+                  </Text>
+                ) : null}
               </View>
             ) : null}
 
@@ -1520,35 +1643,12 @@ function AccountEditorSheet({
                       />
                     </View>
                   </View>
-                  <View className="flex-row flex-wrap gap-2">
-                    {LOAN_INTEREST_MODEL_OPTIONS.map((option) => {
-                      const selected = loanInterestModel === option;
-                      return (
-                        <Pressable
-                          key={option}
-                          onPress={() => {
-                            if (selected) return;
-                            void triggerHaptic('selection');
-                            setLoanInterestModel(option);
-                          }}
-                          accessibilityRole="button"
-                          accessibilityState={{ selected }}
-                          className={`px-4 py-2.5 rounded-full border ${
-                            selected
-                              ? 'bg-primary/15 border-primary/50'
-                              : 'bg-secondary/30 border-border/40'
-                          }`}
-                        >
-                          <Text
-                            variant="caption"
-                            className={selected ? 'text-primary' : 'text-muted-foreground'}
-                          >
-                            {I18n.t(`accounts.loan.interest_model_${option}`)}
-                          </Text>
-                        </Pressable>
-                      );
-                    })}
-                  </View>
+                  <ChoiceChips
+                    options={LOAN_INTEREST_MODEL_OPTIONS}
+                    value={loanInterestModel}
+                    onChange={setLoanInterestModel}
+                    labelOf={(option) => I18n.t(`accounts.loan.interest_model_${option}`)}
+                  />
                 </View>
 
                 <Input
@@ -2273,6 +2373,7 @@ export function AccountEditorScreen({
         cardDesign: input.cardDesign,
         creditStatementDay: input.creditStatementDay,
         creditDueDay: input.creditDueDay,
+        creditDueDaysAfterStatement: input.creditDueDaysAfterStatement,
         includeInTotals: input.includeInTotals,
         currency: input.currency,
         ...loanUpdates,
@@ -2364,6 +2465,7 @@ export function AccountEditorScreen({
             cardDesign: input.cardDesign,
             creditStatementDay: input.creditStatementDay,
             creditDueDay: input.creditDueDay,
+            creditDueDaysAfterStatement: input.creditDueDaysAfterStatement,
             includeInTotals: input.includeInTotals,
             // Already converted in the editor, so they are saved in the
             // new currency alongside the re-denominated history.

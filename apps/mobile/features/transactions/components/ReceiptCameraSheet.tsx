@@ -11,6 +11,7 @@ import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
+import type { PickedReceiptAsset } from '~/services/receiptPicker';
 import { type ScanIntent, subscribeOpenScanCamera } from '~/services/scanCameraNavigation';
 
 // expo-camera is a native module; lazy-load the viewfinder so the rest of the
@@ -39,7 +40,7 @@ export function ReceiptCameraSheet() {
   const insets = useSafeAreaInsets();
   const sheetColumnStyle = useSheetColumnStyle();
   const themeColors = useThemeColors();
-  const { scanReceiptImage } = useReceiptScans();
+  const { scanReceiptImage, scanReceiptBatch, receiptPickLimit } = useReceiptScans();
   const [intent, setIntent] = useState<ScanIntent | null>(null);
 
   useEffect(() => subscribeOpenScanCamera((next) => setIntent(next)), []);
@@ -56,6 +57,15 @@ export function ReceiptCameraSheet() {
       scanReceiptImage(path, source, current);
     },
     [intent, scanReceiptImage],
+  );
+
+  // Several album picks, offered only for a plain (non-split) scan.
+  const handlePickedBatch = useCallback(
+    (assets: PickedReceiptAsset[]) => {
+      setIntent(null);
+      scanReceiptBatch(assets);
+    },
+    [scanReceiptBatch],
   );
 
   const visible = intent != null;
@@ -101,6 +111,8 @@ export function ReceiptCameraSheet() {
                     <InlineReceiptCamera
                       viewfinderHeight={VIEWFINDER_HEIGHT}
                       onCaptured={handleCaptured}
+                      albumPickLimit={receiptPickLimit(intent ?? 'quick')}
+                      onPickedBatch={handlePickedBatch}
                     />
                   </Suspense>
                 </AppErrorBoundary>

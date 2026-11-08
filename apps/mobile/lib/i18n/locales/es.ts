@@ -102,6 +102,13 @@ const es = {
     camera_permission_body:
       'Permite el acceso a la cámara para fotografiar un recibo, o elige uno de tu álbum.',
     camera_permission_grant: 'Permitir acceso a la cámara',
+    batch_scanning: 'Escaneando recibos',
+    batch_logged_one: '{{count}} gasto registrado',
+    batch_logged_other: '{{count}} gastos registrados',
+    batch_none_logged: 'No se registró ningún gasto',
+    batch_failed_one: 'No se pudo leer {{count}} recibo',
+    batch_failed_other: 'No se pudieron leer {{count}} recibos',
+    batch_hint: 'Toca para ver cada recibo',
   },
   app: {
     name: 'Money2Time',
@@ -2140,6 +2147,11 @@ const es = {
     type: 'Tipo',
     statement_day: 'Día de corte',
     due_day: 'Fecha de pago',
+    due_rule: 'Vencimiento',
+    due_rule_day_of_month: 'Día del mes',
+    due_rule_days_after: 'Días tras el corte',
+    due_next_date: 'Próximo vencimiento: {{date}}',
+    due_days_after_error: 'Introduce de 1 a {{max}} días',
     current_balance: 'Saldo actual',
     balance_adjustment_prompt_title: '¿Cómo registrar este cambio de saldo?',
     balance_adjustment_prompt_message:

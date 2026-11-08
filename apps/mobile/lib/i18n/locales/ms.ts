@@ -102,6 +102,13 @@ const ms = {
     camera_permission_body:
       'Benarkan akses kamera untuk mengambil foto resit, atau pilih satu daripada album anda.',
     camera_permission_grant: 'Benarkan akses kamera',
+    batch_scanning: 'Mengimbas resit',
+    batch_logged_one: '{{count}} perbelanjaan direkodkan',
+    batch_logged_other: '{{count}} perbelanjaan direkodkan',
+    batch_none_logged: 'Tiada perbelanjaan direkodkan',
+    batch_failed_one: '{{count}} resit tidak dapat dibaca',
+    batch_failed_other: '{{count}} resit tidak dapat dibaca',
+    batch_hint: 'Ketik untuk melihat setiap resit',
   },
   app: {
     name: 'Money2Time',
@@ -2145,6 +2152,11 @@ const ms = {
     type: 'Jenis',
     statement_day: 'Hari penyata',
     due_day: 'Hari bayaran',
+    due_rule: 'Tarikh akhir bayaran',
+    due_rule_day_of_month: 'Hari dalam bulan',
+    due_rule_days_after: 'Hari selepas penyata',
+    due_next_date: 'Tarikh akhir seterusnya: {{date}}',
+    due_days_after_error: 'Masukkan 1 hingga {{max}} hari',
     current_balance: 'Baki semasa',
     balance_adjustment_prompt_title: 'Bagaimana perubahan baki ini perlu direkodkan?',
     balance_adjustment_prompt_message:

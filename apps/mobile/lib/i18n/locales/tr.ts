@@ -102,6 +102,13 @@ const tr = {
     camera_permission_body:
       'Fiş fotoğrafı çekmek için kamera erişimine izin verin veya albümünüzden bir tane seçin.',
     camera_permission_grant: 'Kamera erişimine izin ver',
+    batch_scanning: 'Fişler taranıyor',
+    batch_logged_one: '{{count}} harcama kaydedildi',
+    batch_logged_other: '{{count}} harcama kaydedildi',
+    batch_none_logged: 'Hiç harcama kaydedilmedi',
+    batch_failed_one: '{{count}} fiş okunamadı',
+    batch_failed_other: '{{count}} fiş okunamadı',
+    batch_hint: 'Her fişi görmek için dokunun',
   },
   app: {
     name: 'Money2Time',
@@ -2140,6 +2147,11 @@ const tr = {
     type: 'Tür',
     statement_day: 'Ekstre günü',
     due_day: 'Son ödeme günü',
+    due_rule: 'Son ödeme',
+    due_rule_day_of_month: 'Ayın günü',
+    due_rule_days_after: 'Ekstreden sonraki gün',
+    due_next_date: 'Sonraki son ödeme: {{date}}',
+    due_days_after_error: '1 ile {{max}} gün arası girin',
     current_balance: 'Mevcut bakiye',
     balance_adjustment_prompt_title: 'Bu bakiye değişikliği nasıl kaydedilsin?',
     balance_adjustment_prompt_message:

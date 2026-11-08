@@ -102,6 +102,13 @@ const pt = {
     camera_permission_body:
       'Permita o acesso à câmera para fotografar um recibo, ou escolha um do seu álbum.',
     camera_permission_grant: 'Permitir acesso à câmera',
+    batch_scanning: 'Digitalizando recibos',
+    batch_logged_one: '{{count}} despesa registrada',
+    batch_logged_other: '{{count}} despesas registradas',
+    batch_none_logged: 'Nenhuma despesa registrada',
+    batch_failed_one: 'Não foi possível ler {{count}} recibo',
+    batch_failed_other: 'Não foi possível ler {{count}} recibos',
+    batch_hint: 'Toque para ver cada recibo',
   },
   app: {
     name: 'Money2Time',
@@ -2140,6 +2147,11 @@ const pt = {
     type: 'Tipo',
     statement_day: 'Dia do fechamento',
     due_day: 'Dia do vencimento',
+    due_rule: 'Vencimento',
+    due_rule_day_of_month: 'Dia do mês',
+    due_rule_days_after: 'Dias após o fechamento',
+    due_next_date: 'Próximo vencimento: {{date}}',
+    due_days_after_error: 'Insira de 1 a {{max}} dias',
     current_balance: 'Saldo atual',
     balance_adjustment_prompt_title: 'Como registrar esta mudança de saldo?',
     balance_adjustment_prompt_message:

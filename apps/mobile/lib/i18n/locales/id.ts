@@ -102,6 +102,13 @@ const id = {
     camera_permission_body:
       'Izinkan akses kamera untuk memotret struk, atau pilih satu dari album Anda.',
     camera_permission_grant: 'Izinkan akses kamera',
+    batch_scanning: 'Memindai struk',
+    batch_logged_one: '{{count}} pengeluaran dicatat',
+    batch_logged_other: '{{count}} pengeluaran dicatat',
+    batch_none_logged: 'Tidak ada pengeluaran yang dicatat',
+    batch_failed_one: '{{count}} struk tidak dapat dibaca',
+    batch_failed_other: '{{count}} struk tidak dapat dibaca',
+    batch_hint: 'Ketuk untuk melihat setiap struk',
   },
   app: {
     name: 'Money2Time',
@@ -2142,6 +2149,11 @@ const id = {
     type: 'Jenis',
     statement_day: 'Tanggal rekening koran',
     due_day: 'Tanggal jatuh tempo',
+    due_rule: 'Jatuh tempo',
+    due_rule_day_of_month: 'Tanggal tiap bulan',
+    due_rule_days_after: 'Hari setelah tagihan',
+    due_next_date: 'Jatuh tempo berikutnya: {{date}}',
+    due_days_after_error: 'Masukkan 1 sampai {{max}} hari',
     current_balance: 'Saldo saat ini',
     balance_adjustment_prompt_title: 'Bagaimana perubahan saldo ini dicatat?',
     balance_adjustment_prompt_message:

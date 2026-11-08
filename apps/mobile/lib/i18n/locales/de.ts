@@ -102,6 +102,13 @@ const de = {
     camera_permission_body:
       'Erlaube den Kamerazugriff, um einen Beleg zu fotografieren, oder wähle stattdessen einen aus deinem Album.',
     camera_permission_grant: 'Kamerazugriff erlauben',
+    batch_scanning: 'Belege werden gescannt',
+    batch_logged_one: '{{count}} Ausgabe erfasst',
+    batch_logged_other: '{{count}} Ausgaben erfasst',
+    batch_none_logged: 'Keine Ausgaben erfasst',
+    batch_failed_one: '{{count}} Beleg konnte nicht gelesen werden',
+    batch_failed_other: '{{count}} Belege konnten nicht gelesen werden',
+    batch_hint: 'Tippen, um jeden Beleg zu sehen',
   },
   app: {
     name: 'Money2Time',
@@ -2156,6 +2163,11 @@ const de = {
     type: 'Typ',
     statement_day: 'Abrechnungstag',
     due_day: 'Fälligkeitstag',
+    due_rule: 'Fälligkeit',
+    due_rule_day_of_month: 'Tag im Monat',
+    due_rule_days_after: 'Tage nach Abrechnung',
+    due_next_date: 'Nächste Fälligkeit: {{date}}',
+    due_days_after_error: 'Gib 1 bis {{max}} Tage ein',
     current_balance: 'Aktueller Saldo',
     balance_adjustment_prompt_title: 'Wie soll diese Saldenänderung erfasst werden?',
     balance_adjustment_prompt_message:

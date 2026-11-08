@@ -102,6 +102,13 @@ const en = {
     camera_permission_body:
       'Allow camera access to snap a receipt, or pick one from your album instead.',
     camera_permission_grant: 'Allow camera access',
+    batch_scanning: 'Scanning receipts',
+    batch_logged_one: '{{count}} expense logged',
+    batch_logged_other: '{{count}} expenses logged',
+    batch_none_logged: 'No expenses logged',
+    batch_failed_one: "{{count}} receipt couldn't be read",
+    batch_failed_other: "{{count}} receipts couldn't be read",
+    batch_hint: 'Tap to see each receipt',
   },
   app: {
     name: 'Money2Time',
@@ -2097,6 +2104,11 @@ const en = {
     type: 'Type',
     statement_day: 'Statement day',
     due_day: 'Due day',
+    due_rule: 'Due date',
+    due_rule_day_of_month: 'Day of month',
+    due_rule_days_after: 'Days after statement',
+    due_next_date: 'Next due date: {{date}}',
+    due_days_after_error: 'Enter 1 to {{max}} days',
     current_balance: 'Current balance',
     currency_change_title: 'Change account currency?',
     currency_change_message:

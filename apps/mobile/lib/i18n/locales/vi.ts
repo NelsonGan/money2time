@@ -102,6 +102,13 @@ const vi = {
     camera_permission_body:
       'Cho phép truy cập camera để chụp hóa đơn, hoặc chọn một ảnh từ thư viện của bạn.',
     camera_permission_grant: 'Cho phép truy cập camera',
+    batch_scanning: 'Đang quét hóa đơn',
+    batch_logged_one: 'Đã ghi {{count}} khoản chi',
+    batch_logged_other: 'Đã ghi {{count}} khoản chi',
+    batch_none_logged: 'Chưa ghi khoản chi nào',
+    batch_failed_one: 'Không đọc được {{count}} hóa đơn',
+    batch_failed_other: 'Không đọc được {{count}} hóa đơn',
+    batch_hint: 'Chạm để xem từng hóa đơn',
   },
   app: {
     name: 'Money2Time',
@@ -2116,6 +2123,11 @@ const vi = {
     type: 'Loại',
     statement_day: 'Ngày sao kê',
     due_day: 'Ngày đáo hạn',
+    due_rule: 'Hạn thanh toán',
+    due_rule_day_of_month: 'Ngày trong tháng',
+    due_rule_days_after: 'Số ngày sau sao kê',
+    due_next_date: 'Hạn tiếp theo: {{date}}',
+    due_days_after_error: 'Nhập từ 1 đến {{max}} ngày',
     current_balance: 'Số dư hiện tại',
     balance_adjustment_prompt_title: 'Ghi thay đổi số dư này như thế nào?',
     balance_adjustment_prompt_message:

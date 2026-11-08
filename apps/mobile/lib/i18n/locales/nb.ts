@@ -102,6 +102,13 @@ const nb = {
     camera_permission_body:
       'Gi kameratilgang for å ta bilde av en kvittering, eller velg en fra albumet ditt.',
     camera_permission_grant: 'Gi kameratilgang',
+    batch_scanning: 'Skanner kvitteringer',
+    batch_logged_one: '{{count}} utgift registrert',
+    batch_logged_other: '{{count}} utgifter registrert',
+    batch_none_logged: 'Ingen utgifter registrert',
+    batch_failed_one: '{{count}} kvittering kunne ikke leses',
+    batch_failed_other: '{{count}} kvitteringer kunne ikke leses',
+    batch_hint: 'Trykk for å se hver kvittering',
   },
   app: {
     name: 'Money2Time',
@@ -2131,6 +2138,11 @@ const nb = {
     type: 'Type',
     statement_day: 'Utskriftsdag',
     due_day: 'Forfallsdag',
+    due_rule: 'Forfallsdato',
+    due_rule_day_of_month: 'Dag i måneden',
+    due_rule_days_after: 'Dager etter faktura',
+    due_next_date: 'Neste forfallsdato: {{date}}',
+    due_days_after_error: 'Skriv inn 1 til {{max}} dager',
     current_balance: 'Gjeldende saldo',
     balance_adjustment_prompt_title: 'Hvordan skal denne saldoberegningen registreres?',
     balance_adjustment_prompt_message:

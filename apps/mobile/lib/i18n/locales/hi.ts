@@ -102,6 +102,13 @@ const hi = {
     camera_permission_body:
       'रसीद की फ़ोटो लेने के लिए कैमरा एक्सेस की अनुमति दें, या अपने एल्बम से कोई चुनें।',
     camera_permission_grant: 'कैमरा एक्सेस की अनुमति दें',
+    batch_scanning: 'रसीदें स्कैन हो रही हैं',
+    batch_logged_one: '{{count}} खर्च दर्ज हुआ',
+    batch_logged_other: '{{count}} खर्च दर्ज हुए',
+    batch_none_logged: 'कोई खर्च दर्ज नहीं हुआ',
+    batch_failed_one: '{{count}} रसीद पढ़ी नहीं जा सकी',
+    batch_failed_other: '{{count}} रसीदें पढ़ी नहीं जा सकीं',
+    batch_hint: 'हर रसीद देखने के लिए टैप करें',
   },
   app: {
     name: 'Money2Time',
@@ -2119,6 +2126,11 @@ const hi = {
     type: 'प्रकार',
     statement_day: 'स्टेटमेंट तारीख',
     due_day: 'देय तारीख',
+    due_rule: 'देय तिथि',
+    due_rule_day_of_month: 'महीने का दिन',
+    due_rule_days_after: 'स्टेटमेंट के बाद दिन',
+    due_next_date: 'अगली देय तिथि: {{date}}',
+    due_days_after_error: '1 से {{max}} दिन दर्ज करें',
     current_balance: 'वर्तमान बैलेंस',
     balance_adjustment_prompt_title: 'यह बैलेंस परिवर्तन कैसे दर्ज करें?',
     balance_adjustment_prompt_message:

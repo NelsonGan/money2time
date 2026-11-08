@@ -102,6 +102,13 @@ const nl = {
     camera_permission_body:
       'Sta cameratoegang toe om een bon te fotograferen, of kies er een uit je album.',
     camera_permission_grant: 'Cameratoegang toestaan',
+    batch_scanning: 'Bonnen scannen',
+    batch_logged_one: '{{count}} uitgave vastgelegd',
+    batch_logged_other: '{{count}} uitgaven vastgelegd',
+    batch_none_logged: 'Geen uitgaven vastgelegd',
+    batch_failed_one: '{{count}} bon kon niet worden gelezen',
+    batch_failed_other: '{{count}} bonnen konden niet worden gelezen',
+    batch_hint: 'Tik om elke bon te zien',
   },
   app: {
     name: 'Money2Time',
@@ -2150,6 +2157,11 @@ const nl = {
     type: 'Type',
     statement_day: 'Afschriftdag',
     due_day: 'Vervaldatum',
+    due_rule: 'Vervaldatum',
+    due_rule_day_of_month: 'Dag van de maand',
+    due_rule_days_after: 'Dagen na afschrift',
+    due_next_date: 'Volgende vervaldatum: {{date}}',
+    due_days_after_error: 'Vul 1 tot {{max}} dagen in',
     current_balance: 'Huidig saldo',
     balance_adjustment_prompt_title: 'Hoe moet deze saldowijziging worden geregistreerd?',
     balance_adjustment_prompt_message:

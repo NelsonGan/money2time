@@ -102,6 +102,13 @@ const it = {
     camera_permission_body:
       'Consenti l’accesso alla fotocamera per fotografare uno scontrino, oppure scegline uno dal tuo album.',
     camera_permission_grant: 'Consenti l’accesso alla fotocamera',
+    batch_scanning: 'Scansione delle ricevute',
+    batch_logged_one: '{{count}} spesa registrata',
+    batch_logged_other: '{{count}} spese registrate',
+    batch_none_logged: 'Nessuna spesa registrata',
+    batch_failed_one: 'Impossibile leggere {{count}} ricevuta',
+    batch_failed_other: 'Impossibile leggere {{count}} ricevute',
+    batch_hint: 'Tocca per vedere ogni ricevuta',
   },
   app: {
     name: 'Money2Time',
@@ -2137,6 +2144,11 @@ const it = {
     type: 'Tipo',
     statement_day: 'Giorno estratto',
     due_day: 'Giorno scadenza',
+    due_rule: 'Scadenza',
+    due_rule_day_of_month: 'Giorno del mese',
+    due_rule_days_after: 'Giorni dopo l’estratto',
+    due_next_date: 'Prossima scadenza: {{date}}',
+    due_days_after_error: 'Inserisci da 1 a {{max}} giorni',
     current_balance: 'Saldo attuale',
     balance_adjustment_prompt_title: 'Come registrare questa variazione di saldo?',
     balance_adjustment_prompt_message:

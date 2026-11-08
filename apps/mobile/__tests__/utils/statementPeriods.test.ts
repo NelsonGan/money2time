@@ -1,13 +1,17 @@
 import { NO_REIMBURSEMENT } from '~/features/reimbursements/lib/reimbursementMath';
 import type { TransactionWithRelations } from '~/types';
 import {
+  addCalendarDays,
   bucketTransactionsByAccountPeriod,
   clampStatementDate,
   computeCreditCycleSummary,
   creditDeltaForAccountTransaction,
+  creditDueColumns,
   formatStatementRangeSublabel,
   getCreditCycleDates,
   getCurrentStatementCycleStart,
+  isDueDaysAfterStatement,
+  nextDueDateAfterStatement,
   nextOccurrenceOfMonthDay,
   statementPeriodFromAnchor,
   statementPeriodKeyForTransactionDate,
@@ -214,6 +218,122 @@ describe('getCreditCycleDates', () => {
       statementDate: null,
       dueDate: null,
     });
+  });
+});
+
+describe('getCreditCycleDates with a due date some days after the statement', () => {
+  it('counts the days from the upcoming statement when paid up', () => {
+    // Statement Jul 25 + 20 days = Aug 14, whatever the fixed due day says.
+    const { statementDate, dueDate } = getCreditCycleDates(25, 1, new Date(2026, 6, 20), false, 20);
+    expect(statementDate).toEqual(new Date(2026, 6, 25));
+    expect(dueDate).toEqual(new Date(2026, 7, 14));
+  });
+
+  it('counts the days from the unpaid statement', () => {
+    const { statementDate, dueDate } = getCreditCycleDates(25, 1, new Date(2026, 6, 28), true, 20);
+    expect(statementDate).toEqual(new Date(2026, 6, 25));
+    expect(dueDate).toEqual(new Date(2026, 7, 14));
+  });
+
+  it('follows the length of the month the statement falls in', () => {
+    // Jan 25 + 20 = Feb 14; Feb 25 + 20 = Mar 17 (2026 is not a leap year),
+    // where a fixed due day would land on the same date every month.
+    expect(getCreditCycleDates(25, null, new Date(2026, 0, 26), true, 20).dueDate).toEqual(
+      new Date(2026, 1, 14),
+    );
+    expect(getCreditCycleDates(25, null, new Date(2026, 1, 26), true, 20).dueDate).toEqual(
+      new Date(2026, 2, 17),
+    );
+  });
+
+  it('counts from a statement day clamped to a short month', () => {
+    // Statement day 31 cuts on Feb 28; 20 days later is Mar 20.
+    expect(getCreditCycleDates(31, null, new Date(2026, 2, 5), true, 20).dueDate).toEqual(
+      new Date(2026, 2, 20),
+    );
+  });
+
+  it('falls back to the fixed due day when there is no statement day', () => {
+    const { statementDate, dueDate } = getCreditCycleDates(
+      null,
+      10,
+      new Date(2026, 6, 20),
+      false,
+      20,
+    );
+    expect(statementDate).toBeNull();
+    expect(dueDate).toEqual(new Date(2026, 7, 10));
+  });
+});
+
+describe('creditDueColumns', () => {
+  it('keeps a fixed due day as it is', () => {
+    expect(creditDueColumns(25, 1, null, new Date(2026, 6, 20))).toEqual({
+      creditDueDay: 1,
+      creditDueDaysAfterStatement: null,
+    });
+  });
+
+  it('saves the day of the month the rule lands on for older readers', () => {
+    // Latest statement Jun 25 (Jul 25 has not cut yet) + 20 days = Jul 15.
+    expect(creditDueColumns(25, 1, 20, new Date(2026, 6, 20))).toEqual({
+      creditDueDay: 15,
+      creditDueDaysAfterStatement: 20,
+    });
+    // Once Jul 25 has cut: Jul 25 + 20 days = Aug 14.
+    expect(creditDueColumns(25, 1, 20, new Date(2026, 6, 26))).toEqual({
+      creditDueDay: 14,
+      creditDueDaysAfterStatement: 20,
+    });
+  });
+
+  it('keeps the fixed day for older readers when there is no statement day', () => {
+    expect(creditDueColumns(null, 3, 20, new Date(2026, 6, 20))).toEqual({
+      creditDueDay: 3,
+      creditDueDaysAfterStatement: 20,
+    });
+  });
+});
+
+describe('nextDueDateAfterStatement', () => {
+  it("is the latest statement's due date while it has not passed", () => {
+    // Statement Nov 25 + 20 days = Dec 15.
+    expect(nextDueDateAfterStatement(25, 20, new Date(2026, 11, 1))).toEqual(
+      new Date(2026, 11, 15),
+    );
+  });
+
+  it('includes a bill due today', () => {
+    expect(nextDueDateAfterStatement(25, 20, new Date(2026, 11, 15, 18, 30))).toEqual(
+      new Date(2026, 11, 15),
+    );
+  });
+
+  it("moves to the next statement once the latest bill's date has passed", () => {
+    // Dec 25 + 20 days = Jan 14.
+    expect(nextDueDateAfterStatement(25, 20, new Date(2026, 11, 16))).toEqual(
+      new Date(2027, 0, 14),
+    );
+  });
+});
+
+describe('isDueDaysAfterStatement', () => {
+  it('takes whole days from 1 to 45', () => {
+    expect(isDueDaysAfterStatement(1)).toBe(true);
+    expect(isDueDaysAfterStatement(20)).toBe(true);
+    expect(isDueDaysAfterStatement(45)).toBe(true);
+    expect(isDueDaysAfterStatement(0)).toBe(false);
+    expect(isDueDaysAfterStatement(46)).toBe(false);
+    expect(isDueDaysAfterStatement(2.5)).toBe(false);
+    expect(isDueDaysAfterStatement('20')).toBe(false);
+    expect(isDueDaysAfterStatement(null)).toBe(false);
+  });
+});
+
+describe('addCalendarDays', () => {
+  it('moves across month and year ends at local midnight', () => {
+    expect(addCalendarDays(new Date(2026, 11, 25), 20)).toEqual(new Date(2027, 0, 14));
+    expect(addCalendarDays(new Date(2026, 2, 1), 30)).toEqual(new Date(2026, 2, 31));
   });
 });
 

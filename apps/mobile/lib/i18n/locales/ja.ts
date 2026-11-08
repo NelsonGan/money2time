@@ -102,6 +102,13 @@ const ja = {
     camera_permission_body:
       'レシートを撮影するにはカメラへのアクセスを許可するか、アルバムから選択してください。',
     camera_permission_grant: 'カメラへのアクセスを許可',
+    batch_scanning: 'レシートをスキャン中',
+    batch_logged_one: '{{count}}件の支出を記録しました',
+    batch_logged_other: '{{count}}件の支出を記録しました',
+    batch_none_logged: '記録された支出はありません',
+    batch_failed_one: '{{count}}枚のレシートを読み取れませんでした',
+    batch_failed_other: '{{count}}枚のレシートを読み取れませんでした',
+    batch_hint: 'タップして各レシートを表示',
   },
   app: {
     name: 'Money2Time',
@@ -2115,6 +2122,11 @@ const ja = {
     type: '種類',
     statement_day: '締め日',
     due_day: '支払日',
+    due_rule: '支払期日',
+    due_rule_day_of_month: '毎月の日付',
+    due_rule_days_after: '締め日から何日後',
+    due_next_date: '次の支払期日：{{date}}',
+    due_days_after_error: '1〜{{max}}日で入力してください',
     current_balance: '現在残高',
     balance_adjustment_prompt_title: 'この残高変動をどう記録しますか？',
     balance_adjustment_prompt_message:

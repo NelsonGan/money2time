@@ -118,7 +118,9 @@ type TransferMeta = {
   /**
    * What this phone handles beyond the first version (`WANT_FEATURES`), so a
    * page offers only what the phone can save: `budget-currencies`, that a web
-   * edit may name a budget's currency. Absent from an older app.
+   * edit may name a budget's currency; `credit-due-days-after`, that an
+   * account edit may set `creditDueDaysAfterStatement`. Absent from an older
+   * app.
    */
   features?: WantFeature[];
   /**
@@ -391,8 +393,12 @@ type SessionEvents = {
  * `want`. A page that names none is sent only what every page can show.
  * - `budget-currencies`: monthly budgets in a currency other than the main one
  *   (an older page would read their amounts as the main currency's).
+ * - `credit-due-days-after`: changes nothing in what is sent (an older page
+ *   reads `credit_due_day`, which a days-after card keeps close to its real
+ *   due day); named so the phone's `meta.features` tells a page it takes the
+ *   days-after due rule in an account edit.
  */
-export const WANT_FEATURES = ['budget-currencies'] as const;
+export const WANT_FEATURES = ['budget-currencies', 'credit-due-days-after'] as const;
 export type WantFeature = (typeof WANT_FEATURES)[number];
 
 /** The known features a `want` names, ignoring anything else. */
