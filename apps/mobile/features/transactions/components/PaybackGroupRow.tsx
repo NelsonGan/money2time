@@ -9,6 +9,7 @@ import {
   LONG_PRESS_DELAY_MS,
   TransactionAccountBadge,
 } from '~/features/transactions/components/TransactionItem';
+import { isPaybackRow } from '~/features/transactions/lib/paybackGroups';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -69,15 +70,20 @@ export function PaybackGroupRow({
   const Chevron = expanded ? ChevronUp : ChevronDown;
   // The same third line as a payback's own row (from → to), so the folded row
   // is as tall as the rows around it. A bill's paybacks all leave its account;
-  // several destinations read as the first one "+2".
+  // several destinations read as the first one "+2". Paybacks that stayed in
+  // the bill's account (payback rows) move nothing, so when every one did, the
+  // line names that one account, as their own rows do.
   const first = transactions[0];
   const fromAccount = first?.fromAccountId ? getAccountById(first.fromAccountId) : undefined;
   const fromLabel: string =
     first?.fromAccountName || fromAccount?.name || I18n.t('common.no_account');
-  const toIds = [...new Set(transactions.map((tx) => tx.toAccountId ?? ''))];
-  const toAccount = first?.toAccountId ? getAccountById(first.toAccountId) : undefined;
-  const toName: string = first?.toAccountName || toAccount?.name || I18n.t('common.no_account');
-  const toLabel = toIds.length > 1 ? `${toName} +${toIds.length - 1}` : toName;
+  const moved = transactions.filter((tx) => !isPaybackRow(tx));
+  const firstMoved = moved[0];
+  const toIds = new Set(transactions.map((tx) => tx.toAccountId ?? ''));
+  const toAccount = firstMoved?.toAccountId ? getAccountById(firstMoved.toAccountId) : undefined;
+  const toName: string =
+    firstMoved?.toAccountName || toAccount?.name || I18n.t('common.no_account');
+  const toLabel = toIds.size > 1 ? `${toName} +${toIds.size - 1}` : toName;
   const badgeClassName = compact ? 'min-w-[40px] shrink' : 'min-w-[44px] shrink';
 
   return (
@@ -144,27 +150,39 @@ export function PaybackGroupRow({
           >
             {subtitle}
           </Text>
-          <View
-            collapsable={false}
-            accessibilityLabel={`${fromLabel} → ${toLabel}`}
-            className={cn('min-w-0 flex-row items-center gap-1', compact ? 'mt-[2px]' : 'mt-[3px]')}
-          >
+          {firstMoved ? (
+            <View
+              collapsable={false}
+              accessibilityLabel={`${fromLabel} → ${toLabel}`}
+              className={cn(
+                'min-w-0 flex-row items-center gap-1',
+                compact ? 'mt-[2px]' : 'mt-[3px]',
+              )}
+            >
+              <TransactionAccountBadge
+                account={fromAccount}
+                label={fromLabel}
+                compact={compact}
+                className={badgeClassName}
+              />
+              <View className="shrink-0">
+                <ArrowRight size={compact ? 10 : 12} color={themeColors.textMuted} />
+              </View>
+              <TransactionAccountBadge
+                account={toAccount}
+                label={toLabel}
+                compact={compact}
+                className={badgeClassName}
+              />
+            </View>
+          ) : (
             <TransactionAccountBadge
               account={fromAccount}
               label={fromLabel}
               compact={compact}
-              className={badgeClassName}
+              className={compact ? 'mt-[2px]' : 'mt-[3px]'}
             />
-            <View className="shrink-0">
-              <ArrowRight size={compact ? 10 : 12} color={themeColors.textMuted} />
-            </View>
-            <TransactionAccountBadge
-              account={toAccount}
-              label={toLabel}
-              compact={compact}
-              className={badgeClassName}
-            />
-          </View>
+          )}
         </View>
         <Text
           variant="mono"

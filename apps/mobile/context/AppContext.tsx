@@ -60,8 +60,10 @@ import { invalidateLedgerPeople } from '~/features/sharedLedgers/lib/ledgerPeopl
 import { countAccountsTowardFreeLimit } from '~/features/transactions/lib/accountEntryGate';
 import { pickPaybackAccountId } from '~/features/transactions/lib/entryDefaults';
 import {
+  buildPaybackRows,
   indexPaybacks,
   type PaybackLink,
+  reusePaybackRows,
   samePaybackIndex,
 } from '~/features/transactions/lib/paybackGroups';
 import {
@@ -746,6 +748,18 @@ const PaybackIndexContext = createContext<ReadonlyMap<string, PaybackLink>>(EMPT
  */
 export function usePaybackIndex(): ReadonlyMap<string, PaybackLink> {
   return useContext(PaybackIndexContext);
+}
+const EMPTY_PAYBACK_ROWS: TransactionWithRelations[] = [];
+const PaybackRowsContext = createContext<TransactionWithRelations[]>(EMPTY_PAYBACK_ROWS);
+
+/**
+ * A row for every payback that wrote no transfer (into the bill's own account,
+ * or on a bill with no account), newest first (`buildPaybackRows`), for the
+ * activity lists to merge in. Display only: never stored, edited or selected.
+ * Its identity holds while those paybacks stay the same.
+ */
+export function usePaybackRows(): TransactionWithRelations[] {
+  return useContext(PaybackRowsContext);
 }
 const EMPTY_ACCOUNT_TRANSACTIONS: TransactionWithRelations[] = [];
 const EMPTY_ALBUM_STATS: AlbumStats = {
@@ -6439,6 +6453,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     paybackIndexRef.current = next;
     return next;
   }, [transactions]);
+  // Paybacks with no transfer get a row of their own in the activity lists,
+  // built from their split; the same array back while they do not change.
+  const paybackRowsRef = useRef<TransactionWithRelations[]>(EMPTY_PAYBACK_ROWS);
+  const paybackRows = useMemo(() => {
+    const currencyById = new Map(accounts.map((account) => [account.id, account.currency]));
+    const next = reusePaybackRows(
+      paybackRowsRef.current,
+      buildPaybackRows(transactions, (accountId) => currencyById.get(accountId)),
+    ) as TransactionWithRelations[];
+    paybackRowsRef.current = next.length === 0 ? EMPTY_PAYBACK_ROWS : next;
+    return paybackRowsRef.current;
+  }, [accounts, transactions]);
 
   if (!settings) {
     if (isLoading) {
@@ -6476,7 +6502,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   return (
     <AppContext.Provider value={value}>
       <TransactionsContext.Provider value={transactionsValue}>
-        <PaybackIndexContext.Provider value={paybackIndex}>{children}</PaybackIndexContext.Provider>
+        <PaybackIndexContext.Provider value={paybackIndex}>
+          <PaybackRowsContext.Provider value={paybackRows}>{children}</PaybackRowsContext.Provider>
+        </PaybackIndexContext.Provider>
       </TransactionsContext.Provider>
     </AppContext.Provider>
   );

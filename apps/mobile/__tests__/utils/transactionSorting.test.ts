@@ -5,6 +5,7 @@ import {
   compareTransactionsByDateAsc,
   compareTransactionsByDateDesc,
   insertTransactionsByDateDesc,
+  mergeTransactionsByDateDesc,
   sortTransactions,
 } from '~/utils/transactionSorting';
 
@@ -275,19 +276,19 @@ describe('compareText', () => {
   });
 });
 
-describe('insertTransactionsByDateDesc', () => {
-  function randomTx(random: () => number, id: string): TransactionWithRelations {
-    const iso = randomIso(random);
-    const roll = random();
-    return makeTx({
-      id,
-      // Some rows are quick-entry day keys, some carry a dragged order key.
-      date: roll < 0.25 ? iso.slice(0, 10) : iso,
-      createdAt: randomIso(random),
-      dayOrder: roll > 0.85 ? Math.floor(random() * 1_000_000) : null,
-    });
-  }
+function randomTx(random: () => number, id: string): TransactionWithRelations {
+  const iso = randomIso(random);
+  const roll = random();
+  return makeTx({
+    id,
+    // Some rows are quick-entry day keys, some carry a dragged order key.
+    date: roll < 0.25 ? iso.slice(0, 10) : iso,
+    createdAt: randomIso(random),
+    dayOrder: roll > 0.85 ? Math.floor(random() * 1_000_000) : null,
+  });
+}
 
+describe('insertTransactionsByDateDesc', () => {
   it('puts each row exactly where a full sort would', () => {
     const random = seededRandom(42);
     for (let round = 0; round < 40; round += 1) {
@@ -311,5 +312,30 @@ describe('insertTransactionsByDateDesc', () => {
     ]);
     expect(existing).toEqual(snapshot);
     expect(next.map((tx) => tx.id)).toEqual(['b', 'a']);
+  });
+});
+
+describe('mergeTransactionsByDateDesc', () => {
+  it('merges two newest-first lists as a full sort would', () => {
+    const random = seededRandom(7);
+    for (let round = 0; round < 40; round += 1) {
+      const existing = sortTransactions(
+        Array.from({ length: 30 }, (_, index) => randomTx(random, `e${round}-${index}`)),
+        'date_desc',
+      );
+      const added = sortTransactions(
+        Array.from({ length: 5 }, (_, index) => randomTx(random, `n${round}-${index}`)),
+        'date_desc',
+      );
+      const expected = sortTransactions([...existing, ...added], 'date_desc');
+      expect(mergeTransactionsByDateDesc(existing, added).map((tx) => tx.id)).toEqual(
+        expected.map((tx) => tx.id),
+      );
+    }
+  });
+
+  it('gives the same array back when there is nothing to merge', () => {
+    const existing = [makeTx({ id: 'a' })];
+    expect(mergeTransactionsByDateDesc(existing, [])).toBe(existing);
   });
 });

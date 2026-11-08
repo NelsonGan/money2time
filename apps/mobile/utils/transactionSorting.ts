@@ -181,3 +181,27 @@ export function insertTransactionsByDateDesc<T extends SortableTransaction>(
   }
   return next;
 }
+
+/**
+ * `transactions` with `rows` merged in, both newest first, in one pass; the
+ * same array back when there is nothing to merge.
+ */
+export function mergeTransactionsByDateDesc<T extends SortableTransaction>(
+  transactions: T[],
+  rows: readonly T[],
+): T[] {
+  if (rows.length === 0) return transactions;
+  const merged: T[] = [];
+  let i = 0;
+  let j = 0;
+  while (i < transactions.length && j < rows.length) {
+    if (compareTransactionsByDateDesc(transactions[i] as T, rows[j] as T) <= 0) {
+      merged.push(transactions[i++] as T);
+    } else {
+      merged.push(rows[j++] as T);
+    }
+  }
+  while (i < transactions.length) merged.push(transactions[i++] as T);
+  while (j < rows.length) merged.push(rows[j++] as T);
+  return merged;
+}
