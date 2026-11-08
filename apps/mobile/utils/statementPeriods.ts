@@ -190,7 +190,9 @@ interface CreditDueColumns {
  * A days-after rule also saves, as `creditDueDay`, the day of the month it
  * lands on for the latest statement, so readers that predate the rule (older
  * app versions, older backups and Web Dashboard pages) still show a due day
- * within a day or two of the real one. Without a statement day the rule has
+ * within a day or two of the real one (for a grace period that reaches past
+ * the next statement, that statement's day: the latest date they can show).
+ * Without a statement day the rule has
  * nothing to count from, so it is dropped and the fixed day stays, whoever
  * asked for it (the app's editor refuses that, but a Web Dashboard page may
  * clear the statement day).
@@ -204,10 +206,14 @@ export function creditDueColumns(
   if (dueDaysAfterStatement == null || statementDay == null) {
     return { creditDueDay: dueDay, creditDueDaysAfterStatement: null };
   }
-  const creditDueDay = addCalendarDays(
-    getCurrentStatementCycleStart(statementDay, now),
-    dueDaysAfterStatement,
-  ).getDate();
+  const latest = getCurrentStatementCycleStart(statementDay, now);
+  const due = addCalendarDays(latest, dueDaysAfterStatement);
+  // Older readers put the due day on its first date after the statement, so
+  // they can show nothing later than the next statement date. A grace period
+  // that reaches past it saves that day: the closest they can show, early
+  // rather than a month early.
+  const nextStatement = statementPeriodFromAnchor(latest, statementDay, 0).end;
+  const creditDueDay = (due.getTime() > nextStatement.getTime() ? nextStatement : due).getDate();
   return { creditDueDay, creditDueDaysAfterStatement: dueDaysAfterStatement };
 }
 

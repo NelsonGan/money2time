@@ -312,6 +312,18 @@ describe('creditDueColumns', () => {
     });
   });
 
+  it('saves the next statement day when the grace period reaches past it', () => {
+    // Statement day 25, 45 days, on Nov 9: latest statement Oct 25, due Dec 9.
+    // An older reader places day 9 on Nov 9, a month early; day 25 reads as
+    // Nov 25, the latest date it can show.
+    expect(creditDueColumns(25, 15, 45, new Date(2026, 10, 9))).toEqual({
+      creditDueDay: 25,
+      creditDueDaysAfterStatement: 45,
+    });
+    // Statement day 31 clamps to Nov 30 as the next statement.
+    expect(creditDueColumns(31, 15, 40, new Date(2026, 10, 9)).creditDueDay).toBe(30);
+  });
+
   it('drops the rule and keeps the fixed day when there is no statement day', () => {
     // Nothing to count from: a Web Dashboard page that clears the statement
     // day leaves a card due on its fixed day, not a rule that cannot work.
