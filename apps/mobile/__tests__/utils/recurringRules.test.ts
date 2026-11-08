@@ -1,12 +1,14 @@
 import type { RecurringTransactionRule } from '~/types';
 import {
   addDaysToDayKey,
+  isRecurringRunTransaction,
   nextRunAfter,
   projectRecurringOccurrences,
   recurrenceFrequencyOf,
   recurringAmountPerMonth,
   recurringExpenseDueBetween,
   recurringMonthlyExpenseTotal,
+  recurringRunRuleId,
   storedRecurrenceOf,
 } from '~/utils/recurringRules';
 
@@ -445,5 +447,44 @@ describe('quarterly and semi-annual frequencies', () => {
     expect(nextRunAfter('2026-08-31T00:00:00.000Z', 'monthly', 6)).toBe(
       localMidnight('2027-02-28'),
     );
+  });
+});
+
+describe('isRecurringRunTransaction', () => {
+  it('reads a rule run from its id', () => {
+    expect(isRecurringRunTransaction({ id: 'rr:rule-1:2026-11-01' })).toBe(true);
+    expect(isRecurringRunTransaction({ id: 'rr:rule-1:2026-11-01', instalmentRuleId: null })).toBe(
+      true,
+    );
+  });
+
+  it('leaves typed-in entries and instalment payments plain', () => {
+    expect(isRecurringRunTransaction({ id: '5f0c2c1e-8f1a-4c55-9d1e-1b2f0a7c9e11' })).toBe(false);
+    // A plan's payments carry the plan's own pill instead.
+    expect(
+      isRecurringRunTransaction({ id: 'rr:plan-1:2026-11-01', instalmentRuleId: 'plan-1' }),
+    ).toBe(false);
+    expect(isRecurringRunTransaction({ id: 'rr:plan-1:payoff', instalmentRuleId: 'plan-1' })).toBe(
+      false,
+    );
+    // Only the prefix counts, not "rr" anywhere in the id.
+    expect(isRecurringRunTransaction({ id: 'abc-rr:1' })).toBe(false);
+    expect(isRecurringRunTransaction({ id: 'rr:' })).toBe(false);
+  });
+
+  it("leaves a plan's payment plain even when an older app wrote it without the plan's id", () => {
+    const plans = new Set(['plan-1']);
+    expect(isRecurringRunTransaction({ id: 'rr:plan-1:2026-11-01' }, plans)).toBe(false);
+    expect(isRecurringRunTransaction({ id: 'rr:rule-1:2026-11-01' }, plans)).toBe(true);
+  });
+});
+
+describe('recurringRunRuleId', () => {
+  it('reads the rule from a run id', () => {
+    expect(recurringRunRuleId('rr:rule-1:2026-11-01')).toBe('rule-1');
+    expect(recurringRunRuleId('rr:plan-1:payoff')).toBe('plan-1');
+    expect(recurringRunRuleId('rr:plan-1:2026-11-01:abc')).toBe('plan-1');
+    expect(recurringRunRuleId('5f0c2c1e')).toBeNull();
+    expect(recurringRunRuleId('rr::x')).toBeNull();
   });
 });

@@ -1874,6 +1874,10 @@ const ja = {
     week_strip_label: '今後7日間',
     this_month: '今月',
     paused_section: '一時停止',
+    settings_title: '定期設定',
+    highlight_label: '定期の記録に色をつける',
+    highlight_hint:
+      '定期ルールが追加した記録は、取引リストで淡いラベンダー色の背景になり、手入力した記録と見分けられます。',
     overdue: '期限超過',
     show_all_days: 'すべての日',
     day_due_count: '{{count}}件が期日',

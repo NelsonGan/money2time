@@ -1896,6 +1896,10 @@ const pt = {
     week_strip_label: 'Próximos 7 dias',
     this_month: 'Este mês',
     paused_section: 'Pausados',
+    settings_title: 'Configurações de recorrentes',
+    highlight_label: 'Destacar lançamentos recorrentes',
+    highlight_hint:
+      'Os lançamentos que suas regras recorrentes adicionam ganham um fundo lavanda suave nas listas de transações, para você diferenciá-los dos que digitou.',
     overdue: 'Vencido',
     show_all_days: 'Todos os dias',
     day_due_count: '{{count}} vencem',

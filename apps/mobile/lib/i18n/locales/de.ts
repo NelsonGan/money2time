@@ -1908,6 +1908,10 @@ const de = {
     week_strip_label: 'Nächste 7 Tage',
     this_month: 'Diesen Monat',
     paused_section: 'Pausiert',
+    settings_title: 'Einstellungen für Wiederkehrendes',
+    highlight_label: 'Wiederkehrende Einträge einfärben',
+    highlight_hint:
+      'Einträge, die deine wiederkehrenden Regeln anlegen, erhalten in deinen Transaktionslisten einen sanften Lavendel-Hintergrund, damit du sie von selbst eingegebenen unterscheiden kannst.',
     overdue: 'Überfällig',
     show_all_days: 'Alle Tage',
     day_due_count: '{{count}} fällig',

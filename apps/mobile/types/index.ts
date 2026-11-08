@@ -326,6 +326,11 @@ export interface UserSettings {
   showAccountPickerBalances: boolean;
   /** Whether the assets page's Accounts and Goals sub-tabs mask balances (their eye). */
   hideAccountBalances: boolean;
+  /**
+   * Whether entries a recurring rule made (`isRecurringRunTransaction`) get a
+   * tinted background in the transaction lists. Off by default.
+   */
+  highlightRecurringTransactions: boolean;
   /** The bottom bar's tabs as stored. Null means the default set; read with parseNavTabs. */
   navTabsJson: string | null;
   /**

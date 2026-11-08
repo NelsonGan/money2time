@@ -176,6 +176,7 @@ class SettingsRepository {
         | 'showTransactionAccount'
         | 'showAccountPickerBalances'
         | 'hideAccountBalances'
+        | 'highlightRecurringTransactions'
         | 'navTabsJson'
       >
     >,
@@ -472,6 +473,7 @@ class SettingsRepository {
         showTransactionAccount: true,
         showAccountPickerBalances: true,
         hideAccountBalances: false,
+        highlightRecurringTransactions: false,
         navTabsJson: null,
         activeLedgerId: null,
         updatedAt: now,

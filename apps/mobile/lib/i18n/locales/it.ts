@@ -1892,6 +1892,10 @@ const it = {
     week_strip_label: 'Prossimi 7 giorni',
     this_month: 'Questo mese',
     paused_section: 'In pausa',
+    settings_title: 'Impostazioni ricorrenti',
+    highlight_label: 'Colora le voci ricorrenti',
+    highlight_hint:
+      'Le voci aggiunte dalle tue regole ricorrenti hanno un tenue sfondo lavanda negli elenchi delle transazioni, così le distingui da quelle inserite da te.',
     overdue: 'Scaduto',
     show_all_days: 'Tutti i giorni',
     day_due_count: '{{count}} in scadenza',

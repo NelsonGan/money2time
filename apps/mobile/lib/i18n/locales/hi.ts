@@ -1877,6 +1877,10 @@ const hi = {
     week_strip_label: 'अगले 7 दिन',
     this_month: 'इस महीने',
     paused_section: 'रुका हुआ',
+    settings_title: 'आवर्ती सेटिंग्स',
+    highlight_label: 'आवर्ती एंट्री को रंगें',
+    highlight_hint:
+      'आपके आवर्ती नियमों से जुड़ी एंट्री को लेन-देन सूचियों में हल्की लैवेंडर पृष्ठभूमि मिलती है, ताकि आप उन्हें अपनी टाइप की गई एंट्री से अलग पहचान सकें।',
     overdue: 'अतिदेय',
     show_all_days: 'सभी दिन',
     day_due_count: '{{count}} देय',

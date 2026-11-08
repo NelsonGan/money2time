@@ -1886,6 +1886,10 @@ const sv = {
     week_strip_label: 'Nästa 7 dagar',
     this_month: 'Denna månad',
     paused_section: 'Pausad',
+    settings_title: 'Inställningar för återkommande',
+    highlight_label: 'Färga återkommande poster',
+    highlight_hint:
+      'Poster som dina återkommande regler lägger till får en mjuk lavendelbakgrund i dina transaktionslistor, så att du kan skilja dem från de du skrivit in själv.',
     overdue: 'Förfallen',
     show_all_days: 'Alla dagar',
     day_due_count: '{{count}} förfaller',

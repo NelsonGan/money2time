@@ -1912,6 +1912,10 @@ const fil = {
     week_strip_label: 'Susunod na 7 araw',
     this_month: 'Ngayong buwan',
     paused_section: 'Naka-pause',
+    settings_title: 'Mga setting ng paulit-ulit',
+    highlight_label: 'Kulayan ang mga paulit-ulit na entry',
+    highlight_hint:
+      'Ang mga entry na idinadagdag ng iyong mga paulit-ulit na rule ay may malambot na lavender na background sa iyong mga listahan ng transaksyon, para makilala mo ang mga ito mula sa mga tinype mo.',
     overdue: 'Lagpas na',
     show_all_days: 'Lahat ng araw',
     day_due_count: '{{count}} dapat na',

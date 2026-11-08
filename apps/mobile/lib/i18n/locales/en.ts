@@ -1857,6 +1857,10 @@ const en = {
     week_strip_label: 'Next 7 days',
     this_month: 'This month',
     paused_section: 'Paused',
+    settings_title: 'Recurring settings',
+    highlight_label: 'Tint recurring entries',
+    highlight_hint:
+      'Entries your recurring rules add get a soft lavender background in your transaction lists, so you can tell them from ones you typed in.',
     overdue: 'Overdue',
     show_all_days: 'All days',
     day_due_count: '{{count}} due',

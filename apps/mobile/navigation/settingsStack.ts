@@ -36,6 +36,7 @@ export type SettingsStackParamList = {
   ExchangeRates: undefined;
   Categories: undefined;
   Recurring: undefined;
+  RecurringSettings: undefined;
   Notifications: undefined;
   NotificationDetail: { type: NotificationDetailType };
   DataManagement: undefined;

@@ -1888,6 +1888,10 @@ const da = {
     week_strip_label: 'Næste 7 dage',
     this_month: 'Denne måned',
     paused_section: 'Sat på pause',
+    settings_title: 'Indstillinger for tilbagevendende',
+    highlight_label: 'Farv tilbagevendende poster',
+    highlight_hint:
+      'Poster, som dine tilbagevendende regler tilføjer, får en blød lavendelbaggrund i dine transaktionslister, så du kan skelne dem fra dem, du selv har indtastet.',
     overdue: 'Forfalden',
     show_all_days: 'Alle dage',
     day_due_count: '{{count}} forfalder',

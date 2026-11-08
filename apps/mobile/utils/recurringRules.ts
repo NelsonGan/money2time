@@ -412,3 +412,33 @@ export function addDaysToDayKey(dayKey: string, days: number): string {
   date.setDate(date.getDate() + days);
   return dayKeyFromDateLocal(date);
 }
+
+/** Every run a rule makes is named `rr:<ruleId>:…` (`recurringRunTransactionId`). */
+const RECURRING_RUN_ID_PREFIX = 'rr:';
+
+/** The rule a run's id names (`rr:<ruleId>:…`), or null for any other id. */
+export function recurringRunRuleId(id: string): string | null {
+  if (!id.startsWith(RECURRING_RUN_ID_PREFIX)) return null;
+  const end = id.indexOf(':', RECURRING_RUN_ID_PREFIX.length);
+  return end > RECURRING_RUN_ID_PREFIX.length
+    ? id.slice(RECURRING_RUN_ID_PREFIX.length, end)
+    : null;
+}
+
+/**
+ * Whether a transaction was made by an ordinary recurring rule, read from its
+ * id, so it needs no column and is the same on every phone and app version
+ * that syncs it. An instalment plan's payments are runs too, but they belong
+ * to the plan (they carry its count pill), not to the Recurring page: a
+ * payment names its plan in `instalmentRuleId`, and `planRuleIds` catches one
+ * an older app made without it. Runs made before run ids existed (app
+ * versions before Cloud Sync) had random ids and read as typed in.
+ */
+export function isRecurringRunTransaction(
+  transaction: { id: string; instalmentRuleId?: string | null },
+  planRuleIds?: ReadonlySet<string>,
+): boolean {
+  if (transaction.instalmentRuleId) return false;
+  const ruleId = recurringRunRuleId(transaction.id);
+  return ruleId !== null && !planRuleIds?.has(ruleId);
+}

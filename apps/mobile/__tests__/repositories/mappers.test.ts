@@ -810,6 +810,14 @@ describe('toSettings', () => {
     expect(toSettings({ ...baseRow, hideAccountBalances: true }).hideAccountBalances).toBe(true);
   });
 
+  it('tints recurring entries only once the user turned it on', () => {
+    expect(toSettings({ ...baseRow }).highlightRecurringTransactions).toBe(false);
+    expect(
+      toSettings({ ...baseRow, highlightRecurringTransactions: true })
+        .highlightRecurringTransactions,
+    ).toBe(true);
+  });
+
   it('maps working-day preferences with migration-safe defaults', () => {
     expect(toSettings({ ...baseRow }).workdayDisplayEnabled).toBe(false);
     expect(toSettings({ ...baseRow }).workingHoursPerDay).toBe(8);

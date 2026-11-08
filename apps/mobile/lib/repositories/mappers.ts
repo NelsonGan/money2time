@@ -675,6 +675,7 @@ export function toSettings(row: SettingsRow): UserSettings {
     showTransactionAccount: row.showTransactionAccount ?? true,
     showAccountPickerBalances: row.showAccountPickerBalances ?? true,
     hideAccountBalances: row.hideAccountBalances ?? false,
+    highlightRecurringTransactions: row.highlightRecurringTransactions ?? false,
     navTabsJson: row.navTabsJson ?? null,
     activeLedgerId: row.activeLedgerId || DEFAULT_LEDGER_ID,
     createdAt: row.createdAt,

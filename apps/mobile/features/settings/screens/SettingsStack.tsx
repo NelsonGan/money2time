@@ -50,6 +50,7 @@ import { QuickEntrySettingsScreen } from './QuickEntrySettingsScreen';
 import { ReceiptSettingsScreen } from './ReceiptSettingsScreen';
 import { ReceiptsScreen } from './ReceiptsScreen';
 import { RecurringScreen } from './RecurringScreen';
+import { RecurringSettingsScreen } from './RecurringSettingsScreen';
 import { SettingsScreen } from './SettingsScreen';
 import { ShareAndEarnScreen } from './ShareAndEarnScreen';
 import { StatementImportListScreen, StatementImportScreen } from './StatementImportScreen';
@@ -350,9 +351,16 @@ export function SettingsStack({
             <RecurringScreen
               onBack={() => props.navigation.goBack()}
               onOpenEditor={onOpenRecurringEditor}
+              onOpenSettings={() => props.navigation.navigate('RecurringSettings')}
               useNativeBackGesture
             />
           );
+        }}
+      </SettingsStackNavigator.Screen>
+      <SettingsStackNavigator.Screen name="RecurringSettings">
+        {(props) => {
+          stackNavigationRef.current = props.navigation;
+          return <RecurringSettingsScreen onBack={() => props.navigation.goBack()} />;
         }}
       </SettingsStackNavigator.Screen>
       <SettingsStackNavigator.Screen name="Notifications">

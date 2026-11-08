@@ -293,6 +293,11 @@ export const settingsTable = sqliteTable('settings', {
   hideAccountBalances: integer('hide_account_balances', { mode: 'boolean' })
     .notNull()
     .default(false),
+  // Whether entries a recurring rule made get a tinted background in the
+  // transaction lists. Off by default.
+  highlightRecurringTransactions: integer('highlight_recurring_transactions', { mode: 'boolean' })
+    .notNull()
+    .default(false),
   // The bottom bar's tabs, in order. Null means the default set; parse with
   // parseNavTabs.
   navTabsJson: text('nav_tabs_json'),
