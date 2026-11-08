@@ -121,7 +121,8 @@ export function getCreditCycleDates(
   }
   const lastStatement = getCurrentStatementCycleStart(statementDay, now);
   if (hasUnpaidEarlierStatement && dueDaysAfterStatement != null) {
-    const earlier = earlierStatementStillDue(statementDay, dueDaysAfterStatement, now);
+    // Shown even once its date has passed: it is the bill that is late.
+    const earlier = earlierStatement(statementDay, dueDaysAfterStatement, now);
     if (earlier) return earlier;
   }
   const statementDate = hasUnpaidStatement
@@ -136,12 +137,13 @@ export function getCreditCycleDates(
 
 /**
  * The statement before the latest one and its due date, when a days-after
- * rule's grace period is longer than a cycle and that bill is still ahead of
- * today. It falls due before the latest statement's, so a card that still owes
- * on it shows it first. Null when its date has passed (always, for a grace
- * period under four weeks).
+ * rule's grace period is longer than a cycle: that bill was not yet due when
+ * the latest statement was issued, so it is still its own bill and falls due
+ * first. A card that still owes on it shows it ahead of the latest one. Null
+ * for a grace period that ends before the next statement (under four weeks),
+ * where the latest statement is the bill to pay.
  */
-export function earlierStatementStillDue(
+export function earlierStatement(
   statementDay: number,
   dueDaysAfterStatement: number,
   now: Date,
@@ -149,15 +151,15 @@ export function earlierStatementStillDue(
   const lastStatement = getCurrentStatementCycleStart(statementDay, now);
   const statementDate = statementPeriodFromAnchor(lastStatement, statementDay, -1).start;
   const dueDate = addCalendarDays(statementDate, dueDaysAfterStatement);
-  return dueDate.getTime() >= startOfDay(now).getTime() ? { statementDate, dueDate } : null;
+  return dueDate.getTime() > lastStatement.getTime() ? { statementDate, dueDate } : null;
 }
 
 /**
  * The first bill due on or after today under a days-after rule: the latest
  * statement's, or the next statement's once that one's due date has passed.
  * With `hasUnpaidEarlierStatement` (the card still owes on the statement
- * before the latest), that earlier bill's date while it is still ahead, as
- * the card's chips show it. The account editor previews it under the field.
+ * before the latest, `earlierStatement`), that earlier bill's date while it
+ * is still ahead, as the card's chips show it. The account editor previews it under the field.
  */
 export function nextDueDateAfterStatement(
   statementDay: number,
@@ -165,13 +167,14 @@ export function nextDueDateAfterStatement(
   now: Date,
   hasUnpaidEarlierStatement = false,
 ): Date {
+  const today = startOfDay(now).getTime();
   if (hasUnpaidEarlierStatement) {
-    const earlier = earlierStatementStillDue(statementDay, dueDaysAfterStatement, now);
-    if (earlier) return earlier.dueDate;
+    const earlier = earlierStatement(statementDay, dueDaysAfterStatement, now);
+    if (earlier && earlier.dueDate.getTime() >= today) return earlier.dueDate;
   }
   const lastStatement = getCurrentStatementCycleStart(statementDay, now);
   const lastDue = addCalendarDays(lastStatement, dueDaysAfterStatement);
-  if (lastDue.getTime() >= startOfDay(now).getTime()) return lastDue;
+  if (lastDue.getTime() >= today) return lastDue;
   const nextStatement = statementPeriodFromAnchor(lastStatement, statementDay, 0).end;
   return addCalendarDays(nextStatement, dueDaysAfterStatement);
 }
@@ -188,7 +191,9 @@ interface CreditDueColumns {
  * lands on for the latest statement, so readers that predate the rule (older
  * app versions, older backups and Web Dashboard pages) still show a due day
  * within a day or two of the real one. Without a statement day the rule has
- * nothing to count from, so the fixed day is kept for them as it was.
+ * nothing to count from, so it is dropped and the fixed day stays, whoever
+ * asked for it (the app's editor refuses that, but a Web Dashboard page may
+ * clear the statement day).
  */
 export function creditDueColumns(
   statementDay: number | null,
@@ -196,16 +201,13 @@ export function creditDueColumns(
   dueDaysAfterStatement: number | null,
   now: Date,
 ): CreditDueColumns {
-  if (dueDaysAfterStatement == null) {
+  if (dueDaysAfterStatement == null || statementDay == null) {
     return { creditDueDay: dueDay, creditDueDaysAfterStatement: null };
   }
-  const creditDueDay =
-    statementDay == null
-      ? dueDay
-      : addCalendarDays(
-          getCurrentStatementCycleStart(statementDay, now),
-          dueDaysAfterStatement,
-        ).getDate();
+  const creditDueDay = addCalendarDays(
+    getCurrentStatementCycleStart(statementDay, now),
+    dueDaysAfterStatement,
+  ).getDate();
   return { creditDueDay, creditDueDaysAfterStatement: dueDaysAfterStatement };
 }
 

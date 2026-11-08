@@ -720,7 +720,7 @@ function AccountEditorSheet({
     recurringRules,
     getTransactionsByAccount,
   } = useApp();
-  const { accountBalances } = useTransactions();
+  const { accountBalances, transactions } = useTransactions();
   // Account currency choices = the main currency + the user's subcurrencies
   // (added ones plus any already used by an account).
   const accountCurrencyCodes = useMemo(() => {
@@ -1269,7 +1269,8 @@ function AccountEditorSheet({
   // Whether this card still owes on the statement before the latest one, read
   // with the statement day as typed, so the preview matches the card's chips.
   const hasUnpaidEarlierStatement = useMemo(() => {
-    if (!account || account.type !== 'credit' || normalizedStatementDay == null) return false;
+    if (!usesDueDaysAfter || !account || account.type !== 'credit') return false;
+    if (normalizedStatementDay == null) return false;
     const balance =
       accountBalances.find((b) => b.accountId === account.id)?.balance ?? account.startingBalance;
     const summary = computeCreditCycleSummary(
@@ -1279,7 +1280,17 @@ function AccountEditorSheet({
       new Date(),
     );
     return normalizeMoneyAmount(summary.earlierPayable) > 0;
-  }, [account, accountBalances, getTransactionsByAccount, normalizedStatementDay]);
+    // getTransactionsByAccount keeps its identity; `transactions` says the
+    // card's entries changed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    account,
+    accountBalances,
+    getTransactionsByAccount,
+    normalizedStatementDay,
+    transactions,
+    usesDueDaysAfter,
+  ]);
   const nextDueDatePreview =
     usesDueDaysAfter && hasValidDueDaysAfter && normalizedStatementDay != null
       ? formatStatementDateLabel(

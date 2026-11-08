@@ -3367,10 +3367,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               // changed currency (`transferFeeAccountAmount`).
               const feeCurrency =
                 (fee.accountId ? accountCurrencyOf(fee.accountId) : null) ?? fee.currency;
-              if (
-                nextAccount &&
-                (nextAccount.currency !== feeCurrency || nextAccount.currency !== fee.currency)
-              ) {
+              if (nextAccount && nextAccount.currency === fee.currency) {
+                // Back in the currency it was entered in: its own amount, exact.
+                if (fee.accountAmount != null) follow.accountAmount = null;
+              } else if (nextAccount && nextAccount.currency !== feeCurrency) {
                 // The same charge in the new account's currency, not the same
                 // number in another currency.
                 follow.currency = nextAccount.currency;

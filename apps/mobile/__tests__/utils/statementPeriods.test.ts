@@ -265,10 +265,16 @@ describe('getCreditCycleDates with a due date some days after the statement', ()
       statementDate: new Date(2026, 9, 25),
       dueDate: new Date(2026, 11, 9),
     });
-    // A day later the Sep bill's date is past, so the Oct one is next.
+    // A day later, still unpaid, the Sep bill is late: it stays on the card.
     expect(getCreditCycleDates(25, null, new Date(2026, 10, 10), true, 45, true)).toEqual({
+      statementDate: new Date(2026, 8, 25),
+      dueDate: new Date(2026, 10, 9),
+    });
+    // A grace period inside one cycle never shows the earlier statement: the
+    // latest one carries what is still owed.
+    expect(getCreditCycleDates(25, null, new Date(2026, 10, 9), true, 20, true)).toEqual({
       statementDate: new Date(2026, 9, 25),
-      dueDate: new Date(2026, 11, 9),
+      dueDate: new Date(2026, 10, 14),
     });
   });
 
@@ -306,10 +312,12 @@ describe('creditDueColumns', () => {
     });
   });
 
-  it('keeps the fixed day for older readers when there is no statement day', () => {
+  it('drops the rule and keeps the fixed day when there is no statement day', () => {
+    // Nothing to count from: a Web Dashboard page that clears the statement
+    // day leaves a card due on its fixed day, not a rule that cannot work.
     expect(creditDueColumns(null, 3, 20, new Date(2026, 6, 20))).toEqual({
       creditDueDay: 3,
-      creditDueDaysAfterStatement: 20,
+      creditDueDaysAfterStatement: null,
     });
   });
 });
