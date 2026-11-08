@@ -563,6 +563,46 @@ const styles = StyleSheet.create({
   },
 });
 
+/** A row of pill chips choosing one of a few options, as the account editor's do. */
+function ChoiceChips<T extends string>({
+  options,
+  value,
+  onChange,
+  labelOf,
+}: {
+  options: readonly T[];
+  value: T;
+  onChange: (option: T) => void;
+  labelOf: (option: T) => string;
+}) {
+  return (
+    <View className="flex-row flex-wrap gap-2">
+      {options.map((option) => {
+        const selected = value === option;
+        return (
+          <Pressable
+            key={option}
+            onPress={() => {
+              if (selected) return;
+              void triggerHaptic('selection');
+              onChange(option);
+            }}
+            accessibilityRole="button"
+            accessibilityState={{ selected }}
+            className={`px-4 py-2.5 rounded-full border ${
+              selected ? 'bg-primary/15 border-primary/50' : 'bg-secondary/30 border-border/40'
+            }`}
+          >
+            <Text variant="caption" className={selected ? 'text-primary' : 'text-muted-foreground'}>
+              {labelOf(option)}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
 function AccountEditorSheet({
   account,
   presetGroupName = null,
@@ -1528,39 +1568,18 @@ function AccountEditorSheet({
                 <Text variant="label" tone="muted">
                   {I18n.t('accounts.due_rule')}
                 </Text>
-                <View className="flex-row flex-wrap gap-2">
-                  {CREDIT_DUE_RULE_OPTIONS.map((option) => {
-                    const selected = creditDueRule === option;
-                    return (
-                      <Pressable
-                        key={option}
-                        onPress={() => {
-                          if (selected) return;
-                          void triggerHaptic('selection');
-                          setCreditDueRule(option);
-                        }}
-                        accessibilityRole="button"
-                        accessibilityState={{ selected }}
-                        className={`px-4 py-2.5 rounded-full border ${
-                          selected
-                            ? 'bg-primary/15 border-primary/50'
-                            : 'bg-secondary/30 border-border/40'
-                        }`}
-                      >
-                        <Text
-                          variant="caption"
-                          className={selected ? 'text-primary' : 'text-muted-foreground'}
-                        >
-                          {I18n.t(
-                            option === 'days_after'
-                              ? 'accounts.due_rule_days_after'
-                              : 'accounts.due_rule_day_of_month',
-                          )}
-                        </Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
+                <ChoiceChips
+                  options={CREDIT_DUE_RULE_OPTIONS}
+                  value={creditDueRule}
+                  onChange={setCreditDueRule}
+                  labelOf={(option) =>
+                    I18n.t(
+                      option === 'days_after'
+                        ? 'accounts.due_rule_days_after'
+                        : 'accounts.due_rule_day_of_month',
+                    )
+                  }
+                />
                 <View className="mt-2 flex-row gap-2">
                   <View className="flex-1">
                     <Input
@@ -1624,35 +1643,12 @@ function AccountEditorSheet({
                       />
                     </View>
                   </View>
-                  <View className="flex-row flex-wrap gap-2">
-                    {LOAN_INTEREST_MODEL_OPTIONS.map((option) => {
-                      const selected = loanInterestModel === option;
-                      return (
-                        <Pressable
-                          key={option}
-                          onPress={() => {
-                            if (selected) return;
-                            void triggerHaptic('selection');
-                            setLoanInterestModel(option);
-                          }}
-                          accessibilityRole="button"
-                          accessibilityState={{ selected }}
-                          className={`px-4 py-2.5 rounded-full border ${
-                            selected
-                              ? 'bg-primary/15 border-primary/50'
-                              : 'bg-secondary/30 border-border/40'
-                          }`}
-                        >
-                          <Text
-                            variant="caption"
-                            className={selected ? 'text-primary' : 'text-muted-foreground'}
-                          >
-                            {I18n.t(`accounts.loan.interest_model_${option}`)}
-                          </Text>
-                        </Pressable>
-                      );
-                    })}
-                  </View>
+                  <ChoiceChips
+                    options={LOAN_INTEREST_MODEL_OPTIONS}
+                    value={loanInterestModel}
+                    onChange={setLoanInterestModel}
+                    labelOf={(option) => I18n.t(`accounts.loan.interest_model_${option}`)}
+                  />
                 </View>
 
                 <Input

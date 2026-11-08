@@ -787,12 +787,15 @@ function planAccount(
     }
     ctx.created.accounts++;
     const statementDay = type === 'credit' ? (fields.creditStatementDay ?? 25) : null;
-    const due = creditDueColumns(
-      statementDay,
-      fields.creditDueDay ?? 1,
-      fields.creditDueDaysAfterStatement ?? null,
-      ctx.now,
-    );
+    const due =
+      type === 'credit'
+        ? creditDueColumns(
+            statementDay,
+            fields.creditDueDay ?? 1,
+            fields.creditDueDaysAfterStatement ?? null,
+            ctx.now,
+          )
+        : null;
     steps.push({
       kind: 'account.create',
       input: {
@@ -805,8 +808,8 @@ function planAccount(
         startingBalance: fields.balance ?? 0,
         includeInTotals: fields.includeInTotals ?? true,
         creditStatementDay: statementDay,
-        creditDueDay: type === 'credit' ? due.creditDueDay : null,
-        creditDueDaysAfterStatement: type === 'credit' ? due.creditDueDaysAfterStatement : null,
+        creditDueDay: due?.creditDueDay ?? null,
+        creditDueDaysAfterStatement: due?.creditDueDaysAfterStatement ?? null,
       },
     });
     return ok(1);

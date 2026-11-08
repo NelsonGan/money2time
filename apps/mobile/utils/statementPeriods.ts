@@ -144,7 +144,7 @@ export function nextDueDateAfterStatement(
 }
 
 /** The two columns that say when a credit card's bill is due. */
-export interface CreditDueColumns {
+interface CreditDueColumns {
   creditDueDay: number | null;
   creditDueDaysAfterStatement: number | null;
 }
