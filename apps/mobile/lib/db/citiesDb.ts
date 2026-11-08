@@ -4,14 +4,14 @@ import type { City } from '~/types';
 
 /**
  * Read-only offline place database (GeoNames cities15000), separate from
- * money2time.db. The prebuilt asset (assets/db/cities.db) is copied into the
- * SQLite directory once on first run, then opened query-only. It is pure
+ * money2time.db. The prebuilt asset (assets/db/cities.db.gz) is unpacked into
+ * the SQLite directory once on first run, then opened query-only. It is pure
  * reference data: never migrated, never backed up, never reset.
  *
  * Regenerate the asset with `node scripts/build-cities-db.mjs`.
  */
 
-// Bump whenever assets/db/cities.db is regenerated so the cached copy is replaced.
+// Bump whenever assets/db/cities.db.gz is regenerated so the cached copy is replaced.
 // v2: populated with real GeoNames cities15000 (the v1 asset was an empty placeholder).
 // v3: fuzzy search by country / state — FTS now indexes admin1 + country names and
 //     every table carries an ascii_name column used for match-tier ordering.
@@ -124,16 +124,48 @@ async function copyAssetIfNeeded(force = false): Promise<void> {
     dest.exists && marker.exists && marker.textSync().trim() === String(CITIES_DB_VERSION);
   if (upToDate && !force) return;
 
-  const asset = Asset.fromModule(require('../../assets/db/cities.db'));
+  // The app ships the database gzipped (2.3 MB instead of 5.3 MB) and unpacks
+  // it here once, so the uncompressed bytes exist on the device only once.
+  // eslint-config-expo allows asset requires by extension and does not list gz.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const asset = Asset.fromModule(require('../../assets/db/cities.db.gz'));
   await asset.downloadAsync();
   if (!asset.localUri) throw new Error('cities.db asset has no localUri');
+  const bytes = await gunzipInSlices(await new File(asset.localUri).bytes());
 
-  if (dest.exists) dest.delete();
-  await new File(asset.localUri).copy(dest);
-
+  // Drop the marker first: a write cut short (app killed, disk full) must not
+  // leave a truncated file that the next launch takes as current.
   if (marker.exists) marker.delete();
+  if (dest.exists) dest.delete();
+  dest.create();
+  await dest.write(bytes);
+
   marker.create();
   await marker.write(String(CITIES_DB_VERSION));
+}
+
+const GUNZIP_SLICE_BYTES = 256 * 1024;
+
+/**
+ * Unpacks gzip a slice at a time and yields to the event loop between slices,
+ * so the one-off 5 MB unpack on the first city search does not freeze typing.
+ */
+export async function gunzipInSlices(compressed: Uint8Array): Promise<Uint8Array> {
+  const { Gunzip } = await import('fflate');
+  const chunks: Uint8Array[] = [];
+  const stream = new Gunzip((chunk) => chunks.push(chunk));
+  for (let start = 0; start < compressed.length; start += GUNZIP_SLICE_BYTES) {
+    const end = start + GUNZIP_SLICE_BYTES;
+    stream.push(compressed.subarray(start, end), end >= compressed.length);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+  const out = new Uint8Array(chunks.reduce((total, chunk) => total + chunk.length, 0));
+  let offset = 0;
+  for (const chunk of chunks) {
+    out.set(chunk, offset);
+    offset += chunk.length;
+  }
+  return out;
 }
 
 function hasCitiesTable(db: SQLiteDatabase): boolean {

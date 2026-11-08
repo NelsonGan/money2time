@@ -6,21 +6,26 @@ import pngOptimizer from './lib/optimizePng.cjs';
 
 const { optimizePng } = pngOptimizer;
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-// Source artwork and launcher tiles are deliberately excluded. In particular,
-// the classic light launcher tile must remain byte-for-byte the shipped art.
-// The category icon atlases are lossless WebP, and
-// scripts/generate-category-icons.mjs applies the same quality gate as it
-// writes them.
+// Source artwork (assets/app-icon-sources, icon-packs, sheets) and the classic
+// launcher tiles are deliberately excluded: the classic light tile must remain
+// byte-for-byte the shipped art. The other files under assets/app-icons are
+// included. Their Android layers and in-app previews are only recompressed
+// losslessly (identical pixels), and their iOS tiles are also reduced to 256
+// colours, because Xcode stores each tile losslessly as raw pixels in
+// Assets.car, where a 256-colour tile takes about a third of the space. The
+// tutorial and automation screenshots are lossy WebP (see
+// scripts/lib/screenshotWebp.mjs), and the category icon atlases are lossless
+// WebP, which scripts/generate-category-icons.mjs gates as it writes them.
 const directories = [
   'account-logos',
-  'autolog',
+  'app-icons',
   'brands',
   'clay-icons',
   'items',
   'mascots',
   'subscription-logos',
-  'tutorials',
 ];
+const ALTERNATE_IOS_TILE = /^assets\/app-icons\/(?!classic\/)[^/]+\/icon-(light|dark)\.png$/;
 const write = process.argv.includes('--write');
 const records = [];
 
@@ -31,11 +36,16 @@ async function visit(directory) {
     else if (entry.name.endsWith('.png')) {
       const input = await fs.readFile(filename);
       const relative = path.relative(root, filename);
+      if (relative.startsWith('assets/app-icons/classic/')) continue;
       const chrome = relative.startsWith('assets/clay-icons/');
-      const screenshot = relative.startsWith('assets/autolog/');
+      // Gated at full 1024 px, not at home-screen size, so large renders
+      // (Settings, Spotlight, iPad) keep the same quality, and per 128 px
+      // region, so banding in one gradient cannot hide in a flat average.
+      const tile = ALTERNATE_IOS_TILE.test(relative);
       const result = await optimizePng(input, {
-        quantize: chrome || screenshot,
+        quantize: chrome || tile,
         ...(chrome ? { displaySize: 52 } : {}),
+        ...(tile ? { cellSize: 128 } : {}),
       });
       if (write && result.buffer.length < input.length) await fs.writeFile(filename, result.buffer);
       records.push({
