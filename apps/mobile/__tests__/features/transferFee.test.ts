@@ -138,6 +138,18 @@ describe('defaultTransferFeeCategoryId', () => {
     ).toBe('fees');
   });
 
+  it('finds a fee category whose name ends in a non-ASCII letter', () => {
+    expect(
+      defaultTransferFeeCategoryId({
+        categories: [
+          ...categories,
+          { id: 'phi', name: 'Phí ngân hàng', type: 'expense', parentId: null, deletedAt: null },
+        ],
+        fallbackCategoryId: 'bills',
+      }),
+    ).toBe('phi');
+  });
+
   it('falls back to the given category, then the first expense category', () => {
     expect(defaultTransferFeeCategoryId({ categories, fallbackCategoryId: 'bills' })).toBe('bills');
     expect(defaultTransferFeeCategoryId({ categories })).toBe('food');

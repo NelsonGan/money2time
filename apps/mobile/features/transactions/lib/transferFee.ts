@@ -133,9 +133,13 @@ export function transferFeeTotals(input: {
   };
 }
 
-/** A category whose name says it is for fees or charges, in common languages. */
+/**
+ * A category whose name says it is for fees or charges, in common languages.
+ * `\b` only knows ASCII letters, so a word ending in another letter ("phí")
+ * ends at the next non-letter instead.
+ */
 const FEE_CATEGORY_NAME =
-  /(\bfees?\b|\bcharges?\b|\bbank\b|\bcaj\b|\byuran\b|\bbiaya\b|\bgebühr|\bfrais\b|\bcomisi|\btarifa|\bkosten\b|\bavgift|\bgebyr|\bopłat|\bphí\b|ค่าธรรมเนียม|手数料|手续费|手續費|수수료|комисси|комісі|शुल्क)/i;
+  /(\bfees?\b|\bcharges?\b|\bbank\b|\bcaj\b|\byuran\b|\bbiaya\b|\bgebühr|\bfrais\b|\bcomisi|\btarifa|\bkosten\b|\bavgift|\bgebyr|\bopłat|\bphí(?!\p{L})|ค่าธรรมเนียม|手数料|手续费|手續費|수수료|комисси|комісі|शुल्क)/iu;
 
 /**
  * The category a new fee is filed under: the one the last fee used

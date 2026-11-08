@@ -89,6 +89,7 @@ import {
 } from '~/features/transactions/lib/splitPayments';
 import {
   buildTransferFeeIndex,
+  canChargeTransferFee,
   EMPTY_TRANSFER_FEE_INDEX,
   indexTransferFees,
   isTransferFee,
@@ -98,6 +99,7 @@ import {
   transferFeeDayOrder,
   type TransferFeeDraft,
   type TransferFeeIndex,
+  transferFeeSideOf,
   type TransferForFee,
 } from '~/features/transactions/lib/transferFee';
 import { normalizeLiveEarningsSchedule } from '~/features/widgets/lib/liveEarningsSchedule';
@@ -2981,6 +2983,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return firstEntrySignalRef.current.prepare(type, transactionsRef.current);
   }, []);
 
+  /** Whether a transfer moves money between accounts of different currencies. */
+  const transferIsCrossCurrency = useCallback(
+    (transfer: { fromAccountId?: string | null; toAccountId?: string | null }) =>
+      !!transfer.fromAccountId &&
+      !!transfer.toAccountId &&
+      accountCurrencyOf(transfer.fromAccountId) !== accountCurrencyOf(transfer.toAccountId),
+    [accountCurrencyOf],
+  );
+
   /**
    * Writes a transfer fee's new expense row (`planTransferFeeWrite`'s create)
    * right under its transfer: a millisecond older (`createdAt`), or a step
@@ -3281,7 +3292,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         insertTransferFeeRow(feeWrite.input, transferFeeCreatedAt(now), null);
         void trackEvent(AnalyticsEvents.TRANSFER_FEE_ADDED, {
           side: meta?.transferFee?.side ?? 'from',
-          cross_currency: !!normalizedInput.toAmount,
+          cross_currency: transferIsCrossCurrency(normalizedInput),
         });
       }
       return id;
@@ -3294,15 +3305,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       prepareFirstEntry,
       refreshAccountBalances,
       resolveRelationNames,
+      transferIsCrossCurrency,
     ],
   );
 
   const updateTransactionsBulk = useCallback(
     (requested: { id: string; input: Partial<CreateTransactionInput> }[]) => {
       if (requested.length === 0) return;
-      // A transfer's fee keeps its day and its place under the transfer: a new
-      // date (the editor, bulk edit, the Web Dashboard) or a drag moves the
-      // fee with it, unless the same call moves the fee itself.
+      const transactionById = new Map(
+        transactionsRef.current.map((transaction) => [transaction.id, transaction]),
+      );
+      // A transfer's fee keeps its day, its place under the transfer and the
+      // side that paid it: a new date (the editor, bulk edit, the Web
+      // Dashboard), a drag or a new account on the fee's side moves the fee
+      // with it, unless the same call moves the fee itself.
       const feeByTransferId = indexTransferFees(transactionsRef.current);
       const updates = [...requested];
       if (feeByTransferId.size > 0) {
@@ -3313,18 +3329,39 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           const follow: Partial<CreateTransactionInput> = {};
           if (typeof input.date === 'string') follow.date = input.date;
           if ('dayOrder' in input) follow.dayOrder = transferFeeDayOrder(input.dayOrder ?? null);
-          // Re-typed as an expense or income, the row has no fee any more: the
-          // fee stays, as the plain expense it always was.
-          if (input.type !== undefined && input.type !== 'transfer') follow.feeOfId = null;
+          if (input.type !== undefined && input.type !== 'transfer') {
+            // Re-typed as an expense or income, the row has no fee any more:
+            // the fee stays, as the plain expense it always was.
+            follow.feeOfId = null;
+          } else {
+            const transfer = transactionById.get(id);
+            const sideKey =
+              transfer && transferFeeSideOf(transfer, fee) === 'to'
+                ? 'toAccountId'
+                : 'fromAccountId';
+            const nextAccountId = input[sideKey];
+            const nextAccount = nextAccountId
+              ? accounts.find((account) => account.id === nextAccountId)
+              : null;
+            // A loan cannot pay one; the fee then stays where it was.
+            if (
+              transfer &&
+              nextAccountId &&
+              nextAccountId !== fee.accountId &&
+              canChargeTransferFee(nextAccount)
+            ) {
+              follow.accountId = nextAccountId;
+              if (nextAccount && nextAccount.currency !== fee.currency) {
+                follow.currency = nextAccount.currency;
+              }
+            }
+          }
           if (Object.keys(follow).length > 0) updates.push({ id: fee.id, input: follow });
         });
       }
       const normalizedUpdates: { id: string; input: Partial<CreateTransactionInput> }[] = [];
       const relationById = new Map<string, ReturnType<typeof resolveRelationNames>>();
       const inputById = new Map<string, Partial<CreateTransactionInput>>();
-      const transactionById = new Map(
-        transactionsRef.current.map((transaction) => [transaction.id, transaction]),
-      );
       updates.forEach(({ id, input }) => {
         let normalizedInput =
           input.amount === undefined
@@ -3527,7 +3564,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   const deleteTransactionsBulk = useCallback(
-    (ids: string[]) => {
+    // `track: false` for a row removed as part of another edit (a transfer's
+    // fee taken off in the editor), which is not a deletion the user asked for.
+    (ids: string[], options?: { track?: boolean }) => {
       if (ids.length === 0) return;
       const seenIds = new Set<string>();
       const uniqueIds: string[] = [];
@@ -3710,12 +3749,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           });
           // Reclaim the now-orphaned receipt file(s) once the rows are gone.
           if (deletedHadReceipt) runUserAssetGc();
-          void trackEvent(
-            requestedDeleteCount === 1
-              ? AnalyticsEvents.TRANSACTION_DELETED
-              : AnalyticsEvents.TRANSACTIONS_BULK_DELETED,
-            { count: requestedDeleteCount },
-          );
+          if (options?.track !== false) {
+            void trackEvent(
+              requestedDeleteCount === 1
+                ? AnalyticsEvents.TRANSACTION_DELETED
+                : AnalyticsEvents.TRANSACTIONS_BULK_DELETED,
+              { count: requestedDeleteCount },
+            );
+          }
         } catch {
           // rollback on failure
         }
@@ -3755,18 +3796,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         );
         void trackEvent(AnalyticsEvents.TRANSFER_FEE_ADDED, {
           side: draft?.side ?? 'from',
-          cross_currency:
-            !!transfer.fromAccountId &&
-            !!transfer.toAccountId &&
-            accountCurrencyOf(transfer.fromAccountId) !== accountCurrencyOf(transfer.toAccountId),
+          cross_currency: transferIsCrossCurrency(transfer),
         });
       } else if (write.kind === 'update') {
         updateTransactionsBulk([{ id: write.feeId, input: write.input }]);
       } else if (write.kind === 'delete') {
-        deleteTransactionsBulk([write.feeId]);
+        deleteTransactionsBulk([write.feeId], { track: false });
       }
     },
-    [accountCurrencyOf, deleteTransactionsBulk, insertTransferFeeRow, updateTransactionsBulk],
+    [
+      accountCurrencyOf,
+      deleteTransactionsBulk,
+      insertTransferFeeRow,
+      transferIsCrossCurrency,
+      updateTransactionsBulk,
+    ],
   );
 
   const deleteTransaction = useCallback(

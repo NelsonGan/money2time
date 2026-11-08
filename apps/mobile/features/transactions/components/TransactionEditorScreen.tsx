@@ -109,6 +109,7 @@ import {
 import { resolveNoteChange } from '~/features/transactions/lib/noteSuggestionPick';
 import { resolveSplitSaveRoute } from '~/features/transactions/lib/splitSaveRoute';
 import {
+  canChargeTransferFee,
   defaultTransferFeeCategoryId,
   type TransferFeeDraft,
   transferFeeTotals,
@@ -2254,6 +2255,17 @@ export function TransactionEditorScreen({
           showToast(I18n.t('transactions.editor.error.complete_required'));
           if (transferErrors.from_account) activateField('fromAccount');
           else if (transferErrors.to_account) activateField('toAccount');
+          return;
+        }
+        // The fee's account may have changed since the sheet checked it (a
+        // loan picked as the from account, say): back to the sheet to charge it
+        // to an account that can pay it, or remove it.
+        if (
+          transferFee &&
+          !canChargeTransferFee(transferFee.side === 'to' ? selectedToAccount : selectedFromAccount)
+        ) {
+          void triggerHaptic('warning');
+          setTransferFeeSheetVisible(true);
           return;
         }
         const fromCurrency = accountCurrency(fromAccountId);

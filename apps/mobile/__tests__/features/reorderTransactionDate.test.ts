@@ -3,6 +3,7 @@ import {
   type ReorderRow,
   type ReorderUpdate,
   reorderUpdatesForDrag,
+  reorderUpdatesKeepingFee,
 } from '~/features/transactions/lib/reorderTransactionDate';
 import type { TransactionWithRelations } from '~/types';
 import { dayKeyFromIsoLocal } from '~/utils/formatters';
@@ -261,5 +262,58 @@ describe('showing a drop before it is saved', () => {
 
     expect(shown[0]).toBe(first);
     expect(shown[1]).toEqual({ ...second, dayOrder: NOW });
+  });
+});
+
+describe('dragging a transfer that has a fee', () => {
+  const feeIdOf = (id: string) => (id === 'transfer' ? 'fee' : undefined);
+  // The fee is created a millisecond before its transfer, so it lists under it.
+  function withFee(dayOfMonth: number, options: { hour?: number; rank: number }) {
+    const transfer = transaction('transfer', dayOfMonth, options);
+    const fee = {
+      ...transaction('fee', dayOfMonth, options),
+      createdAt: new Date(Date.parse(transfer.createdAt) - 1).toISOString(),
+    } as TransactionWithRelations;
+    return { transfer, fee };
+  }
+
+  it('brings the fee along, right under its transfer', () => {
+    const top = transaction('top', 13, { rank: 0 });
+    const { transfer, fee } = withFee(13, { rank: 1 });
+    const bottom = transaction('bottom', 13, { rank: 3 });
+    // Dragged to the top; the fee's row stayed where it was.
+    const dropped = [day(13), row(transfer), row(top), row(fee), row(bottom)];
+
+    const updates = reorderUpdatesKeepingFee(dropped, 'transfer', feeIdOf, NOW);
+
+    expect(new Set(updates.map((update) => update.id)).size).toBe(updates.length);
+    expect(order(applyUpdates(dropped, updates))).toEqual(['transfer', 'fee', 'top', 'bottom']);
+  });
+
+  it('moves the fee to the transfer’s new day and time', () => {
+    const evening = transaction('evening', 14, { hour: 18 });
+    const morning = transaction('morning', 14, { hour: 8 });
+    const { transfer, fee } = withFee(13, { hour: 12, rank: 0 });
+    const dropped = [day(14), row(evening), row(transfer), row(morning), day(13), row(fee)];
+
+    const updates = reorderUpdatesKeepingFee(dropped, 'transfer', feeIdOf, NOW);
+    const saved = applyUpdates(dropped, updates);
+
+    expect(order(saved)).toEqual(['evening', 'transfer', 'fee', 'morning']);
+    const savedFee = saved.find((tx) => tx.id === 'fee')!;
+    const savedTransfer = saved.find((tx) => tx.id === 'transfer')!;
+    expect(dayKeyFromIsoLocal(savedFee.date)).toBe('2026-05-14');
+    expect(savedFee.date).toBe(savedTransfer.date);
+  });
+
+  it('saves any other drop exactly as before', () => {
+    const first = transaction('first', 13, { rank: 0 });
+    const second = transaction('second', 13, { rank: 1 });
+    const third = transaction('third', 13, { rank: 2 });
+    const dropped = [day(13), row(third), row(first), row(second)];
+
+    expect(reorderUpdatesKeepingFee(dropped, 'third', feeIdOf, NOW)).toEqual(
+      reorderUpdatesForDrag(dropped, 'third', NOW),
+    );
   });
 });
