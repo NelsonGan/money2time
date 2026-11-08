@@ -16,6 +16,37 @@ export type PickReceiptResult =
   | { status: 'denied' }
   | { status: 'failed' };
 
+/** An album pick not yet in the receipt store: the picker's temporary copy. */
+export interface PickedReceiptAsset {
+  uri: string;
+  width: number;
+  height: number;
+}
+
+/**
+ * Downscale a picked or captured photo and copy it into the receipt store,
+ * returning its relative path (e.g. `receipts/9f3c.jpg`). Throws when the copy
+ * fails.
+ */
+export async function saveReceiptAsset(asset: PickedReceiptAsset): Promise<string> {
+  const downscaled = await downscaleReceiptForStorage(asset.uri, {
+    width: asset.width,
+    height: asset.height,
+  });
+  return saveReceiptImage(downscaled);
+}
+
+/** Ask for camera or library access; alerts and returns false when refused. */
+async function ensurePickerPermission(source: 'camera' | 'library'): Promise<boolean> {
+  const permission =
+    source === 'camera'
+      ? await ImagePicker.requestCameraPermissionsAsync()
+      : await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (permission.granted) return true;
+  Alert.alert(I18n.t('accounts.logo.permission_title'), I18n.t('accounts.logo.permission_message'));
+  return false;
+}
+
 /**
  * Request permission, launch the camera or photo library, and copy the picked
  * image into the receipt store. Returns a discriminated result: `saved` with
@@ -30,39 +61,17 @@ export async function pickAndSaveReceiptImage(
   source: 'camera' | 'library',
 ): Promise<PickReceiptResult> {
   try {
-    const permission =
-      source === 'camera'
-        ? await ImagePicker.requestCameraPermissionsAsync()
-        : await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert(
-        I18n.t('accounts.logo.permission_title'),
-        I18n.t('accounts.logo.permission_message'),
-      );
-      return { status: 'denied' };
-    }
+    if (!(await ensurePickerPermission(source))) return { status: 'denied' };
     const result =
       source === 'camera'
         ? await ImagePicker.launchCameraAsync({ quality: 0.7 })
         : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7 });
     if (result.canceled || !result.assets?.[0]) return { status: 'cancelled' };
-    const asset = result.assets[0];
-    const downscaled = await downscaleReceiptForStorage(asset.uri, {
-      width: asset.width,
-      height: asset.height,
-    });
-    return { status: 'saved', path: saveReceiptImage(downscaled) };
+    return { status: 'saved', path: await saveReceiptAsset(result.assets[0]) };
   } catch {
     Alert.alert(I18n.t('accounts.logo.upload_failed'));
     return { status: 'failed' };
   }
-}
-
-/** An album pick not yet in the receipt store: the picker's temporary copy. */
-export interface PickedReceiptAsset {
-  uri: string;
-  width: number;
-  height: number;
 }
 
 export type PickReceiptAssetsResult =
@@ -74,19 +83,12 @@ export type PickReceiptAssetsResult =
 /**
  * Open the photo library for up to `limit` receipts, returned in the order the
  * user picked them. Unlike {@link pickAndSaveReceiptImage} nothing is stored:
- * the scan batch downscales and saves each one in the background, so the
- * camera sheet can close the moment the picker does.
+ * the scan batch saves each one with {@link saveReceiptAsset} in the
+ * background, so the camera sheet can close the moment the picker does.
  */
 export async function pickReceiptAssets(limit: number): Promise<PickReceiptAssetsResult> {
   try {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert(
-        I18n.t('accounts.logo.permission_title'),
-        I18n.t('accounts.logo.permission_message'),
-      );
-      return { status: 'denied' };
-    }
+    if (!(await ensurePickerPermission('library'))) return { status: 'denied' };
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       quality: 0.7,

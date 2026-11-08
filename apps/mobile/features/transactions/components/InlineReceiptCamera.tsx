@@ -15,6 +15,7 @@ import {
   pickAndSaveReceiptImage,
   type PickedReceiptAsset,
   pickReceiptAssets,
+  saveReceiptAsset,
 } from '~/services/receiptPicker';
 import { saveReceiptImage } from '~/services/userAssets';
 
@@ -207,11 +208,9 @@ export function InlineReceiptCamera({
         return;
       }
       if (batch.status === 'picked') {
-        // One pick takes the single-receipt path, exactly like before.
-        const [asset] = batch.assets;
+        // One pick takes the single-receipt path (the picker just needs Done).
         try {
-          const downscaled = await downscaleReceiptForStorage(asset!.uri, asset);
-          finishWith(saveReceiptImage(downscaled), 'library');
+          finishWith(await saveReceiptAsset(batch.assets[0]!), 'library');
           return;
         } catch {
           Alert.alert(I18n.t('accounts.logo.upload_failed'));

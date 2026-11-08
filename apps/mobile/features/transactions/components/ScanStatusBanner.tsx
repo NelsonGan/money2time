@@ -1,5 +1,5 @@
 import { AlertTriangle, ChevronDown, ChevronRight, ChevronUp, X } from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, {
   cancelAnimation,
@@ -235,12 +235,25 @@ function ScanBatchCard({
   const summary = summarizeScanBatch(jobs);
   const running = summary.scanning > 0;
   const allFailed = !running && summary.createdJobs === 0;
+  // Opened rows leave the batch, so remember that it logged something: a batch
+  // whose logged rows were all opened must not claim "No expenses logged".
+  const loggedRef = useRef(false);
+  if (summary.createdJobs > 0) loggedRef.current = true;
 
   const toggle = () => {
     void triggerHaptic('selection');
     setExpanded((value) => !value);
   };
 
+  const failedLabel =
+    summary.failed > 0
+      ? I18n.t(
+          summary.failed === 1 ? 'receiptScan.batch_failed_one' : 'receiptScan.batch_failed_other',
+          { count: summary.failed },
+        )
+      : null;
+  // Only failed rows left after the logged ones were opened: lead with them.
+  const onlyFailedLeft = summary.createdTransactions === 0 && loggedRef.current;
   const title =
     summary.createdTransactions > 0
       ? I18n.t(
@@ -249,14 +262,10 @@ function ScanBatchCard({
             : 'receiptScan.batch_logged_other',
           { count: summary.createdTransactions },
         )
-      : I18n.t('receiptScan.batch_none_logged');
-  const hint =
-    summary.failed > 0
-      ? I18n.t(
-          summary.failed === 1 ? 'receiptScan.batch_failed_one' : 'receiptScan.batch_failed_other',
-          { count: summary.failed },
-        )
-      : I18n.t('receiptScan.batch_hint');
+      : onlyFailedLeft && failedLabel
+        ? failedLabel
+        : I18n.t('receiptScan.batch_none_logged');
+  const hint = failedLabel && !onlyFailedLeft ? failedLabel : I18n.t('receiptScan.batch_hint');
   const Chevron = expanded ? ChevronUp : ChevronDown;
 
   return (

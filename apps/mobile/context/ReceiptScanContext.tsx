@@ -3,7 +3,6 @@ import { Alert } from 'react-native';
 
 import { PRO_LIMITS } from '~/constants/proLimits';
 import { useApp } from '~/context/AppContext';
-import { useIsPro } from '~/context/ProContext';
 import {
   RECEIPT_BATCH_CONCURRENCY,
   receiptBatchPickLimit,
@@ -15,8 +14,7 @@ import { I18n } from '~/lib/i18n';
 import { AnalyticsEvents, trackEvent } from '~/services/analytics';
 import { triggerHaptic } from '~/services/haptics';
 import { requestOpenPaywall } from '~/services/paywallNavigation';
-import { downscaleReceiptForStorage } from '~/services/receiptImage';
-import type { PickedReceiptAsset } from '~/services/receiptPicker';
+import { type PickedReceiptAsset, saveReceiptAsset } from '~/services/receiptPicker';
 import {
   ReceiptScanError,
   type ResolvedReceiptDetail,
@@ -31,7 +29,7 @@ import {
   requestEditTransaction,
   requestHighlightTransaction,
 } from '~/services/transactionsNavigation';
-import { copyReceiptImage, deleteReceiptImage, saveReceiptImage } from '~/services/userAssets';
+import { copyReceiptImage, deleteReceiptImage } from '~/services/userAssets';
 import { isAccountArchived } from '~/utils/accountArchive';
 import { formatAmount } from '~/utils/formatters';
 import { newId } from '~/utils/id';
@@ -167,8 +165,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
     getReceiptCount,
     getUnpaidSplitBillCount,
   } = useApp();
-  const { checkLimit } = useProGate();
-  const isPro = useIsPro();
+  const { checkLimit, isPro } = useProGate();
   const [jobs, setJobs] = useState<ScanJob[]>([]);
   // Mirror the list in a ref so dismissJob can read the latest job synchronously
   // (it runs outside React's render-driven state).
@@ -215,6 +212,20 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
     [setJobsBoth],
   );
 
+  // Turn a finished scan into an error card. A job dismissed while it scanned
+  // left its receipt file to the scan, so when no card is left to carry the
+  // file, free it here instead.
+  const markJobError = useCallback(
+    (id: string, rel: string, error: ScanJobError) => {
+      if (!jobsRef.current.some((j) => j.id === id)) {
+        deleteReceiptImage(rel);
+        return;
+      }
+      setJobsBoth((prev) => prev.map((j) => (j.id === id ? { ...j, status: 'error', error } : j)));
+    },
+    [setJobsBoth],
+  );
+
   // Catch handler for the scan flow: quota exhaustion drops the job and either
   // alerts (Pro monthly cap) or opens the paywall (free); anything else leaves a
   // dismissible error card carrying the receipt.
@@ -255,11 +266,9 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
         err instanceof ReceiptScanError && (err.code === 'capacity' || err.code === 'too_large')
           ? err.code
           : 'failed';
-      setJobsBoth((prev) =>
-        prev.map((j) => (j.id === jobId ? { ...j, status: 'error', error } : j)),
-      );
+      markJobError(jobId, rel, error);
     },
-    [setJobsBoth],
+    [markJobError, setJobsBoth],
   );
 
   const canStartScan = useCallback((intent: ScanIntent = 'quick') => {
@@ -392,9 +401,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
             setJobsBoth((prev) => prev.filter((j) => j.id !== id));
             return 'empty';
           }
-          setJobsBoth((prev) =>
-            prev.map((j) => (j.id === id ? { ...j, status: 'error', error: 'empty' } : j)),
-          );
+          markJobError(id, rel, 'empty');
           return 'empty';
         }
 
@@ -531,7 +538,7 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
         return isLimit ? 'limit' : 'failed';
       }
     },
-    [applyScanFailure, setJobsBoth],
+    [applyScanFailure, markJobError, setJobsBoth],
   );
 
   // Enqueue the scanning job, fire the start haptic, and kick off the parse,
@@ -583,24 +590,23 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
         ...queue.map(({ id }): ScanJob => ({ id, status: 'scanning', intent: 'quick', batchId })),
       ]);
       void triggerHaptic('selection');
-      queue.forEach(() => {
-        void trackEvent(AnalyticsEvents.RECEIPT_SCAN_STARTED, {
-          source: 'library',
-          intent: 'quick',
-          batchSize: batch.size,
-        });
-      });
 
       const scanOne = async ({
         asset,
         id,
       }: (typeof queue)[number]): Promise<'continue' | 'stop'> => {
+        // Sent as each receipt starts, so one skipped after the quota ran out
+        // never opens a started→completed pair it cannot close.
+        void trackEvent(AnalyticsEvents.RECEIPT_SCAN_STARTED, {
+          source: 'library',
+          intent: 'quick',
+          batchSize: batch.size,
+        });
         let rel: string;
         try {
           // The same storage treatment as a single pick, done here so the
           // camera sheet never waits on ten resizes.
-          const downscaled = await downscaleReceiptForStorage(asset.uri, asset);
-          rel = saveReceiptImage(downscaled);
+          rel = await saveReceiptAsset(asset);
         } catch {
           void trackEvent(AnalyticsEvents.RECEIPT_SCAN_FAILED, { code: 'unreadable' });
           setJobsBoth((prev) =>
@@ -631,10 +637,15 @@ export function ReceiptScanProvider({ children }: { children: React.ReactNode })
   const receiptPickLimit = useCallback((intent: ScanIntent = 'quick') => {
     if (intent !== 'quick') return 1;
     const scanEnv = envRef.current;
+    // Hand scans still in flight will attach their image too, so they count
+    // against the allowance before their expenses exist.
+    const pending = jobsRef.current.filter(
+      (j) => j.status === 'scanning' && j.intent !== 'screenshot',
+    ).length;
     return receiptBatchPickLimit({
       isPro: scanEnv.isPro,
       keepImage: scanEnv.quickEntryPrefs.saveScannedReceipts,
-      receiptCount: scanEnv.getReceiptCount(),
+      receiptCount: scanEnv.getReceiptCount() + pending,
       freeReceiptLimit: PRO_LIMITS.FREE_MAX_RECEIPTS,
     });
   }, []);
