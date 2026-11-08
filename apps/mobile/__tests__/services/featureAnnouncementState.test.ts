@@ -12,6 +12,7 @@ import {
   insightsCtaFocus,
   notificationReviewCtaTarget,
 } from '~/features/news/featureAnnouncements';
+import { MAX_RECEIPT_BATCH } from '~/features/transactions/lib/receiptScanBatch';
 import { I18n } from '~/lib/i18n';
 import {
   featureAnnouncementStateTestUtils,
@@ -51,8 +52,60 @@ describe('feature announcement state', () => {
     );
   });
 
-  it('announces Cloud Sync, shared ledgers and Household insights on both platforms', () => {
+  it('announces period budgets, part paybacks, batch scans and archiving on both platforms', () => {
     const latest = getLatestFeatureAnnouncement()!;
+    expect(latest).toMatchObject({
+      id: 'budgets_splits_scans_archive_2026_11',
+      announcementNumber: 25,
+      pages: [
+        { key: 'budgets', visual: 'periodBudgets', cta: 'openBudget' },
+        { key: 'partPayments', visual: 'splitPartPayments', cta: 'openSettleUp' },
+        { key: 'batchScan', visual: 'batchScan', cta: 'openScanReceipt' },
+        { key: 'archive', visual: 'archiveAccounts', cta: 'openAccounts' },
+      ],
+    });
+    expect(latest.requiresCapability).toBeUndefined();
+    expect(announcementPagesForPlatform(latest, 'ios')).toHaveLength(4);
+    expect(announcementPagesForPlatform(latest, 'android')).toHaveLength(4);
+  });
+
+  it('takes the batch scan limit in the new announcement from the scan code', () => {
+    const latest = getFeatureAnnouncementById('budgets_splits_scans_archive_2026_11')!;
+    const batchScan = latest.pages.find((page) => page.key === 'batchScan')!;
+    const t = jest.spyOn(I18n, 't');
+    announcementPageBody(latest, batchScan);
+    expect(t).toHaveBeenCalledWith('news.budgets_splits_scans_archive.batchScan.body', {
+      count: MAX_RECEIPT_BATCH,
+    });
+    t.mockRestore();
+    // Every language takes the number as a placeholder, never as written text,
+    // and writes the new announcement without dashes.
+    for (const locale of SUPPORTED_LOCALE_FILES) {
+      const news = loadLocale(locale).news.budgets_splits_scans_archive;
+      expect([locale, news.batchScan.body]).toEqual([locale, expect.stringContaining('%{count}')]);
+      expect([locale, JSON.stringify(news)]).toEqual([locale, expect.not.stringMatching(/[–—]/)]);
+    }
+  });
+
+  it('names the real Scan receipt button in the batch scan page, in every language', () => {
+    for (const locale of SUPPORTED_LOCALE_FILES) {
+      const strings = loadLocale(locale);
+      const body: string = strings.news.budgets_splits_scans_archive.batchScan.body;
+      expect([locale, body]).toEqual([
+        locale,
+        expect.stringContaining(strings.add_action.scan_title),
+      ]);
+    }
+  });
+
+  it('says several budget periods need Pro only while the free plan allows one template', () => {
+    // The budgets page says "Running several periods at once is part of Pro" in
+    // every language. Raise the free limit and that sentence must change too.
+    expect(PRO_LIMITS.FREE_MAX_BUDGET_TEMPLATES).toBe(1);
+  });
+
+  it('announces Cloud Sync, shared ledgers and Household insights on both platforms', () => {
+    const latest = getFeatureAnnouncementById('cloud_sync_shared_ledgers_2026_11')!;
     expect(latest).toMatchObject({
       id: 'cloud_sync_shared_ledgers_2026_11',
       announcementNumber: 24,
@@ -69,7 +122,7 @@ describe('feature announcement state', () => {
     expect(announcementPagesForPlatform(latest, 'android')).toHaveLength(3);
   });
 
-  it('writes the new announcement without dashes, in every language', () => {
+  it('writes the Cloud Sync announcement without dashes, in every language', () => {
     for (const locale of SUPPORTED_LOCALE_FILES) {
       const text = JSON.stringify(loadLocale(locale).news.cloud_sync_shared_ledgers);
       expect([locale, text]).toEqual([locale, expect.not.stringMatching(/[–—]/)]);

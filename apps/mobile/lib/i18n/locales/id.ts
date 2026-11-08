@@ -171,6 +171,25 @@ const id = {
     reset_action: 'Hapus & ganti',
   },
   news: {
+    budgets_splits_scans_archive: {
+      title: 'Anggaran, pembayaran kembali, dan lainnya',
+      budgets: {
+        title: 'Anggaran mingguan dan tahunan',
+        body: 'Anggaran kini bisa berulang setiap minggu atau setiap tahun, selain setiap bulan. Pilih di Berulang saat membuat templat anggaran. Setiap periode punya cincinnya sendiri di halaman Anggaran: ketuk cincin untuk melihat sisanya. Menjalankan beberapa periode sekaligus adalah bagian dari Pro.',
+      },
+      partPayments: {
+        title: 'Pembayaran kembali bertahap',
+        body: 'Teman kini bisa membayar Anda kembali sedikit demi sedikit. Di Siapa yang berutang padamu, ketuk Tandai sudah bayar dan ketik jumlah yang mereka bayar. Sisanya tetap tercatat sebagai utang, dengan bilah progres dan daftar setiap pembayaran, dan setiap pembayaran dihitung di akun Anda saat diterima.',
+      },
+      batchScan: {
+        title: 'Pindai banyak struk sekaligus',
+        body: 'Ketuk Pindai struk, buka album Anda, dan pilih hingga %{count} struk. Masing-masing menjadi pengeluaran tersendiri, dengan merchant, jumlah, tanggal, dan kategorinya sendiri, sementara Anda tetap memakai aplikasi. Satu kartu di Beranda menunjukkan progresnya.',
+      },
+      archive: {
+        title: 'Arsipkan akun',
+        body: 'Sudah menutup kartu atau tidak memakai suatu akun lagi? Edit akun itu dan aktifkan Arsipkan akun. Akun hilang dari daftar dan pilihan akun, tetapi semua transaksinya tetap ada, dan entri berulangnya dijeda. Temukan lagi di Tampilkan arsip pada halaman Akun.',
+      },
+    },
     cloud_sync_shared_ledgers: {
       title: 'Cloud Sync dan buku bersama',
       cloudSync: {
@@ -463,6 +482,9 @@ const id = {
       open_notification_review: 'Nyalakan Tinjauan otomatis',
       open_insights: 'Buka Wawasan',
       open_instalments: 'Lihat cicilan',
+      open_budget: 'Buka Anggaran',
+      open_settle_up: 'Buka Siapa yang berutang padamu',
+      open_scan_receipt: 'Pindai struk',
       open_share_earn: 'Dapatkan Pro gratis',
       open_quick_entry_settings: 'Buka pengaturan Entri Cepat',
       open_auto_log: 'Atur otomatisasi',

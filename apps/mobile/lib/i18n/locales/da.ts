@@ -171,6 +171,25 @@ const da = {
     reset_action: 'Slet og skift',
   },
   news: {
+    budgets_splits_scans_archive: {
+      title: 'Budgetter, tilbagebetalinger og mere',
+      budgets: {
+        title: 'Ugentlige og årlige budgetter',
+        body: 'Budgetter kan nu gentages hver uge eller hvert år, ud over hver måned. Vælg under Gentages, når du laver en budgetskabelon. Hver periode får sin egen ring på siden Budget: tryk på en ring for at se, hvad der er tilbage. Flere perioder på én gang er en del af Pro.',
+      },
+      partPayments: {
+        title: 'Tilbagebetaling i dele',
+        body: 'Venner kan nu betale dig tilbage lidt ad gangen. Under Hvem skylder dig trykker du på Markér betalt og skriver, hvad de har betalt. Resten er stadig skyldig, med en statuslinje og hver betaling på listen, og hver betaling tæller med på dine konti, når den kommer ind.',
+      },
+      batchScan: {
+        title: 'Scan mange kvitteringer på én gang',
+        body: 'Tryk på Scan kvittering, åbn dit album, og vælg op til %{count} kvitteringer. Hver bliver sin egen udgift med egen forretning, beløb, dato og kategori, mens du bruger appen videre. Ét kort på Hjem viser, hvor langt den er nået.',
+      },
+      archive: {
+        title: 'Arkivér konti',
+        body: 'Har du lukket et kort eller holdt op med at bruge en konto? Rediger den, og slå Arkivér konto til. Den forsvinder fra dine kontolister og vælgere, men beholder alle transaktioner, og dens faste betalinger sættes på pause. Find den igen under Vis arkiverede på siden Konti.',
+      },
+    },
     cloud_sync_shared_ledgers: {
       title: 'Cloud Sync og delte regnskaber',
       cloudSync: {
@@ -463,6 +482,9 @@ const da = {
       open_notification_review: 'Slå Autogennemgang til',
       open_insights: 'Åbn Indsigt',
       open_instalments: 'Se afdrag',
+      open_budget: 'Åbn Budget',
+      open_settle_up: 'Åbn Hvem skylder dig',
+      open_scan_receipt: 'Scan kvitteringer',
       open_share_earn: 'Få Pro gratis',
       open_quick_entry_settings: 'Åbn indstillinger for Hurtig registrering',
       open_auto_log: 'Opsæt automatiseringer',
