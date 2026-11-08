@@ -112,7 +112,6 @@ import {
   canChargeTransferFee,
   defaultTransferFeeCategoryId,
   type TransferFeeDraft,
-  transferFeeTotals,
 } from '~/features/transactions/lib/transferFee';
 import { resolveBucketCategoryIds } from '~/features/transactions/utils/categoryKeywords';
 import { offscreenPageLimitFor, usePagerTabSync } from '~/hooks/usePagerTabSync';
@@ -2072,24 +2071,6 @@ export function TransactionEditorScreen({
     return `→ ${currencySymbolForCode(toCur)}${Number.isFinite(received) ? received.toFixed(2) : '0.00'}`;
   }, [amount, isTransferType, rateTable, selectedFromAccount, selectedToAccount, transferToAmount]);
 
-  // What the transfer credits the to account, in its currency: the received
-  // amount across currencies, else the amount itself. The fee sheet's
-  // percentages and totals read it.
-  const transferReceivedValue = useMemo(() => {
-    const fromAmount = Number(amount) || 0;
-    if (
-      !selectedFromAccount ||
-      !selectedToAccount ||
-      selectedFromAccount.currency === selectedToAccount.currency
-    ) {
-      return fromAmount;
-    }
-    const received = transferToAmount.trim()
-      ? Number(transferToAmount)
-      : convert(fromAmount, selectedFromAccount.currency, selectedToAccount.currency, rateTable)
-          .value;
-    return Number.isFinite(received) ? received : 0;
-  }, [amount, rateTable, selectedFromAccount, selectedToAccount, transferToAmount]);
   // Where a new fee is filed: the last fee's category, else one named for
   // fees, else the user's Bills category.
   const transferFeeDefaultCategoryId = useMemo(
@@ -2635,8 +2616,7 @@ export function TransactionEditorScreen({
           });
         })()
       : null;
-  // The fee in a line under the amount, with what it does to the account that
-  // paid it: "RM2.00 fee · RM202.00 leaves Maybank Visa".
+  // The fee's amount, in the currency of the account that pays it, for the chip.
   const transferFeePayingAccount =
     isTransferType && transferFee
       ? transferFee.side === 'to'
@@ -2648,28 +2628,6 @@ export function TransactionEditorScreen({
       ? formatAmount(transferFee.amount, settings, {
           currencyCode: transferFeePayingAccount.currency,
         })
-      : null;
-  const transferFeeSummary =
-    transferFee && transferFeePayingAccount && transferFeeLabel
-      ? (() => {
-          const totals = transferFeeTotals({
-            amount: Number(amount) || 0,
-            received: transferReceivedValue,
-            fee: transferFee.amount,
-            side: transferFee.side,
-          });
-          const total = formatAmount(
-            transferFee.side === 'to' ? totals.arrives : totals.leaves,
-            settings,
-            { currencyCode: transferFeePayingAccount.currency },
-          );
-          return I18n.t(
-            transferFee.side === 'to'
-              ? 'transactions.editor.transfer_fee.summary_to'
-              : 'transactions.editor.transfer_fee.summary_from',
-            { fee: transferFeeLabel, amount: total, account: transferFeePayingAccount.name },
-          );
-        })()
       : null;
   const openTransferFeeSheet = () => {
     void triggerHaptic('selection');
@@ -4753,18 +4711,6 @@ export function TransactionEditorScreen({
                       </Text>
                     </Pressable>
                   ) : null}
-                  {transferFeeSummary ? (
-                    <Pressable
-                      onPress={openTransferFeeSheet}
-                      hitSlop={6}
-                      accessibilityRole="button"
-                      className="active:opacity-70"
-                    >
-                      <Text variant="caption" tone="primary" numberOfLines={1}>
-                        {transferFeeSummary}
-                      </Text>
-                    </Pressable>
-                  ) : null}
                 </View>
                 {showCurrencyButton || transferReceivedLabel || reportingEquivLabel ? (
                   <View className="items-end gap-1 pl-2">
@@ -5149,8 +5095,6 @@ export function TransactionEditorScreen({
       {isTransferType ? (
         <TransferFeeSheet
           visible={transferFeeSheetVisible}
-          amount={Number(amount) || 0}
-          received={transferReceivedValue}
           fromAccount={selectedFromAccount}
           toAccount={selectedToAccount}
           fee={transferFee}

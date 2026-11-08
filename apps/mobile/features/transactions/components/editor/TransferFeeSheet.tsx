@@ -1,6 +1,6 @@
 import { ChevronRight, Tag } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { AccountLogo, CategoryEmoji, Text } from '~/components/ui';
 import {
@@ -11,11 +11,8 @@ import { ThemeModal } from '~/components/ui/theme-modal';
 import {
   canChargeTransferFee,
   defaultTransferFeeSide,
-  TRANSFER_FEE_PERCENTS,
   type TransferFeeDraft,
-  transferFeePercentOf,
   type TransferFeeSide,
-  transferFeeTotals,
 } from '~/features/transactions/lib/transferFee';
 import { useSheetColumnStyle } from '~/hooks/useSheetColumnStyle';
 import { useThemeColors } from '~/hooks/useThemeColors';
@@ -24,7 +21,7 @@ import { triggerHaptic } from '~/services/haptics';
 import type { Account } from '~/types';
 import { cn } from '~/utils';
 import { currencySymbolForCode } from '~/utils/currency';
-import { formatCurrency, normalizeMoneyAmount } from '~/utils/formatters';
+import { normalizeMoneyAmount } from '~/utils/formatters';
 
 import { evaluateExpression, sanitizeInitialAmount } from './calculatorEngine';
 import { MiniNumpad } from './MiniNumpad';
@@ -33,10 +30,6 @@ type SheetAccount = Pick<Account, 'id' | 'name' | 'currency' | 'logoId' | 'type'
 
 interface TransferFeeSheetProps {
   visible: boolean;
-  /** The transfer's amount, in the from account's currency. */
-  amount: number;
-  /** What the transfer credits, in the to account's currency. */
-  received: number;
   fromAccount: SheetAccount | null;
   toAccount: SheetAccount | null;
   /** The fee as it stands; null when the transfer has none yet. */
@@ -52,14 +45,11 @@ interface TransferFeeSheetProps {
 }
 
 /**
- * The transfer editor's fee: how much, which account paid it (from: more
- * leaves; to: less arrives) and the category it is filed under. Quick
- * percentages cover card top-ups. See `features/transactions/lib/transferFee.ts`.
+ * The transfer editor's fee: how much, which account paid it and the category
+ * it is filed under. See `features/transactions/lib/transferFee.ts`.
  */
 export function TransferFeeSheet({
   visible,
-  amount,
-  received,
   fromAccount,
   toAccount,
   fee,
@@ -74,8 +64,7 @@ export function TransferFeeSheet({
   const sheetColumnStyle = useSheetColumnStyle();
 
   const [expression, setExpression] = useState('');
-  // Remounts the pad when the sheet opens or a percentage fills the amount, so
-  // it starts from the value shown.
+  // Remounts the pad each time the sheet opens, so it starts on the fee shown.
   const [padKey, setPadKey] = useState(0);
   const [side, setSide] = useState<TransferFeeSide>('from');
   const [categoryId, setCategoryId] = useState<string | null>(null);
@@ -98,39 +87,6 @@ export function TransferFeeSheet({
   );
   const payingAccount = side === 'to' ? toAccount : fromAccount;
   const feeCurrency = payingAccount?.currency ?? fromAccount?.currency ?? '';
-  const percentBase = side === 'to' ? received : amount;
-  const format = useCallback(
-    (value: number, currency: string) => formatCurrency(value, currencySymbolForCode(currency)),
-    [],
-  );
-  const totals = transferFeeTotals({ amount, received, fee: feeAmount, side });
-  const summary =
-    feeAmount > 0
-      ? side === 'to'
-        ? toAccount
-          ? I18n.t('transactions.editor.transfer_fee.arrives', {
-              account: toAccount.name,
-              amount: format(totals.arrives, toAccount.currency),
-            })
-          : null
-        : fromAccount
-          ? I18n.t('transactions.editor.transfer_fee.leaves', {
-              account: fromAccount.name,
-              amount: format(totals.leaves, fromAccount.currency),
-            })
-          : null
-      : I18n.t('transactions.editor.transfer_fee.hint');
-
-  const handlePercent = useCallback(
-    (percent: number) => {
-      void triggerHaptic('selection');
-      const value = transferFeePercentOf(percentBase, percent);
-      setExpression(sanitizeInitialAmount(String(value)));
-      setPadKey((key) => key + 1);
-    },
-    [percentBase],
-  );
-
   const handleSide = useCallback((next: TransferFeeSide) => {
     void triggerHaptic('selection');
     setSide(next);
@@ -211,14 +167,7 @@ export function TransferFeeSheet({
           </View>
           <View className="items-center px-6 pt-4">
             <Text variant="subheading">{I18n.t('transactions.editor.transfer_fee.title')}</Text>
-            {amount > 0 && fromAccount ? (
-              <Text variant="caption" tone="muted" numberOfLines={1} className="mt-0.5">
-                {I18n.t('transactions.editor.transfer_fee.subtitle', {
-                  amount: format(amount, fromAccount.currency),
-                })}
-              </Text>
-            ) : null}
-            <View className="mt-3 flex-row items-baseline gap-1">
+            <View className="mt-2 flex-row items-baseline gap-1">
               <Text variant="subheading" tone="muted">
                 {currencySymbolForCode(feeCurrency)}
               </Text>
@@ -231,53 +180,9 @@ export function TransferFeeSheet({
                 {expression || '0'}
               </Text>
             </View>
-            {summary ? (
-              <Text variant="caption" tone="muted" numberOfLines={1} className="mt-1">
-                {summary}
-              </Text>
-            ) : null}
           </View>
 
-          {percentBase > 0 ? (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-              contentContainerStyle={{ paddingHorizontal: 16, gap: 8, flexGrow: 1 }}
-              className="mt-3 grow-0"
-            >
-              {TRANSFER_FEE_PERCENTS.map((percent) => {
-                const value = transferFeePercentOf(percentBase, percent);
-                const selected = feeAmount > 0 && Math.abs(value - feeAmount) < 0.005;
-                return (
-                  <Pressable
-                    key={percent}
-                    onPress={() => handlePercent(percent)}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected }}
-                    accessibilityLabel={I18n.t('transactions.editor.transfer_fee.percent_label', {
-                      percent: `${percent}%`,
-                    })}
-                    className={cn(
-                      'h-8 flex-1 items-center justify-center rounded-full border px-3 active:opacity-70',
-                      selected
-                        ? 'border-primary/40 bg-primary/15'
-                        : 'border-border/30 bg-secondary/60',
-                    )}
-                  >
-                    <Text
-                      variant="caption"
-                      className={selected ? 'font-semibold text-primary' : ''}
-                    >
-                      {`${percent}%`}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </ScrollView>
-          ) : null}
-
-          <View className="mx-4 mt-3 overflow-hidden rounded-2xl border border-border/30 bg-secondary/30">
+          <View className="mx-4 mt-4 overflow-hidden rounded-2xl border border-border/30 bg-secondary/30">
             <View className="gap-2 px-3 pb-2.5 pt-3">
               <Text variant="caption" tone="muted">
                 {I18n.t('transactions.editor.transfer_fee.charged_to')}

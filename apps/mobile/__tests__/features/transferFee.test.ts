@@ -12,9 +12,7 @@ import {
   transferFeeCreatedAt,
   transferFeeDayOrder,
   transferFeeDraftOf,
-  transferFeePercentOf,
   transferFeeSideOf,
-  transferFeeTotals,
 } from '~/features/transactions/lib/transferFee';
 import { sortTransactions } from '~/utils/transactionSorting';
 
@@ -81,30 +79,6 @@ describe('fee side', () => {
       amount: 1.5,
       side: 'to',
       categoryId: 'bank-fees',
-    });
-  });
-});
-
-describe('amounts', () => {
-  it('takes a percentage to the cent', () => {
-    expect(transferFeePercentOf(200, 1)).toBe(2);
-    expect(transferFeePercentOf(123.45, 1.5)).toBe(1.85);
-    expect(transferFeePercentOf(0, 1)).toBe(0);
-  });
-
-  it('adds a from-side fee to what leaves, and takes a to-side fee off what arrives', () => {
-    expect(transferFeeTotals({ amount: 200, received: 200, fee: 2, side: 'from' })).toEqual({
-      leaves: 202,
-      arrives: 200,
-    });
-    expect(transferFeeTotals({ amount: 200, received: 200, fee: 2, side: 'to' })).toEqual({
-      leaves: 200,
-      arrives: 198,
-    });
-    // Across currencies each side stays in its own currency.
-    expect(transferFeeTotals({ amount: 100, received: 21.5, fee: 0.5, side: 'to' })).toEqual({
-      leaves: 100,
-      arrives: 21,
     });
   });
 });

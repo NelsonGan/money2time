@@ -30,9 +30,6 @@ export interface TransferFeeDraft {
   categoryId: string | null;
 }
 
-/** The quick percentages the fee sheet offers (card top-ups are 0.5–2%). */
-export const TRANSFER_FEE_PERCENTS = [0.5, 1, 1.5, 2] as const;
-
 type FeeRow = Pick<Transaction, 'id' | 'type' | 'feeOfId' | 'deletedAt'>;
 
 /** Whether a row is the expense of a transfer's fee. */
@@ -105,31 +102,6 @@ export function transferFeeDraftOf(
     amount: fee.amount,
     side: transferFeeSideOf(transfer, fee),
     categoryId: fee.categoryId ?? null,
-  };
-}
-
-/** `percent`% of `base`, rounded to the cent. */
-export function transferFeePercentOf(base: number, percent: number): number {
-  if (!Number.isFinite(base) || base <= 0) return 0;
-  return normalizeMoneyAmount((base * percent) / 100);
-}
-
-/**
- * What moves once the fee is counted, each in its own account's currency:
- * `leaves` off the from account, `arrives` in the to account. `received` is
- * what the transfer itself credits (its `toAmount` across currencies, else the
- * amount).
- */
-export function transferFeeTotals(input: {
-  amount: number;
-  received: number;
-  fee: number;
-  side: TransferFeeSide;
-}): { leaves: number; arrives: number } {
-  const fee = input.fee > 0 ? input.fee : 0;
-  return {
-    leaves: normalizeMoneyAmount(input.amount + (input.side === 'from' ? fee : 0)),
-    arrives: normalizeMoneyAmount(input.received - (input.side === 'to' ? fee : 0)),
   };
 }
 
