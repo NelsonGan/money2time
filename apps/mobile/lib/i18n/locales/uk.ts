@@ -102,6 +102,13 @@ const uk = {
     camera_permission_body:
       'Дозвольте доступ до камери, щоб сфотографувати чек, або виберіть його з альбому.',
     camera_permission_grant: 'Дозволити доступ до камери',
+    batch_scanning: 'Сканування чеків',
+    batch_logged_one: 'Записано витрату: {{count}}',
+    batch_logged_other: 'Записано витрат: {{count}}',
+    batch_none_logged: 'Витрати не записано',
+    batch_failed_one: 'Не вдалося прочитати чек: {{count}}',
+    batch_failed_other: 'Не вдалося прочитати чеків: {{count}}',
+    batch_hint: 'Торкніться, щоб побачити кожен чек',
   },
   app: {
     name: 'Money2Time',

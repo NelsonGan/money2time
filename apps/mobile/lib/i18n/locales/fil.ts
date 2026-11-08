@@ -102,6 +102,13 @@ const fil = {
     camera_permission_body:
       'Payagan ang access sa camera para kumuha ng litrato ng resibo, o pumili ng isa mula sa iyong album.',
     camera_permission_grant: 'Payagan ang access sa camera',
+    batch_scanning: 'Ini-scan ang mga resibo',
+    batch_logged_one: '{{count}} gastos ang naitala',
+    batch_logged_other: '{{count}} gastos ang naitala',
+    batch_none_logged: 'Walang naitalang gastos',
+    batch_failed_one: '{{count}} resibo ang hindi nabasa',
+    batch_failed_other: '{{count}} resibo ang hindi nabasa',
+    batch_hint: 'I-tap para makita ang bawat resibo',
   },
   app: {
     name: 'Money2Time',

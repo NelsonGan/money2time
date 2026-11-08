@@ -102,6 +102,13 @@ const vi = {
     camera_permission_body:
       'Cho phép truy cập camera để chụp hóa đơn, hoặc chọn một ảnh từ thư viện của bạn.',
     camera_permission_grant: 'Cho phép truy cập camera',
+    batch_scanning: 'Đang quét hóa đơn',
+    batch_logged_one: 'Đã ghi {{count}} khoản chi',
+    batch_logged_other: 'Đã ghi {{count}} khoản chi',
+    batch_none_logged: 'Chưa ghi khoản chi nào',
+    batch_failed_one: 'Không đọc được {{count}} hóa đơn',
+    batch_failed_other: 'Không đọc được {{count}} hóa đơn',
+    batch_hint: 'Chạm để xem từng hóa đơn',
   },
   app: {
     name: 'Money2Time',

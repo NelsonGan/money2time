@@ -102,6 +102,13 @@ const de = {
     camera_permission_body:
       'Erlaube den Kamerazugriff, um einen Beleg zu fotografieren, oder wähle stattdessen einen aus deinem Album.',
     camera_permission_grant: 'Kamerazugriff erlauben',
+    batch_scanning: 'Belege werden gescannt',
+    batch_logged_one: '{{count}} Ausgabe erfasst',
+    batch_logged_other: '{{count}} Ausgaben erfasst',
+    batch_none_logged: 'Keine Ausgaben erfasst',
+    batch_failed_one: '{{count}} Beleg konnte nicht gelesen werden',
+    batch_failed_other: '{{count}} Belege konnten nicht gelesen werden',
+    batch_hint: 'Tippen, um jeden Beleg zu sehen',
   },
   app: {
     name: 'Money2Time',

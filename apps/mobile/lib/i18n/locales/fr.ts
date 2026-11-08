@@ -102,6 +102,13 @@ const fr = {
     camera_permission_body:
       'Autorisez l’accès à la caméra pour photographier un reçu, ou choisissez-en un dans votre album.',
     camera_permission_grant: 'Autoriser l’accès à la caméra',
+    batch_scanning: 'Analyse des reçus',
+    batch_logged_one: '{{count}} dépense enregistrée',
+    batch_logged_other: '{{count}} dépenses enregistrées',
+    batch_none_logged: 'Aucune dépense enregistrée',
+    batch_failed_one: '{{count}} reçu n’a pas pu être lu',
+    batch_failed_other: '{{count}} reçus n’ont pas pu être lus',
+    batch_hint: 'Touchez pour voir chaque reçu',
   },
   app: {
     name: 'Money2Time',

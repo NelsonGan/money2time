@@ -102,6 +102,13 @@ const nl = {
     camera_permission_body:
       'Sta cameratoegang toe om een bon te fotograferen, of kies er een uit je album.',
     camera_permission_grant: 'Cameratoegang toestaan',
+    batch_scanning: 'Bonnen scannen',
+    batch_logged_one: '{{count}} uitgave vastgelegd',
+    batch_logged_other: '{{count}} uitgaven vastgelegd',
+    batch_none_logged: 'Geen uitgaven vastgelegd',
+    batch_failed_one: '{{count}} bon kon niet worden gelezen',
+    batch_failed_other: '{{count}} bonnen konden niet worden gelezen',
+    batch_hint: 'Tik om elke bon te zien',
   },
   app: {
     name: 'Money2Time',

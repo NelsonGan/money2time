@@ -102,6 +102,13 @@ const pl = {
     camera_permission_body:
       'Zezwól na dostęp do aparatu, aby zrobić zdjęcie paragonu, lub wybierz je z albumu.',
     camera_permission_grant: 'Zezwól na dostęp do aparatu',
+    batch_scanning: 'Skanowanie paragonów',
+    batch_logged_one: 'Zapisano {{count}} wydatek',
+    batch_logged_other: 'Zapisano wydatki: {{count}}',
+    batch_none_logged: 'Nie zapisano żadnych wydatków',
+    batch_failed_one: 'Nie udało się odczytać {{count}} paragonu',
+    batch_failed_other: 'Nie udało się odczytać paragonów: {{count}}',
+    batch_hint: 'Dotknij, aby zobaczyć każdy paragon',
   },
   app: {
     name: 'Money2Time',
