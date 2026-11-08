@@ -77,7 +77,14 @@ jest.mock('expo-asset', () => ({
 jest.mock('../../assets/db/cities.db.gz', () => 1);
 
 // The asset's content stands in for its unpacked bytes.
-jest.mock('fflate', () => ({ gunzipSync: (bytes: Uint8Array) => bytes }));
+jest.mock('fflate', () => ({
+  Gunzip: class {
+    constructor(private ondata: (chunk: Uint8Array, final: boolean) => void) {}
+    push(chunk: Uint8Array, final: boolean) {
+      this.ondata(chunk, final);
+    }
+  },
+}));
 
 const ROW = {
   id: '1850147',

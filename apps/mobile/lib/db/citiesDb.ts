@@ -131,16 +131,41 @@ async function copyAssetIfNeeded(force = false): Promise<void> {
   const asset = Asset.fromModule(require('../../assets/db/cities.db.gz'));
   await asset.downloadAsync();
   if (!asset.localUri) throw new Error('cities.db asset has no localUri');
-  const { gunzipSync } = await import('fflate');
-  const bytes = gunzipSync(await new File(asset.localUri).bytes());
+  const bytes = await gunzipInSlices(await new File(asset.localUri).bytes());
 
+  // Drop the marker first: a write cut short (app killed, disk full) must not
+  // leave a truncated file that the next launch takes as current.
+  if (marker.exists) marker.delete();
   if (dest.exists) dest.delete();
   dest.create();
   await dest.write(bytes);
 
-  if (marker.exists) marker.delete();
   marker.create();
   await marker.write(String(CITIES_DB_VERSION));
+}
+
+const GUNZIP_SLICE_BYTES = 256 * 1024;
+
+/**
+ * Unpacks gzip a slice at a time and yields to the event loop between slices,
+ * so the one-off 5 MB unpack on the first city search does not freeze typing.
+ */
+export async function gunzipInSlices(compressed: Uint8Array): Promise<Uint8Array> {
+  const { Gunzip } = await import('fflate');
+  const chunks: Uint8Array[] = [];
+  const stream = new Gunzip((chunk) => chunks.push(chunk));
+  for (let start = 0; start < compressed.length; start += GUNZIP_SLICE_BYTES) {
+    const end = start + GUNZIP_SLICE_BYTES;
+    stream.push(compressed.subarray(start, end), end >= compressed.length);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+  const out = new Uint8Array(chunks.reduce((total, chunk) => total + chunk.length, 0));
+  let offset = 0;
+  for (const chunk of chunks) {
+    out.set(chunk, offset);
+    offset += chunk.length;
+  }
+  return out;
 }
 
 function hasCitiesTable(db: SQLiteDatabase): boolean {

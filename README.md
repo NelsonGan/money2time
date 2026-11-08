@@ -3123,7 +3123,8 @@ artwork are generator inputs and were retained.
   tile as lossless raw pixels, so only fewer colours shrink it.
   `npm run optimize:assets` quantizes `icon-light` and `icon-dark` of every
   variant except `classic` (the shipped icon stays byte-for-byte), gated at
-  full 1024 px with the same 3/255 limit (the worst tile is 1.2/255). Re-run it
+  full 1024 px, per 128 px region, with the same 3/255 limit (the worst region
+  is 2.6/255). Re-run it
   after `scripts/generate-app-icons.mjs`, which writes full colour. A palette
   PNG has no alpha unless it carries a `tRNS` chunk, which the icon test checks.
 - **Tutorial and Automation screenshots are quality-85 lossy WebP**

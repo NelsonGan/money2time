@@ -145,10 +145,11 @@ async function copyImages(webDir, tutorials) {
   const names = tutorials.flatMap((tutorial) =>
     tutorial.steps.map((step) => step.image).filter(Boolean),
   );
-  for (const name of new Set(names)) {
+  const unique = new Set(names);
+  for (const name of unique) {
     await fs.copyFile(path.join(ASSET_DIR, `${name}.webp`), path.join(outDir, `${name}.webp`));
   }
-  return names.length;
+  return unique.size;
 }
 
 async function main() {

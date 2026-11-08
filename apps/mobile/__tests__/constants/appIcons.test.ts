@@ -102,12 +102,12 @@ describe('app icon catalogue', () => {
   });
 
   // The App Store rejects an icon that carries an alpha channel. Byte 25 of a
-  // PNG is the IHDR colour type: 2 is RGB and 6 is RGBA. The alternate tiles
-  // are 256-colour (3, palette) to save app size, and a palette image is only
-  // transparent when it carries a tRNS chunk.
+  // PNG is the IHDR colour type: 0 is grey, 2 is RGB, 4 and 6 add alpha. The
+  // alternate tiles are 256-colour (3, palette) to save app size. Grey, RGB and
+  // palette images are only transparent when they carry a tRNS chunk.
   function hasAlpha(png: Buffer): boolean {
     const colourType = png[25];
-    if (colourType !== 2 && colourType !== 3) return true;
+    if (colourType !== 0 && colourType !== 2 && colourType !== 3) return true;
     for (let offset = 8; offset < png.length; offset += 12 + png.readUInt32BE(offset)) {
       if (png.toString('ascii', offset + 4, offset + 8) === 'tRNS') return true;
     }

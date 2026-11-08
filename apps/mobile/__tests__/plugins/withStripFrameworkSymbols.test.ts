@@ -1,5 +1,13 @@
 import { execFileSync, spawnSync } from 'node:child_process';
-import { copyFileSync, mkdirSync, mkdtempSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import {
+  chmodSync,
+  copyFileSync,
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
@@ -36,7 +44,7 @@ describe('withStripFrameworkSymbols', () => {
 
   const darwin = process.platform === 'darwin' ? it : it.skip;
 
-  function runScript(configuration: string) {
+  function runScript(configuration: string, { readOnly = false } = {}) {
     const root = mkdtempSync(path.join(tmpdir(), 'money2time-strip-'));
     const framework = path.join(root, 'Frameworks/Example.framework');
     mkdirSync(framework, { recursive: true });
@@ -60,6 +68,7 @@ describe('withStripFrameworkSymbols', () => {
       path.join(framework, 'Info.plist'),
     ]);
     copyFileSync(path.join(framework, 'Example'), path.join(root, 'original'));
+    if (readOnly) chmodSync(path.join(framework, 'Example'), 0o444);
     const result = spawnSync('/bin/sh', ['-c', plugin.STRIP_SCRIPT], {
       encoding: 'utf8',
       env: {
@@ -75,7 +84,7 @@ describe('withStripFrameworkSymbols', () => {
       (file) => statSync(file).size,
     );
     rmSync(root, { recursive: true, force: true });
-    return { status: result.status, symbols, sizes };
+    return { status: result.status, stdout: result.stdout, symbols, sizes };
   }
 
   darwin('strips local symbols in Release and keeps the exported ones', () => {
@@ -84,6 +93,15 @@ describe('withStripFrameworkSymbols', () => {
     expect(symbols).toContain('_run');
     expect(symbols).not.toContain('_helper');
     expect(sizes[1]).toBeLessThan(sizes[0]);
+  });
+
+  // A failed strip must not fail the release build.
+  darwin('skips a framework strip cannot write', () => {
+    const { status, stdout, symbols, sizes } = runScript('Release', { readOnly: true });
+    expect(status).toBe(0);
+    expect(stdout).toContain('warning: could not strip');
+    expect(symbols).toContain('_helper');
+    expect(sizes[1]).toBe(sizes[0]);
   });
 
   darwin('leaves Debug builds alone', () => {

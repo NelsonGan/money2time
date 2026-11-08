@@ -4,18 +4,23 @@
  * An archive strips the app's own executable, but not the dynamic frameworks
  * CocoaPods copies into `Frameworks/`: pod targets are never "installed", and
  * prebuilt ones (React, Hermes, Turso, MapLibre) are copied as shipped. In the
- * 1.7.4 archive those 21 frameworks took 58 MB, 18.7 MB of it symbol tables.
+ * 1.7.4 archive those 21 frameworks took 61.2 MB, 19.6 MB of it symbol tables.
  *
  * `strip -x -S` removes only local and debug symbols. Exported symbols stay, so
  * dyld still links everything, and a binary's UUID does not change, so the
  * dSYMs uploaded for crash symbolication still match. It is what Xcode's own
- * install step does to a dylib (`STRIP_STYLE = non-global`).
+ * install step does to a dylib (`STRIP_STYLE = non-global`). Prebuilt
+ * frameworks that ship no dSYM (React, Hermes, Turso) lose the names of their
+ * static functions in crash reports; exported and Objective-C names remain.
  *
  * The phase must run after "[CP] Embed Pods Frameworks", which only exists
  * once `pod install` has integrated the project, so it is added from a Podfile
  * `post_integrate` hook rather than from a project mod. Stripping invalidates
  * the framework's signature, so it is re-signed with the command CocoaPods'
- * embed script uses; the app itself is signed after every build phase.
+ * embed script uses; the app itself is signed after every build phase. A
+ * build with signing off (an unsigned archive) is left unsigned, as CocoaPods
+ * leaves it, and is signed when it is exported. A framework strip cannot
+ * handle is skipped with a warning rather than failing the release.
  * Release only: Debug keeps its symbols for the debugger.
  */
 const { withPodfile } = require('@expo/config-plugins');
@@ -35,7 +40,10 @@ for framework in "$frameworks"/*.framework; do
   binary="$framework/$executable"
   [ -f "$binary" ] || continue
   before=$(stat -f%z "$binary")
-  xcrun strip -x -S "$binary" 2>/dev/null
+  if ! xcrun strip -x -S "$binary"; then
+    echo "warning: could not strip $binary; leaving it as it was"
+    continue
+  fi
   [ "$(stat -f%z "$binary")" = "$before" ] && continue
   if [ -n "\${EXPANDED_CODE_SIGN_IDENTITY:-}" ] && [ "\${CODE_SIGNING_REQUIRED:-}" != "NO" ] && [ "\${CODE_SIGNING_ALLOWED:-}" != "NO" ]; then
     /usr/bin/codesign --force --sign "$EXPANDED_CODE_SIGN_IDENTITY" \${OTHER_CODE_SIGN_FLAGS:-} --preserve-metadata=identifier,entitlements "$framework"
