@@ -2128,6 +2128,11 @@ const sv = {
     type: 'Typ',
     statement_day: 'Utdragsdag',
     due_day: 'Förfallodag',
+    due_rule: 'Förfallodag',
+    due_rule_day_of_month: 'Dag i månaden',
+    due_rule_days_after: 'Dagar efter faktura',
+    due_next_date: 'Nästa förfallodag: {{date}}',
+    due_days_after_error: 'Ange 1 till {{max}} dagar',
     current_balance: 'Aktuellt saldo',
     balance_adjustment_prompt_title: 'Hur ska den här saldoändringen registreras?',
     balance_adjustment_prompt_message:

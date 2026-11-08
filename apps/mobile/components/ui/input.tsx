@@ -141,7 +141,7 @@ const Input = React.forwardRef<TextInputInstance, InputProps>(
           </View>
         </Animated.View>
 
-        {hasError ? (
+        {error ? (
           <Text variant="caption" tone="error" className="mt-2 px-1">
             {error}
           </Text>

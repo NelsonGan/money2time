@@ -2291,7 +2291,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const id = runMutation(() => accountsRepository.create(input), {
         refresh: refreshAccountsAndGroups,
       });
-      void trackEvent(AnalyticsEvents.ACCOUNT_CREATED, { type: input.type });
+      void trackEvent(AnalyticsEvents.ACCOUNT_CREATED, {
+        type: input.type,
+        // How a new credit card's bill falls due, to see who counts it in days.
+        ...(input.type === 'credit'
+          ? {
+              creditDueRule:
+                input.creditDueDaysAfterStatement != null ? 'days_after_statement' : 'day_of_month',
+            }
+          : {}),
+      });
       return id;
     },
     [refreshAccountsAndGroups, runMutation],

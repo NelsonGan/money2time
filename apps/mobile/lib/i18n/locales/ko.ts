@@ -2100,6 +2100,11 @@ const ko = {
     type: '유형',
     statement_day: '결제일',
     due_day: '납부일',
+    due_rule: '결제일',
+    due_rule_day_of_month: '매월 날짜',
+    due_rule_days_after: '명세서 후 일수',
+    due_next_date: '다음 결제일: {{date}}',
+    due_days_after_error: '1~{{max}}일을 입력하세요',
     current_balance: '현재 잔액',
     balance_adjustment_prompt_title: '이 잔액 변동을 어떻게 기록할까요?',
     balance_adjustment_prompt_message:

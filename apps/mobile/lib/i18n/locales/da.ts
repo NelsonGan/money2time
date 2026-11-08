@@ -2129,6 +2129,11 @@ const da = {
     type: 'Type',
     statement_day: 'Kontoudtogsdag',
     due_day: 'Forfaldsdato',
+    due_rule: 'Forfaldsdato',
+    due_rule_day_of_month: 'Dag i måneden',
+    due_rule_days_after: 'Dage efter opgørelse',
+    due_next_date: 'Næste forfaldsdato: {{date}}',
+    due_days_after_error: 'Angiv 1 til {{max}} dage',
     current_balance: 'Nuværende saldo',
     balance_adjustment_prompt_title: 'Hvordan skal denne saldoændring registreres?',
     balance_adjustment_prompt_message:

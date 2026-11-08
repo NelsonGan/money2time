@@ -2112,6 +2112,11 @@ const vi = {
     type: 'Loại',
     statement_day: 'Ngày sao kê',
     due_day: 'Ngày đáo hạn',
+    due_rule: 'Hạn thanh toán',
+    due_rule_day_of_month: 'Ngày trong tháng',
+    due_rule_days_after: 'Số ngày sau sao kê',
+    due_next_date: 'Hạn tiếp theo: {{date}}',
+    due_days_after_error: 'Nhập từ 1 đến {{max}} ngày',
     current_balance: 'Số dư hiện tại',
     balance_adjustment_prompt_title: 'Ghi thay đổi số dư này như thế nào?',
     balance_adjustment_prompt_message:

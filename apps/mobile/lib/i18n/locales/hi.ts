@@ -2116,6 +2116,11 @@ const hi = {
     type: 'प्रकार',
     statement_day: 'स्टेटमेंट तारीख',
     due_day: 'देय तारीख',
+    due_rule: 'देय तिथि',
+    due_rule_day_of_month: 'महीने का दिन',
+    due_rule_days_after: 'स्टेटमेंट के बाद दिन',
+    due_next_date: 'अगली देय तिथि: {{date}}',
+    due_days_after_error: '1 से {{max}} दिन दर्ज करें',
     current_balance: 'वर्तमान बैलेंस',
     balance_adjustment_prompt_title: 'यह बैलेंस परिवर्तन कैसे दर्ज करें?',
     balance_adjustment_prompt_message:

@@ -2146,6 +2146,11 @@ const nl = {
     type: 'Type',
     statement_day: 'Afschriftdag',
     due_day: 'Vervaldatum',
+    due_rule: 'Vervaldatum',
+    due_rule_day_of_month: 'Dag van de maand',
+    due_rule_days_after: 'Dagen na afschrift',
+    due_next_date: 'Volgende vervaldatum: {{date}}',
+    due_days_after_error: 'Vul 1 tot {{max}} dagen in',
     current_balance: 'Huidig saldo',
     balance_adjustment_prompt_title: 'Hoe moet deze saldowijziging worden geregistreerd?',
     balance_adjustment_prompt_message:

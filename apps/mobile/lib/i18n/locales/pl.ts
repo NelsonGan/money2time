@@ -2133,6 +2133,11 @@ const pl = {
     type: 'Typ',
     statement_day: 'Dzień wyciągu',
     due_day: 'Dzień płatności',
+    due_rule: 'Termin płatności',
+    due_rule_day_of_month: 'Dzień miesiąca',
+    due_rule_days_after: 'Dni po wyciągu',
+    due_next_date: 'Następny termin: {{date}}',
+    due_days_after_error: 'Wpisz od 1 do {{max}} dni',
     current_balance: 'Bieżące saldo',
     balance_adjustment_prompt_title: 'Jak zarejestrować tę zmianę salda?',
     balance_adjustment_prompt_message:

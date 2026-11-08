@@ -2141,6 +2141,11 @@ const ms = {
     type: 'Jenis',
     statement_day: 'Hari penyata',
     due_day: 'Hari bayaran',
+    due_rule: 'Tarikh akhir bayaran',
+    due_rule_day_of_month: 'Hari dalam bulan',
+    due_rule_days_after: 'Hari selepas penyata',
+    due_next_date: 'Tarikh akhir seterusnya: {{date}}',
+    due_days_after_error: 'Masukkan 1 hingga {{max}} hari',
     current_balance: 'Baki semasa',
     balance_adjustment_prompt_title: 'Bagaimana perubahan baki ini perlu direkodkan?',
     balance_adjustment_prompt_message:
