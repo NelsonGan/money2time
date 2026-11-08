@@ -67,6 +67,16 @@ review those against the diff yourself, and add the expected PostHog event
 volume to the README's event budget when adding an event or increasing its
 frequency.
 
+**The Web Dashboard is part of the change.** app.money2time.com (the
+`money2time-web` repo, at `~/Projects/money2time-web`) rebuilds the app's
+pages, totals and editors from the data the phone sends, so it falls behind
+every time the app changes and it does not. After every product or code change
+works in the app, and before the PR, run the `sync-web-dashboard` skill: it
+decides whether the dashboard shows, edits or reads what changed, and if so
+has you change money2time-web, keep older apps and pages working, verify it
+end to end against the simulator and open a linked web PR. A change without
+web impact says "Web Dashboard: no impact" and why in its PR.
+
 **Show the device in T3 Code's Device panel while testing.** Open it with
 `device_open` and leave it on the tested screen while the user should still look
 at it. The pool runs two devices at once and at most one Android emulator, so
