@@ -78,5 +78,25 @@
       "after": 167143427,
       "saved": 38985540
     }
+  },
+  "android": {
+    "build": "./gradlew :app:assembleRelease -PreactNativeArchitectures=arm64-v8a after npx expo prebuild -p android --clean (same commit base); framework stripping and icon tiles are iOS-only, and the APK zip already compressed the cities database",
+    "bytes": {
+      "apk": {
+        "before": 172278383,
+        "after": 164200535,
+        "saved": 8077848
+      },
+      "images_uncompressed": {
+        "before": 68392524,
+        "after": 60302505,
+        "saved": 8090019
+      },
+      "raw_data": {
+        "before": 2290729,
+        "after": 2302175,
+        "saved": -11446
+      }
+    }
   }
 }
