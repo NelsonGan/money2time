@@ -671,6 +671,7 @@ export function toSettings(row: SettingsRow): UserSettings {
     reimbursementsCountAsExpense: row.reimbursementsCountAsExpense ?? true,
     showTransactionAccount: row.showTransactionAccount ?? true,
     showAccountPickerBalances: row.showAccountPickerBalances ?? true,
+    hideAccountBalances: row.hideAccountBalances ?? false,
     navTabsJson: row.navTabsJson ?? null,
     activeLedgerId: row.activeLedgerId || DEFAULT_LEDGER_ID,
     createdAt: row.createdAt,

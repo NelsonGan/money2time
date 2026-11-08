@@ -45,6 +45,7 @@ const baseSettings: UserSettings = {
   reimbursementsCountAsExpense: true,
   showTransactionAccount: true,
   showAccountPickerBalances: true,
+  hideAccountBalances: false,
   navTabsJson: null,
   activeLedgerId: 'default',
   createdAt: '2026-06-01T00:00:00.000Z',

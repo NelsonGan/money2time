@@ -805,6 +805,11 @@ describe('toSettings', () => {
     );
   });
 
+  it('shows assets-page balances unless the eye hid them', () => {
+    expect(toSettings({ ...baseRow }).hideAccountBalances).toBe(false);
+    expect(toSettings({ ...baseRow, hideAccountBalances: true }).hideAccountBalances).toBe(true);
+  });
+
   it('maps working-day preferences with migration-safe defaults', () => {
     expect(toSettings({ ...baseRow }).workdayDisplayEnabled).toBe(false);
     expect(toSettings({ ...baseRow }).workingHoursPerDay).toBe(8);

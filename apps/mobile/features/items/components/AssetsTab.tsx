@@ -14,15 +14,16 @@ import { useStableSafeAreaInsets } from '~/hooks/useStableSafeAreaInsets';
 import { useWideTabColumns } from '~/hooks/useWideTabColumns';
 import { I18n } from '~/lib/i18n';
 
-interface AccountsRenderOptions {
+interface AssetsTabProps {
+  /**
+   * Whether balances are masked on the Accounts and Goals sub-tabs. The host
+   * passes the saved setting, so the eye's choice survives a restart.
+   */
   hideBalances: boolean;
   onToggleBalances: () => void;
-}
-
-interface AssetsTabProps {
-  renderAccounts: (options: AccountsRenderOptions) => React.ReactNode;
+  renderAccounts: () => React.ReactNode;
   /** Savings-goals pane; shares the balance-visibility toggle with Accounts. */
-  renderGoals: (options: AccountsRenderOptions) => React.ReactNode;
+  renderGoals: () => React.ReactNode;
   renderItems: () => React.ReactNode;
   onAddItem: () => void;
   /**
@@ -75,6 +76,8 @@ function MountedPane({ active, children }: { active: boolean; children: React.Re
  * provides it once, above the tab bar.
  */
 export function AssetsTab({
+  hideBalances,
+  onToggleBalances,
   renderAccounts,
   renderGoals,
   renderItems,
@@ -86,9 +89,7 @@ export function AssetsTab({
 }: AssetsTabProps) {
   const insets = useStableSafeAreaInsets();
   const [tab, setTab] = useState<AssetsTabName>('accounts');
-  const [hideBalances, setHideBalances] = useState(false);
   const { resetMinimize } = useBottomNavMinimize();
-  const toggleBalances = useCallback(() => setHideBalances((previous) => !previous), []);
   const handleTabChange = useCallback(
     (nextTab: AssetsTabName) => {
       resetMinimize();
@@ -115,7 +116,7 @@ export function AssetsTab({
       accessibilityLabel={
         hideBalances ? I18n.t('accounts.show_balances') : I18n.t('accounts.hide_balances')
       }
-      onPress={toggleBalances}
+      onPress={onToggleBalances}
     >
       <ClayIcon name={hideBalances ? 'ui/eye-off' : 'ui/eye'} size={24} flatSize={18} />
     </Button>
@@ -164,12 +165,8 @@ export function AssetsTab({
       </TabletContentContainer>
 
       <View className="flex-1">
-        <MountedPane active={tab === 'accounts'}>
-          {renderAccounts({ hideBalances, onToggleBalances: toggleBalances })}
-        </MountedPane>
-        <MountedPane active={tab === 'goals'}>
-          {renderGoals({ hideBalances, onToggleBalances: toggleBalances })}
-        </MountedPane>
+        <MountedPane active={tab === 'accounts'}>{renderAccounts()}</MountedPane>
+        <MountedPane active={tab === 'goals'}>{renderGoals()}</MountedPane>
         <MountedPane active={tab === 'items'}>{renderItems()}</MountedPane>
       </View>
     </View>
