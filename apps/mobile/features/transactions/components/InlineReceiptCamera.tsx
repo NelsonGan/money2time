@@ -11,7 +11,11 @@ import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
 import { downscaleReceiptForStorage } from '~/services/receiptImage';
-import { pickAndSaveReceiptImage } from '~/services/receiptPicker';
+import {
+  pickAndSaveReceiptImage,
+  type PickedReceiptAsset,
+  pickReceiptAssets,
+} from '~/services/receiptPicker';
 import { saveReceiptImage } from '~/services/userAssets';
 
 interface InlineReceiptCameraProps {
@@ -22,6 +26,14 @@ interface InlineReceiptCameraProps {
    * receipt store. `path` is the stored relative path.
    */
   onCaptured: (path: string, source: 'camera' | 'library') => void;
+  /**
+   * Most receipts the album may pick at once (default 1). Above 1, and with
+   * `onPickedBatch` set, the album opens in multi-select: one pick still ends
+   * in `onCaptured`, several go to `onPickedBatch` unsaved.
+   */
+  albumPickLimit?: number;
+  /** Several album picks, in the order picked, not yet in the receipt store. */
+  onPickedBatch?: (assets: PickedReceiptAsset[]) => void;
   /** Dismiss without capturing. When omitted, no close control is drawn — the
    *  host supplies its own (e.g. the sheet header's back button). */
   onClose?: () => void;
@@ -87,6 +99,8 @@ function Bracket({ top, left }: { top: boolean; left: boolean }) {
 export function InlineReceiptCamera({
   viewfinderHeight,
   onCaptured,
+  albumPickLimit = 1,
+  onPickedBatch,
   onClose,
   horizontalInset = 16,
 }: InlineReceiptCameraProps) {
@@ -182,6 +196,31 @@ export function InlineReceiptCamera({
     inFlightRef.current = true;
     void triggerHaptic('selection');
     setBusyAction('album');
+    if (albumPickLimit > 1 && onPickedBatch) {
+      const batch = await pickReceiptAssets(albumPickLimit);
+      if (batch.status === 'picked' && batch.assets.length > 1) {
+        // The host scans and stores them in the background, so close now.
+        if (!doneRef.current) {
+          doneRef.current = true;
+          onPickedBatch(batch.assets);
+        }
+        return;
+      }
+      if (batch.status === 'picked') {
+        // One pick takes the single-receipt path, exactly like before.
+        const [asset] = batch.assets;
+        try {
+          const downscaled = await downscaleReceiptForStorage(asset!.uri, asset);
+          finishWith(saveReceiptImage(downscaled), 'library');
+          return;
+        } catch {
+          Alert.alert(I18n.t('accounts.logo.upload_failed'));
+        }
+      }
+      inFlightRef.current = false;
+      setBusyAction(null);
+      return;
+    }
     // `library` handles its own permission + save; on cancel/denied/failed we
     // stay on the viewfinder (the picker already alerted for denied/failed).
     const picked = await pickAndSaveReceiptImage('library');
@@ -192,7 +231,7 @@ export function InlineReceiptCamera({
     }
     inFlightRef.current = false;
     setBusyAction(null);
-  }, [finishWith]);
+  }, [albumPickLimit, finishWith, onPickedBatch]);
 
   const granted = permission?.granted ?? false;
   const holding = capturedUri != null;

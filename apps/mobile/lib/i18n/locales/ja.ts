@@ -102,6 +102,13 @@ const ja = {
     camera_permission_body:
       'レシートを撮影するにはカメラへのアクセスを許可するか、アルバムから選択してください。',
     camera_permission_grant: 'カメラへのアクセスを許可',
+    batch_scanning: 'レシートをスキャン中',
+    batch_logged_one: '{{count}}件の支出を記録しました',
+    batch_logged_other: '{{count}}件の支出を記録しました',
+    batch_none_logged: '記録された支出はありません',
+    batch_failed_one: '{{count}}枚のレシートを読み取れませんでした',
+    batch_failed_other: '{{count}}枚のレシートを読み取れませんでした',
+    batch_hint: 'タップして各レシートを表示',
   },
   app: {
     name: 'Money2Time',

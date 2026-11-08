@@ -100,6 +100,13 @@ const zh = {
     camera_permission_title: '需要相机权限',
     camera_permission_body: '允许访问相机以拍摄收据，或从相册中选择一张。',
     camera_permission_grant: '允许访问相机',
+    batch_scanning: '正在扫描收据',
+    batch_logged_one: '已记录 {{count}} 笔支出',
+    batch_logged_other: '已记录 {{count}} 笔支出',
+    batch_none_logged: '未记录任何支出',
+    batch_failed_one: '有 {{count}} 张收据无法读取',
+    batch_failed_other: '有 {{count}} 张收据无法读取',
+    batch_hint: '点按查看每张收据',
   },
   app: {
     name: 'Money2Time',

@@ -57,3 +57,55 @@ export async function pickAndSaveReceiptImage(
     return { status: 'failed' };
   }
 }
+
+/** An album pick not yet in the receipt store: the picker's temporary copy. */
+export interface PickedReceiptAsset {
+  uri: string;
+  width: number;
+  height: number;
+}
+
+export type PickReceiptAssetsResult =
+  | { status: 'picked'; assets: PickedReceiptAsset[] }
+  | { status: 'cancelled' }
+  | { status: 'denied' }
+  | { status: 'failed' };
+
+/**
+ * Open the photo library for up to `limit` receipts, returned in the order the
+ * user picked them. Unlike {@link pickAndSaveReceiptImage} nothing is stored:
+ * the scan batch downscales and saves each one in the background, so the
+ * camera sheet can close the moment the picker does.
+ */
+export async function pickReceiptAssets(limit: number): Promise<PickReceiptAssetsResult> {
+  try {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert(
+        I18n.t('accounts.logo.permission_title'),
+        I18n.t('accounts.logo.permission_message'),
+      );
+      return { status: 'denied' };
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      quality: 0.7,
+      allowsMultipleSelection: true,
+      selectionLimit: limit,
+      orderedSelection: true,
+    });
+    const assets = result.canceled ? [] : (result.assets ?? []);
+    if (assets.length === 0) return { status: 'cancelled' };
+    return {
+      status: 'picked',
+      // The system picker enforces the limit; slicing guards a picker that
+      // ignores it.
+      assets: assets
+        .slice(0, limit)
+        .map((asset) => ({ uri: asset.uri, width: asset.width, height: asset.height })),
+    };
+  } catch {
+    Alert.alert(I18n.t('accounts.logo.upload_failed'));
+    return { status: 'failed' };
+  }
+}

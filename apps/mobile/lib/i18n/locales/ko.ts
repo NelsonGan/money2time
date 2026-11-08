@@ -101,6 +101,13 @@ const ko = {
     camera_permission_title: '카메라 접근 권한 필요',
     camera_permission_body: '영수증을 촬영하려면 카메라 접근을 허용하거나 앨범에서 선택하세요.',
     camera_permission_grant: '카메라 접근 허용',
+    batch_scanning: '영수증 스캔 중',
+    batch_logged_one: '지출 {{count}}건 기록됨',
+    batch_logged_other: '지출 {{count}}건 기록됨',
+    batch_none_logged: '기록된 지출 없음',
+    batch_failed_one: '영수증 {{count}}장을 읽지 못했어요',
+    batch_failed_other: '영수증 {{count}}장을 읽지 못했어요',
+    batch_hint: '탭하여 각 영수증 보기',
   },
   app: {
     name: 'Money2Time',

@@ -1,4 +1,4 @@
-import { AlertTriangle, ChevronRight, X } from 'lucide-react-native';
+import { AlertTriangle, ChevronDown, ChevronRight, ChevronUp, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, {
@@ -14,6 +14,7 @@ import Animated, {
 import { LoadingDots } from '~/components/feedback/LoadingDots';
 import { ClayIcon, Text } from '~/components/ui';
 import { type ScanJob, useReceiptScans } from '~/context/ReceiptScanContext';
+import { groupScanJobs, summarizeScanBatch } from '~/features/transactions/lib/receiptScanBatch';
 import { useThemeColors } from '~/hooks/useThemeColors';
 import { I18n } from '~/lib/i18n';
 import { triggerHaptic } from '~/services/haptics';
@@ -57,16 +58,25 @@ export function ScanStatusBanner() {
   return (
     // No horizontal padding: the home header already insets this row (px-5).
     <View className="gap-2">
-      {jobs.map((job) => (
-        <ScanJobCard
-          key={job.id}
-          job={job}
-          onDismiss={() => dismissJob(job.id)}
-          onOpen={() => openReadyJob(job.id)}
-          onOpenSplit={() => openReadyJobAsSplit(job.id)}
-          onOpenCreated={() => openCreatedJob(job.id)}
-        />
-      ))}
+      {groupScanJobs(jobs).map((entry) =>
+        entry.kind === 'batch' ? (
+          <ScanBatchCard
+            key={entry.batchId}
+            jobs={entry.jobs}
+            onDismissJob={dismissJob}
+            onOpenCreated={openCreatedJob}
+          />
+        ) : (
+          <ScanJobCard
+            key={entry.job.id}
+            job={entry.job}
+            onDismiss={() => dismissJob(entry.job.id)}
+            onOpen={() => openReadyJob(entry.job.id)}
+            onOpenSplit={() => openReadyJobAsSplit(entry.job.id)}
+            onOpenCreated={() => openCreatedJob(entry.job.id)}
+          />
+        ),
+      )}
     </View>
   );
 }
@@ -201,6 +211,231 @@ function ScanJobCard({
         <ScanProgress />
       )}
     </Pressable>
+  );
+}
+
+/**
+ * One card for the receipts of a multi-select album pick, so ten receipts do
+ * not push the calendar off screen. While they scan it shows how many are done;
+ * afterwards how many expenses were logged and how many receipts failed. Tapping
+ * it lists each receipt: a logged one opens its expense, a failed one can be
+ * dismissed. The close button clears the whole batch once nothing is scanning.
+ */
+function ScanBatchCard({
+  jobs,
+  onDismissJob,
+  onOpenCreated,
+}: {
+  jobs: ScanJob[];
+  onDismissJob: (id: string) => void;
+  onOpenCreated: (id: string) => void;
+}) {
+  const themeColors = useThemeColors();
+  const [expanded, setExpanded] = useState(false);
+  const summary = summarizeScanBatch(jobs);
+  const running = summary.scanning > 0;
+  const allFailed = !running && summary.createdJobs === 0;
+
+  const toggle = () => {
+    void triggerHaptic('selection');
+    setExpanded((value) => !value);
+  };
+
+  const title =
+    summary.createdTransactions > 0
+      ? I18n.t(
+          summary.createdTransactions === 1
+            ? 'receiptScan.batch_logged_one'
+            : 'receiptScan.batch_logged_other',
+          { count: summary.createdTransactions },
+        )
+      : I18n.t('receiptScan.batch_none_logged');
+  const hint =
+    summary.failed > 0
+      ? I18n.t(
+          summary.failed === 1 ? 'receiptScan.batch_failed_one' : 'receiptScan.batch_failed_other',
+          { count: summary.failed },
+        )
+      : I18n.t('receiptScan.batch_hint');
+  const Chevron = expanded ? ChevronUp : ChevronDown;
+
+  return (
+    <View className="rounded-2xl border border-border/50 bg-card shadow-soft">
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{ expanded }}
+        onPress={toggle}
+        style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
+        className="flex-row items-center gap-3 px-3 py-2.5"
+      >
+        <View
+          className={cn(
+            'h-11 w-11 items-center justify-center rounded-2xl',
+            allFailed ? 'bg-destructive/10' : null,
+          )}
+        >
+          {allFailed ? (
+            <AlertTriangle size={19} color={themeColors.error} />
+          ) : (
+            <ClayIcon
+              name={running ? 'money-time/receipt' : 'status/success'}
+              size={32}
+              flatSize={22}
+            />
+          )}
+        </View>
+
+        {running ? (
+          <BatchProgress done={summary.total - summary.scanning} total={summary.total} />
+        ) : (
+          <>
+            <View className="flex-1">
+              <Text variant="body" className="font-semibold text-foreground" numberOfLines={1}>
+                {title}
+              </Text>
+              <Text variant="caption" tone="muted" className="mt-0.5" numberOfLines={1}>
+                {hint}
+              </Text>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={I18n.t('common.close')}
+              onPress={() => {
+                void triggerHaptic('selection');
+                jobs.forEach((job) => onDismissJob(job.id));
+              }}
+              hitSlop={8}
+              className="h-7 w-7 items-center justify-center rounded-full bg-secondary/60"
+            >
+              <X size={15} color={themeColors.textMuted} />
+            </Pressable>
+          </>
+        )}
+        <View className="h-7 w-7 items-center justify-center rounded-full bg-primary/15">
+          <Chevron size={16} color={themeColors.primary} />
+        </View>
+      </Pressable>
+
+      {expanded ? (
+        <View className="border-t border-border/40 px-3 py-1">
+          {jobs.map((job) => (
+            <ScanBatchRow
+              key={job.id}
+              job={job}
+              onOpen={() => onOpenCreated(job.id)}
+              onDismiss={() => onDismissJob(job.id)}
+            />
+          ))}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+function ScanBatchRow({
+  job,
+  onOpen,
+  onDismiss,
+}: {
+  job: ScanJob;
+  onOpen: () => void;
+  onDismiss: () => void;
+}) {
+  const themeColors = useThemeColors();
+
+  if (job.status === 'created') {
+    return (
+      <Pressable
+        accessibilityRole="button"
+        onPress={onOpen}
+        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+        className="min-h-[44px] flex-row items-center gap-2.5 py-1.5"
+      >
+        <ClayIcon name="status/success" size={22} flatSize={16} />
+        <Text variant="body" className="flex-1 text-foreground" numberOfLines={1}>
+          {job.createdNote?.trim() || I18n.t('receiptScan.logged_title')}
+        </Text>
+        {job.createdAmountLabel ? (
+          <Text variant="bodyStrong" className="text-foreground" numberOfLines={1}>
+            {job.createdAmountLabel}
+          </Text>
+        ) : null}
+        <ChevronRight size={16} color={themeColors.textMuted} />
+      </Pressable>
+    );
+  }
+
+  if (job.status === 'error') {
+    return (
+      <View className="min-h-[44px] flex-row items-center gap-2.5 py-1.5">
+        <AlertTriangle size={16} color={themeColors.error} />
+        <Text variant="body" className="flex-1 text-foreground" numberOfLines={1}>
+          {errorTitle(job)}
+        </Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={I18n.t('common.close')}
+          onPress={() => {
+            void triggerHaptic('selection');
+            onDismiss();
+          }}
+          hitSlop={8}
+          className="h-7 w-7 items-center justify-center rounded-full bg-secondary/60"
+        >
+          <X size={15} color={themeColors.textMuted} />
+        </Pressable>
+      </View>
+    );
+  }
+
+  return (
+    <View className="min-h-[44px] flex-row items-center gap-2.5 py-1.5">
+      <ClayIcon name="money-time/receipt" size={22} flatSize={16} />
+      <Text variant="body" tone="muted" numberOfLines={1} className="shrink">
+        {I18n.t('receiptScan.banner_scanning').replace(/…\s*$/, '')}
+      </Text>
+      <LoadingDots size="small" color={themeColors.textMuted} />
+    </View>
+  );
+}
+
+/** A batch's scanning row: how many receipts are done, on a real progress bar. */
+function BatchProgress({ done, total }: { done: number; total: number }) {
+  const themeColors = useThemeColors();
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    // A sliver before the first result lands, so the bar reads as started.
+    progress.value = withTiming(Math.max(0.06, total > 0 ? done / total : 0), {
+      duration: 420,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [done, total, progress]);
+
+  const fillStyle = useAnimatedStyle(() => ({ width: `${progress.value * 100}%` }));
+
+  return (
+    <View className="flex-1">
+      <View className="flex-row items-center justify-between gap-2">
+        <View className="min-w-0 flex-1 flex-row items-center">
+          <Text variant="caption" className="shrink font-medium text-foreground" numberOfLines={1}>
+            {I18n.t('receiptScan.batch_scanning')}
+          </Text>
+          <LoadingDots size="small" color={themeColors.textMuted} style={{ marginLeft: 5 }} />
+        </View>
+        <Text variant="caption" tone="muted">
+          {done}/{total}
+        </Text>
+      </View>
+      <View className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary/60">
+        <Animated.View
+          style={[
+            { height: '100%', borderRadius: 999, backgroundColor: themeColors.primary },
+            fillStyle,
+          ]}
+        />
+      </View>
+    </View>
   );
 }
 

@@ -102,6 +102,13 @@ const id = {
     camera_permission_body:
       'Izinkan akses kamera untuk memotret struk, atau pilih satu dari album Anda.',
     camera_permission_grant: 'Izinkan akses kamera',
+    batch_scanning: 'Memindai struk',
+    batch_logged_one: '{{count}} pengeluaran dicatat',
+    batch_logged_other: '{{count}} pengeluaran dicatat',
+    batch_none_logged: 'Tidak ada pengeluaran yang dicatat',
+    batch_failed_one: '{{count}} struk tidak dapat dibaca',
+    batch_failed_other: '{{count}} struk tidak dapat dibaca',
+    batch_hint: 'Ketuk untuk melihat setiap struk',
   },
   app: {
     name: 'Money2Time',

@@ -102,6 +102,13 @@ const tr = {
     camera_permission_body:
       'Fiş fotoğrafı çekmek için kamera erişimine izin verin veya albümünüzden bir tane seçin.',
     camera_permission_grant: 'Kamera erişimine izin ver',
+    batch_scanning: 'Fişler taranıyor',
+    batch_logged_one: '{{count}} harcama kaydedildi',
+    batch_logged_other: '{{count}} harcama kaydedildi',
+    batch_none_logged: 'Hiç harcama kaydedilmedi',
+    batch_failed_one: '{{count}} fiş okunamadı',
+    batch_failed_other: '{{count}} fiş okunamadı',
+    batch_hint: 'Her fişi görmek için dokunun',
   },
   app: {
     name: 'Money2Time',

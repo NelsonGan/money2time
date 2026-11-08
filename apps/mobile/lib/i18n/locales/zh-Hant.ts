@@ -100,6 +100,13 @@ const zhHant = {
     camera_permission_title: '需要相機權限',
     camera_permission_body: '允許使用相機拍攝收據，或從相簿中選擇照片。',
     camera_permission_grant: '允許使用相機',
+    batch_scanning: '正在掃描收據',
+    batch_logged_one: '已記錄 {{count}} 筆支出',
+    batch_logged_other: '已記錄 {{count}} 筆支出',
+    batch_none_logged: '未記錄任何支出',
+    batch_failed_one: '有 {{count}} 張收據無法讀取',
+    batch_failed_other: '有 {{count}} 張收據無法讀取',
+    batch_hint: '點一下查看每張收據',
   },
   app: {
     name: 'Money2Time',

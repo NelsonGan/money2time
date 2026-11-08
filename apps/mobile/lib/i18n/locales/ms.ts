@@ -102,6 +102,13 @@ const ms = {
     camera_permission_body:
       'Benarkan akses kamera untuk mengambil foto resit, atau pilih satu daripada album anda.',
     camera_permission_grant: 'Benarkan akses kamera',
+    batch_scanning: 'Mengimbas resit',
+    batch_logged_one: '{{count}} perbelanjaan direkodkan',
+    batch_logged_other: '{{count}} perbelanjaan direkodkan',
+    batch_none_logged: 'Tiada perbelanjaan direkodkan',
+    batch_failed_one: '{{count}} resit tidak dapat dibaca',
+    batch_failed_other: '{{count}} resit tidak dapat dibaca',
+    batch_hint: 'Ketik untuk melihat setiap resit',
   },
   app: {
     name: 'Money2Time',

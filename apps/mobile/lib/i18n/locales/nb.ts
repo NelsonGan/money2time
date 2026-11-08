@@ -102,6 +102,13 @@ const nb = {
     camera_permission_body:
       'Gi kameratilgang for å ta bilde av en kvittering, eller velg en fra albumet ditt.',
     camera_permission_grant: 'Gi kameratilgang',
+    batch_scanning: 'Skanner kvitteringer',
+    batch_logged_one: '{{count}} utgift registrert',
+    batch_logged_other: '{{count}} utgifter registrert',
+    batch_none_logged: 'Ingen utgifter registrert',
+    batch_failed_one: '{{count}} kvittering kunne ikke leses',
+    batch_failed_other: '{{count}} kvitteringer kunne ikke leses',
+    batch_hint: 'Trykk for å se hver kvittering',
   },
   app: {
     name: 'Money2Time',
